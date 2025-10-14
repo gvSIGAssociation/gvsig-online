@@ -5203,6 +5203,9 @@ def external_layer_add(request):
             elif srs:
                 external_layer.native_srs = srs
 
+            external_layer.save()
+            external_layer.name = 'externallayer_' + str(external_layer.id)
+
             params = {}
             if external_layer.type == 'WMTS' or external_layer.type == 'WMS':
                 params['version'] = request.POST.get('version')
@@ -5245,25 +5248,17 @@ def external_layer_add(request):
                     style_filename = f'style_{external_layer.id}_{style_file.name}'
                     style_path = os.path.join(style_dir, style_filename)
                     
-                    # Guardar el archivo
                     with open(style_path, 'wb+') as destination:
                         for chunk in style_file.chunks():
                             destination.write(chunk)
                     
-                    # Guardar la ruta relativa
-                    params['style_file'] = os.path.relpath(style_path, settings.MEDIA_ROOT)
-                    params['style_url'] = settings.MEDIA_URL + params['style_file']
+                    style_file_path = os.path.relpath(style_path, settings.MEDIA_ROOT)
+                    params['style_url'] = settings.MEDIA_URL + style_file_path
                     params['srs'] = external_layer.native_srs
             else:
                 external_layer.vector_tile = False
                 
             external_layer.external_params = json.dumps(params)
-
-            external_layer.save()
-
-
-
-            external_layer.name = 'externallayer_' + str(external_layer.id)
             external_layer.save()
 
             if external_layer.cached:
@@ -5515,6 +5510,34 @@ def external_layer_update(request, external_layer_id):
 
 
 
+def _delete_external_layer_style_file(external_layer, external_layer_id):
+    """
+    Elimina el archivo de estilo asociado a una capa externa si existe localmente.
+    """
+    if not external_layer.external_params:
+        return
+    
+    try:
+        params = json.loads(external_layer.external_params)
+        style_url = params.get('style_url', '')
+        
+        if style_url and style_url.startswith('/media/'):
+            relative_path = style_url.replace('/media/', '', 1)
+            style_file_path = os.path.join(settings.MEDIA_ROOT, relative_path)
+            
+            if os.path.exists(style_file_path):
+                os.remove(style_file_path)
+                logger.info(f"Deleted style file: {style_file_path}")
+        elif style_url and style_url.startswith(settings.MEDIA_URL):
+            relative_path = style_url.replace(settings.MEDIA_URL, '', 1)
+            style_file_path = os.path.join(settings.MEDIA_ROOT, relative_path)
+            
+            if os.path.exists(style_file_path):
+                os.remove(style_file_path)
+                logger.info(f"Deleted style file: {style_file_path}")
+    except Exception as e:
+        logger.warning(f"Error deleting style file for layer {external_layer_id}: {str(e)}")
+
 @login_required()
 @require_POST
 @staff_required
@@ -5530,12 +5553,16 @@ def external_layer_delete(request, external_layer_id):
                 geowebcache.get_instance().delete_layer(None, external_layer, server, master_node.getUrl())
             geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
 
+        _delete_external_layer_style_file(external_layer, external_layer_id)
+
         external_layer.delete()
         return redirect('external_layer_list')
 
     except Exception as e:
         if e.server_message:
             if 'Unknown layer' in e.server_message:
+                _delete_external_layer_style_file(external_layer, external_layer_id)
+                
                 external_layer.delete()
                 return redirect('external_layer_list')
 
