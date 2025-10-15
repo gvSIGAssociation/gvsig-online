@@ -5510,34 +5510,6 @@ def external_layer_update(request, external_layer_id):
 
 
 
-def _delete_external_layer_style_file(external_layer, external_layer_id):
-    """
-    Elimina el archivo de estilo asociado a una capa externa si existe localmente.
-    """
-    if not external_layer.external_params:
-        return
-    
-    try:
-        params = json.loads(external_layer.external_params)
-        style_url = params.get('style_url', '')
-        
-        if style_url and style_url.startswith('/media/'):
-            relative_path = style_url.replace('/media/', '', 1)
-            style_file_path = os.path.join(settings.MEDIA_ROOT, relative_path)
-            
-            if os.path.exists(style_file_path):
-                os.remove(style_file_path)
-                logger.info(f"Deleted style file: {style_file_path}")
-        elif style_url and style_url.startswith(settings.MEDIA_URL):
-            relative_path = style_url.replace(settings.MEDIA_URL, '', 1)
-            style_file_path = os.path.join(settings.MEDIA_ROOT, relative_path)
-            
-            if os.path.exists(style_file_path):
-                os.remove(style_file_path)
-                logger.info(f"Deleted style file: {style_file_path}")
-    except Exception as e:
-        logger.warning(f"Error deleting style file for layer {external_layer_id}: {str(e)}")
-
 def _delete_local_style_files_for_layer(layer_id):
     """
     Elimina todos los archivos de estilo locales asociados a una capa específica.
@@ -5573,7 +5545,7 @@ def external_layer_delete(request, external_layer_id):
                 geowebcache.get_instance().delete_layer(None, external_layer, server, master_node.getUrl())
             geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
 
-        _delete_external_layer_style_file(external_layer, external_layer_id)
+        _delete_local_style_files_for_layer(external_layer_id)
 
         external_layer.delete()
         return redirect('external_layer_list')
@@ -5581,7 +5553,7 @@ def external_layer_delete(request, external_layer_id):
     except Exception as e:
         if e.server_message:
             if 'Unknown layer' in e.server_message:
-                _delete_external_layer_style_file(external_layer, external_layer_id)
+                _delete_local_style_files_for_layer(external_layer_id)
                 
                 external_layer.delete()
                 return redirect('external_layer_list')
