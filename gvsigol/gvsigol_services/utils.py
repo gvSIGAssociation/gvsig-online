@@ -1203,9 +1203,6 @@ def get_wmts_options(
                 tms.tilematrix[matrix_id].scaledenominator)
                 for matrix_id in tms.tilematrix.keys() ], key=lambda x: x[1], reverse=True)
                 
-        #ordered_matrices = sorted(matrix_ids_with_and_scale, key=lambda x: x[1], reverse=True)
-        #ordered_ids = sorted(tms.tilematrix.keys(), key=level_key)
-        #matrices = [tms.tilematrix[mid] for mid in ordered_ids]
         matrices = [tms.tilematrix[matrix_id] for matrix_id, _ in matrix_ids_with_and_scale]
 
         if not matrices:
@@ -1221,8 +1218,6 @@ def get_wmts_options(
         #tile_sizes = [[m.tilewidth, m.tileheight] for m in matrices]
         tile_sizes = [m.tilewidth for m in matrices]
         origins = [m.topleftcorner for m in matrices]
-        ol_origins = None
-        ol_sizes = None
 
             # Obtener (matrix_id, limit_obj, scaledenominator) para cada límite y ordenar por escala
         if hasattr(layer, "tilematrixsetlinks") and layer.tilematrixsetlinks.get(current_matrix_set_id) \
@@ -1231,8 +1226,6 @@ def get_wmts_options(
             tilematrixlimits_obj = layer.tilematrixsetlinks.get(current_matrix_set_id).tilematrixlimits
             full_tile_ranges = []
             full_tile_ranges_ol4 = []
-            ol_sizes = []
-            ol_origins = []
 
             for idx, m in enumerate(matrices):
                 
@@ -1254,22 +1247,7 @@ def get_wmts_options(
                         "minY": -(mintilerow+1),
                         "maxY": -(maxtilerow+1)
                     })
-                    """
-                    scale_denominator = tms.tilematrix[m.identifier].scaledenominator
-                    res = scale_denominator * PIXEL_SIZE_M
-                    origin = _parse_tlc(matrices[idx].topleftcorner)
-                    tile_w = int(matrices[idx].tilewidth)
-                    tile_h = int(matrices[idx].tileheight)
-                    minx = origin[0] + mintilecol * tile_w * res
-                    maxx = origin[0] + (maxtilecol + 1) * tile_w * res
-                    miny = origin[1] - (maxtilerow + 1) * tile_h * res
-                    maxy = origin[1] - mintilerow * tile_h * res
-                    extent = [minx, miny, maxx, maxy]
-                    olsize = [ (maxtilecol - mintilecol + 1), (maxtilerow - mintilerow + 1) ]
-                    ol_sizes.append(olsize)
-                    origin = [minx, maxy]
-                    ol_origins.append(origin)
-                    """
+
                     if idx == len(matrices) - 1: # use the most detailed matrix to calculate the extent
                         scale_denominator = tms.tilematrix[m.identifier].scaledenominator
                         res = scale_denominator * PIXEL_SIZE_M
@@ -1314,19 +1292,6 @@ def get_wmts_options(
             maxx = origin[0] + mw * tile_w * res0
             miny = origin[1] - mh * tile_h * res0
             extent = [origin[0], miny, maxx, origin[1]]
-        # tmp cesar prueba
-        """
-        origin = _parse_tlc(matrices[0].topleftcorner)
-        tile_w = int(matrices[0].tilewidth)
-        tile_h = int(matrices[0].tileheight)
-        mw = int(matrices[0].matrixwidth)
-        mh = int(matrices[0].matrixheight)
-        res0 = resolutions[0]
-        maxx = origin[0] + mw * tile_w * res0
-        miny = origin[1] - mh * tile_h * res0
-        extent = [origin[0], miny, maxx, origin[1]]
-        """
-        # end tmp cesar prueba
 
         # Normalizar proyección
         projection = _normalize_projection(getattr(tms, "crs", None))
@@ -1340,18 +1305,12 @@ def get_wmts_options(
                 "tileSizes": tile_sizes,
                 "matrixIds": matrix_ids,
             }
-        """    
-        if ol_origins is not None:
-            tile_grid['olOrigins'] = ol_origins
-        if ol_sizes is not None:
-            tile_grid['olSizes'] = ol_sizes
-        """
+
         if full_tile_ranges is None:
             tile_grid['extent'] = extent
         else:
             tile_grid['fullTileRanges'] = full_tile_ranges
             tile_grid['fullTileRanges_ol4'] = full_tile_ranges_ol4
-            #tile_grid['extent'] = None
             tile_grid['extent'] = extent
         
         tile_grids[current_matrix_set_id] = {
