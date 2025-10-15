@@ -5795,20 +5795,17 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                 capabilities = capabilities.decode('utf-8')
 
             layers = list(wmts.contents)
-
+            if (not layer) and len(layers) > 0:
+                layer = layers[0]
             if layer:
                 wmts_options = utils.get_wmts_options(wmts, layer)
            
-            if (not layer) and len(layers) > 0:
-                layer = layers[0]
-            else:
+            if layer:
                 lyr = wmts.contents.get(layer)
-                #for lyr_format in lyr.formats:
-                #    if not lyr_format in formats:
-                #        if lyr_format == 'image/png' or lyr_format == 'image/jpeg':
-                #            formats.append(lyr_format)
-                formats.append('image/jpeg')
-                formats.append('image/png')
+                for lyr_format in lyr.formats:
+                    if not lyr_format in formats:
+                        if 'image/png' in lyr_format or 'image/jpeg' in lyr_format:
+                            formats.append(lyr_format)
                 for infoformat in lyr.infoformats:
                     if not infoformat in infoformats:
                         if infoformat == 'text/plain' or infoformat == 'text/html' or infoformat == 'application/json' or infoformat == 'application/geojson':
