@@ -159,6 +159,7 @@ env = environ.Env(
     FILE_UPLOAD_DIRECTORY_PERMISSIONS=(int, 0o774),
     #DRF
     DRF_PAGE_SIZE=(int,100),
+    DRF_DEFAULT_AUTHENTICATION_CLASSES=(list,[]),
     #Countries
     COUNTRIES_ONLY = (list, []),
     COUNTRIES_FIRST = (list, []),
@@ -627,15 +628,18 @@ WMTS_MAX_VERSION = '1.0.0'
 WMS_MAX_VERSION = '1.3.0'
 BING_LAYERS = ['Road','Aerial','AerialWithLabels']
 
-# REST framework
-default_auth_classes_list = [
-    'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-    'rest_framework.authentication.SessionAuthentication',
-    'rest_framework.authentication.BasicAuthentication'
-]
+DRF_DEFAULT_AUTHENTICATION_CLASSES = env('DRF_DEFAULT_AUTHENTICATION_CLASSES')
+if len(DRF_DEFAULT_AUTHENTICATION_CLASSES) == 0:
+    # REST framework
+    default_auth_classes_list = [
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication'
+    ]
 
-if GVSIGOL_AUTH_PROVIDER == 'gvsigol_plugin_oidc_mozilla' :
-    default_auth_classes_list.insert(0,'mozilla_django_oidc.contrib.drf.OIDCAuthentication')
+    if GVSIGOL_AUTH_PROVIDER == 'gvsigol_plugin_oidc_mozilla' :
+        default_auth_classes_list.insert(0,'mozilla_django_oidc.contrib.drf.OIDCAuthentication')
+else:
+    default_auth_classes_list = DRF_DEFAULT_AUTHENTICATION_CLASSES
 
 DRF_PAGE_SIZE = env('DRF_PAGE_SIZE')
 REST_FRAMEWORK = {
