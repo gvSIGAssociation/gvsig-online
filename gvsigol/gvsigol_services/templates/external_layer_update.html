@@ -488,6 +488,7 @@ $(document).ready(function(){
 				if('get_map_url' in data){
 					$("#get_map_url").val(data['get_map_url']);
 				}
+				var selectedLayer = layer || data['layers'][0];
 
 				if (data.crs_list) {
 					for (var i=0; i<data.crs_list.length; i++) {
@@ -526,7 +527,7 @@ $(document).ready(function(){
 					$("#id_layers").empty();
 					var layers = data['layers'];
 					for(var i=0;i<layers.length; i++){
-	 					if(layers[i] == layer){
+	 					if(layers[i] == selectedLayer){
 							$("#id_layers").append('<option value="' + layers[i] + '" selected>' + layers[i] + '</option>');
 						}else{
 	 						$("#id_layers").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');
