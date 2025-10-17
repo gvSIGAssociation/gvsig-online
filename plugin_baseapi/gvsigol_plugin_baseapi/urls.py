@@ -23,7 +23,7 @@
 from django.urls import path, re_path, include
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
-from rest_framework import routers
+from rest_framework import routers, permissions
 from gvsigol_plugin_baseapi import views
 from gvsigol import settings
 import gvsigol_plugin_baseapi.settings as settings_local
@@ -42,9 +42,8 @@ schema_view = get_schema_view(
         license=openapi.License(name=""),
     ),
     url = settings.BASE_URL + "/" + settings.GVSIGOL_PATH + "/",
-    #validators = ['ssv', 'flex'],
-    public = False,
-    #permission_classes = (permissions.AllowAny,),
+    public = True,
+    permission_classes = (permissions.AllowAny,)
 )
 
 

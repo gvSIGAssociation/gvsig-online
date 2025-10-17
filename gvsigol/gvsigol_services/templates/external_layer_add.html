@@ -347,6 +347,7 @@ $(document).ready(function(){
 						$("#id_title").val(data['title']);
 					}
 				}
+				var selectedLayer = layer || data['layers'][0];
 
 				if('get_map_url' in data){
 					$("#get_map_url").val(data['get_map_url']);
@@ -390,7 +391,7 @@ $(document).ready(function(){
 					$("#id_layers").append('<option value="empty" selected>' + gettext('You must select a layer') + '</option>');
 					var layers = data['layers'];
 					for(var i=0;i<layers.length; i++){
-	 					if(layers[i] == layer){
+	 					if(layers[i] == selectedLayer){
 							$("#id_layers").append('<option value="' + layers[i] + '" selected>' + layers[i] + '</option>');
 						}else{
 	 						$("#id_layers").append('<option value="' + layers[i] + '">' + layers[i] + '</option>');

@@ -200,7 +200,7 @@ def fill_wmts_options(apps, schema_editor):
         for layer in Layer.objects.filter(external=True):
             try:
                 external_params = json.loads(layer.external_params) if layer.external_params else {}
-                if 'capabilities' in external_params:
+                if external_params.get('capabilities'):
                     wmts = WebMapTileService(None, xml=json.loads(external_params['capabilities']), version="1.0.0")
                     wmts_options = get_wmts_options(wmts, external_params['layers'])
                     if wmts_options:
@@ -210,7 +210,7 @@ def fill_wmts_options(apps, schema_editor):
             except Exception as error:
                 import logging
                 logger = logging.getLogger()
-                logger.exception("error")
+                logger.exception(f"error getting wmts options for layer {layer.id} - {layer.name}")
                 print(str(error))
 
     except Exception as error:
