@@ -363,7 +363,7 @@
 															</small>
 														</td>
 														<td>
-															<input type="checkbox" name="no_overlap" id="no_overlap" value="1">
+															<input type="checkbox" name="no_overlap" id="no_overlap" value="1" {% if not user.is_superuser %}disabled title="{% trans 'Only superusers can modify topology rules' %}"{% endif %}>
 														</td>
 														<td>
 															<span class="text-muted">{% trans "No additional configuration required" %}</span>
@@ -386,7 +386,7 @@
 															</small>
 														</td>
 														<td>
-															<input type="checkbox" name="no_gaps" id="no_gaps" value="1">
+															<input type="checkbox" name="no_gaps" id="no_gaps" value="1" {% if not user.is_superuser %}disabled title="{% trans 'Only superusers can modify topology rules' %}"{% endif %}>
 														</td>
 														<td>
 															<span class="text-muted">{% trans "No additional configuration required" %}</span>
@@ -403,11 +403,11 @@
 															</small>
 														</td>
 														<td>
-															<input type="checkbox" name="must_be_covered_by" id="must_be_covered_by" value="1">
+															<input type="checkbox" name="must_be_covered_by" id="must_be_covered_by" value="1" {% if not user.is_superuser %}disabled title="{% trans 'Only superusers can modify topology rules' %}"{% endif %}>
 														</td>
 														<td>
 															<div id="covered_by_layer_group" class="topology-control-group">
-																<select class="form-control" name="covered_by_layer" id="covered_by_layer">
+																<select class="form-control" name="covered_by_layer" id="covered_by_layer" {% if not user.is_superuser %}disabled title="{% trans 'Only superusers can modify topology rules' %}"{% endif %}>
 																	<option value="">{% trans "Select a layer" %}</option>
 																	<!-- Las capas se cargarán dinámicamente vía AJAX -->
 																</select>
@@ -425,11 +425,11 @@
 															</small>
 														</td>
 														<td>
-															<input type="checkbox" name="must_not_overlap_with" id="must_not_overlap_with" value="1">
+															<input type="checkbox" name="must_not_overlap_with" id="must_not_overlap_with" value="1" {% if not user.is_superuser %}disabled title="{% trans 'Only superusers can modify topology rules' %}"{% endif %}>
 														</td>
 														<td>
 															<div id="overlap_layers_group" class="topology-control-group">
-																<select class="form-control" name="overlap_layers" id="overlap_layers" multiple>
+																<select class="form-control" name="overlap_layers" id="overlap_layers" multiple {% if not user.is_superuser %}disabled title="{% trans 'Only superusers can modify topology rules' %}"{% endif %}>
 																	<!-- Las capas se cargarán dinámicamente vía AJAX -->
 																</select>
 																<small class="form-text text-muted">{% trans "Select multiple layers" %}</small>
@@ -453,12 +453,12 @@
 															</small>
 														</td>
 														<td>
-															<input type="checkbox" name="must_be_contiguous" id="must_be_contiguous" value="1">
+															<input type="checkbox" name="must_be_contiguous" id="must_be_contiguous" value="1" {% if not user.is_superuser %}disabled title="{% trans 'Only superusers can modify topology rules' %}"{% endif %}>
 														</td>
 														<td>
 															<div id="tolerance_group" class="topology-control-group">
 																<div class="input-group" style="max-width: 200px;">
-																	<input type="number" class="form-control" name="contiguous_tolerance" id="contiguous_tolerance" value="1" step="1" min="0" placeholder="{% trans 'Tolerance' %}">
+																	<input type="number" class="form-control" name="contiguous_tolerance" id="contiguous_tolerance" value="1" step="1" min="0" placeholder="{% trans 'Tolerance' %}" {% if not user.is_superuser %}disabled title="{% trans 'Only superusers can modify topology rules' %}"{% endif %}>
 																	<div class="input-group-addon">m</div>
 																</div>
 																<small class="form-text text-muted">{% trans "Tolerance distance for contiguity check" %}</small>
@@ -1620,6 +1620,9 @@
 
 		// Funcionalidad para la pestaña de Restricciones de edición
 		$(document).ready(function() {
+			// Variable para verificar si el usuario es superusuario
+			var isSuperuser = {% if user.is_superuser %}true{% else %}false{% endif %};
+			
 			// Función para habilitar/deshabilitar controles (siempre visibles)
 			function toggleTopologyControls() {
 				console.log('Ejecutando toggleTopologyControls...');
@@ -1627,6 +1630,11 @@
 				var overlapWithChecked = $('#must_not_overlap_with').is(':checked');
 				var contiguousChecked = $('#must_be_contiguous').is(':checked');
 				console.log('Checkboxes:', { coveredByChecked, overlapWithChecked, contiguousChecked });
+
+				// Solo permitir cambios si el usuario es superusuario
+				if (!isSuperuser) {
+					return;
+				}
 
 				// Control de "Must be covered by" - solo habilitar/deshabilitar
 				if (coveredByChecked) {

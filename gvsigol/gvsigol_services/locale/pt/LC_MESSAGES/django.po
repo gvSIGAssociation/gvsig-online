@@ -2696,6 +2696,10 @@ msgstr ""
 msgid "Error deleting view: {0}"
 msgstr "Campo de eliminação de erros. Causa: {0}"
 
+#: gvsigol_services/templates/layer_config.html
+msgid "Only superusers can modify topology rules"
+msgstr "Somente superusuários podem modificar regras topológicas"
+
 msgid "Vector layer containing information on {}"
 msgstr "Camada vetorial contendo informações sobre {}"
 

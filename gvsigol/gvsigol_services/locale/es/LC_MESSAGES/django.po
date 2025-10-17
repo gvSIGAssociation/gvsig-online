@@ -3182,6 +3182,10 @@ msgstr "Error borrando la vista: {0}"
 #~ msgid "Upload a Mapbox style file in JSON format."
 #~ msgstr "Sube tu archivo de estilo Mapbox en formato JSON."
 
+#: gvsigol_services/templates/layer_config.html
+msgid "Only superusers can modify topology rules"
+msgstr "Solo los superusuarios pueden modificar reglas topológicas"
+
 #~ msgid "Format field"
 #~ msgstr "Dar formato"
 

@@ -2818,6 +2818,10 @@ msgstr ""
 msgid "Error deleting view: {0}"
 msgstr ""
 
+#: gvsigol_services/templates/layer_config.html
+msgid "Only superusers can modify topology rules"
+msgstr "Super-erabiltzaileek soilik alda ditzakete topologia arauak"
+
 # Topology rules translations
 msgid "Geometries within the same layer cannot overlap with each other"
 msgstr "Geruza bereko geometriak ezin dira elkarren gainean jarri"

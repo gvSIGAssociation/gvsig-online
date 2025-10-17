@@ -3188,6 +3188,10 @@ msgstr "Error suprimint la vista: {0}"
 #~ msgid "Url"
 #~ msgstr "Url"
 
+#: gvsigol_services/templates/layer_config.html
+msgid "Only superusers can modify topology rules"
+msgstr "Només els superusuaris poden modificar regles topològiques"
+
 #~ msgid "Format field"
 #~ msgstr "Donar format"
 
