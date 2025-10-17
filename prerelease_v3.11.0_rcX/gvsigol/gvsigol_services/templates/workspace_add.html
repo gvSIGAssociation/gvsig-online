@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+<form role="form" method="post" action="/gvsigonline/services/workspace_add/">
+	<div class="row">
+		<div class="col-md-12">	
+			<div class="row">
+				<div class="col-md-12 form-group">
+					<div class="box-tools pull-right">
+						<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+					</div>
+				</div>				
+			</div>
+			<div class="box padding-20">
+				{% csrf_token %}
+				{% if form.errors %}
+				<div id="form-error" style="color:#ff0000;">
+					<ul>
+					{{ form.non_field_errors }}
+					{% for field in form %}
+						{% if field.errors %}
+							<li>{{field.label}}. {{ field.errors|striptags }}</li>
+						{% endif %}	
+					{% endfor %}
+					</ul>
+				</div>
+				{% endif %}
+				<div class="box-body">				
+				{{ form }}				
+				</div>	
+			</div>			
+		</div>				
+	</div>
+</form>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-workspaces').addClass("active");
+	
+	$( document ).ready(function() {
+		var server = null;
+		
+		$("#id_description").prop('disabled', true);
+		$("#id_uri").prop('disabled', true);
+		$("#id_wms_endpoint").prop('disabled', true);
+		$("#id_wcs_endpoint").prop('disabled', true);
+		$("#id_wfs_endpoint").prop('disabled', true);
+		$("#id_wmts_endpoint").prop('disabled', true);	
+		$("#id_cache_endpoint").prop('disabled', true);
+		$("#id_is_public").prop('disabled', true);
+		
+		$("#id_server").change(function() {
+			var svName = $(this).find(":selected").val();
+			getServerById(svName);
+			
+			var name = $("#id_name" ).val();
+    		var url = server.frontend_url;
+    		if (url[url.length-1]!="/") { //ensure we have a trailing slash
+    			url = url + "/";
+			}
+			var uri = url + name;
+			if (url.indexOf('http') == -1) {
+				uri = window.location.origin + url + name;
+			}
+    		if (server == null) {
+    			$("#id_uri").val(uri);
+        		$("#id_wms_endpoint").val('');
+        		$("#id_wcs_endpoint").val('');
+        		$("#id_wfs_endpoint").val('');
+        		$("#id_wmts_endpoint").val('');
+        		$("#id_cache_endpoint").val('');
+        		
+    		} else {
+    			$("#id_uri").val(uri);
+        		$("#id_wms_endpoint").val(url+name+"/wms");
+        		$("#id_wcs_endpoint").val(url+name+"/wcs");
+        		$("#id_wfs_endpoint").val(url+name+"/wfs");
+        		$("#id_wmts_endpoint").val(url+"gwc/service/wmts");
+        		$("#id_cache_endpoint").val(url+"gwc/service/wms");
+    		}
+    		
+    	});
+		
+		var serverName = $("#id_server").find(":selected").val();
+		getServerById(serverName);
+		
+    	$("#id_name").change(function() {
+    		$("#id_description").prop('disabled', false);
+    		$("#id_uri").prop('disabled', false);
+    		$("#id_wms_endpoint").prop('disabled', false);
+    		$("#id_wcs_endpoint").prop('disabled', false);
+    		$("#id_wfs_endpoint").prop('disabled', false);
+    		$("#id_wmts_endpoint").prop('disabled', false);	
+    		$("#id_cache_endpoint").prop('disabled', false);
+    		$("#id_is_public").prop('disabled', false);
+    		
+    		$("#id_uri").prop('readOnly', true);
+    		$("#id_wms_endpoint").prop('readOnly', true);
+    		$("#id_wcs_endpoint").prop('readOnly', true);
+    		$("#id_wfs_endpoint").prop('readOnly', true);
+    		$("#id_wmts_endpoint").prop('readOnly', true);	
+    		$("#id_cache_endpoint").prop('readOnly', true);
+    		
+    		var name = $("#id_name" ).val();
+    		var url = server.frontend_url;
+    		if (url[url.length-1]!="/") { //ensure we have a trailing slash
+    			url = url + "/";
+			}
+			var uri = url + name;
+			if (url.indexOf('http') == -1) {
+				uri = window.location.origin + url + name;
+			}
+    		$("#id_uri").val(uri);
+    		$("#id_wms_endpoint").val(url+name+"/wms");
+    		$("#id_wcs_endpoint").val(url+name+"/wcs");
+    		$("#id_wfs_endpoint").val(url+name+"/wfs");
+    		$("#id_wmts_endpoint").val(url+"gwc/service/wmts");
+    		$("#id_cache_endpoint").val(url+"gwc/service/wms");
+    	});
+    	
+    	function getServerById(serverName){
+    		$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/services/get_server/' + serverName + '/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				success	:function(response){
+					server = response.server;
+				},
+				error: function(){
+					server = null;
+				}
+			});
+    	}
+	});
+</script>
+{% endblock %}

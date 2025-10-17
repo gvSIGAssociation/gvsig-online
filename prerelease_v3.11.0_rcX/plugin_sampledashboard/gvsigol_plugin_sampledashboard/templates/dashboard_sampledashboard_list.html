@@ -1,0 +1,156 @@
+{% extends "base.html" %} 
+{% load staticfiles %} 
+{% load i18n %} 
+
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="row">
+			<div class="col-md-12 form-group">
+				<div class="box-tools pull-right">
+					<button id="button-add-samples" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add Sample Entry" %}</button>
+				</div>
+			</div>
+		</div>
+		<div class="box">
+			<div class="box-body">
+				<table class="table" id="samples-table">
+					<thead>
+						<tr>
+							<th>{% trans "ID" %}</th>
+							<th>{% trans "Name" %}</th>
+							<th>{% trans "Title" %}</th>
+							<th>{% trans "Description" %}</th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for sample in samples %}
+						<tr>
+							<td>{{ sample.id }}</td> 
+							<td>{{ sample.name }}</td>
+							<td>{{ sample.title }}</td>
+							<td>{{ sample.description }}</td>
+							<td></td>
+							<td></td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>      
+
+<!-- Modal -->
+<div class="modal fade" id="modal-delete-samples" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Delete test element" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "This test element will be remove. Are you sure?" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-delete-samples-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-delete-samples-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	//$('#menu-manage-services').addClass("active");
+	//$('#submenu-layergroups').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+	var table = $('#samples-table').DataTable({
+		responsive: true,
+	    language: {
+	    	processing		: '{% trans "Processing request..." %}',
+		    search			: '{% blocktrans with sep="&nbsp;:" %}Search{{sep}}{% endblocktrans %}',
+		    lengthMenu		: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
+		    info			: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
+		    infoEmpty		: '{% trans "Showing from 0 to 0 of 0 records" %}',
+		    infoFiltered	: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
+		    infoPostFix		: "",
+		    loadingRecords	: '{% trans "Loading..." %}',
+		    zeroRecords		: '{% trans "No records available" %}',
+		    emptyTable		: '{% trans "No records available" %}',
+		    paginate: {
+		    	first		: '{% trans "First" %}',
+		        previous	: '{% trans "Previous" %}',
+		        next		: '{% trans "Next" %}',
+		        last		: '{% trans "Last" %}'
+		    },
+		    aria: {
+		        sortAscending: '{% blocktrans with sep=": " %}{{sep}}Sort ascending{% endblocktrans %}',
+		        sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
+		    }
+		},
+		"columnDefs": [{
+	  		"targets": -1,
+	        "data": null,
+	        "defaultContent": '<button type="button" name="button-delete-samples" data-toggle="modal" data-target="#modal-delete-samples" data-placement="bottom" title="' + '{% trans "Delete samples" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
+	  	},{
+	      	"targets": -2,
+	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-update-samples" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update samples" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
+	  	}],
+	    "dom": 'T<"clear">lfrtip',
+		"bLengthChange": false
+	});
+	
+	$('#button-add-samples').click( function() {
+		location.href = '/gvsigonline/sampledashboard/sampledashboard_add/';
+	});
+		 
+	$('#samples-table tbody').on('click', 'button', function (){
+		var row = table.row($(this).parents('tr'));
+	    var data = row.data();  
+	    if (this.name == "button-update-samples") {
+	        updateSamples(data);
+	        
+	    } else if (this.name == "button-delete-samples"){
+	        deleteSamples(data, row);   
+	    }
+	});
+	
+	function updateSamples(data){			
+		location.href = '/gvsigonline/sampledashboard/sampledashboard_update/?lgid=' + data[0];
+	}
+	
+
+	function deleteSamples(data, row){
+		$('#button-delete-samples-accept').click( function() {
+			$.ajax({
+				type: 'POST',
+				async: false,
+				data: {
+					"lgid":data[0]
+		        },
+				url: '/gvsigonline/sampledashboard/sampledashboard_delete/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				success	:function(response){
+					$('#modal-delete-samples').modal('hide');
+					location.reload();
+				},
+				error: function(){}
+			});
+		});
+	}
+	    
+});
+</script>
+{% endblock %}

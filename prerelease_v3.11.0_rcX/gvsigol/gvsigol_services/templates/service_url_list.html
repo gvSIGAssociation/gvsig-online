@@ -1,0 +1,154 @@
+{% extends "base.html" %} 
+{% load staticfiles %} 
+{% load i18n %} 
+
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+	
+		<div class="row">
+			<div class="col-md-12 form-group">
+				<div class="box-tools pull-right">
+					<button id="button-add-service" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add service URL" %}</button>
+				</div>
+			</div>
+		</div>
+		
+		<div class="box">		
+			<div class="box-body">
+				<table class="table" id="services-table">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>{% trans "Title" %}</th>
+							<th>{% trans "Type" %}</th>
+							<th>{% trans "URL" %}</th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for service in services %}
+						<tr>
+							<td>{{ service.id }}</td> 
+							<td>{{ service.title }}</td>
+							<td>{{ service.type }}</td>
+							<td>{{ service.url }}</td>
+							<td></td>
+							<td></td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>      
+
+<!-- Modal -->
+<div class="modal fade" id="modal-delete-service" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Delete service URL" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "Service URL will be deleted, Do you want to continue?" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-delete-service-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-delete-service-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-services').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+	var table = $('#services-table').DataTable({
+		responsive: true,
+	    language: {
+	    	processing		: '{% trans "Processing request..." %}',
+		    search			: '{% blocktrans with sep="&nbsp;:" %}Search{{sep}}{% endblocktrans %}',
+		    lengthMenu		: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
+		    info			: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
+		    infoEmpty		: '{% trans "Showing from 0 to 0 of 0 records" %}',
+		    infoFiltered	: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
+		    infoPostFix		: "",
+		    loadingRecords	: '{% trans "Loading..." %}',
+		    zeroRecords		: '{% trans "No records available" %}',
+		    emptyTable		: '{% trans "No records available" %}',
+		    paginate: {
+		    	first		: '{% trans "First" %}',
+		        previous	: '{% trans "Previous" %}',
+		        next		: '{% trans "Next" %}',
+		        last		: '{% trans "Last" %}'
+		    },
+		    aria: {
+		        sortAscending: '{% blocktrans with sep=": " %}{{sep}}Sort ascending{% endblocktrans %}',
+		        sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
+		    }
+		},
+		"columnDefs": [{
+	  		"targets": -1,
+	        "data": null,
+	        "defaultContent": '<button type="button" name="button-delete-service" data-toggle="modal" data-target="#modal-delete-service" data-placement="bottom" title="' + '{% trans "Delete service URL" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
+	  	},{
+	      	"targets": -2,
+	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-update-service" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update service URL" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
+	  	}],
+	    "dom": 'T<"clear">lfrtip',
+		"bLengthChange": false
+	});
+	
+	$('#button-add-service').click( function() {
+		location.href = '/gvsigonline/services/service_url_add/';
+	});
+		 
+	$('#services-table tbody').on('click', 'button', function (){
+		var row = table.row($(this).parents('tr'));
+	    var data = row.data();  
+	    if (this.name == "button-update-service") {
+	        updateServiceURL(data);
+	        
+	    } else if (this.name == "button-delete-service"){
+	        deleteServiceURL(data, row);   
+	    }
+	});
+	
+	function updateServiceURL(data){			
+		location.href = '/gvsigonline/services/service_url_update/' + data[0] + '/';
+	}
+
+	function deleteServiceURL(data, row){
+		$('#button-delete-service-accept').click( function() {
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/services/service_url_delete/' + data[0] + '/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				success	:function(response){
+					$('#modal-delete-service').modal('hide');
+					location.reload();
+				},
+				error: function(){}
+			});
+		});
+	}
+	    
+});
+</script>
+{% endblock %}

@@ -1,0 +1,129 @@
+{
+	"id": "c369c890-4cd0-457f-b230-cba44448c4f9",
+	"name": "LIBRA-PRE",
+	"values": [
+		{
+			"key": "url",
+			"value": "libra-pre.gva.es",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "user",
+			"value": "testapi",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "publicprj",
+			"value": "sigoleicola",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "prj",
+			"value": "TestAPI",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "password",
+			"value": "TrV.Zxj4",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "prjid",
+			"value": "12",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "keycloak",
+			"value": "false",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "client_id",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "client_secret",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "lyr_id",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "public_lyr_id",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "feat_id",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "public_feat_id",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "protocol",
+			"value": "https",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "testlayer",
+			"value": "testlayerAPIRest",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "testpubliclayer",
+			"value": "testpubliclayerAPIRest",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "datastore_id",
+			"value": "43",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "group_id",
+			"value": "46",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "resource_id",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2022-11-17T11:18:03.759Z",
+	"_postman_exported_using": "Postman/9.31.0"
+}

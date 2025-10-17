@@ -1,0 +1,47 @@
+{% load staticfiles %}
+<script>
+	var IMG_PATH = '{% static "img/" %}';
+	var LOADED_IMG_PATH = "{{ MEDIA_URL }}";
+</script>
+<link href="{% static "css/ol3-contextmenu.min.css" %}" rel="stylesheet">
+<script type="text/javascript" src="{% static "js/vendors/geocoding/ol3-contextmenu.js" %}"></script>
+<script type="text/javascript" src="{% static "js/vendors/geocoding/jquery.autocomplete.js" %}"></script>
+<script type="text/javascript" src="{% static "js/lib/widgets/search.js" %}"></script>
+
+
+<script type="text/javascript">
+var is_enabled = true;
+if('widget_conf' in viewer.core){
+	if('Geocoding' in viewer.core['widget_conf']){
+		var geo_conf = viewer.core['widget_conf']['Geocoding'];
+		if('active' in geo_conf){
+			is_enabled = geo_conf["active"];
+		}
+	}
+}
+if(is_enabled){
+	$.ajax({
+		type : 'POST',
+		async : false,
+		url : '/gvsigonline/geocoding/get_conf/',
+		success : function(response) {
+			if(response['has_providers']){
+				var map = viewer.core.getMap();
+				var ui = '';
+				ui += '<div class="viewer-search-form">';
+				ui += 	'<div class="input-group">';
+				ui += 		'<input type="text" name="search-widget-input" id="autocomplete" class="form-control" placeholder="' + gettext("Search") + '...">';
+				ui += 	'</div>';
+				ui += '</div>';
+				
+				$('#viewer-navbar').append(ui);
+				new search(map, response);
+			}
+		},
+		error : function(error) {
+			alert("Error loading geocoder: "+e);
+		}
+	});	
+}
+	
+</script>

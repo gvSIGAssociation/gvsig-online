@@ -1,0 +1,61 @@
+{% extends "base_symbology.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	  
+<div class="row">
+	<div class="col-md-12">
+		<div class="box">
+			<div class="box-header with-border">
+				<h3 class="box-title">{% trans "Create new chart" %}</h3>
+			</div>
+			<div class="box-body">
+				<div class="row">
+					<div class="col-md-12">
+						<ul class="products-list product-list-in-box">
+							<li class="item">
+								<div class="product-img">
+									<span class="new-style-options-icon"><i class="fa fa-bar-chart"></i></span>
+								</div>
+								<div class="product-info">
+									<a href="/gvsigonline/charts/barchart_add/{{layer.id}}/" class="product-title">{% trans "Bar Chart" %}</a> 
+									<span class="product-description"> {% trans "Create new bar chart" %} </span>
+								</div>
+							</li>
+							<li class="item">
+								<div class="product-img">
+									<span class="new-style-options-icon"><i class="fa fa-line-chart"></i></span>
+								</div>
+								<div class="product-info">
+									<a href="/gvsigonline/charts/linechart_add/{{layer.id}}/" class="product-title">{% trans "Line Chart" %}</a> 
+									<span class="product-description"> {% trans "Create new line chart" %} </span>
+								</div>
+							</li>
+							<li class="item">
+								<div class="product-img">
+									<span class="new-style-options-icon"><i class="fa fa-pie-chart"></i></span>
+								</div>
+								<div class="product-info">
+									<a href="/gvsigonline/charts/piechart_add/{{layer.id}}/" class="product-title">{% trans "Pie Chart" %}</a> 
+									<span class="product-description"> {% trans "Create new pie chart" %} </span>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div> 		  	
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-plugins').addClass("active");
+	$('#submenu-charts').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+});
+</script>
+{% endblock %}

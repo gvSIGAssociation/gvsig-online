@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+{% load i18n %}
+<html>
+<head>
+
+	<title>{{GVSIGOL_NAME}}</title>
+
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+	<link rel="stylesheet" href="{% static "js/vendors/jQueryUI/jquery-ui.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-3.3.7/css/bootstrap.min.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-datepicker-1.6.4-dist/css/bootstrap-datepicker.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-datepicker-1.6.4-dist/css/bootstrap-datetimepicker.css" %}">
+	<link rel="stylesheet" href="{% static "css/font-awesome-4.4.0/css/font-awesome.min.css" %}">
+	<link rel="stylesheet" href="{% static "css/fontcustom2/fontcustom.css" %}">
+	<link rel="stylesheet" href="{% static "js/vendors/ol-4.0.1/ol.css" %}">
+	<link rel="stylesheet" href="{% static "css/gvsigOL.css" %}">
+	<link rel="stylesheet" href="{% static "css/viewer.css" %}">
+	<link rel="stylesheet" href="{% static "css/skins/_all-skins.min.css" %}">
+	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body class="{{GVSIGOL_SKIN}}">
+	<header class="main-header map-header">
+		<nav id="viewer-navbar" class="navbar navbar-static-top" style="margin-left:0px;" role="navigation">
+          	<div id="viewer-navbar-header" class="navbar-header">
+      			<a id="main-logo-link" href="#"><img id="main-logo" style="max-height: 52px;" onError="this.style='display:none'"></a>
+			</div>
+			<span id="dashboard-layer-tile" style="position: relative;left: 40%;top: 5px;font-size: 24px;color: #ffffff;">{% trans "Statistics" %}: {{ layer_title }}</span>
+		</nav>
+	</header>
+
+	<ul id="charts-container" style="list-style-type: none; margin: 0; padding: 20px; width: 100%;">
+	</ul>
+
+	<script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery-3.6.0.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jscookie/jscookie-2.2.1.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.easy-overlay.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQueryUI/jquery-ui.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/bootstrap-3.3.7/js/bootstrap.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/proj4js/proj4.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/ol-4.0.1/ol.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.form.js" %} "></script>
+	<script type="text/javascript" src="{% static "js/lib/gvsigOL.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/widgets/messageBox.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jquery-loading-overlay-2.1.6/loadingoverlay.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/Chart.bundle.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/tools/ChartsView.js" %}"></script>
+
+	<script>
+	$(document).ready(function() {
+		document.getElementById('main-logo').src = window.opener.logo_url;
+		
+		var layerId = '{{ layer_id }}';
+		var layerName = '{{ layer_name }}';
+		var layerWorkspace = '{{ layer_workspace }}';
+		var layerWfsUrl = '{{ layer_wfs_url }}';
+		var charts = {{charts|safe}};
+		
+		var layer = {
+			layer_id: layerId,
+			layer_name: layerName,
+			layer_workspace: layerWorkspace,
+			layer_wfs_url: layerWfsUrl
+		};
+		var chartsDashboard = new ChartsDashboard(layer, charts);
+	});
+	</script>
+</body>
+</html>

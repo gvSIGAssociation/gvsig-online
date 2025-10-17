@@ -1,0 +1,38 @@
+{% load staticfiles %}
+<script>
+	var IMG_PATH = '{% static "img/" %}';
+</script>
+<script type="text/javascript" src="{% static "js/lib/tools/print.js" %}"></script>
+<script type="text/javascript">
+	var map = viewer.core.getMap();
+	var conf = viewer.core.getConf();
+	
+	if (viewer.core.ifToolInConf('gvsigol_plugin_print')) {
+		
+		//var button = '<li id="print-div" title="'+gettext("Print map")+'"><a href="#" id="print" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-print"></i></a></li>';
+		var button = '<li role="presentation"><a id="print" role="menuitem" tabindex="-1" href="#"><i class="fa fa-print m-r-5"></i>'+gettext("Print")+'</a></li>';
+		$('#gvsigol-navbar-file-menu').append(button);
+		
+		$.ajax({
+			type : 'POST',
+			async : false,
+			url : '/gvsigonline/print/get_conf/',
+			beforeSend : function(xhr) {
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			success : function(response) {
+				var printProvider = response;
+				
+				var tool = new print(printProvider, conf, map);
+				viewer.core.loadTool(tool);
+				
+				
+			},
+			error : function() {
+				messageBox.show('error', gettext('Error loading print plugin'));
+			}
+		});
+	}
+	
+	
+</script>
