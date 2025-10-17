@@ -1983,6 +1983,8 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
             DECLARE
                 radio INTEGER := 1;
                 snap_precision NUMERIC := {snap_precision};
+                area_eps_m2 NUMERIC := 0.001;
+                length_eps_m NUMERIC := 0.02;
                 conflicting_id TEXT;
                 overlap_geom GEOMETRY;
                 overlap_area NUMERIC;
@@ -1993,14 +1995,14 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 -- Buscar overlaps usando ST_Relate con patrones DE-9IM específicos
                 -- Aplicamos SnapToGrid al milímetro para evitar problemas de precisión
                 SELECT {pk_field}::TEXT, 
-                       ST_Intersection(NEW.{geom_field}, {geom_field}),
-                       ST_Area(ST_Intersection(NEW.{geom_field}, {geom_field})),
-                       ST_Dimension(ST_Intersection(NEW.{geom_field}, {geom_field}))
+                       ST_Intersection(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({geom_field}, {snap_precision})),
+                       ST_Area(ST_Intersection(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({geom_field}, {snap_precision}))),
+                       ST_Dimension(ST_Intersection(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({geom_field}, {snap_precision})))
                 INTO conflicting_id, overlap_geom, overlap_area, intersection_dimension
                 FROM {full_table_name}
                 WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({geom_field}, 3857), radio) -- Optimización espacial
                   AND (
-                                              -- Patrón para overlaps reales (interior-interior se intersecta): 'T*T***T**'
+                        -- Patrón para overlaps reales (interior-interior se intersecta): 'T*T***T**'
                        ST_Relate(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({geom_field}, {snap_precision}), 'T*T***T**')
                         OR
                         -- Patrón para geometrías idénticas: 'T*F**FFF*' (igualdad)
@@ -2669,8 +2671,15 @@ def _save_layer_topology_rules(request, layer):
     Args:
         request: HttpRequest
         layer: La instancia de Layer
+    
+    Solo los superusuarios pueden modificar reglas topológicas.
     """
     try:
+        # Verificar que el usuario sea superusuario
+        if not request.user.is_superuser:
+            logger.warning(f"User {request.user.username} attempted to modify topology rules without superuser privileges")
+            return None
+        
         # Detectar automáticamente si los datos vienen del formulario o de la API JSON
         if 'topology_no_overlap' in request.POST:
             # Datos vienen del formulario (layer_config.html)
@@ -7309,10 +7318,12 @@ def download_layer_resources(request, workspace_name, layer_name):
 
 
 @login_required
+@superuser_required
 def get_topology_available_layers(request, layer_id):
     """
     Obtiene todas las capas disponibles de la misma base de datos que la capa actual.
     Solo devuelve capas que tengan geometría, en formato datastore:nombretabla.
+    Solo accesible para superusuarios.
     """
     if request.method == 'GET':
         try:
@@ -7418,9 +7429,11 @@ def get_topology_available_layers(request, layer_id):
 
 
 @login_required
+@superuser_required
 def get_topology_rules(request, layer_id):
     """
-    Obtiene las reglas topológicas existentes para una capa específica
+    Obtiene las reglas topológicas existentes para una capa específica.
+    Solo accesible para superusuarios.
     """
     if request.method == 'GET':
         try:
@@ -7523,10 +7536,11 @@ def get_topology_rules(request, layer_id):
 
 @login_required()
 @require_http_methods(["POST", "PUT"])
-@staff_required
+@superuser_required
 def update_topology_rules(request, layer_id):
     """
-    Actualiza las reglas de topología para una capa específica
+    Actualiza las reglas de topología para una capa específica.
+    Solo accesible para superusuarios.
     """
     try:
         layer = Layer.objects.get(id=layer_id)

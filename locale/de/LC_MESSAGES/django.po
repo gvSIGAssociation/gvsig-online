@@ -2882,6 +2882,10 @@ msgstr "Nicht erlaubt"
 msgid "Error deleting view: {0}"
 msgstr "Fehler beim Löschen der Ansicht: {0}"
 
+#: gvsigol_services/templates/layer_config.html
+msgid "Only superusers can modify topology rules"
+msgstr "Nur Superuser können Topologieregeln ändern"
+
 #~ msgid "Locks"
 #~ msgstr "Locks"
 

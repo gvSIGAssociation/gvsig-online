@@ -3103,3 +3103,7 @@ msgstr ""
 #, python-brace-format
 msgid "Error deleting view: {0}"
 msgstr ""
+
+#: gvsigol_services/templates/layer_config.html
+msgid "Only superusers can modify topology rules"
+msgstr "Only superusers can modify topology rules"
