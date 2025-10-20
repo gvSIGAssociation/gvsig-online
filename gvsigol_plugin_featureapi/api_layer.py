@@ -34,7 +34,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import FormParser
 from gvsigol_plugin_featureapi.export import VectorLayerExporter
 from gvsigol_plugin_featureapi.serializers import FeatureSerializer, LayerChangesSerializer, LayerCreateSerializer, StyleSerializer
-from gvsigol_plugin_featureapi.serializers import LayerSerializer
+from gvsigol_plugin_featureapi.serializers import LayerSerializer, EmptySerializer
 from gvsigol_plugin_featureapi.serializers import LayerTimeSerializer
 from gvsigol_plugin_baseapi.validation import Validation, HttpException
 from gvsigol_services import geographic_servers
@@ -357,6 +357,7 @@ class Legend(ListAPIView):
 #                 PublicLegend
 #--------------------------------------------------
 class PublicLegend(ListAPIView):
+    serializer_class = EmptySerializer
     serializer_class = None
     permission_classes=[AllowAny]
     pagination_class = None
@@ -875,6 +876,7 @@ class LayersTime(ListAPIView):
 #                  LayersStyle
 #--------------------------------------------------         
 class LayersStyle(ListAPIView):
+    serializer_class = EmptySerializer
     permission_classes = [AllowAny]
     pagination_class = None
     @swagger_auto_schema(operation_id='get_layer_style', operation_summary='Gets the style of the layer',
