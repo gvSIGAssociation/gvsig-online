@@ -47,7 +47,7 @@ from gvsigol_core import utils as core_utils
 from gvsigol_core.models import Project, ProjectLayerGroup, Application, SharedView
 from gvsigol_plugin_projectapi import settings
 from gvsigol_plugin_projectapi.export import VectorLayerExporter
-from gvsigol_plugin_projectapi.serializers import ProjectsSerializer, GsInstanceSerializer, ApplicationsSerializer
+from gvsigol_plugin_projectapi.serializers import ProjectsSerializer, GsInstanceSerializer, ApplicationsSerializer, EmptySerializer
 from gvsigol_plugin_featureapi.serializers import LayerSerializer
 from gvsigol_plugin_baseapi.validation import Validation, HttpException
 from gvsigol_services.models import Layer, LayerGroup, Server
@@ -200,6 +200,7 @@ class Pagination():
 #                Platform
 #--------------------------------------------------   
 class PlatformView(ListAPIView):
+    serializer_class = EmptySerializer
     serializer_class = None
     permission_classes=[AllowAny]
     pagination_class = None
