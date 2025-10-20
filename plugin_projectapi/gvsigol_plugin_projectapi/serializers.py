@@ -45,6 +45,11 @@ from gvsigol_auth import auth_backend
 #logging.basicConfig()
 logger = logging.getLogger(__name__)
 
+
+class EmptySerializer(serializers.Serializer):
+    """Serializer sin campos; útil para endpoints sin body."""
+    pass
+
 class UserSerializer(serializers.ModelSerializer):
     roles = serializers.SerializerMethodField('get_roles_')
 
