@@ -38,7 +38,7 @@ from rest_framework.reverse import reverse
 from gvsigol import settings as core_settings
 from gvsigol_plugin_featureapi import settings
 from gvsigol_plugin_featureapi.models import FeatureVersions
-from gvsigol_plugin_featureapi.serializers import FeatureSerializer, FeatureChangeSerializer, FileUploadSerializer
+from gvsigol_plugin_featureapi.serializers import FeatureSerializer, FeatureChangeSerializer, FileUploadSerializer, EmptySerializer
 from gvsigol_plugin_baseapi.validation import Validation, HttpException
 from gvsigol_services.models import Layer, LayerResource
 from . import serializers
@@ -53,6 +53,7 @@ import json
 import logging
 
 LOGGER_NAME='gvsigol'
+
 
 def handle_topology_error(e):
     """
@@ -1385,6 +1386,7 @@ class GetSignedUrlFromLinkView(ListAPIView):
             return HttpException(500, f"Error getting feature: {str(e)}").get_exception()
 
 class GetSignedDownloadView(ListAPIView):
+    serializer_class = EmptySerializer
     parser_classes = (MultiPartParser,)
     serializer_class = None
     permission_classes = [AllowAny]

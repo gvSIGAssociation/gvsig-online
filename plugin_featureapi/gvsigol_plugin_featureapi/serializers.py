@@ -48,7 +48,9 @@ import sys
 #logging.basicConfig()
 logger = logging.getLogger(__name__)
 
-  
+class EmptySerializer(serializers.Serializer):
+    """Serializer sin campos; útil para endpoints sin body."""
+    pass 
 
 class StyleSerializer(serializers.ModelSerializer):
     class Meta:
