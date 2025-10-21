@@ -130,21 +130,19 @@ def etl_canvas(request):
     except:
         providers = []
 
-    try:
-        statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
+    # Usar get_or_create para evitar duplicados
+    statusModel, created = ETLstatus.objects.get_or_create(
+        name='current_canvas.' + username,
+        defaults={
+            'message': '',
+            'status': '',
+            'id_ws': None
+        }
+    )
+    if not created:
         statusModel.message = ''
         statusModel.status = ''
         statusModel.id_ws = None
-        statusModel.save()
-
-    except:
-
-        statusModel = ETLstatus(
-            name = 'current_canvas.'+username,
-            message = '',
-            status = '',
-            id_ws = None
-        )
         statusModel.save()
 
     try:
@@ -227,16 +225,14 @@ def get_list(request, concat = False, datetime_string = False):
         workspace['id'] = w.id
         workspace['name'] = w.name
         workspace['description'] = w.description
-        try:
-            status = ETLstatus.objects.get(id_ws= w.id)
-            if status.last_exec is not None:
-                if datetime_string:
-                    workspace['last_run'] = str(status.last_exec)
-                else:
-                    workspace['last_run'] = status.last_exec
+        # Usar filter().first() para evitar MultipleObjectsReturned
+        status = ETLstatus.objects.filter(id_ws=w.id).first()
+        if status and status.last_exec is not None:
+            if datetime_string:
+                workspace['last_run'] = str(status.last_exec)
             else:
-                workspace['last_run'] = ''
-        except:
+                workspace['last_run'] = status.last_exec
+        else:
             workspace['last_run'] = ''
         if concat == True:
             workspace['workspace'] = w.workspace
@@ -455,13 +451,15 @@ def save_periodic_workspace(request, workspace):
             task='gvsigol_plugin_geoetl.tasks.run_canvas_background',
         )
 
-    statusModel = ETLstatus(
-        name = workspace.name,
-        message = '',
-        status = '',
-        id_ws = workspace.id
+    # Crear o actualizar el status del workspace (evitar duplicados)
+    statusModel, created = ETLstatus.objects.update_or_create(
+        id_ws=workspace.id,
+        defaults={
+            'name': workspace.name,
+            'message': '',
+            'status': ''
+        }
     )
-    statusModel.save()
 
 
 @transaction.atomic
@@ -576,11 +574,8 @@ def delete_periodic_workspace(workspace):
                 crontabSchedule = CrontabSchedule.objects.get(id = cronid)
                 crontabSchedule.delete()
 
-    try:
-        statusModel  = ETLstatus.objects.get(id_ws = workspace.id)
-        statusModel.delete()
-    except ETLstatus.DoesNotExist:
-        pass
+    # Eliminar todos los status asociados al workspace (por si hay duplicados)
+    ETLstatus.objects.filter(id_ws=workspace.id).delete()
     
     try:
         send_email  = SendEmails.objects.get(etl_ws = workspace.id)
@@ -797,22 +792,21 @@ def etl_workspace_add(request):
 @login_required()
 @staff_required
 def etl_current_canvas_status(request):
-    try:
-        statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+request.POST['username'])
-        status = statusModel.status
-        msg = statusModel.message
-
+    # Usar filter().first() para evitar MultipleObjectsReturned
+    statusModel = ETLstatus.objects.filter(name='current_canvas.'+request.POST['username']).first()
+    
+    if statusModel:
         response = {
-            'status': status, 'message': msg
+            'status': statusModel.status,
+            'message': statusModel.message
+        }
+    else:
+        response = {
+            'status': '',
+            'message': ''
         }
 
-        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
-    except:
-        response = {
-            'status': '', 'message': ''
-        }
-
-        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+    return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
 @login_required()
 @staff_required
@@ -1564,12 +1558,19 @@ def get_status_msg(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
         if form.is_valid():
+            # Usar filter().first() para evitar MultipleObjectsReturned
+            statusModel = ETLstatus.objects.filter(id_ws=request.POST['id_ws']).first()
             
-            statusModel  = ETLstatus.objects.get(id_ws = request.POST['id_ws'])
-            response = {
-                'status': statusModel.status,
-                'message':statusModel.message
-            }
+            if statusModel:
+                response = {
+                    'status': statusModel.status,
+                    'message': statusModel.message
+                }
+            else:
+                response = {
+                    'status': '',
+                    'message': 'No status found'
+                }
             
             return HttpResponse(json.dumps(response), content_type="application/json")
         

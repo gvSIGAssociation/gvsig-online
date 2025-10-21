@@ -54,32 +54,39 @@ def run_canvas_background(**kwargs):
 
     
         if id_ws:
+            # Obtener el nombre del workspace para usar en el status
             try:
-
-                statusModel  = ETLstatus.objects.get(id_ws = id_ws)
+                etl_ws = ETLworkspaces.objects.get(id=int(wspc) if kwargs["concat"] else int(id_ws))
+                ws_name = etl_ws.name
+            except:
+                ws_name = 'workspace_' + str(id_ws)
+            
+            # Usar update_or_create para evitar duplicados (thread-safe)
+            statusModel, created = ETLstatus.objects.update_or_create(
+                id_ws=id_ws,
+                defaults={
+                    'name': ws_name,
+                    'message': 'Running',
+                    'status': 'Running',
+                    'last_exec': timezone.now()
+                }
+            )
+        else:
+            # Para canvas actuales (no guardados), usar get_or_create
+            statusModel, created = ETLstatus.objects.get_or_create(
+                name='current_canvas.' + username,
+                defaults={
+                    'message': 'Running',
+                    'status': 'Running',
+                    'id_ws': None,
+                    'last_exec': timezone.now()
+                }
+            )
+            if not created:
                 statusModel.message = 'Running'
                 statusModel.status = 'Running'
                 statusModel.last_exec = timezone.now()
                 statusModel.save()
-
-            except:
-
-                statusModel = ETLstatus(
-                    name = 'name',
-                    message = 'Running',
-                    status = 'Running',
-                    id_ws = id_ws,
-                    last_exec = timezone.now()
-                )
-                
-                statusModel.save()
-        else:
-
-            statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
-            statusModel.message = 'Running'
-            statusModel.status = 'Running'
-            statusModel.last_exec = timezone.now()
-            statusModel.save()
         
         nodes=[]
         edges =[]
@@ -264,10 +271,13 @@ def run_canvas_background(**kwargs):
                     executeSQL(params['db'], params['sql-after'])
 
             if id_ws:
-                statusModel  = ETLstatus.objects.get(id_ws = id_ws)
-                statusModel.message = 'Process has been executed successfully'
-                statusModel.status = 'Success'
-                statusModel.save()  
+                # Actualizar el status a Success (usar filter().first() por si hay duplicados residuales)
+                statusModel = ETLstatus.objects.filter(id_ws=id_ws).first()
+                if statusModel:
+                    statusModel.message = 'Process has been executed successfully'
+                    statusModel.status = 'Success'
+                    statusModel.save()
+                
                 try:
                     send_mail_params = SendEmails.objects.get(etl_ws_id = id_ws)
                     if send_mail_params.send_after:
@@ -285,10 +295,11 @@ def run_canvas_background(**kwargs):
             
             
             else:
-                statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
-                statusModel.message ='Process has been executed successfully'
-                statusModel.status = 'Success'
-                statusModel.save()
+                statusModel = ETLstatus.objects.filter(name='current_canvas.'+username).first()
+                if statusModel:
+                    statusModel.message = 'Process has been executed successfully'
+                    statusModel.status = 'Success'
+                    statusModel.save()
             
             delete_tables(tables_list_name)
         
@@ -296,10 +307,13 @@ def run_canvas_background(**kwargs):
             logger.exception('Error running workspace')
             
             if id_ws:
-                statusModel  = ETLstatus.objects.get(id_ws = id_ws)
-                statusModel.message = errormsg  + str(e)
-                statusModel.status = 'Error'
-                statusModel.save()
+                # Actualizar el status a Error (usar filter().first() por si hay duplicados residuales)
+                statusModel = ETLstatus.objects.filter(id_ws=id_ws).first()
+                if statusModel:
+                    statusModel.message = errormsg + str(e)
+                    statusModel.status = 'Error'
+                    statusModel.save()
+                
                 try:
                     send_mail_params = SendEmails.objects.get(etl_ws_id = id_ws)
                     if send_mail_params.send_fails:
@@ -317,10 +331,11 @@ def run_canvas_background(**kwargs):
                     print('No se ha podido hacer el request por: '+str(ex))
 
             else:
-                statusModel  = ETLstatus.objects.get(name = 'current_canvas.'+username)
-                statusModel.message = errormsg  + str(e)
-                statusModel.status = 'Error'
-                statusModel.save()
+                statusModel = ETLstatus.objects.filter(name='current_canvas.'+username).first()
+                if statusModel:
+                    statusModel.message = errormsg + str(e)
+                    statusModel.status = 'Error'
+                    statusModel.save()
             
             delete_tables(tables_list_name)
             
