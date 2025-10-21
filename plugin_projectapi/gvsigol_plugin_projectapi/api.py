@@ -199,94 +199,78 @@ class Pagination():
 #--------------------------------------------------
 #                Platform
 #--------------------------------------------------   
-class PlatformView(ListAPIView):
-    serializer_class = EmptySerializer
-    serializer_class = None
-    permission_classes=[AllowAny]
-    pagination_class = None
+class PlatformView(APIView):
+    permission_classes = [AllowAny]
 
-    #@swaggerdoc('test.yml')
-    @swagger_auto_schema(operation_id='get_platform_info', operation_summary='Get information about the platform', 
-                         responses={404: "Database connection NOT found<br>User NOT found"})
-    @action(detail=True, methods=['GET'])
+    @swagger_auto_schema(
+        operation_id='get_platform_info',
+        operation_summary='Get information about the platform',
+        responses={404: "Database connection NOT found<br>User NOT found"}
+    )
     def get(self, request):
         apps = core_settings.INSTALLED_APPS
-        installed_apps = []
-        for app in apps:
-            if(not app.startswith("#")):
-                installed_apps.append(app)
+        installed_apps = [app for app in apps if not app.startswith("#")]
 
         api_calls = []
-        #Se busca entre los módulos el del api rest y una vez encontrado se extraen las llamadas de este y se meten en un array
         for module in urlpatterns:
-            if "gvsigol_plugin_projectapi" in str(module) or "gvsigol_plugin_featureapi" in str(module) or "gvsigol_plugin_layerpackaging" in str(module):#.urlconf_name):
+            if "gvsigol_plugin_projectapi" in str(module) or \
+               "gvsigol_plugin_featureapi" in str(module) or \
+               "gvsigol_plugin_layerpackaging" in str(module):
                 for pattern in module.url_patterns:
                     try:
-                        if(pattern.name is not None):
-                            if("," in pattern.name):
-                                names = pattern.name.split(',')
-                                for i in names:
-                                    api_calls.append(i)
+                        if pattern.name is not None:
+                            if "," in pattern.name:
+                                api_calls.extend(pattern.name.split(","))
                             else:
                                 api_calls.append(pattern.name)
-                    except Exception as te:
+                    except Exception:
                         pass
-                        
-        postres_plugins = []
 
-        db = core_settings.DATABASES['default']
-        
+        postres_plugins = []
         dbhost = core_settings.DATABASES['default']['HOST']
         dbport = core_settings.DATABASES['default']['PORT']
         dbname = core_settings.DATABASES['default']['NAME']
         dbuser = core_settings.DATABASES['default']['USER']
         dbpassword = core_settings.DATABASES['default']['PASSWORD']
-        
+
         try:
-            connection = psycopg2.connect("host=" + dbhost +" port=" + dbport +" dbname=" + dbname +" user=" + dbuser +" password="+ dbpassword);
+            connection = psycopg2.connect(
+                f"host={dbhost} port={dbport} dbname={dbname} user={dbuser} password={dbpassword}"
+            )
             connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-            sql = 'SELECT extname, extversion FROM pg_extension'
             cursor = connection.cursor()
-            cursor.execute(sql)
-            rows = cursor.fetchall()
-            for row in rows:
-                postres_plugins.append({'name' : row[0], 'version' : row[1]})
+            cursor.execute('SELECT extname, extversion FROM pg_extension')
+            for row in cursor.fetchall():
+                postres_plugins.append({'name': row[0], 'version': row[1]})
         except Exception as e:
             print("Failed to connect!", e)
-        
+
         auth = {
-            'type' : 'gvSIGOnline',
-            'url' : core_settings.BASE_URL + "/" + core_settings.GVSIGOL_PATH + "/auth/api-token-auth/"
+            'type': 'gvSIGOnline',
+            'url': core_settings.BASE_URL + "/" + core_settings.GVSIGOL_PATH + "/auth/api-token-auth/"
         }
         if core_settings.GVSIGOL_AUTH_PROVIDER == 'gvsigol_plugin_oidc_mozilla':
             auth = {
                 'type': 'OAuth',
                 'url': OIDC_OP_BASE_URL,
                 'oidc_rp_client_id': OIDC_RP_CLIENT_ID,
-                'realm' : OIDC_OP_REALM_NAME,
-                'mobile_client_id' : OIDC_MOBILE_CLIENT_ID,
-                'auth_endpoint' : OIDC_OP_AUTHORIZATION_ENDPOINT,
-                'token_endpoint' : OIDC_OP_TOKEN_ENDPOINT,
-                'logout_endpoint' : OIDC_OP_LOGOUT_ENDPOINT,
-                'user_endpoint' : OIDC_OP_USER_ENDPOINT,
-                'jwk_endpoint' : OIDC_OP_JWKS_ENDPOINT
+                'realm': OIDC_OP_REALM_NAME,
+                'mobile_client_id': OIDC_MOBILE_CLIENT_ID,
+                'auth_endpoint': OIDC_OP_AUTHORIZATION_ENDPOINT,
+                'token_endpoint': OIDC_OP_TOKEN_ENDPOINT,
+                'logout_endpoint': OIDC_OP_LOGOUT_ENDPOINT,
+                'user_endpoint': OIDC_OP_USER_ENDPOINT,
+                'jwk_endpoint': OIDC_OP_JWKS_ENDPOINT
             }
+
         info = {
             'gvsigonline_version': core_settings.GVSIGOL_VERSION,
             'gvsigonline_plugins': installed_apps,
             'rest_api_calls': api_calls,
-            'postgres_plugins' : postres_plugins,
-            'authentication' : auth
+            'postgres_plugins': postres_plugins,
+            'authentication': auth
         }
-        result = {
-            "content" : info,
-            "links" : [
-                {
-                    "rel" : "self",
-                    "href": request.get_full_path()
-                }
-            ]
-        }
+        result = {"content": info, "links": [{"rel": "self", "href": request.get_full_path()}]}
         return JsonResponse(result, safe=False)
         
 #--------------------------------------------------
