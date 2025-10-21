@@ -91,6 +91,15 @@ class ETLstatus(models.Model):
     id_ws = models.IntegerField(null=True, blank=True)
     last_exec = models.DateTimeField(auto_now_add=False, null=True, blank=True)
     
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['id_ws'],
+                condition=models.Q(id_ws__isnull=False),
+                name='unique_etlstatus_per_workspace'
+            )
+        ]
+    
     def __str__(self):
         return self.name
     
