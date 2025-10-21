@@ -29,6 +29,7 @@ from rest_framework import status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.filters import BaseFilterBackend
 from rest_framework.generics import ListAPIView, ListCreateAPIView, DestroyAPIView
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.parsers import FormParser
@@ -356,17 +357,14 @@ class Legend(ListAPIView):
 #--------------------------------------------------
 #                 PublicLegend
 #--------------------------------------------------
-class PublicLegend(ListAPIView):
-    serializer_class = EmptySerializer
-    serializer_class = None
-    permission_classes=[AllowAny]
-    pagination_class = None
-    
-    @swagger_auto_schema(operation_id='get_geoserver_public_legend', operation_summary='If the layer is public get the geoserver legend',
-                          responses={
-                                    404: "Resource NOT found"
-                                    })
-    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+class PublicLegend(APIView):
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_id='get_geoserver_public_legend',
+        operation_summary='If the layer is public get the geoserver legend',
+        responses={404: "Resource NOT found"}
+    )
     def get(self, request, lyr_id):
         validation = Validation(request)
         try:
@@ -374,6 +372,7 @@ class PublicLegend(ListAPIView):
             validation.check_read_permission(lyr_id)
         except HttpException as e:
             return e.get_exception()
+
         try:
             lyr = Layer.objects.get(id=lyr_id)
             front_url = None
@@ -383,14 +382,14 @@ class PublicLegend(ListAPIView):
                     front_url = params['url']
                     lyr.name = params['layers']
             else:
-                front_url = lyr.datastore.workspace.wms_endpoint #.server.frontend_url
-            
+                front_url = lyr.datastore.workspace.wms_endpoint
+
             if front_url is not None:
-                url = front_url + "?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER=" + lyr.name
-                return JsonResponse({"url" : url}, safe=False)
+                url = f"{front_url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER={lyr.name}"
+                return JsonResponse({"url": url}, safe=False)
             else:
                 return HttpException(404, "Resource NOT found").get_exception()
-        except Exception as e:
+        except Exception:
             return HttpException(404, "Resource NOT found").get_exception()
 
 
@@ -875,37 +874,39 @@ class LayersTime(ListAPIView):
 #--------------------------------------------------
 #                  LayersStyle
 #--------------------------------------------------         
-class LayersStyle(ListAPIView):
-    serializer_class = EmptySerializer
+class LayersStyle(APIView):
     permission_classes = [AllowAny]
-    pagination_class = None
-    @swagger_auto_schema(operation_id='get_layer_style', operation_summary='Gets the style of the layer',
-                         responses={400: "The layer is not in the user datastore",
-                                    403: "The layer is not allowed to this user", 
-                                    404: "Database connection NOT found<br>User NOT found<br>Layer NOT found"})
-    @action(detail=True, methods=['GET'])
+
+    @swagger_auto_schema(
+        operation_id='get_layer_style',
+        operation_summary='Gets the style of the layer',
+        responses={
+            400: "The layer is not in the user datastore",
+            403: "The layer is not allowed to this user",
+            404: "Database connection NOT found<br>User NOT found<br>Layer NOT found"
+        }
+    )
     def get(self, request, lyr_id):
         response = HttpResponse()
         response['Content-Type'] = 'text/xml; charset=utf-8'
-        
-        lyr = Layer.objects.get(id = lyr_id)
+
+        lyr = Layer.objects.get(id=lyr_id)
         try:
             workspace = lyr.datastore.workspace
         except Exception:
             return HttpException(400, "The layer is not in the user workspace").get_exception()
-        
+
         gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-        
         styles = StyleLayer.objects.filter(layer_id=lyr)
-        if(styles is not None and len(styles) > 0):
+        if styles is not None and len(styles) > 0:
             for style_layer in styles:
-                if(style_layer.style.is_default):
+                if style_layer.style.is_default:
                     style_sld = gs.getStyle(style_layer.style.name)
                     if style_sld is None:
                         return response
-                    return HttpResponse(style_sld.sld_body, content_type='application/xml') 
-        
-        return response        
+                    return HttpResponse(style_sld.sld_body, content_type='application/xml')
+
+        return response     
 
 
 class LayersSymbStyle(ListAPIView):

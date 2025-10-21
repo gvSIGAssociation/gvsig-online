@@ -34,7 +34,7 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
-
+from rest_framework.views import APIView
 from gvsigol import settings as core_settings
 from gvsigol_plugin_featureapi import settings
 from gvsigol_plugin_featureapi.models import FeatureVersions
@@ -1385,22 +1385,19 @@ class GetSignedUrlFromLinkView(ListAPIView):
         except Exception as e:
             return HttpException(500, f"Error getting feature: {str(e)}").get_exception()
 
-class GetSignedDownloadView(ListAPIView):
-    serializer_class = EmptySerializer
-    parser_classes = (MultiPartParser,)
-    serializer_class = None
+class GetSignedDownloadView(APIView):
     permission_classes = [AllowAny]
-    pagination_class = None
-    
-    @swagger_auto_schema(operation_id='get_signed_download', operation_summary='Downloads the file specified by token, if valid',
-                          responses={
-                                    404: "Token not found or expired<br>File NOT found in disk"})
-    @action(detail=True, methods=['GET'], permission_classes=[AllowAny])
+
+    @swagger_auto_schema(
+        operation_id='get_signed_download',
+        operation_summary='Downloads the file specified by token, if valid',
+        responses={404: "Token not found or expired<br>File NOT found in disk"}
+    )
     def get(self, request, token):
         path = util.signed_url_download(token)
         if not path:
             return HttpException(404, "Token not found or expired").get_exception()
-        
+
         if not Path(core_settings.MEDIA_ROOT) in Path(path).parents:
             return HttpException(404, "File NOT found in disk").get_exception()
 
