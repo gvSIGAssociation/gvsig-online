@@ -31,6 +31,8 @@ from . import utils, sld_builder
 import tempfile
 import json
 import os
+import re
+from lxml import etree
 from django.utils.crypto import get_random_string
 
 
@@ -317,17 +319,34 @@ def sld_import(name, is_default, layer_id, file, mapservice):
         utils.__delete_temporaries(filepath)
         return False
 
-def clone_layer_style(style, target_layer, new_style_name=None):
-    if not new_style_name:
-        # TODO: decide the new style name
-        new_style_name = target_layer.datastore.workspace.name + "_" + style.name
-    old_id = style.pk
-    style.pk = None
-    style.name = new_style_name
+
+def clone_sld_style(style, target_layer_name, new_style_name):
+    try:
+        sld = etree.fromstring(style.sld)
+    except Exception as e:
+        xml_str = re.sub(r'^<\?xml[^>]*encoding=[\'"].*?[\'"][^>]*\?>', '', style.sld.strip())
+        sld = etree.fromstring(xml_str)
+
+    ns = {'sld': 'http://www.opengis.net/sld'}
+    user_style_name = sld.xpath(
+        '/sld:StyledLayerDescriptor/sld:NamedLayer/sld:UserStyle/sld:Name',
+        namespaces=ns,
+    )
+    if len(user_style_name) > 0:
+        user_style_name[0].text = new_style_name
+        
+    layer_name = sld.xpath(
+        '/sld:StyledLayerDescriptor/sld:NamedLayer/sld:Name',
+        namespaces=ns
+    )
+    if len(layer_name) > 0:
+        layer_name[0].text = target_layer_name
+    style.sld = etree.tostring(sld, encoding="utf-8", xml_declaration=True).decode('utf-8')
     style.save()
-    
-    original_style = Style.objects.get(id=old_id)
-    
+    return style
+
+
+def _clone_layer_style(style, original_style):
     for rule in Rule.objects.filter(style=original_style).order_by('order'):
         old_id = rule.pk
         rule.pk = None # cloning
@@ -393,11 +412,23 @@ def clone_layer_style(style, target_layer, new_style_name=None):
     return Style.objects.get(id=style.pk)
 
 
+def clone_layer_style(style, target_layer, new_style_name=None):
+    if not new_style_name:
+        new_style_name = target_layer.datastore.workspace.name + "_" + style.name
+    old_id = style.pk
+    style.pk = None
+    style.name = new_style_name
+    style.save()
+    if style.type == 'CS':
+        return clone_sld_style(style, target_layer.name, new_style_name)
+    else:
+        original_style = Style.objects.get(id=old_id)
+        return _clone_layer_style(style, original_style)
+
+
 def clone_layer_styles(mapservice, source_layer, target_layer):
     for style_layer in StyleLayer.objects.filter(layer=source_layer).order_by("-style__is_default"):
         style = style_layer.style
-        # TODO: decide the new style name
-        source_layer.datastore.workspace.name
         ws_base_name = target_layer.datastore.workspace.name
         base_name = style.name.replace(source_layer.datastore.workspace.name + "_", "")
         new_style_name = target_layer.datastore.workspace.name + "_" + base_name
@@ -414,7 +445,10 @@ def clone_layer_styles(mapservice, source_layer, target_layer):
         new_style_layer.layer = target_layer
         new_style_layer.style = new_style
         new_style_layer.save()
-        sld_body = sld_builder.build_sld(target_layer, new_style)
+        if style.type != 'CS':
+            sld_body = sld_builder.build_sld(target_layer, new_style, single_symbol=True)
+        else:
+            sld_body = new_style.sld.encode('utf-8')
         if mapservice.createStyle(new_style.name, sld_body):
             mapservice.setLayerStyle(target_layer, new_style.name, new_style.is_default)
         else:
