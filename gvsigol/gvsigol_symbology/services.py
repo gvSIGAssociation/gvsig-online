@@ -425,6 +425,8 @@ def _clone_layer_style(style, original_style):
 
             elif hasattr(original_symbolizer, 'textsymbolizer'):
                 symbolizer = clone_with_subclass(original_symbolizer)
+                symbolizer.rule = new_rule_instance
+                symbolizer.save()
 
     return Style.objects.get(id=style.pk)
 
