@@ -345,6 +345,19 @@ def clone_sld_style(style, target_layer_name, new_style_name):
     style.save()
     return style
 
+def clone_with_subclass(obj):
+    obj.pk = None
+    obj.save()
+
+    for related in obj._meta.related_objects:
+        if related.one_to_one and issubclass(related.related_model, obj.__class__):
+            child = getattr(obj, related.get_accessor_name(), None)
+            if child:
+                child.pk = None
+                setattr(child, related.field.name, obj)
+                child.save()
+
+    return obj
 
 def _clone_layer_style(style, original_style):
     for rule in Rule.objects.filter(style=original_style).order_by('order'):
@@ -408,7 +421,11 @@ def _clone_layer_style(style, original_style):
                     stroke_opacity = original_symbolizer.marksymbolizer.stroke_opacity,
                     stroke_dash_array = original_symbolizer.marksymbolizer.stroke_dash_array
                 )
-                symbolizer.save() 
+                symbolizer.save()
+
+            elif hasattr(original_symbolizer, 'textsymbolizer'):
+                symbolizer = clone_with_subclass(original_symbolizer)
+
     return Style.objects.get(id=style.pk)
 
 
