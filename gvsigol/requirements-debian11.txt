@@ -36,7 +36,7 @@ pillow==10.3.0
 
 ## gsconfig
 geoserver-restconfig==2.0.12
-requests==2.31.0
+requests==2.32.5
 
 # async requests
 requests-futures==1.0.1
