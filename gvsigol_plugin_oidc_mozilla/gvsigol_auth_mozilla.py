@@ -857,6 +857,22 @@ def has_role(request_or_user, role):
     """
     return (role in get_roles(request_or_user))
 
+def _get_session_claim(request_or_user, claim_name):
+    try:
+        # Ignore session for anonymous users.
+        # Session may be present when session-based non-DRF requests
+        # are mixed with DRF session-less requests
+        if request_or_user.user.is_authenticated:
+            if isinstance(request_or_user, HttpRequest):
+                claims = request_or_user.session.get('oidc_access_token_payload')
+                return claims.get(claim_name, [])
+            elif isinstance(request_or_user, Request):
+                claims = request_or_user._request.session.get('oidc_access_token_payload')
+                return claims.get(claim_name, [])
+    except:
+        # oidc_access_token_payload may be absent if a session has not been set; then we'll get roles from auth server
+        pass
+
 def get_groups(request_or_user):
     """Gets the groups of the user. Important: provide a Django HttpRequest
     object to get the groups from the user logged in the request session.
@@ -876,16 +892,10 @@ def get_groups(request_or_user):
     list[str]
         The list of groups of the user
     """
-    try:
-        if isinstance(request_or_user, HttpRequest):
-            claims = request_or_user.session.get('oidc_access_token_payload')
-            return claims.get('groups', [])
-        elif isinstance(request_or_user, Request):
-            claims = request_or_user._request.session.get('oidc_access_token_payload')
-            return claims.get('groups', [])
-    except:
-        # oidc_access_token_payload may be absent if a session has not been set; then we'll get roles from auth server
-        pass
+    groups = _get_session_claim(request_or_user, 'groups')
+    if groups:
+        return groups
+
     if isinstance(request_or_user, str):
         username = request_or_user
     else:
@@ -918,16 +928,9 @@ def get_roles(request_or_user):
     list[str]
         The list of roles of the user
     """
-    try:
-        if isinstance(request_or_user, HttpRequest):
-            claims = request_or_user.session.get('oidc_access_token_payload')
-            return claims.get('gvsigol_roles', [])
-        elif isinstance(request_or_user, Request):
-            claims = request_or_user._request.session.get('oidc_access_token_payload')
-            return claims.get('gvsigol_roles', [])
-    except:
-        # oidc_access_token_payload may be absent if a session has not been set; then we'll get roles from auth server
-        pass
+    roles = _get_session_claim(request_or_user, 'gvsigol_roles')
+    if roles:
+        return roles
     if isinstance(request_or_user, str):
         username = request_or_user
     else:
