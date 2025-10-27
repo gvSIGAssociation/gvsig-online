@@ -893,7 +893,7 @@ def get_groups(request_or_user):
         The list of groups of the user
     """
     groups = _get_session_claim(request_or_user, 'groups')
-    if groups:
+    if groups is not None:
         return groups
 
     if isinstance(request_or_user, str):
@@ -929,7 +929,7 @@ def get_roles(request_or_user):
         The list of roles of the user
     """
     roles = _get_session_claim(request_or_user, 'gvsigol_roles')
-    if roles:
+    if roles is not None:
         return roles
     if isinstance(request_or_user, str):
         username = request_or_user
