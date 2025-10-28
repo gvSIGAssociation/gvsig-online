@@ -1117,7 +1117,7 @@ def _generate_structured_abstract(layer_name, title, datastore, fields_info=None
         abstract_parts.append("-" * 80)
         abstract_parts.append(f"Contiene información sobre {title}.")
         abstract_parts.append("")
-        abstract_parts.append("[Editar esta descripción para explicar el contenido y propósito de la capa]")
+        #abstract_parts.append("[Editar esta descripción para explicar el contenido y propósito de la capa]")
         abstract_parts.append("")
         
         # Sección de Campos
