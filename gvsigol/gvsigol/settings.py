@@ -622,7 +622,7 @@ if 'gvsigol_plugin_restapi' in INSTALLED_APPS or 'gvsigol_plugin_featureapi' in 
         'default':  '1'
         }])
 
-EXTERNAL_LAYER_SUPPORTED_TYPES = ['WMS', 'WMTS', 'XYZ', 'Bing', 'OSM']
+EXTERNAL_LAYER_SUPPORTED_TYPES = ['WMS', 'WMTS', 'XYZ', 'Bing', 'OSM', 'MVT']
 
 WMTS_MAX_VERSION = '1.0.0'
 WMS_MAX_VERSION = '1.3.0'

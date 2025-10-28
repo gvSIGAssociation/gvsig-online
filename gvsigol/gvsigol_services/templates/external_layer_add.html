@@ -3,7 +3,7 @@
 {% load i18n %}
 
 {% block content %}
-<form id="external-layer-add-form" role="form" method="post" action="/gvsigonline/services/external_layer_add/">
+<form id="external-layer-add-form" role="form" method="post" action="/gvsigonline/services/external_layer_add/" enctype="multipart/form-data">
 <div class="row">
 	<div class="col-md-12">
 		<div class="row">
@@ -48,9 +48,9 @@
 										{{ form.type }}
 									</div>
 								</div>
-								<div class="row layers-control xyz-control wms-control wmts-control osm-control">
+								<div class="row layers-control xyz-control wms-control wmts-control osm-control mvt-control">
 									<div class="col-md-12 form-group">
-										<label for="id_url">{% trans "Url" %}</label>
+										<label for="id_url">{% trans "URL" %}</label>
 										{{ form.url }}
 										<input type="hidden" name="get_map_url" id="get_map_url">
 									</div>
@@ -120,12 +120,44 @@
 										{{ form.tilematrix }}
 									</div>
 								</div>
-								<div class="row layers-control bing-control xyz-control osm-control">
+								<div class="row layers-control bing-control xyz-control osm-control mvt-control">
 									<div class="col-md-12 form-group">
 										<label for="id_apikey">{% trans "Api-key" %}</label>
 										{{ form.key }}
 									</div>
 								</div>
+							<div class="row layers-control mvt-control">
+								<div class="col-md-12 form-group">
+									<label for="id_style_url">{% trans "Mapbox style URL" %}</label>
+									{{ form.style_url }}
+									<small class="form-text text-muted">{% trans "Enter the URL of your Mapbox style (.json) file." %}</small>
+								</div>
+							</div>
+							<div class="row layers-control mvt-control">
+								<div class="col-md-12 form-group">
+									<label for="id_style_file">{% trans "Or upload your Mapbox style (.json)" %}</label>
+									<div class="input-group">
+										{{ form.style_file }}
+										<span class="input-group-btn" style="vertical-align: top;">
+											<button type="button" id="clear_style_file" class="btn btn-danger" style="display:none; height: 34px; border-top-left-radius: 0; border-bottom-left-radius: 0;" title="{% trans 'Clear file' %}">
+												<i class="fa fa-times"></i>
+											</button>
+										</span>
+									</div>
+								</div>
+							</div>
+							<div class="row layers-control mvt-control">
+								<div class="col-md-12 form-group pull-right">
+									<label for="id_srs">{% trans "Coordinate reference system" %} {% trans "by default" %}</label>
+									{{ form.srs }}
+								</div>
+							</div>
+							<div class="row" id="custom-srs-row" style="display: none;">
+								<div class="col-md-12 form-group pull-right">
+									<label for="id_custom_srs">{% trans "Specify custom SRS" %}</label>
+									{{ form.custom_srs }}
+								</div>
+							</div>
 							</div>
 						</div>
 					</div>
@@ -230,6 +262,19 @@ function fileExists(url) {
 };
 
 $(document).ready(function(){
+	$('#id_srs').val('EPSG:3857');
+	
+	$('#id_srs').on('change', function() {
+		if ($(this).val() === '__other__') {
+			$('#custom-srs-row').show();
+			$('#id_custom_srs').prop('required', true);
+		} else {
+			$('#custom-srs-row').hide();
+			$('#id_custom_srs').prop('required', false);
+			$('#id_custom_srs').val('');
+		}
+	});
+	
 	var url = "";
 	var format_or = "";
 	var infoformat_or = "";
@@ -506,6 +551,39 @@ $(document).ready(function(){
 		});
 
 	}
+
+	$('#id_style_url').on('input', function() {
+		if ($(this).val().trim() !== '') {
+			$('#id_style_file').prop('disabled', true);
+			$('#id_style_file').closest('.form-group').find('label').css('opacity', '0.5');
+			$('#clear_style_file').hide();
+		} else {
+			$('#id_style_file').prop('disabled', false);
+			$('#id_style_file').closest('.form-group').find('label').css('opacity', '1');
+		}
+	});
+
+	$('#id_style_file').on('change', function() {
+		if ($(this).val() !== '') {
+			$('#id_style_url').prop('disabled', true);
+			$('#id_style_url').closest('.form-group').find('label, small').css('opacity', '0.5');
+			$('#clear_style_file').show();
+			$('#id_style_file').css('border-right', '0');
+		} else {
+			$('#id_style_url').prop('disabled', false);
+			$('#id_style_url').closest('.form-group').find('label, small').css('opacity', '1');
+			$('#clear_style_file').hide();
+			$('#id_style_file').css('border-right', '');
+		}
+	});
+
+	$('#clear_style_file').on('click', function() {
+		$('#id_style_file').val('');
+		$(this).hide();
+		$('#id_style_file').css('border-right', '');
+		$('#id_style_url').prop('disabled', false);
+		$('#id_style_url').closest('.form-group').find('label, small').css('opacity', '1');
+	});
 
 });
 </script>
