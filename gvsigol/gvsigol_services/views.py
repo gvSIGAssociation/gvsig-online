@@ -1074,100 +1074,6 @@ def _get_default_abstract(layer_type, title):
             return _('External layer providing information on {}').format(title)
     return _('Layer containing information on {}').format(title)
 
-def _generate_structured_abstract(layer_name, title, datastore, fields_info=None):
-    """
-    Genera un abstract estructurado con plantilla editable que incluye:
-    - Sección de descripción (placeholder para que el usuario la edite)
-    - Sección de campos con información detallada de cada campo
-    
-    Args:
-        layer_name: Nombre de la tabla/capa
-        title: Título de la capa
-        datastore: Objeto Datastore
-        fields_info: Lista de información de campos (opcional). Si no se proporciona, se intenta obtener de la BD.
-    
-    Returns:
-        str: Abstract estructurado formateado
-    """
-    try:
-        # Si no se proporcionan fields_info, intentar obtenerlos de la BD
-        if fields_info is None and datastore and datastore.type == 'v_PostGIS':
-            try:
-                # Obtener conexión a la BD
-                params = json.loads(datastore.connection_params)
-                host = params['host']
-                port = params['port']
-                dbname = params['database']
-                user = params['user']
-                passwd = params['passwd']
-                schema = params.get('schema', 'public')
-                
-                # Introspección para obtener información de campos
-                with Introspect(database=dbname, host=host, port=port, user=user, password=passwd) as i:
-                    fields_info = i.get_fields_info(layer_name, schema=schema)
-            except Exception as e:
-                logging.getLogger(__name__).warning(f"No se pudo obtener información de campos para {layer_name}: {str(e)}")
-                fields_info = None
-        
-        # Construir el abstract estructurado
-        abstract_parts = []
-        
-        # Sección de Descripción
-        abstract_parts.append("Descripción:")
-        abstract_parts.append("-" * 80)
-        abstract_parts.append(f"Contiene información sobre {title}.")
-        abstract_parts.append("")
-        #abstract_parts.append("[Editar esta descripción para explicar el contenido y propósito de la capa]")
-        abstract_parts.append("")
-        
-        # Sección de Campos
-        if fields_info and len(fields_info) > 0:
-            abstract_parts.append("Campos:")
-            abstract_parts.append("-" * 80)
-            
-            # Limitar el número de campos para evitar abstracts muy largos (máximo 50 campos)
-            max_fields = 50
-            fields_to_show = fields_info[:max_fields] if len(fields_info) > max_fields else fields_info
-            
-            for field in fields_to_show:
-                # field es un diccionario: {'order', 'name', 'type', 'length', 'precision', 'scale', 'nullable'}
-                field_name = field.get('name', str(field))
-                field_type = field.get('type', '')
-                
-                # Formatear el tipo de dato de forma legible
-                type_display = field_type
-                length = field.get('length')
-                precision = field.get('precision')
-                scale = field.get('scale')
-                
-                if length:  # Para tipos con longitud (varchar, char, etc.)
-                    if field_type in ['character varying', 'varchar', 'char', 'character']:
-                        type_display = f"{field_type}({length})"
-                elif precision:  # Para tipos numéricos
-                    if field_type in ['numeric', 'decimal']:
-                        if scale:
-                            type_display = f"{field_type}({precision},{scale})"
-                        else:
-                            type_display = f"{field_type}({precision})"
-                
-                # Agregar información de nullable si está disponible
-                nullable_info = ""
-                nullable = field.get('nullable', 'YES')
-                if nullable == 'NO':
-                    nullable_info = " [requerido]"
-                
-                abstract_parts.append(f"- {field_name}: {type_display}{nullable_info}")
-            
-            if len(fields_info) > max_fields:
-                abstract_parts.append(f"... y {len(fields_info) - max_fields} campos más")
-            abstract_parts.append("")
-        
-        return "\n".join(abstract_parts)
-        
-    except Exception as e:
-        # Si hay cualquier error, usar el abstract simple por defecto
-        logging.getLogger(__name__).error(f"Error generando abstract estructurado: {str(e)}")
-        return _get_default_abstract(datastore.type if datastore else None, title)
 
 @login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
@@ -1325,15 +1231,7 @@ def layer_add_with_group(request, layergroup_id):
 
                 # Generar abstract estructurado si no existe
                 if not abstract:
-                    if datastore.type == 'v_PostGIS' and fields_info:
-                        abstract = _generate_structured_abstract(
-                            form.cleaned_data['name'],
-                            form.cleaned_data['title'],
-                            datastore,
-                            fields_info
-                        )
-                    else:
-                        abstract = _get_default_abstract(datastore.type, form.cleaned_data['title'])
+                    abstract = _get_default_abstract(datastore.type, form.cleaned_data['title'])
 
                 # save it on DB if successfully created
                 del form.cleaned_data['format']
@@ -1459,20 +1357,8 @@ def layer_update(request, layer_id):
         title = request.POST.get('title')
         abstract = request.POST.get('md-abstract')
         if not abstract:
-            # Generar abstract estructurado si la capa es PostGIS
-            if layer.datastore and layer.datastore.type == 'v_PostGIS':
-                try:
-                    abstract = _generate_structured_abstract(
-                        layer.source_name if layer.source_name else layer.name,
-                        title,
-                        layer.datastore,
-                        None  # La función obtendrá los campos automáticamente
-                    )
-                except Exception as e:
-                    logging.getLogger(__name__).warning(f"No se pudo generar abstract estructurado en update: {str(e)}")
-                    abstract = _get_default_abstract(layer.type, title)
-            else:
-                abstract = _get_default_abstract(layer.type, title)
+            abstract = _get_default_abstract(layer.type, title)
+
         updatedParams['title'] = title
         if not layergroup_id:
             layergroup_id = request.POST.get('layer_group', None)
@@ -3720,30 +3606,7 @@ def layer_create_with_group(request, layergroup_id):
 
                     # Generar abstract estructurado si no existe (después de crear la tabla)
                     if not abstract:
-                        if datastore.type == 'v_PostGIS':
-                            try:
-                                params = json.loads(datastore.connection_params)
-                                host = params['host']
-                                port = params['port']
-                                dbname = params['database']
-                                user = params['user']
-                                passwd = params['passwd']
-                                schema = params.get('schema', 'public')
-                                
-                                # Obtener información de campos de la tabla recién creada
-                                with Introspect(database=dbname, host=host, port=port, user=user, password=passwd) as i:
-                                    fields_info = i.get_fields_info(form.cleaned_data['name'], schema)
-                                    abstract = _generate_structured_abstract(
-                                        form.cleaned_data['name'],
-                                        form.cleaned_data['title'],
-                                        datastore,
-                                        fields_info
-                                    )
-                            except Exception as e:
-                                logging.getLogger(__name__).warning(f"No se pudo generar abstract estructurado: {str(e)}")
-                                abstract = _get_default_abstract(datastore.type, form.cleaned_data['title'])
-                        else:
-                            abstract = _get_default_abstract(datastore.type, form.cleaned_data['title'])
+                        abstract = _get_default_abstract(datastore.type, form.cleaned_data['title'])
 
                     # save it on DB if successfully created
                     newRecord = Layer(
