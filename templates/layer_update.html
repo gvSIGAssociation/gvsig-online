@@ -340,10 +340,18 @@
 									<div class="col-md-12 form-group">
 										<label for="detailed_info_html">{% trans "HTML" %}</label>
 										{% if layer.detailed_info_html != None %}
-										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5">{{layer.detailed_info_html}}</textarea>
+										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="15">{{layer.detailed_info_html}}</textarea>
 										{% else %}
-										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5"></textarea>
+										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="15"></textarea>
 										{% endif %}
+										<p class="help-block">
+											<button type="button" class="btn btn-success btn-sm" id="generate-enriched-metadata-btn" onclick="generateEnrichedMetadata({{layer.id}})">
+												<i class="fa fa-magic"></i> {% trans "Generar Metadatos Enriquecidos con Campos" %}
+											</button>
+											<small style="margin-left: 10px;">
+												<i class="fa fa-info-circle"></i> {% trans "Este botón generará automáticamente una estructura con descripción y lista de campos de la base de datos" %}
+											</small>
+										</p>
 									</div>
 								</div>
 							</div>
@@ -514,13 +522,15 @@ $('#submenu-layers').addClass("active");
 			}
 		}
 
-		var codemirror = CodeMirror.fromTextArea(detailedInfoHTML, {
+		// Hacer codemirror global para poder acceder desde generateEnrichedMetadata
+		window.detailedInfoCodeMirror = CodeMirror.fromTextArea(detailedInfoHTML, {
 			mode: "text/html",
 	        extraKeys: {"Ctrl-Space": "autocomplete"},
 	        autoRefresh:true,
 			theme: "xq-dark",
 			lineNumbers: true
 		});
+		var codemirror = window.detailedInfoCodeMirror; // Mantener referencia local para compatibilidad
 
 		$('#detailed_info_enabled').click(function(){
 			if ($('#detailed_info_enabled').is(":checked")) {
@@ -613,5 +623,77 @@ $('#submenu-layers').addClass("active");
 		{% endif %}
 		handleIsPublicResourceCheckbox(searcheableReadList);
 	});
+	
+	// Función para generar metadatos enriquecidos (GeoCopilot)
+	function generateEnrichedMetadata(layerId) {
+		var btn = $('#generate-enriched-metadata-btn');
+		var originalText = btn.html();
+		
+		// Deshabilitar botón y mostrar loading
+		btn.prop('disabled', true);
+		btn.html('<i class="fa fa-spinner fa-spin"></i> {% trans "Generando..." %}');
+		
+		// Construir URL correctamente
+		var baseUrl = window.location.origin;
+		var url = baseUrl + '/gvsigonline/geocopilot/admin/layer/' + layerId + '/generate-enriched-metadata/';
+		
+		console.log('Intentando generar metadatos para capa:', layerId);
+		console.log('URL completa:', url);
+		
+		// Llamar a la API de GeoCopilot
+		$.ajax({
+			url: url,
+			type: 'POST',
+			headers: {'X-CSRFToken': Cookies.get('csrftoken')},
+			success: function(response) {
+				if (response.success) {
+					console.log('Metadatos generados exitosamente:', response.metadata);
+					
+					// Actualizar el CodeMirror con los metadatos generados
+					if (window.detailedInfoCodeMirror) {
+						window.detailedInfoCodeMirror.setValue(response.metadata);
+						window.detailedInfoCodeMirror.refresh();
+						console.log('CodeMirror actualizado correctamente');
+					} else {
+						// Fallback: actualizar el textarea directamente
+						$('#detailed_info_html').val(response.metadata);
+						console.warn('CodeMirror no encontrado, actualizado textarea directamente');
+					}
+					
+					// Mostrar mensaje de éxito
+					alert('{% trans "Metadatos enriquecidos generados correctamente. Puedes editarlos antes de guardar la capa." %}');
+				} else {
+					alert('{% trans "Error:" %} ' + response.message);
+				}
+			},
+			error: function(xhr, status, error) {
+				console.error('Error en la petición:', {
+					status: xhr.status,
+					statusText: xhr.statusText,
+					responseText: xhr.responseText,
+					error: error
+				});
+				
+				var errorMsg = '{% trans "Error al generar metadatos enriquecidos" %}';
+				
+				if (xhr.status === 404) {
+					errorMsg = '{% trans "Error 404: La URL no fue encontrada. Asegúrate de que el plugin GeoCopilot está instalado y el servidor está reiniciado." %}';
+				} else if (xhr.status === 403) {
+					errorMsg = '{% trans "Error 403: No tienes permisos para realizar esta acción." %}';
+				} else if (xhr.status === 500) {
+					errorMsg = '{% trans "Error 500: Error interno del servidor." %}';
+				} else if (xhr.responseJSON && xhr.responseJSON.message) {
+					errorMsg = xhr.responseJSON.message;
+				}
+				
+				alert(errorMsg);
+			},
+			complete: function() {
+				// Rehabilitar botón
+				btn.prop('disabled', false);
+				btn.html(originalText);
+			}
+		});
+	}
 </script>
 {% endblock %}

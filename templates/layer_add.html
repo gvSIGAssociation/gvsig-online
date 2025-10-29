@@ -253,7 +253,18 @@
 								<div style="display: none;" class="row" id="detailed_info_html-row">
 									<div class="col-md-12 form-group">
 										<label for="detailed_info_html">{% trans "HTML" %}</label>
-										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5"></textarea>
+										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="15"></textarea>
+										<p class="help-block">
+											<i class="fa fa-info-circle"></i>
+											<small>
+												{% trans "Para generar automáticamente metadatos enriquecidos con descripción y campos de la base de datos:" %}
+												<ol style="margin-left: 20px; margin-top: 5px;">
+													<li>{% trans "Guarda esta capa primero" %}</li>
+													<li>{% trans "Ve a 'Editar capa' → pestaña 'Información Detallada'" %}</li>
+													<li>{% trans "Usa el botón 'Generar Metadatos Enriquecidos con Campos'" %}</li>
+												</ol>
+											</small>
+										</p>
 									</div>
 								</div>
 							</div>
