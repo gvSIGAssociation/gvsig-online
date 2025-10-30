@@ -623,7 +623,7 @@ class Geoserver():
             error_message = str(e)
             if (error_message.startswith("There is already a style named")):
                 msg_name= name.split('_')[2]
-                error="There is already a style named " + msg_name
+                error = str(_("There is already a style named")) + " " + msg_name
                 raise Exception(error)
             return False
     
