@@ -1607,7 +1607,7 @@ def symbol_add(request, library_id, symbol_type):
             
             except Exception as e:                
                 error_message = str(e)  # Get the error message from the exception                                            
-                return HttpResponse(json.dumps({'error_message': error_message}, indent=4), content_type='application/json')
+                return HttpResponse(json.dumps({'message': error_message, 'success': False}, indent=4), content_type='application/json')
           
 
         except Exception as e:
