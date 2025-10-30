@@ -9,99 +9,99 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-12-22 10:22+0100\n"
-"PO-Revision-Date: 2025-09-11 16:04+0200\n"
+"PO-Revision-Date: 2025-09-11 16:03+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Language: es\n"
+"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.4.2\n"
 
-msgid "Media display"
-msgstr "Visualización multimedia"
+msgid "Simple download"
+msgstr ""
 
 msgid "Plugins"
-msgstr "Plugins"
+msgstr ""
 
 msgid "Add configuration"
-msgstr "Añadir configuración"
+msgstr ""
 
 msgid "Project"
-msgstr "Proyecto"
+msgstr ""
 
 msgid "Select a project..."
-msgstr "Seleccionar un proyecto..."
+msgstr ""
 
 msgid "Layer"
-msgstr "Capa"
+msgstr ""
 
 msgid "Select a layer..."
-msgstr "Seleccionar una capa..."
+msgstr ""
 
 msgid "Configure layer fields"
-msgstr "Configurar campos de la capa"
+msgstr ""
 
 msgid "Configured layers"
-msgstr "Capas configuradas"
+msgstr ""
 
 msgid "No layers configured yet"
-msgstr "Aún no hay capas configuradas"
+msgstr ""
 
 msgid "Order field"
-msgstr "Campo de orden"
+msgstr ""
 
 msgid "Select order field..."
-msgstr "Seleccionar campo de orden..."
+msgstr ""
 
 msgid "Media fields"
-msgstr "Campos multimedia"
+msgstr ""
 
 msgid "Select media fields..."
-msgstr "Seleccionar campos multimedia..."
+msgstr ""
 
 msgid "Hold Ctrl to select multiple fields"
-msgstr "Mantén pulsado Ctrl para seleccionar múltiples campos"
+msgstr ""
 
 msgid "Cancel"
-msgstr "Cancelar"
+msgstr ""
 
 msgid "Save"
-msgstr "Guardar"
+msgstr ""
 
 msgid "Delete configuration"
-msgstr "Eliminar configuración"
+msgstr ""
 
-msgid "Are you sure you want to delete the media display configuration for project"
-msgstr "¿Estás seguro de que quieres eliminar la configuración de visualización multimedia para el proyecto"
+msgid "Are you sure you want to delete the simple download configuration for project"
+msgstr ""
 
 msgid "Delete"
-msgstr "Eliminar"
+msgstr ""
 
 msgid "Update configuration"
-msgstr "Actualizar configuración"
+msgstr ""
 
 msgid "Configure more layers"
-msgstr "Configurar más capas"
+msgstr ""
 
-msgid "Media display configurations"
-msgstr "Configuraciones de visualización multimedia"
+msgid "Simple download configurations"
+msgstr ""
 
 msgid "ID"
-msgstr "ID"
+msgstr ""
 
 msgid "Created"
-msgstr "Creado"
+msgstr ""
 
 msgid "Updated"
-msgstr "Actualizado"
+msgstr ""
 
 msgid "No configurations found. Click 'Add configuration' to create one."
-msgstr "No se encontraron configuraciones. Haz clic en 'Añadir configuración' para crear una."
+msgstr ""
 
 msgid "The configuration will be removed. Do you want to continue?"
-msgstr "La configuración será eliminada. ¿Quieres continuar?"
+msgstr ""
 
 msgid "Accept"
-msgstr "Aceptar"
+msgstr ""

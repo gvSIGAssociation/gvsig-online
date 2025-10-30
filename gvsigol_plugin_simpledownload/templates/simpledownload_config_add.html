@@ -14,7 +14,7 @@
 <div class="row">
     <div class="col-md-12">
         <div class="box">
-            <form id="config-form" role="form" method="post" action="{% url 'mediadisplay_config_add' %}">
+            <form id="config-form" role="form" method="post" action="{% url 'simpledownload_config_add' %}">
                 <div class="box-header with-border">
                     <h3 class="box-title">{% trans "Add configuration" %}</h3>
                     <div class="box-tools pull-right">
@@ -220,7 +220,7 @@ waitForJQuery(function() {
         
         function loadProjectLayers(projectId) {
             $.ajax({
-                url: '/gvsigonline/mediadisplay/api/project-layers/',
+                url: '/gvsigonline/simpledownload/api/project-layers/',
                 data: { 'project_id': projectId },
                 success: function(response) {
                     var select = $('#layer_id');
@@ -242,7 +242,7 @@ waitForJQuery(function() {
         
         function loadLayerFields(layerId) {
             $.ajax({
-                url: '/gvsigonline/mediadisplay/api/layer-fields/',
+                url: '/gvsigonline/simpledownload/api/layer-fields/',
                 data: { 'layer_id': layerId },
                 success: function(response) {
                     

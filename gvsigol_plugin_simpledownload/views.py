@@ -28,7 +28,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from gvsigol_core.models import Project, Layer
-from .models import MediaDisplayConfig
+from .models import SimpleDownloadConfig
 from . import settings
 import json
 from django.views.decorators.csrf import csrf_exempt
@@ -36,35 +36,35 @@ from django.views.decorators.http import require_http_methods
 
 @login_required
 def config_list(request):
-    """Lista de configuraciones de Media Display"""
-    configs = MediaDisplayConfig.objects.all().order_by('-created_at')
+    """Lista de configuraciones de Simple Download"""
+    configs = SimpleDownloadConfig.objects.all().order_by('-created_at')
     
     paginator = Paginator(configs, 10)  
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    return render(request, 'mediadisplay_config_list.html', {
+    return render(request, 'simpledownload_config_list.html', {
         'page_obj': page_obj,
         'configs': page_obj
     })
 
 @login_required
 def config_add(request):
-    """Añadir nueva configuración de Media Display"""
+    """Añadir nueva configuración de Simple Download"""
     if request.method == 'POST':
         project_id = request.POST.get('project_id')
         layer_configs = request.POST.getlist('layer_configs[]')
         
         if not project_id:
             messages.error(request, 'Debe seleccionar un proyecto')
-            return redirect('mediadisplay_config_add')
+            return redirect('simpledownload_config_add')
         
         try:
             project = Project.objects.get(id=project_id)
             
-            if MediaDisplayConfig.objects.filter(project=project).exists():
+            if SimpleDownloadConfig.objects.filter(project=project).exists():
                 messages.warning(request, f'Ya existe configuración para el proyecto {project.name}')
-                return redirect('mediadisplay_config_list')
+                return redirect('simpledownload_config_list')
             
             layer_configs_data = {}
             for layer_config_json in layer_configs:
@@ -78,50 +78,46 @@ def config_add(request):
                     print(f"Error procesando configuración de capa: {e}")
                     continue
             
-            config = MediaDisplayConfig.objects.create(
+            config = SimpleDownloadConfig.objects.create(
                 project=project,
                 layer_configs=layer_configs_data
             )
             
             messages.success(request, f'Configuración creada para el proyecto {project.name}')
-            return redirect('mediadisplay_config_list') 
+            return redirect('simpledownload_config_list') 
             
         except Project.DoesNotExist:
             messages.error(request, 'Proyecto no encontrado')
-            return redirect('mediadisplay_config_add')
+            return redirect('simpledownload_config_add')
     
     # GET - Mostrar formulario de selección de proyecto
-    projects_with_config = MediaDisplayConfig.objects.values_list('project_id', flat=True)
+    projects_with_config = SimpleDownloadConfig.objects.values_list('project_id', flat=True)
     projects = Project.objects.exclude(id__in=projects_with_config).order_by('name')
-    return render(request, 'mediadisplay_config_add.html', {
+    return render(request, 'simpledownload_config_add.html', {
         'projects': projects
     })
 
 @login_required
 def config_edit(request, config_id):
-    """Editar configuración de Media Display"""
-    config = get_object_or_404(MediaDisplayConfig, id=config_id)
+    """Editar configuración de Simple Download"""
+    config = get_object_or_404(SimpleDownloadConfig, id=config_id)
     
     if request.method == 'POST':
-        layer_configs = request.POST.getlist('layer_configs[]')
+        file_configs = request.POST.getlist('file_configs[]')
         
-        layer_configs_data = {}
-        for layer_config_json in layer_configs:
+        file_configs_data = {}
+        for file_config_json in file_configs:
             try:
-                layer_config = json.loads(layer_config_json)
-                layer_configs_data[layer_config['layerId']] = {
-                    'order_field': layer_config['orderField'],
-                    'media_fields': layer_config['mediaFields']
+                file_config = json.loads(file_config_json)
+                file_configs_data[file_config['fileId']] = {
+                    'title': file_config['title'],
+                    'file_url': file_config['file_url']
                 }
-            except (json.JSONDecodeError, KeyError) as e:
-                print(f"Error procesando configuración de capa: {e}")
-                continue
-        
-        config.layer_configs = layer_configs_data
+        config.file_configs = file_configs_data
         config.save()
         
         messages.success(request, 'Configuración actualizada correctamente')
-        return redirect('mediadisplay_config_list')
+        return redirect('simpledownload_config_list')
     
     # Obtener capas del proyecto para mostrar en el formulario
     try:
@@ -182,23 +178,23 @@ def config_edit(request, config_id):
         layers = []
         messages.error(request, f'Error obteniendo capas: {str(e)}')
     
-    return render(request, 'mediadisplay_config_edit.html', {
+    return render(request, 'simpledownload_config_edit.html', {
         'config': config,
         'layers': layers
     })
 
 @login_required
 def config_delete(request, config_id):
-    """Eliminar configuración de Media Display"""
-    config = get_object_or_404(MediaDisplayConfig, id=config_id)
+    """Eliminar configuración de Simple Download"""
+    config = get_object_or_404(SimpleDownloadConfig, id=config_id)
     project_name = config.project.name
     
     if request.method == 'POST': 
         config.delete()
         messages.success(request, f'Configuración eliminada para el proyecto {project_name}')
-        return redirect('mediadisplay_config_list')
+        return redirect('simpledownload_config_list')
     
-    return render(request, 'mediadisplay_config_delete.html', {
+    return render(request, 'simpledownload_config_delete.html', {
         'config': config
     })
 
@@ -292,9 +288,9 @@ def get_config(request):
             project = Project.objects.get(id=project_id)
             
             try:
-                config = MediaDisplayConfig.objects.get(project=project)
+                config = SimpleDownloadConfig.objects.get(project=project)
                 layer_configs = config.layer_configs
-            except MediaDisplayConfig.DoesNotExist:
+            except SimpleDownloadConfig.DoesNotExist:
                 layer_configs = {}
             
             return JsonResponse({

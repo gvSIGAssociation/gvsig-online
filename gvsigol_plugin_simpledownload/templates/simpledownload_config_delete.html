@@ -14,7 +14,7 @@
             <div class="box-body">
                 <div class="alert alert-danger">
                     <i class="fa fa-warning"></i>
-                    {% trans "Are you sure you want to delete the media display configuration for project" %} 
+                    {% trans "Are you sure you want to delete the simple download configuration for project" %} 
                     <strong>{{ config.project.name }}</strong>?
                 </div>
                 
@@ -24,7 +24,7 @@
                         <button type="submit" class="btn btn-danger">
                             <i class="fa fa-trash"></i> {% trans "Delete" %}
                         </button>
-                        <a href="{% url 'mediadisplay_config_list' %}" class="btn btn-default">
+                        <a href="{% url 'simpledownload_config_list' %}" class="btn btn-default">
                             <i class="fa fa-arrow-left"></i> {% trans "Cancel" %}
                         </a>
                     </form>

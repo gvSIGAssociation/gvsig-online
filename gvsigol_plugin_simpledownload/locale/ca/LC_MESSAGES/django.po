@@ -19,7 +19,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.4.2\n"
 
-msgid "Media display"
+msgid "Simple Download"
 msgstr "Visualització multimèdia"
 
 msgid "Plugins"
@@ -73,7 +73,7 @@ msgstr "Desar"
 msgid "Delete configuration"
 msgstr "Eliminar configuració"
 
-msgid "Are you sure you want to delete the media display configuration for project"
+msgid "Are you sure you want to delete the simple download configuration for project"
 msgstr "Estàs segur que vols eliminar la configuració de visualització multimèdia per al projecte"
 
 msgid "Delete"
@@ -85,7 +85,7 @@ msgstr "Actualitzar configuració"
 msgid "Configure more layers"
 msgstr "Configurar més capes"
 
-msgid "Media display configurations"
+msgid "Simple download configurations"
 msgstr "Configuracions de visualització multimèdia"
 
 msgid "ID"

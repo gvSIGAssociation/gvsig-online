@@ -2,7 +2,7 @@
 {% load static %}
 {% load i18n %}
 
-{% block title %}{% trans "Media display configurations" %}{% endblock %}
+{% block title %}{% trans "Simple download configurations" %}{% endblock %}
 
 {% block content %}
 {% if messages %}
@@ -15,7 +15,7 @@
     <div class="col-md-12">
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">{% trans "Media display configurations" %}</h3>
+                <h3 class="box-title">{% trans "Simple download configurations" %}</h3>
                 <div class="box-tools pull-right">
                     <button id="button-add-config" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add configuration" %}</button>
                 </div>
@@ -106,7 +106,7 @@
 {% block extra-scripts %}
 <script>
 $('#menu-manage-plugins').addClass("active");
-$('#submenu-mediadisplay').addClass("active");
+$('#submenu-simpledownload').addClass("active");
 </script>
 <script>
 $(document).ready(function() {
@@ -159,11 +159,11 @@ $(document).ready(function() {
     });
     
     $('#button-add-config').click( function() {
-        location.href = '{% url "mediadisplay_config_add" %}';
+        location.href = '{% url "simpledownload_config_add" %}';
     });
 
     function updateConfig(data){			
-        location.href = '{% url "mediadisplay_config_edit" 0 %}'.replace('0', data[0]);
+        location.href = '{% url "simpledownload_config_edit" 0 %}'.replace('0', data[0]);
     }
 
     function deleteConfig(data, row){
@@ -171,7 +171,7 @@ $(document).ready(function() {
             $.ajax({
                 type: 'POST',
                 async: false,
-                url: '{% url "mediadisplay_config_delete" 0 %}'.replace('0', data[0]),
+                url: '{% url "simpledownload_config_delete" 0 %}'.replace('0', data[0]),
                 beforeSend:function(xhr){
                     xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
                 },
