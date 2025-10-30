@@ -123,7 +123,7 @@ def copy_resources(symbol, resource_path):
         if hasattr(symbolizer, 'externalgraphicsymbolizer'):
             local_path = symbolizer.externalgraphicsymbolizer.online_resource.replace(settings.MEDIA_URL, '')
             file_name = local_path.split('/')[-1]
-            absolute_path = settings.MEDIA_ROOT + local_path
+            absolute_path = os.path.join(settings.MEDIA_ROOT, local_path)
             copy(absolute_path, resource_path + file_name)
 
 def copy(src, dest):
@@ -185,7 +185,7 @@ def get_symbolizer_type(r):
     
             
 def check_library_path(library):
-    library_path = settings.MEDIA_ROOT + "symbol_libraries/" + library.name + "/"
+    library_path = os.path.join(settings.MEDIA_ROOT, "symbol_libraries", library.name) + "/"
     try:        
         os.mkdir(library_path)
         os.chmod(library_path, 0o750)
@@ -196,7 +196,7 @@ def check_library_path(library):
         return library_path
     
 def check_custom_legend_path():
-    legend_path = settings.MEDIA_ROOT + "custom_legends/"
+    legend_path = os.path.join(settings.MEDIA_ROOT, "custom_legends") + "/"
     try:        
         os.mkdir(legend_path)
         os.chmod(legend_path, 0o750)
@@ -238,8 +238,8 @@ def save_external_graphic(library_path, file, file_name):
     
 def delete_external_graphic_img(library, file_name):    
     try: 
-        library_path = settings.MEDIA_ROOT + "symbol_libraries/" + library.name + "/"
-        file_path = library_path + file_name
+        library_path = os.path.join(settings.MEDIA_ROOT, "symbol_libraries", library.name) + "/"
+        file_path = os.path.join(library_path, file_name)
         if os.path.exists(file_path):
             os.remove(file_path)
                 
@@ -251,7 +251,7 @@ def delete_external_graphic_img(library, file_name):
     
 def delete_library_dir(library):    
     try: 
-        library_path = settings.MEDIA_ROOT + "symbol_libraries/" + library.name
+        library_path = os.path.join(settings.MEDIA_ROOT, "symbol_libraries", library.name)
         if os.path.exists(library_path):
             shutil.rmtree(library_path)
                 
