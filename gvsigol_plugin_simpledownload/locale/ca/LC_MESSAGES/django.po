@@ -19,8 +19,8 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.4.2\n"
 
-msgid "Simple Download"
-msgstr "Visualització multimèdia"
+msgid "Simple download"
+msgstr "Descàrrega simple"
 
 msgid "Plugins"
 msgstr "Plugins"
