@@ -49,10 +49,10 @@
                         <div class="col-md-12 form-group">
                             <div class="box box-default">
                                 <div class="box-header with-border">
-                                    <span class="text" style="font-weight: bold;">{% trans "Configured files" %}</span>
+                                    <span class="text" style="font-weight: bold;">{% trans "Added files" %}</span>
                                 </div>
-                                <div class="box-body" id="configured-file-list" style="min-height: 100px;">
-                                    <p class="text-muted">{% trans "No files configured yet" %}</p>
+                                <div class="box-body" id="added-file-list" style="min-height: 100px;">
+                                    <p class="text-muted">{% trans "No files added yet" %}</p>
                                 </div>
                             </div>
                         </div>
@@ -131,7 +131,7 @@ function waitForJQuery(callback) {
 
 waitForJQuery(function() {
     
-    var configuredFiles = {};
+    var addedFiles = {};
     var modalMode = null; // 'create' | 'edit'
     var editingFileId = null;
     var fileIdCounter = 1;
@@ -146,7 +146,7 @@ waitForJQuery(function() {
         $('#add-file-button').click(function() {
             modalMode = 'create';
             editingFileId = null;
-            $('#file-modal-title').text(gettext('Add file configuration'));
+            $('#file-modal-title').text(gettext('Add file information'));
             resetFileInputs();
             $('#file-add-modal').modal('show');
         });
@@ -175,7 +175,7 @@ waitForJQuery(function() {
             var nowIso = new Date().toISOString();
 
             if (modalMode === 'edit' && editingFileId) {
-                configuredFiles[editingFileId] = {
+                addedFiles[editingFileId] = {
                     fileId: editingFileId,
                     title: titleField,
                     description: descriptionField,
@@ -184,7 +184,7 @@ waitForJQuery(function() {
                 };
             } else {
                 var newId = getNextFileId();
-                configuredFiles[newId] = {
+                addedFiles[newId] = {
                     fileId: newId,
                     title: titleField,
                     description: descriptionField,
@@ -194,7 +194,7 @@ waitForJQuery(function() {
             }
             
             normalizeFileIds();
-            updateconfiguredFileList();
+            updateAddedFileList();
             
             $('#file-add-modal').modal('hide');
         });
@@ -208,7 +208,7 @@ waitForJQuery(function() {
                 return false;
             }
             
-            if (Object.keys(configuredFiles).length === 0) {
+            if (Object.keys(addedFiles).length === 0) {
                 e.preventDefault();
                 alert(gettext('Please add at least one file'));
                 return false;
@@ -217,8 +217,8 @@ waitForJQuery(function() {
             $('input[name="file_configs[]"]').remove();
             normalizeFileIds();
             
-            Object.keys(configuredFiles).forEach(function(fileId) {
-                var fileConfig = configuredFiles[fileId];
+            Object.keys(addedFiles).forEach(function(fileId) {
+                var fileConfig = addedFiles[fileId];
                 $('<input>').attr({
                     type: 'hidden',
                     name: 'file_configs[]',
@@ -233,17 +233,17 @@ waitForJQuery(function() {
             });
             
         });   
-        function updateconfiguredFileList() {
-            var container = $('#configured-file-list');
+        function updateAddedFileList() {
+            var container = $('#added-file-list');
             container.empty();
             
-            if (Object.keys(configuredFiles).length === 0) {
-                container.html('<p class="text-muted">' + gettext('No files configured yet') + '</p>');
+            if (Object.keys(addedFiles).length === 0) {
+                container.html('<p class="text-muted">' + gettext('No files added yet') + '</p>');
                 return;
             }
             
-            Object.values(configuredFiles).forEach(function(fileConfig) {
-                var fileHtml = '<div class="configured-file " data-file-id="' + fileConfig.fileId + '">' +
+            Object.values(addedFiles).forEach(function(fileConfig) {
+                var fileHtml = '<div class="added-file " data-file-id="' + fileConfig.fileId + '">' +
                     '<div class="file-item">' +
                     '<div class="file-info">' +
                     '<strong>' + fileConfig.title + '</strong><br>' +
@@ -252,10 +252,10 @@ waitForJQuery(function() {
                     '<small>' + gettext('Updated at') + ': ' + formatDateTime(fileConfig.updated_at) + '</small>' +
                     '</div>' +
                     '<div class="file-actions">' +
-                        '<button type="button" class="btn btn-success edit-configured-file" data-file-id="' + fileConfig.fileId + '">' +
+                        '<button type="button" class="btn btn-success edit-added-file" data-file-id="' + fileConfig.fileId + '">' +
                             '<i class="fa fa-edit"></i>' +
                         '</button>' +
-                        '<button type="button" class="btn btn-danger remove-configured-file" data-file-id="' + fileConfig.fileId + '">' +
+                        '<button type="button" class="btn btn-danger remove-added-file" data-file-id="' + fileConfig.fileId + '">' +
                             '<i class="fa fa-times"></i>' +
                         '</button>' +
                     '</div>' +
@@ -264,16 +264,16 @@ waitForJQuery(function() {
             });
         }
 
-        $(document).on('click', '.remove-configured-file', function() {
+        $(document).on('click', '.remove-added-file', function() {
             var fileId = $(this).data('file-id');
-            delete configuredFiles[fileId];
+            delete addedFiles[fileId];
             normalizeFileIds();
-            updateconfiguredFileList();
+            updateAddedFileList();
         });
 
-        $(document).on('click', '.edit-configured-file', function() {
+        $(document).on('click', '.edit-added-file', function() {
             var fileId = $(this).data('file-id');
-            var fileConfig = configuredFiles[fileId];
+            var fileConfig = addedFiles[fileId];
             if (!fileConfig) {
                 return;
             }
@@ -283,7 +283,7 @@ waitForJQuery(function() {
             $('#file-description').val(fileConfig.description);
             $('#file-url').val(fileConfig.file_url || '');
             $('#upload-input-file').val('');
-            $('#file-modal-title').text(gettext('Edit file configuration'));
+            $('#file-modal-title').text(gettext('Edit file information'));
             updateFileInputStates();
             $('#file-add-modal').modal('show');
         });
@@ -303,7 +303,7 @@ waitForJQuery(function() {
         }
 
         function getNextFileId() {
-            while (configuredFiles[fileIdCounter]) {
+            while (addedFiles[fileIdCounter]) {
                 fileIdCounter += 1;
             }
             var nextId = fileIdCounter;
@@ -312,7 +312,7 @@ waitForJQuery(function() {
         }
 
         function normalizeFileIds() {
-            var filesArray = Object.values(configuredFiles).sort(function(a, b) {
+            var filesArray = Object.values(addedFiles).sort(function(a, b) {
                 return parseInt(a.fileId, 10) - parseInt(b.fileId, 10);
             });
 
@@ -326,7 +326,7 @@ waitForJQuery(function() {
                 nextId += 1;
             });
 
-            configuredFiles = normalized;
+            addedFiles = normalized;
             fileIdCounter = nextId;
         }
 
@@ -396,7 +396,7 @@ waitForJQuery(function() {
 </script>
 
 <style>
-.configured-file {
+.added-file {
     margin-bottom: 10px;
 }
 
@@ -420,13 +420,13 @@ waitForJQuery(function() {
     gap: 4px;
 }
 
-.remove-configured-file {
+.remove-added-file {
     flex-shrink: 0;
 }
 
-#configured-file-list {
-    max-height: 300px;
-    overflow-y: auto;
+#added-file-list {
+    max-height: none;
+    overflow-y: visible;
 }
 </style>
 {% endblock %}

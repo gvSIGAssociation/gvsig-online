@@ -106,85 +106,55 @@ def config_edit(request, config_id):
     
     if request.method == 'POST':
         file_configs = request.POST.getlist('file_configs[]')
-        
+
         file_configs_data = {}
         for file_config_json in file_configs:
             try:
                 file_config = json.loads(file_config_json)
-                file_configs_data[file_config['fileId']] = {
-                    'title': file_config['title'],
-                    'file_url': file_config['file_url']
+                file_id = str(file_config.get('fileId'))
+                if not file_id:
+                    continue
+
+                file_configs_data[file_id] = {
+                    'title': file_config.get('title', ''),
+                    'description': file_config.get('description', ''),
+                    'file_url': file_config.get('file_url', ''),
+                    'updated_at': file_config.get('updated_at')
                 }
-            except (json.JSONDecodeError, KeyError) as e:
-                print(f"Error procesando configuración de archivo: {e}")
+            except (json.JSONDecodeError, KeyError) as exc:
+                print(f"Error procesando configuración de archivo: {exc}")
                 continue
+
         config.file_configs = file_configs_data
         config.save()
-        
+
         messages.success(request, 'Configuración actualizada correctamente')
         return redirect('simpledownload_config_list')
-    
-    # Obtener capas del proyecto para mostrar en el formulario
-    # try:
-    #     from django.test import RequestFactory
-    #     from gvsigol_plugin_projectapi.api import ProjectLayersView
-        
-    #     factory = RequestFactory()
-    #     internal_request = factory.get(f'/api/v1/projects/{config.project.id}/layers/')
-    #     internal_request.user = request.user
-        
-    #     view = ProjectLayersView()
-    #     response = view.get(internal_request, project_id=config.project.id)
-        
-    #     if response.status_code == 200:
-    #         if hasattr(response, 'data'):
-    #             layers_data = response.data
-    #         else:
-    #             layers_data = json.loads(response.content)
-            
-            
-    #         configured_layer_ids = list(config.file_configs.keys())
-            
-    #         layers = []
-            
-    #         if isinstance(layers_data, dict):
-    #             layers_list = layers_data.get('content', [])
-    #         elif isinstance(layers_data, list):
-    #             layers_list = layers_data
-    #         else:
-    #             layers_list = []
-            
-    #         for i, layer in enumerate(layers_list):
-                
-    #             if isinstance(layer, dict):
-    #                 layer_type = layer.get('type', '')
-    #                 if layer_type == 'WMS' or layer_type == 'OSM':
-    #                     continue
-                        
-    #                 layer_id = str(layer.get('layer_id', layer.get('id')))
-    #                 file_config = config.file_configs.get(layer_id, {})
-                    
-    #                 layers.append({
-    #                     'id': layer_id,
-    #                     'name': layer.get('name', ''),
-    #                     'title': layer.get('title', layer.get('name', '')),
-    #                     'enabled': layer_id in configured_layer_ids,
-    #                     'config': file_config
-    #                 })
-    #             else:
-    #                 pass
-            
-    #     else:
-    #         layers = []
-    #         messages.error(request, 'Error obteniendo capas del proyecto')
-            
-    # except Exception as e:
-    #     import traceback
-    #     layers = []
-    #     messages.error(request, f'Error obteniendo capas: {str(e)}')
-    
+     
+    file_configs_dict = config.file_configs or {}
+    files = []
+
+    try:
+        sorted_items = sorted(
+            file_configs_dict.items(),
+            key=lambda item: int(item[0]) if str(item[0]).isdigit() else str(item[0])
+        )
+    except Exception:
+        sorted_items = file_configs_dict.items()
+
+    for file_id, file_config in sorted_items:
+        files.append({
+            'id': str(file_id),
+            'title': file_config.get('title', ''),
+            'description': file_config.get('description', ''),
+            'file_url': file_config.get('file_url', ''),
+            'updated_at': file_config.get('updated_at')
+        })
+
     return render(request, 'simpledownload_config_edit.html', {
-        'config': config
+        'config': config,
+        'files': files,
+        'initial_file_configs_json': json.dumps(file_configs_dict)
     })
 
 @login_required
