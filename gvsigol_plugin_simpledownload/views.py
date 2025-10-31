@@ -27,7 +27,7 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from gvsigol_core.models import Project, Layer
+from gvsigol_core.models import Project
 from .models import SimpleDownloadConfig
 from . import settings
 import json
@@ -53,7 +53,7 @@ def config_add(request):
     """Añadir nueva configuración de Simple Download"""
     if request.method == 'POST':
         project_id = request.POST.get('project_id')
-        layer_configs = request.POST.getlist('layer_configs[]')
+        file_configs = request.POST.getlist('file_configs[]')
         
         if not project_id:
             messages.error(request, 'Debe seleccionar un proyecto')
@@ -66,21 +66,23 @@ def config_add(request):
                 messages.warning(request, f'Ya existe configuración para el proyecto {project.name}')
                 return redirect('simpledownload_config_list')
             
-            layer_configs_data = {}
-            for layer_config_json in layer_configs:
+            file_configs_data = {}
+            for file_config_json in file_configs:
                 try:
-                    layer_config = json.loads(layer_config_json)
-                    layer_configs_data[layer_config['layerId']] = {
-                        'order_field': layer_config['orderField'],
-                        'media_fields': layer_config['mediaFields']
+                    file_config = json.loads(file_config_json)
+                    file_configs_data[file_config['fileId']] = {
+                        'title': file_config['title'],
+                        'description': file_config['description'],
+                        'file_url': file_config['file_url'],
+                        'updated_at': file_config['updated_at']
                     }
                 except (json.JSONDecodeError, KeyError) as e:
-                    print(f"Error procesando configuración de capa: {e}")
+                    print(f"Error procesando configuración de archivo: {e}")
                     continue
             
             config = SimpleDownloadConfig.objects.create(
                 project=project,
-                layer_configs=layer_configs_data
+                file_configs=file_configs_data
             )
             
             messages.success(request, f'Configuración creada para el proyecto {project.name}')
@@ -113,6 +115,9 @@ def config_edit(request, config_id):
                     'title': file_config['title'],
                     'file_url': file_config['file_url']
                 }
+            except (json.JSONDecodeError, KeyError) as e:
+                print(f"Error procesando configuración de archivo: {e}")
+                continue
         config.file_configs = file_configs_data
         config.save()
         
@@ -120,67 +125,66 @@ def config_edit(request, config_id):
         return redirect('simpledownload_config_list')
     
     # Obtener capas del proyecto para mostrar en el formulario
-    try:
-        from django.test import RequestFactory
-        from gvsigol_plugin_projectapi.api import ProjectLayersView
+    # try:
+    #     from django.test import RequestFactory
+    #     from gvsigol_plugin_projectapi.api import ProjectLayersView
         
-        factory = RequestFactory()
-        internal_request = factory.get(f'/api/v1/projects/{config.project.id}/layers/')
-        internal_request.user = request.user
+    #     factory = RequestFactory()
+    #     internal_request = factory.get(f'/api/v1/projects/{config.project.id}/layers/')
+    #     internal_request.user = request.user
         
-        view = ProjectLayersView()
-        response = view.get(internal_request, project_id=config.project.id)
+    #     view = ProjectLayersView()
+    #     response = view.get(internal_request, project_id=config.project.id)
         
-        if response.status_code == 200:
-            if hasattr(response, 'data'):
-                layers_data = response.data
-            else:
-                layers_data = json.loads(response.content)
+    #     if response.status_code == 200:
+    #         if hasattr(response, 'data'):
+    #             layers_data = response.data
+    #         else:
+    #             layers_data = json.loads(response.content)
             
             
-            configured_layer_ids = list(config.layer_configs.keys())
+    #         configured_layer_ids = list(config.file_configs.keys())
             
-            layers = []
+    #         layers = []
             
-            if isinstance(layers_data, dict):
-                layers_list = layers_data.get('content', [])
-            elif isinstance(layers_data, list):
-                layers_list = layers_data
-            else:
-                layers_list = []
+    #         if isinstance(layers_data, dict):
+    #             layers_list = layers_data.get('content', [])
+    #         elif isinstance(layers_data, list):
+    #             layers_list = layers_data
+    #         else:
+    #             layers_list = []
             
-            for i, layer in enumerate(layers_list):
+    #         for i, layer in enumerate(layers_list):
                 
-                if isinstance(layer, dict):
-                    layer_type = layer.get('type', '')
-                    if layer_type == 'WMS' or layer_type == 'OSM':
-                        continue
+    #             if isinstance(layer, dict):
+    #                 layer_type = layer.get('type', '')
+    #                 if layer_type == 'WMS' or layer_type == 'OSM':
+    #                     continue
                         
-                    layer_id = str(layer.get('layer_id', layer.get('id')))
-                    layer_config = config.layer_configs.get(layer_id, {})
+    #                 layer_id = str(layer.get('layer_id', layer.get('id')))
+    #                 file_config = config.file_configs.get(layer_id, {})
                     
-                    layers.append({
-                        'id': layer_id,
-                        'name': layer.get('name', ''),
-                        'title': layer.get('title', layer.get('name', '')),
-                        'enabled': layer_id in configured_layer_ids,
-                        'config': layer_config
-                    })
-                else:
-                    pass
+    #                 layers.append({
+    #                     'id': layer_id,
+    #                     'name': layer.get('name', ''),
+    #                     'title': layer.get('title', layer.get('name', '')),
+    #                     'enabled': layer_id in configured_layer_ids,
+    #                     'config': file_config
+    #                 })
+    #             else:
+    #                 pass
             
-        else:
-            layers = []
-            messages.error(request, 'Error obteniendo capas del proyecto')
+    #     else:
+    #         layers = []
+    #         messages.error(request, 'Error obteniendo capas del proyecto')
             
-    except Exception as e:
-        import traceback
-        layers = []
-        messages.error(request, f'Error obteniendo capas: {str(e)}')
+    # except Exception as e:
+    #     import traceback
+    #     layers = []
+    #     messages.error(request, f'Error obteniendo capas: {str(e)}')
     
     return render(request, 'simpledownload_config_edit.html', {
-        'config': config,
-        'layers': layers
+        'config': config
     })
 
 @login_required
@@ -198,81 +202,6 @@ def config_delete(request, config_id):
         'config': config
     })
 
-@login_required
-def get_project_layers(request):
-    """Obtener capas de un proyecto específico usando el endpoint de projectapi"""
-    try:
-        project_id = request.GET.get('project_id')
-        
-        if not project_id:
-            return JsonResponse({'error': 'project_id is required'}, status=400)
-        
-        project = Project.objects.get(id=project_id)
-        
-        # Usar el endpoint existente de projectapi internamente
-        try:
-            from django.test import RequestFactory
-            from gvsigol_plugin_projectapi.api import ProjectLayersView
-            
-            # Crear una petición simulada
-            factory = RequestFactory()
-            internal_request = factory.get(f'/api/v1/projects/{project_id}/layers/')
-            internal_request.user = request.user
-            
-            view = ProjectLayersView()
-            response = view.get(internal_request, project_id=project_id)
-            
-            if response.status_code == 200:
-                try:
-                    if hasattr(response, 'data'):
-                        layers_data = response.data
-                    else:
-                        layers_data = json.loads(response.content)
-                except json.JSONDecodeError as e:
-                    return JsonResponse({'error': f'Error parsing JSON: {str(e)}'}, status=500)            
-
-                if isinstance(layers_data, dict):
-                    layers_list = layers_data.get('content', [])
-                elif isinstance(layers_data, list):
-                    layers_list = layers_data
-                else:
-                    return JsonResponse({'error': f'Expected dict or list, got {type(layers_data)}'}, status=500)
-                
-                if not isinstance(layers_list, list):
-                    return JsonResponse({'error': f'Expected list in content, got {type(layers_list)}'}, status=500)
-                
-                layers = []
-                for layer in layers_list:
-                    if isinstance(layer, dict):
-                        # Filtrar capas que no tienen campos configurables
-                        layer_type = layer.get('type', '')
-                        if layer_type == 'WMS' or layer_type == 'OSM':
-                            continue
-                        
-                        layers.append({
-                            'id': layer.get('id'),
-                            'name': layer.get('name', ''),
-                            'title': layer.get('title', layer.get('name', ''))
-                        })
-                    else:
-                        pass 
-              
-                return JsonResponse({
-                    'project_name': project.name,
-                    'layers': layers
-                })
-            else:
-                return JsonResponse({'error': f'Error obteniendo capas del proyecto: {response.status_code}'}, status=response.status_code)
-                
-        except Exception as e:
-            import traceback
-            return JsonResponse({'error': f'Error interno: {str(e)}\n{traceback.format_exc()}'}, status=500)
-        
-    except Project.DoesNotExist:
-        return JsonResponse({'error': 'Project not found'}, status=404)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
-
 @csrf_exempt
 @require_http_methods(['GET'])
 def get_config(request):
@@ -289,12 +218,12 @@ def get_config(request):
             
             try:
                 config = SimpleDownloadConfig.objects.get(project=project)
-                layer_configs = config.layer_configs
+                file_configs = config.file_configs
             except SimpleDownloadConfig.DoesNotExist:
-                layer_configs = {}
+                file_configs = {}
             
             return JsonResponse({
-                'layer_configs': layer_configs
+                'file_configs': file_configs
             })
             
         except Project.DoesNotExist:
@@ -302,41 +231,3 @@ def get_config(request):
             
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-
-@login_required
-def get_layer_fields(request):
-    """Obtener campos de una capa específica"""
-    try:
-        layer_id = request.GET.get('layer_id')
-        
-        if not layer_id:
-            return JsonResponse({'error': 'layer_id is required'}, status=400)
-        
-        layer = Layer.objects.get(id=layer_id)
-        
-        fields = []
-        
-        layer_config = layer.get_config_manager()
-        field_configs = layer_config.get_field_viewconf(include_pks=False)
-
-        for field in field_configs:
-            if field.get('editable', True):
-                fields.append({
-                    'id': field.get('name', ''),
-                    'name': field.get('name', ''),
-                    'type': field.get('type', ''),
-                    'title': field.get('title', field.get('name', '')),
-                    'visible': field.get('visible', True),
-                    'editable': field.get('editable', True)
-                })
-        
-        return JsonResponse({
-            'success': True,
-            'fields': fields,
-            'layer_name': layer.name
-        })
-        
-    except Layer.DoesNotExist:
-        return JsonResponse({'error': 'Layer not found'}, status=404)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500) 

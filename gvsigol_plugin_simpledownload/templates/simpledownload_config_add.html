@@ -27,8 +27,8 @@
                 <div class="box-body">
                     {% csrf_token %}
                     
-                    <div class="row">
-                        <div class="col-md-12 form-group">
+                    <div class="row  form-group">
+                        <div class="col-md-12">
                             <label for="project_id">{% trans "Project" %}</label>
                             <select name="project_id" id="project_id" class="form-control" required>
                                 <option value="">{% trans "Select a project..." %}</option>
@@ -38,32 +38,21 @@
                             </select>
                         </div>
                     </div>
-                    
                     <div class="row">
                         <div class="col-md-12 form-group">
-                            <label for="layer_id">{% trans "Layer" %}</label>
-                            <select name="layer_id" id="layer_id" class="form-control" required>
-                                <option value="">{% trans "Select a layer..." %}</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-12 form-group">
-                            <button type="button" id="configure-layer-btn" class="btn btn-primary" disabled>
-                                <i class="fa fa-cog"></i> {% trans "Configure layer fields" %}
+                            <button type="button" id="add-file-button" class="btn btn-primary" disabled>
+                                <i class="fa fa-plus"></i> {% trans "Add file" %}
                             </button>
                         </div>
-                    </div>
-                    
+                    </div>                                       
                     <div class="row">
                         <div class="col-md-12 form-group">
                             <div class="box box-default">
                                 <div class="box-header with-border">
-                                    <span class="text" style="font-weight: bold;">{% trans "Configured layers" %}</span>
+                                    <span class="text" style="font-weight: bold;">{% trans "Configured files" %}</span>
                                 </div>
-                                <div class="box-body" id="configured-layers-list" style="min-height: 100px;">
-                                    <p class="text-muted">{% trans "No layers configured yet" %}</p>
+                                <div class="box-body" id="configured-file-list" style="min-height: 100px;">
+                                    <p class="text-muted">{% trans "No files configured yet" %}</p>
                                 </div>
                             </div>
                         </div>
@@ -74,32 +63,49 @@
     </div>
 </div>
 
-<!-- Modal para configurar campos de la capa -->
-<div class="modal fade" id="layer-config-modal" tabindex="-1" role="dialog">
+<div class="modal fade" id="file-add-modal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">{% trans "Configure layer fields" %}</h4>
+                <h4 class="modal-title" id="file-modal-title">{% trans "Add file" %}</h4>
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label for="order-field">{% trans "Order field" %}</label>
-                    <select id="order-field" class="form-control">
-                        <option value="">{% trans "Select order field..." %}</option>
-                    </select>
+                <div class="row form-group">
+                    <div class="col-md-12">
+                        <label for="file-title">{% trans "Title" %}</label>
+                        <input name="file-title" id="file-title" type="text" class="form-control">								
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="media-fields">{% trans "Media fields" %}</label>
-                    <select id="media-fields" class="form-control" multiple style="height: 150px;">
-                        <option value="">{% trans "Select media fields..." %}</option>
-                    </select>
-                    <small class="help-block">{% trans "Hold Ctrl to select multiple fields" %}</small>
+                <div class="row form-group">
+                    <div class="col-md-12">
+                        <label for="file-description">{% trans "Description" %}</label>
+                        <input name="file-description" id="file-description" type="text" class="form-control">								
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-md-12">
+                        <label for="file-url">{% trans "File URL" %}</label>
+                        <input name="file-url" id="file-url" type="text" class="form-control">								
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-md-12">
+                        <label for="upload-input-file">{% trans "Or upload your file" %}</label>
+                        <div class="input-group">
+                            <input name="upload-input-file" id="upload-input-file" type="file" class="form-control">
+                            <span class="input-group-btn" style="vertical-align: top;">
+                                <button type="button" id="clear_file_upload_input_file" class="btn btn-danger" style="display:none; height: 34px; border-top-left-radius: 0; border-bottom-left-radius: 0;" title="{% trans 'Clear file' %}">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
-                <button type="button" class="btn btn-primary" id="save-layer-config">{% trans "Save" %}</button>
+                <button type="button" class="btn btn-primary" id="save-file-button">{% trans "Save" %}</button>
             </div>
         </div>
     </div>
@@ -125,68 +131,76 @@ function waitForJQuery(callback) {
 
 waitForJQuery(function() {
     
-    var currentLayerId = null;
-    var configuredLayers = {};
+    var configuredFiles = {};
+    var modalMode = null; // 'create' | 'edit'
+    var editingFileId = null;
+    var fileIdCounter = 1;
     
     $(document).ready(function() {
         
         $('#project_id').change(function() {
             var projectId = $(this).val();
-            if (projectId) {
-                loadProjectLayers(projectId);
-            } else {
-                $('#layer_id').empty().html('<option value="">' + gettext('Select a layer...') + '</option>');
-                $('#configure-layer-btn').prop('disabled', true);
-            }
+            $('#add-file-button').prop('disabled', !projectId);
         });
         
-        $('#layer_id').change(function() {
-            var layerId = $(this).val();
-            if (layerId) {
-                $('#configure-layer-btn').prop('disabled', false);
-                currentLayerId = layerId;
-            } else {
-                $('#configure-layer-btn').prop('disabled', true);
-                currentLayerId = null;
-            }
+        $('#add-file-button').click(function() {
+            modalMode = 'create';
+            editingFileId = null;
+            $('#file-modal-title').text(gettext('Add file configuration'));
+            resetFileInputs();
+            $('#file-add-modal').modal('show');
         });
         
-        $('#configure-layer-btn').click(function() {
-            if (currentLayerId) {
-                loadLayerFields(currentLayerId);
-                $('#layer-config-modal').modal('show');
-            }
-        });
-        
-        $('#save-layer-config').click(function() {
-            var orderField = $('#order-field').val();
-            var mediaFields = $('#media-fields').val();
+        $('#save-file-button').click(function() {
+            var titleField = $('#file-title').val();
+            var descriptionField = $('#file-description').val();
+            var urlField = $('#file-url').val();
+            var uploadFileField = $('#upload-input-file').val();
             
-            if (!orderField) {
-                alert(gettext('Please select an order field'));
+            if (!titleField) {
+                alert(gettext('Please enter a title'));
                 return;
             }
             
-            if (!mediaFields || mediaFields.length === 0) {
-                alert(gettext('Please select at least one media field'));
+            if (!descriptionField) {
+                alert(gettext('Please enter a description'));
                 return;
             }
             
-            configuredLayers[currentLayerId] = {
-                layerId: currentLayerId,
-                layerName: $('#layer_id option:selected').text(),
-                orderField: orderField,
-                mediaFields: mediaFields
-            };
+            if (!urlField && !uploadFileField) {
+                alert(gettext('Please enter a URL or upload a file'));
+                return;
+            }
             
-            updateConfiguredLayersList();
+            var nowIso = new Date().toISOString();
+
+            if (modalMode === 'edit' && editingFileId) {
+                configuredFiles[editingFileId] = {
+                    fileId: editingFileId,
+                    title: titleField,
+                    description: descriptionField,
+                    file_url: urlField ? urlField : uploadFileField,
+                    updated_at: nowIso
+                };
+            } else {
+                var newId = getNextFileId();
+                configuredFiles[newId] = {
+                    fileId: newId,
+                    title: titleField,
+                    description: descriptionField,
+                    file_url: urlField ? urlField : uploadFileField,
+                    updated_at: nowIso
+                };
+            }
             
-            $('#layer-config-modal').modal('hide');
+            normalizeFileIds();
+            updateconfiguredFileList();
+            
+            $('#file-add-modal').modal('hide');
         });
         
         $('#config-form').submit(function(e) {
             var projectId = $('#project_id').val();
-            var layerId = $('#layer_id').val();
             
             if (!projectId) {
                 e.preventDefault();
@@ -194,128 +208,199 @@ waitForJQuery(function() {
                 return false;
             }
             
-            if (!layerId) {
+            if (Object.keys(configuredFiles).length === 0) {
                 e.preventDefault();
-                alert(gettext('Please select a layer'));
+                alert(gettext('Please add at least one file'));
                 return false;
             }
             
-            if (Object.keys(configuredLayers).length === 0) {
-                e.preventDefault();
-                alert(gettext('Please configure at least one layer'));
-                return false;
-            }
+            $('input[name="file_configs[]"]').remove();
+            normalizeFileIds();
             
-            $('input[name="layer_configs[]"]').remove();
-            
-            Object.values(configuredLayers).forEach(function(layerConfig) {
+            Object.keys(configuredFiles).forEach(function(fileId) {
+                var fileConfig = configuredFiles[fileId];
                 $('<input>').attr({
                     type: 'hidden',
-                    name: 'layer_configs[]',
-                    value: JSON.stringify(layerConfig)
+                    name: 'file_configs[]',
+                    value: JSON.stringify({
+                        fileId: fileId,
+                        title: fileConfig.title,
+                        description: fileConfig.description,
+                        file_url: fileConfig.file_url,
+                        updated_at: fileConfig.updated_at
+                    })
                 }).appendTo('#config-form');
             });
             
-        });
-        
-        function loadProjectLayers(projectId) {
-            $.ajax({
-                url: '/gvsigonline/simpledownload/api/project-layers/',
-                data: { 'project_id': projectId },
-                success: function(response) {
-                    var select = $('#layer_id');
-
-                    if (response.layers && response.layers.length > 0) {
-                        select.empty().html('<option value="">' + gettext('Select a layer...') + '</option>');
-                        response.layers.forEach(function(layer) {
-                            select.append('<option value="' + layer.id + '">' + (layer.title || layer.name) + '</option>');
-                        });
-                    } else {
-                        select.empty().html('<option value="" disabled>' + gettext('No layers available for multimedia configuration') + '</option>');
-                    }
-                },
-                error: function(xhr) {
-                    alert('Error cargando capas: ' + (xhr.responseJSON ? xhr.responseJSON.error : xhr.statusText));
-                }
-            });
-        }
-        
-        function loadLayerFields(layerId) {
-            $.ajax({
-                url: '/gvsigonline/simpledownload/api/layer-fields/',
-                data: { 'layer_id': layerId },
-                success: function(response) {
-                    
-                    $('#order-field').empty().html('<option value="">' + gettext('Select order field...') + '</option>');
-                    $('#media-fields').empty().html('<option value="">' + gettext('Select media fields...') + '</option>');
-                    
-                    if (response.fields && response.fields.length > 0) {
-                        response.fields.forEach(function(field) {
-                            var option = '<option value="' + field.name + '">' + field.title + '</option>';
-                            $('#order-field').append(option);
-                            $('#media-fields').append(option);
-                        });
-                        
-                        if (configuredLayers[layerId]) {
-                            $('#order-field').val(configuredLayers[layerId].orderField);
-                            $('#media-fields').val(configuredLayers[layerId].mediaFields);
-                        }
-                    } else {
-                        console.log('No se encontraron campos');
-                    }
-                },
-                error: function(xhr) {
-                    alert('Error cargando campos: ' + (xhr.responseJSON ? xhr.responseJSON.error : xhr.statusText));
-                }
-            });
-        }
-        
-        function updateConfiguredLayersList() {
-            var container = $('#configured-layers-list');
+        });   
+        function updateconfiguredFileList() {
+            var container = $('#configured-file-list');
             container.empty();
             
-            if (Object.keys(configuredLayers).length === 0) {
-                container.html('<p class="text-muted">' + gettext('No layers configured yet') + '</p>');
+            if (Object.keys(configuredFiles).length === 0) {
+                container.html('<p class="text-muted">' + gettext('No files configured yet') + '</p>');
                 return;
             }
             
-            Object.values(configuredLayers).forEach(function(layerConfig) {
-                var layerHtml = '<div class="configured-layer" data-layer-id="' + layerConfig.layerId + '">' +
-                    '<div class="layer-item">' +
-                    '<div class="layer-info">' +
-                    '<strong>' + layerConfig.layerName + '</strong><br>' +
-                    '<small>' + gettext('Order') + ': ' + layerConfig.orderField + '</small><br>' +
-                    '<small>'    + gettext('Media fields') + ': ' + layerConfig.mediaFields.join(', ') + '</small>' +
+            Object.values(configuredFiles).forEach(function(fileConfig) {
+                var fileHtml = '<div class="configured-file " data-file-id="' + fileConfig.fileId + '">' +
+                    '<div class="file-item">' +
+                    '<div class="file-info">' +
+                    '<strong>' + fileConfig.title + '</strong><br>' +
+                    '<small>' + gettext('Description') + ': ' + fileConfig.description + '</small><br>' +
+                    '<small>' + gettext('URL') + ': ' + fileConfig.file_url + '</small><br>' +
+                    '<small>' + gettext('Updated at') + ': ' + formatDateTime(fileConfig.updated_at) + '</small>' +
                     '</div>' +
-                    '<button type="button" class="btn btn-xs btn-danger remove-configured-layer" data-layer-id="' + layerConfig.layerId + '">' +
-                    '<i class="fa fa-times"></i>' +
-                    '</button>' +
+                    '<div class="file-actions">' +
+                        '<button type="button" class="btn btn-success edit-configured-file" data-file-id="' + fileConfig.fileId + '">' +
+                            '<i class="fa fa-edit"></i>' +
+                        '</button>' +
+                        '<button type="button" class="btn btn-danger remove-configured-file" data-file-id="' + fileConfig.fileId + '">' +
+                            '<i class="fa fa-times"></i>' +
+                        '</button>' +
                     '</div>' +
                     '</div>';
-                container.append(layerHtml);
+                container.append(fileHtml);
             });
         }
-        
-        $(document).on('click', '.remove-configured-layer', function() {
-            var layerId = $(this).data('layer-id');
-            delete configuredLayers[layerId];
-            updateConfiguredLayersList();
+
+        $(document).on('click', '.remove-configured-file', function() {
+            var fileId = $(this).data('file-id');
+            delete configuredFiles[fileId];
+            normalizeFileIds();
+            updateconfiguredFileList();
+        });
+
+        $(document).on('click', '.edit-configured-file', function() {
+            var fileId = $(this).data('file-id');
+            var fileConfig = configuredFiles[fileId];
+            if (!fileConfig) {
+                return;
+            }
+            modalMode = 'edit';
+            editingFileId = fileId;
+            $('#file-title').val(fileConfig.title);
+            $('#file-description').val(fileConfig.description);
+            $('#file-url').val(fileConfig.file_url || '');
+            $('#upload-input-file').val('');
+            $('#file-modal-title').text(gettext('Edit file configuration'));
+            updateFileInputStates();
+            $('#file-add-modal').modal('show');
+        });
+        function formatDateTime(isoString) {
+            if (!isoString) {
+                return '';
+            }
+            try {
+                var date = new Date(isoString);
+                if (isNaN(date.getTime())) {
+                    return isoString;
+                }
+                return date.toLocaleString();
+            } catch (e) {
+                return isoString;
+            }
+        }
+
+        function getNextFileId() {
+            while (configuredFiles[fileIdCounter]) {
+                fileIdCounter += 1;
+            }
+            var nextId = fileIdCounter;
+            fileIdCounter += 1;
+            return nextId;
+        }
+
+        function normalizeFileIds() {
+            var filesArray = Object.values(configuredFiles).sort(function(a, b) {
+                return parseInt(a.fileId, 10) - parseInt(b.fileId, 10);
+            });
+
+            var normalized = {};
+            var nextId = 1;
+
+            filesArray.forEach(function(fileConfig) {
+                var newId = nextId.toString();
+                fileConfig.fileId = newId;
+                normalized[newId] = fileConfig;
+                nextId += 1;
+            });
+
+            configuredFiles = normalized;
+            fileIdCounter = nextId;
+        }
+
+        function resetFileInputs() {
+            $('#file-title').val('');
+            $('#file-description').val('');
+            $('#file-url').val('');
+            $('#upload-input-file').val('');
+            $('#clear_file_upload_input_file').hide();
+            $('#file-url').prop('disabled', false).closest('.form-group').find('label, small').css('opacity', '1');
+            $('#upload-input-file').prop('disabled', false);
+        }
+
+        function updateFileInputStates() {
+            var urlVal = $('#file-url').val().trim();
+            var fileVal = $('#upload-input-file').val();
+
+            if (urlVal !== '') {
+                $('#upload-input-file').prop('disabled', true);
+                $('#file-url').closest('.form-group').find('label').css('opacity', '1');
+            } else {
+                $('#upload-input-file').prop('disabled', false);
+            }
+
+            if (fileVal !== '') {
+                $('#file-url').prop('disabled', true);
+                $('#file-url').closest('.form-group').find('label, small').css('opacity', '0.5');
+                $('#clear_file_upload_input_file').show();
+            } else {
+                $('#file-url').prop('disabled', false);
+                $('#file-url').closest('.form-group').find('label, small').css('opacity', '1');
+                $('#clear_file_upload_input_file').hide();
+            }
+        }
+
+        $('#file-url').on('input', function() {
+            if ($(this).val().trim() !== '') {
+                $('#upload-input-file').prop('disabled', true);
+                $('#upload-input-file').val('');
+                $('#clear_file_upload_input_file').hide();
+            } else {
+                $('#upload-input-file').prop('disabled', false);
+            }
+        });
+
+        $('#upload-input-file').on('change', function() {
+            if ($(this).val() !== '') {
+                $('#file-url').prop('disabled', true);
+                $('#file-url').val('');
+                $('#file-url').closest('.form-group').find('label, small').css('opacity', '0.5');
+                $('#clear_file_upload_input_file').show();
+            } else {
+                $('#file-url').prop('disabled', false);
+                $('#file-url').closest('.form-group').find('label, small').css('opacity', '1');
+                $('#clear_file_upload_input_file').hide();
+            }
+        });
+
+        $('#clear_file_upload_input_file').on('click', function() {
+            $('#upload-input-file').val('');
+            $('#file-url').prop('disabled', false);
+            $('#file-url').closest('.form-group').find('label, small').css('opacity', '1');
+            $(this).hide();
         });
     });
 });
 </script>
 
 <style>
-.radio-label {
-    margin-right: 20px;
-    font-weight: normal;
-}
-
-.configured-layer {
+.configured-file {
     margin-bottom: 10px;
 }
 
-.layer-item {
+.file-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -325,16 +410,21 @@ waitForJQuery(function() {
     background: #f9f9f9;
 }
 
-.layer-info {
+.file-info {
     flex: 1;
     margin-right: 10px;
 }
 
-.remove-configured-layer {
+.file-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.remove-configured-file {
     flex-shrink: 0;
 }
 
-#configured-layers-list {
+#configured-file-list {
     max-height: 300px;
     overflow-y: auto;
 }
