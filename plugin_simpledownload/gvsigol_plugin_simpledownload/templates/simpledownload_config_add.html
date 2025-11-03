@@ -14,7 +14,7 @@
 <div class="row">
     <div class="col-md-12">
         <div class="box">
-            <form id="config-form" role="form" method="post" action="{% url 'simpledownload_config_add' %}">
+            <form id="config-form" role="form" method="post" action="{% url 'simpledownload_config_add' %}" enctype="multipart/form-data">
                 <div class="box-header with-border">
                     <h3 class="box-title">{% trans "Add configuration" %}</h3>
                     <div class="box-tools pull-right">
@@ -57,6 +57,9 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Contenedor oculto para almacenar inputs de archivos -->
+                    <div id="file-inputs-container" style="display:none;"></div>
                 </div>
             </form>
         </div>
@@ -91,11 +94,11 @@
                 </div>
                 <div class="row form-group">
                     <div class="col-md-12">
-                        <label for="upload-input-file">{% trans "Or upload your file" %}</label>
+                        <label for="file-upload">{% trans "Or upload your file" %}</label>
                         <div class="input-group">
-                            <input name="upload-input-file" id="upload-input-file" type="file" class="form-control">
+                            <input name="file-upload" id="file-upload" type="file" class="form-control">
                             <span class="input-group-btn" style="vertical-align: top;">
-                                <button type="button" id="clear_file_upload_input_file" class="btn btn-danger" style="display:none; height: 34px; border-top-left-radius: 0; border-bottom-left-radius: 0;" title="{% trans 'Clear file' %}">
+                                <button type="button" id="clear_file_upload" class="btn btn-danger" style="display:none; height: 34px; border-top-left-radius: 0; border-bottom-left-radius: 0;" title="{% trans 'Clear file' %}">
                                     <i class="fa fa-times"></i>
                                 </button>
                             </span>
@@ -155,7 +158,8 @@ waitForJQuery(function() {
             var titleField = $('#file-title').val();
             var descriptionField = $('#file-description').val();
             var urlField = $('#file-url').val();
-            var uploadFileField = $('#upload-input-file').val();
+            var fileInput = $('#file-upload')[0];
+            var uploadedFile = fileInput.files.length > 0 ? fileInput.files[0] : null;
             
             if (!titleField) {
                 alert(gettext('Please enter a title'));
@@ -167,31 +171,48 @@ waitForJQuery(function() {
                 return;
             }
             
-            if (!urlField && !uploadFileField) {
+            if (!urlField && !uploadedFile) {
                 alert(gettext('Please enter a URL or upload a file'));
                 return;
             }
             
             var nowIso = new Date().toISOString();
+            var targetFileId;
 
             if (modalMode === 'edit' && editingFileId) {
-                addedFiles[editingFileId] = {
-                    fileId: editingFileId,
-                    title: titleField,
-                    description: descriptionField,
-                    file_url: urlField ? urlField : uploadFileField,
-                    updated_at: nowIso
-                };
+                targetFileId = editingFileId;
             } else {
-                var newId = getNextFileId();
-                addedFiles[newId] = {
-                    fileId: newId,
-                    title: titleField,
-                    description: descriptionField,
-                    file_url: urlField ? urlField : uploadFileField,
-                    updated_at: nowIso
-                };
+                targetFileId = getNextFileId();
             }
+            
+            if (uploadedFile) {
+                $('#uploaded_file_' + targetFileId).remove();
+                
+                var newFileInput = $('<input>').attr({
+                    type: 'file',
+                    name: 'uploaded_file_' + targetFileId,
+                    id: 'uploaded_file_' + targetFileId,
+                    style: 'display:none;'
+                });
+                
+                var dataTransfer = new DataTransfer();
+                dataTransfer.items.add(uploadedFile);
+                newFileInput[0].files = dataTransfer.files;
+                
+                newFileInput.appendTo('#file-inputs-container');
+            } else {
+                $('#uploaded_file_' + targetFileId).remove();
+            }
+            
+            addedFiles[targetFileId] = {
+                fileId: targetFileId,
+                title: titleField,
+                description: descriptionField,
+                file_url: urlField ? urlField : '',
+                has_upload: uploadedFile ? true : false,
+                upload_filename: uploadedFile ? uploadedFile.name : '',
+                updated_at: nowIso
+            };
             
             normalizeFileIds();
             updateAddedFileList();
@@ -243,12 +264,13 @@ waitForJQuery(function() {
             }
             
             Object.values(addedFiles).forEach(function(fileConfig) {
+                var displayUrl = fileConfig.file_url || (fileConfig.has_upload ? fileConfig.upload_filename : '');
                 var fileHtml = '<div class="added-file " data-file-id="' + fileConfig.fileId + '">' +
                     '<div class="file-item">' +
                     '<div class="file-info">' +
                     '<strong>' + fileConfig.title + '</strong><br>' +
                     '<small>' + gettext('Description') + ': ' + fileConfig.description + '</small><br>' +
-                    '<small>' + gettext('URL') + ': ' + fileConfig.file_url + '</small><br>' +
+                    '<small>' + (fileConfig.has_upload ? gettext('File') : gettext('URL')) + ': ' + displayUrl + '</small><br>' +
                     '<small>' + gettext('Updated at') + ': ' + formatDateTime(fileConfig.updated_at) + '</small>' +
                     '</div>' +
                     '<div class="file-actions">' +
@@ -266,6 +288,7 @@ waitForJQuery(function() {
 
         $(document).on('click', '.remove-added-file', function() {
             var fileId = $(this).data('file-id');
+            $('#uploaded_file_' + fileId).remove();
             delete addedFiles[fileId];
             normalizeFileIds();
             updateAddedFileList();
@@ -282,7 +305,7 @@ waitForJQuery(function() {
             $('#file-title').val(fileConfig.title);
             $('#file-description').val(fileConfig.description);
             $('#file-url').val(fileConfig.file_url || '');
-            $('#upload-input-file').val('');
+            $('#file-upload').val('');
             $('#file-modal-title').text(gettext('Edit file information'));
             updateFileInputStates();
             $('#file-add-modal').modal('show');
@@ -320,7 +343,17 @@ waitForJQuery(function() {
             var nextId = 1;
 
             filesArray.forEach(function(fileConfig) {
+                var oldId = fileConfig.fileId;
                 var newId = nextId.toString();
+                
+                if (oldId !== newId && fileConfig.has_upload) {
+                    var oldInput = $('#uploaded_file_' + oldId);
+                    if (oldInput.length > 0) {
+                        oldInput.attr('name', 'uploaded_file_' + newId);
+                        oldInput.attr('id', 'uploaded_file_' + newId);
+                    }
+                }
+                
                 fileConfig.fileId = newId;
                 normalized[newId] = fileConfig;
                 nextId += 1;
@@ -334,59 +367,59 @@ waitForJQuery(function() {
             $('#file-title').val('');
             $('#file-description').val('');
             $('#file-url').val('');
-            $('#upload-input-file').val('');
-            $('#clear_file_upload_input_file').hide();
+            $('#file-upload').val('');
+            $('#clear_file_upload').hide();
             $('#file-url').prop('disabled', false).closest('.form-group').find('label, small').css('opacity', '1');
-            $('#upload-input-file').prop('disabled', false);
+            $('#file-upload').prop('disabled', false);
         }
 
         function updateFileInputStates() {
             var urlVal = $('#file-url').val().trim();
-            var fileVal = $('#upload-input-file').val();
+            var fileVal = $('#file-upload').val();
 
             if (urlVal !== '') {
-                $('#upload-input-file').prop('disabled', true);
+                $('#file-upload').prop('disabled', true);
                 $('#file-url').closest('.form-group').find('label').css('opacity', '1');
             } else {
-                $('#upload-input-file').prop('disabled', false);
+                $('#file-upload').prop('disabled', false);
             }
 
             if (fileVal !== '') {
                 $('#file-url').prop('disabled', true);
                 $('#file-url').closest('.form-group').find('label, small').css('opacity', '0.5');
-                $('#clear_file_upload_input_file').show();
+                $('#clear_file_upload').show();
             } else {
                 $('#file-url').prop('disabled', false);
                 $('#file-url').closest('.form-group').find('label, small').css('opacity', '1');
-                $('#clear_file_upload_input_file').hide();
+                $('#clear_file_upload').hide();
             }
         }
 
         $('#file-url').on('input', function() {
             if ($(this).val().trim() !== '') {
-                $('#upload-input-file').prop('disabled', true);
-                $('#upload-input-file').val('');
-                $('#clear_file_upload_input_file').hide();
+                $('#file-upload').prop('disabled', true);
+                $('#file-upload').val('');
+                $('#clear_file_upload').hide();
             } else {
-                $('#upload-input-file').prop('disabled', false);
+                $('#file-upload').prop('disabled', false);
             }
         });
 
-        $('#upload-input-file').on('change', function() {
+        $('#file-upload').on('change', function() {
             if ($(this).val() !== '') {
                 $('#file-url').prop('disabled', true);
                 $('#file-url').val('');
                 $('#file-url').closest('.form-group').find('label, small').css('opacity', '0.5');
-                $('#clear_file_upload_input_file').show();
+                $('#clear_file_upload').show();
             } else {
                 $('#file-url').prop('disabled', false);
                 $('#file-url').closest('.form-group').find('label, small').css('opacity', '1');
-                $('#clear_file_upload_input_file').hide();
+                $('#clear_file_upload').hide();
             }
         });
 
-        $('#clear_file_upload_input_file').on('click', function() {
-            $('#upload-input-file').val('');
+        $('#clear_file_upload').on('click', function() {
+            $('#file-upload').val('');
             $('#file-url').prop('disabled', false);
             $('#file-url').closest('.form-group').find('label, small').css('opacity', '1');
             $(this).hide();

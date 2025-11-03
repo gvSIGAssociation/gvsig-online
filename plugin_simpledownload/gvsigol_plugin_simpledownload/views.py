@@ -27,10 +27,13 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.core.files.storage import default_storage
+from django.conf import settings as django_settings
 from gvsigol_core.models import Project
 from .models import SimpleDownloadConfig
 from . import settings
 import json
+import os
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
@@ -67,13 +70,32 @@ def config_add(request):
                 return redirect('simpledownload_config_list')
             
             file_configs_data = {}
-            for file_config_json in file_configs:
+            for idx, file_config_json in enumerate(file_configs):
                 try:
                     file_config = json.loads(file_config_json)
-                    file_configs_data[file_config['fileId']] = {
+                    file_id = file_config['fileId']
+                    
+                    file_url = file_config.get('file_url', '').strip()
+                    uploaded_file_key = f'uploaded_file_{file_id}'
+                    
+                    if uploaded_file_key in request.FILES:
+                        uploaded_file = request.FILES[uploaded_file_key]
+                        upload_dir = os.path.join('simpledownload_files', str(project.id))
+                        os.makedirs(os.path.join(django_settings.MEDIA_ROOT, upload_dir), exist_ok=True)
+                        
+                        file_path = os.path.join(upload_dir, uploaded_file.name)
+                        full_path = os.path.join(django_settings.MEDIA_ROOT, file_path)
+                        
+                        if os.path.exists(full_path):
+                            os.remove(full_path)
+                        
+                        saved_path = default_storage.save(file_path, uploaded_file)
+                        file_url = django_settings.MEDIA_URL + saved_path
+                    
+                    file_configs_data[file_id] = {
                         'title': file_config['title'],
                         'description': file_config['description'],
-                        'file_url': file_config['file_url'],
+                        'file_url': file_url,
                         'updated_at': file_config['updated_at']
                     }
                 except (json.JSONDecodeError, KeyError) as e:
@@ -115,10 +137,27 @@ def config_edit(request, config_id):
                 if not file_id:
                     continue
 
+                file_url = file_config.get('file_url', '').strip()
+                uploaded_file_key = f'uploaded_file_{file_id}'
+                
+                if uploaded_file_key in request.FILES:
+                    uploaded_file = request.FILES[uploaded_file_key]
+                    upload_dir = os.path.join('simpledownload_files', str(config.project.id))
+                    os.makedirs(os.path.join(django_settings.MEDIA_ROOT, upload_dir), exist_ok=True)
+                    
+                    file_path = os.path.join(upload_dir, uploaded_file.name)
+                    full_path = os.path.join(django_settings.MEDIA_ROOT, file_path)
+                    
+                    if os.path.exists(full_path):
+                        os.remove(full_path)
+                    
+                    saved_path = default_storage.save(file_path, uploaded_file)
+                    file_url = django_settings.MEDIA_URL + saved_path
+
                 file_configs_data[file_id] = {
                     'title': file_config.get('title', ''),
                     'description': file_config.get('description', ''),
-                    'file_url': file_config.get('file_url', ''),
+                    'file_url': file_url,
                     'updated_at': file_config.get('updated_at')
                 }
             except (json.JSONDecodeError, KeyError) as exc:
