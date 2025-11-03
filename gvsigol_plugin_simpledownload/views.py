@@ -84,6 +84,11 @@ def config_add(request):
                         os.makedirs(os.path.join(django_settings.MEDIA_ROOT, upload_dir), exist_ok=True)
                         
                         file_path = os.path.join(upload_dir, uploaded_file.name)
+                        full_path = os.path.join(django_settings.MEDIA_ROOT, file_path)
+                        
+                        if os.path.exists(full_path):
+                            os.remove(full_path)
+                        
                         saved_path = default_storage.save(file_path, uploaded_file)
                         file_url = django_settings.MEDIA_URL + saved_path
                     
@@ -141,6 +146,11 @@ def config_edit(request, config_id):
                     os.makedirs(os.path.join(django_settings.MEDIA_ROOT, upload_dir), exist_ok=True)
                     
                     file_path = os.path.join(upload_dir, uploaded_file.name)
+                    full_path = os.path.join(django_settings.MEDIA_ROOT, file_path)
+                    
+                    if os.path.exists(full_path):
+                        os.remove(full_path)
+                    
                     saved_path = default_storage.save(file_path, uploaded_file)
                     file_url = django_settings.MEDIA_URL + saved_path
 
