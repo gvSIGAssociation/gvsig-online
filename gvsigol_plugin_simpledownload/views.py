@@ -203,8 +203,17 @@ def config_delete(request, config_id):
     """Eliminar configuración de Simple Download"""
     config = get_object_or_404(SimpleDownloadConfig, id=config_id)
     project_name = config.project.name
+    project_id = config.project.id
     
-    if request.method == 'POST': 
+    if request.method == 'POST':
+        project_dir = os.path.join(django_settings.MEDIA_ROOT, 'simpledownload_files', str(project_id))
+        if os.path.exists(project_dir):
+            try:
+                import shutil
+                shutil.rmtree(project_dir)
+            except Exception as e:
+                print(f"Error al eliminar carpeta {project_dir}: {e}")
+        
         config.delete()
         messages.success(request, f'Configuración eliminada para el proyecto {project_name}')
         return redirect('simpledownload_config_list')
