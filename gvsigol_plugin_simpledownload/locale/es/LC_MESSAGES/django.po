@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-12-22 10:22+0100\n"
-"PO-Revision-Date: 2025-09-11 16:04+0200\n"
+"PO-Revision-Date: 2025-11-04 12:10+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es\n"
@@ -28,53 +28,47 @@ msgstr "Plugins"
 msgid "Add configuration"
 msgstr "Añadir configuración"
 
+msgid "Save"
+msgstr "Guardar"
+
 msgid "Project"
 msgstr "Proyecto"
 
 msgid "Select a project..."
 msgstr "Seleccionar un proyecto..."
 
-msgid "Layer"
-msgstr "Capa"
+msgid "Add file"
+msgstr "Añadir archivo"
 
-msgid "Select a layer..."
-msgstr "Seleccionar una capa..."
+msgid "Added files"
+msgstr "Archivos añadidos"
 
-msgid "Configure layer fields"
-msgstr "Configurar campos de la capa"
+msgid "No files added yet"
+msgstr "No hay archivos añadidos"
 
-msgid "Configured layers"
-msgstr "Capas configuradas"
+msgid "Title"
+msgstr "Título"
 
-msgid "No layers configured yet"
-msgstr "Aún no hay capas configuradas"
+msgid "Description"
+msgstr "Descripción"
 
-msgid "Order field"
-msgstr "Campo de orden"
+msgid "File URL"
+msgstr "URL del archivo"
 
-msgid "Select order field..."
-msgstr "Seleccionar campo de orden..."
-
-msgid "Media fields"
-msgstr "Campos multimedia"
-
-msgid "Select media fields..."
-msgstr "Seleccionar campos multimedia..."
-
-msgid "Hold Ctrl to select multiple fields"
-msgstr "Mantén pulsado Ctrl para seleccionar múltiples campos"
+msgid "Or upload your file"
+msgstr "O suba un archivo"
 
 msgid "Cancel"
 msgstr "Cancelar"
 
-msgid "Save"
-msgstr "Guardar"
+msgid "Clear file"
+msgstr "Quitar archivo"
 
 msgid "Delete configuration"
 msgstr "Eliminar configuración"
 
 msgid "Are you sure you want to delete the simple download configuration for project"
-msgstr "¿Estás seguro de que quieres eliminar la configuración de visualización multimedia para el proyecto"
+msgstr "¿Está seguro de que quiere eliminar la configuración de descarga simple para el proyecto"
 
 msgid "Delete"
 msgstr "Eliminar"
@@ -82,11 +76,11 @@ msgstr "Eliminar"
 msgid "Update configuration"
 msgstr "Actualizar configuración"
 
-msgid "Configure more layers"
-msgstr "Configurar más capas"
+msgid "Updated at"
+msgstr "Actualizado el"
 
 msgid "Simple download configurations"
-msgstr "Configuraciones de visualización multimedia"
+msgstr "Configuraciones de descarga simple"
 
 msgid "ID"
 msgstr "ID"
@@ -98,10 +92,10 @@ msgid "Updated"
 msgstr "Actualizado"
 
 msgid "No configurations found. Click 'Add configuration' to create one."
-msgstr "No se encontraron configuraciones. Haz clic en 'Añadir configuración' para crear una."
+msgstr "No se encontraron configuraciones. Haga clic en 'Añadir configuración' para crear una."
 
 msgid "The configuration will be removed. Do you want to continue?"
-msgstr "La configuración será eliminada. ¿Quieres continuar?"
+msgstr "La configuración será eliminada. ¿Quiere continuar?"
 
 msgid "Accept"
 msgstr "Aceptar"

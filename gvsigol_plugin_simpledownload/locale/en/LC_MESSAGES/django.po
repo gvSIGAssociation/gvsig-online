@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-12-22 10:22+0100\n"
-"PO-Revision-Date: 2025-09-11 16:03+0200\n"
+"PO-Revision-Date: 2025-11-04 10:57+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en\n"
@@ -28,46 +28,40 @@ msgstr ""
 msgid "Add configuration"
 msgstr ""
 
+msgid "Save"
+msgstr ""
+
 msgid "Project"
 msgstr ""
 
 msgid "Select a project..."
 msgstr ""
 
-msgid "Layer"
+msgid "Add file"
 msgstr ""
 
-msgid "Select a layer..."
+msgid "Added files"
 msgstr ""
 
-msgid "Configure layer fields"
+msgid "No files added yet"
 msgstr ""
 
-msgid "Configured layers"
+msgid "Title"
 msgstr ""
 
-msgid "No layers configured yet"
+msgid "Description"
 msgstr ""
 
-msgid "Order field"
+msgid "File URL"
 msgstr ""
 
-msgid "Select order field..."
-msgstr ""
-
-msgid "Media fields"
-msgstr ""
-
-msgid "Select media fields..."
-msgstr ""
-
-msgid "Hold Ctrl to select multiple fields"
+msgid "Or upload your file"
 msgstr ""
 
 msgid "Cancel"
 msgstr ""
 
-msgid "Save"
+msgid "Clear file"
 msgstr ""
 
 msgid "Delete configuration"
@@ -82,7 +76,7 @@ msgstr ""
 msgid "Update configuration"
 msgstr ""
 
-msgid "Configure more layers"
+msgid "Updated at"
 msgstr ""
 
 msgid "Simple download configurations"
