@@ -128,9 +128,23 @@ def config_edit(request, config_id):
     config = get_object_or_404(SimpleDownloadConfig, id=config_id)
     
     if request.method == 'POST':
-        file_configs = request.POST.getlist('file_configs[]')
+        old_file_urls = set()
+        old_configs = config.file_configs or []
+        if isinstance(old_configs, list):
+            for file_config in old_configs:
+                file_url = file_config.get('file_url', '')
+                if file_url and file_url.startswith(django_settings.MEDIA_URL):
+                    old_file_urls.add(file_url)
+        elif isinstance(old_configs, dict):
+            for file_config in old_configs.values():
+                file_url = file_config.get('file_url', '')
+                if file_url and file_url.startswith(django_settings.MEDIA_URL):
+                    old_file_urls.add(file_url)
 
+        file_configs = request.POST.getlist('file_configs[]')
         file_configs_data = []
+        new_file_urls = set()
+        
         for file_config_json in file_configs:
             try:
                 file_config = json.loads(file_config_json)
@@ -162,9 +176,24 @@ def config_edit(request, config_id):
                     'file_url': file_url,
                     'updated_at': file_config.get('updated_at')
                 })
+                
+                if file_url and file_url.startswith(django_settings.MEDIA_URL):
+                    new_file_urls.add(file_url)
+                    
             except (json.JSONDecodeError, KeyError) as exc:
                 print(f"Error procesando configuración de archivo: {exc}")
                 continue
+
+        files_to_delete = old_file_urls - new_file_urls
+        for file_url in files_to_delete:
+            try:
+                file_path = file_url.replace(django_settings.MEDIA_URL, '', 1)
+                full_path = os.path.join(django_settings.MEDIA_ROOT, file_path)
+                if os.path.exists(full_path):
+                    os.remove(full_path)
+                    print(f"Archivo eliminado: {full_path}")
+            except Exception as e:
+                print(f"Error al eliminar archivo {file_url}: {e}")
 
         config.file_configs = file_configs_data
         config.save()
