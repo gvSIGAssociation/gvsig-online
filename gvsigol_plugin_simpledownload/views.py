@@ -69,7 +69,7 @@ def config_add(request):
                 messages.warning(request, f'Ya existe configuración para el proyecto {project.name}')
                 return redirect('simpledownload_config_list')
             
-            file_configs_data = {}
+            file_configs_data = []
             for idx, file_config_json in enumerate(file_configs):
                 try:
                     file_config = json.loads(file_config_json)
@@ -92,12 +92,13 @@ def config_add(request):
                         saved_path = default_storage.save(file_path, uploaded_file)
                         file_url = django_settings.MEDIA_URL + saved_path
                     
-                    file_configs_data[file_id] = {
+                    file_configs_data.append({
+                        'id': int(file_id),
                         'title': file_config['title'],
                         'description': file_config['description'],
                         'file_url': file_url,
                         'updated_at': file_config['updated_at']
-                    }
+                    })
                 except (json.JSONDecodeError, KeyError) as e:
                     print(f"Error procesando configuración de archivo: {e}")
                     continue
@@ -129,11 +130,11 @@ def config_edit(request, config_id):
     if request.method == 'POST':
         file_configs = request.POST.getlist('file_configs[]')
 
-        file_configs_data = {}
+        file_configs_data = []
         for file_config_json in file_configs:
             try:
                 file_config = json.loads(file_config_json)
-                file_id = str(file_config.get('fileId'))
+                file_id = file_config.get('fileId')
                 if not file_id:
                     continue
 
@@ -154,12 +155,13 @@ def config_edit(request, config_id):
                     saved_path = default_storage.save(file_path, uploaded_file)
                     file_url = django_settings.MEDIA_URL + saved_path
 
-                file_configs_data[file_id] = {
+                file_configs_data.append({
+                    'id': int(file_id),
                     'title': file_config.get('title', ''),
                     'description': file_config.get('description', ''),
                     'file_url': file_url,
                     'updated_at': file_config.get('updated_at')
-                }
+                })
             except (json.JSONDecodeError, KeyError) as exc:
                 print(f"Error procesando configuración de archivo: {exc}")
                 continue
@@ -170,30 +172,30 @@ def config_edit(request, config_id):
         messages.success(request, 'Configuración actualizada correctamente')
         return redirect('simpledownload_config_list')
      
-    file_configs_dict = config.file_configs or {}
-    files = []
+    file_configs_list = config.file_configs or []
+    
+    if isinstance(file_configs_list, dict):
+        files = []
+        for file_id, file_config in sorted(file_configs_list.items(), key=lambda x: int(x[0]) if str(x[0]).isdigit() else 0):
+            files.append({
+                'id': int(file_id),
+                'title': file_config.get('title', ''),
+                'description': file_config.get('description', ''),
+                'file_url': file_config.get('file_url', ''),
+                'updated_at': file_config.get('updated_at')
+            })
+    else:
+        files = sorted(file_configs_list, key=lambda x: x.get('id', 0))
 
-    try:
-        sorted_items = sorted(
-            file_configs_dict.items(),
-            key=lambda item: int(item[0]) if str(item[0]).isdigit() else str(item[0])
-        )
-    except Exception:
-        sorted_items = file_configs_dict.items()
-
-    for file_id, file_config in sorted_items:
-        files.append({
-            'id': str(file_id),
-            'title': file_config.get('title', ''),
-            'description': file_config.get('description', ''),
-            'file_url': file_config.get('file_url', ''),
-            'updated_at': file_config.get('updated_at')
-        })
+    # Convertir lista a objeto para el JavaScript (usando id como key)
+    file_configs_obj = {}
+    for file in files:
+        file_configs_obj[str(file['id'])] = file
 
     return render(request, 'simpledownload_config_edit.html', {
         'config': config,
         'files': files,
-        'initial_file_configs_json': json.dumps(file_configs_dict)
+        'initial_file_configs_json': json.dumps(file_configs_obj)
     })
 
 @login_required
@@ -227,12 +229,23 @@ def get_config(request):
             
             try:
                 config = SimpleDownloadConfig.objects.get(project=project)
-                file_configs = config.file_configs
+                file_configs = config.file_configs or []
+                
+                if isinstance(file_configs, dict):
+                    file_list = []
+                    for file_id, file_data in sorted(file_configs.items(), key=lambda x: int(x[0]) if str(x[0]).isdigit() else 0):
+                        file_item = file_data.copy()
+                        file_item['id'] = int(file_id)
+                        file_list.append(file_item)
+                    file_configs = file_list
+                else:
+                    file_configs = sorted(file_configs, key=lambda x: x.get('id', 0))
+                    
             except SimpleDownloadConfig.DoesNotExist:
-                file_configs = {}
+                file_configs = []
             
             return JsonResponse({
-                'file_configs': file_configs
+                'files': file_configs
             })
             
         except Project.DoesNotExist:
