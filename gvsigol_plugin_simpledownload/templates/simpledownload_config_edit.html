@@ -280,7 +280,17 @@ waitForJQuery(function() {
             $('#file-title').val(fileConfig.title);
             $('#file-description').val(fileConfig.description);
             $('#file-url').val(fileConfig.file_url || '');
-            $('#file-upload').val('');
+            
+            var hiddenFileInput = $('#uploaded_file_' + fileId);
+            if (hiddenFileInput.length && hiddenFileInput[0].files.length > 0) {
+                var dataTransfer = new DataTransfer();
+                dataTransfer.items.add(hiddenFileInput[0].files[0]);
+                $('#file-upload')[0].files = dataTransfer.files;
+                $('#clear_file_upload').show();
+            } else {
+                $('#file-upload').val('');
+            }
+            
             $('#file-modal-title').text(gettext('Edit file information'));
             updateFileInputStates();
             $('#file-add-modal').modal('show');
