@@ -27,46 +27,37 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.4.2\n"
 
-msgid "Select a layer..."
+msgid "Add file information"
 msgstr ""
 
-msgid "Please select an order field"
+msgid "Please enter a title"
 msgstr ""
 
-msgid "Please select at least one media field"
+msgid "Please enter a description"
+msgstr ""
+
+msgid "Please enter a URL or upload a file"
 msgstr ""
 
 msgid "Please select a project"
 msgstr ""
 
-msgid "Please select a layer"
+msgid "Please add at least one file"
 msgstr ""
 
-msgid "Please configure at least one layer"
+msgid "Description"
 msgstr ""
 
-msgid "No layers available for multimedia configuration"
+msgid "File"
 msgstr ""
 
-msgid "Select order field..."
+msgid "URL"
 msgstr ""
 
-msgid "Select media fields..."
+msgid "Updated at"
 msgstr ""
 
-msgid "No layers configured yet"
-msgstr ""
-
-msgid "Order"
-msgstr ""
-
-msgid "Media fields"
-msgstr ""
-
-msgid "Are you sure you want to delete this layer configuration?"
-msgstr ""
-
-msgid "No fields available"
+msgid "Edit file information"
 msgstr ""
 
 msgid "Delete configuration"
@@ -76,7 +67,4 @@ msgid "Update configuration"
 msgstr ""
 
 msgid "Error deleting configuration"
-msgstr ""
-
-msgid "No more layers available to configure"
 msgstr ""
