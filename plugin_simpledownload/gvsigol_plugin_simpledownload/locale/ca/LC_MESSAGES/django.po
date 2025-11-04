@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-12-22 10:22+0100\n"
-"PO-Revision-Date: 2025-09-11 16:20+0200\n"
+"PO-Revision-Date: 2025-11-04 11:22+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ca\n"
@@ -28,53 +28,47 @@ msgstr "Plugins"
 msgid "Add configuration"
 msgstr "Afegir configuració"
 
+msgid "Save"
+msgstr "Desar"
+
 msgid "Project"
 msgstr "Projecte"
 
 msgid "Select a project..."
 msgstr "Seleccionar un projecte..."
 
-msgid "Layer"
-msgstr "Capa"
+msgid "Add file"
+msgstr "Afegir arxiu"
 
-msgid "Select a layer..."
-msgstr "Seleccionar una capa..."
+msgid "Added files"
+msgstr "Arxius afegits"
 
-msgid "Configure layer fields"
-msgstr "Configurar camps de la capa"
+msgid "No files added yet"
+msgstr "No hi ha arxius afegits"
 
-msgid "Configured layers"
-msgstr "Capes configurades"
+msgid "Title"
+msgstr "Títol"
 
-msgid "No layers configured yet"
-msgstr "Encara no hi ha capes configurades"
+msgid "Description"
+msgstr "Descripció"
 
-msgid "Order field"
-msgstr "Camp d'ordre"
+msgid "File URL"
+msgstr "URL de l'arxiu"
 
-msgid "Select order field..."
-msgstr "Seleccionar camp d'ordre..."
-
-msgid "Media fields"
-msgstr "Camps multimèdia"
-
-msgid "Select media fields..."
-msgstr "Seleccionar camps multimèdia..."
-
-msgid "Hold Ctrl to select multiple fields"
-msgstr "Mantén premut Ctrl per seleccionar múltiples camps"
+msgid "Or upload your file"
+msgstr "O puge un arxiu"
 
 msgid "Cancel"
 msgstr "Cancel·lar"
 
-msgid "Save"
-msgstr "Desar"
+msgid "Clear file"
+msgstr "Llevar arxiu"
 
 msgid "Delete configuration"
 msgstr "Eliminar configuració"
 
 msgid "Are you sure you want to delete the simple download configuration for project"
-msgstr "Estàs segur que vols eliminar la configuració de visualització multimèdia per al projecte"
+msgstr "Està segur que vol eliminar la configuració de descàrrega simple per al projecte"
 
 msgid "Delete"
 msgstr "Eliminar"
@@ -82,11 +76,11 @@ msgstr "Eliminar"
 msgid "Update configuration"
 msgstr "Actualitzar configuració"
 
-msgid "Configure more layers"
-msgstr "Configurar més capes"
+msgid "Updated at"
+msgstr "Actualitzat el"
 
 msgid "Simple download configurations"
-msgstr "Configuracions de visualització multimèdia"
+msgstr "Configuracions de descàrrega simple"
 
 msgid "ID"
 msgstr "ID"
@@ -98,10 +92,10 @@ msgid "Updated"
 msgstr "Actualitzat"
 
 msgid "No configurations found. Click 'Add configuration' to create one."
-msgstr "No s'han trobat configuracions. Fes clic a 'Afegir configuració' per crear-ne una."
+msgstr "No s'han trobat configuracions. Faça clic en 'Afegir configuració' per crear-ne una."
 
 msgid "The configuration will be removed. Do you want to continue?"
-msgstr "La configuració serà eliminada. Vols continuar?"
+msgstr "La configuració serà eliminada. Vol continuar?"
 
 msgid "Accept"
 msgstr "Acceptar"
