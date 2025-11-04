@@ -319,6 +319,12 @@ class Introspect:
         self.cursor.execute(query, [schema, table])
         r = self.cursor.fetchone()
         return r[0] > 0
+    
+    def is_materialized_view(self, schema, table):
+        query = "SELECT COUNT(*) FROM pg_matviews WHERE schemaname = %s AND matviewname = %s"
+        self.cursor.execute(query, [schema, table])
+        r = self.cursor.fetchone()
+        return r[0] > 0
   
     def create_view(self, schema, view_name, from_tables, fields):
         """
@@ -480,16 +486,48 @@ class Introspect:
         """).format(schema_table=sqlbuilder.Literal(qualified_table))
         self.cursor.execute(query)
         pks = self.cursor.fetchall()
-        if len(pks) == 0 and self.is_view(schema, table):
-            return self.get_geoserver_view_pk_columns(schema, table)
+        
+        # Si no hay clave primaria, buscar índice UNIQUE
+        if len(pks) == 0:
+            if self.is_view(schema, table):
+                return self.get_geoserver_view_pk_columns(schema, table)
+            
+            # Buscar índices UNIQUE
+            unique_query = sqlbuilder.SQL("""
+            SELECT a.attname AS field_name
+                            FROM pg_index i
+                            JOIN pg_attribute a ON a.attrelid = i.indrelid
+                            AND a.attnum = ANY(i.indkey)
+                            WHERE
+                            i.indrelid = ({schema_table})::regclass
+                            AND i.indisunique
+                            AND NOT i.indisprimary
+                            ORDER BY i.indnatts ASC
+                            LIMIT 1
+            """).format(schema_table=sqlbuilder.Literal(qualified_table))
+            self.cursor.execute(unique_query)
+            unique_cols = self.cursor.fetchall()
+            if len(unique_cols) > 0:
+                return [r[0] for r in unique_cols]
+        
         return [r[0] for r in pks]
     
     def get_fields(self, table, schema='public'):
+        #self.cursor.execute("""
+        #SELECT column_name FROM information_schema.columns
+        #WHERE table_schema = %s AND table_name = %s 
+        #""", [schema, table])
+
         self.cursor.execute("""
-        SELECT column_name FROM information_schema.columns
-        WHERE table_schema = %s AND table_name = %s 
+        SELECT a.attname AS column_name FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        JOIN pg_attribute a ON a.attrelid = c.oid
+        WHERE n.nspname = %s
+        AND c.relname = %s
+        AND a.attnum > 0
+        AND NOT a.attisdropped;
         """, [schema, table])
-        
+               
         return [r[0] for r in self.cursor.fetchall()]
 
     def get_fields_by_datatype(self, datatype, table, schema='public'):
@@ -718,15 +756,36 @@ class Introspect:
             columns.append(r[1])
             if field_def['is_pk']:
                 pks.append(r[1])
-        if len(pks) == 0 and self.is_view(schema, table):
-            pk_info = self.get_geoserver_view_pk_columns(schema, table)
-            if len(pk_info) > 0:
-                for pk in pk_info:
-                    pks.append(pk)
-                """for field_def in col_info:
-                    if field_def['name'] in pks:
-                        field_def['is_pk'] = True
-                        pks.append(field_def['is_pk'])"""
+        
+        # Si no hay PK, buscar alternativas
+        if len(pks) == 0:
+            # Para vistas, consultar gt_pk_metadata
+            if self.is_view(schema, table):
+                pk_info = self.get_geoserver_view_pk_columns(schema, table)
+                if len(pk_info) > 0:
+                    for pk in pk_info:
+                        pks.append(pk)
+            
+            # Para vistas materializadas y tablas sin PK, buscar índice UNIQUE
+            if len(pks) == 0 and (self.is_materialized_view(schema, table) or not self.is_view(schema, table)):
+                unique_query = sqlbuilder.SQL("""
+                SELECT a.attname AS field_name
+                                FROM pg_index i
+                                JOIN pg_attribute a ON a.attrelid = i.indrelid
+                                AND a.attnum = ANY(i.indkey)
+                                WHERE
+                                i.indrelid = ({schema_table})::regclass
+                                AND i.indisunique
+                                AND NOT i.indisprimary
+                                ORDER BY i.indnatts ASC
+                                LIMIT 1
+                """).format(schema_table=sqlbuilder.Literal(qualified_table))
+                self.cursor.execute(unique_query)
+                unique_cols = self.cursor.fetchall()
+                if len(unique_cols) > 0:
+                    for r in unique_cols:
+                        pks.append(r[0])
+        
         return TableInfo(columns, col_info, pks)
 
     def get_fields_info(self, table, schema='public', pk_info=False):
