@@ -165,16 +165,19 @@ def format_sentilo_data_etl(entities):
             lat = None
             lng = None
 
+        # Normalizar el metadata reemplazando espacios por guiones bajos para nombres de columna
+        metadata_normalized = metadata.lower().replace(' ', '_')
+        
         list_tmp = {
             "component": componentSensor,
             "observation_time": observation_time,
             "lat": lat,
             "lng": lng,
             "tipo": tipo,
-            "metadata": metadata.lower(),
-            metadata.lower() + "_string": observation_string,
-            metadata.lower() + "_value": observation_value,
-            metadata.lower() + "_uom": uom
+            "metadata": metadata.lower(),  # Mantener el original para registro
+            metadata_normalized + "_string": observation_string,
+            metadata_normalized + "_value": observation_value,
+            metadata_normalized + "_uom": uom
         }
         finalList.append(list_tmp)
 
@@ -195,7 +198,9 @@ def format_sentilo_data_etl(entities):
         key = (item['component'], item['observation_time'], item['lat'], item['lng'])
         grouped_data[key]['tipo'].add(item['tipo'])
         grouped_data[key]['metadata'].add(item['metadata'])
-        metas = filter(lambda key: key.startswith(item['metadata']), item.keys())
+        # Usar el metadata normalizado (con guiones bajos) para buscar las claves de columnas
+        metadata_normalized = item['metadata'].replace(' ', '_')
+        metas = filter(lambda k: k.startswith(metadata_normalized), item.keys())
         for meta in metas:
             grouped_data[key][meta] = item[meta]
     
