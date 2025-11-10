@@ -62,6 +62,7 @@ function configure() {
 		GVSIGOL_CUSTOMER_NAME=$GVSIGOL_NAME	
 	fi
 
+
 	grep -rl "##GVSIGOL_PATH##"  | xargs sed -i "s ##GVSIGOL_PATH## $GVSIGOL_PATH g"
 	grep -rl "/gvsigonline/" | xargs sed -i "s /gvsigonline/ /$GVSIGOL_PATH/ g"
 	grep -rl "\^gvsigonline/" | xargs sed -i "s \^gvsigonline/ \^$GVSIGOL_PATH/ g"
@@ -216,8 +217,14 @@ function configure() {
 		echo "WARNING: EMAIL_TIMEOUT is not defined, using 60 seconds"
 		EMAIL_TIMEOUT=60
 	fi
+        grep -rl "##DEFAULT_FROM_EMAIL##" | xargs sed -i "s ##DEFAULT_FROM_EMAIL## $DEFAULT_FROM_EMAIL g"
+        if [ -z $DEFAULT_FROM_EMAIL ]; then
+            echo "WARNING: DEFAULT_FROM_EMAIL is not defined"
+        fi
+
 	grep -rl "##EMAIL_TIMEOUT##"  | xargs sed -i "s ##EMAIL_TIMEOUT## $EMAIL_TIMEOUT g"
 	grep -rl "##EMAIL_PORT##"  | xargs sed -i "s ##EMAIL_PORT## $EMAIL_PORT g"
+
 	
 	
 	#TODO: hay que llevarlo a la app 
