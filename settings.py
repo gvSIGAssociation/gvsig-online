@@ -285,6 +285,20 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+"""
+Variable EXTRA_MIDDLEWARE is a list of middleware classes to be added to the MIDDLEWARE list.
+It's documented at https://devel.scolab.eu/issues/14791
+
+The syntax is:
+EXTRA_MIDDLEWARE=previous_middleware:middleware_class:next_middleware
+or
+EXTRA_MIDDLEWARE=previous_middleware1:middleware_class1:next_middleware1:previous_middleware2:middleware_class2:next_middleware2:...
+
+If previous_middleware and next_middleware are not provided, the middleware_class is added to the end of the list.
+If next_middleware is provided, the middleware_class is added before the next_middleware.
+If previous_middleware is provided, the middleware_class is added after the previous_middleware.
+If both previous_middleware and next_middleware are provided, the middleware_class is added before the next_middleware (previous middleware is ignored).
+"""
 try:
     _extra_middleware = [x.split(':') for x in env('EXTRA_MIDDLEWARE')]
     for _previous_middleware, _mdlwr, _next_middleware in _extra_middleware:
