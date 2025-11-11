@@ -217,6 +217,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'rest_framework',
     ############# CORE ################
+    'gvsigol_audit',  # Sistema de auditoría (debe ir antes de gvsigol_core)
     'gvsigol_statistics',
     'gvsigol_auth',
     'gvsigol_services',
@@ -280,6 +281,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'gvsigol_audit.audit_middleware.AuditMiddleware',  # Auditoría de APIs REST y vistas Django
     'django.contrib.auth.middleware.PersistentRemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
