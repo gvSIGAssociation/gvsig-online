@@ -181,7 +181,7 @@ function configure() {
 	if [ -z $EMAIL_BACKEND_ACTIVE ]; then
 		EMAIL_BACKEND_ACTIVE="True"
 	else
-		if [ "$EMAIL_BACKEND_ACTIVE" = "true" ]; then
+                if [ "$EMAIL_BACKEND_ACTIVE" = "true" ] || [ "$EMAIL_BACKEND_ACTIVE" = "True" ]; then
 			EMAIL_BACKEND_ACTIVE=True
 		else
 			EMAIL_BACKEND_ACTIVE=False
@@ -191,7 +191,7 @@ function configure() {
 	if [ -z $EMAIL_USE_TLS ]; then
 		EMAIL_USE_TLS="True"
 	else
-		if [ "$EMAIL_USE_TLS" = "true" ]; then
+                if [ "$EMAIL_USE_TLS" = "true" ] || [ "$EMAIL_USE_TLS" = "True" ]; then
 			EMAIL_USE_TLS=True
 		else
 			EMAIL_USE_TLS=False
