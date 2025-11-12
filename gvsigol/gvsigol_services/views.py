@@ -6114,7 +6114,7 @@ def kill_all_group_tasks(request):
     server = Server.objects.get(id=layer_group.server_id)
     master_node = geographic_servers.get_instance().get_master_node(server.id)
 
-    geowebcache.get_instance().kill_all_tasks(layer_group, server, master_node.getUrl())
+    geowebcache.get_instance().kill_all_group_tasks(layer_group, server, master_node.getUrl())
 
     geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
 
