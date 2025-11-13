@@ -72,8 +72,9 @@ AUDIT_ENABLED=True
 AUDIT_MODE=compact
 
 # Ruta del archivo de log o 'stdout' para escribir a stdout (útil para Docker)
-AUDIT_LOG_PATH=stdout
-# O bien:
+# Por defecto, si no se especifica, se usa stdout
+AUDIT_LOG_PATH=stdout  # Valor por defecto
+# O bien, para escribir a un archivo:
 AUDIT_LOG_PATH=/opt/gvsigol_data/logs/audit.log
 
 # Habilitar detección automática (default: True)
@@ -92,8 +93,8 @@ AUDIT_ENABLED = True
 # Modo de logging (por defecto: 'compact')
 AUDIT_MODE = 'compact'  # 'basic', 'full', o 'compact'
 
-# Ruta del archivo de log
-AUDIT_LOG_PATH = 'stdout'  # o ruta a archivo
+# Ruta del archivo de log (por defecto: 'stdout')
+AUDIT_LOG_PATH = 'stdout'  # Valor por defecto, o ruta a archivo
 
 # Habilitar detección automática (default: True)
 AUDIT_AUTO_DETECT = True  # False para solo auditar endpoints registrados explícitamente
@@ -226,7 +227,7 @@ Los logs se generan en formato JSON, una línea por log (formato compatible con 
 
 ### Usando stdout (Recomendado para Docker)
 
-Si se configura `AUDIT_LOG_PATH=stdout`, los logs se escribirán a stdout y pueden ser capturados por Promtail o Fluent Bit:
+Por defecto, si no se especifica `AUDIT_LOG_PATH`, los logs se escribirán a stdout (valor por defecto). Esto es ideal para Docker y contenedores, ya que los logs pueden ser capturados directamente por Promtail o Fluent Bit:
 
 **docker-compose.yml:**
 ```yaml
@@ -391,9 +392,9 @@ class MiPluginConfig(AppConfig):
 
 4. **Espacio en disco**: En modo `full`, los logs pueden ocupar mucho espacio, especialmente si hay muchas geometrías. Use el modo `compact` para reducir el tamaño.
 
-5. **Docker**: Para entornos Docker, se recomienda usar `AUDIT_LOG_PATH=stdout` y capturar los logs con Promtail o Fluent Bit.
+5. **Docker**: Por defecto, los logs se escriben a stdout (valor por defecto de `AUDIT_LOG_PATH`), lo cual es ideal para Docker. Los logs pueden ser capturados directamente por Promtail o Fluent Bit sin configuración adicional.
 
-6. **Fallback**: Si no se puede escribir al archivo de log (por ejemplo, por permisos), el sistema automáticamente escribe a stdout como fallback.
+6. **Fallback**: Si se especifica una ruta de archivo y no se puede escribir al archivo de log (por ejemplo, por permisos), el sistema automáticamente escribe a stdout como fallback.
 
 7. **Exclusiones Automáticas**: El sistema excluye automáticamente paths estáticos, media y admin de la auditoría cuando se detectan bajo el prefijo de gvsigol.
 

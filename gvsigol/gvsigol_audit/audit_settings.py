@@ -50,6 +50,7 @@ except (NameError, AttributeError):
 # Ruta donde escribir los logs de auditoría
 # Se puede configurar mediante variable de entorno AUDIT_LOG_PATH o en settings.py
 # Si se establece a 'stdout', los logs se escribirán a stdout (útil para Docker)
+# Por defecto, si no se especifica, se usa stdout
 try:
     log_path = env('AUDIT_LOG_PATH', default=None)
     if log_path:
@@ -58,20 +59,15 @@ try:
         else:
             AUDIT_LOG_PATH = log_path
     else:
-        # Intentar usar MEDIA_ROOT si está disponible (normalmente montado en Docker)
-        media_root = getattr(settings, 'MEDIA_ROOT', None)
-        if media_root:
-            AUDIT_LOG_PATH = os.path.join(media_root, 'logs', 'audit.log')
-        else:
-            AUDIT_LOG_PATH = os.path.join(settings.BASE_DIR, 'logs', 'audit.log')
+        # Por defecto, usar stdout (recomendado para Docker y contenedores)
+        AUDIT_LOG_PATH = 'stdout'
 except (NameError, AttributeError):
-    media_root = getattr(settings, 'MEDIA_ROOT', None)
-    if media_root:
-        AUDIT_LOG_PATH = getattr(settings, 'AUDIT_LOG_PATH', 
-                                os.path.join(media_root, 'logs', 'audit.log'))
-    else:
-        AUDIT_LOG_PATH = getattr(settings, 'AUDIT_LOG_PATH', 
-                                os.path.join(settings.BASE_DIR, 'logs', 'audit.log'))
+    # Si no se puede usar environ, verificar en settings.py
+    # Si no está en settings.py, usar stdout por defecto
+    AUDIT_LOG_PATH = getattr(settings, 'AUDIT_LOG_PATH', 'stdout')
+    # Asegurar que si es None, se establece a stdout
+    if not AUDIT_LOG_PATH or AUDIT_LOG_PATH.lower() == 'stdout':
+        AUDIT_LOG_PATH = 'stdout'
 
 # Lista de campos sensibles adicionales a filtrar (además de los por defecto)
 # Se puede configurar en settings.py como lista

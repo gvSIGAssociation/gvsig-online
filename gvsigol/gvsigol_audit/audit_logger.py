@@ -275,22 +275,17 @@ def write_audit_log(log_data, log_path=None, use_stdout=False):
             # Obtener path desde settings de auditoría
             try:
                 from gvsigol_audit import audit_settings as audit_settings
-                log_path = getattr(audit_settings, 'AUDIT_LOG_PATH', None)
+                log_path = getattr(audit_settings, 'AUDIT_LOG_PATH', 'stdout')
             except (ImportError, AttributeError):
-                log_path = None
-            
-            # Si no hay path configurado, intentar usar directorio montado en Docker
-            if not log_path:
-                import os
-                from django.conf import settings as django_settings
-                
-                # Intentar usar MEDIA_ROOT si está disponible (normalmente montado en Docker)
-                media_root = getattr(django_settings, 'MEDIA_ROOT', None)
-                if media_root:
-                    log_path = os.path.join(media_root, 'logs', 'audit.log')
-                else:
-                    # Fallback: usar BASE_DIR/logs
-                    log_path = os.path.join(django_settings.BASE_DIR, 'logs', 'audit.log')
+                log_path = 'stdout'
+        
+        # Si el path es 'stdout', escribir directamente a stdout
+        if log_path and log_path.lower() == 'stdout':
+            import sys
+            json.dump(log_data, sys.stdout, ensure_ascii=False)
+            sys.stdout.write('\n')
+            sys.stdout.flush()
+            return
         
         # Crear directorio si no existe
         import os
