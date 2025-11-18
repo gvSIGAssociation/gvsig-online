@@ -1405,3 +1405,23 @@ class GetSignedDownloadView(APIView):
         ext = os.path.splitext(filename)[1]
         attachment = ext.lower() not in ['.png', '.jpg', '.jpeg', '.gif', '.pdf', '.txt']
         return sendfile(request, path, attachment=attachment, attachment_filename=filename)
+
+class DownloadMVTStyleView(APIView):
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_id='download_mvt_style',
+        operation_summary='Downloads the MVT style file',
+        responses={404: "Style file NOT found in disk"}
+    )
+    def get(self, request, lyr_id, style_path):
+        style_path = style_path.rstrip('/')
+        file_path = os.path.join(core_settings.MEDIA_ROOT, style_path)
+        
+        if not Path(core_settings.MEDIA_ROOT) in Path(file_path).parents:
+            return HttpException(404, "Style file NOT found in disk").get_exception()
+        
+        if not path.exists(file_path):
+            return HttpException(404, "Style file NOT found in disk").get_exception()
+        
+        return sendfile(request, file_path, attachment=False)
