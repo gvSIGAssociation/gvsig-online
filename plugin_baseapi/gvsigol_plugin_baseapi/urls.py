@@ -51,7 +51,7 @@ urlpatterns = [
     re_path(r'^swagger(?P<format>.json|.yaml)$', schema_view.without_ui(cache_timeout=None), name='schema-json'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=None), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=None), name='schema-redoc'),
-    path('csrftoken/', views.get_csrftoken, name='get-csrftoken'),
+    path('csrftoken/', views.get_csrftoken, name='get-csrftoken')
 ]
 
 

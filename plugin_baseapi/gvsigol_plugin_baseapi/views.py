@@ -22,6 +22,13 @@ import logging
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.views.decorators.http import require_safe
+from django.apps import apps as django_apps
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+from gvsigol_plugin_baseapi.apps import GvsigolBaseApiConfig
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 #logging.basicConfig()
 logger = logging.getLogger(__name__) 
@@ -38,3 +45,48 @@ def get_csrftoken(request):
     return JsonResponse({
         'csrftoken': get_token(request)
     })
+
+
+class PluginStatusView(APIView):
+    """
+    Template class to return plugin name and status. Subclasses should override the plugin_name attribute.
+
+    Use it by subclassing and overriding the plugin_name attribute.
+
+    Example:
+    class PluginPyCStatusView(PluginStatusView):
+        plugin_name = GvsigolPyCAPIConfig.name
+
+    Then use it in the urls.py:
+    path('status/', PluginPyCStatusView.as_view(), name='my-plugin-status'),
+    """
+    permission_classes = (AllowAny,)
+    plugin_name = GvsigolBaseApiConfig.name
+
+    @swagger_auto_schema(
+        operation_summary="Plugin status",
+        operation_description="Returns plugin name and status.",
+        responses={
+            200: openapi.Response(
+                description="OK",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'name': openapi.Schema(type=openapi.TYPE_STRING),
+                        'status': openapi.Schema(type=openapi.TYPE_STRING),
+                    },
+                    required=['name', 'status'],
+                ),
+                examples={
+                    'application/json': {'name': 'gvsigol_plugin_baseapi', 'status': 'ok'}
+                }
+            )
+        },
+        tags=['status']
+    )
+    def get(self, request, *args, **kwargs):
+        data = {
+            'name': self.plugin_name,
+            'status': 'ok'
+        }
+        return Response(data)
