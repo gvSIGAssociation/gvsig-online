@@ -1,0 +1,28 @@
+{% load staticfiles %}
+{% load i18n %}
+{% if user.is_superuser %}
+<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery-3.6.0.min.js" %}"></script>
+<script>
+if ($("#menu-manage-plugins" ).length){
+    $("#menu-manage-plugins ul.treeview-menu").append(
+        '<li id="submenu-catastrord">'+
+        '  <a href="/gvsigonline/catastrord/admin/">'+
+        '    <i class="fa fa-database"></i>{% trans "Catastro RD / Migración SIC" %}'+
+        '  </a>'+
+        '</li>');
+}else{
+    $(".sidebar-menu").append(
+        '<li id="menu-manage-plugins" class="treeview"><a href="#">'+ 
+        '  <i class="fa fa-puzzle-piece"></i> <span>{% trans "Plugins" %}</span>'+ 
+        '  <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>'+ 
+        '</a>'+ 
+        '<ul class="treeview-menu">'+
+        '  <li id="submenu-catastrord">'+
+        '    <a href="/gvsigonline/catastrord/admin/">'+
+        '      <i class="fa fa-database"></i>{% trans "Catastro RD / Migración SIC" %}'+
+        '    </a>'+
+        '  </li>'+
+        '</ul></li>');
+}
+</script>
+{% endif %}
