@@ -1,0 +1,51 @@
+{% load staticfiles %}
+{% load i18n %}
+{% if user.is_superuser %}
+<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery-3.6.0.min.js" %}"></script>
+<script>
+if ($("#menu-manage-plugins" ).length){
+    // Ya existe el menú "Plugins": añadimos nuestra entrada
+    $("#menu-manage-plugins ul.treeview-menu").append(
+        '<li id="submenu-catastrord_admin">'+
+        '  <a href="/gvsigonline/catastrord/admin/">'+
+        '    <i class="fa fa-database"></i>{% trans "Catastro RD / Migración SIC" %}'+
+        '  </a>'+
+        '</li>'
+    );
+} else {
+    // No existe el menú "Plugins": lo creamos y metemos nuestra opción dentro
+    $(".sidebar-menu").append(
+        '<li id="menu-manage-plugins" class="treeview"><a href="#">' +
+        '  <i class="fa fa-puzzle-piece" aria-hidden="true"></i>' +
+        '  <span>{% trans "Plugins" %}</span>' +
+        '  <i class="fa fa-angle-left pull-right"></i></a>' +
+        '  <ul class="treeview-menu">' +
+        '    <li id="submenu-catastrord_admin">' +
+        '      <a href="/gvsigonline/catastrord/admin/">' +
+        '        <i class="fa fa-database"></i>{% trans "Catastro RD / Migración SIC" %}' +
+        '      </a>' +
+        '    </li>' +
+        '  </ul>' +
+        '</li>'
+    );
+}
+
+// Mantener el menú activo cuando estamos en páginas del plugin Catastro RD
+$(document).ready(function() {
+    var currentPath = window.location.pathname;
+    if (currentPath.indexOf('/gvsigonline/catastrord/admin') !== -1) {
+        var pluginsMenu = $('#menu-manage-plugins');
+
+        // Expandir el menú de plugins si no está expandido
+        if (pluginsMenu.length && !pluginsMenu.hasClass('active')) {
+            pluginsMenu.addClass('active');
+            pluginsMenu.find('.treeview-menu').addClass('menu-open').show();
+        }
+
+        // Marcar nuestro submenu como activo
+        $('#submenu-catastrord_admin').addClass('active');
+        pluginsMenu.addClass('active');
+    }
+});
+</script>
+{% endif %}
