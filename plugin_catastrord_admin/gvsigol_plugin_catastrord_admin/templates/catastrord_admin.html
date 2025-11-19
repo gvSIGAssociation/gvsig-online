@@ -54,7 +54,7 @@
                   </button>
                 </div>
 
-                <form id="form-new-project" class="form-inline" style="margin-bottom: 15px;">
+                <form id="form-new-project" class="form-inline" style="margin-bottom: 15px;" method="post">
                   <div class="form-group">
                     <label for="projectType" class="control-label">
                       {% trans "Tipo de proyecto" %}
@@ -107,7 +107,7 @@
                   </button>
                 </div>
 
-                <form id="form-new-application" class="form-inline" style="margin-bottom: 15px;">
+                <form id="form-new-application" class="form-inline" style="margin-bottom: 15px;" method="post">
                   <div class="form-group">
                     <label for="appName" class="control-label">
                       {% trans "Nombre de la aplicación" %}
@@ -158,7 +158,7 @@
                     </h4>
                   </div>
                   <div class="box-body">
-                    <form id="form-migrate-inmuebles">
+                    <form id="form-migrate-inmuebles" method="post">
                       <div class="form-group">
                         <label>{% trans "Provincia (ID de RD_Provincia)" %}</label>
                         <input type="number" name="provincia" class="form-control" required>
@@ -207,7 +207,7 @@
                     </h4>
                   </div>
                   <div class="box-body">
-                    <form id="form-migrate-parcelas">
+                    <form id="form-migrate-parcelas" method="post">
                       <div class="form-group">
                         <label>{% trans "Provincia (ID de RD_Provincia)" %}</label>
                         <input type="number" name="provincia" class="form-control" required>
@@ -238,7 +238,7 @@
                     </h4>
                   </div>
                   <div class="box-body">
-                    <form id="form-migrate-zoning">
+                    <form id="form-migrate-zoning" method="post">
                       <p class="small text-muted">
                         {% trans "Selecciona qué niveles de zonificación migrar desde el esquema 'migration'." %}
                       </p>
@@ -266,7 +266,7 @@
                     </h4>
                   </div>
                   <div class="box-body">
-                    <form id="form-migrate-puntos">
+                    <form id="form-migrate-puntos" method="post">
                       <div class="form-group">
                         <label>{% trans "SRID origen (geom / x,y)" %}</label>
                         <input type="number" name="srid_origen" class="form-control" value="32619">
@@ -309,7 +309,7 @@
                       {% trans "esta operación llama a /catastrord/migrate/delete y borra datos masivamente." %}
                     </p>
 
-                    <form id="form-delete-ladmrd">
+                    <form id="form-delete-ladmrd" method="post">
                       <div class="row">
                         <div class="col-sm-4">
                           <label class="text-bold">{% trans "Parties / Derechos / Restricciones" %}</label>
@@ -373,7 +373,7 @@
                     <p class="small text-muted">
                       {% trans "Llama a /catastrord/enumerations y convierte los codelist de LADM-RD en objetos Enumeration/EnumerationItem." %}
                     </p>
-                    <form id="form-enumerations">
+                    <form id="form-enumerations" method="post">
                       <div class="checkbox">
                         <label>
                           <input type="checkbox" name="override">
@@ -396,8 +396,6 @@
     </div>     <!-- /.box -->
   </div>
 </div>
-
-{% endblock %}
 
 {# ================================================================ #}
 {# JS: llamadas AJAX a tus endpoints                                #}
@@ -681,3 +679,5 @@ $(function () {
 
 });
 </script>
+
+{% endblock %}
