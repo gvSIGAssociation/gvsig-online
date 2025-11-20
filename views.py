@@ -5277,7 +5277,8 @@ def external_layer_add(request):
                             destination.write(chunk)
                     
                     style_file_path = os.path.relpath(style_path, settings.MEDIA_ROOT)
-                    params['style_url'] = settings.MEDIA_URL + style_file_path
+                    params['style_url'] = f'/{settings.GVSIGOL_PATH}/api/v1/layers/{external_layer.id}/mvt-style/{style_file_path}/'
+                    params['style_file_path'] = style_file_path
                 params['srs'] = external_layer.native_srs
             else:
                 external_layer.vector_tile = False
@@ -5433,16 +5434,43 @@ def external_layer_update(request, external_layer_id):
                 if external_layer.external_params:
                     old_params = json.loads(external_layer.external_params)
                 old_style_url = old_params.get('style_url', '')
+                old_style_file_path = old_params.get('style_file_path', '')
                 
                 if style_url:
                     params['style_url'] = style_url
-                    is_external_url = not (style_url.startswith('/media/') or style_url.startswith(settings.MEDIA_URL))
-                    if is_external_url and old_style_url and (old_style_url.startswith('/media/') or old_style_url.startswith(settings.MEDIA_URL)):
-                        _delete_local_style_files_for_layer(external_layer.id)
+                    # Verificar si la URL recibida es la misma que la del endpoint local existente
+                    if old_style_file_path:
+                        expected_local_url = f'/{settings.GVSIGOL_PATH}/api/v1/layers/{external_layer.id}/mvt-style/{old_style_file_path}/'
+                        if style_url == expected_local_url:
+                            # Es la misma URL del endpoint local, mantener el archivo
+                            params['style_file_path'] = old_style_file_path
+                        else:
+                            # Es una URL externa nueva, eliminar archivo local si existía
+                            _delete_local_style_file(old_style_file_path)
+                    else:
+                        # No hay style_file_path guardado (capa antigua), intentar extraerlo de la URL
+                        extracted_path = _extract_style_file_path_from_url(style_url, external_layer.id)
+                        if extracted_path:
+                            # Verificar que el archivo existe antes de guardarlo
+                            file_path = os.path.join(settings.MEDIA_ROOT, extracted_path)
+                            if os.path.exists(file_path):
+                                # Es un archivo local antiguo, actualizar URL al formato nuevo y guardar path
+                                params['style_file_path'] = extracted_path
+                                params['style_url'] = f'/{settings.GVSIGOL_PATH}/api/v1/layers/{external_layer.id}/mvt-style/{extracted_path}/'
+                            # Si el archivo no existe, no guardar style_file_path (es URL externa)
                 
                 elif style_file:
-                    if old_style_url and (old_style_url.startswith('/media/') or old_style_url.startswith(settings.MEDIA_URL)):
-                        _delete_local_style_files_for_layer(external_layer.id)
+                    if old_style_file_path:
+                        _delete_local_style_file(old_style_file_path)
+                    elif old_style_url:
+                        # Caso antiguo: no tiene style_file_path pero puede tener URL local
+                        # Intentar extraer el path de la URL antigua
+                        old_extracted_path = _extract_style_file_path_from_url(old_style_url, external_layer.id)
+                        if old_extracted_path:
+                            # Verificar que el archivo existe antes de borrarlo
+                            old_file_path = os.path.join(settings.MEDIA_ROOT, old_extracted_path)
+                            if os.path.exists(old_file_path):
+                                _delete_local_style_file(old_extracted_path)
                     
                     style_dir = os.path.join(settings.MEDIA_ROOT, 'layer_styles')
                     if not os.path.exists(style_dir):
@@ -5456,7 +5484,8 @@ def external_layer_update(request, external_layer_id):
                             destination.write(chunk)
                     
                     style_file_path = os.path.relpath(style_path, settings.MEDIA_ROOT)
-                    params['style_url'] = settings.MEDIA_URL + style_file_path
+                    params['style_url'] = f'/{settings.GVSIGOL_PATH}/api/v1/layers/{external_layer.id}/mvt-style/{style_file_path}/'
+                    params['style_file_path'] = style_file_path
                 params['srs'] = external_layer.native_srs
             else:
                 external_layer.vector_tile = False
@@ -5534,25 +5563,55 @@ def external_layer_update(request, external_layer_id):
 
 
 
-def _delete_local_style_files_for_layer(layer_id):
+def _extract_style_file_path_from_url(style_url, layer_id):
     """
-    Elimina todos los archivos de estilo locales asociados a una capa específica.
-    Busca archivos que empiecen por style_{layer_id}_ en el directorio layer_styles.
+    Extrae la ruta del archivo de estilo desde una URL.
+
+    """
+    if not style_url:
+        return None
     
-    Args:
-        layer_id: ID de la capa cuyos archivos de estilo se eliminarán
+    endpoint_pattern = f'/{settings.GVSIGOL_PATH}/api/v1/layers/{layer_id}/mvt-style/'
+    if endpoint_pattern in style_url:
+        path = style_url.split(endpoint_pattern)[1].rstrip('/')
+        return path if path else None
+    
+    if style_url.startswith('/media/'):
+        path = style_url.replace('/media/', '')
+        return path if path else None
+    
+    if style_url.startswith(settings.MEDIA_URL):
+        path = style_url.replace(settings.MEDIA_URL, '')
+        return path if path else None
+    
+    return None
+
+def _delete_local_style_file(style_file_path=None, layer_id=None):
+    """
+    Elimina archivo(s) de estilo local.    
+    Si se proporciona style_file_path, elimina ese archivo específico.
+    Si se proporciona layer_id, elimina todos los archivos del layer que empiecen por style_{layer_id}_.
     """
     try:
-        style_dir = os.path.join(settings.MEDIA_ROOT, 'layer_styles')
-        if os.path.exists(style_dir):
-            prefix = f'style_{layer_id}_'
-            for filename in os.listdir(style_dir):
-                if filename.startswith(prefix):
-                    file_path = os.path.join(style_dir, filename)
-                    os.remove(file_path)
-                    logger.info(f"Deleted old style file: {file_path}")
+        if style_file_path:
+            file_path = os.path.join(settings.MEDIA_ROOT, style_file_path)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                logger.info(f"Deleted style file: {file_path}")
+        elif layer_id:
+            style_dir = os.path.join(settings.MEDIA_ROOT, 'layer_styles')
+            if os.path.exists(style_dir):
+                prefix = f'style_{layer_id}_'
+                for filename in os.listdir(style_dir):
+                    if filename.startswith(prefix):
+                        file_path = os.path.join(style_dir, filename)
+                        os.remove(file_path)
+                        logger.info(f"Deleted style file: {file_path}")
     except Exception as e:
-        logger.warning(f"Error deleting old style files for layer {layer_id}: {str(e)}")
+        if style_file_path:
+            logger.warning(f"Error deleting style file {style_file_path}: {str(e)}")
+        elif layer_id:
+            logger.warning(f"Error deleting style files for layer {layer_id}: {str(e)}")
 
 @login_required()
 @require_POST
@@ -5569,7 +5628,7 @@ def external_layer_delete(request, external_layer_id):
                 geowebcache.get_instance().delete_layer(None, external_layer, server, master_node.getUrl())
             geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
 
-        _delete_local_style_files_for_layer(external_layer_id)
+        _delete_local_style_file(layer_id=external_layer_id)
 
         external_layer.delete()
         return redirect('external_layer_list')
@@ -5577,7 +5636,7 @@ def external_layer_delete(request, external_layer_id):
     except Exception as e:
         if e.server_message:
             if 'Unknown layer' in e.server_message:
-                _delete_local_style_files_for_layer(external_layer_id)
+                _delete_local_style_file(layer_id=external_layer_id)
                 
                 external_layer.delete()
                 return redirect('external_layer_list')
