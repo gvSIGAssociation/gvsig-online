@@ -160,8 +160,14 @@
                   <div class="box-body">
                     <form id="form-migrate-inmuebles" method="post">
                       <div class="form-group">
-                        <label>{% trans "Provincia (código)" %}</label>
-                        <input type="text" name="provincia" class="form-control" value="01" required>
+                        <label>{% trans "Provincia" %}</label>
+                        {# SELECT que envía nationalCadastralZoningReference como 'provincia' #}
+                        <select name="provincia" id="provincia-inmuebles" class="form-control" required>
+                          <option value="">{% trans "Seleccione una provincia..." %}</option>
+                        </select>
+                        <p class="help-block small">
+                          {% trans "Se enviará el código nationalCadastralZoningReference (ej: 01, 02, 30) al backend." %}
+                        </p>
                       </div>
                       <div class="form-group">
                         <label>{% trans "Municipio (código)" %}</label>
@@ -177,7 +183,7 @@
                       </div>
                       <div class="form-group">
                         <label>{% trans "Sector/Barrio (código)" %}</label>
-                        <input type="text" name="sector" class="form-control" value="01">
+                        <input type="text" name="sector" class="form-control" value="24">
                       </div>
                       <div class="form-group">
                         <label>{% trans "Sub-barrio (código)" %}</label>
@@ -185,7 +191,7 @@
                       </div>
                       <div class="form-group">
                         <label>{% trans "Manzana física (código)" %}</label>
-                        <input type="text" name="manzana" class="form-control" value="01">
+                        <input type="text" name="manzana" class="form-control" value="029">
                       </div>
 
                       <button type="submit" class="btn btn-primary">
@@ -209,8 +215,12 @@
                   <div class="box-body">
                     <form id="form-migrate-parcelas" method="post">
                       <div class="form-group">
-                        <label>{% trans "Provincia (código)" %}</label>
-                        <input type="text" name="provincia" class="form-control" value="01" required>
+                        <label>{% trans "Provincia" %}</label>
+                        <select name="provincia" id="provincia-parcelas" class="form-control" required>
+                          <option value="">{% trans "Seleccione una provincia..." %}</option>
+                        </select>
+                        <p class="help-block small">
+                        </p>
                       </div>
                       <div class="checkbox">
                         <label>
@@ -570,11 +580,58 @@ $(function () {
     });
   });
 
+  /* ====================== CARGAR PROVINCIAS (zoning1) ====================== */
+
+  function loadProvincias() {
+    var $selInm = $("#provincia-inmuebles");
+    var $selParc = $("#provincia-parcelas");
+
+    // Limpia y deja el placeholder
+    $selInm.empty().append('<option value="">{% trans "Seleccione una provincia..." %}</option>');
+    $selParc.empty().append('<option value="">{% trans "Seleccione una provincia..." %}</option>');
+
+    $.getJSON(BASE + "zoning1/", function(data) {
+      var results = data.results || data; // por si no va paginado
+
+      var provincias = $.grep(results, function(r) {
+        return r.levelName === "Provincia";
+      });
+
+      // Orden por nationalCadastralZoningReference
+      provincias.sort(function(a, b) {
+        return (a.nationalCadastralZoningReference || "").localeCompare(
+          b.nationalCadastralZoningReference || "",
+          "es",
+          { numeric: true }
+        );
+      });
+
+      $.each(provincias, function(idx, p) {
+        var code = p.nationalCadastralZoningReference;
+        var name = p.name;
+        // IMPORTANTE: value = nationalCadastralZoningReference
+        var optHtml = '<option value="' + p.id + '" data-code="' + code + '">[' + code + '] ' + name + "</option>";
+        $selInm.append(optHtml);
+        $selParc.append(optHtml);
+      });
+
+      showToast("success", "Provincias cargadas correctamente.");
+    }).fail(function(xhr) {
+      showToast("error", "Error cargando provincias (zoning1): " + xhr.responseText);
+    });
+  }
+
   /* ====================== MIGRACIONES ====================== */
 
   $("#form-migrate-inmuebles").on("submit", function(e) {
     e.preventDefault();
     var form = $(this);
+
+    if (!$("#provincia-inmuebles").val()) {
+      alert("{% trans 'Debe seleccionar una provincia.' %}");
+      return;
+    }
+
     var data = form.serialize();
     $("#log-migrate-inmuebles").text("Ejecutando migración...");
     $.post(BASE + "migrate/inmuebles", data)
@@ -590,6 +647,12 @@ $(function () {
 
   $("#form-migrate-parcelas").on("submit", function(e) {
     e.preventDefault();
+
+    if (!$("#provincia-parcelas").val()) {
+      alert("{% trans 'Debe seleccionar una provincia.' %}");
+      return;
+    }
+
     var data = $(this).serialize();
     $("#log-migrate-parcelas").text("Ejecutando migración de parcelas...");
     $.post(BASE + "migrate/parcelas", data)
@@ -675,6 +738,7 @@ $(function () {
 
   loadProjects();
   loadApplications();
+  loadProvincias();  // <- aquí cargamos las provincias en los selects
 
 });
 </script>
