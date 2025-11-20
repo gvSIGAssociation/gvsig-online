@@ -640,8 +640,22 @@ $(function () {
         $("#log-migrate-inmuebles").text(resp);
       })
       .fail(function(xhr) {
-        showToast("error", "Error en migración de inmuebles.");
-        $("#log-migrate-inmuebles").text(xhr.responseText);
+        if (xhr.status === 504) {
+          // Caso típico: Nginx se cansó de esperar, pero el servidor sigue trabajando
+          showToast(
+            "success",
+            "La migración de inmuebles sigue ejecutándose en segundo plano. " +
+            "El servidor tardó demasiado en responder (504), pero el proceso continúa."
+          );
+          $("#log-migrate-inmuebles").text(
+            "⚠️ El servidor devolvió 504 (Gateway Time-out).\n" +
+            "Es muy probable que la migración siga ejecutándose en el servidor.\n" +
+            "Revisa los logs o el visor de datos para confirmar cuando termine."
+          );
+        } else {
+          showToast("error", "Error en migración de inmuebles.");
+          $("#log-migrate-inmuebles").text(xhr.responseText);
+        }
       });
   });
 
