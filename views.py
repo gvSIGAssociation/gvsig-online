@@ -5277,8 +5277,7 @@ def external_layer_add(request):
                             destination.write(chunk)
                     
                     style_file_path = os.path.relpath(style_path, settings.MEDIA_ROOT)
-                    params['style_url'] = f'/{settings.GVSIGOL_PATH}/api/v1/layers/{external_layer.id}/mvt-style/{style_file_path}/'
-                    params['style_file_path'] = style_file_path
+                    params['style_file_url'] = f'/{settings.GVSIGOL_PATH}/api/v1/layers/{external_layer.id}/mvt-style/{style_file_path}/'
                 params['srs'] = external_layer.native_srs
             else:
                 external_layer.vector_tile = False
@@ -5434,43 +5433,59 @@ def external_layer_update(request, external_layer_id):
                 if external_layer.external_params:
                     old_params = json.loads(external_layer.external_params)
                 old_style_url = old_params.get('style_url', '')
-                old_style_file_path = old_params.get('style_file_path', '')
+                old_style_file_url = old_params.get('style_file_url', '')
                 
                 if style_url:
-                    params['style_url'] = style_url
-                    # Verificar si la URL recibida es la misma que la del endpoint local existente
-                    if old_style_file_path:
-                        expected_local_url = f'/{settings.GVSIGOL_PATH}/api/v1/layers/{external_layer.id}/mvt-style/{old_style_file_path}/'
-                        if style_url == expected_local_url:
-                            # Es la misma URL del endpoint local, mantener el archivo
-                            params['style_file_path'] = old_style_file_path
-                        else:
-                            # Es una URL externa nueva, eliminar archivo local si existía
-                            _delete_local_style_file(old_style_file_path)
-                    else:
-                        # No hay style_file_path guardado (capa antigua), intentar extraerlo de la URL
+                    is_old_file_url = old_style_url and (old_style_url.startswith('/media/') or old_style_url.startswith(settings.MEDIA_URL))
+                    
+                    if is_old_file_url:
                         extracted_path = _extract_style_file_path_from_url(style_url, external_layer.id)
                         if extracted_path:
-                            # Verificar que el archivo existe antes de guardarlo
-                            file_path = os.path.join(settings.MEDIA_ROOT, extracted_path)
-                            if os.path.exists(file_path):
-                                # Es un archivo local antiguo, actualizar URL al formato nuevo y guardar path
-                                params['style_file_path'] = extracted_path
-                                params['style_url'] = f'/{settings.GVSIGOL_PATH}/api/v1/layers/{external_layer.id}/mvt-style/{extracted_path}/'
-                            # Si el archivo no existe, no guardar style_file_path (es URL externa)
+                            params['style_file_url'] = f'/{settings.GVSIGOL_PATH}/api/v1/layers/{external_layer.id}/mvt-style/{extracted_path}/'
+                            params.pop('style_url', None)
+                            if old_style_url and old_style_url != style_url:
+                                old_extracted_path = _extract_style_file_path_from_url(old_style_url, external_layer.id)
+                                if old_extracted_path and old_extracted_path != extracted_path:
+                                    _delete_local_style_file(style_file_path=old_extracted_path)
+                        else:
+                            # Cambio a URL externa: borrar el archivo local si existe
+                            params['style_url'] = style_url
+                            params.pop('style_file_url', None)
+                            if old_style_url:
+                                old_extracted_path = _extract_style_file_path_from_url(old_style_url, external_layer.id)
+                                if old_extracted_path:
+                                    _delete_local_style_file(style_file_path=old_extracted_path)
+                    else:
+                        # Verificar si es URL nueva del endpoint o externa
+                        extracted_path = _extract_style_file_path_from_url(style_url, external_layer.id)
+                        if extracted_path:
+                            params['style_file_url'] = style_url
+                            params.pop('style_url', None)
+                            if old_style_file_url and old_style_file_url != params['style_file_url']:
+                                _delete_local_style_file(style_file_url=old_style_file_url, layer_id=external_layer.id)
+                        else:
+                            # La URL recibida es externa
+                            params['style_url'] = style_url
+                            params.pop('style_file_url', None)
+                            if old_style_file_url:
+                                _delete_local_style_file(style_file_url=old_style_file_url, layer_id=external_layer.id)
+                            elif old_style_url:
+                               # Capa antigua: verificar si old_style_url es de archivo local
+                                old_extracted_path = _extract_style_file_path_from_url(old_style_url, external_layer.id)
+                                if old_extracted_path:
+                                    _delete_local_style_file(style_file_path=old_extracted_path)
                 
                 elif style_file:
-                    if old_style_file_path:
-                        _delete_local_style_file(old_style_file_path)
+                    if old_style_file_url:
+                        _delete_local_style_file(style_file_url=old_style_file_url, layer_id=external_layer.id)
                     elif old_style_url:
-                        # Caso antiguo: no tiene style_file_path pero puede tener URL local
-                        # Intentar extraer el path de la URL antigua
+                        # Capa antigua: verificar si old_style_url es de archivo local
                         old_extracted_path = _extract_style_file_path_from_url(old_style_url, external_layer.id)
                         if old_extracted_path:
-                            # Verificar que el archivo existe antes de borrarlo
                             old_file_path = os.path.join(settings.MEDIA_ROOT, old_extracted_path)
+                            old_file_path = os.path.normpath(old_file_path)
                             if os.path.exists(old_file_path):
-                                _delete_local_style_file(old_extracted_path)
+                                _delete_local_style_file(style_file_path=old_extracted_path)
                     
                     style_dir = os.path.join(settings.MEDIA_ROOT, 'layer_styles')
                     if not os.path.exists(style_dir):
@@ -5484,8 +5499,7 @@ def external_layer_update(request, external_layer_id):
                             destination.write(chunk)
                     
                     style_file_path = os.path.relpath(style_path, settings.MEDIA_ROOT)
-                    params['style_url'] = f'/{settings.GVSIGOL_PATH}/api/v1/layers/{external_layer.id}/mvt-style/{style_file_path}/'
-                    params['style_file_path'] = style_file_path
+                    params['style_file_url'] = f'/{settings.GVSIGOL_PATH}/api/v1/layers/{external_layer.id}/mvt-style/{style_file_path}/'
                 params['srs'] = external_layer.native_srs
             else:
                 external_layer.vector_tile = False
@@ -5531,6 +5545,9 @@ def external_layer_update(request, external_layer_id):
             params = json.loads(external_layer.external_params)
             for key in params:
                 form.initial[key] = params[key]
+            # Si hay style_file_url, mostrarlo en el campo style_url del formulario
+            if 'style_file_url' in params and params['style_file_url']:
+                form.initial['style_url'] = params['style_file_url']
     
         if external_layer.native_srs:
             from gvsigol_services.forms_services import supported_srs
@@ -5586,13 +5603,16 @@ def _extract_style_file_path_from_url(style_url, layer_id):
     
     return None
 
-def _delete_local_style_file(style_file_path=None, layer_id=None):
+def _delete_local_style_file(style_file_path=None, style_file_url=None, layer_id=None):
     """
-    Elimina archivo(s) de estilo local.    
-    Si se proporciona style_file_path, elimina ese archivo específico.
-    Si se proporciona layer_id, elimina todos los archivos del layer que empiecen por style_{layer_id}_.
+    Elimina archivo(s) de estilo local.
     """
     try:
+        if style_file_url:
+            extracted_path = _extract_style_file_path_from_url(style_file_url, layer_id if layer_id else 0)
+            if extracted_path:
+                style_file_path = extracted_path
+        
         if style_file_path:
             file_path = os.path.join(settings.MEDIA_ROOT, style_file_path)
             if os.path.exists(file_path):
