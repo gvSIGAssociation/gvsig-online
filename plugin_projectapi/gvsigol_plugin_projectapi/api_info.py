@@ -95,6 +95,16 @@ class ProjectConfView(ListAPIView):
                 except Exception:
                     raise HttpException(400, "Bad parameter project. The value must be a integer") 
             
+            if 'projectname' in self.request.GET and projectid == 0:
+                projectname = self.request.GET['projectname']
+                try:
+                    project = Project.objects.get(name=projectname)
+                    projectid = project.id
+                except Project.DoesNotExist:
+                    raise HttpException(404, "Project not found")
+                except Exception as e:
+                    raise HttpException(400, f"Error resolving project name: {str(e)}") 
+            
             mobile = False
             if 'mobile' in self.request.GET:
                 try:
@@ -156,6 +166,16 @@ class PublicProjectConfView(ListAPIView):
                     projectid = int(self.request.GET['projectid'])
                 except Exception:
                     raise HttpException(400, "Bad parameter project. The value must be a integer") 
+            
+            if 'projectname' in self.request.GET and projectid == 0:
+                projectname = self.request.GET['projectname']
+                try:
+                    project = Project.objects.get(name=projectname)
+                    projectid = project.id
+                except Project.DoesNotExist:
+                    raise HttpException(404, "Project not found")
+                except Exception as e:
+                    raise HttpException(400, f"Error resolving project name: {str(e)}") 
             
             mobile = False
             if 'mobile' in self.request.GET:
