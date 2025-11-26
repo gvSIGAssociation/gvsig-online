@@ -22,19 +22,27 @@ def get_default_project_image():
 def get_default_application_image():
     return settings.STATIC_URL + 'img/no_project.png'
 
-def _get_spa_project_url(projectid):
+def _get_spa_project_url(projectid, projectname=None):
     if settings.FRONTEND_BASE_URL.endswith('/'):
         frontend_base_url = settings.FRONTEND_BASE_URL[:-1]
     else:
         frontend_base_url = settings.FRONTEND_BASE_URL
-    return urljoin(frontend_base_url + "/viewer/", quote(str(projectid) + "/"))
+    
+    if projectname:
+        return urljoin(frontend_base_url + "/v/", quote(projectname) + "/")
+    else:
+        return urljoin(frontend_base_url + "/viewer/", quote(str(projectid) + "/"))
 
-def _get_spa_mobileproject_url(projectid):
+def _get_spa_mobileproject_url(projectid, projectname=None):
     if settings.FRONTEND_BASE_URL.endswith('/'):
         frontend_base_url = settings.FRONTEND_BASE_URL[:-1]
     else:
         frontend_base_url = settings.FRONTEND_BASE_URL
-    return urljoin(frontend_base_url + "/viewer/mobile/", quote(str(projectid) + "/"))
+    
+    if projectname:
+        return urljoin(frontend_base_url + "/v/mobile/", quote(projectname) + "/")
+    else:
+        return urljoin(frontend_base_url + "/viewer/mobile/", quote(str(projectid) + "/"))
 
 
 class Project(models.Model):
@@ -224,7 +232,7 @@ class Project(models.Model):
             preferred_ui = settings.FALLBACK_VIEWER_UI
 
         if preferred_ui == Project.REACT_SPA_UI:
-            return _get_spa_project_url(self.id)
+            return _get_spa_project_url(self.id, self.name)
         else:
             return settings.BASE_URL + reverse('load', kwargs={'project_name': self.name})
     
@@ -236,7 +244,7 @@ class Project(models.Model):
             preferred_ui = settings.FALLBACK_VIEWER_UI
 
         if preferred_ui == Project.REACT_SPA_UI:
-            return _get_spa_mobileproject_url(self.id)
+            return _get_spa_mobileproject_url(self.id, self.name)
         else:
             return settings.BASE_URL + reverse('load', kwargs={'project_name': self.name})
 

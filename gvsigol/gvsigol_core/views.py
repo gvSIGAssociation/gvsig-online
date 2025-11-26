@@ -112,6 +112,7 @@ def home(request):
         project['description'] = p.description
         project['image'] = unquote(image)
         project['url'] = p.url
+        project['viewer_preferred_ui'] = p.viewer_preferred_ui if p.viewer_preferred_ui else settings.FALLBACK_VIEWER_UI
 
         if p.is_public:
             public_projects.append(project)
