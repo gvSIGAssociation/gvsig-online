@@ -1292,6 +1292,13 @@ msgstr ""
 msgid " manual desc"
 msgstr ""
 
+#: Manual del plugin catalog
+msgid "gvsigol_plugin_catalog manual title"
+msgstr "Plugin Catàleg"
+
+msgid "gvsigol_plugin_catalog manual desc"
+msgstr "Manual del plugin de catàleg de metadades de gvSIG Online"
+
 #: gvsigol_core/views.py:1569 gvsigol_core/views.py:1571
 msgid "Shared view"
 msgstr "Vista compartida"
