@@ -28,10 +28,11 @@ def _get_spa_project_url(projectid, projectname=None):
     else:
         frontend_base_url = settings.FRONTEND_BASE_URL
     
-    if projectname:
-        return urljoin(frontend_base_url + "/v/", quote(projectname) + "/")
-    else:
-        return urljoin(frontend_base_url + "/viewer/", quote(str(projectid) + "/"))
+    # if projectname:
+    #     return urljoin(frontend_base_url + "/v/", quote(projectname) + "/")
+    # else:
+    #     return urljoin(frontend_base_url + "/viewer/", quote(str(projectid) + "/"))
+    return urljoin(frontend_base_url + "/viewer/", quote(str(projectid) + "/"))
 
 def _get_spa_mobileproject_url(projectid, projectname=None):
     if settings.FRONTEND_BASE_URL.endswith('/'):
@@ -39,10 +40,12 @@ def _get_spa_mobileproject_url(projectid, projectname=None):
     else:
         frontend_base_url = settings.FRONTEND_BASE_URL
     
-    if projectname:
-        return urljoin(frontend_base_url + "/v/mobile/", quote(projectname) + "/")
-    else:
-        return urljoin(frontend_base_url + "/viewer/mobile/", quote(str(projectid) + "/"))
+    # if projectname:
+    #     return urljoin(frontend_base_url + "/v/mobile/", quote(projectname) + "/")
+    # else:
+    #     return urljoin(frontend_base_url + "/viewer/mobile/", quote(str(projectid) + "/"))
+    return urljoin(frontend_base_url + "/viewer/mobile/", quote(str(projectid) + "/"))
+
 
 
 class Project(models.Model):
