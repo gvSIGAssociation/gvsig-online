@@ -260,7 +260,7 @@
           					<div class="box-body">
           						<div class="row">
 	          						<div class="col-md-6 form-group">
-	          							{% if layer.detailed_info_enabled %}
+	          							{% if external_layer.detailed_info_enabled %}
 	          							<input type="checkbox" name="detailed_info_enabled" id="detailed_info_enabled" checked/>
 	          							{% else %}
 	          							<input type="checkbox" name="detailed_info_enabled" id="detailed_info_enabled"/>
@@ -268,25 +268,25 @@
 										<label for="detailed_info_enabled">{% trans "Enable metaquality" %}</label>
 									</div>
 								</div>
-								{% if layer.detailed_info_enabled %}
+								{% if external_layer.detailed_info_enabled %}
 	          					<div class="row" id="detailed_info_button_title-row">
 	          					{% else %}
 	          					<div style="display: none;" class="row" id="detailed_info_button_title-row">
 	          					{% endif %}
 									<div class="col-md-12 form-group">
 										<label for="detailed_info_button_title">{% trans "Button title in the TOC" %}</label>
-										<input value="{{layer.detailed_info_button_title}}" placeholder="{% trans 'Button title' %}" name="detailed_info_button_title" id="detailed_info_button_title" value="{% trans "Detailed info" %}" type="text" class="form-control">
+										<input value="{{external_layer.detailed_info_button_title}}" placeholder="{% trans 'Button title' %}" name="detailed_info_button_title" id="detailed_info_button_title" type="text" class="form-control">
 									</div>
 								</div>
-								{% if layer.detailed_info_enabled %}
+								{% if external_layer.detailed_info_enabled %}
 								<div class="row" id="detailed_info_html-row">
 								{% else %}
 								<div style="display: none;" class="row" id="detailed_info_html-row">
 								{% endif %}
 									<div class="col-md-12 form-group">
 										<label for="detailed_info_html">{% trans "HTML" %}</label>
-										{% if layer.detailed_info_html != None %}
-										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5">{{layer.detailed_info_html}}</textarea>
+										{% if external_layer.detailed_info_html != None %}
+										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5">{{external_layer.detailed_info_html}}</textarea>
 										{% else %}
 										<textarea class="form-control" name="detailed_info_html" id="detailed_info_html" rows="5"></textarea>
 										{% endif %}
