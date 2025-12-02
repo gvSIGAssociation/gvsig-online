@@ -64,9 +64,11 @@ if (viewer.core.ifToolInConf('gvsigol_plugin_catalog')) {
 }
 
 $(document).ready(function() {
-	var map = viewer.core.getMap();	
-	var tool = new SearchFeaturesInCatalog(map, {});
-	viewer.core.loadTool(tool);
+	var map = viewer.core.getMap();
+	// Desactivado temporalmente: la herramienta de búsqueda en catálogo desde features vectoriales
+	// no funciona correctamente, por lo que no se carga el botón en la barra.
+	// var tool = new SearchFeaturesInCatalog(map, {});
+	// viewer.core.loadTool(tool);
 });
 })();
 </script>
