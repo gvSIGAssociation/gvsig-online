@@ -53,6 +53,7 @@ class LayerSerializer(serializers.ModelSerializer):
     external_tilematrixset = serializers.SerializerMethodField('get_external_tilematrixset_')
     workspace = serializers.SerializerMethodField('get_layer_workspace_')
     writable = serializers.SerializerMethodField('is_writable')
+    is_view = serializers.SerializerMethodField('get_is_view')
     public = serializers.SerializerMethodField('is_public')
     service_version = serializers.SerializerMethodField('get_external_service_version')
     description = serializers.SerializerMethodField('get_description_')
@@ -209,13 +210,41 @@ class LayerSerializer(serializers.ModelSerializer):
     def is_writable(self, obj):
         try:
             if(obj.external):
-                return False  
+                return False
+            
+            # Verificar si es una vista de PostgreSQL - las vistas no son editables
+            if obj.type == 'v_PostGIS' and obj.datastore:
+                try:
+                    i, params = obj.datastore.get_db_connection()
+                    schema = params.get('schema', 'public')
+                    table_name = obj.source_name if obj.source_name else obj.name
+                    with i as con:
+                        if con.is_view(schema, table_name):
+                            return False
+                except Exception:
+                    pass
+            
             if self.context.get('request'):
                 return services_utils.can_write_layer(self.context['request'], obj)
             else:
                 return False
         except Exception:
             return False
+
+    def get_is_view(self, obj):
+        """
+        Determina si la capa proviene de una vista de PostgreSQL
+        """
+        try:
+            if obj.type == 'v_PostGIS' and obj.datastore:
+                i, params = obj.datastore.get_db_connection()
+                schema = params.get('schema', 'public')
+                table_name = obj.source_name if obj.source_name else obj.name
+                with i as con:
+                    return con.is_view(schema, table_name)
+        except Exception:
+            pass
+        return False
 
     def is_public(self, obj):
         try:
@@ -392,7 +421,7 @@ class LayerSerializer(serializers.ModelSerializer):
         
     class Meta:
         model = Layer
-        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'real_time', 'vector_tile', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'public', 'external', 'service_version', 'description', 'wms_url', 'wfs_url', 'cache_url', 'legend_url', 'baselayer', 'default_baselayer', 'order', 'external_params', 'featureapi_endpoint', 'time_enabled', 'allow_download', 'detailed_info_button_title' ,'detailed_info_enabled' ,'detailed_info_html']
+        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'real_time', 'vector_tile', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'is_view', 'public', 'external', 'service_version', 'description', 'wms_url', 'wfs_url', 'cache_url', 'legend_url', 'baselayer', 'default_baselayer', 'order', 'external_params', 'featureapi_endpoint', 'time_enabled', 'allow_download', 'detailed_info_button_title' ,'detailed_info_enabled' ,'detailed_info_html']
 
 
 class LayerGroupSerializer(serializers.ModelSerializer):
