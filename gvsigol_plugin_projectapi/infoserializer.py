@@ -137,9 +137,7 @@ class LayerSerializer(serializers.ModelSerializer):
                     ordered_field_names = list(fields_dict.keys())
                 
                 # añade campos que están en la BD pero no en conf (como wkb_geometry)
-                # pero solo si no están ya en ordered_field_names para evitar duplicados
-                ordered_field_names_set = set(ordered_field_names)
-                ordered_field_names.extend([f for f in missing_fields if f not in ordered_field_names_set])
+                ordered_field_names.extend(list(missing_fields))
 
                 enumeration_fields = []
                 for field_name in ordered_field_names:
@@ -212,14 +210,14 @@ class LayerSerializer(serializers.ModelSerializer):
             if(obj.external):
                 return False
             
-            # Verificar si es una vista de PostgreSQL - las vistas no son editables
+            # Verificar si es una vista o vista materializada de PostgreSQL - no son editables
             if obj.type == 'v_PostGIS' and obj.datastore:
                 try:
                     i, params = obj.datastore.get_db_connection()
                     schema = params.get('schema', 'public')
                     table_name = obj.source_name if obj.source_name else obj.name
                     with i as con:
-                        if con.is_view(schema, table_name):
+                        if con.is_view(schema, table_name) or con.is_materialized_view(schema, table_name):
                             return False
                 except Exception:
                     pass
@@ -233,7 +231,7 @@ class LayerSerializer(serializers.ModelSerializer):
 
     def get_is_view(self, obj):
         """
-        Determina si la capa proviene de una vista de PostgreSQL
+        Determina si la capa proviene de una vista o vista materializada de PostgreSQL
         """
         try:
             if obj.type == 'v_PostGIS' and obj.datastore:
@@ -241,7 +239,7 @@ class LayerSerializer(serializers.ModelSerializer):
                 schema = params.get('schema', 'public')
                 table_name = obj.source_name if obj.source_name else obj.name
                 with i as con:
-                    return con.is_view(schema, table_name)
+                    return con.is_view(schema, table_name) or con.is_materialized_view(schema, table_name)
         except Exception:
             pass
         return False
