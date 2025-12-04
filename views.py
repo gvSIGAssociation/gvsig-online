@@ -1228,71 +1228,106 @@ def layer_add_with_group(request, layergroup_id):
                 server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
                 # first create the resource on the backend
                 do_add_layer(server, datastore, form.cleaned_data['name'], form.cleaned_data['title'], is_queryable, extraParams)
+                
+                newRecord = None
+                layer_id = None
+                try:
+                    # Generar abstract estructurado si no existe
+                    if not abstract:
+                        abstract = _get_default_abstract(datastore.type, form.cleaned_data['title'])
 
-                # Generar abstract estructurado si no existe
-                if not abstract:
-                    abstract = _get_default_abstract(datastore.type, form.cleaned_data['title'])
+                    # save it on DB if successfully created
+                    del form.cleaned_data['format']
+                    newRecord = Layer(**form.cleaned_data)
+                    if not newRecord.source_name:
+                        newRecord.source_name = newRecord.name
+                    newRecord.external = False
+                    newRecord.created_by = request.user.username
+                    newRecord.type = datastore.type
+                    newRecord.visible = is_visible
+                    newRecord.queryable = is_queryable
+                    newRecord.allow_download = allow_download
+                    newRecord.cached = cached
+                    newRecord.single_image = single_image
+                    newRecord.abstract = abstract
+                    newRecord.time_enabled = time_enabled
+                    newRecord.time_enabled_field = time_field
+                    newRecord.time_enabled_endfield = time_endfield
+                    newRecord.time_presentation = time_presentation
+                    newRecord.time_resolution_year = time_resolution_year
+                    newRecord.time_resolution_month = time_resolution_month
+                    newRecord.time_resolution_week = time_resolution_week
+                    newRecord.time_resolution_day = time_resolution_day
+                    newRecord.time_resolution_hour = time_resolution_hour
+                    newRecord.time_resolution_minute = time_resolution_minute
+                    newRecord.time_resolution_second = time_resolution_second
+                    newRecord.time_default_value_mode = time_default_value_mode
+                    newRecord.time_default_value = time_default_value
+                    newRecord.time_resolution = time_resolution
+                    newRecord.detailed_info_enabled = detailed_info_enabled
+                    newRecord.detailed_info_button_title = detailed_info_button_title
+                    newRecord.detailed_info_html = detailed_info_html
+                    newRecord.timeout = request.POST.get('timeout')
+                    newRecord.real_time = real_time
+                    newRecord.vector_tile = vector_tile
+                    newRecord.update_interval = request.POST.get('update_interval')
 
-                # save it on DB if successfully created
-                del form.cleaned_data['format']
-                newRecord = Layer(**form.cleaned_data)
-                if not newRecord.source_name:
-                    newRecord.source_name = newRecord.name
-                newRecord.external = False
-                newRecord.created_by = request.user.username
-                newRecord.type = datastore.type
-                newRecord.visible = is_visible
-                newRecord.queryable = is_queryable
-                newRecord.allow_download = allow_download
-                newRecord.cached = cached
-                newRecord.single_image = single_image
-                newRecord.abstract = abstract
-                newRecord.time_enabled = time_enabled
-                newRecord.time_enabled_field = time_field
-                newRecord.time_enabled_endfield = time_endfield
-                newRecord.time_presentation = time_presentation
-                newRecord.time_resolution_year = time_resolution_year
-                newRecord.time_resolution_month = time_resolution_month
-                newRecord.time_resolution_week = time_resolution_week
-                newRecord.time_resolution_day = time_resolution_day
-                newRecord.time_resolution_hour = time_resolution_hour
-                newRecord.time_resolution_minute = time_resolution_minute
-                newRecord.time_resolution_second = time_resolution_second
-                newRecord.time_default_value_mode = time_default_value_mode
-                newRecord.time_default_value = time_default_value
-                newRecord.time_resolution = time_resolution
-                newRecord.detailed_info_enabled = detailed_info_enabled
-                newRecord.detailed_info_button_title = detailed_info_button_title
-                newRecord.detailed_info_html = detailed_info_html
-                newRecord.timeout = request.POST.get('timeout')
-                newRecord.real_time = real_time
-                newRecord.vector_tile = vector_tile
-                newRecord.update_interval = request.POST.get('update_interval')
+                    params = {}
+                    params['format'] = request.POST.get('format')
+                    newRecord.external_params = json.dumps(params)
 
-                params = {}
-                params['format'] = request.POST.get('format')
-                newRecord.external_params = json.dumps(params)
+                    newRecord.save()
+                    layer_id = newRecord.id
 
-                newRecord.save()
+                    featuretype = {
+                        'max_features': maxFeatures
+                    }
 
-                featuretype = {
-                    'max_features': maxFeatures
-                }
+                    utils.set_layer_permissions(newRecord, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles)
+                    do_config_layer(server, newRecord, featuretype)
+                    if newRecord.cached:
+                        tasks.update_wmts_layer_info.apply_async(args=[newRecord.id])
 
-                utils.set_layer_permissions(newRecord, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles)
-                do_config_layer(server, newRecord, featuretype)
-                if newRecord.cached:
-                    tasks.update_wmts_layer_info.apply_async(args=[newRecord.id])
-
-                if redirect_to_layergroup and (layergroup_id != newRecord.layer_group.id):
-                    new_layergroup_id = newRecord.layer_group.id
-                    if project_id:
-                        to_url =  reverse('layergroup_update_with_project', kwargs={'lgid': new_layergroup_id, 'project_id': project_id})+query_string
+                    if redirect_to_layergroup and (layergroup_id != newRecord.layer_group.id):
+                        new_layergroup_id = newRecord.layer_group.id
+                        if project_id:
+                            to_url =  reverse('layergroup_update_with_project', kwargs={'lgid': new_layergroup_id, 'project_id': project_id})+query_string
+                        else:
+                            to_url = reverse('layergroup_update', kwargs={'lgid': new_layergroup_id})+query_string
                     else:
-                        to_url = reverse('layergroup_update', kwargs={'lgid': new_layergroup_id})+query_string
-                else:
-                    to_url = back_url
-                return HttpResponseRedirect(to_url)
+                        to_url = back_url
+                    return HttpResponseRedirect(to_url)
+                    
+                except Exception as layer_error:
+                    # ROLLBACK: Si falló en cualquier punto después de crear el recurso en el backend, eliminarlo
+                    layer_name = form.cleaned_data.get('name', 'unknown')
+                    logger.error(f"Error during layer creation/configuration for layer '{layer_name}' (ID: {layer_id}). Initiating rollback: {str(layer_error)}")
+                    try:
+                        try:
+                            if newRecord is None:
+                                temp_layer = Layer(
+                                    name=form.cleaned_data['name'],
+                                    datastore=datastore,
+                                    layer_group=layergroup
+                                )
+                                server.deleteResource(workspace, datastore, temp_layer)
+                            else:
+                                server.deleteResource(workspace, datastore, newRecord)
+                            logger.info(f"Layer '{layer_name}' resource deleted from backend during rollback")
+                        except Exception as backend_error:
+                            logger.exception(f"Error deleting resource from backend during rollback for layer '{layer_name}': {str(backend_error)}")
+                        
+                        if layer_id is not None:
+                            try:
+                                Layer.objects.filter(pk=layer_id).delete()
+                                logger.info(f"Layer {layer_id} deleted from database during rollback")
+                            except Exception as db_error:
+                                logger.exception(f"Error deleting layer {layer_id} from database during rollback: {str(db_error)}")
+                    except Exception as cleanup_error:
+                        logger.exception(f"Error during cleanup rollback for layer '{layer_name}': {str(cleanup_error)}")
+                    
+                    # Re-lanzar el error original para que se maneje en el except externo
+                    raise
             except rest_geoserver.RequestError as e:
                 msg = e.server_message
                 logger.exception(msg)
