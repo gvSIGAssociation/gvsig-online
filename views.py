@@ -1302,6 +1302,9 @@ def layer_add_with_group(request, layergroup_id):
                     # ROLLBACK: Si falló en cualquier punto después de crear el recurso en el backend, eliminarlo
                     layer_name = form.cleaned_data.get('name', 'unknown')
                     logger.error(f"Error during layer creation/configuration for layer '{layer_name}' (ID: {layer_id}). Initiating rollback: {str(layer_error)}")
+                    rollback_failed = False
+                    rollback_error_msg = None
+                    
                     try:
                         try:
                             if newRecord is None:
@@ -1316,6 +1319,8 @@ def layer_add_with_group(request, layergroup_id):
                             logger.info(f"Layer '{layer_name}' resource deleted from backend during rollback")
                         except Exception as backend_error:
                             logger.exception(f"Error deleting resource from backend during rollback for layer '{layer_name}': {str(backend_error)}")
+                            rollback_failed = True
+                            rollback_error_msg = f"Backend cleanup failed: {str(backend_error)}"
                         
                         if layer_id is not None:
                             try:
@@ -1323,18 +1328,42 @@ def layer_add_with_group(request, layergroup_id):
                                 logger.info(f"Layer {layer_id} deleted from database during rollback")
                             except Exception as db_error:
                                 logger.exception(f"Error deleting layer {layer_id} from database during rollback: {str(db_error)}")
+                                rollback_failed = True
+                                if rollback_error_msg:
+                                    rollback_error_msg += f"; Database cleanup failed: {str(db_error)}"
+                                else:
+                                    rollback_error_msg = f"Database cleanup failed: {str(db_error)}"
                     except Exception as cleanup_error:
                         logger.exception(f"Error during cleanup rollback for layer '{layer_name}': {str(cleanup_error)}")
+                        rollback_failed = True
+                        rollback_error_msg = f"Critical cleanup error: {str(cleanup_error)}"
+                    
+                    if rollback_failed and rollback_error_msg:
+                        setattr(layer_error, 'rollback_failed', True)
+                        setattr(layer_error, 'rollback_error', rollback_error_msg)
+                        logger.error(f"ROLLBACK FAILED for layer '{layer_name}': {rollback_error_msg}")
                     
                     # Re-lanzar el error original para que se maneje en el except externo
                     raise
             except rest_geoserver.RequestError as e:
                 msg = e.server_message
                 logger.exception(msg)
+                
+                if hasattr(e, 'rollback_failed') and e.rollback_failed:
+                    rollback_msg = getattr(e, 'rollback_error', 'Unknown error')
+                    msg += '. ' + _("WARNING: Rollback failed") + ': ' + rollback_msg
+                    logger.critical(f"Layer publication failed AND rollback failed: {msg}")
+                
                 form.add_error(None, msg)
             except Exception as e:
                 msg = _("Error: layer could not be published") + '. ' + str(e)
                 logger.exception(msg)
+                
+                if hasattr(e, 'rollback_failed') and e.rollback_failed:
+                    rollback_msg = getattr(e, 'rollback_error', 'Unknown error')
+                    msg += '. ' + _("WARNING: Rollback failed") + ': ' + rollback_msg
+                    logger.critical(f"Layer publication failed AND rollback failed: {msg}")
+                
                 # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
                 form.add_error(None, msg)
 
