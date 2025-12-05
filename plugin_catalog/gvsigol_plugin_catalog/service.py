@@ -203,6 +203,14 @@ class Geonetwork():
     def layer_created_handler(self, sender, **kwargs):
         try:
             layer = kwargs['layer']
+            # Verificar si se debe crear metadatos automáticamente
+            auto_create_metadata = plugin_settings.CATALOG_AUTO_CREATE_METADATA
+            
+            # Si el flag está desactivado, no crear metadatos automáticamente (ni para públicas ni privadas)
+            if not auto_create_metadata:
+                logger.info("Skipping automatic metadata creation for layer: %s (CATALOG_AUTO_CREATE_METADATA=False). Metadata must be created manually." % layer.name)
+                return
+            
             muuid = self.metadata_insert(layer)
             if muuid:
                 lm = LayerMetadata(layer=layer, metadata_uuid=muuid[0], metadata_id=muuid[1])
