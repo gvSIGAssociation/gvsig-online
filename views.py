@@ -1305,7 +1305,37 @@ def layer_add_with_group(request, layergroup_id):
                     rollback_failed = False
                     rollback_error_msg = None
                     
-                    try:
+                    try:                        
+                        if newRecord is not None and layer_id is not None:
+                            try:
+                                server.createOrUpdateGeoserverLayerGroup(newRecord.layer_group)
+                                logger.info(f"LayerGroup refreshed in backend during rollback for layer '{layer_name}'")
+                            except Exception as layergroup_error:
+                                logger.warning(f"Could not refresh LayerGroup during rollback for layer '{layer_name}': {str(layergroup_error)}")
+                        
+                        if newRecord is not None and layer_id is not None:
+                            try:
+                                core_utils.toc_remove_layer(newRecord)
+                                logger.info(f"Layer removed from TOC during rollback for layer '{layer_name}'")
+                            except Exception as toc_error:
+                                logger.warning(f"Could not remove layer from TOC during rollback for layer '{layer_name}': {str(toc_error)}")
+                        
+                        if newRecord is not None and hasattr(newRecord, 'thumbnail') and newRecord.thumbnail:
+                            try:
+                                if not 'no_thumbnail.jpg' in newRecord.thumbnail.name:
+                                    if os.path.isfile(newRecord.thumbnail.path):
+                                        os.remove(newRecord.thumbnail.path)
+                                        logger.info(f"Thumbnail deleted during rollback for layer '{layer_name}'")
+                            except Exception as thumb_error:
+                                logger.warning(f"Could not delete thumbnail during rollback for layer '{layer_name}': {str(thumb_error)}")
+                        
+                        if newRecord is not None and layer_id is not None:
+                            try:
+                                server.deleteLayerStyles(newRecord)
+                                logger.info(f"Styles deleted during rollback for layer '{layer_name}'")
+                            except Exception as style_error:
+                                logger.warning(f"Could not delete styles during rollback for layer '{layer_name}': {str(style_error)}")
+                        
                         try:
                             if newRecord is None:
                                 temp_layer = Layer(
