@@ -1082,6 +1082,8 @@ def layer_add_with_group(request, layergroup_id):
     redirect_to_layergroup = request.GET.get('redirect')
     from_redirect = request.GET.get('from_redirect')
     project_id = request.GET.get('project_id')
+    test_rollback = request.GET.get('test_rollback') or request.POST.get('test_rollback')
+    logger.debug(f"DEBUG test_rollback: GET={request.GET.get('test_rollback')}, POST={request.POST.get('test_rollback')}, final={test_rollback}")
 
     if redirect_to_layergroup:
         if from_redirect:
@@ -1279,12 +1281,24 @@ def layer_add_with_group(request, layergroup_id):
                     newRecord.save()
                     layer_id = newRecord.id
 
+                    # EXCEPCIÓN ARTIFICIAL PARA PROBAR ROLLBACK
+                    if test_rollback == '1':
+                        raise Exception("TEST_ROLLBACK_1: Excepción artificial después de guardar en BD")
+
                     featuretype = {
                         'max_features': maxFeatures
                     }
 
                     utils.set_layer_permissions(newRecord, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles)
+                    
+                    if test_rollback == '2':
+                        raise Exception("TEST_ROLLBACK_2: Excepción artificial después de configurar permisos")
+                    
                     do_config_layer(server, newRecord, featuretype)
+                    
+                    if test_rollback == '3':
+                        raise Exception("TEST_ROLLBACK_3: Excepción artificial después de configurar la capa")
+
                     if newRecord.cached:
                         tasks.update_wmts_layer_info.apply_async(args=[newRecord.id])
 
@@ -1305,14 +1319,107 @@ def layer_add_with_group(request, layergroup_id):
                     rollback_failed = False
                     rollback_error_msg = None
                     
-                    try:                        
+                    try:
+                        # 1. Eliminar estilos primero
                         if newRecord is not None and layer_id is not None:
                             try:
-                                server.createOrUpdateGeoserverLayerGroup(newRecord.layer_group)
-                                logger.info(f"LayerGroup refreshed in backend during rollback for layer '{layer_name}'")
-                            except Exception as layergroup_error:
-                                logger.warning(f"Could not refresh LayerGroup during rollback for layer '{layer_name}': {str(layergroup_error)}")
+                                server.deleteLayerStyles(newRecord)
+                                logger.info(f"Styles deleted during rollback for layer '{layer_name}'")
+                            except Exception as style_error:
+                                logger.warning(f"Could not delete styles during rollback for layer '{layer_name}': {str(style_error)}")
                         
+                        # 2. Eliminar el recurso de GeoServer (purge=False para preservar la vista/tabla de BD)
+                        # Nota: deleteResource puede fallar si el recurso está referenciado por un LayerGroup,
+                        # pero esto se maneja más abajo eliminando la capa primero
+                        try:
+                            if newRecord is None:
+                                temp_layer = Layer(
+                                    name=form.cleaned_data['name'],
+                                    datastore=datastore,
+                                    layer_group=layergroup
+                                )
+                                logger.debug(f"Deleting resource '{layer_name}' from backend (temp_layer, purge=False)")
+                                server.deleteResource(workspace, datastore, temp_layer, purge=False)
+                            else:
+                                logger.debug(f"Deleting resource '{layer_name}' from backend (newRecord, purge=False)")
+                                server.deleteResource(workspace, datastore, newRecord, purge=False)
+                            
+                            # Verificar que el recurso realmente se eliminó pq deleteResource siempre retorna true
+                            layer_deleted_successfully = False
+                            try:
+                                import time
+                                time.sleep(0.5)  # Pequeña espera para que GeoServer procese la eliminación
+                                catalog = server.getGsconfig()
+                                deleted_resource = catalog.get_resource(layer_name, datastore.name, workspace.name)
+                                if deleted_resource is None:
+                                    logger.info(f"Layer '{layer_name}' resource successfully deleted from backend during rollback (purge=False to preserve database view/table)")
+                                    layer_deleted_successfully = True
+                                else:
+                                    logger.warning(f"Resource '{layer_name}' still exists in GeoServer after deletion attempt during rollback")
+                                    # Si el recurso sigue existiendo, puede ser que esté referenciado por un LayerGroup
+                                    # Intentar eliminar la capa asociada primero
+                                    try:
+                                        layers = catalog.get_layers()
+                                        layer_to_delete = None
+                                        for layer in layers:
+                                            if layer.resource.name == layer_name:
+                                                layer_to_delete = layer
+                                                logger.warning(f"Found layer '{layer.name}' associated with resource '{layer_name}' during rollback, attempting to delete layer first...")
+                                                break
+                                        
+                                        if layer_to_delete:
+                                            try:
+                                                catalog.delete(layer_to_delete, purge=False, recurse=True)
+                                                logger.warning(f"Successfully deleted layer '{layer_to_delete.name}' during rollback")
+                                                layer_deleted_successfully = True
+                                                time.sleep(0.5)
+
+                                                deleted_resource_check = catalog.get_resource(layer_name, datastore.name, workspace.name)
+                                                if deleted_resource_check is None:
+                                                    logger.info(f"Resource '{layer_name}' successfully deleted after removing layer during rollback")
+                                                else:
+                                                    logger.warning(f"Resource '{layer_name}' still exists after deleting layer during rollback (will be cleaned up automatically later)")
+                                            except Exception as layer_delete_error:
+                                                error_msg = str(layer_delete_error)
+                                                logger.warning(f"Could not delete layer '{layer_to_delete.name}' during rollback: {error_msg}")
+                                    except Exception as layer_search_error:
+                                        logger.warning(f"Could not search for layer during rollback: {str(layer_search_error)}")
+                            except Exception as verify_error:
+                                logger.debug(f"Could not verify resource deletion (this may be normal): {str(verify_error)}")
+                                
+                        except Exception as backend_error:
+                            logger.exception(f"Error deleting resource from backend during rollback for layer '{layer_name}': {str(backend_error)}")
+                            rollback_failed = True
+                            rollback_error_msg = f"Backend cleanup failed: {str(backend_error)}"
+                        
+                        # 3. Recargar el datastore para que el recurso aparezca como disponible de nuevo después del rollback
+                        try:
+                            server.rest_catalog.datastore_reload(workspace.name, datastore.name, user=server.user, password=server.password)
+                            logger.info(f"Datastore '{datastore.name}' reloaded during rollback for layer '{layer_name}' to refresh available resources list")
+                            # Esperar un poco más después de recargar el datastore
+                            import time
+                            time.sleep(2)
+                        except Exception as datastore_reload_error:
+                            logger.warning(f"Could not reload datastore during rollback for layer '{layer_name}': {str(datastore_reload_error)}")
+                        
+                        # 4. Actualizar LayerGroup SOLO si la capa NO se eliminó exitosamente. Si se eliminó, LayerGroup se actualizó automáticamente.
+                        if not layer_deleted_successfully:
+                            if newRecord is not None and layer_id is not None:
+                                try:
+                                    server.createOrUpdateGeoserverLayerGroup(newRecord.layer_group)
+                                    logger.info(f"LayerGroup refreshed in backend during rollback for layer '{layer_name}' (after resource deletion)")
+                                except Exception as layergroup_error:
+                                    logger.warning(f"Could not refresh LayerGroup during rollback for layer '{layer_name}': {str(layergroup_error)}")
+                            elif layergroup is not None:
+                                try:
+                                    server.createOrUpdateGeoserverLayerGroup(layergroup)
+                                    logger.info(f"LayerGroup refreshed in backend during rollback for layer '{layer_name}' (after resource deletion, using form layergroup)")
+                                except Exception as layergroup_error:
+                                    logger.warning(f"Could not refresh LayerGroup during rollback for layer '{layer_name}': {str(layergroup_error)}")
+                        else:
+                            logger.debug(f"LayerGroup update skipped during rollback for layer '{layer_name}' (layer was deleted successfully, LayerGroup already updated)")
+                        
+                        # 5. Eliminar de TOC
                         if newRecord is not None and layer_id is not None:
                             try:
                                 core_utils.toc_remove_layer(newRecord)
@@ -1320,6 +1427,7 @@ def layer_add_with_group(request, layergroup_id):
                             except Exception as toc_error:
                                 logger.warning(f"Could not remove layer from TOC during rollback for layer '{layer_name}': {str(toc_error)}")
                         
+                        # 6. Eliminar thumbnail
                         if newRecord is not None and hasattr(newRecord, 'thumbnail') and newRecord.thumbnail:
                             try:
                                 if not 'no_thumbnail.jpg' in newRecord.thumbnail.name:
@@ -1328,29 +1436,6 @@ def layer_add_with_group(request, layergroup_id):
                                         logger.info(f"Thumbnail deleted during rollback for layer '{layer_name}'")
                             except Exception as thumb_error:
                                 logger.warning(f"Could not delete thumbnail during rollback for layer '{layer_name}': {str(thumb_error)}")
-                        
-                        if newRecord is not None and layer_id is not None:
-                            try:
-                                server.deleteLayerStyles(newRecord)
-                                logger.info(f"Styles deleted during rollback for layer '{layer_name}'")
-                            except Exception as style_error:
-                                logger.warning(f"Could not delete styles during rollback for layer '{layer_name}': {str(style_error)}")
-                        
-                        try:
-                            if newRecord is None:
-                                temp_layer = Layer(
-                                    name=form.cleaned_data['name'],
-                                    datastore=datastore,
-                                    layer_group=layergroup
-                                )
-                                server.deleteResource(workspace, datastore, temp_layer)
-                            else:
-                                server.deleteResource(workspace, datastore, newRecord)
-                            logger.info(f"Layer '{layer_name}' resource deleted from backend during rollback")
-                        except Exception as backend_error:
-                            logger.exception(f"Error deleting resource from backend during rollback for layer '{layer_name}': {str(backend_error)}")
-                            rollback_failed = True
-                            rollback_error_msg = f"Backend cleanup failed: {str(backend_error)}"
                         
                         if layer_id is not None:
                             try:
@@ -1425,7 +1510,8 @@ def layer_add_with_group(request, layergroup_id):
             'layergroup_id': layergroup_id,
             'from_redirect': from_redirect,
             'project_id': project_id,
-            'back_url': back_url
+            'back_url': back_url,
+            'test_rollback': test_rollback
             })
 
 @login_required()
