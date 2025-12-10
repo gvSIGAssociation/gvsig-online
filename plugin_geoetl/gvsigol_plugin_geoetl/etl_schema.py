@@ -161,7 +161,7 @@ def get_schema_csv(dicc):
     if dicc.get('reading') == 'multiple':
         column_array = []
         for file in os.listdir(dicc["csv-file"]):
-            if file.endswith((".csv", ".txt")):
+            if file.endswith((".csv", ".txt",".CSV", ".TXT")):
                 csvdata = pd.read_csv(dicc["csv-file"]+'/'+file, sep=dicc["separator"], 
                                     header=header_param, skiprows=skiprows)
                 
