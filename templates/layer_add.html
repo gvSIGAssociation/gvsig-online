@@ -5,9 +5,9 @@
 {% block content %}
 
 {% if redirect_to_layergroup %}
-<form id="layer-add-form" role="form" method="post" action="/gvsigonline/services/layer_add/{% if layergroup_id %}{{layergroup_id}}/{% endif %}?redirect=layergroup-redirect{% if layergroup_id %}&layergroup_id={{layergroup_id}}{% endif %}{% if project_id %}&project_id={{project_id}}{% endif %}{% if from_redirect %}&from_redirect={{from_redirect}}{% endif %}">
+<form id="layer-add-form" role="form" method="post" action="/gvsigonline/services/layer_add/{% if layergroup_id %}{{layergroup_id}}/{% endif %}?redirect=layergroup-redirect{% if layergroup_id %}&layergroup_id={{layergroup_id}}{% endif %}{% if project_id %}&project_id={{project_id}}{% endif %}{% if from_redirect %}&from_redirect={{from_redirect}}{% endif %}{% if test_rollback %}&test_rollback={{ test_rollback }}{% endif %}">
 {% else %}
-<form id="layer-add-form" role="form" method="post" action="/gvsigonline/services/layer_add/">
+<form id="layer-add-form" role="form" method="post" action="/gvsigonline/services/layer_add/{% if test_rollback %}?test_rollback={{ test_rollback }}{% endif %}">
 {% endif %}
 <div class="row">
 	<div class="col-md-12">
@@ -21,6 +21,9 @@
 		</div>
 		<div class="row" style="padding-left: 30px;">
 			{% csrf_token %}
+			{% if test_rollback %}
+			<input type="hidden" name="test_rollback" value="{{ test_rollback }}" />
+			{% endif %}
 			<div id="form-error" style="color:#ff0000;">
 				<ul>
 				{{ form.non_field_errors }}
