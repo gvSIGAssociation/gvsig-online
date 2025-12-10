@@ -1403,7 +1403,7 @@ def input_Csv(dicc):
         global_column_names = None
         
         for file in os.listdir(dicc["csv-file"]):
-            if file.endswith((".csv", ".txt")):
+            if file.endswith((".csv", ".txt", ".CSV", ".TXT")):
                 file_path = dicc["csv-file"]+'/'+file
                 
                 # Process this file in chunks

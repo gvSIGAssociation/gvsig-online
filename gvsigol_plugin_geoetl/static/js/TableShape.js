@@ -106,19 +106,20 @@ function getPathFile(fileType, ID){
 
     window.filemanagerCallback = function(url) {
 
-        if(fileType == 'csv' && (url.endsWith('.csv') || url.endsWith('.txt'))){
+        var urlLower = url.toLowerCase();
+        if(fileType == 'csv' && (urlLower.endsWith('.csv') || urlLower.endsWith('.txt'))){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
-        }else if(fileType == 'json' && url.endsWith('.json') && ID != '0'){
+        }else if(fileType == 'json' && urlLower.endsWith('.json') && ID != '0'){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
-        }else if(fileType == 'xml' && url.endsWith('.xml') && ID != '0'){
+        }else if(fileType == 'xml' && urlLower.endsWith('.xml') && ID != '0'){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
-        }else if(fileType == 'excel' && (url.endsWith('.xls') || url.endsWith('.xlsx'))){
+        }else if(fileType == 'excel' && (urlLower.endsWith('.xls') || urlLower.endsWith('.xlsx'))){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
-        } else if(fileType == 'shp' && url.endsWith('.shp')){
+        } else if(fileType == 'shp' && urlLower.endsWith('.shp')){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
-        } else if(fileType == 'kml-kmz' && (url.endsWith('.kml') || url.endsWith('.kmz'))){
+        } else if(fileType == 'kml-kmz' && (urlLower.endsWith('.kml') || urlLower.endsWith('.kmz'))){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
-        } else if(fileType == 'json' && url.endsWith('.json') && ID == '0'){
+        } else if(fileType == 'json' && urlLower.endsWith('.json') && ID == '0'){
             $("#etl_json_upload").val("file://" + fm_directory + url)
         } else if(fileType.endsWith('/')){
             $("#"+fileType.replace('/', '')+"-file-"+ID).val(fm_directory + url)
