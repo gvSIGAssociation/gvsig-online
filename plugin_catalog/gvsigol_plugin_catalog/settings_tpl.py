@@ -20,3 +20,7 @@ CATALOG_CUSTOM_FILTER_URL = '##CATALOG_CUSTOM_FILTER_URL##'
 METADATA_VIEWER_BUTTON = '##METADATA_VIEWER_BUTTON##'
 CATALOG_TIMEOUT = ##CATALOG_TIMEOUT##
 GEONETWORK_USE_KEEPALIVE = '##GEONETWORK_USE_KEEPALIVE##'.lower() == 'true'
+# Si es False, no se crearán metadatos automáticamente para ninguna capa (ni públicas ni privadas)
+# Los metadatos deberán crearse manualmente desde gvsigonline
+# Por defecto True para mantener el comportamiento actual
+CATALOG_AUTO_CREATE_METADATA = '##CATALOG_AUTO_CREATE_METADATA##'.lower() == 'true'

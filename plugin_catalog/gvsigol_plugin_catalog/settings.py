@@ -4,6 +4,7 @@ import environ
 env = environ.Env(
     BASE_URL=(str,'https://localhost'),
     GEONETWORK_USE_KEEPALIVE=(bool, True),
+    CATALOG_AUTO_CREATE_METADATA=(bool, True),
 )
 
 APP_TITLE = 'Catálogo de metadatos'
@@ -27,3 +28,7 @@ DISABLE_CATALOG_NAVBAR_MENUS = env('DISABLE_CATALOG_NAVBAR_MENUS', default='Fals
 CATALOG_TIMEOUT = env('CATALOG_TIMEOUT', default=10)
 
 GEONETWORK_USE_KEEPALIVE = env('GEONETWORK_USE_KEEPALIVE')
+# Si es False, no se crearán metadatos automáticamente para ninguna capa (ni públicas ni privadas)
+# Los metadatos deberán crearse manualmente desde gvsigonline
+# Por defecto True para mantener el comportamiento actual
+CATALOG_AUTO_CREATE_METADATA = env('CATALOG_AUTO_CREATE_METADATA')
