@@ -1281,6 +1281,13 @@ msgstr "Catalog Plugin"
 msgid "gvsigol_plugin_catalog manual desc"
 msgstr "Metadata catalog plugin manual for gvSIG Online"
 
+#: GPS Ganado plugin manual
+msgid "gvsigol_plugin_gpsganado manual title"
+msgstr "GPS Ganado Plugin"
+
+msgid "gvsigol_plugin_gpsganado manual desc"
+msgstr "Guide for configuration and use of the GPS Ganado plugin"
+
 #: gvsigol_core/views.py:1569 gvsigol_core/views.py:1571
 msgid "Shared view"
 msgstr ""
