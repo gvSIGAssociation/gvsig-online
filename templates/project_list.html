@@ -46,8 +46,7 @@
 							{% endif %}
 							<td>
 								{% if SHOW_SPA_PROJECT_LINKS %}
-								<!-- <a title="SPA" target="_blank" href="{{frontend_base_url}}/viewer/{{project.id}}/" data-toggle="tooltip" data-placement="bottom" class="btn"><i class="fa fa-television" style="color: green"></i></a>-->
-								<a title="SPA" target="_blank" href="#" onclick="var host = window.location.hostname; var isLocalhost = (host === 'localhost' || host === '127.0.0.1'); var protocol = isLocalhost ? 'http:' : window.location.protocol; var port = isLocalhost ? ':9000' : (window.location.port ? ':' + window.location.port : ''); var frontendPath = '{{frontend_base_url}}'.replace(/\/$/, ''); var projectName = encodeURIComponent('{{project.name}}'); var fullUrl = protocol + '//' + host + port + frontendPath + '/v/' + projectName + '/'; window.open(fullUrl, '_blank'); return false;" data-toggle="tooltip" data-placement="bottom" class="btn"><i class="fa fa-television" style="color: green"></i></a>
+								<a title="SPA" target="_blank" href="{{frontend_base_url}}/v/{{project.name}}/" data-toggle="tooltip" data-placement="bottom" class="btn"><i class="fa fa-television" style="color: green"></i></a>
 								{% endif %}
 								{% if SHOW_BOOTSTRAP_PROJECT_LINKS %}
 								<a id="load_project_jquery" title="JQuery" target="_blank" href="/gvsigonline/core/load/{{project.name}}/" data-toggle="tooltip" data-placement="bottom" class="btn"><i class="fa fa-television" style="color: brown"></i></a>
