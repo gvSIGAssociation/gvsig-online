@@ -85,9 +85,8 @@
 							<img src={{project.image}} alt="Project Image">
 						</div>
 						<div class="product-info">
-							<!-- <a href="{{project.url}}" class="product-title">{{project.title}} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-cube margin-r-5"></i> {% trans "Load project" %}</span></a>  -->
-							<a href="#" onclick="var viewerUi = '{{project.viewer_preferred_ui}}'; var projectName = encodeURIComponent('{{project.name}}'); var fullUrl; if (viewerUi === 'react_spa_ui') { var host = window.location.hostname; var isLocalhost = (host === 'localhost' || host === '127.0.0.1'); var protocol = isLocalhost ? 'http:' : window.location.protocol; var port = isLocalhost ? ':9000' : (window.location.port ? ':' + window.location.port : ''); var frontendPath = '{{frontend_base_url}}'.replace(/\/$/, ''); fullUrl = protocol + '//' + host + port + frontendPath + '/v/' + projectName + '/'; } else { fullUrl = window.location.protocol + '//' + window.location.host + '/gvsigonline/core/load_project/' + projectName + '/'; } window.location.href = fullUrl; return false;" class="product-title">{{project.title}} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-cube margin-r-5"></i> {% trans "Load project" %}</span></a> 
-							<span class="product-description"> {{project.description}}</span>
+							<a href="{{project.url}}" class="product-title">{{project.title}} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-cube margin-r-5"></i> {% trans "Load project" %}</span></a>
+							<span class="product-description"> {{project.description}}</span> 
 						</div>
 					</li>
 					{% endfor %}
@@ -112,7 +111,6 @@
 						</div>
 						<div class="product-info">
 							<a href="{{project.url}}" class="product-title">{{project.title}} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-cube margin-r-5"></i> {% trans "Load project" %}</span></a> 
-							<!-- <a href="#" onclick="var viewerUi = '{{project.viewer_preferred_ui}}'; var projectName = encodeURIComponent('{{project.name}}'); var fullUrl; if (viewerUi === 'react_spa_ui') { var host = window.location.hostname; var isLocalhost = (host === 'localhost' || host === '127.0.0.1'); var protocol = isLocalhost ? 'http:' : window.location.protocol; var port = isLocalhost ? ':9000' : (window.location.port ? ':' + window.location.port : ''); var frontendPath = '{{frontend_base_url}}'.replace(/\/$/, ''); fullUrl = protocol + '//' + host + port + frontendPath + '/v/' + projectName + '/'; } else { fullUrl = window.location.protocol + '//' + window.location.host + '/gvsigonline/core/load_project/' + projectName + '/'; } window.location.href = fullUrl; return false;" class="product-title">{{project.title}} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-cube margin-r-5"></i> {% trans "Load project" %}</span></a> -->
 							<span class="product-description"> {{project.description}}</span>
 						</div>
 					</li>
