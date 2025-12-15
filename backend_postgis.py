@@ -35,6 +35,9 @@ from psycopg2 import sql as sqlbuilder
 from psycopg2.extensions import quote_ident
 import re
 import random, string
+import logging
+
+logger = logging.getLogger(__name__)
 
 plainIdentifierPattern = re.compile("^[a-zA-Z][a-zA-Z0-9_]*$")
 plainSchemaIdentifierPattern = re.compile("^[a-zA-Z][a-zA-Z0-9_]*(.[a-zA-Z][a-zA-Z0-9_]*)?$")
@@ -1203,7 +1206,29 @@ class Introspect:
         # print(query.as_string(self.conn))
         self.cursor.execute(query,  [])
         
-        full_sequence = quote_ident(target_schema, self.conn) + "." + quote_ident(seq_name, self.conn) 
+        # Sincronizar la secuencia con el valor máximo existente en la tabla
+        # COALESCE maneja el caso de tablas vacías o valores NULL
+        # El tercer parámetro 'false' hace que el próximo nextval() devuelva exactamente este valor
+        full_sequence = quote_ident(target_schema, self.conn) + "." + quote_ident(seq_name, self.conn)
+        query = sqlbuilder.SQL("""
+            SELECT setval(
+                {full_sequence}, 
+                COALESCE((SELECT MAX({column}) FROM {target_schema}.{target_table}), 0) + 1,
+                false
+            )
+        """).format(
+            full_sequence=sqlbuilder.Literal(full_sequence),
+            target_schema=sqlbuilder.Identifier(target_schema),
+            target_table=sqlbuilder.Identifier(target_table),
+            column=sqlbuilder.Identifier(column))
+        try:
+            self.cursor.execute(query, [])
+            result = self.cursor.fetchone()
+            if result:
+                logger.info(f"Sequence {target_schema}.{seq_name} synchronized to value: {result[0]}")
+        except Exception as e:
+            logger.warning(f"Error synchronizing sequence {target_schema}.{seq_name}: {str(e)}")
+        
         query = sqlbuilder.SQL("ALTER TABLE {target_schema}.{target_table} ALTER COLUMN  {column} SET DEFAULT nextval({full_sequence})").format(
             target_schema=sqlbuilder.Identifier(target_schema),
             target_table=sqlbuilder.Identifier(target_table),
