@@ -5277,7 +5277,7 @@ def external_layer_add(request):
                             destination.write(chunk)
                     
                     style_file_path = os.path.relpath(style_path, settings.MEDIA_ROOT)
-                    params['style_file_url'] = reverse("get_mvt_style", kwargs={"lyr_id": external_layer.id, "style_path": style_file_path})
+                    params['style_file_url'] = reverse("gvsigol_plugin_featureapi:get_mvt_style", kwargs={"lyr_id": external_layer.id, "style_path": style_file_path})
                 params['srs'] = external_layer.native_srs
             else:
                 external_layer.vector_tile = False
@@ -5441,7 +5441,7 @@ def external_layer_update(request, external_layer_id):
                     if is_old_file_url:
                         extracted_path = _extract_style_file_path_from_url(style_url, external_layer.id)
                         if extracted_path:
-                            params['style_file_url'] = reverse("get_mvt_style", kwargs={"lyr_id": external_layer.id, "style_path": extracted_path})
+                            params['style_file_url'] = reverse("gvsigol_plugin_featureapi:get_mvt_style", kwargs={"lyr_id": external_layer.id, "style_path": extracted_path})
                             params.pop('style_url', None)
                             if old_style_url and old_style_url != style_url:
                                 old_extracted_path = _extract_style_file_path_from_url(old_style_url, external_layer.id)
@@ -5499,7 +5499,7 @@ def external_layer_update(request, external_layer_id):
                             destination.write(chunk)
                     
                     style_file_path = os.path.relpath(style_path, settings.MEDIA_ROOT)
-                    params['style_file_url'] = reverse("get_mvt_style", kwargs={"lyr_id": external_layer.id, "style_path": style_file_path})
+                    params['style_file_url'] = reverse("gvsigol_plugin_featureapi:get_mvt_style", kwargs={"lyr_id": external_layer.id, "style_path": style_file_path})
                 params['srs'] = external_layer.native_srs
             else:
                 external_layer.vector_tile = False
