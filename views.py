@@ -5260,6 +5260,7 @@ def external_layer_add(request):
             if external_layer.type == 'MVT':
                 external_layer.vector_tile = True
                 
+                style_file_upload_error = False
                 style_url = request.POST.get('style_url')
                 style_file = request.FILES.get('style_file')
                 
@@ -5273,12 +5274,27 @@ def external_layer_add(request):
                     style_filename = f'style_{external_layer.id}_{style_file.name}'
                     style_path = os.path.join(style_dir, style_filename)
                     
-                    with open(style_path, 'wb+') as destination:
-                        for chunk in style_file.chunks():
-                            destination.write(chunk)
-                    
-                    style_file_path = os.path.relpath(style_path, settings.MEDIA_ROOT)
-                    params['style_file_url'] = reverse("gvsigol_plugin_featureapi:get_mvt_style", kwargs={"lyr_id": external_layer.id, "style_path": style_file_path})
+                    try:
+                        with open(style_path, 'wb+') as destination:
+                            for chunk in style_file.chunks():
+                                destination.write(chunk)
+                        
+                        if not os.path.exists(style_path) or os.path.getsize(style_path) == 0:
+                            raise IOError("The file was not written correctly")
+                        
+                        style_file_path = os.path.relpath(style_path, settings.MEDIA_ROOT)
+                        params['style_file_url'] = reverse("gvsigol_plugin_featureapi:get_mvt_style", kwargs={"lyr_id": external_layer.id, "style_path": style_file_path})
+                    except Exception as file_error:
+                        logger.exception("Error uploading MVT style file for layer %s", external_layer.id)
+                        style_file_upload_error = True
+                        file_error_msg = str(file_error)
+                        if os.path.exists(style_path):
+                            try:
+                                os.remove(style_path)
+                                logger.info("Deleted empty/corrupted style file: %s", style_path)
+                            except Exception as delete_error:
+                                logger.warning("Could not delete empty style file %s: %s", style_path, str(delete_error))
+                        logger.warning("Layer %s saved without style file. User can update it later. Error: %s", external_layer.id, file_error_msg)
                 params['srs'] = external_layer.native_srs
             else:
                 external_layer.vector_tile = False
@@ -5292,6 +5308,10 @@ def external_layer_add(request):
                     geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
                     geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
 
+            if external_layer.type == 'MVT' and style_file_upload_error:
+                update_url = reverse('external_layer_update', kwargs={'external_layer_id': external_layer.id})
+                return HttpResponseRedirect(update_url + '?style_file_error=1')
+            
             return HttpResponseRedirect(back_url)
 
         except Exception as e:
@@ -5427,6 +5447,7 @@ def external_layer_update(request, external_layer_id):
             if external_layer.type == 'MVT':
                 external_layer.vector_tile = True
                 
+                style_file_upload_error = False
                 style_url = request.POST.get('style_url')
                 style_file = request.FILES.get('style_file')
                 
@@ -5495,12 +5516,27 @@ def external_layer_update(request, external_layer_id):
                     style_filename = f'style_{external_layer.id}_{style_file.name}'
                     style_path = os.path.join(style_dir, style_filename)
                     
-                    with open(style_path, 'wb+') as destination:
-                        for chunk in style_file.chunks():
-                            destination.write(chunk)
-                    
-                    style_file_path = os.path.relpath(style_path, settings.MEDIA_ROOT)
-                    params['style_file_url'] = reverse("gvsigol_plugin_featureapi:get_mvt_style", kwargs={"lyr_id": external_layer.id, "style_path": style_file_path})
+                    try:
+                        with open(style_path, 'wb+') as destination:
+                            for chunk in style_file.chunks():
+                                destination.write(chunk)
+                        
+                        if not os.path.exists(style_path) or os.path.getsize(style_path) == 0:
+                            raise IOError("The file was not written correctly")
+                        
+                        style_file_path = os.path.relpath(style_path, settings.MEDIA_ROOT)
+                        params['style_file_url'] = reverse("gvsigol_plugin_featureapi:get_mvt_style", kwargs={"lyr_id": external_layer.id, "style_path": style_file_path})
+                    except Exception as file_error:
+                        logger.exception("Error uploading MVT style file for layer %s", external_layer.id)
+                        style_file_upload_error = True
+                        file_error_msg = str(file_error)
+                        if os.path.exists(style_path):
+                            try:
+                                os.remove(style_path)
+                                logger.info("Deleted empty/corrupted style file: %s", style_path)
+                            except Exception as delete_error:
+                                logger.warning("Could not delete empty style file %s: %s", style_path, str(delete_error))
+                        logger.warning("Layer %s updated without style file. User can try uploading it again. Error: %s", external_layer.id, file_error_msg)
                 params['srs'] = external_layer.native_srs
             else:
                 external_layer.vector_tile = False
@@ -5517,6 +5553,12 @@ def external_layer_update(request, external_layer_id):
                     to_url = reverse('layergroup_update', kwargs={'lgid': layergroup_id}) + query_string
             else:
                 to_url = back_url
+
+            if external_layer.type == 'MVT' and style_file_upload_error:
+                if not redirect_to_layergroup:
+                    to_url = reverse('external_layer_update', kwargs={'external_layer_id': external_layer.id})
+                return HttpResponseRedirect(to_url + '?style_file_error=1')
+
             return HttpResponseRedirect(to_url)
 
         except Exception as e:
@@ -5565,6 +5607,11 @@ def external_layer_update(request, external_layer_id):
 
         if layergroup_id:
             form.fields['layer_group'].queryset = form.fields['layer_group'].queryset.filter(id=layergroup_id)
+        
+        style_file_error_message = None
+        if request.GET.get('style_file_error') == '1':
+            style_file_error_message = _("The layer was saved successfully, but there was an error uploading the style file. Please try uploading it again.")
+        
         response= {
             'form': form,
             'external_layer': external_layer,
@@ -5574,7 +5621,8 @@ def external_layer_update(request, external_layer_id):
             'project_id': project_id,
             'layergroup_id': layergroup_id,
             'from_redirect': from_redirect,
-            'back_url': back_url
+            'back_url': back_url,
+            'style_file_error_message': style_file_error_message
         }
 
     return render(request, 'external_layer_update.html', response)

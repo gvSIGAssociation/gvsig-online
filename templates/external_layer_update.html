@@ -39,6 +39,11 @@
 					<p>* {{ message }}</p>
 				</div>
 				{% endif %}
+				{% if style_file_error_message %}
+				<div id="style-file-error" style="color:#ff8800; background-color:#fff3cd; padding:10px; border:1px solid #ffc107; border-radius:4px; margin-bottom:10px;">
+					<p><strong>{% trans "Warning" %}:</strong> {{ style_file_error_message }}</p>
+				</div>
+				{% endif %}
 			</div>
 		</div>
 
