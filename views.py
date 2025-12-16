@@ -1528,8 +1528,6 @@ def layer_update(request, layer_id):
             layer.external_params = json.dumps(params)
             layer.conf = layerConf
             layer.save()
-            if layer.cached:
-                tasks.update_wmts_layer_info.apply_async(args=[layer.id])
 
             if 'layer-image' in request.FILES:
                 up_file = request.FILES['layer-image']
@@ -1558,6 +1556,9 @@ def layer_update(request, layer_id):
                 gs.createOrUpdateGeoserverLayerGroup(new_layer_group)
 
             utils.set_layer_permissions(layer, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles)
+            
+            if layer.cached:
+                tasks.update_wmts_layer_info.apply_async(args=[layer.id])
             gs.reload_nodes()
         if from_redirect:
             query_string = '?redirect=' + from_redirect
@@ -3660,8 +3661,6 @@ def layer_create_with_group(request, layergroup_id):
                     
                     newRecord.conf = initial_conf                    
                     newRecord.save()
-                    if newRecord.cached:
-                        tasks.update_wmts_layer_info.apply_async(args=[newRecord.id])
 
                     for i in form.cleaned_data['fields']:
                         if 'enumkey' in i:
@@ -3689,6 +3688,8 @@ def layer_create_with_group(request, layergroup_id):
                         'max_features': maxFeatures
                     }
                     utils.set_layer_permissions(newRecord, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles)
+                    if newRecord.cached:
+                        tasks.update_wmts_layer_info.apply_async(args=[newRecord.id])
                     do_config_layer(server, newRecord, featuretype)
 
                     if redirect_to_layergroup:
