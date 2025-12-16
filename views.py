@@ -5287,6 +5287,12 @@ def external_layer_add(request):
                         logger.exception("Error uploading MVT style file for layer %s", external_layer.id)
                         style_file_upload_error = True
                         file_error_msg = str(file_error)
+                        if os.path.exists(style_path):
+                            try:
+                                os.remove(style_path)
+                                logger.info("Deleted empty/corrupted style file: %s", style_path)
+                            except Exception as delete_error:
+                                logger.warning("Could not delete empty style file %s: %s", style_path, str(delete_error))
                         logger.warning("Layer %s saved without style file. User can update it later. Error: %s", external_layer.id, file_error_msg)
                 params['srs'] = external_layer.native_srs
             else:
@@ -5523,6 +5529,12 @@ def external_layer_update(request, external_layer_id):
                         logger.exception("Error uploading MVT style file for layer %s", external_layer.id)
                         style_file_upload_error = True
                         file_error_msg = str(file_error)
+                        if os.path.exists(style_path):
+                            try:
+                                os.remove(style_path)
+                                logger.info("Deleted empty/corrupted style file: %s", style_path)
+                            except Exception as delete_error:
+                                logger.warning("Could not delete empty style file %s: %s", style_path, str(delete_error))
                         logger.warning("Layer %s updated without style file. User can try uploading it again. Error: %s", external_layer.id, file_error_msg)
                 params['srs'] = external_layer.native_srs
             else:
