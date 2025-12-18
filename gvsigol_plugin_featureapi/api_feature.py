@@ -1369,7 +1369,7 @@ class GetSignedUrlFromLinkView(ListAPIView):
                 return HttpException(404, "File NOT found in disk").get_exception()
             
             if(path.exists(file_path)):
-                base_url = request.build_absolute_uri(reverse('get_signed_download', args=["TOKEN_PLACEHOLDER"]))
+                base_url = request.build_absolute_uri(reverse('gvsigol_plugin_featureapi:get_signed_download', args=["TOKEN_PLACEHOLDER"]))
                 url_tpl = base_url.replace("TOKEN_PLACEHOLDER", "{token}")
                 signed_url = util.create_signed_url(file_path, url_tpl)                
 
