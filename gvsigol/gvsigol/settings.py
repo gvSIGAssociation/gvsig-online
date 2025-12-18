@@ -140,7 +140,8 @@ env = environ.Env(
     #CELERY
     #TODO: split string host, pass, etc
     CELERY_BROKER_URL=(str,'pyamqp://gvsigol:12345678@localhost:5672/gvsigol'),
-    CELERY_TASK_ALWAYS_EAGER =(bool,False),
+    CELERY_TASK_ALWAYS_EAGER =(bool,True),
+    CELERY_RESULT_EXPIRES=(int,259200),  # Resultados expiran en 3 días por defecto (259200 segundos)
     # Session
     SECRET_KEY=(str,'qz$rai5n3e1!13k&7ug1db72@-&g#r2o%bem68#-z+5um%etgk'),
     #Email    
@@ -226,7 +227,8 @@ INSTALLED_APPS = [
     'gvsigol_core',
     'actstream',
     #### DEPENDENCIES ######,
-    'django_celery_beat'    
+    'django_celery_beat',
+    'django_celery_results',  # Para almacenar resultados de Celery en la DB
 ]
 
 # environment
@@ -723,6 +725,8 @@ LEGACY_GVSIGOL_SERVICES = {
 
 
 CELERY_BROKER_URL = env('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = 'django-db'  # Usar la base de datos Django para almacenar resultados
+CELERY_RESULT_EXPIRES = env('CELERY_RESULT_EXPIRES')  # Los resultados expiran en 3 días por defecto
 CELERY_TASK_ACKS_LATE = True
 CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_TASK_ALWAYS_EAGER = env('CELERY_TASK_ALWAYS_EAGER')
