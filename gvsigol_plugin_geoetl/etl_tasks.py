@@ -1407,18 +1407,27 @@ def input_Csv(dicc):
                 file_path = dicc["csv-file"]+'/'+file
                 
                 # Process this file in chunks
-                skiprows = 0
                 first_file_first_chunk = (x == 0)
                 chunk_counter = 10000
                 file_first_chunk = True
+                chunk_number = 0
 
                 while chunk_counter == 10000:
-                    # Calculate actual skiprows for this chunk
-                    actual_skiprows = skiprows + base_skiprows
+                    if file_first_chunk:
+                        # First chunk: read header row after skipping base_skiprows
+                        df = pd.read_csv(file_path, sep=dicc["separator"], encoding='utf8', 
+                                       skiprows=base_skiprows, nrows=10000, 
+                                       header=header_param)
+                    else:
+                        # Subsequent chunks: skip header row + base_skiprows + already read data
+                        # If header_param is 0, we need to account for the header row (1 row)
+                        # plus all data rows already read (chunk_number * 10000)
+                        header_offset = 1 if header_param == 0 else 0
+                        rows_to_skip = base_skiprows + header_offset + (chunk_number * 10000)
+                        df = pd.read_csv(file_path, sep=dicc["separator"], encoding='utf8', 
+                                       skiprows=rows_to_skip, nrows=10000, 
+                                       header=None, names=global_column_names)
                     
-                    df = pd.read_csv(file_path, sep=dicc["separator"], encoding='utf8', 
-                                   skiprows=actual_skiprows, nrows=10000, 
-                                   header=header_param)
                     chunk_counter = df.shape[0]
                     
                     if chunk_counter > 0:
@@ -1429,8 +1438,11 @@ def input_Csv(dicc):
                             df.columns = [string.ascii_uppercase[i] if i < 26 else f"Column{i+1}" for i in range(num_cols)]
                             if global_column_names is None:
                                 global_column_names = list(df.columns)
-                        elif global_column_names is not None:
-                            # Use established column names for consistency
+                        elif file_first_chunk and global_column_names is None:
+                            # First chunk with schema - save column names
+                            global_column_names = list(df.columns)
+                        elif file_first_chunk and global_column_names is not None:
+                            # First chunk of subsequent files - use established names
                             df.columns = global_column_names
                         
                         df['_filename'] = file
@@ -1452,23 +1464,32 @@ def input_Csv(dicc):
                         
                         file_first_chunk = False
                     
-                    skiprows += 10000
+                    chunk_number += 1
                 
                 x += 1
     else:
         # Handle single CSV file (original logic)
-        skiprows = 0
         first = True
         counter = 10000
+        chunk_number = 0
+        column_names = None
 
         while counter == 10000:
 
-            # Calculate actual skiprows for this chunk
-            actual_skiprows = skiprows + base_skiprows
-
-            df = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], encoding='utf8', 
-                            skiprows=actual_skiprows, nrows=10000, 
-                            header=header_param)
+            if first:
+                # First chunk: read header row after skipping base_skiprows
+                df = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], encoding='utf8', 
+                                skiprows=base_skiprows, nrows=10000, 
+                                header=header_param)
+            else:
+                # Subsequent chunks: skip header row + base_skiprows + already read data
+                # If header_param is 0, we need to account for the header row (1 row)
+                # plus all data rows already read (chunk_number * 10000)
+                header_offset = 1 if header_param == 0 else 0
+                rows_to_skip = base_skiprows + header_offset + (chunk_number * 10000)
+                df = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], encoding='utf8', 
+                                skiprows=rows_to_skip, nrows=10000, 
+                                header=None, names=column_names)
 
             counter = df.shape[0]
 
@@ -1485,7 +1506,7 @@ def input_Csv(dicc):
                     num_cols = len(df.columns)
                     df.columns = [string.ascii_uppercase[i] if i < 26 else f"Column{i+1}" for i in range(num_cols)]
 
-                column_names = df.columns
+                column_names = list(df.columns)
 
                 df_obj = df.select_dtypes(['object'])
                 df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
@@ -1495,14 +1516,12 @@ def input_Csv(dicc):
                 
             else:
 
-                df.columns = column_names
-
                 df_obj = df.select_dtypes(['object'])
                 df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
 
                 df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='append', index=False)
 
-            skiprows += 10000
+            chunk_number += 1
 
             conn.close()
             db.dispose()
