@@ -5387,8 +5387,9 @@ def external_layer_update(request, external_layer_id):
 
             master_node = geographic_servers.get_instance().get_master_node(server.id)
             if external_layer.cached and not cached:
-                geowebcache.get_instance().delete_layer(None, external_layer, server, master_node.getUrl())
-                geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
+                if external_layer.type == 'WMS':
+                    geowebcache.get_instance().delete_layer(None, external_layer, server, master_node.getUrl())
+                    geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
 
             if not external_layer.cached and cached:
                 if external_layer.type == 'WMS':
@@ -5399,6 +5400,8 @@ def external_layer_update(request, external_layer_id):
             external_layer.type = request.POST.get('type')
             external_layer.layer_group = layer_group
             external_layer.visible = is_visible
+            if external_layer.type != 'WMS':
+                cached = False
             external_layer.cached = cached
             external_layer.detailed_info_enabled = detailed_info_enabled
             external_layer.detailed_info_button_title = detailed_info_button_title
