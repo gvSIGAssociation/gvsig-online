@@ -179,7 +179,7 @@
 										<label for="visible">{% trans "Visible" %}</label>
 
 									</div>
-									<div class="col-md-4 form-group">
+									<div class="col-md-4 form-group cached-control">
 										<input type="checkbox" name="cached" id="cached"/>
 										<label for="cached">{% trans "Cached" %}</label>
 									</div>
@@ -326,6 +326,12 @@ $(document).ready(function(){
 			for(index in bing_layers){
 				$("#id_layers").append("<option value=\""+bing_layers[index]+"\">"+bing_layers[index]+"</option>")
 			}
+		}
+		
+		if(type == "WMS"){
+			$(".cached-control").css("display","block");
+		} else {
+			$(".cached-control").css("display","none");
 		}
 	};
 

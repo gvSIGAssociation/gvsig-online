@@ -201,7 +201,7 @@
 									{% endif %}
 									<label for="visible">{% trans "Visible" %}</label>
 								</div>
-								<div class="col-md-4 form-group">
+								<div class="col-md-4 form-group cached-control">
 									{% if external_layer.cached %}
 									<input type="checkbox" name="cached"  id="cached" checked/>
 									{% else %}
@@ -400,6 +400,12 @@ $(document).ready(function(){
 				$("#id_layers").append("<option value=\""+bing_layers[index]+"\">"+bing_layers[index]+"</option>")
 			}
 		}
+		
+		if(type == "WMS"){
+			$(".cached-control").css("display","block");
+		} else {
+			$(".cached-control").css("display","none");
+		}
 	};
 
 	$("#id_type").change(function(){
@@ -418,6 +424,11 @@ $(document).ready(function(){
 
 	check_url();
 	updateFormfields();
+	
+	var initialType = $("#id_type option:selected").val();
+	if(initialType != "WMS"){
+		$(".cached-control").css("display","none");
+	}
 
 	function showAlertMatrix(){
 		var matrixset = $("#id_matrixset").val();
