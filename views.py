@@ -131,7 +131,7 @@ def home(request):
     else:
         useClassicViewer = True
 
-    return render(request, 'home.html', {'projects': projects, 'public_projects': public_projects, 'allow_password_update': allow_password_update, 'manage_passwords_url': manage_passwords_url, 'use_classic_viewer': useClassicViewer, 'frontend_base_url': settings.FRONTEND_BASE_URL})
+    return render(request, 'home.html', {'projects': projects, 'public_projects': public_projects, 'allow_password_update': allow_password_update, 'manage_passwords_url': manage_passwords_url, 'use_classic_viewer': useClassicViewer})
 
 @login_required()
 @staff_required
@@ -161,10 +161,12 @@ def project_list(request):
     show_bootstrap_project_links = True
     show_spa_project_links = True
     
+    frontend_base_url = settings.FRONTEND_BASE_URL.rstrip('/')
+    
     response = {
         'projects': projects,
         'servers': Server.objects.all().order_by('-default'),
-        'frontend_base_url': settings.FRONTEND_BASE_URL,
+        'frontend_base_url': frontend_base_url,
         'SHOW_SPA_PROJECT_LINKS': show_spa_project_links,
         'SHOW_BOOTSTRAP_PROJECT_LINKS': show_bootstrap_project_links
     }
