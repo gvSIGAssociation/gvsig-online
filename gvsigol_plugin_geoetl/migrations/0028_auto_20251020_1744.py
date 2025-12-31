@@ -9,36 +9,39 @@ def cleanup_duplicate_etlstatus(apps, schema_editor):
     Limpia registros duplicados de ETLstatus antes de aplicar el constraint de unicidad.
     Conserva el registro más reciente (por last_exec) para cada id_ws.
     """
-    ETLstatus = apps.get_model('gvsigol_plugin_geoetl', 'ETLstatus')
-    
-    # Encontrar id_ws con duplicados
-    duplicates = (ETLstatus.objects
-                  .filter(id_ws__isnull=False)
-                  .values('id_ws')
-                  .annotate(count=Count('id'))
-                  .filter(count__gt=1))
-    
-    total_deleted = 0
-    
-    for dup in duplicates:
-        id_ws = dup['id_ws']
+    try:
+        ETLstatus = apps.get_model('gvsigol_plugin_geoetl', 'ETLstatus')
         
-        # Obtener todos los registros para este id_ws, ordenados por fecha (más reciente primero)
-        status_records = ETLstatus.objects.filter(id_ws=id_ws).order_by('-last_exec', '-id')
+        # Encontrar id_ws con duplicados
+        duplicates = (ETLstatus.objects
+                      .filter(id_ws__isnull=False)
+                      .values('id_ws')
+                      .annotate(count=Count('id'))
+                      .filter(count__gt=1))
         
-        if status_records.count() > 1:
-            # Conservar el primero (más reciente) y eliminar los demás
-            keep_id = status_records.first().id
-            deleted = status_records.exclude(id=keep_id).delete()[0]
-            total_deleted += deleted
+        total_deleted = 0
+        
+        for dup in duplicates:
+            id_ws = dup['id_ws']
             
-            print(f"  Workspace ID {id_ws}: Eliminados {deleted} duplicados, conservado ID {keep_id}")
-    
-    if total_deleted > 0:
-        print(f"\n✓ Limpieza completada: {total_deleted} registros duplicados eliminados")
-    else:
-        print("✓ No se encontraron duplicados")
-
+            # Obtener todos los registros para este id_ws, ordenados por fecha (más reciente primero)
+            status_records = ETLstatus.objects.filter(id_ws=id_ws).order_by('-last_exec', '-id')
+            
+            if status_records.count() > 1:
+                # Conservar el primero (más reciente) y eliminar los demás
+                keep_id = status_records.first().id
+                deleted = status_records.exclude(id=keep_id).delete()[0]
+                total_deleted += deleted
+                
+                print(f"  Workspace ID {id_ws}: Eliminados {deleted} duplicados, conservado ID {keep_id}")
+        
+        if total_deleted > 0:
+            print(f"\n- Limpieza completada: {total_deleted} registros duplicados eliminados")
+        else:
+            print("- No se encontraron duplicados")
+    except:
+      import logging
+      logging.getLogger('gvsigol').exception("Error en cleanup_duplicate_etlstatus")
 
 def reverse_cleanup(apps, schema_editor):
     """
