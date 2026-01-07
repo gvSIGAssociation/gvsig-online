@@ -140,7 +140,7 @@ env = environ.Env(
     #CELERY
     #TODO: split string host, pass, etc
     CELERY_BROKER_URL=(str,'pyamqp://gvsigol:12345678@localhost:5672/gvsigol'),
-    CELERY_TASK_ALWAYS_EAGER =(bool,True),
+    CELERY_TASK_ALWAYS_EAGER =(bool,False),
     CELERY_RESULT_EXPIRES=(int,259200),  # Resultados expiran en 3 días por defecto (259200 segundos)
     # Session
     SECRET_KEY=(str,'qz$rai5n3e1!13k&7ug1db72@-&g#r2o%bem68#-z+5um%etgk'),
