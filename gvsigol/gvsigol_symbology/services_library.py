@@ -71,9 +71,32 @@ def add_symbol(request, json_rule, library_id, symbol_type, gs):
     #    raise InvalidValue(-1, _("Invalid title: '{value}'. Title should not contain any special characters").format(value=title))
     
     prefix_name= library.name + "_lib_"
+    style_name = prefix_name + name
     
+    # Verificar si el símbolo ya existe ANTES de crear nada
+    # 1. Verificar si existe un Style con ese nombre en la BD
+    try:
+        existing_style = Style.objects.get(name=style_name)
+        # Si existe el estilo, verificar si está asociado a esta biblioteca
+        existing_rules = Rule.objects.filter(style=existing_style, name=style_name)
+        for existing_rule in existing_rules:
+            if LibraryRule.objects.filter(library=library, rule=existing_rule).exists():
+                # El símbolo ya existe en esta biblioteca
+                msg_name = name
+                error = str(_("There is already a style named")) + " " + msg_name
+                raise Exception(error)
+    except Style.DoesNotExist:
+        pass  # El estilo no existe en la BD, continuar
+    
+    # 2. Verificar si existe en GeoServer
+    if gs.getStyle(style_name) is not None:
+        msg_name = name
+        error = str(_("There is already a style named")) + " " + msg_name
+        raise Exception(error)
+    
+    # Si llegamos aquí, el símbolo no existe, podemos crearlo
     style = Style(
-        name = prefix_name + name,
+        name = style_name,
         title = title,
         is_default = False,
         type = "US"
@@ -164,12 +187,49 @@ def add_symbol(request, json_rule, library_id, symbol_type, gs):
             
     sld_body = sld_builder.build_library_symbol(rule)
 
-    if gs.createStyle(style.name, sld_body):       
-        return True
-        
-    else:          
-        gs.updateStyle(None, style.name, sld_body)        
-        return True
+    try:
+        if gs.createStyle(style.name, sld_body):       
+            return True
+        else:          
+            gs.updateStyle(None, style.name, sld_body)        
+            return True
+    except Exception as e:
+        # Si falla la creación en GeoServer, limpiar lo que se creó en la BD
+        # (puede ocurrir en condiciones de carrera)
+        error_message = str(e)
+        if "There is already a style named" in error_message or "ya existe un estilo" in error_message.lower():
+            # Limpiar lo creado
+            try:
+                library_rule.delete()
+            except:
+                pass
+            try:
+                rule.delete()
+            except:
+                pass
+            try:
+                style.delete()
+            except:
+                pass
+            # Lanzar el error para que se muestre al usuario
+            msg_name = name
+            error = str(_("There is already a style named")) + " " + msg_name
+            raise Exception(error)
+        else:
+            # Otro tipo de error, también limpiar
+            try:
+                library_rule.delete()
+            except:
+                pass
+            try:
+                rule.delete()
+            except:
+                pass
+            try:
+                style.delete()
+            except:
+                pass
+            raise e
     
 def update_symbol(request, json_rule, rule, library_rule, gs):
     try:
