@@ -122,37 +122,62 @@ class FeatureSerializer(serializers.Serializer):
                 geom_col = geom_cols[0]
 
                 native_epsg = 4326
-                tbuffer = buffer
                 if layer.native_srs:
                     native_epsg = layer.native_srs.split(':')[1]
                     native_epsg = int(native_epsg)
-                    if(native_epsg != 4326):
-                        tbuffer = self.get_transformed_buffer_distance(con, 4326, native_epsg, buffer, lon, lat)
+                
+                source_epsg = epsg
+                
+                # Si source_epsg == 4326, no necesitamos transformar el buffer porque geography ya lo maneja en metros
+                tbuffer = buffer
+                if(native_epsg != source_epsg and source_epsg != 4326):
+                    tbuffer = self.get_transformed_buffer_distance(con, source_epsg, native_epsg, buffer, lon, lat)
                    
-                epsilon = self.get_epsilon(con, geom_col, epsg, native_epsg, table, schema, buffer, lon, lat)
+                epsilon = self.get_epsilon(con, geom_col, source_epsg, native_epsg, table, schema, buffer, lon, lat, tbuffer)
                 #get_buffer_params = " "
                 #if(getbuffer == True):
-                #    get_buffer_params = ", ST_AsGeoJSON(st_buffer('SRID=4326;POINT({lon} {lat})'::geometry, {buffer}))"
+                #    get_buffer_params = ", ST_AsGeoJSON(st_buffer('SRID={source_epsg};POINT({lon} {lat})'::geometry, {buffer}))"
                 if cql_filter_read:
                     cql_filter = sqlbuilder.SQL('{cql_filter} AND').format(cql_filter=self._get_cql_permissions_filter(cql_filter_read))
                 else:
                     cql_filter = sqlbuilder.SQL('')
+                
+                # Para 4326, usar geography para el buffer (más preciso). Para otros CRS, usar geometry
+                if source_epsg == 4326:
+                    buffer_expr_template = sqlbuilder.SQL("st_transform(st_buffer('SRID={source_epsg};POINT({lon} {lat})'::geography, {buffer})::geometry, {native_epsg})")
+                    buffer_expr = buffer_expr_template.format(
+                        source_epsg=sqlbuilder.Literal(source_epsg),
+                        lon=sqlbuilder.Literal(lon),
+                        lat=sqlbuilder.Literal(lat),
+                        buffer=sqlbuilder.Literal(buffer),
+                        native_epsg=sqlbuilder.Literal(native_epsg)
+                    )
+                else:
+                    buffer_expr_template = sqlbuilder.SQL("st_buffer(st_transform('SRID={source_epsg};POINT({lon} {lat})'::geometry, {native_epsg}), {tbuffer})")
+                    buffer_expr = buffer_expr_template.format(
+                        source_epsg=sqlbuilder.Literal(source_epsg),
+                        lon=sqlbuilder.Literal(lon),
+                        lat=sqlbuilder.Literal(lat),
+                        native_epsg=sqlbuilder.Literal(native_epsg),
+                        tbuffer=sqlbuilder.Literal(tbuffer)
+                    )
+                
                 sql = sqlbuilder.SQL("""
                     SELECT
-                    ST_AsGeoJSON(ST_Transform({geom}, {epsg})), row_to_json((SELECT d FROM (SELECT {col_names_values}) d)), ST_AsGeoJSON(ST_Simplify(ST_Transform({geom}, {epsg}), {epsilon})), ST_NPoints({geom}) as props
+                    ST_AsGeoJSON(ST_Transform({geom}, {source_epsg})), row_to_json((SELECT d FROM (SELECT {col_names_values}) d)), ST_AsGeoJSON(ST_Simplify(ST_Transform({geom}, {source_epsg}), {epsilon})), ST_NPoints({geom}) as props
                     FROM {schema}.{table}
                     WHERE
-                    {cql_filter} ST_INTERSECTS(st_buffer(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {tbuffer}), {geom})
-                    ORDER BY st_distance(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {geom})
+                    {cql_filter} ST_INTERSECTS({buffer_expr}, {geom})
+                    ORDER BY st_distance(st_transform('SRID={source_epsg};POINT({lon} {lat})'::geometry, {native_epsg}), {geom})
                 """)
                 query = sql.format(
                     geom=sqlbuilder.Identifier(geom_col),
-                    epsg=sqlbuilder.Literal(epsg),
+                    source_epsg=sqlbuilder.Literal(source_epsg),
                     native_epsg=sqlbuilder.Literal(native_epsg),
                     col_names_values=properties_query,
                     schema=sqlbuilder.Identifier(schema),
                     table=sqlbuilder.Identifier(table),
-                    tbuffer=sqlbuilder.Literal(tbuffer),
+                    buffer_expr=buffer_expr,
                     lat=sqlbuilder.Literal(lat),
                     lon=sqlbuilder.Literal(lon),
                     epsilon=sqlbuilder.Literal(epsilon),
@@ -178,12 +203,12 @@ class FeatureSerializer(serializers.Serializer):
                             geometry = json.loads(feat[0])
 
                             if 'crs' not in geometry:
-                                geometry['crs'] = json.loads("{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}")
+                                geometry['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{source_epsg}"}}}}')
 
                             if feat[2] is not None:
                                 simplegeom = json.loads(feat[2])
                                 if 'crs' not in simplegeom:
-                                    simplegeom['crs'] = json.loads("{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}")
+                                    simplegeom['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{source_epsg}"}}}}')
 
                         element = {
                             "type":"Feature",
@@ -206,10 +231,10 @@ class FeatureSerializer(serializers.Serializer):
 
                 bufferGeom = 'null'
                 if(getbuffer == True):
-                    bufferGeom = self.getBufferGeometry(con, lon, lat, buffer)
+                    bufferGeom = self.getBufferGeometry(con, lon, lat, buffer, source_epsg)
                     bufferGeom = json.loads(bufferGeom)
                     if 'crs' not in bufferGeom:
-                        bufferGeom['crs'] = json.loads("{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}")
+                        bufferGeom['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{source_epsg}"}}}}')
 
                 return {
                         "type":"FeatureCollection",
@@ -251,23 +276,31 @@ class FeatureSerializer(serializers.Serializer):
                 else:
                     cql_filter = sqlbuilder.SQL('')
                 
-                # Consulta optimizada: mantiene lógica espacial original pero usa índices eficientemente  
+                # Consulta optimizada: mantiene lógica espacial original pero usa índices eficientemente
+                # Para 4326, usar geography para el buffer (más preciso). Para otros CRS, usar buffer en metros
+                if source_epsg == 4326:
+                    buffer_expr_template = sqlbuilder.SQL("ST_Buffer(geom_source::geography, {buffer})::geometry")
+                else:
+                    buffer_expr_template = sqlbuilder.SQL("ST_Buffer(geom_source, {buffer})")
+                
+                buffer_expr = buffer_expr_template.format(buffer=sqlbuilder.Literal(buffer))
+                
                 sql = sqlbuilder.SQL("""
                     WITH 
-                    query_point_4326 AS (
-                        SELECT ST_SetSRID(ST_MakePoint({lon}, {lat}), 4326) as geom_4326
+                    query_point_source AS (
+                        SELECT ST_SetSRID(ST_MakePoint({lon}, {lat}), {source_epsg}) as geom_source
                     ),
                     query_point_native AS (
-                        SELECT ST_Transform(geom_4326, {native_epsg}) as geom_native
-                        FROM query_point_4326
+                        SELECT ST_Transform(geom_source, {native_epsg}) as geom_native
+                        FROM query_point_source
                     ),
-                    query_buffer_4326 AS (
-                        SELECT ST_Buffer(geom_4326::geography, {buffer})::geometry as buffer_geom_4326
-                        FROM query_point_4326
+                    query_buffer_source AS (
+                        SELECT {buffer_expr} as buffer_geom_source
+                        FROM query_point_source
                     ),
                     query_buffer_native AS (
-                        SELECT ST_Transform(buffer_geom_4326, {native_epsg}) as buffer_geom_native
-                        FROM query_buffer_4326
+                        SELECT ST_Transform(buffer_geom_source, {native_epsg}) as buffer_geom_native
+                        FROM query_buffer_source
                     ),
                     bbox_candidates AS (
                         SELECT {geom} as geom_original, 
@@ -277,14 +310,14 @@ class FeatureSerializer(serializers.Serializer):
                     ),
                     filtered_features AS (
                         SELECT geom_original,
-                               ST_Transform(geom_original, 4326) as geom_4326_transformed,
+                               ST_Transform(geom_original, {source_epsg}) as geom_source_transformed,
                                {col_names_values}
                         FROM bbox_candidates, query_buffer_native
                         WHERE ST_Intersects(query_buffer_native.buffer_geom_native, bbox_candidates.geom_original)
                     )
-                    SELECT ST_AsGeoJSON(geom_4326_transformed), 
+                    SELECT ST_AsGeoJSON(geom_source_transformed), 
                            row_to_json((SELECT d FROM (SELECT {col_names_values}) d)),
-                           ST_AsGeoJSON(geom_4326_transformed),
+                           ST_AsGeoJSON(geom_source_transformed),
                            ST_NPoints(geom_original) as numpoints
                     FROM filtered_features, query_point_native
                     ORDER BY ST_Distance(query_point_native.geom_native, filtered_features.geom_original)
@@ -292,10 +325,11 @@ class FeatureSerializer(serializers.Serializer):
                 query = sql.format(
                     geom=sqlbuilder.Identifier(geom_col),
                     native_epsg=sqlbuilder.Literal(native_epsg),
+                    source_epsg=sqlbuilder.Literal(source_epsg),
                     col_names_values=properties_query,
                     schema=sqlbuilder.Identifier(schema),
                     table=sqlbuilder.Identifier(table),
-                    buffer=sqlbuilder.Literal(buffer),
+                    buffer_expr=buffer_expr,
                     lat=sqlbuilder.Literal(lat),
                     lon=sqlbuilder.Literal(lon),
                     cql_filter=cql_filter
@@ -319,12 +353,12 @@ class FeatureSerializer(serializers.Serializer):
                             geometry = json.loads(feat[0])
 
                             if 'crs' not in geometry:
-                                geometry['crs'] = json.loads("{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}")
+                                geometry['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{source_epsg}"}}}}')
 
                             if feat[2] is not None:
                                 simplegeom = json.loads(feat[2])
                                 if 'crs' not in simplegeom:
-                                    simplegeom['crs'] = json.loads("{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}")
+                                    simplegeom['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{source_epsg}"}}}}')
 
                         element = {
                             "type":"Feature",
@@ -347,10 +381,10 @@ class FeatureSerializer(serializers.Serializer):
 
                 bufferGeom = 'null'
                 if(getbuffer == True):
-                    bufferGeom = self.getBufferGeometry(con, lon, lat, buffer)
+                    bufferGeom = self.getBufferGeometry(con, lon, lat, buffer, source_epsg)
                     bufferGeom = json.loads(bufferGeom)
                     if 'crs' not in bufferGeom:
-                        bufferGeom['crs'] = json.loads("{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}")
+                        bufferGeom['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{source_epsg}"}}}}')
 
                 return {
                         "type":"FeatureCollection",
@@ -365,12 +399,16 @@ class FeatureSerializer(serializers.Serializer):
             raise HttpException(400, "Features cannot be queried. Unexpected error: " + format(e))
 
 
-    def getBufferGeometry(self, con, lon, lat, buffer):
-        sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(st_buffer('SRID=4326;POINT({lon} {lat})'::geometry, {buffer}))")
+    def getBufferGeometry(self, con, lon, lat, buffer, source_epsg=4326):
+        if source_epsg == 4326:
+            sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(st_buffer('SRID={source_epsg};POINT({lon} {lat})'::geography, {buffer})::geometry)")
+        else:
+            sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(st_buffer('SRID={source_epsg};POINT({lon} {lat})'::geometry, {buffer}))")
         query = sql.format(
             buffer=sqlbuilder.Literal(buffer),
             lat=sqlbuilder.Literal(lat),
             lon=sqlbuilder.Literal(lon),
+            source_epsg=sqlbuilder.Literal(source_epsg),
         )
         con.cursor.execute(query)
         r = con.cursor.fetchone()
@@ -396,26 +434,57 @@ class FeatureSerializer(serializers.Serializer):
                 print(".........Dst Num:" + str(len(coor)) + " " )
 
 
-    def get_epsilon(self, con, geom_col, epsg, native_epsg, table, schema, buffer, lon, lat):
+    def get_epsilon(self, con, geom_col, epsg, native_epsg, table, schema, buffer, lon, lat, tbuffer=None):
         '''
         Epsilon es un número que sirve para la simplificación de polígonos y tiene relación con el número de puntos a simplificar en una curva
-        por la distancia de los puntos a sus extremos.  Como las geometrías están en 4326 epsilon está en grados. Cuanto más grande es epsilon menos
+        por la distancia de los puntos a sus extremos. El epsilon está en las unidades del CRS de destino. Cuanto más grande es epsilon menos
         se simplifica. Lo calculamos de forma aproximada a partir del perímetro del polígono. Si aumentamos div se simplifica más y si lo disminuimos
         se simplifica menos.
 
         Esto se usa desde la app móvil para dibujar poligonos seleccionados porque si metemos muchos vértices petamos la app. 
         '''
         div = 10000
-        sql = sqlbuilder.SQL("SELECT ST_Perimeter(ST_Transform({geom}, {epsg})) FROM {schema}.{table} WHERE ST_INTERSECTS(st_buffer(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {buffer}), {geom}) ORDER BY st_distance(st_transform('SRID=4326;POINT({lon} {lat})'::geometry, {native_epsg}), {geom})")
+        
+        if tbuffer is None:
+            tbuffer = buffer
+            if epsg != native_epsg and epsg != 4326:
+                tbuffer = self.get_transformed_buffer_distance(con, epsg, native_epsg, buffer, lon, lat)
+        
+        point_expr_template = sqlbuilder.SQL("st_transform('SRID={epsg};POINT({lon} {lat})'::geometry, {native_epsg})")
+        point_expr = point_expr_template.format(
+            epsg=sqlbuilder.Literal(epsg),
+            lon=sqlbuilder.Literal(lon),
+            lat=sqlbuilder.Literal(lat),
+            native_epsg=sqlbuilder.Literal(native_epsg)
+        )
+        
+        if epsg == 4326:
+            buffer_expr_template = sqlbuilder.SQL("st_transform(st_buffer('SRID={epsg};POINT({lon} {lat})'::geography, {buffer})::geometry, {native_epsg})")
+            buffer_expr = buffer_expr_template.format(
+                epsg=sqlbuilder.Literal(epsg),
+                lon=sqlbuilder.Literal(lon),
+                lat=sqlbuilder.Literal(lat),
+                buffer=sqlbuilder.Literal(buffer),
+                native_epsg=sqlbuilder.Literal(native_epsg)
+            )
+        else:
+            buffer_expr_template = sqlbuilder.SQL("st_buffer(st_transform('SRID={epsg};POINT({lon} {lat})'::geometry, {native_epsg}), {tbuffer})")
+            buffer_expr = buffer_expr_template.format(
+                epsg=sqlbuilder.Literal(epsg),
+                lon=sqlbuilder.Literal(lon),
+                lat=sqlbuilder.Literal(lat),
+                native_epsg=sqlbuilder.Literal(native_epsg),
+                tbuffer=sqlbuilder.Literal(tbuffer)
+            )
+        
+        sql = sqlbuilder.SQL("SELECT ST_Perimeter(ST_Transform({geom}, {epsg})) FROM {schema}.{table} WHERE ST_INTERSECTS({buffer_expr}, {geom}) ORDER BY st_distance({point_expr}, {geom})")
         query = sql.format(
             geom=sqlbuilder.Identifier(geom_col),
             epsg=sqlbuilder.Literal(epsg),
-            native_epsg=sqlbuilder.Literal(native_epsg),
             schema=sqlbuilder.Identifier(schema),
             table=sqlbuilder.Identifier(table),
-            buffer=sqlbuilder.Literal(buffer),
-            lat=sqlbuilder.Literal(lat),
-            lon=sqlbuilder.Literal(lon),
+            buffer_expr=buffer_expr,
+            point_expr=point_expr,
         )
         con.cursor.execute(query)
         for feat in con.cursor.fetchall():
