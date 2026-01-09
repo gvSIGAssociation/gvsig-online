@@ -333,6 +333,17 @@ class FeaturesView(CreateAPIView):
                 except Exception:
                     raise HttpException(400, "Bad parameter epsg. The value must be an integer")
             
+            if 'geometry' in data and data['geometry'] is not None:
+                if 'crs' in data['geometry'] and data['geometry']['crs'] is not None:
+                    try:
+                        crs_name = data['geometry']['crs'].get('properties', {}).get('name', '')
+                        if crs_name.startswith('EPSG:'):
+                            feature_epsg = int(crs_name.split(':')[1])
+                            if feature_epsg != 4326:
+                                epsg = feature_epsg
+                    except (ValueError, KeyError, AttributeError):
+                        pass
+            
             feat = serializers.FeatureSerializer().update(validation, lyr_id, data, override, version_to_overwrite, username, epsg)
             return JsonResponse(feat, safe=False)
         except HttpException as e:

@@ -1727,8 +1727,10 @@ class FeatureSerializer(serializers.Serializer):
             logger.exception("Error getting CRS")
             target_crs = None
         if "crs" not in geom:
-            #El CRS de origen si no viene se presupone en 4326. El de destino se lee de la capa
-            geom['crs'] = json.loads("{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}")
+            if return_crs is not None:
+                geom['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{return_crs}"}}}}')
+            else:
+                geom['crs'] = json.loads("{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}")
 
         self._check_geom(geom, con)
         values = []
