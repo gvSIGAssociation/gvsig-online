@@ -946,6 +946,10 @@ def test_conexion(request):
 
                 response = etl_schema.test_sqlserver(jsParams['parameters'][0])
 
+            elif jsParams['type-db'] == 'SharePoint':
+
+                response = etl_schema.test_sharepoint(jsParams['parameters'][0])
+
             return HttpResponse(json.dumps(response), content_type="application/json")
 
 @login_required(login_url='/gvsigonline/auth/login_user/')
@@ -1588,6 +1592,51 @@ def etl_schema_padron_atm(request):
 
             return HttpResponse(response, content_type="application/json")        
         
+
+@login_required()
+@staff_required
+def etl_sharepoint_drives(request):
+    """Obtiene las bibliotecas de documentos (drives) de un sitio SharePoint."""
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            jsParams = json.loads(request.POST['jsonParams'])
+            drives = etl_schema.get_sharepoint_drives(jsParams['parameters'][0])
+            return HttpResponse(json.dumps(drives), content_type="application/json")
+
+@login_required()
+@staff_required
+def etl_sharepoint_browse(request):
+    """Lista el contenido de una carpeta en SharePoint."""
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            jsParams = json.loads(request.POST['jsonParams'])
+            contents = etl_schema.get_sharepoint_folder_contents(jsParams['parameters'][0])
+            return HttpResponse(json.dumps(contents), content_type="application/json")
+
+@login_required()
+@staff_required
+def etl_sharepoint_sheets(request):
+    """Obtiene las hojas de un archivo Excel de SharePoint."""
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            jsParams = json.loads(request.POST['jsonParams'])
+            sheets = etl_schema.get_sharepoint_excel_sheets(jsParams['parameters'][0])
+            return HttpResponse(json.dumps(sheets), content_type="application/json")
+
+@login_required()
+@staff_required
+def etl_schema_sharepoint(request):
+    """Obtiene el esquema (columnas) de un archivo de SharePoint según el formato."""
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            jsParams = json.loads(request.POST['jsonParams'])
+            schema = etl_schema.get_schema_sharepoint(jsParams['parameters'][0])
+            return HttpResponse(json.dumps(schema), content_type="application/json")
+
 
 def update_clean_temp_tables_task(ttl_hours):
     my_task_name = 'gvsigol_plugin_geoetl.clean_old_temp_tables'
