@@ -1386,3 +1386,68 @@ msgstr "Puntos mínimos"
 
 msgid "Variogram model"
 msgstr "Modelo de variograma"
+
+# SharePoint input translations
+msgid "SharePoint Connection:"
+msgstr "Conexión SharePoint:"
+
+msgid "Document Library:"
+msgstr "Biblioteca de documentos:"
+
+msgid "File format:"
+msgstr "Formato de archivo:"
+
+msgid "Browse files:"
+msgstr "Explorar archivos:"
+
+msgid "Click to select/deselect multiple files"
+msgstr "Clic para seleccionar/deseleccionar múltiples archivos"
+
+msgid "Selected files:"
+msgstr "Archivos seleccionados:"
+
+msgid "No files selected"
+msgstr "Ningún archivo seleccionado"
+
+msgid "No files found in this folder"
+msgstr "No se encontraron archivos en esta carpeta"
+
+msgid "No common sheets found"
+msgstr "No se encontraron hojas comunes"
+
+msgid "Please select at least one file first"
+msgstr "Por favor selecciona al menos un archivo primero"
+
+msgid "Please select at least one file"
+msgstr "Por favor selecciona al menos un archivo"
+
+msgid "Error loading libraries"
+msgstr "Error al cargar bibliotecas"
+
+msgid "Error loading folder contents"
+msgstr "Error al cargar contenido de la carpeta"
+
+msgid "Error loading sheets"
+msgstr "Error al cargar hojas"
+
+msgid "Loading..."
+msgstr "Cargando..."
+
+msgid "Select a connection and library, then click refresh."
+msgstr "Selecciona una conexión y biblioteca, luego haz clic en actualizar."
+
+# CSV input translations
+msgid "Choose csv/txt file:"
+msgstr "Elige archivo csv/txt:"
+
+msgid "Schema options:"
+msgstr "Opciones de esquema:"
+
+msgid "File has schema"
+msgstr "El archivo tiene esquema"
+
+msgid "File has not schema"
+msgstr "El archivo no tiene esquema"
+
+msgid "Single csv/txt file"
+msgstr "Archivo csv/txt único"

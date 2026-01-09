@@ -30,6 +30,7 @@
                                 <li><a data-shape="input_PadronAtm" class="palette_node_element draw2d_droppable dropdown-item">Padrón ATM</a></li>
                                 <li><a data-shape="input_Postgis" class="palette_node_element draw2d_droppable dropdown-item">PgSQL/PostGIS</a></li>
                                 <li><a data-shape="input_Segex" class="palette_node_element draw2d_droppable dropdown-item">SEGEX</a></li>
+                                <li><a data-shape="input_Sharepoint" class="palette_node_element draw2d_droppable dropdown-item">SharePoint</a></li>
                                 <li><a data-shape="input_Shp" class="palette_node_element draw2d_droppable dropdown-item">Shapefile</a></li>
                                 <li><a data-shape="input_SqlServer" class="palette_node_element draw2d_droppable dropdown-item">SQL Server</a></li>
                                 <li><a data-shape="input_Xml" class="palette_node_element draw2d_droppable dropdown-item">XML</a></li>
@@ -366,6 +367,7 @@
                                     <option value="">---</option>
                                     <option value="indenova">InDenova</option>
                                     <option value="segex">SEGEX</option>
+                                    <option value="sharepoint">SharePoint</option>
                                     <option value="padron-atm">Padrón ATM</option>
                                 </select>
                             </div>
@@ -587,6 +589,45 @@
                                     <input type="text" id="idacceso-atm" class="form-control" pattern="[A-Za-z]{3}">
                                 </div>
                             </div>
+                        </div>
+
+                        <div id="sharepoint-api" name = "api-form" style = "display:none;">
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="col-form-label">{% trans 'Tenant ID' %}</label>
+                                    <input type="text" id="tenant-id-sharepoint" class="form-control" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="col-form-label">{% trans 'Client ID' %}</label>
+                                    <input type="text" id="client-id-sharepoint" class="form-control" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="col-form-label">{% trans 'Client Secret' %}</label>
+                                    <input type="password" id="client-secret-sharepoint" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="col-form-label">{% trans 'SharePoint Host' %}</label>
+                                    <input type="text" id="sharepoint-host" class="form-control" placeholder="example.sharepoint.com">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="col-form-label">{% trans 'Site Path' %}</label>
+                                    <input type="text" id="site-path-sharepoint" class="form-control" placeholder="/sites/MySite">
+                                </div>
+                            </div>
+
                         </div>
 
                     </form>
@@ -870,6 +911,8 @@
             $("#segex-api").slideDown();
         }else if ($("#type-api").val() == 'padron-atm'){
             $("#padron-atm-api").slideDown();
+        }else if ($("#type-api").val() == 'sharepoint'){
+            $("#sharepoint-api").slideDown();
         }
 
     });
@@ -905,7 +948,19 @@
                     "tds-version-sql-server": $('#tds-version-sql-server').val()
                     }
                 ]}
-    }
+        }else if ($("#type-api").val() == 'sharepoint'){
+            var params = {
+                "type-db": "SharePoint",
+                "parameters": [
+                    {
+                    "tenant-id": $('#tenant-id-sharepoint').val(),
+                    "client-id": $('#client-id-sharepoint').val(),
+                    "client-secret": $('#client-secret-sharepoint').val(),
+                    "sharepoint-host": $('#sharepoint-host').val(),
+                    "site-path": $('#site-path-sharepoint').val()
+                    }
+                ]}
+        }
 
         var formData = new FormData();
 
@@ -1020,6 +1075,20 @@
                         "idacceso": $('#idacceso-atm').val(),
                         "email": $('#email-atm').val(),
                         "password": $('#password-atm').val()
+                        }
+                ]}
+            
+            } else if ($("#type-api").val() == 'sharepoint'){
+                var params = {
+                    "type-db": $("#type-api").val(),
+                    "name-db": $("#name-db").val(),
+                    "parameters": [
+                        {
+                        "tenant-id": $('#tenant-id-sharepoint').val(),
+                        "client-id": $('#client-id-sharepoint').val(),
+                        "client-secret": $('#client-secret-sharepoint').val(),
+                        "sharepoint-host": $('#sharepoint-host').val(),
+                        "site-path": $('#site-path-sharepoint').val()
                         }
                 ]}
             

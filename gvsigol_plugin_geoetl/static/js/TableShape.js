@@ -2495,6 +2495,544 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
 });
 
 
+//// INPUT SHAREPOINT ////
+
+input_Sharepoint = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "input_Sharepoint",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3, width:1},attr));
+        
+        this.classLabel = new draw2d.shape.basic.Label({
+            text:"SharePoint", 
+            stroke:1,
+            fontColor:"#ffffff",  
+            bgColor:"#83d0c9", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+
+        var icon = new draw2d.shape.icon.Gear({ 
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        $('#canvas-parent').append('<div id="dialog-input-sharepoint-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog modal-lg" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title">'+paramsTransTpl.replace('{}', 'SharePoint')+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<div class="row">'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('SharePoint Connection:')+'</label>'+
+                                    '<select id="api-sharepoint-'+ID+'" class="form-control"></select>'+
+                                '</div>'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Document Library:')+'</label>'+
+                                    '<div class="input-group">'+
+                                        '<select id="drive-sharepoint-'+ID+'" class="form-control"></select>'+
+                                        '<span class="input-group-btn">'+
+                                            '<a href="#" id="get-drives-'+ID+'" class="btn btn-default"><i class="fa fa-refresh"></i></a>'+
+                                        '</span>'+
+                                    '</div>'+
+                                '</div>'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('File format:')+'</label>'+
+                                    '<select id="format-sharepoint-'+ID+'" class="form-control">'+
+                                        '<option value="excel">Excel (.xls, .xlsx)</option>'+
+                                        '<!-- Future formats: -->'+
+                                        '<!-- <option value="csv">CSV (.csv)</option> -->'+
+                                        '<!-- <option value="json">JSON (.json)</option> -->'+
+                                    '</select>'+
+                                '</div>'+
+                            '</div>'+
+                            '<div class="row" style="margin-top:10px;">'+
+                                '<div class="col-md-12">'+
+                                    '<label class="col-form-label">'+gettext('Browse files:')+'  <small class="text-muted">('+gettext('Click to select/deselect multiple files')+')</small></label>'+
+                                    '<div class="panel panel-default" style="max-height:250px; overflow-y:auto;">'+
+                                        '<div class="panel-body" id="sharepoint-browser-'+ID+'">'+
+                                            '<p class="text-muted">'+gettext('Select a connection and library, then click refresh.')+'</p>'+
+                                        '</div>'+
+                                    '</div>'+
+                                    '<div class="well well-sm" id="selected-files-container-'+ID+'" style="margin-top:5px; max-height:100px; overflow-y:auto;">'+
+                                        '<label class="col-form-label" style="margin-bottom:5px;"><i class="fa fa-check-square-o"></i> '+gettext('Selected files:')+'</label>'+
+                                        '<div id="selected-files-list-'+ID+'">'+
+                                            '<span class="text-muted">'+gettext('No files selected')+'</span>'+
+                                        '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                            '<!-- Excel format parameters -->'+
+                            '<div id="format-params-excel-'+ID+'" class="format-params-sharepoint">'+
+                                '<div class="row" style="margin-top:10px;">'+
+                                    '<div class="col-md-4">'+
+                                        '<label class="col-form-label">'+gettext('Load sheets:')+'</label><br>'+
+                                        '<a href="#" id="get-sheets-sharepoint-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-file-excel-o margin-r-5"></i>'+gettext('Load sheets')+'</a>'+
+                                    '</div>'+
+                                    '<div class="col-md-8">'+
+                                        '<label class="col-form-label">'+gettext('Sheet:')+'</label>'+
+                                        '<select class="form-control" id="sheet-name-sharepoint-'+ID+'"></select>'+
+                                    '</div>'+
+                                '</div>'+
+                                '<div class="row" style="margin-top:10px;">'+
+                                    '<div class="col-md-6">'+
+                                        '<label class="col-form-label">'+gettext('Attribute columns:')+'</label>'+
+                                        '<input id="usecols-sharepoint-'+ID+'" type="text" class="form-control" placeholder="A:H">'+
+                                    '</div>'+
+                                    '<div class="col-md-6">'+
+                                        '<label class="col-form-label">'+gettext('Skip header:')+'</label>'+
+                                        '<input type="number" id="header-sharepoint-'+ID+'" value="0" min="0" class="form-control">'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                            '<!-- Future: CSV format parameters -->'+
+                            '<div id="format-params-csv-'+ID+'" class="format-params-sharepoint" style="display:none;">'+
+                                '<!-- CSV-specific params will go here -->'+
+                            '</div>'+
+                            '<!-- Future: JSON format parameters -->'+
+                            '<div id="format-params-json-'+ID+'" class="format-params-sharepoint" style="display:none;">'+
+                                '<!-- JSON-specific params will go here -->'+
+                            '</div>'+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="input-sharepoint-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+
+        var context = this
+        var currentPath = ''
+        var sharepointSheets = []
+        var selectedFiles = []  // Array para archivos seleccionados
+        
+        // File extensions by format
+        var formatExtensions = {
+            'excel': ['.xls', '.xlsx'],
+            'csv': ['.csv', '.txt'],
+            'json': ['.json']
+        };
+        
+        var formatIcons = {
+            'excel': 'fa-file-excel-o',
+            'csv': 'fa-file-text-o',
+            'json': 'fa-file-code-o'
+        };
+        
+        // Get current selected format
+        function getSelectedFormat() {
+            return $('#format-sharepoint-'+ID).val() || 'excel';
+        }
+        
+        // Update the selected files display
+        function updateSelectedFilesDisplay() {
+            var container = $('#selected-files-list-'+ID);
+            if(selectedFiles.length === 0) {
+                container.html('<span class="text-muted">'+gettext('No files selected')+'</span>');
+            } else {
+                var html = '';
+                for(var i=0; i<selectedFiles.length; i++) {
+                    var fileName = selectedFiles[i].split('/').pop();
+                    html += '<span class="label label-info" style="display:inline-block; margin:2px; padding:5px 8px;">'+
+                            '<i class="fa '+formatIcons[getSelectedFormat()]+'"></i> '+fileName+
+                            ' <a href="#" class="remove-selected-file" data-path="'+selectedFiles[i]+'" style="color:white; margin-left:5px;"><i class="fa fa-times"></i></a>'+
+                            '</span>';
+                }
+                container.html(html);
+                
+                // Bind remove click events
+                container.find('.remove-selected-file').off('click').on('click', function(e) {
+                    e.preventDefault();
+                    var pathToRemove = $(this).data('path');
+                    selectedFiles = selectedFiles.filter(function(f) { return f !== pathToRemove; });
+                    updateSelectedFilesDisplay();
+                    updateBrowserSelection();
+                });
+            }
+        }
+        
+        // Update visual selection state in the browser
+        function updateBrowserSelection() {
+            $('#sharepoint-browser-'+ID+' .sharepoint-file-link').each(function() {
+                var filePath = $(this).data('path');
+                if(selectedFiles.indexOf(filePath) >= 0) {
+                    $(this).addClass('bg-success').css('font-weight', 'bold');
+                } else {
+                    $(this).removeClass('bg-success').css('font-weight', 'normal');
+                }
+            });
+        }
+        
+        // Clear all file selections
+        function clearFileSelections() {
+            selectedFiles = [];
+            sharepointSheets = [];
+            $('#sheet-name-sharepoint-'+ID).empty();
+            updateSelectedFilesDisplay();
+        }
+        
+        // Show/hide format-specific parameters
+        function updateFormatParams(format) {
+            $('.format-params-sharepoint').hide();
+            $('#format-params-'+format+'-'+ID).show();
+            
+            // Clear file selection when format changes
+            clearFileSelections();
+            
+            // Reload folder to filter by new format
+            if(currentPath !== '' || $('#drive-sharepoint-'+ID).val()) {
+                loadSharepointFolder(ID, currentPath);
+            }
+        }
+        
+        // Format change handler
+        $('#format-sharepoint-'+ID).change(function() {
+            updateFormatParams($(this).val());
+        });
+
+        // Populate SharePoint connections dropdown
+        for(var i=0; i<dbc.length; i++){
+            if(dbc[i].type == 'sharepoint'){
+                $('#api-sharepoint-'+ID).append('<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>');
+            }
+        }
+        
+        // Connection change handler - clear selections
+        $('#api-sharepoint-'+ID).change(function() {
+            clearFileSelections();
+            $('#drive-sharepoint-'+ID).empty();
+            $('#sharepoint-browser-'+ID).html('<p class="text-muted">'+gettext('Select a connection and library, then click refresh.')+'</p>');
+        });
+
+        // Get drives (document libraries)
+        $('#get-drives-'+ID).click(function(e){
+            e.preventDefault();
+            var apiName = $('#api-sharepoint-'+ID).val();
+            if(!apiName) return;
+            
+            // Clear all selections when refreshing
+            clearFileSelections();
+
+            $('#drive-sharepoint-'+ID).empty();
+            $('#sharepoint-browser-'+ID).html('<p class="text-muted"><i class="fa fa-spinner fa-spin"></i> '+gettext('Loading...')+'</p>');
+
+            var params = {"parameters": [{"api": apiName}]};
+            var formData = new FormData();
+            formData.append('jsonParams', JSON.stringify(params));
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_sharepoint_drives/',
+                data: formData,
+                beforeSend: function(xhr){ xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken')); },
+                cache: false, contentType: false, processData: false,
+                success: function(data){
+                    $('#drive-sharepoint-'+ID).empty();
+                    for(var j=0; j<data.length; j++){
+                        $('#drive-sharepoint-'+ID).append('<option value="'+data[j].id+'">'+data[j].name+'</option>');
+                    }
+                    // Load root folder
+                    currentPath = '';
+                    loadSharepointFolder(ID, currentPath);
+                },
+                error: function(){
+                    $('#sharepoint-browser-'+ID).html('<p class="text-danger">'+gettext('Error loading libraries')+'</p>');
+                }
+            });
+        });
+
+        // Browse folder function
+        function loadSharepointFolder(id, folderPath){
+            var apiName = $('#api-sharepoint-'+id).val();
+            var driveId = $('#drive-sharepoint-'+id).val();
+            if(!apiName || !driveId) return;
+            
+            var selectedFormat = getSelectedFormat();
+            var extensions = formatExtensions[selectedFormat] || [];
+            var fileIcon = formatIcons[selectedFormat] || 'fa-file-o';
+
+            $('#sharepoint-browser-'+id).html('<p class="text-muted"><i class="fa fa-spinner fa-spin"></i> '+gettext('Loading...')+'</p>');
+
+            var params = {"parameters": [{"api": apiName, "drive-id": driveId, "folder-path": folderPath, "format": selectedFormat}]};
+            var formData = new FormData();
+            formData.append('jsonParams', JSON.stringify(params));
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_sharepoint_browse/',
+                data: formData,
+                beforeSend: function(xhr){ xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken')); },
+                cache: false, contentType: false, processData: false,
+                success: function(data){
+                    var html = '<ul class="list-unstyled" style="margin:0;">';
+                    
+                    // Add back button if not at root
+                    if(folderPath){
+                        var parentPath = folderPath.split('/').slice(0,-1).join('/');
+                        html += '<li><a href="#" class="sharepoint-folder-link" data-path="'+parentPath+'" data-id="'+id+'"><i class="fa fa-level-up"></i> ..</a></li>';
+                    }
+                    
+                    if(data.length === 0){
+                        html += '<li class="text-muted" style="padding:5px 0;"><i class="fa fa-info-circle"></i> '+gettext('No files found in this folder')+'</li>';
+                    } else {
+                        for(var j=0; j<data.length; j++){
+                            var item = data[j];
+                            if(item.is_folder){
+                                var newPath = folderPath ? folderPath + '/' + item.name : item.name;
+                                html += '<li><a href="#" class="sharepoint-folder-link" data-path="'+newPath+'" data-id="'+id+'"><i class="fa fa-folder" style="color:#f0ad4e;"></i> '+item.name+'</a></li>';
+                            } else {
+                                var filePath = folderPath ? folderPath + '/' + item.name : item.name;
+                                html += '<li><a href="#" class="sharepoint-file-link" data-path="'+filePath+'" data-id="'+id+'"><i class="fa '+fileIcon+'" style="color:#5cb85c;"></i> '+item.name+'</a></li>';
+                            }
+                        }
+                    }
+                    html += '</ul>';
+                    
+                    $('#sharepoint-browser-'+id).html(html);
+                    
+                    // Bind click events for folders
+                    $('.sharepoint-folder-link[data-id="'+id+'"]').off('click').on('click', function(e){
+                        e.preventDefault();
+                        currentPath = $(this).data('path');
+                        loadSharepointFolder(id, currentPath);
+                    });
+                    
+                    // Bind click events for files (toggle selection)
+                    $('.sharepoint-file-link[data-id="'+id+'"]').off('click').on('click', function(e){
+                        e.preventDefault();
+                        var selectedPath = $(this).data('path');
+                        
+                        // Toggle selection
+                        var index = selectedFiles.indexOf(selectedPath);
+                        if(index >= 0) {
+                            // Deselect
+                            selectedFiles.splice(index, 1);
+                        } else {
+                            // Select
+                            selectedFiles.push(selectedPath);
+                        }
+                        
+                        updateSelectedFilesDisplay();
+                        updateBrowserSelection();
+                    });
+                    
+                    // Update visual selection state
+                    updateBrowserSelection();
+                },
+                error: function(){
+                    $('#sharepoint-browser-'+id).html('<p class="text-danger">'+gettext('Error loading folder contents')+'</p>');
+                }
+            });
+        }
+
+        // Change drive - reload folder and clear selections
+        $('#drive-sharepoint-'+ID).change(function(){
+            currentPath = '';
+            clearFileSelections();
+            loadSharepointFolder(ID, currentPath);
+        });
+
+        // Get sheets from ALL selected Excel files (shows common sheets)
+        $('#get-sheets-sharepoint-'+ID).click(function(e){
+            e.preventDefault();
+            var apiName = $('#api-sharepoint-'+ID).val();
+            var driveId = $('#drive-sharepoint-'+ID).val();
+            
+            if(!apiName || !driveId || selectedFiles.length === 0){
+                alert(gettext('Please select at least one file first'));
+                return;
+            }
+
+            $('#sheet-name-sharepoint-'+ID).empty().append('<option>'+gettext('Loading...')+'</option>');
+
+            // Send all selected files to get common sheets
+            var params = {"parameters": [{"api": apiName, "drive-id": driveId, "file-paths": selectedFiles}]};
+            var formData = new FormData();
+            formData.append('jsonParams', JSON.stringify(params));
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_sharepoint_sheets/',
+                data: formData,
+                beforeSend: function(xhr){ xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken')); },
+                cache: false, contentType: false, processData: false,
+                success: function(data){
+                    $('#sheet-name-sharepoint-'+ID).empty();
+                    sharepointSheets = data;
+                    if(data.length === 0) {
+                        $('#sheet-name-sharepoint-'+ID).append('<option>'+gettext('No common sheets found')+'</option>');
+                    } else {
+                        for(var j=0; j<data.length; j++){
+                            $('#sheet-name-sharepoint-'+ID).append('<option>'+data[j]+'</option>');
+                        }
+                    }
+                },
+                error: function(){
+                    $('#sheet-name-sharepoint-'+ID).empty().append('<option>'+gettext('Error loading sheets')+'</option>');
+                }
+            });
+        });
+
+        icon.on("click", function(){
+            $('#dialog-input-sharepoint-'+ID).modal('show');
+        });
+
+        $('#input-sharepoint-accept-'+ID).click(function() {
+            var apiName = $('#api-sharepoint-'+ID).val();
+            var driveId = $('#drive-sharepoint-'+ID).val();
+            var sheetName = $('#sheet-name-sharepoint-'+ID).val();
+            
+            if(!apiName || !driveId || selectedFiles.length === 0){
+                alert(gettext('Please select at least one file'));
+                return;
+            }
+
+            var selectedFormat = getSelectedFormat();
+            
+            // Build format-specific parameters
+            var formatParams = {};
+            
+            if(selectedFormat === 'excel') {
+                formatParams = {
+                    "get_sheet-name": sharepointSheets.length ? sharepointSheets : [sheetName],
+                    "sheet-name": sheetName || 0,
+                    "usecols": $('#usecols-sharepoint-'+ID).val() || null,
+                    "header": $('#header-sharepoint-'+ID).val() || "0"
+                };
+            }
+            // Future: Add CSV params
+            // else if(selectedFormat === 'csv') {
+            //     formatParams = {
+            //         "delimiter": ...,
+            //         "encoding": ...,
+            //         "header": ...
+            //     };
+            // }
+            // Future: Add JSON params
+            // else if(selectedFormat === 'json') {
+            //     formatParams = {
+            //         "json-path": ...
+            //     };
+            // }
+            
+            var paramsSharepoint = {"id": ID,
+                "parameters": [Object.assign({
+                    "api": apiName,
+                    "drive-id": driveId,
+                    "file-paths": selectedFiles,  // Array de archivos seleccionados
+                    "format": selectedFormat
+                }, formatParams)]
+            };
+
+            // Get schema
+            var formDataSchema = new FormData();
+            formDataSchema.append('jsonParams', JSON.stringify(paramsSharepoint));
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_schema_sharepoint/',
+                data: formDataSchema,
+                beforeSend: function(xhr){ xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken')); },
+                cache: false, contentType: false, processData: false,
+                success: function(data){
+                    paramsSharepoint['schema'] = data;
+                    passSchemaToEdgeConnected(ID, listLabel, data, context.canvas);
+                },
+                error: function(){
+                    console.log('Error getting SharePoint schema');
+                }
+            });
+
+            isAlreadyInCanvas(jsonParams, paramsSharepoint, ID);
+            icon.setColor('#01b0a0');
+            $('#dialog-input-sharepoint-'+ID).modal('hide');
+        });
+    },
+    
+    addEntity: function(optionalIndex)
+    {
+	   	 var label = new draw2d.shape.basic.Label({
+	   	     text: gettext('Input'),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:40, top:3, right:10, bottom:5},
+	   	     fontColor:"#009688",
+	   	     resizeable:true
+	   	 });
+
+	     var output = label.createPort("output");
+         output.setName("output_"+label.id);
+         
+	     if($.isNumeric(optionalIndex)){
+             this.add(label, null, optionalIndex+1);
+	     } else {
+	         this.add(label);
+         }
+         
+         listLabel.push([this.id, [], [output.name]]);
+         return label;
+    },
+
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     
+    setName: function(name)
+    {
+        this.classLabel.setText(name);
+        return this;
+    },
+     
+    getPersistentAttributes : getPerAttr,
+     
+    setPersistentAttributes : function(memento)
+    {
+        this._super(memento);
+        this.setName(memento.name);
+
+        if(typeof memento.entities !== "undefined"){
+            $.each(memento.entities, $.proxy(function(i,e){
+                var entity = this.addEntity(e.text);
+                entity.id = e.id;
+                entity.getInputPort(0).setName("input_"+e.id);
+                entity.getOutputPort(0).setName("output_"+e.id);
+            },this));
+        }
+        return this;
+    }
+
+});
+
 
 //// INPUT XML ////
 

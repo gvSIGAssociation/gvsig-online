@@ -1401,3 +1401,68 @@ msgstr "Radi de cerca"
 
 msgid "Minimum points"
 msgstr "Punts mínims"
+
+# SharePoint input translations
+msgid "SharePoint Connection:"
+msgstr "Connexió SharePoint:"
+
+msgid "Document Library:"
+msgstr "Biblioteca de documents:"
+
+msgid "File format:"
+msgstr "Format de fitxer:"
+
+msgid "Browse files:"
+msgstr "Explorar fitxers:"
+
+msgid "Click to select/deselect multiple files"
+msgstr "Clic per a seleccionar/desseleccionar múltiples fitxers"
+
+msgid "Selected files:"
+msgstr "Fitxers seleccionats:"
+
+msgid "No files selected"
+msgstr "Cap fitxer seleccionat"
+
+msgid "No files found in this folder"
+msgstr "No s'han trobat fitxers en esta carpeta"
+
+msgid "No common sheets found"
+msgstr "No s'han trobat fulls comuns"
+
+msgid "Please select at least one file first"
+msgstr "Per favor, selecciona almenys un fitxer primer"
+
+msgid "Please select at least one file"
+msgstr "Per favor, selecciona almenys un fitxer"
+
+msgid "Error loading libraries"
+msgstr "Error en carregar biblioteques"
+
+msgid "Error loading folder contents"
+msgstr "Error en carregar el contingut de la carpeta"
+
+msgid "Error loading sheets"
+msgstr "Error en carregar fulls"
+
+msgid "Loading..."
+msgstr "Carregant..."
+
+msgid "Select a connection and library, then click refresh."
+msgstr "Selecciona una connexió i biblioteca, després fes clic en actualitzar."
+
+# CSV input translations
+msgid "Choose csv/txt file:"
+msgstr "Tria fitxer csv/txt:"
+
+msgid "Schema options:"
+msgstr "Opcions d'esquema:"
+
+msgid "File has schema"
+msgstr "El fitxer té esquema"
+
+msgid "File has not schema"
+msgstr "El fitxer no té esquema"
+
+msgid "Single csv/txt file"
+msgstr "Fitxer csv/txt únic"

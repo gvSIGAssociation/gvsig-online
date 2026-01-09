@@ -51,6 +51,10 @@ urlpatterns = [
     path('etl/get_status_msg/', views.get_status_msg, name='get_status_msg'),
     path('etl/etl_schema_padron_atm/', views.etl_schema_padron_atm, name='etl_schema_padron_atm'),
     path('etl/settings/update_ttl/', views.update_ttl, name='update_ttl'),
+    path('etl/etl_sharepoint_drives/', views.etl_sharepoint_drives, name='etl_sharepoint_drives'),
+    path('etl/etl_sharepoint_browse/', views.etl_sharepoint_browse, name='etl_sharepoint_browse'),
+    path('etl/etl_sharepoint_sheets/', views.etl_sharepoint_sheets, name='etl_sharepoint_sheets'),
+    path('etl/etl_schema_sharepoint/', views.etl_schema_sharepoint, name='etl_schema_sharepoint'),
 
    
 ]
