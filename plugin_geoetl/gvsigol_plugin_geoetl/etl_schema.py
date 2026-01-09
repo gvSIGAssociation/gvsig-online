@@ -150,6 +150,371 @@ def test_sqlserver(dicc):
         print('Connection SQL Server Failed: ' + str(e))
         return {"result": False}
 
+def get_sharepoint_token(dicc):
+    """Obtiene un token de acceso para SharePoint usando client credentials flow."""
+    token_url = f"https://login.microsoftonline.com/{dicc['tenant-id']}/oauth2/v2.0/token"
+    
+    data = {
+        "client_id": dicc['client-id'],
+        "client_secret": dicc['client-secret'],
+        "scope": "https://graph.microsoft.com/.default",
+        "grant_type": "client_credentials"
+    }
+    
+    response = requests.post(token_url, data=data)
+    
+    if response.status_code == 200:
+        return response.json().get("access_token")
+    else:
+        raise Exception(f"Error obteniendo token SharePoint: {response.status_code} - {response.text}")
+
+def test_sharepoint(dicc):
+    """Verifica la conexión a SharePoint obteniendo el token y el site ID."""
+    try:
+        # Obtener token
+        access_token = get_sharepoint_token(dicc)
+        
+        # Verificar acceso al sitio
+        headers = {"Authorization": f"Bearer {access_token}"}
+        sharepoint_host = dicc['sharepoint-host']
+        site_path = dicc['site-path']
+        
+        url = f"https://graph.microsoft.com/v1.0/sites/{sharepoint_host}:{site_path}"
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code == 200:
+            return {"result": True}
+        else:
+            print(f'Connection SharePoint Failed: {response.status_code} - {response.text}')
+            return {"result": False}
+    except Exception as e:
+        print('Connection SharePoint Failed: ' + str(e))
+        return {"result": False}
+
+def get_sharepoint_site_id(dicc):
+    """Obtiene el ID del sitio de SharePoint."""
+    access_token = get_sharepoint_token(dicc)
+    headers = {"Authorization": f"Bearer {access_token}"}
+    
+    sharepoint_host = dicc['sharepoint-host']
+    site_path = dicc['site-path']
+    
+    url = f"https://graph.microsoft.com/v1.0/sites/{sharepoint_host}:{site_path}"
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code == 200:
+        return response.json().get("id")
+    else:
+        raise Exception(f"Error obteniendo sitio SharePoint: {response.status_code} - {response.text}")
+
+def get_sharepoint_drives(dicc):
+    """Lista todas las bibliotecas de documentos (drives) del sitio SharePoint."""
+    try:
+        db = database_connections.objects.get(name=dicc['api'])
+        params = json.loads(db.connection_params)
+        
+        access_token = get_sharepoint_token(params)
+        site_id = get_sharepoint_site_id(params)
+        
+        headers = {"Authorization": f"Bearer {access_token}"}
+        url = f"https://graph.microsoft.com/v1.0/sites/{site_id}/drives"
+        
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code == 200:
+            drives = response.json().get("value", [])
+            return [{"id": d.get("id"), "name": d.get("name")} for d in drives]
+        else:
+            print(f'Error getting SharePoint drives: {response.status_code} - {response.text}')
+            return []
+    except Exception as e:
+        print('Error getting SharePoint drives: ' + str(e))
+        return []
+
+def get_sharepoint_folder_contents(dicc):
+    """Lista el contenido de una carpeta en SharePoint (archivos y subcarpetas)."""
+    from urllib.parse import quote
+    
+    # Extensiones de archivo soportadas por formato
+    format_extensions = {
+        'excel': ('.xls', '.xlsx'),
+        'csv': ('.csv', '.txt'),
+        'json': ('.json',)
+    }
+    
+    try:
+        db = database_connections.objects.get(name=dicc['api'])
+        params = json.loads(db.connection_params)
+        
+        access_token = get_sharepoint_token(params)
+        
+        headers = {"Authorization": f"Bearer {access_token}"}
+        drive_id = dicc['drive-id']
+        folder_path = dicc.get('folder-path', '')
+        file_format = dicc.get('format', 'excel')
+        
+        # Obtener extensiones para el formato seleccionado
+        valid_extensions = format_extensions.get(file_format, format_extensions['excel'])
+        
+        if folder_path:
+            encoded_path = quote(folder_path, safe='/')
+            url = f"https://graph.microsoft.com/v1.0/drives/{drive_id}/root:/{encoded_path}:/children"
+        else:
+            url = f"https://graph.microsoft.com/v1.0/drives/{drive_id}/root/children"
+        
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code == 200:
+            items = response.json().get("value", [])
+            result = []
+            for item in items:
+                item_data = {
+                    "name": item.get("name"),
+                    "id": item.get("id"),
+                    "is_folder": "folder" in item,
+                    "size": item.get("size", 0)
+                }
+                # Incluir carpetas o archivos que coincidan con las extensiones del formato
+                if item_data["is_folder"] or item_data["name"].lower().endswith(valid_extensions):
+                    result.append(item_data)
+            return result
+        else:
+            print(f'Error getting SharePoint folder contents: {response.status_code} - {response.text}')
+            return []
+    except Exception as e:
+        print('Error getting SharePoint folder contents: ' + str(e))
+        return []
+
+def download_sharepoint_file(dicc, temp_dir):
+    """Descarga un archivo de SharePoint al directorio temporal."""
+    from urllib.parse import quote
+    
+    db = database_connections.objects.get(name=dicc['api'])
+    params = json.loads(db.connection_params)
+    
+    access_token = get_sharepoint_token(params)
+    site_id = get_sharepoint_site_id(params)
+    
+    headers = {"Authorization": f"Bearer {access_token}"}
+    
+    drive_id = dicc['drive-id']
+    file_path = dicc['file-path']
+    encoded_path = quote(file_path, safe='/')
+    
+    url = f"https://graph.microsoft.com/v1.0/drives/{drive_id}/root:/{encoded_path}:/content"
+    
+    response = requests.get(url, headers=headers, allow_redirects=True)
+    
+    if response.status_code == 200:
+        # Extraer nombre del archivo de la ruta
+        file_name = file_path.split('/')[-1]
+        local_path = os.path.join(temp_dir, file_name)
+        
+        with open(local_path, "wb") as f:
+            f.write(response.content)
+        
+        return local_path
+    else:
+        raise Exception(f"Error descargando archivo SharePoint: {response.status_code} - {response.text}")
+
+def get_sharepoint_excel_sheets(dicc):
+    """Obtiene las hojas de archivos Excel de SharePoint.
+    
+    Si hay múltiples archivos (file-paths), devuelve solo las hojas comunes a todos.
+    Si hay un solo archivo (file-path), devuelve todas sus hojas.
+    """
+    import warnings
+    from .etl_tasks import get_temp_dir
+    
+    warnings.filterwarnings('ignore', category=UserWarning, module='openpyxl')
+    
+    temp_dir = get_temp_dir()
+    
+    try:
+        # Obtener lista de archivos
+        file_paths = dicc.get('file-paths', [])
+        if not file_paths:
+            # Retrocompatibilidad: si viene file-path (singular), usarlo
+            single_path = dicc.get('file-path')
+            if single_path:
+                file_paths = [single_path]
+        
+        if not file_paths:
+            return []
+        
+        all_sheets = []
+        
+        for file_path in file_paths:
+            download_params = {
+                'api': dicc['api'],
+                'drive-id': dicc['drive-id'],
+                'file-path': file_path
+            }
+            local_file = download_sharepoint_file(download_params, temp_dir)
+            xl = pd.ExcelFile(local_file)
+            all_sheets.append(set(xl.sheet_names))
+        
+        # Si hay un solo archivo, devolver todas sus hojas
+        if len(all_sheets) == 1:
+            return list(all_sheets[0])
+        
+        # Si hay múltiples archivos, devolver la intersección (hojas comunes)
+        common_sheets = all_sheets[0]
+        for sheets_set in all_sheets[1:]:
+            common_sheets = common_sheets.intersection(sheets_set)
+        
+        return list(common_sheets)
+        
+    finally:
+        # Limpiar archivo temporal
+        if os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir)
+
+def get_schema_sharepoint(dicc):
+    """Obtiene el esquema (columnas) de archivos de SharePoint según su formato.
+    
+    Si hay múltiples archivos seleccionados (file-paths), devuelve la UNIÓN de todas las columnas.
+    """
+    file_format = dicc.get('format', 'excel')
+    
+    if file_format == 'excel':
+        return get_schema_sharepoint_excel(dicc)
+    # Future: CSV format
+    # elif file_format == 'csv':
+    #     return get_schema_sharepoint_csv(dicc)
+    # Future: JSON format
+    # elif file_format == 'json':
+    #     return get_schema_sharepoint_json(dicc)
+    else:
+        # Default a Excel si el formato no es reconocido
+        return get_schema_sharepoint_excel(dicc)
+
+
+def get_schema_sharepoint_excel(dicc):
+    """Obtiene el esquema (columnas) de archivos Excel de SharePoint.
+    
+    Si hay múltiples archivos (file-paths), devuelve la UNIÓN de todas las columnas (sin duplicados).
+    Si hay un solo archivo (file-path), devuelve sus columnas.
+    """
+    import warnings
+    from .etl_tasks import get_temp_dir
+    
+    warnings.filterwarnings('ignore', category=UserWarning, module='openpyxl')
+    
+    temp_dir = get_temp_dir()
+    
+    try:
+        # Obtener lista de archivos
+        file_paths = dicc.get('file-paths', [])
+        if not file_paths:
+            # Retrocompatibilidad: si viene file-path (singular), usarlo
+            single_path = dicc.get('file-path')
+            if single_path:
+                file_paths = [single_path]
+        
+        if not file_paths:
+            return []
+        
+        # Parámetros compartidos
+        sheet_name = dicc.get("sheet-name")
+        if not sheet_name or sheet_name == "":
+            sheet_name = 0
+        
+        usecols = dicc.get("usecols")
+        if usecols == "" or usecols is None:
+            usecols = None
+        
+        header = int(dicc.get("header", 0))
+        
+        # Conjunto para almacenar todas las columnas (sin duplicados)
+        all_columns = []
+        seen_columns = set()
+        
+        for file_path in file_paths:
+            download_params = {
+                'api': dicc['api'],
+                'drive-id': dicc['drive-id'],
+                'file-path': file_path
+            }
+            local_file = download_sharepoint_file(download_params, temp_dir)
+            
+            # Verificar que la hoja existe
+            xl_file = pd.ExcelFile(local_file)
+            available_sheets = xl_file.sheet_names
+            
+            current_sheet = sheet_name
+            if isinstance(current_sheet, str) and current_sheet not in available_sheets:
+                # Buscar coincidencia aproximada
+                sheet_name_clean = current_sheet.strip()
+                for available in available_sheets:
+                    if available.strip() == sheet_name_clean:
+                        current_sheet = available
+                        break
+                else:
+                    # Si sigue sin encontrarse, usar la primera hoja
+                    current_sheet = 0
+            
+            xl = pd.read_excel(
+                local_file, 
+                sheet_name=current_sheet, 
+                header=header, 
+                usecols=usecols
+            )
+            
+            # Añadir columnas manteniendo el orden de aparición
+            for col in xl.columns:
+                col_str = str(col)
+                if col_str not in seen_columns:
+                    seen_columns.add(col_str)
+                    all_columns.append(col_str)
+        
+        # Añadir la columna _source_file que se añade automáticamente
+        if '_source_file' not in seen_columns:
+            all_columns.append('_source_file')
+        
+        return all_columns
+        
+    finally:
+        # Limpiar archivo temporal
+        if os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir)
+
+
+# Future: CSV schema function
+# def get_schema_sharepoint_csv(dicc):
+#     """Obtiene el esquema (columnas) de un archivo CSV de SharePoint."""
+#     from .etl_tasks import get_temp_dir
+#     
+#     temp_dir = get_temp_dir()
+#     
+#     try:
+#         local_file = download_sharepoint_file(dicc, temp_dir)
+#         delimiter = dicc.get("delimiter", ",")
+#         encoding = dicc.get("encoding", "utf-8")
+#         header = int(dicc.get("header", 0))
+#         
+#         df = pd.read_csv(local_file, delimiter=delimiter, encoding=encoding, header=header, nrows=5)
+#         return list(df.columns)
+#     finally:
+#         if os.path.exists(temp_dir):
+#             shutil.rmtree(temp_dir)
+
+
+# Future: JSON schema function
+# def get_schema_sharepoint_json(dicc):
+#     """Obtiene el esquema (columnas) de un archivo JSON de SharePoint."""
+#     from .etl_tasks import get_temp_dir
+#     
+#     temp_dir = get_temp_dir()
+#     
+#     try:
+#         local_file = download_sharepoint_file(dicc, temp_dir)
+#         df = pd.read_json(local_file, nrows=5)
+#         return list(df.columns)
+#     finally:
+#         if os.path.exists(temp_dir):
+#             shutil.rmtree(temp_dir)
+
 def get_schema_csv(dicc):
     # Determine header parameter for pandas
     skiprows = int(dicc.get("header", 0))  # Always respect skip header value

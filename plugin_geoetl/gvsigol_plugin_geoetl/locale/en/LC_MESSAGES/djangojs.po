@@ -1376,3 +1376,68 @@ msgstr "Minimum points"
 
 msgid "Variogram model"
 msgstr "Variogram model"
+
+# SharePoint input translations
+msgid "SharePoint Connection:"
+msgstr "SharePoint Connection:"
+
+msgid "Document Library:"
+msgstr "Document Library:"
+
+msgid "File format:"
+msgstr "File format:"
+
+msgid "Browse files:"
+msgstr "Browse files:"
+
+msgid "Click to select/deselect multiple files"
+msgstr "Click to select/deselect multiple files"
+
+msgid "Selected files:"
+msgstr "Selected files:"
+
+msgid "No files selected"
+msgstr "No files selected"
+
+msgid "No files found in this folder"
+msgstr "No files found in this folder"
+
+msgid "No common sheets found"
+msgstr "No common sheets found"
+
+msgid "Please select at least one file first"
+msgstr "Please select at least one file first"
+
+msgid "Please select at least one file"
+msgstr "Please select at least one file"
+
+msgid "Error loading libraries"
+msgstr "Error loading libraries"
+
+msgid "Error loading folder contents"
+msgstr "Error loading folder contents"
+
+msgid "Error loading sheets"
+msgstr "Error loading sheets"
+
+msgid "Loading..."
+msgstr "Loading..."
+
+msgid "Select a connection and library, then click refresh."
+msgstr "Select a connection and library, then click refresh."
+
+# CSV input translations
+msgid "Choose csv/txt file:"
+msgstr "Choose csv/txt file:"
+
+msgid "Schema options:"
+msgstr "Schema options:"
+
+msgid "File has schema"
+msgstr "File has schema"
+
+msgid "File has not schema"
+msgstr "File has not schema"
+
+msgid "Single csv/txt file"
+msgstr "Single csv/txt file"
