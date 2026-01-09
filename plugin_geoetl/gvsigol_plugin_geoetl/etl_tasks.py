@@ -83,8 +83,11 @@ def get_temp_dir():
     Creates a unique, temporary directory under os.path.join(settings.TEMP_ROOT, 'plugin_geoetl')
     and returns the absolute path to the temporary directory.
     The created directory is NOT automatically removed.
+    Falls back to system temp directory if TEMP_ROOT is not defined.
     """
-    base_temp = os.path.join(settings.TEMP_ROOT, 'plugin_geoetl')
+    # Use TEMP_ROOT if defined, otherwise fall back to system temp
+    temp_root = getattr(settings, 'TEMP_ROOT', None) or tempfile.gettempdir()
+    base_temp = os.path.join(temp_root, 'plugin_geoetl')
     if not os.path.exists(base_temp):
         os.makedirs(base_temp)
     return tempfile.mkdtemp(dir=base_temp)
@@ -268,6 +271,164 @@ def input_Excel(dicc):
     db.dispose()
     
     return [table_name]
+
+def input_Sharepoint(dicc):
+    """
+    Input que descarga archivos desde SharePoint y los procesa según el formato.
+    Soporta múltiples archivos que se combinan en una sola tabla.
+    Soporta Excel (xls, xlsx), y preparado para futuros formatos (CSV, JSON).
+    """
+    import warnings
+    from .models import database_connections
+    from . import etl_schema
+    
+    warnings.filterwarnings('ignore', category=UserWarning, module='openpyxl')
+    
+    # Obtener parámetros de conexión SharePoint
+    db = database_connections.objects.get(name=dicc['api'])
+    params = json.loads(db.connection_params)
+    
+    # Crear directorio temporal
+    temp_dir = get_temp_dir()
+    
+    # Obtener formato (por defecto Excel para retrocompatibilidad)
+    file_format = dicc.get('format', 'excel')
+    
+    # Obtener lista de archivos (soporta el antiguo file-path para retrocompatibilidad)
+    file_paths = dicc.get('file-paths', [])
+    if not file_paths:
+        # Retrocompatibilidad: si viene file-path (singular), usarlo
+        single_path = dicc.get('file-path')
+        if single_path:
+            file_paths = [single_path]
+    
+    if not file_paths:
+        raise ValueError("No files specified for SharePoint input")
+    
+    try:
+        all_dataframes = []
+        source_files = []  # Para guardar el nombre del archivo de cada fila
+        
+        for file_path in file_paths:
+            # Descargar archivo de SharePoint
+            download_params = {
+                'api': dicc['api'],
+                'drive-id': dicc['drive-id'],
+                'file-path': file_path
+            }
+            local_file = etl_schema.download_sharepoint_file(download_params, temp_dir)
+            
+            # Procesar según el formato
+            if file_format == 'excel':
+                df = _process_sharepoint_excel(dicc, local_file)
+            # Future: CSV format
+            # elif file_format == 'csv':
+            #     df = _process_sharepoint_csv(dicc, local_file)
+            # Future: JSON format
+            # elif file_format == 'json':
+            #     df = _process_sharepoint_json(dicc, local_file)
+            else:
+                # Default a Excel si el formato no es reconocido
+                df = _process_sharepoint_excel(dicc, local_file)
+            
+            # Guardar el nombre del archivo para cada fila (se añadirá al final)
+            file_name = file_path.split('/')[-1]
+            source_files.extend([file_name] * len(df))
+            
+            all_dataframes.append(df)
+        
+        # Combinar todos los DataFrames
+        # Las columnas que no existan en algunos archivos quedarán como NaN
+        if len(all_dataframes) == 1:
+            combined_df = all_dataframes[0]
+        else:
+            combined_df = pd.concat(all_dataframes, ignore_index=True, sort=False)
+        
+        # Añadir _source_file como ÚLTIMA columna (después de combinar)
+        combined_df['_source_file'] = source_files
+        
+        # Guardar en base de datos temporal
+        table_name = dicc['id']
+        
+        conn_string = 'postgresql://'+GEOETL_DB['user']+':'+GEOETL_DB['password']+'@'+GEOETL_DB['host']+':'+GEOETL_DB['port']+'/'+GEOETL_DB['database']
+        
+        db_engine = create_engine(conn_string)
+        conn = db_engine.connect()
+        
+        combined_df.to_sql(table_name, con=conn, schema=GEOETL_DB['schema'], if_exists='replace', index=False)
+        
+        conn.close()
+        db_engine.dispose()
+        
+        return [table_name]
+        
+    finally:
+        # Limpiar directorio temporal
+        if os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir)
+
+
+def _process_sharepoint_excel(dicc, local_file):
+    """Procesa un archivo Excel descargado de SharePoint."""
+    # Si sheet-name está vacío o es None, usar índice 0 (primera hoja)
+    sheet_name = dicc.get("sheet-name")
+    if not sheet_name or sheet_name == "":
+        sheet_name = 0
+    
+    # Manejar usecols vacío
+    usecols = dicc.get("usecols")
+    if usecols == "" or usecols is None:
+        usecols = None
+    
+    # Verificar que la hoja existe y buscar coincidencia si es necesario
+    xl_file = pd.ExcelFile(local_file)
+    available_sheets = xl_file.sheet_names
+    
+    if isinstance(sheet_name, str) and sheet_name not in available_sheets:
+        # Buscar coincidencia aproximada (ignorando espacios)
+        sheet_name_clean = sheet_name.strip()
+        found = False
+        for available in available_sheets:
+            if available.strip() == sheet_name_clean:
+                sheet_name = available
+                found = True
+                break
+        if not found:
+            # Si sigue sin encontrarse, usar la primera hoja
+            sheet_name = 0
+    
+    # Leer Excel
+    df = pd.read_excel(
+        local_file, 
+        sheet_name=sheet_name, 
+        header=int(dicc.get("header", 0)), 
+        usecols=usecols
+    )
+    df = df.replace('\n', ' ', regex=True).replace('\r', '', regex=True).replace('\t', '', regex=True)
+    df_obj = df.select_dtypes(['object'])
+    df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
+    
+    return df
+
+
+# Future: CSV processor
+# def _process_sharepoint_csv(dicc, local_file):
+#     """Procesa un archivo CSV descargado de SharePoint."""
+#     delimiter = dicc.get("delimiter", ",")
+#     encoding = dicc.get("encoding", "utf-8")
+#     header = int(dicc.get("header", 0))
+#     
+#     df = pd.read_csv(local_file, delimiter=delimiter, encoding=encoding, header=header)
+#     return df
+
+
+# Future: JSON processor
+# def _process_sharepoint_json(dicc, local_file):
+#     """Procesa un archivo JSON descargado de SharePoint."""
+#     json_path = dicc.get("json-path", None)
+#     
+#     df = pd.read_json(local_file)
+#     return df
 
 def input_Shp(dicc):
 
@@ -1403,22 +1564,31 @@ def input_Csv(dicc):
         global_column_names = None
         
         for file in os.listdir(dicc["csv-file"]):
-            if file.endswith((".csv", ".txt")):
+            if file.endswith((".csv", ".txt", ".CSV", ".TXT")):
                 file_path = dicc["csv-file"]+'/'+file
                 
                 # Process this file in chunks
-                skiprows = 0
                 first_file_first_chunk = (x == 0)
                 chunk_counter = 10000
                 file_first_chunk = True
+                chunk_number = 0
 
                 while chunk_counter == 10000:
-                    # Calculate actual skiprows for this chunk
-                    actual_skiprows = skiprows + base_skiprows
+                    if file_first_chunk:
+                        # First chunk: read header row after skipping base_skiprows
+                        df = pd.read_csv(file_path, sep=dicc["separator"], encoding='utf8', 
+                                       skiprows=base_skiprows, nrows=10000, 
+                                       header=header_param)
+                    else:
+                        # Subsequent chunks: skip header row + base_skiprows + already read data
+                        # If header_param is 0, we need to account for the header row (1 row)
+                        # plus all data rows already read (chunk_number * 10000)
+                        header_offset = 1 if header_param == 0 else 0
+                        rows_to_skip = base_skiprows + header_offset + (chunk_number * 10000)
+                        df = pd.read_csv(file_path, sep=dicc["separator"], encoding='utf8', 
+                                       skiprows=rows_to_skip, nrows=10000, 
+                                       header=None, names=global_column_names)
                     
-                    df = pd.read_csv(file_path, sep=dicc["separator"], encoding='utf8', 
-                                   skiprows=actual_skiprows, nrows=10000, 
-                                   header=header_param)
                     chunk_counter = df.shape[0]
                     
                     if chunk_counter > 0:
@@ -1429,8 +1599,11 @@ def input_Csv(dicc):
                             df.columns = [string.ascii_uppercase[i] if i < 26 else f"Column{i+1}" for i in range(num_cols)]
                             if global_column_names is None:
                                 global_column_names = list(df.columns)
-                        elif global_column_names is not None:
-                            # Use established column names for consistency
+                        elif file_first_chunk and global_column_names is None:
+                            # First chunk with schema - save column names
+                            global_column_names = list(df.columns)
+                        elif file_first_chunk and global_column_names is not None:
+                            # First chunk of subsequent files - use established names
                             df.columns = global_column_names
                         
                         df['_filename'] = file
@@ -1452,23 +1625,32 @@ def input_Csv(dicc):
                         
                         file_first_chunk = False
                     
-                    skiprows += 10000
+                    chunk_number += 1
                 
                 x += 1
     else:
         # Handle single CSV file (original logic)
-        skiprows = 0
         first = True
         counter = 10000
+        chunk_number = 0
+        column_names = None
 
         while counter == 10000:
 
-            # Calculate actual skiprows for this chunk
-            actual_skiprows = skiprows + base_skiprows
-
-            df = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], encoding='utf8', 
-                            skiprows=actual_skiprows, nrows=10000, 
-                            header=header_param)
+            if first:
+                # First chunk: read header row after skipping base_skiprows
+                df = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], encoding='utf8', 
+                                skiprows=base_skiprows, nrows=10000, 
+                                header=header_param)
+            else:
+                # Subsequent chunks: skip header row + base_skiprows + already read data
+                # If header_param is 0, we need to account for the header row (1 row)
+                # plus all data rows already read (chunk_number * 10000)
+                header_offset = 1 if header_param == 0 else 0
+                rows_to_skip = base_skiprows + header_offset + (chunk_number * 10000)
+                df = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], encoding='utf8', 
+                                skiprows=rows_to_skip, nrows=10000, 
+                                header=None, names=column_names)
 
             counter = df.shape[0]
 
@@ -1485,7 +1667,7 @@ def input_Csv(dicc):
                     num_cols = len(df.columns)
                     df.columns = [string.ascii_uppercase[i] if i < 26 else f"Column{i+1}" for i in range(num_cols)]
 
-                column_names = df.columns
+                column_names = list(df.columns)
 
                 df_obj = df.select_dtypes(['object'])
                 df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
@@ -1495,14 +1677,12 @@ def input_Csv(dicc):
                 
             else:
 
-                df.columns = column_names
-
                 df_obj = df.select_dtypes(['object'])
                 df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
 
                 df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='append', index=False)
 
-            skiprows += 10000
+            chunk_number += 1
 
             conn.close()
             db.dispose()
