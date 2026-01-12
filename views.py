@@ -5739,7 +5739,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
         if service == 'WMS':
             if not version:
                 try:
-                    response = requests.get(url)
+                    response = requests.get(url, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
                     data = xmltodict.parse(response.content)
                     version = data['WMT_MS_Capabilities']['@version']
                 except:
