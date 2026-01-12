@@ -5767,6 +5767,8 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                 pass
 
             get_map_url = wms.getOperationByName('GetMap').methods[0]['url']
+            if get_map_url.startswith("http://"):
+                get_map_url = "https://" + get_map_url[7:] # avoid mixed origin errors
 
             lyr = wms.contents.get(layer)
             if not lyr:
@@ -5784,7 +5786,11 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                     if 'legend' in style:
                         style_def['custom_legend_url'] = style['legend']
                     styles.append(style_def)
-                crs_list = lyr.crs_list
+                try:
+                    crs_list = lyr.crs_list
+                except Exception:
+                    # not available in WMS version 1.1.1
+                    pass
 
         elif service == 'WMTS':
             if not version:
