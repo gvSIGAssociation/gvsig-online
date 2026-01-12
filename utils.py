@@ -1172,7 +1172,10 @@ def get_wmts_options(
             if method.get("type") == "Get":
                 kvp_url = method.get("url")
                 if kvp_url:
+                    if kvp_url.startswith("http://"):
+                        kvp_url = "https://" + kvp_url[7:] # avoid mixed origin errors
                     urls = [kvp_url if kvp_url.endswith("?") else (kvp_url + ("&" if "?" in kvp_url else "?"))]
+                    
 
     def _parse_tlc(tlc):
         """Parse TopLeftCorner from various formats"""
