@@ -419,7 +419,12 @@ class FeaturesExtentView(ListAPIView):
                     raise HttpException(400, "Bad parameter resources. The value must be a value true or false")
 
             epsg = 4326
-            if 'epsg' in self.request.GET:
+            if 'source_epsg' in self.request.GET:
+                try:
+                    epsg = int(self.request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
+            elif 'epsg' in self.request.GET:
                 try:
                     epsg = int(self.request.GET['epsg'])
                 except Exception:
@@ -1069,6 +1074,13 @@ class PublicFeatureByPointView(ListAPIView):
                 except Exception:
                     raise HttpException(400, "Bad parameter blank")
 
+            source_epsg = 4326
+            if 'source_epsg' in self.request.GET:
+                try:
+                    source_epsg = int(self.request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
+
             getbuffer = False
             if 'getbuffer' in self.request.GET:
                 try:
@@ -1083,7 +1095,7 @@ class PublicFeatureByPointView(ListAPIView):
                 raise HttpException(403, "The user does not have permission to read this layer")
 
             serializer = FeatureSerializer()
-            result = serializer.info_by_point(None, lyr, lat, lon, 4326, buffer, geom, lang, blank, getbuffer)
+            result = serializer.info_by_point(None, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer)
 
             result = {
                 "content" : result,

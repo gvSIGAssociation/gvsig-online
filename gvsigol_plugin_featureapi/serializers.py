@@ -1047,13 +1047,13 @@ class FeatureSerializer(serializers.Serializer):
                         nbytes += sys.getsizeof(feat[0])
                         geometry = json.loads(feat[0])
                         if 'crs' not in geometry:
-                            geometry['crs'] = json.loads("{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}")
+                            geometry['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{epsg}"}}}}')
 
                     if feat[2] is not None:
                         nbytes += sys.getsizeof(feat[2])
                         simplegeom = json.loads(feat[2])
                         if 'crs' not in simplegeom:
-                            simplegeom['crs'] = json.loads("{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}")
+                            simplegeom['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{epsg}"}}}}')
 
                     nbytes += sys.getsizeof(feat[1])
                     nbytes += sys.getsizeof(feat[3])
