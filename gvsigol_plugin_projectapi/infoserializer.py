@@ -364,8 +364,8 @@ class LayerSerializer(serializers.ModelSerializer):
     def get_tms_url_(self, obj):
         """
         Devuelve la URL base TMS de vector tiles (MVT) si la capa tiene vector_tile habilitado.
-        Solo se devuelve si el proyecto usa una proyección compatible (EPSG:3857, EPSG:900913, EPSG:4326).
         La URL devuelta es solo hasta /1.0.0, el resto se añade desde el front.
+        La restricción de proyección se gestiona en el front (hasta que se actualice OpenLayers).
         """
         try:
             if not obj.vector_tile:
@@ -377,14 +377,6 @@ class LayerSerializer(serializers.ModelSerializer):
             
             if not obj.datastore.type.startswith('v_'):
                 return None
-            
-            # Verificar proyección compatible del proyecto
-            projectid = self.context.get('projectid')
-            if projectid:
-                project = Project.objects.get(id=projectid)
-                compatible_crs = ['EPSG:3857', 'EPSG:900913', 'EPSG:4326']
-                if project.viewer_default_crs not in compatible_crs:
-                    return None
             
             workspace = obj.datastore.workspace
             # URL base TMS: /geoserver/gwc/service/tms/1.0.0
