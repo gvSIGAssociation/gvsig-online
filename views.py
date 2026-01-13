@@ -1547,6 +1547,13 @@ def layer_update(request, layer_id):
                 gs.setQueryable(workspace, ds.name, ds.type, name, is_queryable)
                 if ds.type == 'v_PostGIS':
                     utils.set_time_enabled(gs, layer)
+            
+            # Actualizar formato MVT en GeoWebCache para capas vectoriales
+            if ds.type.startswith('v_'):
+                try:
+                    gs.update_vector_tile_format(ds.workspace, layer.name, vector_tile)
+                except Exception as e:
+                    logger.warning(f"No se pudo actualizar formato MVT para capa {layer.name}: {e}")
 
             new_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
 

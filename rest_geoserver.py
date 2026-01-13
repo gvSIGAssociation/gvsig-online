@@ -795,6 +795,74 @@ class Geoserver():
         except ET.XMLSyntaxError:
             logger.warning(f"Invalid response XML. Probably the layer has no geometry - {ws_name}:{layer_name}")
     
+    def update_gwclayer_vector_tile_format(self, ws_name, layer_name, enable_mvt, user=None, password=None):
+        """
+        Updates the GWC layer definition to enable or disable MVT (Mapbox Vector Tile) format.
+        
+        Args:
+            ws_name: Workspace name (can be None for layer groups)
+            layer_name: Layer name
+            enable_mvt: True to enable MVT format, False to disable
+            user: GeoServer user
+            password: GeoServer password
+        
+        Returns:
+            True if successful
+        """
+        MVT_MIME_TYPE = "application/vnd.mapbox-vector-tile"
+        
+        if ws_name is None:
+            url = self.gwc_url + "/layers/" + layer_name + ".xml"
+        else:
+            url = self.gwc_url + "/layers/" + ws_name + ":" + layer_name + ".xml"
+        
+        if user and password:
+            auth = (user, password)
+        else:
+            auth = self.session.auth
+        
+        headers = self._apply_override_headers({'content-type': 'text/xml'})
+        
+        # Obtener configuración actual de la capa en GWC
+        r = self.session.get(url, headers=headers, auth=auth)
+        if r.status_code != 200:
+            raise FailedRequestError(r.status_code, r.content)
+        
+        try:
+            root = ET.fromstring(r.content)
+            
+            # Buscar o crear el elemento mimeFormats
+            mime_formats = root.find('mimeFormats')
+            if mime_formats is None:
+                mime_formats = ET.SubElement(root, 'mimeFormats')
+            
+            # Buscar si ya existe el formato MVT
+            mvt_exists = False
+            for string_elem in mime_formats.findall('string'):
+                if string_elem.text == MVT_MIME_TYPE:
+                    mvt_exists = True
+                    if not enable_mvt:
+                        # Eliminar el formato MVT
+                        mime_formats.remove(string_elem)
+                    break
+            
+            # Añadir formato MVT si se debe habilitar y no existe
+            if enable_mvt and not mvt_exists:
+                mvt_elem = ET.SubElement(mime_formats, 'string')
+                mvt_elem.text = MVT_MIME_TYPE
+            
+            # Enviar la configuración actualizada
+            xml = ET.tostring(root, encoding='utf-8')
+            r = self.session.post(url, data=xml, headers=headers, auth=auth)
+            if r.status_code == 200:
+                logger.info(f"MVT format {'enabled' if enable_mvt else 'disabled'} for layer {ws_name}:{layer_name}")
+                return True
+            raise FailedRequestError(r.status_code, r.content)
+            
+        except ET.XMLSyntaxError:
+            logger.warning(f"Invalid response XML for layer {ws_name}:{layer_name}")
+            return False
+    
     def add_style(self, layer, style_name, user=None, password=None):
         url = self.service_url + "/layers/" +  layer + "/styles/"
         if user and password:

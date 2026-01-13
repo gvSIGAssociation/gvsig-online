@@ -2015,6 +2015,33 @@ class Geoserver():
             if isinstance(e, RequestError):
                 logger.error(e.get_detailed_message())
 
+    def update_vector_tile_format(self, workspace, layer_name, enable_mvt):
+        """
+        Actualiza la configuración de GeoWebCache para habilitar o deshabilitar
+        el formato MVT (application/vnd.mapbox-vector-tile) en una capa.
+        
+        Args:
+            workspace: Objeto Workspace (o None para layer groups)
+            layer_name: Nombre de la capa
+            enable_mvt: True para habilitar MVT, False para deshabilitar
+        
+        Returns:
+            True si se actualiza correctamente, False en caso de error
+        """
+        try:
+            ws_name = workspace.name if workspace else None
+            return self.rest_catalog.update_gwclayer_vector_tile_format(
+                ws_name, layer_name, enable_mvt, user=self.user, password=self.password
+            )
+        except Exception as e:
+            logger.exception("Could not update vector tile format for layer")
+            logger.error("vector tile format error - ws: {} - layer: {} - enable: {}".format(
+                str(ws_name), str(layer_name), str(enable_mvt)
+            ))
+            if isinstance(e, RequestError):
+                logger.error(e.get_detailed_message())
+            return False
+
     def clear_resource_cache(self):
         """
         Clears the resource cache in Geoserver, required to clear ACL Rules cache when rule modifications are
