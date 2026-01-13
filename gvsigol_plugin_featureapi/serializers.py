@@ -793,15 +793,25 @@ class FeatureSerializer(serializers.Serializer):
                 feat_list = []
                 for feat in con.cursor.fetchall():
                     if(onlyprops == True):
+                        centroid = 'null'
+                        if feat[1] is not None:
+                            centroid = json.loads(feat[1])
+                            if 'crs' not in centroid:
+                                centroid['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{epsg}"}}}}')
                         element = {
                             "type":"Feature",
                             "properties" : feat[0],
-                            "centroid" : json.loads(feat[1]) if feat[1] is not None else 'null'
+                            "centroid" : centroid
                         }
                     else:
+                        geometry = 'null'
+                        if feat[0] is not None:
+                            geometry = json.loads(feat[0])
+                            if 'crs' not in geometry:
+                                geometry['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{epsg}"}}}}')
                         element = {
                             "type":"Feature",
-                            "geometry" : json.loads(feat[0]) if feat[0] is not None else 'null',
+                            "geometry" : geometry,
                             "properties" : feat[1]
                         }
                     feat_list.append(element)

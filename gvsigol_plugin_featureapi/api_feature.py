@@ -254,9 +254,16 @@ class FeaturesView(CreateAPIView):
                     filter = json.loads(self.request.GET['filter'])
                 except Exception:
                     raise HttpException(400, "Bad parameter filter. The value must be a string")
+            
+            source_epsg = 4326
+            if 'source_epsg' in self.request.GET:
+                try:
+                    source_epsg = int(self.request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
                     
             restrictions = validation.check_read_restrictions(lyr_id)
-            result = serializers.FeatureSerializer().list(validation, lyr_id, pagination, 4326, date, strict_search, onlyprops, text, filter, restrictions.get('cql_filter_read'))
+            result = serializers.FeatureSerializer().list(validation, lyr_id, pagination, source_epsg, date, strict_search, onlyprops, text, filter, restrictions.get('cql_filter_read'))
             return JsonResponse(result, safe=False)
         except HttpException as e:
             return e.get_exception()
@@ -515,7 +522,14 @@ class PublicFeaturesView(CreateAPIView):
                     print(e)
                     raise HttpException(400, "Bad parameter filter. The value must be a string")
 
-            result = serializers.FeatureSerializer().list(None, lyr_id, pagination, 4326, date, strict_search, onlyprops, text, filter)
+            source_epsg = 4326
+            if 'source_epsg' in self.request.GET:
+                try:
+                    source_epsg = int(self.request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
+
+            result = serializers.FeatureSerializer().list(None, lyr_id, pagination, source_epsg, date, strict_search, onlyprops, text, filter)
             return JsonResponse(result, safe=False)
         except HttpException as e:
             return e.get_exception()
