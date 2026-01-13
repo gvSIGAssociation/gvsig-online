@@ -282,13 +282,29 @@ class FeaturesView(CreateAPIView):
             validation.check_create_feature(lyr_id, content)
             username = request.user.username
             
-            # Manejar el parámetro epsg de la query
+            # Manejar source_epsg (formato EPSG:3857) o epsg (entero) para compatibilidad
             epsg = 4326
-            if 'epsg' in request.GET:
+            if 'source_epsg' in request.GET:
+                try:
+                    epsg = int(request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
+            elif 'epsg' in request.GET:
                 try:
                     epsg = int(request.GET['epsg'])
                 except Exception:
                     raise HttpException(400, "Bad parameter epsg. The value must be an integer")
+            
+            if 'geometry' in content and content['geometry'] is not None:
+                if 'crs' in content['geometry'] and content['geometry']['crs'] is not None:
+                    try:
+                        crs_name = content['geometry']['crs'].get('properties', {}).get('name', '')
+                        if crs_name.startswith('EPSG:'):
+                            feature_epsg = int(crs_name.split(':')[1])
+                            if feature_epsg != 4326:
+                                epsg = feature_epsg
+                    except (ValueError, KeyError, AttributeError):
+                        pass
             
             feat = serializers.FeatureSerializer().create(validation, lyr_id, content, username, epsg)
             return JsonResponse(feat, safe=False)

@@ -1684,8 +1684,11 @@ class FeatureSerializer(serializers.Serializer):
         except:
             logger.exception("Error getting CRS")
             target_crs = None
-        if "crs" not in geom: 
-            geom['crs'] = json.loads("{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}")
+        if "crs" not in geom:
+            if return_crs is not None:
+                geom['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{return_crs}"}}}}')
+            else:
+                geom['crs'] = json.loads("{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:4326\"}}")
         self._check_geom(geom, con)
         
         properties_query_with_id = self._get_properties_names(con, schema, table, exclude_cols=[geom_column], fields=table_info.get_columns())
