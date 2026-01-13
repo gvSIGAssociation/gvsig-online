@@ -385,6 +385,32 @@ def get_cache_url(workspace):
     url = workspace.cache_endpoint.replace(settings.BASE_URL, '')
     return url
 
+def get_vector_tile_url(workspace, layer):
+    """
+    Genera la URL base para obtener vector tiles (MVT) de una capa.
+    
+    La URL sigue el formato TMS de GeoWebCache:
+    /geoserver/gwc/service/tms/1.0.0/{workspace}:{layer}@EPSG:900913@pbf/{z}/{x}/{y}.pbf
+    
+    Args:
+        workspace: Objeto Workspace
+        layer: Objeto Layer
+    
+    Returns:
+        URL relativa para obtener vector tiles (con placeholders {z}, {x}, {y})
+    """
+    # Obtener la URL base del servidor (sin el path /wms, /wfs, etc.)
+    server_url = workspace.server.frontend_url.replace(settings.BASE_URL, '')
+    layer_name = workspace.name + ':' + layer.name
+    
+    # Formato TMS para vector tiles
+    # Nota: Usamos EPSG:900913 que es equivalente a EPSG:3857 y es el que usa GeoWebCache por defecto
+    tms_url = "{server}/gwc/service/tms/1.0.0/{layer}@EPSG%3A900913@pbf/{{z}}/{{x}}/{{y}}.pbf".format(
+        server=server_url,
+        layer=layer_name.replace(':', '%3A')
+    )
+    return tms_url
+
 def get_catalog_url(request, layer):   
     catalog_url = ''
     if 'gvsigol_plugin_catalog' in settings.INSTALLED_APPS:
