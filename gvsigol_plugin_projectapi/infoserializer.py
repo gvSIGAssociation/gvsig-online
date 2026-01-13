@@ -60,6 +60,7 @@ class LayerSerializer(serializers.ModelSerializer):
     wms_url = serializers.SerializerMethodField('get_wms_url_')
     wfs_url = serializers.SerializerMethodField('get_wfs_url_')
     cache_url = serializers.SerializerMethodField('get_cache_url_')
+    tms_url = serializers.SerializerMethodField('get_tms_url_')
     legend_url = serializers.SerializerMethodField('get_legend_url_')
     baselayer = serializers.SerializerMethodField('get_baselayer_')
     default_baselayer = serializers.SerializerMethodField('get_default_baselayer_')
@@ -360,6 +361,41 @@ class LayerSerializer(serializers.ModelSerializer):
         except Exception:
             pass
 
+    def get_tms_url_(self, obj):
+        """
+        Devuelve la URL base TMS de vector tiles (MVT) si la capa tiene vector_tile habilitado.
+        Solo se devuelve si el proyecto usa una proyección compatible (EPSG:3857, EPSG:900913, EPSG:4326).
+        La URL devuelta es solo hasta /1.0.0, el resto se añade desde el front.
+        """
+        try:
+            if not obj.vector_tile:
+                return None
+            
+            # Solo para capas vectoriales internas
+            if obj.external or not obj.datastore:
+                return None
+            
+            if not obj.datastore.type.startswith('v_'):
+                return None
+            
+            # Verificar proyección compatible del proyecto
+            projectid = self.context.get('projectid')
+            if projectid:
+                project = Project.objects.get(id=projectid)
+                compatible_crs = ['EPSG:3857', 'EPSG:900913', 'EPSG:4326']
+                if project.viewer_default_crs not in compatible_crs:
+                    return None
+            
+            workspace = obj.datastore.workspace
+            # URL base TMS: /geoserver/gwc/service/tms/1.0.0
+            tms_url = workspace.wms_endpoint.replace('/wms', '/gwc/service/tms/1.0.0')
+            tms_url = tms_url.replace(settings.BASE_URL, '')
+            return tms_url
+
+        except Exception:
+            pass
+        return None
+
     def get_baselayer_ (self, obj):
         baselayer = False
         project_group = ProjectLayerGroup.objects.filter(layer_group=obj.layer_group, project=self.context['projectid']) 
@@ -419,7 +455,7 @@ class LayerSerializer(serializers.ModelSerializer):
         
     class Meta:
         model = Layer
-        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'real_time', 'vector_tile', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'is_view', 'public', 'external', 'service_version', 'description', 'wms_url', 'wfs_url', 'cache_url', 'legend_url', 'baselayer', 'default_baselayer', 'order', 'external_params', 'featureapi_endpoint', 'time_enabled', 'allow_download', 'detailed_info_button_title' ,'detailed_info_enabled' ,'detailed_info_html']
+        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'real_time', 'vector_tile', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'is_view', 'public', 'external', 'service_version', 'description', 'wms_url', 'wfs_url', 'cache_url', 'tms_url', 'legend_url', 'baselayer', 'default_baselayer', 'order', 'external_params', 'featureapi_endpoint', 'time_enabled', 'allow_download', 'detailed_info_button_title' ,'detailed_info_enabled' ,'detailed_info_html']
 
 
 class LayerGroupSerializer(serializers.ModelSerializer):
