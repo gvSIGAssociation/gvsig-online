@@ -65,6 +65,10 @@ urlpatterns = [
 
     path('api/v1/layers/<int:lyr_id>/legend/', api_layer.Legend.as_view(), name='get_geoserver_legend'),
     path('api/v1/layers/<int:lyr_id>/checkchanges/', api_layer.LayerChanges.as_view(), name='check_changes'),
+    
+    # Mapbox Style API - Convierte estilos SLD a Mapbox GL JSON
+    path('api/v1/layers/<int:lyr_id>/mapbox-style/', api_layer.MapboxStyleView.as_view(), name='get_mapbox_style'),
+    path('api/v1/layers/<int:lyr_id>/mapbox-style/<int:style_id>/', api_layer.MapboxStyleView.as_view(), name='get_mapbox_style_by_id'),
 
     path('api/v1/public/layers/<int:lyr_id>/feature/<int:feat_id>/', api_feature.FeatureGetView.as_view(), name='get_feature'),
     path('api/v1/public/layers/<int:lyr_id>/features/', api_feature.PublicFeaturesView.as_view(), name='get_feature_list'),

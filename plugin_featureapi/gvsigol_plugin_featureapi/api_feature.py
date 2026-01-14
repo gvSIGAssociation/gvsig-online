@@ -286,6 +286,9 @@ class FeaturesView(CreateAPIView):
             feat = serializers.FeatureSerializer().create(validation, lyr_id, content, username, epsg)
             return JsonResponse(feat, safe=False)
         except HttpException as e:
+            # Log del error para diagnóstico
+            print(f"Error creating feature in layer {lyr_id}: [{e.code}] {e.msg}")
+            
             # Intentar manejar como error de topología
             topology_response = handle_topology_error(e)
             if topology_response:
@@ -336,6 +339,9 @@ class FeaturesView(CreateAPIView):
             feat = serializers.FeatureSerializer().update(validation, lyr_id, data, override, version_to_overwrite, username, epsg)
             return JsonResponse(feat, safe=False)
         except HttpException as e:
+            # Log del error para diagnóstico
+            logger.error(f"Error updating feature in layer {lyr_id}: [{e.code}] {e.msg}")
+            
             # Intentar manejar como error de topología
             topology_response = handle_topology_error(e)
             if topology_response:
