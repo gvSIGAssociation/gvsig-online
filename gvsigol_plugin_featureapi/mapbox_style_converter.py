@@ -1413,7 +1413,7 @@ def get_all_styles_for_layer(layer_id, tms_base_url=None):
                 "style_id": style.id,
                 "style_name": style.name,
                 "style_title": style.title or style.name,
-                "is_default": style.is_default,
+                "default": style.is_default,
                 "style_type": style.type,
                 "mapbox_style": mapbox_style
             })
@@ -1424,7 +1424,7 @@ def get_all_styles_for_layer(layer_id, tms_base_url=None):
                 "style_id": style.id,
                 "style_name": style.name,
                 "style_title": style.title or style.name,
-                "is_default": style.is_default,
+                "default": style.is_default,
                 "style_type": style.type,
                 "mapbox_style": None,
                 "error": str(e)
