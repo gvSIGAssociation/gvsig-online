@@ -1832,8 +1832,9 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
             # geom_columns_info[0][4] es el SRID (posición 4 en la tupla)
             layer_srid = geom_columns_info[0][4]
         
-        # Determinar la precisión usando el archivo crs_definitions.json
+        # Determinar la precisión y tipo de SRID usando el archivo crs_definitions.json
         snap_precision = 0.001  # Default para métrico
+        is_geographic = False  # Default: asumir proyectado (metros)
         if layer_srid:
             try:
                 import json
@@ -1848,18 +1849,22 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                     if units == 'degrees':
                         # Sistema geográfico (grados decimales) - usar precisión muy alta
                         snap_precision = 0.000000001
+                        is_geographic = True
                     elif units == 'meters':
                         # Sistema métrico (metros) - usar precisión al milímetro
                         snap_precision = 0.001
+                        is_geographic = False
                     else:
                         # Default para unidades desconocidas
                         snap_precision = 0.001
+                        is_geographic = False
                         logger.warning(f"Unidades desconocidas '{units}' para SRID {layer_srid}, usando precisión métrica por defecto")
                 else:
                     logger.warning(f"SRID {layer_srid} no encontrado en crs_definitions.json, usando precisión métrica por defecto")
             except Exception as e:
                 logger.error(f"Error leyendo crs_definitions.json para SRID {layer_srid}: {str(e)}")
                 snap_precision = 0.001  # Default seguro
+                is_geographic = False
         
         logger.info(f"Generando trigger {rule_type} para tabla {full_table_name}: PK='{pk_field}', Geom='{geom_field}', SRID={layer_srid}, SnapToGrid precision={snap_precision}")
         
@@ -2235,8 +2240,19 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
             }
         
         elif rule_type == "must_be_contiguous":
-            # SQL para función MUST BE CONTIGUOUS - Tu lógica original exacta
+            # SQL para función MUST BE CONTIGUOUS
             contiguous_tolerance = kwargs.get('contiguous_tolerance', 1.0)  # Default del modelo
+            
+            if is_geographic:
+                # Para SRID geográfico (grados): usar geography para distancias en metros
+                relate_expr_new = f"ST_SnapToGrid(NEW.{geom_field}, {snap_precision})"
+                relate_expr_existing = f"ST_SnapToGrid({geom_field}, {snap_precision})"
+                distance_expr = f"ST_Distance(vertex::geography, {geom_field}::geography)"
+            else:
+                # Para SRID proyectado: usar geometry directamente (ya está en metros)
+                relate_expr_new = f"ST_SnapToGrid(NEW.{geom_field}, {snap_precision})"
+                relate_expr_existing = f"ST_SnapToGrid({geom_field}, {snap_precision})"
+                distance_expr = f"ST_Distance(vertex, {geom_field})"
             
             function_sql = f"""
             CREATE OR REPLACE FUNCTION {function_name}()
@@ -2248,20 +2264,20 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 error_message TEXT;
                 problem_geojson TEXT;
                 valid_vertex_count INTEGER := 0;
-                vertex_3857 geometry;
+                vertex geometry;
                 min_distance NUMERIC;
                 vertex_counter INTEGER := 0;
                 total_points INTEGER;
                 closest_invalid_vertex geometry;
                 closest_invalid_distance NUMERIC := 999999;
             BEGIN
-                -- PASO 1: ¿Toca por borde en SRID 3857? → VÁLIDO inmediatamente
+                -- PASO 1: ¿Toca por borde en el SRID nativo? → VÁLIDO inmediatamente
                 IF EXISTS (
                     SELECT 1
                     FROM {full_table_name}
                     WHERE ST_Relate(
-                        ST_SnapToGrid(ST_Transform(NEW.{geom_field}, 3857), {snap_precision}),
-                        ST_SnapToGrid(ST_Transform({geom_field}, 3857), {snap_precision}), 
+                        {relate_expr_new},
+                        {relate_expr_existing}, 
                         'F***1****') -- Toca por borde
                     AND {pk_field} <> NEW.{pk_field}
                 ) THEN
@@ -2270,10 +2286,10 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
 
                 -- PASO 2: Contar vértices dentro de tolerancia (en metros) - SIN DUPLICADOS
                 -- Contar total de puntos
-                SELECT ST_NPoints(ST_Transform(NEW.{geom_field}, 3857)) INTO total_points;
+                SELECT ST_NPoints(NEW.{geom_field}) INTO total_points;
                 
-                FOR vertex_3857 IN
-                    SELECT (ST_DumpPoints(ST_Transform(NEW.{geom_field}, 3857))).geom
+                FOR vertex IN
+                    SELECT (ST_DumpPoints(NEW.{geom_field})).geom
                 LOOP
                     vertex_counter := vertex_counter + 1;
                     
@@ -2283,7 +2299,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                     END IF;
                     
                     -- Calcular distancia mínima de este vértice a CUALQUIER geometría existente
-                    SELECT MIN(ST_Distance(vertex_3857, ST_Transform({geom_field}, 3857)))
+                    SELECT MIN({distance_expr})
                     INTO min_distance
                     FROM {full_table_name}
                     WHERE {pk_field} <> NEW.{pk_field};
@@ -2300,7 +2316,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                         -- Este vértice NO cumple tolerancia, ¿es el más cercano a cumplirla?
                         IF min_distance IS NOT NULL AND min_distance < closest_invalid_distance THEN
                             closest_invalid_distance := min_distance;
-                            closest_invalid_vertex := vertex_3857;
+                            closest_invalid_vertex := vertex;
                         END IF;
                     END IF;
                 END LOOP;
@@ -2308,8 +2324,8 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 -- PASO 3: No hay suficientes vértices cercanos → ERROR
                 -- Devolver el vértice que NO cumple tolerancia pero está más cerca de cumplirla
                 IF closest_invalid_vertex IS NOT NULL THEN
-                    -- Transformar el vértice de 3857 al SRID nativo de la layer
-                    SELECT ST_AsGeoJSON(ST_Transform(closest_invalid_vertex, ST_SRID(NEW.{geom_field})))
+                    -- El vértice ya está en el SRID nativo
+                    SELECT ST_AsGeoJSON(closest_invalid_vertex)
                     INTO problem_geojson;
                     
                     error_message := 'TOPOLOGY ERROR: Geometry is not contiguous. Only ' || valid_vertex_count || 
