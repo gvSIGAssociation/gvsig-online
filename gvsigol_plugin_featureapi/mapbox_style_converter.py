@@ -22,11 +22,13 @@
 
 import json
 import logging
+import xml.etree.ElementTree as ET
 
 from gvsigol_symbology.models import (
     Style, StyleLayer, Rule, 
     MarkSymbolizer, LineSymbolizer, PolygonSymbolizer, 
-    TextSymbolizer, ExternalGraphicSymbolizer, RasterSymbolizer
+    TextSymbolizer, ExternalGraphicSymbolizer, RasterSymbolizer,
+    ColorMap, ColorMapEntry
 )
 from gvsigol_services.models import Layer
 
@@ -382,6 +384,658 @@ def convert_external_graphic_symbolizer(symbolizer, layer_id, rule_name, source_
     return layer
 
 
+def parse_ogc_filter_from_sld(filter_elem, namespaces):
+    """
+    Parsea un filtro OGC desde SLD XML y lo convierte a formato Mapbox GL.
+    
+    Soporta:
+    - PropertyIsEqualTo
+    - PropertyIsNotEqualTo
+    - PropertyIsLessThan
+    - PropertyIsLessThanOrEqualTo
+    - PropertyIsGreaterThan
+    - PropertyIsGreaterThanOrEqualTo
+    - PropertyIsLike
+    - PropertyIsNull
+    - PropertyIsBetween
+    - And, Or, Not (operadores lógicos)
+    
+    Args:
+        filter_elem: Elemento XML del filtro (<ogc:Filter>)
+        namespaces: Diccionario de namespaces XML
+    
+    Returns:
+        list o None: Filtro en formato Mapbox GL o None si no se puede parsear
+    """
+    if filter_elem is None:
+        return None
+    
+    try:
+        # PropertyIsEqualTo
+        prop_is_equal = filter_elem.find('ogc:PropertyIsEqualTo', namespaces)
+        if prop_is_equal is not None:
+            prop_name = prop_is_equal.find('ogc:PropertyName', namespaces)
+            literal = prop_is_equal.find('ogc:Literal', namespaces)
+            if prop_name is not None and literal is not None:
+                value = literal.text
+                # Intentar convertir a número si es posible
+                try:
+                    value = float(value) if '.' in value else int(value)
+                except:
+                    pass
+                return ["==", ["get", prop_name.text], value]
+        
+        # PropertyIsNotEqualTo
+        prop_is_not_equal = filter_elem.find('ogc:PropertyIsNotEqualTo', namespaces)
+        if prop_is_not_equal is not None:
+            prop_name = prop_is_not_equal.find('ogc:PropertyName', namespaces)
+            literal = prop_is_not_equal.find('ogc:Literal', namespaces)
+            if prop_name is not None and literal is not None:
+                value = literal.text
+                try:
+                    value = float(value) if '.' in value else int(value)
+                except:
+                    pass
+                return ["!=", ["get", prop_name.text], value]
+        
+        # PropertyIsLessThan
+        prop_is_less = filter_elem.find('ogc:PropertyIsLessThan', namespaces)
+        if prop_is_less is not None:
+            prop_name = prop_is_less.find('ogc:PropertyName', namespaces)
+            literal = prop_is_less.find('ogc:Literal', namespaces)
+            if prop_name is not None and literal is not None:
+                try:
+                    value = float(literal.text)
+                except:
+                    value = literal.text
+                return ["<", ["get", prop_name.text], value]
+        
+        # PropertyIsLessThanOrEqualTo
+        prop_is_less_or_equal = filter_elem.find('ogc:PropertyIsLessThanOrEqualTo', namespaces)
+        if prop_is_less_or_equal is not None:
+            prop_name = prop_is_less_or_equal.find('ogc:PropertyName', namespaces)
+            literal = prop_is_less_or_equal.find('ogc:Literal', namespaces)
+            if prop_name is not None and literal is not None:
+                try:
+                    value = float(literal.text)
+                except:
+                    value = literal.text
+                return ["<=", ["get", prop_name.text], value]
+        
+        # PropertyIsGreaterThan
+        prop_is_greater = filter_elem.find('ogc:PropertyIsGreaterThan', namespaces)
+        if prop_is_greater is not None:
+            prop_name = prop_is_greater.find('ogc:PropertyName', namespaces)
+            literal = prop_is_greater.find('ogc:Literal', namespaces)
+            if prop_name is not None and literal is not None:
+                try:
+                    value = float(literal.text)
+                except:
+                    value = literal.text
+                return [">", ["get", prop_name.text], value]
+        
+        # PropertyIsGreaterThanOrEqualTo
+        prop_is_greater_or_equal = filter_elem.find('ogc:PropertyIsGreaterThanOrEqualTo', namespaces)
+        if prop_is_greater_or_equal is not None:
+            prop_name = prop_is_greater_or_equal.find('ogc:PropertyName', namespaces)
+            literal = prop_is_greater_or_equal.find('ogc:Literal', namespaces)
+            if prop_name is not None and literal is not None:
+                try:
+                    value = float(literal.text)
+                except:
+                    value = literal.text
+                return [">=", ["get", prop_name.text], value]
+        
+        # PropertyIsLike
+        prop_is_like = filter_elem.find('ogc:PropertyIsLike', namespaces)
+        if prop_is_like is not None:
+            prop_name = prop_is_like.find('ogc:PropertyName', namespaces)
+            literal = prop_is_like.find('ogc:Literal', namespaces)
+            if prop_name is not None and literal is not None:
+                # Mapbox no soporta LIKE directamente, usar "in"
+                clean_value = literal.text.replace('%', '').replace('*', '')
+                return ["in", clean_value, ["get", prop_name.text]]
+        
+        # PropertyIsNull
+        prop_is_null = filter_elem.find('ogc:PropertyIsNull', namespaces)
+        if prop_is_null is not None:
+            prop_name = prop_is_null.find('ogc:PropertyName', namespaces)
+            if prop_name is not None:
+                return ["==", ["get", prop_name.text], None]
+        
+        # PropertyIsBetween
+        prop_is_between = filter_elem.find('ogc:PropertyIsBetween', namespaces)
+        if prop_is_between is not None:
+            prop_name = prop_is_between.find('ogc:PropertyName', namespaces)
+            lower_boundary = prop_is_between.find('ogc:LowerBoundary/ogc:Literal', namespaces)
+            upper_boundary = prop_is_between.find('ogc:UpperBoundary/ogc:Literal', namespaces)
+            if prop_name is not None and lower_boundary is not None and upper_boundary is not None:
+                try:
+                    lower = float(lower_boundary.text)
+                    upper = float(upper_boundary.text)
+                except:
+                    lower = lower_boundary.text
+                    upper = upper_boundary.text
+                return ["all",
+                    [">=", ["get", prop_name.text], lower],
+                    ["<=", ["get", prop_name.text], upper]
+                ]
+        
+        # And (operador lógico)
+        and_filter = filter_elem.find('ogc:And', namespaces)
+        if and_filter is not None:
+            sub_filters = []
+            for child in and_filter:
+                # Crear un elemento temporal para parsear cada hijo
+                temp_filter = ET.Element('Filter')
+                temp_filter.append(child)
+                sub_filter = parse_ogc_filter_from_sld(temp_filter, namespaces)
+                if sub_filter:
+                    sub_filters.append(sub_filter)
+            if len(sub_filters) > 0:
+                return ["all"] + sub_filters
+        
+        # Or (operador lógico)
+        or_filter = filter_elem.find('ogc:Or', namespaces)
+        if or_filter is not None:
+            sub_filters = []
+            for child in or_filter:
+                temp_filter = ET.Element('Filter')
+                temp_filter.append(child)
+                sub_filter = parse_ogc_filter_from_sld(temp_filter, namespaces)
+                if sub_filter:
+                    sub_filters.append(sub_filter)
+            if len(sub_filters) > 0:
+                return ["any"] + sub_filters
+        
+        # Not (operador lógico)
+        not_filter = filter_elem.find('ogc:Not', namespaces)
+        if not_filter is not None:
+            for child in not_filter:
+                temp_filter = ET.Element('Filter')
+                temp_filter.append(child)
+                sub_filter = parse_ogc_filter_from_sld(temp_filter, namespaces)
+                if sub_filter:
+                    return ["!", sub_filter]
+        
+        return None
+        
+    except Exception as e:
+        logger.warning(f"Error parsing OGC filter: {e}")
+        return None
+
+
+def parse_sld_to_mapbox(style, layer_id, source_layer):
+    """
+    Parsea un SLD personalizado (tipo CS) y convierte a Mapbox GL Style.
+    Soporta estilos básicos: Point, Line, Polygon, Text symbolizers.
+    
+    Args:
+        style: Objeto Style con campo sld con el XML
+        layer_id: ID de la capa
+        source_layer: Nombre del source-layer
+    
+    Returns:
+        list: Lista de capas Mapbox GL
+    """
+    if not style.sld:
+        logger.warning(f"Style {style.id} has no SLD content")
+        return []
+    
+    try:
+        root = ET.fromstring(style.sld)
+        
+        # Namespaces comunes en SLD
+        namespaces = {
+            'sld': 'http://www.opengis.net/sld',
+            'ogc': 'http://www.opengis.net/ogc',
+            'se': 'http://www.opengis.net/se'
+        }
+        
+        layers = []
+        
+        # Buscar todas las reglas (Rules)
+        rules = root.findall('.//sld:Rule', namespaces)
+        
+        for idx, rule in enumerate(rules):
+            rule_name = rule.find('sld:Name', namespaces)
+            rule_name_str = rule_name.text if rule_name is not None and rule_name.text else f"rule_{idx}"
+            rule_name_str = rule_name_str.replace(' ', '_').replace(':', '_')
+            
+            # Buscar filtros OGC
+            filter_elem = rule.find('ogc:Filter', namespaces)
+            mapbox_filter = parse_ogc_filter_from_sld(filter_elem, namespaces) if filter_elem is not None else None
+            
+            # Buscar escalas
+            minscale_elem = rule.find('sld:MinScaleDenominator', namespaces)
+            maxscale_elem = rule.find('sld:MaxScaleDenominator', namespaces)
+            minscale = float(minscale_elem.text) if minscale_elem is not None and minscale_elem.text else None
+            maxscale = float(maxscale_elem.text) if maxscale_elem is not None and maxscale_elem.text else None
+            
+            # Buscar PointSymbolizer
+            point_symbolizers = rule.findall('.//sld:PointSymbolizer', namespaces)
+            for ps in point_symbolizers:
+                lyr = parse_point_symbolizer_from_sld(ps, namespaces, layer_id, rule_name_str, source_layer)
+                if lyr:
+                    if mapbox_filter:
+                        lyr["filter"] = mapbox_filter
+                    lyr = apply_scale_to_layer(lyr, minscale, maxscale)
+                    layers.append(lyr)
+            
+            # Buscar LineSymbolizer
+            line_symbolizers = rule.findall('.//sld:LineSymbolizer', namespaces)
+            for ls in line_symbolizers:
+                lyr = parse_line_symbolizer_from_sld(ls, namespaces, layer_id, rule_name_str, source_layer)
+                if lyr:
+                    if mapbox_filter:
+                        lyr["filter"] = mapbox_filter
+                    lyr = apply_scale_to_layer(lyr, minscale, maxscale)
+                    layers.append(lyr)
+            
+            # Buscar PolygonSymbolizer
+            polygon_symbolizers = rule.findall('.//sld:PolygonSymbolizer', namespaces)
+            for pgs in polygon_symbolizers:
+                lyrs = parse_polygon_symbolizer_from_sld(pgs, namespaces, layer_id, rule_name_str, source_layer)
+                for lyr in lyrs:
+                    if mapbox_filter:
+                        lyr["filter"] = mapbox_filter
+                    lyr = apply_scale_to_layer(lyr, minscale, maxscale)
+                    layers.append(lyr)
+            
+            # Buscar TextSymbolizer
+            text_symbolizers = rule.findall('.//sld:TextSymbolizer', namespaces)
+            for ts in text_symbolizers:
+                lyr = parse_text_symbolizer_from_sld(ts, namespaces, layer_id, rule_name_str, source_layer)
+                if lyr:
+                    if mapbox_filter:
+                        lyr["filter"] = mapbox_filter
+                    lyr = apply_scale_to_layer(lyr, minscale, maxscale)
+                    layers.append(lyr)
+        
+        return layers
+        
+    except ET.ParseError as e:
+        logger.error(f"Error parsing SLD XML for style {style.id}: {e}")
+        return []
+    except Exception as e:
+        logger.error(f"Error parsing SLD for style {style.id}: {e}")
+        return []
+
+
+def parse_point_symbolizer_from_sld(symbolizer, namespaces, layer_id, rule_name, source_layer):
+    """Parsea PointSymbolizer desde SLD XML."""
+    layer = {
+        "id": f"{layer_id}_{rule_name}_point",
+        "type": "circle",
+        "source": "gvsigol",
+        "source-layer": source_layer,
+        "paint": {}
+    }
+    
+    # Buscar Graphic/Mark
+    mark = symbolizer.find('.//sld:Mark', namespaces)
+    if mark is not None:
+        # Fill
+        fill = mark.find('.//sld:Fill/sld:CssParameter[@name="fill"]', namespaces)
+        if fill is not None and fill.text:
+            layer["paint"]["circle-color"] = fill.text
+        
+        fill_opacity = mark.find('.//sld:Fill/sld:CssParameter[@name="fill-opacity"]', namespaces)
+        if fill_opacity is not None and fill_opacity.text:
+            try:
+                layer["paint"]["circle-opacity"] = float(fill_opacity.text)
+            except:
+                pass
+        
+        # Stroke
+        stroke = mark.find('.//sld:Stroke/sld:CssParameter[@name="stroke"]', namespaces)
+        if stroke is not None and stroke.text:
+            layer["paint"]["circle-stroke-color"] = stroke.text
+        
+        stroke_width = mark.find('.//sld:Stroke/sld:CssParameter[@name="stroke-width"]', namespaces)
+        if stroke_width is not None and stroke_width.text:
+            try:
+                layer["paint"]["circle-stroke-width"] = float(stroke_width.text)
+            except:
+                pass
+    
+    # Size
+    size = symbolizer.find('.//sld:Size', namespaces)
+    if size is not None and size.text:
+        try:
+            layer["paint"]["circle-radius"] = float(size.text) / 2
+        except:
+            layer["paint"]["circle-radius"] = 4
+    else:
+        layer["paint"]["circle-radius"] = 4
+    
+    return layer
+
+
+def parse_line_symbolizer_from_sld(symbolizer, namespaces, layer_id, rule_name, source_layer):
+    """Parsea LineSymbolizer desde SLD XML."""
+    layer = {
+        "id": f"{layer_id}_{rule_name}_line",
+        "type": "line",
+        "source": "gvsigol",
+        "source-layer": source_layer,
+        "paint": {},
+        "layout": {
+            "line-join": "round",
+            "line-cap": "round"
+        }
+    }
+    
+    # Stroke color
+    stroke = symbolizer.find('.//sld:Stroke/sld:CssParameter[@name="stroke"]', namespaces)
+    if stroke is not None and stroke.text:
+        layer["paint"]["line-color"] = stroke.text
+    
+    # Stroke width
+    stroke_width = symbolizer.find('.//sld:Stroke/sld:CssParameter[@name="stroke-width"]', namespaces)
+    if stroke_width is not None and stroke_width.text:
+        try:
+            layer["paint"]["line-width"] = float(stroke_width.text)
+        except:
+            pass
+    
+    # Stroke opacity
+    stroke_opacity = symbolizer.find('.//sld:Stroke/sld:CssParameter[@name="stroke-opacity"]', namespaces)
+    if stroke_opacity is not None and stroke_opacity.text:
+        try:
+            layer["paint"]["line-opacity"] = float(stroke_opacity.text)
+        except:
+            pass
+    
+    # Stroke dasharray
+    stroke_dasharray = symbolizer.find('.//sld:Stroke/sld:CssParameter[@name="stroke-dasharray"]', namespaces)
+    if stroke_dasharray is not None and stroke_dasharray.text:
+        dash = parse_dash_array(stroke_dasharray.text)
+        if dash:
+            layer["paint"]["line-dasharray"] = dash
+    
+    return layer
+
+
+def parse_polygon_symbolizer_from_sld(symbolizer, namespaces, layer_id, rule_name, source_layer):
+    """Parsea PolygonSymbolizer desde SLD XML."""
+    layers = []
+    
+    # Capa de relleno
+    fill_layer = {
+        "id": f"{layer_id}_{rule_name}_fill",
+        "type": "fill",
+        "source": "gvsigol",
+        "source-layer": source_layer,
+        "paint": {}
+    }
+    
+    # Fill color
+    fill = symbolizer.find('.//sld:Fill/sld:CssParameter[@name="fill"]', namespaces)
+    if fill is not None and fill.text:
+        fill_layer["paint"]["fill-color"] = fill.text
+    
+    # Fill opacity
+    fill_opacity = symbolizer.find('.//sld:Fill/sld:CssParameter[@name="fill-opacity"]', namespaces)
+    if fill_opacity is not None and fill_opacity.text:
+        try:
+            fill_layer["paint"]["fill-opacity"] = float(fill_opacity.text)
+        except:
+            pass
+    
+    layers.append(fill_layer)
+    
+    # Capa de borde (Stroke)
+    stroke = symbolizer.find('.//sld:Stroke/sld:CssParameter[@name="stroke"]', namespaces)
+    stroke_width = symbolizer.find('.//sld:Stroke/sld:CssParameter[@name="stroke-width"]', namespaces)
+    
+    if stroke is not None and stroke.text and stroke_width is not None and stroke_width.text:
+        try:
+            width = float(stroke_width.text)
+            if width > 0:
+                stroke_layer = {
+                    "id": f"{layer_id}_{rule_name}_stroke",
+                    "type": "line",
+                    "source": "gvsigol",
+                    "source-layer": source_layer,
+                    "paint": {
+                        "line-color": stroke.text,
+                        "line-width": width
+                    },
+                    "layout": {
+                        "line-join": "round",
+                        "line-cap": "round"
+                    }
+                }
+                
+                # Stroke opacity
+                stroke_opacity = symbolizer.find('.//sld:Stroke/sld:CssParameter[@name="stroke-opacity"]', namespaces)
+                if stroke_opacity is not None and stroke_opacity.text:
+                    try:
+                        stroke_layer["paint"]["line-opacity"] = float(stroke_opacity.text)
+                    except:
+                        pass
+                
+                # Stroke dasharray
+                stroke_dasharray = symbolizer.find('.//sld:Stroke/sld:CssParameter[@name="stroke-dasharray"]', namespaces)
+                if stroke_dasharray is not None and stroke_dasharray.text:
+                    dash = parse_dash_array(stroke_dasharray.text)
+                    if dash:
+                        stroke_layer["paint"]["line-dasharray"] = dash
+                
+                layers.append(stroke_layer)
+        except:
+            pass
+    
+    return layers
+
+
+def parse_text_symbolizer_from_sld(symbolizer, namespaces, layer_id, rule_name, source_layer):
+    """Parsea TextSymbolizer desde SLD XML."""
+    layer = {
+        "id": f"{layer_id}_{rule_name}_label",
+        "type": "symbol",
+        "source": "gvsigol",
+        "source-layer": source_layer,
+        "layout": {},
+        "paint": {}
+    }
+    
+    # Label (PropertyName)
+    label = symbolizer.find('.//sld:Label/ogc:PropertyName', namespaces)
+    if label is not None and label.text:
+        layer["layout"]["text-field"] = ["get", label.text]
+    else:
+        # Si no hay PropertyName, podría ser un literal
+        label_literal = symbolizer.find('.//sld:Label', namespaces)
+        if label_literal is not None and label_literal.text:
+            layer["layout"]["text-field"] = label_literal.text
+    
+    # Font
+    font_family = symbolizer.find('.//sld:Font/sld:CssParameter[@name="font-family"]', namespaces)
+    font_size = symbolizer.find('.//sld:Font/sld:CssParameter[@name="font-size"]', namespaces)
+    font_weight = symbolizer.find('.//sld:Font/sld:CssParameter[@name="font-weight"]', namespaces)
+    
+    if font_family is not None and font_family.text:
+        weight = font_weight.text if font_weight is not None and font_weight.text else "Regular"
+        layer["layout"]["text-font"] = [f"{font_family.text} {weight}"]
+    
+    if font_size is not None and font_size.text:
+        try:
+            layer["layout"]["text-size"] = float(font_size.text)
+        except:
+            pass
+    
+    # Fill color
+    fill = symbolizer.find('.//sld:Fill/sld:CssParameter[@name="fill"]', namespaces)
+    if fill is not None and fill.text:
+        layer["paint"]["text-color"] = fill.text
+    
+    # Halo
+    halo_fill = symbolizer.find('.//sld:Halo/sld:Fill/sld:CssParameter[@name="fill"]', namespaces)
+    halo_radius = symbolizer.find('.//sld:Halo/sld:Radius', namespaces)
+    
+    if halo_fill is not None and halo_fill.text and halo_radius is not None and halo_radius.text:
+        layer["paint"]["text-halo-color"] = halo_fill.text
+        try:
+            layer["paint"]["text-halo-width"] = float(halo_radius.text)
+        except:
+            pass
+    
+    return layer
+
+
+def create_heatmap_from_sld(style, layer_id, source_layer):
+    """
+    Crea una capa heatmap de Mapbox GL desde el SLD almacenado en el estilo.
+    Los estilos tipo "MC" guardan el SLD directamente sin crear Rule/RasterSymbolizer.
+    
+    Args:
+        style: Objeto Style con type='MC' y campo sld con el XML
+        layer_id: ID de la capa
+        source_layer: Nombre del source-layer
+    
+    Returns:
+        dict: Capa Mapbox GL de tipo heatmap
+    """
+    if not style.sld:
+        logger.warning(f"Style {style.id} is type MC but has no SLD content")
+        return None
+    
+    try:
+        # Parsear el SLD XML
+        root = ET.fromstring(style.sld)
+        
+        # Namespaces comunes en SLD
+        namespaces = {
+            'sld': 'http://www.opengis.net/sld',
+            'ogc': 'http://www.opengis.net/ogc'
+        }
+        
+        # Buscar RasterSymbolizer
+        raster_symbolizer = root.find('.//sld:RasterSymbolizer', namespaces)
+        if raster_symbolizer is None:
+            logger.warning(f"Style {style.id} SLD does not contain RasterSymbolizer")
+            return None
+        
+        # Obtener opacidad
+        opacity_elem = raster_symbolizer.find('sld:Opacity', namespaces)
+        opacity = 0.6  # default
+        if opacity_elem is not None and opacity_elem.text:
+            try:
+                opacity = float(opacity_elem.text)
+            except:
+                pass
+        
+        # Buscar ColorMap
+        color_map = raster_symbolizer.find('sld:ColorMap', namespaces)
+        color_stops = []
+        
+        if color_map is not None:
+            # Obtener todas las entradas del ColorMap
+            entries = color_map.findall('sld:ColorMapEntry', namespaces)
+            
+            for entry in entries:
+                color = entry.get('color', '')
+                quantity = entry.get('quantity', '0')
+                label = entry.get('label', '')
+                entry_opacity = entry.get('opacity', '1.0')
+                
+                try:
+                    quantity_float = float(quantity)
+                    opacity_float = float(entry_opacity) if entry_opacity else 1.0
+                    
+                    # Si es nodata, usar transparencia
+                    if label and 'nodata' in label.lower():
+                        color_rgba = "rgba(0,0,0,0)"
+                    else:
+                        # Convertir color hex a rgba
+                        if color:
+                            hex_color = color.lstrip('#')
+                            if len(hex_color) == 6:
+                                r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+                                color_rgba = f"rgba({r}, {g}, {b}, {opacity_float})"
+                            else:
+                                color_rgba = color
+                        else:
+                            color_rgba = "rgba(0,0,0,0)"
+                    
+                    color_stops.append(quantity_float)
+                    color_stops.append(color_rgba)
+                except Exception as e:
+                    logger.warning(f"Error parsing ColorMapEntry: {e}")
+                    continue
+        
+        # Crear la capa heatmap
+        layer = {
+            "id": f"{layer_id}_{style.name}_heatmap",
+            "type": "heatmap",
+            "source": "gvsigol",
+            "source-layer": source_layer,
+            "paint": {
+                "heatmap-opacity": opacity,
+                "heatmap-radius": [
+                    "interpolate",
+                    ["linear"],
+                    ["zoom"],
+                    0, 20,
+                    9, 100,
+                    22, 200
+                ],
+                "heatmap-intensity": [
+                    "interpolate",
+                    ["linear"],
+                    ["zoom"],
+                    0, 1,
+                    9, 3
+                ],
+                "heatmap-weight": 1.0
+            }
+        }
+        
+        # Añadir color stops si se encontraron
+        if len(color_stops) > 0:
+            # Ordenar por quantity para asegurar orden correcto
+            # Los color_stops están en formato: [quantity1, color1, quantity2, color2, ...]
+            # Agrupar en pares y ordenar
+            pairs = [(color_stops[i], color_stops[i+1]) for i in range(0, len(color_stops), 2)]
+            pairs.sort(key=lambda x: x[0])  # Ordenar por quantity
+            color_stops = [item for pair in pairs for item in pair]
+            
+            # Asegurar que el primer stop es 0 con transparencia si no existe
+            if color_stops[0] > 0:
+                color_stops.insert(0, "rgba(0,0,0,0)")  # color
+                color_stops.insert(0, 0.0)  # quantity
+            
+            layer["paint"]["heatmap-color"] = [
+                "interpolate",
+                ["linear"],
+                ["heatmap-density"]
+            ] + color_stops
+        else:
+            # Colores por defecto si no se encontró ColorMap
+            layer["paint"]["heatmap-color"] = [
+                "interpolate",
+                ["linear"],
+                ["heatmap-density"],
+                0, "rgba(0,0,255,0)",
+                0.2, "rgba(239,192,192,1)",
+                0.4, "rgba(223,146,146,1)",
+                0.6, "rgba(208,101,101,1)",
+                0.8, "rgba(192,55,55,1)",
+                1.0, "rgba(176,10,10,1)"
+            ]
+        
+        return layer
+        
+    except ET.ParseError as e:
+        logger.error(f"Error parsing SLD XML for style {style.id}: {e}")
+        return None
+    except Exception as e:
+        logger.error(f"Error creating heatmap from SLD for style {style.id}: {e}")
+        return None
+
+
 def apply_scale_to_layer(mapbox_layer, minscale, maxscale):
     """Aplica restricciones de escala a una capa Mapbox."""
     # Mapbox usa zoom levels (0-22), SLD usa denominadores de escala
@@ -404,6 +1058,124 @@ def apply_scale_to_layer(mapbox_layer, minscale, maxscale):
             pass
     
     return mapbox_layer
+
+
+def convert_raster_symbolizer(symbolizer, layer_id, rule_name, source_layer):
+    """
+    Convierte RasterSymbolizer (usado para Mapas de Calor) a capa Mapbox GL (heatmap).
+    
+    Args:
+        symbolizer: RasterSymbolizer con ColorMap
+        layer_id: ID de la capa
+        rule_name: Nombre de la regla
+        source_layer: Nombre del source-layer
+    
+    Returns:
+        dict: Capa Mapbox GL de tipo heatmap
+    """
+    layer = {
+        "id": f"{layer_id}_{rule_name}_heatmap",
+        "type": "heatmap",
+        "source": "gvsigol",
+        "source-layer": source_layer,
+        "paint": {}
+    }
+    
+    # Opacidad
+    opacity = symbolizer.opacity if symbolizer.opacity is not None else 0.6
+    layer["paint"]["heatmap-opacity"] = opacity
+    
+    # Radio del heatmap (por defecto, se puede ajustar según zoom)
+    # En el SLD ejemplo, radiusPixels es 100 por defecto
+    # Mapbox usa heatmap-radius que puede variar con el zoom
+    layer["paint"]["heatmap-radius"] = [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        0, 20,
+        9, 100,
+        22, 200
+    ]
+    
+    # Intensidad del heatmap
+    layer["paint"]["heatmap-intensity"] = [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        0, 1,
+        9, 3
+    ]
+    
+    # Peso del heatmap (si hay un campo weight, se usa; si no, todos los puntos tienen peso 1)
+    # En el SLD ejemplo, weightAttr es "ogc_fid", pero en Mapbox usamos un campo numérico
+    layer["paint"]["heatmap-weight"] = 1.0
+    
+    # Color del heatmap basado en ColorMap
+    if symbolizer.color_map:
+        color_map_entries = ColorMapEntry.objects.filter(
+            color_map=symbolizer.color_map
+        ).order_by('order', 'quantity')
+        
+        if color_map_entries.exists():
+            # Construir la expresión de interpolación de color
+            color_stops = []
+            
+            for entry in color_map_entries:
+                # Normalizar quantity a rango 0-1 (heatmap-density va de 0 a 1)
+                # Si el quantity máximo es 1.0, usamos directamente
+                # Si no, normalizamos
+                quantity = float(entry.quantity)
+                
+                # Obtener opacidad (si la entrada tiene opacity específica, usarla; si no, usar 1.0)
+                entry_opacity = entry.opacity if entry.opacity is not None else 1.0
+                
+                # Convertir color hex a rgba
+                # Si entry.opacity es 0 o None y el label es "nodata", usar transparencia total
+                if entry.label and "nodata" in entry.label.lower():
+                    color = "rgba(0,0,0,0)"
+                else:
+                    color = hex_to_rgba(entry.color, entry_opacity)
+                    
+                    # Si el color es rgba, usarlo directamente; si es hex, convertirlo
+                    if color and not color.startswith('rgba'):
+                        # Convertir hex a rgba
+                        hex_color = color.lstrip('#')
+                        if len(hex_color) == 6:
+                            r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+                            color = f"rgba({r}, {g}, {b}, {entry_opacity})"
+                
+                # Añadir quantity y color al array (formato: [q1, c1, q2, c2, ...])
+                color_stops.append(quantity)
+                color_stops.append(color)
+            
+            if len(color_stops) > 0:
+                # Asegurar que el primer stop es 0 con transparencia si no existe
+                # Los color_stops están en formato: [quantity1, color1, quantity2, color2, ...]
+                # Si el primer quantity no es 0, añadir un stop transparente en 0
+                if color_stops[0] > 0:
+                    color_stops.insert(0, "rgba(0,0,0,0)")  # color
+                    color_stops.insert(0, 0.0)  # quantity
+                
+                layer["paint"]["heatmap-color"] = [
+                    "interpolate",
+                    ["linear"],
+                    ["heatmap-density"]
+                ] + color_stops
+            else:
+                # Si no hay color_map, usar colores por defecto para heatmap
+                layer["paint"]["heatmap-color"] = [
+                    "interpolate",
+                    ["linear"],
+                    ["heatmap-density"],
+                    0, "rgba(0,0,255,0)",
+                    0.2, "rgba(239,192,192,1)",
+                    0.4, "rgba(223,146,146,1)",
+                    0.6, "rgba(208,101,101,1)",
+                    0.8, "rgba(192,55,55,1)",
+                    1.0, "rgba(176,10,10,1)"
+                ]
+    
+    return layer
 
 
 def convert_style_to_mapbox(layer_id, style_id=None, tms_base_url=None, style_obj=None, layer_obj=None):
@@ -469,8 +1241,42 @@ def convert_style_to_mapbox(layer_id, style_id=None, tms_base_url=None, style_ob
         "layers": []
     }
     
+    # Detectar si es un Mapa de Calor (HeatMap)
+    # Los estilos tipo "MC" guardan el SLD directamente, no tienen Rule/RasterSymbolizer en BD
+    if style.type == 'MC' or (style.sld and 'vec:Heatmap' in style.sld):
+        # Es un Mapa de Calor, crear la capa heatmap
+        heatmap_layer = create_heatmap_from_sld(style, layer_id, source_layer)
+        if heatmap_layer:
+            mapbox_style["layers"].append(heatmap_layer)
+        return mapbox_style
+    
     # Obtener reglas del estilo
     rules = Rule.objects.filter(style=style).order_by('order')
+    
+    # Si no hay reglas pero el estilo tiene SLD personalizado (tipo "CS" u otro),
+    # intentar parsear el SLD directamente
+    if not rules.exists():
+        if style.sld:
+            if style.type == 'CS':
+                logger.info(f"Style {style.id} is type CS (Custom SLD) - attempting to parse SLD")
+                # Intentar parsear el SLD personalizado
+                parsed_layers = parse_sld_to_mapbox(style, layer_id, source_layer)
+                if parsed_layers:
+                    mapbox_style["layers"].extend(parsed_layers)
+                    return mapbox_style
+                else:
+                    # Si falla el parsing, devolver con metadata
+                    logger.warning(f"Failed to parse Custom SLD for style {style.id}")
+                    mapbox_style["metadata"] = {
+                        "gvsigol:warning": "Custom SLD style - parsing failed",
+                        "gvsigol:style_type": style.type,
+                        "gvsigol:has_sld": True
+                    }
+                    return mapbox_style
+            else:
+                # Otro tipo de estilo sin reglas
+                logger.warning(f"Style {style.id} has no rules and type is {style.type}")
+        return mapbox_style
     
     for rule in rules:
         rule_name = rule.name.replace(' ', '_').replace(':', '_')
@@ -486,8 +1292,21 @@ def convert_style_to_mapbox(layer_id, style_id=None, tms_base_url=None, style_ob
         polygon_symbolizers = PolygonSymbolizer.objects.filter(rule=rule)
         text_symbolizers = TextSymbolizer.objects.filter(rule=rule)
         external_graphic_symbolizers = ExternalGraphicSymbolizer.objects.filter(rule=rule)
+        raster_symbolizers = RasterSymbolizer.objects.filter(rule=rule)
         
-        # Convertir cada tipo de symbolizer
+        # Si hay RasterSymbolizer, es un Mapa de Calor (HeatMap)
+        # Los Mapas de Calor tienen prioridad sobre otros symbolizers
+        if raster_symbolizers.exists():
+            for sym in raster_symbolizers:
+                lyr = convert_raster_symbolizer(sym, layer_id, rule_name, source_layer)
+                if mapbox_filter:
+                    lyr["filter"] = mapbox_filter
+                lyr = apply_scale_to_layer(lyr, rule.minscale, rule.maxscale)
+                mapbox_style["layers"].append(lyr)
+            # Si es un heatmap, no procesamos los otros symbolizers
+            continue
+        
+        # Convertir cada tipo de symbolizer (solo si no es heatmap)
         for sym in polygon_symbolizers:
             layers = convert_polygon_symbolizer(sym, layer_id, rule_name, source_layer)
             for lyr in layers:
