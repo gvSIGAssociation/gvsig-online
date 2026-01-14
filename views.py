@@ -1907,8 +1907,8 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
 
                 -- Si hay solapamiento real, generar mensaje de error detallado
                 IF conflicting_id IS NOT NULL THEN
-                    -- Obtener la geometría completa del solape como GEOJSON en EPSG:4326
-                    SELECT ST_AsGeoJSON(ST_Transform(overlap_geom, 4326))
+                    -- Obtener la geometría completa del solape como GEOJSON en el SRID nativo de la layer
+                    SELECT ST_AsGeoJSON(overlap_geom)
                     INTO overlap_geojson;
                     
                     -- Construir mensaje de error estructurado con GEOJSON
@@ -2016,8 +2016,8 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
 
                 -- Si se detecta un hueco, generar mensaje de error con GeoJSON
                 IF gap_geom IS NOT NULL THEN
-                    -- Obtener la geometría del hueco como GEOJSON en EPSG:4326
-                    SELECT ST_AsGeoJSON(ST_Transform(gap_geom, 4326))
+                    -- Obtener la geometría del hueco como GEOJSON en el SRID nativo de la layer
+                    SELECT ST_AsGeoJSON(gap_geom)
                     INTO gap_geojson;
                     
                     -- Construir mensaje de error estructurado con GEOJSON
@@ -2078,8 +2078,8 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
 
                     -- Si encuentra un solapamiento, lanza una excepción
                     IF result = 1 THEN
-                        -- Obtener geometría del solapamiento para el error
-                        SELECT ST_AsGeoJSON(ST_Transform(ST_Intersection(NEW.{geom_field}, {overlap_geom_field}), 4326))
+                        -- Obtener geometría del solapamiento para el error en el SRID nativo de la layer
+                        SELECT ST_AsGeoJSON(ST_Intersection(NEW.{geom_field}, {overlap_geom_field}))
                         INTO overlap_geojson
                         FROM {layer_name}
                         WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({overlap_geom_field}, 3857), radio) 
@@ -2182,8 +2182,8 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                     
                     -- Si queda alguna parte sin cubrir, es un error
                     IF uncovered_geom IS NOT NULL AND NOT ST_IsEmpty(uncovered_geom) THEN
-                        -- Obtener la geometría no cubierta como GEOJSON en EPSG:4326
-                        SELECT ST_AsGeoJSON(ST_Transform(uncovered_geom, 4326))
+                        -- Obtener la geometría no cubierta como GEOJSON en el SRID nativo de la layer
+                        SELECT ST_AsGeoJSON(uncovered_geom)
                         INTO uncovered_geojson;
                         
                         -- Construir mensaje de error estructurado con GEOJSON
@@ -2195,7 +2195,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                     END IF;
                 ELSE
                     -- No hay geometrías que intersecten, toda la nueva geometría está sin cubrir
-                    SELECT ST_AsGeoJSON(ST_Transform(NEW.{geom_field}, 4326))
+                    SELECT ST_AsGeoJSON(NEW.{geom_field})
                     INTO uncovered_geojson;
                     
                     -- Construir mensaje de error estructurado con GEOJSON
@@ -2308,7 +2308,8 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 -- PASO 3: No hay suficientes vértices cercanos → ERROR
                 -- Devolver el vértice que NO cumple tolerancia pero está más cerca de cumplirla
                 IF closest_invalid_vertex IS NOT NULL THEN
-                    SELECT ST_AsGeoJSON(ST_Transform(closest_invalid_vertex, 4326))
+                    -- Transformar el vértice de 3857 al SRID nativo de la layer
+                    SELECT ST_AsGeoJSON(ST_Transform(closest_invalid_vertex, ST_SRID(NEW.{geom_field})))
                     INTO problem_geojson;
                     
                     error_message := 'TOPOLOGY ERROR: Geometry is not contiguous. Only ' || valid_vertex_count || 
@@ -2317,7 +2318,8 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                                     COALESCE(problem_geojson, 'NULL') || '##.';
                 ELSE
                     -- Fallback al centroide si no se encontró ningún vértice inválido
-                    SELECT ST_AsGeoJSON(ST_Transform(ST_Centroid(NEW.{geom_field}), 4326))
+                    -- El centroide ya está en el SRID nativo
+                    SELECT ST_AsGeoJSON(ST_Centroid(NEW.{geom_field}))
                     INTO problem_geojson;
                     
                     error_message := 'TOPOLOGY ERROR: Geometry is not contiguous. Only ' || valid_vertex_count || 
