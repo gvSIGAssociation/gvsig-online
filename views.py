@@ -1874,6 +1874,11 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
         trigger_name = f"trigger_{rule_type}_{table_name.lower()}"
         
         if rule_type == "must_not_overlaps":
+            if is_geographic:
+                dwithin_clause = f"ST_DWithin(NEW.{geom_field}::geography, {geom_field}::geography, radio)"
+            else:
+                dwithin_clause = f"ST_DWithin(NEW.{geom_field}, {geom_field}, radio)"
+            
             # SQL para función MUST NOT OVERLAPS
             function_sql = f"""
             CREATE OR REPLACE FUNCTION {function_name}()
@@ -1899,7 +1904,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                        ST_Dimension(ST_Intersection(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({geom_field}, {snap_precision})))
                 INTO conflicting_id, overlap_geom, overlap_area, intersection_dimension
                 FROM {full_table_name}
-                WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({geom_field}, 3857), radio) -- Optimización espacial
+                WHERE {dwithin_clause} -- Optimización espacial (geography para geográfico, geometry para proyectado)
                   AND (
                         -- Patrón para overlaps reales (interior-interior se intersecta): 'T*T***T**'
                        ST_Relate(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({geom_field}, {snap_precision}), 'T*T***T**')
