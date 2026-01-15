@@ -1957,6 +1957,18 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
             }
         
         elif rule_type == "must_not_have_gaps":
+            radio = 500  # metros
+            buffer_mm = 0.001  # 1 mm en metros
+            
+            if is_geographic:
+                dwithin_clause_existing = f"ST_DWithin({geom_field}::geography, NEW.{geom_field}::geography, radio)"
+                buffer_expr = f"ST_Buffer(NEW.{geom_field}::geography, buffer_mm)::geometry"
+                remaining_geom_expr = "remaining_geom.geom"
+            else:
+                dwithin_clause_existing = f"ST_DWithin({geom_field}, NEW.{geom_field}, radio)"
+                buffer_expr = f"ST_Buffer(NEW.{geom_field}, buffer_mm)"
+                remaining_geom_expr = "remaining_geom.geom"
+            
             # SQL para función MUST NOT HAVE GAPS
             function_sql = f"""
             CREATE OR REPLACE FUNCTION {function_name}()
@@ -1967,21 +1979,18 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 area_unida geometry;
                 area_resto geometry;
                 area_final geometry;
-                geometry_3857 geometry;
-                radio INTEGER := 500;
+                radio INTEGER := {radio};
+                buffer_mm NUMERIC := {buffer_mm};
                 gap_geom geometry;
                 gap_geojson TEXT;
                 error_message TEXT;
             BEGIN
-                -- Transformar la nueva geometría a 3857
-                geometry_3857 := ST_Transform(NEW.{geom_field}, 3857);
-
                 -- Paso 1: Generar el Convex Hull de los polígonos existentes dentro del radio (incluyendo el nuevo)
                 -- Trabajamos en el SRID original para evitar mezclas
                 SELECT ST_ConvexHull(ST_Union(geom_union)) INTO bounding_geom
                 FROM (
                     SELECT {geom_field} as geom_union FROM {full_table_name} 
-                    WHERE ST_DWithin(ST_Transform({geom_field}, 3857), geometry_3857, radio)
+                    WHERE {dwithin_clause_existing}
                     AND {pk_field} <> NEW.{pk_field} -- se excluye por si es una actualizacion solo contar con la nueva modificación
                     UNION ALL
                     SELECT NEW.{geom_field} as geom_union
@@ -1993,7 +2002,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 -- Paso 3: Unir todas las geometrías existentes dentro del radio
                 SELECT ST_Union({geom_field}) INTO area_unida
                 FROM {full_table_name}
-                WHERE ST_DWithin(ST_Transform({geom_field}, 3857), geometry_3857, radio)
+                WHERE {dwithin_clause_existing}
                 AND {pk_field} <> NEW.{pk_field};
 
                 -- Restar del Bounding Box la geometría unida y la nueva geometría
@@ -2013,14 +2022,14 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
 
                 -- Paso 5: Comprobar si alguna de las geometrías restantes interseca con el nuevo polígono con un buffer de 1 mm
                 -- El buffer es necesario porque el Touches no detecta nada por cuestiones decimales.
-                -- Trabajamos todo en 3857 para las operaciones de buffer y distancia
-                SELECT ST_Transform(remaining_geom.geom, ST_SRID(NEW.{geom_field})) INTO gap_geom
+                -- Trabajamos en el SRID nativo usando geography para geográfico o geometry para proyectado
+                SELECT {remaining_geom_expr} INTO gap_geom
                 FROM (
                     SELECT (ST_Dump(area_final)).geom AS geom
                 ) AS remaining_geom
                 WHERE ST_Intersects(
-                    ST_Transform(remaining_geom.geom, 3857), -- Convertir las geometrías restantes a 3857
-                    ST_Buffer(geometry_3857, 0.001) -- Buffer de 1 mm en 3857
+                    {remaining_geom_expr}, -- Geometrías restantes en SRID nativo
+                    {buffer_expr} -- Buffer de 1 mm (geography para geográfico, geometry para proyectado)
                 )
                 LIMIT 1;
 
