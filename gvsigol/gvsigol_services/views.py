@@ -1832,8 +1832,9 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
             # geom_columns_info[0][4] es el SRID (posición 4 en la tupla)
             layer_srid = geom_columns_info[0][4]
         
-        # Determinar la precisión usando el archivo crs_definitions.json
+        # Determinar la precisión y tipo de SRID usando el archivo crs_definitions.json
         snap_precision = 0.001  # Default para métrico
+        is_geographic = False  # Default: asumir proyectado (metros)
         if layer_srid:
             try:
                 import json
@@ -1848,18 +1849,22 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                     if units == 'degrees':
                         # Sistema geográfico (grados decimales) - usar precisión muy alta
                         snap_precision = 0.000000001
+                        is_geographic = True
                     elif units == 'meters':
                         # Sistema métrico (metros) - usar precisión al milímetro
                         snap_precision = 0.001
+                        is_geographic = False
                     else:
                         # Default para unidades desconocidas
                         snap_precision = 0.001
+                        is_geographic = False
                         logger.warning(f"Unidades desconocidas '{units}' para SRID {layer_srid}, usando precisión métrica por defecto")
                 else:
                     logger.warning(f"SRID {layer_srid} no encontrado en crs_definitions.json, usando precisión métrica por defecto")
             except Exception as e:
                 logger.error(f"Error leyendo crs_definitions.json para SRID {layer_srid}: {str(e)}")
                 snap_precision = 0.001  # Default seguro
+                is_geographic = False
         
         logger.info(f"Generando trigger {rule_type} para tabla {full_table_name}: PK='{pk_field}', Geom='{geom_field}', SRID={layer_srid}, SnapToGrid precision={snap_precision}")
         
@@ -1869,6 +1874,11 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
         trigger_name = f"trigger_{rule_type}_{table_name.lower()}"
         
         if rule_type == "must_not_overlaps":
+            if is_geographic:
+                dwithin_clause = f"ST_DWithin(NEW.{geom_field}::geography, {geom_field}::geography, radio)"
+            else:
+                dwithin_clause = f"ST_DWithin(NEW.{geom_field}, {geom_field}, radio)"
+            
             # SQL para función MUST NOT OVERLAPS
             function_sql = f"""
             CREATE OR REPLACE FUNCTION {function_name}()
@@ -1894,7 +1904,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                        ST_Dimension(ST_Intersection(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({geom_field}, {snap_precision})))
                 INTO conflicting_id, overlap_geom, overlap_area, intersection_dimension
                 FROM {full_table_name}
-                WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({geom_field}, 3857), radio) -- Optimización espacial
+                WHERE {dwithin_clause} -- Optimización espacial (geography para geográfico, geometry para proyectado)
                   AND (
                         -- Patrón para overlaps reales (interior-interior se intersecta): 'T*T***T**'
                        ST_Relate(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({geom_field}, {snap_precision}), 'T*T***T**')
@@ -1907,8 +1917,8 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
 
                 -- Si hay solapamiento real, generar mensaje de error detallado
                 IF conflicting_id IS NOT NULL THEN
-                    -- Obtener la geometría completa del solape como GEOJSON en EPSG:4326
-                    SELECT ST_AsGeoJSON(ST_Transform(overlap_geom, 4326))
+                    -- Obtener la geometría completa del solape como GEOJSON en el SRID nativo de la layer
+                    SELECT ST_AsGeoJSON(overlap_geom)
                     INTO overlap_geojson;
                     
                     -- Construir mensaje de error estructurado con GEOJSON
@@ -1947,6 +1957,18 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
             }
         
         elif rule_type == "must_not_have_gaps":
+            radio = 500  # metros
+            buffer_mm = 0.001  # 1 mm en metros
+            
+            if is_geographic:
+                dwithin_clause_existing = f"ST_DWithin({geom_field}::geography, NEW.{geom_field}::geography, radio)"
+                buffer_expr = f"ST_Buffer(NEW.{geom_field}::geography, buffer_mm)::geometry"
+                remaining_geom_expr = "remaining_geom.geom"
+            else:
+                dwithin_clause_existing = f"ST_DWithin({geom_field}, NEW.{geom_field}, radio)"
+                buffer_expr = f"ST_Buffer(NEW.{geom_field}, buffer_mm)"
+                remaining_geom_expr = "remaining_geom.geom"
+            
             # SQL para función MUST NOT HAVE GAPS
             function_sql = f"""
             CREATE OR REPLACE FUNCTION {function_name}()
@@ -1957,21 +1979,18 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 area_unida geometry;
                 area_resto geometry;
                 area_final geometry;
-                geometry_3857 geometry;
-                radio INTEGER := 500;
+                radio INTEGER := {radio};
+                buffer_mm NUMERIC := {buffer_mm};
                 gap_geom geometry;
                 gap_geojson TEXT;
                 error_message TEXT;
             BEGIN
-                -- Transformar la nueva geometría a 3857
-                geometry_3857 := ST_Transform(NEW.{geom_field}, 3857);
-
                 -- Paso 1: Generar el Convex Hull de los polígonos existentes dentro del radio (incluyendo el nuevo)
                 -- Trabajamos en el SRID original para evitar mezclas
                 SELECT ST_ConvexHull(ST_Union(geom_union)) INTO bounding_geom
                 FROM (
                     SELECT {geom_field} as geom_union FROM {full_table_name} 
-                    WHERE ST_DWithin(ST_Transform({geom_field}, 3857), geometry_3857, radio)
+                    WHERE {dwithin_clause_existing}
                     AND {pk_field} <> NEW.{pk_field} -- se excluye por si es una actualizacion solo contar con la nueva modificación
                     UNION ALL
                     SELECT NEW.{geom_field} as geom_union
@@ -1983,7 +2002,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 -- Paso 3: Unir todas las geometrías existentes dentro del radio
                 SELECT ST_Union({geom_field}) INTO area_unida
                 FROM {full_table_name}
-                WHERE ST_DWithin(ST_Transform({geom_field}, 3857), geometry_3857, radio)
+                WHERE {dwithin_clause_existing}
                 AND {pk_field} <> NEW.{pk_field};
 
                 -- Restar del Bounding Box la geometría unida y la nueva geometría
@@ -2003,21 +2022,21 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
 
                 -- Paso 5: Comprobar si alguna de las geometrías restantes interseca con el nuevo polígono con un buffer de 1 mm
                 -- El buffer es necesario porque el Touches no detecta nada por cuestiones decimales.
-                -- Trabajamos todo en 3857 para las operaciones de buffer y distancia
-                SELECT ST_Transform(remaining_geom.geom, ST_SRID(NEW.{geom_field})) INTO gap_geom
+                -- Trabajamos en el SRID nativo usando geography para geográfico o geometry para proyectado
+                SELECT {remaining_geom_expr} INTO gap_geom
                 FROM (
                     SELECT (ST_Dump(area_final)).geom AS geom
                 ) AS remaining_geom
                 WHERE ST_Intersects(
-                    ST_Transform(remaining_geom.geom, 3857), -- Convertir las geometrías restantes a 3857
-                    ST_Buffer(geometry_3857, 0.001) -- Buffer de 1 mm en 3857
+                    {remaining_geom_expr}, -- Geometrías restantes en SRID nativo
+                    {buffer_expr} -- Buffer de 1 mm (geography para geográfico, geometry para proyectado)
                 )
                 LIMIT 1;
 
                 -- Si se detecta un hueco, generar mensaje de error con GeoJSON
                 IF gap_geom IS NOT NULL THEN
-                    -- Obtener la geometría del hueco como GEOJSON en EPSG:4326
-                    SELECT ST_AsGeoJSON(ST_Transform(gap_geom, 4326))
+                    -- Obtener la geometría del hueco como GEOJSON en el SRID nativo de la layer
+                    SELECT ST_AsGeoJSON(gap_geom)
                     INTO gap_geojson;
                     
                     -- Construir mensaje de error estructurado con GEOJSON
@@ -2059,6 +2078,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
         elif rule_type == "must_not_overlap_with":
             # SQL para función MUST NOT OVERLAP WITH
             overlap_geom_fields = kwargs.get('overlap_geom_fields', {})
+            overlap_srids = kwargs.get('overlap_srids', {})
             
             if not overlap_geom_fields:
                 logger.error(f"overlap_geom_fields es requerido para la regla must_not_overlap_with")
@@ -2067,23 +2087,32 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
             # Construir la consulta dinámica para cada tabla en overlap_layers
             overlap_checks = []
             for layer_name, overlap_geom_field in overlap_geom_fields.items():
+                overlap_srid = overlap_srids.get(layer_name)
+                
+                needs_transform = (overlap_srid is not None and layer_srid is not None and overlap_srid != layer_srid)
+                
+                if needs_transform and layer_srid:
+                    overlap_geom_expr = f"ST_Transform({overlap_geom_field}, {layer_srid})"
+                else:
+                    overlap_geom_expr = overlap_geom_field
+                
                 overlap_check = f"""
                     -- Comprobar solapamiento con {layer_name}
                     SELECT 1
                     INTO result
                     FROM {layer_name}
                     WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({overlap_geom_field}, 3857), radio) 
-                      AND ST_Overlaps(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_field}, {snap_precision}))
+                      AND ST_Overlaps(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_expr}, {snap_precision}))
                     LIMIT 1;
 
                     -- Si encuentra un solapamiento, lanza una excepción
                     IF result = 1 THEN
-                        -- Obtener geometría del solapamiento para el error
-                        SELECT ST_AsGeoJSON(ST_Transform(ST_Intersection(NEW.{geom_field}, {overlap_geom_field}), 4326))
+                        -- Obtener geometría del solapamiento para el error en el SRID nativo de la layer
+                        SELECT ST_AsGeoJSON(ST_Intersection(NEW.{geom_field}, {overlap_geom_expr}))
                         INTO overlap_geojson
                         FROM {layer_name}
                         WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({overlap_geom_field}, 3857), radio) 
-                          AND ST_Overlaps(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_field}, {snap_precision}))
+                          AND ST_Overlaps(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_expr}, {snap_precision}))
                         LIMIT 1;
                         
                         error_message := 'TOPOLOGY ERROR: Geometry overlaps with layer ' || '{layer_name.replace(".", "-")}' || '. ' ||
@@ -2142,6 +2171,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
             # SQL para función MUST BE COVERED BY
             covered_by_layer = kwargs.get('covered_by_layer')
             covered_geom_field = kwargs.get('covered_geom_field')
+            covered_srid = kwargs.get('covered_srid')
             
             if not covered_by_layer:
                 logger.error(f"covered_by_layer es requerido para la regla must_be_covered_by")
@@ -2156,6 +2186,13 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 logger.error(f"covered_by_layer debe tener formato schema.tabla: {covered_by_layer}")
                 return None
             
+            needs_transform = (covered_srid is not None and layer_srid is not None and covered_srid != layer_srid)
+            
+            if needs_transform and layer_srid:
+                covered_geom_expr = f"ST_Transform({covered_geom_field}, {layer_srid})"
+            else:
+                covered_geom_expr = covered_geom_field
+            
             function_sql = f"""
             CREATE OR REPLACE FUNCTION {function_name}()
             RETURNS TRIGGER AS
@@ -2169,11 +2206,11 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 covering_union GEOMETRY;
             BEGIN
                 -- Obtener la unión de todas las geometrías que podrían cubrir la nueva geometría
-                SELECT ST_Union({covered_geom_field})
+                SELECT ST_Union({covered_geom_expr})
                 INTO covering_union
                 FROM {covered_by_layer}
                 WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({covered_geom_field}, 3857), radio)
-                  AND ST_Intersects(ST_SnapToGrid({covered_geom_field}, {snap_precision}), ST_SnapToGrid(NEW.{geom_field}, {snap_precision}));
+                  AND ST_Intersects(ST_SnapToGrid({covered_geom_expr}, {snap_precision}), ST_SnapToGrid(NEW.{geom_field}, {snap_precision}));
 
                 -- Si hay geometrías que intersectan, calcular la parte no cubierta
                 IF covering_union IS NOT NULL THEN
@@ -2182,8 +2219,8 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                     
                     -- Si queda alguna parte sin cubrir, es un error
                     IF uncovered_geom IS NOT NULL AND NOT ST_IsEmpty(uncovered_geom) THEN
-                        -- Obtener la geometría no cubierta como GEOJSON en EPSG:4326
-                        SELECT ST_AsGeoJSON(ST_Transform(uncovered_geom, 4326))
+                        -- Obtener la geometría no cubierta como GEOJSON en el SRID nativo de la layer
+                        SELECT ST_AsGeoJSON(uncovered_geom)
                         INTO uncovered_geojson;
                         
                         -- Construir mensaje de error estructurado con GEOJSON
@@ -2195,7 +2232,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                     END IF;
                 ELSE
                     -- No hay geometrías que intersecten, toda la nueva geometría está sin cubrir
-                    SELECT ST_AsGeoJSON(ST_Transform(NEW.{geom_field}, 4326))
+                    SELECT ST_AsGeoJSON(NEW.{geom_field})
                     INTO uncovered_geojson;
                     
                     -- Construir mensaje de error estructurado con GEOJSON
@@ -2235,8 +2272,19 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
             }
         
         elif rule_type == "must_be_contiguous":
-            # SQL para función MUST BE CONTIGUOUS - Tu lógica original exacta
+            # SQL para función MUST BE CONTIGUOUS
             contiguous_tolerance = kwargs.get('contiguous_tolerance', 1.0)  # Default del modelo
+            
+            if is_geographic:
+                # Para SRID geográfico (grados): usar geography para distancias en metros
+                relate_expr_new = f"ST_SnapToGrid(NEW.{geom_field}, {snap_precision})"
+                relate_expr_existing = f"ST_SnapToGrid({geom_field}, {snap_precision})"
+                distance_expr = f"ST_Distance(vertex::geography, {geom_field}::geography)"
+            else:
+                # Para SRID proyectado: usar geometry directamente (ya está en metros)
+                relate_expr_new = f"ST_SnapToGrid(NEW.{geom_field}, {snap_precision})"
+                relate_expr_existing = f"ST_SnapToGrid({geom_field}, {snap_precision})"
+                distance_expr = f"ST_Distance(vertex, {geom_field})"
             
             function_sql = f"""
             CREATE OR REPLACE FUNCTION {function_name}()
@@ -2248,20 +2296,20 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 error_message TEXT;
                 problem_geojson TEXT;
                 valid_vertex_count INTEGER := 0;
-                vertex_3857 geometry;
+                vertex geometry;
                 min_distance NUMERIC;
                 vertex_counter INTEGER := 0;
                 total_points INTEGER;
                 closest_invalid_vertex geometry;
                 closest_invalid_distance NUMERIC := 999999;
             BEGIN
-                -- PASO 1: ¿Toca por borde en SRID 3857? → VÁLIDO inmediatamente
+                -- PASO 1: ¿Toca por borde en el SRID nativo? → VÁLIDO inmediatamente
                 IF EXISTS (
                     SELECT 1
                     FROM {full_table_name}
                     WHERE ST_Relate(
-                        ST_SnapToGrid(ST_Transform(NEW.{geom_field}, 3857), {snap_precision}),
-                        ST_SnapToGrid(ST_Transform({geom_field}, 3857), {snap_precision}), 
+                        {relate_expr_new},
+                        {relate_expr_existing}, 
                         'F***1****') -- Toca por borde
                     AND {pk_field} <> NEW.{pk_field}
                 ) THEN
@@ -2270,10 +2318,10 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
 
                 -- PASO 2: Contar vértices dentro de tolerancia (en metros) - SIN DUPLICADOS
                 -- Contar total de puntos
-                SELECT ST_NPoints(ST_Transform(NEW.{geom_field}, 3857)) INTO total_points;
+                SELECT ST_NPoints(NEW.{geom_field}) INTO total_points;
                 
-                FOR vertex_3857 IN
-                    SELECT (ST_DumpPoints(ST_Transform(NEW.{geom_field}, 3857))).geom
+                FOR vertex IN
+                    SELECT (ST_DumpPoints(NEW.{geom_field})).geom
                 LOOP
                     vertex_counter := vertex_counter + 1;
                     
@@ -2283,7 +2331,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                     END IF;
                     
                     -- Calcular distancia mínima de este vértice a CUALQUIER geometría existente
-                    SELECT MIN(ST_Distance(vertex_3857, ST_Transform({geom_field}, 3857)))
+                    SELECT MIN({distance_expr})
                     INTO min_distance
                     FROM {full_table_name}
                     WHERE {pk_field} <> NEW.{pk_field};
@@ -2300,7 +2348,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                         -- Este vértice NO cumple tolerancia, ¿es el más cercano a cumplirla?
                         IF min_distance IS NOT NULL AND min_distance < closest_invalid_distance THEN
                             closest_invalid_distance := min_distance;
-                            closest_invalid_vertex := vertex_3857;
+                            closest_invalid_vertex := vertex;
                         END IF;
                     END IF;
                 END LOOP;
@@ -2308,7 +2356,8 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 -- PASO 3: No hay suficientes vértices cercanos → ERROR
                 -- Devolver el vértice que NO cumple tolerancia pero está más cerca de cumplirla
                 IF closest_invalid_vertex IS NOT NULL THEN
-                    SELECT ST_AsGeoJSON(ST_Transform(closest_invalid_vertex, 4326))
+                    -- El vértice ya está en el SRID nativo
+                    SELECT ST_AsGeoJSON(closest_invalid_vertex)
                     INTO problem_geojson;
                     
                     error_message := 'TOPOLOGY ERROR: Geometry is not contiguous. Only ' || valid_vertex_count || 
@@ -2317,7 +2366,8 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                                     COALESCE(problem_geojson, 'NULL') || '##.';
                 ELSE
                     -- Fallback al centroide si no se encontró ningún vértice inválido
-                    SELECT ST_AsGeoJSON(ST_Transform(ST_Centroid(NEW.{geom_field}), 4326))
+                    -- El centroide ya está en el SRID nativo
+                    SELECT ST_AsGeoJSON(ST_Centroid(NEW.{geom_field}))
                     INTO problem_geojson;
                     
                     error_message := 'TOPOLOGY ERROR: Geometry is not contiguous. Only ' || valid_vertex_count || 
@@ -2369,7 +2419,7 @@ def _apply_topology_trigger(layer, rule_type, **kwargs):
         i, source_name, schema = layer.get_db_connection()
         
         with i as conn:
-            # Para la regla must_be_covered_by, obtener el campo geometría de la tabla de cobertura
+            # Para la regla must_be_covered_by, obtener el campo geometría y SRID de la tabla de cobertura
             if rule_type == "must_be_covered_by":
                 covered_by_layer = kwargs.get('covered_by_layer')
                 
@@ -2382,14 +2432,27 @@ def _apply_topology_trigger(layer, rule_type, **kwargs):
                         logger.error(f"No se encontró campo de geometría para la tabla de cobertura {covered_by_layer}")
                         return False
                     
-                    kwargs['covered_geom_field'] = covered_geom_columns[0]
-                    logger.info(f"Campo geometría de tabla de cobertura {covered_by_layer}: '{covered_geom_columns[0]}'")
+                    covered_geom_field = covered_geom_columns[0]
+                    kwargs['covered_geom_field'] = covered_geom_field
+                    
+                    # Obtener el SRID de la capa de cobertura
+                    covered_geom_columns_info = conn.get_geometry_columns_info(covered_table, covered_schema)
+                    covered_srid = None
+                    if covered_geom_columns_info and len(covered_geom_columns_info) > 0:
+                        for geom_info in covered_geom_columns_info:
+                            if geom_info[2] == covered_geom_field:  # geom_info[2] es el nombre de la columna
+                                covered_srid = geom_info[4]  # geom_info[4] es el SRID
+                                break
+                    
+                    kwargs['covered_srid'] = covered_srid
+                    logger.info(f"Campo geometría de tabla de cobertura {covered_by_layer}: '{covered_geom_field}', SRID: {covered_srid}")
             
-            # Para la regla must_not_overlap_with, obtener los campos geometría de las tablas objetivo
+            # Para la regla must_not_overlap_with, obtener los campos geometría y SRID de las tablas objetivo
             elif rule_type == "must_not_overlap_with":
                 overlap_layers = kwargs.get('overlap_layers', [])
                 logger.info(f"Processing must_not_overlap_with for layer {layer.id} with overlap_layers: {overlap_layers}")
                 overlap_geom_fields = {}
+                overlap_srids = {}
                 
                 for layer_name in overlap_layers:
                     logger.info(f"Processing overlap layer: {layer_name}")
@@ -2404,14 +2467,25 @@ def _apply_topology_trigger(layer, rule_type, **kwargs):
                             logger.error(f"No se encontró campo de geometría para la tabla {layer_name}")
                             return False
                         
-                        overlap_geom_fields[layer_name] = overlap_geom_columns[0]
-                        logger.info(f"Campo geometría de tabla {layer_name}: '{overlap_geom_columns[0]}'")
+                        overlap_geom_field = overlap_geom_columns[0]
+                        overlap_geom_fields[layer_name] = overlap_geom_field
+                        
+                        overlap_geom_columns_info = conn.get_geometry_columns_info(overlap_table, overlap_schema)
+                        overlap_srid = None
+                        if overlap_geom_columns_info and len(overlap_geom_columns_info) > 0:
+                            for geom_info in overlap_geom_columns_info:
+                                if geom_info[2] == overlap_geom_field:  # geom_info[2] es el nombre de la columna
+                                    overlap_srid = geom_info[4]  # geom_info[4] es el SRID
+                                    break
+                        
+                        overlap_srids[layer_name] = overlap_srid
+                        logger.info(f"Campo geometría de tabla {layer_name}: '{overlap_geom_field}', SRID: {overlap_srid}")
                     else:
                         logger.error(f"overlap_layer debe tener formato schema.tabla: {layer_name}")
                         return False
                 
-                logger.info(f"Final overlap_geom_fields: {overlap_geom_fields}")
                 kwargs['overlap_geom_fields'] = overlap_geom_fields
+                kwargs['overlap_srids'] = overlap_srids
             
             trigger_info = _generate_topology_trigger_sql(rule_type, layer, **kwargs)
             if not trigger_info:
