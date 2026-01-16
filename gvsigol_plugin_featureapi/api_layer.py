@@ -1156,10 +1156,14 @@ class MapboxStyleView(APIView):
                 )
                 return JsonResponse(mapbox_style, safe=False)
             else:
-                # Devolver todos los estilos de la capa
+                # Devolver todos los estilos de la capa (usa caché por defecto)
+                # Permitir forzar regeneración con ?use_cache=false
+                use_cache = request.GET.get('use_cache', 'true').lower() != 'false'
+                
                 result = get_all_styles_for_layer(
                     layer_id=lyr_id,
-                    tms_base_url=tms_base_url
+                    tms_base_url=tms_base_url,
+                    use_cache=use_cache
                 )
                 return JsonResponse(result, safe=False)
             
@@ -1169,4 +1173,52 @@ class MapboxStyleView(APIView):
             import logging
             logger = logging.getLogger(__name__)
             logger.exception(f"Error converting style for layer {lyr_id}")
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    @swagger_auto_schema(
+        operation_id='delete_mapbox_style_cache',
+        operation_summary='Clear Mapbox GL style cache for a layer',
+        responses={
+            200: 'Cache cleared successfully',
+            404: "Layer not found",
+            500: "Error clearing cache"
+        }
+    )
+    def delete(self, request, lyr_id, style_id=None):
+        """
+        Elimina la caché de Mapbox GL para esta capa, forzando regeneración
+        en la próxima petición GET.
+        """
+        try:
+            from gvsigol_symbology.models import MapboxStyleCache
+            from gvsigol_services.models import Layer
+            
+            # Verificar que la capa existe
+            try:
+                layer = Layer.objects.get(id=lyr_id)
+            except Layer.DoesNotExist:
+                return Response({'error': f'Layer {lyr_id} not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+            # Eliminar caché
+            deleted_count, _ = MapboxStyleCache.objects.filter(layer=layer).delete()
+            
+            if deleted_count > 0:
+                return JsonResponse({
+                    'message': f'Cache cleared for layer {lyr_id}',
+                    'layer_id': lyr_id,
+                    'layer_name': layer.name,
+                    'cache_deleted': True
+                })
+            else:
+                return JsonResponse({
+                    'message': f'No cache found for layer {lyr_id}',
+                    'layer_id': lyr_id,
+                    'layer_name': layer.name,
+                    'cache_deleted': False
+                })
+        
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.exception(f"Error deleting cache for layer {lyr_id}")
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
