@@ -55,12 +55,14 @@ import logging
 LOGGER_NAME='gvsigol'
 
 
-def handle_topology_error(e):
+def handle_topology_error(e, lyr_id=None, target_epsg=None):
     """
-    Maneja errores de topología extrayendo el GeoJSON y devolviendo una respuesta estructurada.
+    Maneja errores de topología extrayendo el GeoJSON y transformándolo al CRS del visor si es necesario.
     
     Args:
         e: HttpException con posible error de topología
+        lyr_id: ID de la capa (opcional, necesario para transformar el GeoJSON)
+        target_epsg: EPSG al que transformar el GeoJSON (opcional, si no se proporciona se mantiene el original)
         
     Returns:
         JsonResponse con error estructurado si es error de topología, None en caso contrario
@@ -69,6 +71,7 @@ def handle_topology_error(e):
         try:
             import re
             import json
+            from psycopg2 import sql as sqlbuilder
             error_msg = str(e.msg)
             
             # Extraer el mensaje desde después de los dos puntos hasta el primer punto
@@ -83,6 +86,50 @@ def handle_topology_error(e):
                 geojson_str = geojson_match.group(1)
                 try:
                     geojson_obj = json.loads(geojson_str)
+                    
+                    # Transformar el GeoJSON al CRS del visor si es necesario
+                    if target_epsg and lyr_id:
+                        try:
+                            source_epsg = None
+                            if 'crs' in geojson_obj and geojson_obj['crs'] is not None:
+                                crs_name = geojson_obj['crs'].get('properties', {}).get('name', '')
+                                if crs_name.startswith('EPSG:'):
+                                    source_epsg = int(crs_name.split(':')[1])
+                            
+                            if not source_epsg:
+                                layer = Layer.objects.get(id=lyr_id)
+                                if layer.native_srs:
+                                    source_epsg = int(layer.native_srs.split(':')[1])
+                                else:
+                                    source_epsg = 4326  # Fallback a 4326 si no hay native_srs
+                            
+                            if source_epsg != target_epsg:
+                                i, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
+                                with i as con:
+                                    if 'crs' not in geojson_obj or geojson_obj['crs'] is None:
+                                        sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(ST_Transform(ST_SetSRID(ST_GeomFromGeoJSON({geojson}), {source_epsg}), {target_epsg}))")
+                                        query = sql.format(
+                                            geojson=sqlbuilder.Literal(json.dumps(geojson_obj)),
+                                            source_epsg=sqlbuilder.Literal(source_epsg),
+                                            target_epsg=sqlbuilder.Literal(target_epsg)
+                                        )
+                                    else:
+                                        sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(ST_Transform(ST_GeomFromGeoJSON({geojson}), {target_epsg}))")
+                                        query = sql.format(
+                                            geojson=sqlbuilder.Literal(json.dumps(geojson_obj)),
+                                            target_epsg=sqlbuilder.Literal(target_epsg)
+                                        )
+                                    con.cursor.execute(query)
+                                    result = con.cursor.fetchone()
+                                    if result and result[0]:
+                                        transformed_geojson = json.loads(result[0])
+                                        transformed_geojson['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{target_epsg}"}}}}')
+                                        geojson_obj = transformed_geojson
+                            elif 'crs' not in geojson_obj or geojson_obj['crs'] is None:
+                                geojson_obj['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{target_epsg}"}}}}')
+                        except Exception as transform_error:
+                            logging.getLogger(LOGGER_NAME).warning(f"Error transforming topology error geometry: {str(transform_error)}")
+                    
                     # Devolver error estructurado con GeoJSON
                     return JsonResponse({
                         'topology_error': topology_message,
@@ -254,9 +301,16 @@ class FeaturesView(CreateAPIView):
                     filter = json.loads(self.request.GET['filter'])
                 except Exception:
                     raise HttpException(400, "Bad parameter filter. The value must be a string")
+            
+            source_epsg = 4326
+            if 'source_epsg' in self.request.GET:
+                try:
+                    source_epsg = int(self.request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
                     
             restrictions = validation.check_read_restrictions(lyr_id)
-            result = serializers.FeatureSerializer().list(validation, lyr_id, pagination, 4326, date, strict_search, onlyprops, text, filter, restrictions.get('cql_filter_read'))
+            result = serializers.FeatureSerializer().list(validation, lyr_id, pagination, source_epsg, date, strict_search, onlyprops, text, filter, restrictions.get('cql_filter_read'))
             return JsonResponse(result, safe=False)
         except HttpException as e:
             return e.get_exception()
@@ -275,13 +329,29 @@ class FeaturesView(CreateAPIView):
             validation.check_create_feature(lyr_id, content)
             username = request.user.username
             
-            # Manejar el parámetro epsg de la query
+            # Manejar source_epsg (formato EPSG:3857) o epsg (entero) para compatibilidad
             epsg = 4326
-            if 'epsg' in request.GET:
+            if 'source_epsg' in request.GET:
+                try:
+                    epsg = int(request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
+            elif 'epsg' in request.GET:
                 try:
                     epsg = int(request.GET['epsg'])
                 except Exception:
                     raise HttpException(400, "Bad parameter epsg. The value must be an integer")
+            
+            if 'geometry' in content and content['geometry'] is not None:
+                if 'crs' in content['geometry'] and content['geometry']['crs'] is not None:
+                    try:
+                        crs_name = content['geometry']['crs'].get('properties', {}).get('name', '')
+                        if crs_name.startswith('EPSG:'):
+                            feature_epsg = int(crs_name.split(':')[1])
+                            if feature_epsg != 4326:
+                                epsg = feature_epsg
+                    except (ValueError, KeyError, AttributeError):
+                        pass
             
             feat = serializers.FeatureSerializer().create(validation, lyr_id, content, username, epsg)
             return JsonResponse(feat, safe=False)
@@ -290,7 +360,7 @@ class FeaturesView(CreateAPIView):
             print(f"Error creating feature in layer {lyr_id}: [{e.code}] {e.msg}")
             
             # Intentar manejar como error de topología
-            topology_response = handle_topology_error(e)
+            topology_response = handle_topology_error(e, lyr_id, epsg)
             if topology_response:
                 return topology_response
             
@@ -336,6 +406,17 @@ class FeaturesView(CreateAPIView):
                 except Exception:
                     raise HttpException(400, "Bad parameter epsg. The value must be an integer")
             
+            if 'geometry' in data and data['geometry'] is not None:
+                if 'crs' in data['geometry'] and data['geometry']['crs'] is not None:
+                    try:
+                        crs_name = data['geometry']['crs'].get('properties', {}).get('name', '')
+                        if crs_name.startswith('EPSG:'):
+                            feature_epsg = int(crs_name.split(':')[1])
+                            if feature_epsg != 4326:
+                                epsg = feature_epsg
+                    except (ValueError, KeyError, AttributeError):
+                        pass
+            
             feat = serializers.FeatureSerializer().update(validation, lyr_id, data, override, version_to_overwrite, username, epsg)
             return JsonResponse(feat, safe=False)
         except HttpException as e:
@@ -343,7 +424,7 @@ class FeaturesView(CreateAPIView):
             logger.error(f"Error updating feature in layer {lyr_id}: [{e.code}] {e.msg}")
             
             # Intentar manejar como error de topología
-            topology_response = handle_topology_error(e)
+            topology_response = handle_topology_error(e, lyr_id, epsg)
             if topology_response:
                 return topology_response
             
@@ -414,7 +495,12 @@ class FeaturesExtentView(ListAPIView):
                     raise HttpException(400, "Bad parameter resources. The value must be a value true or false")
 
             epsg = 4326
-            if 'epsg' in self.request.GET:
+            if 'source_epsg' in self.request.GET:
+                try:
+                    epsg = int(self.request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
+            elif 'epsg' in self.request.GET:
                 try:
                     epsg = int(self.request.GET['epsg'])
                 except Exception:
@@ -505,7 +591,14 @@ class PublicFeaturesView(CreateAPIView):
                     print(e)
                     raise HttpException(400, "Bad parameter filter. The value must be a string")
 
-            result = serializers.FeatureSerializer().list(None, lyr_id, pagination, 4326, date, strict_search, onlyprops, text, filter)
+            source_epsg = 4326
+            if 'source_epsg' in self.request.GET:
+                try:
+                    source_epsg = int(self.request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
+
+            result = serializers.FeatureSerializer().list(None, lyr_id, pagination, source_epsg, date, strict_search, onlyprops, text, filter)
             return JsonResponse(result, safe=False)
         except HttpException as e:
             return e.get_exception()
@@ -943,7 +1036,7 @@ class FeatureByPointView(ListAPIView):
                 except Exception:
                     raise HttpException(400, "Bad parameter simplify")
                 
-            source_epsg = 'EPSG:4326'
+            source_epsg = 4326
             if 'source_epsg' in self.request.GET:
                 try:
                     source_epsg = int(self.request.GET['source_epsg'].split(":")[1])
@@ -964,7 +1057,7 @@ class FeatureByPointView(ListAPIView):
             serializer = FeatureSerializer()
             result = None
             if simplify:
-                result = serializer.info_by_point(validation, lyr, lat, lon, 4326, buffer, geom, lang, blank, getbuffer, cql_filter_read=restrictions.get('cql_filter_read'))
+                result = serializer.info_by_point(validation, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer, cql_filter_read=restrictions.get('cql_filter_read'))
             else:
                 result = serializer.info_by_point_without_simplify(validation, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer, cql_filter_read=restrictions.get('cql_filter_read'))
             result['infoFormat'] = 'application/geojson'
@@ -1064,6 +1157,13 @@ class PublicFeatureByPointView(ListAPIView):
                 except Exception:
                     raise HttpException(400, "Bad parameter blank")
 
+            source_epsg = 4326
+            if 'source_epsg' in self.request.GET:
+                try:
+                    source_epsg = int(self.request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
+
             getbuffer = False
             if 'getbuffer' in self.request.GET:
                 try:
@@ -1078,7 +1178,7 @@ class PublicFeatureByPointView(ListAPIView):
                 raise HttpException(403, "The user does not have permission to read this layer")
 
             serializer = FeatureSerializer()
-            result = serializer.info_by_point(None, lyr, lat, lon, 4326, buffer, geom, lang, blank, getbuffer)
+            result = serializer.info_by_point(None, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer)
 
             result = {
                 "content" : result,
