@@ -2078,6 +2078,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
         elif rule_type == "must_not_overlap_with":
             # SQL para función MUST NOT OVERLAP WITH
             overlap_geom_fields = kwargs.get('overlap_geom_fields', {})
+            overlap_srids = kwargs.get('overlap_srids', {})
             
             if not overlap_geom_fields:
                 logger.error(f"overlap_geom_fields es requerido para la regla must_not_overlap_with")
@@ -2086,23 +2087,32 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
             # Construir la consulta dinámica para cada tabla en overlap_layers
             overlap_checks = []
             for layer_name, overlap_geom_field in overlap_geom_fields.items():
+                overlap_srid = overlap_srids.get(layer_name)
+                
+                needs_transform = (overlap_srid is not None and layer_srid is not None and overlap_srid != layer_srid)
+                
+                if needs_transform and layer_srid:
+                    overlap_geom_expr = f"ST_Transform({overlap_geom_field}, {layer_srid})"
+                else:
+                    overlap_geom_expr = overlap_geom_field
+                
                 overlap_check = f"""
                     -- Comprobar solapamiento con {layer_name}
                     SELECT 1
                     INTO result
                     FROM {layer_name}
                     WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({overlap_geom_field}, 3857), radio) 
-                      AND ST_Overlaps(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_field}, {snap_precision}))
+                      AND ST_Overlaps(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_expr}, {snap_precision}))
                     LIMIT 1;
 
                     -- Si encuentra un solapamiento, lanza una excepción
                     IF result = 1 THEN
                         -- Obtener geometría del solapamiento para el error en el SRID nativo de la layer
-                        SELECT ST_AsGeoJSON(ST_Intersection(NEW.{geom_field}, {overlap_geom_field}))
+                        SELECT ST_AsGeoJSON(ST_Intersection(NEW.{geom_field}, {overlap_geom_expr}))
                         INTO overlap_geojson
                         FROM {layer_name}
                         WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({overlap_geom_field}, 3857), radio) 
-                          AND ST_Overlaps(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_field}, {snap_precision}))
+                          AND ST_Overlaps(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_expr}, {snap_precision}))
                         LIMIT 1;
                         
                         error_message := 'TOPOLOGY ERROR: Geometry overlaps with layer ' || '{layer_name.replace(".", "-")}' || '. ' ||
@@ -2417,11 +2427,12 @@ def _apply_topology_trigger(layer, rule_type, **kwargs):
                     kwargs['covered_geom_field'] = covered_geom_columns[0]
                     logger.info(f"Campo geometría de tabla de cobertura {covered_by_layer}: '{covered_geom_columns[0]}'")
             
-            # Para la regla must_not_overlap_with, obtener los campos geometría de las tablas objetivo
+            # Para la regla must_not_overlap_with, obtener los campos geometría y SRID de las tablas objetivo
             elif rule_type == "must_not_overlap_with":
                 overlap_layers = kwargs.get('overlap_layers', [])
                 logger.info(f"Processing must_not_overlap_with for layer {layer.id} with overlap_layers: {overlap_layers}")
                 overlap_geom_fields = {}
+                overlap_srids = {}
                 
                 for layer_name in overlap_layers:
                     logger.info(f"Processing overlap layer: {layer_name}")
@@ -2436,14 +2447,25 @@ def _apply_topology_trigger(layer, rule_type, **kwargs):
                             logger.error(f"No se encontró campo de geometría para la tabla {layer_name}")
                             return False
                         
-                        overlap_geom_fields[layer_name] = overlap_geom_columns[0]
-                        logger.info(f"Campo geometría de tabla {layer_name}: '{overlap_geom_columns[0]}'")
+                        overlap_geom_field = overlap_geom_columns[0]
+                        overlap_geom_fields[layer_name] = overlap_geom_field
+                        
+                        overlap_geom_columns_info = conn.get_geometry_columns_info(overlap_table, overlap_schema)
+                        overlap_srid = None
+                        if overlap_geom_columns_info and len(overlap_geom_columns_info) > 0:
+                            for geom_info in overlap_geom_columns_info:
+                                if geom_info[2] == overlap_geom_field:  # geom_info[2] es el nombre de la columna
+                                    overlap_srid = geom_info[4]  # geom_info[4] es el SRID
+                                    break
+                        
+                        overlap_srids[layer_name] = overlap_srid
+                        logger.info(f"Campo geometría de tabla {layer_name}: '{overlap_geom_field}', SRID: {overlap_srid}")
                     else:
                         logger.error(f"overlap_layer debe tener formato schema.tabla: {layer_name}")
                         return False
                 
-                logger.info(f"Final overlap_geom_fields: {overlap_geom_fields}")
                 kwargs['overlap_geom_fields'] = overlap_geom_fields
+                kwargs['overlap_srids'] = overlap_srids
             
             trigger_info = _generate_topology_trigger_sql(rule_type, layer, **kwargs)
             if not trigger_info:
