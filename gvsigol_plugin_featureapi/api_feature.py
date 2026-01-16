@@ -55,12 +55,14 @@ import logging
 LOGGER_NAME='gvsigol'
 
 
-def handle_topology_error(e):
+def handle_topology_error(e, lyr_id=None, target_epsg=None):
     """
-    Maneja errores de topología extrayendo el GeoJSON y devolviendo una respuesta estructurada.
+    Maneja errores de topología extrayendo el GeoJSON y transformándolo al CRS del visor si es necesario.
     
     Args:
         e: HttpException con posible error de topología
+        lyr_id: ID de la capa (opcional, necesario para transformar el GeoJSON)
+        target_epsg: EPSG al que transformar el GeoJSON (opcional, si no se proporciona se mantiene el original)
         
     Returns:
         JsonResponse con error estructurado si es error de topología, None en caso contrario
@@ -69,6 +71,7 @@ def handle_topology_error(e):
         try:
             import re
             import json
+            from psycopg2 import sql as sqlbuilder
             error_msg = str(e.msg)
             
             # Extraer el mensaje desde después de los dos puntos hasta el primer punto
@@ -83,6 +86,50 @@ def handle_topology_error(e):
                 geojson_str = geojson_match.group(1)
                 try:
                     geojson_obj = json.loads(geojson_str)
+                    
+                    # Transformar el GeoJSON al CRS del visor si es necesario
+                    if target_epsg and lyr_id:
+                        try:
+                            source_epsg = None
+                            if 'crs' in geojson_obj and geojson_obj['crs'] is not None:
+                                crs_name = geojson_obj['crs'].get('properties', {}).get('name', '')
+                                if crs_name.startswith('EPSG:'):
+                                    source_epsg = int(crs_name.split(':')[1])
+                            
+                            if not source_epsg:
+                                layer = Layer.objects.get(id=lyr_id)
+                                if layer.native_srs:
+                                    source_epsg = int(layer.native_srs.split(':')[1])
+                                else:
+                                    source_epsg = 4326  # Fallback a 4326 si no hay native_srs
+                            
+                            if source_epsg != target_epsg:
+                                i, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
+                                with i as con:
+                                    if 'crs' not in geojson_obj or geojson_obj['crs'] is None:
+                                        sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(ST_Transform(ST_SetSRID(ST_GeomFromGeoJSON({geojson}), {source_epsg}), {target_epsg}))")
+                                        query = sql.format(
+                                            geojson=sqlbuilder.Literal(json.dumps(geojson_obj)),
+                                            source_epsg=sqlbuilder.Literal(source_epsg),
+                                            target_epsg=sqlbuilder.Literal(target_epsg)
+                                        )
+                                    else:
+                                        sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(ST_Transform(ST_GeomFromGeoJSON({geojson}), {target_epsg}))")
+                                        query = sql.format(
+                                            geojson=sqlbuilder.Literal(json.dumps(geojson_obj)),
+                                            target_epsg=sqlbuilder.Literal(target_epsg)
+                                        )
+                                    con.cursor.execute(query)
+                                    result = con.cursor.fetchone()
+                                    if result and result[0]:
+                                        transformed_geojson = json.loads(result[0])
+                                        transformed_geojson['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{target_epsg}"}}}}')
+                                        geojson_obj = transformed_geojson
+                            elif 'crs' not in geojson_obj or geojson_obj['crs'] is None:
+                                geojson_obj['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{target_epsg}"}}}}')
+                        except Exception as transform_error:
+                            logging.getLogger(LOGGER_NAME).warning(f"Error transforming topology error geometry: {str(transform_error)}")
+                    
                     # Devolver error estructurado con GeoJSON
                     return JsonResponse({
                         'topology_error': topology_message,
@@ -310,7 +357,7 @@ class FeaturesView(CreateAPIView):
             return JsonResponse(feat, safe=False)
         except HttpException as e:
             # Intentar manejar como error de topología
-            topology_response = handle_topology_error(e)
+            topology_response = handle_topology_error(e, lyr_id, epsg)
             if topology_response:
                 return topology_response
             
@@ -371,7 +418,7 @@ class FeaturesView(CreateAPIView):
             return JsonResponse(feat, safe=False)
         except HttpException as e:
             # Intentar manejar como error de topología
-            topology_response = handle_topology_error(e)
+            topology_response = handle_topology_error(e, lyr_id, epsg)
             if topology_response:
                 return topology_response
             
