@@ -23,6 +23,7 @@
 @author: José Badía <jbadia@scolab.es>
 '''
 from django.db import models
+from django.contrib.postgres.fields import JSONField
 from gvsigol_services.models import Layer
 from django.utils.translation import ugettext as _
 
@@ -196,3 +197,38 @@ class ColorRamp(models.Model):
     
     def __str__(self):
         return self.name
+
+
+class MapboxStyleCache(models.Model):
+    """
+    Caché de estilos Mapbox GL generados por capa.
+    Almacena el JSON completo de get_all_styles_for_layer().
+    
+    La caché se invalida automáticamente cuando se guarda o elimina un Style
+    asociado a la capa (ver signals.py).
+    """
+    layer = models.OneToOneField(
+        Layer,
+        on_delete=models.CASCADE,
+        related_name='mapbox_cache',
+        primary_key=True,
+        help_text="Capa a la que pertenece esta caché"
+    )
+    json_cache = JSONField(
+        help_text="JSON completo con tile_url, source_layer y styles[]"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text="Fecha de creación de la caché"
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        help_text="Fecha de última actualización de la caché"
+    )
+    
+    class Meta:
+        verbose_name = 'Mapbox Style Cache'
+        verbose_name_plural = 'Mapbox Style Caches'
+    
+    def __str__(self):
+        return f"Cache for Layer {self.layer_id}"
