@@ -2171,6 +2171,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
             # SQL para función MUST BE COVERED BY
             covered_by_layer = kwargs.get('covered_by_layer')
             covered_geom_field = kwargs.get('covered_geom_field')
+            covered_srid = kwargs.get('covered_srid')
             
             if not covered_by_layer:
                 logger.error(f"covered_by_layer es requerido para la regla must_be_covered_by")
@@ -2185,6 +2186,13 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 logger.error(f"covered_by_layer debe tener formato schema.tabla: {covered_by_layer}")
                 return None
             
+            needs_transform = (covered_srid is not None and layer_srid is not None and covered_srid != layer_srid)
+            
+            if needs_transform and layer_srid:
+                covered_geom_expr = f"ST_Transform({covered_geom_field}, {layer_srid})"
+            else:
+                covered_geom_expr = covered_geom_field
+            
             function_sql = f"""
             CREATE OR REPLACE FUNCTION {function_name}()
             RETURNS TRIGGER AS
@@ -2198,11 +2206,11 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 covering_union GEOMETRY;
             BEGIN
                 -- Obtener la unión de todas las geometrías que podrían cubrir la nueva geometría
-                SELECT ST_Union({covered_geom_field})
+                SELECT ST_Union({covered_geom_expr})
                 INTO covering_union
                 FROM {covered_by_layer}
                 WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({covered_geom_field}, 3857), radio)
-                  AND ST_Intersects(ST_SnapToGrid({covered_geom_field}, {snap_precision}), ST_SnapToGrid(NEW.{geom_field}, {snap_precision}));
+                  AND ST_Intersects(ST_SnapToGrid({covered_geom_expr}, {snap_precision}), ST_SnapToGrid(NEW.{geom_field}, {snap_precision}));
 
                 -- Si hay geometrías que intersectan, calcular la parte no cubierta
                 IF covering_union IS NOT NULL THEN
@@ -2411,7 +2419,7 @@ def _apply_topology_trigger(layer, rule_type, **kwargs):
         i, source_name, schema = layer.get_db_connection()
         
         with i as conn:
-            # Para la regla must_be_covered_by, obtener el campo geometría de la tabla de cobertura
+            # Para la regla must_be_covered_by, obtener el campo geometría y SRID de la tabla de cobertura
             if rule_type == "must_be_covered_by":
                 covered_by_layer = kwargs.get('covered_by_layer')
                 
@@ -2424,8 +2432,20 @@ def _apply_topology_trigger(layer, rule_type, **kwargs):
                         logger.error(f"No se encontró campo de geometría para la tabla de cobertura {covered_by_layer}")
                         return False
                     
-                    kwargs['covered_geom_field'] = covered_geom_columns[0]
-                    logger.info(f"Campo geometría de tabla de cobertura {covered_by_layer}: '{covered_geom_columns[0]}'")
+                    covered_geom_field = covered_geom_columns[0]
+                    kwargs['covered_geom_field'] = covered_geom_field
+                    
+                    # Obtener el SRID de la capa de cobertura
+                    covered_geom_columns_info = conn.get_geometry_columns_info(covered_table, covered_schema)
+                    covered_srid = None
+                    if covered_geom_columns_info and len(covered_geom_columns_info) > 0:
+                        for geom_info in covered_geom_columns_info:
+                            if geom_info[2] == covered_geom_field:  # geom_info[2] es el nombre de la columna
+                                covered_srid = geom_info[4]  # geom_info[4] es el SRID
+                                break
+                    
+                    kwargs['covered_srid'] = covered_srid
+                    logger.info(f"Campo geometría de tabla de cobertura {covered_by_layer}: '{covered_geom_field}', SRID: {covered_srid}")
             
             # Para la regla must_not_overlap_with, obtener los campos geometría y SRID de las tablas objetivo
             elif rule_type == "must_not_overlap_with":
