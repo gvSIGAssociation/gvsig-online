@@ -23,6 +23,9 @@
 import json
 import logging
 import xml.etree.ElementTree as ET
+import re
+from urllib.parse import quote
+import requests
 
 from gvsigol_symbology.models import (
     Style, StyleLayer, Rule, 
@@ -31,6 +34,7 @@ from gvsigol_symbology.models import (
     ColorMap, ColorMapEntry
 )
 from gvsigol_services.models import Layer
+from gvsigol import settings
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +63,270 @@ def parse_dash_array(dash_array_str):
         return [float(p) for p in parts if p]
     except:
         return None
+
+
+def build_tile_url(layer, workspace):
+    """
+    Construye la URL correcta para tiles MVT según la configuración de la capa.
+    
+    Args:
+        layer: Objeto Layer de Django
+        workspace: Objeto Workspace de Django
+    
+    Returns:
+        str: URL con placeholders {z}, {x}, {y} o {-y} según corresponda
+    
+    Lógica:
+        - Si vector_tile=True y cached=True → GWC (usa {-y} invertido)
+        - Si solo vector_tile=True → WMS-MVT (usa {y} estándar)
+    """
+    if not layer.vector_tile:
+        return None
+    
+    # Obtener URL base del servidor (sin el BASE_URL)
+    server_url = workspace.server.frontend_url.replace(settings.BASE_URL, '')
+    layer_name = f"{workspace.name}:{layer.name}"
+    
+    # GWC: vector_tile=True y cached=True
+    if layer.cached:
+        # GeoWebCache usa TMS con coordenada Y invertida {-y}
+        # Formato: /gwc/service/tms/1.0.0/workspace:layer@EPSG:3857@pbf/{z}/{x}/{-y}.pbf
+        tile_url = (
+            f"{server_url}/gwc/service/tms/1.0.0/"
+            f"{quote(layer_name, safe='')}@EPSG%3A3857@pbf/"
+            f"{{z}}/{{x}}/{{-y}}.pbf"
+        )
+    else:
+        # WMS-MVT: solo vector_tile=True (sin caché)
+        # Formato: /workspace/wms?SERVICE=WMS&REQUEST=GetTile&LAYERS=layer&FORMAT=application/vnd.mapbox-vector-tile&TILEMATRIXSET=EPSG:3857&TILEMATRIX=EPSG:3857:{z}&TILEROW={y}&TILECOL={x}
+        tile_url = (
+            f"{server_url}/{workspace.name}/wms?"
+            f"SERVICE=WMS&REQUEST=GetTile&LAYERS={layer.name}&"
+            f"FORMAT=application%2Fvnd.mapbox-vector-tile&"
+            f"TILEMATRIXSET=EPSG%3A3857&"
+            f"TILEMATRIX=EPSG%3A3857%3A{{z}}&"
+            f"TILEROW={{y}}&TILECOL={{x}}"
+        )
+    
+    return tile_url
+
+
+def detect_source_layer_from_pbf(tile_url, workspace_name, layer_name):
+    """
+    Detecta el nombre real del source-layer parseando un tile PBF de ejemplo.
+    
+    Args:
+        tile_url: URL del servicio de tiles con placeholders {z}, {x}, {y}
+        workspace_name: Nombre del workspace
+        layer_name: Nombre de la capa
+    
+    Returns:
+        str: Nombre real del source-layer en el MVT, o fallback al layer_name
+    
+    El tile PBF contiene el nombre real de la capa, que puede ser diferente
+    del nombre workspace:layer que usamos para la configuración.
+    """
+    # Construir URL para un tile de ejemplo (z=0, x=0, y=0)
+    # Reemplazar los placeholders
+    example_tile_url = tile_url.replace('{z}', '0').replace('{x}', '0').replace('{y}', '0').replace('{-y}', '0')
+    
+    # Si es una URL relativa, agregarle el host completo
+    if example_tile_url.startswith('/'):
+        # Intentar usar localhost o el BASE_URL configurado
+        base = settings.BASE_URL if hasattr(settings, 'BASE_URL') else 'http://localhost:8080'
+        example_tile_url = base + example_tile_url
+    
+    try:
+        # Hacer petición HTTP para obtener el tile
+        response = requests.get(example_tile_url, timeout=5)
+        
+        if response.status_code != 200:
+            logger.warning(f"Failed to fetch tile from {example_tile_url}: HTTP {response.status_code}")
+            return layer_name
+        
+        # Intentar parsear el PBF usando mapbox-vector-tile
+        try:
+            import mapbox_vector_tile
+            
+            # Decodificar el tile
+            tile_data = mapbox_vector_tile.decode(response.content)
+            
+            # El tile_data es un diccionario donde las keys son los nombres de las capas
+            if tile_data and len(tile_data) > 0:
+                # Retornar el primer nombre de capa encontrado
+                source_layer_name = list(tile_data.keys())[0]
+                logger.info(f"Detected source-layer '{source_layer_name}' from PBF tile")
+                return source_layer_name
+        except ImportError:
+            logger.warning("mapbox-vector-tile library not installed, cannot parse PBF. Using fallback.")
+        except Exception as parse_error:
+            logger.warning(f"Error parsing PBF tile: {parse_error}")
+    
+    except requests.exceptions.RequestException as e:
+        logger.warning(f"Error fetching tile from {example_tile_url}: {e}")
+    except Exception as e:
+        logger.warning(f"Unexpected error detecting source-layer: {e}")
+    
+    # Fallback: usar el nombre de la capa sin el workspace
+    return layer_name
+
+
+def normalize_mapbox_style(mapbox_style, style_id=None):
+    """
+    Normaliza un estilo Mapbox GL para asegurar compatibilidad y consistencia.
+    
+    Operaciones:
+    1. Convierte rgba() a rgb() + *-opacity en propiedades de paint
+    2. Asegura IDs únicos para todas las capas
+    3. Valida y limpia filtros Mapbox
+    4. Elimina capas vacías sin paint ni layout útil
+    
+    Args:
+        mapbox_style: Diccionario con el estilo Mapbox GL
+        style_id: ID del estilo para generar sufijos únicos (opcional)
+    
+    Returns:
+        dict: Estilo normalizado
+    """
+    if not mapbox_style or not isinstance(mapbox_style, dict):
+        return mapbox_style
+    
+    if 'layers' not in mapbox_style:
+        return mapbox_style
+    
+    normalized_layers = []
+    layer_ids_seen = set()
+    
+    for idx, layer in enumerate(mapbox_style.get('layers', [])):
+        if not isinstance(layer, dict):
+            continue
+        
+        # 1. Asegurar ID único
+        layer_id = layer.get('id', f'layer_{idx}')
+        original_id = layer_id
+        
+        # Si el ID ya existe, añadir sufijo
+        counter = 1
+        while layer_id in layer_ids_seen:
+            if style_id:
+                layer_id = f"{original_id}_{style_id}_{counter}"
+            else:
+                layer_id = f"{original_id}_{counter}"
+            counter += 1
+        
+        layer['id'] = layer_id
+        layer_ids_seen.add(layer_id)
+        
+        # 2. Normalizar colores rgba() a rgb() + opacity en paint
+        if 'paint' in layer and isinstance(layer['paint'], dict):
+            paint = layer['paint']
+            
+            # Lista de propiedades de color que pueden tener rgba()
+            color_properties = [
+                'fill-color', 'line-color', 'text-color', 'text-halo-color',
+                'circle-color', 'circle-stroke-color', 'fill-outline-color',
+                'background-color', 'heatmap-color'
+            ]
+            
+            for color_prop in color_properties:
+                if color_prop in paint:
+                    color_value = paint[color_prop]
+                    
+                    # Solo procesar si es un string con rgba()
+                    if isinstance(color_value, str) and color_value.startswith('rgba('):
+                        rgb, opacity = _extract_rgb_and_opacity(color_value)
+                        if rgb and opacity is not None:
+                            # Actualizar el color a rgb()
+                            paint[color_prop] = rgb
+                            
+                            # Añadir la propiedad de opacity correspondiente
+                            opacity_prop = color_prop.replace('-color', '-opacity')
+                            
+                            # Solo establecer opacity si no es 1.0 (totalmente opaco)
+                            if opacity < 1.0:
+                                paint[opacity_prop] = opacity
+        
+        # 3. Validar y limpiar filtros
+        if 'filter' in layer:
+            filter_value = layer['filter']
+            
+            # Eliminar filtros vacíos o inválidos
+            if not filter_value or (isinstance(filter_value, list) and len(filter_value) == 0):
+                del layer['filter']
+            elif isinstance(filter_value, list):
+                # Validar que el filtro tenga una estructura correcta
+                if not _is_valid_mapbox_filter(filter_value):
+                    logger.warning(f"Invalid filter in layer {layer_id}, removing: {filter_value}")
+                    del layer['filter']
+        
+        # 4. Eliminar capas vacías (sin paint ni layout útil)
+        has_paint = 'paint' in layer and layer['paint'] and len(layer['paint']) > 0
+        has_useful_layout = 'layout' in layer and layer['layout'] and any(
+            k != 'visibility' for k in layer['layout'].keys()
+        )
+        
+        if has_paint or has_useful_layout:
+            normalized_layers.append(layer)
+        else:
+            logger.debug(f"Removing empty layer: {layer_id}")
+    
+    mapbox_style['layers'] = normalized_layers
+    return mapbox_style
+
+
+def _extract_rgb_and_opacity(rgba_str):
+    """
+    Extrae el valor RGB y la opacidad de un string rgba().
+    
+    Args:
+        rgba_str: String tipo "rgba(255, 0, 0, 0.5)"
+    
+    Returns:
+        tuple: (rgb_str, opacity) ej: ("rgb(255, 0, 0)", 0.5) o (None, None)
+    """
+    try:
+        # Patrón: rgba(R, G, B, A)
+        match = re.match(r'rgba\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)', rgba_str)
+        if match:
+            r, g, b, a = match.groups()
+            rgb_str = f"rgb({r}, {g}, {b})"
+            opacity = float(a)
+            return rgb_str, opacity
+    except Exception as e:
+        logger.warning(f"Error extracting RGB and opacity from '{rgba_str}': {e}")
+    
+    return None, None
+
+
+def _is_valid_mapbox_filter(filter_array):
+    """
+    Valida que un filtro Mapbox GL tenga una estructura básica correcta.
+    
+    Args:
+        filter_array: Array del filtro Mapbox
+    
+    Returns:
+        bool: True si es válido
+    """
+    if not isinstance(filter_array, list) or len(filter_array) == 0:
+        return False
+    
+    # El primer elemento debe ser el operador
+    operator = filter_array[0]
+    if not isinstance(operator, str):
+        return False
+    
+    # Operadores válidos básicos
+    valid_operators = [
+        '==', '!=', '>', '>=', '<', '<=',
+        'in', '!in', 'has', '!has',
+        'all', 'any', 'none',
+        'match', 'case'
+    ]
+    
+    # Si el operador no está en la lista, asumimos que es válido
+    # (puede ser un operador más avanzado)
+    return True
 
 
 def convert_filter_to_mapbox(filter_json_str):
@@ -1352,22 +1620,35 @@ def get_all_styles_for_layer(layer_id, tms_base_url=None):
     """
     Obtiene todos los estilos de una capa y los convierte a formato Mapbox GL.
     
+    Nueva estructura de respuesta que separa estilo de fuente:
+    - tile_url: URL del servicio de tiles (con {z}, {x}, {y} o {-y})
+    - source_layer: Nombre real del layer en el MVT
+    - crs: Sistema de coordenadas (siempre EPSG:3857 para MVT)
+    - minzoom/maxzoom: Niveles de zoom
+    - styles: Array de estilos, con el default primero
+    
     Args:
         layer_id: ID de la capa
-        tms_base_url: URL base del servicio TMS (opcional)
+        tms_base_url: URL base del servicio TMS (opcional, se calcula automáticamente)
     
     Returns:
         dict: {
             "layer_id": int,
             "layer_name": str,
             "workspace": str,
+            "tile_url": str,
+            "source_layer": str,
+            "crs": "EPSG:3857",
+            "minzoom": int,
+            "maxzoom": int,
             "styles": [
                 {
                     "style_id": int,
                     "style_name": str,
                     "style_title": str,
-                    "is_default": bool,
-                    "mapbox_style": dict
+                    "default": bool,
+                    "style_type": str,
+                    "mapbox_style": dict (sin sources)
                 },
                 ...
             ]
@@ -1378,6 +1659,27 @@ def get_all_styles_for_layer(layer_id, tms_base_url=None):
     except Layer.DoesNotExist:
         raise ValueError(f"Layer with id {layer_id} not found")
     
+    # Validar que la capa tiene datastore y workspace
+    if not layer.datastore or not layer.datastore.workspace:
+        raise ValueError(f"Layer {layer_id} has no datastore or workspace")
+    
+    workspace = layer.datastore.workspace
+    workspace_name = workspace.name
+    
+    # Construir la URL de tiles según configuración (GWC vs WMS-MVT)
+    tile_url = build_tile_url(layer, workspace)
+    
+    if not tile_url:
+        raise ValueError(f"Layer {layer_id} does not have vector_tile enabled")
+    
+    # Detectar el source-layer real del MVT parseando un tile
+    source_layer = detect_source_layer_from_pbf(tile_url, workspace_name, layer.name)
+    
+    # Calcular minzoom y maxzoom basados en las escalas de los estilos
+    # Por defecto: 0-22 para MVT
+    minzoom = 0
+    maxzoom = 22
+    
     # Obtener todos los StyleLayer asociados a esta capa
     # Ordenar para que el estilo por defecto (is_default=True) aparezca primero
     style_layers = StyleLayer.objects.filter(layer=layer).select_related('style').order_by('-style__is_default', 'style__name')
@@ -1385,12 +1687,15 @@ def get_all_styles_for_layer(layer_id, tms_base_url=None):
     if not style_layers.exists():
         raise ValueError(f"No styles found for layer {layer_id}")
     
-    workspace_name = layer.datastore.workspace.name if layer.datastore and layer.datastore.workspace else ""
-    
     result = {
         "layer_id": layer_id,
         "layer_name": layer.name,
         "workspace": workspace_name,
+        "tile_url": tile_url,
+        "source_layer": source_layer,
+        "crs": "EPSG:3857",
+        "minzoom": minzoom,
+        "maxzoom": maxzoom,
         "styles": []
     }
     
@@ -1402,12 +1707,20 @@ def get_all_styles_for_layer(layer_id, tms_base_url=None):
             continue
         
         try:
+            # Convertir el estilo a Mapbox GL
             mapbox_style = convert_style_to_mapbox(
                 layer_id=layer_id,
                 style_obj=style,
                 layer_obj=layer,
                 tms_base_url=tms_base_url
             )
+            
+            # Normalizar el estilo (rgba -> rgb+opacity, IDs únicos, etc.)
+            mapbox_style = normalize_mapbox_style(mapbox_style, style_id=style.id)
+            
+            # Eliminar el objeto "sources" del estilo (ya no lo necesitamos en la respuesta)
+            if 'sources' in mapbox_style:
+                del mapbox_style['sources']
             
             result["styles"].append({
                 "style_id": style.id,
