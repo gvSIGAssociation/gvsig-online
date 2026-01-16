@@ -1110,3 +1110,63 @@ def layer_refresh(request, lyr_id):
             return Response(status=status.HTTP_403_FORBIDDEN)
         refresh_layer_info.apply_async(args=[layer.id])
         return Response({'status': 'Layer refresh has been scheduled for execution'})
+
+
+class MapboxStyleView(APIView):
+    """
+    Vista para obtener los estilos de una capa en formato Mapbox GL Style JSON.
+    
+    GET /api/v1/layers/{lyr_id}/mapbox-style/
+        Devuelve TODOS los estilos de la capa en formato Mapbox GL Style JSON.
+        El estilo por defecto aparece primero en el array.
+    
+    GET /api/v1/layers/{lyr_id}/mapbox-style/{style_id}/
+        Devuelve un estilo específico.
+    
+    Query Parameters:
+        tms_base_url: URL base del servicio TMS (opcional)
+    """
+    permission_classes = [AllowAny]
+    
+    @swagger_auto_schema(
+        operation_id='get_mapbox_style',
+        operation_summary='Get Mapbox GL style for a layer',
+        responses={
+            200: 'Mapbox GL Style JSON',
+            404: "Layer or Style not found",
+            500: "Error converting style"
+        }
+    )
+    def get(self, request, lyr_id, style_id=None):
+        """
+        Convierte los estilos SLD de una capa a formato Mapbox GL Style JSON.
+        """
+        try:
+            from .mapbox_style_converter import convert_style_to_mapbox, get_all_styles_for_layer
+            
+            # Obtener tms_base_url si se proporciona
+            tms_base_url = request.GET.get('tms_base_url', None)
+            
+            if style_id:
+                # Si se especifica un style_id, devolver solo ese estilo
+                mapbox_style = convert_style_to_mapbox(
+                    layer_id=lyr_id,
+                    style_id=style_id,
+                    tms_base_url=tms_base_url
+                )
+                return JsonResponse(mapbox_style, safe=False)
+            else:
+                # Devolver todos los estilos de la capa
+                result = get_all_styles_for_layer(
+                    layer_id=lyr_id,
+                    tms_base_url=tms_base_url
+                )
+                return JsonResponse(result, safe=False)
+            
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.exception(f"Error converting style for layer {lyr_id}")
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
