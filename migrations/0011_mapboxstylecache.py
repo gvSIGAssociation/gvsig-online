@@ -8,7 +8,6 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gvsigol_services', '0086_auto_20251020_1744'),
         ('gvsigol_symbology', '0010_style_sld'),
     ]
 
