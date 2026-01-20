@@ -40,16 +40,27 @@ logger = logging.getLogger(__name__)
 
 
 def hex_to_rgba(hex_color, opacity=1.0):
-    """Convierte color hexadecimal a formato rgba de Mapbox."""
+    """
+    Convierte color hexadecimal a formato RGB/Hex de Mapbox.
+    NUNCA retorna rgba(), sino rgb() o #hex según el caso.
+    
+    Args:
+        hex_color: Color en formato hexadecimal (#RRGGBB)
+        opacity: Opacidad (0.0 a 1.0) - NO se incluye en el string retornado
+    
+    Returns:
+        str: Color en formato "rgb(r, g, b)" o "#RRGGBB"
+        
+    Nota: La opacidad debe manejarse por separado en las propiedades *-opacity
+    """
     if not hex_color:
         return None
     
     hex_color = hex_color.lstrip('#')
     if len(hex_color) == 6:
         r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
-        if opacity < 1.0:
-            return f"rgba({r}, {g}, {b}, {opacity})"
-        return f"#{hex_color}"
+        # Siempre retornar rgb() para consistencia
+        return f"rgb({r}, {g}, {b})"
     return hex_color
 
 
@@ -329,6 +340,47 @@ def _is_valid_mapbox_filter(filter_array):
     return True
 
 
+def prepare_mapbox_style_for_openlayers(mapbox_style, source_layer_name):
+    """
+    Prepara un estilo Mapbox GL para ser usado con ol-mapbox-style.
+    
+    Realiza los siguientes ajustes:
+    1. Reemplaza "source-layer" en cada layer con el nombre real
+    2. Elimina el campo "source" de cada layer (OpenLayers lo gestiona diferente)
+    3. Limpia cualquier referencia a sources que no sea necesaria
+    
+    Args:
+        mapbox_style: Diccionario con el estilo Mapbox GL
+        source_layer_name: Nombre real del source-layer a usar
+    
+    Returns:
+        dict: Estilo preparado para OpenLayers
+    """
+    if not mapbox_style or not isinstance(mapbox_style, dict):
+        return mapbox_style
+    
+    # Trabajar con una copia para no modificar el original
+    import copy
+    style = copy.deepcopy(mapbox_style)
+    
+    # Procesar cada layer
+    if 'layers' in style:
+        for layer in style['layers']:
+            # 1. Actualizar source-layer con el nombre real
+            if 'source-layer' in layer:
+                layer['source-layer'] = source_layer_name
+            
+            # 2. Eliminar el campo "source" (OpenLayers no lo usa de la misma forma)
+            if 'source' in layer:
+                del layer['source']
+    
+    # Eliminar el objeto "sources" si existe (ya lo eliminamos antes pero por si acaso)
+    if 'sources' in style:
+        del style['sources']
+    
+    return style
+
+
 def convert_filter_to_mapbox(filter_json_str):
     """
     Convierte un filtro JSON de gvSIG Online a formato de filtro Mapbox GL.
@@ -458,6 +510,9 @@ def convert_mark_symbolizer(symbolizer, layer_id, rule_name, source_layer):
         fill_color = hex_to_rgba(symbolizer.fill, symbolizer.fill_opacity or 1.0)
         if fill_color:
             layer["paint"]["circle-color"] = fill_color
+            # Aplicar opacidad por separado
+            if symbolizer.fill_opacity is not None and symbolizer.fill_opacity < 1.0:
+                layer["paint"]["circle-opacity"] = symbolizer.fill_opacity
     
     # Fill opacity
     if symbolizer.fill_opacity is not None and symbolizer.fill_opacity < 1.0:
@@ -468,6 +523,9 @@ def convert_mark_symbolizer(symbolizer, layer_id, rule_name, source_layer):
         stroke_color = hex_to_rgba(symbolizer.stroke, symbolizer.stroke_opacity or 1.0)
         if stroke_color:
             layer["paint"]["circle-stroke-color"] = stroke_color
+            # Aplicar opacidad por separado
+            if symbolizer.stroke_opacity is not None and symbolizer.stroke_opacity < 1.0:
+                layer["paint"]["circle-stroke-opacity"] = symbolizer.stroke_opacity
     
     # Stroke width
     if symbolizer.stroke_width:
@@ -499,6 +557,9 @@ def convert_line_symbolizer(symbolizer, layer_id, rule_name, source_layer):
         stroke_color = hex_to_rgba(symbolizer.stroke, symbolizer.stroke_opacity or 1.0)
         if stroke_color:
             layer["paint"]["line-color"] = stroke_color
+            # Aplicar opacidad por separado
+            if symbolizer.stroke_opacity is not None and symbolizer.stroke_opacity < 1.0:
+                layer["paint"]["line-opacity"] = symbolizer.stroke_opacity
     
     # Stroke width
     if symbolizer.stroke_width:
@@ -534,6 +595,9 @@ def convert_polygon_symbolizer(symbolizer, layer_id, rule_name, source_layer):
         fill_color = hex_to_rgba(symbolizer.fill, symbolizer.fill_opacity or 1.0)
         if fill_color:
             fill_layer["paint"]["fill-color"] = fill_color
+            # Aplicar opacidad por separado
+            if symbolizer.fill_opacity is not None and symbolizer.fill_opacity < 1.0:
+                fill_layer["paint"]["fill-opacity"] = symbolizer.fill_opacity
     
     # Fill opacity
     if symbolizer.fill_opacity is not None and symbolizer.fill_opacity < 1.0:
@@ -558,6 +622,9 @@ def convert_polygon_symbolizer(symbolizer, layer_id, rule_name, source_layer):
         stroke_color = hex_to_rgba(symbolizer.stroke, symbolizer.stroke_opacity or 1.0)
         if stroke_color:
             stroke_layer["paint"]["line-color"] = stroke_color
+            # Aplicar opacidad por separado
+            if symbolizer.stroke_opacity is not None and symbolizer.stroke_opacity < 1.0:
+                stroke_layer["paint"]["line-opacity"] = symbolizer.stroke_opacity
         
         stroke_layer["paint"]["line-width"] = symbolizer.stroke_width
         
@@ -605,6 +672,9 @@ def convert_text_symbolizer(symbolizer, layer_id, rule_name, source_layer):
         text_color = hex_to_rgba(symbolizer.fill, symbolizer.fill_opacity or 1.0)
         if text_color:
             layer["paint"]["text-color"] = text_color
+            # Aplicar opacidad por separado
+            if symbolizer.fill_opacity is not None and symbolizer.fill_opacity < 1.0:
+                layer["paint"]["text-opacity"] = symbolizer.fill_opacity
     
     # Halo (outline)
     if symbolizer.halo_fill and symbolizer.halo_radius:
@@ -612,6 +682,9 @@ def convert_text_symbolizer(symbolizer, layer_id, rule_name, source_layer):
         if halo_color:
             layer["paint"]["text-halo-color"] = halo_color
             layer["paint"]["text-halo-width"] = symbolizer.halo_radius
+            # Aplicar opacidad del halo por separado
+            if symbolizer.halo_fill_opacity is not None and symbolizer.halo_fill_opacity < 1.0:
+                layer["paint"]["text-halo-opacity"] = symbolizer.halo_fill_opacity
     
     # Anchor/offset
     if symbolizer.anchor_point_x is not None and symbolizer.anchor_point_y is not None:
@@ -1215,21 +1288,35 @@ def create_heatmap_from_sld(style, layer_id, source_layer):
                     
                     # Si es nodata, usar transparencia
                     if label and 'nodata' in label.lower():
-                        color_rgba = "rgba(0,0,0,0)"
+                        color_rgb = "rgb(0,0,0)"
+                        opacity_float = 0.0
                     else:
-                        # Convertir color hex a rgba
+                        # Convertir color hex a rgb
                         if color:
                             hex_color = color.lstrip('#')
                             if len(hex_color) == 6:
                                 r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
-                                color_rgba = f"rgba({r}, {g}, {b}, {opacity_float})"
+                                color_rgb = f"rgb({r}, {g}, {b})"
                             else:
-                                color_rgba = color
+                                color_rgb = color
                         else:
-                            color_rgba = "rgba(0,0,0,0)"
+                            color_rgb = "rgb(0,0,0)"
+                            opacity_float = 0.0
                     
                     color_stops.append(quantity_float)
-                    color_stops.append(color_rgba)
+                    # EXCEPCIÓN: heatmap-color requiere rgba() porque no tiene propiedad de opacidad separada
+                    # A diferencia de otras propiedades de color (fill-color, line-color, etc.) que usan
+                    # rgb() + *-opacity, heatmap-color debe combinar color y opacidad en formato rgba()
+                    if color_rgb.startswith('rgb('):
+                        # Extraer r,g,b y convertir a rgba
+                        match = re.match(r'rgb\((\d+),\s*(\d+),\s*(\d+)\)', color_rgb)
+                        if match:
+                            r, g, b = match.groups()
+                            color_stops.append(f"rgba({r},{g},{b},{opacity_float})")
+                        else:
+                            color_stops.append(f"rgba(0,0,0,{opacity_float})")
+                    else:
+                        color_stops.append(color_rgb)
                 except Exception as e:
                     logger.warning(f"Error parsing ColorMapEntry: {e}")
                     continue
@@ -1282,16 +1369,17 @@ def create_heatmap_from_sld(style, layer_id, source_layer):
             ] + color_stops
         else:
             # Colores por defecto si no se encontró ColorMap
+            # EXCEPCIÓN: heatmap-color requiere rgba() (no tiene propiedad de opacidad separada)
             layer["paint"]["heatmap-color"] = [
                 "interpolate",
                 ["linear"],
                 ["heatmap-density"],
-                0, "rgba(0,0,255,0)",
-                0.2, "rgba(239,192,192,1)",
-                0.4, "rgba(223,146,146,1)",
-                0.6, "rgba(208,101,101,1)",
-                0.8, "rgba(192,55,55,1)",
-                1.0, "rgba(176,10,10,1)"
+                0.0, "rgba(0,0,255,0.0)",
+                0.2, "rgba(239,192,192,1.0)",
+                0.4, "rgba(223,146,146,1.0)",
+                0.6, "rgba(208,101,101,1.0)",
+                0.8, "rgba(192,55,55,1.0)",
+                1.0, "rgba(176,10,10,1.0)"
             ]
         
         return layer
@@ -1397,20 +1485,35 @@ def convert_raster_symbolizer(symbolizer, layer_id, rule_name, source_layer):
                 # Obtener opacidad (si la entrada tiene opacity específica, usarla; si no, usar 1.0)
                 entry_opacity = entry.opacity if entry.opacity is not None else 1.0
                 
-                # Convertir color hex a rgba
+                # Convertir color hex a rgb primero
                 # Si entry.opacity es 0 o None y el label es "nodata", usar transparencia total
                 if entry.label and "nodata" in entry.label.lower():
+                    # EXCEPCIÓN: heatmap-color requiere rgba() porque no tiene propiedad de opacidad separada
                     color = "rgba(0,0,0,0)"
                 else:
-                    color = hex_to_rgba(entry.color, entry_opacity)
+                    color_rgb = hex_to_rgba(entry.color, entry_opacity)
                     
-                    # Si el color es rgba, usarlo directamente; si es hex, convertirlo
-                    if color and not color.startswith('rgba'):
+                    # EXCEPCIÓN: Convertir rgb a rgba para heatmap-color
+                    # heatmap-color es la única propiedad que requiere rgba() en lugar de rgb() + opacity
+                    # Esto es una limitación de la especificación de Mapbox GL Style
+                    if color_rgb and color_rgb.startswith('rgb('):
+                        # Extraer r,g,b y convertir a rgba
+                        match = re.match(r'rgb\((\d+),\s*(\d+),\s*(\d+)\)', color_rgb)
+                        if match:
+                            r, g, b = match.groups()
+                            color = f"rgba({r},{g},{b},{entry_opacity})"
+                        else:
+                            color = f"rgba(0,0,0,{entry_opacity})"
+                    elif color_rgb and color_rgb.startswith('#'):
                         # Convertir hex a rgba
-                        hex_color = color.lstrip('#')
+                        hex_color = color_rgb.lstrip('#')
                         if len(hex_color) == 6:
                             r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
-                            color = f"rgba({r}, {g}, {b}, {entry_opacity})"
+                            color = f"rgba({r},{g},{b},{entry_opacity})"
+                        else:
+                            color = f"rgba(0,0,0,{entry_opacity})"
+                    else:
+                        color = f"rgba(0,0,0,{entry_opacity})"
                 
                 # Añadir quantity y color al array (formato: [q1, c1, q2, c2, ...])
                 color_stops.append(quantity)
@@ -1431,16 +1534,17 @@ def convert_raster_symbolizer(symbolizer, layer_id, rule_name, source_layer):
                 ] + color_stops
             else:
                 # Si no hay color_map, usar colores por defecto para heatmap
+                # EXCEPCIÓN: heatmap-color requiere rgba() (no tiene propiedad de opacidad separada)
                 layer["paint"]["heatmap-color"] = [
                     "interpolate",
                     ["linear"],
                     ["heatmap-density"],
-                    0, "rgba(0,0,255,0)",
-                    0.2, "rgba(239,192,192,1)",
-                    0.4, "rgba(223,146,146,1)",
-                    0.6, "rgba(208,101,101,1)",
-                    0.8, "rgba(192,55,55,1)",
-                    1.0, "rgba(176,10,10,1)"
+                    0.0, "rgba(0,0,255,0.0)",
+                    0.2, "rgba(239,192,192,1.0)",
+                    0.4, "rgba(223,146,146,1.0)",
+                    0.6, "rgba(208,101,101,1.0)",
+                    0.8, "rgba(192,55,55,1.0)",
+                    1.0, "rgba(176,10,10,1.0)"
                 ]
     
     return layer
@@ -1616,9 +1720,12 @@ def convert_style_to_mapbox(layer_id, style_id=None, tms_base_url=None, style_ob
     return mapbox_style
 
 
-def get_all_styles_for_layer(layer_id, tms_base_url=None):
+def get_all_styles_for_layer(layer_id, tms_base_url=None, use_cache=True):
     """
     Obtiene todos los estilos de una capa y los convierte a formato Mapbox GL.
+    
+    Con soporte de caché: si existe MapboxStyleCache para la capa, retorna desde caché.
+    Si no existe o use_cache=False, regenera y guarda en caché.
     
     Nueva estructura de respuesta que separa estilo de fuente:
     - tile_url: URL del servicio de tiles (con {z}, {x}, {y} o {-y})
@@ -1630,6 +1737,7 @@ def get_all_styles_for_layer(layer_id, tms_base_url=None):
     Args:
         layer_id: ID de la capa
         tms_base_url: URL base del servicio TMS (opcional, se calcula automáticamente)
+        use_cache: Si False, fuerza regeneración (útil para debugging). Default: True
     
     Returns:
         dict: {
@@ -1654,11 +1762,26 @@ def get_all_styles_for_layer(layer_id, tms_base_url=None):
             ]
         }
     """
+    # Importar aquí para evitar circular imports
+    from gvsigol_symbology.models import MapboxStyleCache
+    
     try:
         layer = Layer.objects.get(id=layer_id)
     except Layer.DoesNotExist:
         raise ValueError(f"Layer with id {layer_id} not found")
     
+    # Intentar obtener desde caché si use_cache=True
+    if use_cache:
+        try:
+            cache = MapboxStyleCache.objects.get(layer=layer)
+            logger.info(f"Returning cached Mapbox style for layer {layer_id} (cached at {cache.updated_at})")
+            return cache.json_cache
+        except MapboxStyleCache.DoesNotExist:
+            logger.info(f"No cache found for layer {layer_id}, generating...")
+    else:
+        logger.info(f"Cache disabled (use_cache=False), regenerating for layer {layer_id}...")
+    
+    # Si no hay caché o use_cache=False, generar
     # Validar que la capa tiene datastore y workspace
     if not layer.datastore or not layer.datastore.workspace:
         raise ValueError(f"Layer {layer_id} has no datastore or workspace")
@@ -1718,9 +1841,8 @@ def get_all_styles_for_layer(layer_id, tms_base_url=None):
             # Normalizar el estilo (rgba -> rgb+opacity, IDs únicos, etc.)
             mapbox_style = normalize_mapbox_style(mapbox_style, style_id=style.id)
             
-            # Eliminar el objeto "sources" del estilo (ya no lo necesitamos en la respuesta)
-            if 'sources' in mapbox_style:
-                del mapbox_style['sources']
+            # Preparar para OpenLayers: actualizar source-layer, eliminar source
+            mapbox_style = prepare_mapbox_style_for_openlayers(mapbox_style, source_layer)
             
             result["styles"].append({
                 "style_id": style.id,
@@ -1742,6 +1864,17 @@ def get_all_styles_for_layer(layer_id, tms_base_url=None):
                 "mapbox_style": None,
                 "error": str(e)
             })
+    
+    # Guardar en caché si use_cache=True
+    if use_cache:
+        try:
+            MapboxStyleCache.objects.update_or_create(
+                layer=layer,
+                defaults={'json_cache': result}
+            )
+            logger.info(f"Cached Mapbox style for layer {layer_id}")
+        except Exception as e:
+            logger.error(f"Error caching Mapbox style for layer {layer_id}: {e}", exc_info=True)
     
     return result
 
