@@ -421,7 +421,7 @@ class FeaturesView(CreateAPIView):
             return JsonResponse(feat, safe=False)
         except HttpException as e:
             # Log del error para diagnóstico
-            logger.error(f"Error updating feature in layer {lyr_id}: [{e.code}] {e.msg}")
+            logging.getLogger(LOGGER_NAME).error(f"Error updating feature in layer {lyr_id}: [{e.code}] {e.msg}")
             
             # Intentar manejar como error de topología
             topology_response = handle_topology_error(e, lyr_id, epsg)
