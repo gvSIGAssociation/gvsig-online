@@ -2102,7 +2102,8 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                     INTO result
                     FROM {layer_name}
                     WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({overlap_geom_field}, 3857), radio) 
-                      AND ST_Overlaps(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_expr}, {snap_precision}))
+                      AND ST_Intersects(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_expr}, {snap_precision}))
+                      AND NOT ST_Touches(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_expr}, {snap_precision}))
                     LIMIT 1;
 
                     -- Si encuentra un solapamiento, lanza una excepción
@@ -2112,7 +2113,8 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                         INTO overlap_geojson
                         FROM {layer_name}
                         WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({overlap_geom_field}, 3857), radio) 
-                          AND ST_Overlaps(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_expr}, {snap_precision}))
+                          AND ST_Intersects(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_expr}, {snap_precision}))
+                          AND NOT ST_Touches(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_expr}, {snap_precision}))
                         LIMIT 1;
                         
                         error_message := 'TOPOLOGY ERROR: Geometry overlaps with layer ' || '{layer_name.replace(".", "-")}' || '. ' ||
