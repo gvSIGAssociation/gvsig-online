@@ -1,5 +1,8 @@
 from datetime import datetime
 from gvsigol_auth import auth_backend
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+from drf_yasg.utils import swagger_auto_schema
 from gvsigol_services.models import Datastore
 from gvsigol_services import geographic_servers
 from gvsigol_services.backend_postgis import Introspect
@@ -31,6 +34,7 @@ from .tasks import postBackground
 from .models import exports_historical
 from gvsigol.celery import app as celery_app
 from gvsigol_services.shp2postgis import get_fields_from_shape
+from gvsigol_plugin_baseapi.validation import Validation, HttpException
 import re
 
 logger = logging.getLogger("gvsigol")
@@ -399,6 +403,9 @@ class DirectoryCreateView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMi
         return super(DirectoryCreateView, self).form_valid(form)
 
 def download_file(request, filepath):
+    """
+    Django view to download files from the file manager.
+    """
     try:
         print('xsendfile requested file: ' + filepath)
     except:
@@ -413,3 +420,27 @@ def download_file(request, filepath):
     except:
         logger.exception('xsendfile error')
     return sendfile(request, abs_path, attachment=True)
+
+
+class DownloadFile(APIView):
+    """
+    DRF REST view to download files from the file manager.
+    """
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_id='download_filemanager_file',
+        operation_summary='Downloads the file from the file manager',
+        responses={404: "File not found", 403: "Not allowed"}
+    )
+    def get(self, request, filepath):
+        abs_path = os.path.abspath(os.path.join(ABS_FILEMANAGER_DIRECTORY, filepath))
+        if not can_manage_path(request, abs_path):
+            return HttpException(403, "Not allowed").get_exception()
+        if not os.path.exists(abs_path) or not os.path.isfile(abs_path):
+            return HttpException(404, "File not found").get_exception()
+        try:
+            logger.debug(f'REST view: xsendfile served file: {abs_path}')
+        except:
+            logger.exception('xsendfile error')
+        return sendfile(request, abs_path, attachment=True)
