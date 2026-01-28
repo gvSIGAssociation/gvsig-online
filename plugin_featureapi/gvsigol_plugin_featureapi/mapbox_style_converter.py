@@ -642,8 +642,7 @@ def convert_polygon_symbolizer(symbolizer, layer_id, rule_name, source_layer):
 
 def convert_text_symbolizer(symbolizer, layer_id, rule_name, source_layer):
     """Convierte TextSymbolizer a capa Mapbox GL (symbol)."""
-    if not symbolizer.is_actived:
-        return None
+    # NOTA: Si existe TextSymbolizer en BD, se dibuja. No validar is_actived (bug legacy).
     
     layer = {
         "id": f"{layer_id}_{rule_name}_label",
@@ -654,18 +653,53 @@ def convert_text_symbolizer(symbolizer, layer_id, rule_name, source_layer):
         "paint": {}
     }
     
-    # Label field
+    # Label field - CRÍTICO: sin esto las etiquetas no se renderizan
     if symbolizer.label:
         layer["layout"]["text-field"] = ["get", symbolizer.label]
+        logger.info(f"TextSymbolizer id={symbolizer.id}: using label field '{symbolizer.label}'")
+    else:
+        # Si no hay label definido, no generar la capa
+        logger.warning(f"TextSymbolizer id={symbolizer.id} without label field for layer {layer_id}, rule {rule_name} - SKIPPING")
+        return None
     
-    # Font
+    # Font - Normalizar y añadir fallbacks para compatibilidad con OpenLayers
     font_family = symbolizer.font_family or "Arial"
     font_weight = symbolizer.font_weight or "Regular"
-    layer["layout"]["text-font"] = [f"{font_family} {font_weight}"]
+    
+    # Normalizar font_weight (puede venir en minúsculas desde BD)
+    font_weight_map = {
+        'normal': 'Regular',
+        'bold': 'Bold',
+        'italic': 'Italic',
+        'bold italic': 'Bold Italic',
+        'bolditalic': 'Bold Italic'
+    }
+    normalized_weight = font_weight_map.get(font_weight.lower(), font_weight) if isinstance(font_weight, str) else 'Regular'
+    
+    # Usar array de fuentes con fallbacks para OpenLayers/ol-mapbox-style
+    layer["layout"]["text-font"] = [
+        f"{font_family} {normalized_weight}",
+        "Open Sans Regular",
+        "Arial Unicode MS Regular"
+    ]
     
     # Font size
     if symbolizer.font_size:
         layer["layout"]["text-size"] = symbolizer.font_size
+    else:
+        layer["layout"]["text-size"] = 12  # Tamaño por defecto
+    
+    # Propiedades de layout obligatorias para evitar problemas de renderizado
+    layer["layout"]["text-allow-overlap"] = False
+    layer["layout"]["text-ignore-placement"] = False
+    layer["layout"]["text-optional"] = True  # Permite ocultar etiqueta si hay colisiones
+    
+    # Anchor/offset
+    if symbolizer.anchor_point_x is not None and symbolizer.anchor_point_y is not None:
+        layer["layout"]["text-offset"] = [symbolizer.anchor_point_x, symbolizer.anchor_point_y]
+    else:
+        # Anchor por defecto
+        layer["layout"]["text-anchor"] = "center"
     
     # Text color
     if symbolizer.fill:
@@ -675,6 +709,9 @@ def convert_text_symbolizer(symbolizer, layer_id, rule_name, source_layer):
             # Aplicar opacidad por separado
             if symbolizer.fill_opacity is not None and symbolizer.fill_opacity < 1.0:
                 layer["paint"]["text-opacity"] = symbolizer.fill_opacity
+    else:
+        # Color por defecto
+        layer["paint"]["text-color"] = "rgb(0, 0, 0)"
     
     # Halo (outline)
     if symbolizer.halo_fill and symbolizer.halo_radius:
@@ -686,9 +723,8 @@ def convert_text_symbolizer(symbolizer, layer_id, rule_name, source_layer):
             if symbolizer.halo_fill_opacity is not None and symbolizer.halo_fill_opacity < 1.0:
                 layer["paint"]["text-halo-opacity"] = symbolizer.halo_fill_opacity
     
-    # Anchor/offset
-    if symbolizer.anchor_point_x is not None and symbolizer.anchor_point_y is not None:
-        layer["layout"]["text-offset"] = [symbolizer.anchor_point_x, symbolizer.anchor_point_y]
+    # Logging para debugging
+    logger.debug(f"Generated text layer: id={layer['id']}, text-field={layer['layout'].get('text-field')}, text-font={layer['layout'].get('text-font')}")
     
     return layer
 
@@ -988,10 +1024,18 @@ def parse_sld_to_mapbox(style, layer_id, source_layer):
             for ts in text_symbolizers:
                 lyr = parse_text_symbolizer_from_sld(ts, namespaces, layer_id, rule_name_str, source_layer)
                 if lyr:
-                    if mapbox_filter:
-                        lyr["filter"] = mapbox_filter
-                    lyr = apply_scale_to_layer(lyr, minscale, maxscale)
-                    layers.append(lyr)
+                    # Validar capa de texto antes de añadir
+                    is_valid, warnings = validate_text_layer(lyr)
+                    for warning in warnings:
+                        logger.warning(warning)
+                    
+                    if is_valid:
+                        if mapbox_filter:
+                            lyr["filter"] = mapbox_filter
+                        lyr = apply_scale_to_layer(lyr, minscale, maxscale)
+                        layers.append(lyr)
+                    else:
+                        logger.error(f"Skipping invalid text layer from SLD: {lyr.get('id')}")
         
         return layers
         
@@ -1182,7 +1226,7 @@ def parse_text_symbolizer_from_sld(symbolizer, namespaces, layer_id, rule_name, 
         "paint": {}
     }
     
-    # Label (PropertyName)
+    # Label (PropertyName) - CRÍTICO: sin esto las etiquetas no se renderizan
     label = symbolizer.find('.//sld:Label/ogc:PropertyName', namespaces)
     if label is not None and label.text:
         layer["layout"]["text-field"] = ["get", label.text]
@@ -1191,26 +1235,59 @@ def parse_text_symbolizer_from_sld(symbolizer, namespaces, layer_id, rule_name, 
         label_literal = symbolizer.find('.//sld:Label', namespaces)
         if label_literal is not None and label_literal.text:
             layer["layout"]["text-field"] = label_literal.text
+        else:
+            # Sin label, no generar la capa
+            logger.warning(f"TextSymbolizer in SLD without label for layer {layer_id}, rule {rule_name}")
+            return None
     
-    # Font
+    # Font - Normalizar y añadir fallbacks
     font_family = symbolizer.find('.//sld:Font/sld:CssParameter[@name="font-family"]', namespaces)
     font_size = symbolizer.find('.//sld:Font/sld:CssParameter[@name="font-size"]', namespaces)
     font_weight = symbolizer.find('.//sld:Font/sld:CssParameter[@name="font-weight"]', namespaces)
     
     if font_family is not None and font_family.text:
-        weight = font_weight.text if font_weight is not None and font_weight.text else "Regular"
-        layer["layout"]["text-font"] = [f"{font_family.text} {weight}"]
+        weight_text = font_weight.text if font_weight is not None and font_weight.text else "Regular"
+        
+        # Normalizar font_weight
+        font_weight_map = {
+            'normal': 'Regular',
+            'bold': 'Bold',
+            'italic': 'Italic',
+            'bold italic': 'Bold Italic',
+            'bolditalic': 'Bold Italic'
+        }
+        normalized_weight = font_weight_map.get(weight_text.lower(), weight_text) if isinstance(weight_text, str) else 'Regular'
+        
+        # Array con fallbacks para compatibilidad
+        layer["layout"]["text-font"] = [
+            f"{font_family.text} {normalized_weight}",
+            "Open Sans Regular",
+            "Arial Unicode MS Regular"
+        ]
+    else:
+        # Fuentes por defecto si no se especifica en SLD
+        layer["layout"]["text-font"] = ["Open Sans Regular", "Arial Unicode MS Regular"]
     
     if font_size is not None and font_size.text:
         try:
             layer["layout"]["text-size"] = float(font_size.text)
         except:
-            pass
+            layer["layout"]["text-size"] = 12
+    else:
+        layer["layout"]["text-size"] = 12  # Tamaño por defecto
+    
+    # Propiedades de layout obligatorias para evitar problemas de renderizado
+    layer["layout"]["text-allow-overlap"] = False
+    layer["layout"]["text-ignore-placement"] = False
+    layer["layout"]["text-optional"] = True
+    layer["layout"]["text-anchor"] = "center"
     
     # Fill color
     fill = symbolizer.find('.//sld:Fill/sld:CssParameter[@name="fill"]', namespaces)
     if fill is not None and fill.text:
         layer["paint"]["text-color"] = fill.text
+    else:
+        layer["paint"]["text-color"] = "rgb(0, 0, 0)"  # Color por defecto
     
     # Halo
     halo_fill = symbolizer.find('.//sld:Halo/sld:Fill/sld:CssParameter[@name="fill"]', namespaces)
@@ -1222,6 +1299,9 @@ def parse_text_symbolizer_from_sld(symbolizer, namespaces, layer_id, rule_name, 
             layer["paint"]["text-halo-width"] = float(halo_radius.text)
         except:
             pass
+    
+    # Logging para debugging
+    logger.debug(f"Generated text layer from SLD: id={layer['id']}, text-field={layer['layout'].get('text-field')}")
     
     return layer
 
@@ -1414,6 +1494,48 @@ def apply_scale_to_layer(mapbox_layer, minscale, maxscale):
             pass
     
     return mapbox_layer
+
+
+def validate_text_layer(layer):
+    """
+    Valida que una capa de texto (symbol) tiene las propiedades mínimas necesarias.
+    
+    Args:
+        layer: Diccionario con la definición de la capa Mapbox GL
+    
+    Returns:
+        tuple: (is_valid: bool, warnings: list)
+    """
+    warnings = []
+    
+    # Solo validar capas de tipo symbol
+    if layer.get('type') != 'symbol':
+        return True, []
+    
+    # Si tiene icon-image es un icono, no una etiqueta de texto
+    layout = layer.get('layout', {})
+    if 'icon-image' in layout:
+        return True, []
+    
+    # Validar text-field (CRÍTICO)
+    if 'text-field' not in layout or not layout['text-field']:
+        warnings.append(f"Layer {layer.get('id')}: Missing text-field - labels won't render")
+        return False, warnings
+    
+    # Validar text-font (importante para compatibilidad)
+    if 'text-font' not in layout:
+        warnings.append(f"Layer {layer.get('id')}: Missing text-font, may not render correctly")
+    
+    # Validar text-size
+    if 'text-size' not in layout:
+        warnings.append(f"Layer {layer.get('id')}: Missing text-size, using browser default")
+    
+    # Validar text-color
+    paint = layer.get('paint', {})
+    if 'text-color' not in paint:
+        warnings.append(f"Layer {layer.get('id')}: Missing text-color, using default black")
+    
+    return True, warnings
 
 
 def convert_raster_symbolizer(symbolizer, layer_id, rule_name, source_layer):
@@ -1666,6 +1788,12 @@ def convert_style_to_mapbox(layer_id, style_id=None, tms_base_url=None, style_ob
         external_graphic_symbolizers = ExternalGraphicSymbolizer.objects.filter(rule=rule)
         raster_symbolizers = RasterSymbolizer.objects.filter(rule=rule)
         
+        # Logging detallado para debugging de etiquetas
+        logger.info(f"Rule '{rule.name}' (id={rule.id}): found {text_symbolizers.count()} TextSymbolizers")
+        if text_symbolizers.exists():
+            for ts in text_symbolizers:
+                logger.info(f"  - TextSymbolizer id={ts.id}, label='{ts.label}', font_family='{ts.font_family}'")
+        
         # Si hay RasterSymbolizer, es un Mapa de Calor (HeatMap)
         # Los Mapas de Calor tienen prioridad sobre otros symbolizers
         if raster_symbolizers.exists():
@@ -1712,10 +1840,18 @@ def convert_style_to_mapbox(layer_id, style_id=None, tms_base_url=None, style_ob
         for sym in text_symbolizers:
             lyr = convert_text_symbolizer(sym, layer_id, rule_name, source_layer)
             if lyr:
-                if mapbox_filter:
-                    lyr["filter"] = mapbox_filter
-                lyr = apply_scale_to_layer(lyr, rule.minscale, rule.maxscale)
-                mapbox_style["layers"].append(lyr)
+                # Validar capa de texto antes de añadir
+                is_valid, warnings = validate_text_layer(lyr)
+                for warning in warnings:
+                    logger.warning(warning)
+                
+                if is_valid:
+                    if mapbox_filter:
+                        lyr["filter"] = mapbox_filter
+                    lyr = apply_scale_to_layer(lyr, rule.minscale, rule.maxscale)
+                    mapbox_style["layers"].append(lyr)
+                else:
+                    logger.error(f"Skipping invalid text layer: {lyr.get('id')}")
     
     return mapbox_style
 
