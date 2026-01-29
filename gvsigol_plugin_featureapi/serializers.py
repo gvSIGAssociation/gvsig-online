@@ -1622,6 +1622,7 @@ class FeatureSerializer(serializers.Serializer):
                                 query = sqlbuilder.SQL("({query})").format(query=query)
                             query_group_parts.append(query)
                         query = sqlbuilder.SQL(f" {qGroup_operator} ").join(query_group_parts)
+                        query = sqlbuilder.SQL("({query})").format(query=query)
                         query_parts.append(query)
             if len(query_parts)>0:
                 conditions = sqlbuilder.SQL(f" {filter_operator} ").join(query_parts)
