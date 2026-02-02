@@ -670,7 +670,7 @@ def layer_list(request):
         layer = {
             'id': l.id,
             'type': l.type,
-            'thumbnail_url': l.thumbnail.url.replace(settings.BASE_URL, ''),
+            'thumbnail_url': l.thumbnail_relurl,
             'name': l.name,
             'title': l.title,
             'datastore_name': l.datastore.name,
