@@ -488,6 +488,14 @@ class Layer(models.Model):
         i, params = self.datastore.get_db_connection()
         source_name = self.source_name if self.source_name else self.name
         return i, source_name, params.get('schema', 'public')
+    
+    @property
+    def thumbnail_relurl(self):
+        if self.thumbnail:
+            if self.thumbnail.name == get_default_layer_thumbnail():
+                return self.thumbnail.url
+            return self.thumbnail.url.replace(settings.BASE_URL, '')
+        return get_default_layer_thumbnail()
 
 
 class LayerReadGroup(models.Model):
