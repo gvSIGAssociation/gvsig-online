@@ -128,10 +128,14 @@ class FeatureSerializer(serializers.Serializer):
                 
                 source_epsg = epsg
                 
-                # Si source_epsg == 4326, no necesitamos transformar el buffer porque geography ya lo maneja en metros
+                # En info_by_point (simplify=true) el buffer siempre llega en grados -> conversión a metros/nativo.
+                if source_epsg == 4326:
+                    lon_4326, lat_4326 = lon, lat
+                else:
+                    lon_4326, lat_4326 = self.transform_from_epsg_to_4326(con, source_epsg, lon, lat)
+                target_for_meters = native_epsg if native_epsg != 4326 else 3857 #se asume que native es métrico
+                buffer = self.get_transformed_buffer_distance(con, 4326, target_for_meters, buffer, lon_4326, lat_4326)
                 tbuffer = buffer
-                if(native_epsg != source_epsg and source_epsg != 4326):
-                    tbuffer = self.get_transformed_buffer_distance(con, source_epsg, native_epsg, buffer, lon, lat)
                    
                 epsilon = self.get_epsilon(con, geom_col, source_epsg, native_epsg, table, schema, buffer, lon, lat, tbuffer)
                 #get_buffer_params = " "
@@ -521,7 +525,37 @@ class FeatureSerializer(serializers.Serializer):
         con.cursor.execute(sql)
         for feat in con.cursor.fetchall():
             return feat
-        
+
+    def transform_from_epsg_to_4326(self, con, source_epsg, lon, lat):
+        """
+        Transforma coordenadas (lon, lat) desde source_epsg a EPSG:4326 (lon, lat WGS84).
+
+        Args:
+            con: conexión psycopg2 a la base de datos.
+            source_epsg: EPSG de origen (int).
+            lon: coordenada X en source_epsg (float).
+            lat: coordenada Y en source_epsg (float).
+
+        Returns:
+            (lon_4326, lat_4326): coordenadas en WGS84 como tuple de float.
+        """
+        sql = sqlbuilder.SQL("""
+            SELECT ST_X(transf_geom), ST_Y(transf_geom)
+            FROM (
+                SELECT ST_Transform(
+                    ST_SetSRID(ST_MakePoint({lon}, {lat}), {source_epsg}),
+                    4326
+                ) AS transf_geom
+            ) AS sub
+        """).format(
+            lon=sqlbuilder.Literal(lon),
+            lat=sqlbuilder.Literal(lat),
+            source_epsg=sqlbuilder.Literal(source_epsg)
+        )
+        con.cursor.execute(sql)
+        for feat in con.cursor.fetchall():
+            return feat
+
     def get_transformed_buffer_distance(self, con, source_epsg, target_epsg, buffer, lon, lat):
         query_point = [lon, lat] # 0.39059, 39.48329 x, y
         (x1, y1) = query_point
