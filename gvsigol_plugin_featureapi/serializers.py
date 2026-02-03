@@ -1485,7 +1485,7 @@ class FeatureSerializer(serializers.Serializer):
                 if q['type'] == 'query':
                     operator = q['operator'].strip()
                     if operator == 'IN':
-                        query = sqlbuilder.SQL("{column} IN ({values})").format(
+                        query = sqlbuilder.SQL("{column} IN ({value})").format(
                             column=sqlbuilder.Identifier(q['field']),
                             value=sqlbuilder.SQL(str(q['value']))
                             )
@@ -1557,7 +1557,7 @@ class FeatureSerializer(serializers.Serializer):
                         for gq in queries:
                             operator = gq['operator'].strip()
                             if operator == 'IN':
-                                query = sqlbuilder.SQL("{column} IN ({values})").format(
+                                query = sqlbuilder.SQL("{column} IN ({value})").format(
                                     column=sqlbuilder.Identifier(gq['field']),
                                     value=sqlbuilder.SQL(str(gq['value']))
                                     )
