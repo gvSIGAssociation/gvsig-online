@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+<html>
+<head>
+	
+	<title>{{GVSIGOL_NAME}}</title>
+	<link rel="shortcut icon" href="{% static "img/favicon.png" %}">
+	
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+	
+	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-3.3.7/css/bootstrap.min.css" %}">
+	<link rel="stylesheet" href="{% static "css/font-awesome-4.4.0/css/font-awesome.min.css" %}">
+	<link rel="stylesheet" href="{% static "css/fontcustom2/fontcustom.css" %}">
+	<link rel="stylesheet" href="{% static "css/googlefonts.css" %}">
+	<link rel="stylesheet" href="{% static "css/gvsigOL.css" %}">
+	<link rel="stylesheet" href="{% static "css/skins/_all-skins.min.css" %}">
+	
+	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+		<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+	<![endif]-->
+	
+</head>
+
+<body class="hold-transition layout-top-nav">
+
+	<div class="wrapper">
+
+		<header class="main-header">
+			<nav class="navbar navbar-static-top background-grey">
+				<div class="container">
+					<div class="navbar-header">
+						<img style="max-width: 155px; max-height: 75px; width: auto; height: auto;" src="{% static "img/logo_inst.png"%}">
+					</div>
+				</div>
+			</nav>
+		</header>
+
+		<div class="content-wrapper background-grey">
+			<div class="container">
+				<section class="content background-grey">	
+					
+					<div class="box">
+						<div class="box-header with-border">
+							<h3 class="box-title" style="margin-right: 20px;">{% trans "Web application" %}</h3>
+						</div>
+						<div class="box-body">
+							<ul class="products-list product-list-in-box">
+								{% if viewer %}
+								<li class="item">
+									<div class="product-img">
+										<i class="fa fa-globe"></i>
+									</div>
+									<div class="product-info">
+										<a href="{{viewer.url}}" class="product-title ">{% trans "User Manual - Classic Map Viewer" %} {% if viewer.lang %}[{{viewer.lang}}]{% endif %}</a> 
+										<span class="product-description">{% trans "Comprehensive guide to explore and use the functionalities of the JQuery-based map viewer." %}</span>
+									</div>
+								</li>
+								{% endif %}
+								{% if spaviewer %}
+								<li class="item">
+									<div class="product-img">
+										<i class="fa fa-globe"></i>
+									</div>
+									<div class="product-info">
+										<a href="{{spaviewer.url}}" class="product-title ">{% trans "User Manual - New Front Map Viewer" %} {% if spaviewer.lang %}[{{spaviewer.lang}}]{% endif %}</a> 
+										<span class="product-description">{% trans "Learn to navigate and leverage all features of the new map viewer with a modern interface." %}</span>
+									</div>
+								</li>
+								{% endif %}
+								{% if user.is_active %}
+								{% if user.is_superuser or user.is_staff %}
+								{% if admin %}
+								<li class="item">
+									<div class="product-img">
+										<i class="fa fa-cogs"></i>
+									</div>
+									<div class="product-info">
+										<a href="{{admin.url}}" class="product-title ">{% trans "Administration Guide" %} {% if admin.lang %}[{{admin.lang}}]{% endif %}</a> 
+										<span class="product-description">{% trans "Manual for administrators: manage users, groups, services, symbology, and projects on the platform." %}</span>
+									</div>
+								</li>
+								{% endif %}
+								{% endif %}
+								{% endif %}
+								{% for plugin_manual in plugin_manuals %}
+								<li class="item">
+									<div class="product-img">
+										<i class="fa fa-cubes"></i>
+									</div>
+									<div class="product-info">
+										<a href="{{plugin_manual.url}}" class="product-title ">{% trans plugin_manual.title %} {% if plugin_manual.lang %}[{{plugin_manual.lang}}]{% endif %}</a> 
+										<span class="product-description">{% trans plugin_manual.desc %}</span>
+									</div>
+								</li>
+								{% endfor %}
+							</ul>
+						</div>
+					</div>
+					{% if mobile %}
+					<div class="box">
+						<div class="box-header with-border">
+							<h3 class="box-title" style="margin-right: 20px;">{% trans "Mobile application" %}</h3>
+						</div>
+						<div class="box-body">
+							<ul class="products-list product-list-in-box">
+								<li class="item">
+									<div class="product-img">
+										<i class="fa fa-mobile"></i>
+									</div>
+									<div class="product-info">
+										<a href="{{mobile.url}}" class="product-title ">{% trans "User manual" %} {% if mobile.lang %}[{{mobile.lang}}]{% endif %}</a> 
+										<span class="product-description">{% trans "Learn how to manage geographic information from a mobile device or tablet" %}</span>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+					{% endif %}
+				</section>
+			</div>
+		</div>
+
+		<footer class="main-footer">
+			<div class="pull-right hidden-xs">
+				<b>{% trans "Version" %}</b> {{GVSIGOL_VERSION}}
+			</div>
+		</footer>
+
+		
+	</div>
+
+	<script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery-3.6.0.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jscookie/jscookie-2.2.1.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQueryUI/jquery-ui.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.easy-overlay.js" %}"></script>
+	<script>
+		$.widget.bridge('uibutton', $.ui.button);
+	</script>
+	<script type="text/javascript" src="{% static "js/vendors/bootstrap-3.3.7/js/bootstrap.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/slimScroll/jquery.slimscroll.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/vendors/fastclick/fastclick.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/gvsigOL.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/widgets/messageBox.js" %}"></script>
+	<script>
+		var messageBox = new messageBox();
+	</script>
+	
+</body>
+</html>

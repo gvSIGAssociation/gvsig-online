@@ -1,0 +1,147 @@
+{% extends "base.html" %} 
+{% load staticfiles %} 
+{% load i18n %} 
+
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="row">
+			<div class="col-md-12 form-group">
+				<div class="box-tools pull-right">
+					<button id="button-add-role" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add role" %}</button>
+				</div>
+			</div>
+		</div>
+		
+		<div class="box">		
+			<div class="box-body">
+				<table class="table" id="roles-table">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>{% trans "Name" %}</th>
+							<th>{% trans "Description" %}</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for role in roles %}
+						<tr>
+							<td>{{ role.id }}</td>
+							<td>{{ role.name }}</td>
+							<td>{{ role.description }}</td>
+							<td></td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>      
+
+<!-- Modal -->
+<div class="modal fade" id="modal-delete-role" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Delete role" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "The role will be removed, Do you want continue?" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-delete-role-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-delete-role-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-group-users').addClass("active");
+	$('#submenu-roles').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+	var table = $('#roles-table').DataTable({
+		responsive: true,
+	    language: {
+	    	processing		: '{% trans "Processing request..." %}',
+		    search			: '{% blocktrans with sep="&nbsp;:" %}Search{{sep}}{% endblocktrans %}',
+		    lengthMenu		: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
+		    info			: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
+		    infoEmpty		: '{% trans "Showing from 0 to 0 of 0 records" %}',
+		    infoFiltered	: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
+		    infoPostFix		: "",
+		    loadingRecords	: '{% trans "Loading..." %}',
+		    zeroRecords		: '{% trans "No records available" %}',
+		    emptyTable		: '{% trans "No records available" %}',
+		    paginate: {
+		    	first		: '{% trans "First" %}',
+		        previous	: '{% trans "Previous" %}',
+		        next		: '{% trans "Next" %}',
+		        last		: '{% trans "Last" %}'
+		    },
+		    aria: {
+		        sortAscending: '{% blocktrans with sep=": " %}{{sep}}Sort ascending{% endblocktrans %}',
+		        sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
+		    }
+		},
+		"columnDefs": [{
+	        "targets": -1,
+	        "data": null,
+	        "defaultContent": '<button type="button" name="button-delete-role" data-toggle="modal" data-target="#modal-delete-role" data-placement="bottom" title="' + '{% trans "Delete role" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
+	    }],
+	    "dom": 'T<"clear">lfrtip',
+		"bLengthChange": false,
+		"order": [[ 1, 'asc' ]]
+	});
+		 
+	$('#roles-table tbody').on('click', 'button', function (){
+		var row = table.row($(this).parents('tr'));
+	    var data = row.data();     
+	    if (this.name == "button-delete-role"){
+	        deleteRole(data, row);   
+	    }
+	});
+	
+	$('#button-add-role').click( function() {
+		location.href = '/gvsigonline/auth/role_add/';
+	});
+
+	function deleteRole(data, row){
+		$('#button-delete-role-accept').click( function() {
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/auth/role_delete/' + data[1] + '/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				}
+			}).done(function(response){
+				console.log(response);
+				$('#modal-delete-role').modal('hide');
+				location.reload();
+			}).fail(function(jqXHR){
+				console.log(jqXHR);
+				$('#modal-delete-role').modal('hide');
+				if (jqXHR.responseJSON.message) {
+					messageBox.show("error", jqXHR.responseJSON.message);
+				}
+				else {
+					messageBox.show("error", gettext('Error deleting role'));
+				}
+			});
+		});
+	}
+	    
+});
+</script>
+{% endblock %}

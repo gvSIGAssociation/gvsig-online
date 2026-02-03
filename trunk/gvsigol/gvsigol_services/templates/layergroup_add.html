@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+
+<form id="layer-group-form" role="form" method="post" action="/gvsigonline/services/layergroup_add/{% if project_id %}{{project_id}}/{% endif %}{% if redirect %}?redirect={{redirect}}{% endif %}">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="row">
+				<div class="col-md-12 form-group">
+					<div class="box-tools pull-right">
+						<a href="{{back_url}}" class="btn btn-default btn-sm"><i class="fa fa-chevron-left margin-r-5"></i> {% trans "Back" %}</a>
+						<button id="save_button" type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>
+					</div>
+				</div>
+			</div>
+			<div class="row" style="padding-left: 30px;">
+				{% csrf_token %}
+				{% if form.errors or form.non_field_errors %}
+				<div id="form-error" style="color:#ff0000;">
+					<ul>
+					{{ form.non_field_errors }}
+					{% for field in form %}
+						{% if field.errors %}
+							<li>{{field.label}}. {{ field.errors|striptags }}</li>
+						{% endif %}
+					{% endfor %}
+					</ul>
+				</div>
+				{% endif %}
+				{% if message %}
+				<div id="form-error-msg" style="color:#ff0000;">
+					<p>* {{ message }}</p>
+				</div>
+				{% endif %}
+			</div>
+
+			<ul class="nav nav-tabs">
+				<li class="active"><a href="#tab-layergroup-general" data-toggle="tab">{% trans "General" %}</a></li>
+				{% if MANAGE_PERMISSION_UI or user.is_superuser %} <li><a href="#tab-layergroup-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li> {% endif %}
+			</ul>
+			<div class="tab-content">
+				<div class="tab-pane active" id="tab-layergroup-general">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="box">
+								<div class="box-body">
+									<div class="row">
+										<div class="col-md-12 form-group">
+											<label for="layergroup_server_id">{% trans "Select server" %}</label>
+											<select class="form-control" id="layergroup_server_id" name="layergroup_server_id">
+												{% for server in servers %}
+												<option value="{{server.id}}">{{server.title}}</option>
+												{% endfor %}
+											</select>
+										</div>
+									</div>
+
+									<div class="row">
+										<div class="col-md-12">
+											<label for="layergroup_name">{% trans "Name" %}</label>
+											<input placeholder="{% trans 'Layer group name' %}" name="layergroup_name" id="layergroup_name" type="text" class="form-control">
+										</div>
+									</div>
+
+									<div class="row">
+										<div class="col-md-12">
+											<label for="layergroup_title">{% trans "Title" %}</label>
+											<input placeholder="{% trans 'Layer group title' %}" name="layergroup_title" id="layergroup_title" type="text" class="form-control">
+										</div>
+									</div>
+									<br>
+
+									<div class="row">
+										<div class="checkbox col-md-6">
+											<label>
+												<input type="checkbox" name="cached" id="cached" />{% trans "Create cache for the layer group" %}
+											</label>
+											<label></label>
+											<label>
+												<input type="checkbox" name="visible" id="visible" />{% trans "Is visible" %}
+											</label>
+										</div>
+										<!--<div class="checkbox col-md-6">
+											<label>
+												<input type="checkbox" name="visible" id="visible" />{% trans "Is visible" %}
+											</label>
+										</div>-->
+									</div>
+									<!--<div class="box-tools pull-right">
+										<div id="button-create-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn btn-sm btn-default"><i class="fa fa-database margin-r-5"></i> {% trans "Create empty layer" %}</div>
+										<div id="button-import-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn btn-sm btn-default"><i class="fa fa-cloud-upload margin-r-5"></i> {% trans "Publish layer" %}</div>
+									</div>-->
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="tab-pane" id="tab-layergroup-permissions">
+					{% include "select_layergroup_permissions.html" %}
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
+<!-- Modal 
+<div class="modal fade" id="modal-add-layer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Create new layer" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "Is needed to save this layer group first, Do you want continue?" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-add-layer-group-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-add-layer-group-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>-->
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-layergroups').addClass("active");
+
+
+/*	$('#button-create-layer').click(function() {
+		$("#myModalLabel").text(gettext("Create new layer"));
+		$('#button-add-layer-group-accept').click( function() {
+			var queryString = '?redirect=create-layer';
+			const params = new URLSearchParams(window.location.search);
+			if (params.has('redirect')) {
+				queryString += '&from_redirect=' + params.get('redirect');
+			}
+			$('#layer-group-form').attr('action', '/gvsigonline/services/layergroup_add/{% if project_id %}{{project_id}}/{% endif %}' + queryString);
+			$('#save_button').trigger('click');
+		});
+	});
+
+	$('#button-import-layer').click(function() {
+		$("#myModalLabel").text(gettext("Publish layer"));
+		$('#button-add-layer-group-accept').click( function() {
+			var queryString = '?redirect=import-layer';
+			const params = new URLSearchParams(window.location.search);
+			if (params.has('redirect')) {
+				queryString += '&from_redirect=' + params.get('redirect');
+			}
+			$('#layer-group-form').attr('action', '/gvsigonline/services/layergroup_add/{% if project_id %}&project_id={{project_id}}{% endif %}' + queryString);
+			$('#save_button').trigger('click');
+		});
+	});
+
+	$(document).ready(function() {
+		var searcheableList = new List('role-list-box', {
+			valueNames: ['searchable-rolename', 'searchable-roledesc'],
+			listClass:'list',
+			searchClass: 'search',
+			page: 6,
+			pagination: false
+		});
+		$("#save_button").click(function(e){
+			e.preventDefault(); // prevents default
+			for(var i=0; i<searcheableList.items.length; i++){
+				var item = searcheableList.items[i];
+				item.show();
+			}
+			$('#modal-add-layer').modal('hide');
+			$("#layer-group-form").submit();
+			return false;
+		});
+	});*/
+</script>
+{% endblock %}

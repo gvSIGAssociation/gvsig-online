@@ -1,0 +1,63 @@
+{% load staticfiles %}
+
+<link rel="stylesheet" type="text/css" href="{% static "css/downloadManager.css" %}" />
+<script type="text/javascript" src="{% static "js/downloadManagerClient.js" %}"></script>
+
+
+
+<script type="text/javascript">
+(function(){
+if (viewer.core.ifToolInConf('gvsigol_plugin_downloadman')) {
+	
+	var config = {
+		queryUrl: "{% url 'download_manager_base' %}",
+		shopping_cart_max_items: 0,
+	};
+	var client = new DownloadManagerClient(config);
+	$.ajax({
+		type : 'POST',
+		async : false,
+		url : "{% url 'download_manager_getconf' %}",
+		beforeSend : function(xhr) {
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+		},
+		success : function(response) {
+			config.shopping_cart_max_items = response.shopping_cart_max_items;
+			client.setConfig(config);
+		},
+		error : function() {
+			console.log(gettext('Error loading download manager conf'));
+		}
+	});
+	var clientUI = new DownloadManagerUI();
+	clientUI.setClient(client);
+	viewer.core.downloadManager = clientUI;
+	
+	var html = '';
+	if (viewer.core.ifToolInConf('gvsigol_plugin_catalog')) {
+		html += '<li class="dropdown">';
+		html +=   '<a href="#" class="dropdown-toggle show_downloads_catalog_btn" data-toggle="dropdown">' + gettext('Downloads') + '</a>';
+		html += '</li>';
+		$("#gvsigol-navbar-menus").append(html);
+
+		$(".show_downloads_catalog_btn").unbind("click").click(function(){
+			$("body").trigger('show-catalog-event');
+			viewer.core.catalog.showPanel();
+		});
+		$("#show_map").click(function(){
+			viewer.core.catalog.hidePanel()
+		});
+	}
+	html = '<li class="dropdown">';
+	html +=   '<a href="#" class="dropdown-toggle viewer-download-list-btn" data-toggle="dropdown">';
+	html +=     '<span class="input"><span class="download_list_count">0</span><i class="fa fa-shopping-cart fa-icon-button-right"></i></span>';
+	html +=   '</a>';
+	html += '</li>';
+	$("#gvsigol-navbar-menus").append(html);
+	
+	$(".viewer-download-list-btn").unbind("click").click(function(){
+		viewer.core.getDownloadManager().showDownloadList();
+	});
+}
+})();
+</script>

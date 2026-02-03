@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+	<form role="form" method="post" action="/gvsigonline/auth/user_update/{{uid}}/">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<div class="box-tools pull-right">
+							<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+						</div>
+					</div>
+				</div>
+				<div class="row" style="padding-left: 30px;">
+					{% csrf_token %}
+					{% if message %}
+					<div id="form-error" style="color:#ff0000;">
+						<p>* {{ message }}</p>
+					</div>
+					{% endif %}
+				</div>
+				<ul class="nav nav-tabs">
+					<li class="active"><a href="#tab-general" data-toggle="tab">{% trans "General" %}</a></li>
+					{% if AUTH_GROUPS %}
+					<li><a href="#tab-user-groups" data-toggle="tab">{% trans "Groups" %}</a></li>
+					{% endif %}
+					<li><a href="#tab-roles" data-toggle="tab">{% trans "Roles" %}</a></li>
+			    </ul>
+				<div class="tab-content">
+					<div class="tab-pane active" id="tab-general">
+						<div class="row">
+							<div class="col-md-12">
+								<div class="box">
+									<div class="box-body">
+										<div class="row">
+											<div class="col-md-6">
+												<label for="first_name">{% trans "First name" %}</label>
+												<input {% if read_only_users %}readonly{% endif %} placeholder="{% trans 'First name' %}" class="form-control" name="first_name" id="first_name" type="text" value="{{selected_user.first_name}}">							
+											</div>
+											<div class="col-md-6">
+												<label for="last_name">{% trans "Last name" %}</label>
+												<input {% if read_only_users %}readonly{% endif %} placeholder="{% trans 'Last name' %}" class="form-control" name="last_name" id="last_name" type="text" value="{{selected_user.last_name}}">								
+											</div>
+										</div>
+														
+										<div class="row">
+											<div class="col-md-6 form-group">
+												<label for="username">{% trans "Username" %}</label>
+												<input readonly placeholder="{% trans 'Username' %}" class="form-control" name="username" id="username" type="text" value="{{selected_user.username}}">								
+											</div>
+											<div class="col-md-6 form-group">
+												<label for="email">{% trans "Email" %}</label>
+												<input {% if read_only_users %}readonly{% endif %} placeholder="{% trans 'Email' %}" class="form-control" name="email" id="email" type="text" class="validate" value="{{selected_user.email}}">								
+											</div>
+										</div>
+										
+										<br>
+										
+										<div class="row">
+											<div class="checkbox col-md-6">								
+												<label>
+													{% if selected_user.is_superuser %}
+													<input type="checkbox" name="is_superuser" id="is_superuser" checked/>{% trans "Is superuser" %}
+													{% else %}
+													<input type="checkbox" name="is_superuser" id="is_superuser" />{% trans "Is superuser" %}
+													{% endif %}
+												</label>
+											</div>
+											<div class="checkbox col-md-6">								
+												<label>
+													{% if selected_user.is_staff %}
+													<input type="checkbox" name=is_staff id="is_staff" checked/>{% trans "Can manage projects" %}
+													{% else %}
+													<input type="checkbox" name="is_staff" id="is_staff" />{% trans "Can manage projects" %}
+													{% endif %}
+												</label>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					{% if AUTH_GROUPS %}
+					<div class="tab-pane" id="tab-user-groups">
+						<div class="row">
+							<div class="col-md-12">
+								<div class="box">
+									<div class="box-header with-border">
+										<h3 class="box-title">{% trans "Assign groups" %}</h3>
+									</div>
+									<div class="box-body">
+										<ul class="products-list product-list-in-box">
+											{% for group in groups %}
+											<li class="item">
+												<div class="product-img">
+													<img src="{% static "img/users.png" %}" alt="Users Image">
+												</div>
+												<div class="product-info">
+													<a href="javascript:void(0)" class="product-title">{{group.name}}
+														<div class="checkbox pull-right">													
+															<label>
+																{% if group.checked %}
+																<input type="checkbox" name="group-{{group.name}}" id="group-{{group.name}}" checked/>{% trans "Assign group" %}
+																{% else %}
+																<input type="checkbox" name="group-{{group.name}}" id="group-{{group.name}}"/>{% trans "Assign group" %}
+																{% endif %}
+															</label>
+														</div>
+													</a> 
+													<span class="product-description">{{group.description}}</span>
+												</div>
+											</li> 
+											{% endfor %}
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					{% endif %}
+					<div class="tab-pane" id="tab-roles">
+						<div class="row">
+							<div class="col-md-12">
+								<div class="box">
+									<div class="box-header with-border">
+										<h3 class="box-title">{% trans "Assign roles" %}</h3>
+									</div>
+									<div class="box-body">
+										<ul class="products-list product-list-in-box">
+											{% for role in roles %}
+											<li class="item">
+												<div class="product-img">
+													<img src="{% static "img/users.png" %}" alt="Users Image">
+												</div>
+												<div class="product-info">
+													<a href="javascript:void(0)" class="product-title">{{role.name}}
+														<div class="checkbox pull-right">													
+															<label>
+																{% if role.checked %}
+																<input type="checkbox" name="role-{{role.name}}" id="role-{{role.name}}" checked/>{% trans "Assign role" %}
+																{% else %}
+																<input type="checkbox" name="role-{{role.name}}" id="role-{{role.name}}"/>{% trans "Assign role" %}
+																{% endif %}
+															</label>
+														</div>
+													</a> 
+													<span class="product-description">{{role.description}}</span>
+												</div>
+											</li> 
+											{% endfor %}
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>			
+				</div>
+			</div>				
+		</div>
+	</form>	
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-group-users').addClass("active");
+	$('#submenu-users').addClass("active");
+</script>
+{% endblock %}

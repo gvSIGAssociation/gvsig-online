@@ -1,0 +1,70 @@
+# gvSIG Online.
+# Copyright (C) 2019-2021 SCOLAB.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:53+0000\n"
+"PO-Revision-Date: 2025-11-04 12:34+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ca\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.4.2\n"
+
+msgid "Add file information"
+msgstr "Afegir informació de l'arxiu"
+
+msgid "Please enter a title"
+msgstr "Per favor, introduïsca un títol"
+
+msgid "Please enter a description"
+msgstr "Per favor, introduïsca una descripció"
+
+msgid "Please enter a URL or upload a file"
+msgstr "Per favor, introduïsca una URL o puge un arxiu"
+
+msgid "Please select a project"
+msgstr "Per favor, seleccione un projecte"
+
+msgid "Please add at least one file"
+msgstr "Per favor, afegisca almenys un arxiu"
+
+msgid "Description"
+msgstr "Descripció"
+
+msgid "File"
+msgstr "Arxiu"
+
+msgid "URL"
+msgstr "URL"
+
+msgid "Updated at"
+msgstr "Actualitzat el"
+
+msgid "Edit file information"
+msgstr "Editar informació de l'arxiu"
+
+msgid "Delete configuration"
+msgstr "Eliminar configuració"
+
+msgid "Update configuration"
+msgstr "Actualitzar configuració"
+
+msgid "Error deleting configuration"
+msgstr "Error en eliminar la configuració"
