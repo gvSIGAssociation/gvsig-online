@@ -27,6 +27,7 @@ from django.http import HttpResponseForbidden
 from gvsigol_services import geographic_servers
 from gvsigol_services.models import Workspace, Datastore, Layer, Server
 from gvsigol_services import utils as service_utils
+from gvsigol_services.utils import paginate
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from .models import Style, StyleLayer, Rule, Library, LibraryRule, Symbolizer, ColorMap, ColorMapEntry, RasterSymbolizer, ColorRamp, ColorRampFolder, ColorRampLibrary
@@ -78,17 +79,30 @@ def delete_preview_style(request, name, gs):
 @login_required()
 @staff_required
 def style_layer_list(request):
-    ls = []
-    
-    layers = None
+    # Obtener layers con optimización de consultas
     if request.user.is_superuser:
-        layers = Layer.objects.filter(external=False)
+        layers_qs = Layer.objects.filter(external=False).select_related('layer_group')
     else:
         user_roles = auth_backend.get_roles(request)
-        layers = (Layer.objects.filter(created_by=request.user.username, external=False)
-            | Layer.objects.filter(layermanagerole__role__in=user_roles, external=False)).distinct()
+        layers_qs = (Layer.objects.filter(created_by=request.user.username, external=False)
+            | Layer.objects.filter(layermanagerole__role__in=user_roles, external=False)).distinct().select_related('layer_group')
     
-    for lyr in layers:
+    # Prefetch relacionado para evitar N+1 queries
+    layers_qs = layers_qs.prefetch_related('stylelayer_set__style')
+    
+    # Paginar antes de construir los diccionarios
+    page_layers, page_ctx = paginate(
+        request,
+        layers_qs,
+        default_page_size=10,
+        max_page_size=200,
+        page_param="page",
+        page_size_param="page_size",
+    )
+    
+    # Construir la lista solo para los layers de la página actual
+    ls = []
+    for lyr in page_layers:
         layerStyles = StyleLayer.objects.filter(layer=lyr)
         styles = []
         for layerStyle in layerStyles:
@@ -97,7 +111,9 @@ def style_layer_list(request):
         ls.append({'layer': lyr, 'styles': styles})
     
     response = {
-        'layerStyles': ls
+        'layerStyles': ls,
+        'request': request,
+        **page_ctx,  # Agrega paginator/page_obj/page_size/etc al template
     }
     return render(request, 'style_layer_list.html', response)
 
