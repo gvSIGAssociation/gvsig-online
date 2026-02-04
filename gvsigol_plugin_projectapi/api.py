@@ -22,6 +22,7 @@
 from datetime import datetime, timedelta
 import json
 import os
+from urllib.parse import quote
 from wsgiref.util import FileWrapper
 import coreapi
 from django.http.response import HttpResponse, JsonResponse
@@ -842,10 +843,11 @@ class SharedViewManager:
         """
         if url:
             shared_url = url
-            name = url.split('sharedView=')[-1]
+            name = str(url).split('sharedView=')[-1].split('&')[0].strip()
         else:
             name = datetime.today().strftime("%Y%m%d") + get_random_string(length=32)
-            shared_url = '/spa/viewer/'+pid +'?sharedView=' + name
+            project = get_object_or_404(Project, id=pid)
+            shared_url = '/spa/v/' + quote(project.name) + '/?sharedView=' + name
             #shared_url = settings.BASE_URL + '/gvsigonline/core/load_shared_view/' + name
 
         try:
@@ -875,8 +877,11 @@ class CreateSharedViewAPI(APIView):
     """
     def post(self, request, *args, **kwargs):
         pid = request.data.get('pid')
+        if not pid:
+            return Response({'error': 'pid is required'}, status=status.HTTP_400_BAD_REQUEST)
+        project = get_object_or_404(Project, id=pid)
         name = datetime.today().strftime("%Y%m%d") + get_random_string(length=32)
-        shared_url = '/spa/viewer/'+pid +'?sharedView=' + name
+        shared_url = '/spa/v/' + quote(project.name) + '/?sharedView=' + name
         return Response({'shared_url': shared_url}, status=status.HTTP_200_OK)
 
 class SaveSharedViewAPI(APIView):
