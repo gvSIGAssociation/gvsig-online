@@ -48,6 +48,42 @@
 					</tbody>
 				</table>
 			</div>
+			{% if is_paginated|default:False %}
+			<div class="box-footer clearfix">
+				<ul class="pagination pagination-sm no-margin pull-right">
+					{% if page_obj.has_previous %}
+						<li><a href="?page=1{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}">&laquo; {% trans "First" %}</a></li>
+						<li><a href="?page={{ page_obj.previous_page_number }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}">{% trans "Previous" %}</a></li>
+					{% else %}
+						<li class="disabled"><span>&laquo; {% trans "First" %}</span></li>
+						<li class="disabled"><span>{% trans "Previous" %}</span></li>
+					{% endif %}
+					
+					{% for num in paginator.page_range %}
+						{% if page_obj.number == num %}
+							<li class="active"><span>{{ num }}</span></li>
+						{% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+							<li><a href="?page={{ num }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}">{{ num }}</a></li>
+						{% endif %}
+					{% endfor %}
+					
+					{% if page_obj.has_next %}
+						<li><a href="?page={{ page_obj.next_page_number }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}">{% trans "Next" %}</a></li>
+						<li><a href="?page={{ paginator.num_pages }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}">{% trans "Last" %} &raquo;</a></li>
+					{% else %}
+						<li class="disabled"><span>{% trans "Next" %}</span></li>
+						<li class="disabled"><span>{% trans "Last" %} &raquo;</span></li>
+					{% endif %}
+				</ul>
+				<div class="pull-left" style="margin-top: 5px;">
+					<span class="text-muted">
+						{% blocktrans with start=page_obj.start_index end=page_obj.end_index total=total_items %}
+						Showing {{ start }} to {{ end }} of {{ total }} workspaces
+						{% endblocktrans %}
+					</span>
+				</div>
+			</div>
+			{% endif %}
 		</div>
 	</div>
 </div>      
@@ -85,6 +121,10 @@
 $(document).ready(function() {
 	var table = $('#workspaces-table').DataTable({
 		responsive: true,
+		{% if is_paginated|default:False %}
+		paging: false,  // Deshabilitar paginación de DataTables cuando hay paginación del servidor
+		info: false,    // Ocultar info de DataTables (ya lo mostramos en la paginación del servidor)
+		{% endif %}
 	    language: {
 	    	processing		: '{% trans "Processing request..." %}',
 		    search			: '{% blocktrans with sep="&nbsp;:" %}Search{{sep}}{% endblocktrans %}',
