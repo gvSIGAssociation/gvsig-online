@@ -39,6 +39,7 @@ from gvsigol_auth import services as auth_services
 from gvsigol_services import geographic_servers
 from gvsigol_services import utils as services_utils
 from gvsigol_services.models import Workspace, Server
+from gvsigol_services.utils import paginate
 from .utils import superuser_required, staff_required
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
@@ -317,13 +318,29 @@ def password_reset_success(request):
 @login_required()
 @superuser_required
 def user_list(request):
-    users = []
-    for user in users:
-        user["roles"] = "; ".join(user["roles"])
+    # Obtener todos los usuarios (sin paginar aún)
+    response_data = auth_backend.get_filtered_users_details(exclude_system=True)
+    all_users = response_data.get('users', [])
+    
+    # Formatear roles como string para el template
+    for user in all_users:
+        user["roles"] = "; ".join(user.get("roles", []))
+    
+    # Paginar la lista de usuarios
+    page_users, page_ctx = paginate(
+        request,
+        all_users,
+        default_page_size=10,
+        max_page_size=200,
+        page_param="page",
+        page_size_param="page_size",
+    )
                       
     response = {
-        'users': users,
-        'read_only_users': settings.AUTH_READONLY_USERS
+        'users': page_users,
+        'read_only_users': settings.AUTH_READONLY_USERS,
+        'request': request,
+        **page_ctx,  # Agrega paginator/page_obj/page_size/etc al template
     }     
     return render(request, 'user_list.html', response)
 
@@ -620,8 +637,23 @@ def group_delete(request, group_name):
 @login_required()
 @superuser_required
 def role_list(request):
+    # Obtener todos los roles y ordenarlos
+    all_roles = sorted(auth_backend.get_all_roles_details(), key=sort_by_name)
+    
+    # Paginar la lista de roles
+    page_roles, page_ctx = paginate(
+        request,
+        all_roles,
+        default_page_size=10,
+        max_page_size=200,
+        page_param="page",
+        page_size_param="page_size",
+    )
+    
     response = {
-        'roles': sorted(auth_backend.get_all_roles_details(), key=sort_by_name)
+        'roles': page_roles,
+        'request': request,
+        **page_ctx,  # Agrega paginator/page_obj/page_size/etc al template
     }     
     return render(request, 'role_list.html', response)
 

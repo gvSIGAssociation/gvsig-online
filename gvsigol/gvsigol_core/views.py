@@ -41,6 +41,7 @@ from django.urls import reverse
 from gvsigol_auth.utils import superuser_required, is_superuser, staff_required, get_primary_user_role_details
 from . import utils as core_utils
 from gvsigol_services import geographic_servers, utils, backend_postgis
+from gvsigol_services.utils import paginate
 from django.views.decorators.cache import cache_control
 from gvsigol import settings
 from django.conf import settings as django_settings
@@ -137,14 +138,24 @@ def home(request):
 @staff_required
 def project_list(request):
 
-    project_list = None
+    project_list_qs = None
     if request.user.is_superuser:
-        project_list = Project.objects.all()
+        project_list_qs = Project.objects.all()
     else:
-        project_list = get_user_projects(request, permissions=[ProjectRole.PERM_READ, ProjectRole.PERM_MANAGE])
+        project_list_qs = get_user_projects(request, permissions=[ProjectRole.PERM_READ, ProjectRole.PERM_MANAGE])
+
+    # Paginar antes de construir los diccionarios
+    page_projects, page_ctx = paginate(
+        request,
+        project_list_qs,
+        default_page_size=10,
+        max_page_size=200,
+        page_param="page",
+        page_size_param="page_size",
+    )
 
     projects = []
-    for p in project_list:
+    for p in page_projects:
         project = {}
         project['id'] = p.id
         project['name'] = p.name
@@ -168,7 +179,9 @@ def project_list(request):
         'servers': Server.objects.all().order_by('-default'),
         'frontend_base_url': frontend_base_url,
         'SHOW_SPA_PROJECT_LINKS': show_spa_project_links,
-        'SHOW_BOOTSTRAP_PROJECT_LINKS': show_bootstrap_project_links
+        'SHOW_BOOTSTRAP_PROJECT_LINKS': show_bootstrap_project_links,
+        'request': request,
+        **page_ctx,  # Agrega paginator/page_obj/page_size/etc al template
     }
     return render(request, 'project_list.html', response)
 

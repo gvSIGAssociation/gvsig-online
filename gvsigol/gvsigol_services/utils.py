@@ -57,6 +57,68 @@ import requests
 from owslib.wmts import WebMapTileService
 from owslib.util import Authentication
 
+from urllib.parse import urlencode
+
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import HttpRequest
+
+
+############ Paginación ############
+
+def paginate(request: HttpRequest,items,*,default_page_size: int = 10,max_page_size: int = 200,
+page_param: str = "page",page_size_param: str = "page_size",):
+    """
+    Pagina 'items' (QuerySet o lista).
+    Devuelve: (page_items, pagination_context)
+    - Lee ?page= y ?page_size= del request.
+    - Limita page_size a max_page_size.
+    - Maneja páginas inválidas sin reventar.
+    """
+    raw_page = request.GET.get(page_param, "1")
+    raw_size = request.GET.get(page_size_param, str(default_page_size))
+
+    try:
+        page_number = int(raw_page)
+    except (TypeError, ValueError):
+        page_number = 1
+
+    try:
+        page_size = int(raw_size)
+    except (TypeError, ValueError):
+        page_size = default_page_size
+
+    if page_size <= 0:
+        page_size = default_page_size
+    page_size = min(page_size, max_page_size)
+
+    paginator = Paginator(items, page_size)
+
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+
+        page_obj = paginator.page(paginator.num_pages)
+
+    def _qs(**override):
+        q = request.GET.copy()
+        for k, v in override.items():
+            q[k] = str(v)
+        return "?" + urlencode(q, doseq=True)
+
+    ctx = {
+        "paginator": paginator,
+        "page_obj": page_obj,
+        "is_paginated": paginator.num_pages > 1,
+        "page_number": page_obj.number,
+        "page_size": page_size,
+        "total_items": paginator.count,
+        "total_pages": paginator.num_pages,
+        "qs": _qs,  # helper para links en template
+    }
+    return page_obj.object_list, ctx
+
 def _get_layer_obj(layer_or_id):
     if isinstance(layer_or_id, Layer):
         return layer_or_id

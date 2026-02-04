@@ -101,6 +101,14 @@ from django.db.models import Max
 from gvsigol_auth.signals import role_deleted
 from django.views.decorators.cache import never_cache
 
+from collections import defaultdict
+import json
+import os
+import ast
+
+from django.conf import settings
+from .utils import paginate
+
 logger = logging.getLogger("gvsigol")
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
@@ -335,18 +343,34 @@ def reload_node(request, nid):
 @require_safe
 @superuser_required
 def workspace_list(request):
+    # Obtener QuerySet de workspaces
+    workspace_qs = Workspace.objects.all().select_related('server').order_by('id')
+    
+    # Paginar antes de construir dicts
+    page_workspaces, page_ctx = paginate(
+        request,
+        workspace_qs,
+        default_page_size=10,
+        max_page_size=200,
+        page_param="page",
+        page_size_param="page_size",
+    )
+    
+    # Construir lista de diccionarios solo para la página actual
     workspaces = [ {
         'id': w.id,
         'name': w.name,
         'description': w.description,
         'uri': w.uri,
         'is_public': w.is_public,
-        'server': w.server.title_name
+        'server': w.server.title_name if w.server else ''
         }
-        for w in Workspace.objects.all()
+        for w in page_workspaces
     ]
     response = {
-        'workspaces': workspaces
+        'workspaces': workspaces,
+        'request': request,
+        **page_ctx,  # Agrega paginator/page_obj/page_size/etc al template
     }
     return render(request, 'workspace_list.html', response)
 
@@ -461,15 +485,29 @@ def workspace_update(request, wid):
 @staff_required
 def datastore_list(request):
 
-    datastore_list = None
+    # Obtener QuerySet de datastores
     if request.user.is_superuser:
-        datastore_list = Datastore.objects.all()
+        datastore_qs = Datastore.objects.all()
     else:
         # no consideramos DefaultUserDatastore porque por el momento sólo permitimos actualizar el datastore
         # a superusuarios o al creador
-        datastore_list = Datastore.objects.filter(created_by=request.user.username).order_by('name')
+        datastore_qs = Datastore.objects.filter(created_by=request.user.username)
+    
+    # Orden estable para paginación
+    datastore_qs = datastore_qs.order_by('id')
+    
+    # Paginar antes de procesar connection_params
+    page_datastores, page_ctx = paginate(
+        request,
+        datastore_qs,
+        default_page_size=10,
+        max_page_size=200,
+        page_param="page",
+        page_size_param="page_size",
+    )
 
-    for datastore in datastore_list:
+    # Procesar connection_params solo para la página actual
+    for datastore in page_datastores:
         params = json.loads(datastore.connection_params)
         if 'passwd' in params:
             params['passwd'] = '****'
@@ -481,7 +519,9 @@ def datastore_list(request):
         datastore.connection_params = json.dumps(params)
 
     response = {
-        'datastores': datastore_list
+        'datastores': page_datastores,
+        'request': request,
+        **page_ctx,  # Agrega paginator/page_obj/page_size/etc al template
     }
     return render(request, 'datastore_list.html', response)
 
@@ -646,55 +686,75 @@ def datastore_delete(request, dsid):
         return HttpResponseBadRequest()
 
 
+
 @login_required()
 @require_safe
 @staff_required
 def layer_list(request):
-
-    layer_list = None
     if request.user.is_superuser:
-        layer_list = Layer.objects.filter(external=False)
+        layer_qs = Layer.objects.filter(external=False)
         project_list = Project.objects.all()
     else:
         user_roles = auth_backend.get_roles(request)
-        layer_list = (Layer.objects.filter(created_by=request.user.username, external=False)
-            | Layer.objects.filter(layermanagerole__role__in=user_roles, external=False)).distinct()
+        layer_qs = (
+            Layer.objects.filter(created_by=request.user.username, external=False)
+            | Layer.objects.filter(layermanagerole__role__in=user_roles, external=False)
+        ).distinct()
         project_list = core_utils.get_user_projects(request, permissions=ProjectRole.PERM_MANAGE)
+
+    # IMPORTANTE: orden estable para paginación
+    layer_qs = layer_qs.order_by("id").select_related("datastore", "layer_group", "datastore__workspace")
+
+    # Paginar aquí (antes de construir dicts)
+    page_layers, page_ctx = paginate(
+        request,
+        layer_qs,
+        default_page_size=10,  # Reducido para forzar paginación y probar
+        max_page_size=200,
+        page_param="page",
+        page_size_param="page_size",
+    )
+
+    # ---- Evitar N+1: traer ProjectLayerGroup solo para los layer_group de ESTA página
+    lg_ids = [l.layer_group_id for l in page_layers if l.layer_group_id]
+    projects_by_lg = defaultdict(list)
+
+    if lg_ids:
+        plgs = (
+            ProjectLayerGroup.objects
+            .filter(layer_group_id__in=lg_ids)
+            .select_related("project")
+        )
+        for plg in plgs:
+            title = getattr(plg.project, "title", None)
+            if title:
+                projects_by_lg[plg.layer_group_id].append(title)
+
     layers = []
-    for l in layer_list:
-        projects = []
-        project_layergroups = ProjectLayerGroup.objects.filter(layer_group_id=l.layer_group.id)
-        for lg in project_layergroups:
-            if lg.project.title is not None:
-                projects.append(lg.project.title)
+    for l in page_layers:
         layer = {
-            'id': l.id,
-            'type': l.type,
-            'thumbnail_url': l.thumbnail_relurl,
-            'name': l.name,
-            'title': l.title,
-            'datastore_name': l.datastore.name,
-            'lg_name': l.layer_group.name,
-            'lg_title': l.layer_group.title,
-            'cached': l.cached,
-            'projects': '; '.join(projects)
+            "id": l.id,
+            "type": l.type,
+            "thumbnail_url": l.thumbnail.url.replace(settings.BASE_URL, "") if l.thumbnail else "",
+            "name": l.name,
+            "title": l.title,
+            "datastore_name": l.datastore.name if l.datastore else "",
+            "lg_name": l.layer_group.name if l.layer_group else "",
+            "lg_title": l.layer_group.title if l.layer_group else "",
+            "cached": l.cached,
+            "projects": "; ".join(projects_by_lg.get(l.layer_group_id, [])),
         }
         layers.append(layer)
 
-    projects = []
-    for p in project_list:
-        project = {
-            'id': p.id,
-            'name': p.name,
-            'title': p.title
-        }
-        projects.append(project)
+    projects = [{"id": p.id, "name": p.name, "title": p.title} for p in project_list]
 
     response = {
-        'layers': layers,
-        'projects': json.dumps(projects)
+        "layers": layers,
+        "projects": json.dumps(projects),
+        "request": request,  # Necesario para construir URLs en el template
+        **page_ctx,  # <- agrega paginator/page_obj/page_size/etc al template
     }
-    return render(request, 'layer_list.html', response)
+    return render(request, "layer_list.html", response)
 
 
 def _layer_refresh_extent(layer):
@@ -3209,31 +3269,62 @@ def layer_group_cache_clear(layergroup):
 @login_required()
 @staff_required
 def layergroup_list(request):
-    layergroups_list = utils.get_user_layergroups(request, permissions=LayerGroupRole.PERM_MANAGE)
+    layergroups_qs = utils.get_user_layergroups(request, permissions=LayerGroupRole.PERM_MANAGE)
     project_id = request.GET.get('project_id')
     if project_id is not None:
-        layergroups_list = layergroups_list.filter(projectlayergroup__project__id=project_id)
-    layergroups_list = layergroups_list.order_by('id').distinct()
+        layergroups_qs = layergroups_qs.filter(projectlayergroup__project__id=project_id)
+    layergroups_qs = layergroups_qs.order_by('id').distinct()
+    
+    # Paginar antes de construir dicts
+    page_layergroups, page_ctx = paginate(
+        request,
+        layergroups_qs,
+        default_page_size=10,
+        max_page_size=200,
+        page_param="page",
+        page_size_param="page_size",
+    )
+    
+    # ---- Evitar N+1: traer ProjectLayerGroup y Server solo para los layer_group de ESTA página
+    lg_ids = [lg.id for lg in page_layergroups if lg.name != '__default__']
+    server_ids = [lg.server_id for lg in page_layergroups if lg.server_id and lg.name != '__default__']
+    projects_by_lg = defaultdict(list)
+    servers_by_id = {}
+    
+    # Obtener todos los servers necesarios de una vez
+    if server_ids:
+        servers = Server.objects.filter(id__in=server_ids)
+        servers_by_id = {s.id: s for s in servers}
+    
+    # Obtener todos los ProjectLayerGroup necesarios de una vez
+    if lg_ids:
+        plgs = (
+            ProjectLayerGroup.objects
+            .filter(layer_group_id__in=lg_ids)
+            .select_related("project")
+        )
+        for plg in plgs:
+            projects_by_lg[plg.layer_group_id].append(plg.project.name)
+    
     layergroups = []
-    for lg in layergroups_list:
+    for lg in page_layergroups:
         if lg.name != '__default__':
-            server = Server.objects.get(id=lg.server_id)
-            projects = []
-            project_layergroups = ProjectLayerGroup.objects.filter(layer_group_id=lg.id)
-            for alg in project_layergroups:
-                projects.append(alg.project.name)
             layergroup = {}
             layergroup['id'] = lg.id
             layergroup['name'] = lg.name
             layergroup['title'] = lg.title
             layergroup['cached'] = lg.cached
-            layergroup['projects'] = '; '.join(projects)
-            layergroup['server'] = server.title
+            layergroup['projects'] = '; '.join(projects_by_lg.get(lg.id, []))
+            # Obtener server desde el diccionario cacheado
+            server = servers_by_id.get(lg.server_id) if lg.server_id else None
+            layergroup['server'] = server.title if server else ''
             layergroups.append(layergroup)
 
     response = {
         'layergroups': layergroups,
-        'project_id': project_id
+        'project_id': project_id,
+        'request': request,
+        **page_ctx,  # Agrega paginator/page_obj/page_size/etc al template
     }
     return render(request, 'layergroup_list.html', response)
 
