@@ -1593,7 +1593,7 @@ def library_delete(request, library_id):
         try:
             gs.deleteStyle(rule.style.name)
         except Exception as e:
-            logger.warning("library_delete: could not delete style %s from GeoServer: %s", rule.style.name, e)
+            logger.warning("Could not delete style %s from GeoServer: %s", rule.style.name, e)
         symbolizers = Symbolizer.objects.filter(rule_id=rule.id)
         for symbolizer in symbolizers:
             symbolizer.delete()
