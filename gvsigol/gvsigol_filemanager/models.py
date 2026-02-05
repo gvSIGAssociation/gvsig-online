@@ -11,4 +11,4 @@ class exports_historical(models.Model):
     task_id = models.CharField(default='', max_length=250)
     
     def __str__(self):
-        return self.name
+        return f"{self.id} - {self.task_id} - {self.username}"
