@@ -136,12 +136,14 @@ class icv():
             print('Error en geocodificación inversa ICV:', e)
             return self._empty_reverse_suggestion()
 
+        cod_ine_val = json_results.get('cod_ine', '')
         suggestion = {
             'source': 'icv',
             'type': 'icv',
             'address': json_results.get('nombre', ''),
             'nombre': json_results.get('nombre', ''),
-            'codigo_ine': json_results.get('cod_ine', ''),
+            'cod_ine': cod_ine_val,
+            'codigo_ine': cod_ine_val,
             'municipio': json_results.get('municipio', ''),
             'cod_postal': json_results.get('cod_postal', ''),
             'lat': '',
@@ -173,6 +175,7 @@ class icv():
             'type': 'icv',
             'address': '',
             'nombre': '',
+            'cod_ine': '',
             'codigo_ine': '',
             'municipio': '',
             'cod_postal': '',
