@@ -1569,9 +1569,15 @@ def get_symbols_from_library(request):
 @login_required()
 @staff_required
 def library_delete(request, library_id):
+    gs = geographic_servers.get_instance().get_default_server()
     library_rules = LibraryRule.objects.filter(library_id=library_id)
     for lib_rule in library_rules:
         rule = Rule.objects.get(id=lib_rule.rule.id)
+
+        try:
+            gs.deleteStyle(rule.style.name)
+        except Exception as e:
+            logger.warning("Could not delete style %s from GeoServer: %s", rule.style.name, e)
         symbolizers = Symbolizer.objects.filter(rule_id=rule.id)
         for symbolizer in symbolizers:
             symbolizer.delete()
@@ -1583,6 +1589,8 @@ def library_delete(request, library_id):
     lib = Library.objects.get(id=library_id)
     utils.delete_library_dir(lib)
     lib.delete()
+    if library_rules:
+        gs.reload_nodes()
     return redirect('library_list')
 
 
