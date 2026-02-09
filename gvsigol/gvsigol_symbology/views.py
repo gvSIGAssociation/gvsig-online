@@ -24,6 +24,7 @@
 
 from django.shortcuts import render, redirect, HttpResponse
 from django.http import HttpResponseForbidden
+from django.db.models import Q
 from gvsigol_services import geographic_servers
 from gvsigol_services.models import Workspace, Datastore, Layer, Server
 from gvsigol_services import utils as service_utils
@@ -90,6 +91,16 @@ def style_layer_list(request):
     # Prefetch relacionado para evitar N+1 queries
     layers_qs = layers_qs.prefetch_related('stylelayer_set__style')
     
+    # Aplicar búsqueda si se proporciona el parámetro 'search'
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        layers_qs = layers_qs.filter(
+            Q(name__icontains=search_query) |
+            Q(title__icontains=search_query) |
+            Q(layer_group__name__icontains=search_query) |
+            Q(layer_group__title__icontains=search_query)
+        )
+    
     # Paginar antes de construir los diccionarios
     page_layers, page_ctx = paginate(
         request,
@@ -113,6 +124,7 @@ def style_layer_list(request):
     response = {
         'layerStyles': ls,
         'request': request,
+        'search_query': search_query,
         **page_ctx,  # Agrega paginator/page_obj/page_size/etc al template
     }
     return render(request, 'style_layer_list.html', response)

@@ -2,6 +2,26 @@
 {% load staticfiles %} 
 {% load i18n %} 
 
+{% block extra-css %}
+{% if is_paginated|default:False %}
+<style>
+	#datastores-table_filter,
+	div.dataTables_filter,
+	label[for*="datastores-table"],
+	input[aria-controls="datastores-table"][type="search"],
+	#datastores-table_wrapper div.dataTables_filter {
+		display: none !important;
+		visibility: hidden !important;
+		height: 0 !important;
+		width: 0 !important;
+		overflow: hidden !important;
+		padding: 0 !important;
+		margin: 0 !important;
+	}
+</style>
+{% endif %}
+{% endblock %}
+
 {% block content %}
 <div class="row">
 	<div class="col-md-12">
@@ -14,6 +34,22 @@
 		</div>
 		
 		<div class="box">
+			<div class="box-header with-border" style="display: flex; justify-content: flex-end; align-items: center; padding-left: 5px; padding-right: 5px;">
+				<div class="box-tools">
+					<form method="get" action="" id="search-form" class="form-inline" style="margin: 0;">
+						<div class="form-group" style="margin: 0;">
+							<input type="text" name="search" class="form-control input-sm" placeholder="{% trans 'Search...' %}" value="{{ search_query|default:'' }}" style="width: 200px;">
+							{% if request.GET.page_size %}
+								<input type="hidden" name="page_size" value="{{ request.GET.page_size }}">
+							{% endif %}
+							<button type="submit" class="btn btn-sm btn-default"><i class="fa fa-search"></i></button>
+							{% if search_query %}
+								<a href="?{% if request.GET.page_size %}page_size={{ request.GET.page_size }}{% endif %}" class="btn btn-sm btn-default"><i class="fa fa-times"></i></a>
+							{% endif %}
+						</div>
+					</form>
+				</div>
+			</div>
 			<div class="box-body">
 				<table class="table" id="datastores-table">
 					<thead>
@@ -46,8 +82,8 @@
 			<div class="box-footer clearfix">
 				<ul class="pagination pagination-sm no-margin pull-right">
 					{% if page_obj.has_previous %}
-						<li><a href="?page=1{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}">&laquo; {% trans "First" %}</a></li>
-						<li><a href="?page={{ page_obj.previous_page_number }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}">{% trans "Previous" %}</a></li>
+						<li><a href="?page=1{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">&laquo; {% trans "First" %}</a></li>
+						<li><a href="?page={{ page_obj.previous_page_number }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">{% trans "Previous" %}</a></li>
 					{% else %}
 						<li class="disabled"><span>&laquo; {% trans "First" %}</span></li>
 						<li class="disabled"><span>{% trans "Previous" %}</span></li>
@@ -57,13 +93,13 @@
 						{% if page_obj.number == num %}
 							<li class="active"><span>{{ num }}</span></li>
 						{% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-							<li><a href="?page={{ num }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}">{{ num }}</a></li>
+							<li><a href="?page={{ num }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">{{ num }}</a></li>
 						{% endif %}
 					{% endfor %}
 					
 					{% if page_obj.has_next %}
-						<li><a href="?page={{ page_obj.next_page_number }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}">{% trans "Next" %}</a></li>
-						<li><a href="?page={{ paginator.num_pages }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}">{% trans "Last" %} &raquo;</a></li>
+						<li><a href="?page={{ page_obj.next_page_number }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">{% trans "Next" %}</a></li>
+						<li><a href="?page={{ paginator.num_pages }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">{% trans "Last" %} &raquo;</a></li>
 					{% else %}
 						<li class="disabled"><span>{% trans "Next" %}</span></li>
 						<li class="disabled"><span>{% trans "Last" %} &raquo;</span></li>
@@ -127,6 +163,7 @@ $(document).ready(function() {
 		{% if is_paginated|default:False %}
 		paging: false,  // Deshabilitar paginación de DataTables cuando hay paginación del servidor
 		info: false,    // Ocultar info de DataTables (ya lo mostramos en la paginación del servidor)
+		searching: false,  // Deshabilitar búsqueda de DataTables (usamos búsqueda del servidor)
 		{% endif %}
 	    language: {
 	    	processing		: '{% trans "Processing request..." %}',
@@ -159,9 +196,34 @@ $(document).ready(function() {
 	       	"data": null,
 	        "defaultContent": '<button type="button" name="button-update-datastore" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update datastore" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
 	  	}],
-	    "dom": 'T<"clear">lfrtip',
+	    "dom": 'T<"clear">rt',
 		"bLengthChange": false
 	});
+	
+	{% if is_paginated|default:False %}
+	// Eliminar el campo de búsqueda de DataTables si aparece
+	function removeDataTablesSearch() {
+		$('#datastores-table_filter').remove();
+		$('div.dataTables_filter').remove();
+		$('label[for*="datastores-table"]').remove();
+		$('input[aria-controls="datastores-table"][type="search"]').closest('div').remove();
+		$('input[aria-controls="datastores-table"][type="search"]').parent().remove();
+		$('input[aria-controls="datastores-table"][type="search"]').remove();
+		$('#datastores-table_wrapper').find('div.dataTables_filter').remove();
+		$('#datastores-table_wrapper').find('input[type="search"]').closest('div').remove();
+	}
+	
+	// Eliminar inmediatamente y después de eventos de DataTables
+	removeDataTablesSearch();
+	table.on('draw', function() {
+		removeDataTablesSearch();
+	});
+	setTimeout(removeDataTablesSearch, 0);
+	setTimeout(removeDataTablesSearch, 50);
+	setTimeout(removeDataTablesSearch, 100);
+	setTimeout(removeDataTablesSearch, 500);
+	setTimeout(removeDataTablesSearch, 1000);
+	{% endif %}
 		 
 	$('#datastores-table tbody').on('click', 'button', function (){
 		var row = table.row($(this).parents('tr'));

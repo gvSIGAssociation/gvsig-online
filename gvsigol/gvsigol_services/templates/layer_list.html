@@ -17,6 +17,37 @@
 		<div class="box">
 			<div id="form-error" style="color:#ff0000;">
 			</div>
+			<div class="box-header with-border" style="display: flex; justify-content: space-between; align-items: center; padding-left: 5px; padding-right: 5px;">
+				<div style="display: flex; align-items: center;">
+					<select name="project_id" id="select-project" class="form-control input-sm" style="width: 200px; margin-right: 5px;">
+						<option value="__none__">{% trans "Filter by project" %} ...</option>
+						{% for project in projects_list %}
+							{% if project.id|stringformat:"s" == project_id %}
+								<option value="{{ project.id }}" selected>{{ project.title }}</option>
+							{% else %}
+								<option value="{{ project.id }}">{{ project.title }}</option>
+							{% endif %}
+						{% endfor %}
+					</select>
+					<button id="button-clean-filter" style="padding: 7px; margin: 0px;" class="btn btn-sm btn-default">
+						<i class="fa fa-eye margin-r-5"></i>{% trans "Show all layers" %}
+					</button>
+				</div>
+				<div style="display: flex; align-items: center;">
+					<form method="get" action="" id="search-form" class="form-inline" style="margin: 0;">
+						<div class="form-group" style="margin: 0;">
+							<input type="text" name="search" class="form-control input-sm" placeholder="{% trans 'Search...' %}" value="{{ search_query|default:'' }}" style="width: 200px;">
+							{% if request.GET.page_size %}
+								<input type="hidden" name="page_size" value="{{ request.GET.page_size }}">
+							{% endif %}
+							<button type="submit" class="btn btn-sm btn-default"><i class="fa fa-search"></i></button>
+							{% if search_query or project_id %}
+								<a href="?{% if request.GET.page_size %}page_size={{ request.GET.page_size }}{% endif %}" class="btn btn-sm btn-default"><i class="fa fa-times"></i></a>
+							{% endif %}
+						</div>
+					</form>
+				</div>
+			</div>
 			<div class="box-body">
 				<table class="table" id="layers-table">
 					<thead>
@@ -61,8 +92,8 @@
 			<div class="box-footer clearfix">
 				<ul class="pagination pagination-sm no-margin pull-right">
 					{% if page_obj.has_previous %}
-						<li><a href="?page=1{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}">&laquo; {% trans "First" %}</a></li>
-						<li><a href="?page={{ page_obj.previous_page_number }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}">{% trans "Previous" %}</a></li>
+						<li><a href="?page=1{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}">&laquo; {% trans "First" %}</a></li>
+						<li><a href="?page={{ page_obj.previous_page_number }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}">{% trans "Previous" %}</a></li>
 					{% else %}
 						<li class="disabled"><span>&laquo; {% trans "First" %}</span></li>
 						<li class="disabled"><span>{% trans "Previous" %}</span></li>
@@ -72,13 +103,13 @@
 						{% if page_obj.number == num %}
 							<li class="active"><span>{{ num }}</span></li>
 						{% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-							<li><a href="?page={{ num }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}">{{ num }}</a></li>
+							<li><a href="?page={{ num }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}">{{ num }}</a></li>
 						{% endif %}
 					{% endfor %}
 					
 					{% if page_obj.has_next %}
-						<li><a href="?page={{ page_obj.next_page_number }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}">{% trans "Next" %}</a></li>
-						<li><a href="?page={{ paginator.num_pages }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}">{% trans "Last" %} &raquo;</a></li>
+						<li><a href="?page={{ page_obj.next_page_number }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}">{% trans "Next" %}</a></li>
+						<li><a href="?page={{ paginator.num_pages }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}">{% trans "Last" %} &raquo;</a></li>
 					{% else %}
 						<li class="disabled"><span>{% trans "Next" %}</span></li>
 						<li class="disabled"><span>{% trans "Last" %} &raquo;</span></li>
@@ -164,6 +195,7 @@ $(document).ready(function() {
 		{% if is_paginated %}
 		paging: false,  // Deshabilitar paginación de DataTables cuando hay paginación del servidor
 		info: false,    // Ocultar info de DataTables (ya lo mostramos en la paginación del servidor)
+		searching: false,  // Deshabilitar búsqueda de DataTables (usamos búsqueda del servidor)
 		{% endif %}
 	    language: {
 	    	processing		: '{% trans "Processing request..." %}',
@@ -218,7 +250,7 @@ $(document).ready(function() {
 	       	"data": null,
 	        "defaultContent": '<button type="button" name="button-update-thumbnail" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update thumbnail" %}' + '" class="btn btn-primary"><i class="fa fa-file-image-o"></i></button>'
 	  	}],
-	    "dom": 'T<"clear">lfrtip',
+	    "dom": 'T<"clear">rt',
 		"bLengthChange": false
 	});
 
@@ -245,30 +277,31 @@ $(document).ready(function() {
 		location.href = "{% url 'layer_create'%}";
 	});
 	
-	var clearButton = '';
-	clearButton += '<button id="button-clean-filter" style="padding: 7px; margin: 0px; margin-left: 5px;" class="btn btn-sm btn-default"><i class="fa fa-eye margin-r-5"></i>' + gettext('Show all layers') + '</button>';
-	$('#layers-table_wrapper').prepend(clearButton);
-	
-	var selectHtml = '';
-	selectHtml += '<select id="select-project" style="float: left; width: 200px;" name="select-project" class="form-control">';
-	selectHtml += 	'<option value="__none__">' + gettext('Filter by project') + ' ...</option>';
-	selectHtml += '</select>';
-	$('#layers-table_wrapper').prepend(selectHtml);
-	for (var i=0; i<projects.length; i++) {
-		$('#select-project').append($('<option>', {value: projects[i].title, text: projects[i].title}));
-	}
-
+	// Filtro por proyecto - se envía automáticamente al servidor al cambiar
 	$('#select-project').on('change', function() {
-		var project = $(this).val();
-		var dataTable = $('#layers-table').DataTable();
-		var regex = ";" + project + "(?<=;)a[^;]+(?=;)";
-		dataTable.columns(6).search(project, "(?<=;)a[^;]+(?=;)", true, false).draw();
+		var projectId = $(this).val();
+		var urlParams = new URLSearchParams(window.location.search);
+		
+		// Actualizar o eliminar el parámetro project_id
+		if (projectId && projectId !== '__none__') {
+			urlParams.set('project_id', projectId);
+		} else {
+			urlParams.delete('project_id');
+		}
+		
+		// Resetear a la primera página cuando se cambia el filtro
+		urlParams.set('page', '1');
+		
+		// Redirigir con los nuevos parámetros
+		window.location.href = '?' + urlParams.toString();
 	});
 	
+	// Botón para limpiar el filtro de proyecto
 	$('#button-clean-filter').on('click', function() {
-		var dataTable = $('#layers-table').DataTable();
-		dataTable.columns(6).search('', true, false).draw();
-		$('#select-project option[value=__none__]').attr('selected','selected');
+		var urlParams = new URLSearchParams(window.location.search);
+		urlParams.delete('project_id');
+		urlParams.set('page', '1'); // Resetear a la primera página
+		window.location.href = '?' + urlParams.toString();
 	});
 	
 	function updateThumbnail(data){

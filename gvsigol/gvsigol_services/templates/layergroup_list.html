@@ -18,6 +18,25 @@
 			</div>
 		</div>
 		<div class="box">
+			<div class="box-header with-border" style="display: flex; justify-content: flex-end; align-items: center; padding-left: 5px; padding-right: 5px;">
+				<div class="box-tools">
+					<form method="get" action="" id="search-form" class="form-inline" style="margin: 0;">
+						<div class="form-group" style="margin: 0;">
+							<input type="text" name="search" class="form-control input-sm" placeholder="{% trans 'Search...' %}" value="{{ search_query|default:'' }}" style="width: 200px;">
+							{% if request.GET.page_size %}
+								<input type="hidden" name="page_size" value="{{ request.GET.page_size }}">
+							{% endif %}
+							{% if project_id %}
+								<input type="hidden" name="project_id" value="{{ project_id }}">
+							{% endif %}
+							<button type="submit" class="btn btn-sm btn-default"><i class="fa fa-search"></i></button>
+							{% if search_query %}
+								<a href="?{% if request.GET.page_size %}page_size={{ request.GET.page_size }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}" class="btn btn-sm btn-default"><i class="fa fa-times"></i></a>
+							{% endif %}
+						</div>
+					</form>
+				</div>
+			</div>
 			<div class="box-body">
 				<table class="table" id="layergroups-table">
 					<thead>
@@ -56,8 +75,8 @@
 			<div class="box-footer clearfix">
 				<ul class="pagination pagination-sm no-margin pull-right">
 					{% if page_obj.has_previous %}
-						<li><a href="?page=1{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}">&laquo; {% trans "First" %}</a></li>
-						<li><a href="?page={{ page_obj.previous_page_number }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}">{% trans "Previous" %}</a></li>
+						<li><a href="?page=1{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">&laquo; {% trans "First" %}</a></li>
+						<li><a href="?page={{ page_obj.previous_page_number }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">{% trans "Previous" %}</a></li>
 					{% else %}
 						<li class="disabled"><span>&laquo; {% trans "First" %}</span></li>
 						<li class="disabled"><span>{% trans "Previous" %}</span></li>
@@ -67,13 +86,13 @@
 						{% if page_obj.number == num %}
 							<li class="active"><span>{{ num }}</span></li>
 						{% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-							<li><a href="?page={{ num }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}">{{ num }}</a></li>
+							<li><a href="?page={{ num }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">{{ num }}</a></li>
 						{% endif %}
 					{% endfor %}
 					
 					{% if page_obj.has_next %}
-						<li><a href="?page={{ page_obj.next_page_number }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}">{% trans "Next" %}</a></li>
-						<li><a href="?page={{ paginator.num_pages }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}">{% trans "Last" %} &raquo;</a></li>
+						<li><a href="?page={{ page_obj.next_page_number }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">{% trans "Next" %}</a></li>
+						<li><a href="?page={{ paginator.num_pages }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">{% trans "Last" %} &raquo;</a></li>
 					{% else %}
 						<li class="disabled"><span>{% trans "Next" %}</span></li>
 						<li class="disabled"><span>{% trans "Last" %} &raquo;</span></li>
@@ -127,6 +146,7 @@ $(document).ready(function() {
 		{% if is_paginated|default:False %}
 		paging: false,  // Deshabilitar paginación de DataTables cuando hay paginación del servidor
 		info: false,    // Ocultar info de DataTables (ya lo mostramos en la paginación del servidor)
+		searching: false,  // Deshabilitar búsqueda de DataTables (usamos búsqueda del servidor)
 		{% endif %}
 	    language: {
 	    	processing		: '{% trans "Processing request..." %}',
@@ -163,7 +183,7 @@ $(document).ready(function() {
 	       	"data": null,
 	        "defaultContent": '<button type="button" name="button-update-layergroup" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update layer group" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
 	  	}],
-	    "dom": 'T<"clear">lfrtip',
+	    "dom": 'T<"clear">rt',
 		"bLengthChange": false
 	});
 

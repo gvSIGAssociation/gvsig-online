@@ -108,6 +108,7 @@ import ast
 
 from django.conf import settings
 from .utils import paginate
+from django.db.models import Q
 
 logger = logging.getLogger("gvsigol")
 
@@ -346,6 +347,17 @@ def workspace_list(request):
     # Obtener QuerySet de workspaces
     workspace_qs = Workspace.objects.all().select_related('server').order_by('id')
     
+    # Aplicar búsqueda si se proporciona el parámetro 'search'
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        workspace_qs = workspace_qs.filter(
+            Q(name__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(uri__icontains=search_query) |
+            Q(server__name__icontains=search_query) |
+            Q(server__title__icontains=search_query)
+        )
+    
     # Paginar antes de construir dicts
     page_workspaces, page_ctx = paginate(
         request,
@@ -370,6 +382,7 @@ def workspace_list(request):
     response = {
         'workspaces': workspaces,
         'request': request,
+        'search_query': search_query,
         **page_ctx,  # Agrega paginator/page_obj/page_size/etc al template
     }
     return render(request, 'workspace_list.html', response)
@@ -493,6 +506,16 @@ def datastore_list(request):
         # a superusuarios o al creador
         datastore_qs = Datastore.objects.filter(created_by=request.user.username)
     
+    # Aplicar búsqueda si se proporciona el parámetro 'search'
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        datastore_qs = datastore_qs.filter(
+            Q(name__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(type__icontains=search_query) |
+            Q(workspace__name__icontains=search_query)
+        )
+    
     # Orden estable para paginación
     datastore_qs = datastore_qs.order_by('id')
     
@@ -521,6 +544,7 @@ def datastore_list(request):
     response = {
         'datastores': page_datastores,
         'request': request,
+        'search_query': search_query,
         **page_ctx,  # Agrega paginator/page_obj/page_size/etc al template
     }
     return render(request, 'datastore_list.html', response)
@@ -702,6 +726,32 @@ def layer_list(request):
         ).distinct()
         project_list = core_utils.get_user_projects(request, permissions=ProjectRole.PERM_MANAGE)
 
+    # Aplicar búsqueda si se proporciona el parámetro 'search'
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        layer_qs = layer_qs.filter(
+            Q(name__icontains=search_query) |
+            Q(title__icontains=search_query) |
+            Q(datastore__name__icontains=search_query) |
+            Q(layer_group__name__icontains=search_query) |
+            Q(layer_group__title__icontains=search_query)
+        )
+    
+    # Aplicar filtro por proyecto si se proporciona el parámetro 'project_id'
+    project_id = request.GET.get('project_id', '').strip()
+    selected_project = None
+    if project_id and project_id != '__none__':
+        try:
+            project_id_int = int(project_id)
+            # Filtrar capas que pertenecen a layer groups del proyecto
+            layer_qs = layer_qs.filter(
+                layer_group__projectlayergroup__project_id=project_id_int
+            ).distinct()
+            # Obtener el proyecto seleccionado para mostrarlo en el template
+            selected_project = Project.objects.filter(id=project_id_int).first()
+        except (ValueError, TypeError):
+            project_id = ''
+
     # IMPORTANTE: orden estable para paginación
     layer_qs = layer_qs.order_by("id").select_related("datastore", "layer_group", "datastore__workspace")
 
@@ -715,7 +765,7 @@ def layer_list(request):
         page_size_param="page_size",
     )
 
-    # ---- Evitar N+1: traer ProjectLayerGroup solo para los layer_group de ESTA página
+
     lg_ids = [l.layer_group_id for l in page_layers if l.layer_group_id]
     projects_by_lg = defaultdict(list)
 
@@ -750,8 +800,12 @@ def layer_list(request):
 
     response = {
         "layers": layers,
-        "projects": json.dumps(projects),
-        "request": request,  # Necesario para construir URLs en el template
+        "projects": json.dumps(projects),  # Para JavaScript
+        "projects_list": projects,  # Para el template (lista de diccionarios)
+        "request": request,  
+        "search_query": search_query,
+        "project_id": project_id if project_id else '',
+        "selected_project": selected_project,
         **page_ctx,  # <- agrega paginator/page_obj/page_size/etc al template
     }
     return render(request, "layer_list.html", response)
@@ -3273,6 +3327,15 @@ def layergroup_list(request):
     project_id = request.GET.get('project_id')
     if project_id is not None:
         layergroups_qs = layergroups_qs.filter(projectlayergroup__project__id=project_id)
+    
+    # Aplicar búsqueda si se proporciona el parámetro 'search'
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        layergroups_qs = layergroups_qs.filter(
+            Q(name__icontains=search_query) |
+            Q(title__icontains=search_query)
+        )
+    
     layergroups_qs = layergroups_qs.order_by('id').distinct()
     
     # Paginar antes de construir dicts
@@ -3324,6 +3387,7 @@ def layergroup_list(request):
         'layergroups': layergroups,
         'project_id': project_id,
         'request': request,
+        'search_query': search_query,
         **page_ctx,  # Agrega paginator/page_obj/page_size/etc al template
     }
     return render(request, 'layergroup_list.html', response)
