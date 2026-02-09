@@ -27,6 +27,7 @@ from xml.sax.saxutils import escape
 import gvsigol.settings
 import xmltodict
 import json
+import os
 from . import utils
 import re
 
@@ -36,5 +37,5 @@ def copy_resources(symbol, resource_path):
         if hasattr(symbolizer, 'externalgraphicsymbolizer'):
             local_path = symbolizer.externalgraphicsymbolizer.online_resource.replace(gvsigol.settings.MEDIA_URL, '')
             file_name = local_path.split('/')[-1]
-            absolute_path = gvsigol.settings.MEDIA_ROOT + local_path
+            absolute_path = os.path.join(gvsigol.settings.MEDIA_ROOT, local_path)
             utils.copy(absolute_path, resource_path + file_name)
