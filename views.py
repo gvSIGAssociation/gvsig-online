@@ -22,6 +22,7 @@
 '''
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django.db.models import Q
 from gvsigol_core.utils import get_supported_crs, get_user_projects, get_available_tools
 from gvsigol_symbology.models import StyleLayer
 from gdaltools.metadata import project
@@ -144,6 +145,15 @@ def project_list(request):
     else:
         project_list_qs = get_user_projects(request, permissions=[ProjectRole.PERM_READ, ProjectRole.PERM_MANAGE])
 
+    # Aplicar búsqueda si se proporciona el parámetro 'search'
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        project_list_qs = project_list_qs.filter(
+            Q(name__icontains=search_query) |
+            Q(title__icontains=search_query) |
+            Q(description__icontains=search_query)
+        )
+
     # Paginar antes de construir los diccionarios
     page_projects, page_ctx = paginate(
         request,
@@ -181,6 +191,7 @@ def project_list(request):
         'SHOW_SPA_PROJECT_LINKS': show_spa_project_links,
         'SHOW_BOOTSTRAP_PROJECT_LINKS': show_bootstrap_project_links,
         'request': request,
+        'search_query': search_query,
         **page_ctx,  # Agrega paginator/page_obj/page_size/etc al template
     }
     return render(request, 'project_list.html', response)
