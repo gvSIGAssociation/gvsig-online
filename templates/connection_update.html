@@ -1,0 +1,446 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}	
+<form id="connection-form" role="form" method="post" action="{% url 'connection_update' connection_id %}">
+	<div class="row">
+		<div class="col-md-12">	
+			<div class="row">
+				<div class="col-md-12 form-group">
+					<div class="box-tools pull-right">
+						<button type="button" id="btn-test-connection" class="btn btn-default btn-sm"><i class="fa fa-plug margin-r-5"></i> {% trans "Test connection" %}</button>
+						<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>
+					</div>
+				</div>				
+			</div>
+			<div class="box">
+				{% csrf_token %}
+				{% if form.errors %}
+				<div id="form-error" class="alert alert-danger" style="margin: 15px;">
+					<ul>
+					{{ form.non_field_errors }}
+					{% for field in form %}
+						{% if field.errors %}
+							<li>{{field.label}}: {{ field.errors|striptags }}</li>
+						{% endif %}	
+					{% endfor %}
+					</ul>
+				</div>
+				{% endif %}
+				
+				<div class="nav-tabs-custom">
+					<ul class="nav nav-tabs">
+						<li class="active"><a href="#tab-connection" data-toggle="tab">{% trans "Connection" %}</a></li>
+						<li><a href="#tab-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li>
+					</ul>
+					<div class="tab-content">
+						<!-- Pestaña de conexión -->
+						<div class="tab-pane active" id="tab-connection">
+							<div class="row" style="padding: 15px;">
+								<div class="col-md-6">
+									<h4>{% trans "Connection details" %}</h4>
+									<div class="form-group">
+										<label for="id_name">{{ form.name.label }}</label>
+										{{ form.name }}
+									</div>
+									<div class="form-group">
+										<label for="id_description">{{ form.description.label }}</label>
+										{{ form.description }}
+									</div>
+									<div class="form-group">
+										<label>{% trans "Category" %}</label>
+										{% if connection.type == 'PostGIS' or connection.type == 'Oracle' or connection.type == 'SQLServer' %}
+										<input type="text" class="form-control" readonly value="Base de datos">
+										{% else %}
+										<input type="text" class="form-control" readonly value="API externa">
+										{% endif %}
+									</div>
+									<div class="form-group">
+										<label for="id_type">{{ form.type.label }}</label>
+										{{ form.type }}
+										<input type="hidden" name="type" value="{{ connection.type }}">
+									</div>
+								</div>
+								
+								<div class="col-md-6">
+									<h4>{% trans "Connection parameters" %}</h4>
+									
+									<!-- ==================== POSTGRESQL/POSTGIS ==================== -->
+									{% if connection.type == 'PostGIS' %}
+									<div id="params-postgis">
+										<div class="form-group">
+											<label for="id_host">{{ form.host.label }}</label>
+											{{ form.host }}
+										</div>
+										<div class="form-group">
+											<label for="id_port">{{ form.port.label }}</label>
+											{{ form.port }}
+										</div>
+										<div class="form-group">
+											<label for="id_database">{{ form.database.label }}</label>
+											{{ form.database }}
+										</div>
+										<div class="form-group">
+											<label for="id_user">{{ form.user.label }}</label>
+											{{ form.user }}
+										</div>
+										<div class="form-group">
+											<label for="id_password">{{ form.password.label }}</label>
+											{{ form.password }}
+											<small class="text-muted">{% trans "Leave empty to keep current password" %}</small>
+										</div>
+										<h5 class="margin-top-20">{% trans "Additional parameters" %}</h5>
+										<div class="form-group">
+											<label for="id_extra_params">{{ form.extra_params.label }}</label>
+											{{ form.extra_params }}
+											<small class="text-muted">{{ form.extra_params.help_text }}</small>
+										</div>
+									</div>
+									{% endif %}
+									
+									<!-- ==================== ORACLE ==================== -->
+									{% if connection.type == 'Oracle' %}
+									<div id="params-oracle">
+										<div class="form-group">
+											<label for="id_oracle_user">{{ form.oracle_user.label }}</label>
+											{{ form.oracle_user }}
+										</div>
+										<div class="form-group">
+											<label for="id_oracle_password">{{ form.oracle_password.label }}</label>
+											{{ form.oracle_password }}
+											<small class="text-muted">{% trans "Leave empty to keep current password" %}</small>
+										</div>
+										<div class="form-group">
+											<label for="id_oracle_host">{{ form.oracle_host.label }}</label>
+											{{ form.oracle_host }}
+										</div>
+										<div class="form-group">
+											<label for="id_oracle_port">{{ form.oracle_port.label }}</label>
+											{{ form.oracle_port }}
+										</div>
+										<div class="form-group">
+											<label for="id_oracle_service">{{ form.oracle_service.label }}</label>
+											{{ form.oracle_service }}
+										</div>
+									</div>
+									{% endif %}
+									
+									<!-- ==================== SQL SERVER ==================== -->
+									{% if connection.type == 'SQLServer' %}
+									<div id="params-sqlserver">
+										<div class="form-group">
+											<label for="id_sqlserver_server">{{ form.sqlserver_server.label }}</label>
+											{{ form.sqlserver_server }}
+										</div>
+										<div class="form-group">
+											<label for="id_sqlserver_user">{{ form.sqlserver_user.label }}</label>
+											{{ form.sqlserver_user }}
+										</div>
+										<div class="form-group">
+											<label for="id_sqlserver_password">{{ form.sqlserver_password.label }}</label>
+											{{ form.sqlserver_password }}
+											<small class="text-muted">{% trans "Leave empty to keep current password" %}</small>
+										</div>
+										<div class="form-group">
+											<label for="id_sqlserver_database">{{ form.sqlserver_database.label }}</label>
+											{{ form.sqlserver_database }}
+										</div>
+										<div class="form-group">
+											<label for="id_sqlserver_tds_version">{{ form.sqlserver_tds_version.label }}</label>
+											{{ form.sqlserver_tds_version }}
+										</div>
+									</div>
+									{% endif %}
+									
+									<!-- ==================== INDENOVA ==================== -->
+									{% if connection.type == 'indenova' %}
+									<div id="params-indenova">
+										<div class="form-group">
+											<label for="id_indenova_domain">{{ form.indenova_domain.label }}</label>
+											{{ form.indenova_domain }}
+										</div>
+										<div class="form-group">
+											<label for="id_indenova_api_key">{{ form.indenova_api_key.label }}</label>
+											{{ form.indenova_api_key }}
+										</div>
+										<div class="form-group">
+											<label for="id_indenova_client_id">{{ form.indenova_client_id.label }}</label>
+											{{ form.indenova_client_id }}
+										</div>
+										<div class="form-group">
+											<label for="id_indenova_secret">{{ form.indenova_secret.label }}</label>
+											{{ form.indenova_secret }}
+											<small class="text-muted">{% trans "Leave empty to keep current secret" %}</small>
+										</div>
+									</div>
+									{% endif %}
+									
+									<!-- ==================== SEGEX ==================== -->
+									{% if connection.type == 'segex' %}
+									<div id="params-segex">
+										<div class="form-group">
+											<label for="id_segex_domain">{{ form.segex_domain.label }}</label>
+											{{ form.segex_domain }}
+										</div>
+										<div class="form-group">
+											<label>{% trans "Entity" %} ({% trans "Municipality" %})</label>
+											<div class="row">
+												<div class="col-md-10">
+													<select id="segex_entity_select" class="form-control" style="width: 100%;">
+														{% if form.segex_entity.value %}
+														<option value="{{ form.segex_entity.value }}" selected>{{ form.segex_entity.value }} - {% trans "Loading..." %}</option>
+														{% else %}
+														<option value="">-- {% trans "Click Load to get entities" %} --</option>
+														{% endif %}
+													</select>
+												</div>
+												<div class="col-md-2">
+													<button type="button" id="btn_load_segex_entities" class="btn btn-default btn-block">
+														<i class="fa fa-download"></i> {% trans "Load" %}
+													</button>
+												</div>
+											</div>
+											<small class="text-muted">{% trans "You can type to search by code or name." %}</small>
+											<!-- Campo oculto para guardar el valor -->
+											<input type="hidden" id="id_segex_entity" name="segex_entity" value="{{ form.segex_entity.value }}">
+										</div>
+										<div class="form-group">
+											<label for="id_segex_user">{{ form.segex_user.label }}</label>
+											{{ form.segex_user }}
+										</div>
+										<div class="form-group">
+											<label for="id_segex_password">{{ form.segex_password.label }}</label>
+											{{ form.segex_password }}
+											<small class="text-muted">{% trans "Leave empty to keep current password" %}</small>
+										</div>
+									</div>
+									{% endif %}
+									
+									<!-- ==================== SHAREPOINT ==================== -->
+									{% if connection.type == 'sharepoint' %}
+									<div id="params-sharepoint">
+										<div class="form-group">
+											<label for="id_sharepoint_tenant_id">{{ form.sharepoint_tenant_id.label }}</label>
+											{{ form.sharepoint_tenant_id }}
+										</div>
+										<div class="form-group">
+											<label for="id_sharepoint_client_id">{{ form.sharepoint_client_id.label }}</label>
+											{{ form.sharepoint_client_id }}
+										</div>
+										<div class="form-group">
+											<label for="id_sharepoint_client_secret">{{ form.sharepoint_client_secret.label }}</label>
+											{{ form.sharepoint_client_secret }}
+											<small class="text-muted">{% trans "Leave empty to keep current secret" %}</small>
+										</div>
+										<div class="form-group">
+											<label for="id_sharepoint_host">{{ form.sharepoint_host.label }}</label>
+											{{ form.sharepoint_host }}
+										</div>
+										<div class="form-group">
+											<label for="id_sharepoint_site_path">{{ form.sharepoint_site_path.label }}</label>
+											{{ form.sharepoint_site_path }}
+										</div>
+									</div>
+									{% endif %}
+									
+									<!-- ==================== PADRÓN ATM ==================== -->
+									{% if connection.type == 'padron-atm' %}
+									<div id="params-padron-atm">
+										<div class="form-group">
+											<label for="id_padron_atm_email">{{ form.padron_atm_email.label }}</label>
+											{{ form.padron_atm_email }}
+										</div>
+										<div class="form-group">
+											<label for="id_padron_atm_password">{{ form.padron_atm_password.label }}</label>
+											{{ form.padron_atm_password }}
+											<small class="text-muted">{% trans "Leave empty to keep current password" %}</small>
+										</div>
+										<div class="form-group">
+											<label for="id_padron_atm_id_acceso">{{ form.padron_atm_id_acceso.label }}</label>
+											{{ form.padron_atm_id_acceso }}
+										</div>
+									</div>
+									{% endif %}
+									
+									<div id="connection-test-result" class="alert" style="display: none; margin-top: 15px;"></div>
+								</div>
+							</div>
+						</div>
+						
+						<!-- Pestaña de permisos -->
+						<div class="tab-pane" id="tab-permissions">
+							{% include "select_connection_permissions.html" %}
+						</div>
+					</div>
+				</div>
+			</div>			
+		</div>				
+	</div>
+</form>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-connections').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+	var connType = '{{ connection.type }}';
+	
+	// Test de conexión
+	$('#btn-test-connection').click(function() {
+		var btn = $(this);
+		var resultDiv = $('#connection-test-result');
+		
+		btn.prop('disabled', true);
+		btn.html('<i class="fa fa-spinner fa-spin margin-r-5"></i> {% trans "Testing..." %}');
+		
+		// Construir datos según el tipo
+		var postData = {
+			'type': connType
+		};
+		
+		if (connType === 'PostGIS') {
+			postData.host = $('#id_host').val();
+			postData.port = $('#id_port').val();
+			postData.database = $('#id_database').val();
+			postData.user = $('#id_user').val();
+			postData.password = $('#id_password').val();
+		} else if (connType === 'Oracle') {
+			// Componer DSN desde los campos separados
+			var oracleHost = $('#id_oracle_host').val();
+			var oraclePort = $('#id_oracle_port').val() || '1521';
+			var oracleService = $('#id_oracle_service').val();
+			postData.username = $('#id_oracle_user').val();
+			postData.password = $('#id_oracle_password').val();
+			postData.dsn = oracleHost + ':' + oraclePort + '/' + oracleService;
+		} else if (connType === 'SQLServer') {
+			postData['server-sql-server'] = $('#id_sqlserver_server').val();
+			postData['username-sql-server'] = $('#id_sqlserver_user').val();
+			postData['password-sql-server'] = $('#id_sqlserver_password').val();
+			postData['db-sql-server'] = $('#id_sqlserver_database').val();
+			postData['tds-version-sql-server'] = $('#id_sqlserver_tds_version').val();
+		} else if (connType === 'sharepoint') {
+			postData['tenant-id'] = $('#id_sharepoint_tenant_id').val();
+			postData['client-id'] = $('#id_sharepoint_client_id').val();
+			postData['client-secret'] = $('#id_sharepoint_client_secret').val();
+			postData['sharepoint-host'] = $('#id_sharepoint_host').val();
+			postData['site-path'] = $('#id_sharepoint_site_path').val();
+		} else if (connType === 'indenova') {
+			postData.domain = $('#id_indenova_domain').val();
+			postData['api-key'] = $('#id_indenova_api_key').val();
+		} else if (connType === 'segex') {
+			postData.domain = $('#id_segex_domain').val();
+			postData.user = $('#id_segex_user').val();
+			postData.password = $('#id_segex_password').val();
+			// La entity puede estar en el select o en el input hidden
+			postData.entity = $('#segex_entity_select').val() || $('#id_segex_entity').val();
+		} else if (connType === 'padron-atm') {
+			postData.email = $('#id_padron_atm_email').val();
+			postData.password = $('#id_padron_atm_password').val();
+			postData.idacceso = $('#id_padron_atm_id_acceso').val();
+		}
+		
+		$.ajax({
+			type: 'POST',
+			url: '{% url "connection_test" %}',
+			data: postData,
+			beforeSend: function(xhr) {
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			success: function(response) {
+				if (response.success) {
+					resultDiv.removeClass('alert-danger').addClass('alert-success');
+					resultDiv.html('<i class="fa fa-check margin-r-5"></i> {% trans "Connection successful" %}');
+				} else {
+					resultDiv.removeClass('alert-success').addClass('alert-danger');
+					resultDiv.html('<i class="fa fa-times margin-r-5"></i> ' + response.error);
+				}
+				resultDiv.show();
+			},
+			error: function() {
+				resultDiv.removeClass('alert-success').addClass('alert-danger');
+				resultDiv.html('<i class="fa fa-times margin-r-5"></i> {% trans "Error testing connection" %}');
+				resultDiv.show();
+			},
+			complete: function() {
+				btn.prop('disabled', false);
+				btn.html('<i class="fa fa-plug margin-r-5"></i> {% trans "Test connection" %}');
+			}
+		});
+	});
+	
+	// SEGEX: Inicializar Select2 para el desplegable de entidades
+	if ($('#segex_entity_select').length) {
+		$('#segex_entity_select').select2({
+			placeholder: '-- {% trans "Click Load to get entities" %} --',
+			allowClear: true,
+			width: '100%'
+		});
+	}
+	
+	// SEGEX: Función para cargar entidades
+	function loadSegexEntities(autoLoad) {
+		var btn = $('#btn_load_segex_entities');
+		var domain = $('#id_segex_domain').val();
+		var select = $('#segex_entity_select');
+		var currentValue = $('#id_segex_entity').val();
+		
+		if (!autoLoad) {
+			btn.prop('disabled', true);
+			btn.html('<i class="fa fa-spinner fa-spin"></i>');
+		}
+		
+		$.ajax({
+			type: 'GET',
+			url: '{% url "api_segex_entities" %}',
+			data: { domain: domain },
+			success: function(response) {
+				select.empty();
+				if (response.success && response.entities.length > 0) {
+					select.append('<option value="">-- {% trans "Select entity" %} --</option>');
+					$.each(response.entities, function(i, entity) {
+						var selected = (entity.id == currentValue) ? ' selected' : '';
+						select.append('<option value="' + entity.id + '"' + selected + '>' + entity.id + ' - ' + entity.description + '</option>');
+					});
+					// Refrescar Select2
+					select.trigger('change');
+				} else {
+					select.append('<option value="">-- {% trans "No entities found" %} --</option>');
+					select.trigger('change');
+					if (!response.success && !autoLoad) {
+						alert('Error: ' + response.error);
+					}
+				}
+			},
+			error: function() {
+				select.empty();
+				select.append('<option value="">-- {% trans "Error loading entities" %} --</option>');
+				select.trigger('change');
+			},
+			complete: function() {
+				btn.prop('disabled', false);
+				btn.html('<i class="fa fa-download"></i> {% trans "Load" %}');
+			}
+		});
+	}
+	
+	// SEGEX: Cargar entidades al hacer clic en el botón
+	$('#btn_load_segex_entities').click(function() {
+		loadSegexEntities(false);
+	});
+	
+	// SEGEX: Cargar automáticamente las entidades si estamos editando una conexión SEGEX
+	if ($('#params-segex').length && $('#id_segex_entity').val()) {
+		loadSegexEntities(true);
+	}
+	
+	// SEGEX: Actualizar campo oculto cuando se selecciona una entidad
+	$('#segex_entity_select').on('select2:select select2:clear', function() {
+		$('#id_segex_entity').val($(this).val() || '');
+	});
+});
+</script>
+{% endblock %}

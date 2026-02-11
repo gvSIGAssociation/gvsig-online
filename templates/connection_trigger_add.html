@@ -1,0 +1,442 @@
+{% extends "base.html" %} 
+{% load staticfiles %} 
+{% load i18n %} 
+{% load static from staticfiles %}
+
+{% block content %}
+<style>
+	.CodeMirror {
+		border: 1px solid #d2d6de;
+		border-radius: 3px;
+		min-height: 400px;
+		height: calc(100vh - 400px);
+	}
+</style>
+<div class="row">
+	<div class="col-md-12">
+		<form id="trigger-form" method="post" action="">
+			{% csrf_token %}
+			<input type="hidden" id="schemas-hidden" name="schemas_json" value="">
+			
+			<div class="row">
+				<div class="col-md-12 form-group">
+					<div class="box-tools pull-right">
+						<a href="{% url 'connection_config' connection.id %}" class="btn btn-default btn-sm">
+							<i class="fa fa-arrow-left margin-r-5"></i> {% trans "Cancel" %}
+						</a>
+						<button type="submit" class="btn btn-primary btn-sm">
+							<i class="fa fa-save margin-r-5"></i> {% trans "Save trigger" %}
+						</button>
+					</div>
+				</div>
+			</div>
+
+			{% if error_message %}
+			<div class="alert alert-danger alert-dismissible">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				<i class="icon fa fa-ban"></i> {{ error_message }}
+			</div>
+			{% endif %}
+
+			<div class="box box-primary">
+				<div class="box-header with-border">
+					<span class="label label-primary pull-right">{{ connection.name }}</span>
+				</div>
+				<div class="box-body">
+					<!-- Pestañas -->
+					<ul class="nav nav-tabs">
+						<li class="active">
+							<a href="#tab-general" data-toggle="tab">{% trans "General" %}</a>
+						</li>
+						<li>
+							<a href="#tab-permissions" data-toggle="tab">{% trans "Permissions" %}</a>
+						</li>
+					</ul>
+					
+					<div class="tab-content" style="padding-top: 15px;">
+						<!-- Tab General -->
+						<div class="tab-pane active" id="tab-general">
+							<div class="row">
+								<!-- Columna izquierda: Configuración -->
+								<div class="col-md-4">
+									<div class="form-group">
+										<label for="name">{% trans "Name" %} <span class="text-danger">*</span></label>
+										<input type="text" class="form-control" id="name" name="name" required 
+											value="{{ trigger.name|default:'' }}"
+											placeholder="{% trans 'Unique identifier for this trigger' %}"
+											pattern="[a-zA-Z_][a-zA-Z0-9_]*" 
+											title="{% trans 'Only letters, numbers and underscores. Must start with letter or underscore.' %}">
+										<small class="text-muted">{% trans "Only letters, numbers and underscores" %}</small>
+									</div>
+
+									<div class="form-group">
+										<label for="description">{% trans "Description" %}</label>
+										<textarea class="form-control" id="description" name="description" rows="3"
+											placeholder="{% trans 'Brief description of what this trigger does' %}">{{ trigger.description|default:'' }}</textarea>
+									</div>
+
+									<div class="row">
+										<div class="col-md-6">
+											<div class="form-group">
+												<label>{% trans "Timing" %} <span class="text-danger">*</span></label>
+												<select class="form-control" id="timing" name="timing" required>
+													<option value="BEFORE" {% if trigger.timing == 'BEFORE' %}selected{% endif %}>{% trans "Before" %}</option>
+													<option value="AFTER" {% if trigger.timing == 'AFTER' or not trigger %}selected{% endif %}>{% trans "After" %}</option>
+												</select>
+											</div>
+										</div>
+										<div class="col-md-6">
+											<div class="form-group">
+												<label>{% trans "Events" %} <span class="text-danger">*</span></label>
+												<div>
+													<label class="checkbox-inline">
+														<input type="checkbox" name="events" value="INSERT"
+															{% if 'INSERT' in trigger_events %}checked{% endif %}>
+														{% trans "Insert" %}
+													</label>
+													<label class="checkbox-inline">
+														<input type="checkbox" name="events" value="UPDATE"
+															{% if 'UPDATE' in trigger_events %}checked{% endif %}>
+														{% trans "Update" %}
+													</label>
+													<label class="checkbox-inline">
+														<input type="checkbox" name="events" value="DELETE"
+															{% if 'DELETE' in trigger_events %}checked{% endif %}>
+														{% trans "Delete" %}
+													</label>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<hr>
+									<h4>{% trans "Scope" %}</h4>
+
+									<div class="form-group">
+										<label for="scope">{% trans "Apply to" %} <span class="text-danger">*</span></label>
+										<select class="form-control" id="scope" name="scope" required>
+											<option value="global" {% if trigger.scope == 'global' or not trigger %}selected{% endif %}>
+												{% trans "Global (all schemas)" %}
+											</option>
+											<option value="schemas" {% if trigger.scope == 'schemas' %}selected{% endif %}>
+												{% trans "Specific schemas" %}
+											</option>
+										</select>
+										<small class="text-muted">{% trans "Choose whether this trigger applies to all schemas or specific ones" %}</small>
+									</div>
+
+									<div class="form-group" id="schemas-container" style="{% if not trigger or trigger.scope != 'schemas' %}display: none;{% endif %}">
+										<label for="schemas-input">{% trans "Schemas" %}</label>
+										<select id="schemas-input" class="form-control" multiple="multiple" style="width: 100%;">
+										</select>
+										<small class="text-muted">{% trans "Type schema names and press Enter to add" %}</small>
+									</div>
+
+									<hr>
+									<h4>{% trans "Options" %}</h4>
+
+									<div class="form-group">
+										<div class="checkbox">
+											<label>
+												<input type="checkbox" id="is_calculated_field" name="is_calculated_field" value="1"
+													{% if trigger.is_calculated_field %}checked{% endif %}>
+												{% trans "Calculated field" %}
+											</label>
+										</div>
+										<small class="text-muted">{% trans "Can be assigned to layer fields to auto-calculate values" %}</small>
+									</div>
+
+									<hr>
+									<h4>{% trans "Compatible datastores" %}</h4>
+									<div id="compatible-datastores" class="well" style="max-height: 150px; overflow-y: auto;">
+										<p class="text-muted"><em>{% trans "Loading..." %}</em></p>
+									</div>
+								</div>
+
+								<!-- Columna derecha: Código SQL -->
+								<div class="col-md-8">
+									<div class="form-group" style="height: 100%;">
+										<label for="sql_code">{% trans "SQL Code" %} <span class="text-danger">*</span></label>
+										<textarea class="form-control" id="sql_code" name="sql_code"
+											placeholder="{% trans 'SQL code to execute. Use NEW for inserted/updated row, OLD for deleted/updated row.' %}">{% if trigger.sql_code %}{{ trigger.sql_code }}{% else %}-- DECLARE
+--     variable_name TYPE;
+BEGIN
+    -- Your code here
+    -- Use NEW for the new row (INSERT/UPDATE)
+    -- Use OLD for the old row (UPDATE/DELETE)
+    
+    RETURN NEW;  -- Use RETURN OLD; for DELETE-only triggers
+END;{% endif %}</textarea>
+										<div class="help-block" style="margin-top: 5px;">
+											<p class="text-muted" style="margin-bottom: 5px;">
+												{% trans "Use NEW to reference the new row (INSERT/UPDATE) and OLD for the old row (UPDATE/DELETE)." %}
+											</p>
+											<p style="margin-bottom: 0;">
+												<strong>{% trans "Template variables" %}:</strong>
+												<code>{target_field}</code>, 
+												<code>{current_schema}</code>, 
+												<code>{current_table}</code>, 
+												<code>{geom}</code>,
+												<code>{pk_field}</code>
+												<a href="#" data-toggle="tooltip" data-html="true" 
+													title="<strong>{target_field}</strong>: {% trans 'The field selected by the user when assigning the trigger' %}<br>
+													<strong>{current_schema}</strong>: {% trans 'The schema where the layer is located' %}<br>
+													<strong>{current_table}</strong>: {% trans 'The table name of the layer' %}<br>
+													<strong>{geom}</strong>: {% trans 'The geometry field name of the layer' %}<br>
+													<strong>{pk_field}</strong>: {% trans 'The primary key field of the layer' %}">
+													<i class="fa fa-question-circle"></i>
+												</a>
+											</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<!-- Fin Tab General -->
+						
+						<!-- Tab Permisos -->
+						<div class="tab-pane" id="tab-permissions">
+							<div class="row">
+								<div class="col-md-12">
+									<div id="trigger-permissions-box" class="box searchable-list-box">
+										<div class="box-header">
+											<h3 class="col-md-6 box-title" style="vertical-align: middle">{% trans "Select trigger permissions" %}</h3>
+											<div class="col-md-6">
+												<input type="text" class="search form-control" placeholder="{% trans 'Search user role...' %}" id="role-search" />
+											</div>
+											<div class="col-md-12" style="margin-top: 10px;">
+												<div class="checkbox">
+													<label title="{% trans 'All staff users can use this trigger in their layers' %}">
+														<input type="checkbox" name="allow_all" id="allow_all" value="1" {% if trigger and trigger.allow_all %}checked{% endif %}/>
+														<span>{% trans "Allow all staff users" %}</span>
+													</label>
+												</div>
+											</div>
+										</div>
+										<div class="box-body" id="roles-list-container">
+											<ul class="products-list product-list-in-box list">
+												{% for role in available_roles %}
+												<li class="item">
+													<div class="product-img">
+														<img src="{% static 'img/users.png' %}" alt="{% trans 'User role image' %}">
+													</div>
+													<div class="product-info">
+														<span class="product-title">
+															<span class="searchable-rolename">{{ role }}</span>
+															<div class="pull-right checkbox form-inline">
+																<label>
+																	<input type="checkbox" name="allowed_roles" value="{{ role }}" 
+																		{% if role in selected_roles %}checked{% endif %}/>
+																	<span>{% trans "Can use" %}</span>
+																</label>
+															</div>
+														</span>
+													</div>
+												</li>
+												{% empty %}
+												<li class="item">
+													<div class="product-info">
+														<span class="product-description text-muted">{% trans "No roles available" %}</span>
+													</div>
+												</li>
+												{% endfor %}
+											</ul>
+											<ul class="pagination"></ul>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<!-- Fin Tab Permisos -->
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-connections').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+	var connectionId = {{ connection.id }};
+	
+	// Inicializar tooltips
+	$('[data-toggle="tooltip"]').tooltip();
+	
+	// Inicializar CodeMirror para SQL con sintaxis PostgreSQL
+	var sqlEditor = CodeMirror.fromTextArea(document.getElementById('sql_code'), {
+		mode: 'text/x-pgsql',
+		theme: 'xq-dark',
+		lineNumbers: true,
+		indentWithTabs: true,
+		smartIndent: true,
+		matchBrackets: true,
+		autofocus: false,
+		autoRefresh: true
+	});
+	
+	// Ajustar altura del editor
+	sqlEditor.setSize(null, 'calc(100vh - 400px)');
+	
+	// Esquemas disponibles de los datastores existentes (para sugerencias)
+	var availableSchemas = [
+		{% for schema in available_schemas %}'{{ schema }}'{% if not forloop.last %}, {% endif %}{% endfor %}
+	];
+	
+	// Esquemas previamente seleccionados
+	var selectedSchemas = [
+		{% for schema in selected_schemas %}'{{ schema }}'{% if not forloop.last %}, {% endif %}{% endfor %}
+	];
+	
+	// Inicializar Select2 con tags para esquemas
+	$('#schemas-input').select2({
+		tags: true,
+		tokenSeparators: [',', ' '],
+		placeholder: '{% trans "Type schema name and press Enter" %}',
+		allowClear: true,
+		data: availableSchemas.map(function(s) { 
+			return { id: s, text: s }; 
+		}),
+		createTag: function(params) {
+			var term = $.trim(params.term);
+			if (term === '') {
+				return null;
+			}
+			if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(term)) {
+				return null;
+			}
+			return {
+				id: term,
+				text: term,
+				newTag: true
+			};
+		}
+	});
+	
+	// Establecer valores iniciales si existen
+	if (selectedSchemas.length > 0) {
+		selectedSchemas.forEach(function(schema) {
+			if ($('#schemas-input').find("option[value='" + schema + "']").length === 0) {
+				var newOption = new Option(schema, schema, true, true);
+				$('#schemas-input').append(newOption);
+			}
+		});
+		$('#schemas-input').val(selectedSchemas).trigger('change');
+	}
+	
+	// Búsqueda de roles
+	var searcheableRoleList = new List('trigger-permissions-box', {
+		valueNames: ['searchable-rolename'],
+		page: 10,
+		pagination: true
+	});
+	
+	$('#role-search').on('keyup', function() {
+		searcheableRoleList.search($(this).val());
+	});
+	
+	// Deshabilitar checkboxes de roles cuando allow_all está marcado
+	$('#allow_all').change(function() {
+		var isChecked = $(this).is(':checked');
+		$('input[name="allowed_roles"]').prop('disabled', isChecked);
+		if (isChecked) {
+			$('#roles-list-container').addClass('text-muted');
+		} else {
+			$('#roles-list-container').removeClass('text-muted');
+		}
+	});
+	
+	// Inicializar estado
+	if ($('#allow_all').is(':checked')) {
+		$('input[name="allowed_roles"]').prop('disabled', true);
+		$('#roles-list-container').addClass('text-muted');
+	}
+	
+	// Mostrar/ocultar selector de esquemas según scope
+	$('#scope').change(function() {
+		if ($(this).val() === 'schemas') {
+			$('#schemas-container').slideDown();
+		} else {
+			$('#schemas-container').slideUp();
+		}
+		updateCompatibleDatastores();
+	});
+	
+	// Actualizar datastores compatibles cuando cambian los esquemas
+	$('#schemas-input').on('change', function() {
+		updateCompatibleDatastores();
+	});
+	
+	// Actualizar al cargar
+	updateCompatibleDatastores();
+	
+	// Antes de enviar, sincronizar CodeMirror y guardar los esquemas
+	$('#trigger-form').on('submit', function(e) {
+		// Sincronizar contenido de CodeMirror al textarea
+		sqlEditor.save();
+		
+		var schemas = $('#schemas-input').val() || [];
+		$('#schemas-hidden').val(JSON.stringify(schemas));
+		
+		// Validar que hay código SQL
+		if (!$('#sql_code').val().trim()) {
+			e.preventDefault();
+			alert('{% trans "SQL code is required" %}');
+			sqlEditor.focus();
+			return false;
+		}
+	});
+	
+	// Refrescar CodeMirror cuando se cambia a la pestaña General
+	$('a[href="#tab-general"]').on('shown.bs.tab', function() {
+		sqlEditor.refresh();
+	});
+	
+	function updateCompatibleDatastores() {
+		var scope = $('#scope').val();
+		var selectedSchemas = [];
+		
+		if (scope === 'schemas') {
+			selectedSchemas = $('#schemas-input').val() || [];
+			
+			if (selectedSchemas.length === 0) {
+				$('#compatible-datastores').html('<p class="text-muted"><em>{% trans "Select at least one schema to see compatible datastores" %}</em></p>');
+				return;
+			}
+		}
+		
+		$.ajax({
+			url: '/gvsigonline/services/api/connections/' + connectionId + '/datastores/',
+			type: 'GET',
+			data: {
+				scope: scope,
+				schemas: selectedSchemas.join(',')
+			},
+			success: function(data) {
+				var html = '';
+				if (data.datastores && data.datastores.length > 0) {
+					data.datastores.forEach(function(ds) {
+						html += '<span class="label label-info" style="margin: 2px; display: inline-block;">' + ds.name + '</span>';
+					});
+				} else {
+					if (scope === 'global') {
+						html = '<p class="text-muted"><em>{% trans "No datastores in this connection yet" %}</em></p>';
+					} else {
+						html = '<p class="text-muted"><em>{% trans "No datastores match the selected schemas" %}</em></p>';
+					}
+				}
+				$('#compatible-datastores').html(html);
+			},
+			error: function() {
+				$('#compatible-datastores').html('<p class="text-danger"><em>{% trans "Error loading datastores" %}</em></p>');
+			}
+		});
+	}
+});
+</script>
+{% endblock %}

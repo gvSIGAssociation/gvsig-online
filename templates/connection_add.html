@@ -1,0 +1,612 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+<style>
+	/* Iconos para los desplegables de conexión */
+	.conn-icon {
+		width: 16px;
+		height: 16px;
+		margin-right: 8px;
+		vertical-align: middle;
+	}
+	.conn-option {
+		display: flex;
+		align-items: center;
+	}
+	.conn-option i {
+		margin-right: 8px;
+		width: 16px;
+		text-align: center;
+	}
+</style>
+<form id="connection-form" role="form" method="post" action="{% url 'connection_add' %}">
+	<div class="row">
+		<div class="col-md-12">	
+			<div class="row">
+				<div class="col-md-12 form-group">
+					<div class="box-tools pull-right">
+						<button type="button" id="btn-test-connection" class="btn btn-default btn-sm"><i class="fa fa-plug margin-r-5"></i> {% trans "Test connection" %}</button>
+						<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+					</div>
+				</div>				
+			</div>
+			<div class="box">
+				{% csrf_token %}
+				{% if form.errors %}
+				<div id="form-error" class="alert alert-danger" style="margin: 15px;">
+					<ul>
+					{{ form.non_field_errors }}
+					{% for field in form %}
+						{% if field.errors %}
+							<li>{{field.label}}: {{ field.errors|striptags }}</li>
+						{% endif %}	
+					{% endfor %}
+					</ul>
+				</div>
+				{% endif %}
+				
+				<div class="nav-tabs-custom">
+					<ul class="nav nav-tabs">
+						<li class="active"><a href="#tab-connection" data-toggle="tab">{% trans "Connection" %}</a></li>
+						<li><a href="#tab-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li>
+					</ul>
+					<div class="tab-content">
+						<!-- Pestaña de conexión -->
+						<div class="tab-pane active" id="tab-connection">
+							<div class="row" style="padding: 15px;">
+								<div class="col-md-6">
+									<h4>{% trans "Connection details" %}</h4>
+									<div class="form-group">
+										<label for="id_name">{{ form.name.label }}</label>
+										{{ form.name }}
+									</div>
+									<div class="form-group">
+										<label for="id_description">{{ form.description.label }}</label>
+										{{ form.description }}
+									</div>
+									
+									<!-- Primer desplegable: Categoría -->
+									<div class="form-group">
+										<label for="id_category">{{ form.category.label }}</label>
+										{{ form.category }}
+									</div>
+									
+									<!-- Segundo desplegable: Tipo específico -->
+									<div class="form-group">
+										<label for="id_type">{{ form.type.label }}</label>
+										{{ form.type }}
+									</div>
+								</div>
+								
+								<div class="col-md-6">
+									<h4>{% trans "Connection parameters" %}</h4>
+									
+									<!-- ==================== POSTGRESQL/POSTGIS ==================== -->
+									<div id="params-postgis" class="connection-params" style="display:none;">
+										<div class="form-group">
+											<label for="id_host">{{ form.host.label }}</label>
+											{{ form.host }}
+										</div>
+										<div class="form-group">
+											<label for="id_port">{{ form.port.label }}</label>
+											{{ form.port }}
+										</div>
+										<div class="form-group">
+											<label for="id_database">{{ form.database.label }}</label>
+											{{ form.database }}
+										</div>
+										<div class="form-group">
+											<label for="id_user">{{ form.user.label }}</label>
+											{{ form.user }}
+										</div>
+										<div class="form-group">
+											<label for="id_password">{{ form.password.label }}</label>
+											{{ form.password }}
+										</div>
+										<h5 class="margin-top-20">{% trans "Additional parameters" %}</h5>
+										<div class="form-group">
+											<label for="id_extra_params">{{ form.extra_params.label }}</label>
+											{{ form.extra_params }}
+											<small class="text-muted">{{ form.extra_params.help_text }}</small>
+										</div>
+									</div>
+									
+									<!-- ==================== ORACLE ==================== -->
+									<div id="params-oracle" class="connection-params" style="display:none;">
+										<div class="form-group">
+											<label for="id_oracle_user">{{ form.oracle_user.label }}</label>
+											{{ form.oracle_user }}
+										</div>
+										<div class="form-group">
+											<label for="id_oracle_password">{{ form.oracle_password.label }}</label>
+											{{ form.oracle_password }}
+										</div>
+										<div class="form-group">
+											<label for="id_oracle_host">{{ form.oracle_host.label }}</label>
+											{{ form.oracle_host }}
+										</div>
+										<div class="form-group">
+											<label for="id_oracle_port">{{ form.oracle_port.label }}</label>
+											{{ form.oracle_port }}
+										</div>
+										<div class="form-group">
+											<label for="id_oracle_service">{{ form.oracle_service.label }}</label>
+											{{ form.oracle_service }}
+										</div>
+									</div>
+									
+									<!-- ==================== SQL SERVER ==================== -->
+									<div id="params-sqlserver" class="connection-params" style="display:none;">
+										<div class="form-group">
+											<label for="id_sqlserver_server">{{ form.sqlserver_server.label }}</label>
+											{{ form.sqlserver_server }}
+										</div>
+										<div class="form-group">
+											<label for="id_sqlserver_user">{{ form.sqlserver_user.label }}</label>
+											{{ form.sqlserver_user }}
+										</div>
+										<div class="form-group">
+											<label for="id_sqlserver_password">{{ form.sqlserver_password.label }}</label>
+											{{ form.sqlserver_password }}
+										</div>
+										<div class="form-group">
+											<label for="id_sqlserver_database">{{ form.sqlserver_database.label }}</label>
+											{{ form.sqlserver_database }}
+										</div>
+										<div class="form-group">
+											<label for="id_sqlserver_tds_version">{{ form.sqlserver_tds_version.label }}</label>
+											{{ form.sqlserver_tds_version }}
+										</div>
+									</div>
+									
+									<!-- ==================== INDENOVA ==================== -->
+									<div id="params-indenova" class="connection-params" style="display:none;">
+										<div class="form-group">
+											<label for="id_indenova_domain">{{ form.indenova_domain.label }}</label>
+											{{ form.indenova_domain }}
+										</div>
+										<div class="form-group">
+											<label for="id_indenova_api_key">{{ form.indenova_api_key.label }}</label>
+											{{ form.indenova_api_key }}
+										</div>
+										<div class="form-group">
+											<label for="id_indenova_client_id">{{ form.indenova_client_id.label }}</label>
+											{{ form.indenova_client_id }}
+										</div>
+										<div class="form-group">
+											<label for="id_indenova_secret">{{ form.indenova_secret.label }}</label>
+											{{ form.indenova_secret }}
+										</div>
+									</div>
+									
+									<!-- ==================== SEGEX ==================== -->
+									<div id="params-segex" class="connection-params" style="display:none;">
+										<div class="form-group">
+											<label for="id_segex_domain">{{ form.segex_domain.label }}</label>
+											{{ form.segex_domain }}
+										</div>
+										<div class="form-group">
+											<label>{% trans "Entity" %} ({% trans "Municipality" %})</label>
+											<div class="row">
+												<div class="col-md-10">
+													<select id="segex_entity_select" class="form-control" style="width: 100%;">
+														<option value="">-- {% trans "Select domain first and click Load" %} --</option>
+													</select>
+												</div>
+												<div class="col-md-2">
+													<button type="button" id="btn_load_segex_entities" class="btn btn-default btn-block">
+														<i class="fa fa-download"></i> {% trans "Load" %}
+													</button>
+												</div>
+											</div>
+											<small class="text-muted">{% trans "Select the domain and click Load. You can type to search by code or name." %}</small>
+											<!-- Campo oculto para guardar el valor -->
+											<input type="hidden" id="id_segex_entity" name="segex_entity" value="">
+										</div>
+										<div class="form-group">
+											<label for="id_segex_user">{{ form.segex_user.label }}</label>
+											{{ form.segex_user }}
+										</div>
+										<div class="form-group">
+											<label for="id_segex_password">{{ form.segex_password.label }}</label>
+											{{ form.segex_password }}
+										</div>
+									</div>
+									
+									<!-- ==================== SHAREPOINT ==================== -->
+									<div id="params-sharepoint" class="connection-params" style="display:none;">
+										<div class="form-group">
+											<label for="id_sharepoint_tenant_id">{{ form.sharepoint_tenant_id.label }}</label>
+											{{ form.sharepoint_tenant_id }}
+										</div>
+										<div class="form-group">
+											<label for="id_sharepoint_client_id">{{ form.sharepoint_client_id.label }}</label>
+											{{ form.sharepoint_client_id }}
+										</div>
+										<div class="form-group">
+											<label for="id_sharepoint_client_secret">{{ form.sharepoint_client_secret.label }}</label>
+											{{ form.sharepoint_client_secret }}
+										</div>
+										<div class="form-group">
+											<label for="id_sharepoint_host">{{ form.sharepoint_host.label }}</label>
+											{{ form.sharepoint_host }}
+										</div>
+										<div class="form-group">
+											<label for="id_sharepoint_site_path">{{ form.sharepoint_site_path.label }}</label>
+											{{ form.sharepoint_site_path }}
+										</div>
+									</div>
+									
+									<!-- ==================== PADRÓN ATM ==================== -->
+									<div id="params-padron-atm" class="connection-params" style="display:none;">
+										<div class="form-group">
+											<label for="id_padron_atm_email">{{ form.padron_atm_email.label }}</label>
+											{{ form.padron_atm_email }}
+										</div>
+										<div class="form-group">
+											<label for="id_padron_atm_password">{{ form.padron_atm_password.label }}</label>
+											{{ form.padron_atm_password }}
+										</div>
+										<div class="form-group">
+											<label for="id_padron_atm_id_acceso">{{ form.padron_atm_id_acceso.label }}</label>
+											{{ form.padron_atm_id_acceso }}
+										</div>
+									</div>
+									
+									<!-- Mensaje para seleccionar tipo -->
+									<div id="params-placeholder" class="text-muted">
+										<p><i class="fa fa-info-circle margin-r-5"></i> {% trans "Select a category and type to see the connection parameters" %}</p>
+									</div>
+									
+									<div id="connection-test-result" class="alert" style="display: none; margin-top: 15px;"></div>
+								</div>
+							</div>
+						</div>
+						
+						<!-- Pestaña de permisos -->
+						<div class="tab-pane" id="tab-permissions">
+							{% include "select_connection_permissions.html" %}
+						</div>
+					</div>
+				</div>
+			</div>			
+		</div>				
+	</div>
+</form>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-connections').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+	// Tipos de base de datos
+	var databaseTypes = ['PostGIS', 'Oracle', 'SQLServer'];
+	// Tipos de API
+	var apiTypes = ['indenova', 'segex', 'sharepoint', 'padron-atm'];
+	
+	// Mapeo de tipo a ID del div de parámetros
+	var typeToParamsDiv = {
+		'PostGIS': '#params-postgis',
+		'Oracle': '#params-oracle',
+		'SQLServer': '#params-sqlserver',
+		'indenova': '#params-indenova',
+		'segex': '#params-segex',
+		'sharepoint': '#params-sharepoint',
+		'padron-atm': '#params-padron-atm'
+	};
+	
+	// Iconos para cada tipo de conexión
+	// PostgreSQL: Elefante oficial (SVG inline simplificado)
+	var postgresElephant = '<svg class="conn-icon" viewBox="0 0 432.071 445.383" xmlns="http://www.w3.org/2000/svg"><g><path d="M323.205,324.227c2.833-23.601,1.984-27.062,19.563-23.239l4.463,0.392c13.517,0.615,31.199-2.174,41.587-7c22.362-10.376,35.622-27.7,13.572-23.148c-50.297,10.376-53.755-6.655-53.755-6.655c53.111-78.803,75.313-178.836,56.149-203.322C352.514-5.534,262.036,26.049,260.522,26.869l-0.482,0.089c-9.938-2.062-21.06-3.294-33.554-3.496c-22.761-0.374-40.032,5.967-53.133,15.904c0,0-161.408-66.498-153.899,83.628c1.597,31.936,45.777,241.655,98.47,178.31c19.259-23.163,37.871-42.748,37.871-42.748c9.242,6.14,20.307,9.272,31.912,8.147l0.897-0.765c-0.281,2.876-0.157,5.689,0.359,9.019c-13.572,15.167-9.584,17.83-36.723,23.416c-27.457,5.659-11.326,15.734-0.797,18.367c12.768,3.193,42.305,7.716,62.268-20.224l-0.795,3.188c5.325,4.26,4.965,30.619,5.72,49.452c0.756,18.834,2.017,36.409,5.856,46.771c3.839,10.36,8.369,37.05,44.036,29.406c29.809-6.388,52.6-15.582,54.677-101.107" style="fill:#336791;stroke:#fff;stroke-width:12.4651;stroke-linecap:round;stroke-linejoin:round"/><path d="M402.395,271.23c-50.302,10.376-53.76-6.655-53.76-6.655c53.111-78.808,75.313-178.843,56.153-203.326c-52.27-66.785-142.752-35.2-144.262-34.38l-0.486,0.087c-9.938-2.063-21.06-3.292-33.56-3.496c-22.761-0.373-40.026,5.967-53.127,15.902c0,0-161.411-66.495-153.904,83.63c1.597,31.938,45.776,241.657,98.471,178.312c19.26-23.163,37.869-42.748,37.869-42.748c9.243,6.14,20.308,9.272,31.908,8.147l0.901-0.765c-0.28,2.876-0.152,5.689,0.361,9.019c-13.575,15.167-9.586,17.83-36.723,23.416c-27.459,5.659-11.328,15.734-0.796,18.367c12.768,3.193,42.307,7.716,62.266-20.224l-0.796,3.188c5.319,4.26,9.054,27.711,8.428,48.969c-0.626,21.259-1.044,35.854,3.147,47.254c4.191,11.4,8.368,37.05,44.042,29.406c29.809-6.388,45.256-22.942,47.405-50.555c1.525-19.631,4.976-16.729,5.194-34.28l2.768-8.309c3.192-26.611,0.507-35.196,18.872-31.203l4.463,0.392c13.517,0.615,31.208-2.174,41.591-7c22.358-10.376,35.618-27.7,13.573-23.148z" style="fill:#336791;stroke:#fff;stroke-width:12.4651;stroke-linecap:butt;stroke-linejoin:round"/></g></svg>';
+	
+	// Oracle: Logo O simplificado
+	var oracleLogo = '<svg class="conn-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="45" fill="#f80000"/><text x="50" y="68" text-anchor="middle" fill="white" font-size="50" font-weight="bold" font-family="Arial">O</text></svg>';
+	
+	// SQL Server: Logo Microsoft
+	var sqlServerLogo = '<svg class="conn-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="42" height="42" fill="#f25022"/><rect x="53" y="5" width="42" height="42" fill="#7fba00"/><rect x="5" y="53" width="42" height="42" fill="#00a4ef"/><rect x="53" y="53" width="42" height="42" fill="#ffb900"/></svg>';
+	
+	var typeIcons = {
+		'PostGIS': postgresElephant,
+		'Oracle': oracleLogo,
+		'SQLServer': sqlServerLogo,
+		'indenova': '<i class="fa fa-building" style="color: #2c3e50;"></i>',
+		'segex': '<i class="fa fa-file-text" style="color: #27ae60;"></i>',
+		'sharepoint': '<i class="fa fa-cloud" style="color: #0078d4;"></i>',
+		'padron-atm': '<i class="fa fa-users" style="color: #8e44ad;"></i>'
+	};
+	
+	// Actualizar opciones del desplegable de tipo según categoría
+	function updateTypeOptions() {
+		var category = $('#id_category').val();
+		var typeSelect = $('#id_type');
+		var currentValue = typeSelect.val();
+		
+		typeSelect.empty();
+		typeSelect.append('<option value="">---</option>');
+		
+		// Solo mostrar opciones si hay una categoría seleccionada
+		if (category === 'database') {
+			typeSelect.append('<option value="PostGIS">PostgreSQL/PostGIS</option>');
+			typeSelect.append('<option value="Oracle">Oracle</option>');
+			typeSelect.append('<option value="SQLServer">SQL Server</option>');
+		} else if (category === 'api') {
+			typeSelect.append('<option value="indenova">InDenova</option>');
+			typeSelect.append('<option value="segex">SEGEX</option>');
+			typeSelect.append('<option value="sharepoint">SharePoint</option>');
+			typeSelect.append('<option value="padron-atm">Padrón ATM</option>');
+		}
+		// Si categoría está vacía, tipo queda solo con "---"
+		
+		// Restaurar valor si sigue siendo válido
+		if (currentValue && typeSelect.find('option[value="' + currentValue + '"]').length) {
+			typeSelect.val(currentValue);
+		}
+		
+		// Reinicializar Select2 con template para iconos
+		initTypeSelect2();
+		
+		updateParamsVisibility();
+	}
+	
+	// Inicializar Select2 con iconos
+	function initTypeSelect2(selectedValue) {
+		// Destruir Select2 si existe
+		if ($('#id_type').hasClass('select2-hidden-accessible')) {
+			$('#id_type').select2('destroy');
+		}
+		
+		// Reinicializar Select2
+		$('#id_type').select2({
+			templateResult: formatTypeOption,
+			templateSelection: formatTypeOption,
+			escapeMarkup: function(m) { return m; }
+		});
+		
+		// Seleccionar valor si se proporciona
+		if (selectedValue) {
+			$('#id_type').val(selectedValue).trigger('change');
+		}
+	}
+	
+	// Formato para las opciones con iconos
+	function formatTypeOption(option) {
+		if (!option.id) return option.text;
+		var icon = typeIcons[option.id] || '';
+		return '<span class="conn-option">' + icon + ' ' + option.text + '</span>';
+	}
+	
+	// Actualizar visibilidad de los campos de parámetros
+	function updateParamsVisibility() {
+		var connType = $('#id_type').val();
+		
+		// Ocultar todos
+		$('.connection-params').hide();
+		$('#params-placeholder').hide();
+		
+		if (connType && typeToParamsDiv[connType]) {
+			$(typeToParamsDiv[connType]).show();
+		} else {
+			$('#params-placeholder').show();
+		}
+	}
+	
+	// Iconos para categorías (gris)
+	var categoryIcons = {
+		'database': '<i class="fa fa-database" style="color: #666;"></i>',
+		'api': '<i class="fa fa-plug" style="color: #666;"></i>'
+	};
+	
+	// Formato para opciones de categoría
+	function formatCategoryOption(option) {
+		if (!option.id) return option.text;
+		var icon = categoryIcons[option.id] || '';
+		return '<span class="conn-option">' + icon + ' ' + option.text + '</span>';
+	}
+	
+	// Inicializar Select2 para categoría
+	$('#id_category').select2({
+		templateResult: formatCategoryOption,
+		templateSelection: formatCategoryOption,
+		escapeMarkup: function(m) { return m; }
+	});
+	
+	// Eventos de cambio
+	$('#id_category').on('change', function() {
+		updateTypeOptions();
+	});
+	
+	$('#id_type').on('change', function() {
+		updateParamsVisibility();
+	});
+	
+	// Función para inicializar con valores por defecto
+	function initializeDefaults(categoryValue, typeValue) {
+		$('#id_category').val(categoryValue).trigger('change');
+		
+		// Actualizar opciones del tipo
+		var typeSelect = $('#id_type');
+		typeSelect.empty();
+		typeSelect.append('<option value="">---</option>');
+		
+		if (categoryValue === 'database') {
+			typeSelect.append('<option value="PostGIS">PostgreSQL/PostGIS</option>');
+			typeSelect.append('<option value="Oracle">Oracle</option>');
+			typeSelect.append('<option value="SQLServer">SQL Server</option>');
+		} else if (categoryValue === 'api') {
+			typeSelect.append('<option value="indenova">InDenova</option>');
+			typeSelect.append('<option value="segex">SEGEX</option>');
+			typeSelect.append('<option value="sharepoint">SharePoint</option>');
+			typeSelect.append('<option value="padron-atm">Padrón ATM</option>');
+		}
+		
+		// Inicializar Select2 del tipo con el valor seleccionado
+		initTypeSelect2(typeValue);
+		updateParamsVisibility();
+	}
+	
+	// Inicializar al cargar
+	{% if form.type.value %}
+	// Si hay un tipo seleccionado (por error de formulario), determinar la categoría
+	var initialType = '{{ form.type.value }}';
+	if (databaseTypes.indexOf(initialType) !== -1) {
+		initializeDefaults('database', initialType);
+	} else if (apiTypes.indexOf(initialType) !== -1) {
+		initializeDefaults('api', initialType);
+	}
+	{% else %}
+	// Por defecto: Base de datos y PostGIS
+	initializeDefaults('database', 'PostGIS');
+	{% endif %}
+	
+	// Test de conexión
+	$('#btn-test-connection').click(function() {
+		var btn = $(this);
+		var resultDiv = $('#connection-test-result');
+		var connType = $('#id_type').val();
+		
+		if (!connType) {
+			resultDiv.removeClass('alert-success').addClass('alert-danger');
+			resultDiv.html('<i class="fa fa-exclamation-triangle margin-r-5"></i> {% trans "Please select a connection type" %}');
+			resultDiv.show();
+			return;
+		}
+		
+		btn.prop('disabled', true);
+		btn.html('<i class="fa fa-spinner fa-spin margin-r-5"></i> {% trans "Testing..." %}');
+		
+		// Construir datos según el tipo
+		var postData = {
+			'type': connType
+		};
+		
+		if (connType === 'PostGIS') {
+			postData.host = $('#id_host').val();
+			postData.port = $('#id_port').val();
+			postData.database = $('#id_database').val();
+			postData.user = $('#id_user').val();
+			postData.password = $('#id_password').val();
+		} else if (connType === 'Oracle') {
+			// Componer DSN desde los campos separados
+			var oracleHost = $('#id_oracle_host').val();
+			var oraclePort = $('#id_oracle_port').val() || '1521';
+			var oracleService = $('#id_oracle_service').val();
+			postData.username = $('#id_oracle_user').val();
+			postData.password = $('#id_oracle_password').val();
+			postData.dsn = oracleHost + ':' + oraclePort + '/' + oracleService;
+		} else if (connType === 'SQLServer') {
+			postData['server-sql-server'] = $('#id_sqlserver_server').val();
+			postData['username-sql-server'] = $('#id_sqlserver_user').val();
+			postData['password-sql-server'] = $('#id_sqlserver_password').val();
+			postData['db-sql-server'] = $('#id_sqlserver_database').val();
+			postData['tds-version-sql-server'] = $('#id_sqlserver_tds_version').val();
+		} else if (connType === 'sharepoint') {
+			postData['tenant-id'] = $('#id_sharepoint_tenant_id').val();
+			postData['client-id'] = $('#id_sharepoint_client_id').val();
+			postData['client-secret'] = $('#id_sharepoint_client_secret').val();
+			postData['sharepoint-host'] = $('#id_sharepoint_host').val();
+			postData['site-path'] = $('#id_sharepoint_site_path').val();
+		} else if (connType === 'indenova') {
+			postData.domain = $('#id_indenova_domain').val();
+			postData['api-key'] = $('#id_indenova_api_key').val();
+		} else if (connType === 'segex') {
+			postData.domain = $('#id_segex_domain').val();
+			postData.user = $('#id_segex_user').val();
+			postData.password = $('#id_segex_password').val();
+			// La entity puede estar en el select o en el input hidden
+			postData.entity = $('#segex_entity_select').val() || $('#id_segex_entity').val();
+		} else if (connType === 'padron-atm') {
+			postData.email = $('#id_padron_atm_email').val();
+			postData.password = $('#id_padron_atm_password').val();
+			postData.idacceso = $('#id_padron_atm_id_acceso').val();
+		}
+		
+		$.ajax({
+			type: 'POST',
+			url: '{% url "connection_test" %}',
+			data: postData,
+			beforeSend: function(xhr) {
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			success: function(response) {
+				if (response.success) {
+					resultDiv.removeClass('alert-danger').addClass('alert-success');
+					resultDiv.html('<i class="fa fa-check margin-r-5"></i> {% trans "Connection successful" %}');
+				} else {
+					resultDiv.removeClass('alert-success').addClass('alert-danger');
+					resultDiv.html('<i class="fa fa-times margin-r-5"></i> ' + response.error);
+				}
+				resultDiv.show();
+			},
+			error: function() {
+				resultDiv.removeClass('alert-success').addClass('alert-danger');
+				resultDiv.html('<i class="fa fa-times margin-r-5"></i> {% trans "Error testing connection" %}');
+				resultDiv.show();
+			},
+			complete: function() {
+				btn.prop('disabled', false);
+				btn.html('<i class="fa fa-plug margin-r-5"></i> {% trans "Test connection" %}');
+			}
+		});
+	});
+	
+	// SEGEX: Inicializar Select2 para el desplegable de entidades
+	$('#segex_entity_select').select2({
+		placeholder: '-- {% trans "Select domain first and click Load" %} --',
+		allowClear: true,
+		width: '100%'
+	});
+	
+	// SEGEX: Cargar entidades
+	$('#btn_load_segex_entities').click(function() {
+		var btn = $(this);
+		var domain = $('#id_segex_domain').val();
+		var select = $('#segex_entity_select');
+		
+		btn.prop('disabled', true);
+		btn.html('<i class="fa fa-spinner fa-spin"></i>');
+		
+		$.ajax({
+			type: 'GET',
+			url: '{% url "api_segex_entities" %}',
+			data: { domain: domain },
+			success: function(response) {
+				select.empty();
+				if (response.success && response.entities.length > 0) {
+					select.append('<option value="">-- {% trans "Select entity" %} --</option>');
+					$.each(response.entities, function(i, entity) {
+						select.append('<option value="' + entity.id + '">' + entity.id + ' - ' + entity.description + '</option>');
+					});
+					// Refrescar Select2
+					select.trigger('change');
+				} else {
+					select.append('<option value="">-- {% trans "No entities found" %} --</option>');
+					select.trigger('change');
+					if (!response.success) {
+						alert('Error: ' + response.error);
+					}
+				}
+			},
+			error: function() {
+				select.empty();
+				select.append('<option value="">-- {% trans "Error loading entities" %} --</option>');
+				select.trigger('change');
+			},
+			complete: function() {
+				btn.prop('disabled', false);
+				btn.html('<i class="fa fa-download"></i> {% trans "Load" %}');
+			}
+		});
+	});
+	
+	// SEGEX: Actualizar campo oculto cuando se selecciona una entidad
+	$('#segex_entity_select').on('select2:select select2:clear', function() {
+		$('#id_segex_entity').val($(this).val() || '');
+	});
+});
+</script>
+{% endblock %}
