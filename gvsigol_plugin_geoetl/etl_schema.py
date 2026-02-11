@@ -9,7 +9,7 @@ import json
 import re
 #from datetime import date
 from django.contrib.gis.gdal import DataSource
-from .models import database_connections
+from gvsigol_services.models import Connection
 import os
 import shutil
 from zipfile import ZipFile
@@ -21,6 +21,7 @@ import base64
 import pymssql
 import xmltodict
 from .settings import GEOETL_DB
+
 
 def get_sheets_excel(excel, r):
     import warnings
@@ -127,7 +128,7 @@ def test_oracle(dicc):
 
 def test_postgres(dicc):
     try:
-        conn = psycopg2.connect(user = dicc["user"], password = dicc["password"], host = dicc["host"], port = dicc["port"], database = dicc["database"])
+        conn = psycopg2.connect(user = dicc["user"], password = dicc["passwd"], host = dicc["host"], port = dicc["port"], database = dicc["database"])
         cur = conn.cursor()
         
         sql = "SELECT schema_name FROM information_schema.schemata"
@@ -210,7 +211,7 @@ def get_sharepoint_site_id(dicc):
 def get_sharepoint_drives(dicc):
     """Lista todas las bibliotecas de documentos (drives) del sitio SharePoint."""
     try:
-        db = database_connections.objects.get(name=dicc['api'])
+        db = Connection.objects.get(name=dicc['api'])
         params = json.loads(db.connection_params)
         
         access_token = get_sharepoint_token(params)
@@ -243,7 +244,7 @@ def get_sharepoint_folder_contents(dicc):
     }
     
     try:
-        db = database_connections.objects.get(name=dicc['api'])
+        db = Connection.objects.get(name=dicc['api'])
         params = json.loads(db.connection_params)
         
         access_token = get_sharepoint_token(params)
@@ -289,7 +290,7 @@ def download_sharepoint_file(dicc, temp_dir):
     """Descarga un archivo de SharePoint al directorio temporal."""
     from urllib.parse import quote
     
-    db = database_connections.objects.get(name=dicc['api'])
+    db = Connection.objects.get(name=dicc['api'])
     params = json.loads(db.connection_params)
     
     access_token = get_sharepoint_token(params)
@@ -555,7 +556,7 @@ def get_schema_csv(dicc):
 
 def get_owners_oracle(dicc):
 
-    db  = database_connections.objects.get(name = dicc['db'])
+    db  = Connection.objects.get(name = dicc['db'])
 
     params = json.loads(db.connection_params)
 
@@ -578,7 +579,7 @@ def get_owners_oracle(dicc):
 
 def get_tables_oracle(dicc):
 
-    db  = database_connections.objects.get(name = dicc['db'])
+    db  = Connection.objects.get(name = dicc['db'])
 
     params = json.loads(db.connection_params)
 
@@ -601,7 +602,7 @@ def get_tables_oracle(dicc):
 
 def get_schema_oracle(dicc):
 
-    db  = database_connections.objects.get(name = dicc['db'])
+    db  = Connection.objects.get(name = dicc['db'])
 
     params = json.loads(db.connection_params)
 
@@ -683,39 +684,58 @@ def get_schema_oracle(dicc):
     return attrnames
 
 def get_proced_indenova(dicc):
+    import logging
+    logger = logging.getLogger(__name__)
 
-    api  = database_connections.objects.get(name = dicc['api'])
+    api  = Connection.objects.get(name = dicc['api'])
 
-    params_str = api.connection_params
-    params = json.loads(params_str)
-
-    domain = params['domain']
+    params = json.loads(api.connection_params)
+    
+    # Asegurar que el dominio tenga https://
+    domain = params['domain'].strip()
+    if domain and not domain.startswith(('http://', 'https://')):
+        domain = 'https://' + domain
+    domain = domain.rstrip('/')
+    
     api_key = params['api-key']
 
-    url_list = domain + "//api/rest/process/v1/process/list?idsection=27"
+    url_list = domain + "/api/rest/process/v1/process/list?idsection=27"
+
+    logger.info(f"InDenova API request URL: {url_list}")
 
     headers_list = {'esigna-auth-api-key': api_key}
 
     r_list = requests.get(url_list, headers = headers_list)
     
+    logger.info(f"InDenova API response status: {r_list.status_code}")
+    logger.info(f"InDenova API response content (first 500 chars): {r_list.content[:500]}")
+    
     listProd = []
-    for i in json.loads(r_list.content.decode('utf8')):
-        listProd.append([i['id'], i['name']])
+    
+    if r_list.status_code == 200:
+        try:
+            data = json.loads(r_list.content.decode('utf8'))
+            for i in data:
+                listProd.append([i['id'], i['name']])
+        except json.JSONDecodeError as e:
+            logger.error(f"InDenova API JSON decode error: {e}")
+            logger.error(f"Response content: {r_list.content}")
+    else:
+        logger.error(f"InDenova API error: HTTP {r_list.status_code}")
+        logger.error(f"Response content: {r_list.content}")
     
     return listProd
 
 def get_schema_postgres(dicc):
     
-    db  = database_connections.objects.get(name = dicc['db'])
+    db  = Connection.objects.get(name = dicc['db'])
 
-    params_str = db.connection_params
-
-    params = json.loads(params_str)
+    params = json.loads(db.connection_params)
    
     table_name = dicc['tablename']
     
     #postgres connection
-    conn = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
+    conn = psycopg2.connect(user = params["user"], password = params["passwd"], host = params["host"], port = params["port"], database = params["database"])
     cur = conn.cursor()
 
     sql_ = sql.SQL("SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = %s AND table_name   = %s;")
@@ -776,13 +796,11 @@ def get_schema_postgres(dicc):
 
 def get_schema_name_postgres(dicc):
 
-    db  = database_connections.objects.get(name = dicc['db'])
+    db  = Connection.objects.get(name = dicc['db'])
 
-    params_str = db.connection_params
+    params = json.loads(db.connection_params)
 
-    params = json.loads(params_str)
-
-    conn = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
+    conn = psycopg2.connect(user = params["user"], password = params["passwd"], host = params["host"], port = params["port"], database = params["database"])
     cur = conn.cursor()
     
     sql = "SELECT schema_name FROM information_schema.schemata"
@@ -798,13 +816,11 @@ def get_schema_name_postgres(dicc):
 
 def get_table_name_postgres(dicc):
 
-    db  = database_connections.objects.get(name = dicc['db'])
+    db  = Connection.objects.get(name = dicc['db'])
 
-    params_str = db.connection_params
+    params = json.loads(db.connection_params)
 
-    params = json.loads(params_str)
-
-    conn = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
+    conn = psycopg2.connect(user = params["user"], password = params["passwd"], host = params["host"], port = params["port"], database = params["database"])
     cur = conn.cursor()
     
     sql_ = "SELECT table_name FROM information_schema.tables WHERE table_schema = %s"
@@ -862,12 +878,16 @@ def get_entities_segex(dicc):
 
 def get_types_segex (dicc):
 
-    api  = database_connections.objects.get(name = dicc['api'])
+    api  = Connection.objects.get(name = dicc['api'])
 
     params_str = api.connection_params
     params = json.loads(params_str)
 
-    entity = params['entities-list'][0]
+    # Soportar tanto 'entities-list' (formato ETL) como 'entity' (formato nuevo)
+    if 'entities-list' in params and params['entities-list']:
+        entity = params['entities-list'][0]
+    else:
+        entity = params.get('entity', '')
 
     if params['domain'] == 'PRE':
         url = 'https://pre-%s.sedipualba.es/apisegex/' % (entity)
@@ -1005,7 +1025,7 @@ def get_xml_tags(f, r):
 
 def get_schemas_sqlserver(dicc):
 
-    db  = database_connections.objects.get(name = dicc['db'])
+    db  = Connection.objects.get(name = dicc['db'])
 
     params = json.loads(db.connection_params)
 
@@ -1026,7 +1046,7 @@ def get_schemas_sqlserver(dicc):
 
 def get_tables_sqlserver(dicc):
 
-    db  = database_connections.objects.get(name = dicc['db'])
+    db  = Connection.objects.get(name = dicc['db'])
 
     params = json.loads(db.connection_params)
 
@@ -1045,7 +1065,7 @@ def get_tables_sqlserver(dicc):
 
 def get_data_schemas_sqlserver(dicc):
 
-    db  = database_connections.objects.get(name = dicc['db'])
+    db  = Connection.objects.get(name = dicc['db'])
 
     params = json.loads(db.connection_params)
 
@@ -1074,7 +1094,7 @@ def get_data_schemas_sqlserver(dicc):
 def get_schema_padron_atm(dicc):
     
     try:
-        api = database_connections.objects.get(name=dicc['api'])
+        api = Connection.objects.get(name=dicc['api'])
         credenciales = json.loads(api.connection_params)
     except Exception as e:
         print(f"Error al obtener credenciales de la API: {e}")

@@ -16,7 +16,7 @@ import os, shutil, tempfile
 
 import cx_Oracle
 import pymssql
-from .models import database_connections, segex_FechaFinGarantizada, cadastral_requests
+from .models import segex_FechaFinGarantizada, cadastral_requests
 from .utils import refresh_layers_by_params
 import requests
 import base64
@@ -32,7 +32,7 @@ from . import etl_schema
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from celery.utils.log import get_task_logger
-from gvsigol_services.models import Layer, Datastore
+from gvsigol_services.models import Layer, Datastore, Connection
 
 logger = get_task_logger(__name__)
 
@@ -279,13 +279,12 @@ def input_Sharepoint(dicc):
     Soporta Excel (xls, xlsx), y preparado para futuros formatos (CSV, JSON).
     """
     import warnings
-    from .models import database_connections
     from . import etl_schema
     
     warnings.filterwarnings('ignore', category=UserWarning, module='openpyxl')
     
     # Obtener parámetros de conexión SharePoint
-    db = database_connections.objects.get(name=dicc['api'])
+    db = Connection.objects.get(name=dicc['api'])
     params = json.loads(db.connection_params)
     
     # Crear directorio temporal
@@ -937,7 +936,7 @@ def isInSamedb(params):
         str(GEOETL_DB["port"]) == str(params['port']) and 
         GEOETL_DB["database"] == params['database'] and
         GEOETL_DB["user"] == params['user'] and
-        GEOETL_DB["password"] == params['password']):
+        GEOETL_DB["password"] == params['passwd']):
         
         return True
     else:
@@ -975,10 +974,9 @@ def output_Postgis(dicc):
 
     table_name_source = dicc['data'][0]
 
-    db  = database_connections.objects.get(name = dicc['db-option'])
+    db  = Connection.objects.get(name = dicc['db-option'])
 
-    params_str = db.connection_params
-    params = json.loads(params_str)
+    params = json.loads(db.connection_params)
 
     inSame = isInSamedb(params)
 
@@ -1090,7 +1088,7 @@ def output_Postgis(dicc):
                     type_geom = ''
 
                 _conn_source = gdaltools.PgConnectionString(host=GEOETL_DB["host"], port=GEOETL_DB["port"], dbname=GEOETL_DB["database"], schema=GEOETL_DB["schema"], user=GEOETL_DB["user"], password=GEOETL_DB["password"])
-                _conn_target = gdaltools.PgConnectionString(user = params["user"], password = params["password"], host = params["host"], port = params["port"], dbname = params["database"],  schema=esq)
+                _conn_target = gdaltools.PgConnectionString(user = params["user"], password = params["passwd"], host = params["host"], port = params["port"], dbname = params["database"],  schema=esq)
 
                 _ogr = gdaltools.ogr2ogr()
                 _ogr.set_input(_conn_source, table_name=table_name_source)
@@ -1117,7 +1115,7 @@ def output_Postgis(dicc):
                 # Agregar campos de gvSIG Online si está marcada la opción (servidor remoto)
                 if create_gvsigol_fields:
                     try:
-                        con_target = psycopg2.connect(user=params["user"], password=params["password"], 
+                        con_target = psycopg2.connect(user=params["user"], password=params["passwd"], 
                                                      host=params["host"], port=params["port"], 
                                                      database=params["database"])
                         cur_target = con_target.cursor()
@@ -1192,7 +1190,7 @@ def output_Postgis(dicc):
                     schema=GEOETL_DB["schema"], user=GEOETL_DB["user"], password=GEOETL_DB["password"]
                 )
                 _conn_target = gdaltools.PgConnectionString(
-                    user=params["user"], password=params["password"], host=params["host"],
+                    user=params["user"], password=params["passwd"], host=params["host"],
                     port=params["port"], dbname=params["database"], schema=esq
                 )
 
@@ -1216,7 +1214,7 @@ def output_Postgis(dicc):
                 # Agregar campos de gvSIG Online si está marcada la opción (servidor remoto)
                 if create_gvsigol_fields:
                     try:
-                        con_target = psycopg2.connect(user=params["user"], password=params["password"], 
+                        con_target = psycopg2.connect(user=params["user"], password=params["passwd"], 
                                                      host=params["host"], port=params["port"], 
                                                      database=params["database"])
                         cur_target = con_target.cursor()
@@ -1323,7 +1321,7 @@ def output_Postgis(dicc):
                     type_geom = ''
 
                 _conn_source = gdaltools.PgConnectionString(host=GEOETL_DB["host"], port=GEOETL_DB["port"], dbname=GEOETL_DB["database"], schema=GEOETL_DB["schema"], user=GEOETL_DB["user"], password=GEOETL_DB["password"])
-                _conn_target = gdaltools.PgConnectionString(user = params["user"], password = params["password"], host = params["host"], port = params["port"], dbname = params["database"],  schema=esq)
+                _conn_target = gdaltools.PgConnectionString(user = params["user"], password = params["passwd"], host = params["host"], port = params["port"], dbname = params["database"],  schema=esq)
                 _ogr = gdaltools.ogr2ogr()
                 _ogr.set_input(_conn_source, table_name=table_name_source)
                 _ogr.set_output(_conn_target, table_name=tab)
@@ -1374,7 +1372,7 @@ def output_Postgis(dicc):
 
             else:
 
-                con_target = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
+                con_target = psycopg2.connect(user = params["user"], password = params["passwd"], host = params["host"], port = params["port"], database = params["database"])
                 cur_2 = con_target.cursor()
 
             if geometry:
@@ -1510,7 +1508,7 @@ def output_Postgis(dicc):
 
             else:
 
-                con_target = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
+                con_target = psycopg2.connect(user = params["user"], password = params["passwd"], host = params["host"], port = params["port"], database = params["database"])
                 cur_2 = con_target.cursor()
 
             for row in cur:
@@ -2219,11 +2217,13 @@ def trans_TextToPoint(dicc):
 def input_Oracle(dicc):
 
     table_name = dicc['id']
-    db = database_connections.objects.get(name=dicc['db'])
+    db = Connection.objects.get(name=dicc['db'])
     params = json.loads(db.connection_params)
+    # Soportar tanto 'username' (ETL antiguo) como 'user' (Connection nuevo)
+    username = params.get('username', params.get('user', ''))
 
     dsn = params['dsn'].split('/')
-    conn_string_source = f"oracle+cx_oracle://{params['username']}:{params['password']}@{dsn[0]}/?service_name={dsn[1]}"
+    conn_string_source = f"oracle+cx_oracle://{username}:{params['password']}@{dsn[0]}/?service_name={dsn[1]}"
     db_source = create_engine(conn_string_source)
 
     # SQL query
@@ -2238,7 +2238,7 @@ def input_Oracle(dicc):
     columns = list(df_sample.columns)
 
     # Conexión directa con Oracle
-    conn_ora = cx_Oracle.connect(params['username'], params['password'], params['dsn'])
+    conn_ora = cx_Oracle.connect(username, params['password'], params['dsn'])
     cursor = conn_ora.cursor()
     cursor.execute(sql)
 
@@ -2568,12 +2568,16 @@ def trans_Union(dicc):
 
 def input_Indenova(dicc):
 
-    api  = database_connections.objects.get(name = dicc['api'])
+    api  = Connection.objects.get(name = dicc['api'])
 
-    params_str = api.connection_params
-    params = json.loads(params_str)
+    params = json.loads(api.connection_params)
     
-    domain = params['domain']
+    # Asegurar que el dominio tenga https://
+    domain = params['domain'].strip()
+    if domain and not domain.startswith(('http://', 'https://')):
+        domain = 'https://' + domain
+    domain = domain.rstrip('/')
+    
     api_key = params['api-key']
     client_id = params['client-id']
     secret = params['secret']
@@ -2601,7 +2605,7 @@ def input_Indenova(dicc):
 
     schema = dicc['schema']
 
-    url_auth = domain + "//api/rest/security/v1/authentication/authenticate"
+    url_auth = domain + "/api/rest/security/v1/authentication/authenticate"
     headers_auth = {'esigna-auth-api-key': api_key, 'Authorization': "Basic ".encode()+ base64.b64encode(auth) }
     r_auth = requests.get(url_auth, headers = headers_auth)
     token = r_auth.content
@@ -2616,9 +2620,9 @@ def input_Indenova(dicc):
         if i != 'all':
             if dicc['date-indenova'] == "check-init-end-date":
 
-                url_date = domain + '//api/rest/bpm/v1/search//'+i+'//getExpsByTramAndDates?dateIni='+init_date+'&dateEnd='+end_date
+                url_date = domain + '/api/rest/bpm/v1/search/' + i + '/getExpsByTramAndDates?dateIni=' + init_date + '&dateEnd=' + end_date
             else:
-                url_date = domain + "//api/rest/bpm/v1/search//"+i+"//getOpenExpsByTramAndDateIni?dateIni="+init_date
+                url_date = domain + "/api/rest/bpm/v1/search/" + i + "/getOpenExpsByTramAndDateIni?dateIni=" + init_date
 
             headers_token = {'esigna-auth-api-key': api_key, "Authorization": "Bearer "+token.decode()}
             r_date = requests.get(url_date, headers = headers_token)
@@ -2629,7 +2633,7 @@ def input_Indenova(dicc):
                 for j in json.loads(r_date.content.decode('utf8')):
                     numExp = j['numExp']
             
-                    url_cad = domain + '//api/rest/bpm/v1/search/getDataFileByNumber?numExp='+numExp+'&listMetadata=adirefcatt'
+                    url_cad = domain + '/api/rest/bpm/v1/search/getDataFileByNumber?numExp=' + numExp + '&listMetadata=adirefcatt'
                     r_cad = requests.get(url_cad, headers = headers_token)
                     
                     expedient = json.loads(r_cad.content.decode('utf-8'))
@@ -2685,11 +2689,9 @@ def input_Postgis(dicc):
 
     table_name_target= dicc['id'].replace('-','_')
 
-    db  = database_connections.objects.get(name = dicc['db'])
+    db  = Connection.objects.get(name = dicc['db'])
 
-    params_str = db.connection_params
-
-    params = json.loads(params_str)
+    params = json.loads(db.connection_params)
 
     esq = dicc['schema-name']
     tab = dicc['tablename']
@@ -2749,7 +2751,7 @@ def input_Postgis(dicc):
     #Create en diferente servidor o bbdd
     else:
 
-        conn_2 = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
+        conn_2 = psycopg2.connect(user = params["user"], password = params["passwd"], host = params["host"], port = params["port"], database = params["database"])
         cur_2 = conn_2.cursor()
     
         sqlDatetype = 'SELECT column_name, data_type from information_schema.columns '
@@ -2779,7 +2781,7 @@ def input_Postgis(dicc):
         else:
             where_clause = ''
 
-        _conn_source = gdaltools.PgConnectionString(user = params["user"], password = params["password"], host = params["host"], port = params["port"], dbname = params["database"],  schema=esq)
+        _conn_source = gdaltools.PgConnectionString(user = params["user"], password = params["passwd"], host = params["host"], port = params["port"], dbname = params["database"],  schema=esq)
         _conn_target = gdaltools.PgConnectionString(host=GEOETL_DB["host"], port=GEOETL_DB["port"], dbname=GEOETL_DB["database"], schema=GEOETL_DB["schema"], user=GEOETL_DB["user"], password=GEOETL_DB["password"])
 
         _ogr = gdaltools.ogr2ogr()
@@ -3152,7 +3154,7 @@ def get_type_n_srid(table_name, schema = GEOETL_DB["schema"], geom = 'wkb_geomet
 
         conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     else:
-        conn = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
+        conn = psycopg2.connect(user = params["user"], password = params["passwd"], host = params["host"], port = params["port"], database = params["database"])
 
     
     cur = conn.cursor()
@@ -3528,11 +3530,9 @@ def trans_ExecuteSQL(dicc):
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
     
-    db  = database_connections.objects.get(name = dicc['db'])
+    db  = Connection.objects.get(name = dicc['db'])
 
-    params_str = db.connection_params
-
-    params = json.loads(params_str)
+    params = json.loads(db.connection_params)
 
     query = dicc['query']
 
@@ -3554,12 +3554,12 @@ def trans_ExecuteSQL(dicc):
     cur.execute(sqlDup)
     conn.commit()
 
-    if db.type == 'PostgreSQL':
+    if db.type in ('PostgreSQL', 'PostGIS'):
 
         esq = dicc['schema-name']
         table_name = dicc['tablename']
 
-        conn_2 = psycopg2.connect(user = params["user"], password = params["password"], host = params["host"], port = params["port"], database = params["database"])
+        conn_2 = psycopg2.connect(user = params["user"], password = params["passwd"], host = params["host"], port = params["port"], database = params["database"])
         cur_2 = conn_2.cursor()
 
         sqlDatetype = 'SELECT column_name, data_type from information_schema.columns '
@@ -3786,7 +3786,7 @@ def trans_ExecuteSQL(dicc):
 
                 cur_2 = c.execute(q)
 
-            elif db.type == 'PostgreSQL':
+            elif db.type in ('PostgreSQL', 'PostGIS'):
 
                 cur_2.execute(q)
 
@@ -3831,7 +3831,7 @@ def trans_ExecuteSQL(dicc):
 
         cur_2.close()
 
-    elif db.type == 'PostgreSQL':
+    elif db.type in ('PostgreSQL', 'PostGIS'):
 
         conn_2.close()
         cur_2.close()
@@ -4303,12 +4303,18 @@ def trans_Geocoder(dicc):
 
 def input_Segex(dicc):
 
-    api  = database_connections.objects.get(name = dicc['api'])
+    api  = Connection.objects.get(name = dicc['api'])
 
     params_str = api.connection_params
     params = json.loads(params_str)
 
-    entity = params['entities-list'][0]
+    # Soportar tanto 'entities-list' (formato ETL) como 'entity' (formato nuevo)
+    if 'entities-list' in params and params['entities-list']:
+        entity = params['entities-list'][0]
+        entity_desc = params['entities-list'][1] if len(params['entities-list']) > 1 else entity
+    else:
+        entity = params.get('entity', '')
+        entity_desc = entity  # En formato nuevo, entity es el código
 
     types_list = dicc['types-list']
 
@@ -4357,7 +4363,7 @@ def input_Segex(dicc):
 
                     elif dicc['init-segex'] == 'init-guaranteed':
 
-                        segexModel  = segex_FechaFinGarantizada.objects.get(entity = params['entities-list'][1], type = tp)
+                        segexModel  = segex_FechaFinGarantizada.objects.get(entity = entity_desc, type = tp)
                         ts_init = segexModel.fechafingarantizada.strftime('%Y-%m-%d %H:%M:%S')
 
                     else:
@@ -4378,7 +4384,7 @@ def input_Segex(dicc):
                         ts_init = subs_ts.strftime('%Y-%m-%d %H:%M:%S')
 
                     elif dicc['init-segex'] == 'init-guaranteed':
-                        segexModel  = segex_FechaFinGarantizada.objects.get(entity = params['entities-list'][1], type = tp)
+                        segexModel  = segex_FechaFinGarantizada.objects.get(entity = entity_desc, type = tp)
                         ts_init = segexModel.fechafingarantizada.strftime('%Y-%m-%d %H:%M:%S')
 
                     else:
@@ -4404,14 +4410,14 @@ def input_Segex(dicc):
                 print('listGeorefStatus: '+str(r.status_code))
 
                 try:
-                    segexModel  = segex_FechaFinGarantizada.objects.get(entity = params['entities-list'][1], type = tp)
+                    segexModel  = segex_FechaFinGarantizada.objects.get(entity = entity_desc, type = tp)
                     segexModel.fechafingarantizada = r.json()['FechaFinGarantizada']
                     segexModel.save()
 
                 except:
                     
                     segexModel = segex_FechaFinGarantizada(
-                        entity = params['entities-list'][1],
+                        entity = entity_desc,
                         type = tp,
                         fechafingarantizada = r.json()['FechaFinGarantizada']
                     )
@@ -5109,7 +5115,7 @@ def input_SqlServer(dicc):
 
     table_name = dicc['id']
 
-    db  = database_connections.objects.get(name = dicc['db'])
+    db  = Connection.objects.get(name = dicc['db'])
 
     params = json.loads(db.connection_params)
 
@@ -6307,7 +6313,7 @@ def trans_CalcLength(dicc):
 
 def input_PadronAtm(dicc):
     try:
-        api = database_connections.objects.get(name=dicc['api'])
+        api = Connection.objects.get(name=dicc['api'])
         credenciales = json.loads(api.connection_params)
     except Exception as e:
         print(f"Error al obtener credenciales de la API: {e}")

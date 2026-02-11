@@ -22,9 +22,12 @@
 @author: carlesmarti <carlesmarti@scolab.es>
 '''
 
+import logging
 from operator import concat
 from urllib import response
 from django.shortcuts import HttpResponse, render, redirect
+
+logger = logging.getLogger(__name__)
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from gvsigol_auth.utils import superuser_required, staff_required
@@ -41,8 +44,9 @@ from gvsigol_core import utils as core_utils
 from gvsigol_services import utils as services_utils
 
 from .forms import UploadFileForm
-from .models import ETLworkspaces, ETLstatus, database_connections,EtlWorkspaceEditRole,EtlWorkspaceExecuteRole,EtlWorkspaceEditRestrictedRole, SendEmails, SendEndpoint, ETLPluginSettings
-from gvsigol_services.models import Datastore
+from .models import ETLworkspaces, ETLstatus, EtlWorkspaceEditRole,EtlWorkspaceExecuteRole,EtlWorkspaceEditRestrictedRole, SendEmails, SendEndpoint, ETLPluginSettings
+from gvsigol_services.models import Datastore, Connection
+from django.db.models import Q
 from django.contrib.auth.models import User
 from . import settings as settings_geoetl
 from . import etl_tasks
@@ -58,6 +62,45 @@ import os
 
 class EtlWorkspaceExists(Exception):
     pass
+
+
+def get_etl_connections(request):
+    """
+    Obtiene las conexiones disponibles para el usuario en ETL.
+    Superusuarios ven todas, staff solo las que tienen permiso ETL.
+    """
+    if request.user.is_superuser:
+        connections = Connection.objects.all()
+        logger.info(f"ETL connections (superuser): count={connections.count()}, types={list(connections.values_list('name', 'type'))}")
+    else:
+        user_roles = auth_backend.get_roles(request.user)
+        all_user_roles = list(user_roles) + [request.user.username]
+        logger.info(f"ETL connections filter: user={request.user.username}, roles={all_user_roles}")
+        
+        # Usar filter con condiciones que apliquen al mismo registro de ConnectionRole
+        from gvsigol_services.models import ConnectionRole
+        role_ids_with_etl = ConnectionRole.objects.filter(
+            role__in=all_user_roles,
+            can_use_etl=True
+        ).values_list('connection_id', flat=True)
+        
+        connections = Connection.objects.filter(
+            Q(allow_all_etl=True) |
+            Q(created_by=request.user.username) |
+            Q(id__in=role_ids_with_etl)
+        ).distinct()
+        logger.info(f"ETL connections found: {list(connections.values_list('name', 'type'))}")
+    
+    return connections.order_by('name')
+
+
+def get_etl_connections_list(request):
+    """
+    Devuelve lista de diccionarios con name y type para el frontend ETL.
+    """
+    connections = get_etl_connections(request)
+    return [{"name": c.name, "type": c.type} for c in connections]
+
 
 def get_conf(request):
     if request.method == 'POST':
@@ -105,19 +148,17 @@ def etl_canvas(request):
     srs = core_utils.get_supported_crs_array()
     srs_string = json.dumps(srs)
 
-    dbc =[]
-
-    databases  = database_connections.objects.all()
-
-    for db in databases:
-        dbc.append({"name": db.name, "type": db.type})
+    # Obtener conexiones filtradas por permisos ETL
+    dbc_list = get_etl_connections_list(request)
+    dbc = json.dumps(dbc_list)  # Convertir a JSON para JavaScript
+    logger.info(f"ETL canvas - user={username}, dbc count={len(dbc_list)}, dbc={dbc_list}")
 
     try:
 
         from gvsigol_plugin_geocoding.models import Provider
         from gvsigol_plugin_geocoding.settings import GEOCODING_SUPPORTED_TYPES
 
-        providers = []
+        providers_list = []
         providers_obj  = Provider.objects.all()
 
         for pr in providers_obj:
@@ -125,10 +166,11 @@ def etl_canvas(request):
                 if engine[0] == pr.type:
                     name = engine[1]
                     break
-            providers.append({"type": pr.type, 'name': name})
+            providers_list.append({"type": pr.type, 'name': name})
+        providers = json.dumps(providers_list)
 
     except:
-        providers = []
+        providers = json.dumps([])
 
     # Usar get_or_create para evitar duplicados
     statusModel, created = ETLstatus.objects.get_or_create(
@@ -201,7 +243,7 @@ def etl_canvas(request):
         else:
             response = {
                 'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
-                'srs': srs,
+                'srs': srs_string,
                 'dbc': dbc,
                 'providers': providers
             }
@@ -334,20 +376,6 @@ def etl_workspace_list(request):
 
     create_schema(GEOETL_DB)
 
-    #datastores  = Datastore.objects.filter(type = 'v_PostGIS')
-
-    #for ds in datastores:
-    try:
-        bbdd_con = database_connections(
-            type = 'PostgreSQL',
-            name = GEOETL_DB['database'],
-            connection_params = '{ "user": "'+GEOETL_DB['user']+'", "password": "'+GEOETL_DB['password']+'", "host": "'+GEOETL_DB['host']+'", "port":'+GEOETL_DB['port']+', "database": "'+GEOETL_DB['database']+'"}'
-        )
-        bbdd_con.save()
-
-    except Exception as e:
-        print(e)
-
     response = {
         'workspaces': get_list(request),
         'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
@@ -360,20 +388,6 @@ def etl_workspace_list(request):
 def etl_concat_workspaces(request):
 
     create_schema(GEOETL_DB)
-
-    #datastores  = Datastore.objects.filter(type = 'v_PostGIS')
-
-    #for ds in datastores:
-    try:
-        bbdd_con = database_connections(
-            type = 'PostgreSQL',
-            name = GEOETL_DB['database'],
-            connection_params = '{ "user": "'+GEOETL_DB['user']+'", "password": "'+GEOETL_DB['password']+'", "host": "'+GEOETL_DB['host']+'", "port":'+GEOETL_DB['port']+', "database": "'+GEOETL_DB['database']+'"}'
-        )
-        bbdd_con.save()
-
-    except Exception as e:
-        print(e)
 
     response = {
         'workspaces': get_list(request, True),
@@ -952,38 +966,6 @@ def test_conexion(request):
 
             return HttpResponse(json.dumps(response), content_type="application/json")
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
-@staff_required
-def save_conexion(request):
-    if request.method == 'POST':
-        form = UploadFileForm(request.POST)
-        if form.is_valid():
-
-            jsParams = json.loads(request.POST['jsonParams'])
-
-            try:
-                bbdd_con = database_connections(
-                    type = jsParams['type-db'],
-                    name = jsParams['name-db'],
-                    connection_params = json.dumps(jsParams['parameters'][0])
-                )
-                bbdd_con.save()
-
-                response = {
-                    'saved': 'true',
-                    'name': jsParams['name-db'],
-                    'type': jsParams['type-db']
-                }
-
-            except Exception as e:
-                response = {
-                    'saved': 'false',
-                }
-                print(e)
-
-            return HttpResponse(json.dumps(response), content_type="application/json")
-
-
 @login_required()
 @staff_required
 def etl_schema_csv(request):
@@ -1290,12 +1272,8 @@ def get_workspace_parameters(request):
                 response['parameters-endpoint'] = ''
                 response['method-endpoint'] = 'POST'
 
-            response['dbcs'] = []
-
-            databases  = database_connections.objects.all()
-
-            for db in databases:
-                response['dbcs'].append({"name": db.name, "type": db.type})
+            # Obtener conexiones filtradas por permisos ETL
+            response['dbcs'] = get_etl_connections_list(request)
 
 
             return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
