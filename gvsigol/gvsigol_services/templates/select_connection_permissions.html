@@ -1,0 +1,79 @@
+{% load i18n %}
+{% load static from staticfiles %}
+				<div class="row">
+					<div class="col-md-12">
+						<div id="connection-permissions-box" class="box searchable-list-box">
+							<div class="box-header">
+								<h3 class="col-md-6 box-title" style="vertical-align: middle">{% trans "Select connection permissions" %}</h3>
+								<div class="col-md-6"><input type="text" class="search form-control" placeHolder="{% trans 'Search user role...' %}" id="role-search" />
+								</div>
+								<div class="col-md-12" style="margin-top: 10px;">
+									<div class="checkbox" style="display: inline-block; margin-right: 20px;">
+										<label title="{% trans 'All users can create datastores with this connection' %}">
+											<input type="checkbox" name="allow_all_datastore" id="allow_all_datastore" {% if connection and connection.allow_all_datastore %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
+											<span>{% trans "Allow all - Datastores" %}</span>
+										</label>
+									</div>
+									<div class="checkbox" style="display: inline-block; margin-right: 20px;">
+										<label title="{% trans 'All users can use this connection in ETL' %}">
+											<input type="checkbox" name="allow_all_etl" id="allow_all_etl" {% if connection and connection.allow_all_etl %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
+											<span>{% trans "Allow all - ETL" %}</span>
+										</label>
+									</div>
+									<div class="checkbox" style="display: inline-block;">
+										<label title="{% trans 'All users can manage this connection' %}">
+											<input type="checkbox" name="allow_all_manage" id="allow_all_manage" {% if connection and connection.allow_all_manage %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
+											<span>{% trans "Allow all - Management" %}</span>
+										</label>
+									</div>
+								</div>
+							</div>
+							<div class="box-body">
+								<ul class="products-list product-list-in-box list">
+									{% for role in roles %}
+									<li class="item">
+										<div class="product-img">
+											<img src="{% static 'img/users.png' %}" alt="{% trans 'User role image' %}">
+										</div>
+										<div class="product-info">
+											<span class="product-title"><span class="searchable-rolename">{{role.name}}</span>
+												<div class="pull-right checkbox form-inline">
+													<label>
+														<input type="checkbox" name="role_datastore_{{role.name}}" id="role_datastore_{{role.name}}" {% if role.datastore_checked %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
+														<span>{% trans "Datastores" %}</span>
+													</label>
+													<label style="margin-left:10px">
+														<input type="checkbox" name="role_etl_{{role.name}}" id="role_etl_{{role.name}}" {% if role.etl_checked %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
+														<span>{% trans "ETL" %}</span>
+													</label>
+													<label style="margin-left:10px">
+														<input type="checkbox" name="role_manage_{{role.name}}" id="role_manage_{{role.name}}" {% if role.manage_checked %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
+														<span>{% trans "Management" %}</span>
+													</label>
+												</div>
+											</span> 
+											<span class="product-description searchable-roledesc">{{role.description}}</span>
+										</div>
+									</li> 
+									{% endfor %}
+								</ul>
+								<ul class="pagination"></ul>
+							</div>
+						</div>
+					</div>
+				</div>
+<script type="text/javascript">
+$(document).ready(function() {
+	// Búsqueda de roles
+	var searcheableRoleList = new List('connection-permissions-box', {
+		valueNames: ['searchable-rolename', 'searchable-roledesc'],
+		page: 10,
+		pagination: true
+	});
+	
+	$('#role-search').on('keyup', function() {
+		searcheableRoleList.search($(this).val());
+	});
+});
+</script>
+
