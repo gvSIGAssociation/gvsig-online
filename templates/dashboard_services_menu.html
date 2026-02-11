@@ -6,7 +6,8 @@
 		{% if user.is_superuser %}
 		<li id="submenu-servers"><a href="/gvsigonline/services/server_list/"><i class="fa fa-server"></i>{% trans "Servers" %}</a></li>
 		<li id="submenu-workspaces"><a href="/gvsigonline/services/workspace_list/"><i class="fa fa-folder"></i>{% trans "Workspaces" %}</a></li>
-		{% endif %}	
+		{% endif %}
+		<li id="submenu-connections"><a href="/gvsigonline/services/connection_list/"><i class="fa fa-plug"></i>{% trans "Connections" %}</a></li>
 		<li id="submenu-datastores"><a href="/gvsigonline/services/datastore_list/"><i class="fa fa-database"></i>{% trans "Datastores" %}</a></li>
 		<li id="submenu-layergroups"><a href="/gvsigonline/services/layergroup_list/"><i class="fa fa-object-group"></i>{% trans "Layer groups" %}</a></li>
 		<li id="submenu-layers"><a href="/gvsigonline/services/layer_list/"><i class="icon-layers"></i> &nbsp;&nbsp;{% trans "Layers" %}</a></li>

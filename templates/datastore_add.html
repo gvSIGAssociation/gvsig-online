@@ -63,8 +63,27 @@
 						{{ form.description }}
 					</div>
 				</div>	
-					
-				<div class="row" id="connection-params-row">
+				
+				<!-- Selector de conexión y esquema (para PostGIS) -->
+				<div id="connection-selector-row" style="display: none;">
+					<div class="row">
+						<div class="col-md-8 form-group">
+							<label for="id_connection">{% trans "Connection" %} <span class="text-danger">*</span></label>
+							{{ form.connection }}
+							<small class="text-muted">{% trans "Select an existing connection to the database" %}</small>
+						</div>
+						<div class="col-md-4 form-group">
+							<label for="id_schema">{% trans "Schema" %} <span class="text-danger">*</span></label>
+							<select class="form-control" id="id_schema" name="schema">
+								<option value="">---------</option>
+							</select>
+							<small id="schema-status" class="text-muted">{% trans "Select an existing schema or type a new name to create it" %}</small>
+						</div>
+					</div>
+				</div>
+				
+				<!-- Parámetros de conexión (para GeoTIFF, WMS, ImageMosaic) -->
+				<div class="row" id="connection-params-row" style="display: none;">
 					<div class="col-md-12 form-group">
 						<label for="id_connection_params">{% trans "Connection params" %}</label>
 						<div id="test_connection" style="margin: 10px;" class="btn btn-default btn-sm"><i class="fa fa-database margin-r-5"></i> {% trans "Test connection" %}</div>
@@ -104,6 +123,19 @@
 {% endblock %}
 
 {% block extra-scripts %}
+<style>
+	/* Asegurar que el dropdown de conexión sea visible y ancho */
+	#id_connection {
+		width: 100% !important;
+	}
+	.select2-container {
+		width: 100% !important;
+	}
+	.select2-results__option {
+		white-space: normal !important;
+		word-wrap: break-word !important;
+	}
+</style>
 <script>
 	$('#menu-manage-services').addClass("active");
 	$('#submenu-datastores').addClass("active");
@@ -118,6 +150,9 @@ $().ready(function(){
 		lineNumbers: true
 	});
 	
+	// Flag para saber si Select2 ya se inicializó en el campo de conexión
+	var connectionSelect2Initialized = false;
+	
 	window.GOL = window.GOL || {};
 	window.GOL.DS_ADD = window.GOL.DS_ADD || {};
 	window.GOL.DS_ADD.dstypeChanged = function(type, value) {
@@ -125,33 +160,40 @@ $().ready(function(){
 			value = '';
 		}
 		codemirror.setValue(value)
-		//codemirror.setValue('');
 		var code = '';
 		
 		if (type == 'v_SHP') {
 			$('#select-file-row').css('display', 'none');
 			$('#connection-params-row').css('display', 'none');
+			$('#connection-selector-row').css('display', 'none');
 			$('.select-mosaic_dimension').css('display', 'none');
 			code += '{ \n';
 			code += '\t "url": "file:data/valencia-osm" \n';
 			code += '}';
 		} else if (type == 'v_PostGIS') {
+			// PostGIS: SIEMPRE usa conexión centralizada
 			$('#select-file-row').css('display', 'none');
-			$('#connection-params-row').css('display', 'block');
+			$('#connection-params-row').css('display', 'none');
+			$('#connection-selector-row').css('display', 'block');
 			$('.select-mosaic_dimension').css('display', 'none');
-			code += '{ \n';
-			code += '\t "host": "localhost", \n';
-			code += '\t "port": "5432", \n';
-			code += '\t "database": "mydatabase", \n';
-			code += '\t "schema": "public", \n';
-			code += '\t "user": "postgres", \n';
-			code += '\t "passwd": "postgres", \n';
-			code += '\t "dbtype": "postgis" \n';
-			code += '}';
+			// No necesita connection_params, usa la conexión seleccionada
+			
+			// Inicializar Select2 después de que el elemento sea visible
+			if (!connectionSelect2Initialized && $.fn.select2) {
+				setTimeout(function() {
+					$('#id_connection').select2({
+						placeholder: '{% trans "Select a connection" %}',
+						allowClear: true,
+						width: '100%'
+					});
+					connectionSelect2Initialized = true;
+				}, 100);
+			}
 			
 		} else if (type == 'c_GeoTIFF') {
 			$('#select-file-row').css('display', 'block');
 			$('#connection-params-row').css('display', 'none');
+			$('#connection-selector-row').css('display', 'none');
 			$('.select-mosaic_dimension').css('display', 'none');
 			code += '{ \n';
 			code += '\t "url": "url_replace" \n';
@@ -160,23 +202,19 @@ $().ready(function(){
 		}  else if (type == 'e_WMS') {
 			$('#select-file-row').css('display', 'none');
 			$('#connection-params-row').css('display', 'block');
+			$('#connection-selector-row').css('display', 'none');
 			$('.select-mosaic_dimension').css('display', 'none');
 			code += '{ \n';
 			code += '\t "url": "https://demo.gvsigonline.com/geoserver/wms?request=getcapabilities", \n';
 			code += '\t "username": "", \n';
 			code += '\t "password": "" \n';
 			code += '}';
-			
-// 			code += '{ \n';
-// 			code += '\t "url": "https://test.scolab.eu/geoserver/wms?request=getcapabilities", // ' + gettext('URL to capabilities document') + ' \n';
-// 			code += '\t "user": "wmsuser", // * ' + gettext('Only required if service is authenticated') + ' \n';
-// 			code += '\t "password": "wmspassword", // * ' + gettext('Only required if service is authenticated') + ' \n';
-// 			code += '}';
 		
 		}  else if (type == 'c_ImageMosaic') {
 			$('#select-file-row').css('display', 'block');
 			$('.select-mosaic_dimension').css('display', 'block');
 			$('#connection-params-row').css('display', 'none');
+			$('#connection-selector-row').css('display', 'none');
 			code += '{ \n';
 			code += '\t "url": "url_replace", \n';
 			code += '\t "date_regex": "", \n';
@@ -185,9 +223,15 @@ $().ready(function(){
 			code += '\t "ele_format": "" \n';
 			code += '}';
 			
+		} else {
+			// Tipo desconocido: ocultar todo
+			$('#select-file-row').css('display', 'none');
+			$('#connection-params-row').css('display', 'none');
+			$('#connection-selector-row').css('display', 'none');
+			$('.select-mosaic_dimension').css('display', 'none');
 		}
 		
-		if (value == '') {
+		if (value == '' && type != 'v_PostGIS') {
 			codemirror.setValue(code);
 		}
 
@@ -203,7 +247,116 @@ $().ready(function(){
 	
 	$("#id_type").change(function() {
 		var type = $('option:selected', $(this)).val();
-		GOL.DS_ADD.dstypeChanged(type, );
+		GOL.DS_ADD.dstypeChanged(type, '');
+	});
+	
+	// Flag para saber si Select2 ya se inicializó en el campo de esquema
+	var schemaSelect2Initialized = false;
+	
+	// Función para inicializar Select2 en el campo de esquema
+	function initSchemaSelect2() {
+		if (!schemaSelect2Initialized && $.fn.select2) {
+			$('#id_schema').select2({
+				tags: true,  // Permite escribir nuevos valores
+				placeholder: '{% trans "Select or type a new schema name" %}',
+				allowClear: true,
+				width: '100%',
+				createTag: function(params) {
+					var term = $.trim(params.term);
+					if (term === '') {
+						return null;
+					}
+					// Validar nombre del esquema
+					if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(term)) {
+						return null;
+					}
+					return {
+						id: term,
+						text: term + ' {% trans "(new)" %}',
+						newTag: true
+					};
+				}
+			});
+			schemaSelect2Initialized = true;
+		}
+	}
+	
+	// Función para cargar esquemas
+	function loadSchemas(connectionId) {
+		var schemaSelect = $('#id_schema');
+		var schemaStatus = $('#schema-status');
+		
+		if (connectionId) {
+			// Destruir Select2 si existe para poder modificar las opciones
+			if (schemaSelect2Initialized && $.fn.select2) {
+				schemaSelect.select2('destroy');
+				schemaSelect2Initialized = false;
+			}
+			
+			schemaSelect.html('<option value="">{% trans "Loading..." %}</option>');
+			schemaStatus.text('{% trans "Connecting to database..." %}').removeClass('text-danger text-success text-warning').addClass('text-muted');
+			
+			$.ajax({
+				type: 'GET',
+				url: '/gvsigonline/services/connection_schemas/' + connectionId + '/',
+				timeout: 30000,
+				success: function(response) {
+					schemaSelect.empty();
+					schemaSelect.append('<option value="">---------</option>');
+					
+					if (response.success && response.schemas && response.schemas.length > 0) {
+						response.schemas.forEach(function(schema) {
+							schemaSelect.append('<option value="' + schema + '">' + schema + '</option>');
+						});
+						
+						// Inicializar Select2 con tags
+						initSchemaSelect2();
+						
+						// Seleccionar 'public' por defecto si existe
+						if (response.schemas.includes('public')) {
+							schemaSelect.val('public').trigger('change');
+						}
+						
+						schemaStatus.text('{% trans "Select existing or type new name" %}').removeClass('text-danger text-muted text-warning').addClass('text-success');
+						setTimeout(function() { 
+							schemaStatus.text('{% trans "Select an existing schema or type a new name to create it" %}').removeClass('text-success').addClass('text-muted'); 
+						}, 3000);
+					} else if (response.success && (!response.schemas || response.schemas.length === 0)) {
+						// Inicializar Select2 con tags aunque no haya esquemas
+						initSchemaSelect2();
+						schemaStatus.text('{% trans "No schemas found. Type a name to create one." %}').removeClass('text-muted text-danger text-success').addClass('text-warning');
+					} else {
+						schemaStatus.text(response.error || '{% trans "Unknown error" %}').removeClass('text-muted text-success text-warning').addClass('text-danger');
+					}
+				},
+				error: function(xhr, status, error) {
+					schemaSelect.html('<option value="">---------</option>');
+					// Inicializar Select2 con tags para permitir escribir
+					initSchemaSelect2();
+					
+					var errorMsg = '{% trans "Connection error. You can type a schema name." %}';
+					if (status === 'timeout') {
+						errorMsg = '{% trans "Connection timeout. You can type a schema name." %}';
+					}
+					schemaStatus.text(errorMsg).removeClass('text-muted text-success text-warning').addClass('text-danger');
+					console.error('Error loading schemas:', status, error);
+				}
+			});
+		} else {
+			// Destruir Select2 si existe
+			if (schemaSelect2Initialized && $.fn.select2) {
+				schemaSelect.select2('destroy');
+				schemaSelect2Initialized = false;
+			}
+			schemaSelect.html('<option value="">---------</option>');
+			schemaStatus.text('{% trans "Select an existing schema or type a new name to create it" %}').removeClass('text-danger text-success text-warning').addClass('text-muted');
+		}
+	}
+	
+	// Cargar esquemas cuando se selecciona una conexión (soporta Select2 y select nativo)
+	$('#id_connection').on('change select2:select select2:clear', function() {
+		var connectionId = $(this).val();
+		loadSchemas(connectionId);
 	});
 	
 	$("#time_dimension_input").change(function() {
@@ -215,7 +368,15 @@ $().ready(function(){
 		$("#elevation_dimension_text").prop("disabled", !$("#elevation_dimension_input").prop('checked'));
 		$("#elevation_dimension_format").prop("disabled", !$("#elevation_dimension_input").prop('checked'));
 	});
+	
+	// Inicializar visibilidad al cargar según el tipo seleccionado
 	GOL.DS_ADD.dstypeChanged($("#id_type").val(), $('#id_connection_params').val());
+	
+	// Cargar esquemas al inicio si ya hay una conexión seleccionada (ej: después de error de validación)
+	var initialConnectionId = $('#id_connection').val();
+	if (initialConnectionId) {
+		loadSchemas(initialConnectionId);
+	}
 	
 	$('#save_button').click(function (e) {
 		var type = $("#id_type").val();

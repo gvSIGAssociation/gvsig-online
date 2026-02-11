@@ -39,7 +39,7 @@ from gvsigol_auth.models import User
 from gvsigol_auth.auth_backend import get_roles
 from gvsigol_services.backend_postgis import Introspect
 from gvsigol_services.models import Datastore, LayerResource, \
-    LayerFieldEnumeration, EnumerationItem, Enumeration, Layer, LayerGroup, Workspace, Server, DefaultUserDatastore
+    LayerFieldEnumeration, EnumerationItem, Enumeration, Layer, LayerGroup, Workspace, Server, DefaultUserDatastore, Connection
 from .models import LayerReadRole, LayerWriteRole, LayerManageRole, LayerGroupRole
 from gvsigol_core.utils import toc_add_layer
 import ast
@@ -396,7 +396,20 @@ def get_user_layergroups(request, permissions=LayerGroupRole.PERM_MANAGE):
         allowed_groups = LayerGroup.objects.filter(layergrouprole__role__in=user_roles, layergrouprole__permission=permissions)
     return (user_created_groups | allowed_groups)
 
-def add_datastore(workspace, type, name, description, connection_params, username):
+def add_datastore(workspace, type, name, description, connection_params, username, connection=None, schema=None):
+    """
+    Crea un datastore en GeoServer y lo guarda en la base de datos.
+    
+    Args:
+        workspace: Workspace donde crear el datastore
+        type: Tipo de datastore (ej: 'v_PostGIS')
+        name: Nombre del datastore
+        description: Descripción
+        connection_params: Parámetros de conexión en formato JSON string
+        username: Usuario que crea el datastore
+        connection: (Opcional) Objeto Connection para asociar al datastore
+        schema: (Opcional) Schema de la base de datos
+    """
     gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
     # first create the datastore on the backend
     if gs.createDatastore(workspace,
@@ -411,8 +424,11 @@ def add_datastore(workspace, type, name, description, connection_params, usernam
             type=type,
             name=name,
             description=description,
-            connection_params=connection_params,
-            created_by=username
+            connection_params=connection_params if connection is None else None,  # Solo guardar si no hay connection
+            created_by=username,
+            connection=connection,
+            schema=schema,
+            legacy_mode=(connection is None)  # legacy_mode=True si no tiene connection
         )
         datastore.save()
         return datastore
@@ -428,19 +444,71 @@ def create_workspace(server_id, ws_name, uri, values, username):
         gs.reload_nodes()
         return newWs
 
+def get_system_connection():
+    """
+    Obtiene la conexión del sistema para datastores automáticos de usuarios.
+    Esta conexión se basa en la configuración GVSIGOL_USERS_CARTODB y debe
+    haber sido creada por la migración 0088_create_system_connection.
+    
+    Busca una conexión existente con los mismos parámetros (host, port, database, user).
+    
+    Returns:
+        Connection: La conexión del sistema
+        
+    Raises:
+        Connection.DoesNotExist: Si no se encuentra ninguna conexión compatible
+    """
+    dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
+    dbport = settings.GVSIGOL_USERS_CARTODB['dbport']
+    dbname = settings.GVSIGOL_USERS_CARTODB['dbname']
+    dbuser = settings.GVSIGOL_USERS_CARTODB['dbuser']
+    
+    # Buscar conexión existente con los mismos parámetros de conexión
+    # Puede ser una conexión migrada (con_database_host) o del sistema (con_system_database_host)
+    for conn in Connection.objects.filter(type='PostGIS'):
+        try:
+            params = conn.get_connection_params()
+            if (params.get('host') == dbhost and 
+                str(params.get('port')) == str(dbport) and 
+                params.get('database') == dbname and 
+                params.get('user') == dbuser):
+                # Encontrada conexión con los mismos parámetros
+                return conn
+        except:
+            continue
+    
+    # No se encontró ninguna conexión compatible
+    raise Connection.DoesNotExist(
+        f'No se encontró una conexión del sistema para {dbuser}@{dbhost}:{dbport}/{dbname}. '
+        'Ejecute las migraciones con: python manage.py migrate'
+    )
+
+
 def create_datastore(username, ds_name, ws):
+    """
+    Crea un datastore automático para un usuario (ds_<username>).
+    Usa la conexión del sistema basada en GVSIGOL_USERS_CARTODB.
+    """
     ds_type = 'v_PostGIS'
     description = 'BBDD ' + ds_name
 
+    # Obtener la conexión del sistema (debe existir, creada por migración)
+    connection = get_system_connection()
+    
+    # Los parámetros de conexión para GeoServer (incluyen schema)
     dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
     dbport = settings.GVSIGOL_USERS_CARTODB['dbport']
     dbname = settings.GVSIGOL_USERS_CARTODB['dbname']
     dbuser = settings.GVSIGOL_USERS_CARTODB['dbuser']
     dbpassword = settings.GVSIGOL_USERS_CARTODB['dbpassword']
     jndiname = settings.GVSIGOL_USERS_CARTODB.get('jndiname', '')
+    
+    # Parámetros completos para GeoServer (incluye schema)
     connection_params = f'{{"host": "{dbhost}", "port": "{dbport}", "database": "{dbname}", "schema": "{ds_name}", "user": "{dbuser}", "passwd": "{dbpassword}", "dbtype": "postgis", "jndiReferenceName": "{jndiname}"}}'
+    
     if create_schema(ds_name):
-        return add_datastore(ws, ds_type, ds_name, description, connection_params, username)
+        return add_datastore(ws, ds_type, ds_name, description, connection_params, username, 
+                            connection=connection, schema=ds_name)
 
 #TODO: llevar al paquete del core
 def create_schema(ds_name):
@@ -1135,12 +1203,99 @@ def create_user_workspace(username, role):
         create_datastore(username, ds_name, newWs)
         gs.reload_nodes()
 
+
+def _cleanup_layer_database_triggers(layer):
+    """
+    Limpia todos los triggers de base de datos asociados a una capa:
+    - LayerConnectionTrigger (triggers de conexión)
+    - Triggers topológicos
+    
+    Llamar antes de eliminar la capa.
+    """
+    from gvsigol_services.models import LayerConnectionTrigger
+    
+    # 1. Limpiar triggers de conexión (LayerConnectionTrigger)
+    try:
+        layer_triggers = LayerConnectionTrigger.objects.filter(layer=layer)
+        for lt in layer_triggers:
+            try:
+                # Forzar desinstalación del trigger de la base de datos
+                if lt.layer.datastore and lt.layer.datastore.connection:
+                    schema, table = lt.get_schema_and_table()
+                    i, params = lt.layer.datastore.connection.get_db_connection()
+                    if i:
+                        try:
+                            drop_trigger_sql = lt.trigger.generate_drop_trigger_sql(schema, table)
+                            drop_function_sql = lt.trigger.generate_drop_function_sql(schema, table)
+                            i.cursor.execute(drop_trigger_sql)
+                            i.cursor.execute(drop_function_sql)
+                            i.conn.commit()
+                            logger.info(f"Trigger {lt.trigger.name} desinstalado de capa {layer.name}")
+                        except Exception as e:
+                            logger.warning(f"Error ejecutando SQL de desinstalación para {lt.trigger.name}: {e}")
+                        finally:
+                            i.close()
+            except Exception as e:
+                logger.warning(f"Error desinstalando trigger {lt.trigger.name} de capa {layer.name}: {e}")
+    except Exception as e:
+        logger.warning(f"Error obteniendo triggers de conexión para capa {layer.id}: {e}")
+    
+    # 2. Limpiar triggers topológicos
+    try:
+        # Lista de todas las reglas topológicas posibles
+        topology_rules = [
+            "must_not_overlaps",
+            "must_not_have_gaps", 
+            "must_be_covered_by",
+            "must_not_overlap_with",
+            "must_be_contiguous"
+        ]
+        
+        # Obtener conexión a la base de datos
+        try:
+            i, source_name, schema = layer.get_db_connection()
+            if i:
+                # El nombre de la tabla se normaliza igual que en _get_topology_trigger_names
+                table_name = layer.name.replace(':', '_').lower()
+                
+                for rule_type in topology_rules:
+                    try:
+                        # Generar nombres de trigger y función topológica
+                        # Mismo formato que en views.py _get_topology_trigger_names
+                        function_name_simple = f"{rule_type}_{table_name}"
+                        trigger_name = f"trigger_{rule_type}_{table_name}"
+                        full_table_name = f"{schema}.{source_name}"
+                        
+                        # Eliminar trigger y función si existen
+                        drop_trigger_sql = f"DROP TRIGGER IF EXISTS {trigger_name} ON {full_table_name};"
+                        drop_function_sql = f"DROP FUNCTION IF EXISTS {schema}.{function_name_simple}();"
+                        
+                        i.cursor.execute(drop_trigger_sql)
+                        i.cursor.execute(drop_function_sql)
+                    except Exception as e:
+                        # Ignorar errores, el trigger puede no existir
+                        pass
+                
+                i.conn.commit()
+                i.close()
+                logger.info(f"Triggers topológicos limpiados para capa {layer.name}")
+        except Exception as e:
+            logger.warning(f"Error limpiando triggers topológicos para capa {layer.name}: {e}")
+    except Exception as e:
+        logger.warning(f"Error en limpieza de triggers topológicos para capa {layer.id}: {e}")
+
+
 def delete_datastore_elements(ds, gs=None):
     if not gs:
         gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
     layers = Layer.objects.filter(external=False).filter(datastore=ds)
     for l in layers:
         gs.deleteLayerStyles(l)
+        # Limpiar triggers de conexión y topológicos antes de eliminar la capa
+        try:
+            _cleanup_layer_database_triggers(l)
+        except Exception as e:
+            logger.warning(f"Error limpiando triggers para capa {l.name}: {e}")
 
     Datastore.objects.all().filter(name=ds.name).delete()
     if ds.type == 'c_ImageMosaic':

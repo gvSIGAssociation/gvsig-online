@@ -58,7 +58,7 @@ from gvsigol.basetypes import BackendNotAvailable
 from .backend_postgis import Introspect
 from .backend_postgis import SqlFrom, SqlField, SqlJoinFields
 from .forms_geoserver import CreateFeatureTypeForm
-from .forms_services import ServerForm, SqlViewForm, WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, ExternalLayerForm, ServiceUrlForm
+from .forms_services import ServerForm, SqlViewForm, WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, ExternalLayerForm, ServiceUrlForm, ConnectionForm, ConnectionUpdateForm
 from gdaltools import gdalsrsinfo
 from . import geographic_servers
 from gvsigol import settings
@@ -77,7 +77,8 @@ from gvsigol_services.models import LayerResource, TriggerProcedure, Trigger, La
 import gvsigol_services.tiling_service as tiling_service
 from .models import LayerFieldEnumeration, SqlView
 from .models import Workspace, Datastore, LayerGroup, Layer, Enumeration, EnumerationItem, \
-    LayerLock, Server, Node, ServiceUrl, LayerGroupRole, LayerTopologyConfiguration
+    LayerLock, Server, Node, ServiceUrl, LayerGroupRole, LayerTopologyConfiguration, Connection, ConnectionRole, \
+    ConnectionTrigger, LayerConnectionTrigger
 from .rest_geoserver import RequestError
 from . import rest_geoserver
 from . import rest_geowebcache as geowebcache
@@ -97,7 +98,7 @@ from django.contrib import messages
 from . import tasks
 import time
 from django.core import serializers as serial
-from django.db.models import Max
+from django.db.models import Max, Q
 from gvsigol_auth.signals import role_deleted
 from django.views.decorators.cache import never_cache
 
@@ -531,15 +532,9 @@ def datastore_list(request):
 
     # Procesar connection_params solo para la página actual
     for datastore in page_datastores:
-        params = json.loads(datastore.connection_params)
-        if 'passwd' in params:
-            params['passwd'] = '****'
-        if 'password' in params:
-            if params['password'] == '':
-                params['password'] = ''
-            else:
-                params['password'] = '****'
-        datastore.connection_params = json.dumps(params)
+        # Usar el nuevo método que soporta ambos modos (legacy y nuevo)
+        masked_params = datastore.get_masked_connection_params()
+        datastore.connection_params = json.dumps(masked_params)
 
     response = {
         'datastores': page_datastores,
@@ -586,7 +581,7 @@ def datastore_add(request):
             #post_dict['connection_params']['date_regex'] = '(?<=_)[0-9]{8}'
             #post_dict['connection_params']['ele_regex'] = ''
 
-        form = DatastoreForm(post_dict)
+        form = DatastoreForm(post_dict, user=request.user)
         if not has_errors and form.is_valid():
             name = form.cleaned_data['name']
             if _valid_name_regex.search(name) == None:
@@ -595,31 +590,84 @@ def datastore_add(request):
                 form.add_error(None, _("Invalid datastore name: '{value}'. Identifiers must be in lowercase.").format(value=name))
             else:
                 ws = form.cleaned_data['workspace']
-                ds = utils.add_datastore(form.cleaned_data['workspace'],
-                                  form.cleaned_data['type'],
-                                  form.cleaned_data['name'],
-                                  form.cleaned_data['description'],
-                                  form.cleaned_data['connection_params'],
-                                  request.user.username)
-                if ds is not None:
-                    if type == 'c_ImageMosaic':
-                        gs = geographic_servers.get_instance().get_server_by_id(ws.server.id)
+                
+                if type == 'v_PostGIS':
+                    # PostGIS: SIEMPRE usa conexión centralizada
+                    connection = form.cleaned_data['connection']
+                    schema = form.cleaned_data['schema']
+                    
+                    # Validar nombre del esquema
+                    if not schema:
+                        form.add_error('schema', _('Schema name is required'))
+                    elif not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', schema):
+                        form.add_error('schema', _('Invalid schema name. Use only letters, numbers and underscores, starting with a letter or underscore.'))
+                    else:
                         try:
-                            gs.uploadImageMosaic(ws, ds)
-                            gs.reload_nodes()
+                            # Crear el esquema si no existe
+                            connection.create_schema_if_not_exists(schema)
+                            
+                            # Construir connection_params desde la conexión + schema
+                            conn_params = connection.get_connection_params()
+                            conn_params['schema'] = schema
+                            # Añadir extra_params si existen
+                            extra = connection.get_extra_params()
+                            conn_params.update(extra)
+                            connection_params_json = json.dumps(conn_params)
+                            
+                            # Log para depuración
+                            logger.debug(f"Creating datastore with params: {conn_params.get('host')}:{conn_params.get('port')}/{conn_params.get('database')}, schema={schema}")
+                            
+                            ds = utils.add_datastore(
+                                form.cleaned_data['workspace'],
+                                form.cleaned_data['type'],
+                                form.cleaned_data['name'],
+                                form.cleaned_data['description'],
+                                connection_params_json,
+                                request.user.username
+                            )
+                            
+                            if ds is not None:
+                                # Actualizar el datastore para usar el nuevo modelo
+                                ds.connection = connection
+                                ds.schema = schema
+                                ds.legacy_mode = False
+                                ds.save()
+                                return HttpResponseRedirect(reverse('datastore_list'))
+                            else:
+                                logger.error(f"Failed to create datastore. Connection params (masked): host={conn_params.get('host')}, port={conn_params.get('port')}, database={conn_params.get('database')}, schema={schema}, user={conn_params.get('user')}")
+                                form.add_error(None, _('Error: Data store could not be created'))
+                        except ValueError as e:
+                            form.add_error('schema', str(e))
                         except Exception as e:
-                            pass
-
-                    return HttpResponseRedirect(reverse('datastore_list'))
+                            logger.exception("Error creating schema")
+                            form.add_error('schema', _('Error creating schema: ') + str(e))
                 else:
-                    # FIXME: the backend should raise an exception to identify the cause (e.g. datastore exists, backend is offline)
-                    form.add_error(None, _('Error: Data store could not be created'))
+                    # Otros tipos (GeoTIFF, WMS, ImageMosaic): usar connection_params directamente
+                    ds = utils.add_datastore(form.cleaned_data['workspace'],
+                                      form.cleaned_data['type'],
+                                      form.cleaned_data['name'],
+                                      form.cleaned_data['description'],
+                                      form.cleaned_data['connection_params'],
+                                      request.user.username)
+                    if ds is not None:
+                        if type == 'c_ImageMosaic':
+                            gs = geographic_servers.get_instance().get_server_by_id(ws.server.id)
+                            try:
+                                gs.uploadImageMosaic(ws, ds)
+                                gs.reload_nodes()
+                            except Exception as e:
+                                pass
+
+                        return HttpResponseRedirect(reverse('datastore_list'))
+                    else:
+                        # FIXME: the backend should raise an exception to identify the cause (e.g. datastore exists, backend is offline)
+                        form.add_error(None, _('Error: Data store could not be created'))
         else:
             if has_errors:
                 form.add_error(None, _('Error: GeoTIFF is not georreferenced'))
 
     else:
-        form = DatastoreForm()
+        form = DatastoreForm(user=request.user)
         if not request.user.is_superuser:
             form.fields['workspace'].queryset = Workspace.objects.filter(created_by__exact=request.user.username).order_by('name')
     return render(request, 'datastore_add.html', {'fm_directory': FILEMANAGER_DIRECTORY + "/", 'form': form})
@@ -634,13 +682,47 @@ def datastore_update(request, datastore_id):
         return HttpResponseNotFound('<h1>Datastore not found {0}</h1>'.format(datastore_id))
     if not utils.can_manage_datastore(request.user, datastore):
         return forbidden_view(request)
+    
+    # Determinar si es modo conexión o legacy
+    uses_connection = not datastore.legacy_mode and datastore.connection is not None
+    
     if request.method == 'POST':
-        form = DatastoreUpdateForm(request.POST)
+        form = DatastoreUpdateForm(request.POST, instance=datastore)
         if form.is_valid():
-                dstype = datastore.type
-                description = form.cleaned_data.get('description')
+            dstype = datastore.type
+            description = form.cleaned_data.get('description')
+            
+            if uses_connection:
+                # Modo conexión: solo actualizar descripción, el resto viene de la conexión
+                gs = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
+                
+                # Obtener connection_params desde la conexión
+                conn_params = datastore.connection.get_connection_params()
+                conn_params['schema'] = datastore.schema
+                extra = datastore.connection.get_extra_params()
+                conn_params.update(extra)
+                connection_params = json.dumps(conn_params)
+                
+                expose_pks_old = gs.datastore_check_exposed_pks(datastore)
+                if gs.updateDatastore(datastore.workspace.name, datastore.name,
+                                      description, dstype, connection_params):
+                    datastore.description = description
+                    datastore.connection_params = connection_params
+                    datastore.save()
+                    expose_pks_new = gs.datastore_check_exposed_pks(datastore)
+                    if expose_pks_old != expose_pks_new:
+                        for layer in datastore.layer_set.all():
+                            gs.reload_featuretype(layer, attributes=True, nativeBoundingBox=True, latLonBoundingBox=True)
+                            layer.get_config_manager().refresh_field_conf(include_pks=expose_pks_new)
+                            layer.save()
+                    gs.reload_nodes()
+                    return HttpResponseRedirect(reverse('datastore_list'))
+                else:
+                    form.add_error(None, _("Error updating datastore"))
+            else:
+                # Modo legacy: actualizar connection_params
                 connection_params = form.cleaned_data.get('connection_params')
-
+                
                 got_params = json.loads(connection_params)
                 if 'passwd' in got_params and got_params['passwd'] == '****':
                     params = json.loads(datastore.connection_params)
@@ -655,10 +737,7 @@ def datastore_update(request, datastore_id):
                 gs = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
                 expose_pks_old = gs.datastore_check_exposed_pks(datastore)
                 if gs.updateDatastore(datastore.workspace.name, datastore.name,
-                                                      description, dstype, connection_params):
-                    # REST API does not allow to can't change the workspace or name of a datastore
-                    #datastore.workspace = workspace
-                    #datastore.name = name
+                                      description, dstype, connection_params):
                     datastore.description = description
                     datastore.connection_params = connection_params
                     datastore.save()
@@ -669,22 +748,29 @@ def datastore_update(request, datastore_id):
                             layer.get_config_manager().refresh_field_conf(include_pks=expose_pks_new)
                             layer.save()
                     gs.reload_nodes()
-
                     return HttpResponseRedirect(reverse('datastore_list'))
                 else:
                     form.add_error(None, _("Error updating datastore"))
     else:
-        params = json.loads(datastore.connection_params)
-        if 'passwd' in params:
-            params['passwd'] = '****'
-        if 'password' in params:
-            if params['password'] == '':
-                params['password'] = ''
-            else:
-                params['password'] = '****'
-        datastore.connection_params = json.dumps(params)
+        if datastore.connection_params:
+            params = json.loads(datastore.connection_params)
+            if 'passwd' in params:
+                params['passwd'] = '****'
+            if 'password' in params:
+                if params['password'] == '':
+                    params['password'] = ''
+                else:
+                    params['password'] = '****'
+            datastore.connection_params = json.dumps(params)
         form = DatastoreUpdateForm(instance=datastore)
-    return render(request, 'datastore_update.html', {'form': form, 'datastore_id': datastore_id, 'workspace_name': datastore.workspace.name})
+    
+    return render(request, 'datastore_update.html', {
+        'form': form, 
+        'datastore_id': datastore_id, 
+        'workspace_name': datastore.workspace.name,
+        'uses_connection': uses_connection,
+        'connection': datastore.connection if uses_connection else None
+    })
 
 @login_required()
 @require_POST
@@ -869,6 +955,13 @@ def layer_delete(request, layer_id):
             if not 'no_thumbnail.jpg' in layer.thumbnail.name:
                 if os.path.isfile(layer.thumbnail.path):
                     os.remove(layer.thumbnail.path)
+            
+            # Limpiar triggers de conexión asociados a la capa
+            _cleanup_layer_triggers(layer)
+            
+            # Limpiar triggers topológicos de la capa
+            _cleanup_layer_topology_triggers(layer)
+            
             Layer.objects.all().filter(pk=layer_id).delete()
             core_utils.toc_remove_layer(layer)
 
@@ -930,6 +1023,13 @@ def layer_delete_operation(request, layer_id):
         if not 'no_thumbnail.jpg' in layer.thumbnail.name:
             if os.path.isfile(layer.thumbnail.path):
                 os.remove(layer.thumbnail.path)
+        
+        # Limpiar triggers de conexión asociados a la capa
+        _cleanup_layer_triggers(layer)
+        
+        # Limpiar triggers topológicos de la capa
+        _cleanup_layer_topology_triggers(layer)
+        
         Layer.objects.filter(pk=layer_id).delete()
         gs.deleteLayerRules(layer)
         core_utils.toc_remove_layer(layer)
@@ -2748,6 +2848,109 @@ def _apply_topology_triggers_for_layer(layer, topology_config):
     except Exception as e:
         logger.error(f"Error aplicando triggers topológicos para capa {layer.id}: {str(e)}")
 
+
+def _force_uninstall_layer_trigger(layer_trigger):
+    """
+    Fuerza la desinstalación de un LayerConnectionTrigger de la base de datos,
+    ignorando la bandera is_installed. Útil para limpieza al eliminar capas.
+    """
+    try:
+        if layer_trigger.layer.datastore.connection is None:
+            return False, 'Layer datastore has no associated connection'
+        
+        schema, table = layer_trigger.get_schema_and_table()
+        
+        i, params = layer_trigger.layer.datastore.connection.get_db_connection()
+        
+        if i is None:
+            return False, 'Could not connect to database'
+        
+        try:
+            drop_trigger_sql = layer_trigger.trigger.generate_drop_trigger_sql(schema, table)
+            drop_function_sql = layer_trigger.trigger.generate_drop_function_sql(schema, table)
+            
+            logger.debug(f"Ejecutando: {drop_trigger_sql}")
+            i.cursor.execute(drop_trigger_sql)
+            
+            logger.debug(f"Ejecutando: {drop_function_sql}")
+            i.cursor.execute(drop_function_sql)
+            
+            i.conn.commit()
+            i.close()
+            
+            return True, 'Trigger uninstalled successfully'
+            
+        except Exception as e:
+            logger.error(f"Error ejecutando SQL de desinstalación: {e}")
+            try:
+                i.conn.rollback()
+                i.close()
+            except:
+                pass
+            return False, str(e)
+            
+    except Exception as e:
+        logger.error(f"Error en _force_uninstall_layer_trigger: {e}")
+        return False, str(e)
+
+
+def _cleanup_layer_triggers(layer):
+    """
+    Limpia (desinstala y elimina) todos los LayerConnectionTrigger asociados a una capa.
+    Llamar antes de eliminar la capa.
+    Siempre intenta eliminar de la base de datos, ignorando la bandera is_installed.
+    """
+    try:
+        layer_triggers = LayerConnectionTrigger.objects.filter(layer=layer)
+        for lt in layer_triggers:
+            try:
+                # Forzar desinstalación del trigger de la base de datos
+                # Ignoramos is_installed porque queremos asegurar que se elimine de la BD
+                success, msg = _force_uninstall_layer_trigger(lt)
+                if not success:
+                    logger.warning(f"No se pudo desinstalar trigger {lt.trigger.name} de capa {layer.name}: {msg}")
+                else:
+                    logger.info(f"Trigger {lt.trigger.name} desinstalado de capa {layer.name}")
+            except Exception as e:
+                logger.error(f"Error desinstalando trigger {lt.trigger.name} de capa {layer.name}: {e}")
+        
+        # Los registros se eliminarán automáticamente por CASCADE al eliminar la layer
+        logger.info(f"Triggers de conexión limpiados para capa {layer.name}")
+        
+    except Exception as e:
+        logger.error(f"Error limpiando triggers de conexión para capa {layer.id}: {e}")
+
+
+def _cleanup_layer_topology_triggers(layer):
+    """
+    Limpia (desinstala) todos los triggers topológicos de una capa.
+    Llamar antes de eliminar la capa.
+    """
+    try:
+        # Lista de todas las reglas topológicas posibles
+        topology_rules = [
+            "must_not_overlaps",
+            "must_not_have_gaps",
+            "must_be_covered_by",
+            "must_not_overlap_with",
+            "must_be_contiguous"
+        ]
+        
+        for rule_type in topology_rules:
+            try:
+                success = _remove_topology_trigger(layer, rule_type)
+                if success:
+                    logger.info(f"Trigger topológico {rule_type} eliminado de capa {layer.name}")
+            except Exception as e:
+                # Ignorar errores individuales, algunos triggers pueden no existir
+                logger.debug(f"Error eliminando trigger topológico {rule_type} de capa {layer.name}: {e}")
+        
+        logger.info(f"Triggers topológicos limpiados para capa {layer.name}")
+        
+    except Exception as e:
+        logger.error(f"Error limpiando triggers topológicos para capa {layer.id}: {e}")
+
+
 def _save_layer_topology_rules(request, layer):
     """
     Guarda las reglas topológicas desde request.POST (formulario) o request.body (JSON API)
@@ -3047,9 +3250,55 @@ def layer_config(request, layer_id):
         enums = Enumeration.objects.all()
         procedures = []
         disabled_procedures = core_utils.get_setting('GVSIGOL_DISABLED_PROCEDURES', [])
+        # gol_area_m2 ahora se gestiona desde ConnectionTrigger calc_area_native
+        disabled_procedures = list(disabled_procedures) + ['public.gol_area_m2(text)']
         for procedure in TriggerProcedure.objects.all():
             if not procedure.signature in disabled_procedures:
                 procedures.append(procedure)
+        
+        # Obtener triggers de conexión disponibles para esta capa
+        connection_triggers = []
+        layer_connection_triggers = []
+        
+        if layer.datastore and layer.datastore.connection:
+            connection = layer.datastore.connection
+            datastore_schema = layer.datastore.get_schema_name()
+            
+            # Obtener todos los triggers de la conexión
+            available_triggers = ConnectionTrigger.objects.filter(
+                connection=connection
+            )
+            # Filtrar por scope: global o que incluya el esquema del datastore
+            # Y por permisos: el usuario debe poder usar el trigger
+            for trigger in available_triggers:
+                # Verificar permisos
+                if not trigger.can_use(request.user):
+                    continue
+                    
+                if trigger.scope == 'global':
+                    connection_triggers.append(trigger)
+                elif trigger.scope == 'schemas':
+                    trigger_schemas = trigger.get_schemas_list()
+                    if datastore_schema in trigger_schemas:
+                        connection_triggers.append(trigger)
+            
+            # Obtener triggers ya asignados a esta capa
+            # Añadir información de si el usuario puede gestionar cada trigger
+            layer_connection_triggers_raw = LayerConnectionTrigger.objects.filter(layer=layer)
+            layer_connection_triggers = []
+            for lt in layer_connection_triggers_raw:
+                lt.can_manage = lt.trigger.can_use(request.user)
+                layer_connection_triggers.append(lt)
+        
+        # Obtener campos ya usados por triggers calculados (para filtrar en el selector)
+        calculated_fields_used = list(
+            LayerConnectionTrigger.objects.filter(
+                layer=layer,
+                trigger__is_calculated_field=True,
+                field_name__isnull=False
+            ).exclude(field_name='').values_list('field_name', flat=True)
+        )
+        
         data = {
             'layer': layer,
             'layer_id': layer.id,
@@ -3064,7 +3313,10 @@ def layer_config(request, layer_id):
             'redirect_to_layergroup': redirect_to_layergroup,
             'layergroup_id': layergroup_id,
             'project_id': project_id,
-            'from_redirect': from_redirect
+            'from_redirect': from_redirect,
+            'connection_triggers': connection_triggers,
+            'layer_connection_triggers': layer_connection_triggers,
+            'calculated_fields_used': json.dumps(calculated_fields_used),
         }
         return render(request, 'layer_config.html', data)
 
@@ -3979,12 +4231,14 @@ def layer_create_with_group(request, layergroup_id):
                 from gvsigol_plugin_form.models import Form
                 forms = Form.objects.all()
             roles = utils.get_layer_checked_roles_from_user_input(assigned_read_roles, assigned_write_roles, assigned_manage_roles)
+            # gol_area_m2 ahora se gestiona desde ConnectionTrigger calc_area_native
+            available_procedures = TriggerProcedure.objects.exclude(signature='public.gol_area_m2(text)')
             data = {
                 'form': form,
                 'forms': forms,
                 'layer_type': layer_type,
                 'enumerations': get_currentuser_enumerations(request),
-                'procedures':  TriggerProcedure.objects.all(),
+                'procedures': available_procedures,
                 'roles': roles,
                 'resource_is_public': is_public,
                 'redirect_to_layergroup': redirect_to_layergroup,
@@ -4007,12 +4261,14 @@ def layer_create_with_group(request, layergroup_id):
             forms = Form.objects.all()
         # since created layers are empty, it makes sense to set write permissions for the creator
         roles = utils.get_all_user_roles_checked_by_layer(None, get_primary_user_role(request), creator_all=True)
+        # gol_area_m2 ahora se gestiona desde ConnectionTrigger calc_area_native
+        available_procedures = TriggerProcedure.objects.exclude(signature='public.gol_area_m2(text)')
         data = {
             'form': form,
             'forms': forms,
             'layer_type': layer_type,
             'enumerations': get_currentuser_enumerations(request),
-            'procedures':  TriggerProcedure.objects.all(),
+            'procedures': available_procedures,
             'roles': roles,
             'resource_is_public': False,
             'redirect_to_layergroup': redirect_to_layergroup,
@@ -6577,6 +6833,1474 @@ def service_url_update(request, svid):
 
         return render(request, 'service_url_update.html', {'svid': svid, 'form': form})
 
+
+# ============================================================================
+# Connection Views (CRUD)
+# ============================================================================
+
+@login_required()
+@require_safe
+@staff_required
+def connection_list(request):
+    """Lista las conexiones que el usuario puede gestionar."""
+    
+    if request.user.is_superuser:
+        # Superusuarios ven todas las conexiones
+        connections = Connection.objects.all().order_by('name')
+    else:
+        # Usuarios staff solo ven conexiones que pueden gestionar
+        user_roles = auth_backend.get_roles(request.user)
+        all_user_roles = list(user_roles) + [request.user.username]
+        
+        # Obtener IDs de conexiones donde el rol tiene permiso de gestión
+        role_connection_ids = ConnectionRole.objects.filter(
+            role__in=all_user_roles,
+            can_manage=True
+        ).values_list('connection_id', flat=True)
+        
+        connections = Connection.objects.filter(
+            Q(allow_all_manage=True) |
+            Q(created_by=request.user.username) |
+            Q(id__in=role_connection_ids)
+        ).distinct().order_by('name')
+    
+    # Añadir información adicional para visualización
+    for conn in connections:
+        conn.masked_params = conn.get_masked_params()
+        # Contar almacenes de datos que usan esta conexión
+        conn.datastore_count = Datastore.objects.filter(connection=conn).count() if hasattr(Datastore, 'connection') else 0
+    
+    response = {
+        'connections': connections
+    }
+    return render(request, 'connection_list.html', response)
+
+
+@login_required()
+@require_http_methods(["GET", "POST", "HEAD"])
+@staff_required
+def connection_add(request):
+    """Crear una nueva conexión."""
+    # Obtener todos los roles del sistema (excluir roles de sistema)
+    all_roles = auth_backend.get_all_roles_details(exclude_system=True)
+    
+    # Los superusuarios siempre pueden editar permisos
+    can_edit_permissions = request.user.is_superuser
+    
+    if request.method == 'POST':
+        form = ConnectionForm(request.POST)
+        if form.is_valid():
+            try:
+                connection = form.save(commit=False)
+                connection.connection_params = form.get_connection_params()
+                connection.extra_params = form.get_extra_params()
+                connection.created_by = request.user.username
+                
+                # Permisos globales (solo si puede editar permisos)
+                if can_edit_permissions:
+                    connection.allow_all_datastore = 'allow_all_datastore' in request.POST
+                    connection.allow_all_etl = 'allow_all_etl' in request.POST
+                    connection.allow_all_manage = 'allow_all_manage' in request.POST
+                
+                connection.save()
+                
+                # Guardar permisos por rol (solo si puede editar permisos)
+                if can_edit_permissions:
+                    for role in all_roles:
+                        role_name = role.get('name') if isinstance(role, dict) else str(role)
+                        can_datastore = f'role_datastore_{role_name}' in request.POST
+                        can_etl = f'role_etl_{role_name}' in request.POST
+                        can_manage = f'role_manage_{role_name}' in request.POST
+                        
+                        if can_datastore or can_etl or can_manage:
+                            ConnectionRole.objects.create(
+                                connection=connection,
+                                role=role_name,
+                                can_use_datastore=can_datastore,
+                                can_use_etl=can_etl,
+                                can_manage=can_manage
+                            )
+                
+                messages.success(request, _('Connection created successfully'))
+                return HttpResponseRedirect(reverse('connection_list'))
+            except Exception as e:
+                logger.exception("Error creating connection")
+                form.add_error(None, str(e))
+        
+        return render(request, 'connection_add.html', {
+            'form': form,
+            'roles': all_roles,
+            'can_edit_permissions': can_edit_permissions
+        })
+    else:
+        form = ConnectionForm()
+        return render(request, 'connection_add.html', {
+            'form': form,
+            'roles': all_roles,
+            'can_edit_permissions': can_edit_permissions
+        })
+
+
+@login_required()
+@require_http_methods(["GET", "POST", "HEAD"])
+@staff_required
+def connection_update(request, connection_id):
+    """Actualizar una conexión existente."""
+    try:
+        connection = Connection.objects.get(id=connection_id)
+    except Connection.DoesNotExist:
+        return HttpResponseNotFound(_('Connection not found'))
+    
+    # Verificar que el usuario tiene permiso para gestionar esta conexión
+    user_roles = auth_backend.get_roles(request.user)
+    all_user_roles = list(user_roles) + [request.user.username]
+    
+    can_manage = (
+        request.user.is_superuser or
+        connection.allow_all_manage or
+        connection.created_by == request.user.username or
+        connection.roles.filter(role__in=all_user_roles, can_manage=True).exists()
+    )
+    
+    if not can_manage:
+        messages.error(request, _('You do not have permission to manage this connection'))
+        return HttpResponseRedirect(reverse('connection_list'))
+    
+    # Los superusuarios pueden editar permisos
+    can_edit_permissions = request.user.is_superuser
+    
+    # Obtener todos los roles del sistema
+    all_roles = auth_backend.get_all_roles_details(exclude_system=True)
+    
+    # Obtener permisos actuales por rol
+    current_role_permissions = {}
+    for cr in connection.roles.all():
+        current_role_permissions[cr.role] = {
+            'datastore': cr.can_use_datastore,
+            'etl': cr.can_use_etl,
+            'manage': cr.can_manage
+        }
+    
+    # Añadir información de permisos a cada rol
+    for role in all_roles:
+        role_name = role.get('name') if isinstance(role, dict) else str(role)
+        perms = current_role_permissions.get(role_name, {})
+        if isinstance(role, dict):
+            role['datastore_checked'] = perms.get('datastore', False)
+            role['etl_checked'] = perms.get('etl', False)
+            role['manage_checked'] = perms.get('manage', False)
+    
+    if request.method == 'POST':
+        form = ConnectionUpdateForm(request.POST, instance=connection)
+        if form.is_valid():
+            try:
+                current_params = connection.get_connection_params()
+                connection = form.save(commit=False)
+                connection.connection_params = form.get_connection_params(current_params)
+                connection.extra_params = form.get_extra_params()
+                
+                # Permisos globales (solo si puede editar permisos)
+                if can_edit_permissions:
+                    connection.allow_all_datastore = 'allow_all_datastore' in request.POST
+                    connection.allow_all_etl = 'allow_all_etl' in request.POST
+                    connection.allow_all_manage = 'allow_all_manage' in request.POST
+                
+                connection.save()
+                
+                # Actualizar connection_params de los datastores asociados (solo para PostGIS)
+                # Y sincronizar con GeoServer
+                if connection.type == 'PostGIS':
+                    from .models import Datastore
+                    datastores = Datastore.objects.filter(connection=connection)
+                    if datastores.exists():
+                        # Construir los nuevos connection_params para los datastores
+                        conn_params = connection.get_connection_params()
+                        geoserver_errors = []
+                        
+                        for ds in datastores:
+                            # Mantener el schema del datastore
+                            ds_schema = ds.schema or ds.get_schema_name()
+                            ds_params = {
+                                'host': conn_params.get('host', ''),
+                                'port': conn_params.get('port', ''),
+                                'database': conn_params.get('database', ''),
+                                'user': conn_params.get('user', ''),
+                                'passwd': conn_params.get('passwd', ''),
+                                'schema': ds_schema,
+                            }
+                            # Añadir dbtype y otros parámetros de extra_params
+                            if connection.extra_params:
+                                try:
+                                    extra = json.loads(connection.extra_params)
+                                    ds_params.update(extra)
+                                except:
+                                    pass
+                            
+                            new_connection_params = json.dumps(ds_params)
+                            
+                            # Sincronizar con GeoServer
+                            try:
+                                gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
+                                if gs.updateDatastore(ds.workspace.name, ds.name, ds.description or '', ds.type, new_connection_params):
+                                    ds.connection_params = new_connection_params
+                                    ds.save()
+                                    logger.info(f"Updated datastore '{ds.name}' in GeoServer and database")
+                                else:
+                                    geoserver_errors.append(ds.name)
+                                    logger.error(f"Failed to update datastore '{ds.name}' in GeoServer")
+                            except Exception as gs_error:
+                                geoserver_errors.append(ds.name)
+                                logger.exception(f"Error updating datastore '{ds.name}' in GeoServer: {gs_error}")
+                        
+                        if geoserver_errors:
+                            messages.warning(request, _('Connection updated but some datastores could not be synchronized with GeoServer: ') + ', '.join(geoserver_errors))
+                        else:
+                            logger.info(f"Updated and synchronized {datastores.count()} datastores linked to connection '{connection.name}'")
+                
+                # Actualizar roles (solo si puede editar permisos)
+                if can_edit_permissions:
+                    ConnectionRole.objects.filter(connection=connection).delete()
+                    for role in all_roles:
+                        role_name = role.get('name') if isinstance(role, dict) else str(role)
+                        can_datastore = f'role_datastore_{role_name}' in request.POST
+                        can_etl = f'role_etl_{role_name}' in request.POST
+                        can_manage_role = f'role_manage_{role_name}' in request.POST
+                        
+                        if can_datastore or can_etl or can_manage_role:
+                            ConnectionRole.objects.create(
+                                connection=connection,
+                                role=role_name,
+                                can_use_datastore=can_datastore,
+                                can_use_etl=can_etl,
+                                can_manage=can_manage_role
+                            )
+                
+                messages.success(request, _('Connection updated successfully'))
+                return HttpResponseRedirect(reverse('connection_list'))
+            except Exception as e:
+                logger.exception("Error updating connection")
+                form.add_error(None, str(e))
+        
+        return render(request, 'connection_update.html', {
+            'form': form, 
+            'connection_id': connection_id, 
+            'connection': connection,
+            'roles': all_roles,
+            'can_edit_permissions': can_edit_permissions
+        })
+    else:
+        # Cargar datos actuales en el formulario según el tipo de conexión
+        params = connection.get_connection_params()
+        initial_data = {
+            'extra_params': connection.extra_params or '',
+        }
+        
+        conn_type = connection.type
+        if conn_type == 'PostGIS':
+            initial_data.update({
+                'host': params.get('host', ''),
+                'port': params.get('port', ''),
+                'database': params.get('database', ''),
+                'user': params.get('user', ''),
+            })
+        elif conn_type == 'Oracle':
+            # Parsear DSN: "host:port/service"
+            dsn = params.get('dsn', '')
+            oracle_host = ''
+            oracle_port = '1521'
+            oracle_service = ''
+            if dsn:
+                # Formato: host:port/service
+                if '/' in dsn:
+                    host_port, oracle_service = dsn.split('/', 1)
+                else:
+                    host_port = dsn
+                if ':' in host_port:
+                    oracle_host, oracle_port = host_port.split(':', 1)
+                else:
+                    oracle_host = host_port
+            # ETL usa 'username'
+            initial_data.update({
+                'oracle_user': params.get('username', ''),
+                'oracle_host': oracle_host,
+                'oracle_port': oracle_port,
+                'oracle_service': oracle_service,
+            })
+        elif conn_type == 'SQLServer':
+            # ETL usa nombres con guiones
+            initial_data.update({
+                'sqlserver_server': params.get('server-sql-server', ''),
+                'sqlserver_user': params.get('username-sql-server', ''),
+                'sqlserver_database': params.get('db-sql-server', ''),
+                'sqlserver_tds_version': params.get('tds-version-sql-server', '7.0'),
+            })
+        elif conn_type == 'indenova':
+            # ETL usa nombres con guiones
+            initial_data.update({
+                'indenova_domain': params.get('domain', ''),
+                'indenova_api_key': params.get('api-key', ''),
+                'indenova_client_id': params.get('client-id', ''),
+            })
+        elif conn_type == 'segex':
+            # Soportar tanto 'entity' (nuevo) como 'entities-list' (formato ETL antiguo)
+            entity = params.get('entity', '')
+            if not entity and 'entities-list' in params and params['entities-list']:
+                entity = params['entities-list'][0]
+            initial_data.update({
+                'segex_domain': params.get('domain', 'PRO'),
+                'segex_entity': entity,
+                'segex_user': params.get('user', ''),
+            })
+        elif conn_type == 'sharepoint':
+            # ETL usa nombres con guiones
+            initial_data.update({
+                'sharepoint_tenant_id': params.get('tenant-id', ''),
+                'sharepoint_client_id': params.get('client-id', ''),
+                'sharepoint_host': params.get('sharepoint-host', ''),
+                'sharepoint_site_path': params.get('site-path', ''),
+            })
+        elif conn_type == 'padron-atm':
+            # Soportar variantes del nombre del campo idacceso (la API usa 'idacceso')
+            id_acceso = params.get('idacceso', '') or params.get('id_acceso', '') or params.get('idAcceso', '') or params.get('id-acceso', '')
+            initial_data.update({
+                'padron_atm_email': params.get('email', ''),
+                'padron_atm_id_acceso': id_acceso,
+            })
+        
+        form = ConnectionUpdateForm(instance=connection, initial=initial_data)
+        
+        return render(request, 'connection_update.html', {
+            'form': form, 
+            'connection_id': connection_id, 
+            'connection': connection,
+            'can_edit_permissions': can_edit_permissions,
+            'roles': all_roles
+        })
+
+
+@login_required()
+@require_POST
+@superuser_required
+def connection_delete(request, connection_id):
+    """Eliminar una conexión."""
+    try:
+        connection = Connection.objects.get(id=connection_id)
+        force_cascade = request.POST.get('force_cascade', 'false') == 'true'
+        
+        # Verificar que no hay almacenes de datos usando esta conexión
+        if hasattr(Datastore, 'connection'):
+            datastores = Datastore.objects.filter(connection=connection)
+            datastore_count = datastores.count()
+            
+            if datastore_count > 0:
+                if not force_cascade:
+                    messages.error(request, _('Cannot delete connection. It is being used by {0} datastore(s).').format(datastore_count))
+                    return HttpResponseRedirect(reverse('connection_list'))
+                
+                # Eliminación en cascada: borrar todos los datastores y sus recursos
+                logger.info(f"Eliminando conexión {connection.name} en cascada con {datastore_count} datastores")
+                
+                for ds in datastores:
+                    try:
+                        gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
+                        
+                        # Eliminar del servidor geográfico
+                        try:
+                            gs.deleteDatastore(ds.workspace, ds, delete_schema=False)
+                        except Exception as e:
+                            logger.warning(f"Error eliminando datastore {ds.name} de GeoServer: {e}")
+                        
+                        # Eliminar elementos del datastore (layers, triggers, topología)
+                        utils.delete_datastore_elements(ds, gs=gs)
+                        logger.info(f"  ✓ Datastore {ds.name} eliminado")
+                        
+                    except Exception as e:
+                        logger.error(f"  ✗ Error eliminando datastore {ds.name}: {e}")
+        
+        # Eliminar triggers de conexión asociados
+        ConnectionTrigger.objects.filter(connection=connection).delete()
+        
+        connection.delete()
+        messages.success(request, _('Connection and all associated resources deleted successfully'))
+        
+    except Connection.DoesNotExist:
+        messages.error(request, _('Connection not found'))
+    except Exception as e:
+        logger.exception("Error deleting connection")
+        messages.error(request, str(e))
+    
+    return HttpResponseRedirect(reverse('connection_list'))
+
+
+@login_required()
+@require_safe
+@superuser_required
+def connection_info_api(request, connection_id):
+    """API para obtener información de una conexión (conteo de datastores y layers)."""
+    try:
+        connection = Connection.objects.get(id=connection_id)
+        
+        datastore_count = 0
+        layer_count = 0
+        
+        if hasattr(Datastore, 'connection'):
+            datastores = Datastore.objects.filter(connection=connection)
+            datastore_count = datastores.count()
+            
+            for ds in datastores:
+                layer_count += Layer.objects.filter(datastore=ds).count()
+        
+        return JsonResponse({
+            'id': connection.id,
+            'name': connection.name,
+            'datastore_count': datastore_count,
+            'layer_count': layer_count
+        })
+        
+    except Connection.DoesNotExist:
+        return JsonResponse({'error': _('Connection not found')}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required()
+@require_POST
+@superuser_required
+def connection_test(request):
+    """Probar una conexión a base de datos o API."""
+    try:
+        conn_type = request.POST.get('type', 'PostGIS')
+        
+        if conn_type in ('PostGIS', 'PostgreSQL'):
+            try:
+                conn = psycopg2.connect(
+                    user=request.POST.get('user', ''),
+                    password=request.POST.get('password', ''),
+                    host=request.POST.get('host', ''),
+                    port=request.POST.get('port', ''),
+                    database=request.POST.get('database', '')
+                )
+                conn.close()
+                return JsonResponse({'success': True, 'message': _('Connection successful')})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
+        
+        elif conn_type == 'Oracle':
+            try:
+                import cx_Oracle
+                dsn = request.POST.get('dsn', '')
+                conn = cx_Oracle.connect(
+                    request.POST.get('username', ''),
+                    request.POST.get('password', ''),
+                    dsn
+                )
+                conn.close()
+                return JsonResponse({'success': True, 'message': _('Connection successful')})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
+        
+        elif conn_type == 'SQLServer':
+            try:
+                import pymssql
+                conn = pymssql.connect(
+                    server=request.POST.get('server-sql-server', ''),
+                    user=request.POST.get('username-sql-server', ''),
+                    password=request.POST.get('password-sql-server', ''),
+                    database=request.POST.get('db-sql-server', ''),
+                    tds_version=request.POST.get('tds-version-sql-server', '7.0')
+                )
+                conn.close()
+                return JsonResponse({'success': True, 'message': _('Connection successful')})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
+        
+        elif conn_type == 'sharepoint':
+            try:
+                import requests as req
+                tenant_id = request.POST.get('tenant-id', '')
+                client_id = request.POST.get('client-id', '')
+                client_secret = request.POST.get('client-secret', '')
+                sharepoint_host = request.POST.get('sharepoint-host', '')
+                site_path = request.POST.get('site-path', '')
+                
+                # Obtener token
+                token_url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
+                data = {
+                    "client_id": client_id,
+                    "client_secret": client_secret,
+                    "scope": "https://graph.microsoft.com/.default",
+                    "grant_type": "client_credentials"
+                }
+                response = req.post(token_url, data=data)
+                if response.status_code != 200:
+                    return JsonResponse({'success': False, 'error': f'Token error: {response.text}'})
+                
+                access_token = response.json().get("access_token")
+                
+                # Verificar acceso al sitio
+                headers = {"Authorization": f"Bearer {access_token}"}
+                url = f"https://graph.microsoft.com/v1.0/sites/{sharepoint_host}:{site_path}"
+                response = req.get(url, headers=headers)
+                
+                if response.status_code == 200:
+                    return JsonResponse({'success': True, 'message': _('Connection successful')})
+                else:
+                    return JsonResponse({'success': False, 'error': f'Site access error: {response.text}'})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
+        
+        elif conn_type == 'indenova':
+            try:
+                import requests as req
+                domain = request.POST.get('domain', '').strip()
+                if domain and not domain.startswith(('http://', 'https://')):
+                    domain = 'https://' + domain
+                domain = domain.rstrip('/')
+                api_key = request.POST.get('api-key', '')
+                
+                url = f"{domain}/api/rest/process/v1/process/list?idsection=27"
+                headers = {'esigna-auth-api-key': api_key}
+                response = req.get(url, headers=headers)
+                
+                if response.status_code == 200:
+                    return JsonResponse({'success': True, 'message': _('Connection successful')})
+                else:
+                    return JsonResponse({'success': False, 'error': f'API error: {response.status_code}'})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
+        
+        elif conn_type == 'segex':
+            try:
+                import requests as req
+                import hashlib
+                import base64
+                from datetime import datetime
+                
+                domain = request.POST.get('domain', 'PRO')
+                user = request.POST.get('user', '')
+                password = request.POST.get('password', '')
+                entity = request.POST.get('entity', '')
+                
+                if not entity:
+                    return JsonResponse({'success': False, 'error': _('Entity is required for testing SEGEX connection')})
+                
+                # Hash de la contraseña según el formato SEGEX
+                # 1. Obtener fecha UTC actual
+                utc = datetime.utcnow()
+                utc_text = utc.strftime('%Y%m%d%H%M%S')
+                # 2. Concatenar con password y hacer SHA256
+                hash_input = (utc_text + password).encode('utf-8')
+                hash_bytes = hashlib.sha256(hash_input).digest()
+                # 3. Convertir a base64
+                hash_base64 = base64.b64encode(hash_bytes).decode()
+                # 4. Concatenar fecha UTC al inicio
+                ws_seg_pass = utc_text + hash_base64
+                
+                # URL base según dominio y entidad
+                if domain == 'PRE':
+                    base_url = f'https://pre-{entity}.sedipualba.es/apisegex/'
+                else:
+                    base_url = f'https://{entity}.sedipualba.es/apisegex/'
+                
+                url = f"{base_url}Georef/ListTiposGeoref?wsSegUser={user}&wsSegPass={ws_seg_pass}&idEntidad={entity}"
+                response = req.get(url)
+                
+                if response.status_code == 200:
+                    return JsonResponse({'success': True, 'message': _('Connection successful')})
+                else:
+                    return JsonResponse({'success': False, 'error': f'API error: {response.status_code}'})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
+        
+        elif conn_type == 'padron-atm':
+            try:
+                import requests as req
+                # Construir credenciales como las espera la API
+                credenciales = {
+                    'email': request.POST.get('email', ''),
+                    'password': request.POST.get('password', ''),
+                    'idacceso': request.POST.get('idacceso', '')
+                }
+                
+                url_auth = "https://pmcloudserver.atm-maggioli.es/api/auth/login"
+                response = req.post(url_auth, json=credenciales)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    token = data.get("accesstoken", {}).get("token")
+                    if token:
+                        return JsonResponse({'success': True, 'message': _('Connection successful')})
+                    else:
+                        return JsonResponse({'success': False, 'error': 'No token received'})
+                else:
+                    return JsonResponse({'success': False, 'error': f'API error: {response.status_code} - {response.text}'})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
+        
+        else:
+            return JsonResponse({'success': False, 'error': _('Connection type not supported for testing')})
+    
+    except Exception as e:
+        logger.exception("Error testing connection")
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required()
+@require_GET
+@superuser_required
+def connection_config(request, connection_id):
+    """
+    Vista de configuración de una conexión.
+    Muestra pestañas con diferentes opciones (triggers, etc.)
+    Solo disponible para conexiones PostGIS.
+    """
+    try:
+        connection = Connection.objects.get(id=connection_id)
+        
+        # Solo permitir para conexiones PostGIS
+        if connection.type != 'PostGIS':
+            messages.error(request, _('Configuration is only available for PostGIS connections'))
+            return HttpResponseRedirect(reverse('connection_list'))
+        
+        # Obtener triggers de esta conexión
+        triggers = ConnectionTrigger.objects.filter(connection=connection).order_by('name')
+        
+        # Obtener otras conexiones PostGIS para la opción de duplicar triggers
+        # Excluir la conexión actual
+        other_connections = Connection.objects.filter(type='PostGIS').exclude(id=connection_id).order_by('name')
+        
+        return render(request, 'connection_config.html', {
+            'connection': connection,
+            'triggers': triggers,
+            'other_connections': other_connections,
+        })
+        
+    except Connection.DoesNotExist:
+        messages.error(request, _('Connection not found'))
+        return HttpResponseRedirect(reverse('connection_list'))
+
+
+@login_required()
+@superuser_required
+def connection_trigger_add(request, connection_id):
+    """
+    Vista para añadir un nuevo trigger a una conexión.
+    """
+    
+    try:
+        connection = Connection.objects.get(id=connection_id)
+        
+        if connection.type != 'PostGIS':
+            messages.error(request, _('Triggers are only available for PostGIS connections'))
+            return HttpResponseRedirect(reverse('connection_list'))
+        
+        # Obtener esquemas disponibles (nombres de datastores)
+        available_schemas = list(Datastore.objects.filter(connection=connection).values_list('name', flat=True).distinct())
+        
+        if request.method == 'POST':
+            name = request.POST.get('name', '').strip()
+            description = request.POST.get('description', '').strip()
+            timing = request.POST.get('timing', 'AFTER')
+            events = request.POST.getlist('events')  # Lista de eventos seleccionados
+            sql_code = request.POST.get('sql_code', '').strip()
+            scope = request.POST.get('scope', 'global')
+            # Obtener esquemas del campo JSON
+            schemas_json = request.POST.get('schemas_json', '[]')
+            try:
+                schemas = json.loads(schemas_json) if schemas_json else []
+            except:
+                schemas = []
+            is_calculated_field = request.POST.get('is_calculated_field') == '1'
+            
+            # Validaciones
+            if not name:
+                return render(request, 'connection_trigger_add.html', {
+                    'connection': connection,
+                    'available_schemas': available_schemas,
+                    'selected_schemas': schemas,
+                    'trigger_events': events,
+                    'error_message': _('Name is required'),
+                })
+            
+            if ConnectionTrigger.objects.filter(connection=connection, name=name).exists():
+                return render(request, 'connection_trigger_add.html', {
+                    'connection': connection,
+                    'available_schemas': available_schemas,
+                    'selected_schemas': schemas,
+                    'trigger_events': events,
+                    'error_message': _('A trigger with this name already exists'),
+                })
+            
+            if not sql_code:
+                return render(request, 'connection_trigger_add.html', {
+                    'connection': connection,
+                    'available_schemas': available_schemas,
+                    'selected_schemas': schemas,
+                    'trigger_events': events,
+                    'error_message': _('SQL code is required'),
+                })
+            
+            if not events:
+                return render(request, 'connection_trigger_add.html', {
+                    'connection': connection,
+                    'available_schemas': available_schemas,
+                    'selected_schemas': schemas,
+                    'trigger_events': events,
+                    'error_message': _('At least one event must be selected'),
+                })
+            
+            # Obtener permisos
+            allow_all = request.POST.get('allow_all') == '1'
+            allowed_roles = request.POST.getlist('allowed_roles')
+            
+            # Crear trigger
+            trigger = ConnectionTrigger.objects.create(
+                connection=connection,
+                name=name,
+                description=description,
+                timing=timing,
+                event=','.join(events),  # Guardar como string separado por comas
+                sql_code=sql_code,
+                scope=scope,
+                schemas=json.dumps(schemas) if scope == 'schemas' and schemas else None,
+                is_calculated_field=is_calculated_field,
+                allow_all=allow_all,
+                created_by=request.user.username,
+            )
+            
+            # Guardar permisos por rol si no es allow_all
+            if not allow_all and allowed_roles:
+                from .models import ConnectionTriggerRole
+                for role in allowed_roles:
+                    ConnectionTriggerRole.objects.create(trigger=trigger, role=role)
+            
+            messages.success(request, _('Trigger created successfully'))
+            return HttpResponseRedirect(reverse('connection_config', args=[connection_id]))
+        
+        # GET - mostrar formulario
+        compatible_datastores = Datastore.objects.filter(connection=connection)
+        all_roles = auth_backend.get_all_roles_details(exclude_system=True)
+        
+        return render(request, 'connection_trigger_add.html', {
+            'connection': connection,
+            'available_schemas': available_schemas,
+            'selected_schemas': [],
+            'trigger_events': ['INSERT'],  # Por defecto INSERT
+            'compatible_datastores': compatible_datastores,
+            'available_roles': [r['name'] for r in all_roles] if all_roles else [],
+            'selected_roles': [],
+        })
+        
+    except Connection.DoesNotExist:
+        messages.error(request, _('Connection not found'))
+        return HttpResponseRedirect(reverse('connection_list'))
+
+
+@login_required()
+@superuser_required
+def connection_trigger_update(request, connection_id, trigger_id):
+    """
+    Vista para editar un trigger existente.
+    """
+    
+    try:
+        connection = Connection.objects.get(id=connection_id)
+        trigger = ConnectionTrigger.objects.get(id=trigger_id, connection=connection)
+        
+        if connection.type != 'PostGIS':
+            messages.error(request, _('Triggers are only available for PostGIS connections'))
+            return HttpResponseRedirect(reverse('connection_list'))
+        
+        # Obtener esquemas disponibles
+        available_schemas = list(Datastore.objects.filter(connection=connection).values_list('name', flat=True).distinct())
+        selected_schemas = trigger.get_schemas_list()
+        
+        if request.method == 'POST':
+            name = request.POST.get('name', '').strip()
+            description = request.POST.get('description', '').strip()
+            timing = request.POST.get('timing', 'AFTER')
+            events = request.POST.getlist('events')  # Lista de eventos seleccionados
+            sql_code = request.POST.get('sql_code', '').strip()
+            scope = request.POST.get('scope', 'global')
+            # Obtener esquemas del campo JSON
+            schemas_json = request.POST.get('schemas_json', '[]')
+            try:
+                schemas = json.loads(schemas_json) if schemas_json else []
+            except:
+                schemas = []
+            is_calculated_field = request.POST.get('is_calculated_field') == '1'
+            
+            # Validaciones
+            if not name:
+                return render(request, 'connection_trigger_add.html', {
+                    'connection': connection,
+                    'trigger': trigger,
+                    'available_schemas': available_schemas,
+                    'selected_schemas': schemas,
+                    'trigger_events': events,
+                    'error_message': _('Name is required'),
+                })
+            
+            # Verificar nombre único (excepto el actual)
+            if name != trigger.name and ConnectionTrigger.objects.filter(connection=connection, name=name).exists():
+                return render(request, 'connection_trigger_add.html', {
+                    'connection': connection,
+                    'trigger': trigger,
+                    'available_schemas': available_schemas,
+                    'selected_schemas': schemas,
+                    'trigger_events': events,
+                    'error_message': _('A trigger with this name already exists'),
+                })
+            
+            if not sql_code:
+                return render(request, 'connection_trigger_add.html', {
+                    'connection': connection,
+                    'trigger': trigger,
+                    'available_schemas': available_schemas,
+                    'selected_schemas': schemas,
+                    'trigger_events': events,
+                    'error_message': _('SQL code is required'),
+                })
+            
+            if not events:
+                return render(request, 'connection_trigger_add.html', {
+                    'connection': connection,
+                    'trigger': trigger,
+                    'available_schemas': available_schemas,
+                    'selected_schemas': schemas,
+                    'trigger_events': events,
+                    'error_message': _('At least one event must be selected'),
+                })
+            
+            # Detectar si cambió algo que afecta al trigger en la BD
+            new_event = ','.join(events)
+            trigger_definition_changed = (
+                trigger.name != name or
+                trigger.timing != timing or
+                trigger.event != new_event or
+                trigger.sql_code != sql_code
+            )
+            
+            # Si hay cambios, primero desinstalar los triggers existentes CON LOS VALORES ACTUALES
+            layer_triggers = []
+            if trigger_definition_changed:
+                layer_triggers = list(LayerConnectionTrigger.objects.filter(trigger=trigger, is_installed=True))
+                for layer_trigger in layer_triggers:
+                    success_uninstall, msg_uninstall = layer_trigger.uninstall()
+                    if not success_uninstall:
+                        logger.warning(f"Could not uninstall old trigger for layer {layer_trigger.layer.name}: {msg_uninstall}")
+            
+            # Obtener permisos
+            allow_all = request.POST.get('allow_all') == '1'
+            allowed_roles = request.POST.getlist('allowed_roles')
+            
+            # Ahora actualizar el trigger con los nuevos valores
+            trigger.name = name
+            trigger.description = description
+            trigger.timing = timing
+            trigger.event = new_event  # Guardar como string separado por comas
+            trigger.sql_code = sql_code
+            trigger.scope = scope
+            trigger.schemas = json.dumps(schemas) if scope == 'schemas' and schemas else None
+            trigger.is_calculated_field = is_calculated_field
+            trigger.allow_all = allow_all
+            trigger.save()
+            
+            # Actualizar permisos por rol
+            from .models import ConnectionTriggerRole
+            trigger.trigger_roles.all().delete()  # Eliminar roles anteriores
+            if not allow_all and allowed_roles:
+                for role in allowed_roles:
+                    ConnectionTriggerRole.objects.create(trigger=trigger, role=role)
+            
+            # Si hubo cambios, reinstalar los triggers con los NUEVOS valores
+            reinstall_errors = []
+            if trigger_definition_changed and layer_triggers:
+                for layer_trigger in layer_triggers:
+                    # Refrescar el objeto para obtener los nuevos valores del trigger
+                    layer_trigger.refresh_from_db()
+                    success_install, msg_install = layer_trigger.install()
+                    if not success_install:
+                        reinstall_errors.append(f"{layer_trigger.layer.name}: {msg_install}")
+                        logger.error(f"Could not reinstall trigger for layer {layer_trigger.layer.name}: {msg_install}")
+                
+                if reinstall_errors:
+                    messages.warning(request, _('Trigger updated but some layer triggers could not be reinstalled: ') + '; '.join(reinstall_errors))
+                else:
+                    messages.success(request, _('Trigger updated and reinstalled in %(count)d layer(s)') % {'count': len(layer_triggers)})
+            else:
+                messages.success(request, _('Trigger updated successfully'))
+            
+            return HttpResponseRedirect(reverse('connection_config', args=[connection_id]))
+        
+        # GET - mostrar formulario con datos
+        compatible_datastores = trigger.get_compatible_datastores()
+        all_roles = auth_backend.get_all_roles_details(exclude_system=True)
+        selected_roles = trigger.get_allowed_roles()
+        
+        return render(request, 'connection_trigger_add.html', {
+            'connection': connection,
+            'trigger': trigger,
+            'available_schemas': available_schemas,
+            'selected_schemas': selected_schemas,
+            'trigger_events': trigger.get_events_list(),  # Lista de eventos del trigger
+            'compatible_datastores': compatible_datastores,
+            'available_roles': [r['name'] for r in all_roles] if all_roles else [],
+            'selected_roles': selected_roles,
+        })
+        
+    except Connection.DoesNotExist:
+        messages.error(request, _('Connection not found'))
+        return HttpResponseRedirect(reverse('connection_list'))
+    except ConnectionTrigger.DoesNotExist:
+        messages.error(request, _('Trigger not found'))
+        return HttpResponseRedirect(reverse('connection_config', args=[connection_id]))
+
+
+@login_required()
+@require_GET
+@superuser_required
+def connection_datastores_api(request, connection_id):
+    """
+    API para obtener datastores de una conexión, filtrados opcionalmente por esquemas.
+    """
+    from gvsigol_services.models import Datastore
+    
+    try:
+        connection = Connection.objects.get(id=connection_id)
+        
+        scope = request.GET.get('scope', 'global')
+        schemas_str = request.GET.get('schemas', '')
+        
+        datastores = Datastore.objects.filter(connection=connection)
+        
+        if scope == 'schemas' and schemas_str:
+            schemas = [s.strip() for s in schemas_str.split(',') if s.strip()]
+            if schemas:
+                datastores = datastores.filter(name__in=schemas)
+        
+        return JsonResponse({
+            'datastores': [{'id': ds.id, 'name': ds.name} for ds in datastores]
+        })
+        
+    except Connection.DoesNotExist:
+        return JsonResponse({'error': _('Connection not found')}, status=404)
+
+
+@login_required()
+@superuser_required
+def connection_triggers_api(request, connection_id, trigger_id=None):
+    """
+    API REST para gestionar triggers de una conexión.
+    GET: Listar triggers o obtener uno específico
+    POST: Crear nuevo trigger
+    PUT: Actualizar trigger existente
+    DELETE: Eliminar trigger
+    """
+    from gvsigol_services.models import ConnectionTrigger
+    
+    try:
+        connection = Connection.objects.get(id=connection_id)
+        
+        # Solo permitir para conexiones PostGIS
+        if connection.type != 'PostGIS':
+            return JsonResponse({'error': _('Triggers are only available for PostGIS connections')}, status=400)
+        
+        if request.method == 'GET':
+            if trigger_id:
+                # Obtener un trigger específico
+                trigger = ConnectionTrigger.objects.get(id=trigger_id, connection=connection)
+                return JsonResponse({
+                    'id': trigger.id,
+                    'name': trigger.name,
+                    'description': trigger.description,
+                    'event': trigger.event,
+                    'timing': trigger.timing,
+                    'sql_code': trigger.sql_code,
+                    'is_calculated_field': trigger.is_calculated_field,
+                    'created_by': trigger.created_by,
+                    'created_at': trigger.created_at.isoformat(),
+                    'updated_at': trigger.updated_at.isoformat(),
+                })
+            else:
+                # Listar todos los triggers
+                triggers = ConnectionTrigger.objects.filter(connection=connection).order_by('name')
+                return JsonResponse({
+                    'triggers': [{
+                        'id': t.id,
+                        'name': t.name,
+                        'description': t.description,
+                        'event': t.event,
+                        'timing': t.timing,
+                        'is_calculated_field': t.is_calculated_field,
+                    } for t in triggers]
+                })
+        
+        elif request.method == 'POST':
+            # Crear nuevo trigger
+            import json
+            data = json.loads(request.body)
+            
+            # Validar nombre único
+            if ConnectionTrigger.objects.filter(connection=connection, name=data['name']).exists():
+                return JsonResponse({'error': _('A trigger with this name already exists')}, status=400)
+            
+            trigger = ConnectionTrigger.objects.create(
+                connection=connection,
+                name=data['name'],
+                description=data.get('description', ''),
+                event=data['event'],
+                timing=data['timing'],
+                sql_code=data['sql_code'],
+                is_calculated_field=data.get('is_calculated_field', False),
+                created_by=request.user.username,
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'id': trigger.id,
+                'message': _('Trigger created successfully')
+            })
+        
+        elif request.method == 'PUT':
+            # Actualizar trigger existente
+            if not trigger_id:
+                return JsonResponse({'error': _('Trigger ID is required')}, status=400)
+            
+            import json
+            data = json.loads(request.body)
+            
+            trigger = ConnectionTrigger.objects.get(id=trigger_id, connection=connection)
+            
+            # Validar nombre único si cambió
+            if data['name'] != trigger.name and ConnectionTrigger.objects.filter(connection=connection, name=data['name']).exists():
+                return JsonResponse({'error': _('A trigger with this name already exists')}, status=400)
+            
+            trigger.name = data['name']
+            trigger.description = data.get('description', '')
+            trigger.event = data['event']
+            trigger.timing = data['timing']
+            trigger.sql_code = data['sql_code']
+            trigger.is_calculated_field = data.get('is_calculated_field', False)
+            trigger.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': _('Trigger updated successfully')
+            })
+        
+        elif request.method == 'DELETE':
+            # Eliminar trigger
+            if not trigger_id:
+                return JsonResponse({'error': _('Trigger ID is required')}, status=400)
+            
+            trigger = ConnectionTrigger.objects.get(id=trigger_id, connection=connection)
+            
+            # Desinstalar de todas las capas donde está aplicado
+            layer_triggers = LayerConnectionTrigger.objects.filter(trigger=trigger)
+            uninstall_errors = []
+            for layer_trigger in layer_triggers:
+                if layer_trigger.is_installed:
+                    success, message = layer_trigger.uninstall()
+                    if not success:
+                        uninstall_errors.append(f"{layer_trigger.layer.name}: {message}")
+                        logger.warning(f"Could not uninstall trigger from layer {layer_trigger.layer.name}: {message}")
+                # Eliminar la asignación
+                layer_trigger.delete()
+            
+            # Eliminar el trigger de la conexión
+            trigger.delete()
+            
+            if uninstall_errors:
+                return JsonResponse({
+                    'success': True,
+                    'warning': _('Trigger deleted but some layer triggers could not be uninstalled: ') + '; '.join(uninstall_errors),
+                    'message': _('Trigger deleted')
+                })
+            
+            return JsonResponse({
+                'success': True,
+                'message': _('Trigger deleted successfully')
+            })
+        
+        else:
+            return JsonResponse({'error': _('Method not allowed')}, status=405)
+    
+    except Connection.DoesNotExist:
+        return JsonResponse({'error': _('Connection not found')}, status=404)
+    except ConnectionTrigger.DoesNotExist:
+        return JsonResponse({'error': _('Trigger not found')}, status=404)
+    except Exception as e:
+        logger.exception("Error in trigger API")
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required()
+@require_POST
+@staff_required
+def connection_trigger_duplicate(request):
+    """
+    Duplica un trigger a otra conexión.
+    POST: trigger_id, target_connection_id
+    """
+    from gvsigol_services.models import ConnectionTrigger, ConnectionTriggerRole
+    
+    try:
+        trigger_id = request.POST.get('trigger_id')
+        target_connection_id = request.POST.get('target_connection_id')
+        
+        if not trigger_id or not target_connection_id:
+            return JsonResponse({'error': _('Missing required parameters')}, status=400)
+        
+        # Obtener el trigger origen
+        source_trigger = ConnectionTrigger.objects.get(id=int(trigger_id))
+        target_connection = Connection.objects.get(id=int(target_connection_id))
+        
+        # Solo permitir para conexiones PostGIS
+        if target_connection.type != 'PostGIS':
+            return JsonResponse({'error': _('Triggers are only available for PostGIS connections')}, status=400)
+        
+        # Verificar que el usuario puede usar el trigger origen
+        if not source_trigger.can_use(request.user):
+            return JsonResponse({'error': _('You do not have permission to duplicate this trigger')}, status=403)
+        
+        # Verificar que el usuario puede gestionar la conexión destino
+        user_roles = auth_backend.get_roles(request.user)
+        all_user_roles = list(user_roles) + [request.user.username]
+        can_manage_target = (
+            request.user.is_superuser or
+            target_connection.allow_all_manage or
+            target_connection.created_by == request.user.username or
+            target_connection.roles.filter(role__in=all_user_roles, can_manage=True).exists()
+        )
+        
+        if not can_manage_target:
+            return JsonResponse({'error': _('You do not have permission to manage the target connection')}, status=403)
+        
+        # Generar nombre único para el trigger duplicado
+        base_name = source_trigger.name
+        new_name = base_name
+        counter = 1
+        while ConnectionTrigger.objects.filter(connection=target_connection, name=new_name).exists():
+            new_name = f"{base_name}_{counter}"
+            counter += 1
+        
+        # Si el scope es "schemas", verificar cuáles existen en la conexión destino
+        new_scope = source_trigger.scope
+        new_schemas = source_trigger.schemas
+        if source_trigger.scope == 'schemas':
+            # Obtener los esquemas (datastores) disponibles en la conexión destino
+            target_schemas = set(Datastore.objects.filter(
+                connection=target_connection
+            ).values_list('name', flat=True))
+            
+            # Filtrar solo los esquemas que existen en la conexión destino
+            source_schemas = source_trigger.get_schemas_list()
+            matching_schemas = [s for s in source_schemas if s in target_schemas]
+            
+            if matching_schemas:
+                new_schemas = json.dumps(matching_schemas)
+            else:
+                new_schemas = '[]'  # Ningún esquema coincide, dejar vacío
+        
+        # Crear el trigger duplicado
+        new_trigger = ConnectionTrigger.objects.create(
+            connection=target_connection,
+            name=new_name,
+            description=source_trigger.description,
+            timing=source_trigger.timing,
+            event=source_trigger.event,
+            scope=new_scope,
+            schemas=new_schemas,
+            is_calculated_field=source_trigger.is_calculated_field,
+            sql_code=source_trigger.sql_code,
+            allow_all=source_trigger.allow_all,
+            created_by=request.user.username,
+        )
+        
+        # Duplicar los roles si los tiene
+        for source_role in source_trigger.trigger_roles.all():
+            ConnectionTriggerRole.objects.create(
+                trigger=new_trigger,
+                role=source_role.role
+            )
+        
+        return JsonResponse({
+            'success': True,
+            'id': new_trigger.id,
+            'name': new_trigger.name,
+            'message': _('Trigger duplicated successfully')
+        })
+    
+    except ConnectionTrigger.DoesNotExist:
+        return JsonResponse({'error': _('Source trigger not found')}, status=404)
+    except Connection.DoesNotExist:
+        return JsonResponse({'error': _('Target connection not found')}, status=404)
+    except Exception as e:
+        logger.exception("Error duplicating trigger")
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required()
+@require_POST
+@staff_required
+def layer_trigger_assign(request):
+    """
+    Asigna un trigger de conexión a una capa.
+    Si el trigger es de campo calculado, también se especifica el campo destino.
+    """
+    try:
+        layer_id = request.POST.get('layer_id')
+        trigger_id = request.POST.get('trigger_id')
+        field_name = request.POST.get('field_name') or None  # Puede ser vacío/None
+        
+        if not layer_id or not trigger_id:
+            return JsonResponse({'error': _('Missing required parameters')}, status=400)
+        
+        layer = Layer.objects.get(id=int(layer_id))
+        trigger = ConnectionTrigger.objects.get(id=int(trigger_id))
+        
+        # Verificar permisos
+        if not utils.can_manage_layer(request, layer):
+            return JsonResponse({'error': _('Permission denied')}, status=403)
+        
+        # Verificar que el trigger pertenece a la conexión del datastore de la capa
+        if not layer.datastore or not layer.datastore.connection:
+            return JsonResponse({'error': _('Layer has no associated connection')}, status=400)
+        
+        if trigger.connection != layer.datastore.connection:
+            return JsonResponse({'error': _('Trigger does not belong to the layer connection')}, status=400)
+        
+        # Si es campo calculado, el campo es obligatorio
+        if trigger.is_calculated_field and not field_name:
+            return JsonResponse({'error': _('Field name is required for calculated field triggers')}, status=400)
+        
+        # Verificar que el campo no esté ya usado por otro trigger calculado
+        if trigger.is_calculated_field and field_name:
+            if LayerConnectionTrigger.objects.filter(
+                layer=layer,
+                field_name=field_name,
+                trigger__is_calculated_field=True
+            ).exists():
+                return JsonResponse({'error': _('This field is already assigned to another calculated field trigger')}, status=400)
+        
+        # Verificar que no existe ya una asignación de este trigger a esta capa
+        if LayerConnectionTrigger.objects.filter(layer=layer, trigger=trigger).exists():
+            return JsonResponse({'error': _('This trigger is already assigned to this layer')}, status=400)
+        
+        # Crear la asignación
+        layer_trigger = LayerConnectionTrigger.objects.create(
+            layer=layer,
+            trigger=trigger,
+            field_name=field_name,
+            created_by=request.user.username
+        )
+        
+        # Instalar el trigger en la base de datos
+        success, message = layer_trigger.install()
+        
+        if not success:
+            # Si falla la instalación, eliminar la asignación
+            layer_trigger.delete()
+            return JsonResponse({'error': message}, status=500)
+        
+        return JsonResponse({
+            'success': True,
+            'id': layer_trigger.id,
+            'installed': True,
+            'message': _('Trigger assigned and installed successfully')
+        })
+        
+    except Layer.DoesNotExist:
+        return JsonResponse({'error': _('Layer not found')}, status=404)
+    except ConnectionTrigger.DoesNotExist:
+        return JsonResponse({'error': _('Trigger not found')}, status=404)
+    except Exception as e:
+        logger.exception("Error assigning trigger to layer")
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required()
+@require_POST
+@staff_required
+def layer_trigger_remove(request):
+    """
+    Elimina la asignación de un trigger a una capa.
+    Desinstala el trigger de la base de datos antes de eliminar.
+    """
+    try:
+        assignment_id = request.POST.get('id')
+        
+        if not assignment_id:
+            return JsonResponse({'error': _('Missing assignment ID')}, status=400)
+        
+        layer_trigger = LayerConnectionTrigger.objects.get(id=int(assignment_id))
+        
+        # Verificar permisos sobre la capa
+        if not utils.can_manage_layer(request, layer_trigger.layer):
+            return JsonResponse({'error': _('Permission denied')}, status=403)
+        
+        # Verificar permisos sobre el trigger (solo superusers o usuarios con permiso pueden quitar)
+        if not layer_trigger.trigger.can_use(request.user):
+            return JsonResponse({'error': _('You do not have permission to remove this trigger')}, status=403)
+        
+        # Desinstalar el trigger de la base de datos
+        if layer_trigger.is_installed:
+            success, message = layer_trigger.uninstall()
+            if not success:
+                logger.warning(f"Could not uninstall trigger: {message}")
+        
+        layer_trigger.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': _('Trigger removed successfully')
+        })
+        
+    except LayerConnectionTrigger.DoesNotExist:
+        return JsonResponse({'error': _('Assignment not found')}, status=404)
+    except Exception as e:
+        logger.exception("Error removing trigger from layer")
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required()
+@require_GET
+@staff_required
+def connection_schemas(request, connection_id):
+    """Obtener los esquemas disponibles en una conexión."""
+    try:
+        logger.debug(f"Getting schemas for connection_id: {connection_id}")
+        connection = Connection.objects.get(id=connection_id)
+        logger.debug(f"Connection found: {connection.name}, type: {connection.type}")
+        
+        # Verificar permisos de acceso a la conexión para datastores
+        if not request.user.is_superuser:
+            user_roles = auth_backend.get_roles(request.user)
+            # Incluir el username del usuario en la lista de roles para buscar (migración automática)
+            all_user_roles = list(user_roles) + [request.user.username]
+            has_access = (
+                connection.allow_all_datastore or  # Permiso global para datastores
+                connection.created_by == request.user.username or
+                connection.roles.filter(role__in=all_user_roles, can_use_datastore=True).exists() or
+                connection.datastores.filter(created_by=request.user.username).exists()
+            )
+            if not has_access:
+                logger.warning(f"Access denied for user {request.user.username} to connection {connection.name}")
+                return JsonResponse({'success': False, 'error': _('Access denied')})
+        
+        logger.debug(f"Fetching schemas for connection: {connection.name}")
+        schemas = connection.get_schemas()
+        logger.debug(f"Schemas found: {schemas}")
+        return JsonResponse({'success': True, 'schemas': schemas})
+    except Connection.DoesNotExist:
+        logger.error(f"Connection not found: {connection_id}")
+        return JsonResponse({'success': False, 'error': _('Connection not found')})
+    except Exception as e:
+        logger.exception(f"Error getting schemas for connection {connection_id}")
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required()
+@require_GET
+@staff_required
+def connection_list_for_etl(request):
+    """
+    Endpoint para obtener conexiones filtradas por permisos ETL.
+    Se usa desde el plugin ETL para cargar conexiones disponibles.
+    
+    Query params:
+    - type: Filtrar por tipo de conexión (opcional)
+    - category: 'database' o 'api' (opcional)
+    """
+    try:
+        conn_type = request.GET.get('type', '')
+        category = request.GET.get('category', '')
+        
+        # Superusuario ve todas las conexiones
+        if request.user.is_superuser:
+            connections = Connection.objects.all()
+        else:
+            # Usuario staff ve solo las conexiones con permiso ETL
+            user_roles = auth_backend.get_roles(request.user)
+            all_user_roles = list(user_roles) + [request.user.username]
+            # Obtener IDs de conexiones donde el rol tiene permiso ETL
+            role_connection_ids = ConnectionRole.objects.filter(
+                role__in=all_user_roles,
+                can_use_etl=True
+            ).values_list('connection_id', flat=True)
+            connections = Connection.objects.filter(
+                Q(allow_all_etl=True) |
+                Q(created_by=request.user.username) |
+                Q(id__in=role_connection_ids)
+            ).distinct()
+        
+        # Filtrar por tipo si se especifica
+        if conn_type:
+            connections = connections.filter(type=conn_type)
+        
+        # Filtrar por categoría
+        if category == 'database':
+            connections = connections.filter(type__in=['PostGIS', 'Oracle', 'SQLServer', 'MySQL'])
+        elif category == 'api':
+            connections = connections.filter(type__in=['indenova', 'segex', 'sharepoint', 'padron-atm'])
+        
+        result = []
+        for conn in connections.order_by('name'):
+            result.append({
+                'id': conn.id,
+                'name': conn.name,
+                'type': conn.type,
+                'category': conn.get_type_category(),
+            })
+        
+        return JsonResponse({'success': True, 'connections': result})
+    
+    except Exception as e:
+        logger.exception("Error getting ETL connections")
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required()
+@require_GET
+@staff_required
+def connection_params_for_etl(request, connection_id):
+    """
+    Endpoint para obtener los parámetros de conexión para uso en ETL.
+    Verifica permisos ETL antes de devolver los datos.
+    """
+    try:
+        connection = Connection.objects.get(id=connection_id)
+        
+        # Verificar permisos ETL
+        if not request.user.is_superuser:
+            user_roles = auth_backend.get_roles(request.user)
+            all_user_roles = list(user_roles) + [request.user.username]
+            has_access = (
+                connection.allow_all_etl or
+                connection.created_by == request.user.username or
+                connection.roles.filter(role__in=all_user_roles, can_use_etl=True).exists()
+            )
+            if not has_access:
+                return JsonResponse({'success': False, 'error': _('Access denied')})
+        
+        params = connection.get_connection_params()
+        
+        return JsonResponse({
+            'success': True,
+            'id': connection.id,
+            'name': connection.name,
+            'type': connection.type,
+            'connection_params': params
+        })
+    
+    except Connection.DoesNotExist:
+        return JsonResponse({'success': False, 'error': _('Connection not found')})
+    except Exception as e:
+        logger.exception(f"Error getting connection params for ETL: {connection_id}")
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
 @login_required()
 @staff_required
 def test_connection(request):
@@ -8024,3 +9748,41 @@ def db_fill_link_field(request):
     
     logger.error(f'Invalid request method: {request.method}. Only POST is allowed.')
     return utils.get_exception(400, 'Only POST method is allowed')
+
+
+@login_required()
+@staff_required
+def api_segex_entities(request):
+    """
+    Endpoint para obtener la lista de entidades (municipios) de SEGEX.
+    Parámetros GET:
+    - domain: 'PRO' (producción) o 'PRE' (preproducción)
+    """
+    import requests as http_requests
+    
+    domain = request.GET.get('domain', 'PRO')
+    
+    if domain == 'PRE':
+        url = 'https://pre-02000.sedipualba.es/apisegex/Georef/ListEntidades'
+    else:
+        url = 'https://02000.sedipualba.es/apisegex/Georef/ListEntidades'
+    
+    try:
+        r = http_requests.get(url, timeout=30)
+        
+        if r.status_code == 200:
+            entities = []
+            for item in r.json():
+                entities.append({
+                    'id': item['Id'],
+                    'description': item['Descripcion']
+                })
+            return JsonResponse({'success': True, 'entities': entities})
+        else:
+            return JsonResponse({
+                'success': False, 
+                'error': f'Error from SEGEX API: {r.status_code}'
+            })
+    except Exception as e:
+        logger.exception('Error fetching SEGEX entities')
+        return JsonResponse({'success': False, 'error': str(e)})

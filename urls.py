@@ -85,6 +85,35 @@ urlpatterns = [
     path('service_url_add/', services_views.service_url_add, name='service_url_add'),
     path('service_url_delete/<int:svid>/', services_views.service_url_delete, name='service_url_delete'),
     path('service_url_update/<int:svid>/', services_views.service_url_update, name='service_url_update'),
+    
+    # Connection URLs
+    path('connection_list/', services_views.connection_list, name='connection_list'),
+    path('connection_add/', services_views.connection_add, name='connection_add'),
+    path('connection_update/<int:connection_id>/', services_views.connection_update, name='connection_update'),
+    path('connection_delete/<int:connection_id>/', services_views.connection_delete, name='connection_delete'),
+    path('connection_test/', services_views.connection_test, name='connection_test'),
+    path('api/connection/<int:connection_id>/info/', services_views.connection_info_api, name='connection_info_api'),
+    path('connection_schemas/<int:connection_id>/', services_views.connection_schemas, name='connection_schemas'),
+    path('connection_config/<int:connection_id>/', services_views.connection_config, name='connection_config'),
+    path('connection_config/<int:connection_id>/trigger/add/', services_views.connection_trigger_add, name='connection_trigger_add'),
+    path('connection_config/<int:connection_id>/trigger/<int:trigger_id>/', services_views.connection_trigger_update, name='connection_trigger_update'),
+    
+    # Connection Triggers API
+    path('api/connections/<int:connection_id>/triggers/', services_views.connection_triggers_api, name='connection_triggers_list'),
+    path('api/connections/<int:connection_id>/triggers/<int:trigger_id>/', services_views.connection_triggers_api, name='connection_triggers_detail'),
+    path('api/connections/<int:connection_id>/datastores/', services_views.connection_datastores_api, name='connection_datastores_api'),
+    
+    # Layer Triggers API (assign triggers to layers)
+    path('api/layer_trigger/assign/', services_views.layer_trigger_assign, name='layer_trigger_assign'),
+    path('api/layer_trigger/remove/', services_views.layer_trigger_remove, name='layer_trigger_remove'),
+    
+    # Connection Trigger utilities
+    path('api/connection_trigger/duplicate/', services_views.connection_trigger_duplicate, name='connection_trigger_duplicate'),
+    
+    # Connection API for ETL plugin
+    path('api/connections/etl/', services_views.connection_list_for_etl, name='connection_list_for_etl'),
+    path('api/connections/etl/<int:connection_id>/', services_views.connection_params_for_etl, name='connection_params_for_etl'),
+    
     path('test_connection/', services_views.test_connection, name='test_connection'),
     path('register_action/', services_views.register_action, name='register_action'),
     path('db_field_delete/', services_views.db_field_delete, name='db_field_delete'),
@@ -111,4 +140,7 @@ urlpatterns = [
     path('dnie/', services_views.test_dnie, name='test_dnie'),
     path('dnie2/', services_views.test_dnie2, name='test_dnie2'),
     path('dnie-external/', services_views.test_dnie_external, name='test_dnie_external'),
+    
+    # API para conexiones externas
+    path('api/segex/entities/', services_views.api_segex_entities, name='api_segex_entities'),
 ]
