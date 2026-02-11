@@ -58,20 +58,47 @@
 						</div>	
 					</div>
 						
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label for="id_description">{% trans "Description" %}</label>
-							{{ form.description }}
-						</div>
-					</div>	
-						
-					<div class="row" id="connection-params-row">
-						<div class="col-md-12 form-group">
-							<label for="id_connection_params">{% trans "Connection params" %}</label>
-							<div id="test_connection" style="margin: 10px;" class="btn btn-default btn-sm"><i class="fa fa-database margin-r-5"></i> {% trans "Test connection" %}</div>
-							{{ form.connection_params }}
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label for="id_description">{% trans "Description" %}</label>
+						{{ form.description }}
+					</div>
+				</div>	
+				
+				{% if uses_connection %}
+				<!-- Modo conexión: mostrar información de la conexión (solo lectura) -->
+				<div class="row" id="connection-info-row">
+					<div class="col-md-6 form-group">
+						<label for="id_connection_name">{% trans "Connection" %}</label>
+						{{ form.connection_name }}
+						<small class="text-muted">{% trans "This datastore uses a centralized connection" %}</small>
+					</div>
+					<div class="col-md-6 form-group">
+						<label for="id_schema_name">{% trans "Schema" %}</label>
+						{{ form.schema_name }}
+					</div>
+				</div>
+				{% if connection %}
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<div class="alert alert-info">
+							<i class="fa fa-info-circle margin-r-5"></i>
+							{% trans "Connection parameters are managed from the Connections section. To modify them, edit the connection:" %}
+							<a href="{% url 'connection_update' connection.id %}">{{ connection.name }}</a>
 						</div>
 					</div>
+				</div>
+				{% endif %}
+				{% else %}
+				<!-- Modo legacy: mostrar connection_params editables -->
+				<div class="row" id="connection-params-row">
+					<div class="col-md-12 form-group">
+						<label for="id_connection_params">{% trans "Connection params" %}</label>
+						<div id="test_connection" style="margin: 10px;" class="btn btn-default btn-sm"><i class="fa fa-database margin-r-5"></i> {% trans "Test connection" %}</div>
+						{{ form.connection_params }}
+					</div>
+				</div>
+				{% endif %}
 					
 					
 							
@@ -120,14 +147,24 @@
 <script type="text/javascript">
 $().ready(function(){ 
 	var connectionParams = document.getElementById('id_connection_params');
-	var config_json = JSON.parse(connectionParams.value);
+	var config_json = {};
+	var codemirror = null;
 	
-	var codemirror = CodeMirror.fromTextArea(connectionParams, {
-		value: "",
-		mode:  "javascript",
-		theme: "xq-dark",
-		lineNumbers: true
-	});
+	// Solo inicializar CodeMirror si existe el campo connection_params (modo legacy)
+	if (connectionParams && connectionParams.value) {
+		try {
+			config_json = JSON.parse(connectionParams.value);
+		} catch(e) {
+			config_json = {};
+		}
+		
+		codemirror = CodeMirror.fromTextArea(connectionParams, {
+			value: "",
+			mode:  "javascript",
+			theme: "xq-dark",
+			lineNumbers: true
+		});
+	}
 	
 	if($("#id_type").val() == "c_ImageMosaic"){
 		$('#select-file-row').css('display', 'block');
@@ -166,58 +203,61 @@ $().ready(function(){
 	}
 	
 
-	$("#id_type").change(function() {
-		codemirror.setValue('');
-		
-		var type = $('option:selected', $(this)).val();
-		
-		var code = '';
-		
-		if (type == 'v_SHP') {
-			$('#select-file-row').css('display', 'none');
-			$('#connection-params-row').css('display', 'none');
-			$('.select-mosaic_dimension').css('display', 'none');
-			code += '{ \n';
-			code += '\t "url": "file:data/valencia-osm" \n';
-			code += '}';
+	// Solo manejar cambios de tipo si estamos en modo legacy
+	if (codemirror) {
+		$("#id_type").change(function() {
+			codemirror.setValue('');
 			
-		} else if (type == 'v_PostGIS') {
-			$('#select-file-row').css('display', 'none');
-			$('#connection-params-row').css('display', 'block');
-			$('.select-mosaic_dimension').css('display', 'none');
-			code += '{ \n';
-			code += '\t "host": "localhost", \n';
-			code += '\t "port": "5432", \n';
-			code += '\t "database": "mydatabase", \n';
-			code += '\t "user": "postgres", \n';
-			code += '\t "passwd": "postgres", \n';
-			code += '\t "dbtype": "postgis" \n';
-			code += '}';
+			var type = $('option:selected', $(this)).val();
 			
-		} else if (type == 'c_GeoTiff') {
-			$('#select-file-row').css('display', 'block');
-			$('#connection-params-row').css('display', 'none');
-			$('.select-mosaic_dimension').css('display', 'none');
-			code += '{ \n';
-			code += '\t "url": "file:coverages/img_sample/sample.tif" \n';
-			code += '}';
+			var code = '';
 			
-		}  else if (type == 'c_ImageMosaic') {
-			$('#select-file-row').css('display', 'block');
-			$('.select-mosaic_dimension').css('display', 'block');
-			$('#connection-params-row').css('display', 'none');
-			code += '{ \n';
-			code += '\t "url": "url_replace", \n';
-			code += '\t "date_regex": "", \n';
-			code += '\t "date_format": "", \n';
-			code += '\t "ele_regex": "", \n';
-			code += '\t "ele_format": "" \n';
-			code += '}';
+			if (type == 'v_SHP') {
+				$('#select-file-row').css('display', 'none');
+				$('#connection-params-row').css('display', 'none');
+				$('.select-mosaic_dimension').css('display', 'none');
+				code += '{ \n';
+				code += '\t "url": "file:data/valencia-osm" \n';
+				code += '}';
+				
+			} else if (type == 'v_PostGIS') {
+				$('#select-file-row').css('display', 'none');
+				$('#connection-params-row').css('display', 'block');
+				$('.select-mosaic_dimension').css('display', 'none');
+				code += '{ \n';
+				code += '\t "host": "localhost", \n';
+				code += '\t "port": "5432", \n';
+				code += '\t "database": "mydatabase", \n';
+				code += '\t "user": "postgres", \n';
+				code += '\t "passwd": "postgres", \n';
+				code += '\t "dbtype": "postgis" \n';
+				code += '}';
+				
+			} else if (type == 'c_GeoTiff') {
+				$('#select-file-row').css('display', 'block');
+				$('#connection-params-row').css('display', 'none');
+				$('.select-mosaic_dimension').css('display', 'none');
+				code += '{ \n';
+				code += '\t "url": "file:coverages/img_sample/sample.tif" \n';
+				code += '}';
+				
+			}  else if (type == 'c_ImageMosaic') {
+				$('#select-file-row').css('display', 'block');
+				$('.select-mosaic_dimension').css('display', 'block');
+				$('#connection-params-row').css('display', 'none');
+				code += '{ \n';
+				code += '\t "url": "url_replace", \n';
+				code += '\t "date_regex": "", \n';
+				code += '\t "date_format": "", \n';
+				code += '\t "ele_regex": "", \n';
+				code += '\t "ele_format": "" \n';
+				code += '}';
+				
+			}
 			
-		}
-		
-		codemirror.setValue(code);
-	});
+			codemirror.setValue(code);
+		});
+	}
 	
 	$('#select-file-button').click(function (e) {
 		window.open("/gvsigonline/filemanager/?popup=1","Ratting","width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1");
@@ -240,7 +280,7 @@ $().ready(function(){
 	
 	$('#save_button').click(function (e) {
 		var type = $("#id_type").val();
-		if(type == 'c_ImageMosaic'){
+		if(type == 'c_ImageMosaic' && codemirror){
 			var code = '{ \n';
 			code += '\t "url": "'+$("#id_file").val()+'", \n';
 			if($("#time_dimension_input").prop('checked') == true){
@@ -282,31 +322,34 @@ $().ready(function(){
 		$('#main_form').submit();
 	});
 	
-	$('#test_connection').click(function (e) {
-		var connectionParams = JSON.parse(codemirror.getValue());
-		var ds_type = $("#id_type").val();
-		$.ajax({
-			type: 'POST',
-			async: false,
-			url: '/gvsigonline/services/test_connection/',
-			data: {
-				connection_params: JSON.stringify(connectionParams),
-				ds_type: ds_type
-			},
-			beforeSend:function(xhr){
-			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-			},
-			success	:function(response){
-				if (response.success) {
-					messageBox.show('info', gettext('Connection has been success'));
-					
-				} else {
-					messageBox.show('warning', response.error);
-				}
-			},
-			error: function(){}
+	// Solo mostrar test_connection si estamos en modo legacy
+	if (codemirror) {
+		$('#test_connection').click(function (e) {
+			var connectionParams = JSON.parse(codemirror.getValue());
+			var ds_type = $("#id_type").val();
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/services/test_connection/',
+				data: {
+					connection_params: JSON.stringify(connectionParams),
+					ds_type: ds_type
+				},
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				success	:function(response){
+					if (response.success) {
+						messageBox.show('info', gettext('Connection has been success'));
+						
+					} else {
+						messageBox.show('warning', response.error);
+					}
+				},
+				error: function(){}
+			});
 		});
-	});
+	}
 });
 </script>
 {% endblock %}

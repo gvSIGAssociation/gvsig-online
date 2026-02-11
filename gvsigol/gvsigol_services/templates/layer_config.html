@@ -57,6 +57,7 @@
 			<li role="presentation" class="tab-li-layer-fieldgroups"><a href="#tab-layer-fieldgroups" data-toggle="tab">{% trans "Field groups" %}</a></li>
 			<li role="presentation" class="tab-li-layer-fieldgroup-trans"><a href="#tab-layer-fieldgroup-trans" data-toggle="tab">{% trans "Group titles" %}</a></li>
 			<li role="presentation"><a href="#tab-editing-restrictions" data-toggle="tab">{% trans "Editing restrictions" %}</a></li>
+			<li role="presentation"><a href="#tab-triggers" data-toggle="tab">{% trans "Triggers" %}</a></li>
 		</ul>
 		<div class="tab-content">
 			<div class="tab-pane active" id="tab-layer-config">
@@ -475,10 +476,145 @@
 					</div>
 				</div>
 			</div>
+			<div class="tab-pane" id="tab-triggers">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+							<div class="box-header with-border">
+								<h3 class="box-title">{% trans "Connection Triggers" %}</h3>
+								<p class="text-muted" style="margin-top: 5px;">
+									{% trans "Assign triggers to fields. These triggers will execute automatically when data is inserted, updated or deleted." %}
+								</p>
+							</div>
+							<div class="box-body">
+								<div class="table-responsive">
+									<table id="triggers-table" class="table table-striped">
+										<thead>
+											<tr>
+												<th>{% trans "Trigger" %}</th>
+												<th>{% trans "Events" %}</th>
+												<th>{% trans "Target field" %}</th>
+												<th>{% trans "Description" %}</th>
+												<th style="width: 80px;">{% trans "Actions" %}</th>
+											</tr>
+										</thead>
+										<tbody>
+											{% for lct in layer_connection_triggers %}
+											<tr data-id="{{ lct.id }}">
+												<td>
+													<strong>{{ lct.trigger.name }}</strong>
+													<span class="label label-default">{{ lct.trigger.timing }}</span>
+												</td>
+												<td>
+													{% for evt in lct.trigger.get_events_list %}
+														<span class="label label-info">{{ evt }}</span>
+													{% endfor %}
+												</td>
+												<td>
+													{% if lct.field_name %}
+														<code>{{ lct.field_name }}</code>
+													{% else %}
+														<span class="text-muted">-</span>
+													{% endif %}
+												</td>
+												<td>{{ lct.trigger.description|default:"-"|truncatechars:50 }}</td>
+												<td>
+													{% if lct.can_manage %}
+													<button type="button" class="btn btn-xs btn-danger btn-remove-trigger" 
+														data-id="{{ lct.id }}" data-trigger="{{ lct.trigger.name }}">
+														<i class="fa fa-trash"></i>
+													</button>
+													{% else %}
+													<span class="text-muted" title="{% trans 'You do not have permission to remove this trigger' %}">
+														<i class="fa fa-lock"></i>
+													</span>
+													{% endif %}
+												</td>
+											</tr>
+											{% empty %}
+											<tr id="no-triggers-row">
+												<td colspan="5" class="text-center text-muted">
+													<em>{% trans "No triggers assigned to this layer yet" %}</em>
+												</td>
+											</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<div class="box-footer">
+								{% if connection_triggers %}
+								<button type="button" class="btn btn-primary btn-sm" id="btn-add-trigger">
+									<i class="fa fa-plus margin-r-5"></i> {% trans "Assign trigger to field" %}
+								</button>
+								{% else %}
+								<p class="text-muted" style="margin: 0;">
+									<i class="fa fa-info-circle"></i>
+									{% trans "No triggers available. Create triggers with 'Calculated field' option in the connection configuration." %}
+								</p>
+								{% endif %}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
 </form>
+
+<!-- Modal para asignar trigger -->
+<div class="modal fade" id="assign-trigger-modal" tabindex="-1" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title">{% trans "Assign trigger" %}</h4>
+			</div>
+			<div class="modal-body">
+				<div class="form-group">
+					<label for="trigger-select">{% trans "Trigger" %} <span class="text-danger">*</span></label>
+					<select id="trigger-select" class="form-control">
+						<option value="">{% trans "Select a trigger..." %}</option>
+						{% for t in connection_triggers %}
+						<option value="{{ t.id }}" 
+							data-timing="{{ t.timing }}" 
+							data-events="{{ t.event }}" 
+							data-description="{{ t.description }}"
+							data-is-calculated="{{ t.is_calculated_field|yesno:'true,false' }}">
+							{{ t.name }} ({{ t.timing }} {{ t.event }})
+							{% if t.is_calculated_field %}<span class="text-muted">- {% trans "Calculated field" %}</span>{% endif %}
+						</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div id="trigger-info" class="well" style="display: none;">
+					<strong>{% trans "Description" %}:</strong>
+					<p id="trigger-description" class="text-muted"></p>
+				</div>
+				<div class="form-group" id="field-group" style="display: none;">
+					<label for="trigger-field">{% trans "Target field" %} <span class="text-danger">*</span></label>
+					<select id="trigger-field" class="form-control">
+						<option value="">{% trans "Select a field..." %}</option>
+						{% for f in fields %}
+							{% if f.editableactive or f.editable %}
+							<option value="{{ f.name }}">{{ f.name }} ({{ f.type }})</option>
+							{% endif %}
+						{% endfor %}
+					</select>
+					<small class="text-muted">{% trans "Select the field that will be calculated by this trigger" %}</small>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button type="button" class="btn btn-primary" id="btn-confirm-assign">{% trans "Assign" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- Fin modal para asignar trigger -->
 
 <div class="modal fade" id="my-modal-dialog" tabindex="-1" role="dialog" aria-labelledby="modalTitle">
 	<div class="modal-dialog" role="document">
@@ -1863,6 +1999,181 @@
 					toggleTopologyControls();
 					validateTopologyRules();
 				}, 100);
+			});
+		});
+
+		// ================= TRIGGERS =================
+		// Campos ya usados por triggers calculados (no se pueden volver a usar)
+		var calculatedFieldsUsed = {{ calculated_fields_used|safe }};
+		
+		// Resetear modal al cerrarse
+		$('#assign-trigger-modal').on('hidden.bs.modal', function() {
+			$('#trigger-select').val('');
+			$('#trigger-field').val('');
+			$('#trigger-info').hide();
+			$('#field-group').hide();
+		});
+		
+		// Función para actualizar el estado de las opciones de campo
+		function updateFieldOptions() {
+			$('#trigger-field option').each(function() {
+				var fieldName = $(this).val();
+				if (fieldName && calculatedFieldsUsed.indexOf(fieldName) !== -1) {
+					$(this).prop('disabled', true);
+					$(this).text($(this).text().replace(' (ya asignado)', '') + ' (ya asignado)');
+				}
+			});
+		}
+		
+		// Mostrar info del trigger seleccionado y campo si es calculado
+		$('#trigger-select').on('change', function() {
+			var selected = $(this).find('option:selected');
+			var description = selected.data('description');
+			var isCalculated = selected.data('is-calculated') === true || selected.data('is-calculated') === 'true';
+			
+			// Mostrar descripción
+			if (description) {
+				$('#trigger-description').text(description);
+				$('#trigger-info').show();
+			} else {
+				$('#trigger-info').hide();
+			}
+			
+			// Mostrar selector de campo solo si es trigger de campo calculado
+			if (isCalculated) {
+				$('#field-group').show();
+				updateFieldOptions();
+			} else {
+				$('#field-group').hide();
+				$('#trigger-field').val('');
+			}
+		});
+
+		// Abrir modal para asignar trigger
+		$('#btn-add-trigger').on('click', function() {
+			$('#trigger-field').val('');
+			$('#trigger-select').val('');
+			$('#trigger-info').hide();
+			$('#field-group').hide();
+			updateFieldOptions();
+			$('#assign-trigger-modal').modal('show');
+		});
+
+		// Confirmar asignación de trigger
+		$('#btn-confirm-assign').on('click', function() {
+			var fieldName = $('#trigger-field').val();
+			var triggerId = $('#trigger-select').val();
+			var selected = $('#trigger-select').find('option:selected');
+			var isCalculated = selected.data('is-calculated') === true || selected.data('is-calculated') === 'true';
+			
+			if (!triggerId) {
+				alert(gettext('Please select a trigger'));
+				return;
+			}
+			
+			// Si es campo calculado, el campo es obligatorio
+			if (isCalculated && !fieldName) {
+				alert(gettext('Please select a target field for the calculated field trigger'));
+				return;
+			}
+			
+			$.ajax({
+				type: 'POST',
+				url: '/gvsigonline/services/api/layer_trigger/assign/',
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				data: {
+					'layer_id': '{{ layer_id }}',
+					'trigger_id': triggerId,
+					'field_name': fieldName
+				},
+				success: function(response) {
+					if (response.success) {
+						$('#assign-trigger-modal').modal('hide');
+						// Recargar página para ver los cambios
+						window.location.reload();
+					} else {
+						alert(response.error || gettext('Error assigning trigger'));
+					}
+				},
+				error: function(jqXHR) {
+					var error = gettext('Error assigning trigger');
+					try {
+						var resp = JSON.parse(jqXHR.responseText);
+						error = resp.error || error;
+					} catch(e) {}
+					alert(error);
+				}
+			});
+		});
+
+		// Eliminar asignación de trigger
+		$('.btn-remove-trigger').on('click', function() {
+			var id = $(this).data('id');
+			var triggerName = $(this).data('trigger');
+			
+			// Mostrar modal de confirmación
+			$('#my-modal-dialog .modal-title').text(gettext('Remove trigger'));
+			$('#my-modal-dialog .modal-body').empty();
+			
+			var ui = '';
+			ui += '<div class="row">';
+			ui += '<div class="col-md-12">';
+			ui += '<p>' + gettext('Are you sure you want to remove the trigger') + ' <strong>"' + triggerName + '"</strong> ' + gettext('from this layer?') + '</p>';
+			ui += '<p class="text-muted"><small>' + gettext('The trigger will be uninstalled from the database.') + '</small></p>';
+			ui += '</div>';
+			ui += '</div>';
+			$('#my-modal-dialog .modal-body').append(ui);
+			
+			var buttons = '';
+			buttons += '<button type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
+			buttons += '<button type="button" class="btn btn-danger" id="btn-confirm-remove-trigger" data-id="' + id + '">' + gettext('Remove') + '</button>';
+			$('#my-modal-dialog .modal-footer').empty();
+			$('#my-modal-dialog .modal-footer').append(buttons);
+			
+			$('#my-modal-dialog').modal('show');
+		});
+		
+		// Confirmar eliminación de trigger
+		$(document).on('click', '#btn-confirm-remove-trigger', function() {
+			var id = $(this).data('id');
+			
+			$.ajax({
+				type: 'POST',
+				url: '/gvsigonline/services/api/layer_trigger/remove/',
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				data: {
+					'id': id
+				},
+				success: function(response) {
+					$('#my-modal-dialog').modal('hide');
+					if (response.success) {
+						// Eliminar fila de la tabla
+						$('tr[data-id="' + id + '"]').remove();
+						// Si no quedan triggers, mostrar mensaje
+						if ($('#triggers-table tbody tr').length === 0) {
+							$('#triggers-table tbody').append(
+								'<tr id="no-triggers-row"><td colspan="5" class="text-center text-muted">' +
+								'<em>' + gettext('No triggers assigned to this layer yet') + '</em></td></tr>'
+							);
+						}
+						messageBox.show('info', gettext('Trigger removed successfully'));
+					} else {
+						messageBox.show('error', response.error || gettext('Error removing trigger'));
+					}
+				},
+				error: function(jqXHR) {
+					$('#my-modal-dialog').modal('hide');
+					var error = gettext('Error removing trigger');
+					try {
+						var resp = JSON.parse(jqXHR.responseText);
+						error = resp.error || error;
+					} catch(e) {}
+					messageBox.show('error', error);
+				}
 			});
 		});
 </script>

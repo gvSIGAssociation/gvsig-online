@@ -149,6 +149,40 @@ class Introspect:
             self.conn.close()
         return exc_type is None
     
+    def get_schemas(self):
+        """Obtiene la lista de esquemas disponibles en la base de datos."""
+        self.cursor.execute("""
+        SELECT schema_name FROM information_schema.schemata
+        WHERE schema_name NOT LIKE 'pg_%' 
+        AND schema_name != 'information_schema'
+        ORDER BY schema_name
+        """)
+        return [r[0] for r in self.cursor.fetchall()]
+    
+    def schema_exists(self, schema_name):
+        """Verifica si un esquema existe en la base de datos."""
+        self.cursor.execute("""
+        SELECT 1 FROM information_schema.schemata
+        WHERE schema_name = %s
+        """, [schema_name])
+        return self.cursor.rowcount > 0
+    
+    def create_schema(self, schema_name):
+        """Crea un nuevo esquema en la base de datos si no existe."""
+        # Validar nombre del esquema (solo caracteres válidos)
+        import re
+        if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', schema_name):
+            raise ValueError(f"Invalid schema name: {schema_name}")
+        
+        if not self.schema_exists(schema_name):
+            # Usar sql.Identifier para evitar inyección SQL
+            from psycopg2 import sql
+            self.cursor.execute(
+                sql.SQL("CREATE SCHEMA {}").format(sql.Identifier(schema_name))
+            )
+            return True
+        return False
+    
     def get_tables(self, schema='public'):
         self.cursor.execute("""
         SELECT table_name FROM information_schema.tables

@@ -58,7 +58,7 @@
 							<th>{% trans "Name" %}</th>
 							<th>{% trans "Description" %}</th>
 							<th>{% trans "Type" %}</th>
-							<th>{% trans "Connection params" %}</th>
+							<th>{% trans "Connection" %}</th>
 							<th></th>
 							<th></th>
 						</tr>
@@ -70,7 +70,16 @@
 							<td>{{ ws.name }}</td>
 							<td>{{ ws.description }}</td>
 							<td>{{ ws.type }}</td>
-							<td>{{ ws.connection_params }}</td>
+							<td>
+								{% if ws.connection and not ws.legacy_mode %}
+									<span class="label label-success" title="{% trans 'Using centralized connection' %}">
+										<i class="fa fa-link"></i> {{ ws.connection.name }}
+									</span>
+									<br><small>{% trans "Schema" %}: {{ ws.schema|default:"public" }}</small>
+								{% else %}
+									<small>{{ ws.connection_params|truncatechars:80 }}</small>
+								{% endif %}
+							</td>
 							<td></td>
 							<td></td>
 						</tr>

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-28 12:36+0200\n"
+"POT-Creation-Date: 2026-02-11 12:41+0100\n"
 "PO-Revision-Date: 2021-06-15 17:26+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -20,19 +20,19 @@ msgstr ""
 "X-Source-Language: C\n"
 "X-Generator: Poedit 2.4.3\n"
 
-#: backend_geoserver.py:96 backend_geoserver.py:147 forms_services.py:65
+#: backend_geoserver.py:96 backend_geoserver.py:147 forms_services.py:76
 msgid "PostGIS vector"
 msgstr "Vetor PostGIS"
 
-#: backend_geoserver.py:97 forms_services.py:66
+#: backend_geoserver.py:97 forms_services.py:77
 msgid "GeoTiff"
 msgstr "GeoTiff"
 
-#: backend_geoserver.py:98 forms_services.py:67
+#: backend_geoserver.py:98 forms_services.py:78
 msgid "Cascading WMS"
 msgstr "WMS em cache"
 
-#: backend_geoserver.py:99 forms_services.py:68
+#: backend_geoserver.py:99 forms_services.py:79
 msgid "ImageMosaic"
 msgstr "Mosaico de imagens"
 
@@ -44,6 +44,10 @@ msgstr "Camada vetorial"
 msgid "SQL View"
 msgstr "SQL Vista"
 
+#: backend_geoserver.py:626
+msgid "There is already a style named"
+msgstr "Já existe um estilo com o nome"
+
 #: backend_geoserver.py:858 backend_geoserver.py:873 backend_geoserver.py:885
 #: backend_geoserver.py:895 backend_geoserver.py:905 backend_geoserver.py:914
 #: backend_geoserver.py:927
@@ -53,12 +57,12 @@ msgstr "Erro na publicação da camada. Erro backend: {msg}"
 
 #: backend_geoserver.py:861 backend_geoserver.py:876 backend_geoserver.py:888
 #: backend_geoserver.py:898 backend_geoserver.py:907 backend_geoserver.py:917
-#: backend_geoserver.py:929 views.py:1276 views.py:3424
+#: backend_geoserver.py:929 views.py:1401 views.py:3976
 msgid "Error: layer could not be published"
 msgstr "Erro: a camada não pôde ser publicada"
 
 #: backend_geoserver.py:941 backend_geoserver.py:952 backend_geoserver.py:962
-#: views.py:767
+#: views.py:861
 #, python-brace-format
 msgid "Error publishing the layer group. Backend error: {msg}"
 msgstr "Erro na publicação do grupo de camadas. Erro backend: {msg}"
@@ -68,10 +72,8 @@ msgid "Error: layer group could not be published"
 msgstr "Erro: o grupo de camadas não pôde ser publicado"
 
 #: backend_geoserver.py:955
-#, fuzzy
-#| msgid "Error: layer group could not be published"
 msgid "Error: layer group could not be published. Error: "
-msgstr "Erro: o grupo de camadas não pôde ser publicado"
+msgstr "Erro: o grupo de camadas não pôde ser publicado. Erro: "
 
 #: backend_geoserver.py:1008 backend_geoserver.py:1018
 #, python-brace-format
@@ -119,7 +121,7 @@ msgstr ""
 msgid "Error creating the layer. Review the file format."
 msgstr "Erro ao criar a camada. Revisar o formato do arquivo."
 
-#: backend_geoserver.py:1414 views.py:1207
+#: backend_geoserver.py:1414 views.py:1326
 #, python-brace-format
 msgid ""
 "Invalid layer fields: '{value}'. Layer can't have fields with whitespaces"
@@ -163,11 +165,11 @@ msgstr "Tipo de campo não suportado: {0}"
 
 #: backend_geoserver.py:1478
 #: templates/geoserver/create_layer_feature_type.html:297
-#: templates/layer_create.html:668
+#: templates/layer_create.html:682
 msgid "At least one field must be defined"
 msgstr "Pelo menos um campo deve ser definido"
 
-#: backend_geoserver.py:1481 forms_services.py:308
+#: backend_geoserver.py:1481 forms_services.py:434
 msgid "Invalid field definition"
 msgstr "Definição de campo inválida"
 
@@ -238,51 +240,47 @@ msgid "Multipolygon"
 msgstr "Multipolígono"
 
 #: forms_geoserver.py:46
-#, fuzzy
-#| msgid "Primary key column"
 msgid "Preserve primary key values"
-msgstr "Coluna chave primária"
+msgstr "Preservar valores de chave primária"
 
 #: forms_geoserver.py:46
 msgid "Do not preserve primary key values"
-msgstr ""
+msgstr "Não preservar valores de chave primária"
 
-#: forms_geoserver.py:52 templates/layer_config.html:365
-#: templates/layer_config.html:430
+#: forms_geoserver.py:52 templates/layer_config.html:386
+#: templates/layer_config.html:453
 msgid "Not applicable"
-msgstr ""
+msgstr "Não aplicável"
 
 #: forms_geoserver.py:52
 msgid "Preserve table structure (truncate mode)"
-msgstr ""
+msgstr "Preservar estrutura da tabela (modo truncar)"
 
 #: forms_geoserver.py:52
-#, fuzzy
-#| msgid "Default date value"
 msgid "Delete and recreate table"
-msgstr "Avaliação da data predefinida"
+msgstr "Eliminar e recriar tabela"
 
-#: forms_geoserver.py:55 forms_services.py:45
+#: forms_geoserver.py:55 forms_services.py:56
 msgid "continuous interval"
 msgstr "intervalo contínuo"
 
-#: forms_geoserver.py:57 forms_services.py:49
+#: forms_geoserver.py:57 forms_services.py:60
 msgid "smallest domain value"
 msgstr "menor valor de domínio"
 
-#: forms_geoserver.py:57 forms_services.py:50
+#: forms_geoserver.py:57 forms_services.py:61
 msgid "biggest domain value"
 msgstr "maior valor de domínio"
 
-#: forms_geoserver.py:57 forms_services.py:51
+#: forms_geoserver.py:57 forms_services.py:62
 msgid "nearest to the reference value"
 msgstr "mais próximo do valor de referência"
 
-#: forms_geoserver.py:57 forms_services.py:52
+#: forms_geoserver.py:57 forms_services.py:63
 msgid "reference value"
 msgstr "valor de referência"
 
-#: forms_geoserver.py:61 forms_geoserver.py:76 forms_services.py:105
+#: forms_geoserver.py:61 forms_geoserver.py:76 forms_services.py:121
 #: templates/datastore_add.html:33 templates/datastore_update.html:34
 #: templates/geoserver/layer_upload_imagemosaic.html:50
 #: templates/geoserver/layer_upload_raster.html:50
@@ -291,7 +289,7 @@ msgid "Workspace"
 msgstr "Espaço de trabalho "
 
 #: forms_geoserver.py:63 forms_geoserver.py:78 forms_geoserver.py:90
-#: forms_geoserver.py:103 forms_services.py:107
+#: forms_geoserver.py:103 forms_services.py:123
 #: templates/geoserver/layer_upload_postgis.html:41
 #: templates/geoserver/layer_upload_vector.html:33
 #: templates/geoserver/layer_upload_vector.html:39
@@ -300,10 +298,12 @@ msgstr "Arquivo"
 
 #: forms_geoserver.py:64 forms_geoserver.py:79 forms_geoserver.py:91
 #: forms_geoserver.py:105 forms_geoserver.py:146 forms_geoserver.py:161
-#: forms_services.py:83 forms_services.py:94 forms_services.py:108
-#: forms_services.py:138 forms_services.py:159 forms_services.py:186
-#: forms_services.py:272 templates/cache_list.html:35
-#: templates/cache_list.html:78 templates/datastore_add.html:55
+#: forms_services.py:94 forms_services.py:105 forms_services.py:124
+#: forms_services.py:226 forms_services.py:279 forms_services.py:306
+#: forms_services.py:398 forms_services.py:493 forms_services.py:926
+#: templates/cache_list.html:35 templates/cache_list.html:78
+#: templates/connection_config.html:46 templates/connection_list.html:23
+#: templates/connection_trigger_add.html:63 templates/datastore_add.html:55
 #: templates/datastore_list.html:22 templates/datastore_update.html:56
 #: templates/enumeration_add.html:38 templates/enumeration_list.html:21
 #: templates/enumeration_update.html:38
@@ -320,14 +320,14 @@ msgid "Name"
 msgstr "Nome"
 
 #: forms_geoserver.py:65 forms_geoserver.py:80 forms_geoserver.py:92
-#: forms_geoserver.py:152 forms_geoserver.py:164 forms_services.py:84
-#: forms_services.py:160 forms_services.py:187 forms_services.py:239
-#: forms_services.py:262 templates/base_layer_list.html:22
+#: forms_geoserver.py:152 forms_geoserver.py:164 forms_services.py:95
+#: forms_services.py:280 forms_services.py:307 forms_services.py:359
+#: forms_services.py:388 templates/base_layer_list.html:22
 #: templates/cache_list.html:36 templates/cache_list.html:79
 #: templates/enumeration_add.html:44 templates/enumeration_list.html:22
 #: templates/enumeration_update.html:44 templates/external_layer_add.html:68
 #: templates/external_layer_list.html:22
-#: templates/external_layer_update.html:83
+#: templates/external_layer_update.html:88
 #: templates/geoserver/create_layer_feature_type.html:49
 #: templates/geoserver/create_layer_sql_view.html:47
 #: templates/geoserver/layer_upload_imagemosaic.html:65
@@ -344,10 +344,10 @@ msgstr "Título"
 
 #: forms_geoserver.py:67 forms_geoserver.py:82 forms_geoserver.py:94
 #: forms_geoserver.py:153 forms_geoserver.py:165 forms_geoserver.py:214
-#: forms_services.py:161 forms_services.py:188 forms_services.py:240
+#: forms_services.py:281 forms_services.py:308 forms_services.py:360
 #: templates/cache_list.html:38 templates/external_layer_add.html:74
 #: templates/external_layer_list.html:24
-#: templates/external_layer_update.html:89
+#: templates/external_layer_update.html:94
 #: templates/geoserver/create_layer_feature_type.html:92
 #: templates/geoserver/create_layer_sql_view.html:82
 #: templates/geoserver/layer_upload_imagemosaic.html:72
@@ -361,8 +361,8 @@ msgstr "Grupo de camadas"
 
 #: forms_geoserver.py:68 forms_geoserver.py:83 forms_geoserver.py:95
 #: forms_geoserver.py:154 forms_geoserver.py:166
-#: templates/external_layer_add.html:147
-#: templates/external_layer_update.html:165
+#: templates/external_layer_add.html:179
+#: templates/external_layer_update.html:202
 #: templates/geoserver/create_layer_feature_type.html:104
 #: templates/geoserver/create_layer_sql_view.html:94
 #: templates/geoserver/layer_upload_imagemosaic.html:104
@@ -388,9 +388,9 @@ msgstr " Consultável"
 
 #: forms_geoserver.py:70 forms_geoserver.py:85 forms_geoserver.py:97
 #: forms_geoserver.py:156 forms_geoserver.py:168 templates/cache_list.html:39
-#: templates/cache_list.html:80 templates/external_layer_add.html:152
+#: templates/cache_list.html:80 templates/external_layer_add.html:184
 #: templates/external_layer_list.html:25
-#: templates/external_layer_update.html:173
+#: templates/external_layer_update.html:210
 #: templates/geoserver/create_layer_feature_type.html:109
 #: templates/geoserver/create_layer_sql_view.html:99
 #: templates/geoserver/layer_upload_imagemosaic.html:108
@@ -417,7 +417,7 @@ msgstr "Elevação regex"
 
 #: forms_geoserver.py:89 forms_geoserver.py:102 forms_geoserver.py:129
 #: forms_geoserver.py:145 forms_geoserver.py:160 forms_geoserver.py:208
-#: forms_services.py:158 forms_services.py:185 forms_services.py:271
+#: forms_services.py:278 forms_services.py:305 forms_services.py:397
 #: templates/cache_list.html:37 templates/layer_list.html:28
 #: templates/sqlview_add.html:74 templates/sqlview_add.html:111
 #: templates/sqlview_list.html:23
@@ -433,12 +433,13 @@ msgid "Encoding"
 msgstr "Codificação"
 
 #: forms_geoserver.py:107 forms_geoserver.py:151 forms_geoserver.py:163
+#: forms_services.py:377
 msgid "SRS"
 msgstr "SRS"
 
 #: forms_geoserver.py:108
 msgid "Preserve primary key"
-msgstr ""
+msgstr "Preservar chave primária"
 
 #: forms_geoserver.py:109 forms_geoserver.py:134 forms_geoserver.py:148
 #: templates/geoserver/create_layer_sql_view.html:62
@@ -447,7 +448,7 @@ msgstr "Coluna chave primária"
 
 #: forms_geoserver.py:110
 msgid "Preserve table structure"
-msgstr ""
+msgstr "Preservar estrutura da tabela"
 
 #: forms_geoserver.py:147
 msgid "SQL Statement"
@@ -469,55 +470,55 @@ msgstr "Tipo de geometria"
 msgid "Allow downloads"
 msgstr "Permitir downloads"
 
-#: forms_geoserver.py:171 forms_services.py:274
+#: forms_geoserver.py:171 forms_services.py:400
 #: templates/geoserver/create_layer_feature_type.html:66
 #: templates/geoserver/create_layer_sql_view.html:141
 #: templates/layer_create.html:46 templates/sqlview_add.html:40
 msgid "Fields"
 msgstr "Domínios"
 
-#: forms_geoserver.py:172 forms_services.py:165 forms_services.py:196
+#: forms_geoserver.py:172 forms_services.py:285 forms_services.py:316
 #: templates/sqlview_add.html:110
 msgid "Field"
 msgstr "Domínio"
 
-#: forms_geoserver.py:173 forms_services.py:166 forms_services.py:197
+#: forms_geoserver.py:173 forms_services.py:286 forms_services.py:317
 msgid "End field"
 msgstr "Fim do domínio"
 
-#: forms_geoserver.py:174 forms_services.py:170 forms_services.py:198
+#: forms_geoserver.py:174 forms_services.py:290 forms_services.py:318
 msgid "Presentation"
 msgstr "Formato de apresentação"
 
-#: forms_geoserver.py:175 forms_services.py:171 forms_services.py:199
+#: forms_geoserver.py:175 forms_services.py:291 forms_services.py:319
 msgid "Resolution year"
 msgstr "Ano de resolução"
 
-#: forms_geoserver.py:176 forms_services.py:172 forms_services.py:200
+#: forms_geoserver.py:176 forms_services.py:292 forms_services.py:320
 msgid "Resolution month"
 msgstr "Mês da resolução"
 
-#: forms_geoserver.py:177 forms_services.py:173 forms_services.py:201
+#: forms_geoserver.py:177 forms_services.py:293 forms_services.py:321
 msgid "Resolution week"
 msgstr "Semana da resolução"
 
-#: forms_geoserver.py:178 forms_services.py:174 forms_services.py:202
+#: forms_geoserver.py:178 forms_services.py:294 forms_services.py:322
 msgid "Resolution day"
 msgstr "Dia da resolução"
 
-#: forms_geoserver.py:179 forms_services.py:175 forms_services.py:203
+#: forms_geoserver.py:179 forms_services.py:295 forms_services.py:323
 msgid "Resolution hour"
 msgstr "Hora da resolução"
 
-#: forms_geoserver.py:180 forms_services.py:176 forms_services.py:204
+#: forms_geoserver.py:180 forms_services.py:296 forms_services.py:324
 msgid "Resolution minute"
 msgstr "Minuto da resolução"
 
-#: forms_geoserver.py:181 forms_services.py:177 forms_services.py:205
+#: forms_geoserver.py:181 forms_services.py:297 forms_services.py:325
 msgid "Resolution second"
 msgstr "Segundo da resolução"
 
-#: forms_geoserver.py:182 forms_services.py:178 forms_services.py:206
+#: forms_geoserver.py:182 forms_services.py:298 forms_services.py:326
 msgid "Default mode"
 msgstr "Modo padrão"
 
@@ -530,251 +531,632 @@ msgstr "Valor proposto"
 msgid "Error: Invalid field definition"
 msgstr "Erro: Definição de campo inválida"
 
-#: forms_services.py:37
+#: forms_services.py:45
 msgid "No se han podido obtener las capas"
 msgstr "As camadas não puderam ser obtidas"
 
-#: forms_services.py:38
+#: forms_services.py:46
 msgid "1.1.1"
 msgstr "1.1.1"
 
-#: forms_services.py:38
+#: forms_services.py:46
 msgid "1.3.0"
 msgstr "1.3.0"
 
-#: forms_services.py:38
+#: forms_services.py:46
 msgid "1.0.0"
 msgstr "1.0.0"
 
-#: forms_services.py:56
+#: forms_services.py:51
+msgid "Other"
+msgstr "Outro"
+
+#: forms_services.py:67
 msgid "seconds"
 msgstr "segundos"
 
-#: forms_services.py:57
+#: forms_services.py:68
 msgid "minutes"
 msgstr "minutos"
 
-#: forms_services.py:58
+#: forms_services.py:69
 msgid "hours"
 msgstr "horas"
 
-#: forms_services.py:59
+#: forms_services.py:70
 msgid "days"
 msgstr "dias"
 
-#: forms_services.py:60
+#: forms_services.py:71
 msgid "months"
 msgstr "Meses"
 
-#: forms_services.py:61
+#: forms_services.py:72
 msgid "years"
 msgstr "anos"
 
-#: forms_services.py:85 forms_services.py:95 forms_services.py:109
-#: forms_services.py:139 templates/datastore_add.html:62
+#: forms_services.py:96 forms_services.py:106 forms_services.py:125
+#: forms_services.py:227 forms_services.py:499 forms_services.py:932
+#: templates/connection_config.html:47 templates/connection_list.html:24
+#: templates/connection_trigger_add.html:73 templates/datastore_add.html:62
 #: templates/datastore_list.html:23 templates/datastore_update.html:63
-#: templates/layer_config.html:328 templates/server_update.html:49
+#: templates/layer_config.html:349 templates/layer_config.html:497
+#: templates/layer_config.html:594 templates/server_update.html:49
 #: templates/server_update.html:50 templates/workspace_list.html:23
 #: templates/workspace_update.html:30
 msgid "Description"
 msgstr "Descrição"
 
-#: forms_services.py:86 forms_services.py:106 forms_services.py:137
-#: forms_services.py:242 forms_services.py:263
-#: templates/base_layer_list.html:23 templates/datastore_add.html:39
+#: forms_services.py:97 forms_services.py:122 forms_services.py:225
+#: forms_services.py:362 forms_services.py:389 forms_services.py:514
+#: forms_services.py:937 templates/base_layer_list.html:23
+#: templates/connection_list.html:25 templates/datastore_add.html:39
 #: templates/datastore_list.html:24 templates/datastore_update.html:40
 #: templates/external_layer_add.html:47 templates/external_layer_list.html:23
-#: templates/external_layer_update.html:62
+#: templates/external_layer_update.html:67
 #: templates/geoserver/create_layer_feature_type.html:75
-#: templates/layer_config.html:74 templates/lock_list.html:17
+#: templates/layer_config.html:75 templates/lock_list.html:17
 #: templates/server_list.html:25 templates/service_url_list.html:24
 msgid "Type"
 msgstr "Tipo"
 
-#: forms_services.py:87 templates/server_list.html:26
+#: forms_services.py:98 templates/server_list.html:26
 #: templates/server_update.html:55 templates/server_update.html:56
 msgid "Frontend URL"
 msgstr "URL del frontal"
 
-#: forms_services.py:88 templates/server_update.html:61
+#: forms_services.py:99 forms_services.py:540 forms_services.py:782
+#: forms_services.py:788 forms_services.py:795 forms_services.py:809
+#: forms_services.py:963 templates/server_update.html:61
 #: templates/server_update.html:62
 msgid "User"
 msgstr "Usuário"
 
-#: forms_services.py:90 templates/external_layer_update.html:410
+#: forms_services.py:101 templates/external_layer_update.html:472
 #: templates/geoserver/create_layer_feature_type.html:269
 #: templates/geoserver/create_layer_sql_view.html:183
 #: templates/geoserver/layer_upload_imagemosaic.html:150
 #: templates/geoserver/layer_upload_postgis.html:148
 #: templates/geoserver/layer_upload_raster.html:132
 #: templates/geoserver/layer_upload_vector.html:142
-#: templates/layer_add.html:630 templates/layer_create.html:635
-#: templates/layer_create.html:647 templates/layer_create.html:654
-#: templates/layer_update.html:561 templates/layergroup_list.html:40
+#: templates/layer_add.html:641 templates/layer_create.html:643
+#: templates/layer_create.html:655 templates/layer_create.html:662
+#: templates/layer_update.html:571 templates/layergroup_list.html:40
 #: templates/server_update.html:73
 msgid "Default"
 msgstr "Padrão"
 
-#: forms_services.py:93 templates/layergroup_list.html:28
+#: forms_services.py:104 forms_services.py:606 forms_services.py:795
+#: forms_services.py:1033 templates/layergroup_list.html:28
 #: templates/server_add.html:31 templates/server_update.html:31
 #: templates/workspace_list.html:25
 msgid "Server"
 msgstr "Servidor"
 
-#: forms_services.py:97
+#: forms_services.py:108
 msgid "WMS URL"
 msgstr "WMS URL"
 
-#: forms_services.py:98
+#: forms_services.py:109
 msgid "WFS URL"
 msgstr "WFS URL"
 
-#: forms_services.py:99
+#: forms_services.py:110
 msgid "WCS URL"
 msgstr "WCS URL"
 
-#: forms_services.py:100
+#: forms_services.py:111
 msgid "WMTS URL"
 msgstr "WMTS URL"
 
-#: forms_services.py:101
+#: forms_services.py:112
 msgid "Cache URL"
 msgstr "Cache URL"
 
-#: forms_services.py:102 templates/workspace_list.html:26
+#: forms_services.py:113 templates/workspace_list.html:26
 #: templates/workspace_update.html:37
 msgid "Is public?"
 msgstr "É público?"
 
-#: forms_services.py:110 forms_services.py:140 templates/datastore_add.html:69
-#: templates/datastore_list.html:25 templates/datastore_update.html:70
+#: forms_services.py:128 forms_services.py:228 templates/datastore_add.html:88
+#: templates/datastore_update.html:96
 msgid "Connection params"
 msgstr "Parâmetros de conexão"
 
-#: forms_services.py:124
+#: forms_services.py:132 forms_services.py:232 models.py:224
+#: templates/connection_add.html:52 templates/connection_update.html:34
+#: templates/datastore_add.html:71 templates/datastore_list.html:25
+#: templates/datastore_update.html:72
+msgid "Connection"
+msgstr "Conexão"
+
+#: forms_services.py:139 forms_services.py:237 templates/datastore_add.html:76
+#: templates/datastore_list.html:42 templates/datastore_update.html:77
+#: templates/geoserver/create_layer_sql_view.html:136
+msgid "Schema"
+msgstr "Esquema"
+
+#: forms_services.py:146 templates/datastore_add.html:80
+#: templates/datastore_add.html:322 templates/datastore_add.html:352
+msgid "Select an existing schema or type a new name to create it"
+msgstr "Selecione um esquema existente ou digite um novo nome para criá-lo"
+
+#: forms_services.py:196
 msgid "Datastore already exists"
 msgstr "O armazém já existe"
 
-#: forms_services.py:130 forms_services.py:150
+#: forms_services.py:202
+msgid "Please select a connection"
+msgstr "Por favor, selecione uma conexão"
+
+#: forms_services.py:204
+msgid "Please select a schema"
+msgstr "Por favor, selecione um esquema"
+
+#: forms_services.py:211 forms_services.py:267
 msgid "Error: Invalid JSON format"
 msgstr "Erro: Formato JSON inválido"
 
-#: forms_services.py:162 forms_services.py:189 forms_services.py:248
+#: forms_services.py:269
+msgid "Connection params are required"
+msgstr "Os parâmetros de conexão são obrigatórios"
+
+#: forms_services.py:282 forms_services.py:309 forms_services.py:368
 #: templates/external_layer_add.html:94
-#: templates/external_layer_update.html:109
+#: templates/external_layer_update.html:114
 #: templates/group_cache_config.html:79 templates/layer_add.html:77
 #: templates/layer_cache_config.html:79 templates/layer_update.html:83
 msgid "Format"
 msgstr "Formato"
 
-#: forms_services.py:168 forms_services.py:194
+#: forms_services.py:288 forms_services.py:314
 msgid "Resolution"
 msgstr "Resolução"
 
-#: forms_services.py:179 forms_services.py:207
+#: forms_services.py:299 forms_services.py:327
 msgid "Default date value"
 msgstr "Avaliação da data predefinida"
 
-#: forms_services.py:243 templates/external_layer_add.html:80
-#: templates/external_layer_update.html:95
+#: forms_services.py:363 templates/external_layer_add.html:80
+#: templates/external_layer_update.html:100
 msgid "Version"
 msgstr "Versão"
 
-#: forms_services.py:245 forms_services.py:264 templates/server_add.html:61
-#: templates/server_update.html:100 templates/service_url_list.html:25
+#: forms_services.py:365 forms_services.py:390
+#: templates/external_layer_add.html:53 templates/external_layer_update.html:73
+#: templates/server_add.html:61 templates/server_update.html:100
+#: templates/service_url_list.html:25
 msgid "URL"
 msgstr "URL"
 
-#: forms_services.py:246 settings.py:31
-#: templates/dashboard_services_menu.html:12
+#: forms_services.py:366 settings.py:31
+#: templates/dashboard_services_menu.html:13
 #: templates/external_layer_add.html:86
-#: templates/external_layer_update.html:101
+#: templates/external_layer_update.html:106
 msgid "Layers"
 msgstr "Camada"
 
-#: forms_services.py:249 templates/external_layer_add.html:102
-#: templates/external_layer_update.html:117
+#: forms_services.py:369 templates/external_layer_add.html:102
+#: templates/external_layer_update.html:122
 msgid "Featureinfo format"
 msgstr "Formato da informação de característica"
 
-#: forms_services.py:250
+#: forms_services.py:370
 msgid "Matrixset"
 msgstr "Matrixset"
 
-#: forms_services.py:251 templates/external_layer_add.html:119
-#: templates/external_layer_update.html:134
+#: forms_services.py:371 templates/external_layer_add.html:119
+#: templates/external_layer_update.html:139
 msgid "Tilematrix"
-msgstr ""
+msgstr "Tilematrix"
 
-#: forms_services.py:252
+#: forms_services.py:372
 msgid "Apikey"
 msgstr "Apikey"
 
-#: forms_services.py:273 templates/sqlview_add.html:39
+#: forms_services.py:374 templates/external_layer_add.html:131
+#: templates/external_layer_update.html:151
+msgid "Mapbox style URL"
+msgstr "URL de estilo Mapbox"
+
+#: forms_services.py:375 templates/external_layer_add.html:138
+#: templates/external_layer_update.html:158
+msgid "Or upload your Mapbox style (.json)"
+msgstr "Ou carregue o seu estilo Mapbox (.json)"
+
+#: forms_services.py:378
+msgid "Custom SRS"
+msgstr "SRS personalizado"
+
+#: forms_services.py:399 templates/sqlview_add.html:39
 #: templates/sqlview_list.html:24
-#, fuzzy
-#| msgid "Table"
 msgid "Tables"
-msgstr "Tabela"
+msgstr "Tabelas"
 
-#: forms_services.py:279
-#, fuzzy
-#| msgid "At least one node must be defined"
+#: forms_services.py:405
 msgid "At least one table must be selected"
-msgstr "Pelo menos um nó deve ser definido"
+msgstr "Pelo menos uma tabela deve ser selecionada"
 
-#: forms_services.py:287
-#, fuzzy
-#| msgid "Invalid field definition"
+#: forms_services.py:413
 msgid "Invalid table definition"
-msgstr "Definição de campo inválida"
+msgstr "Definição de tabela inválida"
 
-#: forms_services.py:292
+#: forms_services.py:418
 msgid "Invalid table definition. Join field 1 is missing"
-msgstr ""
+msgstr "Definição de tabela inválida. O campo de junção 1 está ausente"
 
-#: forms_services.py:295
+#: forms_services.py:421
 msgid "Invalid table definition. Join field 2 is missing"
-msgstr ""
+msgstr "Definição de tabela inválida. O campo de junção 2 está ausente"
 
-#: forms_services.py:297 forms_services.py:310
-#, fuzzy
-#| msgid "Duplicated field name"
+#: forms_services.py:423 forms_services.py:436
 msgid "Duplicated alias"
-msgstr "Nome do campo duplicado"
+msgstr "Alias duplicado"
 
-#: forms_services.py:304
-#, fuzzy
-#| msgid "At least one field must be defined"
+#: forms_services.py:430
 msgid "At least one field must be selected"
-msgstr "Pelo menos um campo deve ser definido"
+msgstr "Pelo menos um campo deve ser selecionado"
+
+#: forms_services.py:506 templates/connection_update.html:52
+msgid "Category"
+msgstr "Categoria"
+
+#: forms_services.py:522 forms_services.py:576 forms_services.py:782
+#: forms_services.py:788 forms_services.py:816 forms_services.py:945
+#: forms_services.py:1004
+msgid "Host"
+msgstr "Host"
+
+#: forms_services.py:528 forms_services.py:585 forms_services.py:782
+#: forms_services.py:789 forms_services.py:951 forms_services.py:1013
+msgid "Port"
+msgstr "Porta"
+
+#: forms_services.py:534 forms_services.py:623 forms_services.py:782
+#: forms_services.py:796 forms_services.py:957 forms_services.py:1053
+msgid "Database"
+msgstr "Base de dados"
+
+#: forms_services.py:546 forms_services.py:570 forms_services.py:618
+#: forms_services.py:689 forms_services.py:744 forms_services.py:809
+#: forms_services.py:822 forms_services.py:969 forms_services.py:995
+#: forms_services.py:1045 forms_services.py:1122 forms_services.py:1183
+#: templates/server_update.html:67 templates/server_update.html:68
+msgid "Password"
+msgstr "Senha"
+
+#: forms_services.py:551 forms_services.py:977
+msgid "Additional parameters (JSON)"
+msgstr "Parâmetros adicionais (JSON)"
+
+#: forms_services.py:559 forms_services.py:984
+msgid "Optional parameters in JSON format"
+msgstr "Parâmetros opcionais em formato JSON"
+
+#: forms_services.py:564 forms_services.py:612 forms_services.py:989
+#: forms_services.py:1039
+msgid "User name"
+msgstr "Nome de usuário"
+
+#: forms_services.py:595 forms_services.py:789 forms_services.py:1022
+msgid "Service name"
+msgstr "Nome do serviço"
+
+#: forms_services.py:629 forms_services.py:1059
+msgid "TDS Version"
+msgstr "Versão TDS"
+
+#: forms_services.py:642 forms_services.py:667 forms_services.py:802
+#: forms_services.py:1072 forms_services.py:1100
+msgid "Domain"
+msgstr "Domínio"
+
+#: forms_services.py:648 forms_services.py:802 forms_services.py:1078
+msgid "API Key"
+msgstr "Chave API"
+
+#: forms_services.py:654 forms_services.py:705 forms_services.py:803
+#: forms_services.py:815 forms_services.py:1084 forms_services.py:1141
+msgid "Client ID"
+msgstr "ID do cliente"
+
+#: forms_services.py:660 forms_services.py:803 forms_services.py:1090
+msgid "Secret"
+msgstr "Segredo"
+
+#: forms_services.py:676 forms_services.py:1109
+#: templates/connection_add.html:191 templates/connection_update.html:187
+msgid "Entity"
+msgstr "Entidade"
+
+#: forms_services.py:680 forms_services.py:1113
+msgid "Entity code from SEDIPUALB@"
+msgstr "Código de entidade de SEDIPUALB@"
+
+#: forms_services.py:683 forms_services.py:1116
+msgid "User (wsSegUser)"
+msgstr "Usuário (wsSegUser)"
+
+#: forms_services.py:696 forms_services.py:815 forms_services.py:1132
+msgid "Tenant ID"
+msgstr "ID do inquilino"
+
+#: forms_services.py:714 forms_services.py:816 forms_services.py:1150
+msgid "Client Secret"
+msgstr "Segredo do cliente"
+
+#: forms_services.py:719 forms_services.py:1158
+msgid "SharePoint Host"
+msgstr "Host do SharePoint"
+
+#: forms_services.py:728 forms_services.py:1167
+msgid "Site Path"
+msgstr "Caminho do site"
+
+#: forms_services.py:739 forms_services.py:822 forms_services.py:1178
+msgid "E-mail"
+msgstr "E-mail"
+
+#: forms_services.py:749 forms_services.py:823 forms_services.py:1191
+msgid "Id Acceso"
+msgstr "Id de Acesso"
+
+#: forms_services.py:773 forms_services.py:1204
+msgid "Invalid JSON format"
+msgstr "Formato JSON inválido"
+
+#: forms_services.py:785 forms_services.py:792 forms_services.py:799
+#: forms_services.py:806 forms_services.py:812 forms_services.py:819
+#: forms_services.py:826
+msgid "This field is required"
+msgstr "Este campo é obrigatório"
+
+#: forms_services.py:973 forms_services.py:999 forms_services.py:1049
+#: forms_services.py:1126 forms_services.py:1187
+#: templates/connection_update.html:91 templates/connection_update.html:112
+#: templates/connection_update.html:143 templates/connection_update.html:215
+#: templates/connection_update.html:257
+msgid "Leave empty to keep current password"
+msgstr "Deixe vazio para manter a senha atual"
+
+#: forms_services.py:1094 forms_services.py:1154
+#: templates/connection_update.html:174 templates/connection_update.html:234
+msgid "Leave empty to keep current secret"
+msgstr "Deixe vazio para manter o segredo atual"
 
 #: migrations/0039_golfunc_geocoder_inv_cartociudad.py:19
 #: migrations/0041_golfunc_geocoder_inv_cartociudad_v2.py:19
 #: migrations/0042_golfunc_geocoder_inv_cartociudad_v3.py:19
 msgid "Inverse Geocoder Cartociudad"
-msgstr ""
+msgstr "Geocodificador Inverso Cartociudad"
 
 #: migrations/0045_golfunc_geocoder_inv_icv_gva_es.py:59
 msgid "Inverse Geocoder ICV"
-msgstr ""
+msgstr "Geocodificador Inverso ICV"
 
 #: migrations/0057_golfunc_area_m2.py:39
 msgid "Area (m2)"
-msgstr ""
+msgstr "Área (m2)"
 
-#: models.py:381
+#: models.py:196
+msgid "JSON with connection parameters"
+msgstr "JSON com parâmetros de conexão"
+
+#: models.py:201
+msgid "Optional additional parameters in JSON format"
+msgstr "Parâmetros adicionais opcionais em formato JSON"
+
+#: models.py:207
+msgid "Allow all users to create datastores with this connection"
+msgstr "Permitir que todos os usuários criem armazéns de dados com esta conexão"
+
+#: models.py:211
+msgid "Allow all users to use this connection in ETL"
+msgstr "Permitir que todos os usuários usem esta conexão em ETL"
+
+#: models.py:215
+msgid "Allow all users to manage this connection (edit, delete)"
+msgstr "Permitir que todos os usuários gerenciem esta conexão (editar, excluir)"
+
+#: models.py:225 templates/dashboard_services_menu.html:10
+msgid "Connections"
+msgstr "Conexões"
+
+#: models.py:383
+msgid "This role can create datastores with this connection"
+msgstr "Este papel pode criar armazéns de dados com esta conexão"
+
+#: models.py:387
+msgid "This role can use this connection in ETL"
+msgstr "Este papel pode usar esta conexão em ETL"
+
+#: models.py:391
+msgid "This role can manage this connection (edit, delete)"
+msgstr "Este papel pode gerenciar esta conexão (editar, excluir)"
+
+#: models.py:402
+msgid "Connection Role"
+msgstr "Papel de Conexão"
+
+#: models.py:403
+msgid "Connection Roles"
+msgstr "Papéis de Conexão"
+
+#: models.py:427 templates/connection_trigger_add.html:95
+msgid "Insert"
+msgstr "Inserir"
+
+#: models.py:428 templates/connection_trigger_add.html:100
+#: templates/datastore_update.html:12 templates/server_update.html:12
+#: templates/service_url_update.html:12 templates/workspace_update.html:12
+msgid "Update"
+msgstr "Atualização "
+
+#: models.py:429 templates/connection_config.html:98
+#: templates/connection_config.html:130 templates/connection_list.html:119
+#: templates/connection_trigger_add.html:105
+#: templates/enumeration_update.html:102
+msgid "Delete"
+msgstr "Apagar"
+
+#: models.py:436 templates/connection_trigger_add.html:83
+msgid "Before"
+msgstr "Antes"
+
+#: models.py:437 templates/connection_trigger_add.html:84
+msgid "After"
+msgstr "Depois"
+
+#: models.py:444 templates/connection_trigger_add.html:119
+msgid "Global (all schemas)"
+msgstr "Global (todos os esquemas)"
+
+#: models.py:445 templates/connection_trigger_add.html:122
+msgid "Specific schemas"
+msgstr "Esquemas específicos"
+
+#: models.py:452
+msgid "PL/pgSQL (database trigger)"
+msgstr "PL/pgSQL (disparador de base de dados)"
+
+#: models.py:453
+msgid "Python (application-level)"
+msgstr "Python (nível de aplicação)"
+
+#: models.py:461
+msgid "Connection where this trigger will be executed"
+msgstr "Conexão onde este disparador será executado"
+
+#: models.py:465
+msgid "Unique name for this trigger"
+msgstr "Nome único para este disparador"
+
+#: models.py:470
+msgid "Description of what this trigger does"
+msgstr "Descrição do que este disparador faz"
+
+#: models.py:475
+msgid ""
+"Events that activate this trigger (comma-separated: INSERT,UPDATE,DELETE)"
+msgstr "Eventos que ativam este disparador (separados por vírgulas: INSERT,UPDATE,DELETE)"
+
+#: models.py:481
+msgid "When the trigger executes relative to the event"
+msgstr "Quando o disparador é executado relativo ao evento"
+
+#: models.py:484 templates/connection_trigger_add.html:161
+msgid ""
+"SQL code to execute. Use NEW for inserted/updated row, OLD for deleted/"
+"updated row."
+msgstr "Código SQL a executar. Use NEW para linha inserida/atualizada, OLD para linha excluída/atualizada."
+
+#: models.py:491
+msgid "Whether the trigger applies to all schemas or specific ones"
+msgstr "Se o disparador se aplica a todos os esquemas ou a esquemas específicos"
+
+#: models.py:497
+msgid "JSON array of schema names if scope is \"schemas\""
+msgstr "Array JSON de nomes de esquemas se o escopo for \"schemas\""
+
+#: models.py:502
+msgid "If enabled, this trigger can be used as a calculated field in layers"
+msgstr "Se ativado, este disparador pode ser usado como campo calculado nas camadas"
+
+#: models.py:509
+msgid ""
+"Language of the trigger code: PL/pgSQL for database triggers, Python for "
+"application-level triggers"
+msgstr "Linguagem do código do disparador: PL/pgSQL para disparadores de base de dados, Python para disparadores de nível de aplicação"
+
+#: models.py:514
+msgid "Allow all staff users to use this trigger in their layers"
+msgstr "Permitir que todos os usuários staff usem este disparador nas suas camadas"
+
+#: models.py:521
+msgid "Connection Trigger"
+msgstr "Disparador de Conexão"
+
+#: models.py:522 templates/layer_config.html:484
+msgid "Connection Triggers"
+msgstr "Disparadores de Conexão"
+
+#: models.py:740
+msgid "Reference to centralized connection"
+msgstr "Referência à conexão centralizada"
+
+#: models.py:746
+msgid "Database schema for this datastore"
+msgstr "Esquema de base de dados para este armazém de dados"
+
+#: models.py:750
+msgid ""
+"True if using connection_params directly, False if using Connection reference"
+msgstr "Verdadeiro se usar connection_params diretamente, Falso se usar referência de Conexão"
+
+#: models.py:1048
 #, python-brace-format
 msgid "enumerated ({0})"
-msgstr ""
+msgstr "enumerado ({0})"
+
+#: models.py:1256
+msgid ""
+"Name of the field that will be calculated by this trigger (only for "
+"calculated field triggers)"
+msgstr "Nome do campo que será calculado por este disparador (apenas para disparadores de campo calculado)"
+
+#: models.py:1260
+msgid "Whether the trigger is currently installed in the database"
+msgstr "Se o disparador está atualmente instalado na base de dados"
+
+#: models.py:1267
+msgid "Layer Connection Trigger"
+msgstr "Disparador de conexão de camada"
+
+#: models.py:1268
+msgid "Layer Connection Triggers"
+msgstr "Disparadores de conexão de camada"
+
+#: models.py:1348 models.py:1408
+msgid "Layer datastore has no associated connection"
+msgstr "O armazém de dados da camada não tem conexão associada"
+
+#: models.py:1351
+msgid "Trigger installation is only supported for PostGIS connections"
+msgstr "A instalação de disparadores só é suportada para conexões PostGIS"
+
+#: models.py:1360 models.py:1416
+msgid "Could not connect to database"
+msgstr "Não foi possível conectar à base de dados"
+
+#: models.py:1394
+msgid "Trigger installed successfully"
+msgstr "Disparador instalado com sucesso"
+
+#: models.py:1405
+msgid "Trigger was not installed"
+msgstr "O disparador não foi instalado"
+
+#: models.py:1432
+msgid "Trigger uninstalled successfully"
+msgstr "Disparador desinstalado com sucesso"
+
+#: models.py:1536 templates/enumeration_add.html:53
+#: templates/enumeration_update.html:58 templates/enumeration_update.html:60
+msgid "Alphabetical"
+msgstr "Alfabético"
+
+#: models.py:1538 templates/enumeration_add.html:52
+#: templates/enumeration_update.html:53 templates/enumeration_update.html:55
+msgid "Manual"
+msgstr "Manual"
 
 #: settings.py:30
 msgid "Layer requests"
-msgstr ""
+msgstr "Pedidos de camadas"
 
 #: settings.py:39
 msgid "Layer requests by user"
-msgstr ""
+msgstr "Pedidos de camadas por usuário"
 
 #: settings.py:40
 msgid "Users"
@@ -785,11 +1167,13 @@ msgid ""
 "gvSIG Online only supports overwriting/appending tables with primary key "
 "named ogc_fid due to the version of gdal/ogr installed on the server."
 msgstr ""
+"gvSIG Online só suporta sobrescrever/anexar tabelas com chave primária "
+"chamada ogc_fid devido à versão de gdal/ogr instalada no servidor."
 
 #: shp2postgis.py:149
 #, python-brace-format
 msgid "Overwrite or append was specified but the table does not exist: {0}"
-msgstr ""
+msgstr "Foi especificado sobrescrever ou anexar, mas a tabela não existe: {0}"
 
 #: shp2postgis.py:437
 #, python-brace-format
@@ -799,6 +1183,9 @@ msgid ""
 "the data or read the User Manual for the option 'Do not preserve primary "
 "key'. Details: {details}"
 msgstr ""
+"A exportação falhou porque criaria valores duplicados no campo {pkfield}, "
+"que não permite valores duplicados. Considere corrigir os dados ou consulte "
+"o Manual do Usuário para a opção 'Não preservar chave primária'. Detalhes: {details}"
 
 #: templates/base_layer_list.html:11
 msgid "Add base layer"
@@ -812,17 +1199,19 @@ msgstr "Excluir camada base"
 msgid "Base layer will be deleted"
 msgstr "A camada base será eliminada"
 
-#: templates/base_layer_list.html:62 templates/datastore_list.html:74
+#: templates/base_layer_list.html:62 templates/connection_config.html:129
+#: templates/connection_config.html:167 templates/connection_list.html:118
+#: templates/connection_trigger_add.html:25 templates/datastore_list.html:83
 #: templates/enumeration_list.html:59 templates/external_layer_list.html:69
-#: templates/layer_list.html:79 templates/layergroup_add.html:123
-#: templates/layergroup_list.html:74 templates/layergroup_update.html:189
-#: templates/layergroup_update.html:211 templates/server_list.html:65
-#: templates/service_url_list.html:63 templates/sqlview_list.html:62
-#: templates/workspace_list.html:70
+#: templates/layer_config.html:611 templates/layer_list.html:79
+#: templates/layergroup_add.html:123 templates/layergroup_list.html:74
+#: templates/layergroup_update.html:189 templates/layergroup_update.html:211
+#: templates/server_list.html:65 templates/service_url_list.html:63
+#: templates/sqlview_list.html:62 templates/workspace_list.html:70
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: templates/base_layer_list.html:63 templates/datastore_list.html:75
+#: templates/base_layer_list.html:63 templates/datastore_list.html:84
 #: templates/enumeration_list.html:60 templates/external_layer_list.html:70
 #: templates/layer_list.html:80 templates/layer_list.html:95
 #: templates/layer_list.html:110 templates/layergroup_add.html:124
@@ -834,7 +1223,8 @@ msgid "Accept"
 msgstr "Aceitar"
 
 #: templates/base_layer_list.html:80 templates/cache_list.html:124
-#: templates/cache_list.html:161 templates/datastore_list.html:92
+#: templates/cache_list.html:161 templates/connection_config.html:193
+#: templates/connection_list.html:136 templates/datastore_list.html:101
 #: templates/enumeration_list.html:77 templates/external_layer_list.html:87
 #: templates/geoserver/create_layer_sql_view.html:247
 #: templates/layer_list.html:129 templates/layergroup_list.html:92
@@ -845,7 +1235,8 @@ msgid "Processing request..."
 msgstr "Processando solicitação..."
 
 #: templates/base_layer_list.html:81 templates/cache_list.html:125
-#: templates/cache_list.html:162 templates/datastore_list.html:93
+#: templates/cache_list.html:162 templates/connection_config.html:194
+#: templates/connection_list.html:137 templates/datastore_list.html:102
 #: templates/enumeration_list.html:78 templates/external_layer_list.html:88
 #: templates/geoserver/create_layer_sql_view.html:248
 #: templates/layer_list.html:130 templates/layergroup_list.html:93
@@ -857,7 +1248,8 @@ msgid "Search%(sep)s"
 msgstr "Pesquisar%(sep)s"
 
 #: templates/base_layer_list.html:82 templates/cache_list.html:126
-#: templates/cache_list.html:163 templates/datastore_list.html:94
+#: templates/cache_list.html:163 templates/connection_config.html:195
+#: templates/connection_list.html:138 templates/datastore_list.html:103
 #: templates/enumeration_list.html:79 templates/external_layer_list.html:89
 #: templates/geoserver/create_layer_sql_view.html:249
 #: templates/layer_list.html:131 templates/layergroup_list.html:94
@@ -869,7 +1261,8 @@ msgid "Showing %(numrecords)s records"
 msgstr "Mostrando %(numrecords)s registros"
 
 #: templates/base_layer_list.html:83 templates/cache_list.html:127
-#: templates/cache_list.html:164 templates/datastore_list.html:95
+#: templates/cache_list.html:164 templates/connection_config.html:196
+#: templates/connection_list.html:139 templates/datastore_list.html:104
 #: templates/enumeration_list.html:80 templates/external_layer_list.html:90
 #: templates/geoserver/create_layer_sql_view.html:250
 #: templates/layer_list.html:132 templates/layergroup_list.html:95
@@ -881,7 +1274,8 @@ msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr "Mostrando desde %(start)s até %(end)s de %(numrecords)s registros"
 
 #: templates/base_layer_list.html:84 templates/cache_list.html:128
-#: templates/cache_list.html:165 templates/datastore_list.html:96
+#: templates/cache_list.html:165 templates/connection_config.html:197
+#: templates/connection_list.html:140 templates/datastore_list.html:105
 #: templates/enumeration_list.html:81 templates/external_layer_list.html:91
 #: templates/geoserver/create_layer_sql_view.html:251
 #: templates/layer_list.html:133 templates/layergroup_list.html:96
@@ -892,7 +1286,8 @@ msgid "Showing from 0 to 0 of 0 records"
 msgstr "Mostrando de 0 a 0 de 0 registros"
 
 #: templates/base_layer_list.html:85 templates/cache_list.html:129
-#: templates/cache_list.html:166 templates/datastore_list.html:97
+#: templates/cache_list.html:166 templates/connection_config.html:198
+#: templates/connection_list.html:141 templates/datastore_list.html:106
 #: templates/enumeration_list.html:82 templates/external_layer_list.html:92
 #: templates/geoserver/create_layer_sql_view.html:252
 #: templates/layer_list.html:134 templates/layergroup_list.html:97
@@ -904,8 +1299,11 @@ msgid "Filtering %(max)s records"
 msgstr "Filtragem %(max)s registros"
 
 #: templates/base_layer_list.html:87 templates/cache_list.html:131
-#: templates/cache_list.html:168 templates/datastore_list.html:99
-#: templates/enumeration_list.html:84 templates/external_layer_list.html:94
+#: templates/cache_list.html:168 templates/connection_config.html:200
+#: templates/connection_list.html:143 templates/connection_trigger_add.html:152
+#: templates/connection_update.html:192 templates/datastore_add.html:296
+#: templates/datastore_list.html:108 templates/enumeration_list.html:84
+#: templates/external_layer_list.html:94
 #: templates/geoserver/create_layer_sql_view.html:254
 #: templates/layer_list.html:136 templates/layergroup_list.html:99
 #: templates/lock_list.html:61 templates/server_list.html:90
@@ -917,9 +1315,11 @@ msgstr "Carregando..."
 #: templates/base_layer_list.html:88 templates/base_layer_list.html:89
 #: templates/cache_list.html:132 templates/cache_list.html:133
 #: templates/cache_list.html:169 templates/cache_list.html:170
-#: templates/datastore_list.html:100 templates/datastore_list.html:101
-#: templates/enumeration_list.html:85 templates/enumeration_list.html:86
-#: templates/external_layer_list.html:95 templates/external_layer_list.html:96
+#: templates/connection_config.html:201 templates/connection_list.html:144
+#: templates/connection_list.html:145 templates/datastore_list.html:109
+#: templates/datastore_list.html:110 templates/enumeration_list.html:85
+#: templates/enumeration_list.html:86 templates/external_layer_list.html:95
+#: templates/external_layer_list.html:96
 #: templates/geoserver/create_layer_sql_view.html:255
 #: templates/geoserver/create_layer_sql_view.html:256
 #: templates/layer_list.html:137 templates/layer_list.html:138
@@ -933,7 +1333,8 @@ msgid "No records available"
 msgstr "Nenhum registro disponível"
 
 #: templates/base_layer_list.html:91 templates/cache_list.html:135
-#: templates/cache_list.html:172 templates/datastore_list.html:103
+#: templates/cache_list.html:172 templates/connection_config.html:204
+#: templates/connection_list.html:147 templates/datastore_list.html:112
 #: templates/enumeration_list.html:88 templates/external_layer_list.html:98
 #: templates/geoserver/create_layer_sql_view.html:258
 #: templates/layer_list.html:140 templates/layergroup_list.html:103
@@ -944,7 +1345,8 @@ msgid "First"
 msgstr "Primeiro"
 
 #: templates/base_layer_list.html:92 templates/cache_list.html:136
-#: templates/cache_list.html:173 templates/datastore_list.html:104
+#: templates/cache_list.html:173 templates/connection_config.html:205
+#: templates/connection_list.html:148 templates/datastore_list.html:113
 #: templates/enumeration_list.html:89 templates/external_layer_list.html:99
 #: templates/geoserver/create_layer_sql_view.html:259
 #: templates/layer_list.html:141 templates/layergroup_list.html:104
@@ -955,7 +1357,8 @@ msgid "Previous"
 msgstr "Anterior"
 
 #: templates/base_layer_list.html:93 templates/cache_list.html:137
-#: templates/cache_list.html:174 templates/datastore_list.html:105
+#: templates/cache_list.html:174 templates/connection_config.html:206
+#: templates/connection_list.html:149 templates/datastore_list.html:114
 #: templates/enumeration_list.html:90 templates/external_layer_list.html:100
 #: templates/geoserver/create_layer_sql_view.html:260
 #: templates/layer_list.html:142 templates/layergroup_list.html:105
@@ -966,7 +1369,8 @@ msgid "Next"
 msgstr "Seguinte"
 
 #: templates/base_layer_list.html:94 templates/cache_list.html:138
-#: templates/cache_list.html:175 templates/datastore_list.html:106
+#: templates/cache_list.html:175 templates/connection_config.html:207
+#: templates/connection_list.html:150 templates/datastore_list.html:115
 #: templates/enumeration_list.html:91 templates/external_layer_list.html:101
 #: templates/geoserver/create_layer_sql_view.html:261
 #: templates/layer_list.html:143 templates/layergroup_list.html:106
@@ -977,7 +1381,8 @@ msgid "Last"
 msgstr "Último"
 
 #: templates/base_layer_list.html:97 templates/cache_list.html:141
-#: templates/cache_list.html:178 templates/datastore_list.html:109
+#: templates/cache_list.html:178 templates/connection_config.html:210
+#: templates/connection_list.html:153 templates/datastore_list.html:118
 #: templates/enumeration_list.html:94 templates/external_layer_list.html:104
 #: templates/geoserver/create_layer_sql_view.html:264
 #: templates/layer_list.html:146 templates/layergroup_list.html:109
@@ -989,7 +1394,8 @@ msgid "%(sep)sSort ascending"
 msgstr "%(sep)sSort ascendente"
 
 #: templates/base_layer_list.html:98 templates/cache_list.html:142
-#: templates/cache_list.html:179 templates/datastore_list.html:110
+#: templates/cache_list.html:179 templates/connection_config.html:211
+#: templates/connection_list.html:154 templates/datastore_list.html:119
 #: templates/enumeration_list.html:95 templates/external_layer_list.html:105
 #: templates/geoserver/create_layer_sql_view.html:265
 #: templates/layer_list.html:147 templates/layergroup_list.html:110
@@ -1008,9 +1414,9 @@ msgstr "Remover a camada de base"
 msgid "Update baselayer"
 msgstr "Atualizar camada de base"
 
-#: templates/cache_list.html:11
+#: templates/cache_list.html:11 templates/layer_update.html:666
 msgid "Error:"
-msgstr ""
+msgstr "Erro:"
 
 #: templates/cache_list.html:21
 msgid "Cached layers"
@@ -1030,6 +1436,464 @@ msgstr "Limpar cache"
 msgid "Configure cache options"
 msgstr "Configurar opções de cache"
 
+#: templates/connection_add.html:30 templates/connection_add.html:552
+#: templates/connection_update.html:12 templates/connection_update.html:370
+#: templates/datastore_add.html:89 templates/datastore_update.html:97
+msgid "Test connection"
+msgstr "Testar a conexão"
+
+#: templates/connection_add.html:31 templates/connection_update.html:13
+#: templates/datastore_add.html:12 templates/enumeration_add.html:12
+#: templates/enumeration_update.html:12 templates/external_layer_add.html:13
+#: templates/external_layer_update.html:19 templates/layer_add.html:18
+#: templates/layer_config.html:19 templates/layer_create.html:18
+#: templates/layer_update.html:18 templates/layergroup_add.html:14
+#: templates/layergroup_update.html:13 templates/server_add.html:12
+#: templates/service_url_add.html:12 templates/sqlview_add.html:17
+#: templates/workspace_add.html:12
+msgid "Save"
+msgstr "Salvar"
+
+#: templates/connection_add.html:53 templates/connection_list.html:26
+#: templates/connection_trigger_add.html:52 templates/connection_update.html:35
+#: templates/layer_add.html:39 templates/layer_create.html:48
+#: templates/layer_update.html:39 templates/layergroup_add.html:41
+#: templates/layergroup_update.html:41
+msgid "Permissions"
+msgstr "Permissões"
+
+#: templates/connection_add.html:60 templates/connection_update.html:42
+msgid "Connection details"
+msgstr "Detalhes da conexão"
+
+#: templates/connection_add.html:84 templates/connection_update.html:67
+msgid "Connection parameters"
+msgstr "Parâmetros de conexão"
+
+#: templates/connection_add.html:108 templates/connection_update.html:93
+msgid "Additional parameters"
+msgstr "Parâmetros adicionais"
+
+#: templates/connection_add.html:191 templates/connection_update.html:187
+msgid "Municipality"
+msgstr "Município"
+
+#: templates/connection_add.html:195 templates/connection_add.html:559
+msgid "Select domain first and click Load"
+msgstr "Selecione o domínio primeiro e clique em Carregar"
+
+#: templates/connection_add.html:200 templates/connection_add.html:601
+#: templates/connection_update.html:200 templates/connection_update.html:425
+msgid "Load"
+msgstr "Carregar"
+
+#: templates/connection_add.html:204
+msgid ""
+"Select the domain and click Load. You can type to search by code or name."
+msgstr ""
+"Selecione o domínio e clique em Carregar. Pode escrever para pesquisar por código ou nome."
+
+#: templates/connection_add.html:260
+msgid "Select a category and type to see the connection parameters"
+msgstr "Selecione uma categoria e tipo para ver os parâmetros de conexão"
+
+#: templates/connection_add.html:474
+msgid "Please select a connection type"
+msgstr "Por favor, selecione um tipo de conexão"
+
+#: templates/connection_add.html:480 templates/connection_update.html:298
+msgid "Testing..."
+msgstr "Testando..."
+
+#: templates/connection_add.html:538 templates/connection_update.html:356
+#: views.py:7053 views.py:7067 views.py:7082 views.py:7115 views.py:7135
+#: views.py:7178 views.py:7201
+msgid "Connection successful"
+msgstr "Conexão bem-sucedida"
+
+#: templates/connection_add.html:547 templates/connection_update.html:365
+msgid "Error testing connection"
+msgstr "Erro ao testar conexão"
+
+#: templates/connection_add.html:580 templates/connection_update.html:403
+msgid "Select entity"
+msgstr "Selecionar entidade"
+
+#: templates/connection_add.html:587 templates/connection_update.html:411
+msgid "No entities found"
+msgstr "Nenhuma entidade encontrada"
+
+#: templates/connection_add.html:596 templates/connection_update.html:420
+msgid "Error loading entities"
+msgstr "Erro ao carregar entidades"
+
+#: templates/connection_config.html:12
+msgid "Back to connections"
+msgstr "Voltar às conexões"
+
+#: templates/connection_config.html:25 templates/layer_config.html:60
+msgid "Triggers"
+msgstr "Disparadores"
+
+#: templates/connection_config.html:37
+msgid "Add trigger"
+msgstr "Adicionar disparador"
+
+#: templates/connection_config.html:48
+msgid "Event"
+msgstr "Evento"
+
+#: templates/connection_config.html:49
+#: templates/connection_trigger_add.html:113
+msgid "Scope"
+msgstr "Âmbito"
+
+#: templates/connection_config.html:61
+msgid "Can be used as calculated field"
+msgstr "Pode ser usado como campo calculado"
+
+#: templates/connection_config.html:75
+msgid "Global"
+msgstr "Global"
+
+#: templates/connection_config.html:78
+#: templates/connection_trigger_add.html:129
+msgid "Schemas"
+msgstr "Esquemas"
+
+#: templates/connection_config.html:84
+msgid "Edit"
+msgstr "Editar"
+
+#: templates/connection_config.html:91
+msgid "Duplicate to another connection"
+msgstr "Duplicar para outra conexão"
+
+#: templates/connection_config.html:122
+msgid "Delete trigger"
+msgstr "Excluir disparador"
+
+#: templates/connection_config.html:125
+msgid ""
+"Are you sure you want to delete this trigger? This action cannot be undone."
+msgstr ""
+"Tem a certeza de que deseja excluir este disparador? Esta ação não pode ser desfeita."
+
+#: templates/connection_config.html:144
+msgid "Duplicate trigger"
+msgstr "Duplicar disparador"
+
+#: templates/connection_config.html:147
+msgid "Select the target connection to duplicate this trigger:"
+msgstr "Selecione a conexão de destino para duplicar este disparador:"
+
+#: templates/connection_config.html:150
+msgid "Target connection"
+msgstr "Conexão de destino"
+
+#: templates/connection_config.html:152
+msgid "Select a connection..."
+msgstr "Selecione uma conexão..."
+
+#: templates/connection_config.html:157
+msgid "Only PostGIS connections are shown"
+msgstr "Apenas são mostradas conexões PostGIS"
+
+#: templates/connection_config.html:162
+msgid "No other PostGIS connections available."
+msgstr "Nenhuma outra conexão PostGIS disponível."
+
+#: templates/connection_config.html:169 templates/connection_config.html:284
+#: templates/connection_config.html:291
+msgid "Duplicate"
+msgstr "Duplicar"
+
+#: templates/connection_config.html:202
+msgid "No triggers defined for this connection"
+msgstr "Nenhum disparador definido para esta conexão"
+
+#: templates/connection_config.html:245
+msgid "Error deleting trigger"
+msgstr "Erro ao excluir disparador"
+
+#: templates/connection_config.html:265
+msgid "Please select a target connection"
+msgstr "Por favor, selecione uma conexão de destino"
+
+#: templates/connection_config.html:270
+msgid "Duplicating..."
+msgstr "Duplicando..."
+
+#: templates/connection_config.html:286
+msgid "Trigger duplicated successfully as:"
+msgstr "Disparador duplicado com sucesso como:"
+
+#: templates/connection_config.html:292
+msgid "Error duplicating trigger"
+msgstr "Erro ao duplicar disparador"
+
+#: templates/connection_list.html:12
+msgid "Add connection"
+msgstr "Adicionar conexão"
+
+#: templates/connection_list.html:27 templates/connection_list.html:48
+#: templates/dashboard_services_menu.html:11
+#: templates/select_connection_permissions.html:43
+msgid "Datastores"
+msgstr "Armazéns de dados"
+
+#: templates/connection_list.html:48
+msgid "All users can create datastores"
+msgstr "Todos os usuários podem criar armazéns de dados"
+
+#: templates/connection_list.html:51
+msgid "All users can use in ETL"
+msgstr "Todos os usuários podem usar em ETL"
+
+#: templates/connection_list.html:51
+#: templates/select_connection_permissions.html:47
+msgid "ETL"
+msgstr "ETL"
+
+#: templates/connection_list.html:54
+msgid "All users can manage"
+msgstr "Todos os usuários podem gerir"
+
+#: templates/connection_list.html:54
+msgid "Manage"
+msgstr "Gerir"
+
+#: templates/connection_list.html:57
+msgid "Permissions by role only"
+msgstr "Permissões apenas por função"
+
+#: templates/connection_list.html:57
+msgid "By role"
+msgstr "Por função"
+
+#: templates/connection_list.html:64
+msgid "Not compatible"
+msgstr "Não compatível"
+
+#: templates/connection_list.html:69 templates/connection_trigger_add.html:136
+msgid "Options"
+msgstr "Opções"
+
+#: templates/connection_list.html:92 templates/connection_list.html:160
+msgid "Delete connection"
+msgstr "Excluir conexão"
+
+#: templates/connection_list.html:96
+msgid "The connection will be deleted. Do you want to continue?"
+msgstr "A conexão será excluída. Deseja continuar?"
+
+#: templates/connection_list.html:100 templates/external_layer_update.html:44
+#: templates/geoserver/create_layer_sql_view.html:164
+msgid "Warning"
+msgstr "Aviso"
+
+#: templates/connection_list.html:103
+msgid "The connection and all associated resources will be deleted:"
+msgstr "A conexão e todos os recursos associados serão excluídos:"
+
+#: templates/connection_list.html:105
+msgid "All datastores linked to this connection"
+msgstr "Todos os armazéns de dados ligados a esta conexão"
+
+#: templates/connection_list.html:106
+msgid "All layers in those datastores"
+msgstr "Todas as camadas nesses armazéns de dados"
+
+#: templates/connection_list.html:107
+msgid "All triggers and topology rules of those layers"
+msgstr "Todos os disparadores e regras topológicas dessas camadas"
+
+#: templates/connection_list.html:112
+msgid "I understand that this action cannot be undone"
+msgstr "Entendo que esta ação não pode ser desfeita"
+
+#: templates/connection_list.html:164
+msgid "Edit connection"
+msgstr "Editar conexão"
+
+#: templates/connection_list.html:213
+msgid "This connection has"
+msgstr "Esta conexão tem"
+
+#: templates/connection_list.html:213
+msgid "datastore(s) and"
+msgstr "armazém(ns) de dados e"
+
+#: templates/connection_list.html:214
+msgid "layer(s) associated."
+msgstr "camada(s) associada(s)."
+
+#: templates/connection_list.html:257
+msgid "Error deleting connection"
+msgstr "Erro ao excluir conexão"
+
+#: templates/connection_trigger_add.html:28
+msgid "Save trigger"
+msgstr "Guardar disparador"
+
+#: templates/connection_trigger_add.html:49
+#: templates/external_layer_add.html:32 templates/external_layer_update.html:51
+#: templates/layer_add.html:37 templates/layer_create.html:45
+#: templates/layer_update.html:37 templates/layergroup_add.html:40
+#: templates/layergroup_update.html:40 templates/sqlview_add.html:38
+msgid "General"
+msgstr "Geral"
+
+#: templates/connection_trigger_add.html:66
+msgid "Unique identifier for this trigger"
+msgstr "Identificador único para este disparador"
+
+#: templates/connection_trigger_add.html:68
+msgid ""
+"Only letters, numbers and underscores. Must start with letter or underscore."
+msgstr ""
+"Apenas letras, números e sublinhados. Deve começar por letra ou sublinhado."
+
+#: templates/connection_trigger_add.html:69
+msgid "Only letters, numbers and underscores"
+msgstr "Apenas letras, números e sublinhados"
+
+#: templates/connection_trigger_add.html:75
+msgid "Brief description of what this trigger does"
+msgstr "Breve descrição do que este disparador faz"
+
+#: templates/connection_trigger_add.html:81
+msgid "Timing"
+msgstr "Temporização"
+
+#: templates/connection_trigger_add.html:90 templates/layer_config.html:495
+msgid "Events"
+msgstr "Eventos"
+
+#: templates/connection_trigger_add.html:116
+msgid "Apply to"
+msgstr "Aplicar a"
+
+#: templates/connection_trigger_add.html:125
+msgid "Choose whether this trigger applies to all schemas or specific ones"
+msgstr "Escolha se este disparador se aplica a todos os esquemas ou a alguns específicos"
+
+#: templates/connection_trigger_add.html:132
+msgid "Type schema names and press Enter to add"
+msgstr "Digite nomes de esquemas e pressione Enter para adicionar"
+
+#: templates/connection_trigger_add.html:143 templates/layer_config.html:588
+msgid "Calculated field"
+msgstr "Campo calculado"
+
+#: templates/connection_trigger_add.html:146
+msgid "Can be assigned to layer fields to auto-calculate values"
+msgstr "Pode ser atribuído a campos de camada para calcular valores automaticamente"
+
+#: templates/connection_trigger_add.html:150
+msgid "Compatible datastores"
+msgstr "Armazéns de dados compatíveis"
+
+#: templates/connection_trigger_add.html:159
+msgid "SQL Code"
+msgstr "Código SQL"
+
+#: templates/connection_trigger_add.html:172
+msgid ""
+"Use NEW to reference the new row (INSERT/UPDATE) and OLD for the old row "
+"(UPDATE/DELETE)."
+msgstr ""
+"Use NEW para referenciar a nova linha (INSERT/UPDATE) e OLD para a linha antiga "
+"(UPDATE/DELETE)."
+
+#: templates/connection_trigger_add.html:175
+msgid "Template variables"
+msgstr "Variáveis de modelo"
+
+#: templates/connection_trigger_add.html:182
+msgid "The field selected by the user when assigning the trigger"
+msgstr "O campo selecionado pelo usuário ao atribuir o disparador"
+
+#: templates/connection_trigger_add.html:183
+msgid "The schema where the layer is located"
+msgstr "O esquema onde a camada está localizada"
+
+#: templates/connection_trigger_add.html:184
+msgid "The table name of the layer"
+msgstr "O nome da tabela da camada"
+
+#: templates/connection_trigger_add.html:185
+msgid "The geometry field name of the layer"
+msgstr "O nome do campo de geometria da camada"
+
+#: templates/connection_trigger_add.html:186
+msgid "The primary key field of the layer"
+msgstr "O campo de chave primária da camada"
+
+#: templates/connection_trigger_add.html:203
+msgid "Select trigger permissions"
+msgstr "Selecionar permissões do disparador"
+
+#: templates/connection_trigger_add.html:205
+#: templates/select_connection_permissions.html:8
+#: templates/select_layer_permissions.html:8
+#: templates/select_layergroup_permissions.html:8
+msgid "Search user role..."
+msgstr "Pesquisar função de usuário..."
+
+#: templates/connection_trigger_add.html:209
+msgid "All staff users can use this trigger in their layers"
+msgstr "Todos os usuários staff podem usar este disparador nas suas camadas"
+
+#: templates/connection_trigger_add.html:211
+msgid "Allow all staff users"
+msgstr "Permitir todos os usuários staff"
+
+#: templates/connection_trigger_add.html:221
+#: templates/select_connection_permissions.html:36
+msgid "User role image"
+msgstr "Imagem da função de usuário"
+
+#: templates/connection_trigger_add.html:230
+msgid "Can use"
+msgstr "Pode usar"
+
+#: templates/connection_trigger_add.html:239
+msgid "No roles available"
+msgstr "Nenhuma função disponível"
+
+#: templates/connection_trigger_add.html:300
+msgid "Type schema name and press Enter"
+msgstr "Digite o nome do esquema e pressione Enter"
+
+#: templates/connection_trigger_add.html:389 views.py:7309 views.py:7431
+msgid "SQL code is required"
+msgstr "O código SQL é obrigatório"
+
+#: templates/connection_trigger_add.html:408
+msgid "Select at least one schema to see compatible datastores"
+msgstr "Selecione pelo menos um esquema para ver armazéns de dados compatíveis"
+
+#: templates/connection_trigger_add.html:428
+msgid "No datastores in this connection yet"
+msgstr "Ainda não há armazéns de dados nesta conexão"
+
+#: templates/connection_trigger_add.html:430
+msgid "No datastores match the selected schemas"
+msgstr "Nenhum armazém de dados corresponde aos esquemas selecionados"
+
+#: templates/connection_trigger_add.html:436
+msgid "Error loading datastores"
+msgstr "Erro ao carregar armazéns de dados"
+
+#: templates/connection_update.html:194 templates/connection_update.html:378
+msgid "Click Load to get entities"
+msgstr "Clique em Carregar para obter entidades"
+
+#: templates/connection_update.html:204
+msgid "You can type to search by code or name."
+msgstr "Pode escrever para pesquisar por código ou nome."
+
 #: templates/dashboard_services_menu.html:4
 msgid "Services"
 msgstr "Serviços"
@@ -1042,50 +1906,33 @@ msgstr "Servidores"
 msgid "Workspaces"
 msgstr "Espaços de trabalho"
 
-#: templates/dashboard_services_menu.html:10
-msgid "Datastores"
-msgstr "Armazéns de dados"
-
-#: templates/dashboard_services_menu.html:11
+#: templates/dashboard_services_menu.html:12
 msgid "Layer groups"
 msgstr "Grupos de camadas"
 
-#: templates/dashboard_services_menu.html:13
+#: templates/dashboard_services_menu.html:14
 msgid "External layers"
 msgstr "Camadas externas"
 
-#: templates/dashboard_services_menu.html:14
+#: templates/dashboard_services_menu.html:15
 msgid "Cache management"
 msgstr "Gestão de cache"
 
-#: templates/dashboard_services_menu.html:15
+#: templates/dashboard_services_menu.html:16
 msgid "Services URLs"
 msgstr "URLs de serviços"
 
-#: templates/dashboard_services_menu.html:16
-#, fuzzy
-#| msgid "SQL View"
+#: templates/dashboard_services_menu.html:17
 msgid "SQL Views"
-msgstr "SQL Vista"
+msgstr "Vistas SQL"
 
-#: templates/dashboard_services_menu.html:21
+#: templates/dashboard_services_menu.html:22
 msgid "Datatypes"
 msgstr "Tipos de dados"
 
-#: templates/dashboard_services_menu.html:23
+#: templates/dashboard_services_menu.html:24
 msgid "Enumerations"
 msgstr "Enumerações"
-
-#: templates/datastore_add.html:12 templates/enumeration_add.html:12
-#: templates/enumeration_update.html:12 templates/external_layer_add.html:13
-#: templates/external_layer_update.html:19 templates/layer_add.html:18
-#: templates/layer_config.html:19 templates/layer_create.html:18
-#: templates/layer_update.html:18 templates/layergroup_add.html:14
-#: templates/layergroup_update.html:13 templates/server_add.html:12
-#: templates/service_url_add.html:12 templates/sqlview_add.html:17
-#: templates/workspace_add.html:12
-msgid "Save"
-msgstr "Salvar"
 
 #: templates/datastore_add.html:46 templates/datastore_update.html:47
 #: templates/geoserver/layer_upload_imagemosaic.html:41
@@ -1093,52 +1940,107 @@ msgstr "Salvar"
 msgid "Select file"
 msgstr "Selecionar arquivo"
 
-#: templates/datastore_add.html:70 templates/datastore_update.html:71
-msgid "Test connection"
-msgstr "Testar a conexão"
+#: templates/datastore_add.html:73
+msgid "Select an existing connection to the database"
+msgstr "Selecione uma conexão existente à base de dados"
 
-#: templates/datastore_add.html:77 templates/datastore_update.html:86
+#: templates/datastore_add.html:96 templates/datastore_update.html:113
 msgid "Temporal dimension"
 msgstr "Dimensão temporal"
 
-#: templates/datastore_add.html:89 templates/datastore_update.html:98
+#: templates/datastore_add.html:108 templates/datastore_update.html:125
 msgid "Elevation dimension"
 msgstr "Dimensão de elevação"
+
+#: templates/datastore_add.html:185
+msgid "Select a connection"
+msgstr "Selecione uma conexão"
+
+#: templates/datastore_add.html:261
+msgid "Select or type a new schema name"
+msgstr "Selecione ou digite um novo nome de esquema"
+
+#: templates/datastore_add.html:275
+msgid "(new)"
+msgstr "(novo)"
+
+#: templates/datastore_add.html:297
+msgid "Connecting to database..."
+msgstr "Conectando à base de dados..."
+
+#: templates/datastore_add.html:320
+msgid "Select existing or type new name"
+msgstr "Selecione existente ou digite novo nome"
+
+#: templates/datastore_add.html:327
+msgid "No schemas found. Type a name to create one."
+msgstr "Nenhum esquema encontrado. Digite um nome para criar um."
+
+#: templates/datastore_add.html:329
+msgid "Unknown error"
+msgstr "Erro desconhecido"
+
+#: templates/datastore_add.html:337
+msgid "Connection error. You can type a schema name."
+msgstr "Erro de conexão. Pode digitar um nome de esquema."
+
+#: templates/datastore_add.html:339
+msgid "Connection timeout. You can type a schema name."
+msgstr "Tempo limite de conexão. Pode digitar um nome de esquema."
 
 #: templates/datastore_list.html:11
 msgid "Add datastore"
 msgstr "Adicionar datastore"
 
-#: templates/datastore_list.html:58
+#: templates/datastore_list.html:39
+msgid "Using centralized connection"
+msgstr "Usando conexão centralizada"
+
+#: templates/datastore_list.html:67
 msgid "Delete datastore"
 msgstr "Excluir Armazém"
 
-#: templates/datastore_list.html:63
+#: templates/datastore_list.html:72
 msgid "The data store and its registered resources will be deleted"
 msgstr "O armazém de dados e seus recursos registrados serão excluídos"
 
-#: templates/datastore_list.html:69
+#: templates/datastore_list.html:78
 msgid "Check this option to remove the schema associated with the datastore"
 msgstr "Marque esta opção para remover o esquema associado ao banco de dados"
 
-#: templates/datastore_list.html:116
+#: templates/datastore_list.html:125
 msgid "Remove datastore"
 msgstr "Excluir armazém"
 
-#: templates/datastore_list.html:120
+#: templates/datastore_list.html:129
 msgid "Update datastore"
 msgstr "Atualizar armazém"
 
-#: templates/datastore_update.html:12 templates/server_update.html:12
-#: templates/service_url_update.html:12 templates/workspace_update.html:12
-msgid "Update"
-msgstr "Atualização "
+#: templates/datastore_update.html:74
+msgid "This datastore uses a centralized connection"
+msgstr "Este armazém de dados usa uma conexão centralizada"
 
-#: templates/enumeration_add.html:53 templates/enumeration_update.html:53
+#: templates/datastore_update.html:86
+msgid ""
+"Connection parameters are managed from the Connections section. To modify "
+"them, edit the connection:"
+msgstr ""
+"Os parâmetros de conexão são geridos na secção Conexões. Para modificá-los, "
+"edite a conexão:"
+
+#: templates/enumeration_add.html:50 templates/enumeration_update.html:50
+msgid "Order type"
+msgstr "Tipo de ordem"
+
+#: templates/enumeration_add.html:60 templates/enumeration_update.html:72
+msgid "Show first value by default"
+msgstr "Mostrar primeiro valor por defeito"
+
+#: templates/enumeration_add.html:68 templates/enumeration_update.html:80
 msgid "Enumeration items"
 msgstr "Itens de enumeração"
 
-#: templates/enumeration_add.html:59 templates/enumeration_update.html:71
+#: templates/enumeration_add.html:74 templates/enumeration_update.html:114
 msgid "Add item"
 msgstr "Adicionar item"
 
@@ -1158,51 +2060,40 @@ msgstr "A enumeração será removida. Você quer continuar?"
 msgid "Update enumeration"
 msgstr "Atualizar enumeração"
 
-#: templates/enumeration_update.html:60
+#: templates/enumeration_update.html:99
 msgid "Enumeration cannot contain point-colon"
 msgstr "Enumeração não pode conter ponto-colon"
 
-#: templates/enumeration_update.html:63
-msgid "Delete"
-msgstr "Apagar"
+#: templates/enumeration_update.html:99
+msgid "Insert item name"
+msgstr "Inserir nome do item"
 
 #: templates/external_layer_add.html:12 templates/external_layer_update.html:17
 #: templates/layer_add.html:17 templates/layer_config.html:18
 #: templates/layer_create.html:17 templates/layer_update.html:17
 #: templates/layergroup_add.html:13 templates/layergroup_update.html:12
 msgid "Back"
-msgstr ""
+msgstr "Voltar"
 
-#: templates/external_layer_add.html:32 templates/external_layer_update.html:46
-#: templates/layer_add.html:37 templates/layer_create.html:45
-#: templates/layer_update.html:37 templates/layergroup_add.html:40
-#: templates/layergroup_update.html:40 templates/sqlview_add.html:38
-msgid "General"
-msgstr "Geral"
-
-#: templates/external_layer_add.html:33 templates/external_layer_update.html:47
+#: templates/external_layer_add.html:33 templates/external_layer_update.html:52
 #: templates/layer_add.html:38 templates/layer_create.html:47
 #: templates/layer_update.html:38
 msgid "Display properties"
 msgstr "Exibir propriedades"
 
-#: templates/external_layer_add.html:34 templates/external_layer_update.html:48
+#: templates/external_layer_add.html:34 templates/external_layer_update.html:53
 #: templates/layer_add.html:40 templates/layer_create.html:49
 #: templates/layer_update.html:40
 msgid "Metadata"
 msgstr "Metadado"
 
-#: templates/external_layer_add.html:35 templates/external_layer_update.html:49
+#: templates/external_layer_add.html:35 templates/external_layer_update.html:54
 #: templates/layer_add.html:41 templates/layer_create.html:50
 #: templates/layer_update.html:41
 msgid "Detailed information"
 msgstr "Informações detalhadas"
 
-#: templates/external_layer_add.html:53 templates/external_layer_update.html:68
-msgid "Url"
-msgstr "Url"
-
-#: templates/external_layer_add.html:60 templates/external_layer_update.html:75
+#: templates/external_layer_add.html:60 templates/external_layer_update.html:80
 msgid ""
 "Alert: this url is not in the same domain. Several browsers could not load "
 "this base layer due to cross-domain policy."
@@ -1210,33 +2101,62 @@ msgstr ""
 "Alerta: esta url não está no mesmo domínio. Vários navegadores não podem "
 "carregar esta camada base devido à política de domínio cruzado."
 
-#: templates/external_layer_add.html:63 templates/external_layer_update.html:78
+#: templates/external_layer_add.html:63 templates/external_layer_update.html:83
 msgid "Connect"
 msgstr "Conectar"
 
 #: templates/external_layer_add.html:110
-#: templates/external_layer_update.html:125
+#: templates/external_layer_update.html:130
 msgid "MatrixSet"
 msgstr "MatrixSet"
 
 #: templates/external_layer_add.html:114
-#: templates/external_layer_update.html:129
+#: templates/external_layer_update.html:134
 msgid "Alert: The selected matrixset must be compatible with the map CRS"
 msgstr "Alerta: O matrixset selecionado deve ser compatível com o CRS do mapa"
 
 #: templates/external_layer_add.html:125
-#: templates/external_layer_update.html:140
+#: templates/external_layer_update.html:145
 msgid "Api-key"
 msgstr "Api-key"
 
+#: templates/external_layer_add.html:133
+#: templates/external_layer_update.html:153
+msgid "Enter the URL of your Mapbox style (.json) file."
+msgstr "Introduza o URL do seu ficheiro de estilo Mapbox (.json)."
+
 #: templates/external_layer_add.html:142
-#: templates/external_layer_update.html:156 templates/layer_add.html:94
+#: templates/external_layer_update.html:162
+msgid "Clear file"
+msgstr "Limpar ficheiro"
+
+#: templates/external_layer_add.html:151
+#: templates/external_layer_update.html:171
+#: templates/geoserver/create_layer_feature_type.html:59
+#: templates/geoserver/create_layer_sql_view.html:76
+#: templates/geoserver/layer_upload_postgis.html:88
+#: templates/layer_create.html:83
+msgid "Coordinate reference system"
+msgstr "Sistema de referência de coordenadas"
+
+#: templates/external_layer_add.html:151
+#: templates/external_layer_update.html:171
+msgid "by default"
+msgstr "por defeito"
+
+#: templates/external_layer_add.html:157
+#: templates/external_layer_update.html:177
+msgid "Specify custom SRS"
+msgstr "Especificar SRS personalizado"
+
+#: templates/external_layer_add.html:174
+#: templates/external_layer_update.html:193 templates/layer_add.html:94
 #: templates/layer_update.html:111
 msgid "Timeout (miliseconds)"
 msgstr "Tempo limite (milissegundos)"
 
-#: templates/external_layer_add.html:168
-#: templates/external_layer_update.html:213
+#: templates/external_layer_add.html:200
+#: templates/external_layer_update.html:250
 #: templates/geoserver/create_layer_feature_type.html:131
 #: templates/geoserver/create_layer_sql_view.html:121
 #: templates/geoserver/layer_upload_imagemosaic.html:127
@@ -1248,7 +2168,7 @@ msgstr "Tempo limite (milissegundos)"
 msgid "Metadata: Abstract"
 msgstr "Metadados: Resumo"
 
-#: templates/external_layer_add.html:169
+#: templates/external_layer_add.html:201
 #: templates/geoserver/create_layer_feature_type.html:130
 #: templates/geoserver/create_layer_sql_view.html:120
 #: templates/geoserver/layer_upload_imagemosaic.html:128
@@ -1259,44 +2179,43 @@ msgstr "Metadados: Resumo"
 msgid "Some description of the layer"
 msgstr "Alguma descrição da camada"
 
-#: templates/external_layer_add.html:186
-#: templates/external_layer_update.html:236
+#: templates/external_layer_add.html:218
+#: templates/external_layer_update.html:273
 msgid "Enable metaquality"
 msgstr "Ativar"
 
-#: templates/external_layer_add.html:191
-#: templates/external_layer_update.html:245 templates/layer_add.html:248
+#: templates/external_layer_add.html:223
+#: templates/external_layer_update.html:282 templates/layer_add.html:248
 #: templates/layer_create.html:260 templates/layer_update.html:331
 msgid "Button title in the TOC"
 msgstr "Título do botão no PDC"
 
-#: templates/external_layer_add.html:192
-#: templates/external_layer_update.html:246 templates/layer_add.html:249
+#: templates/external_layer_add.html:224
+#: templates/external_layer_update.html:283 templates/layer_add.html:249
 #: templates/layer_create.html:261 templates/layer_update.html:332
 msgid "Button title"
 msgstr "Título do botão"
 
-#: templates/external_layer_add.html:192
-#: templates/external_layer_update.html:246 templates/layer_add.html:249
+#: templates/external_layer_add.html:224 templates/layer_add.html:249
 #: templates/layer_create.html:261 templates/layer_update.html:332
 msgid "Detailed info"
 msgstr "Informação detalhada"
 
-#: templates/external_layer_add.html:198
-#: templates/external_layer_update.html:255 templates/layer_add.html:255
+#: templates/external_layer_add.html:230
+#: templates/external_layer_update.html:292 templates/layer_add.html:255
 #: templates/layer_create.html:267 templates/layer_update.html:341
 msgid "HTML"
 msgstr "HTML"
 
-#: templates/external_layer_add.html:256
-#: templates/external_layer_update.html:314 templates/layer_add.html:564
-#: templates/layer_create.html:604 templates/layer_update.html:510
+#: templates/external_layer_add.html:301
+#: templates/external_layer_update.html:365 templates/layer_add.html:575
+#: templates/layer_create.html:612 templates/layer_update.html:518
 msgid "Layer title"
 msgstr "Título da camada"
 
-#: templates/external_layer_add.html:257
-#: templates/external_layer_update.html:315 templates/layer_add.html:565
-#: templates/layer_create.html:605 templates/layer_update.html:511
+#: templates/external_layer_add.html:302
+#: templates/external_layer_update.html:366 templates/layer_add.html:576
+#: templates/layer_create.html:613 templates/layer_update.html:519
 msgid "Layer description"
 msgstr "Descrição da camada"
 
@@ -1320,25 +2239,25 @@ msgstr "Remover camada externa"
 msgid "Update external layer"
 msgstr "Atualizar camada externa"
 
-#: templates/external_layer_update.html:189 templates/layer_update.html:275
+#: templates/external_layer_update.html:226 templates/layer_update.html:275
 msgid "Layer metadata"
 msgstr "Metadados de camada"
 
-#: templates/external_layer_update.html:194 templates/layer_update.html:280
+#: templates/external_layer_update.html:231 templates/layer_update.html:280
 msgid "Metadata UUID"
 msgstr "Metadados UUID"
 
-#: templates/external_layer_update.html:200
-#: templates/external_layer_update.html:206 templates/layer_update.html:286
+#: templates/external_layer_update.html:237
+#: templates/external_layer_update.html:243 templates/layer_update.html:286
 #: templates/layer_update.html:292
 msgid "Metadata tools"
 msgstr "Ferramentas de metadados"
 
-#: templates/external_layer_update.html:201 templates/layer_update.html:287
+#: templates/external_layer_update.html:238 templates/layer_update.html:287
 msgid "Edit in catalog"
 msgstr "Editar no catálogo"
 
-#: templates/external_layer_update.html:207 templates/layer_update.html:293
+#: templates/external_layer_update.html:244 templates/layer_update.html:293
 msgid "Create metadata"
 msgstr "Criar metadados"
 
@@ -1359,13 +2278,6 @@ msgstr "Armazém de dados"
 #: templates/geoserver/layer_upload_vector.html:59
 msgid "Layer name"
 msgstr "Nome da camada"
-
-#: templates/geoserver/create_layer_feature_type.html:59
-#: templates/geoserver/create_layer_sql_view.html:76
-#: templates/geoserver/layer_upload_postgis.html:88
-#: templates/layer_create.html:83
-msgid "Coordinate reference system"
-msgstr "Sistema de referência de coordenadas"
 
 #: templates/geoserver/create_layer_feature_type.html:83
 msgid "Add Field"
@@ -1393,8 +2305,8 @@ msgid "Single image (No tiles)"
 msgstr " Imagem simples (sem mosaicos)"
 
 #: templates/geoserver/create_layer_feature_type.html:141
-#: templates/layer_create.html:290 templates/layer_create.html:360
-#: templates/layer_create.html:659
+#: templates/layer_create.html:290 templates/layer_create.html:368
+#: templates/layer_create.html:673
 msgid "New field"
 msgstr "Novo campo"
 
@@ -1435,7 +2347,7 @@ msgstr "Nenhum campo foi definido"
 
 #: templates/geoserver/create_layer_feature_type.html:199
 #: templates/geoserver/create_layer_feature_type.html:205
-#: templates/layer_config.html:141
+#: templates/layer_config.html:162
 msgid "Delete field"
 msgstr "Excluir campo"
 
@@ -1465,10 +2377,6 @@ msgstr "instrução SQL"
 msgid "Autocomplete"
 msgstr "Autocompletar"
 
-#: templates/geoserver/create_layer_sql_view.html:136
-msgid "Schema"
-msgstr "Esquema"
-
 #: templates/geoserver/create_layer_sql_view.html:137
 #: templates/sqlview_add.html:75 templates/sqlview_add.html:112
 msgid "Table"
@@ -1489,10 +2397,6 @@ msgstr "CRS"
 #: templates/geoserver/create_layer_sql_view.html:142
 msgid "Key column"
 msgstr "Coluna chave"
-
-#: templates/geoserver/create_layer_sql_view.html:164
-msgid "Warning"
-msgstr "Aviso"
 
 #: templates/geoserver/create_layer_sql_view.html:165
 msgid "Select a data store before using Autocomplete"
@@ -1646,12 +2550,6 @@ msgstr "ID da tarefa"
 msgid "Task status"
 msgstr "Estado da tarefa"
 
-#: templates/layer_add.html:39 templates/layer_create.html:48
-#: templates/layer_update.html:39 templates/layergroup_add.html:41
-#: templates/layergroup_update.html:41
-msgid "Permissions"
-msgstr "Permissões"
-
 #: templates/layer_add.html:53 templates/layer_create.html:61
 #: templates/layer_update.html:59 templates/sqlview_add.html:50
 msgid "Data Store"
@@ -1689,10 +2587,8 @@ msgid "time_enabled field"
 msgstr "Campo temporal"
 
 #: templates/layer_add.html:159
-#, fuzzy
-#| msgid "End time_enabled field"
 msgid "End time enabled field"
-msgstr "Campo tempo (intervalo final)"
+msgstr "Campo de tempo final ativado"
 
 #: templates/layer_add.html:166 templates/layer_create.html:180
 #: templates/layer_update.html:217
@@ -1718,54 +2614,72 @@ msgstr "Modo para atribuir valores padrão"
 
 #: templates/layer_add.html:243 templates/layer_create.html:255
 #: templates/layer_update.html:322
-#, fuzzy
-#| msgid "Detailed information"
 msgid "Enable detailed information"
-msgstr "Informações detalhadas"
+msgstr "Ativar informações detalhadas"
 
-#: templates/layer_add.html:327 templates/layer_create.html:477
-#: templates/layer_update.html:427
+#: templates/layer_add.html:260
+msgid ""
+"Para generar automáticamente metadatos enriquecidos con descripción y campos "
+"de la base de datos:"
+msgstr ""
+"Para gerar automaticamente metadados enriquecidos com descrição e campos "
+"da base de dados:"
+
+#: templates/layer_add.html:262
+msgid "Guarda esta capa primero"
+msgstr "Guarde esta camada primeiro"
+
+#: templates/layer_add.html:263
+msgid "Ve a 'Editar capa' → pestaña 'Información Detallada'"
+msgstr "Vá a 'Editar camada' → separador 'Informação Detalhada'"
+
+#: templates/layer_add.html:264
+msgid "Usa el botón 'Generar Metadatos Enriquecidos con Campos'"
+msgstr "Use o botão 'Gerar Metadados Enriquecidos com Campos'"
+
+#: templates/layer_add.html:338 templates/layer_create.html:485
+#: templates/layer_update.html:435
 msgid "Resource contains no fields"
 msgstr "O recurso não contém campos"
 
-#: templates/layer_add.html:345 templates/layer_create.html:497
-#: templates/layer_update.html:453 templates/sqlview_add.html:299
+#: templates/layer_add.html:356 templates/layer_create.html:505
+#: templates/layer_update.html:461 templates/sqlview_add.html:299
 msgid "Choose field"
 msgstr "Selecionar campo"
 
-#: templates/layer_add.html:372
+#: templates/layer_add.html:383
 msgid "Data store contains no resources to publish"
 msgstr "O armazém de dados não contém recursos para publicar"
 
-#: templates/layer_add.html:389
+#: templates/layer_add.html:400
 msgid "Choose resource"
 msgstr "Selecionar recurso"
 
-#: templates/layer_add.html:395 templates/sqlview_add.html:209
+#: templates/layer_add.html:406 templates/sqlview_add.html:209
 #: templates/sqlview_add.html:261 templates/sqlview_add.html:304
 msgid "Service is unavailable"
 msgstr "O serviço está indisponível"
 
-#: templates/layer_add.html:402 templates/layer_add.html:447
-#: templates/layer_add.html:513 templates/layer_create.html:555
+#: templates/layer_add.html:413 templates/layer_add.html:458
+#: templates/layer_add.html:524 templates/layer_create.html:563
 #: templates/sqlview_add.html:219 templates/sqlview_add.html:268
 msgid "No valid data store selected"
 msgstr "Nenhum armazém de dados válido selecionado"
 
-#: templates/layer_add.html:417 templates/layer_add.html:440
-#: templates/layer_create.html:525 templates/layer_create.html:548
+#: templates/layer_add.html:428 templates/layer_add.html:451
+#: templates/layer_create.html:533 templates/layer_create.html:556
 msgid "No layer groups available"
 msgstr "Nenhum grupo de camadas disponível"
 
-#: templates/layer_add.html:434 templates/layer_create.html:542
+#: templates/layer_add.html:445 templates/layer_create.html:550
 msgid "Choose layer group"
 msgstr "Selecionar grupo de camadas"
 
-#: templates/layer_add.html:475 templates/layer_add.html:503
+#: templates/layer_add.html:486 templates/layer_add.html:514
 msgid "-----------"
 msgstr "-----------"
 
-#: templates/layer_add.html:496
+#: templates/layer_add.html:507
 msgid "Choose date field"
 msgstr "Selecionar campo de data"
 
@@ -1789,230 +2703,279 @@ msgstr "Títulos do grupo"
 msgid "Editing restrictions"
 msgstr "Restrições de edição"
 
-#: templates/layer_config.html:73 templates/layer_config.html:189
+#: templates/layer_config.html:74 templates/layer_config.html:210
 #: templates/layer_create.html:111
 msgid "Field name"
 msgstr "Nome do campo"
 
-#: templates/layer_config.html:75 templates/layer_create.html:113
+#: templates/layer_config.html:76 templates/layer_create.html:113
 msgid "Calculated"
 msgstr "Calculado"
 
-#: templates/layer_config.html:76
+#: templates/layer_config.html:77
 msgid "Nullable"
 msgstr "Nulo"
 
-#: templates/layer_config.html:77
+#: templates/layer_config.html:78
 msgid "mandatory"
 msgstr "Obrigatório"
 
-#: templates/layer_config.html:78
+#: templates/layer_config.html:79
 msgid "Is visible?"
 msgstr "É visível?"
 
-#: templates/layer_config.html:79
+#: templates/layer_config.html:80
 msgid "Is editable?"
 msgstr "É editável?"
 
-#: templates/layer_config.html:80
+#: templates/layer_config.html:81
 msgid "Is shown in getFeatureInfo?"
 msgstr "É mostrado em Obter Informações sobre o Recurso?"
 
-#: templates/layer_config.html:81
+#: templates/layer_config.html:82 templates/layer_config.html:498
 msgid "Actions"
 msgstr "Ferramentas"
 
-#: templates/layer_config.html:92 templates/layer_config.html:94
+#: templates/layer_config.html:93 templates/layer_config.html:95
 msgid "Set at database level"
 msgstr "Definido em nível de banco de dados"
 
-#: templates/layer_config.html:97 templates/layer_config.html:99
+#: templates/layer_config.html:98 templates/layer_config.html:100
 msgid "Required in editing forms"
 msgstr "Necessário em formulários de edição"
 
-#: templates/layer_config.html:128 templates/layer_config.html:165
-#: templates/select_layer_permissions.html:39
-#, fuzzy
-#| msgid "SQL View"
-msgid "SQL views can\\"
-msgstr "SQL Vista"
+#: templates/layer_config.html:135 templates/layer_config.html:156
+msgid "Manage format"
+msgstr "Gerir formato"
 
-#: templates/layer_config.html:136
+#: templates/layer_config.html:138 templates/layer_config.html:143
+#: templates/layer_config.html:186 templates/select_layer_permissions.html:39
+msgid "SQL views can\\"
+msgstr "As vistas SQL podem\\"
+
+#: templates/layer_config.html:152
 msgid "Rename"
 msgstr "Renomear"
 
-#: templates/layer_config.html:137
+#: templates/layer_config.html:153
 msgid "Change type"
 msgstr "Tipo de modificação"
 
-#: templates/layer_config.html:139
+#: templates/layer_config.html:160
 msgid "Convert to enumerate"
 msgstr "Converter para enumeração"
 
-#: templates/layer_config.html:146
+#: templates/layer_config.html:167
 msgid "Reserved field"
 msgstr "Campo reservado"
 
-#: templates/layer_config.html:166 templates/layer_config.html:170
+#: templates/layer_config.html:187 templates/layer_config.html:191
 #: templates/layer_create.html:123
 msgid "Add field"
 msgstr "Adicionar campo"
 
-#: templates/layer_config.html:191
+#: templates/layer_config.html:212
 msgid "Field title"
 msgstr "Título do campo"
 
-#: templates/layer_config.html:238 templates/layer_config.html:1023
+#: templates/layer_config.html:259 templates/layer_config.html:1627
 msgid "Delete group"
 msgstr "Excluir grupo"
 
-#: templates/layer_config.html:264
+#: templates/layer_config.html:285
 msgid "Add field group"
 msgstr "Adicionar grupo de campos"
 
-#: templates/layer_config.html:284
+#: templates/layer_config.html:305
 msgid "Group name"
 msgstr "Nome do grupo"
 
-#: templates/layer_config.html:286
+#: templates/layer_config.html:307
 msgid "Group title"
 msgstr "Título do grupo"
 
-#: templates/layer_config.html:318
+#: templates/layer_config.html:339
 msgid "Topological rules"
 msgstr "Regras topológicas"
 
-#: templates/layer_config.html:327
+#: templates/layer_config.html:348
 msgid "Rule"
 msgstr "Regra"
 
-#: templates/layer_config.html:329
-#, fuzzy
-#| msgid "Geometry column"
+#: templates/layer_config.html:350
 msgid "Geometry Limitations"
-msgstr "Coluna de geometria"
+msgstr "Limitações de geometria"
 
-#: templates/layer_config.html:330
+#: templates/layer_config.html:351
 msgid "Active"
 msgstr "Ativo"
 
-#: templates/layer_config.html:331
+#: templates/layer_config.html:352
 msgid "Configuration"
 msgstr "Configuração"
 
-#: templates/layer_config.html:336
+#: templates/layer_config.html:357
 msgid "Must not overlap"
 msgstr "Não deve sobrepor-se"
 
 # Topology rules translations
-#: templates/layer_config.html:338
+#: templates/layer_config.html:359
 msgid "Geometries within the same layer cannot overlap with each other"
 msgstr "As geometrias dentro da mesma camada não podem sobrepor-se entre si"
 
-#: templates/layer_config.html:342 templates/layer_config.html:382
-#: templates/layer_config.html:404
-#, fuzzy
-#| msgid "Invalid geometry type"
+#: templates/layer_config.html:363 templates/layer_config.html:403
+#: templates/layer_config.html:425
 msgid "Compatible with all geometry types"
-msgstr "Tipo de geometria inválida"
+msgstr "Compatível com todos os tipos de geometria"
 
-#: templates/layer_config.html:349 templates/layer_config.html:372
+#: templates/layer_config.html:367 templates/layer_config.html:390
+#: templates/layer_config.html:407 templates/layer_config.html:411
+#: templates/layer_config.html:429 templates/layer_config.html:433
+#: templates/layer_config.html:457 templates/layer_config.html:462
+msgid "Only superusers can modify topology rules"
+msgstr "Somente superusuários podem modificar regras topológicas"
+
+#: templates/layer_config.html:370 templates/layer_config.html:393
 msgid "No additional configuration required"
 msgstr "Nenhuma configuração adicional necessária"
 
-#: templates/layer_config.html:353
+#: templates/layer_config.html:374
 msgid "Must not have gaps"
 msgstr "Não deve ter lacunas"
 
-#: templates/layer_config.html:355
+#: templates/layer_config.html:376
 msgid ""
 "The layer coverage must be continuous without empty spaces between geometries"
 msgstr ""
 "A cobertura da camada deve ser contínua sem espaços vazios entre geometrias"
 
-#: templates/layer_config.html:359 templates/layer_config.html:426
-#, fuzzy
-#| msgid "Polygon"
+#: templates/layer_config.html:380 templates/layer_config.html:447
 msgid "Polygons"
-msgstr "Polígono"
+msgstr "Polígonos"
 
-#: templates/layer_config.html:359 templates/layer_config.html:426
+#: templates/layer_config.html:380 templates/layer_config.html:447
 msgid "Recommended"
-msgstr ""
+msgstr "Recomendado"
 
-#: templates/layer_config.html:362 templates/layer_config.html:427
-#, fuzzy
-#| msgid "Line"
+#: templates/layer_config.html:383 templates/layer_config.html:450
 msgid "Lines"
-msgstr "Linha"
+msgstr "Linhas"
 
-#: templates/layer_config.html:362
+#: templates/layer_config.html:383
 msgid "Limited use"
-msgstr ""
+msgstr "Uso limitado"
 
-#: templates/layer_config.html:365 templates/layer_config.html:430
-#, fuzzy
-#| msgid "Point"
+#: templates/layer_config.html:386 templates/layer_config.html:453
 msgid "Points"
-msgstr "Ponto"
+msgstr "Pontos"
 
-#: templates/layer_config.html:376
+#: templates/layer_config.html:397
 msgid "Must be covered by"
 msgstr "Deve estar coberto por"
 
-#: templates/layer_config.html:378
+#: templates/layer_config.html:399
 msgid ""
 "All geometries must be completely covered by geometries from another layer"
 msgstr ""
 "Todas as geometrias devem estar completamente cobertas por geometrias de "
 "outra camada"
 
-#: templates/layer_config.html:391 templates/layer_config.html:1343
+#: templates/layer_config.html:412 templates/layer_config.html:1955
 msgid "Select a layer"
 msgstr "Selecionar uma camada"
 
-#: templates/layer_config.html:398
+#: templates/layer_config.html:419
 msgid "Must not overlap with"
 msgstr "Não deve sobrepor-se com"
 
-#: templates/layer_config.html:400
+#: templates/layer_config.html:421
 msgid "Geometries cannot overlap with geometries from specified layers"
 msgstr ""
 "As geometrias não podem sobrepor-se com geometrias das camadas especificadas"
 
-#: templates/layer_config.html:415
+#: templates/layer_config.html:436
 msgid "Select multiple layers"
 msgstr "Selecionar múltiplas camadas"
 
-#: templates/layer_config.html:420
+#: templates/layer_config.html:441
 msgid "Must be contiguous"
 msgstr "Deve ser contíguo"
 
-#: templates/layer_config.html:422
-msgid ""
-"Geometries must be connected."
-"other elements"
-msgstr ""
-"As geometrias devem estar conectadas."
-"vértices tocam outros elementos"
+#: templates/layer_config.html:443
+msgid "Geometries must be connected."
+msgstr "As geometrias devem estar conectadas."
 
-#: templates/layer_config.html:427
+#: templates/layer_config.html:450
 msgid "Suitable for networks"
-msgstr ""
+msgstr "Adequado para redes"
 
-#: templates/layer_config.html:439
+#: templates/layer_config.html:462
 msgid "Tolerance"
 msgstr "Tolerância"
 
-#: templates/layer_config.html:442
+#: templates/layer_config.html:465
 msgid "Tolerance distance for contiguity check"
 msgstr "Distância de tolerância para verificação de contiguidade"
 
-#: templates/layer_config.html:1350
-#, fuzzy
-#| msgid "Select a layer"
+#: templates/layer_config.html:486
+msgid ""
+"Assign triggers to fields. These triggers will execute automatically when "
+"data is inserted, updated or deleted."
+msgstr ""
+"Atribua disparadores a campos. Estes disparadores serão executados automaticamente quando "
+"os dados são inseridos, atualizados ou eliminados."
+
+#: templates/layer_config.html:494 templates/layer_config.html:578
+msgid "Trigger"
+msgstr "Disparador"
+
+#: templates/layer_config.html:496 templates/layer_config.html:598
+msgid "Target field"
+msgstr "Campo de destino"
+
+#: templates/layer_config.html:528 views.py:7914
+msgid "You do not have permission to remove this trigger"
+msgstr "Não tem permissão para remover este disparador"
+
+#: templates/layer_config.html:537
+msgid "No triggers assigned to this layer yet"
+msgstr "Ainda não há disparadores atribuídos a esta camada"
+
+#: templates/layer_config.html:548
+msgid "Assign trigger to field"
+msgstr "Atribuir disparador a campo"
+
+#: templates/layer_config.html:553
+msgid ""
+"No triggers available. Create triggers with 'Calculated field' option in the "
+"connection configuration."
+msgstr ""
+"Nenhum disparador disponível. Crie disparadores com a opção 'Campo calculado' na "
+"configuração da conexão."
+
+#: templates/layer_config.html:574
+msgid "Assign trigger"
+msgstr "Atribuir disparador"
+
+#: templates/layer_config.html:580
+msgid "Select a trigger..."
+msgstr "Selecione um disparador..."
+
+#: templates/layer_config.html:600
+msgid "Select a field..."
+msgstr "Selecione um campo..."
+
+#: templates/layer_config.html:607
+msgid "Select the field that will be calculated by this trigger"
+msgstr "Selecione o campo que será calculado por este disparador"
+
+#: templates/layer_config.html:612
+msgid "Assign"
+msgstr "Atribuir"
+
+#: templates/layer_config.html:1962
 msgid "Select layers"
-msgstr "Selecionar uma camada"
+msgstr "Selecionar camadas"
 
 #: templates/layer_create.html:104
 msgid "Field list"
@@ -2088,6 +3051,50 @@ msgstr "Ícone"
 msgid "Supported formats"
 msgstr "Formatos suportados"
 
+#: templates/layer_update.html:349
+msgid "Generar Metadatos Enriquecidos con Campos"
+msgstr "Gerar Metadados Enriquecidos com Campos"
+
+#: templates/layer_update.html:352
+msgid ""
+"Este botón generará automáticamente una estructura con descripción y lista "
+"de campos de la base de datos"
+msgstr ""
+"Este botão irá gerar automaticamente uma estrutura com descrição e lista "
+"de campos da base de dados"
+
+#: templates/layer_update.html:634
+msgid "Generando..."
+msgstr "Gerando..."
+
+#: templates/layer_update.html:664
+msgid ""
+"Metadatos enriquecidos generados correctamente. Puedes editarlos antes de "
+"guardar la capa."
+msgstr ""
+"Metadados enriquecidos gerados corretamente. Pode editá-los antes de "
+"guardar a camada."
+
+#: templates/layer_update.html:677
+msgid "Error al generar metadatos enriquecidos"
+msgstr "Erro ao gerar metadados enriquecidos"
+
+#: templates/layer_update.html:680
+msgid ""
+"Error 404: La URL no fue encontrada. Asegúrate de que el plugin GeoCopilot "
+"está instalado y el servidor está reiniciado."
+msgstr ""
+"Erro 404: O URL não foi encontrado. Certifique-se de que o plugin GeoCopilot "
+"está instalado e o servidor está reiniciado."
+
+#: templates/layer_update.html:682
+msgid "Error 403: No tienes permisos para realizar esta acción."
+msgstr "Erro 403: Não tem permissões para realizar esta ação."
+
+#: templates/layer_update.html:684
+msgid "Error 500: Error interno del servidor."
+msgstr "Erro 500: Erro interno do servidor."
+
 #: templates/layergroup_add.html:51 templates/layergroup_update.html:51
 msgid "Select server"
 msgstr "Seleccionar servidor"
@@ -2121,7 +3128,7 @@ msgstr ""
 
 #: templates/layergroup_list.html:12
 msgid "Return to project list"
-msgstr ""
+msgstr "Voltar à lista de projetos"
 
 #: templates/layergroup_list.html:16
 msgid "Add layer group"
@@ -2171,18 +3178,41 @@ msgstr "Celular"
 msgid "Unlock layer"
 msgstr "Camada de desbloqueio"
 
-#: templates/select_layer_permissions.html:7
-#, fuzzy
-#| msgid "Read permissions"
-msgid "Select layer permissions"
-msgstr "Ler permissões"
+#: templates/select_connection_permissions.html:7
+msgid "Select connection permissions"
+msgstr "Selecionar permissões de conexão"
 
-#: templates/select_layer_permissions.html:8
-#: templates/select_layergroup_permissions.html:8
-#, fuzzy
-#| msgid "Search user group..."
-msgid "Search user role..."
-msgstr "Pesquisar grupo de usuários"
+#: templates/select_connection_permissions.html:12
+msgid "All users can create datastores with this connection"
+msgstr "Todos os usuários podem criar armazéns de dados com esta conexão"
+
+#: templates/select_connection_permissions.html:14
+msgid "Allow all - Datastores"
+msgstr "Permitir todos - Armazéns de dados"
+
+#: templates/select_connection_permissions.html:18
+msgid "All users can use this connection in ETL"
+msgstr "Todos os usuários podem usar esta conexão em ETL"
+
+#: templates/select_connection_permissions.html:20
+msgid "Allow all - ETL"
+msgstr "Permitir todos - ETL"
+
+#: templates/select_connection_permissions.html:24
+msgid "All users can manage this connection"
+msgstr "Todos os usuários podem gerir esta conexão"
+
+#: templates/select_connection_permissions.html:26
+msgid "Allow all - Management"
+msgstr "Permitir todos - Gestão"
+
+#: templates/select_connection_permissions.html:51
+msgid "Management"
+msgstr "Gestão"
+
+#: templates/select_layer_permissions.html:7
+msgid "Select layer permissions"
+msgstr "Selecionar permissões da camada"
 
 #: templates/select_layer_permissions.html:12
 msgid "Layer will be readable by everyone if public"
@@ -2197,41 +3227,33 @@ msgid ""
 "Non editable permissions since they have been set by a specific permission "
 "tool"
 msgstr ""
+"Permissões não editáveis pois foram definidas por uma ferramenta de "
+"permissões específica"
 
 #: templates/select_layer_permissions.html:27
-#, fuzzy
-#| msgid "Search user group..."
 msgid "Generic user role image"
-msgstr "Pesquisar grupo de usuários"
+msgstr "Imagem genérica de função de usuário"
 
 #: templates/select_layer_permissions.html:35
-#, fuzzy
-#| msgid "Read permissions"
 msgid "Read permission"
-msgstr "Ler permissões"
+msgstr "Permissão de leitura"
 
 #: templates/select_layer_permissions.html:43
-#, fuzzy
-#| msgid "Write permissions"
 msgid "Write permission"
-msgstr "Escrever permissões"
+msgstr "Permissão de escrita"
 
 #: templates/select_layer_permissions.html:47
 #: templates/select_layergroup_permissions.html:27
-#, fuzzy
-#| msgid "Permissions"
 msgid "Permission to manage"
-msgstr "Permissões"
+msgstr "Permissão para gerir"
 
 #: templates/select_layergroup_permissions.html:7
-#, fuzzy
-#| msgid "Give the selected groups permissions to read or write the layer"
 msgid "Give the selected roles permissions to manage the layergroup"
-msgstr "Dar aos grupos selecionados permissão para ler ou escrever a camada"
+msgstr "Conceder às funções selecionadas permissões para gerir o grupo de camadas"
 
 #: templates/select_layergroup_permissions.html:23
 msgid "Permission to include in projects"
-msgstr ""
+msgstr "Permissão para incluir em projetos"
 
 #: templates/server_add.html:32 templates/server_update.html:32
 msgid "Nodes"
@@ -2289,10 +3311,6 @@ msgstr ""
 msgid "Update server"
 msgstr "Atualizar servidor"
 
-#: templates/server_update.html:67 templates/server_update.html:68
-msgid "Password"
-msgstr "Senha"
-
 #: templates/service_url_list.html:12
 msgid "Add service URL"
 msgstr "Adicionar serviço URL"
@@ -2310,110 +3328,84 @@ msgid "Update service URL"
 msgstr "Atualizar serviço"
 
 #: templates/sqlview_add.html:76 templates/sqlview_add.html:113
-#, fuzzy
-#| msgid "Table"
 msgid "Table alias"
-msgstr "Tabela"
+msgstr "Alias da tabela"
 
 #: templates/sqlview_add.html:77
 msgid "Join Field 1"
-msgstr ""
+msgstr "Campo de junção 1"
 
 #: templates/sqlview_add.html:78
 msgid "Join Field 2"
-msgstr ""
+msgstr "Campo de junção 2"
 
 #: templates/sqlview_add.html:89
-#, fuzzy
-#| msgid "Add item"
 msgid "Add table"
-msgstr "Adicionar item"
+msgstr "Adicionar tabela"
 
 #: templates/sqlview_add.html:103
-#, fuzzy
-#| msgid "End field"
 msgid "Included fields"
-msgstr "Fim do domínio"
+msgstr "Campos incluídos"
 
 #: templates/sqlview_add.html:114
 msgid "Alias"
-msgstr ""
+msgstr "Alias"
 
 #: templates/sqlview_add.html:125
-#, fuzzy
-#| msgid "Select file"
 msgid "Select all"
-msgstr "Selecionar arquivo"
+msgstr "Selecionar tudo"
 
 #: templates/sqlview_add.html:129
 msgid "None"
-msgstr ""
+msgstr "Nenhum"
 
 #: templates/sqlview_add.html:181
 msgid "Target datastore is empty"
-msgstr ""
+msgstr "O armazém de dados de destino está vazio"
 
 #: templates/sqlview_add.html:198
-#, fuzzy
-#| msgid "Remove datastore"
 msgid "Choose datastore"
-msgstr "Excluir armazém"
+msgstr "Escolher armazém de dados"
 
 #: templates/sqlview_add.html:234
-#, fuzzy
-#| msgid "Datastore type"
 msgid "Data store is empty"
-msgstr "Tipo de armazém"
+msgstr "O armazém de dados está vazio"
 
 #: templates/sqlview_add.html:252
-#, fuzzy
-#| msgid "Choose field"
 msgid "Choose table"
-msgstr "Selecionar campo"
+msgstr "Escolher tabela"
 
 #: templates/sqlview_add.html:282
-#, fuzzy
-#| msgid "Resource contains no fields"
 msgid "Table has no fields"
-msgstr "O recurso não contém campos"
+msgstr "A tabela não tem campos"
 
 #: templates/sqlview_add.html:310
-#, fuzzy
-#| msgid "No valid data store selected"
 msgid "No valid table selected"
-msgstr "Nenhum armazém de dados válido selecionado"
+msgstr "Nenhuma tabela válida selecionada"
 
 #: templates/sqlview_list.html:11
-#, fuzzy
-#| msgid "SQL View"
 msgid "Add SQL View"
-msgstr "SQL Vista"
+msgstr "Adicionar Vista SQL"
 
 #: templates/sqlview_list.html:56
-#, fuzzy
-#| msgid "SQL View"
 msgid "Delete SQL View"
-msgstr "SQL Vista"
+msgstr "Excluir Vista SQL"
 
 #: templates/sqlview_list.html:59
 msgid "The SQL View and all layers using this view will be deleted"
-msgstr ""
+msgstr "A Vista SQL e todas as camadas que usam esta vista serão excluídas"
 
 #: templates/sqlview_list.html:104
-#, fuzzy
-#| msgid "SQL View"
 msgid "Remove SQL View"
-msgstr "SQL Vista"
+msgstr "Remover Vista SQL"
 
 #: templates/sqlview_list.html:109
-#, fuzzy
-#| msgid "SQL View"
 msgid "Update SQL View"
-msgstr "SQL Vista"
+msgstr "Atualizar Vista SQL"
 
 #: templates/translations.html:3
 msgid "SQL views can't be edited."
-msgstr ""
+msgstr "As vistas SQL não podem ser editadas."
 
 #: templates/workspace_list.html:11
 msgid "Add workspace"
@@ -2446,7 +3438,7 @@ msgstr "Uri"
 msgid "Workspace description"
 msgstr "Descrição do espaço de trabalho"
 
-#: views.py:361
+#: views.py:363
 #, python-brace-format
 msgid ""
 "Invalid workspace name: '{value}'. Identifiers must begin with a letter or "
@@ -2457,11 +3449,11 @@ msgstr ""
 "começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem "
 "ser letras, sublinhados ou números"
 
-#: views.py:372
+#: views.py:374
 msgid "Error: workspace could not be created"
 msgstr "Erro: o espaço de trabalho não pôde ser criado"
 
-#: views.py:528 views.py:3317
+#: views.py:524 views.py:3848
 #, python-brace-format
 msgid ""
 "Invalid datastore name: '{value}'. Identifiers must begin with a letter or "
@@ -2472,61 +3464,91 @@ msgstr ""
 "uma letra ou um sublinhado (_). Os caracteres subsequentes podem ser letras, "
 "sublinhados ou números"
 
-#: views.py:530
+#: views.py:526
 #, python-brace-format
 msgid "Invalid datastore name: '{value}'. Identifiers must be in lowercase."
-msgstr ""
+msgstr "Nome de armazém de dados inválido: '{value}'. Os identificadores devem estar em minúsculas."
 
-#: views.py:551
+#: views.py:537
+msgid "Schema name is required"
+msgstr "O nome do esquema é obrigatório"
+
+#: views.py:539
+msgid ""
+"Invalid schema name. Use only letters, numbers and underscores, starting "
+"with a letter or underscore."
+msgstr ""
+"Nome de esquema inválido. Use apenas letras, números e sublinhados, começando "
+"por uma letra ou sublinhado."
+
+#: views.py:574 views.py:600
 msgid "Error: Data store could not be created"
 msgstr "Erro: A memória de dados não pôde ser criada"
 
-#: views.py:554
+#: views.py:579
+msgid "Error creating schema: "
+msgstr "Erro ao criar esquema: "
+
+#: views.py:603
 msgid "Error: GeoTIFF is not georreferenced"
 msgstr "Erro: GeoTIFF não é georreferenciado"
 
-#: views.py:610
+#: views.py:657 views.py:689
 msgid "Error updating datastore"
 msgstr "Erro na atualização do armazém de dados"
 
-#: views.py:744
+#: views.py:831
 msgid "ERROR can't connect with GeoServer"
 msgstr "ERROR não pode se conectar com GeoServer"
 
-#: views.py:752
+#: views.py:839
 msgid "ERROR can't remove GeoServer data. Forcing remove from DataBase"
 msgstr ""
 "ERROR não pode remover dados do GeoServer. Forçando a remoção de dados da "
 "Base de Dados"
 
-#: views.py:777
+#: views.py:871
 msgid "ERROR User is not authorized to perform this operation"
 msgstr "ERROR O usuário não está autorizado a realizar esta operação"
 
-#: views.py:1167 views.py:3320
-#, fuzzy
-#| msgid "Layer will be uploaded to the selected data store"
+#: views.py:1170
+msgid "Vector layer containing information on {}"
+msgstr "Camada vetorial contendo informações sobre {}"
+
+#: views.py:1172
+msgid "Raster layer containing information on {}"
+msgstr "Camada raster contendo informações sobre {}"
+
+#: views.py:1174
+msgid "External layer providing information on {}"
+msgstr "Camada externa fornecendo informações sobre {}"
+
+#: views.py:1175
+msgid "Layer containing information on {}"
+msgstr "Camada contendo informações sobre {}"
+
+#: views.py:1276 views.py:3851
 msgid "You are not allowed to manage the selected datastore"
-msgstr "A camada será carregada para o armazém de dados selecionados"
+msgstr "Não tem permissão para gerir o armazém de dados selecionado"
 
-#: views.py:1169 views.py:3323
+#: views.py:1278 views.py:3854
 msgid "You are not allowed to manage the selected layergroup"
-msgstr ""
+msgstr "Não tem permissão para gerir o grupo de camadas selecionado"
 
-#: views.py:2818 views.py:2834
+#: views.py:3349 views.py:3365
 #, python-brace-format
 msgid "Error clearing cache. Cause: {cause}."
 msgstr "Cache de compensação de erros. Causa: {cause}."
 
-#: views.py:2820
+#: views.py:3351
 msgid "Not supported."
 msgstr "Não é suportado."
 
-#: views.py:2929
+#: views.py:3460
 msgid "You must enter a name for layer group"
 msgstr "É necessário inserir um nome para o grupo de camadas"
 
-#: views.py:2939 views.py:3091
+#: views.py:3470 views.py:3622
 #, python-brace-format
 msgid ""
 "Invalid layer group name: '{value}'. Identifiers must begin with a letter or "
@@ -2537,72 +3559,262 @@ msgstr ""
 "começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem "
 "ser letras, sublinhados ou números"
 
-#: views.py:2948 views.py:3087
+#: views.py:3479 views.py:3618
 msgid "Layer group name already exists"
 msgstr "O nome do grupo de camadas já existe"
 
-#: views.py:3417
+#: views.py:3969
 msgid ""
 "Error: table already exists. Try to publish the layer instead of creating an "
 "empty one."
 msgstr ""
+"Erro: a tabela já existe. Tente publicar a camada em vez de criar uma vazia."
 
-#: views.py:3580
+#: views.py:4149
 msgid "You must enter a title for enumeration"
 msgstr "É necessário entrar um título para enumeração"
 
-#: views.py:3585
+#: views.py:4159
 msgid "Name already taken"
 msgstr "Nome já utilizado"
 
-#: views.py:4848
+#: views.py:4204
+msgid "Name and title are required"
+msgstr "Nome e título são obrigatórios"
+
+#: views.py:4294
+msgid "Error updating enumeration: "
+msgstr "Erro ao atualizar enumeração: "
+
+#: views.py:5585
 msgid "Error: ExternalLayer could not be published"
 msgstr "Erro: Camada externa não pôde ser publicada"
 
-#: views.py:4974
+#: views.py:5834
 msgid "Error: externallayer could not be published"
 msgstr "Erro: camada externa não pôde ser publicada"
 
-#: views.py:5347
-#, fuzzy, python-brace-format
-#| msgid "Error accessing layer. Cause: {cause}."
-msgid "Error configuring layer. Cause: {cause}."
-msgstr "Camada de acesso de erro. Causa: {cause}."
+#: views.py:5879
+msgid ""
+"The layer was saved successfully, but there was an error uploading the style "
+"file. Please try uploading it again."
+msgstr ""
+"A camada foi guardada com sucesso, mas ocorreu um erro ao carregar o ficheiro "
+"de estilo. Por favor, tente carregá-lo novamente."
 
-#: views.py:5412
+#: views.py:6292
+#, python-brace-format
+msgid "Error configuring layer. Cause: {cause}."
+msgstr "Erro ao configurar camada. Causa: {cause}."
+
+#: views.py:6357
 #, python-brace-format
 msgid "Error accessing layer. Cause: {cause}."
-msgstr "Camada de acesso de erro. Causa: {cause}."
+msgstr "Erro ao aceder à camada. Causa: {cause}."
 
-#: views.py:5508
-#, fuzzy, python-brace-format
-#| msgid "Error accessing layer group. Cause: {cause}."
+#: views.py:6453
+#, python-brace-format
 msgid "Error accessing layer group. Cause: {cause}."
-msgstr "Erro na publicação do grupo de camadas. Erro backend: {msg}"
+msgstr "Erro ao aceder ao grupo de camadas. Causa: {cause}."
 
-#: views.py:5695 views.py:5701
+#: views.py:6693
+msgid "Connection created successfully"
+msgstr "Conexão criada com sucesso"
+
+#: views.py:6721 views.py:6996 views.py:7030 views.py:7248 views.py:7364
+#: views.py:7522 views.py:7556 views.py:7699 views.py:7967 views.py:8067
+msgid "Connection not found"
+msgstr "Conexão não encontrada"
+
+#: views.py:6735
+msgid "You do not have permission to manage this connection"
+msgstr "Não tem permissão para gerir esta conexão"
+
+#: views.py:6825
+msgid ""
+"Connection updated but some datastores could not be synchronized with "
+"GeoServer: "
+msgstr ""
+"Conexão atualizada mas alguns armazéns de dados não puderam ser sincronizados com "
+"GeoServer: "
+
+#: views.py:6847
+msgid "Connection updated successfully"
+msgstr "Conexão atualizada com sucesso"
+
+#: views.py:6966
+#, python-brace-format
+msgid "Cannot delete connection. It is being used by {0} datastore(s)."
+msgstr "Não é possível excluir a conexão. Está a ser usada por {0} armazém(ns) de dados."
+
+#: views.py:6993
+msgid "Connection and all associated resources deleted successfully"
+msgstr "Conexão e todos os recursos associados excluídos com sucesso"
+
+#: views.py:7154
+msgid "Entity is required for testing SEGEX connection"
+msgstr "É necessária uma entidade para testar a conexão SEGEX"
+
+#: views.py:7210
+msgid "Connection type not supported for testing"
+msgstr "Tipo de conexão não suportado para testes"
+
+#: views.py:7231
+msgid "Configuration is only available for PostGIS connections"
+msgstr "A configuração só está disponível para conexões PostGIS"
+
+#: views.py:7263 views.py:7380 views.py:7576 views.py:7730
+msgid "Triggers are only available for PostGIS connections"
+msgstr "Os disparadores só estão disponíveis para conexões PostGIS"
+
+#: views.py:7291 views.py:7410
+msgid "Name is required"
+msgstr "O nome é obrigatório"
+
+#: views.py:7300 views.py:7421 views.py:7615 views.py:7646
+msgid "A trigger with this name already exists"
+msgstr "Já existe um disparador com este nome"
+
+#: views.py:7318 views.py:7441
+msgid "At least one event must be selected"
+msgstr "Pelo menos um evento deve ser selecionado"
+
+#: views.py:7346 views.py:7631
+msgid "Trigger created successfully"
+msgstr "Disparador criado com sucesso"
+
+#: views.py:7497
+msgid "Trigger updated but some layer triggers could not be reinstalled: "
+msgstr "Disparador atualizado mas alguns disparadores de camada não puderam ser reinstalados: "
+
+#: views.py:7499
+#, python-format
+msgid "Trigger updated and reinstalled in %(count)d layer(s)"
+msgstr "Disparador atualizado e reinstalado em %(count)d camada(s)"
+
+#: views.py:7501 views.py:7658
+msgid "Trigger updated successfully"
+msgstr "Disparador atualizado com sucesso"
+
+#: views.py:7525 views.py:7701 views.py:7886
+msgid "Trigger not found"
+msgstr "Disparador não encontrado"
+
+#: views.py:7637 views.py:7664
+msgid "Trigger ID is required"
+msgstr "O ID do disparador é obrigatório"
+
+#: views.py:7686
+msgid "Trigger deleted but some layer triggers could not be uninstalled: "
+msgstr "Disparador excluído mas alguns disparadores de camada não puderam ser desinstalados: "
+
+#: views.py:7687
+msgid "Trigger deleted"
+msgstr "Disparador excluído"
+
+#: views.py:7692
+msgid "Trigger deleted successfully"
+msgstr "Disparador excluído com sucesso"
+
+#: views.py:7696
+msgid "Method not allowed"
+msgstr "Método não permitido"
+
+#: views.py:7722 views.py:7827
+msgid "Missing required parameters"
+msgstr "Parâmetros obrigatórios em falta"
+
+#: views.py:7734
+msgid "You do not have permission to duplicate this trigger"
+msgstr "Não tem permissão para duplicar este disparador"
+
+#: views.py:7747
+msgid "You do not have permission to manage the target connection"
+msgstr "Não tem permissão para gerir a conexão de destino"
+
+#: views.py:7801
+msgid "Trigger duplicated successfully"
+msgstr "Disparador duplicado com sucesso"
+
+#: views.py:7805
+msgid "Source trigger not found"
+msgstr "Disparador de origem não encontrado"
+
+#: views.py:7807
+msgid "Target connection not found"
+msgstr "Conexão de destino não encontrada"
+
+#: views.py:7834 views.py:7910
+msgid "Permission denied"
+msgstr "Permissão negada"
+
+#: views.py:7838
+msgid "Layer has no associated connection"
+msgstr "A camada não tem conexão associada"
+
+#: views.py:7841
+msgid "Trigger does not belong to the layer connection"
+msgstr "O disparador não pertence à conexão da camada"
+
+#: views.py:7845
+msgid "Field name is required for calculated field triggers"
+msgstr "O nome do campo é obrigatório para disparadores de campo calculado"
+
+#: views.py:7854
+msgid "This field is already assigned to another calculated field trigger"
+msgstr "Este campo já está atribuído a outro disparador de campo calculado"
+
+#: views.py:7858
+msgid "This trigger is already assigned to this layer"
+msgstr "Este disparador já está atribuído a esta camada"
+
+#: views.py:7880
+msgid "Trigger assigned and installed successfully"
+msgstr "Disparador atribuído e instalado com sucesso"
+
+#: views.py:7884
+msgid "Layer not found"
+msgstr "Camada não encontrada"
+
+#: views.py:7904
+msgid "Missing assignment ID"
+msgstr "ID de atribuição em falta"
+
+#: views.py:7926
+msgid "Trigger removed successfully"
+msgstr "Disparador removido com sucesso"
+
+#: views.py:7930
+msgid "Assignment not found"
+msgstr "Atribuição não encontrada"
+
+#: views.py:7959 views.py:8054
+msgid "Access denied"
+msgstr "Acesso negado"
+
+#: views.py:8108 views.py:8114
 msgid "Connection failed"
 msgstr "A conexão falhou"
 
-#: views.py:5695
+#: views.py:8108
 msgid "Status code: "
 msgstr "Código de status:"
 
-#: views.py:5706
+#: views.py:8119
 msgid "Connection error"
 msgstr "Erro de conexão"
 
-#: views.py:5746
+#: views.py:8159
 #, python-brace-format
 msgid "Control field \"{0}\" cannot be deleted"
 msgstr "O campo de controle \"{0}\" não pode ser apagado"
 
-#: views.py:5771 views.py:5833 views.py:5837 views.py:5839
+#: views.py:8184 views.py:8246 views.py:8250 views.py:8252
 #, python-brace-format
 msgid "Error renaming field. Cause: {0}"
 msgstr "Campo de renomeação de erro. Causa: {0}"
 
-#: views.py:5773 views.py:5835
+#: views.py:8186 views.py:8248
 msgid ""
 "Field does not exist. Probably, it was deleted or renamed concurrently by "
 "another user"
@@ -2610,26 +3822,41 @@ msgstr ""
 "O campo não existe. Provavelmente, ele foi excluído ou renomeado "
 "simultaneamente por outro usuário."
 
-#: views.py:5775
+#: views.py:8188
 #, python-brace-format
 msgid "Error deleting field. Cause: {0}"
 msgstr "Campo de eliminação de erros. Causa: {0}"
 
-#: views.py:5802
+#: views.py:8215
 #, python-brace-format
 msgid "Control field \"{0}\" cannot be renamed"
 msgstr "O campo de controle \"{0}\" não pode ser renomeado"
 
-#: views.py:5804 views.py:5859
+#: views.py:8217 views.py:8505
 #, python-brace-format
 msgid "The field name \"{0}\" is a reserved name"
 msgstr "Nome de campo \"{0}\" é uma palavra reservada"
 
-#: views.py:5872
+#: views.py:8345
+#, python-brace-format
+msgid "Error saving field format. Cause: {0}"
+msgstr "Erro ao guardar formato de campo. Causa: {0}"
+
+#: views.py:8423
+#, python-brace-format
+msgid "Error deleting field format. Cause: {0}"
+msgstr "Erro ao excluir formato de campo. Causa: {0}"
+
+#: views.py:8480
+#, python-brace-format
+msgid "Error getting field format. Cause: {0}"
+msgstr "Erro ao obter formato de campo. Causa: {0}"
+
+#: views.py:8518
 msgid "Field type not supported"
 msgstr "Tipo de campo não suportado"
 
-#: views.py:5877
+#: views.py:8523
 #, python-brace-format
 msgid ""
 "Error adding field. Probably the field \"{0}\" already exists. Database "
@@ -2638,79 +3865,59 @@ msgstr ""
 "Erro ao adicionar campo. Provavelmente, o campo \"{0}\" já existe. Mensagem "
 "do banco de dados: {1}"
 
-#: views.py:5906
+#: views.py:8666
 #, python-brace-format
 msgid "Error creating field. Cause: {0}"
 msgstr "Campo de criação de erros. Causa: {0}"
 
-#: views.py:5973
+#: views.py:8733
 #, python-brace-format
 msgid ""
 "Join fields must have the same type: {field1}({type1}) - {field2}({type2})"
 msgstr ""
+"Os campos de junção devem ter o mesmo tipo: {field1}({type1}) - {field2}({type2})"
 
-#: views.py:5987
+#: views.py:8747
 msgid "The user can't manage this SQL view"
-msgstr ""
+msgstr "O usuário não pode gerir esta vista SQL"
 
-#: views.py:6015
+#: views.py:8775
 msgid "The main table must have a primary key"
-msgstr ""
+msgstr "A tabela principal deve ter uma chave primária"
 
-#: views.py:6045
-#, fuzzy, python-brace-format
-#| msgid "Field type not supported"
+#: views.py:8805
+#, python-brace-format
 msgid "Field does not exist: {field}"
-msgstr "Tipo de campo não suportado"
+msgstr "O campo não existe: {field}"
 
-#: views.py:6055
+#: views.py:8815
 #, python-brace-format
 msgid "The field {field} is the primary key of main table and must be included"
-msgstr ""
+msgstr "O campo {field} é a chave primária da tabela principal e deve ser incluído"
 
-#: views.py:6075
-#, fuzzy
-#| msgid "A layer already exists with this name: '{value}'"
+#: views.py:8835
 msgid "An object already exists with name: {}"
-msgstr "Já existe uma camada com este nome: '{value}'."
+msgstr "Já existe um objeto com o nome: {}"
 
-#: views.py:6082
-#, fuzzy
-#| msgid "Error: workspace could not be created"
+#: views.py:8842
 msgid "The view could not be created"
-msgstr "Erro: o espaço de trabalho não pôde ser criado"
+msgstr "A vista não pôde ser criada"
 
-#: views.py:6087
-#, fuzzy
-#| msgid "Error: workspace could not be created"
+#: views.py:8847
 msgid "Pk columns could not be inserted"
-msgstr "Erro: o espaço de trabalho não pôde ser criado"
+msgstr "As colunas de chave primária não puderam ser inseridas"
 
-#: views.py:6133
+#: views.py:8893
 msgid "Not allowed"
-msgstr ""
+msgstr "Não permitido"
 
-#: views.py:6143
-#, fuzzy, python-brace-format
-#| msgid "Error deleting field. Cause: {0}"
+#: views.py:8903
+#, python-brace-format
 msgid "Error deleting view: {0}"
-msgstr "Campo de eliminação de erros. Causa: {0}"
+msgstr "Erro ao excluir vista: {0}"
 
-#: gvsigol_services/templates/layer_config.html
-msgid "Only superusers can modify topology rules"
-msgstr "Somente superusuários podem modificar regras topológicas"
-
-msgid "Vector layer containing information on {}"
-msgstr "Camada vetorial contendo informações sobre {}"
-
-msgid "Raster layer containing information on {}"
-msgstr "Camada raster contendo informações sobre {}"
-
-msgid "External layer providing information on {}"
-msgstr "Camada externa fornecendo informações sobre {}"
-
-msgid "Layer containing information on {}"
-msgstr "Camada contendo informações sobre {}"
+#~ msgid "Url"
+#~ msgstr "Url"
 
 #~ msgid "Locks"
 #~ msgstr "Bloqueios"
@@ -2734,11 +3941,6 @@ msgstr "Camada contendo informações sobre {}"
 #~ msgstr ""
 #~ "Aviso: a modificação do nome de um campo pode ter efeitos colaterais, "
 #~ "tais como quebrar uma lenda baseada em campo."
-
-#, fuzzy
-#~| msgid "Read permissions"
-#~ msgid "Manage permission"
-#~ msgstr "Ler permissões"
 
 #~ msgid "Error uploading the layer. Review the file format."
 #~ msgstr "Erro ao carregar a camada. Revisar o formato do arquivo"
@@ -2771,12 +3973,6 @@ msgstr "Camada contendo informações sobre {}"
 
 #~ msgid "Make layer readable only for the following groups"
 #~ msgstr "Tornar a camada legível apenas para os seguintes grupos"
-
-#~ msgid "Assign user group"
-#~ msgstr "Atribuir grupo de usuários"
-
-#~ msgid "Datastore not found"
-#~ msgstr "Armazenamento de dados não encontrado"
 
 #, fuzzy
 #~| msgid "Refresh tasks"
