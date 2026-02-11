@@ -5,7 +5,8 @@ from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSch
 from django.core.mail import send_mail
 from celery.utils.log import get_task_logger
 from gvsigol_plugin_geoetl.utils import get_ttl_hours
-from .models import ETLworkspaces, ETLstatus, database_connections, cadastral_requests, SendEmails, SendEndpoint, TempETLTable
+from .models import ETLworkspaces, ETLstatus, cadastral_requests, SendEmails, SendEndpoint, TempETLTable
+from gvsigol_services.models import Connection
 from gvsigol import settings
 
 from . import etl_tasks, views
@@ -444,7 +445,7 @@ def executeSQL(db, query_list):
 
     query = ' '.join(query_list)
 
-    db_model  = database_connections.objects.get(name = db)
+    db_model  = Connection.objects.get(name = db)
 
     params_str = db_model.connection_params
     connection_params = json.loads(params_str)
@@ -464,7 +465,7 @@ def executeSQL(db, query_list):
 
 def getLoopListFromPostgres(params):
     
-    db_model  = database_connections.objects.get(name = params['db'])
+    db_model  = Connection.objects.get(name = params['db'])
 
     params_str = db_model.connection_params
     connection_params = json.loads(params_str)

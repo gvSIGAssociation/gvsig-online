@@ -102,15 +102,6 @@ class ETLstatus(models.Model):
     
     def __str__(self):
         return self.name
-    
-class database_connections(models.Model):
-
-    type = models.CharField(max_length=250)
-    name = models.CharField(max_length=250, unique=True)
-    connection_params = models.TextField()
-    
-    def __str__(self):
-        return self.name
 
 
 class segex_FechaFinGarantizada(models.Model):

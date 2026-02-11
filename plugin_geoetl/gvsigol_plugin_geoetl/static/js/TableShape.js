@@ -4585,8 +4585,7 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
 
 
         for(i=0;i<dbc.length;i++){
-
-            if(dbc[i].type == 'PostgreSQL'){
+            if(dbc[i].type == 'PostgreSQL' || dbc[i].type == 'PostGIS'){
                 $('#db-'+ID).append(
                     '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
                 );
@@ -4738,8 +4737,7 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
               });
     
             for(i=0;i<dbc.length;i++){
-    
-                if(dbc[i].type == 'PostgreSQL'){
+                if(dbc[i].type == 'PostgreSQL' || dbc[i].type == 'PostGIS'){
     
                     if (! optionList.includes(dbc[i].name)){
                         $('#db-'+ID).append(
@@ -10076,7 +10074,7 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
 
         for(i=0;i<dbc.length;i++){
 
-            //if(dbc[i].type == 'PostgreSQL'){
+            //if(dbc[i].type == 'PostgreSQL' || dbc[i].type == 'PostGIS'){
                 $('#db-'+ID).append(
                     '<option value="'+dbc[i].name+'" data-type = "'+dbc[i].type+'">'+dbc[i].name+'</option>'
                 );
@@ -10085,7 +10083,7 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
 
         $('#db-'+ID).on('change', function() {
 
-            if ($(this).find(":selected").data("type") == 'PostgreSQL'){
+            if ($(this).find(":selected").data("type") == 'PostgreSQL' || $(this).find(":selected").data("type") == 'PostGIS'){
 
                 $('#get-schemas-'+ID).removeAttr('disabled');
                 $('#schema-name-'+ID).prop("disabled",false);
@@ -10305,7 +10303,7 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
 
             type_db = $('#db-'+ID).find(":selected").data("type")
 
-            if (type_db == 'PostgreSQL'){
+            if (type_db == 'PostgreSQL' || type_db == 'PostGIS'){
                 formDataSchemaExecute.append('jsonParamsPostgres', JSON.stringify(paramsExecute))
                 url_ = '/gvsigonline/etl/etl_schema_postgresql/'
 
@@ -17507,7 +17505,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
 
         for(i=0;i<dbc.length;i++){
 
-            if(dbc[i].type == 'PostgreSQL'){
+            if(dbc[i].type == 'PostgreSQL' || dbc[i].type == 'PostGIS'){
                 $('#db-option-'+ID).append(
                     '<option value="'+dbc[i].name+'">'+dbc[i].name+'</option>'
                 );
@@ -17612,7 +17610,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
 
             for(i=0;i<dbc.length;i++){
 
-                if(dbc[i].type == 'PostgreSQL'){
+                if(dbc[i].type == 'PostgreSQL' || dbc[i].type == 'PostGIS'){
 
                     if (! optionList.includes(dbc[i].name)){
                         $('#db-option-'+ID).append(

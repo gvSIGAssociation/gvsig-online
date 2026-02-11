@@ -11,7 +11,7 @@ urlpatterns = [
     path('etl/etl_schema_excel/', views.etl_schema_excel, name='etl_schema_excel'),
     path('etl/etl_schema_shape/', views.etl_schema_shape, name='etl_schema_shape'),
     path('etl/test_conexion/', views.test_conexion, name='test_conexion'),
-    path('etl/save_conexion/', views.save_conexion, name='save_conexion'),
+    # save_conexion eliminado - las conexiones se gestionan desde gvsigol_services
     path('etl/etl_schema_csv/', views.etl_schema_csv, name='etl_schema_csv'),
     path('etl/etl_workspace_list/', views.etl_workspace_list, name='etl_workspace_list'),
     path('etl/etl_workspace_add/', views.etl_workspace_add, name='etl_workspace_add'),
