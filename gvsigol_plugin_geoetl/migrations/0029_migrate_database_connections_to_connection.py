@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-Migración de datos: database_connections → Connection
+Migracion de datos: database_connections -> Connection
 
-Esta migración copia todas las conexiones del modelo database_connections del plugin ETL
+Esta migracion copia todas las conexiones del modelo database_connections del plugin ETL
 al modelo centralizado Connection de gvsigol_services.
 
-Además, analiza los workspaces ETL existentes y asigna permisos ETL a los usuarios
-que utilizan cada conexión en sus workspaces.
+Ademas, analiza los workspaces ETL existentes y asigna permisos ETL a los usuarios
+que utilizan cada conexion en sus workspaces.
 
-Después de ejecutar esta migración y verificar que todo funciona correctamente,
-se puede eliminar el modelo database_connections y su migración asociada.
+Despues de ejecutar esta migracion y verificar que todo funciona correctamente,
+se puede eliminar el modelo database_connections y su migracion asociada.
 """
 from django.db import migrations
 import json
@@ -18,9 +18,9 @@ import re
 
 def normalize_postgres_params(connection_params, conn_type):
     """
-    Normaliza los parámetros de conexión PostgreSQL/PostGIS.
+    Normaliza los parametros de conexion PostgreSQL/PostGIS.
     El ETL guardaba 'password' pero gvsigol_services espera 'passwd'.
-    También asegura que 'port' sea string.
+    Tambien asegura que 'port' sea string.
     """
     if conn_type not in ('PostgreSQL', 'PostGIS'):
         return connection_params
@@ -85,183 +85,209 @@ def extract_connection_names_from_workspace(workspace_json):
 def migrate_database_connections_to_connection(apps, schema_editor):
     """
     Migra todas las conexiones de database_connections a Connection.
-    Además asigna permisos ETL a los usuarios que usan cada conexión en sus workspaces.
+    Ademas asigna permisos ETL a los usuarios que usan cada conexion en sus workspaces.
     """
-    # Obtener los modelos
-    database_connections = apps.get_model('gvsigol_plugin_geoetl', 'database_connections')
-    ETLworkspaces = apps.get_model('gvsigol_plugin_geoetl', 'ETLworkspaces')
-    Connection = apps.get_model('gvsigol_services', 'Connection')
-    ConnectionRole = apps.get_model('gvsigol_services', 'ConnectionRole')
-    User = apps.get_model('auth', 'User')
-    
-    # Importar auth_backend para obtener el rol primario del usuario
-    from gvsigol_auth import auth_backend
-    
-    # Mapeo de tipos: ETL usa PostgreSQL, Connection usa PostGIS
-    type_mapping = {
-        'PostgreSQL': 'PostGIS',
-        'Oracle': 'Oracle',
-        'SQLServer': 'SQLServer',
-        'MySQL': 'MySQL',
-        'indenova': 'indenova',
-        'segex': 'segex',
-        'sharepoint': 'sharepoint',
-        'padron-atm': 'padron-atm',
-    }
-    
-    # Paso 1: Analizar todos los workspaces ETL para saber qué conexiones usa cada usuario
-    # Estructura: {connection_name: set(usernames)}
-    connection_users = {}
-    
-    for ws in ETLworkspaces.objects.all():
-        if not ws.username:
-            continue
+    try:
+        # Obtener los modelos
+        database_connections = apps.get_model('gvsigol_plugin_geoetl', 'database_connections')
+        ETLworkspaces = apps.get_model('gvsigol_plugin_geoetl', 'ETLworkspaces')
+        Connection = apps.get_model('gvsigol_services', 'Connection')
+        ConnectionRole = apps.get_model('gvsigol_services', 'ConnectionRole')
+        User = apps.get_model('auth', 'User')
         
-        # Extraer nombres de conexiones del workspace
-        conn_names = extract_connection_names_from_workspace(ws.workspace)
+        # Importar auth_backend para obtener el rol primario del usuario
+        from gvsigol_auth import auth_backend
         
-        # También revisar en parameters si hay referencias a conexiones
-        if ws.parameters:
+        # Mapeo de tipos: ETL usa PostgreSQL, Connection usa PostGIS
+        type_mapping = {
+            'PostgreSQL': 'PostGIS',
+            'Oracle': 'Oracle',
+            'SQLServer': 'SQLServer',
+            'MySQL': 'MySQL',
+            'indenova': 'indenova',
+            'segex': 'segex',
+            'sharepoint': 'sharepoint',
+            'padron-atm': 'padron-atm',
+        }
+        
+        # Paso 1: Analizar todos los workspaces ETL para saber que conexiones usa cada usuario
+        # Estructura: {connection_name: set(usernames)}
+        connection_users = {}
+        
+        for ws in ETLworkspaces.objects.all():
             try:
-                params = json.loads(ws.parameters)
-                db_param = params.get('db', '')
-                if db_param:
-                    conn_names.add(db_param)
-            except (json.JSONDecodeError, TypeError):
-                pass
-        
-        # Registrar el usuario para cada conexión usada
-        for conn_name in conn_names:
-            if conn_name not in connection_users:
-                connection_users[conn_name] = set()
-            connection_users[conn_name].add(ws.username)
-    
-    print(f"\n=== Análisis de workspaces ETL ===")
-    print(f"  Conexiones referenciadas: {len(connection_users)}")
-    for conn_name, users in connection_users.items():
-        print(f"    - '{conn_name}': usado por {list(users)}")
-    
-    # Paso 2: Migrar las conexiones de database_connections a Connection
-    migrated_count = 0
-    skipped_count = 0
-    connections_map = {}  # {nombre: Connection object}
-    
-    for db_conn in database_connections.objects.all():
-        # Verificar si ya existe una Connection con este nombre
-        existing = Connection.objects.filter(name=db_conn.name).first()
-        if existing:
-            print(f"  Conexión '{db_conn.name}' ya existe en Connection, omitiendo creación...")
-            connections_map[db_conn.name] = existing
-            skipped_count += 1
-            continue
-        
-        # Mapear el tipo
-        new_type = type_mapping.get(db_conn.type, db_conn.type)
-        
-        # Normalizar parámetros de PostgreSQL (password -> passwd, port como string)
-        normalized_params = normalize_postgres_params(db_conn.connection_params, db_conn.type)
-        
-        # Crear la nueva Connection (sin permisos globales)
-        new_conn = Connection.objects.create(
-            name=db_conn.name,
-            description=f'Conexión migrada automáticamente desde plugin ETL (tipo: {db_conn.type})',
-            type=new_type,
-            connection_params=normalized_params,
-            created_by='etl_migration',
-            allow_all_etl=False,
-            allow_all_datastore=False,
-            allow_all_manage=False,
-        )
-        
-        connections_map[db_conn.name] = new_conn
-        print(f"  Migrada: '{db_conn.name}' (type: {db_conn.type} -> {new_type})")
-        migrated_count += 1
-    
-    print(f"\n=== Migración database_connections → Connection completada ===")
-    print(f"  Migradas: {migrated_count}")
-    print(f"  Omitidas (ya existían): {skipped_count}")
-    
-    # Paso 3: Asignar permisos ETL a los usuarios que usan cada conexión
-    permissions_created = 0
-    
-    for conn_name, usernames in connection_users.items():
-        connection = connections_map.get(conn_name)
-        if not connection:
-            # La conexión referenciada no existe en database_connections
-            # Intentar buscarla en Connection por si ya existía
-            connection = Connection.objects.filter(name=conn_name).first()
-            if not connection:
-                print(f"  Advertencia: Conexión '{conn_name}' no encontrada, omitiendo permisos")
-                continue
-        
-        for username in usernames:
-            # Verificar si el usuario es staff (no superuser)
-            try:
-                user = User.objects.get(username=username)
-                if user.is_superuser:
-                    # Superusuarios ya tienen acceso a todo, no necesitan permisos específicos
+                if not ws.username:
                     continue
-                if not user.is_staff:
-                    continue
-            except User.DoesNotExist:
-                print(f"  Advertencia: Usuario '{username}' no encontrado")
-                continue
-            
-            # Obtener el rol primario del usuario (ug_username)
+                
+                # Extraer nombres de conexiones del workspace
+                conn_names = extract_connection_names_from_workspace(ws.workspace)
+                
+                # Tambien revisar en parameters si hay referencias a conexiones
+                if ws.parameters:
+                    try:
+                        params = json.loads(ws.parameters)
+                        db_param = params.get('db', '')
+                        if db_param:
+                            conn_names.add(db_param)
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+                
+                # Registrar el usuario para cada conexion usada
+                for conn_name in conn_names:
+                    if conn_name not in connection_users:
+                        connection_users[conn_name] = set()
+                    connection_users[conn_name].add(ws.username)
+            except Exception as ws_error:
+                print('    ERROR procesando workspace: %s' % str(ws_error))
+        
+        print('')
+        print('=== Analisis de workspaces ETL ===')
+        print('  Conexiones referenciadas: %d' % len(connection_users))
+        for conn_name, users in connection_users.items():
+            print('    - "%s": usado por %s' % (conn_name, list(users)))
+        
+        # Paso 2: Migrar las conexiones de database_connections a Connection
+        migrated_count = 0
+        skipped_count = 0
+        connections_map = {}  # {nombre: Connection object}
+        
+        for db_conn in database_connections.objects.all():
             try:
-                user_role = auth_backend.get_primary_role(username)
-            except Exception:
-                user_role = f"ug_{username}"
-            
-            # Verificar si ya existe el permiso
-            existing_perm = ConnectionRole.objects.filter(
-                connection=connection,
-                role=user_role
-            ).first()
-            
-            if existing_perm:
-                # Actualizar para asegurar que tiene permiso ETL
-                if not existing_perm.can_use_etl:
-                    existing_perm.can_use_etl = True
-                    existing_perm.save()
-                    print(f"  Actualizado permiso ETL: {user_role} -> {conn_name}")
-                    permissions_created += 1
-            else:
-                # Crear nuevo permiso
-                ConnectionRole.objects.create(
-                    connection=connection,
-                    role=user_role,
-                    can_use_etl=True,
-                    can_use_datastore=False,
-                    can_manage=False,
+                # Verificar si ya existe una Connection con este nombre
+                existing = Connection.objects.filter(name=db_conn.name).first()
+                if existing:
+                    print('  Conexion "%s" ya existe en Connection, omitiendo creacion...' % db_conn.name)
+                    connections_map[db_conn.name] = existing
+                    skipped_count += 1
+                    continue
+                
+                # Mapear el tipo
+                new_type = type_mapping.get(db_conn.type, db_conn.type)
+                
+                # Normalizar parametros de PostgreSQL (password -> passwd, port como string)
+                normalized_params = normalize_postgres_params(db_conn.connection_params, db_conn.type)
+                
+                # Crear la nueva Connection (sin permisos globales)
+                new_conn = Connection.objects.create(
+                    name=db_conn.name,
+                    description='Conexion migrada automaticamente desde plugin ETL (tipo: %s)' % db_conn.type,
+                    type=new_type,
+                    connection_params=normalized_params,
+                    created_by='etl_migration',
+                    allow_all_etl=False,
+                    allow_all_datastore=False,
+                    allow_all_manage=False,
                 )
-                print(f"  Creado permiso ETL: {user_role} -> {conn_name}")
-                permissions_created += 1
+                
+                connections_map[db_conn.name] = new_conn
+                print('  Migrada: "%s" (type: %s -> %s)' % (db_conn.name, db_conn.type, new_type))
+                migrated_count += 1
+            except Exception as conn_error:
+                print('  ERROR migrando conexion "%s": %s' % (db_conn.name, str(conn_error)))
+        
+        print('')
+        print('=== Migracion database_connections -> Connection completada ===')
+        print('  Migradas: %d' % migrated_count)
+        print('  Omitidas (ya existian): %d' % skipped_count)
+        
+        # Paso 3: Asignar permisos ETL a los usuarios que usan cada conexion
+        permissions_created = 0
+        
+        for conn_name, usernames in connection_users.items():
+            try:
+                connection = connections_map.get(conn_name)
+                if not connection:
+                    # La conexion referenciada no existe en database_connections
+                    # Intentar buscarla en Connection por si ya existia
+                    connection = Connection.objects.filter(name=conn_name).first()
+                    if not connection:
+                        print('  Advertencia: Conexion "%s" no encontrada, omitiendo permisos' % conn_name)
+                        continue
+                
+                for username in usernames:
+                    try:
+                        # Verificar si el usuario es staff (no superuser)
+                        try:
+                            user = User.objects.get(username=username)
+                            if user.is_superuser:
+                                # Superusuarios ya tienen acceso a todo, no necesitan permisos especificos
+                                continue
+                            if not user.is_staff:
+                                continue
+                        except User.DoesNotExist:
+                            print('  Advertencia: Usuario "%s" no encontrado' % username)
+                            continue
+                        
+                        # Obtener el rol primario del usuario (ug_username)
+                        try:
+                            user_role = auth_backend.get_primary_role(username)
+                        except Exception:
+                            user_role = "ug_%s" % username
+                        
+                        # Verificar si ya existe el permiso
+                        existing_perm = ConnectionRole.objects.filter(
+                            connection=connection,
+                            role=user_role
+                        ).first()
+                        
+                        if existing_perm:
+                            # Actualizar para asegurar que tiene permiso ETL
+                            if not existing_perm.can_use_etl:
+                                existing_perm.can_use_etl = True
+                                existing_perm.save()
+                                print('  Actualizado permiso ETL: %s -> %s' % (user_role, conn_name))
+                                permissions_created += 1
+                        else:
+                            # Crear nuevo permiso
+                            ConnectionRole.objects.create(
+                                connection=connection,
+                                role=user_role,
+                                can_use_etl=True,
+                                can_use_datastore=False,
+                                can_manage=False,
+                            )
+                            print('  Creado permiso ETL: %s -> %s' % (user_role, conn_name))
+                            permissions_created += 1
+                    except Exception as user_error:
+                        print('  ERROR asignando permiso a usuario "%s": %s' % (username, str(user_error)))
+            except Exception as perm_error:
+                print('  ERROR procesando permisos para conexion "%s": %s' % (conn_name, str(perm_error)))
+        
+        print('')
+        print('=== Asignacion de permisos ETL completada ===')
+        print('  Permisos creados/actualizados: %d' % permissions_created)
     
-    print(f"\n=== Asignación de permisos ETL completada ===")
-    print(f"  Permisos creados/actualizados: {permissions_created}")
+    except Exception as e:
+        print('  ERROR en migracion de conexiones ETL: %s' % str(e))
+        raise
 
 
 def reverse_migration(apps, schema_editor):
     """
-    Revierte la migración eliminando las conexiones y permisos creados.
-    Solo elimina las que fueron creadas por esta migración.
+    Revierte la migracion eliminando las conexiones y permisos creados.
+    Solo elimina las que fueron creadas por esta migracion.
     """
-    Connection = apps.get_model('gvsigol_services', 'Connection')
-    ConnectionRole = apps.get_model('gvsigol_services', 'ConnectionRole')
+    try:
+        Connection = apps.get_model('gvsigol_services', 'Connection')
+        ConnectionRole = apps.get_model('gvsigol_services', 'ConnectionRole')
+        
+        # Primero eliminar los ConnectionRoles asociados a conexiones de la migracion
+        migrated_connections = Connection.objects.filter(created_by='etl_migration')
+        roles_deleted = 0
+        for conn in migrated_connections:
+            roles_deleted += ConnectionRole.objects.filter(connection=conn).delete()[0]
+        
+        # Luego eliminar las conexiones
+        deleted_count = migrated_connections.delete()[0]
+        
+        print('')
+        print('=== Reversion completada ===')
+        print('  Conexiones eliminadas: %d' % deleted_count)
+        print('  Permisos eliminados: %d' % roles_deleted)
     
-    # Primero eliminar los ConnectionRoles asociados a conexiones de la migración
-    migrated_connections = Connection.objects.filter(created_by='etl_migration')
-    roles_deleted = 0
-    for conn in migrated_connections:
-        roles_deleted += ConnectionRole.objects.filter(connection=conn).delete()[0]
-    
-    # Luego eliminar las conexiones
-    deleted_count = migrated_connections.delete()[0]
-    
-    print(f"\n=== Reversión completada ===")
-    print(f"  Conexiones eliminadas: {deleted_count}")
-    print(f"  Permisos eliminados: {roles_deleted}")
+    except Exception as e:
+        print('  ERROR revirtiendo migracion ETL: %s' % str(e))
+        raise
 
 
 class Migration(migrations.Migration):
