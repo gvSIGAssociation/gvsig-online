@@ -134,8 +134,11 @@
 										<label for="real_time">{% trans "View in real time" %}</label>
 									</div>
 									<div class="col-md-4 form-group checkbox_vector_tile_layer_property">
-										<input type="checkbox" name="vector_tile" id="vector_tile"/>
+										<input type="checkbox" name="vector_tile" id="vector_tile" disabled/>
 										<label for="vector_tile">{% trans "Show in vector tile format" %}</label>
+										<small class="help-block" id="vector_tile_help" style="display:none; color: #999;">
+											<i class="fa fa-info-circle"></i> {% trans "Only available for PostGIS vector layers" %}
+										</small>
 									</div>
 								</div>
 								<div class="row">
@@ -600,6 +603,8 @@
 			updateLayerGroupList(id_datastore);
 
 			if (id_datastore in datastore_types) {
+				var isVectorPostGIS = datastore_types[id_datastore] === 'v_PostGIS';
+				
 				if(datastore_types[id_datastore].startsWith('v_')){
 					$(".vector_fields").css("display", "block");
 
@@ -618,6 +623,16 @@
 					$(".image_mosaic_tmp_fields").css("display", "none");
 				}else{
 					$(".image_mosaic_tmp_fields").css("display", "block");
+				}
+				
+				// Habilitar/deshabilitar vector_tile según si es PostGIS vectorial
+				if(isVectorPostGIS){
+					$("#vector_tile").attr('disabled', false);
+					$("#vector_tile_help").css("display", "none");
+				} else {
+					$("#vector_tile").prop('checked', false);
+					$("#vector_tile").attr('disabled', true);
+					$("#vector_tile_help").css("display", "block");
 				}
 
 			}/* else {
