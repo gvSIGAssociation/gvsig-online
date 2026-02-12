@@ -189,11 +189,6 @@
 										<input type="checkbox" name="vector_tile" id="vector_tile" {% if datastore_type != "v_PostGIS" %}disabled{% endif %}/>
 										{% endif %}
 										<label for="vector_tile">{% trans "Show in vector tile format" %}</label>
-										{% if datastore_type != "v_PostGIS" %}
-										<small class="help-block" style="color: #999;">
-											<i class="fa fa-info-circle"></i> {% trans "Only available for PostGIS vector layers" %}
-										</small>
-										{% endif %}
 									</div>
 								</div>
 								<div class="row">
