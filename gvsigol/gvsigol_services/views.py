@@ -6846,7 +6846,7 @@ def connection_list(request):
     
     if request.user.is_superuser:
         # Superusuarios ven todas las conexiones
-        connections = Connection.objects.all().order_by('name')
+        connections_qs = Connection.objects.all()
     else:
         # Usuarios staff solo ven conexiones que pueden gestionar
         user_roles = auth_backend.get_roles(request.user)
@@ -6858,20 +6858,45 @@ def connection_list(request):
             can_manage=True
         ).values_list('connection_id', flat=True)
         
-        connections = Connection.objects.filter(
+        connections_qs = Connection.objects.filter(
             Q(allow_all_manage=True) |
             Q(created_by=request.user.username) |
             Q(id__in=role_connection_ids)
-        ).distinct().order_by('name')
+        ).distinct()
     
-    # Añadir información adicional para visualización
-    for conn in connections:
+    # Aplicar búsqueda si se proporciona el parámetro 'search'
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        connections_qs = connections_qs.filter(
+            Q(name__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(type__icontains=search_query)
+        )
+    
+    # Orden estable para paginación
+    connections_qs = connections_qs.order_by('name')
+    
+    # Paginar antes de procesar
+    page_connections, page_ctx = utils.paginate(
+        request,
+        connections_qs,
+        default_page_size=10,
+        max_page_size=200,
+        page_param="page",
+        page_size_param="page_size",
+    )
+    
+    # Añadir información adicional para visualización (solo página actual)
+    for conn in page_connections:
         conn.masked_params = conn.get_masked_params()
         # Contar almacenes de datos que usan esta conexión
         conn.datastore_count = Datastore.objects.filter(connection=conn).count() if hasattr(Datastore, 'connection') else 0
     
     response = {
-        'connections': connections
+        'connections': page_connections,
+        'request': request,
+        'search_query': search_query,
+        **page_ctx,  # Agrega paginator/page_obj/page_size/etc al template
     }
     return render(request, 'connection_list.html', response)
 
