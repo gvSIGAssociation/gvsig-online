@@ -1,18 +1,63 @@
 import importlib
 import logging
 from gvsigol_auth.django_auth import get_primary_role
+from gvsigol_auth import signals
+from gvsigol_auth.models import UserCache, UserProperties
+from django.contrib.auth import get_user_model
+from gvsigol_auth.settings import USE_USER_CACHE
 
+LOGGER_NAME = 'gvsigol'
 try:
     from gvsigol import settings
     if settings.GVSIGOL_ROLE_PROVIDER == 'gvsigol_auth':
         import gvsigol_auth
         auth_backend = gvsigol_auth.django_auth
     else:
-        auth_backend = importlib.import_module(settings.GVSIGOL_ROLE_PROVIDER)
+        auth_plugin = importlib.import_module(settings.GVSIGOL_ROLE_PROVIDER)
+        auth_backend = importlib.import_module(settings.GVSIGOL_ROLE_PROVIDER + '.' + auth_plugin.backend_implementation)
 except:
-    logging.getLogger('gvsigol').exception('Error importing GVSIGOL_ROLE_PROVIDER. Falling back to gvsigol_auth.django_auth')
+    logging.getLogger(LOGGER_NAME).exception('Error importing GVSIGOL_ROLE_PROVIDER. Falling back to gvsigol_auth.django_auth')
     auth_backend = importlib.import_module('gvsigol_auth.django_auth')
 
+def role_deleted_handler(sender, **kwargs):
+    try:
+        for user_cache in UserCache.objects.filter(roles__contains=kwargs['role']):
+            update_userrole_cache(user_cache)
+    except Exception as e:
+        logging.getLogger(LOGGER_NAME).exception('error updating user cache')
+        pass
+
+def user_updated_handler(sender, **kwargs):
+    try:
+        update_user_cache(
+            kwargs['username'],
+            user_dict=kwargs.get('user_dict'),
+            user_obj=kwargs.get('user_obj'),
+            roles=kwargs.get('roles'))
+    except Exception as e:
+        logging.getLogger(LOGGER_NAME).exception('error updating user cache')
+        pass
+
+def user_roles_updated_handler(sender, **kwargs):
+    try:
+        update_userrole_cache(kwargs['username'], kwargs.get('roles'))
+    except Exception as e:
+        logging.getLogger(LOGGER_NAME).exception('error updating user cache')
+        pass
+
+def user_deleted_handler(sender, **kwargs):
+    try:
+        UserCache.objects.filter(username=kwargs['username']).delete()
+    except Exception as e:
+        logging.getLogger(LOGGER_NAME).exception('error updating user cache')
+        pass
+
+def connect_signals():
+    signals.role_deleted.connect(role_deleted_handler)
+    signals.user_updated.connect(user_updated_handler)
+    signals.user_roles_updated.connect(user_roles_updated_handler)
+    signals.user_deleted.connect(user_deleted_handler)
+connect_signals()
 
 has_group = auth_backend.has_group
 """Checks whether a user has the provided role. Important: provide a
@@ -627,3 +672,121 @@ Checks whether this backend provides support for user groups.
 All the backends provide support for user roles, but only some
 backends support user groups.
 """
+
+def update_user_cache(username, user_dict=None, user_obj=None, roles=None):
+    """
+    Updates the user cache for allowing complex search.
+
+    Parameters
+    ----------
+    user: str | User
+        User name | Django User object
+    """
+    if user_obj is None:
+        user_obj = _get_user_instance(username)
+    
+    if user_obj is not None: 
+        try:
+            try:
+                user_props = user_obj.userproperties
+            except UserProperties.DoesNotExist:
+                user_props = UserProperties.objects.create(user=user_obj, editable=True)
+            editable = user_props.editable
+        except:
+            editable = True
+    else:
+        editable = True
+        
+
+    if USE_USER_CACHE:
+        try:
+            if roles is None:
+                roles = get_roles(username)
+            roles_str = "; ".join(roles)
+
+            if user_obj is not None:
+                user_id = user_obj.id
+                email = user_obj.email
+                first_name = user_obj.first_name
+                last_name = user_obj.last_name
+                is_superuser = user_obj.is_superuser
+                is_staff = user_obj.is_staff
+            elif user_dict is not None:
+                user_id = user_dict.get('id')
+                email = user_dict.get('email')
+                first_name = user_dict.get('first_name')
+                last_name = user_dict.get('last_name')
+                is_superuser = user_dict.get('is_superuser')
+                is_staff = user_dict.get('is_staff')
+            else:
+                logging.getLogger(LOGGER_NAME).error(f'No user_obj or user_dict provided for user {username}')
+                return
+            try:
+                user_cache = UserCache.objects.get(username=username)
+                user_cache.user_id = user_id
+                user_cache.email = email
+                user_cache.first_name = first_name
+                user_cache.last_name = last_name
+                user_cache.is_superuser = is_superuser
+                user_cache.is_staff = is_staff
+                user_cache.roles = roles_str
+                user_cache.editable = editable
+                user_cache.save()
+                user_cache.update_searchable_data()
+            except UserCache.DoesNotExist:
+                user_cache = UserCache.objects.create(user_id=user_id, username=username, email=email, first_name=first_name, last_name=last_name, is_superuser=is_superuser, is_staff=is_staff, roles=roles_str, editable=editable)
+                user_cache.update_searchable_data()
+        except:
+            logging.getLogger(LOGGER_NAME).exception('error updating user cache')
+
+def update_userrole_cache(user, roles=None):
+    """
+    Updates the roles of the user cache.
+
+    Parameters
+    ----------
+    user: str | UserCache
+    """
+    try:
+        if isinstance(user, UserCache):
+            username = user.username
+            if roles is None:
+                roles = get_roles(username)
+            user_cache = user
+        elif isinstance(user, str):
+            if roles is None:
+                roles = get_roles(user)
+            user_cache = UserCache.objects.get(username=user)
+        roles_str = "; ".join(roles)
+        user_cache.roles = roles_str
+        user_cache.save()
+        user_cache.update_searchable_data()
+    except UserCache.DoesNotExist:
+        pass
+    except:
+        logging.getLogger(LOGGER_NAME).exception('error updating user cache')
+
+def _get_user_instance(user):
+    """
+    Gets the Django User instance from username or user id
+
+    Parameters
+    ----------
+    user: str|integer|User
+        User name|User id|Django User object
+    Returns
+    -------
+        User
+        A Django User instance or None if the user does not exist
+    """
+    try:
+        User = get_user_model()
+        if isinstance(user, User):
+            return user
+        elif isinstance(user, str):
+            return User.objects.get(username=user)
+        elif isinstance(user, int):
+            return User.objects.get(id=user)
+    except:
+        pass
+

@@ -21,6 +21,7 @@
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 from django.utils.translation import ugettext_noop as _
+import environ
 
 STATISTICS=[{
     'id': 'gvsigol_auth',
@@ -31,3 +32,13 @@ STATISTICS=[{
     'target_title': _('User'),
     'target_field': 'username'
 }]
+
+
+env = environ.Env(
+    # set casting, default value
+    USE_USER_CACHE=(bool, True),
+    USER_CACHE_UPDATE_INTERVAL=(int, 600),
+)
+
+USE_USER_CACHE = env('USE_USER_CACHE')
+USER_CACHE_UPDATE_INTERVAL = env('USER_CACHE_UPDATE_INTERVAL')

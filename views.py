@@ -39,7 +39,6 @@ from gvsigol_auth import services as auth_services
 from gvsigol_services import geographic_servers
 from gvsigol_services import utils as services_utils
 from gvsigol_services.models import Workspace, Server
-from gvsigol_services.utils import paginate
 from .utils import superuser_required, staff_required
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
@@ -51,10 +50,14 @@ import re
 import base64
 from actstream import action
 import logging
+from django.db.models.expressions import RawSQL
+from django.db.models import F
 from gvsigol_core.utils import get_absolute_url
 logger = logging.getLogger('gvsigol')
 from gvsigol_auth import auth_backend, signals
 from gvsigol.settings import GVSIGOL_LDAP, LOGOUT_REDIRECT_URL, AUTH_WITH_REMOTE_USER
+from gvsigol_auth.settings import USE_USER_CACHE
+from gvsigol_auth.models import UserCache
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
@@ -318,31 +321,60 @@ def password_reset_success(request):
 @login_required()
 @superuser_required
 def user_list(request):
-    # Obtener todos los usuarios (sin paginar aún)
-    response_data = auth_backend.get_filtered_users_details(exclude_system=True)
-    all_users = response_data.get('users', [])
-    
-    # Formatear roles como string para el template
-    for user in all_users:
-        user["roles"] = "; ".join(user.get("roles", []))
-    
-    # Paginar la lista de usuarios
-    page_users, page_ctx = paginate(
-        request,
-        all_users,
-        default_page_size=10,
-        max_page_size=200,
-        page_param="page",
-        page_size_param="page_size",
-    )
+    users = []
+    for user in users:
+        user["roles"] = "; ".join(user["roles"])
                       
     response = {
-        'users': page_users,
-        'read_only_users': settings.AUTH_READONLY_USERS,
-        'request': request,
-        **page_ctx,  # Agrega paginator/page_obj/page_size/etc al template
+        'users': users,
+        'read_only_users': settings.AUTH_READONLY_USERS
     }     
     return render(request, 'user_list.html', response)
+
+def _get_users_from_cache(search=None, first=None, max=None):
+    qs = UserCache.objects.all()
+    if search:
+        qs = qs.annotate(
+            search_unaccent=RawSQL("unaccent(%s)", (search.lower(),))
+        ).filter(
+            searchable_data__contains=F('search_unaccent')
+        )
+    numberMatched = qs.count()
+    users = qs[first:first + max]
+    user_list = []
+    for user in users:
+        user_list.append([
+            user.user_id,
+            user.username,
+            user.first_name,
+            user.last_name,
+            user.email,
+            user.is_superuser,
+            user.is_staff,
+            user.roles,
+            user.editable
+        ])
+    return user_list, numberMatched
+
+def _get_users_from_auth_backend(search=None, first=None, max=None):
+    response = auth_backend.get_filtered_users_details(exclude_system=True, first=first, max=max, search=search)
+    users = response.get('users')
+    user_list = []
+    numberMatched = response.get('numberMatched', 0)
+            
+    for user in users:
+        user_list.append([
+            user.get('id'),
+            user.get('username'),
+            user.get('first_name'),
+            user.get('last_name'),
+            user.get('email'),
+            user.get('is_superuser'),
+            user.get('is_staff'),
+            "; ".join(user.get("roles", [])),
+            user.get('editable', True)
+        ])
+    return user_list, numberMatched
 
 @csrf_exempt
 @require_http_methods(["HEAD", "POST"])
@@ -356,23 +388,20 @@ def datatables_user_list(request):
     for key in request.POST:
         if key.startswith('search[value]'):
             search = request.POST.get(key)
+    # DataTables pagination params
+    first = int(start) if start is not None else 0
+    max_ = int(length) if length is not None else 10
     
     try:
-        response = auth_backend.get_filtered_users_details(exclude_system=True, first=start, max=length, search=search)
-        users = response.get('users')
         user_list = []
-        for user in users:
-            user_list.append([
-                                user.get('id'),
-                                user.get('username'),
-                                user.get('first_name'),
-                                user.get('last_name'),
-                                user.get('email'),
-                                user.get('is_superuser'),
-                                user.get('is_staff'),
-                                "; ".join(user.get("roles", []))
-                            ])
+        if USE_USER_CACHE:
+            user_list, numberMatched = _get_users_from_cache(search=search, first=first, max=max_)
+            if numberMatched == 0: # fallback to real data if cache is empty
+                user_list, numberMatched = _get_users_from_auth_backend(search=search, first=first, max=max_)
+        else:
+            user_list, numberMatched = _get_users_from_auth_backend(search=search, first=first, max=max_)
     except Exception as e:
+        logging.getLogger('gvsigol').exception(f"ERROR: Problem getting users from cache or auth backend")
         return JsonResponse({
             "draw": draw,
             "recordsTotal": 0,
@@ -382,12 +411,11 @@ def datatables_user_list(request):
         })
     data = {
         "draw": draw,
-        "recordsTotal": -1,
-        "recordsFiltered": response.get('numberMatched'),
+        "recordsTotal": numberMatched if USE_USER_CACHE else -1,
+        "recordsFiltered": numberMatched,
         "data": user_list
     }
     return JsonResponse(data)
-
 
 @login_required()
 @superuser_required
@@ -537,26 +565,34 @@ def user_update(request, username):
             if 'is_superuser' in request.POST:
                 is_superuser = True
                 is_staff = True
+            try:
+                editable = request.user.userproperties.editable
+            except:
+                editable = True
 
-            if settings.AUTH_READONLY_USERS:
-                success = auth_backend.update_user(
-                    username,
-                    superuser=is_superuser,
-                    staff=is_staff,
-                    groups=assigned_groups,
-                    roles=assigned_roles
-                )
-            else:
-                success = auth_backend.update_user(
+            if editable:
+                if settings.AUTH_READONLY_USERS:
+                    success = auth_backend.update_user(
                         username,
-                        email=request.POST.get('email'),
-                        first_name=request.POST.get('first_name'),
-                        last_name=request.POST.get('last_name'),
                         superuser=is_superuser,
                         staff=is_staff,
                         groups=assigned_groups,
                         roles=assigned_roles
-                )
+                    )
+                else:
+                    success = auth_backend.update_user(
+                            username,
+                            email=request.POST.get('email'),
+                            first_name=request.POST.get('first_name'),
+                            last_name=request.POST.get('last_name'),
+                            superuser=is_superuser,
+                            staff=is_staff,
+                            groups=assigned_groups,
+                            roles=assigned_roles
+                    )
+            else:
+                # ignore update if user is not editable
+                success = False
             if success and (is_superuser or is_staff):
                 auth_utils.config_staff_user(username)
 
@@ -564,24 +600,39 @@ def user_update(request, username):
         else:
             selected_user = auth_backend.get_user_details(user=username)
             roles = auth_utils.get_all_roles_checked_by_user(username)
+            try:
+                editable = User.objects.get(username=selected_user.get('username')).userproperties.editable
+            except:
+                try:
+                    # for users that never logged in gvSIG Online, UserProperties may not be exist yet, so check the cache
+                    editable = UserCache.objects.get(username=selected_user.get('username')).editable
+                except:
+                    editable = True
             response = {
                 'uid': username,
                 'selected_user': selected_user,
                 'user': request.user,
                 'roles': roles,
-                'read_only_users': settings.AUTH_READONLY_USERS
+                'read_only_users': settings.AUTH_READONLY_USERS,
+                'editable': editable
                 }
             if auth_backend.check_group_support():
                 response['groups'] = auth_utils.get_all_groups_checked_by_user(username)
             return render(request, 'user_update.html', response)
     except BackendNotAvailable:
         message = _("The authentication server is not available. Try again later or contact system administrators.")
-        return render(request, 'user_update.html', {'uid': username, 'selected_user': None, 'user': None, 'groups': [], 'roles': []})
+        return render(request, 'user_update.html', {'uid': username, 'selected_user': None, 'user': None, 'groups': [], 'roles': [], 'read_only_users': settings.AUTH_READONLY_USERS, 'editable': False})
         
 @login_required()
 @superuser_required
 def user_delete(request, uid):
     if request.method == 'POST':
+        try:
+            editable = request.user.userproperties.editable
+        except:
+            editable = True
+        if not editable:
+            return HttpResponse(json.dumps({'deleted': False, 'message': _("User is not editable")}, indent=4), content_type='application/json')
         deleted = auth_backend.delete_user(user_id=uid)
         response = {
             'deleted': deleted
@@ -637,23 +688,8 @@ def group_delete(request, group_name):
 @login_required()
 @superuser_required
 def role_list(request):
-    # Obtener todos los roles y ordenarlos
-    all_roles = sorted(auth_backend.get_all_roles_details(), key=sort_by_name)
-    
-    # Paginar la lista de roles
-    page_roles, page_ctx = paginate(
-        request,
-        all_roles,
-        default_page_size=10,
-        max_page_size=200,
-        page_param="page",
-        page_size_param="page_size",
-    )
-    
     response = {
-        'roles': page_roles,
-        'request': request,
-        **page_ctx,  # Agrega paginator/page_obj/page_size/etc al template
+        'roles': sorted(auth_backend.get_all_roles_details(), key=sort_by_name)
     }     
     return render(request, 'role_list.html', response)
 

@@ -24,7 +24,9 @@
 				<ul class="nav nav-tabs">
 					<li class="active"><a href="#tab-general" data-toggle="tab">{% trans "General" %}</a></li>
 					{% if AUTH_GROUPS %}
+					<!--
 					<li><a href="#tab-user-groups" data-toggle="tab">{% trans "Groups" %}</a></li>
+					-->
 					{% endif %}
 					<li><a href="#tab-roles" data-toggle="tab">{% trans "Roles" %}</a></li>
 			    </ul>
@@ -37,22 +39,22 @@
 										<div class="row">
 											<div class="col-md-6">
 												<label for="first_name">{% trans "First name" %}</label>
-												<input {% if read_only_users %}readonly{% endif %} placeholder="{% trans 'First name' %}" class="form-control" name="first_name" id="first_name" type="text" value="{{selected_user.first_name}}">							
+												<input {% if read_only_users or not editable %}readonly{% endif %} {% if not editable %}title="{% trans 'User is not editable' %}"{% endif %} placeholder="{% trans 'First name' %}" class="form-control" name="first_name" id="first_name" type="text" value="{{selected_user.first_name}}">							
 											</div>
 											<div class="col-md-6">
 												<label for="last_name">{% trans "Last name" %}</label>
-												<input {% if read_only_users %}readonly{% endif %} placeholder="{% trans 'Last name' %}" class="form-control" name="last_name" id="last_name" type="text" value="{{selected_user.last_name}}">								
+												<input {% if read_only_users or not editable %}readonly{% endif %} {% if not editable %}title="{% trans 'User is not editable' %}"{% endif %} placeholder="{% trans 'Last name' %}" class="form-control" name="last_name" id="last_name" type="text" value="{{selected_user.last_name}}">								
 											</div>
 										</div>
 														
 										<div class="row">
 											<div class="col-md-6 form-group">
 												<label for="username">{% trans "Username" %}</label>
-												<input readonly placeholder="{% trans 'Username' %}" class="form-control" name="username" id="username" type="text" value="{{selected_user.username}}">								
+												<input readonly {% if not editable %}title="{% trans 'User is not editable' %}"{% endif %} placeholder="{% trans 'Username' %}" class="form-control" name="username" id="username" type="text" value="{{selected_user.username}}">								
 											</div>
 											<div class="col-md-6 form-group">
 												<label for="email">{% trans "Email" %}</label>
-												<input {% if read_only_users %}readonly{% endif %} placeholder="{% trans 'Email' %}" class="form-control" name="email" id="email" type="text" class="validate" value="{{selected_user.email}}">								
+												<input {% if read_only_users or not editable %}readonly{% endif %} {% if not editable %}title="{% trans 'User is not editable' %}"{% endif %} placeholder="{% trans 'Email' %}" class="form-control" name="email" id="email" type="text" class="validate" value="{{selected_user.email}}">								
 											</div>
 										</div>
 										
@@ -60,20 +62,20 @@
 										
 										<div class="row">
 											<div class="checkbox col-md-6">								
-												<label>
+												<label {% if not editable %}title="{% trans 'User is not editable' %}"{% endif %}>
 													{% if selected_user.is_superuser %}
-													<input type="checkbox" name="is_superuser" id="is_superuser" checked/>{% trans "Is superuser" %}
+													<input {% if not editable %}disabled {% endif %}type="checkbox" name="is_superuser" id="is_superuser" checked/>{% trans "Is superuser" %}
 													{% else %}
-													<input type="checkbox" name="is_superuser" id="is_superuser" />{% trans "Is superuser" %}
+													<input {% if not editable %}disabled {% endif %}type="checkbox" name="is_superuser" id="is_superuser" />{% trans "Is superuser" %}
 													{% endif %}
 												</label>
 											</div>
 											<div class="checkbox col-md-6">								
-												<label>
+												<label {% if not editable %}title="{% trans 'User is not editable' %}"{% endif %}>
 													{% if selected_user.is_staff %}
-													<input type="checkbox" name=is_staff id="is_staff" checked/>{% trans "Can manage projects" %}
+													<input {% if not editable %}disabled {% endif %}type="checkbox" name=is_staff id="is_staff" checked/>{% trans "Can manage projects" %}
 													{% else %}
-													<input type="checkbox" name="is_staff" id="is_staff" />{% trans "Can manage projects" %}
+													<input {% if not editable %}disabled {% endif %}type="checkbox" name="is_staff" id="is_staff" />{% trans "Can manage projects" %}
 													{% endif %}
 												</label>
 											</div>
@@ -84,6 +86,7 @@
 						</div>
 					</div>
 					{% if AUTH_GROUPS %}
+					<!--
 					<div class="tab-pane" id="tab-user-groups">
 						<div class="row">
 							<div class="col-md-12">
@@ -120,6 +123,7 @@
 							</div>
 						</div>
 					</div>
+					-->
 					{% endif %}
 					<div class="tab-pane" id="tab-roles">
 						<div class="row">
@@ -138,12 +142,8 @@
 												<div class="product-info">
 													<a href="javascript:void(0)" class="product-title">{{role.name}}
 														<div class="checkbox pull-right">													
-															<label>
-																{% if role.checked %}
-																<input type="checkbox" name="role-{{role.name}}" id="role-{{role.name}}" checked/>{% trans "Assign role" %}
-																{% else %}
-																<input type="checkbox" name="role-{{role.name}}" id="role-{{role.name}}"/>{% trans "Assign role" %}
-																{% endif %}
+															<label {% if not editable %}title="{% trans 'User is not editable' %}" {% elif not role.editable %}title="{% trans 'Role is not editable' %}" {% endif %}>
+																<input {% if not editable or not role.editable %}disabled {% endif %}type="checkbox" name="role-{{role.name}}" id="role-{{role.name}}"{% if role.checked %}checked {% endif %}/>{% trans "Assign role" %}
 															</label>
 														</div>
 													</a> 
