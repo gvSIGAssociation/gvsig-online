@@ -50,7 +50,7 @@ servers = (('geoserver', 'geoserver'),)
 supported_srs = tuple((x['code'],x['code']+' - '+x['title']) for x in core_utils.get_supported_crs_array())
 supported_srs_with_other = supported_srs + (('__other__', ugettext_lazy('Other')),)
 
-img_formats = (('image/png', 'image/png'), ('image/jpeg', 'image/jpeg'))
+img_formats = (('image/png', 'image/png'), ('image/jpeg', 'image/jpeg'), ('vector-tiles', 'Vector Tiles'))
 
 time_presentation_op = (
     ('CONTINUOUS_INTERVAL', _('continuous interval')),

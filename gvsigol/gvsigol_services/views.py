@@ -1337,9 +1337,13 @@ def layer_add_with_group(request, layergroup_id):
         if 'real_time' in request.POST:
             real_time = True
 
+        # Procesar el formato seleccionado
+        format_value = request.POST.get('format', 'image/png')
         vector_tile = False
-        if 'vector_tile' in request.POST:
+        if format_value == 'vector-tiles':
             vector_tile = True
+            # Si es vector tiles, guardar image/png como formato por defecto
+            format_value = 'image/png'
 
         is_public = (request.POST.get('resource-is-public') is not None)
 
@@ -1484,7 +1488,7 @@ def layer_add_with_group(request, layergroup_id):
                 newRecord.update_interval = request.POST.get('update_interval')
 
                 params = {}
-                params['format'] = request.POST.get('format')
+                params['format'] = format_value
                 newRecord.external_params = json.dumps(params)
 
                 newRecord.save()
@@ -1614,9 +1618,13 @@ def layer_update(request, layer_id):
         if 'real_time' in request.POST:
             real_time = True
 
+        # Procesar el formato seleccionado
+        format_value = request.POST.get('format', 'image/png')
         vector_tile = False
-        if 'vector_tile' in request.POST:
+        if format_value == 'vector-tiles':
             vector_tile = True
+            # Si es vector tiles, guardar image/png como formato por defecto
+            format_value = 'image/png'
 
         assigned_read_roles = []
         assigned_manage_roles = []
@@ -1737,7 +1745,7 @@ def layer_update(request, layer_id):
                 layer.update_interval = None
 
             params = {}
-            params['format'] = request.POST.get('format')
+            params['format'] = format_value
 
             layer.external_params = json.dumps(params)
             layer.conf = layerConf
