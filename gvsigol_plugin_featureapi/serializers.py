@@ -38,7 +38,7 @@ from gvsigol_services import utils as services_utils
 from django.utils import timezone
 from django.urls import reverse
 from psycopg2 import sql as sqlbuilder
-from pyproj import Proj, transform
+from pyproj import Proj, transform, CRS
 from gvsigol_services.tasks import tiling_layer
 import logging
 import ast
@@ -281,9 +281,16 @@ class FeatureSerializer(serializers.Serializer):
                     cql_filter = sqlbuilder.SQL('')
                 
                 # Consulta optimizada: mantiene lógica espacial original pero usa índices eficientemente
-                # Para 4326, usar geography para el buffer (más preciso). Para otros CRS, usar buffer en metros
-                if source_epsg == 4326:
-                    buffer_expr_template = sqlbuilder.SQL("ST_Buffer(geom_source::geography, {buffer})::geometry")
+                # Buffer siempre en metros (convención Web). Geográficos: geography. Proyectados: buffer directo en metros.
+                try:
+                    is_geographic = CRS.from_epsg(source_epsg).is_geographic
+                except Exception:
+                    is_geographic = False
+                if is_geographic:
+                    if source_epsg == 4326:
+                        buffer_expr_template = sqlbuilder.SQL("ST_Buffer(geom_source::geography, {buffer})::geometry")
+                    else:
+                        buffer_expr_template = sqlbuilder.SQL("ST_Buffer(ST_Transform(geom_source, 4326)::geography, {buffer})::geometry")
                 else:
                     buffer_expr_template = sqlbuilder.SQL("ST_Buffer(geom_source, {buffer})")
                 
@@ -404,8 +411,15 @@ class FeatureSerializer(serializers.Serializer):
 
 
     def getBufferGeometry(self, con, lon, lat, buffer, source_epsg=4326):
-        if source_epsg == 4326:
-            sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(st_buffer('SRID={source_epsg};POINT({lon} {lat})'::geography, {buffer})::geometry)")
+        try:
+            is_geographic = CRS.from_epsg(source_epsg).is_geographic
+        except Exception:
+            is_geographic = False
+        if is_geographic:
+            if source_epsg == 4326:
+                sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(st_buffer('SRID={source_epsg};POINT({lon} {lat})'::geography, {buffer})::geometry)")
+            else:
+                sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(ST_Transform(st_buffer(ST_Transform(ST_SetSRID(ST_MakePoint({lon}, {lat}), {source_epsg}), 4326)::geography, {buffer})::geometry, {source_epsg}))")
         else:
             sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(st_buffer('SRID={source_epsg};POINT({lon} {lat})'::geometry, {buffer}))")
         query = sql.format(
