@@ -110,6 +110,8 @@ env = environ.Env(
     USE_X_FORWARDED_HOST=(bool,True),
     SECURE_PROXY_SSL_HEADER=(tuple,('HTTP_X_FORWARDED_PROTO', 'https')),
     AUTH_DASHBOARD_UI=(bool,True),
+    # If true, user info cannot be edited from the dashboard, although setting roles, groups
+    # or superuser or staff flags can be changed.
     AUTH_READONLY_USERS=(bool,False),
     # UI
     IFRAME_MODE_UI=(bool,False),
