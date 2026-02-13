@@ -2,14 +2,15 @@ from rest_framework.request import Request
 from django.http import HttpRequest
 from django.db.utils import IntegrityError
 from django.contrib.auth import get_user_model
-from gvsigol_auth.models import Role
+from gvsigol_auth.models import Role, UserProperties, UserCache
 import gvsigol_auth.services as auth_services
 from gvsigol_auth import signals
 import logging, importlib
 from django.db.models import Q
-LOGGER = logging.getLogger('gvsigol')
+#from django.conf import settings
 
 __conf_cache = {}
+LOGGER_NAME = 'gvsigol'
 
 def get_gvsigol_auth_middleware():
     if not 'gvsigol_auth_middleware' in __conf_cache:
@@ -17,7 +18,7 @@ def get_gvsigol_auth_middleware():
             from gvsigol import settings
             if settings.GVSIGOL_AUTH_MIDDLEWARE:
                 __conf_cache['gvsigol_auth_middleware'] = importlib.import_module(settings.GVSIGOL_AUTH_MIDDLEWARE)
-                logging.getLogger('gvsigol').info(f'Configured {settings.GVSIGOL_AUTH_MIDDLEWARE} as GVSIGOL_AUTH_MIDDLEWARE')
+                logging.getLogger(LOGGER_NAME).info(f'Configured {settings.GVSIGOL_AUTH_MIDDLEWARE} as GVSIGOL_AUTH_MIDDLEWARE')
             else:
                 __conf_cache['gvsigol_auth_middleware'] = None
         except Exception as e:
@@ -270,10 +271,23 @@ def add_user(username,
     )
     user.set_password(password)
     user.save()
+    try:
+        UserProperties.objects.create(user=user, editable=True)
+    except Exception as e:
+        logging.getLogger(LOGGER_NAME).exception(f'error creating user properties: {e}')
+
+    params = {
+        "sender": user,
+        "username": username,
+        "user_obj": user
+    }
     if roles is not None:
         if superuser:
             roles.append(get_admin_role())
         set_roles(username, roles)
+        params["roles"] = roles
+    
+    signals.user_updated.send(**params)
     return user
 
 def update_user(
@@ -339,10 +353,19 @@ def update_user(
             user.password = old_password
             user.save()
             raise
+    params = {
+        "sender": user,
+        "username": username,
+        "user_obj": user
+    }
     if roles is not None:
         set_roles(username, roles)
     if superuser:
         add_to_role(username, get_admin_role())
+    
+    if roles is not None:
+        params["roles"] = roles
+    signals.user_updated.send(**params)
     return user
 
 def _get_user(user):
@@ -397,6 +420,7 @@ def delete_user(user=None, user_id=None):
     # TODO improve error handling and op reversion    
     auth_services.get_services().ldap_delete_user(user_instance)
     user_instance.delete()
+    signals.user_deleted.send(sender=None, username=user_instance.username)
     return True
 
 def add_group(group_name, desc=''):
@@ -480,6 +504,8 @@ def delete_role(role):
         role_instance = Role.objects.get(name=role)
     else:
         role_instance = Role.objects.get(id=role)
+    if not role_instance.editable:
+        return False
     # TODO improve error handling
     auth_services.get_services().ldap_delete_group(role_instance.name)
     auth_services.get_services().delete_data_directory(role_instance.name)
@@ -528,12 +554,13 @@ def set_roles(user, roles):
     #TODO: improve error handling and op reversion
     success = True
     for role in to_remove:
-        if not remove_from_role(user, role):
+        if not _remove_from_role(user, role):
             success = False
     to_add = roles - old_roles
     for role in to_add:
-        if not add_to_role(user, role):
+        if not _add_to_role(user, role):
             success = False
+    signals.user_roles_updated.send(sender=user.__class__, username=_get_username(user), roles=roles)
     return success
 
 def add_to_group(user, group):
@@ -572,9 +599,10 @@ def remove_from_group(user, group):
     """
     return remove_from_role(user, group)
 
-def add_to_role(user, role):
+def _add_to_role(user, role):
     """
-    Adds a role to the list of assigned roles of a user
+    *Internal method*: Adds a role to the list of assigned roles of a user.
+    It does not send the user_roles_updated signal.
 
     Parameters
     ----------
@@ -596,6 +624,44 @@ def add_to_role(user, role):
     role.users.add(user)
     return True
 
+def add_to_role(user, role):
+    """
+    Adds a role to the list of assigned roles of a user
+
+    Parameters
+    ----------
+    user: str|integer|User
+        User name|User id|Django User object
+    role: str
+        Role name
+
+    Returns
+    -------
+        boolean
+        True if the operation was successfull, False otherwise
+    """
+    user = _get_user(user)
+    if not _add_to_role(user, role):
+        return False
+    signals.user_roles_updated.send(sender=user.__class__, username=user.username)
+    return True
+
+def _remove_from_role(user, role):
+    """
+    *Internal method*: Remove a role from the list of assigned roles of the user.
+    It does not send the user_roles_updated signal.
+
+    Parameters
+    ----------
+    user: str|integer|User
+    """
+    user = _get_user(user)
+    if auth_services.get_services().ldap_delete_group_member(user, role) == False:
+        return False
+    role = Role.objects.get(name=role)
+    role.users.remove(user)
+    return True
+
 def remove_from_role(user, role):
     """
     Remove a role from the list of assigned roles of the user
@@ -612,12 +678,10 @@ def remove_from_role(user, role):
         boolean
         True if the operation was successfull, False otherwise
     """
-    # FIXME OIDC CMI puede recibir un username o userid
     user = _get_user(user)
-    if auth_services.get_services().ldap_delete_group_member(user, role) == False:
+    if not _remove_from_role(user, role):
         return False
-    role = Role.objects.get(name=role)
-    role.users.remove(user)
+    signals.user_roles_updated.send(sender=user.__class__, username=user.username)
     return True
 
 def _get_user_representation(user):
@@ -791,7 +855,7 @@ def get_user_details(user=None, user_id=None):
             return _get_user_representation(users[0])
         return _get_user_representation(user)
     except User.DoesNotExist:
-        LOGGER.exception('requests error getting users details')
+        logging.getLogger(LOGGER_NAME).exception('requests error getting users details')
 
 def get_role_details(role):
     """
@@ -836,3 +900,27 @@ def from_provider_rolename(role, provider=None):
     # only used for Geoserver at the moment, ignoring provider
     return role[5:].lower()
     
+def _get_username(user):
+    """
+    Gets the username from user id or Django User instance
+
+    Parameters
+    ----------
+    user: str|integer|User
+        User name|User id|Django User object
+    Returns
+    -------
+        str
+        The username of the user or None if the user does not exist
+    """
+    try:
+        if isinstance(user, str):
+            return user
+        elif isinstance(user, int):
+            return User.objects.get(id=user).username
+        else:
+            User = get_user_model()
+            if isinstance(user, User):
+                return user.username
+    except:
+        pass
