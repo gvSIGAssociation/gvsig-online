@@ -182,14 +182,6 @@
 										{% endif %}
 										<label for="real_time">{% trans "View in real time" %}</label>
 									</div>
-									<div class="col-md-4 form-group checkbox_vector_tile_layer_property">
-										{% if layer.vector_tile %}
-										<input type="checkbox" name="vector_tile" id="vector_tile" checked {% if datastore_type != "v_PostGIS" %}disabled{% endif %}/>
-										{% else %}
-										<input type="checkbox" name="vector_tile" id="vector_tile" {% if datastore_type != "v_PostGIS" %}disabled{% endif %}/>
-										{% endif %}
-										<label for="vector_tile">{% trans "Show in vector tile format" %}</label>
-									</div>
 								</div>
 								<div class="row">
 									<div class="col-md-4 form-group update_interval_layer_property">
@@ -695,5 +687,42 @@ $('#submenu-layers').addClass("active");
 			}
 		});
 	}
+	
+	// Controlar las opciones de formato según el tipo de datastore
+	$(document).ready(function() {
+		var datastoreType = "{{datastore_type}}";
+		var formatSelect = $("#id_format");
+		
+		// Función para habilitar/deshabilitar la opción de Vector Tiles
+		function updateFormatOptions() {
+			var isVectorPostGIS = datastoreType === 'v_PostGIS';
+			
+			// Buscar la opción de Vector Tiles
+			var vectorTilesOption = formatSelect.find('option[value="vector-tiles"]');
+			
+			if (isVectorPostGIS) {
+				// Habilitar la opción de Vector Tiles para PostGIS vectorial
+				vectorTilesOption.prop('disabled', false);
+			} else {
+				// Deshabilitar Vector Tiles para otros tipos
+				vectorTilesOption.prop('disabled', true);
+				
+				// Si estaba seleccionado Vector Tiles, cambiar a image/png
+				if (formatSelect.val() === 'vector-tiles') {
+					formatSelect.val('image/png');
+				}
+			}
+		}
+		
+		// Ejecutar al cargar la página
+		updateFormatOptions();
+		
+		// Si el campo vector_tile está marcado en el modelo, seleccionar vector-tiles en el desplegable
+		{% if layer.vector_tile %}
+		if (datastoreType === 'v_PostGIS') {
+			formatSelect.val('vector-tiles');
+		}
+		{% endif %}
+	});
 </script>
 {% endblock %}
