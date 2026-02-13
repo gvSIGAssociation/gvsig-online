@@ -52,6 +52,7 @@ app.conf['task_publish_retry_policy'] = {
 """
 
 app.conf['task_acks_late'] = True
+app.conf['worker_prefetch_multiplier'] = 1   # solo 1 tarea “en curso” por worker
 # set timeout and retry options from producer to broker
 app.conf['broker_transport_options'] = {
     'max_retries': 3,
