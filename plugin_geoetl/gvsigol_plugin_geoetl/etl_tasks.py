@@ -4442,12 +4442,9 @@ def input_Segex(dicc):
                                 exp = r_geof.json()
                         
                             else:
-                                exp = dict.fromkeys(schema, '')
-                                exp['IdGeorreferencia'] = georef['IdGeoref']
-
-                                exp["Latitud"] = 0.0
-                                exp["Longitud"] = 0.0
-                                exp["EstadoExpediente"] = 0
+                                # Saltarse registros vacíos - no aportan información útil
+                                print(f'Georef vacía, ID: {georef["IdGeoref"]} - Registro descartado')
+                                continue
 
                             for tt in types_text_list:
 
