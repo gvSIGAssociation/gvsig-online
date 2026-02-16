@@ -6243,10 +6243,10 @@ def trans_LineEndPoints(dicc):
     sqlCreate = sql.SQL("""
         CREATE TABLE {}.{} AS
         SELECT *,
-            ROUND(ST_X(ST_StartPoint("wkb_geometry"))::NUMERIC, 3) AS _xini,
-            ROUND(ST_Y(ST_StartPoint("wkb_geometry"))::NUMERIC, 3) AS _yini,
-            ROUND(ST_X(ST_EndPoint("wkb_geometry"))::NUMERIC, 3) AS _xend,
-            ROUND(ST_Y(ST_EndPoint("wkb_geometry"))::NUMERIC, 3) AS _yend
+            ROUND(ST_X(ST_StartPoint(ST_LineMerge("wkb_geometry")))::NUMERIC, 3) AS _xini,
+            ROUND(ST_Y(ST_StartPoint(ST_LineMerge("wkb_geometry")))::NUMERIC, 3) AS _yini,
+            ROUND(ST_X(ST_EndPoint(ST_LineMerge("wkb_geometry")))::NUMERIC, 3) AS _xend,
+            ROUND(ST_Y(ST_EndPoint(ST_LineMerge("wkb_geometry")))::NUMERIC, 3) AS _yend
         FROM {}.{};
     """).format(
         sql.Identifier(GEOETL_DB["schema"]),
