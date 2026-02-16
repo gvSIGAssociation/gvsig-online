@@ -142,8 +142,8 @@
 												<div class="product-info">
 													<a href="javascript:void(0)" class="product-title">{{role.name}}
 														<div class="checkbox pull-right">													
-															<label {% if not editable %}title="{% trans 'User is not editable' %}" {% elif not role.editable %}title="{% trans 'Role is not editable' %}" {% endif %}>
-																<input {% if not editable or not role.editable %}disabled {% endif %}type="checkbox" name="role-{{role.name}}" id="role-{{role.name}}"{% if role.checked %}checked {% endif %}/>{% trans "Assign role" %}
+															<label {% if not editable %}title="{% trans 'User is not editable' %}" {% elif role.editable is False %}title="{% trans 'Role is not editable' %}" {% endif %}>
+																<input {% if not editable or role.editable is False %}disabled {% endif %}type="checkbox" name="role-{{role.name}}" id="role-{{role.name}}"{% if role.checked %}checked {% endif %}/>{% trans "Assign role" %}
 															</label>
 														</div>
 													</a> 
