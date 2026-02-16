@@ -9,6 +9,7 @@ from django.utils.encoding import force_bytes
 from mozilla_django_oidc.utils import absolutify
 from django.urls import reverse
 from gvsigol_plugin_oidc_mozilla.gvsigol_auth_mozilla import MAIN_SUPERUSER_ROLE, STAFF_ROLE
+from gvsigol_auth import signals
 
 LOGGER = logging.getLogger(__name__)
 
@@ -120,6 +121,7 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
                 except:
                     LOGGER.exception("Error configuring staff user: {user.username}")
 
+        signals.user_updated.send(sender=None, username=username, user_obj=user, roles=django_roles)
         return user
 
     def default_update_user(self, user, claims):
@@ -138,6 +140,7 @@ class GvsigolOIDCAuthenticationBackend(OIDCAuthenticationBackend):
             except Exception as e:
                 LOGGER.exception("Error configuring staff user: %s", user.username)
                 print(e)
+        signals.user_updated.send(sender=None, username=user.username, user_obj=user, roles=django_roles)
         return user
 
 

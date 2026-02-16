@@ -17,6 +17,7 @@ from requests_oauthlib import OAuth2Session
 from requests.exceptions import RequestException, ConnectionError, Timeout, TooManyRedirects
 from oauthlib.oauth2.rfc6749.errors import InvalidClientIdError, TokenExpiredError, InvalidGrantError
 from gvsigol_auth import signals
+from gvsigol_auth.models import UserProperties, UserCache
 from rest_framework.request import Request
 import importlib
 
@@ -357,6 +358,7 @@ class KeycloakAdminSession(OIDCSession):
                     # accept users already existing in Django to allow creating the user in Keycloak
                     LOGGER.exception('error creating user in django after keycloak creation')
                     user = User.objects.get(username=username)
+                signals.user_updated.send(sender=user.__class__, username=user.username, user_obj=user, roles=realm_roles)
                 return user
             elif response.status_code == 409:
                 error = response.json()
@@ -416,29 +418,27 @@ class KeycloakAdminSession(OIDCSession):
                     user.save()
                 except User.DoesNotExist:
                     # accept non-existing Django users to allow updating users created in Keycloak
-                    pass
+                    user = None
                 if roles is None:
-                    roles = set()
+                    if superuser:
+                        for role in SUPERUSER_ROLES:
+                            add_to_role(username, role)
+                    if staff:
+                        add_to_role(username, STAFF_ROLE)
                 else:
                     roles = set(roles) # remove duplicates
-                if superuser is not None and staff is not None:
-                    if superuser:
-                        realm_roles = SUPERUSER_ROLES | {STAFF_ROLE} | roles
-                    elif staff:
-                        realm_roles = {STAFF_ROLE} | roles - SUPERUSER_ROLES
-                    else:
-                        realm_roles = roles - SUPERUSER_ROLES - {STAFF_ROLE}
-                    set_roles(username, list(realm_roles))
+                    if superuser is not None and staff is not None:
+                        if superuser:
+                            realm_roles = SUPERUSER_ROLES | {STAFF_ROLE} | roles
+                        elif staff:
+                            realm_roles = {STAFF_ROLE} | roles - SUPERUSER_ROLES
+                        else:
+                            realm_roles = roles - SUPERUSER_ROLES - {STAFF_ROLE}
+                        set_roles(username, list(realm_roles))
                 if groups is not None:
                     set_groups(username, groups)
-                """
-                if superuser:
-                    # ensure roles
-                    for role in ["ADMIN", MAIN_SUPERUSER_ROLE, STAFF_ROLE]:
-                        self.add_to_role(username, role)
-                if staff:
-                    self.add_to_role(username, STAFF_ROLE)
-                """
+
+                signals.user_updated.send(sender=None, username=user.username, user_dict=user_rep, user_obj=user)
                 return True
         except (ConnectionError, Timeout, TooManyRedirects) as e:
             raise BackendNotAvailable from e
@@ -497,6 +497,7 @@ class KeycloakAdminSession(OIDCSession):
                 except User.DoesNotExist:
                     # ignore to allow deleting keycloak users that have not been localy created in Django
                     pass
+                signals.user_deleted.send(sender=None, username=username)
                 return True
         except (ConnectionError, Timeout, TooManyRedirects) as e:
             raise BackendNotAvailable from e
@@ -1270,12 +1271,13 @@ def set_roles(user, roles):
     #TODO: improve error handling and op reversion
     success = True
     for role in to_remove:
-        if not remove_from_role(username, role):
+        if not _remove_from_role(username, role):
             success = False
     to_add = roles - old_roles
     for role in to_add:
-        if not add_to_role(username, role):
+        if not _add_to_role(username, role):
             success = False
+    signals.user_roles_updated.send(sender=None, username=username, roles=roles)
     return success
 
 def add_to_group(user, group):
@@ -1320,6 +1322,27 @@ def remove_from_group(user, group):
         return True
     return False
 
+def _add_to_role(username, role):
+    """
+    *Internal method*: Adds a role to the list of assigned roles of a user.
+    It does not send the user_roles_updated signal.
+
+    Parameters
+    ----------
+    username: str
+        User name
+    role: str
+        Role name
+
+    Returns
+    -------
+        boolean
+        True if the operation was successfull, False otherwise
+    """
+    if _get_admin_session().add_to_role(username, role):
+        return True
+    return False
+
 def add_to_role(user, role):
     """
     Adds a role to the list of assigned roles of a user
@@ -1337,7 +1360,28 @@ def add_to_role(user, role):
         True if the operation was successfull, False otherwise
     """
     username = _get_user_name(user)
-    if _get_admin_session().add_to_role(username, role):
+    if _add_to_role(username, role):
+        signals.user_roles_updated.send(sender=None, username=username)
+        return True
+    return False
+
+def _remove_from_role(username, role):
+    """
+    *Internal method*: Remove a role from the list of assigned roles of a user.
+    It does not send the user_roles_updated signal.
+
+    Parameters
+    ----------
+    username: str
+    role: str
+        Role name
+
+    Returns
+    -------
+        boolean
+        True if the operation was successfull, False otherwise
+    """
+    if _get_admin_session().remove_from_role(username, role):
         return True
     return False
 
@@ -1358,7 +1402,8 @@ def remove_from_role(user, role):
         True if the operation was successfull, False otherwise
     """
     username = _get_user_name(user)
-    if _get_admin_session().remove_from_role(username, role):
+    if _remove_from_role(username, role):
+        signals.user_roles_updated.send(sender=None, username=username)
         return True
     return False
 
