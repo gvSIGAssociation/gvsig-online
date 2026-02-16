@@ -30,7 +30,7 @@
 							<td>{{ role.id }}</td>
 							<td>{{ role.name }}</td>
 							<td>{{ role.description }}</td>
-							<td>{% if role.editable %}<button type="button" name="button-delete-role" data-toggle="modal" data-target="#modal-delete-role" data-placement="bottom" title="' + '{% trans "Delete role" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>{% endif %}</td>
+							<td>{% if role.editable is not False %}<button type="button" name="button-delete-role" data-toggle="modal" data-target="#modal-delete-role" data-placement="bottom" title="' + '{% trans "Delete role" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>{% endif %}</td>
 						</tr>
 						{% endfor %}
 					</tbody>
