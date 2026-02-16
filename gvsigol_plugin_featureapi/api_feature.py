@@ -145,6 +145,94 @@ def handle_topology_error(e, lyr_id=None, target_epsg=None):
     # Para errores no topológicos o si falla el procesamiento
     return None
 
+
+def handle_trigger_error(e):
+    """
+    Maneja errores de triggers personalizados (RAISE EXCEPTION desde PL/pgSQL).
+    
+    Los triggers pueden lanzar errores con el formato:
+    - TRIGGER ERROR: <mensaje>
+    - O simplemente un RAISE EXCEPTION sin prefijo especial
+    
+    Opcionalmente puede incluir geometría entre ## para mostrar en el mapa:
+    - TRIGGER ERROR: <mensaje>. ##{"type":"Point","coordinates":[...]}##
+    
+    Args:
+        e: HttpException con posible error de trigger
+        
+    Returns:
+        JsonResponse con error estructurado si es error de trigger, None en caso contrario
+    """
+    if not hasattr(e, 'msg'):
+        return None
+    
+    error_msg = str(e.msg)
+    
+    # Detectar errores de trigger explícitos (TRIGGER ERROR:) o errores genéricos de PostgreSQL
+    # que provengan de RAISE EXCEPTION
+    is_trigger_error = 'TRIGGER ERROR:' in error_msg
+    is_raise_exception = 'RAISE' in error_msg or 'violates check constraint' in error_msg
+    
+    # También detectar patrones típicos de errores de trigger PostgreSQL
+    pg_error_patterns = [
+        'new row for relation',
+        'violates',
+        'cannot insert',
+        'cannot update',
+        'permission denied',
+    ]
+    is_pg_constraint_error = any(pattern in error_msg.lower() for pattern in pg_error_patterns)
+    
+    if is_trigger_error or is_raise_exception or is_pg_constraint_error:
+        try:
+            import re
+            
+            # Extraer mensaje del trigger
+            if 'TRIGGER ERROR:' in error_msg:
+                # Formato: TRIGGER ERROR: <mensaje>
+                trigger_pattern = r'TRIGGER ERROR:\s*(.+?)(?:\s*##|$)'
+                trigger_match = re.search(trigger_pattern, error_msg, re.DOTALL)
+                trigger_message = trigger_match.group(1).strip() if trigger_match else error_msg
+            else:
+                # Usar el mensaje tal cual, limpiando prefijos de PostgreSQL
+                # Quitar prefijos como "ERROR:" o "CONTEXT:"
+                trigger_message = re.sub(r'^(ERROR|CONTEXT|DETAIL):\s*', '', error_msg, flags=re.MULTILINE)
+                trigger_message = trigger_message.strip()
+                # Si hay múltiples líneas, tomar la primera que sea significativa
+                lines = [l.strip() for l in trigger_message.split('\n') if l.strip()]
+                trigger_message = lines[0] if lines else error_msg
+            
+            # Intentar extraer GeoJSON entre ## (opcional)
+            geojson_obj = None
+            geojson_pattern = r'##(.*?)##'
+            geojson_match = re.search(geojson_pattern, error_msg)
+            if geojson_match:
+                geojson_str = geojson_match.group(1)
+                try:
+                    geojson_obj = json.loads(geojson_str)
+                    # Limpiar el mensaje quitando la parte del GeoJSON
+                    trigger_message = re.sub(r'\s*##.*?##\s*', '', trigger_message).strip()
+                except json.JSONDecodeError:
+                    pass
+            
+            # Limpiar puntos finales duplicados o espacios
+            trigger_message = trigger_message.rstrip('. ')
+            
+            response_data = {
+                'trigger_error': trigger_message
+            }
+            
+            if geojson_obj:
+                response_data['geometry'] = geojson_obj
+            
+            return JsonResponse(response_data, status=400)
+            
+        except Exception:
+            # Si hay algún error procesando, devolver error normal
+            pass
+    
+    return None
+
 class CoordsFeatureFilter(BaseFilterBackend):
     def get_schema_fields(self, view):
         fields = [
@@ -364,6 +452,11 @@ class FeaturesView(CreateAPIView):
             if topology_response:
                 return topology_response
             
+            # Intentar manejar como error de trigger
+            trigger_response = handle_trigger_error(e)
+            if trigger_response:
+                return trigger_response
+            
             # Para errores no topológicos o si falla el procesamiento
             return e.get_exception()
     
@@ -427,6 +520,11 @@ class FeaturesView(CreateAPIView):
             topology_response = handle_topology_error(e, lyr_id, epsg)
             if topology_response:
                 return topology_response
+            
+            # Intentar manejar como error de trigger
+            trigger_response = handle_trigger_error(e)
+            if trigger_response:
+                return trigger_response
             
             # Para errores no topológicos o si falla el procesamiento
             return e.get_exception()
