@@ -67,7 +67,7 @@ if env_plugin_oidc_mozilla('OIDC_OP_USER_ENDPOINT'):
 else:
     OIDC_OP_USER_ENDPOINT=OIDC_OP_REALM_BASE_URL+ '/protocol/openid-connect/userinfo'
 #OIDC_OP_LOGOUT_ENDPOINT = ''
-OIDC_OP_LOGOUT_URL_METHOD = "gvsigol_plugin_oidc_mozilla.provider_logout"
+OIDC_OP_LOGOUT_URL_METHOD = "gvsigol_plugin_oidc_mozilla.gvsigol_auth_mozilla.provider_logout"
 OIDC_RP_SIGN_ALGO = env_plugin_oidc_mozilla('OIDC_RP_SIGN_ALGO')
 OIDC_STORE_ID_TOKEN = env_plugin_oidc_mozilla('OIDC_STORE_ID_TOKEN')
 OIDC_STORE_ACCESS_TOKEN =  env_plugin_oidc_mozilla('OIDC_STORE_ACCESS_TOKEN')
@@ -81,7 +81,6 @@ OIDC_GVSIGOL_EMAIL_LOGIN = env_plugin_oidc_mozilla('OIDC_GVSIGOL_EMAIL_LOGIN')
 ALLOW_LOGOUT_GET_METHOD = env_plugin_oidc_mozilla('ALLOW_LOGOUT_GET_METHOD')
 #OIDC_AUTH_REQUEST_EXTRA_PARAMS= {"app": "LIBRA"}
 OIDC_USE_PKCE = True
-#DJANGO_AUTHENTICATION_BACKENDS="'gvsigol_plugin_oidc_mozilla.oidc.GvsigolOIDCAuthenticationBackend',"
 GVSIGOL_SUPERUSER_ROLE = env_plugin_oidc_mozilla('GVSIGOL_SUPERUSER_ROLE')
 GVSIGOL_STAFF_ROLE = env_plugin_oidc_mozilla('GVSIGOL_STAFF_ROLE')
 OIDC_MOBILE_CLIENT_ID = env_plugin_oidc_mozilla('OIDC_MOBILE_CLIENT_ID')
