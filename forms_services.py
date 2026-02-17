@@ -29,6 +29,7 @@ from django.db import models as db_models
 import string
 import random
 import json
+from django.conf import settings as django_settings
 from gvsigol.settings import EXTERNAL_LAYER_SUPPORTED_TYPES
 from django.core.exceptions import ValidationError
 from gvsigol_services.utils import get_user_layergroups, can_manage_layergroup
@@ -50,7 +51,10 @@ servers = (('geoserver', 'geoserver'),)
 supported_srs = tuple((x['code'],x['code']+' - '+x['title']) for x in core_utils.get_supported_crs_array())
 supported_srs_with_other = supported_srs + (('__other__', ugettext_lazy('Other')),)
 
-img_formats = (('image/png', 'image/png'), ('image/jpeg', 'image/jpeg'), ('vector-tiles', 'Vector Tiles'))
+if getattr(django_settings, 'SUPPORTED_FORMATS_CHOICES', None):
+    img_formats = django_settings.SUPPORTED_FORMATS_CHOICES
+else:
+    img_formats = (('image/png', 'image/png'), ('image/jpeg', 'image/jpeg'), ('vector-tiles', 'vector tiles'))
 
 time_presentation_op = (
     ('CONTINUOUS_INTERVAL', _('continuous interval')),

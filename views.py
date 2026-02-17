@@ -6560,7 +6560,7 @@ def layer_cache_config(request, layer_id):
                 "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
                 "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
                 "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
-                "formats": settings.CACHE_OPTIONS['FORMATS'],
+                "format_choices": getattr(settings, 'SUPPORTED_FORMATS_CHOICES', [(f, f) for f in settings.CACHE_OPTIONS['FORMATS']]),
                 "tasks": tasks['long-array-array']
             }
 
@@ -6586,7 +6586,7 @@ def layer_cache_config(request, layer_id):
                 "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
                 "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
                 "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
-                "formats": settings.CACHE_OPTIONS['FORMATS'],
+                "format_choices": getattr(settings, 'SUPPORTED_FORMATS_CHOICES', [(f, f) for f in settings.CACHE_OPTIONS['FORMATS']]),
                 "tasks": tasks['long-array-array'],
                 "latlong_extent": layer.latlong_extent
             }
@@ -6660,7 +6660,7 @@ def group_cache_config(request, group_id):
                 "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
                 "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
                 "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
-                "formats": settings.CACHE_OPTIONS['FORMATS'],
+                "format_choices": getattr(settings, 'SUPPORTED_FORMATS_CHOICES', [(f, f) for f in settings.CACHE_OPTIONS['FORMATS']]),
                 "tasks": tasks['long-array-array']
             }
 
@@ -6683,7 +6683,7 @@ def group_cache_config(request, group_id):
                 "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
                 "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
                 "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
-                "formats": settings.CACHE_OPTIONS['FORMATS'],
+                "format_choices": getattr(settings, 'SUPPORTED_FORMATS_CHOICES', [(f, f) for f in settings.CACHE_OPTIONS['FORMATS']]),
                 "tasks": tasks['long-array-array']
             }
 
