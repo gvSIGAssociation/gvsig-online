@@ -379,6 +379,16 @@ SUPPORTED_CRS = {
     ##SUPPORTED_CRS##
 }
 
+SUPPORTED_FORMATS = ["image/png", "image/jpeg", "vector-tiles"]
+SUPPORTED_FORMATS_LABELS = {
+    'image/png': 'image/png',
+    'image/jpeg': 'image/jpeg',
+    'vector-tiles': 'vector tiles (MVT)',
+}
+SUPPORTED_FORMATS_CHOICES = tuple(
+    (f, SUPPORTED_FORMATS_LABELS.get(f, f)) for f in SUPPORTED_FORMATS
+)
+
 GVSIGOL_TOOLS = {
     ##GVSIGOL_TOOLS##
     'get_feature_info_control': {
@@ -519,8 +529,8 @@ LEGACY_GVSIGOL_SERVICES = { ## We introduce this variable for providing a defaul
 SHARED_VIEW_EXPIRATION_TIME=1 #EN DIAS
 
 CACHE_OPTIONS = {
-    'GRID_SUBSETS': ['EPSG:3857', 'EPSG:4326'],
-    'FORMATS': ['image/png','image/jpeg'],
+    'GRID_SUBSETS': [f'EPSG:{code}' for code in SUPPORTED_CRS],
+    'FORMATS': list(SUPPORTED_FORMATS),
     'OPERATION_MODE': '##CACHE_OPERATION_MODE##'
 }
 try:
