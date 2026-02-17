@@ -99,6 +99,7 @@ env = environ.Env(
     DEFAULT_VIEWER_UI=(str,'react_spa_ui'), # default for new projects
     VIEWER_UI_CHOICES=(list,['react_spa_ui', 'bootstrap_ui']), # available viewer UIs
     SUPPORTED_CRS =(list,["3857", "4326"]),
+    SUPPORTED_FORMATS =(list,["image/png", "image/jpeg", "vector-tiles"]),
     # Auth
     DJANGO_AUTHENTICATION_BACKENDS=(tuple,()),
     GVSIGOL_AUTH_BACKEND=(str,'gvsigol_auth'), # deprecated, use GVSIGOL_AUTH_PROVIDER
@@ -583,6 +584,15 @@ if '4326' not in env('SUPPORTED_CRS'):
 for i in env('SUPPORTED_CRS'):
     SUPPORTED_CRS[i] = crs_definitions_json[i]
 
+SUPPORTED_FORMATS = env('SUPPORTED_FORMATS')
+SUPPORTED_FORMATS_LABELS = {
+    'image/png': 'image/png',
+    'image/jpeg': 'image/jpeg',
+    'vector-tiles': 'vector tiles (MVT)',
+}
+SUPPORTED_FORMATS_CHOICES = tuple(
+    (f, SUPPORTED_FORMATS_LABELS.get(f, f)) for f in SUPPORTED_FORMATS
+)
 
 GVSIGOL_TOOLS = {
     'get_feature_info_control': {
@@ -734,8 +744,8 @@ CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_TASK_ALWAYS_EAGER = env('CELERY_TASK_ALWAYS_EAGER')
 
 CACHE_OPTIONS = {
-    'GRID_SUBSETS': ['EPSG:3857', 'EPSG:4326'],
-    'FORMATS': ['image/png'],
+    'GRID_SUBSETS': [f'EPSG:{code}' for code in SUPPORTED_CRS],
+    'FORMATS': list(SUPPORTED_FORMATS),
     'OPERATION_MODE': 'ONLY_MASTER'
 }
 
