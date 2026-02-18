@@ -2,6 +2,29 @@
 {% load staticfiles %}
 {% load i18n %}
 
+{% block extra-head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/xq-dark.min.css">
+<style>
+	.sql-editor-small {
+		border: 1px solid #d2d6de;
+		border-radius: 3px;
+		height: 70px !important;
+		font-size: 12px;
+	}
+	.sql-editor-small .CodeMirror-gutters {
+		left: 0 !important;
+	}
+	.sql-editor-small .CodeMirror-linenumber {
+		padding: 0 3px 0 5px !important;
+		min-width: 20px !important;
+	}
+	.sql-editor-small .CodeMirror-lines {
+		padding-left: 0 !important;
+	}
+</style>
+{% endblock %}
+
 {% block content %}
 {% if user.is_staff %}
 	<div class="row">
@@ -27,6 +50,18 @@
 					<h3 class="box-title col-md-6">{% trans "Workspaces list" %}</h3>
 				</div>
 				<div class="box-body">
+					<div class="row" style="margin-bottom: 10px;">
+						<div class="col-md-6 col-md-offset-6">
+							<div class="input-group input-group-sm pull-right" style="max-width: 300px;">
+								<input type="text" class="form-control" id="etl-search" placeholder="{% trans 'Search...' %}">
+								<span class="input-group-btn">
+									<button class="btn btn-default" type="button" id="etl-search-btn">
+										<i class="fa fa-search"></i>
+									</button>
+								</span>
+							</div>
+						</div>
+					</div>
 					<table class="table" id="etl-table">
 						<thead>
 							<tr>
@@ -85,12 +120,21 @@
 									<th></th>
 								</tr>
 							{% endfor %}
-						</tbody>
-					</table>
+					</tbody>
+				</table>
+				
+				<!-- Paginación estilo Bootstrap -->
+				<div class="box-footer clearfix" id="etl-pagination-footer" style="display: none;">
+					<ul class="pagination pagination-sm no-margin pull-right" id="etl-pagination">
+					</ul>
+					<div class="pull-left" style="margin-top: 5px;">
+						<span class="text-muted" id="etl-info"></span>
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
+</div>
 
 	<!-- Modals -->
 	<div class="modal fade" id="modal-delete-workspace-etl" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -651,6 +695,79 @@
 {% endblock %}
 
 {% block extra-scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/sql/sql.min.js"></script>
+
+<script>
+// Inicializar CodeMirror para los campos SQL
+var sqlBeforeEditor = null;
+var sqlAfterEditor = null;
+
+$(document).ready(function() {
+	var sqlBeforeTextarea = document.getElementById('sql-before');
+	var sqlAfterTextarea = document.getElementById('sql-after');
+	
+	if (sqlBeforeTextarea) {
+		sqlBeforeEditor = CodeMirror.fromTextArea(sqlBeforeTextarea, {
+			mode: 'text/x-pgsql',
+			theme: 'xq-dark',
+			lineNumbers: true,
+			indentWithTabs: true,
+			smartIndent: true,
+			matchBrackets: true,
+			lineWrapping: true
+		});
+		sqlBeforeEditor.setSize(null, 70);
+		sqlBeforeEditor.getWrapperElement().classList.add('sql-editor-small');
+		setTimeout(function() { sqlBeforeEditor.refresh(); }, 100);
+	}
+	
+	if (sqlAfterTextarea) {
+		sqlAfterEditor = CodeMirror.fromTextArea(sqlAfterTextarea, {
+			mode: 'text/x-pgsql',
+			theme: 'xq-dark',
+			lineNumbers: true,
+			indentWithTabs: true,
+			smartIndent: true,
+			matchBrackets: true,
+			lineWrapping: true
+		});
+		sqlAfterEditor.setSize(null, 70);
+		sqlAfterEditor.getWrapperElement().classList.add('sql-editor-small');
+		setTimeout(function() { sqlAfterEditor.refresh(); }, 100);
+	}
+	
+	// Refrescar CodeMirror cuando se muestra la pestaña SQL
+	$('a[href="#sqlparams"]').on('shown.bs.tab', function() {
+		if (sqlBeforeEditor) sqlBeforeEditor.refresh();
+		if (sqlAfterEditor) sqlAfterEditor.refresh();
+	});
+	
+	// Refrescar CodeMirror cuando se abre el modal de parámetros
+	$('#modal-params').on('shown.bs.modal', function() {
+		setTimeout(function() {
+			if (sqlBeforeEditor) sqlBeforeEditor.refresh();
+			if (sqlAfterEditor) sqlAfterEditor.refresh();
+		}, 100);
+	});
+});
+
+// Funciones para obtener/setear valores desde otros scripts
+function getSqlBeforeValue() {
+	return sqlBeforeEditor ? sqlBeforeEditor.getValue() : $('#sql-before').val();
+}
+function setSqlBeforeValue(val) {
+	if (sqlBeforeEditor) sqlBeforeEditor.setValue(val || '');
+	else $('#sql-before').val(val || '');
+}
+function getSqlAfterValue() {
+	return sqlAfterEditor ? sqlAfterEditor.getValue() : $('#sql-after').val();
+}
+function setSqlAfterValue(val) {
+	if (sqlAfterEditor) sqlAfterEditor.setValue(val || '');
+	else $('#sql-after').val(val || '');
+}
+</script>
 
 <script>
 	$('#menu-plugin-etl').addClass("active");
@@ -991,11 +1108,11 @@
 			responsive: true,
 			language: {
 				processing		: '{% trans "Processing request..." %}',
-				search			: '{% blocktrans with sep="&nbsp;:" %}Search{{sep}}{% endblocktrans %}',
-				lengthMenu		: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
-				info			: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
-				infoEmpty		: '{% trans "Showing from 0 to 0 of 0 records" %}',
-				infoFiltered	: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
+				search			: '',
+				lengthMenu		: '',
+				info			: '',
+				infoEmpty		: '',
+				infoFiltered	: '',
 				infoPostFix		: "",
 				loadingRecords	: '{% trans "Loading..." %}',
 				zeroRecords		: '{% trans "No records available" %}',
@@ -1081,8 +1198,85 @@
 				"data": null,
 				"defaultContent": '<button type="button" name="button-run-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Run workspace" %}' + '" class="btn btn-light"><i class="fa fa-play"></i></button>'
 			}],
-			"dom": 'T<"clear">lfrtip',
-			"bLengthChange": false
+			"dom": 'T<"clear">rt',
+			"paging": true,
+			"pageLength": 10,
+			"bLengthChange": false,
+			"searching": true,
+			"info": false,
+			"drawCallback": function(settings) {
+				updateCustomPagination(this.api());
+			}
+		});
+		
+		// Función para actualizar paginación personalizada estilo Bootstrap
+		function updateCustomPagination(api) {
+			var info = api.page.info();
+			var $footer = $('#etl-pagination-footer');
+			var $pagination = $('#etl-pagination');
+			var $info = $('#etl-info');
+			
+			if (info.pages <= 1) {
+				$footer.hide();
+				return;
+			}
+			
+			$footer.show();
+			$pagination.empty();
+			
+			// Info text
+			var start = info.start + 1;
+			var end = info.end;
+			var total = info.recordsDisplay;
+			$info.text('{% trans "Showing" %} ' + start + ' {% trans "to" %} ' + end + ' {% trans "of" %} ' + total + ' {% trans "workspaces" %}');
+			
+			// First & Previous
+			if (info.page > 0) {
+				$pagination.append('<li><a href="#" data-page="0">&laquo; {% trans "First" %}</a></li>');
+				$pagination.append('<li><a href="#" data-page="' + (info.page - 1) + '">{% trans "Previous" %}</a></li>');
+			} else {
+				$pagination.append('<li class="disabled"><span>&laquo; {% trans "First" %}</span></li>');
+				$pagination.append('<li class="disabled"><span>{% trans "Previous" %}</span></li>');
+			}
+			
+			// Page numbers
+			var startPage = Math.max(0, info.page - 2);
+			var endPage = Math.min(info.pages - 1, info.page + 2);
+			
+			for (var i = startPage; i <= endPage; i++) {
+				if (i === info.page) {
+					$pagination.append('<li class="active"><span>' + (i + 1) + '</span></li>');
+				} else {
+					$pagination.append('<li><a href="#" data-page="' + i + '">' + (i + 1) + '</a></li>');
+				}
+			}
+			
+			// Next & Last
+			if (info.page < info.pages - 1) {
+				$pagination.append('<li><a href="#" data-page="' + (info.page + 1) + '">{% trans "Next" %}</a></li>');
+				$pagination.append('<li><a href="#" data-page="' + (info.pages - 1) + '">{% trans "Last" %} &raquo;</a></li>');
+			} else {
+				$pagination.append('<li class="disabled"><span>{% trans "Next" %}</span></li>');
+				$pagination.append('<li class="disabled"><span>{% trans "Last" %} &raquo;</span></li>');
+			}
+		}
+		
+		// Click en paginación
+		$('#etl-pagination').on('click', 'a', function(e) {
+			e.preventDefault();
+			var page = $(this).data('page');
+			if (page !== undefined) {
+				table.page(page).draw('page');
+			}
+		});
+		
+		// Búsqueda personalizada
+		$('#etl-search').on('keyup', function() {
+			table.search($(this).val()).draw();
+		});
+		
+		$('#etl-search-btn').on('click', function() {
+			table.search($('#etl-search').val()).draw();
 		});
 
 
@@ -1321,9 +1515,9 @@
 							sqlafter = ''
 						}
 
-						$(".modal-body #sql-before").val( sqlbefore.replace( /_##_/g, '"').replace( /#--#/g, "'"));
+						setSqlBeforeValue(sqlbefore.replace( /_##_/g, '"').replace( /#--#/g, "'"));
 
-						$(".modal-body #sql-after").val( sqlafter.replace( /_##_/g, '"').replace( /#--#/g, "'"));
+						setSqlAfterValue(sqlafter.replace( /_##_/g, '"').replace( /#--#/g, "'"));
 
 						json_user_params = response['json-user-params']
 						if (json_user_params == undefined){
@@ -1569,11 +1763,11 @@
 
 			console.log($('#method-endpoint').val())
 
-			params = {
-						"id": $(".modal-body #etl_id").val(),
-						"db": $(".modal-body #db").val(),
-						"sql-before": $(".modal-body #sql-before").val().replace(/"/g, '_##_').replace(/'/g, '#--#'),
-						"sql-after": $(".modal-body #sql-after").val().replace(/"/g, '_##_').replace(/'/g, '#--#'),
+		params = {
+					"id": $(".modal-body #etl_id").val(),
+					"db": $(".modal-body #db").val(),
+					"sql-before": getSqlBeforeValue().replace(/"/g, '_##_').replace(/'/g, '#--#'),
+					"sql-after": getSqlAfterValue().replace(/"/g, '_##_').replace(/'/g, '#--#'),
 						"json-user-params": $(".modal-body #json-user-params").val(),
 						"checkbox-user-params": $(".modal-body #checkbox-user-params").val(),
 						"get_loop-user-params": get_loop.join('","'),

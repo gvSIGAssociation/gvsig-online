@@ -2,6 +2,22 @@
 {% load staticfiles %}
 {% load i18n %}
 
+{% block extra-head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/xq-dark.min.css">
+<style>
+    .sql-editor-etl {
+        border: 1px solid #d2d6de;
+        border-radius: 3px;
+        height: 150px !important;
+        font-size: 12px;
+    }
+    .sql-editor-etl .CodeMirror-gutters { left: 0 !important; }
+    .sql-editor-etl .CodeMirror-linenumber { padding: 0 3px 0 5px !important; }
+    .sql-editor-etl .CodeMirror-lines { padding-left: 0 !important; }
+</style>
+{% endblock %}
+
 {% block content %}
 {% if user.is_staff %}
     <div class="row">
@@ -533,6 +549,88 @@
 <script type="text/javascript" src="{% static "js/lib/draw2d.js" %}"></script>
 
 <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+
+<!-- CodeMirror for SQL syntax highlighting -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/sql/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
+<script>
+// Almacenar las instancias de CodeMirror globalmente por ID
+window.etlSqlEditors = {};
+
+// Función para inicializar un editor SQL de ETL
+window.initEtlSqlEditor = function(textareaId, mode) {
+    // Si ya existe un editor para este ID, destruirlo primero
+    if (window.etlSqlEditors[textareaId]) {
+        window.etlSqlEditors[textareaId].toTextArea();
+        delete window.etlSqlEditors[textareaId];
+    }
+    
+    var textarea = document.getElementById(textareaId);
+    if (!textarea) return null;
+    
+    // Determinar el modo SQL según el tipo de base de datos
+    var sqlMode = 'text/x-pgsql'; // PostgreSQL por defecto
+    if (mode === 'oracle') {
+        sqlMode = 'text/x-plsql';
+    } else if (mode === 'sqlserver') {
+        sqlMode = 'text/x-mssql';
+    }
+    
+    var editor = CodeMirror.fromTextArea(textarea, {
+        mode: sqlMode,
+        theme: 'xq-dark',
+        lineNumbers: true,
+        autoCloseBrackets: true,
+        matchBrackets: true,
+        indentWithTabs: true,
+        smartIndent: true,
+        lineWrapping: true
+    });
+    
+    editor.setSize(null, 150);
+    editor.getWrapperElement().classList.add('sql-editor-etl');
+    
+    // Guardar referencia
+    window.etlSqlEditors[textareaId] = editor;
+    
+    // Refrescar después de un momento para asegurar el renderizado correcto
+    setTimeout(function() {
+        editor.refresh();
+    }, 100);
+    
+    return editor;
+};
+
+// Función para obtener el valor de un editor
+window.getEtlSqlEditorValue = function(textareaId) {
+    if (window.etlSqlEditors[textareaId]) {
+        return window.etlSqlEditors[textareaId].getValue();
+    }
+    var textarea = document.getElementById(textareaId);
+    return textarea ? textarea.value : '';
+};
+
+// Función para establecer el valor de un editor
+window.setEtlSqlEditorValue = function(textareaId, value) {
+    if (window.etlSqlEditors[textareaId]) {
+        window.etlSqlEditors[textareaId].setValue(value || '');
+    } else {
+        var textarea = document.getElementById(textareaId);
+        if (textarea) textarea.value = value || '';
+    }
+};
+
+// Función para refrescar un editor (cuando se muestra el modal)
+window.refreshEtlSqlEditor = function(textareaId) {
+    if (window.etlSqlEditors[textareaId]) {
+        setTimeout(function() {
+            window.etlSqlEditors[textareaId].refresh();
+        }, 100);
+    }
+};
+</script>
 
 <script type="text/javascript" src="{% static "js/Application.js" %}"></script>
 <script type="text/javascript" src="{% static "js/View.js" %}"></script>
