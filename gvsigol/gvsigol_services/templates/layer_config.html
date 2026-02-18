@@ -495,6 +495,7 @@
 												<th>{% trans "Events" %}</th>
 												<th>{% trans "Target field" %}</th>
 												<th>{% trans "Description" %}</th>
+												<th style="width: 80px;">{% trans "Enabled" %}</th>
 												<th style="width: 80px;">{% trans "Actions" %}</th>
 											</tr>
 										</thead>
@@ -520,6 +521,25 @@
 												<td>{{ lct.trigger.description|default:"-"|truncatechars:50 }}</td>
 												<td>
 													{% if lct.can_manage %}
+													<label class="trigger-toggle-switch">
+														<input type="checkbox" class="trigger-toggle-checkbox" 
+															data-id="{{ lct.id }}" 
+															data-trigger="{{ lct.trigger.name }}"
+															{% if lct.is_enabled %}checked{% endif %}>
+														<span class="trigger-toggle-slider"></span>
+													</label>
+													{% else %}
+													<span class="text-muted" title="{% trans 'You do not have permission to modify this trigger' %}">
+														{% if lct.is_enabled %}
+															<i class="fa fa-check text-success"></i>
+														{% else %}
+															<i class="fa fa-times text-danger"></i>
+														{% endif %}
+													</span>
+													{% endif %}
+												</td>
+												<td>
+													{% if lct.can_manage %}
 													<button type="button" class="btn btn-xs btn-danger btn-remove-trigger" 
 														data-id="{{ lct.id }}" data-trigger="{{ lct.trigger.name }}">
 														<i class="fa fa-trash"></i>
@@ -533,7 +553,7 @@
 											</tr>
 											{% empty %}
 											<tr id="no-triggers-row">
-												<td colspan="5" class="text-center text-muted">
+												<td colspan="6" class="text-center text-muted">
 													<em>{% trans "No triggers assigned to this layer yet" %}</em>
 												</td>
 											</tr>
@@ -638,6 +658,58 @@
 {% block extra-scripts %}
 <script type="text/javascript" src="{% static "js/gvsigollibs/layers/newFieldUi.js" %}"></script>
 <style>
+/* Estilos para el toggle switch de triggers */
+.trigger-toggle-switch {
+	position: relative;
+	display: inline-block;
+	width: 42px;
+	height: 22px;
+	margin: 0;
+}
+
+.trigger-toggle-switch input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.trigger-toggle-slider {
+	position: absolute;
+	cursor: pointer;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: #ccc;
+	transition: .3s;
+	border-radius: 22px;
+}
+
+.trigger-toggle-slider:before {
+	position: absolute;
+	content: "";
+	height: 16px;
+	width: 16px;
+	left: 3px;
+	bottom: 3px;
+	background-color: white;
+	transition: .3s;
+	border-radius: 50%;
+}
+
+.trigger-toggle-checkbox:checked + .trigger-toggle-slider {
+	background-color: #00a65a;
+}
+
+.trigger-toggle-checkbox:checked + .trigger-toggle-slider:before {
+	transform: translateX(20px);
+}
+
+.trigger-toggle-checkbox:disabled + .trigger-toggle-slider {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
 /* Estilos para la pestaña de restricciones de edición */
 #topology-rules-table {
 	margin-bottom: 0;
@@ -1071,6 +1143,25 @@
 	}
 
 	function deleteFieldModal(fieldName){
+		// Primero consultar si hay triggers asociados
+		$.ajax({
+			type: 'GET',
+			url: '/gvsigonline/services/api/field_trigger_info/',
+			data: {
+				'field': fieldName,
+				'layer_id': "{{layer_id}}"
+			},
+			success: function(triggerInfo) {
+				showDeleteFieldDialog(fieldName, triggerInfo);
+			},
+			error: function() {
+				// Si falla la consulta, mostrar el diálogo sin info de triggers
+				showDeleteFieldDialog(fieldName, { has_triggers: false, triggers: [] });
+			}
+		});
+	}
+	
+	function showDeleteFieldDialog(fieldName, triggerInfo) {
 		$('#my-modal-dialog .modal-body').empty();
 		$('#my-modal-dialog .modal-title').text(gettext("Delete field"));
 		var ui = '';
@@ -1078,8 +1169,27 @@
 		ui += '<div class="col-md-12 form-group">';
 		ui += '<div class="bg-warning" style="padding: 10px; margin-bottom: 5px">';
 		ui += gettext("Warning: the field will be deleted from the database. This operation cannot be undone. Type the name of the field to confirm the deletion:");
-		ui += '<code>' + fieldName + '</code>';
+		ui += ' <code>' + fieldName + '</code>';
 		ui += '</div>';
+		
+		// Si hay triggers asociados, mostrar aviso adicional
+		if (triggerInfo.has_triggers && triggerInfo.triggers.length > 0) {
+			ui += '<div class="bg-danger" style="padding: 10px; margin-bottom: 5px; color: white;">';
+			ui += '<strong><i class="fa fa-exclamation-triangle"></i> ' + gettext("Attention") + ':</strong> ';
+			ui += gettext("This field has associated triggers that will also be deleted") + ':<br>';
+			ui += '<ul style="margin-top: 5px; margin-bottom: 0;">';
+			for (var i = 0; i < triggerInfo.triggers.length; i++) {
+				var trigger = triggerInfo.triggers[i];
+				ui += '<li><strong>' + trigger.name + '</strong>';
+				if (trigger.is_calculated_field) {
+					ui += ' <span class="label label-info">' + gettext("Calculated field") + '</span>';
+				}
+				ui += '</li>';
+			}
+			ui += '</ul>';
+			ui += '</div>';
+		}
+		
 		ui += '</div>';
 		ui += '<div class="col-md-12 form-group">';
 		ui += 	'<label for="deleted-field-name">' + gettext('Field to delete') + '</label>';
@@ -1089,7 +1199,7 @@
 		$('#my-modal-dialog .modal-body').append(ui);
 		var buttons = '';
 		buttons += '<button id="cancel-delete" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
-		buttons += '<button id="confirm-delete" type="button" class="btn btn-warning" disabled>' + gettext('Delete') + '</button>';
+		buttons += '<button id="confirm-delete" type="button" class="btn btn-danger" disabled>' + gettext('Delete') + '</button>';
 		$('#my-modal-dialog .modal-footer').empty();
 		$('#my-modal-dialog .modal-footer').append(buttons);
 		$('#deleted-field-name').change(function(evt) {
@@ -1123,14 +1233,22 @@
 			  	},
 				success	:function(response) {
 					$('#my-modal-dialog').modal('hide');
-					messageBox.show('Info', gettext('Field was deleted'));
-					$('tr[data-fieldname="' + fieldName + '"]').remove();
-					$('.sortable-fieldgroup-field').filter(function(){
-						return $(this).find('span.text').text()==fieldName
-					}).remove();
-					$('#field-list-table-body tr').filter(function(){
-						return $(this).find('input.field-name').text()==fieldName
-					}).remove();
+					// Si había triggers, recargar la página para actualizar la pestaña de triggers
+					if (triggerInfo.has_triggers && triggerInfo.triggers.length > 0) {
+						messageBox.show('Info', gettext('Field and associated triggers were deleted'));
+						$('#modal-error').on('hidden.bs.modal', function(e) {
+							window.location.reload();
+						});
+					} else {
+						messageBox.show('Info', gettext('Field was deleted'));
+						$('tr[data-fieldname="' + fieldName + '"]').remove();
+						$('.sortable-fieldgroup-field').filter(function(){
+							return $(this).find('span.text').text()==fieldName
+						}).remove();
+						$('#field-list-table-body tr').filter(function(){
+							return $(this).find('input.field-name').text()==fieldName
+						}).remove();
+					}
 				},
 				error: function(jqXHR) {
 					messageBox.show('error', jqXHR.responseText);
@@ -1561,9 +1679,21 @@
 		{% endfor%}
 		config.triggerProcedures = [];
 		{% for tp in procedures %}
-		config.triggerProcedures.push({"id": "{{tp.signature}}", "label": "{{tp.localized_label}}"});
+		config.triggerProcedures.push({"id": "{{tp.signature}}", "label": "{{tp.localized_label}}", "type": "procedure"});
 		{% endfor%}
+		// Añadir triggers de conexión (campos calculados)
+		{% for t in connection_triggers %}
+		{% if t.is_calculated_field %}
+		config.triggerProcedures.push({
+			"id": "connection_trigger_{{t.id}}", 
+			"label": "{{ t.name }}", 
+			"type": "connection_trigger",
+			"trigger_id": {{ t.id }}
+		});
+		{% endif %}
+		{% endfor %}
 		config.modalSelector = '#my-modal-dialog';
+		config.layerId = '{{ layer_id }}';
 		return config;
 	}
 	var addFieldConfig = getAddFieldConfig();
@@ -2151,16 +2281,8 @@
 				success: function(response) {
 					$('#my-modal-dialog').modal('hide');
 					if (response.success) {
-						// Eliminar fila de la tabla
-						$('tr[data-id="' + id + '"]').remove();
-						// Si no quedan triggers, mostrar mensaje
-						if ($('#triggers-table tbody tr').length === 0) {
-							$('#triggers-table tbody').append(
-								'<tr id="no-triggers-row"><td colspan="5" class="text-center text-muted">' +
-								'<em>' + gettext('No triggers assigned to this layer yet') + '</em></td></tr>'
-							);
-						}
-						messageBox.show('info', gettext('Trigger removed successfully'));
+						// Recargar página para actualizar estado de campos (desbloquear campos liberados)
+						window.location.reload();
 					} else {
 						messageBox.show('error', response.error || gettext('Error removing trigger'));
 					}
@@ -2168,6 +2290,51 @@
 				error: function(jqXHR) {
 					$('#my-modal-dialog').modal('hide');
 					var error = gettext('Error removing trigger');
+					try {
+						var resp = JSON.parse(jqXHR.responseText);
+						error = resp.error || error;
+					} catch(e) {}
+					messageBox.show('error', error);
+				}
+			});
+		});
+		
+		// Toggle habilitar/deshabilitar trigger
+		$('.trigger-toggle-checkbox').on('change', function() {
+			var checkbox = $(this);
+			var id = checkbox.data('id');
+			var triggerName = checkbox.data('trigger');
+			var enabled = checkbox.is(':checked');
+			
+			// Deshabilitar el checkbox mientras se procesa
+			checkbox.prop('disabled', true);
+			
+			$.ajax({
+				type: 'POST',
+				url: '/gvsigonline/services/api/layer_trigger/toggle/',
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				data: {
+					'id': id,
+					'enabled': enabled ? 'true' : 'false'
+				},
+				success: function(response) {
+					checkbox.prop('disabled', false);
+					if (response.success) {
+						var msg = enabled ? gettext('Trigger enabled successfully') : gettext('Trigger disabled successfully');
+						messageBox.show('info', msg);
+					} else {
+						// Revertir el cambio si falló
+						checkbox.prop('checked', !enabled);
+						messageBox.show('error', response.error || gettext('Error toggling trigger'));
+					}
+				},
+				error: function(jqXHR) {
+					checkbox.prop('disabled', false);
+					// Revertir el cambio si falló
+					checkbox.prop('checked', !enabled);
+					var error = gettext('Error toggling trigger');
 					try {
 						var resp = JSON.parse(jqXHR.responseText);
 						error = resp.error || error;

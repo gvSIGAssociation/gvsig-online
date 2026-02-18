@@ -14,125 +14,140 @@
 				</div>
 			</div>
 			
-			<div class="box padding-20">
-				{% csrf_token %}	
-				<div class="box-body">
-					<div class="row">
-						<div id="form-error" style="color:#ff0000;">
-							<ul>
-							{{ form.non_field_errors }}
-							{% for field in form %}
-								{% if field.errors %}
-									<li>{{field.label}}. {{ field.errors|striptags }}</li>
-								{% endif %}	
-							{% endfor %}
-							</ul>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label for="workspace_name">{% trans "Workspace" %}</label>
-							<input name="workspace_name" class="form-control" id="workspace_name" type="text" value="{{workspace_name}}" readonly>			
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-12 form-group">	
-							<label for="id_workspace">{% trans "Type" %}</label>
-							{{ form.type }}
-						</div>
-					</div>	
-						
-					<div class="row" id="select-file-row" style="display: none;">
-						<div class="col-md-2">
-							<a href="#" id="select-file-button" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>{% trans "Select file" %}</a>					
-						</div>
-						<div class="col-md-10">
-							{{ form.file }}			
-						</div>
-					</div>		
-						
-					<div class="row">		
-						<div class="col-md-12 form-group">
-							<label for="id_name">{% trans "Name" %}</label>
-							{{ form.name }}
-						</div>	
-					</div>
-						
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<label for="id_description">{% trans "Description" %}</label>
-						{{ form.description }}
-					</div>
-				</div>	
+			<div class="box">
+				{% csrf_token %}
+				{% if form.errors %}
+				<div id="form-error" class="alert alert-danger" style="margin: 15px;">
+					<ul>
+					{{ form.non_field_errors }}
+					{% for field in form %}
+						{% if field.errors %}
+							<li>{{field.label}}: {{ field.errors|striptags }}</li>
+						{% endif %}	
+					{% endfor %}
+					</ul>
+				</div>
+				{% endif %}
 				
-				{% if uses_connection %}
-				<!-- Modo conexión: mostrar información de la conexión (solo lectura) -->
-				<div class="row" id="connection-info-row">
-					<div class="col-md-6 form-group">
-						<label for="id_connection_name">{% trans "Connection" %}</label>
-						{{ form.connection_name }}
-						<small class="text-muted">{% trans "This datastore uses a centralized connection" %}</small>
-					</div>
-					<div class="col-md-6 form-group">
-						<label for="id_schema_name">{% trans "Schema" %}</label>
-						{{ form.schema_name }}
+				<div class="nav-tabs-custom">
+					<ul class="nav nav-tabs">
+						<li class="active"><a href="#tab-datastore" data-toggle="tab">{% trans "Datastore" %}</a></li>
+						<li><a href="#tab-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li>
+					</ul>
+					<div class="tab-content">
+						<!-- Pestaña de Datastore -->
+						<div class="tab-pane active" id="tab-datastore">
+							<div class="box-body">
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label for="workspace_name">{% trans "Workspace" %}</label>
+										<input name="workspace_name" class="form-control" id="workspace_name" type="text" value="{{workspace_name}}" readonly>			
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12 form-group">	
+										<label for="id_workspace">{% trans "Type" %}</label>
+										{{ form.type }}
+									</div>
+								</div>	
+									
+								<div class="row" id="select-file-row" style="display: none;">
+									<div class="col-md-2">
+										<a href="#" id="select-file-button" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>{% trans "Select file" %}</a>					
+									</div>
+									<div class="col-md-10">
+										{{ form.file }}			
+									</div>
+								</div>		
+									
+								<div class="row">		
+									<div class="col-md-12 form-group">
+										<label for="id_name">{% trans "Name" %}</label>
+										{{ form.name }}
+									</div>	
+								</div>
+									
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label for="id_description">{% trans "Description" %}</label>
+										{{ form.description }}
+									</div>
+								</div>	
+								
+								{% if uses_connection %}
+								<!-- Modo conexión: mostrar información de la conexión (solo lectura) -->
+								<div class="row" id="connection-info-row">
+									<div class="col-md-6 form-group">
+										<label for="id_connection_name">{% trans "Connection" %}</label>
+										{{ form.connection_name }}
+										<small class="text-muted">{% trans "This datastore uses a centralized connection" %}</small>
+									</div>
+									<div class="col-md-6 form-group">
+										<label for="id_schema_name">{% trans "Schema" %}</label>
+										{{ form.schema_name }}
+									</div>
+								</div>
+								{% if connection %}
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<div class="alert alert-info">
+											<i class="fa fa-info-circle margin-r-5"></i>
+											{% trans "Connection parameters are managed from the Connections section. To modify them, edit the connection:" %}
+											<a href="{% url 'connection_update' connection.id %}">{{ connection.name }}</a>
+										</div>
+									</div>
+								</div>
+								{% endif %}
+								{% else %}
+								<!-- Modo legacy: mostrar connection_params editables -->
+								<div class="row" id="connection-params-row">
+									<div class="col-md-12 form-group">
+										<label for="id_connection_params">{% trans "Connection params" %}</label>
+										<div id="test_connection" style="margin: 10px;" class="btn btn-default btn-sm"><i class="fa fa-database margin-r-5"></i> {% trans "Test connection" %}</div>
+										{{ form.connection_params }}
+									</div>
+								</div>
+								{% endif %}
+									
+								<div class="row" id="select-file-row-2" style="display: none;">
+									<div class="col-md-12">
+										<input class="form-control" id="id_file" maxlength="500" name="file" type="text" readonly>
+									</div>
+								</div>		
+								
+								<div class="row select-mosaic_dimension" style="display: none;">
+									<div class="col-md-12">
+										<input type="checkbox" id="time_dimension_input" name="time_dimension_input"/><label>{% trans "Temporal dimension" %}</label>
+									</div>
+									<div class="col-md-6">
+										 <input class="form-control" id="time_dimension_text" maxlength="500" name="time_dimension_text" type="text" placeHolder="(?<=_)[0-9]{8}" disabled>	
+									</div>
+									<div class="col-md-6">
+										<input class="form-control" id="time_dimension_format" maxlength="500" name="time_dimension_format" type="text" placeHolder="yyyyMMdd" disabled>	
+									</div>
+								</div>	
+								<div style="display: none;">
+									<div class="row select-mosaic_dimension" style="display: none;">
+										<div class="col-md-12">
+											<input type="checkbox" id="elevation_dimension_input" name="elevation_dimension_input"/><label>{% trans "Elevation dimension" %}</label>
+										</div>
+										<div class="col-md-6">
+											<input class="form-control" id="elevation_dimension_text" maxlength="500" name="elevation_dimension_text" type="text" placeHolder="(?<=_)[0-9]{3}.[0-9]{4}" disabled>	
+										</div>
+										<div class="col-md-6">
+											<input class="form-control" id="elevation_dimension_format" maxlength="500" name="elevation_dimension_format" type="text" placeHolder="" disabled>	
+										</div>
+									</div>	
+								</div>
+							</div>
+						</div>
+						
+						<!-- Pestaña de permisos -->
+						<div class="tab-pane" id="tab-permissions">
+							{% include "select_datastore_permissions.html" %}
+						</div>
 					</div>
 				</div>
-				{% if connection %}
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<div class="alert alert-info">
-							<i class="fa fa-info-circle margin-r-5"></i>
-							{% trans "Connection parameters are managed from the Connections section. To modify them, edit the connection:" %}
-							<a href="{% url 'connection_update' connection.id %}">{{ connection.name }}</a>
-						</div>
-					</div>
-				</div>
-				{% endif %}
-				{% else %}
-				<!-- Modo legacy: mostrar connection_params editables -->
-				<div class="row" id="connection-params-row">
-					<div class="col-md-12 form-group">
-						<label for="id_connection_params">{% trans "Connection params" %}</label>
-						<div id="test_connection" style="margin: 10px;" class="btn btn-default btn-sm"><i class="fa fa-database margin-r-5"></i> {% trans "Test connection" %}</div>
-						{{ form.connection_params }}
-					</div>
-				</div>
-				{% endif %}
-					
-					
-							
-					<div class="row" id="select-file-row" style="display: none;">
-						<div class="col-md-12">
-								<input class="form-control" id="id_file" maxlength="500" name="file" type="text" readonly>
-						</div>
-					</div>		
-					
-					<div class="row select-mosaic_dimension" style="display: none;">
-						<div class="col-md-12">
-							<input type="checkbox" id="time_dimension_input" name="time_dimension_input"/><label>{% trans "Temporal dimension" %}</label>
-						</div>
-						<div class="col-md-6">
-							 <input class="form-control" id="time_dimension_text" maxlength="500" name="time_dimension_text" type="text" placeHolder="(?<=_)[0-9]{8}" disabled>	
-						</div>
-						<div class="col-md-6">
-							<input class="form-control" id="time_dimension_format" maxlength="500" name="time_dimension_format" type="text" placeHolder="yyyyMMdd" disabled>	
-						</div>
-					</div>	
-					<div style="display: none;">
-						<div class="row select-mosaic_dimension" style="display: none;">
-							<div class="col-md-12">
-								<input type="checkbox" id="elevation_dimension_input" name="elevation_dimension_input"/><label>{% trans "Elevation dimension" %}</label>
-							</div>
-							<div class="col-md-6">
-								<input class="form-control" id="elevation_dimension_text" maxlength="500" name="elevation_dimension_text" type="text" placeHolder="(?<=_)[0-9]{3}.[0-9]{4}" disabled>	
-							</div>
-							<div class="col-md-6">
-								<input class="form-control" id="elevation_dimension_format" maxlength="500" name="elevation_dimension_format" type="text" placeHolder="" disabled>	
-							</div>
-						</div>	
-					</div>		
-				</div>		
 			</div>						
 		</div>
 	</div>
@@ -178,32 +193,32 @@ $().ready(function(){
 		
 		if("date_regex" in config_json){
 			if(config_json["date_regex"] != ""){
-				$("#time_dimension_input").prop( "checked", true );
-				$("#time_dimension_text").prop("disabled", false);
+				$("#time_dimension_input").prop('checked', true);
 				$("#time_dimension_text").val(config_json["date_regex"]);
-				if("date_format" in config_json && config_json["date_format"] != ""){
-					$("#time_dimension_format").prop("disabled", false);
-					$("#time_dimension_format").val(config_json["date_format"]);
-				}
+				$("#time_dimension_text").prop("disabled", false);
 			}
 		}
-		
-		
+		if("date_format" in config_json){
+			if(config_json["date_format"] != ""){
+				$("#time_dimension_format").val(config_json["date_format"]);
+				$("#time_dimension_format").prop("disabled", false);
+			}
+		}
 		if("ele_regex" in config_json){
 			if(config_json["ele_regex"] != ""){
-				$("#elevation_dimension_input").prop( "checked", true );
+				$("#elevation_dimension_input").prop('checked', true);
+				$("#elevation_dimension_text").val(config_json["ele_regex"]);
 				$("#elevation_dimension_text").prop("disabled", false);
-				$("#elevation_dimension_text").val(config_json["ele_regex"])
-				if("ele_format" in config_json && config_json["ele_format"] != ""){
-					$("#elevation_dimension_format").prop("disabled", false);
-					$("#elevation_dimension_format").val(config_json["ele_format"]);
-				}
+			}
+		}
+		if("ele_format" in config_json){
+			if(config_json["ele_format"] != ""){
+				$("#elevation_dimension_format").val(config_json["ele_format"]);
+				$("#elevation_dimension_format").prop("disabled", false);
 			}
 		}
 	}
 	
-
-	// Solo manejar cambios de tipo si estamos en modo legacy
 	if (codemirror) {
 		$("#id_type").change(function() {
 			codemirror.setValue('');
@@ -285,12 +300,12 @@ $().ready(function(){
 			code += '\t "url": "'+$("#id_file").val()+'", \n';
 			if($("#time_dimension_input").prop('checked') == true){
 				if($("#time_dimension_text").val() == ""){
-					code += '\t "date_regex": "(?<=_)[0-9]{8}", \n';
+					code += '\t "date_regex": "", \n';
 				}else{
 					code += '\t "date_regex": "'+$("#time_dimension_text").val()+'", \n';
 				}
 				if($("#time_dimension_format").val() == ""){
-					code += '\t "date_format": "yyyyMMdd", \n';
+					code += '\t "date_format": "", \n';
 				}else{
 					code += '\t "date_format": "'+$("#time_dimension_format").val()+'", \n';
 				}
@@ -298,10 +313,9 @@ $().ready(function(){
 				code += '\t "date_regex": "", \n';
 				code += '\t "date_format": "", \n';
 			}
-			
 			if($("#elevation_dimension_input").prop('checked') == true){
 				if($("#elevation_dimension_text").val() == ""){
-					code += '\t "ele_regex": "(?<=_)[0-9]{4}.[0-9]{3}", \n';
+					code += '\t "ele_regex": "", \n';
 				}else{
 					code += '\t "ele_regex": "'+$("#elevation_dimension_text").val()+'", \n';
 				}

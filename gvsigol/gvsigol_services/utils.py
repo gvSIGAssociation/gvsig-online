@@ -339,12 +339,19 @@ def can_manage_layer(request_or_user, layer):
 def can_manage_datastore(request_or_user, datastore):
     """
     Checks whether the user has permissions to manage the provided datastore.
+    
+    A user can manage a datastore if:
+    - Is superuser
+    - Is the owner (created_by)
+    - Has DefaultUserDatastore
+    - allow_all_manage is True
+    - Has a role with can_manage=True
 
     Parameters
     ----------
     request_or_user: Request | HttpRequest | User | str
         A Django Request object | A DRF HttpRequest object | A Django User object | A username
-    layer: Datastore | int
+    datastore: Datastore | int
         A Django Datastore instance or a Datastore id
 
     """
@@ -357,6 +364,60 @@ def can_manage_datastore(request_or_user, datastore):
         if datastore.created_by == user.username:
             return True
         if DefaultUserDatastore.objects.filter(username=user.username, datastore=datastore).exists():
+            return True
+        # Verificar allow_all_manage
+        if hasattr(datastore, 'allow_all_manage') and datastore.allow_all_manage:
+            return True
+        # Verificar permisos por rol
+        from gvsigol_services.models import DatastoreRole
+        from gvsigol_auth import auth_backend
+        user_roles = auth_backend.get_roles(user)
+        if DatastoreRole.objects.filter(
+            datastore=datastore,
+            role__in=user_roles,
+            can_manage=True
+        ).exists():
+            return True
+    except Exception as e:
+        print(e)
+    return False
+
+
+def can_use_datastore(request_or_user, datastore):
+    """
+    Checks whether the user has permissions to use the provided datastore
+    (create layers in it).
+
+    Parameters
+    ----------
+    request_or_user: Request | HttpRequest | User | str
+        A Django Request object | A DRF HttpRequest object | A Django User object | A username
+    datastore: Datastore | int
+        A Django Datastore instance or a Datastore id
+
+    """
+    try:
+        user = _get_user(request_or_user)
+        if not isinstance(datastore, Datastore):
+            datastore = Datastore.objects.get(id=datastore)
+        if user.is_superuser:
+            return True
+        if datastore.created_by == user.username:
+            return True
+        if DefaultUserDatastore.objects.filter(username=user.username, datastore=datastore).exists():
+            return True
+        # Verificar allow_all
+        if datastore.allow_all:
+            return True
+        # Verificar permisos por rol
+        from gvsigol_services.models import DatastoreRole
+        from gvsigol_auth import auth_backend
+        user_roles = auth_backend.get_roles(user)
+        if DatastoreRole.objects.filter(
+            datastore=datastore,
+            role__in=user_roles,
+            can_use=True
+        ).exists():
             return True
     except Exception as e:
         print(e)

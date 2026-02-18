@@ -593,6 +593,13 @@ class ConnectionTrigger(models.Model):
         safe_name = f"{self.name}_{schema}_{table}".replace('.', '_').replace('-', '_')
         return f"fn_tg_{safe_name}"
     
+    def get_trigger_name(self, schema, table):
+        """
+        Genera el nombre del trigger en la base de datos.
+        Usa el método get_full_trigger_name pero pasando solo el nombre de la tabla.
+        """
+        return self.get_full_trigger_name(table)
+    
     def generate_function_sql(self, schema, table, target_field=None, geom_field=None, pk_field=None):
         """
         Genera el SQL para crear la función que ejecutará el trigger.
@@ -749,6 +756,14 @@ class Datastore(models.Model):
         default=True,
         help_text=_('True if using connection_params directly, False if using Connection reference')
     )
+    allow_all = models.BooleanField(
+        default=False,
+        help_text=_('If enabled, all staff users can use this datastore')
+    )
+    allow_all_manage = models.BooleanField(
+        default=False,
+        help_text=_('If enabled, all staff users can manage (edit) this datastore')
+    )
 
     def __str__(self):
         return self.workspace.name + ":" + self.name
@@ -830,10 +845,105 @@ class Datastore(models.Model):
             params['password'] = '****'
         return params
 
+    def can_use(self, user):
+        """
+        Verifica si un usuario puede usar este datastore para crear capas.
+        
+        Un usuario puede usar el datastore si:
+        - Es superusuario
+        - Es el creador del datastore
+        - allow_all está activado
+        - Tiene un rol con permiso can_use=True
+        """
+        if user.is_superuser:
+            return True
+        if self.created_by == user.username:
+            return True
+        if self.allow_all:
+            return True
+        # Verificar permisos por rol
+        from gvsigol_services.models import DatastoreRole
+        from gvsigol_auth import auth_backend
+        user_roles = auth_backend.get_roles(user)
+        return DatastoreRole.objects.filter(
+            datastore=self,
+            role__in=user_roles,
+            can_use=True
+        ).exists()
+
+    def can_manage(self, user):
+        """
+        Verifica si un usuario puede gestionar (editar) este datastore.
+        
+        Un usuario puede gestionar el datastore si:
+        - Es superusuario
+        - Es el creador del datastore
+        - allow_all_manage está activado
+        - Tiene un rol con permiso can_manage=True
+        """
+        if user.is_superuser:
+            return True
+        if self.created_by == user.username:
+            return True
+        if self.allow_all_manage:
+            return True
+        # Verificar permisos por rol
+        from gvsigol_services.models import DatastoreRole
+        from gvsigol_auth import auth_backend
+        user_roles = auth_backend.get_roles(user)
+        return DatastoreRole.objects.filter(
+            datastore=self,
+            role__in=user_roles,
+            can_manage=True
+        ).exists()
+
+    def get_permitted_roles(self):
+        """Obtiene la lista de roles con permisos sobre este datastore."""
+        from gvsigol_services.models import DatastoreRole
+        return DatastoreRole.objects.filter(datastore=self).values_list('role', flat=True)
+
 
 class DefaultUserDatastore(models.Model):
     username = models.TextField(unique=True)
     datastore = models.ForeignKey(Datastore, on_delete=models.CASCADE)
+
+
+class DatastoreRole(models.Model):
+    """
+    Permisos de acceso a datastores por rol.
+    Permite compartir datastores con roles específicos de staff.
+    """
+    datastore = models.ForeignKey(
+        Datastore, 
+        on_delete=models.CASCADE, 
+        related_name='datastore_roles'
+    )
+    role = models.TextField()
+    can_use = models.BooleanField(
+        default=True,
+        help_text=_('Can use this datastore to create layers')
+    )
+    can_manage = models.BooleanField(
+        default=False,
+        help_text=_('Can manage (edit description) this datastore')
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('Datastore Role')
+        verbose_name_plural = _('Datastore Roles')
+        indexes = [
+            models.Index(fields=['datastore', 'role']),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['datastore', 'role'], 
+                name='unique_role_per_datastore'
+            )
+        ]
+    
+    def __str__(self):
+        return f"{self.datastore.name} - {self.role}"
 
 
 class LayerGroup(models.Model):
@@ -1057,21 +1167,26 @@ class LayerConfig:
                     trigger.procedure.localized_label)
                 field['editableactive'] = False
                 field['editable'] = False
-            except:
-                # Verificar si hay un ConnectionTrigger calculado para este campo
-                try:
-                    layer_conn_trigger = LayerConnectionTrigger.objects.get(
-                        layer=self.layer, 
-                        field_name=field['name'],
-                        trigger__is_calculated_field=True
-                    )
-                    field['calculation'] = layer_conn_trigger.trigger.name
-                    field['calculationLabel'] = layer_conn_trigger.trigger.name
+            except Trigger.DoesNotExist:
+                # Verificar si hay un ConnectionTrigger para este campo
+                layer_conn_trigger = LayerConnectionTrigger.objects.filter(
+                    layer=self.layer, 
+                    field_name=field['name']
+                ).select_related('trigger').first()
+                
+                if layer_conn_trigger and layer_conn_trigger.trigger:
+                    trigger_name = layer_conn_trigger.trigger.name
+                    field['calculation'] = trigger_name
+                    field['calculationLabel'] = trigger_name
                     field['editableactive'] = False
                     field['editable'] = False
-                except LayerConnectionTrigger.DoesNotExist:
+                else:
                     field['calculation'] = ''
                     field['calculationLabel'] = ''
+            except Exception:
+                # Otro error inesperado
+                field['calculation'] = ''
+                field['calculationLabel'] = ''
         return fields
 
 
@@ -1267,6 +1382,10 @@ class LayerConnectionTrigger(models.Model):
         default=False,
         help_text=_('Whether the trigger is currently installed in the database')
     )
+    is_enabled = models.BooleanField(
+        default=True,
+        help_text=_('Whether the trigger is enabled (active) or disabled in the database')
+    )
     installed_at = models.DateTimeField(null=True, blank=True)
     created_by = models.CharField(max_length=100, default='')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -1441,6 +1560,66 @@ class LayerConnectionTrigger(models.Model):
             
         except Exception as e:
             logging.getLogger('gvsigol').error(f"Error uninstalling trigger: {e}")
+            return False, str(e)
+    
+    def enable(self):
+        """
+        Habilita el trigger en la base de datos PostgreSQL.
+        El trigger debe estar instalado previamente.
+        """
+        if not self.is_installed:
+            return False, _('Trigger is not installed')
+        
+        if self.layer.datastore.connection is None:
+            return False, _('Layer datastore has no associated connection')
+        
+        schema, table = self.get_schema_and_table()
+        trigger_name = self.trigger.get_trigger_name(schema, table)
+        
+        try:
+            i, params = self.layer.datastore.connection.get_db_connection()
+            
+            if i is None:
+                return False, _('Could not connect to database')
+            
+            i.enable_trigger(trigger_name, schema, table)
+            i.conn.commit()
+            i.close()
+            
+            return True, _('Trigger enabled successfully')
+            
+        except Exception as e:
+            logging.getLogger('gvsigol').error(f"Error enabling trigger: {e}")
+            return False, str(e)
+    
+    def disable(self):
+        """
+        Deshabilita el trigger en la base de datos PostgreSQL.
+        El trigger permanece instalado pero no se ejecuta.
+        """
+        if not self.is_installed:
+            return False, _('Trigger is not installed')
+        
+        if self.layer.datastore.connection is None:
+            return False, _('Layer datastore has no associated connection')
+        
+        schema, table = self.get_schema_and_table()
+        trigger_name = self.trigger.get_trigger_name(schema, table)
+        
+        try:
+            i, params = self.layer.datastore.connection.get_db_connection()
+            
+            if i is None:
+                return False, _('Could not connect to database')
+            
+            i.disable_trigger(trigger_name, schema, table)
+            i.conn.commit()
+            i.close()
+            
+            return True, _('Trigger disabled successfully')
+            
+        except Exception as e:
+            logging.getLogger('gvsigol').error(f"Error disabling trigger: {e}")
             return False, str(e)
 
 
