@@ -78,7 +78,7 @@ import gvsigol_services.tiling_service as tiling_service
 from .models import LayerFieldEnumeration, SqlView
 from .models import Workspace, Datastore, LayerGroup, Layer, Enumeration, EnumerationItem, \
     LayerLock, Server, Node, ServiceUrl, LayerGroupRole, LayerTopologyConfiguration, Connection, ConnectionRole, \
-    ConnectionTrigger, LayerConnectionTrigger
+    ConnectionTrigger, LayerConnectionTrigger, DatastoreRole
 from .rest_geoserver import RequestError
 from . import rest_geoserver
 from . import rest_geowebcache as geowebcache
@@ -503,9 +503,20 @@ def datastore_list(request):
     if request.user.is_superuser:
         datastore_qs = Datastore.objects.all()
     else:
-        # no consideramos DefaultUserDatastore porque por el momento sólo permitimos actualizar el datastore
-        # a superusuarios o al creador
-        datastore_qs = Datastore.objects.filter(created_by=request.user.username)
+        # Usuario staff: ver sus propios datastores + los que tienen permiso por rol + allow_all
+        from gvsigol_services.models import DatastoreRole
+        from gvsigol_auth import auth_backend
+        user_roles = auth_backend.get_roles(request.user)
+        permitted_ds_ids = DatastoreRole.objects.filter(
+            role__in=user_roles,
+            can_use=True
+        ).values_list('datastore_id', flat=True)
+        
+        datastore_qs = Datastore.objects.filter(
+            Q(created_by=request.user.username) |
+            Q(id__in=permitted_ds_ids) |
+            Q(allow_all=True)
+        ).distinct()
     
     # Aplicar búsqueda si se proporciona el parámetro 'search'
     search_query = request.GET.get('search', '').strip()
@@ -632,6 +643,10 @@ def datastore_add(request):
                                 ds.schema = schema
                                 ds.legacy_mode = False
                                 ds.save()
+                                
+                                # Guardar permisos del datastore
+                                _save_datastore_permissions(request, ds)
+                                
                                 return HttpResponseRedirect(reverse('datastore_list'))
                             else:
                                 logger.error(f"Failed to create datastore. Connection params (masked): host={conn_params.get('host')}, port={conn_params.get('port')}, database={conn_params.get('database')}, schema={schema}, user={conn_params.get('user')}")
@@ -658,6 +673,9 @@ def datastore_add(request):
                             except Exception as e:
                                 pass
 
+                        # Guardar permisos del datastore
+                        _save_datastore_permissions(request, ds)
+                        
                         return HttpResponseRedirect(reverse('datastore_list'))
                     else:
                         # FIXME: the backend should raise an exception to identify the cause (e.g. datastore exists, backend is offline)
@@ -670,7 +688,73 @@ def datastore_add(request):
         form = DatastoreForm(user=request.user)
         if not request.user.is_superuser:
             form.fields['workspace'].queryset = Workspace.objects.filter(created_by__exact=request.user.username).order_by('name')
-    return render(request, 'datastore_add.html', {'fm_directory': FILEMANAGER_DIRECTORY + "/", 'form': form})
+    
+    # Obtener roles para la pestaña de permisos
+    all_roles = auth_backend.get_all_roles_details(exclude_system=True)
+    roles = []
+    for role in all_roles:
+        role_name = role.get('name') if isinstance(role, dict) else str(role)
+        role_info = {
+            'name': role_name,
+            'description': role.get('description', '') if isinstance(role, dict) else '',
+            'use_checked': False,  # Por defecto ninguno seleccionado al crear
+            'manage_checked': False
+        }
+        roles.append(role_info)
+    
+    return render(request, 'datastore_add.html', {
+        'fm_directory': FILEMANAGER_DIRECTORY + "/", 
+        'form': form,
+        'roles': roles
+    })
+
+
+def _save_datastore_permissions(request, datastore):
+    """
+    Guarda los permisos de rol para un datastore basándose en los checkboxes del formulario.
+    Solo el propietario o superusuario puede hacer esto.
+    """
+    if not request.user.is_superuser and datastore.created_by != request.user.username:
+        return
+    
+    from gvsigol_services.models import DatastoreRole
+    
+    # Guardar allow_all y allow_all_manage
+    datastore.allow_all = 'allow_all' in request.POST
+    datastore.allow_all_manage = 'allow_all_manage' in request.POST
+    datastore.save()
+    
+    # Obtener todos los roles del sistema
+    all_roles = auth_backend.get_all_roles_details(exclude_system=True)
+    
+    for role in all_roles:
+        role_name = role.get('name') if isinstance(role, dict) else str(role)
+        can_use = f'role_use_{role_name}' in request.POST
+        can_manage = f'role_manage_{role_name}' in request.POST
+        
+        existing_perm = DatastoreRole.objects.filter(
+            datastore=datastore,
+            role=role_name
+        ).first()
+        
+        if can_use or can_manage:
+            if existing_perm:
+                # Actualizar permisos existentes
+                existing_perm.can_use = can_use
+                existing_perm.can_manage = can_manage
+                existing_perm.save()
+            else:
+                # Crear nuevo permiso
+                DatastoreRole.objects.create(
+                    datastore=datastore,
+                    role=role_name,
+                    can_use=can_use,
+                    can_manage=can_manage
+                )
+        elif existing_perm:
+            # Eliminar permiso si no tiene ninguno de los dos
+            existing_perm.delete()
+
 
 @login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
@@ -716,6 +800,10 @@ def datastore_update(request, datastore_id):
                             layer.get_config_manager().refresh_field_conf(include_pks=expose_pks_new)
                             layer.save()
                     gs.reload_nodes()
+                    
+                    # Procesar permisos de usuarios si es propietario
+                    _save_datastore_permissions(request, datastore)
+                    
                     return HttpResponseRedirect(reverse('datastore_list'))
                 else:
                     form.add_error(None, _("Error updating datastore"))
@@ -748,6 +836,10 @@ def datastore_update(request, datastore_id):
                             layer.get_config_manager().refresh_field_conf(include_pks=expose_pks_new)
                             layer.save()
                     gs.reload_nodes()
+                    
+                    # Procesar permisos de usuarios si es propietario
+                    _save_datastore_permissions(request, datastore)
+                    
                     return HttpResponseRedirect(reverse('datastore_list'))
                 else:
                     form.add_error(None, _("Error updating datastore"))
@@ -764,12 +856,40 @@ def datastore_update(request, datastore_id):
             datastore.connection_params = json.dumps(params)
         form = DatastoreUpdateForm(instance=datastore)
     
+    # Obtener roles con permisos para este datastore
+    from gvsigol_services.models import DatastoreRole
+    
+    # Obtener permisos actuales por rol
+    current_role_permissions = {}
+    for dr in DatastoreRole.objects.filter(datastore=datastore):
+        current_role_permissions[dr.role] = {
+            'use': dr.can_use,
+            'manage': dr.can_manage
+        }
+    
+    # Obtener todos los roles del sistema
+    all_roles = auth_backend.get_all_roles_details(exclude_system=True)
+    
+    roles = []
+    for role in all_roles:
+        role_name = role.get('name') if isinstance(role, dict) else str(role)
+        perms = current_role_permissions.get(role_name, {})
+        role_info = {
+            'name': role_name,
+            'description': role.get('description', '') if isinstance(role, dict) else '',
+            'use_checked': perms.get('use', False),
+            'manage_checked': perms.get('manage', False)
+        }
+        roles.append(role_info)
+    
     return render(request, 'datastore_update.html', {
         'form': form, 
         'datastore_id': datastore_id, 
+        'datastore': datastore,
         'workspace_name': datastore.workspace.name,
         'uses_connection': uses_connection,
-        'connection': datastore.connection if uses_connection else None
+        'connection': datastore.connection if uses_connection else None,
+        'roles': roles
     })
 
 @login_required()
@@ -1076,7 +1196,7 @@ def backend_resource_list_available(request):
     if 'id_datastore' in request.GET:
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
-        if not utils.can_manage_datastore(request.user, ds):
+        if not utils.can_use_datastore(request.user, ds):
             return HttpResponseForbidden(json.dumps([]))
         if ds:
             gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
@@ -1095,7 +1215,7 @@ def layergroup_list_editable(request):
         id_ds = request.GET['id_datastore']
         layergroup_id = request.GET.get('layergroup_id')
         ds = Datastore.objects.get(id=id_ds)
-        if not utils.can_manage_datastore(request, ds):
+        if not utils.can_use_datastore(request, ds):
             return HttpResponseForbidden("[]")
         if ds:
             layer_groups = []
@@ -1125,7 +1245,7 @@ def backend_resource_list_configurable(request):
     if 'id_datastore' in request.GET:
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
-        if not utils.can_manage_datastore(request.user, ds):
+        if not utils.can_use_datastore(request.user, ds):
             return HttpResponseForbidden("[]")
         if ds:
             gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
@@ -1149,7 +1269,7 @@ def backend_resource_list(request):
             type = request.GET['type']
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
-        if not utils.can_manage_datastore(request.user, ds):
+        if not utils.can_use_datastore(request.user, ds):
             return HttpResponseForbidden("[]")
         if ds:
             gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
@@ -1179,7 +1299,7 @@ def backend_fields_list(request):
         name = request.GET['table_name']
         ds = Datastore.objects.get(id=datastore_id)
     if ds:
-        if not utils.can_manage_datastore(request.user, ds):
+        if not utils.can_use_datastore(request.user, ds):
             return HttpResponseForbidden("[]")
         layer = Layer.objects.filter(external=False).filter(datastore=ds, name=name).first()
         params = json.loads(ds.connection_params)
@@ -1390,8 +1510,8 @@ def layer_add_with_group(request, layergroup_id):
             try:
                 datastore = form.cleaned_data['datastore']
                 layergroup = form.cleaned_data['layer_group']
-                if not utils.can_manage_datastore(request, datastore):
-                    raise ValueError(_("You are not allowed to manage the selected datastore"))
+                if not utils.can_use_datastore(request, datastore):
+                    raise ValueError(_("You are not allowed to use the selected datastore"))
                 if not utils.can_use_layergroup(request, layergroup, permission=LayerGroupRole.PERM_INCLUDEINPROJECTS):
                     raise ValueError(_("You are not allowed to manage the selected layergroup"))
                 workspace = datastore.workspace
@@ -1524,8 +1644,21 @@ def layer_add_with_group(request, layergroup_id):
     else:
         form = LayerForm()
         if not request.user.is_superuser:
-            form.fields['datastore'].queryset = (Datastore.objects.filter(created_by=request.user.username) |
-                  Datastore.objects.filter(defaultuserdatastore__username=request.user.username)).order_by('name').distinct()
+            # Usuario staff: sus propios datastores + los que tienen permiso por rol + allow_all + DefaultUserDatastore
+            from gvsigol_services.models import DatastoreRole
+            from gvsigol_auth import auth_backend
+            user_roles = auth_backend.get_roles(request.user)
+            permitted_ds_ids = DatastoreRole.objects.filter(
+                role__in=user_roles,
+                can_use=True
+            ).values_list('datastore_id', flat=True)
+            
+            form.fields['datastore'].queryset = (
+                Datastore.objects.filter(created_by=request.user.username) |
+                Datastore.objects.filter(defaultuserdatastore__username=request.user.username) |
+                Datastore.objects.filter(id__in=permitted_ds_ids) |
+                Datastore.objects.filter(allow_all=True)
+            ).order_by('name').distinct()
             form.fields['layer_group'].queryset = (utils.get_user_layergroups(request) | LayerGroup.objects.filter(name='__default__')).order_by('name').distinct()
         if layergroup_id:
             try:
@@ -1888,7 +2021,7 @@ def get_date_fields_from_resource(request):
 
         date_fields = []
         ds = Datastore.objects.get(id=int(datastore_id))
-        if not utils.can_manage_datastore(request, ds):
+        if not utils.can_use_datastore(request, ds):
             return {
                 'date_fields': date_fields,
                 'status': 'error',
@@ -4086,8 +4219,8 @@ def layer_create_with_group(request, layergroup_id):
                 if _valid_name_regex.search(form.cleaned_data['name']) == None:
                     msg = _("Invalid datastore name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=form.cleaned_data['name'])
                     form.add_error(None, msg)
-                elif not utils.can_manage_datastore(request, datastore):
-                    msg = _("You are not allowed to manage the selected datastore")
+                elif not utils.can_use_datastore(request, datastore):
+                    msg = _("You are not allowed to use the selected datastore")
                     form.add_error(None, msg)
                 elif not utils.can_use_layergroup(request, layergroup, permission=LayerGroupRole.PERM_INCLUDEINPROJECTS):
                     msg = _("You are not allowed to manage the selected layergroup")
@@ -8126,7 +8259,8 @@ def layer_trigger_assign(request):
             layer=layer,
             trigger=trigger,
             field_name=field_name,
-            created_by=request.user.username
+            created_by=request.user.username,
+            is_enabled=True
         )
         
         # Instalar el trigger en la base de datos
@@ -8194,6 +8328,184 @@ def layer_trigger_remove(request):
         return JsonResponse({'error': _('Assignment not found')}, status=404)
     except Exception as e:
         logger.exception("Error removing trigger from layer")
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required()
+@require_POST
+@staff_required
+def layer_trigger_toggle(request):
+    """
+    Habilita o deshabilita un trigger asignado a una capa.
+    A diferencia de remove, esto solo activa/desactiva el trigger en la BBDD
+    sin eliminar la función ni la asignación.
+    """
+    try:
+        assignment_id = request.POST.get('id')
+        enabled = request.POST.get('enabled', 'true').lower() == 'true'
+        
+        if not assignment_id:
+            return JsonResponse({'error': _('Missing assignment ID')}, status=400)
+        
+        layer_trigger = LayerConnectionTrigger.objects.get(id=int(assignment_id))
+        
+        # Verificar permisos sobre la capa
+        if not utils.can_manage_layer(request, layer_trigger.layer):
+            return JsonResponse({'error': _('Permission denied')}, status=403)
+        
+        # Verificar permisos sobre el trigger
+        if not layer_trigger.trigger.can_use(request.user):
+            return JsonResponse({'error': _('You do not have permission to modify this trigger')}, status=403)
+        
+        if enabled:
+            # Habilitar el trigger en la BBDD
+            if layer_trigger.is_installed:
+                success, message = layer_trigger.enable()
+                if not success:
+                    return JsonResponse({'error': message}, status=500)
+            else:
+                # Si no estaba instalado, instalarlo
+                success, message = layer_trigger.install()
+                if not success:
+                    return JsonResponse({'error': message}, status=500)
+            
+            layer_trigger.is_enabled = True
+            layer_trigger.save()
+            
+            return JsonResponse({
+                'success': True,
+                'is_enabled': True,
+                'message': _('Trigger enabled successfully')
+            })
+        else:
+            # Deshabilitar el trigger en la BBDD (no elimina la función)
+            if layer_trigger.is_installed:
+                success, message = layer_trigger.disable()
+                if not success:
+                    return JsonResponse({'error': message}, status=500)
+            
+            layer_trigger.is_enabled = False
+            layer_trigger.save()
+            
+            return JsonResponse({
+                'success': True,
+                'is_enabled': False,
+                'message': _('Trigger disabled successfully')
+            })
+        
+    except LayerConnectionTrigger.DoesNotExist:
+        return JsonResponse({'error': _('Assignment not found')}, status=404)
+    except Exception as e:
+        logger.exception("Error toggling trigger state")
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required()
+@require_POST
+@staff_required
+def field_add_with_trigger(request):
+    """
+    Crea un nuevo campo en la capa Y le asigna un trigger de conexión.
+    Todo en una sola operación atómica.
+    """
+    try:
+        field_name = request.POST.get('field_name')
+        field_type = request.POST.get('field_type', 'double')
+        layer_id = request.POST.get('layer_id')
+        trigger_id = request.POST.get('trigger_id')
+        
+        if not field_name or not layer_id or not trigger_id:
+            return JsonResponse({'error': _('Missing required parameters')}, status=400)
+        
+        layer = Layer.objects.get(id=int(layer_id))
+        trigger = ConnectionTrigger.objects.get(id=int(trigger_id))
+        
+        # Verificar permisos
+        if not utils.can_manage_layer(request, layer):
+            return JsonResponse({'error': _('Permission denied')}, status=403)
+        
+        # Verificar que el trigger pertenece a la conexión del datastore de la capa
+        if not layer.datastore or not layer.datastore.connection:
+            return JsonResponse({'error': _('Layer has no associated connection')}, status=400)
+        
+        if trigger.connection != layer.datastore.connection:
+            return JsonResponse({'error': _('Trigger does not belong to the layer connection')}, status=400)
+        
+        # Verificar que es un trigger de campo calculado
+        if not trigger.is_calculated_field:
+            return JsonResponse({'error': _('Selected trigger is not a calculated field trigger')}, status=400)
+        
+        # Verificar que el campo no esté ya usado por otro trigger calculado
+        if LayerConnectionTrigger.objects.filter(
+            layer=layer,
+            field_name=field_name,
+            trigger__is_calculated_field=True
+        ).exists():
+            return JsonResponse({'error': _('This field is already assigned to another calculated field trigger')}, status=400)
+        
+        # Verificar que no existe ya una asignación de este trigger a esta capa
+        if LayerConnectionTrigger.objects.filter(layer=layer, trigger=trigger).exists():
+            return JsonResponse({'error': _('This trigger is already assigned to this layer')}, status=400)
+        
+        # 1. Crear el campo en la base de datos
+        try:
+            i, params = layer.datastore.connection.get_db_connection()
+            if i is None:
+                return JsonResponse({'error': _('Could not connect to database')}, status=500)
+            
+            schema = layer.datastore.get_schema_name()
+            table = layer.source_name if layer.source_name else layer.name
+            
+            # Mapear tipo de campo
+            db_type = field_type
+            if field_type == 'double':
+                db_type = 'double precision'
+            elif field_type == 'character_varying':
+                db_type = 'character varying(255)'
+            
+            # Crear el campo: add_column(schema, table_name, column_name, sql_type)
+            i.add_column(schema, table, field_name, db_type)
+            i.conn.commit()
+            i.close()
+            
+        except Exception as e:
+            logger.exception("Error creating field")
+            return JsonResponse({'error': _('Error creating field: ') + str(e)}, status=500)
+        
+        # 2. Crear la asignación del trigger
+        layer_trigger = LayerConnectionTrigger.objects.create(
+            layer=layer,
+            trigger=trigger,
+            field_name=field_name,
+            created_by=request.user.username,
+            is_enabled=True
+        )
+        
+        # 3. Instalar el trigger en la base de datos
+        success, message = layer_trigger.install()
+        
+        if not success:
+            # Si falla la instalación, eliminar la asignación (el campo ya está creado)
+            layer_trigger.delete()
+            return JsonResponse({
+                'success': False,
+                'error': _('Field created but trigger installation failed: ') + message,
+                'field_created': True
+            }, status=500)
+        
+        return JsonResponse({
+            'success': True,
+            'field_name': field_name,
+            'trigger_id': layer_trigger.id,
+            'message': _('Field created and trigger assigned successfully')
+        })
+        
+    except Layer.DoesNotExist:
+        return JsonResponse({'error': _('Layer not found')}, status=404)
+    except ConnectionTrigger.DoesNotExist:
+        return JsonResponse({'error': _('Trigger not found')}, status=404)
+    except Exception as e:
+        logger.exception("Error in field_add_with_trigger")
         return JsonResponse({'error': str(e)}, status=500)
 
 
@@ -8405,6 +8717,49 @@ def register_action(request):
             logger.exception(f"register action - layer: {layer_name} - ws: {workspace}")
         return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
 
+
+@login_required()
+@staff_required
+def field_trigger_info(request):
+    """
+    Obtiene información sobre los triggers asociados a un campo.
+    """
+    field_name = request.GET.get('field')
+    layer_id = request.GET.get('layer_id')
+    
+    if not field_name or not layer_id:
+        return JsonResponse({'error': _('Missing required parameters')}, status=400)
+    
+    try:
+        layer = Layer.objects.get(id=int(layer_id))
+    except Layer.DoesNotExist:
+        return JsonResponse({'error': _('Layer not found')}, status=404)
+    
+    triggers = []
+    
+    # Buscar triggers tradicionales (Trigger model)
+    for trigger in Trigger.objects.filter(layer=layer, field=field_name):
+        triggers.append({
+            'type': 'procedure',
+            'name': str(trigger.procedure.localized_label),
+            'id': trigger.id
+        })
+    
+    # Buscar ConnectionTrigger asociados al campo
+    for lct in LayerConnectionTrigger.objects.filter(layer=layer, field_name=field_name):
+        triggers.append({
+            'type': 'connection_trigger',
+            'name': lct.trigger.name,
+            'id': lct.id,
+            'is_calculated_field': lct.trigger.is_calculated_field
+        })
+    
+    return JsonResponse({
+        'has_triggers': len(triggers) > 0,
+        'triggers': triggers
+    })
+
+
 @login_required()
 @staff_required
 def db_field_delete(request):
@@ -8438,6 +8793,15 @@ def db_field_delete(request):
             for trigger in triggers:
                 trigger.drop()
             triggers.delete()
+            
+            # Eliminar también los ConnectionTrigger asociados al campo
+            layer_conn_triggers = LayerConnectionTrigger.objects.filter(layer=layer, field_name=field)
+            for lct in layer_conn_triggers:
+                try:
+                    lct.uninstall()
+                except Exception as e:
+                    logger.warning(f"Error uninstalling trigger {lct.trigger.name}: {e}")
+            layer_conn_triggers.delete()
 
 
             gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
@@ -9028,8 +9392,8 @@ def _sqlview_update(request, is_update, sql_view=None):
                     table_name = table.get('name')
                     field_aliases[table_alias] = {}
                     ds = Datastore.objects.get(pk=int(table.get('datastore_id')))
-                    if not utils.can_manage_datastore(request.user, ds):
-                        return HttpResponseForbidden("The user can't manage this datastore: {}".format(table.get('datastore_id')))
+                    if not utils.can_use_datastore(request.user, ds):
+                        return HttpResponseForbidden("The user can't use this datastore: {}".format(table.get('datastore_id')))
                     i, params = ds.get_db_connection()
                     schema = params.get('schema', 'public')
                     with i as c:
@@ -9175,7 +9539,7 @@ def list_datastore_tables(request):
     if 'id_datastore' in request.GET:
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
-        if not utils.can_manage_datastore(request.user, ds):
+        if not utils.can_use_datastore(request.user, ds):
             return HttpResponseForbidden(json.dumps([]))
         if ds:
             c, params = ds.get_db_connection()
@@ -9203,7 +9567,7 @@ def list_table_columns(request):
         id_ds = request.GET['id_datastore']
         table = request.GET['table']
         ds = Datastore.objects.get(id=id_ds)
-        if not utils.can_manage_datastore(request.user, ds):
+        if not utils.can_use_datastore(request.user, ds):
             return HttpResponseForbidden(json.dumps([]))
         if ds:
             c, params = ds.get_db_connection()
@@ -9224,7 +9588,7 @@ def list_datastores_in_db(request):
     if 'id_datastore' in request.GET:
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
-        if not utils.can_manage_datastore(request.user, ds):
+        if not utils.can_use_datastore(request.user, ds):
             return HttpResponseForbidden(json.dumps([]))
         params = json.loads(ds.connection_params)
         host = params.get('host')

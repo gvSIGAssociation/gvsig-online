@@ -30,9 +30,19 @@
 				<div class="tab-content" style="padding-top: 15px;">
 					<!-- Tab Triggers -->
 					<div class="tab-pane active" id="tab-triggers">
-						<div class="row">
-							<div class="col-md-12">
-								<div class="box-tools pull-right" style="margin-bottom: 10px;">
+						<div class="row" style="margin-bottom: 10px;">
+							<div class="col-md-6">
+								<div class="input-group input-group-sm" style="max-width: 300px;">
+									<input type="text" class="form-control" id="triggers-search" placeholder="{% trans 'Search...' %}">
+									<span class="input-group-btn">
+										<button class="btn btn-default" type="button" id="triggers-search-btn">
+											<i class="fa fa-search"></i>
+										</button>
+									</span>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="box-tools pull-right">
 									<a href="{% url 'connection_trigger_add' connection.id %}" class="btn btn-success btn-sm">
 										<i class="fa fa-plus margin-r-5"></i> {% trans "Add trigger" %}
 									</a>
@@ -103,6 +113,15 @@
 								{% endfor %}
 							</tbody>
 						</table>
+						
+						<!-- Paginación estilo Bootstrap -->
+						<div class="box-footer clearfix" id="triggers-pagination-footer" style="display: none;">
+							<ul class="pagination pagination-sm no-margin pull-right" id="triggers-pagination">
+							</ul>
+							<div class="pull-left" style="margin-top: 5px;">
+								<span class="text-muted" id="triggers-info"></span>
+							</div>
+						</div>
 					</div>
 					<!-- Fin Tab Triggers -->
 				</div>
@@ -186,16 +205,16 @@ $(document).ready(function() {
 	var triggersUrl = '/gvsigonline/services/api/connections/' + connectionId + '/triggers/';
 	var currentTriggerId = null;
 	
-	// Inicializar DataTables
+	// Inicializar DataTables con paginación personalizada
 	var table = $('#triggers-table').DataTable({
 		responsive: true,
 		language: {
 			processing		: '{% trans "Processing request..." %}',
-			search			: '{% blocktrans with sep="&nbsp;:" %}Search{{sep}}{% endblocktrans %}',
-			lengthMenu		: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
-			info			: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
-			infoEmpty		: '{% trans "Showing from 0 to 0 of 0 records" %}',
-			infoFiltered	: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
+			search			: '',
+			lengthMenu		: '',
+			info			: '',
+			infoEmpty		: '',
+			infoFiltered	: '',
 			infoPostFix		: "",
 			loadingRecords	: '{% trans "Loading..." %}',
 			zeroRecords		: '{% trans "No records available" %}',
@@ -214,8 +233,85 @@ $(document).ready(function() {
 		"columnDefs": [
 			{ "orderable": false, "targets": [4, 5, 6] }
 		],
-		"dom": 'T<"clear">lfrtip',
-		"bLengthChange": false
+		"dom": 'T<"clear">rt',
+		"paging": true,
+		"pageLength": 10,
+		"bLengthChange": false,
+		"searching": true,
+		"info": false,
+		"drawCallback": function(settings) {
+			updateCustomPagination(this.api());
+		}
+	});
+	
+	// Función para actualizar paginación personalizada estilo Bootstrap
+	function updateCustomPagination(api) {
+		var info = api.page.info();
+		var $footer = $('#triggers-pagination-footer');
+		var $pagination = $('#triggers-pagination');
+		var $info = $('#triggers-info');
+		
+		if (info.pages <= 1) {
+			$footer.hide();
+			return;
+		}
+		
+		$footer.show();
+		$pagination.empty();
+		
+		// Info text
+		var start = info.start + 1;
+		var end = info.end;
+		var total = info.recordsDisplay;
+		$info.text('{% trans "Showing" %} ' + start + ' {% trans "to" %} ' + end + ' {% trans "of" %} ' + total + ' {% trans "triggers" %}');
+		
+		// First & Previous
+		if (info.page > 0) {
+			$pagination.append('<li><a href="#" data-page="0">&laquo; {% trans "First" %}</a></li>');
+			$pagination.append('<li><a href="#" data-page="' + (info.page - 1) + '">{% trans "Previous" %}</a></li>');
+		} else {
+			$pagination.append('<li class="disabled"><span>&laquo; {% trans "First" %}</span></li>');
+			$pagination.append('<li class="disabled"><span>{% trans "Previous" %}</span></li>');
+		}
+		
+		// Page numbers
+		var startPage = Math.max(0, info.page - 2);
+		var endPage = Math.min(info.pages - 1, info.page + 2);
+		
+		for (var i = startPage; i <= endPage; i++) {
+			if (i === info.page) {
+				$pagination.append('<li class="active"><span>' + (i + 1) + '</span></li>');
+			} else {
+				$pagination.append('<li><a href="#" data-page="' + i + '">' + (i + 1) + '</a></li>');
+			}
+		}
+		
+		// Next & Last
+		if (info.page < info.pages - 1) {
+			$pagination.append('<li><a href="#" data-page="' + (info.page + 1) + '">{% trans "Next" %}</a></li>');
+			$pagination.append('<li><a href="#" data-page="' + (info.pages - 1) + '">{% trans "Last" %} &raquo;</a></li>');
+		} else {
+			$pagination.append('<li class="disabled"><span>{% trans "Next" %}</span></li>');
+			$pagination.append('<li class="disabled"><span>{% trans "Last" %} &raquo;</span></li>');
+		}
+	}
+	
+	// Click en paginación
+	$('#triggers-pagination').on('click', 'a', function(e) {
+		e.preventDefault();
+		var page = $(this).data('page');
+		if (page !== undefined) {
+			table.page(page).draw('page');
+		}
+	});
+	
+	// Búsqueda personalizada
+	$('#triggers-search').on('keyup', function() {
+		table.search($(this).val()).draw();
+	});
+	
+	$('#triggers-search-btn').on('click', function() {
+		table.search($('#triggers-search').val()).draw();
 	});
 	
 	// Confirmar eliminación

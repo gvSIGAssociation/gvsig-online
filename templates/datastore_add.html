@@ -13,10 +13,10 @@
 				</div>
 			</div>				
 		</div>
-		<div class="box padding-20">	
+		<div class="box">	
 			{% csrf_token %}
 			{% if form.errors %}
-				<div id="form-error" style="color:#ff0000;">
+				<div id="form-error" style="color:#ff0000; padding: 15px;">
 					<ul>
 					{{ form.non_field_errors }}
 					{% for field in form %}
@@ -26,93 +26,110 @@
 					{% endfor %}
 					</ul>
 				</div>
-			{% endif %}				
-			<div class="box-body">		
-				<div class="row">
-					<div class="col-md-12 form-group">	
-						<label for="id_workspace">{% trans "Workspace" %}</label>
-						{{ form.workspace }}
+			{% endif %}
+			
+			<div class="nav-tabs-custom">
+				<ul class="nav nav-tabs">
+					<li class="active"><a href="#tab-datastore" data-toggle="tab">{% trans "Datastore" %}</a></li>
+					<li><a href="#tab-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li>
+				</ul>
+				<div class="tab-content">
+					<!-- Pestaña de Datastore -->
+					<div class="tab-pane active" id="tab-datastore">
+						<div class="box-body">		
+							<div class="row">
+								<div class="col-md-12 form-group">	
+									<label for="id_workspace">{% trans "Workspace" %}</label>
+									{{ form.workspace }}
+								</div>
+							</div>			
+							<div class="row">
+								<div class="col-md-12 form-group">	
+									<label for="id_workspace">{% trans "Type" %}</label>
+									{{ form.type }}
+								</div>
+							</div>	
+								
+							<div class="row" id="select-file-row" style="display: none;">
+								<div class="col-md-2">
+									<a href="#" id="select-file-button" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>{% trans "Select file" %}</a>					
+								</div>
+								<div class="col-md-10">
+									{{ form.file }}
+								</div>
+							</div>		
+								
+							<div class="row">		
+								<div class="col-md-12 form-group">
+									<label for="id_name">{% trans "Name" %}</label>
+									{{ form.name }}
+								</div>	
+							</div>
+								
+							<div class="row">
+								<div class="col-md-12 form-group">
+									<label for="id_description">{% trans "Description" %}</label>
+									{{ form.description }}
+								</div>
+							</div>	
+							
+							<!-- Selector de conexión y esquema (para PostGIS) -->
+							<div id="connection-selector-row" style="display: none;">
+								<div class="row">
+									<div class="col-md-8 form-group">
+										<label for="id_connection">{% trans "Connection" %} <span class="text-danger">*</span></label>
+										{{ form.connection }}
+										<small class="text-muted">{% trans "Select an existing connection to the database" %}</small>
+									</div>
+									<div class="col-md-4 form-group">
+										<label for="id_schema">{% trans "Schema" %} <span class="text-danger">*</span></label>
+										<select class="form-control" id="id_schema" name="schema">
+											<option value="">---------</option>
+										</select>
+										<small id="schema-status" class="text-muted">{% trans "Select an existing schema or type a new name to create it" %}</small>
+									</div>
+								</div>
+							</div>
+							
+							<!-- Parámetros de conexión (para GeoTIFF, WMS, ImageMosaic) -->
+							<div class="row" id="connection-params-row" style="display: none;">
+								<div class="col-md-12 form-group">
+									<label for="id_connection_params">{% trans "Connection params" %}</label>
+									<div id="test_connection" style="margin: 10px;" class="btn btn-default btn-sm"><i class="fa fa-database margin-r-5"></i> {% trans "Test connection" %}</div>
+									{{ form.connection_params }}
+								</div>
+							</div>
+								
+							<div class="row select-mosaic_dimension" style="display: none;">
+								<div class="col-md-12">
+									<input type="checkbox" id="time_dimension_input" name="time_dimension_input"/><label>{% trans "Temporal dimension" %}</label>
+								</div>
+								<div class="col-md-6">
+									 <input class="form-control" id="time_dimension_text" maxlength="500" name="time_dimension_text" type="text" placeHolder="(?<=_)[0-9]{8}" disabled>	
+								</div>
+								<div class="col-md-6">
+									 <input class="form-control" id="time_dimension_format" maxlength="500" name="time_dimension_format" type="text" placeHolder="yyyyMMdd" disabled>	
+								</div>
+							</div>				
+							<div  style="display: none;">
+								<div class="row select-mosaic_dimension" style="display: none;">
+									<div class="col-md-12">
+										<input type="checkbox" id="elevation_dimension_input" name="elevation_dimension_input"/><label>{% trans "Elevation dimension" %}</label>
+									</div>
+									<div class="col-md-6">
+										<input class="form-control" id="elevation_dimension_text" maxlength="500" name="elevation_dimension_text" type="text" placeHolder="(?<=_)[0-9]{3}.[0-9]{4}" disabled>	
+									</div>
+									<div class="col-md-6">
+										<input class="form-control" id="elevation_dimension_format" maxlength="500" name="elevation_dimension_format" type="text" placeHolder="" disabled>	
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
-				</div>			
-				<div class="row">
-					<div class="col-md-12 form-group">	
-						<label for="id_workspace">{% trans "Type" %}</label>
-						{{ form.type }}
-					</div>
-				</div>	
 					
-				<div class="row" id="select-file-row" style="display: none;">
-					<div class="col-md-2">
-						<a href="#" id="select-file-button" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>{% trans "Select file" %}</a>					
-					</div>
-					<div class="col-md-10">
-						{{ form.file }}
-					</div>
-				</div>		
-					
-				<div class="row">		
-					<div class="col-md-12 form-group">
-						<label for="id_name">{% trans "Name" %}</label>
-						{{ form.name }}
-					</div>	
-				</div>
-					
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<label for="id_description">{% trans "Description" %}</label>
-						{{ form.description }}
-					</div>
-				</div>	
-				
-				<!-- Selector de conexión y esquema (para PostGIS) -->
-				<div id="connection-selector-row" style="display: none;">
-					<div class="row">
-						<div class="col-md-8 form-group">
-							<label for="id_connection">{% trans "Connection" %} <span class="text-danger">*</span></label>
-							{{ form.connection }}
-							<small class="text-muted">{% trans "Select an existing connection to the database" %}</small>
-						</div>
-						<div class="col-md-4 form-group">
-							<label for="id_schema">{% trans "Schema" %} <span class="text-danger">*</span></label>
-							<select class="form-control" id="id_schema" name="schema">
-								<option value="">---------</option>
-							</select>
-							<small id="schema-status" class="text-muted">{% trans "Select an existing schema or type a new name to create it" %}</small>
-						</div>
-					</div>
-				</div>
-				
-				<!-- Parámetros de conexión (para GeoTIFF, WMS, ImageMosaic) -->
-				<div class="row" id="connection-params-row" style="display: none;">
-					<div class="col-md-12 form-group">
-						<label for="id_connection_params">{% trans "Connection params" %}</label>
-						<div id="test_connection" style="margin: 10px;" class="btn btn-default btn-sm"><i class="fa fa-database margin-r-5"></i> {% trans "Test connection" %}</div>
-						{{ form.connection_params }}
-					</div>
-				</div>
-					
-				<div class="row select-mosaic_dimension" style="display: none;">
-					<div class="col-md-12">
-						<input type="checkbox" id="time_dimension_input" name="time_dimension_input"/><label>{% trans "Temporal dimension" %}</label>
-					</div>
-					<div class="col-md-6">
-						 <input class="form-control" id="time_dimension_text" maxlength="500" name="time_dimension_text" type="text" placeHolder="(?<=_)[0-9]{8}" disabled>	
-					</div>
-					<div class="col-md-6">
-						 <input class="form-control" id="time_dimension_format" maxlength="500" name="time_dimension_format" type="text" placeHolder="yyyyMMdd" disabled>	
-					</div>
-				</div>				
-				<div  style="display: none;">
-					<div class="row select-mosaic_dimension" style="display: none;">
-						<div class="col-md-12">
-							<input type="checkbox" id="elevation_dimension_input" name="elevation_dimension_input"/><label>{% trans "Elevation dimension" %}</label>
-						</div>
-						<div class="col-md-6">
-							<input class="form-control" id="elevation_dimension_text" maxlength="500" name="elevation_dimension_text" type="text" placeHolder="(?<=_)[0-9]{3}.[0-9]{4}" disabled>	
-						</div>
-						<div class="col-md-6">
-							<input class="form-control" id="elevation_dimension_format" maxlength="500" name="elevation_dimension_format" type="text" placeHolder="" disabled>	
-						</div>
+					<!-- Pestaña de permisos -->
+					<div class="tab-pane" id="tab-permissions">
+						{% include "select_datastore_permissions.html" %}
 					</div>
 				</div>
 			</div>

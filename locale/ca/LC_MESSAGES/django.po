@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-11 12:41+0100\n"
+"POT-Creation-Date: 2026-02-18 10:08+0100\n"
 "PO-Revision-Date: 2025-12-16 12:27+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -56,12 +56,12 @@ msgstr "Error publicant la capa. Error: {msg}"
 
 #: backend_geoserver.py:861 backend_geoserver.py:876 backend_geoserver.py:888
 #: backend_geoserver.py:898 backend_geoserver.py:907 backend_geoserver.py:917
-#: backend_geoserver.py:929 views.py:1401 views.py:3976
+#: backend_geoserver.py:929 views.py:1639 views.py:4348
 msgid "Error: layer could not be published"
 msgstr "Error: La capa no pot ser publicada"
 
 #: backend_geoserver.py:941 backend_geoserver.py:952 backend_geoserver.py:962
-#: views.py:861
+#: views.py:1095
 #, python-brace-format
 msgid "Error publishing the layer group. Backend error: {msg}"
 msgstr "Error publicant el grup de capes. Error: {msg}"
@@ -120,7 +120,7 @@ msgstr ""
 msgid "Error creating the layer. Review the file format."
 msgstr "Error creant la capa. Revisar el format del fitxer."
 
-#: backend_geoserver.py:1414 views.py:1326
+#: backend_geoserver.py:1414 views.py:1564
 #, python-brace-format
 msgid ""
 "Invalid layer fields: '{value}'. Layer can't have fields with whitespaces"
@@ -280,7 +280,7 @@ msgid "reference value"
 msgstr "Valor de referència"
 
 #: forms_geoserver.py:61 forms_geoserver.py:76 forms_services.py:121
-#: templates/datastore_add.html:33 templates/datastore_update.html:34
+#: templates/datastore_add.html:42 templates/datastore_update.html:43
 #: templates/geoserver/layer_upload_imagemosaic.html:50
 #: templates/geoserver/layer_upload_raster.html:50
 #: templates/layer_update.html:53
@@ -301,20 +301,20 @@ msgstr "Arxiu"
 #: forms_services.py:226 forms_services.py:279 forms_services.py:306
 #: forms_services.py:398 forms_services.py:493 forms_services.py:926
 #: templates/cache_list.html:35 templates/cache_list.html:78
-#: templates/connection_config.html:46 templates/connection_list.html:23
-#: templates/connection_trigger_add.html:63 templates/datastore_add.html:55
-#: templates/datastore_list.html:22 templates/datastore_update.html:56
+#: templates/connection_config.html:56 templates/connection_list.html:59
+#: templates/connection_trigger_add.html:63 templates/datastore_add.html:64
+#: templates/datastore_list.html:58 templates/datastore_update.html:65
 #: templates/enumeration_add.html:38 templates/enumeration_list.html:21
 #: templates/enumeration_update.html:38
 #: templates/geoserver/create_layer_feature_type.html:74
 #: templates/geoserver/create_layer_feature_type.html:145
 #: templates/geoserver/layer_upload_imagemosaic.html:57
 #: templates/geoserver/layer_upload_postgis.html:62
-#: templates/geoserver/layer_upload_raster.html:57 templates/layer_list.html:26
-#: templates/layergroup_add.html:62 templates/layergroup_list.html:26
+#: templates/geoserver/layer_upload_raster.html:57 templates/layer_list.html:57
+#: templates/layergroup_add.html:62 templates/layergroup_list.html:45
 #: templates/layergroup_update.html:66 templates/server_list.html:23
 #: templates/sqlview_add.html:56 templates/sqlview_list.html:22
-#: templates/workspace_list.html:22
+#: templates/workspace_list.html:38
 msgid "Name"
 msgstr "Nom"
 
@@ -333,9 +333,9 @@ msgstr "Nom"
 #: templates/geoserver/layer_upload_postgis.html:70
 #: templates/geoserver/layer_upload_raster.html:65
 #: templates/geoserver/layer_upload_vector.html:70 templates/layer_add.html:65
-#: templates/layer_create.html:73 templates/layer_list.html:27
+#: templates/layer_create.html:73 templates/layer_list.html:58
 #: templates/layer_update.html:71 templates/layergroup_add.html:69
-#: templates/layergroup_list.html:27 templates/layergroup_update.html:73
+#: templates/layergroup_list.html:46 templates/layergroup_update.html:73
 #: templates/server_list.html:24 templates/server_update.html:43
 #: templates/server_update.html:44 templates/service_url_list.html:23
 msgid "Title"
@@ -353,7 +353,7 @@ msgstr "Títol"
 #: templates/geoserver/layer_upload_postgis.html:77
 #: templates/geoserver/layer_upload_raster.html:72
 #: templates/geoserver/layer_upload_vector.html:87 templates/layer_add.html:71
-#: templates/layer_create.html:89 templates/layer_list.html:29
+#: templates/layer_create.html:89 templates/layer_list.html:60
 #: templates/layer_update.html:77
 msgid "Layer group"
 msgstr "Grup de capes"
@@ -417,7 +417,8 @@ msgstr "Elevació regex"
 #: forms_geoserver.py:89 forms_geoserver.py:102 forms_geoserver.py:129
 #: forms_geoserver.py:145 forms_geoserver.py:160 forms_geoserver.py:208
 #: forms_services.py:278 forms_services.py:305 forms_services.py:397
-#: templates/cache_list.html:37 templates/layer_list.html:28
+#: templates/cache_list.html:37 templates/datastore_add.html:33
+#: templates/datastore_update.html:34 templates/layer_list.html:59
 #: templates/sqlview_add.html:74 templates/sqlview_add.html:111
 #: templates/sqlview_list.html:23
 msgid "Datastore"
@@ -521,8 +522,8 @@ msgstr "Resolució segon"
 msgid "Default mode"
 msgstr "Mode per defecte"
 
-#: forms_geoserver.py:183 templates/layer_add.html:199
-#: templates/layer_create.html:211 templates/layer_update.html:248
+#: forms_geoserver.py:183 templates/layer_add.html:195
+#: templates/layer_create.html:211 templates/layer_update.html:240
 msgid "Default value"
 msgstr "Value per defecte"
 
@@ -576,12 +577,12 @@ msgstr "anys"
 
 #: forms_services.py:96 forms_services.py:106 forms_services.py:125
 #: forms_services.py:227 forms_services.py:499 forms_services.py:932
-#: templates/connection_config.html:47 templates/connection_list.html:24
-#: templates/connection_trigger_add.html:73 templates/datastore_add.html:62
-#: templates/datastore_list.html:23 templates/datastore_update.html:63
+#: templates/connection_config.html:57 templates/connection_list.html:60
+#: templates/connection_trigger_add.html:73 templates/datastore_add.html:71
+#: templates/datastore_list.html:59 templates/datastore_update.html:72
 #: templates/layer_config.html:349 templates/layer_config.html:497
-#: templates/layer_config.html:594 templates/server_update.html:49
-#: templates/server_update.html:50 templates/workspace_list.html:23
+#: templates/layer_config.html:614 templates/server_update.html:49
+#: templates/server_update.html:50 templates/workspace_list.html:39
 #: templates/workspace_update.html:30
 msgid "Description"
 msgstr "Descripció"
@@ -589,8 +590,8 @@ msgstr "Descripció"
 #: forms_services.py:97 forms_services.py:122 forms_services.py:225
 #: forms_services.py:362 forms_services.py:389 forms_services.py:514
 #: forms_services.py:937 templates/base_layer_list.html:23
-#: templates/connection_list.html:25 templates/datastore_add.html:39
-#: templates/datastore_list.html:24 templates/datastore_update.html:40
+#: templates/connection_list.html:61 templates/datastore_add.html:48
+#: templates/datastore_list.html:60 templates/datastore_update.html:49
 #: templates/external_layer_add.html:47 templates/external_layer_list.html:23
 #: templates/external_layer_update.html:67
 #: templates/geoserver/create_layer_feature_type.html:75
@@ -618,17 +619,17 @@ msgstr "Usuari"
 #: templates/geoserver/layer_upload_postgis.html:148
 #: templates/geoserver/layer_upload_raster.html:132
 #: templates/geoserver/layer_upload_vector.html:142
-#: templates/layer_add.html:641 templates/layer_create.html:643
+#: templates/layer_add.html:653 templates/layer_create.html:643
 #: templates/layer_create.html:655 templates/layer_create.html:662
-#: templates/layer_update.html:571 templates/layergroup_list.html:40
+#: templates/layer_update.html:563 templates/layergroup_list.html:59
 #: templates/server_update.html:73
 msgid "Default"
 msgstr "Per defecte"
 
 #: forms_services.py:104 forms_services.py:606 forms_services.py:795
-#: forms_services.py:1033 templates/layergroup_list.html:28
+#: forms_services.py:1033 templates/layergroup_list.html:47
 #: templates/server_add.html:31 templates/server_update.html:31
-#: templates/workspace_list.html:25
+#: templates/workspace_list.html:41
 msgid "Server"
 msgstr "Servidor"
 
@@ -652,31 +653,31 @@ msgstr "WMTS URL"
 msgid "Cache URL"
 msgstr "Caché URL"
 
-#: forms_services.py:113 templates/workspace_list.html:26
+#: forms_services.py:113 templates/workspace_list.html:42
 #: templates/workspace_update.html:37
 msgid "Is public?"
 msgstr "Es públic?"
 
-#: forms_services.py:128 forms_services.py:228 templates/datastore_add.html:88
-#: templates/datastore_update.html:96
+#: forms_services.py:128 forms_services.py:228 templates/datastore_add.html:97
+#: templates/datastore_update.html:105
 msgid "Connection params"
 msgstr "Paràmetres de connexió"
 
 #: forms_services.py:132 forms_services.py:232 models.py:224
-#: templates/connection_add.html:52 templates/connection_update.html:34
-#: templates/datastore_add.html:71 templates/datastore_list.html:25
-#: templates/datastore_update.html:72
+#: templates/connection_add.html:75 templates/connection_update.html:57
+#: templates/datastore_add.html:80 templates/datastore_list.html:61
+#: templates/datastore_update.html:81
 msgid "Connection"
 msgstr "Connexió"
 
-#: forms_services.py:139 forms_services.py:237 templates/datastore_add.html:76
-#: templates/datastore_list.html:42 templates/datastore_update.html:77
+#: forms_services.py:139 forms_services.py:237 templates/datastore_add.html:85
+#: templates/datastore_list.html:78 templates/datastore_update.html:86
 #: templates/geoserver/create_layer_sql_view.html:136
 msgid "Schema"
 msgstr "Esquema"
 
-#: forms_services.py:146 templates/datastore_add.html:80
-#: templates/datastore_add.html:322 templates/datastore_add.html:352
+#: forms_services.py:146 templates/datastore_add.html:89
+#: templates/datastore_add.html:339 templates/datastore_add.html:369
 msgid "Select an existing schema or type a new name to create it"
 msgstr "Seleccioneu un esquema existent o escriviu un nom nou per crear-lo"
 
@@ -796,7 +797,7 @@ msgstr "Nom d'àlies duplicat"
 msgid "At least one field must be selected"
 msgstr "S'ha de seleccionar al menys un camp"
 
-#: forms_services.py:506 templates/connection_update.html:52
+#: forms_services.py:506 templates/connection_update.html:75
 msgid "Category"
 msgstr "Categoria"
 
@@ -864,7 +865,7 @@ msgid "Secret"
 msgstr "Secret"
 
 #: forms_services.py:676 forms_services.py:1109
-#: templates/connection_add.html:191 templates/connection_update.html:187
+#: templates/connection_add.html:214 templates/connection_update.html:210
 msgid "Entity"
 msgstr "Entitat"
 
@@ -912,14 +913,14 @@ msgstr "Aquest camp és obligatori"
 
 #: forms_services.py:973 forms_services.py:999 forms_services.py:1049
 #: forms_services.py:1126 forms_services.py:1187
-#: templates/connection_update.html:91 templates/connection_update.html:112
-#: templates/connection_update.html:143 templates/connection_update.html:215
-#: templates/connection_update.html:257
+#: templates/connection_update.html:114 templates/connection_update.html:135
+#: templates/connection_update.html:166 templates/connection_update.html:238
+#: templates/connection_update.html:280
 msgid "Leave empty to keep current password"
 msgstr "Deixeu buit per mantenir la contrasenya actual"
 
 #: forms_services.py:1094 forms_services.py:1154
-#: templates/connection_update.html:174 templates/connection_update.html:234
+#: templates/connection_update.html:197 templates/connection_update.html:257
 msgid "Leave empty to keep current secret"
 msgstr "Deixeu buit per mantenir el secret actual"
 
@@ -947,7 +948,8 @@ msgstr "Paràmetres addicionals opcionals en format JSON"
 
 #: models.py:207
 msgid "Allow all users to create datastores with this connection"
-msgstr "Permetre a tots els usuaris crear magatzems de dades amb aquesta connexió"
+msgstr ""
+"Permetre a tots els usuaris crear magatzems de dades amb aquesta connexió"
 
 #: models.py:211
 msgid "Allow all users to use this connection in ETL"
@@ -955,7 +957,8 @@ msgstr "Permetre a tots els usuaris utilitzar aquesta connexió en ETL"
 
 #: models.py:215
 msgid "Allow all users to manage this connection (edit, delete)"
-msgstr "Permetre a tots els usuaris gestionar aquesta connexió (editar, eliminar)"
+msgstr ""
+"Permetre a tots els usuaris gestionar aquesta connexió (editar, eliminar)"
 
 #: models.py:225 templates/dashboard_services_menu.html:10
 msgid "Connections"
@@ -991,8 +994,8 @@ msgstr "Inserir"
 msgid "Update"
 msgstr "Actualitzar"
 
-#: models.py:429 templates/connection_config.html:98
-#: templates/connection_config.html:130 templates/connection_list.html:119
+#: models.py:429 templates/connection_config.html:108
+#: templates/connection_config.html:149 templates/connection_list.html:191
 #: templates/connection_trigger_add.html:105
 #: templates/enumeration_update.html:102
 msgid "Delete"
@@ -1037,7 +1040,9 @@ msgstr "Descripció del que fa aquest disparador"
 #: models.py:475
 msgid ""
 "Events that activate this trigger (comma-separated: INSERT,UPDATE,DELETE)"
-msgstr "Esdeveniments que activen aquest disparador (separats per comes: INSERT,UPDATE,DELETE)"
+msgstr ""
+"Esdeveniments que activen aquest disparador (separats per comes: INSERT,"
+"UPDATE,DELETE)"
 
 #: models.py:481
 msgid "When the trigger executes relative to the event"
@@ -1047,7 +1052,9 @@ msgstr "Quan s'executa el disparador relatiu a l'esdeveniment"
 msgid ""
 "SQL code to execute. Use NEW for inserted/updated row, OLD for deleted/"
 "updated row."
-msgstr "Codi SQL a executar. Utilitzeu NEW per a fila inserida/actualitzada, OLD per a fila eliminada/actualitzada."
+msgstr ""
+"Codi SQL a executar. Utilitzeu NEW per a fila inserida/actualitzada, OLD per "
+"a fila eliminada/actualitzada."
 
 #: models.py:491
 msgid "Whether the trigger applies to all schemas or specific ones"
@@ -1059,17 +1066,23 @@ msgstr "Matriu JSON de noms d'esquemes si l'àmbit és \"schemas\""
 
 #: models.py:502
 msgid "If enabled, this trigger can be used as a calculated field in layers"
-msgstr "Si està habilitat, aquest disparador es pot utilitzar com a camp calculat a les capes"
+msgstr ""
+"Si està habilitat, aquest disparador es pot utilitzar com a camp calculat a "
+"les capes"
 
 #: models.py:509
 msgid ""
 "Language of the trigger code: PL/pgSQL for database triggers, Python for "
 "application-level triggers"
-msgstr "Llenguatge del codi del disparador: PL/pgSQL per a disparadors de base de dades, Python per a disparadors a nivell d'aplicació"
+msgstr ""
+"Llenguatge del codi del disparador: PL/pgSQL per a disparadors de base de "
+"dades, Python per a disparadors a nivell d'aplicació"
 
 #: models.py:514
 msgid "Allow all staff users to use this trigger in their layers"
-msgstr "Permetre a tots els usuaris staff utilitzar aquest disparador a les seves capes"
+msgstr ""
+"Permetre a tots els usuaris staff utilitzar aquest disparador a les seves "
+"capes"
 
 #: models.py:521
 msgid "Connection Trigger"
@@ -1079,72 +1092,117 @@ msgstr "Disparador de connexió"
 msgid "Connection Triggers"
 msgstr "Disparadors de connexió"
 
-#: models.py:740
+#: models.py:747
 msgid "Reference to centralized connection"
 msgstr "Referència a connexió centralitzada"
 
-#: models.py:746
+#: models.py:753
 msgid "Database schema for this datastore"
 msgstr "Esquema de base de dades per a aquest magatzem de dades"
 
-#: models.py:750
+#: models.py:757
 msgid ""
 "True if using connection_params directly, False if using Connection reference"
-msgstr "Cert si s'utilitzen els paràmetres de connexió directament, Fals si s'utilitza la referència de connexió"
+msgstr ""
+"Cert si s'utilitzen els paràmetres de connexió directament, Fals si "
+"s'utilitza la referència de connexió"
 
-#: models.py:1048
+#: models.py:761
+msgid "If enabled, all staff users can use this datastore"
+msgstr "Si està habilitat, tots els usuaris staff poden utilitzar aquest magatzem de dades"
+
+#: models.py:765
+msgid "If enabled, all staff users can manage (edit) this datastore"
+msgstr "Si està habilitat, tots els usuaris staff poden gestionar (editar) aquest magatzem de dades"
+
+#: models.py:924
+msgid "Can use this datastore to create layers"
+msgstr "Pot utilitzar aquest magatzem de dades per crear capes"
+
+#: models.py:928
+msgid "Can manage (edit description) this datastore"
+msgstr "Pot gestionar (editar descripció) aquest magatzem de dades"
+
+#: models.py:933
+msgid "Datastore Role"
+msgstr "Rol de magatzem de dades"
+
+#: models.py:934
+msgid "Datastore Roles"
+msgstr "Rols de magatzem de dades"
+
+#: models.py:1158
 #, python-brace-format
 msgid "enumerated ({0})"
 msgstr "enumerat ({0})"
 
-#: models.py:1256
+#: models.py:1379
 msgid ""
 "Name of the field that will be calculated by this trigger (only for "
 "calculated field triggers)"
-msgstr "Nom del camp que serà calculat per aquest disparador (només per a disparadors de camp calculat)"
+msgstr ""
+"Nom del camp que serà calculat per aquest disparador (només per a "
+"disparadors de camp calculat)"
 
-#: models.py:1260
+#: models.py:1383
 msgid "Whether the trigger is currently installed in the database"
 msgstr "Si el disparador està instal·lat actualment a la base de dades"
 
-#: models.py:1267
+#: models.py:1387
+msgid "Whether the trigger is enabled (active) or disabled in the database"
+msgstr "Si el disparador està habilitat (actiu) o deshabilitat a la base de dades"
+
+#: models.py:1394
 msgid "Layer Connection Trigger"
 msgstr "Disparador de connexió de capa"
 
-#: models.py:1268
+#: models.py:1395
 msgid "Layer Connection Triggers"
 msgstr "Disparadors de connexió de capa"
 
-#: models.py:1348 models.py:1408
+#: models.py:1475 models.py:1535 models.py:1574 models.py:1604
 msgid "Layer datastore has no associated connection"
 msgstr "El magatzem de dades de la capa no té connexió associada"
 
-#: models.py:1351
+#: models.py:1478
 msgid "Trigger installation is only supported for PostGIS connections"
-msgstr "La instal·lació de disparadors només és compatible amb connexions PostGIS"
+msgstr ""
+"La instal·lació de disparadors només és compatible amb connexions PostGIS"
 
-#: models.py:1360 models.py:1416
+#: models.py:1487 models.py:1543 models.py:1583 models.py:1613 views.py:8454
 msgid "Could not connect to database"
 msgstr "No s'ha pogut connectar a la base de dades"
 
-#: models.py:1394
+#: models.py:1521
 msgid "Trigger installed successfully"
 msgstr "Disparador instal·lat correctament"
 
-#: models.py:1405
+#: models.py:1532
 msgid "Trigger was not installed"
 msgstr "El disparador no s'ha instal·lat"
 
-#: models.py:1432
+#: models.py:1559
 msgid "Trigger uninstalled successfully"
 msgstr "Disparador desinstal·lat correctament"
 
-#: models.py:1536 templates/enumeration_add.html:53
+#: models.py:1571 models.py:1601
+msgid "Trigger is not installed"
+msgstr "El disparador no està instal·lat"
+
+#: models.py:1589 views.py:8378
+msgid "Trigger enabled successfully"
+msgstr "Disparador habilitat correctament"
+
+#: models.py:1619 views.py:8393
+msgid "Trigger disabled successfully"
+msgstr "Disparador deshabilitat correctament"
+
+#: models.py:1723 templates/enumeration_add.html:53
 #: templates/enumeration_update.html:58 templates/enumeration_update.html:60
 msgid "Alphabetical"
 msgstr "Alfabètic"
 
-#: models.py:1538 templates/enumeration_add.html:52
+#: models.py:1725 templates/enumeration_add.html:52
 #: templates/enumeration_update.html:53 templates/enumeration_update.html:55
 msgid "Manual"
 msgstr "Manual"
@@ -1199,209 +1257,233 @@ msgstr "Eliminar capa base"
 msgid "Base layer will be deleted"
 msgstr "La capa base será eliminada"
 
-#: templates/base_layer_list.html:62 templates/connection_config.html:129
-#: templates/connection_config.html:167 templates/connection_list.html:118
-#: templates/connection_trigger_add.html:25 templates/datastore_list.html:83
+#: templates/base_layer_list.html:62 templates/connection_config.html:148
+#: templates/connection_config.html:186 templates/connection_list.html:190
+#: templates/connection_trigger_add.html:25 templates/datastore_list.html:155
 #: templates/enumeration_list.html:59 templates/external_layer_list.html:69
-#: templates/layer_config.html:611 templates/layer_list.html:79
-#: templates/layergroup_add.html:123 templates/layergroup_list.html:74
+#: templates/layer_config.html:631 templates/layer_list.html:146
+#: templates/layergroup_add.html:123 templates/layergroup_list.html:129
 #: templates/layergroup_update.html:189 templates/layergroup_update.html:211
 #: templates/server_list.html:65 templates/service_url_list.html:63
-#: templates/sqlview_list.html:62 templates/workspace_list.html:70
+#: templates/sqlview_list.html:62 templates/workspace_list.html:122
 msgid "Cancel"
 msgstr "Cancel·lar"
 
-#: templates/base_layer_list.html:63 templates/datastore_list.html:84
+#: templates/base_layer_list.html:63 templates/datastore_list.html:156
 #: templates/enumeration_list.html:60 templates/external_layer_list.html:70
-#: templates/layer_list.html:80 templates/layer_list.html:95
-#: templates/layer_list.html:110 templates/layergroup_add.html:124
-#: templates/layergroup_list.html:75 templates/layergroup_update.html:190
+#: templates/layer_list.html:147 templates/layer_list.html:162
+#: templates/layer_list.html:177 templates/layergroup_add.html:124
+#: templates/layergroup_list.html:130 templates/layergroup_update.html:190
 #: templates/layergroup_update.html:212 templates/server_list.html:66
 #: templates/service_url_list.html:64 templates/sqlview_list.html:63
-#: templates/workspace_list.html:71
+#: templates/workspace_list.html:123
 msgid "Accept"
 msgstr "Acceptar"
 
 #: templates/base_layer_list.html:80 templates/cache_list.html:124
-#: templates/cache_list.html:161 templates/connection_config.html:193
-#: templates/connection_list.html:136 templates/datastore_list.html:101
+#: templates/cache_list.html:161 templates/connection_config.html:212
+#: templates/connection_list.html:213 templates/datastore_list.html:178
 #: templates/enumeration_list.html:77 templates/external_layer_list.html:87
 #: templates/geoserver/create_layer_sql_view.html:247
-#: templates/layer_list.html:129 templates/layergroup_list.html:92
+#: templates/layer_list.html:201 templates/layergroup_list.html:152
 #: templates/lock_list.html:54 templates/server_list.html:83
 #: templates/service_url_list.html:81 templates/sqlview_list.html:80
-#: templates/workspace_list.html:89
+#: templates/workspace_list.html:146
 msgid "Processing request..."
 msgstr "Processant petició..."
 
 #: templates/base_layer_list.html:81 templates/cache_list.html:125
-#: templates/cache_list.html:162 templates/connection_config.html:194
-#: templates/connection_list.html:137 templates/datastore_list.html:102
-#: templates/enumeration_list.html:78 templates/external_layer_list.html:88
+#: templates/cache_list.html:162 templates/connection_list.html:214
+#: templates/datastore_list.html:179 templates/enumeration_list.html:78
+#: templates/external_layer_list.html:88
 #: templates/geoserver/create_layer_sql_view.html:248
-#: templates/layer_list.html:130 templates/layergroup_list.html:93
+#: templates/layer_list.html:202 templates/layergroup_list.html:153
 #: templates/lock_list.html:55 templates/server_list.html:84
 #: templates/service_url_list.html:82 templates/sqlview_list.html:81
-#: templates/workspace_list.html:90
+#: templates/workspace_list.html:147
 #, python-format
 msgid "Search%(sep)s"
 msgstr "Cercar%(sep)s"
 
 #: templates/base_layer_list.html:82 templates/cache_list.html:126
-#: templates/cache_list.html:163 templates/connection_config.html:195
-#: templates/connection_list.html:138 templates/datastore_list.html:103
-#: templates/enumeration_list.html:79 templates/external_layer_list.html:89
+#: templates/cache_list.html:163 templates/connection_list.html:215
+#: templates/datastore_list.html:180 templates/enumeration_list.html:79
+#: templates/external_layer_list.html:89
 #: templates/geoserver/create_layer_sql_view.html:249
-#: templates/layer_list.html:131 templates/layergroup_list.html:94
+#: templates/layer_list.html:203 templates/layergroup_list.html:154
 #: templates/lock_list.html:56 templates/server_list.html:85
 #: templates/service_url_list.html:83 templates/sqlview_list.html:82
-#: templates/workspace_list.html:91
+#: templates/workspace_list.html:148
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr "Mostrant %(numrecords)s registres"
 
 #: templates/base_layer_list.html:83 templates/cache_list.html:127
-#: templates/cache_list.html:164 templates/connection_config.html:196
-#: templates/connection_list.html:139 templates/datastore_list.html:104
-#: templates/enumeration_list.html:80 templates/external_layer_list.html:90
+#: templates/cache_list.html:164 templates/connection_list.html:216
+#: templates/datastore_list.html:181 templates/enumeration_list.html:80
+#: templates/external_layer_list.html:90
 #: templates/geoserver/create_layer_sql_view.html:250
-#: templates/layer_list.html:132 templates/layergroup_list.html:95
+#: templates/layer_list.html:204 templates/layergroup_list.html:155
 #: templates/lock_list.html:57 templates/server_list.html:86
 #: templates/service_url_list.html:84 templates/sqlview_list.html:83
-#: templates/workspace_list.html:92
+#: templates/workspace_list.html:149
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr "Mostrant des de %(start)s fins a %(end)s de %(numrecords)s registres"
 
 #: templates/base_layer_list.html:84 templates/cache_list.html:128
-#: templates/cache_list.html:165 templates/connection_config.html:197
-#: templates/connection_list.html:140 templates/datastore_list.html:105
-#: templates/enumeration_list.html:81 templates/external_layer_list.html:91
+#: templates/cache_list.html:165 templates/connection_list.html:217
+#: templates/datastore_list.html:182 templates/enumeration_list.html:81
+#: templates/external_layer_list.html:91
 #: templates/geoserver/create_layer_sql_view.html:251
-#: templates/layer_list.html:133 templates/layergroup_list.html:96
+#: templates/layer_list.html:205 templates/layergroup_list.html:156
 #: templates/lock_list.html:58 templates/server_list.html:87
 #: templates/service_url_list.html:85 templates/sqlview_list.html:84
-#: templates/workspace_list.html:93
+#: templates/workspace_list.html:150
 msgid "Showing from 0 to 0 of 0 records"
 msgstr "Mostrant des de 0 fins a 0 de 0 registres"
 
 #: templates/base_layer_list.html:85 templates/cache_list.html:129
-#: templates/cache_list.html:166 templates/connection_config.html:198
-#: templates/connection_list.html:141 templates/datastore_list.html:106
-#: templates/enumeration_list.html:82 templates/external_layer_list.html:92
+#: templates/cache_list.html:166 templates/connection_list.html:218
+#: templates/datastore_list.html:183 templates/enumeration_list.html:82
+#: templates/external_layer_list.html:92
 #: templates/geoserver/create_layer_sql_view.html:252
-#: templates/layer_list.html:134 templates/layergroup_list.html:97
+#: templates/layer_list.html:206 templates/layergroup_list.html:157
 #: templates/lock_list.html:59 templates/server_list.html:88
 #: templates/service_url_list.html:86 templates/sqlview_list.html:85
-#: templates/workspace_list.html:94
+#: templates/workspace_list.html:151
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr "Filtrant %(max)s registres"
 
 #: templates/base_layer_list.html:87 templates/cache_list.html:131
-#: templates/cache_list.html:168 templates/connection_config.html:200
-#: templates/connection_list.html:143 templates/connection_trigger_add.html:152
-#: templates/connection_update.html:192 templates/datastore_add.html:296
-#: templates/datastore_list.html:108 templates/enumeration_list.html:84
+#: templates/cache_list.html:168 templates/connection_config.html:219
+#: templates/connection_list.html:220 templates/connection_trigger_add.html:152
+#: templates/connection_update.html:215 templates/datastore_add.html:313
+#: templates/datastore_list.html:185 templates/enumeration_list.html:84
 #: templates/external_layer_list.html:94
 #: templates/geoserver/create_layer_sql_view.html:254
-#: templates/layer_list.html:136 templates/layergroup_list.html:99
+#: templates/layer_list.html:208 templates/layergroup_list.html:159
 #: templates/lock_list.html:61 templates/server_list.html:90
 #: templates/service_url_list.html:88 templates/sqlview_list.html:87
-#: templates/workspace_list.html:96
+#: templates/workspace_list.html:153
 msgid "Loading..."
 msgstr "Carregant..."
 
 #: templates/base_layer_list.html:88 templates/base_layer_list.html:89
 #: templates/cache_list.html:132 templates/cache_list.html:133
 #: templates/cache_list.html:169 templates/cache_list.html:170
-#: templates/connection_config.html:201 templates/connection_list.html:144
-#: templates/connection_list.html:145 templates/datastore_list.html:109
-#: templates/datastore_list.html:110 templates/enumeration_list.html:85
+#: templates/connection_config.html:220 templates/connection_list.html:221
+#: templates/connection_list.html:222 templates/datastore_list.html:186
+#: templates/datastore_list.html:187 templates/enumeration_list.html:85
 #: templates/enumeration_list.html:86 templates/external_layer_list.html:95
 #: templates/external_layer_list.html:96
 #: templates/geoserver/create_layer_sql_view.html:255
 #: templates/geoserver/create_layer_sql_view.html:256
-#: templates/layer_list.html:137 templates/layer_list.html:138
-#: templates/layergroup_list.html:100 templates/layergroup_list.html:101
+#: templates/layer_list.html:209 templates/layer_list.html:210
+#: templates/layergroup_list.html:160 templates/layergroup_list.html:161
 #: templates/lock_list.html:62 templates/lock_list.html:63
 #: templates/server_list.html:91 templates/server_list.html:92
 #: templates/service_url_list.html:89 templates/service_url_list.html:90
 #: templates/sqlview_list.html:88 templates/sqlview_list.html:89
-#: templates/workspace_list.html:97 templates/workspace_list.html:98
+#: templates/workspace_list.html:154 templates/workspace_list.html:155
 msgid "No records available"
 msgstr "No hi ha registres disponibles"
 
 #: templates/base_layer_list.html:91 templates/cache_list.html:135
-#: templates/cache_list.html:172 templates/connection_config.html:204
-#: templates/connection_list.html:147 templates/datastore_list.html:112
+#: templates/cache_list.html:172 templates/connection_config.html:223
+#: templates/connection_config.html:270 templates/connection_config.html:273
+#: templates/connection_list.html:119 templates/connection_list.html:122
+#: templates/connection_list.html:224 templates/datastore_list.html:94
+#: templates/datastore_list.html:97 templates/datastore_list.html:189
 #: templates/enumeration_list.html:88 templates/external_layer_list.html:98
 #: templates/geoserver/create_layer_sql_view.html:258
-#: templates/layer_list.html:140 templates/layergroup_list.html:103
+#: templates/layer_list.html:95 templates/layer_list.html:98
+#: templates/layer_list.html:212 templates/layergroup_list.html:78
+#: templates/layergroup_list.html:81 templates/layergroup_list.html:163
 #: templates/lock_list.html:65 templates/server_list.html:94
 #: templates/service_url_list.html:92 templates/sqlview_list.html:91
-#: templates/workspace_list.html:100
+#: templates/workspace_list.html:71 templates/workspace_list.html:74
+#: templates/workspace_list.html:157
 msgid "First"
 msgstr "Primer"
 
 #: templates/base_layer_list.html:92 templates/cache_list.html:136
-#: templates/cache_list.html:173 templates/connection_config.html:205
-#: templates/connection_list.html:148 templates/datastore_list.html:113
+#: templates/cache_list.html:173 templates/connection_config.html:224
+#: templates/connection_config.html:271 templates/connection_config.html:274
+#: templates/connection_list.html:120 templates/connection_list.html:123
+#: templates/connection_list.html:225 templates/datastore_list.html:95
+#: templates/datastore_list.html:98 templates/datastore_list.html:190
 #: templates/enumeration_list.html:89 templates/external_layer_list.html:99
 #: templates/geoserver/create_layer_sql_view.html:259
-#: templates/layer_list.html:141 templates/layergroup_list.html:104
+#: templates/layer_list.html:96 templates/layer_list.html:99
+#: templates/layer_list.html:213 templates/layergroup_list.html:79
+#: templates/layergroup_list.html:82 templates/layergroup_list.html:164
 #: templates/lock_list.html:66 templates/server_list.html:95
 #: templates/service_url_list.html:93 templates/sqlview_list.html:92
-#: templates/workspace_list.html:101
+#: templates/workspace_list.html:72 templates/workspace_list.html:75
+#: templates/workspace_list.html:158
 msgid "Previous"
 msgstr "Anterior"
 
 #: templates/base_layer_list.html:93 templates/cache_list.html:137
-#: templates/cache_list.html:174 templates/connection_config.html:206
-#: templates/connection_list.html:149 templates/datastore_list.html:114
+#: templates/cache_list.html:174 templates/connection_config.html:225
+#: templates/connection_config.html:291 templates/connection_config.html:294
+#: templates/connection_list.html:135 templates/connection_list.html:138
+#: templates/connection_list.html:226 templates/datastore_list.html:110
+#: templates/datastore_list.html:113 templates/datastore_list.html:191
 #: templates/enumeration_list.html:90 templates/external_layer_list.html:100
 #: templates/geoserver/create_layer_sql_view.html:260
-#: templates/layer_list.html:142 templates/layergroup_list.html:105
+#: templates/layer_list.html:111 templates/layer_list.html:114
+#: templates/layer_list.html:214 templates/layergroup_list.html:94
+#: templates/layergroup_list.html:97 templates/layergroup_list.html:165
 #: templates/lock_list.html:67 templates/server_list.html:96
 #: templates/service_url_list.html:94 templates/sqlview_list.html:93
-#: templates/workspace_list.html:102
+#: templates/workspace_list.html:87 templates/workspace_list.html:90
+#: templates/workspace_list.html:159
 msgid "Next"
 msgstr "Següent"
 
 #: templates/base_layer_list.html:94 templates/cache_list.html:138
-#: templates/cache_list.html:175 templates/connection_config.html:207
-#: templates/connection_list.html:150 templates/datastore_list.html:115
+#: templates/cache_list.html:175 templates/connection_config.html:226
+#: templates/connection_config.html:292 templates/connection_config.html:295
+#: templates/connection_list.html:136 templates/connection_list.html:139
+#: templates/connection_list.html:227 templates/datastore_list.html:111
+#: templates/datastore_list.html:114 templates/datastore_list.html:192
 #: templates/enumeration_list.html:91 templates/external_layer_list.html:101
 #: templates/geoserver/create_layer_sql_view.html:261
-#: templates/layer_list.html:143 templates/layergroup_list.html:106
+#: templates/layer_list.html:112 templates/layer_list.html:115
+#: templates/layer_list.html:215 templates/layergroup_list.html:95
+#: templates/layergroup_list.html:98 templates/layergroup_list.html:166
 #: templates/lock_list.html:68 templates/server_list.html:97
 #: templates/service_url_list.html:95 templates/sqlview_list.html:94
-#: templates/workspace_list.html:103
+#: templates/workspace_list.html:88 templates/workspace_list.html:91
+#: templates/workspace_list.html:160
 msgid "Last"
 msgstr "Últim"
 
 #: templates/base_layer_list.html:97 templates/cache_list.html:141
-#: templates/cache_list.html:178 templates/connection_config.html:210
-#: templates/connection_list.html:153 templates/datastore_list.html:118
+#: templates/cache_list.html:178 templates/connection_config.html:229
+#: templates/connection_list.html:230 templates/datastore_list.html:195
 #: templates/enumeration_list.html:94 templates/external_layer_list.html:104
 #: templates/geoserver/create_layer_sql_view.html:264
-#: templates/layer_list.html:146 templates/layergroup_list.html:109
+#: templates/layer_list.html:218 templates/layergroup_list.html:169
 #: templates/lock_list.html:71 templates/server_list.html:100
 #: templates/service_url_list.html:98 templates/sqlview_list.html:97
-#: templates/workspace_list.html:106
+#: templates/workspace_list.html:163
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr "%(sep)sOrdre ascendent"
 
 #: templates/base_layer_list.html:98 templates/cache_list.html:142
-#: templates/cache_list.html:179 templates/connection_config.html:211
-#: templates/connection_list.html:154 templates/datastore_list.html:119
+#: templates/cache_list.html:179 templates/connection_config.html:230
+#: templates/connection_list.html:231 templates/datastore_list.html:196
 #: templates/enumeration_list.html:95 templates/external_layer_list.html:105
 #: templates/geoserver/create_layer_sql_view.html:265
-#: templates/layer_list.html:147 templates/layergroup_list.html:110
+#: templates/layer_list.html:219 templates/layergroup_list.html:170
 #: templates/lock_list.html:72 templates/server_list.html:101
 #: templates/service_url_list.html:99 templates/sqlview_list.html:98
-#: templates/workspace_list.html:107
+#: templates/workspace_list.html:164
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr "%(sep)sOrdre descendent"
@@ -1414,7 +1496,7 @@ msgstr "Eliminar capa base"
 msgid "Update baselayer"
 msgstr "Actualitzar capa base"
 
-#: templates/cache_list.html:11 templates/layer_update.html:666
+#: templates/cache_list.html:11 templates/layer_update.html:658
 msgid "Error:"
 msgstr "Error:"
 
@@ -1427,7 +1509,7 @@ msgid "Cached groups"
 msgstr "Grups a la memòria cau"
 
 #: templates/cache_list.html:148 templates/cache_list.html:185
-#: templates/layergroup_list.html:120 templates/layergroup_update.html:140
+#: templates/layergroup_list.html:180 templates/layergroup_update.html:140
 #: templates/layergroup_update.html:154 templates/layergroup_update.html:156
 msgid "Clear cache"
 msgstr "Netejar memòria cau"
@@ -1436,13 +1518,13 @@ msgstr "Netejar memòria cau"
 msgid "Configure cache options"
 msgstr "Configurar opcions de la memòria cau"
 
-#: templates/connection_add.html:30 templates/connection_add.html:552
-#: templates/connection_update.html:12 templates/connection_update.html:370
-#: templates/datastore_add.html:89 templates/datastore_update.html:97
+#: templates/connection_add.html:53 templates/connection_add.html:608
+#: templates/connection_update.html:35 templates/connection_update.html:422
+#: templates/datastore_add.html:98 templates/datastore_update.html:106
 msgid "Test connection"
 msgstr "Provar connexió"
 
-#: templates/connection_add.html:31 templates/connection_update.html:13
+#: templates/connection_add.html:54 templates/connection_update.html:36
 #: templates/datastore_add.html:12 templates/enumeration_add.html:12
 #: templates/enumeration_update.html:12 templates/external_layer_add.html:13
 #: templates/external_layer_update.html:19 templates/layer_add.html:18
@@ -1454,75 +1536,78 @@ msgstr "Provar connexió"
 msgid "Save"
 msgstr "Guardar"
 
-#: templates/connection_add.html:53 templates/connection_list.html:26
-#: templates/connection_trigger_add.html:52 templates/connection_update.html:35
+#: templates/connection_add.html:76 templates/connection_list.html:62
+#: templates/connection_trigger_add.html:52 templates/connection_update.html:58
+#: templates/datastore_add.html:34 templates/datastore_update.html:35
 #: templates/layer_add.html:39 templates/layer_create.html:48
 #: templates/layer_update.html:39 templates/layergroup_add.html:41
 #: templates/layergroup_update.html:41
 msgid "Permissions"
 msgstr "Permisos"
 
-#: templates/connection_add.html:60 templates/connection_update.html:42
+#: templates/connection_add.html:83 templates/connection_update.html:65
 msgid "Connection details"
 msgstr "Detalls de la connexió"
 
-#: templates/connection_add.html:84 templates/connection_update.html:67
+#: templates/connection_add.html:107 templates/connection_update.html:90
 msgid "Connection parameters"
 msgstr "Paràmetres de connexió"
 
-#: templates/connection_add.html:108 templates/connection_update.html:93
+#: templates/connection_add.html:131 templates/connection_update.html:116
 msgid "Additional parameters"
 msgstr "Paràmetres addicionals"
 
-#: templates/connection_add.html:191 templates/connection_update.html:187
+#: templates/connection_add.html:214 templates/connection_update.html:210
 msgid "Municipality"
 msgstr "Municipi"
 
-#: templates/connection_add.html:195 templates/connection_add.html:559
+#: templates/connection_add.html:218 templates/connection_add.html:615
 msgid "Select domain first and click Load"
 msgstr "Seleccioneu primer el domini i feu clic a Carregar"
 
-#: templates/connection_add.html:200 templates/connection_add.html:601
-#: templates/connection_update.html:200 templates/connection_update.html:425
+#: templates/connection_add.html:223 templates/connection_add.html:657
+#: templates/connection_update.html:223 templates/connection_update.html:477
 msgid "Load"
 msgstr "Carregar"
 
-#: templates/connection_add.html:204
+#: templates/connection_add.html:227
 msgid ""
 "Select the domain and click Load. You can type to search by code or name."
-msgstr "Seleccioneu el domini i feu clic a Carregar. Podeu escriure per cercar per codi o nom."
+msgstr ""
+"Seleccioneu el domini i feu clic a Carregar. Podeu escriure per cercar per "
+"codi o nom."
 
-#: templates/connection_add.html:260
+#: templates/connection_add.html:283
 msgid "Select a category and type to see the connection parameters"
 msgstr "Seleccioneu una categoria i tipus per veure els paràmetres de connexió"
 
-#: templates/connection_add.html:474
+#: templates/connection_add.html:530
 msgid "Please select a connection type"
 msgstr "Si us plau, seleccioneu un tipus de connexió"
 
-#: templates/connection_add.html:480 templates/connection_update.html:298
+#: templates/connection_add.html:536 templates/connection_update.html:350
 msgid "Testing..."
 msgstr "Provant..."
 
-#: templates/connection_add.html:538 templates/connection_update.html:356
-#: views.py:7053 views.py:7067 views.py:7082 views.py:7115 views.py:7135
-#: views.py:7178 views.py:7201
+#: templates/connection_add.html:594 templates/connection_update.html:408
+#: views.py:7450 views.py:7464 views.py:7479 views.py:7512 views.py:7532
+#: views.py:7575 views.py:7598
 msgid "Connection successful"
 msgstr "Connexió correcta"
 
-#: templates/connection_add.html:547 templates/connection_update.html:365
+#: templates/connection_add.html:603 templates/connection_update.html:417
 msgid "Error testing connection"
 msgstr "Error provant la connexió"
 
-#: templates/connection_add.html:580 templates/connection_update.html:403
+#: templates/connection_add.html:636 templates/connection_update.html:455
 msgid "Select entity"
 msgstr "Seleccionar entitat"
 
-#: templates/connection_add.html:587 templates/connection_update.html:411
+#: templates/connection_add.html:643 templates/connection_update.html:463
 msgid "No entities found"
 msgstr "No s'han trobat entitats"
 
-#: templates/connection_add.html:596 templates/connection_update.html:420
+#: templates/connection_add.html:652 templates/connection_update.html:472
 msgid "Error loading entities"
 msgstr "Error carregant entitats"
 
@@ -1534,199 +1619,234 @@ msgstr "Tornar a connexions"
 msgid "Triggers"
 msgstr "Disparadors"
 
-#: templates/connection_config.html:37
+#: templates/connection_config.html:36 templates/connection_list.html:42
+#: templates/datastore_list.html:41 templates/layer_list.html:39
+#: templates/layergroup_list.html:25 templates/workspace_list.html:21
+msgid "Search..."
+msgstr "Cercar..."
+
+#: templates/connection_config.html:47
 msgid "Add trigger"
 msgstr "Afegir disparador"
 
-#: templates/connection_config.html:48
+#: templates/connection_config.html:58
 msgid "Event"
 msgstr "Esdeveniment"
 
-#: templates/connection_config.html:49
+#: templates/connection_config.html:59
 #: templates/connection_trigger_add.html:113
 msgid "Scope"
 msgstr "Àmbit"
 
-#: templates/connection_config.html:61
+#: templates/connection_config.html:71
 msgid "Can be used as calculated field"
 msgstr "Es pot utilitzar com a camp calculat"
 
-#: templates/connection_config.html:75
+#: templates/connection_config.html:85
 msgid "Global"
 msgstr "Global"
 
-#: templates/connection_config.html:78
+#: templates/connection_config.html:88
 #: templates/connection_trigger_add.html:129
 msgid "Schemas"
 msgstr "Esquemes"
 
-#: templates/connection_config.html:84
+#: templates/connection_config.html:94
 msgid "Edit"
 msgstr "Editar"
 
-#: templates/connection_config.html:91
+#: templates/connection_config.html:101
 msgid "Duplicate to another connection"
 msgstr "Duplicar a una altra connexió"
 
-#: templates/connection_config.html:122
+#: templates/connection_config.html:141
 msgid "Delete trigger"
 msgstr "Eliminar disparador"
 
-#: templates/connection_config.html:125
+#: templates/connection_config.html:144
 msgid ""
 "Are you sure you want to delete this trigger? This action cannot be undone."
-msgstr "Esteu segur que voleu eliminar aquest disparador? Aquesta acció no es pot desfer."
+msgstr ""
+"Esteu segur que voleu eliminar aquest disparador? Aquesta acció no es pot "
+"desfer."
 
-#: templates/connection_config.html:144
+#: templates/connection_config.html:163
 msgid "Duplicate trigger"
 msgstr "Duplicar disparador"
 
-#: templates/connection_config.html:147
+#: templates/connection_config.html:166
 msgid "Select the target connection to duplicate this trigger:"
 msgstr "Seleccioneu la connexió de destí per duplicar aquest disparador:"
 
-#: templates/connection_config.html:150
+#: templates/connection_config.html:169
 msgid "Target connection"
 msgstr "Connexió de destí"
 
-#: templates/connection_config.html:152
+#: templates/connection_config.html:171
 msgid "Select a connection..."
 msgstr "Seleccioneu una connexió..."
 
-#: templates/connection_config.html:157
+#: templates/connection_config.html:176
 msgid "Only PostGIS connections are shown"
 msgstr "Només es mostren connexions PostGIS"
 
-#: templates/connection_config.html:162
+#: templates/connection_config.html:181
 msgid "No other PostGIS connections available."
 msgstr "No hi ha altres connexions PostGIS disponibles."
 
-#: templates/connection_config.html:169 templates/connection_config.html:284
-#: templates/connection_config.html:291
+#: templates/connection_config.html:188 templates/connection_config.html:380
+#: templates/connection_config.html:387
 msgid "Duplicate"
 msgstr "Duplicar"
 
-#: templates/connection_config.html:202
+#: templates/connection_config.html:221
 msgid "No triggers defined for this connection"
 msgstr "No hi ha disparadors definits per a aquesta connexió"
 
-#: templates/connection_config.html:245
+#: templates/connection_config.html:266
+msgid "Showing"
+msgstr "Mostrant"
+
+#: templates/connection_config.html:266
+msgid "to"
+msgstr "a"
+
+#: templates/connection_config.html:266
+msgid "of"
+msgstr "de"
+
+#: templates/connection_config.html:266
+msgid "triggers"
+msgstr "disparadors"
+
+#: templates/connection_config.html:341
 msgid "Error deleting trigger"
 msgstr "Error eliminant el disparador"
 
-#: templates/connection_config.html:265
+#: templates/connection_config.html:361
 msgid "Please select a target connection"
 msgstr "Si us plau, seleccioneu una connexió de destí"
 
-#: templates/connection_config.html:270
+#: templates/connection_config.html:366
 msgid "Duplicating..."
 msgstr "Duplicant..."
 
-#: templates/connection_config.html:286
+#: templates/connection_config.html:382
 msgid "Trigger duplicated successfully as:"
 msgstr "Disparador duplicat correctament com:"
 
-#: templates/connection_config.html:292
+#: templates/connection_config.html:388
 msgid "Error duplicating trigger"
 msgstr "Error duplicant el disparador"
 
-#: templates/connection_list.html:12
+#: templates/connection_list.html:32
 msgid "Add connection"
 msgstr "Afegir connexió"
 
-#: templates/connection_list.html:27 templates/connection_list.html:48
+#: templates/connection_list.html:63 templates/connection_list.html:84
 #: templates/dashboard_services_menu.html:11
 #: templates/select_connection_permissions.html:43
 msgid "Datastores"
 msgstr "Magatzems de dades"
 
-#: templates/connection_list.html:48
+#: templates/connection_list.html:84
 msgid "All users can create datastores"
 msgstr "Tots els usuaris poden crear magatzems de dades"
 
-#: templates/connection_list.html:51
+#: templates/connection_list.html:87
 msgid "All users can use in ETL"
 msgstr "Tots els usuaris poden utilitzar en ETL"
 
-#: templates/connection_list.html:51
+#: templates/connection_list.html:87
 #: templates/select_connection_permissions.html:47
 msgid "ETL"
 msgstr "ETL"
 
-#: templates/connection_list.html:54
+#: templates/connection_list.html:90
 msgid "All users can manage"
 msgstr "Tots els usuaris poden gestionar"
 
-#: templates/connection_list.html:54
+#: templates/connection_list.html:90
 msgid "Manage"
 msgstr "Gestionar"
 
-#: templates/connection_list.html:57
+#: templates/connection_list.html:93
 msgid "Permissions by role only"
 msgstr "Permisos només per rol"
 
-#: templates/connection_list.html:57
+#: templates/connection_list.html:93
 msgid "By role"
 msgstr "Per rol"
 
-#: templates/connection_list.html:64
+#: templates/connection_list.html:100
 msgid "Not compatible"
 msgstr "No compatible"
 
-#: templates/connection_list.html:69 templates/connection_trigger_add.html:136
+#: templates/connection_list.html:105 templates/connection_trigger_add.html:136
 msgid "Options"
 msgstr "Opcions"
 
-#: templates/connection_list.html:92 templates/connection_list.html:160
+#: templates/connection_list.html:144
+#, python-format
+msgid ""
+"\n"
+"\t\t\t\t\t\tShowing %(start)s to %(end)s of %(total)s connections\n"
+"\t\t\t\t\t\t"
+msgstr ""
+"\n"
+"\t\t\t\t\t\tMostrant %(start)s a %(end)s de %(total)s connexions\n"
+"\t\t\t\t\t\t"
+
+#: templates/connection_list.html:164 templates/connection_list.html:237
 msgid "Delete connection"
 msgstr "Eliminar connexió"
 
-#: templates/connection_list.html:96
+#: templates/connection_list.html:168
 msgid "The connection will be deleted. Do you want to continue?"
 msgstr "La connexió s'eliminarà. Voleu continuar?"
 
-#: templates/connection_list.html:100 templates/external_layer_update.html:44
+#: templates/connection_list.html:172 templates/external_layer_update.html:44
 #: templates/geoserver/create_layer_sql_view.html:164
 msgid "Warning"
 msgstr "Avís"
 
-#: templates/connection_list.html:103
+#: templates/connection_list.html:175
 msgid "The connection and all associated resources will be deleted:"
 msgstr "La connexió i tots els recursos associats s'eliminaran:"
 
-#: templates/connection_list.html:105
+#: templates/connection_list.html:177
 msgid "All datastores linked to this connection"
 msgstr "Tots els magatzems de dades vinculats a aquesta connexió"
 
-#: templates/connection_list.html:106
+#: templates/connection_list.html:178
 msgid "All layers in those datastores"
 msgstr "Totes les capes d'aquests magatzems de dades"
 
-#: templates/connection_list.html:107
+#: templates/connection_list.html:179
 msgid "All triggers and topology rules of those layers"
 msgstr "Tots els disparadors i regles topològiques d'aquestes capes"
 
-#: templates/connection_list.html:112
+#: templates/connection_list.html:184
 msgid "I understand that this action cannot be undone"
 msgstr "Entenc que aquesta acció no es pot desfer"
 
-#: templates/connection_list.html:164
+#: templates/connection_list.html:241
 msgid "Edit connection"
 msgstr "Editar connexió"
 
-#: templates/connection_list.html:213
+#: templates/connection_list.html:315
 msgid "This connection has"
 msgstr "Aquesta connexió té"
 
-#: templates/connection_list.html:213
+#: templates/connection_list.html:315
 msgid "datastore(s) and"
 msgstr "magatzem(s) de dades i"
 
-#: templates/connection_list.html:214
+#: templates/connection_list.html:316
 msgid "layer(s) associated."
 msgstr "capa(es) associada(es)."
 
-#: templates/connection_list.html:257
+#: templates/connection_list.html:359
 msgid "Error deleting connection"
 msgstr "Error eliminant la connexió"
 
@@ -1749,7 +1869,9 @@ msgstr "Identificador únic per a aquest disparador"
 #: templates/connection_trigger_add.html:68
 msgid ""
 "Only letters, numbers and underscores. Must start with letter or underscore."
-msgstr "Només lletres, números i guions baixos. Ha de començar amb lletra o guió baix."
+msgstr ""
+"Només lletres, números i guions baixos. Ha de començar amb lletra o guió "
+"baix."
 
 #: templates/connection_trigger_add.html:69
 msgid "Only letters, numbers and underscores"
@@ -1773,13 +1895,14 @@ msgstr "Aplicar a"
 
 #: templates/connection_trigger_add.html:125
 msgid "Choose whether this trigger applies to all schemas or specific ones"
-msgstr "Trieu si aquest disparador s'aplica a tots els esquemes o a uns específics"
+msgstr ""
+"Trieu si aquest disparador s'aplica a tots els esquemes o a uns específics"
 
 #: templates/connection_trigger_add.html:132
 msgid "Type schema names and press Enter to add"
 msgstr "Escriviu noms d'esquemes i premeu Enter per afegir"
 
-#: templates/connection_trigger_add.html:143 templates/layer_config.html:588
+#: templates/connection_trigger_add.html:143 templates/layer_config.html:608
 msgid "Calculated field"
 msgstr "Camp calculat"
 
@@ -1799,7 +1922,9 @@ msgstr "Codi SQL"
 msgid ""
 "Use NEW to reference the new row (INSERT/UPDATE) and OLD for the old row "
 "(UPDATE/DELETE)."
-msgstr "Utilitzeu NEW per referenciar la nova fila (INSERT/UPDATE) i OLD per a la fila antiga (UPDATE/DELETE)."
+msgstr ""
+"Utilitzeu NEW per referenciar la nova fila (INSERT/UPDATE) i OLD per a la "
+"fila antiga (UPDATE/DELETE)."
 
 #: templates/connection_trigger_add.html:175
 msgid "Template variables"
@@ -1831,6 +1956,7 @@ msgstr "Seleccionar permisos del disparador"
 
 #: templates/connection_trigger_add.html:205
 #: templates/select_connection_permissions.html:8
+#: templates/select_datastore_permissions.html:8
 #: templates/select_layer_permissions.html:8
 #: templates/select_layergroup_permissions.html:8
 msgid "Search user role..."
@@ -1838,7 +1964,8 @@ msgstr "Cercar rol d'usuari..."
 
 #: templates/connection_trigger_add.html:209
 msgid "All staff users can use this trigger in their layers"
-msgstr "Tots els usuaris staff poden utilitzar aquest disparador a les seves capes"
+msgstr ""
+"Tots els usuaris staff poden utilitzar aquest disparador a les seves capes"
 
 #: templates/connection_trigger_add.html:211
 msgid "Allow all staff users"
@@ -1846,10 +1973,12 @@ msgstr "Permetre a tots els usuaris staff"
 
 #: templates/connection_trigger_add.html:221
 #: templates/select_connection_permissions.html:36
+#: templates/select_datastore_permissions.html:30
 msgid "User role image"
 msgstr "Imatge genèrica d'un rol d'usuari"
 
 #: templates/connection_trigger_add.html:230
+#: templates/select_datastore_permissions.html:37
 msgid "Can use"
 msgstr "Pot utilitzar"
 
@@ -1861,13 +1990,14 @@ msgstr "No hi ha rols disponibles"
 msgid "Type schema name and press Enter"
 msgstr "Escriviu el nom de l'esquema i premeu Enter"
 
-#: templates/connection_trigger_add.html:389 views.py:7309 views.py:7431
+#: templates/connection_trigger_add.html:389 views.py:7706 views.py:7828
 msgid "SQL code is required"
 msgstr "El codi SQL és obligatori"
 
 #: templates/connection_trigger_add.html:408
 msgid "Select at least one schema to see compatible datastores"
-msgstr "Seleccioneu almenys un esquema per veure magatzems de dades compatibles"
+msgstr ""
+"Seleccioneu almenys un esquema per veure magatzems de dades compatibles"
 
 #: templates/connection_trigger_add.html:428
 msgid "No datastores in this connection yet"
@@ -1881,11 +2011,11 @@ msgstr "Cap magatzem de dades coincideix amb els esquemes seleccionats"
 msgid "Error loading datastores"
 msgstr "Error carregant magatzems de dades"
 
-#: templates/connection_update.html:194 templates/connection_update.html:378
+#: templates/connection_update.html:217 templates/connection_update.html:430
 msgid "Click Load to get entities"
 msgstr "Feu clic a Carregar per obtenir entitats"
 
-#: templates/connection_update.html:204
+#: templates/connection_update.html:227
 msgid "You can type to search by code or name."
 msgstr "Podeu escriure per cercar per codi o nom."
 
@@ -1929,99 +2059,113 @@ msgstr "Tipus de dades"
 msgid "Enumerations"
 msgstr "Enumeracions"
 
-#: templates/datastore_add.html:46 templates/datastore_update.html:47
+#: templates/datastore_add.html:55 templates/datastore_update.html:56
 #: templates/geoserver/layer_upload_imagemosaic.html:41
 #: templates/geoserver/layer_upload_raster.html:41
 msgid "Select file"
 msgstr "Seleccionar arxiu"
 
-#: templates/datastore_add.html:73
+#: templates/datastore_add.html:82
 msgid "Select an existing connection to the database"
 msgstr "Seleccioneu una connexió existent a la base de dades"
 
-#: templates/datastore_add.html:96 templates/datastore_update.html:113
+#: templates/datastore_add.html:105 templates/datastore_update.html:120
 msgid "Temporal dimension"
 msgstr "Dimensió temporal"
 
-#: templates/datastore_add.html:108 templates/datastore_update.html:125
+#: templates/datastore_add.html:117 templates/datastore_update.html:132
 msgid "Elevation dimension"
 msgstr "Dimensió d'elevació"
 
-#: templates/datastore_add.html:185
+#: templates/datastore_add.html:202
 msgid "Select a connection"
 msgstr "Seleccioneu una connexió"
 
-#: templates/datastore_add.html:261
+#: templates/datastore_add.html:278
 msgid "Select or type a new schema name"
 msgstr "Seleccioneu o escriviu un nom d'esquema nou"
 
-#: templates/datastore_add.html:275
+#: templates/datastore_add.html:292
 msgid "(new)"
 msgstr "(nou)"
 
-#: templates/datastore_add.html:297
+#: templates/datastore_add.html:314
 msgid "Connecting to database..."
 msgstr "Connectant a la base de dades..."
 
-#: templates/datastore_add.html:320
+#: templates/datastore_add.html:337
 msgid "Select existing or type new name"
 msgstr "Seleccioneu un existent o escriviu un nom nou"
 
-#: templates/datastore_add.html:327
+#: templates/datastore_add.html:344
 msgid "No schemas found. Type a name to create one."
 msgstr "No s'han trobat esquemes. Escriviu un nom per crear-ne un."
 
-#: templates/datastore_add.html:329
+#: templates/datastore_add.html:346
 msgid "Unknown error"
 msgstr "Error desconegut"
 
-#: templates/datastore_add.html:337
+#: templates/datastore_add.html:354
 msgid "Connection error. You can type a schema name."
 msgstr "Error de connexió. Podeu escriure un nom d'esquema."
 
-#: templates/datastore_add.html:339
+#: templates/datastore_add.html:356
 msgid "Connection timeout. You can type a schema name."
 msgstr "Temps d'espera de connexió esgotat. Podeu escriure un nom d'esquema."
 
-#: templates/datastore_list.html:11
+#: templates/datastore_list.html:31
 msgid "Add datastore"
 msgstr "Afegir magatzem"
 
-#: templates/datastore_list.html:39
+#: templates/datastore_list.html:75
 msgid "Using centralized connection"
 msgstr "Utilitzant connexió centralitzada"
 
-#: templates/datastore_list.html:67
+#: templates/datastore_list.html:119
+#, python-format
+msgid ""
+"\n"
+"\t\t\t\t\t\tShowing %(start)s to %(end)s of %(total)s datastores\n"
+"\t\t\t\t\t\t"
+msgstr ""
+"\n"
+"\t\t\t\t\t\tMostrant %(start)s a %(end)s de %(total)s magatzems de dades\n"
+"\t\t\t\t\t\t"
+
+#: templates/datastore_list.html:139
 msgid "Delete datastore"
 msgstr "Eliminar magatzem"
 
-#: templates/datastore_list.html:72
+#: templates/datastore_list.html:144
 msgid "The data store and its registered resources will be deleted"
 msgstr "El magatzem de dades i els recursos associats a ell seran eliminats"
 
-#: templates/datastore_list.html:78
+#: templates/datastore_list.html:150
 msgid "Check this option to remove the schema associated with the datastore"
-msgstr "Marqueu aquesta opció per eliminar l'esquema associat al magatzem de dades"
-"Marcar aquesta opció per a esborrar l'esquema associat amb el magatzem de "
-"dades"
+msgstr ""
+"Marqueu aquesta opció per eliminar l'esquema associat al magatzem de "
+"dadesMarcar aquesta opció per a esborrar l'esquema associat amb el magatzem "
+"de dades"
 
-#: templates/datastore_list.html:125
+#: templates/datastore_list.html:202
 msgid "Remove datastore"
 msgstr "Eliminar magatzem"
 
-#: templates/datastore_list.html:129
+#: templates/datastore_list.html:206
 msgid "Update datastore"
 msgstr "Actualitzar magatzem"
 
-#: templates/datastore_update.html:74
+#: templates/datastore_update.html:83
 msgid "This datastore uses a centralized connection"
 msgstr "Aquest magatzem de dades utilitza una connexió centralitzada"
 
-#: templates/datastore_update.html:86
+#: templates/datastore_update.html:95
 msgid ""
 "Connection parameters are managed from the Connections section. To modify "
 "them, edit the connection:"
-msgstr "Els paràmetres de connexió es gestionen des de la secció Connexions. Per modificar-los, editeu la connexió:"
+msgstr ""
+"Els paràmetres de connexió es gestionen des de la secció Connexions. Per "
+"modificar-los, editeu la connexió:"
 
 #: templates/enumeration_add.html:50 templates/enumeration_update.html:50
 msgid "Order type"
@@ -2159,8 +2303,8 @@ msgstr "Temps d'espera (milisegons)"
 #: templates/geoserver/layer_upload_postgis.html:125
 #: templates/geoserver/layer_upload_raster.html:109
 #: templates/geoserver/layer_upload_vector.html:124
-#: templates/layer_add.html:225 templates/layer_create.html:237
-#: templates/layer_update.html:299
+#: templates/layer_add.html:221 templates/layer_create.html:237
+#: templates/layer_update.html:291
 msgid "Metadata: Abstract"
 msgstr "Metadades: Resum"
 
@@ -2171,7 +2315,7 @@ msgstr "Metadades: Resum"
 #: templates/geoserver/layer_upload_postgis.html:126
 #: templates/geoserver/layer_upload_raster.html:110
 #: templates/geoserver/layer_upload_vector.html:123
-#: templates/layer_add.html:226 templates/layer_create.html:238
+#: templates/layer_add.html:222 templates/layer_create.html:238
 msgid "Some description of the layer"
 msgstr "Alguna descripció de la capa"
 
@@ -2181,37 +2325,37 @@ msgid "Enable metaquality"
 msgstr "Activar metaqualitat"
 
 #: templates/external_layer_add.html:223
-#: templates/external_layer_update.html:282 templates/layer_add.html:248
-#: templates/layer_create.html:260 templates/layer_update.html:331
+#: templates/external_layer_update.html:282 templates/layer_add.html:244
+#: templates/layer_create.html:260 templates/layer_update.html:323
 msgid "Button title in the TOC"
 msgstr "Títol del botó en el TOC"
 
 #: templates/external_layer_add.html:224
-#: templates/external_layer_update.html:283 templates/layer_add.html:249
-#: templates/layer_create.html:261 templates/layer_update.html:332
+#: templates/external_layer_update.html:283 templates/layer_add.html:245
+#: templates/layer_create.html:261 templates/layer_update.html:324
 msgid "Button title"
 msgstr "Títol del botó"
 
-#: templates/external_layer_add.html:224 templates/layer_add.html:249
-#: templates/layer_create.html:261 templates/layer_update.html:332
+#: templates/external_layer_add.html:224 templates/layer_add.html:245
+#: templates/layer_create.html:261 templates/layer_update.html:324
 msgid "Detailed info"
 msgstr "Informació detallada"
 
 #: templates/external_layer_add.html:230
-#: templates/external_layer_update.html:292 templates/layer_add.html:255
-#: templates/layer_create.html:267 templates/layer_update.html:341
+#: templates/external_layer_update.html:292 templates/layer_add.html:251
+#: templates/layer_create.html:267 templates/layer_update.html:333
 msgid "HTML"
 msgstr "HTML"
 
 #: templates/external_layer_add.html:301
-#: templates/external_layer_update.html:365 templates/layer_add.html:575
-#: templates/layer_create.html:612 templates/layer_update.html:518
+#: templates/external_layer_update.html:365 templates/layer_add.html:571
+#: templates/layer_create.html:612 templates/layer_update.html:510
 msgid "Layer title"
 msgstr "Títol de la capa"
 
 #: templates/external_layer_add.html:302
-#: templates/external_layer_update.html:366 templates/layer_add.html:576
-#: templates/layer_create.html:613 templates/layer_update.html:519
+#: templates/external_layer_update.html:366 templates/layer_add.html:572
+#: templates/layer_create.html:613 templates/layer_update.html:511
 msgid "Layer description"
 msgstr "Descripció de la capa"
 
@@ -2235,25 +2379,25 @@ msgstr "Eliminar capa externa"
 msgid "Update external layer"
 msgstr "Actualitzar capa externa"
 
-#: templates/external_layer_update.html:226 templates/layer_update.html:275
+#: templates/external_layer_update.html:226 templates/layer_update.html:267
 msgid "Layer metadata"
 msgstr "Metadades de la capa"
 
-#: templates/external_layer_update.html:231 templates/layer_update.html:280
+#: templates/external_layer_update.html:231 templates/layer_update.html:272
 msgid "Metadata UUID"
 msgstr "UUID de les metadades"
 
 #: templates/external_layer_update.html:237
-#: templates/external_layer_update.html:243 templates/layer_update.html:286
-#: templates/layer_update.html:292
+#: templates/external_layer_update.html:243 templates/layer_update.html:278
+#: templates/layer_update.html:284
 msgid "Metadata tools"
 msgstr "Eines de metadades"
 
-#: templates/external_layer_update.html:238 templates/layer_update.html:287
+#: templates/external_layer_update.html:238 templates/layer_update.html:279
 msgid "Edit in catalog"
 msgstr "Editar en catàleg"
 
-#: templates/external_layer_update.html:244 templates/layer_update.html:293
+#: templates/external_layer_update.html:244 templates/layer_update.html:285
 msgid "Create metadata"
 msgstr "Crear metadada"
 
@@ -2569,111 +2713,109 @@ msgstr "Paràmetre temporal"
 msgid "View in real time"
 msgstr "Veure en temps real"
 
-#: templates/layer_add.html:138 templates/layer_update.html:191
-msgid "Show in vector tile format"
-msgstr "Mostrar en format vector tiles"
-
-#: templates/layer_add.html:143 templates/layer_update.html:196
+#: templates/layer_add.html:139 templates/layer_update.html:188
 msgid "Update interval (miliseconds)"
 msgstr "Interval d'actualització (mil·lisegons)"
 
-#: templates/layer_add.html:152 templates/layer_create.html:168
-#: templates/layer_update.html:204
+#: templates/layer_add.html:148 templates/layer_create.html:168
+#: templates/layer_update.html:196
 msgid "time_enabled field"
 msgstr "Camp amb temps habilitat"
 
-#: templates/layer_add.html:159
+#: templates/layer_add.html:155
 msgid "End time enabled field"
 msgstr "Camp temporal (fi d'interval)"
 
-#: templates/layer_add.html:166 templates/layer_create.html:180
-#: templates/layer_update.html:217
+#: templates/layer_add.html:162 templates/layer_create.html:180
+#: templates/layer_update.html:209
 msgid "Time resolution"
 msgstr "Resolució del temps"
 
-#: templates/layer_add.html:172 templates/layer_create.html:186
-#: templates/layer_update.html:223
+#: templates/layer_add.html:168 templates/layer_create.html:186
+#: templates/layer_update.html:215
 msgid "Time presentation"
 msgstr "Presentació del temps"
 
-#: templates/layer_add.html:178 templates/layer_create.html:192
-#: templates/layer_update.html:229
+#: templates/layer_add.html:174 templates/layer_create.html:192
+#: templates/layer_update.html:221
 msgid ""
 "Time resolution (years, months, weeks, days, hours, minutes and seconds)"
 msgstr ""
 "Resolució de temps (anys, mesos, setmanes, dies, hores, minuts i segons)"
 
-#: templates/layer_add.html:193 templates/layer_create.html:205
-#: templates/layer_update.html:242
+#: templates/layer_add.html:189 templates/layer_create.html:205
+#: templates/layer_update.html:234
 msgid "Default value mode"
 msgstr "Valor per defecte del mode"
 
-#: templates/layer_add.html:243 templates/layer_create.html:255
-#: templates/layer_update.html:322
+#: templates/layer_add.html:239 templates/layer_create.html:255
+#: templates/layer_update.html:314
 msgid "Enable detailed information"
 msgstr "Activar informació detallada"
 
-#: templates/layer_add.html:260
+#: templates/layer_add.html:256
 msgid ""
 "Para generar automáticamente metadatos enriquecidos con descripción y campos "
 "de la base de datos:"
-msgstr "Per generar automàticament metadades enriquides amb descripció i camps de la base de dades:"
+msgstr ""
+"Per generar automàticament metadades enriquides amb descripció i camps de la "
+"base de dades:"
 
-#: templates/layer_add.html:262
+#: templates/layer_add.html:258
 msgid "Guarda esta capa primero"
 msgstr "Deseu primer aquesta capa"
 
-#: templates/layer_add.html:263
+#: templates/layer_add.html:259
 msgid "Ve a 'Editar capa' → pestaña 'Información Detallada'"
 msgstr "Aneu a 'Editar capa' → pestanya 'Informació Detallada'"
 
-#: templates/layer_add.html:264
+#: templates/layer_add.html:260
 msgid "Usa el botón 'Generar Metadatos Enriquecidos con Campos'"
 msgstr "Utilitzeu el botó 'Generar Metadades Enriquides amb Camps'"
 
-#: templates/layer_add.html:338 templates/layer_create.html:485
-#: templates/layer_update.html:435
+#: templates/layer_add.html:334 templates/layer_create.html:485
+#: templates/layer_update.html:427
 msgid "Resource contains no fields"
 msgstr "El recurs no conté cap camp"
 
-#: templates/layer_add.html:356 templates/layer_create.html:505
-#: templates/layer_update.html:461 templates/sqlview_add.html:299
+#: templates/layer_add.html:352 templates/layer_create.html:505
+#: templates/layer_update.html:453 templates/sqlview_add.html:299
 msgid "Choose field"
 msgstr "Trieu camp"
 
-#: templates/layer_add.html:383
+#: templates/layer_add.html:379
 msgid "Data store contains no resources to publish"
 msgstr "El magatzem no conté recursos per publicar"
 
-#: templates/layer_add.html:400
+#: templates/layer_add.html:396
 msgid "Choose resource"
 msgstr "Seleccionar recurs"
 
-#: templates/layer_add.html:406 templates/sqlview_add.html:209
+#: templates/layer_add.html:402 templates/sqlview_add.html:209
 #: templates/sqlview_add.html:261 templates/sqlview_add.html:304
 msgid "Service is unavailable"
 msgstr "El servei no està disponible"
 
-#: templates/layer_add.html:413 templates/layer_add.html:458
-#: templates/layer_add.html:524 templates/layer_create.html:563
+#: templates/layer_add.html:409 templates/layer_add.html:454
+#: templates/layer_add.html:520 templates/layer_create.html:563
 #: templates/sqlview_add.html:219 templates/sqlview_add.html:268
 msgid "No valid data store selected"
 msgstr "Magatzem no vàlid"
 
-#: templates/layer_add.html:428 templates/layer_add.html:451
+#: templates/layer_add.html:424 templates/layer_add.html:447
 #: templates/layer_create.html:533 templates/layer_create.html:556
 msgid "No layer groups available"
 msgstr "No hi ha grups de capes disponibles"
 
-#: templates/layer_add.html:445 templates/layer_create.html:550
+#: templates/layer_add.html:441 templates/layer_create.html:550
 msgid "Choose layer group"
 msgstr "Trieu grup de capes"
 
-#: templates/layer_add.html:486 templates/layer_add.html:514
+#: templates/layer_add.html:482 templates/layer_add.html:510
 msgid "-----------"
 msgstr "-----------"
 
-#: templates/layer_add.html:507
+#: templates/layer_add.html:503
 msgid "Choose date field"
 msgstr "Trieu data"
 
@@ -2726,7 +2868,7 @@ msgstr "És editable?"
 msgid "Is shown in getFeatureInfo?"
 msgstr "Es mostra a getFeatureInfo?"
 
-#: templates/layer_config.html:82 templates/layer_config.html:498
+#: templates/layer_config.html:82 templates/layer_config.html:499
 msgid "Actions"
 msgstr "Accions"
 
@@ -2772,7 +2914,7 @@ msgstr "Afegir camp"
 msgid "Field title"
 msgstr "Títol del camp"
 
-#: templates/layer_config.html:259 templates/layer_config.html:1627
+#: templates/layer_config.html:259 templates/layer_config.html:1757
 msgid "Delete group"
 msgstr "Suprimeix el grup"
 
@@ -2875,7 +3017,7 @@ msgstr ""
 "Totes les geometries han d'estar completament cobertes per geometries d'una "
 "altra capa"
 
-#: templates/layer_config.html:412 templates/layer_config.html:1955
+#: templates/layer_config.html:412 templates/layer_config.html:2085
 msgid "Select a layer"
 msgstr "Eliminar capa base"
 
@@ -2917,55 +3059,67 @@ msgstr "Distància de tolerància per verificació de contigüitat"
 msgid ""
 "Assign triggers to fields. These triggers will execute automatically when "
 "data is inserted, updated or deleted."
-msgstr "Assigneu disparadors als camps. Aquests disparadors s'executaran automàticament quan s'insereixin, actualitzin o eliminin dades."
+msgstr ""
+"Assigneu disparadors als camps. Aquests disparadors s'executaran "
+"automàticament quan s'insereixin, actualitzin o eliminin dades."
 
-#: templates/layer_config.html:494 templates/layer_config.html:578
+#: templates/layer_config.html:494 templates/layer_config.html:598
 msgid "Trigger"
 msgstr "Disparador"
 
-#: templates/layer_config.html:496 templates/layer_config.html:598
+#: templates/layer_config.html:496 templates/layer_config.html:618
 msgid "Target field"
 msgstr "Camp de destí"
 
-#: templates/layer_config.html:528 views.py:7914
+#: templates/layer_config.html:498
+msgid "Enabled"
+msgstr "Habilitat"
+
+#: templates/layer_config.html:532 views.py:8358
+msgid "You do not have permission to modify this trigger"
+msgstr "No teniu permís per modificar aquest disparador"
+
+#: templates/layer_config.html:548 views.py:8312
 msgid "You do not have permission to remove this trigger"
 msgstr "No teniu permís per eliminar aquest disparador"
 
-#: templates/layer_config.html:537
+#: templates/layer_config.html:557
 msgid "No triggers assigned to this layer yet"
 msgstr "Encara no hi ha disparadors assignats a aquesta capa"
 
-#: templates/layer_config.html:548
+#: templates/layer_config.html:568
 msgid "Assign trigger to field"
 msgstr "Assignar disparador a camp"
 
-#: templates/layer_config.html:553
+#: templates/layer_config.html:573
 msgid ""
 "No triggers available. Create triggers with 'Calculated field' option in the "
 "connection configuration."
-msgstr "No hi ha disparadors disponibles. Creeu disparadors amb l'opció 'Camp calculat' a la configuració de la connexió."
+msgstr ""
+"No hi ha disparadors disponibles. Creeu disparadors amb l'opció 'Camp "
+"calculat' a la configuració de la connexió."
 
-#: templates/layer_config.html:574
+#: templates/layer_config.html:594
 msgid "Assign trigger"
 msgstr "Assignar disparador"
 
-#: templates/layer_config.html:580
+#: templates/layer_config.html:600
 msgid "Select a trigger..."
 msgstr "Seleccioneu un disparador..."
 
-#: templates/layer_config.html:600
+#: templates/layer_config.html:620
 msgid "Select a field..."
 msgstr "Seleccioneu un camp..."
 
-#: templates/layer_config.html:607
+#: templates/layer_config.html:627
 msgid "Select the field that will be calculated by this trigger"
 msgstr "Seleccioneu el camp que serà calculat per aquest disparador"
 
-#: templates/layer_config.html:612
+#: templates/layer_config.html:632
 msgid "Assign"
 msgstr "Assignar"
 
-#: templates/layer_config.html:1962
+#: templates/layer_config.html:2092
 msgid "Select layers"
 msgstr "Seleccionar capes"
 
@@ -2973,7 +3127,7 @@ msgstr "Seleccionar capes"
 msgid "Field list"
 msgstr "Llistat de camps"
 
-#: templates/layer_create.html:174 templates/layer_update.html:210
+#: templates/layer_create.html:174 templates/layer_update.html:202
 msgid "End time_enabled field"
 msgstr "Final del camp temporal"
 
@@ -2982,33 +3136,52 @@ msgstr "Final del camp temporal"
 msgid "Create empty layer"
 msgstr "Crear capa buida"
 
-#: templates/layer_list.html:25
+#: templates/layer_list.html:23
+msgid "Filter by project"
+msgstr "Filtrar per projecte"
+
+#: templates/layer_list.html:33
+msgid "Show all layers"
+msgstr "Mostrar totes les capes"
+
+#: templates/layer_list.html:56
 msgid "Preview"
 msgstr "Previsualització"
 
-#: templates/layer_list.html:30
+#: templates/layer_list.html:61
 msgid "Projects"
 msgstr "Projectes"
 
-#: templates/layer_list.html:31
+#: templates/layer_list.html:62
 msgid "Datastore type"
 msgstr "Tipus de magatzem de dades"
 
-#: templates/layer_list.html:73 templates/layer_list.html:153
+#: templates/layer_list.html:120
+#, python-format
+msgid ""
+"\n"
+"\t\t\t\t\t\tShowing %(start)s to %(end)s of %(total)s layers\n"
+"\t\t\t\t\t\t"
+msgstr ""
+"\n"
+"\t\t\t\t\t\tMostrant %(start)s a %(end)s de %(total)s capes\n"
+"\t\t\t\t\t\t"
+
+#: templates/layer_list.html:140 templates/layer_list.html:225
 #: templates/layergroup_update.html:141 templates/layergroup_update.html:159
 #: templates/layergroup_update.html:161 templates/layergroup_update.html:205
 msgid "Delete layer"
 msgstr "Eliminar capa"
 
-#: templates/layer_list.html:76 templates/layergroup_update.html:208
+#: templates/layer_list.html:143 templates/layergroup_update.html:208
 msgid "The layer will be removed, Do you want continue?"
 msgstr "La capa serà eliminada, desitja continuar?"
 
-#: templates/layer_list.html:92
+#: templates/layer_list.html:159
 msgid "Raster layers are not configurable"
 msgstr "Les capes raster no son configurables"
 
-#: templates/layer_list.html:107
+#: templates/layer_list.html:174
 msgid ""
 "The layer could not be removed from GeoServer, but it was deleted from the "
 "list anyway"
@@ -3016,22 +3189,22 @@ msgstr ""
 "La capa no s'ha pogut eliminar de Geosever, però igualment s'ha esborrat "
 "d'aquesta llista"
 
-#: templates/layer_list.html:159 templates/layer_list.html:162
+#: templates/layer_list.html:231 templates/layer_list.html:234
 #: templates/layergroup_update.html:139 templates/layergroup_update.html:149
 #: templates/layergroup_update.html:151
 msgid "Configure layer"
 msgstr "Configurar capa"
 
-#: templates/layer_list.html:170 templates/layergroup_update.html:138
+#: templates/layer_list.html:242 templates/layergroup_update.html:138
 #: templates/layergroup_update.html:144 templates/layergroup_update.html:146
 msgid "Update layer"
 msgstr "Actualitzar capa"
 
-#: templates/layer_list.html:175
+#: templates/layer_list.html:247
 msgid "Refresh extent and layer definition"
 msgstr "Refrescar extensió i definició de capa"
 
-#: templates/layer_list.html:179
+#: templates/layer_list.html:251
 msgid "Update thumbnail"
 msgstr "Actualitzar miniatura"
 
@@ -3043,41 +3216,47 @@ msgstr "Icona"
 msgid "Supported formats"
 msgstr "Formats admesos"
 
-#: templates/layer_update.html:349
+#: templates/layer_update.html:341
 msgid "Generar Metadatos Enriquecidos con Campos"
 msgstr "Generar Metadades Enriquides amb Camps"
 
-#: templates/layer_update.html:352
+#: templates/layer_update.html:344
 msgid ""
 "Este botón generará automáticamente una estructura con descripción y lista "
 "de campos de la base de datos"
-msgstr "Aquest botó generarà automàticament una estructura amb descripció i llista de camps de la base de dades"
+msgstr ""
+"Aquest botó generarà automàticament una estructura amb descripció i llista "
+"de camps de la base de dades"
 
-#: templates/layer_update.html:634
+#: templates/layer_update.html:626
 msgid "Generando..."
 msgstr "Generant..."
 
-#: templates/layer_update.html:664
+#: templates/layer_update.html:656
 msgid ""
 "Metadatos enriquecidos generados correctamente. Puedes editarlos antes de "
 "guardar la capa."
-msgstr "Metadades enriquides generades correctament. Podeu editar-les abans de desar la capa."
+msgstr ""
+"Metadades enriquides generades correctament. Podeu editar-les abans de desar "
+"la capa."
 
-#: templates/layer_update.html:677
+#: templates/layer_update.html:669
 msgid "Error al generar metadatos enriquecidos"
 msgstr "Error en generar metadades enriquides"
 
-#: templates/layer_update.html:680
+#: templates/layer_update.html:672
 msgid ""
 "Error 404: La URL no fue encontrada. Asegúrate de que el plugin GeoCopilot "
 "está instalado y el servidor está reiniciado."
-msgstr "Error 404: La URL no s'ha trobat. Assegureu-vos que el plugin GeoCopilot està instal·lat i el servidor està reiniciat."
+msgstr ""
+"Error 404: La URL no s'ha trobat. Assegureu-vos que el plugin GeoCopilot "
+"està instal·lat i el servidor està reiniciat."
 
-#: templates/layer_update.html:682
+#: templates/layer_update.html:674
 msgid "Error 403: No tienes permisos para realizar esta acción."
 msgstr "Error 403: No teniu permisos per realitzar aquesta acció."
 
-#: templates/layer_update.html:684
+#: templates/layer_update.html:676
 msgid "Error 500: Error interno del servidor."
 msgstr "Error 500: Error intern del servidor."
 
@@ -3119,19 +3298,30 @@ msgstr "Tornar a la llista de projectes"
 msgid "Add layer group"
 msgstr "Afegir grup de capes"
 
-#: templates/layergroup_list.html:29
+#: templates/layergroup_list.html:48
 msgid "Asigned to"
 msgstr "Assignat a"
 
-#: templates/layergroup_list.html:68 templates/layergroup_list.html:116
+#: templates/layergroup_list.html:103
+#, python-format
+msgid ""
+"\n"
+"\t\t\t\t\t\tShowing %(start)s to %(end)s of %(total)s layer groups\n"
+"\t\t\t\t\t\t"
+msgstr ""
+"\n"
+"\t\t\t\t\t\tMostrant %(start)s a %(end)s de %(total)s grups de capes\n"
+"\t\t\t\t\t\t"
+
+#: templates/layergroup_list.html:123 templates/layergroup_list.html:176
 msgid "Delete layer group"
 msgstr "Eliminar grup de capes"
 
-#: templates/layergroup_list.html:71
+#: templates/layergroup_list.html:126
 msgid "The layer group will be removed, Do you want continue?"
 msgstr "El grup de capes serà eliminat, desitja continuar?"
 
-#: templates/layergroup_list.html:124
+#: templates/layergroup_list.html:184
 msgid "Update layer group"
 msgstr "Actualitzar grup de capes"
 
@@ -3188,12 +3378,30 @@ msgid "All users can manage this connection"
 msgstr "Tots els usuaris poden gestionar aquesta connexió"
 
 #: templates/select_connection_permissions.html:26
+#: templates/select_datastore_permissions.html:20
 msgid "Allow all - Management"
 msgstr "Permetre a tots - Gestió"
 
 #: templates/select_connection_permissions.html:51
+#: templates/select_datastore_permissions.html:41
 msgid "Management"
 msgstr "Gestió"
+
+#: templates/select_datastore_permissions.html:7
+msgid "Select datastore permissions"
+msgstr "Seleccionar permisos del magatzem de dades"
+
+#: templates/select_datastore_permissions.html:12
+msgid "All staff users can use this datastore to create layers"
+msgstr "Tots els usuaris staff poden utilitzar aquest magatzem de dades per crear capes"
+
+#: templates/select_datastore_permissions.html:14
+msgid "Allow all - Use"
+msgstr "Permetre a tots - Ús"
+
+#: templates/select_datastore_permissions.html:18
+msgid "All staff users can manage (edit) this datastore"
+msgstr "Tots els usuaris staff poden gestionar (editar) aquest magatzem de dades"
 
 #: templates/select_layer_permissions.html:7
 msgid "Select layer permissions"
@@ -3396,20 +3604,31 @@ msgstr "Les vistes SQL no es poden editar."
 msgid "Add workspace"
 msgstr "Afegir espai de treball"
 
-#: templates/workspace_list.html:24
+#: templates/workspace_list.html:40
 msgid "URI"
 msgstr "URI"
 
-#: templates/workspace_list.html:64 templates/workspace_list.html:113
+#: templates/workspace_list.html:96
+#, python-format
+msgid ""
+"\n"
+"\t\t\t\t\t\tShowing %(start)s to %(end)s of %(total)s workspaces\n"
+"\t\t\t\t\t\t"
+msgstr ""
+"\n"
+"\t\t\t\t\t\tMostrant %(start)s a %(end)s de %(total)s espais de treball\n"
+"\t\t\t\t\t\t"
+
+#: templates/workspace_list.html:116 templates/workspace_list.html:170
 msgid "Delete workspace"
 msgstr "Eliminar espai de treball"
 
-#: templates/workspace_list.html:67
+#: templates/workspace_list.html:119
 msgid ""
 "The workspace and its registered data stores and resources will be deleted"
 msgstr "L'espai de treball i els recursos assignats al mateix seran eliminats"
 
-#: templates/workspace_list.html:117
+#: templates/workspace_list.html:174
 msgid "Update workspace"
 msgstr "Actualitzar espai de treball"
 
@@ -3421,7 +3640,7 @@ msgstr "Uri"
 msgid "Workspace description"
 msgstr "Descripció de l'espai de treball"
 
-#: views.py:363
+#: views.py:400
 #, python-brace-format
 msgid ""
 "Invalid workspace name: '{value}'. Identifiers must begin with a letter or "
@@ -3432,11 +3651,11 @@ msgstr ""
 "començar amb una lletra o un guió baix (_). Els següents caràcters poden ser "
 "lletres, guions o números"
 
-#: views.py:374
+#: views.py:411
 msgid "Error: workspace could not be created"
 msgstr "Error: L'espai de treball no pot ser creat"
 
-#: views.py:524 views.py:3848
+#: views.py:599 views.py:4220
 #, python-brace-format
 msgid ""
 "Invalid datastore name: '{value}'. Identifiers must begin with a letter or "
@@ -3447,91 +3666,93 @@ msgstr ""
 "una lletra o un guió baix (_). Els següents caràcters poden ser lletres, "
 "guions o números"
 
-#: views.py:526
+#: views.py:601
 #, python-brace-format
 msgid "Invalid datastore name: '{value}'. Identifiers must be in lowercase."
 msgstr ""
 "Nom de magatzem de dades invàlid '{value}'. Els identificadors han d'estar "
 "en minúscules."
 
-#: views.py:537
+#: views.py:612
 msgid "Schema name is required"
 msgstr "El nom del camp és requerit"
 
-#: views.py:539
+#: views.py:614
 msgid ""
 "Invalid schema name. Use only letters, numbers and underscores, starting "
 "with a letter or underscore."
-msgstr "Nom d'esquema no vàlid. Utilitzeu només lletres, números i guions baixos, començant amb una lletra o guió baix."
+msgstr ""
+"Nom d'esquema no vàlid. Utilitzeu només lletres, números i guions baixos, "
+"començant amb una lletra o guió baix."
 
-#: views.py:574 views.py:600
+#: views.py:653 views.py:682
 msgid "Error: Data store could not be created"
 msgstr "Error: El magatzem no pot ser creat"
 
-#: views.py:579
+#: views.py:658
 msgid "Error creating schema: "
 msgstr "Error creant esquema: "
 
-#: views.py:603
+#: views.py:685
 msgid "Error: GeoTIFF is not georreferenced"
 msgstr "Error: GeoTIFF no està georreferenciat"
 
-#: views.py:657 views.py:689
+#: views.py:809 views.py:845
 msgid "Error updating datastore"
 msgstr "Error actualitzant magatzem"
 
-#: views.py:831
+#: views.py:1065
 msgid "ERROR can't connect with GeoServer"
 msgstr "ERROR no es pot connectar a GeoServer"
 
-#: views.py:839
+#: views.py:1073
 msgid "ERROR can't remove GeoServer data. Forcing remove from DataBase"
 msgstr ""
 "ERROr no es poden eliminar les dades del GeoServer. Forçant supressió de la "
 "base de dades"
 
-#: views.py:871
+#: views.py:1105
 msgid "ERROR User is not authorized to perform this operation"
 msgstr "ERROR L'usuari no està autoritzat a realitzar aquesta operació"
 
-#: views.py:1170
+#: views.py:1404
 msgid "Vector layer containing information on {}"
 msgstr "Capa vectorial que conté informació sobre {}"
 
-#: views.py:1172
+#: views.py:1406
 msgid "Raster layer containing information on {}"
 msgstr "Capa més ràpida que conté informació sobre {}"
 
-#: views.py:1174
+#: views.py:1408
 msgid "External layer providing information on {}"
 msgstr "Capa externa que proporciona informació sobre {}"
 
-#: views.py:1175
+#: views.py:1409
 msgid "Layer containing information on {}"
 msgstr "Capa que conté informació sobre {}"
 
-#: views.py:1276 views.py:3851
-msgid "You are not allowed to manage the selected datastore"
-msgstr "No tens permisos per gestionar el magatzem seleccionat"
+#: views.py:1514 views.py:4223
+msgid "You are not allowed to use the selected datastore"
+msgstr "No tens permisos per utilitzar el magatzem de dades seleccionat"
 
-#: views.py:1278 views.py:3854
+#: views.py:1516 views.py:4226
 msgid "You are not allowed to manage the selected layergroup"
 msgstr "No tens permisos per gestionar el grup de capes seleccionat"
 
-#: views.py:3349 views.py:3365
+#: views.py:3680 views.py:3696
 #, python-brace-format
 msgid "Error clearing cache. Cause: {cause}."
 msgstr "Error netejant la memòria cau. Causa: {cause}"
 
-#: views.py:3351
+#: views.py:3682
 msgid "Not supported."
 msgstr "No compatible."
 
-#: views.py:3460
+#: views.py:3832
 msgid "You must enter a name for layer group"
 msgstr "Ha d'introduir un nom per al grup de capes"
 
-#: views.py:3470 views.py:3622
+#: views.py:3842 views.py:3994
 #, python-brace-format
 msgid ""
 "Invalid layer group name: '{value}'. Identifiers must begin with a letter or "
@@ -3542,11 +3763,11 @@ msgstr ""
 "començar amb una lletra o un guió baix (_). Els següents caràcters poden ser "
 "lletres, guions o números"
 
-#: views.py:3479 views.py:3618
+#: views.py:3851 views.py:3990
 msgid "Layer group name already exists"
 msgstr "El nom del grup de capes ja existeix"
 
-#: views.py:3969
+#: views.py:4341
 msgid ""
 "Error: table already exists. Try to publish the layer instead of creating an "
 "empty one."
@@ -3554,31 +3775,31 @@ msgstr ""
 "Error: la taula ja existeix. Intenteu publicar la capa en lloc de crear una "
 "buida."
 
-#: views.py:4149
+#: views.py:4521
 msgid "You must enter a title for enumeration"
 msgstr "Ha d'introduir un títol per l'enumeració"
 
-#: views.py:4159
+#: views.py:4531
 msgid "Name already taken"
 msgstr "Nom ja utilitzat"
 
-#: views.py:4204
+#: views.py:4576
 msgid "Name and title are required"
 msgstr "El nom i el títol són requerits"
 
-#: views.py:4294
+#: views.py:4666
 msgid "Error updating enumeration: "
 msgstr "Error en actualitzar l'enumeració: "
 
-#: views.py:5585
+#: views.py:5957
 msgid "Error: ExternalLayer could not be published"
 msgstr "Error: La capa externa no pot ser publicada"
 
-#: views.py:5834
+#: views.py:6206
 msgid "Error: externallayer could not be published"
 msgstr "Error: La capa externa no pot ser publicada"
 
-#: views.py:5879
+#: views.py:6251
 msgid ""
 "The layer was saved successfully, but there was an error uploading the style "
 "file. Please try uploading it again."
@@ -3586,217 +3807,241 @@ msgstr ""
 "La capa s'ha desat correctament, però hi ha hagut un error en pujar el "
 "fitxer d'estil. Si us plau, intenti pujar-lo de nou."
 
-#: views.py:6292
+#: views.py:6664
 #, python-brace-format
 msgid "Error configuring layer. Cause: {cause}."
 msgstr "Error configurant la capa. Causa: {cause}."
 
-#: views.py:6357
+#: views.py:6729
 #, python-brace-format
 msgid "Error accessing layer. Cause: {cause}."
 msgstr "Error accedint a la capa. Causa: {cause}."
 
-#: views.py:6453
+#: views.py:6825
 #, python-brace-format
 msgid "Error accessing layer group. Cause: {cause}."
 msgstr "Error accedint al grupo de capes. Causa: {cause}."
 
-#: views.py:6693
+#: views.py:7090
 msgid "Connection created successfully"
 msgstr "Connexió creada correctament"
 
-#: views.py:6721 views.py:6996 views.py:7030 views.py:7248 views.py:7364
-#: views.py:7522 views.py:7556 views.py:7699 views.py:7967 views.py:8067
+#: views.py:7118 views.py:7393 views.py:7427 views.py:7645 views.py:7761
+#: views.py:7919 views.py:7953 views.py:8096 views.py:8543 views.py:8643
 msgid "Connection not found"
 msgstr "Connexió no trobada"
 
-#: views.py:6735
+#: views.py:7132
 msgid "You do not have permission to manage this connection"
 msgstr "No teniu permís per gestionar aquesta connexió"
 
-#: views.py:6825
+#: views.py:7222
 msgid ""
 "Connection updated but some datastores could not be synchronized with "
 "GeoServer: "
-msgstr "Connexió actualitzada però alguns magatzems de dades no s'han pogut sincronitzar amb GeoServer: "
+msgstr ""
+"Connexió actualitzada però alguns magatzems de dades no s'han pogut "
+"sincronitzar amb GeoServer: "
 
-#: views.py:6847
+#: views.py:7244
 msgid "Connection updated successfully"
 msgstr "Connexió actualitzada correctament"
 
-#: views.py:6966
+#: views.py:7363
 #, python-brace-format
 msgid "Cannot delete connection. It is being used by {0} datastore(s)."
-msgstr "No es pot eliminar la connexió. Està sent utilitzada per {0} magatzem(s) de dades."
+msgstr ""
+"No es pot eliminar la connexió. Està sent utilitzada per {0} magatzem(s) de "
+"dades."
 
-#: views.py:6993
+#: views.py:7390
 msgid "Connection and all associated resources deleted successfully"
 msgstr "Connexió i tots els recursos associats eliminats correctament"
 
-#: views.py:7154
+#: views.py:7551
 msgid "Entity is required for testing SEGEX connection"
 msgstr "L'entitat és obligatòria per provar la connexió SEGEX"
 
-#: views.py:7210
+#: views.py:7607
 msgid "Connection type not supported for testing"
 msgstr "Tipus de connexió no suportat per a proves"
 
-#: views.py:7231
+#: views.py:7628
 msgid "Configuration is only available for PostGIS connections"
 msgstr "La configuració només està disponible per a connexions PostGIS"
 
-#: views.py:7263 views.py:7380 views.py:7576 views.py:7730
+#: views.py:7660 views.py:7777 views.py:7973 views.py:8127
 msgid "Triggers are only available for PostGIS connections"
 msgstr "Els disparadors només estan disponibles per a connexions PostGIS"
 
-#: views.py:7291 views.py:7410
+#: views.py:7688 views.py:7807
 msgid "Name is required"
 msgstr "El nom és obligatori"
 
-#: views.py:7300 views.py:7421 views.py:7615 views.py:7646
+#: views.py:7697 views.py:7818 views.py:8012 views.py:8043
 msgid "A trigger with this name already exists"
 msgstr "Ja existeix un disparador amb aquest nom"
 
-#: views.py:7318 views.py:7441
+#: views.py:7715 views.py:7838
 msgid "At least one event must be selected"
 msgstr "S'ha de seleccionar almenys un esdeveniment"
 
-#: views.py:7346 views.py:7631
+#: views.py:7743 views.py:8028
 msgid "Trigger created successfully"
 msgstr "Disparador creat correctament"
 
-#: views.py:7497
+#: views.py:7894
 msgid "Trigger updated but some layer triggers could not be reinstalled: "
-msgstr "Disparador actualitzat però alguns disparadors de capa no s'han pogut reinstal·lar: "
+msgstr ""
+"Disparador actualitzat però alguns disparadors de capa no s'han pogut "
+"reinstal·lar: "
 
-#: views.py:7499
+#: views.py:7896
 #, python-format
 msgid "Trigger updated and reinstalled in %(count)d layer(s)"
 msgstr "Disparador actualitzat i reinstal·lat en %(count)d capa(es)"
 
-#: views.py:7501 views.py:7658
+#: views.py:7898 views.py:8055
 msgid "Trigger updated successfully"
 msgstr "Disparador actualitzat correctament"
 
-#: views.py:7525 views.py:7701 views.py:7886
+#: views.py:7922 views.py:8098 views.py:8284 views.py:8506
 msgid "Trigger not found"
 msgstr "Disparador no trobat"
 
-#: views.py:7637 views.py:7664
+#: views.py:8034 views.py:8061
 msgid "Trigger ID is required"
 msgstr "L'ID del disparador és obligatori"
 
-#: views.py:7686
+#: views.py:8083
 msgid "Trigger deleted but some layer triggers could not be uninstalled: "
-msgstr "Disparador eliminat però alguns disparadors de capa no s'han pogut desinstal·lar: "
+msgstr ""
+"Disparador eliminat però alguns disparadors de capa no s'han pogut "
+"desinstal·lar: "
 
-#: views.py:7687
+#: views.py:8084
 msgid "Trigger deleted"
 msgstr "Disparador eliminat"
 
-#: views.py:7692
+#: views.py:8089
 msgid "Trigger deleted successfully"
 msgstr "Disparador eliminat correctament"
 
-#: views.py:7696
+#: views.py:8093
 msgid "Method not allowed"
 msgstr "No permès"
 
-#: views.py:7722 views.py:7827
+#: views.py:8119 views.py:8224 views.py:8418 views.py:8731
 msgid "Missing required parameters"
 msgstr "Falten paràmetres obligatoris"
 
-#: views.py:7734
+#: views.py:8131
 msgid "You do not have permission to duplicate this trigger"
 msgstr "No teniu permís per duplicar aquest disparador"
 
-#: views.py:7747
+#: views.py:8144
 msgid "You do not have permission to manage the target connection"
 msgstr "No teniu permís per gestionar la connexió de destí"
 
-#: views.py:7801
+#: views.py:8198
 msgid "Trigger duplicated successfully"
 msgstr "Disparador duplicat amb èxit"
 
-#: views.py:7805
+#: views.py:8202
 msgid "Source trigger not found"
 msgstr "Disparador d'origen no trobat"
 
-#: views.py:7807
+#: views.py:8204
 msgid "Target connection not found"
 msgstr "Connexió de destí no trobada"
 
-#: views.py:7834 views.py:7910
+#: views.py:8231 views.py:8308 views.py:8354 views.py:8425
 msgid "Permission denied"
 msgstr "Permís denegat"
 
-#: views.py:7838
+#: views.py:8235 views.py:8429
 msgid "Layer has no associated connection"
 msgstr "La capa no té connexió associada"
 
-#: views.py:7841
+#: views.py:8238 views.py:8432
 msgid "Trigger does not belong to the layer connection"
 msgstr "El disparador no pertany a la connexió de la capa"
 
-#: views.py:7845
+#: views.py:8242
 msgid "Field name is required for calculated field triggers"
 msgstr "El nom del camp és obligatori per als disparadors de camp calculat"
 
-#: views.py:7854
+#: views.py:8251 views.py:8444
 msgid "This field is already assigned to another calculated field trigger"
 msgstr "Aquest camp ja està assignat a un altre disparador de camp calculat"
 
-#: views.py:7858
+#: views.py:8255 views.py:8448
 msgid "This trigger is already assigned to this layer"
 msgstr "Aquest disparador ja està assignat a aquesta capa"
 
-#: views.py:7880
+#: views.py:8278
 msgid "Trigger assigned and installed successfully"
 msgstr "Disparador assignat i instal·lat correctament"
 
-#: views.py:7884
+#: views.py:8282 views.py:8504 views.py:8736
 msgid "Layer not found"
 msgstr "Capa no trobada"
 
-#: views.py:7904
+#: views.py:8302 views.py:8348
 msgid "Missing assignment ID"
 msgstr "Falta l'ID d'assignació"
 
-#: views.py:7926
+#: views.py:8324
 msgid "Trigger removed successfully"
 msgstr "Disparador eliminat amb èxit"
 
-#: views.py:7930
+#: views.py:8328 views.py:8397
 msgid "Assignment not found"
 msgstr "Assignació no trobada"
 
-#: views.py:7959 views.py:8054
+#: views.py:8436
+msgid "Selected trigger is not a calculated field trigger"
+msgstr "El disparador seleccionat no és un disparador de camp calculat"
+
+#: views.py:8473
+msgid "Error creating field: "
+msgstr "Error al crear el camp: "
+
+#: views.py:8492
+msgid "Field created but trigger installation failed: "
+msgstr "Camp creat però la instal·lació del disparador ha fallat: "
+
+#: views.py:8500
+msgid "Field created and trigger assigned successfully"
+msgstr "Camp creat i disparador assignat correctament"
+
+#: views.py:8535 views.py:8630
 msgid "Access denied"
 msgstr "Accés denegat"
 
-#: views.py:8108 views.py:8114
+#: views.py:8684 views.py:8690
 msgid "Connection failed"
 msgstr "La connexió ha fallat"
 
-#: views.py:8108
+#: views.py:8684
 msgid "Status code: "
 msgstr "Codi d'estat: "
 
-#: views.py:8119
+#: views.py:8695
 msgid "Connection error"
 msgstr "Error de connexió"
 
-#: views.py:8159
+#: views.py:8778
 #, python-brace-format
 msgid "Control field \"{0}\" cannot be deleted"
 msgstr "No es pot suprimir el camp de control \"{0}\""
 
-#: views.py:8184 views.py:8246 views.py:8250 views.py:8252
+#: views.py:8812 views.py:8874 views.py:8878 views.py:8880
 #, python-brace-format
 msgid "Error renaming field. Cause: {0}"
 msgstr "Error canviant el nom del camp. Causa: {0}"
 
-#: views.py:8186 views.py:8248
+#: views.py:8814 views.py:8876
 msgid ""
 "Field does not exist. Probably, it was deleted or renamed concurrently by "
 "another user"
@@ -3804,41 +4049,41 @@ msgstr ""
 "El camp no existeix. Probablement, un altre usuari l'ha suprimit o ha "
 "canviat el nom simultàniament"
 
-#: views.py:8188
+#: views.py:8816
 #, python-brace-format
 msgid "Error deleting field. Cause: {0}"
 msgstr "Error suprimint el camp. Causa: {0}"
 
-#: views.py:8215
+#: views.py:8843
 #, python-brace-format
 msgid "Control field \"{0}\" cannot be renamed"
 msgstr "No es pot canviar el nom del camp de control \"{0}\""
 
-#: views.py:8217 views.py:8505
+#: views.py:8845 views.py:9133
 #, python-brace-format
 msgid "The field name \"{0}\" is a reserved name"
 msgstr "Nom del camp no vàlid. '{0}' és una paraula reservada"
 
-#: views.py:8345
+#: views.py:8973
 #, python-brace-format
 msgid "Error saving field format. Cause: {0}"
 msgstr "Error en guardar el format del camp. Causa: {0}"
 
-#: views.py:8423
+#: views.py:9051
 #, python-brace-format
 msgid "Error deleting field format. Cause: {0}"
 msgstr "Error en esborrar el format del camp. Causa: {0}"
 
-#: views.py:8480
+#: views.py:9108
 #, python-brace-format
 msgid "Error getting field format. Cause: {0}"
 msgstr "Error en obtenir el format del camp. Causa: {0}"
 
-#: views.py:8518
+#: views.py:9146
 msgid "Field type not supported"
 msgstr "Tipus de camp no admès"
 
-#: views.py:8523
+#: views.py:9151
 #, python-brace-format
 msgid ""
 "Error adding field. Probably the field \"{0}\" already exists. Database "
@@ -3847,12 +4092,12 @@ msgstr ""
 "Error afegint el camp. Probabement el camp \"{0}\" ja existeix. Missatge de "
 "la base de dades {1}"
 
-#: views.py:8666
+#: views.py:9294
 #, python-brace-format
 msgid "Error creating field. Cause: {0}"
 msgstr "Error al crear el camp. Causa: {0}"
 
-#: views.py:8733
+#: views.py:9361
 #, python-brace-format
 msgid ""
 "Join fields must have the same type: {field1}({type1}) - {field2}({type2})"
@@ -3860,45 +4105,48 @@ msgstr ""
 "Els camps del JOIN han de ser del mateix tipus: {field1}({type1}) - {field2}"
 "({type2})"
 
-#: views.py:8747
+#: views.py:9375
 msgid "The user can't manage this SQL view"
 msgstr "L'usuari no pot gestionar aquesta Vista SQL"
 
-#: views.py:8775
+#: views.py:9403
 msgid "The main table must have a primary key"
 msgstr "La taula principal ha de tenir una clau primària"
 
-#: views.py:8805
+#: views.py:9433
 #, python-brace-format
 msgid "Field does not exist: {field}"
 msgstr "El camp no existeix {field}"
 
-#: views.py:8815
+#: views.py:9443
 #, python-brace-format
 msgid "The field {field} is the primary key of main table and must be included"
 msgstr ""
 "El camp {field} és la clau primària de la taula principal i ha de ser inclós"
 
-#: views.py:8835
+#: views.py:9463
 msgid "An object already exists with name: {}"
 msgstr "Ja existeix un objecte amb el nom: {}"
 
-#: views.py:8842
+#: views.py:9470
 msgid "The view could not be created"
 msgstr "No s'ha pogut crear la vista"
 
-#: views.py:8847
+#: views.py:9475
 msgid "Pk columns could not be inserted"
 msgstr "Les columnes que són clau primària no s'han pogut afegir"
 
-#: views.py:8893
+#: views.py:9521
 msgid "Not allowed"
 msgstr "No permès"
 
-#: views.py:8903
+#: views.py:9531
 #, python-brace-format
 msgid "Error deleting view: {0}"
 msgstr "Error suprimint la vista: {0}"
+
+#~ msgid "Show in vector tile format"
+#~ msgstr "Mostrar en format vector tiles"
 
 #~ msgid ""
 #~ "Enter the URL of your Mapbox style (.json) file. If you provide a URL, "

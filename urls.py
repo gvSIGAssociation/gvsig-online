@@ -106,6 +106,8 @@ urlpatterns = [
     # Layer Triggers API (assign triggers to layers)
     path('api/layer_trigger/assign/', services_views.layer_trigger_assign, name='layer_trigger_assign'),
     path('api/layer_trigger/remove/', services_views.layer_trigger_remove, name='layer_trigger_remove'),
+    path('api/layer_trigger/toggle/', services_views.layer_trigger_toggle, name='layer_trigger_toggle'),
+    path('api/field_add_with_trigger/', services_views.field_add_with_trigger, name='field_add_with_trigger'),
     
     # Connection Trigger utilities
     path('api/connection_trigger/duplicate/', services_views.connection_trigger_duplicate, name='connection_trigger_duplicate'),
@@ -117,6 +119,7 @@ urlpatterns = [
     path('test_connection/', services_views.test_connection, name='test_connection'),
     path('register_action/', services_views.register_action, name='register_action'),
     path('db_field_delete/', services_views.db_field_delete, name='db_field_delete'),
+    path('api/field_trigger_info/', services_views.field_trigger_info, name='field_trigger_info'),
     #path('db_field_changetype/', services_views.db_field_changetype, name='db_field_changetype'),
     path('db_field_rename/', services_views.db_field_rename, name='db_field_rename'),
     path('db_save_field_format/', services_views.db_save_field_format, name='db_save_field_format'),
