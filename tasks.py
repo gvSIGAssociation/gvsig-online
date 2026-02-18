@@ -525,3 +525,13 @@ def update_wmts_layer_info(self, layer_id):
         pass
     else:
         update_internal_wmts_layer_options(layer)
+
+
+@celery_app.task(bind=True)
+def regenerate_cache_for_extent_async(self, layer_id, minx, miny, maxx, maxy, source_epsg=4326):
+    """
+    Regenerate GeoWebCache for the given extent on a cached layer (async).
+    Called after feature create/update/delete when layer.cached is True.
+    """
+    from gvsigol_services.cache_utils import regenerate_cache_for_extent
+    regenerate_cache_for_extent(layer_id, minx, miny, maxx, maxy, source_epsg)
