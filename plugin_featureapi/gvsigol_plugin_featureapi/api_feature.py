@@ -55,171 +55,54 @@ import logging
 LOGGER_NAME='gvsigol'
 
 
-def handle_topology_error(e, lyr_id=None, target_epsg=None):
+def handle_feature_error(e, lyr_id=None, target_epsg=None):
     """
-    Maneja errores de topología extrayendo el GeoJSON y transformándolo al CRS del visor si es necesario.
+    Maneja errores de operaciones con features de forma unificada.
+    Detecta y procesa errores de topología, triggers y otros errores de validación.
+    
+    El formato de respuesta es:
+    {
+        "error_code": "topology" | "trigger" | "validation",
+        "message": "mensaje del error",
+        "geometry": {...}  // opcional, para errores que incluyen geometría
+    }
     
     Args:
-        e: HttpException con posible error de topología
-        lyr_id: ID de la capa (opcional, necesario para transformar el GeoJSON)
-        target_epsg: EPSG al que transformar el GeoJSON (opcional, si no se proporciona se mantiene el original)
+        e: HttpException con el error
+        lyr_id: ID de la capa (opcional, necesario para transformar geometrías)
+        target_epsg: EPSG al que transformar la geometría (opcional)
         
     Returns:
-        JsonResponse con error estructurado si es error de topología, None en caso contrario
-    """
-    if hasattr(e, 'msg') and 'TOPOLOGY ERROR' in str(e.msg):
-        try:
-            import re
-            import json
-            from psycopg2 import sql as sqlbuilder
-            error_msg = str(e.msg)
-            
-            # Extraer el mensaje desde después de los dos puntos hasta el primer punto
-            topology_pattern = r'TOPOLOGY ERROR: (.*?)\.'
-            topology_match = re.search(topology_pattern, error_msg)
-            topology_message = topology_match.group(1) if topology_match else 'Unknown topology violation'
-            
-            # Extraer GeoJSON entre ##
-            geojson_pattern = r'##(.*?)##'
-            geojson_match = re.search(geojson_pattern, error_msg)
-            if geojson_match:
-                geojson_str = geojson_match.group(1)
-                try:
-                    geojson_obj = json.loads(geojson_str)
-                    
-                    # Transformar el GeoJSON al CRS del visor si es necesario
-                    if target_epsg and lyr_id:
-                        try:
-                            source_epsg = None
-                            if 'crs' in geojson_obj and geojson_obj['crs'] is not None:
-                                crs_name = geojson_obj['crs'].get('properties', {}).get('name', '')
-                                if crs_name.startswith('EPSG:'):
-                                    source_epsg = int(crs_name.split(':')[1])
-                            
-                            if not source_epsg:
-                                layer = Layer.objects.get(id=lyr_id)
-                                if layer.native_srs:
-                                    source_epsg = int(layer.native_srs.split(':')[1])
-                                else:
-                                    source_epsg = 4326  # Fallback a 4326 si no hay native_srs
-                            
-                            if source_epsg != target_epsg:
-                                i, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
-                                with i as con:
-                                    if 'crs' not in geojson_obj or geojson_obj['crs'] is None:
-                                        sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(ST_Transform(ST_SetSRID(ST_GeomFromGeoJSON({geojson}), {source_epsg}), {target_epsg}))")
-                                        query = sql.format(
-                                            geojson=sqlbuilder.Literal(json.dumps(geojson_obj)),
-                                            source_epsg=sqlbuilder.Literal(source_epsg),
-                                            target_epsg=sqlbuilder.Literal(target_epsg)
-                                        )
-                                    else:
-                                        sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(ST_Transform(ST_GeomFromGeoJSON({geojson}), {target_epsg}))")
-                                        query = sql.format(
-                                            geojson=sqlbuilder.Literal(json.dumps(geojson_obj)),
-                                            target_epsg=sqlbuilder.Literal(target_epsg)
-                                        )
-                                    con.cursor.execute(query)
-                                    result = con.cursor.fetchone()
-                                    if result and result[0]:
-                                        transformed_geojson = json.loads(result[0])
-                                        transformed_geojson['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{target_epsg}"}}}}')
-                                        geojson_obj = transformed_geojson
-                            elif 'crs' not in geojson_obj or geojson_obj['crs'] is None:
-                                geojson_obj['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{target_epsg}"}}}}')
-                        except Exception as transform_error:
-                            logging.getLogger(LOGGER_NAME).warning(f"Error transforming topology error geometry: {str(transform_error)}")
-                    
-                    # Devolver error estructurado con GeoJSON
-                    return JsonResponse({
-                        'topology_error': topology_message,
-                        'geometry': geojson_obj
-                    }, status=400)
-                except json.JSONDecodeError:
-                    # Si el GeoJSON no es válido, devolver error normal
-                    pass
-        except Exception:
-            # Si hay algún error procesando, devolver error normal
-            pass
-    
-    # Para errores no topológicos o si falla el procesamiento
-    return None
-
-
-def handle_trigger_error(e):
-    """
-    Maneja errores de triggers personalizados (RAISE EXCEPTION desde PL/pgSQL).
-    
-    Los triggers pueden lanzar errores con el formato:
-    - TRIGGER ERROR: <mensaje>
-    - O simplemente un RAISE EXCEPTION sin prefijo especial
-    
-    Opcionalmente puede incluir geometría entre ## para mostrar en el mapa:
-    - TRIGGER ERROR: <mensaje>. ##{"type":"Point","coordinates":[...]}##
-    
-    Args:
-        e: HttpException con posible error de trigger
-        
-    Returns:
-        JsonResponse con error estructurado si es error de trigger, None en caso contrario
+        JsonResponse con error estructurado, o None si no es un error reconocido
     """
     if not hasattr(e, 'msg'):
         return None
     
+    import re
     error_msg = str(e.msg)
     
-    # Detectar errores de trigger explícitos (TRIGGER ERROR:) o errores genéricos de PostgreSQL
-    # que provengan de RAISE EXCEPTION
-    is_trigger_error = 'TRIGGER ERROR:' in error_msg
-    is_raise_exception = 'RAISE' in error_msg or 'violates check constraint' in error_msg
-    
-    # También detectar patrones típicos de errores de trigger PostgreSQL
-    pg_error_patterns = [
-        'new row for relation',
-        'violates',
-        'cannot insert',
-        'cannot update',
-        'permission denied',
-    ]
-    is_pg_constraint_error = any(pattern in error_msg.lower() for pattern in pg_error_patterns)
-    
-    if is_trigger_error or is_raise_exception or is_pg_constraint_error:
+    # ========================================
+    # 1. Detectar errores de TOPOLOGÍA
+    # ========================================
+    if 'TOPOLOGY ERROR' in error_msg:
         try:
-            import re
+            from psycopg2 import sql as sqlbuilder
             
-            # Extraer mensaje del trigger
-            if 'TRIGGER ERROR:' in error_msg:
-                # Formato: TRIGGER ERROR: <mensaje>
-                trigger_pattern = r'TRIGGER ERROR:\s*(.+?)(?:\s*##|$)'
-                trigger_match = re.search(trigger_pattern, error_msg, re.DOTALL)
-                trigger_message = trigger_match.group(1).strip() if trigger_match else error_msg
-            else:
-                # Usar el mensaje tal cual, limpiando prefijos de PostgreSQL
-                # Quitar prefijos como "ERROR:" o "CONTEXT:"
-                trigger_message = re.sub(r'^(ERROR|CONTEXT|DETAIL):\s*', '', error_msg, flags=re.MULTILINE)
-                trigger_message = trigger_message.strip()
-                # Si hay múltiples líneas, tomar la primera que sea significativa
-                lines = [l.strip() for l in trigger_message.split('\n') if l.strip()]
-                trigger_message = lines[0] if lines else error_msg
+            # Extraer el mensaje desde después de los dos puntos hasta el primer punto
+            topology_pattern = r'TOPOLOGY ERROR: (.*?)\.'
+            topology_match = re.search(topology_pattern, error_msg)
+            message = topology_match.group(1) if topology_match else 'Unknown topology violation'
             
-            # Intentar extraer GeoJSON entre ## (opcional)
-            geojson_obj = None
-            geojson_pattern = r'##(.*?)##'
-            geojson_match = re.search(geojson_pattern, error_msg)
-            if geojson_match:
-                geojson_str = geojson_match.group(1)
-                try:
-                    geojson_obj = json.loads(geojson_str)
-                    # Limpiar el mensaje quitando la parte del GeoJSON
-                    trigger_message = re.sub(r'\s*##.*?##\s*', '', trigger_message).strip()
-                except json.JSONDecodeError:
-                    pass
+            # Extraer GeoJSON entre ##
+            geojson_obj = _extract_geojson(error_msg)
             
-            # Limpiar puntos finales duplicados o espacios
-            trigger_message = trigger_message.rstrip('. ')
+            # Transformar geometría si es necesario
+            if geojson_obj and target_epsg and lyr_id:
+                geojson_obj = _transform_geometry(geojson_obj, lyr_id, target_epsg)
             
             response_data = {
-                'trigger_error': trigger_message
+                'error_code': 'topology',
+                'message': message
             }
             
             if geojson_obj:
@@ -227,11 +110,168 @@ def handle_trigger_error(e):
             
             return JsonResponse(response_data, status=400)
             
-        except Exception:
-            # Si hay algún error procesando, devolver error normal
-            pass
+        except Exception as ex:
+            logging.getLogger(LOGGER_NAME).warning(f"Error processing topology error: {str(ex)}")
     
+    # ========================================
+    # 2. Detectar errores de TRIGGER
+    # ========================================
+    is_trigger_error = 'TRIGGER ERROR:' in error_msg
+    is_raise_exception = 'RAISE' in error_msg
+    
+    if is_trigger_error or is_raise_exception:
+        try:
+            # Extraer mensaje del trigger
+            if 'TRIGGER ERROR:' in error_msg:
+                trigger_pattern = r'TRIGGER ERROR:\s*(.+?)(?:\s*##|$)'
+                trigger_match = re.search(trigger_pattern, error_msg, re.DOTALL)
+                message = trigger_match.group(1).strip() if trigger_match else error_msg
+            else:
+                # Limpiar prefijos de PostgreSQL
+                message = re.sub(r'^(ERROR|CONTEXT|DETAIL):\s*', '', error_msg, flags=re.MULTILINE)
+                message = message.strip()
+                lines = [l.strip() for l in message.split('\n') if l.strip()]
+                message = lines[0] if lines else error_msg
+            
+            # Extraer GeoJSON si existe
+            geojson_obj = _extract_geojson(error_msg)
+            if geojson_obj:
+                message = re.sub(r'\s*##.*?##\s*', '', message).strip()
+            
+            # Transformar geometría si es necesario
+            if geojson_obj and target_epsg and lyr_id:
+                geojson_obj = _transform_geometry(geojson_obj, lyr_id, target_epsg)
+            
+            message = message.rstrip('. ')
+            
+            response_data = {
+                'error_code': 'trigger',
+                'message': message
+            }
+            
+            if geojson_obj:
+                response_data['geometry'] = geojson_obj
+            
+            return JsonResponse(response_data, status=400)
+            
+        except Exception as ex:
+            logging.getLogger(LOGGER_NAME).warning(f"Error processing trigger error: {str(ex)}")
+    
+    # ========================================
+    # 3. Detectar errores de VALIDACIÓN/CONSTRAINT
+    # ========================================
+    pg_error_patterns = [
+        'violates check constraint',
+        'violates foreign key constraint',
+        'violates unique constraint',
+        'violates not-null constraint',
+        'new row for relation',
+        'cannot insert',
+        'cannot update',
+    ]
+    is_validation_error = any(pattern in error_msg.lower() for pattern in pg_error_patterns)
+    
+    if is_validation_error:
+        try:
+            # Limpiar el mensaje
+            message = re.sub(r'^(ERROR|CONTEXT|DETAIL):\s*', '', error_msg, flags=re.MULTILINE)
+            message = message.strip()
+            lines = [l.strip() for l in message.split('\n') if l.strip()]
+            message = lines[0] if lines else error_msg
+            message = message.rstrip('. ')
+            
+            return JsonResponse({
+                'error_code': 'validation',
+                'message': message
+            }, status=400)
+            
+        except Exception as ex:
+            logging.getLogger(LOGGER_NAME).warning(f"Error processing validation error: {str(ex)}")
+    
+    # No es un error reconocido
     return None
+
+
+def _extract_geojson(error_msg):
+    """
+    Extrae un objeto GeoJSON de un mensaje de error entre marcadores ##.
+    
+    Args:
+        error_msg: Mensaje de error que puede contener GeoJSON
+        
+    Returns:
+        dict con el GeoJSON parseado, o None si no se encuentra
+    """
+    import re
+    geojson_pattern = r'##(.*?)##'
+    geojson_match = re.search(geojson_pattern, error_msg)
+    if geojson_match:
+        geojson_str = geojson_match.group(1)
+        try:
+            return json.loads(geojson_str)
+        except json.JSONDecodeError:
+            pass
+    return None
+
+
+def _transform_geometry(geojson_obj, lyr_id, target_epsg):
+    """
+    Transforma la geometría GeoJSON al CRS especificado.
+    
+    Args:
+        geojson_obj: Objeto GeoJSON a transformar
+        lyr_id: ID de la capa para obtener conexión a BD
+        target_epsg: EPSG de destino
+        
+    Returns:
+        GeoJSON transformado o el original si falla
+    """
+    try:
+        from psycopg2 import sql as sqlbuilder
+        
+        source_epsg = None
+        if 'crs' in geojson_obj and geojson_obj['crs'] is not None:
+            crs_name = geojson_obj['crs'].get('properties', {}).get('name', '')
+            if crs_name.startswith('EPSG:'):
+                source_epsg = int(crs_name.split(':')[1])
+        
+        if not source_epsg:
+            layer = Layer.objects.get(id=lyr_id)
+            if layer.native_srs:
+                source_epsg = int(layer.native_srs.split(':')[1])
+            else:
+                source_epsg = 4326
+        
+        if source_epsg != target_epsg:
+            i, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
+            with i as con:
+                if 'crs' not in geojson_obj or geojson_obj['crs'] is None:
+                    sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(ST_Transform(ST_SetSRID(ST_GeomFromGeoJSON({geojson}), {source_epsg}), {target_epsg}))")
+                    query = sql.format(
+                        geojson=sqlbuilder.Literal(json.dumps(geojson_obj)),
+                        source_epsg=sqlbuilder.Literal(source_epsg),
+                        target_epsg=sqlbuilder.Literal(target_epsg)
+                    )
+                else:
+                    sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(ST_Transform(ST_GeomFromGeoJSON({geojson}), {target_epsg}))")
+                    query = sql.format(
+                        geojson=sqlbuilder.Literal(json.dumps(geojson_obj)),
+                        target_epsg=sqlbuilder.Literal(target_epsg)
+                    )
+                con.cursor.execute(query)
+                result = con.cursor.fetchone()
+                if result and result[0]:
+                    transformed_geojson = json.loads(result[0])
+                    transformed_geojson['crs'] = {'type': 'name', 'properties': {'name': f'EPSG:{target_epsg}'}}
+                    return transformed_geojson
+        elif 'crs' not in geojson_obj or geojson_obj['crs'] is None:
+            geojson_obj['crs'] = {'type': 'name', 'properties': {'name': f'EPSG:{target_epsg}'}}
+        
+        return geojson_obj
+        
+    except Exception as ex:
+        logging.getLogger(LOGGER_NAME).warning(f"Error transforming geometry: {str(ex)}")
+        return geojson_obj
 
 class CoordsFeatureFilter(BaseFilterBackend):
     def get_schema_fields(self, view):
@@ -445,19 +485,14 @@ class FeaturesView(CreateAPIView):
             return JsonResponse(feat, safe=False)
         except HttpException as e:
             # Log del error para diagnóstico
-            print(f"Error creating feature in layer {lyr_id}: [{e.code}] {e.msg}")
+            logging.getLogger(LOGGER_NAME).warning(f"Error creating feature in layer {lyr_id}: [{e.code}] {e.msg}")
             
-            # Intentar manejar como error de topología
-            topology_response = handle_topology_error(e, lyr_id, epsg)
-            if topology_response:
-                return topology_response
+            # Intentar manejar como error estructurado (topología, trigger, validación)
+            error_response = handle_feature_error(e, lyr_id, epsg)
+            if error_response:
+                return error_response
             
-            # Intentar manejar como error de trigger
-            trigger_response = handle_trigger_error(e)
-            if trigger_response:
-                return trigger_response
-            
-            # Para errores no topológicos o si falla el procesamiento
+            # Para errores no reconocidos
             return e.get_exception()
     
     
@@ -514,19 +549,14 @@ class FeaturesView(CreateAPIView):
             return JsonResponse(feat, safe=False)
         except HttpException as e:
             # Log del error para diagnóstico
-            logging.getLogger(LOGGER_NAME).error(f"Error updating feature in layer {lyr_id}: [{e.code}] {e.msg}")
+            logging.getLogger(LOGGER_NAME).warning(f"Error updating feature in layer {lyr_id}: [{e.code}] {e.msg}")
             
-            # Intentar manejar como error de topología
-            topology_response = handle_topology_error(e, lyr_id, epsg)
-            if topology_response:
-                return topology_response
+            # Intentar manejar como error estructurado (topología, trigger, validación)
+            error_response = handle_feature_error(e, lyr_id, epsg)
+            if error_response:
+                return error_response
             
-            # Intentar manejar como error de trigger
-            trigger_response = handle_trigger_error(e)
-            if trigger_response:
-                return trigger_response
-            
-            # Para errores no topológicos o si falla el procesamiento
+            # Para errores no reconocidos
             return e.get_exception()
 
 
