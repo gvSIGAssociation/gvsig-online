@@ -3874,11 +3874,29 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
             if($("#checkbox-"+ID).is(':checked')){
                 $(".more-options-"+ID).slideDown("slow")
                 $("#checkbox-"+ID).val("true")
+                // Inicializar el editor SQL de Oracle si existe la función
+                if (typeof window.initEtlSqlEditor === 'function' && !window.etlSqlEditors['sql-'+ID]) {
+                    window.initEtlSqlEditor('sql-'+ID, 'oracle');
+                }
+                if (typeof window.refreshEtlSqlEditor === 'function') {
+                    window.refreshEtlSqlEditor('sql-'+ID);
+                }
             }else{
                 $(".more-options-"+ID).slideUp("slow")
                 $("#checkbox-"+ID).val("")
             }
             
+        });
+
+        // Inicializar CodeMirror cuando se hace check en el checkbox de Oracle
+        $("#checkbox-"+ID).on('change', function() {
+            if($(this).is(':checked')){
+                setTimeout(function() {
+                    if (typeof window.initEtlSqlEditor === 'function' && !window.etlSqlEditors['sql-'+ID]) {
+                        window.initEtlSqlEditor('sql-'+ID, 'oracle');
+                    }
+                }, 300);
+            }
         });
 
         $('#get-owners-'+ID).on("click", function(){
@@ -3950,6 +3968,10 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
 
 
         $('#input-oracle-accept-'+ID).click(function() {
+            // Obtener valor SQL de CodeMirror si está disponible
+            var sqlValue = (typeof window.getEtlSqlEditorValue === 'function') 
+                ? window.getEtlSqlEditorValue('sql-'+ID) 
+                : $('#sql-'+ID).val();
             
             var paramsOracle = {"id": ID,
             "parameters": [
@@ -3957,7 +3979,7 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
                 "owner-name": $('#owner-name-'+ID).val(),
                 "table-name": $('#table-name-'+ID).val(),
                 "checkbox": $("#checkbox-"+ID).val(),
-                "sql": $('#sql-'+ID).val()}
+                "sql": sqlValue}
             ]}
 
             var formDataSchemaOracle = new FormData();
@@ -4257,11 +4279,29 @@ input_SqlServer = draw2d.shape.layout.VerticalLayout.extend({
             if($("#checkbox-"+ID).is(':checked')){
                 $(".more-options-"+ID).slideDown("slow")
                 $("#checkbox-"+ID).val("true")
+                // Inicializar el editor SQL de SQL Server si existe la función
+                if (typeof window.initEtlSqlEditor === 'function' && !window.etlSqlEditors['sql-'+ID]) {
+                    window.initEtlSqlEditor('sql-'+ID, 'sqlserver');
+                }
+                if (typeof window.refreshEtlSqlEditor === 'function') {
+                    window.refreshEtlSqlEditor('sql-'+ID);
+                }
             }else{
                 $(".more-options-"+ID).slideUp("slow")
                 $("#checkbox-"+ID).val("")
             }
             
+        });
+
+        // Inicializar CodeMirror cuando se hace check en el checkbox de SQL Server
+        $("#checkbox-"+ID).on('change', function() {
+            if($(this).is(':checked')){
+                setTimeout(function() {
+                    if (typeof window.initEtlSqlEditor === 'function' && !window.etlSqlEditors['sql-'+ID]) {
+                        window.initEtlSqlEditor('sql-'+ID, 'sqlserver');
+                    }
+                }, 300);
+            }
         });
 
         $('#get-schemas-'+ID).on("click", function(){
@@ -4337,6 +4377,10 @@ input_SqlServer = draw2d.shape.layout.VerticalLayout.extend({
 
 
         $('#input-sql-server-accept-'+ID).click(function() {
+            // Obtener valor SQL de CodeMirror si está disponible
+            var sqlValue = (typeof window.getEtlSqlEditorValue === 'function') 
+                ? window.getEtlSqlEditorValue('sql-'+ID) 
+                : $('#sql-'+ID).val();
             
             var paramsDataSchemaSqlServer = {"id": ID,
             "parameters": [
@@ -4346,7 +4390,7 @@ input_SqlServer = draw2d.shape.layout.VerticalLayout.extend({
                 "schema-name": $('#schema-name-'+ID).val(),
                 "table-name": $('#table-name-'+ID).val(),
                 "checkbox": $("#checkbox-"+ID).val(),
-                "sql": $('#sql-'+ID).val()}
+                "sql": sqlValue}
             ]}
 
             var formDataDataSchemaSqlServer = new FormData();
@@ -4597,6 +4641,12 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
             if($("#checkbox-"+ID).is(':checked')){
                 $(".more-options-"+ID).slideDown("slow")
                 $("#checkbox-"+ID).val("true")
+                // Inicializar el editor SQL de PostgreSQL si existe la función
+                setTimeout(function() {
+                    if (typeof window.initEtlSqlEditor === 'function' && !window.etlSqlEditors['clause-'+ID]) {
+                        window.initEtlSqlEditor('clause-'+ID, 'postgres');
+                    }
+                }, 300);
             }else{
                 $(".more-options-"+ID).slideUp("slow")
                 $("#checkbox-"+ID).val("")
@@ -4753,6 +4803,13 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
             if($("#checkbox-"+ID).is(':checked')){
                 $(".more-options-"+ID).slideDown("slow")
                 $("#checkbox-"+ID).val("true")
+                // Inicializar el editor SQL de PostgreSQL si existe la función
+                if (typeof window.initEtlSqlEditor === 'function' && !window.etlSqlEditors['clause-'+ID]) {
+                    window.initEtlSqlEditor('clause-'+ID, 'postgres');
+                }
+                if (typeof window.refreshEtlSqlEditor === 'function') {
+                    window.refreshEtlSqlEditor('clause-'+ID);
+                }
             }else{
                 $(".more-options-"+ID).slideUp("slow")
                 $("#checkbox-"+ID).val("")
@@ -4760,6 +4817,10 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
         });
 
         $('#input-postgis-accept-'+ID).click(function() {
+            // Obtener valor SQL de CodeMirror si está disponible
+            var clauseValue = (typeof window.getEtlSqlEditorValue === 'function') 
+                ? window.getEtlSqlEditorValue('clause-'+ID) 
+                : $('#clause-'+ID).val();
                 
             var paramsPostgis = {"id": ID,
             "parameters": [
@@ -4769,7 +4830,7 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 "schema-name": $('#schema-name-'+ID).val()[0],
                 "tablename": $('#tablename-'+ID).val()[0],
                 "checkbox": $("#checkbox-"+ID).val(),
-                "clause": $('#clause-'+ID).val()}
+                "clause": clauseValue}
             ]}
 
             var formDataSchemaPostgis = new FormData();
@@ -10266,6 +10327,16 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
             },100);
             
             $('#dialog-execute-sql-'+ID).modal('show')
+            
+            // Inicializar CodeMirror para Execute SQL si existe la función
+            setTimeout(function() {
+                if (typeof window.initEtlSqlEditor === 'function' && !window.etlSqlEditors['query-'+ID]) {
+                    window.initEtlSqlEditor('query-'+ID, 'postgres');
+                }
+                if (typeof window.refreshEtlSqlEditor === 'function') {
+                    window.refreshEtlSqlEditor('query-'+ID);
+                }
+            }, 200);
 
         });
 
@@ -10273,8 +10344,16 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
 
         $(document).on("dblclick", "#attrs-values-"+ID+" > li > a", function(){
             var text = '##'+this.text+'##'
-            var textarea = document.getElementById('query-'+ID)
-            textarea.value = textarea.value + text
+            // Insertar en CodeMirror si está disponible
+            if (window.etlSqlEditors && window.etlSqlEditors['query-'+ID]) {
+                var editor = window.etlSqlEditors['query-'+ID];
+                var doc = editor.getDoc();
+                var cursor = doc.getCursor();
+                doc.replaceRange(text, cursor);
+            } else {
+                var textarea = document.getElementById('query-'+ID)
+                textarea.value = textarea.value + text
+            }
 
         });
 
@@ -10282,12 +10361,24 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
 
          $(document).on("dblclick", "#attrs-execute-sql-"+ID+" > li > a", function(){
              var text = '"'+this.text+'"'
-             var textarea = document.getElementById('query-'+ID)
-             textarea.value = textarea.value + text
+             // Insertar en CodeMirror si está disponible
+             if (window.etlSqlEditors && window.etlSqlEditors['query-'+ID]) {
+                 var editor = window.etlSqlEditors['query-'+ID];
+                 var doc = editor.getDoc();
+                 var cursor = doc.getCursor();
+                 doc.replaceRange(text, cursor);
+             } else {
+                 var textarea = document.getElementById('query-'+ID)
+                 textarea.value = textarea.value + text
+             }
 
         });
 
         $('#execute-sql-accept-'+ID).click(function() {
+            // Obtener valor SQL de CodeMirror si está disponible
+            var queryValue = (typeof window.getEtlSqlEditorValue === 'function') 
+                ? window.getEtlSqlEditorValue('query-'+ID) 
+                : $('#query-'+ID).val();
 
             var paramsExecute= {"id": ID,
             "parameters": [
@@ -10296,7 +10387,7 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
                 "db": $('#db-'+ID).val(),
                 "schema-name": $('#schema-name-'+ID).val(),
                 "tablename": $('#tablename-'+ID).val(),
-                "query": $('#query-'+ID).val()}
+                "query": queryValue}
             ]}
 
             var formDataSchemaExecute = new FormData();
@@ -10310,7 +10401,7 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
             } else if (type_db == 'Oracle'){
 
                 paramsExecute['parameters'][0]['checkbox'] = 'true'
-                paramsExecute['parameters'][0]['sql'] = $('#query-'+ID).val().split('WHERE')[0]
+                paramsExecute['parameters'][0]['sql'] = queryValue.split('WHERE')[0]
                 formDataSchemaExecute.append('jsonParamsOracle', JSON.stringify(paramsExecute))
                 url_ = '/gvsigonline/etl/etl_schema_oracle/'
             }
