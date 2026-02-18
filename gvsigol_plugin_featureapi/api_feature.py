@@ -55,6 +55,37 @@ import logging
 LOGGER_NAME='gvsigol'
 
 
+def _layer_is_cached(lyr_id):
+    """
+    Return True if the layer exists and has cached=True.
+    """
+    try:
+        layer = Layer.objects.get(id=int(lyr_id))
+        return layer.cached
+    except Layer.DoesNotExist:
+        return False
+
+
+def _trigger_cache_regeneration_for_edit(lyr_id, geometry, source_epsg=4326):
+    """
+    Trigger async cache regeneration for the extent of an edited feature.
+    Only runs if the layer has cached=True to avoid unnecessary work (e.g. fetching feature geom on delete).
+    """
+    try:
+        layer = Layer.objects.get(id=int(lyr_id))
+        if not layer.cached:
+            return
+    except Layer.DoesNotExist:
+        return
+
+    from gvsigol_services.cache_utils import get_geojson_geometry_extent
+    from gvsigol_services.tasks import regenerate_cache_for_extent_async
+
+    extent = get_geojson_geometry_extent(geometry)
+    if extent:
+        regenerate_cache_for_extent_async.delay(lyr_id, *extent, source_epsg=source_epsg)
+
+
 def handle_topology_error(e, lyr_id=None, target_epsg=None):
     """
     Maneja errores de topología extrayendo el GeoJSON y transformándolo al CRS del visor si es necesario.
@@ -354,6 +385,8 @@ class FeaturesView(CreateAPIView):
                         pass
             
             feat = serializers.FeatureSerializer().create(validation, lyr_id, content, username, epsg)
+            if 'geometry' in content and content['geometry'] and _layer_is_cached(lyr_id):
+                _trigger_cache_regeneration_for_edit(lyr_id, content['geometry'], source_epsg=epsg)
             return JsonResponse(feat, safe=False)
         except HttpException as e:
             # Log del error para diagnóstico
@@ -418,6 +451,8 @@ class FeaturesView(CreateAPIView):
                         pass
             
             feat = serializers.FeatureSerializer().update(validation, lyr_id, data, override, version_to_overwrite, username, epsg)
+            if 'geometry' in data and data['geometry'] and _layer_is_cached(lyr_id):
+                _trigger_cache_regeneration_for_edit(lyr_id, data['geometry'], source_epsg=epsg)
             return JsonResponse(feat, safe=False)
         except HttpException as e:
             # Log del error para diagnóstico
@@ -616,6 +651,14 @@ class PublicFeaturesView(CreateAPIView):
             validation = Validation(request)
             validation.check_create_feature(lyr_id, content)
             feat = serializers.FeatureSerializer().create(validation, lyr_id, content, None)
+            if 'geometry' in content and content['geometry'] and _layer_is_cached(lyr_id):
+                epsg = 4326
+                if 'source_epsg' in request.GET:
+                    try:
+                        epsg = int(request.GET['source_epsg'].split(":")[1])
+                    except Exception:
+                        pass
+                _trigger_cache_regeneration_for_edit(lyr_id, content['geometry'], source_epsg=epsg)
             return JsonResponse(feat, safe=False)
         except HttpException as e:
             return e.get_exception()
@@ -648,6 +691,14 @@ class PublicFeaturesView(CreateAPIView):
             
             validation.check_update_feature(lyr_id, data)
             feat = serializers.FeatureSerializer().update(validation, lyr_id, data, override, version_to_overwrite, None)
+            if 'geometry' in data and data['geometry'] and _layer_is_cached(lyr_id):
+                epsg = 4326
+                if 'epsg' in request.GET:
+                    try:
+                        epsg = int(request.GET['epsg'])
+                    except Exception:
+                        pass
+                _trigger_cache_regeneration_for_edit(lyr_id, data['geometry'], source_epsg=epsg)
             return JsonResponse(feat, safe=False)
         except HttpException as e:
             return e.get_exception()
@@ -714,7 +765,16 @@ class FeaturesDeleteView(RetrieveDestroyAPIView):
                     pass
 
             validation.check_delete_feature(lyr_id, feat_id)
+            geom = None
+            if _layer_is_cached(lyr_id):
+                try:
+                    feat = serializers.FeatureSerializer().get(validation, lyr_id, feat_id, 4326)
+                    geom = feat.get('geometry') if feat else None
+                except Exception:
+                    pass
             serializers.FeatureSerializer().delete(validation, lyr_id, feat_id, version)
+            if geom:
+                _trigger_cache_regeneration_for_edit(lyr_id, geom, source_epsg=4326)
             return HttpException(204, "OK").get_exception()
         except HttpException as e:
             return e.get_exception() 
