@@ -485,7 +485,7 @@ def add_datastore(workspace, type, name, description, connection_params, usernam
             type=type,
             name=name,
             description=description,
-            connection_params=connection_params if connection is None else None,  # Solo guardar si no hay connection
+            connection_params=connection_params,  # Siempre guardar los parámetros completos (incluyendo schema)
             created_by=username,
             connection=connection,
             schema=schema,
