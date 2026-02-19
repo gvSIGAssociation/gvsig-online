@@ -311,6 +311,8 @@ class PaginationFeatureFilter(BaseFilterBackend):
             coreapi.Field(name="date", description="Modification date", required=False, location='query', example='2020-01-13 14:54'),
             coreapi.Field(name="onlyprops", description="True to get only the properties", required=False, location='query', example='true'),
             coreapi.Field(name="text", description="Search by text", required=False, location='query', example='my text'),
+            coreapi.Field(name="sortfield", description="Field name to sort by", required=False, location='query', example='nombre'),
+            coreapi.Field(name="sortorder", description="Sort order: 'ascend' or 'descend'", required=False, location='query', example='ascend'),
         ]
         return fields
 
@@ -436,9 +438,25 @@ class FeaturesView(CreateAPIView):
                     source_epsg = int(self.request.GET['source_epsg'].split(":")[1])
                 except Exception:
                     raise HttpException(400, "Bad parameter source_epsg")
+            
+            sortfield = None
+            if 'sortfield' in self.request.GET:
+                try:
+                    sortfield = self.request.GET['sortfield']
+                except Exception:
+                    raise HttpException(400, "Bad parameter sortfield. The value must be a string")
+            
+            sortorder = None
+            if 'sortorder' in self.request.GET:
+                try:
+                    sortorder = self.request.GET['sortorder']
+                    if sortorder not in ['ascend', 'descend']:
+                        raise ValueError()
+                except Exception:
+                    raise HttpException(400, "Bad parameter sortorder. The value must be 'ascend' or 'descend'")
                     
             restrictions = validation.check_read_restrictions(lyr_id)
-            result = serializers.FeatureSerializer().list(validation, lyr_id, pagination, source_epsg, date, strict_search, onlyprops, text, filter, restrictions.get('cql_filter_read'))
+            result = serializers.FeatureSerializer().list(validation, lyr_id, pagination, source_epsg, date, strict_search, onlyprops, text, filter, restrictions.get('cql_filter_read'), sortfield, sortorder)
             return JsonResponse(result, safe=False)
         except HttpException as e:
             return e.get_exception()
