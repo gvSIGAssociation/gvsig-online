@@ -1103,7 +1103,7 @@
 			  		'autogen': 'False'
 			  	},
 				success	:function(response) {
-					messageBox.show('Info', gettext('Convert ok'));
+					messageBox.show('info', gettext('Convert ok'));
 					$('#my-modal-dialog').modal('hide');
 				},
 				error: function() {
@@ -1129,7 +1129,7 @@
 			  		'autogen': 'True'
 			  	},
 				success	:function(response) {
-					messageBox.show('Info', gettext('Autogen ok'));
+					messageBox.show('info', gettext('Autogen ok'));
 					$('#my-modal-dialog').modal('hide');
 				},
 				error: function(jqXHR, status, errMsg) {
@@ -1235,12 +1235,12 @@
 					$('#my-modal-dialog').modal('hide');
 					// Si había triggers, recargar la página para actualizar la pestaña de triggers
 					if (triggerInfo.has_triggers && triggerInfo.triggers.length > 0) {
-						messageBox.show('Info', gettext('Field and associated triggers were deleted'));
-						$('#modal-error').on('hidden.bs.modal', function(e) {
-							window.location.reload();
-						});
-					} else {
-						messageBox.show('Info', gettext('Field was deleted'));
+					messageBox.show('info', gettext('Field and associated triggers were deleted'));
+					$('#modal-error').on('hidden.bs.modal', function(e) {
+						window.location.reload();
+					});
+				} else {
+					messageBox.show('info', gettext('Field was deleted'));
 						$('tr[data-fieldname="' + fieldName + '"]').remove();
 						$('.sortable-fieldgroup-field').filter(function(){
 							return $(this).find('span.text').text()==fieldName
@@ -1304,7 +1304,7 @@
 				  	},
 					success	:function(response) {
 						$('#my-modal-dialog').modal('hide');
-						messageBox.show('Info', gettext('Field was renamed'));
+						messageBox.show('info', gettext('Field was renamed'));
 						$('tr[data-fieldname="' + fieldName + '"] input')[0].value = new_name;
 						$('tr[data-fieldname="' + fieldName + '"]')[0].setAttribute('data-fieldname', new_name);
 						$('.sortable-fieldgroup-field span.text').filter(function(){
@@ -1520,7 +1520,7 @@
 				},
 				success	:function(response) {
 					$('#my-modal-dialog').modal('hide');
-					messageBox.show('Info', gettext('Field format was saved successfully'));
+					messageBox.show('info', gettext('Field format was saved successfully'));
 				},
 				error: function(jqXHR) {
 					messageBox.show('error', jqXHR.responseText);
@@ -1543,7 +1543,7 @@
 					},
 					success	:function(response) {
 						$('#my-modal-dialog').modal('hide');
-						messageBox.show('Info', gettext('Field format was deleted'));
+						messageBox.show('info', gettext('Field format was deleted'));
 					},
 					error: function(jqXHR) {
 						messageBox.show('error', jqXHR.responseText);
@@ -1593,7 +1593,7 @@
 				if (field.gvsigol_type === 'link' && field.type_params && field.type_params.related_field) {
 					fillLinkFieldWithUrls(field.name, field.type_params.related_field, "{{layer_id}}");
 				} else {
-					messageBox.show('Info', gettext('Field was added'));
+					messageBox.show('info', gettext('Field was added'));
 					$('#modal-error').on('hidden.bs.modal', function (e) {
 						// reload page to get the updated list of fields
 						window.location = window.location.toString().split("#", 1)[0];
@@ -1630,13 +1630,13 @@
 					}
 					
 					if (data.status === 'success') {
-						messageBox.show('Info', gettext('Field was added and filled with ' + data.updated_records + ' URLs'));
+						messageBox.show('info', gettext('Field was added and filled with ' + data.updated_records + ' URLs'));
 					} else {
-						messageBox.show('Info', gettext('Field was added but there was an error filling URLs: ' + (data.message || 'Unknown error')));
+						messageBox.show('info', gettext('Field was added but there was an error filling URLs: ' + (data.message || 'Unknown error')));
 					}
 				} catch (e) {
 					console.error('Error parsing response:', e, response);
-					messageBox.show('Info', gettext('Field was added but there was an error filling URLs'));
+					messageBox.show('info', gettext('Field was added but there was an error filling URLs'));
 				}
 				
 				$('#modal-error').on('hidden.bs.modal', function (e) {
@@ -1646,7 +1646,7 @@
 			},
 			error: function(jqXHR) {
 				console.error('fillLinkFieldWithUrls error:', jqXHR);
-				messageBox.show('Info', gettext('Field was added but there was an error filling URLs'));
+				messageBox.show('info', gettext('Field was added but there was an error filling URLs'));
 				$('#modal-error').on('hidden.bs.modal', function (e) {
 					// reload page to get the updated list of fields
 					window.location = window.location.toString().split("#", 1)[0];
@@ -2197,13 +2197,13 @@
 			var isCalculated = selected.data('is-calculated') === true || selected.data('is-calculated') === 'true';
 			
 			if (!triggerId) {
-				alert(gettext('Please select a trigger'));
+				messageBox.show('error', gettext('Please select a trigger'));
 				return;
 			}
 			
 			// Si es campo calculado, el campo es obligatorio
 			if (isCalculated && !fieldName) {
-				alert(gettext('Please select a target field for the calculated field trigger'));
+				messageBox.show('error', gettext('Please select a target field for the calculated field trigger'));
 				return;
 			}
 			
@@ -2218,23 +2218,34 @@
 					'trigger_id': triggerId,
 					'field_name': fieldName
 				},
-				success: function(response) {
-					if (response.success) {
-						$('#assign-trigger-modal').modal('hide');
-						// Recargar página para ver los cambios
-						window.location.reload();
-					} else {
-						alert(response.error || gettext('Error assigning trigger'));
-					}
-				},
-				error: function(jqXHR) {
-					var error = gettext('Error assigning trigger');
-					try {
-						var resp = JSON.parse(jqXHR.responseText);
-						error = resp.error || error;
-					} catch(e) {}
-					alert(error);
+			success: function(response) {
+				if (response.success) {
+					$('#assign-trigger-modal').modal('hide');
+					// Recargar página para ver los cambios
+					window.location.reload();
+				} else {
+					$('#assign-trigger-modal').modal('hide');
+					messageBox.show('error', response.error || gettext('Error assigning trigger'));
 				}
+			},
+			error: function(jqXHR) {
+				var error = gettext('Error assigning trigger');
+				var errorType = null;
+				try {
+					var resp = JSON.parse(jqXHR.responseText);
+					error = resp.error || error;
+					errorType = resp.error_type;
+				} catch(e) {}
+				$('#assign-trigger-modal').modal('hide');
+				if (errorType === 'syntax_error') {
+					messageBox.showMultiLine('error', [
+						gettext('SQL syntax error in trigger. Please check the trigger code and fix it before assigning.'),
+						error
+					]);
+				} else {
+					messageBox.show('error', error);
+				}
+			}
 			});
 		});
 

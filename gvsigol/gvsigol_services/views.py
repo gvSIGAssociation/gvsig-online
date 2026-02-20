@@ -8269,7 +8269,12 @@ def layer_trigger_assign(request):
         if not success:
             # Si falla la instalación, eliminar la asignación
             layer_trigger.delete()
-            return JsonResponse({'error': message}, status=500)
+            # Detectar si es un error de sintaxis SQL
+            is_syntax_error = any(kw in message.lower() for kw in ('syntax error', 'error at or near', 'parse error'))
+            return JsonResponse({
+                'error': message,
+                'error_type': 'syntax_error' if is_syntax_error else 'install_error'
+            }, status=400)
         
         return JsonResponse({
             'success': True,
@@ -8487,11 +8492,13 @@ def field_add_with_trigger(request):
         if not success:
             # Si falla la instalación, eliminar la asignación (el campo ya está creado)
             layer_trigger.delete()
+            is_syntax_error = any(kw in message.lower() for kw in ('syntax error', 'error at or near', 'parse error'))
             return JsonResponse({
                 'success': False,
-                'error': _('Field created but trigger installation failed: ') + message,
+                'error': message,
+                'error_type': 'syntax_error' if is_syntax_error else 'install_error',
                 'field_created': True
-            }, status=500)
+            }, status=400)
         
         return JsonResponse({
             'success': True,
