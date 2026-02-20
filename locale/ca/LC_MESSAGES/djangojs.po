@@ -375,6 +375,69 @@ msgstr "Guardar"
 msgid "Field format was saved successfully"
 msgstr "El format del camp s'ha guardat correctament"
 
+msgid "Attention"
+msgstr "Atenció"
+
+msgid "This field has associated triggers that will also be deleted"
+msgstr "Aquest camp té disparadors associats que també seran eliminats"
+
+msgid "Calculated field"
+msgstr "Camp calculat"
+
+msgid "Remove trigger"
+msgstr "Eliminar disparador"
+
+msgid "Are you sure you want to remove the trigger"
+msgstr "Esteu segur que voleu eliminar el disparador"
+
+msgid "from this layer?"
+msgstr "d'aquesta capa?"
+
+msgid "The trigger will be uninstalled from the database."
+msgstr "El disparador serà desinstal·lat de la base de dades."
+
+msgid "Remove"
+msgstr "Eliminar"
+
+msgid "Please select a trigger"
+msgstr "Si us plau, seleccioneu un disparador"
+
+msgid "Please select a target field for the calculated field trigger"
+msgstr "Si us plau, seleccioneu un camp destí per al disparador de camp calculat"
+
+msgid "Error assigning trigger"
+msgstr "Error en assignar el disparador"
+
+msgid "SQL syntax error in trigger. Please check the trigger code and fix it before assigning."
+msgstr "Error de sintaxi SQL en el disparador. Si us plau, reviseu el codi del disparador i corregiu l'error abans d'assignar-lo."
+
+msgid "Error creating field with trigger"
+msgstr "Error en crear el camp amb el disparador"
+
+msgid "Field created and trigger assigned successfully"
+msgstr "Camp creat i disparador assignat correctament"
+
+msgid "Field and associated triggers were deleted"
+msgstr "El camp i els disparadors associats han estat eliminats"
+
+msgid "Error removing trigger"
+msgstr "Error en eliminar el disparador"
+
+msgid "Error toggling trigger"
+msgstr "Error en activar/desactivar el disparador"
+
+msgid "Trigger enabled successfully"
+msgstr "Disparador habilitat correctament"
+
+msgid "Trigger disabled successfully"
+msgstr "Disparador deshabilitat correctament"
+
+msgid "Select a calculation..."
+msgstr "Seleccioneu un càlcul..."
+
+msgid "Please select a calculation for the calculated field"
+msgstr "Si us plau, seleccioneu un càlcul per al camp calculat"
+
 #~ msgid "true"
 #~ msgstr "Veritable"
 

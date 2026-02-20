@@ -622,19 +622,38 @@ function addFieldWithConnectionTrigger(field, layerId, triggerId) {
           window.location.reload();
         }
       } else {
-        alert(response.error || gettext('Error creating field with trigger'));
+        if (typeof messageBox !== 'undefined') {
+          messageBox.show('error', response.error || gettext('Error creating field with trigger'));
+        } else {
+          alert(response.error || gettext('Error creating field with trigger'));
+        }
         window.location.reload();
       }
     },
     error: function(jqXHR) {
       console.error('Error:', jqXHR.responseText);
       var error = gettext('Error creating field with trigger');
+      var errorType = null;
       try {
         var resp = JSON.parse(jqXHR.responseText);
         error = resp.error || error;
+        errorType = resp.error_type;
       } catch(e) {}
-      alert(error);
-      window.location.reload();
+      if (typeof messageBox !== 'undefined') {
+        if (errorType === 'syntax_error') {
+          messageBox.showMultiLine('error', [
+            gettext('SQL syntax error in trigger. Please check the trigger code and fix it before assigning.'),
+            error
+          ]);
+          // No recargar: el usuario debe ir a corregir el trigger primero
+        } else {
+          messageBox.show('error', error);
+          window.location.reload();
+        }
+      } else {
+        alert(error);
+        window.location.reload();
+      }
     }
   });
 }

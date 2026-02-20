@@ -424,6 +424,69 @@ msgstr "Guardar"
 msgid "Field format was saved successfully"
 msgstr "El formato del campo se guardó correctamente"
 
+msgid "Attention"
+msgstr "Atención"
+
+msgid "This field has associated triggers that will also be deleted"
+msgstr "Este campo tiene disparadores asociados que también serán eliminados"
+
+msgid "Calculated field"
+msgstr "Campo calculado"
+
+msgid "Remove trigger"
+msgstr "Eliminar disparador"
+
+msgid "Are you sure you want to remove the trigger"
+msgstr "¿Está seguro de que desea eliminar el disparador"
+
+msgid "from this layer?"
+msgstr "de esta capa?"
+
+msgid "The trigger will be uninstalled from the database."
+msgstr "El disparador será desinstalado de la base de datos."
+
+msgid "Remove"
+msgstr "Eliminar"
+
+msgid "Please select a trigger"
+msgstr "Por favor, seleccione un disparador"
+
+msgid "Please select a target field for the calculated field trigger"
+msgstr "Por favor, seleccione un campo destino para el disparador de campo calculado"
+
+msgid "Error assigning trigger"
+msgstr "Error al asignar el disparador"
+
+msgid "SQL syntax error in trigger. Please check the trigger code and fix it before assigning."
+msgstr "Error de sintaxis SQL en el disparador. Por favor, revise el código del disparador y corrija el error antes de asignarlo."
+
+msgid "Error creating field with trigger"
+msgstr "Error al crear el campo con el disparador"
+
+msgid "Field created and trigger assigned successfully"
+msgstr "Campo creado y disparador asignado correctamente"
+
+msgid "Field and associated triggers were deleted"
+msgstr "El campo y los disparadores asociados han sido eliminados"
+
+msgid "Error removing trigger"
+msgstr "Error al eliminar el disparador"
+
+msgid "Error toggling trigger"
+msgstr "Error al activar/desactivar el disparador"
+
+msgid "Trigger enabled successfully"
+msgstr "Disparador habilitado correctamente"
+
+msgid "Trigger disabled successfully"
+msgstr "Disparador deshabilitado correctamente"
+
+msgid "Select a calculation..."
+msgstr "Seleccione un cálculo..."
+
+msgid "Please select a calculation for the calculated field"
+msgstr "Por favor, seleccione un cálculo para el campo calculado"
+
 #~ msgid "true"
 #~ msgstr "Verdadero"
 
