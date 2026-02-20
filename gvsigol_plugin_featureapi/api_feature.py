@@ -158,6 +158,51 @@ def handle_feature_error(e, lyr_id=None, target_epsg=None):
             logging.getLogger(LOGGER_NAME).warning(f"Error processing trigger error: {str(ex)}")
     
     # ========================================
+    # 2.5. Detectar errores de PROGRAMACIÓN en funciones PL/pgSQL de trigger
+    #      (campo inexistente, tipo erróneo, etc. que se instalan bien pero
+    #       fallan en ejecución — no llevan RAISE ni TRIGGER ERROR)
+    # ========================================
+    is_plpgsql_trigger_error = (
+        'PL/pgSQL function' in error_msg and 'CONTEXT:' in error_msg
+    ) or (
+        'record "new" has no field' in error_msg.lower()
+    ) or (
+        'record "old" has no field' in error_msg.lower()
+    )
+
+    if is_plpgsql_trigger_error:
+        try:
+            # Eliminar prefijo añadido por el serializador si lo hay
+            raw = error_msg
+            for prefix in ('Unexpected error:', 'Feature change cannot be inserted in database.'):
+                if prefix in raw:
+                    raw = raw.split(prefix, 1)[-1].strip()
+
+            # Extraer nombre de la función trigger del CONTEXT (para orientar al desarrollador)
+            func_match = re.search(r'PL/pgSQL function\s+([\w.]+)\(', raw)
+            func_name = func_match.group(1) if func_match else None
+
+            # La primera línea de error real (descartar líneas CONTEXT/PL/pgSQL)
+            lines = [
+                l.strip() for l in raw.split('\n')
+                if l.strip()
+                and not l.strip().startswith('CONTEXT:')
+                and not l.strip().startswith('PL/pgSQL')
+            ]
+            message = lines[0].rstrip('. ') if lines else raw.split('\n')[0].strip()
+
+            if func_name:
+                message = f"{message} [{func_name}]"
+
+            return JsonResponse({
+                'error_code': 'trigger',
+                'message': message
+            }, status=400)
+
+        except Exception as ex:
+            logging.getLogger(LOGGER_NAME).warning(f"Error processing PL/pgSQL trigger error: {str(ex)}")
+
+    # ========================================
     # 3. Detectar errores de VALIDACIÓN/CONSTRAINT
     # ========================================
     pg_error_patterns = [
