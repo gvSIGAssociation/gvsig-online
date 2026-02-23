@@ -3442,8 +3442,7 @@ msgstr "Permiso para gestionar"
 #: templates/select_layergroup_permissions.html:7
 msgid "Give the selected roles permissions to manage the layergroup"
 msgstr ""
-"Dar a los roles seleccionados permisos para gestionar el grupo de capasDar a "
-"los roles seleccionados permisos para gestionar el grupo de capas"
+"Dar a los roles seleccionados permisos para gestionar el grupo de capas"
 
 #: templates/select_layergroup_permissions.html:23
 msgid "Permission to include in projects"
