@@ -51,6 +51,7 @@ urlpatterns = [
     path('get_feature_info/', services_views.get_feature_info, name='get_feature_info'),
     path('get_datatable_data/', services_views.get_datatable_data, name='get_datatable_data'),
     path('get_feature_wfs/', services_views.get_feature_wfs, name='get_feature_wfs'),
+    path('wfs_proxy/', services_views.wfs_proxy, name='wfs_proxy'),
     path('get_unique_values/', services_views.get_unique_values, name='services_get_unique_values'),
     path('get_feature_resources/', services_views.get_feature_resources, name='get_feature_resources'),
     path('upload_resources/', services_views.upload_resources, name='upload_resources'),
