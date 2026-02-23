@@ -38,7 +38,7 @@ import json
 import sys
 
 print ("INFO: Ejecutando settings.py !!...........................................")
-GVSIGOL_VERSION = '3.12.2-dev'
+GVSIGOL_VERSION = '3.13.0_rc2'
 print("INFO: gvSIG Online version: " + GVSIGOL_VERSION)
 if os.environ.get("DEBUG")=='True':
     print ("INFO: Current environment:")
