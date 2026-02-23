@@ -31,6 +31,9 @@ var SelectFeatureControl = function(map, toolbar) {
 	this.interaction = new ol.interaction.Select({
         condition: ol.events.condition.click
     });
+	// No usar interaction.on('select') para la consulta WFS: ese evento no tiene evt.coordinate,
+	// lo que generaba filtro espacial inválido y fallo en selección puntual (puntos/líneas).
+	// La consulta se hace solo con map.on('click'), que sí proporciona MapBrowserEvent.
 	
 	this.control = new ol.control.Toggle({	
 		html: '<i class="fa fa-mouse-pointer" ></i>',
@@ -145,34 +148,29 @@ SelectFeatureControl.prototype.clickHandler = function(evt) {
 			});
 
 			var requestBody = new XMLSerializer().serializeToString(featureRequest);
-			var useProxy = !!(viewer.core.conf.user && viewer.core.conf.user.token);
-			var wfsURL;
-			var fetchOptions;
-			if (useProxy) {
-				var relWfs = qLayer.wfs_url;
-				wfsURL = window.location.origin + '/gvsigonline/services/wfs_proxy/?wfs_url=' + encodeURIComponent(relWfs);
-				fetchOptions = {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/xml' },
-					credentials: 'include',
-					body: requestBody
-				};
-			} else {
-				wfsURL = qLayer.wfs_url.indexOf('http') === 0 ? qLayer.wfs_url : (window.location.origin + qLayer.wfs_url);
-				fetchOptions = {
-					method: 'POST',
-					headers: {},
-					mode: 'cors',
-					body: requestBody
-				};
+			var wfsURL = qLayer.wfs_url.indexOf('http') === 0 ? qLayer.wfs_url : (window.location.origin + qLayer.wfs_url);
+			function getHeaders() {
+				var h = { 'Content-Type': 'application/xml' };
 				if (viewer.core.conf.user && viewer.core.conf.user.token) {
-					fetchOptions.headers['Authorization'] = 'Bearer ' + viewer.core.conf.user.token;
+					h['Authorization'] = 'Bearer ' + viewer.core.conf.user.token;
 				}
+				return h;
 			}
 			function doFetch() {
-				return fetch(wfsURL, fetchOptions);
+				return fetch(wfsURL, {
+					method: 'POST',
+					headers: getHeaders(),
+					mode: 'cors',
+					body: requestBody
+				});
 			}
-			doFetch().then(function(response) {
+			doFetch().then(async function(response) {
+				if (response.status === 401 && viewer.core.conf.user && viewer.core.conf.user.refresh_token) {
+					await viewer.core._refresh_token();
+					return doFetch();
+				}
+				return response;
+			}).then(function(response) {
 				if (!response.ok) {
 					if (response.status === 401) {
 						console.warn('WFS: token rechazado (401). Actualice la página o vuelva a iniciar sesión.');
