@@ -177,8 +177,13 @@ def regenerate_cache_for_extent(layer_id, minx, miny, maxx, maxy, source_epsg=43
     grid_subsets = settings.CACHE_OPTIONS['GRID_SUBSETS']
     zoom_start = '0'
     zoom_stop = str(settings.MAX_ZOOM_LEVEL)
-    op_type = 'reseed'
-    thread_count = '4'
+    # Prueba: solo truncate del extent; las teselas se regeneran bajo demanda cuando el usuario entre en la zona.
+    op_type = 'truncate'
+    truncate_thread_count = '1'
+
+    # --- Reseed (comentado para probar solo truncate): descomentar si hace falta regenerar de inmediato.
+    # op_type_reseed = 'reseed'
+    # thread_count = '4'
 
     ws = layer.datastore.workspace.name if layer.datastore and layer.datastore.workspace else None
 
@@ -192,6 +197,7 @@ def regenerate_cache_for_extent(layer_id, minx, miny, maxx, maxy, source_epsg=43
         else:
             return False
 
+        # Solo truncate del extent modificado (borra teselas de esa zona; GWC regenerará bajo demanda).
         for grid_set in grid_subsets:
             target_epsg = _parse_epsg_from_grid_set(grid_set)
             extent = _transform_extent(minx, miny, maxx, maxy, source_epsg, target_epsg)
@@ -199,7 +205,6 @@ def regenerate_cache_for_extent(layer_id, minx, miny, maxx, maxy, source_epsg=43
                 logger.warning("Skipping grid set %s: could not transform extent", grid_set)
                 continue
 
-            # EPSG:900913 is Web Mercator (same as 3857), use meters
             min_buffer = (MIN_BUFFER_METERS if target_epsg in (3857, 900913)
                           else MIN_BUFFER_DEGREES)
             minx_b, miny_b, maxx_b, maxy_b = _apply_buffer_to_extent(
@@ -210,10 +215,25 @@ def regenerate_cache_for_extent(layer_id, minx, miny, maxx, maxy, source_epsg=43
                 geowebcache.get_instance().execute_cache_operation(
                     ws, layer, server, node_url,
                     str(minx_b), str(miny_b), str(maxx_b), str(maxy_b),
-                    grid_set, zoom_start, zoom_stop, format_, op_type, thread_count
+                    grid_set, zoom_start, zoom_stop, format_, op_type, truncate_thread_count
                 )
 
-        logger.info("Cache regeneration triggered for layer %s (grid sets: %s)",
+        # --- Reseed por extent (comentado): descomentar para regenerar teselas de inmediato en lugar de bajo demanda.
+        # for grid_set in grid_subsets:
+        #     target_epsg = _parse_epsg_from_grid_set(grid_set)
+        #     extent = _transform_extent(minx, miny, maxx, maxy, source_epsg, target_epsg)
+        #     if not extent:
+        #         continue
+        #     min_buffer = (MIN_BUFFER_METERS if target_epsg in (3857, 900913) else MIN_BUFFER_DEGREES)
+        #     minx_b, miny_b, maxx_b, maxy_b = _apply_buffer_to_extent(*extent, BUFFER_PCT, min_buffer)
+        #     for node_url in node_urls:
+        #         geowebcache.get_instance().execute_cache_operation(
+        #             ws, layer, server, node_url,
+        #             str(minx_b), str(miny_b), str(maxx_b), str(maxy_b),
+        #             grid_set, zoom_start, zoom_stop, format_, op_type_reseed, thread_count
+        #         )
+
+        logger.info("Cache truncate (extent only) triggered for layer %s (grid sets: %s)",
                     layer_id, ', '.join(grid_subsets))
         return True
     except Exception as e:
