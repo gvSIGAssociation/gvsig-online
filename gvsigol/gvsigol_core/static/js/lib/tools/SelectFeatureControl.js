@@ -32,10 +32,6 @@ var SelectFeatureControl = function(map, toolbar) {
         condition: ol.events.condition.click
     });
 	
-	this.interaction.on('select', function(e) {
-        self.clickHandler(e);
-    });
-	
 	this.control = new ol.control.Toggle({	
 		html: '<i class="fa fa-mouse-pointer" ></i>',
 		className: "edit",
@@ -88,9 +84,15 @@ SelectFeatureControl.prototype.addInteraction = function() {
 
 SelectFeatureControl.prototype.clickHandler = function(evt) {
 	var self = this;
+	if (!evt || !evt.coordinate || evt.coordinate.length !== 2) {
+		return;
+	}
 	this.showFirst = true;
 
-	var circle = new ol.geom.Circle(evt.coordinate, 10);
+	var res = this.map.getView().getResolution();
+	var radiusPixels = 20;
+	var radius = Math.max(10, res * radiusPixels);
+	var circle = new ol.geom.Circle(evt.coordinate, radius);
 	var polygon = ol.geom.Polygon.fromCircle(circle, 16)
 
 	if (this.active) {
@@ -121,7 +123,6 @@ SelectFeatureControl.prototype.clickHandler = function(evt) {
 			}
 		}
 
-		var viewResolution = (this.map.getView().getResolution());
 		var url = null;
 		var ajaxRequests = new Array();
 		var features = new Array();
@@ -143,23 +144,47 @@ SelectFeatureControl.prototype.clickHandler = function(evt) {
 				filter: f.intersects(geometryName, polygon, 'EPSG:3857')
 			});
 
-			var wfsURL = qLayer.wfs_url;
-			if (wfsURL.indexOf('http') == -1) {
-				wfsURL = window.location.origin + wfsURL;
+			var requestBody = new XMLSerializer().serializeToString(featureRequest);
+			var useProxy = !!(viewer.core.conf.user && viewer.core.conf.user.token);
+			var wfsURL;
+			var fetchOptions;
+			if (useProxy) {
+				var relWfs = qLayer.wfs_url;
+				wfsURL = window.location.origin + '/gvsigonline/services/wfs_proxy/?wfs_url=' + encodeURIComponent(relWfs);
+				fetchOptions = {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/xml' },
+					credentials: 'include',
+					body: requestBody
+				};
+			} else {
+				wfsURL = qLayer.wfs_url.indexOf('http') === 0 ? qLayer.wfs_url : (window.location.origin + qLayer.wfs_url);
+				fetchOptions = {
+					method: 'POST',
+					headers: {},
+					mode: 'cors',
+					body: requestBody
+				};
+				if (viewer.core.conf.user && viewer.core.conf.user.token) {
+					fetchOptions.headers['Authorization'] = 'Bearer ' + viewer.core.conf.user.token;
+				}
 			}
-			var headers = {};
-			if (viewer.core.conf.user && viewer.core.conf.user.token) {
-				// FIXME: this is just an OIDC test. We must properly deal with refresh tokens etc
-				headers["Authorization"] = 'Bearer ' + viewer.core.conf.user.token;
-			};
-			fetch(wfsURL, {
-				method: 'POST',
-				headers: headers,
-				mode: 'cors',
-				body: new XMLSerializer().serializeToString(featureRequest)
-			}).then(function(response) {
+			function doFetch() {
+				return fetch(wfsURL, fetchOptions);
+			}
+			doFetch().then(function(response) {
+				if (!response.ok) {
+					if (response.status === 401) {
+						console.warn('WFS: token rechazado (401). Actualice la página o vuelva a iniciar sesión.');
+						if (typeof messageBox !== 'undefined') {
+							messageBox.show('warning', gettext('Session expired. Please refresh the page or log in again.'));
+						}
+					}
+					return Promise.resolve(null);
+				}
 				return response.json();
 			}).then(function(json) {
+				if (!json) return;
 				var geometryName = self.getFeatureGeometryName(qLayer);
 				var formatGeoJSON = new ol.format.GeoJSON({geometryName: geometryName});
 				var features = formatGeoJSON.readFeatures(json);
@@ -168,14 +193,13 @@ SelectFeatureControl.prototype.clickHandler = function(evt) {
 				var tableFeatures = [];
 				for (var i=0; i<features.length; i++) {
 					var row = {};
-					for (p in features[i].getProperties()) {
+					for (var p in features[i].getProperties()) {
 						if (p != 'wkb_geometry') {
 							row[p] = features[i].getProperties()[p];
 						}
-						
 					}
 					row['featureid'] = features[i].getId();
-					tableFeatures.push(row)
+					tableFeatures.push(row);
 				}
 
 				if (tableFeatures.length > 0) {
@@ -185,7 +209,11 @@ SelectFeatureControl.prototype.clickHandler = function(evt) {
 					self.selectionTable.addTable(tableFeatures, qLayer.layer_name, qLayer.workspace, qLayer.wfs_url, qLayer.conf);
 					self.selectionTable.show();
 					self.selectionTable.registerEvents();
-					
+				}
+			}).catch(function(err) {
+				console.error('WFS GetFeature error', err);
+				if (typeof messageBox !== 'undefined') {
+					messageBox.show('warning', gettext('Error loading selection.'));
 				}
 			});
 

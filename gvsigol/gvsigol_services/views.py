@@ -5376,6 +5376,86 @@ def get_feature_wfs(request):
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
+
+def _refresh_oidc_token(request):
+    """Intenta refrescar el access token OIDC usando el refresh_token de la sesión. Devuelve True si se actualizó."""
+    from django.conf import settings as django_settings
+    refresh_token = request.session.get('oidc_refresh_token')
+    url = getattr(django_settings, 'OIDC_OP_TOKEN_ENDPOINT', None)
+    client_id = getattr(django_settings, 'OIDC_RP_CLIENT_ID', None)
+    if not url or not client_id or not refresh_token:
+        return False
+    try:
+        resp = requests.post(
+            url,
+            data={
+                'client_id': client_id,
+                'grant_type': 'refresh_token',
+                'refresh_token': refresh_token,
+                'scope': 'openid',
+            },
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
+            verify=False,
+            proxies=getattr(settings, 'PROXIES', None),
+        )
+        if resp.status_code != 200:
+            return False
+        data = resp.json()
+        request.session['oidc_access_token'] = data.get('access_token')
+        if data.get('refresh_token'):
+            request.session['oidc_refresh_token'] = data['refresh_token']
+        return True
+    except Exception:
+        logger.exception("Error refreshing OIDC token")
+        return False
+
+
+@csrf_exempt
+@login_required()
+def wfs_proxy(request):
+    """
+    Proxy de peticiones WFS GetFeature para usar la sesión del usuario (y, si aplica, token OIDC).
+    Evita que el token caducado en el cliente provoque 401 en GeoServer.
+    """
+    if request.method != 'POST':
+        return HttpResponseBadRequest()
+    wfs_url = request.GET.get('wfs_url') or request.POST.get('wfs_url')
+    if not wfs_url:
+        return HttpResponseBadRequest('wfs_url required')
+    wfs_url = core_utils.get_absolute_url(wfs_url.strip(), request.META)
+    body = request.body
+    if not body:
+        return HttpResponseBadRequest('Body required')
+    if request.session.get('oidc_refresh_token'):
+        _refresh_oidc_token(request)
+    session = requests.Session()
+    auth = None
+    headers = {'Content-Type': 'application/xml'}
+    if request.session.get('username') and request.session.get('password'):
+        auth = (request.session['username'], request.session['password'])
+    elif request.session.get('oidc_access_token'):
+        headers['Authorization'] = 'Bearer ' + request.session['oidc_access_token']
+    if auth:
+        session.auth = auth
+    session.headers.update(headers)
+    try:
+        resp = session.post(wfs_url, data=body, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT), proxies=settings.PROXIES)
+    except Exception as e:
+        logger.exception("WFS proxy request failed")
+        return HttpResponse(status=502, content=str(e))
+    if resp.status_code == 401 and request.session.get('oidc_refresh_token'):
+        if _refresh_oidc_token(request):
+            session2 = requests.Session()
+            session2.headers.update({
+                'Content-Type': 'application/xml',
+                'Authorization': 'Bearer ' + request.session['oidc_access_token'],
+            })
+            resp = session2.post(wfs_url, data=body, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT), proxies=settings.PROXIES)
+    response = HttpResponse(resp.content, status=resp.status_code, content_type=resp.headers.get('Content-Type', 'application/json'))
+    return response
+
+
 @csrf_exempt
 def get_feature_resources(request):
     if request.method == 'POST':
