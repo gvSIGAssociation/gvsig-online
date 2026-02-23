@@ -49,7 +49,7 @@ from gvsigol_services import views as services_views
 from psycopg2 import sql as sqlbuilder
 from gvsigol_services.forms_geoserver import CreateFeatureTypeForm
 from gvsigol_services.models import LayerFieldEnumeration, TriggerProcedure, Trigger
-from gvsigol_services.tasks import refresh_layer_info
+from gvsigol_services.tasks import refresh_layer_info, do_layer_cache_clear
 import re
 from django.utils.translation import gettext_lazy as _
 
@@ -1110,6 +1110,36 @@ def layer_refresh(request, lyr_id):
             return Response(status=status.HTTP_403_FORBIDDEN)
         refresh_layer_info.apply_async(args=[layer.id])
         return Response({'status': 'Layer refresh has been scheduled for execution'})
+
+
+@swagger_auto_schema(operation_id='layer_cache_refresh',
+                    operation_summary='Clear GWC cache for a cached layer (for users with edit permission)',
+                    method='POST',
+                    responses={
+                        200: 'Cache has been cleared',
+                        404: "Layer NOT found",
+                        403: "The user does not have permission to edit this layer",
+                        400: "Layer is not cached",
+                        401: "The user is not authenticated"
+                    })
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def layer_cache_refresh(request, lyr_id):
+    """Clear GeoWebCache for this layer. Allowed for users with write or manage permission. Runs synchronously so when 200 is returned the cache is already cleared."""
+    try:
+        layer = Layer.objects.select_related('datastore__workspace').get(pk=lyr_id)
+    except Layer.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if not layer.cached:
+        return Response({'error': 'Layer is not cached'}, status=status.HTTP_400_BAD_REQUEST)
+    if not services_utils.can_write_layer(request, layer) and not services_utils.can_manage_layer(request, layer):
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    try:
+        server = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+        do_layer_cache_clear(layer, server)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    return Response({'status': 'Layer cache has been cleared'})
 
 
 class MapboxStyleView(APIView):

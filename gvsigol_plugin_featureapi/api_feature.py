@@ -70,20 +70,23 @@ def _trigger_cache_regeneration_for_edit(lyr_id, geometry, source_epsg=4326):
     """
     Trigger async cache regeneration for the extent of an edited feature.
     Only runs if the layer has cached=True to avoid unnecessary work (e.g. fetching feature geom on delete).
+    Returns the Celery task_id if a task was enqueued, else None (so the frontend can poll and refresh the layer).
     """
     try:
         layer = Layer.objects.get(id=int(lyr_id))
         if not layer.cached:
-            return
+            return None
     except Layer.DoesNotExist:
-        return
+        return None
 
     from gvsigol_services.cache_utils import get_geojson_geometry_extent
     from gvsigol_services.tasks import regenerate_cache_for_extent_async
 
     extent = get_geojson_geometry_extent(geometry)
-    if extent:
-        regenerate_cache_for_extent_async.delay(lyr_id, *extent, source_epsg=source_epsg)
+    if not extent:
+        return None
+    result = regenerate_cache_for_extent_async.delay(lyr_id, *extent, source_epsg=source_epsg)
+    return str(result.id) if result else None
 
 
 def handle_feature_error(e, lyr_id=None, target_epsg=None):
@@ -513,9 +516,15 @@ class FeaturesView(CreateAPIView):
                         pass
             
             feat = serializers.FeatureSerializer().create(validation, lyr_id, content, username, epsg)
+            cache_task_id = None
             if 'geometry' in content and content['geometry'] and _layer_is_cached(lyr_id):
-                _trigger_cache_regeneration_for_edit(lyr_id, content['geometry'], source_epsg=epsg)
-            return JsonResponse(feat, safe=False)
+                cache_task_id = _trigger_cache_regeneration_for_edit(lyr_id, content['geometry'], source_epsg=epsg)
+            if cache_task_id:
+                feat['cache_task_id'] = cache_task_id
+            resp = JsonResponse(feat, safe=False)
+            if cache_task_id:
+                resp['X-Cache-Task-Id'] = cache_task_id
+            return resp
         except HttpException as e:
             # Log del error para diagnóstico
             logging.getLogger(LOGGER_NAME).warning(f"Error creating feature in layer {lyr_id}: [{e.code}] {e.msg}")
@@ -579,9 +588,15 @@ class FeaturesView(CreateAPIView):
                         pass
             
             feat = serializers.FeatureSerializer().update(validation, lyr_id, data, override, version_to_overwrite, username, epsg)
+            cache_task_id = None
             if 'geometry' in data and data['geometry'] and _layer_is_cached(lyr_id):
-                _trigger_cache_regeneration_for_edit(lyr_id, data['geometry'], source_epsg=epsg)
-            return JsonResponse(feat, safe=False)
+                cache_task_id = _trigger_cache_regeneration_for_edit(lyr_id, data['geometry'], source_epsg=epsg)
+            if cache_task_id:
+                feat['cache_task_id'] = cache_task_id
+            resp = JsonResponse(feat, safe=False)
+            if cache_task_id:
+                resp['X-Cache-Task-Id'] = cache_task_id
+            return resp
         except HttpException as e:
             # Log del error para diagnóstico
             logging.getLogger(LOGGER_NAME).warning(f"Error updating feature in layer {lyr_id}: [{e.code}] {e.msg}")
@@ -779,6 +794,7 @@ class PublicFeaturesView(CreateAPIView):
             validation = Validation(request)
             validation.check_create_feature(lyr_id, content)
             feat = serializers.FeatureSerializer().create(validation, lyr_id, content, None)
+            cache_task_id = None
             if 'geometry' in content and content['geometry'] and _layer_is_cached(lyr_id):
                 epsg = 4326
                 if 'source_epsg' in request.GET:
@@ -786,8 +802,13 @@ class PublicFeaturesView(CreateAPIView):
                         epsg = int(request.GET['source_epsg'].split(":")[1])
                     except Exception:
                         pass
-                _trigger_cache_regeneration_for_edit(lyr_id, content['geometry'], source_epsg=epsg)
-            return JsonResponse(feat, safe=False)
+                cache_task_id = _trigger_cache_regeneration_for_edit(lyr_id, content['geometry'], source_epsg=epsg)
+            if cache_task_id:
+                feat['cache_task_id'] = cache_task_id
+            resp = JsonResponse(feat, safe=False)
+            if cache_task_id:
+                resp['X-Cache-Task-Id'] = cache_task_id
+            return resp
         except HttpException as e:
             return e.get_exception()
     
@@ -819,6 +840,7 @@ class PublicFeaturesView(CreateAPIView):
             
             validation.check_update_feature(lyr_id, data)
             feat = serializers.FeatureSerializer().update(validation, lyr_id, data, override, version_to_overwrite, None)
+            cache_task_id = None
             if 'geometry' in data and data['geometry'] and _layer_is_cached(lyr_id):
                 epsg = 4326
                 if 'epsg' in request.GET:
@@ -826,8 +848,13 @@ class PublicFeaturesView(CreateAPIView):
                         epsg = int(request.GET['epsg'])
                     except Exception:
                         pass
-                _trigger_cache_regeneration_for_edit(lyr_id, data['geometry'], source_epsg=epsg)
-            return JsonResponse(feat, safe=False)
+                cache_task_id = _trigger_cache_regeneration_for_edit(lyr_id, data['geometry'], source_epsg=epsg)
+            if cache_task_id:
+                feat['cache_task_id'] = cache_task_id
+            resp = JsonResponse(feat, safe=False)
+            if cache_task_id:
+                resp['X-Cache-Task-Id'] = cache_task_id
+            return resp
         except HttpException as e:
             return e.get_exception()
 
@@ -901,11 +928,41 @@ class FeaturesDeleteView(RetrieveDestroyAPIView):
                 except Exception:
                     pass
             serializers.FeatureSerializer().delete(validation, lyr_id, feat_id, version)
-            if geom:
-                _trigger_cache_regeneration_for_edit(lyr_id, geom, source_epsg=4326)
-            return HttpException(204, "OK").get_exception()
+            cache_task_id = _trigger_cache_regeneration_for_edit(lyr_id, geom, source_epsg=4326) if geom else None
+            resp = HttpException(204, "OK").get_exception()
+            if cache_task_id:
+                resp['X-Cache-Task-Id'] = cache_task_id
+            return resp
         except HttpException as e:
             return e.get_exception() 
+
+
+#--------------------------------------------------
+#                CacheTaskPollView
+#--------------------------------------------------
+class CacheTaskPollView(APIView):
+    """
+    Poll the status of a cache regeneration task (by task_id).
+    No DB storage: uses Celery result backend. When ready=true the frontend should refresh the layer.
+    Only relevant when the layer is cached and was edited (create/update/delete returned X-Cache-Task-Id).
+    """
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(operation_id='get_cache_task_status', operation_summary='Get cache regeneration task status',
+                         responses={200: "task_id, state (PENDING|SUCCESS|FAILURE), ready (bool)"})
+    def get(self, request, lyr_id, task_id):
+        try:
+            from celery.result import AsyncResult
+            from gvsigol.celery import app as celery_app
+            result = AsyncResult(task_id, app=celery_app)
+            return JsonResponse({
+                'task_id': task_id,
+                'state': result.state,
+                'ready': result.ready(),
+            })
+        except Exception as e:
+            logging.getLogger(LOGGER_NAME).warning("Cache task poll failed for task_id=%s: %s", task_id, e)
+            return JsonResponse({'task_id': task_id, 'state': 'UNKNOWN', 'ready': False}, status=200)
 
 
 #--------------------------------------------------
