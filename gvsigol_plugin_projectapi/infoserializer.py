@@ -110,92 +110,104 @@ class LayerSerializer(serializers.ModelSerializer):
                 pass
 
         try:
-            i, table, schema = services_utils.get_db_connect_from_layer(layer)
-            with i as con:
-                pks = con.get_pk_columns(table, schema=schema)
+            # Derive the PK set directly from the already-queried describe_feature_type
+            # result (which now includes is_pk thanks to pk_info=True).  This avoids a
+            # second DB round-trip and is immune to stale source_name values that can
+            # occur in older cloned layers.
+            pks_set = {f['name'] for f in result['fields'] if f.get('is_pk')}
 
-                field_group = self.get_field_group(form_groups, lang)
+            # Fallback: if describe_feature_type did not return is_pk (older code path
+            # or non-PostGIS layer), query the DB as before.
+            if not pks_set:
+                try:
+                    i, table, schema = services_utils.get_db_connect_from_layer(layer)
+                    with i as con:
+                        pks_from_db = con.get_pk_columns(table, schema=schema)
+                    pks_set = set(pks_from_db) if pks_from_db else set()
+                except Exception:
+                    pks_set = set()
 
-                fields_dict = {field['name']: field for field in result['fields']}
-                fields_conf_dict = {field_conf['name']: field_conf for field_conf in fields} if fields else {}
-                pks_set = set(pks) if pks else set()
-                
-                conf_field_names = set()
-                if fields:
-                    conf_field_names = {field_conf['name'] for field_conf in fields}
-                
-                db_field_names = set(fields_dict.keys())
-                
-                missing_fields = db_field_names - conf_field_names
-                
-                ordered_field_names = []
-                if form_groups:
-                    for group in form_groups:
-                        if 'fields' in group:
-                            ordered_field_names.extend(group['fields'])
-                
-                if not ordered_field_names:
-                    ordered_field_names = list(fields_dict.keys())
-                
-                # añade campos que están en la BD pero no en conf (como wkb_geometry)
-                ordered_field_names.extend(list(missing_fields))
+            field_group = self.get_field_group(form_groups, lang)
 
-                enumeration_fields = []
-                for field_name in ordered_field_names:
-                    if field_name in fields_dict and fields_dict[field_name]['type'].endswith('enumeration'):
-                        enumeration_fields.append(field_name)         
+            fields_dict = {field['name']: field for field in result['fields']}
+            fields_conf_dict = {field_conf['name']: field_conf for field_conf in fields} if fields else {}
 
-                enumeration_data = {}
-                if enumeration_fields:
-                    try:
-                        from gvsigol_services.models import LayerFieldEnumeration
-                        layer_field_enums = LayerFieldEnumeration.objects.filter(
-                            layer=layer, 
-                            field__in=enumeration_fields
-                        ).select_related('enumeration').only('field', 'enumeration__show_first_value')
-                        
-                        for lfe in layer_field_enums:
-                            enumeration_data[lfe.field] = lfe.enumeration.show_first_value
-                    except Exception:
-                        pass
+            conf_field_names = set()
+            if fields:
+                conf_field_names = {field_conf['name'] for field_conf in fields}
+            
+            db_field_names = set(fields_dict.keys())
+            
+            missing_fields = db_field_names - conf_field_names
+            
+            ordered_field_names = []
+            if form_groups:
+                for group in form_groups:
+                    if 'fields' in group:
+                        ordered_field_names.extend(group['fields'])
+            
+            if not ordered_field_names:
+                ordered_field_names = list(fields_dict.keys())
+            
+            # añade campos que están en la BD pero no en conf (como wkb_geometry)
+            ordered_field_names.extend(list(missing_fields))
+
+            enumeration_fields = []
+            for field_name in ordered_field_names:
+                if field_name in fields_dict and fields_dict[field_name]['type'].endswith('enumeration'):
+                    enumeration_fields.append(field_name)         
+
+            enumeration_data = {}
+            if enumeration_fields:
+                try:
+                    from gvsigol_services.models import LayerFieldEnumeration
+                    layer_field_enums = LayerFieldEnumeration.objects.filter(
+                        layer=layer, 
+                        field__in=enumeration_fields
+                    ).select_related('enumeration').only('field', 'enumeration__show_first_value')
+                    
+                    for lfe in layer_field_enums:
+                        enumeration_data[lfe.field] = lfe.enumeration.show_first_value
+                except Exception:
+                    pass
+            
+            ordered_fields = []
+            for index, field_name in enumerate(ordered_field_names):
+                if field_name not in fields_dict:
+                    continue
+                    
+                field = fields_dict[field_name].copy() 
+                field['order'] = index
                 
-                ordered_fields = []
-                for index, field_name in enumerate(ordered_field_names):
-                    if field_name not in fields_dict:
-                        continue
-                        
-                    field = fields_dict[field_name].copy() 
-                    field['order'] = index
-                    
-                    if field_name in fields_conf_dict:
-                        field_conf = fields_conf_dict[field_name]
-                        field.update({
-                            'mandatory': field_conf.get('mandatory', False),
-                            'editable': field_conf.get('editable', True),
-                            'visible': field_conf.get('visible', True),
-                            'editableactive': field_conf.get('editableactive', True),
-                            'infovisible': field_conf.get('infovisible', True)
-                        })
-                    
-                    field['pk'] = 'YES' if field_name in pks_set else 'NO'
-                    field['translate'] = translations_dict.get(field_name, field_name)
-                    
-                    if field['type'].endswith('enumeration'):
-                        items = services_utils.get_enum_item_list(layer, field_name)
-                        field['values'] = [item.name for item in items]
-                        field['show_first_value'] = enumeration_data.get(field_name, False)
+                if field_name in fields_conf_dict:
+                    field_conf = fields_conf_dict[field_name]
+                    field.update({
+                        'mandatory': field_conf.get('mandatory', False),
+                        'editable': field_conf.get('editable', True),
+                        'visible': field_conf.get('visible', True),
+                        'editableactive': field_conf.get('editableactive', True),
+                        'infovisible': field_conf.get('infovisible', True)
+                    })
                 
-                    if field_name in field_group:
-                        field.update({
-                            'groupname': field_group[field_name]['groupname'],
-                            'grouporder': field_group[field_name]['grouporder'],
-                            'fieldorder': field_group[field_name]['fieldorder']
-                        })
-                    
-                    ordered_fields.append(field)
+                field['pk'] = 'YES' if field_name in pks_set else 'NO'
+                field['translate'] = translations_dict.get(field_name, field_name)
                 
-                result['fields'] = ordered_fields
-                return result
+                if field['type'].endswith('enumeration'):
+                    items = services_utils.get_enum_item_list(layer, field_name)
+                    field['values'] = [item.name for item in items]
+                    field['show_first_value'] = enumeration_data.get(field_name, False)
+            
+                if field_name in field_group:
+                    field.update({
+                        'groupname': field_group[field_name]['groupname'],
+                        'grouporder': field_group[field_name]['grouporder'],
+                        'fieldorder': field_group[field_name]['fieldorder']
+                    })
+                
+                ordered_fields.append(field)
+            
+            result['fields'] = ordered_fields
+            return result
 
         except Exception:
             return
