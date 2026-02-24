@@ -57,7 +57,8 @@ import requests
 from owslib.wmts import WebMapTileService
 from owslib.util import Authentication
 
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse, parse_qs, urlunparse
+import copy
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpRequest
@@ -1554,23 +1555,60 @@ def get_wmts_options(
     options = {k: v for k, v in options.items() if v is not None}
     return options
 
+def _legend_url_for_style(legend_url, style_name):
+    """Set or replace STYLE parameter in a GetLegendGraphic-style URL"""
+    if not legend_url:
+        return legend_url
+    try:
+        parsed = urlparse(legend_url)
+        qs = parse_qs(parsed.query, keep_blank_values=True)
+        qs['STYLE'] = [style_name] if style_name else qs.get('STYLE', [])
+        qs.pop('style', None)  # avoid duplicate; OGC uses STYLE only
+        new_query = urlencode(qs, doseq=True)
+        return urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, new_query, parsed.fragment))
+    except Exception:
+        return legend_url
+
+
 def wmts_options_for_openlayers(wmts_options, format=None, style=None, layer_styles=None, tilematrixsetname=None, projection=None):
     if len(wmts_options['styles']) > 0:
-        print(wmts_options['styles'])
         if style and wmts_options['styles'].get(style):
             wmts_options['style'] = style
         elif layer_styles:
-            for style in layer_styles:
-                if style.get('is_default', False):
-                    wmts_options['style'] = style.get('name')
+            for s in layer_styles:
+                if s.get('is_default', False):
+                    wmts_options['style'] = s.get('name')
                     break
         if not wmts_options.get('style'):
-            for name, style in wmts_options['styles'].items():
-                if style.get('isDefault', False):
+            for name, s in wmts_options['styles'].items():
+                if s.get('isDefault', False):
                     wmts_options['style'] = name
                     break
         if not wmts_options.get('style'):
             wmts_options['style'] = list(wmts_options['styles'].keys())[0]
+        default_name = wmts_options.get('style')
+        # When layer_styles is provided, rebuild styles to only include DB styles and add missing ones
+        if layer_styles:
+            existing = wmts_options['styles']
+            template = next(iter(existing.values()), None) if existing else None
+            new_styles = {}
+            for s in layer_styles:
+                name = s.get('name')
+                if not name:
+                    continue
+                is_default = (name == default_name)
+                if name in existing:
+                    entry = copy.deepcopy(existing[name])
+                    entry['isDefault'] = is_default
+                elif template:
+                    entry = copy.deepcopy(template)
+                    entry['isDefault'] = is_default
+                    if entry.get('legend'):
+                        entry['legend'] = _legend_url_for_style(entry['legend'], name)
+                else:
+                    entry = {'isDefault': is_default, 'format': 'image/png', 'width': '20', 'height': '20', 'legend': ''}
+                new_styles[name] = entry
+            wmts_options['styles'] = new_styles
     else:
         wmts_options['style'] = None
     if format:
