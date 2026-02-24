@@ -980,6 +980,11 @@ def clone_layer(target_datastore, layer, layer_group, clone_conf=None):
             # clone layer
             layer.pk = None
             layer.name = new_name
+            # Ensure source_name points to the actual cloned DB table name so that
+            # all DB introspection (describe_feature_type, get_pk_columns, etc.) use
+            # the correct physical table name even when the Django layer name was
+            # changed to avoid naming conflicts.
+            layer.source_name = new_table_name
             layer.datastore = target_datastore
             if layer_group is not None:
                 layer.layer_group = layer_group
