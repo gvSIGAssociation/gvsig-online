@@ -8546,8 +8546,7 @@ def connection_schemas(request, connection_id):
             has_access = (
                 connection.allow_all_datastore or  # Permiso global para datastores
                 connection.created_by == request.user.username or
-                connection.roles.filter(role__in=all_user_roles, can_use_datastore=True).exists() or
-                connection.datastores.filter(created_by=request.user.username).exists()
+                connection.roles.filter(role__in=all_user_roles, can_use_datastore=True).exists()
             )
             if not has_access:
                 logger.warning(f"Access denied for user {request.user.username} to connection {connection.name}")
