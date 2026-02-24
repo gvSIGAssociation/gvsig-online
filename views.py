@@ -5711,10 +5711,21 @@ def describe_feature_type(lyr, workspace):
         layer = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
         params = json.loads(layer.datastore.connection_params)
         schema = params.get('schema', 'public')
+        # Prefer source_name (the actual physical DB table name).  Fall back to
+        # layer.name if source_name is absent or points to a non-existent table
+        # (can happen with older cloned layers whose source_name was not updated).
+        source_name = layer.source_name if layer.source_name else layer.name
 
         i = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
-        layer_defs = i.get_fields_info(layer.name, schema)
-        geom_defs = i.get_geometry_columns_info(layer.name, schema)
+        # Use pk_info=True so callers can determine the PK from the returned fields
+        # without needing a second round-trip to the database.
+        layer_defs = i.get_fields_info(source_name, schema, pk_info=True)
+        if not layer_defs and source_name != layer.name:
+            # Fallback: source_name does not match any table in this schema
+            # (typical for cloned layers created before source_name was fixed).
+            source_name = layer.name
+            layer_defs = i.get_fields_info(source_name, schema, pk_info=True)
+        geom_defs = i.get_geometry_columns_info(source_name, schema)
         i.close()
 
         for layer_def in layer_defs:
