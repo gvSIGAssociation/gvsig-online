@@ -54,16 +54,69 @@
 				</div>
 <script type="text/javascript">
 $(document).ready(function() {
-	// Búsqueda de roles
+
+	// -----------------------------------------------------------------------
+	// PASO 1: Leer el estado inicial de TODOS los checkboxes ANTES de que
+	// List.js los elimine del DOM al paginar (usa removeChild internamente).
+	// -----------------------------------------------------------------------
+	var allDsRolePermissions = {};
+
+	$('#datastore-permissions-box .list .item').each(function() {
+		var $useCheck = $(this).find('input[type="checkbox"][name^="role_use_"]');
+		if ($useCheck.length === 0) return;
+		var roleName = $useCheck.attr('name').replace('role_use_', '');
+		allDsRolePermissions[roleName] = {
+			use:    $useCheck.is(':checked'),
+			manage: $(this).find('input[name="role_manage_' + roleName + '"]').is(':checked')
+		};
+	});
+
+	// -----------------------------------------------------------------------
+	// PASO 2: Inicializar List.js con paginación.
+	// -----------------------------------------------------------------------
 	var searcheableRoleList = new List('datastore-permissions-box', {
 		valueNames: ['searchable-rolename', 'searchable-roledesc'],
 		page: 10,
 		pagination: true
 	});
-	
+
 	$('#ds-role-search').on('keyup', function() {
 		searcheableRoleList.search($(this).val());
 	});
+
+	// -----------------------------------------------------------------------
+	// PASO 3: Escuchar cambios en checkboxes visibles para actualizar tracking.
+	// -----------------------------------------------------------------------
+	$('#datastore-permissions-box').on('change', 'input[type="checkbox"][name^="role_use_"]', function() {
+		var roleName = $(this).attr('name').replace('role_use_', '');
+		if (allDsRolePermissions[roleName] !== undefined) {
+			allDsRolePermissions[roleName].use = $(this).is(':checked');
+		}
+	});
+	$('#datastore-permissions-box').on('change', 'input[type="checkbox"][name^="role_manage_"]', function() {
+		var roleName = $(this).attr('name').replace('role_manage_', '');
+		if (allDsRolePermissions[roleName] !== undefined) {
+			allDsRolePermissions[roleName].manage = $(this).is(':checked');
+		}
+	});
+
+	// -----------------------------------------------------------------------
+	// PASO 4: Antes de enviar el formulario, añadir inputs ocultos para todos
+	// los roles marcados que List.js haya eliminado del DOM (páginas ocultas).
+	// -----------------------------------------------------------------------
+	$('#main_form').on('submit', function() {
+		var $form = $(this);
+		$.each(allDsRolePermissions, function(roleName, perms) {
+			$.each([['use', 'role_use_'], ['manage', 'role_manage_']], function(_, pair) {
+				var permType = pair[0], prefix = pair[1];
+				var inputName = prefix + roleName;
+				if (perms[permType] && $form.find('input[name="' + inputName + '"]').length === 0) {
+					$('<input type="hidden">').attr('name', inputName).val('on').appendTo($form);
+				}
+			});
+		});
+	});
+
 });
 </script>
 
