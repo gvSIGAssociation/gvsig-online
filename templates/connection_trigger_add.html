@@ -329,15 +329,37 @@ $(document).ready(function() {
 		$('#schemas-input').val(selectedSchemas).trigger('change');
 	}
 	
-	// Búsqueda de roles
+	// -----------------------------------------------------------------------
+	// PASO 1: Leer el estado inicial de TODOS los checkboxes ANTES de que
+	// List.js los elimine del DOM al paginar (usa removeChild internamente).
+	// -----------------------------------------------------------------------
+	var checkedTriggerRoles = {};  // { roleName: true/false }
+
+	$('#trigger-permissions-box .list .item').each(function() {
+		var $cb = $(this).find('input[name="allowed_roles"]');
+		if ($cb.length === 0) return;
+		var roleName = $cb.val();
+		checkedTriggerRoles[roleName] = $cb.is(':checked');
+	});
+
+	// -----------------------------------------------------------------------
+	// PASO 2: Inicializar List.js con paginación.
+	// -----------------------------------------------------------------------
 	var searcheableRoleList = new List('trigger-permissions-box', {
 		valueNames: ['searchable-rolename'],
 		page: 10,
 		pagination: true
 	});
-	
+
 	$('#role-search').on('keyup', function() {
 		searcheableRoleList.search($(this).val());
+	});
+
+	// -----------------------------------------------------------------------
+	// PASO 3: Escuchar cambios en checkboxes visibles para actualizar tracking.
+	// -----------------------------------------------------------------------
+	$('#trigger-permissions-box').on('change', 'input[name="allowed_roles"]', function() {
+		checkedTriggerRoles[$(this).val()] = $(this).is(':checked');
 	});
 	
 	// Deshabilitar checkboxes de roles cuando allow_all está marcado
@@ -390,6 +412,22 @@ $(document).ready(function() {
 			sqlEditor.focus();
 			return false;
 		}
+
+		// -------------------------------------------------------------------
+		// PASO 4: Añadir inputs ocultos para roles marcados que List.js haya
+		// eliminado del DOM (páginas ocultas), para que lleguen al servidor.
+		// -------------------------------------------------------------------
+		var $form = $(this);
+		$.each(checkedTriggerRoles, function(roleName, isChecked) {
+			if (isChecked) {
+				// Buscar si el checkbox sigue en el DOM y está presente
+				var $existing = $form.find('input[name="allowed_roles"][value="' + roleName + '"]');
+				if ($existing.length === 0) {
+					// List.js lo eliminó del DOM → añadir input oculto
+					$('<input type="hidden">').attr('name', 'allowed_roles').val(roleName).appendTo($form);
+				}
+			}
+		});
 	});
 	
 	// Refrescar CodeMirror cuando se cambia a la pestaña General

@@ -1544,6 +1544,12 @@ msgstr ""
 msgid "Testing..."
 msgstr ""
 
+msgid "Saving..."
+msgstr ""
+
+msgid "Synchronizing %(count)s datastore(s) with GeoServer. This may take a few seconds."
+msgstr ""
+
 #: templates/connection_add.html:594 templates/connection_update.html:408
 #: views.py:7450 views.py:7464 views.py:7479 views.py:7512 views.py:7532
 #: views.py:7575 views.py:7598
@@ -3618,6 +3624,9 @@ msgstr ""
 
 #: views.py:1514 views.py:4223
 msgid "You are not allowed to use the selected datastore"
+msgstr ""
+
+msgid "You do not have permission to use this schema. You can only use your own schema ({user_schema}) or create a new one."
 msgstr ""
 
 #: views.py:1516 views.py:4226
