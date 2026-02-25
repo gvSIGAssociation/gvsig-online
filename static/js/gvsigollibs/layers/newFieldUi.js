@@ -354,19 +354,26 @@ function createModalContent(fid, mode, title, config, fieldNames) {
   ui += "</div>";
   ui += '<div class="col-md-9">';
   ui += '<select id="field-calculation" class="form-control" disabled>';
+  ui += '<option value="">' + gettext("Select a calculation...") + '</option>';
   var procedure;
   for (var i = 0; i < triggerProcedures.length; i++) {
     procedure = triggerProcedures[i];
+    var dataAttrs = '';
+    if (procedure.type === 'connection_trigger') {
+      dataAttrs = ' data-type="connection_trigger" data-trigger-id="' + procedure.trigger_id + '"';
+    } else {
+      dataAttrs = ' data-type="procedure"';
+    }
     if (field && procedure.id == field.calculation) {
       ui +=
         '<option value="' +
         procedure.id +
-        '" selected>' +
+        '"' + dataAttrs + ' selected>' +
         procedure.label +
         "</option>";
     } else {
       ui +=
-        '<option value="' + procedure.id + '">' + procedure.label + "</option>";
+        '<option value="' + procedure.id + '"' + dataAttrs + '>' + procedure.label + "</option>";
     }
   }
   ui += "</select>";
@@ -429,12 +436,29 @@ function createModalContent(fid, mode, title, config, fieldNames) {
     var type = $("#field-db-type").val();
     var enumkey = $("#field-default-value-" + id).val();
     var calculated = document.getElementById("field-calculated").checked;
+    var calculation = "";
+    var calculationLabel = "";
+    var isConnectionTrigger = false;
+    var connectionTriggerId = null;
+    
     if (calculated) {
-      var calculation = $("#field-calculation").val();
-      var calculationLabel = $("#field-calculation option:selected").text();
-    } else {
-      var calculation = "";
-      var calculationLabel = "";
+      calculation = $("#field-calculation").val();
+      // Validar que se ha seleccionado un cálculo
+      if (!calculation) {
+        var error =
+          '<p class="text-muted" style="color: #ff0000; padding: 10px;">* ' +
+          gettext("Please select a calculation for the calculated field") +
+          ".</p>";
+        $("#field-errors").empty();
+        $("#field-errors").append(error);
+        return;
+      }
+      calculationLabel = $("#field-calculation option:selected").text();
+      var selectedOption = $("#field-calculation option:selected");
+      isConnectionTrigger = selectedOption.data('type') === 'connection_trigger';
+      if (isConnectionTrigger) {
+        connectionTriggerId = selectedOption.data('trigger-id');
+      }
     }
 
     if (validateRegex(name)) {
@@ -446,19 +470,39 @@ function createModalContent(fid, mode, title, config, fieldNames) {
         typeParams = window.currentFieldConfig ? window.currentFieldConfig.type_params || {} : {};
       }
       
-      var field = {
-        id: id,
-        name: name,
-        type: type,
-        enumkey: enumkey,
-        calculation: calculation,
-        calculationLabel: calculationLabel,
-        gvsigol_type: gvsigolType,
-        type_params: typeParams
-      };
-      addField(field);
-
-      $(modalSelector).modal("hide");
+      // Si es un trigger de conexión, primero crear el campo y luego asignar el trigger
+      console.log('isConnectionTrigger:', isConnectionTrigger, 'connectionTriggerId:', connectionTriggerId, 'config.layerId:', config.layerId);
+      if (isConnectionTrigger && connectionTriggerId && config.layerId) {
+        var field = {
+          id: id,
+          name: name,
+          type: type,
+          enumkey: enumkey,
+          calculation: '', // No usar el calculation tradicional
+          calculationLabel: calculationLabel,
+          gvsigol_type: gvsigolType,
+          type_params: typeParams,
+          connectionTriggerId: connectionTriggerId
+        };
+        
+        console.log('Calling addFieldWithConnectionTrigger with:', field, config.layerId, connectionTriggerId);
+        // Llamar a addFieldWithConnectionTrigger que creará el campo y asignará el trigger
+        addFieldWithConnectionTrigger(field, config.layerId, connectionTriggerId);
+        $(modalSelector).modal("hide");
+      } else {
+        var field = {
+          id: id,
+          name: name,
+          type: type,
+          enumkey: enumkey,
+          calculation: calculation,
+          calculationLabel: calculationLabel,
+          gvsigol_type: gvsigolType,
+          type_params: typeParams
+        };
+        addField(field);
+        $(modalSelector).modal("hide");
+      }
     } else {
       var error =
         '<p class="text-muted" style="color: #ff0000; padding: 10px;">* ' +
@@ -548,3 +592,68 @@ window.updateLinkFieldParams = function(param, value) {
     window.currentFieldConfig.type_params[param] = value;
   }
 };
+
+// Función para añadir un campo y asignarle un trigger de conexión
+function addFieldWithConnectionTrigger(field, layerId, triggerId) {
+  console.log('addFieldWithConnectionTrigger called:', field, layerId, triggerId);
+  
+  // Usar una sola llamada al servidor que crea el campo Y asigna el trigger
+  $.ajax({
+    type: 'POST',
+    url: '/gvsigonline/services/api/field_add_with_trigger/',
+    beforeSend: function(xhr) {
+      xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+    },
+    data: {
+      'field_name': field.name,
+      'field_type': field.type,
+      'layer_id': layerId,
+      'trigger_id': triggerId
+    },
+    success: function(response) {
+      console.log('Field + trigger response:', response);
+      if (response.success) {
+        if (typeof messageBox !== 'undefined') {
+          messageBox.show('info', gettext('Field created and trigger assigned successfully'));
+          $('#modal-error').on('hidden.bs.modal', function(e) {
+            window.location.reload();
+          });
+        } else {
+          window.location.reload();
+        }
+      } else {
+        if (typeof messageBox !== 'undefined') {
+          messageBox.show('error', response.error || gettext('Error creating field with trigger'));
+        } else {
+          alert(response.error || gettext('Error creating field with trigger'));
+        }
+        window.location.reload();
+      }
+    },
+    error: function(jqXHR) {
+      console.error('Error:', jqXHR.responseText);
+      var error = gettext('Error creating field with trigger');
+      var errorType = null;
+      try {
+        var resp = JSON.parse(jqXHR.responseText);
+        error = resp.error || error;
+        errorType = resp.error_type;
+      } catch(e) {}
+      if (typeof messageBox !== 'undefined') {
+        if (errorType === 'syntax_error') {
+          messageBox.showMultiLine('error', [
+            gettext('SQL syntax error in trigger. Please check the trigger code and fix it before assigning.'),
+            error
+          ]);
+          // No recargar: el usuario debe ir a corregir el trigger primero
+        } else {
+          messageBox.show('error', error);
+          window.location.reload();
+        }
+      } else {
+        alert(error);
+        window.location.reload();
+      }
+    }
+  });
+}

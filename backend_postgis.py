@@ -1415,6 +1415,26 @@ class Introspect:
             )
         print(query.as_string(self.conn))
         self.cursor.execute(query)
+    
+    def enable_trigger(self, trigger_name, target_schema, target_table):
+        """Habilita un trigger existente en la base de datos."""
+        sql_tpl = 'ALTER TABLE {schema}.{table} ENABLE TRIGGER {trigger_name}'
+        query = sqlbuilder.SQL(sql_tpl).format(
+            trigger_name=sqlbuilder.Identifier(trigger_name),
+            schema=sqlbuilder.Identifier(target_schema),
+            table=sqlbuilder.Identifier(target_table)
+        )
+        self.cursor.execute(query)
+    
+    def disable_trigger(self, trigger_name, target_schema, target_table):
+        """Deshabilita un trigger existente en la base de datos (no lo elimina)."""
+        sql_tpl = 'ALTER TABLE {schema}.{table} DISABLE TRIGGER {trigger_name}'
+        query = sqlbuilder.SQL(sql_tpl).format(
+            trigger_name=sqlbuilder.Identifier(trigger_name),
+            schema=sqlbuilder.Identifier(target_schema),
+            table=sqlbuilder.Identifier(target_table)
+        )
+        self.cursor.execute(query)
         
     def clone_triggers(self, target_schema, target_table, source_schema, source_table):
         for trigger in self.get_triggers(source_schema, source_table):

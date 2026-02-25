@@ -2,6 +2,29 @@
 {% load staticfiles %}
 {% load i18n %}
 
+{% block extra-head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/xq-dark.min.css">
+<style>
+	.json-editor-small {
+		border: 1px solid #d2d6de;
+		border-radius: 3px;
+		height: 50px !important;
+		font-size: 12px;
+	}
+	.json-editor-small .CodeMirror-gutters {
+		left: 0 !important;
+	}
+	.json-editor-small .CodeMirror-linenumber {
+		padding: 0 3px 0 5px !important;
+		min-width: 20px !important;
+	}
+	.json-editor-small .CodeMirror-lines {
+		padding-left: 0 !important;
+	}
+</style>
+{% endblock %}
+
 {% block content %}	
 <form id="connection-form" role="form" method="post" action="{% url 'connection_update' connection_id %}">
 	<div class="row">
@@ -281,12 +304,41 @@
 {% endblock %}
 
 {% block extra-scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
 <script>
 	$('#menu-manage-services').addClass("active");
 	$('#submenu-connections').addClass("active");
 </script>
 <script>
 $(document).ready(function() {
+	// Inicializar CodeMirror para JSON en extra_params
+	var jsonEditor = null;
+	var extraParamsTextarea = document.getElementById('id_extra_params');
+	if (extraParamsTextarea) {
+		jsonEditor = CodeMirror.fromTextArea(extraParamsTextarea, {
+			mode: { name: 'javascript', json: true },
+			theme: 'xq-dark',
+			lineNumbers: true,
+			indentWithTabs: true,
+			smartIndent: true,
+			matchBrackets: true,
+			lineWrapping: true
+		});
+		jsonEditor.setSize(null, 50);
+		jsonEditor.getWrapperElement().classList.add('json-editor-small');
+		// Forzar refresco para que se muestre el contenido
+		setTimeout(function() {
+			jsonEditor.refresh();
+		}, 100);
+		
+		// Sincronizar antes de enviar el formulario
+		$('#connection-form').on('submit', function() {
+			if (jsonEditor) {
+				jsonEditor.save();
+			}
+		});
+	}
 	var connType = '{{ connection.type }}';
 	
 	// Test de conexión
