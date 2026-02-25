@@ -28,6 +28,7 @@ from django.contrib.auth.models import User
 from gvsigol_core.models import Project, ProjectLayerGroup, Application
 from gvsigol_plugin_projectapi import util
 from gvsigol_services.models import LayerGroup, Layer
+from gvsigol_symbology.models import StyleLayer
 from gvsigol import settings
 from datetime import datetime
 import time
@@ -447,7 +448,14 @@ class LayerSerializer(serializers.ModelSerializer):
         else:
             if 'wmts_options' in external_params:
                 project_crs = Project.objects.get(id=self.context['projectid']).viewer_default_crs
-                external_params['wmts_options'] = services_utils.wmts_options_for_openlayers(external_params['wmts_options'], projection=project_crs)
+                layer_styles = []
+                for stllyr in StyleLayer.objects.filter(layer_id=obj.id).select_related('style'):
+                    stl = stllyr.style
+                    if not stl.name.endswith('__tmp'):
+                        layer_styles.append({'name': stl.name, 'is_default': stl.is_default})
+                external_params['wmts_options'] = services_utils.wmts_options_for_openlayers(
+                    external_params['wmts_options'], projection=project_crs, layer_styles=layer_styles
+                )
         return external_params
     
     def get_featureapi_endpoint_(self, obj):
