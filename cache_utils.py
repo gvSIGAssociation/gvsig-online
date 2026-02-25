@@ -171,17 +171,17 @@ def regenerate_cache_for_extent(layer_id, minx, miny, maxx, maxy, source_epsg=43
         server = Server.objects.get(id=layer_group.server_id)
     except (LayerGroup.DoesNotExist, Server.DoesNotExist) as e:
         logger.warning("Server/layergroup not found for layer %s: %s", layer_id, e)
-        return False
+        return False    
 
     format_ = settings.CACHE_OPTIONS['FORMATS'][0]
     grid_subsets = settings.CACHE_OPTIONS['GRID_SUBSETS']
     zoom_start = '0'
     zoom_stop = str(settings.MAX_ZOOM_LEVEL)
-    # Prueba: solo truncate del extent; las teselas se regeneran bajo demanda cuando el usuario entre en la zona.
+    # Only truncate the extent; tiles are regenerated on demand when the user enters the zone.
     op_type = 'truncate'
     truncate_thread_count = '1'
 
-    # --- Reseed (comentado para probar solo truncate): descomentar si hace falta regenerar de inmediato.
+    # --- Re-seed (uncomment if you need to regenerate immediately).
     # op_type_reseed = 'reseed'
     # thread_count = '4'
 
@@ -197,7 +197,12 @@ def regenerate_cache_for_extent(layer_id, minx, miny, maxx, maxy, source_epsg=43
         else:
             return False
 
-        # Solo truncate del extent modificado (borra teselas de esa zona; GWC regenerará bajo demanda).
+        # EPSG:3857 = EPSG:900913 (Web Mercator). GWC often uses 900913 as grid set name.
+        def _gwc_grid_set(grid_set):
+            if grid_set == 'EPSG:3857':
+                return 'EPSG:900913'
+            return grid_set
+        
         for grid_set in grid_subsets:
             target_epsg = _parse_epsg_from_grid_set(grid_set)
             extent = _transform_extent(minx, miny, maxx, maxy, source_epsg, target_epsg)
@@ -211,11 +216,12 @@ def regenerate_cache_for_extent(layer_id, minx, miny, maxx, maxy, source_epsg=43
                 *extent, BUFFER_PCT, min_buffer
             )
 
+            gwc_grid_set = _gwc_grid_set(grid_set)
             for node_url in node_urls:
                 geowebcache.get_instance().execute_cache_operation(
                     ws, layer, server, node_url,
                     str(minx_b), str(miny_b), str(maxx_b), str(maxy_b),
-                    grid_set, zoom_start, zoom_stop, format_, op_type, truncate_thread_count
+                    gwc_grid_set, zoom_start, zoom_stop, format_, op_type, truncate_thread_count
                 )
 
         # --- Reseed por extent (comentado): descomentar para regenerar teselas de inmediato en lugar de bajo demanda.
