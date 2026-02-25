@@ -163,7 +163,6 @@ def regenerate_cache_for_extent(layer_id, minx, miny, maxx, maxy, source_epsg=43
         return False
 
     if layer.external:
-        logger.debug("Skipping cache regeneration for external layer %s", layer_id)
         return False
 
     try:
