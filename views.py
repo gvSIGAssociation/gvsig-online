@@ -28,6 +28,7 @@ from django.db.models import Q
 from gvsigol_services import geographic_servers
 from gvsigol_services.models import Workspace, Datastore, Layer, Server
 from gvsigol_services import utils as service_utils
+from gvsigol_services.tasks import do_layer_cache_clear
 from gvsigol_services.utils import paginate
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
@@ -248,6 +249,11 @@ def custom_add(request, layer_id):
             server.reload_nodes()
             if style.is_default:
                 server.updateThumbnail(layer)
+                if getattr(layer, 'cached', False):
+                    try:
+                        do_layer_cache_clear(layer, server)
+                    except Exception:
+                        pass
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -277,6 +283,11 @@ def custom_update(request, layer_id, style_id):
             gs.reload_nodes()
             if style.is_default:
                 gs.updateThumbnail(layer)
+                if getattr(layer, 'cached', False):
+                    try:
+                        do_layer_cache_clear(layer, gs)
+                    except Exception:
+                        pass
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -309,6 +320,11 @@ def map_heat_add(request, layer_id):
             server.reload_nodes()
             if style.is_default:
                 server.updateThumbnail(layer)
+                if getattr(layer, 'cached', False):
+                    try:
+                        do_layer_cache_clear(layer, server)
+                    except Exception:
+                        pass
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -338,6 +354,11 @@ def map_heat_update(request, layer_id, style_id):
             gs.reload_nodes()
             if style.is_default:
                 gs.updateThumbnail(layer)
+                if getattr(layer, 'cached', False):
+                    try:
+                        do_layer_cache_clear(layer, gs)
+                    except Exception:
+                        pass
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -369,6 +390,11 @@ def unique_symbol_add(request, layer_id):
             gs.reload_nodes()
             if style.is_default:
                 gs.updateThumbnail(layer)
+                if getattr(layer, 'cached', False):
+                    try:
+                        do_layer_cache_clear(layer, gs)
+                    except Exception:
+                        pass
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -394,6 +420,11 @@ def unique_symbol_update(request, layer_id, style_id):
             gs.reload_nodes()
             if style.is_default:
                 gs.updateThumbnail(layer)
+                if getattr(layer, 'cached', False):
+                    try:
+                        do_layer_cache_clear(layer, gs)
+                    except Exception:
+                        pass
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -463,6 +494,11 @@ def unique_values_add(request, layer_id):
             gs.reload_nodes()
             if style.is_default:
                 gs.updateThumbnail(layer)
+                if getattr(layer, 'cached', False):
+                    try:
+                        do_layer_cache_clear(layer, gs)
+                    except Exception:
+                        pass
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -493,6 +529,11 @@ def unique_values_update(request, layer_id, style_id):
             gs.reload_nodes()
             if style.is_default:
                 gs.updateThumbnail(layer)
+                if getattr(layer, 'cached', False):
+                    try:
+                        do_layer_cache_clear(layer, gs)
+                    except Exception:
+                        pass
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -590,6 +631,11 @@ def intervals_add(request, layer_id):
             gs.reload_nodes()
             if style.is_default:
                 gs.updateThumbnail(layer)
+                if getattr(layer, 'cached', False):
+                    try:
+                        do_layer_cache_clear(layer, gs)
+                    except Exception:
+                        pass
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -720,6 +766,11 @@ def intervals_update(request, layer_id, style_id):
             gs.reload_nodes()
             if style.is_default:
                 gs.updateThumbnail(layer)
+                if getattr(layer, 'cached', False):
+                    try:
+                        do_layer_cache_clear(layer, gs)
+                    except Exception:
+                        pass
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -817,6 +868,11 @@ def clustered_points_add(request, layer_id):
             gs.reload_nodes()
             if style.is_default:
                 gs.updateThumbnail(layer)
+                if getattr(layer, 'cached', False):
+                    try:
+                        do_layer_cache_clear(layer, gs)
+                    except Exception:
+                        pass
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -843,6 +899,11 @@ def clustered_points_update(request, layer_id, style_id):
             gs.reload_nodes()
             if style.is_default:
                 gs.updateThumbnail(layer)
+                if getattr(layer, 'cached', False):
+                    try:
+                        do_layer_cache_clear(layer, gs)
+                    except Exception:
+                        pass
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -898,6 +959,11 @@ def expressions_add(request, layer_id):
             gs.reload_nodes()
             if style.is_default:
                 gs.updateThumbnail(layer)
+                if getattr(layer, 'cached', False):
+                    try:
+                        do_layer_cache_clear(layer, gs)
+                    except Exception:
+                        pass
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -941,6 +1007,11 @@ def expressions_update(request, layer_id, style_id):
             gs.reload_nodes()
             if style.is_default:
                 gs.updateThumbnail(layer)
+                if getattr(layer, 'cached', False):
+                    try:
+                        do_layer_cache_clear(layer, gs)
+                    except Exception:
+                        pass
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -1000,6 +1071,11 @@ def color_table_add(request, layer_id):
             gs.reload_nodes()
             if style.is_default:
                 gs.updateThumbnail(layer)
+                if getattr(layer, 'cached', False):
+                    try:
+                        do_layer_cache_clear(layer, gs)
+                    except Exception:
+                        pass
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
@@ -1028,6 +1104,11 @@ def color_table_update(request, layer_id, style_id):
             gs.reload_nodes()
             if style.is_default:
                 gs.updateThumbnail(layer)
+                if getattr(layer, 'cached', False):
+                    try:
+                        do_layer_cache_clear(layer, gs)
+                    except Exception:
+                        pass
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
