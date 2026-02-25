@@ -49,7 +49,7 @@ from gvsigol_services import views as services_views
 from psycopg2 import sql as sqlbuilder
 from gvsigol_services.forms_geoserver import CreateFeatureTypeForm
 from gvsigol_services.models import LayerFieldEnumeration, TriggerProcedure, Trigger
-from gvsigol_services.tasks import refresh_layer_info, do_layer_cache_clear
+from gvsigol_services.tasks import refresh_layer_info
 import re
 from django.utils.translation import gettext_lazy as _
 
@@ -1112,16 +1112,6 @@ def layer_refresh(request, lyr_id):
         return Response({'status': 'Layer refresh has been scheduled for execution'})
 
 
-@swagger_auto_schema(operation_id='layer_cache_refresh',
-                    operation_summary='Clear GWC cache for a cached layer (for users with edit permission)',
-                    method='POST',
-                    responses={
-                        200: 'Cache has been cleared',
-                        404: "Layer NOT found",
-                        403: "The user does not have permission to edit this layer",
-                        400: "Layer is not cached",
-                        401: "The user is not authenticated"
-                    })
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def layer_cache_refresh(request, lyr_id):
@@ -1140,6 +1130,7 @@ def layer_cache_refresh(request, lyr_id):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     return Response({'status': 'Layer cache has been cleared'})
+
 
 
 class MapboxStyleView(APIView):

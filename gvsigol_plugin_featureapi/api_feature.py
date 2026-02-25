@@ -68,9 +68,9 @@ def _layer_is_cached(lyr_id):
 
 def _trigger_cache_regeneration_for_edit(lyr_id, geometry, source_epsg=4326):
     """
-    Trigger async cache regeneration for the extent of an edited feature.
-    Only runs if the layer has cached=True to avoid unnecessary work (e.g. fetching feature geom on delete).
-    Returns the Celery task_id if a task was enqueued, else None (so the frontend can poll and refresh the layer).
+    Trigger cache regeneration for the extent of an edited feature (async via Celery).
+    Only runs if the layer has cached=True.
+    Returns the Celery task_id for the frontend to poll, or None if no regeneration needed.
     """
     try:
         layer = Layer.objects.get(id=int(lyr_id))
