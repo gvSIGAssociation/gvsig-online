@@ -1112,6 +1112,27 @@ def layer_refresh(request, lyr_id):
         return Response({'status': 'Layer refresh has been scheduled for execution'})
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def layer_cache_refresh(request, lyr_id):
+    """Clear GeoWebCache for this layer. Allowed for users with write or manage permission. Runs synchronously so when 200 is returned the cache is already cleared."""
+    try:
+        layer = Layer.objects.select_related('datastore__workspace').get(pk=lyr_id)
+    except Layer.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if not layer.cached:
+        return Response({'error': 'Layer is not cached'}, status=status.HTTP_400_BAD_REQUEST)
+    if not services_utils.can_write_layer(request, layer) and not services_utils.can_manage_layer(request, layer):
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    try:
+        server = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+        do_layer_cache_clear(layer, server)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    return Response({'status': 'Layer cache has been cleared'})
+
+
+
 class MapboxStyleView(APIView):
     """
     Vista para obtener los estilos de una capa en formato Mapbox GL Style JSON.
