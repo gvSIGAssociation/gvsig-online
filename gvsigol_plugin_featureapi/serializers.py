@@ -744,7 +744,7 @@ class FeatureSerializer(serializers.Serializer):
                 raise e
             raise HttpException(400, "Features cannot be queried. Unexpected error: " + format(e))
         
-    def list(self, validation, lyr_id, pagination, epsg, date, strict_search, onlyprops = False, text = None, filter = None, cql_filter_read=None):
+    def list(self, validation, lyr_id, pagination, epsg, date, strict_search, onlyprops = False, text = None, filter = None, cql_filter_read=None, sortfield=None, sortorder=None):
         layer = Layer.objects.get(id = int(lyr_id))
         if layer.type != 'v_PostGIS':
             raise HttpException(400, "La capa no es del tipo correcto. Debería ser una capa PostGIS")
@@ -823,10 +823,25 @@ class FeatureSerializer(serializers.Serializer):
                     where = sqlbuilder.SQL(" WHERE {conditions}").format(conditions=sqlbuilder.SQL(" AND ").join(where_components))
                 else:
                     where = sqlbuilder.SQL('')
+                
+                # Construir ORDER BY si se especifica ordenamiento
+                order_by = sqlbuilder.SQL('')
+                if sortfield and sortorder:
+                    # Obtener todas las columnas de la tabla para validar
+                    table_fields = con.get_fields(table, schema=schema)
+                    
+                    # Validar que el campo existe y no es una geometría
+                    if sortfield in table_fields and sortfield not in geom_cols:
+                        direction = sqlbuilder.SQL("ASC") if sortorder == 'ascend' else sqlbuilder.SQL("DESC")
+                        order_by = sqlbuilder.SQL(" ORDER BY {field} {direction}").format(
+                            field=sqlbuilder.Identifier(sortfield),
+                            direction=direction
+                        )
+                
                 if onlyprops == False:
-                    sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(ST_Transform({geom}, {epsg})), row_to_json((SELECT d FROM (SELECT {properties}) d)) as props FROM {schema}.{table} {where} {limit_offset}")
+                    sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(ST_Transform({geom}, {epsg})), row_to_json((SELECT d FROM (SELECT {properties}) d)) as props FROM {schema}.{table} {where}{order_by} {limit_offset}")
                 else:
-                    sql = sqlbuilder.SQL("SELECT row_to_json((SELECT d FROM (SELECT {properties}) d)) as props, ST_AsGeoJSON(ST_Transform(ST_Centroid({geom}), {epsg})) FROM {schema}.{table} {where} {limit_offset}")
+                    sql = sqlbuilder.SQL("SELECT row_to_json((SELECT d FROM (SELECT {properties}) d)) as props, ST_AsGeoJSON(ST_Transform(ST_Centroid({geom}), {epsg})) FROM {schema}.{table} {where}{order_by} {limit_offset}")
                 
                 query = sql.format(
                     geom=sqlbuilder.Identifier(geom_col),
@@ -835,6 +850,7 @@ class FeatureSerializer(serializers.Serializer):
                     schema=sqlbuilder.Identifier(schema),
                     table=sqlbuilder.Identifier(table),
                     where=where,
+                    order_by=order_by,
                     limit_offset=limit_offset
                 )
                 con.cursor.execute(query)
