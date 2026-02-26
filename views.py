@@ -613,6 +613,30 @@ def datastore_add(request):
                     elif not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', schema):
                         form.add_error('schema', _('Invalid schema name. Use only letters, numbers and underscores, starting with a letter or underscore.'))
                     else:
+                        # Validar que el usuario tiene derecho a usar este schema
+                        # Superusuario: sin restricción
+                        # Usuario con can_manage sobre la conexión: sin restricción
+                        # Resto: solo puede usar su propio schema ds_<username> o crear uno nuevo
+                        if not request.user.is_superuser:
+                            _user_roles = auth_backend.get_roles(request.user)
+                            _all_user_roles = list(_user_roles) + [request.user.username]
+                            _can_manage_conn = (
+                                connection.allow_all_manage or
+                                connection.created_by == request.user.username or
+                                connection.roles.filter(role__in=_all_user_roles, can_manage=True).exists()
+                            )
+                            if not _can_manage_conn:
+                                _user_schema = utils.get_datastore_name(request.user.username)
+                                if schema != _user_schema:
+                                    # Comprobar si el schema YA EXISTE en la BD
+                                    try:
+                                        _existing_schemas = connection.get_schemas()
+                                        if schema in _existing_schemas:
+                                            form.add_error('schema', _('You do not have permission to use this schema. You can only use your own schema ({user_schema}) or create a new one.').format(user_schema=_user_schema))
+                                    except Exception:
+                                        pass  # Si no podemos consultarlo, dejamos pasar y que el backend decida
+
+                    if not form.errors:
                         try:
                             # Crear el esquema si no existe
                             connection.create_schema_if_not_exists(schema)
@@ -5711,10 +5735,21 @@ def describe_feature_type(lyr, workspace):
         layer = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
         params = json.loads(layer.datastore.connection_params)
         schema = params.get('schema', 'public')
+        # Prefer source_name (the actual physical DB table name).  Fall back to
+        # layer.name if source_name is absent or points to a non-existent table
+        # (can happen with older cloned layers whose source_name was not updated).
+        source_name = layer.source_name if layer.source_name else layer.name
 
         i = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
-        layer_defs = i.get_fields_info(layer.name, schema)
-        geom_defs = i.get_geometry_columns_info(layer.name, schema)
+        # Use pk_info=True so callers can determine the PK from the returned fields
+        # without needing a second round-trip to the database.
+        layer_defs = i.get_fields_info(source_name, schema, pk_info=True)
+        if not layer_defs and source_name != layer.name:
+            # Fallback: source_name does not match any table in this schema
+            # (typical for cloned layers created before source_name was fixed).
+            source_name = layer.name
+            layer_defs = i.get_fields_info(source_name, schema, pk_info=True)
+        geom_defs = i.get_geometry_columns_info(source_name, schema)
         i.close()
 
         for layer_def in layer_defs:
@@ -7226,21 +7261,42 @@ def connection_update(request, connection_id):
                 
                 # Actualizar roles (solo si puede editar permisos)
                 if can_edit_permissions:
-                    ConnectionRole.objects.filter(connection=connection).delete()
+                    # Enfoque selectivo: solo modificar los roles que aparecen en all_roles
+                    # (los que el formulario puede mostrar). Los ConnectionRole de roles que
+                    # no están en all_roles (migrados, eliminados del backend, etc.) se preservan.
+                    existing_roles = {
+                        cr.role: cr
+                        for cr in ConnectionRole.objects.filter(connection=connection)
+                    }
                     for role in all_roles:
                         role_name = role.get('name') if isinstance(role, dict) else str(role)
                         can_datastore = f'role_datastore_{role_name}' in request.POST
                         can_etl = f'role_etl_{role_name}' in request.POST
                         can_manage_role = f'role_manage_{role_name}' in request.POST
-                        
+
                         if can_datastore or can_etl or can_manage_role:
-                            ConnectionRole.objects.create(
-                                connection=connection,
-                                role=role_name,
-                                can_use_datastore=can_datastore,
-                                can_use_etl=can_etl,
-                                can_manage=can_manage_role
-                            )
+                            if role_name in existing_roles:
+                                # Actualizar el registro existente
+                                cr = existing_roles[role_name]
+                                cr.can_use_datastore = can_datastore
+                                cr.can_use_etl = can_etl
+                                cr.can_manage = can_manage_role
+                                cr.save()
+                            else:
+                                # Crear nuevo registro
+                                ConnectionRole.objects.create(
+                                    connection=connection,
+                                    role=role_name,
+                                    can_use_datastore=can_datastore,
+                                    can_use_etl=can_etl,
+                                    can_manage=can_manage_role
+                                )
+                        else:
+                            # El rol aparece en el formulario pero sin ningún permiso marcado
+                            # → eliminar el registro si existía
+                            if role_name in existing_roles:
+                                existing_roles[role_name].delete()
+                    # Los ConnectionRole cuyo role NO está en all_roles quedan intactos
                 
                 messages.success(request, _('Connection updated successfully'))
                 return HttpResponseRedirect(reverse('connection_list'))
@@ -8528,6 +8584,7 @@ def connection_schemas(request, connection_id):
         logger.debug(f"Connection found: {connection.name}, type: {connection.type}")
         
         # Verificar permisos de acceso a la conexión para datastores
+        can_manage_conn = False
         if not request.user.is_superuser:
             user_roles = auth_backend.get_roles(request.user)
             # Incluir el username del usuario en la lista de roles para buscar (migración automática)
@@ -8535,16 +8592,34 @@ def connection_schemas(request, connection_id):
             has_access = (
                 connection.allow_all_datastore or  # Permiso global para datastores
                 connection.created_by == request.user.username or
-                connection.roles.filter(role__in=all_user_roles, can_use_datastore=True).exists() or
-                connection.datastores.filter(created_by=request.user.username).exists()
+                connection.roles.filter(role__in=all_user_roles, can_use_datastore=True).exists()
             )
             if not has_access:
                 logger.warning(f"Access denied for user {request.user.username} to connection {connection.name}")
                 return JsonResponse({'success': False, 'error': _('Access denied')})
-        
+
+            # Comprobar si tiene permiso de gestión sobre la conexión
+            can_manage_conn = (
+                connection.allow_all_manage or
+                connection.created_by == request.user.username or
+                connection.roles.filter(role__in=all_user_roles, can_manage=True).exists()
+            )
+        else:
+            can_manage_conn = True  # superusuario siempre puede gestionar
+
         logger.debug(f"Fetching schemas for connection: {connection.name}")
         schemas = connection.get_schemas()
         logger.debug(f"Schemas found: {schemas}")
+
+        # Filtrar los esquemas según permisos:
+        # - Superusuario o usuario con can_manage: ve todos los esquemas
+        # - Resto (can_use_datastore sin can_manage): solo ve su propio esquema ds_<username>
+        #   (puede escribir un nombre nuevo gracias al campo tags de Select2)
+        if not can_manage_conn:
+            user_schema = utils.get_datastore_name(request.user.username)
+            schemas = [s for s in schemas if s == user_schema]
+            logger.debug(f"Schemas filtered for non-manager user {request.user.username}: {schemas}")
+
         return JsonResponse({'success': True, 'schemas': schemas})
     except Connection.DoesNotExist:
         logger.error(f"Connection not found: {connection_id}")

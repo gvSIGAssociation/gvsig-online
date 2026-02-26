@@ -28,6 +28,7 @@ from django.contrib.auth.models import AnonymousUser
 import hashlib
 import json
 import os
+from django.db import models
 from django.http.response import HttpResponse
 from django.db.models.query import QuerySet
 from django.db.models import Q
@@ -74,7 +75,16 @@ page_param: str = "page",page_size_param: str = "page_size",):
     - Lee ?page= y ?page_size= del request.
     - Limita page_size a max_page_size.
     - Maneja páginas inválidas sin reventar.
+    - Si recibe un QuerySet sin ordenamiento, agrega ordenamiento por 'id' para evitar warnings.
     """
+    
+    if isinstance(items, models.QuerySet):
+        # Verificar si el QuerySet tiene ordenamiento definido
+        order_by = getattr(items.query, 'order_by', None)
+        if not order_by or (isinstance(order_by, (list, tuple)) and len(order_by) == 0):
+            # Si el QuerySet no tiene ordenamiento, agregar ordenamiento por 'id' por defecto
+            items = items.order_by('id')
+    
     raw_page = request.GET.get(page_param, "1")
     raw_size = request.GET.get(page_size_param, str(default_page_size))
 
@@ -971,6 +981,11 @@ def clone_layer(target_datastore, layer, layer_group, clone_conf=None):
             # clone layer
             layer.pk = None
             layer.name = new_name
+            # Ensure source_name points to the actual cloned DB table name so that
+            # all DB introspection (describe_feature_type, get_pk_columns, etc.) use
+            # the correct physical table name even when the Django layer name was
+            # changed to avoid naming conflicts.
+            layer.source_name = new_table_name
             layer.datastore = target_datastore
             if layer_group is not None:
                 layer.layer_group = layer_group

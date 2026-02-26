@@ -22,10 +22,63 @@
 	.json-editor-small .CodeMirror-lines {
 		padding-left: 0 !important;
 	}
+	/* Overlay de guardado */
+	#saving-overlay {
+		display: none;
+		position: fixed;
+		top: 0; left: 0;
+		width: 100%; height: 100%;
+		background: rgba(0,0,0,0.5);
+		z-index: 9999;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
+		cursor: wait;
+	}
+	#saving-overlay .saving-box {
+		background: #fff;
+		border-radius: 6px;
+		padding: 30px 40px;
+		text-align: center;
+		box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+		max-width: 360px;
+	}
+	#saving-overlay .saving-box .fa-spinner {
+		font-size: 36px;
+		color: #3c8dbc;
+		margin-bottom: 14px;
+	}
+	#saving-overlay .saving-box p {
+		margin: 0;
+		font-size: 15px;
+		color: #444;
+	}
+	#saving-overlay .saving-box .saving-hint {
+		margin-top: 8px;
+		font-size: 12px;
+		color: #888;
+	}
 </style>
 {% endblock %}
 
-{% block content %}	
+{% block content %}
+
+{# Overlay de guardado — visible mientras el servidor procesa el POST #}
+{% with ds_count=connection.datastores.count %}
+<div id="saving-overlay" style="display:none">
+	<div class="saving-box">
+		<p><strong>{% trans "Saving..." %}</strong></p>
+		{% if ds_count > 0 %}
+		<p class="saving-hint">
+			{% blocktrans trimmed with count=ds_count %}
+			Synchronizing {{ count }} datastore(s) with GeoServer. This may take a few seconds.
+			{% endblocktrans %}
+		</p>
+		{% endif %}
+	</div>
+</div>
+{% endwith %}
+
 <form id="connection-form" role="form" method="post" action="{% url 'connection_update' connection_id %}">
 	<div class="row">
 		<div class="col-md-12">	
@@ -337,6 +390,12 @@ $(document).ready(function() {
 			if (jsonEditor) {
 				jsonEditor.save();
 			}
+			// Mostrar overlay de guardado y deshabilitar botón para evitar doble envío
+			$('#saving-overlay').css('display', 'flex');
+			$('body').css('cursor', 'wait');
+			$(this).find('button[type="submit"]')
+				.prop('disabled', true)
+				.html('<i class="fa fa-spinner fa-spin margin-r-5"></i> {% trans "Saving..." %}');
 		});
 	}
 	var connType = '{{ connection.type }}';

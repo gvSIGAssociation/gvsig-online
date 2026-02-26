@@ -1584,6 +1584,12 @@ msgstr "Por favor, seleccione un tipo de conexión"
 msgid "Testing..."
 msgstr "Probando..."
 
+msgid "Saving..."
+msgstr "Guardando..."
+
+msgid "Synchronizing %(count)s datastore(s) with GeoServer. This may take a few seconds."
+msgstr "Sincronizando %(count)s almacén(es) de datos con GeoServer. Esto puede tardar unos segundos."
+
 #: templates/connection_add.html:594 templates/connection_update.html:408
 #: views.py:7450 views.py:7464 views.py:7479 views.py:7512 views.py:7532
 #: views.py:7575 views.py:7598
@@ -3738,6 +3744,9 @@ msgstr "Capa que contiene información sobre {}"
 #: views.py:1514 views.py:4223
 msgid "You are not allowed to use the selected datastore"
 msgstr "No tienes permisos para usar el almacén de datos seleccionado"
+
+msgid "You do not have permission to use this schema. You can only use your own schema ({user_schema}) or create a new one."
+msgstr "No tienes permisos para usar este esquema. Solo puedes usar tu propio esquema ({user_schema}) o crear uno nuevo."
 
 #: views.py:1516 views.py:4226
 msgid "You are not allowed to manage the selected layergroup"

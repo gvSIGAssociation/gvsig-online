@@ -166,7 +166,9 @@ class DatastoreForm(forms.Form):
                 # 2. Las creó él mismo
                 # 3. Tienen un ConnectionRole con alguno de sus roles con can_use_datastore=True
                 # 4. Tienen un ConnectionRole con su username con can_use_datastore=True (migración automática)
-                # 5. Tienen datastores que él creó (para compatibilidad con migración)
+                #
+                # Importante: tener un datastore automático (ds_<username>) NO concede permiso
+                # para crear más datastores. Para ello debe existir permiso explícito.
                 from gvsigol_auth import auth_backend
                 user_roles = auth_backend.get_roles(user)
                 # Incluir el username del usuario en la lista de roles para buscar
@@ -181,8 +183,7 @@ class DatastoreForm(forms.Form):
                 ).filter(
                     db_models.Q(allow_all_datastore=True) |
                     db_models.Q(created_by=user.username) |
-                    db_models.Q(id__in=role_connection_ids) |
-                    db_models.Q(datastores__created_by=user.username)  # Conexiones con datastores creados por este usuario
+                    db_models.Q(id__in=role_connection_ids)
                 ).distinct().order_by('name')
 
     def clean(self):
