@@ -448,12 +448,6 @@ def do_refresh_layer_extent(layer, server):
     except Exception as e:
         logger.exception('error refreshing layer info - {0}'.format(str(layer)))
 
-def do_layer_cache_clear(layer, server):
-    server.clearCache(layer.datastore.workspace.name, layer)
-    layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
-    server.createOrUpdateGeoserverLayerGroup(layer_group)
-    server.clearLayerGroupCache(layer_group.name)
-
 def do_update_thumbnail(layer, server):
     server.updateThumbnail(layer, 'update')
 
@@ -525,3 +519,13 @@ def update_wmts_layer_info(self, layer_id):
         pass
     else:
         update_internal_wmts_layer_options(layer)
+
+
+@celery_app.task(bind=True)
+def regenerate_cache_for_extent_async(self, layer_id, minx, miny, maxx, maxy, source_epsg=4326):
+    """
+    Regenerate GeoWebCache for the given extent on a cached layer (async).
+    Called after feature create/update/delete when layer.cached is True.
+    """
+    from gvsigol_services.cache_utils import regenerate_cache_for_extent
+    regenerate_cache_for_extent(layer_id, minx, miny, maxx, maxy, source_epsg)

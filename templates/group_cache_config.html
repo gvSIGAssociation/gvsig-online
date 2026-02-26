@@ -78,8 +78,8 @@
 							<div class="col-md-3 form-group">
 								<label for="input_format">{% trans "Format" %}</label>
 								<select class="form-control" id="input_format" name="input_format" tabindex="2" aria-hidden="true">
-									{% for f in formats %}
-										<option value="{{f}}">{{f}}</option>
+									{% for value, label in format_choices %}
+										<option value="{{ value }}">{{ label }}</option>
 									{% endfor %}
 								</select>
 							</div>
