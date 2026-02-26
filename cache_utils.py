@@ -13,6 +13,7 @@ from gvsigol import settings
 from gvsigol_services.models import Layer, LayerGroup, Server
 from gvsigol_services import geographic_servers
 from gvsigol_services import rest_geowebcache as geowebcache
+from gvsigol_services.rest_geowebcache import FailedRequestError
 
 logger = logging.getLogger('gvsigol')
 
@@ -216,12 +217,19 @@ def regenerate_cache_for_extent(layer_id, minx, miny, maxx, maxy, source_epsg=43
             )
 
             gwc_grid_set = _gwc_grid_set(grid_set)
-            for node_url in node_urls:
-                geowebcache.get_instance().execute_cache_operation(
-                    ws, layer, server, node_url,
-                    str(minx_b), str(miny_b), str(maxx_b), str(maxy_b),
-                    gwc_grid_set, zoom_start, zoom_stop, format_, op_type, truncate_thread_count
-                )
+            try:
+                for node_url in node_urls:
+                    geowebcache.get_instance().execute_cache_operation(
+                        ws, layer, server, node_url,
+                        str(minx_b), str(miny_b), str(maxx_b), str(maxy_b),
+                        gwc_grid_set, zoom_start, zoom_stop, format_, op_type, truncate_thread_count
+                    )
+            except FailedRequestError as e:
+                msg = e.server_message.decode('utf-8', 'replace') if isinstance(e.server_message, bytes) else str(e.server_message)
+                if 'Unknown grid set' in msg:
+                    logger.warning("Skipping grid set %s: not configured in GeoWebCache (%s)", grid_set, msg.strip())
+                else:
+                    raise
 
         # --- Reseed por extent (comentado): descomentar para regenerar teselas de inmediato en lugar de bajo demanda.
         # for grid_set in grid_subsets:
