@@ -451,19 +451,6 @@ def do_refresh_layer_extent(layer, server):
 def do_update_thumbnail(layer, server):
     server.updateThumbnail(layer, 'update')
 
-# @celery_app.task(bind=True)
-# def clear_layer_cache_async(self, layer_id):
-#     """Clear GWC cache for a cached layer only. Used after feature edit for users with edit permission."""
-#     try:
-#         layer = Layer.objects.select_related("datastore__workspace").get(id=layer_id)
-#         if not layer.cached:
-#             return
-#         server = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
-#         do_layer_cache_clear(layer, server)
-#     except Exception as e:
-#         logger.exception('error clearing layer cache for layer_id=%s: %s', layer_id, e)
-
-
 @celery_app.task(bind=True)
 def refresh_layer_info(self, layer_id):
     try:
