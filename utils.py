@@ -258,7 +258,7 @@ def get_write_restrictions(request_or_user, layer):
             "catalogMode" : "CHALLENGE"
         }
 
-def can_write_layer(request_or_user, layer):
+def can_write_layer(request_or_user, layer, user_profile=None):
     """
     Checks whether the user has permissions to write the provided layer.
 
@@ -271,7 +271,7 @@ def can_write_layer(request_or_user, layer):
     """
     try:
         authz_service = get_authz_server_for_layer(layer)
-        return authz_service.can_write_layer(request_or_user, layer)
+        return authz_service.can_write_layer(request_or_user, layer, user_profile=user_profile)
     except Exception as e:
         print(e)
     return False
@@ -1204,7 +1204,7 @@ def get_layerread_by_user_query(user_roles):
     return Q(layerreadrole__role__in=user_roles)
 
 
-def get_layerread_by_user(request):
+def get_layerread_by_user(request, user_profile=None):
     '''
     Obtiene las capas en las que el usuario tiene permiso de lectura.
     Estas son todas las públicas más todas las privadas sobre las que tiene permisos
@@ -1218,6 +1218,11 @@ def get_layerread_by_user(request):
     if request.user.is_superuser:
         return Layer.objects.all()
     roles = get_roles(request)
+    return Layer.objects.filter(get_layerread_by_user_query(roles) \
+             | get_public_layers_query()).distinct()
+
+def get_layerread_by_role(role):
+    roles = [role]
     return Layer.objects.filter(get_layerread_by_user_query(roles) \
              | get_public_layers_query()).distinct()
 
