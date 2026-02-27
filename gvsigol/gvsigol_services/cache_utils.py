@@ -147,12 +147,105 @@ def _parse_epsg_from_grid_set(grid_set):
         return 3857
 
 
+def _get_min_buffer_for_epsg(target_epsg):
+    """
+    Return minimum buffer value (meters or degrees) for the given EPSG.
+    Uses crs_definitions.json 'units' field for robust handling of any CRS.
+    """
+    crs_def = getattr(settings, 'crs_definitions_json', None)
+    if not crs_def:
+        try:
+            import json
+            import os
+            path = os.path.join(os.path.dirname(settings.__file__), 'crs_definitions.json')
+            with open(path, 'r') as f:
+                crs_def = json.load(f)
+        except Exception as e:
+            logger.warning("Could not load crs_definitions.json for buffer units: %s", e)
+            return MIN_BUFFER_DEGREES  # safe fallback for geographic
+
+    srid_str = str(target_epsg)
+    entry = crs_def.get(srid_str) if crs_def else None
+    if not entry:
+        logger.warning("EPSG:%s not in crs_definitions.json, using degrees buffer", target_epsg)
+        return MIN_BUFFER_DEGREES
+
+    units = entry.get('units', '').lower()
+    if units == 'meters':
+        return MIN_BUFFER_METERS
+    return MIN_BUFFER_DEGREES
+
+
+def _effective_grid_subsets(grid_subsets):
+    """
+    GWC configs vary: some use EPSG:3857, some EPSG:900913 for Web Mercator.
+    When 3857 is requested, also try 900913 so truncate works regardless of GWC config.
+    """
+    effective = list(grid_subsets)
+    if 'EPSG:3857' in effective and 'EPSG:900913' not in effective:
+        effective.append('EPSG:900913')
+    return effective
+
+
+def _truncate_extent_by_grid_sets(server, minx, miny, maxx, maxy, source_epsg, execute_fn, target_name):
+    """
+    Common truncate loop: for each grid set, transform extent, apply buffer, call execute_fn.
+    execute_fn(node_url, minx_b, miny_b, maxx_b, maxy_b, gwc_grid_set, format_, zoom_start,
+               zoom_stop, op_type, truncate_thread_count) performs the GWC truncate.
+    target_name is used in log messages (e.g. "layer 123" or "group mygroup").
+    """
+    format_ = settings.CACHE_OPTIONS['FORMATS'][0]
+    grid_subsets = settings.CACHE_OPTIONS['GRID_SUBSETS']
+    effective_subsets = _effective_grid_subsets(grid_subsets)
+    zoom_start = '0'
+    zoom_stop = str(settings.MAX_ZOOM_LEVEL)
+    op_type = 'truncate'
+    truncate_thread_count = '1'
+
+    if settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ONLY_MASTER':
+        master_node = geographic_servers.get_instance().get_master_node(server.id)
+        node_urls = [master_node.getUrl()]
+    elif settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ALL_NODES':
+        all_nodes = geographic_servers.get_instance().get_all_nodes(server.id)
+        node_urls = [n.getUrl() for n in all_nodes]
+    else:
+        return False
+
+    for grid_set in effective_subsets:
+        target_epsg = _parse_epsg_from_grid_set(grid_set)
+        extent = _transform_extent(minx, miny, maxx, maxy, source_epsg, target_epsg)
+        if not extent:
+            logger.warning("Skipping grid set %s: could not transform extent", grid_set)
+            continue
+
+        min_buffer = _get_min_buffer_for_epsg(target_epsg)
+        minx_b, miny_b, maxx_b, maxy_b = _apply_buffer_to_extent(
+            *extent, BUFFER_PCT, min_buffer
+        )
+
+        try:
+            for node_url in node_urls:
+                execute_fn(node_url, str(minx_b), str(miny_b), str(maxx_b), str(maxy_b),
+                          grid_set, format_, zoom_start, zoom_stop, op_type, truncate_thread_count)
+        except FailedRequestError as e:
+            msg = e.server_message.decode('utf-8', 'replace') if isinstance(e.server_message, bytes) else str(e.server_message)
+            if 'Unknown grid set' in msg:
+                logger.warning("Skipping grid set %s (%s): not configured in GeoWebCache (%s)",
+                              grid_set, target_name, msg.strip())
+            else:
+                raise
+
+    logger.info("Cache truncate (extent only) triggered for %s (grid sets: %s)",
+                target_name, ', '.join(effective_subsets))
+    return True
+
+
 def regenerate_cache_for_extent(layer_id, minx, miny, maxx, maxy, source_epsg=4326):
     """
     Regenerate GeoWebCache for the given extent on a cached layer.
     Only runs if layer.cached is True.
     Extent is in source_epsg (by default 4326).
-    For each grid set, bounds are transformed to that grid set's CRS before seeding.
+    For each grid set, bounds are transformed to that grid set's CRS before truncating.
     """
     try:
         layer = Layer.objects.select_related('datastore__workspace', 'layer_group').get(id=int(layer_id))
@@ -171,84 +264,62 @@ def regenerate_cache_for_extent(layer_id, minx, miny, maxx, maxy, source_epsg=43
         server = Server.objects.get(id=layer_group.server_id)
     except (LayerGroup.DoesNotExist, Server.DoesNotExist) as e:
         logger.warning("Server/layergroup not found for layer %s: %s", layer_id, e)
-        return False    
-
-    format_ = settings.CACHE_OPTIONS['FORMATS'][0]
-    grid_subsets = settings.CACHE_OPTIONS['GRID_SUBSETS']
-    zoom_start = '0'
-    zoom_stop = str(settings.MAX_ZOOM_LEVEL)
-    # Only truncate the extent; tiles are regenerated on demand when the user enters the zone.
-    op_type = 'truncate'
-    truncate_thread_count = '1'
-
-    # --- Re-seed (uncomment if you need to regenerate immediately).
-    # op_type_reseed = 'reseed'
-    # thread_count = '4'
+        return False
 
     ws = layer.datastore.workspace.name if layer.datastore and layer.datastore.workspace else None
 
+    def execute_layer_truncate(node_url, minx_b, miny_b, maxx_b, maxy_b, gwc_grid_set,
+                               format_, zoom_start, zoom_stop, op_type, truncate_thread_count):
+        geowebcache.get_instance().execute_cache_operation(
+            ws, layer, server, node_url,
+            minx_b, miny_b, maxx_b, maxy_b,
+            gwc_grid_set, zoom_start, zoom_stop, format_, op_type, truncate_thread_count
+        )
+
     try:
-        if settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ONLY_MASTER':
-            master_node = geographic_servers.get_instance().get_master_node(server.id)
-            node_urls = [master_node.getUrl()]
-        elif settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ALL_NODES':
-            all_nodes = geographic_servers.get_instance().get_all_nodes(server.id)
-            node_urls = [n.getUrl() for n in all_nodes]
-        else:
-            return False
-
-        # EPSG:3857 = EPSG:900913 (Web Mercator). GWC often uses 900913 as grid set name.
-        def _gwc_grid_set(grid_set):
-            if grid_set == 'EPSG:3857':
-                return 'EPSG:900913'
-            return grid_set
-        
-        for grid_set in grid_subsets:
-            target_epsg = _parse_epsg_from_grid_set(grid_set)
-            extent = _transform_extent(minx, miny, maxx, maxy, source_epsg, target_epsg)
-            if not extent:
-                logger.warning("Skipping grid set %s: could not transform extent", grid_set)
-                continue
-
-            min_buffer = (MIN_BUFFER_METERS if target_epsg in (3857, 900913)
-                          else MIN_BUFFER_DEGREES)
-            minx_b, miny_b, maxx_b, maxy_b = _apply_buffer_to_extent(
-                *extent, BUFFER_PCT, min_buffer
-            )
-
-            gwc_grid_set = _gwc_grid_set(grid_set)
-            try:
-                for node_url in node_urls:
-                    geowebcache.get_instance().execute_cache_operation(
-                        ws, layer, server, node_url,
-                        str(minx_b), str(miny_b), str(maxx_b), str(maxy_b),
-                        gwc_grid_set, zoom_start, zoom_stop, format_, op_type, truncate_thread_count
-                    )
-            except FailedRequestError as e:
-                msg = e.server_message.decode('utf-8', 'replace') if isinstance(e.server_message, bytes) else str(e.server_message)
-                if 'Unknown grid set' in msg:
-                    logger.warning("Skipping grid set %s: not configured in GeoWebCache (%s)", grid_set, msg.strip())
-                else:
-                    raise
-
-        # --- Reseed por extent (comentado): descomentar para regenerar teselas de inmediato en lugar de bajo demanda.
-        # for grid_set in grid_subsets:
-        #     target_epsg = _parse_epsg_from_grid_set(grid_set)
-        #     extent = _transform_extent(minx, miny, maxx, maxy, source_epsg, target_epsg)
-        #     if not extent:
-        #         continue
-        #     min_buffer = (MIN_BUFFER_METERS if target_epsg in (3857, 900913) else MIN_BUFFER_DEGREES)
-        #     minx_b, miny_b, maxx_b, maxy_b = _apply_buffer_to_extent(*extent, BUFFER_PCT, min_buffer)
-        #     for node_url in node_urls:
-        #         geowebcache.get_instance().execute_cache_operation(
-        #             ws, layer, server, node_url,
-        #             str(minx_b), str(miny_b), str(maxx_b), str(maxy_b),
-        #             grid_set, zoom_start, zoom_stop, format_, op_type_reseed, thread_count
-        #         )
-
-        logger.info("Cache truncate (extent only) triggered for layer %s (grid sets: %s)",
-                    layer_id, ', '.join(grid_subsets))
-        return True
+        return _truncate_extent_by_grid_sets(
+            server, minx, miny, maxx, maxy, source_epsg,
+            execute_layer_truncate, "layer %s" % layer_id
+        )
     except Exception as e:
         logger.exception("Error regenerating cache for layer %s: %s", layer_id, e)
+        return False
+
+
+def regenerate_cache_for_extent_group(layer_group_id, minx, miny, maxx, maxy, source_epsg=4326):
+    """
+    Truncate GeoWebCache for the given extent on a cached layer group.
+    Only runs if layer_group.cached is True.
+    Used when a feature is edited in a layer belonging to a cached group.
+    """
+    try:
+        layer_group = LayerGroup.objects.get(id=int(layer_group_id))
+    except LayerGroup.DoesNotExist:
+        logger.warning("LayerGroup %s not found for cache regeneration", layer_group_id)
+        return False
+
+    if not layer_group.cached:
+        return False
+
+    try:
+        server = Server.objects.get(id=layer_group.server_id)
+    except Server.DoesNotExist as e:
+        logger.warning("Server not found for layer group %s: %s", layer_group_id, e)
+        return False
+
+    def execute_group_truncate(node_url, minx_b, miny_b, maxx_b, maxy_b, gwc_grid_set,
+                               format_, zoom_start, zoom_stop, op_type, truncate_thread_count):
+        geowebcache.get_instance().execute_group_cache_operation(
+            layer_group, server, node_url,
+            minx_b, miny_b, maxx_b, maxy_b,
+            gwc_grid_set, zoom_start, zoom_stop, format_, op_type, truncate_thread_count
+        )
+
+    try:
+        return _truncate_extent_by_grid_sets(
+            server, minx, miny, maxx, maxy, source_epsg,
+            execute_group_truncate, "layer group %s" % layer_group.name
+        )
+    except Exception as e:
+        logger.exception("Error regenerating cache for layer group %s: %s", layer_group_id, e)
         return False
