@@ -330,7 +330,7 @@ class PublicLayerFieldOptionsPaginated(ListAPIView):
 #--------------------------------------------------
 #                    Legend
 #--------------------------------------------------
-class Legend(ListAPIView):
+class Legend(APIView):
     serializer_class = None
     pagination_class = None
     
@@ -338,7 +338,6 @@ class Legend(ListAPIView):
                           responses={
                                     404: "Resource NOT found"
                                     })
-    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
     def get(self, request, lyr_id):
         validation = Validation(request)
         try:
@@ -1030,14 +1029,13 @@ class LayerDescription(ListAPIView):
 #--------------------------------------------------
 #              LayerCapabilities
 #--------------------------------------------------
-class LayerCapabilities(ListAPIView):
+class LayerCapabilities(APIView):
     permission_classes = [AllowAny]
     pagination_class = None
     
     @swagger_auto_schema(operation_id='get_layer_capabilities', operation_summary='Gets capabilities of a layer',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
                                     403: "The layer is not allowed to this user"})
-    @action(detail=True, methods=['GET'])
     def get(self, request, lyr_id):
         layer = Layer.objects.get(id = int(lyr_id))
         if layer.external:
@@ -1056,14 +1054,13 @@ class LayerCapabilities(ListAPIView):
         return HttpException(404, "Data NOT exists for this layer").get_exception()
 
 
-class WmtsLayerOptions(ListAPIView):
+class WmtsLayerOptions(APIView):
     permission_classes = [AllowAny]
     pagination_class = None
     
     @swagger_auto_schema(operation_id='get_layer_wmts_options', operation_summary='Gets WMTS load options of a layer',
                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
                                     403: "The layer is not allowed to this user"})
-    @action(detail=True, methods=['GET'])
     def get(self, request, lyr_id):
         try:
             layer = Layer.objects.get(id = lyr_id)
