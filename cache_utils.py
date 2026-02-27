@@ -147,11 +147,44 @@ def _parse_epsg_from_grid_set(grid_set):
         return 3857
 
 
-def _gwc_grid_set(grid_set):
-    """EPSG:3857 = EPSG:900913 (Web Mercator). GWC often uses 900913 as grid set name."""
-    if grid_set == 'EPSG:3857':
-        return 'EPSG:900913'
-    return grid_set
+def _get_min_buffer_for_epsg(target_epsg):
+    """
+    Return minimum buffer value (meters or degrees) for the given EPSG.
+    Uses crs_definitions.json 'units' field for robust handling of any CRS.
+    """
+    crs_def = getattr(settings, 'crs_definitions_json', None)
+    if not crs_def:
+        try:
+            import json
+            import os
+            path = os.path.join(os.path.dirname(settings.__file__), 'crs_definitions.json')
+            with open(path, 'r') as f:
+                crs_def = json.load(f)
+        except Exception as e:
+            logger.warning("Could not load crs_definitions.json for buffer units: %s", e)
+            return MIN_BUFFER_DEGREES  # safe fallback for geographic
+
+    srid_str = str(target_epsg)
+    entry = crs_def.get(srid_str) if crs_def else None
+    if not entry:
+        logger.warning("EPSG:%s not in crs_definitions.json, using degrees buffer", target_epsg)
+        return MIN_BUFFER_DEGREES
+
+    units = entry.get('units', '').lower()
+    if units == 'meters':
+        return MIN_BUFFER_METERS
+    return MIN_BUFFER_DEGREES
+
+
+def _effective_grid_subsets(grid_subsets):
+    """
+    GWC configs vary: some use EPSG:3857, some EPSG:900913 for Web Mercator.
+    When 3857 is requested, also try 900913 so truncate works regardless of GWC config.
+    """
+    effective = list(grid_subsets)
+    if 'EPSG:3857' in effective and 'EPSG:900913' not in effective:
+        effective.append('EPSG:900913')
+    return effective
 
 
 def _truncate_extent_by_grid_sets(server, minx, miny, maxx, maxy, source_epsg, execute_fn, target_name):
@@ -163,6 +196,7 @@ def _truncate_extent_by_grid_sets(server, minx, miny, maxx, maxy, source_epsg, e
     """
     format_ = settings.CACHE_OPTIONS['FORMATS'][0]
     grid_subsets = settings.CACHE_OPTIONS['GRID_SUBSETS']
+    effective_subsets = _effective_grid_subsets(grid_subsets)
     zoom_start = '0'
     zoom_stop = str(settings.MAX_ZOOM_LEVEL)
     op_type = 'truncate'
@@ -177,24 +211,22 @@ def _truncate_extent_by_grid_sets(server, minx, miny, maxx, maxy, source_epsg, e
     else:
         return False
 
-    for grid_set in grid_subsets:
+    for grid_set in effective_subsets:
         target_epsg = _parse_epsg_from_grid_set(grid_set)
         extent = _transform_extent(minx, miny, maxx, maxy, source_epsg, target_epsg)
         if not extent:
             logger.warning("Skipping grid set %s: could not transform extent", grid_set)
             continue
 
-        min_buffer = (MIN_BUFFER_METERS if target_epsg in (3857, 900913)
-                      else MIN_BUFFER_DEGREES)
+        min_buffer = _get_min_buffer_for_epsg(target_epsg)
         minx_b, miny_b, maxx_b, maxy_b = _apply_buffer_to_extent(
             *extent, BUFFER_PCT, min_buffer
         )
 
-        gwc_grid_set = _gwc_grid_set(grid_set)
         try:
             for node_url in node_urls:
                 execute_fn(node_url, str(minx_b), str(miny_b), str(maxx_b), str(maxy_b),
-                          gwc_grid_set, format_, zoom_start, zoom_stop, op_type, truncate_thread_count)
+                          grid_set, format_, zoom_start, zoom_stop, op_type, truncate_thread_count)
         except FailedRequestError as e:
             msg = e.server_message.decode('utf-8', 'replace') if isinstance(e.server_message, bytes) else str(e.server_message)
             if 'Unknown grid set' in msg:
@@ -204,7 +236,7 @@ def _truncate_extent_by_grid_sets(server, minx, miny, maxx, maxy, source_epsg, e
                 raise
 
     logger.info("Cache truncate (extent only) triggered for %s (grid sets: %s)",
-                target_name, ', '.join(grid_subsets))
+                target_name, ', '.join(effective_subsets))
     return True
 
 
