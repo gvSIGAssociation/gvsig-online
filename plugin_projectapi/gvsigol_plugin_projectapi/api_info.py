@@ -62,7 +62,6 @@ from django.utils import timezone
 from gvsigol_services.backend_resources import resource_manager
 from gvsigol_services import utils as services_utils
 from psycopg2 import sql as sqlbuilder
-from gvsigol_services import utils as services_utils
 
 class CoordsFeatureFilter(BaseFilterBackend):
     def get_schema_fields(self, view):
@@ -70,6 +69,7 @@ class CoordsFeatureFilter(BaseFilterBackend):
             coreapi.Field(name="projectid", description="Id de proyecto. Si no está definido los trae todos", required=False, location='query', example='39'),
             coreapi.Field(name="mobile", description="true para descarga de proyectos móviles", required=False, location='query', example='true'),
             coreapi.Field(name="lang", description="Idioma para las traducciones de los campos. Default es", required=False, location='query', example='true'),
+            coreapi.Field(name="user_profile", description="Id del perfil de usuario para filtrar o adaptar la configuración del proyecto", required=False, location='query'),
         ]
         return fields
           
@@ -119,6 +119,9 @@ class ProjectConfView(ListAPIView):
                 except Exception:
                     raise HttpException(400, "Bad parameter lang.")
 
+            user_profile = self.request.GET.get('user_profile')
+            v.check_user_profile(user_profile)
+
             try:
                 v.check_get_project_list()
             except HttpException as e:
@@ -137,7 +140,9 @@ class ProjectConfView(ListAPIView):
             else:
                 queryset = Project.objects.filter(id__in=projects_by_user)
             queryset = queryset.filter(Q(expiration_date__gte=now) | Q(expiration_date=None))
-            serializer = InfoSerializer(queryset, many=True, context={'request': request, 'user': request.user.username, 'lang': lang})
+            serializer = InfoSerializer(queryset, many=True, context={
+                'request': request, 'user': request.user.username, 'lang': lang, 'user_profile': user_profile
+            })
 
             result = {
                 "projects" : serializer.data,

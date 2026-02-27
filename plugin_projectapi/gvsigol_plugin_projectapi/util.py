@@ -175,7 +175,7 @@ def get_layerread_by_user_and_project(request, project_id):
                 layers_by_project_query & \
                 (get_layerread_by_user_query(roles) | get_public_layers_query())).distinct().select_related('datastore')
 
-def get_layerread_by_user_and_group(request, group_id):
+def get_layerread_by_user_and_group(request, group_id, user_profile=None):
     '''
     Devuelve todas las capas de un grupo sobre las que el usuario tiene permisos de lectura. Esto
     incluye las capas públicas y las capas sobre las que tiene permisos explícitos de lectura.
@@ -188,9 +188,12 @@ def get_layerread_by_user_and_group(request, group_id):
         id del grupo de capas (pk en el modelo LayerGroup)
     '''
     layers_by_group_query = Q(layer_group_id=group_id)
-    if request.user.is_superuser:
-        return Layer.objects.filter(layers_by_group_query).select_related('datastore')
-    roles = get_roles(request)
+    if not user_profile:
+        if request.user.is_superuser:
+            return Layer.objects.filter(layers_by_group_query).select_related('datastore')
+        roles = get_roles(request)
+    else:
+        roles = [user_profile]
     return Layer.objects.filter(layers_by_group_query &
                 (get_layerread_by_user_query(roles) | get_public_layers_query())).distinct().select_related('datastore')
 
@@ -262,11 +265,17 @@ def get_layergroups_by_user(request):
     layergroup_ids = set([l.layer_group.id for l in utils.get_layerread_by_user(request)])
     return LayerGroup.objects.filter(id__in=layergroup_ids) | LayerGroup.objects.filter(created_by=request.user.username)
 
-def get_layergroups_by_user_and_project(request, project_id):
+def get_layergroups_by_user_and_project(request, project_id, user_profile=None):
     '''
     Devuelve los grupos de capas que tienen capas para las que el usuario tiene permiso de lectura
     junto con los grupos de capas que tienen capas públicas y que están dentro del proyecto indicado.
     '''
+    if user_profile:
+        layergroup_ids = set([l.layer_group.id for l in utils.get_layerread_by_role(user_profile)])
+        return LayerGroup.objects.filter( \
+            projectlayergroup__project__id=project_id,
+            id__in=layergroup_ids)
+
     layergroup_ids = set([l.layer_group.id for l in utils.get_layerread_by_user(request)])
     return LayerGroup.objects.filter( \
         projectlayergroup__project__id=project_id,

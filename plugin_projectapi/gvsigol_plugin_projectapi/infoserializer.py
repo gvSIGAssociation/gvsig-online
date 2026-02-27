@@ -237,7 +237,7 @@ class LayerSerializer(serializers.ModelSerializer):
                     pass
             
             if self.context.get('request'):
-                return services_utils.can_write_layer(self.context['request'], obj)
+                return services_utils.can_write_layer(self.context['request'], obj, user_profile=self.context.get('user_profile'))
             else:
                 return False
         except Exception:
@@ -479,8 +479,9 @@ class LayerGroupSerializer(serializers.ModelSerializer):
         username = self.context.get('user')
         lang = self.context['lang']
         projectid = self.context['projectid']
-        queryset = util.get_layerread_by_user_and_group(request, obj.id).order_by("-order")
-        serializer = LayerSerializer(queryset, many=True, context={'request': request, 'user': username, 'lang': lang, 'projectid': projectid})
+        queryset = util.get_layerread_by_user_and_group(request, obj.id, user_profile=self.context.get('user_profile')).order_by("-order")
+        context={'request': request, 'user': username, 'lang': lang, 'projectid': projectid, 'user_profile': self.context.get('user_profile')}
+        serializer = LayerSerializer(queryset, many=True, context=context)
         return serializer.data
 
     def get_order_(self, obj):
@@ -529,12 +530,14 @@ class InfoSerializer(serializers.ModelSerializer):
         request = self.context['request']
         username = self.context.get('user')
         lang = self.context['lang']
-        resultset = util.get_layergroups_by_user_and_project(request, obj.id)
+        user_profile = self.context.get('user_profile')
+        resultset = util.get_layergroups_by_user_and_project(request, obj.id, user_profile=user_profile)
         layer_groups = []
         for layer_group in resultset:
-            layers = util.get_layerread_by_user_and_group(request, layer_group.id).order_by("-order")
+            layers = util.get_layerread_by_user_and_group(request, layer_group.id, user_profile=user_profile).order_by("-order")
             if layers.exists():
-                serializer = LayerGroupSerializer(layer_group, context={'request': request, 'user': username, 'lang': lang, 'projectid': obj.id})
+                context={'request': request, 'user': username, 'lang': lang, 'projectid': obj.id, 'user_profile': user_profile}
+                serializer = LayerGroupSerializer(layer_group, context=context)
                 layer_groups.append(serializer.data)
         
         ordered_layer_groups = sorted(layer_groups, key=itemgetter('order'), reverse=True)
