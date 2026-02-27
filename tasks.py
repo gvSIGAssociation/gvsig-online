@@ -524,8 +524,20 @@ def update_wmts_layer_info(self, layer_id):
 @celery_app.task(bind=True)
 def regenerate_cache_for_extent_async(self, layer_id, minx, miny, maxx, maxy, source_epsg=4326):
     """
-    Regenerate GeoWebCache for the given extent on a cached layer (async).
-    Called after feature create/update/delete when layer.cached is True.
+    Regenerate GeoWebCache for the given extent on a cached layer and/or its layer group (async).
+    Called after feature create/update/delete. Truncates:
+    - The layer cache if layer.cached is True
+    - The layer group cache if layer_group.cached is True
     """
-    from gvsigol_services.cache_utils import regenerate_cache_for_extent
-    regenerate_cache_for_extent(layer_id, minx, miny, maxx, maxy, source_epsg)
+    from gvsigol_services.cache_utils import regenerate_cache_for_extent, regenerate_cache_for_extent_group
+    from gvsigol_services.models import Layer
+
+    try:
+        layer = Layer.objects.select_related('layer_group').get(id=int(layer_id))
+    except Layer.DoesNotExist:
+        return
+
+    if layer.cached and not layer.external:
+        regenerate_cache_for_extent(layer_id, minx, miny, maxx, maxy, source_epsg)
+    if layer.layer_group and layer.layer_group.cached:
+        regenerate_cache_for_extent_group(layer.layer_group_id, minx, miny, maxx, maxy, source_epsg)
