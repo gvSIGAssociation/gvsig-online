@@ -55,13 +55,13 @@ import logging
 LOGGER_NAME='gvsigol'
 
 
-def _layer_is_cached(lyr_id):
+def _layer_or_group_is_cached(lyr_id):
     """
-    Return True if the layer exists and has cached=True.
+    Return True if the layer exists and has cached=True, or its layer group has cached=True.
     """
     try:
-        layer = Layer.objects.get(id=int(lyr_id))
-        return layer.cached
+        layer = Layer.objects.select_related('layer_group').get(id=int(lyr_id))
+        return layer.cached or (layer.layer_group and layer.layer_group.cached)
     except Layer.DoesNotExist:
         return False
 
@@ -581,7 +581,7 @@ class FeaturesView(CreateAPIView):
             
             feat = serializers.FeatureSerializer().create(validation, lyr_id, content, username, epsg)
             cache_task_id = None
-            if 'geometry' in content and content['geometry'] and _layer_is_cached(lyr_id):
+            if 'geometry' in content and content['geometry'] and _layer_or_group_is_cached(lyr_id):
                 cache_task_id = _trigger_cache_regeneration_for_edit(lyr_id, content['geometry'], source_epsg=epsg)
             if cache_task_id:
                 feat['cache_task_id'] = cache_task_id
@@ -653,7 +653,7 @@ class FeaturesView(CreateAPIView):
             
             feat = serializers.FeatureSerializer().update(validation, lyr_id, data, override, version_to_overwrite, username, epsg)
             cache_task_id = None
-            if 'geometry' in data and data['geometry'] and _layer_is_cached(lyr_id):
+            if 'geometry' in data and data['geometry'] and _layer_or_group_is_cached(lyr_id):
                 cache_task_id = _trigger_cache_regeneration_for_edit(lyr_id, data['geometry'], source_epsg=epsg)
             if cache_task_id:
                 feat['cache_task_id'] = cache_task_id
@@ -859,7 +859,7 @@ class PublicFeaturesView(CreateAPIView):
             validation.check_create_feature(lyr_id, content)
             feat = serializers.FeatureSerializer().create(validation, lyr_id, content, None)
             cache_task_id = None
-            if 'geometry' in content and content['geometry'] and _layer_is_cached(lyr_id):
+            if 'geometry' in content and content['geometry'] and _layer_or_group_is_cached(lyr_id):
                 epsg = 4326
                 if 'source_epsg' in request.GET:
                     try:
@@ -905,7 +905,7 @@ class PublicFeaturesView(CreateAPIView):
             validation.check_update_feature(lyr_id, data)
             feat = serializers.FeatureSerializer().update(validation, lyr_id, data, override, version_to_overwrite, None)
             cache_task_id = None
-            if 'geometry' in data and data['geometry'] and _layer_is_cached(lyr_id):
+            if 'geometry' in data and data['geometry'] and _layer_or_group_is_cached(lyr_id):
                 epsg = 4326
                 if 'epsg' in request.GET:
                     try:
@@ -985,7 +985,7 @@ class FeaturesDeleteView(RetrieveDestroyAPIView):
 
             validation.check_delete_feature(lyr_id, feat_id)
             geom = None
-            if _layer_is_cached(lyr_id):
+            if _layer_or_group_is_cached(lyr_id):
                 try:
                     feat = serializers.FeatureSerializer().get(validation, lyr_id, feat_id, 4326)
                     geom = feat.get('geometry') if feat else None
