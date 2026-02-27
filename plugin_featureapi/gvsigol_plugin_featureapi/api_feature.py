@@ -69,14 +69,15 @@ def _layer_is_cached(lyr_id):
 def _trigger_cache_regeneration_for_edit(lyr_id, geometry, source_epsg=4326):
     """
     Trigger cache regeneration for the extent of an edited feature (async via Celery).
-    Only runs if the layer has cached=True.
+    Runs if the layer has cached=True and/or its layer group has cached=True.
     Returns the Celery task_id for the frontend to poll, or None if no regeneration needed.
     """
     try:
-        layer = Layer.objects.get(id=int(lyr_id))
-        if not layer.cached:
-            return None
+        layer = Layer.objects.select_related('layer_group').get(id=int(lyr_id))
     except Layer.DoesNotExist:
+        return None
+
+    if not layer.cached and not (layer.layer_group and layer.layer_group.cached):
         return None
 
     from gvsigol_services.cache_utils import get_geojson_geometry_extent
