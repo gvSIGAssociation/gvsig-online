@@ -230,7 +230,7 @@ class PlainAuthorizationService():
             # TODO
             pass
 
-    def can_write_layer(self, request_or_user, layer):
+    def can_write_layer(self, request_or_user, layer, user_profile=None):
         """
         Checks whether the user has permissions to write the provided layer.
 
@@ -243,13 +243,18 @@ class PlainAuthorizationService():
         """
         try:
             user = _get_user(request_or_user)
-            if user.is_superuser:
+            if not user_profile and user.is_superuser:
                 return True
             if isinstance(user, AnonymousUser):
                 return False
             if not isinstance(layer, Layer):
                 layer = Layer.objects.get(id=layer)
             roles = get_roles(request_or_user)
+            if user_profile:
+                if user_profile in roles:
+                    roles = [user_profile]
+                else:
+                    return False
             return LayerWriteRole.objects.filter(layer=layer, role__in=roles).exists()
         except Exception as e:
             print(e)
