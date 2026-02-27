@@ -29,6 +29,7 @@ from gvsigol import settings
 from gvsigol_services import geographic_servers, utils as services_utils
 from gvsigol_services.models import Layer, Datastore, LayerGroup
 from gvsigol_auth.models import User
+from gvsigol_auth.auth_backend import get_roles
 from gvsigol_core.models import Project
 from . import util
 from psycopg2 import sql as sqlbuilder
@@ -447,6 +448,10 @@ class Validation():
                 raise HttpException(403, "The user does not have permission to create a layer in this datastore")
         except Exception:
             raise HttpException(403, "The user does not have permission to create a layer in this datastore")
+    
+    def check_user_profile(self, user_profile):
+        if user_profile and user_profile not in get_roles(self.request):
+            raise HttpException(403, "The user profile is not allowed to this user")
 
 class HttpException(Exception):
     def __init__(self, code, msg):
