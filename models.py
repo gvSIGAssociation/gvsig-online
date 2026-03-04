@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.urls import reverse
 from gvsigol import settings
 from gvsigol_auth.models import UserGroup
@@ -480,3 +481,36 @@ class ApplicationRole(models.Model):
     
     def __str__(self):
         return self.application.name + ' - ' + self.role
+
+
+class ApplicationOrder(models.Model):
+    """
+    Order of applications and projects for the public/dashboard list.
+    If username is null, this is the default ordering for all users.
+    If username is set, this is the ordering for that specific user.
+    Each row references either an Application or a Project (exactly one must be set).
+    """
+    username = models.CharField(max_length=150, null=True, blank=True)
+    order = models.IntegerField(default=0)
+    application = models.ForeignKey(
+        Application, null=True, blank=True, on_delete=models.CASCADE
+    )
+    project = models.ForeignKey(
+        Project, null=True, blank=True, on_delete=models.CASCADE
+    )
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=(
+                    Q(application__isnull=False, project__isnull=True)
+                    | Q(application__isnull=True, project__isnull=False)
+                ),
+                name='applicationorder_one_of_application_or_project',
+            ),
+        ]
+
+    def __str__(self):
+        target = self.application_id and f'Application({self.application_id})' or f'Project({self.project_id})'
+        user = self.username or 'default'
+        return f'{user} - {target} (order={self.order})'
