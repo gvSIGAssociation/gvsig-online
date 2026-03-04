@@ -22,7 +22,7 @@
 from datetime import datetime, timedelta
 import json
 import os
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 from wsgiref.util import FileWrapper
 import coreapi
 from django.http.response import HttpResponse, JsonResponse
@@ -45,7 +45,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
 from django.contrib.auth.models import User
 from gvsigol_core import utils as core_utils
-from gvsigol_core.models import Project, ProjectLayerGroup, Application, SharedView
+from gvsigol_core.models import Project, ProjectLayerGroup, Application, SharedView, ApplicationOrder
 from gvsigol_plugin_projectapi import settings
 from gvsigol_plugin_projectapi.export import VectorLayerExporter
 from gvsigol_plugin_projectapi.serializers import ProjectsSerializer, GsInstanceSerializer, ApplicationsSerializer, EmptySerializer
@@ -826,7 +826,99 @@ class ApplicationListView(ListAPIView):
             ]
         }
         return JsonResponse(result, safe=False)
-    
+
+
+def _serialize_project_for_order(p):
+    return {
+        'type': 'project',
+        'id': p.id,
+        'name': p.name,
+        'title': p.title or p.name,
+        'description': p.description or '',
+        'image': core_settings.BASE_URL + unquote(p.image_url),
+        'absurl': p.url,
+        'order': None,
+        'application_order_id': None,
+    }
+
+
+def _serialize_application_for_order(a):
+    return {
+        'type': 'application',
+        'id': a.id,
+        'name': a.name,
+        'title': a.title or a.name,
+        'description': a.description or '',
+        'image': core_settings.BASE_URL + unquote(a.image_url),
+        'absurl': a.absurl,
+        'order': None,
+        'application_order_id': None,
+    }
+
+
+class ApplicationOrderListView(ListAPIView):
+    """
+    Gets the list of projects and applications in the order defined for the current user
+    (or default order if the user has no custom order).
+    Returns same shape as projects/applications API: { "content": [...], "links": [...] }.
+    """
+    permission_classes = [AllowAny]
+    pagination_class = None
+
+    @swagger_auto_schema(
+        operation_id='get_application_order_list',
+        operation_summary='Gets the ordered list of projects and applications for the dashboard',
+        responses={200: "List of items with type (project|application), id, title, description, image, absurl, sort_order, application_order_id"})
+    @action(detail=True, methods=['GET'], permission_classes=[AllowAny])
+    def get(self, request):
+        username = None
+        if request.user.is_authenticated and ApplicationOrder.objects.filter(username=request.user.username).exists():
+            username = request.user.username
+
+        if username is None:
+            qs = ApplicationOrder.objects.filter(username__isnull=True)
+        else:
+            qs = ApplicationOrder.objects.filter(username=username)
+        qs = qs.select_related('application', 'project').order_by('order')
+
+        def sort_key(row):
+            o = row.order
+            if row.application_id:
+                title = (row.application.title or row.application.name) if row.application else ''
+            else:
+                title = (row.project.title or row.project.name) if row.project else ''
+            return (o, title or '')
+
+        rows = list(qs)
+        rows.sort(key=sort_key)
+
+        items = []
+        only_public = not request.user.is_authenticated
+        for idx, row in enumerate(rows):
+            if row.application_id and row.application:
+                if only_public and not row.application.is_public:
+                    continue
+                item = _serialize_application_for_order(row.application)
+            elif row.project_id and row.project:
+                if only_public and not row.project.is_public:
+                    continue
+                item = _serialize_project_for_order(row.project)
+            else:
+                continue
+            item['order'] = idx
+            item['sort_order'] = row.order
+            item['application_order_id'] = row.id
+            items.append(item)
+
+        result = {
+            "content": items,
+            "links": [
+                {"rel": "self", "href": request.get_full_path()}
+            ]
+        }
+        return JsonResponse(result, safe=False)
+
+
 #--------------------------------------------------
 #                Shared View
 #--------------------------------------------------   

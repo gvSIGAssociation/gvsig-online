@@ -67,6 +67,7 @@ urlpatterns = [
     path('api/v1/public/projectconf/', api_info.PublicProjectConfView.as_view(), name='get_public_project_configuration'),
 
     path('api/v1/applications/', api.ApplicationListView.as_view(), name='application_list'),
+    path('api/v1/application_order_list/', api.ApplicationOrderListView.as_view(), name='application_order_list'),
     path('api/v1/applicationconf/<str:name>/', api_info.ApplicationConfView.as_view(), name='applicationconf'),
 
     path('api/v1/markers/', api_info.MarkerView.as_view(), name='create_marker'),  
