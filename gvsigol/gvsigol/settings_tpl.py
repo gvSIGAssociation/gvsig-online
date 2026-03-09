@@ -37,8 +37,7 @@ debug.HIDDEN_SETTINGS = re.compile(
     flags=re.IGNORECASE,
 )
 
-GVSIGOL_VERSION = '3.13.1-dev'
-print("INFO: gvSIG Online version: " + GVSIGOL_VERSION)
+GVSIGOL_VERSION = '3.4.0-build-2011'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 if '__file__' in globals():
@@ -85,12 +84,10 @@ CSRF_TRUSTED_ORIGINS = [##CSRF_TRUSTED_ORIGINS##
 CORS_ALLOWED_ORIGINS = [##CORS_ALLOWED_ORIGINS##
 ]
 CORS_ALLOW_CREDENTIALS = True
-CORS_EXPOSE_HEADERS = ('X-Cache-Task-Id',)
 USE_X_FORWARDED_HOST = ##USE_X_FORWARDED_HOST##
 SECURE_PROXY_SSL_HEADER = ##SECURE_PROXY_SSL_HEADER##
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 2048
-DATA_UPLOAD_MAX_MEMORY_SIZE = int('##DATA_UPLOAD_MAX_MEMORY_SIZE##') #Tamaño máximo para la memoria del getcapabilities default 2621440 (2.5M) es muy poco y no se pueden añadir capas externas cuando el servidor tiene muchas capas
-FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o774
+DATA_UPLOAD_MAX_MEMORY_SIZE = 26214400 #Tamaño máximo para la memoria del getcapabilities default 2621440 (2.5M) es muy poco y no se pueden añadir capas externas cuando el servidor tiene muchas capas
 
 # Application definition
 
@@ -242,11 +239,6 @@ AUTH_LDAP_USER_SEARCH = LDAPSearch("##LDAP_ROOT_DN##", ldap.SCOPE_SUBTREE, "(uid
 
 LOGIN_URL = 'gvsigol_authenticate_user'
 GVSIGOL_AUTH_BACKEND = '##GVSIGOL_AUTH_BACKEND##'
-"""
-GVSIGOL_AUTH_BACKEND is deprecated, use GVSIGOL_AUTH_PROVIDER and GVSIGOL_ROLE_PROVIDER instead
-"""
-GVSIGOL_AUTH_PROVIDER = GVSIGOL_AUTH_BACKEND
-GVSIGOL_ROLE_PROVIDER = GVSIGOL_AUTH_BACKEND
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "##LOGOUT_REDIRECT_URL##"
 if GVSIGOL_AUTH_BACKEND != 'gvsigol_auth':
@@ -254,9 +246,6 @@ if GVSIGOL_AUTH_BACKEND != 'gvsigol_auth':
 GVSIGOL_AUTH_MIDDLEWARE = '##GVSIGOL_AUTH_MIDDLEWARE##'
 AUTH_DASHBOARD_UI = ("##AUTH_DASHBOARD_UI##" != 'False')
 AUTH_READONLY_USERS = ("##AUTH_READONLY_USERS##" != 'False')
-if GVSIGOL_AUTH_BACKEND == 'gvsigol_plugin_oidc_mozilla' :
-    _insert_at = MIDDLEWARE.index('django.contrib.auth.middleware.AuthenticationMiddleware') + 1
-    MIDDLEWARE.insert(_insert_at, 'gvsigol_plugin_oidc_mozilla.middleware.GvsigolSessionRefresh')
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
@@ -267,9 +256,9 @@ USE_L10N = True
 USE_TZ = True
 
 EXTRA_LANG_INFO = {
-    'ca-es-valencia': {
+    'ca-es@valencia': {
         'bidi': False,
-        'code': 'ca-es-valencia',
+        'code': 'ca-es@valencia',
         'name': 'Valencian',
         'name_local': 'Valencià'
     },
@@ -288,7 +277,7 @@ django.conf.locale.LANG_INFO = LANG_INFO
 LANGUAGES = [ ##LANGUAGES##
 ]
 
-LOCALE_PATHS = [
+LOCALE_PATHS = (
     '##GVSIGOL_HOME##/gvsigol/gvsigol/locale',
     '##GVSIGOL_HOME##/gvsigol/gvsigol_core/locale',
     '##GVSIGOL_HOME##/gvsigol/gvsigol_services/locale',
@@ -296,10 +285,7 @@ LOCALE_PATHS = [
     '##GVSIGOL_HOME##/gvsigol/gvsigol_auth/locale',
     '##GVSIGOL_HOME##/gvsigol/gvsigol_filemanager/locale',
     '##GVSIGOL_HOME##/gvsigol/gvsigol_statistics/locale',
-]
-for app in INSTALLED_APPS:
-    if app.startswith('gvsigol_app_'):
-        LOCALE_PATHS.insert(0, os.path.join('##GVSIGOL_HOME##/gvsigol/', app, 'locale'))
+)
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
@@ -312,7 +298,7 @@ EMAIL_HOST_USER = '##EMAIL_HOST_USER##'
 EMAIL_HOST_PASSWORD = '##EMAIL_HOST_PASSWORD##'
 EMAIL_PORT = ##EMAIL_PORT##
 EMAIL_TIMEOUT = ##EMAIL_TIMEOUT##
-DEFAULT_FROM_EMAIL = '##DEFAULT_FROM_EMAIL##'
+DEFAULT_FROM_EMAIL = 'noreply@##GVSIGOL_HOST##'
 SITE_ID=1
 
 # Static files (CSS, JavaScript, Images)
@@ -322,7 +308,6 @@ MEDIA_ROOT = '##MEDIA_ROOT##'
 MEDIA_URL = '##BASE_URL##/##MEDIA_PATH##/'
 STATIC_URL = '/##STATIC_PATH##/'
 STATIC_ROOT = '##GVSIGOL_HOME##/gvsigol/assets'
-DOCS_URL = '##GVSIGOL_DOCS_URL##'
 TEMP_ROOT = '##TEMP_ROOT##'
 LAYERS_ROOT = 'layer_downloads'
 STATICFILES_FINDERS = (
@@ -336,10 +321,8 @@ GVSIGOL_USERS_CARTODB = {
     'dbport': '##DB_PORT##',
     'dbname': '##DB_NAME##',
     'dbuser': '##DB_USER##',
-    'dbpassword': '##DB_PASSWD##',
-    'jndiname': '##DB_JNDI_NAME##'
+    'dbpassword': '##DB_PASSWD##'
 }
-GEOSERVER_USE_KEEPALIVE = '##GEOSERVER_USE_KEEPALIVE##'.lower() == 'true'
 
 # if MOSAIC_DB entry is omitted, mosaic indexes will be stored as SHPs
 MOSAIC_DB = {
@@ -380,16 +363,6 @@ SUPPORTED_CRS = {
     ##SUPPORTED_CRS##
 }
 
-SUPPORTED_FORMATS = ["image/png", "image/jpeg", "vector-tiles"]
-SUPPORTED_FORMATS_LABELS = {
-    'image/png': 'image/png',
-    'image/jpeg': 'image/jpeg',
-    'vector-tiles': 'vector tiles (MVT)',
-}
-SUPPORTED_FORMATS_CHOICES = tuple(
-    (f, SUPPORTED_FORMATS_LABELS.get(f, f)) for f in SUPPORTED_FORMATS
-)
-
 GVSIGOL_TOOLS = {
     ##GVSIGOL_TOOLS##
     'get_feature_info_control': {
@@ -423,7 +396,6 @@ GVSIGOL_NAME = '##GVSIGOL_NAME##'
 GVSIGOL_SURNAME = '##GVSIGOL_SURNAME##'
 GVSIGOL_NAME_SHORT = '##GVSIGOL_NAME_SHORT##'
 GVSIGOL_SURNAME_SHORT = '##GVSIGOL_SURNAME_SHORT##'
-GVSIGOL_CUSTOMER_NAME = '##GVSIGOL_CUSTOMER_NAME##'
 
 FILEMANAGER_DIRECTORY = '##FILEMANAGER_DIR##'
 FILEMANAGER_MEDIA_ROOT = os.path.join(MEDIA_ROOT, FILEMANAGER_DIRECTORY)
@@ -454,7 +426,7 @@ if 'gvsigol_plugin_restapi' in INSTALLED_APPS or 'gvsigol_plugin_featureapi' in 
         'default':  '1'
         }])
 
-EXTERNAL_LAYER_SUPPORTED_TYPES = ['WMS', 'WMTS', 'XYZ', 'Bing', 'OSM', 'MVT']
+EXTERNAL_LAYER_SUPPORTED_TYPES = ['WMS', 'WMTS', 'XYZ', 'Bing', 'OSM']
 
 WMTS_MAX_VERSION = '1.0.0'
 WMS_MAX_VERSION = '1.3.0'
@@ -530,8 +502,8 @@ LEGACY_GVSIGOL_SERVICES = { ## We introduce this variable for providing a defaul
 SHARED_VIEW_EXPIRATION_TIME=1 #EN DIAS
 
 CACHE_OPTIONS = {
-    'GRID_SUBSETS': [f'EPSG:{code}' for code in SUPPORTED_CRS],
-    'FORMATS': list(SUPPORTED_FORMATS),
+    'GRID_SUBSETS': ['EPSG:3857', 'EPSG:4326'],
+    'FORMATS': ['image/png','image/jpeg'],
     'OPERATION_MODE': '##CACHE_OPERATION_MODE##'
 }
 try:
@@ -580,10 +552,3 @@ USE_SPA_PROJECT_LINKS = '##USE_SPA_PROJECT_LINKS##'
 
 # UI iframe mode (hide html elements)
 IFRAME_MODE_UI = False
-# Show/hide permissions tab
-MANAGE_PERMISSION_UI = True
-
-VIEWER_DEFAULT_CRS = '##VIEWER_DEFAULT_CRS##'
-FALLBACK_VIEWER_UI = '##FALLBACK_VIEWER_UI##' # fallback for existing projects
-DEFAULT_VIEWER_UI = '##DEFAULT_VIEWER_UI##' # default for new projects
-VIEWER_UI_CHOICES = '##VIEWER_UI_CHOICES##'.split(',') # available viewer UIs

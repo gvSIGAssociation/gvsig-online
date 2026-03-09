@@ -29,21 +29,17 @@ import ldap
 import django.conf.locale
 from django.conf import settings
 from django_auth_ldap.config import LDAPSearch
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
 from django.core.files.storage import FileSystemStorage
 import datetime
 from gvsigol.utils import import_settings
 import environ
-import json
-import sys
+
 
 print ("INFO: Ejecutando settings.py !!...........................................")
-GVSIGOL_VERSION = '3.13.1-dev'
-print("INFO: gvSIG Online version: " + GVSIGOL_VERSION)
-if os.environ.get("DEBUG")=='True':
-    print ("INFO: Current environment:")
-    for name, value in os.environ.items():
-        print("{0}: {1}".format(name, value))
+print ("INFO: Current environment:")
+for name, value in os.environ.items():
+    print("{0}: {1}".format(name, value))
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 if '__file__' in globals():
@@ -58,78 +54,47 @@ else:
     default_static_dir=str(os.path.join(BASE_DIR, 'assets'))
     default_static_url="/gvsigonline/static/"
 
-# not all supported languages will be enabled in LANGUAGES
-_all_gvsigol_supported_languages = {
-    'es': _('Spanish'),
-    'ca-es-valencia': _('Valencian'),
-    'ca': _('Catalan'),
-    'en': _('English'),
-    'pt': _('Portuguese'),
-    'de': _('German'),
-    'pt-br': _('Brazilian Portuguese'),
-    'eu': _('Basque')
-}
 
 # Define default environment 
 env = environ.Env(
     # set casting, default value
-    DEBUG=(bool, True),    
+    DEBUG=(bool, False),    
     BASE_URL=(str,'https://localhost'),
     STATIC_ROOT=(str,default_static_dir),
     STATIC_URL=(str,default_static_url),
-    MEDIA_ROOT=(str,'/var/www/media/'),
-    MEDIA_URL=(str,'https://localhost/media/'),
-    DOCS_URL=(str, '/docs/'),
-    DOCS_PATH=(str, '/opt/gvsigonline/docs'),
-    ALLOWED_HOST_NAMES=(list,['http://gvsigol.localhost', 'http://localhost']),
+    MEDIA_ROOT=(str,'/opt/gvsigol_data/'),
+    MEDIA_URL=(str,'/media/'),
+    ALLOWED_HOST_NAMES=(list,['http://localhost:8000']),
     GVSIGOL_PLUGINS=(list),
     GVSIGOL_SKIN=(str,'skin-blue'),
     DB_HOST=(str,'localhost'),
     DB_PORT=(str,'5432'),
-    DB_USER=(str,'postgres'),
-    DB_PASS=(str,'postgres'),
-    DB_NAME=(str,'gvsigonline_v3'),
-    DB_JNDI_NAME=(str, ''),
-    POSTGIS_VERSION=(tuple,(3,5,0)),
-    LANGUAGES = (tuple, ('es','en')),
-    EXTRA_MIDDLEWARE = (list,[]),
-    GVSIGOL_CUSTOMER_NAME = (str,'gvsig'),
-    VIEWER_DEFAULT_CRS=(str,'EPSG:4326'),
-    FALLBACK_VIEWER_UI=(str,'bootstrap_ui'), # fallback for existing projects
-    DEFAULT_VIEWER_UI=(str,'react_spa_ui'), # default for new projects
-    VIEWER_UI_CHOICES=(list,['react_spa_ui', 'bootstrap_ui']), # available viewer UIs
-    SUPPORTED_CRS =(list,["3857", "4326"]),
-    SUPPORTED_FORMATS =(list,["image/png", "image/jpeg", "vector-tiles"]),
+    DB_USER=(str,'gvsigonline'),
+    DB_PASS=(str,'gvsigonline'),
+    DB_NAME=(str,'gvsigonline'),
     # Auth
     DJANGO_AUTHENTICATION_BACKENDS=(tuple,()),
-    GVSIGOL_AUTH_BACKEND=(str,'gvsigol_auth'), # deprecated, use GVSIGOL_AUTH_PROVIDER
-    GVSIGOL_AUTH_PROVIDER=(str,None), # for the moment, default to GVSIGOL_AUTH_BACKEND
-    GVSIGOL_ROLE_PROVIDER= (str,None), # for the moment, default to GVSIGOL_AUTH_BACKEND
+    GVSIGOL_AUTH_BACKEND=(str,'gvsigol_auth'),
     GVSIGOL_AUTH_MIDDLEWARE=(str,''),
     OIDC_VERIFY_SSL=(bool, True),
     # Setup support for proxy headers
     USE_X_FORWARDED_HOST=(bool,True),
     SECURE_PROXY_SSL_HEADER=(tuple,('HTTP_X_FORWARDED_PROTO', 'https')),
     AUTH_DASHBOARD_UI=(bool,True),
-    # If true, user info cannot be edited from the dashboard, although setting roles, groups
-    # or superuser or staff flags can be changed.
     AUTH_READONLY_USERS=(bool,False),
     # UI
     IFRAME_MODE_UI=(bool,False),
     MANAGE_PERMISSION_UI=(bool,True),
     #csrf
-    CSRF_TRUSTED_ORIGINS = (list,['localhost', 'localhost:9000', 'https:localhost']),
+    CSRF_TRUSTED_ORIGINS = (list,['localhost']),
     #cors
     CORS_ALLOWED_ORIGINS = (list,['http://localhost:8000']),    
     CORS_ALLOW_CREDENTIALS = (bool,True),
     CORS_ORIGIN_ALLOW_ALL = (bool,False),
-    CORS_REPLACE_HTTPS_REFERER = (bool,False),
     # frontend SPA
     USE_SPA_PROJECT_LINKS = (bool,False),
-    FRONTEND_BASE_URL = (str,'/spa'),
-    # TODO: revisar si es necesaria o podemos usar la anterior. 
-    # Esta variable puede ser una url completa, no un path y se usa en el view.py de la app, ej. app_libra
-    FRONTEND_REDIRECT_URL = (str,'/spa'),
+    FRONTEND_BASE_URL = (str,'/gvsigonline'),
+    FRONTEND_REDIRECT_URL = (str,'/gvsigonline'),
     #Log level
     LOG_LEVEL=(str,"DEBUG"),
     # LDAP
@@ -137,16 +102,13 @@ env = environ.Env(
     LDAP_HOST=(str,'localhost'),
     LDAP_PORT=(str,'389'),
     LDAP_ROOT_DN=(str,'dc=local,dc=gvsigonline,dc=com'),
-    LDAP_BIND_USER=(str,'cn=admin,dc=local,dc=gvsigonline,dc=com'),
+    LDAP_BIND_USER=(str,'gvsigonline'),
     LDAP_BIND_PASSWD=(str,'gvsigonline'),
     LDAP_AD_SUFFIX=(str,''),
     #CELERY
     #TODO: split string host, pass, etc
     CELERY_BROKER_URL=(str,'pyamqp://gvsigol:12345678@localhost:5672/gvsigol'),
-    CELERY_TASK_ALWAYS_EAGER =(bool,False),
-    CELERY_RESULT_EXPIRES=(int,259200),  # Resultados expiran en 3 días por defecto (259200 segundos)
-    # Session
-    SECRET_KEY=(str,'qz$rai5n3e1!13k&7ug1db72@-&g#r2o%bem68#-z+5um%etgk'),
+
     #Email    
     EMAIL_BACKEND_ACTIVE=(bool,True),
     EMAIL_USE_TLS=(bool,True),
@@ -157,18 +119,8 @@ env = environ.Env(
     EMAIL_TIMEOUT=(str,'60'),
     DEFAULT_FROM_EMAIL=(str,'noreply@gvsigonline.com'),
     #Bing
-    BING_KEY=(str,''),
-    SENDFILE_BACKEND=(str,'django_sendfile.backends.simple'),
-    DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 26214400), # The default size 2621440 (2.5M) is too small and prevents adding external layers from servers having large getcapabilites document
-    FILE_UPLOAD_DIRECTORY_PERMISSIONS=(int, 0o774),
-    #DRF
-    DRF_PAGE_SIZE=(int,100),
-    DRF_DEFAULT_AUTHENTICATION_CLASSES=(list,[]),
-    #Countries
-    COUNTRIES_ONLY = (list, []),
-    COUNTRIES_FIRST = (list, []),
-    COUNTRIES_FIRST_BREAK = (str,"----"),
-    GEOSERVER_USE_KEEPALIVE = (bool,True),
+    BING_KEY=(str,'')
+
 )
 ENVIRON_FILE = os.path.join(BASE_DIR, '.env')
 environ.Env.read_env(ENVIRON_FILE)
@@ -178,8 +130,8 @@ import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-# SECURITY WARNING: keep the secret key used inogc_fid production secret!
-SECRET_KEY = env('SECRET_KEY')
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = '##SECRET_KEY##'
 if len(SECRET_KEY) == 14:
     # It has not been replaced by deployment scripts
     # Generate a random one
@@ -197,6 +149,67 @@ if len(SECRET_KEY) == 14:
         except IOError:
             Exception('Please create a %s file with random characters to generate your secret key!' % SECRET_FILE)
 
+#
+# TODO: Revisar si va a ser necesario con Docker ya que existe un .env que debe añadirse al .svnignore/.gitignore
+#
+# try:
+#     from gvsigol import settings_passwords
+# except:
+#     # Store your passwords for local development in 'settings_passwds.py'
+#     # Do not write any password here!!!!
+#     pw_file = open(os.path.join(BASE_DIR, 'gvsigol', 'settings_passwords.py'), 'w')
+#     pw_file.write("BING_KEY_DEVEL='yourbingkey'\n")
+#     pw_file.write("DB_USER_DEVEL='postgres'\n")
+#     pw_file.write("DB_PW_DEVEL='postgres'\n")
+#     pw_file.write("LDAP_USER_DEVEL='yourldapuser'\n")
+#     pw_file.write("LDAP_PW_DEVEL='yourldapkey'\n")
+#     pw_file.write("GEOSERVER_USER_DEVEL='admin'\n")
+#     pw_file.write("GEOSERVER_PW_DEVEL='geoserver'\n")
+#     pw_file.write("EMAIL_USER_DEVEL='example@youremaildomain.org'\n")
+#     pw_file.write("EMAIL_PASSWORD_DEVEL=''\n")
+#     pw_file.close()
+#     from gvsigol import settings_passwords
+# finally:
+#     # Store your passwords for local development in 'settings_passwords.py'
+#     # Do not write any password here!!!!
+#     try:
+#         BING_KEY_DEVEL = settings_passwords.BING_KEY_DEVEL
+#     except:
+#         BING_KEY_DEVEL = ''
+#     try:
+#         DB_USER_DEVEL = settings_passwords.DB_USER_DEVEL
+#     except:
+#         DB_USER_DEVEL = 'postgres'
+#     try:
+#         DB_PW_DEVEL = settings_passwords.DB_PW_DEVEL
+#     except:
+#         DB_PW_DEVEL = 'postgres'
+#     try:
+#         LDAP_USER_DEVEL = settings_passwords.LDAP_USER_DEVEL
+#     except:
+#         LDAP_USER_DEVEL = ''
+#     try:
+#         LDAP_PW_DEVEL = settings_passwords.LDAP_PW_DEVEL
+#     except:
+#         LDAP_PW_DEVEL = ''
+#     try:
+#         GEOSERVER_USER_DEVEL = settings_passwords.GEOSERVER_USER_DEVEL
+#     except:
+#         GEOSERVER_USER_DEVEL = 'admin'
+#     try:
+#         GEOSERVER_PW_DEVEL = settings_passwords.GEOSERVER_PW_DEVEL
+#     except:
+#         GEOSERVER_PW_DEVEL = 'geoserver'
+#     try:
+#         EMAIL_USER_DEVEL = settings_passwords.EMAIL_USER_DEVEL
+#     except:
+#         EMAIL_USER_DEVEL = ''
+#     try:
+#         EMAIL_PASSWORD_DEVEL = settings_passwords.EMAIL_PASSWORD_DEVEL
+#     except:
+#         EMAIL_PASSWORD_DEVEL = ''
+
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
@@ -205,7 +218,7 @@ USE_X_FORWARDED_HOST = env('USE_X_FORWARDED_HOST')
 SECURE_PROXY_SSL_HEADER = env('SECURE_PROXY_SSL_HEADER')
 
 #GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
-GDAL_LIBRARY_PATH = '/usr/local/lib/libgdal.so'
+#GDAL_LIBRARY_PATH = '/usr/local/lib/libgdal.so'
 
 
 # Application definition
@@ -221,7 +234,6 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'rest_framework',
     ############# CORE ################
-    'gvsigol_audit',  # Sistema de auditoría (debe ir antes de gvsigol_core)
     'gvsigol_statistics',
     'gvsigol_auth',
     'gvsigol_services',
@@ -230,8 +242,7 @@ INSTALLED_APPS = [
     'gvsigol_core',
     'actstream',
     #### DEPENDENCIES ######,
-    'django_celery_beat',
-    'django_celery_results',  # Para almacenar resultados de Celery en la DB
+    'django_celery_beat'    
 ]
 
 # environment
@@ -242,9 +253,7 @@ INSTALLED_APPS = [
 
 #Load plugins
 #plugins = envos.getenv("GVSIGOL_PLUGINS").split(",")
-
-GVSIGOL_PLUGINS= env('GVSIGOL_PLUGINS')
-for i in GVSIGOL_PLUGINS:
+for i in env('GVSIGOL_PLUGINS'):
     print("INFO: Loading plugin " + i)
     INSTALLED_APPS.append(i)
 
@@ -267,7 +276,7 @@ try:
     __import__('django_extensions')
     INSTALLED_APPS.append('django_extensions')
 except ImportError:
-    print('WARNING: No ha instalado la libreria django_extensions')
+    print('ERROR: No ha instalado la libreria django_extensions')
 
 # oidc_mozilla
 if 'gvsigol_plugin_oidc_mozilla' in INSTALLED_APPS:
@@ -279,46 +288,20 @@ ACTSTREAM_SETTINGS = {
 }
 
 
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'gvsigol_audit.audit_middleware.AuditMiddleware',  # Auditoría de APIs REST y vistas Django
+    'django.contrib.auth.middleware.AuthenticationMiddleware',   
     'django.contrib.auth.middleware.PersistentRemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
-"""
-Variable EXTRA_MIDDLEWARE is a list of middleware classes to be added to the MIDDLEWARE list.
-It's documented at https://devel.scolab.eu/issues/14791
-
-The syntax is:
-EXTRA_MIDDLEWARE=previous_middleware:middleware_class:next_middleware
-or
-EXTRA_MIDDLEWARE=previous_middleware1:middleware_class1:next_middleware1:previous_middleware2:middleware_class2:next_middleware2:...
-
-If previous_middleware and next_middleware are not provided, the middleware_class is added to the end of the list.
-If next_middleware is provided, the middleware_class is added before the next_middleware.
-If previous_middleware is provided, the middleware_class is added after the previous_middleware.
-If both previous_middleware and next_middleware are provided, the middleware_class is added before the next_middleware (previous middleware is ignored).
-"""
-try:
-    _extra_middleware = [x.split(':') for x in env('EXTRA_MIDDLEWARE')]
-    for _previous_middleware, _mdlwr, _next_middleware in _extra_middleware:
-        if _next_middleware:
-            _insert_at = MIDDLEWARE.index(_next_middleware)
-            MIDDLEWARE.insert(_insert_at, _mdlwr)
-        elif _previous_middleware:
-            _insert_at = MIDDLEWARE.index(_previous_middleware) + 1
-            MIDDLEWARE.insert(_insert_at, _mdlwr)
-        else:
-            MIDDLEWARE.append(_mdlwr)
-except:
-    print('ERROR: Incorrect syntax in EXTRA_MIDDLEWARE variable')
 
 try:
     __import__('corsheaders')
@@ -326,17 +309,9 @@ try:
 except ImportError:
     print('ERROR: No ha instalado la libreria corsheaders')
 
-# try:
-#     __import__('csp')
-#     MIDDLEWARE.append('csp.middleware.CSPMiddleware')
-# except ImportError:
-#     print('ERROR: No ha instalado la libreria django-csp')
-
 CORS_ORIGIN_ALLOW_ALL = env('CORS_ORIGIN_ALLOW_ALL')
 CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS')
 CORS_ALLOW_CREDENTIALS = env('CORS_ALLOW_CREDENTIALS')
-CORS_REPLACE_HTTPS_REFERER = env('CORS_REPLACE_HTTPS_REFERER')
-CORS_EXPOSE_HEADERS = ('X-Cache-Task-Id',)
 
 CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS')
 
@@ -383,28 +358,9 @@ DATABASES = {
         'PASSWORD': env('DB_PASS'), # WARNING: Do not write any password here!!!! Store them in 'settings_passwords.py' for local development
         'HOST': env('DB_HOST'),
         'PORT': env('DB_PORT'),
-        'TEST': {
-            'NAME': 'test',
-        }, 
     }
 }
-POSTGIS_VERSION = env('POSTGIS_VERSION')
-
-#DATABASE_ROUTERS = ['gvsigol.routers.DatabaseRouter']
-
-DATABASE_ROUTERS = []
-
-# Import routers from plugins
-GVSIGOL_PLUGINS= env('GVSIGOL_PLUGINS')
-for i in GVSIGOL_PLUGINS:    
-    try:
-        aux = i + '.routers'
-        __import__(aux)
-        #from aux import *
-        print("INFO: Import database router " + i)
-        DATABASE_ROUTERS.append(aux+'.Router')
-    except Exception as e:
-        pass 
+POSTGIS_VERSION = (2, 3, 3)
 
 AUTH_WITH_REMOTE_USER = False
 
@@ -430,27 +386,23 @@ GVSIGOL_LDAP = {
 
 AUTHENTICATION_BACKENDS = (
     #'django.contrib.auth.backends.RemoteUserBackend',
+    'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
 
 #Load auth backends
-if env('LDAP_ENABLED'):
-    AUTHENTICATION_BACKENDS = ('django_auth_ldap.backend.LDAPBackend', ) + AUTHENTICATION_BACKENDS
 AUTHENTICATION_BACKENDS = AUTHENTICATION_BACKENDS + env('DJANGO_AUTHENTICATION_BACKENDS')
 print ("INFO: Additional AUTHENTICATION_BACKENDS = " + str(env('DJANGO_AUTHENTICATION_BACKENDS')))
 
 LOGIN_URL = 'gvsigol_authenticate_user'
+#GVSIGOL_AUTH_BACKEND = 'gvsigol_plugin_oidc_mozilla'
 GVSIGOL_AUTH_BACKEND = env('GVSIGOL_AUTH_BACKEND')
-"""
-GVSIGOL_AUTH_BACKEND is deprecated, use GVSIGOL_AUTH_PROVIDER and GVSIGOL_ROLE_PROVIDER instead
-"""
-GVSIGOL_AUTH_PROVIDER = env('GVSIGOL_AUTH_PROVIDER', default=GVSIGOL_AUTH_BACKEND)
-GVSIGOL_ROLE_PROVIDER = env('GVSIGOL_ROLE_PROVIDER', default=GVSIGOL_AUTH_BACKEND)
 LOGIN_REDIRECT_URL = "home"
+#LOGIN_REDIRECT_URL = "https://localhost/gvsigonline"
 LOGOUT_REDIRECT_URL = "index"
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-if GVSIGOL_AUTH_PROVIDER != 'gvsigol_auth':
-    import_settings(GVSIGOL_AUTH_PROVIDER+".settings", globals())
+if GVSIGOL_AUTH_BACKEND != 'gvsigol_auth':
+    import_settings(GVSIGOL_AUTH_BACKEND+".settings", globals())
 GVSIGOL_AUTH_MIDDLEWARE = env('GVSIGOL_AUTH_MIDDLEWARE')
 AUTH_LDAP_SERVER_URI = "ldap://" + env('LDAP_HOST') + ":" + env('LDAP_PORT')
 AUTH_LDAP_ROOT_DN = env('LDAP_ROOT_DN')
@@ -459,25 +411,28 @@ AUTH_DASHBOARD_UI = env('AUTH_DASHBOARD_UI')
 AUTH_READONLY_USERS = env('AUTH_READONLY_USERS')
 OIDC_VERIFY_SSL = env('OIDC_VERIFY_SSL')
 
-if GVSIGOL_AUTH_PROVIDER == 'gvsigol_plugin_oidc_mozilla' :
-    _insert_at = MIDDLEWARE.index('django.contrib.auth.middleware.AuthenticationMiddleware') + 1
-    MIDDLEWARE.insert(_insert_at, 'gvsigol_plugin_oidc_mozilla.middleware.GvsigolSessionRefresh')
+if GVSIGOL_AUTH_BACKEND == 'gvsigol_plugin_oidc_mozilla' :
+    MIDDLEWARE.insert(6, 'mozilla_django_oidc.middleware.SessionRefresh')
 
 # Internationalization
 LANGUAGE_CODE = 'es'
-#TIME_ZONE = 'UTC'
-TIME_ZONE = 'Europe/Madrid'
+TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-
 EXTRA_LANG_INFO = {
-    'ca-es-valencia': {
+    'ca-es@valencia': {
         'bidi': False,
-        'code': 'ca-es-valencia',
+        'code': 'ca-es@valencia',
         'name': 'Valencian',
         'name_local': 'Valencià'
+    },
+    'va': {
+        'bidi': False,
+        'code': 'va',
+        'name': 'Valencian',
+        'name_local': 'Valencian'
     },
 }
 
@@ -485,8 +440,18 @@ EXTRA_LANG_INFO = {
 LANG_INFO = dict(list(django.conf.locale.LANG_INFO.items()) + list(EXTRA_LANG_INFO.items()))
 django.conf.locale.LANG_INFO = LANG_INFO
 
-lang_list = [ (lang_code, _all_gvsigol_supported_languages.get(lang_code)) for lang_code in env('LANGUAGES') ]
-LANGUAGES = lang_list
+
+
+LANGUAGES = (
+    ('es', _('Spanish')),
+    #('ca-es@valencia', _('Valencian')),
+    #('ca', _('Catalan')),
+    ('en', _('English')),
+    #('pt', _('Portuguese')),
+    #('de', _('German')),
+    #('pt-br', _('Brazilian Portuguese')),
+)
+
 
 LOCALE_PATHS =  [
     os.path.join(BASE_DIR, 'gvsigol/locale'),
@@ -498,10 +463,8 @@ LOCALE_PATHS =  [
     os.path.join(BASE_DIR, 'gvsigol_filemanager/locale')
 ]
 for app in INSTALLED_APPS:
-    if app.startswith('gvsigol_app_'):
-        for p in sorted(set(sys.path)): # may be located out of BASEDIR if PYTHONPATH is used to add apps
-            if os.path.isdir(os.path.join(p, app)):
-                LOCALE_PATHS.insert(0, os.path.join(p, app, 'locale'))
+    if app.startswith('gvsigol_app_') or app.startswith('gvsigol_plugin_'):
+        LOCALE_PATHS.append(os.path.join(BASE_DIR, app, 'locale'))
 
 # Email settings
 EMAIL_BACKEND_ACTIVE = env('EMAIL_BACKEND_ACTIVE')
@@ -510,10 +473,20 @@ EMAIL_USE_TLS = env('EMAIL_USE_TLS')
 EMAIL_HOST = env('EMAIL_HOST')
 EMAIL_HOST_USER = env('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-EMAIL_PORT = int(env('EMAIL_PORT'))
-EMAIL_TIMEOUT = int(env('EMAIL_TIMEOUT'))
+EMAIL_PORT = env('EMAIL_PORT')
+EMAIL_TIMEOUT = env('EMAIL_TIMEOUT')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 SITE_ID=1
+
+#EMAIL_BACKEND_ACTIVE = True
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#EMAIL_USE_TLS = True
+#EMAIL_HOST = ''
+#EMAIL_HOST = env('EMAIL_HOST')
+#EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+#EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+#EMAIL_PORT = 587
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
@@ -525,8 +498,6 @@ MEDIA_ROOT = env('MEDIA_ROOT')
 MEDIA_URL = env('MEDIA_URL')
 STATIC_ROOT = env('STATIC_ROOT')
 STATIC_URL = env('STATIC_URL')
-DOCS_URL = env('DOCS_URL')
-DOCS_PATH = env('DOCS_PATH')
 
 #STATICFILES_DIRS = (
 #    os.path.join(BASE_DIR, 'gvsigol_core/static'),
@@ -544,15 +515,15 @@ STATICFILES_FINDERS = (
     #'compressor.finders.CompressorFinder',
 )
 
+GVSIGOL_VERSION = '3.x.x-dev'
+
 GVSIGOL_USERS_CARTODB = {
     'dbhost': env('DB_HOST'),
     'dbport': env('DB_PORT'),
     'dbname': env('DB_NAME'),
     'dbuser': env('DB_USER'), 
-    'dbpassword': env('DB_PASS'),
-    'jndiname': env('DB_JNDI_NAME')
+    'dbpassword': env('DB_PASS') 
 }
-GEOSERVER_USE_KEEPALIVE = env('GEOSERVER_USE_KEEPALIVE')
 
 MOSAIC_DB = {
     'host': env('DB_HOST'),
@@ -573,29 +544,62 @@ MAX_ZOOM_LEVEL = 20
 # Must be a valid iconv encoding name. Use iconv --list on Linux to see valid names 
 SUPPORTED_ENCODINGS = [ "LATIN1", "UTF-8", "ISO-8859-15", "WINDOWS-1252"]
 USE_DEFAULT_SUPPORTED_CRS = True
-
-SUPPORTED_CRS = {}
-path_crs_definitions_json = os.path.join(os.path.dirname(__file__), 'crs_definitions.json')
-with open(path_crs_definitions_json, 'r') as file:
-    crs_definitions_json = json.load(file)
-if '3857' not in env('SUPPORTED_CRS'):
-    SUPPORTED_CRS['3857'] = crs_definitions_json['3857']
-if '4326' not in env('SUPPORTED_CRS'):
-    SUPPORTED_CRS['4326'] = crs_definitions_json['4326']
-if '25830' not in env('SUPPORTED_CRS'):
-    SUPPORTED_CRS['25830'] = crs_definitions_json['25830']
-for i in env('SUPPORTED_CRS'):
-    SUPPORTED_CRS[i] = crs_definitions_json[i]
-
-SUPPORTED_FORMATS = env('SUPPORTED_FORMATS')
-SUPPORTED_FORMATS_LABELS = {
-    'image/png': 'image/png',
-    'image/jpeg': 'image/jpeg',
-    'vector-tiles': 'vector tiles (MVT)',
+SUPPORTED_CRS = {
+    '3857': {
+        'code': 'EPSG:3857',
+        'title': 'WGS 84 / Pseudo-Mercator',
+        'definition': '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs',
+        'units': 'meters'
+    },
+    '900913': {
+        'code': 'EPSG:900913',
+        'title': 'Google Maps Global Mercator -- Spherical Mercator',
+        'definition': '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs',
+        'units': 'meters'
+    },
+    '4326': {
+        'code': 'EPSG:4326',
+        'title': 'WGS84',
+        'definition': '+proj=longlat +datum=WGS84 +no_defs +axis=neu',
+        'units': 'degrees'
+    },
+    '4258': {
+        'code': 'EPSG:4258',
+        'title': 'ETRS89',
+        'definition': '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs +axis=neu',
+        'units': 'degrees'
+    },
+    '25830': {
+        'code': 'EPSG:25830',
+        'title': 'ETRS89 / UTM zone 30N',
+        'definition': '+proj=utm +zone=30 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
+        'units': 'meters'
+    },
+    '25829': {
+        'code': 'EPSG:25829',
+        'title': 'ETRS89 / UTM zone 29N',
+        'definition': '+proj=utm +zone=30 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
+        'units': 'meters'
+    },
+    '102033': {
+        'code': 'EPSG:102033',
+        'title': 'South America Albers Equal Area Conic',
+        'definition': '+proj=aea +lat_1=-5 +lat_2=-42 +lat_0=-32 +lon_0=-60 +x_0=0 +y_0=0 +ellps=aust_SA +units=m +no_defs',
+        'units': 'meters'
+    },
+    '32721': {
+        'code': 'EPSG:32721',
+        'title': 'WGS 84 / UTM zone 21S',
+        'definition': '+proj=utm +zone=21 +south +datum=WGS84 +units=m +no_defs',
+        'units': 'meters'
+    },
+    '4674': {
+        'code': 'EPSG:4674',
+        'title': 'SIRGAS 2000 Geographic2D',
+        'definition': '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs',
+        'units': 'degrees'
+    }
 }
-SUPPORTED_FORMATS_CHOICES = tuple(
-    (f, SUPPORTED_FORMATS_LABELS.get(f, f)) for f in SUPPORTED_FORMATS
-)
 
 GVSIGOL_TOOLS = {
     'get_feature_info_control': {
@@ -624,7 +628,6 @@ GVSIGOL_NAME = 'gvsig'
 GVSIGOL_SURNAME = 'OL'
 GVSIGOL_NAME_SHORT = 'g'
 GVSIGOL_SURNAME_SHORT = 'OL'
-GVSIGOL_CUSTOMER_NAME = env('GVSIGOL_CUSTOMER_NAME')
 
 FILEMANAGER_DIRECTORY = os.path.join(MEDIA_ROOT, 'data')
 FILEMANAGER_MEDIA_ROOT = os.path.join(MEDIA_ROOT, FILEMANAGER_DIRECTORY)
@@ -655,33 +658,27 @@ if 'gvsigol_plugin_restapi' in INSTALLED_APPS or 'gvsigol_plugin_featureapi' in 
         'default':  '1'
         }])
 
-EXTERNAL_LAYER_SUPPORTED_TYPES = ['WMS', 'WMTS', 'XYZ', 'Bing', 'OSM', 'MVT']
+EXTERNAL_LAYER_SUPPORTED_TYPES = ['WMS', 'WMTS', 'XYZ', 'Bing', 'OSM']
 
 WMTS_MAX_VERSION = '1.0.0'
 WMS_MAX_VERSION = '1.3.0'
 BING_LAYERS = ['Road','Aerial','AerialWithLabels']
 
-DRF_DEFAULT_AUTHENTICATION_CLASSES = env('DRF_DEFAULT_AUTHENTICATION_CLASSES')
-if len(DRF_DEFAULT_AUTHENTICATION_CLASSES) == 0:
-    # REST framework
-    default_auth_classes_list = [
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-        'rest_framework.authentication.BasicAuthentication'
-    ]
+# REST framework
+default_auth_classes_list = [
+    'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+    'rest_framework.authentication.SessionAuthentication',
+    'rest_framework.authentication.BasicAuthentication'
+]
+if GVSIGOL_AUTH_BACKEND == 'gvsigol_plugin_oidc_mozilla' :
+    default_auth_classes_list.insert(0,'mozilla_django_oidc.contrib.drf.OIDCAuthentication')
 
-    if GVSIGOL_AUTH_PROVIDER == 'gvsigol_plugin_oidc_mozilla' :
-        default_auth_classes_list.insert(0,'mozilla_django_oidc.contrib.drf.OIDCAuthentication')
-else:
-    default_auth_classes_list = DRF_DEFAULT_AUTHENTICATION_CLASSES
 
-DRF_PAGE_SIZE = env('DRF_PAGE_SIZE')
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-    'DEFAULT_AUTHENTICATION_CLASSES': tuple (default_auth_classes_list),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': DRF_PAGE_SIZE
+    'DEFAULT_AUTHENTICATION_CLASSES': tuple (default_auth_classes_list)
 }
 
 
@@ -740,15 +737,13 @@ LEGACY_GVSIGOL_SERVICES = {
 
 
 CELERY_BROKER_URL = env('CELERY_BROKER_URL')
-CELERY_RESULT_BACKEND = 'django-db'  # Usar la base de datos Django para almacenar resultados
-CELERY_RESULT_EXPIRES = env('CELERY_RESULT_EXPIRES')  # Los resultados expiran en 3 días por defecto
 CELERY_TASK_ACKS_LATE = True
 CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
-CELERY_TASK_ALWAYS_EAGER = env('CELERY_TASK_ALWAYS_EAGER')
+CELERY_TASK_ALWAYS_EAGER  = True
 
 CACHE_OPTIONS = {
-    'GRID_SUBSETS': [f'EPSG:{code}' for code in SUPPORTED_CRS],
-    'FORMATS': list(SUPPORTED_FORMATS),
+    'GRID_SUBSETS': ['EPSG:3857', 'EPSG:4326'],
+    'FORMATS': ['image/png'],
     'OPERATION_MODE': 'ONLY_MASTER'
 }
 
@@ -759,9 +754,8 @@ PROXIES = {
 }
 
 # use development backend if not using Apache/xsendfile
-#SENDFILE_BACKEND = 'django_sendfile.backends.development'
+SENDFILE_BACKEND = 'django_sendfile.backends.development'
 #SENDFILE_BACKEND = 'django_sendfile.backends.xsendfile'
-SENDFILE_BACKEND = env('SENDFILE_BACKEND')
 SENDFILE_ROOT = '/'
 SHARED_VIEW_EXPIRATION_TIME = 1
 
@@ -817,8 +811,6 @@ GEOETL_DB = {
 
 PRJ_LABELS = ['mobile', 'field_work', 'generic', 'main', 'citizen_app', 'public', 'viewer', 'management', 'government' , 'admin', 'infrastructures', 'data_collection', 'info', 'pois']
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 4096
-DATA_UPLOAD_MAX_MEMORY_SIZE = env('DATA_UPLOAD_MAX_MEMORY_SIZE')
-FILE_UPLOAD_DIRECTORY_PERMISSIONS = env('FILE_UPLOAD_DIRECTORY_PERMISSIONS')
 
 # Frontend SPA
 USE_SPA_PROJECT_LINKS = env('USE_SPA_PROJECT_LINKS')
@@ -833,30 +825,3 @@ IFRAME_MODE_UI=env('IFRAME_MODE_UI')
 
 # Allow users to manage permissions 
 MANAGE_PERMISSION_UI=env('MANAGE_PERMISSION_UI')
-
-VIEWER_DEFAULT_CRS=env('VIEWER_DEFAULT_CRS')
-FALLBACK_VIEWER_UI=env('FALLBACK_VIEWER_UI')
-DEFAULT_VIEWER_UI=env('DEFAULT_VIEWER_UI')
-VIEWER_UI_CHOICES=env('VIEWER_UI_CHOICES')
-
-
-#CSP_DEFAULT_SRC = ("'self'", '*')
-#CSP_DEFAULT_SRC = ("'self'", 'https://localhost/*','https://gvsigol-keycloak:8443/*','http://localhost:3000/*')
-#CSP_SCRIPT_SRC = ("'unsafe-inline'", 'https://localhost/*','https://gvsigol-keycloak:8443/*','http://localhost:3000/*')
-#CSP_FRAME_ANCESTORS = ("'self'", 'https://localhost/*','https://gvsigol-keycloak:8443/*','http://localhost:3000/*')
-
-#CSP_DEFAULT_SRC = ("'none'", '*')
-#CSP_SCRIPT_SRC = ("'none'", '*')
-#CSP_FRAME_ANCESTORS = ("'none'", '*')
-
-#CSP_DEFAULT_SRC = ("'self'", "'unsafe-inline'", 'https://localhost/*','https://gvsigol-keycloak:8443/*','http://localhost:3000/*')
-#CSP_SCRIPT_SRC = ("'self'","'unsafe-inline'", 'https://localhost/*','https://gvsigol-keycloak:8443/*','http://localhost:3000/*')
-#CSP_FRAME_ANCESTORS = ("'self'", 'https://localhost/','https://gvsigol-keycloak:8443/','http://localhost:3000/')
-#CSP_FRAME_ANCESTORS = ('*')||||||| .r8141
-
-
-
-# django-countries
-COUNTRIES_ONLY = env("COUNTRIES_ONLY")
-COUNTRIES_FIRST = env("COUNTRIES_FIRST")
-COUNTRIES_FIRST_BREAK = env("COUNTRIES_FIRST_BREAK")
