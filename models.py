@@ -1246,6 +1246,7 @@ class Layer(models.Model):
     update_interval = models.IntegerField(null=True, default=1000)
     featureapi_endpoint = models.CharField(
         max_length=100, null=False, default='/api/v1')
+    annotations = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return self.name

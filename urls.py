@@ -146,4 +146,8 @@ urlpatterns = [
     
     # API para conexiones externas
     path('api/segex/entities/', services_views.api_segex_entities, name='api_segex_entities'),
+
+    # Layer annotations autogenerate endpoints
+    path('layer/<int:layer_id>/generate-annotations/', services_views.layer_generate_annotations, name='layer_generate_annotations'),
+    path('layer/generate-annotations/', services_views.layer_generate_annotations_from_params, name='layer_generate_annotations_from_params'),
 ]

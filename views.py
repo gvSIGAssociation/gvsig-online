@@ -38,7 +38,7 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse, HttpResponseForbidden, StreamingHttpResponse
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.utils.translation import ugettext as _, ugettext_lazy, ugettext
 
@@ -1634,6 +1634,7 @@ def layer_add_with_group(request, layergroup_id):
                 params = {}
                 params['format'] = format_value
                 newRecord.external_params = json.dumps(params)
+                newRecord.annotations = request.POST.get('annotations', '')
 
                 newRecord.save()
 
@@ -1906,6 +1907,7 @@ def layer_update(request, layer_id):
 
             layer.external_params = json.dumps(params)
             layer.conf = layerConf
+            layer.annotations = request.POST.get('annotations', layer.annotations)
             layer.save()
 
             if 'layer-image' in request.FILES:
@@ -4314,7 +4316,8 @@ def layer_create_with_group(request, layergroup_id):
                         }
                         initial_conf['fields'].append(field_conf)
                     
-                    newRecord.conf = initial_conf                    
+                    newRecord.conf = initial_conf
+                    newRecord.annotations = request.POST.get('annotations', '')
                     newRecord.save()
 
                     for i in form.cleaned_data['fields']:
@@ -10266,3 +10269,48 @@ def api_segex_entities(request):
     except Exception as e:
         logger.exception('Error fetching SEGEX entities')
         return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required()
+@staff_required
+def layer_generate_annotations(request, layer_id):
+    """
+    AJAX endpoint that generates plain-text annotations for an existing layer
+    using its metadata and PostgreSQL column introspection when available.
+    Called from layer_update.html.
+    """
+    try:
+        layer = get_object_or_404(Layer, id=layer_id)
+        text = utils.generate_layer_annotations(layer)
+        return JsonResponse({'success': True, 'annotations': text})
+    except Exception as e:
+        logger.exception("Error generating annotations for layer %s", layer_id)
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required()
+@staff_required
+def layer_generate_annotations_from_params(request):
+    """
+    AJAX endpoint that generates basic plain-text annotations from form parameters
+    when the layer does not yet exist in the database (layer_add / layer_create flows).
+    Expects POST: name, title, layer_group_id (optional), layer_type (optional).
+    """
+    try:
+        name = request.POST.get('name', '')
+        title = request.POST.get('title', '')
+        layer_type = request.POST.get('layer_type', '')
+        layer_group_name = ''
+        layer_group_id = request.POST.get('layer_group_id', '')
+        if layer_group_id:
+            try:
+                from gvsigol_services.models import LayerGroup
+                lg = LayerGroup.objects.get(id=int(layer_group_id))
+                layer_group_name = lg.name
+            except Exception:
+                pass
+        text = utils.generate_basic_annotations(name, title, layer_group_name, layer_type)
+        return JsonResponse({'success': True, 'annotations': text})
+    except Exception as e:
+        logger.exception("Error generating basic annotations from params")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
