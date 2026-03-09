@@ -435,9 +435,41 @@
 .skin-pobla .user-panel,
 .skin-talavera .user-panel,
 .skin-villarrobledo .user-panel {
-  padding: 14px 12px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 12px 10px !important;
   border-bottom: 1px solid var(--sb-border) !important;
   background: var(--sb-bg-dark) !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+.skin-blue .user-panel > .image,
+.skin-black .user-panel > .image,
+.skin-blue-dark .user-panel > .image,
+.skin-gray-dark .user-panel > .image,
+.skin-green .user-panel > .image,
+.skin-red .user-panel > .image,
+.skin-yellow .user-panel > .image,
+.skin-purple .user-panel > .image,
+.skin-albacete .user-panel > .image,
+.skin-alzira .user-panel > .image,
+.skin-atlasrenewableenergy .user-panel > .image,
+.skin-cartagena .user-panel > .image,
+.skin-csicgranada .user-panel > .image,
+.skin-eliana .user-panel > .image,
+.skin-libra .user-panel > .image,
+.skin-mallorca .user-panel > .image,
+.skin-ormusa .user-panel > .image,
+.skin-pobla .user-panel > .image,
+.skin-talavera .user-panel > .image,
+.skin-villarrobledo .user-panel > .image {
+  float: none !important;
+  flex-shrink: 0 !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 .skin-blue .user-panel > .image > img,
 .skin-black .user-panel > .image > img,
@@ -459,9 +491,12 @@
 .skin-pobla .user-panel > .image > img,
 .skin-talavera .user-panel > .image > img,
 .skin-villarrobledo .user-panel > .image > img {
-  border-radius: 50% !important;
-  border: 2px solid var(--sb-accent) !important;
-  max-width: 40px !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 6px !important;
+  border: none !important;
+  object-fit: contain !important;
+  background: transparent !important;
 }
 .skin-blue .user-panel > .info,
 .skin-black .user-panel > .info,
@@ -483,7 +518,9 @@
 .skin-pobla .user-panel > .info,
 .skin-talavera .user-panel > .info,
 .skin-villarrobledo .user-panel > .info {
-  padding: 4px 5px 4px 12px !important;
+  float: none !important;
+  padding: 0 0 0 10px !important;
+  overflow: hidden !important;
 }
 .skin-blue .user-panel > .info > p,
 .skin-black .user-panel > .info > p,
@@ -505,11 +542,14 @@
 .skin-pobla .user-panel > .info > p,
 .skin-talavera .user-panel > .info > p,
 .skin-villarrobledo .user-panel > .info > p {
-  color: #fff !important;
+  color: rgba(255,255,255,0.9) !important;
   font-size: 13px !important;
-  font-weight: 600 !important;
-  margin-bottom: 3px !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
   letter-spacing: 0.2px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 /* Sidebar — items primer nivel */
@@ -1141,9 +1181,28 @@
 .skin-red-light .user-panel,
 .skin-purple-light .user-panel,
 .skin-yellow-light .user-panel {
-  padding: 14px 12px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 12px 10px !important;
   border-bottom: 1px solid var(--sb-border) !important;
   background: var(--sb-bg-dark) !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+.skin-blue-light .user-panel > .image,
+.skin-black-light .user-panel > .image,
+.skin-black-light-dphuesca .user-panel > .image,
+.skin-green-light .user-panel > .image,
+.skin-red-light .user-panel > .image,
+.skin-purple-light .user-panel > .image,
+.skin-yellow-light .user-panel > .image {
+  float: none !important;
+  flex-shrink: 0 !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 .skin-blue-light .user-panel > .image > img,
 .skin-black-light .user-panel > .image > img,
@@ -1152,9 +1211,23 @@
 .skin-red-light .user-panel > .image > img,
 .skin-purple-light .user-panel > .image > img,
 .skin-yellow-light .user-panel > .image > img {
-  border-radius: 50% !important;
-  border: 2px solid var(--sb-accent) !important;
-  max-width: 40px !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 6px !important;
+  border: none !important;
+  object-fit: contain !important;
+  background: transparent !important;
+}
+.skin-blue-light .user-panel > .info,
+.skin-black-light .user-panel > .info,
+.skin-black-light-dphuesca .user-panel > .info,
+.skin-green-light .user-panel > .info,
+.skin-red-light .user-panel > .info,
+.skin-purple-light .user-panel > .info,
+.skin-yellow-light .user-panel > .info {
+  float: none !important;
+  padding: 0 0 0 10px !important;
+  overflow: hidden !important;
 }
 .skin-blue-light .user-panel > .info > p,
 .skin-black-light .user-panel > .info > p,
@@ -1165,8 +1238,11 @@
 .skin-yellow-light .user-panel > .info > p {
   color: var(--sb-text) !important;
   font-size: 13px !important;
-  font-weight: 600 !important;
-  margin-bottom: 3px !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 /* Light skins — menu items */
@@ -1516,4 +1592,59 @@
 .skin-yellow-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a:hover {
   background: rgba(0,0,0,0.05) !important;
   color: var(--sb-accent, #4a7fa5) !important;
+}
+
+/* =================================================================
+   USER-PANEL colapsado: ocultar texto, centrar logo
+   ================================================================= */
+.sidebar-mini.sidebar-collapse .user-panel {
+  padding: 10px 7px !important;
+  justify-content: center !important;
+}
+.sidebar-mini.sidebar-collapse .user-panel > .info {
+  display: none !important;
+}
+.sidebar-mini.sidebar-collapse .user-panel > .image {
+  width: 34px !important;
+  height: 34px !important;
+}
+.sidebar-mini.sidebar-collapse .user-panel > .image > img {
+  width: 34px !important;
+  height: 34px !important;
+}
+
+/* =================================================================
+   HEADER LOGO — imagen + texto
+   ================================================================= */
+
+/* Logo expandido: imagen a la izquierda del nombre */
+.main-header .logo .logo-lg {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+}
+.main-header .logo .logo-img-lg {
+  width: 28px !important;
+  height: 28px !important;
+  object-fit: contain !important;
+  flex-shrink: 0 !important;
+  border-radius: 5px !important;
+}
+
+/* Logo colapsado (sidebar-mini colapsado): solo imagen centrada */
+.sidebar-mini.sidebar-collapse .main-header .logo .logo-mini {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.main-header .logo .logo-img-mini {
+  width: 26px !important;
+  height: 26px !important;
+  object-fit: contain !important;
+  border-radius: 5px !important;
+}
+
+/* Ocultar el user-panel del sidebar ya que el logo está en la cabecera */
+.main-sidebar .user-panel {
+  display: none !important;
 }
