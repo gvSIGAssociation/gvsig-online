@@ -393,29 +393,6 @@
 	border-top: 1px solid var(--h-border);
 }
 .list-pagination .pagination { margin: 0; }
-.list-pagination .pagination > li > a,
-.list-pagination .pagination > li > span {
-	border-radius: 5px !important;
-	margin: 0 2px;
-	border: 1px solid var(--h-border);
-	color: var(--h-muted);
-	font-size: 12px;
-	font-weight: 600;
-	padding: 5px 10px;
-	background: var(--h-white);
-	transition: background var(--h-transition), border-color var(--h-transition), color var(--h-transition);
-}
-.list-pagination .pagination > li.active > a,
-.list-pagination .pagination > li.active > span {
-	background: var(--h-accent) !important;
-	border-color: var(--h-accent) !important;
-	color: #fff !important;
-}
-.list-pagination .pagination > li > a:hover {
-	background: #f0f6fb;
-	border-color: var(--h-accent);
-	color: var(--h-accent);
-}
 
 /* Variante card para aplicaciones */
 .project-card--app { border-color: #dce8f3; }
@@ -425,6 +402,192 @@
 	background: #3d7ab5;
 	border-color: #3d7ab5;
 	color: #fff !important;
+}
+
+/* Posición relativa necesaria para badge */
+.project-card { position: relative; }
+
+/* ============================================================
+   BARRA DE FILTROS
+   ============================================================ */
+.filter-bar {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex-wrap: wrap;
+}
+.filter-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	background: var(--h-bg);
+	border: 1px solid var(--h-border);
+	border-radius: 20px;
+	padding: 4px 11px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--h-muted);
+	cursor: pointer;
+	transition: background var(--h-transition), border-color var(--h-transition), color var(--h-transition);
+	white-space: nowrap;
+}
+.filter-btn:hover {
+	border-color: var(--h-accent);
+	color: var(--h-accent);
+	background: #f0f6fb;
+}
+.filter-btn.active {
+	background: var(--h-accent);
+	border-color: var(--h-accent);
+	color: #fff;
+}
+.filter-count {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0,0,0,0.10);
+	border-radius: 10px;
+	font-size: 10px;
+	font-weight: 700;
+	min-width: 18px;
+	padding: 1px 5px;
+	line-height: 1.4;
+}
+.filter-btn.active .filter-count { background: rgba(255,255,255,0.28); }
+
+/* Badge de tipo sobre la card */
+.item-type-badge {
+	position: absolute;
+	top: 8px;
+	left: 8px;
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.3px;
+	padding: 2px 8px;
+	border-radius: 10px;
+	z-index: 1;
+	pointer-events: none;
+}
+.item-type-badge--private { background: rgba(45,95,128,0.85);  color: #fff; }
+.item-type-badge--public  { background: rgba(40,160,100,0.85); color: #fff; }
+.item-type-badge--app     { background: rgba(61,122,181,0.85); color: #fff; }
+
+/* Estado vacío filtrado */
+.filter-empty {
+	display: none;
+	text-align: center;
+	padding: 32px 16px;
+	color: var(--h-muted);
+	font-size: 13px;
+}
+.filter-empty i { font-size: 28px; display: block; margin-bottom: 8px; opacity: 0.5; }
+
+/* ============================================================
+   ORDEN MANUAL – controles
+   ============================================================ */
+.sort-toggle-bar {
+	display: flex;
+	align-items: center;
+	gap: 3px;
+	background: var(--h-bg);
+	border: 1px solid var(--h-border);
+	border-radius: 20px;
+	padding: 2px;
+}
+.sort-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	background: transparent;
+	border: none;
+	border-radius: 18px;
+	padding: 4px 10px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--h-muted);
+	cursor: pointer;
+	transition: background var(--h-transition), color var(--h-transition);
+	white-space: nowrap;
+}
+.sort-btn.active { background: var(--h-accent); color: #fff; }
+.sort-btn:not(.active):hover { color: var(--h-accent); background: rgba(74,127,165,0.1); }
+
+#btn-save-order {
+	display: none;
+	align-items: center;
+	gap: 5px;
+	background: #27ae60;
+	border: none;
+	border-radius: 6px;
+	padding: 5px 12px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #fff;
+	cursor: pointer;
+	height: 32px;
+	transition: background var(--h-transition);
+	white-space: nowrap;
+}
+#btn-save-order:hover { background: #219a52; }
+#btn-save-order.visible { display: inline-flex; }
+
+/* Botón orden global (solo superusuarios) */
+#btn-set-global {
+	display: none;
+	align-items: center;
+	gap: 5px;
+	background: var(--h-bg);
+	border: 1px solid var(--h-border);
+	border-radius: 6px;
+	padding: 5px 12px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--h-muted);
+	cursor: pointer;
+	height: 32px;
+	transition: background var(--h-transition), border-color var(--h-transition), color var(--h-transition);
+	white-space: nowrap;
+}
+#btn-set-global:hover {
+	border-color: #e8a020;
+	color: #b8760f;
+	background: #fef9f0;
+}
+#btn-set-global.visible { display: inline-flex; }
+#btn-set-global.is-global-now {
+	background: #fff8e6;
+	border-color: #e8a020;
+	color: #b8760f;
+}
+
+/* Drag handle */
+.drag-handle {
+	display: none;
+	position: absolute;
+	top: 6px;
+	right: 8px;
+	color: rgba(255,255,255,0.9);
+	background: rgba(0,0,0,0.38);
+	border-radius: 4px;
+	padding: 3px 6px;
+	font-size: 11px;
+	z-index: 2;
+	cursor: grab;
+	line-height: 1;
+	align-items: center;
+}
+.sortable-mode .drag-handle { display: flex; }
+.sortable-mode .project-card:hover { transform: none; }
+
+/* Placeholder visual al arrastrar */
+.ui-sortable-placeholder {
+	visibility: visible !important;
+	background: #e8f0f7;
+	border: 2px dashed #a8c8e8;
+	border-radius: 8px;
 }
 </style>
 {% endblock %}
@@ -492,33 +655,110 @@
 	</div>
 	{% endif %}
 
-	<!-- ===== PROYECTOS PRIVADOS ===== -->
-	{% if projects %}
-	<div id="project-list-box" class="projects-panel searchable-list-box">
+	<!-- ===== PANEL UNIFICADO: proyectos + aplicaciones ===== -->
+	{% if projects or public_projects or applications %}
+	<div id="all-items-panel" class="projects-panel">
 		<div class="projects-panel__header">
 			<h3 class="projects-panel__title">
-				<i class="fa fa-lock"></i>{% trans "Private projects list" %}
+				<i class="fa fa-th-large"></i>{% trans "Projects & Applications" %}
 			</h3>
 			<div class="projects-panel__actions">
+				<!-- Filtros de tipo -->
+				<div class="filter-bar" id="filter-bar-types">
+					<button class="filter-btn active" data-filter="all">
+						<i class="fa fa-th"></i> {% trans "All" %}
+					</button>
+					{% if projects %}
+					<button class="filter-btn" data-filter="private">
+						<i class="fa fa-lock"></i> {% trans "Private" %}
+						<span class="filter-count">{{projects|length}}</span>
+					</button>
+					{% endif %}
+					{% if public_projects %}
+					<button class="filter-btn" data-filter="public">
+						<i class="fa fa-globe"></i> {% trans "Public" %}
+						<span class="filter-count">{{public_projects|length}}</span>
+					</button>
+					{% endif %}
+					{% if applications %}
+					<button class="filter-btn" data-filter="app">
+						<i class="fa fa-th-large"></i> {% trans "Apps" %}
+						<span class="filter-count">{{applications|length}}</span>
+					</button>
+					{% endif %}
+				</div>
+				{% if is_orderable %}
+				<!-- Toggle orden -->
+				<div class="sort-toggle-bar">
+					<button class="sort-btn {% if order_type == 'alpha' %}active{% endif %}" id="btn-sort-alpha">
+						<i class="fa fa-sort-alpha-asc"></i> {% trans "Alphabetical" %}
+					</button>
+					<button class="sort-btn {% if order_type == 'manual' %}active{% endif %}" id="btn-sort-manual">
+						<i class="fa fa-arrows"></i> {% trans "Manual" %}
+					</button>
+				</div>
+				<button id="btn-save-order" {% if order_type == 'manual' %}class="visible"{% endif %}>
+					<i class="fa fa-save"></i> {% trans "Save order" %}
+				</button>
+				{% if user.is_superuser %}
+				<button id="btn-set-global" {% if order_type == 'manual' %}class="visible{% if is_global_active %} is-global-now{% endif %}"{% endif %}>
+					<i class="fa fa-star{% if not is_global_active %}-o{% endif %}"></i> {% trans "Set as global" %}
+				</button>
+				{% endif %}
+				{% endif %}
 				{% if user.is_staff %}
 				<button id="button-add-project" title='{% trans "Add project" %}'>
 					<i class="fa fa-plus"></i> {% trans "Add" %}
 				</button>
 				{% endif %}
 				<div class="elegant-search">
-					<input type="text" class="search form-control" placeholder="{% trans 'Search...' %}" />
+					<input type="text" class="search-all form-control" placeholder="{% trans 'Search...' %}" />
 					<i class="fa fa-search search-icon"></i>
 				</div>
 			</div>
 		</div>
 		<div class="projects-panel__body">
-			<ul class="list projects-grid">
+			<ul class="items-list projects-grid">
+				{% if all_items_ordered %}
+				{% for item in all_items_ordered %}
+				<li data-item-type="{{ item.item_type }}" data-item-id="{{ item.id }}">
+					<div class="project-card{% if item.item_type == 'app' %} project-card--app{% endif %}">
+						<span class="drag-handle"><i class="fa fa-bars"></i></span>
+						{% if item.item_type == 'private' %}
+						<span class="item-type-badge item-type-badge--private"><i class="fa fa-lock"></i> {% trans "Private" %}</span>
+						{% elif item.item_type == 'public' %}
+						<span class="item-type-badge item-type-badge--public"><i class="fa fa-globe"></i> {% trans "Public" %}</span>
+						{% else %}
+						<span class="item-type-badge item-type-badge--app"><i class="fa fa-th-large"></i> {% trans "App" %}</span>
+						{% endif %}
+						<img class="project-card__thumb" src="{{ item.image }}" alt="">
+						<div class="project-card__body">
+							<p class="project-card__name item-title">{{ item.title }}</p>
+							<span class="project-card__desc">{{ item.description }}</span>
+						</div>
+						<div class="project-card__footer">
+							{% if item.item_type == 'app' %}
+							<a href="{{ item.url }}" class="project-card__btn project-card__btn--app">
+								<i class="fa fa-rocket"></i> {% trans "Open application" %}
+							</a>
+							{% else %}
+							<a href="{{ item.url }}" class="project-card__btn">
+								<i class="fa fa-map"></i> {% trans "Load project" %}
+							</a>
+							{% endif %}
+						</div>
+					</div>
+				</li>
+				{% endfor %}
+				{% else %}
 				{% for project in projects %}
-				<li>
+				<li data-item-type="private" data-item-id="{{ project.id }}">
 					<div class="project-card">
+						<span class="drag-handle"><i class="fa fa-bars"></i></span>
+						<span class="item-type-badge item-type-badge--private"><i class="fa fa-lock"></i> {% trans "Private" %}</span>
 						<img class="project-card__thumb" src={{project.image}} alt="">
 						<div class="project-card__body">
-							<p class="project-card__name product-title">{{project.title}}</p>
+							<p class="project-card__name item-title">{{project.title}}</p>
 							<span class="project-card__desc">{{project.description}}</span>
 						</div>
 						<div class="project-card__footer">
@@ -529,9 +769,50 @@
 					</div>
 				</li>
 				{% endfor %}
+				{% for project in public_projects %}
+				<li data-item-type="public" data-item-id="{{ project.id }}">
+					<div class="project-card">
+						<span class="drag-handle"><i class="fa fa-bars"></i></span>
+						<span class="item-type-badge item-type-badge--public"><i class="fa fa-globe"></i> {% trans "Public" %}</span>
+						<img class="project-card__thumb" src={{project.image}} alt="">
+						<div class="project-card__body">
+							<p class="project-card__name item-title">{{project.title}}</p>
+							<span class="project-card__desc">{{project.description}}</span>
+						</div>
+						<div class="project-card__footer">
+							<a href="{{project.url}}" class="project-card__btn">
+								<i class="fa fa-map"></i> {% trans "Load project" %}
+							</a>
+						</div>
+					</div>
+				</li>
+				{% endfor %}
+				{% for app in applications %}
+				<li data-item-type="app" data-item-id="{{ app.id }}">
+					<div class="project-card project-card--app">
+						<span class="drag-handle"><i class="fa fa-bars"></i></span>
+						<span class="item-type-badge item-type-badge--app"><i class="fa fa-th-large"></i> {% trans "App" %}</span>
+						<img class="project-card__thumb" src="{{app.image}}" alt="">
+						<div class="project-card__body">
+							<p class="project-card__name item-title">{{app.title}}</p>
+							<span class="project-card__desc">{{app.description}}</span>
+						</div>
+						<div class="project-card__footer">
+							<a href="{{app.url}}" class="project-card__btn project-card__btn--app">
+								<i class="fa fa-rocket"></i> {% trans "Open application" %}
+							</a>
+						</div>
+					</div>
+				</li>
+				{% endfor %}
+				{% endif %}
 			</ul>
+			<div class="filter-empty" id="filter-empty-msg">
+				<i class="fa fa-search"></i>
+				{% trans "No items found." %}
+			</div>
 			<div class="list-pagination">
-				<ul class="pagination"></ul>
+				<ul class="pagination pagination-sm no-margin pagination-all"></ul>
 			</div>
 		</div>
 	</div>
@@ -539,7 +820,7 @@
 	<div class="projects-panel">
 		<div class="projects-panel__header">
 			<h3 class="projects-panel__title">
-				<i class="fa fa-lock"></i>{% trans "Private projects list" %}
+				<i class="fa fa-th-large"></i>{% trans "Projects & Applications" %}
 			</h3>
 			<div class="projects-panel__actions">
 				<button id="button-add-project" title='{% trans "Add project" %}'>
@@ -551,86 +832,6 @@
 			<div class="projects-empty">
 				<i class="fa fa-folder-open-o"></i>
 				{% trans "No projects available." %}
-			</div>
-		</div>
-	</div>
-	{% endif %}
-
-	<!-- ===== PROYECTOS PÚBLICOS ===== -->
-	{% if public_projects %}
-	<div id="project-list-box2" class="projects-panel searchable-list-box">
-		<div class="projects-panel__header">
-			<h3 class="projects-panel__title">
-				<i class="fa fa-globe"></i>{% trans "Public projects list" %}
-			</h3>
-			<div class="projects-panel__actions">
-				<div class="elegant-search">
-					<input type="text" class="search2 form-control" placeholder="{% trans 'Search...' %}" />
-					<i class="fa fa-search search-icon"></i>
-				</div>
-			</div>
-		</div>
-		<div class="projects-panel__body">
-			<ul class="list2 projects-grid">
-				{% for project in public_projects %}
-				<li>
-					<div class="project-card">
-						<img class="project-card__thumb" src={{project.image}} alt="">
-						<div class="project-card__body">
-							<p class="project-card__name product-title">{{project.title}}</p>
-							<span class="project-card__desc">{{project.description}}</span>
-						</div>
-						<div class="project-card__footer">
-							<a href="{{project.url}}" class="project-card__btn">
-								<i class="fa fa-map"></i> {% trans "Load project" %}
-							</a>
-						</div>
-					</div>
-				</li>
-				{% endfor %}
-			</ul>
-			<div class="list-pagination">
-				<ul class="pagination"></ul>
-			</div>
-		</div>
-	</div>
-	{% endif %}
-
-	<!-- ===== APLICACIONES ===== -->
-	{% if applications %}
-	<div id="app-list-box" class="projects-panel searchable-list-box">
-		<div class="projects-panel__header">
-			<h3 class="projects-panel__title">
-				<i class="fa fa-th-large"></i>{% trans "Applications" %}
-			</h3>
-			<div class="projects-panel__actions">
-				<div class="elegant-search">
-					<input type="text" class="search-apps form-control" placeholder="{% trans 'Search...' %}" />
-					<i class="fa fa-search search-icon"></i>
-				</div>
-			</div>
-		</div>
-		<div class="projects-panel__body">
-			<ul class="list-apps projects-grid">
-				{% for app in applications %}
-				<li>
-					<div class="project-card project-card--app">
-						<img class="project-card__thumb" src="{{app.image}}" alt="">
-						<div class="project-card__body">
-							<p class="project-card__name app-title">{{app.title}}</p>
-							<span class="project-card__desc">{{app.description}}</span>
-						</div>
-						<div class="project-card__footer">
-							<a href="{{app.url}}" class="project-card__btn project-card__btn--app">
-								<i class="fa fa-rocket"></i> {% trans "Open application" %}
-							</a>
-						</div>
-					</div>
-				</li>
-				{% endfor %}
-			</ul>
-			<div class="list-pagination">
-				<ul class="pagination-apps"></ul>
 			</div>
 		</div>
 	</div>
@@ -685,44 +886,189 @@
 	});
 
 	$().ready(function() {
-		{% if projects %}
-		new List('project-list-box', {
-			valueNames: ['product-title'],
-			listClass: 'list',
-			searchClass: 'search',
-			page: 10,
+		{% if projects or public_projects or applications %}
+		var activeFilter = 'all';
+		var currentOrderType = '{{ order_type }}';
+		var sortableEnabled = false;
+
+		// ---- List.js (búsqueda + paginación) ----
+		var itemList = new List('all-items-panel', {
+			valueNames: ['item-title'],
+			listClass: 'items-list',
+			searchClass: 'search-all',
+			page: 15,
 			pagination: [{
-				paginationClass: 'pagination',
+				paginationClass: 'pagination-all',
 				innerWindow: 3,
 				outerWindow: 1
 			}]
+		});
+
+		function applyFilter(filter) {
+			activeFilter = filter;
+			if (sortableEnabled) {
+				// Modo manual: filtrar directamente en el DOM
+				var $items = $('.items-list > li');
+				if (filter === 'all') {
+					$items.show();
+				} else {
+					$items.each(function() {
+						$(this).toggle($(this).data('item-type') === filter);
+					});
+				}
+				$('#filter-empty-msg').toggle($('.items-list > li:visible').length === 0);
+			} else {
+				// Modo alfabético: usar List.js
+				if (filter === 'all') {
+					itemList.filter();
+				} else {
+					itemList.filter(function(item) {
+						return item.elm.getAttribute('data-item-type') === filter;
+					});
+				}
+				$('#filter-empty-msg').toggle(itemList.visibleItems.length === 0);
+			}
+		}
+
+		$('.filter-btn').on('click', function() {
+			$('.filter-btn').removeClass('active');
+			$(this).addClass('active');
+			applyFilter($(this).data('filter'));
+		});
+
+		$('.search-all').on('keyup', function() {
+			$('#filter-empty-msg').toggle(itemList.visibleItems.length === 0);
+		});
+
+		{% if is_orderable %}
+		// ---- Orden manual: jQuery UI Sortable ----
+		function enableSortable() {
+			if (sortableEnabled) return;
+			$('.items-list').sortable({
+				handle: '.drag-handle',
+				items: '> li',
+				placeholder: 'projects-grid__placeholder ui-sortable-placeholder',
+				tolerance: 'pointer',
+				forcePlaceholderSize: true,
+			});
+			$('.items-list').addClass('sortable-mode');
+			sortableEnabled = true;
+			// Desactivamos List.js para que no interfiera con el drag
+			itemList.search();
+			itemList.filter();
+			itemList.update();
+			$('.elegant-search').hide();
+			$('.list-pagination').hide();
+			// Reaplicar filtro activo en modo DOM
+			applyFilter(activeFilter);
+		}
+
+		function disableSortable() {
+			if (!sortableEnabled) return;
+			$('.items-list').sortable('destroy');
+			$('.items-list').removeClass('sortable-mode');
+			sortableEnabled = false;
+			// Mostrar todos los items y dejar que List.js gestione el filtro
+			$('.items-list > li').show();
+			$('.elegant-search').show();
+			$('.list-pagination').show();
+			// Reaplicar filtro activo vía List.js
+			applyFilter(activeFilter);
+		}
+
+		function saveOrderToServer(orderType, orderData) {
+			$.ajax({
+				type: 'POST',
+				url: '{% url "home_order_save" %}',
+				contentType: 'application/json',
+				data: JSON.stringify({ order_type: orderType, order_data: orderData }),
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				error: function() {
+					alert('{% trans "Error saving order." %}');
+				}
+			});
+		}
+
+		function setOrderMode(mode) {
+			currentOrderType = mode;
+			if (mode === 'manual') {
+				$('#btn-sort-alpha').removeClass('active');
+				$('#btn-sort-manual').addClass('active');
+				$('#btn-save-order').addClass('visible');
+				{% if user.is_superuser %}$('#btn-set-global').addClass('visible');{% endif %}
+				enableSortable();
+			} else {
+				$('#btn-sort-manual').removeClass('active');
+				$('#btn-sort-alpha').addClass('active');
+				$('#btn-save-order').removeClass('visible');
+				{% if user.is_superuser %}$('#btn-set-global').removeClass('visible');{% endif %}
+				disableSortable();
+				saveOrderToServer('alpha', []);
+			}
+		}
+
+		$('#btn-sort-alpha').on('click', function() { setOrderMode('alpha'); });
+		$('#btn-sort-manual').on('click', function() { setOrderMode('manual'); });
+
+		// Inicializar en modo manual si así lo indica el servidor
+		if (currentOrderType === 'manual') {
+			enableSortable();
+		}
+
+		// ---- Guardar orden ----
+		$('#btn-save-order').on('click', function() {
+			var orderData = [];
+			$('.items-list > li').each(function() {
+				orderData.push({
+					type: $(this).data('item-type'),
+					id: parseInt($(this).data('item-id'), 10)
+				});
+			});
+			saveOrderToServer('manual', orderData);
+			var btn = $(this);
+			var orig = btn.html();
+			btn.html('<i class="fa fa-check"></i> {% trans "Saved" %}');
+			setTimeout(function() { btn.html(orig); }, 2000);
+		});
+
+		{% if user.is_superuser %}
+		// ---- Establecer orden global ----
+		$('#btn-set-global').on('click', function() {
+			var orderData = [];
+			$('.items-list > li').each(function() {
+				orderData.push({
+					type: $(this).data('item-type'),
+					id: parseInt($(this).data('item-id'), 10)
+				});
+			});
+			var btn = $(this);
+			$.ajax({
+				type: 'POST',
+				url: '{% url "home_global_order_save" %}',
+				contentType: 'application/json',
+				data: JSON.stringify({ order_type: 'manual', order_data: orderData }),
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				success: function(response) {
+					if (response.success) {
+						btn.addClass('is-global-now');
+						btn.find('i').removeClass('fa-star-o').addClass('fa-star');
+						var orig = btn.html();
+						btn.html('<i class="fa fa-check"></i> {% trans "Global set" %}');
+						setTimeout(function() { btn.html(orig); }, 2000);
+					}
+				},
+				error: function() {
+					alert('{% trans "Error saving global order." %}');
+				}
+			});
 		});
 		{% endif %}
-		{% if public_projects %}
-		new List('project-list-box2', {
-			valueNames: ['product-title'],
-			listClass: 'list2',
-			searchClass: 'search2',
-			page: 10,
-			pagination: [{
-				paginationClass: 'pagination',
-				innerWindow: 3,
-				outerWindow: 1
-			}]
-		});
 		{% endif %}
-		{% if applications %}
-		new List('app-list-box', {
-			valueNames: ['app-title'],
-			listClass: 'list-apps',
-			searchClass: 'search-apps',
-			page: 10,
-			pagination: [{
-				paginationClass: 'pagination-apps',
-				innerWindow: 3,
-				outerWindow: 1
-			}]
-		});
+
 		{% endif %}
 	});
 </script>

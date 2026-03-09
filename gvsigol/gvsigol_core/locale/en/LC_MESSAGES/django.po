@@ -1319,3 +1319,39 @@ msgstr ""
 #: gvsigol_core/views.py:1904
 msgid "Application name already exists"
 msgstr ""
+
+msgid "Alphabetical"
+msgstr ""
+
+msgid "Manual"
+msgstr ""
+
+msgid "Save order"
+msgstr ""
+
+msgid "Saved"
+msgstr ""
+
+msgid "Set as global"
+msgstr ""
+
+msgid "Global set"
+msgstr ""
+
+msgid "Error saving global order."
+msgstr ""
+
+msgid "Error saving order."
+msgstr ""
+
+msgid "Projects & Applications"
+msgstr ""
+
+msgid "Open application"
+msgstr ""
+
+msgid "Private"
+msgstr ""
+
+msgid "Public"
+msgstr ""

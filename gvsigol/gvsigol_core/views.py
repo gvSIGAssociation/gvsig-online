@@ -33,7 +33,7 @@ from gvsigol.basetypes import CloneConf
 from gvsigol_auth import auth_backend
 from django.shortcuts import render, HttpResponse, redirect
 from django.http import HttpResponseForbidden
-from .models import Project, ProjectLayerGroup, ProjectRole, Application, ApplicationRole
+from .models import Project, ProjectLayerGroup, ProjectRole, Application, ApplicationRole, UserHomeOrder
 from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup, ServiceUrl, LayerReadRole, LayerGroupRole
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
@@ -116,8 +116,10 @@ def home(request):
         project['url'] = p.url
 
         if p.is_public:
+            project['item_type'] = 'public'
             public_projects.append(project)
         else:
+            project['item_type'] = 'private'
             projects.append(project)
 
     applications = []
@@ -133,7 +135,45 @@ def home(request):
             'description': app.description or '',
             'image': app.image_url,
             'url': app.absurl,
+            'item_type': 'app',
         })
+
+    is_orderable = request.user.is_staff or request.user.is_superuser
+    order_type = UserHomeOrder.ORDER_ALPHA
+    all_items_ordered = None
+    is_global_active = False
+
+    if is_orderable:
+        saved_order = UserHomeOrder.objects.filter(user=request.user).first()
+        # Fallback to global order if the user has no personal order set
+        if not saved_order:
+            saved_order = UserHomeOrder.objects.filter(is_global=True).first()
+        if saved_order:
+            order_type = saved_order.order_type
+            is_global_active = saved_order.is_global and request.user.is_superuser
+        if order_type == UserHomeOrder.ORDER_MANUAL and saved_order and saved_order.order_data:
+            try:
+                order_list = json.loads(saved_order.order_data)
+                lookup = {}
+                for p in projects:
+                    lookup[('private', p['id'])] = p
+                for p in public_projects:
+                    lookup[('public', p['id'])] = p
+                for a in applications:
+                    lookup[('app', a['id'])] = a
+                seen = set()
+                all_items_ordered = []
+                for entry in order_list:
+                    key = (entry['type'], entry['id'])
+                    if key in lookup and key not in seen:
+                        all_items_ordered.append(lookup[key])
+                        seen.add(key)
+                # append new items not yet in saved order
+                for key, item in lookup.items():
+                    if key not in seen:
+                        all_items_ordered.append(item)
+            except Exception:
+                all_items_ordered = None
 
     manage_passwords_url = getattr(settings, 'MANAGE_PASSWORD_URL', None)
     if settings.AUTH_DASHBOARD_UI:        
@@ -148,7 +188,72 @@ def home(request):
     else:
         useClassicViewer = True
 
-    return render(request, 'home.html', {'projects': projects, 'public_projects': public_projects, 'applications': applications, 'allow_password_update': allow_password_update, 'manage_passwords_url': manage_passwords_url, 'use_classic_viewer': useClassicViewer})
+    return render(request, 'home.html', {
+        'projects': projects,
+        'public_projects': public_projects,
+        'applications': applications,
+        'all_items_ordered': all_items_ordered,
+        'order_type': order_type,
+        'is_orderable': is_orderable,
+        'is_global_active': is_global_active,
+        'allow_password_update': allow_password_update,
+        'manage_passwords_url': manage_passwords_url,
+        'use_classic_viewer': useClassicViewer,
+    })
+
+
+@login_required()
+def home_order_get(request):
+    if not (request.user.is_staff or request.user.is_superuser):
+        return HttpResponseForbidden()
+    saved = UserHomeOrder.objects.filter(user=request.user).first()
+    if saved:
+        return JsonResponse({'order_type': saved.order_type, 'order_data': saved.order_data or '[]'})
+    return JsonResponse({'order_type': UserHomeOrder.ORDER_ALPHA, 'order_data': '[]'})
+
+
+@login_required()
+def home_order_save(request):
+    if not (request.user.is_staff or request.user.is_superuser):
+        return HttpResponseForbidden()
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+    try:
+        body = json.loads(request.body)
+        order_type = body.get('order_type', UserHomeOrder.ORDER_ALPHA)
+        order_data = body.get('order_data', [])
+        if order_type not in (UserHomeOrder.ORDER_ALPHA, UserHomeOrder.ORDER_MANUAL):
+            return JsonResponse({'success': False, 'error': 'Invalid order_type'}, status=400)
+        obj, _ = UserHomeOrder.objects.get_or_create(user=request.user)
+        obj.order_type = order_type
+        obj.order_data = json.dumps(order_data)
+        obj.save()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+@login_required()
+def home_global_order_save(request):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden()
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+    try:
+        body = json.loads(request.body)
+        order_type = body.get('order_type', UserHomeOrder.ORDER_ALPHA)
+        order_data = body.get('order_data', [])
+        if order_type not in (UserHomeOrder.ORDER_ALPHA, UserHomeOrder.ORDER_MANUAL):
+            return JsonResponse({'success': False, 'error': 'Invalid order_type'}, status=400)
+        obj, _ = UserHomeOrder.objects.get_or_create(user=request.user)
+        obj.order_type = order_type
+        obj.order_data = json.dumps(order_data)
+        obj.is_global = True
+        obj.save()  # save() enforces only one is_global=True
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
 
 @login_required()
 @staff_required
