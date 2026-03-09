@@ -1,23 +1,59 @@
 {% extends "filemanager_base.html" %}
 {% load i18n %}
 
+{% block header %}
+<style>
+:root {
+	--pf-accent:    #4a7fa5;
+	--pf-accent-dk: #2d5f80;
+	--pf-text:      #2e3a45;
+	--pf-muted:     #7b8a96;
+	--pf-border:    #e8ecef;
+	--pf-bg:        #f4f6f8;
+	--pf-white:     #ffffff;
+	--pf-radius:    10px;
+	--pf-shadow:    0 2px 12px rgba(0,0,0,0.08);
+	--pf-transition: 0.2s ease;
+}
+.pf-topbar { display: flex; align-items: center; justify-content: flex-end; padding: 12px 0 16px; gap: 10px; }
+.btn-pf-save { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-accent); color: #fff !important; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 20px; cursor: pointer; transition: background var(--pf-transition); letter-spacing: 0.2px; }
+.btn-pf-save:hover { background: var(--pf-accent-dk); }
+.pf-card { background: var(--pf-white); border: 1px solid var(--pf-border); border-radius: var(--pf-radius); box-shadow: var(--pf-shadow); padding: 24px; }
+.pf-card-header { font-size: 13px; font-weight: 600; color: var(--pf-muted); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--pf-border); display: flex; align-items: center; gap: 8px; }
+.pf-card-header i { color: var(--pf-accent); }
+.pf-card label { font-size: 12px; font-weight: 700; color: var(--pf-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
+.pf-card p input[type="text"], .pf-card .form-control { border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; transition: border-color var(--pf-transition), box-shadow var(--pf-transition); padding: 6px 12px; width: 100%; display: block; }
+.pf-card p input[type="text"]:focus, .pf-card .form-control:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
+	.breadcrumb { background: var(--pf-bg); border: 1px solid var(--pf-border); border-radius: 6px; padding: 5px 12px; margin: 0; font-size: 12px; }
+	.breadcrumb > li + li::before { color: var(--pf-muted); }
+	.breadcrumb a { color: var(--pf-accent); font-weight: 600; }
+	.breadcrumb > li:last-child { color: var(--pf-text); font-weight: 600; }
+</style>
+{% endblock %}
+
 {% block content %}
 
-	{% include "filemanager_breadcrumbs.html" %}
-	
-	<form method="post" action="{% url 'filemanager:create-directory' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}">
+<div class="pf-topbar">
+	<button type="submit" form="create-dir-form" class="btn-pf-save"><i class="fa fa-plus"></i> {% trans "Create directory" %}</button>
+</div>
+
+<div class="pf-card">
+	<div class="pf-card-header">
+		<i class="fa fa-folder-open"></i>
+		{% include "filemanager_breadcrumbs.html" %}
+	</div>
+
+	<form id="create-dir-form" method="post" action="{% url 'filemanager:create-directory' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}">
 		{% csrf_token %}
-	  	<input type="hidden" name="path" value="{{path}}">
-	  	{{form.as_p}}
-	  	<p>
-	    	<input type="submit" class="btn btn-default" value="{% trans "Create directory" %}">
-	  	</p>
+		<input type="hidden" name="path" value="{{path}}">
+		{{form.as_p}}
 	</form>
-	
+</div>
+
 {% endblock %}
 
 {% block extra-scripts %}
-	<script>
-	$('#menu-manage-files').addClass("active");
-	</script>
+<script>
+$('#menu-manage-files').addClass("active");
+</script>
 {% endblock %}

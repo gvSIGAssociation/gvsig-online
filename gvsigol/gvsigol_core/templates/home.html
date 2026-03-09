@@ -2,206 +2,728 @@
 {% load staticfiles %}
 {% load i18n %}
 
+{% block header %}
+<style>
+/* ============================================================
+   HOME PAGE – REDESIGN v2
+   Profile bar compacta + project cards con paginación
+   ============================================================ */
+:root {
+	--h-accent:     #4a7fa5;
+	--h-accent-dk:  #2d5f80;
+	--h-text:       #2e3a45;
+	--h-muted:      #7b8a96;
+	--h-border:     #e8ecef;
+	--h-bg:         #f4f6f8;
+	--h-white:      #ffffff;
+	--h-radius:     10px;
+	--h-shadow:     0 2px 12px rgba(0,0,0,0.08);
+	--h-shadow-hv:  0 6px 24px rgba(0,0,0,0.13);
+	--h-transition: 0.22s cubic-bezier(.4,0,.2,1);
+}
+
+.home-page { padding: 8px 0; }
+
+/* ============================================================
+   PROFILE BAR
+   ============================================================ */
+.profile-bar {
+	background: linear-gradient(135deg, var(--h-accent) 0%, var(--h-accent-dk) 100%);
+	border-radius: var(--h-radius);
+	box-shadow: 0 4px 18px rgba(45,95,128,0.25);
+	border: none;
+	padding: 14px 20px;
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	flex-wrap: wrap;
+	margin-bottom: 20px;
+}
+
+/* Avatar */
+.profile-bar__avatar {
+	width: 46px;
+	height: 46px;
+	border-radius: 50%;
+	border: 2px solid rgba(255,255,255,0.6);
+	flex-shrink: 0;
+	display: block;
+}
+
+/* Nombre + rol */
+.profile-bar__identity { flex-shrink: 0; }
+.profile-bar__name {
+	font-size: 14px;
+	font-weight: 700;
+	color: #ffffff;
+	margin: 0 0 3px;
+	line-height: 1.2;
+}
+.profile-bar__role-badge {
+	display: inline-block;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.6px;
+	text-transform: uppercase;
+	padding: 2px 9px;
+	border-radius: 20px;
+}
+.profile-bar__role-badge--admin { background: rgba(255,255,255,0.2); color: #fff; }
+.profile-bar__role-badge--staff { background: rgba(255,255,255,0.2); color: #fff; }
+.profile-bar__role-badge--user  { background: rgba(255,255,255,0.2); color: #fff; }
+
+/* Separador vertical */
+.profile-bar__sep {
+	width: 1px;
+	height: 36px;
+	background: rgba(255,255,255,0.25);
+	flex-shrink: 0;
+}
+
+/* Pills de info */
+.profile-bar__pills {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+	flex: 1;
+}
+.profile-bar__pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	background: rgba(255,255,255,0.15);
+	border: 1px solid rgba(255,255,255,0.25);
+	border-radius: 20px;
+	padding: 4px 12px;
+	font-size: 12px;
+	color: #ffffff;
+	white-space: nowrap;
+}
+.profile-bar__pill i {
+	color: rgba(255,255,255,0.75);
+	font-size: 11px;
+	width: 12px;
+	text-align: center;
+}
+.profile-bar__pill span { max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
+
+/* Botón de contraseña */
+.profile-bar__pass-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: rgba(255,255,255,0.15);
+	border: 1px solid rgba(255,255,255,0.3);
+	border-radius: 6px;
+	padding: 5px 12px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #ffffff !important;
+	cursor: pointer;
+	transition: background var(--h-transition), border-color var(--h-transition);
+	flex-shrink: 0;
+	text-decoration: none !important;
+}
+.profile-bar__pass-btn:hover {
+	background: rgba(255,255,255,0.28);
+	border-color: rgba(255,255,255,0.6);
+	color: #ffffff !important;
+}
+.profile-bar__pass-btn i { color: rgba(255,255,255,0.85); font-size: 12px; }
+
+/* Panel colapsable de cambio de contraseña */
+.profile-bar__pass-panel {
+	overflow: hidden;
+	max-height: 0;
+	transition: max-height 0.35s ease;
+	background: var(--h-white);
+	border-radius: var(--h-radius);
+	border: 1px solid var(--h-border);
+	box-shadow: var(--h-shadow);
+	margin-bottom: 20px;
+}
+.profile-bar__pass-panel.pass-visible { max-height: 320px; }
+.profile-bar__pass-panel-inner { padding: 20px; max-width: 480px; }
+.profile-bar__pass-panel-inner .form-group label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--h-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.4px;
+	margin-bottom: 5px;
+}
+.profile-bar__pass-panel-inner .form-control {
+	border-radius: 6px;
+	border-color: var(--h-border);
+	font-size: 13px;
+	height: 36px;
+}
+.profile-bar__pass-panel-inner .form-control:focus {
+	border-color: var(--h-accent);
+	box-shadow: 0 0 0 3px rgba(74,127,165,0.15);
+	outline: none;
+}
+#form-error { display: none; }
+#form-error.pass-error-visible { display: block; }
+.btn-pass-submit {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: var(--h-accent);
+	border: none;
+	color: #fff;
+	font-size: 13px;
+	font-weight: 600;
+	padding: 8px 20px;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: background var(--h-transition);
+	margin-top: 10px;
+}
+.btn-pass-submit:hover { background: var(--h-accent-dk); }
+
+/* ============================================================
+   PANELES DE PROYECTOS
+   ============================================================ */
+.projects-panel {
+	background: var(--h-white);
+	border-radius: var(--h-radius);
+	box-shadow: var(--h-shadow);
+	border: 1px solid var(--h-border);
+	overflow: hidden;
+	margin-bottom: 22px;
+}
+.projects-panel:last-child { margin-bottom: 0; }
+
+.projects-panel__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 20px;
+	border-bottom: 1px solid var(--h-border);
+	gap: 12px;
+	flex-wrap: wrap;
+	background: var(--h-white);
+	border-radius: var(--h-radius) var(--h-radius) 0 0;
+}
+.projects-panel__title {
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--h-accent-dk);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0;
+}
+.projects-panel__title i { color: var(--h-accent); font-size: 15px; }
+.projects-panel__actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* Buscador */
+.elegant-search { position: relative; width: 200px; }
+.elegant-search .form-control {
+	height: 32px;
+	border-radius: 20px;
+	border: 1px solid var(--h-border);
+	background: var(--h-bg);
+	font-size: 12px;
+	color: var(--h-text);
+	padding: 0 30px 0 12px;
+	transition: border-color var(--h-transition), box-shadow var(--h-transition), background var(--h-transition);
+	box-shadow: none;
+}
+.elegant-search .form-control::placeholder { color: var(--h-muted); }
+.elegant-search .form-control:focus {
+	border-color: var(--h-accent);
+	background: var(--h-white);
+	box-shadow: 0 0 0 3px rgba(74,127,165,0.12);
+	outline: none;
+	color: var(--h-text);
+}
+.elegant-search .search-icon {
+	position: absolute;
+	right: 10px;
+	top: 50%;
+	transform: translateY(-50%);
+	color: var(--h-muted);
+	font-size: 11px;
+	pointer-events: none;
+}
+
+/* Botón añadir */
+#button-add-project {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	background: var(--h-accent);
+	color: #fff;
+	border: none;
+	border-radius: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	padding: 6px 12px;
+	height: 32px;
+	cursor: pointer;
+	transition: background var(--h-transition);
+	white-space: nowrap;
+}
+#button-add-project:hover { background: var(--h-accent-dk); }
+
+.projects-panel__body { padding: 20px; }
+
+/* ============================================================
+   PROJECT CARDS — grid responsivo
+   ============================================================ */
+.projects-grid {
+	display: flex;
+	flex-wrap: wrap;
+	margin: 0 -8px;
+	list-style: none;
+	padding: 0;
+}
+.projects-grid > li {
+	padding: 0 8px;
+	margin-bottom: 16px;
+	width: 20%;
+	box-sizing: border-box;
+}
+@media (max-width: 1199px) { .projects-grid > li { width: 25%; } }
+@media (max-width: 991px)  { .projects-grid > li { width: 33.3333%; } }
+@media (max-width: 767px)  { .projects-grid > li { width: 50%; } }
+@media (max-width: 480px)  { .projects-grid > li { width: 100%; } }
+
+.project-card {
+	background: var(--h-white);
+	border: 1px solid var(--h-border);
+	border-radius: 8px;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	transition: box-shadow var(--h-transition), border-color var(--h-transition), transform var(--h-transition);
+}
+.project-card:hover {
+	box-shadow: var(--h-shadow-hv);
+	border-color: #c8dcec;
+	transform: translateY(-2px);
+}
+
+.project-card__thumb {
+	width: 100%;
+	height: 110px;
+	object-fit: contain;
+	object-position: center;
+	background: var(--h-bg);
+	display: block;
+	border-bottom: 1px solid var(--h-border);
+	padding: 6px;
+	box-sizing: border-box;
+}
+
+.project-card__body {
+	padding: 12px 14px;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+.project-card__name {
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--h-text);
+	margin: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.project-card__desc {
+	font-size: 12px;
+	color: var(--h-muted);
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	line-height: 1.5;
+	flex: 1;
+}
+
+.project-card__footer {
+	padding: 0 14px 12px;
+}
+.project-card__btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	width: 100%;
+	background: var(--h-bg);
+	border: 1px solid var(--h-border);
+	border-radius: 6px;
+	color: var(--h-accent) !important;
+	font-size: 12px;
+	font-weight: 600;
+	padding: 6px 0;
+	text-decoration: none !important;
+	transition: background var(--h-transition), border-color var(--h-transition);
+	letter-spacing: 0.2px;
+}
+.project-card:hover .project-card__btn {
+	background: var(--h-accent);
+	border-color: var(--h-accent);
+	color: #fff !important;
+}
+
+/* Estado vacío */
+.projects-empty {
+	text-align: center;
+	padding: 32px 16px;
+	color: var(--h-muted);
+	font-size: 13px;
+}
+.projects-empty i { font-size: 28px; display: block; margin-bottom: 8px; opacity: 0.5; }
+
+/* ============================================================
+   PAGINACIÓN de List.js
+   ============================================================ */
+.list-pagination {
+	display: flex;
+	justify-content: center;
+	margin-top: 16px;
+	padding-top: 14px;
+	border-top: 1px solid var(--h-border);
+}
+.list-pagination .pagination { margin: 0; }
+.list-pagination .pagination > li > a,
+.list-pagination .pagination > li > span {
+	border-radius: 5px !important;
+	margin: 0 2px;
+	border: 1px solid var(--h-border);
+	color: var(--h-muted);
+	font-size: 12px;
+	font-weight: 600;
+	padding: 5px 10px;
+	background: var(--h-white);
+	transition: background var(--h-transition), border-color var(--h-transition), color var(--h-transition);
+}
+.list-pagination .pagination > li.active > a,
+.list-pagination .pagination > li.active > span {
+	background: var(--h-accent) !important;
+	border-color: var(--h-accent) !important;
+	color: #fff !important;
+}
+.list-pagination .pagination > li > a:hover {
+	background: #f0f6fb;
+	border-color: var(--h-accent);
+	color: var(--h-accent);
+}
+
+/* Variante card para aplicaciones */
+.project-card--app { border-color: #dce8f3; }
+.project-card--app:hover { border-color: #a8c8e8; }
+.project-card__btn--app { color: #3d7ab5 !important; }
+.project-card--app:hover .project-card__btn--app {
+	background: #3d7ab5;
+	border-color: #3d7ab5;
+	color: #fff !important;
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row">
-	<div class="col-md-4">
+<div class="home-page">
 
-		<div class="box">
-		
-			<div class="box-body box-profile">
-				<img class="profile-user-img img-responsive img-circle"
-					src="{% static "img/user.png" %}" alt="User profile picture">
-				<h3 class="profile-username text-center">{{user.first_name}} {{user.last_name}}</h3>
+	<!-- ===== PROFILE BAR ===== -->
+	<div class="profile-bar">
+		<img class="profile-bar__avatar" src="{% static "img/user.png" %}" alt="Avatar">
+
+		<div class="profile-bar__identity">
+			<p class="profile-bar__name">{{user.first_name}} {{user.last_name}}</p>
+			{% if user.is_superuser %}
+			<span class="profile-bar__role-badge profile-bar__role-badge--admin">{% trans "Administrator" %}</span>
+			{% elif not user.is_superuser and user.is_staff %}
+			<span class="profile-bar__role-badge profile-bar__role-badge--staff">{% trans "Manager" %}</span>
+			{% else %}
+			<span class="profile-bar__role-badge profile-bar__role-badge--user">{% trans "User" %}</span>
+			{% endif %}
+		</div>
+
+		<div class="profile-bar__sep"></div>
+
+		<div class="profile-bar__pills">
+			<span class="profile-bar__pill"><i class="fa fa-user"></i><span>{{user.username}}</span></span>
+			<span class="profile-bar__pill"><i class="fa fa-envelope-o"></i><span>{{user.email}}</span></span>
+			<span class="profile-bar__pill"><i class="fa fa-clock-o"></i><span>{{user.last_login}}</span></span>
+		</div>
+
+		{% if allow_password_update %}
+		<div class="profile-bar__sep"></div>
+		{% if manage_passwords_url %}
+		<a href="{{manage_passwords_url}}" target="_blank" class="profile-bar__pass-btn">
+			<i class="fa fa-lock"></i> {% trans "Change password" %}
+		</a>
+		{% else %}
+		<a href="" id="show-hide-pass-update-link" class="profile-bar__pass-btn">
+			<i class="fa fa-lock"></i> {% trans "Change password" %}
+		</a>
+		{% endif %}
+		{% endif %}
+	</div>
+
+	{% if allow_password_update and not manage_passwords_url %}
+	<div id="show-hide-pass-update-div" class="profile-bar__pass-panel">
+		<div class="profile-bar__pass-panel-inner">
+			<div id="form-error" class="alert alert-danger" style="padding: 8px 12px; font-size: 12px; border-radius: 6px; margin-bottom: 12px;">
+				{% trans "Passwords doesn't match" %}
 			</div>
-
-			<div class="box-body">
-				<strong><i class="fa fa-user margin-r-5"></i> {% trans "Username" %}</strong>
-				<p class="text-muted">{{user.username}}</p><hr>
-				<strong><i class="fa fa-envelope margin-r-5"></i> {% trans "Email" %}</strong>
-				<p class="text-muted">{{user.email}}</p><hr>
-				<strong><i class="fa fa-shield margin-r-5"></i> {% trans "Is admin?" %}</strong>
-				{% if user.is_superuser %}
-				<p class="text-muted">{% trans "You are logged in as root" %}</p><hr>
-				{% elif not user.is_superuser and user.is_staff %}
-				<p class="text-muted">{% trans "You are logged in as management user" %}</p><hr>
-				{% else %}
-				<p class="text-muted">{% trans "You are logged in as basic user" %}</p><hr>
-				{% endif %}
-				<strong><i class="fa fa-clock-o margin-r-5"></i> {% trans "Last login" %}</strong>
-				<p class="text-muted">{{user.last_login}}</p>
-				
-				{% if allow_password_update %}
-				<hr><strong><i class="fa fa-lock margin-r-5"></i> {% trans "Password" %}</strong>
-				{% if manage_passwords_url %}
-				<p class="text-muted"><a href="{{manage_passwords_url}}" target="_blank" id="">{% trans "Click here" %}</a> {% trans "to update your password" %}</p>
-				{% else %}
-				<p class="text-muted"><a href="" id="show-hide-pass-update-link">{% trans "Click here" %}</a> {% trans "to update your password" %}</p>
-				<div id="show-hide-pass-update-div" class="hide">
-					<div id="form-error" class="hide" style="color: #ff0000;">
-						<p>* {% trans "Passwords doesn't match" %}</p>
-					</div>
-
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label for="password1">{% trans "New password" %}</label>
-							<input placeholder='{% trans "New password" %}' name="password1" id="password1" type="password" class="form-control"> 
-						</div>
-					</div>
-
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label for="password2">{%trans "Repeat new password" %}</label>
-							<input placeholder='{% trans "Repeat new password" %}' name="password2" id="password2" type="password" class="form-control"> 							
-						</div>
-					</div>
-
-					<div class="box-footer">
-						<button id="update-password-submit" class="btn btn-default">{%trans "Update password" %}</button>
-					</div>
+			<div class="row">
+				<div class="col-sm-6 form-group" style="margin-bottom: 10px;">
+					<label for="password1">{% trans "New password" %}</label>
+					<input placeholder='{% trans "New password" %}' name="password1" id="password1" type="password" class="form-control">
 				</div>
-				{% endif %}
-				{% endif %}
+				<div class="col-sm-6 form-group" style="margin-bottom: 10px;">
+					<label for="password2">{% trans "Repeat new password" %}</label>
+					<input placeholder='{% trans "Repeat new password" %}' name="password2" id="password2" type="password" class="form-control">
+				</div>
+			</div>
+			<button id="update-password-submit" class="btn-pass-submit">
+				<i class="fa fa-check"></i> {% trans "Update password" %}
+			</button>
+		</div>
+	</div>
+	{% endif %}
 
+	<!-- ===== PROYECTOS PRIVADOS ===== -->
+	{% if projects %}
+	<div id="project-list-box" class="projects-panel searchable-list-box">
+		<div class="projects-panel__header">
+			<h3 class="projects-panel__title">
+				<i class="fa fa-lock"></i>{% trans "Private projects list" %}
+			</h3>
+			<div class="projects-panel__actions">
+				{% if user.is_staff %}
+				<button id="button-add-project" title='{% trans "Add project" %}'>
+					<i class="fa fa-plus"></i> {% trans "Add" %}
+				</button>
+				{% endif %}
+				<div class="elegant-search">
+					<input type="text" class="search form-control" placeholder="{% trans 'Search...' %}" />
+					<i class="fa fa-search search-icon"></i>
+				</div>
+			</div>
+		</div>
+		<div class="projects-panel__body">
+			<ul class="list projects-grid">
+				{% for project in projects %}
+				<li>
+					<div class="project-card">
+						<img class="project-card__thumb" src={{project.image}} alt="">
+						<div class="project-card__body">
+							<p class="project-card__name product-title">{{project.title}}</p>
+							<span class="project-card__desc">{{project.description}}</span>
+						</div>
+						<div class="project-card__footer">
+							<a href="{{project.url}}" class="project-card__btn">
+								<i class="fa fa-map"></i> {% trans "Load project" %}
+							</a>
+						</div>
+					</div>
+				</li>
+				{% endfor %}
+			</ul>
+			<div class="list-pagination">
+				<ul class="pagination"></ul>
 			</div>
 		</div>
 	</div>
-
-	<div class="col-md-8">
-		<div id="project-list-box" class="box searchable-list-box">
-			<div class="box-header with-border">
-				<h3 class="box-title col-md-6">{% trans "Private projects list" %}</h3>
-				<div class="col-md-6">
-					{% if user.is_staff %}
-					<button id="button-add-project" class="btn btn-box-tool" title='{% trans "Add project" %}' style="float:right;position:relative;z-index:10;"><i class="fa fa-plus margin-r-5"></i></button>
-					{% endif %}
-					<input type="text" class="search form-control" style="padding-right: 30px;position: absolute;" placeHolder="{% trans 'Search projects...' %}" />
-				</div>
+	{% elif user.is_staff %}
+	<div class="projects-panel">
+		<div class="projects-panel__header">
+			<h3 class="projects-panel__title">
+				<i class="fa fa-lock"></i>{% trans "Private projects list" %}
+			</h3>
+			<div class="projects-panel__actions">
+				<button id="button-add-project" title='{% trans "Add project" %}'>
+					<i class="fa fa-plus"></i> {% trans "Add" %}
+				</button>
 			</div>
-			<div class="box-body">
-				<ul class="products-list product-list-in-box list">
-					{% for project in projects %}
-					<li class="item">
-						<div class="product-img">
-							<img src={{project.image}} alt="Project Image">
-						</div>
-						<div class="product-info">
-							<a href="{{project.url}}" class="product-title">{{project.title}} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-cube margin-r-5"></i> {% trans "Load project" %}</span></a>
-							<span class="product-description"> {{project.description}}</span> 
-						</div>
-					</li>
-					{% endfor %}
-				</ul>
-				<ul class="pagination"></ul>
-			</div>
-			
 		</div>
-		<div id="project-list-box2" class="box searchable-list-box">
-			<div class="box-header with-border">
-				<h3 class="box-title col-md-6">{% trans "Public projects list" %}</h3>
-				<div class="col-md-6">
-					<input type="text" class="search2 form-control" style="padding-right: 30px;position: absolute;" placeHolder="{% trans 'Search projects...' %}" />
-				</div>
+		<div class="projects-panel__body">
+			<div class="projects-empty">
+				<i class="fa fa-folder-open-o"></i>
+				{% trans "No projects available." %}
 			</div>
-			<div class="box-body">
-				<ul class="products-list product-list-in-box list2">
-					{% for project in public_projects %}
-					<li class="item">
-						<div class="product-img">
-							<img src={{project.image}} alt="Project Image">
-						</div>
-						<div class="product-info">
-							<a href="{{project.url}}" class="product-title">{{project.title}} <span style="font-size: 100%; font-weight: 500; padding: .5em .5em .5em;" class="btn btn-default pull-right"><i class="fa fa-cube margin-r-5"></i> {% trans "Load project" %}</span></a> 
-							<span class="product-description"> {{project.description}}</span>
-						</div>
-					</li>
-					{% endfor %}
-				</ul>
-				<ul class="pagination"></ul>
-			</div>
-			
 		</div>
-		<!-- /.box -->
 	</div>
+	{% endif %}
+
+	<!-- ===== PROYECTOS PÚBLICOS ===== -->
+	{% if public_projects %}
+	<div id="project-list-box2" class="projects-panel searchable-list-box">
+		<div class="projects-panel__header">
+			<h3 class="projects-panel__title">
+				<i class="fa fa-globe"></i>{% trans "Public projects list" %}
+			</h3>
+			<div class="projects-panel__actions">
+				<div class="elegant-search">
+					<input type="text" class="search2 form-control" placeholder="{% trans 'Search...' %}" />
+					<i class="fa fa-search search-icon"></i>
+				</div>
+			</div>
+		</div>
+		<div class="projects-panel__body">
+			<ul class="list2 projects-grid">
+				{% for project in public_projects %}
+				<li>
+					<div class="project-card">
+						<img class="project-card__thumb" src={{project.image}} alt="">
+						<div class="project-card__body">
+							<p class="project-card__name product-title">{{project.title}}</p>
+							<span class="project-card__desc">{{project.description}}</span>
+						</div>
+						<div class="project-card__footer">
+							<a href="{{project.url}}" class="project-card__btn">
+								<i class="fa fa-map"></i> {% trans "Load project" %}
+							</a>
+						</div>
+					</div>
+				</li>
+				{% endfor %}
+			</ul>
+			<div class="list-pagination">
+				<ul class="pagination"></ul>
+			</div>
+		</div>
+	</div>
+	{% endif %}
+
+	<!-- ===== APLICACIONES ===== -->
+	{% if applications %}
+	<div id="app-list-box" class="projects-panel searchable-list-box">
+		<div class="projects-panel__header">
+			<h3 class="projects-panel__title">
+				<i class="fa fa-th-large"></i>{% trans "Applications" %}
+			</h3>
+			<div class="projects-panel__actions">
+				<div class="elegant-search">
+					<input type="text" class="search-apps form-control" placeholder="{% trans 'Search...' %}" />
+					<i class="fa fa-search search-icon"></i>
+				</div>
+			</div>
+		</div>
+		<div class="projects-panel__body">
+			<ul class="list-apps projects-grid">
+				{% for app in applications %}
+				<li>
+					<div class="project-card project-card--app">
+						<img class="project-card__thumb" src="{{app.image}}" alt="">
+						<div class="project-card__body">
+							<p class="project-card__name app-title">{{app.title}}</p>
+							<span class="project-card__desc">{{app.description}}</span>
+						</div>
+						<div class="project-card__footer">
+							<a href="{{app.url}}" class="project-card__btn project-card__btn--app">
+								<i class="fa fa-rocket"></i> {% trans "Open application" %}
+							</a>
+						</div>
+					</div>
+				</li>
+				{% endfor %}
+			</ul>
+			<div class="list-pagination">
+				<ul class="pagination-apps"></ul>
+			</div>
+		</div>
+	</div>
+	{% endif %}
+
 </div>
 {% endblock %}
+
 {% block extra-scripts %}
 <script>
+	$('body').addClass('sidebar-collapse');
+
 	$('#menu-home').addClass("active");
-</script>
-<script>
-	$('#show-hide-pass-update-link').click( function(e) {
+
+	$('#show-hide-pass-update-link').click(function(e) {
 		e.preventDefault();
-		var div = $('#show-hide-pass-update-div')[0];
-		if (div.className == 'hide') {
-			div.className = div.className.replace('hide', 'show');
-		} else if (div.className == 'show') {
-			div.className = div.className.replace('show', 'hide');
-		}
+		$('#show-hide-pass-update-div').toggleClass('pass-visible');
 	});
-	
-	$('#button-add-project').click( function() {
+
+	$('#button-add-project').click(function() {
 		location.href = '/gvsigonline/core/project_add/';
 	});
-	
-	$('#update-password-submit').click( function() {
+
+	$('#update-password-submit').click(function() {
 		var pass1 = $('#password1').val();
 		var pass2 = $('#password2').val();
 		$.ajax({
 			type: 'POST',
 			async: false,
 			url: '/gvsigonline/auth/password_update/',
-			beforeSend:function(xhr){
-			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			beforeSend: function(xhr) {
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
-			data: {
-		  		'password1': pass1,
-				'password2': pass2
-		  	},
-			success	:function(response){
+			data: { 'password1': pass1, 'password2': pass2 },
+			success: function(response) {
 				if (response.success == true) {
 					var logout_url = '{% url "gvsigol_logout_user" %}';
 					$.ajax({
-						type: 'POST',
-						async: false,
-						url: logout_url,
-						beforeSend:function(xhr){
+						type: 'POST', async: false, url: logout_url,
+						beforeSend: function(xhr) {
 							xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 						},
-						success: function(response, a, b, c) {
-							location.href = '{% url "index" %}';
-						},
-						error: function(response){}
+						success: function() { location.href = '{% url "index" %}'; },
+						error: function() {}
 					});
 				} else {
-					var error = $('#form-error')[0];
-					if (error.className == 'hide') {
-						error.className = error.className.replace('hide', 'show');
-					} else if (error.className == 'show') {
-						error.className = error.className.replace('show', 'hide');
-					}
-				} 
-				
+					$('#form-error').addClass('pass-error-visible');
+				}
 			},
-			error: function(){}
+			error: function() {}
 		});
 	});
-	
+
 	$().ready(function() {
-		var searcheableList = new List('project-list-box', {
-  		  valueNames: ['product-title'],
-  		  listClass:'list',
-  		  searchClass: 'search',
-  		  page: 5,
-  		  pagination: false
-  		});
-		
-		var searcheableList2 = new List('project-list-box2', {
-	  		  valueNames: ['product-title'],
-	  		  listClass:'list2',
-	  		  searchClass: 'search2',
-	  		  page: 5,
-	  		  pagination: false
-	  		});
+		{% if projects %}
+		new List('project-list-box', {
+			valueNames: ['product-title'],
+			listClass: 'list',
+			searchClass: 'search',
+			page: 10,
+			pagination: [{
+				paginationClass: 'pagination',
+				innerWindow: 3,
+				outerWindow: 1
+			}]
+		});
+		{% endif %}
+		{% if public_projects %}
+		new List('project-list-box2', {
+			valueNames: ['product-title'],
+			listClass: 'list2',
+			searchClass: 'search2',
+			page: 10,
+			pagination: [{
+				paginationClass: 'pagination',
+				innerWindow: 3,
+				outerWindow: 1
+			}]
+		});
+		{% endif %}
+		{% if applications %}
+		new List('app-list-box', {
+			valueNames: ['app-title'],
+			listClass: 'list-apps',
+			searchClass: 'search-apps',
+			page: 10,
+			pagination: [{
+				paginationClass: 'pagination-apps',
+				innerWindow: 3,
+				outerWindow: 1
+			}]
+		});
+		{% endif %}
 	});
 </script>
 {% endblock %}

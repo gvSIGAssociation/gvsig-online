@@ -31,6 +31,7 @@
 	<link rel="stylesheet" href="{% static "css/googlefonts.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/search-in-components/select2.min.css" %}" />
 	<link rel="stylesheet" href="{% static "css/gvsigOL.css" %}">
+	<link rel="stylesheet" href="{% static "css/sidebar-refinements.css" %}">
 	<link rel="stylesheet" href="{% static "css/skins/_all-skins.min.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror-5.49.0/lib/codemirror.css" %}" />
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror-5.49.0/addon/hint/show-hint.css" %}" />
@@ -113,7 +114,7 @@
 									<div class="pull-right">
 										<form id="logout-form" method="post" action="{% url 'gvsigol_logout_user' %}">
 											{% csrf_token %}
-											<button type="submit" class="btn btn-default btn-flat">{% trans "Sign out" %}</button>
+											<button type="submit" class="btn btn-default btn-flat"><i class="fa fa-sign-out"></i> {% trans "Sign out" %}</button>
 										</form>
 									</div>
 								</li>

@@ -1,0 +1,1519 @@
+/* =================================================================
+   gvSIG Online — Sidebar & Header refinements
+   Mejoras visuales del sidebar y topbar para todos los skins.
+   Se aplica sobre AdminLTE 2 sin modificar los archivos de skin
+   originales ni gvsigOL.css.
+   ================================================================= */
+
+/* -----------------------------------------------------------------
+   MIXIN DARK: skins con sidebar oscuro (#222d32)
+   Skins: skin-blue, skin-black, skin-blue-dark, skin-gray-dark,
+          skin-green, skin-red, skin-yellow, skin-purple,
+          skin-albacete, skin-alzira, skin-atlasrenewableenergy,
+          skin-cartagena, skin-csicgranada, skin-eliana, skin-libra,
+          skin-mallorca, skin-ormusa, skin-pobla, skin-talavera,
+          skin-villarrobledo
+   ----------------------------------------------------------------- */
+
+/* --- skin-blue --------------------------------------------------- */
+.skin-blue {
+  --sb-bg:        #1e2a35;
+  --sb-bg-dark:   #18222b;
+  --sb-accent:    #4a7fa5;
+  --sb-accent-lt: #7eb8d4;
+  --hdr-bg:       #2d5f80;
+  --hdr-bg-dk:    #23496a;
+}
+
+/* --- skin-black -------------------------------------------------- */
+.skin-black {
+  --sb-bg:        #222d32;
+  --sb-bg-dark:   #1a2226;
+  --sb-accent:    #637a84;
+  --sb-accent-lt: #b8c7ce;
+  --hdr-bg:       #ffffff;
+  --hdr-bg-dk:    #f5f5f5;
+}
+
+/* --- skin-blue-dark ---------------------------------------------- */
+.skin-blue-dark {
+  --sb-bg:        #0d1a2d;
+  --sb-bg-dark:   #071020;
+  --sb-accent:    #2a5080;
+  --sb-accent-lt: #6090c0;
+  --hdr-bg:       #011844;
+  --hdr-bg-dk:    #000e2e;
+}
+
+/* --- skin-gray-dark ---------------------------------------------- */
+.skin-gray-dark {
+  --sb-bg:        #2a3035;
+  --sb-bg-dark:   #1e2428;
+  --sb-accent:    #737c82;
+  --sb-accent-lt: #aab2b8;
+  --hdr-bg:       #56676f;
+  --hdr-bg-dk:    #404e55;
+}
+
+/* --- skin-green -------------------------------------------------- */
+.skin-green {
+  --sb-bg:        #1a2e22;
+  --sb-bg-dark:   #122018;
+  --sb-accent:    #008d4c;
+  --sb-accent-lt: #3fc07a;
+  --hdr-bg:       #007a40;
+  --hdr-bg-dk:    #005a2f;
+}
+
+/* --- skin-red ---------------------------------------------------- */
+.skin-red {
+  --sb-bg:        #2e1a18;
+  --sb-bg-dark:   #221210;
+  --sb-accent:    #d73925;
+  --sb-accent-lt: #f07060;
+  --hdr-bg:       #c0311e;
+  --hdr-bg-dk:    #9a2515;
+}
+
+/* --- skin-yellow ------------------------------------------------- */
+.skin-yellow {
+  --sb-bg:        #2e2615;
+  --sb-bg-dark:   #221c0e;
+  --sb-accent:    #e08e0b;
+  --sb-accent-lt: #f5b83a;
+  --hdr-bg:       #c07c08;
+  --hdr-bg-dk:    #9a6005;
+}
+
+/* --- skin-purple ------------------------------------------------- */
+.skin-purple {
+  --sb-bg:        #211f35;
+  --sb-bg-dark:   #181628;
+  --sb-accent:    #555299;
+  --sb-accent-lt: #8e8bc8;
+  --hdr-bg:       #46437a;
+  --hdr-bg-dk:    #33305e;
+}
+
+/* --- skin-albacete ----------------------------------------------- */
+.skin-albacete {
+  --sb-bg:        #182435;
+  --sb-bg-dark:   #101828;
+  --sb-accent:    #1f4968;
+  --sb-accent-lt: #5a8fb5;
+  --hdr-bg:       #1f4968;
+  --hdr-bg-dk:    #163550;
+}
+
+/* --- skin-alzira ------------------------------------------------- */
+.skin-alzira {
+  --sb-bg:        #2a1018;
+  --sb-bg-dark:   #200a10;
+  --sb-accent:    #a02739;
+  --sb-accent-lt: #d06070;
+  --hdr-bg:       #a02739;
+  --hdr-bg-dk:    #7a1c2b;
+}
+
+/* --- skin-atlasrenewableenergy ----------------------------------- */
+.skin-atlasrenewableenergy {
+  --sb-bg:        #2e2518;
+  --sb-bg-dark:   #221a10;
+  --sb-accent:    #ff5900;
+  --sb-accent-lt: #ff8a45;
+  --hdr-bg:       #cc4700;
+  --hdr-bg-dk:    #a03800;
+}
+
+/* --- skin-cartagena ---------------------------------------------- */
+.skin-cartagena {
+  --sb-bg:        #0d2030;
+  --sb-bg-dark:   #081525;
+  --sb-accent:    #004466;
+  --sb-accent-lt: #3a7fa0;
+  --hdr-bg:       #004466;
+  --hdr-bg-dk:    #003050;
+}
+
+/* --- skin-csicgranada -------------------------------------------- */
+.skin-csicgranada {
+  --sb-bg:        #1a2820;
+  --sb-bg-dark:   #121e18;
+  --sb-accent:    #568666;
+  --sb-accent-lt: #88b898;
+  --hdr-bg:       #486e56;
+  --hdr-bg-dk:    #365240;
+}
+
+/* --- skin-eliana ------------------------------------------------- */
+.skin-eliana {
+  --sb-bg:        #2a1015;
+  --sb-bg-dark:   #200810;
+  --sb-accent:    #d3002d;
+  --sb-accent-lt: #f05070;
+  --hdr-bg:       #b80025;
+  --hdr-bg-dk:    #8c001c;
+}
+
+/* --- skin-libra -------------------------------------------------- */
+.skin-libra {
+  --sb-bg:        #280a12;
+  --sb-bg-dark:   #1e0610;
+  --sb-accent:    #c70f2d;
+  --sb-accent-lt: #f04060;
+  --hdr-bg:       #a80c26;
+  --hdr-bg-dk:    #80091c;
+}
+
+/* --- skin-mallorca ----------------------------------------------- */
+.skin-mallorca {
+  --sb-bg:        #0d2220;
+  --sb-bg-dark:   #081818;
+  --sb-accent:    #00665f;
+  --sb-accent-lt: #30a098;
+  --hdr-bg:       #005550;
+  --hdr-bg-dk:    #003d38;
+}
+
+/* --- skin-ormusa ------------------------------------------------- */
+.skin-ormusa {
+  --sb-bg:        #20101e;
+  --sb-bg-dark:   #180c18;
+  --sb-accent:    #651b55;
+  --sb-accent-lt: #a04888;
+  --hdr-bg:       #5a1748;
+  --hdr-bg-dk:    #421035;
+}
+
+/* --- skin-pobla -------------------------------------------------- */
+.skin-pobla {
+  --sb-bg:        #2a1010;
+  --sb-bg-dark:   #200808;
+  --sb-accent:    #d73925;
+  --sb-accent-lt: #f07060;
+  --hdr-bg:       #a90000;
+  --hdr-bg-dk:    #800000;
+}
+
+/* --- skin-talavera ----------------------------------------------- */
+.skin-talavera {
+  --sb-bg:        #18282e;
+  --sb-bg-dark:   #101e24;
+  --sb-accent:    #61accb;
+  --sb-accent-lt: #90cce0;
+  --hdr-bg:       #4d9ab8;
+  --hdr-bg-dk:    #387a98;
+}
+
+/* --- skin-villarrobledo ------------------------------------------ */
+.skin-villarrobledo {
+  --sb-bg:        #2e1e0e;
+  --sb-bg-dark:   #221508;
+  --sb-accent:    #f27d37;
+  --sb-accent-lt: #f5a872;
+  --hdr-bg:       #d06020;
+  --hdr-bg-dk:    #a84c18;
+}
+
+/* -----------------------------------------------------------------
+   Shared vars para todos los skins (dark y light)
+   ----------------------------------------------------------------- */
+.skin-blue, .skin-black, .skin-blue-dark, .skin-gray-dark,
+.skin-green, .skin-red, .skin-yellow, .skin-purple,
+.skin-albacete, .skin-alzira, .skin-atlasrenewableenergy,
+.skin-cartagena, .skin-csicgranada, .skin-eliana, .skin-libra,
+.skin-mallorca, .skin-ormusa, .skin-pobla, .skin-talavera,
+.skin-villarrobledo,
+.skin-blue-light, .skin-black-light, .skin-black-light-dphuesca,
+.skin-green-light, .skin-red-light, .skin-purple-light, .skin-yellow-light {
+  --sb-text:       #c8d6e0;
+  --sb-text-muted: #7a96a8;
+  --sb-item-hover: rgba(255,255,255,0.06);
+  --sb-border:     rgba(255,255,255,0.07);
+  --sb-transition: 0.18s ease;
+}
+
+/* =================================================================
+   ESTILOS COMUNES — DARK skins
+   ================================================================= */
+.skin-blue .main-header .navbar,
+.skin-black .main-header .navbar,
+.skin-blue-dark .main-header .navbar,
+.skin-gray-dark .main-header .navbar,
+.skin-green .main-header .navbar,
+.skin-red .main-header .navbar,
+.skin-yellow .main-header .navbar,
+.skin-purple .main-header .navbar,
+.skin-albacete .main-header .navbar,
+.skin-alzira .main-header .navbar,
+.skin-atlasrenewableenergy .main-header .navbar,
+.skin-cartagena .main-header .navbar,
+.skin-csicgranada .main-header .navbar,
+.skin-eliana .main-header .navbar,
+.skin-libra .main-header .navbar,
+.skin-mallorca .main-header .navbar,
+.skin-ormusa .main-header .navbar,
+.skin-pobla .main-header .navbar,
+.skin-talavera .main-header .navbar,
+.skin-villarrobledo .main-header .navbar {
+  background-color: var(--hdr-bg) !important;
+  background-image: none !important;
+}
+
+.skin-blue .main-header .logo,
+.skin-black .main-header .logo,
+.skin-blue-dark .main-header .logo,
+.skin-gray-dark .main-header .logo,
+.skin-green .main-header .logo,
+.skin-red .main-header .logo,
+.skin-yellow .main-header .logo,
+.skin-purple .main-header .logo,
+.skin-albacete .main-header .logo,
+.skin-alzira .main-header .logo,
+.skin-atlasrenewableenergy .main-header .logo,
+.skin-cartagena .main-header .logo,
+.skin-csicgranada .main-header .logo,
+.skin-eliana .main-header .logo,
+.skin-libra .main-header .logo,
+.skin-mallorca .main-header .logo,
+.skin-ormusa .main-header .logo,
+.skin-pobla .main-header .logo,
+.skin-talavera .main-header .logo,
+.skin-villarrobledo .main-header .logo {
+  background-color: var(--hdr-bg-dk) !important;
+  background-image: none !important;
+  border-right: 1px solid rgba(255,255,255,0.10) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
+}
+
+.skin-blue .main-header .logo:hover,
+.skin-black .main-header .logo:hover,
+.skin-blue-dark .main-header .logo:hover,
+.skin-gray-dark .main-header .logo:hover,
+.skin-green .main-header .logo:hover,
+.skin-red .main-header .logo:hover,
+.skin-yellow .main-header .logo:hover,
+.skin-purple .main-header .logo:hover,
+.skin-albacete .main-header .logo:hover,
+.skin-alzira .main-header .logo:hover,
+.skin-atlasrenewableenergy .main-header .logo:hover,
+.skin-cartagena .main-header .logo:hover,
+.skin-csicgranada .main-header .logo:hover,
+.skin-eliana .main-header .logo:hover,
+.skin-libra .main-header .logo:hover,
+.skin-mallorca .main-header .logo:hover,
+.skin-ormusa .main-header .logo:hover,
+.skin-pobla .main-header .logo:hover,
+.skin-talavera .main-header .logo:hover,
+.skin-villarrobledo .main-header .logo:hover {
+  background-color: var(--hdr-bg) !important;
+}
+
+/* Topbar: hover botón sidebar-toggle */
+.skin-blue .main-header .navbar .sidebar-toggle:hover,
+.skin-black .main-header .navbar .sidebar-toggle:hover,
+.skin-blue-dark .main-header .navbar .sidebar-toggle:hover,
+.skin-gray-dark .main-header .navbar .sidebar-toggle:hover,
+.skin-green .main-header .navbar .sidebar-toggle:hover,
+.skin-red .main-header .navbar .sidebar-toggle:hover,
+.skin-yellow .main-header .navbar .sidebar-toggle:hover,
+.skin-purple .main-header .navbar .sidebar-toggle:hover,
+.skin-albacete .main-header .navbar .sidebar-toggle:hover,
+.skin-alzira .main-header .navbar .sidebar-toggle:hover,
+.skin-atlasrenewableenergy .main-header .navbar .sidebar-toggle:hover,
+.skin-cartagena .main-header .navbar .sidebar-toggle:hover,
+.skin-csicgranada .main-header .navbar .sidebar-toggle:hover,
+.skin-eliana .main-header .navbar .sidebar-toggle:hover,
+.skin-libra .main-header .navbar .sidebar-toggle:hover,
+.skin-mallorca .main-header .navbar .sidebar-toggle:hover,
+.skin-ormusa .main-header .navbar .sidebar-toggle:hover,
+.skin-pobla .main-header .navbar .sidebar-toggle:hover,
+.skin-talavera .main-header .navbar .sidebar-toggle:hover,
+.skin-villarrobledo .main-header .navbar .sidebar-toggle:hover {
+  background-color: rgba(255,255,255,0.10) !important;
+}
+
+/* Topbar: selector idioma */
+.skin-blue .main-header .navbar-custom-menu .form-control,
+.skin-black .main-header .navbar-custom-menu .form-control,
+.skin-blue-dark .main-header .navbar-custom-menu .form-control,
+.skin-gray-dark .main-header .navbar-custom-menu .form-control,
+.skin-green .main-header .navbar-custom-menu .form-control,
+.skin-red .main-header .navbar-custom-menu .form-control,
+.skin-yellow .main-header .navbar-custom-menu .form-control,
+.skin-purple .main-header .navbar-custom-menu .form-control,
+.skin-albacete .main-header .navbar-custom-menu .form-control,
+.skin-alzira .main-header .navbar-custom-menu .form-control,
+.skin-atlasrenewableenergy .main-header .navbar-custom-menu .form-control,
+.skin-cartagena .main-header .navbar-custom-menu .form-control,
+.skin-csicgranada .main-header .navbar-custom-menu .form-control,
+.skin-eliana .main-header .navbar-custom-menu .form-control,
+.skin-libra .main-header .navbar-custom-menu .form-control,
+.skin-mallorca .main-header .navbar-custom-menu .form-control,
+.skin-ormusa .main-header .navbar-custom-menu .form-control,
+.skin-pobla .main-header .navbar-custom-menu .form-control,
+.skin-talavera .main-header .navbar-custom-menu .form-control,
+.skin-villarrobledo .main-header .navbar-custom-menu .form-control {
+  background: rgba(255,255,255,0.12) !important;
+  border: 1px solid rgba(255,255,255,0.20) !important;
+  color: #fff !important;
+  border-radius: 5px !important;
+  font-size: 12px !important;
+  height: 30px !important;
+  padding: 0 8px !important;
+  margin-top: 10px !important;
+}
+.skin-blue .main-header .navbar-custom-menu .form-control option,
+.skin-black .main-header .navbar-custom-menu .form-control option,
+.skin-blue-dark .main-header .navbar-custom-menu .form-control option,
+.skin-gray-dark .main-header .navbar-custom-menu .form-control option,
+.skin-green .main-header .navbar-custom-menu .form-control option,
+.skin-red .main-header .navbar-custom-menu .form-control option,
+.skin-yellow .main-header .navbar-custom-menu .form-control option,
+.skin-purple .main-header .navbar-custom-menu .form-control option,
+.skin-albacete .main-header .navbar-custom-menu .form-control option,
+.skin-alzira .main-header .navbar-custom-menu .form-control option,
+.skin-atlasrenewableenergy .main-header .navbar-custom-menu .form-control option,
+.skin-cartagena .main-header .navbar-custom-menu .form-control option,
+.skin-csicgranada .main-header .navbar-custom-menu .form-control option,
+.skin-eliana .main-header .navbar-custom-menu .form-control option,
+.skin-libra .main-header .navbar-custom-menu .form-control option,
+.skin-mallorca .main-header .navbar-custom-menu .form-control option,
+.skin-ormusa .main-header .navbar-custom-menu .form-control option,
+.skin-pobla .main-header .navbar-custom-menu .form-control option,
+.skin-talavera .main-header .navbar-custom-menu .form-control option,
+.skin-villarrobledo .main-header .navbar-custom-menu .form-control option {
+  background: var(--hdr-bg-dk);
+  color: #fff;
+}
+
+/* Sidebar fondo */
+.skin-blue .main-sidebar,
+.skin-black .main-sidebar,
+.skin-blue-dark .main-sidebar,
+.skin-gray-dark .main-sidebar,
+.skin-green .main-sidebar,
+.skin-red .main-sidebar,
+.skin-yellow .main-sidebar,
+.skin-purple .main-sidebar,
+.skin-albacete .main-sidebar,
+.skin-alzira .main-sidebar,
+.skin-atlasrenewableenergy .main-sidebar,
+.skin-cartagena .main-sidebar,
+.skin-csicgranada .main-sidebar,
+.skin-eliana .main-sidebar,
+.skin-libra .main-sidebar,
+.skin-mallorca .main-sidebar,
+.skin-ormusa .main-sidebar,
+.skin-pobla .main-sidebar,
+.skin-talavera .main-sidebar,
+.skin-villarrobledo .main-sidebar {
+  background-color: var(--sb-bg) !important;
+  background-image: none !important;
+  box-shadow: 2px 0 12px rgba(0,0,0,0.25) !important;
+}
+
+/* User panel */
+.skin-blue .user-panel,
+.skin-black .user-panel,
+.skin-blue-dark .user-panel,
+.skin-gray-dark .user-panel,
+.skin-green .user-panel,
+.skin-red .user-panel,
+.skin-yellow .user-panel,
+.skin-purple .user-panel,
+.skin-albacete .user-panel,
+.skin-alzira .user-panel,
+.skin-atlasrenewableenergy .user-panel,
+.skin-cartagena .user-panel,
+.skin-csicgranada .user-panel,
+.skin-eliana .user-panel,
+.skin-libra .user-panel,
+.skin-mallorca .user-panel,
+.skin-ormusa .user-panel,
+.skin-pobla .user-panel,
+.skin-talavera .user-panel,
+.skin-villarrobledo .user-panel {
+  padding: 14px 12px 12px !important;
+  border-bottom: 1px solid var(--sb-border) !important;
+  background: var(--sb-bg-dark) !important;
+}
+.skin-blue .user-panel > .image > img,
+.skin-black .user-panel > .image > img,
+.skin-blue-dark .user-panel > .image > img,
+.skin-gray-dark .user-panel > .image > img,
+.skin-green .user-panel > .image > img,
+.skin-red .user-panel > .image > img,
+.skin-yellow .user-panel > .image > img,
+.skin-purple .user-panel > .image > img,
+.skin-albacete .user-panel > .image > img,
+.skin-alzira .user-panel > .image > img,
+.skin-atlasrenewableenergy .user-panel > .image > img,
+.skin-cartagena .user-panel > .image > img,
+.skin-csicgranada .user-panel > .image > img,
+.skin-eliana .user-panel > .image > img,
+.skin-libra .user-panel > .image > img,
+.skin-mallorca .user-panel > .image > img,
+.skin-ormusa .user-panel > .image > img,
+.skin-pobla .user-panel > .image > img,
+.skin-talavera .user-panel > .image > img,
+.skin-villarrobledo .user-panel > .image > img {
+  border-radius: 50% !important;
+  border: 2px solid var(--sb-accent) !important;
+  max-width: 40px !important;
+}
+.skin-blue .user-panel > .info,
+.skin-black .user-panel > .info,
+.skin-blue-dark .user-panel > .info,
+.skin-gray-dark .user-panel > .info,
+.skin-green .user-panel > .info,
+.skin-red .user-panel > .info,
+.skin-yellow .user-panel > .info,
+.skin-purple .user-panel > .info,
+.skin-albacete .user-panel > .info,
+.skin-alzira .user-panel > .info,
+.skin-atlasrenewableenergy .user-panel > .info,
+.skin-cartagena .user-panel > .info,
+.skin-csicgranada .user-panel > .info,
+.skin-eliana .user-panel > .info,
+.skin-libra .user-panel > .info,
+.skin-mallorca .user-panel > .info,
+.skin-ormusa .user-panel > .info,
+.skin-pobla .user-panel > .info,
+.skin-talavera .user-panel > .info,
+.skin-villarrobledo .user-panel > .info {
+  padding: 4px 5px 4px 12px !important;
+}
+.skin-blue .user-panel > .info > p,
+.skin-black .user-panel > .info > p,
+.skin-blue-dark .user-panel > .info > p,
+.skin-gray-dark .user-panel > .info > p,
+.skin-green .user-panel > .info > p,
+.skin-red .user-panel > .info > p,
+.skin-yellow .user-panel > .info > p,
+.skin-purple .user-panel > .info > p,
+.skin-albacete .user-panel > .info > p,
+.skin-alzira .user-panel > .info > p,
+.skin-atlasrenewableenergy .user-panel > .info > p,
+.skin-cartagena .user-panel > .info > p,
+.skin-csicgranada .user-panel > .info > p,
+.skin-eliana .user-panel > .info > p,
+.skin-libra .user-panel > .info > p,
+.skin-mallorca .user-panel > .info > p,
+.skin-ormusa .user-panel > .info > p,
+.skin-pobla .user-panel > .info > p,
+.skin-talavera .user-panel > .info > p,
+.skin-villarrobledo .user-panel > .info > p {
+  color: #fff !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  margin-bottom: 3px !important;
+  letter-spacing: 0.2px !important;
+}
+
+/* Sidebar — items primer nivel */
+.skin-blue .sidebar-menu > li > a,
+.skin-black .sidebar-menu > li > a,
+.skin-blue-dark .sidebar-menu > li > a,
+.skin-gray-dark .sidebar-menu > li > a,
+.skin-green .sidebar-menu > li > a,
+.skin-red .sidebar-menu > li > a,
+.skin-yellow .sidebar-menu > li > a,
+.skin-purple .sidebar-menu > li > a,
+.skin-albacete .sidebar-menu > li > a,
+.skin-alzira .sidebar-menu > li > a,
+.skin-atlasrenewableenergy .sidebar-menu > li > a,
+.skin-cartagena .sidebar-menu > li > a,
+.skin-csicgranada .sidebar-menu > li > a,
+.skin-eliana .sidebar-menu > li > a,
+.skin-libra .sidebar-menu > li > a,
+.skin-mallorca .sidebar-menu > li > a,
+.skin-ormusa .sidebar-menu > li > a,
+.skin-pobla .sidebar-menu > li > a,
+.skin-talavera .sidebar-menu > li > a,
+.skin-villarrobledo .sidebar-menu > li > a {
+  padding: 10px 12px 10px 15px !important;
+  color: var(--sb-text) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  border-left: 3px solid transparent !important;
+  transition: background var(--sb-transition), border-color var(--sb-transition), color var(--sb-transition) !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+.skin-blue .sidebar-menu > li > a > .fa,
+.skin-black .sidebar-menu > li > a > .fa,
+.skin-blue-dark .sidebar-menu > li > a > .fa,
+.skin-gray-dark .sidebar-menu > li > a > .fa,
+.skin-green .sidebar-menu > li > a > .fa,
+.skin-red .sidebar-menu > li > a > .fa,
+.skin-yellow .sidebar-menu > li > a > .fa,
+.skin-purple .sidebar-menu > li > a > .fa,
+.skin-albacete .sidebar-menu > li > a > .fa,
+.skin-alzira .sidebar-menu > li > a > .fa,
+.skin-atlasrenewableenergy .sidebar-menu > li > a > .fa,
+.skin-cartagena .sidebar-menu > li > a > .fa,
+.skin-csicgranada .sidebar-menu > li > a > .fa,
+.skin-eliana .sidebar-menu > li > a > .fa,
+.skin-libra .sidebar-menu > li > a > .fa,
+.skin-mallorca .sidebar-menu > li > a > .fa,
+.skin-ormusa .sidebar-menu > li > a > .fa,
+.skin-pobla .sidebar-menu > li > a > .fa,
+.skin-talavera .sidebar-menu > li > a > .fa,
+.skin-villarrobledo .sidebar-menu > li > a > .fa,
+.skin-blue .sidebar-menu > li > a > .glyphicon,
+.skin-black .sidebar-menu > li > a > .glyphicon,
+.skin-blue-dark .sidebar-menu > li > a > .glyphicon,
+.skin-gray-dark .sidebar-menu > li > a > .glyphicon,
+.skin-green .sidebar-menu > li > a > .glyphicon,
+.skin-red .sidebar-menu > li > a > .glyphicon,
+.skin-yellow .sidebar-menu > li > a > .glyphicon,
+.skin-purple .sidebar-menu > li > a > .glyphicon,
+.skin-albacete .sidebar-menu > li > a > .glyphicon,
+.skin-alzira .sidebar-menu > li > a > .glyphicon,
+.skin-atlasrenewableenergy .sidebar-menu > li > a > .glyphicon,
+.skin-cartagena .sidebar-menu > li > a > .glyphicon,
+.skin-csicgranada .sidebar-menu > li > a > .glyphicon,
+.skin-eliana .sidebar-menu > li > a > .glyphicon,
+.skin-libra .sidebar-menu > li > a > .glyphicon,
+.skin-mallorca .sidebar-menu > li > a > .glyphicon,
+.skin-ormusa .sidebar-menu > li > a > .glyphicon,
+.skin-pobla .sidebar-menu > li > a > .glyphicon,
+.skin-talavera .sidebar-menu > li > a > .glyphicon,
+.skin-villarrobledo .sidebar-menu > li > a > .glyphicon {
+  color: var(--sb-text-muted) !important;
+  width: 20px !important;
+  font-size: 14px !important;
+  transition: color var(--sb-transition) !important;
+}
+
+/* Sidebar — hover items primer nivel */
+.skin-blue .sidebar-menu > li > a:hover,
+.skin-black .sidebar-menu > li > a:hover,
+.skin-blue-dark .sidebar-menu > li > a:hover,
+.skin-gray-dark .sidebar-menu > li > a:hover,
+.skin-green .sidebar-menu > li > a:hover,
+.skin-red .sidebar-menu > li > a:hover,
+.skin-yellow .sidebar-menu > li > a:hover,
+.skin-purple .sidebar-menu > li > a:hover,
+.skin-albacete .sidebar-menu > li > a:hover,
+.skin-alzira .sidebar-menu > li > a:hover,
+.skin-atlasrenewableenergy .sidebar-menu > li > a:hover,
+.skin-cartagena .sidebar-menu > li > a:hover,
+.skin-csicgranada .sidebar-menu > li > a:hover,
+.skin-eliana .sidebar-menu > li > a:hover,
+.skin-libra .sidebar-menu > li > a:hover,
+.skin-mallorca .sidebar-menu > li > a:hover,
+.skin-ormusa .sidebar-menu > li > a:hover,
+.skin-pobla .sidebar-menu > li > a:hover,
+.skin-talavera .sidebar-menu > li > a:hover,
+.skin-villarrobledo .sidebar-menu > li > a:hover {
+  background-color: var(--sb-item-hover) !important;
+  color: #fff !important;
+  border-left-color: var(--sb-accent) !important;
+}
+.skin-blue .sidebar-menu > li > a:hover > .fa,
+.skin-black .sidebar-menu > li > a:hover > .fa,
+.skin-blue-dark .sidebar-menu > li > a:hover > .fa,
+.skin-gray-dark .sidebar-menu > li > a:hover > .fa,
+.skin-green .sidebar-menu > li > a:hover > .fa,
+.skin-red .sidebar-menu > li > a:hover > .fa,
+.skin-yellow .sidebar-menu > li > a:hover > .fa,
+.skin-purple .sidebar-menu > li > a:hover > .fa,
+.skin-albacete .sidebar-menu > li > a:hover > .fa,
+.skin-alzira .sidebar-menu > li > a:hover > .fa,
+.skin-atlasrenewableenergy .sidebar-menu > li > a:hover > .fa,
+.skin-cartagena .sidebar-menu > li > a:hover > .fa,
+.skin-csicgranada .sidebar-menu > li > a:hover > .fa,
+.skin-eliana .sidebar-menu > li > a:hover > .fa,
+.skin-libra .sidebar-menu > li > a:hover > .fa,
+.skin-mallorca .sidebar-menu > li > a:hover > .fa,
+.skin-ormusa .sidebar-menu > li > a:hover > .fa,
+.skin-pobla .sidebar-menu > li > a:hover > .fa,
+.skin-talavera .sidebar-menu > li > a:hover > .fa,
+.skin-villarrobledo .sidebar-menu > li > a:hover > .fa {
+  color: var(--sb-accent) !important;
+}
+
+/* Sidebar — activo primer nivel */
+.skin-blue .sidebar-menu > li.active > a,
+.skin-black .sidebar-menu > li.active > a,
+.skin-blue-dark .sidebar-menu > li.active > a,
+.skin-gray-dark .sidebar-menu > li.active > a,
+.skin-green .sidebar-menu > li.active > a,
+.skin-red .sidebar-menu > li.active > a,
+.skin-yellow .sidebar-menu > li.active > a,
+.skin-purple .sidebar-menu > li.active > a,
+.skin-albacete .sidebar-menu > li.active > a,
+.skin-alzira .sidebar-menu > li.active > a,
+.skin-atlasrenewableenergy .sidebar-menu > li.active > a,
+.skin-cartagena .sidebar-menu > li.active > a,
+.skin-csicgranada .sidebar-menu > li.active > a,
+.skin-eliana .sidebar-menu > li.active > a,
+.skin-libra .sidebar-menu > li.active > a,
+.skin-mallorca .sidebar-menu > li.active > a,
+.skin-ormusa .sidebar-menu > li.active > a,
+.skin-pobla .sidebar-menu > li.active > a,
+.skin-talavera .sidebar-menu > li.active > a,
+.skin-villarrobledo .sidebar-menu > li.active > a {
+  background-color: var(--sb-accent-dk, var(--sb-accent)) !important;
+  color: #fff !important;
+  border-left-color: var(--sb-accent-lt) !important;
+}
+.skin-blue .sidebar-menu > li.active > a > .fa,
+.skin-black .sidebar-menu > li.active > a > .fa,
+.skin-blue-dark .sidebar-menu > li.active > a > .fa,
+.skin-gray-dark .sidebar-menu > li.active > a > .fa,
+.skin-green .sidebar-menu > li.active > a > .fa,
+.skin-red .sidebar-menu > li.active > a > .fa,
+.skin-yellow .sidebar-menu > li.active > a > .fa,
+.skin-purple .sidebar-menu > li.active > a > .fa,
+.skin-albacete .sidebar-menu > li.active > a > .fa,
+.skin-alzira .sidebar-menu > li.active > a > .fa,
+.skin-atlasrenewableenergy .sidebar-menu > li.active > a > .fa,
+.skin-cartagena .sidebar-menu > li.active > a > .fa,
+.skin-csicgranada .sidebar-menu > li.active > a > .fa,
+.skin-eliana .sidebar-menu > li.active > a > .fa,
+.skin-libra .sidebar-menu > li.active > a > .fa,
+.skin-mallorca .sidebar-menu > li.active > a > .fa,
+.skin-ormusa .sidebar-menu > li.active > a > .fa,
+.skin-pobla .sidebar-menu > li.active > a > .fa,
+.skin-talavera .sidebar-menu > li.active > a > .fa,
+.skin-villarrobledo .sidebar-menu > li.active > a > .fa {
+  color: var(--sb-accent-lt) !important;
+}
+
+/* Sidebar — separadores de sección */
+.skin-blue .sidebar-menu li.header,
+.skin-black .sidebar-menu li.header,
+.skin-blue-dark .sidebar-menu li.header,
+.skin-gray-dark .sidebar-menu li.header,
+.skin-green .sidebar-menu li.header,
+.skin-red .sidebar-menu li.header,
+.skin-yellow .sidebar-menu li.header,
+.skin-purple .sidebar-menu li.header,
+.skin-albacete .sidebar-menu li.header,
+.skin-alzira .sidebar-menu li.header,
+.skin-atlasrenewableenergy .sidebar-menu li.header,
+.skin-cartagena .sidebar-menu li.header,
+.skin-csicgranada .sidebar-menu li.header,
+.skin-eliana .sidebar-menu li.header,
+.skin-libra .sidebar-menu li.header,
+.skin-mallorca .sidebar-menu li.header,
+.skin-ormusa .sidebar-menu li.header,
+.skin-pobla .sidebar-menu li.header,
+.skin-talavera .sidebar-menu li.header,
+.skin-villarrobledo .sidebar-menu li.header {
+  color: var(--sb-text-muted) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  padding: 14px 12px 6px 15px !important;
+  background: transparent !important;
+}
+
+/* Sidebar — submenús treeview */
+.skin-blue .sidebar-menu .treeview-menu,
+.skin-black .sidebar-menu .treeview-menu,
+.skin-blue-dark .sidebar-menu .treeview-menu,
+.skin-gray-dark .sidebar-menu .treeview-menu,
+.skin-green .sidebar-menu .treeview-menu,
+.skin-red .sidebar-menu .treeview-menu,
+.skin-yellow .sidebar-menu .treeview-menu,
+.skin-purple .sidebar-menu .treeview-menu,
+.skin-albacete .sidebar-menu .treeview-menu,
+.skin-alzira .sidebar-menu .treeview-menu,
+.skin-atlasrenewableenergy .sidebar-menu .treeview-menu,
+.skin-cartagena .sidebar-menu .treeview-menu,
+.skin-csicgranada .sidebar-menu .treeview-menu,
+.skin-eliana .sidebar-menu .treeview-menu,
+.skin-libra .sidebar-menu .treeview-menu,
+.skin-mallorca .sidebar-menu .treeview-menu,
+.skin-ormusa .sidebar-menu .treeview-menu,
+.skin-pobla .sidebar-menu .treeview-menu,
+.skin-talavera .sidebar-menu .treeview-menu,
+.skin-villarrobledo .sidebar-menu .treeview-menu {
+  background: var(--sb-bg-dark) !important;
+  padding-left: 0 !important;
+  border-top: 1px solid var(--sb-border) !important;
+  border-bottom: 1px solid var(--sb-border) !important;
+}
+.skin-blue .sidebar-menu .treeview-menu > li > a,
+.skin-black .sidebar-menu .treeview-menu > li > a,
+.skin-blue-dark .sidebar-menu .treeview-menu > li > a,
+.skin-gray-dark .sidebar-menu .treeview-menu > li > a,
+.skin-green .sidebar-menu .treeview-menu > li > a,
+.skin-red .sidebar-menu .treeview-menu > li > a,
+.skin-yellow .sidebar-menu .treeview-menu > li > a,
+.skin-purple .sidebar-menu .treeview-menu > li > a,
+.skin-albacete .sidebar-menu .treeview-menu > li > a,
+.skin-alzira .sidebar-menu .treeview-menu > li > a,
+.skin-atlasrenewableenergy .sidebar-menu .treeview-menu > li > a,
+.skin-cartagena .sidebar-menu .treeview-menu > li > a,
+.skin-csicgranada .sidebar-menu .treeview-menu > li > a,
+.skin-eliana .sidebar-menu .treeview-menu > li > a,
+.skin-libra .sidebar-menu .treeview-menu > li > a,
+.skin-mallorca .sidebar-menu .treeview-menu > li > a,
+.skin-ormusa .sidebar-menu .treeview-menu > li > a,
+.skin-pobla .sidebar-menu .treeview-menu > li > a,
+.skin-talavera .sidebar-menu .treeview-menu > li > a,
+.skin-villarrobledo .sidebar-menu .treeview-menu > li > a {
+  padding: 7px 10px 7px 32px !important;
+  color: var(--sb-text-muted) !important;
+  font-size: 12.5px !important;
+  font-weight: 400 !important;
+  border-left: 3px solid transparent !important;
+  transition: background var(--sb-transition), color var(--sb-transition), border-color var(--sb-transition) !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+.skin-blue .sidebar-menu .treeview-menu > li > a:hover,
+.skin-black .sidebar-menu .treeview-menu > li > a:hover,
+.skin-blue-dark .sidebar-menu .treeview-menu > li > a:hover,
+.skin-gray-dark .sidebar-menu .treeview-menu > li > a:hover,
+.skin-green .sidebar-menu .treeview-menu > li > a:hover,
+.skin-red .sidebar-menu .treeview-menu > li > a:hover,
+.skin-yellow .sidebar-menu .treeview-menu > li > a:hover,
+.skin-purple .sidebar-menu .treeview-menu > li > a:hover,
+.skin-albacete .sidebar-menu .treeview-menu > li > a:hover,
+.skin-alzira .sidebar-menu .treeview-menu > li > a:hover,
+.skin-atlasrenewableenergy .sidebar-menu .treeview-menu > li > a:hover,
+.skin-cartagena .sidebar-menu .treeview-menu > li > a:hover,
+.skin-csicgranada .sidebar-menu .treeview-menu > li > a:hover,
+.skin-eliana .sidebar-menu .treeview-menu > li > a:hover,
+.skin-libra .sidebar-menu .treeview-menu > li > a:hover,
+.skin-mallorca .sidebar-menu .treeview-menu > li > a:hover,
+.skin-ormusa .sidebar-menu .treeview-menu > li > a:hover,
+.skin-pobla .sidebar-menu .treeview-menu > li > a:hover,
+.skin-talavera .sidebar-menu .treeview-menu > li > a:hover,
+.skin-villarrobledo .sidebar-menu .treeview-menu > li > a:hover {
+  background-color: rgba(255,255,255,0.05) !important;
+  color: #fff !important;
+  border-left-color: var(--sb-accent) !important;
+}
+.skin-blue .sidebar-menu .treeview-menu > li.active > a,
+.skin-black .sidebar-menu .treeview-menu > li.active > a,
+.skin-blue-dark .sidebar-menu .treeview-menu > li.active > a,
+.skin-gray-dark .sidebar-menu .treeview-menu > li.active > a,
+.skin-green .sidebar-menu .treeview-menu > li.active > a,
+.skin-red .sidebar-menu .treeview-menu > li.active > a,
+.skin-yellow .sidebar-menu .treeview-menu > li.active > a,
+.skin-purple .sidebar-menu .treeview-menu > li.active > a,
+.skin-albacete .sidebar-menu .treeview-menu > li.active > a,
+.skin-alzira .sidebar-menu .treeview-menu > li.active > a,
+.skin-atlasrenewableenergy .sidebar-menu .treeview-menu > li.active > a,
+.skin-cartagena .sidebar-menu .treeview-menu > li.active > a,
+.skin-csicgranada .sidebar-menu .treeview-menu > li.active > a,
+.skin-eliana .sidebar-menu .treeview-menu > li.active > a,
+.skin-libra .sidebar-menu .treeview-menu > li.active > a,
+.skin-mallorca .sidebar-menu .treeview-menu > li.active > a,
+.skin-ormusa .sidebar-menu .treeview-menu > li.active > a,
+.skin-pobla .sidebar-menu .treeview-menu > li.active > a,
+.skin-talavera .sidebar-menu .treeview-menu > li.active > a,
+.skin-villarrobledo .sidebar-menu .treeview-menu > li.active > a {
+  color: var(--sb-accent-lt) !important;
+  background-color: rgba(255,255,255,0.07) !important;
+  border-left-color: var(--sb-accent) !important;
+  font-weight: 600 !important;
+}
+
+/* Sidebar — flecha treeview */
+.skin-blue .sidebar-menu li > a > .fa-angle-left,
+.skin-black .sidebar-menu li > a > .fa-angle-left,
+.skin-blue-dark .sidebar-menu li > a > .fa-angle-left,
+.skin-gray-dark .sidebar-menu li > a > .fa-angle-left,
+.skin-green .sidebar-menu li > a > .fa-angle-left,
+.skin-red .sidebar-menu li > a > .fa-angle-left,
+.skin-yellow .sidebar-menu li > a > .fa-angle-left,
+.skin-purple .sidebar-menu li > a > .fa-angle-left,
+.skin-albacete .sidebar-menu li > a > .fa-angle-left,
+.skin-alzira .sidebar-menu li > a > .fa-angle-left,
+.skin-atlasrenewableenergy .sidebar-menu li > a > .fa-angle-left,
+.skin-cartagena .sidebar-menu li > a > .fa-angle-left,
+.skin-csicgranada .sidebar-menu li > a > .fa-angle-left,
+.skin-eliana .sidebar-menu li > a > .fa-angle-left,
+.skin-libra .sidebar-menu li > a > .fa-angle-left,
+.skin-mallorca .sidebar-menu li > a > .fa-angle-left,
+.skin-ormusa .sidebar-menu li > a > .fa-angle-left,
+.skin-pobla .sidebar-menu li > a > .fa-angle-left,
+.skin-talavera .sidebar-menu li > a > .fa-angle-left,
+.skin-villarrobledo .sidebar-menu li > a > .fa-angle-left {
+  color: var(--sb-text-muted) !important;
+  opacity: 0.7 !important;
+}
+.skin-blue .sidebar-menu li.active > a > .fa-angle-left,
+.skin-black .sidebar-menu li.active > a > .fa-angle-left,
+.skin-blue-dark .sidebar-menu li.active > a > .fa-angle-left,
+.skin-gray-dark .sidebar-menu li.active > a > .fa-angle-left,
+.skin-green .sidebar-menu li.active > a > .fa-angle-left,
+.skin-red .sidebar-menu li.active > a > .fa-angle-left,
+.skin-yellow .sidebar-menu li.active > a > .fa-angle-left,
+.skin-purple .sidebar-menu li.active > a > .fa-angle-left,
+.skin-albacete .sidebar-menu li.active > a > .fa-angle-left,
+.skin-alzira .sidebar-menu li.active > a > .fa-angle-left,
+.skin-atlasrenewableenergy .sidebar-menu li.active > a > .fa-angle-left,
+.skin-cartagena .sidebar-menu li.active > a > .fa-angle-left,
+.skin-csicgranada .sidebar-menu li.active > a > .fa-angle-left,
+.skin-eliana .sidebar-menu li.active > a > .fa-angle-left,
+.skin-libra .sidebar-menu li.active > a > .fa-angle-left,
+.skin-mallorca .sidebar-menu li.active > a > .fa-angle-left,
+.skin-ormusa .sidebar-menu li.active > a > .fa-angle-left,
+.skin-pobla .sidebar-menu li.active > a > .fa-angle-left,
+.skin-talavera .sidebar-menu li.active > a > .fa-angle-left,
+.skin-villarrobledo .sidebar-menu li.active > a > .fa-angle-left {
+  color: var(--sb-accent) !important;
+  opacity: 1 !important;
+}
+
+/* Content wrapper y footer */
+.skin-blue .content-wrapper,
+.skin-black .content-wrapper,
+.skin-blue-dark .content-wrapper,
+.skin-gray-dark .content-wrapper,
+.skin-green .content-wrapper,
+.skin-red .content-wrapper,
+.skin-yellow .content-wrapper,
+.skin-purple .content-wrapper,
+.skin-albacete .content-wrapper,
+.skin-alzira .content-wrapper,
+.skin-atlasrenewableenergy .content-wrapper,
+.skin-cartagena .content-wrapper,
+.skin-csicgranada .content-wrapper,
+.skin-eliana .content-wrapper,
+.skin-libra .content-wrapper,
+.skin-mallorca .content-wrapper,
+.skin-ormusa .content-wrapper,
+.skin-pobla .content-wrapper,
+.skin-talavera .content-wrapper,
+.skin-villarrobledo .content-wrapper {
+  background-color: #f0f3f6 !important;
+}
+
+.skin-blue .main-footer,
+.skin-black .main-footer,
+.skin-blue-dark .main-footer,
+.skin-gray-dark .main-footer,
+.skin-green .main-footer,
+.skin-red .main-footer,
+.skin-yellow .main-footer,
+.skin-purple .main-footer,
+.skin-albacete .main-footer,
+.skin-alzira .main-footer,
+.skin-atlasrenewableenergy .main-footer,
+.skin-cartagena .main-footer,
+.skin-csicgranada .main-footer,
+.skin-eliana .main-footer,
+.skin-libra .main-footer,
+.skin-mallorca .main-footer,
+.skin-ormusa .main-footer,
+.skin-pobla .main-footer,
+.skin-talavera .main-footer,
+.skin-villarrobledo .main-footer {
+  background: #fff !important;
+  border-top: 1px solid #e0e6ea !important;
+  color: #9aabb5 !important;
+  font-size: 12px !important;
+  padding: 10px 20px !important;
+}
+
+/* Scrollbar del sidebar */
+.skin-blue .main-sidebar ::-webkit-scrollbar,
+.skin-black .main-sidebar ::-webkit-scrollbar,
+.skin-blue-dark .main-sidebar ::-webkit-scrollbar,
+.skin-gray-dark .main-sidebar ::-webkit-scrollbar,
+.skin-green .main-sidebar ::-webkit-scrollbar,
+.skin-red .main-sidebar ::-webkit-scrollbar,
+.skin-yellow .main-sidebar ::-webkit-scrollbar,
+.skin-purple .main-sidebar ::-webkit-scrollbar,
+.skin-albacete .main-sidebar ::-webkit-scrollbar,
+.skin-alzira .main-sidebar ::-webkit-scrollbar,
+.skin-atlasrenewableenergy .main-sidebar ::-webkit-scrollbar,
+.skin-cartagena .main-sidebar ::-webkit-scrollbar,
+.skin-csicgranada .main-sidebar ::-webkit-scrollbar,
+.skin-eliana .main-sidebar ::-webkit-scrollbar,
+.skin-libra .main-sidebar ::-webkit-scrollbar,
+.skin-mallorca .main-sidebar ::-webkit-scrollbar,
+.skin-ormusa .main-sidebar ::-webkit-scrollbar,
+.skin-pobla .main-sidebar ::-webkit-scrollbar,
+.skin-talavera .main-sidebar ::-webkit-scrollbar,
+.skin-villarrobledo .main-sidebar ::-webkit-scrollbar { width: 4px; }
+.skin-blue .main-sidebar ::-webkit-scrollbar-thumb,
+.skin-black .main-sidebar ::-webkit-scrollbar-thumb,
+.skin-blue-dark .main-sidebar ::-webkit-scrollbar-thumb,
+.skin-gray-dark .main-sidebar ::-webkit-scrollbar-thumb,
+.skin-green .main-sidebar ::-webkit-scrollbar-thumb,
+.skin-red .main-sidebar ::-webkit-scrollbar-thumb,
+.skin-yellow .main-sidebar ::-webkit-scrollbar-thumb,
+.skin-purple .main-sidebar ::-webkit-scrollbar-thumb,
+.skin-albacete .main-sidebar ::-webkit-scrollbar-thumb,
+.skin-alzira .main-sidebar ::-webkit-scrollbar-thumb,
+.skin-atlasrenewableenergy .main-sidebar ::-webkit-scrollbar-thumb,
+.skin-cartagena .main-sidebar ::-webkit-scrollbar-thumb,
+.skin-csicgranada .main-sidebar ::-webkit-scrollbar-thumb,
+.skin-eliana .main-sidebar ::-webkit-scrollbar-thumb,
+.skin-libra .main-sidebar ::-webkit-scrollbar-thumb,
+.skin-mallorca .main-sidebar ::-webkit-scrollbar-thumb,
+.skin-ormusa .main-sidebar ::-webkit-scrollbar-thumb,
+.skin-pobla .main-sidebar ::-webkit-scrollbar-thumb,
+.skin-talavera .main-sidebar ::-webkit-scrollbar-thumb,
+.skin-villarrobledo .main-sidebar ::-webkit-scrollbar-thumb {
+  background: var(--sb-accent);
+  border-radius: 2px;
+}
+
+/* =================================================================
+   OVERRIDES ESPECIALES — skin-black (header blanco, sidebar oscuro)
+   El skin-black original usa navbar blanca con texto oscuro,
+   por lo que revertimos los estilos de header del bloque común.
+   ================================================================= */
+
+.skin-black .main-header .navbar {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-bottom: 1px solid #eee !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+}
+.skin-black .main-header .logo {
+  background-color: #f5f5f5 !important;
+  color: #333 !important;
+  border-right: 1px solid #ddd !important;
+}
+.skin-black .main-header .logo:hover {
+  background-color: #ebebeb !important;
+}
+.skin-black .main-header .navbar .sidebar-toggle {
+  color: #444 !important;
+}
+.skin-black .main-header .navbar .sidebar-toggle:hover {
+  background-color: #f0f0f0 !important;
+  color: #222 !important;
+}
+.skin-black .main-header .navbar .nav > li > a {
+  color: #444 !important;
+}
+.skin-black .main-header .navbar .nav > li > a:hover {
+  background-color: #f5f5f5 !important;
+  color: #222 !important;
+}
+/* Selector de idioma con fondo blanco: texto oscuro */
+.skin-black .main-header .navbar-custom-menu .form-control {
+  background: #f0f0f0 !important;
+  border: 1px solid #ddd !important;
+  color: #444 !important;
+}
+.skin-black .main-header .navbar-custom-menu .form-control option {
+  background: #fff !important;
+  color: #333 !important;
+}
+
+/* =================================================================
+   LIGHT SKINS — Variables y estilos adaptados
+   Skins: skin-blue-light, skin-black-light, skin-black-light-dphuesca,
+          skin-green-light, skin-red-light, skin-purple-light, skin-yellow-light
+   ================================================================= */
+
+.skin-blue-light {
+  --sb-bg:        #f0f4f7;
+  --sb-bg-dark:   #e4eaef;
+  --sb-accent:    #3c8dbc;
+  --sb-accent-lt: #1b7baa;
+  --sb-text:      #3a3a3a;
+  --sb-text-muted:#7a96a8;
+  --sb-item-hover:rgba(0,0,0,0.05);
+  --sb-border:    rgba(0,0,0,0.07);
+  --hdr-bg:       #3c8dbc;
+  --hdr-bg-dk:    #2a6f99;
+}
+.skin-black-light {
+  --sb-bg:        #f4f4f4;
+  --sb-bg-dark:   #ebebeb;
+  --sb-accent:    #444;
+  --sb-accent-lt: #222;
+  --sb-text:      #333;
+  --sb-text-muted:#888;
+  --sb-item-hover:rgba(0,0,0,0.05);
+  --sb-border:    rgba(0,0,0,0.08);
+  --hdr-bg:       #333;
+  --hdr-bg-dk:    #1a1a1a;
+}
+.skin-black-light-dphuesca {
+  --sb-bg:        #f4f4f4;
+  --sb-bg-dark:   #ebebeb;
+  --sb-accent:    #c61919;
+  --sb-accent-lt: #a01010;
+  --sb-text:      #333;
+  --sb-text-muted:#888;
+  --sb-item-hover:rgba(0,0,0,0.05);
+  --sb-border:    rgba(0,0,0,0.08);
+  --hdr-bg:       #c61919;
+  --hdr-bg-dk:    #a01010;
+}
+.skin-green-light {
+  --sb-bg:        #f0f7f2;
+  --sb-bg-dark:   #e3f0e6;
+  --sb-accent:    #00a65a;
+  --sb-accent-lt: #007a40;
+  --sb-text:      #3a3a3a;
+  --sb-text-muted:#7a9a82;
+  --sb-item-hover:rgba(0,0,0,0.05);
+  --sb-border:    rgba(0,0,0,0.07);
+  --hdr-bg:       #00a65a;
+  --hdr-bg-dk:    #008046;
+}
+.skin-red-light {
+  --sb-bg:        #f7f0f0;
+  --sb-bg-dark:   #f0e3e3;
+  --sb-accent:    #dd4b39;
+  --sb-accent-lt: #b83525;
+  --sb-text:      #3a3a3a;
+  --sb-text-muted:#9a7a78;
+  --sb-item-hover:rgba(0,0,0,0.05);
+  --sb-border:    rgba(0,0,0,0.07);
+  --hdr-bg:       #dd4b39;
+  --hdr-bg-dk:    #b83525;
+}
+.skin-purple-light {
+  --sb-bg:        #f3f0f7;
+  --sb-bg-dark:   #eae3f0;
+  --sb-accent:    #605ca8;
+  --sb-accent-lt: #46428a;
+  --sb-text:      #3a3a3a;
+  --sb-text-muted:#8a7aaa;
+  --sb-item-hover:rgba(0,0,0,0.05);
+  --sb-border:    rgba(0,0,0,0.07);
+  --hdr-bg:       #605ca8;
+  --hdr-bg-dk:    #46428a;
+}
+.skin-yellow-light {
+  --sb-bg:        #f7f5f0;
+  --sb-bg-dark:   #f0ece3;
+  --sb-accent:    #f39c12;
+  --sb-accent-lt: #c07a08;
+  --sb-text:      #3a3a3a;
+  --sb-text-muted:#9a8a60;
+  --sb-item-hover:rgba(0,0,0,0.05);
+  --sb-border:    rgba(0,0,0,0.07);
+  --hdr-bg:       #f39c12;
+  --hdr-bg-dk:    #c07a08;
+}
+
+/* Light skins — sidebar fondo */
+.skin-blue-light .main-sidebar,
+.skin-black-light .main-sidebar,
+.skin-black-light-dphuesca .main-sidebar,
+.skin-green-light .main-sidebar,
+.skin-red-light .main-sidebar,
+.skin-purple-light .main-sidebar,
+.skin-yellow-light .main-sidebar {
+  background-color: var(--sb-bg) !important;
+  background-image: none !important;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.10) !important;
+}
+
+/* Light skins — header */
+.skin-blue-light .main-header .navbar,
+.skin-black-light .main-header .navbar,
+.skin-black-light-dphuesca .main-header .navbar,
+.skin-green-light .main-header .navbar,
+.skin-red-light .main-header .navbar,
+.skin-purple-light .main-header .navbar,
+.skin-yellow-light .main-header .navbar {
+  background-color: var(--hdr-bg) !important;
+  background-image: none !important;
+}
+.skin-blue-light .main-header .logo,
+.skin-black-light .main-header .logo,
+.skin-black-light-dphuesca .main-header .logo,
+.skin-green-light .main-header .logo,
+.skin-red-light .main-header .logo,
+.skin-purple-light .main-header .logo,
+.skin-yellow-light .main-header .logo {
+  background-color: var(--hdr-bg-dk) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
+}
+
+/* Light skins — user panel */
+.skin-blue-light .user-panel,
+.skin-black-light .user-panel,
+.skin-black-light-dphuesca .user-panel,
+.skin-green-light .user-panel,
+.skin-red-light .user-panel,
+.skin-purple-light .user-panel,
+.skin-yellow-light .user-panel {
+  padding: 14px 12px 12px !important;
+  border-bottom: 1px solid var(--sb-border) !important;
+  background: var(--sb-bg-dark) !important;
+}
+.skin-blue-light .user-panel > .image > img,
+.skin-black-light .user-panel > .image > img,
+.skin-black-light-dphuesca .user-panel > .image > img,
+.skin-green-light .user-panel > .image > img,
+.skin-red-light .user-panel > .image > img,
+.skin-purple-light .user-panel > .image > img,
+.skin-yellow-light .user-panel > .image > img {
+  border-radius: 50% !important;
+  border: 2px solid var(--sb-accent) !important;
+  max-width: 40px !important;
+}
+.skin-blue-light .user-panel > .info > p,
+.skin-black-light .user-panel > .info > p,
+.skin-black-light-dphuesca .user-panel > .info > p,
+.skin-green-light .user-panel > .info > p,
+.skin-red-light .user-panel > .info > p,
+.skin-purple-light .user-panel > .info > p,
+.skin-yellow-light .user-panel > .info > p {
+  color: var(--sb-text) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  margin-bottom: 3px !important;
+}
+
+/* Light skins — menu items */
+.skin-blue-light .sidebar-menu > li > a,
+.skin-black-light .sidebar-menu > li > a,
+.skin-black-light-dphuesca .sidebar-menu > li > a,
+.skin-green-light .sidebar-menu > li > a,
+.skin-red-light .sidebar-menu > li > a,
+.skin-purple-light .sidebar-menu > li > a,
+.skin-yellow-light .sidebar-menu > li > a {
+  color: var(--sb-text) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  border-left: 3px solid transparent !important;
+  padding: 10px 12px 10px 15px !important;
+  transition: background var(--sb-transition), border-color var(--sb-transition) !important;
+}
+.skin-blue-light .sidebar-menu > li > a:hover,
+.skin-black-light .sidebar-menu > li > a:hover,
+.skin-black-light-dphuesca .sidebar-menu > li > a:hover,
+.skin-green-light .sidebar-menu > li > a:hover,
+.skin-red-light .sidebar-menu > li > a:hover,
+.skin-purple-light .sidebar-menu > li > a:hover,
+.skin-yellow-light .sidebar-menu > li > a:hover {
+  background-color: var(--sb-item-hover) !important;
+  border-left-color: var(--sb-accent) !important;
+}
+.skin-blue-light .sidebar-menu > li.active > a,
+.skin-black-light .sidebar-menu > li.active > a,
+.skin-black-light-dphuesca .sidebar-menu > li.active > a,
+.skin-green-light .sidebar-menu > li.active > a,
+.skin-red-light .sidebar-menu > li.active > a,
+.skin-purple-light .sidebar-menu > li.active > a,
+.skin-yellow-light .sidebar-menu > li.active > a {
+  border-left-color: var(--sb-accent) !important;
+  background-color: var(--sb-item-hover) !important;
+  font-weight: 600 !important;
+  color: var(--sb-accent-lt) !important;
+}
+
+/* Light skins — separadores */
+.skin-blue-light .sidebar-menu li.header,
+.skin-black-light .sidebar-menu li.header,
+.skin-black-light-dphuesca .sidebar-menu li.header,
+.skin-green-light .sidebar-menu li.header,
+.skin-red-light .sidebar-menu li.header,
+.skin-purple-light .sidebar-menu li.header,
+.skin-yellow-light .sidebar-menu li.header {
+  color: var(--sb-text-muted) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  padding: 14px 12px 6px 15px !important;
+}
+
+/* Light skins — submenús */
+.skin-blue-light .sidebar-menu .treeview-menu,
+.skin-black-light .sidebar-menu .treeview-menu,
+.skin-black-light-dphuesca .sidebar-menu .treeview-menu,
+.skin-green-light .sidebar-menu .treeview-menu,
+.skin-red-light .sidebar-menu .treeview-menu,
+.skin-purple-light .sidebar-menu .treeview-menu,
+.skin-yellow-light .sidebar-menu .treeview-menu {
+  background: var(--sb-bg-dark) !important;
+  padding-left: 0 !important;
+  border-top: 1px solid var(--sb-border) !important;
+  border-bottom: 1px solid var(--sb-border) !important;
+}
+.skin-blue-light .sidebar-menu .treeview-menu > li > a,
+.skin-black-light .sidebar-menu .treeview-menu > li > a,
+.skin-black-light-dphuesca .sidebar-menu .treeview-menu > li > a,
+.skin-green-light .sidebar-menu .treeview-menu > li > a,
+.skin-red-light .sidebar-menu .treeview-menu > li > a,
+.skin-purple-light .sidebar-menu .treeview-menu > li > a,
+.skin-yellow-light .sidebar-menu .treeview-menu > li > a {
+  padding: 7px 10px 7px 32px !important;
+  color: var(--sb-text-muted) !important;
+  font-size: 12.5px !important;
+  border-left: 3px solid transparent !important;
+  transition: background var(--sb-transition), color var(--sb-transition), border-color var(--sb-transition) !important;
+}
+.skin-blue-light .sidebar-menu .treeview-menu > li > a:hover,
+.skin-black-light .sidebar-menu .treeview-menu > li > a:hover,
+.skin-black-light-dphuesca .sidebar-menu .treeview-menu > li > a:hover,
+.skin-green-light .sidebar-menu .treeview-menu > li > a:hover,
+.skin-red-light .sidebar-menu .treeview-menu > li > a:hover,
+.skin-purple-light .sidebar-menu .treeview-menu > li > a:hover,
+.skin-yellow-light .sidebar-menu .treeview-menu > li > a:hover {
+  background-color: rgba(0,0,0,0.04) !important;
+  color: var(--sb-accent) !important;
+  border-left-color: var(--sb-accent) !important;
+}
+.skin-blue-light .sidebar-menu .treeview-menu > li.active > a,
+.skin-black-light .sidebar-menu .treeview-menu > li.active > a,
+.skin-black-light-dphuesca .sidebar-menu .treeview-menu > li.active > a,
+.skin-green-light .sidebar-menu .treeview-menu > li.active > a,
+.skin-red-light .sidebar-menu .treeview-menu > li.active > a,
+.skin-purple-light .sidebar-menu .treeview-menu > li.active > a,
+.skin-yellow-light .sidebar-menu .treeview-menu > li.active > a {
+  color: var(--sb-accent-lt) !important;
+  border-left-color: var(--sb-accent) !important;
+  font-weight: 600 !important;
+}
+
+/* Light skins — content wrapper y footer */
+.skin-blue-light .content-wrapper,
+.skin-black-light .content-wrapper,
+.skin-black-light-dphuesca .content-wrapper,
+.skin-green-light .content-wrapper,
+.skin-red-light .content-wrapper,
+.skin-purple-light .content-wrapper,
+.skin-yellow-light .content-wrapper {
+  background-color: #f0f3f6 !important;
+}
+.skin-blue-light .main-footer,
+.skin-black-light .main-footer,
+.skin-black-light-dphuesca .main-footer,
+.skin-green-light .main-footer,
+.skin-red-light .main-footer,
+.skin-purple-light .main-footer,
+.skin-yellow-light .main-footer {
+  background: #fff !important;
+  border-top: 1px solid #e0e6ea !important;
+  color: #9aabb5 !important;
+  font-size: 12px !important;
+  padding: 10px 20px !important;
+}
+
+/* =================================================================
+   NAVBAR — User menu & language selector
+   ================================================================= */
+
+/* Selector de idioma */
+.navbar-custom-menu #select-language {
+  height: 30px;
+  padding: 2px 8px;
+  font-size: 12px;
+  border-radius: 5px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.9);
+  cursor: pointer;
+  margin-top: 12px !important;
+  transition: background 0.2s, border-color 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.navbar-custom-menu #select-language:focus {
+  outline: none;
+  background: rgba(255,255,255,0.22);
+  border-color: rgba(255,255,255,0.55);
+}
+.navbar-custom-menu #select-language option {
+  background: #2d5f80;
+  color: #fff;
+}
+
+/* Icono de ayuda */
+.navbar-custom-menu #help {
+  opacity: 0.75;
+  transition: opacity 0.2s;
+}
+.navbar-custom-menu #help:hover { opacity: 1; }
+
+/* Trigger del dropdown de usuario */
+.navbar-custom-menu .user-menu > a {
+  display: flex !important;
+  align-items: center;
+  gap: 7px;
+  padding: 0 14px !important;
+  height: 50px;
+  transition: background 0.2s;
+}
+.navbar-custom-menu .user-menu > a:hover {
+  background: rgba(255,255,255,0.1) !important;
+}
+.navbar-custom-menu .user-menu > a .user-image {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.45);
+  margin: 0 !important;
+  flex-shrink: 0;
+}
+.navbar-custom-menu .user-menu > a .hidden-xs {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.92);
+  letter-spacing: 0.2px;
+}
+
+/* Panel dropdown */
+.navbar-custom-menu .user-menu .dropdown-menu {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+  overflow: hidden;
+  min-width: 220px;
+  padding: 0;
+  margin-top: 4px;
+  right: 0;
+  left: auto;
+}
+
+/* Cabecera del dropdown: avatar + nombre */
+.navbar-custom-menu .user-menu .dropdown-menu .user-header {
+  background: linear-gradient(135deg, var(--hdr-bg, #2d5f80) 0%, var(--hdr-bg-dk, #23496a) 100%);
+  padding: 18px 16px 14px;
+  text-align: center;
+  border-bottom: none;
+}
+.navbar-custom-menu .user-menu .dropdown-menu .user-header img {
+  width: 52px;
+  height: 52px;
+  border: 3px solid rgba(255,255,255,0.4);
+  margin-bottom: 8px;
+}
+.navbar-custom-menu .user-menu .dropdown-menu .user-header p {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  line-height: 1.3;
+}
+.navbar-custom-menu .user-menu .dropdown-menu .user-header p small {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.7);
+  margin-top: 2px;
+}
+
+/* Footer del dropdown: botón Sign out */
+.navbar-custom-menu .user-menu .dropdown-menu .user-footer {
+  background: #f8fafb;
+  border-top: 1px solid #e8ecef;
+  padding: 10px 14px;
+  display: flex;
+  justify-content: flex-end;
+}
+.navbar-custom-menu .user-menu .dropdown-menu .user-footer #logout-form {
+  margin: 0;
+}
+.navbar-custom-menu .user-menu .dropdown-menu .user-footer .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid #d0dae2;
+  border-radius: 6px;
+  color: #5a6e7a;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 14px;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.navbar-custom-menu .user-menu .dropdown-menu .user-footer .btn:hover {
+  background: #fee;
+  border-color: #e57373;
+  color: #c0392b;
+}
+
+/* =================================================================
+   SIDEBAR COLAPSADO — etiquetas flotantes y submenús emergentes
+   Cuando sidebar-mini + sidebar-collapse: los spans de texto y los
+   treeview-menu flotan a la derecha del sidebar.
+   ================================================================= */
+
+/* Etiqueta de texto flotante (tooltip del ítem) */
+.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > a > span:not(.pull-right) {
+  background: var(--sb-bg-dark, #18222b) !important;
+  color: #fff !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  padding: 0 16px !important;
+  height: 44px !important;
+  line-height: 44px !important;
+  border-radius: 0 6px 0 0 !important;
+  border-left: 3px solid var(--sb-accent, #4a7fa5) !important;
+  box-shadow: 3px 0 12px rgba(0,0,0,0.25) !important;
+  white-space: nowrap !important;
+}
+
+/* Submenú emergente (treeview) */
+.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu {
+  background: var(--sb-bg-dark, #18222b) !important;
+  border-radius: 0 0 8px 0 !important;
+  border-left: 3px solid var(--sb-accent, #4a7fa5) !important;
+  box-shadow: 4px 6px 16px rgba(0,0,0,0.28) !important;
+  padding: 6px 0 !important;
+  min-width: 180px !important;
+}
+.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a {
+  color: rgba(255,255,255,0.78) !important;
+  font-size: 12.5px !important;
+  padding: 8px 16px 8px 20px !important;
+  transition: background 0.15s, color 0.15s !important;
+}
+.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a:hover {
+  background: rgba(255,255,255,0.08) !important;
+  color: #fff !important;
+}
+.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li.active > a {
+  color: var(--sb-accent-lt, #7eb8d4) !important;
+  font-weight: 600 !important;
+}
+
+/* Skins claros — ajuste de colores */
+.skin-blue-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > a > span:not(.pull-right),
+.skin-black-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > a > span:not(.pull-right),
+.skin-black-light-dphuesca.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > a > span:not(.pull-right),
+.skin-green-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > a > span:not(.pull-right),
+.skin-red-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > a > span:not(.pull-right),
+.skin-purple-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > a > span:not(.pull-right),
+.skin-yellow-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > a > span:not(.pull-right) {
+  background: var(--sb-bg, #f5f7fa) !important;
+  color: var(--sb-text, #2e3a45) !important;
+  border-left-color: var(--sb-accent, #4a7fa5) !important;
+}
+.skin-blue-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu,
+.skin-black-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu,
+.skin-black-light-dphuesca.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu,
+.skin-green-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu,
+.skin-red-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu,
+.skin-purple-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu,
+.skin-yellow-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu {
+  background: var(--sb-bg, #f5f7fa) !important;
+  border-left-color: var(--sb-accent, #4a7fa5) !important;
+  box-shadow: 4px 6px 16px rgba(0,0,0,0.10) !important;
+}
+.skin-blue-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a,
+.skin-black-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a,
+.skin-black-light-dphuesca.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a,
+.skin-green-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a,
+.skin-red-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a,
+.skin-purple-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a,
+.skin-yellow-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a {
+  color: var(--sb-text-muted, #556b78) !important;
+}
+.skin-blue-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a:hover,
+.skin-black-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a:hover,
+.skin-black-light-dphuesca.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a:hover,
+.skin-green-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a:hover,
+.skin-red-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a:hover,
+.skin-purple-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a:hover,
+.skin-yellow-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a:hover {
+  background: rgba(0,0,0,0.05) !important;
+  color: var(--sb-accent, #4a7fa5) !important;
+}

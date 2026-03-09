@@ -2,124 +2,153 @@
 {% load staticfiles %}
 {% load i18n %}
 
+{% block header %}
+<style>
+:root {
+	--pf-accent:    #4a7fa5;
+	--pf-accent-dk: #2d5f80;
+	--pf-text:      #2e3a45;
+	--pf-muted:     #7b8a96;
+	--pf-border:    #e8ecef;
+	--pf-bg:        #f4f6f8;
+	--pf-white:     #ffffff;
+	--pf-radius:    10px;
+	--pf-shadow:    0 2px 12px rgba(0,0,0,0.08);
+	--pf-transition: 0.2s ease;
+}
+.pf-topbar { display: flex; align-items: center; justify-content: flex-end; padding: 12px 0 16px; gap: 10px; flex-wrap: wrap; }
+.btn-pf-save { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-accent); color: #fff !important; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 20px; cursor: pointer; transition: background var(--pf-transition); letter-spacing: 0.2px; text-decoration: none !important; }
+.btn-pf-save:hover { background: var(--pf-accent-dk); }
+.btn-pf-back { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-bg); color: var(--pf-muted) !important; border: 1px solid var(--pf-border); border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 16px; cursor: pointer; transition: background var(--pf-transition); text-decoration: none !important; }
+.btn-pf-back:hover { background: var(--pf-border); color: var(--pf-text) !important; }
+.pf-error-msg { display: none; background: #fff5f5; border-left: 4px solid #e74c3c; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #c0392b; }
+.pf-error-msg:has(li), .pf-error-msg:has(p:not(:empty)), .pf-error-msg:has(ul:not(:empty)) { display: block; }
+.pf-error-msg ul { margin: 0; padding-left: 18px; }
+.pf-card { background: var(--pf-white); border: 1px solid var(--pf-border); border-radius: var(--pf-radius); box-shadow: var(--pf-shadow); padding: 24px; }
+.pf-card label { font-size: 12px; font-weight: 700; color: var(--pf-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
+.pf-card .form-control { border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; transition: border-color var(--pf-transition), box-shadow var(--pf-transition); padding: 6px 12px; }
+.pf-card .form-control:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
+.pf-card .form-control[disabled] { background: #f0f3f5; color: var(--pf-muted); cursor: default; }
+.pf-messages { list-style: none; margin: 0 0 16px; padding: 0; }
+.pf-messages .msg-info { border-left: 4px solid #27ae60; background: #f0fdf4; color: #1e7e34; padding: 10px 14px; border-radius: 6px; margin-bottom: 6px; font-size: 13px; }
+.pf-messages .msg-error { border-left: 4px solid #e74c3c; background: #fff5f5; color: #c0392b; padding: 10px 14px; border-radius: 6px; margin-bottom: 6px; font-size: 13px; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="row">
 	<div class="col-md-12">
-		<div class="box">
 
-			<form id="export-shp-form" role="form" enctype="multipart/form-data" method="post"
-				action="{% url 'filemanager:export-to-database' %}">
-				<div class="box-header">
-					<div class="box-tools pull-right">
-						<a href="{{back_url}}" class="btn btn-default btn-sm"><i class="fa fa-chevron-left margin-r-5"></i> {% trans "Back" %}</a>
-						{% if not_supported_error == None %}
-						<button id="upload-button" type="submit" class="btn btn-default btn-sm save-button">{% trans "Export" %} <i class="fa fa-upload margin-l-5"></i></button>
-						{% endif %}
-					</div>
-				</div>
+		<form id="export-shp-form" role="form" enctype="multipart/form-data" method="post"
+			action="{% url 'filemanager:export-to-database' %}">
 
-				<div class="box-body">
-					{% csrf_token %}
-					{% if form.errors %}
-					<div id="form-error" style="color:#ff0000;">
-						<ul>
-							{{ form.non_field_errors }}
-							{% for field in form %}
-							{% if field.errors %}
-							<li>{{field.label}}. {{ field.errors|striptags }}</li>
-							{% endif %}
-							{% endfor %}
-						</ul>
-					</div>
-					{% endif %}
+			<div class="pf-topbar">
+				<a href="{{back_url}}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
+				{% if not_supported_error == None %}
+				<button id="upload-button" type="submit" class="btn-pf-save">{% trans "Export" %} <i class="fa fa-upload"></i></button>
+				{% endif %}
+			</div>
 
-					{% if messages %}
-					<ul class="messages" style="list-style: none;margin-left: -40px;">
-						{% for message in messages %}
-						{% if message.tags == "info" %}
-						<li style="border: 1px solid green; color: green; padding: 5px; margin-bottom: 5px;">{{ message
-							}}</li>
-						{% elif message.tags == "error" %}
-						<li style="border: 1px solid red; color: red; padding: 5px; margin-bottom: 5px;">{{ message }}
-						</li>
+			<div class="pf-card">
+				{% csrf_token %}
+
+				<div class="pf-error-msg">
+					<ul>
+						{{ form.non_field_errors }}
+						{% for field in form %}
+						{% if field.errors %}
+						<li>{{field.label}}. {{ field.errors|striptags }}</li>
 						{% endif %}
 						{% endfor %}
 					</ul>
-					{% endif %}
-
-					<div class="row" style="margin-top:20px;">
-						<div class="col-md-12 form-group">
-							{% if not_supported_error %}
-							<div class="alert alert-danger">
-								<h4><i class="icon fa fa-warning"></i> {% trans "Error!" %}</h4>
-								{{ not_supported_error }}
-							</div>
-							{% else %}
-							<div class="alert alert-warning alert-dismissible">
-								<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-								<h4><i class="icon fa fa-warning"></i>{% trans "Warning!" %}</h4>
-								{% trans "Before exporting the shapefile check the name of the columns. Column names can not contain spaces or special characters." %}
-							</div>
-							{% endif %}
-						</div>
-					</div>
-
-					<input type="hidden" name="directory_path" value="{{file.directory}}">
-					<input type="hidden" name="file_path" value="{{file.filepath}}">
-					<input id="id_file" class="form-control" type="hidden" name="file" value="{{file.fileurl}}">
-
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label for="id_mode">{% trans "Table creation mode" %}</label>
-							{{ form.mode }}
-						</div>
-					</div>
-
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label for="id_datastore">{% trans "Data store" %}</label>
-							{{ form.datastore }}
-						</div>
-					</div>
-
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label for="id_name">{% trans "Name" %}</label>
-							{{ form.name }}
-							<select id="table_name_select" class="form-control js-example-basic-single select2-hidden-accessible"
-								style="visibility: hidden;"></select>
-							<p class="text-muted">* {% trans "Layer will be uploaded to the selected data store" %}.</p>
-						</div>
-					</div>
-
-					<div class="row">
-						<div class="col-md-6 form-group">
-							<label for="id_encoding">{% trans "Character encoding" %}</label>
-							{{ form.encoding }}
-						</div>
-						<div class="col-md-6 form-group">
-							<label for="id_srs">{% trans "Coordinate reference system" %}</label>
-							{{ form.srs }}
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-6 form-group">
-							<label for="id_truncate">{% trans "Preserve table structure" %}</label>
-							{{ form.truncate }}
-						</div>
-						<div class="col-md-3 form-group">
-							<label for="id_pk_column">{% trans "Primary key column" %}</label>
-							{{ form.pk_column }}
-						</div>
-						<div class="col-md-3 form-group">
-							<label for="id_preserve_pk">{% trans "Primary key values" %}</label>
-							{{ form.preserve_pk }}
-						</div>
-					</div>
-
 				</div>
-			</form>
-		</div>
+
+				{% if messages %}
+				<ul class="pf-messages">
+					{% for message in messages %}
+					{% if message.tags == "info" %}
+					<li class="msg-info">{{ message }}</li>
+					{% elif message.tags == "error" %}
+					<li class="msg-error">{{ message }}</li>
+					{% endif %}
+					{% endfor %}
+				</ul>
+				{% endif %}
+
+				<div class="row" style="margin-top: 8px;">
+					<div class="col-md-12 form-group">
+						{% if not_supported_error %}
+						<div class="alert alert-danger">
+							<h4><i class="icon fa fa-warning"></i> {% trans "Error!" %}</h4>
+							{{ not_supported_error }}
+						</div>
+						{% else %}
+						<div class="alert alert-warning alert-dismissible">
+							<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+							<h4><i class="icon fa fa-warning"></i>{% trans "Warning!" %}</h4>
+							{% trans "Before exporting the shapefile check the name of the columns. Column names can not contain spaces or special characters." %}
+						</div>
+						{% endif %}
+					</div>
+				</div>
+
+				<input type="hidden" name="directory_path" value="{{file.directory}}">
+				<input type="hidden" name="file_path" value="{{file.filepath}}">
+				<input id="id_file" class="form-control" type="hidden" name="file" value="{{file.fileurl}}">
+
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label for="id_mode">{% trans "Table creation mode" %}</label>
+						{{ form.mode }}
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label for="id_datastore">{% trans "Data store" %}</label>
+						{{ form.datastore }}
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label for="id_name">{% trans "Name" %}</label>
+						{{ form.name }}
+						<select id="table_name_select" class="form-control js-example-basic-single select2-hidden-accessible"
+							style="visibility: hidden;"></select>
+						<p class="text-muted" style="font-size: 12px; margin-top: 4px;">* {% trans "Layer will be uploaded to the selected data store" %}.</p>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-6 form-group">
+						<label for="id_encoding">{% trans "Character encoding" %}</label>
+						{{ form.encoding }}
+					</div>
+					<div class="col-md-6 form-group">
+						<label for="id_srs">{% trans "Coordinate reference system" %}</label>
+						{{ form.srs }}
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-6 form-group">
+						<label for="id_truncate">{% trans "Preserve table structure" %}</label>
+						{{ form.truncate }}
+					</div>
+					<div class="col-md-3 form-group">
+						<label for="id_pk_column">{% trans "Primary key column" %}</label>
+						{{ form.pk_column }}
+					</div>
+					<div class="col-md-3 form-group">
+						<label for="id_preserve_pk">{% trans "Primary key values" %}</label>
+						{{ form.preserve_pk }}
+					</div>
+				</div>
+
+			</div>
+		</form>
+
 	</div>
 </div>
 {% endblock %}
@@ -265,7 +294,6 @@
 			}
 		};
 
-
 		$('#upload-button').click(function (e) {
 			//$("body").overlay();
 		});
@@ -304,11 +332,9 @@
 		});
 
 		$('#id_datastore').on('change', function () {
-			// Handle the selected option here
 			var selectedOption = $(this).val();
 			var id_datastore = $('option:selected', $(this)).val();
 			updateTables(id_datastore, $('#table_name_select'));
-
 		});
 
 		$('#id_datastore').click(function () {

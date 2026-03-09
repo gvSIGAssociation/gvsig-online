@@ -1,187 +1,254 @@
 {% extends extends_template %}
 {% load i18n static %}
 
-{% block content %}
-
-	{% if messages %}
-    <ul class="messages" style="list-style: none;margin-left: -40px;">
-        {% for message in messages %}
-        	{% if message.tags == "info" %}
-            <li style="border: 1px solid green; color: green; padding: 5px; margin-bottom: 5px;">{{ message }}</li>
-            {% elif message.tags == "error" %}
-            <li style="border: 1px solid red; color: red; padding: 5px; margin-bottom: 5px;">{{ message }}</li>
-            {% endif %}
-        {% endfor %}
-    </ul>
-	{% endif %}
-	
-	<div id="delete-error" style="color: #ff0000;margin-bottom:15px;padding:15px;background-color:rgba(255,0,0,0.2);display:none">
-	</div>
-	
-	{% include "filemanager_breadcrumbs.html" %}
-	
-	<table class="table">
-	 	<thead>
-	    	<tr>
-		      	{% if popup %}
-		      		<th>{% trans "Select" %}</th>
-		      	{% endif %}
-		      	<th>{% trans "Name" %}</th>
-		      	<th>{% trans "Size" %}</th>
-		      	<th>{% trans "Date" %}</th>
-		      	{% if not popup %}
-		      		{% if not first_level %}
-		      			<th>{% trans "Actions" %}</th>
-		      		{% endif %}
-		      	{% endif %}
-	    	</tr>
-	  	</thead>
-	  	<tbody>
-	    	{% for file in files %}
-	    	<tr>
-	      		{% if popup %}
-	      				<td><a href="javascript: Filemanager.select('{{file.filepath}}');"><i class="fa fa-file"></i></a></td>
-	      		{% endif %}
-	      		{% if file.filetype == "Directory" %}
-	      			<td><img src="{% static "img/folder.png" %}" style="margin-right: 5px;"><a href="?path={{file.filepath}}{% if popup %}&amp;popup=1{% endif %}">{{file.filename}}</a></td>
-	      		{% else %}
-				  	{% url 'fsfilemanager:fdownload' file.filepath as download_url %}
-	      			{% if file.extension|lower == "shp" %}
-	      				<td><a href="{{download_url}}"><img width="32" src="{% static "img/shp.png" %}" style="margin-right: 5px;">{{file.filename}}</a></td>
-	      			{% elif file.extension|lower == "dbf" %}
-	      				<td><a href="{{download_url}}"><img width="32" src="{% static "img/dbf.png" %}" style="margin-right: 5px;">{{file.filename}}</a></td>
-	      			{% elif file.extension|lower == "tif" or file.extension|lower == "tiff" or file.extension|lower == "geotiff" %}
-	      				<td><a href="{{download_url}}"><img width="32" src="{% static "img/tiff.png" %}" style="margin-right: 5px;">{{file.filename}}</a></td>
-	      			{% elif file.extension|lower == "xlsx" or file.extension|lower == "xls" or file.extension|lower == "csv" %}
-	      				<td><a href="{{download_url}}"><img width="32" src="{% static "img/excel.png" %}" style="margin-right: 5px;">{{file.filename}}</a></td>
-	      			{% elif file.extension|lower == "zip" %}
-	      				<td><a href="{{download_url}}"><img width="32" src="{% static "img/zip.png" %}" style="margin-right: 5px;">{{file.filename}}</a></td>
-	      			{% else %}
-	      				<td><a href="{{download_url}}"><img width="32" src="{% static "img/file.png" %}" style="margin-right: 5px;">{{file.filename}}</a></td>
-	      			{% endif %}
-	      		{% endif %}
-	      		<td>{{file.filesize}}</td>
-	      		<td>{{file.filedate}}</td>
-	      		{% if not popup %}
-					{% if user.is_superuser or not first_level %}
-	      			<td>
-		      			<div class="btn-group">
-		                  	<button type="button" class="btn btn-box-tool dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-	                    		<i class="fa fa-wrench"></i>
-	                    	</button>
-	                    	<ul class="dropdown-menu dropdown-menu-right" role="menu">
-	                    	{% if file.filetype == "Directory" %}
-	                    		<li><a href="#" data-filepath="{{file.filepath}}" class="delete-file"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete directory" %}</a></li>                 		
-	                  		{% else %}
-	                  			{% if file.extension|lower == "shp" or file.extension|lower == "dbf" %}
-				      				<li><a href="{% url 'filemanager:export-to-database' %}?path={{file.filepath}}" class="export-to-database" ><i class="fa fa-upload" style="color: #3c8dbc;"></i> {% trans "Export to database" %}</a></li>
-				      				<li class="divider"></li>
-				      			{% endif %}  
-				      			{% if is_etl_plugin_installed %}
-				      			{% if file.extension|lower == "xlsx" or file.extension|lower == "csv" %}
-				      				<li><a href="{% url 'transform-to-database' %}?path={{file.filepath}}" class="transform-to-database" ><i class="fa fa-upload" style="color: #3c8dbc;"></i> {% trans "Transform to database" %}</a></li>
-				      				<li class="divider"></li>
-				      			{% endif %}    
-				      			{% endif %}   
-				      			{% if file.extension|lower == "zip" %}
-				      				<li><a href="#" data-filepath="{{file.filepath}}" class="unzip-file"><i class="fa fa-file-archive-o" style="color: #f56954;"></i> {% trans "Unzip file" %}</a></li>
-				      				<li class="divider"></li>
-				      			{% endif %}               		
-	                    		<li><a href="#" data-filepath="{{file.filepath}}" class="delete-file"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete file" %}</a></li>
-				      		{% endif %}
-				      		</ul>
-		                </div>
-	                </td>
-	                {% endif %}
-	      		{% endif %}
-	    	</tr>
-	    	{% empty %}
-	    	<tr>
-	      		<td colspan="5">
-	        		{% trans "Nothing to see here." %}
-	      		</td>
-	    	</tr>
-	    	{% endfor %}
-	  	</tbody>
-	</table>
-	<div>
-		{% if not popup %}
-			{% if user.is_superuser or not first_level %}
-		  		<a href="{% url 'filemanager:create-directory' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn btn-default"><i class="fa fa-plus margin-r-5"></i>{% trans "Create directory" %}</a>
-		  		<a href="{% url 'filemanager:upload' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn btn-default"><i class="fa fa-upload margin-r-5"></i>{% trans "Upload" %}</a>
-				<a href = "/gvsigonline/filemanager/list_exports/"><button class="btn btn-default"><i class="fa fa-list margin-r-5"></i> {% trans "Export history" %}</button></a>
-
-		  	{% endif %}
-
-	  	{% endif %}
-	</div>
-
-	{% if popup %}
-		{% if user.is_superuser or not first_level %}
-			<a href="{% url 'filemanager:create-directory' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn btn-default"><i class="fa fa-plus margin-r-5"></i>{% trans "Create directory" %}</a>
-			<a href="{% url 'filemanager:upload' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn btn-default"><i class="fa fa-upload margin-r-5"></i>{% trans "Upload" %}</a>
-			<a href = "/gvsigonline/filemanager/list_exports/"><button class="btn btn-default"><i class="fa fa-list margin-r-5"></i> {% trans "Export history" %}</button></a>
-		{% endif %}
-		<script src="{% static "js/filemanager.js" %}"></script>
-	{% endif %}
-	
+{% block header %}
+<style>
+:root {
+	--pl-accent:    #4a7fa5;
+	--pl-accent-dk: #2d5f80;
+	--pl-text:      #2e3a45;
+	--pl-muted:     #7b8a96;
+	--pl-border:    #e8ecef;
+	--pl-bg:        #f4f6f8;
+	--pl-white:     #ffffff;
+	--pl-radius:    10px;
+	--pl-shadow:    0 2px 12px rgba(0,0,0,0.08);
+	--pl-transition: 0.2s ease;
+}
+.pl-panel { background: var(--pl-white); border-radius: var(--pl-radius); box-shadow: var(--pl-shadow); border: 1px solid var(--pl-border); overflow: hidden; }
+.pl-panel__header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--pl-border); gap: 12px; flex-wrap: wrap; }
+.pl-panel__title { font-size: 15px; font-weight: 700; color: var(--pl-text); display: flex; align-items: center; gap: 8px; margin: 0; flex: 1; min-width: 0; }
+.pl-panel__title i { color: var(--pl-accent); }
+.pl-panel__actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pl-panel__body { padding: 0; }
+.btn-pl-add { display: inline-flex; align-items: center; gap: 6px; background: var(--pl-accent); color: #fff !important; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; padding: 6px 14px; height: 34px; cursor: pointer; transition: background var(--pl-transition); text-decoration: none !important; white-space: nowrap; letter-spacing: 0.2px; }
+.btn-pl-add:hover { background: var(--pl-accent-dk); }
+.btn-pl-secondary { display: inline-flex; align-items: center; gap: 6px; background: var(--pl-bg); color: var(--pl-muted) !important; border: 1px solid var(--pl-border); border-radius: 6px; font-size: 12px; font-weight: 600; padding: 6px 14px; height: 34px; cursor: pointer; transition: background var(--pl-transition); text-decoration: none !important; white-space: nowrap; }
+.btn-pl-secondary:hover { background: var(--pl-border); color: var(--pl-text) !important; }
+.pl-table { width: 100%; border-collapse: collapse; font-size: 13px; font-weight: 400; -webkit-font-smoothing: antialiased; }
+.pl-table thead th { background: var(--pl-bg); color: var(--pl-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; padding: 11px 16px; border-bottom: 1px solid var(--pl-border); white-space: nowrap; }
+.pl-table tbody tr { border-bottom: 1px solid var(--pl-border); transition: background var(--pl-transition); }
+.pl-table tbody tr:last-child { border-bottom: none; }
+.pl-table tbody tr:hover { background: #f0f6fb; }
+.pl-table tbody td { padding: 10px 16px; color: #4a5a68; font-size: 13px; vertical-align: middle; }
+.pl-table tbody td a { color: var(--pl-accent); text-decoration: none; }
+.pl-table tbody td a:hover { text-decoration: underline; }
+.pl-table .btn-group .btn-box-tool { background: transparent; border: 1px solid var(--pl-border); border-radius: 5px; color: var(--pl-muted); padding: 4px 10px; transition: background var(--pl-transition); }
+.pl-table .btn-group .btn-box-tool:hover { background: var(--pl-bg); color: var(--pl-accent); border-color: var(--pl-accent); }
+.pl-table .dropdown-menu { border-radius: 8px; border: 1px solid var(--pl-border); box-shadow: 0 4px 16px rgba(0,0,0,0.12); font-size: 13px; }
+.pl-table .dropdown-menu > li > a { padding: 8px 16px; color: var(--pl-text); display: flex; align-items: center; gap: 8px; }
+.pl-table .dropdown-menu > li > a:hover { background: var(--pl-bg); color: var(--pl-accent); }
+.pl-breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; font-size: 12px; color: var(--pl-muted); margin: 0; padding: 0; list-style: none; }
+.pl-breadcrumb li + li::before { content: "/"; margin-right: 4px; color: var(--pl-border); }
+.pl-breadcrumb a { color: var(--pl-accent); text-decoration: none; }
+.pl-breadcrumb a:hover { text-decoration: underline; }
+/* Breadcrumb dentro del panel header — estilo igual al de los formularios */
+.pl-panel__title .breadcrumb { background: var(--pl-bg); border: 1px solid var(--pl-border); border-radius: 6px; padding: 5px 12px; margin: 0; font-size: 12px; display: flex; align-items: center; flex-wrap: wrap; }
+.pl-panel__title .breadcrumb > li { display: inline-flex; align-items: center; }
+.pl-panel__title .breadcrumb > li + li::before { color: var(--pl-muted); padding: 0 4px; }
+.pl-panel__title .breadcrumb a { color: var(--pl-accent); font-weight: 600; }
+.pl-panel__title .breadcrumb > li:last-child { color: var(--pl-text); font-weight: 600; }
+.pl-messages { list-style: none; margin: 0 0 16px; padding: 0; }
+.pl-messages .msg-info { border-left: 4px solid #27ae60; background: #f0fdf4; color: #1e7e34; padding: 10px 14px; border-radius: 6px; margin-bottom: 6px; font-size: 13px; }
+.pl-messages .msg-error { border-left: 4px solid #e74c3c; background: #fff5f5; color: #c0392b; padding: 10px 14px; border-radius: 6px; margin-bottom: 6px; font-size: 13px; }
+.pl-delete-error { background: #fff5f5; border-left: 4px solid #e74c3c; border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; font-size: 13px; color: #c0392b; display: none; }
+</style>
 {% endblock %}
 
-{% block extra-scripts %}	
-	<script>
-	$('#menu-manage-files').addClass("active");
-	$(document).ready(function(){	  	
-	  	$('.delete-file').on('click', function () {				
-	  		$("body").overlay();
-			$.ajax({
-				type: 'POST',
-				async: false,
-				url: "{% url 'filemanager:delete-file' %}",
-				data: {
-					path: this.dataset.filepath
-				},
-				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-				},
-				success	:function(response){
-					$.overlayout();
-					nrsp = JSON.parse(response)
-					if('success' in nrsp && nrsp['success'] == false){
-						$("#delete-error").html(nrsp['message']);
-						$("#delete-error").css("display", "block");
-					}else{
-						location.reload();
-					}
-				},
-				error: function(){}
-			});
-		});
-	  	
-	  	$('.unzip-file').on('click', function () {				
-	  		$("body").overlay();
-			$.ajax({
-				type: 'POST',
-				async: false,
-				url: "{% url 'filemanager:unzip-file' %}",
-				data: {
-					path: this.dataset.filepath
-				},
-				beforeSend:function(xhr){
-				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-				},
-				success	:function(response){
-					$.overlayout();
-					nrsp = JSON.parse(response);
-					if('success' in nrsp && nrsp['success'] == false){
-						$("#delete-error").html(nrsp['message']);
-						$("#delete-error").css("display", "block");
-					}else{
-						location.reload();
-					}
-				},
-				error: function(){}
-			});
+{% block content %}
+
+<div class="pl-panel">
+
+	<div class="pl-panel__header">
+		<div class="pl-panel__title">
+			<i class="fa fa-folder-open"></i>
+			{% include "filemanager_breadcrumbs.html" %}
+		</div>
+		{% if not popup %}
+			{% if user.is_superuser or not first_level %}
+			<div class="pl-panel__actions">
+				<a href="{% url 'filemanager:create-directory' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn-pl-secondary"><i class="fa fa-plus"></i> {% trans "Create directory" %}</a>
+				<a href="{% url 'filemanager:upload' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn-pl-secondary"><i class="fa fa-upload"></i> {% trans "Upload" %}</a>
+				<a href="/gvsigonline/filemanager/list_exports/" class="btn-pl-add"><i class="fa fa-list"></i> {% trans "Export history" %}</a>
+			</div>
+			{% endif %}
+		{% endif %}
+		{% if popup %}
+			{% if user.is_superuser or not first_level %}
+			<div class="pl-panel__actions">
+				<a href="{% url 'filemanager:create-directory' %}?path={{path}}&amp;popup=1" class="btn-pl-secondary"><i class="fa fa-plus"></i> {% trans "Create directory" %}</a>
+				<a href="{% url 'filemanager:upload' %}?path={{path}}&amp;popup=1" class="btn-pl-secondary"><i class="fa fa-upload"></i> {% trans "Upload" %}</a>
+			</div>
+			{% endif %}
+		{% endif %}
+	</div>
+
+	<div class="pl-panel__body" style="padding: 16px 20px 20px;">
+
+		{% if messages %}
+		<ul class="pl-messages">
+			{% for message in messages %}
+				{% if message.tags == "info" %}
+				<li class="msg-info">{{ message }}</li>
+				{% elif message.tags == "error" %}
+				<li class="msg-error">{{ message }}</li>
+				{% endif %}
+			{% endfor %}
+		</ul>
+		{% endif %}
+
+		<div id="delete-error" class="pl-delete-error"></div>
+
+		<table class="pl-table table">
+			<thead>
+				<tr>
+					{% if popup %}
+						<th>{% trans "Select" %}</th>
+					{% endif %}
+					<th>{% trans "Name" %}</th>
+					<th>{% trans "Size" %}</th>
+					<th>{% trans "Date" %}</th>
+					{% if not popup %}
+						{% if not first_level %}
+							<th>{% trans "Actions" %}</th>
+						{% endif %}
+					{% endif %}
+				</tr>
+			</thead>
+			<tbody>
+				{% for file in files %}
+				<tr>
+					{% if popup %}
+						<td><a href="javascript: Filemanager.select('{{file.filepath}}');"><i class="fa fa-file"></i></a></td>
+					{% endif %}
+					{% if file.filetype == "Directory" %}
+						<td><img src="{% static "img/folder.png" %}" style="margin-right: 5px; width: 20px; vertical-align: middle;"><a href="?path={{file.filepath}}{% if popup %}&amp;popup=1{% endif %}">{{file.filename}}</a></td>
+					{% else %}
+						{% url 'fsfilemanager:fdownload' file.filepath as download_url %}
+						{% if file.extension|lower == "shp" %}
+							<td><a href="{{download_url}}"><img width="24" src="{% static "img/shp.png" %}" style="margin-right: 5px; vertical-align: middle;">{{file.filename}}</a></td>
+						{% elif file.extension|lower == "dbf" %}
+							<td><a href="{{download_url}}"><img width="24" src="{% static "img/dbf.png" %}" style="margin-right: 5px; vertical-align: middle;">{{file.filename}}</a></td>
+						{% elif file.extension|lower == "tif" or file.extension|lower == "tiff" or file.extension|lower == "geotiff" %}
+							<td><a href="{{download_url}}"><img width="24" src="{% static "img/tiff.png" %}" style="margin-right: 5px; vertical-align: middle;">{{file.filename}}</a></td>
+						{% elif file.extension|lower == "xlsx" or file.extension|lower == "xls" or file.extension|lower == "csv" %}
+							<td><a href="{{download_url}}"><img width="24" src="{% static "img/excel.png" %}" style="margin-right: 5px; vertical-align: middle;">{{file.filename}}</a></td>
+						{% elif file.extension|lower == "zip" %}
+							<td><a href="{{download_url}}"><img width="24" src="{% static "img/zip.png" %}" style="margin-right: 5px; vertical-align: middle;">{{file.filename}}</a></td>
+						{% else %}
+							<td><a href="{{download_url}}"><img width="24" src="{% static "img/file.png" %}" style="margin-right: 5px; vertical-align: middle;">{{file.filename}}</a></td>
+						{% endif %}
+					{% endif %}
+					<td>{{file.filesize}}</td>
+					<td>{{file.filedate}}</td>
+					{% if not popup %}
+						{% if user.is_superuser or not first_level %}
+						<td>
+							<div class="btn-group">
+								<button type="button" class="btn btn-box-tool dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+									<i class="fa fa-wrench"></i>
+								</button>
+								<ul class="dropdown-menu dropdown-menu-right" role="menu">
+								{% if file.filetype == "Directory" %}
+									<li><a href="#" data-filepath="{{file.filepath}}" class="delete-file"><i class="fa fa-times" style="color: #e74c3c;"></i> {% trans "Delete directory" %}</a></li>
+								{% else %}
+									{% if file.extension|lower == "shp" or file.extension|lower == "dbf" %}
+										<li><a href="{% url 'filemanager:export-to-database' %}?path={{file.filepath}}" class="export-to-database"><i class="fa fa-upload" style="color: #3c8dbc;"></i> {% trans "Export to database" %}</a></li>
+										<li class="divider"></li>
+									{% endif %}
+									{% if is_etl_plugin_installed %}
+									{% if file.extension|lower == "xlsx" or file.extension|lower == "csv" %}
+										<li><a href="{% url 'transform-to-database' %}?path={{file.filepath}}" class="transform-to-database"><i class="fa fa-upload" style="color: #3c8dbc;"></i> {% trans "Transform to database" %}</a></li>
+										<li class="divider"></li>
+									{% endif %}
+									{% endif %}
+									{% if file.extension|lower == "zip" %}
+										<li><a href="#" data-filepath="{{file.filepath}}" class="unzip-file"><i class="fa fa-file-archive-o" style="color: #e67e22;"></i> {% trans "Unzip file" %}</a></li>
+										<li class="divider"></li>
+									{% endif %}
+									<li><a href="#" data-filepath="{{file.filepath}}" class="delete-file"><i class="fa fa-times" style="color: #e74c3c;"></i> {% trans "Delete file" %}</a></li>
+								{% endif %}
+								</ul>
+							</div>
+						</td>
+						{% endif %}
+					{% endif %}
+				</tr>
+				{% empty %}
+				<tr>
+					<td colspan="5" style="text-align: center; color: var(--pl-muted); padding: 32px 16px;">
+						<i class="fa fa-folder-open-o" style="font-size: 24px; display: block; margin-bottom: 8px;"></i>
+						{% trans "Nothing to see here." %}
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+
+	</div>
+</div>
+
+{% if popup %}
+	<script src="{% static "js/filemanager.js" %}"></script>
+{% endif %}
+
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+$('#menu-manage-files').addClass("active");
+$(document).ready(function(){
+	$('.delete-file').on('click', function () {
+		$("body").overlay();
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: "{% url 'filemanager:delete-file' %}",
+			data: {
+				path: this.dataset.filepath
+			},
+			beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			success: function(response){
+				$.overlayout();
+				nrsp = JSON.parse(response);
+				if('success' in nrsp && nrsp['success'] == false){
+					$("#delete-error").html(nrsp['message']);
+					$("#delete-error").css("display", "block");
+				}else{
+					location.reload();
+				}
+			},
+			error: function(){}
 		});
 	});
-	</script>
+
+	$('.unzip-file').on('click', function () {
+		$("body").overlay();
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: "{% url 'filemanager:unzip-file' %}",
+			data: {
+				path: this.dataset.filepath
+			},
+			beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			success: function(response){
+				$.overlayout();
+				nrsp = JSON.parse(response);
+				if('success' in nrsp && nrsp['success'] == false){
+					$("#delete-error").html(nrsp['message']);
+					$("#delete-error").css("display", "block");
+				}else{
+					location.reload();
+				}
+			},
+			error: function(){}
+		});
+	});
+});
+</script>
 {% endblock %}

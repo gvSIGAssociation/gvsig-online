@@ -23,7 +23,7 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.db.models import Q
-from gvsigol_core.utils import get_supported_crs, get_user_projects, get_available_tools
+from gvsigol_core.utils import get_supported_crs, get_user_projects, get_user_applications, get_available_tools
 from gvsigol_symbology.models import StyleLayer
 from gdaltools.metadata import project
 from gvsigol_core.models import SharedView
@@ -105,7 +105,7 @@ def home(request):
         query = Project.objects.filter(expiration_date__gte=datetime.datetime.now()) | Project.objects.filter(expiration_date=None)
     else:
         query = get_user_projects(request)
-    for p in query:
+    for p in query.order_by('title'):
         image = p.image_url
         project = {}
         project['id'] = p.id
@@ -120,6 +120,21 @@ def home(request):
         else:
             projects.append(project)
 
+    applications = []
+    if request.user.is_superuser:
+        apps_query = Application.objects.all()
+    else:
+        apps_query = get_user_applications(request)
+    for app in apps_query.order_by('title'):
+        applications.append({
+            'id': app.id,
+            'name': app.name,
+            'title': app.title or app.name,
+            'description': app.description or '',
+            'image': app.image_url,
+            'url': app.absurl,
+        })
+
     manage_passwords_url = getattr(settings, 'MANAGE_PASSWORD_URL', None)
     if settings.AUTH_DASHBOARD_UI:        
         if 'AD' in settings.GVSIGOL_LDAP and settings.GVSIGOL_LDAP['AD']:
@@ -133,7 +148,7 @@ def home(request):
     else:
         useClassicViewer = True
 
-    return render(request, 'home.html', {'projects': projects, 'public_projects': public_projects, 'allow_password_update': allow_password_update, 'manage_passwords_url': manage_passwords_url, 'use_classic_viewer': useClassicViewer})
+    return render(request, 'home.html', {'projects': projects, 'public_projects': public_projects, 'applications': applications, 'allow_password_update': allow_password_update, 'manage_passwords_url': manage_passwords_url, 'use_classic_viewer': useClassicViewer})
 
 @login_required()
 @staff_required

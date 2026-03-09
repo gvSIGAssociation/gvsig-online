@@ -1,86 +1,121 @@
-{% extends "base.html" %} 
-{% load staticfiles %} 
-{% load i18n %} 
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block header %}
+<style>
+:root {
+	--pl-accent:    #4a7fa5;
+	--pl-accent-dk: #2d5f80;
+	--pl-text:      #2e3a45;
+	--pl-muted:     #7b8a96;
+	--pl-border:    #e8ecef;
+	--pl-bg:        #f4f6f8;
+	--pl-white:     #ffffff;
+	--pl-radius:    10px;
+	--pl-shadow:    0 2px 12px rgba(0,0,0,0.08);
+	--pl-transition: 0.2s ease;
+}
+.pl-panel { background: var(--pl-white); border-radius: var(--pl-radius); box-shadow: var(--pl-shadow); border: 1px solid var(--pl-border); overflow: hidden; }
+.pl-panel__header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--pl-border); gap: 12px; flex-wrap: wrap; }
+.pl-panel__title { font-size: 15px; font-weight: 700; color: var(--pl-text); display: flex; align-items: center; gap: 8px; margin: 0; }
+.pl-panel__title i { color: var(--pl-accent); }
+.pl-panel__actions { display: flex; align-items: center; gap: 8px; }
+.pl-panel__body { padding: 0; }
+.btn-pf-back { display: inline-flex; align-items: center; gap: 7px; background: var(--pl-bg); color: var(--pl-muted) !important; border: 1px solid var(--pl-border); border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 16px; cursor: pointer; transition: background var(--pl-transition); text-decoration: none !important; }
+.btn-pf-back:hover { background: var(--pl-border); color: var(--pl-text) !important; }
+.btn-pf-try { display: inline-flex; align-items: center; gap: 6px; background: var(--pl-bg); color: var(--pl-accent) !important; border: 1px solid var(--pl-border); border-radius: 6px; font-size: 12px; font-weight: 600; padding: 5px 12px; cursor: pointer; transition: background var(--pl-transition); text-decoration: none !important; white-space: nowrap; }
+.btn-pf-try:hover { background: #f0f6fb; border-color: var(--pl-accent); }
+.pl-table { width: 100%; border-collapse: collapse; font-size: 13px; -webkit-font-smoothing: antialiased; }
+.pl-table thead th { background: var(--pl-bg); color: var(--pl-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; padding: 11px 16px; border-bottom: 1px solid var(--pl-border); white-space: nowrap; }
+.pl-table tbody tr { border-bottom: 1px solid var(--pl-border); transition: background var(--pl-transition); }
+.pl-table tbody tr:last-child { border-bottom: none; }
+.pl-table tbody tr:hover { background: #f0f6fb; }
+.pl-table tbody td { padding: 10px 16px; color: #4a5a68; font-size: 13px; vertical-align: middle; }
+.status-icon-success { color: #27ae60; font-size: 15px; }
+.status-icon-error { color: #e74c3c; font-size: 15px; }
+.status-icon-warning { color: #e67e22; font-size: 15px; }
+.status-icon-running { color: var(--pl-accent); font-size: 15px; }
+</style>
+{% endblock %}
 
 {% block content %}
 {% if user.is_staff %}
-	<div class="row">
-		<div class="col-md-12">
-			<div class="row">
-				<div class="col-md-12 form-group">
-					<div class="box-tools pull-right">
-						<a href = "/gvsigonline/filemanager/?path={{ exportations.0.back }}">
-							<button class="btn btn-block btn-default btn-sm"><i class="fa fa-arrow-left margin-r-5"></i> {% trans "Back" %}</button>
-						</a>
-					</div>
-				</div>
-			</div>
-			<div class="box">
-				<div class="box-body">
-					<table class="table" id="exportations-table">
-						<thead>
-							<tr>
-								<th>{% trans "ID" %}</th>
-								<th>{% trans "Status" %}</th>
-								<th>{% trans "File" %}</th>
-								<th>{% trans "Time" %}</th>
-								<th>{% trans "Message" %}</th>
-								<th>{% trans "User" %}</th>
-								<th></th>
-							</tr>
-						</thead>
-						<tbody>
-							{% for export in exportations %}
-								<tr>
-									<td> {{ export.id }} </td>
-									<td>
-										{% if export.status == "Success" %}
-											<i id ="icon-{{ export.id }}" class="fa fa-check" style="color:green; display:inline" aria-hidden="true"></i> 
-										{% elif export.status == "Error" %}
-											<i id ="icon-{{ export.id }}" class="fa fa-times" style="color:red; display:inline" aria-hidden="true" ></i>
-										{% elif export.status == "Running" %}
-											<i id = "icon-{{ export.id }}" class="fa fa-spinner fa-spin" style=" display:inline-block"></i> 
-										{% elif export.status == "Warning" %}
-											<i id ="icon-{{ export.id }}" class="fa fa-exclamation-triangle" style="color:orange; display:inline" aria-hidden="true" ></i>
-										{% endif %}
-											
-									</td>
+<div class="row">
+	<div class="col-md-12">
 
-									<td>{{ export.file }}</td>
-									<td>{{ export.time }}</td>
-									<td><p id = "msg-{{ export.id }}">{{ export.message }}</p></td>
-									<td> {{ export.username }} </td>
-									<td>
-										<div id = "btn-{{ export.id }}">
-											{% if export.status == "Error" %}
-												<a href = "{{ export.redirect }}">
-													<button id="try-again" class="btn btn-block btn-default btn-sm">
-														<i class="fa fa-upload margin-r-5"></i> {% trans "Try again" %}
-													</button>
-												</a>
-											{% endif %}
-										</div>
-									</td>
-								</tr>
-							{% endfor %}
-						</tbody>
-					</table>
+		<div class="pl-panel">
+
+			<div class="pl-panel__header">
+				<div class="pl-panel__title">
+					<i class="fa fa-list"></i>
+					{% trans "Export history" %}
+				</div>
+				<div class="pl-panel__actions">
+					<a href="/gvsigonline/filemanager/?path={{ exportations.0.back }}" class="btn-pf-back">
+						<i class="fa fa-arrow-left"></i> {% trans "Back" %}
+					</a>
 				</div>
 			</div>
+
+			<div class="pl-panel__body">
+				<table class="pl-table table" id="exportations-table">
+					<thead>
+						<tr>
+							<th>{% trans "ID" %}</th>
+							<th>{% trans "Status" %}</th>
+							<th>{% trans "File" %}</th>
+							<th>{% trans "Time" %}</th>
+							<th>{% trans "Message" %}</th>
+							<th>{% trans "User" %}</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for export in exportations %}
+						<tr>
+							<td>{{ export.id }}</td>
+							<td>
+								{% if export.status == "Success" %}
+									<i id="icon-{{ export.id }}" class="fa fa-check status-icon-success" aria-hidden="true"></i>
+								{% elif export.status == "Error" %}
+									<i id="icon-{{ export.id }}" class="fa fa-times status-icon-error" aria-hidden="true"></i>
+								{% elif export.status == "Running" %}
+									<i id="icon-{{ export.id }}" class="fa fa-spinner fa-spin status-icon-running"></i>
+								{% elif export.status == "Warning" %}
+									<i id="icon-{{ export.id }}" class="fa fa-exclamation-triangle status-icon-warning" aria-hidden="true"></i>
+								{% endif %}
+							</td>
+							<td>{{ export.file }}</td>
+							<td>{{ export.time }}</td>
+							<td><p id="msg-{{ export.id }}" style="margin: 0;">{{ export.message }}</p></td>
+							<td>{{ export.username }}</td>
+							<td>
+								<div id="btn-{{ export.id }}">
+									{% if export.status == "Error" %}
+									<a href="{{ export.redirect }}" class="btn-pf-try">
+										<i class="fa fa-upload"></i> {% trans "Try again" %}
+									</a>
+									{% endif %}
+								</div>
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+
 		</div>
+
 	</div>
-
+</div>
 {% endif %}
-
 {% endblock %}
 
 {% block extra-scripts %}
-
 <script>
 function actualizarInfoPanel(data){
-
-	for(var i=0;i<data["exportations"].length; i++){
-
+	for(var i=0; i<data["exportations"].length; i++){
 		var _export = data["exportations"][i];
 		var id = _export["id"];
 		var msg = _export["message"];
@@ -88,57 +123,36 @@ function actualizarInfoPanel(data){
 		var redirect = _export['redirect'];
 
 		if(status == 'Warning'){
-
-			$("#icon-"+id).removeClass("fa fa-spinner fa-spin")
-			$("#icon-"+id).addClass("fa fa-exclamation-triangle")
+			$("#icon-"+id).removeClass("fa fa-spinner fa-spin status-icon-running status-icon-error status-icon-success");
+			$("#icon-"+id).addClass("fa fa-exclamation-triangle status-icon-warning");
 			$("#icon-"+id).css("display", "inline");
-			$("#icon-"+id).css("color", "orange");
-
-			$("#msg-"+id).text(msg)
+			$("#msg-"+id).text(msg);
 		}
 
 		if(status == 'Success'){
-
-			$("#icon-"+id).removeClass("fa fa-spinner fa-spin")
-			$("#icon-"+id).removeClass("fa fa-times")
-			$("#icon-"+id).addClass("fa fa-check")
+			$("#icon-"+id).removeClass("fa fa-spinner fa-spin status-icon-running status-icon-error status-icon-warning");
+			$("#icon-"+id).addClass("fa fa-check status-icon-success");
 			$("#icon-"+id).css("display", "inline");
-			$("#icon-"+id).css("color", "green");
-
-			$("#msg-"+id).text(msg)
-
-			$("#btn-"+id).remove()
-
+			$("#msg-"+id).text(msg);
+			$("#btn-"+id).remove();
 		}
 
 		if(status == 'Running'){
-
-			$("#icon-"+id).addClass("fa fa-spinner fa-spin")
+			$("#icon-"+id).addClass("fa fa-spinner fa-spin status-icon-running");
 			$("#icon-"+id).css("display", "inline-block");
-			$("#icon-"+id).css("color", "");
-			$("#msg-"+id).text(msg)
-
+			$("#msg-"+id).text(msg);
 		}
 
 		if(status == 'Error'){
-
-			$("#icon-"+id).removeClass("fa fa-spinner fa-spin")
-			$("#icon-"+id).addClass("fa fa-times")
+			$("#icon-"+id).removeClass("fa fa-spinner fa-spin status-icon-running status-icon-success status-icon-warning");
+			$("#icon-"+id).addClass("fa fa-times status-icon-error");
 			$("#icon-"+id).css("display", "inline");
-			$("#icon-"+id).css("color", "red");
-
-			$("#msg-"+id).text(msg)
-
+			$("#msg-"+id).text(msg);
 			$("#btn-"+id).empty();
-
-			html_button = '<a href = '+redirect+'>'
-			html_button +=	'<button id="try-again" class="btn btn-block btn-default btn-sm">'
-			html_button +=		'<i class="fa fa-upload margin-r-5"></i>'+gettext("Try again")
-			html_button +=	'</button>'
-			html_button += '</a>'
-
-			$("#btn-"+id).append(html_button)
-			
+			html_button = '<a href="'+redirect+'" class="btn-pf-try">';
+			html_button +=	'<i class="fa fa-upload"></i> '+gettext("Try again");
+			html_button += '</a>';
+			$("#btn-"+id).append(html_button);
 		}
 	}
 }
@@ -146,32 +160,28 @@ function actualizarInfoPanel(data){
 function getCurrentStatus(){
 	$.ajax({
 		type: 'POST',
-		data: {
-			'status': 'true'
-		},
+		data: { 'status': 'true' },
 		async: true,
-		  url: '/gvsigonline/filemanager/list_exports/',
-		  beforeSend:function(xhr){
+		url: '/gvsigonline/filemanager/list_exports/',
+		beforeSend: function(xhr){
 			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-		  },
-		  success	:function(response){
-
-			actualizarInfoPanel(response);  		
 		},
-		  error: function(response){
-			actualizarInfoPanel(response);	
-		  }
+		success: function(response){
+			actualizarInfoPanel(response);
+		},
+		error: function(response){
+			actualizarInfoPanel(response);
+		}
 	});
 	return false;
 }
 
 function startCurrentStatus(){
-	interval = setInterval(function(){ 
+	interval = setInterval(function(){
 		getCurrentStatus();
 	}, 3000);
 }
 
 startCurrentStatus();
-
 </script>
 {% endblock %}

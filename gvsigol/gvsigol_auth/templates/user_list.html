@@ -2,21 +2,157 @@
 {% load staticfiles %} 
 {% load i18n %} 
 
+{% block header %}
+<style>
+:root {
+	--pl-accent:    #4a7fa5;
+	--pl-accent-dk: #2d5f80;
+	--pl-text:      #2e3a45;
+	--pl-muted:     #7b8a96;
+	--pl-border:    #e8ecef;
+	--pl-bg:        #f4f6f8;
+	--pl-white:     #ffffff;
+	--pl-radius:    10px;
+	--pl-shadow:    0 2px 12px rgba(0,0,0,0.08);
+	--pl-transition: 0.2s ease;
+}
+.pl-panel {
+	background: var(--pl-white);
+	border-radius: var(--pl-radius);
+	box-shadow: var(--pl-shadow);
+	border: 1px solid var(--pl-border);
+	overflow: hidden;
+}
+.pl-panel__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--pl-border);
+	gap: 12px;
+	flex-wrap: wrap;
+}
+.pl-panel__title {
+	font-size: 15px;
+	font-weight: 700;
+	color: var(--pl-text);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0;
+}
+.pl-panel__title i { color: var(--pl-accent); }
+.btn-pl-add {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: var(--pl-accent);
+	color: #fff !important;
+	border: none;
+	border-radius: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	padding: 6px 14px;
+	height: 34px;
+	cursor: pointer;
+	transition: background var(--pl-transition);
+	text-decoration: none !important;
+	white-space: nowrap;
+}
+.btn-pl-add:hover { background: var(--pl-accent-dk); }
+.pl-panel__body { padding: 0; }
+.pl-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+	font-weight: 400;
+	-webkit-font-smoothing: antialiased;
+}
+.pl-table thead th {
+	background: var(--pl-bg);
+	color: var(--pl-muted);
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.7px;
+	padding: 11px 16px;
+	border-bottom: 1px solid var(--pl-border);
+	white-space: nowrap;
+}
+.pl-table tbody tr {
+	border-bottom: 1px solid var(--pl-border);
+	transition: background var(--pl-transition);
+}
+.pl-table tbody tr:last-child { border-bottom: none; }
+.pl-table tbody tr:hover { background: #f0f6fb; }
+.pl-table tbody td {
+	padding: 11px 16px;
+	color: #4a5a68;
+	font-size: 13px;
+	font-weight: 400;
+	line-height: 1.5;
+	vertical-align: middle;
+}
+.pl-table tbody td:first-child { color: var(--pl-muted); font-size: 12px; }
+.pl-table tbody td:nth-child(2) { font-weight: 600; color: var(--pl-text); }
+.pl-table tbody td .btn { border-radius: 5px; font-size: 12px; padding: 4px 10px; }
+table.dataTable { border-bottom: none !important; margin-top: 0 !important; margin-bottom: 0 !important; }
+table.dataTable thead th, table.dataTable thead td { border-bottom: 1px solid var(--pl-border) !important; }
+table.dataTable.no-footer { border-bottom: none !important; }
+#users-table .btn-danger, #roles-table .btn-danger, #groups-table .btn-danger {
+	background: transparent; border: 1px solid #e8bebe; color: #c0392b;
+	border-radius: 5px; font-size: 12px; padding: 4px 10px;
+	transition: background var(--pl-transition);
+}
+#users-table .btn-danger:hover, #roles-table .btn-danger:hover, #groups-table .btn-danger:hover {
+	background: #fde8e8; border-color: #c0392b;
+}
+#users-table .btn-success {
+	background: transparent; border: 1px solid var(--pl-border); color: var(--pl-accent);
+	border-radius: 5px; font-size: 12px; padding: 4px 10px;
+	transition: background var(--pl-transition);
+}
+#users-table .btn-success:hover { background: #f0f6fb; border-color: var(--pl-accent); }
+/* ---- Controles de DataTables ---- */
+.dataTables_wrapper { padding: 0; }
+.dataTables_wrapper .dataTables_filter { padding: 12px 16px 0; text-align: right; }
+.dataTables_wrapper .dataTables_filter label { font-size: 12px; font-weight: 600; color: var(--pl-muted); display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+.dataTables_wrapper .dataTables_filter input { height: 32px; border-radius: 20px; border: 1px solid var(--pl-border); background: var(--pl-bg); font-size: 12px; padding: 0 12px; width: 180px; transition: border-color var(--pl-transition), box-shadow var(--pl-transition); box-shadow: none; outline: none; }
+.dataTables_wrapper .dataTables_filter input:focus { border-color: var(--pl-accent); background: var(--pl-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); }
+.dataTables_wrapper .dataTables_length { padding: 12px 16px 0; font-size: 12px; color: var(--pl-muted); }
+.dataTables_wrapper .dataTables_length select { height: 30px; border-radius: 5px; border: 1px solid var(--pl-border); background: var(--pl-bg); font-size: 12px; padding: 0 6px; color: var(--pl-text); }
+.dataTables_wrapper .dataTables_info { padding: 12px 16px; font-size: 12px; color: var(--pl-muted); border-top: 1px solid var(--pl-border); }
+.dataTables_wrapper .dataTables_paginate { padding: 8px 16px; border-top: 1px solid var(--pl-border); text-align: right; }
+.dataTables_wrapper .dataTables_paginate .paginate_button { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; margin: 0 2px; border-radius: 5px; border: 1px solid var(--pl-border); background: var(--pl-white); color: var(--pl-muted) !important; font-size: 12px; font-weight: 600; cursor: pointer; transition: background var(--pl-transition), border-color var(--pl-transition), color var(--pl-transition); }
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover { background: #f0f6fb; border-color: var(--pl-accent); color: var(--pl-accent) !important; }
+.dataTables_wrapper .dataTables_paginate .paginate_button.current, .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover { background: var(--pl-accent) !important; border-color: var(--pl-accent) !important; color: #fff !important; }
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover { background: var(--pl-bg); border-color: var(--pl-border); color: #ccc !important; cursor: default; }
+.modal-content { border-radius: var(--pl-radius); border: none; box-shadow: 0 8px 32px rgba(0,0,0,0.18); }
+.modal-header { border-bottom: 1px solid var(--pl-border); padding: 16px 20px; }
+.modal-title { font-size: 15px; font-weight: 700; color: var(--pl-text); }
+.modal-body { padding: 20px; font-size: 13px; color: var(--pl-muted); }
+.modal-footer { border-top: 1px solid var(--pl-border); padding: 14px 20px; display: flex; justify-content: flex-end; gap: 8px; }
+.modal-footer .btn { border-radius: 6px; font-size: 13px; font-weight: 600; padding: 6px 16px; }
+.modal-footer .btn-default { border-color: var(--pl-border); color: var(--pl-muted); }
+#button-delete-user-accept { background: var(--pl-accent); border-color: var(--pl-accent); color: #fff; }
+#button-delete-user-accept:hover { background: var(--pl-accent-dk); border-color: var(--pl-accent-dk); }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="row">
 	<div class="col-md-12">
-		{% if not read_only_users %}
-		<div class="row">
-			<div class="col-md-12 form-group">
-				<div class="box-tools pull-right">
-					<button id="button-add-user" class="btn btn-block btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add user" %}</button>
-				</div>
+		<div class="pl-panel">
+			<div class="pl-panel__header">
+				<h3 class="pl-panel__title">
+					<i class="fa fa-users"></i>{% trans "Users" %}
+				</h3>
+				{% if not read_only_users %}
+				<button id="button-add-user" class="btn-pl-add"><i class="fa fa-plus"></i> {% trans "Add user" %}</button>
+				{% endif %}
 			</div>
-		</div>
-		{% endif %}
-		<div class="box">
-			<div class="box-body">
-				<table class="table" id="users-table">
+			<div class="pl-panel__body">
+				<table class="pl-table table" id="users-table">
 					<thead>
 						<tr>
 							<th>ID</th>
@@ -58,8 +194,7 @@
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal"
-					aria-label="Close">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
 				<h4 class="modal-title" id="myModalLabel">{% trans "Delete user" %}</h4>
@@ -69,7 +204,7 @@
 			</div>
 			<div class="modal-footer">
 				<button id="button-delete-user-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
-				<button id="button-delete-user-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+				<button id="button-delete-user-accept" type="button" class="btn">{% trans "Accept" %}</button>
 			</div>
 		</div>
 	</div>
@@ -114,46 +249,22 @@ $(document).ready(function() {
 		    }
 		},
 		"columnDefs": [{
-			"targets": 0,
-			"sortable": false,
-			"orderable": false
-		},
-		{
-			"targets": 1,
-			"sortable": false,
-			"orderable": false
-		},
-		{
-			"targets": 2,
-			"sortable": false,
-			"orderable": false
-		},
-		{
-			"targets": 3,
-			"sortable": false,
-			"orderable": false
-		},
-		{
-			"targets": 4,
-			"sortable": false,
-			"orderable": false
-		},
-		{
-			"targets": 5,
-			"sortable": false,
-			"orderable": false
-		},
-		{
-			"targets": 6,
-			"sortable": false,
-			"orderable": false
-		},
-		{
-			"targets": 7,
-			"sortable": false,
-			"orderable": false
-		},
-		{
+			"targets": 0, "sortable": false, "orderable": false
+		},{
+			"targets": 1, "sortable": false, "orderable": false
+		},{
+			"targets": 2, "sortable": false, "orderable": false
+		},{
+			"targets": 3, "sortable": false, "orderable": false
+		},{
+			"targets": 4, "sortable": false, "orderable": false
+		},{
+			"targets": 5, "sortable": false, "orderable": false
+		},{
+			"targets": 6, "sortable": false, "orderable": false
+		},{
+			"targets": 7, "sortable": false, "orderable": false
+		},{
 	        "targets": -1,
 	        "data": null,
 	        "render": function(data, type, row, meta) {
@@ -167,17 +278,14 @@ $(document).ready(function() {
 				return '';
 				{% endif %}
 			},
-			"sortable": false,
-			"orderable": false
-
+			"sortable": false, "orderable": false
 	    },{
 	        "targets": -2,
 	        "data": null,
 	        "render": function(data, type, row, meta) {
 				return '<button type="button" name="button-update-user" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update user" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>';
 			},
-			"sortable": false,
-			"orderable": false
+			"sortable": false, "orderable": false
 	    }],
 	    "dom": 'T<"clear">lfrtip',
 		"bLengthChange": false,

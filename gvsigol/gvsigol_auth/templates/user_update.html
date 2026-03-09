@@ -2,165 +2,348 @@
 {% load staticfiles %}
 {% load i18n %}
 
-{% block content %}	
-	<form role="form" method="post" action="/gvsigonline/auth/user_update/{{uid}}/">
-		<div class="row">
-			<div class="col-md-12">
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<div class="box-tools pull-right">
-							<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+{% block header %}
+<style>
+:root {
+	--pf-accent:    #4a7fa5;
+	--pf-accent-dk: #2d5f80;
+	--pf-text:      #2e3a45;
+	--pf-muted:     #7b8a96;
+	--pf-border:    #e8ecef;
+	--pf-bg:        #f4f6f8;
+	--pf-white:     #ffffff;
+	--pf-radius:    10px;
+	--pf-shadow:    0 2px 12px rgba(0,0,0,0.08);
+	--pf-transition: 0.2s ease;
+}
+.pf-topbar {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	padding: 12px 0 16px;
+	gap: 10px;
+}
+.btn-pf-save {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	background: var(--pf-accent);
+	color: #fff !important;
+	border: none;
+	border-radius: 7px;
+	font-size: 13px;
+	font-weight: 600;
+	padding: 8px 20px;
+	cursor: pointer;
+	transition: background var(--pf-transition);
+	letter-spacing: 0.2px;
+}
+.btn-pf-save:hover { background: var(--pf-accent-dk); }
+.pf-error-msg {
+	display: none;
+	background: #fff5f5;
+	border-left: 4px solid #e74c3c;
+	border-radius: 6px;
+	padding: 12px 16px;
+	margin-bottom: 16px;
+	font-size: 13px;
+	color: #c0392b;
+}
+.pf-error-msg:has(li), .pf-error-msg:has(p:not(:empty)), .pf-error-msg:has(ul:not(:empty)) { display: block; }
+.pf-error-msg p { margin: 0 0 4px; }
+.nav-tabs {
+	border-bottom: 2px solid var(--pf-border);
+	margin-bottom: 0;
+}
+.nav-tabs > li > a {
+	border-radius: 7px 7px 0 0;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--pf-muted);
+	padding: 9px 18px;
+	border: 1px solid transparent;
+	transition: color var(--pf-transition), background var(--pf-transition);
+}
+.nav-tabs > li > a:hover {
+	background: var(--pf-bg);
+	color: var(--pf-accent);
+	border-color: transparent;
+}
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+	color: var(--pf-accent);
+	border: 1px solid var(--pf-border);
+	border-bottom-color: var(--pf-white);
+	background: var(--pf-white);
+	font-weight: 700;
+}
+.tab-content {
+	background: var(--pf-white);
+	border: 1px solid var(--pf-border);
+	border-top: none;
+	border-radius: 0 0 var(--pf-radius) var(--pf-radius);
+	padding: 24px;
+	box-shadow: var(--pf-shadow);
+}
+.tab-content label {
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--pf-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin-bottom: 5px;
+	display: block;
+}
+.tab-content .form-control {
+	border-radius: 7px;
+	border: 1px solid var(--pf-border);
+	background: var(--pf-bg);
+	font-size: 13px;
+	color: var(--pf-text);
+	height: 36px;
+	box-shadow: none;
+	transition: border-color var(--pf-transition), box-shadow var(--pf-transition);
+	padding: 6px 12px;
+}
+.tab-content .form-control:focus {
+	border-color: var(--pf-accent);
+	background: var(--pf-white);
+	box-shadow: 0 0 0 3px rgba(74,127,165,0.12);
+	outline: none;
+}
+.tab-content .form-control[readonly] {
+	background: #f0f3f5;
+	color: var(--pf-muted);
+	cursor: default;
+}
+.tab-content .checkbox label {
+	font-size: 13px;
+	font-weight: 400;
+	color: var(--pf-text);
+	text-transform: none;
+	letter-spacing: 0;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.tab-content .checkbox input[type="checkbox"] {
+	width: 15px;
+	height: 15px;
+	accent-color: var(--pf-accent);
+	cursor: pointer;
+}
+.assign-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+.assign-list__item {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	background: var(--pf-bg);
+	border: 1px solid var(--pf-border);
+	border-radius: 8px;
+	padding: 12px 16px;
+	transition: box-shadow var(--pf-transition), background var(--pf-transition);
+}
+.assign-list__item:hover {
+	background: #f0f6fb;
+	box-shadow: 0 2px 8px rgba(74,127,165,0.08);
+}
+.assign-list__icon {
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	overflow: hidden;
+	flex-shrink: 0;
+	background: var(--pf-border);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.assign-list__icon img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+.assign-list__info {
+	flex: 1;
+	min-width: 0;
+}
+.assign-list__name {
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--pf-text);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.assign-list__desc {
+	font-size: 12px;
+	color: var(--pf-muted);
+	margin-top: 2px;
+}
+.assign-list__check {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--pf-muted);
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+.assign-list__check input[type="checkbox"] {
+	width: 15px;
+	height: 15px;
+	accent-color: var(--pf-accent);
+	cursor: pointer;
+}
+.tab-section-title {
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--pf-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.6px;
+	margin: 0 0 14px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--pf-border);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<form role="form" method="post" action="/gvsigonline/auth/user_update/{{uid}}/">
+	<div class="row">
+		<div class="col-md-12">
+
+			<div class="pf-topbar">
+				<button type="submit" class="btn-pf-save">
+					<i class="fa fa-floppy-o"></i> {% trans "Save" %}
+				</button>
+			</div>
+
+			{% csrf_token %}
+
+			{% if message %}
+<div class="pf-error-msg">
+				<p>* {{ message }}</p>
+			</div>
+{% endif %}
+
+			<ul class="nav nav-tabs">
+				<li class="active"><a href="#tab-general" data-toggle="tab">{% trans "General" %}</a></li>
+				{% if AUTH_GROUPS %}
+				<!--
+				<li><a href="#tab-user-groups" data-toggle="tab">{% trans "Groups" %}</a></li>
+				-->
+				{% endif %}
+				<li><a href="#tab-roles" data-toggle="tab">{% trans "Roles" %}</a></li>
+			</ul>
+
+			<div class="tab-content">
+
+				<div class="tab-pane active" id="tab-general">
+					<div class="row">
+						<div class="col-md-6 form-group">
+							<label for="first_name">{% trans "First name" %}</label>
+							<input {% if read_only_users or not editable %}readonly{% endif %} {% if not editable %}title="{% trans 'User is not editable' %}"{% endif %} placeholder="{% trans 'First name' %}" class="form-control" name="first_name" id="first_name" type="text" value="{{ selected_user.first_name }}">
+						</div>
+						<div class="col-md-6 form-group">
+							<label for="last_name">{% trans "Last name" %}</label>
+							<input {% if read_only_users or not editable %}readonly{% endif %} {% if not editable %}title="{% trans 'User is not editable' %}"{% endif %} placeholder="{% trans 'Last name' %}" class="form-control" name="last_name" id="last_name" type="text" value="{{ selected_user.last_name }}">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-6 form-group">
+							<label for="username">{% trans "Username" %}</label>
+							<input readonly {% if not editable %}title="{% trans 'User is not editable' %}"{% endif %} placeholder="{% trans 'Username' %}" class="form-control" name="username" id="username" type="text" value="{{ selected_user.username }}">
+						</div>
+						<div class="col-md-6 form-group">
+							<label for="email">{% trans "Email" %}</label>
+							<input {% if read_only_users or not editable %}readonly{% endif %} {% if not editable %}title="{% trans 'User is not editable' %}"{% endif %} placeholder="{% trans 'Email' %}" class="form-control" name="email" id="email" type="text" value="{{ selected_user.email }}">
+						</div>
+					</div>
+					<div class="row" style="margin-top: 10px;">
+						<div class="checkbox col-md-6">
+							<label {% if not editable %}title="{% trans 'User is not editable' %}"{% endif %}>
+								{% if selected_user.is_superuser %}
+								<input {% if not editable %}disabled {% endif %}type="checkbox" name="is_superuser" id="is_superuser" checked />{% trans "Is superuser" %}
+								{% else %}
+								<input {% if not editable %}disabled {% endif %}type="checkbox" name="is_superuser" id="is_superuser" />{% trans "Is superuser" %}
+								{% endif %}
+							</label>
+						</div>
+						<div class="checkbox col-md-6">
+							<label {% if not editable %}title="{% trans 'User is not editable' %}"{% endif %}>
+								{% if selected_user.is_staff %}
+								<input {% if not editable %}disabled {% endif %}type="checkbox" name="is_staff" id="is_staff" checked />{% trans "Can manage projects" %}
+								{% else %}
+								<input {% if not editable %}disabled {% endif %}type="checkbox" name="is_staff" id="is_staff" />{% trans "Can manage projects" %}
+								{% endif %}
+							</label>
 						</div>
 					</div>
 				</div>
-				<div class="row" style="padding-left: 30px;">
-					{% csrf_token %}
-					{% if message %}
-					<div id="form-error" style="color:#ff0000;">
-						<p>* {{ message }}</p>
-					</div>
-					{% endif %}
+
+				{% if AUTH_GROUPS %}
+				<!--
+				<div class="tab-pane" id="tab-user-groups">
+					<p class="tab-section-title">{% trans "Assign groups" %}</p>
+					<ul class="assign-list">
+						{% for group in groups %}
+						<li class="assign-list__item">
+							<div class="assign-list__icon">
+								<img src="{% static "img/users.png" %}" alt="">
+							</div>
+							<div class="assign-list__info">
+								<div class="assign-list__name">{{ group.name }}</div>
+								<div class="assign-list__desc">{{ group.description }}</div>
+							</div>
+							<label class="assign-list__check">
+								{% if group.checked %}
+								<input type="checkbox" name="group-{{ group.name }}" id="group-{{ group.name }}" checked />{% trans "Assign group" %}
+								{% else %}
+								<input type="checkbox" name="group-{{ group.name }}" id="group-{{ group.name }}" />{% trans "Assign group" %}
+								{% endif %}
+							</label>
+						</li>
+						{% endfor %}
+					</ul>
 				</div>
-				<ul class="nav nav-tabs">
-					<li class="active"><a href="#tab-general" data-toggle="tab">{% trans "General" %}</a></li>
-					{% if AUTH_GROUPS %}
-					<!--
-					<li><a href="#tab-user-groups" data-toggle="tab">{% trans "Groups" %}</a></li>
-					-->
-					{% endif %}
-					<li><a href="#tab-roles" data-toggle="tab">{% trans "Roles" %}</a></li>
-			    </ul>
-				<div class="tab-content">
-					<div class="tab-pane active" id="tab-general">
-						<div class="row">
-							<div class="col-md-12">
-								<div class="box">
-									<div class="box-body">
-										<div class="row">
-											<div class="col-md-6">
-												<label for="first_name">{% trans "First name" %}</label>
-												<input {% if read_only_users or not editable %}readonly{% endif %} {% if not editable %}title="{% trans 'User is not editable' %}"{% endif %} placeholder="{% trans 'First name' %}" class="form-control" name="first_name" id="first_name" type="text" value="{{selected_user.first_name}}">							
-											</div>
-											<div class="col-md-6">
-												<label for="last_name">{% trans "Last name" %}</label>
-												<input {% if read_only_users or not editable %}readonly{% endif %} {% if not editable %}title="{% trans 'User is not editable' %}"{% endif %} placeholder="{% trans 'Last name' %}" class="form-control" name="last_name" id="last_name" type="text" value="{{selected_user.last_name}}">								
-											</div>
-										</div>
-														
-										<div class="row">
-											<div class="col-md-6 form-group">
-												<label for="username">{% trans "Username" %}</label>
-												<input readonly {% if not editable %}title="{% trans 'User is not editable' %}"{% endif %} placeholder="{% trans 'Username' %}" class="form-control" name="username" id="username" type="text" value="{{selected_user.username}}">								
-											</div>
-											<div class="col-md-6 form-group">
-												<label for="email">{% trans "Email" %}</label>
-												<input {% if read_only_users or not editable %}readonly{% endif %} {% if not editable %}title="{% trans 'User is not editable' %}"{% endif %} placeholder="{% trans 'Email' %}" class="form-control" name="email" id="email" type="text" class="validate" value="{{selected_user.email}}">								
-											</div>
-										</div>
-										
-										<br>
-										
-										<div class="row">
-											<div class="checkbox col-md-6">								
-												<label {% if not editable %}title="{% trans 'User is not editable' %}"{% endif %}>
-													{% if selected_user.is_superuser %}
-													<input {% if not editable %}disabled {% endif %}type="checkbox" name="is_superuser" id="is_superuser" checked/>{% trans "Is superuser" %}
-													{% else %}
-													<input {% if not editable %}disabled {% endif %}type="checkbox" name="is_superuser" id="is_superuser" />{% trans "Is superuser" %}
-													{% endif %}
-												</label>
-											</div>
-											<div class="checkbox col-md-6">								
-												<label {% if not editable %}title="{% trans 'User is not editable' %}"{% endif %}>
-													{% if selected_user.is_staff %}
-													<input {% if not editable %}disabled {% endif %}type="checkbox" name=is_staff id="is_staff" checked/>{% trans "Can manage projects" %}
-													{% else %}
-													<input {% if not editable %}disabled {% endif %}type="checkbox" name="is_staff" id="is_staff" />{% trans "Can manage projects" %}
-													{% endif %}
-												</label>
-											</div>
-										</div>
-									</div>
-								</div>
+				-->
+				{% endif %}
+
+				<div class="tab-pane" id="tab-roles">
+					<p class="tab-section-title">{% trans "Assign roles" %}</p>
+					<ul class="assign-list">
+						{% for role in roles %}
+						<li class="assign-list__item">
+							<div class="assign-list__icon">
+								<img src="{% static "img/users.png" %}" alt="">
 							</div>
-						</div>
-					</div>
-					{% if AUTH_GROUPS %}
-					<!--
-					<div class="tab-pane" id="tab-user-groups">
-						<div class="row">
-							<div class="col-md-12">
-								<div class="box">
-									<div class="box-header with-border">
-										<h3 class="box-title">{% trans "Assign groups" %}</h3>
-									</div>
-									<div class="box-body">
-										<ul class="products-list product-list-in-box">
-											{% for group in groups %}
-											<li class="item">
-												<div class="product-img">
-													<img src="{% static "img/users.png" %}" alt="Users Image">
-												</div>
-												<div class="product-info">
-													<a href="javascript:void(0)" class="product-title">{{group.name}}
-														<div class="checkbox pull-right">													
-															<label>
-																{% if group.checked %}
-																<input type="checkbox" name="group-{{group.name}}" id="group-{{group.name}}" checked/>{% trans "Assign group" %}
-																{% else %}
-																<input type="checkbox" name="group-{{group.name}}" id="group-{{group.name}}"/>{% trans "Assign group" %}
-																{% endif %}
-															</label>
-														</div>
-													</a> 
-													<span class="product-description">{{group.description}}</span>
-												</div>
-											</li> 
-											{% endfor %}
-										</ul>
-									</div>
-								</div>
+							<div class="assign-list__info">
+								<div class="assign-list__name">{{ role.name }}</div>
+								<div class="assign-list__desc">{{ role.description }}</div>
 							</div>
-						</div>
-					</div>
-					-->
-					{% endif %}
-					<div class="tab-pane" id="tab-roles">
-						<div class="row">
-							<div class="col-md-12">
-								<div class="box">
-									<div class="box-header with-border">
-										<h3 class="box-title">{% trans "Assign roles" %}</h3>
-									</div>
-									<div class="box-body">
-										<ul class="products-list product-list-in-box">
-											{% for role in roles %}
-											<li class="item">
-												<div class="product-img">
-													<img src="{% static "img/users.png" %}" alt="Users Image">
-												</div>
-												<div class="product-info">
-													<a href="javascript:void(0)" class="product-title">{{role.name}}
-														<div class="checkbox pull-right">													
-															<label {% if not editable %}title="{% trans 'User is not editable' %}" {% elif role.editable is False %}title="{% trans 'Role is not editable' %}" {% endif %}>
-																<input {% if not editable or role.editable is False %}disabled {% endif %}type="checkbox" name="role-{{role.name}}" id="role-{{role.name}}"{% if role.checked %}checked {% endif %}/>{% trans "Assign role" %}
-															</label>
-														</div>
-													</a> 
-													<span class="product-description">{{role.description}}</span>
-												</div>
-											</li> 
-											{% endfor %}
-										</ul>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>			
+							<label class="assign-list__check" {% if not editable %}title="{% trans 'User is not editable' %}"{% elif role.editable is False %}title="{% trans 'Role is not editable' %}"{% endif %}>
+								<input {% if not editable or role.editable is False %}disabled {% endif %}type="checkbox" name="role-{{ role.name }}" id="role-{{ role.name }}"{% if role.checked %} checked{% endif %} />{% trans "Assign role" %}
+							</label>
+						</li>
+						{% endfor %}
+					</ul>
 				</div>
-			</div>				
+
+			</div><!-- /.tab-content -->
 		</div>
-	</form>	
+	</div>
+</form>
 {% endblock %}
 
 {% block extra-scripts %}

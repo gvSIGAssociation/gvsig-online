@@ -1228,13 +1228,11 @@ def get_layerread_by_role(role):
 
 def set_default_permissions(file_path):
     """
-    Sets the default permissions to the provided file. We set 0o640
-    by default and substract the system umask to get the most
-    restrictive default.
+    Sets the default permissions to the provided file. We set 0o644
+    so that the web server (e.g. Apache running as www-data) can read
+    the files served as public media (thumbnails, etc.).
     """
-    umask = os.umask(0o666) # set a random mask to retrive the system mask
-    os.umask(umask) # restore system mask
-    os.chmod(file_path, 0o640 & ~umask)
+    os.chmod(file_path, 0o644)
 
 def get_datastore_name(username):
     """

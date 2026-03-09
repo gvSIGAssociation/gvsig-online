@@ -2,17 +2,91 @@
 {% load staticfiles %}
 {% load i18n %}
 
+{% block header %}
+<style>
+:root {
+	--pf-accent:    #4a7fa5;
+	--pf-accent-dk: #2d5f80;
+	--pf-text:      #2e3a45;
+	--pf-muted:     #7b8a96;
+	--pf-border:    #e8ecef;
+	--pf-bg:        #f4f6f8;
+	--pf-white:     #ffffff;
+	--pf-radius:    10px;
+	--pf-shadow:    0 2px 12px rgba(0,0,0,0.08);
+}
+.illegal-wrap {
+	display: flex;
+	justify-content: center;
+	padding: 48px 0;
+}
+.illegal-card {
+	background: var(--pf-white);
+	border: 1px solid #f5c6cb;
+	border-radius: var(--pf-radius);
+	box-shadow: var(--pf-shadow);
+	padding: 40px 48px;
+	max-width: 520px;
+	width: 100%;
+	text-align: center;
+}
+.illegal-card__icon {
+	font-size: 48px;
+	color: #e74c3c;
+	margin-bottom: 16px;
+}
+.illegal-card__title {
+	font-size: 22px;
+	font-weight: 700;
+	color: #c0392b;
+	margin: 0 0 8px;
+}
+.illegal-card__subtitle {
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--pf-text);
+	margin: 0 0 12px;
+}
+.illegal-card__text {
+	font-size: 13px;
+	color: var(--pf-muted);
+	margin: 0 0 28px;
+	line-height: 1.6;
+}
+.illegal-card__btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	background: var(--pf-accent);
+	color: #fff !important;
+	border: none;
+	border-radius: 7px;
+	font-size: 13px;
+	font-weight: 600;
+	padding: 9px 22px;
+	text-decoration: none !important;
+	transition: background 0.2s ease;
+}
+.illegal-card__btn:hover { background: var(--pf-accent-dk); }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="error-page">
-	<h2 class="headline text-red">{% trans "Illegal operation" %}</h2>
-	<div class="error-content">
-		<h3>
-			<i class="fa fa-warning text-red"></i> Oops! {% trans "Something went wrong" %}.
+<div class="illegal-wrap">
+	<div class="illegal-card">
+		<div class="illegal-card__icon">
+			<i class="fa fa-ban"></i>
+		</div>
+		<h2 class="illegal-card__title">{% trans "Illegal operation" %}</h2>
+		<h3 class="illegal-card__subtitle">
+			<i class="fa fa-warning"></i> {% trans "Something went wrong" %}
 		</h3>
-		<p>
-				{% trans "You don't have administrative permissions. Meanwhile, you may" %} <a
-				href="/gvsigonline/core/">{% trans "return to dashboard" %}</a>.
+		<p class="illegal-card__text">
+			{% trans "You don't have administrative permissions. Meanwhile, you may return to the dashboard." %}
 		</p>
+		<a href="/gvsigonline/core/" class="illegal-card__btn">
+			<i class="fa fa-home"></i> {% trans "Return to dashboard" %}
+		</a>
 	</div>
 </div>
 {% endblock %}
