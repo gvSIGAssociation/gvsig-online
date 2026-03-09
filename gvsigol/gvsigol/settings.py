@@ -73,24 +73,24 @@ _all_gvsigol_supported_languages = {
 # Define default environment 
 env = environ.Env(
     # set casting, default value
-    DEBUG=(bool, True),    
+    DEBUG=(bool, False),    
     BASE_URL=(str,'https://localhost'),
     STATIC_ROOT=(str,default_static_dir),
     STATIC_URL=(str,default_static_url),
-    MEDIA_ROOT=(str,'/var/www/media/'),
-    MEDIA_URL=(str,'https://localhost/media/'),
+    MEDIA_ROOT=(str,'/opt/gvsigol_data/'),
+    MEDIA_URL=(str,'/media/'),
     DOCS_URL=(str, '/docs/'),
     DOCS_PATH=(str, '/opt/gvsigonline/docs'),
-    ALLOWED_HOST_NAMES=(list,['http://gvsigol.localhost', 'http://localhost']),
+    ALLOWED_HOST_NAMES=(list,['http://localhost:8000']),
     GVSIGOL_PLUGINS=(list),
     GVSIGOL_SKIN=(str,'skin-blue'),
     DB_HOST=(str,'localhost'),
     DB_PORT=(str,'5432'),
-    DB_USER=(str,'postgres'),
-    DB_PASS=(str,'postgres'),
-    DB_NAME=(str,'gvsigonline_v3'),
+    DB_USER=(str,'gvsigonline'),
+    DB_PASS=(str,'gvsigonline'),
+    DB_NAME=(str,'gvsigonline'),
     DB_JNDI_NAME=(str, ''),
-    POSTGIS_VERSION=(tuple,(3,5,0)),
+    POSTGIS_VERSION=(tuple,(2,3,3)),
     LANGUAGES = (tuple, ('es','en')),
     EXTRA_MIDDLEWARE = (list,[]),
     GVSIGOL_CUSTOMER_NAME = (str,'gvsig'),
@@ -205,7 +205,7 @@ USE_X_FORWARDED_HOST = env('USE_X_FORWARDED_HOST')
 SECURE_PROXY_SSL_HEADER = env('SECURE_PROXY_SSL_HEADER')
 
 #GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
-GDAL_LIBRARY_PATH = '/usr/local/lib/libgdal.so'
+#GDAL_LIBRARY_PATH = '/usr/local/lib/libgdal.so'
 
 
 # Application definition
@@ -582,8 +582,6 @@ if '3857' not in env('SUPPORTED_CRS'):
     SUPPORTED_CRS['3857'] = crs_definitions_json['3857']
 if '4326' not in env('SUPPORTED_CRS'):
     SUPPORTED_CRS['4326'] = crs_definitions_json['4326']
-if '25830' not in env('SUPPORTED_CRS'):
-    SUPPORTED_CRS['25830'] = crs_definitions_json['25830']
 for i in env('SUPPORTED_CRS'):
     SUPPORTED_CRS[i] = crs_definitions_json[i]
 
