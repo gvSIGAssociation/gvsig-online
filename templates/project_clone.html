@@ -2,22 +2,124 @@
 {% load staticfiles %}
 {% load i18n %}
 
+{% block header %}
+<style>
+:root {
+	--pf-accent:    #4a7fa5;
+	--pf-accent-dk: #2d5f80;
+	--pf-text:      #2e3a45;
+	--pf-muted:     #7b8a96;
+	--pf-border:    #e8ecef;
+	--pf-bg:        #f4f6f8;
+	--pf-white:     #ffffff;
+	--pf-radius:    10px;
+	--pf-shadow:    0 2px 12px rgba(0,0,0,0.08);
+	--pf-transition: 0.2s ease;
+}
+.pf-topbar {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	margin-bottom: 16px;
+}
+.btn-pf-save {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: var(--pf-accent);
+	color: #fff;
+	border: none;
+	border-radius: 6px;
+	font-size: 13px;
+	font-weight: 600;
+	padding: 8px 20px;
+	cursor: pointer;
+	transition: background var(--pf-transition);
+}
+.btn-pf-save:hover { background: var(--pf-accent-dk); color: #fff; }
+.pf-error-msg {
+	display: none;
+	background: #fde8e8;
+	border: 1px solid #f5c6c6;
+	border-left: 4px solid #c0392b;
+	border-radius: 6px;
+	padding: 10px 14px;
+	color: #c0392b;
+	font-size: 13px;
+	margin-bottom: 14px;
+}
+.pf-error-msg:has(li), .pf-error-msg:has(p:not(:empty)), .pf-error-msg:has(ul:not(:empty)) { display: block; }
+.nav-tabs {
+	border-bottom: 2px solid var(--pf-border);
+	margin-bottom: 0;
+}
+.nav-tabs > li > a {
+	color: var(--pf-muted);
+	font-size: 13px;
+	font-weight: 600;
+	border: none;
+	border-bottom: 2px solid transparent;
+	padding: 10px 18px;
+	margin-bottom: -2px;
+	border-radius: 0;
+	transition: color var(--pf-transition), border-color var(--pf-transition);
+}
+.nav-tabs > li > a:hover { color: var(--pf-accent); background: transparent; border-color: transparent; }
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+	color: var(--pf-accent);
+	background: transparent;
+	border: none;
+	border-bottom: 2px solid var(--pf-accent);
+}
+.tab-content > .tab-pane > .box {
+	border-radius: 0 0 var(--pf-radius) var(--pf-radius);
+	box-shadow: var(--pf-shadow);
+	border: 1px solid var(--pf-border);
+	border-top: none;
+}
+.tab-content .form-control {
+	border-radius: 6px;
+	border-color: var(--pf-border);
+	font-size: 13px;
+	height: 36px;
+	color: var(--pf-text);
+	transition: border-color var(--pf-transition), box-shadow var(--pf-transition);
+}
+.tab-content .form-control:focus {
+	border-color: var(--pf-accent);
+	box-shadow: 0 0 0 3px rgba(74,127,165,0.12);
+	outline: none;
+}
+.tab-content label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--pf-muted);
+}
+.bg-warning {
+	background: #fff8e6 !important;
+	border: 1px solid #f0d080;
+	border-left: 4px solid #e6a817;
+	border-radius: 6px;
+	color: #7a5c00;
+	font-size: 13px;
+}
+</style>
+{% endblock %}
+
 {% block content %}	
 <form id="layer-group-form" role="form" method="post" action="{{ request.get_full_path }}">
 	<div class="row">
 		<div class="col-md-12">
-			<div class="row">
-				<div class="col-md-12 form-group">
-					<div class="box-tools pull-right">
-						<button id="save_button" type="submit" class="btn btn-default btn-sm"><i class="fa fa-clone margin-r-5"></i> {% trans "Clone" %}</button>
-					</div>
-				</div>				
+			<div class="pf-topbar">
+				<button id="save_button" type="submit" class="btn-pf-save"><i class="fa fa-clone"></i> {% trans "Clone" %}</button>
 			</div>
 			<div>
 				{% csrf_token %}					
 				{% if form.errors %}
-				<div id="form-error" style="color:#ff0000;">
-					<ul>
+				<div class="pf-error-msg">
+					<ul style="margin:0; padding-left:18px;">
 					{% for field in form %}
 						{% if field.errors %}
 							<li>{{field.label}}. {{ field.errors|striptags }}</li>
@@ -27,9 +129,7 @@
 				</div>
 				{% endif %}				
 				{% if message %}
-				<div id="form-error" style="color:#ff0000;">
-					<p>* {{ message }}</p>
-				</div>
+				<div class="pf-error-msg">* {{ message }}</div>
 				{% endif %}
 			</div>
 		<ul class="nav nav-tabs">
