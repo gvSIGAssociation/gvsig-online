@@ -36,4 +36,8 @@ urlpatterns = [
     path('application_add/', core_views.application_add, name='application_add'),
     path('application_delete/<int:appid>/', core_views.application_delete, name='application_delete'),
     path('application_update/<int:appid>/', core_views.application_update, name='application_update'),
+
+    path('home_order_get/',  core_views.home_order_get,  name='home_order_get'),
+    path('home_order_save/', core_views.home_order_save, name='home_order_save'),
+    path('home_global_order_save/', core_views.home_global_order_save, name='home_global_order_save'),
 ]

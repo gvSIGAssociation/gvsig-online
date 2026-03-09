@@ -1384,6 +1384,42 @@ msgstr "El nom de l'aplicació ja existeix"
 #~ "Els plugins afegeixen funcionalitats que no estan presents inicialment a "
 #~ "la plataforma"
 
+msgid "Alphabetical"
+msgstr "Alfabètic"
+
+msgid "Manual"
+msgstr "Manual"
+
+msgid "Save order"
+msgstr "Guardar ordre"
+
+msgid "Saved"
+msgstr "Guardat"
+
+msgid "Set as global"
+msgstr "Establir com a global"
+
+msgid "Global set"
+msgstr "Global establit"
+
+msgid "Error saving global order."
+msgstr "Error en guardar l'ordre global."
+
+msgid "Error saving order."
+msgstr "Error en guardar l'ordre."
+
+msgid "Projects & Applications"
+msgstr "Projectes i aplicacions"
+
+msgid "Open application"
+msgstr "Obrir aplicació"
+
+msgid "Private"
+msgstr "Privat"
+
+msgid "Public"
+msgstr "Públic"
+
 #~ msgid "Added tags"
 #~ msgstr ""
 #~ "Etiquetes afegidesEls plugins afegeixen funcionalitats que no estan "

@@ -1356,6 +1356,42 @@ msgstr "El nombre de la aplicación ya existe"
 #~ msgid "Configuration"
 #~ msgstr "Configuración"
 
+msgid "Alphabetical"
+msgstr "Alfabético"
+
+msgid "Manual"
+msgstr "Manual"
+
+msgid "Save order"
+msgstr "Guardar orden"
+
+msgid "Saved"
+msgstr "Guardado"
+
+msgid "Set as global"
+msgstr "Establecer como global"
+
+msgid "Global set"
+msgstr "Global establecido"
+
+msgid "Error saving global order."
+msgstr "Error al guardar el orden global."
+
+msgid "Error saving order."
+msgstr "Error al guardar el orden."
+
+msgid "Projects & Applications"
+msgstr "Proyectos y aplicaciones"
+
+msgid "Open application"
+msgstr "Abrir aplicación"
+
+msgid "Private"
+msgstr "Privado"
+
+msgid "Public"
+msgstr "Público"
+
 #~ msgid "Plugins"
 #~ msgstr "Plugins"
 
