@@ -97,6 +97,108 @@ msgstr "aplicació mòbil"
 #~ msgid "Documentation"
 #~ msgstr "Documentació"
 
+msgid "Public viewers pagination"
+msgstr "Paginació de visors públics"
+
+msgid "Help"
+msgstr "Ajuda"
+
+msgid "Your comprehensive platform to create, manage and share geographic information in a simple and professional way."
+msgstr "La teua plataforma integral per a crear, gestionar i compartir informació geogràfica de manera senzilla i professional."
+
+msgid "Go to dashboard"
+msgstr "Anar al tauler de control"
+
+msgid "Get started"
+msgstr "Començar"
+
+msgid "Discover more"
+msgstr "Descobrir més"
+
+msgid "Explore the territory"
+msgstr "Explora el territori"
+
+msgid "Visualize, analyze and consult geographic information through interactive web viewers."
+msgstr "Visualitza, analitza i consulta informació geogràfica a través de visors web interactius."
+
+msgid "Explore and navigate geographic data interactively"
+msgstr "Explora i navega dades geogràfiques de manera interactiva"
+
+msgid "Previous"
+msgstr "Anterior"
+
+msgid "Next"
+msgstr "Següent"
+
+msgid "Mobile app"
+msgstr "App mòbil"
+
+msgid "Download the mobile application and access geographic information from anywhere."
+msgstr "Descarrega l'aplicació mòbil i accedeix a la informació geogràfica des de qualsevol lloc."
+
+msgid "Display the territory, orthophotos and thematic mapping through interactive viewers."
+msgstr "Visualitza el territori, ortofotografies i cartografia temàtica a través de visors interactius."
+
+msgid "Manage and collaborate"
+msgstr "Gestiona i col·labora"
+
+msgid "A complete platform to administrate geographic data, users and projects from a centralized panel."
+msgstr "Una plataforma completa per a administrar dades geogràfiques, usuaris i projectes des d'un panell centralitzat."
+
+msgid "Publish layers"
+msgstr "Publicar capes"
+
+msgid "Publish your geographic data as WMS and WFS services compatible with OGC standards."
+msgstr "Publica les teues dades geogràfiques com a serveis WMS i WFS compatibles amb els estàndards OGC."
+
+msgid "Manage users"
+msgstr "Gestionar usuaris"
+
+msgid "Control access and permissions for users and groups over projects and geographic layers."
+msgstr "Controla l'accés i els permisos d'usuaris i grups sobre projectes i capes geogràfiques."
+
+msgid "Connect services"
+msgstr "Connectar serveis"
+
+msgid "Integrate data from GeoServer, PostGIS, WMS, WFS and other OGC standards in one place."
+msgstr "Integra dades de GeoServer, PostGIS, WMS, WFS i altres estàndards OGC en un sol lloc."
+
+msgid "Access from anywhere"
+msgstr "Accedeix des de qualsevol lloc"
+
+msgid "Query and manage your geographic information from any device with a web browser."
+msgstr "Consulta i gestiona la teua informació geogràfica des de qualsevol dispositiu amb un navegador web."
+
+msgid "Desktop and mobile"
+msgstr "Escriptori i mòbil"
+
+msgid "Responsive interface that adapts to any screen size, from desktop to mobile devices."
+msgstr "Interfície adaptable a qualsevol mida de pantalla, des d'escriptori fins a dispositius mòbils."
+
+msgid "Admin panel"
+msgstr "Panell d'administració"
+
+msgid "Manage users, projects, layers and data stores from a centralized and intuitive panel."
+msgstr "Gestiona usuaris, projectes, capes i magatzems de dades des d'un panell centralitzat i intuïtiu."
+
+msgid "Open standards"
+msgstr "Estàndards oberts"
+
+msgid "Compatible with OGC standards such as WMS, WFS, WMTS and WCS for maximum interoperability."
+msgstr "Compatible amb estàndards OGC com WMS, WFS, WMTS i WCS per a màxima interoperabilitat."
+
+msgid "Welcome back"
+msgstr "Benvingut de nou"
+
+msgid "Continue working with your geographic data."
+msgstr "Continua treballant amb les teues dades geogràfiques."
+
+msgid "Start now"
+msgstr "Comença ara"
+
+msgid "Sign in to access all the tools and services of the platform."
+msgstr "Inicia sessió per a accedir a totes les eines i serveis de la plataforma."
+
 #~ msgid ""
 #~ "New, attractive and enriched gvSIG Online documentation is now available "
 #~ "on-line"

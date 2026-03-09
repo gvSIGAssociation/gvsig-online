@@ -86,3 +86,105 @@ msgstr ""
 #: templates/index.html:190
 msgid "mobile application"
 msgstr ""
+
+msgid "Public viewers pagination"
+msgstr ""
+
+msgid "Help"
+msgstr ""
+
+msgid "Your comprehensive platform to create, manage and share geographic information in a simple and professional way."
+msgstr ""
+
+msgid "Go to dashboard"
+msgstr ""
+
+msgid "Get started"
+msgstr ""
+
+msgid "Discover more"
+msgstr ""
+
+msgid "Explore the territory"
+msgstr ""
+
+msgid "Visualize, analyze and consult geographic information through interactive web viewers."
+msgstr ""
+
+msgid "Explore and navigate geographic data interactively"
+msgstr ""
+
+msgid "Previous"
+msgstr ""
+
+msgid "Next"
+msgstr ""
+
+msgid "Mobile app"
+msgstr ""
+
+msgid "Download the mobile application and access geographic information from anywhere."
+msgstr ""
+
+msgid "Display the territory, orthophotos and thematic mapping through interactive viewers."
+msgstr ""
+
+msgid "Manage and collaborate"
+msgstr ""
+
+msgid "A complete platform to administrate geographic data, users and projects from a centralized panel."
+msgstr ""
+
+msgid "Publish layers"
+msgstr ""
+
+msgid "Publish your geographic data as WMS and WFS services compatible with OGC standards."
+msgstr ""
+
+msgid "Manage users"
+msgstr ""
+
+msgid "Control access and permissions for users and groups over projects and geographic layers."
+msgstr ""
+
+msgid "Connect services"
+msgstr ""
+
+msgid "Integrate data from GeoServer, PostGIS, WMS, WFS and other OGC standards in one place."
+msgstr ""
+
+msgid "Access from anywhere"
+msgstr ""
+
+msgid "Query and manage your geographic information from any device with a web browser."
+msgstr ""
+
+msgid "Desktop and mobile"
+msgstr ""
+
+msgid "Responsive interface that adapts to any screen size, from desktop to mobile devices."
+msgstr ""
+
+msgid "Admin panel"
+msgstr ""
+
+msgid "Manage users, projects, layers and data stores from a centralized and intuitive panel."
+msgstr ""
+
+msgid "Open standards"
+msgstr ""
+
+msgid "Compatible with OGC standards such as WMS, WFS, WMTS and WCS for maximum interoperability."
+msgstr ""
+
+msgid "Welcome back"
+msgstr ""
+
+msgid "Continue working with your geographic data."
+msgstr ""
+
+msgid "Start now"
+msgstr ""
+
+msgid "Sign in to access all the tools and services of the platform."
+msgstr ""
