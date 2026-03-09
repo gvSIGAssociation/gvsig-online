@@ -1741,3 +1741,103 @@ class AuthPatch(Authentication):
     def __init__(self, *args, **kwargs):
         self._auth_delegate = kwargs.get('auth_delegate')
         super().__init__(*args, **kwargs)
+
+
+def _get_layer_fields_from_db(datastore, table_name, schema='public'):
+    """
+    Introspects PostgreSQL to obtain column names and types for a given table/view.
+    Uses the Datastore model methods to support both legacy (connection_params) and
+    the new centralized Connection model.
+    Returns a list of dicts: [{'name': ..., 'type': ..., 'nullable': ...}, ...]
+    """
+    fields = []
+    try:
+        conn_params = datastore.get_connection_params_dict()
+        connection = psycopg2.connect(
+            host=conn_params.get('host', 'localhost'),
+            port=conn_params.get('port', 5432),
+            database=conn_params.get('database', ''),
+            user=conn_params.get('user', ''),
+            password=conn_params.get('passwd', conn_params.get('password', ''))
+        )
+        cursor = connection.cursor()
+        query = """
+            SELECT
+                a.attname AS column_name,
+                UPPER(pg_catalog.format_type(a.atttypid, a.atttypmod)) AS data_type,
+                NOT a.attnotnull AS is_nullable
+            FROM pg_catalog.pg_attribute a
+            JOIN pg_catalog.pg_class c ON a.attrelid = c.oid
+            JOIN pg_catalog.pg_namespace n ON c.relnamespace = n.oid
+            JOIN pg_catalog.pg_type t ON a.atttypid = t.oid
+            WHERE n.nspname = %s
+              AND c.relname = %s
+              AND a.attnum > 0
+              AND NOT a.attisdropped
+              AND c.relkind IN ('r', 'v', 'm', 'f', 'p')
+            ORDER BY a.attnum;
+        """
+        cursor.execute(query, (schema, table_name))
+        rows = cursor.fetchall()
+        for row in rows:
+            fields.append({'name': row[0], 'type': row[1], 'nullable': row[2]})
+        cursor.close()
+        connection.close()
+    except Exception as e:
+        logger.warning("Could not introspect fields for %s.%s: %s", schema, table_name, str(e))
+    return fields
+
+
+def generate_layer_annotations(layer):
+    """
+    Generates plain-text annotations for an existing Layer instance using all
+    available metadata and, when possible, PostgreSQL column introspection.
+    Returns a plain-text string suitable for a <textarea>.
+    """
+    lines = []
+    if layer.abstract:
+        lines.append("--- Resumen ---")
+        lines.append(layer.abstract)
+
+    # PostgreSQL field introspection for non-external PostGIS layers
+    if not layer.external and layer.datastore and layer.source_name:
+        schema = layer.datastore.get_schema_name()
+        fields = _get_layer_fields_from_db(layer.datastore, layer.source_name, schema)
+        if fields:
+            lines.append("")
+            lines.append("--- Campos de la tabla ({}.{}) ---".format(schema, layer.source_name))
+            for f in fields:
+                lines.append("  {}".format(f['name']))
+    elif layer.external and layer.external_params:
+        lines.append("")
+        lines.append("--- Parámetros externos ---")
+        try:
+            params = json.loads(layer.external_params)
+            for k, v in params.items():
+                lines.append("  {}: {}".format(k, v))
+        except Exception:
+            lines.append(layer.external_params)
+
+    lines.append("")
+    lines.append("[Añade aquí tus anotaciones adicionales]")
+    return "\n".join(lines)
+
+
+def generate_basic_annotations(name, title, layer_group_name='', layer_type=''):
+    """
+    Generates plain-text annotations from basic parameters when the layer does
+    not yet exist in the database (layer_add / layer_create flows).
+    Returns a plain-text string suitable for a <textarea>.
+    """
+    lines = []
+    lines.append("=== ANOTACIONES DE CAPA ===")
+    lines.append("")
+    lines.append("Nombre:         {}".format(name))
+    lines.append("Título:         {}".format(title))
+    if layer_type:
+        lines.append("Tipo:           {}".format(layer_type))
+    if layer_group_name:
+        lines.append("Grupo de capas: {}".format(layer_group_name))
+    lines.append("")
+    lines.append("[Añade aquí tus anotaciones adicionales]")
+    return "\n".join(lines)
