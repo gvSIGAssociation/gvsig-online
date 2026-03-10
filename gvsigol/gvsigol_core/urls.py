@@ -40,4 +40,5 @@ urlpatterns = [
     path('home_order_get/',  core_views.home_order_get,  name='home_order_get'),
     path('home_order_save/', core_views.home_order_save, name='home_order_save'),
     path('home_global_order_save/', core_views.home_global_order_save, name='home_global_order_save'),
+    path('home_hidden_items/', core_views.home_hidden_items, name='home_hidden_items'),
 ]
