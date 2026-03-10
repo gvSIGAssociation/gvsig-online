@@ -360,10 +360,21 @@ class KeycloakAdminSession(OIDCSession):
                     user = User.objects.get(username=username)
                 signals.user_updated.send(sender=user.__class__, username=user.username, user_obj=user, roles=realm_roles)
                 return user
-            elif response.status_code == 409:
-                error = response.json()
-                msg = error.get('errorMessage', response.text)
-                raise(Exception(msg))
+            elif response.status_code in (400, 409):
+                error_message = None
+                try:
+                    err_body = response.json()
+                    if isinstance(err_body, dict):
+                        error_message = err_body.get('errorMessage') or err_body.get('error_description') or err_body.get('error')
+                except (ValueError, TypeError):
+                    pass
+                if not error_message and response.text:
+                    error_message = response.text.strip()
+                msg_lower = (error_message or '').lower()
+                if 'email' in msg_lower or 'duplicate' in msg_lower or 'exists' in msg_lower or 'already' in msg_lower:
+                    from django.utils.translation import ugettext as _
+                    raise UserUpdateError(_("A user with this email address already exists."))
+                raise UserUpdateError(error_message or "User creation failed (HTTP %s)" % response.status_code)
             else:
                 LOGGER.debug(response.status_code)
                 LOGGER.debug(response.text)
