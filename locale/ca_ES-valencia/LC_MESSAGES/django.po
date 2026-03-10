@@ -445,6 +445,9 @@ msgstr ""
 msgid "User creation failed"
 msgstr "La creació de l'usuari ha fallat"
 
+msgid "A user with this email address already exists."
+msgstr "Ja existeix un usuari amb aquesta adreça de correu electrònic."
+
 #: gvsigol_auth/views.py:561
 msgid ""
 "The authentication server is not available. Try again later or contact "
