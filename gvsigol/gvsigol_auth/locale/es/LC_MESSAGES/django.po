@@ -446,6 +446,9 @@ msgstr "Token no válido. Su enlace ha caducado, debe solicitar otro."
 msgid "User creation failed"
 msgstr "La creación del usuario falló"
 
+msgid "A user with this email address already exists."
+msgstr "Ya existe un usuario con esta dirección de correo electrónico."
+
 #: gvsigol_auth/views.py:561
 msgid ""
 "The authentication server is not available. Try again later or contact "

@@ -19,7 +19,7 @@
 '''
 from django.http.response import JsonResponse
 from gvsigol import settings
-from gvsigol.basetypes import BackendNotAvailable
+from gvsigol.basetypes import BackendNotAvailable, UserUpdateError
 from gvsigol.utils import default_sorter
 from gvsigol_auth.django_auth import get_admin_role
 '''
@@ -571,25 +571,48 @@ def user_update(request, username):
                 editable = True
 
             if editable:
-                if settings.AUTH_READONLY_USERS:
-                    success = auth_backend.update_user(
-                        username,
-                        superuser=is_superuser,
-                        staff=is_staff,
-                        groups=assigned_groups,
-                        roles=assigned_roles
-                    )
-                else:
-                    success = auth_backend.update_user(
+                try:
+                    if settings.AUTH_READONLY_USERS:
+                        success = auth_backend.update_user(
                             username,
-                            email=request.POST.get('email'),
-                            first_name=request.POST.get('first_name'),
-                            last_name=request.POST.get('last_name'),
                             superuser=is_superuser,
                             staff=is_staff,
                             groups=assigned_groups,
                             roles=assigned_roles
-                    )
+                        )
+                    else:
+                        success = auth_backend.update_user(
+                                username,
+                                email=request.POST.get('email'),
+                                first_name=request.POST.get('first_name'),
+                                last_name=request.POST.get('last_name'),
+                                superuser=is_superuser,
+                                staff=is_staff,
+                                groups=assigned_groups,
+                                roles=assigned_roles
+                        )
+                except UserUpdateError as e:
+                    # e.g. duplicate email in Keycloak: keep form open and show message
+                    selected_user = auth_backend.get_user_details(user=username)
+                    selected_user = dict(selected_user)
+                    selected_user['email'] = request.POST.get('email') or selected_user.get('email')
+                    selected_user['first_name'] = request.POST.get('first_name') or selected_user.get('first_name')
+                    selected_user['last_name'] = request.POST.get('last_name') or selected_user.get('last_name')
+                    selected_user['is_staff'] = is_staff
+                    selected_user['is_superuser'] = is_superuser
+                    roles = auth_utils.get_all_roles_checked_by_user(username)
+                    response_ctx = {
+                        'uid': username,
+                        'selected_user': selected_user,
+                        'user': request.user,
+                        'roles': roles,
+                        'read_only_users': settings.AUTH_READONLY_USERS,
+                        'editable': editable,
+                        'message': str(e),
+                    }
+                    if auth_backend.check_group_support():
+                        response_ctx['groups'] = auth_utils.get_all_groups_checked_by_user(username)
+                    return render(request, 'user_update.html', response_ctx)
             else:
                 # ignore update if user is not editable
                 success = False

@@ -28,6 +28,11 @@ class ServiceException(Exception):
 class BackendNotAvailable(ServiceException):
     pass
 
+
+class UserUpdateError(ServiceException):
+    """Raised when user update fails (e.g. duplicate email in Keycloak)."""
+    pass
+
 # ugettext_noop to keep all languages in .po regardless settings.py
 lang_ca = _("Catalan")
 lang_de = _("German")
