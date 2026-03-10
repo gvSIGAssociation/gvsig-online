@@ -22,7 +22,7 @@
 '''
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from django.db.models import Q
+from django.db.models import Q, Max
 from gvsigol_core.utils import get_supported_crs, get_user_projects, get_available_tools
 from gvsigol_symbology.models import StyleLayer
 from gdaltools.metadata import project
@@ -33,7 +33,7 @@ from gvsigol.basetypes import CloneConf
 from gvsigol_auth import auth_backend
 from django.shortcuts import render, HttpResponse, redirect
 from django.http import HttpResponseForbidden
-from .models import Project, ProjectLayerGroup, ProjectRole, Application, ApplicationRole
+from .models import Project, ProjectLayerGroup, ProjectRole, Application, ApplicationRole, ApplicationOrder
 from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup, ServiceUrl, LayerReadRole, LayerGroupRole
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
@@ -2086,6 +2086,153 @@ def application_delete(request, appid):
         except:
             logger.exception("Error deleting application")
             return HttpResponseForbidden({"deleted": False, "error": "Not allowed"})
+
+
+def _serialize_project_for_order(p):
+    return {
+        'type': 'project',
+        'id': p.id,
+        'name': p.name,
+        'title': p.title or p.name,
+        'description': p.description or '',
+        'image': settings.BASE_URL + unquote(p.image_url),
+        'absurl': p.url,
+        'order': None,  # set by caller
+        'application_order_id': None,  # set by caller
+    }
+
+
+def _serialize_application_for_order(a):
+    return {
+        'type': 'application',
+        'id': a.id,
+        'name': a.name,
+        'title': a.title or a.name,
+        'description': a.description or '',
+        'image': settings.BASE_URL + unquote(a.image_url),
+        'absurl': a.absurl,
+        'order': None,
+        'application_order_id': None,
+    }
+
+
+@require_http_methods(['GET'])
+def application_order_list(request):
+    """
+    GET: list projects and applications ordered for the current user.
+    If the user has their own ordering in ApplicationOrder (rows with their username), that is returned.
+    Otherwise the default ordering (username=null) is returned.
+    Returns JSON: { "items": [ { "type", "id", "order", "application_order_id", ... }, ... ] }
+    """
+    username = None
+    if request.user.is_authenticated and ApplicationOrder.objects.filter(username=request.user.username).exists():
+        username = request.user.username
+
+    if username is None:
+        qs = ApplicationOrder.objects.filter(username__isnull=True)
+    else:
+        qs = ApplicationOrder.objects.filter(username=username)
+    qs = qs.select_related('application', 'project').order_by('order')
+
+    def sort_key(row):
+        o = row.order
+        if row.application_id:
+            title = (row.application.title or row.application.name) if row.application else ''
+        else:
+            title = (row.project.title or row.project.name) if row.project else ''
+        return (o, title or '')
+
+    rows = list(qs)
+    rows.sort(key=sort_key)
+
+    items = []
+    for idx, row in enumerate(rows):
+        if row.application_id and row.application:
+            item = _serialize_application_for_order(row.application)
+        elif row.project_id and row.project:
+            item = _serialize_project_for_order(row.project)
+        else:
+            continue
+        item['order'] = idx
+        item['sort_order'] = row.order  # raw order from DB: 0 = default, >0 = explicit position
+        item['application_order_id'] = row.id
+        items.append(item)
+
+    return JsonResponse({'items': items})
+
+
+@login_required()
+@require_http_methods(['POST'])
+def application_order_add(request):
+    """
+    POST (JSON): add an item to the user's order. Body: { "project_id": int } or { "application_id": int } (one required).
+    """
+    try:
+        body = json.loads(request.body) if request.body else {}
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+    project_id = body.get('project_id')
+    application_id = body.get('application_id')
+    if (project_id is None and application_id is None) or (project_id is not None and application_id is not None):
+        return JsonResponse({'status': 'error', 'message': 'Provide exactly one of project_id or application_id'}, status=400)
+
+    username = request.user.username
+    max_order = ApplicationOrder.objects.filter(username=username).aggregate(m=Max('order'))['m']
+    next_order = (max_order + 1) if max_order is not None else 0
+
+    if project_id is not None:
+        if not Project.objects.filter(pk=project_id).exists():
+            return JsonResponse({'status': 'error', 'message': 'Project not found'}, status=404)
+        if ApplicationOrder.objects.filter(username=username, project_id=project_id).exists():
+            return JsonResponse({'status': 'error', 'message': 'Project already in your order'}, status=400)
+        ApplicationOrder.objects.create(username=username, order=next_order, project_id=project_id, application=None)
+    else:
+        if not Application.objects.filter(pk=application_id).exists():
+            return JsonResponse({'status': 'error', 'message': 'Application not found'}, status=404)
+        if ApplicationOrder.objects.filter(username=username, application_id=application_id).exists():
+            return JsonResponse({'status': 'error', 'message': 'Application already in your order'}, status=400)
+        ApplicationOrder.objects.create(username=username, order=next_order, application_id=application_id, project=None)
+
+    return JsonResponse({'status': 'success', 'order': next_order})
+
+
+@csrf_exempt
+@login_required()
+@require_http_methods(['POST'])
+def application_order_update(request):
+    """
+    POST (JSON): update the user's order. Body: { "order": [ {"type": "project", "id": int }, {"type": "application", "id": int }, ... ] }
+    """
+    try:
+        body = json.loads(request.body) if request.body else {}
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+    order_list = body.get('order')
+    if not isinstance(order_list, list):
+        return JsonResponse({'status': 'error', 'message': 'order must be a list'}, status=400)
+
+    username = request.user.username
+    for idx, entry in enumerate(order_list):
+        if not isinstance(entry, dict):
+            continue
+        t = entry.get('type')
+        pk = entry.get('id')
+        if t not in ('project', 'application') or pk is None:
+            continue
+        if t == 'project':
+            obj, _ = ApplicationOrder.objects.get_or_create(
+                username=username, project_id=pk, application_id__isnull=True,
+                defaults={'application_id': None, 'order': idx}
+            )
+        else:
+            obj, _ = ApplicationOrder.objects.get_or_create(
+                username=username, application_id=pk, project_id__isnull=True,
+                defaults={'project_id': None, 'order': idx}
+            )
+        obj.order = idx
+        obj.save()
+
+    return JsonResponse({'status': 'success'})
 
 
 def default_index(request, template="index.html", response={}):

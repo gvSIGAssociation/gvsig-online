@@ -36,4 +36,8 @@ urlpatterns = [
     path('application_add/', core_views.application_add, name='application_add'),
     path('application_delete/<int:appid>/', core_views.application_delete, name='application_delete'),
     path('application_update/<int:appid>/', core_views.application_update, name='application_update'),
+
+    path('application_order_list/', core_views.application_order_list, name='application_order_list'),
+    path('application_order_add/', core_views.application_order_add, name='application_order_add'),
+    path('application_order_update/', core_views.application_order_update, name='application_order_update'),
 ]
