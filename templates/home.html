@@ -332,9 +332,7 @@
 	font-weight: 700;
 	color: var(--h-text);
 	margin: 0;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+	word-break: break-word;
 }
 .project-card__desc {
 	font-size: 12px;
@@ -733,7 +731,7 @@
 						{% endif %}
 						<img class="project-card__thumb" src="{{ item.image }}" alt="">
 						<div class="project-card__body">
-							<p class="project-card__name item-title">{{ item.title }}</p>
+							<p class="project-card__name">{{ item.title }}</p>
 							<span class="project-card__desc">{{ item.description }}</span>
 						</div>
 						<div class="project-card__footer">
@@ -758,7 +756,7 @@
 						<span class="item-type-badge item-type-badge--private"><i class="fa fa-lock"></i> {% trans "Private" %}</span>
 						<img class="project-card__thumb" src={{project.image}} alt="">
 						<div class="project-card__body">
-							<p class="project-card__name item-title">{{project.title}}</p>
+							<p class="project-card__name">{{project.title}}</p>
 							<span class="project-card__desc">{{project.description}}</span>
 						</div>
 						<div class="project-card__footer">
@@ -776,7 +774,7 @@
 						<span class="item-type-badge item-type-badge--public"><i class="fa fa-globe"></i> {% trans "Public" %}</span>
 						<img class="project-card__thumb" src={{project.image}} alt="">
 						<div class="project-card__body">
-							<p class="project-card__name item-title">{{project.title}}</p>
+							<p class="project-card__name">{{project.title}}</p>
 							<span class="project-card__desc">{{project.description}}</span>
 						</div>
 						<div class="project-card__footer">
@@ -794,7 +792,7 @@
 						<span class="item-type-badge item-type-badge--app"><i class="fa fa-th-large"></i> {% trans "App" %}</span>
 						<img class="project-card__thumb" src="{{app.image}}" alt="">
 						<div class="project-card__body">
-							<p class="project-card__name item-title">{{app.title}}</p>
+							<p class="project-card__name">{{app.title}}</p>
 							<span class="project-card__desc">{{app.description}}</span>
 						</div>
 						<div class="project-card__footer">
