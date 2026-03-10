@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.db.utils import IntegrityError
 from django.contrib.auth import get_user_model
 from django.http import HttpRequest
-from gvsigol.basetypes import BackendNotAvailable
+from gvsigol.basetypes import BackendNotAvailable, UserUpdateError
 from gvsigol_plugin_oidc_mozilla.settings import KEYCLOAK_ADMIN_CLIENT_ID, KEYCLOAK_ADMIN_CLIENT_SECRET, GVSIGOL_SUPERUSER_ROLE, GVSIGOL_STAFF_ROLE, OIDC_RP_CLIENT_ID
 from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_LOGOUT_ENDPOINT, OIDC_OP_BASE_URL, OIDC_OP_REALM_NAME
 from django.conf import settings
@@ -440,6 +440,23 @@ class KeycloakAdminSession(OIDCSession):
 
                 signals.user_updated.send(sender=None, username=user.username, user_dict=user_rep, user_obj=user)
                 return True
+            else:
+                # Keycloak returns 400 for duplicate email, 409 for conflict, etc.
+                error_message = None
+                try:
+                    err_body = response.json()
+                    if isinstance(err_body, dict):
+                        error_message = err_body.get('errorMessage') or err_body.get('error_description') or err_body.get('error')
+                except (ValueError, TypeError):
+                    pass
+                if not error_message and response.text:
+                    error_message = response.text.strip()
+                if response.status_code in (400, 409):
+                    msg_lower = (error_message or '').lower()
+                    if 'email' in msg_lower or 'duplicate' in msg_lower or 'exists' in msg_lower or 'already' in msg_lower:
+                        from django.utils.translation import ugettext as _
+                        raise UserUpdateError(_("A user with this email address already exists."))
+                raise UserUpdateError(error_message or "User update failed (HTTP %s)" % response.status_code)
         except (ConnectionError, Timeout, TooManyRedirects) as e:
             raise BackendNotAvailable from e
         except RequestException:
