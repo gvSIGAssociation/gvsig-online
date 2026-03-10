@@ -66,6 +66,36 @@ templates:
         default: "logo.png"
       scale: !string
         default: ""
+        
+      gridLayer: !staticLayers
+        default:
+          layers: [
+            {
+              "type": "grid",
+              "gridType": "points",
+              "numberOfLines": [2, 2],
+              "renderAsSvg": true,
+              "gridColor": "lightgray",
+              "haloColor": "#CCFFCC",
+              "labelColor": "darkgray",
+              "labelFormat": "%1.0f %s",
+              "indent": 8,
+              "haloRadius": 0,
+              "rotateLabels": false,
+              "font": {
+                "name": [
+                  "Liberation Sans",
+                  "Helvetica",
+                  "Nimbus Sans L",
+                  "FreeSans",
+                  "Sans-serif"
+                ],
+                "size": 8,
+                "style": "PLAIN"
+              }
+            }
+        ]
+        
     processors:
     - !configureHttpRequests
       httpProcessors:
