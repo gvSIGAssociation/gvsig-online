@@ -99,6 +99,7 @@ def forbidden_view(request):
 
 @login_required()
 def home(request):
+    hidden_prefix = getattr(settings, 'UI_HIDEN_PROJECTS_PREFIX', '')
     projects = []
     public_projects = []
     if request.user.is_superuser:
@@ -106,6 +107,8 @@ def home(request):
     else:
         query = get_user_projects(request)
     for p in query.order_by('title'):
+        if hidden_prefix and p.name.startswith(hidden_prefix):
+            continue
         image = p.image_url
         project = {}
         project['id'] = p.id
@@ -128,6 +131,8 @@ def home(request):
     else:
         apps_query = get_user_applications(request)
     for app in apps_query.order_by('title'):
+        if hidden_prefix and app.name.startswith(hidden_prefix):
+            continue
         applications.append({
             'id': app.id,
             'name': app.name,
@@ -199,6 +204,7 @@ def home(request):
         'allow_password_update': allow_password_update,
         'manage_passwords_url': manage_passwords_url,
         'use_classic_viewer': useClassicViewer,
+        'has_hidden_items': bool(hidden_prefix),
     })
 
 
@@ -253,6 +259,50 @@ def home_global_order_save(request):
         return JsonResponse({'success': True})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+@login_required()
+def home_hidden_items(request):
+    if not (request.user.is_staff or request.user.is_superuser):
+        return HttpResponseForbidden()
+    hidden_prefix = getattr(settings, 'UI_HIDEN_PROJECTS_PREFIX', '')
+    if not hidden_prefix:
+        return JsonResponse({'items': []})
+
+    items = []
+    if request.user.is_superuser:
+        proj_query = Project.objects.filter(
+            expiration_date__gte=datetime.datetime.now()
+        ) | Project.objects.filter(expiration_date=None)
+    else:
+        proj_query = get_user_projects(request)
+    for p in proj_query.filter(name__startswith=hidden_prefix).order_by('title'):
+        items.append({
+            'id': p.id,
+            'name': p.name,
+            'title': p.title,
+            'description': p.description or '',
+            'image': unquote(p.image_url),
+            'url': p.url,
+            'item_type': 'public' if p.is_public else 'private',
+        })
+
+    if request.user.is_superuser:
+        apps_query = Application.objects.filter(name__startswith=hidden_prefix)
+    else:
+        apps_query = get_user_applications(request).filter(name__startswith=hidden_prefix)
+    for app in apps_query.order_by('title'):
+        items.append({
+            'id': app.id,
+            'name': app.name,
+            'title': app.title or app.name,
+            'description': app.description or '',
+            'image': app.image_url,
+            'url': app.absurl,
+            'item_type': 'app',
+        })
+
+    return JsonResponse({'items': items})
 
 
 @login_required()

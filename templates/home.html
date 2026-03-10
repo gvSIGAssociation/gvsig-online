@@ -587,6 +587,40 @@
 	border: 2px dashed #a8c8e8;
 	border-radius: 8px;
 }
+
+/* ============================================================
+   BOTÓN TOGGLE ÍTEMS OCULTOS
+   ============================================================ */
+#btn-toggle-hidden {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	background: var(--h-bg);
+	border: 1px solid var(--h-border);
+	border-radius: 6px;
+	padding: 5px 12px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--h-muted);
+	cursor: pointer;
+	height: 32px;
+	transition: background var(--h-transition), border-color var(--h-transition), color var(--h-transition);
+	white-space: nowrap;
+}
+#btn-toggle-hidden:hover {
+	border-color: #e8a020;
+	color: #b8760f;
+	background: #fef9f0;
+}
+#btn-toggle-hidden.active {
+	background: #fff3cd;
+	border-color: #e8a020;
+	color: #b8760f;
+}
+.project-card--hidden-item {
+	opacity: 0.75;
+	border-style: dashed;
+}
 </style>
 {% endblock %}
 
@@ -704,17 +738,22 @@
 				</button>
 				{% endif %}
 				{% endif %}
-				{% if user.is_staff %}
-				<button id="button-add-project" title='{% trans "Add project" %}'>
-					<i class="fa fa-plus"></i> {% trans "Add" %}
-				</button>
-				{% endif %}
-				<div class="elegant-search">
-					<input type="text" class="search-all form-control" placeholder="{% trans 'Search...' %}" />
-					<i class="fa fa-search search-icon"></i>
-				</div>
+			{% if user.is_staff %}
+			<button id="button-add-project" title='{% trans "Add project" %}'>
+				<i class="fa fa-plus"></i> {% trans "Add" %}
+			</button>
+			{% endif %}
+			{% if has_hidden_items and user.is_staff %}
+			<button id="btn-toggle-hidden" title='{% trans "Show/hide hidden items" %}'>
+				<i class="fa fa-eye-slash"></i> {% trans "Hidden" %}
+			</button>
+			{% endif %}
+			<div class="elegant-search">
+				<input type="text" class="search-all form-control" placeholder="{% trans 'Search...' %}" />
+				<i class="fa fa-search search-icon"></i>
 			</div>
 		</div>
+	</div>
 		<div class="projects-panel__body">
 			<ul class="items-list projects-grid">
 				{% if all_items_ordered %}
@@ -814,6 +853,24 @@
 			</div>
 		</div>
 	</div>
+
+	{% if has_hidden_items and user.is_staff %}
+	<div id="hidden-items-section" style="display:none" class="projects-panel">
+		<div class="projects-panel__header">
+			<h3 class="projects-panel__title">
+				<i class="fa fa-eye-slash"></i> {% trans "Hidden items" %}
+				<span id="hidden-items-count" style="font-size:12px;font-weight:400;color:var(--h-muted);margin-left:4px;"></span>
+			</h3>
+		</div>
+		<div class="projects-panel__body">
+			<div id="hidden-items-loading" style="text-align:center;padding:20px;color:var(--h-muted);">
+				<i class="fa fa-spinner fa-spin fa-2x"></i>
+			</div>
+			<ul id="hidden-items-grid" class="projects-grid" style="display:none"></ul>
+		</div>
+	</div>
+	{% endif %}
+
 	{% elif user.is_staff %}
 	<div class="projects-panel">
 		<div class="projects-panel__header">
@@ -951,10 +1008,13 @@
 			});
 			$('.items-list').addClass('sortable-mode');
 			sortableEnabled = true;
-			// Desactivamos List.js para que no interfiera con el drag
+			// Mostrar TODOS los items expandiendo la página de List.js
+			itemList.page = itemList.items.length || 9999;
 			itemList.search();
 			itemList.filter();
 			itemList.update();
+			// Asegurar que todos los <li> sean visibles
+			$('.items-list > li').show();
 			$('.elegant-search').hide();
 			$('.list-pagination').hide();
 			// Reaplicar filtro activo en modo DOM
@@ -966,7 +1026,8 @@
 			$('.items-list').sortable('destroy');
 			$('.items-list').removeClass('sortable-mode');
 			sortableEnabled = false;
-			// Mostrar todos los items y dejar que List.js gestione el filtro
+			// Restaurar paginación de List.js
+			itemList.page = 15;
 			$('.items-list > li').show();
 			$('.elegant-search').show();
 			$('.list-pagination').show();
@@ -1068,6 +1129,82 @@
 		{% endif %}
 
 		{% endif %}
+
+		{% if has_hidden_items and user.is_staff %}
+		// ---- Ítems ocultos (carga AJAX lazy) ----
+		var hiddenLoaded = false;
+
+		function buildHiddenCard(item) {
+			var badgeClass, badgeIcon, badgeLabel, btnClass, btnIcon, btnLabel;
+			if (item.item_type === 'private') {
+				badgeClass = 'item-type-badge--private';
+				badgeIcon  = 'fa-lock';
+				badgeLabel = '{% trans "Private" %}';
+				btnClass   = '';
+				btnIcon    = 'fa-map';
+				btnLabel   = '{% trans "Load project" %}';
+			} else if (item.item_type === 'public') {
+				badgeClass = 'item-type-badge--public';
+				badgeIcon  = 'fa-globe';
+				badgeLabel = '{% trans "Public" %}';
+				btnClass   = '';
+				btnIcon    = 'fa-map';
+				btnLabel   = '{% trans "Load project" %}';
+			} else {
+				badgeClass = 'item-type-badge--app';
+				badgeIcon  = 'fa-th-large';
+				badgeLabel = '{% trans "App" %}';
+				btnClass   = ' project-card__btn--app';
+				btnIcon    = 'fa-rocket';
+				btnLabel   = '{% trans "Open application" %}';
+			}
+			var cardClass = 'project-card project-card--hidden-item' + (item.item_type === 'app' ? ' project-card--app' : '');
+			return '<li data-item-type="' + item.item_type + '" data-item-id="' + item.id + '">' +
+				'<div class="' + cardClass + '">' +
+					'<span class="item-type-badge ' + badgeClass + '"><i class="fa ' + badgeIcon + '"></i> ' + badgeLabel + '</span>' +
+					'<img class="project-card__thumb" src="' + item.image + '" alt="">' +
+					'<div class="project-card__body">' +
+						'<p class="project-card__name">' + $('<span>').text(item.title).html() + '</p>' +
+						'<span class="project-card__desc">' + $('<span>').text(item.description).html() + '</span>' +
+					'</div>' +
+					'<div class="project-card__footer">' +
+						'<a href="' + item.url + '" class="project-card__btn' + btnClass + '">' +
+							'<i class="fa ' + btnIcon + '"></i> ' + btnLabel +
+						'</a>' +
+					'</div>' +
+				'</div>' +
+			'</li>';
+		}
+
+		$('#btn-toggle-hidden').on('click', function() {
+			var section = $('#hidden-items-section');
+			var isVisible = section.is(':visible');
+			if (isVisible) {
+				section.hide();
+				$(this).removeClass('active');
+				$(this).find('i').removeClass('fa-eye').addClass('fa-eye-slash');
+			} else {
+				section.show();
+				$(this).addClass('active');
+				$(this).find('i').removeClass('fa-eye-slash').addClass('fa-eye');
+				if (!hiddenLoaded) {
+					hiddenLoaded = true;
+					$.getJSON('{% url "home_hidden_items" %}', function(data) {
+						var grid = $('#hidden-items-grid');
+						$('#hidden-items-loading').hide();
+						$('#hidden-items-count').text('(' + data.items.length + ')');
+						$.each(data.items, function(_, item) {
+							grid.append(buildHiddenCard(item));
+						});
+						grid.show();
+					}).fail(function() {
+						$('#hidden-items-loading').html('<span style="color:#c0392b">{% trans "Error loading hidden items." %}</span>');
+					});
+				}
+			}
+		});
+		{% endif %}
+
 	});
 </script>
 {% endblock %}
