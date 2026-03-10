@@ -22,11 +22,13 @@
 from datetime import datetime, timedelta
 import json
 import os
+import unicodedata
 from urllib.parse import quote, unquote
 from wsgiref.util import FileWrapper
 import coreapi
 from django.http.response import HttpResponse, JsonResponse
 from django.utils.crypto import get_random_string
+from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
 from rest_framework.filters import BaseFilterBackend
@@ -45,6 +47,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
 from django.contrib.auth.models import User
 from gvsigol_core import utils as core_utils
+
 from gvsigol_core.models import Project, ProjectLayerGroup, Application, SharedView, ApplicationOrder
 from gvsigol_plugin_projectapi import settings
 from gvsigol_plugin_projectapi.export import VectorLayerExporter
@@ -881,13 +884,20 @@ class ApplicationOrderListView(ListAPIView):
             qs = ApplicationOrder.objects.filter(username=username)
         qs = qs.select_related('application', 'project').order_by('order')
 
+        def _normalize_for_sort(s):
+            """Normalize string for sorting: remove accents so Á sorts with A."""
+            if not s:
+                return ''
+            nfd = unicodedata.normalize('NFD', s)
+            return ''.join(c for c in nfd if unicodedata.category(c) != 'Mn').lower()
+
         def sort_key(row):
             o = row.order
             if row.application_id:
                 title = (row.application.title or row.application.name) if row.application else ''
             else:
                 title = (row.project.title or row.project.name) if row.project else ''
-            return (o, title or '')
+            return (o, _normalize_for_sort(title))
 
         rows = list(qs)
         rows.sort(key=sort_key)
@@ -917,6 +927,66 @@ class ApplicationOrderListView(ListAPIView):
             ]
         }
         return JsonResponse(result, safe=False)
+
+
+class ApplicationOrderUpdateView(APIView):
+    """
+    Updates the current user's application order.
+    POST body: { "order": [ {"type": "project"|"application", "id": int }, ... ] }
+    Uses ApplicationOrder model (core); requires authentication.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_id='update_application_order',
+        operation_summary='Updates the ordered list of projects/applications for the current user',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['order'],
+            properties={
+                'order': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        required=['type', 'id'],
+                        properties={
+                            'type': openapi.Schema(type=openapi.TYPE_STRING, enum=['project', 'application']),
+                            'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        }
+                    )
+                )
+            }
+        ),
+        responses={200: "Success", 400: "Invalid body"}
+    )
+    def post(self, request):
+        body = request.data if request.data is not None else {}
+        order_list = body.get('order')
+        if not isinstance(order_list, list):
+            return Response({'status': 'error', 'message': 'order must be a list'}, status=status.HTTP_400_BAD_REQUEST)
+
+        username = request.user.username
+        for idx, entry in enumerate(order_list):
+            if not isinstance(entry, dict):
+                continue
+            t = entry.get('type')
+            pk = entry.get('id')
+            if t not in ('project', 'application') or pk is None:
+                continue
+            if t == 'project':
+                obj, _ = ApplicationOrder.objects.get_or_create(
+                    username=username, project_id=pk, application_id__isnull=True,
+                    defaults={'application_id': None, 'order': idx}
+                )
+            else:
+                obj, _ = ApplicationOrder.objects.get_or_create(
+                    username=username, application_id=pk, project_id__isnull=True,
+                    defaults={'project_id': None, 'order': idx}
+                )
+            obj.order = idx
+            obj.save()
+
+        return Response({'status': 'success'})
 
 
 #--------------------------------------------------
