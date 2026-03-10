@@ -483,12 +483,13 @@ def user_add(request):
                             pass
         
                         return redirect('user_list')
-                    errors.append({"message": _("User creation failed")}) # FIXME OIDC CMI should get a reason
+                    errors.append({"message": _("User creation failed")})
+            except UserUpdateError as e:
+                # e.g. duplicate email (Keycloak): show translated message
+                errors.append({'message': str(e)})
             except Exception as e:
                 logger.exception("ERROR: Problem creating user")
-                message = "ERROR: Problem creating user - " + str(e)
-                print(message)
-                errors.append({'message': message})
+                errors.append({'message': _("User creation failed") + ": " + str(e)})
             roles = auth_backend.get_all_roles_details(exclude_system=True)
 
             # reverting changes
