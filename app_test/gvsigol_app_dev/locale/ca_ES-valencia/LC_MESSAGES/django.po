@@ -1,0 +1,209 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-03-22 17:12+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: templates/index.html:8
+msgid "Home"
+msgstr "Inici"
+
+#: templates/index.html:75
+msgid "Dashboard"
+msgstr "Panell de control"
+
+#: templates/index.html:78
+msgid "Sign out"
+msgstr "Tancar sessió"
+
+#: templates/index.html:98
+msgid "Sign in"
+msgstr "Iniciar sessió"
+
+#: templates/index.html:137
+msgid "Welcome to gvSIG Online"
+msgstr "Benvingut a gvSIG Online"
+
+#: templates/index.html:146
+msgid "Public viewers"
+msgstr "Visors públics"
+
+#: templates/index.html:148
+msgid "Display the territory, orthophotos and thematic mapping"
+msgstr "Visualitza el territori, ortofotos i cartografia temàtica"
+
+#: templates/index.html:149
+msgid "Access to the list of public viewers"
+msgstr "Accedir a la llista de visors públics"
+
+#: templates/index.html:158
+msgid "Mapping services"
+msgstr "Serveis de mapes"
+
+#: templates/index.html:160
+msgid "Look up OGC services available"
+msgstr "Explora els serveis OGC disponibles"
+
+#: templates/index.html:161
+msgid "Show available services"
+msgstr "Mostra serveis disponibles"
+
+#: templates/index.html:174
+msgid "Metadata catalog"
+msgstr "Catàleg de metadades"
+
+#: templates/index.html:176
+msgid ""
+"Search the metadata catalog for get information about the data and SDI "
+"services"
+msgstr ""
+"Explore el catàleg de metadades per obtenir informació sobre les dades i els "
+"serveis IDE"
+
+#: templates/index.html:177
+msgid "Access to metadata catalog"
+msgstr "Accedir al catàleg de metadades"
+
+#: templates/index.html:188
+msgid "Download app"
+msgstr "Descarregar app"
+
+#: templates/index.html:190
+msgid "Download"
+msgstr "Descarregar"
+
+#: templates/index.html:190
+msgid "mobile application"
+msgstr "aplicació mòbil"
+
+#~ msgid ""
+#~ "Welcome to the Geographic Information Service of La Pobla de Vallbona"
+#~ msgstr ""
+#~ "Benvinguts al Sistema d'Informació Geogràfica de La Pobla de Vallbona"
+
+#~ msgid "Documentation"
+#~ msgstr "Documentació"
+
+msgid "Public viewers pagination"
+msgstr "Paginació de visors públics"
+
+msgid "Help"
+msgstr "Ajuda"
+
+msgid "Your comprehensive platform to create, manage and share geographic information in a simple and professional way."
+msgstr "La teua plataforma integral per a crear, gestionar i compartir informació geogràfica de manera senzilla i professional."
+
+msgid "Go to dashboard"
+msgstr "Anar al tauler de control"
+
+msgid "Get started"
+msgstr "Començar"
+
+msgid "Discover more"
+msgstr "Descobrir més"
+
+msgid "Explore the territory"
+msgstr "Explora el territori"
+
+msgid "Visualize, analyze and consult geographic information through interactive web viewers."
+msgstr "Visualitza, analitza i consulta informació geogràfica a través de visors web interactius."
+
+msgid "Explore and navigate geographic data interactively"
+msgstr "Explora i navega dades geogràfiques de manera interactiva"
+
+msgid "Previous"
+msgstr "Anterior"
+
+msgid "Next"
+msgstr "Següent"
+
+msgid "Mobile app"
+msgstr "App mòbil"
+
+msgid "Download the mobile application and access geographic information from anywhere."
+msgstr "Descarrega l'aplicació mòbil i accedeix a la informació geogràfica des de qualsevol lloc."
+
+msgid "Display the territory, orthophotos and thematic mapping through interactive viewers."
+msgstr "Visualitza el territori, ortofotografies i cartografia temàtica a través de visors interactius."
+
+msgid "Manage and collaborate"
+msgstr "Gestiona i col·labora"
+
+msgid "A complete platform to administrate geographic data, users and projects from a centralized panel."
+msgstr "Una plataforma completa per a administrar dades geogràfiques, usuaris i projectes des d'un panell centralitzat."
+
+msgid "Publish layers"
+msgstr "Publicar capes"
+
+msgid "Publish your geographic data as WMS and WFS services compatible with OGC standards."
+msgstr "Publica les teues dades geogràfiques com a serveis WMS i WFS compatibles amb els estàndards OGC."
+
+msgid "Manage users"
+msgstr "Gestionar usuaris"
+
+msgid "Control access and permissions for users and groups over projects and geographic layers."
+msgstr "Controla l'accés i els permisos d'usuaris i grups sobre projectes i capes geogràfiques."
+
+msgid "Connect services"
+msgstr "Connectar serveis"
+
+msgid "Integrate data from GeoServer, PostGIS, WMS, WFS and other OGC standards in one place."
+msgstr "Integra dades de GeoServer, PostGIS, WMS, WFS i altres estàndards OGC en un sol lloc."
+
+msgid "Access from anywhere"
+msgstr "Accedeix des de qualsevol lloc"
+
+msgid "Query and manage your geographic information from any device with a web browser."
+msgstr "Consulta i gestiona la teua informació geogràfica des de qualsevol dispositiu amb un navegador web."
+
+msgid "Desktop and mobile"
+msgstr "Escriptori i mòbil"
+
+msgid "Responsive interface that adapts to any screen size, from desktop to mobile devices."
+msgstr "Interfície adaptable a qualsevol mida de pantalla, des d'escriptori fins a dispositius mòbils."
+
+msgid "Admin panel"
+msgstr "Panell d'administració"
+
+msgid "Manage users, projects, layers and data stores from a centralized and intuitive panel."
+msgstr "Gestiona usuaris, projectes, capes i magatzems de dades des d'un panell centralitzat i intuïtiu."
+
+msgid "Open standards"
+msgstr "Estàndards oberts"
+
+msgid "Compatible with OGC standards such as WMS, WFS, WMTS and WCS for maximum interoperability."
+msgstr "Compatible amb estàndards OGC com WMS, WFS, WMTS i WCS per a màxima interoperabilitat."
+
+msgid "Welcome back"
+msgstr "Benvingut de nou"
+
+msgid "Continue working with your geographic data."
+msgstr "Continua treballant amb les teues dades geogràfiques."
+
+msgid "Start now"
+msgstr "Comença ara"
+
+msgid "Sign in to access all the tools and services of the platform."
+msgstr "Inicia sessió per a accedir a totes les eines i serveis de la plataforma."
+
+#~ msgid ""
+#~ "New, attractive and enriched gvSIG Online documentation is now available "
+#~ "on-line"
+#~ msgstr "Ara la documentació està disponible en línia"
+
+#~ msgid "Explore documentation"
+#~ msgstr "Explorar documentació"
+
