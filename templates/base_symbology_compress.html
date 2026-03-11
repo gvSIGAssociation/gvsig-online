@@ -57,6 +57,34 @@
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+    <style>
+    .main-header .logo .logo-lg {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 9px !important;
+    }
+    .main-header .logo .logo-img-lg {
+      width: 28px !important;
+      height: 28px !important;
+      object-fit: contain !important;
+      flex-shrink: 0 !important;
+      border-radius: 5px !important;
+    }
+    .sidebar-mini.sidebar-collapse .main-header .logo .logo-mini {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .main-header .logo .logo-img-mini {
+      width: 26px !important;
+      height: 26px !important;
+      object-fit: contain !important;
+      border-radius: 5px !important;
+    }
+    .main-sidebar .user-panel {
+      display: none !important;
+    }
+    </style>
     <script>		var IMG_PATH = '{% static "img/" %}'; </script>
 </head>
 
@@ -66,8 +94,8 @@
 	
 		<header class="main-header">
 			<a href="/gvsigonline/" class="logo">
-				<span class="logo-mini"><b>{{GVSIGOL_NAME_SHORT}}</b>{{GVSIGOL_SURNAME_SHORT}}</span>
-				<span class="logo-lg"><b>{{GVSIGOL_NAME}}</b>{{GVSIGOL_SURNAME}}</span>
+				<span class="logo-mini"><img src="{% static "img/logo_custom_icon.png" %}" class="logo-img-mini" alt="Logo"></span>
+				<span class="logo-lg"><img src="{% static "img/logo_custom_icon.png" %}" class="logo-img-lg" alt="Logo"><b>{{GVSIGOL_NAME}}</b>{{GVSIGOL_SURNAME}}</span>
 			</a>
 
 			<nav class="navbar navbar-static-top" role="navigation">
