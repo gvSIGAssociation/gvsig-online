@@ -1010,3 +1010,21 @@ msgstr "Restricted edition permission"
 #: gvsigol_plugin_geoetl/templates/geoetl_workspaces_permissions.html:40
 msgid "Execute permission"
 msgstr "Execute permission"
+
+msgid "Double-click to expand"
+msgstr "Double-click to expand"
+
+msgid "SQL Editor"
+msgstr "SQL Editor"
+
+msgid "to apply"
+msgstr "to apply"
+
+msgid "to close without saving"
+msgstr "to close without saving"
+
+msgid "Close without saving"
+msgstr "Close without saving"
+
+msgid "Apply"
+msgstr "Apply"

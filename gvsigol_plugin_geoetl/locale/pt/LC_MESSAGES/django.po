@@ -972,6 +972,24 @@ msgstr ""
 msgid "Execute permission"
 msgstr ""
 
+msgid "Double-click to expand"
+msgstr "Duplo clique para expandir"
+
+msgid "SQL Editor"
+msgstr "Editor SQL"
+
+msgid "to apply"
+msgstr "para aplicar"
+
+msgid "to close without saving"
+msgstr "para fechar sem guardar"
+
+msgid "Close without saving"
+msgstr "Fechar sem guardar"
+
+msgid "Apply"
+msgstr "Aplicar"
+
 #: templates/etl.html:99
 msgid "IDW Interpolation"
 msgstr "Interpolação IDW"

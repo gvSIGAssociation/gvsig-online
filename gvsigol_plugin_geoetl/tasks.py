@@ -443,18 +443,30 @@ def periodic_clean():
 
 def executeSQL(db, query_list):
 
-    query = ' '.join(query_list)
+    # Unir con saltos de línea para que los comentarios SQL (-- ...) no
+    # absorban el resto de la query, y aplicar los escapes de caracteres.
+    query = '\n'.join(query_list).replace('_##_', '"').replace('#--#', "'")
+
+    # Ignorar queries que queden vacías tras eliminar comentarios/espacios
+    if not query.strip():
+        return
 
     db_model  = Connection.objects.get(name = db)
 
     params_str = db_model.connection_params
     connection_params = json.loads(params_str)
 
-    connection = psycopg2.connect(user = connection_params["user"], password = connection_params["password"], host = connection_params["host"], port = connection_params["port"], database = connection_params["database"])
+    # La contraseña puede estar almacenada como 'passwd' o 'password'
+    password = connection_params.get("password") or connection_params.get("passwd", "")
+
+    connection = psycopg2.connect(user = connection_params["user"], password = password, host = connection_params["host"], port = connection_params["port"], database = connection_params["database"])
     cursor = connection.cursor()
 
-    sql_ = sql.SQL(query.replace('_##_', '"').replace('#--#', "'"))
-    cursor.execute(sql_)
+    # psycopg2 no admite múltiples sentencias en un solo execute().
+    # Dividimos por ';' y ejecutamos cada sentencia no vacía por separado.
+    statements = [s.strip() for s in query.split(';') if s.strip()]
+    for stmt in statements:
+        cursor.execute(stmt)
     connection.commit()
     
     connection.close()
@@ -470,7 +482,10 @@ def getLoopListFromPostgres(params):
     params_str = db_model.connection_params
     connection_params = json.loads(params_str)
 
-    connection = psycopg2.connect(user = connection_params["user"], password = connection_params["password"], host = connection_params["host"], port = connection_params["port"], database = connection_params["database"])
+    # La contraseña puede estar almacenada como 'passwd' o 'password'
+    password = connection_params.get("password") or connection_params.get("passwd", "")
+
+    connection = psycopg2.connect(user = connection_params["user"], password = password, host = connection_params["host"], port = connection_params["port"], database = connection_params["database"])
     cursor = connection.cursor()
 
     sql_ = sql.SQL("SELECT {column} FROM {schema}.{table};").format(

@@ -1022,6 +1022,24 @@ msgstr "Permiso para editar con restricciones"
 msgid "Execute permission"
 msgstr "Permiso para ejecutar"
 
+msgid "Double-click to expand"
+msgstr "Doble clic para ampliar"
+
+msgid "SQL Editor"
+msgstr "Editor SQL"
+
+msgid "to apply"
+msgstr "para aplicar"
+
+msgid "to close without saving"
+msgstr "para cerrar sin guardar"
+
+msgid "Close without saving"
+msgstr "Cerrar sin guardar"
+
+msgid "Apply"
+msgstr "Aplicar"
+
 #, fuzzy
 #~| msgid "Save"
 #~ msgid "Save TTL"
