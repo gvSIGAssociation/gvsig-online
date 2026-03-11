@@ -1533,6 +1533,12 @@
   display: inline-block !important;
 }
 
+/* Treeview: el título flotante debe tener al menos el mismo ancho que el submenú */
+.sidebar-mini.sidebar-collapse .sidebar-menu > li.treeview:hover > a > span:not(.pull-right) {
+  min-width: 200px !important;
+  border-radius: 0 6px 0 0 !important;
+}
+
 /* Submenú emergente (treeview) */
 .sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu {
   background: var(--sb-bg-dark, #18222b) !important;
@@ -1573,6 +1579,16 @@
   background: var(--sb-bg, #f5f7fa) !important;
   color: var(--sb-text, #2e3a45) !important;
   border-left-color: var(--sb-accent, #4a7fa5) !important;
+}
+/* Treeview light: título flotante con mismo ancho mínimo que el submenú */
+.skin-blue-light.sidebar-mini.sidebar-collapse .sidebar-menu > li.treeview:hover > a > span:not(.pull-right),
+.skin-black-light.sidebar-mini.sidebar-collapse .sidebar-menu > li.treeview:hover > a > span:not(.pull-right),
+.skin-black-light-dphuesca.sidebar-mini.sidebar-collapse .sidebar-menu > li.treeview:hover > a > span:not(.pull-right),
+.skin-green-light.sidebar-mini.sidebar-collapse .sidebar-menu > li.treeview:hover > a > span:not(.pull-right),
+.skin-red-light.sidebar-mini.sidebar-collapse .sidebar-menu > li.treeview:hover > a > span:not(.pull-right),
+.skin-purple-light.sidebar-mini.sidebar-collapse .sidebar-menu > li.treeview:hover > a > span:not(.pull-right),
+.skin-yellow-light.sidebar-mini.sidebar-collapse .sidebar-menu > li.treeview:hover > a > span:not(.pull-right) {
+  min-width: 200px !important;
 }
 .skin-blue-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu,
 .skin-black-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu,
