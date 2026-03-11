@@ -207,9 +207,9 @@
 	</div>
 </section>
 
-{% if public_projects %}
+{% if public_items %}
 <!-- ====================================================================
-     SECCIÓN: VISORES PÚBLICOS
+     SECCIÓN: VISORES PÚBLICOS Y APLICACIONES
      ==================================================================== -->
 <section id="public-viewers" class="section section-light">
 	<div class="container">
@@ -218,14 +218,17 @@
 			{% trans "Display the territory, orthophotos and thematic mapping through interactive viewers." %}
 		</p>
 		<div id="pub-projects-grid" class="pub-projects-grid">
-			{% for project in public_projects %}
-			<a href="{{ project.url }}" class="pub-project-card" data-pub-idx="{{ forloop.counter0 }}">
+			{% for item in public_items %}
+			<a href="{{ item.url }}" class="pub-project-card{% if item.item_type == 'app' %} pub-project-card--app{% endif %}" data-pub-idx="{{ forloop.counter0 }}">
 				<div class="pub-project-card__img">
-					<img src="{{ project.image }}" alt="{{ project.title }}">
+					<img src="{{ item.image }}" alt="{{ item.title }}">
+					{% if item.item_type == 'app' %}
+					<span class="pub-item-badge pub-item-badge--app"><i class="fa fa-rocket"></i> App</span>
+					{% endif %}
 				</div>
 				<div class="pub-project-card__body">
-					<h3>{{ project.title }}</h3>
-					{% if project.description %}<p>{{ project.description }}</p>{% endif %}
+					<h3>{{ item.title }}</h3>
+					{% if item.description %}<p>{{ item.description }}</p>{% endif %}
 				</div>
 			</a>
 			{% endfor %}
