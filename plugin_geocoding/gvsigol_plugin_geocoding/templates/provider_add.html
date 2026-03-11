@@ -2,188 +2,421 @@
 {% load staticfiles %}
 {% load i18n %}
 
-{% block content %}	
-	<div class="row">
-		<div class="col-md-12">
-			<div class="box">
+{% block header %}
+<style>
+:root {
+	--pf-accent:    #4a7fa5;
+	--pf-accent-dk: #2d5f80;
+	--pf-text:      #2e3a45;
+	--pf-muted:     #7b8a96;
+	--pf-border:    #e8ecef;
+	--pf-bg:        #f4f6f8;
+	--pf-white:     #ffffff;
+	--pf-radius:    10px;
+	--pf-shadow:    0 2px 12px rgba(0,0,0,0.08);
+	--pf-transition: 0.2s ease;
+}
 
-				<form id="provider-form" enctype="multipart/form-data" role="form" method="post" action="/gvsigonline/geocoding/provider_add/">
-					<div class="box-header with-border">
-						<h3 class="box-title">{% trans "Add provider" %}</h3>
-						<div class="box-tools pull-right">
-							<button id="submit-button" type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+/* ---- Barra superior ---- */
+.pf-topbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 0 16px;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+.pf-topbar__title {
+	font-size: 15px;
+	font-weight: 700;
+	color: var(--pf-text);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0;
+}
+.pf-topbar__title i { color: var(--pf-accent); }
+.btn-pf-save {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	background: var(--pf-accent);
+	color: #fff !important;
+	border: none;
+	border-radius: 7px;
+	font-size: 13px;
+	font-weight: 600;
+	padding: 8px 20px;
+	cursor: pointer;
+	transition: background var(--pf-transition);
+	text-decoration: none !important;
+}
+.btn-pf-save:hover { background: var(--pf-accent-dk); }
+
+/* ---- Tarjeta de contenido ---- */
+.pf-card {
+	background: var(--pf-white);
+	border: 1px solid var(--pf-border);
+	border-radius: var(--pf-radius);
+	padding: 28px 24px;
+	box-shadow: var(--pf-shadow);
+}
+
+/* ---- Mensajes de error ---- */
+.pf-error-msg {
+	background: #fff5f5;
+	border-left: 4px solid #e74c3c;
+	border-radius: 6px;
+	padding: 12px 16px;
+	margin-bottom: 20px;
+	font-size: 13px;
+	color: #c0392b;
+}
+.pf-error-msg ul { margin: 0; padding-left: 18px; }
+.pf-error-msg p  { margin: 0 0 4px; }
+
+/* ---- Campos de formulario ---- */
+.form-group label:not(.radio-label):not(.file) {
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--pf-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin-bottom: 5px;
+	display: block;
+}
+.form-control {
+	border-radius: 7px;
+	border: 1px solid var(--pf-border);
+	background: var(--pf-bg);
+	font-size: 13px;
+	color: var(--pf-text);
+	height: 36px;
+	box-shadow: none;
+	transition: border-color var(--pf-transition), box-shadow var(--pf-transition);
+	padding: 6px 12px;
+}
+.form-control:focus {
+	border-color: var(--pf-accent);
+	background: var(--pf-white);
+	box-shadow: 0 0 0 3px rgba(74,127,165,0.12);
+	outline: none;
+}
+select.form-control { height: 36px; }
+textarea.form-control { height: auto; min-height: 80px; resize: vertical; }
+
+/* ---- Radios de selección de proyectos ---- */
+.radio-label {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+	font-weight: 400;
+	color: var(--pf-text);
+	margin-right: 20px;
+	cursor: pointer;
+}
+.radio-label input[type="radio"] {
+	accent-color: var(--pf-accent);
+	width: 14px;
+	height: 14px;
+}
+
+/* ---- Selector de proyectos ---- */
+#project-selector {
+	margin-top: 12px;
+	display: flex;
+	gap: 16px;
+	align-items: flex-start;
+	flex-wrap: wrap;
+}
+.pf-sub-card {
+	background: var(--pf-bg);
+	border: 1px solid var(--pf-border);
+	border-radius: 8px;
+	overflow: hidden;
+	margin-top: 12px;
+}
+.pf-sub-card__header {
+	padding: 10px 16px;
+	border-bottom: 1px solid var(--pf-border);
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--pf-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+.pf-sub-card__body {
+	padding: 12px 16px;
+	min-height: 48px;
+}
+.buttons-container {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding-top: 4px;
+}
+.buttons-container .btn {
+	border-radius: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	padding: 5px 12px;
+	white-space: nowrap;
+	background: transparent;
+	border: 1px solid var(--pf-border);
+	color: var(--pf-text);
+	transition: background var(--pf-transition), border-color var(--pf-transition);
+}
+.buttons-container .btn:hover { background: #f0f6fb; border-color: var(--pf-accent); color: var(--pf-accent); }
+
+/* ---- Items de proyecto seleccionado ---- */
+.selected-project { margin-bottom: 6px; }
+.project-item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background: var(--pf-white);
+	border: 1px solid var(--pf-border);
+	border-radius: 6px;
+	padding: 6px 10px;
+	font-size: 13px;
+	color: var(--pf-text);
+}
+.project-name { flex: 1; }
+.remove-project {
+	background: transparent !important;
+	border: 1px solid #e8bebe !important;
+	color: #c0392b !important;
+	border-radius: 4px !important;
+	font-size: 11px !important;
+	padding: 2px 7px !important;
+	margin-left: 8px;
+	transition: background var(--pf-transition) !important;
+}
+.remove-project:hover { background: #fde8e8 !important; border-color: #c0392b !important; }
+
+/* ---- Imagen del proveedor ---- */
+.provider-img {
+	width: 80px;
+	height: 80px;
+	border: 1px solid var(--pf-border);
+	border-radius: 8px;
+	overflow: hidden;
+	background: var(--pf-bg);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 10px;
+}
+.provider-img img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.provider-img-change label { font-size: 12px; font-weight: 700; color: var(--pf-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ---- Parámetros avanzados ---- */
+#advanced-params-button {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	cursor: pointer;
+	padding: 10px 14px;
+	background: var(--pf-bg);
+	border: 1px solid var(--pf-border);
+	border-radius: 7px;
+	margin-bottom: 0;
+	transition: background var(--pf-transition);
+}
+#advanced-params-button:hover { background: #f0f6fb; }
+#advanced-params-button label {
+	font-size: 12px !important;
+	font-weight: 700 !important;
+	color: var(--pf-muted) !important;
+	text-transform: uppercase !important;
+	letter-spacing: 0.5px !important;
+	margin: 0 !important;
+	cursor: pointer !important;
+}
+#advanced-params-icon { color: var(--pf-accent); }
+#advanced-params { margin-top: 8px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+
+		<form id="provider-form" enctype="multipart/form-data" role="form" method="post" action="/gvsigonline/geocoding/provider_add/">
+
+			<div class="pf-topbar">
+				<h3 class="pf-topbar__title">
+					<i class="fa fa-search"></i> {% trans "Add provider" %}
+				</h3>
+				<button id="submit-button" type="submit" class="btn-pf-save">
+					<i class="fa fa-floppy-o"></i> {% trans "Save" %}
+				</button>
+			</div>
+
+			<div class="pf-card">
+				{% csrf_token %}
+
+				{% if form.errors %}
+				<div class="pf-error-msg">
+					<ul>
+					{% for field in form %}
+						{% if field.errors %}
+							<li>{{field.label}}. {{ field.errors|striptags }}</li>
+						{% endif %}
+					{% endfor %}
+					</ul>
+					{% if form.errors %}{{ form.errors }}{% endif %}
+				</div>
+				{% endif %}
+
+				{% if message %}
+				<div class="pf-error-msg">
+					<p>* {{ message }}</p>
+				</div>
+				{% endif %}
+
+				<div class="row">
+					<div class="col-md-6 form-group">
+						<label for="id_type">{% trans "Type" %}</label>
+						{{ form.type }}
+					</div>
+				</div>
+
+				<div class="row generic-param hidden">
+					<div class="col-md-8 form-group">
+						<label for="id_candidates">{% trans "Candidates URL" %}</label>
+						{{ form.candidates_url }}
+					</div>
+				</div>
+
+				<div class="row generic-param hidden">
+					<div class="col-md-8 form-group">
+						<label for="id_find">{% trans "Find URL" %}</label>
+						{{ form.find_url }}
+					</div>
+				</div>
+
+				<div class="row generic-param hidden">
+					<div class="col-md-8 form-group">
+						<label for="id_reverse">{% trans "Reverse URL" %}</label>
+						{{ form.reverse_url }}
+					</div>
+				</div>
+
+				<div class="row generic-param hidden">
+					<div class="col-md-4 form-group">
+						<label for="id_limit">{% trans "Limit" %}</label>
+						{{ form.max_results }}
+					</div>
+				</div>
+
+				<div class="row user-param cartociudad-param postgres-param hidden">
+					<div class="col-md-6 form-group">
+						<label for="id_workspace">{% trans "Workspace" %}</label>
+						{{ form.workspace }}
+					</div>
+				</div>
+
+				<div class="row user-param cartociudad-param postgres-param hidden">
+					<div class="col-md-6 form-group">
+						<label for="id_datastore">{% trans "Data Store" %}</label>
+						{{ form.datastore }}
+					</div>
+				</div>
+
+				<div class="row user-param postgres-param hidden">
+					<div class="col-md-6 form-group">
+						<label for="id_resource">{% trans "Resource name" %}</label>
+						{{ form.resource }}
+					</div>
+				</div>
+
+				<div class="row user-param postgres-param hidden">
+					<div class="col-md-6 form-group">
+						<label for="id_id_field">{% trans "ID Field" %}</label>
+						{{ form.id_field }}
+					</div>
+				</div>
+
+				<div class="row user-param postgres-param hidden">
+					<div class="col-md-6 form-group">
+						<label for="id_text_field">{% trans "Text Field" %}</label>
+						{{ form.text_field }}
+					</div>
+				</div>
+
+				<div class="row user-param postgres-param hidden">
+					<div class="col-md-6 form-group">
+						<label for="id_geom_field">{% trans "Geom Field" %}</label>
+						{{ form.geom_field }}
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-4 form-group">
+						<label for="id_category">{% trans "Category" %}</label>
+						{{ form.category }}
+					</div>
+				</div>
+
+				<div class="row nominatim-param googlemaps-param icv-param new_cartociudad-param user-param postgres-param">
+					<div class="col-md-12" style="margin-bottom: 24px;">
+						<div class="provider-img">
+							<img id="image-preview" src="" alt="">
+						</div>
+						<div class="provider-img-change">
+							<label>{% trans "Select image" %}</label>
+							<input id="id_image" name="image" type="file" class="file" data-show-preview="true">
 						</div>
 					</div>
-				
-					<div class="box-body">
-						{% csrf_token %}													
-						{% if form.errors %}
-							<div id="form-error" style="color:#ff0000;">
-								<ul>
-								{% for field in form %}
-									{% if field.errors %}
-										<li>{{field.label}}. {{ field.errors|striptags }}</li>
-									{% endif %}	
-								{% endfor %}
-								</ul>
-								{% if form.errors %}
-										{{form.errors}}
-									{% endif %}	
-							</div>
-						{% endif %}
-						
-						{% if message %}
-							<div id="form-error" style="color:#ff0000;">
-								<p>* {{ message }}</p>
-							</div>
-						{% endif %}
-						
-						<div class="row">
-							<div class="col-md-12 form-group">	
-								<label for="id_type">{% trans "Type" %}</label>
-								{{ form.type }}									
-							</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-8 form-group">
+						<label>{% trans "Projects" %}</label>
+						<div>
+							<label class="radio-label">
+								<input type="radio" name="project_mode" value="all" checked> {% trans "All projects" %}
+							</label>
+							<label class="radio-label">
+								<input type="radio" name="project_mode" value="by_project"> {% trans "By project" %}
+							</label>
 						</div>
-
-						<div class="row generic-param hidden">
-							<div class="col-md-12 form-group">
-								<label for="id_candidates">{% trans "Candidates URL" %}</label>
-								{{ form.candidates_url }}						
-							</div>
-						</div>	
-
-						<div class="row generic-param hidden">
-							<div class="col-md-12 form-group">
-								<label for="id_find">{% trans "Find URL" %}</label>
-								{{ form.find_url }}						
-							</div>
-						</div>	
-
-						<div class="row generic-param hidden">
-							<div class="col-md-12 form-group">
-								<label for="id_reverse">{% trans "Reverse URL" %}</label>
-								{{ form.reverse_url }}						
-							</div>
-						</div>	
-
-						<div class="row generic-param hidden">
-							<div class="col-md-12 form-group">
-								<label for="id_limit">{% trans "Limit" %}</label>
-								{{ form.max_results }}						
-							</div>
-						</div>	
-
-						
-						<div class="row user-param cartociudad-param postgres-param hidden">
-							<div class="col-md-12 form-group">	
-								<label for="id_workspace">{% trans "Workspace" %}</label>
-								{{ form.workspace }}									
-							</div>
-						</div>
-						
-						<div class="row user-param cartociudad-param postgres-param hidden">
-							<div class="col-md-12 form-group">
-								<label for="id_datastore">{% trans "Data Store" %}</label>
-								{{ form.datastore }}						
-							</div>
-						</div>
-										
-						<div class="row user-param postgres-param hidden">
-							<div class="col-md-12 form-group">
-								<label for="id_resource">{% trans "Resource name" %}</label>
-								{{ form.resource }}						
-							</div>
-						</div>	
-						
-						<div class="row user-param postgres-param hidden">
-							<div class="col-md-12 form-group">
-								<label for="id_id_field">{% trans "ID Field" %}</label>
-								{{ form.id_field }}						
-							</div>
-						</div>	
-						
-						<div class="row user-param postgres-param hidden">
-							<div class="col-md-12 form-group">
-								<label for="id_text_field">{% trans "Text Field" %}</label>
-								{{ form.text_field }}						
-							</div>
-						</div>	
-						
-						<div class="row user-param postgres-param hidden">
-							<div class="col-md-12 form-group">
-								<label for="id_geom_field">{% trans "Geom Field" %}</label>
-								{{ form.geom_field }}						
-							</div>
-						</div>	
-						
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label for="id_category">{% trans "Category" %}</label>
-								{{ form.category }}						
-							</div>
-						</div>	
-						<div class="row nominatim-param googlemaps-param icv-param new_cartociudad-param user-param postgres-param">
-							<div class="col-md-12" style="margin-bottom: 40px;">
-								<div class="provider-img">
-									<img id="image-preview" src="" alt="">
-								</div>
-								<div class="provider-img-change">
-									<label>{% trans "Select image" %}</label>
-									<input id="id_image" name="image" type="file" class="file" data-show-preview="true">						
-								</div>
-							</div>	
-						</div>	
-
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label for="id_project">{% trans "Projects" %}</label>
-								<div>
-									<label class="radio-label">
-										<input type="radio" name="project_mode" value="all" checked> {% trans "All projects" %} 
-									</label>
-									<label class="radio-label">
-										<input type="radio" name="project_mode" value="by_project"> {% trans "By project" %} 
-									</label>
-								</div>
-								<div id="project-selector" class="hidden">
-									<div style="flex: 1;">
-										{{ form.projects }}
-										<div class="box box-default" style="margin-top: 20px;">
-											<div class="box-header with-border">
-												<span class="text" style="font-weight: bold;">{% trans "Project list" %}</span>
-											</div>
-											<div class="box-body" id="selected-projects-list">
-											</div>
-										</div>
-									</div>
-									<div class="buttons-container">
-										<button type="button" id="add-selected" class="btn btn-default"> {% trans "Add selected" %} </button>
-										<button type="button" id="add-all" class="btn btn-default"> {% trans "Add all" %} </button>
-										<button type="button" id="clear-all" class="btn btn-default"> {% trans "Delete all" %} </button>
-									</div>
+						<div id="project-selector" class="hidden">
+							<div style="flex: 1;">
+								{{ form.projects }}
+								<div class="pf-sub-card">
+									<div class="pf-sub-card__header">{% trans "Project list" %}</div>
+									<div class="pf-sub-card__body" id="selected-projects-list"></div>
 								</div>
 							</div>
-						</div>
-										
-						<div class="row nominatim-param googlemaps-param icv-param new_cartociudad-param" id="advanced-params-row">
-							<div class="col-md-12 form-group">
-								<div id="advanced-params-button">
-								<label for="advance-params">{% trans "Advanced params" %}</label>
-								<div class="pull-right"><i id="advanced-params-icon" class="fa fa-plus"></i></div>
-								</div>
-								<div id="advanced-params">
-									<textarea id="params" name="params" form="provider-form">
-										{{ form.params }}
-									</textarea>
-								</div>			
+							<div class="buttons-container">
+								<button type="button" id="add-selected" class="btn">{% trans "Add selected" %}</button>
+								<button type="button" id="add-all" class="btn">{% trans "Add all" %}</button>
+								<button type="button" id="clear-all" class="btn">{% trans "Delete all" %}</button>
 							</div>
 						</div>
-							
-					</div>	
-				</form>		
-			</div>
-		</div>				
+					</div>
+				</div>
+
+				<div class="row nominatim-param googlemaps-param icv-param new_cartociudad-param" id="advanced-params-row">
+					<div class="col-md-8 form-group">
+						<div id="advanced-params-button">
+							<label>{% trans "Advanced params" %}</label>
+							<div><i id="advanced-params-icon" class="fa fa-plus"></i></div>
+						</div>
+						<div id="advanced-params">
+							<textarea id="params" name="params" form="provider-form">{{ form.params }}</textarea>
+						</div>
+					</div>
+				</div>
+
+			</div><!-- /.pf-card -->
+		</form>
+
 	</div>
+</div>
 {% endblock %}
 
 {% block extra-scripts %}
@@ -191,11 +424,9 @@
 	$('#menu-manage-plugins').addClass("active");
 	$('#submenu-geocoding').addClass("active");
 
-
 	var save_label = gettext("Save");
 	var continue_label = gettext("Continue");
-	
-//	var settings = JSON.parse("{\"datastore_id\": 2, \"resource\": \"municipio\", \"text_field\": \"nombre\", \"id_field\": \"id\", \"geom_field\": \"geom\"}");
+
  	var settings = JSON.parse('{{ settings | escapejs }}');
 
 	var connectionParams = document.getElementById('params');
@@ -209,22 +440,17 @@
 	window.GOL = window.GOL || {};
 	window.GOL.DS_ADD = window.GOL.DS_ADD || {};
 	window.GOL.DS_ADD.dstypeChanged = function(type) {
-		
 		codemirror.setValue('');		
 		var code = '';
-		
 		$('#select-file-row').css('display', 'none');
 		$('#connection-params-row').css('display', 'block');
 		code += JSON.stringify(settings[type], null, "\t");
-			
 		codemirror.setValue(code);
-	
 	}
 	
 	$('.save-button').click( function() {
 		$("body").overlay();
 	});
-	
 	
 	$('#id_type').change( function() {
 		updateForm($('#id_type').val());
@@ -234,20 +460,17 @@
 	var id_datastore = "";
 	var id_resource = "";
 	
-	
 	function updateForm(type){
 		$("#id_type > option").each(function() {
 			$("."+this.value+"-param").addClass("hidden");
 		});
 		$("."+type+"-param").removeClass("hidden");
 		
-		
 		if(type == "cartociudad" || type == "user" || type == "postgres" ){
 			$("#submit-button").html("<i class=\"fa fa-chevron-right\" aria-hidden=\"true\"></i> " + continue_label);
 		}else{
 			$("#submit-button").html("<i class=\"fa fa-floppy-o margin-r-5\"></i> " + save_label);
 		}
-		
 		GOL.DS_ADD.dstypeChanged(type);
 	}
 	
@@ -257,7 +480,6 @@
 			value: '__disabled__',
 			text: placeholderOptionText,
 			disabled: 'disabled',
-			
 		};
 		if (placeholderSelected) {
 			attribs['selected'] = 'selected';
@@ -277,7 +499,6 @@
 				var name_select = $("#id_datastore");
 				var previousValue = name_select.val();
 				var placeholderSelected = true;
-				
 				if (data==null || data.length==0) {
 					var text = "{% trans 'Data store contains no resources to publish' %}";
 					rebuildSelect(name_select, text, true);
@@ -286,31 +507,18 @@
 				}
 				var options = [];
 				for (var i=0; i<data.length; i++) {
-					var attribs = {
-						value: data[i],
-						text: data[i]
-					};
-					if (previousValue == data[i]) {
-						attribs['selected']='true';
-						placeholderSelected = false;
-					}
+					var attribs = { value: data[i], text: data[i] };
+					if (previousValue == data[i]) { attribs['selected']='true'; placeholderSelected = false; }
 					options.push($('<option>', attribs));
 				}
-				var text = '{% trans "Choose dataStore" %}';
-				rebuildSelect(name_select, text, placeholderSelected, options);
+				rebuildSelect(name_select, '{% trans "Choose dataStore" %}', placeholderSelected, options);
 				$.overlayout();
-				
 			}).fail(function() {
-				var name_select = $("#id_datastore");
-				var text = "{% trans 'Service is unavailable' %}";
-				rebuildSelect(name_select, text, true);
+				rebuildSelect($("#id_datastore"), "{% trans 'Service is unavailable' %}", true);
 				$.overlayout();
 			});
-		}
-		else {
-			var name_select = $("#id_datastore");
-			var text = "{% trans 'No valid workspace selected' %}";
-			rebuildSelect(name_select, text, true);
+		} else {
+			rebuildSelect($("#id_datastore"), "{% trans 'No valid workspace selected' %}", true);
 		}
 	};
 	
@@ -324,50 +532,31 @@
 						var name_select = $("#id_resource");
 						var previousValue = name_select.val();
 						var placeholderSelected = true;
-						
 						if (data==null || data.length==0) {
-							var text = "{% trans 'Data store contains no resources to publish' %}";
-							rebuildSelect(name_select, text, true);
-							$.overlayout();
-							return;
+							rebuildSelect(name_select, "{% trans 'Data store contains no resources to publish' %}", true);
+							$.overlayout(); return;
 						}
 						var options = [];
 						for (var i=0; i<data.length; i++) {
-							var attribs = {
-								value: data[i],
-								text: data[i]
-							};
-							if (previousValue == data[i]) {
-								attribs['selected']='true';
-								placeholderSelected = false;
-							}
+							var attribs = { value: data[i], text: data[i] };
+							if (previousValue == data[i]) { attribs['selected']='true'; placeholderSelected = false; }
 							options.push($('<option>', attribs));
 						}
-						var text = '{% trans "Choose resource" %}';
-						rebuildSelect(name_select, text, placeholderSelected, options);
+						rebuildSelect(name_select, '{% trans "Choose resource" %}', placeholderSelected, options);
 						$.overlayout();
 					}).fail(function() {
-						var name_select = $("#id_resource");
-						var text = "{% trans 'Service is unavailable' %}";
-						rebuildSelect(name_select, text, true);
+						rebuildSelect($("#id_resource"), "{% trans 'Service is unavailable' %}", true);
 						$.overlayout();
 					});
 				}
-				
 			}).fail(function() {
-				var name_select = $("#id_resource");
-				var text = "{% trans 'Service is unavailable' %}";
-				rebuildSelect(name_select, text, true);
+				rebuildSelect($("#id_resource"), "{% trans 'Service is unavailable' %}", true);
 				$.overlayout();
 			});
-		}
-		else {
-			var name_select = $("#id_resource");
-			var text = "{% trans 'No valid data store selected' %}";
-			rebuildSelect(name_select, text, true);
+		} else {
+			rebuildSelect($("#id_resource"), "{% trans 'No valid data store selected' %}", true);
 		}
 	};
-	
 	
 	function updateFieldsList(id_workspace, id_datastore, id_resource, field) {
 		if (id_workspace && id_datastore && id_resource) {
@@ -377,72 +566,48 @@
 				var name_select = $("#"+field);
 				var previousValue = name_select.val();
 				var placeholderSelected = true;
-				
 				if (data==null || data.length==0) {
-					var text = "{% trans 'Resource contains no fields' %}";
-					rebuildSelect(name_select, text, true);
-					$.overlayout();
-					return;
+					rebuildSelect(name_select, "{% trans 'Resource contains no fields' %}", true);
+					$.overlayout(); return;
 				}
 				var options = [];
 				for (var i=0; i<data.length; i++) {
-					var attribs = {
-						value: data[i]["name"],
-						text: data[i]["title-" + language]
-					};
-					if (previousValue == data[i]["name"]) {
-						attribs['selected']='true';
-						placeholderSelected = false;
-					}
+					var attribs = { value: data[i]["name"], text: data[i]["title-" + language] };
+					if (previousValue == data[i]["name"]) { attribs['selected']='true'; placeholderSelected = false; }
 					options.push($('<option>', attribs));
 				}
-				var text = '{% trans "Choose field" %}';
-				rebuildSelect(name_select, text, placeholderSelected, options);
+				rebuildSelect(name_select, '{% trans "Choose field" %}', placeholderSelected, options);
 				$.overlayout();
-				
 			}).fail(function() {
-				var name_select = $("#"+field);
-				var text = "{% trans 'Service is unavailable' %}";
-				rebuildSelect(name_select, text, true);
+				rebuildSelect($("#"+field), "{% trans 'Service is unavailable' %}", true);
 				$.overlayout();
 			});
-		}
-		else {
-			var name_select = $("#"+field);
-			var text = "{% trans 'No valid data store selected' %}";
-			rebuildSelect(name_select, text, true);
+		} else {
+			rebuildSelect($("#"+field), "{% trans 'No valid data store selected' %}", true);
 		}
 	};
 	
-	 function readURL(input) {
-	        if (input.files && input.files[0]) {
-	            var reader = new FileReader();
-	            
-	            reader.onload = function (e) {
-	                $('#image-preview').attr('src', e.target.result);
-	            }
-	            
-	            reader.readAsDataURL(input.files[0]);
-	        }
-	    }
-	
-	
-	$("#id_image").change(function(){
-     readURL(this);
-	 });
+	function readURL(input) {
+		if (input.files && input.files[0]) {
+			var reader = new FileReader();
+			reader.onload = function (e) { $('#image-preview').attr('src', e.target.result); }
+			reader.readAsDataURL(input.files[0]);
+		}
+	}
+
+	$("#id_image").change(function(){ readURL(this); });
 	
 	$('#advanced-params').hide();
-	 $('#advanced-params-button').click(function(){
-		 if($("#advanced-params-icon").hasClass("fa-plus")){
-			 $("#advanced-params-icon").removeClass("fa-plus").addClass("fa-minus");
-		 }else{
-			 $("#advanced-params-icon").removeClass("fa-minus").addClass("fa-plus");
-		 }
-	         $('#advanced-params').slideToggle("slow");
-	         GOL.DS_ADD.dstypeChanged($('#id_type').val());
-	 });
-	
-	
+	$('#advanced-params-button').click(function(){
+		if($("#advanced-params-icon").hasClass("fa-plus")){
+			$("#advanced-params-icon").removeClass("fa-plus").addClass("fa-minus");
+		}else{
+			$("#advanced-params-icon").removeClass("fa-minus").addClass("fa-plus");
+		}
+		$('#advanced-params').slideToggle("slow");
+		GOL.DS_ADD.dstypeChanged($('#id_type').val());
+	});
+
 	$().ready(function() {
 		updateDataStoreList(id_workspace);
 		updateResourceList(id_workspace, id_datastore);
@@ -469,7 +634,6 @@
 
 		$('#provider-form').submit(function(e) {
 			var projectMode = $('input[name="project_mode"]:checked').val();
-			
 			if (projectMode === 'all') {
 				$('#id_projects option').prop('selected', true);
 			} else {
@@ -478,15 +642,10 @@
 				$('#selected-projects-list .selected-project').each(function() {
 					selectedProjectIds.push($(this).data('id'));
 				});
-				
 				if (selectedProjectIds.length > 0) {
 					selectedProjectIds.forEach(function(projectId) {
 						$('#id_projects option[value="' + projectId + '"]').prop('selected', true);
-						$('<input>').attr({
-							type: 'hidden',
-							name: 'projects',
-							value: projectId
-						}).appendTo('#provider-form');
+						$('<input>').attr({ type: 'hidden', name: 'projects', value: projectId }).appendTo('#provider-form');
 					});
 				} else {
 					e.preventDefault();
@@ -503,13 +662,8 @@
 				var projectText = selectedProject.text();
 				if (!$('#selected-project-' + projectId).length) {
 					var projectHtml = '<div id="selected-project-' + projectId + '" class="selected-project" data-id="' + projectId + '">' +
-						'<div class="project-item">' +
-						'<span class="project-name">' + projectText + '</span>' +
-						'<button type="button" class="btn btn-xs btn-danger remove-project" data-id="' + projectId + '">' +
-						'<i class="fa fa-times"></i>' +
-						'</button>' +
-						'</div>' +
-						'</div>';
+						'<div class="project-item"><span class="project-name">' + projectText + '</span>' +
+						'<button type="button" class="btn btn-xs btn-danger remove-project" data-id="' + projectId + '"><i class="fa fa-times"></i></button></div></div>';
 					$('#selected-projects-list').append(projectHtml);
 				}
 			}
@@ -517,15 +671,10 @@
 
 		$('#remove-selected').click(function() {
 			var selectedProject = $('#id_projects option:selected');
-			if (selectedProject.length > 0) {
-				var projectId = selectedProject.val();
-				$('#selected-project-' + projectId).remove();
-			}
+			if (selectedProject.length > 0) { $('#selected-project-' + selectedProject.val()).remove(); }
 		});
 
-		$('#clear-all').click(function() {
-			$('#selected-projects-list').empty();
-		});
+		$('#clear-all').click(function() { $('#selected-projects-list').empty(); });
 
 		$('#add-all').click(function() {
 			$('#id_projects option').each(function() {
@@ -533,40 +682,30 @@
 				var projectText = $(this).text();
 				if (projectId && projectId !== '__disabled__' && !$('#selected-project-' + projectId).length) {
 					var projectHtml = '<div id="selected-project-' + projectId + '" class="selected-project" data-id="' + projectId + '">' +
-						'<div class="project-item">' +
-						'<span class="project-name">' + projectText + '</span>' +
-						'<button type="button" class="btn btn-xs btn-danger remove-project" data-id="' + projectId + '">' +
-						'<i class="fa fa-times"></i>' +
-						'</button>' +
-						'</div>' +
-						'</div>';
+						'<div class="project-item"><span class="project-name">' + projectText + '</span>' +
+						'<button type="button" class="btn btn-xs btn-danger remove-project" data-id="' + projectId + '"><i class="fa fa-times"></i></button></div></div>';
 					$('#selected-projects-list').append(projectHtml);
 				}
 			});
 		});
 
-		$(document).on('click', '.remove-project', function() {
-			$(this).closest('.selected-project').remove();
-		});
+		$(document).on('click', '.remove-project', function() { $(this).closest('.selected-project').remove(); });
 
 		$("#id_workspace").change(function() {
 			id_workspace = $('option:selected', $(this)).val();
 			updateDataStoreList(id_workspace);
 		});
-		
 		$("#id_datastore").change(function() {
 			id_datastore = $('option:selected', $(this)).val();
 			updateResourceList(id_workspace, id_datastore);
 		});
-		
 		$("#id_resource").change(function() {
 			id_resource = $('option:selected', $(this)).val();
 			updateFieldsList(id_workspace, id_datastore, id_resource, "id_id_field");
 			updateFieldsList(id_workspace, id_datastore, id_resource, "id_text_field");
 			updateFieldsList(id_workspace, id_datastore, id_resource, "id_geom_field");
 		});
-		
-		 $(".select2").css("width", "100%");
+		$(".select2").css("width", "100%");
 	});
 </script>
 {% endblock %}
