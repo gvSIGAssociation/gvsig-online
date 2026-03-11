@@ -3,39 +3,173 @@
 {% load i18n %}
 {% load l10n %}
 
+{% block header %}
+<style>
+:root {
+	--pf-accent:    #4a7fa5;
+	--pf-accent-dk: #2d5f80;
+	--pf-text:      #2e3a45;
+	--pf-muted:     #7b8a96;
+	--pf-border:    #e8ecef;
+	--pf-bg:        #f4f6f8;
+	--pf-white:     #ffffff;
+	--pf-radius:    10px;
+	--pf-shadow:    0 2px 12px rgba(0,0,0,0.08);
+	--pf-transition: 0.2s ease;
+}
+.pf-topbar {
+	display: flex;
+	align-items: flex-start;
+	justify-content: flex-end;
+	margin-bottom: 16px;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+.btn-pf-save {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: var(--pf-accent);
+	color: #fff;
+	border: none;
+	border-radius: 6px;
+	font-size: 13px;
+	font-weight: 600;
+	padding: 8px 20px;
+	cursor: pointer;
+	transition: background var(--pf-transition);
+	letter-spacing: 0.2px;
+	white-space: nowrap;
+}
+.btn-pf-save:hover { background: var(--pf-accent-dk); color: #fff; }
+.pf-error-msg {
+	display: none;
+	background: #fde8e8;
+	border: 1px solid #f5c6c6;
+	border-left: 4px solid #c0392b;
+	border-radius: 6px;
+	padding: 10px 14px;
+	color: #c0392b;
+	font-size: 13px;
+}
+.pf-error-msg:has(li), .pf-error-msg:has(p:not(:empty)), .pf-error-msg:has(ul:not(:empty)) { display: block; }
+.pf-messages { list-style: none; padding: 0; margin: 0 0 16px; }
+.pf-messages li {
+	border-radius: 6px;
+	padding: 9px 14px;
+	font-size: 13px;
+	margin-bottom: 6px;
+}
+.pf-messages li.info  { background: #e6f4fb; border: 1px solid #a8d5ec; color: #1a6e96; }
+.pf-messages li.error { background: #fde8e8; border: 1px solid #f5c6c6; color: #c0392b; }
+.nav-tabs {
+	border-bottom: 2px solid var(--pf-border);
+	margin-bottom: 0;
+}
+.nav-tabs > li > a {
+	color: var(--pf-muted);
+	font-size: 13px;
+	font-weight: 600;
+	border: none;
+	border-bottom: 2px solid transparent;
+	padding: 10px 18px;
+	margin-bottom: -2px;
+	border-radius: 0;
+	transition: color var(--pf-transition), border-color var(--pf-transition);
+}
+.nav-tabs > li > a:hover {
+	color: var(--pf-accent);
+	background: transparent;
+	border-color: transparent;
+}
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+	color: var(--pf-accent);
+	background: transparent;
+	border: none;
+	border-bottom: 2px solid var(--pf-accent);
+}
+.tab-content > .tab-pane > .box,
+.tab-content > .tab-pane > .row > .col-md-9 > .box,
+.tab-content > .tab-pane > .row > .col-md-12 > .box {
+	border-radius: 0 0 var(--pf-radius) var(--pf-radius);
+	box-shadow: var(--pf-shadow);
+	border: 1px solid var(--pf-border);
+	border-top: none;
+}
+.tab-content .form-control {
+	border-radius: 6px;
+	border-color: var(--pf-border);
+	font-size: 13px;
+	height: 36px;
+	color: var(--pf-text);
+	transition: border-color var(--pf-transition), box-shadow var(--pf-transition);
+}
+.tab-content textarea.form-control { height: auto; }
+.tab-content .form-control:focus {
+	border-color: var(--pf-accent);
+	box-shadow: 0 0 0 3px rgba(74,127,165,0.12);
+	outline: none;
+}
+.tab-content label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--pf-muted);
+}
+.tab-content .products-list > .item {
+	border-radius: 6px;
+	margin-bottom: 6px;
+	padding: 10px 12px;
+	background: var(--pf-white);
+	border: 1px solid var(--pf-border);
+	transition: background var(--pf-transition), border-color var(--pf-transition);
+}
+.tab-content .products-list > .item:hover {
+	background: #f0f6fb;
+	border-color: #c8dcec;
+}
+.modal-content {
+	border-radius: var(--pf-radius);
+	border: none;
+	box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+.modal-header { border-bottom: 1px solid var(--pf-border); padding: 16px 20px; }
+.modal-title { font-size: 15px; font-weight: 700; color: var(--pf-text); }
+.modal-body { padding: 20px; font-size: 13px; color: var(--pf-muted); }
+.modal-footer { border-top: 1px solid var(--pf-border); padding: 14px 20px; }
+.modal-footer .btn { border-radius: 6px; font-size: 13px; font-weight: 600; padding: 6px 16px; }
+.modal-footer .btn-default { border-color: var(--pf-border); color: var(--pf-muted); }
+#button-extend-to-layers-accept {
+	background: var(--pf-accent); border-color: var(--pf-accent); color: #fff;
+}
+#button-extend-to-layers-accept:hover {
+	background: var(--pf-accent-dk); border-color: var(--pf-accent-dk);
+}
+</style>
+{% endblock %}
+
 {% block content %}	
 	<div class="row">
 		<div class="col-md-12">
 			<form id="application-form" enctype="multipart/form-data" role="form" method="post" action="/gvsigonline/core/application_update/{{appid}}/">
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<div class="box-tools pull-right">
-							<button id="save_button" class="save_button btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Update" %}</button>					
-						</div>
-					</div>
-					<div class="row" style="padding-left: 30px;">
-						{% csrf_token %}
-						{% if message %}
-						<div id="form-error" style="color:#ff0000;">
-							<p>* {{ message }}</p>
-						</div>
-						{% endif %}
-					</div>
+				<div class="pf-topbar">
+					{% csrf_token %}
+					{% if message %}
+					<div class="pf-error-msg" style="flex:1;">* {{ message }}</div>
+					{% endif %}
+					<button id="save_button" class="save_button btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Update" %}</button>
 				</div>
 				{% if messages %}
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<ul class="messages" style="list-style: none;margin-left: -40px;">
-							{% for message in messages %}
-								{% if message.tags == "info" %}
-								<li style="border: 1px solid green; color: green; padding: 5px; margin-bottom: 5px;">{{ message }}</li>
-								{% elif message.tags == "error" %}
-								<li style="border: 1px solid red; color: red; padding: 5px; margin-bottom: 5px;">{{ message }}</li>
-								{% endif %}
-							{% endfor %}
-						</ul>
-					</div>
-				</div>
+				<ul class="pf-messages">
+					{% for message in messages %}
+						{% if message.tags == "info" %}
+						<li class="info">{{ message }}</li>
+						{% elif message.tags == "error" %}
+						<li class="error">{{ message }}</li>
+						{% endif %}
+					{% endfor %}
+				</ul>
 				{% endif %}
 				<ul id="application-update-tabs" class="nav nav-tabs">
               		<li class="active"><a data-id="0" href="#tab-application-main" data-toggle="tab">{% trans "General" %}</a></li>
@@ -47,7 +181,7 @@
               			<div class="box">
               				<div class="box-body">
               					<input type="hidden" id="application-name" name="application-name" value="{{application.name}}"/>
-						
+					
 								<div class="row">
 									<div class="col-md-12 form-group">
 										<label for="application-title">{% trans "Title" %}</label>
@@ -93,62 +227,62 @@
               		
               		<div class="tab-pane" id="tab-application-usergroups">
               			<div class="row">
-							<div class="col-md-12">
-								<div id="user-list-box" class="box searchable-list-box">
-									<div class="box-header" style="padding-bottom:0px">
-										<label for="is_public" class="form-label" title="{% trans 'Application will be readable by everyone if public' %}">
-											<span>{% trans "application.Is public?" %}</span>
-											<input style="position:absolute; margin-left: 10px" type="checkbox" name="is_public" id="is_public" {% if application.is_public %}checked {% endif %}/>
-										</label>
-										<div class="form-horizontal">
-											<div class="form-group" style="margin-left: 0px; margin-right: 0px">
-											<div class="col-md-6 ">
-											<label class="control-label">{% trans "Allow access to the application for the following user groups:" %}</label>
-											</div>
-											{% if user.is_superuser %}
-											<div class="col-md-4 ">
-											<input type="text" class="search form-control" placeHolder="{% trans 'Search user group...' %}" />
-											</div>
-											<div class="col-md-2 ">
-											<button id="extend-to-lyrs-btn" type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#modal-extend-to-layers"><i class="fa fa-cogs margin-r-5"></i>{% trans "Extend to layers" %}</button>
-											</div>
-											{% else %}
-											<div class="col-md-6 ">
-											<input type="text" class="search form-control" placeHolder="{% trans 'Search user group...' %}" />
-											</div>
-											{% endif %}
-											</div>
+						<div class="col-md-12">
+							<div id="user-list-box" class="box searchable-list-box">
+								<div class="box-header" style="padding-bottom:0px">
+									<label for="is_public" class="form-label" title="{% trans 'Application will be readable by everyone if public' %}">
+										<span>{% trans "application.Is public?" %}</span>
+										<input style="position:absolute; margin-left: 10px" type="checkbox" name="is_public" id="is_public" {% if application.is_public %}checked {% endif %}/>
+									</label>
+									<div class="form-horizontal">
+										<div class="form-group" style="margin-left: 0px; margin-right: 0px">
+										<div class="col-md-6 ">
+										<label class="control-label">{% trans "Allow access to the application for the following user groups:" %}</label>
+										</div>
+										{% if user.is_superuser %}
+										<div class="col-md-4 ">
+										<input type="text" class="search form-control" placeHolder="{% trans 'Search user group...' %}" />
+										</div>
+										<div class="col-md-2 ">
+										<button id="extend-to-lyrs-btn" type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#modal-extend-to-layers"><i class="fa fa-cogs margin-r-5"></i>{% trans "Extend to layers" %}</button>
+										</div>
+										{% else %}
+										<div class="col-md-6 ">
+										<input type="text" class="search form-control" placeHolder="{% trans 'Search user group...' %}" />
+										</div>
+										{% endif %}
 										</div>
 									</div>
-									<div class="box-body" style="padding-top: 0px">
-										<ul class="products-list product-list-in-box list">
-											{% for group in groups %}
-											<li class="item">
-												<div class="product-img">
-													<img src="{% static "img/users.png" %}" alt="Users Image">
-												</div>
-												<div class="product-info">
-													<a href="javascript:void(0)" class="product-title"><span class="searchable-user">{{group.name}}</span>
-														<div class="checkbox pull-right">
-															<label>
-																{% if group.checked %}
-																	<input class="application-usergroup-checkbox" type="checkbox" name="usergroup-{{group.name}}" id="usergroup-{{group.name}}" checked/>{% trans "Assign user group" %}
-																{% else %}
-																	<input class="application-usergroup-checkbox" type="checkbox" name="usergroup-{{group.name}}" id="usergroup-{{group.name}}"/>{% trans "Assign user group" %}
-																{% endif %}
-															</label>
-														</div>
-													</a> 
-													<span class="product-description">{{group.description}}</span>
-												</div>
-											</li> 
-											{% endfor %}
-										</ul>
-										<ul class="pagination"></ul>
-									</div>
+								</div>
+								<div class="box-body" style="padding-top: 0px">
+									<ul class="products-list product-list-in-box list">
+										{% for group in groups %}
+										<li class="item">
+											<div class="product-img">
+												<img src="{% static "img/users.png" %}" alt="Users Image">
+											</div>
+											<div class="product-info">
+												<a href="javascript:void(0)" class="product-title"><span class="searchable-user">{{group.name}}</span>
+													<div class="checkbox pull-right">
+														<label>
+															{% if group.checked %}
+																<input class="application-usergroup-checkbox" type="checkbox" name="usergroup-{{group.name}}" id="usergroup-{{group.name}}" checked/>{% trans "Assign user group" %}
+															{% else %}
+																<input class="application-usergroup-checkbox" type="checkbox" name="usergroup-{{group.name}}" id="usergroup-{{group.name}}"/>{% trans "Assign user group" %}
+															{% endif %}
+														</label>
+													</div>
+												</a> 
+												<span class="product-description">{{group.description}}</span>
+											</div>
+										</li> 
+										{% endfor %}
+									</ul>
+									<ul class="pagination"></ul>
 								</div>
 							</div>
 						</div>
+					</div>
               		</div>   		
           		</div>
           	</form>
@@ -189,12 +323,12 @@
 
 	$().ready(function() {
 		var searcheableList = new List('user-list-box', {
-	  		valueNames: ['searchable-user'],
-	  		listClass:'list',
-	  		searchClass: 'search',
-	  		page: 6,
-	  		pagination: false
-	  	});
+  			valueNames: ['searchable-user'],
+  			listClass:'list',
+  			searchClass: 'search',
+  			page: 6,
+  			pagination: false
+  		});
 		
 		$(".save_button").click(function(e){
 			e.preventDefault(); // prevents default
