@@ -954,6 +954,7 @@
   color: #9aabb5 !important;
   font-size: 12px !important;
   padding: 10px 20px !important;
+  overflow: hidden !important;
 }
 
 /* Scrollbar del sidebar */
@@ -1370,6 +1371,7 @@
   color: #9aabb5 !important;
   font-size: 12px !important;
   padding: 10px 20px !important;
+  overflow: hidden !important;
 }
 
 /* =================================================================
