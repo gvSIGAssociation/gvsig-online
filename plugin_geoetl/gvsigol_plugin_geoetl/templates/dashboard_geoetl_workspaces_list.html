@@ -471,14 +471,24 @@
 
 								<div class="row">
 									<div class="col-md-12">
-										<label class="col-form-label">{% trans "SQL before running workspace" %}</a></label>
+										<label class="col-form-label">
+											{% trans "SQL before running workspace" %}
+											<span class="sql-editor-hint" title="{% trans 'Double-click to expand' %}">
+												<i class="fa fa-expand"></i> {% trans "Double-click to expand" %}
+											</span>
+										</label>
 										<textarea id="sql-before" rows="3" class="form-control"></textarea>
 									</div>
 								</div>
 
 								<div class="row">
 									<div class="col-md-12">
-										<label class="col-form-label">{% trans "SQL after running workspace" %}</a></label>
+										<label class="col-form-label">
+											{% trans "SQL after running workspace" %}
+											<span class="sql-editor-hint" title="{% trans 'Double-click to expand' %}">
+												<i class="fa fa-expand"></i> {% trans "Double-click to expand" %}
+											</span>
+										</label>
 										<textarea id="sql-after" rows="3" class="form-control"></textarea>
 									</div>
 								</div>
@@ -692,16 +702,78 @@
 
 {% endif %}
 
+<!-- Modal SQL Editor expandido -->
+<div id="modal-sql-fullscreen" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
+	<div class="modal-dialog modal-lg" role="document" style="width:92%; max-width:1400px; margin:30px auto;">
+		<div class="modal-content" style="height:calc(100vh - 60px); display:flex; flex-direction:column;">
+			<div class="modal-header" style="flex-shrink:0;">
+				<button type="button" class="close" id="sql-modal-close-btn" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="sql-modal-title">{% trans "SQL Editor" %}</h4>
+			</div>
+			<div class="modal-body" style="flex:1; display:flex; flex-direction:column; padding:10px; overflow:hidden;">
+				<textarea id="sql-fullscreen-textarea" style="display:none;"></textarea>
+			</div>
+			<div class="modal-footer" style="flex-shrink:0;">
+				<small class="text-muted" style="float:left; margin-top:6px;">
+					<i class="fa fa-keyboard-o"></i> Ctrl+Enter {% trans "to apply" %} &nbsp;|&nbsp; Esc {% trans "to close without saving" %}
+				</small>
+				<button type="button" class="btn btn-default" id="sql-modal-cancel-btn">{% trans "Close without saving" %}</button>
+				<button type="button" class="btn btn-primary" id="sql-modal-apply-btn">
+					<i class="fa fa-check"></i> {% trans "Apply" %}
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
 {% endblock %}
 
 {% block extra-scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/sql/sql.min.js"></script>
 
+<style>
+/* Hint de doble-click junto al label */
+.sql-editor-hint {
+	font-size: 11px;
+	color: #888;
+	margin-left: 8px;
+	cursor: pointer;
+	user-select: none;
+	font-weight: normal;
+}
+.sql-editor-hint i { font-size: 11px; }
+
+/* Cursor pointer sobre el wrapper de CodeMirror pequeño */
+.sql-editor-small .CodeMirror,
+.sql-editor-small {
+	cursor: pointer !important;
+}
+
+/* Editor grande en el modal */
+#sql-fullscreen-textarea + .CodeMirror {
+	height: 100% !important;
+	font-size: 14px;
+}
+#modal-sql-fullscreen .modal-body .CodeMirror-scroll {
+	min-height: 200px;
+}
+#modal-sql-fullscreen .modal-body > .CodeMirror {
+	height: 100%;
+	border-radius: 4px;
+}
+</style>
+
 <script>
 // Inicializar CodeMirror para los campos SQL
 var sqlBeforeEditor = null;
 var sqlAfterEditor = null;
+
+// Editor del modal expandido
+var sqlFullscreenEditor = null;
+var sqlFullscreenTarget = null; // 'before' | 'after'
 
 $(document).ready(function() {
 	var sqlBeforeTextarea = document.getElementById('sql-before');
@@ -720,6 +792,11 @@ $(document).ready(function() {
 		sqlBeforeEditor.setSize(null, 70);
 		sqlBeforeEditor.getWrapperElement().classList.add('sql-editor-small');
 		setTimeout(function() { sqlBeforeEditor.refresh(); }, 100);
+
+		// Doble-click abre el modal expandido
+		sqlBeforeEditor.getWrapperElement().addEventListener('dblclick', function() {
+			openSqlModal('before');
+		});
 	}
 	
 	if (sqlAfterTextarea) {
@@ -735,7 +812,25 @@ $(document).ready(function() {
 		sqlAfterEditor.setSize(null, 70);
 		sqlAfterEditor.getWrapperElement().classList.add('sql-editor-small');
 		setTimeout(function() { sqlAfterEditor.refresh(); }, 100);
+
+		// Doble-click abre el modal expandido
+		sqlAfterEditor.getWrapperElement().addEventListener('dblclick', function() {
+			openSqlModal('after');
+		});
 	}
+
+	// También los hints del label abren el modal
+	$(document).on('click', '.sql-editor-hint', function() {
+		var label = $(this).closest('label');
+		if (label.attr('for') === 'sql-before' || label.text().indexOf('{% trans "SQL before" %}') >= 0) {
+			openSqlModal('before');
+		} else {
+			openSqlModal('after');
+		}
+	});
+	// Delegación más robusta por orden en el DOM
+	$('#more-options-sql .row:eq(0) .sql-editor-hint').on('click', function() { openSqlModal('before'); });
+	$('#more-options-sql .row:eq(1) .sql-editor-hint').on('click', function() { openSqlModal('after'); });
 	
 	// Refrescar CodeMirror cuando se muestra la pestaña SQL
 	$('a[href="#sqlparams"]').on('shown.bs.tab', function() {
@@ -744,13 +839,101 @@ $(document).ready(function() {
 	});
 	
 	// Refrescar CodeMirror cuando se abre el modal de parámetros
-	$('#modal-params').on('shown.bs.modal', function() {
+	$('#modal-set-parameters-workspace').on('shown.bs.modal', function() {
 		setTimeout(function() {
 			if (sqlBeforeEditor) sqlBeforeEditor.refresh();
 			if (sqlAfterEditor) sqlAfterEditor.refresh();
 		}, 100);
 	});
+
+	// Inicializar CodeMirror del modal fullscreen al abrirse
+	$('#modal-sql-fullscreen').on('shown.bs.modal', function() {
+		if (!sqlFullscreenEditor) {
+			sqlFullscreenEditor = CodeMirror.fromTextArea(
+				document.getElementById('sql-fullscreen-textarea'), {
+					mode: 'text/x-pgsql',
+					theme: 'xq-dark',
+					lineNumbers: true,
+					indentWithTabs: true,
+					smartIndent: true,
+					matchBrackets: true,
+					lineWrapping: true,
+					autofocus: true,
+					extraKeys: {
+						"Ctrl-Enter": function() { applySqlModal(); }
+					}
+				}
+			);
+		}
+		// Ajustar altura al contenedor del modal-body
+		var bodyH = $('#modal-sql-fullscreen .modal-body').height();
+		sqlFullscreenEditor.setSize(null, bodyH);
+		sqlFullscreenEditor.refresh();
+		sqlFullscreenEditor.focus();
+	});
+
+	// Aplicar al pulsar el botón
+	$('#sql-modal-apply-btn').on('click', function() { applySqlModal(); });
+
+	// Cerrar sin guardar
+	$('#sql-modal-cancel-btn, #sql-modal-close-btn').on('click', function() {
+		$('#modal-sql-fullscreen').modal('hide');
+	});
+
+	// Esc cierra sin guardar (ya lo hace Bootstrap por defecto cuando data-backdrop no es static,
+	// pero como lo marcamos static para evitar cierre accidental, lo manejamos manualmente)
+	$('#modal-sql-fullscreen').on('keydown', function(e) {
+		if (e.key === 'Escape') { $('#modal-sql-fullscreen').modal('hide'); }
+	});
 });
+
+/**
+ * Abre el modal SQL expandido cargando el contenido del editor pequeño.
+ * @param {string} target  'before' | 'after'
+ */
+function openSqlModal(target) {
+	sqlFullscreenTarget = target;
+	var title = target === 'before'
+		? '{% trans "SQL before running workspace" %}'
+		: '{% trans "SQL after running workspace" %}';
+	$('#sql-modal-title').text(title);
+
+	var currentValue = target === 'before' ? getSqlBeforeValue() : getSqlAfterValue();
+
+	if (sqlFullscreenEditor) {
+		sqlFullscreenEditor.setValue(currentValue || '');
+		sqlFullscreenEditor.clearHistory();
+	} else {
+		// Si aún no está inicializado, ponemos el valor en el textarea
+		$('#sql-fullscreen-textarea').val(currentValue || '');
+	}
+
+	$('#modal-sql-fullscreen').modal('show');
+
+	// Refrescar y situar cursor al final después de la animación
+	setTimeout(function() {
+		if (sqlFullscreenEditor) {
+			sqlFullscreenEditor.refresh();
+			sqlFullscreenEditor.focus();
+			var lastLine = sqlFullscreenEditor.lastLine();
+			sqlFullscreenEditor.setCursor({line: lastLine, ch: sqlFullscreenEditor.getLine(lastLine).length});
+		}
+	}, 300);
+}
+
+/**
+ * Copia el contenido del editor grande de vuelta al editor pequeño y cierra el modal.
+ */
+function applySqlModal() {
+	if (!sqlFullscreenTarget) return;
+	var value = sqlFullscreenEditor ? sqlFullscreenEditor.getValue() : $('#sql-fullscreen-textarea').val();
+	if (sqlFullscreenTarget === 'before') {
+		setSqlBeforeValue(value);
+	} else {
+		setSqlAfterValue(value);
+	}
+	$('#modal-sql-fullscreen').modal('hide');
+}
 
 // Funciones para obtener/setear valores desde otros scripts
 function getSqlBeforeValue() {

@@ -1035,6 +1035,24 @@ msgstr "Permís per executar"
 msgid "Execute permission"
 msgstr "Permís per executar"
 
+msgid "Double-click to expand"
+msgstr "Doble clic per ampliar"
+
+msgid "SQL Editor"
+msgstr "Editor SQL"
+
+msgid "to apply"
+msgstr "per aplicar"
+
+msgid "to close without saving"
+msgstr "per tancar sense guardar"
+
+msgid "Close without saving"
+msgstr "Tancar sense guardar"
+
+msgid "Apply"
+msgstr "Aplicar"
+
 #, fuzzy
 #~| msgid "Save"
 #~ msgid "Save TTL"
