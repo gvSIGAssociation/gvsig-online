@@ -1520,13 +1520,17 @@
   color: #fff !important;
   font-size: 13px !important;
   font-weight: 600 !important;
-  padding: 0 16px !important;
+  padding: 0 20px 0 16px !important;
   height: 44px !important;
   line-height: 44px !important;
   border-radius: 0 6px 0 0 !important;
   border-left: 3px solid var(--sb-accent, #4a7fa5) !important;
   box-shadow: 3px 0 12px rgba(0,0,0,0.25) !important;
   white-space: nowrap !important;
+  max-width: calc(100vw - 70px) !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: inline-block !important;
 }
 
 /* Submenú emergente (treeview) */
@@ -1536,13 +1540,18 @@
   border-left: 3px solid var(--sb-accent, #4a7fa5) !important;
   box-shadow: 4px 6px 16px rgba(0,0,0,0.28) !important;
   padding: 6px 0 !important;
-  min-width: 180px !important;
+  min-width: 200px !important;
+  max-width: calc(100vw - 70px) !important;
 }
 .sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a {
   color: rgba(255,255,255,0.78) !important;
   font-size: 12.5px !important;
-  padding: 8px 16px 8px 20px !important;
+  padding: 8px 20px 8px 20px !important;
   transition: background 0.15s, color 0.15s !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: block !important;
 }
 .sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a:hover {
   background: rgba(255,255,255,0.08) !important;
@@ -1584,6 +1593,10 @@
 .skin-purple-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a,
 .skin-yellow-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a {
   color: var(--sb-text-muted, #556b78) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: block !important;
 }
 .skin-blue-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a:hover,
 .skin-black-light.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a:hover,
