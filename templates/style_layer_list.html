@@ -2,34 +2,35 @@
 {% load staticfiles %}
 {% load i18n %}
 
-{% block content %}	  	
+{% block content %}
 <div class="row">
 	<div class="col-md-12">
-		<div class="box">
-			<div class="box-header with-border" style="display: flex; justify-content: flex-end; align-items: center; padding-left: 5px; padding-right: 5px;">
-				<div class="box-tools">
-					<form method="get" action="" id="search-form" class="form-inline" style="margin: 0;">
-						<div class="form-group" style="margin: 0;">
-							<input type="text" name="search" class="form-control input-sm" placeholder="{% trans 'Search...' %}" value="{{ search_query|default:'' }}" style="width: 200px;">
-							{% if request.GET.page_size %}
-								<input type="hidden" name="page_size" value="{{ request.GET.page_size }}">
-							{% endif %}
-							<button type="submit" class="btn btn-sm btn-default"><i class="fa fa-search"></i></button>
-							{% if search_query %}
-								<a href="?{% if request.GET.page_size %}page_size={{ request.GET.page_size }}{% endif %}" class="btn btn-sm btn-default"><i class="fa fa-times"></i></a>
-							{% endif %}
-						</div>
+		<div class="pl-panel">
+			<div class="pl-panel__header">
+				<h3 class="pl-panel__title">
+					<i class="fa fa-paint-brush"></i>{% trans "Layer name" %}
+				</h3>
+				<div class="pl-panel__actions">
+					<form method="get" action="" id="search-form" class="pl-search-form">
+						<input type="text" name="search" class="form-control" placeholder="{% trans 'Search...' %}" value="{{ search_query|default:'' }}">
+						{% if request.GET.page_size %}
+							<input type="hidden" name="page_size" value="{{ request.GET.page_size }}">
+						{% endif %}
+						<button type="submit" class="btn-search"><i class="fa fa-search"></i></button>
+						{% if search_query %}
+							<a href="?{% if request.GET.page_size %}page_size={{ request.GET.page_size }}{% endif %}" class="btn-clear"><i class="fa fa-times"></i></a>
+						{% endif %}
 					</form>
 				</div>
 			</div>
-			<div class="box-body">
-				<table class="table" id="layers-table">
+			<div class="pl-panel__body">
+				<table class="pl-table table" id="layers-table">
 					<thead>
 						<tr>
 							<th>ID</th>
 						    <th>{% trans "Layer name" %}</th>
 						    <th>{% trans "Asigned to layer group" %}</th>
-						    <th>{% trans "Styles" %}</th>			    
+						    <th>{% trans "Styles" %}</th>
 						    <th></th>
 						    <th></th>
 						    <th></th>
@@ -41,7 +42,7 @@
 							    <td>{{ layerStyle.layer.id }}</td>
 								<td>{{ layerStyle.layer.title }}</td>
 								<td>{{ layerStyle.layer.layer_group.name }}</td>
-								<td> 
+								<td>
 									<select class="form-control" style="width: 100%;" id="select-{{ layerStyle.layer.id }}">
 									{% for style in layerStyle.styles %}
 										{% if style.is_default %}
@@ -50,7 +51,7 @@
 										<option value="{{ style.id }}">{{ style.name }}</option>
 										{% endif %}
 									{% endfor %}
-									</select> 		
+									</select>
 								</td>
 								<td></td>
 								<td></td>
@@ -61,8 +62,13 @@
 				</table>
 			</div>
 			{% if is_paginated|default:False %}
-			<div class="box-footer clearfix">
-				<ul class="pagination pagination-sm no-margin pull-right">
+			<div class="pl-panel__footer">
+				<span class="text-muted">
+					{% blocktrans with start=page_obj.start_index end=page_obj.end_index total=total_items %}
+					Showing {{ start }} to {{ end }} of {{ total }} layers
+					{% endblocktrans %}
+				</span>
+				<ul class="pagination pagination-sm no-margin">
 					{% if page_obj.has_previous %}
 						<li><a href="?page=1{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">&laquo; {% trans "First" %}</a></li>
 						<li><a href="?page={{ page_obj.previous_page_number }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">{% trans "Previous" %}</a></li>
@@ -70,7 +76,6 @@
 						<li class="disabled"><span>&laquo; {% trans "First" %}</span></li>
 						<li class="disabled"><span>{% trans "Previous" %}</span></li>
 					{% endif %}
-					
 					{% for num in paginator.page_range %}
 						{% if page_obj.number == num %}
 							<li class="active"><span>{{ num }}</span></li>
@@ -78,7 +83,6 @@
 							<li><a href="?page={{ num }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">{{ num }}</a></li>
 						{% endif %}
 					{% endfor %}
-					
 					{% if page_obj.has_next %}
 						<li><a href="?page={{ page_obj.next_page_number }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">{% trans "Next" %}</a></li>
 						<li><a href="?page={{ paginator.num_pages }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">{% trans "Last" %} &raquo;</a></li>
@@ -87,13 +91,6 @@
 						<li class="disabled"><span>{% trans "Last" %} &raquo;</span></li>
 					{% endif %}
 				</ul>
-				<div class="pull-left" style="margin-top: 5px;">
-					<span class="text-muted">
-						{% blocktrans with start=page_obj.start_index end=page_obj.end_index total=total_items %}
-						Showing {{ start }} to {{ end }} of {{ total }} layers
-						{% endblocktrans %}
-					</span>
-				</div>
 			</div>
 			{% endif %}
 		</div>

@@ -2,36 +2,35 @@
 {% load staticfiles %}
 {% load i18n %}
 
-{% block content %}	
+{% block content %}
 	<div class="row">
 		<div class="col-md-12">
-			<div class="box">
-			
+			<div class="pl-panel">
+
 				<form role="form" method="post" action="/gvsigonline/symbology/color_ramp_folder_update/{{folder.id}}/">
-				
-					<div class="box-header with-border">
-						<h3 class="box-title">{% trans "Update ramp color library" %}</h3>
-						<div class="box-tools pull-right">
-							<button id="update-library" type="submit" class="btn btn-sm btn-default"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+
+					<div class="pl-panel__header">
+						<h3 class="pl-panel__title"><i class="fa fa-folder-open"></i>{% trans "Update ramp color library" %}</h3>
+						<div class="pl-panel__actions">
+							<button id="update-library" type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
 						</div>
 					</div>
 
-					<div class="box-body">					
-						{% csrf_token %}					
+					<div class="pl-panel__body with-padding">
+						{% csrf_token %}
 						{% if form.errors %}
-						<div id="form-error" style="color:#ff0000;">
+						<div class="pf-error-msg force-show">
 							<ul>
 							{% for field in form %}
 								{% if field.errors %}
 									<li>{{field.label}}. {{ field.errors|striptags }}</li>
-								{% endif %}	
+								{% endif %}
 							{% endfor %}
 							</ul>
 						</div>
 						{% endif %}
-							
 						{% if message %}
-						<div id="form-error" style="color:#ff0000;">
+						<div class="pf-error-msg force-show">
 							<p>* {{ message }}</p>
 						</div>
 						{% endif %}
@@ -58,15 +57,15 @@
 						</div>
 						
 					</form>
-					
-					<div class="box-header with-border">
-						<h3 class="box-title">{% trans "Color ramps" %}</h3>
-						<div class="box-tools pull-right">
-							<div id="add-ramp_color" class="btn btn-sm btn-default"><i class="fa fa-plus margin-r-5"></i> {% trans "Add ramp color" %}</button>					
+
+					<div class="pl-panel__header" style="border-top: 1px solid var(--pl-border);">
+						<h3 class="pl-panel__title"><i class="fa fa-tint"></i>{% trans "Color ramps" %}</h3>
+						<div class="pl-panel__actions">
+							<div id="add-ramp_color" class="btn-pl-add"><i class="fa fa-plus"></i> {% trans "Add ramp color" %}</div>
 						</div>
 					</div>
-					
-					<div class="box-body" style="padding:15px 0px">
+
+					<div class="pl-panel__body with-padding">
 						{% for color_ramp in color_ramps %}
 							<div id="color-ramp-{{color_ramp.id}}" class="color-ramp-item col-md-4">
 								<div id="color-ramp-preview-{{color_ramp.id}}" class="preview-ramp-color">
