@@ -5,19 +5,19 @@
 {% block content %}	  	  
 <div class="row">
 	<div class="col-md-12">
-		<div class="box">
+		<div class="pl-panel">
 		
-			<div class="box-header with-border step-2">
-				<h3 class="box-title">{% trans "Add new style" %}</h3>
-				<div class="box-tools pull-right">
-					<button id="refresh-preview" class="btn btn-sm btn-default refresh-preview"><i class="fa fa-refresh margin-r-5"></i> {% trans "Update preview" %}</button>
-					<button id="save-legend" class="btn btn-sm btn-default save-legend"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+			<div class="pl-panel__header">
+				<h3 class="pl-panel__title"><i class="fa fa-paint-brush"></i>{% trans "Add new style" %}</h3>
+				<div class="pl-panel__actions">
+					<button id="refresh-preview" class="btn-pf-secondary refresh-preview"><i class="fa fa-refresh"></i> {% trans "Update preview" %}</button>
+					<button id="save-legend" class="btn-pf-save save-legend"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>					
 				</div>
 			</div>
 
-			<div class="box-body">
+			<div class="pl-panel__body with-padding">
 				<div class="row">
-					<div id="form-error" style="color:#ff0000;"></div>
+					<div id="form-error" class="pf-error-msg"></div>
 				</div>
 				<div class="row">
 					<div class="col-md-12 form-group">
@@ -109,12 +109,12 @@
 							</div>	
 							<div id="steps" class="row">
 								<div class="col-md-12">
-									<div id="form-error" style="color:#ff0000;"></div>
-									<div class="row">
-										<input name="colorramp-definition" id="colorramp-definition" value="" type="hidden">
+								<div id="form-error" class="pf-error-msg"></div>
+								<div class="row">
+									<input name="colorramp-definition" id="colorramp-definition" value="" type="hidden">
 										<div class="col-md-12 form-group">
 											<label>{% trans "Steps" %}</label>
-											<div id="add-step" class="btn btn-sm btn-default add-legend pull-right"><i class="fa fa-plus margin-r-5"></i> {% trans "Add step" %}</div>					
+											<div id="add-step" class="btn-pf-secondary add-legend pull-right"><i class="fa fa-plus"></i> {% trans "Add step" %}</div>					
 										</div>
 									</div>
 								</div>

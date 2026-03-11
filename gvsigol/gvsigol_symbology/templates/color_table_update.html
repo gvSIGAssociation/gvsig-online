@@ -5,22 +5,22 @@
 {% block content %}	  	  
 <div class="row">
 	<div class="col-md-12">
-		<div class="box">
+		<div class="pl-panel">
 		
-			<div class="box-header with-border step-2">
-				<h3 class="box-title">{% trans "Update style" %}</h3>
-				<div class="box-tools pull-right">
-					<button id="raster-statistics" class="btn btn-sm btn-default raster-statistics"><i class="fa fa-refresh margin-r-5"></i> {% trans "Raster statistics" %}</button>
-					<button id="refresh-preview" class="btn btn-sm btn-default refresh-preview"><i class="fa fa-refresh margin-r-5"></i> {% trans "Update preview" %}</button>
-					<button id="save-legend" class="btn btn-sm btn-default save-legend"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+			<div class="pl-panel__header">
+				<h3 class="pl-panel__title"><i class="fa fa-paint-brush"></i>{% trans "Update style" %}</h3>
+				<div class="pl-panel__actions">
+					<button id="raster-statistics" class="btn-pf-secondary raster-statistics"><i class="fa fa-refresh"></i> {% trans "Raster statistics" %}</button>
+					<button id="refresh-preview" class="btn-pf-secondary refresh-preview"><i class="fa fa-refresh"></i> {% trans "Update preview" %}</button>
+					<button id="save-legend" class="btn-pf-save save-legend"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>					
 				</div>
 			</div>
 
-			<div class="box-body">
+			<div class="pl-panel__body with-padding">
 			
 				<div class="row">
 					<div class="col-md-6">
-						<div id="form-error" style="color:#ff0000;"></div>
+						<div id="form-error" class="pf-error-msg"></div>
 						<div class="row">
 							<div class="col-md-12 form-group">
 								<label>{% trans "Name" %}</label>
@@ -111,7 +111,7 @@
 					
 					<div class="col-md-4 form-group">
 						<label>{% trans " " %}</label>
-						<button id="select-ramp-color" class="btn btn-sm btn-default" style="width:100%;"><i class="fa fa-barcode margin-r-5"></i>{% trans "Apply ramp color" %}</button>
+						<button id="select-ramp-color" class="btn-pf-secondary" style="width:100%;"><i class="fa fa-barcode"></i> {% trans "Apply ramp color" %}</button>
 					</div>
 				</div>
 				

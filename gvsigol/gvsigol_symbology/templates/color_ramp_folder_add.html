@@ -2,35 +2,34 @@
 {% load staticfiles %}
 {% load i18n %}
 
-{% block content %}	
+{% block content %}
 	<div class="row">
 		<div class="col-md-12">
-			<div class="box">
+			<div class="pl-panel">
 
 				<form role="form" method="post" action="/gvsigonline/symbology/color_ramp_folder_add/{{library.id}}/">
-					<div class="box-header with-border">
-						<h3 class="box-title">{% trans "Add Ramp category" %}</h3>
-						<div class="box-tools pull-right">
-							<button type="submit" class="btn btn-sm btn-default"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
+					<div class="pl-panel__header">
+						<h3 class="pl-panel__title"><i class="fa fa-folder-open"></i>{% trans "Add Ramp category" %}</h3>
+						<div class="pl-panel__actions">
+							<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
 						</div>
 					</div>
-				
-					<div class="box-body">
-					{% csrf_token %}					
+
+					<div class="pl-panel__body with-padding">
+					{% csrf_token %}
 						{% if form.errors %}
-						<div id="form-error" style="color:#ff0000;">
+						<div class="pf-error-msg force-show">
 							<ul>
 							{% for field in form %}
 								{% if field.errors %}
 									<li>{{field.label}}. {{ field.errors|striptags }}</li>
-								{% endif %}	
+								{% endif %}
 							{% endfor %}
 							</ul>
 						</div>
 						{% endif %}
-								
 						{% if message %}
-						<div id="form-error" style="color:#ff0000;">
+						<div class="pf-error-msg force-show">
 							<p>* {{ message }}</p>
 						</div>
 						{% endif %}

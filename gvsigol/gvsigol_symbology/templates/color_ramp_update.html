@@ -2,23 +2,23 @@
 {% load staticfiles %}
 {% load i18n %}
 
-{% block content %}	  	  
+{% block content %}
 <div class="row">
 	<div class="col-md-12">
-		<div class="box">
+		<div class="pl-panel">
 		<form id="color_ramp_form" role="form" method="post" action="/gvsigonline/symbology/color_ramp_update/{{color_ramp.id}}/">
-			<div class="box-header with-border step-2">
-				<h3 class="box-title">{% trans "Update style" %}</h3>
-				<div class="box-tools pull-right">
-					<div id="save-legend" class="btn btn-sm btn-default save-legend"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</div>					
+			<div class="pl-panel__header">
+				<h3 class="pl-panel__title"><i class="fa fa-tint"></i>{% trans "Update style" %}</h3>
+				<div class="pl-panel__actions">
+					<div id="save-legend" class="btn-pf-save save-legend"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</div>
 				</div>
 			</div>
 
-			<div class="box-body">
+			<div class="pl-panel__body with-padding">
 				{% csrf_token %}
 				<div class="row">
 					<div class="col-md-6">
-						<div id="form-error" style="color:#ff0000;">{{message}}</div>
+						<div id="form-error" class="pf-error-msg">{{message}}</div>
 						<div class="row">
 							<div class="col-md-12 form-group">
 								<label>{% trans "Name" %}</label>
@@ -34,11 +34,11 @@
 				
 				<div id="steps" class="row">
 					<div class="col-md-12">
-						<div id="form-error" style="color:#ff0000;"></div>
+						<div id="form-error" class="pf-error-msg"></div>
 						<div class="row">
 							<div class="col-md-12 form-group">
 								<label>{% trans "Steps" %}</label>
-								<div id="add-step" class="btn btn-sm btn-default add-legend pull-right"><i class="fa fa-plus margin-r-5"></i> {% trans "Add step" %}</div>					
+								<div id="add-step" class="btn-pf-secondary add-legend pull-right"><i class="fa fa-plus"></i> {% trans "Add step" %}</div>					
 							</div>
 						</div>
 					</div>

@@ -2,20 +2,21 @@
 {% load staticfiles %}
 {% load i18n %}
 
-{% block content %}	  	
+{% block content %}
 <div class="row">
 	<div class="col-md-12">
-		<div class="row">
-			<div class="col-md-12 form-group">
-				<div class="box-tools pull-right">
-					<button id="button-add-library" class="btn btn-default btn-sm"><i class="fa fa-plus margin-r-5"></i> {% trans "Add library" %}</button>
-					<button id="button-import-library" class="btn btn-default btn-sm"><i class="fa fa-upload margin-r-5"></i> {% trans "Import library" %}</button>
+		<div class="pl-panel">
+			<div class="pl-panel__header">
+				<h3 class="pl-panel__title">
+					<i class="fa fa-tint"></i>{% trans "Library" %}
+				</h3>
+				<div class="pl-panel__actions">
+					<button id="button-add-library" class="btn-pl-add"><i class="fa fa-plus"></i> {% trans "Add library" %}</button>
+					<button id="button-import-library" class="btn-pl-add"><i class="fa fa-upload"></i> {% trans "Import library" %}</button>
 				</div>
-			</div>				
-		</div>
-		<div class="box">
-			<div class="box-body">
-				<table class="table" id="libraries-table">
+			</div>
+			<div class="pl-panel__body">
+				<table class="pl-table table" id="libraries-table">
 					<thead>
 						<tr>
 							<th>ID</th>

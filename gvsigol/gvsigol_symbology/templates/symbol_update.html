@@ -2,23 +2,19 @@
 {% load staticfiles %}
 {% load i18n %}
 
-{% block content %}	
+{% block content %}
 <div class="row">
 	<div class="col-md-12">
-		<div class="row">
-			<div class="col-md-12 form-group">
-				<div class="box-tools pull-right">
-					<button id="delete-symbol" class="btn btn-danger btn-sm"><i class="fa fa-times margin-r-5"></i> {% trans "Delete" %}</button>	
-					<button id="update-symbol" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>					
-				</div>
-			</div>				
+		<div class="pf-topbar">
+			<button id="delete-symbol" class="btn-pf-secondary" style="color:#c0392b; border-color:#e8bebe;"><i class="fa fa-times"></i> {% trans "Delete" %}</button>
+			<button id="update-symbol" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
 		</div>
-		<div class="box">
-			<div class="box-body">
-				{% csrf_token %}					
+		<div class="pl-panel">
+			<div class="pl-panel__body with-padding">
+				{% csrf_token %}
 				<div class="row">
 					<div class="col-md-12">
-						<div id="form-error" style="color:#ff0000;"></div>
+						<div id="form-error" class="pf-error-msg"></div>
 						<div class="form-group">
 							<label>{% trans "Name" %}</label>
 							<input readonly placeholder="{% trans 'Symbol name' %}" name="symbol-name" id="symbol-name" type="text" value="{{rule.name}}" class="form-control">
@@ -37,9 +33,9 @@
 				<div id="rules" class="row">
 				</div>			
 								
-           	</div>
+			</div>
 		</div>
-	</div>				
+	</div>
 </div>
 	
 <!-- Modal -->
