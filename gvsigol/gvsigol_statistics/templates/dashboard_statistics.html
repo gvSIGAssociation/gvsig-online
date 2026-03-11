@@ -1,73 +1,101 @@
 {% load staticfiles %}
 {% load i18n %}
-<div class="tab-pane" id="tab-statistics-{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}" style="background-color:white;padding:10px">
+<div class="tab-pane" id="tab-statistics-{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}">
 
-
-	<div style="background-color:#eee; padding-left:20px;padding-right:20px;padding-top:1px;padding-bottom:5px;">
-	<h3 style="font-weight:bold">{{ plugin.title }}<div id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter-icon" style="float:right"><i class="fa fa-filter" aria-hidden="true"></i></div></h3>
-	<div class="row hidden" id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter-div" style="padding: 15px;background-color: rgba(200,200,200,0.4);">
-
-		<div class="col-md-4 form-group">
-			{% trans "Petitions from date" %}<br/>
-			<input type="date" name="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter_start_date" class="form-control" style="width:100%" onchange='reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}")');">
-		</div>
-
-		<div class="col-md-4 form-group">
-			{% trans "Petitions to date" %}<br/>
-			<input type="date" name="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter_end_date" class="form-control" style="width:100%" onchange='reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}")'>
-		</div>
-
-		<div class="col-md-4 form-group">
-			{% trans "Petitions done by" %}<br />
-			<select name="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter_username" class="form-control" style="width:100%" onchange='reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}")'>
-		  		<option value="all">All</option>
-		  		<option value="anonymous">{% trans "Anonymous" %}</option>
-
-		  		{% for user in users %}
-		  		<option value="{{ user.username }}">{{ user.username }}</option>
-		  		{% endfor %}
-			</select>
-		</div>
-
-		<div class="col-md-4 form-group">
-			{% trans "Divide by time?" %}
-			<input type="checkbox" name="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter_time" class="form-control"  onchange='reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}")'>
-		</div>
-
-		<div class="col-md-4 form-group">
-			{% trans "Time division" %}<br />
-			<select name="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter_time_pattern" class="form-control" style="width:100%" onchange='reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}")'>
-		  		<option value="YYYY">{% trans "Year" %}</option>
-		  		<option value="MM-YYYY">{% trans "Month" %}</option>
-				<option value="dd-MM-YYYY">{% trans "Day" %}</option>
-			</select>
-		</div>
-
-		<div class="col-md-12 form-group">
-			<span style="font-weight:bold">{% trans "Total petitions" %}: <span id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-absolute-total"></span></span>
-		</div>
-	</div>
+	<!-- Cabecera del panel -->
+	<div class="stat-panel__header">
+		<h3 class="stat-panel__title">{{ plugin.title }}</h3>
+		<button type="button" class="stat-panel__filter-btn"
+			id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter-icon">
+			<i class="fa fa-filter" aria-hidden="true"></i> {% trans "Filters" %}
+		</button>
 	</div>
 
-	<div class="row" style="margin-top: 15px;">
-		<div class="col-md-6 form-group">
-			<div class="col-md-12 form-group" style="overflow:auto">
-				<table id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-target-by-user-table" class="display" style="width:100%">
-			        <thead>
-			            <tr>
-			            	<th>{% trans "Interval" %}</th>
-			                <th>{% trans plugin.target_title %}</th>
-			                <th>{% trans "Num petitions" %}</th>
-			            </tr>
-			        </thead>
-			        <tbody id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-absolute-top">
-			        </tbody>
-			    </table>
-		    </div>
-		</div>
-		<div class="col-md-6 form-group" style="">
+	<!-- Sección de filtros (oculta por defecto) -->
+	<div class="stat-panel__filters hidden"
+		id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter-div">
+		<div class="row">
 
-			<div id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-target-by-user-chart" class="col-md-12 form-group">
+			<div class="col-md-3 form-group">
+				<label>{% trans "Petitions from date" %}</label>
+				<input type="date"
+					name="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter_start_date"
+					class="form-control"
+					onchange='reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}")'>
+			</div>
+
+			<div class="col-md-3 form-group">
+				<label>{% trans "Petitions to date" %}</label>
+				<input type="date"
+					name="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter_end_date"
+					class="form-control"
+					onchange='reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}")'>
+			</div>
+
+			<div class="col-md-3 form-group">
+				<label>{% trans "Petitions done by" %}</label>
+				<select name="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter_username"
+					class="form-control"
+					onchange='reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}")'>
+					<option value="all">All</option>
+					<option value="anonymous">{% trans "Anonymous" %}</option>
+					{% for user in users %}
+					<option value="{{ user.username }}">{{ user.username }}</option>
+					{% endfor %}
+				</select>
+			</div>
+
+			<div class="col-md-3 form-group">
+				<label>{% trans "Time division" %}</label>
+				<select name="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter_time_pattern"
+					class="form-control"
+					onchange='reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}")'>
+					<option value="YYYY">{% trans "Year" %}</option>
+					<option value="MM-YYYY">{% trans "Month" %}</option>
+					<option value="dd-MM-YYYY">{% trans "Day" %}</option>
+				</select>
+			</div>
+
+			<div class="col-md-12 form-group" style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+				<input type="checkbox"
+					class="stat-checkbox"
+					name="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-filter_time"
+					onchange='reload_data("{{ plugin.id }}/{{ plugin.operation }}", {{ plugin.count }}, "{{ plugin.reverse_petition }}", "{{ plugin.target_title }}", "{{ plugin.target_field }}")'>
+				<span style="font-size:13px;color:var(--st-text);">{% trans "Divide by time?" %}</span>
+			</div>
+
+			<div class="col-md-12 form-group">
+				<div class="stat-panel__total">
+					{% trans "Total petitions" %}:
+					<span class="stat-panel__total-value"
+						id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-absolute-total">—</span>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+	<!-- Tabla + Gráfico -->
+	<div class="stat-panel__content">
+		<div class="row">
+			<div class="col-md-6 form-group" style="overflow: auto;">
+				<table id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-target-by-user-table"
+					class="display" style="width:100%">
+					<thead>
+						<tr>
+							<th>{% trans "Interval" %}</th>
+							<th>{% trans plugin.target_title %}</th>
+							<th>{% trans "Num petitions" %}</th>
+						</tr>
+					</thead>
+					<tbody id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-absolute-top">
+					</tbody>
+				</table>
+			</div>
+			<div class="col-md-6 form-group">
+				<div id="{{ plugin.id }}-{{ plugin.operation }}-{{ plugin.count }}-target-by-user-chart"
+					class="col-md-12 form-group">
+				</div>
 			</div>
 		</div>
 	</div>
@@ -129,7 +157,6 @@
 		var time = $("input[name="+route_path+"-filter_time]:checked").length > 0;
 		var time_pattern = $("select[name="+route_path+"-filter_time_pattern]").val();
 
-		// 'Total getConf' petitions
 		$.ajax({
 			type: 'POST',
 			async: false,
@@ -142,7 +169,6 @@
 				'reverse': reverse == "True",
 				'group_by_date': false,
 				'date_pattern': 'YYYY'
-
 			},
 		  	success	:function(response){
 		  		if("count" in response){
@@ -275,13 +301,13 @@
 		  	error: function(){}
 		});
 	}
+
 	function statistics_load(plugin_id, operation, title, count, target_title, target_field, reverse_petition){
 		var stat_id = plugin_id + '-' + operation + '-' + count;
 		$("#statistics-tab-controller").append('<li id="li-statistics-' + stat_id + '"><a href="#tab-statistics-' + stat_id + '" data-toggle="tab">' + title + '</a></li>');
 
 		$("#li-statistics-" + stat_id).click(function(){
 			reload_data(plugin_id + '/' + operation, count, reverse_petition, target_title, target_field);
-
 			$("#li-statistics-" + stat_id).unbind("click");
 		});
 

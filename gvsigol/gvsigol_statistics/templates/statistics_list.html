@@ -3,25 +3,216 @@
 {% load i18n %}
 {% load include_if_exists %}
 
-{% block content %}
-	<div class="row">
-		<div class="col-md-12">
-			<ul id="statistics-tab-controller" class="nav nav-tabs">
-            </ul>
+{% block header %}
+<style>
+:root {
+	--st-accent:    #4a7fa5;
+	--st-accent-dk: #2d5f80;
+	--st-text:      #2e3a45;
+	--st-muted:     #7b8a96;
+	--st-border:    #e8ecef;
+	--st-bg:        #f4f6f8;
+	--st-white:     #ffffff;
+	--st-radius:    10px;
+	--st-shadow:    0 2px 12px rgba(0,0,0,0.08);
+	--st-transition: 0.2s ease;
+}
 
-			<div class="tab-content">
+/* ---- Cabecera de la sección ---- */
+.st-page-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 0 16px;
+	font-size: 15px;
+	font-weight: 700;
+	color: var(--st-text);
+}
+.st-page-header i { color: var(--st-accent); }
 
-				{% for plugin in statistics_conf %}
-					{% with "dashboard_statistics.html" as aux %}
-						{% include_if_exists aux %}
-					{% endwith %}
-			   	{% endfor %}
+/* ---- Pestañas de navegación ---- */
+#statistics-tab-controller {
+	border-bottom: 2px solid var(--st-border);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2px;
+}
+#statistics-tab-controller li > a {
+	display: block;
+	border-radius: 7px 7px 0 0;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--st-muted);
+	padding: 9px 18px;
+	border: 1px solid transparent;
+	text-decoration: none;
+	transition: color var(--st-transition), background var(--st-transition);
+	white-space: nowrap;
+}
+#statistics-tab-controller li > a:hover {
+	background: var(--st-bg);
+	color: var(--st-accent);
+}
+#statistics-tab-controller li.active > a {
+	color: var(--st-accent);
+	border: 1px solid var(--st-border);
+	border-bottom-color: var(--st-white);
+	background: var(--st-white);
+	font-weight: 700;
+}
 
-			</div>
-		</div>
-	</div>
+/* ---- Área de contenido de pestañas ---- */
+.tab-content {
+	background: var(--st-white);
+	border: 1px solid var(--st-border);
+	border-top: none;
+	border-radius: 0 0 var(--st-radius) var(--st-radius);
+	box-shadow: var(--st-shadow);
+	overflow: hidden;
+}
+.tab-pane { background: var(--st-white); }
+
+/* ---- Cabecera del panel de estadística ---- */
+.stat-panel__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--st-border);
+	background: var(--st-bg);
+	gap: 12px;
+}
+.stat-panel__title {
+	font-size: 15px;
+	font-weight: 700;
+	color: var(--st-text);
+	margin: 0;
+}
+.stat-panel__filter-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: transparent;
+	border: 1px solid var(--st-border);
+	border-radius: 6px;
+	padding: 5px 12px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--st-muted);
+	cursor: pointer;
+	transition: background var(--st-transition), border-color var(--st-transition), color var(--st-transition);
+}
+.stat-panel__filter-btn:hover {
+	background: var(--st-white);
+	border-color: var(--st-accent);
+	color: var(--st-accent);
+}
+
+/* ---- Sección de filtros ---- */
+.stat-panel__filters {
+	padding: 20px 20px 8px;
+	background: var(--st-bg);
+	border-bottom: 1px solid var(--st-border);
+}
+.stat-panel__filters .form-group > label,
+.stat-panel__filters .form-group > span.field-label {
+	font-size: 11px;
+	font-weight: 700;
+	color: var(--st-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	display: block;
+	margin-bottom: 5px;
+}
+.stat-panel__filters .form-control {
+	border-radius: 7px;
+	border: 1px solid var(--st-border);
+	background: var(--st-white);
+	font-size: 13px;
+	color: var(--st-text);
+	height: 36px;
+	box-shadow: none;
+	padding: 6px 12px;
+	transition: border-color var(--st-transition), box-shadow var(--st-transition);
+}
+.stat-panel__filters .form-control:focus {
+	border-color: var(--st-accent);
+	background: var(--st-white);
+	box-shadow: 0 0 0 3px rgba(74,127,165,0.12);
+	outline: none;
+}
+.stat-panel__filters input[type="checkbox"].stat-checkbox {
+	width: 16px;
+	height: 16px;
+	accent-color: var(--st-accent);
+	cursor: pointer;
+	margin-top: 8px;
+}
+.stat-panel__total {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--st-text);
+	padding: 4px 0 12px;
+}
+.stat-panel__total-value {
+	color: var(--st-accent);
+	font-weight: 700;
+}
+
+/* ---- Contenido: tabla + gráfico ---- */
+.stat-panel__content { padding: 20px; }
+
+/* ---- Tabla DataTable dentro del panel ---- */
+.stat-panel__content table.display thead th {
+	background: var(--st-bg);
+	color: var(--st-muted);
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.7px;
+	padding: 10px 14px;
+	border-bottom: 1px solid var(--st-border) !important;
+	white-space: nowrap;
+}
+.stat-panel__content table.display tbody tr {
+	border-bottom: 1px solid var(--st-border);
+	transition: background var(--st-transition);
+}
+.stat-panel__content table.display tbody tr:hover { background: #f0f6fb; }
+.stat-panel__content table.display tbody td {
+	padding: 10px 14px;
+	font-size: 13px;
+	color: #4a5a68;
+}
+.stat-panel__content table.display.no-footer { border-bottom: none !important; }
+.stat-panel__content .dataTables_wrapper { padding: 0; font-size: 13px; }
+</style>
 {% endblock %}
 
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+
+		<p class="st-page-header">
+			<i class="fa fa-line-chart"></i> {% trans "Statistics" %}
+		</p>
+
+		<ul id="statistics-tab-controller" class="nav nav-tabs"></ul>
+
+		<div class="tab-content">
+			{% for plugin in statistics_conf %}
+				{% with "dashboard_statistics.html" as aux %}
+					{% include_if_exists aux %}
+				{% endwith %}
+			{% endfor %}
+		</div>
+
+	</div>
+</div>
+{% endblock %}
 
 {% block extra-scripts %}
 <script type="text/javascript">
@@ -35,15 +226,15 @@
 			var title = "{{ plugin.title }}";
 			var count = "{{ plugin.count }}";
 			var target_title = "{{ plugin.target_title }}";
-			var target_field =  "{{ plugin.target_field }}";
-			var reverse_petition =  "{{ plugin.reverse_petition }}";
+			var target_field = "{{ plugin.target_field }}";
+			var reverse_petition = "{{ plugin.reverse_petition }}";
 			statistics_load(plugin_id, operation, title, count, target_title, target_field, reverse_petition);
 		{% endfor %}
-		
-		var first_tab = $("#statistics-tab-controller li").first()
-		if(first_tab != null){
+
+		var first_tab = $("#statistics-tab-controller li").first();
+		if (first_tab != null) {
 			var first_link = first_tab.find("a").first();
-			if(first_link != null){
+			if (first_link != null) {
 				first_link.trigger("click");
 			}
 		}
