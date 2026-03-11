@@ -365,11 +365,11 @@ class LayerSerializer(serializers.ModelSerializer):
             workspace = obj.datastore.workspace
             url = workspace.wms_endpoint.replace(settings.BASE_URL, '')
             if obj.cached:
-                if workspace.wmts_endpoint and workspace.wmts_endpoint.__len__() > 0:
+                if not obj.time_enabled and workspace.wmts_endpoint and len(workspace.wmts_endpoint) > 0:
                     url = workspace.wmts_endpoint.replace(settings.BASE_URL, '')
                 else:
                     url = workspace.cache_endpoint.replace(settings.BASE_URL, '')
-            return url               
+            return url
 
         except Exception:
             pass
