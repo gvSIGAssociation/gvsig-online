@@ -82,7 +82,9 @@
 			{% if MANAGE_PERMISSION_UI or user.is_superuser %} <li><a href="#tab-layer-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li> {% endif %}
           	<li><a href="#tab-layer-metadata" data-toggle="tab">{% trans "Metadata" %}</a></li>
           	<li><a href="#tab-layer-detailedinfo" data-toggle="tab">{% trans "Detailed information" %}</a></li>
-          	<li><a href="#tab-layer-annotations" data-toggle="tab">{% trans "Anotaciones" %}</a></li>
+          	{% if 'gvsigol_plugin_geocopilot' in INSTALLED_APPS %}
+          	<li><a href="#tab-layer-geocopilot" data-toggle="tab">GeoCopilot</a></li>
+          	{% endif %}
         </ul>
 
         <div class="tab-content">
@@ -396,66 +398,136 @@
 				</div>
           	</div>
 
-          	<div class="tab-pane" id="tab-layer-annotations">
+          	{% if 'gvsigol_plugin_geocopilot' in INSTALLED_APPS %}
+          	<div class="tab-pane" id="tab-layer-geocopilot">
           		<div class="row">
 					<div class="col-md-12">
 						<div class="box">
           					<div class="box-body">
           						<div class="row">
           							<div class="col-md-12 form-group">
-										<label for="annotations">{% trans "Anotaciones" %}</label>
-										<p class="help-block">
-											<button type="button" class="btn btn-success btn-sm" id="generate-annotations-btn" onclick="window.generateAnnotations()">
-												<i class="fa fa-magic"></i> {% trans "Autogenerar desde los datos" %}
-											</button>
-											<small style="margin-left: 10px;">
-												<i class="fa fa-info-circle"></i> {% trans "Genera automáticamente el texto de anotaciones con los metadatos y campos disponibles de la capa." %}
-											</small>
-										</p>
-										<textarea class="form-control" name="annotations" id="annotations" rows="20">{% if layer.annotations %}{{layer.annotations}}{% endif %}</textarea>
+										<label for="geocopilot-layer-description">{% trans "Descripción de la capa para el LLM" %}</label>
+										<textarea class="form-control" id="geocopilot-layer-description" rows="4" placeholder="{% trans 'Describe brevemente qué datos contiene esta capa...' %}"></textarea>
 									</div>
 								</div>
+								<div class="row" style="margin-top: 12px;">
+									<div class="col-md-12">
+										<label>{% trans "Configuración de campos" %}</label>
+										<p class="help-block" style="margin-bottom: 10px;">
+											<small><i class="fa fa-info-circle"></i> {% trans "Añade descripciones a cada campo para mejorar las respuestas del LLM. Marca como 'Sensible' los campos con datos personales para que se anonimicen antes de enviarse al LLM." %}</small>
+										</p>
+										<div id="geocopilot-fields-loading" style="padding: 20px; text-align: center; display: none;">
+											<i class="fa fa-spinner fa-spin"></i> {% trans "Cargando campos..." %}
+										</div>
+										<table class="table table-bordered table-striped" id="geocopilot-fields-table" style="display: none;">
+											<thead>
+												<tr>
+													<th style="width: 18%;">{% trans "Campo" %}</th>
+													<th style="width: 15%;">{% trans "Tipo" %}</th>
+													<th>{% trans "Descripción para el LLM" %}</th>
+													<th style="width: 10%; text-align: center;">{% trans "Sensible" %}</th>
+												</tr>
+											</thead>
+											<tbody></tbody>
+										</table>
+									</div>
+								</div>
+								<input type="hidden" name="geocopilot_config" id="geocopilot-config-hidden" value="">
 							</div>
 						</div>
 					</div>
 				</div>
           	</div>
+          	{% endif %}
 
 		</div>
 	</div>
 </div>
 </form>
 <script type="text/javascript">
-window.generateAnnotations = function() {
-	var btn = document.getElementById('generate-annotations-btn');
-	var originalHtml = btn.innerHTML;
-	btn.disabled = true;
-	btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Generando...';
-	var url = window.location.origin + '/gvsigonline/services/layer/{{layer_id}}/generate-annotations/';
-	fetch(url, {
-		method: 'POST',
-		headers: {
-			'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)[1],
-			'X-Requested-With': 'XMLHttpRequest'
+(function() {
+	var LAYER_ID = '{{layer_id}}';
+	var BASE_URL = window.location.origin + '/gvsigonline/geocopilot/admin/layer/' + LAYER_ID;
+	var gcLoaded = false;
+
+	function loadGeoCopilotConfig() {
+		var loading = document.getElementById('geocopilot-fields-loading');
+		var table = document.getElementById('geocopilot-fields-table');
+		if (!loading || !table) return;
+		loading.style.display = 'block';
+		table.style.display = 'none';
+
+		fetch(BASE_URL + '/config/', {
+			method: 'GET',
+			headers: {'X-Requested-With': 'XMLHttpRequest'}
+		})
+		.then(function(r) { return r.json(); })
+		.then(function(data) {
+			if (!data.success) { loading.textContent = 'Error: ' + (data.message || ''); return; }
+
+			var desc = document.getElementById('geocopilot-layer-description');
+			if (desc) desc.value = data.layer_description || '';
+
+			var tbody = table.querySelector('tbody');
+			tbody.innerHTML = '';
+			var fields = data.fields || [];
+			for (var i = 0; i < fields.length; i++) {
+				var f = fields[i];
+				var tr = document.createElement('tr');
+				tr.innerHTML =
+					'<td><code>' + f.name + '</code></td>' +
+					'<td><small>' + f.type + '</small></td>' +
+					'<td><input type="text" class="form-control input-sm gc-field-desc" data-field="' + f.name + '" value="' + (f.description || '').replace(/"/g, '&quot;') + '" placeholder="Describe este campo..."></td>' +
+					'<td style="text-align:center;"><input type="checkbox" class="gc-field-sensitive" data-field="' + f.name + '"' + (f.sensitive ? ' checked' : '') + '></td>';
+				tbody.appendChild(tr);
+			}
+			loading.style.display = 'none';
+			table.style.display = 'table';
+			gcLoaded = true;
+		})
+		.catch(function(err) {
+			loading.textContent = 'Error cargando campos: ' + err;
+		});
+	}
+
+	function serializeGeoCopilotConfig() {
+		if (!gcLoaded) return;
+		var layerDescription = (document.getElementById('geocopilot-layer-description') || {}).value || '';
+		var descs = document.querySelectorAll('.gc-field-desc');
+		var checks = document.querySelectorAll('.gc-field-sensitive');
+		var fieldsMap = {};
+		for (var i = 0; i < descs.length; i++) {
+			fieldsMap[descs[i].getAttribute('data-field')] = {description: descs[i].value};
 		}
-	})
-	.then(function(r) { return r.json(); })
-	.then(function(data) {
-		if (data.success) {
-			document.getElementById('annotations').value = data.annotations;
-		} else {
-			alert('Error: ' + (data.error || data.message));
+		for (var j = 0; j < checks.length; j++) {
+			var name = checks[j].getAttribute('data-field');
+			if (!fieldsMap[name]) fieldsMap[name] = {};
+			fieldsMap[name].sensitive = checks[j].checked;
 		}
-	})
-	.catch(function(err) {
-		console.error('generateAnnotations error:', err);
-		alert('Error al generar anotaciones: ' + err);
-	})
-	.finally(function() {
-		btn.disabled = false;
-		btn.innerHTML = originalHtml;
-	});
-};
+		var fieldsList = [];
+		for (var key in fieldsMap) {
+			fieldsList.push({name: key, description: fieldsMap[key].description || '', sensitive: !!fieldsMap[key].sensitive});
+		}
+		var hidden = document.getElementById('geocopilot-config-hidden');
+		if (hidden) {
+			hidden.value = JSON.stringify({layer_description: layerDescription, fields: fieldsList});
+		}
+	}
+
+	var tabLink = document.querySelector('a[href="#tab-layer-geocopilot"]');
+	if (tabLink) {
+		tabLink.addEventListener('click', function() {
+			if (!gcLoaded) { setTimeout(loadGeoCopilotConfig, 100); }
+		});
+	}
+
+	var form = document.getElementById('layer-update-form');
+	if (form) {
+		form.addEventListener('submit', function() {
+			serializeGeoCopilotConfig();
+		});
+	}
+})();
 </script>
 {% endblock %}
 

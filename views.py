@@ -1634,7 +1634,6 @@ def layer_add_with_group(request, layergroup_id):
                 params = {}
                 params['format'] = format_value
                 newRecord.external_params = json.dumps(params)
-                newRecord.annotations = request.POST.get('annotations', '')
 
                 newRecord.save()
 
@@ -1907,8 +1906,36 @@ def layer_update(request, layer_id):
 
             layer.external_params = json.dumps(params)
             layer.conf = layerConf
-            layer.annotations = request.POST.get('annotations', layer.annotations)
             layer.save()
+
+            geocopilot_config_raw = request.POST.get('geocopilot_config', '').strip()
+            if geocopilot_config_raw and 'gvsigol_plugin_geocopilot' in settings.INSTALLED_APPS:
+                try:
+                    from gvsigol_plugin_geocopilot.models import LayerGeoCopilotConfig
+                    gc_data = json.loads(geocopilot_config_raw)
+                    gc_layer_desc = gc_data.get('layer_description', '')
+                    gc_fields_list = gc_data.get('fields', [])
+                    gc_fields_config = {}
+                    for f in gc_fields_list:
+                        fname = f.get('name', '')
+                        if fname:
+                            gc_fields_config[fname] = {
+                                'description': f.get('description', ''),
+                                'sensitive': bool(f.get('sensitive', False)),
+                            }
+                    gc_config, _ = LayerGeoCopilotConfig.objects.get_or_create(
+                        layer=layer,
+                        defaults={
+                            'layer_description': gc_layer_desc,
+                            'updated_by': request.user.username,
+                        }
+                    )
+                    gc_config.layer_description = gc_layer_desc
+                    gc_config.fields_config = gc_fields_config
+                    gc_config.updated_by = request.user.username
+                    gc_config.save()
+                except Exception as e:
+                    logger.warning(f"Error guardando config GeoCopilot para capa {layer.id}: {e}")
 
             if 'layer-image' in request.FILES:
                 up_file = request.FILES['layer-image']
@@ -10271,46 +10298,3 @@ def api_segex_entities(request):
         return JsonResponse({'success': False, 'error': str(e)})
 
 
-@login_required()
-@staff_required
-def layer_generate_annotations(request, layer_id):
-    """
-    AJAX endpoint that generates plain-text annotations for an existing layer
-    using its metadata and PostgreSQL column introspection when available.
-    Called from layer_update.html.
-    """
-    try:
-        layer = get_object_or_404(Layer, id=layer_id)
-        text = utils.generate_layer_annotations(layer)
-        return JsonResponse({'success': True, 'annotations': text})
-    except Exception as e:
-        logger.exception("Error generating annotations for layer %s", layer_id)
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
-
-
-@login_required()
-@staff_required
-def layer_generate_annotations_from_params(request):
-    """
-    AJAX endpoint that generates basic plain-text annotations from form parameters
-    when the layer does not yet exist in the database (layer_add / layer_create flows).
-    Expects POST: name, title, layer_group_id (optional), layer_type (optional).
-    """
-    try:
-        name = request.POST.get('name', '')
-        title = request.POST.get('title', '')
-        layer_type = request.POST.get('layer_type', '')
-        layer_group_name = ''
-        layer_group_id = request.POST.get('layer_group_id', '')
-        if layer_group_id:
-            try:
-                from gvsigol_services.models import LayerGroup
-                lg = LayerGroup.objects.get(id=int(layer_group_id))
-                layer_group_name = lg.name
-            except Exception:
-                pass
-        text = utils.generate_basic_annotations(name, title, layer_group_name, layer_type)
-        return JsonResponse({'success': True, 'annotations': text})
-    except Exception as e:
-        logger.exception("Error generating basic annotations from params")
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
