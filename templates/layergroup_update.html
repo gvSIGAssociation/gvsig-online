@@ -51,7 +51,7 @@
 				<div class="col-md-12 form-group">
 					<div class="pf-topbar">
 					<a href="{{back_url}}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
-					<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+					<button id="save_button" type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
 				</div>
 				</div>
 			</div>
@@ -263,7 +263,7 @@
 
 	$('#button-create-layer').click(function() {
 		$("#myModalLabel2").text(gettext("Create new layer"));
-		$('#button-add-layer-group-accept').click( function() {
+		$('#button-add-layer-group-accept').off('click').click( function() {
 			var url = '/gvsigonline/services/layergroup_update/{{lgid}}/{% if project_id %}{{project_id}}/{% endif %}?redirect=create-layer';
 			const params = new URLSearchParams(window.location.search);
 			if (params.has('redirect')) {
@@ -276,7 +276,7 @@
 
 	$('#button-import-layer').click(function() {
 		$("#myModalLabel2").text(gettext("Publish layer"));
-		$('#button-add-layer-group-accept').click( function() {
+		$('#button-add-layer-group-accept').off('click').click( function() {
 			var url = '/gvsigonline/services/layergroup_update/{{lgid}}/{% if project_id %}{{project_id}}/{% endif %}?redirect=import-layer';
 			const params = new URLSearchParams(window.location.search);
 			if (params.has('redirect')) {
