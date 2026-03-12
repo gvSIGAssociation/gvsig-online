@@ -40,6 +40,36 @@
 .pf-card .form-control { border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; transition: border-color var(--pf-transition), box-shadow var(--pf-transition); padding: 6px 12px; }
 .pf-card .form-control:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
 .pf-card .form-control[disabled] { background: #f0f3f5; color: var(--pf-muted); cursor: default; }
+.pf-lyr-panel { background: var(--pf-white); border-radius: var(--pf-radius); box-shadow: var(--pf-shadow); border: 1px solid var(--pf-border); overflow: hidden; }
+.pf-lyr-panel__header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--pf-border); gap: 12px; flex-wrap: wrap; }
+.pf-lyr-panel__title { font-size: 14px; font-weight: 700; color: var(--pf-text); display: flex; align-items: center; gap: 8px; margin: 0; }
+.pf-lyr-panel__title i { color: var(--pf-accent); }
+.pf-lyr-panel__actions { display: flex; align-items: center; gap: 8px; }
+.btn-pf-action { display: inline-flex; align-items: center; gap: 6px; background: var(--pf-accent); color: #fff !important; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; padding: 6px 14px; height: 34px; cursor: pointer; transition: background var(--pf-transition); text-decoration: none !important; white-space: nowrap; }
+.btn-pf-action:hover { background: var(--pf-accent-dk); }
+.btn-pf-action--secondary { background: var(--pf-muted); }
+.btn-pf-action--secondary:hover { background: #5a6b78; }
+.pf-lyr-panel__body { padding: 0; }
+.pf-lyr-row { display: flex; align-items: center; padding: 10px 20px; border-bottom: 1px solid var(--pf-border); transition: background var(--pf-transition); gap: 12px; }
+.pf-lyr-row:last-child { border-bottom: none; }
+.pf-lyr-row:hover { background: #f0f6fb; }
+.pf-lyr-row__handle { display: flex; align-items: center; gap: 1px; color: var(--pf-muted); cursor: grab; flex-shrink: 0; padding: 4px 6px; font-size: 13px; opacity: 0.5; transition: opacity var(--pf-transition); }
+.pf-lyr-row:hover .pf-lyr-row__handle { opacity: 1; }
+.pf-lyr-row__info { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 8px; }
+.pf-lyr-row__name { font-size: 13px; font-weight: 600; color: var(--pf-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pf-lyr-row__fqn { font-size: 12px; color: var(--pf-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pf-lyr-row__btns { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.pf-lyr-row__btns .btn { background: transparent; border-radius: 5px; font-size: 12px; padding: 4px 10px; transition: background var(--pf-transition), border-color var(--pf-transition); }
+.pf-lyr-row__btns .btn-success { border: 1px solid var(--pf-border); color: var(--pf-accent); }
+.pf-lyr-row__btns .btn-success:hover { background: #f0f6fb; border-color: var(--pf-accent); }
+.pf-lyr-row__btns .bg-purple { border: 1px solid #d0b8e8; color: #7b5ea7; }
+.pf-lyr-row__btns .bg-purple:hover { background: #f5f0fb; border-color: #7b5ea7; }
+.pf-lyr-row__btns .btn-warning { border: 1px solid #f5d79e; color: #d08b00; background: transparent; }
+.pf-lyr-row__btns .btn-warning:hover { background: #fef9ec; border-color: #d08b00; }
+.pf-lyr-row__btns .btn-danger { border: 1px solid #e8bebe; color: #c0392b; }
+.pf-lyr-row__btns .btn-danger:hover { background: #fde8e8; border-color: #c0392b; }
+.pf-lyr-row__btns .btn[disabled] { opacity: 0.35; cursor: default; pointer-events: none; }
+.ui-sortable-placeholder.pf-lyr-placeholder { visibility: visible !important; background: #e8f0f7; border: 2px dashed #a8c8e8; border-radius: 6px; margin: 2px 0; }
 </style>
 {% endblock %}
 
@@ -153,59 +183,58 @@
 &nbsp;
 <div class="row">
 	<div class="col-md-12">
-		<div class="box">
-			<div class="box-header with-border">
-				<h3 class="box-title">{% trans "Group layers" %}</h3>
-				<div class="pf-topbar"><div id="button-create-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn btn-sm btn-default"><i class="fa fa-database margin-r-5"></i> {% trans "Create empty layer" %}</div>
-						<div id="button-import-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn btn-sm btn-default"><i class="fa fa-cloud-upload margin-r-5"></i> {% trans "Publish layer" %}</div>
-					</div>
+		<div class="pf-lyr-panel">
+			<div class="pf-lyr-panel__header">
+				<h3 class="pf-lyr-panel__title"><i class="fa fa-bars"></i> {% trans "Group layers" %}</h3>
+				<div class="pf-lyr-panel__actions">
+					<div id="button-create-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn-pf-action btn-pf-action--secondary"><i class="fa fa-database"></i> {% trans "Create empty layer" %}</div>
+					<div id="button-import-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn-pf-action"><i class="fa fa-cloud-upload"></i> {% trans "Publish layer" %}</div>
+				</div>
 			</div>
-
-			<div class="box-body">
+			<div class="pf-lyr-panel__body">
 				<div id="toc" class="toc">
 					{% for layer in layers %}
-					<div data-layerid="{{layer.id}}" data-name="{{layer.name}}" data-title="{{layer.title}}" data-order="{{layer.order}}" class="box box-default collapsed-box toc-layergroup layer-item" style="border-top: none;">
-						<div class="box-header">
-							<div class="handle">
-								<span class="" style="margin-right: 20px;">
-									<i class="fa fa-ellipsis-v"></i>
-									<i class="fa fa-ellipsis-v"></i>
-								</span>
-								<span class="text">{{layer.title}} </span><span style="margin-left: 20px; color: #999">[{{layer.fqn}}]</span>
-							</div>
-							<div class="box-tools box-tools-buttons pull-right">
-								{% if not layer.can_manage %}
-								<button type="button" data-id="{{layer.id}}" name="button-update-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success" disabled><i class="fa fa-edit"></i></button>
-								<button type="button" data-id="{{layer.id}}" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Configure layer" %}" class="btn bg-purple" disabled><i class="fa fa-cogs"></i></button>
-								<button type="button" data-id="{{layer.id}}" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="{% trans "Clear cache" %}" class="btn btn-warning" disabled><i class="fa fa-refresh"></i></button>
-								<button type="button" data-id="{{layer.id}}" name="button-delete-layer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger" disabled><i class="fa fa-times"></i></button>
-								{% else %}
-								{% if layer.external %}
-								<button type="button" data-id="{{layer.id}}" name="button-update-externallayer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success"><i class="fa fa-edit"></i></button>
-								{% else %}
-								<button type="button" data-id="{{layer.id}}" name="button-update-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success"><i class="fa fa-edit"></i></button>
-								{% endif %}
-								{% if layer.type == 'v_PostGIS' %}
-									<button type="button" data-id="{{layer.id}}" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Configure layer" %}" class="btn bg-purple"><i class="fa fa-cogs"></i></button>
-								{% else %}
-									<button type="button" data-id="{{layer.id}}" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Configure layer" %}" class="btn bg-purple" disabled><i class="fa fa-cogs"></i></button>
-								{% endif %}
-								{% if layer.cached %}
-								<button type="button" data-id="{{layer.id}}" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="{% trans "Clear cache" %}" class="btn btn-warning"><i class="fa fa-refresh"></i></button>
-								{% else %}
-								<button type="button" data-id="{{layer.id}}" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="{% trans "Clear cache" %}" class="btn btn-warning" disabled><i class="fa fa-refresh"></i></button>
-								{% endif %}
-								{% if layer.external %}
-								<button type="button" data-id="{{layer.id}}" name="button-delete-externallayer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger"><i class="fa fa-times"></i></button>
-								{% else %}
-								<button type="button" data-id="{{layer.id}}" name="button-delete-layer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger"><i class="fa fa-times"></i></button>
-								{% endif %}
-								{% endif %}
-							</div>
+					<div data-layerid="{{layer.id}}" data-name="{{layer.name}}" data-title="{{layer.title}}" data-order="{{layer.order}}" class="pf-lyr-row layer-item">
+						<div class="pf-lyr-row__handle handle">
+							<i class="fa fa-ellipsis-v"></i>
+							<i class="fa fa-ellipsis-v"></i>
+						</div>
+						<div class="pf-lyr-row__info">
+							<span class="pf-lyr-row__name">{{layer.title}}</span>
+							<span class="pf-lyr-row__fqn">[{{layer.fqn}}]</span>
+						</div>
+						<div class="box-tools-buttons pf-lyr-row__btns">
+							{% if not layer.can_manage %}
+							<button type="button" data-id="{{layer.id}}" name="button-update-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success" disabled><i class="fa fa-edit"></i></button>
+							<button type="button" data-id="{{layer.id}}" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Configure layer" %}" class="btn bg-purple" disabled><i class="fa fa-cogs"></i></button>
+							<button type="button" data-id="{{layer.id}}" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="{% trans "Clear cache" %}" class="btn btn-warning" disabled><i class="fa fa-refresh"></i></button>
+							<button type="button" data-id="{{layer.id}}" name="button-delete-layer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger" disabled><i class="fa fa-times"></i></button>
+							{% else %}
+							{% if layer.external %}
+							<button type="button" data-id="{{layer.id}}" name="button-update-externallayer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success"><i class="fa fa-edit"></i></button>
+							{% else %}
+							<button type="button" data-id="{{layer.id}}" name="button-update-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success"><i class="fa fa-edit"></i></button>
+							{% endif %}
+							{% if layer.type == 'v_PostGIS' %}
+							<button type="button" data-id="{{layer.id}}" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Configure layer" %}" class="btn bg-purple"><i class="fa fa-cogs"></i></button>
+							{% else %}
+							<button type="button" data-id="{{layer.id}}" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Configure layer" %}" class="btn bg-purple" disabled><i class="fa fa-cogs"></i></button>
+							{% endif %}
+							{% if layer.cached %}
+							<button type="button" data-id="{{layer.id}}" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="{% trans "Clear cache" %}" class="btn btn-warning"><i class="fa fa-refresh"></i></button>
+							{% else %}
+							<button type="button" data-id="{{layer.id}}" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="{% trans "Clear cache" %}" class="btn btn-warning" disabled><i class="fa fa-refresh"></i></button>
+							{% endif %}
+							{% if layer.external %}
+							<button type="button" data-id="{{layer.id}}" name="button-delete-externallayer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger"><i class="fa fa-times"></i></button>
+							{% else %}
+							<button type="button" data-id="{{layer.id}}" name="button-delete-layer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger"><i class="fa fa-times"></i></button>
+							{% endif %}
+							{% endif %}
 						</div>
 					</div>
 					{% endfor %}
-		        </div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -406,7 +435,7 @@
 		});
 
 		$(".toc").sortable({
-			placeholder: "sort-highlight",
+			placeholder: "pf-lyr-placeholder",
 			handle: ".handle",
 			forcePlaceholderSize: true,
 			zIndex: 999999
