@@ -127,6 +127,12 @@ class FeatureSerializer(serializers.Serializer):
                     native_epsg = int(native_epsg)
                 
                 source_epsg = epsg
+
+                print("****[INFO] NATIVE_EPSG:" + str(native_epsg))
+                print("****[INFO]EPSG SRC:" + str(source_epsg))
+                print("****[INFO]BUFFER:" + str(buffer))  
+                print("****[INFO]LON:" + str(lon))
+                print("****[INFO]LAT:" + str(lat))
                 
                 # Cuando epsg=4326 el buffer llega en grados (convención API). ST_Buffer(geography, dist) exige metros,
                 # por lo que hay que convertir grados -> metros. Si no se convierte, p.ej. 0.001° se interpretaría como
@@ -138,8 +144,13 @@ class FeatureSerializer(serializers.Serializer):
                 target_for_meters = native_epsg if native_epsg != 4326 else 3857  # 3857 para obtener metros cuando native es 4326
                 buffer = self.get_transformed_buffer_distance(con, 4326, target_for_meters, buffer, lon_4326, lat_4326)
                 tbuffer = buffer
+
+                print("****[INFO]TBFFER:" + str(tbuffer))
                    
                 epsilon = self.get_epsilon(con, geom_col, source_epsg, native_epsg, table, schema, buffer, lon, lat, tbuffer)
+
+                print("****[INFO]EPSILON:" + str(epsilon))
+
                 #get_buffer_params = " "
                 #if(getbuffer == True):
                 #    get_buffer_params = ", ST_AsGeoJSON(st_buffer('SRID={source_epsg};POINT({lon} {lat})'::geometry, {buffer}))"
@@ -192,6 +203,7 @@ class FeatureSerializer(serializers.Serializer):
                 
                 con.cursor.execute(query)
                 from gvsigol_plugin_featureapi.serializers import LayerResourceSerializer
+                print("****[INFO]SQL BUFFER:" + query.as_string(con.cursor))
 
                 feat_list = []
                 for feat in con.cursor.fetchall():
@@ -394,7 +406,8 @@ class FeatureSerializer(serializers.Serializer):
 
                 bufferGeom = 'null'
                 if(getbuffer == True):
-                    bufferGeom = self.getBufferGeometry(con, lon, lat, buffer, source_epsg)
+                    buffer_for_geom = self._buffer_in_meters_for_get_buffer(con, source_epsg, native_epsg, buffer, lon, lat)
+                    bufferGeom = self.getBufferGeometry(con, lon, lat, buffer_for_geom, source_epsg)
                     bufferGeom = json.loads(bufferGeom)
                     if 'crs' not in bufferGeom:
                         bufferGeom['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{source_epsg}"}}}}')
@@ -412,7 +425,26 @@ class FeatureSerializer(serializers.Serializer):
             raise HttpException(400, "Features cannot be queried. Unexpected error: " + format(e))
 
 
+    def _buffer_in_meters_for_get_buffer(self, con, source_epsg, native_epsg, buffer, lon, lat):
+        """
+        Devuelve buffer en metros para pasar a getBufferGeometry.
+        Convención API: cuando source_epsg=4326 el buffer llega en grados; getBufferGeometry
+        (ST_Buffer(geography)) exige metros. Si source_epsg no es 4326, devuelve buffer sin cambiar.
+        """
+        if source_epsg != 4326:
+            return buffer
+        lon_4326, lat_4326 = lon, lat
+        target_m = native_epsg if native_epsg != 4326 else 3857
+        buffer_m = self.get_transformed_buffer_distance(con, 4326, target_m, buffer, lon_4326, lat_4326)
+        return buffer_m if buffer_m is not None else buffer
+
     def getBufferGeometry(self, con, lon, lat, buffer, source_epsg=4326):
+        """
+        Devuelve la geometría del buffer como GeoJSON.
+        (lon, lat) deben estar en source_epsg. Cuando source_epsg es geográfico (4326),
+        buffer debe estar en METROS (ST_Buffer(geography, dist) usa metros).
+        Cuando source_epsg es proyectado, buffer en unidades de ese CRS (ej. metros en 25830).
+        """
         try:
             is_geographic = CRS.from_epsg(source_epsg).is_geographic
         except Exception:
@@ -431,6 +463,7 @@ class FeatureSerializer(serializers.Serializer):
             source_epsg=sqlbuilder.Literal(source_epsg),
         )
         con.cursor.execute(query)
+        print("****[INFO]SQL BUFFER:" + query.as_string(con.cursor))
         r = con.cursor.fetchone()
         return r[0]
 
