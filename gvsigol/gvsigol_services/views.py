@@ -4344,7 +4344,6 @@ def layer_create_with_group(request, layergroup_id):
                         initial_conf['fields'].append(field_conf)
                     
                     newRecord.conf = initial_conf
-                    newRecord.annotations = request.POST.get('annotations', '')
                     newRecord.save()
 
                     for i in form.cleaned_data['fields']:

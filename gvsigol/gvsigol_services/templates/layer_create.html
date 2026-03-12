@@ -86,7 +86,6 @@
 				 {% if MANAGE_PERMISSION_UI or user.is_superuser %} <li><a href="#tab-layer-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li> {% endif %}
           		<li><a href="#tab-layer-metadata" data-toggle="tab">{% trans "Metadata" %}</a></li>
           		<li><a href="#tab-layer-detailedinfo" data-toggle="tab">{% trans "Detailed information" %}</a></li>
-          		<li><a href="#tab-layer-annotations" data-toggle="tab">{% trans "Anotaciones" %}</a></li>
            	</ul>
 
            	<div class="tab-content">
@@ -313,31 +312,6 @@
 					</div>
 	          	</div>
 
-          	<div class="tab-pane" id="tab-layer-annotations">
-          		<div class="row">
-				<div class="col-md-12">
-					<div class="box">
-          				<div class="box-body">
-          					<div class="row">
-          						<div class="col-md-12 form-group">
-									<label for="annotations">{% trans "Anotaciones" %}</label>
-									<p class="help-block">
-										<button type="button" class="btn btn-success btn-sm" id="generate-annotations-btn" onclick="window.generateAnnotations()">
-											<i class="fa fa-magic"></i> {% trans "Autogenerar desde los datos" %}
-										</button>
-										<small style="margin-left: 10px;">
-											<i class="fa fa-info-circle"></i> {% trans "Genera automáticamente el texto de anotaciones con los datos del formulario actual." %}
-										</small>
-									</p>
-									<textarea class="form-control" name="annotations" id="annotations" rows="20"></textarea>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-          	</div>
-
          	</div>
 		</div>
 	</div>
@@ -360,45 +334,6 @@
 		</div>
 	</div>
 </div>
-<script type="text/javascript">
-window.generateAnnotations = function() {
-	var btn = document.getElementById('generate-annotations-btn');
-	var originalHtml = btn.innerHTML;
-	btn.disabled = true;
-	btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Generando...';
-	var url = window.location.origin + '/gvsigonline/services/layer/generate-annotations/';
-	var csrfMatch = document.cookie.match(/csrftoken=([^;]+)/);
-	var csrf = csrfMatch ? csrfMatch[1] : '';
-	var nameVal = document.querySelector('#id_name') ? document.querySelector('#id_name').value : '';
-	var titleVal = document.querySelector('#id_title') ? document.querySelector('#id_title').value : '';
-	var lgVal = document.querySelector('#id_layer_group') ? document.querySelector('#id_layer_group').value : '';
-	var body = 'name=' + encodeURIComponent(nameVal) + '&title=' + encodeURIComponent(titleVal) + '&layer_group_id=' + encodeURIComponent(lgVal) + '&layer_type=';
-	fetch(url, {
-		method: 'POST',
-		headers: {
-			'X-CSRFToken': csrf,
-			'X-Requested-With': 'XMLHttpRequest',
-			'Content-Type': 'application/x-www-form-urlencoded'
-		},
-		body: body
-	})
-	.then(function(r) { return r.json(); })
-	.then(function(data) {
-		if (data.success) {
-			document.getElementById('annotations').value = data.annotations;
-		} else {
-			alert('Error: ' + (data.error || data.message));
-		}
-	})
-	.catch(function(err) {
-		alert('Error al generar anotaciones: ' + err);
-	})
-	.finally(function() {
-		btn.disabled = false;
-		btn.innerHTML = originalHtml;
-	});
-};
-</script>
 {% endblock %}
 
 {% block extra-scripts %}
