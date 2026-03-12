@@ -774,15 +774,15 @@
 							<span class="project-card__desc">{{ item.description }}</span>
 						</div>
 						<div class="project-card__footer">
-							{% if item.item_type == 'app' %}
-							<a href="{{ item.url }}" class="project-card__btn project-card__btn--app">
-								<i class="fa fa-rocket"></i> {% trans "Open application" %}
-							</a>
-							{% else %}
-							<a href="{{ item.url }}" class="project-card__btn">
-								<i class="fa fa-map"></i> {% trans "Load project" %}
-							</a>
-							{% endif %}
+						{% if item.item_type == 'app' %}
+						<a href="{{ item.url }}" target="_blank" class="project-card__btn project-card__btn--app">
+							<i class="fa fa-rocket"></i> {% trans "Open application" %}
+						</a>
+						{% else %}
+						<a href="{{ item.url }}" target="_blank" class="project-card__btn">
+							<i class="fa fa-map"></i> {% trans "Load project" %}
+						</a>
+						{% endif %}
 						</div>
 					</div>
 				</li>
@@ -799,14 +799,14 @@
 							<span class="project-card__desc">{{project.description}}</span>
 						</div>
 						<div class="project-card__footer">
-							<a href="{{project.url}}" class="project-card__btn">
-								<i class="fa fa-map"></i> {% trans "Load project" %}
-							</a>
-						</div>
+						<a href="{{project.url}}" target="_blank" class="project-card__btn">
+							<i class="fa fa-map"></i> {% trans "Load project" %}
+						</a>
 					</div>
-				</li>
-				{% endfor %}
-				{% for project in public_projects %}
+				</div>
+			</li>
+			{% endfor %}
+			{% for project in public_projects %}
 				<li data-item-type="public" data-item-id="{{ project.id }}">
 					<div class="project-card">
 						<span class="drag-handle"><i class="fa fa-bars"></i></span>
@@ -817,14 +817,14 @@
 							<span class="project-card__desc">{{project.description}}</span>
 						</div>
 						<div class="project-card__footer">
-							<a href="{{project.url}}" class="project-card__btn">
-								<i class="fa fa-map"></i> {% trans "Load project" %}
-							</a>
-						</div>
+						<a href="{{project.url}}" target="_blank" class="project-card__btn">
+							<i class="fa fa-map"></i> {% trans "Load project" %}
+						</a>
 					</div>
-				</li>
-				{% endfor %}
-				{% for app in applications %}
+				</div>
+			</li>
+			{% endfor %}
+			{% for app in applications %}
 				<li data-item-type="app" data-item-id="{{ app.id }}">
 					<div class="project-card project-card--app">
 						<span class="drag-handle"><i class="fa fa-bars"></i></span>
@@ -835,9 +835,9 @@
 							<span class="project-card__desc">{{app.description}}</span>
 						</div>
 						<div class="project-card__footer">
-							<a href="{{app.url}}" class="project-card__btn project-card__btn--app">
-								<i class="fa fa-rocket"></i> {% trans "Open application" %}
-							</a>
+						<a href="{{app.url}}" target="_blank" class="project-card__btn project-card__btn--app">
+							<i class="fa fa-rocket"></i> {% trans "Open application" %}
+						</a>
 						</div>
 					</div>
 				</li>
@@ -1168,7 +1168,7 @@
 						'<span class="project-card__desc">' + $('<span>').text(item.description).html() + '</span>' +
 					'</div>' +
 					'<div class="project-card__footer">' +
-						'<a href="' + item.url + '" class="project-card__btn' + btnClass + '">' +
+						'<a href="' + item.url + '" target="_blank" class="project-card__btn' + btnClass + '">' +
 							'<i class="fa ' + btnIcon + '"></i> ' + btnLabel +
 						'</a>' +
 					'</div>' +
