@@ -48,6 +48,15 @@ import sys
 #logging.basicConfig()
 logger = logging.getLogger(__name__)
 
+
+def _is_geographic_epsg(epsg):
+    """True si el EPSG es un CRS geográfico (lat/lon), p.ej. 4326 (WGS84), 4258 (ETRS89)."""
+    try:
+        return CRS.from_epsg(int(epsg)).is_geographic
+    except Exception:
+        return False
+
+
 class EmptySerializer(serializers.Serializer):
     """Serializer sin campos; útil para endpoints sin body."""
     pass 
@@ -134,13 +143,13 @@ class FeatureSerializer(serializers.Serializer):
                 print("****[INFO]LON:" + str(lon))
                 print("****[INFO]LAT:" + str(lat))
                 
-                # Cuando epsg=4326: ST_Buffer(geography, dist) exige metros. Si buffer <= 1 se asume en grados (convención API)
-                # y se convierte a metros; si buffer > 1 se asume que ya viene en metros (p.ej. 2684) y no se convierte.
+                # Cuando epsg=4326: ST_Buffer(geography, dist) exige metros. 
                 if source_epsg == 4326:
                     lon_4326, lat_4326 = lon, lat
                 else:
                     lon_4326, lat_4326 = self.transform_from_epsg_to_4326(con, source_epsg, lon, lat)
-                target_for_meters = native_epsg if native_epsg != 4326 else 3857  # 3857 para obtener metros cuando native es 4326
+                # Si native es geográfico (4326, 4258, etc.) usamos 3857 para obtener metros; si no, unidades del CRS nativo.
+                target_for_meters = 3857 if _is_geographic_epsg(native_epsg) else native_epsg
                 buffer = self.get_transformed_buffer_distance(con, 4326, target_for_meters, buffer, lon_4326, lat_4326)
                 tbuffer = buffer
 
@@ -158,10 +167,9 @@ class FeatureSerializer(serializers.Serializer):
                 else:
                     cql_filter = sqlbuilder.SQL('')
                 
-                # Para 4326: geography (buffer ya en metros tras get_transformed_buffer_distance). Otros CRS: geometry con tbuffer en unidades nativas.
-                # Cuando native y source son 4326, usamos geography en WHERE y ORDER BY para que ST_Intersects y st_distance
-                # operen en metros sobre el elipsoide y funcionen bien tanto con columnas geometry como geography.
-                use_geography_4326 = (source_epsg == 4326 and native_epsg == 4326)
+                # Cuando source es 4326 y native es geográfico (4326, 4258, etc.), usamos geography en WHERE y ORDER BY
+                # para operar en metros sobre el elipsoide y evitar mezcla geometry/geography.
+                use_geography_for_filter = (source_epsg == 4326 and _is_geographic_epsg(native_epsg))
                 if source_epsg == 4326:
                     buffer_expr_template = sqlbuilder.SQL("st_transform(st_buffer('SRID={source_epsg};POINT({lon} {lat})'::geography, {buffer})::geometry, {native_epsg})")
                     buffer_expr = buffer_expr_template.format(
@@ -181,20 +189,25 @@ class FeatureSerializer(serializers.Serializer):
                         tbuffer=sqlbuilder.Literal(tbuffer)
                     )
 
-                if use_geography_4326:
-                    # WHERE y ORDER BY en geography: evita mezcla geometry/geography y usa metros correctamente
-                    where_intersects = sqlbuilder.SQL("ST_Intersects(st_buffer('SRID={source_epsg};POINT({lon} {lat})'::geography, {buffer}), {geom}::geography)").format(
+                if use_geography_for_filter:
+                    # WHERE y ORDER BY en geography (WGS84). Si native no es 4326, llevar geom a 4326 para el cast a geography.
+                    geom_for_geography = (
+                        sqlbuilder.SQL("{geom}::geography").format(geom=sqlbuilder.Identifier(geom_col))
+                        if native_epsg == 4326
+                        else sqlbuilder.SQL("ST_Transform({geom}, 4326)::geography").format(geom=sqlbuilder.Identifier(geom_col))
+                    )
+                    where_intersects = sqlbuilder.SQL("ST_Intersects(st_buffer('SRID={source_epsg};POINT({lon} {lat})'::geography, {buffer}), {geom_geog})").format(
                         source_epsg=sqlbuilder.Literal(source_epsg),
                         lon=sqlbuilder.Literal(lon),
                         lat=sqlbuilder.Literal(lat),
                         buffer=sqlbuilder.Literal(buffer),
-                        geom=sqlbuilder.Identifier(geom_col),
+                        geom_geog=geom_for_geography,
                     )
-                    order_by_expr = sqlbuilder.SQL("st_distance('SRID={source_epsg};POINT({lon} {lat})'::geography, {geom}::geography)").format(
+                    order_by_expr = sqlbuilder.SQL("st_distance('SRID={source_epsg};POINT({lon} {lat})'::geography, {geom_geog})").format(
                         source_epsg=sqlbuilder.Literal(source_epsg),
                         lon=sqlbuilder.Literal(lon),
                         lat=sqlbuilder.Literal(lat),
-                        geom=sqlbuilder.Identifier(geom_col),
+                        geom_geog=geom_for_geography,
                     )
                     sql = sqlbuilder.SQL("""
                     SELECT
