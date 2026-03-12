@@ -134,9 +134,8 @@ class FeatureSerializer(serializers.Serializer):
                 print("****[INFO]LON:" + str(lon))
                 print("****[INFO]LAT:" + str(lat))
                 
-                # Cuando epsg=4326 el buffer llega en grados (convención API). ST_Buffer(geography, dist) exige metros,
-                # por lo que hay que convertir grados -> metros. Si no se convierte, p.ej. 0.001° se interpretaría como
-                # 0.001 m (~1 mm) en lugar de ~111 m.
+                # Cuando epsg=4326: ST_Buffer(geography, dist) exige metros. Si buffer <= 1 se asume en grados (convención API)
+                # y se convierte a metros; si buffer > 1 se asume que ya viene en metros (p.ej. 2684) y no se convierte.
                 if source_epsg == 4326:
                     lon_4326, lat_4326 = lon, lat
                 else:
@@ -160,6 +159,9 @@ class FeatureSerializer(serializers.Serializer):
                     cql_filter = sqlbuilder.SQL('')
                 
                 # Para 4326: geography (buffer ya en metros tras get_transformed_buffer_distance). Otros CRS: geometry con tbuffer en unidades nativas.
+                # Cuando native y source son 4326, usamos geography en WHERE y ORDER BY para que ST_Intersects y st_distance
+                # operen en metros sobre el elipsoide y funcionen bien tanto con columnas geometry como geography.
+                use_geography_4326 = (source_epsg == 4326 and native_epsg == 4326)
                 if source_epsg == 4326:
                     buffer_expr_template = sqlbuilder.SQL("st_transform(st_buffer('SRID={source_epsg};POINT({lon} {lat})'::geography, {buffer})::geometry, {native_epsg})")
                     buffer_expr = buffer_expr_template.format(
@@ -178,28 +180,63 @@ class FeatureSerializer(serializers.Serializer):
                         native_epsg=sqlbuilder.Literal(native_epsg),
                         tbuffer=sqlbuilder.Literal(tbuffer)
                     )
-                
-                sql = sqlbuilder.SQL("""
+
+                if use_geography_4326:
+                    # WHERE y ORDER BY en geography: evita mezcla geometry/geography y usa metros correctamente
+                    where_intersects = sqlbuilder.SQL("ST_Intersects(st_buffer('SRID={source_epsg};POINT({lon} {lat})'::geography, {buffer}), {geom}::geography)").format(
+                        source_epsg=sqlbuilder.Literal(source_epsg),
+                        lon=sqlbuilder.Literal(lon),
+                        lat=sqlbuilder.Literal(lat),
+                        buffer=sqlbuilder.Literal(buffer),
+                        geom=sqlbuilder.Identifier(geom_col),
+                    )
+                    order_by_expr = sqlbuilder.SQL("st_distance('SRID={source_epsg};POINT({lon} {lat})'::geography, {geom}::geography)").format(
+                        source_epsg=sqlbuilder.Literal(source_epsg),
+                        lon=sqlbuilder.Literal(lon),
+                        lat=sqlbuilder.Literal(lat),
+                        geom=sqlbuilder.Identifier(geom_col),
+                    )
+                    sql = sqlbuilder.SQL("""
+                    SELECT
+                    ST_AsGeoJSON(ST_Transform({geom}, {source_epsg})), row_to_json((SELECT d FROM (SELECT {col_names_values}) d)), ST_AsGeoJSON(ST_Simplify(ST_Transform({geom}, {source_epsg}), {epsilon})), ST_NPoints({geom}) as props
+                    FROM {schema}.{table}
+                    WHERE
+                    {cql_filter} {where_intersects}
+                    ORDER BY {order_by_expr}
+                    """)
+                    query = sql.format(
+                        geom=sqlbuilder.Identifier(geom_col),
+                        source_epsg=sqlbuilder.Literal(source_epsg),
+                        col_names_values=properties_query,
+                        schema=sqlbuilder.Identifier(schema),
+                        table=sqlbuilder.Identifier(table),
+                        where_intersects=where_intersects,
+                        order_by_expr=order_by_expr,
+                        epsilon=sqlbuilder.Literal(epsilon),
+                        cql_filter=cql_filter,
+                    )
+                else:
+                    sql = sqlbuilder.SQL("""
                     SELECT
                     ST_AsGeoJSON(ST_Transform({geom}, {source_epsg})), row_to_json((SELECT d FROM (SELECT {col_names_values}) d)), ST_AsGeoJSON(ST_Simplify(ST_Transform({geom}, {source_epsg}), {epsilon})), ST_NPoints({geom}) as props
                     FROM {schema}.{table}
                     WHERE
                     {cql_filter} ST_INTERSECTS({buffer_expr}, {geom})
                     ORDER BY st_distance(st_transform('SRID={source_epsg};POINT({lon} {lat})'::geometry, {native_epsg}), {geom})
-                """)
-                query = sql.format(
-                    geom=sqlbuilder.Identifier(geom_col),
-                    source_epsg=sqlbuilder.Literal(source_epsg),
-                    native_epsg=sqlbuilder.Literal(native_epsg),
-                    col_names_values=properties_query,
-                    schema=sqlbuilder.Identifier(schema),
-                    table=sqlbuilder.Identifier(table),
-                    buffer_expr=buffer_expr,
-                    lat=sqlbuilder.Literal(lat),
-                    lon=sqlbuilder.Literal(lon),
-                    epsilon=sqlbuilder.Literal(epsilon),
-                    cql_filter=cql_filter,
-                )
+                    """)
+                    query = sql.format(
+                        geom=sqlbuilder.Identifier(geom_col),
+                        source_epsg=sqlbuilder.Literal(source_epsg),
+                        native_epsg=sqlbuilder.Literal(native_epsg),
+                        col_names_values=properties_query,
+                        schema=sqlbuilder.Identifier(schema),
+                        table=sqlbuilder.Identifier(table),
+                        buffer_expr=buffer_expr,
+                        lat=sqlbuilder.Literal(lat),
+                        lon=sqlbuilder.Literal(lon),
+                        epsilon=sqlbuilder.Literal(epsilon),
+                        cql_filter=cql_filter,
+                    )
                 
                 con.cursor.execute(query)
                 from gvsigol_plugin_featureapi.serializers import LayerResourceSerializer
