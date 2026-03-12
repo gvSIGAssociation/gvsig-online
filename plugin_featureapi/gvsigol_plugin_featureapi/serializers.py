@@ -128,18 +128,15 @@ class FeatureSerializer(serializers.Serializer):
                 
                 source_epsg = epsg
                 
-                # En info_by_point (simplify=true) el buffer siempre llega en grados -> conversión a metros/nativo.
+                # Cuando epsg=4326 el buffer llega en grados (convención API). ST_Buffer(geography, dist) exige metros,
+                # por lo que hay que convertir grados -> metros. Si no se convierte, p.ej. 0.001° se interpretaría como
+                # 0.001 m (~1 mm) en lugar de ~111 m.
                 if source_epsg == 4326:
                     lon_4326, lat_4326 = lon, lat
                 else:
                     lon_4326, lat_4326 = self.transform_from_epsg_to_4326(con, source_epsg, lon, lat)
-                target_for_meters = native_epsg if native_epsg != 4326 else 3857 #se asume que native es métrico
-                # NO PARECE CORRECTO. Comento get_transformed_buffer_distance
-                # Si transformas las distancia del buffer que viene en grados a metros, salen condiciones de la SQL como esta:
-                # WHERE ST_INTERSECTS(st_transform(st_buffer('SRID=4326;POINT(-0.3065 39.4409)'::geography, 79459.54009069598)::geometry, 25830), "wkb_geometry")
-                # en ella se puede ver que las coordenadas del buffer son en 4326 pero la distancia en mts, lo que debe generar un buffer de aquí a burgos. 
-                # Necesitamos algo más así: st_buffer('SRID=4326;POINT(-0.3065 39.4409)'::geography, 0.09) donde el 0.09 lo manda al app en 4326
-                #buffer = self.get_transformed_buffer_distance(con, 4326, target_for_meters, buffer, lon_4326, lat_4326)
+                target_for_meters = native_epsg if native_epsg != 4326 else 3857  # 3857 para obtener metros cuando native es 4326
+                buffer = self.get_transformed_buffer_distance(con, 4326, target_for_meters, buffer, lon_4326, lat_4326)
                 tbuffer = buffer
                    
                 epsilon = self.get_epsilon(con, geom_col, source_epsg, native_epsg, table, schema, buffer, lon, lat, tbuffer)
@@ -151,7 +148,7 @@ class FeatureSerializer(serializers.Serializer):
                 else:
                     cql_filter = sqlbuilder.SQL('')
                 
-                # Para 4326, usar geography para el buffer (más preciso). Para otros CRS, usar geometry
+                # Para 4326: geography (buffer ya en metros tras get_transformed_buffer_distance). Otros CRS: geometry con tbuffer en unidades nativas.
                 if source_epsg == 4326:
                     buffer_expr_template = sqlbuilder.SQL("st_transform(st_buffer('SRID={source_epsg};POINT({lon} {lat})'::geography, {buffer})::geometry, {native_epsg})")
                     buffer_expr = buffer_expr_template.format(
