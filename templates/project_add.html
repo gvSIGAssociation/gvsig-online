@@ -377,6 +377,58 @@
 	background: var(--pf-accent-dk);
 	border-color: var(--pf-accent-dk);
 }
+
+/* ---- Chips de permisos de proyecto ---- */
+#user-list-box .products-list > .item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 12px;
+}
+#user-list-box .products-list .product-img { flex-shrink: 0; width: 32px; height: 32px; }
+#user-list-box .products-list .product-img img { width: 20px; height: 20px; opacity: 0.5; }
+#user-list-box .products-list .product-info { flex: 1; min-width: 0; }
+.proj-role-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 8px;
+	width: 100%;
+}
+.proj-role-info { flex: 1; min-width: 0; }
+.proj-role-name { font-size: 13px; font-weight: 600; color: #2e3a45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.proj-role-desc { font-size: 12px; color: #7b8a96; margin-top: 1px; }
+.proj-perms { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.proj-perm-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	border: 1px solid #e8ecef;
+	border-radius: 20px;
+	padding: 3px 10px 3px 8px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #7b8a96;
+	background: #f4f6f8;
+	cursor: pointer;
+	transition: background 0.15s, border-color 0.15s, color 0.15s;
+	user-select: none;
+	white-space: nowrap;
+	margin: 0;
+	text-transform: none;
+	letter-spacing: 0;
+}
+.proj-perm-chip input[type="checkbox"] {
+	margin: 0;
+	cursor: pointer;
+	accent-color: #4a7fa5;
+	width: 13px;
+	height: 13px;
+	flex-shrink: 0;
+}
+.proj-perm-chip:has(input:checked) { background: rgba(74,127,165,0.1); border-color: #4a7fa5; color: #2d5f80; }
+.proj-perm-chip:has(input:disabled) { opacity: 0.55; cursor: default; }
 </style>
 {% endblock %}
 
@@ -749,19 +801,22 @@
 													<img src="{% static "img/users.png" %}" alt="Users Image">
 												</div>
 												<div class="product-info">
-													<span class="product-title"><span class="searchable-rolename">{{group.name}}</span>
-														<div class="pull-right checkbox form-inline">
-															<label>
+													<div class="proj-role-row">
+														<div class="proj-role-info">
+															<div class="proj-role-name searchable-rolename">{{group.name}}</div>
+															<div class="proj-role-desc searchable-roledesc">{{group.description}}</div>
+														</div>
+														<div class="proj-perms">
+															<label class="proj-perm-chip">
 																<input class="project-read-checkbox" type="checkbox" name="read-role-{{group.name}}" id="read-role-{{group.name}}" {% if group.read_checked %}checked {% endif %}/>
 																<span>{% trans "Permission to access" %}</span>
 															</label>
-															<label style="margin-left:10px">
+															<label class="proj-perm-chip">
 																<input type="checkbox" name="manage-role-{{group.name}}" id="manage-role-{{group.name}}" {% if group.manage_checked %}checked {% endif %}/>
 																<span>{% trans "Permission to manage" %}</span>
 															</label>
 														</div>
-													</span>
-													<span class="product-description searchable-roledesc">{{group.description}}</span>
+													</div>
 												</div>
 											</li> 
 											{% endfor %}
