@@ -5,16 +5,54 @@
 
 {% block header %}
 <style>
-:root { --pf-accent: #4a7fa5; --pf-accent-dk: #2d5f80; --pf-text: #2e3a45; --pf-muted: #7b8a96; --pf-border: #e8ecef; --pf-bg: #f4f6f8; --pf-white: #ffffff; --pf-radius: 10px; --pf-shadow: 0 2px 12px rgba(0,0,0,0.08); --pf-transition: 0.2s ease; }
+:root { --pf-accent: #4a7fa5; --pf-accent-dk: #2d5f80; --pf-accent-lt: rgba(74,127,165,0.06); --pf-text: #2e3a45; --pf-muted: #7b8a96; --pf-border: #e8ecef; --pf-bg: #f4f6f8; --pf-white: #ffffff; --pf-radius: 10px; --pf-shadow: 0 2px 12px rgba(0,0,0,0.08); --pf-transition: 0.2s ease; }
 .pf-topbar { display: flex; align-items: center; justify-content: flex-end; padding: 12px 0 16px; gap: 10px; }
 .btn-pf-save { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-accent); color: #fff !important; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 20px; cursor: pointer; transition: background var(--pf-transition); }
 .btn-pf-back { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-bg); color: var(--pf-muted) !important; border: 1px solid var(--pf-border); border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 16px; cursor: pointer; text-decoration: none !important; }
 .pf-error-msg { display: none; background: #fff5f5; border-left: 4px solid #e74c3c; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #c0392b; }
 .pf-error-msg:has(li), .pf-error-msg:has(p:not(:empty)), .pf-error-msg:has(ul:not(:empty)) { display: block; }
-.nav-tabs { border-bottom: 2px solid var(--pf-border); margin-bottom: 0; }
-.nav-tabs > li > a { border-radius: 7px 7px 0 0; font-size: 13px; font-weight: 600; color: var(--pf-muted); padding: 9px 18px; border: 1px solid transparent; transition: color var(--pf-transition); }
-.nav-tabs > li > a:hover { background: var(--pf-bg); color: var(--pf-accent); }
-.nav-tabs > li.active > a, .nav-tabs > li.active > a:focus { color: var(--pf-accent); border: 1px solid var(--pf-border); border-bottom-color: var(--pf-white); background: var(--pf-white); font-weight: 700; }
+/* ---- Tabs ---- */
+.nav-tabs {
+	border-bottom: 2px solid var(--pf-border);
+	margin-bottom: 0;
+	padding-left: 4px;
+}
+.nav-tabs > li > a {
+	color: var(--pf-muted);
+	font-size: 13px;
+	font-weight: 600;
+	border: none;
+	border-bottom: 2.5px solid transparent;
+	padding: 11px 20px;
+	margin-bottom: -2px;
+	border-radius: 6px 6px 0 0;
+	transition: color var(--pf-transition), border-color var(--pf-transition), background var(--pf-transition);
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+}
+.nav-tabs > li > a i.tab-icon {
+	font-size: 14px;
+	width: 16px;
+	text-align: center;
+	opacity: 0.7;
+	transition: opacity var(--pf-transition);
+}
+.nav-tabs > li > a:hover {
+	color: var(--pf-accent);
+	background: var(--pf-accent-lt);
+	border-color: transparent;
+}
+.nav-tabs > li > a:hover i.tab-icon { opacity: 1; }
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+	color: var(--pf-accent);
+	background: var(--pf-accent-lt);
+	border: none;
+	border-bottom: 2.5px solid var(--pf-accent);
+}
+.nav-tabs > li.active > a i.tab-icon { opacity: 1; color: var(--pf-accent); }
 .tab-content { background: var(--pf-white); border: 1px solid var(--pf-border); border-top: none; border-radius: 0 0 var(--pf-radius) var(--pf-radius); padding: 24px; box-shadow: var(--pf-shadow); }
 .tab-content .form-control { border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; padding: 6px 12px; }
 </style>
@@ -60,15 +98,15 @@
 					<span class="label label-primary pull-right">{{ connection.name }}</span>
 				</div>
 				<div class="box-body">
-					<!-- Pestañas -->
-					<ul class="nav nav-tabs">
-						<li class="active">
-							<a href="#tab-general" data-toggle="tab">{% trans "General" %}</a>
-						</li>
-						<li>
-							<a href="#tab-permissions" data-toggle="tab">{% trans "Permissions" %}</a>
-						</li>
-					</ul>
+				<!-- Pestañas -->
+				<ul class="nav nav-tabs">
+					<li class="active">
+						<a href="#tab-general" data-toggle="tab"><i class="fa fa-cog tab-icon"></i> {% trans "General" %}</a>
+					</li>
+					<li>
+						<a href="#tab-permissions" data-toggle="tab"><i class="fa fa-lock tab-icon"></i> {% trans "Permissions" %}</a>
+					</li>
+				</ul>
 					
 					<div class="tab-content" style="padding-top: 15px;">
 						<!-- Tab General -->

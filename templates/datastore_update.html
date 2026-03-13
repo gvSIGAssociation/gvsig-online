@@ -7,6 +7,7 @@
 :root {
 	--pf-accent:    #4a7fa5;
 	--pf-accent-dk: #2d5f80;
+	--pf-accent-lt: rgba(74,127,165,0.06);
 	--pf-text:      #2e3a45;
 	--pf-muted:     #7b8a96;
 	--pf-border:    #e8ecef;
@@ -16,105 +17,187 @@
 	--pf-shadow:    0 2px 12px rgba(0,0,0,0.08);
 	--pf-transition: 0.2s ease;
 }
-.pf-topbar { display: flex; align-items: center; justify-content: flex-end; padding: 12px 0 16px; gap: 10px; flex-wrap: wrap; }
-.pf-topbar-left { flex: 1; display: flex; align-items: center; gap: 8px; }
-.btn-pf-save { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-accent); color: #fff !important; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 20px; cursor: pointer; transition: background var(--pf-transition); letter-spacing: 0.2px; }
-.btn-pf-save:hover { background: var(--pf-accent-dk); }
-.btn-pf-back { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-bg); color: var(--pf-muted) !important; border: 1px solid var(--pf-border); border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 16px; cursor: pointer; transition: background var(--pf-transition); text-decoration: none !important; }
-.btn-pf-back:hover { background: var(--pf-border); color: var(--pf-text) !important; }
-.pf-error-msg { display: none; background: #fff5f5; border-left: 4px solid #e74c3c; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #c0392b; }
+
+/* ---- Barra de acciones superior ---- */
+.pf-topbar {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	margin-bottom: 16px;
+}
+.btn-pf-save {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: var(--pf-accent);
+	color: #fff;
+	border: none;
+	border-radius: 6px;
+	font-size: 13px;
+	font-weight: 600;
+	padding: 8px 20px;
+	cursor: pointer;
+	transition: background var(--pf-transition);
+	letter-spacing: 0.2px;
+}
+.btn-pf-save:hover { background: var(--pf-accent-dk); color: #fff; }
+
+/* ---- Mensaje de error ---- */
+.pf-error-msg {
+	display: none;
+	background: #fde8e8;
+	border: 1px solid #f5c6c6;
+	border-left: 4px solid #c0392b;
+	border-radius: 6px;
+	padding: 10px 14px;
+	color: #c0392b;
+	font-size: 13px;
+	margin-bottom: 16px;
+}
 .pf-error-msg:has(li), .pf-error-msg:has(p:not(:empty)), .pf-error-msg:has(ul:not(:empty)) { display: block; }
-.pf-error-msg ul { margin: 0; padding-left: 18px; }
-.pf-error-msg p { margin: 0 0 4px; }
-.nav-tabs { border-bottom: 2px solid var(--pf-border); margin-bottom: 0; }
-.nav-tabs > li > a { border-radius: 7px 7px 0 0; font-size: 13px; font-weight: 600; color: var(--pf-muted); padding: 9px 18px; border: 1px solid transparent; transition: color var(--pf-transition), background var(--pf-transition); }
-.nav-tabs > li > a:hover { background: var(--pf-bg); color: var(--pf-accent); border-color: transparent; }
-.nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus { color: var(--pf-accent); border: 1px solid var(--pf-border); border-bottom-color: var(--pf-white); background: var(--pf-white); font-weight: 700; }
-.tab-content { background: var(--pf-white); border: 1px solid var(--pf-border); border-top: none; border-radius: 0 0 var(--pf-radius) var(--pf-radius); padding: 24px; box-shadow: var(--pf-shadow); }
-.tab-content label { font-size: 12px; font-weight: 700; color: var(--pf-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
-.tab-content .form-control { border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; transition: border-color var(--pf-transition), box-shadow var(--pf-transition); padding: 6px 12px; }
-.tab-content .form-control:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
-.tab-content .form-control[readonly] { background: #f0f3f5; color: var(--pf-muted); cursor: default; }
-.pf-card { background: var(--pf-white); border: 1px solid var(--pf-border); border-radius: var(--pf-radius); box-shadow: var(--pf-shadow); padding: 24px; }
-.pf-card label { font-size: 12px; font-weight: 700; color: var(--pf-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
-.pf-card .form-control { border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; transition: border-color var(--pf-transition), box-shadow var(--pf-transition); padding: 6px 12px; }
-.pf-card .form-control:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
-.pf-card .form-control[disabled] { background: #f0f3f5; color: var(--pf-muted); cursor: default; }
+
+/* ---- Tabs ---- */
+.nav-tabs {
+	border-bottom: 2px solid var(--pf-border);
+	margin-bottom: 0;
+	padding-left: 4px;
+}
+.nav-tabs > li > a {
+	color: var(--pf-muted);
+	font-size: 13px;
+	font-weight: 600;
+	border: none;
+	border-bottom: 2.5px solid transparent;
+	padding: 11px 20px;
+	margin-bottom: -2px;
+	border-radius: 6px 6px 0 0;
+	transition: color var(--pf-transition), border-color var(--pf-transition), background var(--pf-transition);
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+}
+.nav-tabs > li > a i.tab-icon {
+	font-size: 14px;
+	width: 16px;
+	text-align: center;
+	opacity: 0.7;
+	transition: opacity var(--pf-transition);
+}
+.nav-tabs > li > a:hover {
+	color: var(--pf-accent);
+	background: var(--pf-accent-lt);
+	border-color: transparent;
+}
+.nav-tabs > li > a:hover i.tab-icon { opacity: 1; }
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+	color: var(--pf-accent);
+	background: var(--pf-accent-lt);
+	border: none;
+	border-bottom: 2.5px solid var(--pf-accent);
+}
+.nav-tabs > li.active > a i.tab-icon { opacity: 1; color: var(--pf-accent); }
+
+/* ---- Panel de contenido de cada tab ---- */
+.tab-content > .tab-pane > .box,
+.tab-content > .tab-pane > .row > .col-md-12 > .box {
+	border-radius: 0 0 var(--pf-radius) var(--pf-radius);
+	box-shadow: var(--pf-shadow);
+	border: 1px solid var(--pf-border);
+	border-top: none;
+}
+
+/* ---- Inputs ---- */
+.tab-content .form-control {
+	border-radius: 6px;
+	border-color: var(--pf-border);
+	font-size: 13px;
+	height: 36px;
+	color: var(--pf-text);
+	transition: border-color var(--pf-transition), box-shadow var(--pf-transition);
+}
+.tab-content textarea.form-control { height: auto; }
+.tab-content .form-control:focus {
+	border-color: var(--pf-accent);
+	box-shadow: 0 0 0 3px rgba(74,127,165,0.12);
+	outline: none;
+}
+.tab-content label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--pf-muted);
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<form id="main_form" role="form" method="post" action="/gvsigonline/services/datastore_update/{{datastore_id}}/">
 	<div class="row">
 		<div class="col-md-12">
-			<div class="row">
-				<div class="col-md-12 form-group">
-					<div class="pf-topbar"><div id="save_button" type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Update" %}</div>					
+			<form id="main_form" role="form" method="post" action="/gvsigonline/services/datastore_update/{{datastore_id}}/">
+				<div class="pf-topbar">
+					{% csrf_token %}
+					{% if form.errors %}
+					<div class="pf-error-msg" style="flex:1; margin-right:16px;">
+						<ul>
+						{{ form.non_field_errors }}
+						{% for field in form %}
+							{% if field.errors %}
+								<li>{{field.label}}: {{ field.errors|striptags }}</li>
+							{% endif %}
+						{% endfor %}
+						</ul>
 					</div>
+					{% endif %}
+					<button id="save_button" type="button" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Update" %}</button>
 				</div>
-			</div>
-			
-			<div class="box">
-				{% csrf_token %}
-				{% if form.errors %}
-				<div id="form-error" class="alert alert-danger" style="margin: 15px;">
-					<ul>
-					{{ form.non_field_errors }}
-					{% for field in form %}
-						{% if field.errors %}
-							<li>{{field.label}}: {{ field.errors|striptags }}</li>
-						{% endif %}	
-					{% endfor %}
-					</ul>
-				</div>
-				{% endif %}
-				
-									<ul class="nav nav-tabs">
-						<li class="active"><a href="#tab-datastore" data-toggle="tab">{% trans "Datastore" %}</a></li>
-						<li><a href="#tab-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li>
-					</ul>
-					<div class="tab-content">
-						<!-- Pestaña de Datastore -->
-						<div class="tab-pane active" id="tab-datastore">
+
+				<ul class="nav nav-tabs">
+					<li class="active"><a href="#tab-datastore" data-toggle="tab"><i class="fa fa-database tab-icon"></i> {% trans "Datastore" %}</a></li>
+					<li><a href="#tab-permissions" data-toggle="tab"><i class="fa fa-lock tab-icon"></i> {% trans "Permissions" %}</a></li>
+				</ul>
+
+				<div class="tab-content">
+					<div class="tab-pane active" id="tab-datastore">
+						<div class="box">
 							<div class="box-body">
 								<div class="row">
 									<div class="col-md-12 form-group">
 										<label for="workspace_name">{% trans "Workspace" %}</label>
-										<input name="workspace_name" class="form-control" id="workspace_name" type="text" value="{{workspace_name}}" readonly>			
+										<input name="workspace_name" class="form-control" id="workspace_name" type="text" value="{{workspace_name}}" readonly>
 									</div>
 								</div>
 								<div class="row">
-									<div class="col-md-12 form-group">	
+									<div class="col-md-12 form-group">
 										<label for="id_workspace">{% trans "Type" %}</label>
 										{{ form.type }}
 									</div>
-								</div>	
-									
+								</div>
+
 								<div class="row" id="select-file-row" style="display: none;">
 									<div class="col-md-2">
-										<a href="#" id="select-file-button" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>{% trans "Select file" %}</a>					
+										<a href="#" id="select-file-button" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>{% trans "Select file" %}</a>
 									</div>
 									<div class="col-md-10">
-										{{ form.file }}			
+										{{ form.file }}
 									</div>
-								</div>		
-									
-								<div class="row">		
+								</div>
+
+								<div class="row">
 									<div class="col-md-12 form-group">
 										<label for="id_name">{% trans "Name" %}</label>
 										{{ form.name }}
-									</div>	
+									</div>
 								</div>
-									
+
 								<div class="row">
 									<div class="col-md-12 form-group">
 										<label for="id_description">{% trans "Description" %}</label>
 										{{ form.description }}
 									</div>
-								</div>	
-								
+								</div>
+
 								{% if uses_connection %}
-								<!-- Modo conexión: mostrar información de la conexión (solo lectura) -->
 								<div class="row" id="connection-info-row">
 									<div class="col-md-6 form-group">
 										<label for="id_connection_name">{% trans "Connection" %}</label>
@@ -138,7 +221,6 @@
 								</div>
 								{% endif %}
 								{% else %}
-								<!-- Modo legacy: mostrar connection_params editables -->
 								<div class="row" id="connection-params-row">
 									<div class="col-md-12 form-group">
 										<label for="id_connection_params">{% trans "Connection params" %}</label>
@@ -147,50 +229,48 @@
 									</div>
 								</div>
 								{% endif %}
-									
+
 								<div class="row" id="select-file-row-2" style="display: none;">
 									<div class="col-md-12">
 										<input class="form-control" id="id_file" maxlength="500" name="file" type="text" readonly>
 									</div>
-								</div>		
-								
+								</div>
+
 								<div class="row select-mosaic_dimension" style="display: none;">
 									<div class="col-md-12">
 										<input type="checkbox" id="time_dimension_input" name="time_dimension_input"/><label>{% trans "Temporal dimension" %}</label>
 									</div>
 									<div class="col-md-6">
-										 <input class="form-control" id="time_dimension_text" maxlength="500" name="time_dimension_text" type="text" placeHolder="(?<=_)[0-9]{8}" disabled>	
+										 <input class="form-control" id="time_dimension_text" maxlength="500" name="time_dimension_text" type="text" placeHolder="(?<=_)[0-9]{8}" disabled>
 									</div>
 									<div class="col-md-6">
-										<input class="form-control" id="time_dimension_format" maxlength="500" name="time_dimension_format" type="text" placeHolder="yyyyMMdd" disabled>	
+										<input class="form-control" id="time_dimension_format" maxlength="500" name="time_dimension_format" type="text" placeHolder="yyyyMMdd" disabled>
 									</div>
-								</div>	
+								</div>
 								<div style="display: none;">
 									<div class="row select-mosaic_dimension" style="display: none;">
 										<div class="col-md-12">
 											<input type="checkbox" id="elevation_dimension_input" name="elevation_dimension_input"/><label>{% trans "Elevation dimension" %}</label>
 										</div>
 										<div class="col-md-6">
-											<input class="form-control" id="elevation_dimension_text" maxlength="500" name="elevation_dimension_text" type="text" placeHolder="(?<=_)[0-9]{3}.[0-9]{4}" disabled>	
+											<input class="form-control" id="elevation_dimension_text" maxlength="500" name="elevation_dimension_text" type="text" placeHolder="(?<=_)[0-9]{3}.[0-9]{4}" disabled>
 										</div>
 										<div class="col-md-6">
-											<input class="form-control" id="elevation_dimension_format" maxlength="500" name="elevation_dimension_format" type="text" placeHolder="" disabled>	
+											<input class="form-control" id="elevation_dimension_format" maxlength="500" name="elevation_dimension_format" type="text" placeHolder="" disabled>
 										</div>
-									</div>	
+									</div>
 								</div>
 							</div>
 						</div>
-						
-						<!-- Pestaña de permisos -->
-						<div class="tab-pane" id="tab-permissions">
-							{% include "select_datastore_permissions.html" %}
-						</div>
+					</div>
+
+					<div class="tab-pane" id="tab-permissions">
+						{% include "select_datastore_permissions.html" %}
 					</div>
 				</div>
-			</div>						
+			</form>
 		</div>
 	</div>
-</form>
 {% endblock %}
 
 {% block extra-scripts %}
