@@ -223,26 +223,32 @@
 								</div>
 
 								<div class="row select-mosaic_dimension" style="display: none;">
-									<div class="col-md-12">
-										<input type="checkbox" id="time_dimension_input" name="time_dimension_input"/><label>{% trans "Temporal dimension" %}</label>
+									<div class="col-md-12" style="margin-bottom: 8px;">
+										<label class="dp-perm-chip">
+											<input type="checkbox" id="time_dimension_input" name="time_dimension_input"/>
+											<span>{% trans "Temporal dimension" %}</span>
+										</label>
 									</div>
 									<div class="col-md-6">
-										 <input class="form-control" id="time_dimension_text" maxlength="500" name="time_dimension_text" type="text" placeHolder="(?<=_)[0-9]{8}" disabled>
+										<input class="form-control" id="time_dimension_text" maxlength="500" name="time_dimension_text" type="text" placeholder="(?<=_)[0-9]{8}" disabled>
 									</div>
 									<div class="col-md-6">
-										 <input class="form-control" id="time_dimension_format" maxlength="500" name="time_dimension_format" type="text" placeHolder="yyyyMMdd" disabled>
+										<input class="form-control" id="time_dimension_format" maxlength="500" name="time_dimension_format" type="text" placeholder="yyyyMMdd" disabled>
 									</div>
 								</div>
 								<div style="display: none;">
 									<div class="row select-mosaic_dimension" style="display: none;">
-										<div class="col-md-12">
-											<input type="checkbox" id="elevation_dimension_input" name="elevation_dimension_input"/><label>{% trans "Elevation dimension" %}</label>
+										<div class="col-md-12" style="margin-bottom: 8px;">
+											<label class="dp-perm-chip">
+												<input type="checkbox" id="elevation_dimension_input" name="elevation_dimension_input"/>
+												<span>{% trans "Elevation dimension" %}</span>
+											</label>
 										</div>
 										<div class="col-md-6">
-											<input class="form-control" id="elevation_dimension_text" maxlength="500" name="elevation_dimension_text" type="text" placeHolder="(?<=_)[0-9]{3}.[0-9]{4}" disabled>
+											<input class="form-control" id="elevation_dimension_text" maxlength="500" name="elevation_dimension_text" type="text" placeholder="(?<=_)[0-9]{3}.[0-9]{4}" disabled>
 										</div>
 										<div class="col-md-6">
-											<input class="form-control" id="elevation_dimension_format" maxlength="500" name="elevation_dimension_format" type="text" placeHolder="" disabled>
+											<input class="form-control" id="elevation_dimension_format" maxlength="500" name="elevation_dimension_format" type="text" placeholder="" disabled>
 										</div>
 									</div>
 								</div>

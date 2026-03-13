@@ -1,57 +1,139 @@
 {% load i18n %}
 {% load static from staticfiles %}
-				<div class="row">
-					<div class="col-md-12">
-						<div id="datastore-permissions-box" class="box searchable-list-box">
-							<div class="box-header">
-								<h3 class="col-md-6 box-title" style="vertical-align: middle">{% trans "Select datastore permissions" %}</h3>
-								<div class="col-md-6"><input type="text" class="search form-control" placeHolder="{% trans 'Search user role...' %}" id="ds-role-search" />
+<style>
+.dp-header {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	padding: 12px 16px;
+}
+.dp-search { flex: 1; min-width: 180px; max-width: 320px; }
+.dp-allow-all {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+.dp-perm-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	border: 1px solid #e8ecef;
+	border-radius: 20px;
+	padding: 3px 10px 3px 8px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #7b8a96;
+	background: #f4f6f8;
+	cursor: pointer;
+	transition: background 0.15s, border-color 0.15s, color 0.15s;
+	user-select: none;
+	white-space: nowrap;
+}
+.dp-perm-chip input[type="checkbox"] {
+	margin: 0;
+	cursor: pointer;
+	accent-color: #4a7fa5;
+	width: 13px;
+	height: 13px;
+	flex-shrink: 0;
+}
+.dp-perm-chip:has(input:checked) {
+	background: rgba(74,127,165,0.1);
+	border-color: #4a7fa5;
+	color: #2d5f80;
+}
+.dp-perm-chip:has(input:disabled) { opacity: 0.55; cursor: default; }
+.dp-role-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 8px;
+	width: 100%;
+}
+.dp-role-info { flex: 1; min-width: 0; }
+.dp-role-name {
+	font-size: 13px;
+	font-weight: 600;
+	color: #2e3a45;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.dp-role-desc { font-size: 12px; color: #7b8a96; margin-top: 1px; }
+.dp-perms { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+#datastore-permissions-box .products-list > .item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 12px;
+}
+#datastore-permissions-box .products-list .product-img {
+	flex-shrink: 0;
+	width: 32px;
+	height: 32px;
+}
+#datastore-permissions-box .products-list .product-img img {
+	width: 20px;
+	height: 20px;
+	opacity: 0.5;
+}
+#datastore-permissions-box .products-list .product-info { flex: 1; min-width: 0; }
+</style>
+
+<div class="row">
+	<div class="col-md-12">
+		<div id="datastore-permissions-box" class="box searchable-list-box">
+			<div class="box-header dp-header">
+				<div class="dp-search">
+					<input type="text" class="search form-control" placeholder="{% trans 'Search user role...' %}" id="ds-role-search" />
+				</div>
+				<div class="dp-allow-all">
+					<label class="dp-perm-chip" title="{% trans 'All staff users can use this datastore to create layers' %}">
+						<input type="checkbox" name="allow_all" id="allow_all" {% if datastore and datastore.allow_all %}checked {% endif %}/>
+						<span>{% trans "Allow all - Use" %}</span>
+					</label>
+					<label class="dp-perm-chip" title="{% trans 'All staff users can manage (edit) this datastore' %}">
+						<input type="checkbox" name="allow_all_manage" id="allow_all_manage" {% if datastore and datastore.allow_all_manage %}checked {% endif %}/>
+						<span>{% trans "Allow all - Management" %}</span>
+					</label>
+				</div>
+			</div>
+			<div class="box-body">
+				<ul class="products-list product-list-in-box list">
+					{% for role in roles %}
+					<li class="item">
+						<div class="product-img">
+							<img src="{% static 'img/users.png' %}" alt="{% trans 'User role image' %}">
+						</div>
+						<div class="product-info">
+							<div class="dp-role-row">
+								<div class="dp-role-info">
+									<div class="dp-role-name searchable-rolename">{{role.name}}</div>
+									<div class="dp-role-desc searchable-roledesc">{{role.description}}</div>
 								</div>
-								<div class="col-md-12" style="margin-top: 10px;">
-									<div class="checkbox" style="display: inline-block; margin-right: 20px;">
-										<label title="{% trans 'All staff users can use this datastore to create layers' %}">
-											<input type="checkbox" name="allow_all" id="allow_all" {% if datastore and datastore.allow_all %}checked {% endif %}/>
-											<span>{% trans "Allow all - Use" %}</span>
-										</label>
-									</div>
-									<div class="checkbox" style="display: inline-block; margin-right: 20px;">
-										<label title="{% trans 'All staff users can manage (edit) this datastore' %}">
-											<input type="checkbox" name="allow_all_manage" id="allow_all_manage" {% if datastore and datastore.allow_all_manage %}checked {% endif %}/>
-											<span>{% trans "Allow all - Management" %}</span>
-										</label>
-									</div>
+								<div class="dp-perms">
+									<label class="dp-perm-chip">
+										<input type="checkbox" name="role_use_{{role.name}}" id="role_use_{{role.name}}" {% if role.use_checked %}checked {% endif %}/>
+										<span>{% trans "Can use" %}</span>
+									</label>
+									<label class="dp-perm-chip">
+										<input type="checkbox" name="role_manage_{{role.name}}" id="role_manage_{{role.name}}" {% if role.manage_checked %}checked {% endif %}/>
+										<span>{% trans "Management" %}</span>
+									</label>
 								</div>
-							</div>
-							<div class="box-body">
-								<ul class="products-list product-list-in-box list">
-									{% for role in roles %}
-									<li class="item">
-										<div class="product-img">
-											<img src="{% static 'img/users.png' %}" alt="{% trans 'User role image' %}">
-										</div>
-										<div class="product-info">
-											<span class="product-title"><span class="searchable-rolename">{{role.name}}</span>
-												<div class="pull-right checkbox form-inline">
-													<label>
-														<input type="checkbox" name="role_use_{{role.name}}" id="role_use_{{role.name}}" {% if role.use_checked %}checked {% endif %}/>
-														<span>{% trans "Can use" %}</span>
-													</label>
-													<label style="margin-left:10px">
-														<input type="checkbox" name="role_manage_{{role.name}}" id="role_manage_{{role.name}}" {% if role.manage_checked %}checked {% endif %}/>
-														<span>{% trans "Management" %}</span>
-													</label>
-												</div>
-											</span> 
-											<span class="product-description searchable-roledesc">{{role.description}}</span>
-										</div>
-									</li> 
-									{% endfor %}
-								</ul>
-								<ul class="pagination"></ul>
 							</div>
 						</div>
-					</div>
-				</div>
+					</li>
+					{% endfor %}
+				</ul>
+				<ul class="pagination"></ul>
+			</div>
+		</div>
+	</div>
+</div>
 <script type="text/javascript">
 $(document).ready(function() {
 

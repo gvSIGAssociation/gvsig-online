@@ -1,63 +1,147 @@
 {% load i18n %}
 {% load static from staticfiles %}
-				<div class="row">
-					<div class="col-md-12">
-						<div id="read-list-box" class="box searchable-list-box">
-							<div class="box-header">
-								<h3 class="col-md-6 box-title" style="vertical-align: middle">{% trans "Select layer permissions" %}</h3>
-								<div class="col-md-6"><input type="text" class="search form-control" placeHolder="{% trans 'Search user role...' %}" />
+<style>
+.lp-header {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	padding: 12px 16px;
+}
+.lp-search { flex: 1; min-width: 180px; max-width: 320px; }
+.lp-public {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	border: 1px solid #e8ecef;
+	border-radius: 20px;
+	padding: 3px 10px 3px 8px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #7b8a96;
+	background: #f4f6f8;
+	cursor: pointer;
+	transition: background 0.15s, border-color 0.15s, color 0.15s;
+	user-select: none;
+	white-space: nowrap;
+	margin: 0;
+}
+.lp-public input[type="checkbox"] {
+	margin: 0;
+	cursor: pointer;
+	accent-color: #4a7fa5;
+	width: 13px;
+	height: 13px;
+	flex-shrink: 0;
+}
+.lp-public:has(input:checked) { background: rgba(74,127,165,0.1); border-color: #4a7fa5; color: #2d5f80; }
+.lp-role-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 8px;
+	width: 100%;
+}
+.lp-role-info { flex: 1; min-width: 0; }
+.lp-role-name { font-size: 13px; font-weight: 600; color: #2e3a45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lp-role-desc { font-size: 12px; color: #7b8a96; margin-top: 1px; }
+.lp-perms { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.lp-perm-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	border: 1px solid #e8ecef;
+	border-radius: 20px;
+	padding: 3px 10px 3px 8px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #7b8a96;
+	background: #f4f6f8;
+	cursor: pointer;
+	transition: background 0.15s, border-color 0.15s, color 0.15s;
+	user-select: none;
+	white-space: nowrap;
+	margin: 0;
+}
+.lp-perm-chip input[type="checkbox"] {
+	margin: 0;
+	cursor: pointer;
+	accent-color: #4a7fa5;
+	width: 13px;
+	height: 13px;
+	flex-shrink: 0;
+}
+.lp-perm-chip:has(input:checked) { background: rgba(74,127,165,0.1); border-color: #4a7fa5; color: #2d5f80; }
+.lp-perm-chip:has(input:disabled) { opacity: 0.55; cursor: default; }
+#read-list-box .products-list > .item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 12px;
+}
+#read-list-box .products-list .product-img { flex-shrink: 0; width: 32px; height: 32px; }
+#read-list-box .products-list .product-img img { width: 20px; height: 20px; opacity: 0.5; }
+#read-list-box .products-list .product-info { flex: 1; min-width: 0; }
+</style>
+
+<div class="row">
+	<div class="col-md-12">
+		<div id="read-list-box" class="box searchable-list-box">
+			<div class="box-header lp-header">
+				<div class="lp-search">
+					<input type="text" class="search form-control" placeholder="{% trans 'Search user role...' %}" />
+				</div>
+				<label class="lp-public" title="{% trans 'Layer will be readable by everyone if public' %}">
+					<input type="checkbox" name="resource-is-public" id="resource-is-public" {% if resource_is_public %}checked {% endif %}/>
+					<span>{% trans "Is public" %}</span>
+				</label>
+			</div>
+			<div class="box-body">
+				<ul class="products-list product-list-in-box list">
+					{% for role in roles %}
+					<li class="item">
+						<div class="product-img">
+							{% if role.external %}
+							<img src="{% static "img/users.png" %}" title="{% trans 'Non editable permissions since they have been set by a specific permission tool' %}" style="opacity: 0.4">
+							{% else %}
+							<img src="{% static "img/users.png" %}" alt="{% trans 'Generic user role image' %}">
+							{% endif %}
+						</div>
+						<div class="product-info">
+							<div class="lp-role-row">
+								<div class="lp-role-info">
+									<div class="lp-role-name searchable-rolename">{{role.name}}</div>
+									<div class="lp-role-desc searchable-roledesc">{{role.description}}</div>
 								</div>
-								<div class="col-md-12">
-								<div class="checkbox">
-									<label title="{% trans 'Layer will be readable by everyone if public' %}">
-										<input type="checkbox" name="resource-is-public" id="resource-is-public" {% if resource_is_public %}checked {% endif %}/>
-										<span>{% trans "Is public" %}</span>
+								<div class="lp-perms">
+									<label class="lp-perm-chip">
+										<input class="layer-read-checkbox{% if role.external is False %} gvsigol-checkable{% endif %}" type="checkbox" name="read-usergroup-{{role.name}}" id="read-usergroup-{{role.name}}"{% if role.read_checked %} checked{% endif %}{% if role.external %} disabled{% endif %} />
+										<span>{% trans "Read permission" %}</span>
+									</label>
+									<label class="lp-perm-chip">
+										{% if is_view %}
+										<input type="checkbox" name="write-usergroup-{{role.name}}" id="write-usergroup-{{role.name}}" title="{% trans 'SQL views can\'t be edited.' %}" disabled />
+										{% else %}
+										<input type="checkbox" name="write-usergroup-{{role.name}}" id="write-usergroup-{{role.name}}"{% if role.write_checked %} checked {% endif %}{% if role.external %} disabled{% endif %} />
+										{% endif %}
+										<span>{% trans "Write permission" %}</span>
+									</label>
+									<label class="lp-perm-chip">
+										<input class="layer-manage-checkbox" type="checkbox" name="manage-usergroup-{{role.name}}" id="manage-usergroup-{{role.name}}" {% if role.manage_checked %}checked {% endif %}/>
+										<span>{% trans "Permission to manage" %}</span>
 									</label>
 								</div>
-								</div>
-							</div>
-							<div class="box-body">
-								<ul class="products-list product-list-in-box list">
-									{% for role in roles %}
-									<li class="item">
-										<div class="product-img">
-											{% if role.external %}
-											<img src="{% static "img/users.png" %}" title="{% trans 'Non editable permissions since they have been set by a specific permission tool' %}" style="opacity: 0.4">
-											{% else %}
-											<img src="{% static "img/users.png" %}" alt="{% trans 'Generic user role image' %}">
-											{% endif %}
-										</div>
-										<div class="product-info">
-											<span class="product-title"><span class="searchable-rolename">{{role.name}}</span>
-												<div class="pull-right checkbox form-inline">
-														<label>
-															<input class="layer-read-checkbox{% if role.external is False %} gvsigol-checkable{% endif %}" type="checkbox" name="read-usergroup-{{role.name}}" id="read-usergroup-{{role.name}}"{% if role.read_checked %} checked{% endif %}{% if role.external %} disabled{% endif %} />
-															<span>{% trans "Read permission" %}</span>
-														</label>
-														<label style="margin-left:10px">
-															{% if is_view %}
-															<input type="checkbox" name="write-usergroup-{{role.name}}" id="write-usergroup-{{role.name}}" title="{% trans 'SQL views can\'t be edited.' %}" disabled />
-															{% else %}
-															<input type="checkbox" name="write-usergroup-{{role.name}}" id="write-usergroup-{{role.name}}"{% if role.write_checked %} checked {% endif %}{% if role.external %} disabled{% endif %} />
-															{% endif %}
-															<span>{% trans "Write permission" %}</span>
-														</label>
-														<label style="margin-left:10px">
-															<input class="layer-manage-checkbox" type="checkbox" name="manage-usergroup-{{role.name}}" id="manage-usergroup-{{role.name}}" {% if role.manage_checked %}checked {% endif %}/>
-															<span>{% trans "Permission to manage" %}</span>
-														</label>
-												</div>
-											</span> 
-											<span class="product-description searchable-roledesc">{{role.description}}</span>
-										</div>
-									</li> 
-									{% endfor %}
-								</ul>
-								<ul class="pagination"></ul>
 							</div>
 						</div>
-					</div>
-				</div>
+					</li>
+					{% endfor %}
+				</ul>
+				<ul class="pagination"></ul>
+			</div>
+		</div>
+	</div>
+</div>
 <script type="text/javascript">
 	function handleIsPublicResourceCheckbox(searcheableReadList) {
 		// inital status
