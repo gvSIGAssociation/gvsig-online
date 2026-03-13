@@ -54,37 +54,35 @@
 				</div>
 				</div>				
 			</div>	
-			<div class="box">
+			<div class="pf-card">
 				{% csrf_token %}					
 				{% if message %}
-<div class="pf-error-msg">
+				<div class="pf-error-msg">
 					<p>* {{ message }}</p>
 				</div>
-{% endif %}
-				<div class="box-body">
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label for="workspace-uri">{% trans "Uri" %}</label>
-							<input type="text" name="workspace-uri" id="workspace-uri" maxlength="500" class="form-control" tabindex="3" value="{{workspace.uri}}">
-						</div>
-						<div class="col-md-12 form-group">
-							<label for="workspace-description">{% trans "Description" %}</label>
-							<input placeholder="{% trans 'Workspace description' %}" name="workspace-description" id="workspace-description" type="text" class="form-control" value="{{workspace.description}}">						
-						</div>
+				{% endif %}
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label for="workspace-uri">{% trans "Uri" %}</label>
+						<input type="text" name="workspace-uri" id="workspace-uri" maxlength="500" class="form-control" tabindex="3" value="{{workspace.uri}}">
 					</div>
-						
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label for="is_public">{% trans "Is public?" %}</label>&nbsp;&nbsp;
-							{% if workspace.is_public %}
-							<input type="checkbox" name="is_public"  id="is_public" checked/>
-							{% else %}
-							<input type="checkbox" name="is_public"  id="is_public"/>
-							{% endif %}								
-						</div>
-					</div>	
+					<div class="col-md-12 form-group">
+						<label for="workspace-description">{% trans "Description" %}</label>
+						<input placeholder="{% trans 'Workspace description' %}" name="workspace-description" id="workspace-description" type="text" class="form-control" value="{{workspace.description}}">						
+					</div>
+				</div>
+					
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label for="is_public">{% trans "Is public?" %}</label>&nbsp;&nbsp;
+						{% if workspace.is_public %}
+						<input type="checkbox" name="is_public"  id="is_public" checked/>
+						{% else %}
+						<input type="checkbox" name="is_public"  id="is_public"/>
+						{% endif %}								
+					</div>
 				</div>	
-			</div>
+		    </div>
 		</div>				
 	</div>
 </form>

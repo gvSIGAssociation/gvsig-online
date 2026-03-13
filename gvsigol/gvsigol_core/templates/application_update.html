@@ -8,6 +8,7 @@
 :root {
 	--pf-accent:    #4a7fa5;
 	--pf-accent-dk: #2d5f80;
+	--pf-accent-lt: rgba(74,127,165,0.06);
 	--pf-text:      #2e3a45;
 	--pf-muted:     #7b8a96;
 	--pf-border:    #e8ecef;
@@ -62,34 +63,48 @@
 }
 .pf-messages li.info  { background: #e6f4fb; border: 1px solid #a8d5ec; color: #1a6e96; }
 .pf-messages li.error { background: #fde8e8; border: 1px solid #f5c6c6; color: #c0392b; }
+/* ---- Tabs ---- */
 .nav-tabs {
 	border-bottom: 2px solid var(--pf-border);
 	margin-bottom: 0;
+	padding-left: 4px;
 }
 .nav-tabs > li > a {
 	color: var(--pf-muted);
 	font-size: 13px;
 	font-weight: 600;
 	border: none;
-	border-bottom: 2px solid transparent;
-	padding: 10px 18px;
+	border-bottom: 2.5px solid transparent;
+	padding: 11px 20px;
 	margin-bottom: -2px;
-	border-radius: 0;
-	transition: color var(--pf-transition), border-color var(--pf-transition);
+	border-radius: 6px 6px 0 0;
+	transition: color var(--pf-transition), border-color var(--pf-transition), background var(--pf-transition);
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+}
+.nav-tabs > li > a i.tab-icon {
+	font-size: 14px;
+	width: 16px;
+	text-align: center;
+	opacity: 0.7;
+	transition: opacity var(--pf-transition);
 }
 .nav-tabs > li > a:hover {
 	color: var(--pf-accent);
-	background: transparent;
+	background: var(--pf-accent-lt);
 	border-color: transparent;
 }
+.nav-tabs > li > a:hover i.tab-icon { opacity: 1; }
 .nav-tabs > li.active > a,
 .nav-tabs > li.active > a:hover,
 .nav-tabs > li.active > a:focus {
 	color: var(--pf-accent);
-	background: transparent;
+	background: var(--pf-accent-lt);
 	border: none;
-	border-bottom: 2px solid var(--pf-accent);
+	border-bottom: 2.5px solid var(--pf-accent);
 }
+.nav-tabs > li.active > a i.tab-icon { opacity: 1; color: var(--pf-accent); }
 .tab-content > .tab-pane > .box,
 .tab-content > .tab-pane > .row > .col-md-9 > .box,
 .tab-content > .tab-pane > .row > .col-md-12 > .box {
@@ -172,8 +187,8 @@
 				</ul>
 				{% endif %}
 				<ul id="application-update-tabs" class="nav nav-tabs">
-              		<li class="active"><a data-id="0" href="#tab-application-main" data-toggle="tab">{% trans "General" %}</a></li>
-              		<li><a  data-id="3" href="#tab-application-usergroups" data-toggle="tab">{% trans "Permissions" %}</a></li>
+              		<li class="active"><a data-id="0" href="#tab-application-main" data-toggle="tab"><i class="fa fa-cog tab-icon"></i> {% trans "General" %}</a></li>
+              		<li><a  data-id="3" href="#tab-application-usergroups" data-toggle="tab"><i class="fa fa-lock tab-icon"></i> {% trans "Permissions" %}</a></li>
             	</ul>
             	
             	<div class="tab-content">

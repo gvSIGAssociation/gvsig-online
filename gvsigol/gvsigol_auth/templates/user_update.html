@@ -7,6 +7,7 @@
 :root {
 	--pf-accent:    #4a7fa5;
 	--pf-accent-dk: #2d5f80;
+	--pf-accent-lt: rgba(74,127,165,0.06);
 	--pf-text:      #2e3a45;
 	--pf-muted:     #7b8a96;
 	--pf-border:    #e8ecef;
@@ -51,33 +52,48 @@
 }
 .pf-error-msg:has(li), .pf-error-msg:has(p:not(:empty)), .pf-error-msg:has(ul:not(:empty)) { display: block; }
 .pf-error-msg p { margin: 0 0 4px; }
+/* ---- Tabs ---- */
 .nav-tabs {
 	border-bottom: 2px solid var(--pf-border);
 	margin-bottom: 0;
+	padding-left: 4px;
 }
 .nav-tabs > li > a {
-	border-radius: 7px 7px 0 0;
+	color: var(--pf-muted);
 	font-size: 13px;
 	font-weight: 600;
-	color: var(--pf-muted);
-	padding: 9px 18px;
-	border: 1px solid transparent;
-	transition: color var(--pf-transition), background var(--pf-transition);
+	border: none;
+	border-bottom: 2.5px solid transparent;
+	padding: 11px 20px;
+	margin-bottom: -2px;
+	border-radius: 6px 6px 0 0;
+	transition: color var(--pf-transition), border-color var(--pf-transition), background var(--pf-transition);
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+}
+.nav-tabs > li > a i.tab-icon {
+	font-size: 14px;
+	width: 16px;
+	text-align: center;
+	opacity: 0.7;
+	transition: opacity var(--pf-transition);
 }
 .nav-tabs > li > a:hover {
-	background: var(--pf-bg);
 	color: var(--pf-accent);
+	background: var(--pf-accent-lt);
 	border-color: transparent;
 }
+.nav-tabs > li > a:hover i.tab-icon { opacity: 1; }
 .nav-tabs > li.active > a,
 .nav-tabs > li.active > a:hover,
 .nav-tabs > li.active > a:focus {
 	color: var(--pf-accent);
-	border: 1px solid var(--pf-border);
-	border-bottom-color: var(--pf-white);
-	background: var(--pf-white);
-	font-weight: 700;
+	background: var(--pf-accent-lt);
+	border: none;
+	border-bottom: 2.5px solid var(--pf-accent);
 }
+.nav-tabs > li.active > a i.tab-icon { opacity: 1; color: var(--pf-accent); }
 .tab-content {
 	background: var(--pf-white);
 	border: 1px solid var(--pf-border);
@@ -238,13 +254,13 @@
 {% endif %}
 
 			<ul class="nav nav-tabs">
-				<li class="active"><a href="#tab-general" data-toggle="tab">{% trans "General" %}</a></li>
+				<li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-user tab-icon"></i> {% trans "General" %}</a></li>
 				{% if AUTH_GROUPS %}
 				<!--
-				<li><a href="#tab-user-groups" data-toggle="tab">{% trans "Groups" %}</a></li>
+				<li><a href="#tab-user-groups" data-toggle="tab"><i class="fa fa-users tab-icon"></i> {% trans "Groups" %}</a></li>
 				-->
 				{% endif %}
-				<li><a href="#tab-roles" data-toggle="tab">{% trans "Roles" %}</a></li>
+				<li><a href="#tab-roles" data-toggle="tab"><i class="fa fa-shield tab-icon"></i> {% trans "Roles" %}</a></li>
 			</ul>
 
 			<div class="tab-content">
