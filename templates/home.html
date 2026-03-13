@@ -1034,7 +1034,7 @@
 			applyFilter(activeFilter);
 		}
 
-		function saveOrderToServer(orderType, orderData) {
+		function saveOrderToServer(orderType, orderData, onSuccess) {
 			$.ajax({
 				type: 'POST',
 				url: '{% url "home_order_save" %}',
@@ -1043,6 +1043,7 @@
 				beforeSend: function(xhr) {
 					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
+				success: function() { if (onSuccess) onSuccess(); },
 				error: function() {
 					alert('{% trans "Error saving order." %}');
 				}
@@ -1059,9 +1060,8 @@
 			} else {
 				$('#btn-sort-manual').removeClass('active');
 				$('#btn-sort-alpha').addClass('active');
-				$('#btn-save-order').removeClass('visible');
+				$('#btn-save-order').addClass('visible');
 				disableSortable();
-				saveOrderToServer('alpha', []);
 			}
 		}
 
@@ -1076,13 +1076,19 @@
 		// ---- Guardar orden ----
 		$('#btn-save-order').on('click', function() {
 			var orderData = [];
-			$('.items-list > li').each(function() {
-				orderData.push({
-					type: $(this).data('item-type'),
-					id: parseInt($(this).data('item-id'), 10)
+			if (currentOrderType === 'manual') {
+				$('.items-list > li').each(function() {
+					orderData.push({
+						type: $(this).data('item-type'),
+						id: parseInt($(this).data('item-id'), 10)
+					});
 				});
+			}
+			saveOrderToServer(currentOrderType, orderData, function() {
+				if (currentOrderType === 'alpha') {
+					$('#btn-save-order').removeClass('visible');
+				}
 			});
-			saveOrderToServer('manual', orderData);
 			var btn = $(this);
 			var orig = btn.html();
 			btn.html('<i class="fa fa-check"></i> {% trans "Saved" %}');
