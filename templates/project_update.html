@@ -8,6 +8,7 @@
 :root {
 	--pf-accent:    #4a7fa5;
 	--pf-accent-dk: #2d5f80;
+	--pf-accent-lt: rgba(74,127,165,0.06);
 	--pf-text:      #2e3a45;
 	--pf-muted:     #7b8a96;
 	--pf-border:    #e8ecef;
@@ -17,6 +18,8 @@
 	--pf-shadow:    0 2px 12px rgba(0,0,0,0.08);
 	--pf-transition: 0.2s ease;
 }
+
+/* ---- Barra de acciones superior ---- */
 .pf-topbar {
 	display: flex;
 	align-items: flex-start;
@@ -42,6 +45,8 @@
 	white-space: nowrap;
 }
 .btn-pf-save:hover { background: var(--pf-accent-dk); color: #fff; }
+
+/* ---- Mensajes ---- */
 .pf-error-msg {
 	display: none;
 	background: #fde8e8;
@@ -62,34 +67,51 @@
 }
 .pf-messages li.info  { background: #e6f4fb; border: 1px solid #a8d5ec; color: #1a6e96; }
 .pf-messages li.error { background: #fde8e8; border: 1px solid #f5c6c6; color: #c0392b; }
+
+/* ---- Tabs ---- */
 .nav-tabs {
 	border-bottom: 2px solid var(--pf-border);
 	margin-bottom: 0;
+	padding-left: 4px;
 }
 .nav-tabs > li > a {
 	color: var(--pf-muted);
 	font-size: 13px;
 	font-weight: 600;
 	border: none;
-	border-bottom: 2px solid transparent;
-	padding: 10px 18px;
+	border-bottom: 2.5px solid transparent;
+	padding: 11px 20px;
 	margin-bottom: -2px;
-	border-radius: 0;
-	transition: color var(--pf-transition), border-color var(--pf-transition);
+	border-radius: 6px 6px 0 0;
+	transition: color var(--pf-transition), border-color var(--pf-transition), background var(--pf-transition);
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+}
+.nav-tabs > li > a i.tab-icon {
+	font-size: 14px;
+	width: 16px;
+	text-align: center;
+	opacity: 0.7;
+	transition: opacity var(--pf-transition);
 }
 .nav-tabs > li > a:hover {
 	color: var(--pf-accent);
-	background: transparent;
+	background: var(--pf-accent-lt);
 	border-color: transparent;
 }
+.nav-tabs > li > a:hover i.tab-icon { opacity: 1; }
 .nav-tabs > li.active > a,
 .nav-tabs > li.active > a:hover,
 .nav-tabs > li.active > a:focus {
 	color: var(--pf-accent);
-	background: transparent;
+	background: var(--pf-accent-lt);
 	border: none;
-	border-bottom: 2px solid var(--pf-accent);
+	border-bottom: 2.5px solid var(--pf-accent);
 }
+.nav-tabs > li.active > a i.tab-icon { opacity: 1; color: var(--pf-accent); }
+
+/* ---- Panel de contenido de cada tab ---- */
 .tab-content > .tab-pane > .box,
 .tab-content > .tab-pane > .row > .col-md-9 > .box,
 .tab-content > .tab-pane > .row > .col-md-12 > .box {
@@ -98,6 +120,27 @@
 	border: 1px solid var(--pf-border);
 	border-top: none;
 }
+
+/* ---- Secciones de formulario ---- */
+.pf-divider {
+	border: none;
+	border-top: 1px solid var(--pf-border);
+	margin: 22px 0;
+}
+.pf-section-title {
+	font-size: 11px;
+	font-weight: 700;
+	color: var(--pf-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.8px;
+	margin-bottom: 14px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+.pf-section-title i { color: var(--pf-accent); font-size: 13px; }
+
+/* ---- Inputs ---- */
 .tab-content .form-control {
 	border-radius: 6px;
 	border-color: var(--pf-border);
@@ -117,18 +160,187 @@
 	font-weight: 600;
 	color: var(--pf-muted);
 }
+
+/* ---- Switches personalizados ---- */
+.pf-switch {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--pf-muted);
+	user-select: none;
+}
+.pf-switch input[type="checkbox"] {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	width: 40px;
+	height: 22px;
+	background: #cdd5db;
+	border-radius: 11px;
+	position: relative;
+	cursor: pointer;
+	transition: background var(--pf-transition);
+	flex-shrink: 0;
+	margin: 0;
+	border: none;
+	outline: none;
+	overflow: hidden;
+	box-sizing: border-box;
+	padding: 0;
+	vertical-align: middle;
+}
+.pf-switch input[type="checkbox"]::after {
+	content: '';
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 18px;
+	height: 18px;
+	background: var(--pf-white);
+	border-radius: 50%;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+	transition: left var(--pf-transition);
+}
+.pf-switch input[type="checkbox"]:checked {
+	background: var(--pf-accent);
+}
+.pf-switch input[type="checkbox"]:checked::after {
+	left: 20px;
+}
+
+/* ---- Barra de busqueda refinada ---- */
+.pf-search-bar {
+	position: relative;
+	max-width: 320px;
+	display: inline-block;
+}
+.pf-search-bar .form-control {
+	padding-left: 34px !important;
+	border-radius: 20px !important;
+	background: var(--pf-bg);
+	height: 36px;
+}
+.pf-search-bar .form-control:focus { background: var(--pf-white); }
+.pf-search-bar::before {
+	content: '\f002';
+	font-family: FontAwesome;
+	position: absolute;
+	left: 12px;
+	top: 50%;
+	transform: translateY(-50%);
+	color: var(--pf-muted);
+	font-size: 12px;
+	z-index: 1;
+	pointer-events: none;
+}
+
+/* ---- Boton anadir ---- */
+.btn-pf-add {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: var(--pf-accent);
+	color: #fff;
+	border: none;
+	border-radius: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	padding: 7px 14px;
+	cursor: pointer;
+	transition: background var(--pf-transition);
+	white-space: nowrap;
+}
+.btn-pf-add:hover { background: var(--pf-accent-dk); color: #fff; }
+
+/* ---- Lista de items (layer groups, tools, roles) ---- */
 .tab-content .products-list > .item {
 	border-radius: 6px;
 	margin-bottom: 6px;
 	padding: 10px 12px;
 	background: var(--pf-white);
 	border: 1px solid var(--pf-border);
-	transition: background var(--pf-transition), border-color var(--pf-transition);
+	transition: background var(--pf-transition), border-color var(--pf-transition), box-shadow var(--pf-transition);
 }
 .tab-content .products-list > .item:hover {
 	background: #f0f6fb;
-	border-color: #c8dcec;
+	border-color: rgba(74,127,165,0.3);
+	box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
+.tab-content .products-list .product-img {
+	width: 36px;
+	height: 36px;
+	background: var(--pf-bg);
+	border-radius: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.tab-content .products-list .product-img img {
+	width: 20px;
+	height: 20px;
+	opacity: 0.55;
+}
+
+/* ---- Sidebar TOC ---- */
+.pf-toc-sidebar {
+	background: var(--pf-bg);
+	border-radius: 0 0 var(--pf-radius) 0;
+	border-left: 1px solid var(--pf-border);
+	min-height: 200px;
+}
+.pf-toc-sidebar .toc-layergroup {
+	background: var(--pf-white);
+	border: 1px solid var(--pf-border) !important;
+	border-radius: 6px !important;
+	margin-bottom: 6px;
+	box-shadow: none !important;
+}
+.pf-toc-sidebar .toc-layergroup .box-header {
+	padding: 8px 10px;
+	min-height: auto;
+}
+.pf-toc-sidebar .handle {
+	color: var(--pf-muted);
+	cursor: grab;
+	transition: color var(--pf-transition);
+}
+.pf-toc-sidebar .handle:hover { color: var(--pf-accent); }
+.pf-toc-sidebar .text {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--pf-text);
+}
+
+/* ---- Mapa ---- */
+.mini-map {
+	border-radius: 8px;
+	border: 1px solid var(--pf-border);
+	overflow: hidden;
+	box-shadow: inset 0 1px 4px rgba(0,0,0,0.06);
+}
+
+/* ---- Zona de upload ---- */
+.pf-upload-area {
+	border: 2px dashed var(--pf-border);
+	border-radius: 8px;
+	padding: 16px 20px;
+	transition: border-color var(--pf-transition), background var(--pf-transition);
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+.pf-upload-area:hover {
+	border-color: var(--pf-accent);
+	background: rgba(74,127,165,0.02);
+}
+.pf-upload-area .provider-img { flex-shrink: 0; }
+.pf-upload-area .provider-img-change { flex: 1; }
+.pf-upload-area input[type="file"] { margin-top: 6px; }
+
+/* ---- Modales ---- */
 .modal-content {
 	border-radius: var(--pf-radius);
 	border: none;
@@ -137,7 +349,13 @@
 .modal-header { border-bottom: 1px solid var(--pf-border); padding: 16px 20px; }
 .modal-title { font-size: 15px; font-weight: 700; color: var(--pf-text); }
 .modal-body { padding: 20px; font-size: 13px; color: var(--pf-muted); }
-.modal-footer { border-top: 1px solid var(--pf-border); padding: 14px 20px; }
+.modal-footer {
+	border-top: 1px solid var(--pf-border);
+	padding: 14px 20px;
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}
 .modal-footer .btn { border-radius: 6px; font-size: 13px; font-weight: 600; padding: 6px 16px; }
 .modal-footer .btn-default { border-color: var(--pf-border); color: var(--pf-muted); }
 #button-add-layer-group-accept,
@@ -148,6 +366,58 @@
 #button-extend-to-layers-accept:hover {
 	background: var(--pf-accent-dk); border-color: var(--pf-accent-dk);
 }
+
+/* ---- Chips de permisos de proyecto ---- */
+#user-list-box .products-list > .item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 12px;
+}
+#user-list-box .products-list .product-img { flex-shrink: 0; width: 32px; height: 32px; }
+#user-list-box .products-list .product-img img { width: 20px; height: 20px; opacity: 0.5; }
+#user-list-box .products-list .product-info { flex: 1; min-width: 0; }
+.proj-role-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 8px;
+	width: 100%;
+}
+.proj-role-info { flex: 1; min-width: 0; }
+.proj-role-name { font-size: 13px; font-weight: 600; color: #2e3a45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.proj-role-desc { font-size: 12px; color: #7b8a96; margin-top: 1px; }
+.proj-perms { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.proj-perm-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	border: 1px solid #e8ecef;
+	border-radius: 20px;
+	padding: 3px 10px 3px 8px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #7b8a96;
+	background: #f4f6f8;
+	cursor: pointer;
+	transition: background 0.15s, border-color 0.15s, color 0.15s;
+	user-select: none;
+	white-space: nowrap;
+	margin: 0;
+	text-transform: none;
+	letter-spacing: 0;
+}
+.proj-perm-chip input[type="checkbox"] {
+	margin: 0;
+	cursor: pointer;
+	accent-color: #4a7fa5;
+	width: 13px;
+	height: 13px;
+	flex-shrink: 0;
+}
+.proj-perm-chip:has(input:checked) { background: rgba(74,127,165,0.1); border-color: #4a7fa5; color: #2d5f80; }
+.proj-perm-chip:has(input:disabled) { opacity: 0.55; cursor: default; }
 </style>
 {% endblock %}
 
@@ -174,11 +444,11 @@
 				</ul>
 				{% endif %}
 				<ul id="project-update-tabs" class="nav nav-tabs">
-              		<li class="active"><a data-id="0" href="#tab-project-main" data-toggle="tab">{% trans "General" %}</a></li>
-              		<li><a  data-id="1" href="#tab-project-layergroups" data-toggle="tab">{% trans "Layer groups" %}</a></li>
-              		<li><a  data-id="2" href="#tab-project-tools" data-toggle="tab">{% trans "Tools" %}</a></li>              		
-					{% if MANAGE_PERMISSION_UI or user.is_superuser %} <li><a href="#tab-project-usergroups" data-toggle="tab">{% trans "Permissions" %}</a></li> {% endif %}
-              		{% if superuser %}<li><a  data-id="4" href="#tab-project-packagebaselayer" data-toggle="tab">{% trans "Package the base layer" %}</a></li>{% endif %}
+              		<li class="active"><a data-id="0" href="#tab-project-main" data-toggle="tab"><i class="fa fa-cog tab-icon"></i> {% trans "General" %}</a></li>
+              		<li><a  data-id="1" href="#tab-project-layergroups" data-toggle="tab"><i class="fa fa-object-group tab-icon"></i> {% trans "Layer groups" %}</a></li>
+              		<li><a  data-id="2" href="#tab-project-tools" data-toggle="tab"><i class="fa fa-wrench tab-icon"></i> {% trans "Tools" %}</a></li>              		
+					{% if MANAGE_PERMISSION_UI or user.is_superuser %} <li><a href="#tab-project-usergroups" data-toggle="tab"><i class="fa fa-lock tab-icon"></i> {% trans "Permissions" %}</a></li> {% endif %}
+              		{% if superuser %}<li><a  data-id="4" href="#tab-project-packagebaselayer" data-toggle="tab"><i class="fa fa-cube tab-icon"></i> {% trans "Package the base layer" %}</a></li>{% endif %}
             	</ul>
             	
             	<div class="tab-content">
@@ -186,15 +456,19 @@
               			<div class="box">
               				<div class="box-body">
               					<input type="hidden" id="project-name" name="project-name" value="{{project.name}}"/>
-						
+
+									<div class="pf-section-title"><i class="fa fa-id-card"></i> {% trans "General" %}</div>
+
 								<div class="row">
 									<div class="col-md-6" style="margin-bottom: 20px;">
-										<div class="provider-img">
-											<img style="max-height: 52px;" id="logo-preview" src="{{project.logo_url}}" alt="">
-										</div>
-										<div class="provider-img-change">
-											<label>{% trans "Select main logo" %}</label>({% trans "Supported formats" %}: .jpg, .jpeg, .png)
-											<input id="project-logo" name="project-logo" accept=".jpg, .jpeg, .png" onchange="readLogoURL(this);" type="file" class="file" data-show-preview="true">						
+										<div class="pf-upload-area">
+											<div class="provider-img">
+												<img style="max-height: 52px;" id="logo-preview" src="{{project.logo_url}}" alt="">
+											</div>
+											<div class="provider-img-change">
+												<label>{% trans "Select main logo" %}</label>({% trans "Supported formats" %}: .jpg, .jpeg, .png)
+												<input id="project-logo" name="project-logo" accept=".jpg, .jpeg, .png" onchange="readLogoURL(this);" type="file" class="file" data-show-preview="true">						
+											</div>
 										</div>
 									</div>	
 									<div class="col-md-6" style="margin-bottom: 20px;">
@@ -214,8 +488,11 @@
 										<label for="project-description">{% trans "Description" %}</label>
 										<input placeholder="{% trans 'Project description' %}" name="project-description" id="project-description" type="text" class="form-control" value="{{project.description}}">						
 									</div>
-								</div>	
-								
+								</div>
+
+								<hr class="pf-divider">
+								<div class="pf-section-title"><i class="fa fa-sliders"></i> {% trans "Toc panel presentation" %}</div>
+
 								<div class="row">
 									<div class="col-md-6 form-group">
 										<label for="id_toc_mode">{% trans "Toc panel presentation" %}</label>
@@ -238,12 +515,14 @@
 										</select>
 									</div>
 									<div class="col-md-3 form-group">
-										<label for="selectable_groups">{% trans "Selectable layer groups" %}</label>&nbsp;&nbsp;
-										{% if project.selectable_groups %}
-										<input type="checkbox" name="selectable_groups"  id="selectable_groups" checked/>
-										{% else %}
-										<input type="checkbox" name="selectable_groups"  id="selectable_groups"/>
-										{% endif %}								
+										<label class="pf-switch">
+											{% if project.selectable_groups %}
+											<input type="checkbox" name="selectable_groups"  id="selectable_groups" checked/>
+											{% else %}
+											<input type="checkbox" name="selectable_groups"  id="selectable_groups"/>
+											{% endif %}
+											{% trans "Selectable layer groups" %}
+										</label>
 									</div>
 									<div class="col-md-3 form-group">
 										<label for="id_expiration_date">{% trans "expiration_date" %}</label>
@@ -257,6 +536,10 @@
 										<input type="text" name="expiration_date_utc"  id="expiration_date_utc" class="form-control hide" />							
 									</div>
 								</div>
+
+								<hr class="pf-divider">
+								<div class="pf-section-title"><i class="fa fa-globe"></i> {% trans "Coordinate reference system" %}</div>
+
 								<div class="row">
 									<div class="col-md-3 form-group">
 										<label for="extent4326_minx">{% trans "MinX" %}</label>
@@ -292,38 +575,48 @@
 								<input type="hidden" name="zoom" id="zoom" value="{{project.zoom}}">
 								<div class="row">
 									<div class="col-md-3 form-group">
-										<label for="restricted_extent">{% trans "Restricted extent" %}</label>&nbsp;&nbsp;
-										{% if project.restricted_extent %}
-										<input type="checkbox" name="restricted_extent"  id="restricted_extent" checked/>
-										{% else %}
-										<input type="checkbox" name="restricted_extent"  id="restricted_extent"/>
-										{% endif %}								
+										<label class="pf-switch">
+											{% if project.restricted_extent %}
+											<input type="checkbox" name="restricted_extent"  id="restricted_extent" checked/>
+											{% else %}
+											<input type="checkbox" name="restricted_extent"  id="restricted_extent"/>
+											{% endif %}
+											{% trans "Restricted extent" %}
+										</label>
 									</div>
 									<div class="col-md-6 form-group pull-right">
 										<label for="id_srs">{% trans "Coordinate reference system" %} {% trans "by default" %}</label>
 										{{ form.srs }}
 									</div>
-								</div>	
+								</div>
+
+								<hr class="pf-divider">
+								<div class="pf-section-title"><i class="fa fa-image"></i> {% trans "Change image?" %}</div>
+
 								<div class="row">
 									<div class="col-md-12" style="margin-bottom: 20px;">
-										<div class="provider-img">
-											<img style="height: 50px; width: 50px;" id="image-preview" src="{{project.image_url}}" alt="">
-										</div>
-										<div class="provider-img-change">
-											<label>{% trans "Change image?" %}</label>({% trans "Supported formats" %}: .jpg, .jpeg, .png)
-											<input id="project-image" name="project-image" accept=".jpg, .jpeg, .png" type="file" class="file" data-show-preview="true">						
+										<div class="pf-upload-area">
+											<div class="provider-img">
+												<img style="height: 50px; width: 50px;" id="image-preview" src="{{project.image_url}}" alt="">
+											</div>
+											<div class="provider-img-change">
+												<label>{% trans "Change image?" %}</label>({% trans "Supported formats" %}: .jpg, .jpeg, .png)
+												<input id="project-image" name="project-image" accept=".jpg, .jpeg, .png" type="file" class="file" data-show-preview="true">						
+											</div>
 										</div>
 									</div>	
 								</div>
 								
 								<div class="row">
 									<div class="col-md-6 form-group">
-										<label for="show_project_icon">{% trans "Show project icon in TOC" %}</label>&nbsp;&nbsp;
-										{% if project.show_project_icon %}
-										<input checked type="checkbox" name="show_project_icon" id="show_project_icon"/>
-										{% else %}
-										<input type="checkbox" name="show_project_icon" id="show_project_icon"/>
-										{% endif %}															
+										<label class="pf-switch">
+											{% if project.show_project_icon %}
+											<input checked type="checkbox" name="show_project_icon" id="show_project_icon"/>
+											{% else %}
+											<input type="checkbox" name="show_project_icon" id="show_project_icon"/>
+											{% endif %}
+											{% trans "Show project icon in TOC" %}
+										</label>
 									</div>
 								</div>
 								<div class="row">
@@ -340,7 +633,8 @@
 									</div>
 								</div>
 
-								<!-- TAGS DE PROYECTO -->
+								<hr class="pf-divider">
+								<div class="pf-section-title"><i class="fa fa-tags"></i> {% trans "Project tags" %}</div>
 
 								<div class="row">
 									<div class="col-md-3 form-group">
@@ -365,11 +659,11 @@
               			<div class="row">
 							<div class="col-md-9">
 								<div id="layer-list-box" class="box searchable-list-box">
-									<div class="box-header">
-										<div class="col-md-6">
-											<div id="add-layer-group-button" class="btn btn-box-tool" title='{% trans "Add layer group" %}' style="float:right;position:relative;z-index:10;" data-toggle="modal" data-target="#modal-add-layer-group"><i class="fa fa-plus margin-r-5"></i></div>
-											<input type="text" class="search2 form-control" placeHolder="{% trans 'Search layer group...' %}" style="padding-right: 30px;position: absolute;"  />
+									<div class="box-header" style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; flex-wrap:wrap; gap:8px;">
+										<div class="pf-search-bar" style="flex:1; max-width:320px;">
+											<input type="text" class="search2 form-control" placeHolder="{% trans 'Search layer group...' %}" />
 										</div>
+										<div id="add-layer-group-button" class="btn-pf-add" title='{% trans "Add layer group" %}' data-toggle="modal" data-target="#modal-add-layer-group"><i class="fa fa-plus"></i> {% trans "Add layer group" %}</div>
 									</div>
 									<div class="box-body">
 										<ul class="products-list product-list-in-box list2">
@@ -441,7 +735,7 @@
 							<input type="hidden" id="selected_base_layer" name="selected_base_layer"/>
 							<input type="hidden" id="selected_base_group" name="selected_base_group"/>
 							<input type="hidden" id="selected_overview_layer" name="selected_overview_layer"/>
-							<div class="col-md-3" style="background-color:#eee">
+							<div class="col-md-3 pf-toc-sidebar">
 								<div class="box searchable-list-box">
 									<div class="box-body toc-layer-update">
 										<div id="toc" class="toc">
@@ -469,8 +763,8 @@
               			<div class="row">
 							<div class="col-md-12">
 								<div id="tool-list-box" class="box searchable-list-box">
-									<div class="box-header">
-										<div class="col-md-6"><input type="text" class="search-plugins form-control" placeHolder="{% trans 'Search tool...' %}" /></div>
+									<div class="box-header" style="padding:12px 16px;">
+										<div class="pf-search-bar"><input type="text" class="search-plugins form-control" placeHolder="{% trans 'Search tool...' %}" /></div>
 									</div>
 									<div class="box-body">
 										<ul class="products-list product-list-in-box list-plugins">
@@ -507,10 +801,10 @@
               			<div class="row">
 							<div class="col-md-12">
 								<div id="user-list-box" class="box searchable-list-box">
-									<div class="box-header" style="padding-bottom:0px">
-										<label for="is_public" class="form-label" title="{% trans 'Project will be readable by everyone if public' %}">
+									<div class="box-header" style="padding:12px 16px 0;">
+										<label class="pf-switch" for="is_public" title="{% trans 'Project will be readable by everyone if public' %}" style="margin-bottom:12px;">
+											<input type="checkbox" name="is_public" id="is_public" {% if project.is_public %}checked {% endif %}/>
 											<span>{% trans "Is public?" %}</span>
-											<input style="position:absolute; margin-left: 10px" type="checkbox" name="is_public" id="is_public" {% if project.is_public %}checked {% endif %}/>
 										</label>
 										<div class="form-horizontal">
 											<div class="form-group" style="margin-left: 0px; margin-right: 0px">
@@ -519,14 +813,18 @@
 											</div>
 											{% if user.is_superuser %}
 											<div class="col-md-4 ">
+											<div class="pf-search-bar" style="width:100%;max-width:100%;">
 											<input type="text" class="search form-control" placeHolder="{% trans 'Search role...' %}" />
 											</div>
+											</div>
 											<div class="col-md-2 ">
-											<button id="extend-to-lyrs-btn" type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#modal-extend-to-layers"><i class="fa fa-cogs margin-r-5"></i>{% trans "Extend to layers" %}</button>
+											<button id="extend-to-lyrs-btn" type="button" class="btn-pf-add" data-toggle="modal" data-target="#modal-extend-to-layers"><i class="fa fa-cogs"></i> {% trans "Extend to layers" %}</button>
 											</div>
 											{% else %}
 											<div class="col-md-6 ">
+											<div class="pf-search-bar" style="width:100%;max-width:100%;">
 											<input type="text" class="search form-control" placeHolder="{% trans 'Search role...' %}" />
+											</div>
 											</div>
 											{% endif %}
 											</div>
@@ -540,19 +838,22 @@
 													<img src="{% static "img/users.png" %}" alt="Users Image">
 												</div>
 												<div class="product-info">
-													<span class="product-title"><span class="searchable-rolename">{{group.name}}</span>
-														<div class="pull-right checkbox form-inline">
-															<label>
+													<div class="proj-role-row">
+														<div class="proj-role-info">
+															<div class="proj-role-name searchable-rolename">{{group.name}}</div>
+															<div class="proj-role-desc searchable-roledesc">{{group.description}}</div>
+														</div>
+														<div class="proj-perms">
+															<label class="proj-perm-chip">
 																<input class="project-read-checkbox" type="checkbox" name="read-role-{{group.name}}" id="read-role-{{group.name}}" {% if group.read_checked %}checked {% endif %}/>
 																<span>{% trans "Permission to access" %}</span>
 															</label>
-															<label style="margin-left:10px">
+															<label class="proj-perm-chip">
 																<input type="checkbox" name="manage-role-{{group.name}}" id="manage-role-{{group.name}}" {% if group.manage_checked %}checked {% endif %}/>
 																<span>{% trans "Permission to manage" %}</span>
 															</label>
 														</div>
-													</span>
-													<span class="product-description searchable-roledesc">{{group.description}}</span>
+													</div>
 												</div>
 											</li> 
 											{% endfor %}

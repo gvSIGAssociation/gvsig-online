@@ -7,6 +7,7 @@
 :root {
 	--pf-accent:    #4a7fa5;
 	--pf-accent-dk: #2d5f80;
+	--pf-accent-lt: rgba(74,127,165,0.06);
 	--pf-text:      #2e3a45;
 	--pf-muted:     #7b8a96;
 	--pf-border:    #e8ecef;
@@ -49,30 +50,51 @@
 	margin-bottom: 14px;
 }
 .pf-error-msg:has(li), .pf-error-msg:has(p:not(:empty)), .pf-error-msg:has(ul:not(:empty)) { display: block; }
+
+/* ---- Tabs ---- */
 .nav-tabs {
 	border-bottom: 2px solid var(--pf-border);
 	margin-bottom: 0;
+	padding-left: 4px;
 }
 .nav-tabs > li > a {
 	color: var(--pf-muted);
 	font-size: 13px;
 	font-weight: 600;
 	border: none;
-	border-bottom: 2px solid transparent;
-	padding: 10px 18px;
+	border-bottom: 2.5px solid transparent;
+	padding: 11px 20px;
 	margin-bottom: -2px;
-	border-radius: 0;
-	transition: color var(--pf-transition), border-color var(--pf-transition);
+	border-radius: 6px 6px 0 0;
+	transition: color var(--pf-transition), border-color var(--pf-transition), background var(--pf-transition);
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
 }
-.nav-tabs > li > a:hover { color: var(--pf-accent); background: transparent; border-color: transparent; }
+.nav-tabs > li > a i.tab-icon {
+	font-size: 14px;
+	width: 16px;
+	text-align: center;
+	opacity: 0.7;
+	transition: opacity var(--pf-transition);
+}
+.nav-tabs > li > a:hover {
+	color: var(--pf-accent);
+	background: var(--pf-accent-lt);
+	border-color: transparent;
+}
+.nav-tabs > li > a:hover i.tab-icon { opacity: 1; }
 .nav-tabs > li.active > a,
 .nav-tabs > li.active > a:hover,
 .nav-tabs > li.active > a:focus {
 	color: var(--pf-accent);
-	background: transparent;
+	background: var(--pf-accent-lt);
 	border: none;
-	border-bottom: 2px solid var(--pf-accent);
+	border-bottom: 2.5px solid var(--pf-accent);
 }
+.nav-tabs > li.active > a i.tab-icon { opacity: 1; color: var(--pf-accent); }
+
+/* ---- Panel ---- */
 .tab-content > .tab-pane > .box {
 	border-radius: 0 0 var(--pf-radius) var(--pf-radius);
 	box-shadow: var(--pf-shadow);
@@ -97,6 +119,26 @@
 	font-weight: 600;
 	color: var(--pf-muted);
 }
+
+/* ---- Secciones ---- */
+.pf-divider {
+	border: none;
+	border-top: 1px solid var(--pf-border);
+	margin: 22px 0;
+}
+.pf-section-title {
+	font-size: 11px;
+	font-weight: 700;
+	color: var(--pf-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.8px;
+	margin-bottom: 14px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+.pf-section-title i { color: var(--pf-accent); font-size: 13px; }
+
 .bg-warning {
 	background: #fff8e6 !important;
 	border: 1px solid #f0d080;
@@ -133,13 +175,16 @@
 				{% endif %}
 			</div>
 		<ul class="nav nav-tabs">
-			<li role="presentation" class="active"><a href="#tab-main" data-toggle="tab">{% trans "General" %}</a></li>
-			<li role="presentation"><a href="#tab-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li>
+			<li role="presentation" class="active"><a href="#tab-main" data-toggle="tab"><i class="fa fa-cog tab-icon"></i> {% trans "General" %}</a></li>
+			<li role="presentation"><a href="#tab-permissions" data-toggle="tab"><i class="fa fa-lock tab-icon"></i> {% trans "Permissions" %}</a></li>
 		</ul>
 		<div class="tab-content">
 			<div class="tab-pane active" id="tab-main">
 				<div class="box">
 					<div class="box-body">
+
+						<div class="pf-section-title"><i class="fa fa-id-card"></i> {% trans "General" %}</div>
+
 						<div class="row">
 							<div class="col-md-12 form-group">
 								<label for="project_title">{% trans "Title" %}</label>
@@ -152,6 +197,10 @@
 								{{form.project_name}}
 							</div>
 						</div>
+
+						<hr class="pf-divider">
+						<div class="pf-section-title"><i class="fa fa-database"></i> {% trans "Workspace" %}</div>
+
 						<div class="row">
 							<div class="col-md-12 form-group">
 								<label for="target_workspace">{% trans "Workspace" %}</label>
@@ -178,6 +227,10 @@
 								</select>
 							</div>
 						</div>
+
+						<hr class="pf-divider">
+						<div class="pf-section-title"><i class="fa fa-sliders"></i> {% trans "Options:" %}</div>
+
 						<div class="row">
 							<div class="col-md-12 form-group">
 								<span>{% trans "Options:" %}.</span>

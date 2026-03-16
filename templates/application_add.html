@@ -8,6 +8,7 @@
 :root {
 	--pf-accent:    #4a7fa5;
 	--pf-accent-dk: #2d5f80;
+	--pf-accent-lt: rgba(74,127,165,0.06);
 	--pf-text:      #2e3a45;
 	--pf-muted:     #7b8a96;
 	--pf-border:    #e8ecef;
@@ -60,31 +61,44 @@
 .nav-tabs {
 	border-bottom: 2px solid var(--pf-border);
 	margin-bottom: 0;
+	padding-left: 4px;
 }
 .nav-tabs > li > a {
 	color: var(--pf-muted);
 	font-size: 13px;
 	font-weight: 600;
 	border: none;
-	border-bottom: 2px solid transparent;
-	padding: 10px 18px;
+	border-bottom: 2.5px solid transparent;
+	padding: 11px 20px;
 	margin-bottom: -2px;
-	border-radius: 0;
-	transition: color var(--pf-transition), border-color var(--pf-transition);
+	border-radius: 6px 6px 0 0;
+	transition: color var(--pf-transition), border-color var(--pf-transition), background var(--pf-transition);
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+}
+.nav-tabs > li > a i.tab-icon {
+	font-size: 14px;
+	width: 16px;
+	text-align: center;
+	opacity: 0.7;
+	transition: opacity var(--pf-transition);
 }
 .nav-tabs > li > a:hover {
 	color: var(--pf-accent);
-	background: transparent;
+	background: var(--pf-accent-lt);
 	border-color: transparent;
 }
+.nav-tabs > li > a:hover i.tab-icon { opacity: 1; }
 .nav-tabs > li.active > a,
 .nav-tabs > li.active > a:hover,
 .nav-tabs > li.active > a:focus {
 	color: var(--pf-accent);
-	background: transparent;
+	background: var(--pf-accent-lt);
 	border: none;
-	border-bottom: 2px solid var(--pf-accent);
+	border-bottom: 2.5px solid var(--pf-accent);
 }
+.nav-tabs > li.active > a i.tab-icon { opacity: 1; color: var(--pf-accent); }
 
 /* ---- Panel de contenido de cada tab ---- */
 .tab-content > .tab-pane > .box,
@@ -130,6 +144,62 @@
 	background: #f0f6fb;
 	border-color: #c8dcec;
 }
+
+/* ---- Chips de permisos ---- */
+#user-list-box .box-header {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	padding: 12px 16px;
+}
+#user-list-box .products-list > .item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+#user-list-box .products-list .product-img { flex-shrink: 0; width: 32px; height: 32px; }
+#user-list-box .products-list .product-img img { width: 20px; height: 20px; opacity: 0.5; }
+#user-list-box .products-list .product-info { flex: 1; min-width: 0; }
+.app-public-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	border: 1px solid #e8ecef;
+	border-radius: 20px;
+	padding: 3px 10px 3px 8px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #7b8a96;
+	background: #f4f6f8;
+	cursor: pointer;
+	transition: background 0.15s, border-color 0.15s, color 0.15s;
+	user-select: none;
+	white-space: nowrap;
+	margin: 0;
+	text-transform: none;
+	letter-spacing: 0;
+}
+.app-public-chip input[type="checkbox"] {
+	margin: 0;
+	cursor: pointer;
+	accent-color: #4a7fa5;
+	width: 13px;
+	height: 13px;
+	flex-shrink: 0;
+}
+.app-public-chip:has(input:checked) { background: rgba(74,127,165,0.1); border-color: #4a7fa5; color: #2d5f80; }
+.app-role-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 8px;
+	width: 100%;
+}
+.app-role-info { flex: 1; min-width: 0; }
+.app-role-name { font-size: 13px; font-weight: 600; color: #2e3a45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.app-role-desc { font-size: 12px; color: #7b8a96; margin-top: 1px; }
 </style>
 {% endblock %}
 
@@ -146,8 +216,8 @@
 				</div>
 				
 				<ul class="nav nav-tabs">
-              		<li class="active"><a href="#tab-application-main" data-toggle="tab">{% trans "General" %}</a></li>
-              		<li><a href="#tab-application-usergroups" data-toggle="tab">{% trans "Permissions" %}</a></li>
+              		<li class="active"><a href="#tab-application-main" data-toggle="tab"><i class="fa fa-cog tab-icon"></i> {% trans "General" %}</a></li>
+              		<li><a href="#tab-application-usergroups" data-toggle="tab"><i class="fa fa-lock tab-icon"></i> {% trans "Permissions" %}</a></li>
             	</ul>
             	
             	<div class="tab-content">
@@ -204,27 +274,12 @@
               			<div class="row">
 						<div class="col-md-12">
 							<div id="user-list-box" class="box searchable-list-box">
-								<div class="box-header" style="padding-bottom:0px">
-									<label for="is_public" class="form-label" title="{% trans 'Application will be readable by everyone if public' %}">
-										<span>{% trans "application.Is public?" %}</span>
-										<input style="position:absolute; margin-left: 10px" type="checkbox" name="is_public" id="is_public" {% if resource_is_public %}checked {% endif %}/>
+								<div class="box-header">
+									<input type="text" class="search form-control" style="flex:1; min-width:180px; max-width:320px; border-radius:20px;" placeholder="{% trans 'Search user group...' %}" />
+									<label class="app-public-chip" title="{% trans 'Application will be readable by everyone if public' %}">
+										<input type="checkbox" name="is_public" id="is_public" {% if resource_is_public %}checked {% endif %}/>
+										<span>{% trans "Is public?" %}</span>
 									</label>
-									<div class="form-horizontal">
-										<div class="form-group" style="margin-left: 0px; margin-right: 0px">
-										<div class="col-md-6 ">
-										<label class="control-label">{% trans "Allow access to the application for the following user groups:" %}</label>
-										</div>
-										{% if user.is_superuser %}
-										<div class="col-md-4 ">
-										<input type="text" class="search form-control" placeHolder="{% trans 'Search user group...' %}" />
-										</div>
-										{% else %}
-										<div class="col-md-6 ">
-										<input type="text" class="search form-control" placeHolder="{% trans 'Search user group...' %}" />
-										</div>
-										{% endif %}
-										</div>
-									</div>
 								</div>
 								<div class="box-body">
 									<ul class="products-list product-list-in-box list">
@@ -234,18 +289,16 @@
 												<img src="{% static "img/users.png" %}" alt="Users Image">
 											</div>
 											<div class="product-info">
-												<a href="javascript:void(0)" class="product-title"><span class="searchable-user">{{group.name}}</span>
-													<div class="checkbox pull-right">													
-														<label>
-															{% if group.checked %}
-																<input class="application-usergroup-checkbox" type="checkbox" name="usergroup-{{group.name}}" id="usergroup-{{group.name}}" checked/>{% trans "Assign user group" %}
-															{% else %}
-																<input class="application-usergroup-checkbox" type="checkbox" name="usergroup-{{group.name}}" id="usergroup-{{group.name}}"/>{% trans "Assign user group" %}
-															{% endif %}
-														</label>
+												<div class="app-role-row">
+													<div class="app-role-info">
+														<div class="app-role-name searchable-user">{{group.name}}</div>
+														<div class="app-role-desc">{{group.description}}</div>
 													</div>
-												</a> 
-												<span class="product-description">{{group.description}}</span>
+													<label class="app-public-chip">
+														<input class="application-usergroup-checkbox" type="checkbox" name="usergroup-{{group.name}}" id="usergroup-{{group.name}}" {% if group.checked %}checked{% endif %}/>
+														<span>{% trans "Assign user group" %}</span>
+													</label>
+												</div>
 											</div>
 										</li> 
 										{% endfor %}
