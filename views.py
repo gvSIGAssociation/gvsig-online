@@ -60,6 +60,7 @@ import json
 import ast
 import re
 import os
+import unicodedata
 
 from django.views.decorators.clickjacking import xframe_options_exempt
 from actstream import action
@@ -184,8 +185,13 @@ def home(request):
         except Exception:
             all_items_ordered = None
     elif order_type == UserHomeOrder.ORDER_ALPHA:
+        def _sort_key_no_accents(s):
+            if not s:
+                return ''
+            nfd = unicodedata.normalize('NFD', (s or '').lower())
+            return ''.join(c for c in nfd if unicodedata.category(c) != 'Mn')
         all_items_ordered = list(projects) + list(public_projects) + list(applications)
-        all_items_ordered.sort(key=lambda item: (item.get('title') or item.get('name') or '').lower())
+        all_items_ordered.sort(key=lambda item: _sort_key_no_accents(item.get('title') or item.get('name') or ''))
 
     manage_passwords_url = getattr(settings, 'MANAGE_PASSWORD_URL', None)
     if settings.AUTH_DASHBOARD_UI:        
