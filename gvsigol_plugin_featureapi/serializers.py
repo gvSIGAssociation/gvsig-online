@@ -125,6 +125,9 @@ class FeatureSerializer(serializers.Serializer):
                 if(blank):
                     return self.get_blank_registry(con, table, schema, geom_cols, layer, lang)
 
+                if not geom_cols:
+                    raise HttpException(400, "La capa no tiene columna de geometría registrada en PostGIS")
+
                 properties_query = self._get_properties_names(con, schema, table, exclude_cols=geom_cols)
                 idfield = util.get_layer_pk_name(con, schema, table)
 
@@ -327,6 +330,9 @@ class FeatureSerializer(serializers.Serializer):
                 #Devuelve un registro en blanco con los identificadores de campos y sus traducciones
                 if(blank):
                     return self.get_blank_registry(con, table, schema, geom_cols, layer, lang)
+
+                if not geom_cols:
+                    raise HttpException(400, "La capa no tiene columna de geometría registrada en PostGIS")
 
                 properties_query = self._get_properties_names(con, schema, table, exclude_cols=geom_cols)
                 idfield = util.get_layer_pk_name(con, schema, table)
@@ -869,13 +875,15 @@ class FeatureSerializer(serializers.Serializer):
                             offset=sqlbuilder.Literal(offset))
                 geom_cols = con.get_geometry_columns(table, schema=schema)
                 properties = self._get_properties_names(con, schema, table, exclude_cols=geom_cols)
-                geom_col = geom_cols[0]
+                geom_col = geom_cols[0] if geom_cols else None
+                if not geom_cols and not onlyprops:
+                    raise HttpException(400, "La capa no tiene columna de geometría registrada en PostGIS")
 
                 if filter is not None:
                     where_components.append(self._get_filter_where(filter))
                     where_count_components.append(self._get_filter_where(filter))
                 if text is not None: # text search must be the last one in the where parts because it sometimes adds an ORDER BY clause
-                    excluded = [geom_cols[0], 'modified_by', 'feat_date_gvol', 'feat_version_gvol', 'last_modification']
+                    excluded = (geom_cols[:1] if geom_cols else []) + ['modified_by', 'feat_date_gvol', 'feat_version_gvol', 'last_modification']
                     if strict_search == True:
                         where_components.append(self._get_strict_search_where(con, schema, table, text, exclude_cols=excluded))
                         where_count_components.append(self._get_strict_search_where(con, schema, table, text, exclude_cols=excluded))
@@ -916,7 +924,7 @@ class FeatureSerializer(serializers.Serializer):
                     table_fields = con.get_fields(table, schema=schema)
                     
                     # Validar que el campo existe y no es una geometría
-                    if sortfield in table_fields and sortfield not in geom_cols:
+                    if sortfield in table_fields and sortfield not in (geom_cols or []):
                         direction = sqlbuilder.SQL("ASC") if sortorder == 'ascend' else sqlbuilder.SQL("DESC")
                         order_by = sqlbuilder.SQL(" ORDER BY {field} {direction}").format(
                             field=sqlbuilder.Identifier(sortfield),
@@ -925,31 +933,53 @@ class FeatureSerializer(serializers.Serializer):
                 
                 if onlyprops == False:
                     sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(ST_Transform({geom}, {epsg})), row_to_json((SELECT d FROM (SELECT {properties}) d)) as props FROM {schema}.{table} {where}{order_by} {limit_offset}")
+                    query = sql.format(
+                        geom=sqlbuilder.Identifier(geom_col),
+                        epsg=sqlbuilder.Literal(epsg),
+                        properties=properties,
+                        schema=sqlbuilder.Identifier(schema),
+                        table=sqlbuilder.Identifier(table),
+                        where=where,
+                        order_by=order_by,
+                        limit_offset=limit_offset
+                    )
                 else:
-                    sql = sqlbuilder.SQL("SELECT row_to_json((SELECT d FROM (SELECT {properties}) d)) as props, ST_AsGeoJSON(ST_Transform(ST_Centroid({geom}), {epsg})) FROM {schema}.{table} {where}{order_by} {limit_offset}")
+                    if geom_col:
+                        sql = sqlbuilder.SQL("SELECT row_to_json((SELECT d FROM (SELECT {properties}) d)) as props, ST_AsGeoJSON(ST_Transform(ST_Centroid({geom}), {epsg})) FROM {schema}.{table} {where}{order_by} {limit_offset}")
+                        query = sql.format(
+                            geom=sqlbuilder.Identifier(geom_col),
+                            epsg=sqlbuilder.Literal(epsg),
+                            properties=properties,
+                            schema=sqlbuilder.Identifier(schema),
+                            table=sqlbuilder.Identifier(table),
+                            where=where,
+                            order_by=order_by,
+                            limit_offset=limit_offset
+                        )
+                    else:
+                        sql = sqlbuilder.SQL("SELECT row_to_json((SELECT d FROM (SELECT {properties}) d)) as props FROM {schema}.{table} {where}{order_by} {limit_offset}")
+                        query = sql.format(
+                            properties=properties,
+                            schema=sqlbuilder.Identifier(schema),
+                            table=sqlbuilder.Identifier(table),
+                            where=where,
+                            order_by=order_by,
+                            limit_offset=limit_offset
+                        )
                 
-                query = sql.format(
-                    geom=sqlbuilder.Identifier(geom_col),
-                    epsg=sqlbuilder.Literal(epsg),
-                    properties=properties,
-                    schema=sqlbuilder.Identifier(schema),
-                    table=sqlbuilder.Identifier(table),
-                    where=where,
-                    order_by=order_by,
-                    limit_offset=limit_offset
-                )
                 con.cursor.execute(query)
                 feat_list = []
                 for feat in con.cursor.fetchall():
                     if(onlyprops == True):
                         centroid = 'null'
-                        if feat[1] is not None:
+                        if geom_col and len(feat) > 1 and feat[1] is not None:
                             centroid = json.loads(feat[1])
                             if 'crs' not in centroid:
                                 centroid['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{epsg}"}}}}')
+                        props = feat[0] if feat else None
                         element = {
                             "type":"Feature",
-                            "properties" : feat[0],
+                            "properties" : props,
                             "centroid" : centroid
                         }
                     else:
