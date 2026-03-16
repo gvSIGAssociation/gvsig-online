@@ -35,6 +35,13 @@ def get_admin_role():
     """
     return 'admin'
 
+def get_staff_role():
+    """
+    Gets the name of the staff role, that is, a role that is always
+    assigned to staff users.
+    """
+    return 'staff'
+
 def get_system_users():
     # TODO parametrize?
     return ['root']
