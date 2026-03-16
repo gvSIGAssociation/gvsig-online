@@ -30,6 +30,14 @@ from gvsigol_core.models import Application, Project, UserHomeOrder
 from urllib.parse import unquote
 import datetime
 import json
+import unicodedata
+
+
+def _sort_key_no_accents(s):
+    if not s:
+        return ''
+    nfd = unicodedata.normalize('NFD', (s or '').lower())
+    return ''.join(c for c in nfd if unicodedata.category(c) != 'Mn')
 
 
 def _get_public_items_ordered():
@@ -60,7 +68,7 @@ def _get_public_items_ordered():
             'item_type': 'app',
         })
 
-    all_items = sorted(public_projects + public_apps, key=lambda x: x['title'].lower())
+    all_items = sorted(public_projects + public_apps, key=lambda x: _sort_key_no_accents(x.get('title') or ''))
 
     global_order = UserHomeOrder.objects.filter(user__isnull=True).first()
     if global_order and global_order.order_type == UserHomeOrder.ORDER_MANUAL and global_order.order_data:
