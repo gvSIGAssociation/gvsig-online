@@ -532,33 +532,33 @@
 #btn-save-order:hover { background: #219a52; }
 #btn-save-order.visible { display: inline-flex; }
 
-/* Botón orden global (solo superusuarios) */
-#btn-set-global {
-	display: none;
-	align-items: center;
-	gap: 5px;
-	background: var(--h-bg);
-	border: 1px solid var(--h-border);
-	border-radius: 6px;
+
+/* ============================================================
+   ORDEN GLOBAL o MI ORDEN
+   ============================================================ */
+#scope-order-select {
+	display: inline-block;
+	width: auto;
+	max-width: none;
+	flex: 0 0 auto;
+	vertical-align: middle;
+	min-width: 100px;
+	height: 32px;
 	padding: 5px 12px;
 	font-size: 12px;
 	font-weight: 600;
 	color: var(--h-muted);
-	cursor: pointer;
-	height: 32px;
+	background: var(--h-bg);
+	border: 1px solid var(--h-border);
+	border-radius: 6px;
 	transition: background var(--h-transition), border-color var(--h-transition), color var(--h-transition);
-	white-space: nowrap;
 }
-#btn-set-global:hover {
-	border-color: #e8a020;
-	color: #b8760f;
-	background: #fef9f0;
+#scope-order-select:hover {
+	border-color: var(--h-border);
 }
-#btn-set-global.visible { display: inline-flex; }
-#btn-set-global.is-global-now {
-	background: #fff8e6;
-	border-color: #e8a020;
-	color: #b8760f;
+#scope-order-select:focus {
+	outline: none;
+	border-color: var(--h-border);
 }
 
 /* Drag handle */
@@ -719,7 +719,6 @@
 					</button>
 					{% endif %}
 				</div>
-				{% if is_orderable %}
 				<!-- Toggle orden -->
 				<div class="sort-toggle-bar">
 					<button class="sort-btn {% if order_type == 'alpha' %}active{% endif %}" id="btn-sort-alpha">
@@ -733,10 +732,10 @@
 					<i class="fa fa-save"></i> {% trans "Save order" %}
 				</button>
 				{% if user.is_superuser %}
-				<button id="btn-set-global" {% if order_type == 'manual' %}class="visible{% if is_global_active %} is-global-now{% endif %}"{% endif %}>
-					<i class="fa fa-star{% if not is_global_active %}-o{% endif %}"></i> {% trans "Set as global" %}
-				</button>
-				{% endif %}
+				<select id="scope-order-select" class="form-control" title="{% trans 'Edit global order (for all users) or your own order' %}">
+					<option value="global" {% if editing_scope == 'global' %}selected{% endif %}>{% trans "Global order" %}</option>
+					<option value="my_order" {% if editing_scope == 'my_order' %}selected{% endif %}>{% trans "My order" %}</option>
+				</select>
 				{% endif %}
 			{% if user.is_staff %}
 			<button id="button-add-project" title='{% trans "Add project" %}'>
@@ -995,7 +994,48 @@
 			$('#filter-empty-msg').toggle(itemList.visibleItems.length === 0);
 		});
 
-		{% if is_orderable %}
+		var currentEditingScope = '{{ editing_scope|default:"my_order" }}';
+		// Orden manual actual (para restaurar si el usuario pasa a alpha sin guardar)
+		var lastManualOrderData = [];
+
+		function getOrderDataFromDom() {
+			var orderData = [];
+			$('#all-items-panel ul.items-list > li').each(function() {
+				orderData.push({
+					type: $(this).data('item-type'),
+					id: parseInt($(this).data('item-id'), 10)
+				});
+			});
+			return orderData;
+		}
+
+		function applyAlphabeticalOrder() {
+			var $list = $('#all-items-panel ul.items-list');
+			if (!$list.length) return;
+			var $items = $list.children('li').get();
+			$items.sort(function(a, b) {
+				var ta = $(a).find('.project-card__name').text().trim().toLowerCase();
+				var tb = $(b).find('.project-card__name').text().trim().toLowerCase();
+				return ta.localeCompare(tb);
+			});
+			$.each($items, function(i, el) { $list.append(el); });
+		}
+
+		function restoreManualOrder() {
+			if (lastManualOrderData.length === 0) return;
+			var $list = $('#all-items-panel ul.items-list');
+			if (!$list.length) return;
+			var itemsByKey = {};
+			$list.children('li').each(function() {
+				var key = $(this).data('item-type') + '-' + $(this).data('item-id');
+				itemsByKey[key] = $(this).detach();
+			});
+			lastManualOrderData.forEach(function(entry) {
+				var key = entry.type + '-' + entry.id;
+				if (itemsByKey[key]) $list.append(itemsByKey[key]);
+			});
+		}
+
 		// ---- Orden manual: jQuery UI Sortable ----
 		function enableSortable() {
 			if (sortableEnabled) return;
@@ -1035,15 +1075,16 @@
 			applyFilter(activeFilter);
 		}
 
-		function saveOrderToServer(orderType, orderData) {
+		function saveOrderToServer(orderType, orderData, onSuccess) {
 			$.ajax({
 				type: 'POST',
 				url: '{% url "home_order_save" %}',
 				contentType: 'application/json',
-				data: JSON.stringify({ order_type: orderType, order_data: orderData }),
+				data: JSON.stringify({ order_type: orderType, order_data: orderData, scope: currentEditingScope }),
 				beforeSend: function(xhr) {
 					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
+				success: function() { if (onSuccess) onSuccess(); },
 				error: function() {
 					alert('{% trans "Error saving order." %}');
 				}
@@ -1053,39 +1094,48 @@
 		function setOrderMode(mode) {
 			currentOrderType = mode;
 			if (mode === 'manual') {
+				restoreManualOrder();
 				$('#btn-sort-alpha').removeClass('active');
 				$('#btn-sort-manual').addClass('active');
 				$('#btn-save-order').addClass('visible');
-				{% if user.is_superuser %}$('#btn-set-global').addClass('visible');{% endif %}
 				enableSortable();
 			} else {
+				lastManualOrderData = getOrderDataFromDom();
 				$('#btn-sort-manual').removeClass('active');
 				$('#btn-sort-alpha').addClass('active');
-				$('#btn-save-order').removeClass('visible');
-				{% if user.is_superuser %}$('#btn-set-global').removeClass('visible');{% endif %}
+				$('#btn-save-order').addClass('visible');
 				disableSortable();
-				saveOrderToServer('alpha', []);
+				applyAlphabeticalOrder();
 			}
 		}
 
 		$('#btn-sort-alpha').on('click', function() { setOrderMode('alpha'); });
 		$('#btn-sort-manual').on('click', function() { setOrderMode('manual'); });
 
-		// Inicializar en modo manual si así lo indica el servidor
+		// Inicializar según modo de orden
 		if (currentOrderType === 'manual') {
+			lastManualOrderData = getOrderDataFromDom();
 			enableSortable();
+		} else {
+			applyAlphabeticalOrder();
 		}
 
 		// ---- Guardar orden ----
 		$('#btn-save-order').on('click', function() {
 			var orderData = [];
-			$('.items-list > li').each(function() {
-				orderData.push({
-					type: $(this).data('item-type'),
-					id: parseInt($(this).data('item-id'), 10)
+			if (currentOrderType === 'manual') {
+				$('.items-list > li').each(function() {
+					orderData.push({
+						type: $(this).data('item-type'),
+						id: parseInt($(this).data('item-id'), 10)
+					});
 				});
+			}
+			saveOrderToServer(currentOrderType, orderData, function() {
+				if (currentOrderType === 'alpha') {
+					$('#btn-save-order').removeClass('visible');
+				}
 			});
-			saveOrderToServer('manual', orderData);
 			var btn = $(this);
 			var orig = btn.html();
 			btn.html('<i class="fa fa-check"></i> {% trans "Saved" %}');
@@ -1093,39 +1143,13 @@
 		});
 
 		{% if user.is_superuser %}
-		// ---- Establecer orden global ----
-		$('#btn-set-global').on('click', function() {
-			var orderData = [];
-			$('.items-list > li').each(function() {
-				orderData.push({
-					type: $(this).data('item-type'),
-					id: parseInt($(this).data('item-id'), 10)
-				});
-			});
-			var btn = $(this);
-			$.ajax({
-				type: 'POST',
-				url: '{% url "home_global_order_save" %}',
-				contentType: 'application/json',
-				data: JSON.stringify({ order_type: 'manual', order_data: orderData }),
-				beforeSend: function(xhr) {
-					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-				},
-				success: function(response) {
-					if (response.success) {
-						btn.addClass('is-global-now');
-						btn.find('i').removeClass('fa-star-o').addClass('fa-star');
-						var orig = btn.html();
-						btn.html('<i class="fa fa-check"></i> {% trans "Global set" %}');
-						setTimeout(function() { btn.html(orig); }, 2000);
-					}
-				},
-				error: function() {
-					alert('{% trans "Error saving global order." %}');
-				}
-			});
+		// ---- Cambiar entre orden por defecto y mi orden (recarga la página con ?scope=) ----
+		$('#scope-order-select').on('change', function() {
+			var scope = $(this).val();
+			var params = new URLSearchParams(window.location.search);
+			params.set('scope', scope);
+			window.location = window.location.pathname + '?' + params.toString();
 		});
-		{% endif %}
 		{% endif %}
 
 		{% endif %}

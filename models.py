@@ -489,22 +489,20 @@ class UserHomeOrder(models.Model):
         (ORDER_ALPHA, 'Alphabetical'),
         (ORDER_MANUAL, 'Manual'),
     ]
+    # null=True: the single row with user=null is the default order for everyone
     user = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name='home_order'
+        User, on_delete=models.CASCADE, related_name='home_order',
+        null=True, blank=True
     )
     order_type = models.CharField(
         max_length=10, choices=ORDER_CHOICES, default=ORDER_ALPHA
     )
     # JSON list: [{"type": "private"|"public"|"app", "id": N}, ...]
     order_data = models.TextField(null=True, blank=True)
-    # Only one record can have is_global=True at a time; enforced in save()
-    is_global = models.BooleanField(default=False)
 
-    def save(self, *args, **kwargs):
-        if self.is_global:
-            UserHomeOrder.objects.exclude(pk=self.pk).filter(is_global=True).update(is_global=False)
-        super().save(*args, **kwargs)
+    # Only one row with user=null (default order) is enforced by migration 0054 (partial unique index).
 
     def __str__(self):
-        suffix = ' [global]' if self.is_global else ''
-        return f'{self.user.username} – {self.order_type}{suffix}'
+        if self.user_id is None:
+            return f'(default) – {self.order_type}'
+        return f'{self.user.username} – {self.order_type}'
