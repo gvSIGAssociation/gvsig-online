@@ -62,7 +62,7 @@ def _get_public_items_ordered():
 
     all_items = sorted(public_projects + public_apps, key=lambda x: x['title'].lower())
 
-    global_order = UserHomeOrder.objects.filter(is_global=True).first()
+    global_order = UserHomeOrder.objects.filter(user__isnull=True).first()
     if global_order and global_order.order_type == UserHomeOrder.ORDER_MANUAL and global_order.order_data:
         try:
             order_list = json.loads(global_order.order_data)
