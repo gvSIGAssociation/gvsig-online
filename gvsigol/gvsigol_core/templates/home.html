@@ -531,6 +531,7 @@
 }
 #btn-save-order:hover { background: #219a52; }
 #btn-save-order.visible { display: inline-flex; }
+#btn-save-order.hide-when-filtered { display: none !important; }
 
 
 /* ============================================================
@@ -958,8 +959,17 @@
 			}]
 		});
 
+		function updateSaveOrderButtonVisibility() {
+			if (activeFilter === 'all') {
+				$('#btn-save-order').removeClass('hide-when-filtered');
+			} else {
+				$('#btn-save-order').addClass('hide-when-filtered');
+			}
+		}
+
 		function applyFilter(filter) {
 			activeFilter = filter;
+			updateSaveOrderButtonVisibility();
 			if (sortableEnabled) {
 				// Modo manual: filtrar directamente en el DOM
 				var $items = $('.items-list > li');
@@ -1016,7 +1026,7 @@
 			$items.sort(function(a, b) {
 				var ta = $(a).find('.project-card__name').text().trim().toLowerCase();
 				var tb = $(b).find('.project-card__name').text().trim().toLowerCase();
-				return ta.localeCompare(tb);
+				return ta.localeCompare(tb, undefined, { sensitivity: 'base' });
 			});
 			$.each($items, function(i, el) { $list.append(el); });
 		}
