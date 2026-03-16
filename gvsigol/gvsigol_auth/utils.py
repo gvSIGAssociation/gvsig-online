@@ -161,6 +161,21 @@ def ensure_admin_group():
     except BackendNotAvailable:
         logging.getLogger(LOGGER_NAME).warning("Authentication backend is not available. Check configuration and connectivity")
 
+def ensure_staff_group():
+    """
+    Ensures the staff group exists and it is assigned to all staff users
+    """
+    try:
+        staff_role = auth_backend.get_staff_role()
+        if not staff_role in auth_backend.get_all_roles():
+            auth_backend.add_role(staff_role)
+        staff_users = User.objects.filter(is_staff=True)
+        for user in staff_users:
+            if not auth_backend.has_role(user, staff_role):
+                auth_backend.add_to_role(user, staff_role)
+    except BackendNotAvailable:
+        logging.getLogger(LOGGER_NAME).warning("Authentication backend is not available. Check configuration and connectivity")
+
 def config_staff_user(username):
     """
     Configures a user as staff user, adding the primary role to the user

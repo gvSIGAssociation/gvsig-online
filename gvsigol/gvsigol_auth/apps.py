@@ -48,8 +48,9 @@ class GvsigolAuthConfig(AppConfig):
         registry.register(get_user_model())
         try:
             # ensure we have a proper environment
-            from gvsigol_auth.utils import ensure_admin_group
+            from gvsigol_auth.utils import ensure_admin_group, ensure_staff_group
             ensure_admin_group()
+            ensure_staff_group()
             self.setup_update_user_cache()
         except Exception as e:
             # Don't fail when we are migrating applications!!

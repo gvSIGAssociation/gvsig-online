@@ -599,6 +599,23 @@ See also
 auth_backend.to_provider_rolename()
 auth_backend.from_provider_rolename()
 """
+
+get_staff_role = auth_backend.get_staff_role
+"""
+Gets the name of the staff role, that is, a role that is always
+assigned to staff users.
+
+Returns
+-------
+str
+    The name of the staff role
+
+See also
+--------
+auth_backend.to_provider_rolename()
+auth_backend.from_provider_rolename()
+"""
+
 get_system_users = auth_backend.get_system_users
 get_system_roles = auth_backend.get_system_roles
 get_primary_role = auth_backend.get_primary_role
