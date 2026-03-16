@@ -228,7 +228,7 @@ class Introspect:
         self.cursor.execute("""
         SELECT f_geometry_column
         FROM public.geometry_columns
-        WHERE f_table_schema = %s AND f_table_name = %s
+        WHERE LOWER(f_table_schema) = LOWER(%s) AND LOWER(f_table_name) = LOWER(%s)
         """, [schema, table])
         return [r[0] for r in self.cursor.fetchall()]
     
