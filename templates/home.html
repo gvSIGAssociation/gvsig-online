@@ -531,6 +531,7 @@
 }
 #btn-save-order:hover { background: #219a52; }
 #btn-save-order.visible { display: inline-flex; }
+#btn-save-order.hide-when-filtered { display: none !important; }
 
 
 /* ============================================================
@@ -958,8 +959,17 @@
 			}]
 		});
 
+		function updateSaveOrderButtonVisibility() {
+			if (activeFilter === 'all') {
+				$('#btn-save-order').removeClass('hide-when-filtered');
+			} else {
+				$('#btn-save-order').addClass('hide-when-filtered');
+			}
+		}
+
 		function applyFilter(filter) {
 			activeFilter = filter;
+			updateSaveOrderButtonVisibility();
 			if (sortableEnabled) {
 				// Modo manual: filtrar directamente en el DOM
 				var $items = $('.items-list > li');
