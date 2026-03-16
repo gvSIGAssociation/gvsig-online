@@ -995,6 +995,47 @@
 		});
 
 		var currentEditingScope = '{{ editing_scope|default:"my_order" }}';
+		// Orden manual actual (para restaurar si el usuario pasa a alpha sin guardar)
+		var lastManualOrderData = [];
+
+		function getOrderDataFromDom() {
+			var orderData = [];
+			$('#all-items-panel ul.items-list > li').each(function() {
+				orderData.push({
+					type: $(this).data('item-type'),
+					id: parseInt($(this).data('item-id'), 10)
+				});
+			});
+			return orderData;
+		}
+
+		function applyAlphabeticalOrder() {
+			var $list = $('#all-items-panel ul.items-list');
+			if (!$list.length) return;
+			var $items = $list.children('li').get();
+			$items.sort(function(a, b) {
+				var ta = $(a).find('.project-card__name').text().trim().toLowerCase();
+				var tb = $(b).find('.project-card__name').text().trim().toLowerCase();
+				return ta.localeCompare(tb);
+			});
+			$.each($items, function(i, el) { $list.append(el); });
+		}
+
+		function restoreManualOrder() {
+			if (lastManualOrderData.length === 0) return;
+			var $list = $('#all-items-panel ul.items-list');
+			if (!$list.length) return;
+			var itemsByKey = {};
+			$list.children('li').each(function() {
+				var key = $(this).data('item-type') + '-' + $(this).data('item-id');
+				itemsByKey[key] = $(this).detach();
+			});
+			lastManualOrderData.forEach(function(entry) {
+				var key = entry.type + '-' + entry.id;
+				if (itemsByKey[key]) $list.append(itemsByKey[key]);
+			});
+		}
+
 		// ---- Orden manual: jQuery UI Sortable ----
 		function enableSortable() {
 			if (sortableEnabled) return;
@@ -1053,24 +1094,30 @@
 		function setOrderMode(mode) {
 			currentOrderType = mode;
 			if (mode === 'manual') {
+				restoreManualOrder();
 				$('#btn-sort-alpha').removeClass('active');
 				$('#btn-sort-manual').addClass('active');
 				$('#btn-save-order').addClass('visible');
 				enableSortable();
 			} else {
+				lastManualOrderData = getOrderDataFromDom();
 				$('#btn-sort-manual').removeClass('active');
 				$('#btn-sort-alpha').addClass('active');
 				$('#btn-save-order').addClass('visible');
 				disableSortable();
+				applyAlphabeticalOrder();
 			}
 		}
 
 		$('#btn-sort-alpha').on('click', function() { setOrderMode('alpha'); });
 		$('#btn-sort-manual').on('click', function() { setOrderMode('manual'); });
 
-		// Inicializar en modo manual si así lo indica el servidor
+		// Inicializar según modo de orden
 		if (currentOrderType === 'manual') {
+			lastManualOrderData = getOrderDataFromDom();
 			enableSortable();
+		} else {
+			applyAlphabeticalOrder();
 		}
 
 		// ---- Guardar orden ----

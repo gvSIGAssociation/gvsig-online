@@ -183,6 +183,9 @@ def home(request):
                     all_items_ordered.append(item)
         except Exception:
             all_items_ordered = None
+    elif order_type == UserHomeOrder.ORDER_ALPHA:
+        all_items_ordered = list(projects) + list(public_projects) + list(applications)
+        all_items_ordered.sort(key=lambda item: (item.get('title') or item.get('name') or '').lower())
 
     manage_passwords_url = getattr(settings, 'MANAGE_PASSWORD_URL', None)
     if settings.AUTH_DASHBOARD_UI:        
