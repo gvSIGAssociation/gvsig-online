@@ -143,42 +143,49 @@ def home(request):
             'item_type': 'app',
         })
 
-    is_orderable = request.user.is_staff or request.user.is_superuser
     order_type = UserHomeOrder.ORDER_ALPHA
     all_items_ordered = None
-    is_global_active = False
+    editing_scope = 'my_order'  # 'global' | 'my_order'; only superuser can use 'global'
 
-    if is_orderable:
-        saved_order = UserHomeOrder.objects.filter(user=request.user).first()
-        # Fallback to global order if the user has no personal order set
-        if not saved_order:
-            saved_order = UserHomeOrder.objects.filter(is_global=True).first()
-        if saved_order:
-            order_type = saved_order.order_type
-            is_global_active = saved_order.is_global and request.user.is_superuser
-        if order_type == UserHomeOrder.ORDER_MANUAL and saved_order and saved_order.order_data:
-            try:
-                order_list = json.loads(saved_order.order_data)
-                lookup = {}
-                for p in projects:
-                    lookup[('private', p['id'])] = p
-                for p in public_projects:
-                    lookup[('public', p['id'])] = p
-                for a in applications:
-                    lookup[('app', a['id'])] = a
-                seen = set()
-                all_items_ordered = []
-                for entry in order_list:
-                    key = (entry['type'], entry['id'])
-                    if key in lookup and key not in seen:
-                        all_items_ordered.append(lookup[key])
-                        seen.add(key)
-                # append new items not yet in saved order
-                for key, item in lookup.items():
-                    if key not in seen:
-                        all_items_ordered.append(item)
-            except Exception:
-                all_items_ordered = None
+    global_order = UserHomeOrder.objects.filter(user__isnull=True).first()
+    user_order = UserHomeOrder.objects.filter(user=request.user).first()
+
+    if request.user.is_superuser:
+        scope = request.GET.get('scope') or ('my_order' if user_order else 'global')
+        if scope not in ('global', 'my_order'):
+            scope = 'my_order'
+        editing_scope = scope
+    else:
+        scope = 'my_order'
+    saved_order = global_order if scope == 'global' else (user_order or global_order)
+    if saved_order:
+        order_type = saved_order.order_type
+    if order_type == UserHomeOrder.ORDER_MANUAL and saved_order and saved_order.order_data:
+        try:
+            order_list = json.loads(saved_order.order_data)
+            lookup = {}
+            for p in projects:
+                lookup[('private', p['id'])] = p
+            for p in public_projects:
+                lookup[('public', p['id'])] = p
+            for a in applications:
+                lookup[('app', a['id'])] = a
+            seen = set()
+            all_items_ordered = []
+            for entry in order_list:
+                key = (entry['type'], entry['id'])
+                if key in lookup and key not in seen:
+                    all_items_ordered.append(lookup[key])
+                    seen.add(key)
+            # append new items not yet in saved order
+            for key, item in lookup.items():
+                if key not in seen:
+                    all_items_ordered.append(item)
+        except Exception:
+            all_items_ordered = None
+    elif order_type == UserHomeOrder.ORDER_ALPHA:
+        all_items_ordered = list(projects) + list(public_projects) + list(applications)
+        all_items_ordered.sort(key=lambda item: (item.get('title') or item.get('name') or '').lower())
 
     manage_passwords_url = getattr(settings, 'MANAGE_PASSWORD_URL', None)
     if settings.AUTH_DASHBOARD_UI:        
@@ -199,8 +206,7 @@ def home(request):
         'applications': applications,
         'all_items_ordered': all_items_ordered,
         'order_type': order_type,
-        'is_orderable': is_orderable,
-        'is_global_active': is_global_active,
+        'editing_scope': editing_scope,
         'allow_password_update': allow_password_update,
         'manage_passwords_url': manage_passwords_url,
         'use_classic_viewer': useClassicViewer,
@@ -210,9 +216,15 @@ def home(request):
 
 @login_required()
 def home_order_get(request):
-    if not (request.user.is_staff or request.user.is_superuser):
-        return HttpResponseForbidden()
-    saved = UserHomeOrder.objects.filter(user=request.user).first()
+    scope = request.GET.get('scope', 'my_order')
+    if scope == 'global' and not request.user.is_superuser:
+        scope = 'my_order'
+    if scope == 'global' and request.user.is_superuser:
+        saved = UserHomeOrder.objects.filter(user__isnull=True).first()
+    else:
+        saved = UserHomeOrder.objects.filter(user=request.user).first()
+        if not saved:
+            saved = UserHomeOrder.objects.filter(user__isnull=True).first()
     if saved:
         return JsonResponse({'order_type': saved.order_type, 'order_data': saved.order_data or '[]'})
     return JsonResponse({'order_type': UserHomeOrder.ORDER_ALPHA, 'order_data': '[]'})
@@ -220,42 +232,22 @@ def home_order_get(request):
 
 @login_required()
 def home_order_save(request):
-    if not (request.user.is_staff or request.user.is_superuser):
-        return HttpResponseForbidden()
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
     try:
         body = json.loads(request.body)
         order_type = body.get('order_type', UserHomeOrder.ORDER_ALPHA)
         order_data = body.get('order_data', [])
+        scope = body.get('scope', 'my_order')
         if order_type not in (UserHomeOrder.ORDER_ALPHA, UserHomeOrder.ORDER_MANUAL):
             return JsonResponse({'success': False, 'error': 'Invalid order_type'}, status=400)
-        obj, _ = UserHomeOrder.objects.get_or_create(user=request.user)
+        if scope == 'global' and request.user.is_superuser:
+            obj, _ = UserHomeOrder.objects.get_or_create(user=None, defaults={'order_type': order_type, 'order_data': json.dumps(order_data)})
+        else:
+            obj, _ = UserHomeOrder.objects.get_or_create(user=request.user)
         obj.order_type = order_type
         obj.order_data = json.dumps(order_data)
         obj.save()
-        return JsonResponse({'success': True})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=400)
-
-
-@login_required()
-def home_global_order_save(request):
-    if not request.user.is_superuser:
-        return HttpResponseForbidden()
-    if request.method != 'POST':
-        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
-    try:
-        body = json.loads(request.body)
-        order_type = body.get('order_type', UserHomeOrder.ORDER_ALPHA)
-        order_data = body.get('order_data', [])
-        if order_type not in (UserHomeOrder.ORDER_ALPHA, UserHomeOrder.ORDER_MANUAL):
-            return JsonResponse({'success': False, 'error': 'Invalid order_type'}, status=400)
-        obj, _ = UserHomeOrder.objects.get_or_create(user=request.user)
-        obj.order_type = order_type
-        obj.order_data = json.dumps(order_data)
-        obj.is_global = True
-        obj.save()  # save() enforces only one is_global=True
         return JsonResponse({'success': True})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
