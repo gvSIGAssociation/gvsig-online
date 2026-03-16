@@ -16,9 +16,10 @@ class GvsigolCatastroConfig(AppConfig):
         Si no existen, los crea automáticamente.
         """
         try:            
-            from gvsigol_services.models import LayerGroup, Layer, Server
+            from gvsigol_services.models import LayerGroup, Layer, Server, LayerGroupRole
             from . import settings
             from django.db import transaction
+            from gvsigol_auth.auth_backend import get_staff_role
             
             with transaction.atomic():
                 default_server = Server.objects.filter(default=True).first()
@@ -40,12 +41,17 @@ class GvsigolCatastroConfig(AppConfig):
                         'created_by': 'system'
                     }
                 )
-                
                 if created:
                     print(f"INFO: Creado LayerGroup '{layer_group_name}' para catastro")
                 else:
                     print(f"INFO: LayerGroup '{layer_group_name}' ya existe")
                 
+                LayerGroupRole.objects.get_or_create(
+                    layergroup=layer_group,
+                    role=get_staff_role(),
+                    permission=LayerGroupRole.PERM_INCLUDEINPROJECTS
+                )
+
                 layer_name = "plugin_catastro"
                 layer, created = Layer.objects.get_or_create(
                     name=layer_name,
