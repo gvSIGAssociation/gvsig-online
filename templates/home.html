@@ -770,6 +770,7 @@
 						{% endif %}
 						<img class="project-card__thumb" src="{{ item.image }}" alt="">
 						<div class="project-card__body">
+							<span class="item-title" style="display:none;">{{ item.title }}</span>
 							<p class="project-card__name">{{ item.title }}</p>
 							<span class="project-card__desc">{{ item.description }}</span>
 						</div>
@@ -795,6 +796,7 @@
 						<span class="item-type-badge item-type-badge--private"><i class="fa fa-lock"></i> {% trans "Private" %}</span>
 						<img class="project-card__thumb" src={{project.image}} alt="">
 						<div class="project-card__body">
+							<span class="item-title" style="display:none;">{{project.title}}</span>
 							<p class="project-card__name">{{project.title}}</p>
 							<span class="project-card__desc">{{project.description}}</span>
 						</div>
@@ -813,6 +815,7 @@
 						<span class="item-type-badge item-type-badge--public"><i class="fa fa-globe"></i> {% trans "Public" %}</span>
 						<img class="project-card__thumb" src={{project.image}} alt="">
 						<div class="project-card__body">
+							<span class="item-title" style="display:none;">{{project.title}}</span>
 							<p class="project-card__name">{{project.title}}</p>
 							<span class="project-card__desc">{{project.description}}</span>
 						</div>
@@ -831,6 +834,7 @@
 						<span class="item-type-badge item-type-badge--app"><i class="fa fa-th-large"></i> {% trans "App" %}</span>
 						<img class="project-card__thumb" src="{{app.image}}" alt="">
 						<div class="project-card__body">
+							<span class="item-title" style="display:none;">{{app.title}}</span>
 							<p class="project-card__name">{{app.title}}</p>
 							<span class="project-card__desc">{{app.description}}</span>
 						</div>
@@ -1198,6 +1202,7 @@
 					'<span class="item-type-badge ' + badgeClass + '"><i class="fa ' + badgeIcon + '"></i> ' + badgeLabel + '</span>' +
 					'<img class="project-card__thumb" src="' + item.image + '" alt="">' +
 					'<div class="project-card__body">' +
+						'<span class="item-title" style="display:none;">' + $('<span>').text(item.title).html() + '</span>' +
 						'<p class="project-card__name">' + $('<span>').text(item.title).html() + '</p>' +
 						'<span class="project-card__desc">' + $('<span>').text(item.description).html() + '</span>' +
 					'</div>' +
