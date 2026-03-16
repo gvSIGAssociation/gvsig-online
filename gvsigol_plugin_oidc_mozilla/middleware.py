@@ -25,18 +25,12 @@ class GvsigolSessionRefresh(SessionRefresh):
             return False
     
     def is_refreshable_url(self, request):
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            LOGGER.debug('XMLHttpRequest(s) must be exempt from SessionRefresh')
+            return False
         if self._is_drf_view(request):
             LOGGER.debug('DRF view detected; skipping SessionRefresh')
             return False
-        return super().is_refreshable_url(request)
-
-    def process_request(self, request):
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            LOGGER.debug('XMLHttpRequest(s) must be exempt from SessionRefresh')
-            return
-        if self._is_drf_view(request):
-            LOGGER.debug('DRF view; process_request short-circuit')
-            return
         elif settings.DEBUG and request.headers.get('referer', '').endswith("swagger/"):
             url = request.headers.get('referer', '')
             parsed = urlparse(url)
@@ -45,7 +39,10 @@ class GvsigolSessionRefresh(SessionRefresh):
                 baseurl += ":" + parsed.port
             if baseurl in settings.ALLOWED_HOST_NAMES and parsed.path == reverse('schema-swagger-ui'):
                 LOGGER.debug('Swagger ajax requests must be exempt from SessionRefresh')
-                return
-        
+                return False
+        return super().is_refreshable_url(request)
+
+    def process_request(self, request):
+        # is_refreshable_url is called by super().process_request        
         return super().process_request(request)
         
