@@ -1016,7 +1016,7 @@
 			$items.sort(function(a, b) {
 				var ta = $(a).find('.project-card__name').text().trim().toLowerCase();
 				var tb = $(b).find('.project-card__name').text().trim().toLowerCase();
-				return ta.localeCompare(tb);
+				return ta.localeCompare(tb, undefined, { sensitivity: 'base' });
 			});
 			$.each($items, function(i, el) { $list.append(el); });
 		}
