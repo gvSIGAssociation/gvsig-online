@@ -753,7 +753,6 @@
 				<i class="fa fa-search search-icon"></i>
 			</div>
 		</div>
-	</div>
 		<div class="projects-panel__body">
 			<ul class="items-list projects-grid">
 				{% if all_items_ordered %}
@@ -1108,17 +1107,23 @@
 		function setOrderMode(mode) {
 			currentOrderType = mode;
 			if (mode === 'manual') {
-				restoreManualOrder();
 				$('#btn-sort-alpha').removeClass('active');
 				$('#btn-sort-manual').addClass('active');
 				$('#btn-save-order').addClass('visible');
 				enableSortable();
+				restoreManualOrder();
 			} else {
 				lastManualOrderData = getOrderDataFromDom();
 				$('#btn-sort-manual').removeClass('active');
 				$('#btn-sort-alpha').addClass('active');
 				$('#btn-save-order').addClass('visible');
 				disableSortable();
+				// Preview alfabético: mostrar todos sin paginar, luego reordenar DOM (después de update para que no lo pise)
+				itemList.page = itemList.items.length || 9999;
+				itemList.search();
+				itemList.filter();
+				itemList.update();
+				$('.list-pagination').hide();
 				applyAlphabeticalOrder();
 			}
 		}
