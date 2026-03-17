@@ -1114,6 +1114,9 @@
 				$('#btn-save-order').addClass('visible');
 				enableSortable();
 				restoreManualOrder();
+				if (lastManualOrderData.length === 0) {
+					applyAlphabeticalOrder();
+				}
 			} else {
 				lastManualOrderData = getOrderDataFromDom();
 				$('#btn-sort-manual').removeClass('active');
@@ -1155,6 +1158,7 @@
 			saveOrderToServer(currentOrderType, orderData, function() {
 				if (currentOrderType === 'alpha') {
 					$('#btn-save-order').removeClass('visible');
+					lastManualOrderData = [];
 				}
 			});
 			var btn = $(this);
