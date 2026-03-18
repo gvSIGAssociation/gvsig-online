@@ -84,9 +84,26 @@ class PluginStatusView(APIView):
         },
         tags=['status']
     )
+
+    def _get_plugin_version(self):
+        """
+        Gets the version of the plugin.
+        """
+        package = self.__class__.__module__.rsplit('.', 1)[0]
+        try:
+            import importlib
+            plugin_settings = importlib.import_module(f'{package}.settings')
+            return plugin_settings.PLUGIN_VERSION
+        except:
+            pass
+
     def get(self, request, *args, **kwargs):
         data = {
             'name': self.plugin_name,
             'status': 'ok'
         }
+        if request.user and request.user.is_authenticated and request.user.is_superuser:
+            version = self._get_plugin_version()
+            if version: # show plugin version if available
+                data['version'] = self._get_plugin_version()
         return Response(data)
