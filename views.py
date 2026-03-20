@@ -1919,10 +1919,15 @@ def layer_update(request, layer_id):
                     for f in gc_fields_list:
                         fname = f.get('name', '')
                         if fname:
-                            gc_fields_config[fname] = {
+                            entry = {
                                 'description': f.get('description', ''),
                                 'sensitive': bool(f.get('sensitive', False)),
                             }
+                            if f.get('fk_table'):
+                                entry['fk_table'] = f['fk_table']
+                                entry['fk_column'] = f.get('fk_column', '')
+                                entry['fk_display_column'] = f.get('fk_display_column', '')
+                            gc_fields_config[fname] = entry
                     gc_config, _ = LayerGeoCopilotConfig.objects.get_or_create(
                         layer=layer,
                         defaults={

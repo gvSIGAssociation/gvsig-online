@@ -426,10 +426,11 @@
 										<table class="table table-bordered table-striped" id="geocopilot-fields-table" style="display: none;">
 											<thead>
 												<tr>
-													<th style="width: 18%;">{% trans "Campo" %}</th>
-													<th style="width: 15%;">{% trans "Tipo" %}</th>
-													<th>{% trans "Descripción para el LLM" %}</th>
-													<th style="width: 10%; text-align: center;">{% trans "Sensible" %}</th>
+													<th style="width: 12%;">{% trans "Campo" %}</th>
+													<th style="width: 10%;">{% trans "Tipo" %}</th>
+													<th style="width: 22%;">{% trans "Descripción para el LLM" %}</th>
+													<th style="width: 7%; text-align: center;">{% trans "Sensible" %}</th>
+													<th style="width: 49%;">{% trans "Relación FK" %}</th>
 												</tr>
 											</thead>
 											<tbody></tbody>
@@ -453,6 +454,65 @@
 	var LAYER_ID = '{{layer_id}}';
 	var BASE_URL = window.location.origin + '/gvsigonline/geocopilot/admin/layer/' + LAYER_ID;
 	var gcLoaded = false;
+	var gcAvailableTables = [];
+	var gcColumnsCache = {};
+
+	function buildTableOptions(selectedValue) {
+		var html = '<option value="">-- Sin FK --</option>';
+		for (var i = 0; i < gcAvailableTables.length; i++) {
+			var t = gcAvailableTables[i];
+			var sel = (t.value === selectedValue) ? ' selected' : '';
+			html += '<option value="' + t.value + '"' + sel + '>' + t.label + '</option>';
+		}
+		return html;
+	}
+
+	function buildColumnOptions(columns, selectedValue) {
+		var html = '<option value="">--</option>';
+		for (var i = 0; i < columns.length; i++) {
+			var sel = (columns[i] === selectedValue) ? ' selected' : '';
+			html += '<option value="' + columns[i] + '"' + sel + '>' + columns[i] + '</option>';
+		}
+		return html;
+	}
+
+	function fetchAndPopulateColumns(row, tableName, fkCol, fkDisplay) {
+		var selCol = row.querySelector('.gc-field-fk-col');
+		var selDisplay = row.querySelector('.gc-field-fk-display');
+		if (!tableName) {
+			selCol.innerHTML = '<option value="">--</option>';
+			selDisplay.innerHTML = '<option value="">--</option>';
+			selCol.disabled = true;
+			selDisplay.disabled = true;
+			return;
+		}
+		if (gcColumnsCache[tableName]) {
+			selCol.innerHTML = buildColumnOptions(gcColumnsCache[tableName], fkCol || '');
+			selDisplay.innerHTML = buildColumnOptions(gcColumnsCache[tableName], fkDisplay || '');
+			selCol.disabled = false;
+			selDisplay.disabled = false;
+			return;
+		}
+		selCol.innerHTML = '<option value="">...</option>';
+		selDisplay.innerHTML = '<option value="">...</option>';
+		fetch(BASE_URL + '/table-columns/?table=' + encodeURIComponent(tableName), {
+			method: 'GET',
+			headers: {'X-Requested-With': 'XMLHttpRequest'}
+		})
+		.then(function(r) { return r.json(); })
+		.then(function(data) {
+			var cols = (data.success && data.columns) ? data.columns : [];
+			gcColumnsCache[tableName] = cols;
+			selCol.innerHTML = buildColumnOptions(cols, fkCol || '');
+			selDisplay.innerHTML = buildColumnOptions(cols, fkDisplay || '');
+			selCol.disabled = false;
+			selDisplay.disabled = false;
+		})
+		.catch(function() {
+			selCol.innerHTML = '<option value="">Error</option>';
+			selDisplay.innerHTML = '<option value="">Error</option>';
+		});
+	}
 
 	function loadGeoCopilotConfig() {
 		var loading = document.getElementById('geocopilot-fields-loading');
@@ -469,6 +529,8 @@
 		.then(function(data) {
 			if (!data.success) { loading.textContent = 'Error: ' + (data.message || ''); return; }
 
+			gcAvailableTables = data.available_tables || [];
+
 			var desc = document.getElementById('geocopilot-layer-description');
 			if (desc) desc.value = data.layer_description || '';
 
@@ -478,13 +540,41 @@
 			for (var i = 0; i < fields.length; i++) {
 				var f = fields[i];
 				var tr = document.createElement('tr');
+				var hasFk = !!(f.fk_table);
+
 				tr.innerHTML =
 					'<td><code>' + f.name + '</code></td>' +
 					'<td><small>' + f.type + '</small></td>' +
 					'<td><input type="text" class="form-control input-sm gc-field-desc" data-field="' + f.name + '" value="' + (f.description || '').replace(/"/g, '&quot;') + '" placeholder="Describe este campo..."></td>' +
-					'<td style="text-align:center;"><input type="checkbox" class="gc-field-sensitive" data-field="' + f.name + '"' + (f.sensitive ? ' checked' : '') + '></td>';
+					'<td style="text-align:center;"><input type="checkbox" class="gc-field-sensitive" data-field="' + f.name + '"' + (f.sensitive ? ' checked' : '') + '></td>' +
+					'<td>' +
+						'<div style="display:flex; gap:4px; align-items:center;">' +
+							'<select class="form-control input-sm gc-field-fk-table" data-field="' + f.name + '" style="flex:2;">' +
+								buildTableOptions(f.fk_table || '') +
+							'</select>' +
+							'<select class="form-control input-sm gc-field-fk-col" data-field="' + f.name + '" style="flex:1;" disabled><option value="">--</option></select>' +
+							'<select class="form-control input-sm gc-field-fk-display" data-field="' + f.name + '" style="flex:1;" disabled><option value="">--</option></select>' +
+						'</div>' +
+						'<div style="display:flex; gap:4px; margin-top:2px;">' +
+							'<small style="flex:2; color:#999;">Tabla</small>' +
+							'<small style="flex:1; color:#999;">Col. clave</small>' +
+							'<small style="flex:1; color:#999;">Col. display</small>' +
+						'</div>' +
+					'</td>';
 				tbody.appendChild(tr);
+
+				if (hasFk) {
+					fetchAndPopulateColumns(tr, f.fk_table, f.fk_column, f.fk_display_column);
+				}
 			}
+
+			tbody.addEventListener('change', function(e) {
+				if (e.target.classList.contains('gc-field-fk-table')) {
+					var row = e.target.closest('tr');
+					fetchAndPopulateColumns(row, e.target.value, '', '');
+				}
+			});
+
 			loading.style.display = 'none';
 			table.style.display = 'table';
 			gcLoaded = true;
@@ -497,20 +587,28 @@
 	function serializeGeoCopilotConfig() {
 		if (!gcLoaded) return;
 		var layerDescription = (document.getElementById('geocopilot-layer-description') || {}).value || '';
-		var descs = document.querySelectorAll('.gc-field-desc');
-		var checks = document.querySelectorAll('.gc-field-sensitive');
-		var fieldsMap = {};
-		for (var i = 0; i < descs.length; i++) {
-			fieldsMap[descs[i].getAttribute('data-field')] = {description: descs[i].value};
-		}
-		for (var j = 0; j < checks.length; j++) {
-			var name = checks[j].getAttribute('data-field');
-			if (!fieldsMap[name]) fieldsMap[name] = {};
-			fieldsMap[name].sensitive = checks[j].checked;
-		}
+		var rows = document.querySelectorAll('#geocopilot-fields-table tbody tr');
 		var fieldsList = [];
-		for (var key in fieldsMap) {
-			fieldsList.push({name: key, description: fieldsMap[key].description || '', sensitive: !!fieldsMap[key].sensitive});
+		for (var i = 0; i < rows.length; i++) {
+			var row = rows[i];
+			var descInput = row.querySelector('.gc-field-desc');
+			var sensitiveInput = row.querySelector('.gc-field-sensitive');
+			var fkTableSel = row.querySelector('.gc-field-fk-table');
+			var fkColSel = row.querySelector('.gc-field-fk-col');
+			var fkDisplaySel = row.querySelector('.gc-field-fk-display');
+			if (!descInput) continue;
+			var fieldName = descInput.getAttribute('data-field');
+			var entry = {
+				name: fieldName,
+				description: descInput.value || '',
+				sensitive: sensitiveInput ? sensitiveInput.checked : false
+			};
+			if (fkTableSel && fkTableSel.value) {
+				entry.fk_table = fkTableSel.value;
+				entry.fk_column = fkColSel ? fkColSel.value : '';
+				entry.fk_display_column = fkDisplaySel ? fkDisplaySel.value : '';
+			}
+			fieldsList.push(entry);
 		}
 		var hidden = document.getElementById('geocopilot-config-hidden');
 		if (hidden) {
