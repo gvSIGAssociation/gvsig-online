@@ -3,10 +3,42 @@
 
 
 from django.db import migrations
-from gvsigol_services.triggers import INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_SIGNATURE, INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_NAME, INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_SCHEMA, InverseGeocoderCartociudad, install_procedure, drop_procedure
+from gvsigol_services.triggers import INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_SIGNATURE, INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_NAME, INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_SCHEMA, InverseGeocoderCartociudad, drop_procedure
+import json, psycopg2
 
 TRIGGER_SIGNATURE = INVERSE_GEOCODER_CARTOCIUDAD_FUNCTION_SIGNATURE
 FUNCTION_DEF_REVERSE = "DROP FUNCTION IF EXISTS " + TRIGGER_SIGNATURE
+
+def get_db_connection(datastore):
+    """
+    Obtiene una conexión de introspección a la base de datos.
+    Soporta tanto el modo legacy como el nuevo modelo de conexiones.
+    """
+    params = json.loads(datastore.connection_params) if datastore.connection_params else {}
+    
+    
+    host = params.get('host', 'localhost')
+    port = params.get('port', '5432')
+    dbname = params.get('database', '')
+    user = params.get('user', '')
+    passwd = params.get('passwd', params.get('password', ''))
+    
+    conn = psycopg2.connect(database=dbname, user=user, password=passwd, host=host, port=port, connect_timeout=5)
+    conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+    return conn
+
+def install_procedure(apps, definition):
+    """
+    Installs the procedure on the database referenced by the cursor.
+    If cursor is not provided, the procedure is installed in the database
+    of all the available datastores
+    """
+    Datastore = apps.get_model("gvsigol_services", "Datastore")
+    for store in Datastore.objects.filter(type='v_PostGIS'):
+        conn = get_db_connection(store)
+        cursor = conn.cursor()
+        cursor.execute(definition)
+        conn.close()
 
 def insert_def(apps, schema_editor):
     try:
@@ -23,7 +55,7 @@ def insert_def(apps, schema_editor):
         procedure.orientation = 'ROW'
         procedure.save()
         
-        install_procedure(procedure.pk)
+        install_procedure(apps, procedure.definition_tpl)
 
     except Exception as error:
         print(error)
