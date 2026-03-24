@@ -2,6 +2,51 @@
 {% load staticfiles %}
 {% load i18n %}
 
+{% block header %}
+<style>
+:root {
+	--pf-accent:    #4a7fa5;
+	--pf-accent-dk: #2d5f80;
+	--pf-accent-lt: rgba(74,127,165,0.06);
+	--pf-text:      #2e3a45;
+	--pf-muted:     #7b8a96;
+	--pf-border:    #e8ecef;
+	--pf-bg:        #f4f6f8;
+	--pf-white:     #ffffff;
+	--pf-radius:    10px;
+	--pf-shadow:    0 2px 12px rgba(0,0,0,0.08);
+	--pf-transition: 0.2s ease;
+}
+.pf-topbar { display: flex; align-items: center; justify-content: flex-end; padding: 12px 0 16px; gap: 10px; flex-wrap: wrap; }
+.pf-topbar-left { flex: 1; display: flex; align-items: center; gap: 8px; }
+.btn-pf-save { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-accent); color: #fff !important; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 20px; cursor: pointer; transition: background var(--pf-transition); letter-spacing: 0.2px; }
+.btn-pf-save:hover { background: var(--pf-accent-dk); }
+.btn-pf-back { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-bg); color: var(--pf-muted) !important; border: 1px solid var(--pf-border); border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 16px; cursor: pointer; transition: background var(--pf-transition); text-decoration: none !important; }
+.btn-pf-back:hover { background: var(--pf-border); color: var(--pf-text) !important; }
+.pf-error-msg { display: none; background: #fff5f5; border-left: 4px solid #e74c3c; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #c0392b; }
+.pf-error-msg:has(li), .pf-error-msg:has(p:not(:empty)), .pf-error-msg:has(ul:not(:empty)) { display: block; }
+.pf-error-msg ul { margin: 0; padding-left: 18px; }
+.pf-error-msg p { margin: 0 0 4px; }
+.nav-tabs { border-bottom: 2px solid var(--pf-border); margin-bottom: 0; padding-left: 4px; }
+.nav-tabs > li > a { color: var(--pf-muted); font-size: 13px; font-weight: 600; border: none; border-bottom: 2.5px solid transparent; padding: 11px 20px; margin-bottom: -2px; border-radius: 6px 6px 0 0; transition: color var(--pf-transition), border-color var(--pf-transition), background var(--pf-transition); display: inline-flex; align-items: center; gap: 7px; }
+.nav-tabs > li > a i.tab-icon { font-size: 14px; width: 16px; text-align: center; opacity: 0.7; transition: opacity var(--pf-transition); }
+.nav-tabs > li > a:hover { color: var(--pf-accent); background: var(--pf-accent-lt); border-color: transparent; }
+.nav-tabs > li > a:hover i.tab-icon { opacity: 1; }
+.nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus { color: var(--pf-accent); background: var(--pf-accent-lt); border: none; border-bottom: 2.5px solid var(--pf-accent); }
+.nav-tabs > li.active > a i.tab-icon { opacity: 1; color: var(--pf-accent); }
+.tab-content { background: var(--pf-white); border: 1px solid var(--pf-border); border-top: none; border-radius: 0 0 var(--pf-radius) var(--pf-radius); padding: 24px; box-shadow: var(--pf-shadow); }
+.tab-content label { font-size: 12px; font-weight: 700; color: var(--pf-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
+.tab-content .form-control { border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; transition: border-color var(--pf-transition), box-shadow var(--pf-transition); padding: 6px 12px; }
+.tab-content .form-control:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
+.tab-content .form-control[readonly] { background: #f0f3f5; color: var(--pf-muted); cursor: default; }
+.pf-card { background: var(--pf-white); border: 1px solid var(--pf-border); border-radius: var(--pf-radius); box-shadow: var(--pf-shadow); padding: 24px; }
+.pf-card label { font-size: 12px; font-weight: 700; color: var(--pf-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
+.pf-card .form-control { border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; transition: border-color var(--pf-transition), box-shadow var(--pf-transition); padding: 6px 12px; }
+.pf-card .form-control:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
+.pf-card .form-control[disabled] { background: #f0f3f5; color: var(--pf-muted); cursor: default; }
+</style>
+{% endblock %}
+
 {% block content %}
 
 {% if redirect_to_layergroup %}
@@ -13,14 +58,15 @@
 	<div class="col-md-12">
 		<div class="row">
 			<div class="col-md-12 form-group">
-				<div class="box-tools pull-right">
-					<a href="javascript:window.history.back();" class="btn btn-default btn-sm"><i class="fa fa-chevron-left margin-r-5"></i> {% trans "Back" %}</a>
-					<button id="dash-submit-button" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>
+				<div class="pf-topbar">
+					<a href="javascript:window.history.back();" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
+					<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
 				</div>
 			</div>
 			<div class="row" style="padding-left: 30px;">
 				{% csrf_token %}
-				<div id="form-error" style="color:#ff0000;">
+{% if form.errors %}
+				<div class="pf-error-msg">
 					<ul>
 					{{ form.non_field_errors }}
 					{% for field in form %}
@@ -30,15 +76,19 @@
 					{% endfor %}
 					</ul>
 				</div>
+{% endif %}
 			</div>
 		</div>
 
 		<ul class="nav nav-tabs">
-          	<li class="active"><a href="#tab-layer-general" data-toggle="tab">{% trans "General" %}</a></li>
-          	<li><a href="#tab-layer-properties" data-toggle="tab">{% trans "Display properties" %}</a></li>
-			{% if MANAGE_PERMISSION_UI or user.is_superuser %} <li><a href="#tab-layer-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li> {% endif %}
-          	<li><a href="#tab-layer-metadata" data-toggle="tab">{% trans "Metadata" %}</a></li>
-          	<li><a href="#tab-layer-detailedinfo" data-toggle="tab">{% trans "Detailed information" %}</a></li>
+          	<li class="active"><a href="#tab-layer-general" data-toggle="tab"><i class="fa fa-cog tab-icon"></i> {% trans "General" %}</a></li>
+          	<li><a href="#tab-layer-properties" data-toggle="tab"><i class="fa fa-paint-brush tab-icon"></i> {% trans "Display properties" %}</a></li>
+			{% if MANAGE_PERMISSION_UI or user.is_superuser %} <li><a href="#tab-layer-permissions" data-toggle="tab"><i class="fa fa-lock tab-icon"></i> {% trans "Permissions" %}</a></li> {% endif %}
+          	<li><a href="#tab-layer-metadata" data-toggle="tab"><i class="fa fa-info-circle tab-icon"></i> {% trans "Metadata" %}</a></li>
+          	<li><a href="#tab-layer-detailedinfo" data-toggle="tab"><i class="fa fa-file-text-o tab-icon"></i> {% trans "Detailed information" %}</a></li>
+          	{% if 'gvsigol_plugin_geocopilot' in INSTALLED_APPS %}
+          	<li><a href="#tab-layer-geocopilot" data-toggle="tab"><i class="fa fa-magic tab-icon"></i> GeoCopilot</a></li>
+          	{% endif %}
         </ul>
 
         <div class="tab-content">
@@ -352,10 +402,235 @@
 				</div>
           	</div>
 
+          	{% if 'gvsigol_plugin_geocopilot' in INSTALLED_APPS %}
+          	<div class="tab-pane" id="tab-layer-geocopilot">
+          		<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+          					<div class="box-body">
+          						<div class="row">
+          							<div class="col-md-12 form-group">
+										<label for="geocopilot-layer-description">{% trans "Descripción de la capa para el LLM" %}</label>
+										<textarea class="form-control" id="geocopilot-layer-description" rows="4" placeholder="{% trans 'Describe brevemente qué datos contiene esta capa...' %}"></textarea>
+									</div>
+								</div>
+								<div class="row" style="margin-top: 12px;">
+									<div class="col-md-12">
+										<label>{% trans "Configuración de campos" %}</label>
+										<p class="help-block" style="margin-bottom: 10px;">
+											<small><i class="fa fa-info-circle"></i> {% trans "Añade descripciones a cada campo para mejorar las respuestas del LLM. Marca como 'Sensible' los campos con datos personales para que se anonimicen antes de enviarse al LLM." %}</small>
+										</p>
+										<div id="geocopilot-fields-loading" style="padding: 20px; text-align: center; display: none;">
+											<i class="fa fa-spinner fa-spin"></i> {% trans "Cargando campos..." %}
+										</div>
+										<table class="table table-bordered table-striped" id="geocopilot-fields-table" style="display: none;">
+											<thead>
+												<tr>
+													<th style="width: 12%;">{% trans "Campo" %}</th>
+													<th style="width: 10%;">{% trans "Tipo" %}</th>
+													<th style="width: 22%;">{% trans "Descripción para el LLM" %}</th>
+													<th style="width: 7%; text-align: center;">{% trans "Sensible" %}</th>
+													<th style="width: 49%;">{% trans "Relación FK" %}</th>
+												</tr>
+											</thead>
+											<tbody></tbody>
+										</table>
+									</div>
+								</div>
+								<input type="hidden" name="geocopilot_config" id="geocopilot-config-hidden" value="">
+							</div>
+						</div>
+					</div>
+				</div>
+          	</div>
+          	{% endif %}
+
 		</div>
 	</div>
 </div>
 </form>
+<script type="text/javascript">
+(function() {
+	var LAYER_ID = '{{layer_id}}';
+	var BASE_URL = window.location.origin + '/gvsigonline/geocopilot/admin/layer/' + LAYER_ID;
+	var gcLoaded = false;
+	var gcAvailableTables = [];
+	var gcColumnsCache = {};
+
+	function buildTableOptions(selectedValue) {
+		var html = '<option value="">-- Sin FK --</option>';
+		for (var i = 0; i < gcAvailableTables.length; i++) {
+			var t = gcAvailableTables[i];
+			var sel = (t.value === selectedValue) ? ' selected' : '';
+			html += '<option value="' + t.value + '"' + sel + '>' + t.label + '</option>';
+		}
+		return html;
+	}
+
+	function buildColumnOptions(columns, selectedValue) {
+		var html = '<option value="">--</option>';
+		for (var i = 0; i < columns.length; i++) {
+			var sel = (columns[i] === selectedValue) ? ' selected' : '';
+			html += '<option value="' + columns[i] + '"' + sel + '>' + columns[i] + '</option>';
+		}
+		return html;
+	}
+
+	function fetchAndPopulateColumns(row, tableName, fkCol, fkDisplay) {
+		var selCol = row.querySelector('.gc-field-fk-col');
+		var selDisplay = row.querySelector('.gc-field-fk-display');
+		if (!tableName) {
+			selCol.innerHTML = '<option value="">--</option>';
+			selDisplay.innerHTML = '<option value="">--</option>';
+			selCol.disabled = true;
+			selDisplay.disabled = true;
+			return;
+		}
+		if (gcColumnsCache[tableName]) {
+			selCol.innerHTML = buildColumnOptions(gcColumnsCache[tableName], fkCol || '');
+			selDisplay.innerHTML = buildColumnOptions(gcColumnsCache[tableName], fkDisplay || '');
+			selCol.disabled = false;
+			selDisplay.disabled = false;
+			return;
+		}
+		selCol.innerHTML = '<option value="">...</option>';
+		selDisplay.innerHTML = '<option value="">...</option>';
+		fetch(BASE_URL + '/table-columns/?table=' + encodeURIComponent(tableName), {
+			method: 'GET',
+			headers: {'X-Requested-With': 'XMLHttpRequest'}
+		})
+		.then(function(r) { return r.json(); })
+		.then(function(data) {
+			var cols = (data.success && data.columns) ? data.columns : [];
+			gcColumnsCache[tableName] = cols;
+			selCol.innerHTML = buildColumnOptions(cols, fkCol || '');
+			selDisplay.innerHTML = buildColumnOptions(cols, fkDisplay || '');
+			selCol.disabled = false;
+			selDisplay.disabled = false;
+		})
+		.catch(function() {
+			selCol.innerHTML = '<option value="">Error</option>';
+			selDisplay.innerHTML = '<option value="">Error</option>';
+		});
+	}
+
+	function loadGeoCopilotConfig() {
+		var loading = document.getElementById('geocopilot-fields-loading');
+		var table = document.getElementById('geocopilot-fields-table');
+		if (!loading || !table) return;
+		loading.style.display = 'block';
+		table.style.display = 'none';
+
+		fetch(BASE_URL + '/config/', {
+			method: 'GET',
+			headers: {'X-Requested-With': 'XMLHttpRequest'}
+		})
+		.then(function(r) { return r.json(); })
+		.then(function(data) {
+			if (!data.success) { loading.textContent = 'Error: ' + (data.message || ''); return; }
+
+			gcAvailableTables = data.available_tables || [];
+
+			var desc = document.getElementById('geocopilot-layer-description');
+			if (desc) desc.value = data.layer_description || '';
+
+			var tbody = table.querySelector('tbody');
+			tbody.innerHTML = '';
+			var fields = data.fields || [];
+			for (var i = 0; i < fields.length; i++) {
+				var f = fields[i];
+				var tr = document.createElement('tr');
+				var hasFk = !!(f.fk_table);
+
+				tr.innerHTML =
+					'<td><code>' + f.name + '</code></td>' +
+					'<td><small>' + f.type + '</small></td>' +
+					'<td><input type="text" class="form-control input-sm gc-field-desc" data-field="' + f.name + '" value="' + (f.description || '').replace(/"/g, '&quot;') + '" placeholder="Describe este campo..."></td>' +
+					'<td style="text-align:center;"><input type="checkbox" class="gc-field-sensitive" data-field="' + f.name + '"' + (f.sensitive ? ' checked' : '') + '></td>' +
+					'<td>' +
+						'<div style="display:flex; gap:4px; align-items:center;">' +
+							'<select class="form-control input-sm gc-field-fk-table" data-field="' + f.name + '" style="flex:2;">' +
+								buildTableOptions(f.fk_table || '') +
+							'</select>' +
+							'<select class="form-control input-sm gc-field-fk-col" data-field="' + f.name + '" style="flex:1;" disabled><option value="">--</option></select>' +
+							'<select class="form-control input-sm gc-field-fk-display" data-field="' + f.name + '" style="flex:1;" disabled><option value="">--</option></select>' +
+						'</div>' +
+						'<div style="display:flex; gap:4px; margin-top:2px;">' +
+							'<small style="flex:2; color:#999;">Tabla</small>' +
+							'<small style="flex:1; color:#999;">Col. clave</small>' +
+							'<small style="flex:1; color:#999;">Col. display</small>' +
+						'</div>' +
+					'</td>';
+				tbody.appendChild(tr);
+
+				if (hasFk) {
+					fetchAndPopulateColumns(tr, f.fk_table, f.fk_column, f.fk_display_column);
+				}
+			}
+
+			tbody.addEventListener('change', function(e) {
+				if (e.target.classList.contains('gc-field-fk-table')) {
+					var row = e.target.closest('tr');
+					fetchAndPopulateColumns(row, e.target.value, '', '');
+				}
+			});
+
+			loading.style.display = 'none';
+			table.style.display = 'table';
+			gcLoaded = true;
+		})
+		.catch(function(err) {
+			loading.textContent = 'Error cargando campos: ' + err;
+		});
+	}
+
+	function serializeGeoCopilotConfig() {
+		if (!gcLoaded) return;
+		var layerDescription = (document.getElementById('geocopilot-layer-description') || {}).value || '';
+		var rows = document.querySelectorAll('#geocopilot-fields-table tbody tr');
+		var fieldsList = [];
+		for (var i = 0; i < rows.length; i++) {
+			var row = rows[i];
+			var descInput = row.querySelector('.gc-field-desc');
+			var sensitiveInput = row.querySelector('.gc-field-sensitive');
+			var fkTableSel = row.querySelector('.gc-field-fk-table');
+			var fkColSel = row.querySelector('.gc-field-fk-col');
+			var fkDisplaySel = row.querySelector('.gc-field-fk-display');
+			if (!descInput) continue;
+			var fieldName = descInput.getAttribute('data-field');
+			var entry = {
+				name: fieldName,
+				description: descInput.value || '',
+				sensitive: sensitiveInput ? sensitiveInput.checked : false
+			};
+			if (fkTableSel && fkTableSel.value) {
+				entry.fk_table = fkTableSel.value;
+				entry.fk_column = fkColSel ? fkColSel.value : '';
+				entry.fk_display_column = fkDisplaySel ? fkDisplaySel.value : '';
+			}
+			fieldsList.push(entry);
+		}
+		var hidden = document.getElementById('geocopilot-config-hidden');
+		if (hidden) {
+			hidden.value = JSON.stringify({layer_description: layerDescription, fields: fieldsList});
+		}
+	}
+
+	var tabLink = document.querySelector('a[href="#tab-layer-geocopilot"]');
+	if (tabLink) {
+		tabLink.addEventListener('click', function() {
+			if (!gcLoaded) { setTimeout(loadGeoCopilotConfig, 100); }
+		});
+	}
+
+	var form = document.getElementById('layer-update-form');
+	if (form) {
+		form.addEventListener('submit', function() {
+			serializeGeoCopilotConfig();
+		});
+	}
+})();
+</script>
 {% endblock %}
 
 {% block extra-scripts %}
@@ -629,8 +904,6 @@ $('#submenu-layers').addClass("active");
 		var baseUrl = window.location.origin;
 		var url = baseUrl + '/gvsigonline/geocopilot/admin/layer/' + layerId + '/generate-enriched-metadata/';
 		
-		console.log('Intentando generar metadatos para capa:', layerId);
-		console.log('URL completa:', url);
 		
 		// Llamar a la API de GeoCopilot
 		$.ajax({
@@ -638,14 +911,11 @@ $('#submenu-layers').addClass("active");
 			type: 'POST',
 			headers: {'X-CSRFToken': Cookies.get('csrftoken')},
 			success: function(response) {
-				if (response.success) {
-					console.log('Metadatos generados exitosamente:', response.metadata);
-					
+				if (response.success) {					
 					// Actualizar el CodeMirror con los metadatos generados
 					if (window.detailedInfoCodeMirror) {
 						window.detailedInfoCodeMirror.setValue(response.metadata);
 						window.detailedInfoCodeMirror.refresh();
-						console.log('CodeMirror actualizado correctamente');
 					} else {
 						// Fallback: actualizar el textarea directamente
 						$('#detailed_info_html').val(response.metadata);

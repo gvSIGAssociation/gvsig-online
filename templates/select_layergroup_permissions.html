@@ -1,40 +1,76 @@
 {% load i18n %}
 {% load static from staticfiles %}
-				<div class="row">
-					<div class="col-md-12">
-						<div id="role-list-box" class="box searchable-list-box">
-							<div class="box-header">
-								<h4 class="col-md-6 box-title" style="vertical-align: middle; font-size:14px !important;">{% trans "Give the selected roles permissions to manage the layergroup" %}</h4>
-								<div class="col-md-6"><input type="text" class="search form-control" placeHolder="{% trans 'Search user role...' %}" />
-								</div>
-							</div>
-							<div class="box-body">
-								<ul class="products-list product-list-in-box list">
-									{% for role in roles %}
-									<li class="item">
-										<div class="product-img">
-											<img src="{% static "img/users.png" %}" alt="Users Image">
-										</div>
-										<div class="product-info">
-											<span class="product-title"><span class="searchable-rolename">{{role.name}}</span>
-												<div class="pull-right checkbox form-inline">
-														<label>
-															<input class="layergroup-includeinprojects-checkbox" type="checkbox" name="includeinprojects-userrole-{{role.name}}" id="includeinprojects-userrole-{{role.name}}" {% if role.includeinprojects_checked %}checked {% endif %}/>
-															<span>{% trans "Permission to include in projects" %}</span>
-														</label>
-														<label style="margin-left:10px">
-															<input class="layergroup-manage-checkbox" type="checkbox" name="manage-userrole-{{role.name}}" id="manage-userrole-{{role.name}}" {% if role.manage_checked %}checked {% endif %}/>
-															<span>{% trans "Permission to manage" %}</span>
-														</label>
-												</div>
-											</span> 
-											<span class="product-description searchable-roledesc">{{role.description}}</span>
-										</div>
-									</li> 
-									{% endfor %}
-								</ul>
-								<ul class="pagination"></ul>
-							</div>
-						</div>
-					</div>
-				</div>
+<style>
+.perm-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 16px; }
+.perm-header__title { font-size: 13px; font-weight: 700; color: var(--pf-text, #2e3a45); margin: 0; }
+.perm-header__search { position: relative; min-width: 180px; max-width: 280px; flex: 1; }
+.perm-header__search .form-control { height: 34px; border-radius: 20px; border: 1px solid var(--pf-border, #e8ecef); background: var(--pf-bg, #f4f6f8); font-size: 12px; padding: 0 14px; box-shadow: none; }
+.perm-header__search .form-control:focus { border-color: var(--pf-accent, #4a7fa5); background: #fff; box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
+.perm-list { list-style: none; padding: 0; margin: 0; }
+.perm-item { display: flex; align-items: center; gap: 14px; padding: 8px 16px; border-bottom: 1px solid var(--pf-border, #e8ecef); }
+.perm-item:last-child { border-bottom: none; }
+.perm-item__avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; object-fit: cover; background: var(--pf-bg, #f4f6f8); opacity: 0.5; }
+.perm-item__info { flex: 1; min-width: 0; }
+.perm-item__name { font-size: 13px; font-weight: 600; color: var(--pf-text, #2e3a45); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.perm-item__desc { font-size: 12px; color: var(--pf-muted, #7b8a96); margin: 1px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.perm-item__checks { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.perm-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	border: 1px solid #e8ecef;
+	border-radius: 20px;
+	padding: 3px 10px 3px 8px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #7b8a96;
+	background: #f4f6f8;
+	cursor: pointer;
+	transition: background 0.15s, border-color 0.15s, color 0.15s;
+	user-select: none;
+	white-space: nowrap;
+	text-transform: none;
+	letter-spacing: 0;
+	margin: 0;
+}
+.perm-chip input[type="checkbox"] {
+	margin: 0;
+	cursor: pointer;
+	accent-color: #4a7fa5;
+	width: 13px;
+	height: 13px;
+	flex-shrink: 0;
+}
+.perm-chip:has(input:checked) { background: rgba(74,127,165,0.1); border-color: #4a7fa5; color: #2d5f80; }
+.perm-chip:has(input:disabled) { opacity: 0.55; cursor: default; }
+</style>
+<div id="role-list-box" class="searchable-list-box">
+	<div class="perm-header">
+		<p class="perm-header__title">{% trans "Give the selected roles permissions to manage the layergroup" %}</p>
+		<div class="perm-header__search">
+			<input type="text" class="search form-control" placeholder="{% trans 'Search user role...' %}" />
+		</div>
+	</div>
+	<ul class="perm-list list">
+		{% for role in roles %}
+		<li class="perm-item item">
+			<img class="perm-item__avatar" src="{% static "img/users.png" %}" alt="">
+			<div class="perm-item__info">
+				<p class="perm-item__name searchable-rolename">{{ role.name }}</p>
+				<p class="perm-item__desc searchable-roledesc">{{ role.description }}</p>
+			</div>
+			<div class="perm-item__checks">
+				<label class="perm-chip">
+					<input class="layergroup-includeinprojects-checkbox" type="checkbox" name="includeinprojects-userrole-{{ role.name }}" id="includeinprojects-userrole-{{ role.name }}" {% if role.includeinprojects_checked %}checked{% endif %} />
+					<span>{% trans "Permission to include in projects" %}</span>
+				</label>
+				<label class="perm-chip">
+					<input class="layergroup-manage-checkbox" type="checkbox" name="manage-userrole-{{ role.name }}" id="manage-userrole-{{ role.name }}" {% if role.manage_checked %}checked{% endif %} />
+					<span>{% trans "Permission to manage" %}</span>
+				</label>
+			</div>
+		</li>
+		{% endfor %}
+	</ul>
+	<ul class="pagination"></ul>
+</div>

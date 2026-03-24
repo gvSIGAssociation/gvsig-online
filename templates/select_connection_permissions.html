@@ -1,67 +1,164 @@
 {% load i18n %}
 {% load static from staticfiles %}
-				<div class="row">
-					<div class="col-md-12">
-						<div id="connection-permissions-box" class="box searchable-list-box">
-							<div class="box-header">
-								<h3 class="col-md-6 box-title" style="vertical-align: middle">{% trans "Select connection permissions" %}</h3>
-								<div class="col-md-6"><input type="text" class="search form-control" placeHolder="{% trans 'Search user role...' %}" id="role-search" />
+<style>
+.cp-header {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	padding: 12px 16px;
+}
+.cp-search { flex: 1; min-width: 180px; max-width: 320px; }
+.cp-allow-all {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+.cp-perm-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	border: 1px solid #e8ecef;
+	border-radius: 20px;
+	padding: 3px 10px 3px 8px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #7b8a96;
+	background: #f4f6f8;
+	cursor: pointer;
+	transition: background 0.15s, border-color 0.15s, color 0.15s;
+	user-select: none;
+	white-space: nowrap;
+}
+.cp-perm-chip input[type="checkbox"] {
+	margin: 0;
+	cursor: pointer;
+	accent-color: #4a7fa5;
+	width: 11px;
+	height: 11px;
+	flex-shrink: 0;
+}
+.cp-perm-chip:has(input:checked) {
+	background: rgba(74,127,165,0.1);
+	border-color: #4a7fa5;
+	color: #2d5f80;
+}
+.cp-perm-chip:has(input:disabled) {
+	opacity: 0.55;
+	cursor: default;
+}
+/* Fila del rol */
+.cp-role-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 8px;
+	width: 100%;
+}
+.cp-role-info { flex: 1; min-width: 0; }
+.cp-role-name {
+	font-size: 13px;
+	font-weight: 600;
+	color: #2e3a45;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.cp-role-desc {
+	font-size: 12px;
+	color: #7b8a96;
+	margin-top: 1px;
+}
+.cp-perms {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-shrink: 0;
+}
+/* Reemplazar estilos del item de la lista */
+#connection-permissions-box .products-list > .item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 12px;
+}
+#connection-permissions-box .products-list .product-img {
+	flex-shrink: 0;
+	width: 32px;
+	height: 32px;
+}
+#connection-permissions-box .products-list .product-img img {
+	width: 20px;
+	height: 20px;
+	opacity: 0.5;
+}
+#connection-permissions-box .products-list .product-info {
+	flex: 1;
+	min-width: 0;
+}
+</style>
+
+<div class="row">
+	<div class="col-md-12">
+		<div id="connection-permissions-box" class="searchable-list-box">
+			<div class="box-header cp-header">
+				<div class="cp-search">
+					<input type="text" class="search form-control" placeholder="{% trans 'Search user role...' %}" id="role-search" />
+				</div>
+				<div class="cp-allow-all">
+					<label class="cp-perm-chip" title="{% trans 'All users can create datastores with this connection' %}">
+						<input type="checkbox" name="allow_all_datastore" id="allow_all_datastore" {% if connection and connection.allow_all_datastore %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
+						<span>{% trans "Allow all - Datastores" %}</span>
+					</label>
+					<label class="cp-perm-chip" title="{% trans 'All users can use this connection in ETL' %}">
+						<input type="checkbox" name="allow_all_etl" id="allow_all_etl" {% if connection and connection.allow_all_etl %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
+						<span>{% trans "Allow all - ETL" %}</span>
+					</label>
+					<label class="cp-perm-chip" title="{% trans 'All users can manage this connection' %}">
+						<input type="checkbox" name="allow_all_manage" id="allow_all_manage" {% if connection and connection.allow_all_manage %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
+						<span>{% trans "Allow all - Management" %}</span>
+					</label>
+				</div>
+			</div>
+			<div class="box-body">
+				<ul class="products-list product-list-in-box list">
+					{% for role in roles %}
+					<li class="item">
+						<div class="product-img">
+							<img src="{% static 'img/users.png' %}" alt="{% trans 'User role image' %}">
+						</div>
+						<div class="product-info">
+							<div class="cp-role-row">
+								<div class="cp-role-info">
+									<div class="cp-role-name searchable-rolename">{{role.name}}</div>
+									<div class="cp-role-desc searchable-roledesc">{{role.description}}</div>
 								</div>
-								<div class="col-md-12" style="margin-top: 10px;">
-									<div class="checkbox" style="display: inline-block; margin-right: 20px;">
-										<label title="{% trans 'All users can create datastores with this connection' %}">
-											<input type="checkbox" name="allow_all_datastore" id="allow_all_datastore" {% if connection and connection.allow_all_datastore %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
-											<span>{% trans "Allow all - Datastores" %}</span>
-										</label>
-									</div>
-									<div class="checkbox" style="display: inline-block; margin-right: 20px;">
-										<label title="{% trans 'All users can use this connection in ETL' %}">
-											<input type="checkbox" name="allow_all_etl" id="allow_all_etl" {% if connection and connection.allow_all_etl %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
-											<span>{% trans "Allow all - ETL" %}</span>
-										</label>
-									</div>
-									<div class="checkbox" style="display: inline-block;">
-										<label title="{% trans 'All users can manage this connection' %}">
-											<input type="checkbox" name="allow_all_manage" id="allow_all_manage" {% if connection and connection.allow_all_manage %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
-											<span>{% trans "Allow all - Management" %}</span>
-										</label>
-									</div>
+								<div class="cp-perms">
+									<label class="cp-perm-chip">
+										<input type="checkbox" name="role_datastore_{{role.name}}" id="role_datastore_{{role.name}}" {% if role.datastore_checked %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
+										<span>{% trans "Datastores" %}</span>
+									</label>
+									<label class="cp-perm-chip">
+										<input type="checkbox" name="role_etl_{{role.name}}" id="role_etl_{{role.name}}" {% if role.etl_checked %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
+										<span>{% trans "ETL" %}</span>
+									</label>
+									<label class="cp-perm-chip">
+										<input type="checkbox" name="role_manage_{{role.name}}" id="role_manage_{{role.name}}" {% if role.manage_checked %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
+										<span>{% trans "Management" %}</span>
+									</label>
 								</div>
 							</div>
-						<div class="box-body">
-							<ul class="products-list product-list-in-box list">
-								{% for role in roles %}
-								<li class="item">
-									<div class="product-img">
-										<img src="{% static 'img/users.png' %}" alt="{% trans 'User role image' %}">
-									</div>
-									<div class="product-info">
-										<span class="product-title"><span class="searchable-rolename">{{role.name}}</span>
-											<div class="pull-right checkbox form-inline">
-												<label>
-													<input type="checkbox" name="role_datastore_{{role.name}}" id="role_datastore_{{role.name}}" {% if role.datastore_checked %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
-													<span>{% trans "Datastores" %}</span>
-												</label>
-												<label style="margin-left:10px">
-													<input type="checkbox" name="role_etl_{{role.name}}" id="role_etl_{{role.name}}" {% if role.etl_checked %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
-													<span>{% trans "ETL" %}</span>
-												</label>
-												<label style="margin-left:10px">
-													<input type="checkbox" name="role_manage_{{role.name}}" id="role_manage_{{role.name}}" {% if role.manage_checked %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
-													<span>{% trans "Management" %}</span>
-												</label>
-											</div>
-										</span> 
-										<span class="product-description searchable-roledesc">{{role.description}}</span>
-									</div>
-								</li> 
-								{% endfor %}
-							</ul>
-							<ul class="pagination"></ul>
 						</div>
-						</div>
-					</div>
-				</div>
+					</li>
+					{% endfor %}
+				</ul>
+				<ul class="pagination"></ul>
+			</div>
+		</div>
+	</div>
+</div>
 <script type="text/javascript">
 $(document).ready(function() {
 

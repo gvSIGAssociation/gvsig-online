@@ -2,24 +2,79 @@
 {% load staticfiles %} 
 {% load i18n %} 
 
+{% block header %}
+<style>
+:root {
+	--pl-accent:    #4a7fa5;
+	--pl-accent-dk: #2d5f80;
+	--pl-accent-lt: rgba(74,127,165,0.06);
+	--pl-text:      #2e3a45;
+	--pl-muted:     #7b8a96;
+	--pl-border:    #e8ecef;
+	--pl-bg:        #f4f6f8;
+	--pl-white:     #ffffff;
+	--pl-radius:    10px;
+	--pl-shadow:    0 2px 12px rgba(0,0,0,0.08);
+	--pl-transition: 0.2s ease;
+}
+.nav-tabs { border-bottom: 2px solid var(--pl-border); margin-bottom: 0; padding-left: 4px; }
+.nav-tabs > li > a { color: var(--pl-muted); font-size: 13px; font-weight: 600; border: none; border-bottom: 2.5px solid transparent; padding: 11px 20px; margin-bottom: -2px; border-radius: 6px 6px 0 0; transition: color var(--pl-transition), border-color var(--pl-transition), background var(--pl-transition); display: inline-flex; align-items: center; gap: 7px; }
+.nav-tabs > li > a i.tab-icon { font-size: 14px; width: 16px; text-align: center; opacity: 0.7; transition: opacity var(--pl-transition); }
+.nav-tabs > li > a:hover { color: var(--pl-accent); background: var(--pl-accent-lt); border-color: transparent; }
+.nav-tabs > li > a:hover i.tab-icon { opacity: 1; }
+.nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus { color: var(--pl-accent); background: var(--pl-accent-lt); border: none; border-bottom: 2.5px solid var(--pl-accent); }
+.nav-tabs > li.active > a i.tab-icon { opacity: 1; color: var(--pl-accent); }
+.tab-content { background: var(--pl-white); border: 1px solid var(--pl-border); border-top: none; border-radius: 0 0 var(--pl-radius) var(--pl-radius); padding: 0; box-shadow: var(--pl-shadow); }
+.pl-table { width: 100%; border-collapse: collapse; font-size: 13px; -webkit-font-smoothing: antialiased; }
+.pl-table thead th { background: var(--pl-bg); color: var(--pl-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; padding: 11px 16px; border-bottom: 1px solid var(--pl-border); white-space: nowrap; }
+.pl-table tbody tr { border-bottom: 1px solid var(--pl-border); transition: background var(--pl-transition); }
+.pl-table tbody tr:last-child { border-bottom: none; }
+.pl-table tbody tr:hover { background: #f0f6fb; }
+.pl-table tbody td { padding: 11px 16px; color: #4a5a68; font-size: 13px; font-weight: 400; line-height: 1.5; vertical-align: middle; }
+.pl-table tbody td:first-child { color: var(--pl-muted); font-size: 12px; }
+.pl-table tbody td:nth-child(2) { font-weight: 600; color: #2e3a45; }
+table.dataTable { border-bottom: none !important; margin-top: 0 !important; margin-bottom: 0 !important; }
+table.dataTable thead th, table.dataTable thead td { border-bottom: 1px solid var(--pl-border) !important; }
+table.dataTable.no-footer { border-bottom: none !important; }
+.dataTables_wrapper { padding: 0; }
+.dataTables_wrapper .dataTables_filter { padding: 12px 16px 0; text-align: right; }
+.dataTables_wrapper .dataTables_filter label { font-size: 12px; font-weight: 600; color: var(--pl-muted); display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+.dataTables_wrapper .dataTables_filter input { height: 32px; border-radius: 20px; border: 1px solid var(--pl-border); background: var(--pl-bg); font-size: 12px; padding: 0 12px; width: 180px; box-shadow: none; outline: none; }
+.dataTables_wrapper .dataTables_filter input:focus { border-color: var(--pl-accent); background: var(--pl-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); }
+.dataTables_wrapper .dataTables_length { padding: 12px 16px 0; font-size: 12px; color: var(--pl-muted); }
+.dataTables_wrapper .dataTables_length select { height: 30px; border-radius: 5px; border: 1px solid var(--pl-border); background: var(--pl-bg); font-size: 12px; padding: 0 6px; color: var(--pl-text); }
+.dataTables_wrapper .dataTables_info { padding: 12px 16px; font-size: 12px; color: var(--pl-muted); border-top: 1px solid var(--pl-border); }
+.dataTables_wrapper .dataTables_paginate { padding: 8px 16px; border-top: 1px solid var(--pl-border); text-align: right; }
+.dataTables_wrapper .dataTables_paginate .paginate_button { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; margin: 0 2px; border-radius: 5px; border: 1px solid var(--pl-border); background: var(--pl-white); color: var(--pl-muted) !important; font-size: 12px; font-weight: 600; cursor: pointer; transition: background var(--pl-transition), color var(--pl-transition); }
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover { background: #f0f6fb; border-color: var(--pl-accent); color: var(--pl-accent) !important; }
+.dataTables_wrapper .dataTables_paginate .paginate_button.current, .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover { background: var(--pl-accent) !important; border-color: var(--pl-accent) !important; color: #fff !important; }
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled, .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover { background: var(--pl-bg); border-color: var(--pl-border); color: #ccc !important; cursor: default; }
+.pl-table .btn-danger { background: transparent; border: 1px solid #e8bebe; color: #c0392b; border-radius: 5px; font-size: 12px; padding: 4px 10px; transition: background var(--pl-transition); }
+.pl-table .btn-danger:hover { background: #fde8e8; border-color: #c0392b; }
+.pl-table .btn-success { background: transparent; border: 1px solid var(--pl-border); color: var(--pl-accent); border-radius: 5px; font-size: 12px; padding: 4px 10px; transition: background var(--pl-transition); }
+.pl-table .btn-success:hover { background: #f0f6fb; border-color: var(--pl-accent); }
+.pl-table .btn-warning { background: transparent; border: 1px solid #f5d79e; color: #d08b00; border-radius: 5px; font-size: 12px; padding: 4px 10px; transition: background var(--pl-transition); }
+.pl-table .btn-warning:hover { background: #fef9ec; border-color: #d08b00; }
+.pl-cache-messages { margin-bottom: 16px; }
+.pl-cache-messages .alert { border-radius: 8px; border-left: 4px solid #e74c3c; background: #fff5f5; color: #c0392b; font-size: 13px; padding: 12px 16px; border-top: none; border-right: none; border-bottom: none; }
+</style>
+{% endblock %}
+
 {% block content %}
 {% for message in messages %}
-<div class="row">
-	<div class="col-md-12">
-		<div class="alert alert-danger" role="alert">
+<div class="pl-cache-messages">
+	<div class="alert alert-danger" role="alert">
 			<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
 			<span class="sr-only">{% trans "Error:" %}</span>
 			{{message}}
-		  </div>
-	</div>
-</div>
+		</div>
 {% endfor %}
 <div class="row">
 	<div class="col-md-12">
 	
 		<ul class="nav nav-tabs">
-	    	<li class="active"><a href="#tab-cached-layers" data-toggle="tab">{% trans "Cached layers" %}</a></li>
-	        <li><a href="#tab-cached-groups" data-toggle="tab">{% trans "Cached groups" %}</a></li>
+	    	<li class="active"><a href="#tab-cached-layers" data-toggle="tab"><i class="fa fa-map tab-icon"></i> {% trans "Cached layers" %}</a></li>
+	        <li><a href="#tab-cached-groups" data-toggle="tab"><i class="fa fa-th-large tab-icon"></i> {% trans "Cached groups" %}</a></li>
 	    </ul>
 	       	
 	  	<div class="tab-content">
@@ -28,7 +83,7 @@
 					<div class="col-md-12">
 						<div class="box">
 							<div class="box-body">
-								<table class="table" style="width: 100%;" id="layers-table">
+								<table class="pl-table table" style="width: 100%;" id="layers-table">
 									<thead>
 										<tr>
 											<th>ID</th>
@@ -71,7 +126,7 @@
 					<div class="col-md-12">
 						<div class="box">
 							<div class="box-body">
-								<table class="table" style="width: 100%;" id="groups-table">
+								<table class="pl-table table" style="width: 100%;" id="groups-table">
 									<thead>
 										<tr>
 											<th>ID</th>

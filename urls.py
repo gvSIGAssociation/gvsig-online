@@ -146,4 +146,5 @@ urlpatterns = [
     
     # API para conexiones externas
     path('api/segex/entities/', services_views.api_segex_entities, name='api_segex_entities'),
+
 ]

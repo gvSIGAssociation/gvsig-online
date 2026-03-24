@@ -38,7 +38,7 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse, HttpResponseForbidden, StreamingHttpResponse
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.utils.translation import ugettext as _, ugettext_lazy, ugettext
 
@@ -1907,6 +1907,40 @@ def layer_update(request, layer_id):
             layer.external_params = json.dumps(params)
             layer.conf = layerConf
             layer.save()
+
+            geocopilot_config_raw = request.POST.get('geocopilot_config', '').strip()
+            if geocopilot_config_raw and 'gvsigol_plugin_geocopilot' in settings.INSTALLED_APPS:
+                try:
+                    from gvsigol_plugin_geocopilot.models import LayerGeoCopilotConfig
+                    gc_data = json.loads(geocopilot_config_raw)
+                    gc_layer_desc = gc_data.get('layer_description', '')
+                    gc_fields_list = gc_data.get('fields', [])
+                    gc_fields_config = {}
+                    for f in gc_fields_list:
+                        fname = f.get('name', '')
+                        if fname:
+                            entry = {
+                                'description': f.get('description', ''),
+                                'sensitive': bool(f.get('sensitive', False)),
+                            }
+                            if f.get('fk_table'):
+                                entry['fk_table'] = f['fk_table']
+                                entry['fk_column'] = f.get('fk_column', '')
+                                entry['fk_display_column'] = f.get('fk_display_column', '')
+                            gc_fields_config[fname] = entry
+                    gc_config, _ = LayerGeoCopilotConfig.objects.get_or_create(
+                        layer=layer,
+                        defaults={
+                            'layer_description': gc_layer_desc,
+                            'updated_by': request.user.username,
+                        }
+                    )
+                    gc_config.layer_description = gc_layer_desc
+                    gc_config.fields_config = gc_fields_config
+                    gc_config.updated_by = request.user.username
+                    gc_config.save()
+                except Exception as e:
+                    logger.warning(f"Error guardando config GeoCopilot para capa {layer.id}: {e}")
 
             if 'layer-image' in request.FILES:
                 up_file = request.FILES['layer-image']
@@ -4314,7 +4348,7 @@ def layer_create_with_group(request, layergroup_id):
                         }
                         initial_conf['fields'].append(field_conf)
                     
-                    newRecord.conf = initial_conf                    
+                    newRecord.conf = initial_conf
                     newRecord.save()
 
                     for i in form.cleaned_data['fields']:
@@ -10266,3 +10300,5 @@ def api_segex_entities(request):
     except Exception as e:
         logger.exception('Error fetching SEGEX entities')
         return JsonResponse({'success': False, 'error': str(e)})
+
+

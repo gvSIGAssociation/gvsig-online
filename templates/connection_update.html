@@ -61,6 +61,86 @@
 </style>
 {% endblock %}
 
+{% block header %}
+<style>
+:root {
+	--pf-accent:    #4a7fa5;
+	--pf-accent-dk: #2d5f80;
+	--pf-accent-lt: rgba(74,127,165,0.06);
+	--pf-text:      #2e3a45;
+	--pf-muted:     #7b8a96;
+	--pf-border:    #e8ecef;
+	--pf-bg:        #f4f6f8;
+	--pf-white:     #ffffff;
+	--pf-radius:    10px;
+	--pf-shadow:    0 2px 12px rgba(0,0,0,0.08);
+	--pf-transition: 0.2s ease;
+}
+.pf-topbar { display: flex; align-items: center; justify-content: flex-end; padding: 12px 0 16px; gap: 10px; flex-wrap: wrap; }
+.pf-topbar-left { flex: 1; display: flex; align-items: center; gap: 8px; }
+.btn-pf-save { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-accent); color: #fff !important; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 20px; cursor: pointer; transition: background var(--pf-transition); letter-spacing: 0.2px; }
+.btn-pf-save:hover { background: var(--pf-accent-dk); }
+.btn-pf-back { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-bg); color: var(--pf-muted) !important; border: 1px solid var(--pf-border); border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 16px; cursor: pointer; transition: background var(--pf-transition); text-decoration: none !important; }
+.btn-pf-back:hover { background: var(--pf-border); color: var(--pf-text) !important; }
+.pf-error-msg { display: none; background: #fff5f5; border-left: 4px solid #e74c3c; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #c0392b; }
+.pf-error-msg:has(li), .pf-error-msg:has(p:not(:empty)), .pf-error-msg:has(ul:not(:empty)) { display: block; }
+.pf-error-msg ul { margin: 0; padding-left: 18px; }
+.pf-error-msg p { margin: 0 0 4px; }
+/* ---- Tabs ---- */
+.nav-tabs {
+	border-bottom: 2px solid var(--pf-border);
+	margin-bottom: 0;
+	padding-left: 4px;
+}
+.nav-tabs > li > a {
+	color: var(--pf-muted);
+	font-size: 13px;
+	font-weight: 600;
+	border: none;
+	border-bottom: 2.5px solid transparent;
+	padding: 11px 20px;
+	margin-bottom: -2px;
+	border-radius: 6px 6px 0 0;
+	transition: color var(--pf-transition), border-color var(--pf-transition), background var(--pf-transition);
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+}
+.nav-tabs > li > a i.tab-icon {
+	font-size: 14px;
+	width: 16px;
+	text-align: center;
+	opacity: 0.7;
+	transition: opacity var(--pf-transition);
+}
+.nav-tabs > li > a:hover {
+	color: var(--pf-accent);
+	background: var(--pf-accent-lt);
+	border-color: transparent;
+}
+.nav-tabs > li > a:hover i.tab-icon { opacity: 1; }
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+	color: var(--pf-accent);
+	background: var(--pf-accent-lt);
+	border: none;
+	border-bottom: 2.5px solid var(--pf-accent);
+}
+.nav-tabs > li.active > a i.tab-icon { opacity: 1; color: var(--pf-accent); }
+.tab-content { background: var(--pf-white); border: 1px solid var(--pf-border); border-top: none; border-radius: 0 0 var(--pf-radius) var(--pf-radius); padding: 24px; box-shadow: var(--pf-shadow); }
+.tab-content label { font-size: 12px; font-weight: 700; color: var(--pf-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
+.tab-content .form-control { border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; transition: border-color var(--pf-transition), box-shadow var(--pf-transition); padding: 6px 12px; }
+.tab-content .form-control:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
+.tab-content .form-control[readonly] { background: #f0f3f5; color: var(--pf-muted); cursor: default; }
+.pf-card { background: var(--pf-white); border: 1px solid var(--pf-border); border-radius: var(--pf-radius); box-shadow: var(--pf-shadow); padding: 24px; }
+.pf-card label { font-size: 12px; font-weight: 700; color: var(--pf-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
+.pf-card .form-control { border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; transition: border-color var(--pf-transition), box-shadow var(--pf-transition); padding: 6px 12px; }
+.pf-card .form-control:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
+.pf-card .form-control[disabled] { background: #f0f3f5; color: var(--pf-muted); cursor: default; }
+</style>
+{% endblock %}
+
 {% block content %}
 
 {# Overlay de guardado — visible mientras el servidor procesa el POST #}
@@ -84,270 +164,266 @@
 		<div class="col-md-12">	
 			<div class="row">
 				<div class="col-md-12 form-group">
-					<div class="box-tools pull-right">
-						<button type="button" id="btn-test-connection" class="btn btn-default btn-sm"><i class="fa fa-plug margin-r-5"></i> {% trans "Test connection" %}</button>
-						<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>
-					</div>
+					<div class="pf-topbar">
+					<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+				</div>
 				</div>				
 			</div>
-			<div class="box">
-				{% csrf_token %}
-				{% if form.errors %}
-				<div id="form-error" class="alert alert-danger" style="margin: 15px;">
-					<ul>
-					{{ form.non_field_errors }}
-					{% for field in form %}
-						{% if field.errors %}
-							<li>{{field.label}}: {{ field.errors|striptags }}</li>
-						{% endif %}	
-					{% endfor %}
-					</ul>
-				</div>
-				{% endif %}
-				
-				<div class="nav-tabs-custom">
-					<ul class="nav nav-tabs">
-						<li class="active"><a href="#tab-connection" data-toggle="tab">{% trans "Connection" %}</a></li>
-						<li><a href="#tab-permissions" data-toggle="tab">{% trans "Permissions" %}</a></li>
-					</ul>
-					<div class="tab-content">
-						<!-- Pestaña de conexión -->
-						<div class="tab-pane active" id="tab-connection">
-							<div class="row" style="padding: 15px;">
-								<div class="col-md-6">
-									<h4>{% trans "Connection details" %}</h4>
-									<div class="form-group">
-										<label for="id_name">{{ form.name.label }}</label>
-										{{ form.name }}
-									</div>
-									<div class="form-group">
-										<label for="id_description">{{ form.description.label }}</label>
-										{{ form.description }}
-									</div>
-									<div class="form-group">
-										<label>{% trans "Category" %}</label>
-										{% if connection.type == 'PostGIS' or connection.type == 'Oracle' or connection.type == 'SQLServer' %}
-										<input type="text" class="form-control" readonly value="Base de datos">
-										{% else %}
-										<input type="text" class="form-control" readonly value="API externa">
-										{% endif %}
-									</div>
-									<div class="form-group">
-										<label for="id_type">{{ form.type.label }}</label>
-										{{ form.type }}
-										<input type="hidden" name="type" value="{{ connection.type }}">
-									</div>
+			{% csrf_token %}
+			{% if form.errors %}
+			<div class="pf-error-msg">
+				<ul>
+				{{ form.non_field_errors }}
+				{% for field in form %}
+					{% if field.errors %}
+						<li>{{field.label}}: {{ field.errors|striptags }}</li>
+					{% endif %}	
+				{% endfor %}
+				</ul>
+			</div>
+			{% endif %}
+			
+							<ul class="nav nav-tabs">
+				<li class="active"><a href="#tab-connection" data-toggle="tab"><i class="fa fa-plug tab-icon"></i> {% trans "Connection" %}</a></li>
+				<li><a href="#tab-permissions" data-toggle="tab"><i class="fa fa-lock tab-icon"></i> {% trans "Permissions" %}</a></li>
+			</ul>
+				<div class="tab-content">
+					<!-- Pestaña de conexión -->
+					<div class="tab-pane active" id="tab-connection">
+						<div class="row" style="padding: 15px;">
+							<div class="col-md-6">
+								<h4>{% trans "Connection details" %}</h4>
+								<div class="form-group">
+									<label for="id_name">{{ form.name.label }}</label>
+									{{ form.name }}
 								</div>
-								
-								<div class="col-md-6">
-									<h4>{% trans "Connection parameters" %}</h4>
-									
-									<!-- ==================== POSTGRESQL/POSTGIS ==================== -->
-									{% if connection.type == 'PostGIS' %}
-									<div id="params-postgis">
-										<div class="form-group">
-											<label for="id_host">{{ form.host.label }}</label>
-											{{ form.host }}
-										</div>
-										<div class="form-group">
-											<label for="id_port">{{ form.port.label }}</label>
-											{{ form.port }}
-										</div>
-										<div class="form-group">
-											<label for="id_database">{{ form.database.label }}</label>
-											{{ form.database }}
-										</div>
-										<div class="form-group">
-											<label for="id_user">{{ form.user.label }}</label>
-											{{ form.user }}
-										</div>
-										<div class="form-group">
-											<label for="id_password">{{ form.password.label }}</label>
-											{{ form.password }}
-											<small class="text-muted">{% trans "Leave empty to keep current password" %}</small>
-										</div>
-										<h5 class="margin-top-20">{% trans "Additional parameters" %}</h5>
-										<div class="form-group">
-											<label for="id_extra_params">{{ form.extra_params.label }}</label>
-											{{ form.extra_params }}
-											<small class="text-muted">{{ form.extra_params.help_text }}</small>
-										</div>
-									</div>
+								<div class="form-group">
+									<label for="id_description">{{ form.description.label }}</label>
+									{{ form.description }}
+								</div>
+								<div class="form-group">
+									<label>{% trans "Category" %}</label>
+									{% if connection.type == 'PostGIS' or connection.type == 'Oracle' or connection.type == 'SQLServer' %}
+									<input type="text" class="form-control" readonly value="Base de datos">
+									{% else %}
+									<input type="text" class="form-control" readonly value="API externa">
 									{% endif %}
-									
-									<!-- ==================== ORACLE ==================== -->
-									{% if connection.type == 'Oracle' %}
-									<div id="params-oracle">
-										<div class="form-group">
-											<label for="id_oracle_user">{{ form.oracle_user.label }}</label>
-											{{ form.oracle_user }}
-										</div>
-										<div class="form-group">
-											<label for="id_oracle_password">{{ form.oracle_password.label }}</label>
-											{{ form.oracle_password }}
-											<small class="text-muted">{% trans "Leave empty to keep current password" %}</small>
-										</div>
-										<div class="form-group">
-											<label for="id_oracle_host">{{ form.oracle_host.label }}</label>
-											{{ form.oracle_host }}
-										</div>
-										<div class="form-group">
-											<label for="id_oracle_port">{{ form.oracle_port.label }}</label>
-											{{ form.oracle_port }}
-										</div>
-										<div class="form-group">
-											<label for="id_oracle_service">{{ form.oracle_service.label }}</label>
-											{{ form.oracle_service }}
-										</div>
-									</div>
-									{% endif %}
-									
-									<!-- ==================== SQL SERVER ==================== -->
-									{% if connection.type == 'SQLServer' %}
-									<div id="params-sqlserver">
-										<div class="form-group">
-											<label for="id_sqlserver_server">{{ form.sqlserver_server.label }}</label>
-											{{ form.sqlserver_server }}
-										</div>
-										<div class="form-group">
-											<label for="id_sqlserver_user">{{ form.sqlserver_user.label }}</label>
-											{{ form.sqlserver_user }}
-										</div>
-										<div class="form-group">
-											<label for="id_sqlserver_password">{{ form.sqlserver_password.label }}</label>
-											{{ form.sqlserver_password }}
-											<small class="text-muted">{% trans "Leave empty to keep current password" %}</small>
-										</div>
-										<div class="form-group">
-											<label for="id_sqlserver_database">{{ form.sqlserver_database.label }}</label>
-											{{ form.sqlserver_database }}
-										</div>
-										<div class="form-group">
-											<label for="id_sqlserver_tds_version">{{ form.sqlserver_tds_version.label }}</label>
-											{{ form.sqlserver_tds_version }}
-										</div>
-									</div>
-									{% endif %}
-									
-									<!-- ==================== INDENOVA ==================== -->
-									{% if connection.type == 'indenova' %}
-									<div id="params-indenova">
-										<div class="form-group">
-											<label for="id_indenova_domain">{{ form.indenova_domain.label }}</label>
-											{{ form.indenova_domain }}
-										</div>
-										<div class="form-group">
-											<label for="id_indenova_api_key">{{ form.indenova_api_key.label }}</label>
-											{{ form.indenova_api_key }}
-										</div>
-										<div class="form-group">
-											<label for="id_indenova_client_id">{{ form.indenova_client_id.label }}</label>
-											{{ form.indenova_client_id }}
-										</div>
-										<div class="form-group">
-											<label for="id_indenova_secret">{{ form.indenova_secret.label }}</label>
-											{{ form.indenova_secret }}
-											<small class="text-muted">{% trans "Leave empty to keep current secret" %}</small>
-										</div>
-									</div>
-									{% endif %}
-									
-									<!-- ==================== SEGEX ==================== -->
-									{% if connection.type == 'segex' %}
-									<div id="params-segex">
-										<div class="form-group">
-											<label for="id_segex_domain">{{ form.segex_domain.label }}</label>
-											{{ form.segex_domain }}
-										</div>
-										<div class="form-group">
-											<label>{% trans "Entity" %} ({% trans "Municipality" %})</label>
-											<div class="row">
-												<div class="col-md-10">
-													<select id="segex_entity_select" class="form-control" style="width: 100%;">
-														{% if form.segex_entity.value %}
-														<option value="{{ form.segex_entity.value }}" selected>{{ form.segex_entity.value }} - {% trans "Loading..." %}</option>
-														{% else %}
-														<option value="">-- {% trans "Click Load to get entities" %} --</option>
-														{% endif %}
-													</select>
-												</div>
-												<div class="col-md-2">
-													<button type="button" id="btn_load_segex_entities" class="btn btn-default btn-block">
-														<i class="fa fa-download"></i> {% trans "Load" %}
-													</button>
-												</div>
-											</div>
-											<small class="text-muted">{% trans "You can type to search by code or name." %}</small>
-											<!-- Campo oculto para guardar el valor -->
-											<input type="hidden" id="id_segex_entity" name="segex_entity" value="{{ form.segex_entity.value }}">
-										</div>
-										<div class="form-group">
-											<label for="id_segex_user">{{ form.segex_user.label }}</label>
-											{{ form.segex_user }}
-										</div>
-										<div class="form-group">
-											<label for="id_segex_password">{{ form.segex_password.label }}</label>
-											{{ form.segex_password }}
-											<small class="text-muted">{% trans "Leave empty to keep current password" %}</small>
-										</div>
-									</div>
-									{% endif %}
-									
-									<!-- ==================== SHAREPOINT ==================== -->
-									{% if connection.type == 'sharepoint' %}
-									<div id="params-sharepoint">
-										<div class="form-group">
-											<label for="id_sharepoint_tenant_id">{{ form.sharepoint_tenant_id.label }}</label>
-											{{ form.sharepoint_tenant_id }}
-										</div>
-										<div class="form-group">
-											<label for="id_sharepoint_client_id">{{ form.sharepoint_client_id.label }}</label>
-											{{ form.sharepoint_client_id }}
-										</div>
-										<div class="form-group">
-											<label for="id_sharepoint_client_secret">{{ form.sharepoint_client_secret.label }}</label>
-											{{ form.sharepoint_client_secret }}
-											<small class="text-muted">{% trans "Leave empty to keep current secret" %}</small>
-										</div>
-										<div class="form-group">
-											<label for="id_sharepoint_host">{{ form.sharepoint_host.label }}</label>
-											{{ form.sharepoint_host }}
-										</div>
-										<div class="form-group">
-											<label for="id_sharepoint_site_path">{{ form.sharepoint_site_path.label }}</label>
-											{{ form.sharepoint_site_path }}
-										</div>
-									</div>
-									{% endif %}
-									
-									<!-- ==================== PADRÓN ATM ==================== -->
-									{% if connection.type == 'padron-atm' %}
-									<div id="params-padron-atm">
-										<div class="form-group">
-											<label for="id_padron_atm_email">{{ form.padron_atm_email.label }}</label>
-											{{ form.padron_atm_email }}
-										</div>
-										<div class="form-group">
-											<label for="id_padron_atm_password">{{ form.padron_atm_password.label }}</label>
-											{{ form.padron_atm_password }}
-											<small class="text-muted">{% trans "Leave empty to keep current password" %}</small>
-										</div>
-										<div class="form-group">
-											<label for="id_padron_atm_id_acceso">{{ form.padron_atm_id_acceso.label }}</label>
-											{{ form.padron_atm_id_acceso }}
-										</div>
-									</div>
-									{% endif %}
-									
-									<div id="connection-test-result" class="alert" style="display: none; margin-top: 15px;"></div>
+								</div>
+								<div class="form-group">
+									<label for="id_type">{{ form.type.label }}</label>
+									{{ form.type }}
+									<input type="hidden" name="type" value="{{ connection.type }}">
 								</div>
 							</div>
+							
+							<div class="col-md-6">
+								<h4>{% trans "Connection parameters" %}</h4>
+								
+								<!-- ==================== POSTGRESQL/POSTGIS ==================== -->
+								{% if connection.type == 'PostGIS' %}
+								<div id="params-postgis">
+									<div class="form-group">
+										<label for="id_host">{{ form.host.label }}</label>
+										{{ form.host }}
+									</div>
+									<div class="form-group">
+										<label for="id_port">{{ form.port.label }}</label>
+										{{ form.port }}
+									</div>
+									<div class="form-group">
+										<label for="id_database">{{ form.database.label }}</label>
+										{{ form.database }}
+									</div>
+									<div class="form-group">
+										<label for="id_user">{{ form.user.label }}</label>
+										{{ form.user }}
+									</div>
+									<div class="form-group">
+										<label for="id_password">{{ form.password.label }}</label>
+										{{ form.password }}
+										<small class="text-muted">{% trans "Leave empty to keep current password" %}</small>
+									</div>
+									<h5 class="margin-top-20">{% trans "Additional parameters" %}</h5>
+									<div class="form-group">
+										<label for="id_extra_params">{{ form.extra_params.label }}</label>
+										{{ form.extra_params }}
+										<small class="text-muted">{{ form.extra_params.help_text }}</small>
+									</div>
+								</div>
+								{% endif %}
+								
+								<!-- ==================== ORACLE ==================== -->
+								{% if connection.type == 'Oracle' %}
+								<div id="params-oracle">
+									<div class="form-group">
+										<label for="id_oracle_user">{{ form.oracle_user.label }}</label>
+										{{ form.oracle_user }}
+									</div>
+									<div class="form-group">
+										<label for="id_oracle_password">{{ form.oracle_password.label }}</label>
+										{{ form.oracle_password }}
+										<small class="text-muted">{% trans "Leave empty to keep current password" %}</small>
+									</div>
+									<div class="form-group">
+										<label for="id_oracle_host">{{ form.oracle_host.label }}</label>
+										{{ form.oracle_host }}
+									</div>
+									<div class="form-group">
+										<label for="id_oracle_port">{{ form.oracle_port.label }}</label>
+										{{ form.oracle_port }}
+									</div>
+									<div class="form-group">
+										<label for="id_oracle_service">{{ form.oracle_service.label }}</label>
+										{{ form.oracle_service }}
+									</div>
+								</div>
+								{% endif %}
+								
+								<!-- ==================== SQL SERVER ==================== -->
+								{% if connection.type == 'SQLServer' %}
+								<div id="params-sqlserver">
+									<div class="form-group">
+										<label for="id_sqlserver_server">{{ form.sqlserver_server.label }}</label>
+										{{ form.sqlserver_server }}
+									</div>
+									<div class="form-group">
+										<label for="id_sqlserver_user">{{ form.sqlserver_user.label }}</label>
+										{{ form.sqlserver_user }}
+									</div>
+									<div class="form-group">
+										<label for="id_sqlserver_password">{{ form.sqlserver_password.label }}</label>
+										{{ form.sqlserver_password }}
+										<small class="text-muted">{% trans "Leave empty to keep current password" %}</small>
+									</div>
+									<div class="form-group">
+										<label for="id_sqlserver_database">{{ form.sqlserver_database.label }}</label>
+										{{ form.sqlserver_database }}
+									</div>
+									<div class="form-group">
+										<label for="id_sqlserver_tds_version">{{ form.sqlserver_tds_version.label }}</label>
+										{{ form.sqlserver_tds_version }}
+									</div>
+								</div>
+								{% endif %}
+								
+								<!-- ==================== INDENOVA ==================== -->
+								{% if connection.type == 'indenova' %}
+								<div id="params-indenova">
+									<div class="form-group">
+										<label for="id_indenova_domain">{{ form.indenova_domain.label }}</label>
+										{{ form.indenova_domain }}
+									</div>
+									<div class="form-group">
+										<label for="id_indenova_api_key">{{ form.indenova_api_key.label }}</label>
+										{{ form.indenova_api_key }}
+									</div>
+									<div class="form-group">
+										<label for="id_indenova_client_id">{{ form.indenova_client_id.label }}</label>
+										{{ form.indenova_client_id }}
+									</div>
+									<div class="form-group">
+										<label for="id_indenova_secret">{{ form.indenova_secret.label }}</label>
+										{{ form.indenova_secret }}
+										<small class="text-muted">{% trans "Leave empty to keep current secret" %}</small>
+									</div>
+								</div>
+								{% endif %}
+								
+								<!-- ==================== SEGEX ==================== -->
+								{% if connection.type == 'segex' %}
+								<div id="params-segex">
+									<div class="form-group">
+										<label for="id_segex_domain">{{ form.segex_domain.label }}</label>
+										{{ form.segex_domain }}
+									</div>
+									<div class="form-group">
+										<label>{% trans "Entity" %} ({% trans "Municipality" %})</label>
+										<div class="row">
+											<div class="col-md-10">
+												<select id="segex_entity_select" class="form-control" style="width: 100%;">
+													{% if form.segex_entity.value %}
+													<option value="{{ form.segex_entity.value }}" selected>{{ form.segex_entity.value }} - {% trans "Loading..." %}</option>
+													{% else %}
+													<option value="">-- {% trans "Click Load to get entities" %} --</option>
+													{% endif %}
+												</select>
+											</div>
+											<div class="col-md-2">
+												<button type="button" id="btn_load_segex_entities" class="btn btn-default btn-block">
+													<i class="fa fa-download"></i> {% trans "Load" %}
+												</button>
+											</div>
+										</div>
+										<small class="text-muted">{% trans "You can type to search by code or name." %}</small>
+										<!-- Campo oculto para guardar el valor -->
+										<input type="hidden" id="id_segex_entity" name="segex_entity" value="{{ form.segex_entity.value }}">
+									</div>
+									<div class="form-group">
+										<label for="id_segex_user">{{ form.segex_user.label }}</label>
+										{{ form.segex_user }}
+									</div>
+									<div class="form-group">
+										<label for="id_segex_password">{{ form.segex_password.label }}</label>
+										{{ form.segex_password }}
+										<small class="text-muted">{% trans "Leave empty to keep current password" %}</small>
+									</div>
+								</div>
+								{% endif %}
+								
+								<!-- ==================== SHAREPOINT ==================== -->
+								{% if connection.type == 'sharepoint' %}
+								<div id="params-sharepoint">
+									<div class="form-group">
+										<label for="id_sharepoint_tenant_id">{{ form.sharepoint_tenant_id.label }}</label>
+										{{ form.sharepoint_tenant_id }}
+									</div>
+									<div class="form-group">
+										<label for="id_sharepoint_client_id">{{ form.sharepoint_client_id.label }}</label>
+										{{ form.sharepoint_client_id }}
+									</div>
+									<div class="form-group">
+										<label for="id_sharepoint_client_secret">{{ form.sharepoint_client_secret.label }}</label>
+										{{ form.sharepoint_client_secret }}
+										<small class="text-muted">{% trans "Leave empty to keep current secret" %}</small>
+									</div>
+									<div class="form-group">
+										<label for="id_sharepoint_host">{{ form.sharepoint_host.label }}</label>
+										{{ form.sharepoint_host }}
+									</div>
+									<div class="form-group">
+										<label for="id_sharepoint_site_path">{{ form.sharepoint_site_path.label }}</label>
+										{{ form.sharepoint_site_path }}
+									</div>
+								</div>
+								{% endif %}
+								
+								<!-- ==================== PADRÓN ATM ==================== -->
+								{% if connection.type == 'padron-atm' %}
+								<div id="params-padron-atm">
+									<div class="form-group">
+										<label for="id_padron_atm_email">{{ form.padron_atm_email.label }}</label>
+										{{ form.padron_atm_email }}
+									</div>
+									<div class="form-group">
+										<label for="id_padron_atm_password">{{ form.padron_atm_password.label }}</label>
+										{{ form.padron_atm_password }}
+										<small class="text-muted">{% trans "Leave empty to keep current password" %}</small>
+									</div>
+									<div class="form-group">
+										<label for="id_padron_atm_id_acceso">{{ form.padron_atm_id_acceso.label }}</label>
+										{{ form.padron_atm_id_acceso }}
+									</div>
+								</div>
+								{% endif %}
+								
+								<div id="connection-test-result" class="alert" style="display: none; margin-top: 15px;"></div>
+							</div>
 						</div>
-						
-						<!-- Pestaña de permisos -->
-						<div class="tab-pane" id="tab-permissions">
-							{% include "select_connection_permissions.html" %}
-						</div>
+					</div>
+					
+					<!-- Pestaña de permisos -->
+					<div class="tab-pane" id="tab-permissions">
+						{% include "select_connection_permissions.html" %}
 					</div>
 				</div>
 			</div>			

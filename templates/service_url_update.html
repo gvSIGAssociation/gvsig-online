@@ -2,21 +2,101 @@
 {% load staticfiles %}
 {% load i18n %}
 
+{% block header %}
+<style>
+:root {
+	--pf-accent:    #4a7fa5;
+	--pf-accent-dk: #2d5f80;
+	--pf-accent-lt: rgba(74,127,165,0.06);
+	--pf-text:      #2e3a45;
+	--pf-muted:     #7b8a96;
+	--pf-border:    #e8ecef;
+	--pf-bg:        #f4f6f8;
+	--pf-white:     #ffffff;
+	--pf-radius:    10px;
+	--pf-shadow:    0 2px 12px rgba(0,0,0,0.08);
+	--pf-transition: 0.2s ease;
+}
+.pf-topbar { display: flex; align-items: center; justify-content: flex-end; padding: 12px 0 16px; gap: 10px; flex-wrap: wrap; }
+.pf-topbar-left { flex: 1; display: flex; align-items: center; gap: 8px; }
+.btn-pf-save { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-accent); color: #fff !important; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 20px; cursor: pointer; transition: background var(--pf-transition); letter-spacing: 0.2px; }
+.btn-pf-save:hover { background: var(--pf-accent-dk); }
+.btn-pf-back { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-bg); color: var(--pf-muted) !important; border: 1px solid var(--pf-border); border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 16px; cursor: pointer; transition: background var(--pf-transition); text-decoration: none !important; }
+.btn-pf-back:hover { background: var(--pf-border); color: var(--pf-text) !important; }
+.pf-error-msg { display: none; background: #fff5f5; border-left: 4px solid #e74c3c; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #c0392b; }
+.pf-error-msg:has(li), .pf-error-msg:has(p:not(:empty)), .pf-error-msg:has(ul:not(:empty)) { display: block; }
+.pf-error-msg ul { margin: 0; padding-left: 18px; }
+.pf-error-msg p { margin: 0 0 4px; }
+/* ---- Tabs ---- */
+.nav-tabs {
+	border-bottom: 2px solid var(--pf-border);
+	margin-bottom: 0;
+	padding-left: 4px;
+}
+.nav-tabs > li > a {
+	color: var(--pf-muted);
+	font-size: 13px;
+	font-weight: 600;
+	border: none;
+	border-bottom: 2.5px solid transparent;
+	padding: 11px 20px;
+	margin-bottom: -2px;
+	border-radius: 6px 6px 0 0;
+	transition: color var(--pf-transition), border-color var(--pf-transition), background var(--pf-transition);
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+}
+.nav-tabs > li > a i.tab-icon {
+	font-size: 14px;
+	width: 16px;
+	text-align: center;
+	opacity: 0.7;
+	transition: opacity var(--pf-transition);
+}
+.nav-tabs > li > a:hover {
+	color: var(--pf-accent);
+	background: var(--pf-accent-lt);
+	border-color: transparent;
+}
+.nav-tabs > li > a:hover i.tab-icon { opacity: 1; }
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+	color: var(--pf-accent);
+	background: var(--pf-accent-lt);
+	border: none;
+	border-bottom: 2.5px solid var(--pf-accent);
+}
+.nav-tabs > li.active > a i.tab-icon { opacity: 1; color: var(--pf-accent); }
+.tab-content { background: var(--pf-white); border: 1px solid var(--pf-border); border-top: none; border-radius: 0 0 var(--pf-radius) var(--pf-radius); padding: 24px; box-shadow: var(--pf-shadow); }
+.tab-content label { font-size: 12px; font-weight: 700; color: var(--pf-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
+.tab-content .form-control { border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; transition: border-color var(--pf-transition), box-shadow var(--pf-transition); padding: 6px 12px; }
+.tab-content .form-control:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
+.tab-content .form-control[readonly] { background: #f0f3f5; color: var(--pf-muted); cursor: default; }
+.pf-card { background: var(--pf-white); border: 1px solid var(--pf-border); border-radius: var(--pf-radius); box-shadow: var(--pf-shadow); padding: 24px; }
+.pf-card label { font-size: 12px; font-weight: 700; color: var(--pf-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
+.pf-card .form-control { border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; transition: border-color var(--pf-transition), box-shadow var(--pf-transition); padding: 6px 12px; }
+.pf-card .form-control:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
+.pf-card .form-control[disabled] { background: #f0f3f5; color: var(--pf-muted); cursor: default; }
+</style>
+{% endblock %}
+
 {% block content %}	
 <form role="form" method="post" action="/gvsigonline/services/service_url_update/{{svid}}/">
 	<div class="row">
 		<div class="col-md-12">	
 			<div class="row">
 				<div class="col-md-12 form-group">
-					<div class="box-tools pull-right">
-						<button type="submit" class="btn btn-default btn-sm"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Update" %}</button>					
-					</div>
+					<div class="pf-topbar">
+					<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Update" %}</button>
+				</div>
 				</div>				
 			</div>
-			<div class="box padding-20">
+			<div class="pf-card">
 				{% csrf_token %}
 				{% if form.errors %}
-				<div id="form-error" style="color:#ff0000;">
+				<div class="pf-error-msg">
 					<ul>
 					{{ form.non_field_errors }}
 					{% for field in form %}

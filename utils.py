@@ -258,7 +258,7 @@ def get_write_restrictions(request_or_user, layer):
             "catalogMode" : "CHALLENGE"
         }
 
-def can_write_layer(request_or_user, layer):
+def can_write_layer(request_or_user, layer, user_profile=None):
     """
     Checks whether the user has permissions to write the provided layer.
 
@@ -271,7 +271,7 @@ def can_write_layer(request_or_user, layer):
     """
     try:
         authz_service = get_authz_server_for_layer(layer)
-        return authz_service.can_write_layer(request_or_user, layer)
+        return authz_service.can_write_layer(request_or_user, layer, user_profile=user_profile)
     except Exception as e:
         print(e)
     return False
@@ -1204,7 +1204,7 @@ def get_layerread_by_user_query(user_roles):
     return Q(layerreadrole__role__in=user_roles)
 
 
-def get_layerread_by_user(request):
+def get_layerread_by_user(request, user_profile=None):
     '''
     Obtiene las capas en las que el usuario tiene permiso de lectura.
     Estas son todas las públicas más todas las privadas sobre las que tiene permisos
@@ -1221,15 +1221,18 @@ def get_layerread_by_user(request):
     return Layer.objects.filter(get_layerread_by_user_query(roles) \
              | get_public_layers_query()).distinct()
 
+def get_layerread_by_role(role):
+    roles = [role]
+    return Layer.objects.filter(get_layerread_by_user_query(roles) \
+             | get_public_layers_query()).distinct()
+
 def set_default_permissions(file_path):
     """
-    Sets the default permissions to the provided file. We set 0o640
-    by default and substract the system umask to get the most
-    restrictive default.
+    Sets the default permissions to the provided file. We set 0o644
+    so that the web server (e.g. Apache running as www-data) can read
+    the files served as public media (thumbnails, etc.).
     """
-    umask = os.umask(0o666) # set a random mask to retrive the system mask
-    os.umask(umask) # restore system mask
-    os.chmod(file_path, 0o640 & ~umask)
+    os.chmod(file_path, 0o644)
 
 def get_datastore_name(username):
     """
@@ -1738,3 +1741,5 @@ class AuthPatch(Authentication):
     def __init__(self, *args, **kwargs):
         self._auth_delegate = kwargs.get('auth_delegate')
         super().__init__(*args, **kwargs)
+
+
