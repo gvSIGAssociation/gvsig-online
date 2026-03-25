@@ -24,7 +24,7 @@ from django.shortcuts import render, redirect, HttpResponse, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from gvsigol_auth.utils import superuser_required, staff_required

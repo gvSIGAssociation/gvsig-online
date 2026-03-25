@@ -30,7 +30,7 @@ from .models import Server, Layer, LayerGroup, Datastore, Workspace
 from gvsigol_symbology.models import Symbolizer, Style, Rule, StyleLayer
 from gvsigol_symbology.services import create_default_style, clone_style
 from gvsigol_symbology import services as symbology_services
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from .backend_postgis import Introspect
 import xml.etree.ElementTree as ET
 import geoserver.catalog as gscat

@@ -10,7 +10,7 @@ from gvsigol_services.forms_geoserver import PostgisLayerUploadForm
 from gvsigol_core import utils as core_utils
 from django.views.generic import TemplateView, FormView
 from django.shortcuts import HttpResponse, redirect
-from django.utils.translation import ugettext as _, ngettext
+from django.utils.translation import gettext as _, ngettext
 from gvsigol.settings import FILEMANAGER_DIRECTORY, INSTALLED_APPS
 from django.urls import reverse_lazy
 from django.http import HttpResponseBadRequest, HttpResponseForbidden

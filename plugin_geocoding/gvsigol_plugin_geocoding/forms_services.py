@@ -22,7 +22,7 @@
 '''
 from gvsigol_services.models import Workspace, Datastore
 from .models import Provider
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django import forms
 import json
 from . import settings

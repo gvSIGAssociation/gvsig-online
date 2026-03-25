@@ -3,7 +3,7 @@ from lxml import etree as ET
 from builtins import str as text
 from .registry import XmlStandardUpdater, BaseStandardManager, XmlStandardReader
 from datetime import datetime
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from gvsigol_plugin_catalog.xmlutils import getTextFromXMLNode, sanitizeXmlText, insertAfter, namespacedTag, setLocalisedCharacterString
 from gvsigol.settings import BASE_DIR
 from django.conf import settings

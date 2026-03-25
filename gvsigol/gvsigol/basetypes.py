@@ -20,7 +20,7 @@
     @author: Cesar Martinez <cmartinez@scolab.es>
 '''
 
-from django.utils.translation import ugettext_noop as _
+from django.utils.translation import gettext_noop as _
 
 class ServiceException(Exception):
     pass
@@ -33,7 +33,7 @@ class UserUpdateError(ServiceException):
     """Raised when user update fails (e.g. duplicate email in Keycloak)."""
     pass
 
-# ugettext_noop to keep all languages in .po regardless settings.py
+# gettext_noop to keep all languages in .po regardless settings.py
 lang_ca = _("Catalan")
 lang_de = _("German")
 lang_en = _("English")

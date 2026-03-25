@@ -21,6 +21,6 @@
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.contrib.auth.models import User
 from django import forms

@@ -1,6 +1,6 @@
 
-from django.utils.translation import ugettext_noop as _
-from django.utils.translation import ugettext
+from django.utils.translation import gettext_noop as _
+from django.utils.translation import gettext
 
 from django.db import models
 from django.utils import timezone
@@ -75,17 +75,17 @@ class DownloadRequest(models.Model):
     def status_desc(self):
         for (choice_code, choice_desc) in DownloadRequest.REQUEST_STATUS_CHOICES:
             if self.request_status == choice_code:
-                return ugettext(choice_desc)
+                return gettext(choice_desc)
     @property
     def status_active(self):
         if self.active:
-            return self.status_desc + ' - ' + ugettext('Active')
+            return self.status_desc + ' - ' + gettext('Active')
         else:
-            return self.status_desc + ' - ' +ugettext('Archived')
+            return self.status_desc + ' - ' +gettext('Archived')
     @property
     def status_authorization(self):
         if self.pending_authorization:
-            return self.status_desc + ' - ' + ugettext('Awaiting approval')
+            return self.status_desc + ' - ' + gettext('Awaiting approval')
         else:
             return self.status_desc
     
@@ -117,7 +117,7 @@ class DownloadRequest(models.Model):
         if len(locators)==1:
             return locators[0].fq_title_name
         else:
-            return ugettext('Multiresource package')
+            return gettext('Multiresource package')
 
     @property
     def contents_details(self):
@@ -128,7 +128,7 @@ class DownloadRequest(models.Model):
     def notification_status_desc(self):
         for (choice_code, choice_desc) in DownloadRequest.NOTIFICATION_STATUS_CHOICES:
             if self.notification_status == choice_code:
-                return ugettext(choice_desc)
+                return gettext(choice_desc)
             
 # class DownmanConfig(models.Model):
     # number of seconds the download link will be up since notified to the user
@@ -165,15 +165,15 @@ class DownloadLink(models.Model):
     def status_desc(self):
         for (choice_code, choice_desc) in DownloadLink.STATUS_CHOICES:
             if self.status == choice_code:
-                return ugettext(choice_desc)
+                return gettext(choice_desc)
     @property
     def status_active(self):
         if self.status == DownloadLink.PROCESSED_STATUS:
-            status_txt = ugettext('Processed')
+            status_txt = gettext('Processed')
         else:
-            status_txt = ugettext('Canceled')
+            status_txt = gettext('Canceled')
         if not self.is_valid:
-            return status_txt + " - " + ugettext('Expired')
+            return status_txt + " - " + gettext('Expired')
         return status_txt
     
     @property
@@ -255,21 +255,21 @@ class ResourceLocator(models.Model):
     def status_desc(self):
         for (choice_code, choice_desc) in ResourceLocator.REQUEST_STATUS_CHOICES:
             if self.status == choice_code:
-                return ugettext(choice_desc)
+                return gettext(choice_desc)
     @property
     def status_canceled(self):
         if self.canceled:
-            return self.status_desc + " + " + ugettext('Canceled')
+            return self.status_desc + " + " + gettext('Canceled')
         return self.status_desc
     @property
     def authorization_desc(self):
         for (choice_code, choice_desc) in ResourceLocator.AUTHORIZATION_CHOICES:
             if self.authorization == choice_code:
-                return ugettext(choice_desc)
+                return gettext(choice_desc)
     
     @property
     def status_detail(self):
-        return self.status_canceled + " - " + ugettext('Approval: ') + self.authorization_desc
+        return self.status_canceled + " - " + gettext('Approval: ') + self.authorization_desc
     
     # res_einternal_id = models.PositiveIntegerField()
     #ds_type = models.CharField(max_length=3, choices=RESOURCE_TYPES_CHOICES)

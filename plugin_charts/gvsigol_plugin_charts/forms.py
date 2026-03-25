@@ -22,7 +22,7 @@
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from gvsigol_services.models import Layer
 from .models import Chart
 from django import forms

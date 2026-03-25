@@ -19,7 +19,7 @@
 import os
 from . import settings
 
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from geopy.util import logger
 from gvsigol import settings as core_settings
 import urllib.request, urllib.error, urllib.parse

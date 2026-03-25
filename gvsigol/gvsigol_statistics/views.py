@@ -25,7 +25,7 @@ from gvsigol import settings
 from django.shortcuts import render, HttpResponse, redirect, render
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.contrib.auth.models import User
 from gvsigol_core.models import Project
 from gvsigol_auth import services as auth_services

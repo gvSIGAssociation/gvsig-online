@@ -23,7 +23,7 @@
 '''
 from django.db import models
 from gvsigol import settings
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 import json
 
 class GTFSProvider(models.Model):

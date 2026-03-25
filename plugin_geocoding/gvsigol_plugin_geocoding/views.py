@@ -28,7 +28,7 @@ from .geocoder import Geocoder
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_safe,require_POST, require_GET
 from gvsigol_plugin_geocoding.models import Provider
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from gvsigol_auth.utils import superuser_required, staff_required
 from .forms_services import ProviderForm, ProviderUpdateForm
 from gvsigol_plugin_geocoding.utils import *

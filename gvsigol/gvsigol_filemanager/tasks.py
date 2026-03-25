@@ -3,7 +3,7 @@ from celery.signals import after_task_publish
 from gvsigol_services.forms_geoserver import PostgisLayerUploadForm
 from gvsigol_services import geographic_servers
 from django.contrib import messages
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.shortcuts import HttpResponse, redirect
 from gvsigol_services import rest_geoserver
 

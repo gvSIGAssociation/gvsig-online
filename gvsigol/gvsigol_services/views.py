@@ -40,7 +40,7 @@ from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpRespon
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
-from django.utils.translation import ugettext as _, ugettext_lazy, ugettext
+from django.utils.translation import gettext as _, gettext_lazy, gettext
 
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_safe, require_POST, require_GET
@@ -3735,9 +3735,9 @@ def layer_cache_clear(request, layer_id):
             gs.reload_nodes()
             return HttpResponse('{"response": "ok"}', content_type='application/json')
     except Exception as e:
-        error_message = ugettext_lazy('Error clearing cache. Cause: {cause}.').format(cause=str(e))
+        error_message = gettext_lazy('Error clearing cache. Cause: {cause}.').format(cause=str(e))
     else:
-        error_message = ugettext_lazy('Not supported.')
+        error_message = gettext_lazy('Not supported.')
     return JsonResponse({"response": "error", "cause": error_message}, status=400)
 
 @login_required()
@@ -3751,7 +3751,7 @@ def layergroup_cache_clear(request, layergroup_id):
         layer_group_cache_clear(layergroup)
         return redirect('layergroup_list')
     except Exception as e:
-        error_message = ugettext_lazy('Error clearing cache. Cause: {cause}.').format(cause=str(e))
+        error_message = gettext_lazy('Error clearing cache. Cause: {cause}.').format(cause=str(e))
     return JsonResponse({"response": "error", "cause": error_message}, status=400)
 
 def layer_group_cache_clear(layergroup):
@@ -6731,7 +6731,7 @@ def layer_cache_config(request, layer_id):
             return render(request, 'cache_list.html', response)
 
         except Exception as e:
-            error_message = ugettext_lazy('Error configuring layer. Cause: {cause}.').format(cause=str(e))
+            error_message = gettext_lazy('Error configuring layer. Cause: {cause}.').format(cause=str(e))
             logger.exception(error_message)
             messages.error(request, error_message)
             response = HttpResponseRedirect(request.path)
@@ -6796,7 +6796,7 @@ def layer_cache_config(request, layer_id):
 
             return render(request, 'layer_cache_config.html', response)
         except Exception as e:
-            error_message = ugettext_lazy('Error accessing layer. Cause: {cause}.').format(cause=str(e))
+            error_message = gettext_lazy('Error accessing layer. Cause: {cause}.').format(cause=str(e))
             logger.exception(error_message)
             messages.error(request, error_message)
             return redirect('cache_list')
@@ -6892,7 +6892,7 @@ def group_cache_config(request, group_id):
 
             return render(request, 'group_cache_config.html', response)
         except Exception as e:
-            error_message = ugettext_lazy('Error accessing layer group. Cause: {cause}.').format(cause=str(e))
+            error_message = gettext_lazy('Error accessing layer group. Cause: {cause}.').format(cause=str(e))
             logger.exception(error_message)
             messages.error(request, error_message)
             return redirect('cache_list')
@@ -9475,7 +9475,7 @@ def _check_join_field_types(from_def):
                 if field.get('name') == join_field2.get('name'):
                     join_field2_type = field.get('type')
             if join_field1_type != join_field2_type:
-                return ugettext("Join fields must have the same type: {field1}({type1}) - {field2}({type2})".format(field1=join_field1.get('name'), type1=join_field1_type, field2=join_field2.get('name'), type2=join_field2_type))
+                return gettext("Join fields must have the same type: {field1}({type1}) - {field2}({type2})".format(field1=join_field1.get('name'), type1=join_field1_type, field2=join_field2.get('name'), type2=join_field2_type))
     return ""
 
 
@@ -9489,7 +9489,7 @@ def _sqlview_update(request, is_update, sql_view=None):
         else:
             form = SqlViewForm(request.user, request.POST, instance=sql_view)
             if not request.user.is_superuser and sql_view.created_by != request.user.username:
-                form.add_error(None, ugettext_lazy("The user can't manage this SQL view"))
+                form.add_error(None, gettext_lazy("The user can't manage this SQL view"))
                 raise Exception
             view_id = sql_view.id
         if form.is_valid():
@@ -9517,7 +9517,7 @@ def _sqlview_update(request, is_update, sql_view=None):
                         if idx == 0:
                             pks = c.get_pk_columns(table_name, schema=schema)
                             if len(pks) == 0:
-                                form.add_error(None, ugettext_lazy('The main table must have a primary key'))
+                                form.add_error(None, gettext_lazy('The main table must have a primary key'))
                                 raise Exception
                             main_table = table_alias
                         table_fields[table_alias] = c.get_fields(table_name, schema=schema)
@@ -9547,7 +9547,7 @@ def _sqlview_update(request, is_update, sql_view=None):
                     field_name = field.get('name')
                     field_alias = field.get('alias')
                     if not field_name in table_fields[table_alias]:
-                        form.add_error(None, ugettext_lazy('Field does not exist: {field}').format(field_name))
+                        form.add_error(None, gettext_lazy('Field does not exist: {field}').format(field_name))
                         raise Exception
 
                     field_obj = SqlField(table_alias, field_name, field_alias)
@@ -9557,7 +9557,7 @@ def _sqlview_update(request, is_update, sql_view=None):
                 try:
                     pk_aliases = [ field_aliases[main_table][p] for p in pks]
                 except:
-                    form.add_error(None, ugettext_lazy('The field {field} is the primary key of main table and must be included').format(field=", ".join(pks)))
+                    form.add_error(None, gettext_lazy('The field {field} is the primary key of main table and must be included').format(field=", ".join(pks)))
                     raise Exception
                 field_defs = [ f.to_json() for f in field_objs]
                 sql_view.json_def = {
@@ -9577,19 +9577,19 @@ def _sqlview_update(request, is_update, sql_view=None):
                             if is_update:
                                 c.delete_view(target_schema, sql_view.name)
                             else:
-                                form.add_error(None, ugettext_lazy('An object already exists with name: {}').format(sql_view.name))
+                                form.add_error(None, gettext_lazy('An object already exists with name: {}').format(sql_view.name))
                                 raise Exception
                         if not c.create_view(target_schema, sql_view.name, from_objs, field_objs):
                             msg = _check_join_field_types(from_def)
                             if msg:
                                 form.add_error(None, msg)
                             else:
-                                form.add_error(None, ugettext_lazy('The view could not be created'))
+                                form.add_error(None, gettext_lazy('The view could not be created'))
                             raise Exception
                         if is_update: # delete and insert again in case the pk field has a new alias
                             c.delete_geoserver_view_pk_columns(target_schema, sql_view.name)
                         if not c.insert_geoserver_view_pk_columns(target_schema, sql_view.name, pk_aliases):
-                            form.add_error(None, ugettext_lazy('Pk columns could not be inserted'))
+                            form.add_error(None, gettext_lazy('Pk columns could not be inserted'))
                             raise Exception
                         # TODO: we should add indexes to the join fields to ensure optimal performance
                         # TODO: maybe we should warn the user if a view name is changed and some layer relies in the old name

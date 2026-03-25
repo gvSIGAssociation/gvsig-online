@@ -47,7 +47,7 @@ from django.utils import timezone
 from gvsigol import settings as core_settings
 import re
 from numpy import genfromtxt
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.utils.crypto import get_random_string
 
 from gvsigol_plugin_downloadman.utils import getLayer

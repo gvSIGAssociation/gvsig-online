@@ -1,5 +1,5 @@
 from django import forms
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from gvsigol_core.models import Project
 from gvsigol_services.models import Datastore
 from .models import Survey, SurveySection

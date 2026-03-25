@@ -32,7 +32,7 @@ from django.shortcuts import render, redirect
 from gvsigol.settings import FILEMANAGER_DIRECTORY
 from django.http import  HttpResponse
 import json
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.db import IntegrityError
 
 

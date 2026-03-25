@@ -20,7 +20,7 @@ from builtins import RuntimeError
 '''
 @author: Jose Badia <jbadia@scolab.es>
 '''
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from geopy.geocoders import Nominatim as Nominatim_geocoder
 import json
 from urllib.parse import urlparse

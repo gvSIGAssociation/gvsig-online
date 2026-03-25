@@ -27,7 +27,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.urls import reverse
 from django import apps
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.core.signing import TimestampSigner, BadSignature, SignatureExpired
 import base64
 import os

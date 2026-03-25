@@ -6,7 +6,7 @@ import logging
 import json
 from django.http import JsonResponse
 from django.core.serializers.json import DjangoJSONEncoder
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.utils.translation import get_language
 from gvsigol_plugin_downloadman.tasks import processDownloadRequest, resolveFileUrl, notifyReceivedRequest, packageRequest, getDownloadResourceUrl, isRestricted
 from gvsigol_plugin_downloadman import models as downman_models

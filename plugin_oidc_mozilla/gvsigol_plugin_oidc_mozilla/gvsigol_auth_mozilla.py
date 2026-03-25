@@ -379,7 +379,7 @@ class KeycloakAdminSession(OIDCSession):
                     error_message = response.text.strip()
                 msg_lower = (error_message or '').lower()
                 if 'email' in msg_lower or 'duplicate' in msg_lower or 'exists' in msg_lower or 'already' in msg_lower:
-                    from django.utils.translation import ugettext as _
+                    from django.utils.translation import gettext as _
                     raise UserUpdateError(_("A user with this email address already exists."))
                 raise UserUpdateError(error_message or "User creation failed (HTTP %s)" % response.status_code)
             else:
@@ -472,7 +472,7 @@ class KeycloakAdminSession(OIDCSession):
                 if response.status_code in (400, 409):
                     msg_lower = (error_message or '').lower()
                     if 'email' in msg_lower or 'duplicate' in msg_lower or 'exists' in msg_lower or 'already' in msg_lower:
-                        from django.utils.translation import ugettext as _
+                        from django.utils.translation import gettext as _
                         raise UserUpdateError(_("A user with this email address already exists."))
                 raise UserUpdateError(error_message or "User update failed (HTTP %s)" % response.status_code)
         except (ConnectionError, Timeout, TooManyRedirects) as e:

@@ -35,7 +35,7 @@ from gvsigol_auth import auth_backend
 from gvsigol_auth.django_auth import get_user_details
 #from gvsigol_auth.auth_backend import get_roles, get_user_details
 from django.core import serializers
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
 from django.db import transaction
 

@@ -37,7 +37,7 @@ from gvsigol_auth.utils import staff_required
 from django.http import JsonResponse
 import logging
 from gvsigol_plugin_catalog import settings as catalog_settings
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from gvsigol_core import utils as core_utils
 import os
 from builtins import str as text

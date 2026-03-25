@@ -24,7 +24,7 @@
 
 from .models import Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, RasterSymbolizer, ColorMap
 from django.db.models import Max
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from gvsigol_core import geom
 from gvsigol_services.models import Layer
 from . import utils, sld_builder

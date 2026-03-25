@@ -25,7 +25,7 @@ from django.db import models
 from gvsigol import settings
 from gvsigol_plugin_geocoding import settings as geocoding_setting
 from gvsigol_services.models import Datastore
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 import json
 from gvsigol_core.models import Project
 

@@ -36,7 +36,7 @@ from django.http import HttpResponseForbidden
 from .models import Project, ProjectLayerGroup, ProjectRole, Application, ApplicationRole, UserHomeOrder
 from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup, ServiceUrl, LayerReadRole, LayerGroupRole
 from django.contrib.auth.decorators import login_required
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.contrib.auth.models import User, AnonymousUser
 from django.urls import reverse
 from gvsigol_auth.utils import superuser_required, is_superuser, staff_required, get_primary_user_role_details
