@@ -185,53 +185,55 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label form="db" class="col-form-label">'+gettext('API Connection:')+'</label>'+
                                 '<select id="api-'+ID+'" class="form-control"></select>'+
                             '</div>'+
-                            '<div class="column33">'+
-                                '<label class="col-form-label" >'+gettext('List urban procedures:')+'</label><br>'+
-                                '<a href="#" id="get-proced-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-download margin-r-5"></i>'+gettext('Get procedures')+'</a>'+
-                            '</div>'+
-                            '<div class="box-tools column66">'+
-                                '<select id="proced-list-'+ID+'" name="proced-list" multiple style="width: 100%; height:200px">'+
-                                    '<option value="all">'+gettext('ALL')+'</option>'+
-                                '</select>'+
-                            '</div><br>'+
-                            '<div class="column40">'+
-                                '<label class="col-form-label" >'+gettext('idTram:')+'</label>'+
-                                '<input type="text" id="idtram-'+ID+'"  class="form-control"></input>'+
-                            '</div>'+
-                            '<div class="column40">'+
-                                '<label class="col-form-label" >'+gettext('Description:')+'</label>'+
-                                '<input type="text" id="description-'+ID+'"  class="form-control"></input>'+
-                            '</div>'+
-                            '<div class="column20">'+
-                                '<label class="col-form-label" >'+gettext('Add Procedure:')+'</label>'+
-                                '<button type="button"  class="btn btn-default btn-sm" id="add-proced-'+ID+'"><i class="fa fa-plus" aria-hidden="true"></i></button>'+
-                            '</div><br>'+
-
-                            '<div class="column33">'+
-                                '<div class="form-check">'+
-                                    '<input type="radio" name="date-indenova-'+ID+'" class="form-check-input" id="check-init-date-'+ID+'" value="check-init-date">'+	
-                                    '<label for="init-date">'+gettext('From an initial date')+'</label>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('List urban procedures:')+'</label><br>'+
+                                    '<a href="#" id="get-proced-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-download margin-r-5"></i>'+gettext('Get procedures')+'</a>'+
                                 '</div>'+
-                                '<div class="form-check">'+
-                                    '<input type="radio" name="date-indenova-'+ID+'" class="form-check-input" id="check-init-end-date-'+ID+'" value="check-init-end-date">'+	
-                                    '<label for="init-end-date">'+gettext('Between dates')+'</label>'+
+                                '<div class="col-md-8 box-tools">'+
+                                    '<label class="col-form-label">&nbsp;</label>'+
+                                    '<select id="proced-list-'+ID+'" name="proced-list" multiple style="width: 100%; height:200px">'+
+                                        '<option value="all">'+gettext('ALL')+'</option>'+
+                                    '</select>'+
                                 '</div>'+
                             '</div>'+
-                            '<div class="column33">'+
-                                '<div class="input-group date">'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-5">'+
+                                    '<label class="col-form-label">'+gettext('idTram:')+'</label>'+
+                                    '<input type="text" id="idtram-'+ID+'" class="form-control">'+
+                                '</div>'+
+                                '<div class="col-md-5">'+
+                                    '<label class="col-form-label">'+gettext('Description:')+'</label>'+
+                                    '<input type="text" id="description-'+ID+'" class="form-control">'+
+                                '</div>'+
+                                '<div class="col-md-2">'+
+                                    '<label class="col-form-label">'+gettext('Add Procedure:')+'</label>'+
+                                    '<button type="button" class="btn btn-default btn-sm" id="add-proced-'+ID+'"><i class="fa fa-plus" aria-hidden="true"></i></button>'+
+                                '</div>'+
+                            '</div>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-4">'+
+                                    '<div class="form-check">'+
+                                        '<input type="radio" name="date-indenova-'+ID+'" class="form-check-input" id="check-init-date-'+ID+'" value="check-init-date">'+
+                                        '<label for="init-date">'+gettext('From an initial date')+'</label>'+
+                                    '</div>'+
+                                    '<div class="form-check">'+
+                                        '<input type="radio" name="date-indenova-'+ID+'" class="form-check-input" id="check-init-end-date-'+ID+'" value="check-init-end-date">'+
+                                        '<label for="init-end-date">'+gettext('Between dates')+'</label>'+
+                                    '</div>'+
+                                '</div>'+
+                                '<div class="col-md-4">'+
                                     '<input type="date" class="form-control" id="init-date-'+ID+'" name="init-date" placeHolder="dd/mm/yyyy"/>'+
                                     '<input type="date" class="form-control" id="end-date-'+ID+'" name="end-date" placeHolder="dd/mm/yyyy"/>'+
                                 '</div>'+
+                                '<div class="col-md-4">'+
+                                    '<input type="checkbox" name="checkbox-init-indenova" id="checkbox-init-'+ID+'" value=""/>'+
+                                    '<label for="checkbox">'+gettext('Current date for initial')+'</label>'+
+                                    '<br>'+
+                                    '<input type="checkbox" name="checkbox-end-indenova" id="checkbox-end-'+ID+'" value=""/>'+
+                                    '<label for="checkbox">'+gettext('Current date for end')+'</label>'+
+                                '</div>'+
                             '</div>'+
-                            '<div class="column33">'+
-                                
-                                '<input type="checkbox" name="checkbox-init-indenova" id="checkbox-init-'+ID+'" value=""/>'+
-                                '<label for="checkbox">'+gettext('Current date for initial')+'</label>'+
-                                '<br><br>'+
-                                '<input type="checkbox" name="checkbox-end-indenova" id="checkbox-end-'+ID+'" value=""/>'+
-                                '<label for="checkbox">'+gettext('Current date for end')+'</label>'+
-                            '</div>'+
-                            '<br><br><br><br><br><br><br><br><br><br><br><br><br><br>'+ 
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -654,13 +656,13 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
                                     '</div>'+
                             '</div>'+
                             
-                            '<div class="input-group date">'+
-                                '<div class="column50">'+
-                                    '<label>'+gettext('Init date')+'</label>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Init date')+'</label>'+
                                     '<input type="datetime-local" class="form-control" id="init-date-'+ID+'" name="init-date"/>'+
                                 '</div>'+
-                                '<div class="column50">'+
-                                    '<label>'+gettext('End date')+'</label>'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('End date')+'</label>'+
                                     '<input type="datetime-local" class="form-control" id="end-date-'+ID+'" name="end-date"/>'+
                                 '</div>'+
                             '</div>'+
@@ -1117,65 +1119,71 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column20">'+
-                                '<label class="col-form-label" >'+gettext('Choose csv/txt file:')+'</label><br>'+
-                                '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select file')+'</a>'+
-                            '</div>'+ 
-                            '<div class="column60">'+
-                                '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
-                                '<input type="text" id="csv-file-'+ID+'" name="file" class="form-control"></input>'+
-                            '</div>'+ 
-                            '<div class="column20">'+
-                                '<label class="col-form-label">'+gettext('Separator:')+'</label>'+
-                                '<select class="form-control" id="separator-'+ID+'">'+
-                                    '<option value=";"> ; </option>'+
-                                    '<option value=","> , </option>'+
-                                '</select>'+
-                            '</div>'+ 
-                            '<div class="column40">'+
-                                '<label form="header" class="col-form-label">'+gettext('Skip header:')+'</label>'+
-                                '<input type="number" id="header-'+ID+'" value=0 min="0" class="form-control" pattern="^[0-9]+">'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-3">'+
+                                    '<label class="col-form-label">'+gettext('Choose csv/txt file:')+'</label><br>'+
+                                    '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select file')+'</a>'+
+                                '</div>'+
+                                '<div class="col-md-7">'+
+                                    '<label class="col-form-label">'+gettext('Path:')+'</label>'+
+                                    '<input type="text" id="csv-file-'+ID+'" name="file" class="form-control">'+
+                                '</div>'+
+                                '<div class="col-md-2">'+
+                                    '<label class="col-form-label">'+gettext('Separator:')+'</label>'+
+                                    '<select class="form-control" id="separator-'+ID+'">'+
+                                        '<option value=";"> ; </option>'+
+                                        '<option value=","> , </option>'+
+                                    '</select>'+
+                                '</div>'+
                             '</div>'+
-                                                        '<div class="column40">'+
-                                '<label class="col-form-label">'+gettext('Schema options:')+'</label>'+
-                                '<div class="form-check">'+
-                                    '<input type="radio" id="has-schema-'+ID+'" name="schema-option-'+ID+'" class="form-check-input" value="has-schema" checked="checked">'+
-                                    '<label for="has-schema" class="form-check-label">'+gettext('File has schema')+'</label>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Skip header:')+'</label>'+
+                                    '<input type="number" id="header-'+ID+'" value=0 min="0" class="form-control">'+
                                 '</div>'+
-                                '<div class="form-check">'+
-                                    '<input type="radio" id="no-schema-'+ID+'" name="schema-option-'+ID+'" class="form-check-input" value="no-schema">'+
-                                    '<label for="no-schema" class="form-check-label">'+gettext('File has not schema')+'</label>'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Schema options:')+'</label>'+
+                                    '<div class="form-check">'+
+                                        '<input type="radio" id="has-schema-'+ID+'" name="schema-option-'+ID+'" class="form-check-input" value="has-schema" checked="checked">'+
+                                        '<label for="has-schema" class="form-check-label">'+gettext('File has schema')+'</label>'+
+                                    '</div>'+
+                                    '<div class="form-check">'+
+                                        '<input type="radio" id="no-schema-'+ID+'" name="schema-option-'+ID+'" class="form-check-input" value="no-schema">'+
+                                        '<label for="no-schema" class="form-check-label">'+gettext('File has not schema')+'</label>'+
+                                    '</div>'+
                                 '</div>'+
-                            '</div>'+ 
-                            '<br><br><br>'+ 
-                            '<div>'+
-                                '<label class="col-form-label" id ="advanced-param-'+ID+'">'+gettext('Advanced Parameters')+'</label>'+
+                            '</div>'+
+                            '<div style="margin-top:10px;margin-bottom:6px">'+
+                                '<label class="col-form-label" id ="advanced-param-'+ID+'" style="cursor:pointer">'+gettext('Advanced Parameters')+'</label>'+
                             '</div>'+
                             '<div id ="more-options-'+ID+'">'+
-                                '<div class="column30">'+
-                                    '<label class="col-form-label">'+gettext('Reading options:')+'</label>'+
-                                    '<div class="form-check">'+
-                                        '<input type="radio" id="single-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="single" checked="checked">'+
-                                        '<label for="single" class="form-check-label">'+gettext('Single csv/txt file')+'</label>'+
+                                '<div class="row" style="margin-top:8px">'+
+                                    '<div class="col-md-4">'+
+                                        '<label class="col-form-label">'+gettext('Reading options:')+'</label>'+
+                                        '<div class="form-check">'+
+                                            '<input type="radio" id="single-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="single" checked="checked">'+
+                                            '<label for="single" class="form-check-label">'+gettext('Single csv/txt file')+'</label>'+
+                                        '</div>'+
+                                        '<div class="form-check">'+
+                                            '<input type="radio" id="multiple-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="multiple">'+
+                                            '<label for="multiple" class="form-check-label">'+gettext('All files in a folder')+'</label>'+
+                                        '</div>'+
                                     '</div>'+
-                                    '<div class="form-check">'+
-                                        '<input type="radio" id="multiple-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="multiple">'+
-                                        '<label for="multiple" class="form-check-label">'+gettext('All files in a folder')+'</label>'+
+                                    '<div class="col-md-8" style="padding-top:20px">'+
+                                        '<input type="checkbox" name="checkbox-csv" id="move-'+ID+'"/>'+
+                                        '<label for="move-'+ID+'">'+gettext('Do you want to (re)-move the files after the process is over?')+'</label>'+
                                     '</div>'+
                                 '</div>'+
-                                '<div class="column70">'+
-                                    '<input type="checkbox" name="checkbox-csv" id="move-'+ID+'"/>'+
-                                    '<label for="checkbox">'+gettext('Do you want to (re)-move the files after the process is over?')+'</label>'+											
+                                '<div class="row" style="margin-top:8px">'+
+                                    '<div class="col-md-3">'+
+                                        '<label class="col-form-label">'+gettext('Choose path:')+'</label><br>'+
+                                        '<a href="#" id="select-folder-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select folder')+'</a>'+
+                                    '</div>'+
+                                    '<div class="col-md-9">'+
+                                        '<label class="col-form-label">'+gettext('Path:')+'</label>'+
+                                        '<input type="text" id="folder-'+ID+'" name="folder" class="form-control" placeholder="'+gettext('For removing files leave this input empty')+'">'+
+                                    '</div>'+
                                 '</div>'+
-                                '<div class="column20">'+
-                                    '<label for ="folder" class="col-form-label">'+gettext('Choose path:')+'</label><br>'+
-                                    '<a href="#" id="select-folder-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select folder')+'</a><br>'+
-                                '</div>'+
-                                '<div class="column50">'+
-                                    '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
-                                    '<input type="text" id="folder-'+ID+'" name="folder" class="form-control" placeholder="'+gettext('For removing files leave this input empty')+'"></input>'+
-                                '</div>'+
-                                '<br><br><br>'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -1460,13 +1468,15 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column20">'+
-                                '<label class="col-form-label" >'+gettext('Choose JSON file')+': </label><br>'+
-                                '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select file')+'</a>'+
-                            '</div>'+ 
-                            '<div class="column80">'+
-                                '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
-                                '<input type="text" id="json-file-'+ID+'" name="file" class="form-control"></input>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-3">'+
+                                    '<label class="col-form-label">'+gettext('Choose JSON file')+': </label><br>'+
+                                    '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select file')+'</a>'+
+                                '</div>'+
+                                '<div class="col-md-9">'+
+                                    '<label class="col-form-label">'+gettext('Path:')+'</label>'+
+                                    '<input type="text" id="json-file-'+ID+'" name="file" class="form-control">'+
+                                '</div>'+
                             '</div>'+
                             '<div>'+
                                 '<input type="checkbox" name="checkbox-json" id="api-rest-'+ID+'"/>'+
@@ -2166,59 +2176,67 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column20">'+
-                                '<label for ="excel-file" class="col-form-label">'+gettext('Choose path:')+'</label><br>'+
-                                '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select path')+'</a><br>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-3">'+
+                                    '<label class="col-form-label">'+gettext('Choose path:')+'</label><br>'+
+                                    '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select path')+'</a>'+
+                                '</div>'+
+                                '<div class="col-md-9">'+
+                                    '<label class="col-form-label">'+gettext('Path:')+'</label>'+
+                                    '<input type="text" id="excel-file-'+ID+'" name="file" class="form-control">'+
+                                '</div>'+
                             '</div>'+
-                            '<div class="column80">'+
-                                '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
-                                '<input type="text" id="excel-file-'+ID+'" name="file" class="form-control"></input>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-3">'+
+                                    '<label class="col-form-label">'+gettext('Load sheets')+':</label><br>'+
+                                    '<a href="#" id="get-sheets-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-file-excel-o margin-r-5"></i>'+gettext('Load sheets')+'</a>'+
+                                '</div>'+
+                                '<div class="col-md-9">'+
+                                    '<label class="col-form-label">'+gettext('Sheet:')+'</label>'+
+                                    '<select class="form-control" id="sheet-name-'+ID+'"> </select>'+
+                                '</div>'+
                             '</div>'+
-                            '<div class="column20">'+
-                                '<label for ="excel-file" class="col-form-label">'+gettext('Load sheets')+':</label><br>'+
-                                '<a href="#" id="get-sheets-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-file-excel-o margin-r-5"></i>'+gettext('Load sheets')+'</a><br>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Attribute columns:')+'</label>'+
+                                    '<input id="usecols-'+ID+'" type="text" class="form-control" placeholder="A:H">'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Skip header:')+'</label>'+
+                                    '<input type="number" id="header-'+ID+'" value=0 min="0" class="form-control">'+
+                                '</div>'+
                             '</div>'+
-                            '<div class="column80">'+
-                                '<label form="sheet-name" class="col-form-label">'+gettext('Sheet:')+'</label>'+
-                                '<select class="form-control" id="sheet-name-'+ID+'"> </select>'+
-                            '</div>'+
-                            '<div class="column50">'+
-                                '<label form="usecols" class="col-form-label">'+gettext('Attribute columns:')+'</label>'+
-                                '<input id="usecols-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}" placeholder="A:H">'+
-                            '</div>'+
-                            '<div class="column50">'+
-                                '<label form="header" class="col-form-label">'+gettext('Skip header:')+'</label>'+
-                                '<input type="number" id="header-'+ID+'" value=0 min="0" class="form-control" pattern="^[0-9]+">'+
-                            '</div>'+
-                            '<br><br><br>'+
-                            '<div>'+
-                                '<label class="col-form-label" id ="advanced-param-'+ID+'">'+gettext('Advanced Parameters')+'</label>'+
+                            '<div style="margin-top:10px;margin-bottom:6px">'+
+                                '<label class="col-form-label" id ="advanced-param-'+ID+'" style="cursor:pointer">'+gettext('Advanced Parameters')+'</label>'+
                             '</div>'+
                             '<div id ="more-options-'+ID+'">'+
-                                '<div class="column30">'+
-                                    '<label class="col-form-label">'+gettext('Reading options:')+'</label>'+
-                                    '<div class="form-check">'+
-                                        '<input type="radio" id="single-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="single" checked="checked">'+
-                                        '<label for="single" class="form-check-label">'+gettext('Single excel file')+'</label>'+
+                                '<div class="row" style="margin-top:8px">'+
+                                    '<div class="col-md-4">'+
+                                        '<label class="col-form-label">'+gettext('Reading options:')+'</label>'+
+                                        '<div class="form-check">'+
+                                            '<input type="radio" id="single-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="single" checked="checked">'+
+                                            '<label for="single" class="form-check-label">'+gettext('Single excel file')+'</label>'+
+                                        '</div>'+
+                                        '<div class="form-check">'+
+                                            '<input type="radio" id="multiple-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="multiple">'+
+                                            '<label for="multiple" class="form-check-label">'+gettext('All files in a folder')+'</label>'+
+                                        '</div>'+
                                     '</div>'+
-                                    '<div class="form-check">'+
-                                        '<input type="radio" id="multiple-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="multiple">'+
-                                        '<label for="multiple" class="form-check-label">'+gettext('All files in a folder')+'</label>'+
+                                    '<div class="col-md-8" style="padding-top:20px">'+
+                                        '<input type="checkbox" name="checkbox-excel" id="move-'+ID+'"/>'+
+                                        '<label for="move-'+ID+'">'+gettext('Do you want to (re)-move the files after the process is over?')+'</label>'+
                                     '</div>'+
                                 '</div>'+
-                                '<div class="column70">'+
-                                    '<input type="checkbox" name="checkbox-excel" id="move-'+ID+'"/>'+
-                                    '<label for="checkbox">'+gettext('Do you want to (re)-move the files after the process is over?')+'</label>'+											
+                                '<div class="row" style="margin-top:8px">'+
+                                    '<div class="col-md-3">'+
+                                        '<label class="col-form-label">'+gettext('Choose path:')+'</label><br>'+
+                                        '<a href="#" id="select-folder-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select folder')+'</a>'+
+                                    '</div>'+
+                                    '<div class="col-md-9">'+
+                                        '<label class="col-form-label">'+gettext('Path:')+'</label>'+
+                                        '<input type="text" id="folder-'+ID+'" name="folder" class="form-control" placeholder="'+gettext('For removing files leave this input empty')+'">'+
+                                    '</div>'+
                                 '</div>'+
-                                '<div class="column20">'+
-                                    '<label for ="folder" class="col-form-label">'+gettext('Choose path:')+'</label><br>'+
-                                    '<a href="#" id="select-folder-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select folder')+'</a><br>'+
-                                '</div>'+
-                                '<div class="column50">'+
-                                    '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
-                                    '<input type="text" id="folder-'+ID+'" name="folder" class="form-control" placeholder="'+gettext('For removing files leave this input empty')+'"></input>'+
-                                '</div>'+
-                                '<br><br><br>'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -3082,21 +3100,25 @@ input_Xml = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column20">'+
-                                '<label for ="xml-file" class="col-form-label">'+gettext('Choose path:')+'</label><br>'+
-                                '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select path')+'</a><br>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-3">'+
+                                    '<label class="col-form-label">'+gettext('Choose path:')+'</label><br>'+
+                                    '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select path')+'</a>'+
+                                '</div>'+
+                                '<div class="col-md-9">'+
+                                    '<label class="col-form-label">'+gettext('Path:')+'</label>'+
+                                    '<input type="text" id="xml-file-'+ID+'" name="file" class="form-control">'+
+                                '</div>'+
                             '</div>'+
-                            '<div class="column80">'+
-                                '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
-                                '<input type="text" id="xml-file-'+ID+'" name="file" class="form-control"></input>'+
-                            '</div>'+
-                            '<div class="column20">'+
-                                '<label for ="xml-file" class="col-form-label">'+gettext('Get tags')+':</label><br>'+
-                                '<a href="#" id="get-tags-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get tags')+'</a><br>'+
-                            '</div>'+
-                            '<div class="column80">'+
-                                '<select id="tag-list-'+ID+'" multiple style="width: 100%; height:200px">'+
-                                '</select>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-3">'+
+                                    '<label class="col-form-label">'+gettext('Get tags')+':</label><br>'+
+                                    '<a href="#" id="get-tags-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get tags')+'</a>'+
+                                '</div>'+
+                                '<div class="col-md-9">'+
+                                    '<select id="tag-list-'+ID+'" multiple style="width:100%;height:200px">'+
+                                    '</select>'+
+                                '</div>'+
                             '</div>'+
                             '<div>'+
                                 '<button type="button" style="float: right;" class="btn btn-default btn-sm" id="quit-'+ID+'"><i class="fa fa-minus" aria-hidden="true"></i></button>'+
@@ -3117,30 +3139,33 @@ input_Xml = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label class="col-form-label" id ="advanced-param-'+ID+'">'+gettext('Advanced Parameters')+'</label>'+
                             '</div>'+
                             '<div id ="more-options-'+ID+'">'+
-                                '<div class="column30">'+
-                                    '<label class="col-form-label">'+gettext('Reading options:')+'</label>'+
-                                    '<div class="form-check">'+
-                                        '<input type="radio" id="single-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="single" checked="checked">'+
-                                        '<label for="single" class="form-check-label">'+gettext('Single XML file')+'</label>'+
+                                '<div class="row" style="margin-top:8px">'+
+                                    '<div class="col-md-4">'+
+                                        '<label class="col-form-label">'+gettext('Reading options:')+'</label>'+
+                                        '<div class="form-check">'+
+                                            '<input type="radio" id="single-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="single" checked="checked">'+
+                                            '<label for="single" class="form-check-label">'+gettext('Single XML file')+'</label>'+
+                                        '</div>'+
+                                        '<div class="form-check">'+
+                                            '<input type="radio" id="multiple-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="multiple">'+
+                                            '<label for="multiple" class="form-check-label">'+gettext('All files in a folder')+'</label>'+
+                                        '</div>'+
                                     '</div>'+
-                                    '<div class="form-check">'+
-                                        '<input type="radio" id="multiple-'+ID+'" name="reading-'+ID+'" class="form-check-input" value="multiple">'+
-                                        '<label for="multiple" class="form-check-label">'+gettext('All files in a folder')+'</label>'+
+                                    '<div class="col-md-8" style="padding-top:20px">'+
+                                        '<input type="checkbox" name="checkbox-xml" id="move-'+ID+'"/>'+
+                                        '<label for="move-'+ID+'">'+gettext('Do you want to (re)-move the files after the process is over?')+'</label>'+
                                     '</div>'+
                                 '</div>'+
-                                '<div class="column70">'+
-                                    '<input type="checkbox" name="checkbox-xml" id="move-'+ID+'"/>'+
-                                    '<label for="checkbox">'+gettext('Do you want to (re)-move the files after the process is over?')+'</label>'+											
+                                '<div class="row" style="margin-top:8px">'+
+                                    '<div class="col-md-3">'+
+                                        '<label class="col-form-label">'+gettext('Choose path:')+'</label><br>'+
+                                        '<a href="#" id="select-folder-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select folder')+'</a>'+
+                                    '</div>'+
+                                    '<div class="col-md-9">'+
+                                        '<label class="col-form-label">'+gettext('Path:')+'</label>'+
+                                        '<input type="text" id="folder-'+ID+'" name="folder" class="form-control" placeholder="'+gettext('For removing files leave this input empty')+'">'+
+                                    '</div>'+
                                 '</div>'+
-                                '<div class="column20">'+
-                                    '<label for ="folder" class="col-form-label">'+gettext('Choose path:')+'</label><br>'+
-                                    '<a href="#" id="select-folder-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select folder')+'</a><br>'+
-                                '</div>'+
-                                '<div class="column50">'+
-                                    '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
-                                    '<input type="text" id="folder-'+ID+'" name="folder" class="form-control" placeholder="'+gettext('For removing files leave this input empty')+'"></input>'+
-                                '</div>'+
-                                '<br><br><br>'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -3537,30 +3562,33 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column20">'+
-                                '<label for ="shp-file" class="col-form-label">'+gettext('Choose shapefile:')+'</label><br>'+
-                                '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select file')+'</a><br>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-3">'+
+                                    '<label class="col-form-label">'+gettext('Choose shapefile:')+'</label><br>'+
+                                    '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select file')+'</a>'+
+                                '</div>'+
+                                '<div class="col-md-9">'+
+                                    '<label class="col-form-label">'+gettext('Path:')+'</label>'+
+                                    '<input type="text" id="shp-file-'+ID+'" name="file" class="form-control">'+
+                                '</div>'+
                             '</div>'+
-                            '<div class="column80">'+
-                                '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
-                                '<input type="text" id="shp-file-'+ID+'" name="file" class="form-control"></input>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Encoding:')+'</label>'+
+                                    '<select id="encode-'+ID+'" class="form-control">'+
+                                        '<option value="LATIN1">LATIN1</option>'+
+                                        '<option value="UTF-8">UTF-8</option>'+
+                                        '<option value="ISO-8859-15">ISO-8859-15</option>'+
+                                        '<option value="WINDOWS-1252">WINDOWS-1252</option>'+
+                                    '</select>'+
+                                '</div>'+
+                                '<div class="col-md-8">'+
+                                    '<label class="col-form-label">EPSG:</label>'+
+                                    '<select id="epsg-'+ID+'" class="form-control">'+
+                                        '<option value="">'+gettext('Insert if PRJ is not loaded')+'</option>'+
+                                    '</select>'+
+                                '</div>'+
                             '</div>'+
-                            '<div class="column20">'+
-                                '<label class="col-form-label">'+gettext('Encoding:')+'</label>'+
-                                '<select id="encode-'+ID+'" class="form-control">'+ 
-                                    '<option value="LATIN1">LATIN1</option>'+
-                                    '<option value="UTF-8">UTF-8</option>'+
-                                    '<option value="ISO-8859-15">ISO-8859-15</option>'+
-                                    '<option value="WINDOWS-1252">WINDOWS-1252</option>'+
-                                '</select>'+
-                            '</div>'+
-                            '<div class="column80">'+
-                                '<label class="col-form-label">EPSG:</label>'+
-                                '<select id="epsg-'+ID+'" class="form-control">'+ 
-                                    '<option value="">'+gettext('Insert if PRJ is not loaded')+'</option>'+
-                                '</select>'+
-                            '</div>'+
-                            '<br><br><br><br><br><br>'+
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -3785,21 +3813,25 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label form="db" class="col-form-label">'+gettext('DB Connection:')+'</label>'+
                                 '<select id="db-'+ID+'" class="form-control"></select>'+
                             '</div>'+
-                            '<div class="column20">'+
-                                '<label for ="get-owners" class="col-form-label">'+gettext('Get owners')+':</label><br>'+
-                                '<a href="#" id="get-owners-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get owners')+'</a><br>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Get owners')+':</label><br>'+
+                                    '<a href="#" id="get-owners-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get owners')+'</a>'+
+                                '</div>'+
+                                '<div class="col-md-8">'+
+                                    '<label class="col-form-label">'+gettext('Owners:')+'</label>'+
+                                    '<select class="form-control" id="owner-name-'+ID+'"> </select>'+
+                                '</div>'+
                             '</div>'+
-                            '<div class="column80">'+
-                                '<label form="owner-name" class="col-form-label">'+gettext('Owners:')+'</label>'+
-                                '<select class="form-control" id="owner-name-'+ID+'"> </select>'+
-                            '</div>'+
-                            '<div class="column20">'+
-                                '<label for ="get-tables" class="col-form-label">'+gettext('Get tables')+':</label><br>'+
-                                '<a href="#" id="get-tables-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get tables')+'</a><br>'+
-                            '</div>'+
-                            '<div class="column80">'+
-                                '<label form="table-name" class="col-form-label">'+gettext('Tables:')+'</label>'+
-                                '<select class="form-control" id="table-name-'+ID+'"> </select>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Get tables')+':</label><br>'+
+                                    '<a href="#" id="get-tables-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get tables')+'</a>'+
+                                '</div>'+
+                                '<div class="col-md-8">'+
+                                    '<label class="col-form-label">'+gettext('Tables:')+'</label>'+
+                                    '<select class="form-control" id="table-name-'+ID+'"> </select>'+
+                                '</div>'+
                             '</div>'+
                             '<br><br><br>'+ 
                             '<div class="col-md-12">'+
@@ -4171,21 +4203,25 @@ input_SqlServer = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label form="db" class="col-form-label">'+gettext('DB Connection:')+'</label>'+
                                 '<select id="db-'+ID+'" class="form-control"></select>'+
                             '</div>'+
-                            '<div class="column20">'+
-                                '<label for ="get-schemas" class="col-form-label">'+gettext('Get schemas')+':</label><br>'+
-                                '<a href="#" id="get-schemas-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get schemas')+'</a><br>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Get schemas')+':</label><br>'+
+                                    '<a href="#" id="get-schemas-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get schemas')+'</a>'+
+                                '</div>'+
+                                '<div class="col-md-8">'+
+                                    '<label class="col-form-label">'+gettext('Schema')+':</label>'+
+                                    '<select class="form-control" id="schema-name-'+ID+'"> </select>'+
+                                '</div>'+
                             '</div>'+
-                            '<div class="column80">'+
-                                '<label form="schema-name" class="col-form-label">'+gettext('Schema')+':</label>'+
-                                '<select class="form-control" id="schema-name-'+ID+'"> </select>'+
-                            '</div>'+
-                            '<div class="column20">'+
-                                '<label for ="get-tables" class="col-form-label">'+gettext('Get tables')+':</label><br>'+
-                                '<a href="#" id="get-tables-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get tables')+'</a><br>'+
-                            '</div>'+
-                            '<div class="column80">'+
-                                '<label form="table-name" class="col-form-label">'+gettext('Table')+':</label>'+
-                                '<select class="form-control" id="table-name-'+ID+'"> </select>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Get tables')+':</label><br>'+
+                                    '<a href="#" id="get-tables-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get tables')+'</a>'+
+                                '</div>'+
+                                '<div class="col-md-8">'+
+                                    '<label class="col-form-label">'+gettext('Table')+':</label>'+
+                                    '<select class="form-control" id="table-name-'+ID+'"> </select>'+
+                                '</div>'+
                             '</div>'+
                             '<br><br><br>'+ 
                             '<div class="col-md-12">'+
@@ -4584,24 +4620,25 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label form="db" class="col-form-label">'+gettext('DB Connection:')+'</label>'+
                                 '<select id="db-'+ID+'" class="form-control"></select>'+
                             '</div>'+
-                            '<div class="column20">'+
-                                '<label for ="get-schemas" class="col-form-label">'+gettext('Get schemas')+':</label><br>'+
-                                '<a href="#" id="get-schemas-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get schemas')+'</a><br>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Get schemas')+':</label><br>'+
+                                    '<a href="#" id="get-schemas-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get schemas')+'</a>'+
+                                '</div>'+
+                                '<div class="col-md-8">'+
+                                    '<label class="col-form-label">'+gettext('Schema:')+'</label>'+
+                                    '<select id="schema-name-'+ID+'" class="form-control select2" multiple="false"></select>'+
+                                '</div>'+
                             '</div>'+
-
-                            '<div class="column80">'+
-                                '<label form="schema" class="col-form-label">'+gettext('Schema:')+'</label>'+
-                                '<select id="schema-name-'+ID+'" class="form-control" select2" multiple="false"></select>'+
-                            '</div>'+
-
-                            '<div class="column20">'+
-                                '<label for ="get-tables" class="col-form-label">'+gettext('Get tables')+':</label><br>'+
-                                '<a href="#" id="get-tables-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get tables')+'</a><br>'+
-                            '</div>'+
-
-                            '<div class="column80">'+
-                                '<label form="tablename" class="col-form-label">'+gettext('Table name:')+'</label>'+
-                                '<select id="tablename-'+ID+'" class="form-control select2" multiple="false"></select>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Get tables')+':</label><br>'+
+                                    '<a href="#" id="get-tables-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get tables')+'</a>'+
+                                '</div>'+
+                                '<div class="col-md-8">'+
+                                    '<label class="col-form-label">'+gettext('Table name:')+'</label>'+
+                                    '<select id="tablename-'+ID+'" class="form-control select2" multiple="false"></select>'+
+                                '</div>'+
                             '</div>'+
                             '<div class="col-md-12">'+
                                 '<input type="checkbox" name="checkbox-postgres" id="checkbox-'+ID+'"/>'+
@@ -5018,48 +5055,51 @@ input_Kml = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column20">'+
-                                '<label for ="shp-file" class="col-form-label">'+gettext('Choose file:')+'</label><br>'+
-                                '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select file')+'</a><br>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-3">'+
+                                    '<label class="col-form-label">'+gettext('Choose file:')+'</label><br>'+
+                                    '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select file')+'</a>'+
+                                '</div>'+
+                                '<div class="col-md-9">'+
+                                    '<label class="col-form-label">'+gettext('Path:')+'</label>'+
+                                    '<input type="text" id="kml-kmz-file-'+ID+'" name="file" class="form-control">'+
+                                '</div>'+
                             '</div>'+
-                            '<div class="column80">'+
-                                '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
-                                '<input type="text" id="kml-kmz-file-'+ID+'" name="file" class="form-control"></input>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Encoding:')+'</label>'+
+                                    '<select id="encode-'+ID+'" class="form-control">'+
+                                        '<option value="LATIN1">LATIN1</option>'+
+                                        '<option value="UTF-8">UTF-8</option>'+
+                                        '<option value="ISO-8859-15">ISO-8859-15</option>'+
+                                        '<option value="WINDOWS-1252">WINDOWS-1252</option>'+
+                                    '</select>'+
+                                '</div>'+
+                                '<div class="col-md-8">'+
+                                    '<label class="col-form-label">EPSG:</label>'+
+                                    '<select id="epsg-'+ID+'" class="form-control">'+
+                                        '<option value="">'+gettext('Insert if needed')+'</option>'+
+                                    '</select>'+
+                                '</div>'+
                             '</div>'+
-                            '<div class="column20">'+
-                                '<label class="col-form-label">'+gettext('Encoding:')+'</label>'+
-                                '<select id="encode-'+ID+'" class="form-control">'+ 
-                                    '<option value="LATIN1">LATIN1</option>'+
-                                    '<option value="UTF-8">UTF-8</option>'+
-                                    '<option value="ISO-8859-15">ISO-8859-15</option>'+
-                                    '<option value="WINDOWS-1252">WINDOWS-1252</option>'+
-                                '</select>'+
+                            '<div style="margin-top:12px">'+
+                                '<label class="col-form-label" id="advanced-param-'+ID+'">'+gettext('Advanced Parameters')+'</label>'+
                             '</div>'+
-                            '<div class="column80">'+
-                                '<label class="col-form-label">EPSG:</label>'+
-                                '<select id="epsg-'+ID+'" class="form-control">'+ 
-                                    '<option value="">'+gettext('Insert if needed')+'</option>'+
-                                '</select>'+
-                            '</div>'+
-
-                            '<br><br><br>'+
-                            '<div>'+
-                                '<label class="col-form-label" id ="advanced-param-'+ID+'">'+gettext('Advanced Parameters')+'</label>'+
-                            '</div>'+
-                            '<div id ="more-options-'+ID+'">'+
+                            '<div id="more-options-'+ID+'">'+
                                 '<div>'+
                                     '<input type="checkbox" name="checkbox-excel" id="move-'+ID+'"/>'+
-                                    '<label for="checkbox">'+gettext('Do you want to (re)-move the files after the process is over?')+'</label>'+											
+                                    '<label for="checkbox">'+gettext('Do you want to (re)-move the files after the process is over?')+'</label>'+
                                 '</div>'+
-                                '<div class="column20">'+
-                                    '<label for ="folder" class="col-form-label">'+gettext('Choose path:')+'</label><br>'+
-                                    '<a href="#" id="select-folder-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select folder')+'</a><br>'+
+                                '<div class="row" style="margin-top:8px">'+
+                                    '<div class="col-md-4">'+
+                                        '<label class="col-form-label">'+gettext('Choose path:')+'</label><br>'+
+                                        '<a href="#" id="select-folder-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select folder')+'</a>'+
+                                    '</div>'+
+                                    '<div class="col-md-8">'+
+                                        '<label class="col-form-label">'+gettext('Path:')+'</label>'+
+                                        '<input type="text" id="folder-'+ID+'" name="folder" class="form-control" placeholder="'+gettext('For removing files leave this input empty')+'">'+
+                                    '</div>'+
                                 '</div>'+
-                                '<div class="column50">'+
-                                    '<label class="col-form-label" >'+gettext('Path:')+'</label>'+
-                                    '<input type="text" id="folder-'+ID+'" name="folder" class="form-control" placeholder="'+gettext('For removing files leave this input empty')+'"></input>'+
-                                '</div>'+
-                                '<br><br><br>'+
                         '</form>'+
                     '</div>'+
                     '<div class="modal-footer">'+
@@ -5343,34 +5383,35 @@ crea_Grid = draw2d.shape.layout.VerticalLayout.extend({
                                 '</div>'+
                             '</div>'+
 
-                            '<div class="column50">'+
-                                '<label form="rows" class="col-form-label">'+gettext('Rows')+'</label>'+
-                                '<input type="number" id="rows-'+ID+'" value=0 min="1" class="form-control" disabled pattern="^[0-9]+">'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Rows')+'</label>'+
+                                    '<input type="number" id="rows-'+ID+'" value=0 min="1" class="form-control" disabled pattern="^[0-9]+">'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Columns')+'</label>'+
+                                    '<input type="number" id="columns-'+ID+'" value=0 min="1" class="form-control" disabled pattern="^[0-9]+">'+
+                                '</div>'+
                             '</div>'+
-
-                            '<div class="column50">'+
-                                '<label form="columns" class="col-form-label">'+gettext('Columns')+'</label>'+
-                                '<input type="number" id="columns-'+ID+'" value=0 min="1" class="form-control" disabled pattern="^[0-9]+">'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Width')+'</label>'+
+                                    '<input type="number" id="width-'+ID+'" value=0 min="0" class="form-control" pattern="^[0-9]+">'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Height')+'</label>'+
+                                    '<input type="number" id="height-'+ID+'" value=0 min="0" class="form-control" pattern="^[0-9]+">'+
+                                '</div>'+
                             '</div>'+
-
-                            '<div class="column50">'+
-                                '<label form="width" class="col-form-label">'+gettext('Width')+'</label>'+
-                                '<input type="number" id="width-'+ID+'" value=0 min="0" class="form-control" pattern="^[0-9]+">'+
-                            '</div>'+
-
-                            '<div class="column50">'+
-                                '<label form="height" class="col-form-label">'+gettext('Height')+'</label>'+
-                                '<input type="number" id="height-'+ID+'" value=0 min="0" class="form-control" pattern="^[0-9]+">'+
-                            '</div>'+
-
-                            '<div class="column50">'+
-                                '<label form="initial-x" class="col-form-label">'+gettext('Initial X')+'</label>'+
-                                '<input type="number" id="init-x-'+ID+'" value=0 min="0" class="form-control" disabled pattern="^[0-9]+">'+
-                            '</div>'+
-
-                            '<div class="column50">'+
-                                '<label form="initial-y" class="col-form-label">'+gettext('Initial Y')+'</label>'+
-                                '<input type="number" id="init-y-'+ID+'" value=0 min="0" class="form-control" disabled pattern="^[0-9]+">'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Initial X')+'</label>'+
+                                    '<input type="number" id="init-x-'+ID+'" value=0 min="0" class="form-control" disabled pattern="^[0-9]+">'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Initial Y')+'</label>'+
+                                    '<input type="number" id="init-y-'+ID+'" value=0 min="0" class="form-control" disabled pattern="^[0-9]+">'+
+                                '</div>'+
                             '</div>'+
 
                             '<div>'+
@@ -5645,24 +5686,27 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column50">'+
-                                '<label form="attr1" class="col-form-label">'+gettext('Main table attribute:')+'</label>'+
-                                '<select class="form-control" id="attr1-'+ID+'"> </select>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Main table attribute:')+'</label>'+
+                                    '<select class="form-control" id="attr1-'+ID+'"> </select>'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Secondary table attribute:')+'</label>'+
+                                    '<select class="form-control" id="attr2-'+ID+'"> </select>'+
+                                '</div>'+
                             '</div>'+
-                            '<div class="column50">'+
-                                '<label form="attr2" class="col-form-label">'+gettext('Secondary table attribute:')+'</label>'+
-                                '<select class="form-control" id="attr2-'+ID+'"> </select>'+
+                            '<div style="margin-top:8px; text-align:right">'+
+                                '<button type="button" class="btn btn-default btn-sm" id="add-'+ID+'"><i class="fa fa-plus" aria-hidden="true"></i></button>'+
+                                '<button type="button" class="btn btn-default btn-sm" id="quit-'+ID+'"><i class="fa fa-minus" aria-hidden="true"></i></button>'+
                             '</div>'+
-                            '<br><br><br>'+
-                            '<button type="button" style="float: right;" class="btn btn-default btn-sm" id="quit-'+ID+'"><i class="fa fa-minus" aria-hidden="true"></i></button>'+
-                            '<button type="button" style="float: right;" class="btn btn-default btn-sm" id="add-'+ID+'"><i class="fa fa-plus" aria-hidden="true"></i></button>'+
-                            
-                            '<br><br><br>'+
-                            '<div class="column50">'+
-                                '<input id="attr-1-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" >'+
-                            '</div>'+
-                            '<div class="column50">'+
-                                '<input id="attr-2-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" >'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-6">'+
+                                    '<input id="attr-1-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}">'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<input id="attr-2-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}">'+
+                                '</div>'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -7130,13 +7174,15 @@ trans_ConcatAttr = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label class="col-form-label">'+gettext('Attributes to concatenate:')+'</label>'+
                                 '<select class="form-control" size="8" multiple id="attr-'+ID+'"> </select>'+
                             '</div>'+
-                            '<div class="column80">'+
-                            '<label class="col-form-label">'+gettext('New attribute name:')+'</label>'+
-                                '<input id="new-attr-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('New attribute name')+'">'+
-                            '</div>'+
-                            '<div class="column20">'+
-                            '<label class="col-form-label">'+gettext('Separator (opt.):')+'</label>'+
-                                '<input id="separator-'+ID+'" type="text" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('Separator')+'">'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-8">'+
+                                    '<label class="col-form-label">'+gettext('New attribute name:')+'</label>'+
+                                    '<input id="new-attr-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('New attribute name')+'">'+
+                                '</div>'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Separator (opt.):')+'</label>'+
+                                    '<input id="separator-'+ID+'" type="text" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('Separator')+'">'+
+                                '</div>'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -8437,13 +8483,15 @@ trans_ModifyValue = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column50">'+
-                                '<label class="col-form-label">'+gettext('Attribute to modify:')+'</label>'+
-                                '<select class="form-control" id="attr-'+ID+'"> </select>'+
-                            '</div>'+
-                            '<div class="column50">'+
-                                '<label class="col-form-label">'+gettext('New value:')+'</label>'+
-                                '<input id="value-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('New attribute value')+'">'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Attribute to modify:')+'</label>'+
+                                    '<select class="form-control" id="attr-'+ID+'"> </select>'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('New value:')+'</label>'+
+                                    '<input id="value-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('New attribute value')+'">'+
+                                '</div>'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -8678,13 +8726,15 @@ trans_Counter = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column50">'+
-                                '<label class="col-form-label">'+gettext('New counter attribute:')+'</label>'+
-                                '<input id="attr-'+ID+'" type="text" size="40" value="_count" class="form-control" pattern="[A-Za-z]{3}">'+
-                            '</div>'+
-                            '<div class="column50">'+
-                                '<label class="col-form-label">'+gettext('Group by:')+'</label>'+
-                                '<select class="form-control" id="group-by-attr-'+ID+'"> </select>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('New counter attribute:')+'</label>'+
+                                    '<input id="attr-'+ID+'" type="text" size="40" value="_count" class="form-control" pattern="[A-Za-z]{3}">'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Group by:')+'</label>'+
+                                    '<select class="form-control" id="group-by-attr-'+ID+'"> </select>'+
+                                '</div>'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -9185,7 +9235,7 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
         setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
 
         $('#canvas-parent').append('<div id="dialog-calculator-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
-            '<div class="modal-dialog" role="document">'+
+            '<div class="modal-dialog modal-lg" role="document">'+
                 '<div class="modal-content">'+
                     '<div class="modal-header">'+
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
@@ -9193,86 +9243,56 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
                         '</button>'+
                         '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext('Calculator'))+'</h4>'+
                     '</div>'+
-                    '<div  class="modal-body">'+
+                    '<div class="modal-body" style="max-height:none;overflow-y:visible">'+
                         '<form>'+
-                            '<div class="column33">'+
+                            '<div>'+
                                 '<label class="col-form-label">'+gettext('Attribute:')+'</label>'+
                                 '<select class="form-control" id="attr-'+ID+'"> </select>'+
-                                '<label class="col-form-label">'+gettext('Attributes:')+'</label>'+
-                                '<div id ="schema-calculator">'+
-                                    '<ul id ="schema-calculator-'+ID+'" class="nav flex-column">'+
-                                    '</ul>'+
+                            '</div>'+
+                            '<div style="display:flex;gap:10px;margin-top:10px">'+
+                                '<div style="flex:1;min-width:0">'+
+                                    '<label class="col-form-label">'+gettext('Attributes:')+'</label>'+
+                                    '<div id="schema-calculator" style="height:120px;overflow-y:auto;border:1px solid #ddd;border-radius:4px">'+
+                                        '<ul id="schema-calculator-'+ID+'" class="nav flex-column" style="margin:0">'+
+                                        '</ul>'+
+                                    '</div>'+
+                                '</div>'+
+                                '<div style="flex:1;min-width:0">'+
+                                    '<label class="col-form-label"><a href="https://www.postgresql.org/docs/9.1/functions-math.html" target="_blank">'+gettext('Math functions:')+'</a></label>'+
+                                    '<div id="functions-calculator" style="height:120px;overflow-y:auto;border:1px solid #ddd;border-radius:4px">'+
+                                        '<ul id="functions-'+ID+'" class="nav flex-column" style="margin:0">'+
+                                            '<li class="nav-item"><a class="nav-link active" name="+">&#43;</a></li>'+
+                                            '<li class="nav-item"><a class="nav-link active" name="-">&#8722;</a></li>'+
+                                            '<li class="nav-item"><a class="nav-link active" name="*">&#215;</a></li>'+
+                                            '<li class="nav-item"><a class="nav-link active" name="/">&#247;</a></li>'+
+                                            '<li class="nav-item"><a class="nav-link active" name="|/">&#8730;x</a></li>'+
+                                            '<li class="nav-item"><a class="nav-link active" name="^2">x&#178;</a></li>'+
+                                            '<li class="nav-item"><a class="nav-link active" name="sin()">sin(x)</a></li>'+
+                                            '<li class="nav-item"><a class="nav-link active" name="cos()">cos(x)</a></li>'+
+                                            '<li class="nav-item"><a class="nav-link active" name="tan()">tan(x)</a></li>'+
+                                            '<li class="nav-item"><a class="nav-link active" name="pi()">&#960;</a></li>'+
+                                        '</ul>'+
+                                    '</div>'+
+                                '</div>'+
+                                '<div style="flex:1;min-width:0">'+
+                                    '<label class="col-form-label"><a href="https://www.postgresql.org/docs/9.1/functions-string.html" target="_blank">'+gettext('String functions:')+'</a></label>'+
+                                    '<div id="functions-string" style="height:120px;overflow-y:auto;border:1px solid #ddd;border-radius:4px">'+
+                                        '<ul id="functions-string-'+ID+'" class="nav flex-column" style="margin:0">'+
+                                            '<li class="nav-item"><a class="nav-link active" name="||">Concatenate string</a></li>'+
+                                            '<li class="nav-item"><a class="nav-link active" name="lower()">Lower case</a></li>'+
+                                            '<li class="nav-item"><a class="nav-link active" name="upper()">Upper case</a></li>'+
+                                            '<li class="nav-item"><a class="nav-link active" name="substring('+"'string'"+' from 2 for 3)">Substring</a></li>'+
+                                            '<li class="nav-item"><a class="nav-link active" name="trim(both '+ "'s'  from 'string')"+'">Trim string</a></li>'+
+                                            '<li class="nav-item"><a class="nav-link active" name="length()">Length string</a></li>'+
+                                            '<li class="nav-item"><a class="nav-link active" name="replace('+"'string', 'from', 'to'"+')">Replace</a></li>'+
+                                        '</ul>'+
+                                    '</div>'+
                                 '</div>'+
                             '</div>'+
-                            '<div class="column33">'+
-                                '<label class="col-form-label"><a href="https://www.postgresql.org/docs/9.1/functions-math.html" target="_blank">'+gettext('Math functions:')+'</a></label>'+
-                                '<div id ="functions-calculator">'+
-                                    '<ul id ="functions-'+ID+'" class="nav flex-column">'+
-                                        '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="+">&#43;</a>'+
-                                        '</li>'+
-                                        '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="-">&#8722;</a>'+
-                                        '</li>'+
-                                        '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="*">&#215;</a>'+
-                                        '</li>'+
-                                        '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="/">&#247;</a>'+
-                                        '</li>'+
-                                        '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="|/">&#8730;x</a>'+
-                                        '</li>'+
-                                        '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="^2">x&#178;</a>'+
-                                        '</li>'+
-                                        '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="sin()">sin(x)</a>'+
-                                        '</li>'+
-                                        '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="cos()">cos(x)</a>'+
-                                        '</li>'+
-                                        '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="tan()">tan(x)</a>'+
-                                        '</li>'+
-                                        '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="pi()">&#960;</a>'+
-                                        '</li>'+
-                                    '</ul>'+
-                                '</div>'+
-                            '</div>'+
-                            '<div class="column33">'+
-                                '<label class="col-form-label"><a href="https://www.postgresql.org/docs/9.1/functions-string.html" target="_blank">'+gettext('String functions:')+'</a></label>'+
-                                '<div id ="functions-string">'+
-                                    '<ul id ="functions-'+ID+'" class="nav flex-column">'+
-                                        '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="||">Concatenate string</a>'+
-                                        '</li>'+
-                                        '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="lower()">Lower case</a>'+
-                                        '</li>'+
-                                        '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="upper()">Upper case</a>'+
-                                        '</li>'+
-                                        '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="substring('+"'string'"+' from 2 for 3)">Substring</a>'+
-                                        '</li>'+
-                                        '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="trim(both '+ "'s'  from 'string')"+'">Trim string</a>'+
-                                        '</li>'+
-                                        '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="length()">Lenght string</a>'+
-                                        '</li>'+
-                                        '<li class="nav-item">'+
-                                            '<a class="nav-link active" name="replace('+"'string', 'from', 'to'"+')">Replace</a>'+
-                                        '</li>'+
-                                    '</ul>'+
-                                '</div>'+
-                            '</div>'+
-                            '<br><br><br><br><br><br><br><br><br><br><br><br><br><br>'+
-                            '<div>'+
-                                '<label class="col-form-label">'+gettext('Expression:')+'</a></label>'+
-                                '<textarea id="expression-'+ID+'" rows="10" class="form-control" placeholder="'+gettext('For more math functions check above link.')+'"></textarea>'+
+                            ''+
+                            '<div style="margin-top:120px">'+
+                                '<label class="col-form-label">'+gettext('Expression:')+'</label>'+
+                                '<textarea id="expression-'+ID+'" rows="5" class="form-control" style="min-height:100px;font-family:\'Courier New\',Courier,monospace;font-size:13px;background:#1e1e2e;color:#cdd6f4;border:1px solid #45475a;border-radius:4px;resize:vertical" placeholder="'+gettext('For more math functions check above link.')+'"></textarea>'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -9344,20 +9364,25 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
          });
          
         $(document).off("dblclick", "#functions-"+ID+" > li > a")
+        $(document).off("dblclick", "#functions-string-"+ID+" > li > a")
+
+        function insertCalcFunction(textarea, text) {
+            textarea.value = textarea.value + text;
+            var end = textarea.selectionEnd;
+            if (textarea.value.charAt(textarea.value.length - 1) == ')') {
+                textarea.focus();
+                textarea.selectionEnd = end - 1;
+            }
+        }
 
         $(document).on("dblclick", "#functions-"+ID+" > li > a", function(){
-            var text = this.name
             var textarea = document.getElementById('expression-'+ID)
-            textarea.value = textarea.value + text
-            var end = textarea.selectionEnd;
-            
-            if (textarea.value.charAt(textarea.value.length-1) == ')'){
+            insertCalcFunction(textarea, this.name);
+        });
 
-                textarea.focus()
-                textarea.selectionEnd= end - 1;
-
-            };
-
+        $(document).on("dblclick", "#functions-string-"+ID+" > li > a", function(){
+            var textarea = document.getElementById('expression-'+ID)
+            insertCalcFunction(textarea, this.name);
         });
 
         $('#calculator-accept-'+ID).click(function() {
@@ -9552,13 +9577,14 @@ trans_ChangeAttrType = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column50">'+
-                                '<label class="col-form-label">'+gettext('Attribute to change type:')+'</label>'+
-                                '<select class="form-control" id="attr-'+ID+'"> </select>'+
-                            '</div>'+
-                            '<div class="column50">'+
-                                '<label class="col-form-label">'+gettext('To data type:')+'</label>'+
-                                '<select class="form-control" id="data-type-option-'+ID+'">'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Attribute to change type:')+'</label>'+
+                                    '<select class="form-control" id="attr-'+ID+'"> </select>'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('To data type:')+'</label>'+
+                                    '<select class="form-control" id="data-type-option-'+ID+'">'+
                                     '<option value="VARCHAR"> '+gettext('Varchar')+'</option>'+
                                     '<option value="INTEGER"> '+gettext('Integer')+' </option>'+
                                     '<option value="FLOAT"> '+gettext('Float')+' </option>'+
@@ -9566,6 +9592,7 @@ trans_ChangeAttrType = draw2d.shape.layout.VerticalLayout.extend({
                                     '<option value="TIMESTAMP"> '+gettext('Time Stamp')+' </option>'+
                                     '<option value="BOOLEAN"> '+gettext('Boolean')+' </option>'+
                                 '</select>'+
+                                '</div>'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -10078,46 +10105,45 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label form="db" class="col-form-label">'+gettext('DB Connection:')+'</label>'+
                                 '<select id="db-'+ID+'" class="form-control"></select>'+
                             '</div>'+
-                            '<div class="column20">'+
-                                '<label for ="get-schemas" class="col-form-label">'+gettext('Get schemas')+':</label><br>'+
-                                '<a href="#" id="get-schemas-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get schemas')+'</a><br>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Get schemas')+':</label><br>'+
+                                    '<a href="#" id="get-schemas-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get schemas')+'</a>'+
+                                '</div>'+
+                                '<div class="col-md-8">'+
+                                    '<label class="col-form-label">'+gettext('Schema:')+'</label>'+
+                                    '<select id="schema-name-'+ID+'" class="form-control"></select>'+
+                                '</div>'+
                             '</div>'+
-
-                            '<div class="column80">'+
-                                '<label form="schema" class="col-form-label">'+gettext('Schema:')+'</label>'+
-                                '<select id="schema-name-'+ID+'" class="form-control"></select>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Get tables')+':</label><br>'+
+                                    '<a href="#" id="get-tables-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get tables')+'</a>'+
+                                '</div>'+
+                                '<div class="col-md-8">'+
+                                    '<label class="col-form-label">'+gettext('Table name:')+'</label>'+
+                                    '<select id="tablename-'+ID+'" class="form-control"></select>'+
+                                '</div>'+
                             '</div>'+
-
-                            '<div class="column20">'+
-                                '<label for ="get-tables" class="col-form-label">'+gettext('Get tables')+':</label><br>'+
-                                '<a href="#" id="get-tables-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get tables')+'</a><br>'+
-                            '</div>'+
-
-                            '<div class="column80">'+
-                                '<label form="tablename" class="col-form-label">'+gettext('Table name:')+'</label>'+
-                                '<select id="tablename-'+ID+'" class="form-control"></select>'+
-                            '</div>'+
-
-                            '<div class="right">'+
+                            '<div style="margin-top:8px; text-align:right">'+
                                 '<button type="button" class="btn btn-default btn-sm" id="get-schema-'+ID+'">'+gettext('Get attributes')+'</button>'+
-                            '</div>'+    
-                            '<div class="column50">'+
-                                '<label class="col-form-label">'+gettext('Attributes from input:')+'</label>'+
-                                '<div id ="attrs-values">'+
-                                    '<ul id ="attrs-values-'+ID+'" class="nav flex-column" style= "height:100px;">'+
-                                    '</ul>'+
+                            '</div>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Attributes from input:')+'</label>'+
+                                    '<div id="attrs-values">'+
+                                        '<ul id="attrs-values-'+ID+'" class="nav flex-column" style="height:100px;">'+
+                                        '</ul>'+
+                                    '</div>'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Attributes from new connection:')+'</label>'+
+                                    '<div id="attrs-execute-sql">'+
+                                        '<ul id="attrs-execute-sql-'+ID+'" class="nav flex-column" style="height:100px;">'+
+                                        '</ul>'+
+                                    '</div>'+
                                 '</div>'+
                             '</div>'+
-
-                            '<div class="column50">'+
-                                '<label class="col-form-label">'+gettext('Attributes from new connection:')+'</label>'+
-                                '<div id ="attrs-execute-sql">'+
-                                    '<ul id ="attrs-execute-sql-'+ID+'" class="nav flex-column" style= "height:100px;">'+
-                                    '</ul>'+
-                                '</div>'+
-                            '</div>'+
-
-                            '<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>'+
 
                             '<div>'+
                                 '<label class="col-form-label">'+gettext('Query:')+'</label>'+
@@ -10614,24 +10640,26 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column40">'+
-                                '<label class="col-form-label">'+gettext("New attribute:")+'</label>'+
-                                '<input id="attr-'+ID+'" type="text" size="40" value="_newattr" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('New attribute name')+'">'+
-                            '</div>'+
-                            '<div class="column20">'+
-                                '<label class="col-form-label">'+gettext('Data type:')+'</label>'+
-                                '<select class="form-control" id="data-type-'+ID+'">'+
-                                '<option value="VARCHAR"> '+gettext('Varchar')+'</option>'+
-                                '<option value="INTEGER"> '+gettext('Integer')+' </option>'+
-                                '<option value="FLOAT"> '+gettext('Float')+' </option>'+
-                                '<option value="DATE"> '+gettext('Date')+' </option>'+
-                                '<option value="TIMESTAMP"> '+gettext('Time Stamp')+' </option>'+
-                                '<option value="BOOLEAN"> '+gettext('Boolean')+' </option>'+
-                                '</select>'+
-                            '</div>'+     
-                            '<div class="column40">'+
-                                '<label class="col-form-label">'+gettext("Value:")+'</label>'+
-                                '<input id="value-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('New attribute value')+'">'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-5">'+
+                                    '<label class="col-form-label">'+gettext("New attribute:")+'</label>'+
+                                    '<input id="attr-'+ID+'" type="text" size="40" value="_newattr" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('New attribute name')+'">'+
+                                '</div>'+
+                                '<div class="col-md-2">'+
+                                    '<label class="col-form-label">'+gettext('Data type:')+'</label>'+
+                                    '<select class="form-control" id="data-type-'+ID+'">'+
+                                        '<option value="VARCHAR"> '+gettext('Varchar')+'</option>'+
+                                        '<option value="INTEGER"> '+gettext('Integer')+' </option>'+
+                                        '<option value="FLOAT"> '+gettext('Float')+' </option>'+
+                                        '<option value="DATE"> '+gettext('Date')+' </option>'+
+                                        '<option value="TIMESTAMP"> '+gettext('Time Stamp')+' </option>'+
+                                        '<option value="BOOLEAN"> '+gettext('Boolean')+' </option>'+
+                                    '</select>'+
+                                '</div>'+
+                                '<div class="col-md-5">'+
+                                    '<label class="col-form-label">'+gettext("Value:")+'</label>'+
+                                    '<input id="value-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('New attribute value')+'">'+
+                                '</div>'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -11131,27 +11159,29 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column40">'+
-                                '<label form="attr" class="col-form-label">'+gettext('Attribute:')+'</label>'+
-                                '<select class="form-control" id="attr-'+ID+'"> </select>'+
-                            '</div>'+
-                            '<div class="column20">'+
-                                '<label class="col-form-label">'+gettext('Operator:')+'</label>'+
-                                '<select class="form-control" id="option-'+ID+'">'+
-                                    '<option value="="> = </option>'+
-                                    '<option value="!="> != </option>'+
-                                    '<option value="<"> < </option>'+
-                                    '<option value=">"> > </option>'+
-                                    '<option value="<="> <= </option>'+
-                                    '<option value=">="> >= </option>'+
-                                    '<option value="starts-with">'+gettext('Starts with')+'</option>'+
-                                    '<option value="ends-with">'+gettext('Ends with')+'</option>'+
-                                    '<option value="contains">'+gettext('Contains')+'</option>'+
-                                '</select>'+
-                            '</div>'+                           
-                            '<div class="column40">'+
-                                '<label form="value" class="col-form-label">'+gettext('Value:')+'</label>'+
-                                '<input id="value-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('New attribute value')+'">'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-5">'+
+                                    '<label class="col-form-label">'+gettext('Attribute:')+'</label>'+
+                                    '<select class="form-control" id="attr-'+ID+'"> </select>'+
+                                '</div>'+
+                                '<div class="col-md-2">'+
+                                    '<label class="col-form-label">'+gettext('Operator:')+'</label>'+
+                                    '<select class="form-control" id="option-'+ID+'">'+
+                                        '<option value="="> = </option>'+
+                                        '<option value="!="> != </option>'+
+                                        '<option value="<"> < </option>'+
+                                        '<option value=">"> > </option>'+
+                                        '<option value="<="> <= </option>'+
+                                        '<option value=">="> >= </option>'+
+                                        '<option value="starts-with">'+gettext('Starts with')+'</option>'+
+                                        '<option value="ends-with">'+gettext('Ends with')+'</option>'+
+                                        '<option value="contains">'+gettext('Contains')+'</option>'+
+                                    '</select>'+
+                                '</div>'+
+                                '<div class="col-md-5">'+
+                                    '<label class="col-form-label">'+gettext('Value:')+'</label>'+
+                                    '<input id="value-'+ID+'" type="text" size="40" value="" class="form-control" pattern="[A-Za-z]{3}" placeholder="'+gettext('New attribute value')+'">'+
+                                '</div>'+
                             '</div>'+
                             '<div>'+
                                 '<button type="button" style="float: right;" class="btn btn-default btn-sm" id="add-'+ID+'"><i class="fa fa-plus" aria-hidden="true"></i></button>'+
@@ -12023,27 +12053,31 @@ trans_Cluster = draw2d.shape.layout.VerticalLayout.extend({
                                 '</select>'+                  
                             '</div>'+
                             '<div id="dbscanoptions">'+
-                                '<div class="column50">'+
-                                    '<label form="attr" class="col-form-label">'+gettext('Desire distance')+':</label>'+
-                                    '<input id="eps-'+ID+'" type="number" value="50.0" min="0" step="0.01" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
-                                '</div>'+
-                                '<div class="column50">'+
-                                    '<label class="col-form-label">'+gettext('Density (Minimum points)')+':</label>'+
-                                    '<input id="minpoints-'+ID+'" type="number" value="5" min="1" step="1" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
+                                '<div class="row" style="margin-top:8px">'+
+                                    '<div class="col-md-6">'+
+                                        '<label class="col-form-label">'+gettext('Desire distance')+':</label>'+
+                                        '<input id="eps-'+ID+'" type="number" value="50.0" min="0" step="0.01" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
+                                    '</div>'+
+                                    '<div class="col-md-6">'+
+                                        '<label class="col-form-label">'+gettext('Density (Minimum points)')+':</label>'+
+                                        '<input id="minpoints-'+ID+'" type="number" value="5" min="1" step="1" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
+                                    '</div>'+
                                 '</div>'+
                             '</div>'+
                             '<div id="kmeansoptions">'+
-                                '<div class="column33">'+
-                                    '<label class="col-form-label">'+gettext('Number of clusters')+':</label>'+
-                                    '<input id="number-clusters-'+ID+'" type="number" value="5" min="1" step="1" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
-                                '</div>'+
-                                '<div class="column33">'+
-                                    '<label class="col-form-label">'+gettext('Maximum radius')+':</label>'+
-                                    '<input id="max-radius-'+ID+'" type="text" value="0.0" size="40" class="form-control">'+
-                                '</div>'+
-                                '<div class="column33">'+
-                                    '<label class="col-form-label">'+gettext('Weight attribute')+':</label>'+
-                                    '<select class="form-control" id="attr-'+ID+'"></select>'+
+                                '<div class="row" style="margin-top:8px">'+
+                                    '<div class="col-md-4">'+
+                                        '<label class="col-form-label">'+gettext('Number of clusters')+':</label>'+
+                                        '<input id="number-clusters-'+ID+'" type="number" value="5" min="1" step="1" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
+                                    '</div>'+
+                                    '<div class="col-md-4">'+
+                                        '<label class="col-form-label">'+gettext('Maximum radius')+':</label>'+
+                                        '<input id="max-radius-'+ID+'" type="text" value="0.0" size="40" class="form-control">'+
+                                    '</div>'+
+                                    '<div class="col-md-4">'+
+                                        '<label class="col-form-label">'+gettext('Weight attribute')+':</label>'+
+                                        '<select class="form-control" id="attr-'+ID+'"></select>'+
+                                    '</div>'+
                                 '</div>'+
                             '</div>'+
                         '</form>'+
@@ -13020,17 +13054,19 @@ trans_Reproject = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column50">'+
-                                '<label class="col-form-label">'+gettext("Source EPSG:")+'</label>'+
-                                '<select id="source-epsg-'+ID+'" class="form-control">'+
-                                '<option value="">'+gettext("Empty to read from input layer")+'</option>'+
-                                '</select>'+
-                            '</div>'+
-                            '<div class="column50">'+
-                                '<label class="col-form-label">'+gettext("Target EPSG:")+'</label>'+
-                                '<select id="target-epsg-'+ID+'" class="form-control">'+ 
-                                '<option value="">------</option>'+
-                                '</select>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext("Source EPSG:")+'</label>'+
+                                    '<select id="source-epsg-'+ID+'" class="form-control">'+
+                                        '<option value="">'+gettext("Empty to read from input layer")+'</option>'+
+                                    '</select>'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext("Target EPSG:")+'</label>'+
+                                    '<select id="target-epsg-'+ID+'" class="form-control">'+
+                                        '<option value="">------</option>'+
+                                    '</select>'+
+                                '</div>'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -13535,15 +13571,17 @@ trans_MGRS = draw2d.shape.layout.VerticalLayout.extend({
                                 '<option value="mgrstolatlon" selected>'+gettext('MGRS to geographic coordinates (EPSG - 4326):')+'</option>'+
                                 '<option value="latlontomgrs">'+gettext('Geographic coordinates (EPSG - 4326) to MGRS:')+'</option>'+
                             '</select>'+
-                            '<div class="column50">'+
-                                '<label form="attr" class="col-form-label">'+gettext('MGRS grid attribute:')+'</label>'+
-                                '<select class="form-control" id="mgrs-'+ID+'"> </select>'+
-                            '</div>'+
-                            '<div class="column50">'+
-                                '<label form="attr" class="col-form-label">'+gettext('Longitude attribute:')+'</label>'+
-                                '<select class="form-control" id="lon-'+ID+'"> </select>'+
-                                '<label form="attr" class="col-form-label">'+gettext('Latitude attribute:')+'</label>'+
-                                '<select class="form-control" id="lat-'+ID+'"> </select>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('MGRS grid attribute:')+'</label>'+
+                                    '<select class="form-control" id="mgrs-'+ID+'"> </select>'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Longitude attribute:')+'</label>'+
+                                    '<select class="form-control" id="lon-'+ID+'"> </select>'+
+                                    '<label class="col-form-label">'+gettext('Latitude attribute:')+'</label>'+
+                                    '<select class="form-control" id="lat-'+ID+'"> </select>'+
+                                '</div>'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -13842,19 +13880,21 @@ trans_TextToPoint = draw2d.shape.layout.VerticalLayout.extend({
                                 '</div>'+
                             '</div>'+
 
-                            '<div class="column33">'+
-                                '<label form="attr" class="col-form-label">'+gettext('Longitude attribute:')+' (X) </label>'+
-                                '<select class="form-control" id="lon-'+ID+'"> </select>'+
-                            '</div>'+
-                            '<div class="column33">'+
-                                '<label form="attr" class="col-form-label">'+gettext('Latitude attribute:')+' (Y) </label>'+
-                                '<select class="form-control" id="lat-'+ID+'"> </select>'+
-                            '</div>'+
-                            '<div class="column33">'+
-                                '<label form="attr" class="col-form-label">'+gettext('Insert EPSG:')+'</label>'+
-                                '<select id="epsg-'+ID+'" class="form-control">'+ 
-                                    '<option value="">----</option>'+
-                                '</select>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Longitude attribute:')+' (X)</label>'+
+                                    '<select class="form-control" id="lon-'+ID+'"> </select>'+
+                                '</div>'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Latitude attribute:')+' (Y)</label>'+
+                                    '<select class="form-control" id="lat-'+ID+'"> </select>'+
+                                '</div>'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Insert EPSG:')+'</label>'+
+                                    '<select id="epsg-'+ID+'" class="form-control">'+
+                                        '<option value="">----</option>'+
+                                    '</select>'+
+                                '</div>'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -14163,15 +14203,17 @@ trans_WktGeom = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column66">'+
-                                '<label form="attr" class="col-form-label">'+gettext('WKT string Attribute:')+'</label>'+
-                                '<select class="form-control" id="attr-'+ID+'"> </select>'+
-                            '</div>'+
-                            '<div class="column33">'+
-                                '<label form="attr" class="col-form-label">'+gettext('Insert EPSG:')+'</label>'+
-                                '<select id="epsg-'+ID+'" class="form-control">'+ 
-                                    '<option value="">----</option>'+
-                                '</select>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-8">'+
+                                    '<label class="col-form-label">'+gettext('WKT string Attribute:')+'</label>'+
+                                    '<select class="form-control" id="attr-'+ID+'"> </select>'+
+                                '</div>'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Insert EPSG:')+'</label>'+
+                                    '<select id="epsg-'+ID+'" class="form-control">'+
+                                        '<option value="">----</option>'+
+                                    '</select>'+
+                                '</div>'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -14432,17 +14474,19 @@ trans_SplitAttr = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column33">'+
-                                '<label form="attr" class="col-form-label">'+gettext('String Attribute:')+'</label>'+
-                                '<select class="form-control" id="attr-'+ID+'"> </select>'+
-                            '</div>'+
-                            '<div class="column33">'+
-                                '<label form="attr" class="col-form-label">'+gettext('List Name:')+'</label>'+
-                                '<input id="list-'+ID+'" type="text" value="_list" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
-                            '</div>'+
-                            '<div class="column33">'+
-                                '<label form="attr" class="col-form-label">'+gettext('Split by:')+'</label>'+
-                                '<input id="split-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('String Attribute:')+'</label>'+
+                                    '<select class="form-control" id="attr-'+ID+'"> </select>'+
+                                '</div>'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('List Name:')+'</label>'+
+                                    '<input id="list-'+ID+'" type="text" value="_list" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
+                                '</div>'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Split by:')+'</label>'+
+                                    '<input id="split-'+ID+'" type="text" value="" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
+                                '</div>'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -14698,13 +14742,15 @@ trans_ExplodeList = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<div class="column33">'+
-                                '<label form="list" class="col-form-label">'+gettext('List Name:')+'</label>'+
-                                '<select class="form-control" id="list-'+ID+'"> </select>'+
-                            '</div>'+
-                            '<div class="column33">'+
-                                '<label form="attr" class="col-form-label">'+gettext('Attribute Name:')+'</label>'+
-                                '<input id="attr-'+ID+'" type="text" value="_attr" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('List Name:')+'</label>'+
+                                    '<select class="form-control" id="list-'+ID+'"> </select>'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Attribute Name:')+'</label>'+
+                                    '<input id="attr-'+ID+'" type="text" value="_attr" size="40" class="form-control" pattern="[A-Za-z]{3}">'+
+                                '</div>'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -16757,15 +16803,18 @@ trans_Geocoder = draw2d.shape.layout.VerticalLayout.extend({
 
                             '<div id = "direct-'+ID+'">'+
 
-                                '<div class ="column80">'+
-                                    '<label form="attr" class="col-form-label">'+gettext('Attribute:')+'</label>'+
-                                    '<select class="form-control" id="attr-'+ID+'"> </select>'+
-                                '</div>'+
-
-                                '<div class ="column20">'+
-                                '<br>'+
-                                    '<button type="button" style="float: right;" class="btn btn-default btn-sm" id="quit-'+ID+'"><i class="fa fa-minus" aria-hidden="true"></i></button>'+
-                                    '<button type="button" style="float: right;" class="btn btn-default btn-sm" id="add-'+ID+'"><i class="fa fa-plus" aria-hidden="true"></i></button>'+
+                                '<div class="row" style="margin-top:8px">'+
+                                    '<div class="col-md-8">'+
+                                        '<label class="col-form-label">'+gettext('Attribute:')+'</label>'+
+                                        '<select class="form-control" id="attr-'+ID+'"> </select>'+
+                                    '</div>'+
+                                    '<div class="col-md-4">'+
+                                        '<label class="col-form-label">&nbsp;</label>'+
+                                        '<div style="text-align:right">'+
+                                            '<button type="button" class="btn btn-default btn-sm" id="add-'+ID+'"><i class="fa fa-plus" aria-hidden="true"></i></button>'+
+                                            '<button type="button" class="btn btn-default btn-sm" id="quit-'+ID+'"><i class="fa fa-minus" aria-hidden="true"></i></button>'+
+                                        '</div>'+
+                                    '</div>'+
                                 '</div>'+
 
                                 '<div>'+
@@ -17163,32 +17212,33 @@ trans_Buffer = draw2d.shape.layout.VerticalLayout.extend({
                                 '<label class="col-form-label">'+gettext('Buffer style parameters')+'</label>'+
                                 '<br>'+
 
-                                '<div class ="column50">'+
-                                    '<label form="attr" class="col-form-label">'+gettext('Quadrant segments')+'</label>'+
-                                    '<input id="quad-segs-'+ID+'" type="number" value="8" class="form-control" >'+
+                                '<div class="row" style="margin-top:8px">'+
+                                    '<div class="col-md-6">'+
+                                        '<label class="col-form-label">'+gettext('Quadrant segments')+'</label>'+
+                                        '<input id="quad-segs-'+ID+'" type="number" value="8" class="form-control">'+
+                                    '</div>'+
+                                    '<div class="col-md-6">'+
+                                        '<label class="col-form-label">'+gettext('End cap style')+'</label>'+
+                                        '<select class="form-control" id="end-cap-option-'+ID+'">'+
+                                            '<option value="round">'+gettext('Round')+'</option>'+
+                                            '<option value="flat">'+gettext('Flat')+'</option>'+
+                                            '<option value="square">'+gettext('Square')+'</option>'+
+                                        '</select>'+
+                                    '</div>'+
                                 '</div>'+
-
-                                '<div class ="column50">'+
-                                    '<label form="attr" class="col-form-label">'+gettext('End cap style')+' </label>'+
-                                    '<select class="form-control" id="end-cap-option-'+ID+'">'+
-                                        '<option value="round">'+gettext('Round')+'</option>'+
-                                        '<option value="flat">'+gettext('Flat')+'</option>'+
-                                        '<option value="square">'+gettext('Square')+'</option>'+
-                                    '</select>'+
-                                '</div>'+
-
-                                '<div class ="column50">'+
-                                    '<label form="attr" class="col-form-label">'+gettext('Join style')+' </label>'+
-                                    '<select class="form-control" id="join-option-'+ID+'">'+
-                                        '<option value="round">'+gettext('Round')+'</option>'+
-                                        '<option value="mitre">'+gettext('Mitre')+'</option>'+
-                                        '<option value="bevel">'+gettext('Bevel')+'</option>'+
-                                    '</select>'+
-                                '</div>'+
-
-                                '<div class ="column50">'+
-                                    '<label form="attr" class="col-form-label">'+gettext('Mitre limit')+' </label>'+
-                                    '<input id="mitre-limit-'+ID+'" type="number" value="5.0" step="0.1" class="form-control" >'+
+                                '<div class="row" style="margin-top:8px">'+
+                                    '<div class="col-md-6">'+
+                                        '<label class="col-form-label">'+gettext('Join style')+'</label>'+
+                                        '<select class="form-control" id="join-option-'+ID+'">'+
+                                            '<option value="round">'+gettext('Round')+'</option>'+
+                                            '<option value="mitre">'+gettext('Mitre')+'</option>'+
+                                            '<option value="bevel">'+gettext('Bevel')+'</option>'+
+                                        '</select>'+
+                                    '</div>'+
+                                    '<div class="col-md-6">'+
+                                        '<label class="col-form-label">'+gettext('Mitre limit')+'</label>'+
+                                        '<input id="mitre-limit-'+ID+'" type="number" value="5.0" step="0.1" class="form-control">'+
+                                    '</div>'+
                                 '</div>'+
 
                                 '<div>'+
@@ -17520,55 +17570,57 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                                 '<select id="db-option-'+ID+'" class="form-control"></select>'+
                             '</div>'+
 
-                            '<div class="column20">'+
-                                '<label for ="get-schemas" class="col-form-label">'+gettext('Get schemas')+':</label><br>'+
-                                '<a href="#" id="get-schemas-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get schemas')+'</a><br>'+
-                            '</div>'+
-
-                            '<div class="column80">'+
-                                '<label form="schema-name" class="col-form-label">'+gettext('Schema:')+'</label>'+
-                                '<select id="schema-name-option-'+ID+'" class="form-control"></select>'+
-                            '</div>'+
-
-                            '<div>'+
-                                '<label form="tablename" class="col-form-label">'+gettext('Table name:')+'</label>'+
-                                '<input id="tablename-'+ID+'" type="text" value="" class="form-control" pattern="[A-Za-z]{3}" >'+
-                            '</div>'+
-                            '<div class="column25">'+
-                                '<label class="col-form-label">'+gettext('Operation:')+'</label>'+
-                                '<div class="form-check">'+
-                                    '<input type="radio" id="create" name="operation-'+ID+'" class="form-check-input" value="CREATE" checked="checked">'+
-                                    '<label for="create" class="form-check-label">'+gettext('CREATE')+'</label>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Get schemas')+':</label><br>'+
+                                    '<a href="#" id="get-schemas-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get schemas')+'</a>'+
                                 '</div>'+
-                                '<div class="form-check">'+
-                                    '<input type="radio" id="dropandcreate-'+ID+'"  name="operation-'+ID+'" class="form-check-input" value="DROPANDCREATE">'+
-                                    '<label for="dropandcreate" class="form-check-label">'+gettext('DROP AND CREATE')+'</label>'+
-                                '</div>'+
-                                '<div class="form-check">'+
-                                    '<input type="radio" id="append-'+ID+'" name="operation-'+ID+'" class="form-check-input" value="APPEND">'+
-                                    '<label for="append" class="form-check-label">'+gettext('APPEND')+'</label>'+
+                                '<div class="col-md-8">'+
+                                    '<label class="col-form-label">'+gettext('Schema:')+'</label>'+
+                                    '<select id="schema-name-option-'+ID+'" class="form-control"></select>'+
                                 '</div>'+
                             '</div>'+
-                            '<div class="column25">'+
-                            '<br><br>'+
-                                '<div class="form-check">'+
-                                    '<input type="radio" id="overwrite-'+ID+'"  name="operation-'+ID+'" class="form-check-input" value="OVERWRITE">'+
-                                    '<label for="overwrite" class="form-check-label">'+gettext('OVERWRITE')+'</label>'+
-                                '</div>'+
-                                '<div class="form-check">'+
-                                    '<input type="radio" id="update-'+ID+'" name="operation-'+ID+'" class="form-check-input" value="UPDATE">'+
-                                    '<label for="update" class="form-check-label">'+gettext('UPDATE')+'</label>'+
-                                '</div>'+
-                                '<div class="form-check">'+
-                                    '<input type="radio" id="delete-'+ID+'" name="operation-'+ID+'" class="form-check-input" value="DELETE">'+
-                                    '<label for="delete" class="form-check-label">'+gettext('DELETE')+'</label>'+
-                                '</div>'+
+                            '<div style="margin-top:8px">'+
+                                '<label class="col-form-label">'+gettext('Table name:')+'</label>'+
+                                '<input id="tablename-'+ID+'" type="text" value="" class="form-control" pattern="[A-Za-z]{3}">'+
                             '</div>'+
-                            '<div class="column50">'+
-                                '<label class="col-form-label">'+gettext('Match column:')+'</label>'+
-                                '<select class="form-control" id="match-'+ID+'" disabled> </select><br>'+
-                                '<label class="col-form-label">'+gettext('Order')+':&nbsp</label>'+
-                                '<input type="number" id="order-'+ID+'" value="0" size ="3"/>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-3">'+
+                                    '<label class="col-form-label">'+gettext('Operation:')+'</label>'+
+                                    '<div class="form-check">'+
+                                        '<input type="radio" id="create" name="operation-'+ID+'" class="form-check-input" value="CREATE" checked="checked">'+
+                                        '<label for="create" class="form-check-label">'+gettext('CREATE')+'</label>'+
+                                    '</div>'+
+                                    '<div class="form-check">'+
+                                        '<input type="radio" id="dropandcreate-'+ID+'" name="operation-'+ID+'" class="form-check-input" value="DROPANDCREATE">'+
+                                        '<label for="dropandcreate" class="form-check-label">'+gettext('DROP AND CREATE')+'</label>'+
+                                    '</div>'+
+                                    '<div class="form-check">'+
+                                        '<input type="radio" id="append-'+ID+'" name="operation-'+ID+'" class="form-check-input" value="APPEND">'+
+                                        '<label for="append" class="form-check-label">'+gettext('APPEND')+'</label>'+
+                                    '</div>'+
+                                '</div>'+
+                                '<div class="col-md-3">'+
+                                    '<label class="col-form-label">&nbsp;</label>'+
+                                    '<div class="form-check">'+
+                                        '<input type="radio" id="overwrite-'+ID+'" name="operation-'+ID+'" class="form-check-input" value="OVERWRITE">'+
+                                        '<label for="overwrite" class="form-check-label">'+gettext('OVERWRITE')+'</label>'+
+                                    '</div>'+
+                                    '<div class="form-check">'+
+                                        '<input type="radio" id="update-'+ID+'" name="operation-'+ID+'" class="form-check-input" value="UPDATE">'+
+                                        '<label for="update" class="form-check-label">'+gettext('UPDATE')+'</label>'+
+                                    '</div>'+
+                                    '<div class="form-check">'+
+                                        '<input type="radio" id="delete-'+ID+'" name="operation-'+ID+'" class="form-check-input" value="DELETE">'+
+                                        '<label for="delete" class="form-check-label">'+gettext('DELETE')+'</label>'+
+                                    '</div>'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label class="col-form-label">'+gettext('Match column:')+'</label>'+
+                                    '<select class="form-control" id="match-'+ID+'" disabled> </select>'+
+                                    '<label class="col-form-label">'+gettext('Order')+':</label>'+
+                                    '<input type="number" id="order-'+ID+'" value="0" class="form-control" style="width:80px;display:inline-block">'+
+                                '</div>'+
                             '</div>'+
                             '<div>'+
                                 '<label class="col-form-label">'+gettext('Preserve FID')+':</label>'+

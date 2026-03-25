@@ -18,7 +18,6 @@
 	flex: 1;
 	min-width: 0;
 	position: relative;
-	z-index: 1;
 	overflow: scroll;
 	background-color: #fff;
 }
@@ -641,17 +640,43 @@ table.dataTable.no-footer {
 .modal-header {
   border-bottom: 1px solid var(--pl-border);
   padding: 16px 20px;
+  background: var(--pl-white);
+  border-radius: var(--pl-radius) var(--pl-radius) 0 0;
 }
 .modal-title {
   font-size: 15px;
   font-weight: 700;
   color: var(--pl-text);
 }
+.modal-body label,
+.modal-body .col-form-label {
+  color: var(--pl-text);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
 .modal-body {
   padding: 20px;
   font-size: 13px;
-  color: var(--pl-muted);
+  color: var(--pl-text);
+  max-height: calc(80vh - 130px);
+  overflow-y: auto;
 }
+/* Alinear columnas por la parte inferior: botón siempre al nivel del input */
+.modal-body .row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  margin-bottom: 0;
+}
+.modal-body .row > [class*="col-"] {
+  float: none;
+  box-sizing: border-box;
+}
+
+
+
 .modal-footer {
   border-top: 1px solid var(--pl-border);
   padding: 14px 20px;
