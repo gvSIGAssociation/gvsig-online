@@ -774,3 +774,24 @@ msgstr "Interpolação IDW"
 #: templates/etl.html:100
 msgid "Kriging Interpolation"
 msgstr "Interpolação Kriging"
+
+msgid "Alphanumeric"
+msgstr "Alfanumérico"
+
+msgid "Geometric"
+msgstr "Geométrico"
+
+msgid "Geostatistical"
+msgstr "Geoestatístico"
+
+msgid "List"
+msgstr "Lista"
+
+msgid "Workflows"
+msgstr "Fluxos"
+
+msgid "Search tasks..."
+msgstr "Pesquisar tarefas..."
+
+msgid "No results"
+msgstr "Sem resultados"

@@ -858,3 +858,24 @@ msgstr "IDW Interpolazioa"
 #: templates/etl.html:100
 msgid "Kriging Interpolation"
 msgstr "Kriging Interpolazioa"
+
+msgid "Alphanumeric"
+msgstr "Alfanumerikoa"
+
+msgid "Geometric"
+msgstr "Geometrikoa"
+
+msgid "Geostatistical"
+msgstr "Geoestatistikoa"
+
+msgid "List"
+msgstr "Zerrenda"
+
+msgid "Workflows"
+msgstr "Lan-fluxuak"
+
+msgid "Search tasks..."
+msgstr "Zereginak bilatu..."
+
+msgid "No results"
+msgstr "Emaitzarik ez"

@@ -1062,3 +1062,24 @@ msgstr "Permís per executar"
 
 #~ msgid "Numeric attribute"
 #~ msgstr "Atribut numèric"
+
+msgid "Alphanumeric"
+msgstr "Alfanumèric"
+
+msgid "Geometric"
+msgstr "Geomètric"
+
+msgid "Geostatistical"
+msgstr "Geoestadístic"
+
+msgid "List"
+msgstr "Llista"
+
+msgid "Workflows"
+msgstr "Fluxos"
+
+msgid "Search tasks..."
+msgstr "Cercar tasques..."
+
+msgid "No results"
+msgstr "Cap resultat"

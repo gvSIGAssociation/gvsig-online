@@ -1000,3 +1000,24 @@ msgstr "Interpolação Kriging"
 
 #~ msgid "Back"
 #~ msgstr "Atrás"
+
+msgid "Alphanumeric"
+msgstr "Alfanumérico"
+
+msgid "Geometric"
+msgstr "Geométrico"
+
+msgid "Geostatistical"
+msgstr "Geoestatístico"
+
+msgid "List"
+msgstr "Lista"
+
+msgid "Workflows"
+msgstr "Fluxos"
+
+msgid "Search tasks..."
+msgstr "Pesquisar tarefas..."
+
+msgid "No results"
+msgstr "Sem resultados"

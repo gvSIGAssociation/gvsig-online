@@ -17,7 +17,7 @@ gvsigolETL.Toolbar = Class.extend({
 		view.on("select", $.proxy(this.onSelectionChanged,this));
 
 		// Inject the new empty canvas Button
-		this.emptyButton  = $('<button id="button-new-empty-canvas" class="btn btn-default btn-sm"><i class="fa fa-file-o margin-r-5"></i>' + gettext('New') + '</button>');
+		this.emptyButton  = $('<button id="button-new-empty-canvas" class="btn-pl-add btn-pl-add--outline"><i class="fa fa-file-o"></i>' + gettext('New') + '</button>');
 		this.html.append(this.emptyButton);
 		this.emptyButton.click( function() {
 
@@ -32,7 +32,7 @@ gvsigolETL.Toolbar = Class.extend({
 
 
 		// Inject the SAVE Button
-		this.saveButton  = $('<button id="button-save" class="btn btn-default btn-sm"><i class="fa fa-save margin-r-5"></i>' + gettext('Save') + '</button>');
+		this.saveButton  = $('<button id="button-save" class="btn-pl-add btn-pl-add--secondary"><i class="fa fa-save"></i>' + gettext('Save') + '</button>');
 		this.html.append(this.saveButton);
 		this.saveButton.off('click').on('click', function() {
 			var searcheableRoleList = null;
@@ -202,7 +202,7 @@ gvsigolETL.Toolbar = Class.extend({
 		});
 
 		// Inject the RUN Button
-		this.runButton  = $('<button id="button-run" class="btn btn-default btn-sm"><i class="fa fa-play margin-r-5" ></i>' + gettext('Run') + '<i id ="icon-success" class="fa fa-check" aria-hidden="true"></i> <i id = "icon-running" class="fa fa-spinner fa-spin"></i> <i id ="icon-error" class="fa fa-times" aria-hidden="true" ></i></button>');
+		this.runButton  = $('<button id="button-run" class="btn-pl-add"><i class="fa fa-play"></i>' + gettext('Run') + '<i id="icon-success" class="fa fa-check" aria-hidden="true"></i><i id="icon-running" class="fa fa-spinner fa-spin"></i><i id="icon-error" class="fa fa-times" aria-hidden="true"></i></button>');
 		this.html.append(this.runButton);
 
 		this.runButton.click(function(){
@@ -239,7 +239,7 @@ gvsigolETL.Toolbar = Class.extend({
 		});
 
 		// Inject the DELETE Button
-		this.deleteButton  = $('<button id="button-remove" class="btn btn-default btn-sm"><i class="fa fa-times margin-r-5"></i>' + gettext('Remove') + '</button>');
+		this.deleteButton  = $('<button id="button-remove" class="btn-pl-add btn-pl-add--danger"><i class="fa fa-times"></i>' + gettext('Remove') + '</button>');
 		this.html.append(this.deleteButton);
 		this.deleteButton.click($.proxy(function(){
 			var node = this.view.getPrimarySelection();
@@ -256,21 +256,21 @@ gvsigolETL.Toolbar = Class.extend({
 		},this));
 
 		// Inject the UNDO Button and the callbacks
-		this.undoButton  = $('<button id="button-undo" class="btn btn-default btn-sm"><i class="fa fa-reply margin-r-5"></i>' + gettext('Undo') + '</button>');
+		this.undoButton  = $('<button id="button-undo" class="btn-pl-add btn-pl-add--outline"><i class="fa fa-reply"></i>' + gettext('Undo') + '</button>');
 		this.html.append(this.undoButton);
 		this.undoButton.click($.proxy(function(){
 			   this.view.getCommandStack().undo();
 		},this));
 
 		// Inject the REDO Button and the callback
-		this.redoButton  = $('<button id="button-redo" class="btn btn-default btn-sm"><i class="fa fa-share margin-r-5"></i>' + gettext('Redo') + '</button>');
+		this.redoButton  = $('<button id="button-redo" class="btn-pl-add btn-pl-add--outline"><i class="fa fa-share"></i>' + gettext('Redo') + '</button>');
 		this.html.append(this.redoButton);
 		this.redoButton.click($.proxy(function(){
 		    this.view.getCommandStack().redo();
 		},this));
 
 		// Inject the ZOOM IN Button and the callbacks
-		this.zoomInButton  = $('<button id="button-zoom-in" class="btn btn-default btn-sm"><i class="fa fa-search-plus margin-r-5"></i>'+gettext('Zoom In')+'</button>');
+		this.zoomInButton  = $('<button id="button-zoom-in" class="btn-pl-add btn-pl-add--outline"><i class="fa fa-search-plus"></i>'+gettext('Zoom In')+'</button>');
 		this.html.append(this.zoomInButton);
 		this.zoomInButton.button().click($.proxy(function(){
 			this.disableButton(this.zoomOutButton, false);
@@ -280,7 +280,7 @@ gvsigolETL.Toolbar = Class.extend({
 		},this));
 
 		// Inject the RESET ZOOM Button
-		this.resetButton  = $('<button id="button-zoom-in" class="btn btn-default btn-sm"><i class="fa fa-arrows-alt margin-r-5"></i> 1:1 </button>');
+		this.resetButton  = $('<button id="button-zoom-reset" class="btn-pl-add btn-pl-add--outline"><i class="fa fa-arrows-alt"></i> 1:1</button>');
 		this.html.append(this.resetButton);
 		this.resetButton.button().click($.proxy(function(){
 			this.disableButton(this.zoomOutButton, true);
@@ -290,7 +290,7 @@ gvsigolETL.Toolbar = Class.extend({
 		},this));
 
 		// Inject the ZOOM OUT Button and the callback
-		this.zoomOutButton  = $('<button id="button-zoom-in" class="btn btn-default btn-sm"><i class="fa fa-search-minus margin-r-5"></i>'+gettext('Zoom Out')+'</button>');
+		this.zoomOutButton  = $('<button id="button-zoom-out" class="btn-pl-add btn-pl-add--outline"><i class="fa fa-search-minus"></i>'+gettext('Zoom Out')+'</button>');
 		this.html.append(this.zoomOutButton);
 		this.zoomOutButton.button().click($.proxy(function(){
 			if(this.view.getZoom()<1 ){
