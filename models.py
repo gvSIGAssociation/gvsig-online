@@ -29,7 +29,7 @@ from django.contrib.postgres.fields import JSONField
 from .backend_postgis import Introspect
 import os
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _, ugettext
+from django.utils.translation import gettext_lazy as _, gettext
 from gvsigol_services.triggers import CUSTOM_PROCEDURES
 from django.utils.crypto import get_random_string
 from gvsigol import settings
@@ -1155,7 +1155,7 @@ class LayerConfig:
                 enum = LayerFieldEnumeration.objects.get(
                     layer=self.layer, field=field['name']).enumeration
                 field['type'] = str(
-                    ugettext('enumerated ({0})').format(enum.title))
+                    gettext('enumerated ({0})').format(enum.title))
             except:
                 field['type'] = self.field_info_dict.get(
                     field['name'], {}).get('type', '')

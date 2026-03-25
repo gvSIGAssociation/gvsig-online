@@ -22,7 +22,7 @@
 '''
 from xml.dom import ValidationErr
 from .models import Workspace, Datastore, Layer, LayerGroup, Server, ServiceUrl, SqlView, Connection, ConnectionRole
-from django.utils.translation import ugettext as _, ugettext_lazy
+from django.utils.translation import gettext as _, gettext_lazy
 from gvsigol_services import geographic_servers
 from django import forms
 from django.db import models as db_models
@@ -49,7 +49,7 @@ blank = (('', '---------'),)
 servers = (('geoserver', 'geoserver'),)
 
 supported_srs = tuple((x['code'],x['code']+' - '+x['title']) for x in core_utils.get_supported_crs_array())
-supported_srs_with_other = supported_srs + (('__other__', ugettext_lazy('Other')),)
+supported_srs_with_other = supported_srs + (('__other__', gettext_lazy('Other')),)
 
 if getattr(django_settings, 'SUPPORTED_FORMATS_CHOICES', None):
     img_formats = django_settings.SUPPORTED_FORMATS_CHOICES
@@ -407,7 +407,7 @@ class SqlViewForm(forms.ModelForm):
     def clean_from_tables(self):
         from_tables = json.loads(self.cleaned_data.get('from_tables', []))
         if len(from_tables) == 0:
-            raise ValidationError(ugettext_lazy('At least one table must be selected'), code='from_table')
+            raise ValidationError(gettext_lazy('At least one table must be selected'), code='from_table')
 
         table_aliases = []
         for idx, table in enumerate(from_tables, start=1):
@@ -415,30 +415,30 @@ class SqlViewForm(forms.ModelForm):
             if not table.get('name') or not alias \
                 or not table.get('datastore_id') \
                 or not table.get('datastore_name'):
-                raise ValidationError(ugettext_lazy('Invalid table definition'), code='from_table')
+                raise ValidationError(gettext_lazy('Invalid table definition'), code='from_table')
             join_field = table.get('join_field')
             if idx > 1:
                 join_field1 = table.get('join_field1')
                 if not join_field1 or not join_field1.get('name'):
-                    raise ValidationError(ugettext_lazy('Invalid table definition. Join field 1 is missing'), code='from_table_join_field1')
+                    raise ValidationError(gettext_lazy('Invalid table definition. Join field 1 is missing'), code='from_table_join_field1')
                 join_field2 = table.get('join_field2')
                 if not join_field2 or not join_field2.get('name'):
-                    raise ValidationError(ugettext_lazy('Invalid table definition. Join field 2 is missing'), code='from_table_join_field2')
+                    raise ValidationError(gettext_lazy('Invalid table definition. Join field 2 is missing'), code='from_table_join_field2')
             if alias in table_aliases:
-                raise ValidationError(ugettext_lazy('Duplicated alias'), code='from_table_alias')
+                raise ValidationError(gettext_lazy('Duplicated alias'), code='from_table_alias')
             table_aliases.append(alias)
         return from_tables
 
     def clean_fields(self):
         fields = json.loads(self.cleaned_data.get('fields', []))
         if len(fields) == 0:
-            raise ValidationError(ugettext_lazy('At least one field must be selected'), code='view_fields')
+            raise ValidationError(gettext_lazy('At least one field must be selected'), code='view_fields')
         field_aliases = []
         for field in fields:
             if not field.get('name') or not field.get('alias') or not field.get('table_alias'):
-                raise ValidationError(ugettext_lazy('Invalid field definition'), code='view_fields')
+                raise ValidationError(gettext_lazy('Invalid field definition'), code='view_fields')
             if field.get('alias') in field_aliases:
-                raise ValidationError(ugettext_lazy('Duplicated alias'), code='view_field_alias')
+                raise ValidationError(gettext_lazy('Duplicated alias'), code='view_field_alias')
             field_aliases.append(field.get('alias'))
         return fields
 

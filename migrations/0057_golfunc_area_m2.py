@@ -62,7 +62,7 @@ def install_procedure(apps, definition):
 
 def insert_def(apps, schema_editor):
     try:
-        from django.utils.translation import ugettext_noop as _
+        from django.utils.translation import gettext_noop as _
         TriggerProcedure = apps.get_model("gvsigol_services", "TriggerProcedure")
         procedure = TriggerProcedure()
         procedure.signature = TRIGGER_FUNCTION_SIGNATURE
