@@ -22,7 +22,7 @@
 from django.core.exceptions import ImproperlyConfigured
 from .models import Role
 from gvsigol_core.models import LayerGroup
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from gvsigol.settings import GVSIGOL_LDAP
 from django.contrib.auth.models import User
 import ldap.modlist as modlist
