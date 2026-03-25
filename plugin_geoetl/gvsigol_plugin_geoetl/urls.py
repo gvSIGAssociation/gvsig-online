@@ -3,7 +3,7 @@ from django.views.i18n import JavaScriptCatalog
 from gvsigol_plugin_geoetl import views
 
 urlpatterns = [
-    path('etl/get_conf/', views.get_conf, name='get_conf'),
+    path('etl/get_conf/', views.get_conf, name='geoetl_get_conf'),
     path('etl/etl_canvas/', views.etl_canvas, name='etl_canvas'),
     path('etl/to_etl_canvas/', views.etl_canvas, name='to_etl_canvas'),
     path('etl/etl_read_canvas/', views.etl_read_canvas, name='etl_read_canvas'),

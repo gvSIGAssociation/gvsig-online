@@ -2,7 +2,7 @@ from django.urls import path
 from gvsigol_plugin_charts import views
 
 urlpatterns = [
-    path('charts/get_conf/', views.get_conf, name='get_conf'),
+    path('charts/get_conf/', views.get_conf, name='charts_get_conf'),
     path('charts/chart_list/', views.chart_list, name='chart_list'),
     path('charts/select_chart_type/<int:layer_id>/', views.select_chart_type, name='select_chart_type'),
     path('charts/barchart_add/<int:layer_id>/', views.barchart_add, name='barchart_add'),

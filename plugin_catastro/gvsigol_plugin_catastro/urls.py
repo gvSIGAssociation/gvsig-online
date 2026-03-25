@@ -2,7 +2,7 @@ from django.urls import path
 from gvsigol_plugin_catastro import views
 
 urlpatterns = [
-    path('catastro/get_conf/', views.get_conf, name='get_conf'),
+    path('catastro/get_conf/', views.get_conf, name='catastro_get_conf'),
 
     path('catastro/get_provincias/', views.get_provincias, name='get_provincias'),
     path('catastro/get_municipios/', views.get_municipios, name='get_municipios'),
