@@ -1050,3 +1050,24 @@ msgstr "Aplicar"
 
 #~ msgid "Update ETL Workspace"
 #~ msgstr "Actualiza Espacio de trabajo ETL"
+
+msgid "Alphanumeric"
+msgstr "Alfanumérico"
+
+msgid "Geometric"
+msgstr "Geométrico"
+
+msgid "Geostatistical"
+msgstr "Geoestadístico"
+
+msgid "List"
+msgstr "Lista"
+
+msgid "Workflows"
+msgstr "Flujos"
+
+msgid "Search tasks..."
+msgstr "Buscar tareas..."
+
+msgid "No results"
+msgstr "Sin resultados"
