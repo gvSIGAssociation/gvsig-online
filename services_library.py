@@ -25,7 +25,7 @@
 from .models import Style, Library, Rule, LibraryRule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, TextSymbolizer, ExternalGraphicSymbolizer, ColorRamp, ColorRampFolder, ColorRampLibrary
 from gvsigol_services.models import Layer
 from gvsigol_services import geographic_servers
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from . import utils, sld_utils, sld_builder, sld_reader
 from django.http import HttpResponse
 from gvsigol import settings

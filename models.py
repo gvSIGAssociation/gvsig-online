@@ -25,7 +25,7 @@
 from django.db import models
 from django.contrib.postgres.fields import JSONField
 from gvsigol_services.models import Layer
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 
 __WELL_KNOWN_LABELS = ( # just needed for triggering xgettext makemessages detection

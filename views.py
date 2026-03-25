@@ -31,7 +31,7 @@ from gvsigol_services import utils as service_utils
 from gvsigol_services.tasks import do_layer_cache_clear
 from gvsigol_services.utils import paginate
 from django.contrib.auth.decorators import login_required
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from .models import Style, StyleLayer, Rule, Library, LibraryRule, Symbolizer, ColorMap, ColorMapEntry, RasterSymbolizer, ColorRamp, ColorRampFolder, ColorRampLibrary
 from gvsigol_auth import auth_backend
 from gvsigol_auth.utils import staff_required
