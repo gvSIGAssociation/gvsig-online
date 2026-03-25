@@ -457,6 +457,7 @@ def refresh_layer_info(self, layer_id):
         layer = Layer.objects.select_related("datastore__workspace").get(id=layer_id)
         server = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
         do_refresh_layer_extent(layer, server)
+        update_internal_wmts_layer_options(layer)
         do_layer_cache_clear(layer, server)
         do_update_thumbnail(layer, server)
         server.reload_nodes()
