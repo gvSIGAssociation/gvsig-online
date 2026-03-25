@@ -83,8 +83,8 @@ urlpatterns = [
     path('edition/check_feat_version/', views.check_version, name='check_feature_version'),
 
     # Topology API endpoints
-    path('api/v1/layers/<int:lyr_id>/topology/available-layers/', api_topology.TopologyAvailableLayersView.as_view(), name='get_topology_available_layers'),
-    path('api/v1/layers/<int:lyr_id>/topology/rules/', api_topology.TopologyRulesView.as_view(), name='get_topology_rules'),
+    path('api/v1/layers/<int:lyr_id>/topology/available-layers/', api_topology.TopologyAvailableLayersView.as_view(), name='featureapi_get_topology_available_layers'),
+    path('api/v1/layers/<int:lyr_id>/topology/rules/', api_topology.TopologyRulesView.as_view(), name='featureapi_get_topology_rules'),
     path('api/v1/layers/<int:lyr_id>/topology/rules/save/', api_topology.TopologyRulesSaveView.as_view(), name='save_topology_rules'),
 
     # Deprecated urls since they have been moved under de fileserver prefix. See urls_fileserver.py    
