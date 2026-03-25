@@ -73,7 +73,7 @@ urlpatterns = [
 
     path('api/v1/public/layers/<int:lyr_id>/feature/<int:feat_id>/', api_feature.FeatureGetView.as_view(), name='get_feature'),
     path('api/v1/public/layers/<int:lyr_id>/features/', api_feature.PublicFeaturesView.as_view(), name='get_feature_list'),
-    path('api/v1/public/layers/<int:lyr_id>/feature/', api_feature.PublicFeatureByPointView.as_view(), name='get_feature_by_point'),
+    path('api/v1/public/layers/<int:lyr_id>/feature/', api_feature.PublicFeatureByPointView.as_view(), name='get_public_feature_by_point'),
     path('api/v1/public/layers/<int:lyr_id>/<int:feat_id>/resources/', api_feature.ResourcesView.as_view(), name='get_list_public_attached_files'),
     path('api/v1/public/layers/<int:lyr_id>/fieldoptions/', api_layer.PublicLayerFieldOptions.as_view(), name='get_public_layer_field_options'),
     path('api/v1/public/layers/<int:lyr_id>/fieldoptions-paginated/', api_layer.PublicLayerFieldOptionsPaginated.as_view(), name='get_public_layer_field_options_paginated'),
