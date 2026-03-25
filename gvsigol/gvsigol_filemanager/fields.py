@@ -1,6 +1,6 @@
 from django import forms
 from django.db import models
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.forms.widgets import Input
 from django.template.loader import render_to_string
 
