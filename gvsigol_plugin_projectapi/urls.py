@@ -40,22 +40,22 @@ urlpatterns = [
     path('api/v1/projectconf/', api_info.ProjectConfView.as_view(), name='projectconf'),
     path('api/v1/platforminfo/', api.PlatformView.as_view(), name='platform_info'),
     
-    path('api/v1/projects/', api.ProjectListView.as_view(), name='project_list'),
+    path('api/v1/projects/', api.ProjectListView.as_view(), name='projectapi_project_list'),
     path('api/v1/projects/<int:project_id>/', api.ProjectView.as_view(), name='get_project'),
     path('api/v1/projects/<int:project_id>/layers/', api.ProjectLayersView.as_view(), name='get_layers_from_project'),
     path('api/v1/projects/<int:project_id>/layers/field-format/', api.ProjectLayersFieldFormatsView.as_view(), name='get_layers_field_format_from_project'),
     path('api/v1/projects/<int:project_id>/groups/', api.ProjectGroupsView.as_view(), name='get_groups_from_project'),
     path('api/v1/projects/<int:project_id>/data/', api.ProjectBaseLayerData.as_view(), name='get_base_layer_data'),
-    path('api/v1/projects/shared_view/create/', api.CreateSharedViewAPI.as_view(), name='create_shared_view'),
-    path('api/v1/projects/shared_view/save/', api.SaveSharedViewAPI.as_view(), name='save_shared_view'),
-    path('api/v1/projects/shared_view/load/<str:view_name>/', api.LoadSharedViewAPI.as_view(), name='load_shared_view'),
+    path('api/v1/projects/shared_view/create/', api.CreateSharedViewAPI.as_view(), name='projectapi_create_shared_view'),
+    path('api/v1/projects/shared_view/save/', api.SaveSharedViewAPI.as_view(), name='projectapi_save_shared_view'),
+    path('api/v1/projects/shared_view/load/<str:view_name>/', api.LoadSharedViewAPI.as_view(), name='projectapi_load_shared_view'),
     
 
     path('api/v1/groups/', api.LayerGroupsListView.as_view(), name='get_group_list'),
     path('api/v1/groups/<int:group_id>/', api.LayerGroupView.as_view(), name='get_group'),   
     path('api/v1/groups/<int:group_id>/layers/', api.LayerGroupLayersView.as_view(), name='get_layers_from_group'),
 
-    path('api/v1/servers/', api.ServerView.as_view(), name='get_server'),
+    path('api/v1/servers/', api.ServerView.as_view(), name='projectapi_get_server'),
     
 
     #url(r'^api/v1/geoserverapikey/$', api.GeoserverAPIKey.as_view(), name='get_geoserver_api_key'),
@@ -66,7 +66,7 @@ urlpatterns = [
     path('api/v1/public/projects/', api.PublicProjectListView.as_view(), name='get_public_project_list'),
     path('api/v1/public/projectconf/', api_info.PublicProjectConfView.as_view(), name='get_public_project_configuration'),
 
-    path('api/v1/applications/', api.ApplicationListView.as_view(), name='application_list'),
+    path('api/v1/applications/', api.ApplicationListView.as_view(), name='get_application_list'),
     path('api/v1/applicationconf/<str:name>/', api_info.ApplicationConfView.as_view(), name='applicationconf'),
 
     path('api/v1/markers/', api_info.MarkerView.as_view(), name='create_marker'),  
