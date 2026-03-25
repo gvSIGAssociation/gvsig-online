@@ -1,10 +1,10 @@
-from django.conf.urls import url
+from django.urls import path
 from . import views
 
 urlpatterns = [
-    url(r'^$', views.index, name='index'),
-    url(r'^ww_providers_list/$', views.list, name='list'),
-    url(r'^ww_provider_add/$', views.add, name='add'),
-    url(r'^ww_provider_delete/(?P<id>[0-9]+)/$', views.delete, name='delete'),
-    url(r'^ww_provider_conf/(?P<id>[0-9]+)/$', views.conf, name='conf')
+    path('', views.index, name='index'),
+    path('ww_providers_list/', views.list, name='list'),
+    path('ww_provider_add/', views.add, name='add'),
+    path('ww_provider_delete/<int:id>/', views.delete, name='delete'),
+    path('ww_provider_conf/<int:id>/', views.conf, name='conf')
 ]

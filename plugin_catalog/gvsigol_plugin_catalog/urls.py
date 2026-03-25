@@ -1,10 +1,10 @@
-from django.conf.urls import url
+from django.urls import path
 from . import views
 
 urlpatterns = [
-   url(r'^catalog/get_query/$', views.get_query, name='get_query'),
-   url(r'^catalog/get_metadata/(?P<layer_id>.+)/$', views.get_metadata, name='get_metadata'),
-   url(r'^catalog/get_metadata_from_uuid/(?P<metadata_uuid>.+)/$', views.get_metadata_from_uuid, name='get_metadata'),
-   url(r'^catalog/get_metadata_id/(?P<layer_ws>.+)/(?P<layer_name>.+)/$', views.get_metadata_id, name='get_metadata_id'),
-   url(r'^catalog/create_metadata/(?P<layer_id>[0-9]+)/$', views.create_metadata, name='create_metadata'),
+   path('catalog/get_query/', views.get_query, name='get_query'),
+   path('catalog/get_metadata/<str:layer_id>/', views.get_metadata, name='get_metadata'),
+   path('catalog/get_metadata_from_uuid/<str:metadata_uuid>/', views.get_metadata_from_uuid, name='get_metadata'),
+   path('catalog/get_metadata_id/<str:layer_ws>/<str:layer_name>/', views.get_metadata_id, name='get_metadata_id'),
+   path('catalog/create_metadata/<int:layer_id>/', views.create_metadata, name='create_metadata'),
 ]

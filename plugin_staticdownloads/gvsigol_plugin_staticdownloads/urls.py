@@ -1,6 +1,6 @@
-from django.conf.urls import url
+from django.urls import path
 from gvsigol_plugin_staticdownloads import views
 
 urlpatterns = [
-    url(r'^staticdownloads/get_conf/$', views.get_conf, name='get_conf'),
+    path('staticdownloads/get_conf/', views.get_conf, name='get_conf'),
 ]

@@ -1,4 +1,3 @@
-from django.conf.urls import url
 from gvsigol_plugin_importvector import views
 
 urlpatterns = [
