@@ -25,7 +25,7 @@
 from gvsigol_auth import auth_backend
 from django import apps
 from django.core.mail import send_mail
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from gvsigol_core.models import Project, ProjectRole, ProjectLayerGroup, Application, ApplicationRole
 from gvsigol_services.models import LayerGroup, Layer, LayerGroupRole
 from gvsigol_services.authorization import can_use_layergroup

@@ -20,7 +20,7 @@
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
-from django.utils.translation import ugettext_noop as _
+from django.utils.translation import gettext_noop as _
 import os
 
 

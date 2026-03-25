@@ -6,7 +6,7 @@ Created on 17 jul. 2020
 
 from django import forms
 from django.core.validators import RegexValidator
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from gvsigol_core.models import Project
 from gvsigol.basetypes import CloneConf
 from gvsigol_services.models import Workspace, Server
