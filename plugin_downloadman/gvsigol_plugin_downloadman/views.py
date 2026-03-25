@@ -472,7 +472,7 @@ def createResourceLocator(resource, downloadRequest):
     
 @csrf_exempt
 def requestDownload(request):
-    if request.is_ajax():
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         if request.method == 'POST':
             json_data = json.loads(request.body)
             try:
