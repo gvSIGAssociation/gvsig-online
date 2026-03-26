@@ -944,7 +944,14 @@ class FeaturesDeleteView(RetrieveDestroyAPIView):
         validation = Validation(request)
         try:
             validation.check_get_feature(lyr_id, feat_id)
-            feat = serializers.FeatureSerializer().get(validation, lyr_id, feat_id, 4326)
+            source_epsg = 4326
+            if 'source_epsg' in self.request.GET:
+                try:
+                    source_epsg = int(self.request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
+
+            feat = serializers.FeatureSerializer().get(validation, lyr_id, feat_id, source_epsg)
             result = {
                 "content" : feat,
                 "links" : [{
@@ -984,15 +991,21 @@ class FeaturesDeleteView(RetrieveDestroyAPIView):
                     pass
 
             validation.check_delete_feature(lyr_id, feat_id)
+            source_epsg = 4326
+            if 'source_epsg' in self.request.GET:
+                try:
+                    source_epsg = int(self.request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
             geom = None
             if _layer_or_group_is_cached(lyr_id):
                 try:
-                    feat = serializers.FeatureSerializer().get(validation, lyr_id, feat_id, 4326)
+                    feat = serializers.FeatureSerializer().get(validation, lyr_id, feat_id, source_epsg)
                     geom = feat.get('geometry') if feat else None
                 except Exception:
                     pass
             serializers.FeatureSerializer().delete(validation, lyr_id, feat_id, version)
-            cache_task_id = _trigger_cache_regeneration_for_edit(lyr_id, geom, source_epsg=4326) if geom else None
+            cache_task_id = _trigger_cache_regeneration_for_edit(lyr_id, geom, source_epsg=source_epsg) if geom else None
             resp = HttpException(204, "OK").get_exception()
             if cache_task_id:
                 resp['X-Cache-Task-Id'] = cache_task_id
