@@ -10,72 +10,88 @@ def assign_default_project(apps, schema_editor):
     Si una categoría está asociada a marcadores de múltiples proyectos,
     se duplica la categoría (una por proyecto) y se actualizan las referencias.
     """
-    Category = apps.get_model('gvsigol_services', 'Category')
-    Marker = apps.get_model('gvsigol_services', 'Marker')
-    
-    total_categories = Category.objects.count()
-    
-    if total_categories == 0:
-        print("No hay categorías para migrar.")
-        return
-    
-    deleted_categories = []
-    
-    for category in Category.objects.all():
-        try:
-            markers = Marker.objects.filter(category=category)
-            
-            if not markers.exists():
-                deleted_categories.append(f"{category.title} (ID: {category.id})")
-                category.delete()
-                continue
-            
-            projects_dict = {}
-            for marker in markers:
-                project_id = marker.idProj
-                if project_id not in projects_dict:
-                    projects_dict[project_id] = []
-                projects_dict[project_id].append(marker)
-            
-            if len(projects_dict) == 1:
-                project_id = list(projects_dict.keys())[0]
-                category.project_id = project_id
-                category.save()
-            else:
-                is_first = True
-                for project_id, markers_list in projects_dict.items():
-                    if is_first:
-                        category.project_id = project_id
-                        category.save()
-                        is_first = False
-                    else:
-                        new_category = Category.objects.create(
-                            title=category.title,
-                            project_id=project_id
-                        )
-                        
-                        Marker.objects.filter(
-                            id__in=[m.id for m in markers_list]
-                        ).update(category=new_category)
+    try:
+        import logging
+        Category = apps.get_model('gvsigol_services', 'Category')
+        Marker = apps.get_model('gvsigol_services', 'Marker')
+        
+        total_categories = Category.objects.count()
+        
+        if total_categories == 0:
+            logging.getLogger('gvsigol').info("There is no categories to migrate")
+            return
+        
+        deleted_categories = []
+        
+        for category in Category.objects.all():
+            try:
+                markers = Marker.objects.filter(category=category)
                 
-        except Exception as e:
-            print(f"ERROR en categoría {category.id}: {e}")
-            if not category.project_id:
-                first_marker = Marker.objects.filter(category=category).first()
-                if first_marker:
-                    category.project_id = first_marker.idProj
+                if not markers.exists():
+                    deleted_categories.append(f"{category.title} (ID: {category.id})")
+                    category.delete()
+                    continue
+                
+                projects_dict = {}
+                for marker in markers:
+                    project_id = marker.idProj
+                    if project_id not in projects_dict:
+                        projects_dict[project_id] = []
+                    projects_dict[project_id].append(marker)
+                
+                if len(projects_dict) == 1:
+                    project_id = list(projects_dict.keys())[0]
+                    category.project_id = project_id
                     category.save()
-    
-    null_count = Category.objects.filter(project__isnull=True).count()
-    
-    if deleted_categories:
-        print(f"Categorías eliminadas (sin marcadores):")
-        for cat in deleted_categories:
-            print(f"  - {cat}")
-    
-    if null_count > 0:
-        print(f"ADVERTENCIA: Quedan {null_count} categorías con project_id NULL")
-
+                else:
+                    is_first = True
+                    for project_id, markers_list in projects_dict.items():
+                        if is_first:
+                            category.project_id = project_id
+                            category.save()
+                            is_first = False
+                        else:
+                            new_category = Category.objects.create(
+                                title=category.title,
+                                project_id=project_id
+                            )
+                            
+                            Marker.objects.filter(
+                                id__in=[m.id for m in markers_list]
+                            ).update(category=new_category)
+                    
+            except Exception as e:
+                try:
+                    import logging
+                    logging.getLogger('gvsigol').exception(f"Error in category {category.id}")
+                except:
+                    pass
+                try:
+                    if not category.project_id:
+                        first_marker = Marker.objects.filter(category=category).first()
+                        if first_marker:
+                            category.project_id = first_marker.idProj
+                            category.save()
+                except Exception as e:
+                    try:
+                        import logging
+                        logging.getLogger('gvsigol').exception(f"Error setting category")
+                    except:
+                        pass
+        
+        null_count = Category.objects.filter(project__isnull=True).count()
+        
+        if deleted_categories:
+            logging.getLogger('gvsigol').info(f"Deleted categories (without markers): {', '.join(deleted_categories)}")
+        
+        if null_count > 0:
+            logging.getLogger('gvsigol').warning(f"There are {null_count} categories with a NULL project_id")
+    except Exception as e:
+        try:
+            import logging
+            logging.exception(f"Error in assign_default_project")
+        except:
+            pass
 
 class Migration(migrations.Migration):
 
