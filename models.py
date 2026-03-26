@@ -25,7 +25,10 @@
 from gvsigol.basetypes import CloneConf
 import logging
 from django.contrib.auth.models import Group
-from django.contrib.postgres.fields import JSONField
+try:
+    from django.db.models import JSONField
+except ImportError:
+    from django_jsonfield_backport.models import JSONField
 from .backend_postgis import Introspect
 import os
 from django.urls import reverse
