@@ -23,7 +23,10 @@
 @author: José Badía <jbadia@scolab.es>
 '''
 from django.db import models
-from django.contrib.postgres.fields import JSONField
+try:
+    from django.db.models import JSONField
+except ImportError:
+    from django_jsonfield_backport.models import JSONField
 from gvsigol_services.models import Layer
 from django.utils.translation import gettext as _
 
