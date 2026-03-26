@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from django.db import models
-from django.contrib.postgres.fields import JSONField
+try:
+    from django.db.models import JSONField
+except ImportError:
+    from django_jsonfield_backport.models import JSONField
 from gvsigol_core.models import Project
 
 class MediaDisplayConfig(models.Model):
