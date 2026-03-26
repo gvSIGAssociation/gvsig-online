@@ -30,5 +30,5 @@ class Migration(migrations.Migration):
                 ('gvsigol_core', '0046_delete_projectusergroup'),
             ]
     except Exception as e:
-        print("Survey está vacío")
+        print("Survey is empty")
         print(e)
