@@ -462,7 +462,7 @@ def refresh_layer_info(self, layer_id):
         do_update_thumbnail(layer, server)
         server.reload_nodes()
     except Exception as e:
-            logger.exception('error refreshing layer info - {0}'.format(str(layer)))
+        logger.exception('error refreshing layer info - layer_id=%s', layer_id)
 
 @celery_app.task(bind=True)
 def update_layer_info(self):
