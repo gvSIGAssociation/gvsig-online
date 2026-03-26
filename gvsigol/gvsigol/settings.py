@@ -210,6 +210,12 @@ SECURE_PROXY_SSL_HEADER = env('SECURE_PROXY_SSL_HEADER')
 #GDAL_LIBRARY_PATH = '/usr/local/lib/libgdal.so'
 
 
+# Maintain int PKs consistent with existing installations; migrate explicitly if needed in the future
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+# Suppress django_jsonfield_backport warning on Django >= 3.1 (it becomes a no-op alias there)
+SILENCED_SYSTEM_CHECKS = ['django_jsonfield_backport.W001']
+
 # Application definition
 
 INSTALLED_APPS = [

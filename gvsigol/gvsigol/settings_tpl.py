@@ -92,6 +92,12 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 2048
 DATA_UPLOAD_MAX_MEMORY_SIZE = int('##DATA_UPLOAD_MAX_MEMORY_SIZE##') #Tamaño máximo para la memoria del getcapabilities default 2621440 (2.5M) es muy poco y no se pueden añadir capas externas cuando el servidor tiene muchas capas
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o774
 
+# Maintain int PKs consistent with existing installations; migrate explicitly if needed in the future
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+# Suppress django_jsonfield_backport warning on Django >= 3.1 (it becomes a no-op alias there)
+SILENCED_SYSTEM_CHECKS = ['django_jsonfield_backport.W001']
+
 # Application definition
 
 INSTALLED_APPS = [
