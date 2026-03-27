@@ -9,7 +9,6 @@
 #   - djangoajax 3.2 → 3.3
 #   - django-countries 7.6.1 → 8.2.0
 #   - django-auth-ldap 2.2.0 → 4.8.0
-#   - djangorestframework 3.12.2 → 3.15.2
 #   - djangorestframework-jwt 1.11.0 → drf-jwt==1.19.2 (Phase 2: drop-in fork, same module path)
 #   - drf-yasg 1.20.0 → 1.21.15
 #   - django-rest-swagger REMOVED (abandoned; drf-yasg covers this)
@@ -57,6 +56,7 @@
 #   - python-resize-image 1.1.19 → 1.1.20
 #
 # Removed dependecies (not used):
+#   - djangorestframework-jwt
 #   - schedule
 #   - django-rest-swagger
 #   - django-rest-swagger-swaggerdoc
@@ -64,7 +64,6 @@
 #   - limesurveyrc2api
 #
 # Kept at current version (require code changes in later phases):
-#   - djangorestframework-jwt==1.11.0 → drf-jwt==1.19.2 (Phase 2: done)
 #   - shapely==1.8.4 (Phase 3: → 2.x)
 #   - SQLAlchemy==1.4.50 (Phase 3: → 2.x)
 #   - pandas==1.5.3 (Phase 3: → 2.x; numpy debe actualizarse en el mismo paso)
