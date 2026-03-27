@@ -28,20 +28,13 @@ from django.utils.translation import gettext as _
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from gvsigol_auth.utils import superuser_required, staff_required
-from .forms_services import GtfsProviderForm, GtfsProviderUpdateForm, GtfsCrontabForm, APPMobileConfigUpdateForm
-from gvsigol import settings
+from .forms_services import GtfsProviderForm, GtfsProviderUpdateForm, APPMobileConfigUpdateForm
 from gvsigol_plugin_trip_planner.utils import *
 import json
 
 from datetime import datetime, timedelta
 
-from gvsigol.settings import INSTALLED_APPS, CRONTAB_ACTIVE
-import threading
-import schedule
-import time
-
 from . import settings as priv_settings
-from django.apps import apps
 from gvsigol_plugin_trip_planner.settings import GTFS_SCRIPT
 
 from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
