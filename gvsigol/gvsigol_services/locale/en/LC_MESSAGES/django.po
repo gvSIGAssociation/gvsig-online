@@ -4016,3 +4016,29 @@ msgstr ""
 #, python-brace-format
 msgid "Error deleting view: {0}"
 msgstr ""
+
+#: utils.py:923
+msgid "Select a field for the temporal dimension."
+msgstr ""
+
+#: utils.py:926
+msgid "Select a time presentation mode."
+msgstr ""
+
+#: utils.py:930
+msgid "Select a valid default value mode for the temporal dimension."
+msgstr ""
+
+#: utils.py:934
+msgid ""
+"Enter a default date when using \"nearest to the reference value\" or "
+"\"reference value\" mode."
+msgstr ""
+
+#: utils.py:938
+msgid "Invalid default date format. Use DD-MM-YYYY HH:mm:ss."
+msgstr ""
+
+#: rest_geoserver.py:369
+msgid "Invalid temporal default date format"
+msgstr ""

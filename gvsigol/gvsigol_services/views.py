@@ -1534,6 +1534,13 @@ def layer_add_with_group(request, layergroup_id):
             try:
                 datastore = form.cleaned_data['datastore']
                 layergroup = form.cleaned_data['layer_group']
+                if datastore.type == 'v_PostGIS' and time_enabled:
+                    terr = utils.validate_temporal_layer_post_params(
+                        time_enabled, time_field, time_presentation,
+                        time_default_value_mode, time_default_value)
+                    if terr:
+                        form.add_error(None, terr)
+                        raise utils.TemporalValidationFailed()
                 if not utils.can_use_datastore(request, datastore):
                     raise ValueError(_("You are not allowed to use the selected datastore"))
                 if not utils.can_use_layergroup(request, layergroup, permission=LayerGroupRole.PERM_INCLUDEINPROJECTS):
@@ -1655,6 +1662,8 @@ def layer_add_with_group(request, layergroup_id):
                 else:
                     to_url = back_url
                 return HttpResponseRedirect(to_url)
+            except utils.TemporalValidationFailed:
+                pass
             except rest_geoserver.RequestError as e:
                 msg = e.server_message
                 logger.exception(msg)
@@ -1862,6 +1871,15 @@ def layer_update(request, layer_id):
 
         ds = Datastore.objects.get(id=layer.datastore.id)
         gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
+        if ds.type == 'v_PostGIS' and time_enabled:
+            temporal_err = utils.validate_temporal_layer_post_params(
+                time_enabled, time_field, time_presentation,
+                time_default_value_mode, time_default_value)
+            if temporal_err:
+                form = LayerUpdateForm(request, request.POST, layergroup_id=layergroup_id, instance=layer)
+                form.add_error(None, temporal_err)
+                return render(request, 'layer_update.html', _layer_update_build_render_context(
+                    request, layer, layer_id, layergroup_id, project_id, from_redirect, redirect_to_layergroup, form))
         if gs.updateResource(workspace, layer.datastore.name, layer.datastore.type, name, updatedParams=updatedParams):
             layer.title = title
             layer.cached = cached
@@ -1992,66 +2010,69 @@ def layer_update(request, layer_id):
         else:
             return redirect('layer_list')
     else:
-        datastore = Datastore.objects.get(id=layer.datastore.id)
-        workspace = Workspace.objects.get(id=datastore.workspace_id)
         form = LayerUpdateForm(request, layergroup_id=layergroup_id, instance=layer)
+        return render(request, 'layer_update.html', _layer_update_build_render_context(
+            request, layer, layer_id, layergroup_id, project_id, from_redirect, redirect_to_layergroup, form))
 
-        if layer.external_params:
-            params = json.loads(layer.external_params)
-            for key in params:
-                form.initial[key] = params[key]
+def _layer_update_build_render_context(request, layer, layer_id, layergroup_id, project_id, from_redirect, redirect_to_layergroup, form):
+    datastore = Datastore.objects.get(id=layer.datastore.id)
+    workspace = Workspace.objects.get(id=datastore.workspace_id)
 
-        try:
-            layerConf = ast.literal_eval(layer.conf)
-        except:
-            layerConf = {}
+    if layer.external_params:
+        params = json.loads(layer.external_params)
+        for key in params:
+            form.initial[key] = params[key]
 
-        date_fields = []
-        if layer.type.startswith('v_'):
-            # ensure we get a value for max_features
-            layerConf['featuretype'] = layerConf.get('featuretype', {})
-            layerConf['featuretype']['max_features'] = layerConf['featuretype'].get('max_features', 0)
-        if layer.type == 'v_PostGIS':
-            aux_fields = get_date_fields(layer.id)
-            if 'fields' in layerConf:
-                for field in layerConf['fields']:
-                    for data_field in aux_fields:
-                        if field['name'] == data_field:
-                            date_fields.append(field)
-            i, params = layer.datastore.get_db_connection()
-            with i as c:
-                is_view = c.is_view(layer.datastore.name, layer.source_name)
-        else:
-            is_view = False
+    try:
+        layerConf = ast.literal_eval(layer.conf)
+    except Exception:
+        layerConf = {}
 
-        md_uuid = core_utils.get_layer_metadata_uuid(layer)
-        plugins_config = core_utils.get_plugins_config()
-        html = True
-        if layer.detailed_info_html == None or layer.detailed_info_html == '' or layer.detailed_info_html == 'null':
-            html = False
+    date_fields = []
+    if layer.type.startswith('v_'):
+        layerConf['featuretype'] = layerConf.get('featuretype', {})
+        layerConf['featuretype']['max_features'] = layerConf['featuretype'].get('max_features', 0)
+    if layer.type == 'v_PostGIS':
+        aux_fields = get_date_fields(layer.id)
+        if 'fields' in layerConf:
+            for field in layerConf['fields']:
+                for data_field in aux_fields:
+                    if field['name'] == data_field:
+                        date_fields.append(field)
+        i, params = layer.datastore.get_db_connection()
+        with i as c:
+            is_view = c.is_view(layer.datastore.name, layer.source_name)
+    else:
+        is_view = False
 
-        _, layer_image_url = utils.get_layer_img(layer.id, None)
-        roles = utils.get_all_user_roles_checked_by_layer(layer)
-        return render(request, 'layer_update.html', {
-            'html': html, 'layer': layer,
-            'workspace': workspace,
-            'form': form,
-            'layer_id': layer_id,
-            'layer_conf': layerConf,
-            'date_fields': json.dumps(date_fields),
+    md_uuid = core_utils.get_layer_metadata_uuid(layer)
+    plugins_config = core_utils.get_plugins_config()
+    html = True
+    if layer.detailed_info_html is None or layer.detailed_info_html == '' or layer.detailed_info_html == 'null':
+        html = False
 
-            'layer_md_uuid': md_uuid,
-            'plugins_config': plugins_config,
-            'layer_image_url': layer_image_url,
-            'datastore_type': layer.datastore.type,
-            'roles': roles,
-            'resource_is_public': layer.public,
-            'is_view': is_view,
-            'redirect_to_layergroup': redirect_to_layergroup,
-            'layergroup_id': layergroup_id,
-            'project_id': project_id,
-            'from_redirect': from_redirect
-        })
+    _, layer_image_url = utils.get_layer_img(layer.id, None)
+    roles = utils.get_all_user_roles_checked_by_layer(layer)
+    return {
+        'html': html, 'layer': layer,
+        'workspace': workspace,
+        'form': form,
+        'layer_id': layer_id,
+        'layer_conf': layerConf,
+        'date_fields': json.dumps(date_fields),
+
+        'layer_md_uuid': md_uuid,
+        'plugins_config': plugins_config,
+        'layer_image_url': layer_image_url,
+        'datastore_type': layer.datastore.type,
+        'roles': roles,
+        'resource_is_public': layer.public,
+        'is_view': is_view,
+        'redirect_to_layergroup': redirect_to_layergroup,
+        'layergroup_id': layergroup_id,
+        'project_id': project_id,
+        'from_redirect': from_redirect
+    }
 
 def get_date_fields(layer_id):
     date_fields = []
@@ -4269,6 +4290,7 @@ def layer_create_with_group(request, layergroup_id):
         form = CreateFeatureTypeForm(request.POST, request=request, layergroup_id=layergroup_id)
         if form.is_valid():
             try:
+                msg = ''
                 datastore = form.cleaned_data['datastore']
                 server = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
                 layergroup = form.cleaned_data['layer_group']
@@ -4285,6 +4307,13 @@ def layer_create_with_group(request, layergroup_id):
                     form.add_error(None, msg)
 
                 else:
+                    if datastore.type == 'v_PostGIS' and time_enabled:
+                        terr = utils.validate_temporal_layer_post_params(
+                            time_enabled, time_field, time_presentation,
+                            time_default_value_mode, time_default_value)
+                        if terr:
+                            form.add_error(None, terr)
+                            raise utils.TemporalValidationFailed()
                     server.normalizeTableFields(form.cleaned_data['fields'])
                     server.createTable(form.cleaned_data)
                     extraParams = {}
@@ -4391,18 +4420,20 @@ def layer_create_with_group(request, layergroup_id):
                         to_url = back_url
                     return HttpResponseRedirect(to_url)
 
+            except utils.TemporalValidationFailed:
+                pass
             except psycopg2.errors.DuplicateTable as e1:
                 logger.exception("Error creating layer: table already exists")
                 try:
                     msg = e1.get_message()
-                except:
+                except Exception:
                     msg = _("Error: table already exists. Try to publish the layer instead of creating an empty one.")
                 form.add_error(None, msg)
             except Exception as e:
                 logger.exception("Error creating layer")
                 try:
                     msg = e.get_message()
-                except:
+                except Exception:
                     msg = _("Error: layer could not be published")
                 # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
                 form.add_error(None, msg)

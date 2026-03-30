@@ -306,8 +306,9 @@ class LayerForm(forms.ModelForm):
 class LayerUpdateForm(forms.ModelForm):
     class Meta:
         model = Layer
-        fields = ['datastore', 'name', 'title', 'layer_group', 'visible', 'queryable', 'time_enabled', 'time_enabled_endfield', 'time_resolution', 'time_presentation', 'time_default_value_mode', 'time_default_value']
-    datastore = forms.CharField(label=_('Datastore'), required=True, max_length=200, widget=forms.TextInput(attrs={'class' : 'form-control', 'readonly': 'true'}))
+        # datastore no va en fields: el template envía el nombre como texto (POST "datastore")
+        # y no puede mapearse al ForeignKey; la capa sigue usando layer.datastore en la vista.
+        fields = ['name', 'title', 'layer_group', 'visible', 'queryable', 'time_enabled', 'time_enabled_endfield', 'time_resolution', 'time_presentation', 'time_default_value_mode', 'time_default_value']
     name = forms.CharField(label=_('Name'), required=True, max_length=100, widget=forms.TextInput(attrs={'class' : 'form-control', 'readonly': 'true'}))
     title = forms.CharField(label=_('Title'), required=True, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     layer_group = forms.ModelChoiceField(label=_('Layer group'), required=True, queryset=None, widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))

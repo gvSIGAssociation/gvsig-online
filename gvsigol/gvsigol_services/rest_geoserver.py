@@ -27,6 +27,7 @@ from gvsigol import settings
 import requests
 import json
 from datetime import datetime
+from django.utils.translation import gettext as _
 from lxml import etree as ET
 import logging
 from builtins import str as text
@@ -356,12 +357,16 @@ class Geoserver():
                 data += '                <resolution>'+str(resolution*1000)+'</resolution>'
             data += '                <units>ISO8601</units>'
             data += '                <defaultValue>'
-            data += '                    <strategy>'+default_value_mode+'</strategy>'
-            if default_value != None and default_value_mode != 'MINIMUM' and default_value_mode != 'MAXIMUM':
-                date_format = datetime.strptime(default_value, '%d-%m-%Y %H:%M:%S')
-                # 2001-12-12T18:00:00.0Z
-                final_value = date_format.strftime('%Y-%m-%dT%H:%M:%S.0Z')
-                data += '                    <referenceValue>'+final_value+'</referenceValue>'
+            strategy = default_value_mode if default_value_mode else 'MAXIMUM'
+            data += '                    <strategy>'+strategy+'</strategy>'
+            dv = (default_value or '').strip() if default_value is not None else ''
+            if dv and default_value_mode not in (None, '', 'MINIMUM', 'MAXIMUM'):
+                try:
+                    date_format = datetime.strptime(dv, '%d-%m-%Y %H:%M:%S')
+                    final_value = date_format.strftime('%Y-%m-%dT%H:%M:%S.0Z')
+                    data += '                    <referenceValue>'+final_value+'</referenceValue>'
+                except ValueError:
+                    raise FailedRequestError(-1, _('Invalid temporal default date format'))
             data += '                </defaultValue>'
         data += '            </dimensionInfo>'
         data += '        </entry>'
