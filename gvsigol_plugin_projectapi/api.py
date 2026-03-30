@@ -73,6 +73,7 @@ def _order_projects_like_home(request, projects):
     """
     Order projects like home / home_order_get: user UserHomeOrder if set, else global (user=null).
     Only uses order entries of type 'private' and 'public' (apps in saved order are ignored here).
+    Also works for public-only lists.
     """
     projects = list(projects)
     if not projects:
@@ -521,8 +522,9 @@ class PublicProjectListView(ListAPIView):
             queryset = Project.objects.filter(is_public=True, labels__contains=label, expiration_date__gte=now) | Project.objects.filter(is_public=True, labels__contains=label, expiration_date=None)
         else:
             queryset = Project.objects.filter(is_public=True, expiration_date__gte=now) | Project.objects.filter(is_public=True, expiration_date=None)
-            
-        serializer = ProjectsSerializer(queryset, many=True)
+
+        projects_ordered = _order_projects_like_home(request, queryset)
+        serializer = ProjectsSerializer(projects_ordered, many=True)
         result = {
             "content" : serializer.data,
             "links" : [
