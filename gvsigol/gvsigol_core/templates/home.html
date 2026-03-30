@@ -5,8 +5,9 @@
 {% block header %}
 <style>
 /* ============================================================
-   HOME PAGE – REDESIGN v2
-   Profile bar compacta + project cards con paginación
+   HOME PAGE – REDESIGN v3
+   Interfaz limpia: perfil compacto, toolbar en dos niveles,
+   cards grandes con borde lateral de color
    ============================================================ */
 :root {
 	--h-accent:     #4a7fa5;
@@ -20,40 +21,43 @@
 	--h-shadow:     0 2px 12px rgba(0,0,0,0.08);
 	--h-shadow-hv:  0 6px 24px rgba(0,0,0,0.13);
 	--h-transition: 0.22s cubic-bezier(.4,0,.2,1);
+	--h-green:      #28a064;
+	--h-blue:       #3d7ab5;
 }
 
-.home-page { padding: 8px 0; }
+.home-page { padding: 20px 0; }
 
 /* ============================================================
-   PROFILE BAR
+   PROFILE BAR – compacta
    ============================================================ */
 .profile-bar {
 	background: linear-gradient(135deg, var(--h-accent) 0%, var(--h-accent-dk) 100%);
-	border-radius: var(--h-radius);
+	border-radius: var(--h-radius) var(--h-radius) 0 0;
 	box-shadow: 0 4px 18px rgba(45,95,128,0.25);
 	border: none;
 	padding: 14px 20px;
 	display: flex;
 	align-items: center;
-	gap: 18px;
-	flex-wrap: wrap;
-	margin-bottom: 20px;
+	gap: 14px;
+	margin-bottom: 0;
+}
+.profile-bar--no-details {
+	border-radius: var(--h-radius);
+	margin-bottom: 24px;
 }
 
-/* Avatar */
 .profile-bar__avatar {
-	width: 46px;
-	height: 46px;
+	width: 42px;
+	height: 42px;
 	border-radius: 50%;
 	border: 2px solid rgba(255,255,255,0.6);
 	flex-shrink: 0;
 	display: block;
 }
 
-/* Nombre + rol */
-.profile-bar__identity { flex-shrink: 0; }
+.profile-bar__identity { flex: 1; }
 .profile-bar__name {
-	font-size: 14px;
+	font-size: 15px;
 	font-weight: 700;
 	color: #ffffff;
 	margin: 0 0 3px;
@@ -68,19 +72,57 @@
 	padding: 2px 9px;
 	border-radius: 20px;
 }
-.profile-bar__role-badge--admin { background: rgba(255,255,255,0.2); color: #fff; }
-.profile-bar__role-badge--staff { background: rgba(255,255,255,0.2); color: #fff; }
-.profile-bar__role-badge--user  { background: rgba(255,255,255,0.2); color: #fff; }
+.profile-bar__role-badge--admin,
+.profile-bar__role-badge--staff,
+.profile-bar__role-badge--user { background: rgba(255,255,255,0.2); color: #fff; }
 
-/* Separador vertical */
-.profile-bar__sep {
-	width: 1px;
-	height: 36px;
-	background: rgba(255,255,255,0.25);
+.profile-bar__details-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: rgba(255,255,255,0.15);
+	border: 1px solid rgba(255,255,255,0.3);
+	border-radius: 6px;
+	padding: 6px 14px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #fff;
+	cursor: pointer;
+	transition: background var(--h-transition), border-color var(--h-transition);
 	flex-shrink: 0;
 }
+.profile-bar__details-btn:hover {
+	background: rgba(255,255,255,0.28);
+	border-color: rgba(255,255,255,0.6);
+}
+.profile-bar__details-btn i {
+	font-size: 10px;
+	transition: transform var(--h-transition);
+}
+.profile-bar__details-btn.active i { transform: rotate(180deg); }
 
-/* Pills de info */
+/* ============================================================
+   PANEL DE DETALLES (desplegable)
+   ============================================================ */
+.profile-details-panel {
+	overflow: hidden;
+	max-height: 0;
+	transition: max-height 0.4s ease;
+	background: var(--h-white);
+	border: 1px solid var(--h-border);
+	border-top: none;
+	border-radius: 0 0 var(--h-radius) var(--h-radius);
+	margin-bottom: 24px;
+}
+.profile-details-panel.details-visible { max-height: 500px; }
+.profile-details-inner {
+	padding: 16px 20px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
 .profile-bar__pills {
 	display: flex;
 	align-items: center;
@@ -92,60 +134,55 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 5px;
-	background: rgba(255,255,255,0.15);
-	border: 1px solid rgba(255,255,255,0.25);
+	background: var(--h-bg);
+	border: 1px solid var(--h-border);
 	border-radius: 20px;
-	padding: 4px 12px;
+	padding: 5px 14px;
 	font-size: 12px;
-	color: #ffffff;
+	color: var(--h-text);
 	white-space: nowrap;
 }
 .profile-bar__pill i {
-	color: rgba(255,255,255,0.75);
+	color: var(--h-muted);
 	font-size: 11px;
 	width: 12px;
 	text-align: center;
 }
-.profile-bar__pill span { max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
+.profile-bar__pill span { max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
 
-/* Botón de contraseña */
 .profile-bar__pass-btn {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
-	background: rgba(255,255,255,0.15);
-	border: 1px solid rgba(255,255,255,0.3);
+	background: var(--h-accent);
+	border: none;
 	border-radius: 6px;
-	padding: 5px 12px;
+	padding: 6px 14px;
 	font-size: 12px;
 	font-weight: 600;
 	color: #ffffff !important;
 	cursor: pointer;
-	transition: background var(--h-transition), border-color var(--h-transition);
+	transition: background var(--h-transition);
 	flex-shrink: 0;
 	text-decoration: none !important;
 }
 .profile-bar__pass-btn:hover {
-	background: rgba(255,255,255,0.28);
-	border-color: rgba(255,255,255,0.6);
+	background: var(--h-accent-dk);
 	color: #ffffff !important;
 }
-.profile-bar__pass-btn i { color: rgba(255,255,255,0.85); font-size: 12px; }
+.profile-bar__pass-btn i { font-size: 12px; }
 
-/* Panel colapsable de cambio de contraseña */
-.profile-bar__pass-panel {
+.profile-bar__pass-form {
+	width: 100%;
 	overflow: hidden;
 	max-height: 0;
 	transition: max-height 0.35s ease;
-	background: var(--h-white);
-	border-radius: var(--h-radius);
-	border: 1px solid var(--h-border);
-	box-shadow: var(--h-shadow);
-	margin-bottom: 20px;
+	border-top: 1px solid var(--h-border);
+	margin-top: 12px;
 }
-.profile-bar__pass-panel.pass-visible { max-height: 320px; }
-.profile-bar__pass-panel-inner { padding: 20px; max-width: 480px; }
-.profile-bar__pass-panel-inner .form-group label {
+.profile-bar__pass-form.pass-visible { max-height: 260px; }
+.profile-bar__pass-form-inner { padding: 14px 0 0; max-width: 480px; }
+.profile-bar__pass-form-inner .form-group label {
 	font-size: 12px;
 	font-weight: 600;
 	color: var(--h-muted);
@@ -153,13 +190,13 @@
 	letter-spacing: 0.4px;
 	margin-bottom: 5px;
 }
-.profile-bar__pass-panel-inner .form-control {
+.profile-bar__pass-form-inner .form-control {
 	border-radius: 6px;
 	border-color: var(--h-border);
 	font-size: 13px;
 	height: 36px;
 }
-.profile-bar__pass-panel-inner .form-control:focus {
+.profile-bar__pass-form-inner .form-control:focus {
 	border-color: var(--h-accent);
 	box-shadow: 0 0 0 3px rgba(74,127,165,0.15);
 	outline: none;
@@ -184,51 +221,66 @@
 .btn-pass-submit:hover { background: var(--h-accent-dk); }
 
 /* ============================================================
-   PANELES DE PROYECTOS
+   PANEL DE PROYECTOS – fondo transparente
    ============================================================ */
 .projects-panel {
-	background: var(--h-white);
-	border-radius: var(--h-radius);
-	box-shadow: var(--h-shadow);
-	border: 1px solid var(--h-border);
-	overflow: hidden;
-	margin-bottom: 22px;
+	background: transparent;
+	border-radius: 0;
+	box-shadow: none;
+	border: none;
+	overflow: visible;
+	margin-bottom: 24px;
 }
 .projects-panel:last-child { margin-bottom: 0; }
 
 .projects-panel__header {
+	background: var(--h-white);
+	border-radius: var(--h-radius);
+	box-shadow: var(--h-shadow);
+	border: 1px solid var(--h-border);
+	margin-bottom: 20px;
+	padding: 0;
+}
+
+.projects-panel__header-main {
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
-	padding: 12px 20px;
-	border-bottom: 1px solid var(--h-border);
+	padding: 14px 20px;
 	gap: 12px;
 	flex-wrap: wrap;
-	background: var(--h-white);
-	border-radius: var(--h-radius) var(--h-radius) 0 0;
 }
+.projects-panel__header-secondary {
+	display: flex;
+	align-items: center;
+	padding: 0 20px 12px;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
 .projects-panel__title {
-	font-size: 14px;
+	font-size: 16px;
 	font-weight: 700;
 	color: var(--h-accent-dk);
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	margin: 0;
+	flex: 1;
 }
-.projects-panel__title i { color: var(--h-accent); font-size: 15px; }
-.projects-panel__actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.projects-panel__title i { color: var(--h-accent); font-size: 16px; }
+
+.projects-panel__body { padding: 0; width: 100%; box-sizing: border-box; }
 
 /* Buscador */
-.elegant-search { position: relative; width: 200px; }
+.elegant-search { position: relative; width: 220px; }
 .elegant-search .form-control {
-	height: 32px;
+	height: 34px;
 	border-radius: 20px;
 	border: 1px solid var(--h-border);
 	background: var(--h-bg);
 	font-size: 12px;
 	color: var(--h-text);
-	padding: 0 30px 0 12px;
+	padding: 0 30px 0 14px;
 	transition: border-color var(--h-transition), box-shadow var(--h-transition), background var(--h-transition);
 	box-shadow: none;
 }
@@ -250,7 +302,6 @@
 	pointer-events: none;
 }
 
-/* Botón añadir */
 #button-add-project {
 	display: inline-flex;
 	align-items: center;
@@ -261,81 +312,96 @@
 	border-radius: 6px;
 	font-size: 12px;
 	font-weight: 600;
-	padding: 6px 12px;
-	height: 32px;
+	padding: 7px 14px;
+	height: 34px;
 	cursor: pointer;
 	transition: background var(--h-transition);
 	white-space: nowrap;
 }
 #button-add-project:hover { background: var(--h-accent-dk); }
 
-.projects-panel__body { padding: 20px; width: 100%; box-sizing: border-box; }
-
 /* ============================================================
-   PROJECT CARDS — grid responsivo
+   GRID DE CARDS – 4 columnas
    ============================================================ */
 .projects-grid {
 	display: flex;
 	flex-wrap: wrap;
-	margin: 0 -8px;
+	margin: 0 -10px;
 	list-style: none;
 	padding: 0;
 	width: 100%;
 	box-sizing: border-box;
 }
 .projects-grid > li {
-	padding: 0 8px;
-	margin-bottom: 16px;
-	width: 20%;
+	padding: 0 10px;
+	margin-bottom: 20px;
+	width: 25%;
 	box-sizing: border-box;
 }
-@media (max-width: 1199px) { .projects-grid > li { width: 25%; } }
-@media (max-width: 991px)  { .projects-grid > li { width: 33.3333%; } }
-@media (max-width: 767px)  { .projects-grid > li { width: 50%; } }
-@media (max-width: 480px)  { .projects-grid > li { width: 100%; } }
+@media (max-width: 1199px) { .projects-grid > li { width: 33.3333%; } }
+@media (max-width: 991px)  { .projects-grid > li { width: 50%; } }
+@media (max-width: 767px)  { .projects-grid > li { width: 100%; } }
 
 .project-card {
 	background: var(--h-white);
 	border: 1px solid var(--h-border);
-	border-radius: 8px;
+	border-radius: var(--h-radius);
 	overflow: hidden;
 	display: flex;
 	flex-direction: column;
 	height: 100%;
+	position: relative;
 	transition: box-shadow var(--h-transition), border-color var(--h-transition), transform var(--h-transition);
 }
 .project-card:hover {
 	box-shadow: var(--h-shadow-hv);
 	border-color: #c8dcec;
-	transform: translateY(-2px);
+	transform: translateY(-3px);
 }
 
 .project-card__thumb {
 	width: 100%;
-	height: 60px;
+	height: 100px;
 	object-fit: contain;
 	object-position: center;
 	background: var(--h-bg);
 	display: block;
 	border-bottom: 1px solid var(--h-border);
-	padding: 6px;
+	padding: 20px;
 	box-sizing: border-box;
 }
 
 .project-card__body {
-	padding: 12px 14px;
+	padding: 14px 16px;
 	flex: 1;
 	display: flex;
 	flex-direction: column;
-	gap: 4px;
+	gap: 6px;
 }
 .project-card__name {
-	font-size: 13px;
+	font-size: 14px;
 	font-weight: 700;
 	color: var(--h-text);
 	margin: 0;
 	word-break: break-word;
 }
+.project-card__type-tag {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.3px;
+	text-transform: uppercase;
+	padding: 2px 8px;
+	border-radius: 4px;
+	line-height: 1.4;
+	width: fit-content;
+}
+.project-card__type-tag--private { background: #e8eef4; color: var(--h-accent-dk); }
+.project-card__type-tag--public  { background: #e4f3eb; color: #1e7a4d; }
+.project-card__type-tag--app     { background: #e6eef7; color: var(--h-blue); }
+
 .project-card__desc {
 	font-size: 12px;
 	color: var(--h-muted);
@@ -347,9 +413,7 @@
 	flex: 1;
 }
 
-.project-card__footer {
-	padding: 0 14px 12px;
-}
+.project-card__footer { padding: 0 16px 14px; }
 .project-card__btn {
 	display: flex;
 	align-items: center;
@@ -362,9 +426,9 @@
 	color: var(--h-accent) !important;
 	font-size: 12px;
 	font-weight: 600;
-	padding: 6px 0;
+	padding: 7px 0;
 	text-decoration: none !important;
-	transition: background var(--h-transition), border-color var(--h-transition);
+	transition: background var(--h-transition), border-color var(--h-transition), color var(--h-transition);
 	letter-spacing: 0.2px;
 }
 .project-card:hover .project-card__btn {
@@ -376,36 +440,21 @@
 /* Estado vacío */
 .projects-empty {
 	text-align: center;
-	padding: 32px 16px;
+	padding: 48px 16px;
 	color: var(--h-muted);
 	font-size: 13px;
 }
-.projects-empty i { font-size: 28px; display: block; margin-bottom: 8px; opacity: 0.5; }
+.projects-empty i { font-size: 32px; display: block; margin-bottom: 10px; opacity: 0.4; }
 
 /* ============================================================
-   PAGINACIÓN de List.js
+   PAGINACIÓN
    ============================================================ */
 .list-pagination {
 	display: flex;
 	justify-content: center;
-	margin-top: 16px;
-	padding-top: 14px;
-	border-top: 1px solid var(--h-border);
+	padding: 16px 0 4px;
 }
 .list-pagination .pagination { margin: 0; }
-
-/* Variante card para aplicaciones */
-.project-card--app { border-color: #dce8f3; }
-.project-card--app:hover { border-color: #a8c8e8; }
-.project-card__btn--app { color: #3d7ab5 !important; }
-.project-card--app:hover .project-card__btn--app {
-	background: #3d7ab5;
-	border-color: #3d7ab5;
-	color: #fff !important;
-}
-
-/* Posición relativa necesaria para badge */
-.project-card { position: relative; }
 
 /* ============================================================
    BARRA DE FILTROS
@@ -455,38 +504,18 @@
 }
 .filter-btn.active .filter-count { background: rgba(255,255,255,0.28); }
 
-/* Badge de tipo sobre la card */
-.item-type-badge {
-	position: absolute;
-	top: 8px;
-	left: 8px;
-	display: inline-flex;
-	align-items: center;
-	gap: 3px;
-	font-size: 10px;
-	font-weight: 700;
-	letter-spacing: 0.3px;
-	padding: 2px 8px;
-	border-radius: 10px;
-	z-index: 1;
-	pointer-events: none;
-}
-.item-type-badge--private { background: rgba(45,95,128,0.85);  color: #fff; }
-.item-type-badge--public  { background: rgba(40,160,100,0.85); color: #fff; }
-.item-type-badge--app     { background: rgba(61,122,181,0.85); color: #fff; }
-
 /* Estado vacío filtrado */
 .filter-empty {
 	display: none;
 	text-align: center;
-	padding: 32px 16px;
+	padding: 40px 16px;
 	color: var(--h-muted);
 	font-size: 13px;
 }
-.filter-empty i { font-size: 28px; display: block; margin-bottom: 8px; opacity: 0.5; }
+.filter-empty i { font-size: 32px; display: block; margin-bottom: 10px; opacity: 0.4; }
 
 /* ============================================================
-   ORDEN MANUAL – controles
+   CONTROLES DE ORDEN
    ============================================================ */
 .sort-toggle-bar {
 	display: flex;
@@ -535,10 +564,6 @@
 #btn-save-order.visible { display: inline-flex; }
 #btn-save-order.hide-when-filtered { display: none !important; }
 
-
-/* ============================================================
-   ORDEN GLOBAL o MI ORDEN
-   ============================================================ */
 #scope-order-select {
 	display: inline-block;
 	width: auto;
@@ -556,13 +581,8 @@
 	border-radius: 6px;
 	transition: background var(--h-transition), border-color var(--h-transition), color var(--h-transition);
 }
-#scope-order-select:hover {
-	border-color: var(--h-border);
-}
-#scope-order-select:focus {
-	outline: none;
-	border-color: var(--h-border);
-}
+#scope-order-select:hover,
+#scope-order-select:focus { outline: none; border-color: var(--h-border); }
 
 /* Drag handle */
 .drag-handle {
@@ -583,12 +603,11 @@
 .sortable-mode .drag-handle { display: flex; }
 .sortable-mode .project-card:hover { transform: none; }
 
-/* Placeholder visual al arrastrar */
 .ui-sortable-placeholder {
 	visibility: visible !important;
 	background: #e8f0f7;
 	border: 2px dashed #a8c8e8;
-	border-radius: 8px;
+	border-radius: var(--h-radius);
 }
 
 /* ============================================================
@@ -624,16 +643,156 @@
 	opacity: 0.75;
 	border-style: dashed;
 }
+
+/* Hidden items panel needs its own card look */
+.projects-panel--hidden {
+	background: var(--h-white);
+	border: 1px solid var(--h-border);
+	border-radius: var(--h-radius);
+	box-shadow: var(--h-shadow);
+	overflow: hidden;
+}
+.projects-panel--hidden .projects-panel__header {
+	box-shadow: none;
+	border: none;
+	border-radius: 0;
+	border-bottom: 1px solid var(--h-border);
+	margin-bottom: 0;
+}
+.projects-panel--hidden .projects-panel__header-main {
+	padding: 12px 20px;
+}
+.projects-panel--hidden .projects-panel__body {
+	padding: 20px;
+}
+
+/* ============================================================
+   TOGGLE VISTA CARDS / LISTA
+   ============================================================ */
+.view-toggle-bar {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	background: var(--h-bg);
+	border: 1px solid var(--h-border);
+	border-radius: 6px;
+	padding: 2px;
+}
+.view-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 28px;
+	background: transparent;
+	border: none;
+	border-radius: 4px;
+	color: var(--h-muted);
+	cursor: pointer;
+	font-size: 13px;
+	transition: background var(--h-transition), color var(--h-transition);
+}
+.view-btn.active { background: var(--h-accent); color: #fff; }
+.view-btn:not(.active):hover { color: var(--h-accent); background: rgba(74,127,165,0.1); }
+
+/* ---- Modo lista ---- */
+.projects-grid--list { margin: 0; }
+.projects-grid--list > li {
+	width: 100% !important;
+	padding: 0;
+	margin-bottom: 8px;
+}
+.projects-grid--list .project-card {
+	flex-direction: row;
+	align-items: center;
+	border-radius: 8px;
+	gap: 0;
+}
+.projects-grid--list .project-card:hover { transform: none; }
+
+.projects-grid--list .project-card__thumb {
+	width: 52px;
+	height: 52px;
+	min-width: 52px;
+	border-radius: 6px;
+	border-bottom: none;
+	padding: 6px;
+	margin: 10px 0 10px 12px;
+}
+
+.projects-grid--list .project-card__body {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	grid-template-rows: auto auto;
+	gap: 2px 14px;
+	align-items: center;
+	padding: 10px 14px;
+	flex: 1;
+	min-width: 0;
+}
+
+.projects-grid--list .project-card__name {
+	grid-column: 1;
+	grid-row: 1;
+	min-width: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	text-align: left;
+}
+
+.projects-grid--list .project-card__desc {
+	grid-column: 1;
+	grid-row: 2;
+	min-width: 0;
+	-webkit-line-clamp: 1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: block;
+	text-align: left;
+}
+
+.projects-grid--list .project-card__type-tag {
+	grid-column: 2;
+	grid-row: 1 / 3;
+	align-self: center;
+	flex-shrink: 0;
+}
+
+.projects-grid--list .project-card__footer {
+	padding: 10px 12px 10px 0;
+	flex-shrink: 0;
+}
+.projects-grid--list .project-card__btn {
+	width: auto;
+	padding: 6px 14px;
+	white-space: nowrap;
+}
+
+.projects-grid--list .drag-handle {
+	position: static;
+	margin: 0 0 0 10px;
+	background: var(--h-bg);
+	color: var(--h-muted);
+	border-radius: 4px;
+	padding: 4px 6px;
+}
+
+@media (max-width: 767px) {
+	.projects-grid--list .project-card { flex-wrap: wrap; }
+	.projects-grid--list .project-card__body { flex-wrap: wrap; }
+	.projects-grid--list .project-card__desc { display: none; }
+}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="home-page">
 
-	<!-- ===== PROFILE BAR ===== -->
-	<div class="profile-bar">
+	<!-- ===== PROFILE BAR (compacta) ===== -->
+	<div class="profile-bar{% if not allow_password_update and not user.email %} profile-bar--no-details{% endif %}">
 		<img class="profile-bar__avatar" src="{% static "img/user.png" %}" alt="Avatar">
-
 		<div class="profile-bar__identity">
 			<p class="profile-bar__name">{{user.first_name}} {{user.last_name}}</p>
 			{% if user.is_superuser %}
@@ -644,61 +803,73 @@
 			<span class="profile-bar__role-badge profile-bar__role-badge--user">{% trans "User" %}</span>
 			{% endif %}
 		</div>
-
-		<div class="profile-bar__sep"></div>
-
-		<div class="profile-bar__pills">
-			<span class="profile-bar__pill"><i class="fa fa-user"></i><span>{{user.username}}</span></span>
-			<span class="profile-bar__pill"><i class="fa fa-envelope-o"></i><span>{{user.email}}</span></span>
-			<span class="profile-bar__pill"><i class="fa fa-clock-o"></i><span>{{user.last_login}}</span></span>
-		</div>
-
-		{% if allow_password_update %}
-		<div class="profile-bar__sep"></div>
-		{% if manage_passwords_url %}
-		<a href="{{manage_passwords_url}}" target="_blank" class="profile-bar__pass-btn">
-			<i class="fa fa-lock"></i> {% trans "Change password" %}
-		</a>
-		{% else %}
-		<a href="" id="show-hide-pass-update-link" class="profile-bar__pass-btn">
-			<i class="fa fa-lock"></i> {% trans "Change password" %}
-		</a>
-		{% endif %}
-		{% endif %}
+		<button type="button" class="profile-bar__details-btn" id="btn-toggle-details">
+			<i class="fa fa-chevron-down"></i> {% trans "Details" %}
+		</button>
 	</div>
 
-	{% if allow_password_update and not manage_passwords_url %}
-	<div id="show-hide-pass-update-div" class="profile-bar__pass-panel">
-		<div class="profile-bar__pass-panel-inner">
-			<div id="form-error" class="alert alert-danger" style="padding: 8px 12px; font-size: 12px; border-radius: 6px; margin-bottom: 12px;">
-				{% trans "Passwords doesn't match" %}
+	<div id="profile-details-panel" class="profile-details-panel">
+		<div class="profile-details-inner">
+			<div class="profile-bar__pills">
+				<span class="profile-bar__pill"><i class="fa fa-user"></i><span>{{user.username}}</span></span>
+				<span class="profile-bar__pill"><i class="fa fa-envelope-o"></i><span>{{user.email}}</span></span>
+				<span class="profile-bar__pill"><i class="fa fa-clock-o"></i><span>{{user.last_login}}</span></span>
 			</div>
-			<div class="row">
-				<div class="col-sm-6 form-group" style="margin-bottom: 10px;">
-					<label for="password1">{% trans "New password" %}</label>
-					<input placeholder='{% trans "New password" %}' name="password1" id="password1" type="password" class="form-control">
-				</div>
-				<div class="col-sm-6 form-group" style="margin-bottom: 10px;">
-					<label for="password2">{% trans "Repeat new password" %}</label>
-					<input placeholder='{% trans "Repeat new password" %}' name="password2" id="password2" type="password" class="form-control">
+			{% if allow_password_update %}
+			{% if manage_passwords_url %}
+			<a href="{{manage_passwords_url}}" target="_blank" class="profile-bar__pass-btn">
+				<i class="fa fa-lock"></i> {% trans "Change password" %}
+			</a>
+			{% else %}
+			<a href="" id="show-hide-pass-update-link" class="profile-bar__pass-btn">
+				<i class="fa fa-lock"></i> {% trans "Change password" %}
+			</a>
+			{% endif %}
+			{% endif %}
+			{% if allow_password_update and not manage_passwords_url %}
+			<div id="show-hide-pass-update-div" class="profile-bar__pass-form">
+				<div class="profile-bar__pass-form-inner">
+					<div id="form-error" class="alert alert-danger" style="padding: 8px 12px; font-size: 12px; border-radius: 6px; margin-bottom: 12px;">
+						{% trans "Passwords doesn't match" %}
+					</div>
+					<div class="row">
+						<div class="col-sm-6 form-group" style="margin-bottom: 10px;">
+							<label for="password1">{% trans "New password" %}</label>
+							<input placeholder='{% trans "New password" %}' name="password1" id="password1" type="password" class="form-control">
+						</div>
+						<div class="col-sm-6 form-group" style="margin-bottom: 10px;">
+							<label for="password2">{% trans "Repeat new password" %}</label>
+							<input placeholder='{% trans "Repeat new password" %}' name="password2" id="password2" type="password" class="form-control">
+						</div>
+					</div>
+					<button id="update-password-submit" class="btn-pass-submit">
+						<i class="fa fa-check"></i> {% trans "Update password" %}
+					</button>
 				</div>
 			</div>
-			<button id="update-password-submit" class="btn-pass-submit">
-				<i class="fa fa-check"></i> {% trans "Update password" %}
-			</button>
+			{% endif %}
 		</div>
 	</div>
-	{% endif %}
 
 	<!-- ===== PANEL UNIFICADO: proyectos + aplicaciones ===== -->
 	{% if projects or public_projects or applications %}
 	<div id="all-items-panel" class="projects-panel">
 		<div class="projects-panel__header">
-			<h3 class="projects-panel__title">
-				<i class="fa fa-th-large"></i>{% trans "Projects & Applications" %}
-			</h3>
-			<div class="projects-panel__actions">
-				<!-- Filtros de tipo -->
+			<div class="projects-panel__header-main">
+				<h3 class="projects-panel__title">
+					<i class="fa fa-th-large"></i>{% trans "Projects & Applications" %}
+				</h3>
+				<div class="elegant-search">
+					<input type="text" class="search-all form-control" placeholder="{% trans 'Search...' %}" />
+					<i class="fa fa-search search-icon"></i>
+				</div>
+				{% if user.is_staff %}
+				<button id="button-add-project" title='{% trans "Add project" %}'>
+					<i class="fa fa-plus"></i> {% trans "Add" %}
+				</button>
+				{% endif %}
+			</div>
+			<div class="projects-panel__header-secondary">
 				<div class="filter-bar" id="filter-bar-types">
 					<button class="filter-btn active" data-filter="all">
 						<i class="fa fa-th"></i> {% trans "All" %}
@@ -722,7 +893,6 @@
 					</button>
 					{% endif %}
 				</div>
-				<!-- Toggle orden -->
 				<div class="sort-toggle-bar">
 					<button class="sort-btn {% if order_type == 'alpha' %}active{% endif %}" id="btn-sort-alpha">
 						<i class="fa fa-sort-alpha-asc"></i> {% trans "Alphabetical" %}
@@ -740,68 +910,68 @@
 					<option value="my_order" {% if editing_scope == 'my_order' %}selected{% endif %}>{% trans "My order" %}</option>
 				</select>
 				{% endif %}
-			{% if user.is_staff %}
-			<button id="button-add-project" title='{% trans "Add project" %}'>
-				<i class="fa fa-plus"></i> {% trans "Add" %}
-			</button>
-			{% endif %}
-			{% if has_hidden_items and user.is_staff %}
-			<button id="btn-toggle-hidden" title='{% trans "Show/hide hidden items" %}'>
-				<i class="fa fa-eye-slash"></i> {% trans "Hidden" %}
-			</button>
-			{% endif %}
-			<div class="elegant-search">
-				<input type="text" class="search-all form-control" placeholder="{% trans 'Search...' %}" />
-				<i class="fa fa-search search-icon"></i>
+				{% if has_hidden_items and user.is_staff %}
+				<button id="btn-toggle-hidden" title='{% trans "Show/hide hidden items" %}'>
+					<i class="fa fa-eye-slash"></i> {% trans "Hidden" %}
+				</button>
+				{% endif %}
+				<div class="view-toggle-bar" style="margin-left:auto;">
+					<button class="view-btn active" id="btn-view-grid" title="{% trans 'Cards' %}">
+						<i class="fa fa-th-large"></i>
+					</button>
+					<button class="view-btn" id="btn-view-list" title="{% trans 'List' %}">
+						<i class="fa fa-list"></i>
+					</button>
+				</div>
 			</div>
 		</div>
 		<div class="projects-panel__body">
 			<ul class="items-list projects-grid">
-				{% if all_items_ordered %}
-				{% for item in all_items_ordered %}
-				<li data-item-type="{{ item.item_type }}" data-item-id="{{ item.id }}">
-					<div class="project-card{% if item.item_type == 'app' %} project-card--app{% endif %}">
-						<span class="drag-handle"><i class="fa fa-bars"></i></span>
+			{% if all_items_ordered %}
+			{% for item in all_items_ordered %}
+			<li data-item-type="{{ item.item_type }}" data-item-id="{{ item.id }}">
+				<div class="project-card">
+					<span class="drag-handle"><i class="fa fa-bars"></i></span>
+					<img class="project-card__thumb" src="{{ item.image }}" alt="">
+					<div class="project-card__body">
+						<span class="item-title" style="display:none;">{{ item.title }}</span>
 						{% if item.item_type == 'private' %}
-						<span class="item-type-badge item-type-badge--private"><i class="fa fa-lock"></i> {% trans "Private" %}</span>
+						<span class="project-card__type-tag project-card__type-tag--private"><i class="fa fa-lock"></i> {% trans "Private" %}</span>
 						{% elif item.item_type == 'public' %}
-						<span class="item-type-badge item-type-badge--public"><i class="fa fa-globe"></i> {% trans "Public" %}</span>
+						<span class="project-card__type-tag project-card__type-tag--public"><i class="fa fa-globe"></i> {% trans "Public" %}</span>
 						{% else %}
-						<span class="item-type-badge item-type-badge--app"><i class="fa fa-th-large"></i> {% trans "App" %}</span>
+						<span class="project-card__type-tag project-card__type-tag--app"><i class="fa fa-th-large"></i> {% trans "Application" %}</span>
 						{% endif %}
-						<img class="project-card__thumb" src="{{ item.image }}" alt="">
-						<div class="project-card__body">
-							<span class="item-title" style="display:none;">{{ item.title }}</span>
-							<p class="project-card__name">{{ item.title }}</p>
-							<span class="project-card__desc">{{ item.description }}</span>
-						</div>
-						<div class="project-card__footer">
-						{% if item.item_type == 'app' %}
-						<a href="{{ item.url }}" target="_blank" class="project-card__btn project-card__btn--app">
-							<i class="fa fa-rocket"></i> {% trans "Open application" %}
-						</a>
-						{% else %}
-						<a href="{{ item.url }}" target="_blank" class="project-card__btn">
-							<i class="fa fa-map"></i> {% trans "Load project" %}
-						</a>
-						{% endif %}
-						</div>
+						<p class="project-card__name">{{ item.title }}</p>
+						<span class="project-card__desc">{{ item.description }}</span>
 					</div>
-				</li>
-				{% endfor %}
+					<div class="project-card__footer">
+					{% if item.item_type == 'app' %}
+					<a href="{{ item.url }}" target="_blank" class="project-card__btn">
+						<i class="fa fa-rocket"></i> {% trans "Open application" %}
+					</a>
+					{% else %}
+					<a href="{{ item.url }}" target="_blank" class="project-card__btn">
+						<i class="fa fa-map"></i> {% trans "Load project" %}
+					</a>
+					{% endif %}
+					</div>
+				</div>
+			</li>
+			{% endfor %}
 				{% else %}
-				{% for project in projects %}
-				<li data-item-type="private" data-item-id="{{ project.id }}">
-					<div class="project-card">
-						<span class="drag-handle"><i class="fa fa-bars"></i></span>
-						<span class="item-type-badge item-type-badge--private"><i class="fa fa-lock"></i> {% trans "Private" %}</span>
-						<img class="project-card__thumb" src={{project.image}} alt="">
-						<div class="project-card__body">
-							<span class="item-title" style="display:none;">{{project.title}}</span>
-							<p class="project-card__name">{{project.title}}</p>
-							<span class="project-card__desc">{{project.description}}</span>
-						</div>
-						<div class="project-card__footer">
+			{% for project in projects %}
+			<li data-item-type="private" data-item-id="{{ project.id }}">
+				<div class="project-card">
+					<span class="drag-handle"><i class="fa fa-bars"></i></span>
+					<img class="project-card__thumb" src={{project.image}} alt="">
+					<div class="project-card__body">
+						<span class="item-title" style="display:none;">{{project.title}}</span>
+						<span class="project-card__type-tag project-card__type-tag--private"><i class="fa fa-lock"></i> {% trans "Private" %}</span>
+						<p class="project-card__name">{{project.title}}</p>
+						<span class="project-card__desc">{{project.description}}</span>
+					</div>
+					<div class="project-card__footer">
 						<a href="{{project.url}}" target="_blank" class="project-card__btn">
 							<i class="fa fa-map"></i> {% trans "Load project" %}
 						</a>
@@ -810,17 +980,17 @@
 			</li>
 			{% endfor %}
 			{% for project in public_projects %}
-				<li data-item-type="public" data-item-id="{{ project.id }}">
-					<div class="project-card">
-						<span class="drag-handle"><i class="fa fa-bars"></i></span>
-						<span class="item-type-badge item-type-badge--public"><i class="fa fa-globe"></i> {% trans "Public" %}</span>
-						<img class="project-card__thumb" src={{project.image}} alt="">
-						<div class="project-card__body">
-							<span class="item-title" style="display:none;">{{project.title}}</span>
-							<p class="project-card__name">{{project.title}}</p>
-							<span class="project-card__desc">{{project.description}}</span>
-						</div>
-						<div class="project-card__footer">
+			<li data-item-type="public" data-item-id="{{ project.id }}">
+				<div class="project-card">
+					<span class="drag-handle"><i class="fa fa-bars"></i></span>
+					<img class="project-card__thumb" src={{project.image}} alt="">
+					<div class="project-card__body">
+						<span class="item-title" style="display:none;">{{project.title}}</span>
+						<span class="project-card__type-tag project-card__type-tag--public"><i class="fa fa-globe"></i> {% trans "Public" %}</span>
+						<p class="project-card__name">{{project.title}}</p>
+						<span class="project-card__desc">{{project.description}}</span>
+					</div>
+					<div class="project-card__footer">
 						<a href="{{project.url}}" target="_blank" class="project-card__btn">
 							<i class="fa fa-map"></i> {% trans "Load project" %}
 						</a>
@@ -829,24 +999,24 @@
 			</li>
 			{% endfor %}
 			{% for app in applications %}
-				<li data-item-type="app" data-item-id="{{ app.id }}">
-					<div class="project-card project-card--app">
-						<span class="drag-handle"><i class="fa fa-bars"></i></span>
-						<span class="item-type-badge item-type-badge--app"><i class="fa fa-th-large"></i> {% trans "App" %}</span>
-						<img class="project-card__thumb" src="{{app.image}}" alt="">
-						<div class="project-card__body">
-							<span class="item-title" style="display:none;">{{app.title}}</span>
-							<p class="project-card__name">{{app.title}}</p>
-							<span class="project-card__desc">{{app.description}}</span>
-						</div>
-						<div class="project-card__footer">
-						<a href="{{app.url}}" target="_blank" class="project-card__btn project-card__btn--app">
+			<li data-item-type="app" data-item-id="{{ app.id }}">
+				<div class="project-card">
+					<span class="drag-handle"><i class="fa fa-bars"></i></span>
+					<img class="project-card__thumb" src="{{app.image}}" alt="">
+					<div class="project-card__body">
+						<span class="item-title" style="display:none;">{{app.title}}</span>
+						<span class="project-card__type-tag project-card__type-tag--app"><i class="fa fa-th-large"></i> {% trans "Application" %}</span>
+						<p class="project-card__name">{{app.title}}</p>
+						<span class="project-card__desc">{{app.description}}</span>
+					</div>
+					<div class="project-card__footer">
+						<a href="{{app.url}}" target="_blank" class="project-card__btn">
 							<i class="fa fa-rocket"></i> {% trans "Open application" %}
 						</a>
-						</div>
 					</div>
-				</li>
-				{% endfor %}
+				</div>
+			</li>
+			{% endfor %}
 				{% endif %}
 			</ul>
 			<div class="filter-empty" id="filter-empty-msg">
@@ -860,12 +1030,14 @@
 	</div>
 
 	{% if has_hidden_items and user.is_staff %}
-	<div id="hidden-items-section" style="display:none" class="projects-panel">
+	<div id="hidden-items-section" style="display:none" class="projects-panel projects-panel--hidden">
 		<div class="projects-panel__header">
-			<h3 class="projects-panel__title">
-				<i class="fa fa-eye-slash"></i> {% trans "Hidden items" %}
-				<span id="hidden-items-count" style="font-size:12px;font-weight:400;color:var(--h-muted);margin-left:4px;"></span>
-			</h3>
+			<div class="projects-panel__header-main">
+				<h3 class="projects-panel__title">
+					<i class="fa fa-eye-slash"></i> {% trans "Hidden items" %}
+					<span id="hidden-items-count" style="font-size:12px;font-weight:400;color:var(--h-muted);margin-left:4px;"></span>
+				</h3>
+			</div>
 		</div>
 		<div class="projects-panel__body">
 			<div id="hidden-items-loading" style="text-align:center;padding:20px;color:var(--h-muted);">
@@ -877,12 +1049,12 @@
 	{% endif %}
 
 	{% elif user.is_staff %}
-	<div class="projects-panel">
+	<div class="projects-panel projects-panel--hidden">
 		<div class="projects-panel__header">
-			<h3 class="projects-panel__title">
-				<i class="fa fa-th-large"></i>{% trans "Projects & Applications" %}
-			</h3>
-			<div class="projects-panel__actions">
+			<div class="projects-panel__header-main">
+				<h3 class="projects-panel__title">
+					<i class="fa fa-th-large"></i>{% trans "Projects & Applications" %}
+				</h3>
 				<button id="button-add-project" title='{% trans "Add project" %}'>
 					<i class="fa fa-plus"></i> {% trans "Add" %}
 				</button>
@@ -905,6 +1077,11 @@
 	$('body').addClass('sidebar-collapse');
 
 	$('#menu-home').addClass("active");
+
+	$('#btn-toggle-details').on('click', function() {
+		$(this).toggleClass('active');
+		$('#profile-details-panel').toggleClass('details-visible');
+	});
 
 	$('#show-hide-pass-update-link').click(function(e) {
 		e.preventDefault();
@@ -950,6 +1127,28 @@
 		var activeFilter = 'all';
 		var currentOrderType = '{{ order_type }}';
 		var sortableEnabled = false;
+
+		// ---- Toggle vista Cards / Lista ----
+		var $gridEl = $('#all-items-panel ul.items-list');
+		var savedView = localStorage.getItem('home_view_mode');
+		if (savedView === 'list') {
+			$gridEl.addClass('projects-grid--list');
+			$('#btn-view-grid').removeClass('active');
+			$('#btn-view-list').addClass('active');
+		}
+
+		$('#btn-view-grid').on('click', function() {
+			$gridEl.removeClass('projects-grid--list');
+			$('#btn-view-list').removeClass('active');
+			$(this).addClass('active');
+			localStorage.setItem('home_view_mode', 'grid');
+		});
+		$('#btn-view-list').on('click', function() {
+			$gridEl.addClass('projects-grid--list');
+			$('#btn-view-grid').removeClass('active');
+			$(this).addClass('active');
+			localStorage.setItem('home_view_mode', 'list');
+		});
 
 		// ---- List.js (búsqueda + paginación) ----
 		var itemList = new List('all-items-panel', {
@@ -1184,41 +1383,39 @@
 		var hiddenLoaded = false;
 
 		function buildHiddenCard(item) {
-			var badgeClass, badgeIcon, badgeLabel, btnClass, btnIcon, btnLabel;
+			var typeIcon, typeLabel, tagClass, btnIcon, btnLabel;
 			if (item.item_type === 'private') {
-				badgeClass = 'item-type-badge--private';
-				badgeIcon  = 'fa-lock';
-				badgeLabel = '{% trans "Private" %}';
-				btnClass   = '';
-				btnIcon    = 'fa-map';
-				btnLabel   = '{% trans "Load project" %}';
+				typeIcon  = 'fa-lock';
+				typeLabel = '{% trans "Private" %}';
+				tagClass  = 'project-card__type-tag--private';
+				btnIcon   = 'fa-map';
+				btnLabel  = '{% trans "Load project" %}';
 			} else if (item.item_type === 'public') {
-				badgeClass = 'item-type-badge--public';
-				badgeIcon  = 'fa-globe';
-				badgeLabel = '{% trans "Public" %}';
-				btnClass   = '';
-				btnIcon    = 'fa-map';
-				btnLabel   = '{% trans "Load project" %}';
+				typeIcon  = 'fa-globe';
+				typeLabel = '{% trans "Public" %}';
+				tagClass  = 'project-card__type-tag--public';
+				btnIcon   = 'fa-map';
+				btnLabel  = '{% trans "Load project" %}';
 			} else {
-				badgeClass = 'item-type-badge--app';
-				badgeIcon  = 'fa-th-large';
-				badgeLabel = '{% trans "App" %}';
-				btnClass   = ' project-card__btn--app';
-				btnIcon    = 'fa-rocket';
-				btnLabel   = '{% trans "Open application" %}';
+				typeIcon  = 'fa-th-large';
+				typeLabel = '{% trans "Application" %}';
+				tagClass  = 'project-card__type-tag--app';
+				btnIcon   = 'fa-rocket';
+				btnLabel  = '{% trans "Open application" %}';
 			}
-			var cardClass = 'project-card project-card--hidden-item' + (item.item_type === 'app' ? ' project-card--app' : '');
+			var safeTitle = $('<span>').text(item.title).html();
+			var safeDesc  = $('<span>').text(item.description).html();
 			return '<li data-item-type="' + item.item_type + '" data-item-id="' + item.id + '">' +
-				'<div class="' + cardClass + '">' +
-					'<span class="item-type-badge ' + badgeClass + '"><i class="fa ' + badgeIcon + '"></i> ' + badgeLabel + '</span>' +
+				'<div class="project-card project-card--hidden-item">' +
 					'<img class="project-card__thumb" src="' + item.image + '" alt="">' +
 					'<div class="project-card__body">' +
-						'<span class="item-title" style="display:none;">' + $('<span>').text(item.title).html() + '</span>' +
-						'<p class="project-card__name">' + $('<span>').text(item.title).html() + '</p>' +
-						'<span class="project-card__desc">' + $('<span>').text(item.description).html() + '</span>' +
+						'<span class="item-title" style="display:none;">' + safeTitle + '</span>' +
+						'<span class="project-card__type-tag ' + tagClass + '"><i class="fa ' + typeIcon + '"></i> ' + typeLabel + '</span>' +
+						'<p class="project-card__name">' + safeTitle + '</p>' +
+						'<span class="project-card__desc">' + safeDesc + '</span>' +
 					'</div>' +
 					'<div class="project-card__footer">' +
-						'<a href="' + item.url + '" target="_blank" class="project-card__btn' + btnClass + '">' +
+						'<a href="' + item.url + '" target="_blank" class="project-card__btn">' +
 							'<i class="fa ' + btnIcon + '"></i> ' + btnLabel +
 						'</a>' +
 					'</div>' +
