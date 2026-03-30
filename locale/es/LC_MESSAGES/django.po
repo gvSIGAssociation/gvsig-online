@@ -4152,6 +4152,34 @@ msgstr "No permitido"
 msgid "Error deleting view: {0}"
 msgstr "Error borrando la vista: {0}"
 
+#: utils.py:923
+msgid "Select a field for the temporal dimension."
+msgstr "Seleccione un campo para la dimensión temporal."
+
+#: utils.py:926
+msgid "Select a time presentation mode."
+msgstr "Seleccione un modo de presentación temporal."
+
+#: utils.py:930
+msgid "Select a valid default value mode for the temporal dimension."
+msgstr "Seleccione un modo de valor por defecto válido para la dimensión temporal."
+
+#: utils.py:934
+msgid ""
+"Enter a default date when using \"nearest to the reference value\" or "
+"\"reference value\" mode."
+msgstr ""
+"Indique una fecha por defecto si usa el modo «más cercano al valor de "
+"referencia» o «valor de referencia»."
+
+#: utils.py:938
+msgid "Invalid default date format. Use DD-MM-YYYY HH:mm:ss."
+msgstr "Formato de fecha por defecto no válido. Use DD-MM-AAAA HH:mm:ss."
+
+#: rest_geoserver.py:369
+msgid "Invalid temporal default date format"
+msgstr "Formato de fecha por defecto temporal no válido."
+
 #~ msgid "Show in vector tile format"
 #~ msgstr "Mostrar en formato vector tiles"
 

@@ -2676,6 +2676,35 @@ msgstr "No permés"
 msgid "Error deleting view: {0}"
 msgstr "Error suprimint la vista: {0}"
 
+#: utils.py:923
+msgid "Select a field for the temporal dimension."
+msgstr "Seleccione un camp per a la dimensió temporal."
+
+#: utils.py:926
+msgid "Select a time presentation mode."
+msgstr "Seleccione un mode de presentació temporal."
+
+#: utils.py:930
+msgid "Select a valid default value mode for the temporal dimension."
+msgstr "Seleccione un mode de valor per defecte vàlid per a la dimensió temporal."
+
+#: utils.py:934
+msgid ""
+"Enter a default date when using \"nearest to the reference value\" or "
+"\"reference value\" mode."
+msgstr ""
+"Indique una data per defecte si utilitza el mode «més pròxim al valor de "
+"referència» o «valor de referència»."
+
+#: utils.py:938
+msgid "Invalid default date format. Use DD-MM-YYYY HH:mm:ss."
+msgstr ""
+"Format de data per defecte no vàlid. Utilitze DD-MM-AAAA HH:mm:ss."
+
+#: rest_geoserver.py:369
+msgid "Invalid temporal default date format"
+msgstr "Format de data per defecte temporal no vàlid."
+
 #~ msgid "Url"
 #~ msgstr "Url"
 

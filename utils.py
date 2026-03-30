@@ -47,7 +47,15 @@ import ast
 from django.utils.crypto import get_random_string
 from psycopg2 import sql as sqlbuilder
 import logging
+from datetime import datetime
+from django.utils.translation import gettext as _
+
 logger = logging.getLogger("gvsigol")
+
+
+class TemporalValidationFailed(Exception):
+    """Interrumpe el flujo de publicación tras registrar error en el formulario."""
+    pass
 from gvsigol_auth import auth_backend
 from gvsigol_auth import services as auth_services
 from gvsigol_auth.utils import ascii_norm_username
@@ -901,6 +909,35 @@ def set_layer_extent(layer, ds_type, layer_info, server):
         
     except Exception as e:
         logger.exception("Error setting layer extent: %s", layer.full_qualified_name)
+
+def validate_temporal_layer_post_params(time_enabled, time_field, time_presentation,
+                                        time_default_value_mode, time_default_value):
+    """
+    Validación de parámetros temporales enviados por POST antes de llamar a GeoServer.
+    Devuelve None si es válido, o un mensaje traducido para mostrar al usuario.
+    """
+    if not time_enabled:
+        return None
+    tf = (time_field or '').strip()
+    if not tf or tf == '__disabled__':
+        return _('Select a field for the temporal dimension.')
+    tp = (time_presentation or '').strip()
+    if not tp:
+        return _('Select a time presentation mode.')
+    mode = (time_default_value_mode or '').strip()
+    valid_modes = ('MINIMUM', 'MAXIMUM', 'NEAREST', 'FIXED')
+    if mode not in valid_modes:
+        return _('Select a valid default value mode for the temporal dimension.')
+    if mode in ('NEAREST', 'FIXED'):
+        dv = (time_default_value or '').strip()
+        if not dv:
+            return _('Enter a default date when using "nearest to the reference value" or "reference value" mode.')
+        try:
+            datetime.strptime(dv, '%d-%m-%Y %H:%M:%S')
+        except ValueError:
+            return _('Invalid default date format. Use DD-MM-YYYY HH:mm:ss.')
+    return None
+
 
 def set_time_enabled(server, layer):
         time_resolution = 0
