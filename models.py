@@ -1075,6 +1075,22 @@ class LayerConfig:
                 settings.CONTROL_FIELDS, 'name')
         return self._control_fields_dict
 
+    def _get_saved_field_conf(self, db_field_name):
+        """
+        Busca la entrada guardada en conf['fields'] para una columna de la BD.
+        La comparación de nombres es insensible a mayúsculas para no perder
+        visible/infovisible tras refresh_field_conf (p. ej. capas ETL vs PostGIS).
+        """
+        d = self.field_conf_dict.get(db_field_name)
+        if d is not None:
+            return dict(d)
+        db_lower = (db_field_name or '').lower()
+        for f in self.conf.get('fields', []):
+            n = f.get('name')
+            if n is not None and str(n).lower() == db_lower:
+                return dict(f)
+        return {}
+
     def init_field_conf(self, field_conf, field_info):
         field_conf['name'] = field_conf.get('name', field_info['name'])
         for id, language in settings.LANGUAGES:
@@ -1140,7 +1156,9 @@ class LayerConfig:
             field_name = the_field_info['name']
             if (include_pks or not field_name in self.pks) and \
                     (not field_name in self.geometry_columns):
-                the_field_conf = self.field_conf_dict.get(field_name, {})
+                the_field_conf = self._get_saved_field_conf(field_name)
+                if the_field_conf:
+                    the_field_conf['name'] = field_name
                 field = self.init_field_conf(the_field_conf, the_field_info)
                 fields.append(field)
         
