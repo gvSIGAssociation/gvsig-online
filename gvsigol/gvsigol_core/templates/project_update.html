@@ -237,6 +237,12 @@
 	pointer-events: none;
 }
 
+/* Neutralizar clearfix de AdminLTE en cabeceras flex */
+.searchable-list-box .box-header::before,
+.searchable-list-box .box-header::after {
+	display: none !important;
+}
+
 /* ---- Boton anadir ---- */
 .btn-pf-add {
 	display: inline-flex;
