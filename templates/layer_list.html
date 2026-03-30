@@ -35,7 +35,7 @@
 .pl-table tbody tr { border-bottom: 1px solid var(--pl-border); transition: background var(--pl-transition); }
 .pl-table tbody tr:last-child { border-bottom: none; }
 .pl-table tbody tr:hover { background: #f0f6fb; }
-.pl-table tbody td { padding: 11px 16px; color: #4a5a68; font-size: 13px; font-weight: 400; line-height: 1.5; vertical-align: middle; }
+.pl-table.table > tbody > tr > td { padding: 11px 16px; color: #4a5a68; font-size: 13px; font-weight: 400; line-height: 1.5; vertical-align: middle !important; }
 .pl-table tbody td:first-child { color: var(--pl-muted); font-size: 12px; }
 .pl-table tbody td:nth-child(2) { font-weight: 600; color: #2e3a45; }
 table.dataTable { border-bottom: none !important; margin-top: 0 !important; margin-bottom: 0 !important; }
@@ -64,8 +64,8 @@ table.dataTable.no-footer { border-bottom: none !important; }
 .pl-table .btn-info:hover { background: #eaf4fb; border-color: #2980b9; }
 .pl-table .btn-primary { background: transparent; border: 1px solid #b8d4e8; color: var(--pl-accent); border-radius: 5px; font-size: 12px; padding: 4px 10px; transition: background var(--pl-transition); }
 .pl-table .btn-primary:hover { background: #f0f6fb; border-color: var(--pl-accent); }
-.pl-table .bg-purple { background: transparent; border: 1px solid #d0b8e8; color: #7b5ea7; border-radius: 5px; font-size: 12px; padding: 4px 10px; transition: background var(--pl-transition); }
-.pl-table .bg-purple:hover { background: #f5f0fb; border-color: #7b5ea7; }
+.pl-table .btn-configure { background: transparent; border: 1px solid #d0b8e8; color: #7b5ea7; border-radius: 5px; font-size: 12px; padding: 4px 10px; transition: background var(--pl-transition); }
+.pl-table .btn-configure:hover { background: #f5f0fb; border-color: #7b5ea7; }
 .pl-server-pagination { padding: 12px 16px; border-top: 1px solid var(--pl-border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 .pl-server-pagination .pagination { margin: 0; }
 .pl-server-pagination .pagination > li > a, .pl-server-pagination .pagination > li > span { border-radius: 5px !important; margin: 0 2px; border: 1px solid var(--pl-border); color: var(--pl-muted); font-size: 12px; font-weight: 600; padding: 4px 10px; background: var(--pl-white); transition: background var(--pl-transition), border-color var(--pl-transition), color var(--pl-transition); }
@@ -144,11 +144,11 @@ table.dataTable.no-footer { border-bottom: none !important; }
 							<td>{{ layer.lg_name }} ({{layer.lg_title }})</td>
 							<td>{{ layer.projects }}</td>
 							<td style="display:none">{{ layer.type }}</td>
-							<td></td>
-							<td></td>
-							<td></td>
-							<th></th>
-							<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
 						</tr>
 						{% endfor %}
 					</tbody>
@@ -287,10 +287,10 @@ $(document).ready(function() {
 	       	"data": null,
 	       	"render": function ( data, type, row ) {
 	       		if (data[7] && data[7] == "v_PostGIS") {
-            		return '<a title="' + '{% trans "Configure layer" %}" ' + '" href="/gvsigonline/services/layer_config/' + data[0] + '/" data-toggle="tooltip" data-placement="bottom" class="btn bg-purple"><i class="fa fa-cogs"></i></a>';
+            		return '<a title="' + '{% trans "Configure layer" %}' + '" href="/gvsigonline/services/layer_config/' + data[0] + '/" data-toggle="tooltip" data-placement="bottom" class="btn btn-configure"><i class="fa fa-cogs"></i></a>';
 	       		}
 	       		else {
-	       			return '<button type="button" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Configure layer" %}' + '" class="btn bg-purple"><i class="fa fa-cogs"></i></button>'
+	       			return '<button type="button" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Configure layer" %}' + '" class="btn btn-configure"><i class="fa fa-cogs"></i></button>'
 	       		}
             }
 	  	},
@@ -298,7 +298,7 @@ $(document).ready(function() {
 	      	"targets": -5,
 	       	"data": null,
 	       	"render": function ( data, type, row ) {
-            	return '<a title="' + '{% trans "Update layer" %}" ' + '" href="/gvsigonline/services/layer_update/' + data[0] + '/" data-toggle="tooltip" data-placement="bottom" class="btn btn-success"><i class="fa fa-edit"></i></a>';
+            	return '<a title="' + '{% trans "Update layer" %}' + '" href="/gvsigonline/services/layer_update/' + data[0] + '/" data-toggle="tooltip" data-placement="bottom" class="btn btn-success"><i class="fa fa-edit"></i></a>';
             }
 	  	},{
 	      	"targets": -3,

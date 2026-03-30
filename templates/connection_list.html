@@ -18,7 +18,7 @@
 	--pl-shadow:    0 2px 12px rgba(0,0,0,0.08);
 	--pl-transition: 0.2s ease;
 }
-.pl-panel { background: var(--pl-white); border-radius: var(--pl-radius); box-shadow: var(--pl-shadow); border: 1px solid var(--pl-border); overflow: hidden; }
+.pl-panel { background: var(--pl-white); border-radius: var(--pl-radius); box-shadow: var(--pl-shadow); border: 1px solid var(--pl-border); }
 .pl-panel__header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--pl-border); gap: 12px; flex-wrap: wrap; }
 .pl-panel__title { font-size: 15px; font-weight: 700; color: var(--pl-text); display: flex; align-items: center; gap: 8px; margin: 0; }
 .pl-panel__title i { color: var(--pl-accent); }
@@ -155,7 +155,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 							</td>
 							<td>
 								{% if conn.type == 'PostGIS' %}
-									<button type="button" name="button-options-connection" data-toggle="tooltip" data-placement="bottom" title="{% trans 'Options' %}" class="btn btn-default"><i class="fa fa-cog"></i></button>
+									<button type="button" name="button-options-connection" data-toggle="tooltip" data-placement="top" title="{% trans 'Options' %}" class="btn btn-default"><i class="fa fa-cog"></i></button>
 								{% endif %}
 							</td>
 							<td></td>
@@ -279,11 +279,11 @@ $(document).ready(function() {
 		"columnDefs": [{
             "targets": -1,
             "data": null,
-            "defaultContent": '<button type="button" name="button-delete-connection" data-toggle="modal" data-target="#modal-delete-connection" data-placement="bottom" title="' + '{% trans "Delete connection" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
+            "defaultContent": '<button type="button" name="button-delete-connection" data-toggle="modal" data-target="#modal-delete-connection" data-toggle="tooltip" data-placement="top" title="' + '{% trans "Delete connection" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
         },{
 	      	"targets": -2,
 	       	"data": null,
-	        "defaultContent": '<button type="button" name="button-update-connection" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Edit connection" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
+	        "defaultContent": '<button type="button" name="button-update-connection" data-toggle="tooltip" data-placement="top" title="' + '{% trans "Edit connection" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
 	  	}],
 	    "dom": 'T<"clear">rt',
 		"bLengthChange": false
@@ -314,6 +314,12 @@ $(document).ready(function() {
 	setTimeout(removeDataTablesSearch, 1000);
 	{% endif %}
 	
+	function initTooltips() {
+		$('#connections-table [data-toggle="tooltip"]').tooltip({ container: 'body' });
+	}
+	initTooltips();
+	table.on('draw.dt', initTooltips);
+
 	$('#button-add-connection').click( function() {
 		location.href = '{% url "connection_add" %}';
 	});
