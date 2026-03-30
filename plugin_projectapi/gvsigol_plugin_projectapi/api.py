@@ -22,6 +22,7 @@
 from datetime import datetime, timedelta
 import json
 import os
+import unicodedata
 from urllib.parse import quote
 from wsgiref.util import FileWrapper
 import coreapi
@@ -45,7 +46,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
 from django.contrib.auth.models import User
 from gvsigol_core import utils as core_utils
-from gvsigol_core.models import Project, ProjectLayerGroup, Application, SharedView
+from gvsigol_core.models import Project, ProjectLayerGroup, Application, SharedView, UserHomeOrder
 from gvsigol_plugin_projectapi import settings
 from gvsigol_plugin_projectapi.export import VectorLayerExporter
 from gvsigol_plugin_projectapi.serializers import ProjectsSerializer, GsInstanceSerializer, ApplicationsSerializer, EmptySerializer
@@ -59,6 +60,66 @@ from . import util
 from gvsigol.urls import urlpatterns
 import psycopg2
 from gvsigol_core.utils import get_user_projects
+
+
+def _sort_key_no_accents(s):
+    if not s:
+        return ''
+    nfd = unicodedata.normalize('NFD', (s or '').lower())
+    return ''.join(c for c in nfd if unicodedata.category(c) != 'Mn')
+
+
+def _order_projects_like_home(request, projects):
+    """
+    Order projects like home / home_order_get: user UserHomeOrder if set, else global (user=null).
+    Only uses order entries of type 'private' and 'public' (apps in saved order are ignored here).
+    """
+    projects = list(projects)
+    if not projects:
+        return projects
+
+    global_order = UserHomeOrder.objects.filter(user__isnull=True).first()
+    if request.user and request.user.is_authenticated:
+        user_order = UserHomeOrder.objects.filter(user=request.user).first()
+        saved = user_order or global_order
+    else:
+        saved = global_order
+
+    order_type = UserHomeOrder.ORDER_ALPHA
+    if saved:
+        order_type = saved.order_type
+
+    if order_type == UserHomeOrder.ORDER_MANUAL and saved and saved.order_data:
+        try:
+            order_list = json.loads(saved.order_data)
+            lookup = {}
+            for p in projects:
+                if not p.is_public:
+                    lookup[('private', p.id)] = p
+            for p in projects:
+                if p.is_public:
+                    lookup[('public', p.id)] = p
+            seen = set()
+            ordered = []
+            for entry in order_list:
+                etype = entry.get('type')
+                eid = entry.get('id')
+                if etype is None or eid is None:
+                    continue
+                key = (etype, eid)
+                if key in lookup and key not in seen:
+                    ordered.append(lookup[key])
+                    seen.add(key)
+            for key, p in lookup.items():
+                if key not in seen:
+                    ordered.append(p)
+            return ordered
+        except Exception:
+            pass
+
+    projects.sort(key=lambda p: _sort_key_no_accents(p.title or p.name or ''))
+    return projects
+
 
 if core_settings.GVSIGOL_AUTH_PROVIDER == 'gvsigol_plugin_oidc_mozilla':
     from gvsigol_plugin_oidc_mozilla.settings import OIDC_OP_BASE_URL, OIDC_OP_REALM_NAME, OIDC_RP_CLIENT_ID, \
@@ -358,7 +419,8 @@ class ProjectListView(ListAPIView):
         now = datetime.now()
         queryset = queryset.filter(Q(expiration_date__gte=now) | Q(expiration_date=None))
 
-        serializer = ProjectsSerializer(queryset, many=True)
+        projects_ordered = _order_projects_like_home(request, queryset)
+        serializer = ProjectsSerializer(projects_ordered, many=True)
         result = {
             "content" : serializer.data,
             "links" : [
