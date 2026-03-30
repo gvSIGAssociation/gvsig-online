@@ -4,140 +4,327 @@
 {% get_current_language as LANGUAGE_CODE %}
 <html>
 <head>
-	
+
 	<title>{{GVSIGOL_NAME}}</title>
 	<link rel="shortcut icon" href="{% static "img/favicon.png" %}">
-	
+
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-	
+
 	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-3.3.7/css/bootstrap.min.css" %}">
 	<link rel="stylesheet" href="{% static "css/font-awesome-4.4.0/css/font-awesome.min.css" %}">
 	<link rel="stylesheet" href="{% static "css/fontcustom2/fontcustom.css" %}">
 	<link rel="stylesheet" href="{% static "css/googlefonts.css" %}">
 	<link rel="stylesheet" href="{% static "css/gvsigOL.css" %}">
-	<link rel="stylesheet" href="{% static "css/skins/_all-skins.min.css" %}">
-	
-	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+
 	<!--[if lt IE 9]>
 		<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 	<![endif]-->
-	
+
+	<style>
+	:root {
+		--pl-accent:     #4a7fa5;
+		--pl-accent-dk:  #2d5f80;
+		--pl-text:       #2e3a45;
+		--pl-muted:      #7b8a96;
+		--pl-border:     #e8ecef;
+		--pl-bg:         #f4f6f8;
+		--pl-white:      #ffffff;
+		--pl-radius:     10px;
+		--pl-shadow:     0 2px 12px rgba(0,0,0,0.08);
+		--pl-transition: 0.2s ease;
+	}
+
+	*, *::before, *::after { box-sizing: border-box; }
+
+	body {
+		margin: 0;
+		padding: 0;
+		background: var(--pl-bg);
+		font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+		color: var(--pl-text);
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+	}
+
+	/* ---- Header ---- */
+	.gol-header {
+		background-color: #fff;
+		position: sticky;
+		top: 0;
+		z-index: 200;
+		border-bottom: 1px solid #e8eaed;
+		flex-shrink: 0;
+	}
+	.gol-header nav { height: 64px; }
+	.gol-nav {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		height: 100%;
+	}
+	.gol-nav__left,
+	.gol-nav__right {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+	.gol-logo {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		text-decoration: none !important;
+	}
+	.gol-logo__img {
+		height: 36px;
+		width: auto;
+	}
+	.gol-logo__text {
+		font-family: 'Google Sans', 'Roboto', sans-serif;
+		font-size: 1.375rem;
+		font-weight: 500;
+		color: #5f6368;
+		letter-spacing: -0.01em;
+	}
+	.gol-lang-form { margin: 0; }
+	.gol-lang-select {
+		height: 34px;
+		padding: 0 10px;
+		font-size: 14px;
+		font-family: inherit;
+		border: 1px solid #dadce0;
+		border-radius: 4px;
+		background: #fff;
+		color: #3c4043;
+		cursor: pointer;
+		outline: none;
+		transition: border-color 0.15s;
+	}
+	.gol-lang-select:focus { border-color: #1a73e8; }
+
+	/* ---- Contenido principal ---- */
+	.doc-content {
+		flex: 1;
+		padding: 32px 24px;
+	}
+	.doc-content .container {
+		max-width: 780px;
+	}
+
+	/* ---- Título de sección ---- */
+	.doc-section-title {
+		font-size: 11px;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.8px;
+		color: var(--pl-muted);
+		margin: 0 0 10px 4px;
+	}
+
+	/* ---- Panel ---- */
+	.pl-panel {
+		background: var(--pl-white);
+		border-radius: var(--pl-radius);
+		box-shadow: var(--pl-shadow);
+		border: 1px solid var(--pl-border);
+		margin-bottom: 24px;
+	}
+	.pl-panel__header {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 14px 20px;
+		border-bottom: 1px solid var(--pl-border);
+	}
+	.pl-panel__header i {
+		color: var(--pl-accent);
+		font-size: 15px;
+		width: 18px;
+		text-align: center;
+	}
+	.pl-panel__title {
+		margin: 0;
+		font-size: 14px;
+		font-weight: 700;
+		color: var(--pl-text);
+	}
+
+	/* ---- Items de documentación ---- */
+	.doc-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.doc-item {
+		display: flex;
+		align-items: flex-start;
+		gap: 16px;
+		padding: 16px 20px;
+		border-bottom: 1px solid var(--pl-border);
+		transition: background var(--pl-transition);
+	}
+	.doc-item:last-child {
+		border-bottom: none;
+	}
+	.doc-item:hover {
+		background: #f0f6fb;
+	}
+	.doc-item__icon {
+		width: 36px;
+		height: 36px;
+		border-radius: 8px;
+		background: #eaf2f8;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+	.doc-item__icon i {
+		color: var(--pl-accent);
+		font-size: 16px;
+	}
+	.doc-item__body {
+		flex: 1;
+		min-width: 0;
+	}
+	.doc-item__title {
+		display: inline-block;
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--pl-accent);
+		text-decoration: none;
+		margin-bottom: 3px;
+		transition: color var(--pl-transition);
+	}
+	.doc-item__title:hover {
+		color: var(--pl-accent-dk);
+		text-decoration: underline;
+	}
+	.doc-item__lang {
+		font-size: 11px;
+		color: var(--pl-muted);
+		font-weight: 400;
+		margin-left: 4px;
+	}
+	.doc-item__desc {
+		font-size: 12px;
+		color: var(--pl-muted);
+		line-height: 1.5;
+		margin: 0;
+	}
+
+	/* ---- Footer ---- */
+	.doc-footer {
+		background: var(--pl-white);
+		border-top: 1px solid var(--pl-border);
+		padding: 12px 24px;
+		font-size: 12px;
+		color: var(--pl-muted);
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		flex-shrink: 0;
+	}
+	</style>
+
 </head>
 
-<body class="hold-transition layout-top-nav">
+<body>
 
-	<div class="wrapper">
-
-		<header class="main-header">
-			<nav class="navbar navbar-static-top background-grey">
-				<div class="container">
-					<div class="navbar-header">
-						<img style="max-width: 155px; max-height: 75px; width: auto; height: auto;" src="{% static "img/logo_small.png"%}">
-					</div>
+	<header class="gol-header">
+		<nav>
+			<div class="container gol-nav">
+				<div class="gol-nav__left">
+					<a href="/" class="gol-logo">
+						<img src="{% static "img/logo_small.png" %}" alt="{{GVSIGOL_NAME}}" class="gol-logo__img">
+						<span class="gol-logo__text">{{GVSIGOL_NAME}} {% if GVSIGOL_SURNAME %} {{GVSIGOL_SURNAME}}{% endif %}</span>
+					</a>
 				</div>
-			</nav>
-		</header>
+			</div>
+		</nav>
+	</header>
 
-		<div class="content-wrapper background-grey">
-			<div class="container">
-				<section class="content background-grey">	
-					
-					<div class="box">
-						<div class="box-header with-border">
-							<h3 class="box-title" style="margin-right: 20px;">{% trans "Web application" %}</h3>
+	<div class="doc-content">
+		<div class="container">
+
+			<div class="pl-panel">
+				<div class="pl-panel__header">
+					<i class="fa fa-desktop"></i>
+					<h3 class="pl-panel__title">{% trans "Web application" %}</h3>
+				</div>
+				<ul class="doc-list">
+					{% if viewer %}
+					<li class="doc-item">
+						<div class="doc-item__icon"><i class="fa fa-globe"></i></div>
+						<div class="doc-item__body">
+							<a href="{{viewer.url}}" target="_blank" class="doc-item__title">{% trans "User Manual - Classic Map Viewer" %}{% if viewer.lang %}<span class="doc-item__lang">[{{viewer.lang}}]</span>{% endif %}</a>
+							<p class="doc-item__desc">{% trans "Comprehensive guide to explore and use the functionalities of the JQuery-based map viewer." %}</p>
 						</div>
-						<div class="box-body">
-							<ul class="products-list product-list-in-box">
-								{% if viewer %}
-								<li class="item">
-									<div class="product-img">
-										<i class="fa fa-globe"></i>
-									</div>
-									<div class="product-info">
-										<a href="{{viewer.url}}" class="product-title ">{% trans "User Manual - Classic Map Viewer" %} {% if viewer.lang %}[{{viewer.lang}}]{% endif %}</a> 
-										<span class="product-description">{% trans "Comprehensive guide to explore and use the functionalities of the JQuery-based map viewer." %}</span>
-									</div>
-								</li>
-								{% endif %}
-								{% if spaviewer %}
-								<li class="item">
-									<div class="product-img">
-										<i class="fa fa-globe"></i>
-									</div>
-									<div class="product-info">
-										<a href="{{spaviewer.url}}" class="product-title ">{% trans "User Manual - New Front Map Viewer" %} {% if spaviewer.lang %}[{{spaviewer.lang}}]{% endif %}</a> 
-										<span class="product-description">{% trans "Learn to navigate and leverage all features of the new map viewer with a modern interface." %}</span>
-									</div>
-								</li>
-								{% endif %}
-								{% if user.is_active %}
-								{% if user.is_superuser or user.is_staff %}
-								{% if admin %}
-								<li class="item">
-									<div class="product-img">
-										<i class="fa fa-cogs"></i>
-									</div>
-									<div class="product-info">
-										<a href="{{admin.url}}" class="product-title ">{% trans "Administration Guide" %} {% if admin.lang %}[{{admin.lang}}]{% endif %}</a> 
-										<span class="product-description">{% trans "Manual for administrators: manage users, groups, services, symbology, and projects on the platform." %}</span>
-									</div>
-								</li>
-								{% endif %}
-								{% endif %}
-								{% endif %}
-								{% for plugin_manual in plugin_manuals %}
-								<li class="item">
-									<div class="product-img">
-										<i class="fa fa-cubes"></i>
-									</div>
-									<div class="product-info">
-										<a href="{{plugin_manual.url}}" class="product-title ">{% trans plugin_manual.title %} {% if plugin_manual.lang %}[{{plugin_manual.lang}}]{% endif %}</a> 
-										<span class="product-description">{% trans plugin_manual.desc %}</span>
-									</div>
-								</li>
-								{% endfor %}
-							</ul>
-						</div>
-					</div>
-					{% if mobile %}
-					<div class="box">
-						<div class="box-header with-border">
-							<h3 class="box-title" style="margin-right: 20px;">{% trans "Mobile application" %}</h3>
-						</div>
-						<div class="box-body">
-							<ul class="products-list product-list-in-box">
-								<li class="item">
-									<div class="product-img">
-										<i class="fa fa-mobile"></i>
-									</div>
-									<div class="product-info">
-										<a href="{{mobile.url}}" class="product-title ">{% trans "User manual" %} {% if mobile.lang %}[{{mobile.lang}}]{% endif %}</a> 
-										<span class="product-description">{% trans "Learn how to manage geographic information from a mobile device or tablet" %}</span>
-									</div>
-								</li>
-							</ul>
-						</div>
-					</div>
+					</li>
 					{% endif %}
-				</section>
+					{% if spaviewer %}
+					<li class="doc-item">
+						<div class="doc-item__icon"><i class="fa fa-globe"></i></div>
+						<div class="doc-item__body">
+							<a href="{{spaviewer.url}}" target="_blank" class="doc-item__title">{% trans "User Manual - New Front Map Viewer" %}{% if spaviewer.lang %}<span class="doc-item__lang">[{{spaviewer.lang}}]</span>{% endif %}</a>
+							<p class="doc-item__desc">{% trans "Learn to navigate and leverage all features of the new map viewer with a modern interface." %}</p>
+						</div>
+					</li>
+					{% endif %}
+					{% if user.is_active %}
+					{% if user.is_superuser or user.is_staff %}
+					{% if admin %}
+					<li class="doc-item">
+						<div class="doc-item__icon"><i class="fa fa-cogs"></i></div>
+						<div class="doc-item__body">
+							<a href="{{admin.url}}" target="_blank" class="doc-item__title">{% trans "Administration Guide" %}{% if admin.lang %}<span class="doc-item__lang">[{{admin.lang}}]</span>{% endif %}</a>
+							<p class="doc-item__desc">{% trans "Manual for administrators: manage users, groups, services, symbology, and projects on the platform." %}</p>
+						</div>
+					</li>
+					{% endif %}
+					{% endif %}
+					{% endif %}
+					{% for plugin_manual in plugin_manuals %}
+					<li class="doc-item">
+						<div class="doc-item__icon"><i class="fa fa-cubes"></i></div>
+						<div class="doc-item__body">
+							<a href="{{plugin_manual.url}}" target="_blank" class="doc-item__title">{% trans plugin_manual.title %}{% if plugin_manual.lang %}<span class="doc-item__lang">[{{plugin_manual.lang}}]</span>{% endif %}</a>
+							<p class="doc-item__desc">{% trans plugin_manual.desc %}</p>
+						</div>
+					</li>
+					{% endfor %}
+				</ul>
 			</div>
+
+			{% if mobile %}
+			<div class="pl-panel">
+				<div class="pl-panel__header">
+					<i class="fa fa-mobile"></i>
+					<h3 class="pl-panel__title">{% trans "Mobile application" %}</h3>
+				</div>
+				<ul class="doc-list">
+					<li class="doc-item">
+						<div class="doc-item__icon"><i class="fa fa-mobile"></i></div>
+						<div class="doc-item__body">
+							<a href="{{mobile.url}}" target="_blank" class="doc-item__title">{% trans "User manual" %}{% if mobile.lang %}<span class="doc-item__lang">[{{mobile.lang}}]</span>{% endif %}</a>
+							<p class="doc-item__desc">{% trans "Learn how to manage geographic information from a mobile device or tablet" %}</p>
+						</div>
+					</li>
+				</ul>
+			</div>
+			{% endif %}
+
 		</div>
-
-		<footer class="main-footer">
-			<div class="pull-right hidden-xs">
-				<b>{% trans "Version" %}</b> {{GVSIGOL_VERSION}}
-			</div>
-		</footer>
-
-		
 	</div>
 
-	<script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+	<footer class="doc-footer">
+		<span><b>{% trans "Version" %}</b>&nbsp;{{GVSIGOL_VERSION}}</span>
+	</footer>
 
+	<script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery-3.6.0.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jscookie/jscookie-2.2.1.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQueryUI/jquery-ui.min.js" %}"></script>
@@ -153,6 +340,11 @@
 	<script>
 		var messageBox = new messageBox();
 	</script>
-	
+	<script>
+		$('#select-language').on('change', function() {
+			$('#select-language-form').submit();
+		});
+	</script>
+
 </body>
 </html>
