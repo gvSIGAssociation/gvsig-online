@@ -1345,9 +1345,11 @@ function setSqlAfterValue(val) {
 			"bLengthChange": false,
 			"searching": true,
 			"info": false,
-			"drawCallback": function(settings) {
-				updateCustomPagination(this.api());
-			}
+		"drawCallback": function(settings) {
+			updateCustomPagination(this.api());
+			$('#etl-table [data-toggle="tooltip"]').tooltip({ container: 'body' });
+			$('#etl-table [data-toggle-second="tooltip"]').tooltip({ container: 'body' });
+		}
 		});
 		
 		// Función para actualizar paginación personalizada estilo Bootstrap
@@ -1421,7 +1423,7 @@ function setSqlAfterValue(val) {
 		});
 
 
-		$('[data-toggle-second="tooltip"]').tooltip();
+		$('[data-toggle-second="tooltip"]').tooltip({ container: 'body' });
 
 
 			$('#button-clean').on('click', function () {
