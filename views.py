@@ -5918,6 +5918,11 @@ def external_layer_add(request):
             if 'cached' in request.POST:
                 cached = True
 
+            single_image = False
+            if request.POST.get('type') == 'WMS' and 'single_image' in request.POST:
+                single_image = True
+                cached = False
+
             detailed_info_enabled = (request.POST.get('detailed_info_enabled') is not None)
             detailed_info_button_title = request.POST.get('detailed_info_button_title')
             detailed_info_html = request.POST.get('detailed_info_html')
@@ -5948,7 +5953,7 @@ def external_layer_add(request):
             external_layer.visible = is_visible
             external_layer.queryable = False
             external_layer.cached = cached
-            external_layer.single_image = False
+            external_layer.single_image = single_image
             external_layer.time_enabled = False
             external_layer.detailed_info_enabled = detailed_info_enabled
             external_layer.detailed_info_button_title = detailed_info_button_title
@@ -6109,6 +6114,11 @@ def external_layer_update(request, external_layer_id):
             if 'cached' in request.POST:
                 cached = True
 
+            single_image = False
+            if 'single_image' in request.POST:
+                single_image = True
+                cached = False
+
             detailed_info_enabled = (request.POST.get('detailed_info_enabled') is not None)
             detailed_info_button_title = request.POST.get('detailed_info_button_title')
             detailed_info_html = request.POST.get('detailed_info_html')
@@ -6138,7 +6148,9 @@ def external_layer_update(request, external_layer_id):
             external_layer.visible = is_visible
             if external_layer.type != 'WMS':
                 cached = False
+                single_image = False
             external_layer.cached = cached
+            external_layer.single_image = single_image
             external_layer.detailed_info_enabled = detailed_info_enabled
             external_layer.detailed_info_button_title = detailed_info_button_title
             external_layer.detailed_info_html = detailed_info_html

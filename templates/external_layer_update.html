@@ -248,6 +248,14 @@
 									{% endif %}
 									<label for="cached">{% trans "Cached" %}</label>
 								</div>
+								<div class="col-md-4 form-group single-image-control">
+									{% if external_layer.single_image %}
+									<input type="checkbox" name="single_image" id="single_image" checked/>
+									{% else %}
+									<input type="checkbox" name="single_image" id="single_image"/>
+									{% endif %}
+									<label for="single_image">{% trans "Single image (No tiles)" %}</label>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -442,8 +450,10 @@ $(document).ready(function(){
 		
 		if(type == "WMS"){
 			$(".cached-control").css("display","block");
+			$(".single-image-control").css("display","block");
 		} else {
 			$(".cached-control").css("display","none");
+			$(".single-image-control").css("display","none");
 		}
 	};
 
@@ -467,6 +477,7 @@ $(document).ready(function(){
 	var initialType = $("#id_type option:selected").val();
 	if(initialType != "WMS"){
 		$(".cached-control").css("display","none");
+		$(".single-image-control").css("display","none");
 	}
 
 	function showAlertMatrix(){
