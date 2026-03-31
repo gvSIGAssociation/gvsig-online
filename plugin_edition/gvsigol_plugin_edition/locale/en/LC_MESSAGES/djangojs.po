@@ -41,6 +41,9 @@ msgstr ""
 msgid "The layer you are trying to edit is locked"
 msgstr ""
 
+msgid "You are editing a cached layer. Changes may take a little while to appear on the map. If you still do not see them after some time, reload the viewer page."
+msgstr ""
+
 # editionBar.js
 #: static/js/lib/widgets/editionBar.js:95
 msgid "Add point"

@@ -41,6 +41,9 @@ msgstr "Esteu editant la capa"
 msgid "The layer you are trying to edit is locked"
 msgstr "La capa que intenta editar està bloquejada"
 
+msgid "You are editing a cached layer. Changes may take a little while to appear on the map. If you still do not see them after some time, reload the viewer page."
+msgstr "Esteu editant una capa emmagatzemada en memòria cau. Els canvis poden tardar una mica a mostrar-se al mapa. Si passat un temps encara no els veu, recarregui la pàgina del visor."
+
 # editionBar.js
 #: static/js/lib/widgets/editionBar.js:95
 msgid "Add point"
