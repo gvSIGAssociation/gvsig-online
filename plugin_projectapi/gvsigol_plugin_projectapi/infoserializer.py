@@ -19,8 +19,10 @@
 
 @author: Nacho Brodin <nbrodin@scolab.es>
 '''
+import base64
 import json
 import math
+import os
 
 from rest_framework import serializers
 
@@ -63,11 +65,35 @@ class LayerSerializer(serializers.ModelSerializer):
     cache_url = serializers.SerializerMethodField('get_cache_url_')
     tms_url = serializers.SerializerMethodField('get_tms_url_')
     legend_url = serializers.SerializerMethodField('get_legend_url_')
+    styles = serializers.SerializerMethodField('get_styles_')
     baselayer = serializers.SerializerMethodField('get_baselayer_')
     default_baselayer = serializers.SerializerMethodField('get_default_baselayer_')
     order = serializers.SerializerMethodField('get_order_')
     external_params = serializers.SerializerMethodField('get_external_params_')
     featureapi_endpoint = serializers.SerializerMethodField('get_featureapi_endpoint_')
+
+    def _absolute_custom_legend_url(self, url):
+        if not url:
+            return url
+        if url.startswith('http://') or url.startswith('https://'):
+            return url
+        return settings.BASE_URL.rstrip('/') + '/' + url.lstrip('/')
+
+    def _custom_legend_payload(self, url):
+        if not url:
+            return url
+        local_path = None
+        if url.startswith(settings.MEDIA_URL):
+            local_path = os.path.join(settings.MEDIA_ROOT, url.replace(settings.MEDIA_URL, '').lstrip('/'))
+        elif url.startswith('/media/'):
+            local_path = os.path.join(settings.MEDIA_ROOT, url.replace('/media/', '').lstrip('/'))
+
+        if local_path and os.path.exists(local_path):
+            with open(local_path, 'rb') as legend_file:
+                encoded = base64.b64encode(legend_file.read()).decode('ascii')
+            return f'data:image/png;base64,{encoded}'
+
+        return self._absolute_custom_legend_url(url)
 
     def get_field_group(self, form_groups, lang):
         field_group = {}
@@ -353,12 +379,33 @@ class LayerSerializer(serializers.ModelSerializer):
 
     def get_legend_url_(self, obj):
         try:
+            for stllyr in StyleLayer.objects.filter(layer_id=obj.id).select_related('style'):
+                stl = stllyr.style
+                if stl.is_default and not stl.name.endswith('__tmp') and stl.has_custom_legend and stl.custom_legend_url:
+                    return self._custom_legend_payload(stl.custom_legend_url)
             workspace = obj.datastore.workspace
             url = workspace.wms_endpoint.replace(settings.BASE_URL, '') + '?SERVICE=WMS&VERSION=1.1.1&layer=' + obj.name + '&REQUEST=getlegendgraphic&FORMAT=image/png&LEGEND_OPTIONS=forceLabels:on'
             return url
 
         except Exception:
             pass
+
+    def get_styles_(self, obj):
+        styles = []
+        try:
+            for stllyr in StyleLayer.objects.filter(layer_id=obj.id).select_related('style'):
+                stl = stllyr.style
+                if not stl.name.endswith('__tmp'):
+                    styles.append({
+                        'name': stl.name,
+                        'title': stl.title,
+                        'is_default': stl.is_default,
+                        'has_custom_legend': stl.has_custom_legend,
+                        'custom_legend_url': self._custom_legend_payload(stl.custom_legend_url),
+                    })
+        except Exception:
+            pass
+        return styles
 
     def get_cache_url_(self, obj):
         try:
@@ -467,7 +514,7 @@ class LayerSerializer(serializers.ModelSerializer):
         
     class Meta:
         model = Layer
-        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'real_time', 'vector_tile', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'is_view', 'public', 'external', 'service_version', 'description', 'wms_url', 'wfs_url', 'cache_url', 'tms_url', 'legend_url', 'baselayer', 'default_baselayer', 'order', 'external_params', 'featureapi_endpoint', 'time_enabled', 'allow_download', 'detailed_info_button_title' ,'detailed_info_enabled' ,'detailed_info_html']
+        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'real_time', 'vector_tile', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'is_view', 'public', 'external', 'service_version', 'description', 'wms_url', 'wfs_url', 'cache_url', 'tms_url', 'legend_url', 'styles', 'baselayer', 'default_baselayer', 'order', 'external_params', 'featureapi_endpoint', 'time_enabled', 'allow_download', 'detailed_info_button_title' ,'detailed_info_enabled' ,'detailed_info_html']
 
 
 class LayerGroupSerializer(serializers.ModelSerializer):
