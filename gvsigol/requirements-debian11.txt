@@ -173,3 +173,10 @@ langsmith==0.4.32
 pydantic==2.11.5  # Para validación de datos en LangChain
 
 sqlglot==26.21.0
+
+
+## Plugin building3d_lidar
+rasterio==1.3.2
+fiona==1.8.22
+geopandas==0.12.2
+rtree==1.2.0
