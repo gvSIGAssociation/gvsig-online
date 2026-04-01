@@ -228,11 +228,11 @@
 					<div class="col-md-12">
 						<div class="box">
           					<div class="box-body">
-          						<div class="col-md-4 form-group">
+          						<div class="col-md-3 form-group">
           							<label for="timeout">{% trans "Timeout (miliseconds)" %}</label>
 									<input name="timeout" id="timeout" value="{{external_layer.timeout}}" type="number" class="form-control">
 								</div>
-          						<div class="col-md-4 form-group">
+          						<div class="col-md-3 form-group">
 									{% if external_layer.visible %}
 									<input type="checkbox" name="visible"  id="visible" checked/>
 									{% else %}
@@ -240,13 +240,26 @@
 									{% endif %}
 									<label for="visible">{% trans "Visible" %}</label>
 								</div>
-								<div class="col-md-4 form-group cached-control">
+								<div class="col-md-3 form-group cached-control">
 									{% if external_layer.cached %}
 									<input type="checkbox" name="cached"  id="cached" checked/>
 									{% else %}
 									<input type="checkbox" name="cached"  id="cached"/>
 									{% endif %}
 									<label for="cached">{% trans "Cached" %}</label>
+								</div>
+								<div class="col-md-3 form-group single-image-control">
+									{% if external_layer.single_image %}
+									<input type="checkbox" name="single_image" id="single_image" checked/>
+									{% else %}
+									<input type="checkbox" name="single_image" id="single_image"/>
+									{% endif %}
+									<label for="single_image">{% trans "Single image (No tiles)" %}</label>
+								</div>
+								<div class="row cached-single-image-notice-row" style="display:none;">
+									<div class="col-md-12">
+										<div id="cached-single-image-notice" class="alert-box-message"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <span class="cached-single-image-notice-text"></span></div>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -442,8 +455,14 @@ $(document).ready(function(){
 		
 		if(type == "WMS"){
 			$(".cached-control").css("display","block");
+			$(".single-image-control").css("display","block");
+			$(".cached-single-image-notice-row").css("display","block");
 		} else {
 			$(".cached-control").css("display","none");
+			$(".single-image-control").css("display","none");
+			$(".cached-single-image-notice-row").css("display","none");
+			$("#cached-single-image-notice").css("display", "none");
+			$("#cached-single-image-notice .cached-single-image-notice-text").empty();
 		}
 	};
 
@@ -455,9 +474,9 @@ $(document).ready(function(){
 		url = $("#id_url").val();
 		var hostname = $('<a>').prop('href', window.location.href).prop('hostname');
 		if(!url.includes(hostname+"/")){
-			$(".alert-box-message").css("display", "block");
+			$("#connect-alert").css("display", "block");
 		}else{
-			$(".alert-box-message").css("display", "none");
+			$("#connect-alert").css("display", "none");
 		}
 	}
 
@@ -467,7 +486,31 @@ $(document).ready(function(){
 	var initialType = $("#id_type option:selected").val();
 	if(initialType != "WMS"){
 		$(".cached-control").css("display","none");
+		$(".single-image-control").css("display","none");
+		$(".cached-single-image-notice-row").css("display","none");
 	}
+
+	var msgSingleImageUncaches = "{% filter escapejs %}{% trans "Alert: single image (no tiles) cannot be combined with tile cache. Cached has been turned off." %}{% endfilter %}";
+	var msgCachedDisablesSingle = "{% filter escapejs %}{% trans "Alert: a cached layer cannot use single image (no tiles). Single image has been turned off." %}{% endfilter %}";
+
+	function showCachedSingleImageNotice(text) {
+		var $box = $("#cached-single-image-notice");
+		$box.find(".cached-single-image-notice-text").text(text);
+		$box.css("display", "block");
+	}
+
+	$("#single_image").on("change", function() {
+		if ($(this).is(":checked") && $("#cached").is(":checked")) {
+			$("#cached").prop("checked", false);
+			showCachedSingleImageNotice(msgSingleImageUncaches);
+		}
+	});
+	$("#cached").on("change", function() {
+		if ($(this).is(":checked") && $("#single_image").is(":checked")) {
+			$("#single_image").prop("checked", false);
+			showCachedSingleImageNotice(msgCachedDisablesSingle);
+		}
+	});
 
 	function showAlertMatrix(){
 		var matrixset = $("#id_matrixset").val();
