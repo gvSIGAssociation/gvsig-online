@@ -1,0 +1,1 @@
+default_app_config = "gvsigol_plugin_building3d_lidar.apps.Building3DLidarConfig"

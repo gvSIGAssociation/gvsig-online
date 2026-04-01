@@ -1,0 +1,44 @@
+{% load staticfiles %}
+{% load i18n %}
+{% if user.is_staff %}
+<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery-3.6.0.min.js" %}"></script>
+<script>
+if ($("#menu-manage-plugins" ).length){
+  $("#menu-manage-plugins ul.treeview-menu").append(
+    '<li id="submenu-building3d_lidar">'+
+    '  <a href="/gvsigonline/building3d-lidar/">'+
+    '    <i class="fa fa-cube"></i>{% trans "Building 3D (LiDAR)" %}'+
+    '  </a>'+
+    '</li>'
+  );
+} else {
+  $(".sidebar-menu").append(
+    '<li id="menu-manage-plugins" class="treeview"><a href="#">' +
+    '  <i class="fa fa-puzzle-piece" aria-hidden="true"></i><span>{% trans "Plugins" %}</span> <i class="fa fa-angle-left pull-right"></i></a>' +
+    '  <ul class="treeview-menu">' +
+    '    <li id="submenu-building3d_lidar">' +
+    '      <a href="/gvsigonline/building3d-lidar/">' +
+    '        <i class="fa fa-cube"></i>{% trans "Building 3D (LiDAR)" %}' +
+    '      </a>' +
+    '    </li>' +
+    '  </ul>' +
+    '</li>'
+  );
+}
+
+// Mantener el menú activo cuando estamos en páginas del plugin
+$(document).ready(function() {
+  var currentPath = window.location.pathname;
+  if (currentPath.indexOf('/gvsigonline/building3d-lidar/') !== -1) {
+    var pluginsMenu = $('#menu-manage-plugins');
+    if (pluginsMenu.length && !pluginsMenu.hasClass('active')) {
+      pluginsMenu.addClass('active');
+      pluginsMenu.find('.treeview-menu').addClass('menu-open').show();
+    }
+    $('#submenu-building3d_lidar').addClass('active');
+    pluginsMenu.addClass('active');
+  }
+});
+</script>
+{% endif %}
+
