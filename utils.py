@@ -32,6 +32,9 @@ import os, shutil, errno
 import json
 import re
 import gdaltools
+import xml.etree.ElementTree as ET
+
+from PIL import Image, ImageColor, ImageDraw, ImageFont
 
 def __get_uncompressed_file_upload_path(f):
     dir_path = tempfile.mkdtemp(suffix='', prefix='tmp-library-')
@@ -84,7 +87,7 @@ def remove_accents(string):
     string = re.sub("[ùúûü]", 'u', string)
     string = re.sub("[ýÿ]", 'y', string)
     
-    string = re.sub('[^a-z0-9 \_\.]', '', string)
+    string = re.sub(r'[^a-z0-9 _.]', '', string)
     string = string.replace(' ','_')
 
     return string
@@ -219,6 +222,128 @@ def save_custom_legend(legend_path, file, file_name):
         return legend_url
      
     except Exception as e:
+        return False
+
+
+def generate_heatmap_legend_from_sld(legend_path, sld, file_name):
+    try:
+        namespaces = {
+            'sld': 'http://www.opengis.net/sld',
+        }
+        root = ET.fromstring(sld)
+        color_map = root.find('.//sld:ColorMap', namespaces)
+        if color_map is None:
+            return False
+
+        entries = []
+        for entry in color_map.findall('sld:ColorMapEntry', namespaces):
+            label = (entry.get('label') or '').lower()
+            if 'nodata' in label:
+                continue
+
+            color = entry.get('color')
+            quantity = entry.get('quantity')
+            opacity = entry.get('opacity')
+            if not color or quantity is None:
+                continue
+
+            try:
+                quantity = float(quantity)
+                opacity = float(opacity) if opacity is not None else 1.0
+            except Exception:
+                continue
+
+            entries.append({
+                'quantity': quantity,
+                'color': color,
+                'opacity': max(0.0, min(1.0, opacity))
+            })
+
+        if len(entries) < 2:
+            return False
+
+        entries.sort(key=lambda item: item['quantity'])
+
+        width = 260
+        height = 76
+        margin_x = 18
+        margin_top = 14
+        bar_height = 22
+        bar_width = width - (margin_x * 2)
+        bar_y = margin_top
+
+        image = Image.new('RGBA', (width, height), (255, 255, 255, 255))
+        draw = ImageDraw.Draw(image)
+        font = ImageFont.load_default()
+
+        def interpolate_channel(start, end, factor):
+            return int(round(start + ((end - start) * factor)))
+
+        def get_rgba_for_ratio(ratio):
+            if ratio <= entries[0]['quantity']:
+                base = entries[0]
+                rgba = ImageColor.getrgb(base['color'])
+                return rgba + (int(base['opacity'] * 255),)
+
+            for idx in range(len(entries) - 1):
+                current_entry = entries[idx]
+                next_entry = entries[idx + 1]
+                if ratio <= next_entry['quantity']:
+                    current_rgb = ImageColor.getrgb(current_entry['color'])
+                    next_rgb = ImageColor.getrgb(next_entry['color'])
+                    span = next_entry['quantity'] - current_entry['quantity']
+                    factor = 0 if span == 0 else (ratio - current_entry['quantity']) / span
+                    alpha = interpolate_channel(
+                        int(current_entry['opacity'] * 255),
+                        int(next_entry['opacity'] * 255),
+                        factor
+                    )
+                    return (
+                        interpolate_channel(current_rgb[0], next_rgb[0], factor),
+                        interpolate_channel(current_rgb[1], next_rgb[1], factor),
+                        interpolate_channel(current_rgb[2], next_rgb[2], factor),
+                        alpha
+                    )
+
+            base = entries[-1]
+            rgba = ImageColor.getrgb(base['color'])
+            return rgba + (int(base['opacity'] * 255),)
+
+        for x in range(bar_width):
+            ratio = 0 if bar_width == 1 else float(x) / float(bar_width - 1)
+            rgba = get_rgba_for_ratio(ratio)
+            draw.line(
+                [(margin_x + x, bar_y), (margin_x + x, bar_y + bar_height)],
+                fill=rgba
+            )
+
+        draw.rectangle(
+            [margin_x, bar_y, margin_x + bar_width, bar_y + bar_height],
+            outline=(120, 120, 120, 255),
+            width=1
+        )
+
+        first_quantity = "{:g}".format(entries[0]['quantity'])
+        last_quantity = "{:g}".format(entries[-1]['quantity'])
+        draw.text((margin_x, bar_y + bar_height + 10), first_quantity, fill=(70, 70, 70, 255), font=font)
+
+        last_bbox = draw.textbbox((0, 0), last_quantity, font=font)
+        last_text_width = last_bbox[2] - last_bbox[0]
+        draw.text(
+            (margin_x + bar_width - last_text_width, bar_y + bar_height + 10),
+            last_quantity,
+            fill=(70, 70, 70, 255),
+            font=font
+        )
+
+        file_path = legend_path + file_name
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        image.save(file_path, format='PNG')
+        set_default_permissions(file_path)
+        return settings.MEDIA_URL + "custom_legends/" + file_name
+
+    except Exception:
         return False
     
             

@@ -22,7 +22,7 @@
 @author: Mehdi Jelassia <mjelassia@scolab.es>
 '''
 
-from .models import Library, Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, TextSymbolizer
+from .models import Library, Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, TextSymbolizer, ColorRampLibrary
 from gvsigol_services import geographic_servers
 from gvsigol_services.models import Layer, Datastore, Workspace
 from gvsigol_core import utils as core_utils
@@ -46,6 +46,16 @@ def create_style(style_name, style_title, is_default, sld, layer, gs, is_preview
         sld = sld
     )
     style.save()
+
+    if not is_preview:
+        legend_path = utils.check_custom_legend_path()
+        legend_name = style.name + ".png"
+        legend_url = utils.generate_heatmap_legend_from_sld(legend_path, sld, legend_name)
+        if legend_url:
+            style.has_custom_legend = True
+            style.custom_legend_url = legend_url
+            style.save(update_fields=['has_custom_legend', 'custom_legend_url'])
+
     style_layer = StyleLayer(
         style = style,
         layer = layer
@@ -70,6 +80,14 @@ def update_style(style_title, is_default, sld, layer, gs, style, is_preview=Fals
     style.title = style_title
     style.is_default = is_default
     style.save()
+
+    if not is_preview:
+        legend_path = utils.check_custom_legend_path()
+        legend_name = style.name + ".png"
+        legend_url = utils.generate_heatmap_legend_from_sld(legend_path, sld, legend_name)
+        style.has_custom_legend = bool(legend_url)
+        style.custom_legend_url = legend_url if legend_url else None
+        style.save(update_fields=['has_custom_legend', 'custom_legend_url'])
 
     sld_body = utils.encode_xml(sld)
 
@@ -141,5 +159,6 @@ def get_conf(request, layer_id):
         'supported_crs': json.dumps(core_utils.get_supported_crs()),
         'preview_url': utils.get_preview_url(workspace, feature_type)
     }
+    conf['ramp_libraries'] = ColorRampLibrary.objects.all()
     utils.set_auth_settings(request, conf)
     return conf
