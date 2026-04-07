@@ -2330,8 +2330,10 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 error_message TEXT;
                 intersection_dimension INTEGER;
             BEGIN
-                -- Buscar overlaps usando ST_Relate con patrones DE-9IM específicos
-                -- Aplicamos SnapToGrid al milímetro para evitar problemas de precisión
+                -- Buscar overlaps usando ST_Relate con patrones DE-9IM específicos.
+                -- Para polígonos añadimos además una comprobación de área de intersección
+                -- positiva para cubrir casos de contains/within donde no se cruzan bordes.
+                -- Aplicamos SnapToGrid al milímetro para evitar problemas de precisión.
                 SELECT {pk_field}::TEXT, 
                        ST_Intersection(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({geom_field}, {snap_precision})),
                        ST_Area(ST_Intersection(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({geom_field}, {snap_precision}))),
@@ -2345,6 +2347,17 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                         OR
                         -- Patrón para geometrías idénticas: 'T*F**FFF*' (igualdad)
                        ST_Relate(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({geom_field}, {snap_precision}), 'T*F**FFF*')
+                        OR
+                        -- Captura polígonos contenidos o contenedores con solape de área real.
+                       COALESCE(
+                           ST_Area(
+                               ST_Intersection(
+                                   ST_SnapToGrid(NEW.{geom_field}, {snap_precision}),
+                                   ST_SnapToGrid({geom_field}, {snap_precision})
+                               )
+                           ),
+                           0
+                       ) > area_eps_m2
                   )
                   AND {pk_field} <> NEW.{pk_field} -- Excluir el registro actual en caso de actualización
                 LIMIT 1;
