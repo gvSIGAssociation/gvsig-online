@@ -687,6 +687,21 @@ msgstr "Wählbare Ebenengruppen"
 msgid "expiration_date"
 msgstr "Verfallsdatum"
 
+#: gvsigol_core/templates/project_add.html:516
+#: gvsigol_core/templates/project_update.html:534
+msgid "expiration_date_optional"
+msgstr "Verfallsdatum (optional)"
+
+#: gvsigol_core/templates/project_add.html:523
+#: gvsigol_core/templates/project_update.html:541
+msgid "expiration_date_hint"
+msgstr "Leer lassen, wenn das Projekt nicht ablaufen soll. Nutzen Sie das Löschen-Symbol im Kalender oder die Schaltfläche unten."
+
+#: gvsigol_core/templates/project_add.html:524
+#: gvsigol_core/templates/project_update.html:542
+msgid "expiration_date_clear"
+msgstr "Verfallsdatum entfernen"
+
 #: gvsigol_core/templates/project_add.html:97
 #: gvsigol_core/templates/project_update.html:126
 msgid "MinX"
