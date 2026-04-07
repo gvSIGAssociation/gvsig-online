@@ -1802,9 +1802,9 @@ def layer_update(request, layer_id):
 
         assigned_write_roles = []
         if layer.type == 'v_PostGIS':
-            i, params = layer.datastore.get_db_connection()
-            with i as c:
-                is_view = c.is_view(layer.datastore.name, layer.source_name)
+            dbi, src, schema = layer.get_db_connection()
+            with dbi as c:
+                is_view = c.is_view(schema, src)
         else:
             is_view = False
         if not is_view:
@@ -2039,9 +2039,9 @@ def _layer_update_build_render_context(request, layer, layer_id, layergroup_id, 
                 for data_field in aux_fields:
                     if field['name'] == data_field:
                         date_fields.append(field)
-        i, params = layer.datastore.get_db_connection()
-        with i as c:
-            is_view = c.is_view(layer.datastore.name, layer.source_name)
+        dbi, src, schema = layer.get_db_connection()
+        with dbi as c:
+            is_view = c.is_view(schema, src)
     else:
         is_view = False
 
@@ -3363,9 +3363,9 @@ def layer_config(request, layer_id):
     layergroup_id = request.GET.get('layergroup_id')
 
     if request.method == 'POST':
-        i, params = layer.datastore.get_db_connection()
-        with i as c:
-            is_view = c.is_view(layer.datastore.name, layer.source_name)
+        dbi, src, schema = layer.get_db_connection()
+        with dbi as c:
+            is_view = c.is_view(schema, src)
         old_conf = ast.literal_eval(layer.conf) if layer.conf else {}
 
         conf = {
@@ -3450,9 +3450,9 @@ def layer_config(request, layer_id):
         for lang_id, _ in LANGUAGES:
             available_languages.append(lang_id)
         try:
-            i, params = layer.datastore.get_db_connection()
-            with i as c:
-                is_view = c.is_view(layer.datastore.name, layer.source_name)
+            dbi, src, schema = layer.get_db_connection()
+            with dbi as c:
+                is_view = c.is_view(schema, src)
         except:
             logger.exception('Error checking layer is_view')
             is_view = False
