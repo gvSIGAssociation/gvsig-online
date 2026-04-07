@@ -1,4 +1,9 @@
 {% load static %}
+{% load i18n %}
+{% trans "Cannot edit this layer because it comes from a view" as edition_view_reason %}
+<script type="text/javascript">
+	window.gvsigolEditionViewReason = "{{ edition_view_reason|escapejs }}";
+</script>
 <script>
 	var IMG_PATH = '{% static "img/" %}';
 </script>
@@ -25,38 +30,44 @@
 					}
 				}
 			}
+			var editionViewReason = window.gvsigolEditionViewReason || gettext('Cannot edit this layer because it comes from a view');
 			if(!is_portable){
 				layers.forEach(function(layer){
-					if (layer.baselayer == false) {
-						if (layer.is_vector) {
-					    	if (layer.write_roles.length >= 1) {
-					    		if (userCanWrite(layer, conf.user.permissions.roles)) {
-					    			var ui = '';
-					    			ui += '	<a id="start-edition-' + layer.get('id') + '" href="#" class="btn btn-block btn-social btn-custom-tool start-edition-link">';
-					    			ui += '		<i class="fa fa-edit"></i> ' + gettext('Edit layer');
-					    			ui += '	</a>';
-					    			$('#layer-box-' + layer.get('id') + ' .box-body').prepend(ui);
-					    		}
-					    	}
-					    }				
+					if (layer.baselayer !== false) return;
+					if (!layer.is_vector || layer.write_roles.length < 1) return;
+					if (!userCanWrite(layer, conf.user.permissions.roles)) return;
+					var $boxBody = $('#layer-box-' + layer.get('id') + ' .box-body');
+					if (layer.is_view) {
+						var $disabled = $('<span class="btn btn-block btn-social btn-custom-tool"></span>')
+							.attr('title', editionViewReason)
+							.css({opacity: 0.65, cursor: 'not-allowed'})
+							.append($('<i class="fa fa-edit"></i>'))
+							.append(document.createTextNode(' ' + gettext('Edit layer')));
+						$boxBody.prepend($disabled);
+					} else {
+						var $link = $('<a id="start-edition-' + layer.get('id') + '" href="#" class="btn btn-block btn-social btn-custom-tool start-edition-link"></a>')
+							.append($('<i class="fa fa-edit"></i>'))
+							.append(document.createTextNode(' ' + gettext('Edit layer')));
+						$boxBody.prepend($link);
 					}
 				}, this);
 			}else{
 				if(is_enabled){
 					layers.forEach(function(layer){
-						if (layer.baselayer == false) {
-							if (layer.is_vector) {
-						    	if (layer.write_roles.length >= 1) {
-						    		if (userCanWrite(layer, portable_write_groups)) {
-						    			var ui = '';
-						    			ui += '	<a id="start-edition-' + layer.get('id') + '" href="#" class="btn btn-block btn-social btn-custom-tool edition-tool-toc-button start-edition-link">';
-						    			ui += '		<i class="fa fa-edit"></i>';
-						    			ui += '	</a>';
-						    			var selector = '#layer-box-' + layer.get('id') + ' .box-header';
-						    			$(selector).append(ui);
-						    		}
-						    	}
-						    }				
+						if (layer.baselayer !== false) return;
+						if (!layer.is_vector || layer.write_roles.length < 1) return;
+						if (!userCanWrite(layer, portable_write_groups)) return;
+						var $header = $('#layer-box-' + layer.get('id') + ' .box-header');
+						if (layer.is_view) {
+							var $disabledIcon = $('<span class="btn btn-social btn-custom-tool edition-tool-toc-button"></span>')
+								.attr('title', editionViewReason)
+								.css({opacity: 0.65, cursor: 'not-allowed'})
+								.append($('<i class="fa fa-edit"></i>'));
+							$header.append($disabledIcon);
+						} else {
+							var $link = $('<a id="start-edition-' + layer.get('id') + '" href="#" class="btn btn-social btn-custom-tool edition-tool-toc-button start-edition-link"></a>')
+								.append($('<i class="fa fa-edit"></i>'));
+							$header.append($link);
 						}
 					}, this);
 				}
@@ -101,9 +112,16 @@
 		 * Tries to add a layer lock and starts edition on success
 		 */
 		function startEdition(layer) {
+			if (layer.is_view) {
+				messageBox.show('warning', window.gvsigolEditionViewReason || gettext('Cannot edit this layer because it comes from a view'));
+				return;
+			}
 			var layerTree = viewer.core.getLayerTree();
 	  		var featureType = describeFeatureType(layer);
 	  		var editionBar = new EditionBar(layerTree, map, featureType, layer);
+	  		if (editionBar._aborted) {
+	  			return;
+	  		}
 	  		layerTree.setEditionBar(editionBar);
 		};
 		

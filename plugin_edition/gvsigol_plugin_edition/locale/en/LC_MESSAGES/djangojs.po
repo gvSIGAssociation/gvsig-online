@@ -44,6 +44,33 @@ msgstr ""
 msgid "You are editing a cached layer. Changes may take a little while to appear on the map. If you still do not see them after some time, reload the viewer page."
 msgstr ""
 
+msgid "Cannot edit this layer because it comes from a view"
+msgstr "Cannot edit this layer because it comes from a view"
+
+msgid "Error!"
+msgstr "Error!"
+
+msgid "This layer is read-only in the map service (for example a SQL or database view). Changes cannot be saved."
+msgstr "This layer is read-only in the map service (for example a SQL or database view). Changes cannot be saved."
+
+msgid "Failed to save the record. You are not allowed to insert or modify these values."
+msgstr "Failed to save the record. You are not allowed to insert or modify these values."
+
+msgid "Failed to save the record because invalid values were provided: "
+msgstr "Failed to save the record because invalid values were provided: "
+
+msgid "Failed to save the record. Probable cause: you are not allowed to insert this values or invalid values were provided"
+msgstr "Failed to save the record. Probable cause: you are not allowed to insert this values or invalid values were provided"
+
+msgid "Failed to save the record. Probable cause: You are not allowed to modify this record or incorrect record values provided"
+msgstr "Failed to save the record. Probable cause: You are not allowed to modify this record or incorrect record values provided"
+
+msgid "You are not allowed to delete this record"
+msgstr "You are not allowed to delete this record"
+
+msgid "Failed to save the record. Please check values"
+msgstr "Failed to save the record. Please check values"
+
 # editionBar.js
 #: static/js/lib/widgets/editionBar.js:95
 msgid "Add point"

@@ -39,6 +39,9 @@ msgstr "La capa que intanta editar está bloqueada"
 msgid "You are editing a cached layer. Changes may take a little while to appear on the map. If you still do not see them after some time, reload the viewer page."
 msgstr "Está editando una capa cacheada. Los cambios pueden tardar un poco en mostrarse en el mapa. Si pasado un tiempo aún no los ve, recargue la página del visor."
 
+msgid "Cannot edit this layer because it comes from a view"
+msgstr "No se puede editar esta capa porque proviene de una vista"
+
 # editionBar.js
 #: static/js/lib/widgets/editionBar.js:95
 msgid "Add point"
@@ -138,6 +141,30 @@ msgstr "Error al guardar el nuevo elemento. Por favor revise los valores"
 #: static/js/lib/widgets/editionBar.js:1672
 msgid "can't be null"
 msgstr "No puede ser nulo"
+
+msgid "Error!"
+msgstr "¡Error!"
+
+msgid "This layer is read-only in the map service (for example a SQL or database view). Changes cannot be saved."
+msgstr "Esta capa es de solo lectura en el servicio de mapas (por ejemplo una vista SQL o de base de datos). No se pueden guardar los cambios."
+
+msgid "Failed to save the record. You are not allowed to insert or modify these values."
+msgstr "No se ha podido guardar el registro. No tiene permiso para insertar o modificar estos valores."
+
+msgid "Failed to save the record because invalid values were provided: "
+msgstr "No se ha podido guardar el registro porque los valores no son válidos: "
+
+msgid "Failed to save the record. Probable cause: you are not allowed to insert this values or invalid values were provided"
+msgstr "No se ha podido guardar el registro. Causa probable: no tiene permiso para insertar estos valores o los valores no son válidos"
+
+msgid "Failed to save the record. Probable cause: You are not allowed to modify this record or incorrect record values provided"
+msgstr "No se ha podido guardar el registro. Causa probable: no tiene permiso para modificar este registro o los valores no son correctos"
+
+msgid "You are not allowed to delete this record"
+msgstr "No tiene permiso para eliminar este registro"
+
+msgid "Failed to save the record. Please check values"
+msgstr "No se ha podido guardar el registro. Por favor revise los valores"
 
 #: static/js/lib/widgets/editionBar.js:1965
 msgid ""

@@ -41,6 +41,14 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer, buildDrawC
 	this.map = map;
 	this.layerTree = layerTree;
 	this.selectedLayer = selectedLayer;
+	this._aborted = false;
+	if (this.selectedLayer && this.selectedLayer.is_view) {
+		$("#jqueryEasyOverlayDiv").css("display", "none");
+		var _viewMsg = (typeof window !== 'undefined' && window.gvsigolEditionViewReason) ? window.gvsigolEditionViewReason : gettext('Cannot edit this layer because it comes from a view');
+		messageBox.show('warning', _viewMsg);
+		this._aborted = true;
+		return;
+	}
 	if (this.selectedLayer && (this.selectedLayer.cached || (this.selectedLayer.cache_url && this.selectedLayer.cache_url.endsWith('/gwc/service/wmts')))) {
 		messageBox.show('warning', gettext('You are editing a cached layer. Changes may take a little while to appear on the map. If you still do not see them after some time, reload the viewer page.'));
 	}
@@ -2367,7 +2375,7 @@ EditionBar.prototype.showError = function(message) {
 	var ui = '';
 	ui += '<div class="alert alert-danger alert-dismissible">';
 	ui += 	'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>';
-	ui +=   '<h4><i class="icon fa fa-ban"></i> Error!</h4>';
+	ui +=   '<h4><i class="icon fa fa-ban"></i> ' + gettext('Error!') + '</h4>';
 	ui +=   '<span id="edition-error-message"></span>';
 	ui += '</div>';
 	$('#edition-error').append(ui);
@@ -2432,8 +2440,20 @@ EditionBar.prototype.transactWFS = function(operationType,f) {
 						}
 					}
 					catch (err) {}
-					var message = gettext('Failed to save the record. You are not allowed to insert or modify these values');
-					message += exception.textContent.trim();
+					var rawDetail = exception.textContent.trim();
+					var message;
+					if (/read-?\s*only|readonly|solo\s+lectura|nom[eé]s\s+lectura|is\s+read-?\s*only/i.test(rawDetail)) {
+						message = gettext(
+							'This layer is read-only in the map service (for example a SQL or database view). Changes cannot be saved.'
+						);
+					} else {
+						message = gettext(
+							'Failed to save the record. You are not allowed to insert or modify these values.'
+						);
+						if (rawDetail) {
+							message += ' ' + rawDetail;
+						}
+					}
 					self.showError(message);
 					return;
 				}

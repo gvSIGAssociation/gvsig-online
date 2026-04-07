@@ -41,6 +41,33 @@ msgstr ""
 msgid "You are editing a cached layer. Changes may take a little while to appear on the map. If you still do not see them after some time, reload the viewer page."
 msgstr "Esteu editant una capa emmagatzemada en memòria cau. Els canvis poden tardar una mica a mostrar-se al mapa. Si passat un temps encara no els veu, recarregui la pàgina del visor."
 
+msgid "Cannot edit this layer because it comes from a view"
+msgstr "No es pot editar aquesta capa perquè prové d'una vista"
+
+msgid "Error!"
+msgstr "Error!"
+
+msgid "This layer is read-only in the map service (for example a SQL or database view). Changes cannot be saved."
+msgstr "Esta capa és de només lectura en el servei de mapes (per exemple una vista SQL o de base de dades). No es poden guardar els canvis."
+
+msgid "Failed to save the record. You are not allowed to insert or modify these values."
+msgstr "No s'ha pogut guardar el registre. No teniu permís per a inserir o modificar estos valors."
+
+msgid "Failed to save the record because invalid values were provided: "
+msgstr "No s'ha pogut guardar el registre perquè els valors no són vàlids: "
+
+msgid "Failed to save the record. Probable cause: you are not allowed to insert this values or invalid values were provided"
+msgstr "No s'ha pogut guardar el registre. Causa probable: no teniu permís per a inserir estos valors o els valors no són vàlids"
+
+msgid "Failed to save the record. Probable cause: You are not allowed to modify this record or incorrect record values provided"
+msgstr "No s'ha pogut guardar el registre. Causa probable: no teniu permís per a modificar este registre o els valors no són correctes"
+
+msgid "You are not allowed to delete this record"
+msgstr "No teniu permís per a eliminar este registre"
+
+msgid "Failed to save the record. Please check values"
+msgstr "No s'ha pogut guardar el registre. Per favor, reviseu els valors"
+
 # editionBar.js
 #: static/js/lib/widgets/editionBar.js:95
 msgid "Add point"
