@@ -766,6 +766,21 @@ msgstr "Grupos de capas seleccionables"
 msgid "expiration_date"
 msgstr "Fecha de expiración"
 
+#: gvsigol_core/templates/project_add.html:516
+#: gvsigol_core/templates/project_update.html:534
+msgid "expiration_date_optional"
+msgstr "Fecha de expiración (opcional)"
+
+#: gvsigol_core/templates/project_add.html:523
+#: gvsigol_core/templates/project_update.html:541
+msgid "expiration_date_hint"
+msgstr "Déjelo vacío si el proyecto no debe caducar. Puede usar el icono de borrar del calendario o el botón de abajo."
+
+#: gvsigol_core/templates/project_add.html:524
+#: gvsigol_core/templates/project_update.html:542
+msgid "expiration_date_clear"
+msgstr "Quitar fecha de expiración"
+
 #: gvsigol_core/templates/project_add.html:276
 #: gvsigol_core/templates/project_update.html:262
 msgid "MinX"

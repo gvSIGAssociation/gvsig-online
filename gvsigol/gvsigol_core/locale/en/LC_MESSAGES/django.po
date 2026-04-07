@@ -741,6 +741,21 @@ msgstr ""
 msgid "expiration_date"
 msgstr "Expiration date"
 
+#: gvsigol_core/templates/project_add.html:516
+#: gvsigol_core/templates/project_update.html:534
+msgid "expiration_date_optional"
+msgstr "Expiration date (optional)"
+
+#: gvsigol_core/templates/project_add.html:523
+#: gvsigol_core/templates/project_update.html:541
+msgid "expiration_date_hint"
+msgstr "Leave empty if the project should not expire. Use the clear icon in the calendar or the button below."
+
+#: gvsigol_core/templates/project_add.html:524
+#: gvsigol_core/templates/project_update.html:542
+msgid "expiration_date_clear"
+msgstr "Clear expiration date"
+
 #: gvsigol_core/templates/project_add.html:276
 #: gvsigol_core/templates/project_update.html:262
 msgid "MinX"

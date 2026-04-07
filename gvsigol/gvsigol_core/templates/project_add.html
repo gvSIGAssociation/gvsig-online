@@ -513,15 +513,16 @@
 										</label>
 									</div>
 									<div class="col-md-3 form-group">
-										<label for="id_expiration_date">{% trans "expiration_date" %}</label>
-										<!-- <input type="datetime-local" name="expiration_date"  id="expiration_date" class="form-control" /> -->
+										<label for="id_expiration_date">{% trans "expiration_date_optional" %}</label>
 										<div class="input-group date" id="expiration_date">
-											<input onkeydown="return false" name="datetimepicker-start-value" type="text" class="form-control" />
+											<input id="id_expiration_date" onkeydown="return false" name="datetimepicker-start-value" type="text" class="form-control" autocomplete="off" />
 											<span class="input-group-addon">
 												<span class="glyphicon glyphicon-calendar"></span>
 											</span>
-										</div>	
-										<input type="text" name="expiration_date_utc"  id="expiration_date_utc" class="form-control hide" />							
+										</div>
+										<p class="help-block text-muted small" style="margin-top:8px;margin-bottom:6px;">{% trans "expiration_date_hint" %}</p>
+										<button type="button" class="btn btn-default btn-sm" id="expiration_date_clear_btn">{% trans "expiration_date_clear" %}</button>
+										<input type="text" name="expiration_date_utc"  id="expiration_date_utc" class="form-control hide" />
 									</div>
 								</div>
 
@@ -888,21 +889,42 @@
 	$('#menu-manage-projects').addClass("active");
 	$('#submenu-projects').addClass("active");
 
-	$('#expiration_date').datetimepicker({
-        //    inline: true,
-        //    sideBySide: true,
-		format: 'YYYY-MM-DD'
-    });
+	(function () {
+		var djangoLang = '{{ LANGUAGE_CODE|escapejs }}';
+		var map = { 'es': 'es', 'en': 'en-gb', 'ca': 'ca', 'ca-es-valencia': 'ca', 'pt': 'pt', 'de': 'de', 'pt-br': 'pt-br', 'eu': 'eu' };
+		var key = String(djangoLang || 'es').toLowerCase().replace(/_/g, '-');
+		var momentLocale = map.hasOwnProperty(key) ? map[key] : (key.indexOf('ca-') === 0 ? 'ca' : 'en-gb');
+		if (!moment.localeData(momentLocale)) {
+			momentLocale = 'en-gb';
+		}
+		$('#expiration_date').datetimepicker({
+			format: 'YYYY-MM-DD',
+			showClear: true,
+			locale: momentLocale
+		});
+	})();
 
 	$("#id_srs option[value='']").remove();
 	$('#id_srs').val('EPSG:3857')
 
 	
-	$('#expiration_date').on('dp.change', function(e){ 
-    	//let localDateStr = $("#expiration_date").val()
-		var localDateStr = e.date;
-        var milliseconds = localDateStr.valueOf();
-		$("#expiration_date_utc").val(getUTCMillisFromLocal(milliseconds))
+	$('#expiration_date').on('dp.change', function(e){
+		if (!e.date) {
+			$("#expiration_date_utc").val('');
+			return;
+		}
+        var milliseconds = e.date.valueOf();
+		var utcMs = getUTCMillisFromLocal(milliseconds);
+		$("#expiration_date_utc").val(utcMs != null ? utcMs : '');
+	});
+
+	$('#expiration_date_clear_btn').on('click', function (ev) {
+		ev.preventDefault();
+		var dp = $('#expiration_date').data('DateTimePicker');
+		if (dp) {
+			dp.clear();
+		}
+		$('#expiration_date_utc').val('');
 	});
 	
 	function readURL(input) {
@@ -1209,9 +1231,14 @@
 			updateMapSelectedExtent(map, vector_source);
 		});
 
-		$("#expiration_date").on('change', function(evt) {
-			let localDateStr = $("#expiration_date").val()
-			$("#expiration_date_utc").val(getUTCMillisFromLocal(localDateStr))
+		$('#expiration_date input').on('change', function() {
+			var localDateStr = $(this).val();
+			if (!localDateStr) {
+				$("#expiration_date_utc").val('');
+				return;
+			}
+			var utcMs = getUTCMillisFromLocal(localDateStr);
+			$("#expiration_date_utc").val(utcMs != null ? utcMs : '');
 		});
 
 		function getUTCMillisFromLocal(localDateStr) {

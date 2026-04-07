@@ -754,6 +754,21 @@ msgstr "Grups de capes seleccionables"
 msgid "expiration_date"
 msgstr "Data d'expiració"
 
+#: gvsigol_core/templates/project_add.html:516
+#: gvsigol_core/templates/project_update.html:534
+msgid "expiration_date_optional"
+msgstr "Data d'expiració (opcional)"
+
+#: gvsigol_core/templates/project_add.html:523
+#: gvsigol_core/templates/project_update.html:541
+msgid "expiration_date_hint"
+msgstr "Deixeu-ho buit si el projecte no ha de caducar. Podeu usar la icona d'esborrar del calendari o el botó de sota."
+
+#: gvsigol_core/templates/project_add.html:524
+#: gvsigol_core/templates/project_update.html:542
+msgid "expiration_date_clear"
+msgstr "Treure la data d'expiració"
+
 #: gvsigol_core/templates/project_add.html:276
 #: gvsigol_core/templates/project_update.html:262
 msgid "MinX"
