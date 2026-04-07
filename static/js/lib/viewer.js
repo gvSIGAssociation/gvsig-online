@@ -1068,6 +1068,7 @@ viewer.core = {
 			wmsLayer.queryable = layerConf.queryable;
 			wmsLayer.is_vector = layerConf.is_vector;
 			wmsLayer.write_roles = layerConf.write_roles;
+			wmsLayer.is_view = layerConf.is_view === true;
 			wmsLayer.namespace = layerConf.namespace;
 			wmsLayer.workspace = layerConf.workspace
 			wmsLayer.crs = layerConf.crs;

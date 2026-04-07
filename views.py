@@ -34,7 +34,7 @@ from gvsigol_auth import auth_backend
 from django.shortcuts import render, HttpResponse, redirect
 from django.http import HttpResponseForbidden
 from .models import Project, ProjectLayerGroup, ProjectRole, Application, ApplicationRole, UserHomeOrder
-from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup, ServiceUrl, LayerReadRole, LayerGroupRole
+from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup, ServiceUrl, LayerReadRole, LayerGroupRole, SqlView
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext as _
 from django.contrib.auth.models import User, AnonymousUser
@@ -1260,6 +1260,29 @@ def project_get_conf(request):
                             layer['is_vector'] = True
                         else:
                             layer['is_vector'] = False
+
+                        layer['is_view'] = False
+                        if l.type == 'v_PostGIS':
+                            src_key = l.source_name if l.source_name else l.name
+                            try:
+                                dbi, src, schema = l.get_db_connection()
+                                with dbi as c:
+                                    layer['is_view'] = (
+                                        c.is_view(schema, src)
+                                        or c.is_materialized_view(schema, src)
+                                    )
+                            except Exception:
+                                logger.exception('Error checking is_view for layer %s', l.id)
+                                layer['is_view'] = False
+                            if not layer['is_view']:
+                                try:
+                                    layer['is_view'] = SqlView.objects.filter(
+                                        datastore_id=l.datastore_id, name=src_key
+                                    ).exists()
+                                except Exception:
+                                    logger.exception(
+                                        'Error checking SqlView for layer %s', l.id
+                                    )
 
                         defaultCrs = None
                         if str(datastore.type) == 'e_WMS':
