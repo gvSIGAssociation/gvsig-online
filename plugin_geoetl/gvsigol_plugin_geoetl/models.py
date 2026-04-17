@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.utils.translation import gettext as _
 from gvsigol_auth import auth_backend
@@ -90,6 +91,7 @@ class ETLstatus(models.Model):
     status = models.CharField(max_length=50, null=True, blank=True)
     id_ws = models.IntegerField(null=True, blank=True)
     last_exec = models.DateTimeField(auto_now_add=False, null=True, blank=True)
+    visualizer_session_id = models.UUIDField(null=True, blank=True)
     
     class Meta:
         constraints = [
@@ -206,6 +208,42 @@ class TempETLTable(models.Model):
 
     def __str__(self):
         return f"{self.table_name} (creada: {self.created_at})"
+
+class ETLVisualizerSession(models.Model):
+    session_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    run_key    = models.CharField(max_length=300)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        verbose_name = "Sesión Visualizador ETL"
+        verbose_name_plural = "Sesiones Visualizador ETL"
+
+    def __str__(self):
+        return f"Session {self.session_id} ({self.run_key})"
+
+
+class ETLVisualizerLayer(models.Model):
+    session       = models.ForeignKey(ETLVisualizerSession, on_delete=models.CASCADE,
+                                      related_name='layers')
+    name          = models.CharField(max_length=250)
+    layer_group   = models.CharField(max_length=250, default='Visualizer')
+    color         = models.CharField(max_length=20)
+    has_geometry  = models.BooleanField(default=False)
+    feature_count = models.IntegerField(default=0)
+    table_name    = models.CharField(max_length=250)
+    extent_3857   = models.CharField(max_length=200, null=True, blank=True)
+    truncated     = models.BooleanField(default=False)
+    layer_order   = models.IntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Capa Visualizador ETL"
+        verbose_name_plural = "Capas Visualizador ETL"
+        ordering = ['layer_order']
+
+    def __str__(self):
+        return f"{self.name} ({self.session.session_id})"
+
 
 def translations_placeholder():
     test = _("gvsigol_plugin_geoetl manual title")

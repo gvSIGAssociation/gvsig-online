@@ -5,7 +5,8 @@ from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSch
 from django.core.mail import send_mail
 from celery.utils.log import get_task_logger
 from gvsigol_plugin_geoetl.utils import get_ttl_hours
-from .models import ETLworkspaces, ETLstatus, cadastral_requests, SendEmails, SendEndpoint, TempETLTable
+from .models import (ETLworkspaces, ETLstatus, cadastral_requests, SendEmails, SendEndpoint,
+                     TempETLTable, ETLVisualizerSession)
 from gvsigol_services.models import Connection
 from gvsigol import settings
 
@@ -140,6 +141,24 @@ def run_canvas_background(**kwargs):
             sortedList.append(ord[1])
         #### ####
 
+        #### Visualizer session setup ####
+        visualizer_session = None
+        visualizer_node_order = {}   # node_id -> layer_order (0-based)
+        _vis_idx = 0
+        for s in sortedList:
+            for n in nodes:
+                if s == n[0] and n[1]['type'] == 'output_Visualizer':
+                    visualizer_node_order[n[1]['id']] = _vis_idx
+                    _vis_idx += 1
+
+        if visualizer_node_order:
+            run_key = f"{id_ws}_{username}_{timezone.now().isoformat()}"
+            visualizer_session = ETLVisualizerSession.objects.create(
+                run_key=run_key,
+                expires_at=timezone.now() + timedelta(hours=get_ttl_hours()),
+            )
+        #### ####
+
         try:
 
             if params and not statusModel.name.startswith('current_canvas'):
@@ -253,6 +272,17 @@ def run_canvas_background(**kwargs):
 
                                 method_to_call = getattr(etl_tasks, n[1]['type'])
                                 parameters['id'] = n[1]['id']
+
+                                if n[1]['type'] == 'output_Visualizer' and visualizer_session:
+                                    node_id = n[1]['id']
+                                    layer_order = visualizer_node_order.get(node_id, 0)
+                                    parameters['_session_id'] = str(visualizer_session.session_id)
+                                    parameters['_layer_order'] = layer_order
+                                    if not parameters.get('layer-name', '').strip():
+                                        parameters['layer-name'] = f'Layer {layer_order + 1}'
+                                    if not parameters.get('layer-group', '').strip():
+                                        parameters['layer-group'] = 'Visualizer'
+
                                 result = method_to_call(parameters)
                                 tables_list_name.append(result)
                                 
@@ -277,6 +307,8 @@ def run_canvas_background(**kwargs):
                 if statusModel:
                     statusModel.message = 'Process has been executed successfully'
                     statusModel.status = 'Success'
+                    if visualizer_session:
+                        statusModel.visualizer_session_id = visualizer_session.session_id
                     statusModel.save()
                 
                 try:
@@ -300,6 +332,8 @@ def run_canvas_background(**kwargs):
                 if statusModel:
                     statusModel.message = 'Process has been executed successfully'
                     statusModel.status = 'Success'
+                    if visualizer_session:
+                        statusModel.visualizer_session_id = visualizer_session.session_id
                     statusModel.save()
             
             delete_tables(tables_list_name)
@@ -439,6 +473,53 @@ def periodic_clean():
         
         connection.close()
         cursor.close()
+
+    # Clean up expired ETL Visualizer sessions and their PostGIS tables
+    _clean_expired_visualizer_sessions()
+
+
+def _clean_expired_visualizer_sessions():
+    """
+    Drops PostGIS tables in etl_visualizer schema for expired sessions,
+    then deletes the expired ETLVisualizerSession records (cascade deletes layers).
+    """
+    from .models import ETLVisualizerSession, ETLVisualizerLayer
+
+    expired_sessions = ETLVisualizerSession.objects.filter(expires_at__lt=timezone.now())
+    if not expired_sessions.exists():
+        return
+
+    table_names = list(
+        ETLVisualizerLayer.objects.filter(session__in=expired_sessions).values_list('table_name', flat=True)
+    )
+
+    if table_names:
+        try:
+            connection = psycopg2.connect(
+                user=GEOETL_DB["user"], password=GEOETL_DB["password"],
+                host=GEOETL_DB["host"], port=GEOETL_DB["port"],
+                database=GEOETL_DB["database"]
+            )
+            cursor = connection.cursor()
+            for tbl in table_names:
+                try:
+                    cursor.execute(
+                        sql.SQL("DROP TABLE IF EXISTS etl_visualizer.{} CASCADE").format(
+                            sql.Identifier(tbl)
+                        )
+                    )
+                    connection.commit()
+                    logger.info("Dropped visualizer table: %s", tbl)
+                except Exception as e:
+                    logger.warning("Could not drop visualizer table %s: %s", tbl, e)
+                    connection.rollback()
+            cursor.close()
+            connection.close()
+        except Exception as e:
+            logger.exception("Error connecting to DB to clean visualizer tables: %s", e)
+
+    count, _ = expired_sessions.delete()
+    logger.info("Deleted %d expired ETLVisualizerSession(s)", count)
 
 
 def executeSQL(db, query_list):

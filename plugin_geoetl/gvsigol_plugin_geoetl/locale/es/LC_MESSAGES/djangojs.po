@@ -1451,3 +1451,15 @@ msgstr "El archivo no tiene esquema"
 
 msgid "Single csv/txt file"
 msgstr "Archivo csv/txt único"
+
+msgid "Visualizer"
+msgstr "Visualizador"
+
+msgid "Open Visualizer"
+msgstr "Abrir Visualizador"
+
+msgid "Layer name:"
+msgstr "Nombre de la capa:"
+
+msgid "Layer group:"
+msgstr "Grupo de la capa:"

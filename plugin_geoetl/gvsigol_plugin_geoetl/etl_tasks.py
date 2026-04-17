@@ -6881,3 +6881,232 @@ def trans_Kriging(dicc):
 
     return [table_name_target]
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# output_Visualizer
+# ─────────────────────────────────────────────────────────────────────────────
+
+VISUALIZER_COLORS = [
+    '#E6194B', '#3CB44B', '#4363D8', '#F58231', '#911EB4',
+    '#42D4F4', '#F032E6', '#BFEF45', '#469990', '#9A6324',
+    '#800000', '#AAFFC3', '#808000', '#FFD8B1', '#000075',
+]
+
+VISUALIZER_SCHEMA = 'etl_visualizer'
+VISUALIZER_MAX_FEATURES = 100000
+
+
+def _ensure_visualizer_schema(cur, con):
+    cur.execute(
+        sql.SQL("CREATE SCHEMA IF NOT EXISTS {}").format(
+            sql.Identifier(VISUALIZER_SCHEMA)
+        )
+    )
+    con.commit()
+
+
+def _detect_geometry_column(cur, source_schema, source_table):
+    """
+    Returns (geom_col_name, srid) or (None, None) if no geometry column.
+    Checks geometry_columns catalog first, then information_schema as fallback.
+    """
+    cur.execute(
+        """
+        SELECT f_geometry_column, srid
+        FROM geometry_columns
+        WHERE f_table_schema = %s AND f_table_name = %s
+        LIMIT 1
+        """,
+        (source_schema, source_table)
+    )
+    row = cur.fetchone()
+    if row:
+        return row[0], row[1]
+
+    cur.execute(
+        """
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_schema = %s AND table_name = %s
+          AND udt_name IN ('geometry', 'geography')
+        LIMIT 1
+        """,
+        (source_schema, source_table)
+    )
+    row = cur.fetchone()
+    if row:
+        geom_col = row[0]
+        cur.execute(
+            sql.SQL("SELECT ST_SRID({geom}) FROM {schema}.{tbl} WHERE {geom} IS NOT NULL LIMIT 1").format(
+                geom=sql.Identifier(geom_col),
+                schema=sql.Identifier(source_schema),
+                tbl=sql.Identifier(source_table),
+            )
+        )
+        srid_row = cur.fetchone()
+        srid = srid_row[0] if srid_row else 4326
+        return geom_col, srid
+
+    return None, None
+
+
+def _get_non_geom_columns(cur, source_schema, source_table, geom_col):
+    """Returns list of non-geometry column names."""
+    cur.execute(
+        """
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_schema = %s AND table_name = %s
+          AND udt_name NOT IN ('geometry', 'geography')
+        ORDER BY ordinal_position
+        """,
+        (source_schema, source_table)
+    )
+    return [row[0] for row in cur.fetchall() if row[0] != geom_col]
+
+
+def output_Visualizer(dicc):
+    import uuid as _uuid
+    from .models import ETLVisualizerSession, ETLVisualizerLayer
+
+    source_table = dicc['data'][0]
+    session_id   = dicc.get('_session_id')
+    layer_name   = dicc.get('layer-name', 'Layer')
+    layer_group  = dicc.get('layer-group', 'Visualizer')
+    layer_order  = int(dicc.get('_layer_order', 0))
+    color        = VISUALIZER_COLORS[layer_order % len(VISUALIZER_COLORS)]
+
+    con = psycopg2.connect(
+        user=GEOETL_DB["user"], password=GEOETL_DB["password"],
+        host=GEOETL_DB["host"], port=GEOETL_DB["port"],
+        database=GEOETL_DB["database"]
+    )
+    cur = con.cursor()
+
+    try:
+        _ensure_visualizer_schema(cur, con)
+
+        source_schema = GEOETL_DB["schema"]
+        geom_col, srid = _detect_geometry_column(cur, source_schema, source_table)
+        has_geometry = geom_col is not None
+
+        prop_cols = _get_non_geom_columns(cur, source_schema, source_table, geom_col)
+
+        dest_table = 'vis_' + str(_uuid.uuid4()).replace('-', '')[:24]
+
+        if has_geometry:
+            target_srid = 3857
+            if srid and srid != 0 and srid != target_srid:
+                geom_expr = sql.SQL("ST_Transform({geom}, {srid})").format(
+                    geom=sql.Identifier(geom_col),
+                    srid=sql.Literal(target_srid),
+                )
+            else:
+                geom_expr = sql.Identifier(geom_col)
+
+            col_list = sql.SQL(', ').join(
+                [sql.Identifier(c) for c in prop_cols] + [
+                    sql.SQL("{} AS geom").format(geom_expr)
+                ]
+            )
+        else:
+            if prop_cols:
+                col_list = sql.SQL(', ').join([sql.Identifier(c) for c in prop_cols])
+            else:
+                col_list = sql.SQL('*')
+
+        cur.execute(
+            sql.SQL("SELECT COUNT(*) FROM {schema}.{tbl}").format(
+                schema=sql.Identifier(source_schema),
+                tbl=sql.Identifier(source_table),
+            )
+        )
+        total_count = cur.fetchone()[0]
+        truncated = total_count > VISUALIZER_MAX_FEATURES
+
+        if truncated:
+            limit_clause = sql.SQL(" LIMIT {n}").format(n=sql.Literal(VISUALIZER_MAX_FEATURES))
+        else:
+            limit_clause = sql.SQL("")
+
+        create_sql = sql.SQL(
+            "CREATE TABLE {vis_schema}.{dest} AS "
+            "SELECT row_number() OVER () AS gvsig_etl_rowid, {cols} "
+            "FROM {src_schema}.{src}{limit}"
+        ).format(
+            vis_schema=sql.Identifier(VISUALIZER_SCHEMA),
+            dest=sql.Identifier(dest_table),
+            cols=col_list,
+            src_schema=sql.Identifier(source_schema),
+            src=sql.Identifier(source_table),
+            limit=limit_clause,
+        )
+        cur.execute(create_sql)
+        # Make gvsig_etl_rowid the primary key for O(1) single-feature lookups
+        cur.execute(
+            sql.SQL(
+                "ALTER TABLE {vis_schema}.{dest} ADD PRIMARY KEY (gvsig_etl_rowid)"
+            ).format(
+                vis_schema=sql.Identifier(VISUALIZER_SCHEMA),
+                dest=sql.Identifier(dest_table),
+            )
+        )
+        con.commit()
+
+        extent_str = None
+        if has_geometry:
+            cur.execute(
+                sql.SQL(
+                    "CREATE INDEX {idx} ON {vis_schema}.{dest} USING GIST(geom)"
+                ).format(
+                    idx=sql.Identifier('idx_' + dest_table),
+                    vis_schema=sql.Identifier(VISUALIZER_SCHEMA),
+                    dest=sql.Identifier(dest_table),
+                )
+            )
+            con.commit()
+
+            cur.execute(
+                sql.SQL(
+                    "SELECT ST_Extent(geom) FROM {vis_schema}.{dest}"
+                ).format(
+                    vis_schema=sql.Identifier(VISUALIZER_SCHEMA),
+                    dest=sql.Identifier(dest_table),
+                )
+            )
+            extent_row = cur.fetchone()
+            if extent_row and extent_row[0]:
+                extent_str = str(extent_row[0])
+
+        feature_count = min(total_count, VISUALIZER_MAX_FEATURES)
+
+        try:
+            session = ETLVisualizerSession.objects.get(session_id=session_id)
+        except ETLVisualizerSession.DoesNotExist:
+            logger.error("output_Visualizer: session %s not found", session_id)
+            return []
+
+        ETLVisualizerLayer.objects.create(
+            session=session,
+            name=layer_name,
+            layer_group=layer_group,
+            color=color,
+            has_geometry=has_geometry,
+            feature_count=feature_count,
+            table_name=dest_table,
+            extent_3857=extent_str,
+            truncated=truncated,
+            layer_order=layer_order,
+        )
+
+    except Exception as e:
+        logger.exception("output_Visualizer error: %s", e)
+        try:
+            con.rollback()
+        except Exception:
+            pass
+    finally:
+        cur.close()
+        con.close()
+
+    return []

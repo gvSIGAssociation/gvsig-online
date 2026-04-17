@@ -205,6 +205,10 @@ gvsigolETL.Toolbar = Class.extend({
 		this.runButton  = $('<button id="button-run" class="btn-pl-add"><i class="fa fa-play"></i>' + gettext('Run') + '<i id="icon-success" class="fa fa-check" aria-hidden="true"></i><i id="icon-running" class="fa fa-spinner fa-spin"></i><i id="icon-error" class="fa fa-times" aria-hidden="true"></i></button>');
 		this.html.append(this.runButton);
 
+		// Inject the OPEN INSPECTOR Button (hidden by default; shown after successful run with visualizer)
+		this.inspectorButton = $('<a id="button-open-inspector" class="btn-pl-add" target="_blank" style="display:none;background:#e8832a;color:#fff;text-decoration:none"><i class="fa fa-map"></i> ' + gettext('Open Visualizer') + '</a>');
+		this.html.append(this.inspectorButton);
+
 		this.runButton.click(function(){
 
             $("#button-run").attr("title", 'Running');

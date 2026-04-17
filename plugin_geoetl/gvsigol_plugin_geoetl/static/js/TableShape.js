@@ -17580,9 +17580,15 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                                     '<select id="schema-name-option-'+ID+'" class="form-control"></select>'+
                                 '</div>'+
                             '</div>'+
-                            '<div style="margin-top:8px">'+
-                                '<label class="col-form-label">'+gettext('Table name:')+'</label>'+
-                                '<input id="tablename-'+ID+'" type="text" value="" class="form-control" pattern="[A-Za-z]{3}">'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Get tables')+':</label><br>'+
+                                    '<a href="#" id="get-tables-out-'+ID+'" class="btn btn-default btn-sm">'+gettext('Get tables')+'</a>'+
+                                '</div>'+
+                                '<div class="col-md-8">'+
+                                    '<label class="col-form-label">'+gettext('Table name:')+'</label>'+
+                                    '<select id="tablename-'+ID+'" class="form-control"></select>'+
+                                '</div>'+
                             '</div>'+
                             '<div class="row" style="margin-top:8px">'+
                                 '<div class="col-md-3">'+
@@ -17716,6 +17722,43 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 }
             })
         });
+
+        $('#get-tables-out-'+ID).on("click", function(){
+
+            var paramsGetTables = {"id": ID,
+            "parameters": [
+                {"db": $('#db-option-'+ID).val(),
+                "schema-name": $('#schema-name-option-'+ID).val()}
+            ]}
+
+            var formDataGetTables = new FormData();
+            formDataGetTables.append('jsonParams', JSON.stringify(paramsGetTables))
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_table_name_postgres/',
+                data: formDataGetTables,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    get_tbl = []
+                    $('#tablename-'+ID).empty()
+
+                    for (i = 0; i < data.length; i++){
+                        $('#tablename-'+ID).append('<option>'+data[i]+'</option>')
+                        get_tbl.push(data[i])
+                    }
+
+                    if (typeof $('#tablename-'+ID).data('select2') !== 'undefined'){
+                        $('#tablename-'+ID).trigger('change')
+                    }
+                }
+            })
+        });
         
       var context = this
 
@@ -17785,8 +17828,72 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 $('#gvsigol-fields-container-'+ID).hide()
             }
 
-
             $('#dialog-output-postgis-'+ID).modal('show')
+
+        });
+
+        // Initialize select2 on both schema and table after the modal is fully visible
+        $('#dialog-output-postgis-'+ID).on('shown.bs.modal', function () {
+
+            if (typeof get_sch === 'undefined') {
+                get_sch = []
+                $("#schema-name-option-"+ID+" option").each(function(){
+                    get_sch.push($(this).val())
+                });
+            }
+
+            if (typeof get_tbl === 'undefined') {
+                get_tbl = []
+                $("#tablename-"+ID+" option").each(function(){
+                    get_tbl.push($(this).val())
+                });
+            }
+
+            var $modal = $('#dialog-output-postgis-'+ID);
+
+            // Schema: search + free typing (tags) so a new schema can also be entered
+            // dropdownParent keeps dropdown inside the modal → prevents Bootstrap enforceFocus stealing keystrokes
+            $("#schema-name-option-"+ID).select2({
+                tags: true,
+                placeholder: gettext('Schema:'),
+                width: '100%',
+                allowClear: true,
+                dropdownParent: $modal
+            });
+
+            $("#schema-name-option-"+ID).off("select2:selecting.pgout").on("select2:selecting.pgout", function (e) {
+                $(this).val(null).trigger('change');
+                var selectedValue = e.params.args.data.id;
+                if (!get_sch.includes(selectedValue)) {
+                    get_sch.push(selectedValue);
+                }
+            });
+
+            // Table: search + free typing so a new table name can be entered
+            var currentTablename = $("#tablename-"+ID).val();
+            if (currentTablename && $("#tablename-"+ID+' option[value="'+currentTablename+'"]').length === 0){
+                $("#tablename-"+ID).append('<option value="'+currentTablename+'">'+currentTablename+'</option>')
+            }
+
+            $("#tablename-"+ID).select2({
+                tags: true,
+                placeholder: gettext('Table name:'),
+                width: '100%',
+                allowClear: true,
+                dropdownParent: $modal
+            });
+
+            if (currentTablename){
+                $("#tablename-"+ID).val(currentTablename).trigger('change');
+            }
+
+            $("#tablename-"+ID).off("select2:selecting.pgout").on("select2:selecting.pgout", function (e) {
+                $(this).val(null).trigger('change');
+                var selectedValue = e.params.args.data.id;
+                if (!get_tbl.includes(selectedValue)) {
+                    get_tbl.push(selectedValue);
+                }
+            });
 
         });
 
@@ -17802,12 +17909,21 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                 );
             }
 
+            if (typeof get_tbl === 'undefined'){
+                get_tbl = []
+            }
+            var currentTablename = $('#tablename-'+ID).val();
+            if (currentTablename && !get_tbl.includes(currentTablename)){
+                get_tbl.push(currentTablename);
+            }
+
             var paramsPostgis = {"id": ID,
             "parameters": [
                 {"get_schema-name-option": get_sch,
+                "get_tablename": get_tbl,
                 "db-option": $('#db-option-'+ID).val(),
                 "schema-name-option": $('#schema-name-option-'+ID).val(),
-                "tablename": $('#tablename-'+ID).val(),
+                "tablename": currentTablename,
                 "match": $('#match-'+ID).val(),
                 "operation": $('input:radio[name="operation-'+ID+'"]:checked').val(),
                 "order": $('#order-'+ID).val(),
@@ -18526,4 +18642,168 @@ trans_Kriging = draw2d.shape.layout.VerticalLayout.extend({
         return this;
     }
     
+});
+// ─────────────────────────────────────────────────────────────────────────────
+// output_Visualizer
+// ─────────────────────────────────────────────────────────────────────────────
+output_Visualizer = draw2d.shape.layout.VerticalLayout.extend({
+
+    NAME: "output_Visualizer",
+
+    init: function(attr) {
+        this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3}, attr));
+
+        this.classLabel = new draw2d.shape.basic.Label({
+            text: gettext("Visualizer"),
+            stroke: 1,
+            fontColor: "#ffffff",
+            bgColor: "#e8ca93",
+            radius: this.getRadius(),
+            padding: 10,
+            resizeable: true,
+            editor: new draw2d.ui.LabelInplaceEditor()
+        });
+
+        var icon = new draw2d.shape.icon.Gear({
+            minWidth: 13,
+            minHeight: 13,
+            width: 13,
+            height: 13,
+            color: "#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8));
+        this.add(this.classLabel);
+
+        var ID = this.id;
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon);
+
+        $('#canvas-parent').append(
+            '<div id="dialog-output-visualizer-' + ID + '" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">' +
+                '<div class="modal-dialog" role="document">' +
+                    '<div class="modal-content">' +
+                        '<div class="modal-header">' +
+                            '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                                '<span aria-hidden="true">&times;</span>' +
+                            '</button>' +
+                            '<h4 class="modal-title">' + paramsTransTpl.replace('{}', gettext('Visualizer')) + '</h4>' +
+                        '</div>' +
+                        '<div class="modal-body">' +
+                            '<form>' +
+                                '<div style="margin-top:8px">' +
+                                    '<label class="col-form-label">' + gettext('Layer name:') + '</label>' +
+                                    '<input id="layer-name-' + ID + '" type="text" value="" placeholder="Layer 1" class="form-control">' +
+                                '</div>' +
+                                '<div style="margin-top:8px">' +
+                                    '<label class="col-form-label">' + gettext('Layer group:') + '</label>' +
+                                    '<input id="layer-group-' + ID + '" type="text" value="" placeholder="Visualizer" class="form-control">' +
+                                '</div>' +
+                            '</form>' +
+                        '</div>' +
+                        '<div class="modal-footer">' +
+                            '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">' + gettext('Close') + '</button>' +
+                            '<button type="button" class="btn btn-default btn-sm" id="output-visualizer-accept-' + ID + '">' + gettext('Accept') + '</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>'
+        );
+
+        // Open modal on gear click (same pattern as output_Postgis)
+        icon.on("click", function() {
+            for (var k = 0; k < jsonParams.length; k++) {
+                if (jsonParams[k]['id'] == ID && jsonParams[k]['parameters'] && jsonParams[k]['parameters'][0]) {
+                    var p = jsonParams[k]['parameters'][0];
+                    $('#layer-name-'  + ID).val(p['layer-name']  || '');
+                    $('#layer-group-' + ID).val(p['layer-group'] || '');
+                    break;
+                }
+            }
+            $('#dialog-output-visualizer-' + ID).modal('show');
+        });
+
+        // Accept button → save params and turn gear orange
+        $('#output-visualizer-accept-' + ID).on('click', function() {
+            var paramsVisualizer = {
+                "id": ID,
+                "parameters": [{
+                    'layer-name':  $('#layer-name-'  + ID).val().trim(),
+                    'layer-group': $('#layer-group-' + ID).val().trim()
+                }]
+            };
+
+            isAlreadyInCanvas(jsonParams, paramsVisualizer, ID);
+
+            icon.setColor('#e79600');
+
+            $('#dialog-output-visualizer-' + ID).modal('hide');
+        });
+    },
+
+    addEntity: function(optionalIndex) {
+        var label = new draw2d.shape.basic.Label({
+            text: gettext("Output"),
+            stroke: 0.2,
+            radius: 0,
+            bgColor: "#ffffff",
+            padding: {left: 10, top: 3, right: 40, bottom: 5},
+            fontColor: "#9a8262",
+            resizeable: true
+        });
+
+        var input = label.createPort("input");
+        input.setName("input_" + label.id);
+
+        if ($.isNumeric(optionalIndex)) {
+            this.add(label, null, optionalIndex + 1);
+        } else {
+            this.add(label);
+        }
+
+        listLabel.push([this.id, [input.name], []]);
+
+        return label;
+    },
+
+    removeEntity: function(index) {
+        this.remove(this.children.get(index + 1).figure);
+    },
+
+    getEntity: function(index) {
+        return this.children.get(index + 1).figure;
+    },
+
+    getEntities: function() {
+        var entities = new draw2d.util.ArrayList();
+        for (var i = 1; i < this.children.getSize(); i++) {
+            entities.add(this.children.get(i));
+        }
+        return entities;
+    },
+
+    setTableName: function(name) {
+        this.classLabel.setText(name);
+    },
+
+    getTableName: function() {
+        return this.classLabel.getText();
+    },
+
+    getPersistentAttributes: getPerAttr,
+
+    setPersistentAttributes: function(memento) {
+        this._super(memento);
+        this.setName(memento.name);
+
+        if (typeof memento.entities !== "undefined") {
+            $.each(memento.entities, $.proxy(function(i, e) {
+                var entity = this.addEntity(e.text);
+                entity.id = e.id;
+                entity.getInputPort(0).setName("input_" + e.id);
+            }, this));
+        }
+
+        return this;
+    }
 });
