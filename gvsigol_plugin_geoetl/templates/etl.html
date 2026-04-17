@@ -831,7 +831,7 @@
             $("#icon-error").css("display", "none");
 
             if(data.visualizer_session_id){
-                var inspUrl = '/spa/etl-inspector/' + data.visualizer_session_id + '/';
+                var inspUrl = '/spa/etl-visualizer/' + data.visualizer_session_id + '/';
                 $("#button-open-inspector").attr("href", inspUrl).show();
             } else {
                 $("#button-open-inspector").hide();
