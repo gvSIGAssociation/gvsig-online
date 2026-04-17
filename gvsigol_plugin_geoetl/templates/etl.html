@@ -389,6 +389,7 @@
                         {% if editablerestrictedly == 'true' %} disabled {% endif %}><i class="fa fa-sign-out"></i> {% trans "Outputs" %}</button>
                         <div class="dropdown-menu">
                             <li><a data-shape="output_Postgis" class="palette_node_element draw2d_droppable dropdown-item">PgSQL/PostGIS</a></li>
+                            <li><a data-shape="output_Visualizer" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Visualizer" %}</a></li>
                         </div>
                     </div>
                 </div>
@@ -809,6 +810,7 @@
             $("#icon-success").css("display", "none");
             $("#icon-running").css("display", "none");
             $("#icon-error").css("display", "none");
+            $("#button-open-inspector").hide();
 
         }
 
@@ -818,6 +820,7 @@
             $("#icon-success").css("display", "none");
             $("#icon-running").css("display", "inline-block");
             $("#icon-error").css("display", "none");
+            $("#button-open-inspector").hide();
 
         }
         if(data.status == 'Success'){
@@ -827,6 +830,13 @@
             $("#icon-running").css("display", "none");
             $("#icon-error").css("display", "none");
 
+            if(data.visualizer_session_id){
+                var inspUrl = '/spa/etl-inspector/' + data.visualizer_session_id + '/';
+                $("#button-open-inspector").attr("href", inspUrl).show();
+            } else {
+                $("#button-open-inspector").hide();
+            }
+
         }
         if(data.status == 'Error'){
 
@@ -834,6 +844,7 @@
             $("#icon-success").css("display", "none");
             $("#icon-running").css("display", "none");
             $("#icon-error").css("display", "inline");
+            $("#button-open-inspector").hide();
 
         }
 

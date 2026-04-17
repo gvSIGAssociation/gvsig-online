@@ -1,6 +1,20 @@
-from django.urls import path
+import uuid
+from django.urls import path, register_converter
 from django.views.i18n import JavaScriptCatalog
 from gvsigol_plugin_geoetl import views
+
+
+class UUIDConverter:
+    regex = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+
+    def to_python(self, value):
+        return uuid.UUID(value)
+
+    def to_url(self, value):
+        return str(value)
+
+
+register_converter(UUIDConverter, 'uuid')
 
 urlpatterns = [
     path('etl/get_conf/', views.get_conf, name='geoetl_get_conf'),
@@ -56,5 +70,8 @@ urlpatterns = [
     path('etl/etl_sharepoint_sheets/', views.etl_sharepoint_sheets, name='etl_sharepoint_sheets'),
     path('etl/etl_schema_sharepoint/', views.etl_schema_sharepoint, name='etl_schema_sharepoint'),
 
-   
+    # Visualizer API — session config & raw GeoJSON batch loader for map display
+    path('etl/visualizer/<uuid:session_id>/config/', views.etl_visualizer_config, name='etl_visualizer_config'),
+    path('etl/visualizer/layer/<int:layer_id>/features/', views.etl_visualizer_layer_features, name='etl_visualizer_layer_features'),
+    # Featureapi-compatible proxy (DataTable, Filter) is now in plugin_featureapi under /featureapi/geojson/
 ]

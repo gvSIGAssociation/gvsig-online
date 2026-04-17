@@ -1250,3 +1250,15 @@ msgstr "Criar automaticamente campos do gvSIG Online"
 
 msgid "Create feat_date_gvol and feat_version_gvol fields"
 msgstr "Criar campos feat_date_gvol e feat_version_gvol"
+
+msgid "Visualizer"
+msgstr "Visualizador"
+
+msgid "Open Visualizer"
+msgstr "Abrir Visualizador"
+
+msgid "Layer name:"
+msgstr "Nome da camada:"
+
+msgid "Layer group:"
+msgstr "Grupo de camadas:"

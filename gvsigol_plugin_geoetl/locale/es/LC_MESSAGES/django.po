@@ -1071,3 +1071,9 @@ msgstr "Buscar tareas..."
 
 msgid "No results"
 msgstr "Sin resultados"
+
+msgid "Visualizer"
+msgstr "Visualizador"
+
+msgid "Open Visualizer"
+msgstr "Abrir Visualizador"

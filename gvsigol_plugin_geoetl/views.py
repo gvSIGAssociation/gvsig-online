@@ -44,7 +44,9 @@ from gvsigol_core import utils as core_utils
 from gvsigol_services import utils as services_utils
 
 from .forms import UploadFileForm
-from .models import ETLworkspaces, ETLstatus, EtlWorkspaceEditRole,EtlWorkspaceExecuteRole,EtlWorkspaceEditRestrictedRole, SendEmails, SendEndpoint, ETLPluginSettings
+from .models import (ETLworkspaces, ETLstatus, EtlWorkspaceEditRole, EtlWorkspaceExecuteRole,
+                     EtlWorkspaceEditRestrictedRole, SendEmails, SendEndpoint, ETLPluginSettings,
+                     ETLVisualizerSession, ETLVisualizerLayer)
 from gvsigol_services.models import Datastore, Connection
 from django.db.models import Q
 from django.contrib.auth.models import User
@@ -812,12 +814,14 @@ def etl_current_canvas_status(request):
     if statusModel:
         response = {
             'status': statusModel.status,
-            'message': statusModel.message
+            'message': statusModel.message,
+            'visualizer_session_id': str(statusModel.visualizer_session_id) if statusModel.visualizer_session_id else None,
         }
     else:
         response = {
             'status': '',
-            'message': ''
+            'message': '',
+            'visualizer_session_id': None,
         }
 
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
@@ -1647,3 +1651,321 @@ def update_ttl(request):
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
     return JsonResponse({"status": "error", "message": "Método no permitido"}, status=405)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Visualizer API views
+# ─────────────────────────────────────────────────────────────────────────────
+
+import re as _re
+
+
+def _parse_extent(extent_str):
+    """
+    Convert PostGIS ST_Extent string like 'BOX(xmin ymin,xmax ymax)'
+    to [xmin, ymin, xmax, ymax] list of floats, or None on failure.
+    """
+    if not extent_str:
+        return None
+    m = _re.search(r'BOX\(([^ ]+) ([^,]+),([^ ]+) ([^)]+)\)', extent_str)
+    if m:
+        return [float(m.group(1)), float(m.group(2)), float(m.group(3)), float(m.group(4))]
+    return None
+
+
+def _union_extents(extents):
+    """Return the bounding box that contains all extents."""
+    valid = [e for e in extents if e]
+    if not valid:
+        return None
+    xmin = min(e[0] for e in valid)
+    ymin = min(e[1] for e in valid)
+    xmax = max(e[2] for e in valid)
+    ymax = max(e[3] for e in valid)
+    return [xmin, ymin, xmax, ymax]
+
+
+@login_required()
+def etl_visualizer_config(request, session_id):
+    """
+    GET /etl/visualizer/<session_id>/config/
+    Returns session metadata + list of layers + supported CRS from settings.
+    """
+    try:
+        session = ETLVisualizerSession.objects.get(session_id=session_id)
+    except ETLVisualizerSession.DoesNotExist:
+        return JsonResponse({'error': 'Session not found'}, status=404)
+
+    # Map PostgreSQL udt_name → simple type used by Filter component
+    _PG_TYPE_MAP = {
+        'int2': 'integer', 'int4': 'integer', 'int8': 'integer',
+        'float4': 'double', 'float8': 'double', 'numeric': 'double',
+        'bool': 'boolean',
+        'date': 'date', 'timestamp': 'date', 'timestamptz': 'date',
+    }
+
+    layers_data = []
+    extents = []
+
+    try:
+        con_fields = psycopg2.connect(
+            user=GEOETL_DB["user"], password=GEOETL_DB["password"],
+            host=GEOETL_DB["host"], port=GEOETL_DB["port"],
+            database=GEOETL_DB["database"]
+        )
+        cur_fields = con_fields.cursor()
+    except Exception:
+        con_fields = None
+        cur_fields = None
+
+    for layer in session.layers.all():
+        parsed = _parse_extent(layer.extent_3857)
+        extents.append(parsed)
+
+        # _rowid is a synthetic PK added at query time via row_number()
+        fields = [
+            {
+                'name': '_rowid',
+                'translate': '#',
+                'visible': False,
+                'type': 'integer',
+                'pk': 'YES',
+            }
+        ]
+        if cur_fields:
+            try:
+                cur_fields.execute(
+                    """
+                    SELECT column_name, udt_name
+                    FROM information_schema.columns
+                    WHERE table_schema = %s AND table_name = %s
+                      AND column_name != 'geom'
+                      AND udt_name NOT IN ('geometry', 'geography')
+                    ORDER BY ordinal_position
+                    """,
+                    ('etl_visualizer', layer.table_name)
+                )
+                for col_name, udt in cur_fields.fetchall():
+                    fields.append({
+                        'name': col_name,
+                        'translate': col_name,
+                        'visible': True,
+                        'type': _PG_TYPE_MAP.get(udt, 'text'),
+                        'pk': 'NO',
+                    })
+            except Exception:
+                fields = [fields[0]]  # keep only _rowid on error
+
+        layers_data.append({
+            'id': layer.id,
+            'name': layer.name,
+            'layer_group': layer.layer_group,
+            'color': layer.color,
+            'has_geometry': layer.has_geometry,
+            'feature_count': layer.feature_count,
+            'truncated': layer.truncated,
+            'extent': parsed,
+            'layer_order': layer.layer_order,
+            'fields': fields,
+        })
+
+    if cur_fields:
+        cur_fields.close()
+    if con_fields:
+        con_fields.close()
+
+    combined_extent = _union_extents(extents)
+
+    # Build supported CRS list from Django settings (same format as the viewer)
+    supported_crs = core_utils.get_supported_crs_array()
+
+    from django.conf import settings as _dj_settings
+    logo_url = _dj_settings.STATIC_URL + 'img/no_project.png'
+
+    return JsonResponse({
+        'session_id': str(session.session_id),
+        'layers': layers_data,
+        'combined_extent': combined_extent,
+        'supported_crs': supported_crs,
+        'logo_url': logo_url,
+    })
+
+
+@login_required()
+def etl_visualizer_layer_features(request, layer_id):
+    """
+    GET /etl/visualizer/layer/<layer_id>/features/
+        ?bbox=xmin,ymin,xmax,ymax   (optional, EPSG:3857)
+        &limit=5000                  (optional, default 5000, max 10000)
+
+    Returns a GeoJSON FeatureCollection for layers with geometry,
+    or a JSON object with a 'rows' array for tabular layers.
+    """
+    try:
+        layer = ETLVisualizerLayer.objects.select_related('session').get(id=layer_id)
+    except ETLVisualizerLayer.DoesNotExist:
+        return JsonResponse({'error': 'Layer not found'}, status=404)
+
+    bbox_param = request.GET.get('bbox', '')
+    try:
+        offset = int(request.GET.get('offset', 0))
+    except (ValueError, TypeError):
+        offset = 0
+    try:
+        batch_size = min(int(request.GET.get('batch_size', 100000)), 500000)
+    except (ValueError, TypeError):
+        batch_size = 100000
+
+    table_name = layer.table_name
+    vis_schema = 'etl_visualizer'
+
+    try:
+        con = psycopg2.connect(
+            user=GEOETL_DB["user"], password=GEOETL_DB["password"],
+            host=GEOETL_DB["host"], port=GEOETL_DB["port"],
+            database=GEOETL_DB["database"]
+        )
+        cur = con.cursor()
+
+        if layer.has_geometry:
+            # Get non-geom column names
+            cur.execute(
+                """
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_schema = %s AND table_name = %s
+                  AND column_name != 'geom'
+                  AND udt_name NOT IN ('geometry', 'geography')
+                ORDER BY ordinal_position
+                """,
+                (vis_schema, table_name)
+            )
+            prop_cols = [row[0] for row in cur.fetchall()]
+
+            prop_sql = sql.SQL(', ').join([sql.Identifier(c) for c in prop_cols])
+
+            if bbox_param and ',' in bbox_param:
+                try:
+                    parts = [float(v) for v in bbox_param.split(',')]
+                    xmin, ymin, xmax, ymax = parts[0], parts[1], parts[2], parts[3]
+                    where_clause = sql.SQL(
+                        "WHERE ST_Intersects(geom, ST_MakeEnvelope({xmin},{ymin},{xmax},{ymax},3857))"
+                    ).format(
+                        xmin=sql.Literal(xmin), ymin=sql.Literal(ymin),
+                        xmax=sql.Literal(xmax), ymax=sql.Literal(ymax),
+                    )
+                except (ValueError, IndexError):
+                    where_clause = sql.SQL("")
+            else:
+                where_clause = sql.SQL("")
+
+            # Count total for pagination metadata
+            count_q = sql.SQL(
+                "SELECT COUNT(*) FROM {schema}.{tbl} {where}"
+            ).format(
+                schema=sql.Identifier(vis_schema),
+                tbl=sql.Identifier(table_name),
+                where=where_clause,
+            )
+            cur.execute(count_q)
+            total = cur.fetchone()[0]
+
+            query = sql.SQL(
+                "SELECT gvsig_etl_rowid AS _rowid, {props}, ST_AsGeoJSON(geom) AS _geom_json "
+                "FROM {schema}.{tbl} {where} "
+                "ORDER BY gvsig_etl_rowid "
+                "LIMIT {lim} OFFSET {off}"
+            ).format(
+                props=prop_sql,
+                schema=sql.Identifier(vis_schema),
+                tbl=sql.Identifier(table_name),
+                where=where_clause,
+                lim=sql.Literal(batch_size),
+                off=sql.Literal(offset),
+            )
+            cur.execute(query)
+            rows = cur.fetchall()
+            col_names = [desc[0] for desc in cur.description]
+
+            features = []
+            for row in rows:
+                props = {}
+                geom_json = None
+                for i, col in enumerate(col_names):
+                    if col == '_geom_json':
+                        geom_json = row[i]
+                    else:
+                        val = row[i]
+                        if hasattr(val, 'isoformat'):
+                            val = val.isoformat()
+                        props[col] = val
+                if geom_json:
+                    features.append({
+                        'type': 'Feature',
+                        'geometry': json.loads(geom_json),
+                        'properties': props,
+                    })
+
+            result = {
+                'type': 'FeatureCollection',
+                'features': features,
+                'total': total,
+                'offset': offset,
+                'batch_size': batch_size,
+            }
+            cur.close()
+            con.close()
+            return JsonResponse(result)
+
+        else:
+            # Tabular data — no geometry
+            count_q = sql.SQL("SELECT COUNT(*) FROM {schema}.{tbl}").format(
+                schema=sql.Identifier(vis_schema),
+                tbl=sql.Identifier(table_name),
+            )
+            cur.execute(count_q)
+            total = cur.fetchone()[0]
+
+            query = sql.SQL(
+                "SELECT * FROM {schema}.{tbl} "
+                "ORDER BY gvsig_etl_rowid "
+                "LIMIT {lim} OFFSET {off}"
+            ).format(
+                schema=sql.Identifier(vis_schema),
+                tbl=sql.Identifier(table_name),
+                lim=sql.Literal(batch_size),
+                off=sql.Literal(offset),
+            )
+            cur.execute(query)
+            rows = cur.fetchall()
+            col_names = [desc[0] for desc in cur.description]
+
+            result_rows = []
+            for row in rows:
+                r = {}
+                for i, col in enumerate(col_names):
+                    val = row[i]
+                    if hasattr(val, 'isoformat'):
+                        val = val.isoformat()
+                    r[col] = val
+                result_rows.append(r)
+
+            cur.close()
+            con.close()
+            return JsonResponse({'rows': result_rows, 'columns': col_names, 'total': total, 'offset': offset})
+
+    except Exception as e:
+        logger.exception("etl_visualizer_layer_features error: %s", e)
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+# ---------------------------------------------------------------------------
+# featureapi-compatible endpoints (used by @scolab/common DataTable & Filter)
+# URL prefix: /etl/visualizer/layers/<layer_id>/
+# ---------------------------------------------------------------------------
+
+_PG_TYPE_MAP_GLOBAL = {
+    'int2': 'integer', 'int4': 'integer', 'int8': 'integer',
+    'float4': 'double', 'float8': 'double', 'numeric': 'double',
+    'bool': 'boolean',
+    'date': 'date', 'timestamp': 'date', 'timestamptz': 'date',
+}
