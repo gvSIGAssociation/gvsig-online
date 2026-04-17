@@ -1190,10 +1190,12 @@ def etl_clean_tmp_tables(request):
 
     user = connection_params.get('user')
     schema = connection_params.get('schema')
+    vis_schema = 'etl_visualizer'
 
     connection = psycopg2.connect(user = connection_params["user"], password = connection_params["password"], host = connection_params["host"], port = connection_params["port"], database = connection_params["database"])
     cursor = connection.cursor()
 
+    # Clean ETL temporary schema
     drop_schema = sql.SQL("DROP SCHEMA {schema} CASCADE;").format(
         schema = sql.SQL(schema)
     )
@@ -1207,8 +1209,25 @@ def etl_clean_tmp_tables(request):
     cursor.execute(create_schema)
     connection.commit()
 
+    # Clean ETL Visualizer schema (drop all session tables)
+    cursor.execute(
+        sql.SQL("DROP SCHEMA IF EXISTS {schema} CASCADE;").format(schema=sql.Identifier(vis_schema))
+    )
+    connection.commit()
+
+    cursor.execute(
+        sql.SQL("CREATE SCHEMA IF NOT EXISTS {schema} AUTHORIZATION {user};").format(
+            schema=sql.Identifier(vis_schema),
+            user=sql.SQL(user)
+        )
+    )
+    connection.commit()
+
     connection.close()
     cursor.close()
+
+    # Remove all visualizer session records (cascades to ETLVisualizerLayer)
+    ETLVisualizerSession.objects.all().delete()
 
     response = {}
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
