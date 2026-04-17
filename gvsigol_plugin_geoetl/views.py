@@ -842,6 +842,7 @@ def etl_list_canvas_status(request):
             workspace['status'] = sm.status
             workspace['message'] = sm.message
             workspace['last_exec'] = str(sm.last_exec)
+            workspace['visualizer_session_id'] = str(sm.visualizer_session_id) if sm.visualizer_session_id else None
             workspaces.append(workspace)
 
     response = {
