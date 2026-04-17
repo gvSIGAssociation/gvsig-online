@@ -1229,6 +1229,10 @@ def etl_clean_tmp_tables(request):
     # Remove all visualizer session records (cascades to ETLVisualizerLayer)
     ETLVisualizerSession.objects.all().delete()
 
+    # Clear visualizer_session_id from all ETLstatus entries so the
+    # "Open Visualizer" button no longer appears in the workspace list
+    ETLstatus.objects.all().update(visualizer_session_id=None)
+
     response = {}
     return render(request, 'dashboard_geoetl_workspaces_list.html', response)
 
