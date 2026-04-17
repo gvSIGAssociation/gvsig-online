@@ -129,6 +129,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 						<tr>
 							<th>{% trans "ID" %}</th>
 							<th></th>
+							<th></th>
 							<th>{% trans "Status" %}</th>
 							<th>{% trans "Last execution" %}</th>
 							<th>{% trans "Name" %}</th>
@@ -147,6 +148,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 						<tr data-workspaceid="{{ workspace.id }}" data-editable="{{workspace.editable}}" data-execute="{{workspace.execute}}" data-editablerestrictedly="{{workspace.editable_restrictedly}}">
 							<td>{{ workspace.id }}</td>
 							<td></td>
+							<td><a id="btn-open-visualizer-{{ workspace.id }}" class="btn btn-warning" target="_blank" data-toggle="tooltip" data-placement="bottom" title="{% trans 'Open Visualizer' %}" style="display:none;"><i class="fa fa-map"></i></a></td>
 							<td>
 								<div class="etl-status-icons">
 									<i id="icon-success-{{ workspace.id }}" class="fa fa-check" style="color:#1a7a45;display:none" aria-hidden="true"></i>
@@ -1269,76 +1271,80 @@ function setSqlAfterValue(val) {
 					sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
 				}
 			},
-			"columnDefs": [{
-				"targets": -1,
-				"data": null,
-				"render": function ( data, type, row ) {
-					var filter = 'tr[data-workspaceid="' + data[0] + '"]';
-					var dataset = $('#etl-table').find(filter).data();
-					if (dataset['editable']) {
-						return '<button type="button" name="button-download-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Download workspace" %}' + '" class="btn btn-primary"><i class="fa fa-download"></i></button>';
-					}
-					else {
-						return '';
-					}
+		"columnDefs": [{
+			"targets": -1,
+			"data": null,
+			"render": function ( data, type, row ) {
+				var filter = 'tr[data-workspaceid="' + data[0] + '"]';
+				var dataset = $('#etl-table').find(filter).data();
+				if (dataset['editable']) {
+					return '<button type="button" name="button-download-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Download workspace" %}' + '" class="btn btn-primary"><i class="fa fa-download"></i></button>';
 				}
-			},{
-				"targets": -2,
-				"data": null,
-				"render": function ( data, type, row ) {
-					var filter = 'tr[data-workspaceid="' + data[0] + '"]';
-					var dataset = $('#etl-table').find(filter).data();
-					if (dataset['editable']) {
-						return '<button type="button" name="button-delete-workspace-etl" data-toggle="modal" data-toggle-second="tooltip" data-target="#modal-delete-workspace-etl" data-placement="bottom" title="' + '{% trans "Delete workspace" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>';
-					}
-					else {
-						return '';
-					}
+				else {
+					return '';
 				}
-			},{
-				"targets": -3,
-				"data": null,
-				"render": function ( data, type, row ) {
-					var filter = 'tr[data-workspaceid="' + data[0] + '"]';
-					var dataset = $('#etl-table').find(filter).data();
-					if (dataset['editable']) {
-						return '<button type="button" name="button-update-workspace-etl" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update workspace" %}' + '" class="btn btn-warning"><i class="fa fa-edit"></i></button>';
-					}
-					else {
-						return '';
-					}
+			}
+		},{
+			"targets": -2,
+			"data": null,
+			"render": function ( data, type, row ) {
+				var filter = 'tr[data-workspaceid="' + data[0] + '"]';
+				var dataset = $('#etl-table').find(filter).data();
+				if (dataset['editable']) {
+					return '<button type="button" name="button-delete-workspace-etl" data-toggle="modal" data-toggle-second="tooltip" data-target="#modal-delete-workspace-etl" data-placement="bottom" title="' + '{% trans "Delete workspace" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>';
 				}
-			},{
-				"targets": -4,
-				"data": null,
-				"render": function ( data, type, row ) {
-					var filter = 'tr[data-workspaceid="' + data[0] + '"]';
-					var dataset = $('#etl-table').find(filter).data();
-					if (dataset['editable'] || dataset['editablerestrictedly']) {
-						return '<button type="button" name="button-open-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Open workspace" %}' + '" class="btn btn-success"><i class="fa fa-folder-open"></i></button>';
-					}
-					else {
-						return '';
-					}
+				else {
+					return '';
 				}
-			},{
-				"targets": -5,
-				"data": null,
-				"render": function ( data, type, row ) {
-					var filter = 'tr[data-workspaceid="' + data[0] + '"]';
-					var dataset = $('#etl-table').find(filter).data();
-					if (dataset['editable']) {
-						return '<button type="button" name="button-set-parameters-workspace" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Set parameters" %}' + '" class="btn btn-secondary"><i class="fa fa-bars"></i></button>';
-					}
-					else {
-						return '';
-					}
+			}
+		},{
+			"targets": -3,
+			"data": null,
+			"render": function ( data, type, row ) {
+				var filter = 'tr[data-workspaceid="' + data[0] + '"]';
+				var dataset = $('#etl-table').find(filter).data();
+				if (dataset['editable']) {
+					return '<button type="button" name="button-update-workspace-etl" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update workspace" %}' + '" class="btn btn-warning"><i class="fa fa-edit"></i></button>';
 				}
-			},{
-				"targets": 1,
-				"data": null,
-				"defaultContent": '<button type="button" name="button-run-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Run workspace" %}' + '" class="btn btn-light"><i class="fa fa-play"></i></button>'
-			}],
+				else {
+					return '';
+				}
+			}
+		},{
+			"targets": -4,
+			"data": null,
+			"render": function ( data, type, row ) {
+				var filter = 'tr[data-workspaceid="' + data[0] + '"]';
+				var dataset = $('#etl-table').find(filter).data();
+				if (dataset['editable'] || dataset['editablerestrictedly']) {
+					return '<button type="button" name="button-open-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Open workspace" %}' + '" class="btn btn-success"><i class="fa fa-folder-open"></i></button>';
+				}
+				else {
+					return '';
+				}
+			}
+		},{
+			"targets": -5,
+			"data": null,
+			"render": function ( data, type, row ) {
+				var filter = 'tr[data-workspaceid="' + data[0] + '"]';
+				var dataset = $('#etl-table').find(filter).data();
+				if (dataset['editable']) {
+					return '<button type="button" name="button-set-parameters-workspace" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Set parameters" %}' + '" class="btn btn-secondary"><i class="fa fa-bars"></i></button>';
+				}
+				else {
+					return '';
+				}
+			}
+		},{
+			"targets": 1,
+			"data": null,
+			"defaultContent": '<button type="button" name="button-run-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Run workspace" %}' + '" class="btn btn-light"><i class="fa fa-play"></i></button>'
+		},{
+			"targets": 2,
+			"orderable": false,
+			"searchable": false
+		}],
 			"dom": 'T<"clear">rt',
 			"paging": true,
 			"pageLength": 10,
@@ -2178,6 +2184,7 @@ function setSqlAfterValue(val) {
 			var msg = workspace["message"];
 			var status = workspace['status'];
 			var last_exec = workspace['last_exec'];
+			var visualizer_session_id = workspace['visualizer_session_id'];
 
 			$("#see-msg-status-"+id).css("display", "inline-block");
 
@@ -2186,6 +2193,7 @@ function setSqlAfterValue(val) {
 				$("#icon-success-"+id).css("display", "none");
 				$("#icon-running-"+id).css("display", "none");
 				$("#icon-error-"+id).css("display", "none");
+				$("#btn-open-visualizer-"+id).hide();
 
 			}
 
@@ -2194,6 +2202,7 @@ function setSqlAfterValue(val) {
 				$("#icon-success-"+id).css("display", "none");
 				$("#icon-running-"+id).css("display", "inline-block");
 				$("#icon-error-"+id).css("display", "none");
+				$("#btn-open-visualizer-"+id).hide();
 
 			}
 			if(status == 'Success'){
@@ -2202,12 +2211,20 @@ function setSqlAfterValue(val) {
 				$("#icon-running-"+id).css("display", "none");
 				$("#icon-error-"+id).css("display", "none");
 
+				if (visualizer_session_id) {
+					var inspUrl = '/spa/etl-visualizer/' + visualizer_session_id + '/';
+					$("#btn-open-visualizer-"+id).attr("href", inspUrl).show();
+				} else {
+					$("#btn-open-visualizer-"+id).hide();
+				}
+
 			}
 			if(status == 'Error'){
 
 				$("#icon-success-"+id).css("display", "none");
 				$("#icon-running-"+id).css("display", "none");
 				$("#icon-error-"+id).css("display", "inline");
+				$("#btn-open-visualizer-"+id).hide();
 
 			}
 
