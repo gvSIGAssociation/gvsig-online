@@ -426,11 +426,28 @@ def geojson_layer_single_feature(request, layer_id, rowid, dummy=None):
             return JsonResponse({'error': 'No columns'}, status=404)
 
         prop_sql = sql.SQL(', ').join([sql.Identifier(c) for c in prop_cols])
-        # Geometry in EPSG:4326 — DataTable reads GeoJSON assuming 4326 then transforms.
-        geom_col = (
-            sql.SQL(", ST_AsGeoJSON(ST_Transform(geom, 4326)) AS _geom_json")
-            if layer.has_geometry else sql.SQL("")
+
+        # When the DataTable runs with USE_STRICT_CRS=true it sends source_epsg=EPSG:3857
+        # and expects the geometry in that CRS (no client-side transform is applied).
+        # Otherwise it expects EPSG:4326 and transforms to the map CRS itself.
+        source_epsg = request.GET.get('source_epsg', '')
+        use_strict_crs = bool(source_epsg and '3857' in source_epsg)
+        print(
+            f"[geojson_single_feature] layer_id={layer_id} rowid={rowid} "
+            f"source_epsg={source_epsg!r} use_strict_crs={use_strict_crs} has_geometry={layer.has_geometry}"
         )
+        if use_strict_crs:
+            # Return geometry as-is (already stored in EPSG:3857)
+            geom_col = (
+                sql.SQL(", ST_AsGeoJSON(geom) AS _geom_json")
+                if layer.has_geometry else sql.SQL("")
+            )
+        else:
+            # Return geometry in EPSG:4326 — DataTable will transform 4326 → map CRS
+            geom_col = (
+                sql.SQL(", ST_AsGeoJSON(ST_Transform(geom, 4326)) AS _geom_json")
+                if layer.has_geometry else sql.SQL("")
+            )
 
         q = sql.SQL(
             "SELECT gvsig_etl_rowid AS _rowid, {props}{geom} "
@@ -457,9 +474,20 @@ def geojson_layer_single_feature(request, layer_id, rowid, dummy=None):
                 val = row[i]
                 props[col] = val.isoformat() if hasattr(val, 'isoformat') else val
 
+        if geom_json:
+            parsed_geom = json.loads(geom_json)
+            coords = parsed_geom.get('coordinates')
+            first_coord = coords[0] if coords else None
+            print(
+                f"[geojson_single_feature] returning CRS={'EPSG:3857' if use_strict_crs else 'EPSG:4326'} "
+                f"first_coord={first_coord}"
+            )
+        else:
+            parsed_geom = None
+
         return JsonResponse({'content': {
             'type': 'Feature',
-            'geometry': json.loads(geom_json) if geom_json else None,
+            'geometry': parsed_geom,
             'properties': props,
         }})
 
