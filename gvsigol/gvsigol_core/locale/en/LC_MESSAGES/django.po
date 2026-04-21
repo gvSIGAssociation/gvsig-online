@@ -1364,6 +1364,16 @@ msgstr ""
 msgid " manual desc"
 msgstr ""
 
+#: gvsigol_core/views.py:1713 gvsigol_core/views.py:1723
+msgid "gvsigol_plugin_catalog manual title"
+msgstr "Metadata catalog plugin"
+
+#: gvsigol_core/views.py:1714 gvsigol_core/views.py:1724
+msgid "gvsigol_plugin_catalog manual desc"
+msgstr ""
+"Guide to the geographic metadata catalog in gvSIG Online: publishing, "
+"editing, and search."
+
 #: gvsigol_core/views.py:1781 gvsigol_core/views.py:1783
 msgid "Shared view"
 msgstr ""
@@ -1395,12 +1405,6 @@ msgstr ""
 #: gvsigol_core/views.py:2116
 msgid "Application name already exists"
 msgstr ""
-
-#~ msgid "gvsigol_plugin_catalog manual title"
-#~ msgstr "Catalog Plugin"
-
-#~ msgid "gvsigol_plugin_catalog manual desc"
-#~ msgstr "Metadata catalog plugin manual for gvSIG Online"
 
 #~ msgid "gvsigol_plugin_gpsganado manual title"
 #~ msgstr "GPS Ganado Plugin"

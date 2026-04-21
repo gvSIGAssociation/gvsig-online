@@ -1395,6 +1395,16 @@ msgstr ""
 msgid " manual desc"
 msgstr "Manual d'usuari"
 
+#: gvsigol_core/views.py:1713 gvsigol_core/views.py:1723
+msgid "gvsigol_plugin_catalog manual title"
+msgstr "Plugin Catàleg de metadades"
+
+#: gvsigol_core/views.py:1714 gvsigol_core/views.py:1724
+msgid "gvsigol_plugin_catalog manual desc"
+msgstr ""
+"Guia del catàleg de metadades geogràfiques en gvSIG Online: publicació, "
+"edició i consulta."
+
 #: gvsigol_core/views.py:1781 gvsigol_core/views.py:1783
 msgid "Shared view"
 msgstr "Vista compartida"
@@ -1466,12 +1476,6 @@ msgstr "El nom de l'aplicació ja existeix"
 
 #~ msgid "Public projects list"
 #~ msgstr "Llistat de projectes"
-
-#~ msgid "gvsigol_plugin_catalog manual title"
-#~ msgstr "Plugin Catàleg"
-
-#~ msgid "gvsigol_plugin_catalog manual desc"
-#~ msgstr "Manual del plugin de catàleg de metadades de gvSIG Online"
 
 #~ msgid "gvsigol_plugin_gpsganado manual title"
 #~ msgstr "Plugin GPS Ganado"
