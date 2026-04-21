@@ -1399,6 +1399,16 @@ msgstr "título del manual"
 msgid " manual desc"
 msgstr "descripción del manual"
 
+#: gvsigol_core/views.py:1713 gvsigol_core/views.py:1723
+msgid "gvsigol_plugin_catalog manual title"
+msgstr "Plugin Catálogo de metadatos"
+
+#: gvsigol_core/views.py:1714 gvsigol_core/views.py:1724
+msgid "gvsigol_plugin_catalog manual desc"
+msgstr ""
+"Guía del catálogo de metadatos geográficos en gvSIG Online: publicación, "
+"edición y consulta."
+
 #: gvsigol_core/views.py:1781 gvsigol_core/views.py:1783
 msgid "Shared view"
 msgstr "Vista compartida"
@@ -1470,12 +1480,6 @@ msgstr "El nombre de la aplicación ya existe"
 
 #~ msgid "Public projects list"
 #~ msgstr "Lista de proyectos públicos"
-
-#~ msgid "gvsigol_plugin_catalog manual title"
-#~ msgstr "Plugin Catálogo"
-
-#~ msgid "gvsigol_plugin_catalog manual desc"
-#~ msgstr "Manual del plugin de catálogo de metadatos de gvSIG Online"
 
 #~ msgid "gvsigol_plugin_gpsganado manual title"
 #~ msgstr "Plugin GPS Ganado"
