@@ -1983,9 +1983,92 @@ def etl_visualizer_layer_features(request, layer_id):
 
 
 # ---------------------------------------------------------------------------
-# featureapi-compatible endpoints (used by @scolab/common DataTable & Filter)
-# URL prefix: /etl/visualizer/layers/<layer_id>/
+# featureapi-compatible proxy views for ETL Visualizer layers
 # ---------------------------------------------------------------------------
+#
+# Architecture note:
+#   The actual SQL logic lives in plugin_featureapi.api_geojson_layer as pure
+#   Python functions that accept (request, layer, con).  This plugin owns the
+#   HTTP endpoints, resolves ETLVisualizerLayer, opens the DB connection, and
+#   delegates to those functions.  This way plugin_featureapi has zero
+#   dependency on plugin_geoetl.
+#
+# URL prefix (registered in plugin_geoetl/urls.py):
+#   /etl/geojson/<layer_id>/layers/<dummy>/...
+#
+# Frontend featureapi_endpoint in etl-visualizer/Utils.js:
+#   /etl/geojson/${etlLayerId}
+# ---------------------------------------------------------------------------
+
+from gvsigol_plugin_featureapi import api_geojson_layer as featureapi_geojson
+
+ETL_VISUALIZER_SCHEMA = 'etl_visualizer'
+
+
+def _etl_layer_resolve_and_connect(layer_id):
+    """
+    Resolve an ETLVisualizerLayer by id and open a psycopg2 connection.
+
+    Returns (layer, con) where layer exposes .table_name, .schema and
+    .has_geometry — the duck-type interface expected by featureapi_geojson
+    functions — or (None, None) if the layer does not exist.
+    """
+    try:
+        layer = ETLVisualizerLayer.objects.get(id=layer_id)
+    except ETLVisualizerLayer.DoesNotExist:
+        return None, None
+
+    # Attach the schema attribute that featureapi functions expect.
+    # ETLVisualizerLayer stores its data in the dedicated visualizer schema.
+    layer.schema = ETL_VISUALIZER_SCHEMA
+
+    con = psycopg2.connect(
+        user=GEOETL_DB["user"], password=GEOETL_DB["password"],
+        host=GEOETL_DB["host"], port=GEOETL_DB["port"],
+        database=GEOETL_DB["database"],
+    )
+    return layer, con
+
+
+def etl_geojson_features(request, layer_id, dummy=None):
+    """Proxy → featureapi_geojson.geojson_layer_features."""
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+    layer, con = _etl_layer_resolve_and_connect(layer_id)
+    if layer is None:
+        return JsonResponse({'error': 'Layer not found'}, status=404)
+    return featureapi_geojson.geojson_layer_features(request, layer, con)
+
+
+def etl_geojson_fieldoptions(request, layer_id, dummy=None):
+    """Proxy → featureapi_geojson.geojson_layer_fieldoptions."""
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+    layer, con = _etl_layer_resolve_and_connect(layer_id)
+    if layer is None:
+        return JsonResponse({'error': 'Layer not found'}, status=404)
+    return featureapi_geojson.geojson_layer_fieldoptions(request, layer, con)
+
+
+def etl_geojson_fieldoptions_paginated(request, layer_id, dummy=None):
+    """Proxy → featureapi_geojson.geojson_layer_fieldoptions_paginated."""
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+    layer, con = _etl_layer_resolve_and_connect(layer_id)
+    if layer is None:
+        return JsonResponse({'error': 'Layer not found'}, status=404)
+    return featureapi_geojson.geojson_layer_fieldoptions_paginated(request, layer, con)
+
+
+def etl_geojson_single_feature(request, layer_id, rowid, dummy=None):
+    """Proxy → featureapi_geojson.geojson_layer_single_feature."""
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+    layer, con = _etl_layer_resolve_and_connect(layer_id)
+    if layer is None:
+        return JsonResponse({'error': 'Layer not found'}, status=404)
+    return featureapi_geojson.geojson_layer_single_feature(request, layer, con, rowid)
+
 
 _PG_TYPE_MAP_GLOBAL = {
     'int2': 'integer', 'int4': 'integer', 'int8': 'integer',
