@@ -358,6 +358,11 @@ msgstr "Asignar grupo"
 msgid "Assign roles"
 msgstr "Asignar roles"
 
+#: gvsigol_auth/templates/user_add.html
+#: gvsigol_auth/templates/user_update.html
+msgid "Filter roles by name or description"
+msgstr "Filtrar roles por nombre o descripción"
+
 #: gvsigol_auth/templates/user_add.html:161
 #: gvsigol_auth/templates/user_update.html:143
 #: gvsigol_auth/templates/user_update.html:145

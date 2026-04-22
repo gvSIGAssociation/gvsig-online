@@ -246,6 +246,35 @@
 	padding-bottom: 8px;
 	border-bottom: 1px solid var(--pf-border);
 }
+/* ---- Barra de búsqueda (misma que permisos de proyecto / listas) ---- */
+.pf-search-bar {
+	position: relative;
+	width: 100%;
+	max-width: 520px;
+	display: block;
+	margin-bottom: 14px;
+}
+.pf-search-bar .form-control {
+	width: 100%;
+	box-sizing: border-box;
+	padding-left: 34px !important;
+	border-radius: 20px !important;
+	background: var(--pf-bg);
+	height: 36px;
+}
+.pf-search-bar .form-control:focus { background: var(--pf-white); }
+.pf-search-bar::before {
+	content: '\f002';
+	font-family: FontAwesome;
+	position: absolute;
+	left: 12px;
+	top: 50%;
+	transform: translateY(-50%);
+	color: var(--pf-muted);
+	font-size: 12px;
+	z-index: 1;
+	pointer-events: none;
+}
 </style>
 {% endblock %}
 
@@ -366,7 +395,10 @@
 
 				<div class="tab-pane" id="tab-roles">
 					<p class="tab-section-title">{% trans "Assign roles" %}</p>
-					<ul class="assign-list">
+					<div class="pf-search-bar">
+						<input type="text" id="role-search-filter" class="search form-control" placeholder="{% trans 'Filter roles by name or description' %}" autocomplete="off" aria-label="{% trans 'Filter roles by name or description' %}" />
+					</div>
+					<ul class="assign-list" id="role-assign-list">
 						{% for role in roles %}
 						<li class="assign-list__item">
 							<div class="assign-list__icon">
@@ -394,5 +426,22 @@
 <script>
 	$('#menu-manage-group-users').addClass("active");
 	$('#submenu-users').addClass("active");
+	(function () {
+		var $list = $('#role-assign-list');
+		var $input = $('#role-search-filter');
+		if (!$list.length || !$input.length) {
+			return;
+		}
+		$input.on('input', function () {
+			var q = ($input.val() || '').toLowerCase().trim();
+			$list.find('.assign-list__item').each(function () {
+				var $item = $(this);
+				var name = ($item.find('.assign-list__name').text() || '').toLowerCase();
+				var desc = ($item.find('.assign-list__desc').text() || '').toLowerCase();
+				var match = !q || name.indexOf(q) !== -1 || desc.indexOf(q) !== -1;
+				$item.toggle(match);
+			});
+		});
+	})();
 </script>
 {% endblock %}
