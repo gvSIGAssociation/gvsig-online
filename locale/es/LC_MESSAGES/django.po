@@ -1194,8 +1194,6 @@ msgstr ""
 "corregir los datos o consulte en el Manual de Usuario la opción 'No preservar clave primaría' Detalles: {details}"
 
 #: gvsigol_services/templates/base_layer_list.html:93
-#, fuzzy
-#| msgid "Base layer list"
 msgid "Base layers list"
 msgstr "Lista de capas base"
 
@@ -1671,10 +1669,8 @@ msgid "Error duplicating trigger"
 msgstr "Error al duplicar el disparador"
 
 #: gvsigol_services/templates/connection_list.html:95
-#, fuzzy
-#| msgid "Connections"
 msgid "Connections list"
-msgstr "Conexiones"
+msgstr "Lista de conexiones"
 
 #: gvsigol_services/templates/connection_list.html:103
 msgid "Add connection"
@@ -2045,10 +2041,8 @@ msgid "Connection timeout. You can type a schema name."
 msgstr "Tiempo de conexión agotado. Puede escribir un nombre de esquema."
 
 #: gvsigol_services/templates/datastore_list.html:95
-#, fuzzy
-#| msgid "Datastores"
 msgid "Datastores list"
-msgstr "Almacenes de datos"
+msgstr "Lista de almacenes de datos"
 
 #: gvsigol_services/templates/datastore_list.html:103
 msgid "Add datastore"
@@ -3048,8 +3042,6 @@ msgid "End time_enabled field"
 msgstr "Campo temporal (fin intervalo)"
 
 #: gvsigol_services/templates/layer_list.html:94
-#, fuzzy
-#| msgid "Layer list"
 msgid "Layers list"
 msgstr "Lista de capas"
 
@@ -3436,10 +3428,8 @@ msgid "Only one master node can exist"
 msgstr "Solo puede existir un nodo maestro"
 
 #: gvsigol_services/templates/server_list.html:94
-#, fuzzy
-#| msgid "Servers"
 msgid "Servers list"
-msgstr "Servidores"
+msgstr "Lista de servidores"
 
 #: gvsigol_services/templates/server_list.html:96
 msgid "Add server"

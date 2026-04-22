@@ -1222,10 +1222,8 @@ msgid ""
 msgstr ""
 
 #: gvsigol_services/templates/base_layer_list.html:93
-#, fuzzy
-#| msgid "Layer list"
 msgid "Base layers list"
-msgstr "Llistat de capes"
+msgstr "Llistat de capes base"
 
 #: gvsigol_services/templates/base_layer_list.html:95
 msgid "Add base layer"
@@ -1741,10 +1739,8 @@ msgid "Error duplicating trigger"
 msgstr "Error actualitzant magatzem"
 
 #: gvsigol_services/templates/connection_list.html:95
-#, fuzzy
-#| msgid "Connection params"
 msgid "Connections list"
-msgstr "Paràmetres de connexió"
+msgstr "Llista de connexions"
 
 #: gvsigol_services/templates/connection_list.html:103
 #, fuzzy
@@ -2167,10 +2163,8 @@ msgid "Connection timeout. You can type a schema name."
 msgstr ""
 
 #: gvsigol_services/templates/datastore_list.html:95
-#, fuzzy
-#| msgid "Datastores"
 msgid "Datastores list"
-msgstr "Magatzems de dades"
+msgstr "Llista de magatzems de dades"
 
 #: gvsigol_services/templates/datastore_list.html:103
 msgid "Add datastore"
@@ -3166,8 +3160,6 @@ msgid "End time_enabled field"
 msgstr "Final del camp temporal"
 
 #: gvsigol_services/templates/layer_list.html:94
-#, fuzzy
-#| msgid "Layer list"
 msgid "Layers list"
 msgstr "Llistat de capes"
 
@@ -3546,10 +3538,8 @@ msgid "Only one master node can exist"
 msgstr "Només pot existir un node mestre"
 
 #: gvsigol_services/templates/server_list.html:94
-#, fuzzy
-#| msgid "Servers"
 msgid "Servers list"
-msgstr "Servidors"
+msgstr "Llista de servidors"
 
 #: gvsigol_services/templates/server_list.html:96
 msgid "Add server"
