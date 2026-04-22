@@ -10,8 +10,6 @@
    cards grandes con borde lateral de color
    ============================================================ */
 :root {
-	--h-accent:     #4a7fa5;
-	--h-accent-dk:  #2d5f80;
 	--h-text:       #2e3a45;
 	--h-muted:      #7b8a96;
 	--h-border:     #e8ecef;
@@ -25,15 +23,25 @@
 	--h-blue:       #3d7ab5;
 }
 
-.home-page { padding: 20px 0; }
+/* Acentos = cabecera del tema (sidebar-refinements.css define --hdr-bg / --hdr-bg-dk por skin) */
+.home-page {
+	padding: 20px 0;
+	--h-accent:    var(--hdr-bg, #4a7fa5);
+	--h-accent-dk: var(--hdr-bg-dk, #2d5f80);
+}
+/* skin-black: cabecera clara; usar acento del sidebar para barra de perfil y controles */
+body.skin-black .home-page {
+	--h-accent:    var(--sb-accent, #637a84);
+	--h-accent-dk: #4d606a;
+}
 
 /* ============================================================
    PROFILE BAR – compacta
    ============================================================ */
 .profile-bar {
-	background: linear-gradient(135deg, var(--h-accent) 0%, var(--h-accent-dk) 100%);
+	background: linear-gradient(135deg, var(--h-accent-dk) 0%, var(--h-accent) 100%);
 	border-radius: var(--h-radius) var(--h-radius) 0 0;
-	box-shadow: 0 4px 18px rgba(45,95,128,0.25);
+	box-shadow: 0 4px 18px color-mix(in srgb, var(--h-accent-dk) 35%, transparent);
 	border: none;
 	padding: 14px 20px;
 	display: flex;
@@ -198,7 +206,7 @@
 }
 .profile-bar__pass-form-inner .form-control:focus {
 	border-color: var(--h-accent);
-	box-shadow: 0 0 0 3px rgba(74,127,165,0.15);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--h-accent) 22%, transparent);
 	outline: none;
 }
 #form-error { display: none; }
@@ -288,7 +296,7 @@
 .elegant-search .form-control:focus {
 	border-color: var(--h-accent);
 	background: var(--h-white);
-	box-shadow: 0 0 0 3px rgba(74,127,165,0.12);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--h-accent) 18%, transparent);
 	outline: none;
 	color: var(--h-text);
 }
@@ -355,7 +363,7 @@
 }
 .project-card:hover {
 	box-shadow: var(--h-shadow-hv);
-	border-color: #c8dcec;
+	border-color: color-mix(in srgb, var(--h-accent) 18%, var(--h-border));
 	transform: translateY(-3px);
 }
 
@@ -483,7 +491,7 @@
 .filter-btn:hover {
 	border-color: var(--h-accent);
 	color: var(--h-accent);
-	background: #f0f6fb;
+	background: color-mix(in srgb, var(--h-accent) 7%, var(--h-white));
 }
 .filter-btn.active {
 	background: var(--h-accent);
@@ -542,7 +550,7 @@
 	white-space: nowrap;
 }
 .sort-btn.active { background: var(--h-accent); color: #fff; }
-.sort-btn:not(.active):hover { color: var(--h-accent); background: rgba(74,127,165,0.1); }
+.sort-btn:not(.active):hover { color: var(--h-accent); background: color-mix(in srgb, var(--h-accent) 10%, transparent); }
 
 #btn-save-order {
 	display: none;
@@ -605,8 +613,8 @@
 
 .ui-sortable-placeholder {
 	visibility: visible !important;
-	background: #e8f0f7;
-	border: 2px dashed #a8c8e8;
+	background: color-mix(in srgb, var(--h-accent) 6%, var(--h-white));
+	border: 2px dashed color-mix(in srgb, var(--h-accent) 26%, var(--h-border));
 	border-radius: var(--h-radius);
 }
 
@@ -693,7 +701,7 @@
 	transition: background var(--h-transition), color var(--h-transition);
 }
 .view-btn.active { background: var(--h-accent); color: #fff; }
-.view-btn:not(.active):hover { color: var(--h-accent); background: rgba(74,127,165,0.1); }
+.view-btn:not(.active):hover { color: var(--h-accent); background: color-mix(in srgb, var(--h-accent) 10%, transparent); }
 
 /* ---- Modo lista ---- */
 .projects-grid--list { margin: 0; }

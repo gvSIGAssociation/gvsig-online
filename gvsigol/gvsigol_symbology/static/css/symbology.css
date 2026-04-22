@@ -389,38 +389,69 @@
 	border-top: 1px solid var(--pl-border);
 	text-align: right;
 }
-.pl-panel .dataTables_wrapper .dataTables_paginate .paginate_button {
-	display: inline-flex;
+/* Bootstrap+DataTables: jquery.dataTables.css estiliza .paginate_button como si fuera el botón; con Bootstrap la clase va en <li> y el clic es <a> — hay que anular el <li> o queda doble recuadro. */
+.pl-panel .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button,
+.pl-panel .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button:hover,
+.pl-panel .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button:active,
+.pl-panel .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button:focus,
+.pl-panel .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button.current,
+.pl-panel .dataTables_wrapper .dataTables_paginate ul.pagination > li.paginate_button.active {
+	display: inline-block;
+	padding: 0 !important;
+	margin: 0 !important;
+	min-width: 0 !important;
+	border: none !important;
+	border-radius: 0;
+	background: transparent none !important;
+	box-shadow: none !important;
+	color: inherit !important;
+	text-decoration: none !important;
+	cursor: default;
+}
+.pl-panel .dataTables_wrapper .dataTables_paginate ul.pagination {
+	margin: 2px 0;
+}
+/* Misma separación y tamaño que servicios/capas (layer_list / pl-server-pagination): margin 0 2px y ~30px de alto. */
+.pl-panel .dataTables_wrapper .dataTables_paginate .paginate_button > a {
+	cursor: pointer;
+	float: none !important;
+	display: inline-flex !important;
 	align-items: center;
 	justify-content: center;
+	margin: 0 2px !important;
 	min-width: 30px;
 	height: 30px;
 	padding: 0 8px;
-	margin: 0 2px;
+	box-sizing: border-box;
 	border-radius: 5px;
-	border: 1px solid var(--pl-border);
-	background: var(--pl-white);
+	border: 1px solid var(--pl-border) !important;
+	background: var(--pl-white) !important;
 	color: var(--pl-muted) !important;
 	font-size: 12px;
 	font-weight: 600;
-	cursor: pointer;
+	vertical-align: middle;
 	transition: background var(--pl-transition), border-color var(--pl-transition), color var(--pl-transition);
 }
-.pl-panel .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-	background: #f0f6fb;
-	border-color: var(--pl-accent);
+.pl-panel .dataTables_wrapper .dataTables_paginate .paginate_button:not(.disabled):not(.active) > a:hover {
+	background: #f0f6fb !important;
+	border-color: var(--pl-accent) !important;
 	color: var(--pl-accent) !important;
 }
-.pl-panel .dataTables_wrapper .dataTables_paginate .paginate_button.current,
-.pl-panel .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+.pl-panel .dataTables_wrapper .dataTables_paginate .paginate_button.active > a,
+.pl-panel .dataTables_wrapper .dataTables_paginate .paginate_button.active > a:hover,
+.pl-panel .dataTables_wrapper .dataTables_paginate .paginate_button.active > a:focus,
+.pl-panel .dataTables_wrapper .dataTables_paginate .paginate_button.current > a,
+.pl-panel .dataTables_wrapper .dataTables_paginate .paginate_button.current > a:hover,
+.pl-panel .dataTables_wrapper .dataTables_paginate .paginate_button.current > a:focus {
 	background: var(--pl-accent) !important;
 	border-color: var(--pl-accent) !important;
 	color: #fff !important;
 }
-.pl-panel .dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
-.pl-panel .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
-	background: var(--pl-bg);
-	border-color: var(--pl-border);
+.pl-panel .dataTables_wrapper .dataTables_paginate .paginate_button.disabled > a,
+.pl-panel .dataTables_wrapper .dataTables_paginate .paginate_button.disabled > a:hover,
+.pl-panel .dataTables_wrapper .dataTables_paginate .paginate_button.disabled > a:focus {
+	background: var(--pl-bg) !important;
+	border-color: var(--pl-border) !important;
 	color: #ccc !important;
 	cursor: default;
 }
