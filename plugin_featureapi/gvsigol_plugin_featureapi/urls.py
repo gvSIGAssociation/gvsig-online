@@ -28,7 +28,6 @@ from rest_framework import routers
 from gvsigol_plugin_featureapi import api_layer
 from gvsigol_plugin_featureapi import api_feature
 from gvsigol_plugin_featureapi import api_topology
-from gvsigol_plugin_featureapi import api_geojson_layer
 from gvsigol import settings
 import gvsigol_plugin_featureapi.settings as settings_local
 from gvsigol_plugin_featureapi import views
@@ -91,11 +90,6 @@ urlpatterns = [
     # Deprecated urls since they have been moved under de fileserver prefix. See urls_fileserver.py    
     path('get_historic_resource/<int:layer_id>/<int:feat_id>/<int:version>/', views.get_layer_historic_resource, name='get_layer_historic_resource'),
 
-    # GeoJSON layer API — featureapi-compatible endpoints for in-memory/ETL GeoJSON layers
-    path('geojson/<int:layer_id>/layers/<str:dummy>/features/', api_geojson_layer.geojson_layer_features, name='geojson_layer_features'),
-    path('geojson/<int:layer_id>/layers/<str:dummy>/fieldoptions/', api_geojson_layer.geojson_layer_fieldoptions, name='geojson_layer_fieldoptions'),
-    path('geojson/<int:layer_id>/layers/<str:dummy>/fieldoptions-paginated/', api_geojson_layer.geojson_layer_fieldoptions_paginated, name='geojson_layer_fieldoptions_paginated'),
-    path('geojson/<int:layer_id>/layers/<str:dummy>/<int:rowid>/', api_geojson_layer.geojson_layer_single_feature, name='geojson_layer_single_feature'),
 ]
 
 

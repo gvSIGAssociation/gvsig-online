@@ -1,65 +1,55 @@
 # -*- coding: utf-8 -*-
 """
-api_geojson_layer.py — Feature API endpoints for GeoJSON-backed layers.
+api_geojson_layer.py — Reusable library for GeoJSON-backed PostGIS table queries.
 
-These views expose a featureapi-compatible interface for layers whose data is
-stored as GeoJSON in a PostGIS table (e.g. ETL Visualizer layers). They are
-consumed by @scolab/common components: DataTable, Filter and PopupInfo, which
-build URLs following the pattern:
+These are pure Python functions (NOT Django views) that any plugin can call
+after resolving its own layer object and opening a DB connection.  The caller
+is responsible for authentication, URL routing and layer resolution.
 
-    GVSIGOL_BASE + featureapi_endpoint + "/layers/" + layerId + "/<sub-path>"
+Expected ``layer`` duck-type interface:
+    layer.table_name  – str, name of the PostGIS table
+    layer.schema      – str, PostgreSQL schema (e.g. 'etl_visualizer')
+    layer.has_geometry – bool
 
-URL prefix:  /featureapi/geojson/<layer_id>/layers/<dummy>/
+``con`` must be an open psycopg2 connection; the functions close it when done.
+
+Usage example from a Django view in any plugin:
+
+    from gvsigol_plugin_featureapi import api_geojson_layer as featureapi_geojson
+
+    def my_features_view(request, layer_id):
+        layer, con = _resolve_my_layer(layer_id)
+        if layer is None:
+            return JsonResponse({'error': 'not found'}, status=404)
+        return featureapi_geojson.geojson_layer_features(request, layer, con)
 """
 
 import json
 import logging
 
-import psycopg2
 from psycopg2 import sql
 
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
-from gvsigol_plugin_geoetl.models import ETLVisualizerLayer
-from gvsigol_plugin_geoetl.settings import GEOETL_DB
-
 logger = logging.getLogger(__name__)
-
-GEOJSON_SCHEMA = 'etl_visualizer'
 
 
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
 
-def _get_geojson_layer(layer_id, request_user):
-    """Return (layer, con, cur) for a GeoJSON layer, or (None, None, None)."""
-    try:
-        layer = ETLVisualizerLayer.objects.select_related('session').get(id=layer_id)
-    except ETLVisualizerLayer.DoesNotExist:
-        return None, None, None
-    con = psycopg2.connect(
-        user=GEOETL_DB["user"], password=GEOETL_DB["password"],
-        host=GEOETL_DB["host"], port=GEOETL_DB["port"],
-        database=GEOETL_DB["database"],
-    )
-    cur = con.cursor()
-    return layer, con, cur
-
-
-def _get_prop_cols(cur, table_name):
+def _get_prop_cols(cur, table_name, schema):
     """Return non-geometry, non-PK column names in ordinal order."""
     cur.execute(
         """
         SELECT column_name
         FROM information_schema.columns
-        WHERE table_schema = 'etl_visualizer' AND table_name = %s
+        WHERE table_schema = %s AND table_name = %s
           AND column_name NOT IN ('geom', 'gvsig_etl_rowid')
           AND udt_name NOT IN ('geometry', 'geography')
         ORDER BY ordinal_position
         """,
-        (table_name,)
+        (schema, table_name)
     )
     return [r[0] for r in cur.fetchall()]
 
@@ -169,14 +159,11 @@ def _single_condition(query, prop_cols):
 
 
 # ---------------------------------------------------------------------------
-# Public views
+# Public library functions  (called by plugin-specific Django views)
 # ---------------------------------------------------------------------------
 
-@login_required()
-def geojson_layer_features(request, layer_id, dummy=None):
+def geojson_layer_features(request, layer, con):
     """
-    GET /featureapi/geojson/<layer_id>/layers/<dummy>/features/
-
     Featureapi-compatible paginated features endpoint.
     Consumed by @scolab/common DataTable and Filter components.
 
@@ -189,11 +176,10 @@ def geojson_layer_features(request, layer_id, dummy=None):
       sortorder – 'ascend' | 'descend' (optional)
     """
     try:
-        layer, con, cur = _get_geojson_layer(layer_id, request.user)
-        if layer is None:
-            return JsonResponse({'error': 'Layer not found'}, status=404)
-
+        cur = con.cursor()
         table_name = layer.table_name
+        schema = layer.schema
+
         max_items = int(request.GET.get('max', 25))
         page = int(request.GET.get('page', 0))
         text_search = request.GET.get('text', '').strip()
@@ -201,8 +187,9 @@ def geojson_layer_features(request, layer_id, dummy=None):
         sortfield = request.GET.get('sortfield', '')
         sortorder = request.GET.get('sortorder', '')
 
-        prop_cols = _get_prop_cols(cur, table_name)
+        prop_cols = _get_prop_cols(cur, table_name, schema)
         if not prop_cols:
+            con.close()
             return JsonResponse({'content': {'lendata': 0, 'features': []}})
 
         row_num_expr = sql.SQL("gvsig_etl_rowid AS _rowid")
@@ -238,7 +225,7 @@ def geojson_layer_features(request, layer_id, dummy=None):
             order_clause = sql.SQL("")
 
         count_q = sql.SQL("SELECT COUNT(*) FROM {schema}.{tbl} {where}").format(
-            schema=sql.Identifier(GEOJSON_SCHEMA),
+            schema=sql.Identifier(schema),
             tbl=sql.Identifier(table_name),
             where=where_clause,
         )
@@ -247,7 +234,7 @@ def geojson_layer_features(request, layer_id, dummy=None):
 
         inner_q = sql.SQL("SELECT {row_num}, {props}{geom} FROM {schema}.{tbl} {where} {order}").format(
             row_num=row_num_expr, props=prop_sql, geom=geom_col,
-            schema=sql.Identifier(GEOJSON_SCHEMA), tbl=sql.Identifier(table_name),
+            schema=sql.Identifier(schema), tbl=sql.Identifier(table_name),
             where=where_clause, order=order_clause,
         )
         data_q = sql.SQL("SELECT * FROM ({inner}) _t LIMIT {lim} OFFSET {off}").format(
@@ -281,11 +268,8 @@ def geojson_layer_features(request, layer_id, dummy=None):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-@login_required()
-def geojson_layer_fieldoptions(request, layer_id, dummy=None):
+def geojson_layer_fieldoptions(request, layer, con):
     """
-    GET /featureapi/geojson/<layer_id>/layers/<dummy>/fieldoptions/
-
     Returns distinct values for a field.
     Consumed by @scolab/common Filter (traditional fallback).
 
@@ -294,15 +278,13 @@ def geojson_layer_fieldoptions(request, layer_id, dummy=None):
       lang          – language (unused, for API compatibility)
     """
     try:
-        layer, con, cur = _get_geojson_layer(layer_id, request.user)
-        if layer is None:
-            return JsonResponse({'error': 'Layer not found'}, status=404)
-
+        cur = con.cursor()
         fieldselected = request.GET.get('fieldselected', '')
         if not fieldselected:
+            con.close()
             return JsonResponse([], safe=False)
 
-        prop_cols = _get_prop_cols(cur, layer.table_name)
+        prop_cols = _get_prop_cols(cur, layer.table_name, layer.schema)
         if fieldselected not in prop_cols:
             cur.close(); con.close()
             return JsonResponse([], safe=False)
@@ -312,7 +294,7 @@ def geojson_layer_fieldoptions(request, layer_id, dummy=None):
             "WHERE {col} IS NOT NULL ORDER BY {col} LIMIT 1000"
         ).format(
             col=sql.Identifier(fieldselected),
-            schema=sql.Identifier(GEOJSON_SCHEMA),
+            schema=sql.Identifier(layer.schema),
             tbl=sql.Identifier(layer.table_name),
         )
         cur.execute(q)
@@ -325,11 +307,8 @@ def geojson_layer_fieldoptions(request, layer_id, dummy=None):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-@login_required()
-def geojson_layer_fieldoptions_paginated(request, layer_id, dummy=None):
+def geojson_layer_fieldoptions_paginated(request, layer, con):
     """
-    GET /featureapi/geojson/<layer_id>/layers/<dummy>/fieldoptions-paginated/
-
     Paginated distinct field values.
     Consumed by @scolab/common Filter (Select2-style components).
 
@@ -341,19 +320,17 @@ def geojson_layer_fieldoptions_paginated(request, layer_id, dummy=None):
       lang          – language (unused)
     """
     try:
-        layer, con, cur = _get_geojson_layer(layer_id, request.user)
-        if layer is None:
-            return JsonResponse({'error': 'Layer not found'}, status=404)
-
+        cur = con.cursor()
         fieldselected = request.GET.get('fieldselected', '')
         limit = int(request.GET.get('limit', 50))
         offset = int(request.GET.get('offset', 0))
         search = request.GET.get('search', '').strip()
 
         if not fieldselected:
+            con.close()
             return JsonResponse({'data': [], 'has_more': False, 'total': 0, 'offset': 0})
 
-        prop_cols = _get_prop_cols(cur, layer.table_name)
+        prop_cols = _get_prop_cols(cur, layer.table_name, layer.schema)
         if fieldselected not in prop_cols:
             cur.close(); con.close()
             return JsonResponse({'data': [], 'has_more': False, 'total': 0, 'offset': 0})
@@ -371,7 +348,7 @@ def geojson_layer_fieldoptions_paginated(request, layer_id, dummy=None):
             "WHERE {col} IS NOT NULL {search}"
         ).format(
             col=sql.Identifier(fieldselected),
-            schema=sql.Identifier(GEOJSON_SCHEMA),
+            schema=sql.Identifier(layer.schema),
             tbl=sql.Identifier(layer.table_name),
             search=search_clause,
         )
@@ -383,7 +360,7 @@ def geojson_layer_fieldoptions_paginated(request, layer_id, dummy=None):
             "WHERE {col} IS NOT NULL {search} ORDER BY {col} LIMIT {lim} OFFSET {off}"
         ).format(
             col=sql.Identifier(fieldselected),
-            schema=sql.Identifier(GEOJSON_SCHEMA),
+            schema=sql.Identifier(layer.schema),
             tbl=sql.Identifier(layer.table_name),
             search=search_clause,
             lim=sql.Literal(limit),
@@ -405,21 +382,19 @@ def geojson_layer_fieldoptions_paginated(request, layer_id, dummy=None):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-@login_required()
-def geojson_layer_single_feature(request, layer_id, rowid, dummy=None):
+def geojson_layer_single_feature(request, layer, con, rowid):
     """
-    GET /featureapi/geojson/<layer_id>/layers/<dummy>/<rowid>/
-
     Returns a single feature by its stable row ID.
-    Consumed by @scolab/common DataTable (zoom to selected row) and PopupInfo detail view.
+    Consumed by @scolab/common DataTable (zoom to selected row) and PopupInfo.
+
+    Query params:
+      source_epsg – if contains '3857', return geometry in EPSG:3857 (no transform);
+                    otherwise return in EPSG:4326 for client-side transform.
     """
     try:
-        layer, con, cur = _get_geojson_layer(layer_id, request.user)
-        if layer is None:
-            return JsonResponse({'error': 'Layer not found'}, status=404)
-
+        cur = con.cursor()
         table_name = layer.table_name
-        prop_cols = _get_prop_cols(cur, table_name)
+        prop_cols = _get_prop_cols(cur, table_name, layer.schema)
 
         if not prop_cols:
             cur.close(); con.close()
@@ -427,23 +402,18 @@ def geojson_layer_single_feature(request, layer_id, rowid, dummy=None):
 
         prop_sql = sql.SQL(', ').join([sql.Identifier(c) for c in prop_cols])
 
-        # When the DataTable runs with USE_STRICT_CRS=true it sends source_epsg=EPSG:3857
-        # and expects the geometry in that CRS (no client-side transform is applied).
-        # Otherwise it expects EPSG:4326 and transforms to the map CRS itself.
         source_epsg = request.GET.get('source_epsg', '')
         use_strict_crs = bool(source_epsg and '3857' in source_epsg)
         print(
-            f"[geojson_single_feature] layer_id={layer_id} rowid={rowid} "
+            f"[geojson_single_feature] table={table_name} rowid={rowid} "
             f"source_epsg={source_epsg!r} use_strict_crs={use_strict_crs} has_geometry={layer.has_geometry}"
         )
         if use_strict_crs:
-            # Return geometry as-is (already stored in EPSG:3857)
             geom_col = (
                 sql.SQL(", ST_AsGeoJSON(geom) AS _geom_json")
                 if layer.has_geometry else sql.SQL("")
             )
         else:
-            # Return geometry in EPSG:4326 — DataTable will transform 4326 → map CRS
             geom_col = (
                 sql.SQL(", ST_AsGeoJSON(ST_Transform(geom, 4326)) AS _geom_json")
                 if layer.has_geometry else sql.SQL("")
@@ -454,7 +424,7 @@ def geojson_layer_single_feature(request, layer_id, rowid, dummy=None):
             "FROM {schema}.{tbl} WHERE gvsig_etl_rowid = {rid}"
         ).format(
             props=prop_sql, geom=geom_col,
-            schema=sql.Identifier(GEOJSON_SCHEMA),
+            schema=sql.Identifier(layer.schema),
             tbl=sql.Identifier(table_name),
             rid=sql.Literal(rowid),
         )
