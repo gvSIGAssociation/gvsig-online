@@ -26,15 +26,16 @@
 			<div class="pl-panel__body">
 				<table class="pl-table table" id="layers-table">
 					<thead>
-						<tr>
-							<th>ID</th>
-						    <th>{% trans "Layer name" %}</th>
-						    <th>{% trans "Asigned to layer group" %}</th>
-						    <th>{% trans "Styles" %}</th>
-						    <th></th>
-						    <th></th>
-						    <th></th>
-						</tr>
+					<tr>
+						<th>ID</th>
+					    <th>{% trans "Layer name" %}</th>
+					    <th>{% trans "Asigned to layer group" %}</th>
+					    <th>{% trans "Styles" %}</th>
+					    <th></th>
+					    <th></th>
+					    <th></th>
+					    <th></th>
+					</tr>
 					</thead>
 					<tbody>
 						{% for layerStyle in layerStyles %}
@@ -53,10 +54,11 @@
 									{% endfor %}
 									</select>
 								</td>
-								<td></td>
-								<td></td>
-								<td></td>
-							</tr>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
 						{% endfor %}
 					</tbody>
 				</table>
@@ -135,13 +137,17 @@ $(document).ready(function() {
 		    }
 		},
 		"columnDefs": [{
-	      	"targets": -3,
+	      	"targets": -4,
 	       	"data": null,
 	        "defaultContent": '<button type="button" name="button-add-style" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Add style" %}' + '" class="btn btn-success"><i class="fa fa-plus"></i></button>'
 	  	},{
-	      	"targets": -2,
+	      	"targets": -3,
 	       	"data": null,
 	        "defaultContent": '<button type="button" name="button-update-style" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update style" %}' + '" class="btn btn-warning"><i class="fa fa-edit"></i></button>'
+	  	},{
+	      	"targets": -2,
+	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-download-sld" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Download SLD" %}' + '" class="btn btn-info"><i class="fa fa-download"></i></button>'
 	  	},{
 	      	"targets": -1,
 	       	"data": null,
@@ -160,6 +166,9 @@ $(document).ready(function() {
 	    } else if (this.name == "button-add-style") {
 	        addStyle(data);
 	        
+	    } else if (this.name == "button-download-sld") {
+	        downloadSld(data);
+
 	    } else if (this.name == "button-delete-style") {
 	        deleteStyle(data);
 	    }
@@ -178,6 +187,13 @@ $(document).ready(function() {
 		location.href = '/gvsigonline/symbology/select_legend_type/' + data[0] + '/';
 	}
 	
+	function downloadSld(data){
+		var style_id = $("#select-"+data[0]).val();
+		if(style_id != null){
+			window.location.href = '/gvsigonline/symbology/sld_download/' + style_id + '/';
+		}
+	}
+
 	function deleteStyle(data){
 		var style_id = $("#select-"+data[0]).val();
 		if(style_id != null){	
