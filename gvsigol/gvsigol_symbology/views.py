@@ -22,8 +22,8 @@
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
 
-from django.shortcuts import render, redirect, HttpResponse
-from django.http import HttpResponseForbidden
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse, HttpResponseForbidden
 from django.db.models import Q
 from gvsigol_services import geographic_servers
 from gvsigol_services.models import Workspace, Datastore, Layer, Server
@@ -1151,6 +1151,26 @@ def color_table_update(request, layer_id, style_id):
         return render(request, 'color_table_update.html', response)
     
     
+@login_required()
+@staff_required
+def sld_download(request, style_id):
+    style = get_object_or_404(Style, id=style_id)
+    style_layer = StyleLayer.objects.filter(style=style).select_related('layer').first()
+    if style_layer is None:
+        return HttpResponse(status=404)
+    layer = style_layer.layer
+    datastore = Datastore.objects.get(id=layer.datastore_id)
+    workspace = Workspace.objects.get(id=datastore.workspace_id)
+    gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+    gs_style = gs.getStyle(style.name)
+    if gs_style is None or not gs_style.sld_body:
+        return HttpResponse(status=404)
+    filename = "{}.sld".format(style.name)
+    response = HttpResponse(gs_style.sld_body, content_type='application/xml')
+    response['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
+    return response
+
+
 @login_required()
 @staff_required
 def sld_import(request, layer_id):

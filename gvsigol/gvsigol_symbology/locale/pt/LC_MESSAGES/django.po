@@ -1112,6 +1112,10 @@ msgstr "Adicionar estilo"
 msgid "Delete style"
 msgstr "Apagar estilo"
 
+#: gvsigol_symbology/templates/style_layer_list.html:150
+msgid "Download SLD"
+msgstr "Descarregar SLD"
+
 #: gvsigol_symbology/templates/symbol_add.html:55
 #: gvsigol_symbology/templates/symbol_update.html:53
 msgid "Edit symbolizer"

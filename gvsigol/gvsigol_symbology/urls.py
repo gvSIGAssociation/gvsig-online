@@ -7,6 +7,7 @@ urlpatterns = [
     path('style_layer_delete/', symbology_views.style_layer_delete, name='style_layer_delete'),
     path('select_legend_type/<int:layer_id>/', symbology_views.select_legend_type, name='select_legend_type'),
     path('sld_import/<int:layer_id>/', symbology_views.sld_import, name='sld_import'),
+    path('sld_download/<int:style_id>/', symbology_views.sld_download, name='sld_download'),
     
     path('unique_symbol_add/<int:layer_id>/', symbology_views.unique_symbol_add, name='unique_symbol_add'),
     path('unique_symbol_update/<int:layer_id>/<int:style_id>/', symbology_views.unique_symbol_update, name='unique_symbol_update'),
