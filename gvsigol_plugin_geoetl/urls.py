@@ -73,5 +73,12 @@ urlpatterns = [
     # Visualizer API — session config & raw GeoJSON batch loader for map display
     path('etl/visualizer/<uuid:session_id>/config/', views.etl_visualizer_config, name='etl_visualizer_config'),
     path('etl/visualizer/layer/<int:layer_id>/features/', views.etl_visualizer_layer_features, name='etl_visualizer_layer_features'),
-    # Featureapi-compatible proxy (DataTable, Filter) is now in plugin_featureapi under /featureapi/geojson/
+
+    # Featureapi-compatible proxy endpoints for ETL Visualizer layers
+    # (DataTable, Filter, PopupInfo in @scolab/common)
+    # plugin_geoetl resolves ETLVisualizerLayer and delegates SQL logic to plugin_featureapi
+    path('etl/geojson/<int:layer_id>/layers/<str:dummy>/features/', views.etl_geojson_features, name='etl_geojson_features'),
+    path('etl/geojson/<int:layer_id>/layers/<str:dummy>/fieldoptions/', views.etl_geojson_fieldoptions, name='etl_geojson_fieldoptions'),
+    path('etl/geojson/<int:layer_id>/layers/<str:dummy>/fieldoptions-paginated/', views.etl_geojson_fieldoptions_paginated, name='etl_geojson_fieldoptions_paginated'),
+    path('etl/geojson/<int:layer_id>/layers/<str:dummy>/<int:rowid>/', views.etl_geojson_single_feature, name='etl_geojson_single_feature'),
 ]
