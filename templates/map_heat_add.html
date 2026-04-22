@@ -789,12 +789,18 @@ function GenerateColorRamp() {
             });
         });
 
-		let firstItem = rampColorArray[0];
-		let res = `<ColorMapEntry color="${firstItem.color}"  quantity="${firstItem.quantity}"  label="nodata" opacity="${firstItem.alpha}" />\n`;
+		/* Valores por debajo del primer umbral deben ser transparentes (como en el gradiente).
+		   Antes el primer tramo de la rampa iba con label=nodata pero con el color del usuario,
+		   y GeoServer pintaba todo el rectángulo del raster con ese color. */
+		let res = `<ColorMapEntry color="#FFFFFF" quantity="0" label="nodata" opacity="0"/>\n`;
 
-        // Iterate through rampColorArray and build the result string
-        for (let i = 1; i < rampColorArray.length-1; i++) {
+        for (let i = 0; i < rampColorArray.length - 1; i++) {
             let item = rampColorArray[i];
+            /* No repetir quantity=0: la fila 0% del formulario chocaría con el nodata anterior
+               y GeoServer acabaría pintando un rectángulo opaco/semiopaco en toda la extensión. */
+            if (Number(item.quantity) <= 0) {
+                continue;
+            }
             res += `<ColorMapEntry color="${item.color}" quantity="${item.quantity}" opacity="${item.alpha}"/>\n`;
         }
 
