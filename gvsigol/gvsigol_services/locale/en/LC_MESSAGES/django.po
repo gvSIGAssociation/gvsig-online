@@ -2170,7 +2170,7 @@ msgstr ""
 
 #: gvsigol_services/templates/connection_list.html:95
 msgid "Connections list"
-msgstr ""
+msgstr "Connections list"
 
 #: gvsigol_services/templates/connection_list.html:103
 msgid "Add connection"
@@ -2564,7 +2564,7 @@ msgstr ""
 
 #: gvsigol_services/templates/datastore_list.html:95
 msgid "Datastores list"
-msgstr ""
+msgstr "Datastores list"
 
 #: gvsigol_services/templates/datastore_list.html:103
 msgid "Add datastore"
@@ -3695,7 +3695,7 @@ msgstr ""
 
 #: gvsigol_services/templates/layer_list.html:94
 msgid "Layers list"
-msgstr ""
+msgstr "Layers list"
 
 #: gvsigol_services/templates/layer_list.html:97
 msgid "Filter by project"
@@ -4095,7 +4095,7 @@ msgstr ""
 
 #: gvsigol_services/templates/server_list.html:94
 msgid "Servers list"
-msgstr ""
+msgstr "Servers list"
 
 #: gvsigol_services/templates/server_list.html:96
 msgid "Add server"
