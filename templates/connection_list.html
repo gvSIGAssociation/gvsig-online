@@ -130,6 +130,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 								{% elif conn.type == 'padron-atm' %}Padrón-ATM
 								{% elif conn.type == 'sharepoint' %}SharePoint
 								{% elif conn.type == 'segex' %}SEGEX
+								{% elif conn.type == 'sgarexws' %}SgaRexWS
 								{% else %}{{ conn.type }}{% endif %}
 							</td>
 							<td>
@@ -285,7 +286,7 @@ $(document).ready(function() {
 	       	"data": null,
 	        "defaultContent": '<button type="button" name="button-update-connection" data-toggle="tooltip" data-placement="top" title="' + '{% trans "Edit connection" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
 	  	}],
-	    "dom": 'T<"clear">rt',
+	    "dom": 'T<"clear">rtip',
 		"bLengthChange": false
 	});
 	

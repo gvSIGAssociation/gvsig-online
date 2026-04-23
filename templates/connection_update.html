@@ -415,6 +415,25 @@
 									</div>
 								</div>
 								{% endif %}
+
+								<!-- ==================== SGAREXWS ==================== -->
+								{% if connection.type == 'sgarexws' %}
+								<div id="params-sgarexws">
+									<div class="form-group">
+										<label for="id_sgarexws_url">{{ form.sgarexws_url.label }}</label>
+										{{ form.sgarexws_url }}
+									</div>
+									<div class="form-group">
+										<label for="id_sgarexws_username">{{ form.sgarexws_username.label }}</label>
+										{{ form.sgarexws_username }}
+									</div>
+									<div class="form-group">
+										<label for="id_sgarexws_password">{{ form.sgarexws_password.label }}</label>
+										{{ form.sgarexws_password }}
+										<small class="text-muted">{% trans "Leave empty to keep current password" %}</small>
+									</div>
+								</div>
+								{% endif %}
 								
 								<div id="connection-test-result" class="alert" style="display: none; margin-top: 15px;"></div>
 							</div>
@@ -528,6 +547,12 @@ $(document).ready(function() {
 			postData.email = $('#id_padron_atm_email').val();
 			postData.password = $('#id_padron_atm_password').val();
 			postData.idacceso = $('#id_padron_atm_id_acceso').val();
+		} else if (connType === 'sgarexws') {
+			postData.url = $('#id_sgarexws_url').val();
+			postData.username = $('#id_sgarexws_username').val();
+			postData.password = $('#id_sgarexws_password').val();
+			//Si la contraseña está en blanco, connection_test necesita connection_id para obtenerla
+			postData.connection_id = '{{ connection.id }}';
 		}
 		
 		$.ajax({

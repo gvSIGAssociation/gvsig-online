@@ -355,6 +355,22 @@
 										{{ form.padron_atm_id_acceso }}
 									</div>
 								</div>
+
+								<!-- ==================== SGAREXWS ==================== -->
+								<div id="params-sgarexws" class="connection-params" style="display:none;">
+									<div class="form-group">
+										<label for="id_sgarexws_url">{{ form.sgarexws_url.label }}</label>
+										{{ form.sgarexws_url }}
+									</div>
+									<div class="form-group">
+										<label for="id_sgarexws_username">{{ form.sgarexws_username.label }}</label>
+										{{ form.sgarexws_username }}
+									</div>
+									<div class="form-group">
+										<label for="id_sgarexws_password">{{ form.sgarexws_password.label }}</label>
+										{{ form.sgarexws_password }}
+									</div>
+								</div>
 								
 								<!-- Mensaje para seleccionar tipo -->
 								<div id="params-placeholder" class="text-muted">
@@ -420,7 +436,7 @@ $(document).ready(function() {
 	// Tipos de base de datos
 	var databaseTypes = ['PostGIS', 'Oracle', 'SQLServer'];
 	// Tipos de API
-	var apiTypes = ['indenova', 'segex', 'sharepoint', 'padron-atm'];
+	var apiTypes = ['indenova', 'segex', 'sharepoint', 'padron-atm', 'sgarexws'];
 	
 	// Mapeo de tipo a ID del div de parámetros
 	var typeToParamsDiv = {
@@ -430,7 +446,8 @@ $(document).ready(function() {
 		'indenova': '#params-indenova',
 		'segex': '#params-segex',
 		'sharepoint': '#params-sharepoint',
-		'padron-atm': '#params-padron-atm'
+		'padron-atm': '#params-padron-atm',
+		'sgarexws': '#params-sgarexws'
 	};
 	
 	// Iconos para cada tipo de conexión
@@ -450,7 +467,8 @@ $(document).ready(function() {
 		'indenova': '<i class="fa fa-building" style="color: #2c3e50;"></i>',
 		'segex': '<i class="fa fa-file-text" style="color: #27ae60;"></i>',
 		'sharepoint': '<i class="fa fa-cloud" style="color: #0078d4;"></i>',
-		'padron-atm': '<i class="fa fa-users" style="color: #8e44ad;"></i>'
+		'padron-atm': '<i class="fa fa-users" style="color: #8e44ad;"></i>',
+		'sgarexws': '<i class="fa fa-server" style="color: #16a085;"></i>'
 	};
 	
 	// Actualizar opciones del desplegable de tipo según categoría
@@ -472,6 +490,7 @@ $(document).ready(function() {
 			typeSelect.append('<option value="segex">SEGEX</option>');
 			typeSelect.append('<option value="sharepoint">SharePoint</option>');
 			typeSelect.append('<option value="padron-atm">Padrón ATM</option>');
+			typeSelect.append('<option value="sgarexws">SgaRexWS</option>');
 		}
 		// Si categoría está vacía, tipo queda solo con "---"
 		
@@ -656,6 +675,10 @@ $(document).ready(function() {
 			postData.email = $('#id_padron_atm_email').val();
 			postData.password = $('#id_padron_atm_password').val();
 			postData.idacceso = $('#id_padron_atm_id_acceso').val();
+		} else if (connType === 'sgarexws') {
+			postData.url = $('#id_sgarexws_url').val();
+			postData.username = $('#id_sgarexws_username').val();
+			postData.password = $('#id_sgarexws_password').val();
 		}
 		
 		$.ajax({

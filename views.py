@@ -7479,6 +7479,11 @@ def connection_update(request, connection_id):
                 'padron_atm_email': params.get('email', ''),
                 'padron_atm_id_acceso': id_acceso,
             })
+        elif conn_type == 'sgarexws':
+            initial_data.update({
+                'sgarexws_url': params.get('url', ''),
+                'sgarexws_username': params.get('username', ''),
+            })
         
         form = ConnectionUpdateForm(instance=connection, initial=initial_data)
         
@@ -7747,6 +7752,45 @@ def connection_test(request):
                         return JsonResponse({'success': False, 'error': 'No token received'})
                 else:
                     return JsonResponse({'success': False, 'error': f'API error: {response.status_code} - {response.text}'})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
+
+        elif conn_type == 'sgarexws':
+            try:
+                import requests as req
+                base_url = (request.POST.get('url', '') or '').strip().rstrip('/')
+                username = (request.POST.get('username', '') or '').strip()
+                password = request.POST.get('password', '') or ''
+                connection_id = request.POST.get('connection_id')
+                if not password and connection_id:
+                    try:
+                        conn_obj = Connection.objects.get(pk=int(connection_id))
+                        if conn_obj.type == 'sgarexws':
+                            saved = json.loads(conn_obj.connection_params or '{}')
+                            password = saved.get('password') or ''
+                    except (ValueError, Connection.DoesNotExist, json.JSONDecodeError, TypeError):
+                        password = ''
+                if not base_url or not username:
+                    return JsonResponse({'success': False, 'error': _('URL and username are required')})
+                login_url = base_url + '/login'
+                response = req.post(
+                    login_url,
+                    json={'username': username, 'password': password},
+                    headers={'Content-Type': 'application/json', 'accept': 'application/json'},
+                    verify=False,
+                    timeout=30,
+                )
+                if response.status_code != 200:
+                    return JsonResponse({'success': False, 'error': f'HTTP {response.status_code}: {response.text[:500]}'})
+                try:
+                    body = response.json()
+                except ValueError:
+                    return JsonResponse({'success': False, 'error': _('Invalid JSON response from login')})
+                resultado = (body or {}).get('resultado') or {}
+                if resultado.get('codigo') == '1':
+                    return JsonResponse({'success': True, 'message': _('Connection successful')})
+                desc = resultado.get('descripcion') or body
+                return JsonResponse({'success': False, 'error': str(desc)})
             except Exception as e:
                 return JsonResponse({'success': False, 'error': str(e)})
         
@@ -8761,7 +8805,7 @@ def connection_list_for_etl(request):
         if category == 'database':
             connections = connections.filter(type__in=['PostGIS', 'Oracle', 'SQLServer', 'MySQL'])
         elif category == 'api':
-            connections = connections.filter(type__in=['indenova', 'segex', 'sharepoint', 'padron-atm'])
+            connections = connections.filter(type__in=['indenova', 'segex', 'sharepoint', 'padron-atm', 'sgarexws'])
         
         result = []
         for conn in connections.order_by('name'):

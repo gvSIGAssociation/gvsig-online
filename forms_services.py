@@ -462,27 +462,13 @@ connection_categories = (
     ('api', 'API externa'),
 )
 
-# Tipos de bases de datos (segundo desplegable cuando category=database)
-database_connection_types = (
-    ('PostGIS', 'PostgreSQL/PostGIS'),
-    ('Oracle', 'Oracle'),
-    ('SQLServer', 'SQL Server'),
-)
+connection_types = Connection.TYPE_CHOICES
 
-# Tipos de APIs externas (segundo desplegable cuando category=api)
-api_connection_types = (
-    ('indenova', 'InDenova'),
-    ('segex', 'SEGEX'),
-    ('sharepoint', 'SharePoint'),
-    ('padron-atm', 'Padrón ATM'),
-)
+# Listas para validación en plantillas/JS 
+DATABASE_TYPE_LIST = Connection.DATABASE_TYPES
+API_TYPE_LIST = Connection.API_TYPES
 
-# Todos los tipos combinados
-connection_types = database_connection_types + api_connection_types
 
-# Listas para validación
-DATABASE_TYPE_LIST = ('PostGIS', 'Oracle', 'SQLServer')
-API_TYPE_LIST = ('indenova', 'segex', 'sharepoint', 'padron-atm')
 
 class ConnectionForm(forms.ModelForm):
     """
@@ -758,6 +744,28 @@ class ConnectionForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'class': 'form-control api-padron-atm-field'})
     )
 
+    # ==================== CAMPOS PARA SGAREXWS ====================
+    sgarexws_url = forms.URLField(
+        label=_('URL'),
+        required=False,
+        max_length=500,
+        widget=forms.URLInput(attrs={
+            'class': 'form-control api-sgarexws-field',
+            'placeholder': 'https://www.example.es/SgaRexWS/'
+        }),        
+    )
+    sgarexws_username = forms.CharField(
+        label=_('Username'),
+        required=False,
+        max_length=250,
+        widget=forms.TextInput(attrs={'class': 'form-control api-sgarexws-field'})
+    )
+    sgarexws_password = forms.CharField(
+        label=_('Password'),
+        required=False,
+        widget=forms.PasswordInput(attrs={'class': 'form-control api-sgarexws-field'})
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Pre-rellenar con valores por defecto de la BBDD de la aplicación
@@ -827,6 +835,13 @@ class ConnectionForm(forms.ModelForm):
         elif conn_type == 'padron-atm':
             required = {'padron_atm_email': _('E-mail'), 'padron_atm_password': _('Password'),
                        'padron_atm_id_acceso': _('Id Acceso')}
+            for field, label in required.items():
+                if not cleaned_data.get(field):
+                    self.add_error(field, _('This field is required'))
+
+        elif conn_type == 'sgarexws':
+            required = {'sgarexws_url': _('URL'), 'sgarexws_username': _('Username'),
+                        'sgarexws_password': _('Password')}
             for field, label in required.items():
                 if not cleaned_data.get(field):
                     self.add_error(field, _('This field is required'))
@@ -904,6 +919,16 @@ class ConnectionForm(forms.ModelForm):
                 'email': self.cleaned_data.get('padron_atm_email', ''),
                 'password': self.cleaned_data.get('padron_atm_password', ''),
                 'idacceso': self.cleaned_data.get('padron_atm_id_acceso', ''),
+            })
+
+        elif conn_type == 'sgarexws':
+            url_val = (self.cleaned_data.get('sgarexws_url') or '').strip()
+            if url_val and not url_val.endswith('/'):
+                url_val += '/'
+            return json.dumps({
+                'url': url_val,
+                'username': self.cleaned_data.get('sgarexws_username', ''),
+                'password': self.cleaned_data.get('sgarexws_password', ''),
             })
         
         return '{}'
@@ -1200,6 +1225,31 @@ class ConnectionUpdateForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'class': 'form-control api-padron-atm-field'})
     )
 
+    # ==================== CAMPOS PARA SGAREXWS ====================
+    sgarexws_url = forms.URLField(
+        label=_('URL'),
+        required=False,
+        max_length=500,
+        widget=forms.URLInput(attrs={
+            'class': 'form-control api-sgarexws-field',
+            'placeholder': 'https://www.example.es/SgaRexWS/'
+        })
+    )
+    sgarexws_username = forms.CharField(
+        label=_('Username'),
+        required=False,
+        max_length=250,
+        widget=forms.TextInput(attrs={'class': 'form-control api-sgarexws-field'})
+    )
+    sgarexws_password = forms.CharField(
+        label=_('Password'),
+        required=False,
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control api-sgarexws-field',
+            'placeholder': _('Leave empty to keep current password'),
+        })
+    )
+
     def clean_extra_params(self):
         """Valida que extra_params sea un JSON válido."""
         extra_params = self.cleaned_data.get('extra_params', '')
@@ -1209,6 +1259,16 @@ class ConnectionUpdateForm(forms.ModelForm):
             except json.JSONDecodeError:
                 raise forms.ValidationError(_('Invalid JSON format'))
         return extra_params
+
+    def clean(self):
+        cleaned_data = super().clean()
+        conn_type = cleaned_data.get('type')
+        if conn_type == 'sgarexws':
+            if not (cleaned_data.get('sgarexws_url') or '').strip():
+                self.add_error('sgarexws_url', _('This field is required'))
+            if not (cleaned_data.get('sgarexws_username') or '').strip():
+                self.add_error('sgarexws_username', _('This field is required'))
+        return cleaned_data
 
     def get_connection_params(self, current_params=None):
         """Construye el JSON de parámetros de conexión, preservando contraseñas si no se proporciona una nueva."""
@@ -1302,6 +1362,19 @@ class ConnectionUpdateForm(forms.ModelForm):
                 'email': self.cleaned_data.get('padron_atm_email', ''),
                 'password': password,
                 'idacceso': self.cleaned_data.get('padron_atm_id_acceso', ''),
+            })
+
+        elif conn_type == 'sgarexws':
+            password = self.cleaned_data.get('sgarexws_password', '')
+            if not password and current_params:
+                password = current_params.get('password', '')
+            url_val = (self.cleaned_data.get('sgarexws_url') or '').strip()
+            if url_val and not url_val.endswith('/'):
+                url_val += '/'
+            return json.dumps({
+                'url': url_val,
+                'username': self.cleaned_data.get('sgarexws_username', ''),
+                'password': password,
             })
         
         return '{}'
