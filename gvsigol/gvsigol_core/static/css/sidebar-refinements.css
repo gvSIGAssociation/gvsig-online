@@ -1047,6 +1047,64 @@
   color: #333 !important;
 }
 
+/*
+ * skin-black: --hdr-bg / --hdr-bg-dk son blancos (cabecera clara). El bloque
+ * global del user-menu usa esas variables en .user-header → fondo blanco
+ * con texto blanco (ilegible). El span .hidden-xs también forzaba blanco
+ * sobre la navbar blanca.
+ */
+.skin-black .main-header .navbar-custom-menu .user-menu .dropdown-menu .user-header {
+  background: linear-gradient(
+    135deg,
+    var(--sb-accent, #637a84) 0%,
+    var(--sb-bg-dark, #1a2226) 100%
+  ) !important;
+}
+.skin-black .main-header .navbar-custom-menu .user-menu > a .hidden-xs {
+  color: #333 !important;
+}
+.skin-black .main-header .navbar-custom-menu .user-menu > a .user-image {
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+/* #select-language usa ID: gana a .form-control y seguía con color claro del bloque global */
+.skin-black .main-header .navbar-custom-menu #select-language,
+.skin-black .main-header .navbar-custom-menu #select-language:focus {
+  background: #f0f0f0 !important;
+  border: 1px solid #ddd !important;
+  color: #333 !important;
+}
+.skin-black .main-header .navbar-custom-menu #select-language:focus {
+  background: #fff !important;
+  border-color: #ccc !important;
+}
+.skin-black .main-header .navbar-custom-menu #select-language option {
+  background: #fff !important;
+  color: #333 !important;
+}
+
+/* Ayuda + usuario: texto oscuro sobre barra blanca (los globales usan blanco para skins oscuros) */
+.skin-black .main-header .navbar-custom-menu .nav > li > a,
+.skin-black .main-header .navbar-custom-menu .nav > li > a:focus,
+.skin-black .main-header .navbar-custom-menu .nav .open > a,
+.skin-black .main-header .navbar-custom-menu .nav .open > a:focus,
+.skin-black .main-header .navbar-custom-menu .nav .open > a:hover {
+  color: #333 !important;
+}
+.skin-black .main-header .navbar-custom-menu .nav > li > a:hover {
+  background-color: #f0f0f0 !important;
+  color: #222 !important;
+}
+.skin-black .main-header .navbar-custom-menu #help,
+.skin-black .main-header .navbar-custom-menu #help i {
+  color: #444 !important;
+}
+.skin-black .main-header .navbar-custom-menu .user-menu > a,
+.skin-black .main-header .navbar-custom-menu .user-menu > a:hover,
+.skin-black .main-header .navbar-custom-menu .user-menu > a:focus {
+  color: #333 !important;
+}
+
 /* =================================================================
    LIGHT SKINS — Variables y estilos adaptados
    Skins: skin-blue-light, skin-black-light, skin-black-light-dphuesca,
@@ -1378,8 +1436,8 @@
    NAVBAR — User menu & language selector
    ================================================================= */
 
-/* Selector de idioma */
-.navbar-custom-menu #select-language {
+/* Selector de idioma (estilo “sobre cabecera oscura”; en skin-black la barra es blanca — no aplicar) */
+body:not(.skin-black) .navbar-custom-menu #select-language {
   height: 30px;
   padding: 2px 8px;
   font-size: 12px;
@@ -1393,12 +1451,12 @@
   -webkit-appearance: none;
   appearance: none;
 }
-.navbar-custom-menu #select-language:focus {
+body:not(.skin-black) .navbar-custom-menu #select-language:focus {
   outline: none;
   background: rgba(255,255,255,0.22);
   border-color: rgba(255,255,255,0.55);
 }
-.navbar-custom-menu #select-language option {
+body:not(.skin-black) .navbar-custom-menu #select-language option {
   background: #2d5f80;
   color: #fff;
 }
@@ -1419,18 +1477,20 @@
   height: 50px;
   transition: background 0.2s;
 }
-.navbar-custom-menu .user-menu > a:hover {
+body:not(.skin-black) .navbar-custom-menu .user-menu > a:hover {
   background: rgba(255,255,255,0.1) !important;
 }
 .navbar-custom-menu .user-menu > a .user-image {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.45);
   margin: 0 !important;
   flex-shrink: 0;
 }
-.navbar-custom-menu .user-menu > a .hidden-xs {
+body:not(.skin-black) .navbar-custom-menu .user-menu > a .user-image {
+  border: 2px solid rgba(255,255,255,0.45);
+}
+body:not(.skin-black) .navbar-custom-menu .user-menu > a .hidden-xs {
   font-size: 13px;
   font-weight: 600;
   color: rgba(255,255,255,0.92);
