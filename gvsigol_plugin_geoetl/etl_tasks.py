@@ -970,6 +970,75 @@ def add_gvsigol_fields(cursor, schema, table_name):
         print(f"Error al agregar campos gvSIG Online: {str(e)}")
 
 
+def _ensure_ogc_fid_serial(cur, con, esq, tab):
+    """
+    Ensures ogc_fid is a proper SERIAL (sequence-backed) primary key column.
+
+    When a table is created via CREATE TABLE ... AS SELECT *, any existing
+    ogc_fid column is copied as a plain integer with no DEFAULT/sequence.
+    This function detects that situation and repairs it by creating the
+    sequence and wiring it up.  If ogc_fid does not exist yet, it is added
+    as a standard SERIAL.  If the column exists but is not an integer type
+    (e.g. text, uuid) the sequence cannot be created and the call is a no-op.
+    """
+    INTEGER_TYPES = ('integer', 'bigint', 'smallint', 'int2', 'int4', 'int8')
+
+    cur.execute(
+        "SELECT data_type FROM information_schema.columns "
+        "WHERE table_schema = %s AND table_name = %s AND column_name = 'ogc_fid'",
+        [esq, tab]
+    )
+    row = cur.fetchone()
+
+    if row is None:
+        # Column does not exist – add it as SERIAL
+        cur.execute(
+            sql.SQL('ALTER TABLE {s}.{t} ADD COLUMN ogc_fid SERIAL').format(
+                s=sql.Identifier(esq), t=sql.Identifier(tab)
+            )
+        )
+        con.commit()
+    elif row[0].lower() in INTEGER_TYPES:
+        # Column exists as integer but has no sequence – create and attach one
+        seq_name = '{}_ogc_fid_seq'.format(tab)
+        cur.execute(
+            sql.SQL('CREATE SEQUENCE IF NOT EXISTS {s}.{seq}').format(
+                s=sql.Identifier(esq),
+                seq=sql.Identifier(seq_name)
+            )
+        )
+        cur.execute(
+            sql.SQL(
+                'ALTER TABLE {s}.{t} ALTER COLUMN ogc_fid '
+                'SET DEFAULT nextval({seq_full})'
+            ).format(
+                s=sql.Identifier(esq),
+                t=sql.Identifier(tab),
+                seq_full=sql.Literal('{}.{}'.format(esq, seq_name))
+            )
+        )
+        cur.execute(
+            sql.SQL('ALTER SEQUENCE {s}.{seq} OWNED BY {s}.{t}.ogc_fid').format(
+                s=sql.Identifier(esq),
+                seq=sql.Identifier(seq_name),
+                t=sql.Identifier(tab)
+            )
+        )
+        # Advance the sequence past the highest existing value to avoid PK conflicts
+        cur.execute(
+            sql.SQL(
+                "SELECT setval({seq_full}, COALESCE((SELECT MAX(ogc_fid) FROM {s}.{t}), 0) + 1, false)"
+            ).format(
+                seq_full=sql.Literal('{}.{}'.format(esq, seq_name)),
+                s=sql.Identifier(esq),
+                t=sql.Identifier(tab)
+            )
+        )
+        con.commit()
+    else:
+        print("ogc_fid exists but is of type '{}' – skipping sequence creation.".format(row[0]))
+
+
 def output_Postgis(dicc):
 
     table_name_source = dicc['data'][0]
@@ -1042,12 +1111,7 @@ def output_Postgis(dicc):
                     cur.execute(sqlCreate)
                     con_source.commit()                    
 
-                sqlAlter = sql.SQL('ALTER TABLE {sch_target}.{tbl_target}  ADD COLUMN IF NOT EXISTS ogc_fid SERIAL').format(
-                    sch_target = sql.Identifier(esq),
-                    tbl_target = sql.Identifier(tab))
-
-                cur.execute(sqlAlter)
-                con_source.commit()
+                _ensure_ogc_fid_serial(cur, con_source, esq, tab)
 
                 sqlAlter_ =  sql.SQL('ALTER TABLE {sch_target}.{tbl_target} ADD PRIMARY KEY (ogc_fid)').format(
                     sch_target = sql.Identifier(esq),
@@ -1144,12 +1208,7 @@ def output_Postgis(dicc):
                 cur.execute(sqlCreate)
                 con_source.commit()
 
-                sqlAlter = sql.SQL('ALTER TABLE {sch_target}.{tbl_target} ADD COLUMN IF NOT EXISTS ogc_fid SERIAL').format(
-                    sch_target = sql.Identifier(esq),
-                    tbl_target = sql.Identifier(tab)
-                )
-                cur.execute(sqlAlter)
-                con_source.commit()
+                _ensure_ogc_fid_serial(cur, con_source, esq, tab)
 
                 sqlPK = sql.SQL('ALTER TABLE {sch_target}.{tbl_target} ADD PRIMARY KEY (ogc_fid)').format(
                     sch_target = sql.Identifier(esq),
