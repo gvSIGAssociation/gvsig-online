@@ -34,7 +34,7 @@
 				
 				<div id="steps" class="row">
 					<div class="col-md-12">
-						<div id="form-error" class="pf-error-msg"></div>
+						<div id="form-error-steps" class="pf-error-msg"></div>
 						<div class="row">
 							<div class="col-md-12 form-group">
 								<label>{% trans "Steps" %}</label>
@@ -96,51 +96,50 @@ $(document).ready(function() {
 
 
 	$("#save-legend").on('click', function(e){
-		if ($("#style-name").val() != '') {
-			var color_tabs = $("#colorramp-table").find("tr");
-			if(color_tabs.length<3){
-				$("#form-error").empty();
-				$("#form-error").append('<p>*{% trans "Two or more color definitions are required" %}</p>');
-			}
-			else{
-				var ramp_color_array = [];
-				
-				$(".color-ramp-data").each(function(){
-					var quantity = $(this).find(".percentaje-chooser").val();
-					var color = $(this).find(".color-chooser").val();
-					var alpha = $(this).find(".alpha-chooser").val();
-					var aux_color_entry = {
-							'quantity': quantity,
-							'color': color,
-							'alpha': alpha
-					}
-					ramp_color_array.push(aux_color_entry);
-					
-				});
-				var array_size = ramp_color_array.length;
-				item =  ramp_color_array[array_size-1]
-				var last_quantity = parseInt(item.quantity); 
-				if  (last_quantity < 100) {
-					var aux_color_entry = {
-							'quantity': '100',
-							'color': item.color,
-							'alpha': item.alpha
-					}
-					ramp_color_array.push(aux_color_entry);
-				}
-				var ramp_color = {
-						'definition' : ramp_color_array
-				};
-				
-				$("#colorramp-definition").val(JSON.stringify(ramp_color));
-				
-				$("#color_ramp_form").submit();
-			}
-		} else {
+		$("#form-error").empty();
+		$("#form-error-steps").empty();
+		var nameVal = ($("#colorramp-name").val() || '').trim();
+		if (nameVal === '') {
 			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
-			
+			return;
 		}
-		
+		var color_tabs = $("#colorramp-table").find("tr");
+		if(color_tabs.length<3){
+			$("#form-error-steps").append('<p>*{% trans "Two or more color definitions are required" %}</p>');
+			return;
+		}
+		var ramp_color_array = [];
+
+		$(".color-ramp-data").each(function(){
+			var quantity = $(this).find(".percentaje-chooser").val();
+			var color = $(this).find(".color-chooser").val();
+			var alpha = $(this).find(".alpha-chooser").val();
+			var aux_color_entry = {
+					'quantity': quantity,
+					'color': color,
+					'alpha': alpha
+			}
+			ramp_color_array.push(aux_color_entry);
+
+		});
+		var array_size = ramp_color_array.length;
+		item =  ramp_color_array[array_size-1]
+		var last_quantity = parseInt(item.quantity);
+		if  (last_quantity < 100) {
+			var aux_color_entry = {
+					'quantity': '100',
+					'color': item.color,
+					'alpha': item.alpha
+			}
+			ramp_color_array.push(aux_color_entry);
+		}
+		var ramp_color = {
+				'definition' : ramp_color_array
+		};
+
+		$("#colorramp-definition").val(JSON.stringify(ramp_color));
+
+		$("#color_ramp_form").submit();
 	});
 	
 });
