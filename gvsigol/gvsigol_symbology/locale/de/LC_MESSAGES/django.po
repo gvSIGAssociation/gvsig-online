@@ -1164,3 +1164,19 @@ msgstr "Sie müssen einen Namen für die Bibliothek eingeben"
 msgid "You must enter a name for the library and select a file"
 msgstr ""
 "Sie müssen einen Namen für die Bibliothek eingeben und eine Datei auswählen"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Add value"
+msgstr "Wert hinzufügen"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Value"
+msgstr "Wert"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Enter the attribute value"
+msgstr "Attributwert eingeben"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Add"
+msgstr "Hinzufügen"

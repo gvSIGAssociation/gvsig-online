@@ -479,7 +479,7 @@ def unique_symbol_update(request, layer_id, style_id):
     
 @login_required()
 @staff_required
-def unique_values_add(request, layer_id):
+def unique_values_add(request, layer_id, style_id=None):
     if request.method == 'POST':
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)

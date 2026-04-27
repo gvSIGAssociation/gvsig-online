@@ -522,3 +522,11 @@ msgstr "Sense valor"
 
 #~ msgid "Append color map entry"
 #~ msgstr "Anyadir entrada de color"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "You must select a field first"
+msgstr "Heu de seleccionar primer un camp"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Drag to reorder"
+msgstr "Arrossega per reordenar"

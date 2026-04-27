@@ -67,7 +67,9 @@
 						</select>
 					</div>
 					<div class="col-md-2 form-group">
-					</div>			
+						<label>{% trans " " %}</label>
+						<button id="add-unique-value" class="btn-pf-secondary" style="width:100%;"><i class="fa fa-plus"></i> {% trans "Add value" %}</button>
+					</div>
 					<div class="col-md-4 form-group">
 						<label>{% trans " " %}</label>
 						<button id="select-ramp-color" class="btn-pf-secondary" style="width:100%;"><i class="fa fa-barcode"></i> {% trans "Apply ramp color" %}</button>
@@ -177,6 +179,32 @@
 	</div>
 </div>
 
+
+<!-- Modal -->
+<div class="modal fade" id="modal-add-value" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title">{% trans "Add value" %}</h4>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label>{% trans "Value" %}</label>
+						<input id="new-unique-value" type="text" class="form-control" placeholder="{% trans 'Enter the attribute value' %}">
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button id="button-add-value-confirm" type="button" class="btn btn-primary">{% trans "Add" %}</button>
+				<button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
 
 <!-- Modal -->
 <div class="modal fade" id="modal-select-ramp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -293,6 +321,30 @@ $(document).ready(function() {
 	var utils = new SymbologyUtils(map, layerId, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
 	window.uniqueValues = new UniqueValues(featureType, layerName, utils, previewUrl);
 	var uniqueValues = window.uniqueValues;
+
+	$(document).on('click', '.delete-rule', function(e){
+		uniqueValues.deleteRule(this.dataset.ruleid);
+	});
+
+	$('#rules').sortable({
+		placeholder: "sort-highlight",
+		handle: ".unique-values-sort-handle",
+		forcePlaceholderSize: true,
+		zIndex: 999999
+	});
+	$('#rules').on("sortupdate", function(event, ui) {
+		var children = document.getElementById("rules").children;
+		var reordered = [];
+		for (var i = 0; i < children.length; i++) {
+			var ruleId = children[i].dataset.ruleid;
+			var rule = uniqueValues.getRuleById(ruleId);
+			if (rule) {
+				rule.order = i;
+				reordered.push(rule);
+			}
+		}
+		uniqueValues.rules = reordered;
+	});
 	
 	utils.centerMap(layerName, wfsUrl, authToken);
 	
@@ -373,15 +425,39 @@ $(document).ready(function() {
 				field: selectedField
 			},
 			success: function(response){
-				uniqueValues.load(selectedField, response.values);	
-				$(".delete-rule").on('click', function(e){
-					uniqueValues.deleteRule(this.dataset.ruleid);
-				});
+				uniqueValues.load(selectedField, response.values);
 			},
 		    error: function(){}
 		});
 	});
 	
+	$("#add-unique-value").on('click', function(e) {
+		e.preventDefault();
+		var selectedField = $('#select-unique-values-field').val();
+		if (!selectedField) {
+			messageBox.show('warning', gettext('You must select a field first'));
+			return;
+		}
+		$('#new-unique-value').val('');
+		$('#modal-add-value').modal('show');
+	});
+
+	$("#button-add-value-confirm").on('click', function(e) {
+		var value = $('#new-unique-value').val().trim();
+		if (!value) {
+			return;
+		}
+		var selectedField = $('#select-unique-values-field').val();
+		uniqueValues.addSingleValue(selectedField, value);
+		$('#modal-add-value').modal('hide');
+	});
+
+	$('#new-unique-value').on('keypress', function(e) {
+		if (e.which === 13) {
+			$('#button-add-value-confirm').trigger('click');
+		}
+	});
+
 	$("#select-ramp-color").on('click', function(e){
 		e.preventDefault();
 		if(uniqueValues.rules.length > 0){

@@ -1239,3 +1239,19 @@ msgstr ""
 
 #~ msgid "Use a color gradient"
 #~ msgstr "Use a color gradient"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Add value"
+msgstr "Add value"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Value"
+msgstr "Value"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Enter the attribute value"
+msgstr "Enter the attribute value"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Add"
+msgstr "Add"

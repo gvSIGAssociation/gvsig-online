@@ -1157,3 +1157,19 @@ msgstr ""
 #: gvsigol_symbology/views.py:1388
 msgid "There is already a library with that name"
 msgstr ""
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Add value"
+msgstr "Gehitu balioa"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Value"
+msgstr "Balioa"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Enter the attribute value"
+msgstr "Sartu atributuaren balioa"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Add"
+msgstr "Gehitu"

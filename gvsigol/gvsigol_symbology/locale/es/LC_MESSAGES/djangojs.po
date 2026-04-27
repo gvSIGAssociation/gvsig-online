@@ -520,3 +520,11 @@ msgstr "Sin valor"
 #~ msgstr ""
 #~ "En caso de necesitar alguna, se requieren al menos dos definiciones en la "
 #~ "tabla de color"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "You must select a field first"
+msgstr "Debe seleccionar un campo primero"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Drag to reorder"
+msgstr "Arrastrar para reordenar"

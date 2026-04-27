@@ -536,3 +536,11 @@ msgstr ""
 
 #~ msgid "Append color map entry"
 #~ msgstr "Anexar entrada de mapa de cores"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "You must select a field first"
+msgstr "Você deve selecionar um campo primeiro"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Drag to reorder"
+msgstr "Arraste para reordenar"
