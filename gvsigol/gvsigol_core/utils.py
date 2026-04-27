@@ -37,8 +37,6 @@ import os
 import importlib
 import gvsigol
 from iso639 import languages
-from future.utils import string_types
-from future.builtins import int
 from django.core.validators import URLValidator
 import logging
 import sys
@@ -53,7 +51,7 @@ def can_read_project(request, project):
     It accepts a project instance, a project name or a project id.
     """
     try:
-        if isinstance(project, string_types):
+        if isinstance(project, str):
             project = Project.objects.get(name=project)
         elif isinstance(project, int):
             project = Project.objects.get(pk=project)
@@ -66,7 +64,7 @@ def can_manage_project(request, project):
     try:
         if request.user.is_superuser:
             return True
-        if isinstance(project, string_types):
+        if isinstance(project, str):
             project = Project.objects.get(name=project)
         elif isinstance(project, int):
             project = Project.objects.get(pk=project)
