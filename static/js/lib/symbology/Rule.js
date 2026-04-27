@@ -73,6 +73,9 @@ Rule.prototype.getTableUI = function(allowImport, type, editableRule) {
 	}
 	ui += 		'<div class="box-header with-border">';
 	ui += 			'<div class="rule-preview" id="rule-preview-' + this.id + '"></div>';
+	if(type == 'unique_values') {
+		ui += 		'<i class="fa fa-bars unique-values-sort-handle" style="cursor:grab;cursor:-webkit-grab;margin-right:6px;color:#bbb;vertical-align:middle;" title="' + gettext('Drag to reorder') + '"></i>';
+	}
 	ui += 				'<h3 id="rule-title-' + this.id + '" class="box-title">' + this.title + '</h3>';
 
 		ui += 			'<div class="box-tools pull-right">';

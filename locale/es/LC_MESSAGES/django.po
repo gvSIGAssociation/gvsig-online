@@ -1411,3 +1411,19 @@ msgstr "Ya existe una biblioteca con ese nombre"
 #~| msgid "You must enter a name for the library and select a file"
 #~ msgid "You must enter a name for the style and select a file"
 #~ msgstr "Debe introducir un nombre para el estilo y seleccionar un archivo"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Add value"
+msgstr "Añadir valor"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Value"
+msgstr "Valor"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Enter the attribute value"
+msgstr "Introduzca el valor del atributo"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Add"
+msgstr "Añadir"

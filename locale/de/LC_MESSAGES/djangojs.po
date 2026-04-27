@@ -497,3 +497,11 @@ msgstr "Filterausdrücke beschriften"
 #: gvsigol_symbology/static/js/lib/symbology/UniqueValues.js:163
 msgid "null_value"
 msgstr "null_value"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "You must select a field first"
+msgstr "Sie müssen zuerst ein Feld auswählen"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Drag to reorder"
+msgstr "Zum Neuordnen ziehen"

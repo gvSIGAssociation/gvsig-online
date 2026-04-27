@@ -16,6 +16,7 @@ urlpatterns = [
     path('map_heat_update/<int:layer_id>/<int:style_id>/', symbology_views.map_heat_update, name='map_heat_update'),
     
     path('unique_values_add/<int:layer_id>/', symbology_views.unique_values_add, name='unique_values_add'),
+    path('unique_values_add/<int:layer_id>/<int:style_id>/', symbology_views.unique_values_add, name='unique_values_add_with_style_id'),
     path('unique_values_update/<int:layer_id>/<int:style_id>/', symbology_views.unique_values_update, name='unique_values_update'),
     path('get_unique_values/', symbology_views.get_unique_values, name='symbology_get_unique_values'),
     

@@ -1362,3 +1362,19 @@ msgstr ""
 
 #~ msgid "Maximum scale denominator"
 #~ msgstr "Escala máxima"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Add value"
+msgstr "Afegir valor"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Value"
+msgstr "Valor"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Enter the attribute value"
+msgstr "Introduïu el valor de l'atribut"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Add"
+msgstr "Afegir"

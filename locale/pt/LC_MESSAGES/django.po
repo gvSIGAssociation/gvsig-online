@@ -1237,3 +1237,19 @@ msgstr ""
 
 #~ msgid "gvsigonline docs"
 #~ msgstr "gvsigonline docs"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Add value"
+msgstr "Adicionar valor"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Value"
+msgstr "Valor"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Enter the attribute value"
+msgstr "Introduza o valor do atributo"
+
+#: gvsigol_symbology/templates/unique_values_update.html
+msgid "Add"
+msgstr "Adicionar"

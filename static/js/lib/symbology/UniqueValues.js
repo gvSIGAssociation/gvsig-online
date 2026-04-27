@@ -110,6 +110,47 @@ UniqueValues.prototype.addRule = function(rule) {
 	return this.rules.push(rule);
 };
 
+UniqueValues.prototype.addSingleValue = function(selectedField, value) {
+	var i = this.rules.length;
+	var nextId = 0;
+	for (var j=0; j<this.rules.length; j++) {
+		var ruleId = parseInt(this.rules[j].id);
+		if (!isNaN(ruleId) && ruleId >= nextId) {
+			nextId = ruleId + 1;
+		}
+	}
+	var ruleName = "rule_" + nextId;
+	var ruleTitle = value;
+	var minscale = $('#symbol-minscale').val();
+	var maxscale = $('#symbol-maxscale').val();
+
+	var options = {
+		"id": nextId,
+		"name": ruleName,
+		"title": ruleTitle,
+		"abstract": "",
+		"filter": "",
+		"minscale": minscale,
+		"maxscale": maxscale,
+		"order": i
+	};
+
+	var rule = new Rule(nextId, ruleName, ruleTitle, options, this.utils);
+	var filter = {
+		operation: 'is_equal_to',
+		field: selectedField,
+		value: value
+	};
+	rule.setFilter(filter);
+	$('#rules').append(rule.getTableUI(true, 'unique_values'));
+	rule.registerEvents();
+	var colors = this.utils.createColorRange('random', 1);
+	rule.addSymbolizer({fill: colors[0], stroke: colors[0]});
+	rule.preview();
+	this.addRule(rule);
+	return rule;
+};
+
 UniqueValues.prototype.deleteRule = function(id) {
 	for (var i=0; i < this.rules.length; i++) {
 		if (this.rules[i].id == id) {
