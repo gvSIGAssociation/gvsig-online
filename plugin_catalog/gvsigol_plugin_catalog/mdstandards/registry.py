@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 from lxml import etree as ET
-from builtins import str as text
 from abc import ABCMeta, abstractmethod
-from future.utils import with_metaclass
 
 _registry = []
 _CONFIG = {'DEFAULT_MANAGER': None}
 
 
-class BaseStandardManager(with_metaclass(ABCMeta, object)):
+class BaseStandardManager(metaclass=ABCMeta):
     def get_code(self):
         """
         A string identifying the metadata standard managed by this class, e.g. "ISO19139:2007"

@@ -20,7 +20,6 @@
 '''
 @author: Javier Rodrigo <jrodrigo@scolab.es>
 '''
-from builtins import str as text
 from lxml import etree as ET
 from gvsigol import settings
 from datetime import datetime
@@ -32,7 +31,7 @@ from gvsigol_plugin_catalog.mdstandards import registry
 import logging
 logger = logging.getLogger("gvsigol")
 from .xmlutils import getTextFromXMLNode, getXMLNode, getXMLCodeText, sanitizeXmlText
-from future.moves.urllib.parse import quote
+from urllib.parse import quote
 from gvsigol_plugin_catalog.settings import GEONETWORK_USE_KEEPALIVE
 
 DEFAULT_TIMEOUT = 10 #seconds
@@ -363,7 +362,7 @@ class Geonetwork():
         })
               
         r = self.session.get(url, headers=headers, timeout=get_default_timeout(), proxies=settings.PROXIES)
-        logger.debug('gn_get_metadata_raw: ' + text(r.status_code))
+        logger.debug('gn_get_metadata_raw: ' + str(r.status_code))
         if r.status_code==200:
             return r.content
         raise FailedRequestError(r.status_code, r.content)
