@@ -25,8 +25,19 @@ import datetime
 import pytz
 import ssl
 from dateutil.parser import parse as parsedate
-from tzlocal import get_localzone # $ pip install tzlocal
+from tzlocal import get_localzone
 from shutil import copyfileobj
+
+
+def _localize_naive(dt, tz):
+    """Naive datetime in local wall time → aware. pytz zones use .localize(); ZoneInfo uses .replace()."""
+    if dt.tzinfo is not None:
+        return dt
+    localize = getattr(tz, "localize", None)
+    if localize is not None:
+        return localize(dt)
+    return dt.replace(tzinfo=tz)
+
 
 def download_file(url, dstFile):
     try:
@@ -59,7 +70,7 @@ def download_file_if_newer(url, dstFile):
         
         file_time = datetime.datetime.fromtimestamp(os.path.getmtime(dstFile))
         tz = get_localzone()
-        local_dt = tz.localize(file_time)
+        local_dt = _localize_naive(file_time, tz)
         utc_dt = local_dt.astimezone(pytz.utc)
     
         if url_date > utc_dt :
