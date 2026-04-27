@@ -94,7 +94,7 @@ def check_group_support():
     return True
 
 class OIDCSession():
-    def __init__(self, client_id, client_secret, token_url, refresh_url=None) -> None:
+    def __init__(self, client_id, client_secret, token_url, refresh_url=None, scope=None) -> None:
         self.client_id = client_id
         self.client_secret = client_secret
         self.token_url = token_url
@@ -102,6 +102,7 @@ class OIDCSession():
             self.refresh_url = refresh_url
         else:
             self.refresh_url = token_url
+        self.scope = scope
         self.token = None
         self._session = None
         self.oidc_verify_ssl = getattr(settings, 'OIDC_VERIFY_SSL', True)
@@ -113,18 +114,24 @@ class OIDCSession():
         }
         client = BackendApplicationClient(client_id=self.client_id)
         self._session = OAuth2Session(
-                client=client,
-                token=self.token,
-                auto_refresh_url=self.refresh_url,
-                auto_refresh_kwargs=extra,
-                token_updater=token_updater
-                )
-        self._session.fetch_token(
-                token_url=self.token_url,
-                client_id=self.client_id,
-                client_secret=self.client_secret,
-                verify=self.oidc_verify_ssl
-                )
+            client=client,
+            token=self.token,
+            auto_refresh_url=self.refresh_url,
+            auto_refresh_kwargs=extra,
+            token_updater=token_updater,
+        )
+        fetch_args = {
+            'token_url': self.token_url,
+            'client_id': self.client_id,
+            'client_secret': self.client_secret,
+            'verify': self.oidc_verify_ssl
+        }
+        
+        if self.scope:
+            fetch_args['scope'] = self.scope
+
+        self._session.fetch_token(**fetch_args)
+
         return self._session
     
     def _get_session(self):
