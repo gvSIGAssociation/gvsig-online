@@ -3739,6 +3739,19 @@ def layer_boundingbox_from_data(request):
 
 def _layer_cache_clear(layer_id):
     layer = Layer.objects.get(id=int(layer_id))
+    layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
+
+    if layer.external:
+        if layer.type != 'WMS':
+            return
+        gs = geographic_servers.get_instance().get_server_by_id(layer_group.server_id)
+        gs.clearCache(None, layer)
+        gs.reload_nodes()
+        if Layer.objects.filter(layer_group_id=layer_group.id, external=False).exists():
+            gs.createOrUpdateGeoserverLayerGroup(layer_group)
+            gs.clearLayerGroupCache(layer_group.name)
+        return
+
     datastore = Datastore.objects.get(id=layer.datastore.id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
     gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
@@ -3749,7 +3762,6 @@ def _layer_cache_clear(layer_id):
     gs.clearCache(workspace.name, layer)
     gs.updateThumbnail(layer, 'update')
 
-    layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
     gs.createOrUpdateGeoserverLayerGroup(layer_group)
     gs.clearLayerGroupCache(layer_group.name)
 
@@ -3764,7 +3776,7 @@ def layer_cache_clear(request, layer_id):
         layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
         server = Server.objects.get(id=layer_group.server_id)
         gs = geographic_servers.get_instance().get_server_by_id(server.id)
-        if not layer.external:
+        if not layer.external or layer.type == 'WMS':
             _layer_cache_clear(layer_id)
             gs.reload_nodes()
             return HttpResponse('{"response": "ok"}', content_type='application/json')
@@ -3790,18 +3802,21 @@ def layergroup_cache_clear(request, layergroup_id):
 
 def layer_group_cache_clear(layergroup):
     last = None
-    layers = Layer.objects.filter(external=False).filter(layer_group_id=int(layergroup.id))
+    layers = Layer.objects.filter(layer_group_id=int(layergroup.id)).filter(
+        Q(external=False) | Q(external=True, type='WMS')
+    )
     for layer in layers:
-        if not layer.external:
-            _layer_cache_clear(layer.id)
-            last = layer
+        _layer_cache_clear(layer.id)
+        last = layer
 
     if last:
-        gs = geographic_servers.get_instance().get_server_by_id(last.datastore.workspace.server.id)
-        gs.deleteGeoserverLayerGroup(layergroup)
-
-        gs.createOrUpdateGeoserverLayerGroup(layergroup)
-        gs.clearLayerGroupCache(layergroup.name)
+        gs = geographic_servers.get_instance().get_server_by_id(layergroup.server_id)
+        # rest_geoserver.create_or_update_gs_layer_group omits external layers.
+        # group may not exist if layer group only has external layers.
+        if Layer.objects.filter(layer_group_id=layergroup.id, external=False).exists():
+            gs.deleteGeoserverLayerGroup(layergroup)
+            gs.createOrUpdateGeoserverLayerGroup(layergroup)
+            gs.clearLayerGroupCache(layergroup.name)
         gs.reload_nodes()
 
 
