@@ -212,6 +212,19 @@ class Geoserver():
             print(str(e))
             return False
 
+    def reload_master(self):
+        """
+        Reloads the master GeoServer node catalog. Needed after GWC REST API
+        changes (e.g. enabling MVT format) so the in-memory GWC tile layer
+        dispatcher picks up the updated configuration.
+        """
+        try:
+            self.rest_catalog.reload(self.conf_url, user=self.user, password=self.password)
+            return True
+        except Exception as e:
+            logger.exception("Could not reload master GeoServer node")
+            return False
+
         
     def createWorkspace(self, name, uri):
         try:
@@ -501,9 +514,21 @@ class Geoserver():
             # catalog.save() someway sets fixed subsets for gwc layers, so we need to
             # restore dynamic grid subsets afterwards
             self.set_gwclayer_dynamic_subsets(layer.datastore.workspace, layer.name)
+            # catalog.save() also resets GWC parameterFilters, so re-apply the style
+            # configuration after restoring grid subsets
+            style_list = []
+            default_style = ''
+            for sl in StyleLayer.objects.filter(layer=layer):
+                if not sl.style.name.endswith('_tmp'):
+                    style_list.append(sl.style.name)
+                if sl.style.is_default:
+                    default_style = sl.style.name
+            self.rest_catalog.update_layer_styles_configuration(
+                layer, style, default_style, style_list,
+                user=self.user, password=self.password)
             return True
         except Exception as e:
-            logger.exception("error setting style", e)
+            logger.exception("error setting style: %s", e)
             return False
         
     def get_geometry_type(self, layer):
@@ -2028,16 +2053,15 @@ class Geoserver():
         Returns:
             True si se actualiza correctamente, False en caso de error
         """
+        ws_name = workspace.name if workspace else None
         try:
-            ws_name = workspace.name if workspace else None
             return self.rest_catalog.update_gwclayer_vector_tile_format(
                 ws_name, layer_name, enable_mvt, user=self.user, password=self.password
             )
         except Exception as e:
             logger.exception("Could not update vector tile format for layer")
-            logger.error("vector tile format error - ws: {} - layer: {} - enable: {}".format(
-                str(ws_name), str(layer_name), str(enable_mvt)
-            ))
+            logger.error("vector tile format error - ws: %s - layer: %s - enable: %s",
+                         ws_name, layer_name, enable_mvt)
             if isinstance(e, RequestError):
                 logger.error(e.get_detailed_message())
             return False

@@ -1075,6 +1075,29 @@ def clone_layer(target_datastore, layer, layer_group, clone_conf=None):
         
             toc_add_layer(new_layer_instance)
             server.createOrUpdateGeoserverLayerGroup(new_layer_instance.layer_group)
+
+            if new_layer_instance.vector_tile:
+                server.update_vector_tile_format(
+                    new_layer_instance.datastore.workspace,
+                    new_layer_instance.name,
+                    True
+                )
+
+            if new_layer_instance.cached:
+                # Reload GeoServer so the WMTS capabilities reflect the new layer name.
+                # The clone copies external_params verbatim, so wmts_options still points
+                # to the original layer's WMTS URL template; we must regenerate it here.
+                server.reload_master()
+                try:
+                    wmts_opts = get_wmts_options_from_layer(new_layer_instance)
+                    if wmts_opts is not None:
+                        ep = json.loads(new_layer_instance.external_params) if new_layer_instance.external_params else {}
+                        ep['wmts_options'] = wmts_opts
+                        new_layer_instance.external_params = json.dumps(ep)
+                        new_layer_instance.save()
+                except Exception:
+                    logger.exception("Could not refresh wmts_options for cloned cached layer %s", new_layer_instance.name)
+
             new_layer_instance._cloned_from_name = old_name
             new_layer_instance._cloned_from_instance = old_instance
             return new_layer_instance
