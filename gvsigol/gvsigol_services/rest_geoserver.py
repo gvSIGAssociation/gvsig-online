@@ -865,7 +865,8 @@ class Geoserver():
             xml = ET.tostring(root, encoding='utf-8')
             r = self.session.post(url, data=xml, headers=headers, auth=auth)
             if r.status_code == 200:
-                logger.info(f"MVT format {'enabled' if enable_mvt else 'disabled'} for layer {ws_name}:{layer_name}")
+                logger.info("MVT format %s for layer %s:%s",
+                            'enabled' if enable_mvt else 'disabled', ws_name, layer_name)
                 return True
             raise FailedRequestError(r.status_code, r.content)
             
@@ -892,7 +893,6 @@ class Geoserver():
     
     def get_layer_styles_configuration(self, layer, user=None, password=None):
         url = self.gwc_url + '/layers/'+layer.datastore.workspace.name +':'+layer.name+'.xml'
-        print('########################### get_layer_styles_configuration: update_layer_styles_configuration' + url)
         
         if user and password:
             auth = (user, password)
@@ -918,7 +918,11 @@ class Geoserver():
         
         headers = self._apply_override_headers({'content-type': 'text/xml'})
         
-        for parameterFiltersElem in tree.findall('./parameterFilters'):
+        parameterFiltersElems = tree.findall('./parameterFilters')
+        if not parameterFiltersElems:
+            parameterFiltersElems = [ET.SubElement(tree, 'parameterFilters')]
+        
+        for parameterFiltersElem in parameterFiltersElems:
             for styleParameterFilterElem in parameterFiltersElem.findall('./styleParameterFilter'):
                 styleParameterFilterElem.getparent().remove(styleParameterFilterElem)
             styleParameterFilterElem = ET.SubElement(parameterFiltersElem, 'styleParameterFilter')
@@ -929,11 +933,10 @@ class Geoserver():
                 defaultValueElem.text = default_style
             elif len(styles_list) > 0:
                 defaultValueElem.text = styles_list[0]
-            # ET.SubElement(styleParameterFilterElem, 'normalize')
-            #valuesElem = ET.SubElement(styleParameterFilterElem, 'values')
-            #for style_list in styles_list: 
-            #    stringValueElem = ET.SubElement(valuesElem, 'string')
-            #    stringValueElem.text = style_list
+            valuesElem = ET.SubElement(styleParameterFilterElem, 'values')
+            for s in styles_list:
+                stringValueElem = ET.SubElement(valuesElem, 'string')
+                stringValueElem.text = s
         r = self.session.post(url, data=ET.tostring(tree, encoding='UTF-8'), headers=headers, auth=auth)
         if r.status_code==200:
             return True
