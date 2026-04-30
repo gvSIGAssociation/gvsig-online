@@ -744,7 +744,12 @@ class Geoserver():
     def clear_cache(self, ws, layer, user=None, password=None):
         url = self.gwc_url + "/masstruncate"
         headers = self._apply_override_headers({'content-type': 'text/xml'})
-        xml = "<truncateLayer><layerName>" + ws + ":" + layer.name + "</layerName></truncateLayer>"
+        # External WMS layers are registered in GWC by bare layer.name (see APIGeoWebCache.add_layer).
+        if getattr(layer, 'external', False):
+            gwc_layer_name = layer.name
+        else:
+            gwc_layer_name = ws + ":" + layer.name
+        xml = "<truncateLayer><layerName>" + gwc_layer_name + "</layerName></truncateLayer>"
         if user and password:
             auth = (user, password)
         else:

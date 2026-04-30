@@ -341,9 +341,12 @@ class APIGeoWebCache():
     def clear_cache(self, ws, layer, user=None, password=None):
         url = self.gwc_url + "/masstruncate"
         headers = {'content-type': 'text/xml'}
-        
-        xml = "<truncateLayer>" 
-        xml +=  "<layerName>" + ws + ":" + layer.name + "</layerName>"
+        if getattr(layer, 'external', False):
+            gwc_layer_name = layer.name
+        else:
+            gwc_layer_name = ws + ":" + layer.name
+        xml = "<truncateLayer>"
+        xml += "<layerName>" + gwc_layer_name + "</layerName>"
         xml += "</truncateLayer>"
         
         if user and password:
