@@ -26,7 +26,6 @@ import xml.etree.ElementTree as ET
 from django.http.response import JsonResponse
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
-from rest_framework.generics import ListAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from gvsigol_plugin_baseapi.validation import HttpException
@@ -663,8 +662,7 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
         return  # To not perform the csrf check previously happening
 
 
-class ServicesView(ListAPIView):
-    serializer_class = None
+class ServicesView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
 
