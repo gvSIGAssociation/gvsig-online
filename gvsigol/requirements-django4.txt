@@ -52,13 +52,15 @@
 #   - mgrs 1.4.2 → 1.5.4
 #   - cx-Oracle 8.2.1 → 8.3.0
 #   - pyodbc 5.2.0 → 5.3.0
-#   - geomet 0.3.0 → 1.1.0 (misma API load/dumps; 1.x añade EsriJSON y elimina dep. six)
+#   - geomet 0.3.0 → 1.1.0
 #   - suds-community 0.8.4 → 1.2.0
 #   - python-resize-image 1.1.19 → 1.1.20
 #   - rasterio 1.3.2 → 1.3.10
 #   - fiona 1.8.22 → 1.9.6
 #   - geopandas 0.12.2 → 0.14.4
 #   - rtree 1.2.0 → 1.4.1
+#   - numpy 1.26.4 → 2.0.2
+#   - pandas 1.5.3 → 2.3.3
 #
 # Removed dependecies (not used):
 #   - djangorestframework-jwt
@@ -71,8 +73,6 @@
 # Kept at current version (require code changes in later phases):
 #   - shapely==1.8.4 (Phase 3: → 2.x)
 #   - SQLAlchemy==1.4.50 (Phase 3: → 2.x)
-#   - pandas==1.5.3 (Phase 3: → 2.x; numpy debe actualizarse en el mismo paso)
-#   - numpy==1.26.4 (Phase 3: → 2.x; 1.26.4 es la última 1.x; incompatible con pandas 1.5.x)
 #   - zeep==3.4.0 (Phase 3: evaluar → 4.x)
 #   - tinydb==3.15.2 (pinned: 4.x renombra purge_tables→drop_tables; usado en plugin_gtfs_editor)
 #
@@ -130,7 +130,7 @@ six==1.17.0
 pytz # don't specify version, since timezones need to be up-to-date
 python-dateutil==2.9.0.post0
 
-numpy==1.26.4  # Phase 3: → 2.x junto con pandas (pandas 1.5.x requiere numpy < 2.0)
+numpy==2.0.2
 
 cmislib3==1.0.8
 lxml==5.4.0
@@ -188,7 +188,7 @@ xmlsec==1.3.17
 django_tinymce==3.7.1
 
 # plugin geoetl
-pandas==1.5.3
+pandas==2.3.3
 xlrd==2.0.2
 #gdal==2.4.4 # compiled and installed from gdal source code in production, not managed by pip
 mgrs==1.5.4
