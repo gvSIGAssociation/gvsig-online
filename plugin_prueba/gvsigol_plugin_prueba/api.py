@@ -26,7 +26,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
 from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
-from rest_framework.generics import ListAPIView
+from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
 from gvsigol_plugin_baseapi.validation import HttpException
@@ -44,8 +44,7 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
         return  # To not perform the csrf check previously happening
 
 
-class DataView(ListAPIView):
-    serializer_class = None
+class DataView(APIView):
     authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
 
     @swagger_auto_schema(operation_id='get_data', operation_summary='',

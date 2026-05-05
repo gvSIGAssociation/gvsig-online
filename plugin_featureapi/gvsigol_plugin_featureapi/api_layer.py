@@ -331,9 +331,6 @@ class PublicLayerFieldOptionsPaginated(ListAPIView):
 #                    Legend
 #--------------------------------------------------
 class Legend(APIView):
-    serializer_class = None
-    pagination_class = None
-    
     @swagger_auto_schema(operation_id='get_geoserver_legend', operation_summary='Get the geoserver legend',
                           responses={
                                     404: "Resource NOT found"
