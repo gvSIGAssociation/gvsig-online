@@ -51,7 +51,7 @@ six==1.15.0
 pytz # don't specify version, since timezones need to be up-to-date
 python-dateutil==2.8.1
 
-numpy==1.26.4
+numpy==1.26.4 # debemos mantener compatibilidad en código con numpy 2.0.x
 
 cmislib3==1.0.8
 lxml==4.9.2
@@ -118,7 +118,7 @@ xmlsec==1.3.14 # fix error with 1.3.15 in RH9.3/LIBRA
 django_tinymce==3.4.0
 
 # plugin geoetl
-pandas==1.5.3
+pandas==1.5.3 # debemos mantener compatibilidad en código con pandas 2.3.x
 xlrd==2.0.1
 #gdal==2.4.4 # compiled and installed from gdal source code in production, not managed by pip
 mgrs==1.4.2
@@ -134,7 +134,7 @@ oauthlib==3.2.2
 requests-oauthlib==1.3.1
 
 # plugin gmlcatastro 
-shapely==1.8.4
+shapely==1.8.4 # debemos mantener compatibilidad en código con shapely 2.0.x
 
 # read environment
 django-environ==0.10.0
@@ -178,5 +178,5 @@ sqlglot==26.21.0
 ## Plugin building3d_lidar
 rasterio==1.3.2
 fiona==1.8.22
-geopandas==0.12.2
+geopandas==0.12.2 # debemos mantener compatibilidad en código con geopandas 1.0.x
 rtree==1.2.0

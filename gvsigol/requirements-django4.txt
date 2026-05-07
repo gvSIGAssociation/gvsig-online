@@ -61,6 +61,7 @@
 #   - rtree 1.2.0 → 1.4.1
 #   - numpy 1.26.4 → 2.0.2
 #   - pandas 1.5.3 → 2.3.3
+#   - shapely 1.8.4 → 2.0.7
 #
 # Removed dependecies (not used):
 #   - djangorestframework-jwt
@@ -71,7 +72,6 @@
 #   - limesurveyrc2api
 #
 # Kept at current version (require code changes in later phases):
-#   - shapely==1.8.4 (Phase 3: → 2.x)
 #   - SQLAlchemy==1.4.50 (Phase 3: → 2.x)
 #   - zeep==3.4.0 (Phase 3: evaluar → 4.x)
 #   - tinydb==3.15.2 (pinned: 4.x renombra purge_tables→drop_tables; usado en plugin_gtfs_editor)
@@ -130,7 +130,7 @@ six==1.17.0
 pytz # don't specify version, since timezones need to be up-to-date
 python-dateutil==2.9.0.post0
 
-numpy==2.0.2
+numpy==2.0.2 # debemos mantener compatibilidad en código con numpy 1.26.x
 
 cmislib3==1.0.8
 lxml==5.4.0
@@ -188,7 +188,7 @@ xmlsec==1.3.17
 django_tinymce==3.7.1
 
 # plugin geoetl
-pandas==2.3.3
+pandas==2.3.3 # debemos mantener compatibilidad en código con pandas 1.5.x
 xlrd==2.0.2
 #gdal==2.4.4 # compiled and installed from gdal source code in production, not managed by pip
 mgrs==1.5.4
@@ -203,8 +203,8 @@ mozilla-django-oidc==3.0.0  # ATENCIÓN: auth.login() ya no se llama en session 
 oauthlib==3.3.1
 requests-oauthlib==2.0.0
 
-# plugin gmlcatastro 
-shapely==1.8.4  # Phase 3: upgrade to 2.x (geometry API changes)
+# plugin gmlcatastro
+shapely==2.0.7 # debemos mantener compatibilidad en código con shapely 1.8.x
 
 # read environment
 django-environ==0.11.2
@@ -247,5 +247,5 @@ sqlglot==26.21.0
 ## Plugin building3d_lidar
 rasterio==1.3.10
 fiona==1.9.6
-geopandas==0.14.4
+geopandas==1.0.1 # debemos mantener compatibilidad en código con geopandas 0.14.x
 rtree==1.4.1

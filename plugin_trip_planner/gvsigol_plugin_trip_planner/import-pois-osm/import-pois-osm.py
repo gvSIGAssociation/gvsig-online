@@ -2,9 +2,7 @@
 
 import ogr
 import osr
-import shapely
 from shapely.geometry import Point
-import geopandas as gpd
 import requests
 import sys
 import os
