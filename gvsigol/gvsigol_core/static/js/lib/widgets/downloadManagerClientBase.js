@@ -88,9 +88,15 @@ DownloadManagerUI.prototype.layerDirectDownloads = function(layer) {
 			ui += 	'</div>';
 			ui += '</div>';
 			
-			$('#float-modal .modal-body').empty();
-			$('#float-modal .modal-body').append(ui);
-			$('#float-modal').modal('show');
+			$(this.modalSelector + ' .modal-title').empty();
+			$(this.modalSelector + ' .modal-title').append(gettext('Download links'));
+			$(this.modalSelector + ' .modal-body').empty();
+			$(this.modalSelector + ' .modal-body').append(ui);
+			$(this.modalSelector + ' .modal-footer').empty();
+			$(this.modalSelector + ' .modal-footer').append(
+				'<button id="float-modal-cancel" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>'
+			);
+			$(this.modalSelector).modal('show');
 		}
 		else if (layer.wcs_url) {
 			var rasterLink = layer.wcs_url + '?service=WCS&version=2.0.0&request=GetCoverage&CoverageId=' + layer.layer_name;
@@ -106,9 +112,15 @@ DownloadManagerUI.prototype.layerDirectDownloads = function(layer) {
 			ui += 	'</div>';
 			ui += '</div>';
 			
-			$('#float-modal .modal-body').empty();
-			$('#float-modal .modal-body').append(ui);
-			$('#float-modal').modal('show');
+			$(this.modalSelector + ' .modal-title').empty();
+			$(this.modalSelector + ' .modal-title').append(gettext('Download links'));
+			$(this.modalSelector + ' .modal-body').empty();
+			$(this.modalSelector + ' .modal-body').append(ui);
+			$(this.modalSelector + ' .modal-footer').empty();
+			$(this.modalSelector + ' .modal-footer').append(
+				'<button id="float-modal-cancel" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>'
+			);
+			$(this.modalSelector).modal('show');
 		}
 	}
 }
