@@ -216,17 +216,8 @@ ImportFromService.prototype.createServiceForm = function() {
 								return;
 							}
 							var formats = self._getWFSOutputFormats(response);
-							var format = null;
-							for (var i=0; i<formats.length; i++) {
-								if (formats[i] == 'application/json') {
-									format = formats[i];
-									break; // prefer json format
-								}
-								else if (formats[i].indexOf('gml/3.1.1')!==-1) {
-									format = formats[i];
-								}
-							}
-							if (format === null) {
+							var format = self._resolveWFSOutputFormat(formats);
+							if (!format) {
 								$('#format-error').css('display', 'block');
 								return;
 							}
@@ -300,6 +291,23 @@ ImportFromService.prototype._getWFSOutputFormats = function(capabilitiesElement)
 	return formats;
 }
 
+ImportFromService.prototype._resolveWFSOutputFormat = function(formats) {
+	if (!formats || formats.length === 0) {
+		return 'application/json; subtype=geojson';
+	}
+	for (var i=0; i<formats.length; i++) {
+		if (formats[i] && formats[i].toLowerCase().indexOf('json') !== -1) {
+			return formats[i];
+		}
+	}
+	for (var j=0; j<formats.length; j++) {
+		if (formats[j] && formats[j].indexOf('gml/3.1.1') !== -1) {
+			return formats[j];
+		}
+	}
+	return null;
+}
+
 ImportFromService.prototype.loadWMSLayer = function(url, layer) {
 	var self = this;
 	var layerId = viewer.core._nextLayerId();
@@ -351,6 +359,8 @@ ImportFromService.prototype.loadWFSLayer = function(url, layer, format) {
 	var layerId = viewer.core._nextLayerId();
 	var layerName = layer.children[0].textContent;
 	var layerTitle = layer.children[1].textContent;
+	var viewProjection = self.map.getView().getProjection();
+	var srsName = viewProjection ? viewProjection.getCode() : 'EPSG:3857';
 
 	var style = self.getRandomStyle();
 
@@ -358,7 +368,29 @@ ImportFromService.prototype.loadWFSLayer = function(url, layer, format) {
 		formatParser = new ol.format.GeoJSON();
 	}
 	else if (format.indexOf("gml/3.1.1")!==-1) {
-		formatParser = new ol.format.GML3();
+		var featureType = layerName.indexOf(':') !== -1 ? layerName.split(':')[1] : layerName;
+		var featurePrefix = layerName.indexOf(':') !== -1 ? layerName.split(':')[0] : null;
+		var featureNS = null;
+		try {
+			var capabilitiesDoc = layer.ownerDocument;
+			var targetNamespace = capabilitiesDoc && capabilitiesDoc.documentElement
+				? capabilitiesDoc.documentElement.getAttribute('targetNamespace')
+				: null;
+			featureNS = targetNamespace || null;
+		} catch (e) {
+			featureNS = null;
+		}
+
+		var gmlOptions = {
+			featureType: featureType
+		};
+		if (featureNS) {
+			gmlOptions.featureNS = featureNS;
+		}
+		if (featurePrefix) {
+			gmlOptions.featurePrefix = featurePrefix;
+		}
+		formatParser = new ol.format.GML3(gmlOptions);
 	}
 	
 	var wfsLayer = new ol.layer.Vector({
@@ -369,11 +401,25 @@ ImportFromService.prototype.loadWFSLayer = function(url, layer, format) {
 		source: new ol.source.Vector({
 			format: formatParser,
 		    url: function(extent) {
-		    	return  url + '?' +
+		    	var request = url + '?' +
 		        		'service=WFS&' +
-		        		'version=1.0.0&request=GetFeature&typename=' + layerName +
-		        		'&outputFormat=' + encodeURI(format) + '&srsname=EPSG:3857';/* +
-		        		'bbox=' + extent.join(',') + ',EPSG:3857';*/
+		        		'version=1.1.0&request=GetFeature&typename=' + layerName +
+		        		'&outputFormat=' + encodeURIComponent(format) +
+		        		'&srsname=' + encodeURIComponent(srsName);
+
+		    	var requestExtent = extent;
+		    	if (!self.isValidExtent(requestExtent)) {
+		    		var mapView = self.map && self.map.getView ? self.map.getView() : null;
+		    		var mapSize = self.map && self.map.getSize ? self.map.getSize() : null;
+		    		if (mapView && mapSize) {
+		    			requestExtent = mapView.calculateExtent(mapSize);
+		    		}
+		    	}
+
+		    	if (self.isValidExtent(requestExtent)) {
+		    		request += '&bbox=' + requestExtent.join(',') + ',' + encodeURIComponent(srsName);
+		    	}
+		    	return request;
 		    }
 		})
 	});
@@ -389,10 +435,57 @@ ImportFromService.prototype.loadWFSLayer = function(url, layer, format) {
 	wfsLayer.imported = true;
 	wfsLayer.is_vector = true;
 
+	var firstLoad = true;
+	wfsLayer.getSource().on('featuresloaderror', function() {
+		if (firstLoad) {
+			firstLoad = false;
+			alert(gettext('No features could be loaded from the selected WFS layer'));
+		}
+	});
+
+	wfsLayer.getSource().on('featuresloadend', function() {
+		if (!firstLoad) {
+			return;
+		}
+		firstLoad = false;
+		var extent = wfsLayer.getSource().getExtent();
+		if (self.isValidExtent(extent)) {
+			wfsLayer.latlong_extent = ol.proj.transformExtent(extent, ol.proj.get(srsName), ol.proj.get('EPSG:4326'));
+		}
+	});
+
 	self.map.addLayer(wfsLayer);
 	self.createLayerUI (wfsLayer, layerId);
 	$("#modal-importfromservice-dialog").modal('hide');
 	self.modal = null;
+};
+
+ImportFromService.prototype.isValidExtent = function(extent) {
+	if (!Array.isArray(extent) || extent.length !== 4) {
+		return false;
+	}
+	for (var i = 0; i < extent.length; i++) {
+		if (!isFinite(extent[i])) {
+			return false;
+		}
+	}
+	return !(extent[0] === Infinity || extent[1] === Infinity || extent[2] === -Infinity || extent[3] === -Infinity);
+};
+
+ImportFromService.prototype.zoomToLayerSafely = function(layer) {
+	if (!layer || !layer.getSource || typeof layer.getSource !== 'function') {
+		return;
+	}
+	var source = layer.getSource();
+	if (!source || typeof source.getExtent !== 'function') {
+		return;
+	}
+	var extent = source.getExtent();
+	if (!this.isValidExtent(extent)) {
+		alert(gettext('Layer has no features to zoom to'));
+		return;
+	}
+	this.map.getView().fit(extent, this.map.getSize());
 };
 
 ImportFromService.prototype.getRandomStyle = function() {
@@ -519,6 +612,12 @@ ImportFromService.prototype.createLayerUI = function(layer, dataId) {
 	layerUI.find(".box-body .zoom-to-layer").after(removeLayerButtonUI);
 	$(".importfromservice-layer-group").append(layerUI);
 	layerTree.setLayerEvents();
+	if (layer && layer.imported && layer.is_vector) {
+		$("#zoom-to-layer-" + dataId).unbind("click").on('click', function(e) {
+			e.preventDefault();
+			self.zoomToLayerSafely(layer);
+		});
+	}
 
 	$(".remove-service-layer-btn").unbind("click").click(function (e) {
 		var id = $(this).attr("data-layerid");
