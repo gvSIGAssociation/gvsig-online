@@ -397,9 +397,9 @@ ImportFromService.prototype.loadWFSLayer = function(url, layer, format) {
 		id: layerId,
 		name: layerName,
 		style: style,
-		strategy: ol.loadingstrategy.bbox,
 		source: new ol.source.Vector({
 			format: formatParser,
+			strategy: ol.loadingstrategy.bbox,
 		    url: function(extent) {
 		    	var request = url + '?' +
 		        		'service=WFS&' +
@@ -417,7 +417,7 @@ ImportFromService.prototype.loadWFSLayer = function(url, layer, format) {
 		    	}
 
 		    	if (self.isValidExtent(requestExtent)) {
-		    		request += '&bbox=' + requestExtent.join(',') + ',' + encodeURIComponent(srsName);
+		    		request += '&bbox=' + requestExtent.join(',') + ',' + srsName;
 		    	}
 		    	return request;
 		    }
@@ -444,10 +444,10 @@ ImportFromService.prototype.loadWFSLayer = function(url, layer, format) {
 	});
 
 	wfsLayer.getSource().on('featuresloadend', function() {
-		if (!firstLoad) {
-			return;
+		if (firstLoad) {
+			firstLoad = false;
 		}
-		firstLoad = false;
+		// Tras cada bbox (incl. zoom out / pan), el extent de la fuente es la unión de lo cargado.
 		var extent = wfsLayer.getSource().getExtent();
 		if (self.isValidExtent(extent)) {
 			wfsLayer.latlong_extent = ol.proj.transformExtent(extent, ol.proj.get(srsName), ol.proj.get('EPSG:4326'));
