@@ -7168,7 +7168,7 @@ def connection_list(request):
         page_size_param="page_size",
     )
     
-    # Añadir información adicional para visualización (solo página actual)
+    # Añadir atribuciones para visualización (solo página actual)
     for conn in page_connections:
         conn.masked_params = conn.get_masked_params()
         # Contar almacenes de datos que usan esta conexión
@@ -10373,3 +10373,331 @@ def api_segex_entities(request):
         return JsonResponse({'success': False, 'error': str(e)})
 
 
+# ============================================================================
+# Attributions management
+# ============================================================================
+
+from .models import AttributionConfig, AttributionLink, AttributionAttachment, \
+    AttributionProjectMembership
+from .forms_attributions import AttributionConfigForm
+
+
+def _attr_modal_section_labels():
+    """Etiquetas para la lista de ordenación del modal (panel de control)."""
+    return {
+        'logo': gettext('Logo'),
+        'copyright': gettext('Copyright notice'),
+        'other': gettext('Others'),
+        'help': gettext('Help'),
+        'contact': gettext('Contact information'),
+        'legal': gettext('Legal notice'),
+        'links': gettext('Useful links'),
+        'attachments': gettext('Attachments'),
+    }
+
+
+def _attr_resolve_modal_section_order(form, base):
+    """Orden de bloques coherente con el campo oculto del formulario y la BD."""
+    raw = ''
+    if getattr(form, 'data', None) is not None and form.is_bound:
+        raw = (form.data.get('modal_section_order_json') or '').strip()
+    if not raw:
+        val = form['modal_section_order_json'].value()
+        if isinstance(val, str):
+            raw = val.strip()
+    if raw:
+        try:
+            return utils.normalize_attributions_modal_section_order(json.loads(raw))
+        except (ValueError, TypeError):
+            pass
+    if base is not None:
+        return utils.normalize_attributions_modal_section_order(base.modal_section_order)
+    return utils.normalize_attributions_modal_section_order([])
+
+
+def _attr_redirect_to_list():
+    return HttpResponseRedirect(reverse('attributions_list'))
+
+
+def _attr_apply_links_and_attachments(request, config):
+    """
+    Procesa los listados dinámicos de links y attachments enviados por el form
+    completo. Espera campos POST con prefijo 'link_url[]', 'link_description[]',
+    'attachment_internal_path[]', 'attachment_public_url[]', 'attachment_description[]'.
+    Sustituye los registros existentes por los enviados.
+    """
+    link_urls = request.POST.getlist('link_url[]')
+    link_descs = request.POST.getlist('link_description[]')
+
+    config.links.all().delete()
+    for idx, url in enumerate(link_urls):
+        if not url or not url.strip():
+            continue
+        desc = link_descs[idx] if idx < len(link_descs) else ''
+        safe_url = strip_tags(url).strip()
+        safe_desc = strip_tags((desc or '')).strip()
+        if not safe_url:
+            continue
+        AttributionLink.objects.create(
+            config=config,
+            url=safe_url,
+            description=safe_desc,
+            order=idx,
+        )
+
+    att_paths = request.POST.getlist('attachment_internal_path[]')
+    att_pub_urls = request.POST.getlist('attachment_public_url[]')
+    att_descs = request.POST.getlist('attachment_description[]')
+
+    config.attachments.all().delete()
+    for idx, internal_path in enumerate(att_paths):
+        if not internal_path or not internal_path.strip():
+            continue
+        public_url = att_pub_urls[idx] if idx < len(att_pub_urls) else ''
+        description = att_descs[idx] if idx < len(att_descs) else ''
+        safe_internal_path = strip_tags(internal_path).strip()
+        safe_public_url = strip_tags((public_url or '')).strip()
+        safe_description = strip_tags((description or '')).strip()
+        if not safe_internal_path:
+            continue
+        if not safe_public_url:
+            safe_public_url = utils.build_attributions_public_url(safe_internal_path)
+        AttributionAttachment.objects.create(
+            config=config,
+            internal_path=safe_internal_path,
+            public_url=safe_public_url,
+            description=safe_description,
+            order=idx,
+        )
+
+
+def _attr_apply_membership(request, config):
+    """
+    Aplica/actualiza la N:M de proyectos para configuraciones genéricas según
+    los checkboxes 'attr_project_ids[]'. Si la config no es genérica o la opción
+    'apply_to_all_projects' está activada, se elimina cualquier membership.
+    """
+    config.project_memberships.all().delete()
+
+    if not config.is_generic:
+        return
+    if config.apply_to_all_projects:
+        return
+
+    selected_ids = request.POST.getlist('attr_project_ids[]')
+    valid_projects = Project.objects.filter(id__in=selected_ids)
+    for project in valid_projects:
+        AttributionProjectMembership.objects.get_or_create(
+            config=config,
+            project=project,
+        )
+
+
+def _attr_get_form_context(form, config=None, source=None):
+    """
+    Construye el contexto que necesita el template attributions_form.html.
+    `source` es la configuración genérica usada como plantilla cuando se está
+    creando una configuración específica con la opción "Copiar configuración
+    genérica".
+    """
+    base = source if source is not None else config
+    if base is not None:
+        links = list(base.links.all().order_by('order', 'id'))
+        attachments = list(base.attachments.all().order_by('order', 'id'))
+    else:
+        links = []
+        attachments = []
+
+    if config is not None and config.pk and source is None:
+        selected_project_ids = list(
+            AttributionProjectMembership.objects
+            .filter(config=config)
+            .values_list('project_id', flat=True)
+        )
+    elif source is not None and source.is_generic:
+        selected_project_ids = list(
+            AttributionProjectMembership.objects
+            .filter(config=source)
+            .values_list('project_id', flat=True)
+        )
+    else:
+        selected_project_ids = []
+
+    modal_order = _attr_resolve_modal_section_order(form, base)
+    labels = _attr_modal_section_labels()
+    order_display = [(sid, labels[sid]) for sid in modal_order]
+
+    return {
+        'form': form,
+        'attr_config': config,
+        'projects': Project.objects.all().order_by('name'),
+        'generic_configs': AttributionConfig.objects.filter(
+            kind=AttributionConfig.KIND_GENERIC,
+        ).order_by('name'),
+        'attr_links': links,
+        'attr_attachments': attachments,
+        'attr_selected_project_ids': selected_project_ids,
+        'attr_modal_section_order_display': order_display,
+        'fm_directory': FILEMANAGER_DIRECTORY + "/",
+    }
+
+
+@login_required()
+@require_safe
+@superuser_required
+def attributions_list(request):
+    configs = AttributionConfig.objects.all().order_by('-updated_at')
+    has_generic = configs.filter(kind=AttributionConfig.KIND_GENERIC).exists()
+    return render(request, 'attributions_list.html', {
+        'configs': configs,
+        'has_generic': has_generic,
+    })
+
+
+@login_required()
+@superuser_required
+@require_http_methods(["GET", "POST"])
+def attributions_add(request):
+    source = None
+    source_id = request.GET.get('source') or request.POST.get('source')
+    if source_id:
+        try:
+            source = AttributionConfig.objects.get(id=int(source_id))
+        except (AttributionConfig.DoesNotExist, ValueError):
+            source = None
+
+    if request.method == 'POST':
+        form = AttributionConfigForm(request.POST)
+        if form.is_valid():
+            config = form.save(commit=False)
+            config.created_by = request.user.username
+            config.save()
+            _attr_apply_membership(request, config)
+            _attr_apply_links_and_attachments(request, config)
+            messages.success(request, gettext('Attributions configuration created successfully.'))
+            return _attr_redirect_to_list()
+        return render(request, 'attributions_form.html', _attr_get_form_context(form, source=source))
+
+    initial = {
+        'modal_section_order_json': json.dumps(
+            utils.normalize_attributions_modal_section_order([])
+        ),
+    }
+    if source is not None:
+        initial.update({
+            'name': '',
+            'description': source.description,
+            'other_title': source.other_title,
+            'other_text': source.other_text,
+            'logo_internal_path': source.logo_internal_path,
+            'logo_public_url': source.logo_public_url,
+            'kind': AttributionConfig.KIND_PROJECT_SPECIFIC,
+            'apply_to_all_projects': False,
+            'is_active': True,
+            'copyright_notice': source.copyright_notice,
+            'help_text': source.help_text,
+            'contact_organization': source.contact_organization,
+            'contact_person': source.contact_person,
+            'contact_address': source.contact_address,
+            'contact_phone': source.contact_phone,
+            'contact_email': source.contact_email,
+            'legal_notice': source.legal_notice,
+            'modal_section_order_json': json.dumps(
+                utils.normalize_attributions_modal_section_order(source.modal_section_order)
+            ),
+        })
+    form = AttributionConfigForm(initial=initial)
+    return render(request, 'attributions_form.html', _attr_get_form_context(form, source=source))
+
+
+@login_required()
+@superuser_required
+@require_http_methods(["GET", "POST"])
+def attributions_edit(request, attr_id):
+    config = get_object_or_404(AttributionConfig, id=attr_id)
+
+    if request.method == 'POST':
+        form = AttributionConfigForm(request.POST, instance=config)
+        if form.is_valid():
+            config = form.save()
+            _attr_apply_membership(request, config)
+            _attr_apply_links_and_attachments(request, config)
+            messages.success(request, gettext('Attributions configuration updated successfully.'))
+            return _attr_redirect_to_list()
+        return render(request, 'attributions_form.html', _attr_get_form_context(form, config=config))
+
+    form = AttributionConfigForm(instance=config)
+    return render(request, 'attributions_form.html', _attr_get_form_context(form, config=config))
+
+
+@login_required()
+@superuser_required
+@require_POST
+def attributions_delete(request, attr_id):
+    try:
+        config = AttributionConfig.objects.get(id=attr_id)
+        config.delete()
+        return JsonResponse({'success': True})
+    except AttributionConfig.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'not_found'}, status=404)
+    except Exception as e:
+        logger.exception('Error deleting attributions config')
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required()
+@superuser_required
+def attributions_clone(request, attr_id):
+    """Inicia la creación de una configuración nueva pre-rellenada con los
+    datos de `attr_id` (típicamente una genérica). Redirige al formulario de
+    creación con el parámetro `?source=<id>`."""
+    get_object_or_404(AttributionConfig, id=attr_id)
+    return HttpResponseRedirect(reverse('attributions_add') + '?source={}'.format(attr_id))
+
+
+def attributions_public_download(request, file_path):
+    """
+    Sirve sin autenticación un archivo adjunto de atribuciones. Replica el
+    patrón de plugin_vinya: el path es relativo a FILEMANAGER_DIRECTORY y se
+    valida con Path para impedir traversal. La razón para servirlo público es
+    que estos contenidos son legalmente "para difusión" (avisos copyright,
+    licencias) y los proyectos pueden ser privados.
+
+    internal_path en BD puede ser absoluta (/opt/.../data/f.pdf) o duplicar el
+    prefijo del directorio del FM en la URL; se normaliza siempre con
+    normalize_attributions_filemanager_relative_path.
+    """
+    from pathlib import Path
+
+    raw_path = (file_path or '').strip().lstrip('/')
+    if not raw_path:
+        return HttpResponseNotFound()
+
+    norm_rel = utils.normalize_attributions_filemanager_relative_path(raw_path)
+    if not norm_rel:
+        return HttpResponseNotFound()
+
+    full_path = os.path.normpath(os.path.join(FILEMANAGER_DIRECTORY, norm_rel))
+
+    fm_root = Path(FILEMANAGER_DIRECTORY).resolve()
+    try:
+        resolved = Path(full_path).resolve()
+    except Exception:
+        return HttpResponseNotFound()
+
+    if fm_root not in resolved.parents and resolved != fm_root:
+        logger.warning('Attributions download attempt outside FILEMANAGER_DIRECTORY: %s', full_path)
+        return HttpResponseNotFound()
+
+    if not resolved.is_file():
+        return HttpResponseNotFound()
+
+    if not (
+        utils.attributions_attachment_matches_relative_path(norm_rel)
+        or utils.attributions_logo_matches_relative_path(norm_rel)
+    ):
+        logger.warning('Attributions download attempt of an unreferenced resource: %s', norm_rel)
+        return HttpResponseNotFound()
+
+    filename = os.path.basename(str(resolved))
+    return sendfile(request, str(resolved), attachment=True, attachment_filename=filename)
