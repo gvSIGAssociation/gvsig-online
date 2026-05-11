@@ -49,7 +49,8 @@ urlpatterns = [
     path('api/v1/projects/shared_view/create/', api.CreateSharedViewAPI.as_view(), name='projectapi_create_shared_view'),
     path('api/v1/projects/shared_view/save/', api.SaveSharedViewAPI.as_view(), name='projectapi_save_shared_view'),
     path('api/v1/projects/shared_view/load/<str:view_name>/', api.LoadSharedViewAPI.as_view(), name='projectapi_load_shared_view'),
-    
+    path('api/v1/projects/<int:project_id>/attributions/', api_info.ProjectAttributionsView.as_view(), name='project_attributions'),
+
 
     path('api/v1/groups/', api.LayerGroupsListView.as_view(), name='get_group_list'),
     path('api/v1/groups/<int:group_id>/', api.LayerGroupView.as_view(), name='get_group'),   
@@ -65,6 +66,7 @@ urlpatterns = [
 
     path('api/v1/public/projects/', api.PublicProjectListView.as_view(), name='get_public_project_list'),
     path('api/v1/public/projectconf/', api_info.PublicProjectConfView.as_view(), name='get_public_project_configuration'),
+    path('api/v1/public/projects/<int:project_id>/attributions/', api_info.PublicProjectAttributionsView.as_view(), name='public_project_attributions'),
 
     path('api/v1/applications/', api.ApplicationListView.as_view(), name='get_application_list'),
     path('api/v1/applicationconf/<str:name>/', api_info.ApplicationConfView.as_view(), name='applicationconf'),

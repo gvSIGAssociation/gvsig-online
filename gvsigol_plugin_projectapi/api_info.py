@@ -462,3 +462,75 @@ class FilterView(APIView):
             return Response({'error': 'Filter not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ProjectAttributionsView(APIView):
+    """
+    Devuelve la configuración de atribuciones aplicable a un proyecto para
+    el usuario autenticado, aplicando las reglas de prioridad implementadas en
+    `gvsigol_services.utils.get_attributions_for_project`.
+
+    Devuelve 204 cuando no aplica ninguna configuración (el frontend no
+    mostrará el bloque). Devuelve 403 si el usuario no tiene acceso al
+    proyecto.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_id='get_project_attributions',
+        operation_summary='Devuelve la atribuciones aplicable al proyecto',
+        responses={
+            200: 'Atribuciones aplicable al proyecto',
+            204: 'No hay atribuciones configurada para este proyecto',
+            403: 'El proyecto no es accesible para el usuario',
+            404: 'Proyecto no encontrado',
+        },
+    )
+    def get(self, request, project_id):
+        try:
+            project = Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            return JsonResponse({'error': 'Project not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        allowed_ids = util.get_projects_ids_by_user(request)
+        if project.id not in allowed_ids:
+            return JsonResponse({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+
+        config = services_utils.get_attributions_for_project(project)
+        if config is None:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return JsonResponse(services_utils.serialize_attributions(config))
+
+
+class PublicProjectAttributionsView(APIView):
+    """
+    Variante pública: solo expone atribuciones para proyectos marcados
+    como `is_public=True`. Replica el patrón de PublicProjectConfView.
+    """
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_id='get_public_project_attributions',
+        operation_summary='Devuelve la atribuciones aplicable a un proyecto público',
+        responses={
+            200: 'Atribuciones aplicable al proyecto público',
+            204: 'No hay atribuciones configurada para este proyecto',
+            403: 'El proyecto no es público',
+            404: 'Proyecto no encontrado',
+        },
+    )
+    def get(self, request, project_id):
+        try:
+            project = Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            return JsonResponse({'error': 'Project not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if not project.is_public:
+            return JsonResponse({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+
+        config = services_utils.get_attributions_for_project(project)
+        if config is None:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return JsonResponse(services_utils.serialize_attributions(config))
