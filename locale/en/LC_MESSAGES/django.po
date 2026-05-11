@@ -18,6 +18,251 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.4.2\n"
 
+#: gvsigol_services/forms_attributions.py
+#: gvsigol_services/templates/dashboard_services_menu.html
+msgid "Attributions"
+msgstr "Attributions"
+
+#: gvsigol_services/forms_attributions.py
+msgid "Generic"
+msgstr "Generic"
+
+#: gvsigol_services/forms_attributions.py
+msgid "Project specific"
+msgstr "Project specific"
+
+#: gvsigol_services/forms_attributions.py
+msgid "Associated project"
+msgstr "Associated project"
+
+#: gvsigol_services/forms_attributions.py
+msgid "Active for all projects"
+msgstr "Active for all projects"
+
+#: gvsigol_services/forms_attributions.py
+msgid "Custom title"
+msgstr "Custom title"
+
+#: gvsigol_services/forms_attributions.py
+msgid "Custom text"
+msgstr "Custom text"
+
+#: gvsigol_services/forms_attributions.py
+msgid "Logo internal path"
+msgstr "Logo internal path"
+
+#: gvsigol_services/forms_attributions.py
+msgid "Logo public URL"
+msgstr "Logo public URL"
+
+#: gvsigol_services/forms_attributions.py
+msgid "Copyright notice"
+msgstr "Copyright notice"
+
+#: gvsigol_services/forms_attributions.py
+msgid "Organization"
+msgstr "Organization"
+
+#: gvsigol_services/forms_attributions.py
+msgid "Contact person"
+msgstr "Contact person"
+
+#: gvsigol_services/forms_attributions.py
+msgid "Address"
+msgstr "Address"
+
+#: gvsigol_services/forms_attributions.py
+msgid "Phone"
+msgstr "Phone"
+
+#: gvsigol_services/forms_attributions.py
+msgid "Email"
+msgstr "Email"
+
+#: gvsigol_services/forms_attributions.py
+msgid "Legal notice"
+msgstr "Legal notice"
+
+#: gvsigol_services/forms_attributions.py
+msgid "Help"
+msgstr "Help"
+
+#: gvsigol_services/forms_attributions.py
+msgid "Use this field to briefly contextualize the attributions. A common use case is to present licensing notes."
+msgstr "Use this field to briefly contextualize the attributions. A common use case is to present licensing notes."
+
+#: gvsigol_services/forms_attributions.py
+msgid "Free text shown to viewer users. HTML tags are not allowed."
+msgstr "Free text shown to viewer users. HTML tags are not allowed."
+
+#: gvsigol_services/forms_attributions.py
+msgid "Help text shown to viewer users. HTML tags are not allowed."
+msgstr "Help text shown to viewer users. HTML tags are not allowed."
+
+#: gvsigol_services/forms_attributions.py
+msgid "Optional custom block shown in the modal between copyright and help. HTML tags are not allowed."
+msgstr "Optional custom block shown in the modal between copyright and help. HTML tags are not allowed."
+
+#: gvsigol_services/forms_attributions.py
+msgid "Plain text legal information. HTML tags are not allowed."
+msgstr "Plain text legal information. HTML tags are not allowed."
+
+#: gvsigol_services/forms_attributions.py
+msgid "When this generic configuration is enabled for all projects it is used as the default attributions whenever no project specific configuration exists."
+msgstr "When this generic configuration is enabled for all projects it is used as the default attributions whenever no project specific configuration exists."
+
+#: gvsigol_services/forms_attributions.py
+msgid "A project must be selected for project specific configurations."
+msgstr "A project must be selected for project specific configurations."
+
+#: gvsigol_services/forms_attributions.py
+msgid "A project specific attributions configuration already exists for this project."
+msgstr "A project specific attributions configuration already exists for this project."
+
+#: gvsigol_services/forms_attributions.py
+msgid "HTML tags are not allowed in this field."
+msgstr "HTML tags are not allowed in this field."
+
+#: gvsigol_services/forms_attributions.py
+msgid "Invalid section order data."
+msgstr "Invalid section order data."
+
+#: gvsigol_services/templates/attributions_list.html
+msgid "There is no generic attributions configuration yet. We recommend creating a generic configuration first; you can later create project specific configurations or copy from the generic one."
+msgstr "There is no generic attributions configuration yet. We recommend creating a generic configuration first; you can later create project specific configurations or copy from the generic one."
+
+#: gvsigol_services/templates/attributions_list.html
+msgid "New configuration"
+msgstr "New configuration"
+
+#: gvsigol_services/templates/attributions_list.html
+msgid "Use as template for project specific"
+msgstr "Use as template for project specific"
+
+#: gvsigol_services/templates/attributions_list.html
+msgid "No attributions configurations yet"
+msgstr "No attributions configurations yet"
+
+#: gvsigol_services/templates/attributions_list.html
+msgid "Start by creating a generic configuration that can be reused across your projects."
+msgstr "Start by creating a generic configuration that can be reused across your projects."
+
+#: gvsigol_services/templates/attributions_list.html
+msgid "Create generic configuration"
+msgstr "Create generic configuration"
+
+#: gvsigol_services/templates/attributions_list.html
+msgid "Delete attributions configuration"
+msgstr "Delete attributions configuration"
+
+#: gvsigol_services/templates/attributions_list.html
+msgid "The selected configuration will be permanently deleted."
+msgstr "The selected configuration will be permanently deleted."
+
+#: gvsigol_services/templates/attributions_form.html
+msgid "Copy from generic..."
+msgstr "Copy from generic..."
+
+#: gvsigol_services/templates/attributions_form.html
+msgid "You are creating a new configuration starting from a generic one. Adjust whatever you need before saving."
+msgstr "You are creating a new configuration starting from a generic one. Adjust whatever you need before saving."
+
+#: gvsigol_services/templates/attributions_form.html
+msgid "General information"
+msgstr "General information"
+
+#: gvsigol_services/templates/attributions_form.html
+msgid "Associated projects"
+msgstr "Associated projects"
+
+#: gvsigol_services/templates/attributions_form.html
+msgid "Project specific configurations always take precedence over generic ones."
+msgstr "Project specific configurations always take precedence over generic ones."
+
+#: gvsigol_services/templates/attributions_form.html
+msgid "Or select projects manually"
+msgstr "Or select projects manually"
+
+#: gvsigol_services/templates/attributions_form.html
+msgid "There are no projects to assign yet."
+msgstr "There are no projects to assign yet."
+
+#: gvsigol_services/templates/attributions_form.html
+msgid "Modal content order"
+msgstr "Modal content order"
+
+#: gvsigol_services/templates/attributions_form.html
+msgid "Drag each row by the grip icon to set the order of blocks in the viewer modal. Empty sections are not shown."
+msgstr "Drag each row by the grip icon to set the order of blocks in the viewer modal. Empty sections are not shown."
+
+#: gvsigol_services/templates/attributions_form.html
+msgid "Drag to reorder"
+msgstr "Drag to reorder"
+
+#: gvsigol_services/templates/attributions_form.html
+msgid "Recommended use: document copyright/licensing information, legal notices and complementary references for map viewers."
+msgstr "Recommended use: document copyright/licensing information, legal notices and complementary references for map viewers."
+
+#: gvsigol_services/templates/attributions_form.html
+msgid "Notice text"
+msgstr "Notice text"
+
+#: gvsigol_services/templates/attributions_form.html gvsigol_services/views.py
+msgid "Others"
+msgstr "Others"
+
+#: gvsigol_services/templates/attributions_form.html
+msgid "Contact information"
+msgstr "Contact information"
+
+#: gvsigol_services/templates/attributions_form.html
+msgid "Help text"
+msgstr "Help text"
+
+#: gvsigol_services/templates/attributions_form.html gvsigol_services/views.py
+msgid "Useful links"
+msgstr "Useful links"
+
+#: gvsigol_services/templates/attributions_form.html gvsigol_services/views.py
+msgid "Logo"
+msgstr "Logo"
+
+#: gvsigol_services/templates/attributions_form.html
+msgid "Optional. Select a logo from file manager. It will be shown inside the modal."
+msgstr "Optional. Select a logo from file manager. It will be shown inside the modal."
+
+#: gvsigol_services/templates/attributions_form.html
+msgid "Add link"
+msgstr "Add link"
+
+#: gvsigol_services/templates/attributions_form.html gvsigol_services/views.py
+msgid "Attachments"
+msgstr "Attachments"
+
+#: gvsigol_services/templates/attributions_form.html
+msgid "Files are not uploaded here. Use the file manager selector to choose an existing file. The public download URL will be stored automatically so attachments can be downloaded even when the project is private."
+msgstr "Files are not uploaded here. Use the file manager selector to choose an existing file. The public download URL will be stored automatically so attachments can be downloaded even when the project is private."
+
+#: gvsigol_services/templates/attributions_form.html
+msgid "Internal path"
+msgstr "Internal path"
+
+#: gvsigol_services/templates/attributions_form.html
+msgid "Choose file..."
+msgstr "Choose file..."
+
+#: gvsigol_services/templates/attributions_form.html
+msgid "Add attachment"
+msgstr "Add attachment"
+
+#: gvsigol_services/views.py
+msgid "Attributions configuration created successfully."
+msgstr "Attributions configuration created successfully."
+
+#: gvsigol_services/views.py
+msgid "Attributions configuration updated successfully."
+msgstr "Attributions configuration updated successfully."
+
 #: gvsigol_services/backend_geoserver.py:96
 #: gvsigol_services/backend_geoserver.py:147
 #: gvsigol_services/forms_services.py:80
@@ -716,6 +961,7 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
+#: gvsigol_services/forms_attributions.py
 #: gvsigol_services/forms_services.py:101
 #: gvsigol_services/forms_services.py:126
 #: gvsigol_services/forms_services.py:230
@@ -3632,7 +3878,7 @@ msgstr ""
 msgid "Target field"
 msgstr ""
 
-#: gvsigol_services/templates/layer_config.html:536
+#: gvsigol_services/forms_attributions.py gvsigol_services/templates/layer_config.html:536
 msgid "Enabled"
 msgstr ""
 

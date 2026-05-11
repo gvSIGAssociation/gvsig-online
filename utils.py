@@ -35,7 +35,7 @@ from django.db.models import Q
 import psycopg2
 from . import geographic_servers
 from gvsigol import settings
-from gvsigol.settings import MEDIA_ROOT
+from gvsigol.settings import MEDIA_ROOT, FILEMANAGER_DIRECTORY
 from gvsigol_auth.models import User
 from gvsigol_auth.auth_backend import get_roles
 from gvsigol_services.backend_postgis import Introspect
@@ -66,7 +66,7 @@ import requests
 from owslib.wmts import WebMapTileService
 from owslib.util import Authentication
 
-from urllib.parse import urlencode, urlparse, parse_qs, urlunparse
+from urllib.parse import urlencode, urlparse, parse_qs, urlunparse, quote
 import copy
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -1803,3 +1803,287 @@ class AuthPatch(Authentication):
         super().__init__(*args, **kwargs)
 
 
+# ---------------------------------------------------------------------------
+# Attributions resolution helpers
+# ---------------------------------------------------------------------------
+
+def get_attributions_for_project(project):
+    """
+    Devuelve la configuración de atribuciones aplicable a `project` siguiendo
+    las reglas de prioridad acordadas:
+
+    1. Si existe una configuración 'project_specific' activa para ese proyecto,
+       se devuelve esa.
+    2. Si no, se devuelve la primera configuración 'generic' activa que aplique
+       al proyecto (orden alfabético por `name` para que la elección sea
+       determinista). Una genérica aplica cuando `apply_to_all_projects=True` o
+       cuando el proyecto está incluido en su lista de memberships.
+    3. Si nada coincide, devuelve None.
+    """
+    if project is None:
+        return None
+
+    from .models import AttributionConfig
+
+    specific = (
+        AttributionConfig.objects
+        .filter(kind=AttributionConfig.KIND_PROJECT_SPECIFIC,
+                is_active=True,
+                project=project)
+        .first()
+    )
+    if specific is not None:
+        return specific
+
+    generic_qs = (
+        AttributionConfig.objects
+        .filter(kind=AttributionConfig.KIND_GENERIC, is_active=True)
+        .filter(Q(apply_to_all_projects=True) | Q(project_memberships__project=project))
+        .order_by('name')
+        .distinct()
+    )
+    return generic_qs.first()
+
+
+def normalize_attributions_filemanager_relative_path(internal_path):
+    """
+    Devuelve la ruta del fichero relativa a FILEMANAGER_DIRECTORY, con '/' como
+    separador. Tolera valores guardados como ruta absoluta y el caso legacy en
+    que se concatena el prefijo duplicado (p. ej. opt/gvsigol_data/data/...)
+    encima del directorio del filemanager.
+    """
+    from pathlib import Path
+
+    if internal_path is None:
+        return ''
+    s = str(internal_path).strip()
+    if not s:
+        return ''
+
+    fm_root = Path(FILEMANAGER_DIRECTORY).resolve()
+
+    def rel_to_fm(abs_path):
+        try:
+            r = Path(abs_path).resolve().relative_to(fm_root)
+            return str(r).replace('\\', '/')
+        except ValueError:
+            return None
+
+    p = Path(s.replace('\\', '/'))
+
+    if p.is_absolute():
+        rel = rel_to_fm(p)
+        if rel is not None:
+            return rel
+
+    rel_s = s.replace('\\', '/').lstrip('/')
+
+    fm_noprefix = str(fm_root).replace('\\', '/').lstrip('/')
+    low = rel_s.lower()
+    low_fm = fm_noprefix.lower()
+    if low.startswith(low_fm + '/'):
+        rel_s = rel_s[len(fm_noprefix) + 1:]
+    elif low == low_fm:
+        rel_s = ''
+
+    if not rel_s:
+        return ''
+
+    try:
+        cand = (fm_root / rel_s).resolve()
+        rel = rel_to_fm(cand)
+        if rel is not None:
+            return rel
+    except (OSError, RuntimeError):
+        pass
+
+    trial = Path('/') / rel_s
+    try:
+        rel = rel_to_fm(trial)
+        if rel is not None:
+            return rel
+    except (OSError, RuntimeError):
+        pass
+
+    return rel_s
+
+
+def attributions_attachment_matches_relative_path(norm_relative_path):
+    """
+    True si existe algún AttributionAttachment cuya internal_path
+    normalizada coincide con norm_relative_path (separadores '/').
+    """
+    from pathlib import Path
+    from .models import AttributionAttachment
+
+    norm = norm_relative_path.replace('\\', '/').strip('/')
+    if not norm:
+        return False
+
+    fm = Path(FILEMANAGER_DIRECTORY).resolve()
+    try:
+        abs_under_fm = str((fm / norm).resolve())
+    except (OSError, ValueError):
+        abs_under_fm = None
+
+    q = (
+        Q(internal_path__iendswith='/' + norm) |
+        Q(internal_path__iexact=norm)
+    )
+    if abs_under_fm:
+        q |= Q(internal_path__iexact=abs_under_fm)
+
+    for att in AttributionAttachment.objects.filter(q):
+        if normalize_attributions_filemanager_relative_path(att.internal_path) == norm:
+            return True
+
+    # Respaldo: internal_path en BD con prefijos distintos al esperado en q
+    bn = os.path.basename(norm)
+    if bn:
+        for att in AttributionAttachment.objects.filter(
+            Q(internal_path__iendswith='/' + bn) | Q(internal_path__iexact=bn)
+        ):
+            if normalize_attributions_filemanager_relative_path(att.internal_path) == norm:
+                return True
+    return False
+
+
+def attributions_logo_matches_relative_path(norm_relative_path):
+    """
+    True si existe alguna configuración de atribuciones cuyo
+    logo_internal_path normalizado coincide con norm_relative_path.
+    """
+    from .models import AttributionConfig
+
+    norm = (norm_relative_path or '').replace('\\', '/').strip('/')
+    if not norm:
+        return False
+
+    for cfg in AttributionConfig.objects.exclude(
+        Q(logo_internal_path__isnull=True) | Q(logo_internal_path__exact='')
+    ).only('logo_internal_path'):
+        if normalize_attributions_filemanager_relative_path(cfg.logo_internal_path) == norm:
+            return True
+    return False
+
+
+def build_attributions_public_url(internal_path):
+    """
+    Construye la URL pública para descargar un adjunto de atribuciones a
+    partir de su ruta interna en el file manager. La URL apunta al fileserver
+    de gvsigol_services y se sirve con sendfile y permission_classes=[AllowAny].
+    """
+    relative_path = normalize_attributions_filemanager_relative_path(internal_path)
+    if not relative_path:
+        return ''
+
+    base_url = (settings.BASE_URL or '').rstrip('/')
+    gvsigol_prefix = (getattr(settings, 'GVSIGOL_URL_PREFIX', 'gvsigonline/') or '').strip('/')
+    # Rutas en urls.py: include(prefix + 'fileserver/', gvsigol_services.urls_fileserver)
+    # → URL real: …/fileserver/attributions/download/<path>/ (sin segmento gvsigol_services).
+    # La ruta Django declara barra final; facilita coincidencia con APPEND_SLASH.
+    path_enc = quote(relative_path, safe='/')
+    return '{base}/{prefix}/fileserver/attributions/download/{path}/'.format(
+        base=base_url,
+        prefix=gvsigol_prefix,
+        path=path_enc,
+    )
+
+
+ATTRIBUTION_MODAL_SECTION_KEYS = (
+    'logo',
+    'copyright',
+    'other',
+    'help',
+    'contact',
+    'legal',
+    'links',
+    'attachments',
+)
+
+
+def normalize_attributions_modal_section_order(value):
+    """
+    Lista ordenada de ids de bloque válidos para el modal de atribuciones.
+    Si falta algún id conocido, se añade al final preservando el orden por defecto.
+    """
+    if value is None or value == '' or value == []:
+        return list(ATTRIBUTION_MODAL_SECTION_KEYS)
+    if isinstance(value, str):
+        try:
+            value = json.loads(value)
+        except (ValueError, TypeError):
+            return list(ATTRIBUTION_MODAL_SECTION_KEYS)
+    if not isinstance(value, list):
+        return list(ATTRIBUTION_MODAL_SECTION_KEYS)
+    allowed = set(ATTRIBUTION_MODAL_SECTION_KEYS)
+    seen = set()
+    out = []
+    for key in value:
+        if key in allowed and key not in seen:
+            out.append(key)
+            seen.add(key)
+    for key in ATTRIBUTION_MODAL_SECTION_KEYS:
+        if key not in seen:
+            out.append(key)
+            seen.add(key)
+    return out
+
+
+def serialize_attributions(config):
+    """
+    Genera la representación JSON-serializable de una `AttributionConfig`
+    para ser consumida por el visor React. Devuelve None si la configuración
+    es None.
+    """
+    if config is None:
+        return None
+
+    links = [
+        {
+            'url': link.url,
+            'description': link.description or '',
+        }
+        for link in config.links.all().order_by('order', 'id')
+    ]
+
+    attachments = [
+        {
+            'public_url': build_attributions_public_url(att.internal_path)
+                or (att.public_url or ''),
+            'description': att.description or '',
+        }
+        for att in config.attachments.all().order_by('order', 'id')
+    ]
+
+    return {
+        'id': config.id,
+        'title': config.name,
+        'name': config.name,
+        'description': config.description or '',
+        'other': {
+            'title': config.other_title or '',
+            'text': config.other_text or '',
+        },
+        'logo': {
+            'internal_path': config.logo_internal_path or '',
+            'public_url': build_attributions_public_url(config.logo_internal_path)
+                or (config.logo_public_url or ''),
+        },
+        'kind': config.kind,
+        'copyright_notice': config.copyright_notice or '',
+        'help_text': config.help_text or '',
+        'contact': {
+            'organization': config.contact_organization or '',
+            'person': config.contact_person or '',
+            'address': config.contact_address or '',
+            'phone': config.contact_phone or '',
+            'email': config.contact_email or '',
+            'legal_notice': config.legal_notice or '',
+        },
+        'links': links,
+        'attachments': attachments,
+        'modal_section_order': normalize_attributions_modal_section_order(
+            config.modal_section_order
+        ),
+    }
