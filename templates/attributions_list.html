@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block header %}
+<style>
+:root {
+    --pl-accent:    #4a7fa5;
+    --pl-accent-dk: #2d5f80;
+    --pl-text:      #2e3a45;
+    --pl-muted:     #7b8a96;
+    --pl-border:    #e8ecef;
+    --pl-bg:        #f4f6f8;
+    --pl-white:     #ffffff;
+    --pl-radius:    10px;
+    --pl-shadow:    0 2px 12px rgba(0,0,0,0.08);
+    --pl-transition: 0.2s ease;
+}
+.pl-panel { background: var(--pl-white); border-radius: var(--pl-radius); box-shadow: var(--pl-shadow); border: 1px solid var(--pl-border); overflow: hidden; }
+.pl-panel__header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--pl-border); gap: 12px; flex-wrap: wrap; }
+.pl-panel__title { font-size: 15px; font-weight: 700; color: var(--pl-text); display: flex; align-items: center; gap: 8px; margin: 0; }
+.pl-panel__title i { color: var(--pl-accent); }
+.pl-panel__actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pl-panel__body { padding: 0; }
+.btn-pl-add { display: inline-flex; align-items: center; gap: 6px; background: var(--pl-accent); color: #fff !important; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; padding: 6px 14px; height: 34px; cursor: pointer; transition: background var(--pl-transition); text-decoration: none !important; white-space: nowrap; letter-spacing: 0.2px; }
+.btn-pl-add:hover { background: var(--pl-accent-dk); }
+.btn-pl-add .fa {
+    width: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-size: 10px;
+    position: relative;
+    top: -0.5px;
+}
+.pl-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.pl-table thead th { background: var(--pl-bg); color: var(--pl-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; padding: 11px 16px; border-bottom: 1px solid var(--pl-border); white-space: nowrap; }
+.pl-table tbody tr { border-bottom: 1px solid var(--pl-border); transition: background var(--pl-transition); }
+.pl-table tbody tr:hover { background: #f0f6fb; }
+.pl-table tbody td { padding: 11px 16px; color: #4a5a68; font-size: 13px; vertical-align: middle; }
+.pl-empty { padding: 40px 24px; text-align: center; color: var(--pl-muted); }
+.pl-empty .fa { font-size: 36px; color: var(--pl-accent); margin-bottom: 12px; }
+.pl-empty .btn-pl-add .fa {
+    font-size: 10px;
+    color: inherit;
+    margin-bottom: 0;
+}
+.pl-empty h4 { color: var(--pl-text); font-weight: 700; margin: 8px 0 6px; }
+.pl-empty p { font-size: 13px; }
+.pl-badge { display: inline-block; padding: 3px 9px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.pl-badge--generic { background: #eaf4fb; color: #2980b9; }
+.pl-badge--specific { background: #f5efff; color: #7b5ea7; }
+.pl-state { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
+.pl-state--on { color: #2e7d32; }
+.pl-state--off { color: #b71c1c; }
+.pl-state .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.pl-table .btn { background: transparent; border: 1px solid var(--pl-border); border-radius: 5px; font-size: 12px; padding: 4px 10px; transition: background var(--pl-transition); margin-right: 4px; }
+.pl-table .btn-primary { color: var(--pl-accent); border-color: #b8d4e8; }
+.pl-table .btn-primary:hover { background: #f0f6fb; }
+.pl-table .btn-success { color: var(--pl-accent); }
+.pl-table .btn-success:hover { background: #f0f6fb; border-color: var(--pl-accent); }
+.pl-table .btn-danger { color: #c0392b; border-color: #e8bebe; }
+.pl-table .btn-danger:hover { background: #fde8e8; border-color: #c0392b; }
+.pl-table .pl-col-action { width: 48px; text-align: center; }
+.pl-warning { background: #fff8e1; border-left: 4px solid #f1c40f; padding: 14px 18px; border-radius: 6px; margin: 0 0 16px; color: #715a1a; font-size: 13px; }
+.pl-warning i { color: #f1c40f; margin-right: 6px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        {% if not has_generic %}
+        <div class="pl-warning">
+            <i class="fa fa-info-circle"></i>
+            {% trans "There is no generic attributions configuration yet. We recommend creating a generic configuration first; you can later create project specific configurations or copy from the generic one." %}
+        </div>
+        {% endif %}
+        <div class="pl-panel">
+            <div class="pl-panel__header">
+                <h3 class="pl-panel__title"><i class="fa fa-info-circle"></i>{% trans "Attributions" %}</h3>
+                <div class="pl-panel__actions">
+                    <a href="/gvsigonline/services/attributions_add/" class="btn-pl-add"><i class="fa fa-plus"></i> {% trans "New configuration" %}</a>
+                </div>
+            </div>
+            <div class="pl-panel__body">
+                {% if configs %}
+                <table class="pl-table table" id="attr-table">
+                    <thead>
+                        <tr>
+                            <th>{% trans "Title" %}</th>
+                            <th>{% trans "Type" %}</th>
+                            <th>{% trans "Project" %}</th>
+                            <th>{% trans "State" %}</th>
+                            <th>{% trans "Last update" %}</th>
+                            <th class="pl-col-action"></th>
+                            <th class="pl-col-action"></th>
+                            <th class="pl-col-action"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for config in configs %}
+                        <tr data-id="{{ config.id }}">
+                            <td><strong>{{ config.title }}</strong>{% if config.description %}<div style="color: var(--pl-muted); font-size: 12px;">{{ config.description }}</div>{% endif %}</td>
+                            <td>
+                                {% if config.is_generic %}
+                                <span class="pl-badge pl-badge--generic">{% trans "Generic" %}</span>
+                                {% else %}
+                                <span class="pl-badge pl-badge--specific">{% trans "Project specific" %}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if config.is_project_specific and config.project %}
+                                {{ config.project.name }}
+                                {% elif config.is_generic and config.apply_to_all_projects %}
+                                <em>{% trans "All projects" %}</em>
+                                {% elif config.is_generic %}
+                                <em>{% trans "Selected projects" %}</em>
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if config.is_active %}
+                                <span class="pl-state pl-state--on"><span class="dot"></span>{% trans "Enabled" %}</span>
+                                {% else %}
+                                <span class="pl-state pl-state--off"><span class="dot"></span>{% trans "Disabled" %}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ config.updated_at|date:"Y-m-d H:i" }}</td>
+                            <td class="pl-col-action">
+                                <a href="/gvsigonline/services/attributions_edit/{{ config.id }}/" class="btn btn-success" title="{% trans 'Edit' %}"><i class="fa fa-edit"></i></a>
+                            </td>
+                            <td class="pl-col-action">
+                                {% if config.is_generic %}
+                                <a href="/gvsigonline/services/attributions_clone/{{ config.id }}/" class="btn btn-primary" title="{% trans 'Use as template for project specific' %}"><i class="fa fa-copy"></i></a>
+                                {% endif %}
+                            </td>
+                            <td class="pl-col-action">
+                                <button type="button" class="btn btn-danger attr-delete-btn" data-id="{{ config.id }}" data-name="{{ config.title }}" title="{% trans 'Delete' %}"><i class="fa fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="pl-empty">
+                    <i class="fa fa-info-circle"></i>
+                    <h4>{% trans "No attributions configurations yet" %}</h4>
+                    <p>{% trans "Start by creating a generic configuration that can be reused across your projects." %}</p>
+                    <a href="/gvsigonline/services/attributions_add/" class="btn-pl-add" style="margin-top: 12px;"><i class="fa fa-plus"></i> {% trans "Create generic configuration" %}</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-delete-cc" tabindex="-1" role="dialog" aria-labelledby="aiDeleteLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="aiDeleteLabel">{% trans "Delete attributions configuration" %}</h4>
+            </div>
+            <div class="modal-body">
+                <p>{% trans "The selected configuration will be permanently deleted." %} <strong id="attr-delete-name"></strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                <button id="attr-delete-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+    $('#menu-manage-services').addClass("active");
+    $('#submenu-attributions').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+    if ($('#attr-table').length) {
+        $('#attr-table').DataTable({
+            responsive: true,
+            order: [[4, 'desc']],
+            language: {
+                processing      : '{% trans "Processing request..." %}',
+                search          : '{% blocktrans with sep="&nbsp;:" %}Search{{sep}}{% endblocktrans %}',
+                lengthMenu      : '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
+                info            : '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
+                infoEmpty       : '{% trans "Showing from 0 to 0 of 0 records" %}',
+                infoFiltered    : '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
+                loadingRecords  : '{% trans "Loading..." %}',
+                zeroRecords     : '{% trans "No records available" %}',
+                emptyTable      : '{% trans "No records available" %}',
+                paginate: {
+                    first   : '{% trans "First" %}',
+                    previous: '{% trans "Previous" %}',
+                    next    : '{% trans "Next" %}',
+                    last    : '{% trans "Last" %}'
+                }
+            },
+            columnDefs: [{ targets: [5, 6, 7], orderable: false }],
+            bLengthChange: false
+        });
+    }
+
+    var pendingDelete = null;
+    $('#attr-table').on('click', '.attr-delete-btn', function() {
+        pendingDelete = $(this).data('id');
+        $('#attr-delete-name').text($(this).data('name'));
+        $('#modal-delete-cc').modal('show');
+    });
+
+    $('#attr-delete-accept').on('click', function() {
+        if (!pendingDelete) {
+            return;
+        }
+        $.ajax({
+            type: 'POST',
+            url: '/gvsigonline/services/attributions_delete/' + pendingDelete + '/',
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+            },
+            success: function() {
+                $('#modal-delete-cc').modal('hide');
+                location.reload();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
