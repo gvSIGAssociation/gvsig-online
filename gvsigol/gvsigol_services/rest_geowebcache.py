@@ -24,6 +24,9 @@
 from gvsigol import settings
 import requests
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 class RequestError(Exception):
     def __init__(self, status_code=-1, server_message=""):
@@ -112,10 +115,22 @@ class APIGeoWebCache():
             layer_name = layer.name
             external_params = json.loads(layer.external_params)
             wms_layers = external_params.get('layers')
-            if external_params.get('get_map_url'):
-                url = external_params.get('get_map_url')
-            else:
-                url = external_params
+
+            url = (external_params.get('get_map_url') or external_params.get('url') or '').strip()
+            if not url:
+                logger.error(
+                    "GWC add_layer: external layer %s has no get_map_url or url",
+                    getattr(layer, "name", layer),
+                )
+                raise FailedRequestError(
+                    -1,
+                    "External cached layer needs get_map_url or url (WMS GetMap endpoint) to register in GeoWebCache.",
+                )
+            if not wms_layers:
+                raise FailedRequestError(
+                    -1,
+                    "External cached layer needs 'layers' (remote WMS layer name)",
+                )
         else:
             layer_name = ws + ":" + layer.name
             wms_layers = layer_name
