@@ -1762,7 +1762,7 @@ def etl_visualizer_config(request, session_id):
                     SELECT column_name, udt_name
                     FROM information_schema.columns
                     WHERE table_schema = %s AND table_name = %s
-                      AND column_name != 'geom'
+                      AND column_name NOT IN ('geom', 'gvsig_etl_rowid')
                       AND udt_name NOT IN ('geometry', 'geography')
                     ORDER BY ordinal_position
                     """,

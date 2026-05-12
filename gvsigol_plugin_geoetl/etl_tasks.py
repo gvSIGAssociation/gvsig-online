@@ -255,7 +255,7 @@ def input_Excel(dicc):
                     dfx['_filename'] = file
                     df_obj = dfx.select_dtypes(['object'])
                     dfx[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
-                    df = df.append(dfx, sort = False)
+                    df = pd.concat([df, dfx], sort=False)
                 x += 1
 
     table_name = dicc['id']
