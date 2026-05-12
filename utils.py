@@ -1709,7 +1709,27 @@ def _legend_url_for_style(legend_url, style_name):
         return legend_url
 
 
+def _normalize_wmts_style_identifier_for_kvp(wmts_options):
+    """
+    OWSLib may serialize a missing WMTS style Identifier as the string 'null'.
+    OpenLayers then requests STYLE=null and GeoServer returns blank tiles; default style needs ''.
+    """
+    styles = wmts_options.get('styles')
+    if isinstance(styles, dict) and 'null' in styles:
+        entry = styles.pop('null')
+        if '' not in styles:
+            styles[''] = entry
+    st = wmts_options.get('style')
+    if st is None or (isinstance(st, str) and st.strip().lower() == 'null'):
+        wmts_options.pop('style', None)
+    elif isinstance(st, str) and st.strip() == '':
+        wmts_options.pop('style', None)
+
+
 def wmts_options_for_openlayers(wmts_options, format=None, style=None, layer_styles=None, tilematrixsetname=None, projection=None):
+    if wmts_options.get('styles') is None:
+        wmts_options['styles'] = {}
+    _normalize_wmts_style_identifier_for_kvp(wmts_options)
     if len(wmts_options['styles']) > 0:
         if style and wmts_options['styles'].get(style):
             wmts_options['style'] = style
@@ -1749,12 +1769,15 @@ def wmts_options_for_openlayers(wmts_options, format=None, style=None, layer_sty
                 new_styles[name] = entry
             wmts_options['styles'] = new_styles
     else:
-        wmts_options['style'] = None
+        wmts_options.pop('style', None)
     if format:
+        fmts = wmts_options.get("formats")
+        if isinstance(fmts, (list, tuple)) and fmts and format not in fmts:
+            format = next((f for f in fmts if "png" in f.lower()), fmts[0])
         wmts_options['format'] = format
         try:
             del wmts_options['formats']
-        except:
+        except Exception:
             pass
 
     tilematrixset = None
@@ -1780,6 +1803,8 @@ def wmts_options_for_openlayers(wmts_options, format=None, style=None, layer_sty
         wmts_options['projection'] = tilematrixset['projection']
         del wmts_options['tileGrids']
         del wmts_options['matrixSets']
+
+    _normalize_wmts_style_identifier_for_kvp(wmts_options)
     return wmts_options
 
 

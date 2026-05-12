@@ -467,9 +467,12 @@ def refresh_layer_info(self, layer_id):
 @celery_app.task(bind=True)
 def update_layer_info(self):
     servers = []
-    for layer in Layer.objects.all().select_related("datastore__workspace"):
+    for layer in Layer.objects.all().select_related("datastore__workspace", "layer_group"):
         if layer.external:
-            update_external_wmts_layer_options(layer)
+            if layer.type == 'WMTS':
+                update_external_wmts_layer_options(layer)
+            elif layer.type == 'WMS' and layer.cached:
+                update_external_cached_wms_wmts_options(layer)
         else:
             try:
                 server = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
@@ -513,11 +516,59 @@ def update_external_wmts_layer_options(layer):
     except Exception as e:
         logger.exception(f"Error getting wmts options for layer {layer.id} - {layer.name}")
 
+
+def update_external_cached_wms_wmts_options(layer):
+    """
+    Persist wmts_options for external WMS layers cached in GeoWebCache (GWC layer name = layer.name, e.g. externallayer_<id>).
+    Uses this deployment's GeoServer WMTS endpoint (not the remote WMS URL). External layers have no datastore;
+    server comes from layer.layer_group.
+    """
+    try:
+        if not (layer.external and layer.type == 'WMS' and layer.cached):
+            return
+        if not layer.name or not layer.layer_group_id:
+            return
+        layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
+        # get_server_by_id returns backend Geoserver(), not Django Server; WMTS URL lives on the model.
+        server_model = geographic_servers.get_instance().get_server_model(layer_group.server_id)
+        url = server_model.getWmtsEndpoint()
+        auth = AuthPatch(username=server_model.user, password=server_model.password, verify=False)
+        wmts = WebMapTileService(url, version=settings.WMTS_MAX_VERSION, auth=auth)
+        wmts_id = layer.name
+        if wmts_id not in wmts.contents:
+            for k in wmts.contents.keys():
+                if k == wmts_id or k.endswith(':' + wmts_id):
+                    wmts_id = k
+                    break
+        if wmts_id not in wmts.contents:
+            logger.warning(
+                "WMTS capabilities: layer %r not found (have %d layers). Skipping wmts_options.",
+                layer.name,
+                len(wmts.contents),
+            )
+            return
+        wmts_options = get_wmts_options(wmts, wmts_id)
+        if wmts_options:
+            params = json.loads(layer.external_params) if layer.external_params else {}
+            params['wmts_options'] = wmts_options
+            layer.external_params = json.dumps(params)
+            layer.save(update_fields=['external_params'])
+    except Exception as e:
+        logger.exception(
+            "Error getting GWC wmts_options for external cached WMS layer %s - %s",
+            layer.id,
+            layer.name,
+        )
+
+
 @celery_app.task(bind=True)
 def update_wmts_layer_info(self, layer_id):
-    layer = Layer.objects.get(id=layer_id)
+    layer = Layer.objects.select_related('layer_group').get(id=layer_id)
     if layer.external:
-        pass
+        if layer.type == 'WMTS':
+            update_external_wmts_layer_options(layer)
+        elif layer.type == 'WMS' and layer.cached:
+            update_external_cached_wms_wmts_options(layer)
     else:
         update_internal_wmts_layer_options(layer)
 
