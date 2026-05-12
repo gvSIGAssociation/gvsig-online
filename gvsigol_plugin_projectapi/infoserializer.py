@@ -488,10 +488,30 @@ class LayerSerializer(serializers.ModelSerializer):
         
         if 'capabilities' in external_params:
             external_params.pop('capabilities')
-        
+
+        include_gwc_wmts = (
+            obj.external
+            and obj.type == 'WMS'
+            and obj.cached
+            and 'wmts_options' in external_params
+        )
+
         if obj.external:
-            if 'wmts_options' in external_params: # wmts_options are retrieved asynchronously for external layers, no need to inlcude here
+            if 'wmts_options' in external_params and not include_gwc_wmts:
                 external_params.pop('wmts_options')
+            if include_gwc_wmts:
+                try:
+                    project_crs = Project.objects.get(id=self.context['projectid']).viewer_default_crs
+                    external_params['wmts_options'] = services_utils.wmts_options_for_openlayers(
+                        external_params['wmts_options'],
+                        external_params.get('format'),
+                        projection=project_crs,
+                    )
+                except Exception:
+                    logger.exception(
+                        'wmts_options_for_openlayers failed for external cached WMS layer id=%s',
+                        obj.id,
+                    )
         else:
             if 'wmts_options' in external_params:
                 project_crs = Project.objects.get(id=self.context['projectid']).viewer_default_crs
