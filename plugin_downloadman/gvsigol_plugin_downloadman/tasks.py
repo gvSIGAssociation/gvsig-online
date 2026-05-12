@@ -662,7 +662,14 @@ class WCSClient():
                     # use iterpase to avoid parsing the whole document (it could be a big GML file for instance)
                     ns, sep, tag = element.tag.rpartition('}') # get the tag name
                     if 'www.opengis.net/ows' in ns and tag == 'ExceptionReport':
-                        error_text = ET.parse(tmp_path).tostring()
+                        error_root = ET.parse(tmp_path).getroot()
+                        exc = error_root.find('ows:Exception', self.wcs200Namespaces)
+                        if exc is not None:
+                            code = exc.get('exceptionCode')
+                            message = "".join(exc.itertext()).strip()
+                            error_text = ((code + ' - ') if code else '') + message
+                        else:
+                            error_text = " - ".join(error_root.itertext())
                         raise PreparationError('Error retrieving WCS resource. Url: ' + url + 'OWS error message: ' + error_text)
                     break
 
@@ -946,7 +953,14 @@ class WFSClient():
                     # use iterpase to avoid parsing the whole document (it could be a big GML file for instance)
                     ns, sep, tag = element.tag.rpartition('}') # get the tag name
                     if 'www.opengis.net/ows' in ns and tag == 'ExceptionReport':
-                        error_text = ET.parse(resource_path).tostring()
+                        error_root = ET.parse(resource_path).getroot()
+                        exc = error_root.find('ows:Exception', self.wfs200Namespaces)
+                        if exc is not None:
+                            code = exc.get('exceptionCode')
+                            message = "".join(exc.itertext()).strip()
+                            error_text = ((code + ' - ') if code else '') + message
+                        else:
+                            error_text = " - ".join(error_root.itertext()).strip()
                         raise PreparationError('Error retrieving WFS resource. Url: ' + url + 'OWS error message: ' + error_text)
                     break
 
