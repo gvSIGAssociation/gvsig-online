@@ -1065,7 +1065,11 @@ class WmtsLayerOptions(APIView):
                 external_params = json.loads(layer.external_params)
                 crs = self.request.query_params.get('crs')
                 result = {
-                    "content" : services_utils.wmts_options_for_openlayers(external_params['wmts_options'], projection=crs),
+                    "content" : services_utils.wmts_options_for_openlayers(
+                        external_params['wmts_options'],
+                        external_params.get('format'),
+                        projection=crs,
+                    ),
                     "links" : [
                         {
                             "rel" : "self",
