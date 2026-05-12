@@ -4588,11 +4588,6 @@ def enumeration_add(request):
         if 'show_first_value' in request.POST:
             show_first_value = True
 
-        aux_title = b"".join(title.encode('ASCII', 'ignore').split())[:4]
-        aux_title = aux_title.lower()
-
-        name = name + '_' + re.sub("[!@#$%^&*()[]{};:,./<>?\|`~-=_+ ]", "", aux_title.decode("utf-8"))
-
         name_exists = False
         enums = Enumeration.objects.all()
         for enum in enums:
