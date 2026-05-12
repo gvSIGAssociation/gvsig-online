@@ -815,9 +815,7 @@ def get_param_date(request):
             raise HttpException(400, "Bad parameter date. The format must be d/m/Y H:M")
 
 
-class GeoserverAPIKey(ListAPIView):
-    serializer_class = None 
-    pagination_class = None
+class GeoserverAPIKey(APIView):
 
     @swagger_auto_schema(operation_id='get_geoserver_api_key', operation_summary='Gets the geoserver API Key',
                          responses={404: "User NOT found", 401: "API Key file not exists"})
