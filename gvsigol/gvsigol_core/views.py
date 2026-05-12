@@ -1382,6 +1382,7 @@ def project_get_conf(request):
                     layer['baselayer'] = False
                 
                 layer['layer_id'] = l.id
+                layer['id'] = l.id
                 layer['opacity'] = 1
                 layer['external'] = True   
                 layer['name'] = l.name
@@ -1396,7 +1397,7 @@ def project_get_conf(request):
                 layer['detailed_info_html'] = l.detailed_info_html
                 layer['metadata'] = core_utils.get_layer_metadata_uuid(l)
                 layer['metadata_url'] = core_utils.get_catalog_url_from_uuid(request, layer['metadata'], lang=language.part2b)
-                
+
                 if l.external_params:
                     params = json.loads(l.external_params)
                     if l.type == 'WMTS':
@@ -1415,9 +1416,23 @@ def project_get_conf(request):
                             params['capabilities'] = capabilities.decode('utf-8')
                             l.external_params = json.dumps(params)
                             l.save()
+                    elif l.type == 'WMS' and l.cached and params.get('wmts_options'):
+                        try:
+                            wmts_options = params['wmts_options']
+                            params['wmts_options'] = services_utils.wmts_options_for_openlayers(
+                                wmts_options, params.get('format'), projection=project.viewer_default_crs
+                            )
+                        except Exception:
+                            logger.exception(
+                                "wmts_options_for_openlayers failed for external cached WMS layer id=%s; sending stored wmts_options as-is",
+                                l.id,
+                            )
                     layer.update(params)
                     if params.get('get_map_url'):
                         layer['url'] = params.get('get_map_url')
+                    layer['external_url'] = params.get('get_map_url') or params.get('url', '')
+                    layer['external_layers'] = params.get('layers', '')
+                    layer['external_params'] = dict(params)
 
                 order = int(conf_group['groupOrder']) + l.order
                 layer['order'] = order
