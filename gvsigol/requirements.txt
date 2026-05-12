@@ -161,3 +161,8 @@ certifi>=2024.8.30
 # model versions
 django-simple-history==3.0.0
 
+## Plugin building3d_lidar
+rasterio==1.2.10
+fiona==1.8.22
+geopandas==0.9.0 # debemos mantener compatibilidad en codigo con geopandas 1.0.x
+rtree==0.9.7
