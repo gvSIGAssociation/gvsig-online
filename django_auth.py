@@ -7,6 +7,7 @@ import gvsigol_auth.services as auth_services
 from gvsigol_auth import signals
 import logging, importlib
 from django.db.models import Q
+from gvsigol_auth.settings import GEOSERVER_LEGACY_ROLE_NAME_FORMAT
 #from django.conf import settings
 
 __conf_cache = {}
@@ -901,11 +902,17 @@ def get_primary_role(username):
 
 def to_provider_rolename(role, provider=None):
     # only used for Geoserver at the moment, ignoring provider
-    return 'ROLE_' + role.upper()
+    if GEOSERVER_LEGACY_ROLE_NAME_FORMAT:
+        return 'ROLE_' + role.upper()
+    else:
+        return role
 
 def from_provider_rolename(role, provider=None):
     # only used for Geoserver at the moment, ignoring provider
-    return role[5:].lower()
+    if GEOSERVER_LEGACY_ROLE_NAME_FORMAT:
+        return role[5:].lower()
+    else:
+        return role
     
 def _get_username(user):
     """
