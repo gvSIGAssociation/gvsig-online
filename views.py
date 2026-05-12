@@ -6071,6 +6071,9 @@ def external_layer_add(request):
                     master_node = geographic_servers.get_instance().get_master_node(server.id)
                     geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
                     geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
+                    tasks.update_external_cached_wms_wmts_options(
+                        Layer.objects.get(pk=external_layer.pk)
+                    )
 
             if external_layer.type == 'MVT' and style_file_upload_error:
                 update_url = reverse('external_layer_update', kwargs={'external_layer_id': external_layer.id})
@@ -6129,6 +6132,13 @@ def external_layer_update(request, external_layer_id):
         server = Server.objects.get(id=layer_group.server_id)
 
         try:
+            prev_params = {}
+            if external_layer.external_params:
+                try:
+                    prev_params = json.loads(external_layer.external_params)
+                except (json.JSONDecodeError, TypeError):
+                    prev_params = {}
+
             is_visible = False
             if 'visible' in request.POST:
                 is_visible = True
@@ -6209,6 +6219,12 @@ def external_layer_update(request, external_layer_id):
                 except Exception as e:
                     logger.exception("Error updating wmts options")
                     pass
+
+            if external_layer.type == 'WMS':
+                if cached and prev_params.get('wmts_options'):
+                    params.setdefault('wmts_options', prev_params['wmts_options'])
+                if not cached:
+                    params.pop('wmts_options', None)
 
             if external_layer.type == 'Bing':
                 params['key'] = request.POST.get('key')
@@ -6318,6 +6334,11 @@ def external_layer_update(request, external_layer_id):
             #geographic_servers.get_instance().get_server_by_id(server.id).updateThumbnail(external_layer)
             external_layer.external_params = json.dumps(params)
             external_layer.save()
+
+            if external_layer.cached and external_layer.type == 'WMS':
+                tasks.update_external_cached_wms_wmts_options(
+                    Layer.objects.get(pk=external_layer.pk)
+                )
 
             if redirect_to_layergroup:
                 # recalculate to_url since layergroup_id may change
