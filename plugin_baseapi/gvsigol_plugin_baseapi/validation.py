@@ -290,11 +290,21 @@ class Validation():
             raise HttpException(404, "Group NOT found")
     
     def check_feature(self, feat):
-        geom = feat['geometry']
-        if (feat is None or feat['type'] is None or geom is None or feat['properties'] is None):
+        if feat is None:
             raise HttpException(400, "Feature malformed. Fields geometry, type and properties are needed")
+        if ('type' not in feat or feat['type'] is None or
+                'properties' not in feat or feat['properties'] is None or
+                'geometry' not in feat):
+            raise HttpException(400, "Feature malformed. Fields geometry, type and properties are needed")
+
+        geom = feat['geometry']
+        # Geometry can be NULL for layers with nullable geometry column.
+        if geom is None:
+            return
+        if not isinstance(geom, dict):
+            raise HttpException(400, "Feature malformed. Geometry is not properly")
         
-        if (not isinstance(geom['coordinates'], list) or len(geom['coordinates']) <= 0):
+        if ('coordinates' not in geom or not isinstance(geom['coordinates'], list) or len(geom['coordinates']) <= 0):
             raise HttpException(400, "Feature malformed. Geometry is not properly")
         
         type_ = geom['type'].upper()  
