@@ -90,6 +90,37 @@ def _trigger_cache_regeneration_for_edit(lyr_id, geometry, source_epsg=4326):
     return str(result.id) if result else None
 
 
+def _get_validation_geometry_for_layer(lyr_id):
+    """
+    Build a minimal valid GeoJSON geometry matching layer geometry type.
+    Used only to satisfy strict validation when request geometry is NULL.
+    """
+    default_geom = {"type": "Point", "coordinates": [0, 0]}
+    try:
+        i, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
+        with i as con:
+            geom_info = con.get_geometry_columns_info(table=table, schema=schema)
+            if not geom_info:
+                return default_geom
+            geom_type = (geom_info[0][5] or "").upper()
+
+            if "MULTIPOINT" in geom_type:
+                return {"type": "MultiPoint", "coordinates": [[0, 0]]}
+            if "LINESTRING" in geom_type and "MULTI" not in geom_type:
+                return {"type": "LineString", "coordinates": [[0, 0], [0.00001, 0.00001]]}
+            if "MULTILINESTRING" in geom_type:
+                return {"type": "MultiLineString", "coordinates": [[[0, 0], [0.00001, 0.00001]]]}
+            if "POLYGON" in geom_type and "MULTI" not in geom_type:
+                return {"type": "Polygon", "coordinates": [[[0, 0], [0.00001, 0], [0.00001, 0.00001], [0, 0.00001], [0, 0]]]}
+            if "MULTIPOLYGON" in geom_type:
+                return {"type": "MultiPolygon", "coordinates": [[[[0, 0], [0.00001, 0], [0.00001, 0.00001], [0, 0.00001], [0, 0]]]]}
+            if "GEOMETRYCOLLECTION" in geom_type:
+                return {"type": "GeometryCollection", "geometries": []}
+            return default_geom
+    except Exception:
+        return default_geom
+
+
 def handle_feature_error(e, lyr_id=None, target_epsg=None):
     """
     Maneja errores de operaciones con features de forma unificada.
@@ -549,14 +580,25 @@ class FeaturesView(CreateAPIView):
                                     400: "Feature malformed. Geometry is not properly<br>Feature malformed. Fields geometry, type and properties are needed<br>Error checking version column:<br>Feature malformed. Wrong feature type<br>Feature malformed. Wrong coordinates"}) 
     @action(detail=True, methods=['POST'], permission_classes=[IsAuthenticated])
     def post(self, request, lyr_id):
+        epsg = 4326
         try:
             content = util.get_content(request)
+            if 'type' not in content:
+                content['type'] = 'Feature'
+            if 'properties' not in content or content['properties'] is None:
+                content['properties'] = {}
+            if 'geometry' not in content:
+                content['geometry'] = None
             validation = Validation(request)
-            validation.check_create_feature(lyr_id, content)
+            requested_null_geometry = (content.get('geometry') is None)
+            validation_content = content
+            if requested_null_geometry:
+                validation_content = dict(content)
+                validation_content['geometry'] = _get_validation_geometry_for_layer(lyr_id)
+            validation.check_create_feature(lyr_id, validation_content)
             username = request.user.username
             
             # Manejar source_epsg (formato EPSG:3857) o epsg (entero) para compatibilidad
-            epsg = 4326
             if 'source_epsg' in request.GET:
                 try:
                     epsg = int(request.GET['source_epsg'].split(":")[1])
@@ -855,8 +897,19 @@ class PublicFeaturesView(CreateAPIView):
     def post(self, request, lyr_id):
         try:
             content = util.get_content(request)
+            if 'type' not in content:
+                content['type'] = 'Feature'
+            if 'properties' not in content or content['properties'] is None:
+                content['properties'] = {}
+            if 'geometry' not in content:
+                content['geometry'] = None
             validation = Validation(request)
-            validation.check_create_feature(lyr_id, content)
+            requested_null_geometry = (content.get('geometry') is None)
+            validation_content = content
+            if requested_null_geometry:
+                validation_content = dict(content)
+                validation_content['geometry'] = _get_validation_geometry_for_layer(lyr_id)
+            validation.check_create_feature(lyr_id, validation_content)
             feat = serializers.FeatureSerializer().create(validation, lyr_id, content, None)
             cache_task_id = None
             if 'geometry' in content and content['geometry'] and _layer_or_group_is_cached(lyr_id):

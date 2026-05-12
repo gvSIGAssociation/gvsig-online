@@ -1864,7 +1864,7 @@ class FeatureSerializer(serializers.Serializer):
         except:
             logger.exception("Error getting CRS")
             target_crs = None
-        if "crs" not in geom:
+        if geom is not None and "crs" not in geom:
             if return_crs is not None:
                 geom['crs'] = json.loads(f'{{"type":"name","properties":{{"name":"EPSG:{return_crs}"}}}}')
             else:
@@ -1894,10 +1894,13 @@ class FeatureSerializer(serializers.Serializer):
                 )
             ]
         colnames.append(sqlbuilder.Identifier(geom_column))
-        colvalues.append(sqlbuilder.SQL("ST_TRANSFORM(ST_GeomFromGeoJSON({geojson}),{crs})").format(
-                    geojson=sqlbuilder.Literal(json.dumps(geom)),
-                    crs=sqlbuilder.Literal(target_crs)
-                    ))
+        if geom is None:
+            colvalues.append(sqlbuilder.SQL("NULL"))
+        else:
+            colvalues.append(sqlbuilder.SQL("ST_TRANSFORM(ST_GeomFromGeoJSON({geojson}),{crs})").format(
+                        geojson=sqlbuilder.Literal(json.dumps(geom)),
+                        crs=sqlbuilder.Literal(target_crs)
+                        ))
         for i in list(props.keys()):
             colnames.append(sqlbuilder.Identifier(i))
             colvalues.append(sqlbuilder.Literal(props[i]))

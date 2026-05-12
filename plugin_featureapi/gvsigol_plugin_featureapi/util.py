@@ -26,6 +26,7 @@ from gvsigol_plugin_baseapi.validation import HttpException
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 from django.db.models import Q
+from django.contrib.gis.geos import GEOSGeometry
 from django.utils import timezone
 from django.urls import reverse
 from django import apps
@@ -229,6 +230,9 @@ def save_feature_version(lyr_id, feat_id, wkb_geom, properties, version, date, u
     """
     change = FeatureVersions()
     change.version = version
+    if wkb_geom is None:
+        # En caso de que la geometría sea None, se guarda una geometría vacía
+        wkb_geom = GEOSGeometry('SRID=4326;GEOMETRYCOLLECTION EMPTY')
     change.wkb_geometry = wkb_geom
     change.fields = properties
     change.date = date
