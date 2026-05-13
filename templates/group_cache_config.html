@@ -428,6 +428,22 @@ $().ready(function() {
 		});
 	});
 	
+	$('#cache-config-form').submit(function(event) {
+		event.preventDefault();
+		 
+		var minX = $('#input_min_x').val();
+		var minY = $('#input_min_y').val();
+		var maxX = $('#input_max_x').val();
+		var maxY = $('#input_max_y').val();
+		 
+		 if (minX == 'null' || minY == 'null' || maxX == 'null' || maxY == 'null') {
+			 messageBox.show('warning', gettext('You must select an extent on the map using the control'));
+			 
+		 } else {
+			 $(this).unbind('submit').submit();	 
+		 }
+	});
+	
 });
 </script>
 {% endblock %}
