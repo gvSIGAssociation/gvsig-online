@@ -80,8 +80,8 @@
 .pf-topbar-left { flex: 1; display: flex; align-items: center; gap: 8px; }
 .btn-pf-save { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-accent); color: #fff !important; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 20px; cursor: pointer; transition: background var(--pf-transition); letter-spacing: 0.2px; }
 .btn-pf-save:hover { background: var(--pf-accent-dk); }
-.btn-pf-back { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-bg); color: var(--pf-muted) !important; border: 1px solid var(--pf-border); border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 16px; cursor: pointer; transition: background var(--pf-transition); text-decoration: none !important; }
-.btn-pf-back:hover { background: var(--pf-border); color: var(--pf-text) !important; }
+.btn-pf-back, .btn-pf-test { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-bg); color: var(--pf-muted) !important; border: 1px solid var(--pf-border); border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 16px; cursor: pointer; transition: background var(--pf-transition); text-decoration: none !important; }
+.btn-pf-back:hover, .btn-pf-test:hover { background: var(--pf-border); color: var(--pf-text) !important; }
 .pf-error-msg { display: none; background: #fff5f5; border-left: 4px solid #e74c3c; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #c0392b; }
 .pf-error-msg:has(li), .pf-error-msg:has(p:not(:empty)), .pf-error-msg:has(ul:not(:empty)) { display: block; }
 .pf-error-msg ul { margin: 0; padding-left: 18px; }
@@ -165,6 +165,7 @@
 			<div class="row">
 				<div class="col-md-12 form-group">
 					<div class="pf-topbar">
+					<button type="button" id="btn-test-connection" class="btn-pf-test"><i class="fa fa-plug margin-r-5"></i> {% trans "Test connection" %}</button>
 					<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
 				</div>
 				</div>				
