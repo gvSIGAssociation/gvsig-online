@@ -48,6 +48,7 @@
 .pf-dyn-row__main .pf-row-line > * { flex: 1 1 240px; }
 .btn-pf-remove { background: transparent; border: 1px solid #e8bebe; color: #c0392b; border-radius: 6px; padding: 6px 10px; cursor: pointer; transition: background var(--pf-transition); font-size: 13px; }
 .btn-pf-remove:hover { background: #fde8e8; }
+.btn-pf-remove:disabled { opacity: 0.45; cursor: not-allowed; }
 .btn-pf-add-row { display: inline-flex; align-items: center; gap: 6px; background: transparent; border: 1px dashed var(--pf-accent); color: var(--pf-accent); border-radius: 6px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background var(--pf-transition); margin-top: 6px; }
 .btn-pf-add-row:hover { background: var(--pf-accent-lt); }
 .btn-pf-fm { background: var(--pf-white); border: 1px solid var(--pf-border); color: var(--pf-text); border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 12px; transition: background var(--pf-transition); white-space: nowrap; }
@@ -348,16 +349,15 @@
                 <p class="pf-help" style="margin-bottom: 12px;">
                     {% trans "Optional. Select a logo from file manager. It will be shown inside the modal." %}
                 </p>
-                <div class="pf-row">
-                    <div class="pf-col-100">
+                <div class="pf-dyn-row" id="attr-logo-row">
+                    <div class="pf-dyn-row__main">
                         <label for="id_logo_internal_path">{% trans "Internal path" %}</label>
                         <input type="text" id="id_logo_internal_path" name="logo_internal_path" class="form-control" value="{{ form.logo_internal_path.value|default_if_none:'' }}" readonly>
                         <input type="hidden" id="id_logo_public_url" name="logo_public_url" value="{{ form.logo_public_url.value|default_if_none:'' }}">
                         <div class="pf-attachment-path" id="attr-logo-public-path">{{ form.logo_public_url.value|default_if_none:'' }}</div>
+                        <button type="button" class="btn-pf-fm" id="attr-pick-logo" style="align-self: flex-start;"><i class="fa fa-folder-open"></i> {% trans "Choose file..." %}</button>
                     </div>
-                    <div class="pf-col-100">
-                        <button type="button" class="btn-pf-fm" id="attr-pick-logo"><i class="fa fa-folder-open"></i> {% trans "Choose file..." %}</button>
-                    </div>
+                    <button type="button" class="btn-pf-remove" id="attr-clear-logo" title="{% trans 'Remove' %}"><i class="fa fa-times"></i></button>
                 </div>
             </div>
         </div>
@@ -491,6 +491,21 @@ $(document).ready(function() {
                     "width=820,height=620,resizable=yes,scrollbars=yes");
     });
 
+    function attrLogoSyncClearButton() {
+        var has = ($('#id_logo_internal_path').val() || '').trim().length > 0;
+        $('#attr-clear-logo').prop('disabled', !has);
+    }
+
+    $('#attr-clear-logo').on('click', function() {
+        if ($(this).prop('disabled')) {
+            return;
+        }
+        $('#id_logo_internal_path').val('');
+        $('#id_logo_public_url').val('');
+        $('#attr-logo-public-path').text('');
+        attrLogoSyncClearButton();
+    });
+
     window.filemanagerCallback = function(url) {
         if (pendingLogoField) {
             var fullLogoPath = (fmDirectory || '') + (url || '');
@@ -498,6 +513,7 @@ $(document).ready(function() {
             $('#id_logo_internal_path').val(fullLogoPath);
             $('#id_logo_public_url').val(logoPublicUrl);
             $('#attr-logo-public-path').text(logoPublicUrl);
+            attrLogoSyncClearButton();
             pendingLogoField = false;
             pendingAttachmentRow = null;
             return;
@@ -521,6 +537,8 @@ $(document).ready(function() {
         }
         window.location.href = '/gvsigonline/services/attributions_add/?source=' + sourceId;
     });
+
+    attrLogoSyncClearButton();
 });
 </script>
 {% endblock %}
