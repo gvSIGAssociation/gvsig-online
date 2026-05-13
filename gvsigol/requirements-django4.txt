@@ -130,7 +130,7 @@ six==1.17.0
 pytz # don't specify version, since timezones need to be up-to-date
 python-dateutil==2.9.0.post0
 
-numpy==2.0.2 # debemos mantener compatibilidad en codigo con numpy 1.26.x
+numpy==1.26.4 # debemos mantener compatibilidad en codigo con numpy 1.26.x
 
 cmislib3==1.0.8
 lxml==6.1.0
@@ -188,7 +188,7 @@ xmlsec==1.3.17
 django_tinymce==3.7.1
 
 # plugin geoetl
-pandas==2.3.3 # debemos mantener compatibilidad en codigo con pandas 1.5.x
+pandas==2.1.4 # debemos mantener compatibilidad en codigo con pandas 1.5.x
 xlrd==2.0.2
 #gdal==2.4.4 # compiled and installed from gdal source code in production, not managed by pip
 mgrs==1.5.4
