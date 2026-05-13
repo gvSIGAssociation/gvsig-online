@@ -59,8 +59,7 @@
 #   - fiona 1.8.22 -> 1.9.6
 #   - geopandas 0.12.2 -> 0.14.4
 #   - rtree 1.2.0 -> 1.4.1
-#   - numpy 1.26.4 -> 2.0.2
-#   - pandas 1.5.3 -> 2.3.3
+#   - pandas 1.5.3 -> 2.1.2
 #   - shapely 1.8.4 -> 2.0.7
 #
 # Removed dependecies (not used):
@@ -72,6 +71,7 @@
 #   - limesurveyrc2api
 #
 # Kept at current version (require code changes in later phases):
+#   - numpy 1.26.4 # must be migrated together with pandas and SQLAlchemy when no longer supporting Python 3.6
 #   - SQLAlchemy==1.4.50 (Phase 3: -> 2.x)
 #   - zeep==3.4.0 (Phase 3: evaluar -> 4.x)
 #   - tinydb==3.15.2 (pinned: 4.x renombra purge_tables->drop_tables; usado en plugin_gtfs_editor)
@@ -130,8 +130,6 @@ six==1.17.0
 pytz # don't specify version, since timezones need to be up-to-date
 python-dateutil==2.9.0.post0
 
-numpy==1.26.4 # debemos mantener compatibilidad en codigo con numpy 1.26.x
-
 cmislib3==1.0.8
 lxml==6.1.0
 python-slugify[unidecode]==8.0.4
@@ -188,13 +186,17 @@ xmlsec==1.3.17
 django_tinymce==3.7.1
 
 # plugin geoetl
+## queda pendiente migrar pandas a v 2.3.3, numpy a 2.0.2 y SQLAlchemy a 2.x cuando dejemos de soportar Python 3.6 a nivel de código fuente
+## de momento no es posible porque pandas >= 2.2 requiere SQLAlchemy >= 2.0, que requiere Python >= 3.7
 pandas==2.1.4 # debemos mantener compatibilidad en codigo con pandas 1.5.x
+numpy==1.26.4 
+SQLAlchemy==1.4.50  # Phase 3: upgrade to 2.x (Session/Query API changes)
+
 xlrd==2.0.2
 #gdal==2.4.4 # compiled and installed from gdal source code in production, not managed by pip
 mgrs==1.5.4
 cx-Oracle==8.3.0
 geomet==1.1.0
-SQLAlchemy==1.4.50  # Phase 3: upgrade to 2.x (Session/Query API changes)
 pymssql==2.3.13
 pyenchant==3.3.0
 
