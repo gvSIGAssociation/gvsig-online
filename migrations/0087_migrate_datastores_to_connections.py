@@ -105,8 +105,9 @@ def migrate_datastores_to_connections(apps, schema_editor):
                 extra_params = {}
                 if 'dbtype' in first_params:
                     extra_params['dbtype'] = first_params['dbtype']
-                # Añadir jndiReferenceName por defecto si no existe
-                if 'jndiReferenceName' not in extra_params:
+                if 'jndiReferenceName' in first_params:
+                    extra_params['jndiReferenceName'] = first_params['jndiReferenceName']
+                else:
                     extra_params['jndiReferenceName'] = ''
                 
                 # Crear la conexión sin permisos globales (se gestionan por roles)
