@@ -568,9 +568,13 @@ body.skin-black .home-page {
 	transition: background var(--h-transition);
 	white-space: nowrap;
 }
-#btn-save-order:hover { background: #219a52; }
+#btn-save-order:hover:not(.save-order--blocked) { background: #219a52; }
 #btn-save-order.visible { display: inline-flex; }
-#btn-save-order.hide-when-filtered { display: none !important; }
+#btn-save-order.save-order--blocked {
+	opacity: 0.55;
+	cursor: not-allowed;
+	background: #95a5a6;
+}
 
 #scope-order-select {
 	display: inline-block;
@@ -610,6 +614,10 @@ body.skin-black .home-page {
 }
 .sortable-mode .drag-handle { display: flex; }
 .sortable-mode .project-card:hover { transform: none; }
+.sortable-mode.sortable-mode--filtered .drag-handle {
+	cursor: not-allowed;
+	opacity: 0.45;
+}
 
 .ui-sortable-placeholder {
 	visibility: visible !important;
@@ -909,7 +917,7 @@ body.skin-black .home-page {
 						<i class="fa fa-arrows"></i> {% trans "Manual" %}
 					</button>
 				</div>
-				<button id="btn-save-order" {% if order_type == 'manual' %}class="visible"{% endif %}>
+				<button type="button" id="btn-save-order" {% if order_type == 'manual' %}class="visible"{% endif %}>
 					<i class="fa fa-save"></i> {% trans "Save order" %}
 				</button>
 				{% if user.is_superuser %}
@@ -1171,28 +1179,58 @@ body.skin-black .home-page {
 			}]
 		});
 
-		function updateSaveOrderButtonVisibility() {
-			if (activeFilter === 'all') {
-				$('#btn-save-order').removeClass('hide-when-filtered');
+		function hasActiveTextSearch() {
+			return $.trim($('.search-all').val()).length > 0;
+		}
+
+		function isNarrowingFilterActive() {
+			return activeFilter !== 'all' || hasActiveTextSearch();
+		}
+
+		var saveOrderFilteredTitle = '{% filter escapejs %}{% trans "If a filter is applied, project order cannot be changed." %}{% endfilter %}';
+
+		function updateSaveOrderButtonState() {
+			var filtered = activeFilter !== 'all' || (sortableEnabled && hasActiveTextSearch());
+			var $btn = $('#btn-save-order');
+			if (filtered) {
+				$btn.addClass('save-order--blocked')
+					.attr('title', saveOrderFilteredTitle)
+					.attr('aria-disabled', 'true');
 			} else {
-				$('#btn-save-order').addClass('hide-when-filtered');
+				$btn.removeClass('save-order--blocked')
+					.removeAttr('title')
+					.removeAttr('aria-disabled');
+			}
+		}
+
+		function updateSortableDragState() {
+			if (!sortableEnabled) return;
+			var $list = $('.items-list');
+			if (!$list.length || !$list.hasClass('ui-sortable')) return;
+			if (isNarrowingFilterActive()) {
+				$list.sortable('disable');
+				$list.addClass('sortable-mode--filtered');
+			} else {
+				$list.sortable('enable');
+				$list.removeClass('sortable-mode--filtered');
 			}
 		}
 
 		function applyFilter(filter) {
 			activeFilter = filter;
-			updateSaveOrderButtonVisibility();
+			updateSaveOrderButtonState();
 			if (sortableEnabled) {
-				// Modo manual: filtrar directamente en el DOM
-				var $items = $('.items-list > li');
-				if (filter === 'all') {
-					$items.show();
-				} else {
-					$items.each(function() {
-						$(this).toggle($(this).data('item-type') === filter);
-					});
-				}
+				// Modo manual: tipo + texto (List.js sigue enganchado al input; unificamos visibilidad aquí)
+				var q = $.trim($('.search-all').val()).toLowerCase();
+				$('.items-list > li').each(function() {
+					var $el = $(this);
+					var typeOk = filter === 'all' || $el.data('item-type') === filter;
+					var title = ($el.find('.item-title').text() || '').toLowerCase();
+					var textOk = !q || title.indexOf(q) !== -1;
+					$el.toggle(typeOk && textOk);
+				});
 				$('#filter-empty-msg').toggle($('.items-list > li:visible').length === 0);
+				updateSortableDragState();
 			} else {
 				// Modo alfabético: usar List.js
 				if (filter === 'all') {
@@ -1212,7 +1250,11 @@ body.skin-black .home-page {
 			applyFilter($(this).data('filter'));
 		});
 
-		$('.search-all').on('keyup', function() {
+		$('.search-all').on('keyup input', function() {
+			if (sortableEnabled) {
+				applyFilter(activeFilter);
+				return;
+			}
 			$('#filter-empty-msg').toggle(itemList.visibleItems.length === 0);
 		});
 
@@ -1277,7 +1319,6 @@ body.skin-black .home-page {
 			itemList.update();
 			// Asegurar que todos los <li> sean visibles
 			$('.items-list > li').show();
-			$('.elegant-search').hide();
 			$('.list-pagination').hide();
 			// Reaplicar filtro activo en modo DOM
 			applyFilter(activeFilter);
@@ -1285,6 +1326,7 @@ body.skin-black .home-page {
 
 		function disableSortable() {
 			if (!sortableEnabled) return;
+			$('.items-list').removeClass('sortable-mode--filtered');
 			$('.items-list').sortable('destroy');
 			$('.items-list').removeClass('sortable-mode');
 			sortableEnabled = false;
@@ -1350,9 +1392,11 @@ body.skin-black .home-page {
 		} else {
 			applyAlphabeticalOrder();
 		}
+		updateSaveOrderButtonState();
 
 		// ---- Guardar orden ----
 		$('#btn-save-order').on('click', function() {
+			if ($(this).hasClass('save-order--blocked')) return;
 			var orderData = [];
 			if (currentOrderType === 'manual') {
 				$('.items-list > li').each(function() {
