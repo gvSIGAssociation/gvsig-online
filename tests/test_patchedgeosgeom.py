@@ -5,11 +5,13 @@
 '''
 
 import unittest
+from django.test import tag
 from django.contrib.gis.geos import GEOSGeometry
 import json
 from gvsigol_core.geom import transform_point, transform_wkt
 
 
+@tag('geo', 'no_db')
 class PatchedGeosPointTestCase(unittest.TestCase):
     """ Checks the behavior of coordinate transformations using gvsigol convinience functions
     created to avoid inconsistences in Django/GEOSGeometry behaviour depending on GDAL/LIBPROJ versions.
@@ -376,6 +378,7 @@ class PatchedGeosPointTestCase(unittest.TestCase):
 # LINESTRING(714340.11389 4402692.86474, 715832.48897 4401572.49473, 717012.14105 4401031.56513,  717885.443754401084.016)
 # MULTILINESTRING((714340.11389 4402692.86474, 715832.48897 4401572.49473), (717012.14105 4401031.56513, 717885.44375 4401084.016))
 
+@tag('geo', 'no_db')
 class PatchedGeosLinestringTestCase(unittest.TestCase):
     """ Checks the behavior of coordinate transformations using gvsigol convinience functions
     created to avoid inconsistences in Django/GEOSGeometry behaviour depending on GDAL/LIBPROJ versions.
@@ -944,6 +947,7 @@ class PatchedGeosLinestringTestCase(unittest.TestCase):
         self.assertAlmostEqual(float(coord3[1]), expected__lat_3, delta=delta, msg=f"transformed wkt lat coordinate 3 failed from {source_crs} to {target_crs}")
 
 
+@tag('geo', 'no_db')
 class PatchedGeosMultiLinestringTestCase(unittest.TestCase):
     """ Checks the behavior of coordinate transformations using gvsigol convinience functions
     created to avoid inconsistences in Django/GEOSGeometry behaviour depending on GDAL/LIBPROJ versions.
@@ -1581,6 +1585,7 @@ class PatchedGeosMultiLinestringTestCase(unittest.TestCase):
         self.assertAlmostEqual(float(coord3[1]), expected__lat_3, delta=delta, msg=f"transformed wkt lat coordinate 3 failed from {source_crs} to {target_crs}")
 
 
+@tag('geo', 'no_db')
 class PatchedGeosPolygonTestCase(unittest.TestCase):
     """ Checks the behavior of coordinate transformations using gvsigol convinience functions
     created to avoid inconsistences in Django/GEOSGeometry behaviour depending on GDAL/LIBPROJ versions.
