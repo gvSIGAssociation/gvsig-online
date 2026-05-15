@@ -5,11 +5,13 @@
 '''
 
 import unittest
+from django.test import tag
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.geos import Point
 import json
 from gvsigol_core.geom import transform_point, transform_wkt
 
+@tag('geo', 'no_db')
 class GeosGeometryTestCase(unittest.TestCase):
     """ Checks the behavior of coordinate transformations in GEOSGeometry,
     which is usually influenced by the execution environment

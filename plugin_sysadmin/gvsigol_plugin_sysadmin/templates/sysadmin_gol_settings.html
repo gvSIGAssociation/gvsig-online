@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="box box-primary">
+			<div class="box-header with-border">
+				<h3 class="box-title">{% trans "Database settings (GolSettings)" %}</h3>
+				<div class="box-tools pull-right">
+					<a href="{% url 'sysadmin_home' %}" class="btn btn-default btn-sm"><i class="fa fa-chevron-left margin-r-5"></i> {% trans "Platform console" %}</a>
+					<a href="{% url 'home' %}" class="btn btn-default btn-sm"><i class="fa fa-home margin-r-5"></i> {% trans "Back to dashboard home" %}</a>
+				</div>
+			</div>
+			<div class="box-body">
+				<p class="text-muted">
+					{% trans "Runtime key/value pairs stored in the database (see gvsigol_core.models.GolSettings). This is not the same as gvsigol_app_*.settings Python modules or static settings.py." %}
+				</p>
+
+				{% if messages %}
+					{% for message in messages %}
+						<div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %}">{{ message }}</div>
+					{% endfor %}
+				{% endif %}
+
+				<h4>{% trans "New entry" %}</h4>
+				<form class="form-inline" style="margin-bottom:20px;" method="post" action="{% url 'sysadmin_gol_settings_create' %}">
+					{% csrf_token %}
+					<div class="form-group" style="margin-right:8px;">
+						<label class="sr-only" for="new-plugin">plugin_name</label>
+						<input type="text" name="plugin_name" id="new-plugin" class="form-control input-sm" placeholder="plugin_name" required>
+					</div>
+					<div class="form-group" style="margin-right:8px;">
+						<label class="sr-only" for="new-key">key</label>
+						<input type="text" name="key" id="new-key" class="form-control input-sm" placeholder="key" required>
+					</div>
+					<div class="form-group" style="margin-right:8px;">
+						<label class="sr-only" for="new-value">value</label>
+						<input type="text" name="value" id="new-value" class="form-control input-sm" placeholder="value">
+					</div>
+					<button type="submit" class="btn btn-primary btn-sm">{% trans "Create" %}</button>
+				</form>
+
+				<h4>{% trans "Existing rows" %}</h4>
+				<div class="table-responsive">
+					<table class="table table-striped table-condensed">
+						<thead>
+							<tr>
+								<th>{% trans "Plugin" %}</th>
+								<th>{% trans "Key" %}</th>
+								<th>{% trans "Value" %}</th>
+								<th style="width:200px;">{% trans "Actions" %}</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for row in items %}
+							<tr>
+								<td>{{ row.plugin_name }}</td>
+								<td>{{ row.key }}</td>
+								<td>
+									<form method="post" action="{% url 'sysadmin_gol_settings_save' %}" class="form-inline">
+										{% csrf_token %}
+										<input type="hidden" name="plugin_name" value="{{ row.plugin_name }}">
+										<input type="hidden" name="key" value="{{ row.key }}">
+										<input type="text" name="value" class="form-control input-sm" value="{{ row.value }}" style="min-width:200px;">
+										<button type="submit" class="btn btn-default btn-sm">{% trans "Save" %}</button>
+									</form>
+								</td>
+								<td>
+									<form method="post" action="{% url 'sysadmin_gol_settings_delete' %}" style="display:inline;" onsubmit="return confirm('{% trans "Delete this row?" %}');">
+										{% csrf_token %}
+										<input type="hidden" name="plugin_name" value="{{ row.plugin_name }}">
+										<input type="hidden" name="key" value="{{ row.key }}">
+										<button type="submit" class="btn btn-danger btn-sm">{% trans "Delete" %}</button>
+									</form>
+								</td>
+							</tr>
+							{% empty %}
+							<tr><td colspan="4" class="text-muted">{% trans "No GolSettings rows yet." %}</td></tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

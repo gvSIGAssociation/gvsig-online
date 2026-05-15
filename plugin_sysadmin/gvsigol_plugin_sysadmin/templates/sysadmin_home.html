@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="box box-primary">
+			<div class="box-header with-border">
+				<h3 class="box-title">{% trans "Platform console" %}</h3>
+			</div>
+			<div class="box-body">
+				<p class="text-muted">{% trans "Superuser-only tools. This plugin is not listed in the sidebar menu." %}</p>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="small-box bg-aqua">
+							<div class="inner">
+								<h4>{% trans "Unit tests" %}</h4>
+								<p>{% trans "Discover, filter, and run deploy test suites via Celery." %}</p>
+							</div>
+							<div class="icon"><i class="fa fa-flask"></i></div>
+							<a href="{% url 'sysadmin_tests' %}" class="small-box-footer">{% trans "Open" %} <i class="fa fa-arrow-circle-right"></i></a>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="small-box bg-green">
+							<div class="inner">
+								<h4>{% trans "Database settings" %}</h4>
+								<p>{% trans "View and edit GolSettings (runtime key/value per plugin)." %}</p>
+							</div>
+							<div class="icon"><i class="fa fa-database"></i></div>
+							<a href="{% url 'sysadmin_gol_settings' %}" class="small-box-footer">{% trans "Open" %} <i class="fa fa-arrow-circle-right"></i></a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

@@ -8,6 +8,7 @@ from gvsigol.basetypes import CloneConf
 from gvsigol_auth import auth_backend
 from django.contrib.auth.models import User
 from urllib.parse import quote, urlparse, urljoin
+import importlib
 import json
 import logging
 
@@ -324,21 +325,48 @@ class SharedView(models.Model):
     def __str__(self):
         return self.name
 
+def _gol_default_from_plugin_settings(plugin_name, key):
+    """
+    Return ``str(value)`` from ``<plugin_name>.settings.GOL_SETTINGS_DEFAULTS.get(key)``
+    when *value* is not None; otherwise None (caller uses *default* from get_value).
+
+    Any import error or ``GOL_SETTINGS_DEFAULTS`` not being a dict yields None.
+    """
+    try:
+        mod = importlib.import_module('%s.settings' % plugin_name)
+        defaults = getattr(mod, 'GOL_SETTINGS_DEFAULTS', {})
+        if not isinstance(defaults, dict):
+            return None
+        val = defaults.get(key)
+        if val is not None:
+            return str(val)
+    except Exception:
+        pass
+    return None
+
+
 class SettingsManager(models.Manager):
     def get_value(self, plugin_name, key, default=""):
         try:
-            return GolSettings.objects.get(plugin_name=plugin_name, key = key).value
+            return GolSettings.objects.get(plugin_name=plugin_name, key=key).value
         except GolSettings.DoesNotExist:
-            return default
+            pass
+        deploy_default = _gol_default_from_plugin_settings(plugin_name, key)
+        if deploy_default is not None:
+            return deploy_default
+        return default
     
     def set_value(self, plugin_name, key, value):
         try:
-            settings_entry = GolSettings.objects.get(plugin_name=plugin_name, key = key)
+            settings_entry = GolSettings.objects.get(plugin_name=plugin_name, key=key)
         except GolSettings.DoesNotExist:
             settings_entry = GolSettings()
             settings_entry.plugin_name = plugin_name
             settings_entry.key = key
-        settings_entry.value = value
+        if value is None:
+            settings_entry.value = ''
+        else:
+            settings_entry.value = str(value)
         settings_entry.save()
     
 class GolSettings(models.Model):
@@ -365,9 +393,16 @@ class GolSettings(models.Model):
         plugin_name="gvsigol_plugin_downloadman",
         key = "link_validity",
         default = "9")
+
+    Resolution order for ``get_value``:
+
+    1. **Database** — row for ``(plugin_name, key)`` if it exists.
+    2. **Plugin defaults** — ``GOL_SETTINGS_DEFAULTS.get(key)`` in ``<plugin_name>.settings``
+       when defined, not ``None``, and the mapping is a dict (values via ``str()``).
+    3. **Call-site** — the *default* argument passed to ``get_value``.
     
-    A GolSettings.DoesNotExist exception will be raised if the key is not defined and
-    no default has been provided
+    Values passed to set_value are stored as text (``str(value)``); ``None`` is
+    stored as an empty string.
     """
     plugin_name = models.TextField()
     key = models.TextField()
