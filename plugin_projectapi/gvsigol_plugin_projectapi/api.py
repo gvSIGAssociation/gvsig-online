@@ -937,11 +937,15 @@ class CreateSharedViewAPI(APIView):
     API endpoint para crear una vista compartida.
     Devuelve un JSON con el shared_url generado.
     """
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, *args, **kwargs):
         pid = request.data.get('pid')
         if not pid:
             return Response({'error': 'pid is required'}, status=status.HTTP_400_BAD_REQUEST)
         project = get_object_or_404(Project, id=pid)
+        if not core_utils.can_read_project(request, project):
+            raise PermissionDenied('No tiene permiso para compartir este proyecto.')
         name = datetime.today().strftime("%Y%m%d") + get_random_string(length=32)
         shared_url = '/spa/v/' + quote(project.name) + '/?sharedView=' + name
         return Response({'shared_url': shared_url}, status=status.HTTP_200_OK)
