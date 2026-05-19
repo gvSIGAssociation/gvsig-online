@@ -905,11 +905,6 @@ def project_update(request, pid):
                     'baselayer': baselayer
                 })
         
-        url_base_lyr = ''
-        icon = settings.BASE_URL + settings.STATIC_URL + 'img/processing.gif'
-        if(project.baselayer_version is not None and project.baselayer_version > 0):
-            url_base_lyr = settings.MEDIA_URL + settings.LAYERS_ROOT + "/" + project.name + '_prj_' + str(project.baselayer_version) + ".zip"
-                    
         labels_added = []
         if project.labels:
             labels_added = project.labels.split(',')   
@@ -936,9 +931,6 @@ def project_update(request, pid):
                                                        'layergroups': layer_groups, 
                                                        'has_geocoding_plugin': has_geocoding_plugin, 
                                                        'toc': ordered_toc, 
-                                                       'superuser' : is_superuser(request.user), 
-                                                       'processing_icon' : icon,
-                                                       'url_base_lyr' : url_base_lyr,
                                                        'label_list': labels,
                                                        'form': form,
                                                        'REACT_SPA_UI': Project.REACT_SPA_UI if Project.REACT_SPA_UI in settings.VIEWER_UI_CHOICES else None,
