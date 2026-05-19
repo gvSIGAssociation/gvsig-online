@@ -223,67 +223,6 @@ class Tiling():
                             return False
         return True
 
-    def create_tiles_from_utm(self, base_layer_process, min_x, min_y, max_x, max_y, maxzoom, format_):
-        #from 0 to 6 download all
-#         if self.mode  != "OSM":
-#             for zoom in range(0,7,1):
-#                 break;
-#                 for x in range(0,2**zoom,1):        
-#                     for y in range(0,2**zoom,1):
-#                         self._download_wmts(zoom, x, y)
-        
-        start_time = t()
-
-        if self.mode  != "OSM":
-            #Si la capa es WMTS:
-            #De los niveles 0-6 se descargan todos los tiles de la capa ajustandose al extent de esta
-            #para no pedir tiles que no contenga.
-            # Como el extent de la capa siempre viene en geográficas se usa deg2num
-            for zoom in range(0, 7, 1):
-                xtile, ytile = self._deg2num(float(self.min_lat), float(self.min_lon), zoom)
-                final_xtile, final_ytile = self._deg2num(float(self.max_lat), float(self.max_lon), zoom)
-
-                for x in range(xtile, final_xtile + 1, 1):
-                    for y in range(ytile, final_ytile - 1, -1):  
-                        if self._download_wmts(zoom, x, y, format_) is False:
-                            return False
-                        if base_layer_process is not None:
-                            if base_layer_process[str(self.prj_id)]['stop'] == 'true':
-                                return False
-                            base_layer_process[str(self.prj_id)]['active'] = 'true'
-                            base_layer_process[str(self.prj_id)]['processed_tiles'] = base_layer_process[str(self.prj_id)]['processed_tiles'] + 1
-                            base_layer_process[str(self.prj_id)]['time'] = self.get_estimated_time(start_time, base_layer_process, 0)
-                            
-                        
-            #Si la capa es OSM los niveles 0-6 ya están en un zip
-                        
-        #Para cualquier capa base se descargan los siguientes niveles               
-        #solo de la extensión del proyecto
-        for zoom in range(7, int(maxzoom) + 1, 1):
-            xtile, ytile = self._utm2num(min_y, min_x, zoom)
-            final_xtile, final_ytile = self._utm2num(max_y, max_x, zoom)
-      
-            #print "%d:%d-%d/%d-%d" % (zoom, xtile, final_xtile, ytile, final_ytile)
-            for x in range(xtile, final_xtile + 1, 1):
-                for y in range(ytile, final_ytile - 1, -1):  
-                    if self.mode == "OSM":
-                        self._download_url(zoom, x, y)
-                    else:
-                        if self._download_wmts(zoom, x, y, format_) is False:
-                            return False
-                    if base_layer_process is not None:
-                        if str(self.prj_id) in base_layer_process:
-                            if base_layer_process[str(self.prj_id)]['stop'] == 'true':
-                                return False
-                            base_layer_process[str(self.prj_id)]['active'] = 'true'
-                            base_layer_process[str(self.prj_id)]['processed_tiles'] = base_layer_process[str(self.prj_id)]['processed_tiles'] + 1
-                            base_layer_process[str(self.prj_id)]['time'] = self.get_estimated_time(start_time, base_layer_process, 0)
-                              
-     
-        return True
-
-
-
     def retry_tiles_from_utm(self, base_layer_process, min_x, min_y, max_x, max_y, maxzoom, format_, start_level, start_x, start_y, tiling_status = None, tiles_already_download = None):
         '''
         Parameters
@@ -597,26 +536,6 @@ def get_extent(json, properties):
         return min_lon, min_lat, max_lon, max_lat
 
 
-def _get_retry_titing_params(dir):
-    """
-    Calcula los parámetros nivel de resolución y tile de inicio (x,y)
-    Para reanudar la descarga de la capa
-    """
-    levels = _sorted_alphanumeric(os.listdir(dir))
-    level = levels[len(levels) - 1]
-
-    leveldir = os.path.join(dir, level)
-    xlist = _sorted_alphanumeric(os.listdir(leveldir))
-    x = xlist[len(xlist) - 1]
-
-    xdir = os.path.join(leveldir, x)
-    ylist = _sorted_alphanumeric(os.listdir(xdir))
-    y = ylist[0]
-    y = y[0:y.rindex(".")]
-
-    return int(level), int(x), int(y), _get_number_of_tiles(dir, levels)
-
-
 def _sorted_alphanumeric(data):
     convert = lambda text: int(text) if text.isdigit() else text.lower()
     alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
@@ -637,41 +556,7 @@ def _get_number_of_tiles(dir, levels):
             xlist = os.listdir(xdir)
             count = count + len(xlist)
     return count
-
-def _delete_pending_downloads(dir, prefix):
-    """
-    @deprecated: pongo esto deprecated porque al implementar el retry no podemos eliminar los directorios pendientes de descarga
-    Borra los directorios pendientes de descarga si se inicia una nueva para evitar acumular basura
-    """
-    content = os.listdir(dir)
-    for file in content:
-        path = os.path.join(dir, file)
-        if(os.path.isdir(path) and file.startswith(prefix)):
-            shutil.rmtree(path)
-        
-
-def _close_download(base_layer_process, prj, folder_prj, version, status):
-    """
-    Acciones de fin de descarga
-    - Empaquetado
-    - Actualización del interfaz web
-    - Salvar la versión
-    - Marcar como proceso terminado
-    """
-    #Empaquetamos y borramos el directorio si no se ha pulsado el botón de stop
-    #Si se ha pulsado lo dejamos como está para poder hacer retry cuando se ponga el botón
-    if base_layer_process[str(prj.id)]['stop'] == 'false': 
-        _zipFolder(folder_prj)
-
-    #Si no se ha parado y ha terminado bien se guarda la nueva versión en Project
-    if(status is not False):
-        prj.baselayer_version = version
-        prj.save()
-
-    #Se guarda en bd como proceso acabado
-    store = ProjectBaseLayerTiling.objects.get(id=prj.id)
-    store.running = False
-    store.save()
+     
 
 
 def _zipFolder(folder_prj):
@@ -689,42 +574,8 @@ def _zipFolder(folder_prj):
     zipf.close()
     shutil.rmtree(folder_prj)
 
-            
-def exists_base_layer_tiled(prj_id):
-    prj = Project.objects.get(id = prj_id)
-    layers_dir = os.path.join(settings.MEDIA_ROOT, settings.LAYERS_ROOT)
-    file_ =  os.path.join(layers_dir, prj.name) + "_prj.zip"
-    return os.path.isfile(file_)
 
 
-def load_number_of_tiles(process_data, identif, number_of_tiles):
-    MAX_TILES_PACKAGE = 32768
-    if(number_of_tiles == 0):
-        process_data[str(identif)]['active'] = 'false' 
-    process_data[str(identif)]['total_tiles'] = number_of_tiles
 
-    if(number_of_tiles > MAX_TILES_PACKAGE):
-        process_data[str(identif)]['extent_processed'] = 'too_many_tiles'
-        process_data[str(identif)]['stop'] = 'true'
-        process_data[str(identif)]['active'] = 'false' 
-
-    return process_data
                              
-
-def _adjustExtent(minx, miny, maxx, maxy):
-    """
-    Hay ocasiones en que el extent puede ser mayor o menor que el max/min del planeta. Esto es porque OSM
-    es un mapa corrido y sin querer puedes centrar el extent del proyecto en el mapa de la derecha o la izda
-    Cuando esto pasa te vuelves loco para saber porque los tiles no se están generando por lo que meto está
-    función para asegurar que el extent es correcto y si no lo es lo rectifica.
-    """
-    while minx > 20037508.34 and maxx > 20037508.34:
-        minx = minx - 40075016.68
-        maxx = maxx - 40075016.68
-
-    while minx < -20037508.34 and maxx < -20037508.34:
-        minx = minx + 40075016.68
-        maxx = maxx + 40075016.68
-
-    return minx, miny, maxx, maxy
 
