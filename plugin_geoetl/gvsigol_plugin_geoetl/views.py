@@ -355,9 +355,9 @@ def permissons_tab(request, id_wks):
             for b in role_edit_restrictedly_wks:
                 editing_restricted_role.append(b.role)
     else:
-        editing_role=all_roles
-        execution_role=all_roles
-        editing_restricted_role = all_roles
+        editing_role = []
+        execution_role = []
+        editing_restricted_role = []
 
     response = {
             'groups': all_roles,
@@ -366,8 +366,9 @@ def permissons_tab(request, id_wks):
             'editing_restricted_role' : editing_restricted_role
             }
 
-    if ws.can_edit_restrictedly(request) and not ws.can_edit(request):
-        response['editablerestrictedly'] = 'true'
+    if id_wks != 0 and id_wks is not None:
+        if ws.can_edit_restrictedly(request) and not ws.can_edit(request):
+            response['editablerestrictedly'] = 'true'
 
     return render(request,  "geoetl_workspaces_permissions.html", response)
 
