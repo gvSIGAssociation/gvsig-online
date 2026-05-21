@@ -1515,6 +1515,12 @@ def etl_concatenate_workspace_update(request):
                 'exists': 'true',
             }
             return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+        except ValueError as e:
+            return HttpResponse(
+                json.dumps({'error': str(e)}),
+                status=400,
+                content_type='application/json',
+            )
 
     response = {}
     return render(request, 'dashboard_geoetl_concat_workspaces.html', response)
