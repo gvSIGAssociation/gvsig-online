@@ -1,5 +1,42 @@
 idRestore = []
 
+function validateEtlPeriodicSchedule() {
+	if (!$("#repeat_periodically").is(':checked')) {
+		return true;
+	}
+	var day = $("#ws-program-day").val();
+	var programUnit = $("#ws-program-unit").val();
+	var intervalVal = $("#ws-program-interval").val();
+	var timeVal = ($("#ws-program-time").val() || '').trim();
+
+	if (day === 'every') {
+		if (!programUnit || programUnit === 'empty') {
+			messageBox.show('error', gettext('Select a time unit (minutes, hours or days).'));
+			return false;
+		}
+		var n = parseInt(intervalVal, 10);
+		if (!intervalVal || isNaN(n) || n < 1) {
+			messageBox.show('error', gettext('Enter a valid interval number (1 or greater).'));
+			return false;
+		}
+	} else if (!timeVal) {
+		messageBox.show('error', gettext('Enter a time of day (HH:mm:ss).'));
+		return false;
+	}
+	return true;
+}
+
+function showEtlSaveError(xhr, fallbackMsg) {
+	var msg = fallbackMsg || gettext('Could not save the workspace.');
+	try {
+		var data = JSON.parse(xhr.responseText);
+		if (data.error) {
+			msg = data.error;
+		}
+	} catch (e) {}
+	messageBox.show('error', msg);
+}
+
 gvsigolETL.Toolbar = Class.extend({
 
 	init:function(elementId, view)
@@ -80,6 +117,9 @@ gvsigolETL.Toolbar = Class.extend({
 			});
 
 			$('#save-etl').off('click').on('click', function() {
+				if (!validateEtlPeriodicSchedule()) {
+					return;
+				}
 				var formWorkspace = new FormData();
 
 				formWorkspace.append('id', $('#etl_id').val())
@@ -158,12 +198,23 @@ gvsigolETL.Toolbar = Class.extend({
 						contentType: false,
 						processData: false,
 						success: function (response) {
-							$('#dialog-save').modal('hide')
-							if(response['exists']=="true"){
-								$('#modal-ws-exists').modal('show')
-							}else{
-								location.href = '/gvsigonline/etl/etl_workspace_list/';
-							}
+							try {
+								var data = typeof response === 'string' ? JSON.parse(response) : response;
+								if (data && data.error) {
+									messageBox.show('error', data.error);
+									return;
+								}
+								if (data && data.exists === 'true') {
+									$('#dialog-save').modal('hide');
+									$('#modal-ws-exists').modal('show');
+									return;
+								}
+							} catch (e) {}
+							$('#dialog-save').modal('hide');
+							location.href = '/gvsigonline/etl/etl_workspace_list/';
+						},
+						error: function(xhr) {
+							showEtlSaveError(xhr, gettext('Could not save the workspace.'));
 						}
 					});
 				} else {
@@ -185,16 +236,26 @@ gvsigolETL.Toolbar = Class.extend({
 							cache: false,
 							contentType: false,
 							processData: false,
-							success	:function(response){
-								$('#modal-overwrite-workspace-etl').modal('hide')
+							success: function(response) {
+								try {
+									var data = typeof response === 'string' ? JSON.parse(response) : response;
+									if (data && data.error) {
+										messageBox.show('error', data.error);
+										return;
+									}
+									if (data && data.exists === 'true') {
+										$('#modal-overwrite-workspace-etl').modal('hide');
+										$('#modal-ws-exists').modal('show');
+										return;
+									}
+								} catch (e) {}
+								$('#modal-overwrite-workspace-etl').modal('hide');
 								$('#modal-update-workspace-etl').modal('hide');
-								if(response['exists']=="true"){
-									$('#modal-ws-exists').modal('show')
-								}else{
-									location.href = '/gvsigonline/etl/etl_workspace_list/';
-								}
+								location.href = '/gvsigonline/etl/etl_workspace_list/';
 							},
-							error: function(){}
+							error: function(xhr) {
+								showEtlSaveError(xhr, gettext('Could not save the workspace.'));
+							}
 						});
 					});
 				}

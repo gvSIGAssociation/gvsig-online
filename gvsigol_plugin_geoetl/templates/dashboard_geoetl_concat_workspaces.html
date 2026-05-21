@@ -661,6 +661,10 @@ table.dataTable.no-footer { border-bottom: none !important; }
 
 			$('#update-etl-concat-workspace').click( function() {
 
+				if (!validateUpdatePeriodicSchedule()) {
+					return;
+				}
+
 				updateData = {"id": $(".modal-body #etl_id").val(),
 							"name": $(".modal-body #etl_name").val(),
 							"description": $(".modal-body #etl_desc").val(),
@@ -693,16 +697,33 @@ table.dataTable.no-footer { border-bottom: none !important; }
 					beforeSend:function(xhr){
 						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 					},
-					success	:function(response){
+					success	:function(response, textStatus, xhr){
+						try {
+							var data = typeof response === 'string' ? JSON.parse(response) : response;
+							if (data && data.error) {
+								messageBox.show('error', data.error);
+								return;
+							}
+							if (data && data.exists === 'true') {
+								$('#modal-update-concat-workspace-etl').modal('hide');
+								$('#modal-ws-exists').modal('show');
+								return;
+							}
+						} catch (e) {}
 
 						$('#modal-update-concat-workspace-etl').modal('hide');
-						if(response['exists']=="true"){
-							$('#modal-ws-exists').modal('show')
-						}else{
-							location.reload();
-						}
+						location.reload();
 					},
-					error: function(){}
+					error: function(xhr) {
+						var msg = '{% trans "Could not update the workspace." %}';
+						try {
+							var data = JSON.parse(xhr.responseText);
+							if (data.error) {
+								msg = data.error;
+							}
+						} catch (e) {}
+						messageBox.show('error', msg);
+					}
 				});
 			});
 		};
@@ -737,6 +758,32 @@ table.dataTable.no-footer { border-bottom: none !important; }
 			$(".more-options").slideUp("slow");
 			$(".more-hour-options").slideDown("slow");
 		 }
+	}
+
+	function validateUpdatePeriodicSchedule() {
+		if (!$("#repeat_periodically").is(':checked')) {
+			return true;
+		}
+		var day = $("#modal-update-concat-workspace-etl #ws-program-day").val();
+		var programUnit = $("#modal-update-concat-workspace-etl #ws-program-unit").val();
+		var intervalVal = $("#modal-update-concat-workspace-etl #ws-program-interval").val();
+		var timeVal = ($("#modal-update-concat-workspace-etl #ws-program-time").val() || '').trim();
+
+		if (day === 'every') {
+			if (!programUnit || programUnit === 'empty') {
+				messageBox.show('error', '{% trans "Select a time unit (minutes, hours or days)." %}');
+				return false;
+			}
+			var n = parseInt(intervalVal, 10);
+			if (!intervalVal || isNaN(n) || n < 1) {
+				messageBox.show('error', '{% trans "Enter a valid interval number (1 or greater)." %}');
+				return false;
+			}
+		} else if (!timeVal) {
+			messageBox.show('error', '{% trans "Enter a time of day (HH:mm:ss)." %}');
+			return false;
+		}
+		return true;
 	}
 
 	$('#ws-program-time').datetimepicker({
