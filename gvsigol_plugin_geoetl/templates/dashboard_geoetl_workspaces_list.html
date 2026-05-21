@@ -1567,32 +1567,32 @@ function setSqlAfterValue(val) {
 			var row = table.row($(this).parents('tr'));
 			var data = row.data();
 			if (this.name == "button-update-workspace-etl") {
+				// Column order: 0=ID, 1-2=actions, 3=Status, 4=Last run, 5=Name, 6=Description, 7=Periodicity, 8=User
+				var wsName = $('<div>').html(data[5] || '').text().trim();
+				var wsDesc = $('<div>').html(data[6] || '').text().trim();
+				var wsPeriodicity = $('<div>').html(data[7] || '').text().trim();
 
-				$(".modal-body #etl_id").val( data[0] );
-				$(".modal-body #etl_name").val( data[4] );
-				$(".modal-body #etl_desc").val( data[5] );
+				$("#modal-update-workspace-etl #etl_id").val(data[0]);
+				$("#modal-update-workspace-etl #etl_name").val(wsName);
+				$("#modal-update-workspace-etl #etl_desc").val(wsDesc);
 
-				if(data[5]!=''){
+				if (wsPeriodicity !== '') {
 					$("#repeat_periodically").prop('checked', true);
 					$(".repeat_periodically_time").slideDown("slow");
 
-					if(data[5].includes(':')){
-
+					if (wsPeriodicity.includes(':')) {
 						$(".more-options").slideUp("slow");
 						$(".more-hour-options").slideDown("slow");
 
-						$(".modal-body #ws-program-day").val(data[5].split(' ')[0]);
-						$(".modal-body #ws-program-time").val(data[5].split(' ')[1]+':00');
-
-					}else{
-
-						$(".more-options").slideDown("slow");  // checked
+						$("#modal-update-workspace-etl #ws-program-day").val(wsPeriodicity.split(' ')[0]);
+						$("#modal-update-workspace-etl #ws-program-time").val(wsPeriodicity.split(' ')[1] + ':00');
+					} else {
+						$(".more-options").slideDown("slow");
 						$(".more-hour-options").slideUp("slow");
 
-						$(".modal-body #ws-program-day").val('every')
-						$(".modal-body #ws-program-interval").val(data[5].split(' ')[0])
-						$(".modal-body #ws-program-unit").val(data[5].split(' ')[1])
-
+						$("#modal-update-workspace-etl #ws-program-day").val('every');
+						$("#modal-update-workspace-etl #ws-program-interval").val(wsPeriodicity.split(' ')[0]);
+						$("#modal-update-workspace-etl #ws-program-unit").val(wsPeriodicity.split(' ')[1]);
 					}
 
 				}else{
@@ -2022,10 +2022,9 @@ function setSqlAfterValue(val) {
 	$('#repeat_periodically').click(function() {
 
 		if($("#repeat_periodically").is(':checked')){
-			$(".repeat_periodically_time").slideDown("slow");  // checked
-		}
-
-		else{
+			$(".repeat_periodically_time").slideDown("slow");
+			edit_progamming_form($("#modal-update-workspace-etl #ws-program-day").val());
+		} else {
 			$(".repeat_periodically_time").slideUp("slow");
 		}
 
@@ -2037,7 +2036,7 @@ function setSqlAfterValue(val) {
 
 	$('#modal-update-workspace-etl').on('shown.bs.modal', function (e) {
 		var searcheableRoleList = null;
-		var id_wks= $(".modal-body #etl_id").val();
+		var id_wks= $("#modal-update-workspace-etl #etl_id").val();
 		if (id_wks == ""){
 			id_wks=0; //todavia no se guardó el wks, es nuevo
 		}
@@ -2064,18 +2063,21 @@ function setSqlAfterValue(val) {
 
 
 		$('#update-etl-workspace').off("click").on("click", function() {
+			if (!validateUpdatePeriodicSchedule()) {
+				return;
+			}
 			var updateData = {"id": $('#modal-update-workspace-etl').attr('data-wsid'),
-						"name": $(".modal-body #etl_name").val(),
-						"description": $(".modal-body #etl_desc").val(),
-						"day": $(".modal-body #ws-program-day").val(),
-						"time": $(".modal-body #ws-program-time").val(),
-						"interval": $(".modal-body #ws-program-interval").val(),
-						"unit": $(".modal-body #ws-program-unit").val(),
+						"name": $("#modal-update-workspace-etl #etl_name").val(),
+						"description": $("#modal-update-workspace-etl #etl_desc").val(),
+						"day": $("#modal-update-workspace-etl #ws-program-day").val(),
+						"time": $("#modal-update-workspace-etl #ws-program-time").val(),
+						"interval": $("#modal-update-workspace-etl #ws-program-interval").val(),
+						"unit": $("#modal-update-workspace-etl #ws-program-unit").val(),
 						"username": username
 					}
 
 			if($("#repeat_periodically").is(':checked')){
-				updateData["checked"] = true
+				updateData["checked"] = true;
 			} else {
 				updateData["checked"] = false
 			}
@@ -2125,16 +2127,35 @@ function setSqlAfterValue(val) {
 				beforeSend:function(xhr){
 					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
-				success	:function(response){
-
-					$('#modal-update-workspace-etl').modal('hide');
-					if(response['exists']=="true"){
-						$('#modal-ws-exists').modal('show')
-					}else{
-						location.reload();
+				success	:function(response, textStatus, xhr){
+					if (xhr && xhr.getResponseHeader('content-type') &&
+						xhr.getResponseHeader('content-type').indexOf('application/json') !== -1) {
+						try {
+							var data = typeof response === 'string' ? JSON.parse(response) : response;
+							if (data.error) {
+								messageBox.show('error', data.error);
+								return;
+							}
+							if (data.exists === 'true') {
+								$('#modal-update-workspace-etl').modal('hide');
+								$('#modal-ws-exists').modal('show');
+								return;
+							}
+						} catch (e) {}
 					}
+					$('#modal-update-workspace-etl').modal('hide');
+					location.reload();
 				},
-				error: function(){}
+				error: function(xhr) {
+					var msg = '{% trans "Could not update the workspace." %}';
+					try {
+						var data = JSON.parse(xhr.responseText);
+						if (data.error) {
+							msg = data.error;
+						}
+					} catch (e) {}
+					messageBox.show('error', msg);
+				}
 			});
 		});
 
@@ -2151,6 +2172,32 @@ function setSqlAfterValue(val) {
 		 }
 	}
 
+	function validateUpdatePeriodicSchedule() {
+		if (!$("#repeat_periodically").is(':checked')) {
+			return true;
+		}
+		var day = $("#modal-update-workspace-etl #ws-program-day").val();
+		var programUnit = $("#modal-update-workspace-etl #ws-program-unit").val();
+		var intervalVal = $("#modal-update-workspace-etl #ws-program-interval").val();
+		var timeVal = ($("#modal-update-workspace-etl #ws-program-time").val() || '').trim();
+
+		if (day === 'every') {
+			if (!programUnit || programUnit === 'empty') {
+				messageBox.show('error', '{% trans "Select a time unit (minutes, hours or days)." %}');
+				return false;
+			}
+			var n = parseInt(intervalVal, 10);
+			if (!intervalVal || isNaN(n) || n < 1) {
+				messageBox.show('error', '{% trans "Enter a valid interval number (1 or greater)." %}');
+				return false;
+			}
+		} else if (!timeVal) {
+			messageBox.show('error', '{% trans "Enter a time of day (HH:mm:ss)." %}');
+			return false;
+		}
+		return true;
+	}
+
 	$('#ws-program-time').datetimepicker({
 		format: 'HH:mm:ss'
 	});
@@ -2160,20 +2207,23 @@ function setSqlAfterValue(val) {
 	});
 
 	function formatDate(date) {
-    // Crear un objeto de fecha de JavaScript
-    var d = new Date(date);
-    
-    // Obtener las partes de la fecha
-    var day = ("0" + d.getDate()).slice(-2);  // Asegura que siempre haya dos dígitos
-    var month = ("0" + (d.getMonth() + 1)).slice(-2);  // Los meses comienzan en 0
-    var year = d.getFullYear();
-    var hours = ("0" + d.getHours()).slice(-2);
-    var minutes = ("0" + d.getMinutes()).slice(-2);
-    var seconds = ("0" + d.getSeconds()).slice(-2);  // Incluir los segundos
-    
-    // Formatear como dd/mm/yyyy hh:mm:ss
-    return day + "/" + month + "/" + year + " " + hours + ":" + minutes + ":" + seconds;
-}
+		if (date == null || date === '' || date === 'None' || date === 'null') {
+			return '';
+		}
+		var d = new Date(date);
+		if (isNaN(d.getTime())) {
+			return '';
+		}
+		var day = ("0" + d.getDate()).slice(-2);  // Asegura que siempre haya dos dígitos
+		var month = ("0" + (d.getMonth() + 1)).slice(-2);  // Los meses comienzan en 0
+		var year = d.getFullYear();
+		var hours = ("0" + d.getHours()).slice(-2);
+		var minutes = ("0" + d.getMinutes()).slice(-2);
+		var seconds = ("0" + d.getSeconds()).slice(-2);  // Incluir los segundos
+		
+		// Formatear como dd/mm/yyyy hh:mm:ss
+		return day + "/" + month + "/" + year + " " + hours + ":" + minutes + ":" + seconds;
+	}
 
     function actualizarInfoPanel(data){
 
@@ -2228,7 +2278,10 @@ function setSqlAfterValue(val) {
 
 			}
 
-			$("#last-run-" + id).text(formatDate(last_exec));
+			var formattedLastExec = formatDate(last_exec);
+			if (formattedLastExec) {
+				$("#last-run-" + id).text(formattedLastExec);
+			}
 		}
 
     }
