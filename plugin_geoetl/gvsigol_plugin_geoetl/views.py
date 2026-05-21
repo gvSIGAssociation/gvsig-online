@@ -423,6 +423,14 @@ def save_periodic_workspace(request, workspace):
     my_task_name = 'gvsigol_plugin_geoetl.'+workspace.name+'.'+str(workspace.id)
 
     if day == 'every':
+        if unit_program in (None, '', 'empty'):
+            raise ValueError(_('A time unit (minutes, hours or days) is required.'))
+        try:
+            num_program = int(str(num_program).strip())
+        except (TypeError, ValueError):
+            raise ValueError(_('A valid interval number is required (integer greater than or equal to 1).'))
+        if num_program < 1:
+            raise ValueError(_('The interval number must be at least 1.'))
 
         if unit_program == 'minutes':
             unit_period = IntervalSchedule.MINUTES
@@ -444,7 +452,10 @@ def save_periodic_workspace(request, workspace):
         )
     else:
 
-        time = datetime.strptime(request.POST.get('time'), '%H:%M:%S').time()
+        time_str = (request.POST.get('time') or '').strip()
+        if not time_str:
+            raise ValueError(_('A time of day is required for scheduled execution (HH:mm:ss).'))
+        time = datetime.strptime(time_str, '%H:%M:%S').time()
 
         days_of_week = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 
@@ -467,8 +478,9 @@ def save_periodic_workspace(request, workspace):
             task='gvsigol_plugin_geoetl.tasks.run_canvas_background',
         )
 
-    # Crear o actualizar el status del workspace (evitar duplicados)
-    statusModel, created = ETLstatus.objects.update_or_create(
+    # Crear o actualizar el status del workspace (evitar duplicados).
+    # No resetear message/status/last_exec al reconfigurar la periodicidad.
+    statusModel, created = ETLstatus.objects.get_or_create(
         id_ws=workspace.id,
         defaults={
             'name': workspace.name,
@@ -476,6 +488,9 @@ def save_periodic_workspace(request, workspace):
             'status': ''
         }
     )
+    if not created and statusModel.name != workspace.name:
+        statusModel.name = workspace.name
+        statusModel.save(update_fields=['name'])
 
 
 @transaction.atomic
@@ -590,9 +605,6 @@ def delete_periodic_workspace(workspace):
                 crontabSchedule = CrontabSchedule.objects.get(id = cronid)
                 crontabSchedule.delete()
 
-    # Eliminar todos los status asociados al workspace (por si hay duplicados)
-    ETLstatus.objects.filter(id_ws=workspace.id).delete()
-    
     try:
         send_email  = SendEmails.objects.get(etl_ws = workspace.id)
         send_email.delete()
@@ -764,6 +776,12 @@ def etl_workspace_update(request):
                 'exists': 'true',
             }
             return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
+        except ValueError as e:
+            return HttpResponse(
+                json.dumps({'error': str(e)}),
+                status=400,
+                content_type='application/json',
+            )
 
         response = {
             'workspaces': get_list(request)
@@ -792,6 +810,7 @@ def etl_workspace_delete(request):
         instance  = ETLworkspaces.objects.get(id=int(lgid))
         if instance.can_edit(request):
             delete_periodic_workspace(instance)
+            ETLstatus.objects.filter(id_ws=instance.id).delete()
             instance.delete()
             # Ejecutar cleanup de tareas huérfanas después de la eliminación
             cleanup_orphan_canvas_tasks()
@@ -841,7 +860,7 @@ def etl_list_canvas_status(request):
             workspace['id_ws'] = sm.id_ws
             workspace['status'] = sm.status
             workspace['message'] = sm.message
-            workspace['last_exec'] = str(sm.last_exec)
+            workspace['last_exec'] = sm.last_exec.isoformat() if sm.last_exec else None
             workspace['visualizer_session_id'] = str(sm.visualizer_session_id) if sm.visualizer_session_id else None
             workspaces.append(workspace)
 
