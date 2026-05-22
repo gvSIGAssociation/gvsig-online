@@ -291,9 +291,14 @@ $(document).ready(function () {
         ev.preventDefault();
         var form = this;
         $('#btn-execute-import').prop('disabled', true).text('{% trans "Importing…" %}');
-        fetch(form.action || window.location.href, {
+        /* Use fetch so the browser sends Origin: <current-host> instead of
+           Origin: null (which causes Django 4 CSRF 403 in proxy/K8s setups).
+           keepalive: true ensures the POST reaches the server even as we
+           navigate away immediately, exactly like the export flow. */
+        fetch(window.location.href, {
             method: 'POST',
             credentials: 'same-origin',
+            headers: { 'X-CSRFToken': Cookies.get('csrftoken') },
             body: new FormData(form),
             keepalive: true
         });

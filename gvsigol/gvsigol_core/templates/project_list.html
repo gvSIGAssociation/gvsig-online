@@ -1063,6 +1063,26 @@ $(document).ready(function() {
 		window.location = '{% url "project_package_activity_log" %}';
 	});
 
+	/* Import form: use fetch so Origin header is set correctly (plain form submit
+	   can send Origin: null in some proxy/K8s setups, causing Django CSRF 403). */
+	$('#modal-import-project-package form').on('submit', function (ev) {
+		ev.preventDefault();
+		var form = this;
+		var $btn = $(form).find('button[type="submit"]');
+		$btn.prop('disabled', true).text('{% trans "Importing…" %}');
+		$('#modal-import-project-package').modal('hide');
+		fetch(form.action, {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: { 'X-CSRFToken': getCsrfToken() },
+			body: new FormData(form)
+		}).then(function (resp) {
+			window.location = resp.url;
+		}).catch(function () {
+			$btn.prop('disabled', false).text('{% trans "Import" %}');
+		});
+	});
+
 	$('#projects-table tbody').on('click', 'button', function (){
 		var row = table.row($(this).parents('tr'));
 	    var data = row.data();
