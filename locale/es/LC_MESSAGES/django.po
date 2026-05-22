@@ -1690,6 +1690,339 @@ msgstr "capa(s) con errores"
 msgid "Report"
 msgstr "Informe"
 
+#: templates/project_list.html
+msgid "Export project package"
+msgstr "Exportar paquete de proyecto"
+
+#: templates/project_list.html
+msgid "Import project"
+msgstr "Importar proyecto"
+
+#: templates/project_list.html
+msgid "Package reports"
+msgstr "Informes de paquetes"
+
+#: templates/project_list.html
+msgid "Import a project from a ZIP package file"
+msgstr "Importar un proyecto desde un fichero ZIP"
+
+#: templates/project_list.html
+msgid "Export ZIP"
+msgstr "Exportar ZIP"
+
+#: templates/project_list.html
+msgid "Package file"
+msgstr "Fichero de paquete"
+
+#: templates/project_list.html
+msgid "Loading export options…"
+msgstr "Cargando opciones de exportación…"
+
+#: templates/project_list.html
+msgid "Could not load export options."
+msgstr "No se pudieron cargar las opciones de exportación."
+
+#: templates/project_list.html
+msgid "Connection"
+msgstr "Conexión"
+
+#: templates/project_list.html
+msgid "Data (GPKG)"
+msgstr "Datos (GPKG)"
+
+#: templates/project_list.html
+msgid "Definition only"
+msgstr "Solo definición"
+
+#: templates/project_list.html
+msgid "Include layer and project role permissions"
+msgstr "Incluir permisos de roles de capa y proyecto"
+
+#: templates/project_list.html
+msgid "Include raster files in the package"
+msgstr "Incluir ficheros ráster en el paquete"
+
+#: templates/project_list.html
+msgid "Layers on external databases"
+msgstr "Capas en bases de datos externas"
+
+#: templates/project_package_import_wizard.html
+msgid "Import project package"
+msgstr "Importar paquete de proyecto"
+
+#: templates/project_package_import_wizard.html
+msgid "Execute import"
+msgstr "Ejecutar importación"
+
+#: templates/project_package_import_wizard.html
+msgid "Importing…"
+msgstr "Importando…"
+
+#: templates/project_package_import_wizard.html
+msgid "Exported project name"
+msgstr "Nombre del proyecto exportado"
+
+#: templates/project_package_import_wizard.html
+msgid "Exported from"
+msgstr "Exportado desde"
+
+#: templates/project_package_import_wizard.html
+msgid "Package format"
+msgstr "Formato del paquete"
+
+#: templates/project_package_import_wizard.html
+msgid "Job"
+msgstr "Trabajo"
+
+#: templates/project_package_import_wizard.html
+msgid "Primary workspace (for new layer groups)"
+msgstr "Espacio de trabajo principal (para nuevos grupos de capas)"
+
+#: templates/project_package_import_wizard.html
+msgid "Override project name (internal id)"
+msgstr "Sobreescribir nombre del proyecto (id interno)"
+
+#: templates/project_package_import_wizard.html
+msgid "Override project title"
+msgstr "Sobreescribir título del proyecto"
+
+#: templates/project_package_import_wizard.html
+msgid "Leave empty to use names from the package."
+msgstr "Dejar vacío para usar los nombres del paquete."
+
+#: templates/project_package_import_wizard.html
+msgid "Where to load vector data (GPKG)"
+msgstr "Dónde cargar los datos vectoriales (GPKG)"
+
+#: templates/project_package_import_wizard.html
+msgid "Source"
+msgstr "Origen"
+
+#: templates/project_package_import_wizard.html
+msgid "Target (workspace / datastore)"
+msgstr "Destino (espacio de trabajo / almacén de datos)"
+
+#: templates/project_package_import_wizard.html
+msgid "Op."
+msgstr "Op."
+
+#: templates/project_package_import_wizard.html
+msgid "Layers"
+msgstr "Capas"
+
+#: templates/project_package_import_wizard.html
+msgid "Skip"
+msgstr "Omitir"
+
+#: templates/project_package_import_wizard.html
+msgid "Definition-only layers (external database)"
+msgstr "Capas solo de definición (base de datos externa)"
+
+#: templates/project_package_import_wizard.html
+msgid "Exported connection"
+msgstr "Conexión exportada"
+
+#: templates/project_package_import_wizard.html
+msgid "Target connection"
+msgstr "Conexión destino"
+
+#: templates/project_package_import_wizard.html
+msgid "Target datastore"
+msgstr "Almacén de datos destino"
+
+#: templates/project_package_import_wizard.html
+msgid "Foreign DB"
+msgstr "BD externa"
+
+#: templates/project_package_import_wizard.html
+msgid "Local DB"
+msgstr "BD local"
+
+#: templates/project_package_import_wizard.html
+msgid "Do not import these layers"
+msgstr "No importar estas capas"
+
+#: templates/project_package_import_wizard.html
+msgid "Raster layers included in package"
+msgstr "Capas ráster incluidas en el paquete"
+
+#: templates/project_package_import_wizard.html
+msgid "Primary file"
+msgstr "Fichero principal"
+
+#: templates/project_package_import_wizard.html
+msgid "Files"
+msgstr "Ficheros"
+
+#: templates/project_package_import_wizard.html
+msgid "External layers (WMS/WMTS)"
+msgstr "Capas externas (WMS/WMTS)"
+
+#: templates/project_package_import_wizard.html
+msgid "Type"
+msgstr "Tipo"
+
+#: templates/project_package_import_wizard.html
+msgid "Technical preflight log"
+msgstr "Log técnico de preflight"
+
+#: templates/project_package_import_wizard.html
+msgid "Recent import/export operations"
+msgstr "Operaciones recientes de importación/exportación"
+
+#: templates/project_package_import_wizard.html
+msgid "View full history"
+msgstr "Ver historial completo"
+
+#: templates/project_package_import_wizard.html
+msgid "Last import error"
+msgstr "Último error de importación"
+
+#: templates/project_package_import_wizard.html
+msgid "Advanced overrides (optional)"
+msgstr "Sobreescrituras avanzadas (opcional)"
+
+#: templates/project_package_import_wizard.html
+msgid "Import/export history"
+msgstr "Historial de importación/exportación"
+
+#: templates/project_package_import_result.html
+msgid "Import report"
+msgstr "Informe de importación"
+
+#: templates/project_package_import_result.html
+msgid "Open imported project"
+msgstr "Abrir proyecto importado"
+
+#: templates/project_package_import_result.html
+msgid "Imported layers"
+msgstr "Capas importadas"
+
+#: templates/project_package_import_result.html
+msgid "Reused layers"
+msgstr "Capas reutilizadas"
+
+#: templates/project_package_import_result.html
+msgid "Skipped layers"
+msgstr "Capas omitidas"
+
+#: templates/project_package_import_result.html
+msgid "Warnings"
+msgstr "Advertencias"
+
+#: templates/project_package_import_result.html
+msgid "Errors"
+msgstr "Errores"
+
+#: templates/project_package_import_result.html
+msgid "Reason"
+msgstr "Motivo"
+
+#: templates/project_package_import_result.html
+msgid "Full technical log"
+msgstr "Log técnico completo"
+
+#: templates/project_package_import_result.html
+msgid "No layer-level details in the report."
+msgstr "No hay detalles por capa en el informe."
+
+#: templates/project_package_import_result.html
+msgid "Import did not complete. No project was created."
+msgstr "La importación no se completó. No se creó ningún proyecto."
+
+#: templates/project_package_export_result.html
+msgid "Export report"
+msgstr "Informe de exportación"
+
+#: templates/project_package_export_result.html
+msgid "Open project"
+msgstr "Abrir proyecto"
+
+#: templates/project_package_export_result.html
+msgid "Exported permissions (layer/project roles)"
+msgstr "Permisos exportados (roles de capa/proyecto)"
+
+#: templates/project_package_export_result.html
+msgid "Layer vector modes"
+msgstr "Modos vectoriales de capa"
+
+#: templates/project_package_export_result.html
+msgid "Technical export log"
+msgstr "Log técnico de exportación"
+
+#: templates/project_package_export_result.html
+msgid "Layer-level lines (JSON Lines)"
+msgstr "Líneas por capa (JSON Lines)"
+
+#: templates/project_package_export_result.html
+msgid "Same content as reports/export_log.jsonl inside the downloaded ZIP."
+msgstr ""
+"Mismo contenido que reports/export_log.jsonl dentro del ZIP descargado."
+
+#: templates/project_package_export_result.html
+msgid "No layer-level log entries for this export."
+msgstr "No hay entradas de log por capa para esta exportación."
+
+#: templates/project_package_export_result.html
+msgid "Warning: the following layers could not be fully exported"
+msgstr "Aviso: las siguientes capas no se pudieron exportar completamente"
+
+#: templates/project_package_export_result.html
+msgid "status"
+msgstr "estado"
+
+#: templates/project_package_export_result.html
+msgid "user"
+msgstr "usuario"
+
+#: templates/project_package_job_status.html
+msgid "Exporting project package"
+msgstr "Exportando paquete de proyecto"
+
+#: templates/project_package_job_status.html
+msgid "Importing project package"
+msgstr "Importando paquete de proyecto"
+
+#: templates/project_package_job_status.html
+msgid "Processing… please wait."
+msgstr "Procesando… por favor, espere."
+
+#: templates/project_package_job_status.html
+msgid "Export completed successfully."
+msgstr "Exportación completada correctamente."
+
+#: templates/project_package_job_status.html
+msgid "Import completed successfully."
+msgstr "Importación completada correctamente."
+
+#: templates/project_package_job_status.html
+msgid "Operation failed."
+msgstr "La operación ha fallado."
+
+#: templates/project_package_job_status.html
+msgid "Check server logs for details."
+msgstr "Consulte los logs del servidor para más detalles."
+
+#: templates/project_package_job_status.html
+msgid "Download ZIP"
+msgstr "Descargar ZIP"
+
+#: templates/project_package_job_status.html
+msgid "View import report"
+msgstr "Ver informe de importación"
+
+#: templates/project_package_job_status.html
+msgid "Activity log"
+msgstr "Registro de actividad"
+
+#: templates/project_package_import_wizard.html
+msgid "title"
+msgstr "título"
+
+#: templates/project_package_import_wizard.html
+msgid "— Select —"
+msgstr "— Seleccionar —"
+
 #~ msgid "Allow access to the application for the following user groups:"
 #~ msgstr ""
 #~ "Permitir acceder a la aplicación  a los siguientes grupos de usuarios:"
