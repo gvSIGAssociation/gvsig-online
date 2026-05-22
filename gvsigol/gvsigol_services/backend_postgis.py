@@ -39,6 +39,58 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Subtypes accepted by GeoServer bindings in backend_geoserver.getGeoserverBindings
+_GEOMETRY_SUBTYPES_GEOSERVER = frozenset({
+    'POINT', 'MULTIPOINT', 'LINESTRING', 'MULTILINESTRING', 'POLYGON', 'MULTIPOLYGON',
+})
+
+
+def _normalize_geometry_subtype_for_geoserver(label):
+    """
+    Map PostGIS ST_GeometryType / typmod labels (e.g. ST_MultiPolygonZ) to a plain
+    OGC name that matches geometry_columns / GeoServer (MULTIPOLYGON, ...).
+    """
+    if not label:
+        return None
+    s = str(label).strip().upper()
+    if s.startswith('ST_'):
+        s = s[3:]
+    for suffix in ('ZM', 'Z', 'M'):
+        if len(s) > len(suffix) and s.endswith(suffix):
+            base = s[: -len(suffix)]
+            if base in _GEOMETRY_SUBTYPES_GEOSERVER:
+                return base
+    if s in _GEOMETRY_SUBTYPES_GEOSERVER:
+        return s
+    return None
+
+
+def _geometry_typmod_subtype_is_generic(raw_subtype):
+    """True for unconstrained / SRID-only typmod: geometry, geometry(Geometry,srid), etc."""
+    if raw_subtype is None:
+        return True
+    s = str(raw_subtype).strip().upper()
+    return s in ('GEOMETRY', 'GEOM')
+
+
+def _geometry_format_type_needs_concrete_subtype(format_type_str):
+    """
+    True if pg_attribute format_type is not already a single GeoServer-friendly subtype
+    (e.g. geometry(Geometry,32619) from OGR still needs narrowing; geometry(MULTIPOLYGON,32619) does not).
+    """
+    if not format_type_str:
+        return True
+    ft = format_type_str.strip()
+    if re.match(r'^geometry\s*$', ft, flags=re.IGNORECASE):
+        return True
+    m = re.search(r'geometry\s*\(\s*([^,)\s]+)', ft, flags=re.IGNORECASE)
+    if not m:
+        return True
+    raw = m.group(1)
+    if _geometry_typmod_subtype_is_generic(raw):
+        return True
+    return _normalize_geometry_subtype_for_geoserver(raw) is None
+
 plainIdentifierPattern = re.compile("^[a-zA-Z][a-zA-Z0-9_]*$")
 plainSchemaIdentifierPattern = re.compile("^[a-zA-Z][a-zA-Z0-9_]*(.[a-zA-Z][a-zA-Z0-9_]*)?$")
 
@@ -273,6 +325,121 @@ class Introspect:
             """, [schema])
         
         return [(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7]) for r in self.cursor.fetchall()]
+
+    def resolve_concrete_geometry_type(self, schema, table, column):
+        """
+        When geometry_columns reports generic type GEOMETRY (typical after ogr2ogr GPKG load),
+        return a concrete subtype string (POINT, MULTIPOLYGON, ...) compatible with GeoServer
+        bindings, or None if it cannot be determined safely.
+        """
+        try:
+            self.cursor.execute(
+                """
+                SELECT format_type(a.atttypid, a.atttypmod)
+                FROM pg_attribute a
+                JOIN pg_class c ON c.oid = a.attrelid
+                JOIN pg_namespace n ON n.oid = c.relnamespace
+                WHERE n.nspname = %s AND c.relname = %s AND a.attname = %s
+                  AND a.attnum > 0 AND NOT a.attisdropped
+                """,
+                [schema, table, column],
+            )
+            row = self.cursor.fetchone()
+            if row and row[0]:
+                ft = row[0].strip()
+                m = re.search(
+                    r'geometry\s*\(\s*([^,)\s]+)',
+                    ft,
+                    flags=re.IGNORECASE,
+                )
+                if m:
+                    raw = m.group(1)
+                    if not _geometry_typmod_subtype_is_generic(raw):
+                        sub = _normalize_geometry_subtype_for_geoserver(raw)
+                        if sub:
+                            return sub
+            q = sqlbuilder.SQL(
+                'SELECT ST_GeometryType({g}) FROM {sch}.{tbl} WHERE {g} IS NOT NULL LIMIT 1'
+            ).format(
+                g=sqlbuilder.Identifier(column),
+                sch=sqlbuilder.Identifier(schema),
+                tbl=sqlbuilder.Identifier(table),
+            )
+            self.cursor.execute(q)
+            row = self.cursor.fetchone()
+            if not row or not row[0]:
+                return None
+            return _normalize_geometry_subtype_for_geoserver(row[0])
+        except Exception as ex:
+            logger.warning(
+                'resolve_concrete_geometry_type failed for %s.%s.%s: %s',
+                schema, table, column, ex,
+                exc_info=True,
+            )
+            return None
+
+    def promote_untyped_geometry_columns(self, schema, table):
+        """
+        ALTER unrestricted geometry columns to geometry(Subtype, srid) when data is
+        homogeneous enough to match a GeoServer-supported subtype.
+        """
+        for row in self.get_geometry_columns_info(table=table, schema=schema):
+            geom_col = row[2]
+            srid = row[4]
+            gtype = row[5]
+            self.cursor.execute(
+                """
+                SELECT format_type(a.atttypid, a.atttypmod)
+                FROM pg_attribute a
+                JOIN pg_class c ON c.oid = a.attrelid
+                JOIN pg_namespace n ON n.oid = c.relnamespace
+                WHERE n.nspname = %s AND c.relname = %s AND a.attname = %s
+                  AND a.attnum > 0 AND NOT a.attisdropped
+                """,
+                [schema, table, geom_col],
+            )
+            ft_row = self.cursor.fetchone()
+            format_type = (ft_row[0] or '').strip() if ft_row and ft_row[0] else ''
+            generic_by_catalog = (
+                not gtype
+                or not str(gtype).strip()
+                or str(gtype).upper() == 'GEOMETRY'
+            )
+            generic_by_typmod = _geometry_format_type_needs_concrete_subtype(format_type)
+            if not (generic_by_catalog or generic_by_typmod):
+                continue
+            concrete = self.resolve_concrete_geometry_type(schema, table, geom_col)
+            if not concrete or concrete == 'GEOMETRY' or concrete not in _GEOMETRY_SUBTYPES_GEOSERVER:
+                continue
+            try:
+                srid_val = int(srid) if srid is not None else 0
+            except (TypeError, ValueError):
+                srid_val = 0
+            m = re.search(r'geometry\s*\(\s*[^,)\s]+\s*,\s*(-?\d+)', format_type, flags=re.IGNORECASE)
+            if m:
+                try:
+                    srid_val = int(m.group(1))
+                except ValueError:
+                    pass
+            sub_sql = sqlbuilder.SQL(concrete)
+            stmt = sqlbuilder.SQL(
+                'ALTER TABLE {sch}.{tbl} ALTER COLUMN {geom} TYPE geometry({sub}, {srid}) '
+                'USING {geom}::geometry({sub}, {srid})'
+            ).format(
+                sch=sqlbuilder.Identifier(schema),
+                tbl=sqlbuilder.Identifier(table),
+                geom=sqlbuilder.Identifier(geom_col),
+                sub=sub_sql,
+                srid=sqlbuilder.Literal(srid_val),
+            )
+            try:
+                self.cursor.execute(stmt)
+            except Exception as ex:
+                logger.warning(
+                    'promote_untyped_geometry_columns: ALTER failed for %s.%s.%s: %s',
+                    schema, table, geom_col, ex,
+                    exc_info=True,
+                )
 
     def get_geometry_column_info(self, table=None, column=None, schema='public'):
         """

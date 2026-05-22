@@ -1520,6 +1520,12 @@ class Geoserver():
         for f in geometry_columns_info:
             name = f[2]
             geometry_type = f[5]
+            if geometry_type and geometry_type.upper() == 'GEOMETRY' and hasattr(
+                conn, 'resolve_concrete_geometry_type'
+            ):
+                resolved = conn.resolve_concrete_geometry_type(schema, tablename, name)
+                if resolved:
+                    geometry_type = resolved
             geometry_columns[name] = geometry_type
         
         for f in field_info:
