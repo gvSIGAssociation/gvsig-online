@@ -138,6 +138,53 @@
 }
 .btn-pl-add:hover { background: var(--pl-accent-dk); }
 
+/* ---- Importar paquete (cabecera) ---- */
+.btn-pl-import {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: var(--pl-white);
+	color: var(--pl-accent) !important;
+	border: 1px solid var(--pl-accent);
+	border-radius: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	padding: 6px 14px;
+	height: 34px;
+	cursor: pointer;
+	transition: background var(--pl-transition), color var(--pl-transition);
+	text-decoration: none !important;
+	white-space: nowrap;
+	letter-spacing: 0.2px;
+}
+.btn-pl-import:hover {
+	background: #eef4f8;
+	color: var(--pl-accent-dk) !important;
+	border-color: var(--pl-accent-dk);
+}
+
+.btn-pl-reports {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: var(--pl-bg);
+	color: var(--pl-text) !important;
+	border: 1px solid var(--pl-border);
+	border-radius: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	padding: 6px 14px;
+	height: 34px;
+	transition: background var(--pl-transition), border-color var(--pl-transition);
+	text-decoration: none !important;
+	white-space: nowrap;
+}
+.btn-pl-reports:hover {
+	background: var(--pl-white);
+	border-color: var(--pl-accent);
+	color: var(--pl-accent) !important;
+}
+
 /* ---- Tabla ---- */
 .pl-panel__body { padding: 0; }
 
@@ -480,6 +527,12 @@ table.dataTable.no-footer {
 							<a href="?{% if request.GET.page_size %}page_size={{ request.GET.page_size }}{% endif %}" class="btn-clear"><i class="fa fa-times"></i></a>
 						{% endif %}
 					</form>
+					<button type="button" class="btn-pl-import" data-toggle="modal" data-target="#modal-import-project-package" title="{% trans 'Import a project from a ZIP package file' %}">
+						<i class="fa fa-upload"></i>{% trans "Import project" %}
+					</button>
+					<a href="{% url 'project_package_activity_log' %}" class="btn-pl-reports" title="{% trans 'Import and export reports' %}">
+						<i class="fa fa-list-alt"></i>{% trans "Package reports" %}
+					</a>
 					<a href="/gvsigonline/core/project_add/" class="btn-pl-add"><i class="fa fa-plus"></i>{% trans "Add project" %}</a>
 				</div>
 			</div>
@@ -493,6 +546,7 @@ table.dataTable.no-footer {
 							<th>{% trans "Description" %}</th>
 							<th>{% trans "Is public?" %}</th>
 							<th>{% trans "Preview" %}</th>
+							<th></th>
 							<th></th>
 							<th></th>
 							<th></th>
@@ -519,6 +573,7 @@ table.dataTable.no-footer {
 								<a id="load_project_jquery" title="JQuery" target="_blank" href="/gvsigonline/core/load/{{project.name}}/" data-toggle="tooltip" data-placement="bottom" class="btn"><i class="fa fa-television" style="color: brown"></i></a>
 								{% endif %}
 							</td>
+						<td></td>
 						<td></td>
 						<td></td>
 						<td></td>
@@ -637,6 +692,104 @@ table.dataTable.no-footer {
 		</div>
 	</div>
 </div>
+
+<!-- Modal: importar paquete ZIP -->
+<div class="modal fade" id="modal-import-project-package" tabindex="-1" role="dialog" aria-labelledby="importProjectPackageLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="importProjectPackageLabel">{% trans "Import project" %}</h4>
+			</div>
+			<form method="post" action="{% url 'project_package_import' %}" enctype="multipart/form-data">
+				{% csrf_token %}
+				<div class="modal-body">
+					<p class="text-muted" style="margin-bottom: 12px;">{% trans "Select a project package file (.zip) exported from another gvSIG Online server." %}</p>
+					<div class="form-group">
+						<label for="id_project_package_file">{% trans "Package file" %}</label>
+						<input id="id_project_package_file" name="package" type="file" accept=".zip,application/zip" class="form-control" required>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+					<button type="submit" class="btn btn-primary">{% trans "Import" %}</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<!-- Modal: export package options -->
+<div class="modal fade" id="modal-export-project-package" tabindex="-1" role="dialog" aria-labelledby="exportProjectPackageLabel">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="exportProjectPackageLabel">{% trans "Export project package" %}</h4>
+			</div>
+			<form id="form-export-project-package" method="post" action="">
+				{% csrf_token %}
+				<div class="modal-body">
+					<p class="text-muted" id="export-package-preflight-loading">{% trans "Loading export options…" %}</p>
+					<div id="export-package-preflight-error" class="alert alert-danger" style="display:none"></div>
+					<div id="export-package-options" style="display:none">
+					<div id="export-package-permissions-block" class="checkbox" style="display:none">
+						<label>
+							<input type="checkbox" name="export_permissions" value="1" id="export_permissions_cb">
+							{% trans "Include layer and project role permissions" %}
+						</label>
+						<p class="help-block small">{% trans "Private project: export read/write/manage rules so they can be restored on import." %}</p>
+					</div>
+					<div class="checkbox">
+						<label>
+							<input type="checkbox" name="include_raster_sidecars" value="1" id="include_raster_sidecars_cb" checked>
+							{% trans "Include raster files in the package" %}
+						</label>
+						<p class="help-block small">{% trans "Pack all raster files (GeoTIFF and associated auxiliary files) so they are published automatically on import." %}</p>
+					</div>
+						<div id="export-package-foreign-layers" style="display:none">
+							<h4>{% trans "Layers on external databases" %}</h4>
+							<p class="text-muted">{% trans "Choose whether to copy data into the package (GPKG) or export metadata only (destination must already have the tables)." %}</p>
+							<table class="table table-bordered table-condensed">
+								<thead>
+									<tr>
+										<th>{% trans "Layer" %}</th>
+										<th>{% trans "Connection" %}</th>
+										<th>{% trans "Export" %}</th>
+									</tr>
+								</thead>
+								<tbody id="export-package-foreign-tbody"></tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+					<button type="submit" class="btn btn-primary" id="btn-export-package-submit" disabled>{% trans "Export ZIP" %}</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<!-- Modal: export ZIP (building package) -->
+<div class="modal fade" id="modal-export-package-wait" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">{% trans "Export project package" %}</h4>
+			</div>
+			<div class="modal-body text-center">
+				<p><i class="fa fa-spinner fa-spin fa-2x"></i></p>
+				<p>{% trans "Building the ZIP file. This may take several minutes for large projects. Please wait." %}</p>
+			</div>
+		</div>
+	</div>
+</div>
 {% endblock %}
 
 {% block extra-scripts %}
@@ -727,6 +880,20 @@ $(document).ready(function() {
 					return '';
 				}
             }
+	    },{
+	        "targets": -5,
+	        "data": null,
+            "render": function ( data, type, row ) {
+				var filter = 'tr[data-projectid="' + data[0] + '"]';
+				var dataset = $('#projects-table').find(filter).data();
+				if (dataset['canmanage']) {
+					var exportUrl = '{% url "project_package_export" 888888888 %}'.replace('888888888', data[0]);
+            		return '<a title="' + '{% trans "Export project package" %}' + '" href="' + exportUrl + '" data-toggle="tooltip" data-placement="top" class="btn btn-info project-package-export-btn"><i class="fa fa-download"></i></a>';
+				}
+				else {
+					return '';
+				}
+            }
 	    }],
 	    "dom": 'T<"clear">rtip',
 		"bLengthChange": false
@@ -762,6 +929,139 @@ $(document).ready(function() {
 	}
 	initTooltips();
 	table.on('draw.dt', initTooltips);
+
+	var exportPreflightUrlTpl = '{% url "project_package_export_preflight" 888888888 %}';
+	var exportPackageUrlTpl = '{% url "project_package_export" 888888888 %}';
+
+	function getCsrfToken() {
+		var inp = document.querySelector('#form-export-project-package input[name=csrfmiddlewaretoken]');
+		if (inp && inp.value) {
+			return inp.value;
+		}
+		var m = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
+		return m ? decodeURIComponent(m[1]) : '';
+	}
+
+	function downloadPackageBlob(resp) {
+		var ct = (resp.headers.get('Content-Type') || '').toLowerCase();
+		if (!resp.ok) {
+			throw new Error('http');
+		}
+		if (ct.indexOf('zip') === -1 && ct.indexOf('octet-stream') === -1) {
+			throw new Error('ctype');
+		}
+		var dispo = resp.headers.get('Content-Disposition') || '';
+		var fname = 'project_package.zip';
+		var m = /filename\*=UTF-8''([^;\s]+)|filename="([^"]+)"|filename=([^;\s]+)/i.exec(dispo);
+		if (m) {
+			fname = decodeURIComponent((m[1] || m[2] || m[3] || '').trim().replace(/^"|"$/g, ''));
+		}
+		return resp.blob().then(function (blob) {
+			var u = URL.createObjectURL(blob);
+			var a = document.createElement('a');
+			a.href = u;
+			a.download = fname || 'project_package.zip';
+			document.body.appendChild(a);
+			a.click();
+			setTimeout(function () {
+				document.body.removeChild(a);
+				URL.revokeObjectURL(u);
+			}, 0);
+		});
+	}
+
+	function resetExportPackageModal() {
+		$('#export-package-preflight-loading').show();
+		$('#export-package-preflight-error').hide().text('');
+		$('#export-package-options').hide();
+		$('#export-package-permissions-block').hide();
+		$('#export-package-foreign-layers').hide();
+		$('#export-package-foreign-tbody').empty();
+		$('#btn-export-package-submit').prop('disabled', true);
+	}
+
+	function fillExportPackageModal(data) {
+		$('#export-package-preflight-loading').hide();
+		$('#export-package-options').show();
+		$('#btn-export-package-submit').prop('disabled', false);
+		if (data.ask_export_permissions) {
+			$('#export-package-permissions-block').show();
+		}
+		var foreign = (data.vector_layers || []).filter(function (ly) { return ly.is_foreign; });
+		if (foreign.length) {
+			$('#export-package-foreign-layers').show();
+			var tbody = $('#export-package-foreign-tbody');
+			foreign.forEach(function (ly) {
+				var defMode = ly.default_vector_mode || 'definition_only';
+				var row = $('<tr></tr>');
+				row.append($('<td></td>').text(ly.title + ' (' + ly.layer_group + ')'));
+				row.append($('<td></td>').text(ly.connection_label || ''));
+				var cell = $('<td></td>');
+				var emb = $('<label class="radio-inline"></label>').append(
+					$('<input type="radio">').attr({
+						name: 'layer_vector_mode_' + ly.layer_id,
+						value: 'embedded'
+					}).prop('checked', defMode === 'embedded')
+				).append(' {% trans "Data (GPKG)" %} ');
+				var defn = $('<label class="radio-inline"></label>').append(
+					$('<input type="radio">').attr({
+						name: 'layer_vector_mode_' + ly.layer_id,
+						value: 'definition_only'
+					}).prop('checked', defMode === 'definition_only')
+				).append(' {% trans "Definition only" %} ');
+				cell.append(emb).append(defn);
+				row.append(cell);
+				tbody.append(row);
+			});
+		}
+	}
+
+	$('#projects-table').on('click', 'a.project-package-export-btn', function (ev) {
+		if (ev.which !== 1 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) {
+			return;
+		}
+		ev.preventDefault();
+		var href = $(this).attr('href');
+		var m = href.match(/(\d+)\/?$/);
+		if (!m) {
+			return false;
+		}
+		var pid = m[1];
+		var preflightUrl = exportPreflightUrlTpl.replace('888888888', pid);
+		var exportUrl = exportPackageUrlTpl.replace('888888888', pid);
+		$('#form-export-project-package').attr('action', exportUrl);
+		resetExportPackageModal();
+		$('#modal-export-project-package').modal('show');
+		fetch(preflightUrl, { credentials: 'same-origin' })
+			.then(function (resp) { return resp.json(); })
+			.then(function (data) {
+				if (!data.ok) {
+					throw new Error(data.error || 'preflight');
+				}
+				fillExportPackageModal(data);
+			})
+			.catch(function () {
+				$('#export-package-preflight-loading').hide();
+				$('#export-package-preflight-error').show().text(
+					'{% trans "Could not load export options." %}'
+				);
+			});
+		return false;
+	});
+
+	$('#form-export-project-package').on('submit', function (ev) {
+		ev.preventDefault();
+		var form = this;
+		$('#modal-export-project-package').modal('hide');
+		fetch(form.action, {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: { 'X-CSRFToken': getCsrfToken() },
+			body: new FormData(form),
+			keepalive: true
+		});
+		window.location = '{% url "project_package_activity_log" %}';
+	});
 
 	$('#projects-table tbody').on('click', 'button', function (){
 		var row = table.row($(this).parents('tr'));

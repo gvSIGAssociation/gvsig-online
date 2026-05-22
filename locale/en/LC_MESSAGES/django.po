@@ -18,19 +18,19 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.4.2\n"
 
-#: gvsigol_core/forms.py:17
+#: forms.py:17
 msgid "Clone project and layer permissions"
 msgstr ""
 
-#: gvsigol_core/forms.py:18
+#: forms.py:18
 msgid "Don't apply any permission. Cloned layers will become public"
 msgstr ""
 
-#: gvsigol_core/forms.py:26
+#: forms.py:26
 msgid "New project title"
 msgstr ""
 
-#: gvsigol_core/forms.py:31 gvsigol_core/forms.py:38 gvsigol_core/forms.py:46
+#: forms.py:31 forms.py:38 forms.py:46
 msgid ""
 "must start by a lower case alphanumeric and contain lower case alphanumerics "
 "or underscores"
@@ -48,27 +48,27 @@ msgstr ""
 msgid "Target datastore and database schema name"
 msgstr ""
 
-#: gvsigol_core/forms.py:54
+#: forms.py:54
 msgid "numeric value required"
 msgstr ""
 
-#: gvsigol_core/forms.py:63
+#: forms.py:63
 msgid "Project exists"
 msgstr ""
 
-#: gvsigol_core/forms.py:68
+#: forms.py:68
 msgid "Workspace exists"
 msgstr ""
 
-#: gvsigol_core/forms.py:73
+#: forms.py:73
 msgid "Database schema exists"
 msgstr ""
 
-#: gvsigol_core/forms.py:80
+#: forms.py:80
 msgid "Server does not exist"
 msgstr ""
 
-#: gvsigol_core/forms.py:84
+#: forms.py:84
 msgid "SRS"
 msgstr ""
 
@@ -82,44 +82,41 @@ msgstr ""
 msgid "Classic (Bootstrap)"
 msgstr ""
 
-#: gvsigol_core/settings.py:32
+#: settings.py:32
 msgid "Project requests"
 msgstr ""
 
-#: gvsigol_core/settings.py:33
-#: gvsigol_core/templates/dashboard_core_menu.html:5
-#: gvsigol_core/templates/dashboard_core_menu.html:8
+#: settings.py:33 templates/dashboard_core_menu.html:5
+#: templates/dashboard_core_menu.html:8
 msgid "Projects"
 msgstr ""
 
-#: gvsigol_core/settings.py:41
+#: settings.py:41
 msgid "Project requests by user"
 msgstr ""
 
-#: gvsigol_core/settings.py:42
+#: settings.py:42
 msgid "Users"
 msgstr ""
 
-#: gvsigol_core/templates/404.html:10
-#: gvsigol_core/templates/not_found_sharedview.html:10
+#: templates/404.html:10 templates/not_found_sharedview.html:10
 msgid "Page not found"
 msgstr ""
 
-#: gvsigol_core/templates/404.html:13
-#: gvsigol_core/templates/not_found_sharedview.html:13
+#: templates/404.html:13 templates/not_found_sharedview.html:13
 msgid "We could not find the page you were looking for. Meanwhile, you may"
 msgstr ""
 
-#: gvsigol_core/templates/404.html:14 gvsigol_core/templates/500.html:14
-#: gvsigol_core/templates/not_found_sharedview.html:14
+#: templates/404.html:14 templates/500.html:14
+#: templates/not_found_sharedview.html:14
 msgid "return to dashboard"
 msgstr ""
 
-#: gvsigol_core/templates/500.html:10
+#: templates/500.html:10
 msgid "Something went wrong"
 msgstr ""
 
-#: gvsigol_core/templates/500.html:13
+#: templates/500.html:13
 msgid "We will work on fixing that right away. Meanwhile, you may"
 msgstr ""
 
@@ -255,11 +252,11 @@ msgstr ""
 msgid "Assign user group"
 msgstr ""
 
-#: gvsigol_core/templates/application_list.html:319
+#: templates/application_list.html:319
 msgid "Applications list"
 msgstr ""
 
-#: gvsigol_core/templates/application_list.html:322
+#: templates/application_list.html:322
 msgid "Add application"
 msgstr ""
 
@@ -272,7 +269,7 @@ msgstr "Is public?"
 msgid "Delete application"
 msgstr ""
 
-#: gvsigol_core/templates/application_list.html:374
+#: templates/application_list.html:374
 msgid "Application will be removed, Do you want continue?"
 msgstr ""
 
@@ -287,7 +284,7 @@ msgstr ""
 #: gvsigol_core/templates/viewer.html:291
 #: gvsigol_core/templates/viewer_compress.html:294
 msgid "Cancel"
-msgstr ""
+msgstr "Cancel"
 
 #: gvsigol_core/templates/application_list.html:378
 #: gvsigol_core/templates/project_add.html:854
@@ -404,7 +401,7 @@ msgstr ""
 msgid "%(sep)sSort descending"
 msgstr ""
 
-#: gvsigol_core/templates/application_list.html:423
+#: templates/application_list.html:423
 msgid "Update application"
 msgstr ""
 
@@ -452,11 +449,11 @@ msgstr ""
 msgid "All rights reserved"
 msgstr ""
 
-#: gvsigol_core/templates/dashboard_core_menu.html:9
+#: templates/dashboard_core_menu.html:9
 msgid "Shared views"
 msgstr ""
 
-#: gvsigol_core/templates/dashboard_core_menu.html:14
+#: templates/dashboard_core_menu.html:14
 msgid "Applications"
 msgstr ""
 
@@ -671,25 +668,107 @@ msgstr ""
 msgid "Error loading hidden items."
 msgstr ""
 
-#: gvsigol_core/templates/ogc_services.html:62
+#: templates/includes/project_package_reports_table.html:5
+#: templates/project_package_activity_log.html:79
+#: templates/project_package_export_result.html:11
+#: templates/project_package_import_wizard.html:37
+msgid "When"
+msgstr "When"
+
+#: templates/includes/project_package_reports_table.html:6
+#: templates/project_package_activity_log.html:30
+#: templates/project_package_activity_log.html:80
+msgid "Operation"
+msgstr ""
+
+#: templates/includes/project_package_reports_table.html:7
+#: templates/project_package_activity_log.html:32
+#: templates/project_package_activity_log.html:81
+#: templates/project_package_import_wizard.html:37
+msgid "Status"
+msgstr "Status"
+
+#: templates/includes/project_package_reports_table.html:8
+#: templates/includes/project_package_reports_table.html:50
+#: templates/project_package_activity_log.html:31
+#: templates/project_package_activity_log.html:82
+#: templates/project_package_activity_log.html:134
+#: templates/project_package_import_wizard.html:37
+#: templates/project_update.html:944
+msgid "Project"
+msgstr ""
+
+#: templates/includes/project_package_reports_table.html:9
+#: templates/project_package_activity_log.html:83
+msgid "Summary"
+msgstr "Summary"
+
+#: templates/includes/project_package_reports_table.html:19
+#: templates/project_list.html:717
+#: templates/project_package_activity_log.html:54
+#: templates/project_package_activity_log.html:93
+msgid "Import"
+msgstr "Import"
+
+#: templates/includes/project_package_reports_table.html:21
+#: templates/project_list.html:762
+#: templates/project_package_activity_log.html:39
+#: templates/project_package_activity_log.html:95
+msgid "Export"
+msgstr "Export"
+
+#: templates/includes/project_package_reports_table.html:28
+#: templates/project_package_activity_log.html:102
+msgid "Partial"
+msgstr "Partial"
+
+#: templates/includes/project_package_reports_table.html:30
+#: templates/project_package_activity_log.html:104
+msgid "Failed"
+msgstr "Failed"
+
+#: templates/includes/project_package_reports_table.html:37
+#: templates/project_package_activity_log.html:111
+msgid "imported"
+msgstr "imported"
+
+#: templates/includes/project_package_reports_table.html:38
+#: templates/project_package_activity_log.html:112
+msgid "skipped"
+msgstr "skipped"
+
+#: templates/includes/project_package_reports_table.html:40
+#: templates/project_package_activity_log.html:114
+msgid "Package downloaded"
+msgstr "Package downloaded"
+
+#: templates/includes/project_package_reports_table.html:46
+#: templates/includes/project_package_reports_table.html:48
+msgid "View report"
+msgstr "View report"
+
+#: templates/includes/project_package_reports_table.html:56
+#: templates/project_package_activity_log.html:140
+msgid "No import or export reports yet."
+msgstr "No import or export reports yet."
+
+#: templates/ogc_services.html:62
 msgid "WMS Service"
 msgstr ""
 
-#: gvsigol_core/templates/ogc_services.html:62
-#: gvsigol_core/templates/ogc_services.html:72
+#: templates/ogc_services.html:62 templates/ogc_services.html:72
 msgid "Show capabilities"
 msgstr ""
 
-#: gvsigol_core/templates/ogc_services.html:72
+#: templates/ogc_services.html:72
 msgid "WFS Service"
 msgstr ""
 
-#: gvsigol_core/templates/ogc_services.html:86
+#: templates/ogc_services.html:86
 msgid "No services have been published"
 msgstr ""
 
-#: gvsigol_core/templates/ogc_services.html:117
-#: gvsigol_core/templates/services_view.html:170
+#: templates/ogc_services.html:117 templates/services_view.html:170
 msgid "Service capabilities"
 msgstr ""
 
@@ -764,15 +843,13 @@ msgstr ""
 msgid "expiration_date_optional"
 msgstr "Expiration date (optional)"
 
-#: gvsigol_core/templates/project_add.html:523
-#: gvsigol_core/templates/project_update.html:541
+#: templates/project_add.html:523 templates/project_update.html:541
 msgid "expiration_date_hint"
 msgstr ""
 "Leave empty if the project should not expire. Use the clear icon in the "
 "calendar or the button below."
 
-#: gvsigol_core/templates/project_add.html:524
-#: gvsigol_core/templates/project_update.html:542
+#: templates/project_add.html:524 templates/project_update.html:542
 msgid "expiration_date_clear"
 msgstr "Clear expiration date"
 
@@ -1103,10 +1180,6 @@ msgstr ""
 msgid "Download"
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:944
-msgid "Project"
-msgstr ""
-
 #: gvsigol_core/templates/project_update.html:947
 msgid "Layer"
 msgstr ""
@@ -1143,41 +1216,40 @@ msgstr ""
 msgid "Stop Process"
 msgstr ""
 
-#: gvsigol_core/templates/select_public_mobile_project.html:8
-#: gvsigol_core/templates/select_public_project.html:8
+#: templates/select_public_mobile_project.html:8
+#: templates/select_public_project.html:8
 #, python-format
 msgid "Public viewers - %(GVSIGOL_CUSTOMER_NAME)s"
 msgstr ""
 
-#: gvsigol_core/templates/select_public_mobile_project.html:80
-#: gvsigol_core/templates/select_public_project.html:107
+#: templates/select_public_mobile_project.html:80
+#: templates/select_public_project.html:107
 msgid "There are no public projects"
 msgstr ""
 
-#: gvsigol_core/templates/select_public_mobile_project.html:91
-#: gvsigol_core/templates/select_public_project.html:118
+#: templates/select_public_mobile_project.html:91
+#: templates/select_public_project.html:118
 msgid "Application list"
 msgstr ""
 
-#: gvsigol_core/templates/select_public_project.html:72
-#: gvsigol_core/templates/viewer.html:176
-#: gvsigol_core/templates/viewer_compress.html:178
+#: templates/select_public_project.html:72 templates/viewer.html:176
+#: templates/viewer_compress.html:178
 msgid "Sign in"
 msgstr ""
 
-#: gvsigol_core/templates/services_view.html:58
+#: templates/services_view.html:58
 msgid "WMS Services"
 msgstr ""
 
-#: gvsigol_core/templates/services_view.html:59
+#: templates/services_view.html:59
 msgid "WMTS Services"
 msgstr ""
 
-#: gvsigol_core/templates/services_view.html:60
+#: templates/services_view.html:60
 msgid "WFS Services"
 msgstr ""
 
-#: gvsigol_core/templates/services_view.html:61
+#: templates/services_view.html:61
 msgid "CSW Services"
 msgstr ""
 
@@ -1201,38 +1273,32 @@ msgstr ""
 msgid "Delete shared view"
 msgstr ""
 
-#: gvsigol_core/templates/toc_update.html:11
+#: templates/toc_update.html:11
 msgid "Update TOC"
 msgstr ""
 
-#: gvsigol_core/templates/viewer.html:91 gvsigol_core/templates/viewer.html:552
-#: gvsigol_core/templates/viewer_compress.html:93
-#: gvsigol_core/templates/viewer_compress.html:510
+#: templates/viewer.html:91 templates/viewer.html:552
+#: templates/viewer_compress.html:93 templates/viewer_compress.html:510
 msgid "Close"
 msgstr ""
 
-#: gvsigol_core/templates/viewer.html:123
-#: gvsigol_core/templates/viewer_compress.html:125
+#: templates/viewer.html:123 templates/viewer_compress.html:125
 msgid "Views"
 msgstr ""
 
-#: gvsigol_core/templates/viewer.html:126
-#: gvsigol_core/templates/viewer_compress.html:128
+#: templates/viewer.html:126 templates/viewer_compress.html:128
 msgid "View 2D"
 msgstr ""
 
-#: gvsigol_core/templates/viewer.html:209
-#: gvsigol_core/templates/viewer_compress.html:211
+#: templates/viewer.html:209 templates/viewer_compress.html:211
 msgid "Layer tree"
 msgstr ""
 
-#: gvsigol_core/templates/viewer.html:210
-#: gvsigol_core/templates/viewer_compress.html:212
+#: templates/viewer.html:210 templates/viewer_compress.html:212
 msgid "Legend"
 msgstr ""
 
-#: gvsigol_core/templates/viewer.html:211
-#: gvsigol_core/templates/viewer_compress.html:213
+#: templates/viewer.html:211 templates/viewer_compress.html:213
 msgid "Filters"
 msgstr ""
 
@@ -1241,18 +1307,15 @@ msgstr ""
 msgid "Temporary"
 msgstr ""
 
-#: gvsigol_core/templates/viewer.html:285
-#: gvsigol_core/templates/viewer_compress.html:288
+#: templates/viewer.html:285 templates/viewer_compress.html:288
 msgid "End edition"
 msgstr ""
 
-#: gvsigol_core/templates/viewer.html:288
-#: gvsigol_core/templates/viewer_compress.html:291
+#: templates/viewer.html:288 templates/viewer_compress.html:291
 msgid "Changes don't saved will be missed. Continue?"
 msgstr ""
 
-#: gvsigol_core/templates/viewer.html:308
-#: gvsigol_core/templates/viewer_compress.html:311
+#: templates/viewer.html:308 templates/viewer_compress.html:311
 msgid "Error loading layers"
 msgstr ""
 

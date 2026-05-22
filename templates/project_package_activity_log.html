@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="box box-primary">
+	<div class="box-header with-border">
+		<h3 class="box-title">{% trans "Import and export reports" %}</h3>
+	</div>
+	<div class="box-body">
+		<p class="text-muted">{% trans "Last import and export operations on this server" %} ({{ limit }}).</p>
+
+		{% if migration_missing %}
+		<div class="alert alert-warning">
+			{% trans "Activity log is not available until database migrations are applied:" %}
+			<code>python manage.py migrate gvsigol_core</code>
+		</div>
+		{% endif %}
+
+		{# ── In-progress section (updated via AJAX — no full reload) ────── #}
+		<div id="pp-inprogress-wrapper">
+		{% if in_progress_exports or in_progress_imports %}
+		<div id="pp-inprogress-section">
+			<h4 style="margin-bottom:0.5em">
+				<i class="fa fa-spinner fa-spin text-primary"></i>
+				{% trans "In progress" %}
+			</h4>
+			<table class="table table-bordered table-condensed" style="font-size:12px" id="pp-inprogress-table">
+				<thead>
+					<tr>
+						<th>{% trans "Started" %}</th>
+						<th>{% trans "Operation" %}</th>
+						<th>{% trans "Project" %}</th>
+						<th>{% trans "Status" %}</th>
+					</tr>
+				</thead>
+				<tbody id="pp-inprogress-tbody">
+					{% for job in in_progress_exports %}
+					<tr data-job-type="export" data-job-id="{{ job.id }}">
+						<td nowrap><small>{{ job.created_at|date:"Y-m-d H:i" }}</small></td>
+						<td><span class="label label-info">{% trans "Export" %}</span></td>
+						<td>{{ job.project_name|default:"—"|truncatechars:50 }}</td>
+						<td class="pp-status-cell">
+							<i class="fa fa-spinner fa-spin"></i>
+							<span class="pp-status-text text-muted">
+								{% if job.status == 'running' %}{% trans "running" %}
+								{% else %}{% trans "pending" %}{% endif %}
+							</span>
+							<div class="pp-progress-bar" style="display:none;margin-top:4px">
+								<div class="progress progress-striped active" style="margin-bottom:0;height:10px">
+									<div class="progress-bar" role="progressbar" style="width:0%"></div>
+								</div>
+							</div>
+							<span class="pp-cancel-wrap" style="margin-left:0.5em">
+							<button type="button" class="btn btn-xs btn-danger pp-cancel-btn"
+								data-cancel-url="{% url 'cancel_package_job' job_type='export' job_id=job.id %}">{% trans "Cancel" %}</button>
+								<span class="pp-cancel-confirm" style="display:none">
+									{% trans "Sure?" %}
+									<button type="button" class="btn btn-xs btn-danger pp-cancel-yes">{% trans "Yes" %}</button>
+									<button type="button" class="btn btn-xs btn-default pp-cancel-no">{% trans "No" %}</button>
+								</span>
+							</span>
+						</td>
+					</tr>
+					{% endfor %}
+					{% for job in in_progress_imports %}
+					<tr data-job-type="import" data-job-id="{{ job.id }}">
+						<td nowrap><small>{{ job.created_at|date:"Y-m-d H:i" }}</small></td>
+						<td><span class="label label-primary">{% trans "Import" %}</span></td>
+						<td>{% with mn=job.manifest_json %}{{ mn.source_project_name|default:"—"|truncatechars:50 }}{% endwith %}</td>
+						<td class="pp-status-cell">
+							<i class="fa fa-spinner fa-spin"></i>
+							<span class="pp-status-text text-muted">
+								{% if job.status == 'running' %}{% trans "running" %}
+								{% elif job.status == 'preflight_ok' %}{% trans "pending" %}
+								{% else %}{% trans "pending" %}{% endif %}
+							</span>
+							<div class="pp-progress-bar" style="display:none;margin-top:4px">
+								<div class="progress progress-striped active" style="margin-bottom:0;height:10px">
+									<div class="progress-bar" role="progressbar" style="width:0%"></div>
+								</div>
+							</div>
+							<span class="pp-cancel-wrap" style="margin-left:0.5em">
+							<button type="button" class="btn btn-xs btn-danger pp-cancel-btn"
+								data-cancel-url="{% url 'cancel_package_job' job_type='import' job_id=job.id %}">{% trans "Cancel" %}</button>
+								<span class="pp-cancel-confirm" style="display:none">
+									{% trans "Sure?" %}
+									<button type="button" class="btn btn-xs btn-danger pp-cancel-yes">{% trans "Yes" %}</button>
+									<button type="button" class="btn btn-xs btn-default pp-cancel-no">{% trans "No" %}</button>
+								</span>
+							</span>
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		{% endif %}
+		</div>{# /pp-inprogress-wrapper #}
+
+		{# ── Completed operations table ──────────────────────────────────── #}
+		<table class="table table-bordered table-striped table-condensed" style="margin-bottom:0;font-size:12px">
+			<thead>
+				<tr>
+					<th>{% trans "When" %}</th>
+					<th>{% trans "Operation" %}</th>
+					<th>{% trans "Status" %}</th>
+					<th>{% trans "Project" %}</th>
+					<th>{% trans "Summary" %}</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for row in report_rows %}
+				<tr>
+					<td nowrap><small>{{ row.created_at|date:"Y-m-d H:i" }}</small></td>
+					<td>
+						{% if row.operation == 'import' %}
+						<span class="label label-primary">{% trans "Import" %}</span>
+						{% else %}
+						<span class="label label-info">{% trans "Export" %}</span>
+						{% endif %}
+					</td>
+					<td>
+						{% if row.status == 'ok' %}
+						<span class="label label-success">OK</span>
+						{% elif row.status == 'partial' %}
+						<span class="label label-warning">{% trans "Partial" %}</span>
+						{% else %}
+						<span class="label label-danger">{% trans "Failed" %}</span>
+						{% endif %}
+					</td>
+					<td>{{ row.project_name|default:"—"|truncatechars:50 }}</td>
+					<td>
+						{% with s=row.summary %}
+						{% if row.operation == 'import' %}
+							{% if s.counts.imported %}{{ s.counts.imported }} {% trans "imported" %}{% endif %}
+							{% if s.counts.skipped %}, {{ s.counts.skipped }} {% trans "skipped" %}{% endif %}
+						{% else %}
+							{% trans "Package downloaded" %}
+							{% if s.export_errors %}
+							— <span class="text-warning">{{ s.export_errors|length }} {% trans "layer(s) with errors" %}</span>
+							{% endif %}
+						{% endif %}
+						{% endwith %}
+					</td>
+					<td nowrap>
+						{# Download button for exports with zip still available #}
+						{% if row.download_url %}
+						<a class="btn btn-xs btn-success" href="{{ row.download_url }}" title="{{ row.zip_filename }}">
+							<i class="fa fa-download"></i> {% trans "Download" %}
+						</a>
+						{% endif %}
+						{# Report link #}
+						{% if row.has_report and row.import_job_id %}
+						<a class="btn btn-xs btn-default" href="{% url 'project_package_import_result' job_id=row.import_job_id %}">{% trans "Report" %}</a>
+						{% elif row.has_report and row.activity_log_id %}
+						<a class="btn btn-xs btn-default" href="{% url 'project_package_export_result' log_id=row.activity_log_id %}">{% trans "Report" %}</a>
+						{% elif row.project_id %}
+						<a class="btn btn-xs btn-link" href="{% url 'project_update' pid=row.project_id %}">{% trans "Project" %}</a>
+						{% endif %}
+					</td>
+				</tr>
+				{% empty %}
+				<tr>
+					<td colspan="6" class="text-muted">{% trans "No import or export reports yet." %}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+
+		<p style="margin-top:1em">
+			<a class="btn btn-default" href="{% url 'project_list' %}">
+				<i class="fa fa-arrow-left"></i> {% trans "Back to projects" %}
+			</a>
+		</p>
+	</div>{# /box-body #}
+</div>{# /box #}
+
+{% if has_in_progress %}
+<script>
+(function () {
+    'use strict';
+
+    /* ── Translated strings ──────────────────────────────────────────── */
+    var T = {
+        running:  "{% trans 'running' %}",
+        pending:  "{% trans 'pending' %}",
+        sure:     "{% trans 'Sure?' %}",
+        yes:      "{% trans 'Yes' %}",
+        no:       "{% trans 'No' %}"
+    };
+
+    var POLL_URL = "{% url 'activity_log_inprogress_json' %}";
+    var pollInterval = null;
+    var reloadScheduled = false;
+
+    /* ── Inline cancel confirmation (no JS alert) ──────────────────── */
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('.pp-cancel-btn');
+        if (btn) {
+            e.preventDefault();
+            var wrap = btn.closest('.pp-cancel-wrap');
+            btn.style.display = 'none';
+            wrap.querySelector('.pp-cancel-confirm').style.display = 'inline';
+            return;
+        }
+
+        var noBtn = e.target.closest('.pp-cancel-no');
+        if (noBtn) {
+            var wrap = noBtn.closest('.pp-cancel-wrap');
+            wrap.querySelector('.pp-cancel-btn').style.display = 'inline-block';
+            wrap.querySelector('.pp-cancel-confirm').style.display = 'none';
+            return;
+        }
+
+        var yesBtn = e.target.closest('.pp-cancel-yes');
+        if (yesBtn) {
+            var wrap = yesBtn.closest('.pp-cancel-wrap');
+            var cancelBtn = wrap.querySelector('.pp-cancel-btn');
+            var url = cancelBtn.getAttribute('data-cancel-url');
+            /* POST via fetch — CSRF token from cookie */
+            var csrf = document.cookie.match(/csrftoken=([^;]+)/);
+            var token = csrf ? csrf[1] : '';
+            fetch(url, {
+                method: 'POST',
+                headers: {'X-CSRFToken': token, 'Content-Type': 'application/x-www-form-urlencoded'},
+                credentials: 'same-origin'
+            }).then(function () { location.reload(); });
+            return;
+        }
+    });
+
+    /* ── AJAX polling — update only status cells, no full reload ──── */
+    function updateRow(jobType, jobId, data) {
+        var row = document.querySelector(
+            'tr[data-job-type="' + jobType + '"][data-job-id="' + jobId + '"]'
+        );
+        if (!row) return;
+
+        /* Status text */
+        var statusEl = row.querySelector('.pp-status-text');
+        if (statusEl) {
+            var label = data.status === 'running' ? T.running : T.pending;
+            statusEl.textContent = label;
+        }
+
+        /* Progress bar */
+        if (data.percent !== null && data.percent !== undefined) {
+            var barWrap = row.querySelector('.pp-progress-bar');
+            var bar = row.querySelector('.progress-bar');
+            if (barWrap && bar) {
+                barWrap.style.display = 'block';
+                bar.style.width = data.percent + '%';
+                bar.setAttribute('aria-valuenow', data.percent);
+                var title = data.percent + '%';
+                if (data.step) title += ' – ' + data.step;
+                bar.title = title;
+            }
+        }
+    }
+
+    function poll() {
+        fetch(POLL_URL, {credentials: 'same-origin'})
+            .then(function (r) { return r.json(); })
+            .then(function (json) {
+                json.exports.forEach(function (j) { updateRow('export', j.id, j); });
+                json.imports.forEach(function (j) { updateRow('import', j.id, j); });
+
+                if (!json.has_in_progress && !reloadScheduled) {
+                    reloadScheduled = true;
+                    clearInterval(pollInterval);
+                    /* Reload once to show the completed result in the table */
+                    setTimeout(function () { location.reload(); }, 1000);
+                }
+            })
+            .catch(function () { /* network hiccup — ignore, retry next tick */ });
+    }
+
+    pollInterval = setInterval(poll, 3000);
+    poll(); /* immediate first call */
+})();
+</script>
+{% endif %}
+{% endblock %}
