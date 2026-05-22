@@ -21,7 +21,7 @@
 '''
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
-from lxml.etree import parse, Element, XMLSchema, tostring
+from lxml.etree import parse, Element, XMLSchema, tostring, XMLSchemaParseError
 from lxml import objectify
 try:
     from urllib.request import urlopen
@@ -31,6 +31,29 @@ from tempfile import NamedTemporaryFile
 import os
 import copy
 import logging
+
+_SLD_XML_SCHEMA_COMPILE_WARNED = False
+
+
+def _build_sld_xml_schema(schemadoc):
+    """
+    Compile the bundled SLD 1.0 XSD for optional instance validation.
+
+    The XSD imports W3C xlink; newer xlink.xsd revisions may break lxml's
+    schema compiler. Parsing SLD does not require a compiled schema.
+    """
+    global _SLD_XML_SCHEMA_COMPILE_WARNED
+    try:
+        return XMLSchema(schemadoc)
+    except XMLSchemaParseError:
+        if not _SLD_XML_SCHEMA_COMPILE_WARNED:
+            _SLD_XML_SCHEMA_COMPILE_WARNED = True
+            logging.warning(
+                'Could not compile bundled SLD XML Schema (xlink/OGC imports). '
+                'SLD instance validation is disabled; SLD parsing continues.',
+                exc_info=True,
+            )
+        return None
 
 
 class SLDNode(object):
@@ -1846,6 +1869,10 @@ class Rules(SLDNode):
         """
         self._nodes.remove(self._nodes[key])
 
+    def __iter__(self):
+        for i in range(len(self)):
+            yield self[i]
+
 
 class Transformation(SLDNode):
     """
@@ -2168,8 +2195,8 @@ class StyledLayerDescriptor(SLDNode):
 
         if not sld_file is None:
             self._node = parse(sld_file)
-            self._schema = XMLSchema(self._schemadoc)
-            if not self._schema.validate(self._node):
+            self._schema = _build_sld_xml_schema(self._schemadoc)
+            if self._schema is not None and not self._schema.validate(self._node):
                 logging.warn('SLD File "%s" does not validate against the SLD schema.', sld_file)
         else:
             self._node = Element("{%s}StyledLayerDescriptor" % SLDNode._nsmap['sld'], version="1.0.0", nsmap=SLDNode._nsmap)
@@ -2221,7 +2248,11 @@ class StyledLayerDescriptor(SLDNode):
             return False
 
         if self._schema is None:
-            self._schema = XMLSchema(self._schemadoc)
+            self._schema = _build_sld_xml_schema(self._schemadoc)
+
+        if self._schema is None:
+            logging.debug('SLD schema not compiled; skipping validation.')
+            return False
 
         is_valid = self._schema.validate(self._node)
 

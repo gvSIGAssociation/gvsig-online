@@ -40,6 +40,182 @@ SLD_STORED_TYPES = ('CS', 'MC')
 # Rule-based styles that need full SLD build (e.g. gs:PointStacker transformation for clustered points).
 SLD_BUILD_FULL_TYPES = ('CP',)
 
+_SLD_NS = {
+    'sld': 'http://www.opengis.net/sld',
+    'ogc': 'http://www.opengis.net/ogc',
+    'xlink': 'http://www.w3.org/1999/xlink',
+}
+
+
+def _sld_first_text(elem, xpath):
+    if elem is None:
+        return None
+    hit = elem.xpath(xpath, namespaces=_SLD_NS)
+    if not hit:
+        return None
+    t = hit[0].text
+    if t is None:
+        return None
+    t = t.strip()
+    return t if t else None
+
+
+def _sld_css_map(elem):
+    m = {}
+    if elem is None:
+        return m
+    for p in elem.xpath('sld:CssParameter', namespaces=_SLD_NS):
+        k = p.get('name')
+        if k:
+            m[k] = (p.text or '').strip()
+    return m
+
+
+def _sld_float(val, default):
+    if val is None or val == '':
+        return default
+    try:
+        return float(val)
+    except (TypeError, ValueError):
+        return default
+
+
+def _sld_import_symbolizers(rule_node, model_rule):
+    """
+    Persist symbolizers from a Rule element using lxml (parse_sld uses sld.Rule
+    wrappers, not generateDS).
+    """
+    scount = 0
+    sym_tags = (
+        'PointSymbolizer',
+        'LineSymbolizer',
+        'PolygonSymbolizer',
+        'TextSymbolizer',
+        'RasterSymbolizer',
+    )
+    for child in rule_node:
+        if not isinstance(child.tag, str):
+            continue
+        if etree.QName(child).localname not in sym_tags:
+            continue
+        tag = etree.QName(child).localname
+
+        if tag == 'PointSymbolizer':
+            g = child.xpath('sld:Graphic', namespaces=_SLD_NS)
+            graphic = g[0] if g else None
+            if graphic is not None:
+                opacity = _sld_float(_sld_first_text(graphic, 'sld:Opacity'), 1.0)
+                rotation = _sld_float(_sld_first_text(graphic, 'sld:Rotation'), 0.0)
+                size = _sld_float(_sld_first_text(graphic, 'sld:Size'), 8.0)
+                marks = graphic.xpath('sld:Mark', namespaces=_SLD_NS)
+                if marks:
+                    mark = marks[0]
+                    fill = '#383838'
+                    fill_opacity = 0.5
+                    fills = mark.xpath('sld:Fill', namespaces=_SLD_NS)
+                    if fills:
+                        for k, v in _sld_css_map(fills[0]).items():
+                            if k == 'fill':
+                                fill = v
+                            elif k == 'fill-opacity':
+                                fill_opacity = _sld_float(v, fill_opacity)
+                    stroke = '#ffffff'
+                    stroke_width = 1
+                    stroke_opacity = 0.0
+                    stroke_dash_array = 'none'
+                    strokes = mark.xpath('sld:Stroke', namespaces=_SLD_NS)
+                    if strokes:
+                        for k, v in _sld_css_map(strokes[0]).items():
+                            if k == 'stroke':
+                                stroke = v
+                            elif k == 'stroke-width':
+                                stroke_width = _sld_float(v, stroke_width)
+                            elif k == 'stroke-opacity':
+                                stroke_opacity = _sld_float(v, stroke_opacity)
+                            elif k == 'stroke-dasharray':
+                                stroke_dash_array = v
+                    wkn = _sld_first_text(mark, 'sld:WellKnownName') or 'circle'
+                    MarkSymbolizer(
+                        rule=model_rule,
+                        order=scount,
+                        opacity=opacity,
+                        size=size,
+                        rotation=rotation,
+                        well_known_name=wkn,
+                        fill=fill,
+                        fill_opacity=fill_opacity,
+                        stroke=stroke,
+                        stroke_width=stroke_width,
+                        stroke_opacity=stroke_opacity,
+                        stroke_dash_array=stroke_dash_array,
+                    ).save()
+                elif graphic.xpath('sld:ExternalGraphic', namespaces=_SLD_NS):
+                    pass
+
+        elif tag == 'LineSymbolizer':
+            stroke = '#ffffff'
+            stroke_width = 1
+            stroke_opacity = 0.0
+            stroke_dash_array = 'none'
+            strokes = child.xpath('sld:Stroke', namespaces=_SLD_NS)
+            if strokes:
+                for k, v in _sld_css_map(strokes[0]).items():
+                    if k == 'stroke':
+                        stroke = v
+                    elif k == 'stroke-width':
+                        stroke_width = _sld_float(v, stroke_width)
+                    elif k == 'stroke-opacity':
+                        stroke_opacity = _sld_float(v, stroke_opacity)
+                    elif k == 'stroke-dasharray':
+                        stroke_dash_array = v
+            LineSymbolizer(
+                rule=model_rule,
+                order=scount,
+                stroke=stroke,
+                stroke_width=stroke_width,
+                stroke_opacity=stroke_opacity,
+                stroke_dash_array=stroke_dash_array,
+            ).save()
+
+        elif tag == 'PolygonSymbolizer':
+            fill = '#383838'
+            fill_opacity = 0.5
+            fills = child.xpath('sld:Fill', namespaces=_SLD_NS)
+            if fills:
+                for k, v in _sld_css_map(fills[0]).items():
+                    if k == 'fill':
+                        fill = v
+                    elif k == 'fill-opacity':
+                        fill_opacity = _sld_float(v, fill_opacity)
+            stroke = '#ffffff'
+            stroke_width = 1
+            stroke_opacity = 0.0
+            stroke_dash_array = 'none'
+            strokes = child.xpath('sld:Stroke', namespaces=_SLD_NS)
+            if strokes:
+                for k, v in _sld_css_map(strokes[0]).items():
+                    if k == 'stroke':
+                        stroke = v
+                    elif k == 'stroke-width':
+                        stroke_width = _sld_float(v, stroke_width)
+                    elif k == 'stroke-opacity':
+                        stroke_opacity = _sld_float(v, stroke_opacity)
+                    elif k == 'stroke-dasharray':
+                        stroke_dash_array = v
+            PolygonSymbolizer(
+                rule=model_rule,
+                order=scount,
+                fill=fill,
+                fill_opacity=fill_opacity,
+                stroke=stroke,
+                stroke_width=stroke_width,
+                stroke_opacity=stroke_opacity,
+                stroke_dash_array=stroke_dash_array,
+            ).save()
+
+        scount += 1
+
+
 
 def create_default_style(layer_id, style_name, style_type, geom_type, count):
     layer = Layer.objects.get(id=int(layer_id))
@@ -165,11 +341,29 @@ def sld_import(name, is_default, layer_id, file, mapservice):
     filepath = tup[1]
     tmp_sld = open(filepath, 'r')
 
-    sld = sld_builder.parse_sld(tmp_sld)
-    
+    try:
+        sld = sld_builder.parse_sld(tmp_sld)
+    finally:
+        tmp_sld.close()
+
+    nl = sld.NamedLayer
+    if nl is None:
+        utils.__delete_temporaries(filepath)
+        return False
+    us = nl.UserStyle
+    if us is None:
+        utils.__delete_temporaries(filepath)
+        return False
+    fts = us.FeatureTypeStyle
+    if fts is None:
+        utils.__delete_temporaries(filepath)
+        return False
+
+    style_title = us.Title if us.Title else name
+
     style = Style(
         name = name,
-        title = sld.NamedLayer[0].UserStyle[0].Title,
+        title = style_title,
         is_default = is_default,
         type = "EX"
     )
@@ -181,138 +375,25 @@ def sld_import(name, is_default, layer_id, file, mapservice):
     )
     style_layer.save()
     
-    rules = sld.NamedLayer[0].UserStyle[0].FeatureTypeStyle[0].Rule
-    for r in rules:
-        filter = utils.filter_to_json(r.Filter)
+    rules_col = fts.Rules
+    for r in rules_col:
+        filt = utils.sld_filter_to_json(r.Filter)
+        rn = _sld_first_text(r._node, 'sld:Name')
+        rt = _sld_first_text(r._node, 'sld:Title')
+        rule_name = rn or rt or ''
+        rule_title = rt or rn or ''
         rule = Rule(
             style = style,
-            name = r.Name,
-            title = r.Title,
+            name = rule_name,
+            title = rule_title,
             abstract = '',
-            filter = json.dumps(filter),
+            filter = json.dumps(filt) if filt is not None else '',
             minscale = -1 if r.MinScaleDenominator is None else r.MinScaleDenominator,
             maxscale = -1 if r.MaxScaleDenominator is None else r.MaxScaleDenominator,
             order = 0
         )
         rule.save()
-    
-        scount = 0
-        for s in r.Symbolizer:
-            if s.original_tagname_ == 'PointSymbolizer':
-                opacity = s.Graphic.Opacity.valueOf_
-                rotation = s.Graphic.Rotation.valueOf_
-                size = s.Graphic.Size.valueOf_
-                if len(s.Graphic.Mark) >= 1:
-                    mark = s.Graphic.Mark[0]
-                    
-                    fill = '#383838'
-                    fill_opacity = 0.5
-                    if len(mark.Fill.CssParameter) > 0:
-                        for css_parameter in mark.Fill.CssParameter:
-                            if css_parameter.name == 'fill':
-                                fill =  css_parameter.valueOf_
-                            if css_parameter.name == 'fill-opacity':
-                                fill_opacity =  css_parameter.valueOf_
-                                
-                    stroke = '#ffffff'
-                    stroke_width = 1
-                    stroke_opacity = 0.0
-                    stroke_dash_array = 'none'
-                    if len(mark.Stroke.CssParameter) > 0:
-                        for css_parameter in mark.Stroke.CssParameter:
-                            if css_parameter.name == 'stroke':
-                                stroke =  css_parameter.valueOf_
-                            if css_parameter.name == 'stroke-width':
-                                stroke_width =  css_parameter.valueOf_
-                            if css_parameter.name == 'stroke-opacity':
-                                stroke_opacity =  css_parameter.valueOf_
-                            if css_parameter.name == 'stroke-dasharray':
-                                stroke_dash_array =  css_parameter.valueOf_
-                        
-                    symbolizer = MarkSymbolizer(
-                        rule = rule,
-                        order = scount,
-                        opacity = opacity,
-                        size = size,
-                        rotation = rotation,
-                        well_known_name = mark.WellKnownName,
-                        fill = fill,
-                        fill_opacity = fill_opacity,
-                        stroke = stroke,
-                        stroke_width = stroke_width,
-                        stroke_opacity = stroke_opacity,
-                        stroke_dash_array = stroke_dash_array                
-                    )
-                    symbolizer.save()
-                    
-                if len(s.Graphic.ExternalGraphic) >= 1:
-                    print('ExternalGraphic')
-                    
-            elif s.original_tagname_ == 'LineSymbolizer':
-                stroke = '#ffffff'
-                stroke_width = 1
-                stroke_opacity = 0.0
-                stroke_dash_array = 'none'
-                if len(s.Stroke.CssParameter) > 0:
-                    for css_parameter in s.Stroke.CssParameter:
-                        if css_parameter.name == 'stroke':
-                            stroke =  css_parameter.valueOf_
-                        if css_parameter.name == 'stroke-width':
-                            stroke_width =  css_parameter.valueOf_
-                        if css_parameter.name == 'stroke-opacity':
-                            stroke_opacity =  css_parameter.valueOf_
-                        if css_parameter.name == 'stroke-dasharray':
-                            stroke_dash_array =  css_parameter.valueOf_
-                                
-                symbolizer = LineSymbolizer(
-                    rule = rule,
-                    order = scount,
-                    stroke = stroke,
-                    stroke_width = stroke_width,
-                    stroke_opacity = stroke_opacity,
-                    stroke_dash_array = stroke_dash_array              
-                )
-                symbolizer.save()
-                    
-            elif s.original_tagname_ == 'PolygonSymbolizer':
-                
-                fill = '#383838'
-                fill_opacity = 0.5
-                if len(s.Fill.CssParameter) > 0:
-                    for css_parameter in s.Fill.CssParameter:
-                        if css_parameter.name == 'fill':
-                            fill =  css_parameter.valueOf_
-                        if css_parameter.name == 'fill-opacity':
-                            fill_opacity =  css_parameter.valueOf_
-                
-                stroke = '#ffffff'
-                stroke_width = 1
-                stroke_opacity = 0.0
-                stroke_dash_array = 'none'
-                if len(s.Stroke.CssParameter) > 0:
-                    for css_parameter in s.Stroke.CssParameter:
-                        if css_parameter.name == 'stroke':
-                            stroke =  css_parameter.valueOf_
-                        if css_parameter.name == 'stroke-width':
-                            stroke_width =  css_parameter.valueOf_
-                        if css_parameter.name == 'stroke-opacity':
-                            stroke_opacity =  css_parameter.valueOf_
-                        if css_parameter.name == 'stroke-dasharray':
-                            stroke_dash_array =  css_parameter.valueOf_
-                            
-                symbolizer = PolygonSymbolizer(
-                    rule = rule,
-                    order = scount,
-                    fill = fill,
-                    fill_opacity = fill_opacity,
-                    stroke = stroke,
-                    stroke_width = stroke_width,
-                    stroke_opacity = stroke_opacity,
-                    stroke_dash_array = stroke_dash_array                 
-                )
-                symbolizer.save()
-                
-            scount+= 1
+        _sld_import_symbolizers(r._node, rule)
         
     sld_body = sld_builder.build_sld(layer, style)
     if mapservice.createStyle(style.name, sld_body): 

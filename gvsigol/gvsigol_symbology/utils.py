@@ -525,6 +525,63 @@ def filter_to_json(filter):
         
     return json_filter
 
+
+def sld_filter_to_json(flt):
+    """
+    Convert a gvsigol_symbology.sld.Filter wrapper (lxml-backed) into the JSON
+    dict shape expected by sld_builder.create_rule (operation, field, value).
+    """
+    from lxml import etree
+
+    if flt is None:
+        return None
+
+    OGC = 'http://www.opengis.net/ogc'
+    ns = {'ogc': OGC}
+    root = flt._node
+    child = None
+    for c in root:
+        if isinstance(c.tag, str) and etree.QName(c).namespace == OGC:
+            child = c
+            break
+    if child is None:
+        return None
+
+    tag = etree.QName(child).localname
+
+    def _text(xpath):
+        hit = child.xpath(xpath, namespaces=ns)
+        if not hit:
+            return None
+        t = hit[0].text
+        return (t or '').strip() if t is not None else None
+
+    field = _text('ogc:PropertyName')
+    literal = _text('ogc:Literal')
+
+    if tag == 'PropertyIsEqualTo':
+        return {'operation': 'is_equal_to', 'field': field, 'value': literal}
+    if tag == 'PropertyIsNull':
+        return {'operation': 'is_null', 'field': field}
+    if tag == 'PropertyIsLike':
+        return {'operation': 'is_like', 'field': field, 'value': literal}
+    if tag == 'PropertyIsNotEqualTo':
+        return {'operation': 'is_not_equal', 'field': field, 'value': literal}
+    if tag == 'PropertyIsGreaterThan':
+        return {'operation': 'is_greater_than', 'field': field, 'value': literal}
+    if tag == 'PropertyIsGreaterThanOrEqualTo':
+        return {'operation': 'is_greater_than_or_equal_to', 'field': field, 'value': literal}
+    if tag == 'PropertyIsLessThan':
+        return {'operation': 'is_less_than', 'field': field, 'value': literal}
+    if tag == 'PropertyIsLessThanOrEqualTo':
+        return {'operation': 'is_less_than_or_equal_to', 'field': field, 'value': literal}
+    if tag == 'PropertyIsBetween':
+        v1 = _text('ogc:LowerBoundary/ogc:Literal')
+        v2 = _text('ogc:UpperBoundary/ogc:Literal')
+        return {'operation': 'is_between', 'field': field, 'value1': v1, 'value2': v2}
+
+    return None
+
     
 def get_geometry_field(layer):
     if layer.type == 'v_PostGIS':

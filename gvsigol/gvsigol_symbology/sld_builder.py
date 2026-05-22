@@ -216,44 +216,45 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
     
     if r.filter != '':
         f = json.loads(r.filter)
-        if isinstance(f, list):
-            if len(f) == 1:
-                if f[0].get('operation') == 'is_null':
-                    f2 = Filter(rule)
-                    f2.PropertyIsNull = PropertyCriterion(f2, 'PropertyIsNull')
-                    f2.PropertyIsNull.PropertyName = f[0].get('field')
+        if f is not None:
+            if isinstance(f, list):
+                if len(f) == 1:
+                    if f[0].get('operation') == 'is_null':
+                        f2 = Filter(rule)
+                        f2.PropertyIsNull = PropertyCriterion(f2, 'PropertyIsNull')
+                        f2.PropertyIsNull.PropertyName = f[0].get('field')
+                        
+                        rule.Filter = f2 
                     
-                    rule.Filter = f2 
-                
-                else:
-                    rule.create_filter(f[0].get('field'), get_operation_symbol(f[0].get('operation')), f[0].get('value'))
-                
-            elif len(f) >= 3:
-                rule.Filter = build_complex_filter(f, rule)
-        else:
-            if f.get('operation') == 'is_between':
-                f1 = Filter(rule)
-                f1.PropertyIsGreaterThanOrEqualTo = PropertyCriterion(f1, 'PropertyIsGreaterThanOrEqualTo')
-                f1.PropertyIsGreaterThanOrEqualTo.PropertyName = f.get('field')
-                f1.PropertyIsGreaterThanOrEqualTo.Literal = str(f.get('value1'))
-                
-                f2 = Filter(rule)
-                f2.PropertyIsLessThanOrEqualTo = PropertyCriterion(f2, 'PropertyIsLessThanOrEqualTo')
-                f2.PropertyIsLessThanOrEqualTo.PropertyName = f.get('field')
-                f2.PropertyIsLessThanOrEqualTo.Literal = str(f.get('value2'))
-                
-                rule.Filter = f1 + f2 
-                
+                    else:
+                        rule.create_filter(f[0].get('field'), get_operation_symbol(f[0].get('operation')), f[0].get('value'))
+                    
+                elif len(f) >= 3:
+                    rule.Filter = build_complex_filter(f, rule)
             else:
-                if f.get('operation') == 'is_null':
-                    f2 = Filter(rule)
-                    f2.PropertyIsNull = PropertyCriterion(f2, 'PropertyIsNull')
-                    f2.PropertyIsNull.PropertyName = f.get('field')
+                if f.get('operation') == 'is_between':
+                    f1 = Filter(rule)
+                    f1.PropertyIsGreaterThanOrEqualTo = PropertyCriterion(f1, 'PropertyIsGreaterThanOrEqualTo')
+                    f1.PropertyIsGreaterThanOrEqualTo.PropertyName = f.get('field')
+                    f1.PropertyIsGreaterThanOrEqualTo.Literal = str(f.get('value1'))
                     
-                    rule.Filter = f2 
-                
+                    f2 = Filter(rule)
+                    f2.PropertyIsLessThanOrEqualTo = PropertyCriterion(f2, 'PropertyIsLessThanOrEqualTo')
+                    f2.PropertyIsLessThanOrEqualTo.PropertyName = f.get('field')
+                    f2.PropertyIsLessThanOrEqualTo.Literal = str(f.get('value2'))
+                    
+                    rule.Filter = f1 + f2 
+                    
                 else:
-                    rule.create_filter(f.get('field'), get_operation_symbol(f.get('operation')), f.get('value'))
+                    if f.get('operation') == 'is_null':
+                        f2 = Filter(rule)
+                        f2.PropertyIsNull = PropertyCriterion(f2, 'PropertyIsNull')
+                        f2.PropertyIsNull.PropertyName = f.get('field')
+                        
+                        rule.Filter = f2 
+                    
+                    else:
+                        rule.create_filter(f.get('field'), get_operation_symbol(f.get('operation')), f.get('value'))
     
     for s in symbolizers:
         if hasattr(s, 'marksymbolizer'):
