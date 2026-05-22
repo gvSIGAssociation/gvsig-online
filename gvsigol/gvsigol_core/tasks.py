@@ -23,3 +23,7 @@ def setup_periodic_tasks(sender, **kwargs):
 def clean_shared_views(self):
     now = timezone.now()
     SharedView.objects.filter(expiration_date__lt=now).delete()
+
+
+# Make project-package async tasks visible to Celery autodiscovery
+from gvsigol_core.project_package.tasks import export_project_task, import_project_task  # noqa: F401, E402

@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.urls import reverse
 from gvsigol import settings
@@ -541,3 +543,116 @@ class UserHomeOrder(models.Model):
         if self.user_id is None:
             return f'(default) – {self.order_type}'
         return f'{self.user.username} – {self.order_type}'
+
+
+# ---------------------------------------------------------------------------
+# Project package import/export models (moved from gvsigol_project_package)
+# ---------------------------------------------------------------------------
+
+class ProjectPackageImportJob(models.Model):
+    ST_DRAFT = 'draft'
+    ST_PREFLIGHT_OK = 'preflight_ok'
+    ST_RUNNING = 'running'
+    ST_COMMITTED = 'committed'
+    ST_FAILED = 'failed'
+    STATUS_CHOICES = (
+        (ST_DRAFT, 'draft'),
+        (ST_PREFLIGHT_OK, 'preflight_ok'),
+        (ST_RUNNING, 'running'),
+        (ST_COMMITTED, 'committed'),
+        (ST_FAILED, 'failed'),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.CharField(max_length=150, blank=True)
+    status = models.CharField(max_length=32, choices=STATUS_CHOICES, default=ST_DRAFT)
+    celery_task_id = models.CharField(max_length=255, null=True, blank=True)
+    zip_path = models.CharField(max_length=1024, help_text='Absolute or MEDIA-relative path')
+    extract_dir = models.CharField(max_length=1024, null=True, blank=True)
+    manifest_json = models.JSONField(null=True, blank=True)
+    wizard_json = models.JSONField(default=dict, blank=True)
+    report_json = models.JSONField(default=list, blank=True)
+    id_map_json = models.JSONField(default=dict, blank=True)
+    result_project_id = models.IntegerField(null=True, blank=True)
+    summary_json = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        app_label = 'gvsigol_core'
+        db_table = 'gvsigol_project_package_projectpackageimportjob'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return 'ProjectPackageImportJob %s (%s)' % (self.id, self.status)
+
+
+class ProjectPackageActivityLog(models.Model):
+    """Last import/export operations (query with limit; typically 20)."""
+
+    OP_IMPORT = 'import'
+    OP_EXPORT = 'export'
+    OPERATION_CHOICES = (
+        (OP_IMPORT, 'import'),
+        (OP_EXPORT, 'export'),
+    )
+
+    ST_OK = 'ok'
+    ST_PARTIAL = 'partial'
+    ST_FAILED = 'failed'
+    STATUS_CHOICES = (
+        (ST_OK, 'ok'),
+        (ST_PARTIAL, 'partial'),
+        (ST_FAILED, 'failed'),
+    )
+
+    operation = models.CharField(max_length=16, choices=OPERATION_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.CharField(max_length=150, blank=True)
+    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default=ST_OK)
+    project_id = models.IntegerField(null=True, blank=True)
+    project_name = models.CharField(max_length=200, blank=True)
+    import_job_id = models.UUIDField(null=True, blank=True)
+    summary_json = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        app_label = 'gvsigol_core'
+        db_table = 'gvsigol_project_package_projectpackageactivitylog'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return '%s %s (%s)' % (self.operation, self.project_name or self.pk, self.status)
+
+
+class ProjectPackageExportJob(models.Model):
+    """Tracks an async export task so the user can poll progress and download the result."""
+
+    ST_PENDING = 'pending'
+    ST_RUNNING = 'running'
+    ST_DONE    = 'done'
+    ST_FAILED  = 'failed'
+    STATUS_CHOICES = (
+        (ST_PENDING, 'pending'),
+        (ST_RUNNING, 'running'),
+        (ST_DONE,    'done'),
+        (ST_FAILED,  'failed'),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.CharField(max_length=150, blank=True)
+    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default=ST_PENDING)
+    celery_task_id = models.CharField(max_length=255, null=True, blank=True)
+    project_id = models.IntegerField(null=True, blank=True)
+    project_name = models.CharField(max_length=200, blank=True)
+    zip_filename = models.CharField(max_length=512, blank=True)
+    zip_path = models.CharField(max_length=1024, blank=True)
+    export_options_json = models.JSONField(default=dict, blank=True)
+    summary_json = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        app_label = 'gvsigol_core'
+        db_table = 'gvsigol_project_package_projectpackageexportjob'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return 'ProjectPackageExportJob %s (%s)' % (self.id, self.status)

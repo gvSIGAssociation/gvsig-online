@@ -31,8 +31,8 @@ from django.http.response import JsonResponse
 from gvsigol_core import forms
 from gvsigol.basetypes import CloneConf
 from gvsigol_auth import auth_backend
-from django.shortcuts import render, HttpResponse, redirect
-from django.http import HttpResponseForbidden
+from django.shortcuts import render, HttpResponse, redirect, get_object_or_404
+from django.http import FileResponse
 from .models import Project, ProjectLayerGroup, ProjectRole, Application, ApplicationRole, UserHomeOrder
 from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup, ServiceUrl, LayerReadRole, LayerGroupRole, SqlView
 from django.contrib.auth.decorators import login_required
@@ -60,6 +60,7 @@ import json
 import ast
 import re
 import os
+import uuid
 import unicodedata
 
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -67,6 +68,7 @@ from actstream import action
 from actstream.models import Action
 from iso639 import languages
 from django.core.exceptions import PermissionDenied
+from django.db.utils import OperationalError, ProgrammingError
 from django.utils.crypto import get_random_string
 from gvsigol_core.forms import CloneProjectForm
 from django.contrib import messages
@@ -351,7 +353,7 @@ def project_list(request):
     show_spa_project_links = True
     
     frontend_base_url = settings.FRONTEND_BASE_URL.rstrip('/')
-    
+
     response = {
         'projects': projects,
         'servers': Server.objects.all().order_by('-default'),
@@ -363,6 +365,608 @@ def project_list(request):
         **page_ctx,  # Agrega paginator/page_obj/page_size/etc al template
     }
     return render(request, 'project_list.html', response)
+
+
+@login_required()
+@staff_required
+def project_package_export_preflight(request, pid):
+    """JSON inventory for export wizard (foreign layers, permissions prompt)."""
+    from django.http import JsonResponse
+    from gvsigol_core.project_package.connection_utils import analyze_project_layers
+
+    try:
+        project = Project.objects.get(id=int(pid))
+    except Project.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': 'not_found'}, status=404)
+    if not project.can_manage(request):
+        return JsonResponse({'ok': False, 'error': 'forbidden'}, status=403)
+    return JsonResponse({'ok': True, **analyze_project_layers(project)})
+
+
+@login_required()
+@staff_required
+@require_http_methods(['GET', 'POST'])
+def project_package_export(request, pid):
+    """
+    ZIP export (async): creates a ProjectPackageExportJob, fires the Celery task and
+    redirects to the status/progress page. The user downloads the ZIP from there.
+
+    POST accepts export_permissions and layer_vector_mode_<layer_id> fields from the wizard.
+    """
+    from gvsigol_core.models import ProjectPackageExportJob
+    from gvsigol_core.project_package.tasks import export_project_task
+
+    try:
+        project = Project.objects.get(id=int(pid))
+    except Project.DoesNotExist:
+        messages.error(request, _('Operation not allowed on this project.'))
+        return redirect('project_list')
+    if not project.can_manage(request):
+        messages.error(request, _('Operation not allowed on this project.'))
+        return redirect('project_list')
+
+    export_options = {}
+    if request.method == 'POST':
+        export_options['export_permissions'] = bool(request.POST.get('export_permissions'))
+        export_options['include_raster_sidecars'] = bool(request.POST.get('include_raster_sidecars'))
+        layer_modes = {}
+        for key, val in request.POST.items():
+            if key.startswith('layer_vector_mode_') and val in ('embedded', 'definition_only'):
+                lid = key[len('layer_vector_mode_'):]
+                layer_modes[lid] = val
+        export_options['layer_vector_modes'] = layer_modes
+
+    job = ProjectPackageExportJob.objects.create(
+        created_by=request.user.username,
+        project_id=project.id,
+        project_name=(project.title or project.name)[:200],
+        export_options_json=export_options,
+    )
+    try:
+        export_project_task.apply_async(kwargs={
+            'export_job_id': str(job.id),
+            'pid': pid,
+            'export_options': export_options,
+            'username': request.user.username,
+        })
+    except Exception:
+        logger.exception('project_package_export: could not enqueue task (job %s)', job.id)
+    return redirect('project_package_activity_log')
+
+
+@login_required()
+@staff_required
+def export_job_status(request, job_id):
+    """Progress page for an async export job."""
+    from gvsigol_core.models import ProjectPackageExportJob
+
+    job = get_object_or_404(ProjectPackageExportJob, pk=job_id)
+    if job.created_by != request.user.username and not request.user.is_superuser:
+        raise PermissionDenied
+    return render(request, 'project_package_job_status.html', {
+        'job': job,
+        'job_type': 'export',
+        'status_json_url': reverse('export_job_status_json', kwargs={'job_id': job_id}),
+    })
+
+
+@login_required()
+@staff_required
+def export_job_status_json(request, job_id):
+    """JSON status endpoint polled by the progress page."""
+    from django.http import JsonResponse
+    from gvsigol_core.models import ProjectPackageExportJob
+
+    job = get_object_or_404(ProjectPackageExportJob, pk=job_id)
+    if job.created_by != request.user.username and not request.user.is_superuser:
+        return JsonResponse({'error': 'forbidden'}, status=403)
+
+    summary = job.summary_json or {}
+    export_errors = summary.get('export_errors') or []
+    data = {
+        'status': job.status,
+        'project_name': job.project_name,
+        'export_errors': export_errors,
+    }
+    if job.status == ProjectPackageExportJob.ST_DONE:
+        data['download_url'] = reverse('export_job_download', kwargs={'job_id': job_id})
+        data['zip_filename'] = job.zip_filename
+    elif job.status == ProjectPackageExportJob.ST_FAILED:
+        data['error'] = summary.get('error', _('Export failed. Check server logs.'))
+    return JsonResponse(data)
+
+
+@login_required()
+@staff_required
+def export_job_download(request, job_id):
+    """Serve the export ZIP once the task is done."""
+    from gvsigol_core.models import ProjectPackageExportJob
+
+    job = get_object_or_404(ProjectPackageExportJob, pk=job_id)
+    if job.created_by != request.user.username and not request.user.is_superuser:
+        raise PermissionDenied
+    if job.status != ProjectPackageExportJob.ST_DONE or not job.zip_path:
+        messages.error(request, _('Export is not ready for download.'))
+        return redirect('export_job_status', job_id=job_id)
+    resp = FileResponse(open(job.zip_path, 'rb'), as_attachment=True, filename=job.zip_filename or 'export.zip')
+    resp['Content-Type'] = 'application/zip'
+    return resp
+
+
+@login_required()
+@staff_required
+def import_job_status(request, job_id):
+    """Progress page for an async import job."""
+    from gvsigol_core.models import ProjectPackageImportJob
+
+    job = get_object_or_404(ProjectPackageImportJob, pk=job_id)
+    if job.created_by != request.user.username and not request.user.is_superuser:
+        raise PermissionDenied
+    return render(request, 'project_package_job_status.html', {
+        'job': job,
+        'job_type': 'import',
+        'status_json_url': reverse('import_job_status_json', kwargs={'job_id': job_id}),
+    })
+
+
+@login_required()
+@staff_required
+def import_job_status_json(request, job_id):
+    """JSON status endpoint polled by the progress page for an import job."""
+    from django.http import JsonResponse
+    from gvsigol_core.models import ProjectPackageImportJob
+
+    job = get_object_or_404(ProjectPackageImportJob, pk=job_id)
+    if job.created_by != request.user.username and not request.user.is_superuser:
+        return JsonResponse({'error': 'forbidden'}, status=403)
+
+    summary = job.summary_json or {}
+    status = job.status
+    data = {
+        'status': status,
+        'project_name': (job.manifest_json or {}).get('project_name', ''),
+    }
+    if status == ProjectPackageImportJob.ST_COMMITTED:
+        data['status'] = 'done'
+        data['result_url'] = reverse('project_package_import_result', kwargs={'job_id': job_id})
+        if summary.get('skipped_layers'):
+            data['warning'] = str(_('Project imported with warnings. Some layers were skipped — see the import report.'))
+    elif status == ProjectPackageImportJob.ST_FAILED:
+        data['error'] = summary.get('error', str(_('Import failed. Check server logs.')))
+    return JsonResponse(data)
+
+
+@login_required()
+@staff_required
+def activity_log_inprogress_json(request):
+    """
+    AJAX endpoint that returns current in-progress export/import jobs with Celery progress.
+    Used by the activity log page for non-flickering live updates.
+    """
+    from django.http import JsonResponse
+    from django.utils import timezone
+    from datetime import timedelta
+    from gvsigol_core.models import ProjectPackageExportJob, ProjectPackageImportJob
+
+    cutoff = timezone.now() - timedelta(hours=2)
+
+    def _celery_progress(celery_task_id):
+        """Read percent/step from Celery result backend if available."""
+        if not celery_task_id:
+            return None, None
+        try:
+            from celery.result import AsyncResult
+            result = AsyncResult(celery_task_id)
+            if result.state == 'PROGRESS':
+                meta = result.info or {}
+                return meta.get('percent'), meta.get('step', '')
+            if result.state == 'SUCCESS':
+                return 100, 'done'
+        except Exception:
+            pass
+        return None, None
+
+    exports = []
+    for job in ProjectPackageExportJob.objects.filter(
+        status__in=[ProjectPackageExportJob.ST_PENDING, ProjectPackageExportJob.ST_RUNNING],
+        created_at__gte=cutoff,
+    ).order_by('created_at'):
+        percent, step = _celery_progress(job.celery_task_id)
+        exports.append({
+            'id': str(job.id),
+            'status': job.status,
+            'project_name': job.project_name or '\u2014',
+            'created_at': job.created_at.strftime('%Y-%m-%d %H:%M'),
+            'percent': percent,
+            'step': step or '',
+        })
+
+    imports = []
+    for job in ProjectPackageImportJob.objects.filter(
+        status__in=[
+            ProjectPackageImportJob.ST_DRAFT,
+            ProjectPackageImportJob.ST_PREFLIGHT_OK,
+            ProjectPackageImportJob.ST_RUNNING,
+        ],
+        created_at__gte=cutoff,
+    ).order_by('created_at'):
+        percent, step = _celery_progress(job.celery_task_id)
+        project_name = ''
+        if job.manifest_json:
+            project_name = (job.manifest_json.get('source_project_name') or '')
+        imports.append({
+            'id': str(job.id),
+            'status': job.status,
+            'project_name': project_name or '\u2014',
+            'created_at': job.created_at.strftime('%Y-%m-%d %H:%M'),
+            'percent': percent,
+            'step': step or '',
+        })
+
+    return JsonResponse({
+        'exports': exports,
+        'imports': imports,
+        'has_in_progress': bool(exports or imports),
+    })
+
+
+@login_required()
+@staff_required
+@require_http_methods(['POST'])
+def cancel_package_job(request, job_type, job_id):
+    """Mark a stuck pending/running job as failed so it disappears from the in-progress list."""
+    from gvsigol_core.models import ProjectPackageExportJob, ProjectPackageImportJob
+
+    if job_type == 'export':
+        job = get_object_or_404(ProjectPackageExportJob, pk=job_id)
+        if job.created_by != request.user.username and not request.user.is_superuser:
+            raise PermissionDenied
+        job.status = ProjectPackageExportJob.ST_FAILED
+        job.summary_json = {**(job.summary_json or {}), 'error': 'Cancelled by user'}
+        job.save(update_fields=['status', 'summary_json'])
+    elif job_type == 'import':
+        job = get_object_or_404(ProjectPackageImportJob, pk=job_id)
+        if job.created_by != request.user.username and not request.user.is_superuser:
+            raise PermissionDenied
+        job.status = ProjectPackageImportJob.ST_FAILED
+        job.save(update_fields=['status'])
+    return redirect('project_package_activity_log')
+
+
+@login_required()
+@staff_required
+@require_http_methods(['GET', 'POST'])
+def project_package_import(request):
+    """
+    Accept ZIP upload, store it, then continue in the import wizard (preflight + commit).
+    """
+    from gvsigol_core.models import ProjectPackageImportJob
+
+    if request.method == 'POST':
+        package = request.FILES.get('package')
+        if not package:
+            messages.error(request, _('No package file was selected.'))
+            return redirect('project_list')
+        incoming = os.path.join(django_settings.MEDIA_ROOT, 'project_packages', 'incoming')
+        os.makedirs(incoming, exist_ok=True)
+        job_id = uuid.uuid4()
+        dest = os.path.join(incoming, str(job_id) + '.zip')
+        try:
+            with open(dest, 'wb') as out:
+                for chunk in package.chunks():
+                    out.write(chunk)
+        except Exception:
+            logger.exception('project_package_import save failed')
+            messages.error(request, _('Could not store the package file.'))
+            return redirect('project_list')
+        try:
+            ProjectPackageImportJob.objects.create(
+                id=job_id,
+                zip_path=dest,
+                created_by=request.user.username,
+                status=ProjectPackageImportJob.ST_DRAFT,
+            )
+        except (ProgrammingError, OperationalError):
+            logger.exception('project_package_import: ProjectPackageImportJob table missing?')
+            try:
+                os.unlink(dest)
+            except OSError:
+                pass
+            messages.error(
+                request,
+                _(
+                    'Project package import is not set up in the database. '
+                    'Run migrations on the server (for example: python manage.py migrate gvsigol_core).'
+                ),
+            )
+            return redirect('project_list')
+        return redirect('project_package_import_wizard', job_id=job_id)
+    return redirect('project_list')
+
+
+@login_required()
+@staff_required
+@require_http_methods(['GET', 'POST'])
+def project_package_import_wizard(request, job_id):
+    from gvsigol_core.project_package.import_service import preflight_job
+    from gvsigol_core.models import ProjectPackageImportJob
+
+    job = get_object_or_404(ProjectPackageImportJob, pk=job_id)
+    if job.created_by != request.user.username and not request.user.is_superuser:
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        wiz = {
+            'target_server_id': int(request.POST.get('target_server')),
+        }
+        foreign_connection_map = {}
+        for key, val in request.POST.items():
+            if key.startswith('foreign_connection_') and val:
+                ck = key[len('foreign_connection_'):]
+                try:
+                    foreign_connection_map[ck] = int(val)
+                except (TypeError, ValueError):
+                    pass
+        if foreign_connection_map:
+            wiz['foreign_connection_map'] = foreign_connection_map
+        gpkg_foreign_datastores = {}
+        for key, val in request.POST.items():
+            if key.startswith('gpkg_datastore_') and val:
+                ck = key[len('gpkg_datastore_'):]
+                try:
+                    gpkg_foreign_datastores[ck] = int(val)
+                except (TypeError, ValueError):
+                    pass
+        if gpkg_foreign_datastores:
+            wiz['gpkg_foreign_datastores'] = gpkg_foreign_datastores
+        skip_foreign_connections = []
+        for key, val in request.POST.items():
+            if key.startswith('skip_foreign_connection_') and val:
+                skip_foreign_connections.append(key[len('skip_foreign_connection_'):])
+        if skip_foreign_connections:
+            wiz['skip_foreign_connection_keys'] = skip_foreign_connections
+        on = (request.POST.get('override_project_name') or '').strip()
+        if on:
+            wiz['override_project_name'] = on
+        ot = (request.POST.get('override_project_title') or '').strip()
+        if ot:
+            wiz['override_project_title'] = ot
+        job.wizard_json = wiz
+        job.save()
+        from gvsigol_core.project_package.tasks import import_project_task
+        try:
+            import_project_task.apply_async(kwargs={'import_job_id': str(job.id)})
+        except Exception:
+            logger.exception('project_package_import_wizard: could not enqueue task (job %s)', job.id)
+        return redirect('project_package_activity_log')
+
+    if job.status == ProjectPackageImportJob.ST_DRAFT:
+        result = preflight_job(job)
+        if not result.get('ok'):
+            messages.error(request, _('Package validation failed: ') + ', '.join(result.get('errors', [])))
+
+    from gvsigol_services.models import Connection, Datastore
+
+    servers = Server.objects.all().order_by('-default')
+    postgis_connections = Connection.objects.filter(type='PostGIS').order_by('name')
+    package_layout = None
+    if job.extract_dir:
+        import json
+        import os
+        from gvsigol_core.project_package.constants import PROJECT_JSON
+        from gvsigol_core.project_package.import_service import extract_snapshot_layout
+
+        pj_path = os.path.join(job.extract_dir, PROJECT_JSON.replace('/', os.sep))
+        if os.path.isfile(pj_path):
+            with open(pj_path, 'r', encoding='utf-8') as f:
+                package_layout = extract_snapshot_layout(json.load(f))
+    if package_layout is None:
+        for row in job.report_json or []:
+            if isinstance(row, dict) and 'package_layout' in row:
+                package_layout = row['package_layout']
+                break
+    wizard = job.wizard_json or {}
+    foreign_map = wizard.get('foreign_connection_map') or {}
+    gpkg_foreign_map = wizard.get('gpkg_foreign_datastores') or {}
+    target_server_id = wizard.get('target_server_id')
+    if not target_server_id and servers:
+        target_server_id = servers[0].id
+    server_datastores = []
+    if target_server_id:
+        from gvsigol_core.project_package.connection_utils import local_cartodb_datastores_for_server
+
+        server_datastores = local_cartodb_datastores_for_server(target_server_id)
+    import_report_warnings = []
+    import_last_error = None
+    for row in job.report_json or []:
+        if not isinstance(row, dict):
+            continue
+        if row.get('warning'):
+            import_report_warnings.append(row['warning'])
+        if row.get('error') and not import_last_error:
+            import_last_error = row['error']
+        if row.get('fatal') and row.get('error'):
+            import_last_error = row['error']
+
+    if package_layout:
+        for fc in package_layout.get('foreign_connections') or []:
+            ck = fc.get('connection_key')
+            if ck:
+                fc['selected_connection_id'] = foreign_map.get(ck)
+        gpkg_rows = package_layout.get('gpkg_connection_targets') or []
+        package_layout['gpkg_local_targets'] = [r for r in gpkg_rows if not r.get('is_foreign_source')]
+        package_layout['gpkg_foreign_targets'] = [r for r in gpkg_rows if r.get('is_foreign_source')]
+        for row in gpkg_rows:
+            ck = row.get('connection_key')
+            if ck and row.get('is_foreign_source'):
+                row['selected_datastore_id'] = gpkg_foreign_map.get(ck)
+    recent_package_activity = []
+    try:
+        from gvsigol_core.project_package.activity_log import recent_package_activity as _recent_activity
+
+        recent_package_activity = _recent_activity()
+    except Exception:
+        logger.exception('recent_package_activity')
+
+    return render(
+        request,
+        'project_package_import_wizard.html',
+        {
+            'job': job,
+            'servers': servers,
+            'postgis_connections': postgis_connections,
+            'server_datastores': server_datastores,
+            'package_layout': package_layout,
+            'wizard': wizard,
+            'foreign_map': foreign_map,
+            'import_report_warnings': import_report_warnings,
+            'import_last_error': import_last_error,
+            'recent_package_activity': recent_package_activity,
+        },
+    )
+
+
+@login_required()
+@staff_required
+def project_package_import_result(request, job_id):
+    """Import outcome: skipped layers, warnings, link to project."""
+    from gvsigol_core.models import ProjectPackageImportJob
+    from gvsigol_core.project_package.report_summary import summarize_import_report
+
+    job = get_object_or_404(ProjectPackageImportJob, pk=job_id)
+    if job.created_by != request.user.username and not request.user.is_superuser:
+        raise PermissionDenied
+
+    summary = job.summary_json or summarize_import_report(job.report_json)
+    project = None
+    if job.result_project_id:
+        try:
+            project = Project.objects.get(pk=job.result_project_id)
+        except Project.DoesNotExist:
+            project = None
+
+    return render(
+        request,
+        'project_package_import_result.html',
+        {
+            'job': job,
+            'summary': summary,
+            'project': project,
+        },
+    )
+
+
+@login_required()
+@staff_required
+def project_package_export_result(request, log_id):
+    """Export outcome: technical log matching reports/export_log.jsonl in the ZIP."""
+    from gvsigol_core.models import ProjectPackageActivityLog
+
+    log_entry = get_object_or_404(
+        ProjectPackageActivityLog,
+        pk=log_id,
+        operation=ProjectPackageActivityLog.OP_EXPORT,
+    )
+    if log_entry.created_by != request.user.username and not request.user.is_superuser:
+        raise PermissionDenied
+
+    summary = log_entry.summary_json or {}
+    report_lines = summary.get('report_lines') or []
+
+    project_obj = None
+    if log_entry.project_id:
+        try:
+            project_obj = Project.objects.get(pk=log_entry.project_id)
+        except Project.DoesNotExist:
+            project_obj = None
+
+    return render(
+        request,
+        'project_package_export_result.html',
+        {
+            'log_entry': log_entry,
+            'summary': summary,
+            'report_lines': report_lines,
+            'project': project_obj,
+        },
+    )
+
+
+@login_required()
+@staff_required
+def project_package_activity_log(request):
+    """Last 20 import/export operations, plus any jobs still in progress."""
+    from django.db.utils import OperationalError, ProgrammingError
+
+    from gvsigol_core.project_package.activity_log import RECENT_ACTIVITY_LIMIT, get_package_report_rows
+    from gvsigol_core.models import ProjectPackageExportJob, ProjectPackageImportJob
+
+    migration_missing = False
+    report_rows = []
+    try:
+        rows = get_package_report_rows(limit=RECENT_ACTIVITY_LIMIT)
+        # Attach download URL for completed exports that still have a zip on disk
+        for row in rows:
+            ej_id = (row.get('summary') or {}).get('export_job_id')
+            if ej_id:
+                try:
+                    ej = ProjectPackageExportJob.objects.get(pk=ej_id)
+                    if ej.status == ProjectPackageExportJob.ST_DONE and ej.zip_path:
+                        row['download_url'] = reverse('export_job_download', kwargs={'job_id': ej_id})
+                        row['zip_filename'] = ej.zip_filename
+                except ProjectPackageExportJob.DoesNotExist:
+                    pass
+        report_rows = rows
+    except (ProgrammingError, OperationalError):
+        migration_missing = True
+    except Exception:
+        logger.exception('project_package_activity_log')
+
+    # In-progress jobs: only show those created in the last 2 hours to avoid
+    # infinite refresh from orphaned/stuck jobs.
+    from django.utils import timezone as _tz
+    import datetime as _dt
+    _cutoff = _tz.now() - _dt.timedelta(hours=2)
+    in_progress_exports = []
+    in_progress_imports = []
+    try:
+        in_progress_exports = list(
+            ProjectPackageExportJob.objects
+            .filter(
+                status__in=[ProjectPackageExportJob.ST_PENDING, ProjectPackageExportJob.ST_RUNNING],
+                created_at__gte=_cutoff,
+            )
+            .order_by('-created_at')[:10]
+        )
+        in_progress_imports = list(
+            ProjectPackageImportJob.objects
+            .filter(
+                status__in=[
+                    ProjectPackageImportJob.ST_DRAFT,
+                    ProjectPackageImportJob.ST_PREFLIGHT_OK,
+                    ProjectPackageImportJob.ST_RUNNING,
+                ],
+                created_at__gte=_cutoff,
+            )
+            .order_by('-created_at')[:10]
+        )
+    except Exception:
+        pass
+
+    has_in_progress = bool(in_progress_exports or in_progress_imports)
+    return render(
+        request,
+        'project_package_activity_log.html',
+        {
+            'report_rows': report_rows,
+            'limit': RECENT_ACTIVITY_LIMIT,
+            'migration_missing': migration_missing,
+            'in_progress_exports': in_progress_exports,
+            'in_progress_imports': in_progress_imports,
+            'has_in_progress': has_in_progress,
+        },
+    )
+
 
 def _get_prepared_layer_groups(request):
     if request.user.is_superuser:

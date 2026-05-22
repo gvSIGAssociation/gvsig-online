@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="box box-primary">
+	<div class="box-header with-border">
+		<h3 class="box-title">{% trans "Import project package" %}</h3>
+		<div class="box-tools pull-right">
+			<a class="btn btn-default btn-sm" href="{% url 'project_package_activity_log' %}">{% trans "Import/export history" %}</a>
+		</div>
+	</div>
+	<div class="box-body">
+		{% if messages %}
+		{% for message in messages %}
+		<div class="alert alert-{% if 'error' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'success' in message.tags %}success{% else %}info{% endif %}" style="margin-bottom:12px">
+			{{ message }}
+		</div>
+		{% endfor %}
+		{% endif %}
+
+		{% if import_last_error %}
+		<div class="alert alert-danger">
+			<strong>{% trans "Last import error" %}:</strong> {{ import_last_error }}
+		</div>
+		{% endif %}
+
+		{% for w in import_report_warnings %}
+		<div class="alert alert-warning">{{ w }}</div>
+		{% endfor %}
+
+		<p class="text-muted">{% trans "Job" %}: {{ job.id }} — {% trans "status" %}: {{ job.status }}</p>
+
+		{% if recent_package_activity %}
+		<details style="margin-bottom:1em">
+			<summary>{% trans "Recent import/export operations" %} ({{ recent_package_activity|length }})</summary>
+			<table class="table table-condensed table-bordered" style="margin-top:0.5em;max-width:900px">
+				<thead><tr><th>{% trans "When" %}</th><th>{% trans "Op." %}</th><th>{% trans "Project" %}</th><th>{% trans "Status" %}</th><th></th></tr></thead>
+				<tbody>
+				{% for e in recent_package_activity %}
+				<tr>
+					<td><small>{{ e.created_at|date:"m-d H:i" }}</small></td>
+					<td>{{ e.operation }}</td>
+					<td>{{ e.project_name|default:"—"|truncatechars:40 }}</td>
+					<td>{{ e.status }}</td>
+					<td>
+						{% if e.operation == 'import' and e.import_job_id %}
+						<a href="{% url 'project_package_import_result' job_id=e.import_job_id %}">{% trans "Report" %}</a>
+						{% elif e.operation == 'export' and e.summary_json and 'report_lines' in e.summary_json %}
+						<a href="{% url 'project_package_export_result' log_id=e.pk %}">{% trans "Report" %}</a>
+						{% endif %}
+					</td>
+				</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+			<p><a href="{% url 'project_package_activity_log' %}">{% trans "View full history" %}</a></p>
+		</details>
+		{% endif %}
+
+		{% if job.manifest_json %}
+		<p><strong>{% trans "Package format" %}:</strong> {{ job.manifest_json.package_format_version }}</p>
+		<p><strong>{% trans "Source" %}:</strong> {{ job.manifest_json.source_base_url }}</p>
+		{% endif %}
+
+		{% if package_layout %}
+		<p><strong>{% trans "Primary workspace (for new layer groups)" %}:</strong> {{ package_layout.primary_workspace }}</p>
+		{% if package_layout.exported_project_name %}
+		<p><strong>{% trans "Exported project name" %}:</strong> {{ package_layout.exported_project_name }}
+			{% if package_layout.exported_project_title %}
+			— <strong>{% trans "title" %}:</strong> {{ package_layout.exported_project_title }}
+			{% endif %}
+		</p>
+		{% endif %}
+		{% endif %}
+
+		{% if job.report_json %}
+		<details style="margin:1em 0">
+			<summary>{% trans "Technical preflight log" %}</summary>
+			<pre style="max-height:200px;overflow:auto;">{{ job.report_json }}</pre>
+		</details>
+		{% endif %}
+
+		<form method="post" action="">
+			{% csrf_token %}
+
+			<div class="form-group">
+				<label for="target_server">{% trans "Select server" %}</label>
+				<select class="form-control" id="target_server" name="target_server" required style="max-width:480px">
+					{% for s in servers %}
+					<option value="{{ s.id }}" {% if wizard.target_server_id == s.id %}selected{% endif %}>{{ s.title }} [{{ s.name }}]</option>
+					{% endfor %}
+				</select>
+			</div>
+
+			{% if package_layout.gpkg_connection_targets %}
+			<h4>{% trans "Where to load vector data (GPKG)" %}</h4>
+
+			{% for g in package_layout.gpkg_local_targets %}
+			<div class="well well-sm" style="margin-bottom:1em">
+				<p class="text-muted" style="margin-bottom:0.5em">
+					{% trans "Layers from the local database are loaded into the original workspace and datastore from the export (created automatically on this server if they do not exist)." %}
+				</p>
+				<table class="table table-bordered table-condensed" style="margin-bottom:0">
+					<thead>
+						<tr>
+							<th>{% trans "Source" %}</th>
+							<th>{% trans "Layers" %}</th>
+							<th>{% trans "Target (workspace / datastore)" %}</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>
+								<span class="label label-default">{% trans "Local DB" %}</span>
+								<br><code>{{ g.connection_key }}</code>
+								<br><span class="text-muted">{{ g.connection_label }}</span>
+							</td>
+							<td>
+								{{ g.layer_count }}
+								{% if g.sample_layers %}
+								<br><small class="text-muted">{{ g.sample_layers|join:", " }}</small>
+								{% endif %}
+							</td>
+							<td>
+								<code>{{ g.exported_workspace }}</code>
+								<small class="text-muted"> / </small>
+								<code>{{ g.exported_datastore }}</code>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			{% endfor %}
+
+			{% if package_layout.gpkg_foreign_targets %}
+			<p class="text-muted">
+				{% trans "Data exported from a foreign database is loaded into the local CartoDB. Choose an existing local CartoDB datastore on this server (workspace is taken from the datastore). Foreign database datastores are not listed." %}
+			</p>
+			<table class="table table-bordered table-condensed">
+				<thead>
+					<tr>
+						<th>{% trans "Source" %}</th>
+						<th>{% trans "Layers" %}</th>
+						<th>{% trans "Target datastore" %}</th>
+					</tr>
+				</thead>
+				<tbody>
+			{% for g in package_layout.gpkg_foreign_targets %}
+					<tr>
+						<td>
+							<span class="label label-warning">{% trans "Foreign DB" %}</span>
+							<br><code>{{ g.connection_key }}</code>
+							<br><span class="text-muted">{{ g.connection_label }}</span>
+							<br><small class="text-muted">{% trans "Exported from" %}: <code>{{ g.exported_workspace }}</code> / <code>{{ g.exported_datastore }}</code></small>
+						</td>
+						<td>
+							{{ g.layer_count }}
+							{% if g.sample_layers %}
+							<br><small class="text-muted">{{ g.sample_layers|join:", " }}</small>
+							{% endif %}
+						</td>
+						<td>
+							<select class="form-control input-sm" name="gpkg_datastore_{{ g.connection_key }}" required style="max-width:360px">
+								<option value="">{% trans "— Select —" %}</option>
+								{% for ds in server_datastores %}
+								<option value="{{ ds.id }}" {% if g.selected_datastore_id == ds.id %}selected{% endif %}>{{ ds.workspace.name }} / {{ ds.name }}{% if ds.get_schema_name %} ({{ ds.get_schema_name }}){% endif %}</option>
+								{% endfor %}
+							</select>
+						</td>
+					</tr>
+			{% endfor %}
+				</tbody>
+			</table>
+			{% endif %}
+			{% endif %}
+
+			{% if package_layout.foreign_connections %}
+			<h4>{% trans "Definition-only layers (external database)" %}</h4>
+			<p class="text-muted">{% trans "These layers have no GPKG in the package. Map each connection to PostGIS on this server, or check Skip to omit them (the rest of the project still imports)." %}</p>
+			<table class="table table-bordered table-condensed">
+				<thead>
+					<tr>
+						<th>{% trans "Skip" %}</th>
+						<th>{% trans "Exported connection" %}</th>
+						<th>{% trans "Layers" %}</th>
+						<th>{% trans "Target connection" %}</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for fc in package_layout.foreign_connections %}
+					<tr>
+						<td>
+							<input type="checkbox" name="skip_foreign_connection_{{ fc.connection_key }}" value="1" title="{% trans 'Do not import these layers' %}">
+						</td>
+						<td><code>{{ fc.connection_key }}</code><br><span class="text-muted">{{ fc.connection_label }}</span></td>
+						<td>
+							{% if fc.sample_layers %}
+								{{ fc.sample_layers|join:", " }}
+							{% else %}
+								{{ fc.layer_count }}
+							{% endif %}
+						</td>
+						<td>
+							<select class="form-control input-sm" name="foreign_connection_{{ fc.connection_key }}" style="max-width:320px">
+								<option value="">{% trans "— Select —" %}</option>
+								{% for c in postgis_connections %}
+								<option value="{{ c.id }}" {% if fc.selected_connection_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+								{% endfor %}
+							</select>
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			<p class="help-block small">{% trans "Check Skip to leave definition-only layers out (you can add them manually later)." %}</p>
+			{% endif %}
+
+		{% if package_layout.raster_layers %}
+		<h4>{% trans "Raster layers included in package" %}</h4>
+		<p class="text-muted">{% trans "The following raster layers will be published automatically during import." %}</p>
+		<table class="table table-bordered table-condensed">
+			<thead>
+				<tr>
+					<th>{% trans "Layer" %}</th>
+					<th>{% trans "Type" %}</th>
+					<th>{% trans "Primary file" %}</th>
+					<th>{% trans "Files" %}</th>
+				</tr>
+			</thead>
+			<tbody>
+			{% for r in package_layout.raster_layers %}
+				<tr>
+					<td><strong>{{ r.title }}</strong>{% if r.title != r.name %}<br><small class="text-muted">{{ r.name }}</small>{% endif %}</td>
+					<td><span class="label label-info">{{ r.type }}</span></td>
+					<td><code>{{ r.primary_file }}</code></td>
+					<td>{{ r.file_count }}</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+		{% endif %}
+
+		{% if package_layout.external_layers %}
+		<h4>{% trans "External layers (WMS/WMTS)" %}</h4>
+		<p class="text-muted">{% trans "The following external service layers will be imported as-is (no data is copied)." %}</p>
+		<table class="table table-bordered table-condensed">
+			<thead>
+				<tr>
+					<th>{% trans "Layer" %}</th>
+					<th>{% trans "Type" %}</th>
+				</tr>
+			</thead>
+			<tbody>
+			{% for e in package_layout.external_layers %}
+				<tr>
+					<td><strong>{{ e.title }}</strong>{% if e.title != e.name %}<br><small class="text-muted">{{ e.name }}</small>{% endif %}</td>
+					<td><span class="label label-default">{{ e.type }}</span></td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+		{% endif %}
+
+		<details style="margin-bottom:1em">
+			<summary>{% trans "Advanced overrides (optional)" %}</summary>
+				<p class="text-muted">{% trans "Leave empty to use names from the package." %}</p>
+				<div class="form-group">
+					<label for="override_project_name">{% trans "Override project name (internal id)" %}</label>
+					<input class="form-control" id="override_project_name" name="override_project_name" pattern="[a-zA-Z0-9_\-]+" style="max-width:480px" value="{{ wizard.override_project_name|default:'' }}">
+				</div>
+				<div class="form-group">
+					<label for="override_project_title">{% trans "Override project title" %}</label>
+					<input class="form-control" id="override_project_title" name="override_project_title" style="max-width:480px" value="{{ wizard.override_project_title|default:'' }}">
+				</div>
+			</details>
+
+			<p class="help-block small" style="margin-top:1em">
+				<strong>{% trans "Execute import" %}:</strong> {% trans "Loads GPKG into the target datastores, publishes layers, and creates the project. Role permissions from the package are applied when present; otherwise the project stays public." %}
+			</p>
+
+		<button type="submit" class="btn btn-primary" id="btn-execute-import">{% trans "Execute import" %}</button>
+	</form>
+</div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+$(document).ready(function () {
+    $('form[method="post"]').on('submit', function (ev) {
+        ev.preventDefault();
+        var form = this;
+        $('#btn-execute-import').prop('disabled', true).text('{% trans "Importing…" %}');
+        fetch(form.action || window.location.href, {
+            method: 'POST',
+            credentials: 'same-origin',
+            body: new FormData(form),
+            keepalive: true
+        });
+        window.location = '{% url "project_package_activity_log" %}';
+    });
+});
+</script>
+{% endblock %}
+

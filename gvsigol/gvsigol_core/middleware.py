@@ -6,23 +6,27 @@ from django.utils.translation import get_language
 import datetime
 from django.conf import settings
 
-"""
-Middleware to cache certain GET requests when the view being processed sets
-response[GVSIGOL_SET_STATIC_CACHE_RESPONSE_KEY] = True  AND
-request.get_full_path() is contained in CACHED_PATHS.
 
-Caching is performed server-side (using Django's configured cache framework)
-and optionally client-side (using Cache-Control headers).
+class DropInvalidCsrfOriginMiddleware(MiddlewareMixin):
+    """
+    Browsers (and some proxies) may send ``Origin: null`` for opaque origins
+    (sandboxed documents, redirects, etc.). Django treats that as a real origin
+    and rejects the request. Removing the header lets CsrfViewMiddleware fall
+    back to its normal rules (token check; on HTTPS, Referer when Origin is
+    absent). Must run immediately before ``django.middleware.csrf.CsrfViewMiddleware``.
+    """
 
-To enable it, add:
-EXTRA_MIDDLEWARE=":gvsigol_core.middleware.UpdateStaticCacheMiddleware:django.contrib.sessions.middleware.SessionMiddleware,django.middleware.locale.LocaleMiddleware:gvsigol_core.middleware.FetchStaticCacheMiddleware:"
-to the settings environment.
+    def process_request(self, request):
+        origin = request.META.get("HTTP_ORIGIN")
+        if origin is not None and origin.strip().lower() == "null":
+            del request.META["HTTP_ORIGIN"]
 
-Use:
-settings.STATIC_CACHE_MIDDLEWARE_CACHED_PATHS to set CACHED_PATHS
-settings.STATIC_CACHE_MIDDLEWARE_CLIENT_CACHE to enable client caching (server side caching
-is always used regardless this setting)
-"""
+
+# Static cache middleware (FetchStaticCacheMiddleware / UpdateStaticCacheMiddleware):
+# Caches certain GET requests when the view sets
+# response[GVSIGOL_SET_STATIC_CACHE_RESPONSE_KEY] = True and the path is in CACHED_PATHS.
+# Server-side via Django cache; optional client Cache-Control headers.
+# Enable with EXTRA_MIDDLEWARE, see project docs / original gvsigol_core.middleware notes.
 
 CACHE_TIMEOUT = 600 # seconds
 GVSIGOL_SET_STATIC_CACHE_RESPONSE_KEY = '_gvsigol_set_public_cache'

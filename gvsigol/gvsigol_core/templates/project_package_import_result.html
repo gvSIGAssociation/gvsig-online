@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="box box-primary">
+	<div class="box-header with-border">
+		<h3 class="box-title">{% trans "Import report" %}</h3>
+	</div>
+	<div class="box-body">
+		<p class="text-muted">{% trans "Job" %}: {{ job.id }} — {% trans "status" %}: <strong>{{ job.status }}</strong></p>
+
+		{% if project %}
+		<p>
+			<a class="btn btn-success" href="{% url 'project_update' pid=project.id %}">
+				{% trans "Open imported project" %}: {{ project.title|default:project.name }}
+			</a>
+		</p>
+		{% elif job.status == 'failed' %}
+		<div class="alert alert-danger">{% trans "Import did not complete. No project was created." %}</div>
+		{% endif %}
+
+		{% if summary.skipped_layers %}
+		<h4>{% trans "Skipped layers" %}</h4>
+		<table class="table table-bordered table-condensed">
+			<thead>
+				<tr>
+					<th>{% trans "Layer" %}</th>
+					<th>{% trans "Reason" %}</th>
+					<th>{% trans "Details" %}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for row in summary.skipped_layers %}
+				<tr>
+					<td>{{ row.layer }}</td>
+					<td><code>{{ row.reason }}</code></td>
+					<td>
+						{% if row.message %}{{ row.message }}{% endif %}
+						{% if row.table %}<br><small class="text-muted">{{ row.table }}{% if row.connection %} — {{ row.connection }}{% endif %}</small>{% endif %}
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		{% endif %}
+
+		{% if summary.reused_layers %}
+		<h4>{% trans "Reused layers" %}</h4>
+		<ul>
+			{% for row in summary.reused_layers %}
+			<li>{{ row.layer }}{% if row.connection %} <span class="text-muted">({{ row.connection }})</span>{% endif %}</li>
+			{% endfor %}
+		</ul>
+		{% endif %}
+
+		{% if summary.imported_layers %}
+		<h4>{% trans "Imported layers" %}</h4>
+		<ul>
+			{% for row in summary.imported_layers %}
+			<li><strong>{{ row.layer }}</strong>{% if row.table %} — <code>{{ row.table }}</code>{% endif %} <span class="text-muted">({{ row.kind }})</span></li>
+			{% endfor %}
+		</ul>
+		{% endif %}
+
+		{% if summary.warnings %}
+		<h4>{% trans "Warnings" %}</h4>
+		<ul class="text-warning">
+			{% for w in summary.warnings %}
+			<li>{{ w }}</li>
+			{% endfor %}
+		</ul>
+		{% endif %}
+
+		{% if summary.errors %}
+		<h4>{% trans "Errors" %}</h4>
+		<ul class="text-danger">
+			{% for e in summary.errors %}
+			<li>{{ e }}</li>
+			{% endfor %}
+		</ul>
+		{% endif %}
+
+		{% if not summary.skipped_layers and not summary.imported_layers and not summary.errors %}
+		<p class="text-muted">{% trans "No layer-level details in the report." %}</p>
+		{% endif %}
+
+		<details style="margin-top:1.5em">
+			<summary>{% trans "Full technical log" %}</summary>
+			<pre style="max-height:320px;overflow:auto;margin-top:0.5em;">{{ job.report_json }}</pre>
+		</details>
+
+		<p style="margin-top:1.5em">
+			<a class="btn btn-default" href="{% url 'project_package_activity_log' %}">{% trans "Import/export history" %}</a>
+			<a class="btn btn-default" href="{% url 'project_list' %}">{% trans "Back to projects" %}</a>
+		</p>
+	</div>
+</div>
+{% endblock %}

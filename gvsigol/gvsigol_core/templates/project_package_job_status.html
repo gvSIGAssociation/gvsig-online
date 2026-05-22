@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <h3 class="box-title">
+            {% if job_type == 'export' %}
+                {% trans "Exporting project package" %}{% if job.project_name %}: {{ job.project_name }}{% endif %}
+            {% else %}
+                {% trans "Importing project package" %}{% if job.project_name %}: {{ job.project_name }}{% endif %}
+            {% endif %}
+        </h3>
+    </div>
+    <div class="box-body">
+
+        {# Spinner / running state #}
+        <div id="pp-running" style="display:none; text-align:center; padding:2em 0;">
+            <i class="fa fa-spinner fa-spin fa-3x text-primary"></i>
+            <p id="pp-progress-msg" class="text-muted" style="margin-top:1em">{% trans "Processing… please wait." %}</p>
+        </div>
+
+        {# Done state — export #}
+        <div id="pp-done-export" style="display:none">
+            <div class="alert alert-success">
+                <i class="fa fa-check-circle"></i>
+                {% trans "Export completed successfully." %}
+            </div>
+            <div id="pp-export-warnings" style="display:none" class="alert alert-warning"></div>
+            <p>
+                <a id="pp-download-btn" class="btn btn-primary btn-lg" href="#">
+                    <i class="fa fa-download"></i>
+                    {% trans "Download ZIP" %}
+                </a>
+                <a href="{% url 'project_package_activity_log' %}" class="btn btn-default" style="margin-left:0.5em">
+                    <i class="fa fa-list"></i>
+                    {% trans "Activity log" %}
+                </a>
+                <a href="{% url 'project_list' %}" class="btn btn-default" style="margin-left:0.5em">
+                    <i class="fa fa-arrow-left"></i>
+                    {% trans "Back to projects" %}
+                </a>
+            </p>
+        </div>
+
+        {# Done state — import #}
+        <div id="pp-done-import" style="display:none">
+            <div id="pp-import-warning" style="display:none" class="alert alert-warning"></div>
+            <div id="pp-import-success" style="display:none" class="alert alert-success">
+                <i class="fa fa-check-circle"></i>
+                {% trans "Import completed successfully." %}
+            </div>
+            <p>
+                <a id="pp-result-btn" class="btn btn-success" href="#">
+                    <i class="fa fa-eye"></i>
+                    {% trans "View import report" %}
+                </a>
+                <a href="{% url 'project_list' %}" class="btn btn-default" style="margin-left:0.5em">
+                    <i class="fa fa-arrow-left"></i>
+                    {% trans "Back to projects" %}
+                </a>
+            </p>
+        </div>
+
+        {# Failed state #}
+        <div id="pp-failed" style="display:none">
+            <div class="alert alert-danger">
+                <strong>{% trans "Operation failed." %}</strong>
+                <p id="pp-error-msg" style="margin-top:0.5em;margin-bottom:0"></p>
+            </div>
+            <p style="margin-top:1em">
+                <a href="{% url 'project_list' %}" class="btn btn-default">
+                    <i class="fa fa-arrow-left"></i>
+                    {% trans "Back to projects" %}
+                </a>
+                <a href="{% url 'project_package_activity_log' %}" class="btn btn-default" style="margin-left:0.5em">
+                    <i class="fa fa-list"></i>
+                    {% trans "Activity log" %}
+                </a>
+            </p>
+        </div>
+
+        {# Always-visible footer nav (useful while still running) #}
+        <div style="margin-top:2em; border-top:1px solid #eee; padding-top:1em">
+            <a href="{% url 'project_list' %}" class="btn btn-default btn-sm">
+                <i class="fa fa-arrow-left"></i>
+                {% trans "Back to projects" %}
+            </a>
+            <a href="{% url 'project_package_activity_log' %}" class="btn btn-default btn-sm" style="margin-left:0.5em">
+                <i class="fa fa-list"></i>
+                {% trans "Activity log" %}
+            </a>
+        </div>
+
+    </div>{# /box-body #}
+</div>{# /box #}
+
+<script>
+(function () {
+    'use strict';
+
+    var STATUS_URL = '{{ status_json_url }}';
+    var JOB_TYPE   = '{{ job_type }}';
+    var pollHandle = null;
+
+    function show(id) {
+        ['pp-running', 'pp-done-export', 'pp-done-import', 'pp-failed'].forEach(function (eid) {
+            document.getElementById(eid).style.display = (eid === id) ? '' : 'none';
+        });
+    }
+
+    function handleDone(data) {
+        if (JOB_TYPE === 'export') {
+            show('pp-done-export');
+            document.getElementById('pp-download-btn').href = data.download_url;
+            var warns = data.export_errors || [];
+            if (warns.length) {
+                var warnEl = document.getElementById('pp-export-warnings');
+                warnEl.style.display = '';
+                var html = '<strong>{% trans "Warning: the following layers could not be fully exported" %}:</strong><ul style="margin-top:0.5em;margin-bottom:0">';
+                warns.forEach(function (e) {
+                    html += '<li><code>' + e.layer + '</code> — ' + e.error + '</li>';
+                });
+                html += '</ul>';
+                warnEl.innerHTML = html;
+            }
+        } else {
+            show('pp-done-import');
+            document.getElementById('pp-result-btn').href = data.result_url;
+            if (data.warning) {
+                var el = document.getElementById('pp-import-warning');
+                el.style.display = '';
+                el.textContent = data.warning;
+            } else {
+                document.getElementById('pp-import-success').style.display = '';
+            }
+        }
+    }
+
+    function handleFailed(data) {
+        show('pp-failed');
+        document.getElementById('pp-error-msg').textContent = data.error || '{% trans "Check server logs for details." %}';
+    }
+
+    function poll() {
+        fetch(STATUS_URL, {credentials: 'same-origin'})
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var st = data.status;
+                if (st === 'pending' || st === 'running' || st === 'draft' || st === 'preflight_ok') {
+                    show('pp-running');
+                    if (pollHandle === null) {
+                        pollHandle = setInterval(poll, 2000);
+                    }
+                } else {
+                    clearInterval(pollHandle);
+                    if (st === 'done' || st === 'committed') {
+                        handleDone(data);
+                    } else {
+                        handleFailed(data);
+                    }
+                }
+            })
+            .catch(function () {
+                /* network error — keep polling */
+            });
+    }
+
+    /* Start polling as soon as the page loads */
+    show('pp-running');
+    poll();
+})();
+</script>
+{% endblock %}
