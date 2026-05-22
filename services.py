@@ -37,6 +37,8 @@ from django.utils.crypto import get_random_string
 
 # Styles that store the full SLD document in style.sld (not built from Rule/Symbolizer rows).
 SLD_STORED_TYPES = ('CS', 'MC')
+# Rule-based styles that need full SLD build (e.g. gs:PointStacker transformation for clustered points).
+SLD_BUILD_FULL_TYPES = ('CP',)
 
 
 def create_default_style(layer_id, style_name, style_type, geom_type, count):
@@ -505,7 +507,9 @@ def clone_layer_styles(mapservice, source_layer, target_layer):
         if style.type in SLD_STORED_TYPES:
             sld_body = utils.encode_xml(new_style.sld)
         else:
-            sld_body = sld_builder.build_sld(target_layer, new_style, single_symbol=True)
+            # CP clustered points require PointStacker (single_symbol=True strips it).
+            single_symbol = style.type not in SLD_BUILD_FULL_TYPES
+            sld_body = sld_builder.build_sld(target_layer, new_style, single_symbol=single_symbol)
         if mapservice.createStyle(new_style.name, sld_body):
             mapservice.setLayerStyle(target_layer, new_style.name, new_style.is_default)
         else:
