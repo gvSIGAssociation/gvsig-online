@@ -49,7 +49,7 @@ var EditionBar = function(layerTree, map, featureType, selectedLayer, buildDrawC
 		this._aborted = true;
 		return;
 	}
-	if (this.selectedLayer && (this.selectedLayer.cached || (this.selectedLayer.cache_url && this.selectedLayer.cache_url.endsWith('/gwc/service/wmts')))) {
+	if (this.selectedLayer && (this.selectedLayer.cached || this.selectedLayer.groupCached || (this.selectedLayer.cache_url && this.selectedLayer.cache_url.endsWith('/gwc/service/wmts')))) {
 		messageBox.show('warning', gettext('You are editing a cached layer. Changes may take a little while to appear on the map. If you still do not see them after some time, reload the viewer page.'));
 	}
 	this.resourceManager = null;
