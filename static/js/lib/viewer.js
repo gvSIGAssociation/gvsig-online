@@ -1077,6 +1077,7 @@ viewer.core = {
 			wmsLayer.setZIndex(parseInt(layerConf.order));
 			wmsLayer.conf = JSON.parse(layerConf.conf);
 			wmsLayer.parentGroup = group.groupName;
+			wmsLayer.groupCached = group.cached;
 			wmsLayer.external = false;
 			wmsLayer.imported = false;
 			wmsLayer.allow_download = layerConf.allow_download;
