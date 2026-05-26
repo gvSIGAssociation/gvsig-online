@@ -1788,14 +1788,14 @@ class FileDeleteView(RetrieveDestroyAPIView):
 class GetSignedUrlFromLinkView(ListAPIView):
     parser_classes = (MultiPartParser,)
     serializer_class = FileUploadSerializer
-    permission_classes = [IsAuthenticated]  
+    permission_classes = [AllowAny]
     pagination_class = None
     
     @swagger_auto_schema(operation_id='get_signed_url_from_link', operation_summary='Get signed URL for a link field',
                           responses={
                                     400: "The layer does not have this resource.<br>Resource NOT found",
                                     404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
-                                    403: "The layer is not allowed to this user"})
+                                    403: "The layer is not allowed to this user<br>Layer is not public"})
     def get(self, request, layer_id, feat_id, field_name):
         validation = Validation(request)
     
@@ -1811,9 +1811,15 @@ class GetSignedUrlFromLinkView(ListAPIView):
                     lyr_conf = None
             
             try:
+                if not request.user.is_authenticated:
+                    validation.is_public_layer(layer_id)
                 validation.check_read_feature_permission(layer, feat_id)
             except HttpException as e:
                 return e.get_exception()
+        except Layer.DoesNotExist:
+            return HttpException(404, "Layer not found or Resource not found in database").get_exception()
+        except HttpException as e:
+            return e.get_exception()
         except Exception as e:
             return HttpException(404, "Layer not found or Resource not found in database").get_exception()
         
