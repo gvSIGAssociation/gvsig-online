@@ -71,17 +71,77 @@ def _serialize_permissions(layer):
 
 def _vector_mode_for_layer(layer, export_options):
     """
-    export_options['layer_vector_modes']: {str(layer_id): 'embedded'|'definition_only'}
-    Local layers always embedded; foreign layers follow user choice (default definition_only).
+    export_options['layer_vector_modes']: {str(layer_id): 'embedded'|'definition_only'|'view_sql_definition'}
+    Local layers: embedded by default; foreign layers: definition_only by default.
     """
     modes = export_options.get('layer_vector_modes') or {}
     mode = modes.get(str(layer.id)) or modes.get(layer.id)
-    if mode in ('embedded', 'definition_only'):
+    if mode in ('embedded', 'definition_only', 'view_sql_definition'):
         return mode
     ds = layer.datastore
     if is_foreign_postgis_datastore(ds):
         return 'definition_only'
     return 'embedded'
+
+
+def _export_view_sql_definition(layer, ds, schema, report):
+    """
+    Fetch the SQL definition and GT_pk_metadata for a view layer.
+    Returns a dict to store as 'view_sql_definition' in the manifest entry,
+    or None on failure (error appended to report).
+    """
+    import json as _json
+    intro = None
+    try:
+        intro, _ = ds.get_db_connection()
+        source = (layer.source_name or layer.name or '').strip()
+
+        # Try the datastore's configured schema first.
+        sql = intro.get_view_definition(schema, source)
+        actual_schema = schema
+
+        if not sql:
+            # The view may live in a different schema; search across all.
+            found_schema, found_sql = intro.find_view_in_any_schema(source)
+            if found_sql:
+                sql = found_sql
+                actual_schema = found_schema
+                LOG.warning(
+                    'View "%s" not found in schema "%s"; found in "%s" — '
+                    'exporting from there.',
+                    source, schema, found_schema,
+                )
+
+        if not sql:
+            report.append(_json.dumps({
+                'layer': layer.name,
+                'export_error': (
+                    'view_sql_definition requested but view "%s" was not found '
+                    'in schema "%s" or any other schema; falling back to GPKG.'
+                    % (source, schema)
+                ),
+            }))
+            return None
+
+        gt_pk_rows = intro.get_gt_pk_metadata_full_rows(actual_schema, source)
+        return {
+            'sql': sql,
+            'schema': actual_schema,
+            'view_name': source,
+            'gt_pk_metadata': gt_pk_rows,
+        }
+    except Exception as ex:
+        report.append(_json.dumps({
+            'layer': layer.name,
+            'export_error': 'Failed to export view SQL definition: %s' % ex,
+        }))
+        return None
+    finally:
+        if intro:
+            try:
+                intro.close()
+            except Exception:
+                pass
 
 
 def _serialize_layer(layer: Layer, datastore):
@@ -327,6 +387,28 @@ def build_project_zip(project: Project, export_options=None, progress_cb=None):
                         schema, table = _schema_and_table(layer)
                         vmode = _vector_mode_for_layer(layer, export_options)
                         layer_entry['vector_data_mode'] = vmode
+                        if vmode == 'view_sql_definition':
+                            view_def = _export_view_sql_definition(
+                                layer, ds, schema, log_lines
+                            )
+                            if view_def:
+                                layer_entry['view_sql_definition'] = view_def
+                                log_lines.append(json.dumps({
+                                    'layer': layer.name,
+                                    'vector': 'view_sql_definition',
+                                    'schema': schema,
+                                    'view': table,
+                                }))
+                            else:
+                                # Fallback to GPKG: SQL retrieval failed
+                                # (error already appended to log_lines by _export_view_sql_definition)
+                                LOG.warning(
+                                    'view_sql_definition requested for layer "%s" but SQL '
+                                    'could not be retrieved; falling back to GPKG export.',
+                                    layer.name,
+                                )
+                                vmode = 'embedded'
+                                layer_entry['vector_data_mode'] = vmode
                         if vmode == 'embedded':
                             gpkg_rel = 'data/vector/%s.gpkg' % eid
                             gpkg_abs = os.path.join(root, gpkg_rel.replace('/', os.sep))
@@ -340,7 +422,7 @@ def build_project_zip(project: Project, export_options=None, progress_cb=None):
                             layer_entry['vector_gpkg'] = gpkg_rel
                             layer_entry['gpkg_layer_name'] = gpkg_layer
                             log_lines.append(json.dumps({'layer': layer.name, 'vector': gpkg_rel}))
-                        else:
+                        elif vmode == 'definition_only':
                             log_lines.append(json.dumps({
                                 'layer': layer.name,
                                 'vector': 'definition_only',

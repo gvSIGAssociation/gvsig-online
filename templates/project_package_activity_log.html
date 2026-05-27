@@ -5,6 +5,11 @@
 <div class="box box-primary">
 	<div class="box-header with-border">
 		<h3 class="box-title">{% trans "Import and export reports" %}</h3>
+		<div class="box-tools pull-right">
+			<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modal-import-project-package">
+				<i class="fa fa-upload"></i> {% trans "Import project package" %}
+			</button>
+		</div>
 	</div>
 	<div class="box-body">
 		<p class="text-muted">{% trans "Last import and export operations on this server" %} ({{ limit }}).</p>
@@ -281,4 +286,61 @@
 })();
 </script>
 {% endif %}
+
+<!-- Modal: import project package -->
+<div class="modal fade" id="modal-import-project-package" tabindex="-1" role="dialog" aria-labelledby="importProjectPackageLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="importProjectPackageLabel">{% trans "Import project" %}</h4>
+			</div>
+			<form method="post" action="{% url 'project_package_import' %}" enctype="multipart/form-data" id="form-activity-import">
+				{% csrf_token %}
+				<div class="modal-body">
+					<p class="text-muted" style="margin-bottom:12px;">{% trans "Select a project package file (.zip) exported from another gvSIG Online server." %}</p>
+					<div class="form-group">
+						<label for="id_activity_package_file">{% trans "Package file" %}</label>
+						<input id="id_activity_package_file" name="package" type="file" accept=".zip,application/zip" class="form-control" required>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+					<button type="submit" class="btn btn-primary" id="btn-activity-import-submit">{% trans "Import" %}</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<script>
+(function () {
+	'use strict';
+	function getCsrfToken() {
+		var m = document.cookie.match(/csrftoken=([^;]+)/);
+		return m ? m[1] : '';
+	}
+	document.getElementById('form-activity-import').addEventListener('submit', function (ev) {
+		ev.preventDefault();
+		var form = this;
+		var btn = document.getElementById('btn-activity-import-submit');
+		btn.disabled = true;
+		btn.textContent = '{% trans "Importing…" %}';
+		$('#modal-import-project-package').modal('hide');
+		fetch(form.action, {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: { 'X-CSRFToken': getCsrfToken() },
+			body: new FormData(form)
+		}).then(function (resp) {
+			window.location = resp.url;
+		}).catch(function () {
+			btn.disabled = false;
+			btn.textContent = '{% trans "Import" %}';
+		});
+	});
+})();
+</script>
 {% endblock %}

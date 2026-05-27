@@ -751,20 +751,44 @@ table.dataTable.no-footer {
 						</label>
 						<p class="help-block small">{% trans "Pack all raster files (GeoTIFF and associated auxiliary files) so they are published automatically on import." %}</p>
 					</div>
-						<div id="export-package-foreign-layers" style="display:none">
-							<h4>{% trans "Layers on external databases" %}</h4>
-							<p class="text-muted">{% trans "Choose whether to copy data into the package (GPKG) or export metadata only (destination must already have the tables)." %}</p>
-							<table class="table table-bordered table-condensed">
-								<thead>
-									<tr>
-										<th>{% trans "Layer" %}</th>
-										<th>{% trans "Connection" %}</th>
-										<th>{% trans "Export" %}</th>
-									</tr>
-								</thead>
-								<tbody id="export-package-foreign-tbody"></tbody>
-							</table>
-						</div>
+					<div id="export-package-foreign-layers" style="display:none">
+						<h4>{% trans "Layers on external databases" %}</h4>
+						<p class="text-muted">{% trans "Choose whether to copy data into the package (GPKG) or export metadata only (destination must already have the tables)." %}</p>
+						<table class="table table-bordered table-condensed">
+						<colgroup>
+							<col style="width:33%">
+							<col style="width:33%">
+							<col style="width:33%">
+						</colgroup>
+						<thead>
+							<tr>
+								<th>{% trans "Layer" %}</th>
+								<th>{% trans "Connection" %}</th>
+								<th>{% trans "Export" %}</th>
+							</tr>
+						</thead>
+						<tbody id="export-package-foreign-tbody"></tbody>
+						</table>
+					</div>
+					<div id="export-package-view-layers" style="display:none">
+						<h4>{% trans "SQL view layers" %}</h4>
+						<p class="text-muted">{% trans "These layers are PostgreSQL views. Choose how to export each one: copy the data as a GeoPackage, or export the SQL view definition so it can be recreated on import." %}</p>
+					<table class="table table-bordered table-condensed">
+						<colgroup>
+							<col style="width:33%">
+							<col style="width:33%">
+							<col style="width:33%">
+						</colgroup>
+						<thead>
+							<tr>
+								<th>{% trans "Layer" %}</th>
+								<th></th>
+								<th>{% trans "Export" %}</th>
+							</tr>
+						</thead>
+						<tbody id="export-package-view-tbody"></tbody>
+					</table>
+					</div>
 					</div>
 				</div>
 				<div class="modal-footer">
@@ -977,6 +1001,8 @@ $(document).ready(function() {
 		$('#export-package-permissions-block').hide();
 		$('#export-package-foreign-layers').hide();
 		$('#export-package-foreign-tbody').empty();
+		$('#export-package-view-layers').hide();
+		$('#export-package-view-tbody').empty();
 		$('#btn-export-package-submit').prop('disabled', true);
 	}
 
@@ -1012,6 +1038,32 @@ $(document).ready(function() {
 				cell.append(emb).append(defn);
 				row.append(cell);
 				tbody.append(row);
+			});
+		}
+		var views = (data.vector_layers || []).filter(function (ly) { return ly.is_view && !ly.is_foreign; });
+		if (views.length) {
+			$('#export-package-view-layers').show();
+			var vtbody = $('#export-package-view-tbody');
+			views.forEach(function (ly) {
+				var row = $('<tr></tr>');
+				row.append($('<td></td>').text(ly.title + ' (' + ly.layer_group + ')'));
+				row.append($('<td></td>'));
+				var cell = $('<td></td>');
+				var emb = $('<label class="radio-inline"></label>').append(
+					$('<input type="radio">').attr({
+						name: 'layer_vector_mode_' + ly.layer_id,
+						value: 'embedded'
+					}).prop('checked', true)
+				).append(' {% trans "Data (GPKG)" %} ');
+				var sqlv = $('<label class="radio-inline"></label>').append(
+					$('<input type="radio">').attr({
+						name: 'layer_vector_mode_' + ly.layer_id,
+						value: 'view_sql_definition'
+					})
+				).append(' {% trans "SQL view definition" %} ');
+				cell.append(emb).append(sqlv);
+				row.append(cell);
+				vtbody.append(row);
 			});
 		}
 	}

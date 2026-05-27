@@ -94,12 +94,33 @@ def local_cartodb_datastores_for_server(server_id):
     return [ds for ds in qs if not is_foreign_postgis_datastore(ds)]
 
 
+def _detect_views_in_datastore(ds, source_names):
+    """Return the subset of source_names that are SQL views in ds (one DB query)."""
+    if not source_names:
+        return set()
+    try:
+        intro, _ = ds.get_db_connection()
+        if intro is None:
+            return set()
+        params = ds.get_connection_params_dict()
+        schema = (params.get('schema') or 'public').strip() or 'public'
+        result = intro.get_views_in_schema(schema, list(source_names))
+        intro.close()
+        return result
+    except Exception:
+        return set()
+
+
 def analyze_project_layers(project):
     """
-    Inventory for export wizard: which vector layers are local vs foreign PostGIS.
+    Inventory for export wizard: which vector layers are local vs foreign PostGIS,
+    and which local layers are SQL views.
     """
     layers_out = []
     foreign_keys = {}
+
+    # Collect layers per datastore first so we can batch-detect views.
+    ds_to_layers = {}  # ds_id -> (ds, list of (layer, entry_placeholder))
 
     for prj_lg in project.projectlayergroup_set.all():
         lg = prj_lg.layer_group
@@ -112,14 +133,18 @@ def analyze_project_layers(project):
             entry = {
                 'layer_id': layer.id,
                 'name': layer.name,
+                'source_name': layer.source_name or layer.name,
                 'title': layer.title or layer.name,
                 'layer_group': lg.title or lg.name,
                 'is_foreign': foreign,
+                'is_view': False,
                 'connection_key': ck,
                 'connection_label': datastore_connection_label(ds),
                 'default_vector_mode': 'definition_only' if foreign else 'embedded',
             }
             layers_out.append(entry)
+            if not foreign and ds:
+                ds_to_layers.setdefault(ds.id, (ds, []))[1].append(entry)
             if foreign:
                 if ck not in foreign_keys:
                     foreign_keys[ck] = {
@@ -132,6 +157,14 @@ def analyze_project_layers(project):
                     'name': layer.name,
                     'title': layer.title or layer.name,
                 })
+
+    # Batch-detect views per datastore (one query per unique local datastore).
+    for _ds_id, (ds, entries) in ds_to_layers.items():
+        source_names = {e['source_name'] for e in entries if e['source_name']}
+        view_names = _detect_views_in_datastore(ds, source_names)
+        for entry in entries:
+            if entry['source_name'] in view_names:
+                entry['is_view'] = True
 
     has_roles = project.projectrole_set.exists()
     return {
