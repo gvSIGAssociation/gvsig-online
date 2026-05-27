@@ -1504,6 +1504,55 @@ def getUserAuthSession(request):
 
 
 PIXEL_SIZE_M = 0.00028  # 0.28 mm
+
+def _is_generic_wms_default_style_name(name, layer_name=None):
+    if not name:
+        return True
+    if name.lower() == 'default':
+        return True
+    if name.endswith('.Default'):
+        return True
+    if layer_name:
+        short_name = layer_name.split(':')[-1]
+        if name == short_name + '.Default':
+            return True
+    return False
+
+
+def mark_default_external_wms_style(styles, layer_name=None):
+    """
+    Mark the default WMS style for external layers.
+    Prefer the first thematic style (not generic Default/default names),
+    else the first generic default style, else the first style.
+    """
+    if not styles:
+        return styles
+    for style in styles:
+        if isinstance(style, dict):
+            style['is_default'] = False
+
+    default_idx = 0
+    for i, style in enumerate(styles):
+        if not isinstance(style, dict):
+            continue
+        name = style.get('name') or ''
+        if not _is_generic_wms_default_style_name(name, layer_name):
+            default_idx = i
+            break
+    else:
+        for i, style in enumerate(styles):
+            if not isinstance(style, dict):
+                continue
+            name = style.get('name') or ''
+            if _is_generic_wms_default_style_name(name, layer_name) and name:
+                default_idx = i
+                break
+
+    if isinstance(styles[default_idx], dict):
+        styles[default_idx]['is_default'] = True
+    return styles
+
+
 def get_wmts_options(
     wmts, # owslib.wmts.WebMapTileService
     layer_id: str

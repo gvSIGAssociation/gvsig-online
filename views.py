@@ -5830,6 +5830,52 @@ def external_layer_list(request):
         }
         return render(request, 'external_layer_list.html', response)
 
+
+def _parse_external_wms_styles(request):
+    raw = request.POST.get('wms_styles')
+    if not raw:
+        return None
+    try:
+        styles = json.loads(raw)
+    except (ValueError, TypeError):
+        return None
+    if not isinstance(styles, list):
+        return None
+    normalized = []
+    for i, style in enumerate(styles):
+        if not isinstance(style, dict):
+            continue
+        name = style.get('name')
+        if not name:
+            continue
+        normalized.append({
+            'name': name,
+            'title': style.get('title') or name,
+            'is_default': bool(style.get('is_default')),
+            'custom_legend_url': style.get('custom_legend_url') or style.get('legend') or '',
+        })
+    if not normalized:
+        return None
+    utils.mark_default_external_wms_style(normalized, request.POST.get('layers'))
+    return normalized
+
+
+def _fetch_external_wms_styles_from_capabilities(url, version, layer_name):
+    if not url or not layer_name or layer_name == 'empty':
+        return None
+    try:
+        data = ows_get_capabilities(url, 'WMS', version, layer_name, False)
+    except Exception:
+        logger.exception('Error fetching WMS styles from capabilities for layer %s', layer_name)
+        return None
+    if data.get('response') == '500':
+        return None
+    styles = data.get('styles') or []
+    if not styles:
+        return None
+    return utils.mark_default_external_wms_style(styles, layer_name)
+
+
 @login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
@@ -5910,6 +5956,17 @@ def external_layer_add(request):
                 params['layers'] = request.POST.get('layers')
                 params['format'] = request.POST.get('format')
                 params['infoformat'] = request.POST.get('infoformat')
+
+            if external_layer.type == 'WMS':
+                wms_styles = _parse_external_wms_styles(request)
+                if not wms_styles:
+                    wms_styles = _fetch_external_wms_styles_from_capabilities(
+                        request.POST.get('url'),
+                        request.POST.get('version'),
+                        request.POST.get('layers'),
+                    )
+                if wms_styles:
+                    params['styles'] = wms_styles
 
             if external_layer.type == 'WMTS':
                 params['matrixset'] = request.POST.get('matrixset')
@@ -6113,6 +6170,19 @@ def external_layer_update(request, external_layer_id):
                 params['layers'] = request.POST.get('layers')
                 params['format'] = request.POST.get('format')
                 params['infoformat'] = request.POST.get('infoformat')
+                wms_styles = _parse_external_wms_styles(request)
+                if wms_styles is not None:
+                    params['styles'] = wms_styles
+                elif prev_params.get('styles'):
+                    params['styles'] = prev_params['styles']
+                elif external_layer.type == 'WMS':
+                    fetched_styles = _fetch_external_wms_styles_from_capabilities(
+                        request.POST.get('url'),
+                        request.POST.get('version'),
+                        request.POST.get('layers'),
+                    )
+                    if fetched_styles:
+                        params['styles'] = fetched_styles
 
             if external_layer.type == 'WMTS':
                 params['matrixset'] = request.POST.get('matrixset')
@@ -6484,6 +6554,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                     if 'legend' in style:
                         style_def['custom_legend_url'] = style['legend']
                     styles.append(style_def)
+                utils.mark_default_external_wms_style(styles, layer)
                 try:
                     crs_list = lyr.crs_list
                 except Exception:
