@@ -384,8 +384,9 @@ class Geoserver():
         if r.status_code==200:
             return True
         
-        print("ERROR " + str(r.status_code) + ":" + r.content)
-        raise FailedRequestError(r.status_code, r.content)
+        content = r.content.decode('utf-8', errors='replace') if isinstance(r.content, bytes) else r.content
+        print("ERROR " + str(r.status_code) + ":" + content)
+        raise FailedRequestError(r.status_code, content)
             
     def raw_request(self, url, params, user=None, password=None):
         try:
