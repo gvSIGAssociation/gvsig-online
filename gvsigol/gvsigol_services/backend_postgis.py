@@ -676,6 +676,170 @@ class Introspect:
             # the table may not exist, this is not an error
             return []
 
+    def get_gt_pk_metadata_full_rows(self, schema, table):
+        """Return full gt_pk_metadata rows for a view (all columns)."""
+        try:
+            if not self.table_exists('gt_pk_metadata', schema=schema):
+                return []
+            query = sqlbuilder.SQL(
+                "SELECT table_schema, table_name, pk_column, pk_column_idx, pk_policy, pk_sequence "
+                "FROM {schema}.gt_pk_metadata WHERE table_schema = %s AND table_name = %s"
+            ).format(schema=sqlbuilder.Identifier(schema))
+            self.cursor.execute(query, [schema, table])
+            return [
+                {
+                    'table_schema': r[0], 'table_name': r[1], 'pk_column': r[2],
+                    'pk_column_idx': r[3], 'pk_policy': r[4], 'pk_sequence': r[5],
+                }
+                for r in self.cursor.fetchall()
+            ]
+        except Exception:
+            return []
+
+    def insert_gt_pk_metadata_full_row(self, schema, view_name, row):
+        """Insert one full row into gt_pk_metadata (creates table if missing)."""
+        if not self.table_exists('gt_pk_metadata', schema=schema):
+            self.create_geoserver_pk_metadata_table(schema)
+        query = sqlbuilder.SQL("""
+            INSERT INTO {schema}.gt_pk_metadata
+            (table_schema, table_name, pk_column, pk_column_idx, pk_policy, pk_sequence)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ON CONFLICT (table_schema, table_name, pk_column) DO UPDATE
+                SET pk_column_idx = EXCLUDED.pk_column_idx,
+                    pk_policy     = EXCLUDED.pk_policy,
+                    pk_sequence   = EXCLUDED.pk_sequence
+        """).format(schema=sqlbuilder.Identifier(schema))
+        self.cursor.execute(query, [
+            schema,
+            view_name,
+            row.get('pk_column'),
+            row.get('pk_column_idx'),
+            row.get('pk_policy'),
+            row.get('pk_sequence'),
+        ])
+
+    def get_view_definition(self, schema, view_name):
+        """Return the SQL body of a view from information_schema, or None."""
+        self.cursor.execute(
+            "SELECT view_definition FROM information_schema.views "
+            "WHERE table_schema = %s AND table_name = %s",
+            [schema, view_name],
+        )
+        row = self.cursor.fetchone()
+        return row[0] if row else None
+
+    def find_view_in_any_schema(self, view_name):
+        """
+        Search all non-system schemas for a view with the given name.
+        Returns (schema, sql) or (None, None) if not found.
+        Uses pg_get_viewdef which is more reliable than information_schema.
+        """
+        self.cursor.execute(
+            """
+            SELECT n.nspname, pg_get_viewdef(c.oid, true)
+            FROM pg_catalog.pg_class c
+            JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+            WHERE c.relname = %s
+              AND c.relkind = 'v'
+              AND n.nspname NOT IN ('information_schema', 'pg_catalog')
+              AND n.nspname NOT LIKE 'pg_%%'
+            ORDER BY n.nspname
+            LIMIT 1
+            """,
+            [view_name],
+        )
+        row = self.cursor.fetchone()
+        return (row[0], row[1]) if row else (None, None)
+
+    def get_views_in_schema(self, schema, names):
+        """Return the subset of *names* that are views in *schema*."""
+        if not names:
+            return set()
+        placeholders = ','.join(['%s'] * len(names))
+        self.cursor.execute(
+            f"SELECT table_name FROM information_schema.views "
+            f"WHERE table_schema = %s AND table_name IN ({placeholders})",
+            [schema] + list(names),
+        )
+        return {row[0] for row in self.cursor.fetchall()}
+
+    def create_view_from_sql(self, schema, view_name, sql, force_unique=False):
+        """
+        CREATE [OR REPLACE] VIEW schema.view_name AS <sql>.
+
+        When force_unique=False (default):
+          - If the name is free or already a VIEW: uses CREATE OR REPLACE VIEW
+            (replaces the existing view in-place).
+          - If the name is taken by a non-view object (table, etc.): appends a
+            numeric suffix (_1, _2, …) until a free name is found.
+
+        When force_unique=True (used during import to always produce a fresh layer):
+          - Finds the first name that is entirely free in PostgreSQL (no object of
+            ANY kind at schema.name), then uses CREATE VIEW (without OR REPLACE).
+          - This guarantees that each import produces a new independent view rather
+            than overwriting an existing one.
+
+        Returns the actual view name used.
+        """
+        def _pg_name_free(name):
+            self.cursor.execute(
+                """
+                SELECT 1 FROM pg_catalog.pg_class c
+                JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+                WHERE n.nspname = %s AND c.relname = %s
+                """,
+                [schema, name],
+            )
+            return self.cursor.fetchone() is None
+
+        if force_unique:
+            # Always create a brand-new view; never replace an existing one.
+            suffix = 1
+            candidate = view_name
+            while not _pg_name_free(candidate):
+                candidate = '%s_%d' % (view_name, suffix)
+                suffix += 1
+            view_name = candidate
+            stmt = (
+                sqlbuilder.SQL("CREATE VIEW {schema}.{view} AS ").format(
+                    schema=sqlbuilder.Identifier(schema),
+                    view=sqlbuilder.Identifier(view_name),
+                )
+                + sqlbuilder.SQL(sql)
+            )
+            self.cursor.execute(stmt)
+            return view_name
+
+        # Default path: replace existing views, suffix non-view conflicts.
+        self.cursor.execute(
+            """
+            SELECT c.relkind
+            FROM pg_catalog.pg_class c
+            JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+            WHERE n.nspname = %s AND c.relname = %s
+            """,
+            [schema, view_name],
+        )
+        row = self.cursor.fetchone()
+        if row and row[0] != 'v':
+            # Name is taken by a table (r), materialized view (m), sequence (S), etc.
+            suffix = 1
+            candidate = '%s_%d' % (view_name, suffix)
+            while not _pg_name_free(candidate):
+                suffix += 1
+                candidate = '%s_%d' % (view_name, suffix)
+            view_name = candidate
+
+        stmt = (
+            sqlbuilder.SQL("CREATE OR REPLACE VIEW {schema}.{view} AS ").format(
+                schema=sqlbuilder.Identifier(schema),
+                view=sqlbuilder.Identifier(view_name),
+            )
+            + sqlbuilder.SQL(sql)
+        )
+        self.cursor.execute(stmt)
+        return view_name
+
     def get_pk_columns(self, table, schema='public'):
         qualified_table = quote_ident(schema, self.conn) + "." + quote_ident(table, self.conn) 
 
