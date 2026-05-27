@@ -49,9 +49,9 @@
 
 {% block content %}
 {% if redirect_to_layergroup %}
-<form role="form" method="post" action="/gvsigonline/services/external_layer_update/{{ external_layer.id }}/?redirect=layergroup-redirect{% if layergroup_id %}&layergroup_id={{layergroup_id}}{% endif %}{% if project_id %}&project_id={{project_id}}{% endif %}{% if from_redirect %}&from_redirect={{from_redirect}}{% endif %}" enctype="multipart/form-data">
+<form id="external-layer-update-form" role="form" method="post" action="/gvsigonline/services/external_layer_update/{{ external_layer.id }}/?redirect=layergroup-redirect{% if layergroup_id %}&layergroup_id={{layergroup_id}}{% endif %}{% if project_id %}&project_id={{project_id}}{% endif %}{% if from_redirect %}&from_redirect={{from_redirect}}{% endif %}" enctype="multipart/form-data">
 {% else %}
-<form role="form" method="post" action="/gvsigonline/services/external_layer_update/{{ external_layer.id }}/" enctype="multipart/form-data">
+<form id="external-layer-update-form" role="form" method="post" action="/gvsigonline/services/external_layer_update/{{ external_layer.id }}/" enctype="multipart/form-data">
 {% endif %}
 
 <div class="row">
@@ -558,6 +558,68 @@ $(document).ready(function(){
 		}
 	}
 
+	function isGenericWmsDefaultStyleName(name, layerName) {
+		if (!name) {
+			return true;
+		}
+		if (name.toLowerCase() === 'default') {
+			return true;
+		}
+		if (name.endsWith('.Default')) {
+			return true;
+		}
+		if (layerName) {
+			var shortName = layerName.split(':').pop();
+			if (name === shortName + '.Default') {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	function pickDefaultWmsStyleIndex(styles, layerName) {
+		if (!styles || !styles.length || styles.length === 1) {
+			return 0;
+		}
+		for (var i = 0; i < styles.length; i++) {
+			if (!isGenericWmsDefaultStyleName(styles[i].name, layerName)) {
+				return i;
+			}
+		}
+		for (var j = 0; j < styles.length; j++) {
+			if (isGenericWmsDefaultStyleName(styles[j].name, layerName) && styles[j].name) {
+				return j;
+			}
+		}
+		return 0;
+	}
+
+	function setWmsStylesFromCapabilities(data, layerName) {
+		$('#wms_styles').remove();
+		if (!data.styles || !data.styles.length) {
+			return;
+		}
+		var defaultIndex = pickDefaultWmsStyleIndex(data.styles, layerName);
+		var styles = data.styles.map(function(style, index) {
+			return {
+				name: style.name,
+				title: style.title || style.name,
+				is_default: index === defaultIndex,
+				custom_legend_url: style.custom_legend_url || style.legend || ''
+			};
+		});
+		$('<input>').attr({
+			type: 'hidden',
+			id: 'wms_styles',
+			name: 'wms_styles',
+			value: JSON.stringify(styles)
+		}).appendTo('#external-layer-update-form');
+	}
+
+	if (params.styles && params.styles.length) {
+		setWmsStylesFromCapabilities({ styles: params.styles }, params.layers);
+	}
+
 	function getNewLayersFromCapabilities(url, type, version, layer, edit_version){
 		$("#form-error ul").empty();
 		$.ajax({
@@ -600,7 +662,7 @@ $(document).ready(function(){
 						    id: 'crs_' + data.crs_list[i][4],
 						    name: 'crs_' + data.crs_list[i][4],
 						    value: bounds
-						}).appendTo('form');
+						}).appendTo('#external-layer-update-form');
 					}
 				}
 
@@ -610,7 +672,7 @@ $(document).ready(function(){
 					    id: 'capabilities',
 					    name: 'capabilities',
 					    value: JSON.stringify(data.capabilities)
-					}).appendTo('form');
+					}).appendTo('#external-layer-update-form');
 				}
 				if (data.wmts_options) {
 					$('<input>').attr({
@@ -618,7 +680,7 @@ $(document).ready(function(){
 					    id: 'wmts_options',
 					    name: 'wmts_options',
 					    value: JSON.stringify(data.wmts_options)
-					}).appendTo('form');
+					}).appendTo('#external-layer-update-form');
 				}
 
 				 if('layers' in data){
@@ -656,6 +718,20 @@ $(document).ready(function(){
 							}
 						}
 					}
+
+				if (type === 'WMS') {
+					if ((!data.styles || !data.styles.length) && selectedLayer && selectedLayer !== 'empty' && !layer) {
+						getNewLayersFromCapabilities(
+							url,
+							type,
+							$("#id_version option:selected").val() || data.version,
+							selectedLayer,
+							false
+						);
+					} else {
+						setWmsStylesFromCapabilities(data, selectedLayer);
+					}
+				}
 
 				let matrixsetSelected = null
 				if(type == "WMTS" && 'matrixsets' in data) {
