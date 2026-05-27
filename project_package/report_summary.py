@@ -12,16 +12,27 @@ def _retranslate(text):
     if not text:
         return text
 
-    # Table "X" already exists in schema "Y"; loading as "Z".
+    # Layer "X" already exists in datastore "Y"; loading as "Z".  (current format)
+    m = _re.match(
+        r'^Layer "(.+)" already exists in datastore "(.+)"; loading as "(.+)"\.$',
+        text,
+    )
+    if m:
+        return _(
+            'Layer "%(wanted)s" already exists in datastore "%(ds)s"; '
+            'loading as "%(actual)s".'
+        ) % {'wanted': m.group(1), 'ds': m.group(2), 'actual': m.group(3)}
+
+    # Table "X" already exists in schema "Y"; loading as "Z".  (legacy format)
     m = _re.match(
         r'^Table "(.+)" already exists in schema "(.+)"; loading as "(.+)"\.$',
         text,
     )
     if m:
         return _(
-            'Table "%(wanted)s" already exists in schema "%(schema)s"; '
+            'Layer "%(wanted)s" already exists in datastore "%(ds)s"; '
             'loading as "%(actual)s".'
-        ) % {'wanted': m.group(1), 'schema': m.group(2), 'actual': m.group(3)}
+        ) % {'wanted': m.group(1), 'ds': m.group(2), 'actual': m.group(3)}
 
     # Definition-only layer "X" was skipped by choice in the import wizard.
     m = _re.match(

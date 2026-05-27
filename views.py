@@ -762,6 +762,17 @@ def project_package_import_wizard(request, job_id):
                 view_sql_overrides[eid] = val.strip()
         if view_sql_overrides:
             wiz['view_sql_overrides'] = view_sql_overrides
+        # Target datastore overrides for local GPKG layers and SQL views
+        local_ds_overrides = {}
+        for key, val in request.POST.items():
+            if key.startswith('local_ds_') and val:
+                eid = key[len('local_ds_'):]
+                try:
+                    local_ds_overrides[eid] = int(val)
+                except (TypeError, ValueError):
+                    pass
+        if local_ds_overrides:
+            wiz['local_datastore_overrides'] = local_ds_overrides
         on = (request.POST.get('override_project_name') or '').strip()
         if on:
             wiz['override_project_name'] = on
@@ -843,6 +854,28 @@ def project_package_import_wizard(request, job_id):
             ck = ly.get('connection_key')
             if ck and ly.get('is_foreign_source'):
                 ly['selected_datastore_id'] = gpkg_foreign_map.get(ck)
+
+        # For local layers and views: find if the exported workspace/datastore
+        # already exists on the target server so the template can pre-select it
+        # and warn when it will be newly created.
+        ds_lookup = {
+            (ds.workspace.name, ds.name): ds.id
+            for ds in server_datastores
+        }
+        local_ds_overrides = (wizard.get('local_datastore_overrides') or {})
+        for ly in package_layout.get('gpkg_layers') or []:
+            if not ly.get('is_foreign_source'):
+                eid = ly.get('export_id') or ''
+                ly['existing_ds_id'] = ds_lookup.get(
+                    (ly.get('exported_workspace', ''), ly.get('exported_datastore', ''))
+                )
+                ly['selected_local_ds_id'] = local_ds_overrides.get(eid) or ly['existing_ds_id']
+        for v in package_layout.get('view_sql_layers') or []:
+            eid = v.get('export_id') or ''
+            v['existing_ds_id'] = ds_lookup.get(
+                (v.get('exported_workspace', ''), v.get('exported_datastore', ''))
+            )
+            v['selected_local_ds_id'] = local_ds_overrides.get(eid) or v['existing_ds_id']
     recent_package_activity = []
     try:
         from gvsigol_core.project_package.activity_log import recent_package_activity as _recent_activity

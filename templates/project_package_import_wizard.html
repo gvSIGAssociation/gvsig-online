@@ -153,10 +153,14 @@
 				{% endfor %}
 			</select>
 			{% else %}
-			<span class="text-muted"><small>
-				<code>{{ ly.exported_workspace }}</code> / <code>{{ ly.exported_datastore }}</code>
-				<br><em>{% trans "(auto)" %}</em>
-			</small></span>
+			<select class="form-control input-sm" name="local_ds_{{ ly.export_id }}" style="max-width:100%">
+				<option value="" {% if not ly.existing_ds_id %}selected{% endif %}>
+					{{ ly.exported_workspace }} / {{ ly.exported_datastore }}{% if not ly.existing_ds_id %} ⚠ {% trans "(new)" %}{% endif %}
+				</option>
+				{% for ds in server_datastores %}
+				<option value="{{ ds.id }}" {% if ly.selected_local_ds_id == ds.id %}selected{% endif %}>{{ ds.workspace.name }} / {{ ds.name }}{% if ds.get_schema_name %} ({{ ds.get_schema_name }}){% endif %}</option>
+				{% endfor %}
+			</select>
 			{% endif %}
 		</td>
 	</tr>
@@ -257,12 +261,14 @@
 				{% endif %}
 			</td>
 			<td style="vertical-align:middle">
-				{# Same style as local GPKG: workspace / datastore + (auto) #}
-				<span class="text-muted"><small>
-					<code>{{ v.exported_workspace }}</code> / <code>{{ v.exported_datastore }}</code>
-					<br><em>{% trans "(auto)" %}</em>
-				</small></span>
-				<br>
+				<select class="form-control input-sm" name="local_ds_{{ v.export_id }}" style="max-width:100%;margin-bottom:4px">
+					<option value="" {% if not v.existing_ds_id %}selected{% endif %}>
+						{{ v.exported_workspace }} / {{ v.exported_datastore }}{% if not v.existing_ds_id %} ⚠ {% trans "(new)" %}{% endif %}
+					</option>
+					{% for ds in server_datastores %}
+					<option value="{{ ds.id }}" {% if v.selected_local_ds_id == ds.id %}selected{% endif %}>{{ ds.workspace.name }} / {{ ds.name }}{% if ds.get_schema_name %} ({{ ds.get_schema_name }}){% endif %}</option>
+					{% endfor %}
+				</select>
 				{# Hidden textarea + Edit SQL button #}
 				<textarea name="view_sql_{{ v.export_id }}" id="view_sql_input_{{ v.export_id }}"
 					style="display:none">{{ v.sql }}</textarea>

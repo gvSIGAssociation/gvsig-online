@@ -47,14 +47,17 @@ def pg_conn_string_from_params(params):
 def datastore_connection_key(datastore):
     """
     Stable key to group layers that share the same DB connection in import wizard.
+    Local CartoDB datastores always return 'local_cartodb', even if they happen
+    to have a Connection object pointing to localhost.
     """
     if datastore is None:
         return 'unknown'
+    # Check local first: a Connection pointing to localhost is still local.
+    if is_local_cartodb_params(datastore.get_connection_params_dict()):
+        return 'local_cartodb'
     if datastore.is_using_connection() and datastore.connection_id:
         return 'conn_%s' % datastore.connection_id
     fp = _params_fingerprint(datastore.get_connection_params_dict())
-    if is_local_cartodb_params(datastore.get_connection_params_dict()):
-        return 'local_cartodb'
     digest = hashlib.sha256(fp.encode('utf-8')).hexdigest()[:16]
     return 'legacy_%s' % digest
 

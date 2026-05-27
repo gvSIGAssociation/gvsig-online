@@ -552,6 +552,14 @@ def _build_datastore_map_from_gpkg_targets(server_id, username, gpkg_targets, re
     return datastore_map, ws_objs, workspaces_created
 
 
+def _datastore_by_id(ds_id):
+    """Return a Datastore instance by primary key, or None."""
+    try:
+        return Datastore.objects.select_related('workspace').get(pk=int(ds_id))
+    except Exception:
+        return None
+
+
 def _embedded_target_datastore(ld, default_ws, gpkg_targets, datastore_map):
     ck = ld.get('datastore_connection_key') or 'local_cartodb'
     tgt = gpkg_targets.get(ck)
@@ -979,7 +987,14 @@ def _postgis_table_taken(intro, schema, name):
 
 
 def _unique_gpkg_table_name(target_datastore, schema, base, report):
-    """Free name in PostGIS schema and gvSIG layer registry (_1, _2, … if taken)."""
+    """Free name in the gvSIG Layer registry for this datastore (_1, _2, … if taken).
+
+    Uniqueness is scoped to the target *datastore* (workspace), not to the raw
+    PostgreSQL schema.  Multiple datastores/workspaces in the same DB schema can
+    legitimately share a table, so we only rename when a Layer with that name
+    already exists inside this specific datastore.  ogr2ogr is called with
+    OVERWRITE so an existing same-name table gets replaced with the package data.
+    """
     intro, _db_params = target_datastore.get_db_connection()
     try:
         name = _sanitize_pg_table_base(base)
@@ -987,14 +1002,13 @@ def _unique_gpkg_table_name(target_datastore, schema, base, report):
         i = 1
         salt = ''
         while True:
-            taken_pg = _postgis_table_taken(intro, schema, candidate)
             taken_layer = Layer.objects.filter(name=candidate, datastore=target_datastore).exists()
             low = candidate.lower()
             if low != candidate:
                 taken_layer = taken_layer or Layer.objects.filter(
                     name=low, datastore=target_datastore
                 ).exists()
-            if not taken_pg and not taken_layer:
+            if not taken_layer:
                 break
             candidate = name + '_' + str(i) + salt
             i += 1
@@ -1003,9 +1017,13 @@ def _unique_gpkg_table_name(target_datastore, schema, base, report):
         if candidate != name:
             report.append({
                 'warning': _(
-                    'Table "%(wanted)s" already exists in schema "%(schema)s"; '
+                    'Layer "%(wanted)s" already exists in datastore "%(ds)s"; '
                     'loading as "%(actual)s".'
-                ) % {'wanted': name, 'schema': schema, 'actual': candidate},
+                ) % {
+                    'wanted': name,
+                    'ds': target_datastore.name,
+                    'actual': candidate,
+                },
             })
         return candidate
     finally:
@@ -1045,7 +1063,7 @@ def _datastore_postgis_schema(target_datastore, ld=None):
     return gs or 'public'
 
 
-def _gpkg_load_schema(target_datastore, ld=None):
+def _gpkg_load_schema(target_datastore, ld=None, use_ds_schema=False):
     """PostGIS schema for ogr2ogr GPKG load.
 
     Priority:
@@ -1053,10 +1071,11 @@ def _gpkg_load_schema(target_datastore, ld=None):
        comparing to the datastore name.  The schema_name IS the correct
        PostgreSQL schema where the layer lived on the source server; even when
        it equals the datastore name that is intentional (e.g. ds_carles/ds_carles).
+       Skipped when use_ds_schema=True (user selected a different target datastore).
     2. Schema of the target datastore connection.
     3. Datastore name as fallback (CartoDB / legacy behaviour).
     """
-    if ld:
+    if ld and not use_ds_schema:
         raw_schema = (ld.get('schema_name') or '').strip()
         if raw_schema and re.match(r'^[a-zA-Z0-9_]+$', raw_schema):
             return raw_schema
@@ -1275,6 +1294,7 @@ def _import_vector_layer(
     import_permissions,
     id_map,
     report,
+    use_ds_schema=False,
 ):
     ld = layer_entry['layer']
     gpkg_rel = layer_entry['vector_gpkg']
@@ -1282,7 +1302,7 @@ def _import_vector_layer(
     if not os.path.isfile(gpkg_path):
         report.append({'error': 'missing_gpkg', 'export_id': layer_entry.get('export_id')})
         return None
-    schema = _gpkg_load_schema(target_datastore, ld)
+    schema = _gpkg_load_schema(target_datastore, ld, use_ds_schema=use_ds_schema)
     _ensure_cartodb_schema_exists(schema)
     table_base = ld.get('source_name') or ld.get('name')
     table_name = _unique_gpkg_table_name(target_datastore, schema, table_base, report)
@@ -1514,7 +1534,24 @@ def _resolve_definition_datastore(
             datastore_map[(wk, dk)] = ds
         return ds
 
-    connection = _connection_for_import_key(ck, foreign_connection_map)
+    try:
+        connection = _connection_for_import_key(ck, foreign_connection_map)
+    except (ValueError, Exception):
+        # Connection key not mapped or doesn't exist on this server.
+        # The source datastore may be a local PostGIS that happens to use a
+        # Connection object (conn_N), but the view is local data — fall back
+        # to creating a plain local datastore with the same name.
+        LOG.warning(
+            '_resolve_definition_datastore: connection key %r not found, '
+            'falling back to local datastore for %s/%s', ck, wk, dk
+        )
+        ds = datastore_map.get((wk, dk))
+        if not ds:
+            ws_obj = _resolve_workspace_for_import(server_id, wk, ws_objs, username, report)
+            ds, _ds_created = _get_or_create_datastore(username, ws_obj, dk, report)
+            datastore_map[(wk, dk)] = ds
+        return ds
+
     if not schema:
         schema = _connection_default_schema(connection)
     cache_key = (wk, dk, connection.id, schema)
@@ -1820,6 +1857,7 @@ def _import_view_sql_definition_layer(
     server_id=None,
     sql_override=None,
     group_reuse_state=None,
+    use_ds_schema=False,
 ):
     """
     Create a PostgreSQL view from a SQL definition and publish it in GeoServer.
@@ -1853,7 +1891,12 @@ def _import_view_sql_definition_layer(
     # Always prefer the schema recorded in the view_sql_definition (captured at
     # export time directly from pg_get_viewdef / information_schema).  Only fall
     # back to the target-datastore schema when the export didn't record one.
-    schema = (view_def.get('schema') or '').strip() or _datastore_postgis_schema(target_datastore, ld)
+    # When the user picked a different target datastore (use_ds_schema=True), use
+    # that datastore's schema instead of the exported view's original schema.
+    if use_ds_schema:
+        schema = _datastore_postgis_schema(target_datastore, {})
+    else:
+        schema = (view_def.get('schema') or '').strip() or _datastore_postgis_schema(target_datastore, ld)
     base_view_name = (view_def.get('view_name') or ld.get('source_name') or ld.get('name') or 'view').strip()
     gt_pk_rows = view_def.get('gt_pk_metadata') or []
 
@@ -1923,6 +1966,9 @@ def _import_view_sql_definition_layer(
     ld_copy = dict(ld)
     ld_copy['source_name'] = view_name
     ld_copy['name'] = view_name
+    # Override schema_name so _datastore_postgis_schema() in the publishing step
+    # looks in the same schema where we just created the view.
+    ld_copy['schema_name'] = schema
     entry_copy = dict(layer_entry)
     entry_copy['layer'] = ld_copy
 
@@ -2346,6 +2392,7 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
         skipped_gpkg_ck = set(wiz.get('skip_gpkg_connection_keys') or [])
         skipped_gpkg_layer_ids = set(wiz.get('skip_gpkg_layer_export_ids') or [])
         view_sql_overrides = wiz.get('view_sql_overrides') or {}
+        local_datastore_overrides = wiz.get('local_datastore_overrides') or {}
         required_foreign_keys = _foreign_connection_keys_required(snapshot, skipped_definition_ids)
         for ck in required_foreign_keys:
             if ck == 'local_cartodb':
@@ -2549,17 +2596,25 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
                     # matching the exported workspace+datastore names.  Using
                     # _embedded_target_datastore here would fall back to the default GPKG
                     # datastore (typically schema=public) instead of the view's real schema.
-                    target_ds = _resolve_definition_datastore(
-                        ld,
-                        default_ws,
-                        server.id,
-                        ws_objs,
-                        datastore_map,
-                        connection_ds_cache,
-                        foreign_connection_map,
-                        username,
-                        report,
-                    )
+                    view_ds_override = bool(eid and eid in local_datastore_overrides)
+                    if view_ds_override:
+                        target_ds = _datastore_by_id(local_datastore_overrides[eid]) or \
+                            _resolve_definition_datastore(
+                                ld, default_ws, server.id, ws_objs, datastore_map,
+                                connection_ds_cache, foreign_connection_map, username, report,
+                            )
+                    else:
+                        target_ds = _resolve_definition_datastore(
+                            ld,
+                            default_ws,
+                            server.id,
+                            ws_objs,
+                            datastore_map,
+                            connection_ds_cache,
+                            foreign_connection_map,
+                            username,
+                            report,
+                        )
                     _import_view_sql_definition_layer(
                         layer_entry,
                         target_ds,
@@ -2570,6 +2625,7 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
                         id_map,
                         report,
                         server_id=server.id,
+                        use_ds_schema=view_ds_override,
                         sql_override=view_sql_overrides.get(eid) if eid else None,
                         group_reuse_state=group_reuse_state,
                     )
@@ -2587,7 +2643,20 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
                             },
                         })
                         continue
-                    target_ds = _embedded_target_datastore(ld, default_ws, gpkg_targets, datastore_map)
+                    # Foreign-source layers always go into the user-selected target
+                    # datastore's schema (their packaged schema belongs to an entirely
+                    # different database).  Local layers only force the target schema
+                    # when the user explicitly changed the datastore in the wizard.
+                    is_foreign_source = (
+                        ck != 'local_cartodb' or bool(ld.get('datastore_is_foreign'))
+                    )
+                    if eid and eid in local_datastore_overrides:
+                        target_ds = _datastore_by_id(local_datastore_overrides[eid]) or \
+                            _embedded_target_datastore(ld, default_ws, gpkg_targets, datastore_map)
+                        use_ds_schema = True
+                    else:
+                        target_ds = _embedded_target_datastore(ld, default_ws, gpkg_targets, datastore_map)
+                        use_ds_schema = is_foreign_source
                     _import_vector_layer(
                         extract_dir,
                         layer_entry,
@@ -2598,6 +2667,7 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
                         import_permissions,
                         id_map,
                         report,
+                        use_ds_schema=use_ds_schema,
                     )
                 elif _is_definition_only_layer_entry(layer_entry):
                     eid = layer_entry.get('export_id')

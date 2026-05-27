@@ -210,15 +210,16 @@ msgstr ""
 msgid "Additional reused LayerGroup from this package block."
 msgstr "Grupo de capas adicional reutilizado de este bloque del paquete."
 
-#: gvsigol_core/project_package/import_service.py:1006
+#: gvsigol_core/project_package/import_service.py:1018
 #: gvsigol_core/project_package/report_summary.py:22
+#: gvsigol_core/project_package/report_summary.py:30
 #, python-format
 msgid ""
-"Table \"%(wanted)s\" already exists in schema \"%(schema)s\"; loading as "
+"Layer \"%(wanted)s\" already exists in datastore \"%(ds)s\"; loading as "
 "\"%(actual)s\"."
 msgstr ""
-"La tabla \"%(wanted)s\" ya existe en el esquema \"%(schema)s\"; se carga "
-"como \"%(actual)s\"."
+"La capa \"%(wanted)s\" ya existe en el almacén \"%(ds)s\"; se carga como "
+"\"%(actual)s\"."
 
 #: gvsigol_core/project_package/import_service.py:1071
 #, python-format
@@ -2436,3 +2437,6 @@ msgstr ""
 #: gvsigol_core/views.py:2802
 msgid "Application name already exists"
 msgstr "El nombre de la aplicación ya existe"
+
+msgid "(new)"
+msgstr "(nuevo)"
