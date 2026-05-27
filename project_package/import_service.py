@@ -1904,6 +1904,7 @@ def _import_view_sql_definition_layer(
     _ensure_cartodb_schema_exists(schema)
 
     intro = None
+    view_name = base_view_name  # fallback so the except block can reference it safely
     try:
         intro, _conn_meta = target_datastore.get_db_connection()
 
