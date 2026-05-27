@@ -104,6 +104,11 @@ def _normalized_ws_ds_for_vector_layer(ld, default_ws):
     return wk, dk
 
 
+def _is_view_sql_layer_entry(ly):
+    """True when this manifest entry contains a SQL view definition."""
+    return bool(ly.get('view_sql_definition') and ly.get('vector_data_mode') == 'view_sql_definition')
+
+
 def _collect_foreign_definition_layers(snapshot):
     """Per-layer rows for import wizard (foreign PostGIS definition-only)."""
     rows = []
@@ -135,6 +140,11 @@ def _parse_skip_definition_export_ids(wizard, snapshot=None):
     return skipped
 
 
+def _parse_skip_view_export_ids(wizard):
+    """Export IDs of view-sql layers the user chose to skip in the wizard."""
+    return set(wizard.get('skip_view_layer_export_ids') or [])
+
+
 def _active_definition_layers(snapshot, skipped_export_ids):
     """Definition-only layers that are not explicitly skipped in the wizard."""
     skipped = set(skipped_export_ids or [])
@@ -163,6 +173,7 @@ def extract_snapshot_layout(snapshot):
     default_ws = _default_workspace_from_project(snapshot)
     foreign_map = {}
     gpkg_groups = {}
+    gpkg_layers = []
     n_def = 0
     n_embedded = 0
     foreign_definition_layers = []
@@ -182,6 +193,7 @@ def extract_snapshot_layout(snapshot):
                 bundle = ly.get('raster_bundle') or {}
                 primary = bundle.get('primary') or ''
                 raster_layers.append({
+                    'export_id': ly.get('export_id') or '',
                     'name': ld.get('name') or '',
                     'title': ld.get('title') or ld.get('name') or '',
                     'type': lt,
@@ -197,6 +209,7 @@ def extract_snapshot_layout(snapshot):
                 if ep not in seen_external_params:
                     seen_external_params.add(ep)
                     external_layers.append({
+                        'export_id': ly.get('export_id') or '',
                         'name': ld.get('name') or '',
                         'title': ld.get('title') or ld.get('name') or '',
                         'type': lt or ld.get('type') or '',
@@ -212,11 +225,12 @@ def extract_snapshot_layout(snapshot):
                 n_embedded += 1
                 ck = ld.get('datastore_connection_key') or 'local_cartodb'
                 exp_wk, exp_ds = _normalized_ws_ds_for_vector_layer(ld, default_ws)
+                is_foreign = bool(ld.get('datastore_is_foreign'))
                 if ck not in gpkg_groups:
                     gpkg_groups[ck] = {
                         'connection_key': ck,
                         'connection_label': ld.get('datastore_connection_label') or ck,
-                        'is_foreign_source': bool(ld.get('datastore_is_foreign')),
+                        'is_foreign_source': is_foreign,
                         'exported_workspace': exp_wk,
                         'exported_datastore': exp_ds,
                         'layer_count': 0,
@@ -225,6 +239,17 @@ def extract_snapshot_layout(snapshot):
                 gpkg_groups[ck]['layer_count'] += 1
                 if len(gpkg_groups[ck]['sample_layers']) < 5:
                     gpkg_groups[ck]['sample_layers'].append(ld.get('title') or ld.get('name'))
+                # Individual entry for per-layer Skip in the wizard
+                gpkg_layers.append({
+                    'export_id': ly.get('export_id') or '',
+                    'name': ld.get('name') or '',
+                    'title': ld.get('title') or ld.get('name') or '',
+                    'connection_key': ck,
+                    'connection_label': ld.get('datastore_connection_label') or ck,
+                    'is_foreign_source': is_foreign,
+                    'exported_workspace': exp_wk,
+                    'exported_datastore': exp_ds,
+                })
             elif vmode == 'definition_only' or (
                 not ly.get('vector_gpkg')
                 and vmode != 'embedded'
@@ -246,20 +271,48 @@ def extract_snapshot_layout(snapshot):
                 layer_label = ld.get('title') or ld.get('name')
                 if layer_label and layer_label not in samples and len(samples) < 8:
                     samples.append(layer_label)
+    # Collect SQL view layers for the import wizard
+    view_sql_layers = []
+    for group in snapshot.get('layer_groups', []):
+        for ly in group.get('layers', []):
+            if not _is_view_sql_layer_entry(ly):
+                continue
+            ld = ly.get('layer') or {}
+            view_def = ly.get('view_sql_definition') or {}
+            view_sql_layers.append({
+                'export_id': ly.get('export_id'),
+                'name': ld.get('name') or '',
+                'title': ld.get('title') or ld.get('name') or '',
+                'view_name': view_def.get('view_name') or ld.get('source_name') or ld.get('name') or '',
+                'schema': view_def.get('schema') or '',
+                'sql': view_def.get('sql') or '',
+                'gt_pk_metadata': view_def.get('gt_pk_metadata') or [],
+                # Exported origin info for display in the import wizard
+                'exported_workspace': ld.get('workspace_name') or '',
+                'exported_datastore': ld.get('datastore_name') or '',
+            })
+
     foreign_definition_layers = _collect_foreign_definition_layers(snapshot)
     primary_workspace = default_ws
     pdata = snapshot.get('project') or {}
+    all_gpkg_targets = list(gpkg_groups.values())
+    gpkg_local_targets = [g for g in all_gpkg_targets if not g.get('is_foreign_source')]
+    gpkg_foreign_targets = [g for g in all_gpkg_targets if g.get('is_foreign_source')]
     return {
         'primary_workspace': primary_workspace,
         'exported_project_name': pdata.get('name'),
         'exported_project_title': pdata.get('title'),
         'definition_only_layers': n_def,
         'embedded_vector_layers': n_embedded,
-        'gpkg_connection_targets': list(gpkg_groups.values()),
+        'gpkg_connection_targets': all_gpkg_targets,
+        'gpkg_local_targets': gpkg_local_targets,
+        'gpkg_foreign_targets': gpkg_foreign_targets,
+        'gpkg_layers': gpkg_layers,
         'foreign_connections': list(foreign_map.values()),
         'foreign_definition_layers': foreign_definition_layers,
         'raster_layers': raster_layers,
         'external_layers': external_layers,
+        'view_sql_layers': view_sql_layers,
     }
 
 
@@ -992,8 +1045,21 @@ def _datastore_postgis_schema(target_datastore, ld=None):
     return gs or 'public'
 
 
-def _gpkg_load_schema(target_datastore):
-    """PostGIS schema for ogr2ogr GPKG load (local CartoDB may use datastore name as schema)."""
+def _gpkg_load_schema(target_datastore, ld=None):
+    """PostGIS schema for ogr2ogr GPKG load.
+
+    Priority:
+    1. schema_name recorded in the package metadata — used directly without
+       comparing to the datastore name.  The schema_name IS the correct
+       PostgreSQL schema where the layer lived on the source server; even when
+       it equals the datastore name that is intentional (e.g. ds_carles/ds_carles).
+    2. Schema of the target datastore connection.
+    3. Datastore name as fallback (CartoDB / legacy behaviour).
+    """
+    if ld:
+        raw_schema = (ld.get('schema_name') or '').strip()
+        if raw_schema and re.match(r'^[a-zA-Z0-9_]+$', raw_schema):
+            return raw_schema
     if target_datastore.is_using_connection() and target_datastore.schema:
         schema = target_datastore.schema.strip()
     else:
@@ -1216,7 +1282,7 @@ def _import_vector_layer(
     if not os.path.isfile(gpkg_path):
         report.append({'error': 'missing_gpkg', 'export_id': layer_entry.get('export_id')})
         return None
-    schema = _gpkg_load_schema(target_datastore)
+    schema = _gpkg_load_schema(target_datastore, ld)
     _ensure_cartodb_schema_exists(schema)
     table_base = ld.get('source_name') or ld.get('name')
     table_name = _unique_gpkg_table_name(target_datastore, schema, table_base, report)
@@ -1329,7 +1395,16 @@ def _import_vector_layer(
             LayerManageRole(layer=lyr, role=row['role']).save()
         server.setLayerDataRules(lyr, read_roles, write_roles)
 
-    services_utils.set_time_enabled(server, lyr)
+    try:
+        services_utils.set_time_enabled(server, lyr)
+    except Exception as _ste_exc:
+        LOG.warning(
+            'set_time_enabled failed for layer %r (time_enabled=%s, field=%r): %s',
+            lyr.name,
+            lyr.time_enabled,
+            lyr.time_enabled_field,
+            _ste_exc,
+        )
 
     for en in layer_entry.get('enumerations', []):
         enum = None
@@ -1468,6 +1543,7 @@ def _import_postgis_definition_layer(
     report,
     server_id=None,
     group_reuse_state=None,
+    skip_layer_reuse=False,
 ):
     ld = layer_entry['layer']
     table_name = (ld.get('source_name') or ld.get('name') or 'layer').strip()
@@ -1512,7 +1588,7 @@ def _import_postgis_definition_layer(
         )
         return None
 
-    existing = _find_reusable_definition_layer(layer_entry, target_datastore, layer_group)
+    existing = None if skip_layer_reuse else _find_reusable_definition_layer(layer_entry, target_datastore, layer_group)
     if existing:
         reuse_payload = {
             'export_id': layer_entry.get('export_id'),
@@ -1663,7 +1739,16 @@ def _import_postgis_definition_layer(
             LayerManageRole(layer=lyr, role=row['role']).save()
         server.setLayerDataRules(lyr, read_roles, write_roles)
 
-    services_utils.set_time_enabled(server, lyr)
+    try:
+        services_utils.set_time_enabled(server, lyr)
+    except Exception as _ste_exc:
+        LOG.warning(
+            'set_time_enabled failed for layer %r (time_enabled=%s, field=%r): %s',
+            lyr.name,
+            lyr.time_enabled,
+            lyr.time_enabled_field,
+            _ste_exc,
+        )
 
     for en in layer_entry.get('enumerations', []):
         enum = None
@@ -1721,6 +1806,144 @@ def _import_postgis_definition_layer(
     id_map[layer_entry['export_id']] = lyr.id
     report.append({'imported': 'vector_definition', 'layer': lyr.name, 'table': table_name})
     return lyr
+
+
+def _import_view_sql_definition_layer(
+    layer_entry,
+    target_datastore,
+    layer_group,
+    server,
+    username,
+    import_permissions,
+    id_map,
+    report,
+    server_id=None,
+    sql_override=None,
+    group_reuse_state=None,
+):
+    """
+    Create a PostgreSQL view from a SQL definition and publish it in GeoServer.
+
+    Flow:
+    1. CREATE OR REPLACE VIEW in the target datastore (using the SQL from the
+       manifest, optionally overridden by the wizard editor).
+    2. Insert GT_pk_metadata rows so GeoServer can detect the primary key.
+    3. Delegate the rest (GeoServer feature type + Django Layer) to
+       _import_postgis_definition_layer, which will find the view via
+       object_exists() and proceed normally.
+    """
+    ld = layer_entry.get('layer') or {}
+    view_def = layer_entry.get('view_sql_definition') or {}
+    layer_label = ld.get('title') or ld.get('name') or layer_entry.get('export_id')
+
+    sql = (sql_override or view_def.get('sql') or '').strip()
+    if not sql:
+        report.append({
+            'view_layer_skipped': {
+                'export_id': layer_entry.get('export_id'),
+                'layer': layer_label,
+                'reason': 'no_sql',
+                'message': _(
+                    'View layer "%(layer)s" was not imported: no SQL definition available.'
+                ) % {'layer': layer_label},
+            },
+        })
+        return None
+
+    # Always prefer the schema recorded in the view_sql_definition (captured at
+    # export time directly from pg_get_viewdef / information_schema).  Only fall
+    # back to the target-datastore schema when the export didn't record one.
+    schema = (view_def.get('schema') or '').strip() or _datastore_postgis_schema(target_datastore, ld)
+    base_view_name = (view_def.get('view_name') or ld.get('source_name') or ld.get('name') or 'view').strip()
+    gt_pk_rows = view_def.get('gt_pk_metadata') or []
+
+    # Ensure the schema exists (CartoDB setup may need it created).
+    _ensure_cartodb_schema_exists(schema)
+
+    intro = None
+    try:
+        intro, _conn_meta = target_datastore.get_db_connection()
+
+        # Create a brand-new, uniquely-named view every time (force_unique=True).
+        # This guarantees that each import produces an independent view instead of
+        # overwriting an existing one with CREATE OR REPLACE VIEW.
+        # create_view_from_sql returns the actual name used (base_view_name or _1, _2, …).
+        view_name = intro.create_view_from_sql(schema, base_view_name, sql, force_unique=True)
+        LOG.info('Created new view %s.%s in datastore %s', schema, view_name, target_datastore.name)
+        # GT_pk_metadata: insert/update all exported rows with the target view_name.
+        for row in gt_pk_rows:
+            row_copy = dict(row)
+            row_copy['table_schema'] = schema
+            row_copy['table_name'] = view_name
+            intro.insert_gt_pk_metadata_full_row(schema, view_name, row_copy)
+        intro.cursor.connection.commit()
+        report.append({
+            'view_created': {
+                'schema': schema,
+                'view': view_name,
+                'pk_metadata_rows': len(gt_pk_rows),
+            },
+        })
+    except Exception as ex:
+        if intro:
+            try:
+                intro.cursor.connection.rollback()
+            except Exception:
+                pass
+        report.append({
+            'view_layer_skipped': {
+                'export_id': layer_entry.get('export_id'),
+                'layer': layer_label,
+                'reason': 'create_view_failed',
+                'message': _(
+                    'View layer "%(layer)s" was not imported: could not create view '
+                    '"%(schema)s"."%(view)s": %(error)s'
+                ) % {
+                    'layer': layer_label,
+                    'schema': schema,
+                    'view': view_name,
+                    'error': str(ex),
+                },
+            },
+        })
+        LOG.warning(
+            'Skipping view layer %s: could not create view %s.%s: %s',
+            layer_label, schema, view_name, ex, exc_info=True,
+        )
+        return None
+    finally:
+        if intro:
+            try:
+                intro.close()
+            except Exception:
+                pass
+
+    # Update source_name and name in the layer metadata so _import_postgis_definition_layer
+    # uses the actual created view name (may include a numeric suffix from create_view_from_sql).
+    ld_copy = dict(ld)
+    ld_copy['source_name'] = view_name
+    ld_copy['name'] = view_name
+    entry_copy = dict(layer_entry)
+    entry_copy['layer'] = ld_copy
+
+    # Now the view exists in PostGIS — delegate GeoServer publishing + Django Layer creation.
+    # Pass skip_layer_reuse=True: SQL view layers must always be published as a NEW
+    # GeoServer/Django layer.  Never reuse an existing Layer object (even if one with the
+    # same name exists from a previous import), because the view was just (re-)created and
+    # needs its own fresh metadata record, style, and TOC entry.
+    return _import_postgis_definition_layer(
+        entry_copy,
+        target_datastore,
+        layer_group,
+        server,
+        username,
+        import_permissions,
+        id_map,
+        report,
+        server_id=server_id,
+        group_reuse_state=group_reuse_state,
+        skip_layer_reuse=True,
+    )
 
 
 def _import_definition_layer_entry(
@@ -2117,6 +2340,12 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
         )
         reuse_existing_groups = wiz.get('reuse_existing_layer_groups', True)
         skipped_definition_ids = _parse_skip_definition_export_ids(wiz, snapshot)
+        skipped_view_ids = _parse_skip_view_export_ids(wiz)
+        skipped_raster_ids = set(wiz.get('skip_raster_export_ids') or [])
+        skipped_external_ids = set(wiz.get('skip_external_export_ids') or [])
+        skipped_gpkg_ck = set(wiz.get('skip_gpkg_connection_keys') or [])
+        skipped_gpkg_layer_ids = set(wiz.get('skip_gpkg_layer_export_ids') or [])
+        view_sql_overrides = wiz.get('view_sql_overrides') or {}
         required_foreign_keys = _foreign_connection_keys_required(snapshot, skipped_definition_ids)
         for ck in required_foreign_keys:
             if ck == 'local_cartodb':
@@ -2300,8 +2529,64 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
                     )
                     continue
 
-                if lt == 'v_PostGIS' and layer_entry.get('vector_gpkg'):
+                if _is_view_sql_layer_entry(layer_entry):
+                    eid = layer_entry.get('export_id')
+                    ld = layer_entry.get('layer') or {}
+                    if eid and eid in skipped_view_ids:
+                        report.append({
+                            'view_layer_skipped': {
+                                'export_id': eid,
+                                'layer': ld.get('title') or ld.get('name'),
+                                'reason': 'wizard_skip',
+                                'message': _(
+                                    'View layer "%(layer)s" was skipped by choice in the import wizard.'
+                                ) % {'layer': ld.get('title') or ld.get('name')},
+                            },
+                        })
+                        continue
+                    # Use _resolve_definition_datastore (same as definition-only layers):
+                    # it finds or creates the correct workspace/datastore on the target server,
+                    # matching the exported workspace+datastore names.  Using
+                    # _embedded_target_datastore here would fall back to the default GPKG
+                    # datastore (typically schema=public) instead of the view's real schema.
+                    target_ds = _resolve_definition_datastore(
+                        ld,
+                        default_ws,
+                        server.id,
+                        ws_objs,
+                        datastore_map,
+                        connection_ds_cache,
+                        foreign_connection_map,
+                        username,
+                        report,
+                    )
+                    _import_view_sql_definition_layer(
+                        layer_entry,
+                        target_ds,
+                        lg,
+                        gs,
+                        username,
+                        import_permissions,
+                        id_map,
+                        report,
+                        server_id=server.id,
+                        sql_override=view_sql_overrides.get(eid) if eid else None,
+                        group_reuse_state=group_reuse_state,
+                    )
+                elif lt == 'v_PostGIS' and layer_entry.get('vector_gpkg'):
                     ld = layer_entry['layer']
+                    ck = ld.get('datastore_connection_key') or 'local_cartodb'
+                    eid = layer_entry.get('export_id')
+                    if (eid and eid in skipped_gpkg_layer_ids) or ck in skipped_gpkg_ck:
+                        report.append({
+                            'gpkg_layer_skipped': {
+                                'export_id': eid,
+                                'layer': ld.get('title') or ld.get('name'),
+                                'connection_key': ck,
+                                'reason': 'wizard_skip',
+                            },
+                        })
+                        continue
                     target_ds = _embedded_target_datastore(ld, default_ws, gpkg_targets, datastore_map)
                     _import_vector_layer(
                         extract_dir,
@@ -2346,8 +2631,30 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
                         group_reuse_state=group_reuse_state,
                     )
                 elif layer_entry['layer'].get('external'):
+                    eid = layer_entry.get('export_id')
+                    if eid and eid in skipped_external_ids:
+                        ld2 = layer_entry.get('layer') or {}
+                        report.append({
+                            'external_layer_skipped': {
+                                'export_id': eid,
+                                'layer': ld2.get('title') or ld2.get('name'),
+                                'reason': 'wizard_skip',
+                            },
+                        })
+                        continue
                     _import_external_layer(layer_entry, lg, username, id_map, report)
                 elif lt and lt.startswith('c_') and layer_entry.get('raster_bundle'):
+                    eid = layer_entry.get('export_id')
+                    if eid and eid in skipped_raster_ids:
+                        ld2 = layer_entry.get('layer') or {}
+                        report.append({
+                            'raster_layer_skipped': {
+                                'export_id': eid,
+                                'layer': ld2.get('title') or ld2.get('name'),
+                                'reason': 'wizard_skip',
+                            },
+                        })
+                        continue
                     _import_raster_layer(
                         layer_entry, lg, extract_dir, server.id, ws_objs,
                         default_ws, gs, username, id_map, report, job.id,

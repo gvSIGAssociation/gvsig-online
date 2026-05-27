@@ -411,7 +411,7 @@ def project_package_export(request, pid):
         export_options['include_raster_sidecars'] = bool(request.POST.get('include_raster_sidecars'))
         layer_modes = {}
         for key, val in request.POST.items():
-            if key.startswith('layer_vector_mode_') and val in ('embedded', 'definition_only'):
+            if key.startswith('layer_vector_mode_') and val in ('embedded', 'definition_only', 'view_sql_definition'):
                 lid = key[len('layer_vector_mode_'):]
                 layer_modes[lid] = val
         export_options['layer_vector_modes'] = layer_modes
@@ -725,6 +725,43 @@ def project_package_import_wizard(request, job_id):
                 skip_foreign_connections.append(key[len('skip_foreign_connection_'):])
         if skip_foreign_connections:
             wiz['skip_foreign_connection_keys'] = skip_foreign_connections
+        skip_gpkg_connections = []
+        for key, val in request.POST.items():
+            if key.startswith('skip_gpkg_connection_') and val:
+                skip_gpkg_connections.append(key[len('skip_gpkg_connection_'):])
+        if skip_gpkg_connections:
+            wiz['skip_gpkg_connection_keys'] = skip_gpkg_connections
+        skip_gpkg_layers = []
+        for key, val in request.POST.items():
+            if key.startswith('skip_gpkg_layer_') and val:
+                skip_gpkg_layers.append(key[len('skip_gpkg_layer_'):])
+        if skip_gpkg_layers:
+            wiz['skip_gpkg_layer_export_ids'] = skip_gpkg_layers
+        skip_rasters = []
+        for key, val in request.POST.items():
+            if key.startswith('skip_raster_') and val:
+                skip_rasters.append(key[len('skip_raster_'):])
+        if skip_rasters:
+            wiz['skip_raster_export_ids'] = skip_rasters
+        skip_externals = []
+        for key, val in request.POST.items():
+            if key.startswith('skip_external_') and val:
+                skip_externals.append(key[len('skip_external_'):])
+        if skip_externals:
+            wiz['skip_external_export_ids'] = skip_externals
+        skip_view_layers = []
+        for key, val in request.POST.items():
+            if key.startswith('skip_view_layer_') and val:
+                skip_view_layers.append(key[len('skip_view_layer_'):])
+        if skip_view_layers:
+            wiz['skip_view_layer_export_ids'] = skip_view_layers
+        view_sql_overrides = {}
+        for key, val in request.POST.items():
+            if key.startswith('view_sql_') and val.strip():
+                eid = key[len('view_sql_'):]
+                view_sql_overrides[eid] = val.strip()
+        if view_sql_overrides:
+            wiz['view_sql_overrides'] = view_sql_overrides
         on = (request.POST.get('override_project_name') or '').strip()
         if on:
             wiz['override_project_name'] = on
@@ -800,6 +837,12 @@ def project_package_import_wizard(request, job_id):
             ck = row.get('connection_key')
             if ck and row.get('is_foreign_source'):
                 row['selected_datastore_id'] = gpkg_foreign_map.get(ck)
+        # Propagate selected_datastore_id to individual gpkg_layers entries too,
+        # so the inline dropdown in each row can pre-select the right datastore.
+        for ly in package_layout.get('gpkg_layers') or []:
+            ck = ly.get('connection_key')
+            if ck and ly.get('is_foreign_source'):
+                ly['selected_datastore_id'] = gpkg_foreign_map.get(ck)
     recent_package_activity = []
     try:
         from gvsigol_core.project_package.activity_log import recent_package_activity as _recent_activity
@@ -837,7 +880,10 @@ def project_package_import_result(request, job_id):
     if job.created_by != request.user.username and not request.user.is_superuser:
         raise PermissionDenied
 
-    summary = job.summary_json or summarize_import_report(job.report_json)
+    # Always regenerate from report_json so messages are translated in the
+    # request locale.  summary_json was built inside the Celery task which has
+    # no user locale, so it would always be in the server's default language.
+    summary = summarize_import_report(job.report_json) if job.report_json else (job.summary_json or {})
     project = None
     if job.result_project_id:
         try:

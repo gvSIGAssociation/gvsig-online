@@ -1,12 +1,64 @@
 # -*- coding: utf-8 -*-
+import logging
+import os
+
 from gvsigol_core.models import ProjectPackageActivityLog, ProjectPackageImportJob
 from gvsigol_core.project_package.report_summary import summarize_import_report
+
+LOG = logging.getLogger('gvsigol_celery')
 
 RECENT_ACTIVITY_LIMIT = 20
 
 
+def _purge_old_activity():
+    """
+    Keep only the newest RECENT_ACTIVITY_LIMIT records in ProjectPackageActivityLog.
+    Deletes older records and cleans up:
+      - Export ZIPs linked via summary_json['export_job_id']
+      - ProjectPackageExportJob rows no longer referenced
+    """
+    from gvsigol_core.models import ProjectPackageExportJob
+
+    all_ids = list(
+        ProjectPackageActivityLog.objects
+        .order_by('-created_at')
+        .values_list('id', flat=True)
+    )
+    if len(all_ids) <= RECENT_ACTIVITY_LIMIT:
+        return
+
+    keep_ids = set(all_ids[:RECENT_ACTIVITY_LIMIT])
+    old_entries = ProjectPackageActivityLog.objects.exclude(pk__in=keep_ids)
+
+    # Collect export job IDs referenced by the entries being deleted
+    export_job_ids = []
+    for entry in old_entries.filter(operation=ProjectPackageActivityLog.OP_EXPORT):
+        ej_id = (entry.summary_json or {}).get('export_job_id')
+        if ej_id:
+            export_job_ids.append(ej_id)
+
+    old_entries.delete()
+
+    # Delete export ZIPs and their job rows
+    for ej_id in export_job_ids:
+        try:
+            ej = ProjectPackageExportJob.objects.get(pk=ej_id)
+            if ej.zip_path and os.path.isfile(ej.zip_path):
+                os.remove(ej.zip_path)
+                LOG.info('Deleted export ZIP %s', ej.zip_path)
+            ej.delete()
+        except ProjectPackageExportJob.DoesNotExist:
+            pass
+        except Exception as exc:
+            LOG.warning('Could not clean up export job %s: %s', ej_id, exc)
+
+
 def record_import_activity(job, project=None):
     """Persist import outcome for the activity log (last N operations)."""
+    # Build summary inside the task to get counts/status — but messages will be
+    # in the Celery worker's default locale (likely English).  The view always
+    # re-runs summarize_import_report() at request time so the user sees
+    # translated text.  We still persist summary_json for counts and status.
     summary = summarize_import_report(job.report_json)
     if project:
         job.result_project_id = project.id
@@ -36,6 +88,7 @@ def record_import_activity(job, project=None):
         import_job_id=job.id,
         summary_json=summary,
     )
+    _purge_old_activity()
 
 
 def record_failed_import_activity(job, error_message=None):
@@ -54,6 +107,7 @@ def record_failed_import_activity(job, error_message=None):
         import_job_id=job.id,
         summary_json=summary,
     )
+    _purge_old_activity()
 
 
 def record_export_activity(username, project, export_options=None, report_lines=None, export_job_id=None):
@@ -97,6 +151,7 @@ def record_export_activity(username, project, export_options=None, report_lines=
         project_name=(project.title or project.name)[:200],
         summary_json=summary,
     )
+    _purge_old_activity()
 
 
 def recent_package_activity(limit=RECENT_ACTIVITY_LIMIT, username=None):

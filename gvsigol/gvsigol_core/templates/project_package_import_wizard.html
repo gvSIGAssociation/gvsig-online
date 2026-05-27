@@ -92,174 +92,216 @@
 				</select>
 			</div>
 
-			{% if package_layout.gpkg_connection_targets %}
-			<h4>{% trans "Where to load vector data (GPKG)" %}</h4>
+	{% if package_layout.gpkg_layers or package_layout.foreign_connections or package_layout.raster_layers or package_layout.external_layers or package_layout.view_sql_layers %}
+	<h4>{% trans "Layers in this package" %}</h4>
+	<p class="text-muted small">{% trans "Check Skip to leave a layer or group out. The rest of the project imports normally." %}</p>
+	<table class="table table-bordered table-condensed" id="layers-package-table">
+		<colgroup>
+			<col style="width:6%">
+			<col style="width:12%">
+			<col style="width:26%">
+			<col style="width:30%">
+			<col style="width:26%">
+		</colgroup>
+		<thead>
+			<tr>
+				<th style="text-align:center">{% trans "Skip" %}</th>
+				<th>{% trans "Type" %}</th>
+				<th>{% trans "Layer / Group" %}</th>
+				<th>{% trans "Details" %}</th>
+				<th>{% trans "Target / Action" %}</th>
+			</tr>
+		</thead>
+		<tbody>
 
-			{% for g in package_layout.gpkg_local_targets %}
-			<div class="well well-sm" style="margin-bottom:1em">
-				<p class="text-muted" style="margin-bottom:0.5em">
-					{% trans "Layers from the local database are loaded into the original workspace and datastore from the export (created automatically on this server if they do not exist)." %}
-				</p>
-				<table class="table table-bordered table-condensed" style="margin-bottom:0">
-					<thead>
-						<tr>
-							<th>{% trans "Source" %}</th>
-							<th>{% trans "Layers" %}</th>
-							<th>{% trans "Target (workspace / datastore)" %}</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td>
-								<span class="label label-default">{% trans "Local DB" %}</span>
-								<br><code>{{ g.connection_key }}</code>
-								<br><span class="text-muted">{{ g.connection_label }}</span>
-							</td>
-							<td>
-								{{ g.layer_count }}
-								{% if g.sample_layers %}
-								<br><small class="text-muted">{{ g.sample_layers|join:", " }}</small>
-								{% endif %}
-							</td>
-							<td>
-								<code>{{ g.exported_workspace }}</code>
-								<small class="text-muted"> / </small>
-								<code>{{ g.exported_datastore }}</code>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-			{% endfor %}
-
-			{% if package_layout.gpkg_foreign_targets %}
-			<p class="text-muted">
-				{% trans "Data exported from a foreign database is loaded into the local CartoDB. Choose an existing local CartoDB datastore on this server (workspace is taken from the datastore). Foreign database datastores are not listed." %}
-			</p>
-			<table class="table table-bordered table-condensed">
-				<thead>
-					<tr>
-						<th>{% trans "Source" %}</th>
-						<th>{% trans "Layers" %}</th>
-						<th>{% trans "Target datastore" %}</th>
-					</tr>
-				</thead>
-				<tbody>
-			{% for g in package_layout.gpkg_foreign_targets %}
-					<tr>
-						<td>
-							<span class="label label-warning">{% trans "Foreign DB" %}</span>
-							<br><code>{{ g.connection_key }}</code>
-							<br><span class="text-muted">{{ g.connection_label }}</span>
-							<br><small class="text-muted">{% trans "Exported from" %}: <code>{{ g.exported_workspace }}</code> / <code>{{ g.exported_datastore }}</code></small>
-						</td>
-						<td>
-							{{ g.layer_count }}
-							{% if g.sample_layers %}
-							<br><small class="text-muted">{{ g.sample_layers|join:", " }}</small>
-							{% endif %}
-						</td>
-						<td>
-							<select class="form-control input-sm" name="gpkg_datastore_{{ g.connection_key }}" required style="max-width:360px">
-								<option value="">{% trans "— Select —" %}</option>
-								{% for ds in server_datastores %}
-								<option value="{{ ds.id }}" {% if g.selected_datastore_id == ds.id %}selected{% endif %}>{{ ds.workspace.name }} / {{ ds.name }}{% if ds.get_schema_name %} ({{ ds.get_schema_name }}){% endif %}</option>
-								{% endfor %}
-							</select>
-						</td>
-					</tr>
-			{% endfor %}
-				</tbody>
-			</table>
+	{# ── Individual GPKG layers (one row per layer) ── #}
+	{# For foreign-source layers the datastore selector is shown inline in Target/Action. #}
+	{% for ly in package_layout.gpkg_layers %}
+	<tr>
+		<td style="text-align:center;vertical-align:middle">
+			<input type="checkbox" name="skip_gpkg_layer_{{ ly.export_id }}" value="1"
+				title="{% trans 'Skip this layer' %}">
+		</td>
+		<td style="vertical-align:middle">
+			{% if ly.is_foreign_source %}
+			<span class="label label-warning">GPKG</span>
+			{% else %}
+			<span class="label label-default">GPKG</span>
 			{% endif %}
+		</td>
+		<td style="vertical-align:middle">
+			<strong>{{ ly.title }}</strong>
+			{% if ly.title != ly.name %}<br><small class="text-muted">{{ ly.name }}</small>{% endif %}
+		</td>
+		<td style="vertical-align:middle">
+			{% if ly.is_foreign_source %}
+			<small class="text-warning"><strong>{% trans "Foreign DB connection" %}</strong></small><br>
 			{% endif %}
+			<code style="font-size:11px">{{ ly.connection_key }}</code>
+			{% if ly.connection_label != ly.connection_key %}<br><small class="text-muted">{{ ly.connection_label }}</small>{% endif %}
+			{% if ly.is_foreign_source %}
+			<br><small class="text-muted">{% trans "From" %}: <code>{{ ly.exported_workspace }}</code>/<code>{{ ly.exported_datastore }}</code></small>
+			{% endif %}
+		</td>
+		<td style="vertical-align:middle">
+			{% if ly.is_foreign_source %}
+			<label class="control-label small" style="font-weight:normal;margin-bottom:2px">{% trans "Target datastore" %}</label>
+			<select class="form-control input-sm" name="gpkg_datastore_{{ ly.connection_key }}" style="max-width:100%">
+				<option value="">{% trans "— Select datastore —" %}</option>
+				{% for ds in server_datastores %}
+				<option value="{{ ds.id }}" {% if ly.selected_datastore_id == ds.id %}selected{% endif %}>{{ ds.workspace.name }} / {{ ds.name }}{% if ds.get_schema_name %} ({{ ds.get_schema_name }}){% endif %}</option>
+				{% endfor %}
+			</select>
+			{% else %}
+			<span class="text-muted"><small>
+				<code>{{ ly.exported_workspace }}</code> / <code>{{ ly.exported_datastore }}</code>
+				<br><em>{% trans "(auto)" %}</em>
+			</small></span>
+			{% endif %}
+		</td>
+	</tr>
+	{% endfor %}
 
-			{% if package_layout.foreign_connections %}
-			<h4>{% trans "Definition-only layers (external database)" %}</h4>
-			<p class="text-muted">{% trans "These layers have no GPKG in the package. Map each connection to PostGIS on this server, or check Skip to omit them (the rest of the project still imports)." %}</p>
-			<table class="table table-bordered table-condensed">
-				<thead>
-					<tr>
-						<th>{% trans "Skip" %}</th>
-						<th>{% trans "Exported connection" %}</th>
-						<th>{% trans "Layers" %}</th>
-						<th>{% trans "Target connection" %}</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for fc in package_layout.foreign_connections %}
-					<tr>
-						<td>
-							<input type="checkbox" name="skip_foreign_connection_{{ fc.connection_key }}" value="1" title="{% trans 'Do not import these layers' %}">
-						</td>
-						<td><code>{{ fc.connection_key }}</code><br><span class="text-muted">{{ fc.connection_label }}</span></td>
-						<td>
-							{% if fc.sample_layers %}
-								{{ fc.sample_layers|join:", " }}
-							{% else %}
-								{{ fc.layer_count }}
-							{% endif %}
-						</td>
-						<td>
-							<select class="form-control input-sm" name="foreign_connection_{{ fc.connection_key }}" style="max-width:320px">
-								<option value="">{% trans "— Select —" %}</option>
-								{% for c in postgis_connections %}
-								<option value="{{ c.id }}" {% if fc.selected_connection_id == c.id %}selected{% endif %}>{{ c.name }}</option>
-								{% endfor %}
-							</select>
-						</td>
-					</tr>
+		{# ── Definition-only foreign connections ── #}
+		{% for fc in package_layout.foreign_connections %}
+		<tr>
+			<td style="text-align:center;vertical-align:middle">
+				<input type="checkbox" name="skip_foreign_connection_{{ fc.connection_key }}" value="1"
+					title="{% trans 'Do not import these layers' %}">
+			</td>
+			<td style="vertical-align:middle"><span class="label label-danger">{% trans "Ext. DB" %}</span></td>
+			<td style="vertical-align:middle">
+				{% if fc.sample_layers %}
+					{{ fc.sample_layers|join:", " }}
+				{% else %}
+					{{ fc.layer_count }} {% trans "layer(s)" %}
+				{% endif %}
+			</td>
+			<td style="vertical-align:middle">
+				<code style="font-size:11px">{{ fc.connection_key }}</code>
+				{% if fc.connection_label != fc.connection_key %}<br><small class="text-muted">{{ fc.connection_label }}</small>{% endif %}
+				<br><small class="text-muted">{% trans "No GPKG — definition only" %}</small>
+			</td>
+			<td style="vertical-align:middle">
+				<select class="form-control input-sm" name="foreign_connection_{{ fc.connection_key }}" style="max-width:100%">
+					<option value="">{% trans "— Select connection —" %}</option>
+					{% for c in postgis_connections %}
+					<option value="{{ c.id }}" {% if fc.selected_connection_id == c.id %}selected{% endif %}>{{ c.name }}</option>
 					{% endfor %}
-				</tbody>
-			</table>
-			<p class="help-block small">{% trans "Check Skip to leave definition-only layers out (you can add them manually later)." %}</p>
-			{% endif %}
+				</select>
+			</td>
+		</tr>
+		{% endfor %}
 
-		{% if package_layout.raster_layers %}
-		<h4>{% trans "Raster layers included in package" %}</h4>
-		<p class="text-muted">{% trans "The following raster layers will be published automatically during import." %}</p>
-		<table class="table table-bordered table-condensed">
-			<thead>
-				<tr>
-					<th>{% trans "Layer" %}</th>
-					<th>{% trans "Type" %}</th>
-					<th>{% trans "Primary file" %}</th>
-					<th>{% trans "Files" %}</th>
-				</tr>
-			</thead>
-			<tbody>
-			{% for r in package_layout.raster_layers %}
-				<tr>
-					<td><strong>{{ r.title }}</strong>{% if r.title != r.name %}<br><small class="text-muted">{{ r.name }}</small>{% endif %}</td>
-					<td><span class="label label-info">{{ r.type }}</span></td>
-					<td><code>{{ r.primary_file }}</code></td>
-					<td>{{ r.file_count }}</td>
-				</tr>
-			{% endfor %}
-			</tbody>
-		</table>
-		{% endif %}
+		{# ── Raster layers ── #}
+		{% for r in package_layout.raster_layers %}
+		<tr>
+			<td style="text-align:center;vertical-align:middle">
+				<input type="checkbox" name="skip_raster_{{ r.export_id }}" value="1"
+					title="{% trans 'Skip this raster layer' %}">
+			</td>
+			<td style="vertical-align:middle"><span class="label label-info">{% trans "Raster" %}</span></td>
+			<td style="vertical-align:middle">
+				<strong>{{ r.title }}</strong>
+				{% if r.title != r.name %}<br><small class="text-muted">{{ r.name }}</small>{% endif %}
+			</td>
+			<td style="vertical-align:middle">
+				<code style="font-size:11px">{{ r.primary_file }}</code>
+				<br><small class="text-muted">{{ r.file_count }} {% trans "file(s)" %}</small>
+			</td>
+			<td style="vertical-align:middle">
+				<span class="text-muted"><em><small>{% trans "Published automatically" %}</small></em></span>
+			</td>
+		</tr>
+		{% endfor %}
 
-		{% if package_layout.external_layers %}
-		<h4>{% trans "External layers (WMS/WMTS)" %}</h4>
-		<p class="text-muted">{% trans "The following external service layers will be imported as-is (no data is copied)." %}</p>
-		<table class="table table-bordered table-condensed">
-			<thead>
-				<tr>
-					<th>{% trans "Layer" %}</th>
-					<th>{% trans "Type" %}</th>
-				</tr>
-			</thead>
-			<tbody>
-			{% for e in package_layout.external_layers %}
-				<tr>
-					<td><strong>{{ e.title }}</strong>{% if e.title != e.name %}<br><small class="text-muted">{{ e.name }}</small>{% endif %}</td>
-					<td><span class="label label-default">{{ e.type }}</span></td>
-				</tr>
-			{% endfor %}
-			</tbody>
-		</table>
-		{% endif %}
+		{# ── External service layers (WMS/WMTS) ── #}
+		{% for e in package_layout.external_layers %}
+		<tr>
+			<td style="text-align:center;vertical-align:middle">
+				<input type="checkbox" name="skip_external_{{ e.export_id }}" value="1"
+					title="{% trans 'Skip this external layer' %}">
+			</td>
+			<td style="vertical-align:middle"><span class="label label-default">{{ e.type|upper }}</span></td>
+			<td style="vertical-align:middle">
+				<strong>{{ e.title }}</strong>
+				{% if e.title != e.name %}<br><small class="text-muted">{{ e.name }}</small>{% endif %}
+			</td>
+			<td style="vertical-align:middle">
+				<small class="text-muted">{% trans "External service" %}</small>
+			</td>
+			<td style="vertical-align:middle">
+				<span class="text-muted"><em><small>{% trans "Imported as-is (no data copied)" %}</small></em></span>
+			</td>
+		</tr>
+		{% endfor %}
+
+		{# ── SQL view layers ── #}
+		{% for v in package_layout.view_sql_layers %}
+		<tr>
+			<td style="text-align:center;vertical-align:middle">
+				<input type="checkbox" name="skip_view_layer_{{ v.export_id }}" value="1"
+					title="{% trans 'Do not import this view' %}">
+			</td>
+			<td style="vertical-align:middle"><span class="label label-primary">{% trans "SQL View" %}</span></td>
+			<td style="vertical-align:middle">
+				<strong>{{ v.title }}</strong>
+				{% if v.title != v.name %}<br><small class="text-muted">{{ v.name }}</small>{% endif %}
+			</td>
+			<td style="vertical-align:middle">
+				<code style="font-size:11px">{{ v.schema }}.{{ v.view_name }}</code>
+				{% if v.gt_pk_metadata %}
+				<br><small class="text-muted">PK:
+					{% for pk in v.gt_pk_metadata %}<code>{{ pk.pk_column }}</code>{% if not forloop.last %}, {% endif %}{% endfor %}
+				</small>
+				{% endif %}
+			</td>
+			<td style="vertical-align:middle">
+				{# Same style as local GPKG: workspace / datastore + (auto) #}
+				<span class="text-muted"><small>
+					<code>{{ v.exported_workspace }}</code> / <code>{{ v.exported_datastore }}</code>
+					<br><em>{% trans "(auto)" %}</em>
+				</small></span>
+				<br>
+				{# Hidden textarea + Edit SQL button #}
+				<textarea name="view_sql_{{ v.export_id }}" id="view_sql_input_{{ v.export_id }}"
+					style="display:none">{{ v.sql }}</textarea>
+				<button type="button" class="btn btn-xs btn-default btn-edit-view-sql"
+					data-export-id="{{ v.export_id }}"
+					data-layer-title="{{ v.title|escapejs }}">
+					<i class="glyphicon glyphicon-pencil"></i> {% trans "Edit SQL" %}
+				</button>
+			</td>
+		</tr>
+		{% endfor %}
+
+		</tbody>
+	</table>
+	<p class="help-block small">{% trans "Skipped layers are left out entirely; the rest of the project still imports. For SQL views you can also edit the query before recreating the view." %}</p>
+	{% endif %}
+
+	{# Modal: SQL editor for view layers #}
+	<div class="modal fade" id="modal-edit-view-sql" tabindex="-1" role="dialog">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title" id="modal-edit-view-sql-title">{% trans "Edit view SQL" %}</h4>
+				</div>
+				<div class="modal-body">
+					<p class="text-muted small">
+						{% trans "Edit the SQL query that will be used to create the view. You can rename tables, change schemas, or modify the query to match the target environment." %}
+					</p>
+					<textarea id="modal-view-sql-editor" class="form-control"
+						style="font-family:monospace;min-height:280px;resize:vertical"></textarea>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+					<button type="button" class="btn btn-primary" id="btn-save-view-sql">{% trans "Apply" %}</button>
+				</div>
+			</div>
+		</div>
+	</div>
 
 		<details style="margin-bottom:1em">
 			<summary>{% trans "Advanced overrides (optional)" %}</summary>
@@ -287,14 +329,37 @@
 {% block extra-scripts %}
 <script>
 $(document).ready(function () {
+
+    /* ── SQL view editor modal ─────────────────────────────────────── */
+    var _currentViewExportId = null;
+
+    $(document).on('click', '.btn-edit-view-sql', function () {
+        var eid   = $(this).data('export-id');
+        var title = $(this).data('layer-title');
+        _currentViewExportId = eid;
+        var currentSql = $('#view_sql_input_' + eid).val();
+        $('#modal-edit-view-sql-title').text('{% trans "Edit view SQL" %} — ' + title);
+        $('#modal-view-sql-editor').val(currentSql);
+        $('#modal-edit-view-sql').modal('show');
+    });
+
+    $('#btn-save-view-sql').on('click', function () {
+        if (_currentViewExportId) {
+            var editedSql = $('#modal-view-sql-editor').val();
+            $('#view_sql_input_' + _currentViewExportId).val(editedSql);
+            /* Mark the button to show the SQL was edited */
+            $('.btn-edit-view-sql[data-export-id="' + _currentViewExportId + '"]')
+                .addClass('btn-warning').removeClass('btn-default')
+                .text('{% trans "SQL edited" %} ✎');
+        }
+        $('#modal-edit-view-sql').modal('hide');
+    });
+
+    /* ── Form submission (fetch + immediate navigate, avoids Origin:null) ── */
     $('form[method="post"]').on('submit', function (ev) {
         ev.preventDefault();
         var form = this;
         $('#btn-execute-import').prop('disabled', true).text('{% trans "Importing…" %}');
-        /* Use fetch so the browser sends Origin: <current-host> instead of
-           Origin: null (which causes Django 4 CSRF 403 in proxy/K8s setups).
-           keepalive: true ensures the POST reaches the server even as we
-           navigate away immediately, exactly like the export flow. */
         fetch(window.location.href, {
             method: 'POST',
             credentials: 'same-origin',

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-21 17:20+0200\n"
+"POT-Creation-Date: 2026-05-26 16:50+0200\n"
 "PO-Revision-Date: 2026-03-13 13:07+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -19,19 +19,19 @@ msgstr ""
 "X-Source-Language: C\n"
 "X-Generator: Poedit 3.4.2\n"
 
-#: forms.py:17
+#: gvsigol_core/forms.py:17
 msgid "Clone project and layer permissions"
 msgstr "Clonar els permisos del projecte i la capa"
 
-#: forms.py:18
+#: gvsigol_core/forms.py:18
 msgid "Don't apply any permission. Cloned layers will become public"
 msgstr "No aplicar cap permís. Les capes clonades seran públiques"
 
-#: forms.py:26
+#: gvsigol_core/forms.py:26
 msgid "New project title"
 msgstr "Títol del nou projecte"
 
-#: forms.py:31 forms.py:38 forms.py:46
+#: gvsigol_core/forms.py:31 gvsigol_core/forms.py:38 gvsigol_core/forms.py:46
 msgid ""
 "must start by a lower case alphanumeric and contain lower case alphanumerics "
 "or underscores"
@@ -39,108 +39,414 @@ msgstr ""
 "ha de començar per un alfanumèric en minúscula i contenir alfanumèrics de "
 "minúscula o guions baixos"
 
-#: gvsigol_core/forms.py:33 gvsigol_core/templates/project_list.html:611
+#: gvsigol_core/forms.py:33 gvsigol_core/templates/project_list.html:666
 msgid "New project name"
 msgstr "Nom del nou projecte"
 
-#: forms.py:41 templates/project_list.html:672
-#: gvsigol_core/forms.py:41 gvsigol_core/templates/project_list.html:617
+#: gvsigol_core/forms.py:41 gvsigol_core/templates/project_list.html:672
 msgid "Target workspace name"
 msgstr "Nom de l'espai de treball de destinació"
 
-#: forms.py:49 templates/project_list.html:678
-#: gvsigol_core/forms.py:49 gvsigol_core/templates/project_list.html:623
+#: gvsigol_core/forms.py:49 gvsigol_core/templates/project_list.html:678
 msgid "Target datastore and database schema name"
 msgstr "Magatzem de dades de destinació i nom del esquema de base de dades"
 
-#: forms.py:54
+#: gvsigol_core/forms.py:54
 msgid "numeric value required"
 msgstr "cal un valor numèric"
 
-#: forms.py:63
+#: gvsigol_core/forms.py:63
 msgid "Project exists"
 msgstr "El projecte existeix"
 
-#: forms.py:68
+#: gvsigol_core/forms.py:68
 msgid "Workspace exists"
 msgstr "L'espai de treball existeix"
 
-#: forms.py:73
+#: gvsigol_core/forms.py:73
 msgid "Database schema exists"
 msgstr "L'esquema de base de dades existeix"
 
-#: forms.py:80
+#: gvsigol_core/forms.py:80
 msgid "Server does not exist"
 msgstr "El servidor no existeix"
 
-#: forms.py:84
+#: gvsigol_core/forms.py:84
 msgid "SRS"
 msgstr "SRS"
 
-#: models.py:53 templates/project_add.html:608
-#: templates/project_update.html:634
-#: gvsigol_core/models.py:53 gvsigol_core/templates/project_add.html:608
-#: gvsigol_core/templates/project_update.html:634
+#: gvsigol_core/models.py:56 gvsigol_core/templates/project_add.html:608
+#: gvsigol_core/templates/project_update.html:633
 msgid "Current (React)"
 msgstr "Actual (React)"
 
-#: models.py:55 templates/project_add.html:611
-#: templates/project_update.html:637
-#: gvsigol_core/models.py:55 gvsigol_core/templates/project_add.html:611
-#: gvsigol_core/templates/project_update.html:637
+#: gvsigol_core/models.py:58 gvsigol_core/templates/project_add.html:611
+#: gvsigol_core/templates/project_update.html:636
 msgid "Classic (Bootstrap)"
 msgstr "Clàssic (Bootstrap)"
 
-#: settings.py:32
+#: gvsigol_core/project_package/import_service.py:332
+#, python-format
+msgid "Invalid workspace name in package: \"%s\""
+msgstr "Nom d'espai de treball no vàlid al paquet: \"%s\""
+
+#: gvsigol_core/project_package/import_service.py:339
+#, python-format
+msgid ""
+"Workspace \"%(n)s\" already exists on another GeoServer instance. Use a "
+"different server or remove/rename that workspace."
+msgstr ""
+
+#: gvsigol_core/project_package/import_service.py:362
+#, python-format
+msgid "Could not create GeoServer workspace \"%s\""
+msgstr "No s'ha pogut crear l'espai de treball de GeoServer \"%s\""
+
+#: gvsigol_core/project_package/import_service.py:404
+#, python-format
+msgid ""
+"Datastore \"%(ds)s\" in workspace \"%(ws)s\" is already registered with "
+"another database connection (\"%(other)s\"). Select that connection in the "
+"wizard, or skip this layer."
+msgstr ""
+
+#: gvsigol_core/project_package/import_service.py:423
+#, python-format
+msgid "Imported from package (%(schema)s)"
+msgstr "Importat des del paquet (%(schema)s)"
+
+#: gvsigol_core/project_package/import_service.py:449
+#, python-format
+msgid ""
+"GeoServer store \"%(ws)s:%(ds)s\" already exists but is tied to another "
+"database connection. Select the matching connection or skip this layer."
+msgstr ""
+
+#: gvsigol_core/project_package/import_service.py:456
+#, python-format
+msgid "Could not create datastore \"%(ds)s\" for connection \"%(conn)s\""
+msgstr ""
+"No s'ha pogut crear el magatzem de dades \"%(ds)s\" per a la connexió "
+"\"%(conn)s\""
+
+#: gvsigol_core/project_package/import_service.py:482
+#, python-format
+msgid "Select a datastore for GPKG import (%(label)s)"
+msgstr "Seleccioneu un magatzem de dades per importar el GPKG (%(label)s)"
+
+#: gvsigol_core/project_package/import_service.py:488
+#, python-format
+msgid "Datastore \"%(ds)s\" is not on the selected server"
+msgstr "El magatzem de dades \"%(ds)s\" no és al servidor seleccionat"
+
+#: gvsigol_core/project_package/import_service.py:493
+#, python-format
+msgid ""
+"Datastore \"%(ds)s\" uses a foreign database. Choose a local CartoDB "
+"datastore for GPKG import."
+msgstr ""
+
+#: gvsigol_core/project_package/import_service.py:507
+#, python-format
+msgid "Missing workspace or datastore for local GPKG import (%(label)s)"
+msgstr ""
+"Falta l'espai de treball o el magatzem de dades per a la importació GPKG "
+"local (%(label)s)"
+
+#: gvsigol_core/project_package/import_service.py:512
+#, python-format
+msgid "Invalid workspace or datastore name for connection \"%(label)s\""
+msgstr ""
+"Nom d'espai de treball o magatzem de dades no vàlid per a la connexió "
+"\"%(label)s\""
+
+#: gvsigol_core/project_package/import_service.py:564
+#, python-format
+msgid ""
+"Missing datastore for GPKG target workspace \"%(w)s\" / datastore \"%(d)s\""
+msgstr ""
+
+#: gvsigol_core/project_package/import_service.py:577
+#, python-format
+msgid "Could not create datastore \"%s\" in workspace \"%s\""
+msgstr ""
+"No s'ha pogut crear el magatzem de dades \"%s\" a l'espai de treball \"%s\""
+
+#: gvsigol_core/project_package/import_service.py:595
+#, python-format
+msgid "Could not allocate a unique project name from \"%s\""
+msgstr "No s'ha pogut assignar un nom de projecte únic a partir de \"%s\""
+
+#: gvsigol_core/project_package/import_service.py:642
+msgid ""
+"GDAL (pygdaltools) is not available on this server; vector GeoPackage import/"
+"export will fail."
+msgstr ""
+
+#: gvsigol_core/project_package/import_service.py:730
+#, python-format
+msgid " (+%d more)"
+msgstr " (+%d més)"
+
+#: gvsigol_core/project_package/import_service.py:733
+#, python-format
+msgid ""
+"The reused layer group \"%(lg)s\" was linked to this project. It also "
+"contains %(n)d layer(s) that were not part of this package TOC block's "
+"reused definitions — they remain visible because they share the server layer "
+"group: %(layers)s."
+msgstr ""
+
+#: gvsigol_core/project_package/import_service.py:751
+#, python-format
+msgid ""
+"This project already uses layer group \"%(lg)s\"; an extra empty TOC row "
+"from this package block was removed."
+msgstr ""
+
+#: gvsigol_core/project_package/import_service.py:776
+#, python-format
+msgid ""
+"Linked existing group \"%(lg)s\": reused definition layers already live "
+"there, while other layers in this package block stay in the newly created "
+"group."
+msgstr ""
+
+#: gvsigol_core/project_package/import_service.py:780
+msgid "Additional reused LayerGroup from this package block."
+msgstr "Grup de capes addicional reutilitzat d'aquest bloc del paquet."
+
+#: gvsigol_core/project_package/import_service.py:1006
+#: gvsigol_core/project_package/report_summary.py:22
+#, python-format
+msgid ""
+"Table \"%(wanted)s\" already exists in schema \"%(schema)s\"; loading as "
+"\"%(actual)s\"."
+msgstr ""
+"La taula \"%(wanted)s\" ja existeix a l'esquema \"%(schema)s\"; s'importa "
+"com a \"%(actual)s\"."
+
+#: gvsigol_core/project_package/import_service.py:1071
+#, python-format
+msgid "Invalid or missing schema for datastore \"%(ds)s\""
+msgstr "Esquema no vàlid o absent per al magatzem de dades \"%(ds)s\""
+
+#: gvsigol_core/project_package/import_service.py:1100
+#, python-format
+msgid "Could not create PostGIS schema \"%s\""
+msgstr "No s'ha pogut crear l'esquema PostGIS \"%s\""
+
+#: gvsigol_core/project_package/import_service.py:1108
+#, python-format
+msgid "Could not read layers inside GeoPackage \"%(path)s\"."
+msgstr "No s'han pogut llegir les capes del GeoPackage \"%(path)s\"."
+
+#: gvsigol_core/project_package/import_service.py:1140
+#, python-format
+msgid ""
+"GeoPackage \"%(path)s\" contains layers %(layers)s; none match %(hints)s."
+msgstr ""
+
+#: gvsigol_core/project_package/import_service.py:1160
+#, python-format
+msgid ""
+"ogr2ogr created table \"%(table)s\" in schema \"public\" instead of "
+"\"%(schema)s\". Check datastore connection parameters."
+msgstr ""
+
+#: gvsigol_core/project_package/import_service.py:1169
+#, python-format
+msgid ""
+"ogr2ogr did not create table \"%(schema)s\".\"%(table)s\".%(hint)s Check "
+"server logs for ogr2ogr output."
+msgstr ""
+
+#: gvsigol_core/project_package/import_service.py:1205
+#, python-format
+msgid ""
+"Could not read columns for table \"%(schema)s\".\"%(table)s\". Check that "
+"ogr2ogr loaded data into the datastore schema."
+msgstr ""
+
+#: gvsigol_core/project_package/import_service.py:1474
+#, python-format
+msgid "No database connection selected for \"%(key)s\""
+msgstr "No s'ha seleccionat cap connexió de base de dades per a \"%(key)s\""
+
+#: gvsigol_core/project_package/import_service.py:1551
+msgid "Definition-only layer has no table name in package metadata"
+msgstr "La capa de definició no té nom de taula als metadades del paquet"
+
+#: gvsigol_core/project_package/import_service.py:1572
+#, python-format
+msgid ""
+"Definition-only layer \"%(layer)s\": table \"%(schema)s\".\"%(table)s\" was "
+"not found in connection \"%(connection)s\". The layer was not imported."
+msgstr ""
+
+#: gvsigol_core/project_package/import_service.py:1605
+msgid ""
+"Uses an existing LayerGroup on the server — the project will be linked to "
+"that group rather than stealing the Layer from another group."
+msgstr ""
+
+#: gvsigol_core/project_package/import_service.py:1656
+#, python-format
+msgid ""
+"Definition-only layer \"%(layer)s\": could not publish on GeoServer. The "
+"layer was not imported."
+msgstr ""
+
+#: gvsigol_core/project_package/import_service.py:1847
+#: gvsigol_core/project_package/report_summary.py:53
+#, python-format
+msgid "View layer \"%(layer)s\" was not imported: no SQL definition available."
+msgstr ""
+"La capa vista \"%(layer)s\" no s'ha importat: no hi ha definició SQL "
+"disponible."
+
+#: gvsigol_core/project_package/import_service.py:1899
+#, python-format
+msgid ""
+"View layer \"%(layer)s\" was not imported: could not create view "
+"\"%(schema)s\".\"%(view)s\": %(error)s"
+msgstr ""
+
+#: gvsigol_core/project_package/import_service.py:2000
+#, python-format
+msgid ""
+"Definition-only layer \"%(layer)s\" was not imported. You can add it "
+"manually later."
+msgstr ""
+
+#: gvsigol_core/project_package/import_service.py:2312
+msgid "Job not extracted; run preflight first"
+msgstr "El treball no s'ha extret; executeu primer el preflight"
+
+#: gvsigol_core/project_package/import_service.py:2355
+#, python-format
+msgid "Select a database connection for \"%(key)s\""
+msgstr "Seleccioneu una connexió de base de dades per a \"%(key)s\""
+
+#: gvsigol_core/project_package/import_service.py:2518
+msgid "Layer already exists in this group (reused, not duplicated)."
+msgstr "La capa ja existeix en aquest grup (reutilitzada, no duplicada)."
+
+#: gvsigol_core/project_package/import_service.py:2542
+#: gvsigol_core/project_package/report_summary.py:43
+#, python-format
+msgid "View layer \"%(layer)s\" was skipped by choice in the import wizard."
+msgstr "La capa vista \"%(layer)s\" s'ha omès a l'assistent d'importació."
+
+#: gvsigol_core/project_package/import_service.py:2612
+#: gvsigol_core/project_package/report_summary.py:33
+#, python-format
+msgid ""
+"Definition-only layer \"%(layer)s\" was skipped by choice in the import "
+"wizard."
+msgstr ""
+"La capa de definició \"%(layer)s\" s'ha omès a l'assistent d'importació."
+
+#: gvsigol_core/project_package/report_summary.py:62
+msgid "Skipped by user"
+msgstr "Omesa per l'usuari"
+
+#: gvsigol_core/project_package/report_summary.py:63
+msgid "Table not found"
+msgstr "Taula no trobada"
+
+#: gvsigol_core/project_package/report_summary.py:64
+msgid "GeoServer publish failed"
+msgstr "Error en publicar a GeoServer"
+
+#: gvsigol_core/project_package/report_summary.py:65
+msgid "No SQL definition"
+msgstr "Sense definició SQL"
+
+#: gvsigol_core/project_package/report_summary.py:66
+msgid "View creation failed"
+msgstr "Error en crear la vista"
+
+#: gvsigol_core/project_package/report_summary.py:67
+msgid "Import failed"
+msgstr "Error en la importació"
+
+#: gvsigol_core/project_package/report_summary.py:75
+msgid "Vector"
+msgstr "Vectorial"
+
+#: gvsigol_core/project_package/report_summary.py:76
+msgid "Vector (definition)"
+msgstr "Vectorial (definició)"
+
+#: gvsigol_core/project_package/report_summary.py:77
+msgid "External layer"
+msgstr "Capa externa"
+
+#: gvsigol_core/project_package/report_summary.py:78
+#: gvsigol_core/templates/project_package_import_wizard.html:203
+msgid "Raster"
+msgstr "Ràster"
+
+#: gvsigol_core/project_package/report_summary.py:79
+msgid "SQL view"
+msgstr "Vista SQL"
+
+#: gvsigol_core/project_package/report_summary.py:129
+msgid "external"
+msgstr "externa"
+
+#: gvsigol_core/project_package/report_summary.py:150
+msgid "Raster import error"
+msgstr "Error d'importació de ràster"
+
+#: gvsigol_core/settings.py:32
 msgid "Project requests"
 msgstr "Sol·licituds de projecte"
 
-#: settings.py:33 templates/dashboard_core_menu.html:5
-#: templates/dashboard_core_menu.html:8
+#: gvsigol_core/settings.py:33
+#: gvsigol_core/templates/dashboard_core_menu.html:5
+#: gvsigol_core/templates/dashboard_core_menu.html:8
 msgid "Projects"
 msgstr "Projectes"
 
-#: settings.py:41
+#: gvsigol_core/settings.py:41
 msgid "Project requests by user"
 msgstr "Peticions de projecte per usuari"
 
-#: settings.py:42
+#: gvsigol_core/settings.py:42
 msgid "Users"
 msgstr "Usuaris"
 
-#: templates/404.html:10 templates/not_found_sharedview.html:10
+#: gvsigol_core/templates/404.html:10
+#: gvsigol_core/templates/not_found_sharedview.html:10
 msgid "Page not found"
 msgstr "Pàgina no trobada"
 
-#: templates/404.html:13 templates/not_found_sharedview.html:13
+#: gvsigol_core/templates/404.html:13
+#: gvsigol_core/templates/not_found_sharedview.html:13
 msgid "We could not find the page you were looking for. Meanwhile, you may"
 msgstr "La pàgina que ha sol·licitat no existeix, Mentrestant, pot"
 
-#: templates/404.html:14 templates/500.html:14
-#: templates/not_found_sharedview.html:14
+#: gvsigol_core/templates/404.html:14 gvsigol_core/templates/500.html:14
+#: gvsigol_core/templates/not_found_sharedview.html:14
 msgid "return to dashboard"
 msgstr "tornar al panell de control"
 
-#: templates/500.html:10
+#: gvsigol_core/templates/500.html:10
 msgid "Something went wrong"
 msgstr "Alguna cosa ha sortit malament"
 
-#: templates/500.html:13
+#: gvsigol_core/templates/500.html:13
 msgid "We will work on fixing that right away. Meanwhile, you may"
 msgstr "Estem treballant per solucionar el problema. Mentrestant, pot"
 
-#: templates/application_add.html:215 templates/project_add.html:444
-#: templates/toc_update.html:13
 #: gvsigol_core/templates/application_add.html:215
 #: gvsigol_core/templates/project_add.html:444
 #: gvsigol_core/templates/toc_update.html:13
 msgid "Save"
 msgstr "Guardar"
 
-#: templates/application_add.html:219 templates/application_update.html:265
-#: templates/project_add.html:448 templates/project_add.html:459
-#: templates/project_clone.html:178 templates/project_clone.html:186
-#: templates/project_update.html:453 templates/project_update.html:466
 #: gvsigol_core/templates/application_add.html:219
 #: gvsigol_core/templates/application_update.html:265
 #: gvsigol_core/templates/project_add.html:448
@@ -148,13 +454,10 @@ msgstr "Guardar"
 #: gvsigol_core/templates/project_clone.html:178
 #: gvsigol_core/templates/project_clone.html:186
 #: gvsigol_core/templates/project_update.html:453
-#: gvsigol_core/templates/project_update.html:466
+#: gvsigol_core/templates/project_update.html:465
 msgid "General"
 msgstr "General"
 
-#: templates/application_add.html:220 templates/application_update.html:266
-#: templates/project_add.html:451 templates/project_clone.html:179
-#: templates/project_update.html:456
 #: gvsigol_core/templates/application_add.html:220
 #: gvsigol_core/templates/application_update.html:266
 #: gvsigol_core/templates/project_add.html:451
@@ -163,36 +466,26 @@ msgstr "General"
 msgid "Permissions"
 msgstr "Permisos"
 
-#: templates/application_add.html:229 templates/application_list.html:330
-#: templates/project_add.html:480 templates/project_clone.html:196
-#: templates/project_list.html:544 templates/project_list.html:665
 #: gvsigol_core/templates/application_add.html:229
 #: gvsigol_core/templates/application_list.html:330
 #: gvsigol_core/templates/project_add.html:480
 #: gvsigol_core/templates/project_clone.html:196
-#: gvsigol_core/templates/project_list.html:491
-#: gvsigol_core/templates/project_list.html:610
+#: gvsigol_core/templates/project_list.html:544
+#: gvsigol_core/templates/project_list.html:665
 msgid "Name"
 msgstr "Nom"
 
-#: templates/application_add.html:230
 #: gvsigol_core/templates/application_add.html:230
 msgid "Application name"
 msgstr "Nom de l'aplicació"
 
-#: templates/application_add.html:235 templates/application_list.html:331
-#: templates/application_update.html:277 templates/project_add.html:486
-#: templates/project_clone.html:190 templates/project_list.html:545
-#: templates/project_update.html:487 templates/services_view.html:71
-#: templates/services_view.html:91 templates/services_view.html:110
-#: templates/services_view.html:129
 #: gvsigol_core/templates/application_add.html:235
 #: gvsigol_core/templates/application_list.html:331
 #: gvsigol_core/templates/application_update.html:277
 #: gvsigol_core/templates/project_add.html:486
 #: gvsigol_core/templates/project_clone.html:190
-#: gvsigol_core/templates/project_list.html:492
-#: gvsigol_core/templates/project_update.html:487
+#: gvsigol_core/templates/project_list.html:545
+#: gvsigol_core/templates/project_update.html:486
 #: gvsigol_core/templates/services_view.html:71
 #: gvsigol_core/templates/services_view.html:91
 #: gvsigol_core/templates/services_view.html:110
@@ -200,33 +493,24 @@ msgstr "Nom de l'aplicació"
 msgid "Title"
 msgstr "Títol"
 
-#: templates/application_add.html:236 templates/application_update.html:278
 #: gvsigol_core/templates/application_add.html:236
 #: gvsigol_core/templates/application_update.html:278
 msgid "Application title"
 msgstr "Títol de l'aplicació"
 
-#: templates/application_add.html:241 templates/application_update.html:284
-#: templates/project_add.html:492 templates/project_list.html:546
-#: templates/project_update.html:494
 #: gvsigol_core/templates/application_add.html:241
 #: gvsigol_core/templates/application_update.html:284
 #: gvsigol_core/templates/project_add.html:492
-#: gvsigol_core/templates/project_list.html:493
-#: gvsigol_core/templates/project_update.html:494
+#: gvsigol_core/templates/project_list.html:546
+#: gvsigol_core/templates/project_update.html:493
 msgid "Description"
 msgstr "Descripció"
 
-#: templates/application_add.html:242 templates/application_update.html:285
 #: gvsigol_core/templates/application_add.html:242
 #: gvsigol_core/templates/application_update.html:285
 msgid "Application description"
 msgstr "Descripció de l'aplicació"
 
-#: templates/application_add.html:247 templates/application_list.html:332
-#: templates/application_update.html:291 templates/services_view.html:72
-#: templates/services_view.html:92 templates/services_view.html:111
-#: templates/services_view.html:130 templates/shared_view_list.html:275
 #: gvsigol_core/templates/application_add.html:247
 #: gvsigol_core/templates/application_list.html:332
 #: gvsigol_core/templates/application_update.html:291
@@ -252,8 +536,8 @@ msgstr "Configuració"
 #: gvsigol_core/templates/application_update.html:309
 #: gvsigol_core/templates/project_add.html:580
 #: gvsigol_core/templates/project_add.html:589
-#: gvsigol_core/templates/project_update.html:601
-#: gvsigol_core/templates/project_update.html:610
+#: gvsigol_core/templates/project_update.html:600
+#: gvsigol_core/templates/project_update.html:609
 msgid "Change image?"
 msgstr "Canviar imatge?"
 
@@ -261,8 +545,8 @@ msgstr "Canviar imatge?"
 #: gvsigol_core/templates/application_update.html:309
 #: gvsigol_core/templates/project_add.html:468
 #: gvsigol_core/templates/project_add.html:589
-#: gvsigol_core/templates/project_update.html:475
-#: gvsigol_core/templates/project_update.html:610
+#: gvsigol_core/templates/project_update.html:474
+#: gvsigol_core/templates/project_update.html:609
 msgid "Supported formats"
 msgstr "Formats suportats"
 
@@ -279,8 +563,8 @@ msgstr "Tothom podrà llegir l'aplicació si és pública"
 #: gvsigol_core/templates/application_add.html:281
 #: gvsigol_core/templates/application_update.html:329
 #: gvsigol_core/templates/project_add.html:771
-#: gvsigol_core/templates/project_list.html:494
-#: gvsigol_core/templates/project_update.html:814
+#: gvsigol_core/templates/project_list.html:547
+#: gvsigol_core/templates/project_update.html:813
 msgid "Is public?"
 msgstr "És públic?"
 
@@ -289,11 +573,11 @@ msgstr "És públic?"
 msgid "Assign user group"
 msgstr "Asignar grup d'usuari"
 
-#: templates/application_list.html:319
+#: gvsigol_core/templates/application_list.html:319
 msgid "Applications list"
 msgstr "Llistat d'aplicacions"
 
-#: templates/application_list.html:322
+#: gvsigol_core/templates/application_list.html:322
 msgid "Add application"
 msgstr "Afegir aplicació"
 
@@ -306,17 +590,22 @@ msgstr "És pública?"
 msgid "Delete application"
 msgstr "Eliminar aplicació"
 
-#: templates/application_list.html:374
+#: gvsigol_core/templates/application_list.html:374
 msgid "Application will be removed, Do you want continue?"
 msgstr "L'aplicació serà eliminada, Voleu continuar?"
 
 #: gvsigol_core/templates/application_list.html:377
 #: gvsigol_core/templates/project_add.html:853
 #: gvsigol_core/templates/project_add.html:879
-#: gvsigol_core/templates/project_list.html:583
-#: gvsigol_core/templates/project_list.html:634
-#: gvsigol_core/templates/project_update.html:1022
-#: gvsigol_core/templates/project_update.html:1048
+#: gvsigol_core/templates/project_list.html:638
+#: gvsigol_core/templates/project_list.html:689
+#: gvsigol_core/templates/project_list.html:716
+#: gvsigol_core/templates/project_list.html:795
+#: gvsigol_core/templates/project_package_activity_log.html:55
+#: gvsigol_core/templates/project_package_activity_log.html:84
+#: gvsigol_core/templates/project_package_import_wizard.html:299
+#: gvsigol_core/templates/project_update.html:894
+#: gvsigol_core/templates/project_update.html:920
 #: gvsigol_core/templates/shared_view_list.html:311
 #: gvsigol_core/templates/viewer.html:291
 #: gvsigol_core/templates/viewer_compress.html:294
@@ -326,9 +615,9 @@ msgstr "Cancel·lar"
 #: gvsigol_core/templates/application_list.html:378
 #: gvsigol_core/templates/project_add.html:854
 #: gvsigol_core/templates/project_add.html:880
-#: gvsigol_core/templates/project_list.html:584
-#: gvsigol_core/templates/project_update.html:1023
-#: gvsigol_core/templates/project_update.html:1049
+#: gvsigol_core/templates/project_list.html:639
+#: gvsigol_core/templates/project_update.html:895
+#: gvsigol_core/templates/project_update.html:921
 #: gvsigol_core/templates/shared_view_list.html:312
 #: gvsigol_core/templates/viewer.html:292
 #: gvsigol_core/templates/viewer.html:314
@@ -338,107 +627,107 @@ msgid "Accept"
 msgstr "Acceptar"
 
 #: gvsigol_core/templates/application_list.html:394
-#: gvsigol_core/templates/project_list.html:657
+#: gvsigol_core/templates/project_list.html:834
 #: gvsigol_core/templates/shared_view_list.html:329
 msgid "Processing request..."
 msgstr "Processant petició..."
 
 #: gvsigol_core/templates/application_list.html:395
-#: gvsigol_core/templates/project_list.html:658
+#: gvsigol_core/templates/project_list.html:835
 #: gvsigol_core/templates/shared_view_list.html:330
 #, python-format
 msgid "Search%(sep)s"
 msgstr "Cercar%(sep)s"
 
 #: gvsigol_core/templates/application_list.html:396
-#: gvsigol_core/templates/project_list.html:659
+#: gvsigol_core/templates/project_list.html:836
 #: gvsigol_core/templates/shared_view_list.html:331
 #, python-format
 msgid "Showing %(numrecords)s records"
 msgstr "Mostrant %(numrecords)s registres"
 
 #: gvsigol_core/templates/application_list.html:397
-#: gvsigol_core/templates/project_list.html:660
+#: gvsigol_core/templates/project_list.html:837
 #: gvsigol_core/templates/shared_view_list.html:332
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgstr "Mostrant des de %(start)s fins %(end)s de %(numrecords)s registres"
 
 #: gvsigol_core/templates/application_list.html:398
-#: gvsigol_core/templates/project_list.html:661
+#: gvsigol_core/templates/project_list.html:838
 #: gvsigol_core/templates/shared_view_list.html:333
 msgid "Showing from 0 to 0 of 0 records"
 msgstr "Mostrant des de 0 fins 0 de 0 registres"
 
 #: gvsigol_core/templates/application_list.html:399
-#: gvsigol_core/templates/project_list.html:662
+#: gvsigol_core/templates/project_list.html:839
 #: gvsigol_core/templates/shared_view_list.html:334
 #, python-format
 msgid "Filtering %(max)s records"
 msgstr "Filtrant %(max)s registres"
 
 #: gvsigol_core/templates/application_list.html:401
-#: gvsigol_core/templates/project_list.html:664
+#: gvsigol_core/templates/project_list.html:841
 #: gvsigol_core/templates/shared_view_list.html:336
 msgid "Loading..."
 msgstr "Carregant..."
 
 #: gvsigol_core/templates/application_list.html:402
 #: gvsigol_core/templates/application_list.html:403
-#: gvsigol_core/templates/project_list.html:665
-#: gvsigol_core/templates/project_list.html:666
+#: gvsigol_core/templates/project_list.html:842
+#: gvsigol_core/templates/project_list.html:843
 #: gvsigol_core/templates/shared_view_list.html:337
 #: gvsigol_core/templates/shared_view_list.html:338
 msgid "No records available"
 msgstr "No hi ha registres disponibles"
 
 #: gvsigol_core/templates/application_list.html:405
-#: gvsigol_core/templates/project_list.html:540
-#: gvsigol_core/templates/project_list.html:543
-#: gvsigol_core/templates/project_list.html:668
+#: gvsigol_core/templates/project_list.html:595
+#: gvsigol_core/templates/project_list.html:598
+#: gvsigol_core/templates/project_list.html:845
 #: gvsigol_core/templates/shared_view_list.html:340
 msgid "First"
 msgstr "Primer"
 
 #: gvsigol_core/templates/application_list.html:406
-#: gvsigol_core/templates/project_list.html:541
-#: gvsigol_core/templates/project_list.html:544
-#: gvsigol_core/templates/project_list.html:669
+#: gvsigol_core/templates/project_list.html:596
+#: gvsigol_core/templates/project_list.html:599
+#: gvsigol_core/templates/project_list.html:846
 #: gvsigol_core/templates/shared_view_list.html:341
 msgid "Previous"
 msgstr "Anterior"
 
 #: gvsigol_core/templates/application_list.html:407
-#: gvsigol_core/templates/project_list.html:554
-#: gvsigol_core/templates/project_list.html:557
-#: gvsigol_core/templates/project_list.html:670
+#: gvsigol_core/templates/project_list.html:609
+#: gvsigol_core/templates/project_list.html:612
+#: gvsigol_core/templates/project_list.html:847
 #: gvsigol_core/templates/shared_view_list.html:342
 msgid "Next"
 msgstr "Pròxim"
 
 #: gvsigol_core/templates/application_list.html:408
-#: gvsigol_core/templates/project_list.html:555
-#: gvsigol_core/templates/project_list.html:558
-#: gvsigol_core/templates/project_list.html:671
+#: gvsigol_core/templates/project_list.html:610
+#: gvsigol_core/templates/project_list.html:613
+#: gvsigol_core/templates/project_list.html:848
 #: gvsigol_core/templates/shared_view_list.html:343
 msgid "Last"
 msgstr "Últim"
 
 #: gvsigol_core/templates/application_list.html:411
-#: gvsigol_core/templates/project_list.html:674
+#: gvsigol_core/templates/project_list.html:851
 #: gvsigol_core/templates/shared_view_list.html:346
 #, python-format
 msgid "%(sep)sSort ascending"
 msgstr "%(sep)sOrdre ascendent"
 
 #: gvsigol_core/templates/application_list.html:412
-#: gvsigol_core/templates/project_list.html:675
+#: gvsigol_core/templates/project_list.html:852
 #: gvsigol_core/templates/shared_view_list.html:347
 #, python-format
 msgid "%(sep)sSort descending"
 msgstr "%(sep)sOrdre descendent"
 
-#: templates/application_list.html:423
+#: gvsigol_core/templates/application_list.html:423
 msgid "Update application"
 msgstr "Actualitzar aplicació"
 
@@ -449,7 +738,7 @@ msgstr "Actualitzar"
 
 #: gvsigol_core/templates/application_update.html:325
 #: gvsigol_core/templates/project_add.html:785
-#: gvsigol_core/templates/project_update.html:828
+#: gvsigol_core/templates/project_update.html:827
 msgid "Extend to layers"
 msgstr "Amplia a les capes"
 
@@ -486,11 +775,11 @@ msgstr "Versió"
 msgid "All rights reserved"
 msgstr "Tots els drets reservats"
 
-#: templates/dashboard_core_menu.html:9
+#: gvsigol_core/templates/dashboard_core_menu.html:9
 msgid "Shared views"
 msgstr "Vistes compartides"
 
-#: templates/dashboard_core_menu.html:14
+#: gvsigol_core/templates/dashboard_core_menu.html:14
 msgid "Applications"
 msgstr "Aplicacions"
 
@@ -500,7 +789,7 @@ msgstr "Aplicació web"
 
 #: gvsigol_core/templates/documentation.html:263
 msgid "User Manual - Classic Map Viewer"
-msgstr ""
+msgstr "Manual d'usuari - Visor de mapa clàssic"
 
 #: gvsigol_core/templates/documentation.html:264
 msgid ""
@@ -510,7 +799,7 @@ msgstr ""
 
 #: gvsigol_core/templates/documentation.html:272
 msgid "User Manual - New Front Map Viewer"
-msgstr ""
+msgstr "Manual d'usuari - Nou visor de mapa"
 
 #: gvsigol_core/templates/documentation.html:273
 msgid ""
@@ -559,7 +848,10 @@ msgstr "Gestor"
 msgid "User"
 msgstr "Usuaris"
 
-#: gvsigol_core/templates/home.html:823 gvsigol_core/templates/viewer.html:212
+#: gvsigol_core/templates/home.html:823
+#: gvsigol_core/templates/project_package_import_result.html:38
+#: gvsigol_core/templates/project_package_import_wizard.html:111
+#: gvsigol_core/templates/viewer.html:212
 #: gvsigol_core/templates/viewer_compress.html:214
 msgid "Details"
 msgstr "Detalls"
@@ -591,19 +883,19 @@ msgid "Projects & Applications"
 msgstr "Projectes i aplicacions"
 
 #: gvsigol_core/templates/home.html:879
-#: gvsigol_core/templates/project_list.html:474
+#: gvsigol_core/templates/project_list.html:521
 msgid "Search..."
 msgstr "Cercar..."
 
 #: gvsigol_core/templates/home.html:883 gvsigol_core/templates/home.html:1074
-#: gvsigol_core/templates/project_list.html:483
+#: gvsigol_core/templates/project_list.html:536
 msgid "Add project"
 msgstr "Afegir projecte"
 
 #: gvsigol_core/templates/home.html:884 gvsigol_core/templates/home.html:1075
 #: gvsigol_core/templates/project_add.html:666
-#: gvsigol_core/templates/project_update.html:696
-#: gvsigol_core/templates/project_update.html:698
+#: gvsigol_core/templates/project_update.html:695
+#: gvsigol_core/templates/project_update.html:697
 msgid "Add"
 msgstr "Afegir"
 
@@ -659,11 +951,11 @@ msgstr "Ocult"
 
 #: gvsigol_core/templates/home.html:935
 msgid "Cards"
-msgstr ""
+msgstr "Targetes"
 
 #: gvsigol_core/templates/home.html:938
 msgid "List"
-msgstr ""
+msgstr "Llista"
 
 #: gvsigol_core/templates/home.html:959 gvsigol_core/templates/home.html:1024
 #: gvsigol_core/templates/home.html:1453
@@ -715,109 +1007,112 @@ msgstr "Guardat"
 msgid "Error loading hidden items."
 msgstr "Error carregant elements ocults."
 
-#: templates/includes/project_package_reports_table.html:5
-#: templates/project_package_activity_log.html:79
-#: templates/project_package_export_result.html:11
-#: templates/project_package_import_wizard.html:37
+#: gvsigol_core/templates/includes/project_package_reports_table.html:5
+#: gvsigol_core/templates/project_package_activity_log.html:104
+#: gvsigol_core/templates/project_package_export_result.html:11
+#: gvsigol_core/templates/project_package_import_wizard.html:37
 msgid "When"
 msgstr "Quan"
 
-#: templates/includes/project_package_reports_table.html:6
-#: templates/project_package_activity_log.html:30
-#: templates/project_package_activity_log.html:80
+#: gvsigol_core/templates/includes/project_package_reports_table.html:6
+#: gvsigol_core/templates/project_package_activity_log.html:31
+#: gvsigol_core/templates/project_package_activity_log.html:105
 #, fuzzy
 #| msgid "Options:"
 msgid "Operation"
 msgstr "Opcions:"
 
-#: templates/includes/project_package_reports_table.html:7
-#: templates/project_package_activity_log.html:32
-#: templates/project_package_activity_log.html:81
-#: templates/project_package_import_wizard.html:37
+#: gvsigol_core/templates/includes/project_package_reports_table.html:7
+#: gvsigol_core/templates/project_package_activity_log.html:33
+#: gvsigol_core/templates/project_package_activity_log.html:106
+#: gvsigol_core/templates/project_package_import_wizard.html:37
 msgid "Status"
 msgstr "Estat"
 
-#: templates/includes/project_package_reports_table.html:8
-#: templates/includes/project_package_reports_table.html:50
-#: templates/project_package_activity_log.html:31
-#: templates/project_package_activity_log.html:82
-#: templates/project_package_activity_log.html:134
-#: templates/project_package_import_wizard.html:37
-#: templates/project_update.html:944
+#: gvsigol_core/templates/includes/project_package_reports_table.html:8
+#: gvsigol_core/templates/includes/project_package_reports_table.html:50
+#: gvsigol_core/templates/project_package_activity_log.html:32
+#: gvsigol_core/templates/project_package_activity_log.html:107
+#: gvsigol_core/templates/project_package_activity_log.html:159
+#: gvsigol_core/templates/project_package_import_wizard.html:37
 msgid "Project"
 msgstr "Projecte"
 
-#: templates/includes/project_package_reports_table.html:9
-#: templates/project_package_activity_log.html:83
+#: gvsigol_core/templates/includes/project_package_reports_table.html:9
+#: gvsigol_core/templates/project_package_activity_log.html:108
 msgid "Summary"
 msgstr "Resum"
 
-#: templates/includes/project_package_reports_table.html:19
-#: templates/project_list.html:717
-#: templates/project_package_activity_log.html:54
-#: templates/project_package_activity_log.html:93
+#: gvsigol_core/templates/includes/project_package_reports_table.html:19
+#: gvsigol_core/templates/project_list.html:717
+#: gvsigol_core/templates/project_list.html:1134
+#: gvsigol_core/templates/project_package_activity_log.html:68
+#: gvsigol_core/templates/project_package_activity_log.html:118
 msgid "Import"
 msgstr "Importar"
 
-#: templates/includes/project_package_reports_table.html:21
-#: templates/project_list.html:762
-#: templates/project_package_activity_log.html:39
-#: templates/project_package_activity_log.html:95
+#: gvsigol_core/templates/includes/project_package_reports_table.html:21
+#: gvsigol_core/templates/project_list.html:767
+#: gvsigol_core/templates/project_list.html:786
+#: gvsigol_core/templates/project_package_activity_log.html:40
+#: gvsigol_core/templates/project_package_activity_log.html:120
 msgid "Export"
 msgstr "Exportar"
 
-#: templates/includes/project_package_reports_table.html:28
-#: templates/project_package_activity_log.html:102
+#: gvsigol_core/templates/includes/project_package_reports_table.html:28
+#: gvsigol_core/templates/project_package_activity_log.html:127
 msgid "Partial"
 msgstr "Parcial"
 
-#: templates/includes/project_package_reports_table.html:30
-#: templates/project_package_activity_log.html:104
+#: gvsigol_core/templates/includes/project_package_reports_table.html:30
+#: gvsigol_core/templates/project_package_activity_log.html:129
 msgid "Failed"
 msgstr "Fallat"
 
-#: templates/includes/project_package_reports_table.html:37
-#: templates/project_package_activity_log.html:111
+#: gvsigol_core/templates/includes/project_package_reports_table.html:37
+#: gvsigol_core/templates/project_package_activity_log.html:136
 msgid "imported"
 msgstr "importat"
 
-#: templates/includes/project_package_reports_table.html:38
-#: templates/project_package_activity_log.html:112
+#: gvsigol_core/templates/includes/project_package_reports_table.html:38
+#: gvsigol_core/templates/project_package_activity_log.html:137
 msgid "skipped"
 msgstr "omès"
 
-#: templates/includes/project_package_reports_table.html:40
-#: templates/project_package_activity_log.html:114
+#: gvsigol_core/templates/includes/project_package_reports_table.html:40
+#: gvsigol_core/templates/project_package_activity_log.html:139
 msgid "Package downloaded"
 msgstr "Paquet descarregat"
 
-#: templates/includes/project_package_reports_table.html:46
-#: templates/includes/project_package_reports_table.html:48
+#: gvsigol_core/templates/includes/project_package_reports_table.html:46
+#: gvsigol_core/templates/includes/project_package_reports_table.html:48
 msgid "View report"
 msgstr "Veure informe"
 
-#: templates/includes/project_package_reports_table.html:56
-#: templates/project_package_activity_log.html:140
+#: gvsigol_core/templates/includes/project_package_reports_table.html:56
+#: gvsigol_core/templates/project_package_activity_log.html:165
 msgid "No import or export reports yet."
 msgstr "Encara no hi ha informes d'importació o exportació."
 
-#: templates/ogc_services.html:62
+#: gvsigol_core/templates/ogc_services.html:62
 msgid "WMS Service"
 msgstr "Servei WMS"
 
-#: templates/ogc_services.html:62 templates/ogc_services.html:72
+#: gvsigol_core/templates/ogc_services.html:62
+#: gvsigol_core/templates/ogc_services.html:72
 msgid "Show capabilities"
 msgstr "Mostra característiques"
 
-#: templates/ogc_services.html:72
+#: gvsigol_core/templates/ogc_services.html:72
 msgid "WFS Service"
 msgstr "Servei WFS"
 
-#: templates/ogc_services.html:86
+#: gvsigol_core/templates/ogc_services.html:86
 msgid "No services have been published"
 msgstr "No s'han publicat serveis"
 
-#: templates/ogc_services.html:117 templates/services_view.html:170
+#: gvsigol_core/templates/ogc_services.html:117
+#: gvsigol_core/templates/services_view.html:170
 msgid "Service capabilities"
 msgstr "Característiques del servei"
 
@@ -834,12 +1129,12 @@ msgid "Tools"
 msgstr "Eines"
 
 #: gvsigol_core/templates/project_add.html:468
-#: gvsigol_core/templates/project_update.html:475
+#: gvsigol_core/templates/project_update.html:474
 msgid "Select main logo"
 msgstr "Seleccionar logo principal"
 
 #: gvsigol_core/templates/project_add.html:474
-#: gvsigol_core/templates/project_update.html:481
+#: gvsigol_core/templates/project_update.html:480
 msgid "Link for logo"
 msgstr "Link para el logo"
 
@@ -848,202 +1143,204 @@ msgid "Project name"
 msgstr "Nom del projecte"
 
 #: gvsigol_core/templates/project_add.html:487
-#: gvsigol_core/templates/project_update.html:488
+#: gvsigol_core/templates/project_update.html:487
 msgid "Project title"
 msgstr "Títol del projecte"
 
 #: gvsigol_core/templates/project_add.html:493
-#: gvsigol_core/templates/project_update.html:495
+#: gvsigol_core/templates/project_update.html:494
 msgid "Project description"
 msgstr "Descripció del projecte"
 
 #: gvsigol_core/templates/project_add.html:498
 #: gvsigol_core/templates/project_add.html:502
-#: gvsigol_core/templates/project_update.html:500
-#: gvsigol_core/templates/project_update.html:504
+#: gvsigol_core/templates/project_update.html:499
+#: gvsigol_core/templates/project_update.html:503
 msgid "Toc panel presentation"
 msgstr "Presentació del TOC"
 
 #: gvsigol_core/templates/project_add.html:504
-#: gvsigol_core/templates/project_update.html:507
-#: gvsigol_core/templates/project_update.html:509
+#: gvsigol_core/templates/project_update.html:506
+#: gvsigol_core/templates/project_update.html:508
 msgid "Toc hidden"
 msgstr "TOC ocult"
 
 #: gvsigol_core/templates/project_add.html:505
-#: gvsigol_core/templates/project_update.html:512
-#: gvsigol_core/templates/project_update.html:514
+#: gvsigol_core/templates/project_update.html:511
+#: gvsigol_core/templates/project_update.html:513
 msgid "Show toc and groups"
 msgstr "Mostra TOC i grups"
 
 #: gvsigol_core/templates/project_add.html:506
-#: gvsigol_core/templates/project_update.html:517
-#: gvsigol_core/templates/project_update.html:519
+#: gvsigol_core/templates/project_update.html:516
+#: gvsigol_core/templates/project_update.html:518
 msgid "Show toc, groups and layers"
 msgstr "Mostra TOC, grups i capes"
 
 #: gvsigol_core/templates/project_add.html:512
-#: gvsigol_core/templates/project_update.html:530
+#: gvsigol_core/templates/project_update.html:529
 msgid "Selectable layer groups"
 msgstr "Grups de capes seleccionables"
 
 #: gvsigol_core/templates/project_add.html:516
-#: gvsigol_core/templates/project_update.html:534
+#: gvsigol_core/templates/project_update.html:533
 msgid "expiration_date_optional"
 msgstr "Data d'expiració (opcional)"
 
-#: templates/project_add.html:523 templates/project_update.html:541
+#: gvsigol_core/templates/project_add.html:523
+#: gvsigol_core/templates/project_update.html:540
 msgid "expiration_date_hint"
 msgstr ""
 "Deixeu-ho buit si el projecte no ha de caducar. Podeu usar la icona "
 "d'esborrar del calendari o el botó de sota."
 
-#: templates/project_add.html:524 templates/project_update.html:542
+#: gvsigol_core/templates/project_add.html:524
+#: gvsigol_core/templates/project_update.html:541
 msgid "expiration_date_clear"
 msgstr "Treure la data d'expiració"
 
 #: gvsigol_core/templates/project_add.html:530
 #: gvsigol_core/templates/project_add.html:574
-#: gvsigol_core/templates/project_update.html:548
-#: gvsigol_core/templates/project_update.html:595
+#: gvsigol_core/templates/project_update.html:547
+#: gvsigol_core/templates/project_update.html:594
 msgid "Coordinate reference system"
 msgstr "Sistema de referència de coordenades"
 
 #: gvsigol_core/templates/project_add.html:534
-#: gvsigol_core/templates/project_update.html:552
+#: gvsigol_core/templates/project_update.html:551
 msgid "MinX"
 msgstr "MinX"
 
 #: gvsigol_core/templates/project_add.html:538
-#: gvsigol_core/templates/project_update.html:556
+#: gvsigol_core/templates/project_update.html:555
 msgid "MinY"
 msgstr "MinY"
 
 #: gvsigol_core/templates/project_add.html:542
-#: gvsigol_core/templates/project_update.html:560
+#: gvsigol_core/templates/project_update.html:559
 msgid "MaxX"
 msgstr "MaxX"
 
 #: gvsigol_core/templates/project_add.html:546
-#: gvsigol_core/templates/project_update.html:564
+#: gvsigol_core/templates/project_update.html:563
 msgid "MaxY"
 msgstr "MaxY"
 
 #: gvsigol_core/templates/project_add.html:554
-#: gvsigol_core/templates/project_update.html:572
+#: gvsigol_core/templates/project_update.html:571
 msgid "Locate place..."
 msgstr "Cercar lloc..."
 
 #: gvsigol_core/templates/project_add.html:570
-#: gvsigol_core/templates/project_update.html:591
+#: gvsigol_core/templates/project_update.html:590
 msgid "Restricted extent"
 msgstr "Extensió restringida"
 
 #: gvsigol_core/templates/project_add.html:574
-#: gvsigol_core/templates/project_update.html:595
+#: gvsigol_core/templates/project_update.html:594
 msgid "by default"
 msgstr "per defecte"
 
 #: gvsigol_core/templates/project_add.html:599
-#: gvsigol_core/templates/project_update.html:625
+#: gvsigol_core/templates/project_update.html:624
 msgid "Show project icon in TOC"
 msgstr "Mostra la icona del projecte al TOC"
 
 #: gvsigol_core/templates/project_add.html:605
-#: gvsigol_core/templates/project_update.html:631
+#: gvsigol_core/templates/project_update.html:630
 msgid "Viewer technology"
 msgstr "Tecnologia del visor"
 
 #: gvsigol_core/templates/project_add.html:618
 #: gvsigol_core/templates/project_add.html:622
-#: gvsigol_core/templates/project_update.html:644
-#: gvsigol_core/templates/project_update.html:648
+#: gvsigol_core/templates/project_update.html:643
+#: gvsigol_core/templates/project_update.html:647
 msgid "Project tags"
 msgstr "Etiquetes de projecte"
 
 #: gvsigol_core/templates/project_add.html:646
-#: gvsigol_core/templates/project_update.html:671
+#: gvsigol_core/templates/project_update.html:670
 msgid "Search layer group..."
 msgstr "Cercar grup de capes..."
 
 #: gvsigol_core/templates/project_add.html:648
-#: gvsigol_core/templates/project_update.html:673
+#: gvsigol_core/templates/project_update.html:672
 msgid "Add layer group"
 msgstr "Afegir grup de capes"
 
 #: gvsigol_core/templates/project_add.html:661
-#: gvsigol_core/templates/project_update.html:687
-#: gvsigol_core/templates/project_update.html:689
+#: gvsigol_core/templates/project_update.html:686
+#: gvsigol_core/templates/project_update.html:688
 msgid "Base group"
 msgstr "Grup base"
 
 #: gvsigol_core/templates/project_add.html:683
-#: gvsigol_core/templates/project_update.html:721
-#: gvsigol_core/templates/project_update.html:723
+#: gvsigol_core/templates/project_update.html:720
+#: gvsigol_core/templates/project_update.html:722
 msgid "Base by default"
 msgstr "Base per defecte"
 
 #: gvsigol_core/templates/project_add.html:684
-#: gvsigol_core/templates/project_update.html:726
+#: gvsigol_core/templates/project_update.html:725
 msgid "Overview"
 msgstr "Localitzador"
 
 #: gvsigol_core/templates/project_add.html:731
-#: gvsigol_core/templates/project_update.html:774
+#: gvsigol_core/templates/project_update.html:773
 msgid "Search tool..."
 msgstr "Eina de recerca..."
 
 #: gvsigol_core/templates/project_add.html:745
 #: gvsigol_core/templates/project_add.html:747
-#: gvsigol_core/templates/project_update.html:788
-#: gvsigol_core/templates/project_update.html:790
+#: gvsigol_core/templates/project_update.html:787
+#: gvsigol_core/templates/project_update.html:789
 msgid "Assign tool"
 msgstr "Assignar eina"
 
 #: gvsigol_core/templates/project_add.html:769
-#: gvsigol_core/templates/project_update.html:812
+#: gvsigol_core/templates/project_update.html:811
 msgid "Project will be readable by everyone if public"
 msgstr "Tothom podrà llegir el projecte si és públic"
 
 #: gvsigol_core/templates/project_add.html:776
-#: gvsigol_core/templates/project_update.html:819
+#: gvsigol_core/templates/project_update.html:818
 msgid "Set project permissions:"
 msgstr "Establir permisos del projecte:"
 
 #: gvsigol_core/templates/project_add.html:781
 #: gvsigol_core/templates/project_add.html:790
-#: gvsigol_core/templates/project_update.html:824
-#: gvsigol_core/templates/project_update.html:833
+#: gvsigol_core/templates/project_update.html:823
+#: gvsigol_core/templates/project_update.html:832
 msgid "Search role..."
 msgstr "Cercar rol..."
 
 #: gvsigol_core/templates/project_add.html:813
-#: gvsigol_core/templates/project_update.html:856
+#: gvsigol_core/templates/project_update.html:855
 msgid "Permission to access"
 msgstr "Permís per accedir"
 
 #: gvsigol_core/templates/project_add.html:817
-#: gvsigol_core/templates/project_update.html:860
+#: gvsigol_core/templates/project_update.html:859
 msgid "Permission to manage"
 msgstr "Permís per gestionar"
 
 #: gvsigol_core/templates/project_add.html:847
-#: gvsigol_core/templates/project_update.html:1016
+#: gvsigol_core/templates/project_update.html:888
 msgid "Create new layer group"
 msgstr "Crear nou grup de capes"
 
 #: gvsigol_core/templates/project_add.html:850
-#: gvsigol_core/templates/project_update.html:1019
+#: gvsigol_core/templates/project_update.html:891
 msgid "The project has to be saved first, Do you want continue?"
 msgstr "Cal guardar el projecte primer, Voleu continuar?"
 
 #: gvsigol_core/templates/project_add.html:867
-#: gvsigol_core/templates/project_update.html:1036
+#: gvsigol_core/templates/project_update.html:908
 msgid "Extend project permissions to layers"
 msgstr "Amplia els permisos del projecte a les capes"
 
 #: gvsigol_core/templates/project_add.html:870
-#: gvsigol_core/templates/project_update.html:1039
+#: gvsigol_core/templates/project_update.html:911
 msgid ""
 "This action will give the selected user groups permission to read all the "
 "layers included in this project. Notes:"
@@ -1052,7 +1349,7 @@ msgstr ""
 "totes les capes incloses en aquest projecte. Notes:"
 
 #: gvsigol_core/templates/project_add.html:872
-#: gvsigol_core/templates/project_update.html:1041
+#: gvsigol_core/templates/project_update.html:913
 msgid ""
 "If the project is public, all the layers assigned to the project will become "
 "public."
@@ -1061,7 +1358,7 @@ msgstr ""
 "públiques."
 
 #: gvsigol_core/templates/project_add.html:873
-#: gvsigol_core/templates/project_update.html:1042
+#: gvsigol_core/templates/project_update.html:914
 msgid ""
 "This action will operate on layers, layer groups and user groups currently "
 "selected, even if they have been not saved."
@@ -1070,44 +1367,45 @@ msgstr ""
 "seleccionats actualment, encara que no s'hagin guardat."
 
 #: gvsigol_core/templates/project_add.html:874
-#: gvsigol_core/templates/project_update.html:1043
+#: gvsigol_core/templates/project_update.html:915
 msgid "Additional permissions existing on the layer will not be removed."
 msgstr "No se suprimiran els permisos addicionals existents a la capa."
 
 #: gvsigol_core/templates/project_add.html:875
-#: gvsigol_core/templates/project_update.html:1044
+#: gvsigol_core/templates/project_update.html:916
 msgid "Public layers will remain public."
 msgstr "Les capes públiques continuaran sent públiques."
 
 #: gvsigol_core/templates/project_add.html:1532
-#: gvsigol_core/templates/project_update.html:1862
+#: gvsigol_core/templates/project_update.html:1614
 msgid "Success: Project permissions were applied to layers."
 msgstr "Èxit: Els permisos del projecte s'han aplicat a les capes."
 
 #: gvsigol_core/templates/project_add.html:1536
 #: gvsigol_core/templates/project_add.html:1542
-#: gvsigol_core/templates/project_update.html:1866
-#: gvsigol_core/templates/project_update.html:1872
+#: gvsigol_core/templates/project_update.html:1618
+#: gvsigol_core/templates/project_update.html:1624
 msgid "Error: Permissions could not be extended to layers."
 msgstr "Error: els permisos no s'han pogut estendre a les capes."
 
 #: gvsigol_core/templates/project_clone.html:158
-#: gvsigol_core/templates/project_list.html:635
+#: gvsigol_core/templates/project_list.html:690
 msgid "Clone"
 msgstr "Clonar"
 
 #: gvsigol_core/templates/project_clone.html:202
 #: gvsigol_core/templates/project_clone.html:206
-#: gvsigol_core/templates/project_list.html:616
+#: gvsigol_core/templates/project_list.html:671
 msgid "Workspace"
 msgstr "Espai de treball"
 
 #: gvsigol_core/templates/project_clone.html:212
-#: gvsigol_core/templates/project_list.html:622
+#: gvsigol_core/templates/project_list.html:677
 msgid "Datastore"
 msgstr "Magatzem de dades"
 
 #: gvsigol_core/templates/project_clone.html:218
+#: gvsigol_core/templates/project_package_import_wizard.html:87
 msgid "Select server"
 msgstr "Seleccionar servidor"
 
@@ -1140,17 +1438,41 @@ msgstr "S'exclouran les capes ràster (excepte les capes base)"
 msgid "Permissions cloning"
 msgstr "Clonar permisos"
 
-#: gvsigol_core/templates/project_list.html:470
+#: gvsigol_core/templates/project_list.html:517
 #: gvsigol_core/templates/select_public_mobile_project.html:58
 #: gvsigol_core/templates/select_public_project.html:85
 msgid "Projects list"
 msgstr "Llistat de projectes"
 
-#: gvsigol_core/templates/project_list.html:495
+#: gvsigol_core/templates/project_list.html:530
+msgid "Import a project from a ZIP package file"
+msgstr "Importa un projecte des d'un fitxer ZIP de paquet"
+
+#: gvsigol_core/templates/project_list.html:531
+#: gvsigol_core/templates/project_list.html:704
+#, fuzzy
+#| msgid "Update project"
+msgid "Import project"
+msgstr "Actualitzar projecte"
+
+#: gvsigol_core/templates/project_list.html:533
+#: gvsigol_core/templates/project_package_activity_log.html:7
+#, fuzzy
+#| msgid "No import or export reports yet."
+msgid "Import and export reports"
+msgstr "Encara no hi ha informes d'importació o exportació."
+
+#: gvsigol_core/templates/project_list.html:534
+#, fuzzy
+#| msgid "View report"
+msgid "Package reports"
+msgstr "Veure informe"
+
+#: gvsigol_core/templates/project_list.html:548
 msgid "Preview"
 msgstr "Previsualitzar"
 
-#: gvsigol_core/templates/project_list.html:534
+#: gvsigol_core/templates/project_list.html:589
 #, fuzzy, python-format
 #| msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
 msgid ""
@@ -1159,155 +1481,689 @@ msgid ""
 "\t\t\t\t\t"
 msgstr "Mostrant des de %(start)s fins %(end)s de %(numrecords)s registres"
 
-#: gvsigol_core/templates/project_list.html:577
-#: gvsigol_core/templates/project_list.html:685
+#: gvsigol_core/templates/project_list.html:632
+#: gvsigol_core/templates/project_list.html:862
 msgid "Delete project"
 msgstr "Eliminar projecte"
 
-#: gvsigol_core/templates/project_list.html:580
+#: gvsigol_core/templates/project_list.html:635
 msgid "The project will be removed, Do you want continue?"
 msgstr "El projecte serà eliminat, Voleu continuar?"
 
-#: gvsigol_core/templates/project_list.html:599
-#: gvsigol_core/templates/project_list.html:698
+#: gvsigol_core/templates/project_list.html:654
+#: gvsigol_core/templates/project_list.html:875
 msgid "Clone project"
 msgstr "Clonar projecte"
 
-#: gvsigol_core/templates/project_list.html:628
+#: gvsigol_core/templates/project_list.html:683
 msgid "Server"
 msgstr "Servidor"
 
-#: gvsigol_core/templates/project_list.html:629
+#: gvsigol_core/templates/project_list.html:684
 msgid "Target server"
 msgstr "Servidor de destinació"
 
-#: gvsigol_core/templates/project_list.html:688
-msgid "You are not allowed to manage this project"
-msgstr "No tens permisos per gestionar aquest projecte"
+#: gvsigol_core/templates/project_list.html:709
+msgid ""
+"Select a project package file (.zip) exported from another gvSIG Online "
+"server."
+msgstr ""
 
 #: gvsigol_core/templates/project_list.html:711
-msgid "Project layer groups"
-msgstr "Grups de capes del projecte"
+#, fuzzy
+#| msgid "Package downloaded"
+msgid "Package file"
+msgstr "Paquet descarregat"
 
-#: gvsigol_core/templates/project_list.html:724
-msgid "Update project"
-msgstr "Actualitzar projecte"
+#: gvsigol_core/templates/project_list.html:732
+#: gvsigol_core/templates/project_list.html:808
+#: gvsigol_core/templates/project_list.html:915
+msgid "Export project package"
+msgstr "Exportar paquet de projecte"
 
-#: gvsigol_core/templates/project_update.html:457
-msgid "Package the base layer"
-msgstr "Empaquetar la capa base"
+#: gvsigol_core/templates/project_list.html:737
+msgid "Loading export options…"
+msgstr "Carregant opcions d'exportació…"
 
-#: gvsigol_core/templates/project_update.html:886
-msgid "Process running"
-msgstr "Procés en execució"
+#: gvsigol_core/templates/project_list.html:743
+#, fuzzy
+#| msgid "Clone project and layer permissions"
+msgid "Include layer and project role permissions"
+msgstr "Clonar els permisos del projecte i la capa"
 
-#: gvsigol_core/templates/project_update.html:891
-msgid "Processed"
-msgstr "Processat"
+#: gvsigol_core/templates/project_list.html:745
+msgid ""
+"Private project: export read/write/manage rules so they can be restored on "
+"import."
+msgstr ""
 
-#: gvsigol_core/templates/project_update.html:893
-msgid "of"
-msgstr "de"
+#: gvsigol_core/templates/project_list.html:750
+msgid "Include raster files in the package"
+msgstr "Incloure fitxers ràster al paquet"
 
-#: gvsigol_core/templates/project_update.html:900
-msgid "Estimated Time"
-msgstr "Temps estimat"
+#: gvsigol_core/templates/project_list.html:752
+msgid ""
+"Pack all raster files (GeoTIFF and associated auxiliary files) so they are "
+"published automatically on import."
+msgstr ""
 
-#: gvsigol_core/templates/project_update.html:906
-#: gvsigol_core/templates/project_update.html:954
-msgid "Format"
-msgstr "Format"
+#: gvsigol_core/templates/project_list.html:755
+msgid "Layers on external databases"
+msgstr "Capes en bases de dades externes"
 
-#: gvsigol_core/templates/project_update.html:912
-#: gvsigol_core/templates/project_update.html:941
-msgid "Extent"
-msgstr "Extensió"
+#: gvsigol_core/templates/project_list.html:756
+msgid ""
+"Choose whether to copy data into the package (GPKG) or export metadata only "
+"(destination must already have the tables)."
+msgstr ""
 
-#: gvsigol_core/templates/project_update.html:918
-#: gvsigol_core/templates/project_update.html:967
-msgid "Niveles de zoom"
-msgstr "Nivells de zoom"
-
-#: gvsigol_core/templates/project_update.html:928
-msgid "Download version"
-msgstr "Descarregar versió"
-
-#: gvsigol_core/templates/project_update.html:933
-msgid "Download"
-msgstr "Descarregar"
-
-#: gvsigol_core/templates/project_update.html:947
+#: gvsigol_core/templates/project_list.html:765
+#: gvsigol_core/templates/project_list.html:784
+#: gvsigol_core/templates/project_package_import_result.html:36
 #, fuzzy
 #| msgid "Layer tree"
 msgid "Layer"
 msgstr "Arbre de capes"
 
-#: gvsigol_core/templates/project_update.html:957
-msgid "PNG"
-msgstr "PNG"
+#: gvsigol_core/templates/project_list.html:766
+msgid "Connection"
+msgstr "Connexió"
 
-#: gvsigol_core/templates/project_update.html:960
-msgid "JPG"
-msgstr "JPG"
+#: gvsigol_core/templates/project_list.html:774
+#, fuzzy
+#| msgid "Base layers"
+msgid "SQL view layers"
+msgstr "Capes base"
 
-#: gvsigol_core/templates/project_update.html:970
-msgid "Tiles per side"
+#: gvsigol_core/templates/project_list.html:775
+msgid ""
+"These layers are PostgreSQL views. Choose how to export each one: copy the "
+"data as a GeoPackage, or export the SQL view definition so it can be "
+"recreated on import."
 msgstr ""
 
-#: gvsigol_core/templates/project_update.html:977
-msgid "Tilematrixset (WMTS)"
-msgstr "Tilematrixset (WMTS)"
+#: gvsigol_core/templates/project_list.html:796
+#, fuzzy
+#| msgid "Export"
+msgid "Export ZIP"
+msgstr "Exportar"
 
-#: gvsigol_core/templates/project_update.html:980
-msgid "Tilematrixset"
-msgstr "Tilematrixset"
+#: gvsigol_core/templates/project_list.html:812
+msgid ""
+"Building the ZIP file. This may take several minutes for large projects. "
+"Please wait."
+msgstr ""
 
-#: gvsigol_core/templates/project_update.html:986
-msgid "Create layer"
-msgstr "Crear capa"
+#: gvsigol_core/templates/project_list.html:865
+msgid "You are not allowed to manage this project"
+msgstr "No tens permisos per gestionar aquest projecte"
 
-#: gvsigol_core/templates/project_update.html:987
-msgid "Continue download"
-msgstr "Continua la baixada"
+#: gvsigol_core/templates/project_list.html:888
+msgid "Project layer groups"
+msgstr "Grups de capes del projecte"
 
-#: gvsigol_core/templates/project_update.html:988
-msgid "Stop Process"
-msgstr "Aturar procés"
+#: gvsigol_core/templates/project_list.html:901
+msgid "Update project"
+msgstr "Actualitzar projecte"
 
-#: templates/select_public_mobile_project.html:8
-#: templates/select_public_project.html:8
+#: gvsigol_core/templates/project_list.html:1031
+#: gvsigol_core/templates/project_list.html:1057
+msgid "Data (GPKG)"
+msgstr "Dades (GPKG)"
+
+#: gvsigol_core/templates/project_list.html:1037
+msgid "Definition only"
+msgstr "Només definició"
+
+#: gvsigol_core/templates/project_list.html:1063
+msgid "SQL view definition"
+msgstr "Definició SQL de vista"
+
+#: gvsigol_core/templates/project_list.html:1098
+msgid "Could not load export options."
+msgstr "No s'han pogut carregar les opcions d'exportació."
+
+#: gvsigol_core/templates/project_list.html:1124
+#: gvsigol_core/templates/project_package_import_wizard.html:362
+#, fuzzy
+#| msgid "Import"
+msgid "Importing…"
+msgstr "Importar"
+
+#: gvsigol_core/templates/project_package_activity_log.html:10
+msgid "Last import and export operations on this server"
+msgstr "Últimes operacions d'importació i exportació en aquest servidor"
+
+#: gvsigol_core/templates/project_package_activity_log.html:14
+msgid "Activity log is not available until database migrations are applied:"
+msgstr ""
+"El registre d'activitat no està disponible fins que s'apliquen les "
+"migracions de base de dades:"
+
+#: gvsigol_core/templates/project_package_activity_log.html:25
+msgid "In progress"
+msgstr "En curs"
+
+#: gvsigol_core/templates/project_package_activity_log.html:30
+msgid "Started"
+msgstr "Iniciat"
+
+#: gvsigol_core/templates/project_package_activity_log.html:45
+#: gvsigol_core/templates/project_package_activity_log.html:73
+#: gvsigol_core/templates/project_package_activity_log.html:186
+#: gvsigol_core/templates/project_package_import_result.html:13
+#, fuzzy
+#| msgid "Process running"
+msgid "running"
+msgstr "Procés en execució"
+
+#: gvsigol_core/templates/project_package_activity_log.html:46
+#: gvsigol_core/templates/project_package_activity_log.html:74
+#: gvsigol_core/templates/project_package_activity_log.html:75
+#: gvsigol_core/templates/project_package_activity_log.html:187
+#: gvsigol_core/templates/project_package_import_result.html:16
+msgid "pending"
+msgstr "pendent"
+
+#: gvsigol_core/templates/project_package_activity_log.html:57
+#: gvsigol_core/templates/project_package_activity_log.html:86
+#: gvsigol_core/templates/project_package_activity_log.html:188
+msgid "Sure?"
+msgstr "Segur?"
+
+#: gvsigol_core/templates/project_package_activity_log.html:58
+#: gvsigol_core/templates/project_package_activity_log.html:87
+#: gvsigol_core/templates/project_package_activity_log.html:189
+msgid "Yes"
+msgstr "Sí"
+
+#: gvsigol_core/templates/project_package_activity_log.html:59
+#: gvsigol_core/templates/project_package_activity_log.html:88
+#: gvsigol_core/templates/project_package_activity_log.html:190
+msgid "No"
+msgstr "No"
+
+#: gvsigol_core/templates/project_package_activity_log.html:141
+msgid "layer(s) with errors"
+msgstr "capa(es) amb errors"
+
+#: gvsigol_core/templates/project_package_activity_log.html:150
+msgid "Download"
+msgstr "Descarregar"
+
+#: gvsigol_core/templates/project_package_activity_log.html:155
+#: gvsigol_core/templates/project_package_activity_log.html:157
+#: gvsigol_core/templates/project_package_import_wizard.html:47
+#: gvsigol_core/templates/project_package_import_wizard.html:49
+#, fuzzy
+#| msgid "Import"
+msgid "Report"
+msgstr "Importar"
+
+#: gvsigol_core/templates/project_package_activity_log.html:173
+#: gvsigol_core/templates/project_package_export_result.html:66
+#: gvsigol_core/templates/project_package_import_result.html:103
+#: gvsigol_core/templates/project_package_job_status.html:41
+#: gvsigol_core/templates/project_package_job_status.html:60
+#: gvsigol_core/templates/project_package_job_status.html:74
+#: gvsigol_core/templates/project_package_job_status.html:87
+#, fuzzy
+#| msgid "Update project"
+msgid "Back to projects"
+msgstr "Actualitzar projecte"
+
+#: gvsigol_core/templates/project_package_export_result.html:7
+#, fuzzy
+#| msgid "Export"
+msgid "Export report"
+msgstr "Exportar"
+
+#: gvsigol_core/templates/project_package_export_result.html:12
+#: gvsigol_core/templates/project_package_import_result.html:10
+#: gvsigol_core/templates/project_package_import_wizard.html:31
+#, fuzzy
+#| msgid "Status"
+msgid "status"
+msgstr "Estat"
+
+#: gvsigol_core/templates/project_package_export_result.html:13
+msgid "user"
+msgstr "usuari"
+
+#: gvsigol_core/templates/project_package_export_result.html:18
+#: gvsigol_core/templates/project_package_job_status.html:120
+msgid "Warning: the following layers could not be fully exported"
+msgstr "Avís: les capes següents no s'han pogut exportar completament"
+
+#: gvsigol_core/templates/project_package_export_result.html:24
+msgid ""
+"These layers are included in the package as metadata only (no GPKG data). "
+"Check the technical log for details."
+msgstr ""
+
+#: gvsigol_core/templates/project_package_export_result.html:29
+#, fuzzy
+#| msgid "Extend project permissions to layers"
+msgid "Exported permissions (layer/project roles)"
+msgstr "Amplia els permisos del projecte a les capes"
+
+#: gvsigol_core/templates/project_package_export_result.html:32
+#, fuzzy
+#| msgid "Layer tree"
+msgid "Layer vector modes"
+msgstr "Arbre de capes"
+
+#: gvsigol_core/templates/project_package_export_result.html:43
+#, fuzzy
+#| msgid "Update project"
+msgid "Open project"
+msgstr "Actualitzar projecte"
+
+#: gvsigol_core/templates/project_package_export_result.html:48
+msgid "Technical export log"
+msgstr "Registre tècnic d'exportació"
+
+#: gvsigol_core/templates/project_package_export_result.html:49
+msgid "Same content as reports/export_log.jsonl inside the downloaded ZIP."
+msgstr ""
+"Mateix contingut que reports/export_log.jsonl dins del ZIP descarregat."
+
+#: gvsigol_core/templates/project_package_export_result.html:52
+msgid "Layer-level lines (JSON Lines)"
+msgstr "Línies per capa (JSON Lines)"
+
+#: gvsigol_core/templates/project_package_export_result.html:57
+msgid "No layer-level log entries for this export."
+msgstr "No hi ha entrades de registre per capa en aquesta exportació."
+
+#: gvsigol_core/templates/project_package_export_result.html:61
+msgid ""
+"No detailed log lines were recorded for this entry (older exports may lack "
+"this)."
+msgstr ""
+
+#: gvsigol_core/templates/project_package_export_result.html:65
+#: gvsigol_core/templates/project_package_import_result.html:102
+#: gvsigol_core/templates/project_package_import_wizard.html:9
+msgid "Import/export history"
+msgstr "Historial d'importació/exportació"
+
+#: gvsigol_core/templates/project_package_import_result.html:7
+msgid "Import report"
+msgstr "Informe d'importació"
+
+#: gvsigol_core/templates/project_package_import_result.html:10
+#: gvsigol_core/templates/project_package_import_wizard.html:31
+msgid "Job"
+msgstr "Tasca"
+
+#: gvsigol_core/templates/project_package_import_result.html:12
+msgid "completed"
+msgstr "completat"
+
+#: gvsigol_core/templates/project_package_import_result.html:14
+#, fuzzy
+#| msgid "Failed"
+msgid "failed"
+msgstr "Fallat"
+
+#: gvsigol_core/templates/project_package_import_result.html:15
+#, fuzzy
+#| msgid "Cancel"
+msgid "cancelled"
+msgstr "Cancel·lar"
+
+#: gvsigol_core/templates/project_package_import_result.html:24
+msgid "Open imported project"
+msgstr "Obrir projecte importat"
+
+#: gvsigol_core/templates/project_package_import_result.html:28
+msgid "Import did not complete. No project was created."
+msgstr "La importació no s'ha completat. No s'ha creat cap projecte."
+
+#: gvsigol_core/templates/project_package_import_result.html:32
+msgid "Skipped layers"
+msgstr "Capes omeses"
+
+#: gvsigol_core/templates/project_package_import_result.html:37
+msgid "Reason"
+msgstr "Motiu"
+
+#: gvsigol_core/templates/project_package_import_result.html:57
+msgid "Reused layers"
+msgstr "Capes reutilitzades"
+
+#: gvsigol_core/templates/project_package_import_result.html:66
+msgid "Imported layers"
+msgstr "Capes importades"
+
+#: gvsigol_core/templates/project_package_import_result.html:75
+msgid "Warnings"
+msgstr "Avisos"
+
+#: gvsigol_core/templates/project_package_import_result.html:84
+msgid "Errors"
+msgstr "Errors"
+
+#: gvsigol_core/templates/project_package_import_result.html:93
+msgid "No layer-level details in the report."
+msgstr "No hi ha detalls per capa a l'informe."
+
+#: gvsigol_core/templates/project_package_import_result.html:97
+msgid "Full technical log"
+msgstr "Registre tècnic complet"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:7
+msgid "Import project package"
+msgstr "Importar paquet de projecte"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:23
+msgid "Last import error"
+msgstr "Últim error d'importació"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:35
+msgid "Recent import/export operations"
+msgstr "Operacions d'importació/exportació recents"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:37
+msgid "Op."
+msgstr "Op."
+
+#: gvsigol_core/templates/project_package_import_wizard.html:56
+msgid "View full history"
+msgstr "Veure historial complet"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:61
+#, fuzzy
+#| msgid "Package downloaded"
+msgid "Package format"
+msgstr "Paquet descarregat"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:62
+msgid "Source"
+msgstr "Origen"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:66
+#, fuzzy
+#| msgid "Create new layer group"
+msgid "Primary workspace (for new layer groups)"
+msgstr "Crear nou grup de capes"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:68
+#, fuzzy
+#| msgid "New project name"
+msgid "Exported project name"
+msgstr "Nom del nou projecte"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:70
+#, fuzzy
+#| msgid "Title"
+msgid "title"
+msgstr "Títol"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:78
+msgid "Technical preflight log"
+msgstr "Registre tècnic de preflight"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:96
+msgid "Layers in this package"
+msgstr "Capes en aquest paquet"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:97
+msgid ""
+"Check Skip to leave a layer or group out. The rest of the project imports "
+"normally."
+msgstr ""
+
+#: gvsigol_core/templates/project_package_import_wizard.html:108
+msgid "Skip"
+msgstr "Ometre"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:109
+msgid "Type"
+msgstr "Tipus"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:110
+#, fuzzy
+#| msgid "Layer groups"
+msgid "Layer / Group"
+msgstr "Grups de capes"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:112
+msgid "Target / Action"
+msgstr "Destí / Acció"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:123
+msgid "Skip this layer"
+msgstr "Omet aquesta capa"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:138
+msgid "Foreign DB connection"
+msgstr "Connexió BD externa"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:143
+msgid "From"
+msgstr "Des de"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:148
+#, fuzzy
+#| msgid "Target server"
+msgid "Target datastore"
+msgstr "Servidor de destinació"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:150
+msgid "— Select datastore —"
+msgstr "— Seleccioneu el magatzem de dades —"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:158
+#: gvsigol_core/templates/project_package_import_wizard.html:263
+msgid "(auto)"
+msgstr "(auto)"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:170
+msgid "Do not import these layers"
+msgstr "No importar aquestes capes"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:172
+msgid "Ext. DB"
+msgstr "BD ext."
+
+#: gvsigol_core/templates/project_package_import_wizard.html:177
+#, fuzzy
+#| msgid "Base layers"
+msgid "layer(s)"
+msgstr "Capes base"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:183
+msgid "No GPKG — definition only"
+msgstr "Sense GPKG — només definició"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:187
+msgid "— Select connection —"
+msgstr "— Seleccioneu connexió —"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:201
+#, fuzzy
+#| msgid "Package the base layer"
+msgid "Skip this raster layer"
+msgstr "Empaquetar la capa base"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:210
+msgid "file(s)"
+msgstr "fitxer(s)"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:213
+msgid "Published automatically"
+msgstr "Publicada automàticament"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:223
+msgid "Skip this external layer"
+msgstr "Omet aquesta capa externa"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:231
+msgid "External service"
+msgstr "Servei extern"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:234
+msgid "Imported as-is (no data copied)"
+msgstr "Importada tal qual (sense copiar dades)"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:244
+msgid "Do not import this view"
+msgstr "No importeu aquesta vista"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:246
+#, fuzzy
+#| msgid "Views"
+msgid "SQL View"
+msgstr "Vistes"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:272
+msgid "Edit SQL"
+msgstr "Editar SQL"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:280
+msgid ""
+"Skipped layers are left out entirely; the rest of the project still imports. "
+"For SQL views you can also edit the query before recreating the view."
+msgstr ""
+
+#: gvsigol_core/templates/project_package_import_wizard.html:289
+#: gvsigol_core/templates/project_package_import_wizard.html:341
+msgid "Edit view SQL"
+msgstr "Editar SQL de la vista"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:293
+msgid ""
+"Edit the SQL query that will be used to create the view. You can rename "
+"tables, change schemas, or modify the query to match the target environment."
+msgstr ""
+
+#: gvsigol_core/templates/project_package_import_wizard.html:300
+msgid "Apply"
+msgstr "Aplicar"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:307
+msgid "Advanced overrides (optional)"
+msgstr "Substitucions avançades (opcional)"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:308
+msgid "Leave empty to use names from the package."
+msgstr "Deixeu buit per utilitzar els noms del paquet."
+
+#: gvsigol_core/templates/project_package_import_wizard.html:310
+msgid "Override project name (internal id)"
+msgstr "Substituir nom del projecte (id intern)"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:314
+#, fuzzy
+#| msgid "New project title"
+msgid "Override project title"
+msgstr "Títol del nou projecte"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:320
+#: gvsigol_core/templates/project_package_import_wizard.html:323
+#, fuzzy
+#| msgid "Export"
+msgid "Execute import"
+msgstr "Exportar"
+
+#: gvsigol_core/templates/project_package_import_wizard.html:320
+msgid ""
+"Loads GPKG into the target datastores, publishes layers, and creates the "
+"project. Role permissions from the package are applied when present; "
+"otherwise the project stays public."
+msgstr ""
+
+#: gvsigol_core/templates/project_package_import_wizard.html:353
+msgid "SQL edited"
+msgstr "SQL editat"
+
+#: gvsigol_core/templates/project_package_job_status.html:9
+msgid "Exporting project package"
+msgstr "Exportant paquet de projecte"
+
+#: gvsigol_core/templates/project_package_job_status.html:11
+msgid "Importing project package"
+msgstr "Important paquet de projecte"
+
+#: gvsigol_core/templates/project_package_job_status.html:20
+#, fuzzy
+#| msgid "Processing request..."
+msgid "Processing… please wait."
+msgstr "Processant petició..."
+
+#: gvsigol_core/templates/project_package_job_status.html:27
+msgid "Export completed successfully."
+msgstr "Exportació completada correctament."
+
+#: gvsigol_core/templates/project_package_job_status.html:33
+#, fuzzy
+#| msgid "Download"
+msgid "Download ZIP"
+msgstr "Descarregar"
+
+#: gvsigol_core/templates/project_package_job_status.html:37
+#: gvsigol_core/templates/project_package_job_status.html:78
+#: gvsigol_core/templates/project_package_job_status.html:91
+msgid "Activity log"
+msgstr "Registre d'activitat"
+
+#: gvsigol_core/templates/project_package_job_status.html:51
+msgid "Import completed successfully."
+msgstr "Importació completada correctament."
+
+#: gvsigol_core/templates/project_package_job_status.html:56
+#, fuzzy
+#| msgid "View report"
+msgid "View import report"
+msgstr "Veure informe"
+
+#: gvsigol_core/templates/project_package_job_status.html:68
+#, fuzzy
+#| msgid "Options:"
+msgid "Operation failed."
+msgstr "Opcions:"
+
+#: gvsigol_core/templates/project_package_job_status.html:142
+msgid "Check server logs for details."
+msgstr "Consulteu els registres del servidor per a més detalls."
+
+#: gvsigol_core/templates/select_public_mobile_project.html:8
+#: gvsigol_core/templates/select_public_project.html:8
 #, python-format
 msgid "Public viewers - %(GVSIGOL_CUSTOMER_NAME)s"
 msgstr "Visors públics - %(GVSIGOL_CUSTOMER_NAME)s"
 
-#: templates/select_public_mobile_project.html:80
-#: templates/select_public_project.html:107
+#: gvsigol_core/templates/select_public_mobile_project.html:80
+#: gvsigol_core/templates/select_public_project.html:107
 msgid "There are no public projects"
 msgstr "No hi ha projectes públics"
 
-#: templates/select_public_mobile_project.html:91
-#: templates/select_public_project.html:118
+#: gvsigol_core/templates/select_public_mobile_project.html:91
+#: gvsigol_core/templates/select_public_project.html:118
 msgid "Application list"
 msgstr "Llistat d'aplicacions"
 
-#: templates/select_public_project.html:72 templates/viewer.html:176
-#: templates/viewer_compress.html:178
+#: gvsigol_core/templates/select_public_project.html:72
+#: gvsigol_core/templates/viewer.html:176
+#: gvsigol_core/templates/viewer_compress.html:178
 msgid "Sign in"
 msgstr "Iniciar sessió"
 
-#: templates/services_view.html:58
+#: gvsigol_core/templates/services_view.html:58
 msgid "WMS Services"
 msgstr "Serveis WMS"
 
-#: templates/services_view.html:59
+#: gvsigol_core/templates/services_view.html:59
 msgid "WMTS Services"
 msgstr "Serveis WMTS"
 
-#: templates/services_view.html:60
+#: gvsigol_core/templates/services_view.html:60
 msgid "WFS Services"
 msgstr "Serveis WFS"
 
-#: templates/services_view.html:61
+#: gvsigol_core/templates/services_view.html:61
 msgid "CSW Services"
 msgstr "Serveis CSW"
 
@@ -1331,32 +2187,38 @@ msgstr "El vista serà eliminada, Voleu continuar?"
 msgid "Delete shared view"
 msgstr "Eliminar vista compartida"
 
-#: templates/toc_update.html:11
+#: gvsigol_core/templates/toc_update.html:11
 msgid "Update TOC"
 msgstr "Actualitzar TOC"
 
-#: templates/viewer.html:91 templates/viewer.html:552
-#: templates/viewer_compress.html:93 templates/viewer_compress.html:510
+#: gvsigol_core/templates/viewer.html:91 gvsigol_core/templates/viewer.html:552
+#: gvsigol_core/templates/viewer_compress.html:93
+#: gvsigol_core/templates/viewer_compress.html:510
 msgid "Close"
 msgstr "Tancar"
 
-#: templates/viewer.html:123 templates/viewer_compress.html:125
+#: gvsigol_core/templates/viewer.html:123
+#: gvsigol_core/templates/viewer_compress.html:125
 msgid "Views"
 msgstr "Vistes"
 
-#: templates/viewer.html:126 templates/viewer_compress.html:128
+#: gvsigol_core/templates/viewer.html:126
+#: gvsigol_core/templates/viewer_compress.html:128
 msgid "View 2D"
 msgstr "Vista 2D"
 
-#: templates/viewer.html:209 templates/viewer_compress.html:211
+#: gvsigol_core/templates/viewer.html:209
+#: gvsigol_core/templates/viewer_compress.html:211
 msgid "Layer tree"
 msgstr "Arbre de capes"
 
-#: templates/viewer.html:210 templates/viewer_compress.html:212
+#: gvsigol_core/templates/viewer.html:210
+#: gvsigol_core/templates/viewer_compress.html:212
 msgid "Legend"
 msgstr "Llegenda"
 
-#: templates/viewer.html:211 templates/viewer_compress.html:213
+#: gvsigol_core/templates/viewer.html:211
+#: gvsigol_core/templates/viewer_compress.html:213
 msgid "Filters"
 msgstr "Filtres"
 
@@ -1365,15 +2227,18 @@ msgstr "Filtres"
 msgid "Temporary"
 msgstr "Temporal"
 
-#: templates/viewer.html:285 templates/viewer_compress.html:288
+#: gvsigol_core/templates/viewer.html:285
+#: gvsigol_core/templates/viewer_compress.html:288
 msgid "End edition"
 msgstr "Terminar edició"
 
-#: templates/viewer.html:288 templates/viewer_compress.html:291
+#: gvsigol_core/templates/viewer.html:288
+#: gvsigol_core/templates/viewer_compress.html:291
 msgid "Changes don't saved will be missed. Continue?"
 msgstr "Els canvis no guardats es perdran. Continuar?"
 
-#: templates/viewer.html:308 templates/viewer_compress.html:311
+#: gvsigol_core/templates/viewer.html:308
+#: gvsigol_core/templates/viewer_compress.html:311
 msgid "Error loading layers"
 msgstr "Error carregant capes"
 
@@ -1477,11 +2342,55 @@ msgstr "Seleccionar entitat"
 msgid "Select features from current layers"
 msgstr "Seleccioneu entitats de les capes actuals"
 
-#: gvsigol_core/views.py:482
+#: gvsigol_core/views.py:402 gvsigol_core/views.py:405
+#, fuzzy
+#| msgid "Operation not allowed on project: "
+msgid "Operation not allowed on this project."
+msgstr "Operació no permesa en el projecte: "
+
+#: gvsigol_core/views.py:475
+msgid "Export failed. Check server logs."
+msgstr "L'exportació ha fallat. Consulteu els registres del servidor."
+
+#: gvsigol_core/views.py:489
+msgid "Export is not ready for download."
+msgstr "L'exportació encara no està llesta per descarregar."
+
+#: gvsigol_core/views.py:533
+msgid ""
+"Project imported with warnings. Some layers were skipped — see the import "
+"report."
+msgstr ""
+
+#: gvsigol_core/views.py:535
+msgid "Import failed. Check server logs."
+msgstr "La importació ha fallat. Consulteu els registres del servidor."
+
+#: gvsigol_core/views.py:648
+msgid "No package file was selected."
+msgstr "No s'ha seleccionat cap fitxer de paquet."
+
+#: gvsigol_core/views.py:660
+msgid "Could not store the package file."
+msgstr "No s'ha pogut emmagatzemar el fitxer de paquet."
+
+#: gvsigol_core/views.py:678
+msgid ""
+"Project package import is not set up in the database. Run migrations on the "
+"server (for example: python manage.py migrate gvsigol_core)."
+msgstr ""
+
+#: gvsigol_core/views.py:783
+#, fuzzy
+#| msgid "Package downloaded"
+msgid "Package validation failed: "
+msgstr "Paquet descarregat"
+
+#: gvsigol_core/views.py:1129
 msgid "You must enter an project name"
 msgstr "Ha d'introduir un nom de projecte"
 
-#: gvsigol_core/views.py:496
+#: gvsigol_core/views.py:1143
 #, python-brace-format
 msgid ""
 "Invalid project name: '{value}'. Identifiers must begin with a letter or an "
@@ -1491,39 +2400,39 @@ msgstr ""
 "una lletra o guió baix (_). Els següents caracters poden ser lletres, guió "
 "baix o nombres"
 
-#: gvsigol_core/views.py:512
+#: gvsigol_core/views.py:1159
 msgid "Project name already exists"
 msgstr "El nom del projecte ja existeix"
 
-#: gvsigol_core/views.py:1728 gvsigol_core/views.py:1738
+#: gvsigol_core/views.py:2367 gvsigol_core/views.py:2377
 msgid " manual title"
-msgstr ""
+msgstr " títol del manual"
 
-#: gvsigol_core/views.py:1729 gvsigol_core/views.py:1739
+#: gvsigol_core/views.py:2368 gvsigol_core/views.py:2378
 msgid " manual desc"
-msgstr ""
+msgstr " descripció del manual"
 
-#: gvsigol_core/views.py:1828 gvsigol_core/views.py:1830
+#: gvsigol_core/views.py:2467 gvsigol_core/views.py:2469
 msgid "Shared view"
 msgstr "Vista compartida"
 
-#: gvsigol_core/views.py:1831
+#: gvsigol_core/views.py:2470
 msgid "Link"
 msgstr "Enllaç"
 
-#: gvsigol_core/views.py:1994 gvsigol_core/views.py:2018
+#: gvsigol_core/views.py:2633 gvsigol_core/views.py:2657
 msgid "Operation not allowed on project: "
 msgstr "Operació no permesa en el projecte: "
 
-#: gvsigol_core/views.py:2013
+#: gvsigol_core/views.py:2652
 msgid "The project was successfully cloned."
 msgstr "El projecte s'ha clonat correctament."
 
-#: gvsigol_core/views.py:2155
+#: gvsigol_core/views.py:2794
 msgid "You must enter an application name"
 msgstr "Ha d'introduir un nom d'aplicació"
 
-#: gvsigol_core/views.py:2159
+#: gvsigol_core/views.py:2798
 #, python-brace-format
 msgid ""
 "Invalid application name: '{value}'. Identifiers must begin with a letter or "
@@ -1534,121 +2443,6 @@ msgstr ""
 "una lletra o guió baix (_). Els següents caràcters poden ser lletres, guió "
 "baix o nombres"
 
-#: gvsigol_core/views.py:2163
+#: gvsigol_core/views.py:2802
 msgid "Application name already exists"
 msgstr "El nom de l'aplicació ja existeix"
-
-#~ msgid "Allow access to the application for the following user groups:"
-#~ msgstr "Permetre l'accés a l'aplicació per als següents grups d'usuaris:"
-
-#~ msgid "App"
-#~ msgstr "Aplicació"
-
-#~ msgid "expiration_date"
-#~ msgstr "Data d'expiració"
-
-#~ msgid "gvsigol_plugin_catalog manual title"
-#~ msgstr "Plugin Catàleg de metadades"
-
-#~ msgid "gvsigol_plugin_catalog manual desc"
-#~ msgstr ""
-#~ "Guia del catàleg de metadades geogràfiques a gvSIG Online: publicació, "
-#~ "edició i consulta."
-
-#~ msgid "Introduction and concepts"
-#~ msgstr "Introducció i conceptes"
-
-#~ msgid ""
-#~ "Features of the platform and license. Definition of the objects and "
-#~ "entities that are part of the environment."
-#~ msgstr ""
-#~ "Característiques de la plataforma i llicència. Definició d'objectes i "
-#~ "entitats que són part de l'entorn."
-
-#~ msgid "Is admin?"
-#~ msgstr "És administrador?"
-
-#~ msgid "You are logged in as root"
-#~ msgstr "Ha iniciat sessió com a superusuari"
-
-#~ msgid "You are logged in as management user"
-#~ msgstr "Ha iniciat sessió com a usuari de gestió"
-
-#~ msgid "You are logged in as basic user"
-#~ msgstr "Ha iniciat sessió com a usuari bàsic"
-
-#~ msgid "Last login"
-#~ msgstr "Última connexió"
-
-#~ msgid "Click here"
-#~ msgstr "Cliqueu aquí"
-
-#~ msgid "to update your password"
-#~ msgstr "per actualitzar la vostra contrasenya"
-
-#~ msgid "Private projects list"
-#~ msgstr "Llistat de projectes privats"
-
-#~ msgid "Search projects..."
-#~ msgstr "Cercar projectes..."
-
-#~ msgid "Public projects list"
-#~ msgstr "Llistat de projectes"
-
-#~ msgid "Map viewer user manual"
-#~ msgstr "Manual d'usuari del visor de mapes"
-
-#~ msgid ""
-#~ "This manual provides a review of each of the features offered by the "
-#~ "JQuery based map viewer"
-#~ msgstr ""
-#~ "Aquest manual proporciona una revisió de cadascuna de les "
-#~ "característiques ofertes pel visor de mapes basat en JQuery"
-
-#~ msgid "Map viewer user manual (ReactJS)"
-#~ msgstr "Manual d'usuari del visor de mapes (ReactJS)"
-
-#~ msgid ""
-#~ "This manual provides a review of each of the features offered by the "
-#~ "React based map viewer"
-#~ msgstr ""
-#~ "Aquest manual proporciona una revisió de cadascuna de les "
-#~ "característiques ofertes pel visor de mapes basat en React"
-
-#~ msgid ""
-#~ "This guide is intended for platform admin users. It teaches the steps to "
-#~ "carry out the management of users and groups, services, symbology, "
-#~ "projects ... "
-#~ msgstr ""
-#~ "Aquesta guia està destinada als usuaris administradors de la plataforma. "
-#~ "Mostra els passos per portar a terme la gestió d'usuaris i grups, "
-#~ "serveis, simbologia, projectes ... "
-
-#~ msgid "Base layers"
-#~ msgstr "Capes base"
-
-#, fuzzy
-#~| msgid "Permissions"
-#~ msgid "Access permission"
-#~ msgstr "Permisos"
-
-#, fuzzy
-#~| msgid "Permissions"
-#~ msgid "Manage permission"
-#~ msgstr "Permisos"
-
-#~ msgid "Plugins"
-#~ msgstr "Plugins"
-
-#~ msgid "Plugins add features that are not initially present on the platform"
-#~ msgstr ""
-#~ "Els plugins afegeixen funcionalitats que no estan presents inicialment a "
-#~ "la plataforma"
-
-#~ msgid "Added tags"
-#~ msgstr ""
-#~ "Etiquetes afegidesEls plugins afegeixen funcionalitats que no estan "
-#~ "presents inicialment a la plataforma"
-
-#~ msgid "This is your new temporary password"
-#~ msgstr "Aquesta és la contrasenya provisionalment"
