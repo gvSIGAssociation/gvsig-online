@@ -4,9 +4,25 @@ gvsigolETL.View = draw2d.Canvas.extend({
     {
         this._super(id);
 		
-        this.setScrollArea("#"+id);
+        this.setScrollArea("#canvas-parent");
                 
 	},
+
+    /**
+     * draw2d usa clientX/clientY (viewport) pero el método por defecto devuelve
+     * offset() del canvas (documento). Hay que usar el rect del contenedor de
+     * scroll (#canvas-parent), que es el mismo sistema de coordenadas que el
+     * scrollTop que se compensa en fromDocumentToCanvasCoordinate.
+     */
+    getAbsoluteX: function()
+    {
+        return this.getScrollArea()[0].getBoundingClientRect().left;
+    },
+
+    getAbsoluteY: function()
+    {
+        return this.getScrollArea()[0].getBoundingClientRect().top;
+    },
 
     /**
      * @method
