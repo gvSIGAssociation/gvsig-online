@@ -1,5 +1,9 @@
 import uuid
 
+try:
+    from django.db.models import JSONField
+except ImportError:
+    from django_jsonfield_backport.models import JSONField
 from django.db import models
 from django.urls import reverse
 from gvsigol import settings
@@ -570,12 +574,12 @@ class ProjectPackageImportJob(models.Model):
     celery_task_id = models.CharField(max_length=255, null=True, blank=True)
     zip_path = models.CharField(max_length=1024, help_text='Absolute or MEDIA-relative path')
     extract_dir = models.CharField(max_length=1024, null=True, blank=True)
-    manifest_json = models.JSONField(null=True, blank=True)
-    wizard_json = models.JSONField(default=dict, blank=True)
-    report_json = models.JSONField(default=list, blank=True)
-    id_map_json = models.JSONField(default=dict, blank=True)
+    manifest_json = JSONField(null=True, blank=True)
+    wizard_json = JSONField(default=dict, blank=True)
+    report_json = JSONField(default=list, blank=True)
+    id_map_json = JSONField(default=dict, blank=True)
     result_project_id = models.IntegerField(null=True, blank=True)
-    summary_json = models.JSONField(default=dict, blank=True)
+    summary_json = JSONField(default=dict, blank=True)
 
     class Meta:
         app_label = 'gvsigol_core'
@@ -612,7 +616,7 @@ class ProjectPackageActivityLog(models.Model):
     project_id = models.IntegerField(null=True, blank=True)
     project_name = models.CharField(max_length=200, blank=True)
     import_job_id = models.UUIDField(null=True, blank=True)
-    summary_json = models.JSONField(default=dict, blank=True)
+    summary_json = JSONField(default=dict, blank=True)
 
     class Meta:
         app_label = 'gvsigol_core'
@@ -646,8 +650,8 @@ class ProjectPackageExportJob(models.Model):
     project_name = models.CharField(max_length=200, blank=True)
     zip_filename = models.CharField(max_length=512, blank=True)
     zip_path = models.CharField(max_length=1024, blank=True)
-    export_options_json = models.JSONField(default=dict, blank=True)
-    summary_json = models.JSONField(default=dict, blank=True)
+    export_options_json = JSONField(default=dict, blank=True)
+    summary_json = JSONField(default=dict, blank=True)
 
     class Meta:
         app_label = 'gvsigol_core'
