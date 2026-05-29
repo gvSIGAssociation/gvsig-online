@@ -155,7 +155,6 @@ table.dataTable.no-footer { border-bottom: none !important; }
 				<table class="pl-table table" id="users-table">
 					<thead>
 						<tr>
-							<th>ID</th>
 							<th>{% trans "Username" %}</th>
 							<th>{% trans "First name" %}</th>
 							<th>{% trans "Last name" %}</th>
@@ -170,7 +169,6 @@ table.dataTable.no-footer { border-bottom: none !important; }
 					<tbody>
 						{% for user in users %}
 						<tr>
-							<td>{{ user.id }}</td>
 							<td>{{ user.username }}</td>
 							<td>{{ user.first_name }}</td>
 							<td>{{ user.last_name }}</td>
@@ -263,8 +261,6 @@ $(document).ready(function() {
 		},{
 			"targets": 6, "sortable": false, "orderable": false
 		},{
-			"targets": 7, "sortable": false, "orderable": false
-		},{
 	        "targets": -1,
 	        "data": null,
 	        "render": function(data, type, row, meta) {
@@ -307,7 +303,7 @@ $(document).ready(function() {
 	});
 
 	function updateUser(data){			
-		location.href = '/gvsigonline/auth/user_update/' + data[1] + '/';
+		location.href = '/gvsigonline/auth/user_update/' + data[0] + '/';
 	}
 
 	function deleteUser(data, row){
