@@ -739,18 +739,25 @@ table.dataTable.no-footer {
 					<div id="export-package-options" style="display:none">
 					<div id="export-package-permissions-block" class="checkbox" style="display:none">
 						<label>
-							<input type="checkbox" name="export_permissions" value="1" id="export_permissions_cb">
+							<input type="checkbox" name="export_permissions" value="1" id="export_permissions_cb" checked>
 							{% trans "Include layer and project role permissions" %}
 						</label>
 						<p class="help-block small">{% trans "Private project: export read/write/manage rules so they can be restored on import." %}</p>
 					</div>
-					<div class="checkbox">
-						<label>
-							<input type="checkbox" name="include_raster_sidecars" value="1" id="include_raster_sidecars_cb" checked>
-							{% trans "Include raster files in the package" %}
-						</label>
-						<p class="help-block small">{% trans "Pack all raster files (GeoTIFF and associated auxiliary files) so they are published automatically on import." %}</p>
-					</div>
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" name="include_raster_sidecars" value="1" id="include_raster_sidecars_cb" checked>
+						{% trans "Include raster files in the package" %}
+					</label>
+					<p class="help-block small">{% trans "Pack all raster files (GeoTIFF and associated auxiliary files) so they are published automatically on import." %}</p>
+				</div>
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" name="include_tools" value="1" id="include_tools_cb" checked>
+						{% trans "Include project tools configuration" %}
+					</label>
+					<p class="help-block small">{% trans "Export the exact set of tools (core and plugins) enabled for this project. On import, only tools available on the target server will be applied; missing tools will be logged as warnings. If unchecked, the imported project will use the server default tools." %}</p>
+				</div>
 					<div id="export-package-foreign-layers" style="display:none">
 						<h4>{% trans "Layers on external databases" %}</h4>
 						<p class="text-muted">{% trans "Choose whether to copy data into the package (GPKG) or export metadata only (destination must already have the tables)." %}</p>

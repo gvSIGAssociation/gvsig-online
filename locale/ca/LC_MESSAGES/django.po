@@ -182,6 +182,8 @@ msgid ""
 "GDAL (pygdaltools) is not available on this server; vector GeoPackage import/"
 "export will fail."
 msgstr ""
+"GDAL (pygdaltools) no està disponible en aquest servidor; la importació/"
+"exportació de GeoPackage vectorial fallarà."
 
 #: gvsigol_core/project_package/import_service.py:730
 #, python-format
@@ -290,6 +292,8 @@ msgid ""
 "Uses an existing LayerGroup on the server — the project will be linked to "
 "that group rather than stealing the Layer from another group."
 msgstr ""
+"Usa un grup de capes existent al servidor — el projecte s'enllaçarà a aquell "
+"grup en lloc de moure la capa d'un altre grup."
 
 #: gvsigol_core/project_package/import_service.py:1656
 #, python-format
@@ -369,6 +373,10 @@ msgid "View creation failed"
 msgstr "Error en crear la vista"
 
 #: gvsigol_core/project_package/report_summary.py:67
+msgid "GPKG load failed"
+msgstr "Error en carregar el GeoPackage"
+
+#: gvsigol_core/project_package/report_summary.py:68
 msgid "Import failed"
 msgstr "Error en la importació"
 
@@ -797,6 +805,8 @@ msgid ""
 "Comprehensive guide to explore and use the functionalities of the JQuery-"
 "based map viewer."
 msgstr ""
+"Guia completa per explorar i usar les funcionalitats del visor de mapes "
+"basat en JQuery."
 
 #: gvsigol_core/templates/documentation.html:272
 msgid "User Manual - New Front Map Viewer"
@@ -807,6 +817,8 @@ msgid ""
 "Learn to navigate and leverage all features of the new map viewer with a "
 "modern interface."
 msgstr ""
+"Apreneu a navegar i aprofitar totes les funcionalitats del nou visor de "
+"mapes amb interfície moderna."
 
 #: gvsigol_core/templates/documentation.html:283
 msgid "Administration Guide"
@@ -817,6 +829,8 @@ msgid ""
 "Manual for administrators: manage users, groups, services, symbology, and "
 "projects on the platform."
 msgstr ""
+"Manual per a administradors: gestió d'usuaris, grups, serveis, simbologia i "
+"projectes a la plataforma."
 
 #: gvsigol_core/templates/documentation.html:306
 msgid "Mobile application"
@@ -1509,12 +1523,12 @@ msgid ""
 "Select a project package file (.zip) exported from another gvSIG Online "
 "server."
 msgstr ""
+"Seleccioneu un fitxer de paquet de projecte (.zip) exportat des d'un altre "
+"servidor gvSIG Online."
 
 #: gvsigol_core/templates/project_list.html:711
-#, fuzzy
-#| msgid "Package downloaded"
 msgid "Package file"
-msgstr "Paquet descarregat"
+msgstr "Fitxer de paquet"
 
 #: gvsigol_core/templates/project_list.html:732
 #: gvsigol_core/templates/project_list.html:808
@@ -1527,16 +1541,16 @@ msgid "Loading export options…"
 msgstr "Carregant opcions d'exportació…"
 
 #: gvsigol_core/templates/project_list.html:743
-#, fuzzy
-#| msgid "Clone project and layer permissions"
 msgid "Include layer and project role permissions"
-msgstr "Clonar els permisos del projecte i la capa"
+msgstr "Incloure permisos de rols de capa i projecte"
 
 #: gvsigol_core/templates/project_list.html:745
 msgid ""
 "Private project: export read/write/manage rules so they can be restored on "
 "import."
 msgstr ""
+"Projecte privat: exporta les regles de lectura/escriptura/gestió perquè es "
+"puguin restaurar en importar."
 
 #: gvsigol_core/templates/project_list.html:750
 msgid "Include raster files in the package"
@@ -1547,6 +1561,8 @@ msgid ""
 "Pack all raster files (GeoTIFF and associated auxiliary files) so they are "
 "published automatically on import."
 msgstr ""
+"Empaqueta tots els fitxers ràster (GeoTIFF i fitxers auxiliars associats) "
+"perquè es publiquin automàticament en importar."
 
 #: gvsigol_core/templates/project_list.html:755
 msgid "Layers on external databases"
@@ -1557,24 +1573,22 @@ msgid ""
 "Choose whether to copy data into the package (GPKG) or export metadata only "
 "(destination must already have the tables)."
 msgstr ""
+"Trieu si voleu copiar les dades al paquet (GPKG) o exportar només els "
+"metadades (el destí ja ha de tenir les taules)."
 
 #: gvsigol_core/templates/project_list.html:765
 #: gvsigol_core/templates/project_list.html:784
 #: gvsigol_core/templates/project_package_import_result.html:36
-#, fuzzy
-#| msgid "Layer tree"
 msgid "Layer"
-msgstr "Arbre de capes"
+msgstr "Capa"
 
 #: gvsigol_core/templates/project_list.html:766
 msgid "Connection"
 msgstr "Connexió"
 
 #: gvsigol_core/templates/project_list.html:774
-#, fuzzy
-#| msgid "Base layers"
 msgid "SQL view layers"
-msgstr "Capes base"
+msgstr "Capes de vista SQL"
 
 #: gvsigol_core/templates/project_list.html:775
 msgid ""
@@ -1582,6 +1596,9 @@ msgid ""
 "data as a GeoPackage, or export the SQL view definition so it can be "
 "recreated on import."
 msgstr ""
+"Aquestes capes són vistes PostgreSQL. Trieu com exportar cadascuna: copiar "
+"les dades com a GeoPackage, o exportar la definició SQL de la vista perquè "
+"es pugui recrear en importar."
 
 #: gvsigol_core/templates/project_list.html:796
 #, fuzzy
@@ -1594,6 +1611,8 @@ msgid ""
 "Building the ZIP file. This may take several minutes for large projects. "
 "Please wait."
 msgstr ""
+"Generant el fitxer ZIP. Pot trigar diversos minuts en projectes grans. "
+"Si us plau, espereu."
 
 #: gvsigol_core/templates/project_list.html:865
 msgid "You are not allowed to manage this project"
@@ -1741,6 +1760,8 @@ msgid ""
 "These layers are included in the package as metadata only (no GPKG data). "
 "Check the technical log for details."
 msgstr ""
+"Aquestes capes s'inclouen al paquet només com a metadades (sense dades GPKG). "
+"Consulteu el registre tècnic per a més detalls."
 
 #: gvsigol_core/templates/project_package_export_result.html:29
 #, fuzzy
@@ -1782,6 +1803,8 @@ msgid ""
 "No detailed log lines were recorded for this entry (older exports may lack "
 "this)."
 msgstr ""
+"No s'han registrat línies de registre detallades per a aquesta entrada "
+"(exportacions antigues poden no tenir-ne)."
 
 #: gvsigol_core/templates/project_package_export_result.html:65
 #: gvsigol_core/templates/project_package_import_result.html:102
@@ -1915,6 +1938,8 @@ msgid ""
 "Check Skip to leave a layer or group out. The rest of the project imports "
 "normally."
 msgstr ""
+"Marca Omet per excloure una capa o grup. La resta del projecte s'importa "
+"amb normalitat."
 
 #: gvsigol_core/templates/project_package_import_wizard.html:108
 msgid "Skip"
@@ -1925,10 +1950,8 @@ msgid "Type"
 msgstr "Tipus"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:110
-#, fuzzy
-#| msgid "Layer groups"
 msgid "Layer / Group"
-msgstr "Grups de capes"
+msgstr "Capa / Grup"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:112
 msgid "Target / Action"
@@ -2028,6 +2051,9 @@ msgid ""
 "Skipped layers are left out entirely; the rest of the project still imports. "
 "For SQL views you can also edit the query before recreating the view."
 msgstr ""
+"Les capes omeses s'exclouen completament; la resta del projecte s'importa "
+"igualment. Per a les vistes SQL també podeu editar la consulta abans de "
+"recrear la vista."
 
 #: gvsigol_core/templates/project_package_import_wizard.html:289
 #: gvsigol_core/templates/project_package_import_wizard.html:341
@@ -2039,6 +2065,8 @@ msgid ""
 "Edit the SQL query that will be used to create the view. You can rename "
 "tables, change schemas, or modify the query to match the target environment."
 msgstr ""
+"Editeu la consulta SQL que s'usarà per crear la vista. Podeu canviar noms de "
+"taules, esquemes o modificar la consulta per adaptar-la a l'entorn destí."
 
 #: gvsigol_core/templates/project_package_import_wizard.html:300
 msgid "Apply"
@@ -2075,6 +2103,9 @@ msgid ""
 "project. Role permissions from the package are applied when present; "
 "otherwise the project stays public."
 msgstr ""
+"Carrega el GPKG als magatzems de dades destí, publica les capes i crea el "
+"projecte. Els permisos de rols del paquet s'apliquen si estan presents; "
+"en cas contrari el projecte queda públic."
 
 #: gvsigol_core/templates/project_package_import_wizard.html:353
 msgid "SQL edited"
@@ -2362,6 +2393,8 @@ msgid ""
 "Project imported with warnings. Some layers were skipped — see the import "
 "report."
 msgstr ""
+"Projecte importat amb avisos. Algunes capes s'han omès — consulteu l'informe "
+"d'importació."
 
 #: gvsigol_core/views.py:535
 msgid "Import failed. Check server logs."
@@ -2380,12 +2413,13 @@ msgid ""
 "Project package import is not set up in the database. Run migrations on the "
 "server (for example: python manage.py migrate gvsigol_core)."
 msgstr ""
+"La importació del paquet de projecte no està configurada a la base de dades. "
+"Executeu les migracions al servidor (per exemple: python manage.py migrate "
+"gvsigol_core)."
 
 #: gvsigol_core/views.py:783
-#, fuzzy
-#| msgid "Package downloaded"
 msgid "Package validation failed: "
-msgstr "Paquet descarregat"
+msgstr "La validació del paquet ha fallat: "
 
 #: gvsigol_core/views.py:1129
 msgid "You must enter an project name"
@@ -2450,3 +2484,24 @@ msgstr "El nom de l'aplicació ja existeix"
 
 msgid "(new)"
 msgstr "(nou)"
+
+#: gvsigol_core/templates/project_list.html
+msgid "Include project tools configuration"
+msgstr "Inclou la configuració d'eines del projecte"
+
+#: gvsigol_core/project_package/report_summary.py
+#, python-format
+msgid "Tool \"%(tool)s\" is not installed on this server and was not applied."
+msgstr "L'eina \"%(tool)s\" no està instal·lada en aquest servidor i no s'ha aplicat."
+
+#: gvsigol_core/templates/project_list.html
+msgid ""
+"Export the exact set of tools (core and plugins) enabled for this project. "
+"On import, only tools available on the target server will be applied; missing "
+"tools will be logged as warnings. If unchecked, the imported project will use "
+"the server default tools."
+msgstr ""
+"Exporta el conjunt exacte d'eines (base i plugins) habilitades en aquest "
+"projecte. En importar, només s'aplicaran les eines disponibles al servidor "
+"destí; les que no estiguin instal·lades es registraran com a avisos. Si no "
+"es marca, el projecte importat usarà les eines per defecte del servidor."

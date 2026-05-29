@@ -409,6 +409,7 @@ def project_package_export(request, pid):
     if request.method == 'POST':
         export_options['export_permissions'] = bool(request.POST.get('export_permissions'))
         export_options['include_raster_sidecars'] = bool(request.POST.get('include_raster_sidecars'))
+        export_options['include_tools'] = bool(request.POST.get('include_tools'))
         layer_modes = {}
         for key, val in request.POST.items():
             if key.startswith('layer_vector_mode_') and val in ('embedded', 'definition_only', 'view_sql_definition'):

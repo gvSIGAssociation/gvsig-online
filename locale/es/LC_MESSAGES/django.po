@@ -176,6 +176,8 @@ msgid ""
 "GDAL (pygdaltools) is not available on this server; vector GeoPackage import/"
 "export will fail."
 msgstr ""
+"GDAL (pygdaltools) no está disponible en este servidor; la importación/exportación "
+"de GeoPackage vectorial fallará."
 
 #: gvsigol_core/project_package/import_service.py:730
 #, python-format
@@ -287,6 +289,8 @@ msgid ""
 "Uses an existing LayerGroup on the server — the project will be linked to "
 "that group rather than stealing the Layer from another group."
 msgstr ""
+"Usa un grupo de capas existente en el servidor — el proyecto se vinculará a "
+"ese grupo en lugar de mover la capa de otro grupo."
 
 #: gvsigol_core/project_package/import_service.py:1656
 #, python-format
@@ -370,6 +374,10 @@ msgid "View creation failed"
 msgstr "Error al crear la vista"
 
 #: gvsigol_core/project_package/report_summary.py:67
+msgid "GPKG load failed"
+msgstr "Error al cargar el GeoPackage"
+
+#: gvsigol_core/project_package/report_summary.py:68
 msgid "Import failed"
 msgstr "Error en la importación"
 
@@ -1487,6 +1495,9 @@ msgid ""
 "\t\t\t\t\tShowing %(start)s to %(end)s of %(total)s projects\n"
 "\t\t\t\t\t"
 msgstr ""
+"\n"
+"\t\t\t\t\tMostrando del %(start)s al %(end)s de %(total)s proyectos\n"
+"\t\t\t\t\t"
 
 #: gvsigol_core/templates/project_list.html:632
 #: gvsigol_core/templates/project_list.html:862
@@ -1590,6 +1601,9 @@ msgid ""
 "data as a GeoPackage, or export the SQL view definition so it can be "
 "recreated on import."
 msgstr ""
+"Estas capas son vistas PostgreSQL. Elige cómo exportar cada una: copiar los "
+"datos como GeoPackage, o exportar la definición SQL de la vista para que "
+"pueda recrearse al importar."
 
 #: gvsigol_core/templates/project_list.html:796
 msgid "Export ZIP"
@@ -1895,16 +1909,16 @@ msgid "Technical preflight log"
 msgstr "Log técnico de preflight"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:96
-#, fuzzy
-#| msgid "Raster layers included in package"
 msgid "Layers in this package"
-msgstr "Capas ráster incluidas en el paquete"
+msgstr "Capas en este paquete"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:97
 msgid ""
 "Check Skip to leave a layer or group out. The rest of the project imports "
 "normally."
 msgstr ""
+"Marca Omitir para excluir una capa o grupo. El resto del proyecto se importa "
+"con normalidad."
 
 #: gvsigol_core/templates/project_package_import_wizard.html:108
 msgid "Skip"
@@ -1915,28 +1929,20 @@ msgid "Type"
 msgstr "Tipo"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:110
-#, fuzzy
-#| msgid "Layer groups"
 msgid "Layer / Group"
-msgstr "Grupos de capas"
+msgstr "Capa / Grupo"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:112
-#, fuzzy
-#| msgid "Target connection"
 msgid "Target / Action"
-msgstr "Conexión destino"
+msgstr "Destino / Acción"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:123
-#, fuzzy
-#| msgid "Skipped layers"
 msgid "Skip this layer"
-msgstr "Capas omitidas"
+msgstr "Omitir esta capa"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:138
-#, fuzzy
-#| msgid "Exported connection"
 msgid "Foreign DB connection"
-msgstr "Conexión exportada"
+msgstr "Conexión BD foránea"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:143
 msgid "From"
@@ -2030,6 +2036,9 @@ msgid ""
 "Skipped layers are left out entirely; the rest of the project still imports. "
 "For SQL views you can also edit the query before recreating the view."
 msgstr ""
+"Las capas omitidas se excluyen por completo; el resto del proyecto se importa "
+"igualmente. Para las vistas SQL también puedes editar la consulta antes de "
+"recrear la vista."
 
 #: gvsigol_core/templates/project_package_import_wizard.html:289
 #: gvsigol_core/templates/project_package_import_wizard.html:341
@@ -2041,6 +2050,9 @@ msgid ""
 "Edit the SQL query that will be used to create the view. You can rename "
 "tables, change schemas, or modify the query to match the target environment."
 msgstr ""
+"Edita la consulta SQL que se usará para crear la vista. Puedes renombrar "
+"tablas, cambiar esquemas o modificar la consulta para adaptarla al entorno "
+"destino."
 
 #: gvsigol_core/templates/project_package_import_wizard.html:300
 msgid "Apply"
@@ -2355,6 +2367,8 @@ msgid ""
 "Project imported with warnings. Some layers were skipped — see the import "
 "report."
 msgstr ""
+"Proyecto importado con avisos. Algunas capas se omitieron — consulte el "
+"informe de importación."
 
 #: gvsigol_core/views.py:535
 msgid "Import failed. Check server logs."
@@ -2373,12 +2387,13 @@ msgid ""
 "Project package import is not set up in the database. Run migrations on the "
 "server (for example: python manage.py migrate gvsigol_core)."
 msgstr ""
+"La importación del paquete de proyecto no está configurada en la base de "
+"datos. Ejecute las migraciones en el servidor (por ejemplo: python manage.py "
+"migrate gvsigol_core)."
 
 #: gvsigol_core/views.py:783
-#, fuzzy
-#| msgid "Package downloaded"
 msgid "Package validation failed: "
-msgstr "Paquete descargado"
+msgstr "La validación del paquete falló: "
 
 #: gvsigol_core/views.py:1129
 msgid "You must enter an project name"
@@ -2390,6 +2405,9 @@ msgid ""
 "Invalid project name: '{value}'. Identifiers must begin with a letter or an "
 "underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgstr ""
+"Nombre de proyecto no válido: '{value}'. Los identificadores deben comenzar "
+"con una letra o guion bajo (_). Los siguientes caracteres pueden ser letras, "
+"guion bajo o números"
 
 #: gvsigol_core/views.py:1159
 msgid "Project name already exists"
@@ -2440,3 +2458,25 @@ msgstr "El nombre de la aplicación ya existe"
 
 msgid "(new)"
 msgstr "(nuevo)"
+
+#: gvsigol_core/templates/project_list.html
+msgid "Include project tools configuration"
+msgstr "Incluir configuración de herramientas del proyecto"
+
+#: gvsigol_core/project_package/report_summary.py
+#, python-format
+msgid "Tool \"%(tool)s\" is not installed on this server and was not applied."
+msgstr "La herramienta \"%(tool)s\" no está instalada en este servidor y no se ha aplicado."
+
+#: gvsigol_core/templates/project_list.html
+msgid ""
+"Export the exact set of tools (core and plugins) enabled for this project. "
+"On import, only tools available on the target server will be applied; missing "
+"tools will be logged as warnings. If unchecked, the imported project will use "
+"the server default tools."
+msgstr ""
+"Exporta el conjunto exacto de herramientas (base y plugins) habilitadas en "
+"este proyecto. Al importar, solo se aplicarán las herramientas disponibles en "
+"el servidor destino; las que no estén instaladas se registrarán como avisos. "
+"Si no se marca, el proyecto importado usará las herramientas por defecto del "
+"servidor."

@@ -143,7 +143,7 @@ def analyze_project_layers(project):
                 'is_view': False,
                 'connection_key': ck,
                 'connection_label': datastore_connection_label(ds),
-                'default_vector_mode': 'definition_only' if foreign else 'embedded',
+                'default_vector_mode': 'embedded',
             }
             layers_out.append(entry)
             if not foreign and ds:

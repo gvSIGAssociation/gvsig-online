@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import ast
+import datetime
 import json
 import logging
 import os
@@ -19,13 +20,14 @@ from django.utils.translation import gettext as _
 from gvsigol.basetypes import CloneConf
 from gvsigol_auth import auth_backend
 from gvsigol_core import utils as core_utils
-from gvsigol_core.models import Project, ProjectLayerGroup, ProjectRole
+from gvsigol_core.models import Project, ProjectLayerGroup, ProjectRole, SharedView
 from gvsigol_services import geographic_servers
 from gvsigol_services import utils as services_utils
 from gvsigol_services.models import (
     Connection,
     Datastore,
     Enumeration,
+    EnumerationItem,
     Layer,
     LayerFieldEnumeration,
     LayerManageRole,
@@ -36,6 +38,7 @@ from gvsigol_services.models import (
     Server,
     Workspace,
 )
+from gvsigol_symbology.models import Library
 from gvsigol_symbology.services import sld_import
 
 from gvsigol_core.project_package.connection_utils import _params_fingerprint
@@ -987,13 +990,9 @@ def _postgis_table_taken(intro, schema, name):
 
 
 def _unique_gpkg_table_name(target_datastore, schema, base, report):
-    """Free name in the gvSIG Layer registry for this datastore (_1, _2, … if taken).
-
-    Uniqueness is scoped to the target *datastore* (workspace), not to the raw
-    PostgreSQL schema.  Multiple datastores/workspaces in the same DB schema can
-    legitimately share a table, so we only rename when a Layer with that name
-    already exists inside this specific datastore.  ogr2ogr is called with
-    OVERWRITE so an existing same-name table gets replaced with the package data.
+    """Return a table name that is free both in PostgreSQL and in the gvSIG Layer
+    registry for the given datastore.  Appends _1, _2, … until a free slot is
+    found.  Never overwrites existing data.
     """
     intro, _db_params = target_datastore.get_db_connection()
     try:
@@ -1002,13 +1001,14 @@ def _unique_gpkg_table_name(target_datastore, schema, base, report):
         i = 1
         salt = ''
         while True:
+            taken_pg = _postgis_table_taken(intro, schema, candidate)
             taken_layer = Layer.objects.filter(name=candidate, datastore=target_datastore).exists()
             low = candidate.lower()
             if low != candidate:
                 taken_layer = taken_layer or Layer.objects.filter(
                     name=low, datastore=target_datastore
                 ).exists()
-            if not taken_layer:
+            if not taken_pg and not taken_layer:
                 break
             candidate = name + '_' + str(i) + salt
             i += 1
@@ -1284,6 +1284,149 @@ def _reload_geoserver_vector_layer(server, layer):
         )
 
 
+def _import_symbol_libraries(snapshot, extract_dir, report):
+    """Restore symbol library image files from the package and create Library
+    records on the target server if they do not already exist.
+
+    Files are stored in the ZIP under  symbology/libraries/{lib_name}/{file}.
+    They are extracted to  MEDIA_ROOT/symbol_libraries/{lib_name}/{file}.
+    """
+    libs = snapshot.get('symbol_libraries') or []
+    if not libs:
+        return
+    for lib_data in libs:
+        lib_name = (lib_data.get('name') or '').strip()
+        if not lib_name:
+            continue
+        dest_dir = os.path.join(settings.MEDIA_ROOT, 'symbol_libraries', lib_name)
+        try:
+            os.makedirs(dest_dir, exist_ok=True)
+        except Exception as _mk_exc:
+            LOG.warning('Could not create symbol library dir %s: %s', dest_dir, _mk_exc)
+            continue
+        copied = 0
+        for fname in lib_data.get('files') or []:
+            src = os.path.join(
+                extract_dir, 'symbology', 'libraries', lib_name, fname
+            )
+            if not os.path.isfile(src):
+                LOG.warning('Symbol library file missing in package: %s', src)
+                continue
+            try:
+                import shutil as _shutil
+                _shutil.copy2(src, os.path.join(dest_dir, fname))
+                copied += 1
+            except Exception as _cp_exc:
+                LOG.warning('Could not restore symbol library file %s: %s', fname, _cp_exc)
+        # Create the Library record if absent
+        try:
+            lib_obj, created = Library.objects.get_or_create(
+                name=lib_name,
+                defaults={'description': lib_data.get('description') or ''},
+            )
+            action = 'created' if created else 'reused'
+            report.append({
+                'symbol_library_imported': {
+                    'name': lib_name,
+                    'files_copied': copied,
+                    'action': action,
+                },
+            })
+        except Exception as _lib_exc:
+            LOG.warning('Could not create/reuse Library record "%s": %s', lib_name, _lib_exc)
+
+
+def _import_layer_enumerations(layer_entry, lyr, username):
+    """Create missing Enumeration/EnumerationItem records and bind them to *lyr*."""
+    for en in layer_entry.get('enumerations', []):
+        enum = None
+        if en.get('enumeration_id'):
+            enum = Enumeration.objects.filter(id=en['enumeration_id']).first()
+        if enum is None and en.get('enumeration_name'):
+            enum = Enumeration.objects.filter(name=en['enumeration_name']).first()
+        if enum is None and en.get('enumeration_name') and en.get('enumeration_items') is not None:
+            try:
+                enum = Enumeration.objects.create(
+                    name=en['enumeration_name'],
+                    title=en.get('enumeration_title') or en['enumeration_name'],
+                    created_by=username,
+                    order_type=en.get('enumeration_order_type') or 'alphabetical',
+                    show_first_value=bool(en.get('enumeration_show_first_value')),
+                )
+                for item in en.get('enumeration_items') or []:
+                    EnumerationItem.objects.create(
+                        enumeration=enum,
+                        name=item['name'],
+                        selected=bool(item.get('selected')),
+                        order=int(item.get('order') or 0),
+                    )
+                LOG.info('Created enumeration "%s" from package', enum.name)
+            except Exception as _enum_exc:
+                LOG.warning(
+                    'Could not create enumeration "%s": %s',
+                    en.get('enumeration_name'), _enum_exc,
+                )
+                enum = None
+        if enum:
+            LayerFieldEnumeration.objects.get_or_create(
+                layer=lyr,
+                field=en['field'],
+                defaults={
+                    'enumeration': enum,
+                    'multiple': bool(en.get('multiple')),
+                },
+            )
+
+
+def _import_layer_resources(layer_entry, lyr, extract_dir):
+    """Restore LayerResource (feature attachments) for *lyr* from the package.
+
+    Files packaged under ``layer_resources/{eid}/`` are copied to the correct
+    ``MEDIA_ROOT/resources/{lyr.id}/{type_dir}/`` directory so that serving
+    code can find them.  URL/Alfresco resources (path starts with http/https)
+    are kept as-is without file copying.
+    """
+    for res in layer_entry.get('layer_resources', []):
+        feat = res.get('feature')
+        if feat is None:
+            continue
+        try:
+            rtype = int(res.get('type', LayerResource.EXTERNAL_FILE))
+        except (TypeError, ValueError):
+            rtype = LayerResource.EXTERNAL_FILE
+
+        new_path = res.get('path') or ''
+        zip_path = res.get('zip_path')
+        if zip_path:
+            src = os.path.join(extract_dir, zip_path.replace('/', os.sep))
+            if os.path.isfile(src):
+                try:
+                    dest_dir = services_utils.get_resources_dir(lyr.id, rtype)
+                    fname = os.path.basename(src)
+                    dest_file = os.path.join(dest_dir, fname)
+                    if not os.path.exists(dest_file):
+                        shutil.copy2(src, dest_file)
+                    new_path = os.path.relpath(dest_file, settings.MEDIA_ROOT)
+                except Exception as _lrcp_exc:
+                    LOG.warning(
+                        'Could not restore layer resource %s for layer %s: %s',
+                        zip_path, lyr.name, _lrcp_exc,
+                    )
+            else:
+                LOG.warning(
+                    'Layer resource file missing in package: %s (layer %s)',
+                    zip_path, lyr.name,
+                )
+
+        LayerResource(
+            layer=lyr,
+            feature=int(feat),
+            title=res.get('title') or '',
+            path=new_path,
+            type=rtype,
+        ).save()
+
+
 def _import_vector_layer(
     extract_dir,
     layer_entry,
@@ -1302,6 +1445,7 @@ def _import_vector_layer(
     if not os.path.isfile(gpkg_path):
         report.append({'error': 'missing_gpkg', 'export_id': layer_entry.get('export_id')})
         return None
+    layer_label = ld.get('title') or ld.get('name') or layer_entry.get('export_id')
     schema = _gpkg_load_schema(target_datastore, ld, use_ds_schema=use_ds_schema)
     _ensure_cartodb_schema_exists(schema)
     table_base = ld.get('source_name') or ld.get('name')
@@ -1309,7 +1453,31 @@ def _import_vector_layer(
 
     pg_conn = pg_connection_from_datastore(target_datastore, schema=schema)
     gpkg_layer = _gpkg_source_layer_name(gpkg_path, layer_entry)
-    import_gpkg_to_postgis(gpkg_path, gpkg_layer, pg_conn, table_name, schema)
+    try:
+        import_gpkg_to_postgis(gpkg_path, gpkg_layer, pg_conn, table_name, schema)
+    except Exception as gpkg_ex:
+        LOG.warning(
+            'GPKG import failed for layer %s (%s.%s): %s',
+            layer_label, schema, table_name, gpkg_ex,
+        )
+        report.append({
+            'gpkg_layer_skipped': {
+                'export_id': layer_entry.get('export_id'),
+                'layer': layer_label,
+                'connection_key': ld.get('datastore_connection_key') or 'local_cartodb',
+                'reason': 'gpkg_import_failed',
+                'message': _(
+                    'Layer "%(layer)s" could not be loaded into PostGIS '
+                    '(%(schema)s.%(table)s): %(error)s'
+                ) % {
+                    'layer': layer_label,
+                    'schema': schema,
+                    'table': table_name,
+                    'error': str(gpkg_ex),
+                },
+            },
+        })
+        return None
     table_name = _verify_gpkg_table_loaded(target_datastore, schema, table_name)
     report.append({'gpkg_loaded': {'schema': schema, 'table': table_name}})
 
@@ -1426,30 +1594,8 @@ def _import_vector_layer(
             _ste_exc,
         )
 
-    for en in layer_entry.get('enumerations', []):
-        enum = None
-        if en.get('enumeration_id'):
-            enum = Enumeration.objects.filter(id=en['enumeration_id']).first()
-        if enum is None and en.get('enumeration_name'):
-            enum = Enumeration.objects.filter(name=en['enumeration_name']).first()
-        if enum:
-            LayerFieldEnumeration(layer=lyr, field=en['field'], enumeration=enum).save()
-
-    for res in layer_entry.get('layer_resources', []):
-        feat = res.get('feature')
-        if feat is None:
-            continue
-        try:
-            rtype = int(res.get('type', LayerResource.EXTERNAL_FILE))
-        except (TypeError, ValueError):
-            rtype = LayerResource.EXTERNAL_FILE
-        LayerResource(
-            layer=lyr,
-            feature=int(feat),
-            title=res.get('title') or '',
-            path=res.get('path') or '',
-            type=rtype,
-        ).save()
+    _import_layer_enumerations(layer_entry, lyr, username)
+    _import_layer_resources(layer_entry, lyr, extract_dir)
 
     default_done = False
     for i, st in enumerate(layer_entry.get('styles', [])):
@@ -1465,7 +1611,7 @@ def _import_vector_layer(
         is_def = bool(st.get('is_default')) and not default_done
         if is_def:
             default_done = True
-        sld_import(style_name, is_def, lyr.id, StringIO(sld_text), server)
+        sld_import(style_name, is_def, lyr.id, StringIO(sld_text), server, style_type=st.get('type'))
 
     _reload_geoserver_vector_layer(server, lyr)
     server.updateThumbnail(lyr, 'create')
@@ -1787,30 +1933,8 @@ def _import_postgis_definition_layer(
             _ste_exc,
         )
 
-    for en in layer_entry.get('enumerations', []):
-        enum = None
-        if en.get('enumeration_id'):
-            enum = Enumeration.objects.filter(id=en['enumeration_id']).first()
-        if enum is None and en.get('enumeration_name'):
-            enum = Enumeration.objects.filter(name=en['enumeration_name']).first()
-        if enum:
-            LayerFieldEnumeration(layer=lyr, field=en['field'], enumeration=enum).save()
-
-    for res in layer_entry.get('layer_resources', []):
-        feat = res.get('feature')
-        if feat is None:
-            continue
-        try:
-            rtype = int(res.get('type', LayerResource.EXTERNAL_FILE))
-        except (TypeError, ValueError):
-            rtype = LayerResource.EXTERNAL_FILE
-        LayerResource(
-            layer=lyr,
-            feature=int(feat),
-            title=res.get('title') or '',
-            path=res.get('path') or '',
-            type=rtype,
-        ).save()
+    _import_layer_enumerations(layer_entry, lyr, username)
+    _import_layer_resources(layer_entry, lyr, extract_dir)
 
     default_done = False
     for i, st in enumerate(layer_entry.get('styles', [])):
@@ -1830,7 +1954,7 @@ def _import_postgis_definition_layer(
         is_def = bool(st.get('is_default')) and not default_done
         if is_def:
             default_done = True
-        sld_import(style_name, is_def, lyr.id, StringIO(sld_text), server)
+        sld_import(style_name, is_def, lyr.id, StringIO(sld_text), server, style_type=st.get('type'))
 
     _reload_geoserver_vector_layer(server, lyr)
     server.updateThumbnail(lyr, 'create')
@@ -2059,14 +2183,18 @@ def _import_definition_layer_entry(
 
 
 def _unique_style_name(server, ws_name, base):
-    name = (base or 'style')[:200]
-    if not name.startswith(ws_name):
-        name = (ws_name + '_' + name)[:210]
+    # Strip the workspace prefix from base before (re)adding it, so we never
+    # end up with ws_foo_ws_foo_... in either the first attempt or the conflict loop.
+    base_clean = (base or 'style')
+    prefix = ws_name + '_'
+    if base_clean.startswith(prefix):
+        base_clean = base_clean[len(prefix):]
+    name = (prefix + base_clean)[:210]
     i = 0
     salt = ''
     while server.getStyle(name) is not None:
         suffix = '_%d%s' % (i, salt)
-        name = (ws_name + '_' + (base or 'st'))[: (210 - len(suffix))] + suffix
+        name = (prefix + base_clean)[: (210 - len(suffix))] + suffix
         i += 1
         if i % 1000 == 0:
             salt = '_' + get_random_string(3)
@@ -2322,9 +2450,33 @@ def _import_raster_layer(
         type=lt,
         public=ld.get('public', False),
         visible=ld.get('visible', False),
-        queryable=False,
+        queryable=ld.get('queryable', False),
         cached=ld.get('cached', False),
         single_image=ld.get('single_image', False),
+        vector_tile=ld.get('vector_tile', False),
+        allow_download=ld.get('allow_download', False),
+        time_enabled=ld.get('time_enabled', False),
+        time_enabled_field=ld.get('time_enabled_field') or '',
+        time_enabled_endfield=ld.get('time_enabled_endfield') or '',
+        time_presentation=ld.get('time_presentation') or '',
+        time_resolution_year=ld.get('time_resolution_year'),
+        time_resolution_month=ld.get('time_resolution_month'),
+        time_resolution_week=ld.get('time_resolution_week'),
+        time_resolution_day=ld.get('time_resolution_day'),
+        time_resolution_hour=ld.get('time_resolution_hour'),
+        time_resolution_minute=ld.get('time_resolution_minute'),
+        time_resolution_second=ld.get('time_resolution_second'),
+        time_default_value_mode=ld.get('time_default_value_mode') or '',
+        time_default_value=ld.get('time_default_value') or '',
+        time_resolution=ld.get('time_resolution') or '',
+        conf=ld.get('conf') or '',
+        detailed_info_enabled=ld.get('detailed_info_enabled', False),
+        detailed_info_button_title=ld.get('detailed_info_button_title') or '',
+        detailed_info_html=ld.get('detailed_info_html') or '',
+        timeout=ld.get('timeout'),
+        real_time=ld.get('real_time', False),
+        update_interval=ld.get('update_interval'),
+        featureapi_endpoint=ld.get('featureapi_endpoint') or '',
         created_by=username,
         order=ld.get('order') or 1,
         native_srs=ld.get('native_srs'),
@@ -2344,7 +2496,77 @@ def _import_raster_layer(
         'primary_path': primary_path,
         'files_copied': len(copied),
     }})
+
+    # Apply exported styles (SLD) to the raster layer
+    server_obj = gs  # gs is already the server object
+    default_done = False
+    for i, st in enumerate(layer_entry.get('styles', [])):
+        raw = st.get('sld')
+        if isinstance(raw, bytes):
+            sld_text = raw.decode('utf-8', errors='replace')
+        else:
+            sld_text = raw or ''
+        sld_text = sld_text.strip()
+        if not sld_text:
+            continue
+        try:
+            style_name = _unique_style_name(
+                server_obj, ws_obj.name, st.get('name') or ('raster_imported_%d' % i)
+            )
+            is_def = bool(st.get('is_default')) and not default_done
+            sld_import(style_name, is_def, lyr.id, StringIO(sld_text), server_obj, style_type=st.get('type'))
+            default_done = default_done or is_def
+        except Exception as _sld_exc:
+            LOG.warning(
+                '_import_raster_layer: could not import style %d for %s: %s',
+                i, lyr.name, _sld_exc,
+            )
+
     return lyr
+
+
+def _resolve_import_tools(raw_tools_json, report):
+    """Merge exported tool states with the tools available on this server.
+
+    * If ``raw_tools_json`` is None/empty the package was exported without tool
+      configuration → return None so the project uses server defaults.
+    * For each tool in the package:
+        - If it exists on this server: apply the exported ``checked`` state.
+        - If it does NOT exist: add a warning to *report* and skip it.
+    * Tools present on this server but absent from the package keep their
+      default state (core tools enabled, plugin tools disabled).
+
+    Returns a JSON string suitable for ``Project.tools``, or None.
+    """
+    if not raw_tools_json:
+        return None
+    try:
+        exported = json.loads(raw_tools_json) if isinstance(raw_tools_json, str) else raw_tools_json
+    except Exception:
+        return None
+    if not isinstance(exported, list):
+        return None
+
+    from gvsigol_core.utils import get_available_tools
+    available = get_available_tools(core_enabled=True, plugin_enabled=True)
+    available_map = {t['name']: t for t in available}
+    exported_map = {t['name']: t for t in exported if isinstance(t, dict) and t.get('name')}
+
+    merged = []
+    for name, avail_tool in available_map.items():
+        if name in exported_map:
+            entry = dict(avail_tool)
+            entry['checked'] = bool(exported_map[name].get('checked', avail_tool.get('checked', False)))
+            merged.append(entry)
+        else:
+            merged.append(avail_tool)
+
+    for name in exported_map:
+        if name not in available_map:
+            LOG.warning('Tool "%s" from package is not installed on this server; skipping.', name)
+            report.append({'tool_not_installed': name})
+
+    return json.dumps(merged)
 
 
 def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
@@ -2378,7 +2600,12 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
     datastore_map = {}
     project = None
     gs = None
+    clone_conf = None
     try:
+        # Restore symbol library files and records before processing layers so
+        # that ExternalGraphicSymbolizers in the imported SLDs resolve correctly.
+        _import_symbol_libraries(snapshot, extract_dir, report)
+
         ws_objs = {}
         connection_ds_cache = {}
         foreign_connection_map = _autofill_foreign_connection_map(
@@ -2447,7 +2674,7 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
             show_project_icon=pdata.get('show_project_icon', True),
             selectable_groups=pdata.get('selectable_groups', False),
             restricted_extent=pdata.get('restricted_extent', False),
-            tools=pdata.get('tools'),
+            tools=_resolve_import_tools(pdata.get('tools'), report),
             baselayer_version=pdata.get('baselayer_version'),
             labels=pdata.get('labels'),
             expiration_date=exp_dt,
@@ -2457,6 +2684,54 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
             viewer_preferred_ui=pdata.get('viewer_preferred_ui') or '',
         )
         project.save()
+
+        # Restore project logo and image from the package
+        for field_name, file_key in (('logo', 'logo_file'), ('image', 'image_file')):
+            fname = pdata.get(file_key)
+            if not fname:
+                continue
+            src = os.path.join(extract_dir, 'project_images', fname)
+            if not os.path.isfile(src):
+                LOG.warning('Project image missing in package: %s', src)
+                continue
+            try:
+                from django.core.files import File as DjangoFile
+                field = getattr(project, field_name)
+                with open(src, 'rb') as fh:
+                    field.save(fname, DjangoFile(fh), save=True)
+            except Exception as _img_exc:
+                LOG.warning('Could not restore project %s (%s): %s', field_name, fname, _img_exc)
+
+        # Restore shared views (bookmarks / marcadores) for the project
+        _sv_imported = 0
+        for sv_data in snapshot.get('shared_views', []):
+            try:
+                new_name = datetime.date.today().strftime('%Y%m%d') + get_random_string(length=32)
+                new_url = settings.BASE_URL + '/gvsigonline/core/load_shared_view/' + new_name
+                sv_exp = None
+                raw_exp = sv_data.get('expiration_date')
+                if raw_exp:
+                    try:
+                        sv_exp = datetime.date.fromisoformat(raw_exp)
+                    except Exception:
+                        sv_exp = None
+                if sv_exp is None:
+                    sv_exp = datetime.date.max
+                SharedView(
+                    name=new_name,
+                    project_id=project.id,
+                    description=sv_data.get('description') or '',
+                    url=new_url,
+                    state=sv_data.get('state') or '',
+                    expiration_date=sv_exp,
+                    created_by=sv_data.get('created_by') or username,
+                    internal=bool(sv_data.get('internal', False)),
+                ).save()
+                _sv_imported += 1
+            except Exception as _sv_exc:
+                LOG.warning('Could not restore shared view: %s', _sv_exc)
+        if _sv_imported:
+            LOG.info('commit_job: restored %d shared view(s) for project %s', _sv_imported, project.name)
 
         gs = geographic_servers.get_instance().get_server_by_id(server.id)
         pending_default_baselayers = []
@@ -2801,7 +3076,7 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
         return project
     except Exception as ex:
         LOG.exception('Package import failed')
-        if clone_conf.clean_on_failure:
+        if clone_conf and clone_conf.clean_on_failure:
             try:
                 if project:
                     project.delete()

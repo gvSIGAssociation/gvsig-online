@@ -188,7 +188,7 @@ def import_gpkg_to_postgis(gpkg_path, gpkg_layer, pg_conn, table_name, schema):
     ogr.set_input(gpkg_path, table_name=gpkg_layer)
     ogr.set_output(pg_conn, table_name=table_name)
     ogr.set_output_mode(
-        layer_mode=ogr.MODE_LAYER_OVERWRITE,
+        layer_mode=ogr.MODE_LAYER_CREATE,
         data_source_mode=ogr.MODE_DS_UPDATE,
     )
     ogr.layer_creation_options = {
