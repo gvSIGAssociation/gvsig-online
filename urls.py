@@ -51,12 +51,12 @@ if settings.AUTH_DASHBOARD_UI:
     if not settings.AUTH_READONLY_USERS:
         urlpatterns = urlpatterns + [
             path('user_add/', auth_views.user_add, name='user_add'),
-            path('user_delete/<uid>/', auth_views.user_delete, name='user_delete')
+            path('user_delete/<username>/', auth_views.user_delete, name='user_delete')
         ]
 MANAGE_PASSWORD_URL = getattr(settings, 'MANAGE_PASSWORD_URL', None)
 if not MANAGE_PASSWORD_URL:
     urlpatterns = urlpatterns + [
-        path('reset/<username>/<uid>/<token>/', auth_views.password_reset_confirmation, name='password_reset_confirmation'),
+        path('reset/<username>/<token>/', auth_views.password_reset_confirmation, name='password_reset_confirmation'),
         path('reset/done/', auth_views.password_reset_complete, name='password_reset_confirmation_complete'),
         path('password_update/', auth_views.password_update, name='password_update'),
         path('password_reset/', auth_views.password_reset, name='password_reset'),

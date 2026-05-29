@@ -243,11 +243,9 @@ def password_reset(request):
         username = request.POST.get('username')
         try:
             user = User.objects.get(username__exact=username)
-            
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
             token =  default_token_generator.make_token(user)
 
-            pass_reset_url = reverse('password_reset_confirmation', kwargs={'username': user.username, 'uid': uid, 'token': token})
+            pass_reset_url = reverse('password_reset_confirmation', kwargs={'username': user.username, 'token': token})
             pass_reset_url = get_absolute_url(pass_reset_url, request.META)
             auth_utils.send_reset_password_email(user.email, pass_reset_url)
             return redirect('password_reset_success')
@@ -267,10 +265,9 @@ def password_reset(request):
 
 
 
-def password_reset_confirmation(request, username, uid, token):
+def password_reset_confirmation(request, username, token):
     context = {
         'username' : username,
-        'uid': uid,
         'token': token
         }
             
@@ -344,7 +341,6 @@ def _get_users_from_cache(search=None, first=None, max=None):
     user_list = []
     for user in users:
         user_list.append([
-            user.user_id,
             user.username,
             user.first_name,
             user.last_name,
@@ -364,7 +360,6 @@ def _get_users_from_auth_backend(search=None, first=None, max=None):
             
     for user in users:
         user_list.append([
-            user.get('id'),
             user.get('username'),
             user.get('first_name'),
             user.get('last_name'),
@@ -649,7 +644,7 @@ def user_update(request, username):
         
 @login_required()
 @superuser_required
-def user_delete(request, uid):
+def user_delete(request, username):
     if request.method == 'POST':
         try:
             editable = request.user.userproperties.editable
@@ -657,7 +652,7 @@ def user_delete(request, uid):
             editable = True
         if not editable:
             return HttpResponse(json.dumps({'deleted': False, 'message': _("User is not editable")}, indent=4), content_type='application/json')
-        deleted = auth_backend.delete_user(user_id=uid)
+        deleted = auth_backend.delete_user(user=username)
         response = {
             'deleted': deleted
         }
