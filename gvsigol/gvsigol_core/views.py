@@ -2102,12 +2102,18 @@ def project_get_conf(request):
                                 "wmts_options_for_openlayers failed for external cached WMS layer id=%s; sending stored wmts_options as-is",
                                 l.id,
                             )
+                    if l.type == 'WMS':
+                        params['styles'] = services_utils.mark_default_external_wms_style(
+                            params.get('styles') or [], params.get('layers')
+                        )
                     layer.update(params)
                     if params.get('get_map_url'):
                         layer['url'] = params.get('get_map_url')
                     layer['external_url'] = params.get('get_map_url') or params.get('url', '')
                     layer['external_layers'] = params.get('layers', '')
                     layer['external_params'] = dict(params)
+                    if l.type == 'WMS':
+                        layer['styles'] = params.get('styles') or []
 
                 order = int(conf_group['groupOrder']) + l.order
                 layer['order'] = order
