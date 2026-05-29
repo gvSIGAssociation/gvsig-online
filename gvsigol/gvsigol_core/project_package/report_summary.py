@@ -75,6 +75,7 @@ def _reason_label(reason):
         'geoserver_publish_failed': _('GeoServer publish failed'),
         'no_sql': _('No SQL definition'),
         'create_view_failed': _('View creation failed'),
+        'gpkg_import_failed': _('GPKG load failed'),
         'import_failed': _('Import failed'),
     }
     return mapping.get(reason, reason)
@@ -162,6 +163,12 @@ def summarize_import_report(report_json):
                 (' [%s]' % step) if step else '',
                 layer_name or str(d),
             )))
+        elif 'tool_not_installed' in row:
+            tool_name = row['tool_not_installed']
+            warnings.append(
+                _('Tool "%(tool)s" is not installed on this server and was not applied.')
+                % {'tool': tool_name}
+            )
         elif row.get('warning'):
             warnings.append(_retranslate(str(row['warning'])))
         elif 'definition_shared_layer_group_added' in row:
@@ -172,10 +179,16 @@ def summarize_import_report(report_json):
         elif row.get('error') and not row.get('imported'):
             errors.append(str(row['error']))
 
+    # "partial" only when something was skipped for reasons beyond the user's
+    # explicit choice (wizard_skip).  User-chosen skips and rename warnings
+    # are expected outcomes and should not downgrade a successful import.
+    involuntary_skips = [
+        s for s in skipped_layers if s.get('reason_code') != 'wizard_skip'
+    ]
     status = 'ok'
     if errors:
         status = 'failed'
-    elif skipped_layers or warnings:
+    elif involuntary_skips:
         status = 'partial'
 
     return {

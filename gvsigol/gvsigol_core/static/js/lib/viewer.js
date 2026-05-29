@@ -885,8 +885,12 @@ viewer.core = {
 			var xhr = new XMLHttpRequest();
 			xhr.open("GET", src);
 			if (self.conf.user && self.conf.user.token) {
-				var bearer_token = "Bearer " + self.conf.user.token;
-				xhr.setRequestHeader('Authorization', bearer_token);
+				xhr.setRequestHeader('Authorization', "Bearer " + self.conf.user.token);
+				xhr.withCredentials = true;
+			} else if (self._auth_needed()) {
+				xhr.setRequestHeader('Authorization', "Basic " + self.stringToBase64(
+					self.conf.user.credentials.username + ":" + self.conf.user.credentials.password
+				));
 				xhr.withCredentials = true;
 			}
 			xhr.responseType = "blob";
@@ -995,7 +999,7 @@ viewer.core = {
 						wrapX: true
 					});
 				}
-				if (self.conf.user && self.conf.user.token) {
+				if (useAuthenticatedTileLoad) {
 					wmtsSource.setTileLoadFunction(customLoadFunction);
 				};
 		        var wmsLayer = new ol.layer.Tile({
