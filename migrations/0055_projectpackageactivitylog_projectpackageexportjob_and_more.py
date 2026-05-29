@@ -3,6 +3,11 @@
 from django.db import migrations, models
 import uuid
 
+try:
+    from django.db.models import JSONField
+except ImportError:
+    from django_jsonfield_backport.models import JSONField
+
 
 class Migration(migrations.Migration):
 
@@ -22,7 +27,7 @@ class Migration(migrations.Migration):
                 ('project_id', models.IntegerField(blank=True, null=True)),
                 ('project_name', models.CharField(blank=True, max_length=200)),
                 ('import_job_id', models.UUIDField(blank=True, null=True)),
-                ('summary_json', models.JSONField(blank=True, default=dict)),
+                ('summary_json', JSONField(blank=True, default=dict)),
             ],
             options={
                 'db_table': 'gvsigol_project_package_projectpackageactivitylog',
@@ -41,8 +46,8 @@ class Migration(migrations.Migration):
                 ('project_name', models.CharField(blank=True, max_length=200)),
                 ('zip_filename', models.CharField(blank=True, max_length=512)),
                 ('zip_path', models.CharField(blank=True, max_length=1024)),
-                ('export_options_json', models.JSONField(blank=True, default=dict)),
-                ('summary_json', models.JSONField(blank=True, default=dict)),
+                ('export_options_json', JSONField(blank=True, default=dict)),
+                ('summary_json', JSONField(blank=True, default=dict)),
             ],
             options={
                 'db_table': 'gvsigol_project_package_projectpackageexportjob',
@@ -59,12 +64,12 @@ class Migration(migrations.Migration):
                 ('celery_task_id', models.CharField(blank=True, max_length=255, null=True)),
                 ('zip_path', models.CharField(help_text='Absolute or MEDIA-relative path', max_length=1024)),
                 ('extract_dir', models.CharField(blank=True, max_length=1024, null=True)),
-                ('manifest_json', models.JSONField(blank=True, null=True)),
-                ('wizard_json', models.JSONField(blank=True, default=dict)),
-                ('report_json', models.JSONField(blank=True, default=list)),
-                ('id_map_json', models.JSONField(blank=True, default=dict)),
+                ('manifest_json', JSONField(blank=True, null=True)),
+                ('wizard_json', JSONField(blank=True, default=dict)),
+                ('report_json', JSONField(blank=True, default=list)),
+                ('id_map_json', JSONField(blank=True, default=dict)),
                 ('result_project_id', models.IntegerField(blank=True, null=True)),
-                ('summary_json', models.JSONField(blank=True, default=dict)),
+                ('summary_json', JSONField(blank=True, default=dict)),
             ],
             options={
                 'db_table': 'gvsigol_project_package_projectpackageimportjob',
