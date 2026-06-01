@@ -1994,6 +1994,7 @@ def _import_view_sql_definition_layer(
     sql_override=None,
     group_reuse_state=None,
     use_ds_schema=False,
+    extract_dir=None,
 ):
     """
     Create a PostgreSQL view from a SQL definition and publish it in GeoServer.
@@ -2922,6 +2923,7 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
                         use_ds_schema=view_ds_override,
                         sql_override=view_sql_overrides.get(eid) if eid else None,
                         group_reuse_state=group_reuse_state,
+                        extract_dir=extract_dir,
                     )
                 elif lt == 'v_PostGIS' and layer_entry.get('vector_gpkg'):
                     ld = layer_entry['layer']
