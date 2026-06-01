@@ -154,8 +154,11 @@ def _sld_import_symbolizers(rule_node, model_rule):
                     or_nodes = eg_node.xpath('sld:OnlineResource', namespaces=_SLD_NS)
                     online_resource = ''
                     if or_nodes:
+                        # Some serializers write xlink:href, others plain href.
                         online_resource = (
-                            or_nodes[0].get('{http://www.w3.org/1999/xlink}href') or ''
+                            or_nodes[0].get('{http://www.w3.org/1999/xlink}href')
+                            or or_nodes[0].get('href')
+                            or ''
                         )
                     fmt = _sld_first_text(eg_node, 'sld:Format') or 'image/svg+xml'
                     if online_resource:
@@ -462,13 +465,34 @@ def create_default_style(layer_id, style_name, style_type, geom_type, count):
     return sld_body
 
 def sld_import(name, is_default, layer_id, file, mapservice, style_type=None):
-    
+
     layer = Layer.objects.get(id=int(layer_id))
-    
+    raw_sld_text = file.read()
+
+    # SLD_STORED_TYPES (MC heatmap, CS custom): the SLD is kept verbatim in
+    # style.sld and sent directly to GeoServer — do NOT try to parse rules
+    # because these styles use rendering transformations (ras:Heatmap etc.)
+    # that are not representable in the Rule/Symbolizer model.
+    if style_type in SLD_STORED_TYPES:
+        style = Style(
+            name=name,
+            title=name,
+            is_default=is_default,
+            type=style_type,
+            sld=raw_sld_text,
+        )
+        style.save()
+        StyleLayer(style=style, layer=layer).save()
+        sld_body = utils.encode_xml(raw_sld_text)
+        if mapservice.createStyle(style.name, sld_body):
+            mapservice.setLayerStyle(layer, style.name, style.is_default)
+            return True
+        return False
+
     ### write the data to a temp file
     tup = tempfile.mkstemp() # make a tmp file
     f = os.fdopen(tup[0], 'w') # open the tmp file for writing
-    f.write(file.read()) # write the tmp file
+    f.write(raw_sld_text) # write the tmp file
     f.close()
     
     filepath = tup[1]
@@ -527,8 +551,10 @@ def sld_import(name, is_default, layer_id, file, mapservice, style_type=None):
         )
         rule.save()
         _sld_import_symbolizers(r._node, rule)
-        
-    sld_body = sld_builder.build_sld(layer, style)
+
+    # CP (clustered points) must keep the PointStacker transformation.
+    single_symbol = style_type not in SLD_BUILD_FULL_TYPES
+    sld_body = sld_builder.build_sld(layer, style, single_symbol=single_symbol)
     if mapservice.createStyle(style.name, sld_body): 
         mapservice.setLayerStyle(layer, style.name, style.is_default)
         utils.__delete_temporaries(filepath)
