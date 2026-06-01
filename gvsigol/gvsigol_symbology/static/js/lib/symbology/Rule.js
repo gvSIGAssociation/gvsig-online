@@ -497,6 +497,11 @@ Rule.prototype.addSymbolizer = function(options) {
 		symbolizer = new PolygonSymbolizer(this, options, this.utils);
 	}
 	
+	if (!symbolizer) {
+		console.warn('Cannot create symbolizer: unknown feature type "' + this.utils.getFeatureType() + '"');
+		return null;
+	}
+	
 	$('#rule-' + this.id + '-symbolizers tbody').append(symbolizer.getTableUI());
 	
 	$('#rule-' + this.id + '-symbolizers tbody').sortable({

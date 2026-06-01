@@ -398,6 +398,8 @@ def get_fields(resource):
     fields = None
     if resource != None:
         fields = resource.get('featureType').get('attributes').get('attribute')
+        if isinstance(fields, dict):
+            fields = [fields]
         
     return fields
 
@@ -426,14 +428,16 @@ def get_numeric_fields(fields):
 
 def get_feature_type(fields):
     featureType = None
+    if not fields:
+        return featureType
     for field in fields:
         if 'jts.geom' in field.get('binding'):
             auxType = field.get('binding').split('.')[-1]
-            if auxType == "Point" or auxType == "MultiPoint":
+            if auxType in ("Point", "MultiPoint"):
                 featureType = "PointSymbolizer"
-            if auxType == "Line" or auxType == "LineString" or auxType == "MultiLineString":
+            elif auxType in ("Line", "LineString", "MultiLineString"):
                 featureType = "LineSymbolizer"
-            if auxType == "Polygon" or auxType == "MultiPolygon":
+            elif auxType in ("Polygon", "MultiPolygon"):
                 featureType = "PolygonSymbolizer"
                 
     return featureType

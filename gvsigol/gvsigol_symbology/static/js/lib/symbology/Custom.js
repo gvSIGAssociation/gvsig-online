@@ -63,17 +63,20 @@ var Charts = function(featureType, layerName, utils, rule_opts) {
 };
 
 Charts.prototype.addDefault = function() {
+	if (!this.utils.featureType && this.featureType) {
+		this.utils.featureType = this.featureType;
+	}
 	var symbolRule = new Rule(0, 'symbol', 'symbol', null, this.utils);
 	$('#rules').append(symbolRule.getTableUI(false, 'charts'));
 	symbolRule.registerEvents('charts');
-	symbolRule.addSymbolizer(this.utils);
+	symbolRule.addSymbolizer();
 	symbolRule.preview();
 	this.addRule(symbolRule);
 	
 	var chartRule = new Rule(1, 'chart', 'chart', null, this.utils);
 	$('#rules').append(chartRule.getChartUI());
 	chartRule.registerEvents('charts');
-	chartRule.addSymbolizer(this.utils);
+	chartRule.addSymbolizer();
 	chartRule.preview();
 	this.addRule(chartRule);
 };

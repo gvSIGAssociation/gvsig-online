@@ -22,7 +22,7 @@
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 
-from .models import Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, RasterSymbolizer, ColorMap
+from .models import Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, RasterSymbolizer, ColorMap, ColorMapEntry, TextSymbolizer as TextSymbolizerModel
 from django.db.models import Max
 from django.utils.translation import gettext_lazy as _
 from gvsigol_core import geom
@@ -150,7 +150,24 @@ def _sld_import_symbolizers(rule_node, model_rule):
                         stroke_dash_array=stroke_dash_array,
                     ).save()
                 elif graphic.xpath('sld:ExternalGraphic', namespaces=_SLD_NS):
-                    pass
+                    eg_node = graphic.xpath('sld:ExternalGraphic', namespaces=_SLD_NS)[0]
+                    or_nodes = eg_node.xpath('sld:OnlineResource', namespaces=_SLD_NS)
+                    online_resource = ''
+                    if or_nodes:
+                        online_resource = (
+                            or_nodes[0].get('{http://www.w3.org/1999/xlink}href') or ''
+                        )
+                    fmt = _sld_first_text(eg_node, 'sld:Format') or 'image/svg+xml'
+                    if online_resource:
+                        ExternalGraphicSymbolizer(
+                            rule=model_rule,
+                            order=scount,
+                            opacity=max(1, int(round(opacity))),
+                            size=max(1, int(round(size))),
+                            rotation=int(round(rotation)),
+                            online_resource=online_resource,
+                            format=fmt,
+                        ).save()
 
         elif tag == 'LineSymbolizer':
             stroke = '#ffffff'
@@ -211,6 +228,122 @@ def _sld_import_symbolizers(rule_node, model_rule):
                 stroke_width=stroke_width,
                 stroke_opacity=stroke_opacity,
                 stroke_dash_array=stroke_dash_array,
+            ).save()
+
+        elif tag == 'TextSymbolizer':
+            # Label field (PropertyName inside Label element)
+            label_pn = _sld_first_text(child, 'sld:Label/sld:PropertyName') or \
+                       _sld_first_text(child, 'sld:Label/ogc:PropertyName') or ''
+
+            # Font CSS parameters
+            font_family = 'Arial'
+            font_size = 12
+            font_style = 'normal'
+            font_weight = 'normal'
+            fonts = child.xpath('sld:Font', namespaces=_SLD_NS)
+            if fonts:
+                for k, v in _sld_css_map(fonts[0]).items():
+                    if k == 'font-family':
+                        font_family = v
+                    elif k == 'font-size':
+                        font_size = int(_sld_float(v, font_size))
+                    elif k == 'font-style':
+                        font_style = v
+                    elif k == 'font-weight':
+                        font_weight = v
+
+            # LabelPlacement — AnchorPoint
+            anchor_x = 0.5
+            anchor_y = -1.5
+            ap = child.xpath(
+                'sld:LabelPlacement/sld:PointPlacement/sld:AnchorPoint',
+                namespaces=_SLD_NS,
+            )
+            if ap:
+                anchor_x = _sld_float(_sld_first_text(ap[0], 'sld:AnchorPointX'), anchor_x)
+                anchor_y = _sld_float(_sld_first_text(ap[0], 'sld:AnchorPointY'), anchor_y)
+
+            # Halo
+            halo_radius = 1
+            halo_fill = '#ffffff'
+            halo_fill_opacity = 1.0
+            halos = child.xpath('sld:Halo', namespaces=_SLD_NS)
+            if halos:
+                halo_radius = int(_sld_float(
+                    _sld_first_text(halos[0], 'sld:Radius'), halo_radius,
+                ))
+                halo_fills = halos[0].xpath('sld:Fill', namespaces=_SLD_NS)
+                if halo_fills:
+                    for k, v in _sld_css_map(halo_fills[0]).items():
+                        if k == 'fill':
+                            halo_fill = v
+                        elif k == 'fill-opacity':
+                            halo_fill_opacity = _sld_float(v, halo_fill_opacity)
+
+            # Fill (text colour)
+            text_fill = '#000000'
+            text_fill_opacity = 1.0
+            fills = child.xpath('sld:Fill', namespaces=_SLD_NS)
+            if fills:
+                for k, v in _sld_css_map(fills[0]).items():
+                    if k == 'fill':
+                        text_fill = v
+                    elif k == 'fill-opacity':
+                        text_fill_opacity = _sld_float(v, text_fill_opacity)
+
+            TextSymbolizerModel(
+                rule=model_rule,
+                order=scount,
+                is_actived=bool(label_pn),
+                label=label_pn,
+                font_family=font_family,
+                font_size=font_size,
+                font_style=font_style,
+                font_weight=font_weight,
+                fill=text_fill,
+                fill_opacity=text_fill_opacity,
+                halo_radius=halo_radius,
+                halo_fill=halo_fill,
+                halo_fill_opacity=halo_fill_opacity,
+                anchor_point_x=anchor_x,
+                anchor_point_y=anchor_y,
+            ).save()
+
+        elif tag == 'RasterSymbolizer':
+            opacity = _sld_float(_sld_first_text(child, 'sld:Opacity'), 1.0)
+            # ColorMap
+            cm_type = 'ramp'
+            cm_extended = False
+            color_map_entries = []
+            cms = child.xpath('sld:ColorMap', namespaces=_SLD_NS)
+            if cms:
+                cm_node = cms[0]
+                cm_type = cm_node.get('type') or 'ramp'
+                cm_extended = cm_node.get('extended', '').lower() in ('true', '1')
+                for idx, entry in enumerate(cm_node.xpath('sld:ColorMapEntry', namespaces=_SLD_NS)):
+                    color_map_entries.append({
+                        'color': entry.get('color') or '#000000',
+                        'quantity': float(entry.get('quantity') or 0),
+                        'label': entry.get('label') or '',
+                        'opacity': float(entry.get('opacity') or 1.0),
+                        'order': idx,
+                    })
+            color_map = ColorMap(type=cm_type, extended=cm_extended)
+            color_map.save()
+            for e in color_map_entries:
+                ColorMapEntry(
+                    color_map=color_map,
+                    color=e['color'],
+                    quantity=e['quantity'],
+                    label=e['label'],
+                    opacity=e['opacity'],
+                    order=e['order'],
+                ).save()
+            RasterSymbolizer(
+                rule=model_rule,
+                order=scount,
+                opacity=opacity,
+                color_map=color_map,
             ).save()
 
         scount += 1
@@ -328,7 +461,7 @@ def create_default_style(layer_id, style_name, style_type, geom_type, count):
     sld_body = sld_builder.build_sld(layer, style)
     return sld_body
 
-def sld_import(name, is_default, layer_id, file, mapservice):
+def sld_import(name, is_default, layer_id, file, mapservice, style_type=None):
     
     layer = Layer.objects.get(id=int(layer_id))
     
@@ -362,10 +495,10 @@ def sld_import(name, is_default, layer_id, file, mapservice):
     style_title = us.Title if us.Title else name
 
     style = Style(
-        name = name,
-        title = style_title,
-        is_default = is_default,
-        type = "EX"
+        name=name,
+        title=style_title,
+        is_default=is_default,
+        type=style_type or 'EX',
     )
     style.save()
     

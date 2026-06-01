@@ -254,9 +254,42 @@
 		function imagePostFunction(image, src) {
 			var auth_token = "{{auth_token}}";
 			if (auth_token) {
+				return auth_token;
+			}
+			if (username && password) {
+				return "Basic " + btoa(username + ":" + password);
+			}
+			return null;
+		}
+
+		function loadAuthenticatedImage(img, src) {
+			var authorization = getGeoserverAuthorization();
+			if (!authorization) {
+				img.src = src;
+				return;
+			}
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', src);
+			xhr.setRequestHeader('Authorization', authorization);
+			xhr.responseType = 'blob';
+			xhr.onload = function () {
+				if (xhr.status >= 200 && xhr.status < 300) {
+					var contentType = xhr.getResponseHeader("content-type") || '';
+					if (contentType.indexOf("image") !== -1) {
+						var urlCreator = window.URL || window.webkitURL;
+						img.src = urlCreator.createObjectURL(xhr.response);
+					}
+				}
+			};
+			xhr.send();
+		}
+
+		function imagePostFunction(image, src) {
+			var authorization = getGeoserverAuthorization();
+			if (authorization) {
 				var xhr = new XMLHttpRequest();
 				xhr.open('GET', src);
-				xhr.setRequestHeader('Authorization', auth_token);
+				xhr.setRequestHeader('Authorization', authorization);
 				xhr.responseType = 'blob';
 				xhr.onload = function () {
 					if (xhr.status == 401) {

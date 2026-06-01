@@ -312,7 +312,7 @@ def get_conf(request, layer_id):
     index = utils.get_next_index(layer)
     (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
     fields = utils.get_fields(resource)
-    if layer.conf:
+    if fields and layer.conf:
         new_fields = []
         conf = None
         if layer and layer.conf:
@@ -332,8 +332,8 @@ def get_conf(request, layer_id):
             new_fields.append(field)
         fields = new_fields
 
-    feature_type = utils.get_feature_type(fields)
-    alphanumeric_fields = utils.get_alphanumeric_fields(fields)
+    feature_type = utils.get_feature_type(fields) or 'PointSymbolizer'
+    alphanumeric_fields = utils.get_alphanumeric_fields(fields) if fields else []
 
     supported_fonts_str = gs.getSupportedFonts()
     supported_fonts = json.loads(supported_fonts_str)

@@ -63,10 +63,13 @@ var UniqueSymbol = function(featureType, layerName, utils, rule_opts) {
 };
 
 UniqueSymbol.prototype.addDefault = function() {
+	if (!this.utils.featureType && this.featureType) {
+		this.utils.featureType = this.featureType;
+	}
 	var rule = new Rule(0, $("#style-name").val(), $("#style-name").val(), null, this.utils);
 	$('#rules').append(rule.getTableUI(true, 'unique'));
 	rule.registerEvents('unique');
-	rule.addSymbolizer(this.utils);
+	rule.addSymbolizer();
 	rule.preview();
 	this.addRule(rule);
 };
