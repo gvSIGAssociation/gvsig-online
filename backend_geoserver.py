@@ -845,6 +845,8 @@ class Geoserver():
             return 'com.vividsolutions.jts.geom.Polygon'
         elif sql_type == "MULTIPOLYGON":
             return 'com.vividsolutions.jts.geom.MultiPolygon'
+        elif sql_type in ("GEOMETRY", "GEOMETRYCOLLECTION", "MULTIGEOMETRY"):
+            return 'com.vividsolutions.jts.geom.Geometry'
 
     def createResource(self, workspace, store, name, title, extraParams={}):
         try:
