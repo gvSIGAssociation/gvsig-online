@@ -441,6 +441,63 @@ class Introspect:
                     exc_info=True,
                 )
 
+    def promote_untyped_geometry_columns_hint(self, schema, table, geom_subtype):
+        """
+        Like promote_untyped_geometry_columns but uses a caller-supplied *geom_subtype*
+        (e.g. 'POINT', 'MULTIPOLYGON') instead of inspecting the data.
+        Useful for empty tables where the subtype cannot be determined from rows.
+        Only alters columns that are still generic (type == GEOMETRY or no typmod subtype).
+        """
+        for row in self.get_geometry_columns_info(table=table, schema=schema):
+            geom_col = row[2]
+            srid = row[4]
+            gtype = (row[5] or '').strip().upper()
+            if gtype and gtype != 'GEOMETRY':
+                continue
+            self.cursor.execute(
+                """
+                SELECT format_type(a.atttypid, a.atttypmod)
+                FROM pg_attribute a
+                JOIN pg_class c ON c.oid = a.attrelid
+                JOIN pg_namespace n ON n.oid = c.relnamespace
+                WHERE n.nspname = %s AND c.relname = %s AND a.attname = %s
+                  AND a.attnum > 0 AND NOT a.attisdropped
+                """,
+                [schema, table, geom_col],
+            )
+            ft_row = self.cursor.fetchone()
+            format_type = (ft_row[0] or '').strip() if ft_row and ft_row[0] else ''
+            if not _geometry_format_type_needs_concrete_subtype(format_type):
+                continue
+            m = re.search(r'geometry\s*\(\s*[^,)\s]+\s*,\s*(-?\d+)', format_type, flags=re.IGNORECASE)
+            try:
+                srid_val = int(m.group(1)) if m else (int(srid) if srid is not None else 0)
+            except (TypeError, ValueError):
+                srid_val = 0
+            sub_sql = sqlbuilder.SQL(geom_subtype)
+            stmt = sqlbuilder.SQL(
+                'ALTER TABLE {sch}.{tbl} ALTER COLUMN {geom} TYPE geometry({sub}, {srid}) '
+                'USING {geom}::geometry({sub}, {srid})'
+            ).format(
+                sch=sqlbuilder.Identifier(schema),
+                tbl=sqlbuilder.Identifier(table),
+                geom=sqlbuilder.Identifier(geom_col),
+                sub=sub_sql,
+                srid=sqlbuilder.Literal(srid_val),
+            )
+            try:
+                self.cursor.execute(stmt)
+                logger.debug(
+                    'promote_untyped_geometry_columns_hint: set %s.%s.%s → geometry(%s,%s)',
+                    schema, table, geom_col, geom_subtype, srid_val,
+                )
+            except Exception as ex:
+                logger.warning(
+                    'promote_untyped_geometry_columns_hint: ALTER failed for %s.%s.%s: %s',
+                    schema, table, geom_col, ex,
+                    exc_info=True,
+                )
+
     def get_geometry_column_info(self, table=None, column=None, schema='public'):
         """
         Gives information about a geometry column. Use exact name.
