@@ -1481,12 +1481,29 @@ def _import_vector_layer(
     table_name = _verify_gpkg_table_loaded(target_datastore, schema, table_name)
     report.append({'gpkg_loaded': {'schema': schema, 'table': table_name}})
 
+    layer_conf = {}
+    try:
+        layer_conf = ast.literal_eval(ld.get('conf') or '{}')
+    except Exception:
+        layer_conf = {}
+
     if target_datastore.type in ('PostGIS', 'PostgreSQL', 'v_PostGIS'):
         intro = None
         try:
             intro, _db_params = target_datastore.get_db_connection()
             if intro:
                 intro.promote_untyped_geometry_columns(schema, table_name)
+                # For empty tables promote_untyped_geometry_columns cannot detect
+                # the geometry type from data.  Fall back to the exported conf.
+                _hint = (
+                    layer_conf.get('featuretype', {}).get('geomtype') or ''
+                ).strip().upper()
+                if _hint and _hint not in ('', 'GEOMETRY', 'UNKNOWN'):
+                    from gvsigol_services.backend_postgis import _GEOMETRY_SUBTYPES_GEOSERVER
+                    if _hint in _GEOMETRY_SUBTYPES_GEOSERVER:
+                        intro.promote_untyped_geometry_columns_hint(
+                            schema, table_name, _hint
+                        )
         except Exception as ex:
             LOG.warning(
                 'Could not narrow generic geometry column after GPKG import %s.%s: %s',
@@ -1499,11 +1516,6 @@ def _import_vector_layer(
             if intro:
                 intro.close()
 
-    layer_conf = {}
-    try:
-        layer_conf = ast.literal_eval(ld.get('conf') or '{}')
-    except Exception:
-        layer_conf = {}
     extra_params = {'max_features': layer_conf.get('featuretype', {}).get('', 0)}
 
     gs_layer_name = table_name

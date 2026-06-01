@@ -142,6 +142,11 @@ def export_postgis_to_gpkg(schema, table, dest_gpkg, pg_conn=None):
     """
     Export a PostGIS table to GeoPackage. Returns the layer name stored in the GPKG.
     pg_conn: gdaltools.PgConnectionString (or None for default CartoDB).
+
+    We reference the table directly (not via a SQL query) so that the PostgreSQL
+    OGR driver reads the geometry type from PostGIS metadata (geometry_columns).
+    This preserves the exact subtype (e.g. MultiPoint) even for empty tables,
+    whereas a SQL query would fall back to generic 'Geometry' when there is no data.
     """
     import gdaltools
 
@@ -156,12 +161,9 @@ def export_postgis_to_gpkg(schema, table, dest_gpkg, pg_conn=None):
     os.makedirs(os.path.dirname(dest_gpkg), exist_ok=True)
 
     ogr = gdaltools.ogr2ogr()
-    sql = 'SELECT * FROM "%s"."%s"' % (
-        schema.replace('"', '""'),
-        table.replace('"', '""'),
-    )
-    ogr.set_input(pg_conn)
-    ogr.set_sql(sql)
+    # Use table_name directly so the PostgreSQL driver reads geometry type from
+    # geometry_columns metadata — crucial for empty tables.
+    ogr.set_input(pg_conn, table_name=table)
     # pygdaltools defaults unknown extensions to ESRI Shapefile (10-char field names,
     # directory output). Must force GPKG explicitly.
     ogr.set_output(dest_gpkg, file_type='GPKG', table_name=gpkg_layer)
