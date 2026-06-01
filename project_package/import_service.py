@@ -2541,25 +2541,31 @@ def _resolve_import_tools(raw_tools_json, report):
     """Merge exported tool states with the tools available on this server.
 
     * If ``raw_tools_json`` is None/empty the package was exported without tool
-      configuration → return None so the project uses server defaults.
-    * For each tool in the package:
+      configuration (checkbox unchecked) → return the standard default tool set:
+      all core tools enabled, all plugin tools disabled — exactly what a brand-new
+      project gets.
+    * For each tool in the package (checkbox checked):
         - If it exists on this server: apply the exported ``checked`` state.
         - If it does NOT exist: add a warning to *report* and skip it.
     * Tools present on this server but absent from the package keep their
       default state (core tools enabled, plugin tools disabled).
 
-    Returns a JSON string suitable for ``Project.tools``, or None.
+    Returns a JSON string suitable for ``Project.tools``.
     """
+    from gvsigol_core.utils import get_available_tools
+
     if not raw_tools_json:
-        return None
+        # No tool configuration exported → use the same defaults as a new project:
+        # core tools all enabled, plugin tools all disabled.
+        return json.dumps(get_available_tools(core_enabled=True, plugin_enabled=False))
+
     try:
         exported = json.loads(raw_tools_json) if isinstance(raw_tools_json, str) else raw_tools_json
     except Exception:
-        return None
+        return json.dumps(get_available_tools(core_enabled=True, plugin_enabled=False))
     if not isinstance(exported, list):
-        return None
+        return json.dumps(get_available_tools(core_enabled=True, plugin_enabled=False))
 
-    from gvsigol_core.utils import get_available_tools
     available = get_available_tools(core_enabled=True, plugin_enabled=True)
     available_map = {t['name']: t for t in available}
     exported_map = {t['name']: t for t in exported if isinstance(t, dict) and t.get('name')}
