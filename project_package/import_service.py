@@ -2588,6 +2588,79 @@ def _resolve_import_tools(raw_tools_json, report):
     return json.dumps(merged)
 
 
+def _remap_toc_order(project, snapshot, id_map):
+    """
+    After import, patch toc_order so that group/layer name changes (due to
+    conflict-driven renames) are reflected.  Otherwise the viewer silently
+    ignores the stored order values for any layer or group whose name changed.
+
+    Strategy:
+    * Groups: match by position – snapshot['layer_groups'][i] corresponds to
+      project.projectlayergroup_set.order_by('id')[i] because PLG rows are
+      always created in snapshot order.
+    * Layers: use id_map (export_id → new Layer pk) to look up the new name.
+    """
+    old_toc_str = project.toc_order
+    if not old_toc_str:
+        return
+    try:
+        old_toc = json.loads(old_toc_str)
+    except Exception:
+        return
+    if not isinstance(old_toc, dict) or not old_toc:
+        return
+
+    snap_groups = snapshot.get('layer_groups', [])
+    plgs = list(
+        project.projectlayergroup_set.order_by('id').select_related('layer_group')
+    )
+
+    # Build old → new group name map (positional)
+    group_name_map = {}
+    for sg, plg in zip(snap_groups, plgs):
+        old_gname = sg['layer_group']['name']
+        new_gname = plg.layer_group.name
+        if old_gname != new_gname:
+            group_name_map[old_gname] = new_gname
+
+    # Build old → new layer name map (via id_map)
+    layer_name_map = {}
+    for sg in snap_groups:
+        for entry in sg.get('layers', []):
+            eid = entry.get('export_id')
+            old_name = (entry.get('layer') or {}).get('name') or ''
+            if not eid or not old_name or eid not in id_map:
+                continue
+            new_id = id_map[eid]
+            try:
+                new_name = Layer.objects.get(id=new_id).name
+                if new_name and new_name != old_name:
+                    layer_name_map[old_name] = new_name
+            except Layer.DoesNotExist:
+                pass
+
+    if not group_name_map and not layer_name_map:
+        return  # nothing to remap
+
+    new_toc = {}
+    for old_gname, gdata in old_toc.items():
+        new_gname = group_name_map.get(old_gname, old_gname)
+        new_gdata = dict(gdata)
+        new_gdata['name'] = new_gname
+        old_layers = gdata.get('layers') or {}
+        new_layers = {}
+        for old_lname, ldata in old_layers.items():
+            new_lname = layer_name_map.get(old_lname, old_lname)
+            new_ldata = dict(ldata)
+            new_ldata['name'] = new_lname
+            new_layers[new_lname] = new_ldata
+        new_gdata['layers'] = new_layers
+        new_toc[new_gname] = new_gdata
+
+    project.toc_order = json.dumps(new_toc)
+    project.save(update_fields=['toc_order'])
+
+
 def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
     wiz = job.wizard_json or {}
     report = list(job.report_json or [])
@@ -3081,6 +3154,12 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
         if import_permissions:
             for pr in snapshot.get('project_roles', []):
                 ProjectRole(project=project, role=pr['role'], permission=pr.get('permission', ProjectRole.PERM_READ)).save()
+
+        # Patch toc_order so renamed layers/groups still appear in the right order
+        try:
+            _remap_toc_order(project, snapshot, id_map)
+        except Exception:
+            LOG.exception('Could not remap toc_order after import')
 
         gs.reload_nodes()
         job.id_map_json = id_map
