@@ -251,7 +251,13 @@ def _styles_payload(layer, skip_db_sld=False):
     attempting any database connection (appropriate for definition-only or
     foreign-datastore layers whose DB may be unreachable).
     sld_errors_list entries have {style, error} for reporting.
+
+    SLD_STORED_TYPES (MC heatmap, CS custom) store the full SLD verbatim in
+    style.sld rather than in Rule/Symbolizer rows, so we export style.sld
+    directly for those types instead of calling build_sld (which would
+    return an empty document for them).
     """
+    from gvsigol_symbology.services import SLD_STORED_TYPES
     out = []
     sld_errors = []
     for sl in StyleLayer.objects.filter(layer=layer).select_related('style').order_by('-style__is_default'):
@@ -259,11 +265,15 @@ def _styles_payload(layer, skip_db_sld=False):
         sld = ''
         if not skip_db_sld:
             try:
-                body = sld_builder.build_sld(layer, st)
-                if isinstance(body, bytes):
-                    sld = body.decode('utf-8', errors='replace')
+                if st.type in SLD_STORED_TYPES:
+                    # Heatmap (MC) and custom (CS): SLD is stored verbatim.
+                    sld = st.sld or ''
                 else:
-                    sld = str(body)
+                    body = sld_builder.build_sld(layer, st)
+                    if isinstance(body, bytes):
+                        sld = body.decode('utf-8', errors='replace')
+                    else:
+                        sld = str(body)
             except Exception as _sld_exc:
                 LOG.warning(
                     'Could not serialize SLD for layer %s style %s (will export empty SLD): %s',
