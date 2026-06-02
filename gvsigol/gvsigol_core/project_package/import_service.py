@@ -2994,7 +2994,7 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
             if not cat_title:
                 continue
             try:
-                cat_obj, _ = Category.objects.get_or_create(
+                cat_obj, _created = Category.objects.get_or_create(
                     title=cat_title,
                     project=project,
                 )
