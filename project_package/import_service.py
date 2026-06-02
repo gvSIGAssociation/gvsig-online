@@ -24,6 +24,7 @@ from gvsigol_core.models import Project, ProjectLayerGroup, ProjectRole, SharedV
 from gvsigol_services import geographic_servers
 from gvsigol_services import utils as services_utils
 from gvsigol_services.models import (
+    Category,
     Connection,
     Datastore,
     Enumeration,
@@ -35,6 +36,7 @@ from gvsigol_services.models import (
     LayerResource,
     LayerWriteRole,
     LayerGroup,
+    Marker,
     Server,
     Workspace,
 )
@@ -2984,6 +2986,42 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
                 LOG.warning('Could not restore shared view: %s', _sv_exc)
         if _sv_imported:
             LOG.info('commit_job: restored %d shared view(s) for project %s', _sv_imported, project.name)
+
+        # Restore marker categories and markers (Marcadores panel in viewer)
+        _cat_map = {}  # old title -> new Category
+        for cat_data in snapshot.get('marker_categories', []):
+            cat_title = cat_data.get('title') or ''
+            if not cat_title:
+                continue
+            try:
+                cat_obj, _ = Category.objects.get_or_create(
+                    title=cat_title,
+                    project=project,
+                )
+                _cat_map[cat_title] = cat_obj
+            except Exception as _cat_exc:
+                LOG.warning('Could not restore marker category "%s": %s', cat_title, _cat_exc)
+
+        _mk_imported = 0
+        for mk_data in snapshot.get('markers', []):
+            try:
+                cat_title = mk_data.get('category_title')
+                cat_obj = _cat_map.get(cat_title) if cat_title else None
+                Marker(
+                    idProj=project.id,
+                    title=mk_data.get('title') or '',
+                    position_lat=mk_data.get('position_lat') or 0.0,
+                    position_lng=mk_data.get('position_lng') or 0.0,
+                    zoom=mk_data.get('zoom') or 0.0,
+                    thumbnail=mk_data.get('thumbnail') or '',
+                    description=mk_data.get('description') or '',
+                    category=cat_obj,
+                ).save()
+                _mk_imported += 1
+            except Exception as _mk_exc:
+                LOG.warning('Could not restore marker "%s": %s', mk_data.get('title'), _mk_exc)
+        if _mk_imported:
+            LOG.info('commit_job: restored %d marker(s) for project %s', _mk_imported, project.name)
 
         gs = geographic_servers.get_instance().get_server_by_id(server.id)
         pending_default_baselayers = []

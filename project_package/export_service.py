@@ -13,6 +13,7 @@ from django.conf import settings
 
 from gvsigol_core.models import Project, SharedView
 from gvsigol_services.models import (
+    Category,
     Datastore,
     Enumeration,
     EnumerationItem,
@@ -23,6 +24,7 @@ from gvsigol_services.models import (
     LayerResource,
     LayerWriteRole,
     LayerGroup,
+    Marker,
     Server,
 )
 from gvsigol_symbology.models import ExternalGraphicSymbolizer, Library, LibraryRule, Rule, StyleLayer
@@ -372,6 +374,22 @@ def build_project_zip(project: Project, export_options=None, progress_cb=None):
                     'internal': sv.internal,
                 }
                 for sv in SharedView.objects.filter(project_id=project.id, internal=False)
+            ],
+            'marker_categories': [
+                {'title': cat.title}
+                for cat in Category.objects.filter(project=project)
+            ],
+            'markers': [
+                {
+                    'title': m.title,
+                    'position_lat': m.position_lat,
+                    'position_lng': m.position_lng,
+                    'zoom': m.zoom,
+                    'thumbnail': m.thumbnail or '',
+                    'description': m.description or '',
+                    'category_title': m.category.title if m.category else None,
+                }
+                for m in Marker.objects.filter(idProj=project.id).select_related('category')
             ],
         }
         # Accumulated symbol library assets across all layers: {lib_name: {...}}
