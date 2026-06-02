@@ -1648,6 +1648,11 @@ def _import_vector_layer(
         server.update_vector_tile_format(lyr.datastore.workspace, lyr.name, True)
     if lyr.cached:
         server.reload_master()
+        try:
+            from gvsigol_services.tasks import update_internal_wmts_layer_options
+            update_internal_wmts_layer_options(lyr)
+        except Exception as _wmts_exc:
+            LOG.warning('Could not update WMTS options for cached layer %s: %s', lyr.name, _wmts_exc)
     id_map[layer_entry['export_id']] = lyr.id
     report.append({'imported': 'vector', 'layer': lyr.name, 'table': table_name})
     return lyr
@@ -1992,6 +1997,11 @@ def _import_postgis_definition_layer(
         server.update_vector_tile_format(lyr.datastore.workspace, lyr.name, True)
     if lyr.cached:
         server.reload_master()
+        try:
+            from gvsigol_services.tasks import update_internal_wmts_layer_options
+            update_internal_wmts_layer_options(lyr)
+        except Exception as _wmts_exc:
+            LOG.warning('Could not update WMTS options for cached layer %s: %s', lyr.name, _wmts_exc)
     id_map[layer_entry['export_id']] = lyr.id
     report.append({'imported': 'vector_definition', 'layer': lyr.name, 'table': table_name})
     return lyr
