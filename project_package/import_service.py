@@ -1739,6 +1739,7 @@ def _import_postgis_definition_layer(
     server_id=None,
     group_reuse_state=None,
     skip_layer_reuse=False,
+    extract_dir=None,
 ):
     ld = layer_entry['layer']
     table_name = (ld.get('source_name') or ld.get('name') or 'layer').strip()
@@ -2127,6 +2128,7 @@ def _import_view_sql_definition_layer(
         server_id=server_id,
         group_reuse_state=group_reuse_state,
         skip_layer_reuse=True,
+        extract_dir=extract_dir,
     )
 
 
@@ -2145,6 +2147,7 @@ def _import_definition_layer_entry(
     connection_ds_cache,
     foreign_connection_map,
     group_reuse_state=None,
+    extract_dir=None,
 ):
     """Import one definition-only layer; never abort the whole job on failure."""
     ld = layer_entry.get('layer') or {}
@@ -2172,6 +2175,7 @@ def _import_definition_layer_entry(
             report,
             server_id=server_id,
             group_reuse_state=group_reuse_state,
+            extract_dir=extract_dir,
         )
     except Exception as ex:
         report.append({
@@ -3068,6 +3072,7 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
                         connection_ds_cache,
                         foreign_connection_map,
                         group_reuse_state=group_reuse_state,
+                        extract_dir=extract_dir,
                     )
                 elif layer_entry['layer'].get('external'):
                     eid = layer_entry.get('export_id')
