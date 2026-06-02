@@ -92,7 +92,7 @@
 				</select>
 			</div>
 
-	{% if package_layout.gpkg_layers or package_layout.foreign_connections or package_layout.raster_layers or package_layout.external_layers or package_layout.view_sql_layers %}
+	{% if package_layout.gpkg_layers or package_layout.foreign_connections or package_layout.raster_layers or package_layout.external_layers or package_layout.view_sql_layers or package_layout.wms_cascading_layers %}
 	<h4>{% trans "Layers in this package" %}</h4>
 	<p class="text-muted small">{% trans "Check Skip to leave a layer or group out. The rest of the project imports normally." %}</p>
 	<table class="table table-bordered table-condensed" id="layers-package-table">
@@ -236,6 +236,25 @@
 			</td>
 			<td style="vertical-align:middle">
 				<span class="text-muted"><em><small>{% trans "Imported as-is (no data copied)" %}</small></em></span>
+			</td>
+		</tr>
+		{% endfor %}
+
+		{# ── WMS cascading layers (e_WMS datastore, not external) ── #}
+		{% for w in package_layout.wms_cascading_layers %}
+		<tr>
+			<td style="text-align:center;vertical-align:middle"></td>
+			<td style="vertical-align:middle"><span class="label label-info">WMS</span></td>
+			<td style="vertical-align:middle">
+				<strong>{{ w.title }}</strong>
+				{% if w.title != w.name %}<br><small class="text-muted">{{ w.name }}</small>{% endif %}
+			</td>
+			<td style="vertical-align:middle">
+				<small class="text-muted">{% trans "WMS cascading (GeoServer store)" %}</small><br>
+				<small class="text-muted">{{ w.exported_workspace }} / {{ w.exported_datastore }}</small>
+			</td>
+			<td style="vertical-align:middle">
+				<span class="text-muted"><em><small>{% trans "Recreated from WMS store URL" %}</small></em></span>
 			</td>
 		</tr>
 		{% endfor %}
