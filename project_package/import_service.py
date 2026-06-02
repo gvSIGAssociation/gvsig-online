@@ -1594,10 +1594,10 @@ def _import_vector_layer(
     )
     lyr.save()
 
+    admin_role = auth_backend.get_admin_role()
+    read_roles = [admin_role]
+    write_roles = [admin_role]
     if import_permissions:
-        admin_role = auth_backend.get_admin_role()
-        read_roles = [admin_role]
-        write_roles = [admin_role]
         for row in layer_entry.get('permissions', {}).get('read_roles', []):
             lr = LayerReadRole(layer=lyr, role=row['role'], filtered=row.get('filtered', False), external=row.get('external', False))
             lr.save()
@@ -1608,7 +1608,9 @@ def _import_vector_layer(
             write_roles.append(row['role'])
         for row in layer_entry.get('permissions', {}).get('manage_roles', []):
             LayerManageRole(layer=lyr, role=row['role']).save()
-        server.setLayerDataRules(lyr, read_roles, write_roles)
+    # Always set GeoServer ACL rules so the layer's public flag is respected:
+    # public layers get "*" access, private layers get admin-only.
+    server.setLayerDataRules(lyr, read_roles, write_roles)
 
     try:
         services_utils.set_time_enabled(server, lyr)
@@ -1929,10 +1931,10 @@ def _import_postgis_definition_layer(
     )
     lyr.save()
 
+    admin_role = auth_backend.get_admin_role()
+    read_roles = [admin_role]
+    write_roles = [admin_role]
     if import_permissions:
-        admin_role = auth_backend.get_admin_role()
-        read_roles = [admin_role]
-        write_roles = [admin_role]
         for row in layer_entry.get('permissions', {}).get('read_roles', []):
             lr = LayerReadRole(
                 layer=lyr,
@@ -1953,7 +1955,9 @@ def _import_postgis_definition_layer(
             write_roles.append(row['role'])
         for row in layer_entry.get('permissions', {}).get('manage_roles', []):
             LayerManageRole(layer=lyr, role=row['role']).save()
-        server.setLayerDataRules(lyr, read_roles, write_roles)
+    # Always set GeoServer ACL rules so the layer's public flag is respected:
+    # public layers get "*" access, private layers get admin-only.
+    server.setLayerDataRules(lyr, read_roles, write_roles)
 
     try:
         services_utils.set_time_enabled(server, lyr)
@@ -2475,7 +2479,7 @@ def _unique_layer_name_external(layer_group, base):
 
 def _import_raster_layer(
     layer_entry, layer_group, extract_dir, server_id, ws_objs, default_ws,
-    gs, username, id_map, report, job_id,
+    gs, username, id_map, report, job_id, import_permissions=False,
 ):
     """
     Copy raster bundle from the extracted package directly into the raster import root
@@ -2634,6 +2638,25 @@ def _import_raster_layer(
         latlong_extent=ld.get('latlong_extent'),
     )
     lyr.save()
+
+    # Always set GeoServer ACL rules so the layer's public flag is respected.
+    try:
+        _admin_role = auth_backend.get_admin_role()
+        _read_roles = [_admin_role]
+        _write_roles = [_admin_role]
+        if import_permissions:
+            for row in layer_entry.get('permissions', {}).get('read_roles', []):
+                LayerReadRole(layer=lyr, role=row['role'], filtered=row.get('filtered', False), external=row.get('external', False)).save()
+                _read_roles.append(row['role'])
+            for row in layer_entry.get('permissions', {}).get('write_roles', []):
+                LayerWriteRole(layer=lyr, role=row['role'], filtered=row.get('filtered', False), external=row.get('external', False)).save()
+                _write_roles.append(row['role'])
+            for row in layer_entry.get('permissions', {}).get('manage_roles', []):
+                LayerManageRole(layer=lyr, role=row['role']).save()
+        gs.setLayerDataRules(lyr, _read_roles, _write_roles)
+    except Exception as _acl_exc:
+        LOG.warning('Could not set ACL rules for raster layer %s: %s', lyr.name, _acl_exc)
+
     if eid:
         id_map[eid] = lyr.id
     LOG.info(
@@ -3245,6 +3268,7 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
                     _import_raster_layer(
                         layer_entry, lg, extract_dir, server.id, ws_objs,
                         default_ws, gs, username, id_map, report, job.id,
+                        import_permissions=import_permissions,
                     )
                 elif lt == 'e_WMS' and not (layer_entry.get('layer') or {}).get('external'):
                     _import_wms_cascading_layer(
