@@ -89,6 +89,7 @@ def _kind_label(kind):
         'external': _('External layer'),
         'raster': _('Raster'),
         'view_sql': _('SQL view'),
+        'wms_cascading': _('WMS cascading'),
     }
     return mapping.get(kind, kind)
 
@@ -154,6 +155,28 @@ def summarize_import_report(report_json):
                 'kind_code': 'raster',
                 'layer': d.get('layer') or '',
                 'table': d.get('primary_path') or '',
+            })
+        elif 'wms_cascading_imported' in row:
+            d = row['wms_cascading_imported']
+            imported_layers.append({
+                'kind': _kind_label('wms_cascading'),
+                'kind_code': 'wms_cascading',
+                'layer': d.get('layer') or '',
+                'table': d.get('datastore') or '',
+            })
+        elif 'wms_cascading_error' in row:
+            d = row['wms_cascading_error']
+            # Non-fatal: the project is still created, just without this WMS layer → partial
+            skipped_layers.append({
+                'layer': d.get('layer') or d.get('export_id') or '',
+                'reason': _('WMS store creation failed'),
+                'reason_code': 'wms_cascading_error',
+                'message': _('WMS cascading layer "%(layer)s" could not be imported: %(error)s') % {
+                    'layer': d.get('layer') or d.get('export_id') or '',
+                    'error': d.get('error') or '',
+                },
+                'table': '',
+                'connection': '',
             })
         elif 'raster_import_error' in row:
             d = row['raster_import_error']

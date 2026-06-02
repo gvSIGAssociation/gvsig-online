@@ -206,6 +206,8 @@ def _serialize_layer(layer: Layer, datastore):
         'datastore_connection_key': datastore_connection_key(datastore) if datastore else '',
         'datastore_connection_label': datastore_connection_label(datastore) if datastore else '',
         'datastore_is_foreign': is_foreign_postgis_datastore(datastore) if datastore else False,
+        'datastore_type': datastore.type if datastore else '',
+        'datastore_connection_params': datastore.connection_params if datastore else '',
     }
     return scrub_json_tree(d)
 
@@ -576,6 +578,13 @@ def build_project_zip(project: Project, export_options=None, progress_cb=None):
                             'schema': schema,
                             'table': table,
                             'note': 'metadata_only',
+                        }))
+                    elif layer.type == 'e_WMS' and ds and not layer.external:
+                        log_lines.append(json.dumps({
+                            'layer': layer.name,
+                            'type': 'e_WMS',
+                            'datastore': ds.name,
+                            'note': 'wms_cascading',
                         }))
                     else:
                         log_lines.append(json.dumps({'layer': layer.name, 'type': layer.type, 'note': 'metadata_only'}))

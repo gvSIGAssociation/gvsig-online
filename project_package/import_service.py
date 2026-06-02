@@ -276,11 +276,25 @@ def extract_snapshot_layout(snapshot):
                     samples.append(layer_label)
     # Collect SQL view layers for the import wizard
     view_sql_layers = []
+    wms_cascading_layers = []
     for group in snapshot.get('layer_groups', []):
         for ly in group.get('layers', []):
+            lt = ly.get('layer_type')
+            ld = ly.get('layer') or {}
+
+            # WMS cascading layers (e_WMS datastore, not external flag)
+            if lt == 'e_WMS' and not ld.get('external'):
+                wms_cascading_layers.append({
+                    'export_id': ly.get('export_id') or '',
+                    'name': ld.get('name') or '',
+                    'title': ld.get('title') or ld.get('name') or '',
+                    'exported_workspace': ld.get('workspace_name') or '',
+                    'exported_datastore': ld.get('datastore_name') or '',
+                })
+                continue
+
             if not _is_view_sql_layer_entry(ly):
                 continue
-            ld = ly.get('layer') or {}
             view_def = ly.get('view_sql_definition') or {}
             view_sql_layers.append({
                 'export_id': ly.get('export_id'),
@@ -316,6 +330,7 @@ def extract_snapshot_layout(snapshot):
         'raster_layers': raster_layers,
         'external_layers': external_layers,
         'view_sql_layers': view_sql_layers,
+        'wms_cascading_layers': wms_cascading_layers,
     }
 
 
@@ -2218,6 +2233,114 @@ def _unique_style_name(server, ws_name, base):
     return name
 
 
+def _import_wms_cascading_layer(
+    layer_entry, layer_group, gs, username, ws_objs, default_ws, id_map, report, server_id
+):
+    """
+    Import a WMS cascading layer (type='e_WMS', external=False).
+
+    Flow:
+    1. Resolve workspace (same as exported, create if needed).
+    2. Find or create the WMS datastore in GeoServer + Django model.
+    3. Create the Django Layer record.
+    4. Call GeoServer to publish the WMS layer from the datastore.
+    """
+    from gvsigol_services import utils as services_utils
+
+    ld = layer_entry.get('layer') or {}
+    layer_label = ld.get('title') or ld.get('name') or layer_entry.get('export_id')
+    try:
+        ws_name = ld.get('workspace_name') or default_ws
+        workspace = _resolve_workspace_for_import(server_id, ws_name, ws_objs, username, report)
+        if workspace is None:
+            raise ValueError(_('Could not resolve workspace "%(ws)s" for WMS cascading layer "%(layer)s"') % {
+                'ws': ws_name, 'layer': layer_label,
+            })
+
+        ds_name = ld.get('datastore_name') or ('wms_' + (ld.get('name') or 'layer'))
+        # Ensure unique datastore name
+        while Datastore.objects.filter(workspace=workspace, name=ds_name).exists():
+            ds_name = ds_name + '_1'
+
+        conn_params = ld.get('datastore_connection_params') or '{}'
+
+        # Create the WMS store (GeoServer + Django model)
+        datastore = services_utils.add_datastore(
+            workspace, 'e_WMS', ds_name, ld.get('abstract') or '', conn_params, username
+        )
+        if datastore is None:
+            raise RuntimeError(
+                _('Could not create WMS datastore "%(ds)s" for layer "%(layer)s". '
+                  'Check that the WMS URL is accessible from this server.')
+                % {'ds': ds_name, 'layer': layer_label}
+            )
+
+        source_name = ld.get('source_name') or ld.get('name') or ''
+        layer_name = _unique_layer_name_external(layer_group, ld.get('name') or source_name)
+
+        lyr = Layer(
+            datastore=datastore,
+            layer_group=layer_group,
+            name=layer_name,
+            title=ld.get('title') or layer_name,
+            abstract=ld.get('abstract'),
+            type='e_WMS',
+            external=False,
+            public=ld.get('public', False),
+            visible=ld.get('visible', False),
+            queryable=ld.get('queryable', True),
+            cached=ld.get('cached', False),
+            single_image=ld.get('single_image', False),
+            vector_tile=False,
+            allow_download=ld.get('allow_download', False),
+            time_enabled=ld.get('time_enabled', False),
+            time_enabled_field=ld.get('time_enabled_field'),
+            time_enabled_endfield=ld.get('time_enabled_endfield'),
+            time_presentation=ld.get('time_presentation'),
+            time_resolution_year=ld.get('time_resolution_year') or 0,
+            time_resolution_month=ld.get('time_resolution_month') or 0,
+            time_resolution_week=ld.get('time_resolution_week') or 0,
+            time_resolution_day=ld.get('time_resolution_day') or 0,
+            time_resolution_hour=ld.get('time_resolution_hour') or 0,
+            time_resolution_minute=ld.get('time_resolution_minute') or 0,
+            time_resolution_second=ld.get('time_resolution_second') or 0,
+            time_default_value_mode=ld.get('time_default_value_mode'),
+            time_default_value=ld.get('time_default_value'),
+            time_resolution=ld.get('time_resolution'),
+            order=ld.get('order') or 100,
+            created_by=username,
+            conf=ld.get('conf'),
+            detailed_info_enabled=ld.get('detailed_info_enabled', True),
+            detailed_info_button_title=ld.get('detailed_info_button_title'),
+            detailed_info_html=ld.get('detailed_info_html'),
+            timeout=ld.get('timeout') or 30000,
+            native_srs=ld.get('native_srs') or 'EPSG:4326',
+            native_extent=ld.get('native_extent') or '-180,-90,180,90',
+            latlong_extent=ld.get('latlong_extent') or '-180,-90,180,90',
+            source_name=source_name,
+            real_time=ld.get('real_time', False),
+            update_interval=ld.get('update_interval') or 1000,
+            featureapi_endpoint=ld.get('featureapi_endpoint') or '/api/v1',
+        )
+        lyr.save()
+
+        gs.createResource(workspace, datastore, source_name, lyr.title)
+
+        id_map[layer_entry['export_id']] = lyr.id
+        report.append({'wms_cascading_imported': {'layer': lyr.name, 'datastore': datastore.name}})
+        return lyr
+    except Exception as ex:
+        LOG.warning('WMS cascading layer import failed for "%s": %s', layer_label, ex, exc_info=True)
+        report.append({
+            'wms_cascading_error': {
+                'export_id': layer_entry.get('export_id'),
+                'layer': layer_label,
+                'error': str(ex),
+            },
+        })
+        return None
+
+
 def _import_external_layer(layer_entry, layer_group, username, id_map, report):
     ld = layer_entry['layer']
     lyr = Layer(
@@ -3102,6 +3225,10 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
                     _import_raster_layer(
                         layer_entry, lg, extract_dir, server.id, ws_objs,
                         default_ws, gs, username, id_map, report, job.id,
+                    )
+                elif lt == 'e_WMS' and not (layer_entry.get('layer') or {}).get('external'):
+                    _import_wms_cascading_layer(
+                        layer_entry, lg, gs, username, ws_objs, default_ws, id_map, report, server.id
                     )
                 else:
                     report.append({'skipped': lt, 'export_id': layer_entry.get('export_id')})

@@ -2480,3 +2480,21 @@ msgstr ""
 "el servidor destino; las que no estén instaladas se registrarán como avisos. "
 "Si no se marca, el proyecto importado usará las herramientas por defecto del "
 "servidor."
+
+msgid "WMS cascading (GeoServer store)"
+msgstr "WMS en cascada (almacén GeoServer)"
+
+msgid "Recreated from WMS store URL"
+msgstr "Recreada desde la URL del almacén WMS"
+
+msgid "WMS cascading"
+msgstr "WMS en cascada"
+
+msgid "WMS cascading layer \"%(layer)s\" could not be imported: %(error)s"
+msgstr "La capa WMS en cascada \"%(layer)s\" no se pudo importar: %(error)s"
+
+msgid "Could not resolve workspace \"%(ws)s\" for WMS cascading layer \"%(layer)s\""
+msgstr "No se pudo resolver el workspace \"%(ws)s\" para la capa WMS en cascada \"%(layer)s\""
+
+msgid "Could not create WMS datastore \"%(ds)s\" for layer \"%(layer)s\". Check that the WMS URL is accessible from this server."
+msgstr "No se pudo crear el almacén WMS \"%(ds)s\" para la capa \"%(layer)s\". Verifique que la URL WMS es accesible desde este servidor."

@@ -2505,3 +2505,21 @@ msgstr ""
 "projecte. En importar, només s'aplicaran les eines disponibles al servidor "
 "destí; les que no estiguin instal·lades es registraran com a avisos. Si no "
 "es marca, el projecte importat usarà les eines per defecte del servidor."
+
+msgid "WMS cascading (GeoServer store)"
+msgstr "WMS en cascada (emmagatzematge GeoServer)"
+
+msgid "Recreated from WMS store URL"
+msgstr "Recreada des de la URL de l'emmagatzematge WMS"
+
+msgid "WMS cascading"
+msgstr "WMS en cascada"
+
+msgid "WMS cascading layer \"%(layer)s\" could not be imported: %(error)s"
+msgstr "La capa WMS en cascada \"%(layer)s\" no s'ha pogut importar: %(error)s"
+
+msgid "Could not resolve workspace \"%(ws)s\" for WMS cascading layer \"%(layer)s\""
+msgstr "No s'ha pogut resoldre el workspace \"%(ws)s\" per a la capa WMS en cascada \"%(layer)s\""
+
+msgid "Could not create WMS datastore \"%(ds)s\" for layer \"%(layer)s\". Check that the WMS URL is accessible from this server."
+msgstr "No s'ha pogut crear l'emmagatzematge WMS \"%(ds)s\" per a la capa \"%(layer)s\". Verifiqueu que la URL WMS és accessible des d'aquest servidor."
