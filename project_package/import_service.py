@@ -3049,6 +3049,16 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
                 if basemap_canonical_hit or group_is_preexisting:
                     ld0 = layer_entry['layer']
                     if ld0.get('external'):
+                        eid0 = layer_entry.get('export_id')
+                        if eid0 and eid0 in skipped_external_ids:
+                            report.append({
+                                'external_layer_skipped': {
+                                    'export_id': eid0,
+                                    'layer': ld0.get('title') or ld0.get('name'),
+                                    'reason': 'wizard_skip',
+                                },
+                            })
+                            continue
                         lyr = _find_matching_external_in_layer_group(lg, layer_entry)
                         if lyr:
                             id_map[layer_entry['export_id']] = lyr.id
