@@ -1,0 +1,111 @@
+{
+  "layout": "_ws_jjdelcerro-_-jj_vertices_geodesicos_20260420_v1-_-Reseña_de_vértice_de_topografía_att",
+  "outputFilename": "Reseña_de_vértice_de_topografía",
+  "outputFormat": "pdf",
+  "attributes": {
+    "logo_url": "logo.png",
+    "datasource" : [
+        {
+	    "Nombre": "algo",
+	    "coord_x": "123.456",
+	    "coord_y": "789.012",
+	    "coord_z": "345.678",
+	    "tipo_senal": "Clavo de acero",
+	    "precision": "0.015",
+	    "fecha": "diciembre/15",
+	    "foto": "DSCN2122.JPG",
+            "enl_foto":"123",
+	    "map": {
+	      "projection": "EPSG:25830",
+	      "dpi": 254,
+	      "rotation": 0,
+	      "center": [600117.474978323, 4316424.96495869],
+	      "scale": 2255,
+	      "layers": [
+		{
+		  "type": "geojson",
+		  "geoJson": {
+		    "type": "FeatureCollection",
+		    "features": [
+		      {
+		        "type": "Feature",
+		        "geometry": {
+		          "type": "MultiPoint",
+		          "coordinates": [
+		            [600117.474978323, 4316424.96495869]
+		          ]
+		        },
+		        "properties": {
+		          "style_name": "selection_points"
+		        }
+		      }
+		    ]
+		  },
+		  "style": {
+		    "version": "2",
+		    "[style_name='selection_points']": {
+		      "symbolizers": [
+		        {
+		          "type": "point",
+		          "fillColor": "rgba(229,45,224,0.5)",
+		          "fillOpacity": 0.3,
+		          "graphicName": "circle",
+		          "pointRadius": 3,
+		          "strokeColor": "rgba(229,45,224,1)",
+		          "strokeWidth": 1
+		        }
+		      ]
+		    }
+		  }
+		},
+		{
+		  "baseURL": "https://gvsigol-geoserver:8443/geoserver/ws_albacete1/wms",
+		  "opacity": 1,
+		  "type": "WMS",
+		  "imageFormat": "image/png",
+		  "customParams": {
+		    "TRANSPARENT": "true"
+		  },
+		  "mergeableParams": {
+
+		  },
+		  "layers": [
+		    "ws_albacete1:vertices_geodesicos"
+		  ]
+		},
+		{
+		  "baseURL": "https://gvsigol-geoserver:8443/geoserver/ws_albacete1/wms",
+		  "opacity": 1,
+		  "type": "WMS",
+		  "imageFormat": "image/png",
+		  "customParams": {
+		    "TRANSPARENT": "true"
+		  },
+		  "mergeableParams": {
+
+		  },
+		  "layers": [
+		    "ws_albacete1:rt_tramo_vial_albacete"
+		  ]
+		},
+		{
+		  "baseURL": "https://gvsigol-geoserver:8443/geoserver/ws_albacete1/wms",
+		  "opacity": 1,
+		  "type": "WMS",
+		  "imageFormat": "image/png",
+		  "customParams": {
+		    "TRANSPARENT": "true"
+		  },
+		  "mergeableParams": {
+
+		  },
+		  "layers": [
+		    "ws_albacete1:provincias_25830"
+		  ]
+		}
+	      ]
+	    }
+        }
+    ]
+  }
+}
