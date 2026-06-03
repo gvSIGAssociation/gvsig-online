@@ -88,10 +88,6 @@ def build_sld(layer, style, single_symbol = False):
                                        <ogc:Literal>wms_height</ogc:Literal>
                                     </ogc:Function>
                                 </ogc:Function>
-                                <ogc:Function name="parameter">
-                                    <ogc:Literal>preserveLocation</ogc:Literal>
-                                    <ogc:Literal>Superimposed</ogc:Literal>
-                                </ogc:Function>
                             </ogc:Function>
                        </sld:Transformation>"""
         sld_body = sld_body.replace(b'<sld:FeatureTypeStyle>', transform, 1)
