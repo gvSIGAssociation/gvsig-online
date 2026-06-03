@@ -417,11 +417,7 @@ def build_project_zip(project: Project, export_options=None, progress_cb=None):
                     and prj_lg.default_baselayer
                     and prj_lg.default_baselayer == layer.id
                 )
-                # Determine vector mode early so we can skip remote DB calls for SLD
-                _is_foreign = bool(layer.type == 'v_PostGIS' and is_foreign_postgis_datastore(ds))
-                _vmode_early = _vector_mode_for_layer(layer, export_options) if _is_foreign else None
-                _skip_db_sld = _is_foreign and _vmode_early == 'definition_only'
-                _styles, _sld_errs = _styles_payload(layer, skip_db_sld=_skip_db_sld)
+                _styles, _sld_errs = _styles_payload(layer)
                 if _sld_errs:
                     log_lines.append(json.dumps({
                         'layer': layer.name,
