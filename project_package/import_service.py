@@ -3075,7 +3075,12 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
                                 'note': 'default_baselayergroup_unconditional_reuse',
                             },
                         })
-                elif reuse_existing_groups and _group_allows_layer_group_reuse(group):
+                # Custom basemap groups (basemap_sig is not None) must NEVER be reused via
+                # reuse_existing_groups: the user may want to skip specific external layers
+                # via the wizard, and reusing an existing group would bypass those skips
+                # (the existing group already has all its layers attached).
+                # They are always freshly created so wizard selections are honoured.
+                elif reuse_existing_groups and basemap_sig is None and _group_allows_layer_group_reuse(group):
                     lg = _find_existing_layer_group(server.id, lg_src)
                     if lg:
                         group_is_preexisting = True
