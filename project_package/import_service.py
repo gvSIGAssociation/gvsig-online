@@ -2265,6 +2265,8 @@ def _import_wms_cascading_layer(
 
     ld = layer_entry.get('layer') or {}
     layer_label = ld.get('title') or ld.get('name') or layer_entry.get('export_id')
+    datastore = None
+    lyr = None
     try:
         ws_name = ld.get('workspace_name') or default_ws
         workspace = _resolve_workspace_for_import(server_id, ws_name, ws_objs, username, report)
@@ -2293,6 +2295,11 @@ def _import_wms_cascading_layer(
 
         source_name = ld.get('source_name') or ld.get('name') or ''
         layer_name = _unique_layer_name_external(layer_group, ld.get('name') or source_name)
+
+        # Publish on GeoServer BEFORE saving the Django Layer so that if this
+        # fails we do not leave a dangling Layer record in the database that
+        # would make the layer appear in the project despite the import error.
+        gs.createResource(workspace, datastore, source_name, ld.get('title') or layer_name)
 
         lyr = Layer(
             datastore=datastore,
@@ -2340,13 +2347,23 @@ def _import_wms_cascading_layer(
         )
         lyr.save()
 
-        gs.createResource(workspace, datastore, source_name, lyr.title)
-
         id_map[layer_entry['export_id']] = lyr.id
         report.append({'wms_cascading_imported': {'layer': lyr.name, 'datastore': datastore.name}})
         return lyr
     except Exception as ex:
         LOG.warning('WMS cascading layer import failed for "%s": %s', layer_label, ex, exc_info=True)
+        # Roll back any partially-created Django objects so the layer does not
+        # appear in the project when the import actually failed.
+        if lyr is not None and lyr.pk:
+            try:
+                lyr.delete()
+            except Exception:
+                pass
+        if datastore is not None and datastore.pk:
+            try:
+                datastore.delete()
+            except Exception:
+                pass
         report.append({
             'wms_cascading_error': {
                 'export_id': layer_entry.get('export_id'),
