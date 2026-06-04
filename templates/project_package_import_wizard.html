@@ -243,7 +243,10 @@
 		{# ── WMS cascading layers (e_WMS datastore, not external) ── #}
 		{% for w in package_layout.wms_cascading_layers %}
 		<tr>
-			<td style="text-align:center;vertical-align:middle"></td>
+			<td style="text-align:center;vertical-align:middle">
+				<input type="checkbox" name="skip_wms_cascading_{{ w.export_id }}" value="1"
+					title="{% trans 'Skip this WMS cascading layer' %}">
+			</td>
 			<td style="vertical-align:middle"><span class="label label-info">WMS</span></td>
 			<td style="vertical-align:middle">
 				<strong>{{ w.title }}</strong>

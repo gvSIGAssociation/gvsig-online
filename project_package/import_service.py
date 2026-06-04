@@ -1210,6 +1210,33 @@ def _verify_gpkg_table_loaded(target_datastore, schema, table_name):
         intro.close()
 
 
+# Style types that use GeoServer rendering transformations (gs:PointStacker for
+# clustered points, ras:Heatmap for heatmaps). GWC cannot build WMTS capabilities
+# for cached layers carrying these styles ("Error searching max and min scale
+# denominators for style ..."), so such layers must NOT be GWC-cached. They are
+# served via WMS, which is the only correct way to render a rendering transformation.
+TRANSFORMATION_STYLE_TYPES = ('CP', 'MC')
+
+
+def _disable_cache_for_transformation_styles(lyr, has_transformation_style, report):
+    """Force cached=False for layers whose styles use rendering transformations.
+
+    Clustering / heatmap cannot be tiled by GWC, and a cached layer with such a
+    style breaks the whole WMTS GetCapabilities document. Disabling caching keeps
+    the layer rendering correctly via WMS and avoids the GWC failure.
+    """
+    if has_transformation_style and lyr.cached:
+        lyr.cached = False
+        try:
+            lyr.save(update_fields=['cached'])
+        except Exception:
+            lyr.save()
+        report.append({'warning': _(
+            'Layer "%(layer)s" uses a clustering/heatmap style (rendering transformation) '
+            'and cannot be tile-cached; caching has been disabled for it.'
+        ) % {'layer': lyr.name}})
+
+
 def _publish_vector_layer_on_geoserver(
     server,
     target_datastore,
@@ -1629,6 +1656,7 @@ def _import_vector_layer(
     _import_layer_resources(layer_entry, lyr, extract_dir)
 
     default_done = False
+    has_transformation_style = False
     for i, st in enumerate(layer_entry.get('styles', [])):
         raw = st.get('sld')
         if isinstance(raw, bytes):
@@ -1638,11 +1666,15 @@ def _import_vector_layer(
         sld_text = sld_text.strip()
         if not sld_text:
             continue
+        if st.get('type') in TRANSFORMATION_STYLE_TYPES:
+            has_transformation_style = True
         style_name = _unique_style_name(server, lyr.datastore.workspace.name, st.get('name') or ('imported_%d' % i))
         is_def = bool(st.get('is_default')) and not default_done
         if is_def:
             default_done = True
         sld_import(style_name, is_def, lyr.id, StringIO(sld_text), server, style_type=st.get('type'))
+
+    _disable_cache_for_transformation_styles(lyr, has_transformation_style, report)
 
     _reload_geoserver_vector_layer(server, lyr)
     server.updateThumbnail(lyr, 'create')
@@ -1976,6 +2008,7 @@ def _import_postgis_definition_layer(
     _import_layer_resources(layer_entry, lyr, extract_dir)
 
     default_done = False
+    has_transformation_style = False
     for i, st in enumerate(layer_entry.get('styles', [])):
         raw = st.get('sld')
         if isinstance(raw, bytes):
@@ -1985,6 +2018,8 @@ def _import_postgis_definition_layer(
         sld_text = sld_text.strip()
         if not sld_text:
             continue
+        if st.get('type') in TRANSFORMATION_STYLE_TYPES:
+            has_transformation_style = True
         style_name = _unique_style_name(
             server,
             lyr.datastore.workspace.name,
@@ -1994,6 +2029,8 @@ def _import_postgis_definition_layer(
         if is_def:
             default_done = True
         sld_import(style_name, is_def, lyr.id, StringIO(sld_text), server, style_type=st.get('type'))
+
+    _disable_cache_for_transformation_styles(lyr, has_transformation_style, report)
 
     _reload_geoserver_vector_layer(server, lyr)
     server.updateThumbnail(lyr, 'create')
@@ -2275,10 +2312,21 @@ def _import_wms_cascading_layer(
                 'ws': ws_name, 'layer': layer_label,
             })
 
-        ds_name = ld.get('datastore_name') or ('wms_' + (ld.get('name') or 'layer'))
-        # Ensure unique datastore name
-        while Datastore.objects.filter(workspace=workspace, name=ds_name).exists():
-            ds_name = ds_name + '_1'
+        ds_base = ld.get('datastore_name') or ('wms_' + (ld.get('name') or 'layer'))
+        # Ensure unique datastore name in BOTH the Django model AND GeoServer.
+        # A previous failed import may have left an orphaned GeoServer store, so
+        # checking only the Django model is not enough.
+        ds_name = ds_base
+        ds_counter = 1
+        ds_salt = ''
+        while (
+            Datastore.objects.filter(workspace=workspace, name=ds_name).exists()
+            or gs.datastore_exists(workspace.name, ds_name)
+        ):
+            ds_name = '%s_%d%s' % (ds_base, ds_counter, ds_salt)
+            ds_counter += 1
+            if ds_counter % 1000 == 0:
+                ds_salt = '_' + get_random_string(3)
 
         conn_params = ld.get('datastore_connection_params') or '{}'
 
@@ -2294,12 +2342,33 @@ def _import_wms_cascading_layer(
             )
 
         source_name = ld.get('source_name') or ld.get('name') or ''
-        layer_name = _unique_layer_name_external(layer_group, ld.get('name') or source_name)
+        # For e_WMS layers, Layer.name == GeoServer resource name, so we need a
+        # name that is unique in BOTH the Django layer_group AND the GeoServer
+        # workspace.  source_name is kept as the WMS nativeName (the actual
+        # layer name in the remote WMS service) and must not change.
+        base_name = ld.get('name') or source_name
+        layer_name = base_name
+        counter = 1
+        salt = ''
+        while (
+            Layer.objects.filter(name=layer_name, layer_group=layer_group).exists()
+            or gs.resource_exists(workspace.name, layer_name)
+        ):
+            layer_name = '%s_%d%s' % (base_name, counter, salt)
+            counter += 1
+            if counter % 1000 == 0:
+                salt = '_' + get_random_string(3)
+        if layer_name != base_name:
+            report.append({'warning': _(
+                'WMS cascading layer "%(orig)s" already exists in workspace "%(ws)s"; '
+                'importing as "%(new)s".'
+            ) % {'orig': base_name, 'ws': workspace.name, 'new': layer_name}})
 
         # Publish on GeoServer BEFORE saving the Django Layer so that if this
         # fails we do not leave a dangling Layer record in the database that
         # would make the layer appear in the project despite the import error.
-        gs.createResource(workspace, datastore, source_name, ld.get('title') or layer_name)
+        # native_name=source_name keeps the link to the actual remote WMS layer.
+        gs.createResource(workspace, datastore, layer_name, ld.get('title') or layer_name, native_name=source_name)
 
         lyr = Layer(
             datastore=datastore,
@@ -2360,6 +2429,12 @@ def _import_wms_cascading_layer(
             except Exception:
                 pass
         if datastore is not None and datastore.pk:
+            # Also delete the GeoServer store to avoid leaving an orphaned store
+            # that would block a future re-import with the same name.
+            try:
+                gs.deleteDatastore(datastore.workspace, datastore, False)
+            except Exception:
+                pass
             try:
                 datastore.delete()
             except Exception:
@@ -2746,18 +2821,27 @@ def _resolve_import_tools(raw_tools_json, report):
     if not isinstance(exported, list):
         return json.dumps(get_available_tools(core_enabled=True, plugin_enabled=False))
 
-    available = get_available_tools(core_enabled=True, plugin_enabled=True)
-    available_map = {t['name']: t for t in available}
+    # Build two views: one with plugin tools disabled (used for "not in export" fallback)
+    # and one with all tools enabled (used as metadata source for display properties).
+    available_full = get_available_tools(core_enabled=True, plugin_enabled=True)
+    available_defaults = get_available_tools(core_enabled=True, plugin_enabled=False)
+    available_map = {t['name']: t for t in available_full}
+    defaults_map = {t['name']: t for t in available_defaults}
     exported_map = {t['name']: t for t in exported if isinstance(t, dict) and t.get('name')}
 
     merged = []
     for name, avail_tool in available_map.items():
         if name in exported_map:
+            # Tool was exported: honour the exported checked state.
             entry = dict(avail_tool)
             entry['checked'] = bool(exported_map[name].get('checked', avail_tool.get('checked', False)))
             merged.append(entry)
         else:
-            merged.append(avail_tool)
+            # Tool is installed on this server but was NOT in the export package
+            # (e.g. plugin not installed on the source server).
+            # Apply default: core tools enabled, plugin tools disabled — same as a new project.
+            default_tool = defaults_map.get(name)
+            merged.append(default_tool if default_tool is not None else avail_tool)
 
     for name in exported_map:
         if name not in available_map:
@@ -2888,6 +2972,7 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
         skipped_view_ids = _parse_skip_view_export_ids(wiz)
         skipped_raster_ids = set(wiz.get('skip_raster_export_ids') or [])
         skipped_external_ids = set(wiz.get('skip_external_export_ids') or [])
+        skipped_wms_cascading_ids = set(wiz.get('skip_wms_cascading_export_ids') or [])
         skipped_gpkg_ck = set(wiz.get('skip_gpkg_connection_keys') or [])
         skipped_gpkg_layer_ids = set(wiz.get('skip_gpkg_layer_export_ids') or [])
         view_sql_overrides = wiz.get('view_sql_overrides') or {}
@@ -3331,9 +3416,20 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
                         import_permissions=import_permissions,
                     )
                 elif lt == 'e_WMS' and not (layer_entry.get('layer') or {}).get('external'):
-                    _import_wms_cascading_layer(
-                        layer_entry, lg, gs, username, ws_objs, default_ws, id_map, report, server.id
-                    )
+                    eid = layer_entry.get('export_id')
+                    if eid and eid in skipped_wms_cascading_ids:
+                        ld2 = layer_entry.get('layer') or {}
+                        report.append({
+                            'external_layer_skipped': {
+                                'export_id': eid,
+                                'layer': ld2.get('title') or ld2.get('name'),
+                                'reason': 'wizard_skip',
+                            },
+                        })
+                    else:
+                        _import_wms_cascading_layer(
+                            layer_entry, lg, gs, username, ws_objs, default_ws, id_map, report, server.id
+                        )
                 else:
                     report.append({'skipped': lt, 'export_id': layer_entry.get('export_id')})
 

@@ -756,6 +756,12 @@ def project_package_import_wizard(request, job_id):
                 skip_view_layers.append(key[len('skip_view_layer_'):])
         if skip_view_layers:
             wiz['skip_view_layer_export_ids'] = skip_view_layers
+        skip_wms_cascading = []
+        for key, val in request.POST.items():
+            if key.startswith('skip_wms_cascading_') and val:
+                skip_wms_cascading.append(key[len('skip_wms_cascading_'):])
+        if skip_wms_cascading:
+            wiz['skip_wms_cascading_export_ids'] = skip_wms_cascading
         view_sql_overrides = {}
         for key, val in request.POST.items():
             if key.startswith('view_sql_') and val.strip():
