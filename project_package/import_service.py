@@ -1210,33 +1210,6 @@ def _verify_gpkg_table_loaded(target_datastore, schema, table_name):
         intro.close()
 
 
-# Style types that use GeoServer rendering transformations (gs:PointStacker for
-# clustered points, ras:Heatmap for heatmaps). GWC cannot build WMTS capabilities
-# for cached layers carrying these styles ("Error searching max and min scale
-# denominators for style ..."), so such layers must NOT be GWC-cached. They are
-# served via WMS, which is the only correct way to render a rendering transformation.
-TRANSFORMATION_STYLE_TYPES = ('CP', 'MC')
-
-
-def _disable_cache_for_transformation_styles(lyr, has_transformation_style, report):
-    """Force cached=False for layers whose styles use rendering transformations.
-
-    Clustering / heatmap cannot be tiled by GWC, and a cached layer with such a
-    style breaks the whole WMTS GetCapabilities document. Disabling caching keeps
-    the layer rendering correctly via WMS and avoids the GWC failure.
-    """
-    if has_transformation_style and lyr.cached:
-        lyr.cached = False
-        try:
-            lyr.save(update_fields=['cached'])
-        except Exception:
-            lyr.save()
-        report.append({'warning': _(
-            'Layer "%(layer)s" uses a clustering/heatmap style (rendering transformation) '
-            'and cannot be tile-cached; caching has been disabled for it.'
-        ) % {'layer': lyr.name}})
-
-
 def _publish_vector_layer_on_geoserver(
     server,
     target_datastore,
@@ -1656,7 +1629,6 @@ def _import_vector_layer(
     _import_layer_resources(layer_entry, lyr, extract_dir)
 
     default_done = False
-    has_transformation_style = False
     for i, st in enumerate(layer_entry.get('styles', [])):
         raw = st.get('sld')
         if isinstance(raw, bytes):
@@ -1666,15 +1638,11 @@ def _import_vector_layer(
         sld_text = sld_text.strip()
         if not sld_text:
             continue
-        if st.get('type') in TRANSFORMATION_STYLE_TYPES:
-            has_transformation_style = True
         style_name = _unique_style_name(server, lyr.datastore.workspace.name, st.get('name') or ('imported_%d' % i))
         is_def = bool(st.get('is_default')) and not default_done
         if is_def:
             default_done = True
         sld_import(style_name, is_def, lyr.id, StringIO(sld_text), server, style_type=st.get('type'))
-
-    _disable_cache_for_transformation_styles(lyr, has_transformation_style, report)
 
     _reload_geoserver_vector_layer(server, lyr)
     server.updateThumbnail(lyr, 'create')
@@ -2008,7 +1976,6 @@ def _import_postgis_definition_layer(
     _import_layer_resources(layer_entry, lyr, extract_dir)
 
     default_done = False
-    has_transformation_style = False
     for i, st in enumerate(layer_entry.get('styles', [])):
         raw = st.get('sld')
         if isinstance(raw, bytes):
@@ -2018,8 +1985,6 @@ def _import_postgis_definition_layer(
         sld_text = sld_text.strip()
         if not sld_text:
             continue
-        if st.get('type') in TRANSFORMATION_STYLE_TYPES:
-            has_transformation_style = True
         style_name = _unique_style_name(
             server,
             lyr.datastore.workspace.name,
@@ -2029,8 +1994,6 @@ def _import_postgis_definition_layer(
         if is_def:
             default_done = True
         sld_import(style_name, is_def, lyr.id, StringIO(sld_text), server, style_type=st.get('type'))
-
-    _disable_cache_for_transformation_styles(lyr, has_transformation_style, report)
 
     _reload_geoserver_vector_layer(server, lyr)
     server.updateThumbnail(lyr, 'create')

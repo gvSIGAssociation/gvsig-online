@@ -261,7 +261,7 @@ def _styles_payload(layer, skip_db_sld=False):
     directly for those types instead of calling build_sld (which would
     return an empty document for them).
     """
-    from gvsigol_symbology.services import SLD_STORED_TYPES
+    from gvsigol_symbology.services import SLD_STORED_TYPES, SLD_BUILD_FULL_TYPES
     out = []
     sld_errors = []
     for sl in StyleLayer.objects.filter(layer=layer).select_related('style').order_by('-style__is_default'):
@@ -272,6 +272,11 @@ def _styles_payload(layer, skip_db_sld=False):
                 if st.type in SLD_STORED_TYPES:
                     # Heatmap (MC) and custom (CS): SLD is stored verbatim.
                     sld = st.sld or ''
+                elif st.type in SLD_BUILD_FULL_TYPES and st.sld:
+                    # Clustered points (CP): SLD is built with PointStacker and stored
+                    # verbatim in style.sld so all compound ogc:Filter expressions and
+                    # PointStacker parameters (e.g. preserveLocation) are preserved.
+                    sld = st.sld
                 else:
                     body = sld_builder.build_sld(layer, st)
                     if isinstance(body, bytes):
