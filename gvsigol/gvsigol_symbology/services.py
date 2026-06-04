@@ -552,15 +552,23 @@ def sld_import(name, is_default, layer_id, file, mapservice, style_type=None):
         rule.save()
         _sld_import_symbolizers(r._node, rule)
 
-    # CP (clustered points) must keep the PointStacker transformation.
-    single_symbol = style_type not in SLD_BUILD_FULL_TYPES
-    sld_body = sld_builder.build_sld(layer, style, single_symbol=single_symbol)
-    # CP styles contain GeoServer-specific SLD extensions (gs:PointStacker transformation)
-    # that fail OGC SLD schema validation. raw=True bypasses GeoServer's SLD validation
-    # so the file is written correctly; without it GeoServer creates the catalog entry but
-    # never writes the .sld file, producing a "No such resource" error at render time.
-    use_raw = style_type in SLD_BUILD_FULL_TYPES
-    if mapservice.createStyle(style.name, sld_body, raw=use_raw):
+    # CP (clustered points) — for GeoServer upload use the ORIGINAL SLD verbatim
+    # when available.  Rebuilding via build_sld loses compound ogc:Filter expressions
+    # (And/Or) and any PointStacker parameters (e.g. preserveLocation) because the
+    # Django Rule/Symbolizer model cannot represent them.  Using the verbatim SLD
+    # preserves exact rendering behaviour across the export→import round-trip.
+    # raw=True is always needed for CP because GeoServer's schema validator rejects
+    # the gs:PointStacker extension without it.
+    if style_type in SLD_BUILD_FULL_TYPES:
+        # Store the original SLD verbatim for later export fidelity.
+        style.sld = raw_sld_text if isinstance(raw_sld_text, str) else raw_sld_text.decode('utf-8', errors='replace')
+        style.save(update_fields=['sld'])
+        sld_body = utils.encode_xml(raw_sld_text)
+    else:
+        single_symbol = True  # non-CP non-stored types: single-symbol rebuild
+        sld_body = sld_builder.build_sld(layer, style, single_symbol=single_symbol)
+
+    if mapservice.createStyle(style.name, sld_body, raw=(style_type in SLD_BUILD_FULL_TYPES)):
         mapservice.setLayerStyle(layer, style.name, style.is_default)
         utils.__delete_temporaries(filepath)
         return True

@@ -149,11 +149,16 @@ def create_style(request, json_data, layer, gs, is_preview=False):
                 symbolizer.save()
 
     sld_body = sld_builder.build_sld(layer, style)
+    # Persist the built SLD so export/import can use it verbatim and round-trip
+    # without losing compound ogc:Filter expressions or PointStacker parameters.
+    sld_text = sld_body.decode('utf-8', errors='replace') if isinstance(sld_body, bytes) else sld_body
+    style.sld = sld_text
+    style.save(update_fields=['sld'])
     if is_preview:
-        if gs.createOverwrittenStyle(style.name, sld_body, True): 
+        if gs.createOverwrittenStyle(style.name, sld_body, True, raw=True):
             return style
     else:
-        if gs.createStyle(style.name, sld_body): 
+        if gs.createStyle(style.name, sld_body, raw=True):
             if not is_preview:
                 gs.setLayerStyle(layer, style.name, style.is_default)
             return style
@@ -289,11 +294,17 @@ def update_style(request, json_data, layer, gs, style, is_preview=False):
 
     sld_body = sld_builder.build_sld(layer, style)
 
+    # Persist the built SLD so export/import can use it verbatim and round-trip
+    # without losing compound ogc:Filter expressions or PointStacker parameters.
+    sld_text = sld_body.decode('utf-8', errors='replace') if isinstance(sld_body, bytes) else sld_body
+    style.sld = sld_text
+    style.save(update_fields=['sld'])
+
     if is_preview:
-        if gs.createOverwrittenStyle(style.name, sld_body, True): 
+        if gs.createOverwrittenStyle(style.name, sld_body, True, raw=True):
             return style
     else:
-        if gs.updateStyle(layer, style.name, sld_body): 
+        if gs.updateStyle(layer, style.name, sld_body, raw=True):
             gs.setLayerStyle(layer, style.name, style.is_default)
             return style
         else:
