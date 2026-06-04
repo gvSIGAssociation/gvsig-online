@@ -555,7 +555,12 @@ def sld_import(name, is_default, layer_id, file, mapservice, style_type=None):
     # CP (clustered points) must keep the PointStacker transformation.
     single_symbol = style_type not in SLD_BUILD_FULL_TYPES
     sld_body = sld_builder.build_sld(layer, style, single_symbol=single_symbol)
-    if mapservice.createStyle(style.name, sld_body): 
+    # CP styles contain GeoServer-specific SLD extensions (gs:PointStacker transformation)
+    # that fail OGC SLD schema validation. raw=True bypasses GeoServer's SLD validation
+    # so the file is written correctly; without it GeoServer creates the catalog entry but
+    # never writes the .sld file, producing a "No such resource" error at render time.
+    use_raw = style_type in SLD_BUILD_FULL_TYPES
+    if mapservice.createStyle(style.name, sld_body, raw=use_raw):
         mapservice.setLayerStyle(layer, style.name, style.is_default)
         utils.__delete_temporaries(filepath)
         return True
@@ -750,7 +755,9 @@ def clone_layer_styles(mapservice, source_layer, target_layer):
             # CP clustered points require PointStacker (single_symbol=True strips it).
             single_symbol = style.type not in SLD_BUILD_FULL_TYPES
             sld_body = sld_builder.build_sld(target_layer, new_style, single_symbol=single_symbol)
-        if mapservice.createStyle(new_style.name, sld_body):
+        # CP styles use GeoServer-specific SLD extensions; raw=True avoids schema validation.
+        use_raw = style.type in SLD_BUILD_FULL_TYPES
+        if mapservice.createStyle(new_style.name, sld_body, raw=use_raw):
             mapservice.setLayerStyle(target_layer, new_style.name, new_style.is_default)
         else:
             # TODO: manage errors
