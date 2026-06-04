@@ -19,6 +19,7 @@ from django.utils.translation import gettext as _
 
 from gvsigol.basetypes import CloneConf
 from gvsigol_auth import auth_backend
+from gvsigol_auth.models import Role as AuthRole
 from gvsigol_core import utils as core_utils
 from gvsigol_core.models import Project, ProjectLayerGroup, ProjectRole, SharedView
 from gvsigol_services import geographic_servers
@@ -27,10 +28,12 @@ from gvsigol_services.models import (
     Category,
     Connection,
     Datastore,
+    DatastoreRole,
     Enumeration,
     EnumerationItem,
     Layer,
     LayerFieldEnumeration,
+    LayerGroupRole,
     LayerManageRole,
     LayerReadRole,
     LayerResource,
@@ -1210,6 +1213,33 @@ def _verify_gpkg_table_loaded(target_datastore, schema, table_name):
         intro.close()
 
 
+def _ensure_role_exists(role_name):
+    """Create the Django Role object if it does not exist yet.
+
+    Roles are plain text labels; creating the Django object makes it visible
+    and assignable in the admin UI. GeoServer learns about roles implicitly
+    through ACL rules, so no GeoServer call is needed here.
+    System roles (admin, PUBLIC) are never created by import.
+    """
+    if not role_name:
+        return
+    system_roles = {auth_backend.get_admin_role(), 'ROLE_AUTHENTICATED', 'ROLE_ANONYMOUS', 'ROLE_NO_AUTH'}
+    if role_name in system_roles:
+        return
+    AuthRole.objects.get_or_create(name=role_name)
+
+
+def _apply_datastore_roles(datastore, layer_entry, import_permissions):
+    """Import DatastoreRole rows for a datastore from the package entry."""
+    if not import_permissions or datastore is None:
+        return
+    for dr in layer_entry.get('datastore_roles', []):
+        role = dr.get('role')
+        if role:
+            _ensure_role_exists(role)
+            DatastoreRole.objects.get_or_create(datastore=datastore, role=role)
+
+
 def _publish_vector_layer_on_geoserver(
     server,
     target_datastore,
@@ -1601,18 +1631,22 @@ def _import_vector_layer(
     write_roles = [admin_role]
     if import_permissions:
         for row in layer_entry.get('permissions', {}).get('read_roles', []):
+            _ensure_role_exists(row['role'])
             lr = LayerReadRole(layer=lyr, role=row['role'], filtered=row.get('filtered', False), external=row.get('external', False))
             lr.save()
             read_roles.append(row['role'])
         for row in layer_entry.get('permissions', {}).get('write_roles', []):
+            _ensure_role_exists(row['role'])
             lw = LayerWriteRole(layer=lyr, role=row['role'], filtered=row.get('filtered', False), external=row.get('external', False))
             lw.save()
             write_roles.append(row['role'])
         for row in layer_entry.get('permissions', {}).get('manage_roles', []):
+            _ensure_role_exists(row['role'])
             LayerManageRole(layer=lyr, role=row['role']).save()
     # Always set GeoServer ACL rules so the layer's public flag is respected:
     # public layers get "*" access, private layers get admin-only.
     server.setLayerDataRules(lyr, read_roles, write_roles)
+    _apply_datastore_roles(lyr.datastore, layer_entry, import_permissions)
 
     try:
         services_utils.set_time_enabled(server, lyr)
@@ -1938,6 +1972,7 @@ def _import_postgis_definition_layer(
     write_roles = [admin_role]
     if import_permissions:
         for row in layer_entry.get('permissions', {}).get('read_roles', []):
+            _ensure_role_exists(row['role'])
             lr = LayerReadRole(
                 layer=lyr,
                 role=row['role'],
@@ -1947,6 +1982,7 @@ def _import_postgis_definition_layer(
             lr.save()
             read_roles.append(row['role'])
         for row in layer_entry.get('permissions', {}).get('write_roles', []):
+            _ensure_role_exists(row['role'])
             lw = LayerWriteRole(
                 layer=lyr,
                 role=row['role'],
@@ -1956,10 +1992,12 @@ def _import_postgis_definition_layer(
             lw.save()
             write_roles.append(row['role'])
         for row in layer_entry.get('permissions', {}).get('manage_roles', []):
+            _ensure_role_exists(row['role'])
             LayerManageRole(layer=lyr, role=row['role']).save()
     # Always set GeoServer ACL rules so the layer's public flag is respected:
     # public layers get "*" access, private layers get admin-only.
     server.setLayerDataRules(lyr, read_roles, write_roles)
+    _apply_datastore_roles(lyr.datastore, layer_entry, import_permissions)
 
     try:
         services_utils.set_time_enabled(server, lyr)
@@ -2703,14 +2741,18 @@ def _import_raster_layer(
         _write_roles = [_admin_role]
         if import_permissions:
             for row in layer_entry.get('permissions', {}).get('read_roles', []):
+                _ensure_role_exists(row['role'])
                 LayerReadRole(layer=lyr, role=row['role'], filtered=row.get('filtered', False), external=row.get('external', False)).save()
                 _read_roles.append(row['role'])
             for row in layer_entry.get('permissions', {}).get('write_roles', []):
+                _ensure_role_exists(row['role'])
                 LayerWriteRole(layer=lyr, role=row['role'], filtered=row.get('filtered', False), external=row.get('external', False)).save()
                 _write_roles.append(row['role'])
             for row in layer_entry.get('permissions', {}).get('manage_roles', []):
+                _ensure_role_exists(row['role'])
                 LayerManageRole(layer=lyr, role=row['role']).save()
         gs.setLayerDataRules(lyr, _read_roles, _write_roles)
+        _apply_datastore_roles(lyr.datastore, layer_entry, import_permissions)
     except Exception as _acl_exc:
         LOG.warning('Could not set ACL rules for raster layer %s: %s', lyr.name, _acl_exc)
 
@@ -3166,6 +3208,15 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
                     created_by=username,
                 )
                 lg.save()
+                if import_permissions:
+                    for gr in lg_src.get('group_roles', []):
+                        if gr.get('role') and gr.get('permission'):
+                            _ensure_role_exists(gr['role'])
+                            LayerGroupRole.objects.get_or_create(
+                                layergroup=lg,
+                                role=gr['role'],
+                                permission=gr['permission'],
+                            )
                 report.append({'layer_group_created': lg.name})
             if basemap_sig is not None and not basemap_canonical_hit:
                 canonical_baselayer_lg_by_sig[basemap_sig] = lg
@@ -3448,6 +3499,7 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
 
         if import_permissions:
             for pr in snapshot.get('project_roles', []):
+                _ensure_role_exists(pr['role'])
                 ProjectRole(project=project, role=pr['role'], permission=pr.get('permission', ProjectRole.PERM_READ)).save()
 
         # Patch toc_order so renamed layers/groups still appear in the right order

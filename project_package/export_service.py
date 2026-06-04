@@ -15,10 +15,12 @@ from gvsigol_core.models import Project, SharedView
 from gvsigol_services.models import (
     Category,
     Datastore,
+    DatastoreRole,
     Enumeration,
     EnumerationItem,
     Layer,
     LayerFieldEnumeration,
+    LayerGroupRole,
     LayerManageRole,
     LayerReadRole,
     LayerResource,
@@ -54,8 +56,8 @@ def _schema_and_table(layer):
     return schema, table
 
 
-def _layer_group_to_dict(lg: LayerGroup):
-    return {
+def _layer_group_to_dict(lg: LayerGroup, export_permissions=False):
+    d = {
         'name': lg.name,
         'title': lg.title,
         'visible': lg.visible,
@@ -63,6 +65,16 @@ def _layer_group_to_dict(lg: LayerGroup):
         'created_by': lg.created_by,
         'server_name': Server.objects.filter(id=lg.server_id).values_list('name', flat=True).first(),
     }
+    if export_permissions:
+        d['group_roles'] = list(
+            LayerGroupRole.objects.filter(layergroup=lg).values('role', 'permission')
+        )
+    return d
+
+
+def _serialize_datastore_roles(datastore):
+    """Serialize DatastoreRole rows for a datastore (for permission export)."""
+    return list(DatastoreRole.objects.filter(datastore=datastore).values('role'))
 
 
 def _serialize_permissions(layer):
@@ -444,6 +456,9 @@ def build_project_zip(project: Project, export_options=None, progress_cb=None):
                     'permissions': (
                         _serialize_permissions(layer) if export_permissions else {}
                     ),
+                    'datastore_roles': (
+                        _serialize_datastore_roles(ds) if (export_permissions and ds) else []
+                    ),
                     'vector_data_mode': None,
                     'layer_resources': [],  # populated below
                     'raster_bundle': None,
@@ -633,7 +648,7 @@ def build_project_zip(project: Project, export_options=None, progress_cb=None):
             if prj_lg.default_baselayer:
                 default_baselayer_eid = layer_export_id_by_pk.get(prj_lg.default_baselayer)
             group_entry = {
-                'layer_group': _layer_group_to_dict(lg),
+                'layer_group': _layer_group_to_dict(lg, export_permissions=export_permissions),
                 'project_layer_group': {
                     'multiselect': prj_lg.multiselect,
                     'baselayer_group': prj_lg.baselayer_group,
