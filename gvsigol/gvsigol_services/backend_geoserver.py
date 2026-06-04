@@ -635,12 +635,12 @@ class Geoserver():
             return False
     
      
-    def createOverwrittenStyle(self, name, data, overwrite):
+    def createOverwrittenStyle(self, name, data, overwrite, raw=False):
         """
         Create new style
         """
         try:
-            self.getGsconfig().create_style(name, data, overwrite=overwrite, workspace=None, style_format="sld10", raw=False)
+            self.getGsconfig().create_style(name, data, overwrite=overwrite, workspace=None, style_format="sld10", raw=raw)
             return True
         
         except Exception as e:
@@ -652,8 +652,8 @@ class Geoserver():
                 raise Exception(error)
             return False
     
-    def createStyle(self, name, data):
-        return self.createOverwrittenStyle(name, data, False)
+    def createStyle(self, name, data, raw=False):
+        return self.createOverwrittenStyle(name, data, False, raw=raw)
         
     def addStyle(self, layer, layer_name, name):
         """
@@ -848,12 +848,12 @@ class Geoserver():
         elif sql_type in ("GEOMETRY", "GEOMETRYCOLLECTION", "MULTIGEOMETRY"):
             return 'com.vividsolutions.jts.geom.Geometry'
 
-    def createResource(self, workspace, store, name, title, extraParams={}):
+    def createResource(self, workspace, store, name, title, extraParams={}, native_name=None):
         try:
             if store.type[0]=="v":
                 return self.createFeaturetype(workspace, store, name, title, extraParams)
             elif store.type[0]=="e":
-                return self.createWMSLayer(workspace, store, name, title)
+                return self.createWMSLayer(workspace, store, name, title, native_name=native_name)
             else:
                 if store.type == 'c_ImageMosaic':
                     #got_params = json.loads(store.connection_params)
@@ -943,12 +943,12 @@ class Geoserver():
             logger.exception('ERROR createCoverage failed. Layer: ' + name + ' - Store: ' + coveragestore.name)
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published"))
     
-    def createWMSLayer(self, workspace, store, name, title):
+    def createWMSLayer(self, workspace, store, name, title, native_name=None):
         try:   
             catalog = self.getGsconfig()
             ws = catalog.get_workspace(workspace.name)
             dst = catalog.get_store(store.name, ws)
-            return catalog.create_wmslayer(ws, dst, name, name)
+            return catalog.create_wmslayer(ws, dst, name, native_name or name)
 
         except rest_geoserver.FailedRequestError as e:
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
