@@ -646,8 +646,20 @@ class Geoserver():
         except Exception as e:
             logger.exception('Sobrescribiendo estilo: ' + name)
             error_message = str(e)
-            if (error_message.startswith("There is already a style named")):
-                msg_name= name.split('_')[2]
+            if error_message.startswith("There is already a style named"):
+                if not overwrite:
+                    # A GeoServer orphan style (no Django record) blocks creation.
+                    # Overwrite it so the new Django-tracked style takes effect.
+                    try:
+                        self.getGsconfig().create_style(name, data, overwrite=True, workspace=None, style_format="sld10", raw=raw)
+                        return True
+                    except Exception as e2:
+                        logger.exception('Sobrescribiendo estilo (retry overwrite): ' + name)
+                # overwrite=True was already tried and still failed – bubble up.
+                try:
+                    msg_name = name.split('_')[2]
+                except IndexError:
+                    msg_name = name
                 error = str(_("There is already a style named")) + " " + msg_name
                 raise Exception(error)
             return False
@@ -672,13 +684,13 @@ class Geoserver():
                             
             self.rest_catalog.update_layer_styles_configuration(layer, name, default_style, style_list, user=self.user, password=self.password)
         
-    def updateStyle(self, layer, style_name, sld_body):
+    def updateStyle(self, layer, style_name, sld_body, raw=False):
         """
         Update a style
         """
             
         try:
-            self.rest_catalog.update_style(style_name, sld_body, user=self.user, password=self.password)
+            self.rest_catalog.update_style(style_name, sld_body, user=self.user, password=self.password, raw=raw)
             if layer is not None:
                 style_list = []
                 default_style = ''

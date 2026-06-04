@@ -944,8 +944,10 @@ class Geoserver():
         raise UploadError(r.status_code, r.text)
         
     
-    def update_style(self, style_name, sld_body, user=None, password=None):
+    def update_style(self, style_name, sld_body, user=None, password=None, raw=False):
         url = self.service_url + "/styles/" + style_name + ".sld"
+        if raw:
+            url += "?raw=true"
         if user and password:
             auth = (user, password)
         else:
