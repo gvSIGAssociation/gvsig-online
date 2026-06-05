@@ -60,7 +60,7 @@
 			<div class="col-md-12 form-group">
 				<div class="pf-topbar">
 					<a href="javascript:window.history.back();" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
-					<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+					<button type="button" id="save-layer-button" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
 				</div>
 			</div>
 			<div class="row" style="padding-left: 30px;">
@@ -764,7 +764,7 @@ $('#submenu-layers').addClass("active");
 				pagination: false
 			});
 
-		$("#dash-submit-button").click(function(e){
+		$("#save-layer-button").click(function(e){
 			for(var i=0; i<searcheableReadList.items.length; i++){
 				var item = searcheableReadList.items[i];
 				item.show();
@@ -842,7 +842,7 @@ $('#submenu-layers').addClass("active");
 			}
 		}
 
-		$('#dash-submit-button').click( function() {
+		$('#save-layer-button').click( function() {
 			$("body").overlay();
 		});
 
