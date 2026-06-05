@@ -47,6 +47,14 @@ from .forms import UploadFileForm
 from .models import (ETLworkspaces, ETLstatus, EtlWorkspaceEditRole, EtlWorkspaceExecuteRole,
                      EtlWorkspaceEditRestrictedRole, SendEmails, SendEndpoint, ETLPluginSettings,
                      ETLVisualizerSession, ETLVisualizerLayer)
+
+
+def _ctx(extra=None):
+    """Return a base template context that includes FRONTEND_BASE_URL."""
+    ctx = {'FRONTEND_BASE_URL': settings.FRONTEND_BASE_URL.rstrip('/')}
+    if extra:
+        ctx.update(extra)
+    return ctx
 from gvsigol_services.models import Datastore, Connection
 from django.db.models import Q
 from django.contrib.auth.models import User
@@ -233,7 +241,7 @@ def etl_canvas(request):
                     response['every'] = interval.every
                     response['period'] = interval.period
 
-            return render(request, 'etl.html', response)
+            return render(request, 'etl.html', _ctx(response))
 
         else:
 
@@ -249,7 +257,7 @@ def etl_canvas(request):
                 'dbc': dbc,
                 'providers': providers
             }
-            return render(request, 'etl.html', response)
+            return render(request, 'etl.html', _ctx(response))
 
 def get_list(request, concat = False, datetime_string = False):
     user = request.user
@@ -384,7 +392,7 @@ def etl_workspace_list(request):
         'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
     }
 
-    return render(request, 'dashboard_geoetl_workspaces_list.html', response)
+    return render(request, 'dashboard_geoetl_workspaces_list.html', _ctx(response))
 
 @login_required()
 @staff_required
@@ -788,7 +796,7 @@ def etl_workspace_update(request):
             'workspaces': get_list(request)
         }
 
-        return render(request, 'dashboard_geoetl_workspaces_list.html', response)
+        return render(request, 'dashboard_geoetl_workspaces_list.html', _ctx(response))
 
 @login_required()
 @staff_required
@@ -817,7 +825,7 @@ def etl_workspace_delete(request):
             cleanup_orphan_canvas_tasks()
 
     response = {}
-    return render(request, 'dashboard_geoetl_workspaces_list.html', response)
+    return render(request, 'dashboard_geoetl_workspaces_list.html', _ctx(response))
 
 
 @login_required()
@@ -1144,7 +1152,7 @@ def etl_workspace_upload(request):
     f.close()
 
     response = {}
-    return render(request, 'dashboard_geoetl_workspaces_list.html', response)
+    return render(request, 'dashboard_geoetl_workspaces_list.html', _ctx(response))
 
 @login_required()
 @staff_required
@@ -1254,7 +1262,7 @@ def etl_clean_tmp_tables(request):
     ETLstatus.objects.all().update(visualizer_session_id=None)
 
     response = {}
-    return render(request, 'dashboard_geoetl_workspaces_list.html', response)
+    return render(request, 'dashboard_geoetl_workspaces_list.html', _ctx(response))
 
 
 @login_required()

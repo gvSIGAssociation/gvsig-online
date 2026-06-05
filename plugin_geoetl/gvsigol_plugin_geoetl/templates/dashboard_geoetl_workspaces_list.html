@@ -2262,7 +2262,7 @@ function setSqlAfterValue(val) {
 				$("#icon-error-"+id).css("display", "none");
 
 				if (visualizer_session_id) {
-					var inspUrl = '/spa/etl-visualizer/' + visualizer_session_id + '/';
+					var inspUrl = '{{ FRONTEND_BASE_URL }}/etl-visualizer/' + visualizer_session_id + '/';
 					$("#btn-open-visualizer-"+id).attr("href", inspUrl).show();
 				} else {
 					$("#btn-open-visualizer-"+id).hide();
