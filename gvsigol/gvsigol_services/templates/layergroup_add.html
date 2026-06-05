@@ -56,7 +56,7 @@
 				<div class="col-md-12 form-group">
 					<div class="pf-topbar">
 					<a href="{{back_url}}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
-					<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+					<button type="button" id="save_button" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
 				</div>
 				</div>
 			</div>
@@ -212,6 +212,15 @@
 			searchClass: 'search',
 			page: 6,
 			pagination: false
+		});
+
+		$('#save_button').click(function(e) {
+			for(var i=0; i<searcheableList.items.length; i++){
+				var item = searcheableList.items[i];
+				item.show();
+			}
+			$('#layer-group-form').submit();
+			return false;
 		});
 	});
 </script>
