@@ -176,8 +176,10 @@ class LayerSerializer(serializers.ModelSerializer):
             if not ordered_field_names:
                 ordered_field_names = list(fields_dict.keys())
             
-            # añade campos que están en la BD pero no en conf (como wkb_geometry)
-            ordered_field_names.extend(list(missing_fields))
+            # añade campos que están en la BD pero no en conf (como la geometría o el ogc_fid),
+            # evitando duplicados con campos ya presentes (p.ej. ogc_fid en form_groups)
+            already_ordered = set(ordered_field_names)
+            ordered_field_names.extend([f for f in missing_fields if f not in already_ordered])
 
             enumeration_fields = []
             for field_name in ordered_field_names:
