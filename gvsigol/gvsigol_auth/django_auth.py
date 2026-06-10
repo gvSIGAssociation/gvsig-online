@@ -481,7 +481,7 @@ def add_role(role_name, desc=''):
         boolean
         True if the operation was successfull, False otherwise
     """
-    if auth_services.get_services().ldap_add_group(role_name, desc) == False:
+    if auth_services.get_services().ldap_add_group(role_name, desc, ignore_existing=True) == False:
         return False
 
     try:
