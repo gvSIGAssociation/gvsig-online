@@ -138,6 +138,30 @@ page_param: str = "page",page_size_param: str = "page_size",):
     }
     return page_obj.object_list, ctx
 
+_VALENCIAN_TITLE_LEGACY_KEYS = ('title-va', 'title-ca-es@valencia')
+
+
+def get_field_title_for_lang(field_conf, lang_id, default_name=None):
+    """
+    Resuelve el título de un campo para un idioma, con compatibilidad hacia atrás
+    para claves valencianas antiguas (title-va, title-ca-es@valencia).
+    """
+    if not field_conf:
+        return default_name or ''
+    title_key = 'title-' + lang_id
+    val = field_conf.get(title_key)
+    if val is not None and str(val).strip():
+        return str(val).strip()
+    if lang_id == 'ca-es-valencia':
+        for legacy_key in _VALENCIAN_TITLE_LEGACY_KEYS:
+            legacy_val = field_conf.get(legacy_key)
+            if legacy_val is not None and str(legacy_val).strip():
+                return str(legacy_val).strip()
+    if default_name is not None:
+        return default_name
+    return field_conf.get('name', '') or ''
+
+
 def _get_layer_obj(layer_or_id):
     if isinstance(layer_or_id, Layer):
         return layer_or_id

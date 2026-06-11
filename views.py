@@ -1348,7 +1348,8 @@ def backend_fields_list(request):
                         field = {}
                         field['name'] = f['name']
                         for id, language in LANGUAGES:
-                            field['title-'+id] = f.get('title-'+id, field['name'])
+                            field['title-'+id] = utils.get_field_title_for_lang(
+                                f, id, field['name'])
                         result_resources.append(field)
                         founded = True
                 if not founded:
@@ -2223,8 +2224,8 @@ def _parse_form_groups(form_groups, fields):
                 group_fields.remove(field)
         for id, language in LANGUAGES:
             title_lang = 'title-'+id
-            if group.get(title_lang) is None:
-                group[title_lang] = ''
+            if group.get(title_lang) is None or not str(group.get(title_lang, '')).strip():
+                group[title_lang] = utils.get_field_title_for_lang(group, id, '')
         group['fields'] = group_fields
     group0_fields = form_groups[0].get("fields", [])
     for f in all_fields:
@@ -3394,16 +3395,26 @@ def layer_config(request, layer_id):
         for i in range(1, counter+1):
             field = {}
             field['name'] = request.POST.get('field-name-' + str(i))
-            
+            if not field['name']:
+                continue
+
             # Preservar gvsigol_type, type_params y field_format de la configuración anterior
-            if field['name'] in existing_fields:
-                existing_field = existing_fields[field['name']]
+            existing_field = existing_fields.get(field['name'], {})
+            if existing_field:
                 field['gvsigol_type'] = existing_field.get('gvsigol_type', '')
                 field['type_params'] = existing_field.get('type_params', {})
                 field['field_format'] = existing_field.get('field_format', {})
-            
+
             for id, language in LANGUAGES:
-                field['title-'+id] = request.POST.get('field-title-'+id+'-' + str(i), field['name']).strip()
+                posted_title = request.POST.get('field-title-' + id + '-' + str(i))
+                if posted_title is not None:
+                    posted_title = posted_title.strip()
+                else:
+                    posted_title = ''
+                if not posted_title:
+                    posted_title = utils.get_field_title_for_lang(
+                        existing_field, id, field['name'])
+                field['title-' + id] = posted_title or field['name']
             field['visible'] = False
             if 'field-visible-' + str(i) in request.POST:
                 field['visible'] = True

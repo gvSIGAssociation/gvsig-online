@@ -372,6 +372,17 @@
 
 	};
 
+	function getFieldTitleForLang(field, language) {
+		var title = field["title-" + language];
+		if (title) {
+			return title;
+		}
+		if (language === 'ca-es-valencia') {
+			return field['title-va'] || field['title-ca-es@valencia'] || field.name || '';
+		}
+		return field.name || '';
+	}
+
 	function create_date_select(field, data, previousValue){
 		var language = $("#select-language").val();
 		var name_select = $("#"+field);
@@ -388,7 +399,7 @@
 		for (var i=0; i<data.length; i++) {
 			var attribs = {
 				value: data[i]["name"],
-				text: data[i]["title-" + language]
+				text: getFieldTitleForLang(data[i], language) || data[i]["name"]
 			};
 			if (previousValue == data[i]["name"]) {
 				attribs['selected']='true';
