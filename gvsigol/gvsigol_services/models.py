@@ -1093,10 +1093,11 @@ class LayerConfig:
         return {}
 
     def init_field_conf(self, field_conf, field_info):
+        from gvsigol_services.utils import get_field_title_for_lang
         field_conf['name'] = field_conf.get('name', field_info['name'])
         for id, language in settings.LANGUAGES:
-            field_conf['title-' +
-                       id] = field_conf.get('title-'+id, field_info['name'])
+            field_conf['title-' + id] = get_field_title_for_lang(
+                field_conf, id, field_info['name'])
         field_conf['visible'] = field_conf.get('visible', True)
         if field_conf['name'] in self.pks:
             field_conf['editable'] = field_conf.get('editable', False)

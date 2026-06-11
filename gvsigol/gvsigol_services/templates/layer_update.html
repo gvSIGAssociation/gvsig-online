@@ -137,7 +137,7 @@
 								<div class="row">
 									<div class="col-md-12" style="margin-bottom: 20px;">
 										<div class="provider-img">
-											<img style="height: 50px; width: 50px;" id="image-preview" src="{{layer_image_url}}" alt="">
+											<img style="height: 50px; width: 50px;" id="image-preview"{% if layer_image_url %} src="{{ layer_image_url }}"{% endif %} alt="">
 										</div>
 										<div class="provider-img-change">
 											<label>{% trans "Icon" %}</label>({% trans "Supported formats" %}: .jpg, .jpeg, .png, .svg)
@@ -693,6 +693,17 @@ $('#submenu-layers').addClass("active");
 
 	};
 
+	function getFieldTitleForLang(field, language) {
+		var title = field["title-" + language];
+		if (title) {
+			return title;
+		}
+		if (language === 'ca-es-valencia') {
+			return field['title-va'] || field['title-ca-es@valencia'] || field.name || '';
+		}
+		return field.name || '';
+	}
+
 	function create_date_select(field, data, previousValue, allow_blank){
 		var language = $("#select-language").val();
 		var name_select = $("#"+field);
@@ -709,16 +720,11 @@ $('#submenu-layers').addClass("active");
 			options.push($('<option>'));
 		}
 		for (var i=0; i<data.length; i++) {
+			var fieldTitle = getFieldTitleForLang(data[i], language);
 			var attribs = {
 					value: data[i]["name"],
-					text: data[i]["name"]
+					text: fieldTitle || data[i]["name"]
 				};
-			if(data[i]["title-" + language] != ""){
-				attribs = {
-					value: data[i]["name"],
-					text: data[i]["title-" + language]
-				};
-			}
 			if (previousValue == data[i]["name"]) {
 				attribs['selected']='true';
 				placeholderSelected = false;
@@ -765,11 +771,13 @@ $('#submenu-layers').addClass("active");
 			});
 
 		$("#save-layer-button").click(function(e){
+			e.preventDefault();
 			for(var i=0; i<searcheableReadList.items.length; i++){
 				var item = searcheableReadList.items[i];
 				item.show();
 			}
 			$(".layer-read-checkbox.gvsigol-checkable").prop("disabled", false);
+			$("body").overlay();
 			$("#layer-update-form").submit();
 			return false;
 		});
@@ -812,20 +820,20 @@ $('#submenu-layers').addClass("active");
 		});
 
 		var date_fields = {{ date_fields|safe }};
-		var time_enabled_field = "{{ layer.time_enabled_field }}";
-		var time_enabled_endfield = "{{ layer.time_enabled_endfield }}";
+		var time_enabled_field = "{{ layer.time_enabled_field|default_if_none:'' }}";
+		var time_enabled_endfield = "{{ layer.time_enabled_endfield|default_if_none:'' }}";
 		$("#id_layer_group option[value='']").attr('disabled','disabled');
 
 		create_date_select("id_time_enabled_field", date_fields, time_enabled_field, false);
 		create_date_select("id_time_enabled_endfield", date_fields, time_enabled_endfield, true);
 
-		$('#id_time_resolution_year').val({{ layer.time_resolution_year }});
-		$('#id_time_resolution_month').val({{ layer.time_resolution_month }});
-		$('#id_time_resolution_week').val({{ layer.time_resolution_week }});
-		$('#id_time_resolution_day').val({{ layer.time_resolution_day }});
-		$('#id_time_resolution_hour').val({{ layer.time_resolution_hour }});
-		$('#id_time_resolution_minute').val({{ layer.time_resolution_minute }});
-		$('#id_time_resolution_second').val({{ layer.time_resolution_second }});
+		$('#id_time_resolution_year').val('{{ layer.time_resolution_year|default_if_none:"" }}');
+		$('#id_time_resolution_month').val('{{ layer.time_resolution_month|default_if_none:"" }}');
+		$('#id_time_resolution_week').val('{{ layer.time_resolution_week|default_if_none:"" }}');
+		$('#id_time_resolution_day').val('{{ layer.time_resolution_day|default_if_none:"" }}');
+		$('#id_time_resolution_hour').val('{{ layer.time_resolution_hour|default_if_none:"" }}');
+		$('#id_time_resolution_minute').val('{{ layer.time_resolution_minute|default_if_none:"" }}');
+		$('#id_time_resolution_second').val('{{ layer.time_resolution_second|default_if_none:"" }}');
 
 		$('#select-style option[value="{{layer.style}}"]').attr('selected','selected');
 
@@ -841,10 +849,6 @@ $('#submenu-layers').addClass("active");
 				lgs.val(1);
 			}
 		}
-
-		$('#save-layer-button').click( function() {
-			$("body").overlay();
-		});
 
 		$('#time_enabled').click(function(){
 			temporary_field($(this));
@@ -869,9 +873,6 @@ $('#submenu-layers').addClass("active");
 		});
 
 		{% if 'gvsigol_plugin_catalog' in INSTALLED_APPS %}
-		{% if 'CATALOG_FACETS_CONFIG' in plugins_config.gvsigol_plugin_catalog %}
-		facetsConfig: {{ plugins_config.gvsigol_plugin_catalog.CATALOG_BASE_URL }},
-		{% endif %}
 		$('#create_metadata_btn').click(function() {
 			var url = '{% url 'create_metadata' layer_id %}';
 			$.ajax({url: url, type: 'post', data: {},
