@@ -223,6 +223,11 @@
 										<label for="allow_download">{% trans "Allow downloads" %}</label>
 									</div>
 								</div>
+								<div class="row cached-single-image-notice-row">
+									<div class="col-md-12">
+										<div id="cached-single-image-notice" class="alert-box-message" style="display:none;"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <span class="cached-single-image-notice-text"></span></div>
+									</div>
+								</div>
 								<div class="row">
 									<div class="col-md-4 form-group checkbox_real_time_layer_property">
 										{% if layer.real_time %}
@@ -710,7 +715,7 @@ $('#submenu-layers').addClass("active");
 		var placeholderSelected = true;
 
 		if (data==null || data.length==0) {
-			var text = "{% trans 'Resource contains no fields' %}";
+			var text = "{% filter escapejs %}{% trans 'Resource contains no fields' %}{% endfilter %}";
 			rebuildSelect(name_select, text, true);
 			$.overlayout();
 			return;
@@ -731,7 +736,7 @@ $('#submenu-layers').addClass("active");
 			}
 			options.push($('<option>', attribs));
 		}
-		var text = '{% trans "Choose field" %}';
+		var text = '{% filter escapejs %}{% trans "Choose field" %}{% endfilter %}';
 		rebuildSelect(name_select, text, placeholderSelected, options);
 	};
 
@@ -843,7 +848,7 @@ $('#submenu-layers').addClass("active");
 		for (var i=0; i<lg_options.length; i++) {
 			text = $(lg_options[i]).text();
 			if (text=="__default__") {
-				$(lg_options[i]).html('{% trans "Default" %}');
+				$(lg_options[i]).html('{% filter escapejs %}{% trans "Default" %}{% endfilter %}');
 			}
 			if (lgs.val()=="") {
 				lgs.val(1);
@@ -866,6 +871,28 @@ $('#submenu-layers').addClass("active");
 
 
 		make_temporal_form();
+
+		var msgSingleImageUncaches = "{% filter escapejs %}{% trans "Alert: single image (no tiles) cannot be combined with tile cache. Cached has been turned off." %}{% endfilter %}";
+		var msgCachedDisablesSingle = "{% filter escapejs %}{% trans "Alert: a cached layer cannot use single image (no tiles). Single image has been turned off." %}{% endfilter %}";
+
+		function showCachedSingleImageNotice(text) {
+			var $box = $("#cached-single-image-notice");
+			$box.find(".cached-single-image-notice-text").text(text);
+			$box.css("display", "block");
+		}
+
+		$("#single_image").on("change", function() {
+			if ($(this).is(":checked") && $("#cached").is(":checked")) {
+				$("#cached").prop("checked", false);
+				showCachedSingleImageNotice(msgSingleImageUncaches);
+			}
+		});
+		$("#cached").on("change", function() {
+			if ($(this).is(":checked") && $("#single_image").is(":checked")) {
+				$("#single_image").prop("checked", false);
+				showCachedSingleImageNotice(msgCachedDisablesSingle);
+			}
+		});
 
 		$('#datetimepicker').datetimepicker({
 			format: 'DD-MM-YYYY HH:mm:ss',
@@ -899,7 +926,7 @@ $('#submenu-layers').addClass("active");
 		
 		// Deshabilitar botón y mostrar loading
 		btn.prop('disabled', true);
-		btn.html('<i class="fa fa-spinner fa-spin"></i> {% trans "Generando..." %}');
+		btn.html('<i class="fa fa-spinner fa-spin"></i> {% filter escapejs %}{% trans "Generando..." %}{% endfilter %}');
 		
 		// Construir URL correctamente
 		var baseUrl = window.location.origin;
@@ -924,9 +951,9 @@ $('#submenu-layers').addClass("active");
 					}
 					
 					// Mostrar mensaje de éxito
-					alert('{% trans "Metadatos enriquecidos generados correctamente. Puedes editarlos antes de guardar la capa." %}');
+					alert('{% filter escapejs %}{% trans "Metadatos enriquecidos generados correctamente. Puedes editarlos antes de guardar la capa." %}{% endfilter %}');
 				} else {
-					alert('{% trans "Error:" %} ' + response.message);
+					alert('{% filter escapejs %}{% trans "Error:" %}{% endfilter %} ' + response.message);
 				}
 			},
 			error: function(xhr, status, error) {
@@ -937,14 +964,14 @@ $('#submenu-layers').addClass("active");
 					error: error
 				});
 				
-				var errorMsg = '{% trans "Error al generar metadatos enriquecidos" %}';
+				var errorMsg = '{% filter escapejs %}{% trans "Error al generar metadatos enriquecidos" %}{% endfilter %}';
 				
 				if (xhr.status === 404) {
-					errorMsg = '{% trans "Error 404: La URL no fue encontrada. Asegúrate de que el plugin GeoCopilot está instalado y el servidor está reiniciado." %}';
+					errorMsg = '{% filter escapejs %}{% trans "Error 404: La URL no fue encontrada. Asegúrate de que el plugin GeoCopilot está instalado y el servidor está reiniciado." %}{% endfilter %}';
 				} else if (xhr.status === 403) {
-					errorMsg = '{% trans "Error 403: No tienes permisos para realizar esta acción." %}';
+					errorMsg = '{% filter escapejs %}{% trans "Error 403: No tienes permisos para realizar esta acción." %}{% endfilter %}';
 				} else if (xhr.status === 500) {
-					errorMsg = '{% trans "Error 500: Error interno del servidor." %}';
+					errorMsg = '{% filter escapejs %}{% trans "Error 500: Error interno del servidor." %}{% endfilter %}';
 				} else if (xhr.responseJSON && xhr.responseJSON.message) {
 					errorMsg = xhr.responseJSON.message;
 				}
