@@ -596,7 +596,7 @@ $(document).ready(function() {
 					// Refrescar Select2
 					select.trigger('change');
 				} else {
-					select.append('<option value="">-- {% trans "No entities found" %} --</option>');
+					select.append('<option value="">-- {% filter escapejs %}{% trans "No entities found" %}{% endfilter %} --</option>');
 					select.trigger('change');
 					if (!response.success && !autoLoad) {
 						alert('Error: ' + response.error);

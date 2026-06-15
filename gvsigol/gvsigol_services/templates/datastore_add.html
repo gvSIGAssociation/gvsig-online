@@ -325,7 +325,7 @@ $().ready(function(){
 			if (!connectionSelect2Initialized && $.fn.select2) {
 				setTimeout(function() {
 					$('#id_connection').select2({
-						placeholder: '{% trans "Select a connection" %}',
+						placeholder: '{% filter escapejs %}{% trans "Select a connection" %}{% endfilter %}',
 						allowClear: true,
 						width: '100%'
 					});
@@ -401,7 +401,7 @@ $().ready(function(){
 		if (!schemaSelect2Initialized && $.fn.select2) {
 			$('#id_schema').select2({
 				tags: true,  // Permite escribir nuevos valores
-				placeholder: '{% trans "Select or type a new schema name" %}',
+				placeholder: '{% filter escapejs %}{% trans "Select or type a new schema name" %}{% endfilter %}',
 				allowClear: true,
 				width: '100%',
 				createTag: function(params) {
@@ -415,7 +415,7 @@ $().ready(function(){
 					}
 					return {
 						id: term,
-						text: term + ' {% trans "(new)" %}',
+						text: term + ' {% filter escapejs %}{% trans "(new)" %}{% endfilter %}',
 						newTag: true
 					};
 				}
@@ -436,8 +436,8 @@ $().ready(function(){
 				schemaSelect2Initialized = false;
 			}
 			
-			schemaSelect.html('<option value="">{% trans "Loading..." %}</option>');
-			schemaStatus.text('{% trans "Connecting to database..." %}').removeClass('text-danger text-success text-warning').addClass('text-muted');
+			schemaSelect.html('<option value="">{% filter escapejs %}{% trans "Loading..." %}{% endfilter %}</option>');
+			schemaStatus.text('{% filter escapejs %}{% trans "Connecting to database..." %}{% endfilter %}').removeClass('text-danger text-success text-warning').addClass('text-muted');
 			
 			$.ajax({
 				type: 'GET',
@@ -460,16 +460,16 @@ $().ready(function(){
 							schemaSelect.val('public').trigger('change');
 						}
 						
-						schemaStatus.text('{% trans "Select existing or type new name" %}').removeClass('text-danger text-muted text-warning').addClass('text-success');
+						schemaStatus.text('{% filter escapejs %}{% trans "Select existing or type new name" %}{% endfilter %}').removeClass('text-danger text-muted text-warning').addClass('text-success');
 						setTimeout(function() { 
-							schemaStatus.text('{% trans "Select an existing schema or type a new name to create it" %}').removeClass('text-success').addClass('text-muted'); 
+							schemaStatus.text('{% filter escapejs %}{% trans "Select an existing schema or type a new name to create it" %}{% endfilter %}').removeClass('text-success').addClass('text-muted'); 
 						}, 3000);
 					} else if (response.success && (!response.schemas || response.schemas.length === 0)) {
 						// Inicializar Select2 con tags aunque no haya esquemas
 						initSchemaSelect2();
-						schemaStatus.text('{% trans "No schemas found. Type a name to create one." %}').removeClass('text-muted text-danger text-success').addClass('text-warning');
+						schemaStatus.text('{% filter escapejs %}{% trans "No schemas found. Type a name to create one." %}{% endfilter %}').removeClass('text-muted text-danger text-success').addClass('text-warning');
 					} else {
-						schemaStatus.text(response.error || '{% trans "Unknown error" %}').removeClass('text-muted text-success text-warning').addClass('text-danger');
+						schemaStatus.text(response.error || '{% filter escapejs %}{% trans "Unknown error" %}{% endfilter %}').removeClass('text-muted text-success text-warning').addClass('text-danger');
 					}
 				},
 				error: function(xhr, status, error) {
@@ -477,9 +477,9 @@ $().ready(function(){
 					// Inicializar Select2 con tags para permitir escribir
 					initSchemaSelect2();
 					
-					var errorMsg = '{% trans "Connection error. You can type a schema name." %}';
+					var errorMsg = '{% filter escapejs %}{% trans "Connection error. You can type a schema name." %}{% endfilter %}';
 					if (status === 'timeout') {
-						errorMsg = '{% trans "Connection timeout. You can type a schema name." %}';
+						errorMsg = '{% filter escapejs %}{% trans "Connection timeout. You can type a schema name." %}{% endfilter %}';
 					}
 					schemaStatus.text(errorMsg).removeClass('text-muted text-success text-warning').addClass('text-danger');
 					console.error('Error loading schemas:', status, error);
@@ -492,7 +492,7 @@ $().ready(function(){
 				schemaSelect2Initialized = false;
 			}
 			schemaSelect.html('<option value="">---------</option>');
-			schemaStatus.text('{% trans "Select an existing schema or type a new name to create it" %}').removeClass('text-danger text-success text-warning').addClass('text-muted');
+			schemaStatus.text('{% filter escapejs %}{% trans "Select an existing schema or type a new name to create it" %}{% endfilter %}').removeClass('text-danger text-success text-warning').addClass('text-muted');
 		}
 	}
 	

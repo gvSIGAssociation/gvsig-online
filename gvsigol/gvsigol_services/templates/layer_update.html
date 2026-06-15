@@ -795,8 +795,8 @@ $('#submenu-layers').addClass("active");
 			} else {
 				var aux = '';
 				aux += '<div class="col-md-12"> \n';
-				aux += '\t <h2>{% trans "Layer title" %}</h2> \n';
-				aux += '\t <p>{% trans "Layer description" %}</p> \n';
+				aux += '\t <h2>{% filter escapejs %}{% trans "Layer title" %}{% endfilter %}</h2> \n';
+				aux += '\t <p>{% filter escapejs %}{% trans "Layer description" %}{% endfilter %}</p> \n';
 				aux += '</div> \n';
 				detailedInfoHTML.innerHTML = aux;
 			}

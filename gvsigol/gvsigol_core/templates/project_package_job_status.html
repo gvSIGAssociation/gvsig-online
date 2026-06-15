@@ -117,7 +117,7 @@
             if (warns.length) {
                 var warnEl = document.getElementById('pp-export-warnings');
                 warnEl.style.display = '';
-                var html = '<strong>{% trans "Warning: the following layers could not be fully exported" %}:</strong><ul style="margin-top:0.5em;margin-bottom:0">';
+                var html = '<strong>{% filter escapejs %}{% trans "Warning: the following layers could not be fully exported" %}{% endfilter %}:</strong><ul style="margin-top:0.5em;margin-bottom:0">';
                 warns.forEach(function (e) {
                     html += '<li><code>' + e.layer + '</code> — ' + e.error + '</li>';
                 });
