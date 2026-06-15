@@ -645,7 +645,7 @@
 										<div class="pf-search-bar" style="flex:1; max-width:320px;">
 											<input type="text" class="search2 form-control" placeHolder="{% trans 'Search layer group...' %}" />
 										</div>
-										<div id="add-layer-group-button" class="btn-pf-add" title='{% trans "Add layer group" %}' data-toggle="modal" data-target="#modal-add-layer-group"><i class="fa fa-plus"></i> {% trans "Add layer group" %}</div>
+										<div id="add-layer-group-button" class="btn-pf-add" title="{% filter force_escape %}{% trans "Add layer group" %}{% endfilter %}" data-toggle="modal" data-target="#modal-add-layer-group"><i class="fa fa-plus"></i> {% trans "Add layer group" %}</div>
 									</div>
 									<div class="box-body">
 										<ul class="products-list product-list-in-box list2">

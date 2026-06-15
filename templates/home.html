@@ -851,11 +851,11 @@ body.skin-black .home-page {
 					<div class="row">
 						<div class="col-sm-6 form-group" style="margin-bottom: 10px;">
 							<label for="password1">{% trans "New password" %}</label>
-							<input placeholder='{% trans "New password" %}' name="password1" id="password1" type="password" class="form-control">
+							<input placeholder="{% filter force_escape %}{% trans "New password" %}{% endfilter %}" name="password1" id="password1" type="password" class="form-control">
 						</div>
 						<div class="col-sm-6 form-group" style="margin-bottom: 10px;">
 							<label for="password2">{% trans "Repeat new password" %}</label>
-							<input placeholder='{% trans "Repeat new password" %}' name="password2" id="password2" type="password" class="form-control">
+							<input placeholder="{% filter force_escape %}{% trans "Repeat new password" %}{% endfilter %}" name="password2" id="password2" type="password" class="form-control">
 						</div>
 					</div>
 					<button id="update-password-submit" class="btn-pass-submit">
@@ -880,7 +880,7 @@ body.skin-black .home-page {
 					<i class="fa fa-search search-icon"></i>
 				</div>
 				{% if user.is_staff %}
-				<button id="button-add-project" title='{% trans "Add project" %}'>
+				<button id="button-add-project" title="{% filter force_escape %}{% trans "Add project" %}{% endfilter %}">
 					<i class="fa fa-plus"></i> {% trans "Add" %}
 				</button>
 				{% endif %}
@@ -927,7 +927,7 @@ body.skin-black .home-page {
 				</select>
 				{% endif %}
 				{% if has_hidden_items and user.is_staff %}
-				<button id="btn-toggle-hidden" title='{% trans "Show/hide hidden items" %}'>
+				<button id="btn-toggle-hidden" title="{% filter force_escape %}{% trans "Show/hide hidden items" %}{% endfilter %}">
 					<i class="fa fa-eye-slash"></i> {% trans "Hidden" %}
 				</button>
 				{% endif %}
@@ -1071,7 +1071,7 @@ body.skin-black .home-page {
 				<h3 class="projects-panel__title">
 					<i class="fa fa-th-large"></i>{% trans "Projects & Applications" %}
 				</h3>
-				<button id="button-add-project" title='{% trans "Add project" %}'>
+				<button id="button-add-project" title="{% filter force_escape %}{% trans "Add project" %}{% endfilter %}">
 					<i class="fa fa-plus"></i> {% trans "Add" %}
 				</button>
 			</div>
@@ -1350,7 +1350,7 @@ body.skin-black .home-page {
 				},
 				success: function() { if (onSuccess) onSuccess(); },
 				error: function() {
-					alert('{% trans "Error saving order." %}');
+					alert('{% filter escapejs %}{% trans "Error saving order." %}{% endfilter %}');
 				}
 			});
 		}

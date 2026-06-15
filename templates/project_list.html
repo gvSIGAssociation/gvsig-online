@@ -1102,7 +1102,7 @@ $(document).ready(function() {
 			.catch(function () {
 				$('#export-package-preflight-loading').hide();
 				$('#export-package-preflight-error').show().text(
-					'{% trans "Could not load export options." %}'
+					'{% filter escapejs %}{% trans "Could not load export options." %}{% endfilter %}'
 				);
 			});
 		return false;
