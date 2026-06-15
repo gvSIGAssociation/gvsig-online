@@ -219,8 +219,8 @@
 					searching: false,
 					ordering: false,
 				    language: {
-					    zeroRecords		: '{% trans "No fields have been defined" %}',
-					    emptyTable		: '{% trans "No fields have been defined" %}',
+					    zeroRecords		: '{% filter escapejs %}{% trans "No fields have been defined" %}{% endfilter %}',
+					    emptyTable		: '{% filter escapejs %}{% trans "No fields have been defined" %}{% endfilter %}',
 					},
 					"columnDefs": [{
 						"targets": -2,

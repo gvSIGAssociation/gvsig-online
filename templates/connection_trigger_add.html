@@ -184,7 +184,7 @@
 										<label for="schemas-input">{% trans "Schemas" %}</label>
 										<select id="schemas-input" class="form-control" multiple="multiple" style="width: 100%;">
 										</select>
-										<small class="text-muted">{% trans "Type schema names and press Enter to add" %}</small>
+										<small class="text-muted">{% filter force_escape %}{% trans "Type schema names and press Enter to add" %}{% endfilter %}</small>
 									</div>
 
 									<hr>
@@ -257,7 +257,7 @@ END;{% endif %}</textarea>
 										<div class="box-header">
 											<h3 class="col-md-6 box-title" style="vertical-align: middle">{% trans "Select trigger permissions" %}</h3>
 											<div class="col-md-6">
-												<input type="text" class="search form-control" placeholder="{% trans 'Search user role...' %}" id="role-search" />
+												<input type="text" class="search form-control" placeholder="{% filter force_escape %}{% trans 'Search user role...' %}{% endfilter %}" id="role-search" />
 											</div>
 											<div class="col-md-12" style="margin-top: 10px;">
 												<div class="checkbox">
@@ -318,6 +318,45 @@ END;{% endif %}</textarea>
 </script>
 <script>
 $(document).ready(function() {
+	// Permisos: script independiente para que List.js funcione aunque falle otro bloque JS
+	var checkedTriggerRoles = {};
+
+	$('#trigger-permissions-box .list .item').each(function() {
+		var $cb = $(this).find('input[name="allowed_roles"]');
+		if ($cb.length === 0) return;
+		checkedTriggerRoles[$cb.val()] = $cb.is(':checked');
+	});
+
+	var searcheableRoleList = new List('trigger-permissions-box', {
+		valueNames: ['searchable-rolename'],
+		page: 10,
+		pagination: true
+	});
+
+	$('#role-search').on('keyup', function() {
+		searcheableRoleList.search($(this).val());
+	});
+
+	$('#trigger-permissions-box').on('change', 'input[name="allowed_roles"]', function() {
+		checkedTriggerRoles[$(this).val()] = $(this).is(':checked');
+	});
+
+	$('#allow_all').change(function() {
+		var isChecked = $(this).is(':checked');
+		$('input[name="allowed_roles"]').prop('disabled', isChecked);
+		$('#roles-list-container').toggleClass('text-muted', isChecked);
+	});
+
+	if ($('#allow_all').is(':checked')) {
+		$('input[name="allowed_roles"]').prop('disabled', true);
+		$('#roles-list-container').addClass('text-muted');
+	}
+
+	window.triggerPermissionsState = { checkedTriggerRoles: checkedTriggerRoles };
+});
+</script>
+<script>
+$(document).ready(function() {
 	var connectionId = {{ connection.id }};
 	
 	// Inicializar tooltips
@@ -352,7 +391,7 @@ $(document).ready(function() {
 	$('#schemas-input').select2({
 		tags: true,
 		tokenSeparators: [',', ' '],
-		placeholder: '{% trans "Type schema name and press Enter" %}',
+		placeholder: '{% filter escapejs %}{% trans "Type schema name and press Enter" %}{% endfilter %}',
 		allowClear: true,
 		data: availableSchemas.map(function(s) { 
 			return { id: s, text: s }; 
@@ -384,56 +423,6 @@ $(document).ready(function() {
 		$('#schemas-input').val(selectedSchemas).trigger('change');
 	}
 	
-	// -----------------------------------------------------------------------
-	// PASO 1: Leer el estado inicial de TODOS los checkboxes ANTES de que
-	// List.js los elimine del DOM al paginar (usa removeChild internamente).
-	// -----------------------------------------------------------------------
-	var checkedTriggerRoles = {};  // { roleName: true/false }
-
-	$('#trigger-permissions-box .list .item').each(function() {
-		var $cb = $(this).find('input[name="allowed_roles"]');
-		if ($cb.length === 0) return;
-		var roleName = $cb.val();
-		checkedTriggerRoles[roleName] = $cb.is(':checked');
-	});
-
-	// -----------------------------------------------------------------------
-	// PASO 2: Inicializar List.js con paginación.
-	// -----------------------------------------------------------------------
-	var searcheableRoleList = new List('trigger-permissions-box', {
-		valueNames: ['searchable-rolename'],
-		page: 10,
-		pagination: true
-	});
-
-	$('#role-search').on('keyup', function() {
-		searcheableRoleList.search($(this).val());
-	});
-
-	// -----------------------------------------------------------------------
-	// PASO 3: Escuchar cambios en checkboxes visibles para actualizar tracking.
-	// -----------------------------------------------------------------------
-	$('#trigger-permissions-box').on('change', 'input[name="allowed_roles"]', function() {
-		checkedTriggerRoles[$(this).val()] = $(this).is(':checked');
-	});
-	
-	// Deshabilitar checkboxes de roles cuando allow_all está marcado
-	$('#allow_all').change(function() {
-		var isChecked = $(this).is(':checked');
-		$('input[name="allowed_roles"]').prop('disabled', isChecked);
-		if (isChecked) {
-			$('#roles-list-container').addClass('text-muted');
-		} else {
-			$('#roles-list-container').removeClass('text-muted');
-		}
-	});
-	
-	// Inicializar estado
-	if ($('#allow_all').is(':checked')) {
-		$('input[name="allowed_roles"]').prop('disabled', true);
-		$('#roles-list-container').addClass('text-muted');
-	}
-	
 	// Mostrar/ocultar selector de esquemas según scope
 	$('#scope').change(function() {
 		if ($(this).val() === 'schemas') {
@@ -463,16 +452,14 @@ $(document).ready(function() {
 		// Validar que hay código SQL
 		if (!$('#sql_code').val().trim()) {
 			e.preventDefault();
-			alert('{% trans "SQL code is required" %}');
+			alert('{% filter escapejs %}{% trans "SQL code is required" %}{% endfilter %}');
 			sqlEditor.focus();
 			return false;
 		}
 
-		// -------------------------------------------------------------------
-		// PASO 4: Añadir inputs ocultos para roles marcados que List.js haya
-		// eliminado del DOM (páginas ocultas), para que lleguen al servidor.
-		// -------------------------------------------------------------------
+		// Añadir inputs ocultos para roles marcados que List.js haya eliminado del DOM
 		var $form = $(this);
+		var checkedTriggerRoles = (window.triggerPermissionsState || {}).checkedTriggerRoles || {};
 		$.each(checkedTriggerRoles, function(roleName, isChecked) {
 			if (isChecked) {
 				// Buscar si el checkbox sigue en el DOM y está presente
@@ -498,7 +485,7 @@ $(document).ready(function() {
 			selectedSchemas = $('#schemas-input').val() || [];
 			
 			if (selectedSchemas.length === 0) {
-				$('#compatible-datastores').html('<p class="text-muted"><em>{% trans "Select at least one schema to see compatible datastores" %}</em></p>');
+				$('#compatible-datastores').html('<p class="text-muted"><em>{% filter escapejs %}{% trans "Select at least one schema to see compatible datastores" %}{% endfilter %}</em></p>');
 				return;
 			}
 		}
@@ -518,15 +505,15 @@ $(document).ready(function() {
 					});
 				} else {
 					if (scope === 'global') {
-						html = '<p class="text-muted"><em>{% trans "No datastores in this connection yet" %}</em></p>';
+						html = '<p class="text-muted"><em>{% filter escapejs %}{% trans "No datastores in this connection yet" %}{% endfilter %}</em></p>';
 					} else {
-						html = '<p class="text-muted"><em>{% trans "No datastores match the selected schemas" %}</em></p>';
+						html = '<p class="text-muted"><em>{% filter escapejs %}{% trans "No datastores match the selected schemas" %}{% endfilter %}</em></p>';
 					}
 				}
 				$('#compatible-datastores').html(html);
 			},
 			error: function() {
-				$('#compatible-datastores').html('<p class="text-danger"><em>{% trans "Error loading datastores" %}</em></p>');
+				$('#compatible-datastores').html('<p class="text-danger"><em>{% filter escapejs %}{% trans "Error loading datastores" %}{% endfilter %}</em></p>');
 			}
 		});
 	}

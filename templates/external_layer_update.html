@@ -490,8 +490,8 @@ $(document).ready(function(){
 		$(".cached-single-image-notice-row").css("display","none");
 	}
 
-	var msgSingleImageUncaches = "{% filter escapejs %}{% trans "Alert: single image (no tiles) cannot be combined with tile cache. Cached has been turned off." %}{% endfilter %}";
-	var msgCachedDisablesSingle = "{% filter escapejs %}{% trans "Alert: a cached layer cannot use single image (no tiles). Single image has been turned off." %}{% endfilter %}";
+	var msgSingleImageUncaches = "{% trans "Alert: single image (no tiles) cannot be combined with tile cache. Cached has been turned off." %}";
+	var msgCachedDisablesSingle = "{% trans "Alert: a cached layer cannot use single image (no tiles). Single image has been turned off." %}";
 
 	function showCachedSingleImageNotice(text) {
 		var $box = $("#cached-single-image-notice");
