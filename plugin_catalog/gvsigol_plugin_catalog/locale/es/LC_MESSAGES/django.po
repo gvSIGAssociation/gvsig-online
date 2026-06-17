@@ -156,3 +156,9 @@ msgstr "No hay recursos disponibles"
 #: views.py:284
 msgid "Metadata detail not available"
 msgstr "El detalle del metadato no está disponible"
+
+msgid "gvsigol_plugin_catalog manual title"
+msgstr "Plugin Catálogo"
+
+msgid "gvsigol_plugin_catalog manual desc"
+msgstr "Manual del plugin de catálogo de metadatos de gvSIG Online"
