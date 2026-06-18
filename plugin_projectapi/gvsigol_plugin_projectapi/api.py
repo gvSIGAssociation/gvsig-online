@@ -46,7 +46,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
 from django.contrib.auth.models import User
 from gvsigol_core import utils as core_utils
-from gvsigol_core.models import Project, ProjectLayerGroup, Application, SharedView, UserHomeOrder
+from gvsigol_core.models import Project, ProjectLayerGroup, Application, SharedView, UserHomeOrder, get_shared_view_url
 from gvsigol_plugin_projectapi import settings
 from gvsigol_plugin_projectapi.export import VectorLayerExporter
 from gvsigol_plugin_projectapi.serializers import ProjectsSerializer, GsInstanceSerializer, ApplicationsSerializer, EmptySerializer
@@ -909,8 +909,7 @@ class SharedViewManager:
         else:
             name = datetime.today().strftime("%Y%m%d") + get_random_string(length=32)
             project = get_object_or_404(Project, id=pid)
-            shared_url = '/spa/v/' + quote(project.name) + '/?sharedView=' + name
-            #shared_url = settings.BASE_URL + '/gvsigonline/core/load_shared_view/' + name
+            shared_url = get_shared_view_url(project, name)
 
         try:
             # Se intenta obtener una vista compartida existente con el mismo nombre.
@@ -947,7 +946,7 @@ class CreateSharedViewAPI(APIView):
         if not core_utils.can_read_project(request, project):
             raise PermissionDenied('No tiene permiso para compartir este proyecto.')
         name = datetime.today().strftime("%Y%m%d") + get_random_string(length=32)
-        shared_url = '/spa/v/' + quote(project.name) + '/?sharedView=' + name
+        shared_url = get_shared_view_url(project, name)
         return Response({'shared_url': shared_url}, status=status.HTTP_200_OK)
 
 class SaveSharedViewAPI(APIView):
@@ -978,7 +977,7 @@ class SaveSharedViewAPI(APIView):
             SharedViewManager.save_shared_view(pid, description, view_state, expiration_date, request.user, False, shared_url)
         else:
             shared_view = SharedViewManager.save_shared_view(pid, description, view_state, expiration_date, request.user)
-            shared_url = shared_view.shared_url
+            shared_url = shared_view.url
         
         return Response({'shared_url': shared_url}, status=status.HTTP_200_OK)
     
