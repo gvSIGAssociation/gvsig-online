@@ -53,6 +53,9 @@ def _get_spa_mobileproject_url(projectid, projectname=None):
         return urljoin(frontend_base_url + "/viewer/mobile/", quote(str(projectid) + "/"))
     # return urljoin(frontend_base_url + "/viewer/mobile/", quote(str(projectid) + "/"))
 
+def get_shared_view_url(project, shared_view_name):
+    base_url = _get_spa_project_url(project.id, project.name).rstrip('/')
+    return base_url + '/?sharedView=' + shared_view_name
 
 
 class Project(models.Model):
