@@ -185,6 +185,7 @@ class Connection(models.Model):
         ('segex', 'SEGEX'),
         ('sharepoint', 'SharePoint'),
         ('padron-atm', 'Padrón ATM'),
+        ('sgarexws', 'SgaRexWS'),
     )
     
     # Todos los tipos combinados para el campo del modelo
@@ -192,7 +193,7 @@ class Connection(models.Model):
     
     # Listas para validación rápida
     DATABASE_TYPES = ('PostGIS', 'Oracle', 'SQLServer')
-    API_TYPES = ('indenova', 'segex', 'sharepoint', 'padron-atm')
+    API_TYPES = ('indenova', 'segex', 'sharepoint', 'padron-atm', 'sgarexws')
     
     name = models.CharField(max_length=250, unique=True)
     description = models.TextField(null=True, blank=True)
