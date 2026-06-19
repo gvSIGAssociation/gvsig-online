@@ -130,6 +130,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 								{% elif conn.type == 'padron-atm' %}Padrón-ATM
 								{% elif conn.type == 'sharepoint' %}SharePoint
 								{% elif conn.type == 'segex' %}SEGEX
+								{% elif conn.type == 'sgarexws' %}SgaRexWS
 								{% else %}{{ conn.type }}{% endif %}
 							</td>
 							<td>
