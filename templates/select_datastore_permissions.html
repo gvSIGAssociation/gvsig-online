@@ -1,5 +1,5 @@
 {% load i18n %}
-{% load static from staticfiles %}
+{% load static %}
 <style>
 .dp-header {
 	display: flex;
@@ -88,7 +88,7 @@
 		<div id="datastore-permissions-box" class="box searchable-list-box">
 			<div class="box-header dp-header">
 				<div class="dp-search">
-					<input type="text" class="search form-control" placeholder="{% trans 'Search user role...' %}" id="ds-role-search" />
+					<input type="text" class="search form-control" placeholder="{% filter force_escape %}{% trans 'Search user role...' %}{% endfilter %}" id="ds-role-search" />
 				</div>
 				<div class="dp-allow-all">
 					<label class="dp-perm-chip" title="{% trans 'All staff users can use this datastore to create layers' %}">

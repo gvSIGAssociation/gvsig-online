@@ -35,7 +35,7 @@ from django.db.models import Q
 import psycopg2
 from . import geographic_servers
 from gvsigol import settings
-from gvsigol.settings import MEDIA_ROOT
+from gvsigol.settings import MEDIA_ROOT, FILEMANAGER_DIRECTORY
 from gvsigol_auth.models import User
 from gvsigol_auth.auth_backend import get_roles
 from gvsigol_services.backend_postgis import Introspect
@@ -66,7 +66,7 @@ import requests
 from owslib.wmts import WebMapTileService
 from owslib.util import Authentication
 
-from urllib.parse import urlencode, urlparse, parse_qs, urlunparse
+from urllib.parse import urlencode, urlparse, parse_qs, urlunparse, quote
 import copy
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -137,6 +137,30 @@ page_param: str = "page",page_size_param: str = "page_size",):
         "qs": _qs,  # helper para links en template
     }
     return page_obj.object_list, ctx
+
+_VALENCIAN_TITLE_LEGACY_KEYS = ('title-va', 'title-ca-es@valencia')
+
+
+def get_field_title_for_lang(field_conf, lang_id, default_name=None):
+    """
+    Resuelve el título de un campo para un idioma, con compatibilidad hacia atrás
+    para claves valencianas antiguas (title-va, title-ca-es@valencia).
+    """
+    if not field_conf:
+        return default_name or ''
+    title_key = 'title-' + lang_id
+    val = field_conf.get(title_key)
+    if val is not None and str(val).strip():
+        return str(val).strip()
+    if lang_id == 'ca-es-valencia':
+        for legacy_key in _VALENCIAN_TITLE_LEGACY_KEYS:
+            legacy_val = field_conf.get(legacy_key)
+            if legacy_val is not None and str(legacy_val).strip():
+                return str(legacy_val).strip()
+    if default_name is not None:
+        return default_name
+    return field_conf.get('name', '') or ''
+
 
 def _get_layer_obj(layer_or_id):
     if isinstance(layer_or_id, Layer):
@@ -1075,6 +1099,29 @@ def clone_layer(target_datastore, layer, layer_group, clone_conf=None):
         
             toc_add_layer(new_layer_instance)
             server.createOrUpdateGeoserverLayerGroup(new_layer_instance.layer_group)
+
+            if new_layer_instance.vector_tile:
+                server.update_vector_tile_format(
+                    new_layer_instance.datastore.workspace,
+                    new_layer_instance.name,
+                    True
+                )
+
+            if new_layer_instance.cached:
+                # Reload GeoServer so the WMTS capabilities reflect the new layer name.
+                # The clone copies external_params verbatim, so wmts_options still points
+                # to the original layer's WMTS URL template; we must regenerate it here.
+                server.reload_master()
+                try:
+                    wmts_opts = get_wmts_options_from_layer(new_layer_instance)
+                    if wmts_opts is not None:
+                        ep = json.loads(new_layer_instance.external_params) if new_layer_instance.external_params else {}
+                        ep['wmts_options'] = wmts_opts
+                        new_layer_instance.external_params = json.dumps(ep)
+                        new_layer_instance.save()
+                except Exception:
+                    logger.exception("Could not refresh wmts_options for cloned cached layer %s", new_layer_instance.name)
+
             new_layer_instance._cloned_from_name = old_name
             new_layer_instance._cloned_from_instance = old_instance
             return new_layer_instance
@@ -1481,6 +1528,55 @@ def getUserAuthSession(request):
 
 
 PIXEL_SIZE_M = 0.00028  # 0.28 mm
+
+def _is_generic_wms_default_style_name(name, layer_name=None):
+    if not name:
+        return True
+    if name.lower() == 'default':
+        return True
+    if name.endswith('.Default'):
+        return True
+    if layer_name:
+        short_name = layer_name.split(':')[-1]
+        if name == short_name + '.Default':
+            return True
+    return False
+
+
+def mark_default_external_wms_style(styles, layer_name=None):
+    """
+    Mark the default WMS style for external layers.
+    Prefer the first thematic style (not generic Default/default names),
+    else the first generic default style, else the first style.
+    """
+    if not styles:
+        return styles
+    for style in styles:
+        if isinstance(style, dict):
+            style['is_default'] = False
+
+    default_idx = 0
+    for i, style in enumerate(styles):
+        if not isinstance(style, dict):
+            continue
+        name = style.get('name') or ''
+        if not _is_generic_wms_default_style_name(name, layer_name):
+            default_idx = i
+            break
+    else:
+        for i, style in enumerate(styles):
+            if not isinstance(style, dict):
+                continue
+            name = style.get('name') or ''
+            if _is_generic_wms_default_style_name(name, layer_name) and name:
+                default_idx = i
+                break
+
+    if isinstance(styles[default_idx], dict):
+        styles[default_idx]['is_default'] = True
+    return styles
+
+
 def get_wmts_options(
     wmts, # owslib.wmts.WebMapTileService
     layer_id: str
@@ -1686,7 +1782,27 @@ def _legend_url_for_style(legend_url, style_name):
         return legend_url
 
 
+def _normalize_wmts_style_identifier_for_kvp(wmts_options):
+    """
+    OWSLib may serialize a missing WMTS style Identifier as the string 'null'.
+    OpenLayers then requests STYLE=null and GeoServer returns blank tiles; default style needs ''.
+    """
+    styles = wmts_options.get('styles')
+    if isinstance(styles, dict) and 'null' in styles:
+        entry = styles.pop('null')
+        if '' not in styles:
+            styles[''] = entry
+    st = wmts_options.get('style')
+    if st is None or (isinstance(st, str) and st.strip().lower() == 'null'):
+        wmts_options.pop('style', None)
+    elif isinstance(st, str) and st.strip() == '':
+        wmts_options.pop('style', None)
+
+
 def wmts_options_for_openlayers(wmts_options, format=None, style=None, layer_styles=None, tilematrixsetname=None, projection=None):
+    if wmts_options.get('styles') is None:
+        wmts_options['styles'] = {}
+    _normalize_wmts_style_identifier_for_kvp(wmts_options)
     if len(wmts_options['styles']) > 0:
         if style and wmts_options['styles'].get(style):
             wmts_options['style'] = style
@@ -1726,12 +1842,15 @@ def wmts_options_for_openlayers(wmts_options, format=None, style=None, layer_sty
                 new_styles[name] = entry
             wmts_options['styles'] = new_styles
     else:
-        wmts_options['style'] = None
+        wmts_options.pop('style', None)
     if format:
+        fmts = wmts_options.get("formats")
+        if isinstance(fmts, (list, tuple)) and fmts and format not in fmts:
+            format = next((f for f in fmts if "png" in f.lower()), fmts[0])
         wmts_options['format'] = format
         try:
             del wmts_options['formats']
-        except:
+        except Exception:
             pass
 
     tilematrixset = None
@@ -1757,6 +1876,8 @@ def wmts_options_for_openlayers(wmts_options, format=None, style=None, layer_sty
         wmts_options['projection'] = tilematrixset['projection']
         del wmts_options['tileGrids']
         del wmts_options['matrixSets']
+
+    _normalize_wmts_style_identifier_for_kvp(wmts_options)
     return wmts_options
 
 
@@ -1780,3 +1901,287 @@ class AuthPatch(Authentication):
         super().__init__(*args, **kwargs)
 
 
+# ---------------------------------------------------------------------------
+# Attributions resolution helpers
+# ---------------------------------------------------------------------------
+
+def get_attributions_for_project(project):
+    """
+    Devuelve la configuración de atribuciones aplicable a `project` siguiendo
+    las reglas de prioridad acordadas:
+
+    1. Si existe una configuración 'project_specific' activa para ese proyecto,
+       se devuelve esa.
+    2. Si no, se devuelve la primera configuración 'generic' activa que aplique
+       al proyecto (orden alfabético por `name` para que la elección sea
+       determinista). Una genérica aplica cuando `apply_to_all_projects=True` o
+       cuando el proyecto está incluido en su lista de memberships.
+    3. Si nada coincide, devuelve None.
+    """
+    if project is None:
+        return None
+
+    from .models import AttributionConfig
+
+    specific = (
+        AttributionConfig.objects
+        .filter(kind=AttributionConfig.KIND_PROJECT_SPECIFIC,
+                is_active=True,
+                project=project)
+        .first()
+    )
+    if specific is not None:
+        return specific
+
+    generic_qs = (
+        AttributionConfig.objects
+        .filter(kind=AttributionConfig.KIND_GENERIC, is_active=True)
+        .filter(Q(apply_to_all_projects=True) | Q(project_memberships__project=project))
+        .order_by('name')
+        .distinct()
+    )
+    return generic_qs.first()
+
+
+def normalize_attributions_filemanager_relative_path(internal_path):
+    """
+    Devuelve la ruta del fichero relativa a FILEMANAGER_DIRECTORY, con '/' como
+    separador. Tolera valores guardados como ruta absoluta y el caso legacy en
+    que se concatena el prefijo duplicado (p. ej. opt/gvsigol_data/data/...)
+    encima del directorio del filemanager.
+    """
+    from pathlib import Path
+
+    if internal_path is None:
+        return ''
+    s = str(internal_path).strip()
+    if not s:
+        return ''
+
+    fm_root = Path(FILEMANAGER_DIRECTORY).resolve()
+
+    def rel_to_fm(abs_path):
+        try:
+            r = Path(abs_path).resolve().relative_to(fm_root)
+            return str(r).replace('\\', '/')
+        except ValueError:
+            return None
+
+    p = Path(s.replace('\\', '/'))
+
+    if p.is_absolute():
+        rel = rel_to_fm(p)
+        if rel is not None:
+            return rel
+
+    rel_s = s.replace('\\', '/').lstrip('/')
+
+    fm_noprefix = str(fm_root).replace('\\', '/').lstrip('/')
+    low = rel_s.lower()
+    low_fm = fm_noprefix.lower()
+    if low.startswith(low_fm + '/'):
+        rel_s = rel_s[len(fm_noprefix) + 1:]
+    elif low == low_fm:
+        rel_s = ''
+
+    if not rel_s:
+        return ''
+
+    try:
+        cand = (fm_root / rel_s).resolve()
+        rel = rel_to_fm(cand)
+        if rel is not None:
+            return rel
+    except (OSError, RuntimeError):
+        pass
+
+    trial = Path('/') / rel_s
+    try:
+        rel = rel_to_fm(trial)
+        if rel is not None:
+            return rel
+    except (OSError, RuntimeError):
+        pass
+
+    return rel_s
+
+
+def attributions_attachment_matches_relative_path(norm_relative_path):
+    """
+    True si existe algún AttributionAttachment cuya internal_path
+    normalizada coincide con norm_relative_path (separadores '/').
+    """
+    from pathlib import Path
+    from .models import AttributionAttachment
+
+    norm = norm_relative_path.replace('\\', '/').strip('/')
+    if not norm:
+        return False
+
+    fm = Path(FILEMANAGER_DIRECTORY).resolve()
+    try:
+        abs_under_fm = str((fm / norm).resolve())
+    except (OSError, ValueError):
+        abs_under_fm = None
+
+    q = (
+        Q(internal_path__iendswith='/' + norm) |
+        Q(internal_path__iexact=norm)
+    )
+    if abs_under_fm:
+        q |= Q(internal_path__iexact=abs_under_fm)
+
+    for att in AttributionAttachment.objects.filter(q):
+        if normalize_attributions_filemanager_relative_path(att.internal_path) == norm:
+            return True
+
+    # Respaldo: internal_path en BD con prefijos distintos al esperado en q
+    bn = os.path.basename(norm)
+    if bn:
+        for att in AttributionAttachment.objects.filter(
+            Q(internal_path__iendswith='/' + bn) | Q(internal_path__iexact=bn)
+        ):
+            if normalize_attributions_filemanager_relative_path(att.internal_path) == norm:
+                return True
+    return False
+
+
+def attributions_logo_matches_relative_path(norm_relative_path):
+    """
+    True si existe alguna configuración de atribuciones cuyo
+    logo_internal_path normalizado coincide con norm_relative_path.
+    """
+    from .models import AttributionConfig
+
+    norm = (norm_relative_path or '').replace('\\', '/').strip('/')
+    if not norm:
+        return False
+
+    for cfg in AttributionConfig.objects.exclude(
+        Q(logo_internal_path__isnull=True) | Q(logo_internal_path__exact='')
+    ).only('logo_internal_path'):
+        if normalize_attributions_filemanager_relative_path(cfg.logo_internal_path) == norm:
+            return True
+    return False
+
+
+def build_attributions_public_url(internal_path):
+    """
+    Construye la URL pública para descargar un adjunto de atribuciones a
+    partir de su ruta interna en el file manager. La URL apunta al fileserver
+    de gvsigol_services y se sirve con sendfile y permission_classes=[AllowAny].
+    """
+    relative_path = normalize_attributions_filemanager_relative_path(internal_path)
+    if not relative_path:
+        return ''
+
+    base_url = (settings.BASE_URL or '').rstrip('/')
+    gvsigol_prefix = (getattr(settings, 'GVSIGOL_URL_PREFIX', 'gvsigonline/') or '').strip('/')
+    # Rutas en urls.py: include(prefix + 'fileserver/', gvsigol_services.urls_fileserver)
+    # → URL real: …/fileserver/attributions/download/<path>/ (sin segmento gvsigol_services).
+    # La ruta Django declara barra final; facilita coincidencia con APPEND_SLASH.
+    path_enc = quote(relative_path, safe='/')
+    return '{base}/{prefix}/fileserver/attributions/download/{path}/'.format(
+        base=base_url,
+        prefix=gvsigol_prefix,
+        path=path_enc,
+    )
+
+
+ATTRIBUTION_MODAL_SECTION_KEYS = (
+    'logo',
+    'copyright',
+    'other',
+    'help',
+    'contact',
+    'legal',
+    'links',
+    'attachments',
+)
+
+
+def normalize_attributions_modal_section_order(value):
+    """
+    Lista ordenada de ids de bloque válidos para el modal de atribuciones.
+    Si falta algún id conocido, se añade al final preservando el orden por defecto.
+    """
+    if value is None or value == '' or value == []:
+        return list(ATTRIBUTION_MODAL_SECTION_KEYS)
+    if isinstance(value, str):
+        try:
+            value = json.loads(value)
+        except (ValueError, TypeError):
+            return list(ATTRIBUTION_MODAL_SECTION_KEYS)
+    if not isinstance(value, list):
+        return list(ATTRIBUTION_MODAL_SECTION_KEYS)
+    allowed = set(ATTRIBUTION_MODAL_SECTION_KEYS)
+    seen = set()
+    out = []
+    for key in value:
+        if key in allowed and key not in seen:
+            out.append(key)
+            seen.add(key)
+    for key in ATTRIBUTION_MODAL_SECTION_KEYS:
+        if key not in seen:
+            out.append(key)
+            seen.add(key)
+    return out
+
+
+def serialize_attributions(config):
+    """
+    Genera la representación JSON-serializable de una `AttributionConfig`
+    para ser consumida por el visor React. Devuelve None si la configuración
+    es None.
+    """
+    if config is None:
+        return None
+
+    links = [
+        {
+            'url': link.url,
+            'description': link.description or '',
+        }
+        for link in config.links.all().order_by('order', 'id')
+    ]
+
+    attachments = [
+        {
+            'public_url': build_attributions_public_url(att.internal_path)
+                or (att.public_url or ''),
+            'description': att.description or '',
+        }
+        for att in config.attachments.all().order_by('order', 'id')
+    ]
+
+    return {
+        'id': config.id,
+        'title': config.name,
+        'name': config.name,
+        'description': config.description or '',
+        'other': {
+            'title': config.other_title or '',
+            'text': config.other_text or '',
+        },
+        'logo': {
+            'internal_path': config.logo_internal_path or '',
+            'public_url': build_attributions_public_url(config.logo_internal_path)
+                or (config.logo_public_url or ''),
+        },
+        'kind': config.kind,
+        'copyright_notice': config.copyright_notice or '',
+        'help_text': config.help_text or '',
+        'contact': {
+            'organization': config.contact_organization or '',
+            'person': config.contact_person or '',
+            'address': config.contact_address or '',
+            'phone': config.contact_phone or '',
+            'email': config.contact_email or '',
+            'legal_notice': config.legal_notice or '',
+        },
+        'links': links,
+        'attachments': attachments,
+        'modal_section_order': normalize_attributions_modal_section_order(
+            config.modal_section_order
+        ),
+    }

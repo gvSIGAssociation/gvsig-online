@@ -1,5 +1,5 @@
 {% load i18n %}
-{% load static from staticfiles %}
+{% load static %}
 <style>
 .lp-header {
 	display: flex;
@@ -90,7 +90,7 @@
 		<div id="read-list-box" class="box searchable-list-box">
 			<div class="box-header lp-header">
 				<div class="lp-search">
-					<input type="text" class="search form-control" placeholder="{% trans 'Search user role...' %}" />
+					<input type="text" class="search form-control" placeholder="{% filter force_escape %}{% trans 'Search user role...' %}{% endfilter %}" />
 				</div>
 				<label class="lp-public" title="{% trans 'Layer will be readable by everyone if public' %}">
 					<input type="checkbox" name="resource-is-public" id="resource-is-public" {% if resource_is_public %}checked {% endif %}/>

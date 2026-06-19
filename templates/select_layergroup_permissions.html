@@ -1,5 +1,5 @@
 {% load i18n %}
-{% load static from staticfiles %}
+{% load static %}
 <style>
 .perm-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 16px; }
 .perm-header__title { font-size: 13px; font-weight: 700; color: var(--pf-text, #2e3a45); margin: 0; }
@@ -48,7 +48,7 @@
 	<div class="perm-header">
 		<p class="perm-header__title">{% trans "Give the selected roles permissions to manage the layergroup" %}</p>
 		<div class="perm-header__search">
-			<input type="text" class="search form-control" placeholder="{% trans 'Search user role...' %}" />
+			<input type="text" class="search form-control" placeholder="{% filter force_escape %}{% trans 'Search user role...' %}{% endfilter %}" />
 		</div>
 	</div>
 	<ul class="perm-list list">

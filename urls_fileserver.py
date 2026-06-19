@@ -5,4 +5,9 @@ urlpatterns =  [
     # fileserver URLs are managed by XSendfile and they are served under the /fileserver
     # prefix to simplify deployments
     path('layer_resource/<int:resource_id>/', services_views.get_resource, name='layer_resource'),
+    path(
+        'attributions/download/<path:file_path>/',
+        services_views.attributions_public_download,
+        name='attributions_public_download',
+    ),
 ]

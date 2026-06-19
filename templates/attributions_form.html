@@ -1,0 +1,610 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block header %}
+<style>
+:root {
+    --pf-accent:    #4a7fa5;
+    --pf-accent-dk: #2d5f80;
+    --pf-accent-lt: rgba(74,127,165,0.06);
+    --pf-text:      #2e3a45;
+    --pf-muted:     #7b8a96;
+    --pf-border:    #e8ecef;
+    --pf-bg:        #f4f6f8;
+    --pf-white:     #ffffff;
+    --pf-radius:    10px;
+    --pf-shadow:    0 2px 12px rgba(0,0,0,0.08);
+    --pf-transition: 0.2s ease;
+}
+.pf-topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 0 16px; gap: 10px; flex-wrap: wrap; }
+.pf-topbar-left { display: flex; align-items: center; gap: 8px; }
+.pf-topbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.btn-pf-save { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-accent); color: #fff !important; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 20px; cursor: pointer; transition: background var(--pf-transition); letter-spacing: 0.2px; }
+.btn-pf-save:hover { background: var(--pf-accent-dk); }
+.btn-pf-back { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-bg); color: var(--pf-muted) !important; border: 1px solid var(--pf-border); border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 16px; cursor: pointer; transition: background var(--pf-transition); text-decoration: none !important; }
+.btn-pf-back:hover { background: var(--pf-border); color: var(--pf-text) !important; }
+.pf-card { background: var(--pf-white); border: 1px solid var(--pf-border); border-radius: var(--pf-radius); box-shadow: var(--pf-shadow); padding: 24px; margin-bottom: 18px; }
+.pf-card h4 { font-size: 14px; font-weight: 700; color: var(--pf-text); margin: 0 0 18px; padding-bottom: 10px; border-bottom: 1px solid var(--pf-border); display: flex; align-items: center; gap: 8px; }
+.pf-card h4 i { color: var(--pf-accent); }
+.pf-card label { font-size: 12px; font-weight: 700; color: var(--pf-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
+.pf-card .form-control, .pf-card input[type="text"], .pf-card input[type="email"], .pf-card textarea, .pf-card select { width: 100%; border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; transition: border-color var(--pf-transition), box-shadow var(--pf-transition); padding: 6px 12px; }
+.pf-card .form-control:focus, .pf-card input:focus, .pf-card textarea:focus, .pf-card select:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
+.pf-help { font-size: 11px; color: var(--pf-muted); margin-top: 4px; font-style: italic; }
+.pf-error-msg { background: #fff5f5; border-left: 4px solid #e74c3c; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #c0392b; }
+.pf-error-msg ul { margin: 0; padding-left: 18px; }
+.pf-row { display: flex; gap: 16px; flex-wrap: wrap; }
+.pf-col-50 { flex: 1 1 calc(50% - 8px); min-width: 240px; }
+.pf-col-100 { flex: 1 1 100%; }
+.pf-checkbox-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; padding: 10px 14px; background: var(--pf-bg); border-radius: 7px; border: 1px solid var(--pf-border); }
+.pf-checkbox-row label { margin: 0; text-transform: none; font-size: 13px; font-weight: 600; color: var(--pf-text); letter-spacing: 0; cursor: pointer; }
+.pf-checkbox-row input[type="checkbox"] { margin: 0; }
+.attr-project-search-wrap { position: relative; margin-bottom: 10px; }
+.attr-project-search-wrap .attr-project-search { padding-right: 34px; }
+.attr-project-search-wrap .attr-project-search-icon {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--pf-muted); pointer-events: none; font-size: 13px;
+}
+.pf-projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px 14px; max-height: 260px; overflow-y: auto; padding: 12px; border: 1px solid var(--pf-border); border-radius: 7px; background: var(--pf-bg); }
+.pf-projects-grid label { display: flex; align-items: center; gap: 8px; margin: 0; text-transform: none; letter-spacing: 0; font-size: 13px; font-weight: 500; color: var(--pf-text); cursor: pointer; }
+.attr-projects-no-match { display: none; margin: 0; padding: 8px 4px 0; font-size: 12px; color: var(--pf-muted); font-style: italic; }
+.pf-dyn-list { display: flex; flex-direction: column; gap: 10px; }
+.pf-dyn-row { display: flex; gap: 10px; align-items: flex-start; padding: 12px; background: var(--pf-bg); border: 1px solid var(--pf-border); border-radius: 8px; }
+.pf-dyn-row__main { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.pf-dyn-row__main .pf-row-line { display: flex; gap: 10px; flex-wrap: wrap; }
+.pf-dyn-row__main .pf-row-line > * { flex: 1 1 240px; }
+.btn-pf-remove { background: transparent; border: 1px solid #e8bebe; color: #c0392b; border-radius: 6px; padding: 6px 10px; cursor: pointer; transition: background var(--pf-transition); font-size: 13px; }
+.btn-pf-remove:hover { background: #fde8e8; }
+.btn-pf-remove:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-pf-add-row { display: inline-flex; align-items: center; gap: 6px; background: transparent; border: 1px dashed var(--pf-accent); color: var(--pf-accent); border-radius: 6px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background var(--pf-transition); margin-top: 6px; }
+.btn-pf-add-row:hover { background: var(--pf-accent-lt); }
+.btn-pf-fm { background: var(--pf-white); border: 1px solid var(--pf-border); color: var(--pf-text); border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 12px; transition: background var(--pf-transition); white-space: nowrap; }
+.btn-pf-fm:hover { background: var(--pf-bg); border-color: var(--pf-accent); color: var(--pf-accent); }
+.pf-attachment-path { font-family: monospace; font-size: 12px; color: var(--pf-muted); }
+.pf-clone-banner { background: #eaf4fb; border-left: 4px solid var(--pf-accent); padding: 14px 18px; border-radius: 6px; margin-bottom: 16px; font-size: 13px; color: var(--pf-text); }
+.pf-clone-banner i { color: var(--pf-accent); margin-right: 6px; }
+.attr-modal-order-list { list-style: none; padding: 0; margin: 12px 0 0; }
+.attr-modal-order-list li { display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 8px; background: var(--pf-bg); border: 1px solid var(--pf-border); border-radius: 8px; }
+.attr-modal-sort-handle { cursor: grab; cursor: -webkit-grab; color: #bbb; flex-shrink: 0; margin-right: 2px; font-size: 14px; vertical-align: middle; }
+.attr-modal-sort-handle:active { cursor: grabbing; cursor: -webkit-grabbing; }
+.attr-modal-order-label { flex: 1; font-size: 13px; font-weight: 600; color: var(--pf-text); }
+/* Top layout: compact left column (general + projects) + modal order beside */
+.attr-form-top-layout { display: flex; flex-wrap: wrap; }
+.attr-form-top-layout > [class*="col-"] {
+    display: flex; flex-direction: column;
+}
+.attr-form-top-left .pf-card { padding: 16px 18px; margin-bottom: 14px; }
+.attr-form-top-left .pf-card h4 { font-size: 13px; margin-bottom: 12px; padding-bottom: 8px; }
+.attr-form-top-left .pf-row { gap: 10px 12px; }
+.attr-form-top-left .pf-col-50 { flex: 1 1 calc(50% - 6px); min-width: 180px; }
+.attr-form-top-left .attr-gen-desc-row {
+    width: 100%;
+    flex-basis: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    align-items: flex-start;
+}
+.attr-gen-desc-main { flex: 1 1 260px; min-width: 0; }
+.attr-gen-desc-main .pf-help { margin-bottom: 0; }
+.attr-gen-enabled-aside {
+    flex: 0 0 auto;
+    width: 188px;
+    max-width: 100%;
+    padding-top: 22px;
+}
+.attr-gen-enabled-aside .pf-checkbox-row { margin: 8px 0 0; }
+@media (max-width: 600px) {
+    .attr-gen-enabled-aside { width: 100%; padding-top: 0; }
+    .attr-gen-enabled-aside .pf-checkbox-row { margin-top: 0; }
+}
+.attr-form-top-left .pf-projects-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    max-height: 220px;
+    padding: 12px;
+    gap: 8px 12px;
+}
+.attr-form-top-right .pf-card {
+    padding: 12px 10px; margin-bottom: 0; flex: 1; display: flex; flex-direction: column;
+    min-height: 240px;
+}
+.attr-form-top-right .pf-card h4 { font-size: 12px; margin-bottom: 6px; padding-bottom: 6px; flex-shrink: 0; line-height: 1.25; }
+.attr-form-top-right .pf-help:first-of-type { margin-bottom: 6px; flex-shrink: 0; font-size: 10px; line-height: 1.35; }
+.attr-form-top-right .attr-modal-order-list { flex: 1; margin-top: 6px; overflow-y: auto; min-height: 0; max-height: 420px; }
+.attr-form-top-right .attr-modal-order-list li { padding: 6px 8px; margin-bottom: 4px; }
+.attr-form-top-right .attr-modal-order-label { font-size: 12px; word-break: break-word; line-height: 1.2; }
+.attr-form-top-right .attr-modal-sort-handle { font-size: 12px; }
+@media (max-width: 991px) {
+    .attr-form-top-right .pf-card { min-height: 0; }
+    .attr-form-top-right .attr-modal-order-list { max-height: 320px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<form role="form" method="post" id="attr-form">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="pf-topbar">
+                <div class="pf-topbar-left">
+                    <a href="/gvsigonline/services/attributions_list/" class="btn-pf-back"><i class="fa fa-arrow-left"></i> {% trans "Back" %}</a>
+                </div>
+                <div class="pf-topbar-right">
+                    {% if not attr_config and generic_configs %}
+                    <select id="attr-clone-source" class="form-control" style="height: 36px;">
+                        <option value="">{% trans "Copy from generic..." %}</option>
+                        {% for g in generic_configs %}
+                        <option value="{{ g.id }}">{{ g.title }}</option>
+                        {% endfor %}
+                    </select>
+                    {% endif %}
+                    <button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+                </div>
+            </div>
+
+            {% if request.GET.source %}
+            <div class="pf-clone-banner">
+                <i class="fa fa-copy"></i>
+                {% trans "You are creating a new configuration starting from a generic one. Adjust whatever you need before saving." %}
+            </div>
+            {% endif %}
+
+            {% if form.errors or form.non_field_errors %}
+            <div class="pf-error-msg">
+                <ul>
+                    {% for err in form.non_field_errors %}<li>{{ err }}</li>{% endfor %}
+                    {% for field in form %}
+                        {% if field.errors %}<li>{{ field.label }}: {{ field.errors|striptags }}</li>{% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="row attr-form-top-layout">
+                <div class="col-md-10 col-sm-12 attr-form-top-left">
+                    <div class="pf-card">
+                        <h4><i class="fa fa-info-circle"></i>{% trans "General information" %}</h4>
+                        <div class="pf-row">
+                            <div class="pf-col-50">
+                                <label for="id_name">{% trans "Title" %}</label>
+                                {{ form.name }}
+                            </div>
+                            <div class="pf-col-50">
+                                <label for="id_attr_kind">{% trans "Type" %}</label>
+                                {{ form.kind }}
+                            </div>
+                            <div class="attr-gen-desc-row">
+                                <div class="attr-gen-desc-main">
+                                    <label for="id_description">{% trans "Description" %}</label>
+                                    {{ form.description }}
+                                    <p class="pf-help">
+                                        {% trans "Recommended use: document copyright/licensing information, legal notices and complementary references for map viewers." %}
+                                    </p>
+                                </div>
+                                <div class="attr-gen-enabled-aside">
+                                    <div class="pf-checkbox-row">
+                                        {{ form.is_active }}
+                                        <label for="id_is_active">{% trans "Enabled" %}</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pf-card">
+                        <h4><i class="fa fa-folder-open"></i>{% trans "Associated projects" %}</h4>
+
+                        <div id="attr-block-specific">
+                            <div class="pf-row">
+                                <div class="pf-col-100">
+                                    <label for="id_attr_project">{% trans "Project" %}</label>
+                                    <div class="attr-project-search-wrap">
+                                        <input type="text" id="attr-project-specific-search" class="form-control attr-project-search"
+                                               placeholder="{% trans 'Search...' %}" autocomplete="off"
+                                               aria-label="{% trans 'Search...' %}">
+                                        <i class="fa fa-search attr-project-search-icon" aria-hidden="true"></i>
+                                    </div>
+                                    {{ form.project }}
+                                    <p class="pf-help">{% trans "Project specific configurations always take precedence over generic ones." %}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="attr-block-generic">
+                            <div class="pf-checkbox-row">
+                                {{ form.apply_to_all_projects }}
+                                <label for="id_attr_apply_all">{% trans "Active for all projects" %}</label>
+                            </div>
+                            <p class="pf-help">{{ form.apply_to_all_projects.help_text }}</p>
+
+                            <div id="attr-block-project-selection">
+                                <label>{% trans "Or select projects manually" %}</label>
+                                <div class="attr-project-search-wrap">
+                                    <input type="text" id="attr-projects-grid-search" class="form-control attr-project-search"
+                                           placeholder="{% trans 'Search...' %}" autocomplete="off"
+                                           aria-label="{% trans 'Search...' %}">
+                                    <i class="fa fa-search attr-project-search-icon" aria-hidden="true"></i>
+                                </div>
+                                <div class="pf-projects-grid" id="attr-projects-grid">
+                                    {% for project in projects %}
+                                    <label class="attr-project-item">
+                                        <input type="checkbox" name="attr_project_ids[]" value="{{ project.id }}"
+                                               {% if project.id in attr_selected_project_ids %}checked{% endif %}>
+                                        <span class="attr-project-name">{{ project.name }}</span>
+                                    </label>
+                                    {% empty %}
+                                    <p class="pf-help">{% trans "There are no projects to assign yet." %}</p>
+                                    {% endfor %}
+                                </div>
+                                <p class="attr-projects-no-match" id="attr-projects-no-match">{% trans "No projects match your search." %}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2 col-sm-12 attr-form-top-right">
+                    <div class="pf-card">
+                        <h4><i class="fa fa-sort"></i>{% trans "Modal content order" %}</h4>
+                        <p class="pf-help">{% trans "Drag each row by the grip icon to set the order of blocks in the viewer modal. Empty sections are not shown." %}</p>
+                        {{ form.modal_section_order_json }}
+                        <ul id="attr-modal-order-list" class="attr-modal-order-list">
+                            {% for sid, label in attr_modal_section_order_display %}
+                            <li data-section="{{ sid }}">
+                                <i class="fa fa-bars attr-modal-sort-handle" title="{% trans 'Drag to reorder' %}" aria-hidden="true"></i>
+                                <span class="attr-modal-order-label">{{ label }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pf-card">
+                <h4><i class="fa fa-copyright"></i>{% trans "Copyright notice" %}</h4>
+                <label for="id_copyright_notice">{% trans "Notice text" %}</label>
+                {{ form.copyright_notice }}
+                <p class="pf-help">{{ form.copyright_notice.help_text }}</p>
+            </div>
+
+            <div class="pf-card">
+                <h4><i class="fa fa-pencil-square-o"></i>{% trans "Others" %}</h4>
+                <div class="pf-row">
+                    <div class="pf-col-100">
+                        <label for="id_other_title">{% trans "Custom title" %}</label>
+                        {{ form.other_title }}
+                    </div>
+                    <div class="pf-col-100">
+                        <label for="id_other_text">{% trans "Custom text" %}</label>
+                        {{ form.other_text }}
+                        <p class="pf-help">{{ form.other_text.help_text }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pf-card">
+                <h4><i class="fa fa-question-circle"></i>{% trans "Help" %}</h4>
+                <label for="id_help_text">{% trans "Help text" %}</label>
+                <textarea name="help_text" id="id_help_text" class="form-control" rows="6">{{ form.help_text.value|default_if_none:'' }}</textarea>
+                <p class="pf-help">{{ form.help_text.help_text }}</p>
+            </div>
+
+            <div class="pf-card">
+                <h4><i class="fa fa-address-card"></i>{% trans "Contact information" %}</h4>
+                <div class="pf-row">
+                    <div class="pf-col-50">
+                        <label for="id_contact_organization">{% trans "Organization" %}</label>
+                        {{ form.contact_organization }}
+                    </div>
+                    <div class="pf-col-50">
+                        <label for="id_contact_person">{% trans "Contact person" %}</label>
+                        {{ form.contact_person }}
+                    </div>
+                    <div class="pf-col-100">
+                        <label for="id_contact_address">{% trans "Address" %}</label>
+                        {{ form.contact_address }}
+                    </div>
+                    <div class="pf-col-50">
+                        <label for="id_contact_phone">{% trans "Phone" %}</label>
+                        {{ form.contact_phone }}
+                    </div>
+                    <div class="pf-col-50">
+                        <label for="id_contact_email">{% trans "Email" %}</label>
+                        {{ form.contact_email }}
+                    </div>
+                    <div class="pf-col-100">
+                        <label for="id_legal_notice">{% trans "Legal notice" %}</label>
+                        {{ form.legal_notice }}
+                        <p class="pf-help">{{ form.legal_notice.help_text }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pf-card">
+                <h4><i class="fa fa-link"></i>{% trans "Useful links" %}</h4>
+                <div class="pf-dyn-list" id="attr-links-list">
+                    {% for link in attr_links %}
+                    <div class="pf-dyn-row">
+                        <div class="pf-dyn-row__main">
+                            <div class="pf-row-line">
+                                <input type="text" name="link_url[]" value="{{ link.url }}" placeholder="https://..." required>
+                                <input type="text" name="link_description[]" value="{{ link.description|default:'' }}" placeholder="{% trans 'Description' %}">
+                            </div>
+                        </div>
+                        <button type="button" class="btn-pf-remove attr-remove-row" title="{% trans 'Remove' %}"><i class="fa fa-times"></i></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="button" class="btn-pf-add-row" id="attr-add-link"><i class="fa fa-plus"></i> {% trans "Add link" %}</button>
+            </div>
+
+            <div class="pf-card">
+                <h4><i class="fa fa-paperclip"></i>{% trans "Attachments" %}</h4>
+                <p class="pf-help" style="margin-bottom: 12px;">
+                    {% trans "Files are not uploaded here. Use the file manager selector to choose an existing file. The public download URL will be stored automatically so attachments can be downloaded even when the project is private." %}
+                </p>
+                <div class="pf-dyn-list" id="attr-attachments-list">
+                    {% for att in attr_attachments %}
+                    <div class="pf-dyn-row">
+                        <div class="pf-dyn-row__main">
+                            <div class="pf-row-line">
+                                <div style="flex: 2 1 360px;">
+                                    <input type="text" class="attr-att-internal" name="attachment_internal_path[]" value="{{ att.internal_path }}" placeholder="{% trans 'Internal path' %}" readonly>
+                                    <div class="pf-attachment-path">{{ att.public_url|default:'' }}</div>
+                                    <input type="hidden" class="attr-att-public" name="attachment_public_url[]" value="{{ att.public_url|default:'' }}">
+                                </div>
+                                <input type="text" name="attachment_description[]" value="{{ att.description|default:'' }}" placeholder="{% trans 'Description' %}">
+                            </div>
+                            <button type="button" class="btn-pf-fm attr-pick-file" style="align-self: flex-start;"><i class="fa fa-folder-open"></i> {% trans "Choose file..." %}</button>
+                        </div>
+                        <button type="button" class="btn-pf-remove attr-remove-row" title="{% trans 'Remove' %}"><i class="fa fa-times"></i></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="button" class="btn-pf-add-row" id="attr-add-attachment"><i class="fa fa-plus"></i> {% trans "Add attachment" %}</button>
+            </div>
+
+            <div class="pf-card">
+                <h4><i class="fa fa-picture-o"></i>{% trans "Logo" %}</h4>
+                <p class="pf-help" style="margin-bottom: 12px;">
+                    {% trans "Optional. Select a logo from file manager. It will be shown inside the modal." %}
+                </p>
+                <div class="pf-dyn-row" id="attr-logo-row">
+                    <div class="pf-dyn-row__main">
+                        <label for="id_logo_internal_path">{% trans "Internal path" %}</label>
+                        <input type="text" id="id_logo_internal_path" name="logo_internal_path" class="form-control" value="{{ form.logo_internal_path.value|default_if_none:'' }}" readonly>
+                        <input type="hidden" id="id_logo_public_url" name="logo_public_url" value="{{ form.logo_public_url.value|default_if_none:'' }}">
+                        <div class="pf-attachment-path" id="attr-logo-public-path">{{ form.logo_public_url.value|default_if_none:'' }}</div>
+                        <button type="button" class="btn-pf-fm" id="attr-pick-logo" style="align-self: flex-start;"><i class="fa fa-folder-open"></i> {% trans "Choose file..." %}</button>
+                    </div>
+                    <button type="button" class="btn-pf-remove" id="attr-clear-logo" title="{% trans 'Remove' %}"><i class="fa fa-times"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<template id="attr-link-template">
+    <div class="pf-dyn-row">
+        <div class="pf-dyn-row__main">
+            <div class="pf-row-line">
+                <input type="text" name="link_url[]" placeholder="https://..." required>
+                <input type="text" name="link_description[]" placeholder="{% trans 'Description' %}">
+            </div>
+        </div>
+        <button type="button" class="btn-pf-remove attr-remove-row" title="{% trans 'Remove' %}"><i class="fa fa-times"></i></button>
+    </div>
+</template>
+
+<template id="attr-attachment-template">
+    <div class="pf-dyn-row">
+        <div class="pf-dyn-row__main">
+            <div class="pf-row-line">
+                <div style="flex: 2 1 360px;">
+                    <input type="text" class="attr-att-internal" name="attachment_internal_path[]" placeholder="{% trans 'Internal path' %}" readonly>
+                    <div class="pf-attachment-path"></div>
+                    <input type="hidden" class="attr-att-public" name="attachment_public_url[]" value="">
+                </div>
+                <input type="text" name="attachment_description[]" placeholder="{% trans 'Description' %}">
+            </div>
+            <button type="button" class="btn-pf-fm attr-pick-file" style="align-self: flex-start;"><i class="fa fa-folder-open"></i> {% trans "Choose file..." %}</button>
+        </div>
+        <button type="button" class="btn-pf-remove attr-remove-row" title="{% trans 'Remove' %}"><i class="fa fa-times"></i></button>
+    </div>
+</template>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+    $('#menu-manage-services').addClass("active");
+    $('#submenu-attributions').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+    function attrModalOrderSync() {
+        var ids = [];
+        $('#attr-modal-order-list li').each(function() {
+            ids.push($(this).data('section'));
+        });
+        $('#id_modal_section_order_json').val(JSON.stringify(ids));
+    }
+    $('#attr-modal-order-list').sortable({
+        placeholder: 'sort-highlight',
+        handle: '.attr-modal-sort-handle',
+        forcePlaceholderSize: true,
+        zIndex: 999999,
+        stop: function() {
+            attrModalOrderSync();
+        }
+    });
+    attrModalOrderSync();
+    $('#attr-form').on('submit', function() {
+        attrModalOrderSync();
+    });
+
+    var fmDirectory = "{{ fm_directory }}";
+    var basePath = (window.location.origin || '') + '/gvsigonline/fileserver/attributions/download/';
+    var pendingAttachmentRow = null;
+    var pendingLogoField = false;
+
+    function buildPublicUrl(internalPath) {
+        if (!internalPath) {
+            return '';
+        }
+        var clean = internalPath;
+        if (fmDirectory && clean.indexOf(fmDirectory) === 0) {
+            clean = clean.substring(fmDirectory.length);
+        }
+        clean = clean.replace(/^\/+/, '');
+        return clean ? (basePath + clean + '/') : '';
+    }
+
+    function attrNormalizeSearchText(s) {
+        if (!s) {
+            return '';
+        }
+        return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function attrProjectMatches(term, text) {
+        if (!term) {
+            return true;
+        }
+        return attrNormalizeSearchText(text).indexOf(term) >= 0;
+    }
+
+    function attrFilterProjectSelect() {
+        var term = attrNormalizeSearchText($('#attr-project-specific-search').val().trim());
+        var $select = $('#id_attr_project');
+        $select.find('option').each(function() {
+            var $opt = $(this);
+            if (!$opt.val()) {
+                $opt.prop('hidden', false);
+                return;
+            }
+            $opt.prop('hidden', !attrProjectMatches(term, $opt.text()));
+        });
+    }
+
+    function attrFilterProjectsGrid() {
+        var term = attrNormalizeSearchText($('#attr-projects-grid-search').val().trim());
+        var visibleCount = 0;
+        $('#attr-projects-grid .attr-project-item').each(function() {
+            var name = $(this).find('.attr-project-name').text();
+            var match = attrProjectMatches(term, name);
+            $(this).toggle(match);
+            if (match) {
+                visibleCount++;
+            }
+        });
+        $('#attr-projects-no-match').toggle(term.length > 0 && visibleCount === 0);
+    }
+
+    function toggleKindBlocks() {
+        var kind = $('#id_attr_kind').val();
+        if (kind === 'project_specific') {
+            $('#attr-block-specific').show();
+            $('#attr-block-generic').hide();
+        } else {
+            $('#attr-block-specific').hide();
+            $('#attr-block-generic').show();
+            toggleProjectSelectionBlock();
+        }
+    }
+
+    function toggleProjectSelectionBlock() {
+        if ($('#id_attr_apply_all').is(':checked')) {
+            $('#attr-block-project-selection').hide();
+        } else {
+            $('#attr-block-project-selection').show();
+            attrFilterProjectsGrid();
+        }
+    }
+
+    $('#id_attr_kind').on('change', toggleKindBlocks);
+    $('#id_attr_apply_all').on('change', toggleProjectSelectionBlock);
+    $('#attr-project-specific-search').on('input', attrFilterProjectSelect);
+    $('#attr-projects-grid-search').on('input', attrFilterProjectsGrid);
+    toggleKindBlocks();
+    attrFilterProjectSelect();
+    attrFilterProjectsGrid();
+
+    $('#attr-add-link').on('click', function() {
+        var tpl = document.getElementById('attr-link-template').content.cloneNode(true);
+        $('#attr-links-list').append(tpl);
+    });
+
+    $('#attr-add-attachment').on('click', function() {
+        var tpl = document.getElementById('attr-attachment-template').content.cloneNode(true);
+        $('#attr-attachments-list').append(tpl);
+    });
+
+    $(document).on('click', '.attr-remove-row', function() {
+        $(this).closest('.pf-dyn-row').remove();
+    });
+
+    $(document).on('click', '.attr-pick-file', function() {
+        pendingAttachmentRow = $(this).closest('.pf-dyn-row');
+        pendingLogoField = false;
+        window.open("/gvsigonline/filemanager/?popup=1", "FileManagerAttribution",
+                    "width=820,height=620,resizable=yes,scrollbars=yes");
+    });
+
+    $('#attr-pick-logo').on('click', function() {
+        pendingAttachmentRow = null;
+        pendingLogoField = true;
+        window.open("/gvsigonline/filemanager/?popup=1", "FileManagerAttribution",
+                    "width=820,height=620,resizable=yes,scrollbars=yes");
+    });
+
+    function attrLogoSyncClearButton() {
+        var has = ($('#id_logo_internal_path').val() || '').trim().length > 0;
+        $('#attr-clear-logo').prop('disabled', !has);
+    }
+
+    $('#attr-clear-logo').on('click', function() {
+        if ($(this).prop('disabled')) {
+            return;
+        }
+        $('#id_logo_internal_path').val('');
+        $('#id_logo_public_url').val('');
+        $('#attr-logo-public-path').text('');
+        attrLogoSyncClearButton();
+    });
+
+    window.filemanagerCallback = function(url) {
+        if (pendingLogoField) {
+            var fullLogoPath = (fmDirectory || '') + (url || '');
+            var logoPublicUrl = buildPublicUrl(fullLogoPath);
+            $('#id_logo_internal_path').val(fullLogoPath);
+            $('#id_logo_public_url').val(logoPublicUrl);
+            $('#attr-logo-public-path').text(logoPublicUrl);
+            attrLogoSyncClearButton();
+            pendingLogoField = false;
+            pendingAttachmentRow = null;
+            return;
+        }
+        if (!pendingAttachmentRow) {
+            return;
+        }
+        var fullInternalPath = (fmDirectory || '') + (url || '');
+        var publicUrl = buildPublicUrl(fullInternalPath);
+        pendingAttachmentRow.find('.attr-att-internal').val(fullInternalPath);
+        pendingAttachmentRow.find('.attr-att-public').val(publicUrl);
+        pendingAttachmentRow.find('.pf-attachment-path').text(publicUrl);
+        pendingAttachmentRow = null;
+        pendingLogoField = false;
+    };
+
+    $('#attr-clone-source').on('change', function() {
+        var sourceId = $(this).val();
+        if (!sourceId) {
+            return;
+        }
+        window.location.href = '/gvsigonline/services/attributions_add/?source=' + sourceId;
+    });
+
+    attrLogoSyncClearButton();
+});
+</script>
+{% endblock %}

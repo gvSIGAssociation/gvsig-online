@@ -39,6 +39,58 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Subtypes accepted by GeoServer bindings in backend_geoserver.getGeoserverBindings
+_GEOMETRY_SUBTYPES_GEOSERVER = frozenset({
+    'POINT', 'MULTIPOINT', 'LINESTRING', 'MULTILINESTRING', 'POLYGON', 'MULTIPOLYGON',
+})
+
+
+def _normalize_geometry_subtype_for_geoserver(label):
+    """
+    Map PostGIS ST_GeometryType / typmod labels (e.g. ST_MultiPolygonZ) to a plain
+    OGC name that matches geometry_columns / GeoServer (MULTIPOLYGON, ...).
+    """
+    if not label:
+        return None
+    s = str(label).strip().upper()
+    if s.startswith('ST_'):
+        s = s[3:]
+    for suffix in ('ZM', 'Z', 'M'):
+        if len(s) > len(suffix) and s.endswith(suffix):
+            base = s[: -len(suffix)]
+            if base in _GEOMETRY_SUBTYPES_GEOSERVER:
+                return base
+    if s in _GEOMETRY_SUBTYPES_GEOSERVER:
+        return s
+    return None
+
+
+def _geometry_typmod_subtype_is_generic(raw_subtype):
+    """True for unconstrained / SRID-only typmod: geometry, geometry(Geometry,srid), etc."""
+    if raw_subtype is None:
+        return True
+    s = str(raw_subtype).strip().upper()
+    return s in ('GEOMETRY', 'GEOM')
+
+
+def _geometry_format_type_needs_concrete_subtype(format_type_str):
+    """
+    True if pg_attribute format_type is not already a single GeoServer-friendly subtype
+    (e.g. geometry(Geometry,32619) from OGR still needs narrowing; geometry(MULTIPOLYGON,32619) does not).
+    """
+    if not format_type_str:
+        return True
+    ft = format_type_str.strip()
+    if re.match(r'^geometry\s*$', ft, flags=re.IGNORECASE):
+        return True
+    m = re.search(r'geometry\s*\(\s*([^,)\s]+)', ft, flags=re.IGNORECASE)
+    if not m:
+        return True
+    raw = m.group(1)
+    if _geometry_typmod_subtype_is_generic(raw):
+        return True
+    return _normalize_geometry_subtype_for_geoserver(raw) is None
+
 plainIdentifierPattern = re.compile("^[a-zA-Z][a-zA-Z0-9_]*$")
 plainSchemaIdentifierPattern = re.compile("^[a-zA-Z][a-zA-Z0-9_]*(.[a-zA-Z][a-zA-Z0-9_]*)?$")
 
@@ -274,6 +326,178 @@ class Introspect:
         
         return [(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7]) for r in self.cursor.fetchall()]
 
+    def resolve_concrete_geometry_type(self, schema, table, column):
+        """
+        When geometry_columns reports generic type GEOMETRY (typical after ogr2ogr GPKG load),
+        return a concrete subtype string (POINT, MULTIPOLYGON, ...) compatible with GeoServer
+        bindings, or None if it cannot be determined safely.
+        """
+        try:
+            self.cursor.execute(
+                """
+                SELECT format_type(a.atttypid, a.atttypmod)
+                FROM pg_attribute a
+                JOIN pg_class c ON c.oid = a.attrelid
+                JOIN pg_namespace n ON n.oid = c.relnamespace
+                WHERE n.nspname = %s AND c.relname = %s AND a.attname = %s
+                  AND a.attnum > 0 AND NOT a.attisdropped
+                """,
+                [schema, table, column],
+            )
+            row = self.cursor.fetchone()
+            if row and row[0]:
+                ft = row[0].strip()
+                m = re.search(
+                    r'geometry\s*\(\s*([^,)\s]+)',
+                    ft,
+                    flags=re.IGNORECASE,
+                )
+                if m:
+                    raw = m.group(1)
+                    if not _geometry_typmod_subtype_is_generic(raw):
+                        sub = _normalize_geometry_subtype_for_geoserver(raw)
+                        if sub:
+                            return sub
+            q = sqlbuilder.SQL(
+                'SELECT ST_GeometryType({g}) FROM {sch}.{tbl} WHERE {g} IS NOT NULL LIMIT 1'
+            ).format(
+                g=sqlbuilder.Identifier(column),
+                sch=sqlbuilder.Identifier(schema),
+                tbl=sqlbuilder.Identifier(table),
+            )
+            self.cursor.execute(q)
+            row = self.cursor.fetchone()
+            if not row or not row[0]:
+                return None
+            return _normalize_geometry_subtype_for_geoserver(row[0])
+        except Exception as ex:
+            logger.warning(
+                'resolve_concrete_geometry_type failed for %s.%s.%s: %s',
+                schema, table, column, ex,
+                exc_info=True,
+            )
+            return None
+
+    def promote_untyped_geometry_columns(self, schema, table):
+        """
+        ALTER unrestricted geometry columns to geometry(Subtype, srid) when data is
+        homogeneous enough to match a GeoServer-supported subtype.
+        """
+        for row in self.get_geometry_columns_info(table=table, schema=schema):
+            geom_col = row[2]
+            srid = row[4]
+            gtype = row[5]
+            self.cursor.execute(
+                """
+                SELECT format_type(a.atttypid, a.atttypmod)
+                FROM pg_attribute a
+                JOIN pg_class c ON c.oid = a.attrelid
+                JOIN pg_namespace n ON n.oid = c.relnamespace
+                WHERE n.nspname = %s AND c.relname = %s AND a.attname = %s
+                  AND a.attnum > 0 AND NOT a.attisdropped
+                """,
+                [schema, table, geom_col],
+            )
+            ft_row = self.cursor.fetchone()
+            format_type = (ft_row[0] or '').strip() if ft_row and ft_row[0] else ''
+            generic_by_catalog = (
+                not gtype
+                or not str(gtype).strip()
+                or str(gtype).upper() == 'GEOMETRY'
+            )
+            generic_by_typmod = _geometry_format_type_needs_concrete_subtype(format_type)
+            if not (generic_by_catalog or generic_by_typmod):
+                continue
+            concrete = self.resolve_concrete_geometry_type(schema, table, geom_col)
+            if not concrete or concrete == 'GEOMETRY' or concrete not in _GEOMETRY_SUBTYPES_GEOSERVER:
+                continue
+            try:
+                srid_val = int(srid) if srid is not None else 0
+            except (TypeError, ValueError):
+                srid_val = 0
+            m = re.search(r'geometry\s*\(\s*[^,)\s]+\s*,\s*(-?\d+)', format_type, flags=re.IGNORECASE)
+            if m:
+                try:
+                    srid_val = int(m.group(1))
+                except ValueError:
+                    pass
+            sub_sql = sqlbuilder.SQL(concrete)
+            stmt = sqlbuilder.SQL(
+                'ALTER TABLE {sch}.{tbl} ALTER COLUMN {geom} TYPE geometry({sub}, {srid}) '
+                'USING {geom}::geometry({sub}, {srid})'
+            ).format(
+                sch=sqlbuilder.Identifier(schema),
+                tbl=sqlbuilder.Identifier(table),
+                geom=sqlbuilder.Identifier(geom_col),
+                sub=sub_sql,
+                srid=sqlbuilder.Literal(srid_val),
+            )
+            try:
+                self.cursor.execute(stmt)
+            except Exception as ex:
+                logger.warning(
+                    'promote_untyped_geometry_columns: ALTER failed for %s.%s.%s: %s',
+                    schema, table, geom_col, ex,
+                    exc_info=True,
+                )
+
+    def promote_untyped_geometry_columns_hint(self, schema, table, geom_subtype):
+        """
+        Like promote_untyped_geometry_columns but uses a caller-supplied *geom_subtype*
+        (e.g. 'POINT', 'MULTIPOLYGON') instead of inspecting the data.
+        Useful for empty tables where the subtype cannot be determined from rows.
+        Only alters columns that are still generic (type == GEOMETRY or no typmod subtype).
+        """
+        for row in self.get_geometry_columns_info(table=table, schema=schema):
+            geom_col = row[2]
+            srid = row[4]
+            gtype = (row[5] or '').strip().upper()
+            if gtype and gtype != 'GEOMETRY':
+                continue
+            self.cursor.execute(
+                """
+                SELECT format_type(a.atttypid, a.atttypmod)
+                FROM pg_attribute a
+                JOIN pg_class c ON c.oid = a.attrelid
+                JOIN pg_namespace n ON n.oid = c.relnamespace
+                WHERE n.nspname = %s AND c.relname = %s AND a.attname = %s
+                  AND a.attnum > 0 AND NOT a.attisdropped
+                """,
+                [schema, table, geom_col],
+            )
+            ft_row = self.cursor.fetchone()
+            format_type = (ft_row[0] or '').strip() if ft_row and ft_row[0] else ''
+            if not _geometry_format_type_needs_concrete_subtype(format_type):
+                continue
+            m = re.search(r'geometry\s*\(\s*[^,)\s]+\s*,\s*(-?\d+)', format_type, flags=re.IGNORECASE)
+            try:
+                srid_val = int(m.group(1)) if m else (int(srid) if srid is not None else 0)
+            except (TypeError, ValueError):
+                srid_val = 0
+            sub_sql = sqlbuilder.SQL(geom_subtype)
+            stmt = sqlbuilder.SQL(
+                'ALTER TABLE {sch}.{tbl} ALTER COLUMN {geom} TYPE geometry({sub}, {srid}) '
+                'USING {geom}::geometry({sub}, {srid})'
+            ).format(
+                sch=sqlbuilder.Identifier(schema),
+                tbl=sqlbuilder.Identifier(table),
+                geom=sqlbuilder.Identifier(geom_col),
+                sub=sub_sql,
+                srid=sqlbuilder.Literal(srid_val),
+            )
+            try:
+                self.cursor.execute(stmt)
+                logger.debug(
+                    'promote_untyped_geometry_columns_hint: set %s.%s.%s → geometry(%s,%s)',
+                    schema, table, geom_col, geom_subtype, srid_val,
+                )
+            except Exception as ex:
+                logger.warning(
+                    'promote_untyped_geometry_columns_hint: ALTER failed for %s.%s.%s: %s',
+                    schema, table, geom_col, ex,
+                    exc_info=True,
+                )
+
     def get_geometry_column_info(self, table=None, column=None, schema='public'):
         """
         Gives information about a geometry column. Use exact name.
@@ -508,6 +732,170 @@ class Introspect:
         except:
             # the table may not exist, this is not an error
             return []
+
+    def get_gt_pk_metadata_full_rows(self, schema, table):
+        """Return full gt_pk_metadata rows for a view (all columns)."""
+        try:
+            if not self.table_exists('gt_pk_metadata', schema=schema):
+                return []
+            query = sqlbuilder.SQL(
+                "SELECT table_schema, table_name, pk_column, pk_column_idx, pk_policy, pk_sequence "
+                "FROM {schema}.gt_pk_metadata WHERE table_schema = %s AND table_name = %s"
+            ).format(schema=sqlbuilder.Identifier(schema))
+            self.cursor.execute(query, [schema, table])
+            return [
+                {
+                    'table_schema': r[0], 'table_name': r[1], 'pk_column': r[2],
+                    'pk_column_idx': r[3], 'pk_policy': r[4], 'pk_sequence': r[5],
+                }
+                for r in self.cursor.fetchall()
+            ]
+        except Exception:
+            return []
+
+    def insert_gt_pk_metadata_full_row(self, schema, view_name, row):
+        """Insert one full row into gt_pk_metadata (creates table if missing)."""
+        if not self.table_exists('gt_pk_metadata', schema=schema):
+            self.create_geoserver_pk_metadata_table(schema)
+        query = sqlbuilder.SQL("""
+            INSERT INTO {schema}.gt_pk_metadata
+            (table_schema, table_name, pk_column, pk_column_idx, pk_policy, pk_sequence)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ON CONFLICT (table_schema, table_name, pk_column) DO UPDATE
+                SET pk_column_idx = EXCLUDED.pk_column_idx,
+                    pk_policy     = EXCLUDED.pk_policy,
+                    pk_sequence   = EXCLUDED.pk_sequence
+        """).format(schema=sqlbuilder.Identifier(schema))
+        self.cursor.execute(query, [
+            schema,
+            view_name,
+            row.get('pk_column'),
+            row.get('pk_column_idx'),
+            row.get('pk_policy'),
+            row.get('pk_sequence'),
+        ])
+
+    def get_view_definition(self, schema, view_name):
+        """Return the SQL body of a view from information_schema, or None."""
+        self.cursor.execute(
+            "SELECT view_definition FROM information_schema.views "
+            "WHERE table_schema = %s AND table_name = %s",
+            [schema, view_name],
+        )
+        row = self.cursor.fetchone()
+        return row[0] if row else None
+
+    def find_view_in_any_schema(self, view_name):
+        """
+        Search all non-system schemas for a view with the given name.
+        Returns (schema, sql) or (None, None) if not found.
+        Uses pg_get_viewdef which is more reliable than information_schema.
+        """
+        self.cursor.execute(
+            """
+            SELECT n.nspname, pg_get_viewdef(c.oid, true)
+            FROM pg_catalog.pg_class c
+            JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+            WHERE c.relname = %s
+              AND c.relkind = 'v'
+              AND n.nspname NOT IN ('information_schema', 'pg_catalog')
+              AND n.nspname NOT LIKE 'pg_%%'
+            ORDER BY n.nspname
+            LIMIT 1
+            """,
+            [view_name],
+        )
+        row = self.cursor.fetchone()
+        return (row[0], row[1]) if row else (None, None)
+
+    def get_views_in_schema(self, schema, names):
+        """Return the subset of *names* that are views in *schema*."""
+        if not names:
+            return set()
+        placeholders = ','.join(['%s'] * len(names))
+        self.cursor.execute(
+            f"SELECT table_name FROM information_schema.views "
+            f"WHERE table_schema = %s AND table_name IN ({placeholders})",
+            [schema] + list(names),
+        )
+        return {row[0] for row in self.cursor.fetchall()}
+
+    def create_view_from_sql(self, schema, view_name, sql, force_unique=False):
+        """
+        CREATE [OR REPLACE] VIEW schema.view_name AS <sql>.
+
+        When force_unique=False (default):
+          - If the name is free or already a VIEW: uses CREATE OR REPLACE VIEW
+            (replaces the existing view in-place).
+          - If the name is taken by a non-view object (table, etc.): appends a
+            numeric suffix (_1, _2, …) until a free name is found.
+
+        When force_unique=True (used during import to always produce a fresh layer):
+          - Finds the first name that is entirely free in PostgreSQL (no object of
+            ANY kind at schema.name), then uses CREATE VIEW (without OR REPLACE).
+          - This guarantees that each import produces a new independent view rather
+            than overwriting an existing one.
+
+        Returns the actual view name used.
+        """
+        def _pg_name_free(name):
+            self.cursor.execute(
+                """
+                SELECT 1 FROM pg_catalog.pg_class c
+                JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+                WHERE n.nspname = %s AND c.relname = %s
+                """,
+                [schema, name],
+            )
+            return self.cursor.fetchone() is None
+
+        if force_unique:
+            # Always create a brand-new view; never replace an existing one.
+            suffix = 1
+            candidate = view_name
+            while not _pg_name_free(candidate):
+                candidate = '%s_%d' % (view_name, suffix)
+                suffix += 1
+            view_name = candidate
+            stmt = (
+                sqlbuilder.SQL("CREATE VIEW {schema}.{view} AS ").format(
+                    schema=sqlbuilder.Identifier(schema),
+                    view=sqlbuilder.Identifier(view_name),
+                )
+                + sqlbuilder.SQL(sql)
+            )
+            self.cursor.execute(stmt)
+            return view_name
+
+        # Default path: replace existing views, suffix non-view conflicts.
+        self.cursor.execute(
+            """
+            SELECT c.relkind
+            FROM pg_catalog.pg_class c
+            JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+            WHERE n.nspname = %s AND c.relname = %s
+            """,
+            [schema, view_name],
+        )
+        row = self.cursor.fetchone()
+        if row and row[0] != 'v':
+            # Name is taken by a table (r), materialized view (m), sequence (S), etc.
+            suffix = 1
+            candidate = '%s_%d' % (view_name, suffix)
+            while not _pg_name_free(candidate):
+                suffix += 1
+                candidate = '%s_%d' % (view_name, suffix)
+            view_name = candidate
+
+        stmt = (
+            sqlbuilder.SQL("CREATE OR REPLACE VIEW {schema}.{view} AS ").format(
+                schema=sqlbuilder.Identifier(schema),
+                view=sqlbuilder.Identifier(view_name),
+            )
+            + sqlbuilder.SQL(sql)
+        )
+        self.cursor.execute(stmt)
+        return view_name
 
     def get_pk_columns(self, table, schema='public'):
         qualified_table = quote_ident(schema, self.conn) + "." + quote_ident(table, self.conn) 

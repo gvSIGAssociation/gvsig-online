@@ -37,6 +37,7 @@ from gvsigol_services.triggers import CUSTOM_PROCEDURES
 from django.utils.crypto import get_random_string
 from gvsigol import settings
 from django.db import models
+from django.db.models import Q
 from gvsigol_auth.models import UserGroup
 import ast
 import json
@@ -1093,10 +1094,11 @@ class LayerConfig:
         return {}
 
     def init_field_conf(self, field_conf, field_info):
+        from gvsigol_services.utils import get_field_title_for_lang
         field_conf['name'] = field_conf.get('name', field_info['name'])
         for id, language in settings.LANGUAGES:
-            field_conf['title-' +
-                       id] = field_conf.get('title-'+id, field_info['name'])
+            field_conf['title-' + id] = get_field_title_for_lang(
+                field_conf, id, field_info['name'])
         field_conf['visible'] = field_conf.get('visible', True)
         if field_conf['name'] in self.pks:
             field_conf['editable'] = field_conf.get('editable', False)
@@ -2108,3 +2110,141 @@ class FavoriteFilter(models.Model):
             return self.project.userprojectrole_set.filter(user=user).exists()
         
         return False
+
+
+class AttributionConfig(models.Model):
+    """
+    Configuración de atribuciones para proyectos.
+
+    Puede ser de tipo 'generic' (reutilizable) o 'project_specific' (asociada a un único proyecto).
+
+    Reglas de aplicación (ver gvsigol_services.utils.get_attributions_for_project):
+    - Si existe una configuración 'project_specific' activa para un proyecto, se usa esa.
+    - En caso contrario se usa la configuración 'generic' activa que aplique al proyecto, ya sea
+      porque tiene apply_to_all_projects=True o porque el proyecto está incluido en su N:M.
+    """
+    KIND_GENERIC = 'generic'
+    KIND_PROJECT_SPECIFIC = 'project_specific'
+    KIND_CHOICES = (
+        (KIND_GENERIC, _('Generic')),
+        (KIND_PROJECT_SPECIFIC, _('Project specific')),
+    )
+
+    name = models.CharField(max_length=150)
+    description = models.CharField(max_length=500, null=True, blank=True)
+    other_title = models.CharField(max_length=150, null=True, blank=True)
+    other_text = models.TextField(null=True, blank=True)
+    logo_internal_path = models.CharField(max_length=1024, null=True, blank=True)
+    logo_public_url = models.CharField(max_length=1024, null=True, blank=True)
+    kind = models.CharField(max_length=20, choices=KIND_CHOICES, default=KIND_GENERIC)
+    project = models.ForeignKey('gvsigol_core.Project', on_delete=models.CASCADE,
+                                null=True, blank=True, related_name='attributions_configs')
+    apply_to_all_projects = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+
+    copyright_notice = models.TextField(null=True, blank=True)
+    help_text = models.TextField(null=True, blank=True)
+
+    contact_organization = models.CharField(max_length=200, null=True, blank=True)
+    contact_person = models.CharField(max_length=200, null=True, blank=True)
+    contact_address = models.CharField(max_length=500, null=True, blank=True)
+    contact_phone = models.CharField(max_length=100, null=True, blank=True)
+    contact_email = models.CharField(max_length=200, null=True, blank=True)
+    legal_notice = models.TextField(null=True, blank=True)
+
+    #: Orden de los bloques en el modal del visor (lista de ids: logo, copyright, …).
+    modal_section_order = JSONField(default=list, blank=True)
+
+    created_by = models.CharField(max_length=100, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Attributions config'
+        verbose_name_plural = 'Attributions configs'
+        indexes = [
+            models.Index(fields=['kind', 'is_active']),
+            models.Index(fields=['project']),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['project'],
+                condition=Q(kind='project_specific'),
+                name='unique_attributions_per_project_when_specific',
+            ),
+        ]
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def title(self):
+        return self.name
+
+    @property
+    def is_generic(self):
+        return self.kind == AttributionConfig.KIND_GENERIC
+
+    @property
+    def is_project_specific(self):
+        return self.kind == AttributionConfig.KIND_PROJECT_SPECIFIC
+
+
+class AttributionLink(models.Model):
+    """Enlaces de interés asociados a una configuración de atribuciones."""
+    config = models.ForeignKey(AttributionConfig, on_delete=models.CASCADE, related_name='links')
+    url = models.CharField(max_length=1024)
+    description = models.CharField(max_length=500, null=True, blank=True)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return self.description or self.url
+
+
+class AttributionAttachment(models.Model):
+    """
+    Archivo adjunto asociado a una configuración de atribuciones.
+
+    No se sube nada aquí: la ruta interna proviene del file manager del admin
+    (selector estándar) y la URL pública se genera apuntando al fileserver
+    público de gvsigol_services. Así los adjuntos pueden descargarse aunque
+    el proyecto sea privado.
+    """
+    config = models.ForeignKey(AttributionConfig, on_delete=models.CASCADE, related_name='attachments')
+    internal_path = models.CharField(max_length=1024)
+    public_url = models.CharField(max_length=1024, null=True, blank=True)
+    description = models.CharField(max_length=500, null=True, blank=True)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return self.description or self.internal_path
+
+
+class AttributionProjectMembership(models.Model):
+    """
+    Vincula configuraciones genéricas (kind='generic') a proyectos concretos
+    cuando se decide aplicarlas solo a una selección manual de proyectos
+    (es decir, cuando apply_to_all_projects=False).
+    """
+    config = models.ForeignKey(AttributionConfig, on_delete=models.CASCADE,
+                               related_name='project_memberships')
+    project = models.ForeignKey('gvsigol_core.Project', on_delete=models.CASCADE,
+                                related_name='attributions_memberships')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['config', 'project'],
+                                    name='unique_attributions_membership_config_project'),
+        ]
+        indexes = [
+            models.Index(fields=['project']),
+        ]
+
+    def __str__(self):
+        return '{} - {}'.format(self.config.name, self.project.name)

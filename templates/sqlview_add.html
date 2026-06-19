@@ -564,7 +564,7 @@
 			});
 		}
 
-		function udateFieldsTab(previousValues) {
+		function udateFieldsTab(previousValues, callback) {
 			var fromTables = [];
 			$(".from-tables").each(function () {
 				var selection = $(".from-table-datastore option:selected", $(this));
@@ -596,6 +596,12 @@
 				});
 			}
 			$("#field-list-table-body").empty();
+			if (fromTables.length === 0) {
+				if (typeof callback === "function") {
+					callback();
+				}
+				return;
+			}
 			var selectedFieldAliases = [];
 			// since getJSON is async and returns in random order, we use an ordered ui processor
 			// to ensure fields are always added in the same order
@@ -606,6 +612,9 @@
 						row = sortedResults[i][j];
 						$("#field-list-table-body").append(row);
 					}
+				}
+				if (typeof callback === "function") {
+					callback();
 				}
 			});
 			for (var i = 0; i < fromTables.length; i++) {
@@ -630,20 +639,24 @@
 		}
 
 		function deserializeFields(fields) {
-			if (fields) {
-				var fields = JSON.parse(fields);
-				var field;
-				var fieldsDict = {};
-				for (var i=0; i<fields.length; i++) {
-					field = fields[i];
-					fieldsDict[field["table_alias"]] = fieldsDict[field["table_alias"]] || {};
-					fieldsDict[field["table_alias"]][field["name"]] = {
-						"selected": true,
-						"alias": field["alias"]
-					};
-				}
-				udateFieldsTab(fieldsDict);
+			if (!fields || !String(fields).trim()) {
+				return;
 			}
+			var fieldsArr = JSON.parse(fields);
+			if (!fieldsArr || fieldsArr.length === 0) {
+				return;
+			}
+			var field;
+			var fieldsDict = {};
+			for (var i=0; i<fieldsArr.length; i++) {
+				field = fieldsArr[i];
+				fieldsDict[field["table_alias"]] = fieldsDict[field["table_alias"]] || {};
+				fieldsDict[field["table_alias"]][field["name"]] = {
+					"selected": true,
+					"alias": field["alias"]
+				};
+			}
+			udateFieldsTab(fieldsDict);
 		}
 
 		function serializeTables() {
@@ -706,15 +719,50 @@
 			updateDatastores($('option:selected', $(this)).val());
 		});
 
+		function sqlViewFieldsHiddenEmpty(fieldsVal) {
+			if (!fieldsVal || !String(fieldsVal).trim()) {
+				return true;
+			}
+			var t = String(fieldsVal).trim();
+			if (t === "[]") {
+				return true;
+			}
+			try {
+				var arr = JSON.parse(t);
+				return !arr || arr.length === 0;
+			} catch (err) {
+				return true;
+			}
+		}
+
 		$('#save_button').click(function (e) {
-			//udateFieldsTab();
-			$("#fields").val(serializeFields());
-			$("#from_tables").val(serializeTables());
-			$('#main_form').submit();
+			e.preventDefault();
+			function finishSave() {
+				$("#fields").val(serializeFields());
+				$("#from_tables").val(serializeTables());
+				$('#main_form')[0].submit();
+			}
+			var hasTables = $("#from-table-list-table tbody tr.from-tables").length > 0;
+			var fieldRows = $("#field-list-table-body tr").length;
+			if (hasTables && fieldRows === 0) {
+				$("body").overlay();
+				udateFieldsTab(undefined, function () {
+					$.overlayout();
+					finishSave();
+				});
+			} else {
+				finishSave();
+			}
 		});
 
+		var fieldsHiddenInitial = $("#fields").val();
 		deserializeTables($("#from_tables").val());
-		deserializeFields($("#fields").val());
+		deserializeFields(fieldsHiddenInitial);
+		if (sqlViewFieldsHiddenEmpty(fieldsHiddenInitial) && $("#from-table-list-table tbody tr.from-tables").length > 0) {
+			udateFieldsTab(undefined, function () {
+				$("#fields").val(serializeFields());
+			});
+		}
 	});
 </script>
 {% endblock %}

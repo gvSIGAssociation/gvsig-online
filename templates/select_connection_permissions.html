@@ -1,5 +1,5 @@
 {% load i18n %}
-{% load static from staticfiles %}
+{% load static %}
 <style>
 .cp-header {
 	display: flex;
@@ -105,7 +105,7 @@
 		<div id="connection-permissions-box" class="searchable-list-box">
 			<div class="box-header cp-header">
 				<div class="cp-search">
-					<input type="text" class="search form-control" placeholder="{% trans 'Search user role...' %}" id="role-search" />
+					<input type="text" class="search form-control" placeholder="{% filter force_escape %}{% trans 'Search user role...' %}{% endfilter %}" id="role-search" />
 				</div>
 				<div class="cp-allow-all">
 					<label class="cp-perm-chip" title="{% trans 'All users can create datastores with this connection' %}">

@@ -68,8 +68,8 @@ from gvsigol_auth.utils import superuser_required, staff_required, get_primary_u
 from gvsigol_auth import auth_backend
 from gvsigol_core import utils as core_utils
 from gvsigol_core.views import forbidden_view
-from gvsigol_core.models import Project, ProjectRole, ProjectBaseLayerTiling
-from gvsigol_core.models import ProjectLayerGroup, TilingProcessStatus
+from gvsigol_core.models import Project, ProjectRole
+from gvsigol_core.models import ProjectLayerGroup
 from gvsigol_symbology.models import Style
 from gvsigol_core.views import not_found_view
 from gvsigol_services.backend_resources import resource_manager
@@ -117,7 +117,6 @@ _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 CONNECT_TIMEOUT = 3.05
 READ_TIMEOUT = 30
-base_layer_process = {}
 
 
 def role_deleted_handler(sender, **kwargs):
@@ -1349,7 +1348,8 @@ def backend_fields_list(request):
                         field = {}
                         field['name'] = f['name']
                         for id, language in LANGUAGES:
-                            field['title-'+id] = f.get('title-'+id, field['name'])
+                            field['title-'+id] = utils.get_field_title_for_lang(
+                                f, id, field['name'])
                         result_resources.append(field)
                         founded = True
                 if not founded:
@@ -2224,8 +2224,8 @@ def _parse_form_groups(form_groups, fields):
                 group_fields.remove(field)
         for id, language in LANGUAGES:
             title_lang = 'title-'+id
-            if group.get(title_lang) is None:
-                group[title_lang] = ''
+            if group.get(title_lang) is None or not str(group.get(title_lang, '')).strip():
+                group[title_lang] = utils.get_field_title_for_lang(group, id, '')
         group['fields'] = group_fields
     group0_fields = form_groups[0].get("fields", [])
     for f in all_fields:
@@ -3395,16 +3395,26 @@ def layer_config(request, layer_id):
         for i in range(1, counter+1):
             field = {}
             field['name'] = request.POST.get('field-name-' + str(i))
-            
+            if not field['name']:
+                continue
+
             # Preservar gvsigol_type, type_params y field_format de la configuración anterior
-            if field['name'] in existing_fields:
-                existing_field = existing_fields[field['name']]
+            existing_field = existing_fields.get(field['name'], {})
+            if existing_field:
                 field['gvsigol_type'] = existing_field.get('gvsigol_type', '')
                 field['type_params'] = existing_field.get('type_params', {})
                 field['field_format'] = existing_field.get('field_format', {})
-            
+
             for id, language in LANGUAGES:
-                field['title-'+id] = request.POST.get('field-title-'+id+'-' + str(i), field['name']).strip()
+                posted_title = request.POST.get('field-title-' + id + '-' + str(i))
+                if posted_title is not None:
+                    posted_title = posted_title.strip()
+                else:
+                    posted_title = ''
+                if not posted_title:
+                    posted_title = utils.get_field_title_for_lang(
+                        existing_field, id, field['name'])
+                field['title-' + id] = posted_title or field['name']
             field['visible'] = False
             if 'field-visible-' + str(i) in request.POST:
                 field['visible'] = True
@@ -3739,6 +3749,19 @@ def layer_boundingbox_from_data(request):
 
 def _layer_cache_clear(layer_id):
     layer = Layer.objects.get(id=int(layer_id))
+    layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
+
+    if layer.external:
+        if layer.type != 'WMS':
+            return
+        gs = geographic_servers.get_instance().get_server_by_id(layer_group.server_id)
+        gs.clearCache(None, layer)
+        gs.reload_nodes()
+        if Layer.objects.filter(layer_group_id=layer_group.id, external=False).exists():
+            gs.createOrUpdateGeoserverLayerGroup(layer_group)
+            gs.clearLayerGroupCache(layer_group.name)
+        return
+
     datastore = Datastore.objects.get(id=layer.datastore.id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
     gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
@@ -3749,7 +3772,6 @@ def _layer_cache_clear(layer_id):
     gs.clearCache(workspace.name, layer)
     gs.updateThumbnail(layer, 'update')
 
-    layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
     gs.createOrUpdateGeoserverLayerGroup(layer_group)
     gs.clearLayerGroupCache(layer_group.name)
 
@@ -3764,7 +3786,7 @@ def layer_cache_clear(request, layer_id):
         layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
         server = Server.objects.get(id=layer_group.server_id)
         gs = geographic_servers.get_instance().get_server_by_id(server.id)
-        if not layer.external:
+        if not layer.external or layer.type == 'WMS':
             _layer_cache_clear(layer_id)
             gs.reload_nodes()
             return HttpResponse('{"response": "ok"}', content_type='application/json')
@@ -3790,18 +3812,21 @@ def layergroup_cache_clear(request, layergroup_id):
 
 def layer_group_cache_clear(layergroup):
     last = None
-    layers = Layer.objects.filter(external=False).filter(layer_group_id=int(layergroup.id))
+    layers = Layer.objects.filter(layer_group_id=int(layergroup.id)).filter(
+        Q(external=False) | Q(external=True, type='WMS')
+    )
     for layer in layers:
-        if not layer.external:
-            _layer_cache_clear(layer.id)
-            last = layer
+        _layer_cache_clear(layer.id)
+        last = layer
 
     if last:
-        gs = geographic_servers.get_instance().get_server_by_id(last.datastore.workspace.server.id)
-        gs.deleteGeoserverLayerGroup(layergroup)
-
-        gs.createOrUpdateGeoserverLayerGroup(layergroup)
-        gs.clearLayerGroupCache(layergroup.name)
+        gs = geographic_servers.get_instance().get_server_by_id(layergroup.server_id)
+        # rest_geoserver.create_or_update_gs_layer_group omits external layers.
+        # group may not exist if layer group only has external layers.
+        if Layer.objects.filter(layer_group_id=layergroup.id, external=False).exists():
+            gs.deleteGeoserverLayerGroup(layergroup)
+            gs.createOrUpdateGeoserverLayerGroup(layergroup)
+            gs.clearLayerGroupCache(layergroup.name)
         gs.reload_nodes()
 
 
@@ -4573,11 +4598,6 @@ def enumeration_add(request):
         if 'show_first_value' in request.POST:
             show_first_value = True
 
-        aux_title = b"".join(title.encode('ASCII', 'ignore').split())[:4]
-        aux_title = aux_title.lower()
-
-        name = name + '_' + re.sub("[!@#$%^&*()[]{};:,./<>?\|`~-=_+ ]", "", aux_title.decode("utf-8"))
-
         name_exists = False
         enums = Enumeration.objects.all()
         for enum in enums:
@@ -4786,99 +4806,6 @@ def enumeration_update(request, eid):
             'ALPHABETICAL': Enumeration.ALPHABETICAL
         })
 
-#***************************************************
-# TILEADO CAPAS BASE
-#***************************************************
-
-@login_required()
-@staff_required
-def create_base_layer(request, pid):
-    if request.method == 'POST':
-        plg = ProjectLayerGroup.objects.filter(project_id=pid, baselayer_group=True)
-        if plg is None or len(plg) == 0:
-            return utils.get_exception(400, 'This project does not have base layer')
-        id_base_lyr = plg[0].default_baselayer
-        base_lyr = Layer.objects.get(id=id_base_lyr)
-
-        num_res_levels = None
-        try:
-            num_res_levels = int(request.POST.get('tiles'))
-            format_ = request.POST.get('format')
-        except Exception:
-            return utils.get_exception(400, 'Wrong number of tiles')
-        tilematrixset = request.POST.get('tilematrixset')
-        extent = request.POST.get('extent')
-        version = int(round(time.time() * 1000))
-
-        base_layer_process = {}
-        if num_res_levels is not None:
-            if num_res_levels > 22:
-                return utils.get_exception(400, 'The number of resolution levels cannot be greater than 22')
-            else:
-                tasks.tiling_base_layer(base_layer_process, version, base_lyr, pid, num_res_levels, tilematrixset, format_, extent)
-        else:
-            return utils.get_exception(400, 'Wrong number of tiles')
-
-    return HttpResponse('{"response": "' + str(base_layer_process[str(pid)]['extent_processed']) + '"}', content_type='application/json')
-
-
-
-
-@login_required()
-@staff_required
-def retry_base_layer_process(request, pid):
-    if request.method == 'POST':
-        prj = ProjectBaseLayerTiling.objects.get(id=pid)
-        if(prj is not None):
-            if not os.path.exists(prj.folder_prj):
-                return utils.get_exception(400, 'This project does not have a base layer downloading')
-        else:
-            return utils.get_exception(400, 'This project does not have base layer running')
-        version = prj.version
-        processes = TilingProcessStatus.objects.filter(version=version)
-        for tiling_status in processes: #solo debería haber uno
-            tiling_status.stop = 'false'
-            tiling_status.active = 'true'
-            tiling_status.save()
-            base_layer_process[prj.id] = tiling_status
-            tasks.retry_base_layer_tiling(base_layer_process, prj, tiling_status)
-
-    return HttpResponse('{"response": "ok"}', content_type='application/json')
-
-
-
-@login_required()
-@staff_required
-def base_layer_process_update(request, pid):
-    if request.method == 'POST':
-        try:
-            base_layer_tiling = ProjectBaseLayerTiling.objects.get(id=pid)
-            version = base_layer_tiling.version
-            status_json = {}
-            status = TilingProcessStatus.objects.filter(version=version)
-            if(status is not None) :
-                for s in status:
-                    status_json = serial.serialize('json', status)
-                    status_json = json.loads(status_json)[0]['fields']
-                    return HttpResponse(json.dumps(status_json, indent=4), content_type='application/json')
-        except Exception as e:
-            pass
-        return HttpResponse('{"active" : "false"}', content_type='application/json')
-
-
-@login_required()
-@staff_required
-def stop_base_layer_process(request, pid):
-    if request.method == 'POST':
-        base_layer_tiling = ProjectBaseLayerTiling.objects.get(id=pid)
-        version = base_layer_tiling.version
-        status_json = {}
-        processes = TilingProcessStatus.objects.filter(version=version)
-        for tiling_status in processes: #solo debería haber uno
-            tiling_status.stop = 'true'
-            tiling_status.save()
-
-#***************************************************
 
 @csrf_exempt
 def get_enumeration(request):
@@ -5914,6 +5841,52 @@ def external_layer_list(request):
         }
         return render(request, 'external_layer_list.html', response)
 
+
+def _parse_external_wms_styles(request):
+    raw = request.POST.get('wms_styles')
+    if not raw:
+        return None
+    try:
+        styles = json.loads(raw)
+    except (ValueError, TypeError):
+        return None
+    if not isinstance(styles, list):
+        return None
+    normalized = []
+    for i, style in enumerate(styles):
+        if not isinstance(style, dict):
+            continue
+        name = style.get('name')
+        if not name:
+            continue
+        normalized.append({
+            'name': name,
+            'title': style.get('title') or name,
+            'is_default': bool(style.get('is_default')),
+            'custom_legend_url': style.get('custom_legend_url') or style.get('legend') or '',
+        })
+    if not normalized:
+        return None
+    utils.mark_default_external_wms_style(normalized, request.POST.get('layers'))
+    return normalized
+
+
+def _fetch_external_wms_styles_from_capabilities(url, version, layer_name):
+    if not url or not layer_name or layer_name == 'empty':
+        return None
+    try:
+        data = ows_get_capabilities(url, 'WMS', version, layer_name, False)
+    except Exception:
+        logger.exception('Error fetching WMS styles from capabilities for layer %s', layer_name)
+        return None
+    if data.get('response') == '500':
+        return None
+    styles = data.get('styles') or []
+    if not styles:
+        return None
+    return utils.mark_default_external_wms_style(styles, layer_name)
+
+
 @login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
@@ -5995,6 +5968,17 @@ def external_layer_add(request):
                 params['format'] = request.POST.get('format')
                 params['infoformat'] = request.POST.get('infoformat')
 
+            if external_layer.type == 'WMS':
+                wms_styles = _parse_external_wms_styles(request)
+                if not wms_styles:
+                    wms_styles = _fetch_external_wms_styles_from_capabilities(
+                        request.POST.get('url'),
+                        request.POST.get('version'),
+                        request.POST.get('layers'),
+                    )
+                if wms_styles:
+                    params['styles'] = wms_styles
+
             if external_layer.type == 'WMTS':
                 params['matrixset'] = request.POST.get('matrixset')
                 params['tilematrix'] = request.POST.get('tilematrix')
@@ -6061,6 +6045,9 @@ def external_layer_add(request):
                     master_node = geographic_servers.get_instance().get_master_node(server.id)
                     geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
                     geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
+                    tasks.update_external_cached_wms_wmts_options(
+                        Layer.objects.get(pk=external_layer.pk)
+                    )
 
             if external_layer.type == 'MVT' and style_file_upload_error:
                 update_url = reverse('external_layer_update', kwargs={'external_layer_id': external_layer.id})
@@ -6119,6 +6106,13 @@ def external_layer_update(request, external_layer_id):
         server = Server.objects.get(id=layer_group.server_id)
 
         try:
+            prev_params = {}
+            if external_layer.external_params:
+                try:
+                    prev_params = json.loads(external_layer.external_params)
+                except (json.JSONDecodeError, TypeError):
+                    prev_params = {}
+
             is_visible = False
             if 'visible' in request.POST:
                 is_visible = True
@@ -6187,6 +6181,19 @@ def external_layer_update(request, external_layer_id):
                 params['layers'] = request.POST.get('layers')
                 params['format'] = request.POST.get('format')
                 params['infoformat'] = request.POST.get('infoformat')
+                wms_styles = _parse_external_wms_styles(request)
+                if wms_styles is not None:
+                    params['styles'] = wms_styles
+                elif prev_params.get('styles'):
+                    params['styles'] = prev_params['styles']
+                elif external_layer.type == 'WMS':
+                    fetched_styles = _fetch_external_wms_styles_from_capabilities(
+                        request.POST.get('url'),
+                        request.POST.get('version'),
+                        request.POST.get('layers'),
+                    )
+                    if fetched_styles:
+                        params['styles'] = fetched_styles
 
             if external_layer.type == 'WMTS':
                 params['matrixset'] = request.POST.get('matrixset')
@@ -6199,6 +6206,12 @@ def external_layer_update(request, external_layer_id):
                 except Exception as e:
                     logger.exception("Error updating wmts options")
                     pass
+
+            if external_layer.type == 'WMS':
+                if cached and prev_params.get('wmts_options'):
+                    params.setdefault('wmts_options', prev_params['wmts_options'])
+                if not cached:
+                    params.pop('wmts_options', None)
 
             if external_layer.type == 'Bing':
                 params['key'] = request.POST.get('key')
@@ -6308,6 +6321,11 @@ def external_layer_update(request, external_layer_id):
             #geographic_servers.get_instance().get_server_by_id(server.id).updateThumbnail(external_layer)
             external_layer.external_params = json.dumps(params)
             external_layer.save()
+
+            if external_layer.cached and external_layer.type == 'WMS':
+                tasks.update_external_cached_wms_wmts_options(
+                    Layer.objects.get(pk=external_layer.pk)
+                )
 
             if redirect_to_layergroup:
                 # recalculate to_url since layergroup_id may change
@@ -6547,6 +6565,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                     if 'legend' in style:
                         style_def['custom_legend_url'] = style['legend']
                     styles.append(style_def)
+                utils.mark_default_external_wms_style(styles, layer)
                 try:
                     crs_list = lyr.crs_list
                 except Exception:
@@ -7153,7 +7172,7 @@ def connection_list(request):
         page_size_param="page_size",
     )
     
-    # Añadir información adicional para visualización (solo página actual)
+    # Añadir atribuciones para visualización (solo página actual)
     for conn in page_connections:
         conn.masked_params = conn.get_masked_params()
         # Contar almacenes de datos que usan esta conexión
@@ -10402,3 +10421,331 @@ def api_segex_entities(request):
         return JsonResponse({'success': False, 'error': str(e)})
 
 
+# ============================================================================
+# Attributions management
+# ============================================================================
+
+from .models import AttributionConfig, AttributionLink, AttributionAttachment, \
+    AttributionProjectMembership
+from .forms_attributions import AttributionConfigForm
+
+
+def _attr_modal_section_labels():
+    """Etiquetas para la lista de ordenación del modal (panel de control)."""
+    return {
+        'logo': gettext('Logo'),
+        'copyright': gettext('Copyright notice'),
+        'other': gettext('Others'),
+        'help': gettext('Help'),
+        'contact': gettext('Contact information'),
+        'legal': gettext('Legal notice'),
+        'links': gettext('Useful links'),
+        'attachments': gettext('Attachments'),
+    }
+
+
+def _attr_resolve_modal_section_order(form, base):
+    """Orden de bloques coherente con el campo oculto del formulario y la BD."""
+    raw = ''
+    if getattr(form, 'data', None) is not None and form.is_bound:
+        raw = (form.data.get('modal_section_order_json') or '').strip()
+    if not raw:
+        val = form['modal_section_order_json'].value()
+        if isinstance(val, str):
+            raw = val.strip()
+    if raw:
+        try:
+            return utils.normalize_attributions_modal_section_order(json.loads(raw))
+        except (ValueError, TypeError):
+            pass
+    if base is not None:
+        return utils.normalize_attributions_modal_section_order(base.modal_section_order)
+    return utils.normalize_attributions_modal_section_order([])
+
+
+def _attr_redirect_to_list():
+    return HttpResponseRedirect(reverse('attributions_list'))
+
+
+def _attr_apply_links_and_attachments(request, config):
+    """
+    Procesa los listados dinámicos de links y attachments enviados por el form
+    completo. Espera campos POST con prefijo 'link_url[]', 'link_description[]',
+    'attachment_internal_path[]', 'attachment_public_url[]', 'attachment_description[]'.
+    Sustituye los registros existentes por los enviados.
+    """
+    link_urls = request.POST.getlist('link_url[]')
+    link_descs = request.POST.getlist('link_description[]')
+
+    config.links.all().delete()
+    for idx, url in enumerate(link_urls):
+        if not url or not url.strip():
+            continue
+        desc = link_descs[idx] if idx < len(link_descs) else ''
+        safe_url = strip_tags(url).strip()
+        safe_desc = strip_tags((desc or '')).strip()
+        if not safe_url:
+            continue
+        AttributionLink.objects.create(
+            config=config,
+            url=safe_url,
+            description=safe_desc,
+            order=idx,
+        )
+
+    att_paths = request.POST.getlist('attachment_internal_path[]')
+    att_pub_urls = request.POST.getlist('attachment_public_url[]')
+    att_descs = request.POST.getlist('attachment_description[]')
+
+    config.attachments.all().delete()
+    for idx, internal_path in enumerate(att_paths):
+        if not internal_path or not internal_path.strip():
+            continue
+        public_url = att_pub_urls[idx] if idx < len(att_pub_urls) else ''
+        description = att_descs[idx] if idx < len(att_descs) else ''
+        safe_internal_path = strip_tags(internal_path).strip()
+        safe_public_url = strip_tags((public_url or '')).strip()
+        safe_description = strip_tags((description or '')).strip()
+        if not safe_internal_path:
+            continue
+        if not safe_public_url:
+            safe_public_url = utils.build_attributions_public_url(safe_internal_path)
+        AttributionAttachment.objects.create(
+            config=config,
+            internal_path=safe_internal_path,
+            public_url=safe_public_url,
+            description=safe_description,
+            order=idx,
+        )
+
+
+def _attr_apply_membership(request, config):
+    """
+    Aplica/actualiza la N:M de proyectos para configuraciones genéricas según
+    los checkboxes 'attr_project_ids[]'. Si la config no es genérica o la opción
+    'apply_to_all_projects' está activada, se elimina cualquier membership.
+    """
+    config.project_memberships.all().delete()
+
+    if not config.is_generic:
+        return
+    if config.apply_to_all_projects:
+        return
+
+    selected_ids = request.POST.getlist('attr_project_ids[]')
+    valid_projects = Project.objects.filter(id__in=selected_ids)
+    for project in valid_projects:
+        AttributionProjectMembership.objects.get_or_create(
+            config=config,
+            project=project,
+        )
+
+
+def _attr_get_form_context(form, config=None, source=None):
+    """
+    Construye el contexto que necesita el template attributions_form.html.
+    `source` es la configuración genérica usada como plantilla cuando se está
+    creando una configuración específica con la opción "Copiar configuración
+    genérica".
+    """
+    base = source if source is not None else config
+    if base is not None:
+        links = list(base.links.all().order_by('order', 'id'))
+        attachments = list(base.attachments.all().order_by('order', 'id'))
+    else:
+        links = []
+        attachments = []
+
+    if config is not None and config.pk and source is None:
+        selected_project_ids = list(
+            AttributionProjectMembership.objects
+            .filter(config=config)
+            .values_list('project_id', flat=True)
+        )
+    elif source is not None and source.is_generic:
+        selected_project_ids = list(
+            AttributionProjectMembership.objects
+            .filter(config=source)
+            .values_list('project_id', flat=True)
+        )
+    else:
+        selected_project_ids = []
+
+    modal_order = _attr_resolve_modal_section_order(form, base)
+    labels = _attr_modal_section_labels()
+    order_display = [(sid, labels[sid]) for sid in modal_order]
+
+    return {
+        'form': form,
+        'attr_config': config,
+        'projects': Project.objects.all().order_by('name'),
+        'generic_configs': AttributionConfig.objects.filter(
+            kind=AttributionConfig.KIND_GENERIC,
+        ).order_by('name'),
+        'attr_links': links,
+        'attr_attachments': attachments,
+        'attr_selected_project_ids': selected_project_ids,
+        'attr_modal_section_order_display': order_display,
+        'fm_directory': FILEMANAGER_DIRECTORY + "/",
+    }
+
+
+@login_required()
+@require_safe
+@superuser_required
+def attributions_list(request):
+    configs = AttributionConfig.objects.all().order_by('-updated_at')
+    has_generic = configs.filter(kind=AttributionConfig.KIND_GENERIC).exists()
+    return render(request, 'attributions_list.html', {
+        'configs': configs,
+        'has_generic': has_generic,
+    })
+
+
+@login_required()
+@superuser_required
+@require_http_methods(["GET", "POST"])
+def attributions_add(request):
+    source = None
+    source_id = request.GET.get('source') or request.POST.get('source')
+    if source_id:
+        try:
+            source = AttributionConfig.objects.get(id=int(source_id))
+        except (AttributionConfig.DoesNotExist, ValueError):
+            source = None
+
+    if request.method == 'POST':
+        form = AttributionConfigForm(request.POST)
+        if form.is_valid():
+            config = form.save(commit=False)
+            config.created_by = request.user.username
+            config.save()
+            _attr_apply_membership(request, config)
+            _attr_apply_links_and_attachments(request, config)
+            messages.success(request, gettext('Attributions configuration created successfully.'))
+            return _attr_redirect_to_list()
+        return render(request, 'attributions_form.html', _attr_get_form_context(form, source=source))
+
+    initial = {
+        'modal_section_order_json': json.dumps(
+            utils.normalize_attributions_modal_section_order([])
+        ),
+    }
+    if source is not None:
+        initial.update({
+            'name': '',
+            'description': source.description,
+            'other_title': source.other_title,
+            'other_text': source.other_text,
+            'logo_internal_path': source.logo_internal_path,
+            'logo_public_url': source.logo_public_url,
+            'kind': AttributionConfig.KIND_PROJECT_SPECIFIC,
+            'apply_to_all_projects': False,
+            'is_active': True,
+            'copyright_notice': source.copyright_notice,
+            'help_text': source.help_text,
+            'contact_organization': source.contact_organization,
+            'contact_person': source.contact_person,
+            'contact_address': source.contact_address,
+            'contact_phone': source.contact_phone,
+            'contact_email': source.contact_email,
+            'legal_notice': source.legal_notice,
+            'modal_section_order_json': json.dumps(
+                utils.normalize_attributions_modal_section_order(source.modal_section_order)
+            ),
+        })
+    form = AttributionConfigForm(initial=initial)
+    return render(request, 'attributions_form.html', _attr_get_form_context(form, source=source))
+
+
+@login_required()
+@superuser_required
+@require_http_methods(["GET", "POST"])
+def attributions_edit(request, attr_id):
+    config = get_object_or_404(AttributionConfig, id=attr_id)
+
+    if request.method == 'POST':
+        form = AttributionConfigForm(request.POST, instance=config)
+        if form.is_valid():
+            config = form.save()
+            _attr_apply_membership(request, config)
+            _attr_apply_links_and_attachments(request, config)
+            messages.success(request, gettext('Attributions configuration updated successfully.'))
+            return _attr_redirect_to_list()
+        return render(request, 'attributions_form.html', _attr_get_form_context(form, config=config))
+
+    form = AttributionConfigForm(instance=config)
+    return render(request, 'attributions_form.html', _attr_get_form_context(form, config=config))
+
+
+@login_required()
+@superuser_required
+@require_POST
+def attributions_delete(request, attr_id):
+    try:
+        config = AttributionConfig.objects.get(id=attr_id)
+        config.delete()
+        return JsonResponse({'success': True})
+    except AttributionConfig.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'not_found'}, status=404)
+    except Exception as e:
+        logger.exception('Error deleting attributions config')
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required()
+@superuser_required
+def attributions_clone(request, attr_id):
+    """Inicia la creación de una configuración nueva pre-rellenada con los
+    datos de `attr_id` (típicamente una genérica). Redirige al formulario de
+    creación con el parámetro `?source=<id>`."""
+    get_object_or_404(AttributionConfig, id=attr_id)
+    return HttpResponseRedirect(reverse('attributions_add') + '?source={}'.format(attr_id))
+
+
+def attributions_public_download(request, file_path):
+    """
+    Sirve sin autenticación un archivo adjunto de atribuciones. Replica el
+    patrón de plugin_vinya: el path es relativo a FILEMANAGER_DIRECTORY y se
+    valida con Path para impedir traversal. La razón para servirlo público es
+    que estos contenidos son legalmente "para difusión" (avisos copyright,
+    licencias) y los proyectos pueden ser privados.
+
+    internal_path en BD puede ser absoluta (/opt/.../data/f.pdf) o duplicar el
+    prefijo del directorio del FM en la URL; se normaliza siempre con
+    normalize_attributions_filemanager_relative_path.
+    """
+    from pathlib import Path
+
+    raw_path = (file_path or '').strip().lstrip('/')
+    if not raw_path:
+        return HttpResponseNotFound()
+
+    norm_rel = utils.normalize_attributions_filemanager_relative_path(raw_path)
+    if not norm_rel:
+        return HttpResponseNotFound()
+
+    full_path = os.path.normpath(os.path.join(FILEMANAGER_DIRECTORY, norm_rel))
+
+    fm_root = Path(FILEMANAGER_DIRECTORY).resolve()
+    try:
+        resolved = Path(full_path).resolve()
+    except Exception:
+        return HttpResponseNotFound()
+
+    if fm_root not in resolved.parents and resolved != fm_root:
+        logger.warning('Attributions download attempt outside FILEMANAGER_DIRECTORY: %s', full_path)
+        return HttpResponseNotFound()
+
+    if not resolved.is_file():
+        return HttpResponseNotFound()
+
+    if not (
+        utils.attributions_attachment_matches_relative_path(norm_rel)
+        or utils.attributions_logo_matches_relative_path(norm_rel)
+    ):
+        logger.warning('Attributions download attempt of an unreferenced resource: %s', norm_rel)
+        return HttpResponseNotFound()
+
+    filename = os.path.basename(str(resolved))
+    return sendfile(request, str(resolved), attachment=True, attachment_filename=filename)

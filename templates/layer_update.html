@@ -60,7 +60,7 @@
 			<div class="col-md-12 form-group">
 				<div class="pf-topbar">
 					<a href="javascript:window.history.back();" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
-					<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+					<button type="button" id="save-layer-button" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
 				</div>
 			</div>
 			<div class="row" style="padding-left: 30px;">
@@ -137,7 +137,7 @@
 								<div class="row">
 									<div class="col-md-12" style="margin-bottom: 20px;">
 										<div class="provider-img">
-											<img style="height: 50px; width: 50px;" id="image-preview" src="{{layer_image_url}}" alt="">
+											<img style="height: 50px; width: 50px;" id="image-preview"{% if layer_image_url %} src="{{ layer_image_url }}"{% endif %} alt="">
 										</div>
 										<div class="provider-img-change">
 											<label>{% trans "Icon" %}</label>({% trans "Supported formats" %}: .jpg, .jpeg, .png, .svg)
@@ -221,6 +221,11 @@
 										<input type="checkbox" name="allow_download"  id="allow_download"/>
 										{% endif %}
 										<label for="allow_download">{% trans "Allow downloads" %}</label>
+									</div>
+								</div>
+								<div class="row cached-single-image-notice-row">
+									<div class="col-md-12">
+										<div id="cached-single-image-notice" class="alert-box-message" style="display:none;"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <span class="cached-single-image-notice-text"></span></div>
 									</div>
 								</div>
 								<div class="row">
@@ -693,13 +698,24 @@ $('#submenu-layers').addClass("active");
 
 	};
 
+	function getFieldTitleForLang(field, language) {
+		var title = field["title-" + language];
+		if (title) {
+			return title;
+		}
+		if (language === 'ca-es-valencia') {
+			return field['title-va'] || field['title-ca-es@valencia'] || field.name || '';
+		}
+		return field.name || '';
+	}
+
 	function create_date_select(field, data, previousValue, allow_blank){
 		var language = $("#select-language").val();
 		var name_select = $("#"+field);
 		var placeholderSelected = true;
 
 		if (data==null || data.length==0) {
-			var text = "{% trans 'Resource contains no fields' %}";
+			var text = "{% filter escapejs %}{% trans 'Resource contains no fields' %}{% endfilter %}";
 			rebuildSelect(name_select, text, true);
 			$.overlayout();
 			return;
@@ -709,23 +725,18 @@ $('#submenu-layers').addClass("active");
 			options.push($('<option>'));
 		}
 		for (var i=0; i<data.length; i++) {
+			var fieldTitle = getFieldTitleForLang(data[i], language);
 			var attribs = {
 					value: data[i]["name"],
-					text: data[i]["name"]
+					text: fieldTitle || data[i]["name"]
 				};
-			if(data[i]["title-" + language] != ""){
-				attribs = {
-					value: data[i]["name"],
-					text: data[i]["title-" + language]
-				};
-			}
 			if (previousValue == data[i]["name"]) {
 				attribs['selected']='true';
 				placeholderSelected = false;
 			}
 			options.push($('<option>', attribs));
 		}
-		var text = '{% trans "Choose field" %}';
+		var text = '{% filter escapejs %}{% trans "Choose field" %}{% endfilter %}';
 		rebuildSelect(name_select, text, placeholderSelected, options);
 	};
 
@@ -764,12 +775,14 @@ $('#submenu-layers').addClass("active");
 				pagination: false
 			});
 
-		$("#dash-submit-button").click(function(e){
+		$("#save-layer-button").click(function(e){
+			e.preventDefault();
 			for(var i=0; i<searcheableReadList.items.length; i++){
 				var item = searcheableReadList.items[i];
 				item.show();
 			}
 			$(".layer-read-checkbox.gvsigol-checkable").prop("disabled", false);
+			$("body").overlay();
 			$("#layer-update-form").submit();
 			return false;
 		});
@@ -782,8 +795,8 @@ $('#submenu-layers').addClass("active");
 			} else {
 				var aux = '';
 				aux += '<div class="col-md-12"> \n';
-				aux += '\t <h2>{% trans "Layer title" %}</h2> \n';
-				aux += '\t <p>{% trans "Layer description" %}</p> \n';
+				aux += '\t <h2>{% filter escapejs %}{% trans "Layer title" %}{% endfilter %}</h2> \n';
+				aux += '\t <p>{% filter escapejs %}{% trans "Layer description" %}{% endfilter %}</p> \n';
 				aux += '</div> \n';
 				detailedInfoHTML.innerHTML = aux;
 			}
@@ -812,20 +825,20 @@ $('#submenu-layers').addClass("active");
 		});
 
 		var date_fields = {{ date_fields|safe }};
-		var time_enabled_field = "{{ layer.time_enabled_field }}";
-		var time_enabled_endfield = "{{ layer.time_enabled_endfield }}";
+		var time_enabled_field = "{{ layer.time_enabled_field|default_if_none:'' }}";
+		var time_enabled_endfield = "{{ layer.time_enabled_endfield|default_if_none:'' }}";
 		$("#id_layer_group option[value='']").attr('disabled','disabled');
 
 		create_date_select("id_time_enabled_field", date_fields, time_enabled_field, false);
 		create_date_select("id_time_enabled_endfield", date_fields, time_enabled_endfield, true);
 
-		$('#id_time_resolution_year').val({{ layer.time_resolution_year }});
-		$('#id_time_resolution_month').val({{ layer.time_resolution_month }});
-		$('#id_time_resolution_week').val({{ layer.time_resolution_week }});
-		$('#id_time_resolution_day').val({{ layer.time_resolution_day }});
-		$('#id_time_resolution_hour').val({{ layer.time_resolution_hour }});
-		$('#id_time_resolution_minute').val({{ layer.time_resolution_minute }});
-		$('#id_time_resolution_second').val({{ layer.time_resolution_second }});
+		$('#id_time_resolution_year').val('{{ layer.time_resolution_year|default_if_none:"" }}');
+		$('#id_time_resolution_month').val('{{ layer.time_resolution_month|default_if_none:"" }}');
+		$('#id_time_resolution_week').val('{{ layer.time_resolution_week|default_if_none:"" }}');
+		$('#id_time_resolution_day').val('{{ layer.time_resolution_day|default_if_none:"" }}');
+		$('#id_time_resolution_hour').val('{{ layer.time_resolution_hour|default_if_none:"" }}');
+		$('#id_time_resolution_minute').val('{{ layer.time_resolution_minute|default_if_none:"" }}');
+		$('#id_time_resolution_second').val('{{ layer.time_resolution_second|default_if_none:"" }}');
 
 		$('#select-style option[value="{{layer.style}}"]').attr('selected','selected');
 
@@ -835,16 +848,12 @@ $('#submenu-layers').addClass("active");
 		for (var i=0; i<lg_options.length; i++) {
 			text = $(lg_options[i]).text();
 			if (text=="__default__") {
-				$(lg_options[i]).html('{% trans "Default" %}');
+				$(lg_options[i]).html('{% filter escapejs %}{% trans "Default" %}{% endfilter %}');
 			}
 			if (lgs.val()=="") {
 				lgs.val(1);
 			}
 		}
-
-		$('#dash-submit-button').click( function() {
-			$("body").overlay();
-		});
 
 		$('#time_enabled').click(function(){
 			temporary_field($(this));
@@ -863,15 +872,34 @@ $('#submenu-layers').addClass("active");
 
 		make_temporal_form();
 
+		var msgSingleImageUncaches = "{% filter escapejs %}{% trans "Alert: single image (no tiles) cannot be combined with tile cache. Cached has been turned off." %}{% endfilter %}";
+		var msgCachedDisablesSingle = "{% filter escapejs %}{% trans "Alert: a cached layer cannot use single image (no tiles). Single image has been turned off." %}{% endfilter %}";
+
+		function showCachedSingleImageNotice(text) {
+			var $box = $("#cached-single-image-notice");
+			$box.find(".cached-single-image-notice-text").text(text);
+			$box.css("display", "block");
+		}
+
+		$("#single_image").on("change", function() {
+			if ($(this).is(":checked") && $("#cached").is(":checked")) {
+				$("#cached").prop("checked", false);
+				showCachedSingleImageNotice(msgSingleImageUncaches);
+			}
+		});
+		$("#cached").on("change", function() {
+			if ($(this).is(":checked") && $("#single_image").is(":checked")) {
+				$("#single_image").prop("checked", false);
+				showCachedSingleImageNotice(msgCachedDisablesSingle);
+			}
+		});
+
 		$('#datetimepicker').datetimepicker({
 			format: 'DD-MM-YYYY HH:mm:ss',
 			showClose: true
 		});
 
 		{% if 'gvsigol_plugin_catalog' in INSTALLED_APPS %}
-		{% if 'CATALOG_FACETS_CONFIG' in plugins_config.gvsigol_plugin_catalog %}
-		facetsConfig: {{ plugins_config.gvsigol_plugin_catalog.CATALOG_BASE_URL }},
-		{% endif %}
 		$('#create_metadata_btn').click(function() {
 			var url = '{% url 'create_metadata' layer_id %}';
 			$.ajax({url: url, type: 'post', data: {},
@@ -898,7 +926,7 @@ $('#submenu-layers').addClass("active");
 		
 		// Deshabilitar botón y mostrar loading
 		btn.prop('disabled', true);
-		btn.html('<i class="fa fa-spinner fa-spin"></i> {% trans "Generando..." %}');
+		btn.html('<i class="fa fa-spinner fa-spin"></i> {% filter escapejs %}{% trans "Generando..." %}{% endfilter %}');
 		
 		// Construir URL correctamente
 		var baseUrl = window.location.origin;
@@ -923,9 +951,9 @@ $('#submenu-layers').addClass("active");
 					}
 					
 					// Mostrar mensaje de éxito
-					alert('{% trans "Metadatos enriquecidos generados correctamente. Puedes editarlos antes de guardar la capa." %}');
+					alert('{% filter escapejs %}{% trans "Metadatos enriquecidos generados correctamente. Puedes editarlos antes de guardar la capa." %}{% endfilter %}');
 				} else {
-					alert('{% trans "Error:" %} ' + response.message);
+					alert('{% filter escapejs %}{% trans "Error:" %}{% endfilter %} ' + response.message);
 				}
 			},
 			error: function(xhr, status, error) {
@@ -936,14 +964,14 @@ $('#submenu-layers').addClass("active");
 					error: error
 				});
 				
-				var errorMsg = '{% trans "Error al generar metadatos enriquecidos" %}';
+				var errorMsg = '{% filter escapejs %}{% trans "Error al generar metadatos enriquecidos" %}{% endfilter %}';
 				
 				if (xhr.status === 404) {
-					errorMsg = '{% trans "Error 404: La URL no fue encontrada. Asegúrate de que el plugin GeoCopilot está instalado y el servidor está reiniciado." %}';
+					errorMsg = '{% filter escapejs %}{% trans "Error 404: La URL no fue encontrada. Asegúrate de que el plugin GeoCopilot está instalado y el servidor está reiniciado." %}{% endfilter %}';
 				} else if (xhr.status === 403) {
-					errorMsg = '{% trans "Error 403: No tienes permisos para realizar esta acción." %}';
+					errorMsg = '{% filter escapejs %}{% trans "Error 403: No tienes permisos para realizar esta acción." %}{% endfilter %}';
 				} else if (xhr.status === 500) {
-					errorMsg = '{% trans "Error 500: Error interno del servidor." %}';
+					errorMsg = '{% filter escapejs %}{% trans "Error 500: Error interno del servidor." %}{% endfilter %}';
 				} else if (xhr.responseJSON && xhr.responseJSON.message) {
 					errorMsg = xhr.responseJSON.message;
 				}

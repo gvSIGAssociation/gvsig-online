@@ -44,9 +44,9 @@
 {% block content %}
 
 {% if redirect_to_layergroup %}
-<form role="form" method="post" action="/gvsigonline/services/layer_config/{{layer_id}}/?redirect=layergroup-redirect{% if layergroup_id %}&layergroup_id={{layergroup_id}}{% endif %}{% if project_id %}&project_id={{project_id}}{% endif %}{% if from_redirect %}&from_redirect={{from_redirect}}{% endif %}">
+<form id="layer-config-form" role="form" method="post" action="/gvsigonline/services/layer_config/{{layer_id}}/?redirect=layergroup-redirect{% if layergroup_id %}&layergroup_id={{layergroup_id}}{% endif %}{% if project_id %}&project_id={{project_id}}{% endif %}{% if from_redirect %}&from_redirect={{from_redirect}}{% endif %}">
 {% else %}
-<form role="form" method="post" action="/gvsigonline/services/layer_config/{{layer_id}}/">
+<form id="layer-config-form" role="form" method="post" action="/gvsigonline/services/layer_config/{{layer_id}}/">
 {% endif %}
 <div class="row">
 	<div class="col-md-12">
@@ -1021,12 +1021,22 @@
 		var fields = {{ fields_json|safe }};
 		var available_languages = {{ available_languages_array|safe }};
 
+		var getFieldTitleForLang = function(field, lang) {
+			var title = field["title-" + lang];
+			if (title) {
+				return title;
+			}
+			if (lang === 'ca-es-valencia') {
+				return field['title-va'] || field['title-ca-es@valencia'] || field.name || '';
+			}
+			return field.name || '';
+		};
+
 		for(var i=0; i<fields.length; i++){
 			var field = fields[i];
 			for(var j=0; j<available_languages.length; j++){
 				var lang = available_languages[j];
-				$("input[name=\"field-title-"+lang+"-"+(i+1)+"\"]").val(field["title-"+lang]);
-
+				$("input[name=\"field-title-"+lang+"-"+(i+1)+"\"]").val(getFieldTitleForLang(field, lang));
 			}
 		}
 	});
@@ -1709,22 +1719,22 @@
 
 		config.enumerations = [];
 		{% for e in enumerations %}
-		config.enumerations.push({"id": "{{e.id}}", "title": "{{e.title}}"});
+		config.enumerations.push({"id": "{{e.id}}", "title": "{{ e.title|escapejs }}"});
 		{% endfor%}
 		config.forms = [];
 		{% for f in forms %}
-		config.forms.push({"name": "{{f.name}}", "title": "{{f.title}}"});
+		config.forms.push({"name": "{{f.name|escapejs}}", "title": "{{f.title|escapejs}}"});
 		{% endfor%}
 		config.triggerProcedures = [];
 		{% for tp in procedures %}
-		config.triggerProcedures.push({"id": "{{tp.signature}}", "label": "{{tp.localized_label}}", "type": "procedure"});
+		config.triggerProcedures.push({"id": "{{tp.signature|escapejs}}", "label": "{{ tp.localized_label|escapejs }}", "type": "procedure"});
 		{% endfor%}
 		// Añadir triggers de conexión (campos calculados)
 		{% for t in connection_triggers %}
 		{% if t.is_calculated_field %}
 		config.triggerProcedures.push({
-			"id": "connection_trigger_{{t.id}}", 
-			"label": "{{ t.name }}", 
+			"id": "connection_trigger_{{t.id}}",
+			"label": "{{ t.name|escapejs }}",
 			"type": "connection_trigger",
 			"trigger_id": {{ t.id }}
 		});
@@ -1876,7 +1886,7 @@
 		installEvents();
 	});
 	installEvents();
-	$('form').submit(function(e) {
+	$('#layer-config-form').on('submit', function(e) {
 			$("body").overlay();
 			if (!checkUniqueGroupNames()) {
 				e.preventDefault();
@@ -1898,15 +1908,19 @@
 					$('.fieldgroup-trans-row').filter(function(){
 						return $(this).data("groupid") == groupId;
 					}).find("input.fieldgroup-trans").each(function(idx, elem) {
-						var lang = elem.dataset['title'];
+						var lang = elem.getAttribute('data-title');
 						var trans = elem.value;
-						lastGroup[lang] = trans;
+						if (lang) {
+							lastGroup[lang] = trans;
+						}
 					});
 					jsonGroups.push(lastGroup);
 				}
 				else if (jqElem.hasClass('sortable-fieldgroup-field')) {
 					var fieldName = jqElem.find('span.text').text();
-					lastGroup.fields.push(fieldName);
+					if (lastGroup) {
+						lastGroup.fields.push(fieldName);
+					}
 				}
 			});
 			$('#form_groups').val(JSON.stringify(jsonGroups));

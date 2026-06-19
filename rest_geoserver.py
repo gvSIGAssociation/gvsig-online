@@ -384,8 +384,9 @@ class Geoserver():
         if r.status_code==200:
             return True
         
-        print("ERROR " + str(r.status_code) + ":" + r.content)
-        raise FailedRequestError(r.status_code, r.content)
+        content = r.content.decode('utf-8', errors='replace') if isinstance(r.content, bytes) else r.content
+        print("ERROR " + str(r.status_code) + ":" + content)
+        raise FailedRequestError(r.status_code, content)
             
     def raw_request(self, url, params, user=None, password=None):
         try:
@@ -744,7 +745,12 @@ class Geoserver():
     def clear_cache(self, ws, layer, user=None, password=None):
         url = self.gwc_url + "/masstruncate"
         headers = self._apply_override_headers({'content-type': 'text/xml'})
-        xml = "<truncateLayer><layerName>" + ws + ":" + layer.name + "</layerName></truncateLayer>"
+        # External WMS layers are registered in GWC by bare layer.name (see APIGeoWebCache.add_layer).
+        if getattr(layer, 'external', False):
+            gwc_layer_name = layer.name
+        else:
+            gwc_layer_name = ws + ":" + layer.name
+        xml = "<truncateLayer><layerName>" + gwc_layer_name + "</layerName></truncateLayer>"
         if user and password:
             auth = (user, password)
         else:
@@ -860,7 +866,8 @@ class Geoserver():
             xml = ET.tostring(root, encoding='utf-8')
             r = self.session.post(url, data=xml, headers=headers, auth=auth)
             if r.status_code == 200:
-                logger.info(f"MVT format {'enabled' if enable_mvt else 'disabled'} for layer {ws_name}:{layer_name}")
+                logger.info("MVT format %s for layer %s:%s",
+                            'enabled' if enable_mvt else 'disabled', ws_name, layer_name)
                 return True
             raise FailedRequestError(r.status_code, r.content)
             
@@ -887,7 +894,6 @@ class Geoserver():
     
     def get_layer_styles_configuration(self, layer, user=None, password=None):
         url = self.gwc_url + '/layers/'+layer.datastore.workspace.name +':'+layer.name+'.xml'
-        print('########################### get_layer_styles_configuration: update_layer_styles_configuration' + url)
         
         if user and password:
             auth = (user, password)
@@ -913,7 +919,11 @@ class Geoserver():
         
         headers = self._apply_override_headers({'content-type': 'text/xml'})
         
-        for parameterFiltersElem in tree.findall('./parameterFilters'):
+        parameterFiltersElems = tree.findall('./parameterFilters')
+        if not parameterFiltersElems:
+            parameterFiltersElems = [ET.SubElement(tree, 'parameterFilters')]
+        
+        for parameterFiltersElem in parameterFiltersElems:
             for styleParameterFilterElem in parameterFiltersElem.findall('./styleParameterFilter'):
                 styleParameterFilterElem.getparent().remove(styleParameterFilterElem)
             styleParameterFilterElem = ET.SubElement(parameterFiltersElem, 'styleParameterFilter')
@@ -924,19 +934,20 @@ class Geoserver():
                 defaultValueElem.text = default_style
             elif len(styles_list) > 0:
                 defaultValueElem.text = styles_list[0]
-            # ET.SubElement(styleParameterFilterElem, 'normalize')
-            #valuesElem = ET.SubElement(styleParameterFilterElem, 'values')
-            #for style_list in styles_list: 
-            #    stringValueElem = ET.SubElement(valuesElem, 'string')
-            #    stringValueElem.text = style_list
+            valuesElem = ET.SubElement(styleParameterFilterElem, 'values')
+            for s in styles_list:
+                stringValueElem = ET.SubElement(valuesElem, 'string')
+                stringValueElem.text = s
         r = self.session.post(url, data=ET.tostring(tree, encoding='UTF-8'), headers=headers, auth=auth)
         if r.status_code==200:
             return True
         raise UploadError(r.status_code, r.text)
         
     
-    def update_style(self, style_name, sld_body, user=None, password=None):
+    def update_style(self, style_name, sld_body, user=None, password=None, raw=False):
         url = self.service_url + "/styles/" + style_name + ".sld"
+        if raw:
+            url += "?raw=true"
         if user and password:
             auth = (user, password)
         else:
