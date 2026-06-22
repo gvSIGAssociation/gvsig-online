@@ -327,7 +327,28 @@
 }
 .pf-upload-area .provider-img { flex-shrink: 0; }
 .pf-upload-area .provider-img-change { flex: 1; }
-.pf-upload-area input[type="file"] { margin-top: 6px; }
+.pf-file-picker {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin-top: 6px;
+}
+.pf-file-picker__input {
+	position: absolute;
+	width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	z-index: -1;
+}
+.pf-file-picker__name {
+	font-size: 13px;
+	color: var(--pf-muted);
+}
+.pf-file-picker__btn {
+	margin: 0;
+}
 
 /* ---- Modales ---- */
 .modal-content {
@@ -439,7 +460,7 @@
 				<div class="pf-topbar">
 					{% csrf_token %}
 					{% if message %}
-					<div class="pf-error-msg" style="flex:1; margin-right:16px;">* {{ message }}</div>
+					<div class="pf-error-msg" style="flex:1; margin-right:16px;"><p>* {{ message }}</p></div>
 					{% endif %}
 					<button id="save_button" class="save_button btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
 				</div>
@@ -462,35 +483,41 @@
 									<div class="col-md-7" style="margin-bottom: 20px;">
 										<div class="pf-upload-area">
 											<div class="provider-img">
-												<img style="max-height: 52px;" id="logo-preview" src="{{project.logo.url}}" alt="">
+												<img style="max-height: 52px;" id="logo-preview" src="{{ project.logo_url }}" alt="">
 											</div>
 											<div class="provider-img-change">
 												<label>{% trans "Select main logo" %}</label>({% trans "Supported formats" %}: .jpg, .jpeg, .png)
-												<input id="project-logo" name="project-logo" accept=".jpg, .jpeg, .png" type="file" onchange="readURL(this);" class="file" data-show-preview="true">						
+												<div class="pf-file-picker">
+													<label for="project-logo" class="btn btn-default btn-sm pf-file-picker__btn" title="{% filter force_escape %}{% trans 'Select file' %}{% endfilter %}">
+														<i class="fa fa-folder-open margin-r-5"></i>{% trans "Select file" %}
+													</label>
+													<span class="pf-file-picker__name" id="project-logo-filename">{% trans "No file selected" %}</span>
+													<input id="project-logo" name="project-logo" accept=".jpg, .jpeg, .png" type="file" onchange="readLogoURL(this);" class="pf-file-picker__input" tabindex="-1">
+												</div>
 											</div>
 										</div>
 									</div>
 									<div class="col-md-5" style="margin-bottom: 20px;">
 										<label for="project-logo-link">{% trans "Link for logo" %}</label>
-										<input name="project-logo-link" id="project-logo-link" type="text" class="form-control">
+										<input name="project-logo-link" id="project-logo-link" type="text" class="form-control" value="{{ project.logo_link|default:'' }}">
 									</div>
 								</div>
               					<div class="row">
 		              				<div class="col-md-12 form-group">
 										<label for="project-name">{% trans "Name" %}</label>
-										<input placeholder="{% trans 'Project name' %}" name="project-name" id="project-name" type="text" class="form-control">						
+										<input placeholder="{% trans 'Project name' %}" name="project-name" id="project-name" type="text" class="form-control" value="{{ project.name|default:'' }}">
 									</div>
 								</div>
 								<div class="row">
 									<div class="col-md-12 form-group">
 										<label for="project-title">{% trans "Title" %}</label>
-										<input placeholder="{% trans 'Project title' %}" name="project-title" id="project-title" type="text" class="form-control">						
+										<input placeholder="{% trans 'Project title' %}" name="project-title" id="project-title" type="text" class="form-control" value="{{ project.title|default:'' }}">
 									</div>
 								</div>
 								<div class="row">
 									<div class="col-md-12 form-group">
 										<label for="project-description">{% trans "Description" %}</label>
-										<input placeholder="{% trans 'Project description' %}" name="project-description" id="project-description" type="text" class="form-control">						
+										<input placeholder="{% trans 'Project description' %}" name="project-description" id="project-description" type="text" class="form-control" value="{{ project.description|default:'' }}">
 									</div>
 								</div>
 
@@ -501,28 +528,28 @@
 									<div class="col-md-6 form-group">
 										<label for="id_toc_mode">{% trans "Toc panel presentation" %}</label>
 										<select class="form-control" id="id_toc_mode" name="toc_mode" tabindex="-1" aria-hidden="true">
-											<option value="toc_hidden">{% trans "Toc hidden" %}</option>
-											<option value="toc_groups">{% trans "Show toc and groups" %}</option>
-											<option value="toc_layers">{% trans "Show toc, groups and layers" %}</option>
+											<option value="toc_hidden"{% if project.toc_mode == 'toc_hidden' %} selected{% endif %}>{% trans "Toc hidden" %}</option>
+											<option value="toc_groups"{% if project.toc_mode == 'toc_groups' %} selected{% endif %}>{% trans "Show toc and groups" %}</option>
+											<option value="toc_layers"{% if project.toc_mode == 'toc_layers' %} selected{% endif %}>{% trans "Show toc, groups and layers" %}</option>
 										</select>
 									</div>
 									<div class="col-md-3 form-group">
 										<label class="pf-switch">
-											<input type="checkbox" name="selectable_groups" id="selectable_groups"/>
+											<input type="checkbox" name="selectable_groups" id="selectable_groups"{% if project.selectable_groups %} checked{% endif %}/>
 											{% trans "Selectable layer groups" %}
 										</label>
 									</div>
 									<div class="col-md-3 form-group">
 										<label for="id_expiration_date">{% trans "expiration_date_optional" %}</label>
 										<div class="input-group date" id="expiration_date">
-											<input id="id_expiration_date" onkeydown="return false" name="datetimepicker-start-value" type="text" class="form-control" autocomplete="off" />
+											<input id="id_expiration_date" onkeydown="return false" name="datetimepicker-start-value" type="text" class="form-control" autocomplete="off" value="{{ expiration_display|default:'' }}" />
 											<span class="input-group-addon">
 												<span class="glyphicon glyphicon-calendar"></span>
 											</span>
 										</div>
 										<p class="help-block text-muted small" style="margin-top:8px;margin-bottom:6px;">{% trans "expiration_date_hint" %}</p>
 										<button type="button" class="btn btn-default btn-sm" id="expiration_date_clear_btn">{% trans "expiration_date_clear" %}</button>
-										<input type="text" name="expiration_date_utc"  id="expiration_date_utc" class="form-control hide" />
+										<input type="text" name="expiration_date_utc" id="expiration_date_utc" class="form-control hide" value="{{ expiration_date_utc_value|default:'' }}" />
 									</div>
 								</div>
 
@@ -559,14 +586,14 @@
 								{% endif %}	
 								</div>
 								
-								<input type="hidden" name="center-lat" id="center-lat">
-								<input type="hidden" name="center-lon" id="center-lon">
-								<input type="hidden" name="extent" id="extent">
-								<input type="hidden" name="zoom" id="zoom">
+								<input type="hidden" name="center-lat" id="center-lat" value="{{ project.center_lat|default:'' }}">
+								<input type="hidden" name="center-lon" id="center-lon" value="{{ project.center_lon|default:'' }}">
+								<input type="hidden" name="extent" id="extent" value="{{ project.extent|default:'' }}">
+								<input type="hidden" name="zoom" id="zoom" value="{{ project.zoom|default:'' }}">
 								<div class="row">
 									<div class="col-md-6 form-group">
 										<label class="pf-switch">
-											<input type="checkbox" name="restricted_extent" id="restricted_extent"/>
+											<input type="checkbox" name="restricted_extent" id="restricted_extent"{% if project.restricted_extent %} checked{% endif %}/>
 											{% trans "Restricted extent" %}
 										</label>
 									</div>
@@ -583,11 +610,17 @@
 									<div class="col-md-12" style="margin-bottom: 20px;">
 										<div class="pf-upload-area">
 											<div class="provider-img">
-												<img style="height: 50px; width: 50px;" id="image-preview" src="{{project.image.url}}" alt="">
+												<img style="height: 50px; width: 50px;" id="image-preview" src="{{ project.image_url }}" alt="">
 											</div>
 											<div class="provider-img-change">
 												<label>{% trans "Change image?" %}</label>({% trans "Supported formats" %}: .jpg, .jpeg, .png)
-												<input id="project-image" name="project-image" accept=".jpg, .jpeg, .png" type="file" class="file" data-show-preview="true">						
+												<div class="pf-file-picker">
+													<label for="project-image" class="btn btn-default btn-sm pf-file-picker__btn" title="{% filter force_escape %}{% trans 'Select file' %}{% endfilter %}">
+														<i class="fa fa-folder-open margin-r-5"></i>{% trans "Select file" %}
+													</label>
+													<span class="pf-file-picker__name" id="project-image-filename">{% trans "No file selected" %}</span>
+													<input id="project-image" name="project-image" accept=".jpg, .jpeg, .png" type="file" onchange="readImageURL(this);" class="pf-file-picker__input" tabindex="-1">
+												</div>
 											</div>
 										</div>
 									</div>
@@ -595,7 +628,7 @@
 								<div class="row">
 									<div class="col-md-6 form-group">
 										<label class="pf-switch">
-											<input checked type="checkbox" name="show_project_icon" id="show_project_icon"/>
+											<input type="checkbox" name="show_project_icon" id="show_project_icon"{% if project.show_project_icon %} checked{% endif %}/>
 											{% trans "Show project icon in TOC" %}
 										</label>
 									</div>
@@ -605,10 +638,10 @@
 										<label for="viewer_preferred_ui">{% trans "Viewer technology" %}</label>
 										<select class="form-control" id="viewer_preferred_ui" name="viewer_preferred_ui" tabindex="-1" aria-hidden="true">
 											{% if REACT_SPA_UI is not None %}
-											<option value="{{ REACT_SPA_UI }}" {% if DEFAULT_VIEWER_UI == REACT_SPA_UI %}selected{% endif %}>{% trans "Current (React)" %}</option>
+											<option value="{{ REACT_SPA_UI }}"{% if project.viewer_preferred_ui == REACT_SPA_UI %} selected{% elif not project.viewer_preferred_ui and DEFAULT_VIEWER_UI == REACT_SPA_UI %} selected{% endif %}>{% trans "Current (React)" %}</option>
 											{% endif %}
 											{% if BOOTSTRAP_UI is not None %}
-											<option value="{{ BOOTSTRAP_UI }}" {% if DEFAULT_VIEWER_UI == BOOTSTRAP_UI %}selected{% endif %}>{% trans "Classic (Bootstrap)" %}</option>
+											<option value="{{ BOOTSTRAP_UI }}"{% if project.viewer_preferred_ui == BOOTSTRAP_UI %} selected{% elif not project.viewer_preferred_ui and DEFAULT_VIEWER_UI == BOOTSTRAP_UI %} selected{% endif %}>{% trans "Classic (Bootstrap)" %}</option>
 											{% endif %}
 										</select>
 									</div>
@@ -621,7 +654,7 @@
 									<div class="col-md-3 form-group">
 										<label for="header_project_label">{% trans "Project tags" %}</label>
 									</div>
-									<input class="hide form-control" id="labels_added" name="labels_added" type="text" />
+									<input class="hide form-control" id="labels_added" name="labels_added" type="text" value="{{ labels_added_value|default:'' }}" />
 								</div>
 								{% for s in label_list %}
 								<div class="row">
@@ -658,18 +691,30 @@
 													<span class="product-title"><span class="searchable-layer">{{layergroup.title}}</span></span>
 													<div style="margin-right: 10px;" class="radio pull-right">
 														<label>
-															<input type="radio" class="selected-base-group" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="selected-base-group-btn" value="{{layergroup.id}}" id="selected-base-group-{{layergroup.id}}"/>{% trans "Base group" %}
+															{% if layergroup.baselayer_group %}
+																<input type="radio" class="selected-base-group" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="selected-base-group-btn" id="selected-base-group-{{layergroup.id}}" value="{{layergroup.id}}" checked/>{% trans "Base group" %}
+															{% else %}
+																<input type="radio" class="selected-base-group" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="selected-base-group-btn" id="selected-base-group-{{layergroup.id}}" value="{{layergroup.id}}"/>{% trans "Base group" %}
+															{% endif %}
 														</label>
 													</div>
 													<div style="margin-right: 10px;" class="checkbox pull-right">
 														<label>
-															<input type="checkbox" class="layergroup-input" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}"/>{% trans "Add" %}
+															{% if layergroup.checked %}
+																<input type="checkbox" class="layergroup-input" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}" checked/>{% trans "Add" %}
+															{% else %}
+																<input type="checkbox" class="layergroup-input" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}"/>{% trans "Add" %}
+															{% endif %}
 														</label>
 													</div>
 													<span class="product-description"><span class="searchable-layer-desc">{{layergroup.name}}</span></span>
 												</div>
 												<div class="box-body">
+													{% if layergroup.baselayer_group %}
+													<ul id="basegroup-layers-{{layergroup.id}}" class="products-list product-list-in-box basegroup-layers" style="display: block;">
+													{% else %}
 													<ul id="basegroup-layers-{{layergroup.id}}" class="products-list product-list-in-box basegroup-layers" style="display: none;">
+													{% endif %}
 														{% for l in layergroup.layers %}
 														<li class="item">
 															<div class="product-info">
@@ -680,9 +725,16 @@
 																</span>
 																<div class="checkbox pull-right">
 																	<label>
-																		<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}"/><span style="width:150px;">{% trans "Base by default" %}</span>
-																		<input type="radio" class="overview-layer" name="overview-layer" value="{{l.id}}" id="overview-{{l.id}}"/><span style="width:150px;">{% trans "Overview" %}</span>
-
+																		{% if l.baselayer %}
+																			<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}-default" checked/><span style="width:150px;">{% trans "Base by default" %}</span>
+																		{% else %}
+																			<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}-default"/><span style="width:150px;">{% trans "Base by default" %}</span>
+																		{% endif %}
+																		{% if l.overview %}
+																			<input type="radio" class="overview-layer" name="overview-layer" value="{{l.id}}" id="overview-{{l.id}}" checked/><span style="width:150px;">{% trans "Overview" %}</span>
+																		{% else %}
+																			<input type="radio" class="overview-layer" name="overview-layer" value="{{l.id}}" id="overview-{{l.id}}"/><span style="width:150px;">{% trans "Overview" %}</span>
+																		{% endif %}
 																	</label>
 																</div>
 															</div>
@@ -697,15 +749,15 @@
 									</div>
 								</div>
 							</div>
-							<input type="hidden" id="selected_base_layer" name="selected_base_layer"/>
-							<input type="hidden" id="selected_base_group" name="selected_base_group"/>
-							<input type="hidden" id="selected_overview_layer" name="selected_overview_layer"/>
+							<input type="hidden" id="selected_base_layer" name="selected_base_layer" value="{{ selected_base_layer|default:'' }}"/>
+							<input type="hidden" id="selected_base_group" name="selected_base_group" value="{{ selected_base_group|default:'' }}"/>
+							<input type="hidden" id="selected_overview_layer" name="selected_overview_layer" value="{{ selected_overview_layer|default:'' }}"/>
 							<div class="col-md-3 pf-toc-sidebar">
 								<div class="box searchable-list-box">
 									<div class="box-body toc-layer-update">
 										<div id="toc" class="toc">
 										{% for g in toc %}
-											<div id="lg_{{g.1.id}}" data-name="{{g.1.name}}" data-title="{{g.1.title}}" data-order="{{g.1.order}}" class="box box-default collapsed-box toc-layergroup">
+											<div id="lg_{{g.1.id}}" data-groupid="{{g.1.id}}" data-name="{{g.1.name}}" data-title="{{g.1.title}}" data-order="{{g.1.order}}" class="box box-default collapsed-box toc-layergroup">
 												<div class="box-header with-border">
 													<span class="handle" style="margin-right: 20px;"> 
 														<i class="fa fa-ellipsis-v"></i>
@@ -830,7 +882,7 @@
               		</div>
               		
           		</div>
-          		<input type="hidden" id="toc_value" name="toc_value" value=""/>
+          		<input type="hidden" id="toc_value" name="toc_value" value="{{ toc_value|default:'' }}"/>
           	</form>
 		</div>
 	</div>
@@ -889,6 +941,18 @@
 	$('#menu-manage-projects').addClass("active");
 	$('#submenu-projects').addClass("active");
 
+	function clearProjectAddOverlay() {
+		if (typeof $.overlayout === 'function') {
+			$.overlayout();
+		}
+		$("#jqueryEasyOverlayDiv").remove();
+	}
+
+	{% if message %}
+	clearProjectAddOverlay();
+	$(window).on('pageshow', clearProjectAddOverlay);
+	{% endif %}
+
 	(function () {
 		var djangoLang = '{{ LANGUAGE_CODE|escapejs }}';
 		var map = { 'es': 'es', 'en': 'en-gb', 'ca': 'ca', 'ca-es-valencia': 'ca', 'pt': 'pt', 'de': 'de', 'pt-br': 'pt-br', 'eu': 'eu' };
@@ -905,7 +969,11 @@
 	})();
 
 	$("#id_srs option[value='']").remove();
-	$('#id_srs').val('EPSG:3857')
+	{% if project.viewer_default_crs %}
+	$('#id_srs').val('{{ project.viewer_default_crs|escapejs }}');
+	{% else %}
+	$('#id_srs').val('EPSG:3857');
+	{% endif %}
 
 	
 	$('#expiration_date').on('dp.change', function(e){
@@ -927,16 +995,33 @@
 		$('#expiration_date_utc').val('');
 	});
 	
-	function readURL(input) {
-  	    if (input.files && input.files[0]) {
-  	        var reader = new FileReader();
-  	        reader.onload = function (e) {
-  	            $('#logo-preview').attr('src', e.target.result);
-  	        };
-  	        reader.readAsDataURL(input.files[0]);
-  	        
-  	    }
-  	}	
+	function updateFilePickerName(input, nameElementId) {
+		if (input.files && input.files[0]) {
+			$("#" + nameElementId).text(input.files[0].name);
+		}
+	}
+
+	function readLogoURL(input) {
+		updateFilePickerName(input, 'project-logo-filename');
+		if (input.files && input.files[0]) {
+			var reader = new FileReader();
+			reader.onload = function (e) {
+				$('#logo-preview').attr('src', e.target.result);
+			};
+			reader.readAsDataURL(input.files[0]);
+		}
+	}
+
+	function readImageURL(input) {
+		updateFilePickerName(input, 'project-image-filename');
+		if (input.files && input.files[0]) {
+			var reader = new FileReader();
+			reader.onload = function (e) {
+				$('#image-preview').attr('src', e.target.result);
+			};
+			reader.readAsDataURL(input.files[0]);
+		}
+	}
 	
 	var epsg3857Bounds = [-20037508.34, -20037508.34, 20037508.34, 20037508.34];
 	var epsg4326Bounds = [-180.0, -90.0, 180.0, 90.0];
@@ -1382,7 +1467,6 @@
 		});
 		
 		$('#project-form').submit(function() {
-			$("body").overlay();
 			var minx_4326 = parseFloat($("#extent4326_minx").val());
 			var maxx_4326 = parseFloat($("#extent4326_maxx").val());
 			var miny_4326 = parseFloat($("#extent4326_miny").val());

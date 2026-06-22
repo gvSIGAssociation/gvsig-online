@@ -789,6 +789,11 @@ msgstr ""
 msgid "Select main logo"
 msgstr ""
 
+#: gvsigol_core/templates/project_add.html
+#: gvsigol_core/templates/project_update.html
+msgid "No file selected"
+msgstr "No file selected"
+
 #: gvsigol_core/templates/project_add.html:474
 #: gvsigol_core/templates/project_update.html:481
 msgid "Link for logo"

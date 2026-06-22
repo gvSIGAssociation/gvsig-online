@@ -1148,6 +1148,11 @@ msgstr "Eines"
 msgid "Select main logo"
 msgstr "Seleccionar logo principal"
 
+#: gvsigol_core/templates/project_add.html
+#: gvsigol_core/templates/project_update.html
+msgid "No file selected"
+msgstr "Cap fitxer seleccionat"
+
 #: gvsigol_core/templates/project_add.html:474
 #: gvsigol_core/templates/project_update.html:480
 msgid "Link for logo"
