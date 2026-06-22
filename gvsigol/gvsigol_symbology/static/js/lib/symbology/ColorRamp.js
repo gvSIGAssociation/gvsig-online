@@ -96,7 +96,7 @@ ColorRamp.prototype.getColorRampUI = function(rule_entry) {
 	var ui = '';
 	ui += '<tr class="color-ramp-data" data-rowid="' + rule_entry.id + '">';
 	ui += 	'<td>'
-	ui += 		'<span class="handle"> ';
+	ui += 		'<span class="handle" style="cursor:grab;cursor:-webkit-grab;" title="' + gettext('Drag to reorder') + '"> ';
 	ui += 			'<i class="fa fa-ellipsis-v"></i>';
 	ui += 			'<i class="fa fa-ellipsis-v"></i>';
 	ui += 		'</span>';
@@ -130,6 +130,13 @@ ColorRamp.prototype.loadRule = function(entries) {
 	}
 };
 
+ColorRamp.prototype.updateRowIdLabels = function() {
+	$("#colorramp-table tr.color-ramp-data").each(function(index) {
+		var id = $(this).attr("data-rowid");
+		$("#color-map-entry-preview-div-" + id).text(index);
+	});
+};
+
 ColorRamp.prototype.updateEvents = function() {
 	var self = this;
 	$(".color-chooser").unbind("change").change(function(){
@@ -146,10 +153,26 @@ ColorRamp.prototype.updateEvents = function() {
 		$(this).parent().parent().remove();
 		self.refreshPreview();
 	});
+
+	var $table = $("#colorramp-table");
+	if ($table.hasClass("ui-sortable")) {
+		$table.sortable("destroy");
+	}
+	$table.sortable({
+		items: "tr.color-ramp-data",
+		placeholder: "sort-highlight",
+		handle: ".handle",
+		forcePlaceholderSize: true,
+		zIndex: 999999
+	});
+	$table.off("sortupdate").on("sortupdate", function() {
+		self.refreshPreview();
+	});
 };
 
 
 ColorRamp.prototype.refreshPreview = function() {
+	this.updateRowIdLabels();
 	var css_string1 = "";
 	var css_string2 = "";
 	
@@ -163,7 +186,7 @@ ColorRamp.prototype.refreshPreview = function() {
 	});
 	
 	sortable.sort(function(a, b) {
-	    return a[0].quantity - b[0].quantity;
+	    return parseFloat(a[0]) - parseFloat(b[0]);
 	});
 	
 	
@@ -176,11 +199,11 @@ ColorRamp.prototype.refreshPreview = function() {
 		}
 		
 		var rgba_color_ini_aux = this.utils.convertHex(sortable[0][1]);
-		var rgba_color_ini = "rgba(" + rgba_color_aux.red + ","+ rgba_color_aux.green + ","+ rgba_color_aux.blue + ","+ sortable[0][2] + ")"
+		var rgba_color_ini = "rgba(" + rgba_color_ini_aux.red + ","+ rgba_color_ini_aux.green + ","+ rgba_color_ini_aux.blue + ","+ sortable[0][2] + ")"
 		var ini_color = rgba_color_ini;
 		
 		var rgba_color_fin_aux = this.utils.convertHex(sortable[sortable.length-1][1]);
-		var rgba_color_fin = "rgba(" + rgba_color_aux.red + ","+ rgba_color_aux.green + ","+ rgba_color_aux.blue + ","+ sortable[sortable.length-1][2] + ")"
+		var rgba_color_fin = "rgba(" + rgba_color_fin_aux.red + ","+ rgba_color_fin_aux.green + ","+ rgba_color_fin_aux.blue + ","+ sortable[sortable.length-1][2] + ")"
 		var end_color = rgba_color_fin;
 		
 		var style = "";
@@ -217,7 +240,7 @@ ColorRamp.prototype.getStyleForPreview = function(json_data) {
 	}
 	
 	sortable.sort(function(a, b) {
-	    return a[0].quantity - b[0].quantity;
+	    return parseFloat(a[0]) - parseFloat(b[0]);
 	});
 	
 	
@@ -230,11 +253,11 @@ ColorRamp.prototype.getStyleForPreview = function(json_data) {
 		}
 		
 		var rgba_color_ini_aux = this.utils.convertHex(sortable[0][1]);
-		var rgba_color_ini = "rgba(" + rgba_color_aux.red + ","+ rgba_color_aux.green + ","+ rgba_color_aux.blue + ","+ sortable[0][2] + ")"
+		var rgba_color_ini = "rgba(" + rgba_color_ini_aux.red + ","+ rgba_color_ini_aux.green + ","+ rgba_color_ini_aux.blue + ","+ sortable[0][2] + ")"
 		var ini_color = rgba_color_ini;
 		
 		var rgba_color_fin_aux = this.utils.convertHex(sortable[sortable.length-1][1]);
-		var rgba_color_fin = "rgba(" + rgba_color_aux.red + ","+ rgba_color_aux.green + ","+ rgba_color_aux.blue + ","+ sortable[sortable.length-1][2] + ")"
+		var rgba_color_fin = "rgba(" + rgba_color_fin_aux.red + ","+ rgba_color_fin_aux.green + ","+ rgba_color_fin_aux.blue + ","+ sortable[sortable.length-1][2] + ")"
 		var end_color = rgba_color_fin;
 		
 		style = style + "background-color:"+ini_color+";";
