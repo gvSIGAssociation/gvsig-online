@@ -170,7 +170,9 @@ env = environ.Env(
     COUNTRIES_FIRST_BREAK = (str,"----"),
     GEOSERVER_USE_KEEPALIVE = (bool,True),
 
-    UI_HIDEN_PROJECTS_PREFIX=(str,'hidden')
+    UI_HIDEN_PROJECTS_PREFIX=(str,'hidden'),
+    GDALTOOLS_BASEPATH=(str,''),
+    GDALTOOLS_CMD_PREFIX=(str,'')
 )
 ENVIRON_FILE = os.path.join(BASE_DIR, '.env')
 environ.Env.read_env(ENVIRON_FILE)
@@ -573,9 +575,8 @@ MOSAIC_DB = {
     'passwd': env('DB_PASS')
 }
 
-#GDALTOOLS_BASEPATH = '/usr/bin'
-#GDALTOOLS_BASEPATH = '/usr/local/bin'
-#OGR2OGR_PATH = GDALTOOLS_BASEPATH + '/ogr2ogr'
+GDALTOOLS_BASEPATH = env('GDALTOOLS_BASEPATH')
+GDALTOOLS_CMD_PREFIX = env('GDALTOOLS_CMD_PREFIX')
 
 TILE_SIZE = 256
 MAX_ZOOM_LEVEL = 20 
