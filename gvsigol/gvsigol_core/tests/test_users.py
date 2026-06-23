@@ -1,7 +1,8 @@
-from django.test import TestCase
+from django.test import TestCase, tag
 from gvsigol_auth.models import UserGroup, UserGroupUser
 from django.contrib.auth.models import User
 
+@tag('auth', 'integration')
 class CreateUserEnvironmentTest(TestCase):
     
     def create_user(self, username="username", first_name="firstname", last_name="lastname", email="test@gmail.com", is_superuser=True, is_staff=True, password="aassddff"):
