@@ -730,6 +730,11 @@ msgstr "Herramientas"
 msgid "Select main logo"
 msgstr "Seleccionar logo principal"
 
+#: gvsigol_core/templates/project_add.html
+#: gvsigol_core/templates/project_update.html
+msgid "No file selected"
+msgstr "Ningún archivo seleccionado"
+
 #: gvsigol_core/templates/project_add.html:474
 #: gvsigol_core/templates/project_update.html:481
 msgid "Link for logo"
