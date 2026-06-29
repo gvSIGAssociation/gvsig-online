@@ -344,7 +344,28 @@
 }
 .pf-upload-area .provider-img { flex-shrink: 0; }
 .pf-upload-area .provider-img-change { flex: 1; }
-.pf-upload-area input[type="file"] { margin-top: 6px; }
+.pf-file-picker {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin-top: 6px;
+}
+.pf-file-picker__input {
+	position: absolute;
+	width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	z-index: -1;
+}
+.pf-file-picker__name {
+	font-size: 13px;
+	color: var(--pf-muted);
+}
+.pf-file-picker__btn {
+	margin: 0;
+}
 
 /* ---- Modales ---- */
 .modal-content {
@@ -472,7 +493,13 @@
 											</div>
 											<div class="provider-img-change">
 												<label>{% trans "Select main logo" %}</label>({% trans "Supported formats" %}: .jpg, .jpeg, .png)
-												<input id="project-logo" name="project-logo" accept=".jpg, .jpeg, .png" onchange="readLogoURL(this);" type="file" class="file" data-show-preview="true">						
+												<div class="pf-file-picker">
+													<label for="project-logo" class="btn btn-default btn-sm pf-file-picker__btn" title="{% filter force_escape %}{% trans 'Select file' %}{% endfilter %}">
+														<i class="fa fa-folder-open margin-r-5"></i>{% trans "Select file" %}
+													</label>
+													<span class="pf-file-picker__name" id="project-logo-filename">{% trans "No file selected" %}</span>
+													<input id="project-logo" name="project-logo" accept=".jpg, .jpeg, .png" onchange="readLogoURL(this);" type="file" class="pf-file-picker__input" tabindex="-1">
+												</div>
 											</div>
 										</div>
 									</div>	
@@ -607,7 +634,13 @@
 											</div>
 											<div class="provider-img-change">
 												<label>{% trans "Change image?" %}</label>({% trans "Supported formats" %}: .jpg, .jpeg, .png)
-												<input id="project-image" name="project-image" accept=".jpg, .jpeg, .png" type="file" class="file" data-show-preview="true">						
+												<div class="pf-file-picker">
+													<label for="project-image" class="btn btn-default btn-sm pf-file-picker__btn" title="{% filter force_escape %}{% trans 'Select file' %}{% endfilter %}">
+														<i class="fa fa-folder-open margin-r-5"></i>{% trans "Select file" %}
+													</label>
+													<span class="pf-file-picker__name" id="project-image-filename">{% trans "No file selected" %}</span>
+													<input id="project-image" name="project-image" accept=".jpg, .jpeg, .png" type="file" onchange="readImageURL(this);" class="pf-file-picker__input" tabindex="-1">
+												</div>
 											</div>
 										</div>
 									</div>	
@@ -969,32 +1002,33 @@
 	}
 	
 
-	function readURL(input) {
-	        if (input.files && input.files[0]) {
-	            var reader = new FileReader();
-	            
-	            reader.onload = function (e) {
-	                $('#image-preview').attr('src', e.target.result);
-	            }
-	            
-	            reader.readAsDataURL(input.files[0]);
-	        }
-	    }
+	function updateFilePickerName(input, nameElementId) {
+		if (input.files && input.files[0]) {
+			$("#" + nameElementId).text(input.files[0].name);
+		}
+	}
 
-	$("#project-image").change(function(){
-	  readURL(this);
-	});
-	
+	function readImageURL(input) {
+		updateFilePickerName(input, 'project-image-filename');
+		if (input.files && input.files[0]) {
+			var reader = new FileReader();
+			reader.onload = function (e) {
+				$('#image-preview').attr('src', e.target.result);
+			};
+			reader.readAsDataURL(input.files[0]);
+		}
+	}
+
 	function readLogoURL(input) {
-  	    if (input.files && input.files[0]) {
-  	        var reader = new FileReader();
-  	        reader.onload = function (e) {
-  	            $('#logo-preview').attr('src', e.target.result);
-  	        };
-  	        reader.readAsDataURL(input.files[0]);
-  	        
-  	    }
-  	}
+		updateFilePickerName(input, 'project-logo-filename');
+		if (input.files && input.files[0]) {
+			var reader = new FileReader();
+			reader.onload = function (e) {
+				$('#logo-preview').attr('src', e.target.result);
+			};
+			reader.readAsDataURL(input.files[0]);
+		}
+	}
 	
 	var epsg3857Bounds = [-20037508.34, -20037508.34, 20037508.34, 20037508.34];
 	var epsg4326Bounds = [-180.0, -90.0, 180.0, 90.0];
