@@ -60,6 +60,9 @@ class GvsigolCoreConfig(AppConfig):
         GDALTOOLS_BASEPATH = getattr(settings, 'GDALTOOLS_BASEPATH', '')
         if GDALTOOLS_BASEPATH:
             gdaltools.Wrapper.BASEPATH = GDALTOOLS_BASEPATH
+        GDALTOOLS_CMD_PREFIX = getattr(settings, 'GDALTOOLS_CMD_PREFIX', '')
+        if GDALTOOLS_CMD_PREFIX:
+            gdaltools.Wrapper.CMD_PREFIX = GDALTOOLS_CMD_PREFIX
 
     def output_locale_conf(self):
         logger = logging.getLogger('gvsigol')

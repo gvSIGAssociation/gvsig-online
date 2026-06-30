@@ -42,6 +42,9 @@ def _configure_gdaltools():
     basepath = getattr(settings, 'GDALTOOLS_BASEPATH', '')
     if basepath:
         gdaltools.Wrapper.BASEPATH = basepath
+    cmd_prefix = getattr(settings, 'GDALTOOLS_CMD_PREFIX', '')
+    if cmd_prefix:
+        gdaltools.Wrapper.CMD_PREFIX = cmd_prefix
 
 
 def _get_ogr2ogr():

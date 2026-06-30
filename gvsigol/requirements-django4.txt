@@ -1,4 +1,4 @@
-##
+c##
 # requirements-django4.txt
 # Python target: 3.9
 # Django target: 4.2 LTS
@@ -121,7 +121,7 @@ requests-futures==1.0.2
 
 ## Scolab tools
 spatialiteintrospect==1.2
-pygdaltools==1.4.2
+pygdaltools==1.5.0
 # *NOTE:* It requires having gdal tools installed in the system (gdal-bin package)
 
 ## Other
@@ -186,7 +186,7 @@ xmlsec==1.3.17
 django_tinymce==3.7.1
 
 # plugin geoetl
-## queda pendiente migrar pandas a v 2.3.3, numpy a 2.0.2 y SQLAlchemy a 2.x cuando dejemos de soportar Python 3.6 a nivel de código fuente
+## queda pendiente migrar pandas a v 2.3.3, numpy a 2.0.2 y SQLAlchemy a 2.x cuando dejemos de soportar Python 3.6 a nivel de codigo fuente
 ## de momento no es posible porque pandas >= 2.2 requiere SQLAlchemy >= 2.0, que requiere Python >= 3.7
 pandas==2.1.4 # debemos mantener compatibilidad en codigo con pandas 1.5.x
 numpy==1.26.4 
