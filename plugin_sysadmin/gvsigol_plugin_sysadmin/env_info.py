@@ -25,6 +25,7 @@ Notes
   an XSS defense.
 """
 
+import locale
 import logging
 import os
 import platform
@@ -396,6 +397,42 @@ def get_python_info():
             data[key] = func()
         except Exception:
             data[key] = 'unknown'
+    return data
+
+
+def get_locale_info():
+    """Locale and character-encoding configuration of the running process.
+
+    This information used to be written to the gvsigol startup log; it is
+    surfaced here instead.
+    """
+    data = {'env': {}}
+    try:
+        data['stdout_encoding'] = getattr(sys.stdout, 'encoding', None) or 'unknown'
+    except Exception:
+        data['stdout_encoding'] = 'unknown'
+    try:
+        data['stderr_encoding'] = getattr(sys.stderr, 'encoding', None) or 'unknown'
+    except Exception:
+        data['stderr_encoding'] = 'unknown'
+    try:
+        data['filesystem_encoding'] = sys.getfilesystemencoding() or 'unknown'
+    except Exception:
+        data['filesystem_encoding'] = 'unknown'
+    try:
+        data['preferred_encoding'] = locale.getpreferredencoding(False)
+    except Exception:
+        data['preferred_encoding'] = 'unknown'
+    try:
+        data['default_locale'] = str(locale.getdefaultlocale())
+    except Exception:
+        data['default_locale'] = 'unknown'
+    for key in ('LANG', 'LANGUAGE', 'LC_ALL', 'LC_CTYPE',
+                'PYTHONIOENCODING', 'PYTHONUTF8'):
+        try:
+            data['env'][key] = _clean_text(os.environ.get(key) or '')
+        except Exception:
+            data['env'][key] = ''
     return data
 
 
@@ -993,6 +1030,7 @@ def collect_environment():
         ('lsb_release', get_lsb_release),
         ('memory', get_memory_info),
         ('python', get_python_info),
+        ('locale', get_locale_info),
         ('packages', get_installed_packages),
         ('pygdaltools', get_pygdaltools_gdal),
         ('geodjango', get_geodjango_gdal),

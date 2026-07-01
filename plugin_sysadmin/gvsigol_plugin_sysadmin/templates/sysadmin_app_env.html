@@ -83,6 +83,23 @@
 				</table>
 				{% endwith %}
 
+				{# ---------------- Locale & encoding ---------------- #}
+				<h4><i class="fa fa-language margin-r-5"></i> {% trans "Locale & encoding" %}</h4>
+				{% with loc=env.locale %}
+				<table class="table table-condensed table-bordered">
+					<tbody>
+						<tr><th style="width:260px;">sys.stdout.encoding</th><td>{{ loc.stdout_encoding|default:"unknown" }}</td></tr>
+						<tr><th>sys.stderr.encoding</th><td>{{ loc.stderr_encoding|default:"unknown" }}</td></tr>
+						<tr><th>sys.getfilesystemencoding()</th><td>{{ loc.filesystem_encoding|default:"unknown" }}</td></tr>
+						<tr><th>locale.getpreferredencoding()</th><td>{{ loc.preferred_encoding|default:"unknown" }}</td></tr>
+						<tr><th>locale.getdefaultlocale()</th><td>{{ loc.default_locale|default:"unknown" }}</td></tr>
+						{% for k, v in loc.env.items %}
+						<tr><th>{{ k }}</th><td>{{ v|default:"(not set)" }}</td></tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				{% endwith %}
+
 				{# ---------------- Installed packages ---------------- #}
 				{% with pkg=env.packages %}
 				<h4><i class="fa fa-cubes margin-r-5"></i> {% trans "Installed packages" %} <small class="text-muted">{{ pkg.source|default:"importlib.metadata" }}</small></h4>
