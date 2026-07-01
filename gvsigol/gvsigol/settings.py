@@ -26,6 +26,7 @@
 
 import os
 import ldap
+import django
 import django.conf.locale
 from django.conf import settings
 from django_auth_ldap.config import LDAPSearch
@@ -119,6 +120,7 @@ env = environ.Env(
     MANAGE_PERMISSION_UI=(bool,True),
     #csrf
     CSRF_TRUSTED_ORIGINS = (list,['localhost', 'localhost:9000', 'https:localhost']),
+    CSRF_TRUSTED_ORIGINS_DJANGO2 = (list,None),
     #cors
     CORS_ALLOWED_ORIGINS = (list,['http://localhost:8000']),    
     CORS_ALLOW_CREDENTIALS = (bool,True),
@@ -347,7 +349,11 @@ if env('CORS_REPLACE_HTTPS_REFERER'):
     CORS_REPLACE_HTTPS_REFERER = env('CORS_REPLACE_HTTPS_REFERER')
 CORS_EXPOSE_HEADERS = ('X-Cache-Task-Id',)
 
-CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS')
+
+if env('CSRF_TRUSTED_ORIGINS_DJANGO2') and django.VERSION[0] == 2:
+    CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS_DJANGO2')
+else:
+    CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS')
 
 CRONTAB_ACTIVE = True
 ROOT_URLCONF = 'gvsigol.urls'
