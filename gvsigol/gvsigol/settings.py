@@ -172,7 +172,8 @@ env = environ.Env(
 
     UI_HIDEN_PROJECTS_PREFIX=(str,'hidden'),
     GDALTOOLS_BASEPATH=(str,''),
-    GDALTOOLS_CMD_PREFIX=(str,'')
+    GDALTOOLS_CMD_PREFIX=(str,''),
+    GDAL_LIBRARY_PATH=(str, '')
 )
 ENVIRON_FILE = os.path.join(BASE_DIR, '.env')
 environ.Env.read_env(ENVIRON_FILE)
@@ -207,10 +208,6 @@ DEBUG = env('DEBUG')
 ALLOWED_HOSTS = ['*']
 USE_X_FORWARDED_HOST = env('USE_X_FORWARDED_HOST')
 SECURE_PROXY_SSL_HEADER = env('SECURE_PROXY_SSL_HEADER')
-
-#GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
-#GDAL_LIBRARY_PATH = '/usr/local/lib/libgdal.so'
-
 
 # Maintain int PKs consistent with existing installations; migrate explicitly if needed in the future
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
@@ -577,6 +574,10 @@ MOSAIC_DB = {
 
 GDALTOOLS_BASEPATH = env('GDALTOOLS_BASEPATH')
 GDALTOOLS_CMD_PREFIX = env('GDALTOOLS_CMD_PREFIX')
+if env('GDAL_LIBRARY_PATH'):
+    GDAL_LIBRARY_PATH = env('GDAL_LIBRARY_PATH')
+    #GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
+    #GDAL_LIBRARY_PATH = '/usr/local/lib/libgdal.so'
 
 TILE_SIZE = 256
 MAX_ZOOM_LEVEL = 20 
