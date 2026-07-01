@@ -5,6 +5,11 @@ from gvsigol_plugin_sysadmin import views
 
 urlpatterns = [
     path('sysadmin/', views.sysadmin_home, name='sysadmin_home'),
+    path(
+        'sysadmin/environment/',
+        views.sysadmin_app_env,
+        name='sysadmin_app_env',
+    ),
     path('sysadmin/tests/', views.sysadmin_tests, name='sysadmin_tests'),
     path(
         'sysadmin/tests/discover/',

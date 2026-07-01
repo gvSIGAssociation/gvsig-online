@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% comment %}
+	All values below come from env_info.collect_environment(). They are rendered
+	with Django's default auto-escaping (no |safe filter is used anywhere), so
+	command output and file contents cannot inject HTML or JavaScript.
+{% endcomment %}
+
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="box box-primary">
+			<div class="box-header with-border">
+				<h3 class="box-title">{% trans "Application environment" %}</h3>
+				<div class="box-tools pull-right">
+					<a href="{% url 'sysadmin_home' %}" class="btn btn-default btn-sm"><i class="fa fa-chevron-left margin-r-5"></i> {% trans "Platform console" %}</a>
+					<a href="{% url 'home' %}" class="btn btn-default btn-sm"><i class="fa fa-home margin-r-5"></i> {% trans "Back to dashboard home" %}</a>
+				</div>
+			</div>
+			<div class="box-body">
+				<p class="text-muted">
+					{% trans "Read-only diagnostics of the runtime environment gvSIG Online is running in. Files are read from a fixed allowlist and commands run with fixed arguments and no shell." %}
+				</p>
+
+				{# ---------------- System ---------------- #}
+				<h4><i class="fa fa-desktop margin-r-5"></i> {% trans "System" %}</h4>
+				{% with sys=env.system %}
+				<table class="table table-condensed table-bordered">
+					<tbody>
+						<tr><th style="width:220px;">{% trans "Operating system" %}</th><td>{{ sys.system|default:"unknown" }} {{ sys.release }}</td></tr>
+						<tr><th>{% trans "Kernel version" %}</th><td>{{ sys.version|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "Hostname" %}</th><td>{{ sys.node|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "Architecture" %}</th><td>{{ sys.machine|default:"unknown" }} {{ sys.processor }}</td></tr>
+						<tr><th>{% trans "CPU count" %}</th><td>{{ sys.cpu_count|default:"unknown" }}</td></tr>
+					</tbody>
+				</table>
+				{% endwith %}
+
+				{# ---------------- Memory ---------------- #}
+				<h4><i class="fa fa-microchip margin-r-5"></i> {% trans "Total RAM" %}</h4>
+				{% with mem=env.memory %}
+				{% if mem.total_bytes %}
+					<p>{{ mem.total_human }} <span class="text-muted">({{ mem.total_bytes }} {% trans "bytes" %}, {% trans "source" %}: {{ mem.source }})</span></p>
+				{% else %}
+					<div class="alert alert-warning">{{ mem.error|default:_("Total RAM could not be determined") }}</div>
+				{% endif %}
+				{% endwith %}
+
+				{# ---------------- OS release file ---------------- #}
+				<h4><i class="fa fa-file-text-o margin-r-5"></i> {% trans "Operating system version" %} <small class="text-muted">/etc/os-release</small></h4>
+				{% with osr=env.os_release %}
+				{% if osr.ok %}
+					<pre style="max-height:280px; overflow:auto;">{{ osr.content }}</pre>
+				{% else %}
+					<div class="alert alert-warning">{{ osr.error|default:_("Not available") }}</div>
+				{% endif %}
+				{% endwith %}
+
+				{# ---------------- lsb_release ---------------- #}
+				<h4><i class="fa fa-file-text-o margin-r-5"></i> {% trans "Operating system version" %} <small class="text-muted">lsb_release -a</small></h4>
+				{% with lsb=env.lsb_release %}
+				{% if lsb.ok %}
+					<pre style="max-height:280px; overflow:auto;">{{ lsb.output }}</pre>
+				{% else %}
+					<div class="alert alert-warning">{{ lsb.error|default:_("Not available") }}</div>
+				{% endif %}
+				{% endwith %}
+
+				{# ---------------- Python ---------------- #}
+				<h4><i class="fa fa-code margin-r-5"></i> {% trans "Python interpreter" %}</h4>
+				{% with py=env.python %}
+				<table class="table table-condensed table-bordered">
+					<tbody>
+						<tr><th style="width:220px;">{% trans "Version" %}</th><td>{{ py.version_short|default:"unknown" }} <span class="text-muted">({{ py.implementation }})</span></td></tr>
+						<tr><th>{% trans "Full version" %}</th><td><pre style="margin:0;">{{ py.version|default:"unknown" }}</pre></td></tr>
+						<tr><th>{% trans "Interpreter" %}</th><td>{{ py.real_executable|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "Process executable" %}</th><td>{{ py.process_executable|default:"unknown" }} <span class="text-muted">({% trans "sys.executable; may be the application server binary" %})</span></td></tr>
+						<tr><th>{% trans "Application server" %}</th><td>{{ py.application_server|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "Prefix" %}</th><td>{{ py.prefix|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "Platform" %}</th><td>{{ py.platform|default:"unknown" }}</td></tr>
+					</tbody>
+				</table>
+				{% endwith %}
+
+				{# ---------------- Installed packages ---------------- #}
+				{% with pkg=env.packages %}
+				<h4><i class="fa fa-cubes margin-r-5"></i> {% trans "Installed packages" %} <small class="text-muted">{{ pkg.source|default:"importlib.metadata" }}</small></h4>
+				{% if pkg.ok %}
+					<pre style="max-height:360px; overflow:auto;">{{ pkg.output }}</pre>
+				{% else %}
+					<div class="alert alert-warning">{{ pkg.error|default:_("Not available") }}</div>
+					{% if pkg.output %}<pre style="max-height:360px; overflow:auto;">{{ pkg.output }}</pre>{% endif %}
+				{% endif %}
+				{% endwith %}
+
+				{# ---------------- pygdaltools GDAL ---------------- #}
+				<h4><i class="fa fa-globe margin-r-5"></i> {% trans "GDAL used by pygdaltools" %} <small class="text-muted">{% trans "external command-line tools" %}</small></h4>
+				{% with gd=env.pygdaltools %}
+				{% if gd.error %}<div class="alert alert-warning">{{ gd.error }}</div>{% endif %}
+				<table class="table table-condensed table-bordered">
+					<tbody>
+						<tr><th style="width:220px;">{% trans "GDAL version" %}</th><td>{{ gd.version|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "ogr2ogr path" %}</th><td>{{ gd.ogr_command_path|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "gdalinfo path" %}</th><td>{{ gd.gdalinfo_command_path|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "GEOS / PROJ" %}</th><td class="text-muted">{{ gd.notes }}</td></tr>
+					</tbody>
+				</table>
+				<p><strong>{% trans "Vector drivers" %}</strong> ({{ gd.vector_drivers|length }}):</p>
+				{% if gd.vector_drivers %}
+					<div style="max-height:200px; overflow:auto;">
+						<code>{% for drv in gd.vector_drivers %}{{ drv.name }} ({{ drv.capabilities }}){% if not forloop.last %}, {% endif %}{% endfor %}</code>
+					</div>
+				{% else %}
+					<p class="text-muted">{% trans "No drivers reported." %}</p>
+				{% endif %}
+				<p style="margin-top:10px;"><strong>{% trans "Raster drivers" %}</strong> ({{ gd.raster_drivers|length }}):</p>
+				{% if gd.raster_drivers %}
+					<div style="max-height:200px; overflow:auto;">
+						<code>{% for drv in gd.raster_drivers %}{{ drv.name }} ({{ drv.capabilities }}){% if not forloop.last %}, {% endif %}{% endfor %}</code>
+					</div>
+				{% else %}
+					<p class="text-muted">{% trans "No drivers reported." %}</p>
+				{% endif %}
+				{% endwith %}
+
+				{# ---------------- GeoDjango GDAL ---------------- #}
+				<h4><i class="fa fa-globe margin-r-5"></i> {% trans "GDAL used by GeoDjango" %} <small class="text-muted">{% trans "in-process library" %}</small></h4>
+				{% with gj=env.geodjango %}
+				{% if gj.error %}<div class="alert alert-warning">{{ gj.error }}</div>{% endif %}
+				<table class="table table-condensed table-bordered">
+					<tbody>
+						<tr><th style="width:220px;">{% trans "GDAL version" %}</th><td>{{ gj.gdal_version|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "GDAL full version" %}</th><td>{{ gj.gdal_full_version|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "GDAL library (as loaded)" %}</th><td>{{ gj.library_path|default:"unknown" }} <span class="text-muted">({{ gj.library_path_source }})</span></td></tr>
+						<tr><th>{% trans "GDAL library full path" %}</th><td>{{ gj.library_full_path|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "GEOS version" %}</th><td>{{ gj.geos_version|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "GEOS library (as loaded)" %}</th><td>{{ gj.geos_library_path|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "GEOS library full path" %}</th><td>{{ gj.geos_library_full_path|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "PROJ version" %}</th><td>{{ gj.proj_version|default:"unknown" }}</td></tr>
+					</tbody>
+				</table>
+				<p><strong>{% trans "Vector drivers" %}</strong> ({{ gj.vector_drivers|length }}):</p>
+				{% if gj.vector_drivers %}
+					<div style="max-height:200px; overflow:auto;"><code>{{ gj.vector_drivers|join:", " }}</code></div>
+				{% else %}
+					<p class="text-muted">{% trans "No drivers reported." %}</p>
+				{% endif %}
+				<p style="margin-top:10px;"><strong>{% trans "Raster drivers" %}</strong> ({{ gj.raster_drivers|length }}):</p>
+				{% if gj.raster_drivers %}
+					<div style="max-height:200px; overflow:auto;"><code>{{ gj.raster_drivers|join:", " }}</code></div>
+				{% else %}
+					<p class="text-muted">{% trans "No drivers reported." %}</p>
+				{% endif %}
+				{% endwith %}
+
+				{# ---------------- pyogrio ---------------- #}
+				<h4><i class="fa fa-map-o margin-r-5"></i> {% trans "pyogrio" %} <small class="text-muted">{% trans "bundled native GDAL" %}</small></h4>
+				{% with po=env.pyogrio %}
+				{% if po.error %}<div class="alert alert-warning">{{ po.error }}</div>{% endif %}
+				<table class="table table-condensed table-bordered">
+					<tbody>
+						<tr><th style="width:220px;">{% trans "pyogrio version" %}</th><td>{{ po.version|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "GDAL version" %}</th><td>{{ po.gdal_version|default:"unknown" }} {% if po.gdal_version_string %}<span class="text-muted">({{ po.gdal_version_string }})</span>{% endif %}</td></tr>
+						<tr><th>{% trans "GEOS version" %}</th><td>{{ po.geos_version|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "Module path" %}</th><td>{{ po.module_path|default:"unknown" }}</td></tr>
+					</tbody>
+				</table>
+				<p><strong>{% trans "Bundled native libraries" %}</strong> ({{ po.bundled_libraries|length }}):</p>
+				{% if po.bundled_libraries %}
+					<div class="table-responsive" style="max-height:220px; overflow:auto;">
+						<table class="table table-condensed table-striped">
+							<thead><tr><th>{% trans "Library" %}</th><th>{% trans "Path" %}</th></tr></thead>
+							<tbody>
+								{% for lib in po.bundled_libraries %}
+								<tr><td>{{ lib.name }}</td><td><small>{{ lib.path }}</small></td></tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				{% else %}
+					<p class="text-muted">{% trans "No bundled libraries found." %}</p>
+				{% endif %}
+				{% endwith %}
+
+				{# ---------------- rasterio ---------------- #}
+				<h4><i class="fa fa-map-o margin-r-5"></i> {% trans "rasterio" %} <small class="text-muted">{% trans "bundled native GDAL" %}</small></h4>
+				{% with ra=env.rasterio %}
+				{% if ra.error %}<div class="alert alert-warning">{{ ra.error }}</div>{% endif %}
+				<table class="table table-condensed table-bordered">
+					<tbody>
+						<tr><th style="width:220px;">{% trans "rasterio version" %}</th><td>{{ ra.version|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "GDAL version" %}</th><td>{{ ra.gdal_version|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "PROJ version" %}</th><td>{{ ra.proj_version|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "GEOS version" %}</th><td>{{ ra.geos_version|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "Module path" %}</th><td>{{ ra.module_path|default:"unknown" }}</td></tr>
+					</tbody>
+				</table>
+				<p><strong>{% trans "Bundled native libraries" %}</strong> ({{ ra.bundled_libraries|length }}):</p>
+				{% if ra.bundled_libraries %}
+					<div class="table-responsive" style="max-height:220px; overflow:auto;">
+						<table class="table table-condensed table-striped">
+							<thead><tr><th>{% trans "Library" %}</th><th>{% trans "Path" %}</th></tr></thead>
+							<tbody>
+								{% for lib in ra.bundled_libraries %}
+								<tr><td>{{ lib.name }}</td><td><small>{{ lib.path }}</small></td></tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				{% else %}
+					<p class="text-muted">{% trans "No bundled libraries found." %}</p>
+				{% endif %}
+				{% endwith %}
+
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
