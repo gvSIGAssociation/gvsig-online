@@ -12,6 +12,7 @@ from django.views.decorators.http import require_POST
 from gvsigol_auth.utils import superuser_required
 from gvsigol_core.models import GolSettings
 
+from gvsigol_plugin_sysadmin.env_info import collect_environment
 from gvsigol_plugin_sysadmin.models import SysadminTestRun
 from gvsigol_plugin_sysadmin.tasks import run_sysadmin_tests
 from gvsigol_plugin_sysadmin.test_registry import (
@@ -33,6 +34,22 @@ def sysadmin_home(request):
 @superuser_required
 def sysadmin_tests(request):
     return render(request, 'sysadmin_tests.html', {})
+
+
+@login_required()
+@superuser_required
+def sysadmin_app_env(request):
+    """
+    Read-only report of the runtime application environment (OS, RAM, Python,
+    pip freeze and the GDAL/GEOS/PROJ stacks used by pygdaltools, GeoDjango,
+    pyogrio and rasterio).
+
+    All information is gathered defensively in ``env_info.collect_environment``:
+    files are read from a fixed allowlist and commands run with a fixed argument
+    vector without a shell, so this view cannot be used to read arbitrary files
+    or execute arbitrary commands.
+    """
+    return render(request, 'sysadmin_app_env.html', {'env': collect_environment()})
 
 
 @login_required()
