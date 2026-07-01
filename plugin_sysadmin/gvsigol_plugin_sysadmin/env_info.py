@@ -25,11 +25,13 @@ Notes
   an XSS defense.
 """
 
+import glob
 import locale
 import logging
 import os
 import platform
 import re
+import struct
 import subprocess
 import sys
 
@@ -926,6 +928,254 @@ def get_rasterio_info():
     return data
 
 
+def _elf_needed(path):
+    """Return the ``DT_NEEDED`` sonames declared by an ELF shared object.
+
+    Pure-Python ELF reader (no ``ldd``/subprocess) so it also works in minimal
+    or locked-down environments. Returns ``[]`` on any problem.
+    """
+    try:
+        # The section header table lives at the *end* of a shared object, so the
+        # whole file must be available for random access. Guard against absurd
+        # sizes; real ``.so`` files are well under this limit.
+        if os.path.getsize(path) > 512 * 1024 * 1024:
+            return []
+        with open(path, 'rb') as handle:
+            data = handle.read()
+    except Exception:
+        return []
+    if len(data) < 64 or data[:4] != b'\x7fELF':
+        return []
+    ei_class = data[4]  # 1 = 32-bit, 2 = 64-bit
+    ei_data = data[5]   # 1 = little-endian, 2 = big-endian
+    endian = '<' if ei_data == 1 else '>'
+    is64 = ei_class == 2
+    try:
+        if is64:
+            e_shoff = struct.unpack_from(endian + 'Q', data, 0x28)[0]
+            e_shentsize = struct.unpack_from(endian + 'H', data, 0x3a)[0]
+            e_shnum = struct.unpack_from(endian + 'H', data, 0x3c)[0]
+        else:
+            e_shoff = struct.unpack_from(endian + 'I', data, 0x20)[0]
+            e_shentsize = struct.unpack_from(endian + 'H', data, 0x2e)[0]
+            e_shnum = struct.unpack_from(endian + 'H', data, 0x30)[0]
+        if not e_shoff or not e_shnum:
+            return []
+
+        # Locate the SHT_DYNAMIC section and the string table it links to.
+        sections = []  # (sh_type, sh_offset, sh_size, sh_link)
+        dyn = None
+        for index in range(e_shnum):
+            base = e_shoff + index * e_shentsize
+            if base + e_shentsize > len(data):
+                break
+            sh_type = struct.unpack_from(endian + 'I', data, base + 4)[0]
+            if is64:
+                sh_offset = struct.unpack_from(endian + 'Q', data, base + 0x18)[0]
+                sh_size = struct.unpack_from(endian + 'Q', data, base + 0x20)[0]
+                sh_link = struct.unpack_from(endian + 'I', data, base + 0x28)[0]
+            else:
+                sh_offset = struct.unpack_from(endian + 'I', data, base + 0x10)[0]
+                sh_size = struct.unpack_from(endian + 'I', data, base + 0x14)[0]
+                sh_link = struct.unpack_from(endian + 'I', data, base + 0x18)[0]
+            sections.append((sh_type, sh_offset, sh_size, sh_link))
+            if sh_type == 6:  # SHT_DYNAMIC
+                dyn = (sh_offset, sh_size, sh_link)
+        if dyn is None:
+            return []
+        dyn_off, dyn_size, dyn_link = dyn
+        if dyn_link < 0 or dyn_link >= len(sections):
+            return []
+        _, str_off, str_size, _ = sections[dyn_link]
+        strtab = data[str_off:str_off + str_size]
+
+        needed_offsets = []
+        entsize = 16 if is64 else 8
+        for off in range(dyn_off, dyn_off + dyn_size, entsize):
+            if off + entsize > len(data):
+                break
+            if is64:
+                d_tag = struct.unpack_from(endian + 'q', data, off)[0]
+                d_val = struct.unpack_from(endian + 'Q', data, off + 8)[0]
+            else:
+                d_tag = struct.unpack_from(endian + 'i', data, off)[0]
+                d_val = struct.unpack_from(endian + 'I', data, off + 4)[0]
+            if d_tag == 0:  # DT_NULL terminates the array
+                break
+            if d_tag == 1:  # DT_NEEDED
+                needed_offsets.append(d_val)
+
+        result = []
+        for offset in needed_offsets:
+            end = strtab.find(b'\x00', offset)
+            if end < 0:
+                continue
+            try:
+                result.append(strtab[offset:end].decode('utf-8', 'replace'))
+            except Exception:
+                continue
+        return result
+    except Exception:
+        return []
+
+
+def _library_search_dirs():
+    """Directories the dynamic loader would search, discovered without running
+    any command: ``LD_LIBRARY_PATH``, ``/etc/ld.so.conf`` (+ its includes) and
+    the usual system defaults.
+    """
+    dirs = []
+    seen = set()
+
+    def add(directory):
+        if not directory:
+            return
+        directory = directory.strip()
+        if directory and directory not in seen and os.path.isdir(directory):
+            seen.add(directory)
+            dirs.append(directory)
+
+    for entry in (os.environ.get('LD_LIBRARY_PATH', '') or '').split(os.pathsep):
+        add(entry)
+
+    def parse_conf(path, depth=0):
+        if depth > 10:
+            return
+        try:
+            with open(path, 'r', errors='replace') as handle:
+                for line in handle:
+                    line = line.strip()
+                    if not line or line.startswith('#'):
+                        continue
+                    if line.startswith('include'):
+                        pattern = line.split(None, 1)[1].strip() if ' ' in line else ''
+                        if not pattern:
+                            continue
+                        if not os.path.isabs(pattern):
+                            pattern = os.path.join('/etc', pattern)
+                        for included in sorted(glob.glob(pattern)):
+                            parse_conf(included, depth + 1)
+                    else:
+                        add(line)
+        except Exception:
+            return
+
+    parse_conf('/etc/ld.so.conf')
+    for default in (
+        '/lib64', '/usr/lib64', '/lib', '/usr/lib',
+        '/usr/local/lib64', '/usr/local/lib',
+        '/lib/x86_64-linux-gnu', '/usr/lib/x86_64-linux-gnu',
+    ):
+        add(default)
+    return dirs
+
+
+def _find_library_candidates(patterns, extra_dirs=None):
+    """Return files matching ``patterns`` (e.g. ``libpdalcpp.so*``) across the
+    loader search directories, de-duplicated by real path.
+    """
+    found = []
+    seen = set()
+    search = list(extra_dirs or [])
+    search.extend(_library_search_dirs())
+    for directory in search:
+        for pattern in patterns:
+            try:
+                for match in sorted(glob.glob(os.path.join(directory, pattern))):
+                    if not os.path.isfile(match):
+                        continue
+                    real = os.path.realpath(match)
+                    if real in seen:
+                        continue
+                    seen.add(real)
+                    found.append(match)
+            except Exception:
+                continue
+    return found
+
+
+def _diagnose_pdal_import():
+    """Explain *why* ``import pdal`` fails, using only Python (no subprocess).
+
+    The ``pdal`` wheel ships Python bindings but **not** the native PDAL
+    library: the compiled extension ``dlopen``s ``libpdalcpp`` at runtime. This
+    reports the installed distribution, the extension modules in the wheel, the
+    exact loader error (reproduced with ``ctypes``), the ``DT_NEEDED`` entries
+    read straight from the ELF and whether each resolves, plus any
+    ``libpdalcpp``/``libpdal`` found on the system.
+    """
+    diag = {
+        'distribution_version': 'unknown',
+        'package_dir': '',
+        'extension_files': [],    # [{name, path, load_error}]
+        'needed': [],             # [{soname, resolved}]
+        'system_candidates': [],  # [path, ...]
+    }
+
+    try:
+        try:
+            from importlib import metadata as importlib_metadata
+        except Exception:
+            import importlib_metadata  # type: ignore
+        try:
+            diag['distribution_version'] = importlib_metadata.version('pdal')
+        except Exception:
+            pass
+    except Exception:
+        pass
+
+    pkg_dir = ''
+    try:
+        import importlib.util
+        spec = importlib.util.find_spec('pdal')
+        if spec is not None:
+            if spec.submodule_search_locations:
+                pkg_dir = list(spec.submodule_search_locations)[0]
+            elif spec.origin:
+                pkg_dir = os.path.dirname(spec.origin)
+    except Exception:
+        pkg_dir = ''
+    diag['package_dir'] = pkg_dir
+
+    extension_paths = []
+    if pkg_dir and os.path.isdir(pkg_dir):
+        try:
+            for name in sorted(os.listdir(pkg_dir)):
+                if '.so' in name:
+                    extension_paths.append(os.path.join(pkg_dir, name))
+        except Exception:
+            pass
+
+    all_needed = []
+    for path in extension_paths:
+        entry = {'name': os.path.basename(path), 'path': path, 'load_error': ''}
+        try:
+            from ctypes import CDLL
+            CDLL(path)
+        except Exception as exc:
+            entry['load_error'] = _clean_text('%s: %s' % (type(exc).__name__, exc))
+        diag['extension_files'].append(entry)
+        for soname in _elf_needed(path):
+            if soname not in all_needed:
+                all_needed.append(soname)
+
+    search_dirs = _library_search_dirs()
+    for soname in all_needed:
+        resolved = ''
+        for directory in search_dirs:
+            candidate = os.path.join(directory, soname)
+            if os.path.isfile(candidate):
+                resolved = candidate
+                break
+        diag['needed'].append({'soname': soname, 'resolved': resolved})
+
+    extra = [pkg_dir] if pkg_dir else []
+    diag['system_candidates'] = _find_library_candidates(
+        ['libpdalcpp.so*', 'libpdal.so*'], extra_dirs=extra,
+    )
+    return diag
+
+
 def get_pdal_info():
     """PDAL version plus the GDAL it links against at runtime.
 
@@ -946,11 +1196,31 @@ def get_pdal_info():
         'vector_drivers': [],
         'raster_drivers': [],
         'error': '',
+        'import_error': '',
+        'import_traceback': '',
+        'diagnostics': None,
     }
     try:
         import pdal  # type: ignore  # optional native dependency
-    except Exception:
+    except Exception as exc:
+        # Surface the *real* reason (e.g. a missing native library such as
+        # "libpdalcpp.so.XX: cannot open shared object file", an undefined
+        # symbol from a version mismatch, or ModuleNotFoundError). This is
+        # essential to diagnose environments where no shell access is available.
         data['error'] = 'PDAL (python bindings) is not importable'
+        data['import_error'] = _clean_text('%s: %s' % (type(exc).__name__, exc))
+        try:
+            import traceback
+            data['import_traceback'] = _clean_text(
+                traceback.format_exc()
+            )[:MAX_OUTPUT_BYTES]
+        except Exception:
+            pass
+        try:
+            data['diagnostics'] = _diagnose_pdal_import()
+        except Exception:
+            logger.exception('PDAL import diagnostics failed')
+        logger.exception('PDAL python bindings could not be imported')
         return data
 
     data['available'] = True

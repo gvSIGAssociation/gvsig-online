@@ -233,7 +233,79 @@
 				{# ---------------- PDAL ---------------- #}
 				<h4><i class="fa fa-cube margin-r-5"></i> {% trans "PDAL" %} <small class="text-muted">{% trans "and the GDAL it links against at runtime" %}</small></h4>
 				{% with pd=env.pdal %}
-				{% if pd.error %}<div class="alert alert-warning">{{ pd.error }}</div>{% endif %}
+				{% if pd.error %}
+				<div class="alert alert-warning">
+					{{ pd.error }}
+					{% if pd.import_error %}<br><strong>{{ pd.import_error }}</strong>{% endif %}
+				</div>
+				{% endif %}
+				{% if pd.import_traceback %}
+				<pre style="max-height:220px; overflow:auto;">{{ pd.import_traceback }}</pre>
+				{% endif %}
+				{% if pd.diagnostics %}
+				{% with dg=pd.diagnostics %}
+				<div class="box box-warning" style="margin-top:10px;">
+					<div class="box-header with-border"><h5 class="box-title"><i class="fa fa-stethoscope margin-r-5"></i> {% trans "Import diagnostics (pure Python, no shell)" %}</h5></div>
+					<div class="box-body">
+						<table class="table table-condensed table-bordered">
+							<tbody>
+								<tr><th style="width:220px;">{% trans "Installed distribution (pip)" %}</th><td>pdal == {{ dg.distribution_version|default:"unknown" }}</td></tr>
+								<tr><th>{% trans "Package directory" %}</th><td>{{ dg.package_dir|default:"unknown" }}</td></tr>
+							</tbody>
+						</table>
+
+						<p style="margin-top:10px;"><strong>{% trans "Native extension modules in the wheel" %}</strong> ({{ dg.extension_files|length }}):</p>
+						{% if dg.extension_files %}
+						<div class="table-responsive" style="max-height:220px; overflow:auto;">
+							<table class="table table-condensed table-striped">
+								<thead><tr><th>{% trans "Extension" %}</th><th>{% trans "ctypes load result" %}</th></tr></thead>
+								<tbody>
+									{% for ext in dg.extension_files %}
+									<tr>
+										<td><small>{{ ext.path }}</small></td>
+										<td>{% if ext.load_error %}<span class="text-red">{{ ext.load_error }}</span>{% else %}<span class="text-green">{% trans "loads OK" %}</span>{% endif %}</td>
+									</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+						</div>
+						{% else %}
+						<p class="text-muted">{% trans "No native extension (.so) found in the package." %}</p>
+						{% endif %}
+
+						<p style="margin-top:10px;"><strong>{% trans "Required shared libraries (DT_NEEDED, read from the ELF)" %}</strong> ({{ dg.needed|length }}):</p>
+						{% if dg.needed %}
+						<div class="table-responsive" style="max-height:260px; overflow:auto;">
+							<table class="table table-condensed table-striped">
+								<thead><tr><th>{% trans "Soname" %}</th><th>{% trans "Resolved to" %}</th></tr></thead>
+								<tbody>
+									{% for need in dg.needed %}
+									<tr>
+										<td>{{ need.soname }}</td>
+										<td>{% if need.resolved %}<small>{{ need.resolved }}</small>{% else %}<span class="text-red">{% trans "NOT FOUND in loader search path" %}</span>{% endif %}</td>
+									</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+						</div>
+						{% else %}
+						<p class="text-muted">{% trans "Could not read DT_NEEDED entries." %}</p>
+						{% endif %}
+
+						<p style="margin-top:10px;"><strong>{% trans "libpdalcpp / libpdal found on the system" %}</strong> ({{ dg.system_candidates|length }}):</p>
+						{% if dg.system_candidates %}
+						<div style="max-height:200px; overflow:auto;">
+							<ul class="list-unstyled">
+								{% for cand in dg.system_candidates %}<li><small>{{ cand }}</small></li>{% endfor %}
+							</ul>
+						</div>
+						{% else %}
+						<p class="text-red">{% trans "No libpdalcpp/libpdal found: the native PDAL library is not installed (or not in the loader search path)." %}</p>
+						{% endif %}
+					</div>
+				</div>
+				{% endwith %}
+				{% endif %}
 				<table class="table table-condensed table-bordered">
 					<tbody>
 						<tr><th style="width:220px;">{% trans "PDAL version" %}</th><td>{{ pd.version|default:"unknown" }}</td></tr>
