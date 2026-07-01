@@ -213,6 +213,34 @@
 				{% endif %}
 				{% endwith %}
 
+				{# ---------------- PDAL ---------------- #}
+				<h4><i class="fa fa-cube margin-r-5"></i> {% trans "PDAL" %} <small class="text-muted">{% trans "and the GDAL it links against at runtime" %}</small></h4>
+				{% with pd=env.pdal %}
+				{% if pd.error %}<div class="alert alert-warning">{{ pd.error }}</div>{% endif %}
+				<table class="table table-condensed table-bordered">
+					<tbody>
+						<tr><th style="width:220px;">{% trans "PDAL version" %}</th><td>{{ pd.version|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "PDAL library path" %}</th><td>{{ pd.library_path|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "Python module path" %}</th><td>{{ pd.module_path|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "GDAL version (used by PDAL)" %}</th><td>{{ pd.gdal_version|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "GDAL library (linked by PDAL)" %}</th><td>{{ pd.gdal_library_soname|default:"unknown" }}</td></tr>
+						<tr><th>{% trans "GDAL library full path" %}</th><td>{{ pd.gdal_library_path|default:"unknown" }}</td></tr>
+					</tbody>
+				</table>
+				<p><strong>{% trans "Vector drivers" %}</strong> ({{ pd.vector_drivers|length }}):</p>
+				{% if pd.vector_drivers %}
+					<div style="max-height:200px; overflow:auto;"><code>{{ pd.vector_drivers|join:", " }}</code></div>
+				{% else %}
+					<p class="text-muted">{% trans "No drivers reported." %}</p>
+				{% endif %}
+				<p style="margin-top:10px;"><strong>{% trans "Raster drivers" %}</strong> ({{ pd.raster_drivers|length }}):</p>
+				{% if pd.raster_drivers %}
+					<div style="max-height:200px; overflow:auto;"><code>{{ pd.raster_drivers|join:", " }}</code></div>
+				{% else %}
+					<p class="text-muted">{% trans "No drivers reported." %}</p>
+				{% endif %}
+				{% endwith %}
+
 			</div>
 		</div>
 	</div>
