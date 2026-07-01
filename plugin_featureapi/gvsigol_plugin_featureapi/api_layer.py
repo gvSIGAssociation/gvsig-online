@@ -1051,6 +1051,28 @@ class LayerCapabilities(APIView):
         return HttpException(404, "Data NOT exists for this layer").get_exception()
 
 
+class CapabilitiesFromUrlView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_id='get_capabilities_from_url',
+        operation_summary='Gets OWS capabilities from an external service URL',
+        responses={
+            200: 'Capabilities JSON (same structure as services get_capabilities_from_url)',
+            401: 'The user is not authenticated',
+            403: 'The user is not staff',
+        },
+    )
+    def get(self, request):
+        url = request.query_params.get('url')
+        service = request.query_params.get('type')
+        version = request.query_params.get('version')
+        layer = request.query_params.get('layer')
+
+        data = services_views.ows_get_capabilities(url, service, version, layer, False)
+        return JsonResponse(data, safe=False)
+
+
 class WmtsLayerOptions(APIView):
     permission_classes = [AllowAny]
     pagination_class = None
