@@ -55,6 +55,10 @@ _FORMAT_LINE_RE = re.compile(
     r'^\s+(?P<driver>.+?)\s+-(?P<types>[^-]+)-\s+\((?P<caps>[^)]+)\):'
 )
 
+# libgdal dependency line in ``ldd`` output, e.g.:
+#   libgdal.so.34 => /lib/x86_64-linux-gnu/libgdal.so.34 (0x00007f...)
+_LDD_GDAL_RE = re.compile(r'(libgdal[^\s]*)\s*=>\s*(\S+)')
+
 
 # --------------------------------------------------------------------------- #
 # Low level primitives
@@ -585,6 +589,45 @@ def _resolve_full_library_path(name_or_path):
     return None
 
 
+def _gdal_version_from_lib(handle):
+    """Return GDAL ``RELEASE_NAME`` from an arbitrary GDAL CDLL handle."""
+    try:
+        from ctypes import c_char_p
+        func = getattr(handle, 'GDALVersionInfo', None)
+        if func is None:
+            return None
+        func.argtypes = [c_char_p]
+        func.restype = c_char_p
+        value = func(b'RELEASE_NAME')
+        if value:
+            return value.decode('utf-8', 'replace')
+    except Exception:
+        return None
+    return None
+
+
+def _gdal_from_ldd(lib_path):
+    """Resolve which ``libgdal`` a native library links against, via ``ldd``.
+
+    ``ldd`` is run only on our own installed PDAL libraries (paths taken from
+    this process' memory map or the ``pdal`` package directory), never on user
+    input. Returns ``(soname, full_path)`` or ``(None, None)``.
+    """
+    if not lib_path or not os.path.isfile(lib_path):
+        return None, None
+    result = _run_command(['ldd', lib_path])
+    if not result.get('ok'):
+        return None, None
+    for line in result['output'].splitlines():
+        match = _LDD_GDAL_RE.search(line)
+        if match:
+            soname = match.group(1)
+            path = match.group(2)
+            if path and path.startswith('/'):
+                return soname, path
+    return None, None
+
+
 def _proj_version_from_lib(handle):
     """Return the PROJ version string from a GDAL >= 3 CDLL handle, if exposed."""
     try:
@@ -846,6 +889,98 @@ def get_rasterio_info():
     return data
 
 
+def get_pdal_info():
+    """PDAL version plus the GDAL it links against at runtime.
+
+    On some distributions (e.g. RHEL 9) the GDAL used by PDAL is **not** the
+    same as the one used by GeoDjango or pygdaltools. It is therefore resolved
+    independently: the native ``libpdal`` is located, its ``libgdal`` dependency
+    is discovered with ``ldd``, and that GDAL is then queried directly for its
+    version and available vector/raster drivers.
+    """
+    data = {
+        'available': False,
+        'version': 'unknown',
+        'library_path': 'unknown',
+        'module_path': 'unknown',
+        'gdal_version': 'unknown',
+        'gdal_library_soname': 'unknown',
+        'gdal_library_path': 'unknown',
+        'vector_drivers': [],
+        'raster_drivers': [],
+        'error': '',
+    }
+    try:
+        import pdal  # type: ignore  # optional native dependency
+    except Exception:
+        data['error'] = 'PDAL (python bindings) is not importable'
+        return data
+
+    data['available'] = True
+    try:
+        data['version'] = str(getattr(pdal, '__version__', 'unknown'))
+    except Exception:
+        pass
+    try:
+        data['module_path'] = os.path.dirname(pdal.__file__)
+    except Exception:
+        pass
+
+    # Candidate native PDAL libraries: those mapped into the process plus any
+    # shared objects shipped inside the ``pdal`` package.
+    candidates = []
+    for base, full in _loaded_library_paths().items():
+        if 'pdal' in base.lower() and full not in candidates:
+            candidates.append(full)
+    try:
+        for lib in _list_bundled_libraries(pdal):
+            if lib['path'] not in candidates:
+                candidates.append(lib['path'])
+    except Exception:
+        pass
+
+    # Prefer the core libpdal (not the python extension) for display.
+    for candidate in candidates:
+        base = os.path.basename(candidate).lower()
+        if base.startswith('libpdal') and 'python' not in base:
+            data['library_path'] = candidate
+            break
+    else:
+        if candidates:
+            data['library_path'] = candidates[0]
+
+    # Resolve PDAL's GDAL and query it directly.
+    gdal_soname = gdal_path = None
+    for candidate in candidates:
+        gdal_soname, gdal_path = _gdal_from_ldd(candidate)
+        if gdal_path:
+            break
+
+    if gdal_path:
+        data['gdal_library_soname'] = gdal_soname or 'unknown'
+        data['gdal_library_path'] = gdal_path
+        handle = None
+        try:
+            from ctypes import CDLL
+            handle = CDLL(gdal_path)
+        except Exception:
+            handle = None
+        if handle is not None:
+            version = _gdal_version_from_lib(handle)
+            if version:
+                data['gdal_version'] = version
+            raster, vector = _drivers_from_lib(handle)
+            data['raster_drivers'] = raster
+            data['vector_drivers'] = vector
+    else:
+        data['error'] = (
+            "Could not determine PDAL's GDAL (ldd unavailable or no libgdal "
+            "dependency found)."
+        )
+
+    return data
+
+
 def collect_environment():
     """Aggregate every environment section into a single dict for the template.
 
@@ -863,6 +998,7 @@ def collect_environment():
         ('geodjango', get_geodjango_gdal),
         ('pyogrio', get_pyogrio_info),
         ('rasterio', get_rasterio_info),
+        ('pdal', get_pdal_info),
     )
     environment = {}
     for key, collector in collectors:
