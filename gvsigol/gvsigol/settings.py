@@ -39,7 +39,7 @@ import json
 import sys
 
 print ("INFO: Ejecutando settings.py !!...........................................")
-GVSIGOL_VERSION = '4.1.0_rc3'
+GVSIGOL_VERSION = '4.0.1-dev'
 print("INFO: gvSIG Online version: " + GVSIGOL_VERSION)
 if os.environ.get("DEBUG")=='True':
     print ("INFO: Current environment:")
@@ -175,7 +175,8 @@ env = environ.Env(
     UI_HIDEN_PROJECTS_PREFIX=(str,'hidden'),
     GDALTOOLS_BASEPATH=(str,''),
     GDALTOOLS_CMD_PREFIX=(str,''),
-    GDAL_LIBRARY_PATH=(str, '')
+    GDAL_LIBRARY_PATH=(str, ''),
+    GDAL_LIBRARY_PATH_DJANGO4=(str, '')
 )
 ENVIRON_FILE = os.path.join(BASE_DIR, '.env')
 environ.Env.read_env(ENVIRON_FILE)
@@ -580,7 +581,9 @@ MOSAIC_DB = {
 
 GDALTOOLS_BASEPATH = env('GDALTOOLS_BASEPATH')
 GDALTOOLS_CMD_PREFIX = env('GDALTOOLS_CMD_PREFIX')
-if env('GDAL_LIBRARY_PATH'):
+if env('GDAL_LIBRARY_PATH_DJANGO4') and django.VERSION[0] == 4:
+    GDAL_LIBRARY_PATH = env('GDAL_LIBRARY_PATH_DJANGO4')
+elif env('GDAL_LIBRARY_PATH'):
     GDAL_LIBRARY_PATH = env('GDAL_LIBRARY_PATH')
     #GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
     #GDAL_LIBRARY_PATH = '/usr/local/lib/libgdal.so'
