@@ -11,7 +11,7 @@
 			<div class="box-body">
 				<p class="text-muted">{% trans "Superuser-only tools. This plugin is not listed in the sidebar menu." %}</p>
 				<div class="row">
-					<div class="col-md-6">
+					<div class="col-md-4">
 						<div class="small-box bg-aqua">
 							<div class="inner">
 								<h4>{% trans "Unit tests" %}</h4>
@@ -21,7 +21,7 @@
 							<a href="{% url 'sysadmin_tests' %}" class="small-box-footer">{% trans "Open" %} <i class="fa fa-arrow-circle-right"></i></a>
 						</div>
 					</div>
-					<div class="col-md-6">
+					<div class="col-md-4">
 						<div class="small-box bg-green">
 							<div class="inner">
 								<h4>{% trans "Database settings" %}</h4>
@@ -29,6 +29,16 @@
 							</div>
 							<div class="icon"><i class="fa fa-database"></i></div>
 							<a href="{% url 'sysadmin_gol_settings' %}" class="small-box-footer">{% trans "Open" %} <i class="fa fa-arrow-circle-right"></i></a>
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="small-box bg-purple">
+							<div class="inner">
+								<h4>{% trans "Application environment" %}</h4>
+								<p>{% trans "OS, RAM, Python, pip freeze and GDAL/GEOS/PROJ stacks." %}</p>
+							</div>
+							<div class="icon"><i class="fa fa-server"></i></div>
+							<a href="{% url 'sysadmin_app_env' %}" class="small-box-footer">{% trans "Open" %} <i class="fa fa-arrow-circle-right"></i></a>
 						</div>
 					</div>
 				</div>

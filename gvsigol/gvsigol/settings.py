@@ -26,6 +26,7 @@
 
 import os
 import ldap
+import django
 import django.conf.locale
 from django.conf import settings
 from django_auth_ldap.config import LDAPSearch
@@ -38,7 +39,7 @@ import json
 import sys
 
 print ("INFO: Ejecutando settings.py !!...........................................")
-GVSIGOL_VERSION = '4.1.0_rc3'
+GVSIGOL_VERSION = '4.0.1-dev'
 print("INFO: gvSIG Online version: " + GVSIGOL_VERSION)
 if os.environ.get("DEBUG")=='True':
     print ("INFO: Current environment:")
@@ -119,6 +120,7 @@ env = environ.Env(
     MANAGE_PERMISSION_UI=(bool,True),
     #csrf
     CSRF_TRUSTED_ORIGINS = (list,['localhost', 'localhost:9000', 'https:localhost']),
+    CSRF_TRUSTED_ORIGINS_DJANGO2 = (list,None),
     #cors
     CORS_ALLOWED_ORIGINS = (list,['http://localhost:8000']),    
     CORS_ALLOW_CREDENTIALS = (bool,True),
@@ -172,7 +174,8 @@ env = environ.Env(
 
     UI_HIDEN_PROJECTS_PREFIX=(str,'hidden'),
     GDALTOOLS_BASEPATH=(str,''),
-    GDALTOOLS_CMD_PREFIX=(str,'')
+    GDALTOOLS_CMD_PREFIX=(str,''),
+    GDAL_LIBRARY_PATH=(str, '')
 )
 ENVIRON_FILE = os.path.join(BASE_DIR, '.env')
 environ.Env.read_env(ENVIRON_FILE)
@@ -207,10 +210,6 @@ DEBUG = env('DEBUG')
 ALLOWED_HOSTS = ['*']
 USE_X_FORWARDED_HOST = env('USE_X_FORWARDED_HOST')
 SECURE_PROXY_SSL_HEADER = env('SECURE_PROXY_SSL_HEADER')
-
-#GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
-#GDAL_LIBRARY_PATH = '/usr/local/lib/libgdal.so'
-
 
 # Maintain int PKs consistent with existing installations; migrate explicitly if needed in the future
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
@@ -350,7 +349,11 @@ if env('CORS_REPLACE_HTTPS_REFERER'):
     CORS_REPLACE_HTTPS_REFERER = env('CORS_REPLACE_HTTPS_REFERER')
 CORS_EXPOSE_HEADERS = ('X-Cache-Task-Id',)
 
-CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS')
+
+if env('CSRF_TRUSTED_ORIGINS_DJANGO2') and django.VERSION[0] == 2:
+    CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS_DJANGO2')
+else:
+    CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS')
 
 CRONTAB_ACTIVE = True
 ROOT_URLCONF = 'gvsigol.urls'
@@ -577,6 +580,10 @@ MOSAIC_DB = {
 
 GDALTOOLS_BASEPATH = env('GDALTOOLS_BASEPATH')
 GDALTOOLS_CMD_PREFIX = env('GDALTOOLS_CMD_PREFIX')
+if env('GDAL_LIBRARY_PATH'):
+    GDAL_LIBRARY_PATH = env('GDAL_LIBRARY_PATH')
+    #GEOS_LIBRARY_PATH = 'C:\\Python27\\Lib\\site-packages\\osgeo\\geos_c.dll'
+    #GDAL_LIBRARY_PATH = '/usr/local/lib/libgdal.so'
 
 TILE_SIZE = 256
 MAX_ZOOM_LEVEL = 20 
