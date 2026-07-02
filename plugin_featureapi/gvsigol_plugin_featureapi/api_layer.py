@@ -1052,7 +1052,7 @@ class LayerCapabilities(APIView):
 
 
 class CapabilitiesFromUrlView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     @swagger_auto_schema(
         operation_id='get_capabilities_from_url',
