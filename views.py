@@ -9934,6 +9934,7 @@ def get_topology_available_layers(request, layer_id):
             
             # Buscar todos los datastores con los mismos parámetros de conexión
             available_layers = []
+            seen_layer_ids = set()
             
             for datastore in Datastore.objects.all():
                 try:
@@ -9961,6 +9962,11 @@ def get_topology_available_layers(request, layer_id):
                                 if (layer_identifier == f"{current_datastore.name}:{current_layer.source_name}" or 
                                     table_name == current_layer.source_name):
                                     continue
+
+                                # Skip duplicates (e.g. tables with multiple geometry columns)
+                                if layer_identifier in seen_layer_ids:
+                                    continue
+                                seen_layer_ids.add(layer_identifier)
                                 
                                 # Usar formato datastore:nametable para el display
                                 display_name = layer_identifier
