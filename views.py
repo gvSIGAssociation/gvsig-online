@@ -2126,6 +2126,9 @@ def project_get_conf(request):
                 layer['order'] = order
                 
                 layer['timeout'] = l.timeout
+                if 'gvsigol_plugin_indices_teledeteccion' in settings.INSTALLED_APPS:
+                    from gvsigol_plugin_indices_teledeteccion import service as indices_teledeteccion_service
+                    indices_teledeteccion_service.adjust_viewer_layer_dict(layer)
                 layers.append(layer)
         
         if allows_getmap:
@@ -2368,7 +2371,39 @@ def get_manual(request, doc_name, forced_lang=None, default=None):
     elif not forced_lang:
         return get_manual(request, doc_name, 'es', default=default)
     return default
-    return default
+
+
+def _get_project_enabled_plugins(project_id):
+    try:
+        project = Project.objects.get(id=project_id)
+        tools = json.loads(project.tools)
+        return [tool['name'] for tool in tools if tool.get('checked')]
+    except Exception:
+        return []
+
+
+def _find_plugin_manual(app_name, lang, plugins_base_path, base_docs_url):
+    lang_path = os.path.join(plugins_base_path, app_name, app_name + '_' + lang + '.pdf')
+    if os.path.exists(lang_path):
+        return lang_path, None
+    es_path = os.path.join(plugins_base_path, app_name, app_name + '_es.pdf')
+    if os.path.exists(es_path):
+        return es_path, 'es'
+    try:
+        import importlib
+        module = importlib.import_module(app_name)
+        plugin_root = os.path.dirname(module.__file__)
+        manual_dir = os.path.join(plugin_root, 'resources', 'manual')
+        for candidate in (
+            os.path.join(manual_dir, 'manual_emergencias.pdf'),
+            os.path.join(manual_dir, app_name + '_' + lang + '.pdf'),
+            os.path.join(manual_dir, app_name + '_es.pdf'),
+        ):
+            if os.path.isfile(candidate):
+                return candidate, None
+    except Exception:
+        pass
+    return None, None
 
 
 def documentation(request):
@@ -2406,27 +2441,34 @@ def documentation(request):
     
     plugins_base_path = base_docs_url + '/plugins'
     plugin_manuals = []
-    for app_name in settings.INSTALLED_APPS:
-        if  app_name.startswith('gvsigol_'):
-            the_path = os.path.join(plugins_base_path, app_name, app_name + '_' + lang + '.pdf')
-            if os.path.exists(the_path):
-                the_url = settings.DOCS_URL + os.path.relpath(the_path, base_docs_url)
-                plugin_manuals.append({
-                    'url': the_url,
-                    'title': _(app_name + ' manual title'),
-                    'desc': _(app_name + ' manual desc'),
-                    'lang': None
-                })
-            else:
-                plugin_path = os.path.join(plugins_base_path, app_name, app_name + '_es.pdf')
-                if os.path.exists(plugin_path):
-                    the_url = settings.DOCS_URL + os.path.relpath(plugin_path, base_docs_url)
-                    plugin_manuals.append({
-                        'url': the_url,
-                        'title': _(app_name + ' manual title'),
-                        'desc': _(app_name + ' manual desc'),
-                        'lang': 'es'
-                    })
+    project_id = request.GET.get('project_id')
+    if project_id:
+        enabled_plugins = _get_project_enabled_plugins(project_id)
+        apps_to_scan = [
+            app_name for app_name in enabled_plugins
+            if app_name.startswith('gvsigol_') and app_name in settings.INSTALLED_APPS
+        ]
+    else:
+        apps_to_scan = []
+
+    for app_name in apps_to_scan:
+        the_path, manual_lang = _find_plugin_manual(
+            app_name, lang, plugins_base_path, base_docs_url
+        )
+        if not the_path:
+            continue
+        if the_path.startswith(base_docs_url):
+            the_url = settings.DOCS_URL + os.path.relpath(the_path, base_docs_url)
+        elif app_name == 'gvsigol_plugin_libraemergencias':
+            the_url = request.build_absolute_uri(reverse('servir_manual_emergencias'))
+        else:
+            continue
+        plugin_manuals.append({
+            'url': the_url,
+            'title': _(app_name + ' manual title'),
+            'desc': _(app_name + ' manual desc'),
+            'lang': manual_lang
+        })
         
     response = {
         'plugin_manuals': plugin_manuals,
