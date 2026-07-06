@@ -119,7 +119,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 					</thead>
 					<tbody>
 						{% for ws in datastores %}
-						<tr>
+						<tr data-schema="{{ ws.get_schema_name|lower }}">
 							<td>{{ ws.id }}</td>
 							<td>{{ ws.name }}</td>
 							<td>{{ ws.description }}</td>
@@ -188,6 +188,14 @@ table.dataTable.no-footer { border-bottom: none !important; }
 				<div class="row">
 					<div class="col-md-12 form-group">
 						<p style="font-weight: 600;">{% trans "The data store and its registered resources will be deleted" %}</p>
+					</div>
+				</div>
+				<div id="div-delete-schema-warning" class="row" style="display: none;">
+					<div class="col-md-12 form-group">
+						<div class="alert alert-warning" style="margin-bottom: 0;">
+							<i class="fa fa-exclamation-triangle"></i>
+							{% trans "This datastore uses the protected schema \"public\". The schema cannot be deleted. The datastore can be removed from gvSIG Online without affecting the database schema." %}
+						</div>
 					</div>
 				</div>
 				<div id="div-delete-schema" class="row">
@@ -292,10 +300,22 @@ $(document).ready(function() {
 	    	}
 			
 		} else if (this.name == "button-delete-datastore"){
-			if (data[3] != 'v_PostGIS') {
-				$('#div-delete-schema').css('display', 'none');	
-	    	}
-        	deleteDatastore(data, row);   
+			var schema = $(this).closest('tr').data('schema') || 'public';
+			var isPostgis = data[3] == 'v_PostGIS';
+			var isProtectedSchema = schema === 'public';
+
+			$('#checkbox-delete-schema').prop('checked', false);
+			if (!isPostgis) {
+				$('#div-delete-schema').hide();
+				$('#div-delete-schema-warning').hide();
+			} else if (isProtectedSchema) {
+				$('#div-delete-schema').hide();
+				$('#div-delete-schema-warning').show();
+			} else {
+				$('#div-delete-schema').show();
+				$('#div-delete-schema-warning').hide();
+			}
+        	deleteDatastore(data, row);
         }
 	});
 	
@@ -308,11 +328,8 @@ $(document).ready(function() {
 	}
 
 	function deleteDatastore(data, row){
-		$('#button-delete-datastore-accept').click( function() {
-			var deleteSchema = false;
-			if($('#checkbox-delete-schema').is(":checked")) {
-				deleteSchema = true;
-			}
+		$('#button-delete-datastore-accept').off('click').on('click', function() {
+			var deleteSchema = $('#checkbox-delete-schema').is(':checked');
 			$.ajax({
 				type: 'POST',
 				async: false,
@@ -327,7 +344,13 @@ $(document).ready(function() {
 					$('#modal-delete-datastore').modal('hide');
 					location.reload();
 				},
-				error: function(){}
+				error: function(jqXHR){
+					var errorMessage = gettext('Error deleting datastore');
+					if (jqXHR.responseJSON && jqXHR.responseJSON.error) {
+						errorMessage = jqXHR.responseJSON.error;
+					}
+					messageBox.show('error', errorMessage);
+				}
 			});
 		});
 	}

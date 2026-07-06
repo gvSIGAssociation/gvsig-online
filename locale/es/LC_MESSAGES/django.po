@@ -3055,6 +3055,27 @@ msgstr ""
 "Marque esta opción para eliminar el esquema asociado al almacén de "
 "datosMarque esta opción para eliminar el esquema asociado al almacén de datos"
 
+#: gvsigol_services/templates/datastore_list.html:197
+msgid ""
+"This datastore uses the protected schema \"public\". The schema cannot be "
+"deleted. The datastore can be removed from gvSIG Online without affecting "
+"the database schema."
+msgstr ""
+"Este almacén de datos utiliza el esquema protegido \"public\". El esquema no "
+"puede eliminarse. El almacén puede eliminarse de gvSIG Online sin afectar al "
+"esquema de la base de datos."
+
+#: gvsigol_services/views.py:937
+#, python-format
+msgid ""
+"The schema \"%(schema)s\" is a protected system schema and cannot be "
+"deleted. Uncheck the schema deletion option to remove the datastore from "
+"gvSIG Online only."
+msgstr ""
+"El esquema \"%(schema)s\" es un esquema de sistema protegido y no puede "
+"eliminarse. Desmarque la opción de eliminar el esquema para eliminar solo el "
+"almacén de datos de gvSIG Online."
+
 #: gvsigol_services/templates/datastore_list.html:248
 msgid "Remove datastore"
 msgstr "Eliminar almacén de datos"

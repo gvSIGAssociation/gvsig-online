@@ -665,6 +665,16 @@ def create_schema_for_datastore(connection_params):
     close_connection(cursor, connection)
     return True
 
+PROTECTED_DATABASE_SCHEMAS = frozenset(['public'])
+
+
+def is_protected_database_schema(schema_name):
+    """Indica si un esquema de base de datos no puede eliminarse."""
+    if not schema_name:
+        return False
+    return schema_name.lower() in PROTECTED_DATABASE_SCHEMAS
+
+
 #TODO: llevar al paquete del core
 def delete_schema_for_datastore(connection_params):
     host = connection_params.get('host')
@@ -673,6 +683,12 @@ def delete_schema_for_datastore(connection_params):
     user = connection_params.get('user')
     passwd = connection_params.get('passwd')
     schema = connection_params.get('schema')
+
+    if is_protected_database_schema(schema):
+        logger.warning(
+            "Blocked attempt to delete protected database schema '%s'", schema
+        )
+        return False
 
     connection = get_connection(host, port, database, user, passwd)
     cursor = connection.cursor()

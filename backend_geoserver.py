@@ -472,7 +472,9 @@ class Geoserver():
             else:
                 catalog.delete(ds, purge, recurse=True)
                 if delete_schema:
-                    utils.delete_schema_for_datastore(json.loads(datastore.connection_params))
+                    utils.delete_schema_for_datastore(
+                        datastore.get_connection_params_dict()
+                    )
                 
             return True
         else:
