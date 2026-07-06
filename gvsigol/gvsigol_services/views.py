@@ -929,6 +929,18 @@ def datastore_delete(request, dsid):
         delete_schema = False
         if request.POST.get('delete_schema') == 'true':
             delete_schema = True
+
+        schema_name = ds.get_schema_name()
+        if delete_schema and utils.is_protected_database_schema(schema_name):
+            return JsonResponse({
+                'success': False,
+                'error': _(
+                    'The schema "%(schema)s" is a protected system schema and '
+                    'cannot be deleted. Uncheck the schema deletion option to '
+                    'remove the datastore from gvSIG Online only.'
+                ) % {'schema': schema_name}
+            }, status=400)
+
         gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
         gs.deleteDatastore(ds.workspace, ds, delete_schema=delete_schema)
         utils.delete_datastore_elements(ds, gs=gs)

@@ -2837,6 +2837,27 @@ msgstr ""
 msgid "Check this option to remove the schema associated with the datastore"
 msgstr ""
 
+#: gvsigol_services/templates/datastore_list.html:197
+msgid ""
+"This datastore uses the protected schema \"public\". The schema cannot be "
+"deleted. The datastore can be removed from gvSIG Online without affecting "
+"the database schema."
+msgstr ""
+"This datastore uses the protected schema \"public\". The schema cannot be "
+"deleted. The datastore can be removed from gvSIG Online without affecting "
+"the database schema."
+
+#: gvsigol_services/views.py:937
+#, python-format
+msgid ""
+"The schema \"%(schema)s\" is a protected system schema and cannot be "
+"deleted. Uncheck the schema deletion option to remove the datastore from "
+"gvSIG Online only."
+msgstr ""
+"The schema \"%(schema)s\" is a protected system schema and cannot be "
+"deleted. Uncheck the schema deletion option to remove the datastore from "
+"gvSIG Online only."
+
 #: gvsigol_services/templates/datastore_list.html:248
 msgid "Remove datastore"
 msgstr ""

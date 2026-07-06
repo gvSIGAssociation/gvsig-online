@@ -3081,6 +3081,27 @@ msgstr ""
 "dadesMarcar aquesta opció per a esborrar l'esquema associat amb el magatzem "
 "de dades"
 
+#: gvsigol_services/templates/datastore_list.html:197
+msgid ""
+"This datastore uses the protected schema \"public\". The schema cannot be "
+"deleted. The datastore can be removed from gvSIG Online without affecting "
+"the database schema."
+msgstr ""
+"Aquest magatzem de dades utilitza l'esquema protegit \"public\". L'esquema no "
+"es pot eliminar. El magatzem es pot eliminar de gvSIG Online sense afectar "
+"l'esquema de la base de dades."
+
+#: gvsigol_services/views.py:937
+#, python-format
+msgid ""
+"The schema \"%(schema)s\" is a protected system schema and cannot be "
+"deleted. Uncheck the schema deletion option to remove the datastore from "
+"gvSIG Online only."
+msgstr ""
+"L'esquema \"%(schema)s\" és un esquema de sistema protegit i no es pot "
+"eliminar. Desmarqueu l'opció d'eliminar l'esquema per eliminar només el "
+"magatzem de dades de gvSIG Online."
+
 #: gvsigol_services/templates/datastore_list.html:248
 msgid "Remove datastore"
 msgstr "Eliminar magatzem"
