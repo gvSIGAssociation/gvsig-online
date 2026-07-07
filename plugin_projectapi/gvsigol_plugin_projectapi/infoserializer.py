@@ -29,7 +29,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from gvsigol_core.models import Project, ProjectLayerGroup, Application
 from gvsigol_plugin_projectapi import util
-from gvsigol_services.models import LayerGroup, Layer
+from gvsigol_services.models import LayerGroup, Layer, Server
 from gvsigol_symbology.models import StyleLayer
 from gvsigol import settings
 from datetime import datetime
@@ -539,16 +539,54 @@ class LayerSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'real_time', 'vector_tile', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'is_view', 'public', 'external', 'service_version', 'description', 'wms_url', 'wfs_url', 'cache_url', 'tms_url', 'legend_url', 'styles', 'baselayer', 'default_baselayer', 'order', 'external_params', 'featureapi_endpoint', 'time_enabled', 'allow_download', 'detailed_info_button_title' ,'detailed_info_enabled' ,'detailed_info_html']
 
 
+def _compute_allows_getmap(layers_qs):
+    """True when all layers are internal and belong to the same GeoServer instance."""
+    allows_getmap = True
+    servers_list = []
+    for layer in layers_qs:
+        if layer.external:
+            allows_getmap = False
+        elif layer.datastore and layer.datastore.workspace:
+            servers_list.append(layer.datastore.workspace.server.name)
+        else:
+            allows_getmap = False
+    if allows_getmap and len(servers_list) > 0:
+        allows_getmap = all(elem == servers_list[0] for elem in servers_list)
+    return allows_getmap
+
+
+def _get_group_server_endpoints(group):
+    try:
+        server = Server.objects.get(id=group.server_id)
+        return {
+            'wms_url': server.getWmsEndpoint(relative=True),
+            'wfs_url': server.getWfsEndpoint(relative=True),
+            'cache_url': server.getCacheEndpoint(relative=True),
+        }
+    except Exception:
+        return {'wms_url': None, 'wfs_url': None, 'cache_url': None}
+
+
 class LayerGroupSerializer(serializers.ModelSerializer):
     layers = serializers.SerializerMethodField('get_layers_')
     order = serializers.SerializerMethodField('get_order_')
+    allows_getmap = serializers.SerializerMethodField('get_allows_getmap_')
+    wms_url = serializers.SerializerMethodField('get_wms_url_')
+    wfs_url = serializers.SerializerMethodField('get_wfs_url_')
+    cache_url = serializers.SerializerMethodField('get_cache_url_')
+
+    def _get_readable_layers_queryset(self, obj):
+        request = self.context['request']
+        return util.get_layerread_by_user_and_group(
+            request, obj.id, user_profile=self.context.get('user_profile')
+        )
 
     def get_layers_(self, obj):
         request = self.context['request']
         username = self.context.get('user')
         lang = self.context['lang']
         projectid = self.context['projectid']
-        queryset = util.get_layerread_by_user_and_group(request, obj.id, user_profile=self.context.get('user_profile')).order_by("-order")
+        queryset = self._get_readable_layers_queryset(obj).order_by("-order")
         context={'request': request, 'user': username, 'lang': lang, 'projectid': projectid, 'user_profile': self.context.get('user_profile')}
         serializer = LayerSerializer(queryset, many=True, context=context)
         return serializer.data
@@ -558,18 +596,37 @@ class LayerGroupSerializer(serializers.ModelSerializer):
         order = util.get_order_in_project(projectid, obj.name)
         return order
 
+    def get_allows_getmap_(self, obj):
+        return _compute_allows_getmap(self._get_readable_layers_queryset(obj))
+
+    def get_wms_url_(self, obj):
+        return _get_group_server_endpoints(obj).get('wms_url')
+
+    def get_wfs_url_(self, obj):
+        return _get_group_server_endpoints(obj).get('wfs_url')
+
+    def get_cache_url_(self, obj):
+        return _get_group_server_endpoints(obj).get('cache_url')
+
     class Meta:
         model = LayerGroup
-        fields = ['id', 'name', 'title', 'cached', 'created_by', 'visible', 'server_id', 'layers', 'order']
+        fields = ['id', 'name', 'title', 'cached', 'created_by', 'visible', 'server_id', 'layers', 'order', 'allows_getmap', 'wms_url', 'wfs_url', 'cache_url']
 
 class PublicLayerGroupSerializer(serializers.ModelSerializer):
     layers = serializers.SerializerMethodField('get_layers_')
     order = serializers.SerializerMethodField('get_order_')
+    allows_getmap = serializers.SerializerMethodField('get_allows_getmap_')
+    wms_url = serializers.SerializerMethodField('get_wms_url_')
+    wfs_url = serializers.SerializerMethodField('get_wfs_url_')
+    cache_url = serializers.SerializerMethodField('get_cache_url_')
+
+    def _get_readable_layers_queryset(self, obj):
+        return util.get_layerread_by_group(obj.id)
 
     def get_layers_(self, obj):
         lang = self.context['lang']
         projectid = self.context['projectid']
-        queryset = util.get_layerread_by_group(obj.id)
+        queryset = self._get_readable_layers_queryset(obj)
         serializer = LayerSerializer(queryset, many=True, context={'lang': lang, 'projectid': projectid})
         return serializer.data
 
@@ -578,9 +635,21 @@ class PublicLayerGroupSerializer(serializers.ModelSerializer):
         order = util.get_order_in_project(projectid, obj.name)
         return order
 
+    def get_allows_getmap_(self, obj):
+        return _compute_allows_getmap(self._get_readable_layers_queryset(obj))
+
+    def get_wms_url_(self, obj):
+        return _get_group_server_endpoints(obj).get('wms_url')
+
+    def get_wfs_url_(self, obj):
+        return _get_group_server_endpoints(obj).get('wfs_url')
+
+    def get_cache_url_(self, obj):
+        return _get_group_server_endpoints(obj).get('cache_url')
+
     class Meta:
         model = LayerGroup
-        fields = ['id', 'name', 'title', 'cached', 'created_by', 'visible', 'server_id', 'layers', 'order']
+        fields = ['id', 'name', 'title', 'cached', 'created_by', 'visible', 'server_id', 'layers', 'order', 'allows_getmap', 'wms_url', 'wfs_url', 'cache_url']
 
 
 class InfoSerializer(serializers.ModelSerializer):
@@ -662,7 +731,7 @@ class InfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ['id', 'name', 'title', 'description', 'image', 'relative_image', 'center_lat', 'center_lon', 'zoom', 'extent', "extent_array", 'toc_mode', 'toc_order', 'created_by', 'is_public', 'baselayer_version', 'base_layer_groups', 'layer_groups', 'default_baselayer', 'gs_instances', 'plugins', 'supported_crs', 'expiration_date', 'viewer_default_crs', 'custom_overview', 'layer_overview']
+        fields = ['id', 'name', 'title', 'description', 'image', 'relative_image', 'center_lat', 'center_lon', 'zoom', 'extent', "extent_array", 'toc_mode', 'toc_order', 'created_by', 'is_public', 'baselayer_version', 'base_layer_groups', 'layer_groups', 'default_baselayer', 'gs_instances', 'plugins', 'supported_crs', 'expiration_date', 'viewer_default_crs', 'custom_overview', 'layer_overview', 'selectable_groups']
         #fields = '__all__'
 
 
@@ -727,7 +796,7 @@ class PublicInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ['id', 'name', 'title', 'description', 'image', 'relative_image', 'center_lat', 'center_lon', 'zoom', 'extent', 'toc_mode', 'toc_order', 'created_by', 'is_public', 'baselayer_version', 'base_layer_groups', 'layer_groups', 'default_baselayer', 'gs_instances', 'plugins', 'supported_crs', 'expiration_date', 'viewer_default_crs']
+        fields = ['id', 'name', 'title', 'description', 'image', 'relative_image', 'center_lat', 'center_lon', 'zoom', 'extent', 'toc_mode', 'toc_order', 'created_by', 'is_public', 'baselayer_version', 'base_layer_groups', 'layer_groups', 'default_baselayer', 'gs_instances', 'plugins', 'supported_crs', 'expiration_date', 'viewer_default_crs', 'selectable_groups']
         #fields = '__all__'
 
 class AppInfoSerializer(serializers.ModelSerializer):
