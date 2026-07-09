@@ -5899,6 +5899,39 @@ def _fetch_external_wms_styles_from_capabilities(url, version, layer_name):
     return utils.mark_default_external_wms_style(styles, layer_name)
 
 
+def _default_external_wms_style_from_params(params):
+    styles = params.get('styles') or []
+    for style in styles:
+        if isinstance(style, dict) and style.get('is_default'):
+            return (style.get('name') or '').strip()
+    for style in styles:
+        if isinstance(style, dict):
+            name = (style.get('name') or '').strip()
+            if name:
+                return name
+    return ''
+
+
+def _external_cached_wms_gwc_config(params, native_srs, layer_group_id):
+    return {
+        'version': (params.get('version') or '1.1.1').strip(),
+        'url': (params.get('get_map_url') or params.get('url') or '').strip(),
+        'layers': (params.get('layers') or '').strip(),
+        'format': (params.get('format') or 'image/png').strip(),
+        'default_style': _default_external_wms_style_from_params(params),
+        'native_srs': (native_srs or '').strip(),
+        'layer_group_id': layer_group_id,
+    }
+
+
+def _external_cached_wms_needs_gwc_reregister(prev_config, new_config, cache_was_enabled, cache_is_enabled):
+    if not cache_is_enabled:
+        return False
+    if not cache_was_enabled:
+        return True
+    return prev_config != new_config
+
+
 @login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
@@ -6125,6 +6158,13 @@ def external_layer_update(request, external_layer_id):
                 except (json.JSONDecodeError, TypeError):
                     prev_params = {}
 
+            cache_was_enabled = external_layer.cached
+            prev_layer_group_id = external_layer.layer_group_id
+            prev_native_srs = external_layer.native_srs
+            prev_gwc_config = _external_cached_wms_gwc_config(
+                prev_params, prev_native_srs, prev_layer_group_id
+            )
+
             is_visible = False
             if 'visible' in request.POST:
                 is_visible = True
@@ -6154,11 +6194,6 @@ def external_layer_update(request, external_layer_id):
             if external_layer.cached and not cached:
                 if external_layer.type == 'WMS':
                     geowebcache.get_instance().delete_layer(None, external_layer, server, master_node.getUrl())
-                    geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
-
-            if not external_layer.cached and cached:
-                if external_layer.type == 'WMS':
-                    geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
                     geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
 
             external_layer.title = request.POST.get('title')
@@ -6335,9 +6370,19 @@ def external_layer_update(request, external_layer_id):
             external_layer.save()
 
             if external_layer.cached and external_layer.type == 'WMS':
-                tasks.update_external_cached_wms_wmts_options(
-                    Layer.objects.get(pk=external_layer.pk)
+                new_gwc_config = _external_cached_wms_gwc_config(
+                    params, external_layer.native_srs, layer_group.id
                 )
+                if _external_cached_wms_needs_gwc_reregister(
+                    prev_gwc_config, new_gwc_config, cache_was_enabled, True
+                ):
+                    geowebcache.get_instance().add_layer(
+                        None, external_layer, server, master_node.getUrl(), crs_list
+                    )
+                    geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
+                    tasks.update_external_cached_wms_wmts_options(
+                        Layer.objects.get(pk=external_layer.pk)
+                    )
 
             if redirect_to_layergroup:
                 # recalculate to_url since layergroup_id may change

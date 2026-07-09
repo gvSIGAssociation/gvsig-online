@@ -69,6 +69,45 @@ class AmbiguousRequestError(RequestError):
 class FailedRequestError(RequestError):
     pass
 
+
+def _default_external_wms_style_name(external_params):
+    styles = external_params.get('styles') or []
+    for style in styles:
+        if isinstance(style, dict) and style.get('is_default'):
+            name = (style.get('name') or '').strip()
+            if name:
+                return name
+    for style in styles:
+        if isinstance(style, dict):
+            name = (style.get('name') or '').strip()
+            if name:
+                return name
+    return ''
+
+
+def _append_external_wms_backend_options(xml, external_params, native_srs=None):
+    """
+    Append GWC backend WMS options for external cached layers.
+    external_params.version is stored when the layer is created/updated in views.py
+    but was not forwarded to GeoWebCache (defaulted to WMS 1.1.1).
+    """
+    wms_version = (external_params.get('version') or '1.1.1').strip()
+    wms_style = _default_external_wms_style_name(external_params)
+
+    if wms_style:
+        xml += "<wmsStyles>" + wms_style + "</wmsStyles>"
+    if wms_version:
+        xml += "<wmsVersion>" + wms_version + "</wmsVersion>"
+    # Strict WMS 1.3.0 backends expect CRS; GWC may still send SRS unless version is 1.3.0.
+    if wms_version.startswith('1.3'):
+        crs = (native_srs or external_params.get('srs') or '').strip()
+        if crs and not crs.upper().startswith('EPSG:'):
+            crs = 'EPSG:' + crs
+        if crs:
+            xml += "<vendorParameters>CRS=" + crs + "</vendorParameters>"
+    return xml
+
+
 class APIGeoWebCache():
     
     def __init__(self):
@@ -111,6 +150,7 @@ class APIGeoWebCache():
         layer_name = None
         wms_layers = None
         url = None
+        external_params = None
         if layer.external:
             layer_name = layer.name
             external_params = json.loads(layer.external_params)
@@ -165,6 +205,12 @@ class APIGeoWebCache():
         xml +=      "<string>" + url + "</string>"
         xml +=  "</wmsUrl>"
         xml +=  "<wmsLayers>" + wms_layers + "</wmsLayers>"
+        if layer.external and external_params is not None:
+            xml = _append_external_wms_backend_options(
+                xml,
+                external_params,
+                native_srs=getattr(layer, 'native_srs', None),
+            )
         xml += "</wmsLayer>"
 
         # xml-encode any & appearance which causes Geoserver to complain.
