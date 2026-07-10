@@ -270,8 +270,32 @@ def update_external_cached_wms_wmts_options(layer):
         # get_server_by_id returns backend Geoserver(), not Django Server; WMTS URL lives on the model.
         server_model = geographic_servers.get_instance().get_server_model(layer_group.server_id)
         url = server_model.getWmtsEndpoint()
+        params = json.loads(layer.external_params) if layer.external_params else {}
+        if params.pop('wmts_options', None) is not None:
+            layer.external_params = json.dumps(params)
+            layer.save(update_fields=['external_params'])
+
         auth = AuthPatch(username=server_model.user, password=server_model.password, verify=False)
-        wmts = WebMapTileService(url, version=settings.WMTS_MAX_VERSION, auth=auth)
+        last_error = None
+        wmts = None
+        for attempt in range(3):
+            try:
+                wmts = WebMapTileService(url, version=settings.WMTS_MAX_VERSION, auth=auth)
+                break
+            except Exception as e:
+                last_error = e
+                logger.warning(
+                    "Error reading GWC WMTS capabilities for external cached WMS layer %s - %s (attempt %s/3)",
+                    layer.id,
+                    layer.name,
+                    attempt + 1,
+                    exc_info=True,
+                )
+                if attempt < 2:
+                    time.sleep(3)
+        if wmts is None:
+            raise last_error
+
         wmts_id = layer.name
         if wmts_id not in wmts.contents:
             for k in wmts.contents.keys():
