@@ -86,11 +86,17 @@ def _default_external_wms_style_name(external_params):
     return ''
 
 
-def _append_external_wms_backend_options(xml, external_params, native_srs=None):
+def _append_external_wms_backend_options(xml, external_params, grid_subsets=None):
     """
     Append GWC backend WMS options for external cached layers.
     external_params.version is stored when the layer is created/updated in views.py
     but was not forwarded to GeoWebCache (defaulted to WMS 1.1.1).
+
+    Do not force a fixed CRS when the cached layer is registered with multiple
+    gridsets. GeoWebCache must request the remote WMS using the CRS that matches
+    each requested tile matrix. A fixed CRS here can make GWC request, for
+    example, EPSG:25830 tiles while forcing CRS=EPSG:3857 in the backend WMS
+    request.
     """
     wms_version = (external_params.get('version') or '1.1.1').strip()
     wms_style = _default_external_wms_style_name(external_params)
@@ -99,13 +105,14 @@ def _append_external_wms_backend_options(xml, external_params, native_srs=None):
         xml += "<wmsStyles>" + escape(wms_style) + "</wmsStyles>"
     if wms_version:
         xml += "<wmsVersion>" + escape(wms_version) + "</wmsVersion>"
-    # Strict WMS 1.3.0 backends expect CRS; GWC may still send SRS unless version is 1.3.0.
+
     if wms_version.startswith('1.3'):
-        crs = (native_srs or external_params.get('srs') or '').strip()
-        if crs and not crs.upper().startswith('EPSG:'):
-            crs = 'EPSG:' + crs
-        if crs:
-            xml += "<vendorParameters>CRS=" + escape(crs) + "</vendorParameters>"
+        selected_gridsets = [_normalize_crs_key(gs) for gs in (grid_subsets or [])]
+        selected_gridsets = [gs for gs in selected_gridsets if gs]
+
+        if len(selected_gridsets) == 1:
+            xml += "<vendorParameters>CRS=" + escape(selected_gridsets[0]) + "</vendorParameters>"
+
     return xml
 
 
@@ -328,7 +335,7 @@ class APIGeoWebCache():
             xml = _append_external_wms_backend_options(
                 xml,
                 external_params,
-                native_srs=getattr(layer, 'native_srs', None),
+                grid_subsets=grid_subsets,
             )
         if concurrency is not None:
             xml += "<gutter>0</gutter>"

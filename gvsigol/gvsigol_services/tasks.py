@@ -271,9 +271,6 @@ def update_external_cached_wms_wmts_options(layer):
         server_model = geographic_servers.get_instance().get_server_model(layer_group.server_id)
         url = server_model.getWmtsEndpoint()
         params = json.loads(layer.external_params) if layer.external_params else {}
-        if params.pop('wmts_options', None) is not None:
-            layer.external_params = json.dumps(params)
-            layer.save(update_fields=['external_params'])
 
         auth = AuthPatch(username=server_model.user, password=server_model.password, verify=False)
         last_error = None
