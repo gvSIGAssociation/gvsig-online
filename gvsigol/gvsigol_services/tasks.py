@@ -263,9 +263,9 @@ def update_external_cached_wms_wmts_options(layer):
     """
     try:
         if not (layer.external and layer.type == 'WMS' and layer.cached):
-            return
+            return False
         if not layer.name or not layer.layer_group_id:
-            return
+            return False
         layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
         # get_server_by_id returns backend Geoserver(), not Django Server; WMTS URL lives on the model.
         server_model = geographic_servers.get_instance().get_server_model(layer_group.server_id)
@@ -305,19 +305,27 @@ def update_external_cached_wms_wmts_options(layer):
                 layer.name,
                 len(wmts.contents),
             )
-            return
+            return False
         wmts_options = get_wmts_options(wmts, wmts_id)
         if wmts_options:
             params = json.loads(layer.external_params) if layer.external_params else {}
             params['wmts_options'] = wmts_options
             layer.external_params = json.dumps(params)
             layer.save(update_fields=['external_params'])
+            return True
+        logger.warning(
+            "WMTS capabilities: empty wmts_options for external cached WMS layer %s - %s",
+            layer.id,
+            layer.name,
+        )
+        return False
     except Exception as e:
         logger.exception(
             "Error getting GWC wmts_options for external cached WMS layer %s - %s",
             layer.id,
             layer.name,
         )
+        return False
 
 
 @celery_app.task(bind=True)

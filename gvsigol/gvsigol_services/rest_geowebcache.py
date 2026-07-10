@@ -29,6 +29,10 @@ from xml.sax.saxutils import escape
 
 logger = logging.getLogger(__name__)
 
+
+def _gwc_rest_timeout():
+    return int(getattr(settings, 'GWC_REST_TIMEOUT', 20))
+
 class RequestError(Exception):
     def __init__(self, status_code=-1, server_message=""):
         self.status_code = status_code
@@ -157,7 +161,7 @@ class APIGeoWebCache():
         
         auth = (server.user, server.password)
         headers = {'content-type': 'application/json'}
-        response = self.session.get(api_url, headers=headers, auth=auth)
+        response = self.session.get(api_url, headers=headers, auth=auth, timeout=_gwc_rest_timeout())
         if response.status_code==200:
             return json.loads(response.content)
         
@@ -169,7 +173,7 @@ class APIGeoWebCache():
         
         auth = (server.user, server.password)
         headers = {'content-type': 'application/json'}
-        response = self.session.get(api_url, headers=headers, auth=auth)
+        response = self.session.get(api_url, headers=headers, auth=auth, timeout=_gwc_rest_timeout())
         if response.status_code==200:
             return json.loads(response.content)
         
@@ -183,7 +187,7 @@ class APIGeoWebCache():
         auth = (server.user, server.password)
         headers = {'accept': 'application/json'}
         try:
-            response = self.session.get(api_url, headers=headers, auth=auth)
+            response = self.session.get(api_url, headers=headers, auth=auth, timeout=_gwc_rest_timeout())
             if response.status_code != 200:
                 raise FailedRequestError(response.status_code, response.content)
             data = json.loads(response.content)
@@ -345,7 +349,7 @@ class APIGeoWebCache():
         
         auth = (server.user, server.password)
         headers = {'content-type': 'text/xml'}
-        response = self.session.put(api_url, data=xml.encode('utf-8'), headers=headers, auth=auth)
+        response = self.session.put(api_url, data=xml.encode('utf-8'), headers=headers, auth=auth, timeout=_gwc_rest_timeout())
         if response.status_code==200:
             return True
         raise FailedRequestError(response.status_code, response.content)
@@ -378,7 +382,7 @@ class APIGeoWebCache():
         
         auth = (server.user, server.password)
         headers = {'content-type': 'text/xml'}
-        response = self.session.post(api_url, data=xml.encode(), headers=headers, auth=auth)
+        response = self.session.post(api_url, data=xml.encode(), headers=headers, auth=auth, timeout=_gwc_rest_timeout())
         if response.status_code==200:
             return True
         
@@ -395,8 +399,8 @@ class APIGeoWebCache():
         
         auth = (server.user, server.password)
         headers = {'content-type': 'text/xml'}
-        response = self.session.delete(api_url, headers=headers, auth=auth)
-        if response.status_code==200:
+        response = self.session.delete(api_url, headers=headers, auth=auth, timeout=_gwc_rest_timeout())
+        if response.status_code in (200, 204, 404):
             return True
         
         raise FailedRequestError(response.status_code, response.text)
@@ -479,7 +483,7 @@ class APIGeoWebCache():
         
         auth = (server.user, server.password)
         headers = {'content-type': 'application/json'}
-        response = self.session.get(api_url, headers=headers, auth=auth)
+        response = self.session.get(api_url, headers=headers, auth=auth, timeout=_gwc_rest_timeout())
         if response.status_code==200:
             return json.loads(response.content)
         
@@ -490,7 +494,7 @@ class APIGeoWebCache():
         
         auth = (server.user, server.password)
         headers = {'content-type': 'application/json'}
-        response = self.session.get(api_url, headers=headers, auth=auth)
+        response = self.session.get(api_url, headers=headers, auth=auth, timeout=_gwc_rest_timeout())
         if response.status_code==200:
             return json.loads(response.content)
         

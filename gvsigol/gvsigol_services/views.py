@@ -5932,6 +5932,59 @@ def _external_cached_wms_needs_gwc_reregister(prev_config, new_config, cache_was
     return prev_config != new_config
 
 
+def _remove_external_wms_wmts_options(params):
+    params.pop('wmts_options', None)
+    return params
+
+
+def _mark_external_wms_uncached(layer, params=None):
+    if params is None:
+        try:
+            params = json.loads(layer.external_params or '{}')
+        except (json.JSONDecodeError, TypeError):
+            params = {}
+    _remove_external_wms_wmts_options(params)
+    Layer.objects.filter(pk=layer.pk).update(
+        cached=False,
+        external_params=json.dumps(params),
+    )
+    layer.cached = False
+    layer.external_params = json.dumps(params)
+    return params
+
+
+def _best_effort_delete_external_wms_gwc_layer(layer, server, master_node_url):
+    try:
+        geowebcache.get_instance().delete_layer(None, layer, server, master_node_url)
+        return True
+    except Exception:
+        logger.warning(
+            'Could not delete external cached WMS layer %s from GeoWebCache',
+            getattr(layer, 'name', layer),
+            exc_info=True,
+        )
+        return False
+
+
+def _best_effort_reload_gwc_nodes(server_id):
+    try:
+        geographic_servers.get_instance().get_server_by_id(server_id).reload_nodes()
+        return True
+    except Exception:
+        logger.warning(
+            'Could not reload GeoServer nodes after external WMS cache operation on server %s',
+            server_id,
+            exc_info=True,
+        )
+        return False
+
+
+def _rollback_failed_external_wms_cache(layer, params, server, master_node_url):
+    _mark_external_wms_uncached(layer, params)
+    _best_effort_delete_external_wms_gwc_layer(layer, server, master_node_url)
+    _best_effort_reload_gwc_nodes(server.id)
+
+
 @login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
@@ -6088,11 +6141,24 @@ def external_layer_add(request):
             if external_layer.cached:
                 if external_layer.type == 'WMS':
                     master_node = geographic_servers.get_instance().get_master_node(server.id)
-                    geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
-                    geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
-                    tasks.update_external_cached_wms_wmts_options(
-                        Layer.objects.get(pk=external_layer.pk)
-                    )
+                    try:
+                        geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
+                        _best_effort_reload_gwc_nodes(server.id)
+                        wmts_options_updated = tasks.update_external_cached_wms_wmts_options(
+                            Layer.objects.get(pk=external_layer.pk)
+                        )
+                        if not wmts_options_updated:
+                            raise geowebcache.FailedRequestError(
+                                -1,
+                                'External WMS cached layer could not be registered because wmts_options could not be generated.',
+                            )
+                    except Exception:
+                        logger.exception(
+                            'Error registering external WMS layer %s in GeoWebCache. Leaving it uncached.',
+                            external_layer.name,
+                        )
+                        _rollback_failed_external_wms_cache(external_layer, params, server, master_node.getUrl())
+                        raise
 
             if external_layer.type == 'MVT' and style_file_upload_error:
                 update_url = reverse('external_layer_update', kwargs={'external_layer_id': external_layer.id})
@@ -6191,10 +6257,13 @@ def external_layer_update(request, external_layer_id):
                     })
 
             master_node = geographic_servers.get_instance().get_master_node(server.id)
-            if external_layer.cached and not cached:
-                if external_layer.type == 'WMS':
-                    geowebcache.get_instance().delete_layer(None, external_layer, server, master_node.getUrl())
-                    geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
+            if cache_was_enabled and not cached and external_layer.type == 'WMS':
+                # Do not let a slow or failing GeoWebCache DELETE leave the layer
+                # cached in the database. The viewer must stop treating the layer
+                # as WMTS even if GWC cleanup has to be done later.
+                _mark_external_wms_uncached(external_layer, prev_params)
+                _best_effort_delete_external_wms_gwc_layer(external_layer, server, master_node.getUrl())
+                _best_effort_reload_gwc_nodes(server.id)
 
             external_layer.title = request.POST.get('title')
             external_layer.type = request.POST.get('type')
@@ -6373,16 +6442,33 @@ def external_layer_update(request, external_layer_id):
                 new_gwc_config = _external_cached_wms_gwc_config(
                     params, external_layer.native_srs, layer_group.id
                 )
-                if _external_cached_wms_needs_gwc_reregister(
+                needs_gwc_reregister = _external_cached_wms_needs_gwc_reregister(
                     prev_gwc_config, new_gwc_config, cache_was_enabled, True
-                ):
-                    geowebcache.get_instance().add_layer(
-                        None, external_layer, server, master_node.getUrl(), crs_list
+                )
+                try:
+                    if needs_gwc_reregister:
+                        geowebcache.get_instance().add_layer(
+                            None, external_layer, server, master_node.getUrl(), crs_list
+                        )
+                        _best_effort_reload_gwc_nodes(server.id)
+
+                    needs_wmts_options = needs_gwc_reregister or not params.get('wmts_options')
+                    if needs_wmts_options:
+                        wmts_options_updated = tasks.update_external_cached_wms_wmts_options(
+                            Layer.objects.get(pk=external_layer.pk)
+                        )
+                        if not wmts_options_updated:
+                            raise geowebcache.FailedRequestError(
+                                -1,
+                                'External WMS cached layer could not be registered because wmts_options could not be generated.',
+                            )
+                except Exception:
+                    logger.exception(
+                        'Error updating external WMS layer %s in GeoWebCache. Leaving it uncached.',
+                        external_layer.name,
                     )
-                    geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
-                    tasks.update_external_cached_wms_wmts_options(
-                        Layer.objects.get(pk=external_layer.pk)
-                    )
+                    _rollback_failed_external_wms_cache(external_layer, params, server, master_node.getUrl())
+                    raise
 
             if redirect_to_layergroup:
                 # recalculate to_url since layergroup_id may change
