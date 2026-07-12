@@ -222,10 +222,21 @@ class APIGeoWebCache():
         fall back to the native/local CRS when no preferred global gridset is usable.
         This avoids choosing local gridsets such as EPSG:25830 for base layers when
         EPSG:3857/EPSG:4326 are available.
+
+        For WMS 1.3.x backends, keep a single gridset by default. GeoWebCache
+        cannot vary vendorParameters per tile matrix, and some strict WMS 1.3
+        services require CRS instead of SRS. Keeping one gridset lets us send a
+        CRS vendor parameter that matches the selected cache gridset.
         """
         crs_bounds = _crs_bounds_map(crs_list)
         supported = set(crs_bounds.keys())
         available = set(_normalize_crs_key(gs) for gs in available_gridsets)
+        external_params = json.loads(layer.external_params) if layer.external_params else {}
+        wms_version = (external_params.get('version') or '1.1.1').strip()
+        single_gridset = (
+            wms_version.startswith('1.3')
+            and getattr(settings, 'EXTERNAL_WMS_CACHE_SINGLE_GRIDSET_WMS13', True)
+        )
 
         explicit = getattr(settings, 'EXTERNAL_WMS_CACHE_GRID_SUBSETS', None)
         priority = explicit or getattr(
@@ -237,9 +248,8 @@ class APIGeoWebCache():
 
         selected = [gs for gs in priority if gs in available and gs in supported]
         if selected:
-            return selected, crs_bounds
+            return (selected[:1] if single_gridset else selected), crs_bounds
 
-        external_params = json.loads(layer.external_params) if layer.external_params else {}
         native_srs = _normalize_crs_key(getattr(layer, 'native_srs', None) or external_params.get('srs'))
         if native_srs and native_srs in available and native_srs in supported:
             return [native_srs], crs_bounds
@@ -250,7 +260,7 @@ class APIGeoWebCache():
         )
         configured = [_normalize_crs_key(gs) for gs in settings.CACHE_OPTIONS.get('GRID_SUBSETS', [])]
         selected = [gs for gs in configured if gs in available and gs in supported and gs not in excluded]
-        return selected, crs_bounds
+        return (selected[:1] if single_gridset else selected), crs_bounds
 
     def add_layer(self, ws, layer, server, master_node_url, crs_list):
         layer_name = None
