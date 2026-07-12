@@ -110,12 +110,19 @@ def _append_external_wms_backend_options(xml, external_params, grid_subsets=None
     if wms_version:
         xml += "<wmsVersion>" + escape(wms_version) + "</wmsVersion>"
 
+    vendor_parameters = []
+
     if wms_version.startswith('1.3'):
         selected_gridsets = [_normalize_crs_key(gs) for gs in (grid_subsets or [])]
         selected_gridsets = [gs for gs in selected_gridsets if gs]
 
         if len(selected_gridsets) == 1:
-            xml += "<vendorParameters>CRS=" + escape(selected_gridsets[0]) + "</vendorParameters>"
+            vendor_parameters.append('CRS=' + selected_gridsets[0])
+
+        vendor_parameters.append('EXCEPTIONS=XML')
+
+    if vendor_parameters:
+        xml += "<vendorParameters>" + escape('&'.join(vendor_parameters)) + "</vendorParameters>"
 
     return xml
 
