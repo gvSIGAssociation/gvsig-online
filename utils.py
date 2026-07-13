@@ -437,7 +437,7 @@ def get_catalog_url_from_uuid(request, metadata_uuid, baseUrl=None, lang=None):
                 if request.session['username'] is not None and request.session['password'] is not None:
                     split_catalog_url = baseUrl.split('//')
                     baseUrl = split_catalog_url[0] + '//' + request.session['username'] + ':' + request.session['password'] + '@' + split_catalog_url[1]
-            metadata_url = baseUrl + '/srv/' + lang + '/catalog.search#/metadata/' + metadata_uuid
+            metadata_url = baseUrl + catalog_settings.CATALOG_EDITOR_PATH + '#/metadata/' + metadata_uuid
         except Exception as e:
             pass
         
