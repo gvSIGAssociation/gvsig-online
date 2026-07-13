@@ -26,8 +26,9 @@ from lxml import etree
 def getTextFromXMLNode(tree, xpath_filter, ns={}):
     if tree is not None:
         for item in tree.findall(xpath_filter, ns):
-            if item.text:
-                return item.text
+            text = ''.join(item.itertext()).strip()
+            if text:
+                return text
     return ''
 
 def getXMLNode(tree, xpath_filter, ns):

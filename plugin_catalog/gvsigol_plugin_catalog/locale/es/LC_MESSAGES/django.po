@@ -162,3 +162,435 @@ msgstr "Plugin Catálogo"
 
 msgid "gvsigol_plugin_catalog manual desc"
 msgstr "Manual del plugin de catálogo de metadatos de gvSIG Online"
+
+#: metadata_labels.py
+msgid "pointOfContact"
+msgstr "Punto de contacto"
+
+#: metadata_labels.py
+msgid "distributor"
+msgstr "Distribuidor"
+
+#: metadata_labels.py
+msgid "user"
+msgstr "Usuario"
+
+#: metadata_labels.py
+msgid "processor"
+msgstr "Procesador"
+
+#: metadata_labels.py
+msgid "sponsor"
+msgstr "Patrocinador"
+
+#: metadata_labels.py
+msgid "collaborator"
+msgstr "Colaborador"
+
+#: metadata_labels.py
+msgid "vector"
+msgstr "Vectorial"
+
+#: metadata_labels.py
+msgid "grid"
+msgstr "Raster"
+
+#: metadata_labels.py
+msgid "textTable"
+msgstr "Tabla de texto"
+
+#: metadata_labels.py
+msgid "tin"
+msgstr "Modelo TIN"
+
+#: metadata_labels.py
+msgid "stereoModel"
+msgstr "Modelo estéreo"
+
+#: metadata_labels.py
+msgid "video"
+msgstr "Vídeo"
+
+#: metadata_labels.py
+msgid "copyright"
+msgstr "Derechos de autor"
+
+#: metadata_labels.py
+msgid "patent"
+msgstr "Patente"
+
+#: metadata_labels.py
+msgid "patentPending"
+msgstr "Patente pendiente"
+
+#: metadata_labels.py
+msgid "trademark"
+msgstr "Marca registrada"
+
+#: metadata_labels.py
+msgid "license"
+msgstr "Licencia"
+
+#: metadata_labels.py
+msgid "intellectualPropertyRights"
+msgstr "Derechos de propiedad intelectual"
+
+#: metadata_labels.py
+msgid "restricted"
+msgstr "Restringido"
+
+#: metadata_labels.py
+msgid "otherRestrictions"
+msgstr "Otras restricciones"
+
+#: metadata_labels.py
+msgid "farming"
+msgstr "Agricultura"
+
+#: metadata_labels.py
+msgid "biota"
+msgstr "Biota"
+
+#: metadata_labels.py
+msgid "boundaries"
+msgstr "Límites administrativos"
+
+#: metadata_labels.py
+msgid "climatologyMeteorologyAtmosphere"
+msgstr "Climatología, meteorología y atmósfera"
+
+#: metadata_labels.py
+msgid "climateMeteorologyAtmosphere"
+msgstr "Climatología, meteorología y atmósfera"
+
+#: metadata_labels.py
+msgid "economy"
+msgstr "Economía"
+
+#: metadata_labels.py
+msgid "elevation"
+msgstr "Elevación"
+
+#: metadata_labels.py
+msgid "environment"
+msgstr "Medio ambiente"
+
+#: metadata_labels.py
+msgid "geoscientificInformation"
+msgstr "Información geocientífica"
+
+#: metadata_labels.py
+msgid "health"
+msgstr "Salud"
+
+#: metadata_labels.py
+msgid "imageryBaseMapsEarthCover"
+msgstr "Imágenes, mapas base y cubierta terrestre"
+
+#: metadata_labels.py
+msgid "intelligenceMilitary"
+msgstr "Inteligencia militar"
+
+#: metadata_labels.py
+msgid "inlandWaters"
+msgstr "Aguas continentales"
+
+#: metadata_labels.py
+msgid "location"
+msgstr "Localización"
+
+#: metadata_labels.py
+msgid "oceans"
+msgstr "Océanos"
+
+#: metadata_labels.py
+msgid "planningCadastre"
+msgstr "Ordenación territorial y catastro"
+
+#: metadata_labels.py
+msgid "society"
+msgstr "Sociedad"
+
+#: metadata_labels.py
+msgid "structure"
+msgstr "Estructuras"
+
+#: metadata_labels.py
+msgid "transportation"
+msgstr "Transporte"
+
+#: metadata_labels.py
+msgid "utilitiesCommunication"
+msgstr "Servicios públicos y comunicaciones"
+
+#: metadata_labels.py views.py
+msgid "Use limitation"
+msgstr "Limitación de uso"
+
+#: metadata_labels.py views.py
+msgid "Access constraint"
+msgstr "Restricción de acceso"
+
+#: metadata_labels.py views.py
+msgid "Use constraint type"
+msgstr "Tipo de restricción de uso"
+
+#: metadata_labels.py views.py
+msgid "Constraint description"
+msgstr "Descripción de la restricción"
+
+#: metadata_labels.py views.py
+msgid "Update frequency"
+msgstr "Frecuencia de actualización"
+
+#: metadata_labels.py views.py
+msgid "Place"
+msgstr "Lugar"
+
+#: metadata_labels.py views.py
+msgid "Resource identifier"
+msgstr "Identificador de recurso"
+
+#: metadata_labels.py views.py
+msgid "Language"
+msgstr "Idioma"
+
+#: metadata_labels.py
+msgid "continual"
+msgstr "Continua"
+
+#: metadata_labels.py
+msgid "daily"
+msgstr "Diaria"
+
+#: metadata_labels.py
+msgid "weekly"
+msgstr "Semanal"
+
+#: metadata_labels.py
+msgid "fortnightly"
+msgstr "Quincenal"
+
+#: metadata_labels.py
+msgid "monthly"
+msgstr "Mensual"
+
+#: metadata_labels.py
+msgid "quarterly"
+msgstr "Trimestral"
+
+#: metadata_labels.py
+msgid "biannually"
+msgstr "Semestral"
+
+#: metadata_labels.py
+msgid "annually"
+msgstr "Anual"
+
+#: metadata_labels.py
+msgid "asNeeded"
+msgstr "Según necesidad"
+
+#: metadata_labels.py
+msgid "irregular"
+msgstr "Irregular"
+
+#: metadata_labels.py
+msgid "never"
+msgstr "Nunca"
+
+#: metadata_labels.py
+msgid "unknown"
+msgstr "Desconocida"
+
+#: metadata_labels.py views.py
+msgid "Resource status"
+msgstr "Estado del recurso"
+
+#: metadata_labels.py views.py
+msgid "Hierarchy level"
+msgstr "Nivel jerárquico"
+
+#: metadata_labels.py views.py
+msgid "Character set"
+msgstr "Juego de caracteres"
+
+#: metadata_labels.py views.py
+msgid "Distribution format"
+msgstr "Formato de distribución"
+
+#: metadata_labels.py views.py
+msgid "Purpose"
+msgstr "Propósito"
+
+#: metadata_labels.py
+msgid "completed"
+msgstr "Completado"
+
+#: metadata_labels.py
+msgid "onHold"
+msgstr "En espera"
+
+#: metadata_labels.py
+msgid "planned"
+msgstr "Planificado"
+
+#: metadata_labels.py
+msgid "underDevelopment"
+msgstr "En desarrollo"
+
+#: metadata_labels.py
+msgid "required"
+msgstr "Obligatorio"
+
+#: metadata_labels.py
+msgid "final"
+msgstr "Final"
+
+#: metadata_labels.py
+msgid "historicalArchive"
+msgstr "Archivo histórico"
+
+#: metadata_labels.py
+msgid "obsolete"
+msgstr "Obsoleto"
+
+#: metadata_labels.py
+msgid "dataset"
+msgstr "Conjunto de datos"
+
+#: metadata_labels.py
+msgid "series"
+msgstr "Serie"
+
+#: metadata_labels.py
+msgid "service"
+msgstr "Servicio"
+
+#: metadata_labels.py
+msgid "utf8"
+msgstr "UTF-8"
+
+#: metadata_labels.py
+msgid "ucs2"
+msgstr "UCS-2"
+
+#: metadata_labels.py
+msgid "lang_eng"
+msgstr "Inglés"
+
+#: metadata_labels.py
+msgid "lang_spa"
+msgstr "Español"
+
+#: metadata_labels.py
+msgid "lang_cat"
+msgstr "Catalán"
+
+#: metadata_labels.py
+msgid "lang_glg"
+msgstr "Gallego"
+
+#: metadata_labels.py
+msgid "lang_eus"
+msgstr "Euskera"
+
+#: metadata_labels.py
+msgid "lang_por"
+msgstr "Portugués"
+
+#: metadata_labels.py
+msgid "lang_fra"
+msgstr "Francés"
+
+#: metadata_labels.py
+msgid "lang_deu"
+msgstr "Alemán"
+
+#: metadata_labels.py
+msgid "lang_ita"
+msgstr "Italiano"
+
+#: metadata_labels.py views.py
+msgid "Metadata standard"
+msgstr "Estándar de metadatos"
+
+#: metadata_labels.py views.py
+msgid "Metadata standard version"
+msgstr "Versión del estándar de metadatos"
+
+#: metadata_labels.py views.py
+msgid "Metadata date stamp"
+msgstr "Fecha de actualización del metadato"
+
+#: metadata_labels.py views.py
+msgid "Metadata update frequency"
+msgstr "Frecuencia de actualización del metadato"
+
+#: metadata_labels.py views.py
+msgid "Update scope"
+msgstr "Ámbito de actualización"
+
+#: metadata_labels.py views.py
+msgid "Geographic bounding box"
+msgstr "Caja geográfica"
+
+#: metadata_labels.py views.py
+msgid "West"
+msgstr "Oeste"
+
+#: metadata_labels.py views.py
+msgid "East"
+msgstr "Este"
+
+#: metadata_labels.py views.py
+msgid "South"
+msgstr "Sur"
+
+#: metadata_labels.py views.py
+msgid "North"
+msgstr "Norte"
+
+#: metadata_labels.py views.py
+msgid "Responsible parties"
+msgstr "Partes responsables"
+
+#: metadata_labels.py views.py
+msgid "Distributor contacts"
+msgstr "Contactos del distribuidor"
+
+#: metadata_labels.py views.py
+msgid "Metadata constraints"
+msgstr "Restricciones del metadato"
+
+#: metadata_labels.py views.py
+msgid "Thesaurus keywords"
+msgstr "Palabras clave de tesauro"
+
+#: metadata_labels.py views.py
+msgid "Copy URL"
+msgstr "Copiar URL"
+
+#: metadata_labels.py views.py
+msgid "Show in Catalog"
+msgstr "Mostrar en Catálogo"
+
+#: metadata_labels.py
+msgid "place"
+msgstr "Lugar"
+
+#: metadata_labels.py
+msgid "theme"
+msgstr "Tema"
+
+#: metadata_labels.py
+msgid "stratum"
+msgstr "Estrato"
+
+#: metadata_labels.py
+msgid "temporal"
+msgstr "Temporal"
+
+#: metadata_labels.py
+msgid "discipline"
+msgstr "Disciplina"

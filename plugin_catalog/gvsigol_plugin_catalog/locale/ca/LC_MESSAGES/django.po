@@ -34,19 +34,19 @@ msgstr "Contacte"
 
 #: mdstandards/iso19139_2007.py:25
 msgid "resourceProvider"
-msgstr ""
+msgstr "Proveïdor del recurs"
 
 #: mdstandards/iso19139_2007.py:26
 msgid "custodian"
-msgstr ""
+msgstr "Custodi"
 
 #: mdstandards/iso19139_2007.py:27
 msgid "originator"
-msgstr ""
+msgstr "Creador"
 
 #: mdstandards/iso19139_2007.py:28
 msgid "publisher"
-msgstr ""
+msgstr "Editor"
 
 #: templates/catalog_details.html:12
 msgid "About this resource"
@@ -149,3 +149,179 @@ msgstr ""
 #| msgid "Metadata identifier"
 msgid "Metadata detail not available"
 msgstr "Identificador de metadades"
+
+#: metadata_labels.py
+msgid "pointOfContact"
+msgstr "Punt de contacte"
+
+#: metadata_labels.py
+msgid "distributor"
+msgstr "Distribuïdor"
+
+#: metadata_labels.py
+msgid "user"
+msgstr "Usuari"
+
+#: metadata_labels.py
+msgid "processor"
+msgstr "Processador"
+
+#: metadata_labels.py
+msgid "sponsor"
+msgstr "Patrocinador"
+
+#: metadata_labels.py
+msgid "collaborator"
+msgstr "Col·laborador"
+
+#: metadata_labels.py
+msgid "vector"
+msgstr "Vectorial"
+
+#: metadata_labels.py
+msgid "grid"
+msgstr "Ràster"
+
+#: metadata_labels.py
+msgid "textTable"
+msgstr "Taula de text"
+
+#: metadata_labels.py
+msgid "tin"
+msgstr "Model TIN"
+
+#: metadata_labels.py
+msgid "stereoModel"
+msgstr "Model estèreo"
+
+#: metadata_labels.py
+msgid "video"
+msgstr "Vídeo"
+
+#: metadata_labels.py
+msgid "copyright"
+msgstr "Drets d'autor"
+
+#: metadata_labels.py
+msgid "patent"
+msgstr "Patent"
+
+#: metadata_labels.py
+msgid "patentPending"
+msgstr "Patent pendent"
+
+#: metadata_labels.py
+msgid "trademark"
+msgstr "Marca registrada"
+
+#: metadata_labels.py
+msgid "license"
+msgstr "Llicència"
+
+#: metadata_labels.py
+msgid "intellectualPropertyRights"
+msgstr "Drets de propietat intel·lectual"
+
+#: metadata_labels.py
+msgid "restricted"
+msgstr "Restringit"
+
+#: metadata_labels.py
+msgid "otherRestrictions"
+msgstr "Altres restriccions"
+
+#: metadata_labels.py
+msgid "farming"
+msgstr "Agricultura"
+
+#: metadata_labels.py
+msgid "biota"
+msgstr "Biota"
+
+#: metadata_labels.py
+msgid "boundaries"
+msgstr "Límits administratius"
+
+#: metadata_labels.py
+msgid "climatologyMeteorologyAtmosphere"
+msgstr "Climatologia, meteorologia i atmosfera"
+
+#: metadata_labels.py
+msgid "climateMeteorologyAtmosphere"
+msgstr "Climatologia, meteorologia i atmosfera"
+
+#: metadata_labels.py
+msgid "economy"
+msgstr "Economia"
+
+#: metadata_labels.py
+msgid "elevation"
+msgstr "Elevació"
+
+#: metadata_labels.py
+msgid "environment"
+msgstr "Medi ambient"
+
+#: metadata_labels.py
+msgid "geoscientificInformation"
+msgstr "Informació geocientífica"
+
+#: metadata_labels.py
+msgid "health"
+msgstr "Salut"
+
+#: metadata_labels.py
+msgid "imageryBaseMapsEarthCover"
+msgstr "Imatges, mapes base i coberta terrestre"
+
+#: metadata_labels.py
+msgid "intelligenceMilitary"
+msgstr "Intel·ligència militar"
+
+#: metadata_labels.py
+msgid "inlandWaters"
+msgstr "Aigües continentals"
+
+#: metadata_labels.py
+msgid "location"
+msgstr "Localització"
+
+#: metadata_labels.py
+msgid "oceans"
+msgstr "Oceans"
+
+#: metadata_labels.py
+msgid "planningCadastre"
+msgstr "Ordenació territorial i cadastre"
+
+#: metadata_labels.py
+msgid "society"
+msgstr "Societat"
+
+#: metadata_labels.py
+msgid "structure"
+msgstr "Estructures"
+
+#: metadata_labels.py
+msgid "transportation"
+msgstr "Transport"
+
+#: metadata_labels.py
+msgid "utilitiesCommunication"
+msgstr "Serveis públics i comunicacions"
+
+#: metadata_labels.py views.py
+msgid "Use limitation"
+msgstr "Limitació d'ús"
+
+#: metadata_labels.py views.py
+msgid "Access constraint"
+msgstr "Restricció d'accés"
+
+#: metadata_labels.py views.py
+msgid "Use constraint type"
+msgstr "Tipus de restricció d'ús"
+
+#: metadata_labels.py views.py
+msgid "Constraint description"
+msgstr "Descripció de la restricció"

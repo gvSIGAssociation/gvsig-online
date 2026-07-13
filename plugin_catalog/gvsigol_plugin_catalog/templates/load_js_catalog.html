@@ -46,6 +46,11 @@ if (viewer.core.ifToolInConf('gvsigol_plugin_catalog')) {
 					{% else %}
 						metadata_viewer_button: "FULL",
 					{% endif %}
+					{% if 'CATALOG_EDITOR_PATH' in plugins_config.gvsigol_plugin_catalog %}
+						editorPath: '{{ plugins_config.gvsigol_plugin_catalog.CATALOG_EDITOR_PATH }}',
+					{% else %}
+						editorPath: '/srv/spa/catalog.search',
+					{% endif %}
 					{% if 'CATALOG_CUSTOM_FILTER_URL' in plugins_config.gvsigol_plugin_catalog %}
 						customFiltersConfig: {url: '{{ plugins_config.gvsigol_plugin_catalog.CATALOG_CUSTOM_FILTER_URL }}'},
 					{% endif %}

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 CATALOG_URL = '##CATALOG_URL##'
 CATALOG_BASE_URL = '##CATALOG_BASE_URL##'
-CATALOG_QUERY_URL = CATALOG_BASE_URL + '/srv/eng/q'
+CATALOG_QUERY_URL = '/gvsigonline/catalog/get_query/'
 CATALOG_USER = '##GEONETWORK_USER##'
 CATALOG_PASSWORD = '##GEONETWORK_PASS##'
 # valid values: 'legacy3.2', 'api0.1'

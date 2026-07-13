@@ -65,8 +65,10 @@
 			<div style="clear:both"></div>
 		{% endfor %}
 
+		{% if image_url %}
 		<h2>{% trans 'Spatial Extent' %}</h2>
-		<img class="gn-img-thumbnail img-thumbnail gn-img-extent" data-ng-src="{{ image_url }}" src="{{ image_url }}"/>
+		<img class="gn-img-thumbnail img-thumbnail gn-img-extent" src="{{ image_url }}"/>
+		{% endif %}
 		
 		<h2>{% trans 'Temporal Extent' %}</h2>
 		<span>{% trans 'Publication date' %}:</span>

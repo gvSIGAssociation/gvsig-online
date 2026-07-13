@@ -27,7 +27,9 @@ from django.core.exceptions import ImproperlyConfigured
 from gvsigol_plugin_catalog.models import LayerMetadata
 import logging
 from gvsigol_plugin_catalog.mdstandards import registry
+import json
 import requests
+from gvsigol import settings as gvsigol_settings
 from  django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger("gvsigol")
@@ -120,6 +122,63 @@ class Geonetwork():
             print(e)
         return online_resources
         
+    def _parse_extent_tuple(self, extent_str):
+        if not extent_str:
+            return ('-180', '-90', '180', '90')
+        parts = [part.strip() for part in str(extent_str).split(',')]
+        if len(parts) >= 4:
+            return (parts[0], parts[1], parts[2], parts[3])
+        return ('-180', '-90', '180', '90')
+
+    def _thumbnail_url(self, layer):
+        if not layer.thumbnail:
+            return ''
+        try:
+            url = layer.thumbnail.url
+        except Exception:
+            return ''
+        if not url:
+            return ''
+        if url.startswith('http://') or url.startswith('https://'):
+            return url
+        base = gvsigol_settings.BASE_URL.rstrip('/')
+        if url.startswith('/'):
+            return base + url
+        return base + '/' + url
+
+    def create_metadata_for_external_layer(self, layer):
+        params = {}
+        if layer.external_params:
+            try:
+                params = json.loads(layer.external_params)
+            except (TypeError, json.JSONDecodeError):
+                params = {}
+
+        layer_type = (layer.type or '').upper()
+        if layer_type == 'WMS':
+            spatial_representation_type = 'grid'
+            service_url = params.get('get_map_url') or params.get('url')
+        elif layer_type in ('WMTS', 'XYZ', 'OSM', 'BING', 'MVT'):
+            spatial_representation_type = 'grid'
+            service_url = params.get('url')
+        else:
+            spatial_representation_type = 'grid'
+            service_url = params.get('url')
+
+        mdfields = {
+            'title': layer.title,
+            'abstract': layer.abstract or layer.title,
+            'qualified_name': layer.name,
+            'extent_tuple': self._parse_extent_tuple(layer.latlong_extent),
+            'crs': layer.native_srs or 'EPSG:4326',
+            'spatial_representation_type': spatial_representation_type,
+            'thumbnail_url': self._thumbnail_url(layer),
+            'wms_endpoint': service_url,
+            'wfs_endpoint': None,
+            'wcs_endpoint': None,
+        }
+        return registry.create('dataset', mdfields)
+
     def create_metadata(self, layer, layer_info, ds_type):
         ws = layer.datastore.workspace
         if ds_type == 'imagemosaic':
@@ -161,21 +220,30 @@ class Geonetwork():
         return registry.create('dataset', mdfields)
     
     def metadata_insert(self, layer):
-        gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
-        (ds_type, layer_info) = gs.getResourceInfo(layer.datastore.workspace.name, layer.datastore, layer.name, "json")
-        md_record = self.create_metadata(layer, layer_info, ds_type)
         try:
+            if layer.external or not layer.datastore_id:
+                md_record = self.create_metadata_for_external_layer(layer)
+            else:
+                gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+                (ds_type, layer_info) = gs.getResourceInfo(
+                    layer.datastore.workspace.name,
+                    layer.datastore,
+                    layer.name,
+                    "json",
+                )
+                md_record = self.create_metadata(layer, layer_info, ds_type)
             if self.xmlapi.gn_auth(self.user, self.password):
                 uuid = self.xmlapi.gn_insert_metadata(md_record)
-                self.xmlapi.add_thumbnail(uuid[0], layer.thumbnail.url)
+                self.xmlapi.add_thumbnail(uuid[0], self._thumbnail_url(layer))
                 self.xmlapi.set_metadata_privileges(uuid[0])
                 self.xmlapi.gn_unauth()
                 return uuid
             logger.error("Error authenticating in catalog")
             return None
-        
-        except:
+
+        except Exception:
             logger.exception("Error inserting metadata")
+            return None
             
     def get_query(self, query):
         try:
@@ -224,7 +292,9 @@ class Geonetwork():
         try:
             layer = kwargs['layer']
             lm = LayerMetadata.objects.get(layer=layer)
-            
+            if layer.external or not layer.datastore_id:
+                return
+
             gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
             (ds_type, layer_info) = gs.getResourceInfo(layer.datastore.workspace.name, layer.datastore, layer.name, "json")
             if self.xmlapi.gn_auth(self.user, self.password) and lm.metadata_uuid:
@@ -257,7 +327,7 @@ def connect_signals(geonetwork_service):
 def initialize():
     try:
         version = plugin_settings.CATALOG_API_VERSION
-        service_url = plugin_settings.CATALOG_BASE_URL
+        service_url = plugin_settings.CATALOG_SERVICE_URL
         user = plugin_settings.CATALOG_USER
         password = plugin_settings.CATALOG_PASSWORD
         geonetwork_service = Geonetwork(version, service_url, user, password) 

@@ -11,12 +11,17 @@ APP_TITLE = 'Catálogo de metadatos'
 APP_DESCRIPTION = 'Catálogo de metadatos'
 BASE_URL = env('BASE_URL')
 CATALOG_BASE_URL = env('GEONETWORK_BASE_URL', default=f'{BASE_URL}/geonetwork')
+# URL used by the backend to reach GeoNetwork (Docker: internal hostname)
+CATALOG_SERVICE_URL = env('GEONETWORK_INTERNAL_URL', default=CATALOG_BASE_URL)
+# GeoNetwork 4.x SPA UI path (GN 3.x used /srv/eng/catalog.search)
+CATALOG_EDITOR_PATH = env('GEONETWORK_EDITOR_PATH', default='/srv/spa/catalog.search')
 CATALOG_URL = CATALOG_BASE_URL + '/srv/eng/'
-CATALOG_QUERY_URL = CATALOG_BASE_URL + '/srv/eng/q'
+# GeoNetwork 4.x no longer exposes /srv/eng/q; search is proxied via gvSIGOL backend.
+CATALOG_QUERY_URL = '/gvsigonline/catalog/get_query/'
 CATALOG_USER = env('GEONETWORK_USER', default='admin')
 CATALOG_PASSWORD = env('GEONETWORK_PASS', default='admin')
-# valid values: 'legacy3.2', 'api0.1'
-CATALOG_API_VERSION = 'api0.1'
+# valid values: 'legacy3.2', 'api0.1', 'gn4'
+CATALOG_API_VERSION = env('CATALOG_API_VERSION', default='gn4')
 CATALOG_FACETS_CONFIG = env('CATALOG_FACETS_CONFIG', default='{}')
 CATALOG_FACETS_ORDER = env('CATALOG_FACETS_ORDER', default='[]')
 CATALOG_DISABLED_FACETS = env('CATALOG_DISABLED_FACETS', default='[]')

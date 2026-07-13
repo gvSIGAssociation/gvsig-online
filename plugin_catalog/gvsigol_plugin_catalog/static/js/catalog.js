@@ -463,11 +463,19 @@ CatalogView.prototype.getMetadataEntry = function(metadata){
 			if(!Array.isArray(image)){
 				image = [image];
 			}
+			var baseUrl = this.getBaseUrl();
 			for(var i=0; i< image.length; i++){
 				var image_info = image[i].split("|");
-				if (image_info[1] && // we want to avoid relative URLs for images
-						(image_info[1].lastIndexOf("http://", 0) === 0 || image_info[1].lastIndexOf("https://", 0) === 0)) {
-					image_src = image_info[1];
+				if (image_info[1]) {
+					var candidate = image_info[1];
+					if (candidate.lastIndexOf("http://", 0) !== 0 && candidate.lastIndexOf("https://", 0) !== 0) {
+						if (candidate.charAt(0) === '/') {
+							candidate = baseUrl + candidate;
+						} else {
+							candidate = baseUrl + '/' + candidate;
+						}
+					}
+					image_src = candidate;
 				}
 				break;
 			}
@@ -1167,10 +1175,14 @@ CatalogView.prototype.getCatalogFilters = function(query, searchComponents, cate
 	var facetsOrder = self.config.facetsOrder;
 	var disabledFacets = self.config.disabledFacets;
 	
-	var url = self.getLocalizedEndpoint() + "/q";
-	// TODO: authentication
+	var url = self.config.queryUrl;
+	if (!url) {
+		console.error('CATALOG_QUERY_URL is not configured; catalog search is unavailable.');
+		$('#catalog-search-button-icon').removeClass('fa-spinner fa-spin').addClass('fa-search');
+		$("#catalog_content").html(self._getSearchingContent());
+		return;
+	}
 	url = url + '?_content_type=json' + filters + '&bucket=s101&facet.q=' + query + '&fast=index&resultType=details' + self.sortBy;
-	//var url = '/gvsigonline/catalog/get_query/?_content_type=json&bucket=s101&facet.q='+query+'&fast=index&from=1&resultType=details&sortBy=relevance';
 	$.ajax({
 		url: url,
 		success: function(response) {
@@ -1409,7 +1421,8 @@ CatalogView.prototype.hidePanel = function(){
 }
 
 CatalogView.prototype.getMetadataUrl = function(uuid) {
-	return this.getLocalizedEndpoint() + '/catalog.search#/metadata/' + uuid;
+	var editorPath = this.config.editorPath || '/srv/spa/catalog.search';
+	return this.getBaseUrl() + editorPath + '#/metadata/' + uuid;
 }
 
 CatalogView.prototype._replaceMetadataBtnEvents = function() {

@@ -14,8 +14,8 @@ if [ -z "$CATALOG_URL" ]; then
 fi
 
 if [ -z "$CATALOG_API_VERSION" ]; then
-        echo "WARNING: CATALOG_API_VERSION is not defined, using 'legacy3.2'."
-        CATALOG_API_VERSION="api0.1"
+        echo "WARNING: CATALOG_API_VERSION is not defined, using 'gn4'."
+        CATALOG_API_VERSION="gn4"
 fi
 
 if [ -z "$CATALOG_TIMEOUT" ]; then
