@@ -63,6 +63,104 @@ from gvsigol_services.backend_resources import resource_manager
 from gvsigol_services import utils as services_utils
 from psycopg2 import sql as sqlbuilder
 
+def _apply_cached_external_wms_legend_compat(data):
+    """
+    Compatibility layer for cached external WMS layers.
+
+    Cached external WMS layers are rendered as WMTS by the frontend, but their
+    legend still belongs to the original external WMS service. Expose the
+    default external WMS legend in the classic layer legend fields so the viewer
+    can display it even when the layer is cached.
+    """
+    def normalize_style(style):
+        if not isinstance(style, dict):
+            return None
+
+        legend_url = style.get('custom_legend_url') or style.get('legend') or ''
+        is_default = style.get('is_default', style.get('isDefault', False))
+
+        style_def = dict(style)
+        style_def['name'] = style.get('name')
+        style_def['title'] = style.get('title') or style.get('name')
+        style_def['is_default'] = is_default
+        style_def['has_custom_legend'] = bool(legend_url)
+        style_def['custom_legend_url'] = legend_url
+
+        return style_def
+
+    def apply_to_layer(layer):
+        if not isinstance(layer, dict):
+            return
+
+        if not (
+            layer.get('external') is True and
+            layer.get('cached') is True and
+            str(layer.get('type')) == 'WMS'
+        ):
+            return
+
+        external_params = layer.get('external_params') or {}
+        if isinstance(external_params, str):
+            try:
+                external_params = json.loads(external_params)
+            except Exception:
+                return
+
+        external_styles = external_params.get('styles') or []
+        if not isinstance(external_styles, list) or not external_styles:
+            return
+
+        normalized_styles = []
+        default_style = None
+
+        for style in external_styles:
+            style_def = normalize_style(style)
+            if not style_def:
+                continue
+
+            normalized_styles.append(style_def)
+
+            if style_def.get('is_default'):
+                default_style = style_def
+
+        if not normalized_styles:
+            return
+
+        if default_style is None:
+            default_style = normalized_styles[0]
+            default_style['is_default'] = True
+
+        if not layer.get('styles'):
+            layer['styles'] = normalized_styles
+
+        legend_url = default_style.get('custom_legend_url')
+        if not legend_url:
+            return
+
+        for key in (
+            'legend',
+            'legend_no_auth',
+            'legend_graphic',
+            'legend_graphic_no_auth',
+            'legend_url',
+        ):
+            if not layer.get(key):
+                layer[key] = legend_url
+
+    def walk(obj):
+        if isinstance(obj, list):
+            for item in obj:
+                walk(item)
+        elif isinstance(obj, dict):
+            apply_to_layer(obj)
+            for value in obj.values():
+                walk(value)
+
+    walk(data)
+    return data
+
+
+
 class CoordsFeatureFilter(BaseFilterBackend):
     def get_schema_fields(self, view):
         fields = [
@@ -144,8 +242,11 @@ class ProjectConfView(ListAPIView):
                 'request': request, 'user': request.user.username, 'lang': lang, 'user_profile': user_profile
             })
 
+            projects_data = serializer.data
+            _apply_cached_external_wms_legend_compat(projects_data)
+
             result = {
-                "projects" : serializer.data,
+                "projects" : projects_data,
             }
             return JsonResponse(result, safe=False)
         except HttpException as e:
@@ -201,8 +302,11 @@ class PublicProjectConfView(ListAPIView):
 
             serializer = PublicInfoSerializer(queryset, many=True, context={'lang': lang})
 
+            projects_data = serializer.data
+            _apply_cached_external_wms_legend_compat(projects_data)
+
             result = {
-                "projects" : serializer.data,
+                "projects" : projects_data,
             }
             return JsonResponse(result, safe=False)
         except HttpException as e:
