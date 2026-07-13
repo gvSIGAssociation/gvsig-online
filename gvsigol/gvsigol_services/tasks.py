@@ -13,7 +13,7 @@ from gvsigol_core.models import Project
 #from gvsigol_services.decorators import start_new_thread
 from gvsigol_services import geographic_servers
 from gvsigol_services.models import Layer, LayerGroup
-from gvsigol_services.utils import set_layer_extent, get_wmts_options_from_layer, get_wmts_options, AuthPatch
+from gvsigol_services.utils import set_layer_extent, get_wmts_options_from_layer, get_wmts_options, wmts_options_for_openlayers, AuthPatch
 import logging
 from owslib.wmts import WebMapTileService
 
@@ -309,6 +309,11 @@ def update_external_cached_wms_wmts_options(layer):
         wmts_options = get_wmts_options(wmts, wmts_id)
         if wmts_options:
             params = json.loads(layer.external_params) if layer.external_params else {}
+            wmts_options = wmts_options_for_openlayers(
+                wmts_options,
+                params.get('format'),
+                layer_styles=params.get('styles'),
+            )
             params['wmts_options'] = wmts_options
             layer.external_params = json.dumps(params)
             layer.save(update_fields=['external_params'])

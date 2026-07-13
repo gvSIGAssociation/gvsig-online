@@ -1845,16 +1845,23 @@ def wmts_options_for_openlayers(wmts_options, format=None, style=None, layer_sty
                 if not name:
                     continue
                 is_default = (name == default_name)
+                legend_url = s.get('custom_legend_url') or s.get('legend') or ''
                 if name in existing:
                     entry = copy.deepcopy(existing[name])
                     entry['isDefault'] = is_default
                 elif template:
                     entry = copy.deepcopy(template)
                     entry['isDefault'] = is_default
-                    if entry.get('legend'):
-                        entry['legend'] = _legend_url_for_style(entry['legend'], name)
                 else:
                     entry = {'isDefault': is_default, 'format': 'image/png', 'width': '20', 'height': '20', 'legend': ''}
+
+                if legend_url:
+                    entry['legend'] = _legend_url_for_style(legend_url, name)
+                elif entry.get('legend'):
+                    entry['legend'] = _legend_url_for_style(entry['legend'], name)
+                if s.get('title'):
+                    entry['title'] = s.get('title')
+
                 new_styles[name] = entry
             wmts_options['styles'] = new_styles
     else:
