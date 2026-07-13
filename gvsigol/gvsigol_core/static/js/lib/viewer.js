@@ -569,7 +569,10 @@ viewer.core = {
     	if (externalLayer['type'] == 'WMTS') {
 
 			if (externalLayer.wmts_options && externalLayer.wmts_options.tileGrid) {
-				var wmtsSource = this._createWMTSTileSourceFromOptions(externalLayer.wmts_options);
+				var wmtsSource = this._createWMTSTileSourceFromOptions(
+					externalLayer.wmts_options,
+					externalLayer.cache_url || externalLayer.url
+				);
 			}
 			else {
 				var xmlDoc = null;
@@ -769,38 +772,56 @@ viewer.core = {
 		}
 
 	},
-	_createWMTSTileSourceFromOptions: function(wmtsOptions) {
-		var origins = wmtsOptions.tileGrid.origins;
+	_browserWmtsUrlsFromCacheUrl: function(cacheUrl) {
+		if (!cacheUrl) {
+			return [];
+		}
+		var base = cacheUrl;
+		if (base.indexOf('://') === -1) {
+			base = window.location.origin + (base.charAt(0) === '/' ? base : '/' + base);
+		}
+		if (base.indexOf('?') === -1) {
+			base += (base.endsWith('/') ? '' : '/') + '?';
+		}
+		return [base];
+	},
+	_createWMTSTileSourceFromOptions: function(wmtsOptions, cacheUrl) {
+		var options = wmtsOptions;
+		if (cacheUrl) {
+			options = $.extend({}, wmtsOptions);
+			options.urls = this._browserWmtsUrlsFromCacheUrl(cacheUrl);
+		}
+		var origins = options.tileGrid.origins;
 		var tileGrid = new ol.tilegrid.WMTS({
-			extent: wmtsOptions.tileGrid.extent,
+			extent: options.tileGrid.extent,
 			origins: origins,
-			resolutions: wmtsOptions.tileGrid.resolutions,
-			matrixIds: wmtsOptions.tileGrid.matrixIds,
-			tileSizes: wmtsOptions.tileGrid.tileSizes
+			resolutions: options.tileGrid.resolutions,
+			matrixIds: options.tileGrid.matrixIds,
+			tileSizes: options.tileGrid.tileSizes
 		});
-		if (wmtsOptions.tileGrid.fullTileRanges && wmtsOptions.tileGrid.fullTileRanges_ol4) {
+		if (options.tileGrid.fullTileRanges && options.tileGrid.fullTileRanges_ol4) {
 			var fullTileRanges = [];
-			for (var i=0; i<wmtsOptions.tileGrid.fullTileRanges_ol4.length; i++) {
+			for (var i=0; i<options.tileGrid.fullTileRanges_ol4.length; i++) {
 				fullTileRanges.push(new viewer.olcustom.TileRange(
-					wmtsOptions.tileGrid.fullTileRanges_ol4[i].minX,
-					wmtsOptions.tileGrid.fullTileRanges_ol4[i].maxX,
-					wmtsOptions.tileGrid.fullTileRanges_ol4[i].minY,
-					wmtsOptions.tileGrid.fullTileRanges_ol4[i].maxY
+					options.tileGrid.fullTileRanges_ol4[i].minX,
+					options.tileGrid.fullTileRanges_ol4[i].maxX,
+					options.tileGrid.fullTileRanges_ol4[i].minY,
+					options.tileGrid.fullTileRanges_ol4[i].maxY
 				));
 			}
 			tileGrid.a = fullTileRanges; // nasty hack: minimized name for fullTileRanges
-			tileGrid.fullTileRanges = wmtsOptions.tileGrid.fullTileRanges;
+			tileGrid.fullTileRanges = options.tileGrid.fullTileRanges;
 		}
 		var source = new ol.source.WMTS({
-			urls: wmtsOptions.urls,
-			layer: wmtsOptions.layer,
-			matrixSet: wmtsOptions.matrixSet,
-			format: wmtsOptions.format,
-			projection: ol.proj.get(wmtsOptions.projection),
-			requestEncoding: wmtsOptions.requestEncoding,
+			urls: options.urls,
+			layer: options.layer,
+			matrixSet: options.matrixSet,
+			format: options.format,
+			projection: ol.proj.get(options.projection),
+			requestEncoding: options.requestEncoding,
 			tileGrid: tileGrid,
-			style: wmtsOptions.style,
-			dimensions: wmtsOptions.dimensions,
+			style: options.style,
+			dimensions: options.dimensions,
 			wrapX: true
 		});
 		source.setTileUrlFunction(function(tileCoord, pixelRatio, projection) {
@@ -968,7 +989,7 @@ viewer.core = {
 			if(url.endsWith('/gwc/service/wmts')){
 				var default_srs = 'EPSG:3857';
 				if (layerConf.wmts_options && layerConf.wmts_options.tileGrid) {
-					var wmtsSource = this._createWMTSTileSourceFromOptions(layerConf.wmts_options);
+					var wmtsSource = this._createWMTSTileSourceFromOptions(layerConf.wmts_options, url);
 				} else {
 					var projection = new ol.proj.get(default_srs);
 					var projectionExtent = projection.getExtent();
@@ -999,7 +1020,7 @@ viewer.core = {
 						wrapX: true
 					});
 				}
-				if (useAuthenticatedTileLoad) {
+				if (self.conf.user && self.conf.user.token) {
 					wmtsSource.setTileLoadFunction(customLoadFunction);
 				};
 		        var wmsLayer = new ol.layer.Tile({

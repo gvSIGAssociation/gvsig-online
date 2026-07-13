@@ -287,7 +287,7 @@
 								<div id="mdtoolseditdiv" class="row {% if layer_md_uuid %}{% else %}hidden d-none{% endif %}">
 									<div class="col-md-2 form-group">
 										<label for="edit_metadata_btn">{% trans "Metadata tools" %}</label>
-										<a id="edit_metadata_btn" href="{{plugins_config.gvsigol_plugin_catalog.CATALOG_BASE_URL}}/srv/eng/catalog.search#/metadata/{{layer_md_uuid}}" role="button" target="_blank" class="btn btn-default form-control">{% trans "Edit in catalog" %}</a>
+										<a id="edit_metadata_btn" href="{{plugins_config.gvsigol_plugin_catalog.CATALOG_BASE_URL}}{{plugins_config.gvsigol_plugin_catalog.CATALOG_EDITOR_PATH}}#/metadata/{{layer_md_uuid}}" role="button" target="_blank" class="btn btn-default form-control">{% trans "Edit in catalog" %}</a>
 									</div>
 								</div>
 								<div id="mdtoolscreatediv" class="row {% if layer_md_uuid %}hidden d-none{% else %}{% endif %}">
@@ -889,6 +889,39 @@ $(document).ready(function(){
 		$('#id_style_url').prop('disabled', false);
 		$('#id_style_url').closest('.form-group').find('label, small').css('opacity', '1');
 	});
+
+	{% if 'gvsigol_plugin_catalog' in INSTALLED_APPS %}
+	$('#create_metadata_btn').click(function() {
+		var url = '{% url 'create_metadata' external_layer.id %}';
+		$.ajax({
+			url: url,
+			type: 'post',
+			data: {},
+			headers: {'X-CSRFToken': Cookies.get('csrftoken')},
+			success: function(data) {
+				if (data.status == 'ok') {
+					$('#uuid').val(data.uuid);
+					$('#mdtoolseditdiv').removeClass('hidden d-none');
+					$('#mdtoolscreatediv').addClass('hidden d-none');
+					var new_url = '{{ plugins_config.gvsigol_plugin_catalog.CATALOG_BASE_URL }}' + '{{ plugins_config.gvsigol_plugin_catalog.CATALOG_EDITOR_PATH }}' + '#/metadata/' + data.uuid;
+					$('#edit_metadata_btn').attr('href', new_url);
+				} else if (data.error) {
+					alert(data.error);
+				}
+			},
+			error: function(jqXHR) {
+				var message = gettext('Could not create metadata in GeoNetwork.');
+				try {
+					var data = JSON.parse(jqXHR.responseText);
+					if (data.error) {
+						message = data.error;
+					}
+				} catch (e) {}
+				alert(message);
+			}
+		});
+	});
+	{% endif %}
 
 });
 </script>

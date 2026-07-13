@@ -6278,6 +6278,9 @@ def external_layer_update(request, external_layer_id):
             external_layer.detailed_info_button_title = detailed_info_button_title
             external_layer.detailed_info_html = detailed_info_html
             external_layer.timeout = request.POST.get('timeout')
+
+            layer_md_uuid = request.POST.get('uuid', '').strip()
+            core_utils.update_layer_metadata_uuid(external_layer, layer_md_uuid)
             
             srs = request.POST.get('srs')
             if srs == '__other__':
@@ -6503,7 +6506,10 @@ def external_layer_update(request, external_layer_id):
                 'project_id': project_id,
                 'layergroup_id': layergroup_id,
                 'from_redirect': from_redirect,
-                'back_url': back_url
+                'back_url': back_url,
+                'layer_md_uuid': core_utils.get_layer_metadata_uuid(external_layer),
+                'plugins_config': core_utils.get_plugins_config(),
+                'layer_id': external_layer.id,
             }
 
     else:
@@ -6536,6 +6542,9 @@ def external_layer_update(request, external_layer_id):
         style_file_error_message = None
         if request.GET.get('style_file_error') == '1':
             style_file_error_message = _("The layer was saved successfully, but there was an error uploading the style file. Please try uploading it again.")
+
+        md_uuid = core_utils.get_layer_metadata_uuid(external_layer)
+        plugins_config = core_utils.get_plugins_config()
         
         response= {
             'form': form,
@@ -6547,7 +6556,10 @@ def external_layer_update(request, external_layer_id):
             'layergroup_id': layergroup_id,
             'from_redirect': from_redirect,
             'back_url': back_url,
-            'style_file_error_message': style_file_error_message
+            'style_file_error_message': style_file_error_message,
+            'layer_md_uuid': md_uuid,
+            'plugins_config': plugins_config,
+            'layer_id': external_layer.id,
         }
 
     return render(request, 'external_layer_update.html', response)

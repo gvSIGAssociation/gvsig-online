@@ -331,7 +331,7 @@
 								<div id="mdtoolseditdiv" class="row {% if layer_md_uuid %}{% else %}hidden d-none{% endif %}">
 									<div class="col-md-2 form-group">
 										<label for="edit_metadata_btn">{% trans "Metadata tools" %}</label>
-										<a id="edit_metadata_btn" href="{{plugins_config.gvsigol_plugin_catalog.CATALOG_BASE_URL}}/srv/eng/catalog.search#/metadata/{{layer_md_uuid}}" role="button" target="_blank" class="btn btn-default form-control">{% trans "Edit in catalog" %}</a>
+										<a id="edit_metadata_btn" href="{{plugins_config.gvsigol_plugin_catalog.CATALOG_BASE_URL}}{{plugins_config.gvsigol_plugin_catalog.CATALOG_EDITOR_PATH}}#/metadata/{{layer_md_uuid}}" role="button" target="_blank" class="btn btn-default form-control">{% trans "Edit in catalog" %}</a>
 									</div>
 								</div>
 								<div id="mdtoolscreatediv" class="row {% if layer_md_uuid %}hidden d-none{% else %}{% endif %}">
@@ -909,7 +909,7 @@ $('#submenu-layers').addClass("active");
 						$('#uuid').val(data.uuid);
 						$('#mdtoolseditdiv').removeClass('hidden d-none');
 						$('#mdtoolscreatediv').addClass('hidden d-none');
-						var new_url = '{{plugins_config.gvsigol_plugin_catalog.CATALOG_BASE_URL}}' + '/srv/eng/catalog.search#/metadata/' + data.uuid;
+						var new_url = '{{plugins_config.gvsigol_plugin_catalog.CATALOG_BASE_URL}}' + '{{plugins_config.gvsigol_plugin_catalog.CATALOG_EDITOR_PATH}}' + '#/metadata/' + data.uuid;
 						$('#edit_metadata_btn').attr('href', new_url);
 					}
 				}
