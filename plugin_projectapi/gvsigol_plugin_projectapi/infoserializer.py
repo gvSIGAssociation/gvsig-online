@@ -71,6 +71,27 @@ class LayerSerializer(serializers.ModelSerializer):
     order = serializers.SerializerMethodField('get_order_')
     external_params = serializers.SerializerMethodField('get_external_params_')
     featureapi_endpoint = serializers.SerializerMethodField('get_featureapi_endpoint_')
+    metadata = serializers.SerializerMethodField('get_metadata_')
+    metadata_url = serializers.SerializerMethodField('get_metadata_url_')
+
+    def get_metadata_(self, obj):
+        from gvsigol_core import utils as core_utils
+        return core_utils.get_layer_metadata_uuid(obj) or ''
+
+    def get_metadata_url_(self, obj):
+        from gvsigol_core import utils as core_utils
+        metadata_uuid = core_utils.get_layer_metadata_uuid(obj)
+        if not metadata_uuid:
+            return ''
+        request = self.context.get('request')
+        lang = self.context.get('lang')
+        if request:
+            return core_utils.get_catalog_url_from_uuid(request, metadata_uuid, lang=lang)
+        try:
+            from gvsigol_plugin_catalog import settings as catalog_settings
+            return catalog_settings.CATALOG_BASE_URL + catalog_settings.CATALOG_EDITOR_PATH + '#/metadata/' + metadata_uuid
+        except Exception:
+            return ''
 
     def _absolute_custom_legend_url(self, url):
         if not url:
@@ -536,7 +557,7 @@ class LayerSerializer(serializers.ModelSerializer):
         
     class Meta:
         model = Layer
-        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'real_time', 'vector_tile', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'is_view', 'public', 'external', 'service_version', 'description', 'wms_url', 'wfs_url', 'cache_url', 'tms_url', 'legend_url', 'styles', 'baselayer', 'default_baselayer', 'order', 'external_params', 'featureapi_endpoint', 'time_enabled', 'allow_download', 'detailed_info_button_title' ,'detailed_info_enabled' ,'detailed_info_html']
+        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'real_time', 'vector_tile', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'is_view', 'public', 'external', 'service_version', 'description', 'wms_url', 'wfs_url', 'cache_url', 'tms_url', 'legend_url', 'styles', 'baselayer', 'default_baselayer', 'order', 'external_params', 'featureapi_endpoint', 'time_enabled', 'allow_download', 'detailed_info_button_title' ,'detailed_info_enabled' ,'detailed_info_html', 'metadata', 'metadata_url']
 
 
 def _compute_allows_getmap(layers_qs):
