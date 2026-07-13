@@ -2005,6 +2005,39 @@ def project_get_conf(request):
 
                         if datastore.type == 'e_WMS':
                             layer['legend'] = ""
+
+                            if l.cached:
+                                external_styles = params.get('styles') or []
+                                if external_styles:
+                                    normalized_styles = []
+                                    default_style = None
+
+                                    for style in external_styles:
+                                        style_def = {
+                                            'name': style.get('name'),
+                                            'title': style.get('title') or style.get('name'),
+                                            'is_default': style.get('is_default', False),
+                                            'has_custom_legend': bool(style.get('custom_legend_url') or style.get('legend')),
+                                            'custom_legend_url': style.get('custom_legend_url') or style.get('legend') or ''
+                                        }
+                                        normalized_styles.append(style_def)
+
+                                        if style_def['is_default']:
+                                            default_style = style_def
+
+                                    if default_style is None and normalized_styles:
+                                        default_style = normalized_styles[0]
+                                        default_style['is_default'] = True
+
+                                    layer['styles'] = normalized_styles
+
+                                    if default_style and default_style.get('custom_legend_url'):
+                                        legend_url = default_style['custom_legend_url']
+                                        layer['legend'] = legend_url
+                                        layer['legend_no_auth'] = legend_url
+                                        layer['legend_graphic'] = legend_url
+                                        layer['legend_graphic_no_auth'] = legend_url
+                                        layer['legend_url'] = legend_url
                         else:
                             ls = get_default_style(l)
                             if ls is None:
