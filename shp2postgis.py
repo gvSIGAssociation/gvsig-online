@@ -6,7 +6,7 @@ import gdaltools
 from dbfread import DBF
 import json, re, os
 import psycopg2.errors
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 import logging
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import ElementTree

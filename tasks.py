@@ -9,11 +9,11 @@ import shutil
 import gvsigol_services.tiling_service as tiling_service #Tiling, create_status, _zipFolder, get_extent
 from pyproj import Proj, transform
 from gvsigol_services.models import Layer
-from gvsigol_core.models import Project, ProjectBaseLayerTiling, TilingProcessStatus
+from gvsigol_core.models import Project
 #from gvsigol_services.decorators import start_new_thread
 from gvsigol_services import geographic_servers
 from gvsigol_services.models import Layer, LayerGroup
-from gvsigol_services.utils import set_layer_extent, get_wmts_options_from_layer, get_wmts_options, AuthPatch
+from gvsigol_services.utils import set_layer_extent, get_wmts_options_from_layer, get_wmts_options, wmts_options_for_openlayers, AuthPatch
 import logging
 from owslib.wmts import WebMapTileService
 
@@ -40,36 +40,6 @@ def tiling_layer(version, process_data, lyr, geojson_list, num_res_levels, tilem
         tiling_layer_celery_task.apply_async(args=[version, process_data, lyr.id, geojson_list, num_res_levels, tilematrixset, format_, matrixset_prefix, properties, download_first_levels])
     except Exception as e:
         raise RuntimeError
-
-
-def retry_tiles_from_utm(base_layer_process, 
-    tile_min_x, 
-    tile_min_y, 
-    tile_max_x, 
-    tile_max_y, 
-    num_res_levels, 
-    format_, start_level, 
-    start_x, 
-    start_y, 
-    #tiling_status,
-    #prj, 
-    folder_prj, version, 
-    #tiling
-    folder_package, mode, tilematrixset, url, prj_id, lyr_name, lyr_min_x, lyr_min_y, lyr_max_x, lyr_max_y, base_lyr_id, tiling_status_id
-    ):
-    
-    if tiling_status_id:
-        for i in list(base_layer_process)[:1]:
-            del base_layer_process[i]
-
-    #tiling = tiling_service.Tiling(folder_package, mode, tilematrixset, url, prj_id)
-    try:
-        #retry_tiles_from_utm_celery_task(base_layer_process, tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, format_, start_level, start_x, start_y, tiling_status, prj, folder_prj, version, tiling)
-        retry_tiles_from_utm_celery_task.apply_async(args=[tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, format_, start_level, start_x, start_y, folder_prj, version, folder_package, mode, tilematrixset, url, prj_id, lyr_name, lyr_min_x, lyr_min_y, lyr_max_x, lyr_max_y, base_lyr_id, tiling_status_id], kwargs = {'base_layer_process': base_layer_process})
-    except Exception as e:
-        raise RuntimeError
-        #print(str(e))
-
 
 @celery_app.task
 def tiling_layer_celery_task(version, process_data, lyr_id, geojson_list, num_res_levels, tilematrixset, format_, matrixset_prefix, properties, download_first_levels):
@@ -174,238 +144,6 @@ def tiling_layer_celery_task(version, process_data, lyr_id, geojson_list, num_re
         print(e)
         return
 
-
-
-@celery_app.task
-def retry_tiles_from_utm_celery_task(
-    tile_min_x, 
-    tile_min_y, 
-    tile_max_x, 
-    tile_max_y, 
-    num_res_levels, 
-    format_, start_level, 
-    start_x, 
-    start_y, 
-    #tiling_status,
-    #prj, 
-    folder_prj, version, #tiling, 
-    folder_package, mode, tilematrixset, url, prj_id, lyr_name, lyr_min_x, lyr_min_y, lyr_max_x, lyr_max_y, base_lyr_id, tiling_status_id,
-    **kwargs):
-
-    prj = Project.objects.get(id = prj_id)
-    
-    if tiling_status_id:
-        
-        base_layer_process = kwargs["base_layer_process"]
-
-        tiling = tiling_service.Tiling(folder_package, mode, tilematrixset, url, prj_id)
-        
-        if mode != "OSM":
-            
-            lyr = Layer.objects.get(id = base_lyr_id)
-            tiling.set_layer_name(lyr.datastore.workspace.name + ":" + lyr.name)
-            tiling.set_layer_extent(lyr_min_x, lyr_min_y, lyr_max_x, lyr_max_y)
-        
-        number_of_tiles = tiling.get_number_of_tiles(tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, base_layer_process)              
-        tiling_status = TilingProcessStatus.objects.get(id = tiling_status_id)
-    
-    else:
-        
-        base_layer_process_ = kwargs["base_layer_process"]
-
-        tiling = tiling_service.Tiling(folder_package, mode, tilematrixset, url, prj_id)
-
-
-        if mode != "OSM":
-
-            tiling.set_layer_name(lyr_name)
-
-            tiling.set_layer_extent(lyr_min_x, lyr_min_y, lyr_max_x, lyr_max_y)
-
-
-        number_of_tiles = tiling.get_number_of_tiles(tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, base_layer_process_) 
-        base_layer_process = tiling_service.load_number_of_tiles(base_layer_process_, prj_id, number_of_tiles)   
-        tiling_status = tiling_service.create_status(base_layer_process[str(prj_id)], base_lyr_id)   
-
-     
-    status = tiling.retry_tiles_from_utm(base_layer_process, tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, format_, start_level, start_x, start_y, tiling_status)
-    
-    tiling_service._close_download(base_layer_process, prj, folder_prj, version, status)
-
-
-
-
-
-def retry_base_layer_tiling(base_layer_process, tiling_data, tiling_status):
-    prj = tiling_data.project
-    prj_id = prj.id
-
-    if base_layer_process is not None:
-        lyr = Layer.objects.get(id=tiling_data.layer)
-        if lyr.datastore is not None:
-            url = lyr.datastore.workspace.wmts_endpoint
-            if(tiling_data.tilematrixset == 'EPSG:900913'):
-                dir = 'EPSG3857'
-            else:
-                dir = tiling_data.tilematrixset.replace(":", "")
-            folder_package = os.path.join(tiling_data.folder_prj, dir)
-            start_level, start_x, start_y, processed_tiles = tiling_service._get_retry_titing_params(folder_package)
-
-            base_layer_process[str(prj.id)] = {
-                'active' : 'true',
-                'total_tiles' : 0,
-                'processed_tiles' : processed_tiles,
-                'version' : tiling_data.version,
-                'time' : '-',
-                'stop' : 'false',
-                'format_processed' : tiling_data.format,
-                'extent_processed' : tiling_data.extentid,
-                'zoom_levels_processed' : tiling_data.levels
-            }
-
-            ##-##tiling = tiling_service.Tiling(folder_package, lyr.type, tiling_data.tilematrixset, url, tiling_data.project.id)
-
-            if lyr.type != 'OSM':
-                ##-##tiling.set_layer_name(lyr.datastore.workspace.name + ":" + lyr.name)
-                extent = lyr.latlong_extent
-                extent = extent.split(',')
-                lyr_min_x = float(extent[0])
-                lyr_min_y = float(extent[1])
-                lyr_max_x = float(extent[2])
-                lyr_max_y = float(extent[3])
-                ##-##tiling.set_layer_extent(lyr_min_x, lyr_min_y, lyr_max_x, lyr_max_y)
-
-            if(tiling_data.extentid == 'project'):
-                if prj.extent is not None:
-                    bbox = prj.extent.split(',')
-                    min_x = float(bbox[0])
-                    min_y = float(bbox[1])
-                    max_x = float(bbox[2])
-                    max_y = float(bbox[3])
-                    min_x, min_y, max_x, max_y = tiling_service._adjustExtent(min_x, min_y, max_x, max_y)
-                    
-                    ##-##number_of_tiles = tiling.get_number_of_tiles(min_x, min_y, max_x, max_y, tiling_data.levels, base_layer_process)    
-                    #Genera el tileado a partir de coords en 3857 q es en las que está el extent del proyecto
-                    status = retry_tiles_from_utm(base_layer_process, min_x, min_y, max_x, max_y, tiling_data.levels, tiling_data.format, 
-                        start_level, start_x, start_y, tiling_data.folder_prj, tiling_data.version, ##--##tiling) tiling_status, prj antes de folder_prj
-                        folder_package, lyr.type, tiling_data.tilematrixset, url, prj_id, tiling_data.layer, lyr_min_x, lyr_min_y, lyr_max_x, lyr_max_y, lyr.id, tiling_status.id)
-            else:
-                #Si hay que usar el extent de la capa hay que transformar las coordenadas geográficas a 3857
-                inProj = Proj(init='epsg:4326')
-                outProj = Proj(init='epsg:3857')
-                tile_min_x, tile_min_y = transform(inProj, outProj, lyr_min_x, lyr_min_y)
-                tile_max_x, tile_max_y = transform(inProj, outProj, lyr_max_x, lyr_max_y)
-                ##-##number_of_tiles = tiling.get_number_of_tiles(tile_min_x, tile_min_y, tile_max_x, tile_max_y, tiling_data.levels, base_layer_process) 
-                status = retry_tiles_from_utm(base_layer_process, tile_min_x, tile_min_y, tile_max_x, tile_max_y, tiling_data.levels, tiling_data.format, 
-                    start_level, start_x, start_y, tiling_data.folder_prj, tiling_data.version, ##--##tiling) tiling_status, prj antes de folder_prj
-                        folder_package, lyr.type, tiling_data.tilematrixset, url, prj_id, tiling_data.layer, lyr_min_x, lyr_min_y, lyr_max_x, lyr_max_y, lyr.id, tiling_status.id)
-
-            #tiling_service._close_download(base_layer_process, prj, tiling_data.folder_prj, number_of_tiles, tiling_data.version, status)
-
-
-def tiling_base_layer(base_layer_process, version, base_lyr, prj_id, num_res_levels, tilematrixset, format_='image/png', extentid='project'):
-    prj = Project.objects.get(id = prj_id)
-    if(tilematrixset == 'EPSG:900913'):
-        dir = 'EPSG3857'
-    else:
-        dir = tilematrixset.replace(":", "")
-
-    url = None
-    if base_lyr.datastore is not None:
-        url = base_lyr.datastore.workspace.wmts_endpoint
-    
-    layers_dir = os.path.join(settings.MEDIA_ROOT, settings.LAYERS_ROOT)
-    #_delete_pending_downloads(layers_dir, prj.name + "_prj_")
-    folder_prj =  os.path.join(layers_dir, prj.name) + "_prj_" + str(version)
-    folder_package = os.path.join(folder_prj, dir)
-    if not os.path.exists(layers_dir):
-        os.mkdir(layers_dir)
-    
-    try:
-        store = ProjectBaseLayerTiling()
-        store.id = prj_id
-        store.project = prj
-        store.format = format_
-        store.extentid = extentid
-        store.tilematrixset = tilematrixset
-        store.levels = num_res_levels
-        store.version = version
-        store.running = True
-        store.layer = base_lyr.id 
-        store.folder_prj = folder_prj
-        store.save()
-
-        mode = base_lyr.type
-        
-        ##--##tiling = tiling_service.Tiling(folder_package, mode, tilematrixset, url, prj_id)
-        #num_res_levels = tiling.get_zoom_level(floor(max_x - min_x)/1000, tiles_side) 
-        
-        if mode == 'OSM':
-            base_zip = os.getcwd() + "/gvsigol_services/static/data/osm_tiles_levels_0-6.zip"
-            with zipfile.ZipFile(base_zip, 'r') as zipObj:
-                zipObj.extractall(path=layers_dir)
-                shutil.move(layers_dir + '/tiles_download', folder_package)
-        else:
-            lyr_name = base_lyr.datastore.workspace.name + ":" + base_lyr.name
-            ##--##tiling.set_layer_name(lyr_name)
-            
-            extent = base_lyr.latlong_extent
-            extent = extent.split(',')
-            lyr_min_x = float(extent[0])
-            lyr_min_y = float(extent[1])
-            lyr_max_x = float(extent[2])
-            lyr_max_y = float(extent[3])
-            ##--##tiling.set_layer_extent(lyr_min_x, lyr_min_y, lyr_max_x, lyr_max_y)
-            
-        
-        base_layer_process[str(prj_id)] = {
-            'active' : 'true',
-            'total_tiles' : 0,
-            'processed_tiles' : 0,
-            'version' : version,
-            'time' : '-',
-            'stop' : 'false',
-            'format_processed' : format_,
-            'extent_processed' : extentid,
-            'zoom_levels_processed' : num_res_levels
-        }
-
-        if(extentid == 'project'):
-            if prj.extent is not None:
-                bbox = prj.extent.split(',')
-                min_x = float(bbox[0])
-                min_y = float(bbox[1])
-                max_x = float(bbox[2])
-                max_y = float(bbox[3])
-                min_x, min_y, max_x, max_y = tiling_service._adjustExtent(min_x, min_y, max_x, max_y)
-                ##--##number_of_tiles = tiling.get_number_of_tiles(min_x, min_y, max_x, max_y, num_res_levels, base_layer_process) 
-                ##--##base_layer_process = tiling_service.load_number_of_tiles(base_layer_process, prj_id, number_of_tiles)   
-                ##--##tiling_status = tiling_service.create_status(base_layer_process[str(prj_id)], base_lyr.id)
-                
-                
-                #Genera el tileado a partir de coords en 3857 q es en las que está el extent del proyecto
-                status = retry_tiles_from_utm(base_layer_process, min_x, min_y, max_x, max_y, num_res_levels, format_, 
-                        None, None, None, folder_prj, version, ##--##tiling) tiling_status, prj antes de folder_prj
-                        folder_package, mode, tilematrixset, url, prj_id, lyr_name, lyr_min_x, lyr_min_y, lyr_max_x, lyr_max_y, base_lyr.id, None)
-        else:
-            #Si hay que usar el extent de la capa hay que transformar las coordenadas geográficas a 3857
-            inProj = Proj(init='epsg:4326')
-            outProj = Proj(init='epsg:3857')
-            tile_min_x, tile_min_y = transform(inProj, outProj, lyr_min_x, lyr_min_y)
-            tile_max_x, tile_max_y = transform(inProj, outProj, lyr_max_x, lyr_max_y)
-            ##--##number_of_tiles = tiling.get_number_of_tiles(tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, base_layer_process) 
-            ##--##base_layer_process = tiling_service.load_number_of_tiles(base_layer_process, prj_id, number_of_tiles)  
-            ##--##tiling_status = tiling_service.create_status(base_layer_process[str(prj_id)], base_lyr.id) 
-            
-            
-            status = retry_tiles_from_utm(base_layer_process, tile_min_x, tile_min_y, tile_max_x, tile_max_y, num_res_levels, format_, 
-                    None, None, None, folder_prj, version, ##--##tiling) tiling_status, prj antes de folder_prj
-                    folder_package, mode, tilematrixset, url, prj_id, lyr_name, lyr_min_x, lyr_min_y, lyr_max_x, lyr_max_y, base_lyr.id, None)
-
-       
-    except Exception as e:
-        return
-
 @celery_app.task
 def check_gdal_env():
     try:
@@ -448,12 +186,6 @@ def do_refresh_layer_extent(layer, server):
     except Exception as e:
         logger.exception('error refreshing layer info - {0}'.format(str(layer)))
 
-def do_layer_cache_clear(layer, server):
-    server.clearCache(layer.datastore.workspace.name, layer)
-    layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
-    server.createOrUpdateGeoserverLayerGroup(layer_group)
-    server.clearLayerGroupCache(layer_group.name)
-
 def do_update_thumbnail(layer, server):
     server.updateThumbnail(layer, 'update')
 
@@ -463,18 +195,22 @@ def refresh_layer_info(self, layer_id):
         layer = Layer.objects.select_related("datastore__workspace").get(id=layer_id)
         server = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
         do_refresh_layer_extent(layer, server)
+        update_internal_wmts_layer_options(layer)
         do_layer_cache_clear(layer, server)
         do_update_thumbnail(layer, server)
         server.reload_nodes()
     except Exception as e:
-            logger.exception('error refreshing layer info - {0}'.format(str(layer)))
+        logger.exception('error refreshing layer info - layer_id=%s', layer_id)
 
 @celery_app.task(bind=True)
 def update_layer_info(self):
     servers = []
-    for layer in Layer.objects.all().select_related("datastore__workspace"):
+    for layer in Layer.objects.all().select_related("datastore__workspace", "layer_group"):
         if layer.external:
-            update_external_wmts_layer_options(layer)
+            if layer.type == 'WMTS':
+                update_external_wmts_layer_options(layer)
+            elif layer.type == 'WMS' and layer.cached:
+                update_external_cached_wms_wmts_options(layer)
         else:
             try:
                 server = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
@@ -518,10 +254,114 @@ def update_external_wmts_layer_options(layer):
     except Exception as e:
         logger.exception(f"Error getting wmts options for layer {layer.id} - {layer.name}")
 
+
+def update_external_cached_wms_wmts_options(layer):
+    """
+    Persist wmts_options for external WMS layers cached in GeoWebCache (GWC layer name = layer.name, e.g. externallayer_<id>).
+    Uses this deployment's GeoServer WMTS endpoint (not the remote WMS URL). External layers have no datastore;
+    server comes from layer.layer_group.
+    """
+    try:
+        if not (layer.external and layer.type == 'WMS' and layer.cached):
+            return False
+        if not layer.name or not layer.layer_group_id:
+            return False
+        layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
+        # get_server_by_id returns backend Geoserver(), not Django Server; WMTS URL lives on the model.
+        server_model = geographic_servers.get_instance().get_server_model(layer_group.server_id)
+        url = server_model.getWmtsEndpoint()
+        params = json.loads(layer.external_params) if layer.external_params else {}
+
+        auth = AuthPatch(username=server_model.user, password=server_model.password, verify=False)
+        last_error = None
+        wmts = None
+        for attempt in range(3):
+            try:
+                wmts = WebMapTileService(url, version=settings.WMTS_MAX_VERSION, auth=auth)
+                break
+            except Exception as e:
+                last_error = e
+                logger.warning(
+                    "Error reading GWC WMTS capabilities for external cached WMS layer %s - %s (attempt %s/3)",
+                    layer.id,
+                    layer.name,
+                    attempt + 1,
+                    exc_info=True,
+                )
+                if attempt < 2:
+                    time.sleep(3)
+        if wmts is None:
+            raise last_error
+
+        wmts_id = layer.name
+        if wmts_id not in wmts.contents:
+            for k in wmts.contents.keys():
+                if k == wmts_id or k.endswith(':' + wmts_id):
+                    wmts_id = k
+                    break
+        if wmts_id not in wmts.contents:
+            logger.warning(
+                "WMTS capabilities: layer %r not found (have %d layers). Skipping wmts_options.",
+                layer.name,
+                len(wmts.contents),
+            )
+            return False
+        wmts_options = get_wmts_options(wmts, wmts_id)
+        if wmts_options:
+            params = json.loads(layer.external_params) if layer.external_params else {}
+            wmts_options = wmts_options_for_openlayers(
+                wmts_options,
+                params.get('format'),
+                layer_styles=params.get('styles'),
+            )
+            params['wmts_options'] = wmts_options
+            layer.external_params = json.dumps(params)
+            layer.save(update_fields=['external_params'])
+            return True
+        logger.warning(
+            "WMTS capabilities: empty wmts_options for external cached WMS layer %s - %s",
+            layer.id,
+            layer.name,
+        )
+        return False
+    except Exception as e:
+        logger.exception(
+            "Error getting GWC wmts_options for external cached WMS layer %s - %s",
+            layer.id,
+            layer.name,
+        )
+        return False
+
+
 @celery_app.task(bind=True)
 def update_wmts_layer_info(self, layer_id):
-    layer = Layer.objects.get(id=layer_id)
+    layer = Layer.objects.select_related('layer_group').get(id=layer_id)
     if layer.external:
-        pass
+        if layer.type == 'WMTS':
+            update_external_wmts_layer_options(layer)
+        elif layer.type == 'WMS' and layer.cached:
+            update_external_cached_wms_wmts_options(layer)
     else:
         update_internal_wmts_layer_options(layer)
+
+
+@celery_app.task(bind=True)
+def regenerate_cache_for_extent_async(self, layer_id, minx, miny, maxx, maxy, source_epsg=4326):
+    """
+    Regenerate GeoWebCache for the given extent on a cached layer and/or its layer group (async).
+    Called after feature create/update/delete. Truncates:
+    - The layer cache if layer.cached is True
+    - The layer group cache if layer_group.cached is True
+    """
+    from gvsigol_services.cache_utils import regenerate_cache_for_extent, regenerate_cache_for_extent_group
+    from gvsigol_services.models import Layer
+
+    try:
+        layer = Layer.objects.select_related('layer_group').get(id=int(layer_id))
+    except Layer.DoesNotExist:
+        return
+
+    if layer.cached and not layer.external:
+        regenerate_cache_for_extent(layer_id, minx, miny, maxx, maxy, source_epsg)
+    if layer.layer_group and layer.layer_group.cached:
+        regenerate_cache_for_extent_group(layer.layer_group_id, minx, miny, maxx, maxy, source_epsg)

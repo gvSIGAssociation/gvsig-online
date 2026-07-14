@@ -375,5 +375,68 @@ msgstr ""
 msgid "Field format was saved successfully"
 msgstr ""
 
+msgid "Attention"
+msgstr ""
+
+msgid "This field has associated triggers that will also be deleted"
+msgstr ""
+
+msgid "Calculated field"
+msgstr ""
+
+msgid "Remove trigger"
+msgstr ""
+
+msgid "Are you sure you want to remove the trigger"
+msgstr ""
+
+msgid "from this layer?"
+msgstr ""
+
+msgid "The trigger will be uninstalled from the database."
+msgstr ""
+
+msgid "Remove"
+msgstr ""
+
+msgid "Please select a trigger"
+msgstr ""
+
+msgid "Please select a target field for the calculated field trigger"
+msgstr ""
+
+msgid "Error assigning trigger"
+msgstr ""
+
+msgid "SQL syntax error in trigger. Please check the trigger code and fix it before assigning."
+msgstr ""
+
+msgid "Error creating field with trigger"
+msgstr ""
+
+msgid "Field created and trigger assigned successfully"
+msgstr ""
+
+msgid "Field and associated triggers were deleted"
+msgstr ""
+
+msgid "Error removing trigger"
+msgstr ""
+
+msgid "Error toggling trigger"
+msgstr ""
+
+msgid "Trigger enabled successfully"
+msgstr ""
+
+msgid "Trigger disabled successfully"
+msgstr ""
+
+msgid "Select a calculation..."
+msgstr ""
+
+msgid "Please select a calculation for the calculated field"
+msgstr ""
+
 #~ msgid "too_many_files"
 #~ msgstr "Too many files to download. Reduce the number of zoom levels or make the project size smaller"

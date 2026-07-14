@@ -400,6 +400,121 @@ msgstr ""
 "Você não pode atualizar um tipo de armazenamento de dados GeoTIFF. Exclua-o "
 "e crie-o novamente"
 
+msgid "Manage format"
+msgstr "Gerenciar formato"
+
+msgid "Delete format"
+msgstr "Excluir formato"
+
+msgid ""
+"Configure the display format for numeric fields will affect how values are "
+"shown in forms and reports."
+msgstr ""
+"Configurar o formato de exibição para campos numéricos afetará como os "
+"valores são mostrados em formulários e relatórios."
+
+msgid "Symbol"
+msgstr "Símbolo"
+
+msgid "e.g., €, $, m, kg, °"
+msgstr "ex., €, $, m, kg, °"
+
+msgid "Symbol position"
+msgstr "Posição do símbolo"
+
+msgid "After number"
+msgstr "Após o número"
+
+msgid "Before number"
+msgstr "Antes do número"
+
+msgid "Decimal places"
+msgstr "Casas decimais"
+
+msgid "Decimal separator"
+msgstr "Separador decimal"
+
+msgid "Comma (,)"
+msgstr "Vírgula (,)"
+
+msgid "Point (.)"
+msgstr "Ponto (.)"
+
+msgid "Thousands separator"
+msgstr "Separador de milhar"
+
+msgid "No separator"
+msgstr "Sem separador"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Field format was saved successfully"
+msgstr "O formato do campo foi guardado com sucesso"
+
+msgid "Attention"
+msgstr "Atenção"
+
+msgid "This field has associated triggers that will also be deleted"
+msgstr "Este campo tem gatilhos associados que também serão excluídos"
+
+msgid "Calculated field"
+msgstr "Campo calculado"
+
+msgid "Remove trigger"
+msgstr "Remover gatilho"
+
+msgid "Are you sure you want to remove the trigger"
+msgstr "Tem certeza de que deseja remover o gatilho"
+
+msgid "from this layer?"
+msgstr "desta camada?"
+
+msgid "The trigger will be uninstalled from the database."
+msgstr "O gatilho será desinstalado do banco de dados."
+
+msgid "Remove"
+msgstr "Remover"
+
+msgid "Please select a trigger"
+msgstr "Por favor, selecione um gatilho"
+
+msgid "Please select a target field for the calculated field trigger"
+msgstr "Por favor, selecione um campo de destino para o gatilho de campo calculado"
+
+msgid "Error assigning trigger"
+msgstr "Erro ao atribuir o gatilho"
+
+msgid "SQL syntax error in trigger. Please check the trigger code and fix it before assigning."
+msgstr "Erro de sintaxe SQL no gatilho. Por favor, verifique o código do gatilho e corrija o erro antes de atribuí-lo."
+
+msgid "Error creating field with trigger"
+msgstr "Erro ao criar o campo com o gatilho"
+
+msgid "Field created and trigger assigned successfully"
+msgstr "Campo criado e gatilho atribuído com sucesso"
+
+msgid "Field and associated triggers were deleted"
+msgstr "O campo e os gatilhos associados foram eliminados"
+
+msgid "Error removing trigger"
+msgstr "Erro ao remover o gatilho"
+
+msgid "Error toggling trigger"
+msgstr "Erro ao ativar/desativar o gatilho"
+
+msgid "Trigger enabled successfully"
+msgstr "Gatilho habilitado com sucesso"
+
+msgid "Trigger disabled successfully"
+msgstr "Gatilho desabilitado com sucesso"
+
+msgid "Select a calculation..."
+msgstr "Selecione um cálculo..."
+
+msgid "Please select a calculation for the calculated field"
+msgstr "Por favor, selecione um cálculo para o campo calculado"
+
 #~ msgid "true"
 #~ msgstr "Verdadeiro"
 

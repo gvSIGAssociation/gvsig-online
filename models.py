@@ -25,15 +25,19 @@
 from gvsigol.basetypes import CloneConf
 import logging
 from django.contrib.auth.models import Group
-from django.contrib.postgres.fields import JSONField
+try:
+    from django.db.models import JSONField
+except ImportError:
+    from django_jsonfield_backport.models import JSONField
 from .backend_postgis import Introspect
 import os
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _, ugettext
+from django.utils.translation import gettext_lazy as _, gettext
 from gvsigol_services.triggers import CUSTOM_PROCEDURES
 from django.utils.crypto import get_random_string
 from gvsigol import settings
 from django.db import models
+from django.db.models import Q
 from gvsigol_auth.models import UserGroup
 import ast
 import json
@@ -152,39 +156,799 @@ class Workspace(models.Model):
         return self.name
 
 
+class Connection(models.Model):
+    """
+    Modelo centralizado para gestionar conexiones a bases de datos y servicios externos.
+    Los almacenes de datos (Datastore) referenciarán conexiones en lugar de almacenar
+    credenciales directamente. También usado por el plugin ETL.
+    """
+    # Categorías de tipos de conexión
+    TYPE_CATEGORY_DATABASE = 'database'
+    TYPE_CATEGORY_API = 'api'
+    
+    # Opciones del primer desplegable (categoría)
+    CATEGORY_CHOICES = (
+        ('database', 'Base de datos'),
+        ('api', 'API externa'),
+    )
+    
+    # Tipos de bases de datos disponibles
+    DATABASE_TYPE_CHOICES = (
+        ('PostGIS', 'PostgreSQL/PostGIS'),
+        ('Oracle', 'Oracle'),
+        ('SQLServer', 'SQL Server'),
+    )
+    
+    # Tipos de APIs externas disponibles
+    API_TYPE_CHOICES = (
+        ('indenova', 'InDenova'),
+        ('segex', 'SEGEX'),
+        ('sharepoint', 'SharePoint'),
+        ('padron-atm', 'Padrón ATM'),
+        ('sgarexws', 'SgaRexWS'),
+    )
+    
+    # Todos los tipos combinados para el campo del modelo
+    TYPE_CHOICES = DATABASE_TYPE_CHOICES + API_TYPE_CHOICES
+    
+    # Listas para validación rápida
+    DATABASE_TYPES = ('PostGIS', 'Oracle', 'SQLServer')
+    API_TYPES = ('indenova', 'segex', 'sharepoint', 'padron-atm', 'sgarexws')
+    
+    name = models.CharField(max_length=250, unique=True)
+    description = models.TextField(null=True, blank=True)
+    type = models.CharField(max_length=50, choices=TYPE_CHOICES, default='PostGIS')
+    connection_params = models.TextField(help_text=_('JSON with connection parameters'))
+    # Parámetros adicionales opcionales en formato JSON (ej: {"dbtype": "postgis", "jndiReferenceName": ""})
+    extra_params = models.TextField(
+        null=True, 
+        blank=True,
+        help_text=_('Optional additional parameters in JSON format')
+    )
+    
+    # Permisos globales - determinan si TODOS los usuarios pueden usar esta conexión
+    allow_all_datastore = models.BooleanField(
+        default=False,
+        help_text=_('Allow all users to create datastores with this connection')
+    )
+    allow_all_etl = models.BooleanField(
+        default=False,
+        help_text=_('Allow all users to use this connection in ETL')
+    )
+    allow_all_manage = models.BooleanField(
+        default=False,
+        help_text=_('Allow all users to manage this connection (edit, delete)')
+    )
+    
+    created_by = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = _('Connection')
+        verbose_name_plural = _('Connections')
+
+    def __str__(self):
+        return self.name
+
+    def is_database_type(self):
+        """Retorna True si la conexión es de tipo base de datos."""
+        return self.type in self.DATABASE_TYPES
+    
+    def is_api_type(self):
+        """Retorna True si la conexión es de tipo API externa."""
+        return self.type in self.API_TYPES
+    
+    def can_be_used_for_datastore(self):
+        """Retorna True si la conexión puede usarse para crear Datastores."""
+        # Solo conexiones PostGIS pueden usarse para Datastores de GeoServer
+        return self.type in ('PostGIS', 'PostgreSQL')
+    
+    def get_type_category(self):
+        """Retorna la categoría del tipo: 'database' o 'api'."""
+        if self.is_database_type():
+            return self.TYPE_CATEGORY_DATABASE
+        return self.TYPE_CATEGORY_API
+    
+    def get_etl_type(self):
+        """
+        Retorna el tipo de conexión compatible con el ETL.
+        PostGIS -> PostgreSQL para compatibilidad con ETL.
+        """
+        if self.type == 'PostGIS':
+            return 'PostgreSQL'
+        return self.type
+
+    @staticmethod
+    def get_default_db_params():
+        """
+        Obtiene los parámetros por defecto de la base de datos de la aplicación.
+        Útil para pre-rellenar formularios.
+        """
+        from django.conf import settings as django_settings
+        db_config = django_settings.DATABASES.get('default', {})
+        return {
+            'host': db_config.get('HOST', 'localhost'),
+            'port': str(db_config.get('PORT', '5432')),
+            'database': db_config.get('NAME', ''),
+            'user': db_config.get('USER', ''),
+            # No incluimos password por seguridad
+        }
+
+    def get_connection_params(self):
+        """Devuelve los parámetros de conexión como diccionario."""
+        try:
+            return json.loads(self.connection_params)
+        except:
+            return {}
+
+    def get_extra_params(self):
+        """Devuelve los parámetros adicionales como diccionario."""
+        try:
+            return json.loads(self.extra_params) if self.extra_params else {}
+        except:
+            return {}
+
+    def get_all_params(self):
+        """
+        Devuelve todos los parámetros combinados (conexión + extras).
+        Los extras sobrescriben los de conexión si hay conflicto.
+        """
+        params = self.get_connection_params()
+        params.update(self.get_extra_params())
+        return params
+
+    def get_masked_params(self):
+        """Devuelve los parámetros con contraseñas enmascaradas para visualización."""
+        params = self.get_connection_params()
+        if 'passwd' in params:
+            params['passwd'] = '****'
+        if 'password' in params:
+            params['password'] = '****'
+        return params
+
+    def get_db_connection(self):
+        """Obtiene una conexión de introspección a la base de datos."""
+        params = self.get_connection_params()
+        if self.type in ('PostGIS', 'PostgreSQL'):
+            host = params.get('host', 'localhost')
+            port = params.get('port', '5432')
+            dbname = params.get('database', '')
+            user = params.get('user', '')
+            passwd = params.get('passwd', params.get('password', ''))
+            i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+            return i, params
+        return None, params
+
+    def test_connection(self):
+        """Prueba la conexión y devuelve True si es exitosa, False en caso contrario."""
+        try:
+            if self.type in ('PostGIS', 'PostgreSQL'):
+                i, _ = self.get_db_connection()
+                if i:
+                    i.close()
+                    return True
+            # Para otros tipos de bases de datos, retornar False por ahora
+            # (se puede extender para Oracle, SQLServer, etc.)
+            return False
+        except Exception as e:
+            logging.getLogger(LOG_NAME).error(f"Connection test failed for {self.name}: {e}")
+            return False
+
+    def get_schemas(self):
+        """Obtiene la lista de esquemas disponibles en la conexión."""
+        try:
+            if self.type in ('PostGIS', 'PostgreSQL'):
+                i, _ = self.get_db_connection()
+                if i:
+                    schemas = i.get_schemas()
+                    i.close()
+                    return schemas
+            return []
+        except Exception as e:
+            logging.getLogger(LOG_NAME).error(f"Error getting schemas for {self.name}: {e}")
+            return []
+
+    def create_schema_if_not_exists(self, schema_name):
+        """
+        Crea un esquema en la base de datos si no existe.
+        Retorna True si se creó, False si ya existía.
+        Lanza excepción si hay error.
+        """
+        try:
+            if self.type in ('PostGIS', 'PostgreSQL'):
+                i, _ = self.get_db_connection()
+                if i:
+                    created = i.create_schema(schema_name)
+                    i.close()
+                    if created:
+                        logging.getLogger(LOG_NAME).info(f"Schema '{schema_name}' created in connection '{self.name}'")
+                    return created
+            return False
+        except Exception as e:
+            logging.getLogger(LOG_NAME).error(f"Error creating schema '{schema_name}' in {self.name}: {e}")
+            raise
+
+
+class ConnectionRole(models.Model):
+    """
+    Permisos de acceso a conexiones por rol.
+    Permite compartir conexiones con roles específicos.
+    Cada rol puede tener permisos separados para:
+    - Usar la conexión en datastores
+    - Usar la conexión en ETL  
+    - Gestionar la conexión (editar, eliminar)
+    """
+    connection = models.ForeignKey(Connection, on_delete=models.CASCADE, related_name='roles')
+    role = models.TextField()
+    # Permisos separados para mayor flexibilidad
+    can_use_datastore = models.BooleanField(
+        default=False,
+        help_text=_('This role can create datastores with this connection')
+    )
+    can_use_etl = models.BooleanField(
+        default=False,
+        help_text=_('This role can use this connection in ETL')
+    )
+    can_manage = models.BooleanField(
+        default=False,
+        help_text=_('This role can manage this connection (edit, delete)')
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['connection', 'role']),
+        ]
+        constraints = [
+            models.UniqueConstraint(fields=['connection', 'role'], name='unique_role_per_connection')
+        ]
+        verbose_name = _('Connection Role')
+        verbose_name_plural = _('Connection Roles')
+
+    def __str__(self):
+        perms = []
+        if self.can_use_datastore:
+            perms.append('datastore')
+        if self.can_use_etl:
+            perms.append('etl')
+        if self.can_manage:
+            perms.append('manage')
+        return f"{self.connection.name} - {self.role} ({', '.join(perms) if perms else 'no perms'})"
+
+
+class ConnectionTrigger(models.Model):
+    """
+    Trigger SQL asociado a una conexión PostGIS.
+    Los triggers se pueden asignar a capas para ejecutar código SQL
+    en operaciones INSERT, UPDATE o DELETE.
+    """
+    # Tipos de eventos que pueden activar el trigger
+    EVENT_INSERT = 'INSERT'
+    EVENT_UPDATE = 'UPDATE'
+    EVENT_DELETE = 'DELETE'
+    EVENT_CHOICES = [
+        (EVENT_INSERT, _('Insert')),
+        (EVENT_UPDATE, _('Update')),
+        (EVENT_DELETE, _('Delete')),
+    ]
+    
+    # Momento de ejecución del trigger
+    TIMING_BEFORE = 'BEFORE'
+    TIMING_AFTER = 'AFTER'
+    TIMING_CHOICES = [
+        (TIMING_BEFORE, _('Before')),
+        (TIMING_AFTER, _('After')),
+    ]
+    
+    # Ámbito del trigger
+    SCOPE_GLOBAL = 'global'
+    SCOPE_SCHEMAS = 'schemas'
+    SCOPE_CHOICES = [
+        (SCOPE_GLOBAL, _('Global (all schemas)')),
+        (SCOPE_SCHEMAS, _('Specific schemas')),
+    ]
+    
+    # Lenguaje del trigger
+    LANGUAGE_PLPGSQL = 'plpgsql'
+    LANGUAGE_PYTHON = 'python'
+    LANGUAGE_CHOICES = [
+        (LANGUAGE_PLPGSQL, _('PL/pgSQL (database trigger)')),
+        (LANGUAGE_PYTHON, _('Python (application-level)')),
+    ]
+    
+    connection = models.ForeignKey(
+        Connection, 
+        on_delete=models.CASCADE, 
+        related_name='connection_triggers',
+        limit_choices_to={'type': 'PostGIS'},
+        help_text=_('Connection where this trigger will be executed')
+    )
+    name = models.CharField(
+        max_length=150,
+        help_text=_('Unique name for this trigger')
+    )
+    description = models.TextField(
+        blank=True, 
+        null=True,
+        help_text=_('Description of what this trigger does')
+    )
+    # Almacena eventos como string separado por comas: "INSERT,UPDATE" o "INSERT,UPDATE,DELETE"
+    event = models.CharField(
+        max_length=30,
+        help_text=_('Events that activate this trigger (comma-separated: INSERT,UPDATE,DELETE)')
+    )
+    timing = models.CharField(
+        max_length=10,
+        choices=TIMING_CHOICES,
+        default=TIMING_AFTER,
+        help_text=_('When the trigger executes relative to the event')
+    )
+    sql_code = models.TextField(
+        help_text=_('SQL code to execute. Use NEW for inserted/updated row, OLD for deleted/updated row.')
+    )
+    # Ámbito: global o esquemas específicos
+    scope = models.CharField(
+        max_length=10,
+        choices=SCOPE_CHOICES,
+        default=SCOPE_GLOBAL,
+        help_text=_('Whether the trigger applies to all schemas or specific ones')
+    )
+    # Lista de esquemas (JSON array) si scope='schemas'
+    schemas = models.TextField(
+        blank=True,
+        null=True,
+        help_text=_('JSON array of schema names if scope is "schemas"')
+    )
+    # Si puede usarse como campo calculado
+    is_calculated_field = models.BooleanField(
+        default=False,
+        help_text=_('If enabled, this trigger can be used as a calculated field in layers')
+    )
+    # Lenguaje: plpgsql (trigger nativo de PostgreSQL) o python (código ejecutado a nivel de aplicación)
+    language = models.CharField(
+        max_length=10,
+        choices=LANGUAGE_CHOICES,
+        default=LANGUAGE_PLPGSQL,
+        help_text=_('Language of the trigger code: PL/pgSQL for database triggers, Python for application-level triggers')
+    )
+    # Permisos globales - si True, todos los staff pueden usar este trigger
+    allow_all = models.BooleanField(
+        default=False,
+        help_text=_('Allow all staff users to use this trigger in their layers')
+    )
+    created_by = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = _('Connection Trigger')
+        verbose_name_plural = _('Connection Triggers')
+        ordering = ['connection', 'name']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['connection', 'name'], 
+                name='unique_conn_trigger_name_per_connection'
+            )
+        ]
+    
+    def __str__(self):
+        return f"{self.name} ({self.timing} {self.event}) - {self.connection.name}"
+    
+    def get_schemas_list(self):
+        """Devuelve la lista de esquemas si scope='schemas', o lista vacía si es global."""
+        if self.scope == self.SCOPE_SCHEMAS and self.schemas:
+            try:
+                return json.loads(self.schemas)
+            except:
+                return []
+        return []
+    
+    def set_schemas_list(self, schemas_list):
+        """Establece la lista de esquemas como JSON."""
+        self.schemas = json.dumps(schemas_list) if schemas_list else None
+    
+    def get_events_list(self):
+        """Devuelve la lista de eventos (INSERT, UPDATE, DELETE)."""
+        if self.event:
+            return [e.strip() for e in self.event.split(',') if e.strip()]
+        return []
+    
+    def set_events_list(self, events_list):
+        """Establece los eventos como string separado por comas."""
+        self.event = ','.join(events_list) if events_list else ''
+    
+    def get_events_display(self):
+        """Devuelve los eventos formateados para mostrar."""
+        return ', '.join(self.get_events_list())
+    
+    def get_compatible_datastores(self):
+        """
+        Obtiene los datastores compatibles con este trigger.
+        Si scope='global', devuelve todos los datastores de la conexión.
+        Si scope='schemas', solo los que coincidan con los esquemas especificados.
+        """
+        from gvsigol_services.models import Datastore
+        
+        datastores = Datastore.objects.filter(connection=self.connection)
+        
+        if self.scope == self.SCOPE_SCHEMAS:
+            schemas = self.get_schemas_list()
+            if schemas:
+                datastores = datastores.filter(name__in=schemas)
+        
+        return datastores
+    
+    def get_full_trigger_name(self, layer_name):
+        """
+        Genera el nombre completo del trigger para una capa específica.
+        Formato: tg_{trigger_name}_{layer_name}_{timing}_{events}
+        Los eventos se unen con guión bajo: insert_update_delete
+        """
+        # Convertir "INSERT,UPDATE" a "insert_update"
+        events_part = '_'.join([e.strip().lower() for e in self.event.split(',') if e.strip()])
+        return f"tg_{self.name}_{layer_name}_{self.timing.lower()}_{events_part}"
+    
+    def get_function_name(self, schema, table):
+        """
+        Genera el nombre de la función PL/pgSQL para este trigger.
+        Formato: fn_tg_{trigger_name}_{schema}_{table}
+        """
+        safe_name = f"{self.name}_{schema}_{table}".replace('.', '_').replace('-', '_')
+        return f"fn_tg_{safe_name}"
+    
+    def get_trigger_name(self, schema, table):
+        """
+        Genera el nombre del trigger en la base de datos.
+        Usa el método get_full_trigger_name pero pasando solo el nombre de la tabla.
+        """
+        return self.get_full_trigger_name(table)
+    
+    def generate_function_sql(self, schema, table, target_field=None, geom_field=None, pk_field=None):
+        """
+        Genera el SQL para crear la función que ejecutará el trigger.
+        El código SQL del usuario se usa directamente tal cual - debe incluir
+        DECLARE (opcional), BEGIN, RETURN y END.
+        
+        Variables de plantilla soportadas:
+        - {target_field}: El campo seleccionado por el usuario al asignar el trigger
+        - {current_schema}: El esquema donde está la capa
+        - {current_table}: La tabla de la capa
+        - {geom}: El nombre del campo de geometría de la capa
+        - {pk_field}: El campo de clave primaria de la capa
+        """
+        function_name = self.get_function_name(schema, table)
+        
+        # Reemplazar variables de plantilla en el código SQL
+        processed_sql = self.sql_code
+        processed_sql = processed_sql.replace('{current_schema}', schema)
+        processed_sql = processed_sql.replace('{current_table}', table)
+        if target_field:
+            processed_sql = processed_sql.replace('{target_field}', target_field)
+        if geom_field:
+            processed_sql = processed_sql.replace('{geom}', geom_field)
+        if pk_field:
+            processed_sql = processed_sql.replace('{pk_field}', pk_field)
+        
+        sql = f"""
+CREATE OR REPLACE FUNCTION {schema}.{function_name}()
+RETURNS TRIGGER AS $$
+{processed_sql}
+$$ LANGUAGE plpgsql;
+"""
+        return sql
+    
+    def generate_trigger_sql(self, schema, table):
+        """
+        Genera el SQL para crear el trigger en la tabla especificada.
+        Soporta múltiples eventos (INSERT OR UPDATE OR DELETE).
+        """
+        trigger_name = self.get_full_trigger_name(table)
+        function_name = self.get_function_name(schema, table)
+        full_table_name = f"{schema}.{table}"
+        events = self.get_events_list()
+        events_clause = ' OR '.join(events)  # "INSERT OR UPDATE" o "INSERT OR UPDATE OR DELETE"
+        
+        sql = f"""
+CREATE TRIGGER {trigger_name}
+{self.timing} {events_clause} ON {full_table_name}
+FOR EACH ROW
+EXECUTE FUNCTION {schema}.{function_name}();
+"""
+        return sql
+    
+    def generate_drop_trigger_sql(self, schema, table):
+        """
+        Genera el SQL para eliminar el trigger.
+        """
+        trigger_name = self.get_full_trigger_name(table)
+        full_table_name = f"{schema}.{table}"
+        
+        sql = f"DROP TRIGGER IF EXISTS {trigger_name} ON {full_table_name};"
+        return sql
+    
+    def generate_drop_function_sql(self, schema, table):
+        """
+        Genera el SQL para eliminar la función del trigger.
+        """
+        function_name = self.get_function_name(schema, table)
+        
+        sql = f"DROP FUNCTION IF EXISTS {schema}.{function_name}();"
+        return sql
+    
+    def can_use(self, user):
+        """
+        Verifica si un usuario puede usar este trigger.
+        - Superusers siempre pueden
+        - Si allow_all=True, todos los staff pueden
+        - Si no, se verifica si el usuario tiene algún rol con permiso
+        """
+        if user.is_superuser:
+            return True
+        
+        if self.allow_all:
+            return True
+        
+        # Verificar permisos por rol
+        from gvsigol_auth import auth_backend
+        user_roles = auth_backend.get_roles(user)
+        
+        return self.trigger_roles.filter(role__in=user_roles).exists()
+    
+    def get_allowed_roles(self):
+        """Devuelve la lista de roles que tienen permiso para usar este trigger."""
+        return list(self.trigger_roles.values_list('role', flat=True))
+
+
+class ConnectionTriggerRole(models.Model):
+    """
+    Permisos de acceso a triggers por rol.
+    Permite compartir triggers con roles específicos de staff.
+    """
+    trigger = models.ForeignKey(
+        ConnectionTrigger, 
+        on_delete=models.CASCADE, 
+        related_name='trigger_roles'
+    )
+    role = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['trigger', 'role']),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['trigger', 'role'], 
+                name='unique_role_per_trigger'
+            )
+        ]
+    
+    def __str__(self):
+        return f"{self.trigger.name} - {self.role}"
+
+
 class Datastore(models.Model):
+    """
+    Almacén de datos que puede usar el modelo legacy (connection_params directo)
+    o el nuevo modelo (referencia a Connection + schema).
+    """
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE)
     type = models.CharField(max_length=250)
     name = models.CharField(max_length=250)
     description = models.CharField(max_length=500, null=True, blank=True)
-    connection_params = models.TextField()
+    # Campo legacy - se mantiene para compatibilidad hacia atrás
+    connection_params = models.TextField(null=True, blank=True)
     created_by = models.CharField(max_length=100)
+    
+    # Nuevos campos para el modelo de conexiones centralizadas
+    connection = models.ForeignKey(
+        Connection, 
+        on_delete=models.PROTECT,  # Proteger conexión si hay datastores usándola
+        null=True, 
+        blank=True,
+        related_name='datastores',
+        help_text=_('Reference to centralized connection')
+    )
+    schema = models.CharField(
+        max_length=150, 
+        null=True, 
+        blank=True,
+        help_text=_('Database schema for this datastore')
+    )
+    legacy_mode = models.BooleanField(
+        default=True,
+        help_text=_('True if using connection_params directly, False if using Connection reference')
+    )
+    allow_all = models.BooleanField(
+        default=False,
+        help_text=_('If enabled, all staff users can use this datastore')
+    )
+    allow_all_manage = models.BooleanField(
+        default=False,
+        help_text=_('If enabled, all staff users can manage (edit) this datastore')
+    )
 
     def __str__(self):
         return self.workspace.name + ":" + self.name
 
+    def is_using_connection(self):
+        """Indica si el datastore usa el nuevo modelo de conexiones."""
+        return not self.legacy_mode and self.connection is not None
+
     def get_schema_name(self):
+        """Obtiene el nombre del esquema, soportando ambos modos."""
+        # Nuevo modelo: usar campo schema directamente
+        if self.is_using_connection() and self.schema:
+            return self.schema
+        
+        # Modo legacy: extraer del connection_params
         try:
-            params = json.loads(self.connection_params)
+            params = json.loads(self.connection_params) if self.connection_params else {}
             return params.get('schema', 'public')
         except:
             return 'public'
 
+    def get_connection_params_dict(self):
+        """
+        Obtiene los parámetros de conexión como diccionario,
+        independientemente del modo (legacy o nuevo).
+        """
+        if self.is_using_connection():
+            # Nuevo modelo: obtener de la Connection y añadir schema
+            params = self.connection.get_connection_params()
+            params['schema'] = self.schema or 'public'
+            return params
+        else:
+            # Modo legacy: parsear connection_params
+            try:
+                return json.loads(self.connection_params) if self.connection_params else {}
+            except:
+                return {}
+
     def get_db_connection(self):
-        params = json.loads(self.connection_params)
-        host = params['host']
-        port = params['port']
-        dbname = params['database']
-        user = params['user']
-        passwd = params['passwd']
+        """
+        Obtiene una conexión de introspección a la base de datos.
+        Soporta tanto el modo legacy como el nuevo modelo de conexiones.
+        """
+        params = self.get_connection_params_dict()
+        
+        host = params.get('host', 'localhost')
+        port = params.get('port', '5432')
+        dbname = params.get('database', '')
+        user = params.get('user', '')
+        passwd = params.get('passwd', params.get('password', ''))
+        
         i = Introspect(database=dbname, host=host,
                        port=port, user=user, password=passwd)
         return i, params
+
+    def migrate_to_connection(self, connection, schema=None):
+        """
+        Migra este datastore del modo legacy al nuevo modelo de conexiones.
+        
+        Args:
+            connection: Instancia de Connection a usar
+            schema: Esquema a usar (si no se proporciona, se extrae del connection_params actual)
+        """
+        if schema is None:
+            schema = self.get_schema_name()
+        
+        self.connection = connection
+        self.schema = schema
+        self.legacy_mode = False
+        # Preservamos connection_params como backup
+        self.save()
+
+    def get_masked_connection_params(self):
+        """Devuelve los parámetros de conexión con contraseñas enmascaradas."""
+        params = self.get_connection_params_dict()
+        if 'passwd' in params:
+            params['passwd'] = '****'
+        if 'password' in params:
+            params['password'] = '****'
+        return params
+
+    def can_use(self, user):
+        """
+        Verifica si un usuario puede usar este datastore para crear capas.
+        
+        Un usuario puede usar el datastore si:
+        - Es superusuario
+        - Es el creador del datastore
+        - allow_all está activado
+        - Tiene un rol con permiso can_use=True
+        """
+        if user.is_superuser:
+            return True
+        if self.created_by == user.username:
+            return True
+        if self.allow_all:
+            return True
+        # Verificar permisos por rol
+        from gvsigol_services.models import DatastoreRole
+        from gvsigol_auth import auth_backend
+        user_roles = auth_backend.get_roles(user)
+        return DatastoreRole.objects.filter(
+            datastore=self,
+            role__in=user_roles,
+            can_use=True
+        ).exists()
+
+    def can_manage(self, user):
+        """
+        Verifica si un usuario puede gestionar (editar) este datastore.
+        
+        Un usuario puede gestionar el datastore si:
+        - Es superusuario
+        - Es el creador del datastore
+        - allow_all_manage está activado
+        - Tiene un rol con permiso can_manage=True
+        """
+        if user.is_superuser:
+            return True
+        if self.created_by == user.username:
+            return True
+        if self.allow_all_manage:
+            return True
+        # Verificar permisos por rol
+        from gvsigol_services.models import DatastoreRole
+        from gvsigol_auth import auth_backend
+        user_roles = auth_backend.get_roles(user)
+        return DatastoreRole.objects.filter(
+            datastore=self,
+            role__in=user_roles,
+            can_manage=True
+        ).exists()
+
+    def get_permitted_roles(self):
+        """Obtiene la lista de roles con permisos sobre este datastore."""
+        from gvsigol_services.models import DatastoreRole
+        return DatastoreRole.objects.filter(datastore=self).values_list('role', flat=True)
 
 
 class DefaultUserDatastore(models.Model):
     username = models.TextField(unique=True)
     datastore = models.ForeignKey(Datastore, on_delete=models.CASCADE)
+
+
+class DatastoreRole(models.Model):
+    """
+    Permisos de acceso a datastores por rol.
+    Permite compartir datastores con roles específicos de staff.
+    """
+    datastore = models.ForeignKey(
+        Datastore, 
+        on_delete=models.CASCADE, 
+        related_name='datastore_roles'
+    )
+    role = models.TextField()
+    can_use = models.BooleanField(
+        default=True,
+        help_text=_('Can use this datastore to create layers')
+    )
+    can_manage = models.BooleanField(
+        default=False,
+        help_text=_('Can manage (edit description) this datastore')
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('Datastore Role')
+        verbose_name_plural = _('Datastore Roles')
+        indexes = [
+            models.Index(fields=['datastore', 'role']),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['datastore', 'role'], 
+                name='unique_role_per_datastore'
+            )
+        ]
+    
+    def __str__(self):
+        return f"{self.datastore.name} - {self.role}"
 
 
 class LayerGroup(models.Model):
@@ -313,17 +1077,43 @@ class LayerConfig:
                 settings.CONTROL_FIELDS, 'name')
         return self._control_fields_dict
 
+    def _get_saved_field_conf(self, db_field_name):
+        """
+        Busca la entrada guardada en conf['fields'] para una columna de la BD.
+        La comparación de nombres es insensible a mayúsculas para no perder
+        visible/infovisible tras refresh_field_conf (p. ej. capas ETL vs PostGIS).
+        """
+        d = self.field_conf_dict.get(db_field_name)
+        if d is not None:
+            return dict(d)
+        db_lower = (db_field_name or '').lower()
+        for f in self.conf.get('fields', []):
+            n = f.get('name')
+            if n is not None and str(n).lower() == db_lower:
+                return dict(f)
+        return {}
+
     def init_field_conf(self, field_conf, field_info):
+        from gvsigol_services.utils import get_field_title_for_lang
         field_conf['name'] = field_conf.get('name', field_info['name'])
         for id, language in settings.LANGUAGES:
-            field_conf['title-' +
-                       id] = field_conf.get('title-'+id, field_info['name'])
+            field_conf['title-' + id] = get_field_title_for_lang(
+                field_conf, id, field_info['name'])
         field_conf['visible'] = field_conf.get('visible', True)
         if field_conf['name'] in self.pks:
             field_conf['editable'] = field_conf.get('editable', False)
             field_conf['editableactive'] = True
         elif field_conf.get('editable', True) and \
                 Trigger.objects.filter(layer=self.layer, field=field_conf['name']).exists():
+            field_conf['editable'] = False
+            field_conf['editableactive'] = False
+        elif field_conf.get('editable', True) and \
+                LayerConnectionTrigger.objects.filter(
+                    layer=self.layer, 
+                    field_name=field_conf['name'],
+                    trigger__is_calculated_field=True
+                ).exists():
+            # Campo calculado por un ConnectionTrigger
             field_conf['editable'] = False
             field_conf['editableactive'] = False
         else:
@@ -369,7 +1159,9 @@ class LayerConfig:
             field_name = the_field_info['name']
             if (include_pks or not field_name in self.pks) and \
                     (not field_name in self.geometry_columns):
-                the_field_conf = self.field_conf_dict.get(field_name, {})
+                the_field_conf = self._get_saved_field_conf(field_name)
+                if the_field_conf:
+                    the_field_conf['name'] = field_name
                 field = self.init_field_conf(the_field_conf, the_field_info)
                 fields.append(field)
         
@@ -387,7 +1179,7 @@ class LayerConfig:
                 enum = LayerFieldEnumeration.objects.get(
                     layer=self.layer, field=field['name']).enumeration
                 field['type'] = str(
-                    ugettext('enumerated ({0})').format(enum.title))
+                    gettext('enumerated ({0})').format(enum.title))
             except:
                 field['type'] = self.field_info_dict.get(
                     field['name'], {}).get('type', '')
@@ -399,7 +1191,24 @@ class LayerConfig:
                     trigger.procedure.localized_label)
                 field['editableactive'] = False
                 field['editable'] = False
-            except:
+            except Trigger.DoesNotExist:
+                # Verificar si hay un ConnectionTrigger para este campo
+                layer_conn_trigger = LayerConnectionTrigger.objects.filter(
+                    layer=self.layer, 
+                    field_name=field['name']
+                ).select_related('trigger').first()
+                
+                if layer_conn_trigger and layer_conn_trigger.trigger:
+                    trigger_name = layer_conn_trigger.trigger.name
+                    field['calculation'] = trigger_name
+                    field['calculationLabel'] = trigger_name
+                    field['editableactive'] = False
+                    field['editable'] = False
+                else:
+                    field['calculation'] = ''
+                    field['calculationLabel'] = ''
+            except Exception:
+                # Otro error inesperado
                 field['calculation'] = ''
                 field['calculationLabel'] = ''
         return fields
@@ -488,6 +1297,14 @@ class Layer(models.Model):
         i, params = self.datastore.get_db_connection()
         source_name = self.source_name if self.source_name else self.name
         return i, source_name, params.get('schema', 'public')
+    
+    @property
+    def thumbnail_relurl(self):
+        if self.thumbnail:
+            if self.thumbnail.name == get_default_layer_thumbnail():
+                return self.thumbnail.url
+            return self.thumbnail.url.replace(settings.BASE_URL, '')
+        return get_default_layer_thumbnail()
 
 
 class LayerReadGroup(models.Model):
@@ -570,6 +1387,264 @@ class LayerManageRole(models.Model):
             models.UniqueConstraint(
                 fields=['layer', 'role'], name='unique_manage_role_per_layer')
         ]
+
+
+class LayerConnectionTrigger(models.Model):
+    """
+    Vincula un ConnectionTrigger con un campo de una Layer.
+    Cuando se asigna, se crea el trigger nativo en PostgreSQL.
+    """
+    layer = models.ForeignKey(Layer, on_delete=models.CASCADE, related_name='layer_connection_triggers')
+    trigger = models.ForeignKey(ConnectionTrigger, on_delete=models.CASCADE, related_name='layer_connection_triggers')
+    field_name = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        help_text=_('Name of the field that will be calculated by this trigger (only for calculated field triggers)')
+    )
+    is_installed = models.BooleanField(
+        default=False,
+        help_text=_('Whether the trigger is currently installed in the database')
+    )
+    is_enabled = models.BooleanField(
+        default=True,
+        help_text=_('Whether the trigger is enabled (active) or disabled in the database')
+    )
+    installed_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.CharField(max_length=100, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = _('Layer Connection Trigger')
+        verbose_name_plural = _('Layer Connection Triggers')
+        constraints = [
+            # Un trigger solo puede asignarse una vez por capa
+            models.UniqueConstraint(
+                fields=['layer', 'trigger'],
+                name='unique_trigger_per_layer'
+            )
+        ]
+    
+    def __str__(self):
+        return f"{self.layer.name} - {self.trigger.name}"
+    
+    def get_schema_and_table(self):
+        """
+        Obtiene el schema y nombre de tabla de la capa.
+        El schema se obtiene de los connection_params del datastore.
+        """
+        # Obtener el schema de los connection_params del datastore
+        schema = 'public'  # Valor por defecto
+        
+        if self.layer.datastore.connection_params:
+            try:
+                if isinstance(self.layer.datastore.connection_params, str):
+                    params = json.loads(self.layer.datastore.connection_params)
+                else:
+                    params = self.layer.datastore.connection_params
+                schema = params.get('schema', 'public')
+            except:
+                schema = 'public'
+        
+        # Si no hay schema en connection_params, usar el nombre del datastore
+        if not schema or schema == 'public':
+            # Intentar obtener el schema del método get_schema_name si existe
+            if hasattr(self.layer.datastore, 'get_schema_name'):
+                schema = self.layer.datastore.get_schema_name() or self.layer.datastore.name
+            else:
+                schema = self.layer.datastore.name
+        
+        table = self.layer.source_name if self.layer.source_name else self.layer.name
+        
+        return schema, table
+    
+    def get_geometry_field(self, introspect, table, schema):
+        """
+        Obtiene el nombre del campo de geometría de la capa.
+        """
+        try:
+            geom_columns = introspect.get_geometry_columns(table, schema)
+            if geom_columns and len(geom_columns) > 0:
+                return geom_columns[0]  # Primer campo de geometría
+        except Exception:
+            pass
+        return 'wkb_geometry'  # Valor por defecto común
+    
+    def get_pk_field(self, introspect, table, schema):
+        """
+        Obtiene el nombre del campo de clave primaria de la capa.
+        """
+        try:
+            pk_columns = introspect.get_pk_columns(table, schema)
+            if pk_columns and len(pk_columns) > 0:
+                return pk_columns[0]  # Primera clave primaria
+        except Exception:
+            pass
+        return 'ogc_fid'  # Valor por defecto común
+    
+    def install(self):
+        """
+        Instala el trigger en la base de datos PostgreSQL.
+        
+        Variables de plantilla que se reemplazan:
+        - {target_field}: El campo seleccionado (self.field_name)
+        - {current_schema}: El esquema de la capa
+        - {current_table}: La tabla de la capa
+        - {geom}: El campo de geometría de la capa
+        - {pk_field}: El campo de clave primaria de la capa
+        """
+        from django.utils import timezone
+        
+        if self.layer.datastore.connection is None:
+            return False, _('Layer datastore has no associated connection')
+        
+        if self.layer.datastore.connection.type != 'PostGIS':
+            return False, _('Trigger installation is only supported for PostGIS connections')
+        
+        schema, table = self.get_schema_and_table()
+        
+        try:
+            # Obtener conexión a la base de datos
+            i, params = self.layer.datastore.connection.get_db_connection()
+            
+            if i is None:
+                return False, _('Could not connect to database')
+            
+            # Obtener el nombre del campo de geometría y clave primaria
+            geom_field = self.get_geometry_field(i, table, schema)
+            pk_field = self.get_pk_field(i, table, schema)
+            
+            # Primero eliminar si existe
+            drop_trigger_sql = self.trigger.generate_drop_trigger_sql(schema, table)
+            drop_function_sql = self.trigger.generate_drop_function_sql(schema, table)
+            
+            i.cursor.execute(drop_trigger_sql)
+            i.cursor.execute(drop_function_sql)
+            
+            # Crear función y trigger con variables de plantilla reemplazadas
+            function_sql = self.trigger.generate_function_sql(
+                schema, 
+                table, 
+                target_field=self.field_name,
+                geom_field=geom_field,
+                pk_field=pk_field
+            )
+            trigger_sql = self.trigger.generate_trigger_sql(schema, table)
+            
+            i.cursor.execute(function_sql)
+            i.cursor.execute(trigger_sql)
+            i.conn.commit()
+            
+            i.close()
+            
+            # Marcar como instalado
+            self.is_installed = True
+            self.installed_at = timezone.now()
+            self.save()
+            
+            return True, _('Trigger installed successfully')
+            
+        except Exception as e:
+            logging.getLogger('gvsigol').error(f"Error installing trigger: {e}")
+            return False, str(e)
+    
+    def uninstall(self):
+        """
+        Desinstala el trigger de la base de datos PostgreSQL.
+        """
+        if not self.is_installed:
+            return True, _('Trigger was not installed')
+        
+        if self.layer.datastore.connection is None:
+            return False, _('Layer datastore has no associated connection')
+        
+        schema, table = self.get_schema_and_table()
+        
+        try:
+            i, params = self.layer.datastore.connection.get_db_connection()
+            
+            if i is None:
+                return False, _('Could not connect to database')
+            
+            drop_trigger_sql = self.trigger.generate_drop_trigger_sql(schema, table)
+            drop_function_sql = self.trigger.generate_drop_function_sql(schema, table)
+            
+            i.cursor.execute(drop_trigger_sql)
+            i.cursor.execute(drop_function_sql)
+            i.conn.commit()
+            
+            i.close()
+            
+            # Marcar como no instalado
+            self.is_installed = False
+            self.installed_at = None
+            self.save()
+            
+            return True, _('Trigger uninstalled successfully')
+            
+        except Exception as e:
+            logging.getLogger('gvsigol').error(f"Error uninstalling trigger: {e}")
+            return False, str(e)
+    
+    def enable(self):
+        """
+        Habilita el trigger en la base de datos PostgreSQL.
+        El trigger debe estar instalado previamente.
+        """
+        if not self.is_installed:
+            return False, _('Trigger is not installed')
+        
+        if self.layer.datastore.connection is None:
+            return False, _('Layer datastore has no associated connection')
+        
+        schema, table = self.get_schema_and_table()
+        trigger_name = self.trigger.get_trigger_name(schema, table)
+        
+        try:
+            i, params = self.layer.datastore.connection.get_db_connection()
+            
+            if i is None:
+                return False, _('Could not connect to database')
+            
+            i.enable_trigger(trigger_name, schema, table)
+            i.conn.commit()
+            i.close()
+            
+            return True, _('Trigger enabled successfully')
+            
+        except Exception as e:
+            logging.getLogger('gvsigol').error(f"Error enabling trigger: {e}")
+            return False, str(e)
+    
+    def disable(self):
+        """
+        Deshabilita el trigger en la base de datos PostgreSQL.
+        El trigger permanece instalado pero no se ejecuta.
+        """
+        if not self.is_installed:
+            return False, _('Trigger is not installed')
+        
+        if self.layer.datastore.connection is None:
+            return False, _('Layer datastore has no associated connection')
+        
+        schema, table = self.get_schema_and_table()
+        trigger_name = self.trigger.get_trigger_name(schema, table)
+        
+        try:
+            i, params = self.layer.datastore.connection.get_db_connection()
+            
+            if i is None:
+                return False, _('Could not connect to database')
+            
+            i.disable_trigger(trigger_name, schema, table)
+            i.conn.commit()
+            i.close()
+            
+            return True, _('Trigger disabled successfully')
+            
+        except Exception as e:
+            logging.getLogger('gvsigol').error(f"Error disabling trigger: {e}")
+            return False, str(e)
 
 
 class LayerGroupRole(models.Model):
@@ -1035,3 +2110,141 @@ class FavoriteFilter(models.Model):
             return self.project.userprojectrole_set.filter(user=user).exists()
         
         return False
+
+
+class AttributionConfig(models.Model):
+    """
+    Configuración de atribuciones para proyectos.
+
+    Puede ser de tipo 'generic' (reutilizable) o 'project_specific' (asociada a un único proyecto).
+
+    Reglas de aplicación (ver gvsigol_services.utils.get_attributions_for_project):
+    - Si existe una configuración 'project_specific' activa para un proyecto, se usa esa.
+    - En caso contrario se usa la configuración 'generic' activa que aplique al proyecto, ya sea
+      porque tiene apply_to_all_projects=True o porque el proyecto está incluido en su N:M.
+    """
+    KIND_GENERIC = 'generic'
+    KIND_PROJECT_SPECIFIC = 'project_specific'
+    KIND_CHOICES = (
+        (KIND_GENERIC, _('Generic')),
+        (KIND_PROJECT_SPECIFIC, _('Project specific')),
+    )
+
+    name = models.CharField(max_length=150)
+    description = models.CharField(max_length=500, null=True, blank=True)
+    other_title = models.CharField(max_length=150, null=True, blank=True)
+    other_text = models.TextField(null=True, blank=True)
+    logo_internal_path = models.CharField(max_length=1024, null=True, blank=True)
+    logo_public_url = models.CharField(max_length=1024, null=True, blank=True)
+    kind = models.CharField(max_length=20, choices=KIND_CHOICES, default=KIND_GENERIC)
+    project = models.ForeignKey('gvsigol_core.Project', on_delete=models.CASCADE,
+                                null=True, blank=True, related_name='attributions_configs')
+    apply_to_all_projects = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+
+    copyright_notice = models.TextField(null=True, blank=True)
+    help_text = models.TextField(null=True, blank=True)
+
+    contact_organization = models.CharField(max_length=200, null=True, blank=True)
+    contact_person = models.CharField(max_length=200, null=True, blank=True)
+    contact_address = models.CharField(max_length=500, null=True, blank=True)
+    contact_phone = models.CharField(max_length=100, null=True, blank=True)
+    contact_email = models.CharField(max_length=200, null=True, blank=True)
+    legal_notice = models.TextField(null=True, blank=True)
+
+    #: Orden de los bloques en el modal del visor (lista de ids: logo, copyright, …).
+    modal_section_order = JSONField(default=list, blank=True)
+
+    created_by = models.CharField(max_length=100, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Attributions config'
+        verbose_name_plural = 'Attributions configs'
+        indexes = [
+            models.Index(fields=['kind', 'is_active']),
+            models.Index(fields=['project']),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['project'],
+                condition=Q(kind='project_specific'),
+                name='unique_attributions_per_project_when_specific',
+            ),
+        ]
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def title(self):
+        return self.name
+
+    @property
+    def is_generic(self):
+        return self.kind == AttributionConfig.KIND_GENERIC
+
+    @property
+    def is_project_specific(self):
+        return self.kind == AttributionConfig.KIND_PROJECT_SPECIFIC
+
+
+class AttributionLink(models.Model):
+    """Enlaces de interés asociados a una configuración de atribuciones."""
+    config = models.ForeignKey(AttributionConfig, on_delete=models.CASCADE, related_name='links')
+    url = models.CharField(max_length=1024)
+    description = models.CharField(max_length=500, null=True, blank=True)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return self.description or self.url
+
+
+class AttributionAttachment(models.Model):
+    """
+    Archivo adjunto asociado a una configuración de atribuciones.
+
+    No se sube nada aquí: la ruta interna proviene del file manager del admin
+    (selector estándar) y la URL pública se genera apuntando al fileserver
+    público de gvsigol_services. Así los adjuntos pueden descargarse aunque
+    el proyecto sea privado.
+    """
+    config = models.ForeignKey(AttributionConfig, on_delete=models.CASCADE, related_name='attachments')
+    internal_path = models.CharField(max_length=1024)
+    public_url = models.CharField(max_length=1024, null=True, blank=True)
+    description = models.CharField(max_length=500, null=True, blank=True)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return self.description or self.internal_path
+
+
+class AttributionProjectMembership(models.Model):
+    """
+    Vincula configuraciones genéricas (kind='generic') a proyectos concretos
+    cuando se decide aplicarlas solo a una selección manual de proyectos
+    (es decir, cuando apply_to_all_projects=False).
+    """
+    config = models.ForeignKey(AttributionConfig, on_delete=models.CASCADE,
+                               related_name='project_memberships')
+    project = models.ForeignKey('gvsigol_core.Project', on_delete=models.CASCADE,
+                                related_name='attributions_memberships')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['config', 'project'],
+                                    name='unique_attributions_membership_config_project'),
+        ]
+        indexes = [
+            models.Index(fields=['project']),
+        ]
+
+    def __str__(self):
+        return '{} - {}'.format(self.config.name, self.project.name)

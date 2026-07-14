@@ -28,25 +28,34 @@ from django.contrib.auth.models import AnonymousUser
 import hashlib
 import json
 import os
+from django.db import models
 from django.http.response import HttpResponse
 from django.db.models.query import QuerySet
 from django.db.models import Q
 import psycopg2
 from . import geographic_servers
 from gvsigol import settings
-from gvsigol.settings import MEDIA_ROOT
+from gvsigol.settings import MEDIA_ROOT, FILEMANAGER_DIRECTORY
 from gvsigol_auth.models import User
 from gvsigol_auth.auth_backend import get_roles
 from gvsigol_services.backend_postgis import Introspect
 from gvsigol_services.models import Datastore, LayerResource, \
-    LayerFieldEnumeration, EnumerationItem, Enumeration, Layer, LayerGroup, Workspace, Server, DefaultUserDatastore
+    LayerFieldEnumeration, EnumerationItem, Enumeration, Layer, LayerGroup, Workspace, Server, DefaultUserDatastore, Connection
 from .models import LayerReadRole, LayerWriteRole, LayerManageRole, LayerGroupRole
 from gvsigol_core.utils import toc_add_layer
 import ast
 from django.utils.crypto import get_random_string
 from psycopg2 import sql as sqlbuilder
 import logging
+from datetime import datetime
+from django.utils.translation import gettext as _
+
 logger = logging.getLogger("gvsigol")
+
+
+class TemporalValidationFailed(Exception):
+    """Interrumpe el flujo de publicación tras registrar error en el formulario."""
+    pass
 from gvsigol_auth import auth_backend
 from gvsigol_auth import services as auth_services
 from gvsigol_auth.utils import ascii_norm_username
@@ -56,6 +65,102 @@ from gvsigol_services.authorization import _get_user, can_use_layergroup, get_au
 import requests
 from owslib.wmts import WebMapTileService
 from owslib.util import Authentication
+
+from urllib.parse import urlencode, urlparse, parse_qs, urlunparse, quote
+import copy
+
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import HttpRequest
+
+
+############ Paginación ############
+
+def paginate(request: HttpRequest,items,*,default_page_size: int = 10,max_page_size: int = 200,
+page_param: str = "page",page_size_param: str = "page_size",):
+    """
+    Pagina 'items' (QuerySet o lista).
+    Devuelve: (page_items, pagination_context)
+    - Lee ?page= y ?page_size= del request.
+    - Limita page_size a max_page_size.
+    - Maneja páginas inválidas sin reventar.
+    - Si recibe un QuerySet sin ordenamiento, agrega ordenamiento por 'id' para evitar warnings.
+    """
+    
+    if isinstance(items, models.QuerySet):
+        # Verificar si el QuerySet tiene ordenamiento definido
+        order_by = getattr(items.query, 'order_by', None)
+        if not order_by or (isinstance(order_by, (list, tuple)) and len(order_by) == 0):
+            # Si el QuerySet no tiene ordenamiento, agregar ordenamiento por 'id' por defecto
+            items = items.order_by('id')
+    
+    raw_page = request.GET.get(page_param, "1")
+    raw_size = request.GET.get(page_size_param, str(default_page_size))
+
+    try:
+        page_number = int(raw_page)
+    except (TypeError, ValueError):
+        page_number = 1
+
+    try:
+        page_size = int(raw_size)
+    except (TypeError, ValueError):
+        page_size = default_page_size
+
+    if page_size <= 0:
+        page_size = default_page_size
+    page_size = min(page_size, max_page_size)
+
+    paginator = Paginator(items, page_size)
+
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+
+        page_obj = paginator.page(paginator.num_pages)
+
+    def _qs(**override):
+        q = request.GET.copy()
+        for k, v in override.items():
+            q[k] = str(v)
+        return "?" + urlencode(q, doseq=True)
+
+    ctx = {
+        "paginator": paginator,
+        "page_obj": page_obj,
+        "is_paginated": paginator.num_pages > 1,
+        "page_number": page_obj.number,
+        "page_size": page_size,
+        "total_items": paginator.count,
+        "total_pages": paginator.num_pages,
+        "qs": _qs,  # helper para links en template
+    }
+    return page_obj.object_list, ctx
+
+_VALENCIAN_TITLE_LEGACY_KEYS = ('title-va', 'title-ca-es@valencia')
+
+
+def get_field_title_for_lang(field_conf, lang_id, default_name=None):
+    """
+    Resuelve el título de un campo para un idioma, con compatibilidad hacia atrás
+    para claves valencianas antiguas (title-va, title-ca-es@valencia).
+    """
+    if not field_conf:
+        return default_name or ''
+    title_key = 'title-' + lang_id
+    val = field_conf.get(title_key)
+    if val is not None and str(val).strip():
+        return str(val).strip()
+    if lang_id == 'ca-es-valencia':
+        for legacy_key in _VALENCIAN_TITLE_LEGACY_KEYS:
+            legacy_val = field_conf.get(legacy_key)
+            if legacy_val is not None and str(legacy_val).strip():
+                return str(legacy_val).strip()
+    if default_name is not None:
+        return default_name
+    return field_conf.get('name', '') or ''
+
 
 def _get_layer_obj(layer_or_id):
     if isinstance(layer_or_id, Layer):
@@ -185,7 +290,7 @@ def get_write_restrictions(request_or_user, layer):
             "catalogMode" : "CHALLENGE"
         }
 
-def can_write_layer(request_or_user, layer):
+def can_write_layer(request_or_user, layer, user_profile=None):
     """
     Checks whether the user has permissions to write the provided layer.
 
@@ -198,7 +303,7 @@ def can_write_layer(request_or_user, layer):
     """
     try:
         authz_service = get_authz_server_for_layer(layer)
-        return authz_service.can_write_layer(request_or_user, layer)
+        return authz_service.can_write_layer(request_or_user, layer, user_profile=user_profile)
     except Exception as e:
         print(e)
     return False
@@ -277,12 +382,19 @@ def can_manage_layer(request_or_user, layer):
 def can_manage_datastore(request_or_user, datastore):
     """
     Checks whether the user has permissions to manage the provided datastore.
+    
+    A user can manage a datastore if:
+    - Is superuser
+    - Is the owner (created_by)
+    - Has DefaultUserDatastore
+    - allow_all_manage is True
+    - Has a role with can_manage=True
 
     Parameters
     ----------
     request_or_user: Request | HttpRequest | User | str
         A Django Request object | A DRF HttpRequest object | A Django User object | A username
-    layer: Datastore | int
+    datastore: Datastore | int
         A Django Datastore instance or a Datastore id
 
     """
@@ -295,6 +407,60 @@ def can_manage_datastore(request_or_user, datastore):
         if datastore.created_by == user.username:
             return True
         if DefaultUserDatastore.objects.filter(username=user.username, datastore=datastore).exists():
+            return True
+        # Verificar allow_all_manage
+        if hasattr(datastore, 'allow_all_manage') and datastore.allow_all_manage:
+            return True
+        # Verificar permisos por rol
+        from gvsigol_services.models import DatastoreRole
+        from gvsigol_auth import auth_backend
+        user_roles = auth_backend.get_roles(user)
+        if DatastoreRole.objects.filter(
+            datastore=datastore,
+            role__in=user_roles,
+            can_manage=True
+        ).exists():
+            return True
+    except Exception as e:
+        print(e)
+    return False
+
+
+def can_use_datastore(request_or_user, datastore):
+    """
+    Checks whether the user has permissions to use the provided datastore
+    (create layers in it).
+
+    Parameters
+    ----------
+    request_or_user: Request | HttpRequest | User | str
+        A Django Request object | A DRF HttpRequest object | A Django User object | A username
+    datastore: Datastore | int
+        A Django Datastore instance or a Datastore id
+
+    """
+    try:
+        user = _get_user(request_or_user)
+        if not isinstance(datastore, Datastore):
+            datastore = Datastore.objects.get(id=datastore)
+        if user.is_superuser:
+            return True
+        if datastore.created_by == user.username:
+            return True
+        if DefaultUserDatastore.objects.filter(username=user.username, datastore=datastore).exists():
+            return True
+        # Verificar allow_all
+        if datastore.allow_all:
+            return True
+        # Verificar permisos por rol
+        from gvsigol_services.models import DatastoreRole
+        from gvsigol_auth import auth_backend
+        user_roles = auth_backend.get_roles(user)
+        if DatastoreRole.objects.filter(
+            datastore=datastore,
+            role__in=user_roles,
+            can_use=True
+        ).exists():
             return True
     except Exception as e:
         print(e)
@@ -334,7 +500,20 @@ def get_user_layergroups(request, permissions=LayerGroupRole.PERM_MANAGE):
         allowed_groups = LayerGroup.objects.filter(layergrouprole__role__in=user_roles, layergrouprole__permission=permissions)
     return (user_created_groups | allowed_groups)
 
-def add_datastore(workspace, type, name, description, connection_params, username):
+def add_datastore(workspace, type, name, description, connection_params, username, connection=None, schema=None):
+    """
+    Crea un datastore en GeoServer y lo guarda en la base de datos.
+    
+    Args:
+        workspace: Workspace donde crear el datastore
+        type: Tipo de datastore (ej: 'v_PostGIS')
+        name: Nombre del datastore
+        description: Descripción
+        connection_params: Parámetros de conexión en formato JSON string
+        username: Usuario que crea el datastore
+        connection: (Opcional) Objeto Connection para asociar al datastore
+        schema: (Opcional) Schema de la base de datos
+    """
     gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
     # first create the datastore on the backend
     if gs.createDatastore(workspace,
@@ -349,8 +528,11 @@ def add_datastore(workspace, type, name, description, connection_params, usernam
             type=type,
             name=name,
             description=description,
-            connection_params=connection_params,
-            created_by=username
+            connection_params=connection_params,  # Siempre guardar los parámetros completos (incluyendo schema)
+            created_by=username,
+            connection=connection,
+            schema=schema,
+            legacy_mode=(connection is None)  # legacy_mode=True si no tiene connection
         )
         datastore.save()
         return datastore
@@ -366,19 +548,71 @@ def create_workspace(server_id, ws_name, uri, values, username):
         gs.reload_nodes()
         return newWs
 
+def get_system_connection():
+    """
+    Obtiene la conexión del sistema para datastores automáticos de usuarios.
+    Esta conexión se basa en la configuración GVSIGOL_USERS_CARTODB y debe
+    haber sido creada por la migración 0088_create_system_connection.
+    
+    Busca una conexión existente con los mismos parámetros (host, port, database, user).
+    
+    Returns:
+        Connection: La conexión del sistema
+        
+    Raises:
+        Connection.DoesNotExist: Si no se encuentra ninguna conexión compatible
+    """
+    dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
+    dbport = settings.GVSIGOL_USERS_CARTODB['dbport']
+    dbname = settings.GVSIGOL_USERS_CARTODB['dbname']
+    dbuser = settings.GVSIGOL_USERS_CARTODB['dbuser']
+    
+    # Buscar conexión existente con los mismos parámetros de conexión
+    # Puede ser una conexión migrada (con_database_host) o del sistema (con_system_database_host)
+    for conn in Connection.objects.filter(type='PostGIS'):
+        try:
+            params = conn.get_connection_params()
+            if (params.get('host') == dbhost and 
+                str(params.get('port')) == str(dbport) and 
+                params.get('database') == dbname and 
+                params.get('user') == dbuser):
+                # Encontrada conexión con los mismos parámetros
+                return conn
+        except:
+            continue
+    
+    # No se encontró ninguna conexión compatible
+    raise Connection.DoesNotExist(
+        f'No se encontró una conexión del sistema para {dbuser}@{dbhost}:{dbport}/{dbname}. '
+        'Ejecute las migraciones con: python manage.py migrate'
+    )
+
+
 def create_datastore(username, ds_name, ws):
+    """
+    Crea un datastore automático para un usuario (ds_<username>).
+    Usa la conexión del sistema basada en GVSIGOL_USERS_CARTODB.
+    """
     ds_type = 'v_PostGIS'
     description = 'BBDD ' + ds_name
 
+    # Obtener la conexión del sistema (debe existir, creada por migración)
+    connection = get_system_connection()
+    
+    # Los parámetros de conexión para GeoServer (incluyen schema)
     dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
     dbport = settings.GVSIGOL_USERS_CARTODB['dbport']
     dbname = settings.GVSIGOL_USERS_CARTODB['dbname']
     dbuser = settings.GVSIGOL_USERS_CARTODB['dbuser']
     dbpassword = settings.GVSIGOL_USERS_CARTODB['dbpassword']
     jndiname = settings.GVSIGOL_USERS_CARTODB.get('jndiname', '')
+    
+    # Parámetros completos para GeoServer (incluye schema)
     connection_params = f'{{"host": "{dbhost}", "port": "{dbport}", "database": "{dbname}", "schema": "{ds_name}", "user": "{dbuser}", "passwd": "{dbpassword}", "dbtype": "postgis", "jndiReferenceName": "{jndiname}"}}'
+    
     if create_schema(ds_name):
-        return add_datastore(ws, ds_type, ds_name, description, connection_params, username)
+        return add_datastore(ws, ds_type, ds_name, description, connection_params, username, 
+                            connection=connection, schema=ds_name)
 
 #TODO: llevar al paquete del core
 def create_schema(ds_name):
@@ -431,6 +665,16 @@ def create_schema_for_datastore(connection_params):
     close_connection(cursor, connection)
     return True
 
+PROTECTED_DATABASE_SCHEMAS = frozenset(['public'])
+
+
+def is_protected_database_schema(schema_name):
+    """Indica si un esquema de base de datos no puede eliminarse."""
+    if not schema_name:
+        return False
+    return schema_name.lower() in PROTECTED_DATABASE_SCHEMAS
+
+
 #TODO: llevar al paquete del core
 def delete_schema_for_datastore(connection_params):
     host = connection_params.get('host')
@@ -439,6 +683,12 @@ def delete_schema_for_datastore(connection_params):
     user = connection_params.get('user')
     passwd = connection_params.get('passwd')
     schema = connection_params.get('schema')
+
+    if is_protected_database_schema(schema):
+        logger.warning(
+            "Blocked attempt to delete protected database schema '%s'", schema
+        )
+        return False
 
     connection = get_connection(host, port, database, user, passwd)
     cursor = connection.cursor()
@@ -700,6 +950,35 @@ def set_layer_extent(layer, ds_type, layer_info, server):
     except Exception as e:
         logger.exception("Error setting layer extent: %s", layer.full_qualified_name)
 
+def validate_temporal_layer_post_params(time_enabled, time_field, time_presentation,
+                                        time_default_value_mode, time_default_value):
+    """
+    Validación de parámetros temporales enviados por POST antes de llamar a GeoServer.
+    Devuelve None si es válido, o un mensaje traducido para mostrar al usuario.
+    """
+    if not time_enabled:
+        return None
+    tf = (time_field or '').strip()
+    if not tf or tf == '__disabled__':
+        return _('Select a field for the temporal dimension.')
+    tp = (time_presentation or '').strip()
+    if not tp:
+        return _('Select a time presentation mode.')
+    mode = (time_default_value_mode or '').strip()
+    valid_modes = ('MINIMUM', 'MAXIMUM', 'NEAREST', 'FIXED')
+    if mode not in valid_modes:
+        return _('Select a valid default value mode for the temporal dimension.')
+    if mode in ('NEAREST', 'FIXED'):
+        dv = (time_default_value or '').strip()
+        if not dv:
+            return _('Enter a default date when using "nearest to the reference value" or "reference value" mode.')
+        try:
+            datetime.strptime(dv, '%d-%m-%Y %H:%M:%S')
+        except ValueError:
+            return _('Invalid default date format. Use DD-MM-YYYY HH:mm:ss.')
+    return None
+
+
 def set_time_enabled(server, layer):
         time_resolution = 0
         if (layer.time_resolution_year != None and layer.time_resolution_year > 0) or (layer.time_resolution_month != None and layer.time_resolution_month > 0) or (layer.time_resolution_week != None and layer.time_resolution_week > 0) or (layer.time_resolution_day != None and layer.time_resolution_day > 0):
@@ -779,6 +1058,11 @@ def clone_layer(target_datastore, layer, layer_group, clone_conf=None):
             # clone layer
             layer.pk = None
             layer.name = new_name
+            # Ensure source_name points to the actual cloned DB table name so that
+            # all DB introspection (describe_feature_type, get_pk_columns, etc.) use
+            # the correct physical table name even when the Django layer name was
+            # changed to avoid naming conflicts.
+            layer.source_name = new_table_name
             layer.datastore = target_datastore
             if layer_group is not None:
                 layer.layer_group = layer_group
@@ -831,6 +1115,29 @@ def clone_layer(target_datastore, layer, layer_group, clone_conf=None):
         
             toc_add_layer(new_layer_instance)
             server.createOrUpdateGeoserverLayerGroup(new_layer_instance.layer_group)
+
+            if new_layer_instance.vector_tile:
+                server.update_vector_tile_format(
+                    new_layer_instance.datastore.workspace,
+                    new_layer_instance.name,
+                    True
+                )
+
+            if new_layer_instance.cached:
+                # Reload GeoServer so the WMTS capabilities reflect the new layer name.
+                # The clone copies external_params verbatim, so wmts_options still points
+                # to the original layer's WMTS URL template; we must regenerate it here.
+                server.reload_master()
+                try:
+                    wmts_opts = get_wmts_options_from_layer(new_layer_instance)
+                    if wmts_opts is not None:
+                        ep = json.loads(new_layer_instance.external_params) if new_layer_instance.external_params else {}
+                        ep['wmts_options'] = wmts_opts
+                        new_layer_instance.external_params = json.dumps(ep)
+                        new_layer_instance.save()
+                except Exception:
+                    logger.exception("Could not refresh wmts_options for cloned cached layer %s", new_layer_instance.name)
+
             new_layer_instance._cloned_from_name = old_name
             new_layer_instance._cloned_from_instance = old_instance
             return new_layer_instance
@@ -997,7 +1304,7 @@ def get_layerread_by_user_query(user_roles):
     return Q(layerreadrole__role__in=user_roles)
 
 
-def get_layerread_by_user(request):
+def get_layerread_by_user(request, user_profile=None):
     '''
     Obtiene las capas en las que el usuario tiene permiso de lectura.
     Estas son todas las públicas más todas las privadas sobre las que tiene permisos
@@ -1014,15 +1321,18 @@ def get_layerread_by_user(request):
     return Layer.objects.filter(get_layerread_by_user_query(roles) \
              | get_public_layers_query()).distinct()
 
+def get_layerread_by_role(role):
+    roles = [role]
+    return Layer.objects.filter(get_layerread_by_user_query(roles) \
+             | get_public_layers_query()).distinct()
+
 def set_default_permissions(file_path):
     """
-    Sets the default permissions to the provided file. We set 0o640
-    by default and substract the system umask to get the most
-    restrictive default.
+    Sets the default permissions to the provided file. We set 0o644
+    so that the web server (e.g. Apache running as www-data) can read
+    the files served as public media (thumbnails, etc.).
     """
-    umask = os.umask(0o666) # set a random mask to retrive the system mask
-    os.umask(umask) # restore system mask
-    os.chmod(file_path, 0o640 & ~umask)
+    os.chmod(file_path, 0o644)
 
 def get_datastore_name(username):
     """
@@ -1073,12 +1383,99 @@ def create_user_workspace(username, role):
         create_datastore(username, ds_name, newWs)
         gs.reload_nodes()
 
+
+def _cleanup_layer_database_triggers(layer):
+    """
+    Limpia todos los triggers de base de datos asociados a una capa:
+    - LayerConnectionTrigger (triggers de conexión)
+    - Triggers topológicos
+    
+    Llamar antes de eliminar la capa.
+    """
+    from gvsigol_services.models import LayerConnectionTrigger
+    
+    # 1. Limpiar triggers de conexión (LayerConnectionTrigger)
+    try:
+        layer_triggers = LayerConnectionTrigger.objects.filter(layer=layer)
+        for lt in layer_triggers:
+            try:
+                # Forzar desinstalación del trigger de la base de datos
+                if lt.layer.datastore and lt.layer.datastore.connection:
+                    schema, table = lt.get_schema_and_table()
+                    i, params = lt.layer.datastore.connection.get_db_connection()
+                    if i:
+                        try:
+                            drop_trigger_sql = lt.trigger.generate_drop_trigger_sql(schema, table)
+                            drop_function_sql = lt.trigger.generate_drop_function_sql(schema, table)
+                            i.cursor.execute(drop_trigger_sql)
+                            i.cursor.execute(drop_function_sql)
+                            i.conn.commit()
+                            logger.info(f"Trigger {lt.trigger.name} desinstalado de capa {layer.name}")
+                        except Exception as e:
+                            logger.warning(f"Error ejecutando SQL de desinstalación para {lt.trigger.name}: {e}")
+                        finally:
+                            i.close()
+            except Exception as e:
+                logger.warning(f"Error desinstalando trigger {lt.trigger.name} de capa {layer.name}: {e}")
+    except Exception as e:
+        logger.warning(f"Error obteniendo triggers de conexión para capa {layer.id}: {e}")
+    
+    # 2. Limpiar triggers topológicos
+    try:
+        # Lista de todas las reglas topológicas posibles
+        topology_rules = [
+            "must_not_overlaps",
+            "must_not_have_gaps", 
+            "must_be_covered_by",
+            "must_not_overlap_with",
+            "must_be_contiguous"
+        ]
+        
+        # Obtener conexión a la base de datos
+        try:
+            i, source_name, schema = layer.get_db_connection()
+            if i:
+                # El nombre de la tabla se normaliza igual que en _get_topology_trigger_names
+                table_name = layer.name.replace(':', '_').lower()
+                
+                for rule_type in topology_rules:
+                    try:
+                        # Generar nombres de trigger y función topológica
+                        # Mismo formato que en views.py _get_topology_trigger_names
+                        function_name_simple = f"{rule_type}_{table_name}"
+                        trigger_name = f"trigger_{rule_type}_{table_name}"
+                        full_table_name = f"{schema}.{source_name}"
+                        
+                        # Eliminar trigger y función si existen
+                        drop_trigger_sql = f"DROP TRIGGER IF EXISTS {trigger_name} ON {full_table_name};"
+                        drop_function_sql = f"DROP FUNCTION IF EXISTS {schema}.{function_name_simple}();"
+                        
+                        i.cursor.execute(drop_trigger_sql)
+                        i.cursor.execute(drop_function_sql)
+                    except Exception as e:
+                        # Ignorar errores, el trigger puede no existir
+                        pass
+                
+                i.conn.commit()
+                i.close()
+                logger.info(f"Triggers topológicos limpiados para capa {layer.name}")
+        except Exception as e:
+            logger.warning(f"Error limpiando triggers topológicos para capa {layer.name}: {e}")
+    except Exception as e:
+        logger.warning(f"Error en limpieza de triggers topológicos para capa {layer.id}: {e}")
+
+
 def delete_datastore_elements(ds, gs=None):
     if not gs:
         gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
     layers = Layer.objects.filter(external=False).filter(datastore=ds)
     for l in layers:
         gs.deleteLayerStyles(l)
+        # Limpiar triggers de conexión y topológicos antes de eliminar la capa
+        try:
+            _cleanup_layer_database_triggers(l)
+        except Exception as e:
+            logger.warning(f"Error limpiando triggers para capa {l.name}: {e}")
 
     Datastore.objects.all().filter(name=ds.name).delete()
     if ds.type == 'c_ImageMosaic':
@@ -1147,6 +1544,55 @@ def getUserAuthSession(request):
 
 
 PIXEL_SIZE_M = 0.00028  # 0.28 mm
+
+def _is_generic_wms_default_style_name(name, layer_name=None):
+    if not name:
+        return True
+    if name.lower() == 'default':
+        return True
+    if name.endswith('.Default'):
+        return True
+    if layer_name:
+        short_name = layer_name.split(':')[-1]
+        if name == short_name + '.Default':
+            return True
+    return False
+
+
+def mark_default_external_wms_style(styles, layer_name=None):
+    """
+    Mark the default WMS style for external layers.
+    Prefer the first thematic style (not generic Default/default names),
+    else the first generic default style, else the first style.
+    """
+    if not styles:
+        return styles
+    for style in styles:
+        if isinstance(style, dict):
+            style['is_default'] = False
+
+    default_idx = 0
+    for i, style in enumerate(styles):
+        if not isinstance(style, dict):
+            continue
+        name = style.get('name') or ''
+        if not _is_generic_wms_default_style_name(name, layer_name):
+            default_idx = i
+            break
+    else:
+        for i, style in enumerate(styles):
+            if not isinstance(style, dict):
+                continue
+            name = style.get('name') or ''
+            if _is_generic_wms_default_style_name(name, layer_name) and name:
+                default_idx = i
+                break
+
+    if isinstance(styles[default_idx], dict):
+        styles[default_idx]['is_default'] = True
+    return styles
+
+
 def get_wmts_options(
     wmts, # owslib.wmts.WebMapTileService
     layer_id: str
@@ -1172,7 +1618,10 @@ def get_wmts_options(
             if method.get("type") == "Get":
                 kvp_url = method.get("url")
                 if kvp_url:
+                    if kvp_url.startswith("http://"):
+                        kvp_url = "https://" + kvp_url[7:] # avoid mixed origin errors
                     urls = [kvp_url if kvp_url.endswith("?") else (kvp_url + ("&" if "?" in kvp_url else "?"))]
+                    
 
     def _parse_tlc(tlc):
         """Parse TopLeftCorner from various formats"""
@@ -1334,30 +1783,97 @@ def get_wmts_options(
     options = {k: v for k, v in options.items() if v is not None}
     return options
 
+def _legend_url_for_style(legend_url, style_name):
+    """Set or replace STYLE parameter in a GetLegendGraphic-style URL"""
+    if not legend_url:
+        return legend_url
+    try:
+        parsed = urlparse(legend_url)
+        qs = parse_qs(parsed.query, keep_blank_values=True)
+        qs['STYLE'] = [style_name] if style_name else qs.get('STYLE', [])
+        qs.pop('style', None)  # avoid duplicate; OGC uses STYLE only
+        new_query = urlencode(qs, doseq=True)
+        return urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, new_query, parsed.fragment))
+    except Exception:
+        return legend_url
+
+
+def _normalize_wmts_style_identifier_for_kvp(wmts_options):
+    """
+    OWSLib may serialize a missing WMTS style Identifier as the string 'null'.
+    OpenLayers then requests STYLE=null and GeoServer returns blank tiles; default style needs ''.
+    """
+    styles = wmts_options.get('styles')
+    if isinstance(styles, dict) and 'null' in styles:
+        entry = styles.pop('null')
+        if '' not in styles:
+            styles[''] = entry
+    st = wmts_options.get('style')
+    if st is None or (isinstance(st, str) and st.strip().lower() == 'null'):
+        wmts_options.pop('style', None)
+    elif isinstance(st, str) and st.strip() == '':
+        wmts_options.pop('style', None)
+
+
 def wmts_options_for_openlayers(wmts_options, format=None, style=None, layer_styles=None, tilematrixsetname=None, projection=None):
+    if wmts_options.get('styles') is None:
+        wmts_options['styles'] = {}
+    _normalize_wmts_style_identifier_for_kvp(wmts_options)
     if len(wmts_options['styles']) > 0:
-        print(wmts_options['styles'])
         if style and wmts_options['styles'].get(style):
             wmts_options['style'] = style
         elif layer_styles:
-            for style in layer_styles:
-                if style.get('is_default', False):
-                    wmts_options['style'] = style.get('name')
+            for s in layer_styles:
+                if s.get('is_default', False):
+                    wmts_options['style'] = s.get('name')
                     break
         if not wmts_options.get('style'):
-            for name, style in wmts_options['styles'].items():
-                if style.get('isDefault', False):
+            for name, s in wmts_options['styles'].items():
+                if s.get('isDefault', False):
                     wmts_options['style'] = name
                     break
         if not wmts_options.get('style'):
             wmts_options['style'] = list(wmts_options['styles'].keys())[0]
+        default_name = wmts_options.get('style')
+        # When layer_styles is provided, rebuild styles to only include DB styles and add missing ones
+        if layer_styles:
+            existing = wmts_options['styles']
+            template = next(iter(existing.values()), None) if existing else None
+            new_styles = {}
+            for s in layer_styles:
+                name = s.get('name')
+                if not name:
+                    continue
+                is_default = (name == default_name)
+                legend_url = s.get('custom_legend_url') or s.get('legend') or ''
+                if name in existing:
+                    entry = copy.deepcopy(existing[name])
+                    entry['isDefault'] = is_default
+                elif template:
+                    entry = copy.deepcopy(template)
+                    entry['isDefault'] = is_default
+                else:
+                    entry = {'isDefault': is_default, 'format': 'image/png', 'width': '20', 'height': '20', 'legend': ''}
+
+                if legend_url:
+                    entry['legend'] = _legend_url_for_style(legend_url, name)
+                elif entry.get('legend'):
+                    entry['legend'] = _legend_url_for_style(entry['legend'], name)
+                if s.get('title'):
+                    entry['title'] = s.get('title')
+
+                new_styles[name] = entry
+            wmts_options['styles'] = new_styles
     else:
-        wmts_options['style'] = None
+        wmts_options.pop('style', None)
     if format:
+        fmts = wmts_options.get("formats")
+        if isinstance(fmts, (list, tuple)) and fmts and format not in fmts:
+            format = next((f for f in fmts if "png" in f.lower()), fmts[0])
         wmts_options['format'] = format
         try:
             del wmts_options['formats']
-        except:
+        except Exception:
             pass
 
     tilematrixset = None
@@ -1383,6 +1899,8 @@ def wmts_options_for_openlayers(wmts_options, format=None, style=None, layer_sty
         wmts_options['projection'] = tilematrixset['projection']
         del wmts_options['tileGrids']
         del wmts_options['matrixSets']
+
+    _normalize_wmts_style_identifier_for_kvp(wmts_options)
     return wmts_options
 
 
@@ -1404,3 +1922,289 @@ class AuthPatch(Authentication):
     def __init__(self, *args, **kwargs):
         self._auth_delegate = kwargs.get('auth_delegate')
         super().__init__(*args, **kwargs)
+
+
+# ---------------------------------------------------------------------------
+# Attributions resolution helpers
+# ---------------------------------------------------------------------------
+
+def get_attributions_for_project(project):
+    """
+    Devuelve la configuración de atribuciones aplicable a `project` siguiendo
+    las reglas de prioridad acordadas:
+
+    1. Si existe una configuración 'project_specific' activa para ese proyecto,
+       se devuelve esa.
+    2. Si no, se devuelve la primera configuración 'generic' activa que aplique
+       al proyecto (orden alfabético por `name` para que la elección sea
+       determinista). Una genérica aplica cuando `apply_to_all_projects=True` o
+       cuando el proyecto está incluido en su lista de memberships.
+    3. Si nada coincide, devuelve None.
+    """
+    if project is None:
+        return None
+
+    from .models import AttributionConfig
+
+    specific = (
+        AttributionConfig.objects
+        .filter(kind=AttributionConfig.KIND_PROJECT_SPECIFIC,
+                is_active=True,
+                project=project)
+        .first()
+    )
+    if specific is not None:
+        return specific
+
+    generic_qs = (
+        AttributionConfig.objects
+        .filter(kind=AttributionConfig.KIND_GENERIC, is_active=True)
+        .filter(Q(apply_to_all_projects=True) | Q(project_memberships__project=project))
+        .order_by('name')
+        .distinct()
+    )
+    return generic_qs.first()
+
+
+def normalize_attributions_filemanager_relative_path(internal_path):
+    """
+    Devuelve la ruta del fichero relativa a FILEMANAGER_DIRECTORY, con '/' como
+    separador. Tolera valores guardados como ruta absoluta y el caso legacy en
+    que se concatena el prefijo duplicado (p. ej. opt/gvsigol_data/data/...)
+    encima del directorio del filemanager.
+    """
+    from pathlib import Path
+
+    if internal_path is None:
+        return ''
+    s = str(internal_path).strip()
+    if not s:
+        return ''
+
+    fm_root = Path(FILEMANAGER_DIRECTORY).resolve()
+
+    def rel_to_fm(abs_path):
+        try:
+            r = Path(abs_path).resolve().relative_to(fm_root)
+            return str(r).replace('\\', '/')
+        except ValueError:
+            return None
+
+    p = Path(s.replace('\\', '/'))
+
+    if p.is_absolute():
+        rel = rel_to_fm(p)
+        if rel is not None:
+            return rel
+
+    rel_s = s.replace('\\', '/').lstrip('/')
+
+    fm_noprefix = str(fm_root).replace('\\', '/').lstrip('/')
+    low = rel_s.lower()
+    low_fm = fm_noprefix.lower()
+    if low.startswith(low_fm + '/'):
+        rel_s = rel_s[len(fm_noprefix) + 1:]
+    elif low == low_fm:
+        rel_s = ''
+
+    if not rel_s:
+        return ''
+
+    try:
+        cand = (fm_root / rel_s).resolve()
+        rel = rel_to_fm(cand)
+        if rel is not None:
+            return rel
+    except (OSError, RuntimeError):
+        pass
+
+    trial = Path('/') / rel_s
+    try:
+        rel = rel_to_fm(trial)
+        if rel is not None:
+            return rel
+    except (OSError, RuntimeError):
+        pass
+
+    return rel_s
+
+
+def attributions_attachment_matches_relative_path(norm_relative_path):
+    """
+    True si existe algún AttributionAttachment cuya internal_path
+    normalizada coincide con norm_relative_path (separadores '/').
+    """
+    from pathlib import Path
+    from .models import AttributionAttachment
+
+    norm = norm_relative_path.replace('\\', '/').strip('/')
+    if not norm:
+        return False
+
+    fm = Path(FILEMANAGER_DIRECTORY).resolve()
+    try:
+        abs_under_fm = str((fm / norm).resolve())
+    except (OSError, ValueError):
+        abs_under_fm = None
+
+    q = (
+        Q(internal_path__iendswith='/' + norm) |
+        Q(internal_path__iexact=norm)
+    )
+    if abs_under_fm:
+        q |= Q(internal_path__iexact=abs_under_fm)
+
+    for att in AttributionAttachment.objects.filter(q):
+        if normalize_attributions_filemanager_relative_path(att.internal_path) == norm:
+            return True
+
+    # Respaldo: internal_path en BD con prefijos distintos al esperado en q
+    bn = os.path.basename(norm)
+    if bn:
+        for att in AttributionAttachment.objects.filter(
+            Q(internal_path__iendswith='/' + bn) | Q(internal_path__iexact=bn)
+        ):
+            if normalize_attributions_filemanager_relative_path(att.internal_path) == norm:
+                return True
+    return False
+
+
+def attributions_logo_matches_relative_path(norm_relative_path):
+    """
+    True si existe alguna configuración de atribuciones cuyo
+    logo_internal_path normalizado coincide con norm_relative_path.
+    """
+    from .models import AttributionConfig
+
+    norm = (norm_relative_path or '').replace('\\', '/').strip('/')
+    if not norm:
+        return False
+
+    for cfg in AttributionConfig.objects.exclude(
+        Q(logo_internal_path__isnull=True) | Q(logo_internal_path__exact='')
+    ).only('logo_internal_path'):
+        if normalize_attributions_filemanager_relative_path(cfg.logo_internal_path) == norm:
+            return True
+    return False
+
+
+def build_attributions_public_url(internal_path):
+    """
+    Construye la URL pública para descargar un adjunto de atribuciones a
+    partir de su ruta interna en el file manager. La URL apunta al fileserver
+    de gvsigol_services y se sirve con sendfile y permission_classes=[AllowAny].
+    """
+    relative_path = normalize_attributions_filemanager_relative_path(internal_path)
+    if not relative_path:
+        return ''
+
+    base_url = (settings.BASE_URL or '').rstrip('/')
+    gvsigol_prefix = (getattr(settings, 'GVSIGOL_URL_PREFIX', 'gvsigonline/') or '').strip('/')
+    # Rutas en urls.py: include(prefix + 'fileserver/', gvsigol_services.urls_fileserver)
+    # → URL real: …/fileserver/attributions/download/<path>/ (sin segmento gvsigol_services).
+    # La ruta Django declara barra final; facilita coincidencia con APPEND_SLASH.
+    path_enc = quote(relative_path, safe='/')
+    return '{base}/{prefix}/fileserver/attributions/download/{path}/'.format(
+        base=base_url,
+        prefix=gvsigol_prefix,
+        path=path_enc,
+    )
+
+
+ATTRIBUTION_MODAL_SECTION_KEYS = (
+    'logo',
+    'copyright',
+    'other',
+    'help',
+    'contact',
+    'legal',
+    'links',
+    'attachments',
+)
+
+
+def normalize_attributions_modal_section_order(value):
+    """
+    Lista ordenada de ids de bloque válidos para el modal de atribuciones.
+    Si falta algún id conocido, se añade al final preservando el orden por defecto.
+    """
+    if value is None or value == '' or value == []:
+        return list(ATTRIBUTION_MODAL_SECTION_KEYS)
+    if isinstance(value, str):
+        try:
+            value = json.loads(value)
+        except (ValueError, TypeError):
+            return list(ATTRIBUTION_MODAL_SECTION_KEYS)
+    if not isinstance(value, list):
+        return list(ATTRIBUTION_MODAL_SECTION_KEYS)
+    allowed = set(ATTRIBUTION_MODAL_SECTION_KEYS)
+    seen = set()
+    out = []
+    for key in value:
+        if key in allowed and key not in seen:
+            out.append(key)
+            seen.add(key)
+    for key in ATTRIBUTION_MODAL_SECTION_KEYS:
+        if key not in seen:
+            out.append(key)
+            seen.add(key)
+    return out
+
+
+def serialize_attributions(config):
+    """
+    Genera la representación JSON-serializable de una `AttributionConfig`
+    para ser consumida por el visor React. Devuelve None si la configuración
+    es None.
+    """
+    if config is None:
+        return None
+
+    links = [
+        {
+            'url': link.url,
+            'description': link.description or '',
+        }
+        for link in config.links.all().order_by('order', 'id')
+    ]
+
+    attachments = [
+        {
+            'public_url': build_attributions_public_url(att.internal_path)
+                or (att.public_url or ''),
+            'description': att.description or '',
+        }
+        for att in config.attachments.all().order_by('order', 'id')
+    ]
+
+    return {
+        'id': config.id,
+        'title': config.name,
+        'name': config.name,
+        'description': config.description or '',
+        'other': {
+            'title': config.other_title or '',
+            'text': config.other_text or '',
+        },
+        'logo': {
+            'internal_path': config.logo_internal_path or '',
+            'public_url': build_attributions_public_url(config.logo_internal_path)
+                or (config.logo_public_url or ''),
+        },
+        'kind': config.kind,
+        'copyright_notice': config.copyright_notice or '',
+        'help_text': config.help_text or '',
+        'contact': {
+            'organization': config.contact_organization or '',
+            'person': config.contact_person or '',
+            'address': config.contact_address or '',
+            'phone': config.contact_phone or '',
+            'email': config.contact_email or '',
+            'legal_notice': config.legal_notice or '',
+        },
+        'links': links,
+        'attachments': attachments,
+        'modal_section_order': normalize_attributions_modal_section_order(
+            config.modal_section_order
+        ),
+    }

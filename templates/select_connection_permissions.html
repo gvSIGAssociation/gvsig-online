@@ -1,0 +1,241 @@
+{% load i18n %}
+{% load static %}
+<style>
+.cp-header {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	padding: 12px 16px;
+}
+.cp-search { flex: 1; min-width: 180px; max-width: 320px; }
+.cp-allow-all {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+.cp-perm-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	border: 1px solid #e8ecef;
+	border-radius: 20px;
+	padding: 3px 10px 3px 8px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #7b8a96;
+	background: #f4f6f8;
+	cursor: pointer;
+	transition: background 0.15s, border-color 0.15s, color 0.15s;
+	user-select: none;
+	white-space: nowrap;
+}
+.cp-perm-chip input[type="checkbox"] {
+	margin: 0;
+	cursor: pointer;
+	accent-color: #4a7fa5;
+	width: 11px;
+	height: 11px;
+	flex-shrink: 0;
+}
+.cp-perm-chip:has(input:checked) {
+	background: rgba(74,127,165,0.1);
+	border-color: #4a7fa5;
+	color: #2d5f80;
+}
+.cp-perm-chip:has(input:disabled) {
+	opacity: 0.55;
+	cursor: default;
+}
+/* Fila del rol */
+.cp-role-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 8px;
+	width: 100%;
+}
+.cp-role-info { flex: 1; min-width: 0; }
+.cp-role-name {
+	font-size: 13px;
+	font-weight: 600;
+	color: #2e3a45;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.cp-role-desc {
+	font-size: 12px;
+	color: #7b8a96;
+	margin-top: 1px;
+}
+.cp-perms {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-shrink: 0;
+}
+/* Reemplazar estilos del item de la lista */
+#connection-permissions-box .products-list > .item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 12px;
+}
+#connection-permissions-box .products-list .product-img {
+	flex-shrink: 0;
+	width: 32px;
+	height: 32px;
+}
+#connection-permissions-box .products-list .product-img img {
+	width: 20px;
+	height: 20px;
+	opacity: 0.5;
+}
+#connection-permissions-box .products-list .product-info {
+	flex: 1;
+	min-width: 0;
+}
+</style>
+
+<div class="row">
+	<div class="col-md-12">
+		<div id="connection-permissions-box" class="searchable-list-box">
+			<div class="box-header cp-header">
+				<div class="cp-search">
+					<input type="text" class="search form-control" placeholder="{% filter force_escape %}{% trans 'Search user role...' %}{% endfilter %}" id="role-search" />
+				</div>
+				<div class="cp-allow-all">
+					<label class="cp-perm-chip" title="{% trans 'All users can create datastores with this connection' %}">
+						<input type="checkbox" name="allow_all_datastore" id="allow_all_datastore" {% if connection and connection.allow_all_datastore %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
+						<span>{% trans "Allow all - Datastores" %}</span>
+					</label>
+					<label class="cp-perm-chip" title="{% trans 'All users can use this connection in ETL' %}">
+						<input type="checkbox" name="allow_all_etl" id="allow_all_etl" {% if connection and connection.allow_all_etl %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
+						<span>{% trans "Allow all - ETL" %}</span>
+					</label>
+					<label class="cp-perm-chip" title="{% trans 'All users can manage this connection' %}">
+						<input type="checkbox" name="allow_all_manage" id="allow_all_manage" {% if connection and connection.allow_all_manage %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
+						<span>{% trans "Allow all - Management" %}</span>
+					</label>
+				</div>
+			</div>
+			<div class="box-body">
+				<ul class="products-list product-list-in-box list">
+					{% for role in roles %}
+					<li class="item">
+						<div class="product-img">
+							<img src="{% static 'img/users.png' %}" alt="{% trans 'User role image' %}">
+						</div>
+						<div class="product-info">
+							<div class="cp-role-row">
+								<div class="cp-role-info">
+									<div class="cp-role-name searchable-rolename">{{role.name}}</div>
+									<div class="cp-role-desc searchable-roledesc">{{role.description}}</div>
+								</div>
+								<div class="cp-perms">
+									<label class="cp-perm-chip">
+										<input type="checkbox" name="role_datastore_{{role.name}}" id="role_datastore_{{role.name}}" {% if role.datastore_checked %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
+										<span>{% trans "Datastores" %}</span>
+									</label>
+									<label class="cp-perm-chip">
+										<input type="checkbox" name="role_etl_{{role.name}}" id="role_etl_{{role.name}}" {% if role.etl_checked %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
+										<span>{% trans "ETL" %}</span>
+									</label>
+									<label class="cp-perm-chip">
+										<input type="checkbox" name="role_manage_{{role.name}}" id="role_manage_{{role.name}}" {% if role.manage_checked %}checked {% endif %}{% if not can_edit_permissions %}disabled{% endif %}/>
+										<span>{% trans "Management" %}</span>
+									</label>
+								</div>
+							</div>
+						</div>
+					</li>
+					{% endfor %}
+				</ul>
+				<ul class="pagination"></ul>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+$(document).ready(function() {
+
+	// -----------------------------------------------------------------------
+	// PASO 1: Leer el estado inicial de TODOS los checkboxes ANTES de que
+	// List.js los elimine del DOM al paginar (usa removeChild internamente).
+	// -----------------------------------------------------------------------
+	var allRolePermissions = {};
+
+	$('#connection-permissions-box .list .item').each(function() {
+		// Encontrar el nombre del rol buscando el primer checkbox de la fila
+		var $dsCheck = $(this).find('input[type="checkbox"][name^="role_datastore_"]');
+		if ($dsCheck.length === 0) return;
+		var roleName = $dsCheck.attr('name').replace('role_datastore_', '');
+		allRolePermissions[roleName] = {
+			datastore: $dsCheck.is(':checked'),
+			etl:       $(this).find('input[name="role_etl_' + roleName + '"]').is(':checked'),
+			manage:    $(this).find('input[name="role_manage_' + roleName + '"]').is(':checked')
+		};
+	});
+
+	// -----------------------------------------------------------------------
+	// PASO 2: Inicializar List.js con paginación (puede eliminar del DOM los
+	// items que no están en la página actual).
+	// -----------------------------------------------------------------------
+	var searcheableRoleList = new List('connection-permissions-box', {
+		valueNames: ['searchable-rolename', 'searchable-roledesc'],
+		page: 10,
+		pagination: true
+	});
+
+	$('#role-search').on('keyup', function() {
+		searcheableRoleList.search($(this).val());
+	});
+
+	// -----------------------------------------------------------------------
+	// PASO 3: Cuando el usuario cambia un checkbox visible, actualizar el
+	// objeto de tracking para reflejar el nuevo estado.
+	// -----------------------------------------------------------------------
+	$('#connection-permissions-box').on('change', 'input[type="checkbox"][name^="role_datastore_"]', function() {
+		var roleName = $(this).attr('name').replace('role_datastore_', '');
+		if (allRolePermissions[roleName] !== undefined) {
+			allRolePermissions[roleName].datastore = $(this).is(':checked');
+		}
+	});
+	$('#connection-permissions-box').on('change', 'input[type="checkbox"][name^="role_etl_"]', function() {
+		var roleName = $(this).attr('name').replace('role_etl_', '');
+		if (allRolePermissions[roleName] !== undefined) {
+			allRolePermissions[roleName].etl = $(this).is(':checked');
+		}
+	});
+	$('#connection-permissions-box').on('change', 'input[type="checkbox"][name^="role_manage_"]', function() {
+		var roleName = $(this).attr('name').replace('role_manage_', '');
+		if (allRolePermissions[roleName] !== undefined) {
+			allRolePermissions[roleName].manage = $(this).is(':checked');
+		}
+	});
+
+	// -----------------------------------------------------------------------
+	// PASO 4: Antes de enviar el formulario, añadir inputs ocultos para todos
+	// los roles marcados que List.js haya eliminado del DOM (páginas ocultas).
+	// Así el servidor recibe el estado completo de TODOS los roles.
+	// -----------------------------------------------------------------------
+	$('#connection-form').on('submit', function() {
+		var $form = $(this);
+		$.each(allRolePermissions, function(roleName, perms) {
+			// Para cada tipo de permiso, si está marcado pero su input ya no
+			// está en el DOM (List.js lo eliminó), añadimos un input oculto.
+			$.each(['datastore', 'etl', 'manage'], function(_, permType) {
+				var inputName = 'role_' + permType + '_' + roleName;
+				if (perms[permType] && $form.find('input[name="' + inputName + '"]').length === 0) {
+					$('<input type="hidden">').attr('name', inputName).val('on').appendTo($form);
+				}
+			});
+		});
+	});
+
+});
+</script>
+

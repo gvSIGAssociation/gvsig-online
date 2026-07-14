@@ -45,7 +45,7 @@ def get_name(trigger):
 
 def insert_def(apps, schema_editor):
     try:
-        from django.utils.translation import ugettext_noop as _
+        from django.utils.translation import gettext_noop as _
         TriggerProcedure = apps.get_model("gvsigol_services", "TriggerProcedure")
         for procedure in TriggerProcedure.objects.filter(func_name=''):
             if procedure.signature == 'public.gol_geocoder_inverso_cartociudad(text)':

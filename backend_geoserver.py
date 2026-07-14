@@ -30,7 +30,7 @@ from .models import Server, Layer, LayerGroup, Datastore, Workspace
 from gvsigol_symbology.models import Symbolizer, Style, Rule, StyleLayer
 from gvsigol_symbology.services import create_default_style, clone_style
 from gvsigol_symbology import services as symbology_services
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from .backend_postgis import Introspect
 import xml.etree.ElementTree as ET
 import geoserver.catalog as gscat
@@ -210,6 +210,19 @@ class Geoserver():
             return True
         except Exception as e:
             print(str(e))
+            return False
+
+    def reload_master(self):
+        """
+        Reloads the master GeoServer node catalog. Needed after GWC REST API
+        changes (e.g. enabling MVT format) so the in-memory GWC tile layer
+        dispatcher picks up the updated configuration.
+        """
+        try:
+            self.rest_catalog.reload(self.conf_url, user=self.user, password=self.password)
+            return True
+        except Exception as e:
+            logger.exception("Could not reload master GeoServer node")
             return False
 
         
@@ -459,7 +472,9 @@ class Geoserver():
             else:
                 catalog.delete(ds, purge, recurse=True)
                 if delete_schema:
-                    utils.delete_schema_for_datastore(json.loads(datastore.connection_params))
+                    utils.delete_schema_for_datastore(
+                        datastore.get_connection_params_dict()
+                    )
                 
             return True
         else:
@@ -501,9 +516,21 @@ class Geoserver():
             # catalog.save() someway sets fixed subsets for gwc layers, so we need to
             # restore dynamic grid subsets afterwards
             self.set_gwclayer_dynamic_subsets(layer.datastore.workspace, layer.name)
+            # catalog.save() also resets GWC parameterFilters, so re-apply the style
+            # configuration after restoring grid subsets
+            style_list = []
+            default_style = ''
+            for sl in StyleLayer.objects.filter(layer=layer):
+                if not sl.style.name.endswith('_tmp'):
+                    style_list.append(sl.style.name)
+                if sl.style.is_default:
+                    default_style = sl.style.name
+            self.rest_catalog.update_layer_styles_configuration(
+                layer, style, default_style, style_list,
+                user=self.user, password=self.password)
             return True
         except Exception as e:
-            logger.exception("error setting style", e)
+            logger.exception("error setting style: %s", e)
             return False
         
     def get_geometry_type(self, layer):
@@ -610,25 +637,37 @@ class Geoserver():
             return False
     
      
-    def createOverwrittenStyle(self, name, data, overwrite):
+    def createOverwrittenStyle(self, name, data, overwrite, raw=False):
         """
         Create new style
         """
         try:
-            self.getGsconfig().create_style(name, data, overwrite=overwrite, workspace=None, style_format="sld10", raw=False)
+            self.getGsconfig().create_style(name, data, overwrite=overwrite, workspace=None, style_format="sld10", raw=raw)
             return True
         
         except Exception as e:
             logger.exception('Sobrescribiendo estilo: ' + name)
             error_message = str(e)
-            if (error_message.startswith("There is already a style named")):
-                msg_name= name.split('_')[2]
+            if error_message.startswith("There is already a style named"):
+                if not overwrite:
+                    # A GeoServer orphan style (no Django record) blocks creation.
+                    # Overwrite it so the new Django-tracked style takes effect.
+                    try:
+                        self.getGsconfig().create_style(name, data, overwrite=True, workspace=None, style_format="sld10", raw=raw)
+                        return True
+                    except Exception as e2:
+                        logger.exception('Sobrescribiendo estilo (retry overwrite): ' + name)
+                # overwrite=True was already tried and still failed – bubble up.
+                try:
+                    msg_name = name.split('_')[2]
+                except IndexError:
+                    msg_name = name
                 error = str(_("There is already a style named")) + " " + msg_name
                 raise Exception(error)
             return False
     
-    def createStyle(self, name, data):
-        return self.createOverwrittenStyle(name, data, False)
+    def createStyle(self, name, data, raw=False):
+        return self.createOverwrittenStyle(name, data, False, raw=raw)
         
     def addStyle(self, layer, layer_name, name):
         """
@@ -647,13 +686,13 @@ class Geoserver():
                             
             self.rest_catalog.update_layer_styles_configuration(layer, name, default_style, style_list, user=self.user, password=self.password)
         
-    def updateStyle(self, layer, style_name, sld_body):
+    def updateStyle(self, layer, style_name, sld_body, raw=False):
         """
         Update a style
         """
             
         try:
-            self.rest_catalog.update_style(style_name, sld_body, user=self.user, password=self.password)
+            self.rest_catalog.update_style(style_name, sld_body, user=self.user, password=self.password, raw=raw)
             if layer is not None:
                 style_list = []
                 default_style = ''
@@ -820,13 +859,15 @@ class Geoserver():
             return 'com.vividsolutions.jts.geom.Polygon'
         elif sql_type == "MULTIPOLYGON":
             return 'com.vividsolutions.jts.geom.MultiPolygon'
+        elif sql_type in ("GEOMETRY", "GEOMETRYCOLLECTION", "MULTIGEOMETRY"):
+            return 'com.vividsolutions.jts.geom.Geometry'
 
-    def createResource(self, workspace, store, name, title, extraParams={}):
+    def createResource(self, workspace, store, name, title, extraParams={}, native_name=None):
         try:
             if store.type[0]=="v":
                 return self.createFeaturetype(workspace, store, name, title, extraParams)
             elif store.type[0]=="e":
-                return self.createWMSLayer(workspace, store, name, title)
+                return self.createWMSLayer(workspace, store, name, title, native_name=native_name)
             else:
                 if store.type == 'c_ImageMosaic':
                     #got_params = json.loads(store.connection_params)
@@ -916,12 +957,12 @@ class Geoserver():
             logger.exception('ERROR createCoverage failed. Layer: ' + name + ' - Store: ' + coveragestore.name)
             raise rest_geoserver.FailedRequestError(-1, _("Error: layer could not be published"))
     
-    def createWMSLayer(self, workspace, store, name, title):
+    def createWMSLayer(self, workspace, store, name, title, native_name=None):
         try:   
             catalog = self.getGsconfig()
             ws = catalog.get_workspace(workspace.name)
             dst = catalog.get_store(store.name, ws)
-            return catalog.create_wmslayer(ws, dst, name, name)
+            return catalog.create_wmslayer(ws, dst, name, native_name or name)
 
         except rest_geoserver.FailedRequestError as e:
             raise rest_geoserver.FailedRequestError(e.status_code, _("Error publishing the layer. Backend error: {msg}").format(msg=e.get_message()))
@@ -1495,6 +1536,12 @@ class Geoserver():
         for f in geometry_columns_info:
             name = f[2]
             geometry_type = f[5]
+            if geometry_type and geometry_type.upper() == 'GEOMETRY' and hasattr(
+                conn, 'resolve_concrete_geometry_type'
+            ):
+                resolved = conn.resolve_concrete_geometry_type(schema, tablename, name)
+                if resolved:
+                    geometry_type = resolved
             geometry_columns[name] = geometry_type
         
         for f in field_info:
@@ -2014,6 +2061,32 @@ class Geoserver():
             logger.error("gwc subset error - ws: {} - layer: {}".format(str(ws_name), str(layer_name)))
             if isinstance(e, RequestError):
                 logger.error(e.get_detailed_message())
+
+    def update_vector_tile_format(self, workspace, layer_name, enable_mvt):
+        """
+        Actualiza la configuración de GeoWebCache para habilitar o deshabilitar
+        el formato MVT (application/vnd.mapbox-vector-tile) en una capa.
+        
+        Args:
+            workspace: Objeto Workspace (o None para layer groups)
+            layer_name: Nombre de la capa
+            enable_mvt: True para habilitar MVT, False para deshabilitar
+        
+        Returns:
+            True si se actualiza correctamente, False en caso de error
+        """
+        ws_name = workspace.name if workspace else None
+        try:
+            return self.rest_catalog.update_gwclayer_vector_tile_format(
+                ws_name, layer_name, enable_mvt, user=self.user, password=self.password
+            )
+        except Exception as e:
+            logger.exception("Could not update vector tile format for layer")
+            logger.error("vector tile format error - ws: %s - layer: %s - enable: %s",
+                         ws_name, layer_name, enable_mvt)
+            if isinstance(e, RequestError):
+                logger.error(e.get_detailed_message())
+            return False
 
     def clear_resource_cache(self):
         """

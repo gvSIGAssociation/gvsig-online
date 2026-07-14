@@ -38,9 +38,9 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse, HttpResponseForbidden, StreamingHttpResponse
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
-from django.utils.translation import ugettext as _, ugettext_lazy, ugettext
+from django.utils.translation import gettext as _, gettext_lazy, gettext
 
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_safe, require_POST, require_GET
@@ -58,7 +58,7 @@ from gvsigol.basetypes import BackendNotAvailable
 from .backend_postgis import Introspect
 from .backend_postgis import SqlFrom, SqlField, SqlJoinFields
 from .forms_geoserver import CreateFeatureTypeForm
-from .forms_services import ServerForm, SqlViewForm, WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, ExternalLayerForm, ServiceUrlForm
+from .forms_services import ServerForm, SqlViewForm, WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, ExternalLayerForm, ServiceUrlForm, ConnectionForm, ConnectionUpdateForm
 from gdaltools import gdalsrsinfo
 from . import geographic_servers
 from gvsigol import settings
@@ -68,8 +68,8 @@ from gvsigol_auth.utils import superuser_required, staff_required, get_primary_u
 from gvsigol_auth import auth_backend
 from gvsigol_core import utils as core_utils
 from gvsigol_core.views import forbidden_view
-from gvsigol_core.models import Project, ProjectRole, ProjectBaseLayerTiling
-from gvsigol_core.models import ProjectLayerGroup, TilingProcessStatus
+from gvsigol_core.models import Project, ProjectRole
+from gvsigol_core.models import ProjectLayerGroup
 from gvsigol_symbology.models import Style
 from gvsigol_core.views import not_found_view
 from gvsigol_services.backend_resources import resource_manager
@@ -77,7 +77,8 @@ from gvsigol_services.models import LayerResource, TriggerProcedure, Trigger, La
 import gvsigol_services.tiling_service as tiling_service
 from .models import LayerFieldEnumeration, SqlView
 from .models import Workspace, Datastore, LayerGroup, Layer, Enumeration, EnumerationItem, \
-    LayerLock, Server, Node, ServiceUrl, LayerGroupRole, LayerTopologyConfiguration
+    LayerLock, Server, Node, ServiceUrl, LayerGroupRole, LayerTopologyConfiguration, Connection, ConnectionRole, \
+    ConnectionTrigger, LayerConnectionTrigger, DatastoreRole
 from .rest_geoserver import RequestError
 from . import rest_geoserver
 from . import rest_geowebcache as geowebcache
@@ -97,9 +98,18 @@ from django.contrib import messages
 from . import tasks
 import time
 from django.core import serializers as serial
-from django.db.models import Max
+from django.db.models import Max, Q
 from gvsigol_auth.signals import role_deleted
 from django.views.decorators.cache import never_cache
+
+from collections import defaultdict
+import json
+import os
+import ast
+
+from django.conf import settings
+from .utils import paginate
+from django.db.models import Q
 
 logger = logging.getLogger("gvsigol")
 
@@ -107,7 +117,6 @@ _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 CONNECT_TIMEOUT = 3.05
 READ_TIMEOUT = 30
-base_layer_process = {}
 
 
 def role_deleted_handler(sender, **kwargs):
@@ -335,18 +344,46 @@ def reload_node(request, nid):
 @require_safe
 @superuser_required
 def workspace_list(request):
+    # Obtener QuerySet de workspaces
+    workspace_qs = Workspace.objects.all().select_related('server').order_by('id')
+    
+    # Aplicar búsqueda si se proporciona el parámetro 'search'
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        workspace_qs = workspace_qs.filter(
+            Q(name__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(uri__icontains=search_query) |
+            Q(server__name__icontains=search_query) |
+            Q(server__title__icontains=search_query)
+        )
+    
+    # Paginar antes de construir dicts
+    page_workspaces, page_ctx = paginate(
+        request,
+        workspace_qs,
+        default_page_size=10,
+        max_page_size=200,
+        page_param="page",
+        page_size_param="page_size",
+    )
+    
+    # Construir lista de diccionarios solo para la página actual
     workspaces = [ {
         'id': w.id,
         'name': w.name,
         'description': w.description,
         'uri': w.uri,
         'is_public': w.is_public,
-        'server': w.server.title_name
+        'server': w.server.title_name if w.server else ''
         }
-        for w in Workspace.objects.all()
+        for w in page_workspaces
     ]
     response = {
-        'workspaces': workspaces
+        'workspaces': workspaces,
+        'request': request,
+        'search_query': search_query,
+        **page_ctx,  # Agrega paginator/page_obj/page_size/etc al template
     }
     return render(request, 'workspace_list.html', response)
 
@@ -461,27 +498,59 @@ def workspace_update(request, wid):
 @staff_required
 def datastore_list(request):
 
-    datastore_list = None
+    # Obtener QuerySet de datastores
     if request.user.is_superuser:
-        datastore_list = Datastore.objects.all()
+        datastore_qs = Datastore.objects.all()
     else:
-        # no consideramos DefaultUserDatastore porque por el momento sólo permitimos actualizar el datastore
-        # a superusuarios o al creador
-        datastore_list = Datastore.objects.filter(created_by=request.user.username).order_by('name')
+        # Usuario staff: ver sus propios datastores + los que tienen permiso por rol + allow_all
+        from gvsigol_services.models import DatastoreRole
+        from gvsigol_auth import auth_backend
+        user_roles = auth_backend.get_roles(request.user)
+        permitted_ds_ids = DatastoreRole.objects.filter(
+            role__in=user_roles,
+            can_use=True
+        ).values_list('datastore_id', flat=True)
+        
+        datastore_qs = Datastore.objects.filter(
+            Q(created_by=request.user.username) |
+            Q(id__in=permitted_ds_ids) |
+            Q(allow_all=True)
+        ).distinct()
+    
+    # Aplicar búsqueda si se proporciona el parámetro 'search'
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        datastore_qs = datastore_qs.filter(
+            Q(name__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(type__icontains=search_query) |
+            Q(workspace__name__icontains=search_query)
+        )
+    
+    # Orden estable para paginación
+    datastore_qs = datastore_qs.order_by('id')
+    
+    # Paginar antes de procesar connection_params
+    page_datastores, page_ctx = paginate(
+        request,
+        datastore_qs,
+        default_page_size=10,
+        max_page_size=200,
+        page_param="page",
+        page_size_param="page_size",
+    )
 
-    for datastore in datastore_list:
-        params = json.loads(datastore.connection_params)
-        if 'passwd' in params:
-            params['passwd'] = '****'
-        if 'password' in params:
-            if params['password'] == '':
-                params['password'] = ''
-            else:
-                params['password'] = '****'
-        datastore.connection_params = json.dumps(params)
+    # Procesar connection_params solo para la página actual
+    for datastore in page_datastores:
+        # Usar el nuevo método que soporta ambos modos (legacy y nuevo)
+        masked_params = datastore.get_masked_connection_params()
+        datastore.connection_params = json.dumps(masked_params)
 
     response = {
-        'datastores': datastore_list
+        'datastores': page_datastores,
+        'request': request,
+        'search_query': search_query,
+        **page_ctx,  # Agrega paginator/page_obj/page_size/etc al template
     }
     return render(request, 'datastore_list.html', response)
 
@@ -522,7 +591,7 @@ def datastore_add(request):
             #post_dict['connection_params']['date_regex'] = '(?<=_)[0-9]{8}'
             #post_dict['connection_params']['ele_regex'] = ''
 
-        form = DatastoreForm(post_dict)
+        form = DatastoreForm(post_dict, user=request.user)
         if not has_errors and form.is_valid():
             name = form.cleaned_data['name']
             if _valid_name_regex.search(name) == None:
@@ -531,34 +600,184 @@ def datastore_add(request):
                 form.add_error(None, _("Invalid datastore name: '{value}'. Identifiers must be in lowercase.").format(value=name))
             else:
                 ws = form.cleaned_data['workspace']
-                ds = utils.add_datastore(form.cleaned_data['workspace'],
-                                  form.cleaned_data['type'],
-                                  form.cleaned_data['name'],
-                                  form.cleaned_data['description'],
-                                  form.cleaned_data['connection_params'],
-                                  request.user.username)
-                if ds is not None:
-                    if type == 'c_ImageMosaic':
-                        gs = geographic_servers.get_instance().get_server_by_id(ws.server.id)
-                        try:
-                            gs.uploadImageMosaic(ws, ds)
-                            gs.reload_nodes()
-                        except Exception as e:
-                            pass
+                
+                if type == 'v_PostGIS':
+                    # PostGIS: SIEMPRE usa conexión centralizada
+                    connection = form.cleaned_data['connection']
+                    schema = form.cleaned_data['schema']
+                    
+                    # Validar nombre del esquema
+                    if not schema:
+                        form.add_error('schema', _('Schema name is required'))
+                    elif not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', schema):
+                        form.add_error('schema', _('Invalid schema name. Use only letters, numbers and underscores, starting with a letter or underscore.'))
+                    else:
+                        # Validar que el usuario tiene derecho a usar este schema
+                        # Superusuario: sin restricción
+                        # Usuario con can_manage sobre la conexión: sin restricción
+                        # Resto: solo puede usar su propio schema ds_<username> o crear uno nuevo
+                        if not request.user.is_superuser:
+                            _user_roles = auth_backend.get_roles(request.user)
+                            _all_user_roles = list(_user_roles) + [request.user.username]
+                            _can_manage_conn = (
+                                connection.allow_all_manage or
+                                connection.created_by == request.user.username or
+                                connection.roles.filter(role__in=_all_user_roles, can_manage=True).exists()
+                            )
+                            if not _can_manage_conn:
+                                _user_schema = utils.get_datastore_name(request.user.username)
+                                if schema != _user_schema:
+                                    # Comprobar si el schema YA EXISTE en la BD
+                                    try:
+                                        _existing_schemas = connection.get_schemas()
+                                        if schema in _existing_schemas:
+                                            form.add_error('schema', _('You do not have permission to use this schema. You can only use your own schema ({user_schema}) or create a new one.').format(user_schema=_user_schema))
+                                    except Exception:
+                                        pass  # Si no podemos consultarlo, dejamos pasar y que el backend decida
 
-                    return HttpResponseRedirect(reverse('datastore_list'))
+                    if not form.errors:
+                        try:
+                            # Crear el esquema si no existe
+                            connection.create_schema_if_not_exists(schema)
+                            
+                            # Construir connection_params desde la conexión + schema
+                            conn_params = connection.get_connection_params()
+                            conn_params['schema'] = schema
+                            # Añadir extra_params si existen
+                            extra = connection.get_extra_params()
+                            conn_params.update(extra)
+                            connection_params_json = json.dumps(conn_params)
+                            
+                            # Log para depuración
+                            logger.debug(f"Creating datastore with params: {conn_params.get('host')}:{conn_params.get('port')}/{conn_params.get('database')}, schema={schema}")
+                            
+                            ds = utils.add_datastore(
+                                form.cleaned_data['workspace'],
+                                form.cleaned_data['type'],
+                                form.cleaned_data['name'],
+                                form.cleaned_data['description'],
+                                connection_params_json,
+                                request.user.username
+                            )
+                            
+                            if ds is not None:
+                                # Actualizar el datastore para usar el nuevo modelo
+                                ds.connection = connection
+                                ds.schema = schema
+                                ds.legacy_mode = False
+                                ds.save()
+                                
+                                # Guardar permisos del datastore
+                                _save_datastore_permissions(request, ds)
+                                
+                                return HttpResponseRedirect(reverse('datastore_list'))
+                            else:
+                                logger.error(f"Failed to create datastore. Connection params (masked): host={conn_params.get('host')}, port={conn_params.get('port')}, database={conn_params.get('database')}, schema={schema}, user={conn_params.get('user')}")
+                                form.add_error(None, _('Error: Data store could not be created'))
+                        except ValueError as e:
+                            form.add_error('schema', str(e))
+                        except Exception as e:
+                            logger.exception("Error creating schema")
+                            form.add_error('schema', _('Error creating schema: ') + str(e))
                 else:
-                    # FIXME: the backend should raise an exception to identify the cause (e.g. datastore exists, backend is offline)
-                    form.add_error(None, _('Error: Data store could not be created'))
+                    # Otros tipos (GeoTIFF, WMS, ImageMosaic): usar connection_params directamente
+                    ds = utils.add_datastore(form.cleaned_data['workspace'],
+                                      form.cleaned_data['type'],
+                                      form.cleaned_data['name'],
+                                      form.cleaned_data['description'],
+                                      form.cleaned_data['connection_params'],
+                                      request.user.username)
+                    if ds is not None:
+                        if type == 'c_ImageMosaic':
+                            gs = geographic_servers.get_instance().get_server_by_id(ws.server.id)
+                            try:
+                                gs.uploadImageMosaic(ws, ds)
+                                gs.reload_nodes()
+                            except Exception as e:
+                                pass
+
+                        # Guardar permisos del datastore
+                        _save_datastore_permissions(request, ds)
+                        
+                        return HttpResponseRedirect(reverse('datastore_list'))
+                    else:
+                        # FIXME: the backend should raise an exception to identify the cause (e.g. datastore exists, backend is offline)
+                        form.add_error(None, _('Error: Data store could not be created'))
         else:
             if has_errors:
                 form.add_error(None, _('Error: GeoTIFF is not georreferenced'))
 
     else:
-        form = DatastoreForm()
+        form = DatastoreForm(user=request.user)
         if not request.user.is_superuser:
             form.fields['workspace'].queryset = Workspace.objects.filter(created_by__exact=request.user.username).order_by('name')
-    return render(request, 'datastore_add.html', {'fm_directory': FILEMANAGER_DIRECTORY + "/", 'form': form})
+    
+    # Obtener roles para la pestaña de permisos
+    all_roles = auth_backend.get_all_roles_details(exclude_system=True)
+    roles = []
+    for role in all_roles:
+        role_name = role.get('name') if isinstance(role, dict) else str(role)
+        role_info = {
+            'name': role_name,
+            'description': role.get('description', '') if isinstance(role, dict) else '',
+            'use_checked': False,  # Por defecto ninguno seleccionado al crear
+            'manage_checked': False
+        }
+        roles.append(role_info)
+    
+    return render(request, 'datastore_add.html', {
+        'fm_directory': FILEMANAGER_DIRECTORY + "/", 
+        'form': form,
+        'roles': roles
+    })
+
+
+def _save_datastore_permissions(request, datastore):
+    """
+    Guarda los permisos de rol para un datastore basándose en los checkboxes del formulario.
+    Solo el propietario o superusuario puede hacer esto.
+    """
+    if not request.user.is_superuser and datastore.created_by != request.user.username:
+        return
+    
+    from gvsigol_services.models import DatastoreRole
+    
+    # Guardar allow_all y allow_all_manage
+    datastore.allow_all = 'allow_all' in request.POST
+    datastore.allow_all_manage = 'allow_all_manage' in request.POST
+    datastore.save()
+    
+    # Obtener todos los roles del sistema
+    all_roles = auth_backend.get_all_roles_details(exclude_system=True)
+    
+    for role in all_roles:
+        role_name = role.get('name') if isinstance(role, dict) else str(role)
+        can_use = f'role_use_{role_name}' in request.POST
+        can_manage = f'role_manage_{role_name}' in request.POST
+        
+        existing_perm = DatastoreRole.objects.filter(
+            datastore=datastore,
+            role=role_name
+        ).first()
+        
+        if can_use or can_manage:
+            if existing_perm:
+                # Actualizar permisos existentes
+                existing_perm.can_use = can_use
+                existing_perm.can_manage = can_manage
+                existing_perm.save()
+            else:
+                # Crear nuevo permiso
+                DatastoreRole.objects.create(
+                    datastore=datastore,
+                    role=role_name,
+                    can_use=can_use,
+                    can_manage=can_manage
+                )
+        elif existing_perm:
+            # Eliminar permiso si no tiene ninguno de los dos
+            existing_perm.delete()
+
 
 @login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
@@ -570,13 +789,51 @@ def datastore_update(request, datastore_id):
         return HttpResponseNotFound('<h1>Datastore not found {0}</h1>'.format(datastore_id))
     if not utils.can_manage_datastore(request.user, datastore):
         return forbidden_view(request)
+    
+    # Determinar si es modo conexión o legacy
+    uses_connection = not datastore.legacy_mode and datastore.connection is not None
+    
     if request.method == 'POST':
-        form = DatastoreUpdateForm(request.POST)
+        form = DatastoreUpdateForm(request.POST, instance=datastore)
         if form.is_valid():
-                dstype = datastore.type
-                description = form.cleaned_data.get('description')
+            dstype = datastore.type
+            description = form.cleaned_data.get('description')
+            
+            if uses_connection:
+                # Modo conexión: solo actualizar descripción, el resto viene de la conexión
+                gs = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
+                
+                # Obtener connection_params desde la conexión
+                conn_params = datastore.connection.get_connection_params()
+                conn_params['schema'] = datastore.schema
+                extra = datastore.connection.get_extra_params()
+                conn_params.update(extra)
+                connection_params = json.dumps(conn_params)
+                
+                expose_pks_old = gs.datastore_check_exposed_pks(datastore)
+                if gs.updateDatastore(datastore.workspace.name, datastore.name,
+                                      description, dstype, connection_params):
+                    datastore.description = description
+                    datastore.connection_params = connection_params
+                    datastore.save()
+                    expose_pks_new = gs.datastore_check_exposed_pks(datastore)
+                    if expose_pks_old != expose_pks_new:
+                        for layer in datastore.layer_set.all():
+                            gs.reload_featuretype(layer, attributes=True, nativeBoundingBox=True, latLonBoundingBox=True)
+                            layer.get_config_manager().refresh_field_conf(include_pks=expose_pks_new)
+                            layer.save()
+                    gs.reload_nodes()
+                    
+                    # Procesar permisos de usuarios si es propietario
+                    _save_datastore_permissions(request, datastore)
+                    
+                    return HttpResponseRedirect(reverse('datastore_list'))
+                else:
+                    form.add_error(None, _("Error updating datastore"))
+            else:
+                # Modo legacy: actualizar connection_params
                 connection_params = form.cleaned_data.get('connection_params')
-
+                
                 got_params = json.loads(connection_params)
                 if 'passwd' in got_params and got_params['passwd'] == '****':
                     params = json.loads(datastore.connection_params)
@@ -591,10 +848,7 @@ def datastore_update(request, datastore_id):
                 gs = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
                 expose_pks_old = gs.datastore_check_exposed_pks(datastore)
                 if gs.updateDatastore(datastore.workspace.name, datastore.name,
-                                                      description, dstype, connection_params):
-                    # REST API does not allow to can't change the workspace or name of a datastore
-                    #datastore.workspace = workspace
-                    #datastore.name = name
+                                      description, dstype, connection_params):
                     datastore.description = description
                     datastore.connection_params = connection_params
                     datastore.save()
@@ -605,22 +859,61 @@ def datastore_update(request, datastore_id):
                             layer.get_config_manager().refresh_field_conf(include_pks=expose_pks_new)
                             layer.save()
                     gs.reload_nodes()
-
+                    
+                    # Procesar permisos de usuarios si es propietario
+                    _save_datastore_permissions(request, datastore)
+                    
                     return HttpResponseRedirect(reverse('datastore_list'))
                 else:
                     form.add_error(None, _("Error updating datastore"))
     else:
-        params = json.loads(datastore.connection_params)
-        if 'passwd' in params:
-            params['passwd'] = '****'
-        if 'password' in params:
-            if params['password'] == '':
-                params['password'] = ''
-            else:
-                params['password'] = '****'
-        datastore.connection_params = json.dumps(params)
+        if datastore.connection_params:
+            params = json.loads(datastore.connection_params)
+            if 'passwd' in params:
+                params['passwd'] = '****'
+            if 'password' in params:
+                if params['password'] == '':
+                    params['password'] = ''
+                else:
+                    params['password'] = '****'
+            datastore.connection_params = json.dumps(params)
         form = DatastoreUpdateForm(instance=datastore)
-    return render(request, 'datastore_update.html', {'form': form, 'datastore_id': datastore_id, 'workspace_name': datastore.workspace.name})
+    
+    # Obtener roles con permisos para este datastore
+    from gvsigol_services.models import DatastoreRole
+    
+    # Obtener permisos actuales por rol
+    current_role_permissions = {}
+    for dr in DatastoreRole.objects.filter(datastore=datastore):
+        current_role_permissions[dr.role] = {
+            'use': dr.can_use,
+            'manage': dr.can_manage
+        }
+    
+    # Obtener todos los roles del sistema
+    all_roles = auth_backend.get_all_roles_details(exclude_system=True)
+    
+    roles = []
+    for role in all_roles:
+        role_name = role.get('name') if isinstance(role, dict) else str(role)
+        perms = current_role_permissions.get(role_name, {})
+        role_info = {
+            'name': role_name,
+            'description': role.get('description', '') if isinstance(role, dict) else '',
+            'use_checked': perms.get('use', False),
+            'manage_checked': perms.get('manage', False)
+        }
+        roles.append(role_info)
+    
+    return render(request, 'datastore_update.html', {
+        'form': form, 
+        'datastore_id': datastore_id, 
+        'datastore': datastore,
+        'workspace_name': datastore.workspace.name,
+        'uses_connection': uses_connection,
+        'connection': datastore.connection if uses_connection else None,
+        'roles': roles
+    })
 
 @login_required()
 @require_POST
@@ -636,6 +929,18 @@ def datastore_delete(request, dsid):
         delete_schema = False
         if request.POST.get('delete_schema') == 'true':
             delete_schema = True
+
+        schema_name = ds.get_schema_name()
+        if delete_schema and utils.is_protected_database_schema(schema_name):
+            return JsonResponse({
+                'success': False,
+                'error': _(
+                    'The schema "%(schema)s" is a protected system schema and '
+                    'cannot be deleted. Uncheck the schema deletion option to '
+                    'remove the datastore from gvSIG Online only.'
+                ) % {'schema': schema_name}
+            }, status=400)
+
         gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
         gs.deleteDatastore(ds.workspace, ds, delete_schema=delete_schema)
         utils.delete_datastore_elements(ds, gs=gs)
@@ -646,55 +951,105 @@ def datastore_delete(request, dsid):
         return HttpResponseBadRequest()
 
 
+
 @login_required()
 @require_safe
 @staff_required
 def layer_list(request):
-
-    layer_list = None
     if request.user.is_superuser:
-        layer_list = Layer.objects.filter(external=False)
+        layer_qs = Layer.objects.filter(external=False)
         project_list = Project.objects.all()
     else:
         user_roles = auth_backend.get_roles(request)
-        layer_list = (Layer.objects.filter(created_by=request.user.username, external=False)
-            | Layer.objects.filter(layermanagerole__role__in=user_roles, external=False)).distinct()
+        layer_qs = (
+            Layer.objects.filter(created_by=request.user.username, external=False)
+            | Layer.objects.filter(layermanagerole__role__in=user_roles, external=False)
+        ).distinct()
         project_list = core_utils.get_user_projects(request, permissions=ProjectRole.PERM_MANAGE)
+
+    # Aplicar búsqueda si se proporciona el parámetro 'search'
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        layer_qs = layer_qs.filter(
+            Q(name__icontains=search_query) |
+            Q(title__icontains=search_query) |
+            Q(datastore__name__icontains=search_query) |
+            Q(layer_group__name__icontains=search_query) |
+            Q(layer_group__title__icontains=search_query)
+        )
+    
+    # Aplicar filtro por proyecto si se proporciona el parámetro 'project_id'
+    project_id = request.GET.get('project_id', '').strip()
+    selected_project = None
+    if project_id and project_id != '__none__':
+        try:
+            project_id_int = int(project_id)
+            # Filtrar capas que pertenecen a layer groups del proyecto
+            layer_qs = layer_qs.filter(
+                layer_group__projectlayergroup__project_id=project_id_int
+            ).distinct()
+            # Obtener el proyecto seleccionado para mostrarlo en el template
+            selected_project = Project.objects.filter(id=project_id_int).first()
+        except (ValueError, TypeError):
+            project_id = ''
+
+    # IMPORTANTE: orden estable para paginación
+    layer_qs = layer_qs.order_by("id").select_related("datastore", "layer_group", "datastore__workspace")
+
+    # Paginar aquí (antes de construir dicts)
+    page_layers, page_ctx = paginate(
+        request,
+        layer_qs,
+        default_page_size=10,  # Reducido para forzar paginación y probar
+        max_page_size=200,
+        page_param="page",
+        page_size_param="page_size",
+    )
+
+
+    lg_ids = [l.layer_group_id for l in page_layers if l.layer_group_id]
+    projects_by_lg = defaultdict(list)
+
+    if lg_ids:
+        plgs = (
+            ProjectLayerGroup.objects
+            .filter(layer_group_id__in=lg_ids)
+            .select_related("project")
+        )
+        for plg in plgs:
+            title = getattr(plg.project, "title", None)
+            if title:
+                projects_by_lg[plg.layer_group_id].append(title)
+
     layers = []
-    for l in layer_list:
-        projects = []
-        project_layergroups = ProjectLayerGroup.objects.filter(layer_group_id=l.layer_group.id)
-        for lg in project_layergroups:
-            if lg.project.title is not None:
-                projects.append(lg.project.title)
+    for l in page_layers:
         layer = {
-            'id': l.id,
-            'type': l.type,
-            'thumbnail_url': l.thumbnail.url.replace(settings.BASE_URL, ''),
-            'name': l.name,
-            'title': l.title,
-            'datastore_name': l.datastore.name,
-            'lg_name': l.layer_group.name,
-            'lg_title': l.layer_group.title,
-            'cached': l.cached,
-            'projects': '; '.join(projects)
+            "id": l.id,
+            "type": l.type,
+            "thumbnail_url": l.thumbnail.url.replace(settings.BASE_URL, "") if l.thumbnail else "",
+            "name": l.name,
+            "title": l.title,
+            "datastore_name": l.datastore.name if l.datastore else "",
+            "lg_name": l.layer_group.name if l.layer_group else "",
+            "lg_title": l.layer_group.title if l.layer_group else "",
+            "cached": l.cached,
+            "projects": "; ".join(projects_by_lg.get(l.layer_group_id, [])),
         }
         layers.append(layer)
 
-    projects = []
-    for p in project_list:
-        project = {
-            'id': p.id,
-            'name': p.name,
-            'title': p.title
-        }
-        projects.append(project)
+    projects = [{"id": p.id, "name": p.name, "title": p.title} for p in project_list]
 
     response = {
-        'layers': layers,
-        'projects': json.dumps(projects)
+        "layers": layers,
+        "projects": json.dumps(projects),  # Para JavaScript
+        "projects_list": projects,  # Para el template (lista de diccionarios)
+        "request": request,  
+        "search_query": search_query,
+        "project_id": project_id if project_id else '',
+        "selected_project": selected_project,
+        **page_ctx,  # <- agrega paginator/page_obj/page_size/etc al template
     }
-    return render(request, 'layer_list.html', response)
+    return render(request, "layer_list.html", response)
 
 
 def _layer_refresh_extent(layer):
@@ -755,6 +1110,13 @@ def layer_delete(request, layer_id):
             if not 'no_thumbnail.jpg' in layer.thumbnail.name:
                 if os.path.isfile(layer.thumbnail.path):
                     os.remove(layer.thumbnail.path)
+            
+            # Limpiar triggers de conexión asociados a la capa
+            _cleanup_layer_triggers(layer)
+            
+            # Limpiar triggers topológicos de la capa
+            _cleanup_layer_topology_triggers(layer)
+            
             Layer.objects.all().filter(pk=layer_id).delete()
             core_utils.toc_remove_layer(layer)
 
@@ -816,6 +1178,13 @@ def layer_delete_operation(request, layer_id):
         if not 'no_thumbnail.jpg' in layer.thumbnail.name:
             if os.path.isfile(layer.thumbnail.path):
                 os.remove(layer.thumbnail.path)
+        
+        # Limpiar triggers de conexión asociados a la capa
+        _cleanup_layer_triggers(layer)
+        
+        # Limpiar triggers topológicos de la capa
+        _cleanup_layer_topology_triggers(layer)
+        
         Layer.objects.filter(pk=layer_id).delete()
         gs.deleteLayerRules(layer)
         core_utils.toc_remove_layer(layer)
@@ -862,7 +1231,7 @@ def backend_resource_list_available(request):
     if 'id_datastore' in request.GET:
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
-        if not utils.can_manage_datastore(request.user, ds):
+        if not utils.can_use_datastore(request.user, ds):
             return HttpResponseForbidden(json.dumps([]))
         if ds:
             gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
@@ -881,7 +1250,7 @@ def layergroup_list_editable(request):
         id_ds = request.GET['id_datastore']
         layergroup_id = request.GET.get('layergroup_id')
         ds = Datastore.objects.get(id=id_ds)
-        if not utils.can_manage_datastore(request, ds):
+        if not utils.can_use_datastore(request, ds):
             return HttpResponseForbidden("[]")
         if ds:
             layer_groups = []
@@ -911,7 +1280,7 @@ def backend_resource_list_configurable(request):
     if 'id_datastore' in request.GET:
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
-        if not utils.can_manage_datastore(request.user, ds):
+        if not utils.can_use_datastore(request.user, ds):
             return HttpResponseForbidden("[]")
         if ds:
             gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
@@ -935,7 +1304,7 @@ def backend_resource_list(request):
             type = request.GET['type']
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
-        if not utils.can_manage_datastore(request.user, ds):
+        if not utils.can_use_datastore(request.user, ds):
             return HttpResponseForbidden("[]")
         if ds:
             gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
@@ -965,7 +1334,7 @@ def backend_fields_list(request):
         name = request.GET['table_name']
         ds = Datastore.objects.get(id=datastore_id)
     if ds:
-        if not utils.can_manage_datastore(request.user, ds):
+        if not utils.can_use_datastore(request.user, ds):
             return HttpResponseForbidden("[]")
         layer = Layer.objects.filter(external=False).filter(datastore=ds, name=name).first()
         params = json.loads(ds.connection_params)
@@ -991,7 +1360,8 @@ def backend_fields_list(request):
                         field = {}
                         field['name'] = f['name']
                         for id, language in LANGUAGES:
-                            field['title-'+id] = f.get('title-'+id, field['name'])
+                            field['title-'+id] = utils.get_field_title_for_lang(
+                                f, id, field['name'])
                         result_resources.append(field)
                         founded = True
                 if not founded:
@@ -1125,9 +1495,13 @@ def layer_add_with_group(request, layergroup_id):
         if 'real_time' in request.POST:
             real_time = True
 
+        # Procesar el formato seleccionado
+        format_value = request.POST.get('format', 'image/png')
         vector_tile = False
-        if 'vector_tile' in request.POST:
+        if format_value == 'vector-tiles':
             vector_tile = True
+            # Si es vector tiles, guardar image/png como formato por defecto
+            format_value = 'image/png'
 
         is_public = (request.POST.get('resource-is-public') is not None)
 
@@ -1174,8 +1548,15 @@ def layer_add_with_group(request, layergroup_id):
             try:
                 datastore = form.cleaned_data['datastore']
                 layergroup = form.cleaned_data['layer_group']
-                if not utils.can_manage_datastore(request, datastore):
-                    raise ValueError(_("You are not allowed to manage the selected datastore"))
+                if datastore.type == 'v_PostGIS' and time_enabled:
+                    terr = utils.validate_temporal_layer_post_params(
+                        time_enabled, time_field, time_presentation,
+                        time_default_value_mode, time_default_value)
+                    if terr:
+                        form.add_error(None, terr)
+                        raise utils.TemporalValidationFailed()
+                if not utils.can_use_datastore(request, datastore):
+                    raise ValueError(_("You are not allowed to use the selected datastore"))
                 if not utils.can_use_layergroup(request, layergroup, permission=LayerGroupRole.PERM_INCLUDEINPROJECTS):
                     raise ValueError(_("You are not allowed to manage the selected layergroup"))
                 workspace = datastore.workspace
@@ -1275,11 +1656,10 @@ def layer_add_with_group(request, layergroup_id):
                     newRecord.update_interval = request.POST.get('update_interval')
 
                     params = {}
-                    params['format'] = request.POST.get('format')
+                    params['format'] = format_value
                     newRecord.external_params = json.dumps(params)
 
                     newRecord.save()
-                    layer_id = newRecord.id
 
                     # EXCEPCIÓN ARTIFICIAL PARA PROBAR ROLLBACK
                     if test_rollback == '1':
@@ -1460,6 +1840,8 @@ def layer_add_with_group(request, layergroup_id):
                     
                     # Re-lanzar el error original para que se maneje en el except externo
                     raise
+            except utils.TemporalValidationFailed:
+                pass
             except rest_geoserver.RequestError as e:
                 msg = e.server_message
                 logger.exception(msg)
@@ -1485,8 +1867,21 @@ def layer_add_with_group(request, layergroup_id):
     else:
         form = LayerForm()
         if not request.user.is_superuser:
-            form.fields['datastore'].queryset = (Datastore.objects.filter(created_by=request.user.username) |
-                  Datastore.objects.filter(defaultuserdatastore__username=request.user.username)).order_by('name').distinct()
+            # Usuario staff: sus propios datastores + los que tienen permiso por rol + allow_all + DefaultUserDatastore
+            from gvsigol_services.models import DatastoreRole
+            from gvsigol_auth import auth_backend
+            user_roles = auth_backend.get_roles(request.user)
+            permitted_ds_ids = DatastoreRole.objects.filter(
+                role__in=user_roles,
+                can_use=True
+            ).values_list('datastore_id', flat=True)
+            
+            form.fields['datastore'].queryset = (
+                Datastore.objects.filter(created_by=request.user.username) |
+                Datastore.objects.filter(defaultuserdatastore__username=request.user.username) |
+                Datastore.objects.filter(id__in=permitted_ds_ids) |
+                Datastore.objects.filter(allow_all=True)
+            ).order_by('name').distinct()
             form.fields['layer_group'].queryset = (utils.get_user_layergroups(request) | LayerGroup.objects.filter(name='__default__')).order_by('name').distinct()
         if layergroup_id:
             try:
@@ -1580,9 +1975,13 @@ def layer_update(request, layer_id):
         if 'real_time' in request.POST:
             real_time = True
 
+        # Procesar el formato seleccionado
+        format_value = request.POST.get('format', 'image/png')
         vector_tile = False
-        if 'vector_tile' in request.POST:
+        if format_value == 'vector-tiles':
             vector_tile = True
+            # Si es vector tiles, guardar image/png como formato por defecto
+            format_value = 'image/png'
 
         assigned_read_roles = []
         assigned_manage_roles = []
@@ -1594,9 +1993,9 @@ def layer_update(request, layer_id):
 
         assigned_write_roles = []
         if layer.type == 'v_PostGIS':
-            i, params = layer.datastore.get_db_connection()
-            with i as c:
-                is_view = c.is_view(layer.datastore.name, layer.source_name)
+            dbi, src, schema = layer.get_db_connection()
+            with dbi as c:
+                is_view = c.is_view(schema, src)
         else:
             is_view = False
         if not is_view:
@@ -1663,6 +2062,15 @@ def layer_update(request, layer_id):
 
         ds = Datastore.objects.get(id=layer.datastore.id)
         gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
+        if ds.type == 'v_PostGIS' and time_enabled:
+            temporal_err = utils.validate_temporal_layer_post_params(
+                time_enabled, time_field, time_presentation,
+                time_default_value_mode, time_default_value)
+            if temporal_err:
+                form = LayerUpdateForm(request, request.POST, layergroup_id=layergroup_id, instance=layer)
+                form.add_error(None, temporal_err)
+                return render(request, 'layer_update.html', _layer_update_build_render_context(
+                    request, layer, layer_id, layergroup_id, project_id, from_redirect, redirect_to_layergroup, form))
         if gs.updateResource(workspace, layer.datastore.name, layer.datastore.type, name, updatedParams=updatedParams):
             layer.title = title
             layer.cached = cached
@@ -1703,13 +2111,45 @@ def layer_update(request, layer_id):
                 layer.update_interval = None
 
             params = {}
-            params['format'] = request.POST.get('format')
+            params['format'] = format_value
 
             layer.external_params = json.dumps(params)
             layer.conf = layerConf
             layer.save()
-            if layer.cached:
-                tasks.update_wmts_layer_info.apply_async(args=[layer.id])
+
+            geocopilot_config_raw = request.POST.get('geocopilot_config', '').strip()
+            if geocopilot_config_raw and 'gvsigol_plugin_geocopilot' in settings.INSTALLED_APPS:
+                try:
+                    from gvsigol_plugin_geocopilot.models import LayerGeoCopilotConfig
+                    gc_data = json.loads(geocopilot_config_raw)
+                    gc_layer_desc = gc_data.get('layer_description', '')
+                    gc_fields_list = gc_data.get('fields', [])
+                    gc_fields_config = {}
+                    for f in gc_fields_list:
+                        fname = f.get('name', '')
+                        if fname:
+                            entry = {
+                                'description': f.get('description', ''),
+                                'sensitive': bool(f.get('sensitive', False)),
+                            }
+                            if f.get('fk_table'):
+                                entry['fk_table'] = f['fk_table']
+                                entry['fk_column'] = f.get('fk_column', '')
+                                entry['fk_display_column'] = f.get('fk_display_column', '')
+                            gc_fields_config[fname] = entry
+                    gc_config, _ = LayerGeoCopilotConfig.objects.get_or_create(
+                        layer=layer,
+                        defaults={
+                            'layer_description': gc_layer_desc,
+                            'updated_by': request.user.username,
+                        }
+                    )
+                    gc_config.layer_description = gc_layer_desc
+                    gc_config.fields_config = gc_fields_config
+                    gc_config.updated_by = request.user.username
+                    gc_config.save()
+                except Exception as e:
+                    logger.warning(f"Error guardando config GeoCopilot para capa {layer.id}: {e}")
 
             if 'layer-image' in request.FILES:
                 up_file = request.FILES['layer-image']
@@ -1729,6 +2169,13 @@ def layer_update(request, layer_id):
                 gs.setQueryable(workspace, ds.name, ds.type, name, is_queryable)
                 if ds.type == 'v_PostGIS':
                     utils.set_time_enabled(gs, layer)
+            
+            # Actualizar formato MVT en GeoWebCache para capas vectoriales
+            if ds.type.startswith('v_'):
+                try:
+                    gs.update_vector_tile_format(ds.workspace, layer.name, vector_tile)
+                except Exception as e:
+                    logger.warning(f"No se pudo actualizar formato MVT para capa {layer.name}: {e}")
 
             new_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
 
@@ -1738,6 +2185,9 @@ def layer_update(request, layer_id):
                 gs.createOrUpdateGeoserverLayerGroup(new_layer_group)
 
             utils.set_layer_permissions(layer, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles)
+            
+            if layer.cached:
+                tasks.update_wmts_layer_info.apply_async(args=[layer.id])
             gs.reload_nodes()
         if from_redirect:
             query_string = '?redirect=' + from_redirect
@@ -1751,66 +2201,69 @@ def layer_update(request, layer_id):
         else:
             return redirect('layer_list')
     else:
-        datastore = Datastore.objects.get(id=layer.datastore.id)
-        workspace = Workspace.objects.get(id=datastore.workspace_id)
         form = LayerUpdateForm(request, layergroup_id=layergroup_id, instance=layer)
+        return render(request, 'layer_update.html', _layer_update_build_render_context(
+            request, layer, layer_id, layergroup_id, project_id, from_redirect, redirect_to_layergroup, form))
 
-        if layer.external_params:
-            params = json.loads(layer.external_params)
-            for key in params:
-                form.initial[key] = params[key]
+def _layer_update_build_render_context(request, layer, layer_id, layergroup_id, project_id, from_redirect, redirect_to_layergroup, form):
+    datastore = Datastore.objects.get(id=layer.datastore.id)
+    workspace = Workspace.objects.get(id=datastore.workspace_id)
 
-        try:
-            layerConf = ast.literal_eval(layer.conf)
-        except:
-            layerConf = {}
+    if layer.external_params:
+        params = json.loads(layer.external_params)
+        for key in params:
+            form.initial[key] = params[key]
 
-        date_fields = []
-        if layer.type.startswith('v_'):
-            # ensure we get a value for max_features
-            layerConf['featuretype'] = layerConf.get('featuretype', {})
-            layerConf['featuretype']['max_features'] = layerConf['featuretype'].get('max_features', 0)
-        if layer.type == 'v_PostGIS':
-            aux_fields = get_date_fields(layer.id)
-            if 'fields' in layerConf:
-                for field in layerConf['fields']:
-                    for data_field in aux_fields:
-                        if field['name'] == data_field:
-                            date_fields.append(field)
-            i, params = layer.datastore.get_db_connection()
-            with i as c:
-                is_view = c.is_view(layer.datastore.name, layer.source_name)
-        else:
-            is_view = False
+    try:
+        layerConf = ast.literal_eval(layer.conf)
+    except Exception:
+        layerConf = {}
 
-        md_uuid = core_utils.get_layer_metadata_uuid(layer)
-        plugins_config = core_utils.get_plugins_config()
-        html = True
-        if layer.detailed_info_html == None or layer.detailed_info_html == '' or layer.detailed_info_html == 'null':
-            html = False
+    date_fields = []
+    if layer.type.startswith('v_'):
+        layerConf['featuretype'] = layerConf.get('featuretype', {})
+        layerConf['featuretype']['max_features'] = layerConf['featuretype'].get('max_features', 0)
+    if layer.type == 'v_PostGIS':
+        aux_fields = get_date_fields(layer.id)
+        if 'fields' in layerConf:
+            for field in layerConf['fields']:
+                for data_field in aux_fields:
+                    if field['name'] == data_field:
+                        date_fields.append(field)
+        dbi, src, schema = layer.get_db_connection()
+        with dbi as c:
+            is_view = c.is_view(schema, src)
+    else:
+        is_view = False
 
-        _, layer_image_url = utils.get_layer_img(layer.id, None)
-        roles = utils.get_all_user_roles_checked_by_layer(layer)
-        return render(request, 'layer_update.html', {
-            'html': html, 'layer': layer,
-            'workspace': workspace,
-            'form': form,
-            'layer_id': layer_id,
-            'layer_conf': layerConf,
-            'date_fields': json.dumps(date_fields),
+    md_uuid = core_utils.get_layer_metadata_uuid(layer)
+    plugins_config = core_utils.get_plugins_config()
+    html = True
+    if layer.detailed_info_html is None or layer.detailed_info_html == '' or layer.detailed_info_html == 'null':
+        html = False
 
-            'layer_md_uuid': md_uuid,
-            'plugins_config': plugins_config,
-            'layer_image_url': layer_image_url,
-            'datastore_type': layer.datastore.type,
-            'roles': roles,
-            'resource_is_public': layer.public,
-            'is_view': is_view,
-            'redirect_to_layergroup': redirect_to_layergroup,
-            'layergroup_id': layergroup_id,
-            'project_id': project_id,
-            'from_redirect': from_redirect
-        })
+    _, layer_image_url = utils.get_layer_img(layer.id, None)
+    roles = utils.get_all_user_roles_checked_by_layer(layer)
+    return {
+        'html': html, 'layer': layer,
+        'workspace': workspace,
+        'form': form,
+        'layer_id': layer_id,
+        'layer_conf': layerConf,
+        'date_fields': json.dumps(date_fields),
+
+        'layer_md_uuid': md_uuid,
+        'plugins_config': plugins_config,
+        'layer_image_url': layer_image_url,
+        'datastore_type': layer.datastore.type,
+        'roles': roles,
+        'resource_is_public': layer.public,
+        'is_view': is_view,
+        'redirect_to_layergroup': redirect_to_layergroup,
+        'layergroup_id': layergroup_id,
+        'project_id': project_id,
+        'from_redirect': from_redirect
+    }
 
 def get_date_fields(layer_id):
     date_fields = []
@@ -1838,7 +2291,7 @@ def get_date_fields_from_resource(request):
 
         date_fields = []
         ds = Datastore.objects.get(id=int(datastore_id))
-        if not utils.can_manage_datastore(request, ds):
+        if not utils.can_use_datastore(request, ds):
             return {
                 'date_fields': date_fields,
                 'status': 'error',
@@ -1962,8 +2415,8 @@ def _parse_form_groups(form_groups, fields):
                 group_fields.remove(field)
         for id, language in LANGUAGES:
             title_lang = 'title-'+id
-            if group.get(title_lang) is None:
-                group[title_lang] = ''
+            if group.get(title_lang) is None or not str(group.get(title_lang, '')).strip():
+                group[title_lang] = utils.get_field_title_for_lang(group, id, '')
         group['fields'] = group_fields
     group0_fields = form_groups[0].get("fields", [])
     for f in all_fields:
@@ -2004,8 +2457,9 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
             # geom_columns_info[0][4] es el SRID (posición 4 en la tupla)
             layer_srid = geom_columns_info[0][4]
         
-        # Determinar la precisión usando el archivo crs_definitions.json
+        # Determinar la precisión y tipo de SRID usando el archivo crs_definitions.json
         snap_precision = 0.001  # Default para métrico
+        is_geographic = False  # Default: asumir proyectado (metros)
         if layer_srid:
             try:
                 import json
@@ -2020,18 +2474,22 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                     if units == 'degrees':
                         # Sistema geográfico (grados decimales) - usar precisión muy alta
                         snap_precision = 0.000000001
+                        is_geographic = True
                     elif units == 'meters':
                         # Sistema métrico (metros) - usar precisión al milímetro
                         snap_precision = 0.001
+                        is_geographic = False
                     else:
                         # Default para unidades desconocidas
                         snap_precision = 0.001
+                        is_geographic = False
                         logger.warning(f"Unidades desconocidas '{units}' para SRID {layer_srid}, usando precisión métrica por defecto")
                 else:
                     logger.warning(f"SRID {layer_srid} no encontrado en crs_definitions.json, usando precisión métrica por defecto")
             except Exception as e:
                 logger.error(f"Error leyendo crs_definitions.json para SRID {layer_srid}: {str(e)}")
                 snap_precision = 0.001  # Default seguro
+                is_geographic = False
         
         logger.info(f"Generando trigger {rule_type} para tabla {full_table_name}: PK='{pk_field}', Geom='{geom_field}', SRID={layer_srid}, SnapToGrid precision={snap_precision}")
         
@@ -2041,6 +2499,11 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
         trigger_name = f"trigger_{rule_type}_{table_name.lower()}"
         
         if rule_type == "must_not_overlaps":
+            if is_geographic:
+                dwithin_clause = f"ST_DWithin(NEW.{geom_field}::geography, {geom_field}::geography, radio)"
+            else:
+                dwithin_clause = f"ST_DWithin(NEW.{geom_field}, {geom_field}, radio)"
+            
             # SQL para función MUST NOT OVERLAPS
             function_sql = f"""
             CREATE OR REPLACE FUNCTION {function_name}()
@@ -2058,29 +2521,42 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 error_message TEXT;
                 intersection_dimension INTEGER;
             BEGIN
-                -- Buscar overlaps usando ST_Relate con patrones DE-9IM específicos
-                -- Aplicamos SnapToGrid al milímetro para evitar problemas de precisión
+                -- Buscar overlaps usando ST_Relate con patrones DE-9IM específicos.
+                -- Para polígonos añadimos además una comprobación de área de intersección
+                -- positiva para cubrir casos de contains/within donde no se cruzan bordes.
+                -- Aplicamos SnapToGrid al milímetro para evitar problemas de precisión.
                 SELECT {pk_field}::TEXT, 
                        ST_Intersection(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({geom_field}, {snap_precision})),
                        ST_Area(ST_Intersection(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({geom_field}, {snap_precision}))),
                        ST_Dimension(ST_Intersection(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({geom_field}, {snap_precision})))
                 INTO conflicting_id, overlap_geom, overlap_area, intersection_dimension
                 FROM {full_table_name}
-                WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({geom_field}, 3857), radio) -- Optimización espacial
+                WHERE {dwithin_clause} -- Optimización espacial (geography para geográfico, geometry para proyectado)
                   AND (
                         -- Patrón para overlaps reales (interior-interior se intersecta): 'T*T***T**'
                        ST_Relate(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({geom_field}, {snap_precision}), 'T*T***T**')
                         OR
                         -- Patrón para geometrías idénticas: 'T*F**FFF*' (igualdad)
                        ST_Relate(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({geom_field}, {snap_precision}), 'T*F**FFF*')
+                        OR
+                        -- Captura polígonos contenidos o contenedores con solape de área real.
+                       COALESCE(
+                           ST_Area(
+                               ST_Intersection(
+                                   ST_SnapToGrid(NEW.{geom_field}, {snap_precision}),
+                                   ST_SnapToGrid({geom_field}, {snap_precision})
+                               )
+                           ),
+                           0
+                       ) > area_eps_m2
                   )
                   AND {pk_field} <> NEW.{pk_field} -- Excluir el registro actual en caso de actualización
                 LIMIT 1;
 
                 -- Si hay solapamiento real, generar mensaje de error detallado
                 IF conflicting_id IS NOT NULL THEN
-                    -- Obtener la geometría completa del solape como GEOJSON en EPSG:4326
-                    SELECT ST_AsGeoJSON(ST_Transform(overlap_geom, 4326))
+                    -- Obtener la geometría completa del solape como GEOJSON en el SRID nativo de la layer
+                    SELECT ST_AsGeoJSON(overlap_geom)
                     INTO overlap_geojson;
                     
                     -- Construir mensaje de error estructurado con GEOJSON
@@ -2119,6 +2595,18 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
             }
         
         elif rule_type == "must_not_have_gaps":
+            radio = 500  # metros
+            buffer_mm = 0.001  # 1 mm en metros
+            
+            if is_geographic:
+                dwithin_clause_existing = f"ST_DWithin({geom_field}::geography, NEW.{geom_field}::geography, radio)"
+                buffer_expr = f"ST_Buffer(NEW.{geom_field}::geography, buffer_mm)::geometry"
+                remaining_geom_expr = "remaining_geom.geom"
+            else:
+                dwithin_clause_existing = f"ST_DWithin({geom_field}, NEW.{geom_field}, radio)"
+                buffer_expr = f"ST_Buffer(NEW.{geom_field}, buffer_mm)"
+                remaining_geom_expr = "remaining_geom.geom"
+            
             # SQL para función MUST NOT HAVE GAPS
             function_sql = f"""
             CREATE OR REPLACE FUNCTION {function_name}()
@@ -2129,21 +2617,18 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 area_unida geometry;
                 area_resto geometry;
                 area_final geometry;
-                geometry_3857 geometry;
-                radio INTEGER := 500;
+                radio INTEGER := {radio};
+                buffer_mm NUMERIC := {buffer_mm};
                 gap_geom geometry;
                 gap_geojson TEXT;
                 error_message TEXT;
             BEGIN
-                -- Transformar la nueva geometría a 3857
-                geometry_3857 := ST_Transform(NEW.{geom_field}, 3857);
-
                 -- Paso 1: Generar el Convex Hull de los polígonos existentes dentro del radio (incluyendo el nuevo)
                 -- Trabajamos en el SRID original para evitar mezclas
                 SELECT ST_ConvexHull(ST_Union(geom_union)) INTO bounding_geom
                 FROM (
                     SELECT {geom_field} as geom_union FROM {full_table_name} 
-                    WHERE ST_DWithin(ST_Transform({geom_field}, 3857), geometry_3857, radio)
+                    WHERE {dwithin_clause_existing}
                     AND {pk_field} <> NEW.{pk_field} -- se excluye por si es una actualizacion solo contar con la nueva modificación
                     UNION ALL
                     SELECT NEW.{geom_field} as geom_union
@@ -2155,7 +2640,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 -- Paso 3: Unir todas las geometrías existentes dentro del radio
                 SELECT ST_Union({geom_field}) INTO area_unida
                 FROM {full_table_name}
-                WHERE ST_DWithin(ST_Transform({geom_field}, 3857), geometry_3857, radio)
+                WHERE {dwithin_clause_existing}
                 AND {pk_field} <> NEW.{pk_field};
 
                 -- Restar del Bounding Box la geometría unida y la nueva geometría
@@ -2175,21 +2660,21 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
 
                 -- Paso 5: Comprobar si alguna de las geometrías restantes interseca con el nuevo polígono con un buffer de 1 mm
                 -- El buffer es necesario porque el Touches no detecta nada por cuestiones decimales.
-                -- Trabajamos todo en 3857 para las operaciones de buffer y distancia
-                SELECT ST_Transform(remaining_geom.geom, ST_SRID(NEW.{geom_field})) INTO gap_geom
+                -- Trabajamos en el SRID nativo usando geography para geográfico o geometry para proyectado
+                SELECT {remaining_geom_expr} INTO gap_geom
                 FROM (
                     SELECT (ST_Dump(area_final)).geom AS geom
                 ) AS remaining_geom
                 WHERE ST_Intersects(
-                    ST_Transform(remaining_geom.geom, 3857), -- Convertir las geometrías restantes a 3857
-                    ST_Buffer(geometry_3857, 0.001) -- Buffer de 1 mm en 3857
+                    {remaining_geom_expr}, -- Geometrías restantes en SRID nativo
+                    {buffer_expr} -- Buffer de 1 mm (geography para geográfico, geometry para proyectado)
                 )
                 LIMIT 1;
 
                 -- Si se detecta un hueco, generar mensaje de error con GeoJSON
                 IF gap_geom IS NOT NULL THEN
-                    -- Obtener la geometría del hueco como GEOJSON en EPSG:4326
-                    SELECT ST_AsGeoJSON(ST_Transform(gap_geom, 4326))
+                    -- Obtener la geometría del hueco como GEOJSON en el SRID nativo de la layer
+                    SELECT ST_AsGeoJSON(gap_geom)
                     INTO gap_geojson;
                     
                     -- Construir mensaje de error estructurado con GEOJSON
@@ -2231,6 +2716,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
         elif rule_type == "must_not_overlap_with":
             # SQL para función MUST NOT OVERLAP WITH
             overlap_geom_fields = kwargs.get('overlap_geom_fields', {})
+            overlap_srids = kwargs.get('overlap_srids', {})
             
             if not overlap_geom_fields:
                 logger.error(f"overlap_geom_fields es requerido para la regla must_not_overlap_with")
@@ -2239,23 +2725,34 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
             # Construir la consulta dinámica para cada tabla en overlap_layers
             overlap_checks = []
             for layer_name, overlap_geom_field in overlap_geom_fields.items():
+                overlap_srid = overlap_srids.get(layer_name)
+                
+                needs_transform = (overlap_srid is not None and layer_srid is not None and overlap_srid != layer_srid)
+                
+                if needs_transform and layer_srid:
+                    overlap_geom_expr = f"ST_Transform({overlap_geom_field}, {layer_srid})"
+                else:
+                    overlap_geom_expr = overlap_geom_field
+                
                 overlap_check = f"""
                     -- Comprobar solapamiento con {layer_name}
                     SELECT 1
                     INTO result
                     FROM {layer_name}
                     WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({overlap_geom_field}, 3857), radio) 
-                      AND ST_Overlaps(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_field}, {snap_precision}))
+                      AND ST_Intersects(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_expr}, {snap_precision}))
+                      AND NOT ST_Touches(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_expr}, {snap_precision}))
                     LIMIT 1;
 
                     -- Si encuentra un solapamiento, lanza una excepción
                     IF result = 1 THEN
-                        -- Obtener geometría del solapamiento para el error
-                        SELECT ST_AsGeoJSON(ST_Transform(ST_Intersection(NEW.{geom_field}, {overlap_geom_field}), 4326))
+                        -- Obtener geometría del solapamiento para el error en el SRID nativo de la layer
+                        SELECT ST_AsGeoJSON(ST_Intersection(NEW.{geom_field}, {overlap_geom_expr}))
                         INTO overlap_geojson
                         FROM {layer_name}
                         WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({overlap_geom_field}, 3857), radio) 
-                          AND ST_Overlaps(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_field}, {snap_precision}))
+                          AND ST_Intersects(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_expr}, {snap_precision}))
+                          AND NOT ST_Touches(ST_SnapToGrid(NEW.{geom_field}, {snap_precision}), ST_SnapToGrid({overlap_geom_expr}, {snap_precision}))
                         LIMIT 1;
                         
                         error_message := 'TOPOLOGY ERROR: Geometry overlaps with layer ' || '{layer_name.replace(".", "-")}' || '. ' ||
@@ -2314,6 +2811,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
             # SQL para función MUST BE COVERED BY
             covered_by_layer = kwargs.get('covered_by_layer')
             covered_geom_field = kwargs.get('covered_geom_field')
+            covered_srid = kwargs.get('covered_srid')
             
             if not covered_by_layer:
                 logger.error(f"covered_by_layer es requerido para la regla must_be_covered_by")
@@ -2328,6 +2826,13 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 logger.error(f"covered_by_layer debe tener formato schema.tabla: {covered_by_layer}")
                 return None
             
+            needs_transform = (covered_srid is not None and layer_srid is not None and covered_srid != layer_srid)
+            
+            if needs_transform and layer_srid:
+                covered_geom_expr = f"ST_Transform({covered_geom_field}, {layer_srid})"
+            else:
+                covered_geom_expr = covered_geom_field
+            
             function_sql = f"""
             CREATE OR REPLACE FUNCTION {function_name}()
             RETURNS TRIGGER AS
@@ -2341,11 +2846,11 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 covering_union GEOMETRY;
             BEGIN
                 -- Obtener la unión de todas las geometrías que podrían cubrir la nueva geometría
-                SELECT ST_Union({covered_geom_field})
+                SELECT ST_Union({covered_geom_expr})
                 INTO covering_union
                 FROM {covered_by_layer}
                 WHERE ST_DWithin(ST_Transform(NEW.{geom_field}, 3857), ST_Transform({covered_geom_field}, 3857), radio)
-                  AND ST_Intersects(ST_SnapToGrid({covered_geom_field}, {snap_precision}), ST_SnapToGrid(NEW.{geom_field}, {snap_precision}));
+                  AND ST_Intersects(ST_SnapToGrid({covered_geom_expr}, {snap_precision}), ST_SnapToGrid(NEW.{geom_field}, {snap_precision}));
 
                 -- Si hay geometrías que intersectan, calcular la parte no cubierta
                 IF covering_union IS NOT NULL THEN
@@ -2354,8 +2859,8 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                     
                     -- Si queda alguna parte sin cubrir, es un error
                     IF uncovered_geom IS NOT NULL AND NOT ST_IsEmpty(uncovered_geom) THEN
-                        -- Obtener la geometría no cubierta como GEOJSON en EPSG:4326
-                        SELECT ST_AsGeoJSON(ST_Transform(uncovered_geom, 4326))
+                        -- Obtener la geometría no cubierta como GEOJSON en el SRID nativo de la layer
+                        SELECT ST_AsGeoJSON(uncovered_geom)
                         INTO uncovered_geojson;
                         
                         -- Construir mensaje de error estructurado con GEOJSON
@@ -2367,7 +2872,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                     END IF;
                 ELSE
                     -- No hay geometrías que intersecten, toda la nueva geometría está sin cubrir
-                    SELECT ST_AsGeoJSON(ST_Transform(NEW.{geom_field}, 4326))
+                    SELECT ST_AsGeoJSON(NEW.{geom_field})
                     INTO uncovered_geojson;
                     
                     -- Construir mensaje de error estructurado con GEOJSON
@@ -2407,8 +2912,19 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
             }
         
         elif rule_type == "must_be_contiguous":
-            # SQL para función MUST BE CONTIGUOUS - Tu lógica original exacta
+            # SQL para función MUST BE CONTIGUOUS
             contiguous_tolerance = kwargs.get('contiguous_tolerance', 1.0)  # Default del modelo
+            
+            if is_geographic:
+                # Para SRID geográfico (grados): usar geography para distancias en metros
+                relate_expr_new = f"ST_SnapToGrid(NEW.{geom_field}, {snap_precision})"
+                relate_expr_existing = f"ST_SnapToGrid({geom_field}, {snap_precision})"
+                distance_expr = f"ST_Distance(vertex::geography, {geom_field}::geography)"
+            else:
+                # Para SRID proyectado: usar geometry directamente (ya está en metros)
+                relate_expr_new = f"ST_SnapToGrid(NEW.{geom_field}, {snap_precision})"
+                relate_expr_existing = f"ST_SnapToGrid({geom_field}, {snap_precision})"
+                distance_expr = f"ST_Distance(vertex, {geom_field})"
             
             function_sql = f"""
             CREATE OR REPLACE FUNCTION {function_name}()
@@ -2420,20 +2936,20 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 error_message TEXT;
                 problem_geojson TEXT;
                 valid_vertex_count INTEGER := 0;
-                vertex_3857 geometry;
+                vertex geometry;
                 min_distance NUMERIC;
                 vertex_counter INTEGER := 0;
                 total_points INTEGER;
                 closest_invalid_vertex geometry;
                 closest_invalid_distance NUMERIC := 999999;
             BEGIN
-                -- PASO 1: ¿Toca por borde en SRID 3857? → VÁLIDO inmediatamente
+                -- PASO 1: ¿Toca por borde en el SRID nativo? → VÁLIDO inmediatamente
                 IF EXISTS (
                     SELECT 1
                     FROM {full_table_name}
                     WHERE ST_Relate(
-                        ST_SnapToGrid(ST_Transform(NEW.{geom_field}, 3857), {snap_precision}),
-                        ST_SnapToGrid(ST_Transform({geom_field}, 3857), {snap_precision}), 
+                        {relate_expr_new},
+                        {relate_expr_existing}, 
                         'F***1****') -- Toca por borde
                     AND {pk_field} <> NEW.{pk_field}
                 ) THEN
@@ -2442,10 +2958,10 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
 
                 -- PASO 2: Contar vértices dentro de tolerancia (en metros) - SIN DUPLICADOS
                 -- Contar total de puntos
-                SELECT ST_NPoints(ST_Transform(NEW.{geom_field}, 3857)) INTO total_points;
+                SELECT ST_NPoints(NEW.{geom_field}) INTO total_points;
                 
-                FOR vertex_3857 IN
-                    SELECT (ST_DumpPoints(ST_Transform(NEW.{geom_field}, 3857))).geom
+                FOR vertex IN
+                    SELECT (ST_DumpPoints(NEW.{geom_field})).geom
                 LOOP
                     vertex_counter := vertex_counter + 1;
                     
@@ -2455,7 +2971,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                     END IF;
                     
                     -- Calcular distancia mínima de este vértice a CUALQUIER geometría existente
-                    SELECT MIN(ST_Distance(vertex_3857, ST_Transform({geom_field}, 3857)))
+                    SELECT MIN({distance_expr})
                     INTO min_distance
                     FROM {full_table_name}
                     WHERE {pk_field} <> NEW.{pk_field};
@@ -2472,7 +2988,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                         -- Este vértice NO cumple tolerancia, ¿es el más cercano a cumplirla?
                         IF min_distance IS NOT NULL AND min_distance < closest_invalid_distance THEN
                             closest_invalid_distance := min_distance;
-                            closest_invalid_vertex := vertex_3857;
+                            closest_invalid_vertex := vertex;
                         END IF;
                     END IF;
                 END LOOP;
@@ -2480,7 +2996,8 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 -- PASO 3: No hay suficientes vértices cercanos → ERROR
                 -- Devolver el vértice que NO cumple tolerancia pero está más cerca de cumplirla
                 IF closest_invalid_vertex IS NOT NULL THEN
-                    SELECT ST_AsGeoJSON(ST_Transform(closest_invalid_vertex, 4326))
+                    -- El vértice ya está en el SRID nativo
+                    SELECT ST_AsGeoJSON(closest_invalid_vertex)
                     INTO problem_geojson;
                     
                     error_message := 'TOPOLOGY ERROR: Geometry is not contiguous. Only ' || valid_vertex_count || 
@@ -2489,7 +3006,8 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                                     COALESCE(problem_geojson, 'NULL') || '##.';
                 ELSE
                     -- Fallback al centroide si no se encontró ningún vértice inválido
-                    SELECT ST_AsGeoJSON(ST_Transform(ST_Centroid(NEW.{geom_field}), 4326))
+                    -- El centroide ya está en el SRID nativo
+                    SELECT ST_AsGeoJSON(ST_Centroid(NEW.{geom_field}))
                     INTO problem_geojson;
                     
                     error_message := 'TOPOLOGY ERROR: Geometry is not contiguous. Only ' || valid_vertex_count || 
@@ -2541,7 +3059,7 @@ def _apply_topology_trigger(layer, rule_type, **kwargs):
         i, source_name, schema = layer.get_db_connection()
         
         with i as conn:
-            # Para la regla must_be_covered_by, obtener el campo geometría de la tabla de cobertura
+            # Para la regla must_be_covered_by, obtener el campo geometría y SRID de la tabla de cobertura
             if rule_type == "must_be_covered_by":
                 covered_by_layer = kwargs.get('covered_by_layer')
                 
@@ -2554,14 +3072,27 @@ def _apply_topology_trigger(layer, rule_type, **kwargs):
                         logger.error(f"No se encontró campo de geometría para la tabla de cobertura {covered_by_layer}")
                         return False
                     
-                    kwargs['covered_geom_field'] = covered_geom_columns[0]
-                    logger.info(f"Campo geometría de tabla de cobertura {covered_by_layer}: '{covered_geom_columns[0]}'")
+                    covered_geom_field = covered_geom_columns[0]
+                    kwargs['covered_geom_field'] = covered_geom_field
+                    
+                    # Obtener el SRID de la capa de cobertura
+                    covered_geom_columns_info = conn.get_geometry_columns_info(covered_table, covered_schema)
+                    covered_srid = None
+                    if covered_geom_columns_info and len(covered_geom_columns_info) > 0:
+                        for geom_info in covered_geom_columns_info:
+                            if geom_info[2] == covered_geom_field:  # geom_info[2] es el nombre de la columna
+                                covered_srid = geom_info[4]  # geom_info[4] es el SRID
+                                break
+                    
+                    kwargs['covered_srid'] = covered_srid
+                    logger.info(f"Campo geometría de tabla de cobertura {covered_by_layer}: '{covered_geom_field}', SRID: {covered_srid}")
             
-            # Para la regla must_not_overlap_with, obtener los campos geometría de las tablas objetivo
+            # Para la regla must_not_overlap_with, obtener los campos geometría y SRID de las tablas objetivo
             elif rule_type == "must_not_overlap_with":
                 overlap_layers = kwargs.get('overlap_layers', [])
                 logger.info(f"Processing must_not_overlap_with for layer {layer.id} with overlap_layers: {overlap_layers}")
                 overlap_geom_fields = {}
+                overlap_srids = {}
                 
                 for layer_name in overlap_layers:
                     logger.info(f"Processing overlap layer: {layer_name}")
@@ -2576,14 +3107,25 @@ def _apply_topology_trigger(layer, rule_type, **kwargs):
                             logger.error(f"No se encontró campo de geometría para la tabla {layer_name}")
                             return False
                         
-                        overlap_geom_fields[layer_name] = overlap_geom_columns[0]
-                        logger.info(f"Campo geometría de tabla {layer_name}: '{overlap_geom_columns[0]}'")
+                        overlap_geom_field = overlap_geom_columns[0]
+                        overlap_geom_fields[layer_name] = overlap_geom_field
+                        
+                        overlap_geom_columns_info = conn.get_geometry_columns_info(overlap_table, overlap_schema)
+                        overlap_srid = None
+                        if overlap_geom_columns_info and len(overlap_geom_columns_info) > 0:
+                            for geom_info in overlap_geom_columns_info:
+                                if geom_info[2] == overlap_geom_field:  # geom_info[2] es el nombre de la columna
+                                    overlap_srid = geom_info[4]  # geom_info[4] es el SRID
+                                    break
+                        
+                        overlap_srids[layer_name] = overlap_srid
+                        logger.info(f"Campo geometría de tabla {layer_name}: '{overlap_geom_field}', SRID: {overlap_srid}")
                     else:
                         logger.error(f"overlap_layer debe tener formato schema.tabla: {layer_name}")
                         return False
                 
-                logger.info(f"Final overlap_geom_fields: {overlap_geom_fields}")
                 kwargs['overlap_geom_fields'] = overlap_geom_fields
+                kwargs['overlap_srids'] = overlap_srids
             
             trigger_info = _generate_topology_trigger_sql(rule_type, layer, **kwargs)
             if not trigger_info:
@@ -2729,6 +3271,109 @@ def _apply_topology_triggers_for_layer(layer, topology_config):
         
     except Exception as e:
         logger.error(f"Error aplicando triggers topológicos para capa {layer.id}: {str(e)}")
+
+
+def _force_uninstall_layer_trigger(layer_trigger):
+    """
+    Fuerza la desinstalación de un LayerConnectionTrigger de la base de datos,
+    ignorando la bandera is_installed. Útil para limpieza al eliminar capas.
+    """
+    try:
+        if layer_trigger.layer.datastore.connection is None:
+            return False, 'Layer datastore has no associated connection'
+        
+        schema, table = layer_trigger.get_schema_and_table()
+        
+        i, params = layer_trigger.layer.datastore.connection.get_db_connection()
+        
+        if i is None:
+            return False, 'Could not connect to database'
+        
+        try:
+            drop_trigger_sql = layer_trigger.trigger.generate_drop_trigger_sql(schema, table)
+            drop_function_sql = layer_trigger.trigger.generate_drop_function_sql(schema, table)
+            
+            logger.debug(f"Ejecutando: {drop_trigger_sql}")
+            i.cursor.execute(drop_trigger_sql)
+            
+            logger.debug(f"Ejecutando: {drop_function_sql}")
+            i.cursor.execute(drop_function_sql)
+            
+            i.conn.commit()
+            i.close()
+            
+            return True, 'Trigger uninstalled successfully'
+            
+        except Exception as e:
+            logger.error(f"Error ejecutando SQL de desinstalación: {e}")
+            try:
+                i.conn.rollback()
+                i.close()
+            except:
+                pass
+            return False, str(e)
+            
+    except Exception as e:
+        logger.error(f"Error en _force_uninstall_layer_trigger: {e}")
+        return False, str(e)
+
+
+def _cleanup_layer_triggers(layer):
+    """
+    Limpia (desinstala y elimina) todos los LayerConnectionTrigger asociados a una capa.
+    Llamar antes de eliminar la capa.
+    Siempre intenta eliminar de la base de datos, ignorando la bandera is_installed.
+    """
+    try:
+        layer_triggers = LayerConnectionTrigger.objects.filter(layer=layer)
+        for lt in layer_triggers:
+            try:
+                # Forzar desinstalación del trigger de la base de datos
+                # Ignoramos is_installed porque queremos asegurar que se elimine de la BD
+                success, msg = _force_uninstall_layer_trigger(lt)
+                if not success:
+                    logger.warning(f"No se pudo desinstalar trigger {lt.trigger.name} de capa {layer.name}: {msg}")
+                else:
+                    logger.info(f"Trigger {lt.trigger.name} desinstalado de capa {layer.name}")
+            except Exception as e:
+                logger.error(f"Error desinstalando trigger {lt.trigger.name} de capa {layer.name}: {e}")
+        
+        # Los registros se eliminarán automáticamente por CASCADE al eliminar la layer
+        logger.info(f"Triggers de conexión limpiados para capa {layer.name}")
+        
+    except Exception as e:
+        logger.error(f"Error limpiando triggers de conexión para capa {layer.id}: {e}")
+
+
+def _cleanup_layer_topology_triggers(layer):
+    """
+    Limpia (desinstala) todos los triggers topológicos de una capa.
+    Llamar antes de eliminar la capa.
+    """
+    try:
+        # Lista de todas las reglas topológicas posibles
+        topology_rules = [
+            "must_not_overlaps",
+            "must_not_have_gaps",
+            "must_be_covered_by",
+            "must_not_overlap_with",
+            "must_be_contiguous"
+        ]
+        
+        for rule_type in topology_rules:
+            try:
+                success = _remove_topology_trigger(layer, rule_type)
+                if success:
+                    logger.info(f"Trigger topológico {rule_type} eliminado de capa {layer.name}")
+            except Exception as e:
+                # Ignorar errores individuales, algunos triggers pueden no existir
+                logger.debug(f"Error eliminando trigger topológico {rule_type} de capa {layer.name}: {e}")
+        
+        logger.info(f"Triggers topológicos limpiados para capa {layer.name}")
+        
+    except Exception as e:
+        logger.error(f"Error limpiando triggers topológicos para capa {layer.id}: {e}")
+
 
 def _save_layer_topology_rules(request, layer):
     """
@@ -2922,9 +3567,9 @@ def layer_config(request, layer_id):
     layergroup_id = request.GET.get('layergroup_id')
 
     if request.method == 'POST':
-        i, params = layer.datastore.get_db_connection()
-        with i as c:
-            is_view = c.is_view(layer.datastore.name, layer.source_name)
+        dbi, src, schema = layer.get_db_connection()
+        with dbi as c:
+            is_view = c.is_view(schema, src)
         old_conf = ast.literal_eval(layer.conf) if layer.conf else {}
 
         conf = {
@@ -2941,16 +3586,26 @@ def layer_config(request, layer_id):
         for i in range(1, counter+1):
             field = {}
             field['name'] = request.POST.get('field-name-' + str(i))
-            
+            if not field['name']:
+                continue
+
             # Preservar gvsigol_type, type_params y field_format de la configuración anterior
-            if field['name'] in existing_fields:
-                existing_field = existing_fields[field['name']]
+            existing_field = existing_fields.get(field['name'], {})
+            if existing_field:
                 field['gvsigol_type'] = existing_field.get('gvsigol_type', '')
                 field['type_params'] = existing_field.get('type_params', {})
                 field['field_format'] = existing_field.get('field_format', {})
-            
+
             for id, language in LANGUAGES:
-                field['title-'+id] = request.POST.get('field-title-'+id+'-' + str(i), field['name']).strip()
+                posted_title = request.POST.get('field-title-' + id + '-' + str(i))
+                if posted_title is not None:
+                    posted_title = posted_title.strip()
+                else:
+                    posted_title = ''
+                if not posted_title:
+                    posted_title = utils.get_field_title_for_lang(
+                        existing_field, id, field['name'])
+                field['title-' + id] = posted_title or field['name']
             field['visible'] = False
             if 'field-visible-' + str(i) in request.POST:
                 field['visible'] = True
@@ -3009,9 +3664,9 @@ def layer_config(request, layer_id):
         for lang_id, _ in LANGUAGES:
             available_languages.append(lang_id)
         try:
-            i, params = layer.datastore.get_db_connection()
-            with i as c:
-                is_view = c.is_view(layer.datastore.name, layer.source_name)
+            dbi, src, schema = layer.get_db_connection()
+            with dbi as c:
+                is_view = c.is_view(schema, src)
         except:
             logger.exception('Error checking layer is_view')
             is_view = False
@@ -3029,9 +3684,55 @@ def layer_config(request, layer_id):
         enums = Enumeration.objects.all()
         procedures = []
         disabled_procedures = core_utils.get_setting('GVSIGOL_DISABLED_PROCEDURES', [])
+        # gol_area_m2 ahora se gestiona desde ConnectionTrigger calc_area_native
+        disabled_procedures = list(disabled_procedures) + ['public.gol_area_m2(text)']
         for procedure in TriggerProcedure.objects.all():
             if not procedure.signature in disabled_procedures:
                 procedures.append(procedure)
+        
+        # Obtener triggers de conexión disponibles para esta capa
+        connection_triggers = []
+        layer_connection_triggers = []
+        
+        if layer.datastore and layer.datastore.connection:
+            connection = layer.datastore.connection
+            datastore_schema = layer.datastore.get_schema_name()
+            
+            # Obtener todos los triggers de la conexión
+            available_triggers = ConnectionTrigger.objects.filter(
+                connection=connection
+            )
+            # Filtrar por scope: global o que incluya el esquema del datastore
+            # Y por permisos: el usuario debe poder usar el trigger
+            for trigger in available_triggers:
+                # Verificar permisos
+                if not trigger.can_use(request.user):
+                    continue
+                    
+                if trigger.scope == 'global':
+                    connection_triggers.append(trigger)
+                elif trigger.scope == 'schemas':
+                    trigger_schemas = trigger.get_schemas_list()
+                    if datastore_schema in trigger_schemas:
+                        connection_triggers.append(trigger)
+            
+            # Obtener triggers ya asignados a esta capa
+            # Añadir información de si el usuario puede gestionar cada trigger
+            layer_connection_triggers_raw = LayerConnectionTrigger.objects.filter(layer=layer)
+            layer_connection_triggers = []
+            for lt in layer_connection_triggers_raw:
+                lt.can_manage = lt.trigger.can_use(request.user)
+                layer_connection_triggers.append(lt)
+        
+        # Obtener campos ya usados por triggers calculados (para filtrar en el selector)
+        calculated_fields_used = list(
+            LayerConnectionTrigger.objects.filter(
+                layer=layer,
+                trigger__is_calculated_field=True,
+                field_name__isnull=False
+            ).exclude(field_name='').values_list('field_name', flat=True)
+        )
+        
         data = {
             'layer': layer,
             'layer_id': layer.id,
@@ -3046,7 +3747,10 @@ def layer_config(request, layer_id):
             'redirect_to_layergroup': redirect_to_layergroup,
             'layergroup_id': layergroup_id,
             'project_id': project_id,
-            'from_redirect': from_redirect
+            'from_redirect': from_redirect,
+            'connection_triggers': connection_triggers,
+            'layer_connection_triggers': layer_connection_triggers,
+            'calculated_fields_used': json.dumps(calculated_fields_used),
         }
         return render(request, 'layer_config.html', data)
 
@@ -3236,6 +3940,19 @@ def layer_boundingbox_from_data(request):
 
 def _layer_cache_clear(layer_id):
     layer = Layer.objects.get(id=int(layer_id))
+    layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
+
+    if layer.external:
+        if layer.type != 'WMS':
+            return
+        gs = geographic_servers.get_instance().get_server_by_id(layer_group.server_id)
+        gs.clearCache(None, layer)
+        gs.reload_nodes()
+        if Layer.objects.filter(layer_group_id=layer_group.id, external=False).exists():
+            gs.createOrUpdateGeoserverLayerGroup(layer_group)
+            gs.clearLayerGroupCache(layer_group.name)
+        return
+
     datastore = Datastore.objects.get(id=layer.datastore.id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
     gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
@@ -3246,7 +3963,6 @@ def _layer_cache_clear(layer_id):
     gs.clearCache(workspace.name, layer)
     gs.updateThumbnail(layer, 'update')
 
-    layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
     gs.createOrUpdateGeoserverLayerGroup(layer_group)
     gs.clearLayerGroupCache(layer_group.name)
 
@@ -3261,14 +3977,14 @@ def layer_cache_clear(request, layer_id):
         layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
         server = Server.objects.get(id=layer_group.server_id)
         gs = geographic_servers.get_instance().get_server_by_id(server.id)
-        if not layer.external:
+        if not layer.external or layer.type == 'WMS':
             _layer_cache_clear(layer_id)
             gs.reload_nodes()
             return HttpResponse('{"response": "ok"}', content_type='application/json')
     except Exception as e:
-        error_message = ugettext_lazy('Error clearing cache. Cause: {cause}.').format(cause=str(e))
+        error_message = gettext_lazy('Error clearing cache. Cause: {cause}.').format(cause=str(e))
     else:
-        error_message = ugettext_lazy('Not supported.')
+        error_message = gettext_lazy('Not supported.')
     return JsonResponse({"response": "error", "cause": error_message}, status=400)
 
 @login_required()
@@ -3282,54 +3998,98 @@ def layergroup_cache_clear(request, layergroup_id):
         layer_group_cache_clear(layergroup)
         return redirect('layergroup_list')
     except Exception as e:
-        error_message = ugettext_lazy('Error clearing cache. Cause: {cause}.').format(cause=str(e))
+        error_message = gettext_lazy('Error clearing cache. Cause: {cause}.').format(cause=str(e))
     return JsonResponse({"response": "error", "cause": error_message}, status=400)
 
 def layer_group_cache_clear(layergroup):
     last = None
-    layers = Layer.objects.filter(external=False).filter(layer_group_id=int(layergroup.id))
+    layers = Layer.objects.filter(layer_group_id=int(layergroup.id)).filter(
+        Q(external=False) | Q(external=True, type='WMS')
+    )
     for layer in layers:
-        if not layer.external:
-            _layer_cache_clear(layer.id)
-            last = layer
+        _layer_cache_clear(layer.id)
+        last = layer
 
     if last:
-        gs = geographic_servers.get_instance().get_server_by_id(last.datastore.workspace.server.id)
-        gs.deleteGeoserverLayerGroup(layergroup)
-
-        gs.createOrUpdateGeoserverLayerGroup(layergroup)
-        gs.clearLayerGroupCache(layergroup.name)
+        gs = geographic_servers.get_instance().get_server_by_id(layergroup.server_id)
+        # rest_geoserver.create_or_update_gs_layer_group omits external layers.
+        # group may not exist if layer group only has external layers.
+        if Layer.objects.filter(layer_group_id=layergroup.id, external=False).exists():
+            gs.deleteGeoserverLayerGroup(layergroup)
+            gs.createOrUpdateGeoserverLayerGroup(layergroup)
+            gs.clearLayerGroupCache(layergroup.name)
         gs.reload_nodes()
 
 
 @login_required()
 @staff_required
 def layergroup_list(request):
-    layergroups_list = utils.get_user_layergroups(request, permissions=LayerGroupRole.PERM_MANAGE)
+    layergroups_qs = utils.get_user_layergroups(request, permissions=LayerGroupRole.PERM_MANAGE)
     project_id = request.GET.get('project_id')
     if project_id is not None:
-        layergroups_list = layergroups_list.filter(projectlayergroup__project__id=project_id)
-    layergroups_list = layergroups_list.order_by('id').distinct()
+        layergroups_qs = layergroups_qs.filter(projectlayergroup__project__id=project_id)
+    
+    # Aplicar búsqueda si se proporciona el parámetro 'search'
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        layergroups_qs = layergroups_qs.filter(
+            Q(name__icontains=search_query) |
+            Q(title__icontains=search_query)
+        )
+    
+    layergroups_qs = layergroups_qs.order_by('id').distinct()
+    
+    # Paginar antes de construir dicts
+    page_layergroups, page_ctx = paginate(
+        request,
+        layergroups_qs,
+        default_page_size=10,
+        max_page_size=200,
+        page_param="page",
+        page_size_param="page_size",
+    )
+    
+    # ---- Evitar N+1: traer ProjectLayerGroup y Server solo para los layer_group de ESTA página
+    lg_ids = [lg.id for lg in page_layergroups if lg.name != '__default__']
+    server_ids = [lg.server_id for lg in page_layergroups if lg.server_id and lg.name != '__default__']
+    projects_by_lg = defaultdict(list)
+    servers_by_id = {}
+    
+    # Obtener todos los servers necesarios de una vez
+    if server_ids:
+        servers = Server.objects.filter(id__in=server_ids)
+        servers_by_id = {s.id: s for s in servers}
+    
+    # Obtener todos los ProjectLayerGroup necesarios de una vez
+    if lg_ids:
+        plgs = (
+            ProjectLayerGroup.objects
+            .filter(layer_group_id__in=lg_ids)
+            .select_related("project")
+        )
+        for plg in plgs:
+            projects_by_lg[plg.layer_group_id].append(plg.project.name)
+    
     layergroups = []
-    for lg in layergroups_list:
+    for lg in page_layergroups:
         if lg.name != '__default__':
-            server = Server.objects.get(id=lg.server_id)
-            projects = []
-            project_layergroups = ProjectLayerGroup.objects.filter(layer_group_id=lg.id)
-            for alg in project_layergroups:
-                projects.append(alg.project.name)
             layergroup = {}
             layergroup['id'] = lg.id
             layergroup['name'] = lg.name
             layergroup['title'] = lg.title
             layergroup['cached'] = lg.cached
-            layergroup['projects'] = '; '.join(projects)
-            layergroup['server'] = server.title
+            layergroup['projects'] = '; '.join(projects_by_lg.get(lg.id, []))
+            # Obtener server desde el diccionario cacheado
+            server = servers_by_id.get(lg.server_id) if lg.server_id else None
+            layergroup['server'] = server.title if server else ''
             layergroups.append(layergroup)
 
     response = {
         'layergroups': layergroups,
-        'project_id': project_id
+        'project_id': project_id,
+        'request': request,
+        'search_query': search_query,
+        **page_ctx,  # Agrega paginator/page_obj/page_size/etc al template
     }
     return render(request, 'layergroup_list.html', response)
 
@@ -3759,6 +4519,7 @@ def layer_create_with_group(request, layergroup_id):
         form = CreateFeatureTypeForm(request.POST, request=request, layergroup_id=layergroup_id)
         if form.is_valid():
             try:
+                msg = ''
                 datastore = form.cleaned_data['datastore']
                 server = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
                 layergroup = form.cleaned_data['layer_group']
@@ -3767,14 +4528,21 @@ def layer_create_with_group(request, layergroup_id):
                 if _valid_name_regex.search(form.cleaned_data['name']) == None:
                     msg = _("Invalid datastore name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=form.cleaned_data['name'])
                     form.add_error(None, msg)
-                elif not utils.can_manage_datastore(request, datastore):
-                    msg = _("You are not allowed to manage the selected datastore")
+                elif not utils.can_use_datastore(request, datastore):
+                    msg = _("You are not allowed to use the selected datastore")
                     form.add_error(None, msg)
                 elif not utils.can_use_layergroup(request, layergroup, permission=LayerGroupRole.PERM_INCLUDEINPROJECTS):
                     msg = _("You are not allowed to manage the selected layergroup")
                     form.add_error(None, msg)
 
                 else:
+                    if datastore.type == 'v_PostGIS' and time_enabled:
+                        terr = utils.validate_temporal_layer_post_params(
+                            time_enabled, time_field, time_presentation,
+                            time_default_value_mode, time_default_value)
+                        if terr:
+                            form.add_error(None, terr)
+                            raise utils.TemporalValidationFailed()
                     server.normalizeTableFields(form.cleaned_data['fields'])
                     server.createTable(form.cleaned_data)
                     extraParams = {}
@@ -3838,10 +4606,8 @@ def layer_create_with_group(request, layergroup_id):
                         }
                         initial_conf['fields'].append(field_conf)
                     
-                    newRecord.conf = initial_conf                    
+                    newRecord.conf = initial_conf
                     newRecord.save()
-                    if newRecord.cached:
-                        tasks.update_wmts_layer_info.apply_async(args=[newRecord.id])
 
                     for i in form.cleaned_data['fields']:
                         if 'enumkey' in i:
@@ -3869,6 +4635,8 @@ def layer_create_with_group(request, layergroup_id):
                         'max_features': maxFeatures
                     }
                     utils.set_layer_permissions(newRecord, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles)
+                    if newRecord.cached:
+                        tasks.update_wmts_layer_info.apply_async(args=[newRecord.id])
                     do_config_layer(server, newRecord, featuretype)
 
                     if redirect_to_layergroup:
@@ -3881,18 +4649,20 @@ def layer_create_with_group(request, layergroup_id):
                         to_url = back_url
                     return HttpResponseRedirect(to_url)
 
+            except utils.TemporalValidationFailed:
+                pass
             except psycopg2.errors.DuplicateTable as e1:
                 logger.exception("Error creating layer: table already exists")
                 try:
                     msg = e1.get_message()
-                except:
+                except Exception:
                     msg = _("Error: table already exists. Try to publish the layer instead of creating an empty one.")
                 form.add_error(None, msg)
             except Exception as e:
                 logger.exception("Error creating layer")
                 try:
                     msg = e.get_message()
-                except:
+                except Exception:
                     msg = _("Error: layer could not be published")
                 # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
                 form.add_error(None, msg)
@@ -3920,12 +4690,14 @@ def layer_create_with_group(request, layergroup_id):
                 from gvsigol_plugin_form.models import Form
                 forms = Form.objects.all()
             roles = utils.get_layer_checked_roles_from_user_input(assigned_read_roles, assigned_write_roles, assigned_manage_roles)
+            # gol_area_m2 ahora se gestiona desde ConnectionTrigger calc_area_native
+            available_procedures = TriggerProcedure.objects.exclude(signature='public.gol_area_m2(text)')
             data = {
                 'form': form,
                 'forms': forms,
                 'layer_type': layer_type,
                 'enumerations': get_currentuser_enumerations(request),
-                'procedures':  TriggerProcedure.objects.all(),
+                'procedures': available_procedures,
                 'roles': roles,
                 'resource_is_public': is_public,
                 'redirect_to_layergroup': redirect_to_layergroup,
@@ -3948,12 +4720,14 @@ def layer_create_with_group(request, layergroup_id):
             forms = Form.objects.all()
         # since created layers are empty, it makes sense to set write permissions for the creator
         roles = utils.get_all_user_roles_checked_by_layer(None, get_primary_user_role(request), creator_all=True)
+        # gol_area_m2 ahora se gestiona desde ConnectionTrigger calc_area_native
+        available_procedures = TriggerProcedure.objects.exclude(signature='public.gol_area_m2(text)')
         data = {
             'form': form,
             'forms': forms,
             'layer_type': layer_type,
             'enumerations': get_currentuser_enumerations(request),
-            'procedures':  TriggerProcedure.objects.all(),
+            'procedures': available_procedures,
             'roles': roles,
             'resource_is_public': False,
             'redirect_to_layergroup': redirect_to_layergroup,
@@ -4014,11 +4788,6 @@ def enumeration_add(request):
         show_first_value = False
         if 'show_first_value' in request.POST:
             show_first_value = True
-
-        aux_title = b"".join(title.encode('ASCII', 'ignore').split())[:4]
-        aux_title = aux_title.lower()
-
-        name = name + '_' + re.sub("[!@#$%^&*()[]{};:,./<>?\|`~-=_+ ]", "", aux_title.decode("utf-8"))
 
         name_exists = False
         enums = Enumeration.objects.all()
@@ -4228,99 +4997,6 @@ def enumeration_update(request, eid):
             'ALPHABETICAL': Enumeration.ALPHABETICAL
         })
 
-#***************************************************
-# TILEADO CAPAS BASE
-#***************************************************
-
-@login_required()
-@staff_required
-def create_base_layer(request, pid):
-    if request.method == 'POST':
-        plg = ProjectLayerGroup.objects.filter(project_id=pid, baselayer_group=True)
-        if plg is None or len(plg) == 0:
-            return utils.get_exception(400, 'This project does not have base layer')
-        id_base_lyr = plg[0].default_baselayer
-        base_lyr = Layer.objects.get(id=id_base_lyr)
-
-        num_res_levels = None
-        try:
-            num_res_levels = int(request.POST.get('tiles'))
-            format_ = request.POST.get('format')
-        except Exception:
-            return utils.get_exception(400, 'Wrong number of tiles')
-        tilematrixset = request.POST.get('tilematrixset')
-        extent = request.POST.get('extent')
-        version = int(round(time.time() * 1000))
-
-        base_layer_process = {}
-        if num_res_levels is not None:
-            if num_res_levels > 22:
-                return utils.get_exception(400, 'The number of resolution levels cannot be greater than 22')
-            else:
-                tasks.tiling_base_layer(base_layer_process, version, base_lyr, pid, num_res_levels, tilematrixset, format_, extent)
-        else:
-            return utils.get_exception(400, 'Wrong number of tiles')
-
-    return HttpResponse('{"response": "' + str(base_layer_process[str(pid)]['extent_processed']) + '"}', content_type='application/json')
-
-
-
-
-@login_required()
-@staff_required
-def retry_base_layer_process(request, pid):
-    if request.method == 'POST':
-        prj = ProjectBaseLayerTiling.objects.get(id=pid)
-        if(prj is not None):
-            if not os.path.exists(prj.folder_prj):
-                return utils.get_exception(400, 'This project does not have a base layer downloading')
-        else:
-            return utils.get_exception(400, 'This project does not have base layer running')
-        version = prj.version
-        processes = TilingProcessStatus.objects.filter(version=version)
-        for tiling_status in processes: #solo debería haber uno
-            tiling_status.stop = 'false'
-            tiling_status.active = 'true'
-            tiling_status.save()
-            base_layer_process[prj.id] = tiling_status
-            tasks.retry_base_layer_tiling(base_layer_process, prj, tiling_status)
-
-    return HttpResponse('{"response": "ok"}', content_type='application/json')
-
-
-
-@login_required()
-@staff_required
-def base_layer_process_update(request, pid):
-    if request.method == 'POST':
-        try:
-            base_layer_tiling = ProjectBaseLayerTiling.objects.get(id=pid)
-            version = base_layer_tiling.version
-            status_json = {}
-            status = TilingProcessStatus.objects.filter(version=version)
-            if(status is not None) :
-                for s in status:
-                    status_json = serial.serialize('json', status)
-                    status_json = json.loads(status_json)[0]['fields']
-                    return HttpResponse(json.dumps(status_json, indent=4), content_type='application/json')
-        except Exception as e:
-            pass
-        return HttpResponse('{"active" : "false"}', content_type='application/json')
-
-
-@login_required()
-@staff_required
-def stop_base_layer_process(request, pid):
-    if request.method == 'POST':
-        base_layer_tiling = ProjectBaseLayerTiling.objects.get(id=pid)
-        version = base_layer_tiling.version
-        status_json = {}
-        processes = TilingProcessStatus.objects.filter(version=version)
-        for tiling_status in processes: #solo debería haber uno
-            tiling_status.stop = 'true'
-            tiling_status.save()
-
-#***************************************************
 
 @csrf_exempt
 def get_enumeration(request):
@@ -4920,6 +5596,7 @@ def get_feature_wfs(request):
 
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
+
 @csrf_exempt
 def get_feature_resources(request):
     if request.method == 'POST':
@@ -5254,10 +5931,21 @@ def describe_feature_type(lyr, workspace):
         layer = Layer.objects.get(name=lyr, datastore__workspace__name=workspace)
         params = json.loads(layer.datastore.connection_params)
         schema = params.get('schema', 'public')
+        # Prefer source_name (the actual physical DB table name).  Fall back to
+        # layer.name if source_name is absent or points to a non-existent table
+        # (can happen with older cloned layers whose source_name was not updated).
+        source_name = layer.source_name if layer.source_name else layer.name
 
         i = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
-        layer_defs = i.get_fields_info(layer.name, schema)
-        geom_defs = i.get_geometry_columns_info(layer.name, schema)
+        # Use pk_info=True so callers can determine the PK from the returned fields
+        # without needing a second round-trip to the database.
+        layer_defs = i.get_fields_info(source_name, schema, pk_info=True)
+        if not layer_defs and source_name != layer.name:
+            # Fallback: source_name does not match any table in this schema
+            # (typical for cloned layers created before source_name was fixed).
+            source_name = layer.name
+            layer_defs = i.get_fields_info(source_name, schema, pk_info=True)
+        geom_defs = i.get_geometry_columns_info(source_name, schema)
         i.close()
 
         for layer_def in layer_defs:
@@ -5344,6 +6032,138 @@ def external_layer_list(request):
         }
         return render(request, 'external_layer_list.html', response)
 
+
+def _parse_external_wms_styles(request):
+    raw = request.POST.get('wms_styles')
+    if not raw:
+        return None
+    try:
+        styles = json.loads(raw)
+    except (ValueError, TypeError):
+        return None
+    if not isinstance(styles, list):
+        return None
+    normalized = []
+    for i, style in enumerate(styles):
+        if not isinstance(style, dict):
+            continue
+        name = style.get('name')
+        if not name:
+            continue
+        normalized.append({
+            'name': name,
+            'title': style.get('title') or name,
+            'is_default': bool(style.get('is_default')),
+            'custom_legend_url': style.get('custom_legend_url') or style.get('legend') or '',
+        })
+    if not normalized:
+        return None
+    utils.mark_default_external_wms_style(normalized, request.POST.get('layers'))
+    return normalized
+
+
+def _fetch_external_wms_styles_from_capabilities(url, version, layer_name):
+    if not url or not layer_name or layer_name == 'empty':
+        return None
+    try:
+        data = ows_get_capabilities(url, 'WMS', version, layer_name, False)
+    except Exception:
+        logger.exception('Error fetching WMS styles from capabilities for layer %s', layer_name)
+        return None
+    if data.get('response') == '500':
+        return None
+    styles = data.get('styles') or []
+    if not styles:
+        return None
+    return utils.mark_default_external_wms_style(styles, layer_name)
+
+
+def _default_external_wms_style_from_params(params):
+    styles = params.get('styles') or []
+    for style in styles:
+        if isinstance(style, dict) and style.get('is_default'):
+            return (style.get('name') or '').strip()
+    for style in styles:
+        if isinstance(style, dict):
+            name = (style.get('name') or '').strip()
+            if name:
+                return name
+    return ''
+
+
+def _external_cached_wms_gwc_config(params, native_srs, layer_group_id):
+    return {
+        'version': (params.get('version') or '1.1.1').strip(),
+        'url': (params.get('get_map_url') or params.get('url') or '').strip(),
+        'layers': (params.get('layers') or '').strip(),
+        'format': (params.get('format') or 'image/png').strip(),
+        'default_style': _default_external_wms_style_from_params(params),
+        'native_srs': (native_srs or '').strip(),
+        'layer_group_id': layer_group_id,
+    }
+
+
+def _external_cached_wms_needs_gwc_reregister(prev_config, new_config, cache_was_enabled, cache_is_enabled):
+    if not cache_is_enabled:
+        return False
+    if not cache_was_enabled:
+        return True
+    return prev_config != new_config
+
+
+def _remove_external_wms_wmts_options(params):
+    params.pop('wmts_options', None)
+    return params
+
+
+def _mark_external_wms_uncached(layer, params=None):
+    if params is None:
+        try:
+            params = json.loads(layer.external_params or '{}')
+        except (json.JSONDecodeError, TypeError):
+            params = {}
+    _remove_external_wms_wmts_options(params)
+    Layer.objects.filter(pk=layer.pk).update(
+        cached=False,
+        external_params=json.dumps(params),
+    )
+    layer.cached = False
+    layer.external_params = json.dumps(params)
+    return params
+
+
+def _best_effort_delete_external_wms_gwc_layer(layer, server, master_node_url):
+    try:
+        geowebcache.get_instance().delete_layer(None, layer, server, master_node_url)
+        return True
+    except Exception:
+        logger.warning(
+            'Could not delete external cached WMS layer %s from GeoWebCache',
+            getattr(layer, 'name', layer),
+            exc_info=True,
+        )
+        return False
+
+
+def _best_effort_reload_gwc_nodes(server_id):
+    try:
+        geographic_servers.get_instance().get_server_by_id(server_id).reload_nodes()
+        return True
+    except Exception:
+        logger.warning(
+            'Could not reload GeoServer nodes after external WMS cache operation on server %s',
+            server_id,
+            exc_info=True,
+        )
+        return False
+
+
+def _rollback_failed_external_wms_cache(layer, params, server, master_node_url):
+    _mark_external_wms_uncached(layer, params)
+    _best_effort_delete_external_wms_gwc_layer(layer, server, master_node_url)
+    _best_effort_reload_gwc_nodes(server.id)
+
+
 @login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
@@ -5360,6 +6180,11 @@ def external_layer_add(request):
             cached = False
             if 'cached' in request.POST:
                 cached = True
+
+            single_image = False
+            if request.POST.get('type') == 'WMS' and 'single_image' in request.POST:
+                single_image = True
+                cached = False
 
             detailed_info_enabled = (request.POST.get('detailed_info_enabled') is not None)
             detailed_info_button_title = request.POST.get('detailed_info_button_title')
@@ -5391,7 +6216,7 @@ def external_layer_add(request):
             external_layer.visible = is_visible
             external_layer.queryable = False
             external_layer.cached = cached
-            external_layer.single_image = False
+            external_layer.single_image = single_image
             external_layer.time_enabled = False
             external_layer.detailed_info_enabled = detailed_info_enabled
             external_layer.detailed_info_button_title = detailed_info_button_title
@@ -5420,6 +6245,17 @@ def external_layer_add(request):
                 params['format'] = request.POST.get('format')
                 params['infoformat'] = request.POST.get('infoformat')
 
+            if external_layer.type == 'WMS':
+                wms_styles = _parse_external_wms_styles(request)
+                if not wms_styles:
+                    wms_styles = _fetch_external_wms_styles_from_capabilities(
+                        request.POST.get('url'),
+                        request.POST.get('version'),
+                        request.POST.get('layers'),
+                    )
+                if wms_styles:
+                    params['styles'] = wms_styles
+
             if external_layer.type == 'WMTS':
                 params['matrixset'] = request.POST.get('matrixset')
                 params['tilematrix'] = request.POST.get('tilematrix')
@@ -5439,6 +6275,7 @@ def external_layer_add(request):
             if external_layer.type == 'MVT':
                 external_layer.vector_tile = True
                 
+                style_file_upload_error = False
                 style_url = request.POST.get('style_url')
                 style_file = request.FILES.get('style_file')
                 
@@ -5452,12 +6289,27 @@ def external_layer_add(request):
                     style_filename = f'style_{external_layer.id}_{style_file.name}'
                     style_path = os.path.join(style_dir, style_filename)
                     
-                    with open(style_path, 'wb+') as destination:
-                        for chunk in style_file.chunks():
-                            destination.write(chunk)
-                    
-                    style_file_path = os.path.relpath(style_path, settings.MEDIA_ROOT)
-                    params['style_file_url'] = reverse("get_mvt_style", kwargs={"lyr_id": external_layer.id, "style_path": style_file_path})
+                    try:
+                        with open(style_path, 'wb+') as destination:
+                            for chunk in style_file.chunks():
+                                destination.write(chunk)
+                        
+                        if not os.path.exists(style_path) or os.path.getsize(style_path) == 0:
+                            raise IOError("The file was not written correctly")
+                        
+                        style_file_path = os.path.relpath(style_path, settings.MEDIA_ROOT)
+                        params['style_file_url'] = reverse("gvsigol_plugin_featureapi:get_mvt_style", kwargs={"lyr_id": external_layer.id, "style_path": style_file_path})
+                    except Exception as file_error:
+                        logger.exception("Error uploading MVT style file for layer %s", external_layer.id)
+                        style_file_upload_error = True
+                        file_error_msg = str(file_error)
+                        if os.path.exists(style_path):
+                            try:
+                                os.remove(style_path)
+                                logger.info("Deleted empty/corrupted style file: %s", style_path)
+                            except Exception as delete_error:
+                                logger.warning("Could not delete empty style file %s: %s", style_path, str(delete_error))
+                        logger.warning("Layer %s saved without style file. User can update it later. Error: %s", external_layer.id, file_error_msg)
                 params['srs'] = external_layer.native_srs
             else:
                 external_layer.vector_tile = False
@@ -5468,9 +6320,29 @@ def external_layer_add(request):
             if external_layer.cached:
                 if external_layer.type == 'WMS':
                     master_node = geographic_servers.get_instance().get_master_node(server.id)
-                    geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
-                    geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
+                    try:
+                        geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
+                        _best_effort_reload_gwc_nodes(server.id)
+                        wmts_options_updated = tasks.update_external_cached_wms_wmts_options(
+                            Layer.objects.get(pk=external_layer.pk)
+                        )
+                        if not wmts_options_updated:
+                            raise geowebcache.FailedRequestError(
+                                -1,
+                                'External WMS cached layer could not be registered because wmts_options could not be generated.',
+                            )
+                    except Exception:
+                        logger.exception(
+                            'Error registering external WMS layer %s in GeoWebCache. Leaving it uncached.',
+                            external_layer.name,
+                        )
+                        _rollback_failed_external_wms_cache(external_layer, params, server, master_node.getUrl())
+                        raise
 
+            if external_layer.type == 'MVT' and style_file_upload_error:
+                update_url = reverse('external_layer_update', kwargs={'external_layer_id': external_layer.id})
+                return HttpResponseRedirect(update_url + '?style_file_error=1')
+            
             return HttpResponseRedirect(back_url)
 
         except Exception as e:
@@ -5524,6 +6396,20 @@ def external_layer_update(request, external_layer_id):
         server = Server.objects.get(id=layer_group.server_id)
 
         try:
+            prev_params = {}
+            if external_layer.external_params:
+                try:
+                    prev_params = json.loads(external_layer.external_params)
+                except (json.JSONDecodeError, TypeError):
+                    prev_params = {}
+
+            cache_was_enabled = external_layer.cached
+            prev_layer_group_id = external_layer.layer_group_id
+            prev_native_srs = external_layer.native_srs
+            prev_gwc_config = _external_cached_wms_gwc_config(
+                prev_params, prev_native_srs, prev_layer_group_id
+            )
+
             is_visible = False
             if 'visible' in request.POST:
                 is_visible = True
@@ -5531,6 +6417,11 @@ def external_layer_update(request, external_layer_id):
             cached = False
             if 'cached' in request.POST:
                 cached = True
+
+            single_image = False
+            if 'single_image' in request.POST:
+                single_image = True
+                cached = False
 
             detailed_info_enabled = (request.POST.get('detailed_info_enabled') is not None)
             detailed_info_button_title = request.POST.get('detailed_info_button_title')
@@ -5545,24 +6436,30 @@ def external_layer_update(request, external_layer_id):
                     })
 
             master_node = geographic_servers.get_instance().get_master_node(server.id)
-            if external_layer.cached and not cached:
-                geowebcache.get_instance().delete_layer(None, external_layer, server, master_node.getUrl())
-                geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
-
-            if not external_layer.cached and cached:
-                if external_layer.type == 'WMS':
-                    geowebcache.get_instance().add_layer(None, external_layer, server, master_node.getUrl(), crs_list)
-                    geographic_servers.get_instance().get_server_by_id(server.id).reload_nodes()
+            if cache_was_enabled and not cached and external_layer.type == 'WMS':
+                # Do not let a slow or failing GeoWebCache DELETE leave the layer
+                # cached in the database. The viewer must stop treating the layer
+                # as WMTS even if GWC cleanup has to be done later.
+                _mark_external_wms_uncached(external_layer, prev_params)
+                _best_effort_delete_external_wms_gwc_layer(external_layer, server, master_node.getUrl())
+                _best_effort_reload_gwc_nodes(server.id)
 
             external_layer.title = request.POST.get('title')
             external_layer.type = request.POST.get('type')
             external_layer.layer_group = layer_group
             external_layer.visible = is_visible
+            if external_layer.type != 'WMS':
+                cached = False
+                single_image = False
             external_layer.cached = cached
+            external_layer.single_image = single_image
             external_layer.detailed_info_enabled = detailed_info_enabled
             external_layer.detailed_info_button_title = detailed_info_button_title
             external_layer.detailed_info_html = detailed_info_html
             external_layer.timeout = request.POST.get('timeout')
+
+            layer_md_uuid = request.POST.get('uuid', '').strip()
+            core_utils.update_layer_metadata_uuid(external_layer, layer_md_uuid)
             
             srs = request.POST.get('srs')
             if srs == '__other__':
@@ -5582,6 +6479,19 @@ def external_layer_update(request, external_layer_id):
                 params['layers'] = request.POST.get('layers')
                 params['format'] = request.POST.get('format')
                 params['infoformat'] = request.POST.get('infoformat')
+                wms_styles = _parse_external_wms_styles(request)
+                if wms_styles is not None:
+                    params['styles'] = wms_styles
+                elif prev_params.get('styles'):
+                    params['styles'] = prev_params['styles']
+                elif external_layer.type == 'WMS':
+                    fetched_styles = _fetch_external_wms_styles_from_capabilities(
+                        request.POST.get('url'),
+                        request.POST.get('version'),
+                        request.POST.get('layers'),
+                    )
+                    if fetched_styles:
+                        params['styles'] = fetched_styles
 
             if external_layer.type == 'WMTS':
                 params['matrixset'] = request.POST.get('matrixset')
@@ -5595,6 +6505,12 @@ def external_layer_update(request, external_layer_id):
                     logger.exception("Error updating wmts options")
                     pass
 
+            if external_layer.type == 'WMS':
+                if cached and prev_params.get('wmts_options'):
+                    params.setdefault('wmts_options', prev_params['wmts_options'])
+                if not cached:
+                    params.pop('wmts_options', None)
+
             if external_layer.type == 'Bing':
                 params['key'] = request.POST.get('key')
                 params['layers'] = request.POST.get('layers')
@@ -5606,6 +6522,7 @@ def external_layer_update(request, external_layer_id):
             if external_layer.type == 'MVT':
                 external_layer.vector_tile = True
                 
+                style_file_upload_error = False
                 style_url = request.POST.get('style_url')
                 style_file = request.FILES.get('style_file')
                 
@@ -5621,7 +6538,7 @@ def external_layer_update(request, external_layer_id):
                     if is_old_file_url:
                         extracted_path = _extract_style_file_path_from_url(style_url, external_layer.id)
                         if extracted_path:
-                            params['style_file_url'] = reverse("get_mvt_style", kwargs={"lyr_id": external_layer.id, "style_path": extracted_path})
+                            params['style_file_url'] = reverse("gvsigol_plugin_featureapi:get_mvt_style", kwargs={"lyr_id": external_layer.id, "style_path": extracted_path})
                             params.pop('style_url', None)
                             if old_style_url and old_style_url != style_url:
                                 old_extracted_path = _extract_style_file_path_from_url(old_style_url, external_layer.id)
@@ -5674,12 +6591,27 @@ def external_layer_update(request, external_layer_id):
                     style_filename = f'style_{external_layer.id}_{style_file.name}'
                     style_path = os.path.join(style_dir, style_filename)
                     
-                    with open(style_path, 'wb+') as destination:
-                        for chunk in style_file.chunks():
-                            destination.write(chunk)
-                    
-                    style_file_path = os.path.relpath(style_path, settings.MEDIA_ROOT)
-                    params['style_file_url'] = reverse("get_mvt_style", kwargs={"lyr_id": external_layer.id, "style_path": style_file_path})
+                    try:
+                        with open(style_path, 'wb+') as destination:
+                            for chunk in style_file.chunks():
+                                destination.write(chunk)
+                        
+                        if not os.path.exists(style_path) or os.path.getsize(style_path) == 0:
+                            raise IOError("The file was not written correctly")
+                        
+                        style_file_path = os.path.relpath(style_path, settings.MEDIA_ROOT)
+                        params['style_file_url'] = reverse("gvsigol_plugin_featureapi:get_mvt_style", kwargs={"lyr_id": external_layer.id, "style_path": style_file_path})
+                    except Exception as file_error:
+                        logger.exception("Error uploading MVT style file for layer %s", external_layer.id)
+                        style_file_upload_error = True
+                        file_error_msg = str(file_error)
+                        if os.path.exists(style_path):
+                            try:
+                                os.remove(style_path)
+                                logger.info("Deleted empty/corrupted style file: %s", style_path)
+                            except Exception as delete_error:
+                                logger.warning("Could not delete empty style file %s: %s", style_path, str(delete_error))
+                        logger.warning("Layer %s updated without style file. User can try uploading it again. Error: %s", external_layer.id, file_error_msg)
                 params['srs'] = external_layer.native_srs
             else:
                 external_layer.vector_tile = False
@@ -5687,6 +6619,38 @@ def external_layer_update(request, external_layer_id):
             #geographic_servers.get_instance().get_server_by_id(server.id).updateThumbnail(external_layer)
             external_layer.external_params = json.dumps(params)
             external_layer.save()
+
+            if external_layer.cached and external_layer.type == 'WMS':
+                new_gwc_config = _external_cached_wms_gwc_config(
+                    params, external_layer.native_srs, layer_group.id
+                )
+                needs_gwc_reregister = _external_cached_wms_needs_gwc_reregister(
+                    prev_gwc_config, new_gwc_config, cache_was_enabled, True
+                )
+                try:
+                    if needs_gwc_reregister:
+                        geowebcache.get_instance().add_layer(
+                            None, external_layer, server, master_node.getUrl(), crs_list
+                        )
+                        _best_effort_reload_gwc_nodes(server.id)
+
+                    needs_wmts_options = needs_gwc_reregister or not params.get('wmts_options')
+                    if needs_wmts_options:
+                        wmts_options_updated = tasks.update_external_cached_wms_wmts_options(
+                            Layer.objects.get(pk=external_layer.pk)
+                        )
+                        if not wmts_options_updated:
+                            raise geowebcache.FailedRequestError(
+                                -1,
+                                'External WMS cached layer could not be registered because wmts_options could not be generated.',
+                            )
+                except Exception:
+                    logger.exception(
+                        'Error updating external WMS layer %s in GeoWebCache. Leaving it uncached.',
+                        external_layer.name,
+                    )
+                    _rollback_failed_external_wms_cache(external_layer, params, server, master_node.getUrl())
+                    raise
 
             if redirect_to_layergroup:
                 # recalculate to_url since layergroup_id may change
@@ -5696,6 +6660,12 @@ def external_layer_update(request, external_layer_id):
                     to_url = reverse('layergroup_update', kwargs={'lgid': layergroup_id}) + query_string
             else:
                 to_url = back_url
+
+            if external_layer.type == 'MVT' and style_file_upload_error:
+                if not redirect_to_layergroup:
+                    to_url = reverse('external_layer_update', kwargs={'external_layer_id': external_layer.id})
+                return HttpResponseRedirect(to_url + '?style_file_error=1')
+
             return HttpResponseRedirect(to_url)
 
         except Exception as e:
@@ -5715,7 +6685,10 @@ def external_layer_update(request, external_layer_id):
                 'project_id': project_id,
                 'layergroup_id': layergroup_id,
                 'from_redirect': from_redirect,
-                'back_url': back_url
+                'back_url': back_url,
+                'layer_md_uuid': core_utils.get_layer_metadata_uuid(external_layer),
+                'plugins_config': core_utils.get_plugins_config(),
+                'layer_id': external_layer.id,
             }
 
     else:
@@ -5744,6 +6717,14 @@ def external_layer_update(request, external_layer_id):
 
         if layergroup_id:
             form.fields['layer_group'].queryset = form.fields['layer_group'].queryset.filter(id=layergroup_id)
+        
+        style_file_error_message = None
+        if request.GET.get('style_file_error') == '1':
+            style_file_error_message = _("The layer was saved successfully, but there was an error uploading the style file. Please try uploading it again.")
+
+        md_uuid = core_utils.get_layer_metadata_uuid(external_layer)
+        plugins_config = core_utils.get_plugins_config()
+        
         response= {
             'form': form,
             'external_layer': external_layer,
@@ -5753,7 +6734,11 @@ def external_layer_update(request, external_layer_id):
             'project_id': project_id,
             'layergroup_id': layergroup_id,
             'from_redirect': from_redirect,
-            'back_url': back_url
+            'back_url': back_url,
+            'style_file_error_message': style_file_error_message,
+            'layer_md_uuid': md_uuid,
+            'plugins_config': plugins_config,
+            'layer_id': external_layer.id,
         }
 
     return render(request, 'external_layer_update.html', response)
@@ -5867,7 +6852,7 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
         if service == 'WMS':
             if not version:
                 try:
-                    response = requests.get(url)
+                    response = requests.get(url, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
                     data = xmltodict.parse(response.content)
                     version = data['WMT_MS_Capabilities']['@version']
                 except:
@@ -5895,6 +6880,8 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                 pass
 
             get_map_url = wms.getOperationByName('GetMap').methods[0]['url']
+            if get_map_url.startswith("http://"):
+                get_map_url = "https://" + get_map_url[7:] # avoid mixed origin errors
 
             lyr = wms.contents.get(layer)
             if not lyr:
@@ -5912,7 +6899,12 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                     if 'legend' in style:
                         style_def['custom_legend_url'] = style['legend']
                     styles.append(style_def)
-                crs_list = lyr.crs_list
+                utils.mark_default_external_wms_style(styles, layer)
+                try:
+                    crs_list = lyr.crs_list
+                except Exception:
+                    # not available in WMS version 1.1.1
+                    pass
 
         elif service == 'WMTS':
             if not version:
@@ -6148,7 +7140,7 @@ def layer_cache_config(request, layer_id):
             return render(request, 'cache_list.html', response)
 
         except Exception as e:
-            error_message = ugettext_lazy('Error configuring layer. Cause: {cause}.').format(cause=str(e))
+            error_message = gettext_lazy('Error configuring layer. Cause: {cause}.').format(cause=str(e))
             logger.exception(error_message)
             messages.error(request, error_message)
             response = HttpResponseRedirect(request.path)
@@ -6180,7 +7172,7 @@ def layer_cache_config(request, layer_id):
                 "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
                 "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
                 "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
-                "formats": settings.CACHE_OPTIONS['FORMATS'],
+                "format_choices": getattr(settings, 'SUPPORTED_FORMATS_CHOICES', [(f, f) for f in settings.CACHE_OPTIONS['FORMATS']]),
                 "tasks": tasks['long-array-array']
             }
 
@@ -6206,14 +7198,14 @@ def layer_cache_config(request, layer_id):
                 "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
                 "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
                 "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
-                "formats": settings.CACHE_OPTIONS['FORMATS'],
+                "format_choices": getattr(settings, 'SUPPORTED_FORMATS_CHOICES', [(f, f) for f in settings.CACHE_OPTIONS['FORMATS']]),
                 "tasks": tasks['long-array-array'],
                 "latlong_extent": layer.latlong_extent
             }
 
             return render(request, 'layer_cache_config.html', response)
         except Exception as e:
-            error_message = ugettext_lazy('Error accessing layer. Cause: {cause}.').format(cause=str(e))
+            error_message = gettext_lazy('Error accessing layer. Cause: {cause}.').format(cause=str(e))
             logger.exception(error_message)
             messages.error(request, error_message)
             return redirect('cache_list')
@@ -6280,7 +7272,7 @@ def group_cache_config(request, group_id):
                 "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
                 "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
                 "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
-                "formats": settings.CACHE_OPTIONS['FORMATS'],
+                "format_choices": getattr(settings, 'SUPPORTED_FORMATS_CHOICES', [(f, f) for f in settings.CACHE_OPTIONS['FORMATS']]),
                 "tasks": tasks['long-array-array']
             }
 
@@ -6303,13 +7295,13 @@ def group_cache_config(request, group_id):
                 "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
                 "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
                 "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
-                "formats": settings.CACHE_OPTIONS['FORMATS'],
+                "format_choices": getattr(settings, 'SUPPORTED_FORMATS_CHOICES', [(f, f) for f in settings.CACHE_OPTIONS['FORMATS']]),
                 "tasks": tasks['long-array-array']
             }
 
             return render(request, 'group_cache_config.html', response)
         except Exception as e:
-            error_message = ugettext_lazy('Error accessing layer group. Cause: {cause}.').format(cause=str(e))
+            error_message = gettext_lazy('Error accessing layer group. Cause: {cause}.').format(cause=str(e))
             logger.exception(error_message)
             messages.error(request, error_message)
             return redirect('cache_list')
@@ -6461,6 +7453,1769 @@ def service_url_update(request, svid):
 
         return render(request, 'service_url_update.html', {'svid': svid, 'form': form})
 
+
+# ============================================================================
+# Connection Views (CRUD)
+# ============================================================================
+
+@login_required()
+@require_safe
+@staff_required
+def connection_list(request):
+    """Lista las conexiones que el usuario puede gestionar."""
+    
+    if request.user.is_superuser:
+        # Superusuarios ven todas las conexiones
+        connections_qs = Connection.objects.all()
+    else:
+        # Usuarios staff solo ven conexiones que pueden gestionar
+        user_roles = auth_backend.get_roles(request.user)
+        all_user_roles = list(user_roles) + [request.user.username]
+        
+        # Obtener IDs de conexiones donde el rol tiene permiso de gestión
+        role_connection_ids = ConnectionRole.objects.filter(
+            role__in=all_user_roles,
+            can_manage=True
+        ).values_list('connection_id', flat=True)
+        
+        connections_qs = Connection.objects.filter(
+            Q(allow_all_manage=True) |
+            Q(created_by=request.user.username) |
+            Q(id__in=role_connection_ids)
+        ).distinct()
+    
+    # Aplicar búsqueda si se proporciona el parámetro 'search'
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        connections_qs = connections_qs.filter(
+            Q(name__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(type__icontains=search_query)
+        )
+    
+    # Orden estable para paginación
+    connections_qs = connections_qs.order_by('name')
+    
+    # Paginar antes de procesar
+    page_connections, page_ctx = utils.paginate(
+        request,
+        connections_qs,
+        default_page_size=10,
+        max_page_size=200,
+        page_param="page",
+        page_size_param="page_size",
+    )
+    
+    # Añadir atribuciones para visualización (solo página actual)
+    for conn in page_connections:
+        conn.masked_params = conn.get_masked_params()
+        # Contar almacenes de datos que usan esta conexión
+        conn.datastore_count = Datastore.objects.filter(connection=conn).count() if hasattr(Datastore, 'connection') else 0
+    
+    response = {
+        'connections': page_connections,
+        'request': request,
+        'search_query': search_query,
+        **page_ctx,  # Agrega paginator/page_obj/page_size/etc al template
+    }
+    return render(request, 'connection_list.html', response)
+
+
+@login_required()
+@require_http_methods(["GET", "POST", "HEAD"])
+@staff_required
+def connection_add(request):
+    """Crear una nueva conexión."""
+    # Obtener todos los roles del sistema (excluir roles de sistema)
+    all_roles = auth_backend.get_all_roles_details(exclude_system=True)
+    
+    # Los superusuarios siempre pueden editar permisos
+    can_edit_permissions = request.user.is_superuser
+    
+    if request.method == 'POST':
+        form = ConnectionForm(request.POST)
+        if form.is_valid():
+            try:
+                connection = form.save(commit=False)
+                connection.connection_params = form.get_connection_params()
+                connection.extra_params = form.get_extra_params()
+                connection.created_by = request.user.username
+                
+                # Permisos globales (solo si puede editar permisos)
+                if can_edit_permissions:
+                    connection.allow_all_datastore = 'allow_all_datastore' in request.POST
+                    connection.allow_all_etl = 'allow_all_etl' in request.POST
+                    connection.allow_all_manage = 'allow_all_manage' in request.POST
+                
+                connection.save()
+                
+                # Guardar permisos por rol (solo si puede editar permisos)
+                if can_edit_permissions:
+                    for role in all_roles:
+                        role_name = role.get('name') if isinstance(role, dict) else str(role)
+                        can_datastore = f'role_datastore_{role_name}' in request.POST
+                        can_etl = f'role_etl_{role_name}' in request.POST
+                        can_manage = f'role_manage_{role_name}' in request.POST
+                        
+                        if can_datastore or can_etl or can_manage:
+                            ConnectionRole.objects.create(
+                                connection=connection,
+                                role=role_name,
+                                can_use_datastore=can_datastore,
+                                can_use_etl=can_etl,
+                                can_manage=can_manage
+                            )
+                
+                messages.success(request, _('Connection created successfully'))
+                return HttpResponseRedirect(reverse('connection_list'))
+            except Exception as e:
+                logger.exception("Error creating connection")
+                form.add_error(None, str(e))
+        
+        return render(request, 'connection_add.html', {
+            'form': form,
+            'roles': all_roles,
+            'can_edit_permissions': can_edit_permissions
+        })
+    else:
+        form = ConnectionForm()
+        return render(request, 'connection_add.html', {
+            'form': form,
+            'roles': all_roles,
+            'can_edit_permissions': can_edit_permissions
+        })
+
+
+@login_required()
+@require_http_methods(["GET", "POST", "HEAD"])
+@staff_required
+def connection_update(request, connection_id):
+    """Actualizar una conexión existente."""
+    try:
+        connection = Connection.objects.get(id=connection_id)
+    except Connection.DoesNotExist:
+        return HttpResponseNotFound(_('Connection not found'))
+    
+    # Verificar que el usuario tiene permiso para gestionar esta conexión
+    user_roles = auth_backend.get_roles(request.user)
+    all_user_roles = list(user_roles) + [request.user.username]
+    
+    can_manage = (
+        request.user.is_superuser or
+        connection.allow_all_manage or
+        connection.created_by == request.user.username or
+        connection.roles.filter(role__in=all_user_roles, can_manage=True).exists()
+    )
+    
+    if not can_manage:
+        messages.error(request, _('You do not have permission to manage this connection'))
+        return HttpResponseRedirect(reverse('connection_list'))
+    
+    # Los superusuarios pueden editar permisos
+    can_edit_permissions = request.user.is_superuser
+    
+    # Obtener todos los roles del sistema
+    all_roles = auth_backend.get_all_roles_details(exclude_system=True)
+    
+    # Obtener permisos actuales por rol
+    current_role_permissions = {}
+    for cr in connection.roles.all():
+        current_role_permissions[cr.role] = {
+            'datastore': cr.can_use_datastore,
+            'etl': cr.can_use_etl,
+            'manage': cr.can_manage
+        }
+    
+    # Añadir información de permisos a cada rol
+    for role in all_roles:
+        role_name = role.get('name') if isinstance(role, dict) else str(role)
+        perms = current_role_permissions.get(role_name, {})
+        if isinstance(role, dict):
+            role['datastore_checked'] = perms.get('datastore', False)
+            role['etl_checked'] = perms.get('etl', False)
+            role['manage_checked'] = perms.get('manage', False)
+    
+    if request.method == 'POST':
+        form = ConnectionUpdateForm(request.POST, instance=connection)
+        if form.is_valid():
+            try:
+                current_params = connection.get_connection_params()
+                connection = form.save(commit=False)
+                connection.connection_params = form.get_connection_params(current_params)
+                connection.extra_params = form.get_extra_params()
+                
+                # Permisos globales (solo si puede editar permisos)
+                if can_edit_permissions:
+                    connection.allow_all_datastore = 'allow_all_datastore' in request.POST
+                    connection.allow_all_etl = 'allow_all_etl' in request.POST
+                    connection.allow_all_manage = 'allow_all_manage' in request.POST
+                
+                connection.save()
+                
+                # Actualizar connection_params de los datastores asociados (solo para PostGIS)
+                # Y sincronizar con GeoServer
+                if connection.type == 'PostGIS':
+                    from .models import Datastore
+                    datastores = Datastore.objects.filter(connection=connection)
+                    if datastores.exists():
+                        # Construir los nuevos connection_params para los datastores
+                        conn_params = connection.get_connection_params()
+                        geoserver_errors = []
+                        
+                        for ds in datastores:
+                            # Mantener el schema del datastore
+                            ds_schema = ds.schema or ds.get_schema_name()
+                            ds_params = {
+                                'host': conn_params.get('host', ''),
+                                'port': conn_params.get('port', ''),
+                                'database': conn_params.get('database', ''),
+                                'user': conn_params.get('user', ''),
+                                'passwd': conn_params.get('passwd', ''),
+                                'schema': ds_schema,
+                            }
+                            # Añadir dbtype y otros parámetros de extra_params
+                            if connection.extra_params:
+                                try:
+                                    extra = json.loads(connection.extra_params)
+                                    ds_params.update(extra)
+                                except:
+                                    pass
+                            
+                            new_connection_params = json.dumps(ds_params)
+                            
+                            # Sincronizar con GeoServer
+                            try:
+                                gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
+                                if gs.updateDatastore(ds.workspace.name, ds.name, ds.description or '', ds.type, new_connection_params):
+                                    ds.connection_params = new_connection_params
+                                    ds.save()
+                                    logger.info(f"Updated datastore '{ds.name}' in GeoServer and database")
+                                else:
+                                    geoserver_errors.append(ds.name)
+                                    logger.error(f"Failed to update datastore '{ds.name}' in GeoServer")
+                            except Exception as gs_error:
+                                geoserver_errors.append(ds.name)
+                                logger.exception(f"Error updating datastore '{ds.name}' in GeoServer: {gs_error}")
+                        
+                        if geoserver_errors:
+                            messages.warning(request, _('Connection updated but some datastores could not be synchronized with GeoServer: ') + ', '.join(geoserver_errors))
+                        else:
+                            logger.info(f"Updated and synchronized {datastores.count()} datastores linked to connection '{connection.name}'")
+                
+                # Actualizar roles (solo si puede editar permisos)
+                if can_edit_permissions:
+                    # Enfoque selectivo: solo modificar los roles que aparecen en all_roles
+                    # (los que el formulario puede mostrar). Los ConnectionRole de roles que
+                    # no están en all_roles (migrados, eliminados del backend, etc.) se preservan.
+                    existing_roles = {
+                        cr.role: cr
+                        for cr in ConnectionRole.objects.filter(connection=connection)
+                    }
+                    for role in all_roles:
+                        role_name = role.get('name') if isinstance(role, dict) else str(role)
+                        can_datastore = f'role_datastore_{role_name}' in request.POST
+                        can_etl = f'role_etl_{role_name}' in request.POST
+                        can_manage_role = f'role_manage_{role_name}' in request.POST
+
+                        if can_datastore or can_etl or can_manage_role:
+                            if role_name in existing_roles:
+                                # Actualizar el registro existente
+                                cr = existing_roles[role_name]
+                                cr.can_use_datastore = can_datastore
+                                cr.can_use_etl = can_etl
+                                cr.can_manage = can_manage_role
+                                cr.save()
+                            else:
+                                # Crear nuevo registro
+                                ConnectionRole.objects.create(
+                                    connection=connection,
+                                    role=role_name,
+                                    can_use_datastore=can_datastore,
+                                    can_use_etl=can_etl,
+                                    can_manage=can_manage_role
+                                )
+                        else:
+                            # El rol aparece en el formulario pero sin ningún permiso marcado
+                            # → eliminar el registro si existía
+                            if role_name in existing_roles:
+                                existing_roles[role_name].delete()
+                    # Los ConnectionRole cuyo role NO está en all_roles quedan intactos
+                
+                messages.success(request, _('Connection updated successfully'))
+                return HttpResponseRedirect(reverse('connection_list'))
+            except Exception as e:
+                logger.exception("Error updating connection")
+                form.add_error(None, str(e))
+        
+        return render(request, 'connection_update.html', {
+            'form': form, 
+            'connection_id': connection_id, 
+            'connection': connection,
+            'roles': all_roles,
+            'can_edit_permissions': can_edit_permissions
+        })
+    else:
+        # Cargar datos actuales en el formulario según el tipo de conexión
+        params = connection.get_connection_params()
+        initial_data = {
+            'extra_params': connection.extra_params or '',
+        }
+        
+        conn_type = connection.type
+        if conn_type == 'PostGIS':
+            initial_data.update({
+                'host': params.get('host', ''),
+                'port': params.get('port', ''),
+                'database': params.get('database', ''),
+                'user': params.get('user', ''),
+            })
+        elif conn_type == 'Oracle':
+            # Parsear DSN: "host:port/service"
+            dsn = params.get('dsn', '')
+            oracle_host = ''
+            oracle_port = '1521'
+            oracle_service = ''
+            if dsn:
+                # Formato: host:port/service
+                if '/' in dsn:
+                    host_port, oracle_service = dsn.split('/', 1)
+                else:
+                    host_port = dsn
+                if ':' in host_port:
+                    oracle_host, oracle_port = host_port.split(':', 1)
+                else:
+                    oracle_host = host_port
+            # ETL usa 'username'
+            initial_data.update({
+                'oracle_user': params.get('username', ''),
+                'oracle_host': oracle_host,
+                'oracle_port': oracle_port,
+                'oracle_service': oracle_service,
+            })
+        elif conn_type == 'SQLServer':
+            # ETL usa nombres con guiones
+            initial_data.update({
+                'sqlserver_server': params.get('server-sql-server', ''),
+                'sqlserver_user': params.get('username-sql-server', ''),
+                'sqlserver_database': params.get('db-sql-server', ''),
+                'sqlserver_tds_version': params.get('tds-version-sql-server', '7.0'),
+            })
+        elif conn_type == 'indenova':
+            # ETL usa nombres con guiones
+            initial_data.update({
+                'indenova_domain': params.get('domain', ''),
+                'indenova_api_key': params.get('api-key', ''),
+                'indenova_client_id': params.get('client-id', ''),
+            })
+        elif conn_type == 'segex':
+            # Soportar tanto 'entity' (nuevo) como 'entities-list' (formato ETL antiguo)
+            entity = params.get('entity', '')
+            if not entity and 'entities-list' in params and params['entities-list']:
+                entity = params['entities-list'][0]
+            initial_data.update({
+                'segex_domain': params.get('domain', 'PRO'),
+                'segex_entity': entity,
+                'segex_user': params.get('user', ''),
+            })
+        elif conn_type == 'sharepoint':
+            # ETL usa nombres con guiones
+            initial_data.update({
+                'sharepoint_tenant_id': params.get('tenant-id', ''),
+                'sharepoint_client_id': params.get('client-id', ''),
+                'sharepoint_host': params.get('sharepoint-host', ''),
+                'sharepoint_site_path': params.get('site-path', ''),
+            })
+        elif conn_type == 'padron-atm':
+            # Soportar variantes del nombre del campo idacceso (la API usa 'idacceso')
+            id_acceso = params.get('idacceso', '') or params.get('id_acceso', '') or params.get('idAcceso', '') or params.get('id-acceso', '')
+            initial_data.update({
+                'padron_atm_email': params.get('email', ''),
+                'padron_atm_id_acceso': id_acceso,
+            })
+        elif conn_type == 'sgarexws':
+            initial_data.update({
+                'sgarexws_url': params.get('url', ''),
+                'sgarexws_username': params.get('username', ''),
+            })
+        
+        form = ConnectionUpdateForm(instance=connection, initial=initial_data)
+        
+        return render(request, 'connection_update.html', {
+            'form': form, 
+            'connection_id': connection_id, 
+            'connection': connection,
+            'can_edit_permissions': can_edit_permissions,
+            'roles': all_roles
+        })
+
+
+@login_required()
+@require_POST
+@superuser_required
+def connection_delete(request, connection_id):
+    """Eliminar una conexión."""
+    try:
+        connection = Connection.objects.get(id=connection_id)
+        force_cascade = request.POST.get('force_cascade', 'false') == 'true'
+        
+        # Verificar que no hay almacenes de datos usando esta conexión
+        if hasattr(Datastore, 'connection'):
+            datastores = Datastore.objects.filter(connection=connection)
+            datastore_count = datastores.count()
+            
+            if datastore_count > 0:
+                if not force_cascade:
+                    messages.error(request, _('Cannot delete connection. It is being used by {0} datastore(s).').format(datastore_count))
+                    return HttpResponseRedirect(reverse('connection_list'))
+                
+                # Eliminación en cascada: borrar todos los datastores y sus recursos
+                logger.info(f"Eliminando conexión {connection.name} en cascada con {datastore_count} datastores")
+                
+                for ds in datastores:
+                    try:
+                        gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
+                        
+                        # Eliminar del servidor geográfico
+                        try:
+                            gs.deleteDatastore(ds.workspace, ds, delete_schema=False)
+                        except Exception as e:
+                            logger.warning(f"Error eliminando datastore {ds.name} de GeoServer: {e}")
+                        
+                        # Eliminar elementos del datastore (layers, triggers, topología)
+                        utils.delete_datastore_elements(ds, gs=gs)
+                        logger.info(f"  ✓ Datastore {ds.name} eliminado")
+                        
+                    except Exception as e:
+                        logger.error(f"  ✗ Error eliminando datastore {ds.name}: {e}")
+        
+        # Eliminar triggers de conexión asociados
+        ConnectionTrigger.objects.filter(connection=connection).delete()
+        
+        connection.delete()
+        messages.success(request, _('Connection and all associated resources deleted successfully'))
+        
+    except Connection.DoesNotExist:
+        messages.error(request, _('Connection not found'))
+    except Exception as e:
+        logger.exception("Error deleting connection")
+        messages.error(request, str(e))
+    
+    return HttpResponseRedirect(reverse('connection_list'))
+
+
+@login_required()
+@require_safe
+@superuser_required
+def connection_info_api(request, connection_id):
+    """API para obtener información de una conexión (conteo de datastores y layers)."""
+    try:
+        connection = Connection.objects.get(id=connection_id)
+        
+        datastore_count = 0
+        layer_count = 0
+        
+        if hasattr(Datastore, 'connection'):
+            datastores = Datastore.objects.filter(connection=connection)
+            datastore_count = datastores.count()
+            
+            for ds in datastores:
+                layer_count += Layer.objects.filter(datastore=ds).count()
+        
+        return JsonResponse({
+            'id': connection.id,
+            'name': connection.name,
+            'datastore_count': datastore_count,
+            'layer_count': layer_count
+        })
+        
+    except Connection.DoesNotExist:
+        return JsonResponse({'error': _('Connection not found')}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required()
+@require_POST
+@superuser_required
+def connection_test(request):
+    """Probar una conexión a base de datos o API."""
+    try:
+        conn_type = request.POST.get('type', 'PostGIS')
+        
+        if conn_type in ('PostGIS', 'PostgreSQL'):
+            try:
+                conn = psycopg2.connect(
+                    user=request.POST.get('user', ''),
+                    password=request.POST.get('password', ''),
+                    host=request.POST.get('host', ''),
+                    port=request.POST.get('port', ''),
+                    database=request.POST.get('database', '')
+                )
+                conn.close()
+                return JsonResponse({'success': True, 'message': _('Connection successful')})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
+        
+        elif conn_type == 'Oracle':
+            try:
+                import cx_Oracle
+                dsn = request.POST.get('dsn', '')
+                conn = cx_Oracle.connect(
+                    request.POST.get('username', ''),
+                    request.POST.get('password', ''),
+                    dsn
+                )
+                conn.close()
+                return JsonResponse({'success': True, 'message': _('Connection successful')})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
+        
+        elif conn_type == 'SQLServer':
+            try:
+                import pymssql
+                conn = pymssql.connect(
+                    server=request.POST.get('server-sql-server', ''),
+                    user=request.POST.get('username-sql-server', ''),
+                    password=request.POST.get('password-sql-server', ''),
+                    database=request.POST.get('db-sql-server', ''),
+                    tds_version=request.POST.get('tds-version-sql-server', '7.0')
+                )
+                conn.close()
+                return JsonResponse({'success': True, 'message': _('Connection successful')})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
+        
+        elif conn_type == 'sharepoint':
+            try:
+                import requests as req
+                tenant_id = request.POST.get('tenant-id', '')
+                client_id = request.POST.get('client-id', '')
+                client_secret = request.POST.get('client-secret', '')
+                sharepoint_host = request.POST.get('sharepoint-host', '')
+                site_path = request.POST.get('site-path', '')
+                
+                # Obtener token
+                token_url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
+                data = {
+                    "client_id": client_id,
+                    "client_secret": client_secret,
+                    "scope": "https://graph.microsoft.com/.default",
+                    "grant_type": "client_credentials"
+                }
+                response = req.post(token_url, data=data)
+                if response.status_code != 200:
+                    return JsonResponse({'success': False, 'error': f'Token error: {response.text}'})
+                
+                access_token = response.json().get("access_token")
+                
+                # Verificar acceso al sitio
+                headers = {"Authorization": f"Bearer {access_token}"}
+                url = f"https://graph.microsoft.com/v1.0/sites/{sharepoint_host}:{site_path}"
+                response = req.get(url, headers=headers)
+                
+                if response.status_code == 200:
+                    return JsonResponse({'success': True, 'message': _('Connection successful')})
+                else:
+                    return JsonResponse({'success': False, 'error': f'Site access error: {response.text}'})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
+        
+        elif conn_type == 'indenova':
+            try:
+                import requests as req
+                domain = request.POST.get('domain', '').strip()
+                if domain and not domain.startswith(('http://', 'https://')):
+                    domain = 'https://' + domain
+                domain = domain.rstrip('/')
+                api_key = request.POST.get('api-key', '')
+                
+                url = f"{domain}/api/rest/process/v1/process/list?idsection=27"
+                headers = {'esigna-auth-api-key': api_key}
+                response = req.get(url, headers=headers)
+                
+                if response.status_code == 200:
+                    return JsonResponse({'success': True, 'message': _('Connection successful')})
+                else:
+                    return JsonResponse({'success': False, 'error': f'API error: {response.status_code}'})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
+        
+        elif conn_type == 'segex':
+            try:
+                import requests as req
+                import hashlib
+                import base64
+                from datetime import datetime
+                
+                domain = request.POST.get('domain', 'PRO')
+                user = request.POST.get('user', '')
+                password = request.POST.get('password', '')
+                entity = request.POST.get('entity', '')
+                
+                if not entity:
+                    return JsonResponse({'success': False, 'error': _('Entity is required for testing SEGEX connection')})
+                
+                # Hash de la contraseña según el formato SEGEX
+                # 1. Obtener fecha UTC actual
+                utc = datetime.utcnow()
+                utc_text = utc.strftime('%Y%m%d%H%M%S')
+                # 2. Concatenar con password y hacer SHA256
+                hash_input = (utc_text + password).encode('utf-8')
+                hash_bytes = hashlib.sha256(hash_input).digest()
+                # 3. Convertir a base64
+                hash_base64 = base64.b64encode(hash_bytes).decode()
+                # 4. Concatenar fecha UTC al inicio
+                ws_seg_pass = utc_text + hash_base64
+                
+                # URL base según dominio y entidad
+                if domain == 'PRE':
+                    base_url = f'https://pre-{entity}.sedipualba.es/apisegex/'
+                else:
+                    base_url = f'https://{entity}.sedipualba.es/apisegex/'
+                
+                url = f"{base_url}Georef/ListTiposGeoref?wsSegUser={user}&wsSegPass={ws_seg_pass}&idEntidad={entity}"
+                response = req.get(url)
+                
+                if response.status_code == 200:
+                    return JsonResponse({'success': True, 'message': _('Connection successful')})
+                else:
+                    return JsonResponse({'success': False, 'error': f'API error: {response.status_code}'})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
+        
+        elif conn_type == 'padron-atm':
+            try:
+                import requests as req
+                # Construir credenciales como las espera la API
+                credenciales = {
+                    'email': request.POST.get('email', ''),
+                    'password': request.POST.get('password', ''),
+                    'idacceso': request.POST.get('idacceso', '')
+                }
+                
+                url_auth = "https://pmcloudserver.atm-maggioli.es/api/auth/login"
+                response = req.post(url_auth, json=credenciales)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    token = data.get("accesstoken", {}).get("token")
+                    if token:
+                        return JsonResponse({'success': True, 'message': _('Connection successful')})
+                    else:
+                        return JsonResponse({'success': False, 'error': 'No token received'})
+                else:
+                    return JsonResponse({'success': False, 'error': f'API error: {response.status_code} - {response.text}'})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
+
+        elif conn_type == 'sgarexws':
+            try:
+                import requests as req
+                base_url = (request.POST.get('url', '') or '').strip().rstrip('/')
+                username = (request.POST.get('username', '') or '').strip()
+                password = request.POST.get('password', '') or ''
+                connection_id = request.POST.get('connection_id')
+                if not password and connection_id:
+                    try:
+                        conn_obj = Connection.objects.get(pk=int(connection_id))
+                        if conn_obj.type == 'sgarexws':
+                            saved = json.loads(conn_obj.connection_params or '{}')
+                            password = saved.get('password') or ''
+                    except (ValueError, Connection.DoesNotExist, json.JSONDecodeError, TypeError):
+                        password = ''
+                if not base_url or not username:
+                    return JsonResponse({'success': False, 'error': _('URL and username are required')})
+                login_url = base_url + '/login'
+                response = req.post(
+                    login_url,
+                    json={'username': username, 'password': password},
+                    headers={'Content-Type': 'application/json', 'accept': 'application/json'},
+                    verify=False,
+                    timeout=30,
+                )
+                if response.status_code != 200:
+                    return JsonResponse({'success': False, 'error': f'HTTP {response.status_code}: {response.text[:500]}'})
+                try:
+                    body = response.json()
+                except ValueError:
+                    return JsonResponse({'success': False, 'error': _('Invalid JSON response from login')})
+                resultado = (body or {}).get('resultado') or {}
+                if resultado.get('codigo') == '1':
+                    return JsonResponse({'success': True, 'message': _('Connection successful')})
+                desc = resultado.get('descripcion') or body
+                return JsonResponse({'success': False, 'error': str(desc)})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
+        
+        else:
+            return JsonResponse({'success': False, 'error': _('Connection type not supported for testing')})
+    
+    except Exception as e:
+        logger.exception("Error testing connection")
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required()
+@require_GET
+@superuser_required
+def connection_config(request, connection_id):
+    """
+    Vista de configuración de una conexión.
+    Muestra pestañas con diferentes opciones (triggers, etc.)
+    Solo disponible para conexiones PostGIS.
+    """
+    try:
+        connection = Connection.objects.get(id=connection_id)
+        
+        # Solo permitir para conexiones PostGIS
+        if connection.type != 'PostGIS':
+            messages.error(request, _('Configuration is only available for PostGIS connections'))
+            return HttpResponseRedirect(reverse('connection_list'))
+        
+        # Obtener triggers de esta conexión
+        triggers = ConnectionTrigger.objects.filter(connection=connection).order_by('name')
+        
+        # Obtener otras conexiones PostGIS para la opción de duplicar triggers
+        # Excluir la conexión actual
+        other_connections = Connection.objects.filter(type='PostGIS').exclude(id=connection_id).order_by('name')
+        
+        return render(request, 'connection_config.html', {
+            'connection': connection,
+            'triggers': triggers,
+            'other_connections': other_connections,
+        })
+        
+    except Connection.DoesNotExist:
+        messages.error(request, _('Connection not found'))
+        return HttpResponseRedirect(reverse('connection_list'))
+
+
+@login_required()
+@superuser_required
+def connection_trigger_add(request, connection_id):
+    """
+    Vista para añadir un nuevo trigger a una conexión.
+    """
+    
+    try:
+        connection = Connection.objects.get(id=connection_id)
+        
+        if connection.type != 'PostGIS':
+            messages.error(request, _('Triggers are only available for PostGIS connections'))
+            return HttpResponseRedirect(reverse('connection_list'))
+        
+        # Obtener esquemas disponibles (nombres de datastores)
+        available_schemas = list(Datastore.objects.filter(connection=connection).values_list('name', flat=True).distinct())
+        
+        if request.method == 'POST':
+            name = request.POST.get('name', '').strip()
+            description = request.POST.get('description', '').strip()
+            timing = request.POST.get('timing', 'AFTER')
+            events = request.POST.getlist('events')  # Lista de eventos seleccionados
+            sql_code = request.POST.get('sql_code', '').strip()
+            scope = request.POST.get('scope', 'global')
+            # Obtener esquemas del campo JSON
+            schemas_json = request.POST.get('schemas_json', '[]')
+            try:
+                schemas = json.loads(schemas_json) if schemas_json else []
+            except:
+                schemas = []
+            is_calculated_field = request.POST.get('is_calculated_field') == '1'
+            
+            # Validaciones
+            if not name:
+                return render(request, 'connection_trigger_add.html', {
+                    'connection': connection,
+                    'available_schemas': available_schemas,
+                    'selected_schemas': schemas,
+                    'trigger_events': events,
+                    'error_message': _('Name is required'),
+                })
+            
+            if ConnectionTrigger.objects.filter(connection=connection, name=name).exists():
+                return render(request, 'connection_trigger_add.html', {
+                    'connection': connection,
+                    'available_schemas': available_schemas,
+                    'selected_schemas': schemas,
+                    'trigger_events': events,
+                    'error_message': _('A trigger with this name already exists'),
+                })
+            
+            if not sql_code:
+                return render(request, 'connection_trigger_add.html', {
+                    'connection': connection,
+                    'available_schemas': available_schemas,
+                    'selected_schemas': schemas,
+                    'trigger_events': events,
+                    'error_message': _('SQL code is required'),
+                })
+            
+            if not events:
+                return render(request, 'connection_trigger_add.html', {
+                    'connection': connection,
+                    'available_schemas': available_schemas,
+                    'selected_schemas': schemas,
+                    'trigger_events': events,
+                    'error_message': _('At least one event must be selected'),
+                })
+            
+            # Obtener permisos
+            allow_all = request.POST.get('allow_all') == '1'
+            allowed_roles = request.POST.getlist('allowed_roles')
+            
+            # Crear trigger
+            trigger = ConnectionTrigger.objects.create(
+                connection=connection,
+                name=name,
+                description=description,
+                timing=timing,
+                event=','.join(events),  # Guardar como string separado por comas
+                sql_code=sql_code,
+                scope=scope,
+                schemas=json.dumps(schemas) if scope == 'schemas' and schemas else None,
+                is_calculated_field=is_calculated_field,
+                allow_all=allow_all,
+                created_by=request.user.username,
+            )
+            
+            # Guardar permisos por rol si no es allow_all
+            if not allow_all and allowed_roles:
+                from .models import ConnectionTriggerRole
+                for role in allowed_roles:
+                    ConnectionTriggerRole.objects.create(trigger=trigger, role=role)
+            
+            messages.success(request, _('Trigger created successfully'))
+            return HttpResponseRedirect(reverse('connection_config', args=[connection_id]))
+        
+        # GET - mostrar formulario
+        compatible_datastores = Datastore.objects.filter(connection=connection)
+        all_roles = auth_backend.get_all_roles_details(exclude_system=True)
+        
+        return render(request, 'connection_trigger_add.html', {
+            'connection': connection,
+            'available_schemas': available_schemas,
+            'selected_schemas': [],
+            'trigger_events': ['INSERT'],  # Por defecto INSERT
+            'compatible_datastores': compatible_datastores,
+            'available_roles': [r['name'] for r in all_roles] if all_roles else [],
+            'selected_roles': [],
+        })
+        
+    except Connection.DoesNotExist:
+        messages.error(request, _('Connection not found'))
+        return HttpResponseRedirect(reverse('connection_list'))
+
+
+@login_required()
+@superuser_required
+def connection_trigger_update(request, connection_id, trigger_id):
+    """
+    Vista para editar un trigger existente.
+    """
+    
+    try:
+        connection = Connection.objects.get(id=connection_id)
+        trigger = ConnectionTrigger.objects.get(id=trigger_id, connection=connection)
+        
+        if connection.type != 'PostGIS':
+            messages.error(request, _('Triggers are only available for PostGIS connections'))
+            return HttpResponseRedirect(reverse('connection_list'))
+        
+        # Obtener esquemas disponibles
+        available_schemas = list(Datastore.objects.filter(connection=connection).values_list('name', flat=True).distinct())
+        selected_schemas = trigger.get_schemas_list()
+        
+        if request.method == 'POST':
+            name = request.POST.get('name', '').strip()
+            description = request.POST.get('description', '').strip()
+            timing = request.POST.get('timing', 'AFTER')
+            events = request.POST.getlist('events')  # Lista de eventos seleccionados
+            sql_code = request.POST.get('sql_code', '').strip()
+            scope = request.POST.get('scope', 'global')
+            # Obtener esquemas del campo JSON
+            schemas_json = request.POST.get('schemas_json', '[]')
+            try:
+                schemas = json.loads(schemas_json) if schemas_json else []
+            except:
+                schemas = []
+            is_calculated_field = request.POST.get('is_calculated_field') == '1'
+            
+            # Validaciones
+            if not name:
+                return render(request, 'connection_trigger_add.html', {
+                    'connection': connection,
+                    'trigger': trigger,
+                    'available_schemas': available_schemas,
+                    'selected_schemas': schemas,
+                    'trigger_events': events,
+                    'error_message': _('Name is required'),
+                })
+            
+            # Verificar nombre único (excepto el actual)
+            if name != trigger.name and ConnectionTrigger.objects.filter(connection=connection, name=name).exists():
+                return render(request, 'connection_trigger_add.html', {
+                    'connection': connection,
+                    'trigger': trigger,
+                    'available_schemas': available_schemas,
+                    'selected_schemas': schemas,
+                    'trigger_events': events,
+                    'error_message': _('A trigger with this name already exists'),
+                })
+            
+            if not sql_code:
+                return render(request, 'connection_trigger_add.html', {
+                    'connection': connection,
+                    'trigger': trigger,
+                    'available_schemas': available_schemas,
+                    'selected_schemas': schemas,
+                    'trigger_events': events,
+                    'error_message': _('SQL code is required'),
+                })
+            
+            if not events:
+                return render(request, 'connection_trigger_add.html', {
+                    'connection': connection,
+                    'trigger': trigger,
+                    'available_schemas': available_schemas,
+                    'selected_schemas': schemas,
+                    'trigger_events': events,
+                    'error_message': _('At least one event must be selected'),
+                })
+            
+            # Detectar si cambió algo que afecta al trigger en la BD
+            new_event = ','.join(events)
+            trigger_definition_changed = (
+                trigger.name != name or
+                trigger.timing != timing or
+                trigger.event != new_event or
+                trigger.sql_code != sql_code
+            )
+            
+            # Si hay cambios, primero desinstalar los triggers existentes CON LOS VALORES ACTUALES
+            layer_triggers = []
+            if trigger_definition_changed:
+                layer_triggers = list(LayerConnectionTrigger.objects.filter(trigger=trigger, is_installed=True))
+                for layer_trigger in layer_triggers:
+                    success_uninstall, msg_uninstall = layer_trigger.uninstall()
+                    if not success_uninstall:
+                        logger.warning(f"Could not uninstall old trigger for layer {layer_trigger.layer.name}: {msg_uninstall}")
+            
+            # Obtener permisos
+            allow_all = request.POST.get('allow_all') == '1'
+            allowed_roles = request.POST.getlist('allowed_roles')
+            
+            # Ahora actualizar el trigger con los nuevos valores
+            trigger.name = name
+            trigger.description = description
+            trigger.timing = timing
+            trigger.event = new_event  # Guardar como string separado por comas
+            trigger.sql_code = sql_code
+            trigger.scope = scope
+            trigger.schemas = json.dumps(schemas) if scope == 'schemas' and schemas else None
+            trigger.is_calculated_field = is_calculated_field
+            trigger.allow_all = allow_all
+            trigger.save()
+            
+            # Actualizar permisos por rol
+            from .models import ConnectionTriggerRole
+            trigger.trigger_roles.all().delete()  # Eliminar roles anteriores
+            if not allow_all and allowed_roles:
+                for role in allowed_roles:
+                    ConnectionTriggerRole.objects.create(trigger=trigger, role=role)
+            
+            # Si hubo cambios, reinstalar los triggers con los NUEVOS valores
+            reinstall_errors = []
+            if trigger_definition_changed and layer_triggers:
+                for layer_trigger in layer_triggers:
+                    # Refrescar el objeto para obtener los nuevos valores del trigger
+                    layer_trigger.refresh_from_db()
+                    success_install, msg_install = layer_trigger.install()
+                    if not success_install:
+                        reinstall_errors.append(f"{layer_trigger.layer.name}: {msg_install}")
+                        logger.error(f"Could not reinstall trigger for layer {layer_trigger.layer.name}: {msg_install}")
+                
+                if reinstall_errors:
+                    messages.warning(request, _('Trigger updated but some layer triggers could not be reinstalled: ') + '; '.join(reinstall_errors))
+                else:
+                    messages.success(request, _('Trigger updated and reinstalled in %(count)d layer(s)') % {'count': len(layer_triggers)})
+            else:
+                messages.success(request, _('Trigger updated successfully'))
+            
+            return HttpResponseRedirect(reverse('connection_config', args=[connection_id]))
+        
+        # GET - mostrar formulario con datos
+        compatible_datastores = trigger.get_compatible_datastores()
+        all_roles = auth_backend.get_all_roles_details(exclude_system=True)
+        selected_roles = trigger.get_allowed_roles()
+        
+        return render(request, 'connection_trigger_add.html', {
+            'connection': connection,
+            'trigger': trigger,
+            'available_schemas': available_schemas,
+            'selected_schemas': selected_schemas,
+            'trigger_events': trigger.get_events_list(),  # Lista de eventos del trigger
+            'compatible_datastores': compatible_datastores,
+            'available_roles': [r['name'] for r in all_roles] if all_roles else [],
+            'selected_roles': selected_roles,
+        })
+        
+    except Connection.DoesNotExist:
+        messages.error(request, _('Connection not found'))
+        return HttpResponseRedirect(reverse('connection_list'))
+    except ConnectionTrigger.DoesNotExist:
+        messages.error(request, _('Trigger not found'))
+        return HttpResponseRedirect(reverse('connection_config', args=[connection_id]))
+
+
+@login_required()
+@require_GET
+@superuser_required
+def connection_datastores_api(request, connection_id):
+    """
+    API para obtener datastores de una conexión, filtrados opcionalmente por esquemas.
+    """
+    from gvsigol_services.models import Datastore
+    
+    try:
+        connection = Connection.objects.get(id=connection_id)
+        
+        scope = request.GET.get('scope', 'global')
+        schemas_str = request.GET.get('schemas', '')
+        
+        datastores = Datastore.objects.filter(connection=connection)
+        
+        if scope == 'schemas' and schemas_str:
+            schemas = [s.strip() for s in schemas_str.split(',') if s.strip()]
+            if schemas:
+                datastores = datastores.filter(name__in=schemas)
+        
+        return JsonResponse({
+            'datastores': [{'id': ds.id, 'name': ds.name} for ds in datastores]
+        })
+        
+    except Connection.DoesNotExist:
+        return JsonResponse({'error': _('Connection not found')}, status=404)
+
+
+@login_required()
+@superuser_required
+def connection_triggers_api(request, connection_id, trigger_id=None):
+    """
+    API REST para gestionar triggers de una conexión.
+    GET: Listar triggers o obtener uno específico
+    POST: Crear nuevo trigger
+    PUT: Actualizar trigger existente
+    DELETE: Eliminar trigger
+    """
+    from gvsigol_services.models import ConnectionTrigger
+    
+    try:
+        connection = Connection.objects.get(id=connection_id)
+        
+        # Solo permitir para conexiones PostGIS
+        if connection.type != 'PostGIS':
+            return JsonResponse({'error': _('Triggers are only available for PostGIS connections')}, status=400)
+        
+        if request.method == 'GET':
+            if trigger_id:
+                # Obtener un trigger específico
+                trigger = ConnectionTrigger.objects.get(id=trigger_id, connection=connection)
+                return JsonResponse({
+                    'id': trigger.id,
+                    'name': trigger.name,
+                    'description': trigger.description,
+                    'event': trigger.event,
+                    'timing': trigger.timing,
+                    'sql_code': trigger.sql_code,
+                    'is_calculated_field': trigger.is_calculated_field,
+                    'created_by': trigger.created_by,
+                    'created_at': trigger.created_at.isoformat(),
+                    'updated_at': trigger.updated_at.isoformat(),
+                })
+            else:
+                # Listar todos los triggers
+                triggers = ConnectionTrigger.objects.filter(connection=connection).order_by('name')
+                return JsonResponse({
+                    'triggers': [{
+                        'id': t.id,
+                        'name': t.name,
+                        'description': t.description,
+                        'event': t.event,
+                        'timing': t.timing,
+                        'is_calculated_field': t.is_calculated_field,
+                    } for t in triggers]
+                })
+        
+        elif request.method == 'POST':
+            # Crear nuevo trigger
+            import json
+            data = json.loads(request.body)
+            
+            # Validar nombre único
+            if ConnectionTrigger.objects.filter(connection=connection, name=data['name']).exists():
+                return JsonResponse({'error': _('A trigger with this name already exists')}, status=400)
+            
+            trigger = ConnectionTrigger.objects.create(
+                connection=connection,
+                name=data['name'],
+                description=data.get('description', ''),
+                event=data['event'],
+                timing=data['timing'],
+                sql_code=data['sql_code'],
+                is_calculated_field=data.get('is_calculated_field', False),
+                created_by=request.user.username,
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'id': trigger.id,
+                'message': _('Trigger created successfully')
+            })
+        
+        elif request.method == 'PUT':
+            # Actualizar trigger existente
+            if not trigger_id:
+                return JsonResponse({'error': _('Trigger ID is required')}, status=400)
+            
+            import json
+            data = json.loads(request.body)
+            
+            trigger = ConnectionTrigger.objects.get(id=trigger_id, connection=connection)
+            
+            # Validar nombre único si cambió
+            if data['name'] != trigger.name and ConnectionTrigger.objects.filter(connection=connection, name=data['name']).exists():
+                return JsonResponse({'error': _('A trigger with this name already exists')}, status=400)
+            
+            trigger.name = data['name']
+            trigger.description = data.get('description', '')
+            trigger.event = data['event']
+            trigger.timing = data['timing']
+            trigger.sql_code = data['sql_code']
+            trigger.is_calculated_field = data.get('is_calculated_field', False)
+            trigger.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': _('Trigger updated successfully')
+            })
+        
+        elif request.method == 'DELETE':
+            # Eliminar trigger
+            if not trigger_id:
+                return JsonResponse({'error': _('Trigger ID is required')}, status=400)
+            
+            trigger = ConnectionTrigger.objects.get(id=trigger_id, connection=connection)
+            
+            # Desinstalar de todas las capas donde está aplicado
+            layer_triggers = LayerConnectionTrigger.objects.filter(trigger=trigger)
+            uninstall_errors = []
+            for layer_trigger in layer_triggers:
+                if layer_trigger.is_installed:
+                    success, message = layer_trigger.uninstall()
+                    if not success:
+                        uninstall_errors.append(f"{layer_trigger.layer.name}: {message}")
+                        logger.warning(f"Could not uninstall trigger from layer {layer_trigger.layer.name}: {message}")
+                # Eliminar la asignación
+                layer_trigger.delete()
+            
+            # Eliminar el trigger de la conexión
+            trigger.delete()
+            
+            if uninstall_errors:
+                return JsonResponse({
+                    'success': True,
+                    'warning': _('Trigger deleted but some layer triggers could not be uninstalled: ') + '; '.join(uninstall_errors),
+                    'message': _('Trigger deleted')
+                })
+            
+            return JsonResponse({
+                'success': True,
+                'message': _('Trigger deleted successfully')
+            })
+        
+        else:
+            return JsonResponse({'error': _('Method not allowed')}, status=405)
+    
+    except Connection.DoesNotExist:
+        return JsonResponse({'error': _('Connection not found')}, status=404)
+    except ConnectionTrigger.DoesNotExist:
+        return JsonResponse({'error': _('Trigger not found')}, status=404)
+    except Exception as e:
+        logger.exception("Error in trigger API")
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required()
+@require_POST
+@staff_required
+def connection_trigger_duplicate(request):
+    """
+    Duplica un trigger a otra conexión.
+    POST: trigger_id, target_connection_id
+    """
+    from gvsigol_services.models import ConnectionTrigger, ConnectionTriggerRole
+    
+    try:
+        trigger_id = request.POST.get('trigger_id')
+        target_connection_id = request.POST.get('target_connection_id')
+        
+        if not trigger_id or not target_connection_id:
+            return JsonResponse({'error': _('Missing required parameters')}, status=400)
+        
+        # Obtener el trigger origen
+        source_trigger = ConnectionTrigger.objects.get(id=int(trigger_id))
+        target_connection = Connection.objects.get(id=int(target_connection_id))
+        
+        # Solo permitir para conexiones PostGIS
+        if target_connection.type != 'PostGIS':
+            return JsonResponse({'error': _('Triggers are only available for PostGIS connections')}, status=400)
+        
+        # Verificar que el usuario puede usar el trigger origen
+        if not source_trigger.can_use(request.user):
+            return JsonResponse({'error': _('You do not have permission to duplicate this trigger')}, status=403)
+        
+        # Verificar que el usuario puede gestionar la conexión destino
+        user_roles = auth_backend.get_roles(request.user)
+        all_user_roles = list(user_roles) + [request.user.username]
+        can_manage_target = (
+            request.user.is_superuser or
+            target_connection.allow_all_manage or
+            target_connection.created_by == request.user.username or
+            target_connection.roles.filter(role__in=all_user_roles, can_manage=True).exists()
+        )
+        
+        if not can_manage_target:
+            return JsonResponse({'error': _('You do not have permission to manage the target connection')}, status=403)
+        
+        # Generar nombre único para el trigger duplicado
+        base_name = source_trigger.name
+        new_name = base_name
+        counter = 1
+        while ConnectionTrigger.objects.filter(connection=target_connection, name=new_name).exists():
+            new_name = f"{base_name}_{counter}"
+            counter += 1
+        
+        # Si el scope es "schemas", verificar cuáles existen en la conexión destino
+        new_scope = source_trigger.scope
+        new_schemas = source_trigger.schemas
+        if source_trigger.scope == 'schemas':
+            # Obtener los esquemas (datastores) disponibles en la conexión destino
+            target_schemas = set(Datastore.objects.filter(
+                connection=target_connection
+            ).values_list('name', flat=True))
+            
+            # Filtrar solo los esquemas que existen en la conexión destino
+            source_schemas = source_trigger.get_schemas_list()
+            matching_schemas = [s for s in source_schemas if s in target_schemas]
+            
+            if matching_schemas:
+                new_schemas = json.dumps(matching_schemas)
+            else:
+                new_schemas = '[]'  # Ningún esquema coincide, dejar vacío
+        
+        # Crear el trigger duplicado
+        new_trigger = ConnectionTrigger.objects.create(
+            connection=target_connection,
+            name=new_name,
+            description=source_trigger.description,
+            timing=source_trigger.timing,
+            event=source_trigger.event,
+            scope=new_scope,
+            schemas=new_schemas,
+            is_calculated_field=source_trigger.is_calculated_field,
+            sql_code=source_trigger.sql_code,
+            allow_all=source_trigger.allow_all,
+            created_by=request.user.username,
+        )
+        
+        # Duplicar los roles si los tiene
+        for source_role in source_trigger.trigger_roles.all():
+            ConnectionTriggerRole.objects.create(
+                trigger=new_trigger,
+                role=source_role.role
+            )
+        
+        return JsonResponse({
+            'success': True,
+            'id': new_trigger.id,
+            'name': new_trigger.name,
+            'message': _('Trigger duplicated successfully')
+        })
+    
+    except ConnectionTrigger.DoesNotExist:
+        return JsonResponse({'error': _('Source trigger not found')}, status=404)
+    except Connection.DoesNotExist:
+        return JsonResponse({'error': _('Target connection not found')}, status=404)
+    except Exception as e:
+        logger.exception("Error duplicating trigger")
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required()
+@require_POST
+@staff_required
+def layer_trigger_assign(request):
+    """
+    Asigna un trigger de conexión a una capa.
+    Si el trigger es de campo calculado, también se especifica el campo destino.
+    """
+    try:
+        layer_id = request.POST.get('layer_id')
+        trigger_id = request.POST.get('trigger_id')
+        field_name = request.POST.get('field_name') or None  # Puede ser vacío/None
+        
+        if not layer_id or not trigger_id:
+            return JsonResponse({'error': _('Missing required parameters')}, status=400)
+        
+        layer = Layer.objects.get(id=int(layer_id))
+        trigger = ConnectionTrigger.objects.get(id=int(trigger_id))
+        
+        # Verificar permisos
+        if not utils.can_manage_layer(request, layer):
+            return JsonResponse({'error': _('Permission denied')}, status=403)
+        
+        # Verificar que el trigger pertenece a la conexión del datastore de la capa
+        if not layer.datastore or not layer.datastore.connection:
+            return JsonResponse({'error': _('Layer has no associated connection')}, status=400)
+        
+        if trigger.connection != layer.datastore.connection:
+            return JsonResponse({'error': _('Trigger does not belong to the layer connection')}, status=400)
+        
+        # Si es campo calculado, el campo es obligatorio
+        if trigger.is_calculated_field and not field_name:
+            return JsonResponse({'error': _('Field name is required for calculated field triggers')}, status=400)
+        
+        # Verificar que el campo no esté ya usado por otro trigger calculado
+        if trigger.is_calculated_field and field_name:
+            if LayerConnectionTrigger.objects.filter(
+                layer=layer,
+                field_name=field_name,
+                trigger__is_calculated_field=True
+            ).exists():
+                return JsonResponse({'error': _('This field is already assigned to another calculated field trigger')}, status=400)
+        
+        # Verificar que no existe ya una asignación de este trigger a esta capa
+        if LayerConnectionTrigger.objects.filter(layer=layer, trigger=trigger).exists():
+            return JsonResponse({'error': _('This trigger is already assigned to this layer')}, status=400)
+        
+        # Crear la asignación
+        layer_trigger = LayerConnectionTrigger.objects.create(
+            layer=layer,
+            trigger=trigger,
+            field_name=field_name,
+            created_by=request.user.username,
+            is_enabled=True
+        )
+        
+        # Instalar el trigger en la base de datos
+        success, message = layer_trigger.install()
+        
+        if not success:
+            # Si falla la instalación, eliminar la asignación
+            layer_trigger.delete()
+            # Detectar si es un error de sintaxis SQL
+            is_syntax_error = any(kw in message.lower() for kw in ('syntax error', 'error at or near', 'parse error'))
+            return JsonResponse({
+                'error': message,
+                'error_type': 'syntax_error' if is_syntax_error else 'install_error'
+            }, status=400)
+        
+        return JsonResponse({
+            'success': True,
+            'id': layer_trigger.id,
+            'installed': True,
+            'message': _('Trigger assigned and installed successfully')
+        })
+        
+    except Layer.DoesNotExist:
+        return JsonResponse({'error': _('Layer not found')}, status=404)
+    except ConnectionTrigger.DoesNotExist:
+        return JsonResponse({'error': _('Trigger not found')}, status=404)
+    except Exception as e:
+        logger.exception("Error assigning trigger to layer")
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required()
+@require_POST
+@staff_required
+def layer_trigger_remove(request):
+    """
+    Elimina la asignación de un trigger a una capa.
+    Desinstala el trigger de la base de datos antes de eliminar.
+    """
+    try:
+        assignment_id = request.POST.get('id')
+        
+        if not assignment_id:
+            return JsonResponse({'error': _('Missing assignment ID')}, status=400)
+        
+        layer_trigger = LayerConnectionTrigger.objects.get(id=int(assignment_id))
+        
+        # Verificar permisos sobre la capa
+        if not utils.can_manage_layer(request, layer_trigger.layer):
+            return JsonResponse({'error': _('Permission denied')}, status=403)
+        
+        # Verificar permisos sobre el trigger (solo superusers o usuarios con permiso pueden quitar)
+        if not layer_trigger.trigger.can_use(request.user):
+            return JsonResponse({'error': _('You do not have permission to remove this trigger')}, status=403)
+        
+        # Desinstalar el trigger de la base de datos
+        if layer_trigger.is_installed:
+            success, message = layer_trigger.uninstall()
+            if not success:
+                logger.warning(f"Could not uninstall trigger: {message}")
+        
+        layer_trigger.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': _('Trigger removed successfully')
+        })
+        
+    except LayerConnectionTrigger.DoesNotExist:
+        return JsonResponse({'error': _('Assignment not found')}, status=404)
+    except Exception as e:
+        logger.exception("Error removing trigger from layer")
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required()
+@require_POST
+@staff_required
+def layer_trigger_toggle(request):
+    """
+    Habilita o deshabilita un trigger asignado a una capa.
+    A diferencia de remove, esto solo activa/desactiva el trigger en la BBDD
+    sin eliminar la función ni la asignación.
+    """
+    try:
+        assignment_id = request.POST.get('id')
+        enabled = request.POST.get('enabled', 'true').lower() == 'true'
+        
+        if not assignment_id:
+            return JsonResponse({'error': _('Missing assignment ID')}, status=400)
+        
+        layer_trigger = LayerConnectionTrigger.objects.get(id=int(assignment_id))
+        
+        # Verificar permisos sobre la capa
+        if not utils.can_manage_layer(request, layer_trigger.layer):
+            return JsonResponse({'error': _('Permission denied')}, status=403)
+        
+        # Verificar permisos sobre el trigger
+        if not layer_trigger.trigger.can_use(request.user):
+            return JsonResponse({'error': _('You do not have permission to modify this trigger')}, status=403)
+        
+        if enabled:
+            # Habilitar el trigger en la BBDD
+            if layer_trigger.is_installed:
+                success, message = layer_trigger.enable()
+                if not success:
+                    return JsonResponse({'error': message}, status=500)
+            else:
+                # Si no estaba instalado, instalarlo
+                success, message = layer_trigger.install()
+                if not success:
+                    return JsonResponse({'error': message}, status=500)
+            
+            layer_trigger.is_enabled = True
+            layer_trigger.save()
+            
+            return JsonResponse({
+                'success': True,
+                'is_enabled': True,
+                'message': _('Trigger enabled successfully')
+            })
+        else:
+            # Deshabilitar el trigger en la BBDD (no elimina la función)
+            if layer_trigger.is_installed:
+                success, message = layer_trigger.disable()
+                if not success:
+                    return JsonResponse({'error': message}, status=500)
+            
+            layer_trigger.is_enabled = False
+            layer_trigger.save()
+            
+            return JsonResponse({
+                'success': True,
+                'is_enabled': False,
+                'message': _('Trigger disabled successfully')
+            })
+        
+    except LayerConnectionTrigger.DoesNotExist:
+        return JsonResponse({'error': _('Assignment not found')}, status=404)
+    except Exception as e:
+        logger.exception("Error toggling trigger state")
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required()
+@require_POST
+@staff_required
+def field_add_with_trigger(request):
+    """
+    Crea un nuevo campo en la capa Y le asigna un trigger de conexión.
+    Todo en una sola operación atómica.
+    """
+    try:
+        field_name = request.POST.get('field_name')
+        field_type = request.POST.get('field_type', 'double')
+        layer_id = request.POST.get('layer_id')
+        trigger_id = request.POST.get('trigger_id')
+        
+        if not field_name or not layer_id or not trigger_id:
+            return JsonResponse({'error': _('Missing required parameters')}, status=400)
+        
+        layer = Layer.objects.get(id=int(layer_id))
+        trigger = ConnectionTrigger.objects.get(id=int(trigger_id))
+        
+        # Verificar permisos
+        if not utils.can_manage_layer(request, layer):
+            return JsonResponse({'error': _('Permission denied')}, status=403)
+        
+        # Verificar que el trigger pertenece a la conexión del datastore de la capa
+        if not layer.datastore or not layer.datastore.connection:
+            return JsonResponse({'error': _('Layer has no associated connection')}, status=400)
+        
+        if trigger.connection != layer.datastore.connection:
+            return JsonResponse({'error': _('Trigger does not belong to the layer connection')}, status=400)
+        
+        # Verificar que es un trigger de campo calculado
+        if not trigger.is_calculated_field:
+            return JsonResponse({'error': _('Selected trigger is not a calculated field trigger')}, status=400)
+        
+        # Verificar que el campo no esté ya usado por otro trigger calculado
+        if LayerConnectionTrigger.objects.filter(
+            layer=layer,
+            field_name=field_name,
+            trigger__is_calculated_field=True
+        ).exists():
+            return JsonResponse({'error': _('This field is already assigned to another calculated field trigger')}, status=400)
+        
+        # Verificar que no existe ya una asignación de este trigger a esta capa
+        if LayerConnectionTrigger.objects.filter(layer=layer, trigger=trigger).exists():
+            return JsonResponse({'error': _('This trigger is already assigned to this layer')}, status=400)
+        
+        # 1. Crear el campo en la base de datos
+        try:
+            i, params = layer.datastore.connection.get_db_connection()
+            if i is None:
+                return JsonResponse({'error': _('Could not connect to database')}, status=500)
+            
+            schema = layer.datastore.get_schema_name()
+            table = layer.source_name if layer.source_name else layer.name
+            
+            # Mapear tipo de campo
+            db_type = field_type
+            if field_type == 'double':
+                db_type = 'double precision'
+            elif field_type == 'character_varying':
+                db_type = 'character varying(255)'
+            
+            # Crear el campo: add_column(schema, table_name, column_name, sql_type)
+            i.add_column(schema, table, field_name, db_type)
+            i.conn.commit()
+            i.close()
+            
+        except Exception as e:
+            logger.exception("Error creating field")
+            return JsonResponse({'error': _('Error creating field: ') + str(e)}, status=500)
+        
+        # 2. Crear la asignación del trigger
+        layer_trigger = LayerConnectionTrigger.objects.create(
+            layer=layer,
+            trigger=trigger,
+            field_name=field_name,
+            created_by=request.user.username,
+            is_enabled=True
+        )
+        
+        # 3. Instalar el trigger en la base de datos
+        success, message = layer_trigger.install()
+        
+        if not success:
+            # Si falla la instalación, eliminar la asignación (el campo ya está creado)
+            layer_trigger.delete()
+            is_syntax_error = any(kw in message.lower() for kw in ('syntax error', 'error at or near', 'parse error'))
+            return JsonResponse({
+                'success': False,
+                'error': message,
+                'error_type': 'syntax_error' if is_syntax_error else 'install_error',
+                'field_created': True
+            }, status=400)
+        
+        return JsonResponse({
+            'success': True,
+            'field_name': field_name,
+            'trigger_id': layer_trigger.id,
+            'message': _('Field created and trigger assigned successfully')
+        })
+        
+    except Layer.DoesNotExist:
+        return JsonResponse({'error': _('Layer not found')}, status=404)
+    except ConnectionTrigger.DoesNotExist:
+        return JsonResponse({'error': _('Trigger not found')}, status=404)
+    except Exception as e:
+        logger.exception("Error in field_add_with_trigger")
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required()
+@require_GET
+@staff_required
+def connection_schemas(request, connection_id):
+    """Obtener los esquemas disponibles en una conexión."""
+    try:
+        logger.debug(f"Getting schemas for connection_id: {connection_id}")
+        connection = Connection.objects.get(id=connection_id)
+        logger.debug(f"Connection found: {connection.name}, type: {connection.type}")
+        
+        # Verificar permisos de acceso a la conexión para datastores
+        can_manage_conn = False
+        if not request.user.is_superuser:
+            user_roles = auth_backend.get_roles(request.user)
+            # Incluir el username del usuario en la lista de roles para buscar (migración automática)
+            all_user_roles = list(user_roles) + [request.user.username]
+            has_access = (
+                connection.allow_all_datastore or  # Permiso global para datastores
+                connection.created_by == request.user.username or
+                connection.roles.filter(role__in=all_user_roles, can_use_datastore=True).exists()
+            )
+            if not has_access:
+                logger.warning(f"Access denied for user {request.user.username} to connection {connection.name}")
+                return JsonResponse({'success': False, 'error': _('Access denied')})
+
+            # Comprobar si tiene permiso de gestión sobre la conexión
+            can_manage_conn = (
+                connection.allow_all_manage or
+                connection.created_by == request.user.username or
+                connection.roles.filter(role__in=all_user_roles, can_manage=True).exists()
+            )
+        else:
+            can_manage_conn = True  # superusuario siempre puede gestionar
+
+        logger.debug(f"Fetching schemas for connection: {connection.name}")
+        schemas = connection.get_schemas()
+        logger.debug(f"Schemas found: {schemas}")
+
+        # Filtrar los esquemas según permisos:
+        # - Superusuario o usuario con can_manage: ve todos los esquemas
+        # - Resto (can_use_datastore sin can_manage): solo ve su propio esquema ds_<username>
+        #   (puede escribir un nombre nuevo gracias al campo tags de Select2)
+        if not can_manage_conn:
+            user_schema = utils.get_datastore_name(request.user.username)
+            schemas = [s for s in schemas if s == user_schema]
+            logger.debug(f"Schemas filtered for non-manager user {request.user.username}: {schemas}")
+
+        return JsonResponse({'success': True, 'schemas': schemas})
+    except Connection.DoesNotExist:
+        logger.error(f"Connection not found: {connection_id}")
+        return JsonResponse({'success': False, 'error': _('Connection not found')})
+    except Exception as e:
+        logger.exception(f"Error getting schemas for connection {connection_id}")
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required()
+@require_GET
+@staff_required
+def connection_list_for_etl(request):
+    """
+    Endpoint para obtener conexiones filtradas por permisos ETL.
+    Se usa desde el plugin ETL para cargar conexiones disponibles.
+    
+    Query params:
+    - type: Filtrar por tipo de conexión (opcional)
+    - category: 'database' o 'api' (opcional)
+    """
+    try:
+        conn_type = request.GET.get('type', '')
+        category = request.GET.get('category', '')
+        
+        # Superusuario ve todas las conexiones
+        if request.user.is_superuser:
+            connections = Connection.objects.all()
+        else:
+            # Usuario staff ve solo las conexiones con permiso ETL
+            user_roles = auth_backend.get_roles(request.user)
+            all_user_roles = list(user_roles) + [request.user.username]
+            # Obtener IDs de conexiones donde el rol tiene permiso ETL
+            role_connection_ids = ConnectionRole.objects.filter(
+                role__in=all_user_roles,
+                can_use_etl=True
+            ).values_list('connection_id', flat=True)
+            connections = Connection.objects.filter(
+                Q(allow_all_etl=True) |
+                Q(created_by=request.user.username) |
+                Q(id__in=role_connection_ids)
+            ).distinct()
+        
+        # Filtrar por tipo si se especifica
+        if conn_type:
+            connections = connections.filter(type=conn_type)
+        
+        # Filtrar por categoría
+        if category == 'database':
+            connections = connections.filter(type__in=['PostGIS', 'Oracle', 'SQLServer', 'MySQL'])
+        elif category == 'api':
+            connections = connections.filter(type__in=['indenova', 'segex', 'sharepoint', 'padron-atm', 'sgarexws'])
+        
+        result = []
+        for conn in connections.order_by('name'):
+            result.append({
+                'id': conn.id,
+                'name': conn.name,
+                'type': conn.type,
+                'category': conn.get_type_category(),
+            })
+        
+        return JsonResponse({'success': True, 'connections': result})
+    
+    except Exception as e:
+        logger.exception("Error getting ETL connections")
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required()
+@require_GET
+@staff_required
+def connection_params_for_etl(request, connection_id):
+    """
+    Endpoint para obtener los parámetros de conexión para uso en ETL.
+    Verifica permisos ETL antes de devolver los datos.
+    """
+    try:
+        connection = Connection.objects.get(id=connection_id)
+        
+        # Verificar permisos ETL
+        if not request.user.is_superuser:
+            user_roles = auth_backend.get_roles(request.user)
+            all_user_roles = list(user_roles) + [request.user.username]
+            has_access = (
+                connection.allow_all_etl or
+                connection.created_by == request.user.username or
+                connection.roles.filter(role__in=all_user_roles, can_use_etl=True).exists()
+            )
+            if not has_access:
+                return JsonResponse({'success': False, 'error': _('Access denied')})
+        
+        params = connection.get_connection_params()
+        
+        return JsonResponse({
+            'success': True,
+            'id': connection.id,
+            'name': connection.name,
+            'type': connection.type,
+            'connection_params': params
+        })
+    
+    except Connection.DoesNotExist:
+        return JsonResponse({'success': False, 'error': _('Connection not found')})
+    except Exception as e:
+        logger.exception(f"Error getting connection params for ETL: {connection_id}")
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
 @login_required()
 @staff_required
 def test_connection(request):
@@ -6532,6 +9287,49 @@ def register_action(request):
             logger.exception(f"register action - layer: {layer_name} - ws: {workspace}")
         return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
 
+
+@login_required()
+@staff_required
+def field_trigger_info(request):
+    """
+    Obtiene información sobre los triggers asociados a un campo.
+    """
+    field_name = request.GET.get('field')
+    layer_id = request.GET.get('layer_id')
+    
+    if not field_name or not layer_id:
+        return JsonResponse({'error': _('Missing required parameters')}, status=400)
+    
+    try:
+        layer = Layer.objects.get(id=int(layer_id))
+    except Layer.DoesNotExist:
+        return JsonResponse({'error': _('Layer not found')}, status=404)
+    
+    triggers = []
+    
+    # Buscar triggers tradicionales (Trigger model)
+    for trigger in Trigger.objects.filter(layer=layer, field=field_name):
+        triggers.append({
+            'type': 'procedure',
+            'name': str(trigger.procedure.localized_label),
+            'id': trigger.id
+        })
+    
+    # Buscar ConnectionTrigger asociados al campo
+    for lct in LayerConnectionTrigger.objects.filter(layer=layer, field_name=field_name):
+        triggers.append({
+            'type': 'connection_trigger',
+            'name': lct.trigger.name,
+            'id': lct.id,
+            'is_calculated_field': lct.trigger.is_calculated_field
+        })
+    
+    return JsonResponse({
+        'has_triggers': len(triggers) > 0,
+        'triggers': triggers
+    })
+
+
 @login_required()
 @staff_required
 def db_field_delete(request):
@@ -6565,6 +9363,15 @@ def db_field_delete(request):
             for trigger in triggers:
                 trigger.drop()
             triggers.delete()
+            
+            # Eliminar también los ConnectionTrigger asociados al campo
+            layer_conn_triggers = LayerConnectionTrigger.objects.filter(layer=layer, field_name=field)
+            for lct in layer_conn_triggers:
+                try:
+                    lct.uninstall()
+                except Exception as e:
+                    logger.warning(f"Error uninstalling trigger {lct.trigger.name}: {e}")
+            layer_conn_triggers.delete()
 
 
             gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
@@ -7121,7 +9928,7 @@ def _check_join_field_types(from_def):
                 if field.get('name') == join_field2.get('name'):
                     join_field2_type = field.get('type')
             if join_field1_type != join_field2_type:
-                return ugettext("Join fields must have the same type: {field1}({type1}) - {field2}({type2})".format(field1=join_field1.get('name'), type1=join_field1_type, field2=join_field2.get('name'), type2=join_field2_type))
+                return gettext("Join fields must have the same type: {field1}({type1}) - {field2}({type2})".format(field1=join_field1.get('name'), type1=join_field1_type, field2=join_field2.get('name'), type2=join_field2_type))
     return ""
 
 
@@ -7135,7 +9942,7 @@ def _sqlview_update(request, is_update, sql_view=None):
         else:
             form = SqlViewForm(request.user, request.POST, instance=sql_view)
             if not request.user.is_superuser and sql_view.created_by != request.user.username:
-                form.add_error(None, ugettext_lazy("The user can't manage this SQL view"))
+                form.add_error(None, gettext_lazy("The user can't manage this SQL view"))
                 raise Exception
             view_id = sql_view.id
         if form.is_valid():
@@ -7155,15 +9962,15 @@ def _sqlview_update(request, is_update, sql_view=None):
                     table_name = table.get('name')
                     field_aliases[table_alias] = {}
                     ds = Datastore.objects.get(pk=int(table.get('datastore_id')))
-                    if not utils.can_manage_datastore(request.user, ds):
-                        return HttpResponseForbidden("The user can't manage this datastore: {}".format(table.get('datastore_id')))
+                    if not utils.can_use_datastore(request.user, ds):
+                        return HttpResponseForbidden("The user can't use this datastore: {}".format(table.get('datastore_id')))
                     i, params = ds.get_db_connection()
                     schema = params.get('schema', 'public')
                     with i as c:
                         if idx == 0:
                             pks = c.get_pk_columns(table_name, schema=schema)
                             if len(pks) == 0:
-                                form.add_error(None, ugettext_lazy('The main table must have a primary key'))
+                                form.add_error(None, gettext_lazy('The main table must have a primary key'))
                                 raise Exception
                             main_table = table_alias
                         table_fields[table_alias] = c.get_fields(table_name, schema=schema)
@@ -7193,7 +10000,7 @@ def _sqlview_update(request, is_update, sql_view=None):
                     field_name = field.get('name')
                     field_alias = field.get('alias')
                     if not field_name in table_fields[table_alias]:
-                        form.add_error(None, ugettext_lazy('Field does not exist: {field}').format(field_name))
+                        form.add_error(None, gettext_lazy('Field does not exist: {field}').format(field_name))
                         raise Exception
 
                     field_obj = SqlField(table_alias, field_name, field_alias)
@@ -7203,7 +10010,7 @@ def _sqlview_update(request, is_update, sql_view=None):
                 try:
                     pk_aliases = [ field_aliases[main_table][p] for p in pks]
                 except:
-                    form.add_error(None, ugettext_lazy('The field {field} is the primary key of main table and must be included').format(field=", ".join(pks)))
+                    form.add_error(None, gettext_lazy('The field {field} is the primary key of main table and must be included').format(field=", ".join(pks)))
                     raise Exception
                 field_defs = [ f.to_json() for f in field_objs]
                 sql_view.json_def = {
@@ -7223,19 +10030,19 @@ def _sqlview_update(request, is_update, sql_view=None):
                             if is_update:
                                 c.delete_view(target_schema, sql_view.name)
                             else:
-                                form.add_error(None, ugettext_lazy('An object already exists with name: {}').format(sql_view.name))
+                                form.add_error(None, gettext_lazy('An object already exists with name: {}').format(sql_view.name))
                                 raise Exception
                         if not c.create_view(target_schema, sql_view.name, from_objs, field_objs):
                             msg = _check_join_field_types(from_def)
                             if msg:
                                 form.add_error(None, msg)
                             else:
-                                form.add_error(None, ugettext_lazy('The view could not be created'))
+                                form.add_error(None, gettext_lazy('The view could not be created'))
                             raise Exception
                         if is_update: # delete and insert again in case the pk field has a new alias
                             c.delete_geoserver_view_pk_columns(target_schema, sql_view.name)
                         if not c.insert_geoserver_view_pk_columns(target_schema, sql_view.name, pk_aliases):
-                            form.add_error(None, ugettext_lazy('Pk columns could not be inserted'))
+                            form.add_error(None, gettext_lazy('Pk columns could not be inserted'))
                             raise Exception
                         # TODO: we should add indexes to the join fields to ensure optimal performance
                         # TODO: maybe we should warn the user if a view name is changed and some layer relies in the old name
@@ -7302,7 +10109,7 @@ def list_datastore_tables(request):
     if 'id_datastore' in request.GET:
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
-        if not utils.can_manage_datastore(request.user, ds):
+        if not utils.can_use_datastore(request.user, ds):
             return HttpResponseForbidden(json.dumps([]))
         if ds:
             c, params = ds.get_db_connection()
@@ -7330,7 +10137,7 @@ def list_table_columns(request):
         id_ds = request.GET['id_datastore']
         table = request.GET['table']
         ds = Datastore.objects.get(id=id_ds)
-        if not utils.can_manage_datastore(request.user, ds):
+        if not utils.can_use_datastore(request.user, ds):
             return HttpResponseForbidden(json.dumps([]))
         if ds:
             c, params = ds.get_db_connection()
@@ -7351,7 +10158,7 @@ def list_datastores_in_db(request):
     if 'id_datastore' in request.GET:
         id_ds = request.GET['id_datastore']
         ds = Datastore.objects.get(id=id_ds)
-        if not utils.can_manage_datastore(request.user, ds):
+        if not utils.can_use_datastore(request.user, ds):
             return HttpResponseForbidden(json.dumps([]))
         params = json.loads(ds.connection_params)
         host = params.get('host')
@@ -7461,6 +10268,7 @@ def get_topology_available_layers(request, layer_id):
             
             # Buscar todos los datastores con los mismos parámetros de conexión
             available_layers = []
+            seen_layer_ids = set()
             
             for datastore in Datastore.objects.all():
                 try:
@@ -7488,6 +10296,11 @@ def get_topology_available_layers(request, layer_id):
                                 if (layer_identifier == f"{current_datastore.name}:{current_layer.source_name}" or 
                                     table_name == current_layer.source_name):
                                     continue
+
+                                # Skip duplicates (e.g. tables with multiple geometry columns)
+                                if layer_identifier in seen_layer_ids:
+                                    continue
+                                seen_layer_ids.add(layer_identifier)
                                 
                                 # Usar formato datastore:nametable para el display
                                 display_name = layer_identifier
@@ -7908,3 +10721,371 @@ def db_fill_link_field(request):
     
     logger.error(f'Invalid request method: {request.method}. Only POST is allowed.')
     return utils.get_exception(400, 'Only POST method is allowed')
+
+
+@login_required()
+@staff_required
+def api_segex_entities(request):
+    """
+    Endpoint para obtener la lista de entidades (municipios) de SEGEX.
+    Parámetros GET:
+    - domain: 'PRO' (producción) o 'PRE' (preproducción)
+    """
+    import requests as http_requests
+    
+    domain = request.GET.get('domain', 'PRO')
+    
+    if domain == 'PRE':
+        url = 'https://pre-02000.sedipualba.es/apisegex/Georef/ListEntidades'
+    else:
+        url = 'https://02000.sedipualba.es/apisegex/Georef/ListEntidades'
+    
+    try:
+        r = http_requests.get(url, timeout=30)
+        
+        if r.status_code == 200:
+            entities = []
+            for item in r.json():
+                entities.append({
+                    'id': item['Id'],
+                    'description': item['Descripcion']
+                })
+            return JsonResponse({'success': True, 'entities': entities})
+        else:
+            return JsonResponse({
+                'success': False, 
+                'error': f'Error from SEGEX API: {r.status_code}'
+            })
+    except Exception as e:
+        logger.exception('Error fetching SEGEX entities')
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+# ============================================================================
+# Attributions management
+# ============================================================================
+
+from .models import AttributionConfig, AttributionLink, AttributionAttachment, \
+    AttributionProjectMembership
+from .forms_attributions import AttributionConfigForm
+
+
+def _attr_modal_section_labels():
+    """Etiquetas para la lista de ordenación del modal (panel de control)."""
+    return {
+        'logo': gettext('Logo'),
+        'copyright': gettext('Copyright notice'),
+        'other': gettext('Others'),
+        'help': gettext('Help'),
+        'contact': gettext('Contact information'),
+        'legal': gettext('Legal notice'),
+        'links': gettext('Useful links'),
+        'attachments': gettext('Attachments'),
+    }
+
+
+def _attr_resolve_modal_section_order(form, base):
+    """Orden de bloques coherente con el campo oculto del formulario y la BD."""
+    raw = ''
+    if getattr(form, 'data', None) is not None and form.is_bound:
+        raw = (form.data.get('modal_section_order_json') or '').strip()
+    if not raw:
+        val = form['modal_section_order_json'].value()
+        if isinstance(val, str):
+            raw = val.strip()
+    if raw:
+        try:
+            return utils.normalize_attributions_modal_section_order(json.loads(raw))
+        except (ValueError, TypeError):
+            pass
+    if base is not None:
+        return utils.normalize_attributions_modal_section_order(base.modal_section_order)
+    return utils.normalize_attributions_modal_section_order([])
+
+
+def _attr_redirect_to_list():
+    return HttpResponseRedirect(reverse('attributions_list'))
+
+
+def _attr_apply_links_and_attachments(request, config):
+    """
+    Procesa los listados dinámicos de links y attachments enviados por el form
+    completo. Espera campos POST con prefijo 'link_url[]', 'link_description[]',
+    'attachment_internal_path[]', 'attachment_public_url[]', 'attachment_description[]'.
+    Sustituye los registros existentes por los enviados.
+    """
+    link_urls = request.POST.getlist('link_url[]')
+    link_descs = request.POST.getlist('link_description[]')
+
+    config.links.all().delete()
+    for idx, url in enumerate(link_urls):
+        if not url or not url.strip():
+            continue
+        desc = link_descs[idx] if idx < len(link_descs) else ''
+        safe_url = strip_tags(url).strip()
+        safe_desc = strip_tags((desc or '')).strip()
+        if not safe_url:
+            continue
+        AttributionLink.objects.create(
+            config=config,
+            url=safe_url,
+            description=safe_desc,
+            order=idx,
+        )
+
+    att_paths = request.POST.getlist('attachment_internal_path[]')
+    att_pub_urls = request.POST.getlist('attachment_public_url[]')
+    att_descs = request.POST.getlist('attachment_description[]')
+
+    config.attachments.all().delete()
+    for idx, internal_path in enumerate(att_paths):
+        if not internal_path or not internal_path.strip():
+            continue
+        public_url = att_pub_urls[idx] if idx < len(att_pub_urls) else ''
+        description = att_descs[idx] if idx < len(att_descs) else ''
+        safe_internal_path = strip_tags(internal_path).strip()
+        safe_public_url = strip_tags((public_url or '')).strip()
+        safe_description = strip_tags((description or '')).strip()
+        if not safe_internal_path:
+            continue
+        if not safe_public_url:
+            safe_public_url = utils.build_attributions_public_url(safe_internal_path)
+        AttributionAttachment.objects.create(
+            config=config,
+            internal_path=safe_internal_path,
+            public_url=safe_public_url,
+            description=safe_description,
+            order=idx,
+        )
+
+
+def _attr_apply_membership(request, config):
+    """
+    Aplica/actualiza la N:M de proyectos para configuraciones genéricas según
+    los checkboxes 'attr_project_ids[]'. Si la config no es genérica o la opción
+    'apply_to_all_projects' está activada, se elimina cualquier membership.
+    """
+    config.project_memberships.all().delete()
+
+    if not config.is_generic:
+        return
+    if config.apply_to_all_projects:
+        return
+
+    selected_ids = request.POST.getlist('attr_project_ids[]')
+    valid_projects = Project.objects.filter(id__in=selected_ids)
+    for project in valid_projects:
+        AttributionProjectMembership.objects.get_or_create(
+            config=config,
+            project=project,
+        )
+
+
+def _attr_get_form_context(form, config=None, source=None):
+    """
+    Construye el contexto que necesita el template attributions_form.html.
+    `source` es la configuración genérica usada como plantilla cuando se está
+    creando una configuración específica con la opción "Copiar configuración
+    genérica".
+    """
+    base = source if source is not None else config
+    if base is not None:
+        links = list(base.links.all().order_by('order', 'id'))
+        attachments = list(base.attachments.all().order_by('order', 'id'))
+    else:
+        links = []
+        attachments = []
+
+    if config is not None and config.pk and source is None:
+        selected_project_ids = list(
+            AttributionProjectMembership.objects
+            .filter(config=config)
+            .values_list('project_id', flat=True)
+        )
+    elif source is not None and source.is_generic:
+        selected_project_ids = list(
+            AttributionProjectMembership.objects
+            .filter(config=source)
+            .values_list('project_id', flat=True)
+        )
+    else:
+        selected_project_ids = []
+
+    modal_order = _attr_resolve_modal_section_order(form, base)
+    labels = _attr_modal_section_labels()
+    order_display = [(sid, labels[sid]) for sid in modal_order]
+
+    return {
+        'form': form,
+        'attr_config': config,
+        'projects': Project.objects.all().order_by('name'),
+        'generic_configs': AttributionConfig.objects.filter(
+            kind=AttributionConfig.KIND_GENERIC,
+        ).order_by('name'),
+        'attr_links': links,
+        'attr_attachments': attachments,
+        'attr_selected_project_ids': selected_project_ids,
+        'attr_modal_section_order_display': order_display,
+        'fm_directory': FILEMANAGER_DIRECTORY + "/",
+    }
+
+
+@login_required()
+@require_safe
+@superuser_required
+def attributions_list(request):
+    configs = AttributionConfig.objects.all().order_by('-updated_at')
+    has_generic = configs.filter(kind=AttributionConfig.KIND_GENERIC).exists()
+    return render(request, 'attributions_list.html', {
+        'configs': configs,
+        'has_generic': has_generic,
+    })
+
+
+@login_required()
+@superuser_required
+@require_http_methods(["GET", "POST"])
+def attributions_add(request):
+    source = None
+    source_id = request.GET.get('source') or request.POST.get('source')
+    if source_id:
+        try:
+            source = AttributionConfig.objects.get(id=int(source_id))
+        except (AttributionConfig.DoesNotExist, ValueError):
+            source = None
+
+    if request.method == 'POST':
+        form = AttributionConfigForm(request.POST)
+        if form.is_valid():
+            config = form.save(commit=False)
+            config.created_by = request.user.username
+            config.save()
+            _attr_apply_membership(request, config)
+            _attr_apply_links_and_attachments(request, config)
+            messages.success(request, gettext('Attributions configuration created successfully.'))
+            return _attr_redirect_to_list()
+        return render(request, 'attributions_form.html', _attr_get_form_context(form, source=source))
+
+    initial = {
+        'modal_section_order_json': json.dumps(
+            utils.normalize_attributions_modal_section_order([])
+        ),
+    }
+    if source is not None:
+        initial.update({
+            'name': '',
+            'description': source.description,
+            'other_title': source.other_title,
+            'other_text': source.other_text,
+            'logo_internal_path': source.logo_internal_path,
+            'logo_public_url': source.logo_public_url,
+            'kind': AttributionConfig.KIND_PROJECT_SPECIFIC,
+            'apply_to_all_projects': False,
+            'is_active': True,
+            'copyright_notice': source.copyright_notice,
+            'help_text': source.help_text,
+            'contact_organization': source.contact_organization,
+            'contact_person': source.contact_person,
+            'contact_address': source.contact_address,
+            'contact_phone': source.contact_phone,
+            'contact_email': source.contact_email,
+            'legal_notice': source.legal_notice,
+            'modal_section_order_json': json.dumps(
+                utils.normalize_attributions_modal_section_order(source.modal_section_order)
+            ),
+        })
+    form = AttributionConfigForm(initial=initial)
+    return render(request, 'attributions_form.html', _attr_get_form_context(form, source=source))
+
+
+@login_required()
+@superuser_required
+@require_http_methods(["GET", "POST"])
+def attributions_edit(request, attr_id):
+    config = get_object_or_404(AttributionConfig, id=attr_id)
+
+    if request.method == 'POST':
+        form = AttributionConfigForm(request.POST, instance=config)
+        if form.is_valid():
+            config = form.save()
+            _attr_apply_membership(request, config)
+            _attr_apply_links_and_attachments(request, config)
+            messages.success(request, gettext('Attributions configuration updated successfully.'))
+            return _attr_redirect_to_list()
+        return render(request, 'attributions_form.html', _attr_get_form_context(form, config=config))
+
+    form = AttributionConfigForm(instance=config)
+    return render(request, 'attributions_form.html', _attr_get_form_context(form, config=config))
+
+
+@login_required()
+@superuser_required
+@require_POST
+def attributions_delete(request, attr_id):
+    try:
+        config = AttributionConfig.objects.get(id=attr_id)
+        config.delete()
+        return JsonResponse({'success': True})
+    except AttributionConfig.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'not_found'}, status=404)
+    except Exception as e:
+        logger.exception('Error deleting attributions config')
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required()
+@superuser_required
+def attributions_clone(request, attr_id):
+    """Inicia la creación de una configuración nueva pre-rellenada con los
+    datos de `attr_id` (típicamente una genérica). Redirige al formulario de
+    creación con el parámetro `?source=<id>`."""
+    get_object_or_404(AttributionConfig, id=attr_id)
+    return HttpResponseRedirect(reverse('attributions_add') + '?source={}'.format(attr_id))
+
+
+def attributions_public_download(request, file_path):
+    """
+    Sirve sin autenticación un archivo adjunto de atribuciones. Replica el
+    patrón de plugin_vinya: el path es relativo a FILEMANAGER_DIRECTORY y se
+    valida con Path para impedir traversal. La razón para servirlo público es
+    que estos contenidos son legalmente "para difusión" (avisos copyright,
+    licencias) y los proyectos pueden ser privados.
+
+    internal_path en BD puede ser absoluta (/opt/.../data/f.pdf) o duplicar el
+    prefijo del directorio del FM en la URL; se normaliza siempre con
+    normalize_attributions_filemanager_relative_path.
+    """
+    from pathlib import Path
+
+    raw_path = (file_path or '').strip().lstrip('/')
+    if not raw_path:
+        return HttpResponseNotFound()
+
+    norm_rel = utils.normalize_attributions_filemanager_relative_path(raw_path)
+    if not norm_rel:
+        return HttpResponseNotFound()
+
+    full_path = os.path.normpath(os.path.join(FILEMANAGER_DIRECTORY, norm_rel))
+
+    fm_root = Path(FILEMANAGER_DIRECTORY).resolve()
+    try:
+        resolved = Path(full_path).resolve()
+    except Exception:
+        return HttpResponseNotFound()
+
+    if fm_root not in resolved.parents and resolved != fm_root:
+        logger.warning('Attributions download attempt outside FILEMANAGER_DIRECTORY: %s', full_path)
+        return HttpResponseNotFound()
+
+    if not resolved.is_file():
+        return HttpResponseNotFound()
+
+    if not (
+        utils.attributions_attachment_matches_relative_path(norm_rel)
+        or utils.attributions_logo_matches_relative_path(norm_rel)
+    ):
+        logger.warning('Attributions download attempt of an unreferenced resource: %s', norm_rel)
+        return HttpResponseNotFound()
+
+    filename = os.path.basename(str(resolved))
+    return sendfile(request, str(resolved), attachment=True, attachment_filename=filename)

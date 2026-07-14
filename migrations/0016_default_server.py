@@ -35,7 +35,7 @@ def create_default_server(apps, schema_editor):
                 node.is_master = True
                 node.save()
                 return
-        print("\n    ** Aviso gvsigol: no se creará un Server por defecto. Añada LEGACY_GVSIGOL_SERVICES a settings si es necesario")
+        print("\n    ** gvsigol warning: no default Server will be created. Add LEGACY_GVSIGOL_SERVICES to settings if needed")
     except Exception as error:
         print("\n    ** Error gvsigol: Error creando Server por defecto:")
         print(error)

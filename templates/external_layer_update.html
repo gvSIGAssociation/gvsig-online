@@ -1,29 +1,72 @@
 {% extends "base.html" %}
-{% load staticfiles %}
+{% load static %}
 {% load i18n %}
+
+{% block header %}
+<style>
+:root {
+	--pf-accent:    #4a7fa5;
+	--pf-accent-dk: #2d5f80;
+	--pf-accent-lt: rgba(74,127,165,0.06);
+	--pf-text:      #2e3a45;
+	--pf-muted:     #7b8a96;
+	--pf-border:    #e8ecef;
+	--pf-bg:        #f4f6f8;
+	--pf-white:     #ffffff;
+	--pf-radius:    10px;
+	--pf-shadow:    0 2px 12px rgba(0,0,0,0.08);
+	--pf-transition: 0.2s ease;
+}
+.pf-topbar { display: flex; align-items: center; justify-content: flex-end; padding: 12px 0 16px; gap: 10px; flex-wrap: wrap; }
+.pf-topbar-left { flex: 1; display: flex; align-items: center; gap: 8px; }
+.btn-pf-save { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-accent); color: #fff !important; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 20px; cursor: pointer; transition: background var(--pf-transition); letter-spacing: 0.2px; }
+.btn-pf-save:hover { background: var(--pf-accent-dk); }
+.btn-pf-back { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-bg); color: var(--pf-muted) !important; border: 1px solid var(--pf-border); border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 16px; cursor: pointer; transition: background var(--pf-transition); text-decoration: none !important; }
+.btn-pf-back:hover { background: var(--pf-border); color: var(--pf-text) !important; }
+.pf-error-msg { display: none; background: #fff5f5; border-left: 4px solid #e74c3c; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #c0392b; }
+.pf-error-msg:has(li), .pf-error-msg:has(p:not(:empty)), .pf-error-msg:has(ul:not(:empty)) { display: block; }
+.pf-error-msg ul { margin: 0; padding-left: 18px; }
+.pf-error-msg p { margin: 0 0 4px; }
+.nav-tabs { border-bottom: 2px solid var(--pf-border); margin-bottom: 0; padding-left: 4px; }
+.nav-tabs > li > a { color: var(--pf-muted); font-size: 13px; font-weight: 600; border: none; border-bottom: 2.5px solid transparent; padding: 11px 20px; margin-bottom: -2px; border-radius: 6px 6px 0 0; transition: color var(--pf-transition), border-color var(--pf-transition), background var(--pf-transition); display: inline-flex; align-items: center; gap: 7px; }
+.nav-tabs > li > a i.tab-icon { font-size: 14px; width: 16px; text-align: center; opacity: 0.7; transition: opacity var(--pf-transition); }
+.nav-tabs > li > a:hover { color: var(--pf-accent); background: var(--pf-accent-lt); border-color: transparent; }
+.nav-tabs > li > a:hover i.tab-icon { opacity: 1; }
+.nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus { color: var(--pf-accent); background: var(--pf-accent-lt); border: none; border-bottom: 2.5px solid var(--pf-accent); }
+.nav-tabs > li.active > a i.tab-icon { opacity: 1; color: var(--pf-accent); }
+.tab-content { background: var(--pf-white); border: 1px solid var(--pf-border); border-top: none; border-radius: 0 0 var(--pf-radius) var(--pf-radius); padding: 24px; box-shadow: var(--pf-shadow); }
+.tab-content label { font-size: 12px; font-weight: 700; color: var(--pf-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
+.tab-content .form-control { border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; transition: border-color var(--pf-transition), box-shadow var(--pf-transition); padding: 6px 12px; }
+.tab-content .form-control:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
+.tab-content .form-control[readonly] { background: #f0f3f5; color: var(--pf-muted); cursor: default; }
+.pf-card { background: var(--pf-white); border: 1px solid var(--pf-border); border-radius: var(--pf-radius); box-shadow: var(--pf-shadow); padding: 24px; }
+.pf-card label { font-size: 12px; font-weight: 700; color: var(--pf-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
+.pf-card .form-control { border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; transition: border-color var(--pf-transition), box-shadow var(--pf-transition); padding: 6px 12px; }
+.pf-card .form-control:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
+.pf-card .form-control[disabled] { background: #f0f3f5; color: var(--pf-muted); cursor: default; }
+</style>
+{% endblock %}
 
 {% block content %}
 {% if redirect_to_layergroup %}
-<form role="form" method="post" action="/gvsigonline/services/external_layer_update/{{ external_layer.id }}/?redirect=layergroup-redirect{% if layergroup_id %}&layergroup_id={{layergroup_id}}{% endif %}{% if project_id %}&project_id={{project_id}}{% endif %}{% if from_redirect %}&from_redirect={{from_redirect}}{% endif %}" enctype="multipart/form-data">
+<form id="external-layer-update-form" role="form" method="post" action="/gvsigonline/services/external_layer_update/{{ external_layer.id }}/?redirect=layergroup-redirect{% if layergroup_id %}&layergroup_id={{layergroup_id}}{% endif %}{% if project_id %}&project_id={{project_id}}{% endif %}{% if from_redirect %}&from_redirect={{from_redirect}}{% endif %}" enctype="multipart/form-data">
 {% else %}
-<form role="form" method="post" action="/gvsigonline/services/external_layer_update/{{ external_layer.id }}/" enctype="multipart/form-data">
+<form id="external-layer-update-form" role="form" method="post" action="/gvsigonline/services/external_layer_update/{{ external_layer.id }}/" enctype="multipart/form-data">
 {% endif %}
 
 <div class="row">
 	<div class="col-md-12">
 		<div class="row">
 			<div class="col-md-12 form-group">
-				<div class="box-tools pull-right">
-					<a href="{{back_url}}" class="btn btn-default btn-sm"><i class="fa fa-chevron-left margin-r-5"></i> {% trans "Back" %}</a>
-					<button type="submit" class="btn btn-default btn-sm">
-						<i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}
-					</button>
+				<div class="pf-topbar">
+					<a href="{{back_url}}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
+					<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
 				</div>
 			</div>
 			<div class="row" style="padding-left: 30px;">
 				{% csrf_token %}
 				{% if form.errors %}
-				<div id="form-error" style="color:#ff0000;">
+				<div class="pf-error-msg">
 					<ul>
 					{{ form.non_field_errors }}
 					{% for field in form %}
@@ -35,18 +78,23 @@
 				</div>
 				{% endif %}
 				{% if message %}
-				<div id="form-error" style="color:#ff0000;">
+<div class="pf-error-msg">
 					<p>* {{ message }}</p>
+				</div>
+{% endif %}
+				{% if style_file_error_message %}
+				<div id="style-file-error" style="color:#ff8800; background-color:#fff3cd; padding:10px; border:1px solid #ffc107; border-radius:4px; margin-bottom:10px;">
+					<p><strong>{% trans "Warning" %}:</strong> {{ style_file_error_message }}</p>
 				</div>
 				{% endif %}
 			</div>
 		</div>
 
 		<ul class="nav nav-tabs">
-          	<li class="active"><a href="#tab-layer-general" data-toggle="tab">{% trans "General" %}</a></li>
-          	<li><a href="#tab-layer-properties" data-toggle="tab">{% trans "Display properties" %}</a></li>
-          	<li><a href="#tab-layer-metadata" data-toggle="tab">{% trans "Metadata" %}</a></li>
-          	<li><a href="#tab-layer-detailedinfo" data-toggle="tab">{% trans "Detailed information" %}</a></li>
+          	<li class="active"><a href="#tab-layer-general" data-toggle="tab"><i class="fa fa-cog tab-icon"></i> {% trans "General" %}</a></li>
+          	<li><a href="#tab-layer-properties" data-toggle="tab"><i class="fa fa-paint-brush tab-icon"></i> {% trans "Display properties" %}</a></li>
+          	<li><a href="#tab-layer-metadata" data-toggle="tab"><i class="fa fa-info-circle tab-icon"></i> {% trans "Metadata" %}</a></li>
+          	<li><a href="#tab-layer-detailedinfo" data-toggle="tab"><i class="fa fa-file-text-o tab-icon"></i> {% trans "Detailed information" %}</a></li>
         </ul>
 
 
@@ -55,124 +103,120 @@
         	<div class="tab-pane active" id="tab-layer-general">
           		<div class="row">
 					<div class="col-md-12">
-						<div class="box">
-          					<div class="box-body">
-     							<div class="row">
-									<div class="col-md-12 form-group">
-										<label for="id_type">{% trans "Type" %}</label>
-										{{ form.type }}
-									</div>
-								</div>
-								<div class="row layers-control xyz-control wms-control wmts-control osm-control mvt-control">
-									<div class="col-md-12 form-group">
-										<label for="id_url">{% trans "URL" %}</label>
-										{{ form.url }}
-										<input type="hidden" name="get_map_url" id="get_map_url">
-									</div>
-								</div>
-								<div class="row layers-control wms-control wmts-control">
-									<div class="col-md-9 form-group">
-										<div id="connect-alert" class="alert-box-message"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans "Alert: this url is not in the same domain. Several browsers could not load this base layer due to cross-domain policy." %}</div>
-									</div>
-									<div class="col-md-3 form-group">
-										<div id="connect-button" class="btn btn-default btn-sm pull-right"><i class="fa fa-plug" aria-hidden="true"></i> {% trans "Connect" %}</div>
-									</div>
-								</div>
-								<div class="row">
-									<div class="col-md-12 form-group">
-										<label for="id_title">{% trans "Title" %}</label>
-										{{ form.title }}
-									</div>
-								</div>
-								<div class="row">
-									<div class="col-md-12 form-group">
-										<label class="active" for="id_layer_group">{% trans "Layer group" %}</label>
-										{{ form.layer_group }}
-									</div>
-								</div>
-								<div class="row layers-control wms-control wmts-control">
-									<div class="col-md-12 form-group">
-										<label for="id_version">{% trans "Version" %}</label>
-										{{ form.version }}
-									</div>
-								</div>
-								<div class="row layers-control bing-control wms-control wmts-control">
-									<div class="col-md-12 form-group">
-										<label for="id_layers">{% trans "Layers" %}</label>
-										{{ form.layers }}
-										<datalist id="id_layer_list">
-										</datalist>
-									</div>
-								</div>
-								<div class="row layers-control wms-control wmts-control">
-									<div class="col-md-12 form-group">
-										<label for="id_format">{% trans "Format" %}</label>
-										{{ form.format }}
-										<datalist id="id_format_list">
-										</datalist>
-									</div>
-								</div>
-								<div class="row layers-control wms-control wmts-control">
-									<div class="col-md-12 form-group">
-										<label for="id_infoformat">{% trans "Featureinfo format" %}</label>
-										{{ form.infoformat }}
-										<datalist id="id_infoformat_list">
-										</datalist>
-									</div>
-								</div>
-								<div class="row layers-control wmts-control">
-									<div class="col-md-12 form-group">
-										<label for="id_matrixset">{% trans "MatrixSet" %}</label>
-										{{ form.matrixset }}
-									</div>
-									<div class="col-md-9 form-group">
-										<div id="matrixset-alert" class="alert-box-message"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans "Alert: The selected matrixset must be compatible with the map CRS" %}</div>
-									</div>
-								</div>
-								<div class="row layers-control wmts-control hidden">
-									<div class="col-md-12 form-group">
-										<label for="id_tilematrix">{% trans "Tilematrix" %}</label>
-										{{ form.tilematrix }}
-									</div>
-								</div>
-								<div class="row layers-control bing-control xyz-control osm-control mvt-control">
-									<div class="col-md-12 form-group">
-										<label for="id_apikey">{% trans "Api-key" %}</label>
-										{{ form.key }}
-									</div>
-								</div>
-							<div class="row layers-control mvt-control">
-								<div class="col-md-12 form-group">
-									<label for="id_style_url">{% trans "Mapbox style URL" %}</label>
-									{{ form.style_url }}
-									<small class="form-text text-muted">{% trans "Enter the URL of your Mapbox style (.json) file." %}</small>
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="id_type">{% trans "Type" %}</label>
+								{{ form.type }}
+							</div>
+						</div>
+						<div class="row layers-control xyz-control wms-control wmts-control osm-control mvt-control">
+							<div class="col-md-12 form-group">
+								<label for="id_url">{% trans "URL" %}</label>
+								{{ form.url }}
+								<input type="hidden" name="get_map_url" id="get_map_url">
+							</div>
+						</div>
+						<div class="row layers-control wms-control wmts-control">
+							<div class="col-md-9 form-group">
+								<div id="connect-alert" class="alert-box-message"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans "Alert: this url is not in the same domain. Several browsers could not load this base layer due to cross-domain policy." %}</div>
+							</div>
+							<div class="col-md-3 form-group">
+								<div id="connect-button" class="btn btn-default btn-sm pull-right"><i class="fa fa-plug" aria-hidden="true"></i> {% trans "Connect" %}</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label for="id_title">{% trans "Title" %}</label>
+								{{ form.title }}
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label class="active" for="id_layer_group">{% trans "Layer group" %}</label>
+								{{ form.layer_group }}
+							</div>
+						</div>
+						<div class="row layers-control wms-control wmts-control">
+							<div class="col-md-12 form-group">
+								<label for="id_version">{% trans "Version" %}</label>
+								{{ form.version }}
+							</div>
+						</div>
+						<div class="row layers-control bing-control wms-control wmts-control">
+							<div class="col-md-12 form-group">
+								<label for="id_layers">{% trans "Layers" %}</label>
+								{{ form.layers }}
+								<datalist id="id_layer_list">
+								</datalist>
+							</div>
+						</div>
+						<div class="row layers-control wms-control wmts-control">
+							<div class="col-md-12 form-group">
+								<label for="id_format">{% trans "Format" %}</label>
+								{{ form.format }}
+								<datalist id="id_format_list">
+								</datalist>
+							</div>
+						</div>
+						<div class="row layers-control wms-control wmts-control">
+							<div class="col-md-12 form-group">
+								<label for="id_infoformat">{% trans "Featureinfo format" %}</label>
+								{{ form.infoformat }}
+								<datalist id="id_infoformat_list">
+								</datalist>
+							</div>
+						</div>
+						<div class="row layers-control wmts-control">
+							<div class="col-md-12 form-group">
+								<label for="id_matrixset">{% trans "MatrixSet" %}</label>
+								{{ form.matrixset }}
+							</div>
+							<div class="col-md-9 form-group">
+								<div id="matrixset-alert" class="alert-box-message"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans "Alert: The selected matrixset must be compatible with the map CRS" %}</div>
+							</div>
+						</div>
+						<div class="row layers-control wmts-control hidden">
+							<div class="col-md-12 form-group">
+								<label for="id_tilematrix">{% trans "Tilematrix" %}</label>
+								{{ form.tilematrix }}
+							</div>
+						</div>
+						<div class="row layers-control bing-control xyz-control osm-control mvt-control">
+							<div class="col-md-12 form-group">
+								<label for="id_apikey">{% trans "Api-key" %}</label>
+								{{ form.key }}
+							</div>
+						</div>
+						<div class="row layers-control mvt-control">
+							<div class="col-md-12 form-group">
+								<label for="id_style_url">{% trans "Mapbox style URL" %}</label>
+								{{ form.style_url }}
+								<small class="form-text text-muted">{% trans "Enter the URL of your Mapbox style (.json) file." %}</small>
+							</div>
+						</div>
+						<div class="row layers-control mvt-control">
+							<div class="col-md-12 form-group">
+								<label for="id_style_file">{% trans "Or upload your Mapbox style (.json)" %}</label>
+								<div class="input-group">
+									{{ form.style_file }}
+									<span class="input-group-btn" style="vertical-align: top;">
+										<button type="button" id="clear_style_file" class="btn btn-danger" style="display:none; height: 34px; border-top-left-radius: 0; border-bottom-left-radius: 0;" title="{% trans 'Clear file' %}">
+											<i class="fa fa-times"></i>
+										</button>
+									</span>
 								</div>
 							</div>
-							<div class="row layers-control mvt-control">
-								<div class="col-md-12 form-group">
-									<label for="id_style_file">{% trans "Or upload your Mapbox style (.json)" %}</label>
-									<div class="input-group">
-										{{ form.style_file }}
-										<span class="input-group-btn" style="vertical-align: top;">
-											<button type="button" id="clear_style_file" class="btn btn-danger" style="display:none; height: 34px; border-top-left-radius: 0; border-bottom-left-radius: 0;" title="{% trans 'Clear file' %}">
-												<i class="fa fa-times"></i>
-											</button>
-										</span>
-									</div>
-								</div>
+						</div>
+						<div class="row layers-control mvt-control">
+							<div class="col-md-12 form-group pull-right">
+								<label for="id_srs">{% trans "Coordinate reference system" %} {% trans "by default" %}</label>
+								{{ form.srs }}
 							</div>
-							<div class="row layers-control mvt-control">
-								<div class="col-md-12 form-group pull-right">
-									<label for="id_srs">{% trans "Coordinate reference system" %} {% trans "by default" %}</label>
-									{{ form.srs }}
-								</div>
-							</div>
-							<div class="row" id="custom-srs-row" style="display: none;">
-								<div class="col-md-12 form-group pull-right">
-									<label for="id_custom_srs">{% trans "Specify custom SRS" %}</label>
-									{{ form.custom_srs }}
-								</div>
-							</div>
+						</div>
+						<div class="row" id="custom-srs-row" style="display: none;">
+							<div class="col-md-12 form-group pull-right">
+								<label for="id_custom_srs">{% trans "Specify custom SRS" %}</label>
+								{{ form.custom_srs }}
 							</div>
 						</div>
 					</div>
@@ -184,11 +228,11 @@
 					<div class="col-md-12">
 						<div class="box">
           					<div class="box-body">
-          						<div class="col-md-4 form-group">
+          						<div class="col-md-3 form-group">
           							<label for="timeout">{% trans "Timeout (miliseconds)" %}</label>
 									<input name="timeout" id="timeout" value="{{external_layer.timeout}}" type="number" class="form-control">
 								</div>
-          						<div class="col-md-4 form-group">
+          						<div class="col-md-3 form-group">
 									{% if external_layer.visible %}
 									<input type="checkbox" name="visible"  id="visible" checked/>
 									{% else %}
@@ -196,13 +240,26 @@
 									{% endif %}
 									<label for="visible">{% trans "Visible" %}</label>
 								</div>
-								<div class="col-md-4 form-group">
+								<div class="col-md-3 form-group cached-control">
 									{% if external_layer.cached %}
 									<input type="checkbox" name="cached"  id="cached" checked/>
 									{% else %}
 									<input type="checkbox" name="cached"  id="cached"/>
 									{% endif %}
 									<label for="cached">{% trans "Cached" %}</label>
+								</div>
+								<div class="col-md-3 form-group single-image-control">
+									{% if external_layer.single_image %}
+									<input type="checkbox" name="single_image" id="single_image" checked/>
+									{% else %}
+									<input type="checkbox" name="single_image" id="single_image"/>
+									{% endif %}
+									<label for="single_image">{% trans "Single image (No tiles)" %}</label>
+								</div>
+								<div class="row cached-single-image-notice-row" style="display:none;">
+									<div class="col-md-12">
+										<div id="cached-single-image-notice" class="alert-box-message"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <span class="cached-single-image-notice-text"></span></div>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -230,7 +287,7 @@
 								<div id="mdtoolseditdiv" class="row {% if layer_md_uuid %}{% else %}hidden d-none{% endif %}">
 									<div class="col-md-2 form-group">
 										<label for="edit_metadata_btn">{% trans "Metadata tools" %}</label>
-										<a id="edit_metadata_btn" href="{{plugins_config.gvsigol_plugin_catalog.CATALOG_BASE_URL}}/srv/eng/catalog.search#/metadata/{{layer_md_uuid}}" role="button" target="_blank" class="btn btn-default form-control">{% trans "Edit in catalog" %}</a>
+										<a id="edit_metadata_btn" href="{{plugins_config.gvsigol_plugin_catalog.CATALOG_BASE_URL}}{{plugins_config.gvsigol_plugin_catalog.CATALOG_EDITOR_PATH}}#/metadata/{{layer_md_uuid}}" role="button" target="_blank" class="btn btn-default form-control">{% trans "Edit in catalog" %}</a>
 									</div>
 								</div>
 								<div id="mdtoolscreatediv" class="row {% if layer_md_uuid %}hidden d-none{% else %}{% endif %}">
@@ -395,6 +452,18 @@ $(document).ready(function(){
 				$("#id_layers").append("<option value=\""+bing_layers[index]+"\">"+bing_layers[index]+"</option>")
 			}
 		}
+		
+		if(type == "WMS"){
+			$(".cached-control").css("display","block");
+			$(".single-image-control").css("display","block");
+			$(".cached-single-image-notice-row").css("display","block");
+		} else {
+			$(".cached-control").css("display","none");
+			$(".single-image-control").css("display","none");
+			$(".cached-single-image-notice-row").css("display","none");
+			$("#cached-single-image-notice").css("display", "none");
+			$("#cached-single-image-notice .cached-single-image-notice-text").empty();
+		}
 	};
 
 	$("#id_type").change(function(){
@@ -405,14 +474,43 @@ $(document).ready(function(){
 		url = $("#id_url").val();
 		var hostname = $('<a>').prop('href', window.location.href).prop('hostname');
 		if(!url.includes(hostname+"/")){
-			$(".alert-box-message").css("display", "block");
+			$("#connect-alert").css("display", "block");
 		}else{
-			$(".alert-box-message").css("display", "none");
+			$("#connect-alert").css("display", "none");
 		}
 	}
 
 	check_url();
 	updateFormfields();
+	
+	var initialType = $("#id_type option:selected").val();
+	if(initialType != "WMS"){
+		$(".cached-control").css("display","none");
+		$(".single-image-control").css("display","none");
+		$(".cached-single-image-notice-row").css("display","none");
+	}
+
+	var msgSingleImageUncaches = "{% trans "Alert: single image (no tiles) cannot be combined with tile cache. Cached has been turned off." %}";
+	var msgCachedDisablesSingle = "{% trans "Alert: a cached layer cannot use single image (no tiles). Single image has been turned off." %}";
+
+	function showCachedSingleImageNotice(text) {
+		var $box = $("#cached-single-image-notice");
+		$box.find(".cached-single-image-notice-text").text(text);
+		$box.css("display", "block");
+	}
+
+	$("#single_image").on("change", function() {
+		if ($(this).is(":checked") && $("#cached").is(":checked")) {
+			$("#cached").prop("checked", false);
+			showCachedSingleImageNotice(msgSingleImageUncaches);
+		}
+	});
+	$("#cached").on("change", function() {
+		if ($(this).is(":checked") && $("#single_image").is(":checked")) {
+			$("#single_image").prop("checked", false);
+			showCachedSingleImageNotice(msgCachedDisablesSingle);
+		}
+	});
 
 	function showAlertMatrix(){
 		var matrixset = $("#id_matrixset").val();
@@ -460,6 +558,68 @@ $(document).ready(function(){
 		}
 	}
 
+	function isGenericWmsDefaultStyleName(name, layerName) {
+		if (!name) {
+			return true;
+		}
+		if (name.toLowerCase() === 'default') {
+			return true;
+		}
+		if (name.endsWith('.Default')) {
+			return true;
+		}
+		if (layerName) {
+			var shortName = layerName.split(':').pop();
+			if (name === shortName + '.Default') {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	function pickDefaultWmsStyleIndex(styles, layerName) {
+		if (!styles || !styles.length || styles.length === 1) {
+			return 0;
+		}
+		for (var i = 0; i < styles.length; i++) {
+			if (!isGenericWmsDefaultStyleName(styles[i].name, layerName)) {
+				return i;
+			}
+		}
+		for (var j = 0; j < styles.length; j++) {
+			if (isGenericWmsDefaultStyleName(styles[j].name, layerName) && styles[j].name) {
+				return j;
+			}
+		}
+		return 0;
+	}
+
+	function setWmsStylesFromCapabilities(data, layerName) {
+		$('#wms_styles').remove();
+		if (!data.styles || !data.styles.length) {
+			return;
+		}
+		var defaultIndex = pickDefaultWmsStyleIndex(data.styles, layerName);
+		var styles = data.styles.map(function(style, index) {
+			return {
+				name: style.name,
+				title: style.title || style.name,
+				is_default: index === defaultIndex,
+				custom_legend_url: style.custom_legend_url || style.legend || ''
+			};
+		});
+		$('<input>').attr({
+			type: 'hidden',
+			id: 'wms_styles',
+			name: 'wms_styles',
+			value: JSON.stringify(styles)
+		}).appendTo('#external-layer-update-form');
+	}
+
+	if (params.styles && params.styles.length) {
+		setWmsStylesFromCapabilities({ styles: params.styles }, params.layers);
+	}
+
 	function getNewLayersFromCapabilities(url, type, version, layer, edit_version){
 		$("#form-error ul").empty();
 		$.ajax({
@@ -502,7 +662,7 @@ $(document).ready(function(){
 						    id: 'crs_' + data.crs_list[i][4],
 						    name: 'crs_' + data.crs_list[i][4],
 						    value: bounds
-						}).appendTo('form');
+						}).appendTo('#external-layer-update-form');
 					}
 				}
 
@@ -512,7 +672,7 @@ $(document).ready(function(){
 					    id: 'capabilities',
 					    name: 'capabilities',
 					    value: JSON.stringify(data.capabilities)
-					}).appendTo('form');
+					}).appendTo('#external-layer-update-form');
 				}
 				if (data.wmts_options) {
 					$('<input>').attr({
@@ -520,7 +680,7 @@ $(document).ready(function(){
 					    id: 'wmts_options',
 					    name: 'wmts_options',
 					    value: JSON.stringify(data.wmts_options)
-					}).appendTo('form');
+					}).appendTo('#external-layer-update-form');
 				}
 
 				 if('layers' in data){
@@ -558,6 +718,20 @@ $(document).ready(function(){
 							}
 						}
 					}
+
+				if (type === 'WMS') {
+					if ((!data.styles || !data.styles.length) && selectedLayer && selectedLayer !== 'empty' && !layer) {
+						getNewLayersFromCapabilities(
+							url,
+							type,
+							$("#id_version option:selected").val() || data.version,
+							selectedLayer,
+							false
+						);
+					} else {
+						setWmsStylesFromCapabilities(data, selectedLayer);
+					}
+				}
 
 				let matrixsetSelected = null
 				if(type == "WMTS" && 'matrixsets' in data) {
@@ -715,6 +889,39 @@ $(document).ready(function(){
 		$('#id_style_url').prop('disabled', false);
 		$('#id_style_url').closest('.form-group').find('label, small').css('opacity', '1');
 	});
+
+	{% if 'gvsigol_plugin_catalog' in INSTALLED_APPS %}
+	$('#create_metadata_btn').click(function() {
+		var url = '{% url 'create_metadata' external_layer.id %}';
+		$.ajax({
+			url: url,
+			type: 'post',
+			data: {},
+			headers: {'X-CSRFToken': Cookies.get('csrftoken')},
+			success: function(data) {
+				if (data.status == 'ok') {
+					$('#uuid').val(data.uuid);
+					$('#mdtoolseditdiv').removeClass('hidden d-none');
+					$('#mdtoolscreatediv').addClass('hidden d-none');
+					var new_url = '{{ plugins_config.gvsigol_plugin_catalog.CATALOG_BASE_URL }}' + '{{ plugins_config.gvsigol_plugin_catalog.CATALOG_EDITOR_PATH }}' + '#/metadata/' + data.uuid;
+					$('#edit_metadata_btn').attr('href', new_url);
+				} else if (data.error) {
+					alert(data.error);
+				}
+			},
+			error: function(jqXHR) {
+				var message = gettext('Could not create metadata in GeoNetwork.');
+				try {
+					var data = JSON.parse(jqXHR.responseText);
+					if (data.error) {
+						message = data.error;
+					}
+				} catch (e) {}
+				alert(message);
+			}
+		});
+	});
+	{% endif %}
 
 });
 </script>

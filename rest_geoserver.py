@@ -27,6 +27,7 @@ from gvsigol import settings
 import requests
 import json
 from datetime import datetime
+from django.utils.translation import gettext as _
 from lxml import etree as ET
 import logging
 from builtins import str as text
@@ -356,12 +357,16 @@ class Geoserver():
                 data += '                <resolution>'+str(resolution*1000)+'</resolution>'
             data += '                <units>ISO8601</units>'
             data += '                <defaultValue>'
-            data += '                    <strategy>'+default_value_mode+'</strategy>'
-            if default_value != None and default_value_mode != 'MINIMUM' and default_value_mode != 'MAXIMUM':
-                date_format = datetime.strptime(default_value, '%d-%m-%Y %H:%M:%S')
-                # 2001-12-12T18:00:00.0Z
-                final_value = date_format.strftime('%Y-%m-%dT%H:%M:%S.0Z')
-                data += '                    <referenceValue>'+final_value+'</referenceValue>'
+            strategy = default_value_mode if default_value_mode else 'MAXIMUM'
+            data += '                    <strategy>'+strategy+'</strategy>'
+            dv = (default_value or '').strip() if default_value is not None else ''
+            if dv and default_value_mode not in (None, '', 'MINIMUM', 'MAXIMUM'):
+                try:
+                    date_format = datetime.strptime(dv, '%d-%m-%Y %H:%M:%S')
+                    final_value = date_format.strftime('%Y-%m-%dT%H:%M:%S.0Z')
+                    data += '                    <referenceValue>'+final_value+'</referenceValue>'
+                except ValueError:
+                    raise FailedRequestError(-1, _('Invalid temporal default date format'))
             data += '                </defaultValue>'
         data += '            </dimensionInfo>'
         data += '        </entry>'
@@ -379,8 +384,9 @@ class Geoserver():
         if r.status_code==200:
             return True
         
-        print("ERROR " + str(r.status_code) + ":" + r.content)
-        raise FailedRequestError(r.status_code, r.content)
+        content = r.content.decode('utf-8', errors='replace') if isinstance(r.content, bytes) else r.content
+        print("ERROR " + str(r.status_code) + ":" + content)
+        raise FailedRequestError(r.status_code, content)
             
     def raw_request(self, url, params, user=None, password=None):
         try:
@@ -739,7 +745,12 @@ class Geoserver():
     def clear_cache(self, ws, layer, user=None, password=None):
         url = self.gwc_url + "/masstruncate"
         headers = self._apply_override_headers({'content-type': 'text/xml'})
-        xml = "<truncateLayer><layerName>" + ws + ":" + layer.name + "</layerName></truncateLayer>"
+        # External WMS layers are registered in GWC by bare layer.name (see APIGeoWebCache.add_layer).
+        if getattr(layer, 'external', False):
+            gwc_layer_name = layer.name
+        else:
+            gwc_layer_name = ws + ":" + layer.name
+        xml = "<truncateLayer><layerName>" + gwc_layer_name + "</layerName></truncateLayer>"
         if user and password:
             auth = (user, password)
         else:
@@ -795,6 +806,75 @@ class Geoserver():
         except ET.XMLSyntaxError:
             logger.warning(f"Invalid response XML. Probably the layer has no geometry - {ws_name}:{layer_name}")
     
+    def update_gwclayer_vector_tile_format(self, ws_name, layer_name, enable_mvt, user=None, password=None):
+        """
+        Updates the GWC layer definition to enable or disable MVT (Mapbox Vector Tile) format.
+        
+        Args:
+            ws_name: Workspace name (can be None for layer groups)
+            layer_name: Layer name
+            enable_mvt: True to enable MVT format, False to disable
+            user: GeoServer user
+            password: GeoServer password
+        
+        Returns:
+            True if successful
+        """
+        MVT_MIME_TYPE = "application/vnd.mapbox-vector-tile"
+        
+        if ws_name is None:
+            url = self.gwc_url + "/layers/" + layer_name + ".xml"
+        else:
+            url = self.gwc_url + "/layers/" + ws_name + ":" + layer_name + ".xml"
+        
+        if user and password:
+            auth = (user, password)
+        else:
+            auth = self.session.auth
+        
+        headers = self._apply_override_headers({'content-type': 'text/xml'})
+        
+        # Obtener configuración actual de la capa en GWC
+        r = self.session.get(url, headers=headers, auth=auth)
+        if r.status_code != 200:
+            raise FailedRequestError(r.status_code, r.content)
+        
+        try:
+            root = ET.fromstring(r.content)
+            
+            # Buscar o crear el elemento mimeFormats
+            mime_formats = root.find('mimeFormats')
+            if mime_formats is None:
+                mime_formats = ET.SubElement(root, 'mimeFormats')
+            
+            # Buscar si ya existe el formato MVT
+            mvt_exists = False
+            for string_elem in mime_formats.findall('string'):
+                if string_elem.text == MVT_MIME_TYPE:
+                    mvt_exists = True
+                    if not enable_mvt:
+                        # Eliminar el formato MVT
+                        mime_formats.remove(string_elem)
+                    break
+            
+            # Añadir formato MVT si se debe habilitar y no existe
+            if enable_mvt and not mvt_exists:
+                mvt_elem = ET.SubElement(mime_formats, 'string')
+                mvt_elem.text = MVT_MIME_TYPE
+            
+            # Enviar la configuración actualizada
+            xml = ET.tostring(root, encoding='utf-8')
+            r = self.session.post(url, data=xml, headers=headers, auth=auth)
+            if r.status_code == 200:
+                logger.info("MVT format %s for layer %s:%s",
+                            'enabled' if enable_mvt else 'disabled', ws_name, layer_name)
+                return True
+            raise FailedRequestError(r.status_code, r.content)
+            
+        except ET.XMLSyntaxError:
+            logger.warning(f"Invalid response XML for layer {ws_name}:{layer_name}")
+            return False
+    
     def add_style(self, layer, style_name, user=None, password=None):
         url = self.service_url + "/layers/" +  layer + "/styles/"
         if user and password:
@@ -814,7 +894,6 @@ class Geoserver():
     
     def get_layer_styles_configuration(self, layer, user=None, password=None):
         url = self.gwc_url + '/layers/'+layer.datastore.workspace.name +':'+layer.name+'.xml'
-        print('########################### get_layer_styles_configuration: update_layer_styles_configuration' + url)
         
         if user and password:
             auth = (user, password)
@@ -840,7 +919,11 @@ class Geoserver():
         
         headers = self._apply_override_headers({'content-type': 'text/xml'})
         
-        for parameterFiltersElem in tree.findall('./parameterFilters'):
+        parameterFiltersElems = tree.findall('./parameterFilters')
+        if not parameterFiltersElems:
+            parameterFiltersElems = [ET.SubElement(tree, 'parameterFilters')]
+        
+        for parameterFiltersElem in parameterFiltersElems:
             for styleParameterFilterElem in parameterFiltersElem.findall('./styleParameterFilter'):
                 styleParameterFilterElem.getparent().remove(styleParameterFilterElem)
             styleParameterFilterElem = ET.SubElement(parameterFiltersElem, 'styleParameterFilter')
@@ -851,19 +934,20 @@ class Geoserver():
                 defaultValueElem.text = default_style
             elif len(styles_list) > 0:
                 defaultValueElem.text = styles_list[0]
-            # ET.SubElement(styleParameterFilterElem, 'normalize')
-            #valuesElem = ET.SubElement(styleParameterFilterElem, 'values')
-            #for style_list in styles_list: 
-            #    stringValueElem = ET.SubElement(valuesElem, 'string')
-            #    stringValueElem.text = style_list
+            valuesElem = ET.SubElement(styleParameterFilterElem, 'values')
+            for s in styles_list:
+                stringValueElem = ET.SubElement(valuesElem, 'string')
+                stringValueElem.text = s
         r = self.session.post(url, data=ET.tostring(tree, encoding='UTF-8'), headers=headers, auth=auth)
         if r.status_code==200:
             return True
         raise UploadError(r.status_code, r.text)
         
     
-    def update_style(self, style_name, sld_body, user=None, password=None):
+    def update_style(self, style_name, sld_body, user=None, password=None, raw=False):
         url = self.service_url + "/styles/" + style_name + ".sld"
+        if raw:
+            url += "?raw=true"
         if user and password:
             auth = (user, password)
         else:
