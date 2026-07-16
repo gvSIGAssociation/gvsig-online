@@ -904,7 +904,7 @@ def get_enterapi_connection_params(api_name):
 
 
 ENTERAPI_EPIGRAFES = ('inmuebles',)
-ENTERAPI_POR_PAGINA = 500
+ENTERAPI_POR_PAGINA = 1000
 ENTERAPI_SCHEMA = [
     'numero_inventario',
     'denominacion',
