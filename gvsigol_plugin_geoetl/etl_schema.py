@@ -852,6 +852,15 @@ def getwsSegPass(psw):
 
     return wsSegPass
 
+def get_enterapi_password(api_token):
+    now_utc = datetime.utcnow()
+    timestamp_part = now_utc.strftime('%Y%m%d%H%M')
+    timestamp_string = timestamp_part + '00'
+    hash_input = (timestamp_string + api_token).encode('utf-8')
+    sha256_bytes = sha256(hash_input).digest()
+    hash_base64 = base64.b64encode(sha256_bytes).decode()
+    return timestamp_string + hash_base64
+
 def get_entities_segex(dicc):
 
     if dicc['domain'] == 'PRE':
@@ -915,7 +924,7 @@ ENTERAPI_JSON_COLUMNS = ('registro', 'referencia_catastral')
 def build_enterapi_query_params(conn, dicc, pagina=1, por_pagina=ENTERAPI_POR_PAGINA):
     params = {
         'entidad': conn['entity'],
-        'input_password': getwsSegPass(conn['token']),
+        'input_password': get_enterapi_password(conn['token']),
         'epigrafe': dicc.get('epigrafe') or 'inmuebles',
         'pagina': max(int(pagina or 1), 1),
         'por_pagina': min(max(int(por_pagina or ENTERAPI_POR_PAGINA), 1), 1000),
