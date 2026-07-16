@@ -1072,6 +1072,37 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
 });
 
 //// INPUT ENTERAPI ////
+function loadEnterApiLastDownload(ID){
+    var paramsEnterApi = {
+        "id": ID,
+        "parameters": [{
+            "api": $('#api-'+ID).val(),
+            "epigrafe": $('#epigrafe-'+ID).val()
+        }]
+    };
+    var formData = new FormData();
+    formData.append('jsonParamsEnterApi', JSON.stringify(paramsEnterApi));
+
+    $.ajax({
+        type: 'POST',
+        url: '/gvsigonline/etl/etl_enterapi_last_download/',
+        data: formData,
+        beforeSend:function(xhr){
+            xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+        },
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: function (data) {
+            if (data && data.last_download){
+                $('#modificado-desde-'+ID).val(data.last_download)
+            } else {
+                $('#modificado-desde-'+ID).val("")
+            }
+        }
+    });
+}
+
 input_EnterApi = draw2d.shape.layout.VerticalLayout.extend({
 
 	NAME: "input_EnterApi",
@@ -1181,6 +1212,13 @@ input_EnterApi = draw2d.shape.layout.VerticalLayout.extend({
                 $('#modificado-desde-'+ID).val("")
             } else {
                 $('#modificado-desde-'+ID).prop('disabled', false)
+                loadEnterApiLastDownload(ID)
+            }
+        });
+
+        $('#api-'+ID+', #epigrafe-'+ID).change(function(){
+            if ($('#check-init-date-'+ID).is(':checked')){
+                loadEnterApiLastDownload(ID)
             }
         });
 
@@ -1189,6 +1227,15 @@ input_EnterApi = draw2d.shape.layout.VerticalLayout.extend({
             for(var k=0;k<jsonParams.length;k++){
                 if(jsonParams[k]['id'] == ID && jsonParams[k]['parameters'] && jsonParams[k]['parameters'][0]['api']){
                     $('#api-'+ID).val(jsonParams[k]['parameters'][0]['api'])
+                    if(jsonParams[k]['parameters'][0]['epigrafe']){
+                        $('#epigrafe-'+ID).val(jsonParams[k]['parameters'][0]['epigrafe'])
+                    }
+                    if(jsonParams[k]['parameters'][0]['incluir_bajas'] == 'true'){
+                        $('#incluir-bajas-'+ID).prop('checked', true)
+                    }
+                    if(jsonParams[k]['parameters'][0]['date-enterapi']){
+                        $('input:radio[name="date-enterapi-'+ID+'"][value="'+jsonParams[k]['parameters'][0]['date-enterapi']+'"]').prop('checked', true)
+                    }
                     break
                 }
             }
@@ -1197,8 +1244,10 @@ input_EnterApi = draw2d.shape.layout.VerticalLayout.extend({
 
             if ($('#check-no-date-'+ID).is(':checked')){
                 $('#modificado-desde-'+ID).prop('disabled', true)
+                $('#modificado-desde-'+ID).val("")
             } else {
                 $('#modificado-desde-'+ID).prop('disabled', false)
+                loadEnterApiLastDownload(ID)
             }
         });
 

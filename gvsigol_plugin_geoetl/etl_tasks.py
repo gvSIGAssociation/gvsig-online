@@ -16,7 +16,7 @@ import os, shutil, tempfile
 
 import cx_Oracle
 import pymssql
-from .models import segex_FechaFinGarantizada, cadastral_requests
+from .models import segex_FechaFinGarantizada, cadastral_requests, enterapi_LastDownload
 from .utils import refresh_layers_by_params
 import requests
 import base64
@@ -4607,6 +4607,18 @@ def input_EnterApi(dicc):
 
     pg_conn.close()
     db.dispose()
+
+    epigrafe = dicc.get('epigrafe') or 'inmuebles'
+    try:
+        row = enterapi_LastDownload.objects.get(entity=api_conn['entity'], epigraph=epigrafe)
+        row.last_download = datetime.now()
+        row.save()
+    except enterapi_LastDownload.DoesNotExist:
+        enterapi_LastDownload(
+            entity=api_conn['entity'],
+            epigraph=epigrafe,
+            last_download=datetime.now(),
+        ).save()
 
     return [table_name]
 

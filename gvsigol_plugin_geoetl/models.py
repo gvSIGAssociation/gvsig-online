@@ -114,6 +114,24 @@ class segex_FechaFinGarantizada(models.Model):
     def __str__(self):
         return self.name
 
+
+class enterapi_LastDownload(models.Model):
+    entity = models.CharField(max_length=250)
+    epigraph = models.CharField(max_length=250)
+    last_download = models.DateTimeField(null=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['entity', 'epigraph'],
+                name='unique_enterapi_last_download'
+            )
+        ]
+
+    def __str__(self):
+        return '%s / %s: %s' % (self.entity, self.epigraph, self.last_download)
+
+
 class cadastral_requests(models.Model):
     name = models.CharField(max_length=20, default='cadastral_requests')
     requests = models.IntegerField(null=False, default=0)
