@@ -1976,11 +1976,9 @@ def layer_update(request, layer_id):
                 up_file = request.FILES['layer-image']
                 path, _ = utils.get_layer_img(layer.id, up_file.name)
 
-                destination = open(path, 'wb+')
-                for chunk in up_file.chunks():
-                    destination.write(chunk)
-                    destination.close()
-
+                with open(path, 'wb+') as destination:
+                    for chunk in up_file.chunks():
+                        destination.write(chunk)
 
             if layer.datastore.type == 'c_ImageMosaic':
                 gs.updateImageMosaicTemporal(layer.datastore, layer)
