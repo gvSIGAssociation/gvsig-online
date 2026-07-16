@@ -4557,6 +4557,60 @@ def input_Segex(dicc):
     return [table_name]
 
 
+def input_EnterApi(dicc):
+
+    api_conn = etl_schema.get_enterapi_connection_params(dicc['api'])
+    schema = dicc.get('schema') or etl_schema.ENTERAPI_SCHEMA
+
+    conn_string = 'postgresql://'+GEOETL_DB['user']+':'+GEOETL_DB['password']+'@'+GEOETL_DB['host']+':'+GEOETL_DB['port']+'/'+GEOETL_DB['database']
+    db = create_engine(conn_string)
+    pg_conn = db.connect()
+
+    first = True
+    table_name = dicc['id']
+    pagina = 1
+    por_pagina = etl_schema.ENTERAPI_POR_PAGINA
+
+    while True:
+        records, paginacion = etl_schema.fetch_enterapi_page(api_conn, dicc, pagina, por_pagina)
+        if not records:
+            break
+
+        records = etl_schema.normalize_enterapi_records(records)
+        df = pd.DataFrame(records)
+        for col in schema:
+            if col not in df.columns:
+                df[col] = None
+        df = df[schema]
+
+        if 'superficie' in df.columns:
+            df['superficie'] = pd.to_numeric(df['superficie'], errors='coerce')
+
+        if first:
+            df.to_sql(table_name, con=pg_conn, schema=GEOETL_DB['schema'], if_exists='replace', index=False)
+            first = False
+        else:
+            df.to_sql(table_name, con=pg_conn, schema=GEOETL_DB['schema'], if_exists='append', index=False)
+
+        total = paginacion.get('total')
+        pagina_actual = paginacion.get('pagina', pagina)
+        por_pag = paginacion.get('por_pagina', por_pagina)
+        if total is not None and pagina_actual * por_pag >= total:
+            break
+        if len(records) < por_pagina:
+            break
+        pagina += 1
+
+    if first:
+        df = pd.DataFrame(columns=schema)
+        df.to_sql(table_name, con=pg_conn, schema=GEOETL_DB['schema'], if_exists='replace', index=False)
+
+    pg_conn.close()
+    db.dispose()
+
+    return [table_name]
+
+
 def input_Json(dicc):
     
     conn_string = 'postgresql://'+GEOETL_DB['user']+':'+GEOETL_DB['password']+'@'+GEOETL_DB['host']+':'+GEOETL_DB['port']+'/'+GEOETL_DB['database']
