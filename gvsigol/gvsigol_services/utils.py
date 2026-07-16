@@ -893,17 +893,17 @@ def get_layer_img(layerid, filename):
         if(suffix is not None and len(suffix) > 0):
             ext = suffix[-1]
         filename = m.hexdigest() + "." + ext
-        path_ = settings.MEDIA_ROOT + "images/" + filename
-        url = settings.MEDIA_URL + "images/" + filename
+        path_ = os.path.join(settings.MEDIA_ROOT, "images", filename)
+        url = settings.MEDIA_URL.rstrip('/') + "/images/" + filename
         url = url.replace(settings.BASE_URL, '')
     else:
         suffix_list = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'svg']
         filename = m.hexdigest()
         for ext in suffix_list:
             test = filename + "." + ext
-            path_ = settings.MEDIA_ROOT + "images/" + test
+            path_ = os.path.join(settings.MEDIA_ROOT, "images", test)
             if os.path.exists(path_):
-                url = settings.MEDIA_URL + "images/" + test
+                url = settings.MEDIA_URL.rstrip('/') + "/images/" + test
                 url = url.replace(settings.BASE_URL, '')
                 break
             else:
