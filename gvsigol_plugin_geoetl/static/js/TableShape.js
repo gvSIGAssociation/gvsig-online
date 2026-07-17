@@ -1155,17 +1155,11 @@ input_EnterApi = draw2d.shape.layout.VerticalLayout.extend({
                                 '<select id="api-'+ID+'" class="form-control"></select>'+
                             '</div>'+
 
-                            '<div class="row" style="margin-top:8px">'+
-                                '<div class="col-md-6">'+
-                                    '<label class="col-form-label">'+gettext('Epigraph:')+'</label>'+
-                                    '<select id="epigrafe-'+ID+'" class="form-control">'+
-                                        '<option value="inmuebles">'+gettext('Inmuebles')+'</option>'+
-                                    '</select>'+
-                                '</div>'+
-                                '<div class="col-md-6" style="margin-top:24px">'+
-                                    '<input type="checkbox" id="incluir-bajas-'+ID+'" value=""/>'+
-                                    '<label for="incluir-bajas-'+ID+'">'+gettext('Include deleted/draft items (BAJA/BORRADOR)')+'</label>'+
-                                '</div>'+
+                            '<div style="margin-top:8px">'+
+                                '<label class="col-form-label">'+gettext('Epigraph:')+'</label>'+
+                                '<select id="epigrafe-'+ID+'" class="form-control">'+
+                                    '<option value="inmuebles">'+gettext('Inmuebles')+'</option>'+
+                                '</select>'+
                             '</div>'+
 
                             '<div style="margin-top:8px">'+
@@ -1230,9 +1224,6 @@ input_EnterApi = draw2d.shape.layout.VerticalLayout.extend({
                     if(jsonParams[k]['parameters'][0]['epigrafe']){
                         $('#epigrafe-'+ID).val(jsonParams[k]['parameters'][0]['epigrafe'])
                     }
-                    if(jsonParams[k]['parameters'][0]['incluir_bajas'] == 'true'){
-                        $('#incluir-bajas-'+ID).prop('checked', true)
-                    }
                     if(jsonParams[k]['parameters'][0]['date-enterapi']){
                         $('input:radio[name="date-enterapi-'+ID+'"][value="'+jsonParams[k]['parameters'][0]['date-enterapi']+'"]').prop('checked', true)
                     }
@@ -1258,7 +1249,7 @@ input_EnterApi = draw2d.shape.layout.VerticalLayout.extend({
                 {   
                     "api": $('#api-'+ID).val(),
                     "epigrafe": $('#epigrafe-'+ID).val(),
-                    "incluir_bajas": $('#incluir-bajas-'+ID).is(':checked') ? 'true' : '',
+                    "incluir_bajas": 'true',
                     "modificado-desde": $('#modificado-desde-'+ID).val(),
                     "date-enterapi": $('input:radio[name="date-enterapi-'+ID+'"]:checked').val()
                 }

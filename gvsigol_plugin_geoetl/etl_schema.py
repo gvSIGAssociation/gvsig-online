@@ -929,8 +929,7 @@ def build_enterapi_query_params(conn, dicc, pagina=1, por_pagina=ENTERAPI_POR_PA
         'pagina': max(int(pagina or 1), 1),
         'por_pagina': min(max(int(por_pagina or ENTERAPI_POR_PAGINA), 1), 1000),
     }
-    if dicc.get('incluir_bajas') == 'true':
-        params['incluir_bajas'] = 'true'
+    params['incluir_bajas'] = 'true'
     if dicc.get('date-enterapi') == 'check-init-date' and dicc.get('modificado-desde'):
         params['modificado_desde'] = str(dicc['modificado-desde'])[:10]
     return params
