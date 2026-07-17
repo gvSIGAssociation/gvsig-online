@@ -1077,7 +1077,8 @@ function loadEnterApiLastDownload(ID){
         "id": ID,
         "parameters": [{
             "api": $('#api-'+ID).val(),
-            "epigrafe": $('#epigrafe-'+ID).val()
+            "epigrafe": $('#epigrafe-'+ID).val(),
+            "id_ws": $('#etl_id').val()
         }]
     };
     var formData = new FormData();

@@ -195,6 +195,12 @@ def run_canvas_background(**kwargs):
                             except:
                                 parameters_copy = {}
 
+                            if parameters_copy and wspc not in (None, ''):
+                                try:
+                                    parameters_copy['id_ws'] = int(wspc)
+                                except (TypeError, ValueError):
+                                    pass
+
                             parameters = copy.deepcopy(parameters_copy)
 
                             if params and not statusModel.name.startswith('current_canvas'):

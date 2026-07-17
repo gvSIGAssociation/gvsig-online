@@ -4608,17 +4608,25 @@ def input_EnterApi(dicc):
     pg_conn.close()
     db.dispose()
 
-    epigrafe = dicc.get('epigrafe') or 'inmuebles'
-    try:
-        row = enterapi_LastDownload.objects.get(entity=api_conn['entity'], epigraph=epigrafe)
-        row.last_download = datetime.now()
-        row.save()
-    except enterapi_LastDownload.DoesNotExist:
-        enterapi_LastDownload(
-            entity=api_conn['entity'],
-            epigraph=epigrafe,
-            last_download=datetime.now(),
-        ).save()
+    id_ws = dicc.get('id_ws')
+    if id_ws is not None:
+        epigrafe = dicc.get('epigrafe') or 'inmuebles'
+        id_ws = int(id_ws)
+        try:
+            row = enterapi_LastDownload.objects.get(
+                id_ws=id_ws,
+                entity=api_conn['entity'],
+                epigraph=epigrafe,
+            )
+            row.last_download = datetime.now()
+            row.save()
+        except enterapi_LastDownload.DoesNotExist:
+            enterapi_LastDownload(
+                id_ws=id_ws,
+                entity=api_conn['entity'],
+                epigraph=epigrafe,
+                last_download=datetime.now(),
+            ).save()
 
     return [table_name]
 

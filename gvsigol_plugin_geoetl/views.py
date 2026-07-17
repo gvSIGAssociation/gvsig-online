@@ -1452,14 +1452,18 @@ def etl_enterapi_last_download(request):
             params = jsParams['parameters'][0]
             api_conn = etl_schema.get_enterapi_connection_params(params['api'])
             epigrafe = params.get('epigrafe') or 'inmuebles'
-            try:
-                row = enterapi_LastDownload.objects.get(
-                    entity=api_conn['entity'],
-                    epigraph=epigrafe,
-                )
-                last_download = row.last_download.date().isoformat()
-            except enterapi_LastDownload.DoesNotExist:
-                last_download = None
+            id_ws = params.get('id_ws')
+            last_download = None
+            if id_ws not in (None, ''):
+                try:
+                    row = enterapi_LastDownload.objects.get(
+                        id_ws=int(id_ws),
+                        entity=api_conn['entity'],
+                        epigraph=epigrafe,
+                    )
+                    last_download = row.last_download.date().isoformat()
+                except (enterapi_LastDownload.DoesNotExist, ValueError, TypeError):
+                    last_download = None
             return HttpResponse(
                 json.dumps({'last_download': last_download}),
                 content_type='application/json',
