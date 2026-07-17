@@ -918,7 +918,7 @@ ENTERAPI_SCHEMA = [
     'estado',
     'url',
 ]
-ENTERAPI_JSON_COLUMNS = ('registro', 'referencia_catastral')
+ENTERAPI_TEXT_ARRAY_COLUMNS = ('registro', 'referencia_catastral')
 
 
 def build_enterapi_query_params(conn, dicc, pagina=1, por_pagina=ENTERAPI_POR_PAGINA):
@@ -978,16 +978,70 @@ def fetch_enterapi_page(conn, dicc, pagina=1, por_pagina=ENTERAPI_POR_PAGINA):
     return _parse_enterapi_response(body)
 
 
+def _format_enterapi_array_field(value):
+    """
+    Normaliza arrays EnterApi (registro, referencia_catastral) a texto plano.
+    - [] / null / vacío -> None
+    - [{"texto": "x"}, ...] -> "x; y"
+    - [{"Ref Catastral": "...", "Municipio": "...", ...}, ...] ->
+      "ref | municipio | ...; ref2 | municipio2 | ..."
+    """
+    if value is None:
+        return None
+    if isinstance(value, str):
+        text = value.strip()
+        return text or None
+    if not isinstance(value, list):
+        text = str(value).strip()
+        return text or None
+    if not value:
+        return None
+
+    items = []
+    for entry in value:
+        if not isinstance(entry, dict):
+            if entry is None:
+                continue
+            text = str(entry).strip()
+            if text:
+                items.append(text)
+            continue
+
+        keys = list(entry.keys())
+        if len(keys) == 1 and keys[0].lower() == 'texto':
+            text = entry[keys[0]]
+            if text is None:
+                continue
+            text = str(text).strip()
+            if text:
+                items.append(text)
+            continue
+
+        parts = []
+        for v in entry.values():
+            if v is None:
+                continue
+            text = str(v).strip()
+            if text:
+                parts.append(text)
+        if parts:
+            items.append(' | '.join(parts))
+
+    if not items:
+        return None
+    return '; '.join(items)
+
+
 def normalize_enterapi_records(records):
-    """Serializa columnas array a JSON texto para PostgreSQL."""
+    """Normaliza columnas array a texto plano legible para PostgreSQL/capa."""
     normalized = []
     for record in records:
         if not isinstance(record, dict):
             continue
         row = dict(record)
-        for col in ENTERAPI_JSON_COLUMNS:
-            if col in row and row[col] is not None and not isinstance(row[col], str):
-                row[col] = json.dumps(row[col], ensure_ascii=False)
+        for col in ENTERAPI_TEXT_ARRAY_COLUMNS:
+            if col in row:
+                row[col] = _format_enterapi_array_field(row[col])
         normalized.append(row)
     return normalized
 
