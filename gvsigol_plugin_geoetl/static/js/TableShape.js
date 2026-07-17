@@ -1155,28 +1155,22 @@ input_EnterApi = draw2d.shape.layout.VerticalLayout.extend({
                                 '<select id="api-'+ID+'" class="form-control"></select>'+
                             '</div>'+
 
-                            '<div style="margin-top:8px">'+
+                            '<div style="margin-top:20px">'+
                                 '<label class="col-form-label">'+gettext('Epigraph:')+'</label>'+
                                 '<select id="epigrafe-'+ID+'" class="form-control">'+
                                     '<option value="inmuebles">'+gettext('Inmuebles')+'</option>'+
                                 '</select>'+
                             '</div>'+
 
-                            '<div style="margin-top:8px">'+
-                                '<label>'+gettext('Sync mode')+'</label><br>'+
+                            '<div style="margin-top:20px">'+
+                                '<label class="col-form-label" style="margin-bottom:4px;">'+gettext('Choose date')+'</label>'+
                                 '<div>'+
                                     '<input type="radio" name="date-enterapi-'+ID+'" id="check-no-date-'+ID+'" value="check-no-date" checked>'+
-                                    '<label for="check-no-date-'+ID+'">'+gettext('No date, download all')+'</label>'+
+                                    '<label for="check-no-date-'+ID+'" style="display:inline;margin-left:6px;margin-bottom:0;">'+gettext('No date, download all')+'</label>'+
                                     '<br>'+
                                     '<input type="radio" name="date-enterapi-'+ID+'" id="check-init-date-'+ID+'" value="check-init-date">'+
-                                    '<label for="check-init-date-'+ID+'">'+gettext('From an initial date')+'</label>'+
-                                '</div>'+
-                            '</div>'+
-
-                            '<div class="row" style="margin-top:8px">'+
-                                '<div class="col-md-6">'+
-                                    '<label class="col-form-label">'+gettext('Modified since')+'</label>'+
-                                    '<input type="date" class="form-control" id="modificado-desde-'+ID+'" name="modificado-desde" disabled/>'+
+                                    '<label for="check-init-date-'+ID+'" style="display:inline;margin-left:6px;margin-bottom:0;">'+gettext('From an initial date')+':</label>'+
+                                    '<input type="date" class="form-control" id="modificado-desde-'+ID+'" name="modificado-desde" disabled style="display:inline-block;width:auto;margin-left:8px;vertical-align:middle;"/>'+
                                 '</div>'+
                             '</div>'+
 
