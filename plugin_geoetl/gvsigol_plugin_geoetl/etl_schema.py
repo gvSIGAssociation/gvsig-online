@@ -852,6 +852,15 @@ def getwsSegPass(psw):
 
     return wsSegPass
 
+def get_enterapi_password(api_token):
+    now_utc = datetime.utcnow()
+    timestamp_part = now_utc.strftime('%Y%m%d%H%M')
+    timestamp_string = timestamp_part + '00'
+    hash_input = (timestamp_string + api_token).encode('utf-8')
+    sha256_bytes = sha256(hash_input).digest()
+    hash_base64 = base64.b64encode(sha256_bytes).decode()
+    return timestamp_string + hash_base64
+
 def get_entities_segex(dicc):
 
     if dicc['domain'] == 'PRE':
@@ -875,6 +884,167 @@ def get_entities_segex(dicc):
         return listEntities
     else:
         return []
+
+def get_enterapi_connection_params(api_name):
+    """Parámetros de conexión EnterApi: url, username (entidad), password (token)."""
+    api = Connection.objects.get(name=api_name)
+    params = json.loads(api.connection_params or '{}')
+    url = (params.get('url') or '').strip()
+    if url and not url.endswith('/'):
+        url += '/'
+    entity = (params.get('username') or '').strip()
+    token = params.get('password') or ''
+    if not url or not entity:
+        raise ValueError('La conexión EnterApi debe definir url y username (entidad).')
+    return {
+        'url': url,
+        'entity': entity,
+        'token': token,
+    }
+
+
+ENTERAPI_EPIGRAFES = ('inmuebles',)
+ENTERAPI_POR_PAGINA = 1000
+ENTERAPI_SCHEMA = [
+    'numero_inventario',
+    'denominacion',
+    'descripcion',
+    'direccion',
+    'superficie',
+    'registro',
+    'referencia_catastral',
+    'fecha_alta',
+    'fecha_baja',
+    'estado',
+    'url',
+]
+ENTERAPI_TEXT_ARRAY_COLUMNS = ('registro', 'referencia_catastral')
+
+
+def build_enterapi_query_params(conn, dicc, pagina=1, por_pagina=ENTERAPI_POR_PAGINA):
+    params = {
+        'entidad': conn['entity'],
+        'input_password': get_enterapi_password(conn['token']),
+        'epigrafe': dicc.get('epigrafe') or 'inmuebles',
+        'pagina': max(int(pagina or 1), 1),
+        'por_pagina': min(max(int(por_pagina or ENTERAPI_POR_PAGINA), 1), 1000),
+    }
+    params['incluir_bajas'] = 'true'
+    if dicc.get('date-enterapi') == 'check-init-date' and dicc.get('modificado-desde'):
+        params['modificado_desde'] = str(dicc['modificado-desde'])[:10]
+    return params
+
+
+def _parse_enterapi_response(body):
+    """
+    Parsea respuesta EnterApi:
+    éxito -> ok=true, data.bienes[], meta.paginacion{}
+    error -> ok=false, error.code, error.message
+    """
+    if not isinstance(body, dict):
+        raise ValueError('Respuesta EnterApi inválida: se esperaba un objeto JSON.')
+
+    if body.get('ok') is False:
+        err = body.get('error') or {}
+        code = err.get('code', 'ERROR')
+        message = err.get('message', 'Error desconocido en EnterApi.')
+        raise ValueError('%s: %s' % (code, message))
+
+    if body.get('ok') is not True:
+        raise ValueError('Respuesta EnterApi inválida: se esperaba ok=true.')
+
+    data = body.get('data') or {}
+    bienes = data.get('bienes')
+    if bienes is None:
+        bienes = []
+    if not isinstance(bienes, list):
+        raise ValueError('Respuesta EnterApi inválida: data.bienes debe ser una lista.')
+
+    meta = body.get('meta') or {}
+    paginacion = meta.get('paginacion') or {}
+    return bienes, paginacion
+
+
+def fetch_enterapi_page(conn, dicc, pagina=1, por_pagina=ENTERAPI_POR_PAGINA):
+    query = build_enterapi_query_params(conn, dicc, pagina, por_pagina)
+    r = requests.get(conn['url'], params=query, timeout=120)
+    print('EnterApi page %s: %s' % (pagina, r.status_code))
+    if r.status_code != 200:
+        raise ValueError('EnterApi HTTP %s: %s' % (r.status_code, (r.text or '')[:500]))
+    try:
+        body = r.json()
+    except ValueError as exc:
+        raise ValueError('EnterApi: respuesta JSON inválida.') from exc
+    return _parse_enterapi_response(body)
+
+
+def _format_enterapi_array_field(value):
+    """
+    Normaliza arrays EnterApi (registro, referencia_catastral) a texto plano.
+    - [] / null / vacío -> None
+    - [{"texto": "x"}, ...] -> "x; y"
+    - [{"Ref Catastral": "...", "Municipio": "...", ...}, ...] ->
+      "ref | municipio | ...; ref2 | municipio2 | ..."
+    """
+    if value is None:
+        return None
+    if isinstance(value, str):
+        text = value.strip()
+        return text or None
+    if not isinstance(value, list):
+        text = str(value).strip()
+        return text or None
+    if not value:
+        return None
+
+    items = []
+    for entry in value:
+        if not isinstance(entry, dict):
+            if entry is None:
+                continue
+            text = str(entry).strip()
+            if text:
+                items.append(text)
+            continue
+
+        keys = list(entry.keys())
+        if len(keys) == 1 and keys[0].lower() == 'texto':
+            text = entry[keys[0]]
+            if text is None:
+                continue
+            text = str(text).strip()
+            if text:
+                items.append(text)
+            continue
+
+        parts = []
+        for v in entry.values():
+            if v is None:
+                continue
+            text = str(v).strip()
+            if text:
+                parts.append(text)
+        if parts:
+            items.append(' | '.join(parts))
+
+    if not items:
+        return None
+    return '; '.join(items)
+
+
+def normalize_enterapi_records(records):
+    """Normaliza columnas array a texto plano legible para PostgreSQL/capa."""
+    normalized = []
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        row = dict(record)
+        for col in ENTERAPI_TEXT_ARRAY_COLUMNS:
+            if col in row:
+                row[col] = _format_enterapi_array_field(row[col])
+        normalized.append(row)
+    return normalized
+
 
 def get_types_segex (dicc):
 

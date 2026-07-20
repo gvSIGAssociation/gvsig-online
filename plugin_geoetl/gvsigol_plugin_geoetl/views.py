@@ -46,7 +46,7 @@ from gvsigol_services import utils as services_utils
 from .forms import UploadFileForm
 from .models import (ETLworkspaces, ETLstatus, EtlWorkspaceEditRole, EtlWorkspaceExecuteRole,
                      EtlWorkspaceEditRestrictedRole, SendEmails, SendEndpoint, ETLPluginSettings,
-                     ETLVisualizerSession, ETLVisualizerLayer)
+                     ETLVisualizerSession, ETLVisualizerLayer, enterapi_LastDownload)
 
 
 def _ctx(extra=None):
@@ -1441,6 +1441,33 @@ def etl_types_segex(request):
             response = json.dumps(listTypes)
 
             return HttpResponse(response, content_type="application/json")
+
+@login_required()
+@staff_required
+def etl_enterapi_last_download(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            jsParams = json.loads(request.POST['jsonParamsEnterApi'])
+            params = jsParams['parameters'][0]
+            api_conn = etl_schema.get_enterapi_connection_params(params['api'])
+            epigrafe = params.get('epigrafe') or 'inmuebles'
+            id_ws = params.get('id_ws')
+            last_download = None
+            if id_ws not in (None, ''):
+                try:
+                    row = enterapi_LastDownload.objects.get(
+                        id_ws=int(id_ws),
+                        entity=api_conn['entity'],
+                        epigraph=epigrafe,
+                    )
+                    last_download = row.last_download.date().isoformat()
+                except (enterapi_LastDownload.DoesNotExist, ValueError, TypeError):
+                    last_download = None
+            return HttpResponse(
+                json.dumps({'last_download': last_download}),
+                content_type='application/json',
+            )
 
 @login_required()
 @staff_required
