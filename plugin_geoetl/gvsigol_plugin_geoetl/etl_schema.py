@@ -905,19 +905,26 @@ def get_enterapi_connection_params(api_name):
 
 ENTERAPI_EPIGRAFES = ('inmuebles',)
 ENTERAPI_POR_PAGINA = 1000
+# Nombres ≤10 chars para compatibilidad Shape/capa reutilizable.
 ENTERAPI_SCHEMA = [
-    'numero_inventario',
-    'denominacion',
-    'descripcion',
+    'num_invent',
+    'denominaci',
+    'descripcio',
     'direccion',
     'superficie',
     'registro',
-    'referencia_catastral',
+    'refcat',
     'fecha_alta',
     'fecha_baja',
     'estado',
     'url',
 ]
+ENTERAPI_COLUMN_RENAME = {
+    'numero_inventario': 'num_invent',
+    'denominacion': 'denominaci',
+    'descripcion': 'descripcio',
+    'referencia_catastral': 'refcat',
+}
 ENTERAPI_TEXT_ARRAY_COLUMNS = ('registro', 'referencia_catastral')
 
 
@@ -1033,7 +1040,7 @@ def _format_enterapi_array_field(value):
 
 
 def normalize_enterapi_records(records):
-    """Normaliza columnas array a texto plano legible para PostgreSQL/capa."""
+    """Normaliza arrays a texto y renombra columnas API a nombres de capa (≤10 chars)."""
     normalized = []
     for record in records:
         if not isinstance(record, dict):
@@ -1042,6 +1049,9 @@ def normalize_enterapi_records(records):
         for col in ENTERAPI_TEXT_ARRAY_COLUMNS:
             if col in row:
                 row[col] = _format_enterapi_array_field(row[col])
+        for api_name, layer_name in ENTERAPI_COLUMN_RENAME.items():
+            if api_name in row:
+                row[layer_name] = row.pop(api_name)
         normalized.append(row)
     return normalized
 
