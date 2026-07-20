@@ -1250,8 +1250,8 @@ input_EnterApi = draw2d.shape.layout.VerticalLayout.extend({
                 }
             ]};
 
-            data = ['numero_inventario', 'denominacion', 'descripcion', 'direccion', 'superficie',
-                    'registro', 'referencia_catastral', 'fecha_alta', 'fecha_baja', 'estado', 'url']
+            data = ['num_invent', 'denominaci', 'descripcio', 'direccion', 'superficie',
+                    'registro', 'refcat', 'fecha_alta', 'fecha_baja', 'estado', 'url']
 
             paramsEnterApi['schema'] = data
             paramsEnterApi['parameters'][0]['schema'] = data

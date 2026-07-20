@@ -4560,7 +4560,7 @@ def input_Segex(dicc):
 def input_EnterApi(dicc):
 
     api_conn = etl_schema.get_enterapi_connection_params(dicc['api'])
-    schema = dicc.get('schema') or etl_schema.ENTERAPI_SCHEMA
+    schema = etl_schema.ENTERAPI_SCHEMA
 
     conn_string = 'postgresql://'+GEOETL_DB['user']+':'+GEOETL_DB['password']+'@'+GEOETL_DB['host']+':'+GEOETL_DB['port']+'/'+GEOETL_DB['database']
     db = create_engine(conn_string)
