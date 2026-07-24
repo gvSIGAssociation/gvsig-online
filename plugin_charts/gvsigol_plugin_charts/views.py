@@ -38,6 +38,32 @@ from .models import Chart
 from . import settings
 from . import utils
 import json
+from urllib.parse import urlparse
+
+
+def get_browser_wfs_url(layer):
+    """
+    Return a WFS URL usable from the browser (prefer relative path through the
+    public reverse proxy instead of an internal docker hostname).
+    """
+    workspace = layer.datastore.workspace
+    server = getattr(workspace, 'server', None)
+    if server is not None:
+        endpoint = server.getWfsEndpoint(workspace.name, relative=True)
+        if endpoint.startswith('http://') or endpoint.startswith('https://'):
+            path = urlparse(endpoint).path
+            if path:
+                return path
+        return endpoint
+    if workspace.wfs_endpoint:
+        endpoint = workspace.wfs_endpoint
+        if endpoint.startswith('http://') or endpoint.startswith('https://'):
+            path = urlparse(endpoint).path
+            if path:
+                return path
+        return endpoint
+    return '/geoserver/%s/wfs' % workspace.name
+
 
 def get_conf(request):
     if request.method == 'POST': 
@@ -449,7 +475,7 @@ def view(request):
             'layer_name': layer.name,
             'layer_title': layer.title,
             'layer_workspace': layer.datastore.workspace.name,
-            'layer_wfs_url': layer.datastore.workspace.wfs_endpoint,
+            'layer_wfs_url': get_browser_wfs_url(layer),
             'layer_native_srs': layer.native_srs,
             'charts': charts
         }
@@ -468,7 +494,7 @@ def single_chart(request):
             'layer_name': layer.name,
             'layer_title': layer.title,
             'layer_workspace': layer.datastore.workspace.name,
-            'layer_wfs_url': layer.datastore.workspace.wfs_endpoint,
+            'layer_wfs_url': get_browser_wfs_url(layer),
             'layer_native_srs': layer.native_srs,
             'chart': {
                 'chart_id': chart.id,

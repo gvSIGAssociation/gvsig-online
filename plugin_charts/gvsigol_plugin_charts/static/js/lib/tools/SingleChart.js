@@ -118,10 +118,11 @@ SingleChart.prototype.loadVectorLayer = function() {
 	  		features = geojson.readFeatures(response);
 	  		for (var i=0; i < features.length; i++) {
 				var feat = features[i];
-				//CHANGE
-				//var geom = feat.getGeometry().transform('EPSG:4326', 'EPSG:3857');
-	  			var geom = feat.getGeometry().transform(self.layer.layer_native_srs, 'EPSG:3857');
-	  			feat.setGeometry(geom.clone());	
+				var geom = feat.getGeometry();
+				if (geom) {
+					geom = geom.transform(self.layer.layer_native_srs, 'EPSG:3857');
+					feat.setGeometry(geom.clone());
+				}
 	  			var props = feat.getProperties();
 	  			props['custom_color'] = self.getRandomColor();
 	  			feat.setProperties(props);
