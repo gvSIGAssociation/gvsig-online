@@ -73,11 +73,23 @@ function isAlreadyInCanvas(jsonParams, jsonTask, ID){
 
 
 function setColorIfIsOpened(jsonParams, type, ID, icon){
+    if (typeof registerEtlGearIcon === 'function') {
+        registerEtlGearIcon(ID, icon);
+    } else {
+        // SchemaPropagator may load after; keep a local fallback map
+        window._etlGearById = window._etlGearById || {};
+        window._etlGearById[ID] = icon;
+    }
     
     setTimeout(function(){
         
         for(k=0;k<jsonParams.length;k++){
             if (jsonParams[k]['id'] == ID){
+
+                if (jsonParams[k]._schemaValid === false) {
+                    icon.setColor('#e2504c');
+                    break;
+                }
 
                 if (type.startsWith('input')){ 
                     icon.setColor('#01b0a0')
@@ -459,6 +471,7 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                     passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
                     
                     isAlreadyInCanvas(jsonParams, paramsIndenova, ID)
+                    if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
                     icon.setColor('#01b0a0')
                     
@@ -957,6 +970,7 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
             passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
             
             isAlreadyInCanvas(jsonParams, paramsSegex, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#01b0a0')
             
@@ -1602,12 +1616,15 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
                 processData: false,
                 success: function (data) {
                     paramsCSV['schema'] = data
+                    isAlreadyInCanvas(jsonParams, paramsCSV, ID)
                     
                     passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+                    if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
                     }
                 })
     
             isAlreadyInCanvas(jsonParams, paramsCSV, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#01b0a0')
             
@@ -1862,12 +1879,15 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
                 processData: false,
                 success: function (data) {
                     paramsJSON['schema'] = data
+                    isAlreadyInCanvas(jsonParams, paramsJSON, ID)
                     
                     passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+                    if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
                     }
                 })
     
             isAlreadyInCanvas(jsonParams, paramsJSON, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#01b0a0')
             
@@ -2080,12 +2100,15 @@ input_PadronAlbacete = draw2d.shape.layout.VerticalLayout.extend({
                 processData: false,
                 success: function (data) {
                     paramsJSON['schema'] = data
+                    isAlreadyInCanvas(jsonParams, paramsJSON, ID)
                     
                     passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+                    if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
                     }
                 })
     
             isAlreadyInCanvas(jsonParams, paramsJSON, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#01b0a0')
             
@@ -2311,6 +2334,7 @@ input_PadronAtm = draw2d.shape.layout.VerticalLayout.extend({
                     passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
                     
                     isAlreadyInCanvas(jsonParams, paramsJSON, ID)
+                    if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
                     icon.setColor('#01b0a0')
                     
@@ -2696,11 +2720,14 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                 processData: false,
                 success: function (data) {
                     paramsExcel['schema'] = data
+                    isAlreadyInCanvas(jsonParams, paramsExcel, ID)
                     passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+                    if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
                     
                     }
                 })
             isAlreadyInCanvas(jsonParams, paramsExcel, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#01b0a0')
 
@@ -3279,7 +3306,9 @@ input_Sharepoint = draw2d.shape.layout.VerticalLayout.extend({
                 cache: false, contentType: false, processData: false,
                 success: function(data){
                     paramsSharepoint['schema'] = data;
+                    isAlreadyInCanvas(jsonParams, paramsSharepoint, ID)
                     passSchemaToEdgeConnected(ID, listLabel, data, context.canvas);
+                    if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
                 },
                 error: function(){
                     console.log('Error getting SharePoint schema');
@@ -3287,6 +3316,7 @@ input_Sharepoint = draw2d.shape.layout.VerticalLayout.extend({
             });
 
             isAlreadyInCanvas(jsonParams, paramsSharepoint, ID);
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
             icon.setColor('#01b0a0');
             $('#dialog-input-sharepoint-'+ID).modal('hide');
         });
@@ -3703,6 +3733,7 @@ input_Xml = draw2d.shape.layout.VerticalLayout.extend({
             formDataSchemaXml.append('jsonParamsXml', JSON.stringify(paramsXml))
 
             isAlreadyInCanvas(jsonParams, paramsXml, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#01b0a0')
 
@@ -3945,11 +3976,14 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
                 success: function (data) {
                     data.unshift('ogc_fid')
                     paramsSHP['schema'] = data
+                    isAlreadyInCanvas(jsonParams, paramsSHP, ID)
                     passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+                    if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
                     }
                 })
     
             isAlreadyInCanvas(jsonParams, paramsSHP, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#01b0a0')
             
@@ -4256,12 +4290,7 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
                 processData: false,
                 success: function (data) {
 
-                    $('#owner-name-'+ID).empty()
-
-                    for (i = 0; i < data.length; i++){
-                        $('#owner-name-'+ID).append('<option>'+data[i]+'</option>')
-
-                    }
+                    refillSelectPreserving($('#owner-name-'+ID), data, getStoredParamValue(ID, 'owner-name'))
                 }
             })
         });
@@ -4290,12 +4319,7 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
                 processData: false,
                 success: function (data) {
 
-                    $('#table-name-'+ID).empty()
-
-                    for (i = 0; i < data.length; i++){
-                        $('#table-name-'+ID).append('<option>'+data[i]+'</option>')
-
-                    }
+                    refillSelectPreserving($('#table-name-'+ID), data, getStoredParamValue(ID, 'table-name'))
                 }
             })
         });
@@ -4332,13 +4356,16 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
                 processData: false,
                 success: function (data) {
                     paramsOracle['schema'] = data
+                    isAlreadyInCanvas(jsonParams, paramsOracle, ID)
 
                     passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+                    if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
                     
                     }
                 })
             
             isAlreadyInCanvas(jsonParams, paramsOracle, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#01b0a0')
 
@@ -4747,13 +4774,16 @@ input_SqlServer = draw2d.shape.layout.VerticalLayout.extend({
                 processData: false,
                 success: function (data) {
                     paramsDataSchemaSqlServer['schema'] = data
+                    isAlreadyInCanvas(jsonParams, paramsDataSchemaSqlServer, ID)
 
                     passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+                    if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
                     
                     }
                 })
             
             isAlreadyInCanvas(jsonParams, paramsDataSchemaSqlServer, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#01b0a0')
 
@@ -5193,6 +5223,7 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                     passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
                     
                     isAlreadyInCanvas(jsonParams, paramsPostgis, ID)
+                    if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
                     
                     icon.setColor('#01b0a0')
                     
@@ -5502,11 +5533,14 @@ input_Kml = draw2d.shape.layout.VerticalLayout.extend({
                 processData: false,
                 success: function (data) {
                     paramsKml['schema'] = data
+                    isAlreadyInCanvas(jsonParams, paramsKml, ID)
                     passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
+                    if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
                     }
                 })
     
             isAlreadyInCanvas(jsonParams, paramsKml, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#01b0a0')
             
@@ -5810,6 +5844,7 @@ crea_Grid = draw2d.shape.layout.VerticalLayout.extend({
             passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
             
             isAlreadyInCanvas(jsonParams, paramsGrid, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
             
             icon.setColor('#8e57eb')
                     
@@ -6068,18 +6103,11 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
 
-                    $('#attr1-'+ID).empty()
-                    $('#attr2-'+ID).empty()
-
-                    for (i = 0; i < schemaEdge[0].length; i++){
-                        $('#attr1-'+ID).append('<option>'+schemaEdge[0][i]+'</option>')
-                    }
-                    for (i = 0; i < schemaEdge[1].length; i++){
-                        $('#attr2-'+ID).append('<option>'+schemaEdge[1][i]+'</option>')
-                    }
+                    refillSelectPreserving($('#attr1-'+ID), schemaEdge[0], getStoredParamValue(ID, 'attr1'))
+                    refillSelectPreserving($('#attr2-'+ID), schemaEdge[1], getStoredParamValue(ID, 'attr2'))
                 }
 
             },100);
@@ -6120,6 +6148,7 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
 
             isAlreadyInCanvas(jsonParams, paramsJoin, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -6381,14 +6410,10 @@ trans_NearestNeighbor = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
 
-                    $('#attr-'+ID).empty()
-                    $('#attr-'+ID).append('<option> </option>')
-                    for (i = 0; i < schemaEdge[0].length; i++){
-                        $('#attr-'+ID).append('<option>'+schemaEdge[0][i]+'</option>')
-                    }
+                    refillSelectPreserving($('#attr-'+ID), [' '].concat(schemaEdge[0]), getStoredParamValue(ID, 'attr'))
                 }
 
             },100);
@@ -6428,6 +6453,7 @@ trans_NearestNeighbor = draw2d.shape.layout.VerticalLayout.extend({
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
 
             isAlreadyInCanvas(jsonParams, paramsNeighbor, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -6681,14 +6707,10 @@ trans_CompareRows = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
                    
-                    $('#attr-'+ID).empty()
-
-                    for (i = 0; i < schema[0].length; i++){
-                        $('#attr-'+ID).append('<option>'+schema[0][i]+'</option>')
-                    }
+                    refillSelectPreserving($('#attr-'+ID), schema[0], getStoredParamValue(ID, 'attr'))
                 }
 
             },100);
@@ -6719,6 +6741,7 @@ trans_CompareRows = draw2d.shape.layout.VerticalLayout.extend({
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
 
             isAlreadyInCanvas(jsonParams, paramsCompare, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -6996,14 +7019,9 @@ trans_RemoveAttr = draw2d.shape.layout.VerticalLayout.extend({
 
                 //if edge schema and old schema is not the same is the first time you open parameters or
                 //something was changed in the edge so we hace to create a new schema option
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
-                    $('#attr-'+ID).empty()
-
-                    for (i = 0; i < schema.length; i++){
-                        
-                        $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#attr-'+ID), schema, getStoredParamValue(ID, 'attr'))
                 }
 
             },100);
@@ -7042,6 +7060,7 @@ trans_RemoveAttr = draw2d.shape.layout.VerticalLayout.extend({
             
             //check if parameters are already in json canvas
             isAlreadyInCanvas(jsonParams, paramsRemove, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             //set red color to another in order to know if parameters are checked
             icon.setColor('#4682B4')
@@ -7254,14 +7273,9 @@ trans_RenameAttr = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
-                    $('#old-attr-'+ID).empty()
-
-                    for (i = 0; i < schema.length; i++){
-                        
-                        $('#old-attr-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#old-attr-'+ID), schema, getStoredParamValue(ID, 'old-attr'))
                 }
 
             },100);
@@ -7296,6 +7310,7 @@ trans_RenameAttr = draw2d.shape.layout.VerticalLayout.extend({
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
 
             isAlreadyInCanvas(jsonParams, paramsRename, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -7512,14 +7527,9 @@ trans_ConcatAttr = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
-                    $('#attr-'+ID).empty()
-
-                    for (i = 0; i < schema.length; i++){
-                        
-                        $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#attr-'+ID), schema, getStoredParamValue(ID, 'attr'))
                 }
 
             },100);
@@ -7548,6 +7558,7 @@ trans_ConcatAttr = draw2d.shape.layout.VerticalLayout.extend({
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
 
             isAlreadyInCanvas(jsonParams, paramsConcat, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -7770,14 +7781,9 @@ trans_PadAttr = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
-                    $('#attr-'+ID).empty()
-
-                    for (i = 0; i < schema.length; i++){
-                        
-                        $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#attr-'+ID), schema, getStoredParamValue(ID, 'attr'))
                 }
 
             },100);
@@ -7806,6 +7812,7 @@ trans_PadAttr = draw2d.shape.layout.VerticalLayout.extend({
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
 
             isAlreadyInCanvas(jsonParams, paramsPad, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -8019,14 +8026,9 @@ trans_FilterDupli = draw2d.shape.layout.VerticalLayout.extend({
 
                 //if edge schema and old schema is not the same is the first time you open parameters or
                 //something was changed in the edge so we hace to create a new schema option
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
-                    $('#attr-'+ID).empty()
-
-                    for (i = 0; i < schema.length; i++){
-                        
-                        $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#attr-'+ID), schema, getStoredParamValue(ID, 'attr'))
                 }
 
             },100);
@@ -8052,6 +8054,7 @@ trans_FilterDupli = draw2d.shape.layout.VerticalLayout.extend({
             
             //check if parameters are already in json canvas
             isAlreadyInCanvas(jsonParams, paramsRemove, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             //set red color to another in order to know if parameters are checked
             icon.setColor('#4682B4')
@@ -8286,7 +8289,7 @@ trans_ValGeom = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
                 }
 
@@ -8324,6 +8327,7 @@ trans_ValGeom = draw2d.shape.layout.VerticalLayout.extend({
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
             
             isAlreadyInCanvas(jsonParams, paramsValGeom, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -8557,7 +8561,7 @@ trans_SimpGeom = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
                 }
 
@@ -8591,6 +8595,7 @@ trans_SimpGeom = draw2d.shape.layout.VerticalLayout.extend({
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
             
             isAlreadyInCanvas(jsonParams, paramsValGeom, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -8821,14 +8826,9 @@ trans_ModifyValue = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
-                    $('#attr-'+ID).empty()
-
-                    for (i = 0; i < schema.length; i++){
-                        
-                        $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#attr-'+ID), schema, getStoredParamValue(ID, 'attr'))
                 }
 
             },100);
@@ -8850,6 +8850,7 @@ trans_ModifyValue = draw2d.shape.layout.VerticalLayout.extend({
 
             passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
             isAlreadyInCanvas(jsonParams, paramsModifyValue, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -9066,14 +9067,9 @@ trans_Counter = draw2d.shape.layout.VerticalLayout.extend({
 
                 schemaEdge = ['-'].concat(schemaEdge)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
-                    $('#group-by-attr-'+ID).empty()
-
-                    for (i = 0; i < schema.length; i++){
-                        
-                        $('#group-by-attr-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#group-by-attr-'+ID), schema, getStoredParamValue(ID, 'group-by-attr'))
                 }
 
             },100);
@@ -9101,6 +9097,7 @@ trans_Counter = draw2d.shape.layout.VerticalLayout.extend({
 
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
             isAlreadyInCanvas(jsonParams, paramsCounter, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -9324,17 +9321,11 @@ trans_Stats = draw2d.shape.layout.VerticalLayout.extend({
 
                 schemaEdge = ['-'].concat(schemaEdge)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
-                    $('#attr-'+ID).empty()
-                    $('#group-by-attr-'+ID).empty()
-
-                    for (i = 0; i < schema.length; i++){
-                        if(schema[i] != '-'){
-                            $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
-                        }
-                        $('#group-by-attr-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    var statsAttrs = schema.filter(function(c){ return c != '-'; });
+                    refillSelectPreserving($('#attr-'+ID), statsAttrs, getStoredParamValue(ID, 'attr'))
+                    refillSelectPreserving($('#group-by-attr-'+ID), schema, getStoredParamValue(ID, 'group-by-attr'))
                 }
 
             },100);
@@ -9368,6 +9359,7 @@ trans_Stats = draw2d.shape.layout.VerticalLayout.extend({
             
             //check if parameters are already in json canvas
             isAlreadyInCanvas(jsonParams, paramsStats, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             //set red color to another in order to know if parameters are checked
             icon.setColor('#4682B4')
@@ -9623,14 +9615,12 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
 
-                    $('#attr-'+ID).empty()
+                    refillSelectPreserving($('#attr-'+ID), schema, getStoredParamValue(ID, 'attr'))
                     $('#schema-calculator-'+ID).empty()
-
                     for (i = 0; i < schema.length; i++){
-                        $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
                         $('#schema-calculator-'+ID).append('<li class="nav-item"><a class="nav-link active">'+schema[i]+'</a></li>')
                     }
                 //this else only for this transformer for selecting attributes
@@ -9700,6 +9690,7 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
 
             passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
             isAlreadyInCanvas(jsonParams, paramsCalculator, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -9923,14 +9914,9 @@ trans_ChangeAttrType = draw2d.shape.layout.VerticalLayout.extend({
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
                 schema = schemaEdge
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
-                    $('#attr-'+ID).empty()
-    
-                    for (i = 0; i < schema.length; i++){
-                        
-                        $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#attr-'+ID), schema, getStoredParamValue(ID, 'attr'))
                 }   
 
             },100);
@@ -9957,6 +9943,7 @@ trans_ChangeAttrType = draw2d.shape.layout.VerticalLayout.extend({
 
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
             isAlreadyInCanvas(jsonParams, paramsCreateAttr, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -10184,14 +10171,9 @@ trans_CorrectSpelling = draw2d.shape.layout.VerticalLayout.extend({
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
                 schema = schemaEdge
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
-                    $('#attr-'+ID).empty()
-    
-                    for (i = 0; i < schema.length; i++){
-                        
-                        $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#attr-'+ID), schema, getStoredParamValue(ID, 'attr'))
                 }   
 
             },100);
@@ -10224,6 +10206,7 @@ trans_CorrectSpelling = draw2d.shape.layout.VerticalLayout.extend({
 
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
             isAlreadyInCanvas(jsonParams, paramsCreateAttr, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -10635,7 +10618,7 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
 
                     $('#attrs-values-'+ID).empty()
@@ -10753,14 +10736,17 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
                     }
                     
                     paramsExecute['schema'] = schemaMod
+                    isAlreadyInCanvas(jsonParams, paramsExecute, ID)
                     paramsExecute['schema-old'] = schemaEdge
 
                     passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+                    if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
                 }
             })
             
             isAlreadyInCanvas(jsonParams, paramsExecute, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -11013,6 +10999,7 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
 
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
             isAlreadyInCanvas(jsonParams, paramsCreateAttr, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -11283,6 +11270,7 @@ trans_ExposeAttr = draw2d.shape.layout.VerticalLayout.extend({
 
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
             isAlreadyInCanvas(jsonParams, paramsExposeAttr, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -11521,15 +11509,10 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
 
-                    $('#attr-'+ID).empty()
-
-                    for (i = 0; i < schema.length; i++){
-                        
-                        $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#attr-'+ID), schema, getStoredParamValue(ID, 'attr'))
                 }
 
             },100);
@@ -11591,6 +11574,7 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
             passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
 
             isAlreadyInCanvas(jsonParams, paramsFilter, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -11901,6 +11885,7 @@ trans_Intersection = draw2d.shape.layout.VerticalLayout.extend({
             passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
 
             isAlreadyInCanvas(jsonParams, paramsInter, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -12153,6 +12138,7 @@ trans_SpatialRel = draw2d.shape.layout.VerticalLayout.extend({
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
 
             isAlreadyInCanvas(jsonParams, paramsSpatialRel, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -12424,14 +12410,9 @@ trans_Cluster = draw2d.shape.layout.VerticalLayout.extend({
 
                 schemaEdge = ['-'].concat(schemaEdge)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
-                    $('#attr-'+ID).empty()
-    
-                    for (i = 0; i < schema.length; i++){
-                        
-                        $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#attr-'+ID), schema, getStoredParamValue(ID, 'attr'))
                 }
 
             },100);
@@ -12476,6 +12457,7 @@ trans_Cluster = draw2d.shape.layout.VerticalLayout.extend({
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
 
             isAlreadyInCanvas(jsonParams, paramsSpatialRel, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -12679,6 +12661,7 @@ trans_Difference = draw2d.shape.layout.VerticalLayout.extend({
                 passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
     
                 isAlreadyInCanvas(jsonParams, paramsDiff, ID)
+                if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
     
                 icon.setColor('#4682B4')
 
@@ -12906,7 +12889,7 @@ trans_Voronoi = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
                 }
 
@@ -12930,6 +12913,7 @@ trans_Voronoi = draw2d.shape.layout.VerticalLayout.extend({
 
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
             isAlreadyInCanvas(jsonParams, paramsVoronoi, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -13139,21 +13123,19 @@ trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
-                    $('#attr-'+ID).empty()
+                    refillSelectPreserving($('#attr-'+ID), schema, getStoredParamValue(ID, 'attr'))
 
-                    for (i = 0; i < schema.length; i++){
-                        $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
+                    // Inicializa Select2 si aún no está activo (refillSelectPreserving lo recrea si ya existía)
+                    if (!$('#attr-' + ID).data('select2')) {
+                        $('#attr-' + ID).select2({
+                            tags: true,
+                            tokenSeparators: [',', ' '],
+                            placeholder: gettext("Select or type options"),
+                            width: '100%'
+                        });
                     }
-
-                    // Inicializa Select2 con la funcionalidad de "tags"
-                    $('#attr-' + ID).select2({
-                        tags: true, // Permite agregar nuevas opciones
-                        tokenSeparators: [',', ' '], // Define cómo separar opciones (coma o espacio)
-                        placeholder: gettext("Select or type options"), // Placeholder
-                        width: '100%' // Asegura que se ajuste al ancho del contenedor
-                    });
 
                 }
 
@@ -13178,6 +13160,7 @@ trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
             
             isAlreadyInCanvas(jsonParams, paramsKeep, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -13437,6 +13420,7 @@ trans_Reproject = draw2d.shape.layout.VerticalLayout.extend({
             
             //check if parameters are already in json canvas
             isAlreadyInCanvas(jsonParams, paramsReproject, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             //set red color to another in order to know if parameters are checked
             icon.setColor('#4682B4')
@@ -13652,14 +13636,9 @@ trans_CadastralGeom = draw2d.shape.layout.VerticalLayout.extend({
 
                 //if edge schema and old schema is not the same is the first time you open parameters or
                 //something was changed in the edge so we hace to create a new schema option
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
-                    $('#attr-'+ID).empty()
-
-                    for (i = 0; i < schema.length; i++){
-                        
-                        $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#attr-'+ID), schema, getStoredParamValue(ID, 'attr'))
                 }
 
             },100);
@@ -13686,6 +13665,7 @@ trans_CadastralGeom = draw2d.shape.layout.VerticalLayout.extend({
             
             //check if parameters are already in json canvas
             isAlreadyInCanvas(jsonParams, paramsCadGeom, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             //set red color to another in order to know if parameters are checked
             icon.setColor('#4682B4')
@@ -13936,18 +13916,11 @@ trans_MGRS = draw2d.shape.layout.VerticalLayout.extend({
 
                 //if edge schema and old schema is not the same is the first time you open parameters or
                 //something was changed in the edge so we hace to create a new schema option
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
-                    $('#mgrs-'+ID).empty()
-                    $('#lon-'+ID).empty()
-                    $('#lat-'+ID).empty()
-
-                    for (i = 0; i < schema.length; i++){
-                        
-                        $('#mgrs-'+ID).append('<option>'+schema[i]+'</option>')
-                        $('#lon-'+ID).append('<option>'+schema[i]+'</option>')
-                        $('#lat-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#mgrs-'+ID), schema, getStoredParamValue(ID, 'mgrs'))
+                    refillSelectPreserving($('#lon-'+ID), schema, getStoredParamValue(ID, 'lon'))
+                    refillSelectPreserving($('#lat-'+ID), schema, getStoredParamValue(ID, 'lat'))
                 }
 
             },100);
@@ -13985,6 +13958,7 @@ trans_MGRS = draw2d.shape.layout.VerticalLayout.extend({
             
             //check if parameters are already in json canvas
             isAlreadyInCanvas(jsonParams, paramsMGRS, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             //set red color to another in order to know if parameters are checked
             icon.setColor('#4682B4')
@@ -14274,17 +14248,11 @@ trans_TextToPoint = draw2d.shape.layout.VerticalLayout.extend({
 
                 //if edge schema and old schema is not the same is the first time you open parameters or
                 //something was changed in the edge so we hace to create a new schema option
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
 
-                    $('#lon-'+ID).empty()
-                    $('#lat-'+ID).empty()
-
-                    for (i = 0; i < schema.length; i++){
-                        
-                        $('#lon-'+ID).append('<option>'+schema[i]+'</option>')
-                        $('#lat-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#lon-'+ID), schema, getStoredParamValue(ID, 'lon'))
+                    refillSelectPreserving($('#lat-'+ID), schema, getStoredParamValue(ID, 'lat'))
                 }
 
             },100);
@@ -14324,6 +14292,7 @@ trans_TextToPoint = draw2d.shape.layout.VerticalLayout.extend({
             
             //check if parameters are already in json canvas
             isAlreadyInCanvas(jsonParams, paramsTextToPoint, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             //set red color to another in order to know if parameters are checked
             icon.setColor('#4682B4')
@@ -14558,14 +14527,9 @@ trans_WktGeom = draw2d.shape.layout.VerticalLayout.extend({
 
                 //if edge schema and old schema is not the same is the first time you open parameters or
                 //something was changed in the edge so we hace to create a new schema option
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
-                    $('#attr-'+ID).empty()
-
-                    for (i = 0; i < schema.length; i++){
-                        
-                        $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#attr-'+ID), schema, getStoredParamValue(ID, 'attr'))
                 }
 
             },100);
@@ -14595,6 +14559,7 @@ trans_WktGeom = draw2d.shape.layout.VerticalLayout.extend({
             
             //check if parameters are already in json canvas
             isAlreadyInCanvas(jsonParams, paramsWktGeom, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             //set red color to another in order to know if parameters are checked
             icon.setColor('#4682B4')
@@ -14823,14 +14788,9 @@ trans_SplitAttr = draw2d.shape.layout.VerticalLayout.extend({
 
                 //if edge schema and old schema is not the same is the first time you open parameters or
                 //something was changed in the edge so we hace to create a new schema option
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
-                    $('#attr-'+ID).empty()
-
-                    for (i = 0; i < schema.length; i++){
-                        
-                        $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#attr-'+ID), schema, getStoredParamValue(ID, 'attr'))
                 }
 
             },100);
@@ -14863,6 +14823,7 @@ trans_SplitAttr = draw2d.shape.layout.VerticalLayout.extend({
             
             //check if parameters are already in json canvas
             isAlreadyInCanvas(jsonParams, paramsSplitAttr, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             //set red color to another in order to know if parameters are checked
             icon.setColor('#4682B4')
@@ -15087,14 +15048,9 @@ trans_ExplodeList = draw2d.shape.layout.VerticalLayout.extend({
 
                 //if edge schema and old schema is not the same is the first time you open parameters or
                 //something was changed in the edge so we hace to create a new schema option
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
-                    $('#list-'+ID).empty()
-
-                    for (i = 0; i < schema.length; i++){
-                        
-                        $('#list-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#list-'+ID), schema, getStoredParamValue(ID, 'list'))
                 }
 
             },100);
@@ -15125,6 +15081,7 @@ trans_ExplodeList = draw2d.shape.layout.VerticalLayout.extend({
             
             //check if parameters are already in json canvas
             isAlreadyInCanvas(jsonParams, paramsSplitAttr, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             //set red color to another in order to know if parameters are checked
             icon.setColor('#4682B4')
@@ -15339,14 +15296,9 @@ trans_Union = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
                 schemaEdge = ['-'].concat(schemaEdge)
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
-                    $('#group-by-attr-'+ID).empty()
-
-                    for (i = 0; i < schema.length; i++){
-                        
-                        $('#group-by-attr-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#group-by-attr-'+ID), schema, getStoredParamValue(ID, 'group-by-attr'))
                 }
 
             },100);
@@ -15384,6 +15336,7 @@ trans_Union = draw2d.shape.layout.VerticalLayout.extend({
 
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
             isAlreadyInCanvas(jsonParams, paramsUnion, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -15567,6 +15520,7 @@ trans_RemoveGeom = draw2d.shape.layout.VerticalLayout.extend({
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
 
             isAlreadyInCanvas(jsonParams, paramsRGeom, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
                 
@@ -15753,6 +15707,7 @@ trans_FilterGeom = draw2d.shape.layout.VerticalLayout.extend({
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
 
             isAlreadyInCanvas(jsonParams, paramsFGeom, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
                 
@@ -16011,7 +15966,7 @@ trans_ExplodeGeom = draw2d.shape.layout.VerticalLayout.extend({
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
                 }
 
@@ -16024,6 +15979,7 @@ trans_ExplodeGeom = draw2d.shape.layout.VerticalLayout.extend({
 
             passSchemaToEdgeConnected(ID, listLabel, schemaEdge, context.canvas)
             isAlreadyInCanvas(jsonParams, paramsExplodGeom, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
 
@@ -16206,7 +16162,7 @@ trans_LineEndPoints = draw2d.shape.layout.VerticalLayout.extend({
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
                 }
 
@@ -16223,6 +16179,7 @@ trans_LineEndPoints = draw2d.shape.layout.VerticalLayout.extend({
     
                 passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
                 isAlreadyInCanvas(jsonParams, paramsLineEndpoints, ID)
+                if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
     
                 icon.setColor('#4682B4')
 
@@ -16408,7 +16365,7 @@ trans_CalcLength = draw2d.shape.layout.VerticalLayout.extend({
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
                 }
 
@@ -16422,6 +16379,7 @@ trans_CalcLength = draw2d.shape.layout.VerticalLayout.extend({
     
                 passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
                 isAlreadyInCanvas(jsonParams, paramsLineEndpoints, ID)
+                if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
     
                 icon.setColor('#4682B4')
 
@@ -16632,7 +16590,7 @@ trans_CalcArea = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
                 }
 
@@ -16657,6 +16615,7 @@ trans_CalcArea = draw2d.shape.layout.VerticalLayout.extend({
             
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
             isAlreadyInCanvas(jsonParams, paramsCalcArea, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -16878,7 +16837,7 @@ trans_CurrentDate = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
                 }
 
@@ -16907,6 +16866,7 @@ trans_CurrentDate = draw2d.shape.layout.VerticalLayout.extend({
 
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
             isAlreadyInCanvas(jsonParams, paramsDate, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -17211,17 +17171,12 @@ trans_Geocoder = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
 
-                    $('#attr-'+ID).empty()
-
-                    for (i = 0; i < schema.length; i++){
-                        
-                        $('#attr-'+ID).append('<option>'+schema[i]+'</option>')
-                        $('#x-'+ID).append('<option>'+schema[i]+'</option>')
-                        $('#y-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#attr-'+ID), schema, getStoredParamValue(ID, 'attr'))
+                    refillSelectPreserving($('#x-'+ID), schema, getStoredParamValue(ID, 'x'))
+                    refillSelectPreserving($('#y-'+ID), schema, getStoredParamValue(ID, 'y'))
                 }
 
             },100);
@@ -17269,6 +17224,7 @@ trans_Geocoder = draw2d.shape.layout.VerticalLayout.extend({
 
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
             isAlreadyInCanvas(jsonParams, paramsGeocoder, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -17624,19 +17580,11 @@ trans_Buffer = draw2d.shape.layout.VerticalLayout.extend({
                 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
 
-                    $('#radius-attr-'+ID).empty()
-                    //$('#current-area-attr-'+ID).empty()
-                    $('#area-attr-reach-'+ID).empty()
-
-                    for (i = 0; i < schema.length; i++){
-                        
-                        $('#radius-attr-'+ID).append('<option>'+schema[i]+'</option>')
-                        //$('#current-area-attr-'+ID).append('<option>'+schema[i]+'</option>')
-                        $('#area-attr-reach-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#radius-attr-'+ID), schema, getStoredParamValue(ID, 'radius-attr'))
+                    refillSelectPreserving($('#area-attr-reach-'+ID), schema, getStoredParamValue(ID, 'area-attr-reach'))
                 }
 
             },100);
@@ -17685,6 +17633,7 @@ trans_Buffer = draw2d.shape.layout.VerticalLayout.extend({
 
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
             isAlreadyInCanvas(jsonParams, paramsBuffer, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -18081,11 +18030,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
 
                 if ((JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]) && !editablerestrictedly){
                     schema = schemaEdge
-                    $('#match-'+ID).empty()
-
-                    for (i = 0; i < schema.length; i++){
-                        $('#match-'+ID).append('<option>'+schema[i]+'</option>')
-                    }
+                    refillSelectPreserving($('#match-'+ID), schema, getStoredParamValue(ID, 'match'))
                 }
 
             },100);
@@ -18237,6 +18182,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
             paramsPostgis['schema'] = schema
             
             isAlreadyInCanvas(jsonParams, paramsPostgis, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#e79600')
             
@@ -18445,13 +18391,10 @@ trans_IDW = draw2d.shape.layout.VerticalLayout.extend({
                     schemaEdge = []
                 }
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
 
-                    $('#value-field-'+ID).empty();
-                    for (var i = 0; i < schema.length; i++) {
-                        $('#value-field-'+ID).append('<option value="' + schema[i] + '">' + schema[i] + '</option>');
-                    }
+                    refillSelectPreserving($('#value-field-'+ID), schema, getStoredParamValue(ID, 'value-field'));
                 }
 
             },100);
@@ -18480,6 +18423,7 @@ trans_IDW = draw2d.shape.layout.VerticalLayout.extend({
 
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
             isAlreadyInCanvas(jsonParams, paramsIDW, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -18742,13 +18686,10 @@ trans_Kriging = draw2d.shape.layout.VerticalLayout.extend({
                     schemaEdge = []
                 }
 
-                if (JSON.stringify(schemaEdge) != JSON.stringify(schemaOld) || schema==[]){
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
                     schema = schemaEdge
 
-                    $('#value-field-kriging-'+ID).empty();
-                    for (var i = 0; i < schema.length; i++) {
-                        $('#value-field-kriging-'+ID).append('<option value="' + schema[i] + '">' + schema[i] + '</option>');
-                    }
+                    refillSelectPreserving($('#value-field-kriging-'+ID), schema, getStoredParamValue(ID, 'value-field'));
                 }
 
 
@@ -18779,6 +18720,7 @@ trans_Kriging = draw2d.shape.layout.VerticalLayout.extend({
 
             passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
             isAlreadyInCanvas(jsonParams, paramsKriging, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#4682B4')
             
@@ -19036,6 +18978,7 @@ output_Visualizer = draw2d.shape.layout.VerticalLayout.extend({
             };
 
             isAlreadyInCanvas(jsonParams, paramsVisualizer, ID);
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
             icon.setColor('#e79600');
 

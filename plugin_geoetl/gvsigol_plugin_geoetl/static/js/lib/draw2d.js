@@ -17158,6 +17158,14 @@ _packages2.default.command.CommandReconnect = _packages2.default.command.Command
 				
 			}
 		}
+		try {
+			if (typeof propagateSchemaFrom === 'function' && target && target.getParent) {
+				var tgtFig = target.getParent();
+				if (tgtFig && tgtFig.id) {
+					propagateSchemaFrom(tgtFig.id, source.canvas, { skipStart: false });
+				}
+			}
+		} catch (propErr) { /* ignore */ }
 	});
   },
 
