@@ -542,6 +542,65 @@ SingleChart.prototype.createLineChart = function(c) {
 };
 
 SingleChart.prototype.createAggregatedLineChart = function(c) {
+	var ctx = document.getElementById('schart-' + this.jsonChart.chart_id).getContext('2d');
+	
+	var labels = new Array();
+	for (var i=0; i<this.jsonChart.chart_conf.columns.length; i++) {
+		labels.push(this.jsonChart.chart_conf.columns[i].title);
+	}
+	
+	var features = this.vectorLayer.getSource().getFeatures();
+	var color = this.getRandomColor();
+	var newDataset = {
+		label: this.jsonChart.chart_title,
+		backgroundColor: color,
+		borderColor: color,
+		borderWidth: 1,
+		fill: false,
+		data: []
+	};		
+	for (var k=0; k<this.jsonChart.chart_conf.columns.length; k++) {
+		var data = 0;
+		for (var j=0; j<features.length; j++) {
+			data += features[j].getProperties()[this.jsonChart.chart_conf.columns[k].name]
+		}
+		newDataset.data.push(data);
+	}
+	var data = {
+		labels: labels,
+		datasets: [newDataset]
+	};
+	this.chart = new Chart(ctx, {
+		type: 'line',
+		data: data,
+		options: {
+			responsive: true,
+			legend: {
+				display: false
+			},
+			scales: {
+				xAxes: [{
+					display: true,
+					scaleLabel: {
+						display: true,
+						labelString: this.jsonChart.chart_conf.x_axis_title
+					}
+				}],
+				yAxes: [{
+					display: true,
+					scaleLabel: {
+						display: true,
+						labelString: this.jsonChart.chart_conf.y_axis_title
+					},
+					ticks: {
+						beginAtZero: this.jsonChart.chart_conf.y_axis_begin_at_zero
+					}
+				}]
+			}
+		}
+	});
+	this.chart.chart_id = this.jsonChart.chart_id;
+	this.chart.update();
 };
 
 SingleChart.prototype.createPieChart = function(c) {

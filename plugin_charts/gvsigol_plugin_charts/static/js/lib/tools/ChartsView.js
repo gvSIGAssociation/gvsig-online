@@ -712,6 +712,66 @@ ChartsView.prototype.createLineChart = function(c) {
 };
 
 ChartsView.prototype.createAggregatedLineChart = function(c) {
+	var ctx = document.getElementById('chart-' + c.chart_id).getContext('2d');
+	
+	var labels = new Array();
+	for (var i=0; i<c.chart_conf.columns.length; i++) {
+		labels.push(c.chart_conf.columns[i].title);
+	}
+	
+	var features = this.vectorLayer.getSource().getFeatures();
+	var color = this.getRandomColor();
+	var newDataset = {
+		label: c.chart_title,
+		backgroundColor: color,
+		borderColor: color,
+		borderWidth: 1,
+		fill: false,
+		data: []
+	};		
+	for (var k=0; k<c.chart_conf.columns.length; k++) {
+		var data = 0;
+		for (var j=0; j<features.length; j++) {
+			data += features[j].getProperties()[c.chart_conf.columns[k].name]
+		}
+		newDataset.data.push(data);
+	}
+	var data = {
+		labels: labels,
+		datasets: [newDataset]
+	};
+	var chart = new Chart(ctx, {
+		type: 'line',
+		data: data,
+		options: {
+			responsive: true,
+			legend: {
+				display: false
+			},
+			scales: {
+				xAxes: [{
+					display: true,
+					scaleLabel: {
+						display: true,
+						labelString: c.chart_conf.x_axis_title
+					}
+				}],
+				yAxes: [{
+					display: true,
+					scaleLabel: {
+						display: true,
+						labelString: c.chart_conf.y_axis_title
+					},
+					ticks: {
+						beginAtZero: c.chart_conf.y_axis_begin_at_zero
+					}
+				}]
+			}
+		}
+	});
+	chart.chart_id = c.chart_id;
+	
+	this.charts.push(chart);
 };
 
 ChartsView.prototype.createPieChart = function(c, isFirst) {
