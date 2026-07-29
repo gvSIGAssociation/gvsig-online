@@ -35,6 +35,7 @@ from urllib.parse import quote
 from gvsigol_plugin_catalog.settings import GEONETWORK_USE_KEEPALIVE
 from gvsigol_plugin_catalog import settings as catalog_settings
 from gvsigol_plugin_catalog import gn4_search
+from gvsigol_plugin_catalog import oidc_token
 
 DEFAULT_TIMEOUT = 10 #seconds
 
@@ -60,16 +61,24 @@ class Geonetwork():
         self.session = requests.Session()
         self.session.verify = False
         self.service_url = service_url
+        self._bearer_token = None
         if not GEONETWORK_USE_KEEPALIVE:
             self._override_headers = {"Connection": "close"}
             self.session.headers.update(self._override_headers)
         else:
             self._override_headers = {}
 
+    def _auth_type(self):
+        return (getattr(catalog_settings, 'GEONETWORK_AUTH_TYPE', 'basic') or 'basic').lower()
+
     def _apply_override_headers(self, headers):
         """Apply global override headers to the given headers"""
         merged = headers.copy()
-        merged['X-XSRF-TOKEN'] = self.get_csrf_token()
+        csrf = self.get_csrf_token()
+        if csrf:
+            merged['X-XSRF-TOKEN'] = csrf
+        if self._bearer_token:
+            merged['Authorization'] = 'Bearer ' + self._bearer_token
         merged.update(self._override_headers)
         return merged
         
@@ -105,37 +114,102 @@ class Geonetwork():
             raise FailedRequestError(last_error[0], last_error[1])
         return None
 
-    def gn_auth(self, user, password):
+    def _is_authenticated_me_response(self, response, auth_url):
+        """Return True only when GeoNetwork confirms an authenticated user."""
+        if '/api/me' in auth_url:
+            # Anonymous callers get 204; authenticated users get 200 + JSON body.
+            if response.status_code != 200 or not response.content:
+                return False
+            try:
+                payload = response.json()
+            except Exception:
+                return False
+            return bool(payload.get('username') or payload.get('name') or payload.get('id'))
+        if response.status_code != 200 or not response.content:
+            return False
+        return b'authenticated="true"' in response.content or b"authenticated='true'" in response.content
+
+    def _init_csrf_cookie(self):
+        init_urls = [
+            self.service_url + "/srv/api/me",
+            self.service_url + "/srv/eng/info?type=me",
+        ]
+        for init_url in init_urls:
+            headers = self._apply_override_headers(
+                {'Accept': 'application/json'} if '/api/me' in init_url else {}
+            )
+            # Avoid sending a stale bearer while bootstrapping CSRF.
+            headers.pop('Authorization', None)
+            r = self.session.get(
+                init_url,
+                headers=headers,
+                timeout=get_default_timeout(),
+                proxies=settings.PROXIES,
+            )
+            if r.status_code in (200, 204, 403):
+                break
+
+    def _gn_auth_bearer(self):
+        self.session.auth = None
+        try:
+            self._bearer_token = oidc_token.get_access_token()
+        except Exception:
+            logger.exception('Error obtaining GeoNetwork OIDC access token')
+            self._bearer_token = None
+            return False
+        try:
+            self._init_csrf_cookie()
+            headers = self._apply_override_headers({'Accept': 'application/json'})
+            r = self.session.get(
+                self.service_url + "/srv/api/me",
+                headers=headers,
+                timeout=get_default_timeout(),
+                proxies=settings.PROXIES,
+            )
+            if self._is_authenticated_me_response(r, "/srv/api/me"):
+                return True
+            # Token may have expired between cache and use; retry once.
+            self._bearer_token = oidc_token.get_access_token(force_refresh=True)
+            headers = self._apply_override_headers({'Accept': 'application/json'})
+            r = self.session.get(
+                self.service_url + "/srv/api/me",
+                headers=headers,
+                timeout=get_default_timeout(),
+                proxies=settings.PROXIES,
+            )
+            if self._is_authenticated_me_response(r, "/srv/api/me"):
+                return True
+            logger.error(
+                "GeoNetwork bearer authentication failed: %s %s",
+                r.status_code,
+                r.text,
+            )
+            return False
+        except Exception:
+            logger.exception('Error authenticating with bearer token')
+            return False
+
+    def _gn_auth_basic(self, user, password):
+        self._bearer_token = None
         self.session.auth = (user, password)
         try:
-            init_urls = [
-                self.service_url + "/srv/api/me",
-                self.service_url + "/srv/eng/info?type=me",
-            ]
-            for init_url in init_urls:
-                r = self.session.get(
-                    init_url,
-                    timeout=get_default_timeout(),
-                    proxies=settings.PROXIES,
-                )
-                if r.status_code in (200, 403):
-                    break
-
-            headers = self._apply_override_headers({})
+            self._init_csrf_cookie()
+            headers = self._apply_override_headers({'Accept': 'application/json'})
             auth_urls = [
                 self.service_url + "/srv/api/me",
                 self.service_url + "/srv/eng/info?type=me",
             ]
             for auth_url in auth_urls:
+                req_headers = headers if '/api/me' in auth_url else self._apply_override_headers({})
                 r = self.session.request(
                     'GET' if '/api/me' in auth_url else 'POST',
                     auth_url,
                     auth=(user, password),
-                    headers=headers,
+                    headers=req_headers,
                     timeout=get_default_timeout(),
                     proxies=settings.PROXIES,
                 )
-                if r.status_code == 200:
+                if self._is_authenticated_me_response(r, auth_url):
                     return True
             logger.error(
                 "GeoNetwork authentication failed: %s %s",
@@ -147,9 +221,16 @@ class Geonetwork():
             logger.exception('Error authenticating')
             print(str(e))
             return False
+
+    def gn_auth(self, user, password):
+        if self._auth_type() == 'bearer':
+            return self._gn_auth_bearer()
+        return self._gn_auth_basic(user, password)
         
     def gn_unauth(self):
         self.session.auth = None
+        self._bearer_token = None
+        self.session.headers.pop('Authorization', None)
         
     def get_csrf_token(self):
         cookie = self.session.cookies.get_dict()

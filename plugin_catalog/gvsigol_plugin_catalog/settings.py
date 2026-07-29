@@ -20,6 +20,15 @@ CATALOG_URL = CATALOG_BASE_URL + '/srv/eng/'
 CATALOG_QUERY_URL = '/gvsigonline/catalog/get_query/'
 CATALOG_USER = env('GEONETWORK_USER', default='admin')
 CATALOG_PASSWORD = env('GEONETWORK_PASS', default='admin')
+# Auth against GeoNetwork API: 'basic' (local DB user) or 'bearer' (OIDC access token)
+GEONETWORK_AUTH_TYPE = env('GEONETWORK_AUTH_TYPE', default='basic').lower()
+GEONETWORK_OIDC_TOKEN_URL = env('GEONETWORK_OIDC_TOKEN_URL', default='')
+GEONETWORK_OIDC_CLIENT_ID = env('GEONETWORK_OIDC_CLIENT_ID', default='geonetwork-client')
+GEONETWORK_OIDC_CLIENT_SECRET = env('GEONETWORK_OIDC_CLIENT_SECRET', default='')
+GEONETWORK_OIDC_SCOPE = env(
+    'GEONETWORK_OIDC_SCOPE',
+    default='openid email profile offline_access',
+)
 # valid values: 'legacy3.2', 'api0.1', 'gn4'
 CATALOG_API_VERSION = env('CATALOG_API_VERSION', default='gn4')
 CATALOG_FACETS_CONFIG = env('CATALOG_FACETS_CONFIG', default='{}')
