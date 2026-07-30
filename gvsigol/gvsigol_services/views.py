@@ -1116,6 +1116,13 @@ def layer_delete(request, layer_id):
             
             # Limpiar triggers topológicos de la capa
             _cleanup_layer_topology_triggers(layer)
+
+            # Delete linked GeoNetwork metadata before removing the Layer row
+            # (LayerMetadata has CASCADE on Layer).
+            try:
+                signals.layer_deleted.send(sender=None, layer=layer)
+            except Exception:
+                logger.exception("Error notifying layer_deleted while force-deleting layer %s", layer_id)
             
             Layer.objects.all().filter(pk=layer_id).delete()
             core_utils.toc_remove_layer(layer)
