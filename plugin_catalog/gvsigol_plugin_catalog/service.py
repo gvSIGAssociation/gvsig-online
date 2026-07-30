@@ -257,15 +257,43 @@ class Geonetwork():
             print(e)        
 
     def metadata_delete(self, lm):
+        """
+        Delete metadata from GeoNetwork. Returns True on success (including already-absent).
+        Does not delete the local LayerMetadata row; caller must do that on success.
+        """
         try:
-            if self.xmlapi.gn_auth(self.user, self.password):
+            if not self.xmlapi.gn_auth(self.user, self.password):
+                logger.error(
+                    "GeoNetwork auth failed while deleting metadata uuid=%s id=%s",
+                    getattr(lm, 'metadata_uuid', None),
+                    getattr(lm, 'metadata_id', None),
+                )
+                return False
+            try:
                 self.xmlapi.gn_delete_metadata(lm)
-                self.xmlapi.gn_unauth()
                 return True
-            return False
-        
-        except Exception as e:
-            print(e)
+            except Exception:
+                # Retry once with a fresh OIDC token / CSRF session (common on deployed OpenID setups).
+                logger.exception(
+                    "GeoNetwork metadata delete failed; retrying with refreshed auth (uuid=%s)",
+                    getattr(lm, 'metadata_uuid', None),
+                )
+                if not self.xmlapi.gn_auth(self.user, self.password, force_refresh=True):
+                    return False
+                self.xmlapi.gn_delete_metadata(lm)
+                return True
+            finally:
+                self.xmlapi.gn_unauth()
+        except Exception:
+            logger.exception(
+                "GeoNetwork metadata delete failed for uuid=%s id=%s",
+                getattr(lm, 'metadata_uuid', None),
+                getattr(lm, 'metadata_id', None),
+            )
+            try:
+                self.xmlapi.gn_unauth()
+            except Exception:
+                pass
             return False
         
     def layer_created_handler(self, sender, **kwargs):
@@ -309,19 +337,39 @@ class Geonetwork():
     def layer_deleted_handler(self, sender, **kwargs):
         try:
             layer = kwargs['layer']
-            lm = LayerMetadata.objects.get(layer=layer)
-            self.metadata_delete(lm)
-            lm.delete()
-        except LayerMetadata.DoesNotExist:
-            pass
-        except Exception as e:
+            layer_metas = list(LayerMetadata.objects.filter(layer=layer))
+            if not layer_metas:
+                return
+            for lm in layer_metas:
+                uuid = lm.metadata_uuid
+                deleted = self.metadata_delete(lm)
+                if deleted:
+                    lm.delete()
+                else:
+                    # Layer CASCADE will still remove LayerMetadata; log clearly for ops.
+                    logger.error(
+                        "Failed to delete GeoNetwork metadata uuid=%s for layer id=%s name=%s. "
+                        "The catalog record may remain as an orphan.",
+                        uuid,
+                        getattr(layer, 'id', None),
+                        getattr(layer, 'name', None),
+                    )
+        except Exception:
             logger.exception("layer metadata delete failed")
-            pass
 
 def connect_signals(geonetwork_service):
-    signals.layer_created.connect(geonetwork_service.layer_created_handler)
-    signals.layer_updated.connect(geonetwork_service.layer_updated_handler)
-    signals.layer_deleted.connect(geonetwork_service.layer_deleted_handler)
+    signals.layer_created.connect(
+        geonetwork_service.layer_created_handler,
+        dispatch_uid='gvsigol_catalog_layer_created',
+    )
+    signals.layer_updated.connect(
+        geonetwork_service.layer_updated_handler,
+        dispatch_uid='gvsigol_catalog_layer_updated',
+    )
+    signals.layer_deleted.connect(
+        geonetwork_service.layer_deleted_handler,
+        dispatch_uid='gvsigol_catalog_layer_deleted',
+    )
 
 
 def initialize():

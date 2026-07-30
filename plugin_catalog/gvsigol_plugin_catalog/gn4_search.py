@@ -281,19 +281,21 @@ def _resolve_url(url):
 def public_thumbnail_url(url, metadata_uuid=None):
     """
     Return a browser-accessible thumbnail URL.
-    GN /geonetwork/media/thumbnails/* requires authentication; gvSIGOL serves
-    the same files publicly under /media/thumbnails/*.
+
+    GeoNetwork /media/thumbnails/* and attachments require authentication
+    (especially with OpenID). Prefer the gvSIGOL proxy so <img> tags work
+    without a GeoNetwork session in the browser.
     """
     if not url:
         return url
+    if metadata_uuid:
+        return '/gvsigonline/catalog/get_thumbnail/' + str(metadata_uuid) + '/'
     absolute = _resolve_url(url)
     path = urlparse(absolute).path
     if '/media/thumbnails/' in path:
         basename = os.path.basename(path)
         if basename:
             return catalog_settings.BASE_URL.rstrip('/') + '/media/thumbnails/' + basename
-    if metadata_uuid:
-        return '/gvsigonline/catalog/get_thumbnail/' + metadata_uuid + '/'
     return absolute
 
 

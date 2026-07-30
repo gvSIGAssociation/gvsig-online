@@ -129,7 +129,14 @@ class Geonetwork():
             return False
         return b'authenticated="true"' in response.content or b"authenticated='true'" in response.content
 
-    def _init_csrf_cookie(self):
+    def _init_csrf_cookie(self, with_auth=False):
+        """
+        Obtain XSRF-TOKEN (+ session cookie) required by GeoNetwork for PUT/POST/DELETE.
+
+        with_auth=True keeps Authorization/session.auth so the CSRF token matches an
+        authenticated session. Required for bearer/OIDC: an anonymous CSRF bootstrap
+        often causes 403 on DELETE while PUT/insert may still appear to work.
+        """
         init_urls = [
             self.service_url + "/srv/api/me",
             self.service_url + "/srv/eng/info?type=me",
@@ -138,8 +145,8 @@ class Geonetwork():
             headers = self._apply_override_headers(
                 {'Accept': 'application/json'} if '/api/me' in init_url else {}
             )
-            # Avoid sending a stale bearer while bootstrapping CSRF.
-            headers.pop('Authorization', None)
+            if not with_auth:
+                headers.pop('Authorization', None)
             r = self.session.get(
                 init_url,
                 headers=headers,
@@ -149,16 +156,18 @@ class Geonetwork():
             if r.status_code in (200, 204, 403):
                 break
 
-    def _gn_auth_bearer(self):
+    def _gn_auth_bearer(self, force_refresh=False):
         self.session.auth = None
         try:
-            self._bearer_token = oidc_token.get_access_token()
+            self._bearer_token = oidc_token.get_access_token(force_refresh=force_refresh)
         except Exception:
             logger.exception('Error obtaining GeoNetwork OIDC access token')
             self._bearer_token = None
             return False
         try:
-            self._init_csrf_cookie()
+            # Drop previous anonymous session cookies so CSRF matches the bearer session.
+            self.session.cookies.clear()
+            self._init_csrf_cookie(with_auth=True)
             headers = self._apply_override_headers({'Accept': 'application/json'})
             r = self.session.get(
                 self.service_url + "/srv/api/me",
@@ -167,18 +176,12 @@ class Geonetwork():
                 proxies=settings.PROXIES,
             )
             if self._is_authenticated_me_response(r, "/srv/api/me"):
+                if not self.get_csrf_token():
+                    self._init_csrf_cookie(with_auth=True)
                 return True
             # Token may have expired between cache and use; retry once.
-            self._bearer_token = oidc_token.get_access_token(force_refresh=True)
-            headers = self._apply_override_headers({'Accept': 'application/json'})
-            r = self.session.get(
-                self.service_url + "/srv/api/me",
-                headers=headers,
-                timeout=get_default_timeout(),
-                proxies=settings.PROXIES,
-            )
-            if self._is_authenticated_me_response(r, "/srv/api/me"):
-                return True
+            if not force_refresh:
+                return self._gn_auth_bearer(force_refresh=True)
             logger.error(
                 "GeoNetwork bearer authentication failed: %s %s",
                 r.status_code,
@@ -193,7 +196,7 @@ class Geonetwork():
         self._bearer_token = None
         self.session.auth = (user, password)
         try:
-            self._init_csrf_cookie()
+            self._init_csrf_cookie(with_auth=True)
             headers = self._apply_override_headers({'Accept': 'application/json'})
             auth_urls = [
                 self.service_url + "/srv/api/me",
@@ -222,9 +225,9 @@ class Geonetwork():
             print(str(e))
             return False
 
-    def gn_auth(self, user, password):
+    def gn_auth(self, user, password, force_refresh=False):
         if self._auth_type() == 'bearer':
-            return self._gn_auth_bearer()
+            return self._gn_auth_bearer(force_refresh=force_refresh)
         return self._gn_auth_basic(user, password)
         
     def gn_unauth(self):
@@ -436,18 +439,29 @@ class Geonetwork():
         return self._set_metadata_privileges_gn4(uuid)
     
     def gn_delete_metadata(self, lm):
-        metadata_uuid = lm.metadata_uuid
-        if not metadata_uuid:
+        metadata_uuid = getattr(lm, 'metadata_uuid', None) or (lm if isinstance(lm, str) else None)
+        metadata_id = getattr(lm, 'metadata_id', None)
+        if not metadata_uuid and not metadata_id:
             raise FailedRequestError(400, b'Missing metadata UUID')
-        quoted = quote(str(metadata_uuid), safe='')
-        paths = [
-            "/srv/api/records/" + quoted + "?withBackup=false",
-        ]
-        if lm.metadata_id:
-            paths.append(
-                "/srv/api/0.1/records/" + str(lm.metadata_id) + "?withBackup=false"
-            )
+
+        # Refresh CSRF right before mutating calls (important with OIDC/bearer).
+        if not self.get_csrf_token():
+            self._init_csrf_cookie(with_auth=True)
+
+        quoted = quote(str(metadata_uuid), safe='') if metadata_uuid else None
+        paths = []
+        if quoted:
+            paths.extend([
+                "/srv/api/records/" + quoted + "?withBackup=false",
+                "/srv/api/records?uuids=" + quoted + "&withBackup=false",
+            ])
+        if metadata_id:
+            paths.extend([
+                "/srv/api/records/" + str(metadata_id) + "?withBackup=false",
+                "/srv/api/0.1/records/" + str(metadata_id) + "?withBackup=false",
+            ])
         headers = self._apply_override_headers({'Accept': 'application/json'})
+        success_statuses = (200, 204)
         last_error = None
         for path in paths:
             r = self.session.delete(
@@ -456,13 +470,36 @@ class Geonetwork():
                 timeout=get_default_timeout(),
                 proxies=settings.PROXIES,
             )
-            if r.status_code == 204:
+            if r.status_code in success_statuses:
                 return True
-            if r.status_code != 404:
+            # Already gone in GeoNetwork: treat as success so local link can be cleaned.
+            if r.status_code == 404:
+                continue
+            last_error = (r.status_code, r.content)
+            logger.warning(
+                "GeoNetwork metadata delete failed for %s via %s: %s %s",
+                metadata_uuid or metadata_id,
+                path,
+                r.status_code,
+                (r.text or '')[:500],
+            )
+            # Stale CSRF / session: refresh once and retry this path.
+            if r.status_code in (401, 403):
+                self._init_csrf_cookie(with_auth=True)
+                headers = self._apply_override_headers({'Accept': 'application/json'})
+                r = self.session.delete(
+                    self.service_url + path,
+                    headers=headers,
+                    timeout=get_default_timeout(),
+                    proxies=settings.PROXIES,
+                )
+                if r.status_code in success_statuses or r.status_code == 404:
+                    return True
                 last_error = (r.status_code, r.content)
         if last_error:
             raise FailedRequestError(last_error[0], last_error[1])
-        raise FailedRequestError(404, b'Metadata record not found')
+        # All candidates returned 404 → record already absent.
+        return True
     
    
     def _getXMLConstraints(self, tree, xpath_filter, ns):

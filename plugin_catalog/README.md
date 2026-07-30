@@ -189,7 +189,17 @@ Respuesta esperada: HTTP 200 con usuario y `profile` tipo `Administrator`.
 
 ---
 
-## Problemas frecuentes
+### Borrado de metadatos al eliminar capas
+
+Al borrar una capa desde **Servicios → Capas**, el plugin escucha la señal `layer_deleted` y elimina el registro asociado en GeoNetwork.
+
+En despliegues con **OpenID (`GEONETWORK_AUTH_TYPE=bearer`)** el borrado exige:
+
+1. Token OIDC válido del usuario de servicio (`GEONETWORK_USER` / `GEONETWORK_PASS`).
+2. Roles de cliente en **userinfo** (`Administrator` o al menos `Editor`).
+3. Cabecera CSRF (`X-XSRF-TOKEN`) alineada con la sesión autenticada.
+
+Si el DELETE en GeoNetwork falla (403 CSRF / privilegios insuficientes), el metadato puede quedar huérfano en el catálogo. Revisar los logs de gvSIG Online buscando `GeoNetwork metadata delete failed`.
 
 | Síntoma | Causa habitual |
 |---|---|
@@ -198,6 +208,7 @@ Respuesta esperada: HTTP 200 con usuario y `profile` tipo `Administrator`.
 | Token OK pero perfil Guest/RegisteredUser | Roles de cliente no van a **userinfo** |
 | `gn_auth` falla en modo bearer | Falta secret/user/pass, Direct Access Grants OFF, o URL de token incorrecta |
 | Basic Auth con OIDC-only | GeoNetwork no acepta login local; cambiar a `bearer` + `openidconnectbearer` |
+| Capa borrada pero metadato sigue en GeoNetwork | DELETE falló con OIDC (CSRF/privilegios); ver logs `metadata delete failed` |
 
 Las peticiones a `/srv/api/*` deben llevar `Accept: application/json`. Sin ese header, GeoNetwork puede responder *Service not found* vía el servlet Jeeves.
 
