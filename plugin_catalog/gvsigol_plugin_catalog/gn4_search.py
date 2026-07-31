@@ -14,13 +14,14 @@ from gvsigol_plugin_catalog import settings as catalog_settings
 logger = logging.getLogger("gvsigol")
 
 # GN3 facet name -> (ES field, human label)
+# GeoNetwork 4.x indexes ISO topic / org / keywords differently than GN3.
 FACET_DEFINITIONS = {
     'type': ('resourceType', 'Type'),
     'spatialRepresentationType': ('cl_spatialRepresentationType.key', 'Representation type'),
-    'cat': ('topicCat', 'Categories'),
-    '_cat': ('topicCat', 'Categories'),
-    'orgName': ('orgName', 'Organisation'),
-    'keyword': ('keyword', 'Keywords'),
+    'cat': ('cl_topic.key', 'Categories'),
+    '_cat': ('cl_topic.key', 'Categories'),
+    'orgName': ('OrgForResourceObject.default', 'Organisation'),
+    'keyword': ('tag.default', 'Keywords'),
     'gemetKeyword': ('th_gemetConcept.default', 'GEMET keywords'),
     'createDateYear': ('createDateYear', 'Year'),
     'denominator': ('denominator', 'Scale'),
@@ -29,18 +30,24 @@ FACET_DEFINITIONS = {
         'cl_maintenanceAndUpdateFrequency.key',
         'Update frequencies',
     ),
-    'sourceCatalog': ('sourceCatalog', 'Source catalog'),
+    'sourceCatalog': ('sourceCatalogue', 'Source catalog'),
     'format': ('format', 'Format'),
 }
 
-# GN3 search field -> GN4 ES / Lucene field
+# Free-text search fields still used for title/abstract/any.
+# Category / keyword / organisation advanced filters use term filters (see below).
 SEARCH_FIELD_MAP = {
     'any': 'anytext',
     'title': 'resourceTitleObject.default',
     'abstract': 'resourceAbstractObject.default',
+}
+
+# Advanced-search query params -> exact-match ES fields (GN4)
+ADVANCED_TERM_FIELDS = {
+    '_cat': 'cl_topic.key',
+    'cat': 'cl_topic.key',
     'keyword': 'tag.default',
-    '_cat': 'topicCat',
-    'orgName': 'orgName',
+    'orgName': 'OrgForResourceObject.default',
 }
 
 SORT_MAP = {
@@ -80,14 +87,14 @@ def _escape_lucene(value):
 
 
 def _build_text_clauses(params):
-    """Build Lucene clauses for free-text and field-specific search params."""
+    """Build Lucene clauses for free-text search params (any/title/abstract)."""
     clauses = []
     search_field = _first(params, 'searchField', catalog_settings.CATALOG_SEARCH_FIELD or 'any')
     if search_field not in params and 'any' in params:
         search_field = 'any'
 
     handled = set()
-    for key in (search_field, 'any', 'title', 'abstract', 'keyword', '_cat', 'orgName'):
+    for key in (search_field, 'any', 'title', 'abstract'):
         if key in handled or key not in params:
             continue
         handled.add(key)
@@ -111,6 +118,39 @@ def _build_text_clauses(params):
             seen.add(clause)
             unique.append(clause)
     return ' AND '.join(unique)
+
+
+def _build_advanced_term_filters(params):
+    """
+    Exact filters for advanced search (_cat / keyword / orgName).
+
+    These must be term filters on GN4 fields (cl_topic.key, tag.default,
+    OrgForResourceObject.default). Putting them in query_string against the old
+    GN3 names (topicCat / orgName) always returns zero hits.
+    """
+    filters = []
+    seen = set()
+    for param_key, es_field in ADVANCED_TERM_FIELDS.items():
+        for raw in _all(params, param_key):
+            value = (raw or '').strip()
+            if not value:
+                continue
+            # Support "a or b" from legacy OR helper
+            parts = [p.strip() for p in re.split(r'\s+or\s+', value, flags=re.IGNORECASE) if p.strip()]
+            if len(parts) > 1:
+                filters.append({
+                    'bool': {
+                        'should': [{'term': {es_field: {'value': part}}} for part in parts],
+                        'minimum_should_match': 1,
+                    }
+                })
+            else:
+                key = (es_field, parts[0])
+                if key in seen:
+                    continue
+                seen.add(key)
+                filters.append({'term': {es_field: {'value': parts[0]}}})
+    return filters
 
 
 def _decode_facet_value(value):
@@ -415,6 +455,9 @@ def build_es_request(query_string):
 
     for facet_name, facet_value in _parse_facet_filters(params):
         bool_query['filter'].append(_facet_filter_clause(facet_name, facet_value))
+
+    for term_filter in _build_advanced_term_filters(params):
+        bool_query['filter'].append(term_filter)
 
     creation_range = _date_range_filter(
         'createDate',
