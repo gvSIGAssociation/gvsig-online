@@ -29,7 +29,6 @@ import logging
 from gvsigol_plugin_catalog.mdstandards import registry
 import json
 import requests
-from gvsigol import settings as gvsigol_settings
 from  django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger("gvsigol")
@@ -131,20 +130,8 @@ class Geonetwork():
         return ('-180', '-90', '180', '90')
 
     def _thumbnail_url(self, layer):
-        if not layer.thumbnail:
-            return ''
-        try:
-            url = layer.thumbnail.url
-        except Exception:
-            return ''
-        if not url:
-            return ''
-        if url.startswith('http://') or url.startswith('https://'):
-            return url
-        base = gvsigol_settings.BASE_URL.rstrip('/')
-        if url.startswith('/'):
-            return base + url
-        return base + '/' + url
+        from gvsigol_plugin_catalog import gn4_search
+        return gn4_search.layer_thumbnail_absolute_url(layer)
 
     def create_metadata_for_external_layer(self, layer):
         params = {}
@@ -211,7 +198,10 @@ class Geonetwork():
             'extent_tuple': (minx, miny, maxx, maxy),
             'crs': crs,
             'spatial_representation_type': spatial_representation_type,
-            'thumbnail_url': layer.thumbnail.url,
+            # Must be absolute (same as external layers). Relative ImageField
+            # URLs break GeoNetwork mosaic/overview when the catalog is on
+            # another path/host than /media.
+            'thumbnail_url': self._thumbnail_url(layer),
             'wms_endpoint': wms_endpoint,
             'wfs_endpoint': wfs_endpoint,
             'wcs_endpoint': wcs_endpoint
@@ -221,6 +211,10 @@ class Geonetwork():
     
     def metadata_insert(self, layer):
         try:
+            # Reload so we use the latest thumbnail on disk (publish often
+            # creates metadata in the same request that generates the PNG).
+            if getattr(layer, 'pk', None):
+                layer = layer.__class__.objects.get(pk=layer.pk)
             if layer.external or not layer.datastore_id:
                 md_record = self.create_metadata_for_external_layer(layer)
             else:

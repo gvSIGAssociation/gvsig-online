@@ -1262,7 +1262,8 @@ class Geonetwork():
         md_content = self._fetch_metadata_xml(uuid)
         extent_tuple = self.get_extent(layer_info, ds_type)
         updater = registry.get_updater(md_content)
-        return updater.update_all(extent_tuple, layer.thumbnail.url).tostring()
+        thumbnail_url = gn4_search.layer_thumbnail_absolute_url(layer)
+        return updater.update_all(extent_tuple, thumbnail_url).tostring()
 
     def get_extent(self, layer_info, ds_type):
         if ds_type == 'imagemosaic':

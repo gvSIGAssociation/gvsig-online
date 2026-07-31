@@ -299,6 +299,35 @@ def public_thumbnail_url(url, metadata_uuid=None):
     return absolute
 
 
+def layer_thumbnail_absolute_url(layer):
+    """
+    Absolute public URL for a Layer.thumbnail suitable for ISO graphicOverview.
+
+    Returns '' when missing or still the placeholder no_thumbnail image, so we
+    do not publish a broken overview into GeoNetwork.
+    """
+    if not layer or not getattr(layer, 'thumbnail', None):
+        return ''
+    try:
+        name = getattr(layer.thumbnail, 'name', None) or ''
+        if not name or 'no_thumbnail' in name:
+            return ''
+        url = layer.thumbnail.url
+    except Exception:
+        return ''
+    if not url or 'no_thumbnail' in url:
+        return ''
+    if url.startswith('http://') or url.startswith('https://'):
+        return url
+    base = catalog_settings.BASE_URL.rstrip('/')
+    if url.startswith('/'):
+        return base + url
+    # Django ImageField relative to MEDIA_URL (e.g. thumbnails/xxx.png)
+    if '/media/' in url or url.startswith('thumbnails/'):
+        return base + '/media/' + url.lstrip('/')
+    return base + '/' + url
+
+
 def _legacy_link(link, title):
     name = _localised_text(link.get('nameObject'))
     description = _localised_text(link.get('descriptionObject')) or title

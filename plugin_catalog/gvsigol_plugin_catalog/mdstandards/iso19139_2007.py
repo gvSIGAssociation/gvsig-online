@@ -103,7 +103,8 @@ def create_datset_metadata(mdfields):
             dateTime = tree.find('/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/gco:Date', namespaces)
             dateTime.text = text(current_datetime.date().isoformat())
         
-        create_thumbnail(tree, thumbnail_url, title)
+        if thumbnail_url:
+            create_thumbnail(tree, thumbnail_url, title)
         minx, miny, maxx, maxy = extent_tuple
         create_extent(tree, minx, miny, maxx, maxy)
         
@@ -299,22 +300,32 @@ class Iso19139_2007Updater(XmlStandardUpdater):
         
     def update_thumbnail(self, thumbnail_url):
         graphicOverviews = self.tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview', namespaces)
-        valid_overviews = 0
         to_remove = []
+        updated = False
         for overview in graphicOverviews:
             file_name = overview.find('./gmd:MD_BrowseGraphic/gmd:fileName/gco:CharacterString', namespaces)
-            if file_name.text == '' or file_name.text == 'n/a':
+            file_text = (file_name.text or '').strip() if file_name is not None else ''
+            if file_text == '' or file_text == 'n/a' or 'no_thumbnail' in file_text:
                 to_remove.append(overview)
-            else:
-                valid_overviews += 1
-                ftype = overview.find('./gmd:MD_BrowseGraphic/gmd:fileType/gco:CharacterString', namespaces)
-                desc = overview.find('./gmd:MD_BrowseGraphic/gmd:fileDescription/gco:CharacterString', namespaces)
-                if (ftype is not None and ftype.text ==  'gvsigol thumbnail') \
-                        or (desc is not None and desc.text == 'gvsigol thumbnail'):
-                    file_name.text = thumbnail_url
+                continue
+            ftype = overview.find('./gmd:MD_BrowseGraphic/gmd:fileType/gco:CharacterString', namespaces)
+            desc = overview.find('./gmd:MD_BrowseGraphic/gmd:fileDescription/gco:CharacterString', namespaces)
+            is_gvsigol = (
+                (ftype is not None and ftype.text == 'gvsigol thumbnail')
+                or (desc is not None and desc.text == 'gvsigol thumbnail')
+            )
+            if is_gvsigol and thumbnail_url:
+                file_name.text = thumbnail_url
+                updated = True
+            elif is_gvsigol and not thumbnail_url:
+                # Drop stale gvsigol overview when layer has no real thumbnail
+                to_remove.append(overview)
         for el in to_remove:
             el.getparent().remove(el)
-        if valid_overviews == 0:
+        # Previous logic skipped create when another overview existed but was
+        # not marked as gvsigol thumbnail — rasters often kept a bad/empty
+        # overview and never got the real /media/thumbnails URL.
+        if thumbnail_url and not updated:
             create_thumbnail(self.tree, thumbnail_url)
         return self
 
