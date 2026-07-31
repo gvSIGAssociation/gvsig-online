@@ -31,11 +31,12 @@ from gvsigol_plugin_catalog.mdstandards import registry
 import logging
 logger = logging.getLogger("gvsigol")
 from .xmlutils import getTextFromXMLNode, getXMLNode, getXMLCodeText, sanitizeXmlText
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 from gvsigol_plugin_catalog.settings import GEONETWORK_USE_KEEPALIVE
 from gvsigol_plugin_catalog import settings as catalog_settings
 from gvsigol_plugin_catalog import gn4_search
 from gvsigol_plugin_catalog import oidc_token
+import os
 
 DEFAULT_TIMEOUT = 10 #seconds
 
@@ -648,38 +649,113 @@ class Geonetwork():
         raise FailedRequestError(r.status_code, r.content)
 
     def gn_fetch_thumbnail(self, metadata_uuid):
-        """Fetch thumbnail bytes for proxying to the browser."""
+        """
+        Fetch thumbnail bytes for proxying to the browser.
+
+        gvSIG Online stores layer previews under /media/thumbnails/*.png and writes
+        that absolute URL into graphicOverview. If the file was removed (layer
+        recreate, copy of metadata, volume cleanup), fall back to GN extents.png.
+        """
         content = self._fetch_metadata_xml(metadata_uuid)
         tree = ET.fromstring(content)
         ns = {'gmd': 'http://www.isotc211.org/2005/gmd', 'gco': 'http://www.isotc211.org/2005/gco'}
         for browseGraphic in tree.findall(
-            './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview/gmd:MD_BrowseGraphic',
+            './gmd:identificationInfo/*/gmd:graphicOverview/gmd:MD_BrowseGraphic',
             ns,
         ):
             url_node = browseGraphic.find('gmd:fileName/gco:CharacterString', ns)
             if url_node is None or not url_node.text:
                 continue
-            public_url = gn4_search.public_thumbnail_url(url_node.text, metadata_uuid)
-            if public_url.startswith('http://') or public_url.startswith('https://'):
-                r = requests.get(
-                    public_url,
-                    timeout=get_default_timeout(),
-                    proxies=settings.PROXIES,
-                    verify=False,
-                )
-                if r.status_code == 200:
-                    return r.content
-            gn_url = self._public_catalog_url(url_node.text)
-            headers = self._apply_override_headers({'Accept': 'image/*'})
-            r = self.session.get(
-                gn_url,
-                headers=headers,
+            image_bytes = self._fetch_thumbnail_url(url_node.text.strip())
+            if image_bytes:
+                return image_bytes
+
+        # No usable graphicOverview (or broken /media/thumbnails link) → extent preview
+        try:
+            return self.gn_fetch_extent_image(metadata_uuid, width=250)
+        except Exception:
+            logger.exception(
+                'No thumbnail and extents.png fallback failed for %s', metadata_uuid
+            )
+        raise FailedRequestError(404, b'Thumbnail not found')
+
+    def _fetch_thumbnail_url(self, url):
+        """Download a thumbnail URL (gvSIGOL media or GeoNetwork resource)."""
+        if not url:
+            return None
+
+        # Local MEDIA_ROOT for /media/thumbnails/<file> (avoids public HTTP round-trip)
+        local_bytes = self._read_local_media_thumbnail(url)
+        if local_bytes:
+            return local_bytes
+
+        absolute = url
+        if not (url.startswith('http://') or url.startswith('https://')):
+            absolute = self._public_catalog_url(url)
+
+        # Plain GET first — gvsigol /media/thumbnails is public; do not send GN Bearer
+        try:
+            r = requests.get(
+                absolute,
                 timeout=get_default_timeout(),
                 proxies=settings.PROXIES,
+                verify=False,
             )
-            if r.status_code == 200:
+            if r.status_code == 200 and r.content:
                 return r.content
-        raise FailedRequestError(404, b'Thumbnail not found')
+            logger.warning(
+                'Thumbnail URL returned %s: %s', r.status_code, absolute
+            )
+        except Exception:
+            logger.exception('Error fetching thumbnail URL %s', absolute)
+
+        # GeoNetwork-hosted media/attachments need the authenticated session
+        if '/geonetwork/' in absolute or '/srv/api/records/' in absolute:
+            try:
+                headers = self._apply_override_headers({'Accept': 'image/*'})
+                # Prefer internal service URL when the path is under this catalog
+                fetch_url = absolute
+                parsed_path = urlparse(absolute).path
+                service_base = (self.service_url or '').rstrip('/')
+                public_base = catalog_settings.CATALOG_BASE_URL.rstrip('/')
+                if service_base and public_base and absolute.startswith(public_base):
+                    fetch_url = service_base + absolute[len(public_base):]
+                elif parsed_path.startswith('/geonetwork/'):
+                    # path includes context; service_url usually already ends with /geonetwork
+                    suffix = parsed_path.split('/geonetwork', 1)[-1]
+                    fetch_url = service_base + suffix
+                r = self.session.get(
+                    fetch_url,
+                    headers=headers,
+                    timeout=get_default_timeout(),
+                    proxies=settings.PROXIES,
+                )
+                if r.status_code == 200 and r.content:
+                    return r.content
+            except Exception:
+                logger.exception('Authenticated thumbnail fetch failed for %s', absolute)
+        return None
+
+    def _read_local_media_thumbnail(self, url):
+        """If URL points to /media/thumbnails/<name>, try reading it from MEDIA_ROOT."""
+        try:
+            path = urlparse(url).path if '://' in url else url
+            marker = '/media/thumbnails/'
+            if marker not in path:
+                return None
+            basename = os.path.basename(path)
+            if not basename or basename in ('.', '..'):
+                return None
+            media_root = getattr(settings, 'MEDIA_ROOT', None)
+            if not media_root:
+                return None
+            file_path = os.path.join(media_root, 'thumbnails', basename)
+            if os.path.isfile(file_path):
+                with open(file_path, 'rb') as handle:
+                    return handle.read()
+        except Exception:
+            logger.exception('Error reading local media thumbnail for %s', url)
+        return None
 
     def gn_get_metadata_raw(self, metadata_id):
         content = self._fetch_metadata_xml(metadata_id)
