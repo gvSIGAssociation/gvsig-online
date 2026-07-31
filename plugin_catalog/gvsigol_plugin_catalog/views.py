@@ -564,12 +564,23 @@ def get_extent_image(request, metadata_uuid):
 
 
 def get_thumbnail(request, metadata_uuid):
-    """Proxy metadata thumbnail for browser display."""
+    """
+    Serve the layer overview thumbnail for catalog cards.
+
+    Prefers the current gvSIG Online layer thumbnail on disk (via LayerMetadata
+    or workspace:layer in the metadata). Does not use GeoNetwork extents.png.
+    """
     geonetwork_instance = geonetwork_service.get_instance()
     if geonetwork_instance is None or request.method != 'GET':
         return HttpResponse(status=503)
     try:
         xmlapi = geonetwork_instance.xmlapi
+        # Fast path: linked layer thumbnail (no GeoNetwork call)
+        content = xmlapi._layer_thumbnail_bytes_by_uuid(metadata_uuid)
+        if content:
+            response = HttpResponse(content, content_type='image/png')
+            response['Cache-Control'] = 'public, max-age=3600'
+            return response
         if xmlapi.gn_auth(geonetwork_instance.user, geonetwork_instance.password):
             try:
                 content = xmlapi.gn_fetch_thumbnail(metadata_uuid)

@@ -650,15 +650,28 @@ class Geonetwork():
 
     def gn_fetch_thumbnail(self, metadata_uuid):
         """
-        Fetch thumbnail bytes for proxying to the browser.
+        Fetch the layer overview thumbnail for catalog cards.
 
-        gvSIG Online stores layer previews under /media/thumbnails/*.png and writes
-        that absolute URL into graphicOverview. If the file was removed (layer
-        recreate, copy of metadata, volume cleanup), fall back to GN extents.png.
+        Prefer the *current* gvSIG Online layer thumbnail (disk), because the URL
+        stored in graphicOverview often goes stale (layer recreate, metadata copy,
+        media cleanup). Never fall back to GeoNetwork extents.png — that is not
+        the layer overview users expect.
         """
+        # 1) Linked LayerMetadata → current layer.thumbnail
+        image_bytes = self._layer_thumbnail_bytes_by_uuid(metadata_uuid)
+        if image_bytes:
+            return image_bytes
+
         content = self._fetch_metadata_xml(metadata_uuid)
         tree = ET.fromstring(content)
         ns = {'gmd': 'http://www.isotc211.org/2005/gmd', 'gco': 'http://www.isotc211.org/2005/gco'}
+
+        # 2) Resolve workspace:layer from citation identifier → current thumbnail
+        image_bytes = self._layer_thumbnail_bytes_from_metadata_xml(tree, ns)
+        if image_bytes:
+            return image_bytes
+
+        # 3) graphicOverview fileName (may be a stale /media/thumbnails URL)
         for browseGraphic in tree.findall(
             './gmd:identificationInfo/*/gmd:graphicOverview/gmd:MD_BrowseGraphic',
             ns,
@@ -670,21 +683,85 @@ class Geonetwork():
             if image_bytes:
                 return image_bytes
 
-        # No usable graphicOverview (or broken /media/thumbnails link) → extent preview
+        raise FailedRequestError(404, b'Thumbnail not found')
+
+    def _layer_thumbnail_bytes_by_uuid(self, metadata_uuid):
         try:
-            return self.gn_fetch_extent_image(metadata_uuid, width=250)
+            from gvsigol_plugin_catalog.models import LayerMetadata
+            lm = (
+                LayerMetadata.objects
+                .filter(metadata_uuid=metadata_uuid)
+                .select_related('layer')
+                .first()
+            )
+            if lm and lm.layer_id:
+                return self._read_layer_thumbnail_field(lm.layer)
         except Exception:
             logger.exception(
-                'No thumbnail and extents.png fallback failed for %s', metadata_uuid
+                'Error resolving layer thumbnail for metadata uuid %s', metadata_uuid
             )
-        raise FailedRequestError(404, b'Thumbnail not found')
+        return None
+
+    def _layer_thumbnail_bytes_from_metadata_xml(self, tree, ns):
+        try:
+            code = getTextFromXMLNode(
+                tree,
+                './gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/'
+                'gmd:identifier/*/gmd:code/gco:CharacterString/',
+                ns,
+            )
+            if not code or ':' not in code:
+                return None
+            workspace_name, layer_name = code.split(':', 1)
+            from gvsigol_services.models import Layer
+            layer = (
+                Layer.objects
+                .filter(
+                    name=layer_name,
+                    datastore__workspace__name=workspace_name,
+                )
+                .select_related('datastore__workspace')
+                .first()
+            )
+            if layer:
+                return self._read_layer_thumbnail_field(layer)
+        except Exception:
+            logger.exception('Error resolving layer thumbnail from metadata XML')
+        return None
+
+    def _read_layer_thumbnail_field(self, layer):
+        """Read bytes from Layer.thumbnail ImageField on disk."""
+        try:
+            if not layer or not layer.thumbnail:
+                return None
+            name = getattr(layer.thumbnail, 'name', None) or ''
+            if not name or 'no_thumbnail' in name:
+                return None
+            path = getattr(layer.thumbnail, 'path', None)
+            if path and os.path.isfile(path):
+                with open(path, 'rb') as handle:
+                    data = handle.read()
+                if data:
+                    return data
+            # Fallback: MEDIA_ROOT / thumbnail relative name
+            media_root = getattr(settings, 'MEDIA_ROOT', None)
+            if media_root and name:
+                file_path = os.path.join(media_root, name)
+                if os.path.isfile(file_path):
+                    with open(file_path, 'rb') as handle:
+                        return handle.read()
+        except Exception:
+            logger.exception(
+                'Error reading layer thumbnail for layer id=%s',
+                getattr(layer, 'id', None),
+            )
+        return None
 
     def _fetch_thumbnail_url(self, url):
         """Download a thumbnail URL (gvSIGOL media or GeoNetwork resource)."""
         if not url:
             return None
 
-        # Local MEDIA_ROOT for /media/thumbnails/<file> (avoids public HTTP round-trip)
         local_bytes = self._read_local_media_thumbnail(url)
         if local_bytes:
             return local_bytes
@@ -693,7 +770,7 @@ class Geonetwork():
         if not (url.startswith('http://') or url.startswith('https://')):
             absolute = self._public_catalog_url(url)
 
-        # Plain GET first — gvsigol /media/thumbnails is public; do not send GN Bearer
+        # Plain GET — gvsigol /media/thumbnails is public; do not send GN Bearer
         try:
             r = requests.get(
                 absolute,
@@ -713,7 +790,6 @@ class Geonetwork():
         if '/geonetwork/' in absolute or '/srv/api/records/' in absolute:
             try:
                 headers = self._apply_override_headers({'Accept': 'image/*'})
-                # Prefer internal service URL when the path is under this catalog
                 fetch_url = absolute
                 parsed_path = urlparse(absolute).path
                 service_base = (self.service_url or '').rstrip('/')
@@ -721,7 +797,6 @@ class Geonetwork():
                 if service_base and public_base and absolute.startswith(public_base):
                     fetch_url = service_base + absolute[len(public_base):]
                 elif parsed_path.startswith('/geonetwork/'):
-                    # path includes context; service_url usually already ends with /geonetwork
                     suffix = parsed_path.split('/geonetwork', 1)[-1]
                     fetch_url = service_base + suffix
                 r = self.session.get(
