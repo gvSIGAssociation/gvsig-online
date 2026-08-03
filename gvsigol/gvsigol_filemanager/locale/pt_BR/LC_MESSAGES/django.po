@@ -188,7 +188,7 @@ msgstr ""
 
 #: gvsigol_filemanager/templates/filemanager_exports_historical.html:28
 msgid "User"
-msgstr ""
+msgstr "Usuário"
 
 #: gvsigol_filemanager/templates/filemanager_exports_historical.html:58
 msgid "Try again"

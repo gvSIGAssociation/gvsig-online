@@ -633,7 +633,7 @@ msgstr "Mostrando %(numrecords)s registros"
 #: gvsigol_symbology/templates/style_layer_list.html:65
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
-msgstr "Mostrando desde %(start)s até %(end)s de %(numrecords)s registros"
+msgstr "Mostrando de %(start)s a %(end)s de %(numrecords)s registros"
 
 #: gvsigol_symbology/templates/color_ramp_library_list.html:107
 #: gvsigol_symbology/templates/color_ramp_library_update.html:131
@@ -687,7 +687,7 @@ msgstr "Anterior"
 #: gvsigol_symbology/templates/library_list.html:93
 #: gvsigol_symbology/templates/style_layer_list.html:75
 msgid "Next"
-msgstr "Seguinte"
+msgstr "Próximo"
 
 #: gvsigol_symbology/templates/color_ramp_library_list.html:117
 #: gvsigol_symbology/templates/color_ramp_library_update.html:141
@@ -971,7 +971,7 @@ msgstr "Excluir"
 #: gvsigol_symbology/templates/external_graphic_update.html:13
 #: gvsigol_symbology/templates/library_update.html:12
 msgid "Update"
-msgstr "Atualização"
+msgstr "Atualizar"
 
 #: gvsigol_symbology/templates/intervals_add.html:64
 #: gvsigol_symbology/templates/intervals_update.html:68
@@ -1253,3 +1253,6 @@ msgstr "Introduza o valor do atributo"
 #: gvsigol_symbology/templates/unique_values_update.html
 msgid "Add"
 msgstr "Adicionar"
+
+msgid "role_default-roles"
+msgstr "Roles padrão"

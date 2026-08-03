@@ -56,7 +56,7 @@ msgstr "Senha"
 
 #: gvsigol_auth/forms.py:35 gvsigol_auth/templates/user_add.html:81
 msgid "Repeat password"
-msgstr "Repita a senha"
+msgstr "Repetir senha"
 
 #: gvsigol_auth/services.py:79
 msgid "Group for admin users"
@@ -162,13 +162,13 @@ msgstr "Mostrando %(numrecords)s registros"
 #: gvsigol_auth/templates/user_list.html:92
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
-msgstr "Mostrando desde %(start)s até %(end)s de %(numrecords)s registros"
+msgstr "Mostrando de %(start)s a %(end)s de %(numrecords)s registros"
 
 #: gvsigol_auth/templates/group_list.html:80
 #: gvsigol_auth/templates/role_list.html:80
 #: gvsigol_auth/templates/user_list.html:93
 msgid "Showing from 0 to 0 of 0 records"
-msgstr "Mostrando desde 0 até 0 registros"
+msgstr "Mostrando de 0 a 0 de 0 registros"
 
 #: gvsigol_auth/templates/group_list.html:81
 #: gvsigol_auth/templates/role_list.html:81
@@ -208,7 +208,7 @@ msgstr "Anterior"
 #: gvsigol_auth/templates/role_list.html:89
 #: gvsigol_auth/templates/user_list.html:102
 msgid "Next"
-msgstr "Seguinte"
+msgstr "Próximo"
 
 #: gvsigol_auth/templates/group_list.html:90
 #: gvsigol_auth/templates/role_list.html:90
@@ -387,7 +387,7 @@ msgstr "O usuário será removido. Você quer continuar?"
 
 #: gvsigol_auth/templates/user_list.html:117
 msgid "Update user"
-msgstr "Atualizar usuário"
+msgstr "Editar usuário"
 
 #: gvsigol_auth/utils.py:89
 msgid "New user account"
@@ -508,3 +508,12 @@ msgstr "Os roles do sistema podem ser excluídas"
 
 #~ msgid "There must be at least one server"
 #~ msgstr "Deve haver pelo menos um servidor"
+
+msgid "Filter roles by name or description"
+msgstr "Filtrar roles por nome ou descrição"
+
+msgid "No file selected"
+msgstr "Nenhum arquivo selecionado"
+
+msgid "role_default-roles"
+msgstr "Roles padrão"

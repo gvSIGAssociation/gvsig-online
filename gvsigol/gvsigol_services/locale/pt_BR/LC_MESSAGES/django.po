@@ -23,7 +23,7 @@ msgstr ""
 
 #: backend_geoserver.py:96 backend_geoserver.py:147 forms_services.py:65
 msgid "PostGIS vector"
-msgstr "Vetor PostGIS"
+msgstr "PostGIS vetorial"
 
 #: backend_geoserver.py:97 forms_services.py:66
 msgid "GeoTiff"
@@ -642,7 +642,7 @@ msgstr "WMTS URL"
 
 #: forms_services.py:101
 msgid "Cache URL"
-msgstr "Cache URL"
+msgstr "URL de cache"
 
 #: forms_services.py:102 templates/workspace_list.html:26
 #: templates/workspace_update.html:37
@@ -871,7 +871,7 @@ msgstr "Mostrando %(numrecords)s registros"
 #: templates/workspace_list.html:92
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
-msgstr "Mostrando desde %(start)s até %(end)s de %(numrecords)s registros"
+msgstr "Mostrando de %(start)s a %(end)s de %(numrecords)s registros"
 
 #: templates/base_layer_list.html:84 templates/cache_list.html:128
 #: templates/cache_list.html:165 templates/datastore_list.html:96
@@ -956,7 +956,7 @@ msgstr "Anterior"
 #: templates/service_url_list.html:94 templates/sqlview_list.html:93
 #: templates/workspace_list.html:102
 msgid "Next"
-msgstr "Seguinte"
+msgstr "Próximo"
 
 #: templates/base_layer_list.html:94 templates/cache_list.html:138
 #: templates/cache_list.html:175 templates/datastore_list.html:106
@@ -1041,6 +1041,10 @@ msgstr "Espaços de trabalho"
 msgid "Datastores"
 msgstr "Armazéns de dados"
 
+#: templates/connection_list.html:95
+msgid "Connections list"
+msgstr "Lista de conexões"
+
 #: templates/dashboard_services_menu.html:11
 msgid "Layer groups"
 msgstr "Grupos de camadas"
@@ -1059,7 +1063,7 @@ msgstr "URLs de serviços"
 
 #: templates/dashboard_services_menu.html:16
 msgid "SQL Views"
-msgstr "Vistas SQL"
+msgstr "Views SQL"
 
 #: templates/dashboard_services_menu.html:21
 msgid "Datatypes"
@@ -1125,7 +1129,7 @@ msgstr "Atualizar armazém"
 #: templates/datastore_update.html:12 templates/server_update.html:12
 #: templates/service_url_update.html:12 templates/workspace_update.html:12
 msgid "Update"
-msgstr "Atualização"
+msgstr "Atualizar"
 
 #: templates/enumeration_add.html:53 templates/enumeration_update.html:53
 msgid "Enumeration items"
@@ -1183,7 +1187,7 @@ msgstr "Propriedades da camada"
 #: templates/layer_add.html:40 templates/layer_create.html:49
 #: templates/layer_update.html:40
 msgid "Metadata"
-msgstr "Metadado"
+msgstr "Metadados"
 
 #: templates/external_layer_add.html:35 templates/external_layer_update.html:49
 #: templates/layer_add.html:41 templates/layer_create.html:50
@@ -1315,7 +1319,7 @@ msgstr "Atualizar camada externa"
 
 #: templates/external_layer_update.html:189 templates/layer_update.html:275
 msgid "Layer metadata"
-msgstr "Metadado da camada"
+msgstr "Metadados da camada"
 
 #: templates/external_layer_update.html:194 templates/layer_update.html:280
 msgid "Metadata UUID"
@@ -1643,7 +1647,7 @@ msgstr "Estado da tarefa"
 #: templates/layer_update.html:39 templates/layergroup_add.html:41
 #: templates/layergroup_update.html:41
 msgid "Permissions"
-msgstr "Ler permissões"
+msgstr "Permissões"
 
 #: templates/layer_add.html:53 templates/layer_create.html:61
 #: templates/layer_update.html:59 templates/sqlview_add.html:50
@@ -2005,7 +2009,7 @@ msgstr "Campo temporal (intervalo final)"
 #: templates/layer_list.html:11 templates/layergroup_add.html:92
 #: templates/layergroup_update.html:119
 msgid "Create empty layer"
-msgstr "Criar camada vazia"
+msgstr "Criar camada em branco"
 
 #: templates/layer_list.html:25
 msgid "Preview"
@@ -2152,10 +2156,8 @@ msgid "Unlock layer"
 msgstr "Camada de desbloqueio"
 
 #: templates/select_layer_permissions.html:7
-#, fuzzy
-#| msgid "Read permissions"
 msgid "Select layer permissions"
-msgstr "Ler permissões"
+msgstr "Selecionar permissões da camada"
 
 #: templates/select_layer_permissions.html:8
 #: templates/select_layergroup_permissions.html:8
@@ -2170,7 +2172,7 @@ msgstr "A camada será lida por todos se for pública"
 
 #: templates/select_layer_permissions.html:14
 msgid "Is public"
-msgstr "É pública"
+msgstr "É público"
 
 #: templates/select_layer_permissions.html:25
 msgid ""
@@ -2185,23 +2187,17 @@ msgid "Generic user role image"
 msgstr "Pesquisar grupo de usuários..."
 
 #: templates/select_layer_permissions.html:35
-#, fuzzy
-#| msgid "Read permissions"
 msgid "Read permission"
-msgstr "Ler permissões"
+msgstr "Permissão de leitura"
 
 #: templates/select_layer_permissions.html:43
-#, fuzzy
-#| msgid "Write permissions"
 msgid "Write permission"
-msgstr "Escrever permissões"
+msgstr "Permissão de escrita"
 
 #: templates/select_layer_permissions.html:47
 #: templates/select_layergroup_permissions.html:27
-#, fuzzy
-#| msgid "Permissions"
 msgid "Permission to manage"
-msgstr "Ler permissões"
+msgstr "Permissão de gerenciamento"
 
 #: templates/select_layergroup_permissions.html:7
 #, fuzzy
@@ -2315,11 +2311,11 @@ msgstr "Alias"
 
 #: templates/sqlview_add.html:125
 msgid "Select all"
-msgstr "Selecione todos"
+msgstr "Selecionar todos"
 
 #: templates/sqlview_add.html:129
 msgid "None"
-msgstr "Nenhuma"
+msgstr "Nenhum"
 
 #: templates/sqlview_add.html:181
 msgid "Target datastore is empty"
@@ -2686,3 +2682,203 @@ msgstr "Somente superusuários podem modificar regras topológicas"
 
 #~ msgid "Error uploading the layer. Review the file format."
 #~ msgstr "Erro ao carregar a camada. Revisar o formato do arquivo"
+
+msgid "Filter roles by name or description"
+msgstr "Filtrar roles por nome ou descrição"
+
+msgid "No file selected"
+msgstr "Nenhum arquivo selecionado"
+
+msgid "role_default-roles"
+msgstr "Roles padrão"
+
+msgid "Choose file..."
+msgstr "Selecionar arquivo..."
+
+msgid "Category"
+msgstr "Categoria"
+
+msgid "Database"
+msgstr "Banco de dados"
+
+msgid "Port"
+msgstr "Porta"
+
+msgid "User name"
+msgstr "Nome de usuário"
+
+msgid "Additional parameters"
+msgstr "Parâmetros adicionais"
+
+msgid "Additional parameters (JSON)"
+msgstr "Parâmetros adicionais (JSON)"
+
+msgid "Optional additional parameters in JSON format"
+msgstr "Parâmetros opcionais em formato JSON"
+
+msgid "Select an existing connection to the database"
+msgstr "Selecione uma conexão existente com o banco de dados"
+
+msgid "Select an existing schema or type a new name to create it"
+msgstr "Selecione um esquema existente ou digite um novo nome para criá-lo"
+
+msgid "External layers list"
+msgstr "Lista de camadas externas"
+
+msgid "Enter the URL of your Mapbox style (.json) file."
+msgstr "Insira a URL do seu arquivo de estilo Mapbox (.json)."
+
+msgid "Mapbox style URL"
+msgstr "URL do estilo Mapbox"
+
+msgid "Or upload your Mapbox style (.json)"
+msgstr "Ou carregue o seu estilo Mapbox (.json)"
+
+msgid "Service URLs list"
+msgstr "Lista de URLs de serviços"
+
+msgid "SQL Views list"
+msgstr "Lista de views SQL"
+
+msgid "Attributions"
+msgstr "Atribuições"
+
+msgid "New configuration"
+msgstr "Nova configuração"
+
+msgid "Create generic configuration"
+msgstr "Criar configuração genérica"
+
+msgid "No attributions configurations yet"
+msgstr "Ainda não há configurações de atribuições"
+
+msgid "General information"
+msgstr "Informações gerais"
+
+msgid "Associated projects"
+msgstr "Projetos associados"
+
+msgid "Active for all projects"
+msgstr "Ativar para todos os projetos"
+
+msgid "Or select projects manually"
+msgstr "Selecionar projetos manualmente"
+
+msgid "Notice text"
+msgstr "Texto do aviso"
+
+msgid "Free text shown to viewer users. HTML tags are not allowed."
+msgstr "Texto livre que será mostrado aos usuários do visualizador. Não são permitidas tags HTML."
+
+msgid "Others"
+msgstr "Outros"
+
+msgid "Help"
+msgstr "Ajuda"
+
+msgid "Help text"
+msgstr "Texto de ajuda"
+
+msgid "Help text shown to viewer users. HTML tags are not allowed."
+msgstr "Texto de ajuda que será mostrado aos usuários do visualizador. Não são permitidas tags HTML."
+
+msgid "Contact information"
+msgstr "Informações de contato"
+
+msgid "Organization"
+msgstr "Organização"
+
+msgid "Contact person"
+msgstr "Pessoa de contato"
+
+msgid "Address"
+msgstr "Endereço"
+
+msgid "Phone"
+msgstr "Telefone"
+
+msgid "Useful links"
+msgstr "Links de interesse"
+
+msgid "Add link"
+msgstr "Adicionar link"
+
+msgid "Attachments"
+msgstr "Arquivos anexos"
+
+msgid "Add attachment"
+msgstr "Adicionar anexo"
+
+msgid "Internal path"
+msgstr "Caminho interno"
+
+msgid "Logo internal path"
+msgstr "Caminho interno do logotipo"
+
+msgid "Modal content order"
+msgstr "Ordem do conteúdo do modal"
+
+msgid "Drag to reorder"
+msgstr "Arrastar para reordenar"
+
+msgid "There are no projects to assign yet."
+msgstr "Ainda não há projetos disponíveis para atribuir."
+
+msgid "Attributions configuration created successfully."
+msgstr "Configuração de atribuições criada com sucesso."
+
+msgid "Attributions configuration updated successfully."
+msgstr "Configuração de atribuições atualizada com sucesso."
+
+msgid "Delete attributions configuration"
+msgstr "Excluir configuração de atribuições"
+
+msgid "Copyright notice"
+msgstr "Aviso de copyright"
+
+msgid "Custom title"
+msgstr "Título personalizado"
+
+msgid "Custom text"
+msgstr "Texto personalizado"
+
+msgid "Legal notice"
+msgstr "Aviso legal"
+
+msgid "Email"
+msgstr "E-mail"
+
+msgid ""
+"There is no generic attributions configuration yet. We recommend creating a "
+"generic configuration first; you can later create project specific "
+"configurations or copy from the generic one."
+msgstr "Ainda não há nenhuma configuração genérica de atribuições. Recomendamos criar primeiro uma genérica para que possa ser reutilizada como base nas configurações específicas de projeto."
+
+msgid ""
+"When this generic configuration is enabled for all projects it is used as "
+"the default attributions whenever no project specific configuration exists."
+msgstr "Quando esta configuração genérica estiver ativa para todos os projetos, será usada como atribuições padrão sempre que não houver uma configuração específica."
+
+msgid ""
+"Files are not uploaded here. Use the file manager selector to choose an "
+"existing file. The public download URL will be stored automatically so "
+"attachments can be downloaded even when the project is private."
+msgstr "Os arquivos não são enviados por aqui. Use o seletor do gerenciador de arquivos para escolher um arquivo já existente. A URL pública de download será salva automaticamente."
+
+msgid ""
+"Drag each row by the grip icon to set the order of blocks in the viewer "
+"modal. Empty sections are not shown."
+msgstr "Arraste cada linha pelo ícone de alça para definir a ordem dos blocos no modal do visualizador. Seções vazias não são exibidas."
+
+msgid ""
+"Optional custom block shown in the modal between copyright and help. HTML "
+"tags are not allowed."
+msgstr "Bloco personalizado opcional que é exibido no modal entre o copyright e a ajuda. Não são permitidas tags HTML."
+
+msgid ""
+"Use this field to briefly contextualize the attributions. A common use case "
+"is to present licensing notes."
+msgstr "Uso recomendado: documentar informações de copyright ou de licenciamento."
+
+msgid "Optional. Select a logo from file manager. It will be shown inside the modal."
+msgstr "Opcional. Selecione um logotipo no gerenciador de arquivos. Será mostrado dentro do modal."

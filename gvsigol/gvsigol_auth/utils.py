@@ -34,6 +34,29 @@ import re
 
 LOGGER_NAME = 'gvsigol'
 
+_KEYCLOAK_ROLE_DESC_RE = re.compile(r'^\$\{([^}]+)\}$')
+
+
+def localize_role_description(description):
+    """Translate Keycloak i18n placeholders such as ${role_default-roles}."""
+    if not description:
+        return description
+    match = _KEYCLOAK_ROLE_DESC_RE.match(str(description).strip())
+    if not match:
+        return description
+    return _(match.group(1))
+
+
+def localize_roles_details(roles):
+    """Return a copy of role dicts with localized descriptions."""
+    localized = []
+    for role in roles or []:
+        item = dict(role)
+        if 'description' in item:
+            item['description'] = localize_role_description(item.get('description'))
+        localized.append(item)
+    return localized
+
 def superuser_required(function):
     def wrap(request, *args, **kwargs):
         if request.user.is_superuser:

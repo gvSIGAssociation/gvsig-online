@@ -64,7 +64,7 @@ msgstr "Organização"
 #: gvsigol_core/static/js/lib/_trans.gvsigol.js:11
 #: gvsigol_core/static/js/lib/_trans.gvsigol.js:42
 msgid "Contact person"
-msgstr "Pessoa de contacto"
+msgstr "Pessoa de contato"
 
 #: gvsigol_core/static/js/lib/_trans.gvsigol.js:12
 #: gvsigol_core/static/js/lib/_trans.gvsigol.js:43
@@ -262,7 +262,7 @@ msgstr ""
 #: gvsigol_core/static/js/lib/tools/attributeTable.js:340
 #: gvsigol_core/static/js/lib/tools/selectFeatureByBuffer.js:178
 msgid "Search"
-msgstr "Procurar"
+msgstr "Pesquisar"
 
 #: gvsigol_core/static/js/lib/tools/SelectFeatureControl.js:42
 msgid "Select feature"
@@ -350,7 +350,7 @@ msgstr "Anterior"
 #: gvsigol_core/static/js/lib/tools/SelectionTable.js:279
 #: gvsigol_core/static/js/lib/tools/attributeTable.js:352
 msgid "Next"
-msgstr "Seguinte"
+msgstr "Próximo"
 
 #: gvsigol_core/static/js/lib/tools/SelectionTable.js:280
 #: gvsigol_core/static/js/lib/tools/attributeTable.js:353
@@ -360,12 +360,12 @@ msgstr "Último"
 #: gvsigol_core/static/js/lib/tools/SelectionTable.js:283
 #: gvsigol_core/static/js/lib/tools/attributeTable.js:356
 msgid "Sort ascending"
-msgstr "Ordenar por ordem crescente"
+msgstr "Ordenar em ordem crescente"
 
 #: gvsigol_core/static/js/lib/tools/SelectionTable.js:284
 #: gvsigol_core/static/js/lib/tools/attributeTable.js:357
 msgid "Sort descending"
-msgstr "Ordenação decrescente"
+msgstr "Ordenar em ordem decrescente"
 
 #: gvsigol_core/static/js/lib/tools/SelectionTable.js:501
 #: gvsigol_core/static/js/lib/tools/SelectionTable.js:563
@@ -674,7 +674,7 @@ msgstr "Sistema de Referência de Coordenadas"
 
 #: gvsigol_core/static/js/lib/tools/searchByCoordinate.js:117
 msgid "Find"
-msgstr "Procurar"
+msgstr "Buscar"
 
 #: gvsigol_core/static/js/lib/tools/selectFeature.js:43
 #, fuzzy
@@ -882,7 +882,7 @@ msgstr "Baixar"
 
 #: gvsigol_core/static/js/lib/widgets/layerTree.js:1960
 msgid "Metadata"
-msgstr "Metadado"
+msgstr "Metadados"
 
 #: gvsigol_core/static/js/lib/widgets/layerTree.js:1971
 msgid "Zoom to layer"

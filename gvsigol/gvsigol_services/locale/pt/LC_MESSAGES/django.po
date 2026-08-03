@@ -22,7 +22,7 @@ msgstr ""
 
 #: backend_geoserver.py:96 backend_geoserver.py:147 forms_services.py:76
 msgid "PostGIS vector"
-msgstr "Vetor PostGIS"
+msgstr "PostGIS vetorial"
 
 #: backend_geoserver.py:97 forms_services.py:77
 msgid "GeoTiff"
@@ -652,7 +652,7 @@ msgstr "WMTS URL"
 
 #: forms_services.py:112
 msgid "Cache URL"
-msgstr "Cache URL"
+msgstr "URL de cache"
 
 #: forms_services.py:113 templates/workspace_list.html:42
 #: templates/workspace_update.html:37
@@ -758,7 +758,7 @@ msgstr "Apikey"
 #: forms_services.py:374 templates/external_layer_add.html:131
 #: templates/external_layer_update.html:151
 msgid "Mapbox style URL"
-msgstr "URL de estilo Mapbox"
+msgstr "URL do estilo Mapbox"
 
 #: forms_services.py:375 templates/external_layer_add.html:138
 #: templates/external_layer_update.html:158
@@ -816,7 +816,7 @@ msgstr "Porta"
 #: forms_services.py:534 forms_services.py:623 forms_services.py:782
 #: forms_services.py:796 forms_services.py:957 forms_services.py:1053
 msgid "Database"
-msgstr "Base de dados"
+msgstr "Banco de dados"
 
 #: forms_services.py:546 forms_services.py:570 forms_services.py:618
 #: forms_services.py:689 forms_services.py:744 forms_services.py:809
@@ -945,7 +945,7 @@ msgstr "JSON com parâmetros de conexão"
 
 #: models.py:201
 msgid "Optional additional parameters in JSON format"
-msgstr "Parâmetros adicionais opcionais em formato JSON"
+msgstr "Parâmetros opcionais em formato JSON"
 
 #: models.py:207
 msgid "Allow all users to create datastores with this connection"
@@ -993,7 +993,7 @@ msgstr "Inserir"
 #: templates/datastore_update.html:12 templates/server_update.html:12
 #: templates/service_url_update.html:12 templates/workspace_update.html:12
 msgid "Update"
-msgstr "Atualização "
+msgstr "Atualizar"
 
 #: models.py:429 templates/connection_config.html:108
 #: templates/connection_config.html:149 templates/connection_list.html:191
@@ -1199,12 +1199,12 @@ msgstr "Disparador desativado com sucesso"
 #: models.py:1723 templates/enumeration_add.html:53
 #: templates/enumeration_update.html:58 templates/enumeration_update.html:60
 msgid "Alphabetical"
-msgstr "Alfabético"
+msgstr "Alfabética"
 
 #: models.py:1725 templates/enumeration_add.html:52
 #: templates/enumeration_update.html:53 templates/enumeration_update.html:55
 msgid "Manual"
-msgstr "Manual"
+msgstr "Ordem manual"
 
 #: settings.py:30
 msgid "Layer requests"
@@ -1328,7 +1328,7 @@ msgstr "Mostrando %(numrecords)s registros"
 #: templates/workspace_list.html:149
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
-msgstr "Mostrando desde %(start)s até %(end)s de %(numrecords)s registros"
+msgstr "Mostrando de %(start)s a %(end)s de %(numrecords)s registros"
 
 #: templates/base_layer_list.html:84 templates/cache_list.html:128
 #: templates/cache_list.html:165 templates/connection_list.html:217
@@ -1441,7 +1441,7 @@ msgstr "Anterior"
 #: templates/workspace_list.html:87 templates/workspace_list.html:90
 #: templates/workspace_list.html:159
 msgid "Next"
-msgstr "Seguinte"
+msgstr "Próximo"
 
 #: templates/base_layer_list.html:94 templates/cache_list.html:138
 #: templates/cache_list.html:175 templates/connection_config.html:226
@@ -1743,6 +1743,10 @@ msgstr "Disparador duplicado com sucesso como:"
 #: templates/connection_config.html:388
 msgid "Error duplicating trigger"
 msgstr "Erro ao duplicar disparador"
+
+#: templates/connection_list.html:95
+msgid "Connections list"
+msgstr "Lista de conexões"
 
 #: templates/connection_list.html:32
 msgid "Add connection"
@@ -2053,7 +2057,7 @@ msgstr "URLs de serviços"
 
 #: templates/dashboard_services_menu.html:17
 msgid "SQL Views"
-msgstr "Vistas SQL"
+msgstr "Views SQL"
 
 #: templates/dashboard_services_menu.html:22
 msgid "Datatypes"
@@ -2071,7 +2075,7 @@ msgstr "Selecionar arquivo"
 
 #: templates/datastore_add.html:82
 msgid "Select an existing connection to the database"
-msgstr "Selecione uma conexão existente à base de dados"
+msgstr "Selecione uma conexão existente com o banco de dados"
 
 #: templates/datastore_add.html:105 templates/datastore_update.html:120
 msgid "Temporal dimension"
@@ -2225,7 +2229,7 @@ msgstr "Exibir propriedades"
 #: templates/layer_add.html:40 templates/layer_create.html:49
 #: templates/layer_update.html:40
 msgid "Metadata"
-msgstr "Metadado"
+msgstr "Metadados"
 
 #: templates/external_layer_add.html:35 templates/external_layer_update.html:54
 #: templates/layer_add.html:41 templates/layer_create.html:50
@@ -2263,12 +2267,12 @@ msgstr "Api-key"
 #: templates/external_layer_add.html:133
 #: templates/external_layer_update.html:153
 msgid "Enter the URL of your Mapbox style (.json) file."
-msgstr "Introduza o URL do seu ficheiro de estilo Mapbox (.json)."
+msgstr "Insira a URL do seu arquivo de estilo Mapbox (.json)."
 
 #: templates/external_layer_add.html:142
 #: templates/external_layer_update.html:162
 msgid "Clear file"
-msgstr "Limpar ficheiro"
+msgstr "Limpar arquivo"
 
 #: templates/external_layer_add.html:151
 #: templates/external_layer_update.html:171
@@ -3132,7 +3136,7 @@ msgstr "Campo tempo (intervalo final)"
 #: templates/layer_list.html:11 templates/layergroup_add.html:92
 #: templates/layergroup_update.html:119
 msgid "Create empty layer"
-msgstr "Criar camada vazia"
+msgstr "Criar camada em branco"
 
 #: templates/layer_list.html:23
 msgid "Filter by project"
@@ -3437,7 +3441,7 @@ msgstr "Permissão de escrita"
 #: templates/select_layer_permissions.html:47
 #: templates/select_layergroup_permissions.html:27
 msgid "Permission to manage"
-msgstr "Permissão para gerir"
+msgstr "Permissão de gerenciamento"
 
 #: templates/select_layergroup_permissions.html:7
 msgid "Give the selected roles permissions to manage the layergroup"
@@ -3546,7 +3550,7 @@ msgstr "Alias"
 
 #: templates/sqlview_add.html:125
 msgid "Select all"
-msgstr "Selecionar tudo"
+msgstr "Selecionar todos"
 
 #: templates/sqlview_add.html:129
 msgid "None"
@@ -4229,3 +4233,167 @@ msgstr "Erro ao excluir vista: {0}"
 #~| msgid "Time resolution"
 #~ msgid "Field translation"
 #~ msgstr "Resolução de tempo"
+
+msgid "Filter roles by name or description"
+msgstr "Filtrar roles por nome ou descrição"
+
+msgid "No file selected"
+msgstr "Nenhum arquivo selecionado"
+
+msgid "role_default-roles"
+msgstr "Roles padrão"
+
+msgid "Choose file..."
+msgstr "Selecionar arquivo..."
+
+msgid "External layers list"
+msgstr "Lista de camadas externas"
+
+msgid "Service URLs list"
+msgstr "Lista de URLs de serviços"
+
+msgid "SQL Views list"
+msgstr "Lista de views SQL"
+
+msgid "Attributions"
+msgstr "Atribuições"
+
+msgid "New configuration"
+msgstr "Nova configuração"
+
+msgid "Create generic configuration"
+msgstr "Criar configuração genérica"
+
+msgid "No attributions configurations yet"
+msgstr "Ainda não há configurações de atribuições"
+
+msgid "General information"
+msgstr "Informações gerais"
+
+msgid "Associated projects"
+msgstr "Projetos associados"
+
+msgid "Active for all projects"
+msgstr "Ativar para todos os projetos"
+
+msgid "Or select projects manually"
+msgstr "Selecionar projetos manualmente"
+
+msgid "Notice text"
+msgstr "Texto do aviso"
+
+msgid "Free text shown to viewer users. HTML tags are not allowed."
+msgstr "Texto livre que será mostrado aos usuários do visualizador. Não são permitidas tags HTML."
+
+msgid "Others"
+msgstr "Outros"
+
+msgid "Help"
+msgstr "Ajuda"
+
+msgid "Help text"
+msgstr "Texto de ajuda"
+
+msgid "Help text shown to viewer users. HTML tags are not allowed."
+msgstr "Texto de ajuda que será mostrado aos usuários do visualizador. Não são permitidas tags HTML."
+
+msgid "Contact information"
+msgstr "Informações de contato"
+
+msgid "Organization"
+msgstr "Organização"
+
+msgid "Contact person"
+msgstr "Pessoa de contato"
+
+msgid "Address"
+msgstr "Endereço"
+
+msgid "Phone"
+msgstr "Telefone"
+
+msgid "Useful links"
+msgstr "Links de interesse"
+
+msgid "Add link"
+msgstr "Adicionar link"
+
+msgid "Attachments"
+msgstr "Arquivos anexos"
+
+msgid "Add attachment"
+msgstr "Adicionar anexo"
+
+msgid "Internal path"
+msgstr "Caminho interno"
+
+msgid "Logo internal path"
+msgstr "Caminho interno do logotipo"
+
+msgid "Modal content order"
+msgstr "Ordem do conteúdo do modal"
+
+msgid "Drag to reorder"
+msgstr "Arrastar para reordenar"
+
+msgid "There are no projects to assign yet."
+msgstr "Ainda não há projetos disponíveis para atribuir."
+
+msgid "Attributions configuration created successfully."
+msgstr "Configuração de atribuições criada com sucesso."
+
+msgid "Attributions configuration updated successfully."
+msgstr "Configuração de atribuições atualizada com sucesso."
+
+msgid "Delete attributions configuration"
+msgstr "Excluir configuração de atribuições"
+
+msgid "Copyright notice"
+msgstr "Aviso de copyright"
+
+msgid "Custom title"
+msgstr "Título personalizado"
+
+msgid "Custom text"
+msgstr "Texto personalizado"
+
+msgid "Legal notice"
+msgstr "Aviso legal"
+
+msgid "Email"
+msgstr "E-mail"
+
+msgid ""
+"There is no generic attributions configuration yet. We recommend creating a "
+"generic configuration first; you can later create project specific "
+"configurations or copy from the generic one."
+msgstr "Ainda não há nenhuma configuração genérica de atribuições. Recomendamos criar primeiro uma genérica para que possa ser reutilizada como base nas configurações específicas de projeto."
+
+msgid ""
+"When this generic configuration is enabled for all projects it is used as "
+"the default attributions whenever no project specific configuration exists."
+msgstr "Quando esta configuração genérica estiver ativa para todos os projetos, será usada como atribuições padrão sempre que não houver uma configuração específica."
+
+msgid ""
+"Files are not uploaded here. Use the file manager selector to choose an "
+"existing file. The public download URL will be stored automatically so "
+"attachments can be downloaded even when the project is private."
+msgstr "Os arquivos não são enviados por aqui. Use o seletor do gerenciador de arquivos para escolher um arquivo já existente. A URL pública de download será salva automaticamente."
+
+msgid ""
+"Drag each row by the grip icon to set the order of blocks in the viewer "
+"modal. Empty sections are not shown."
+msgstr "Arraste cada linha pelo ícone de alça para definir a ordem dos blocos no modal do visualizador. Seções vazias não são exibidas."
+
+msgid ""
+"Optional custom block shown in the modal between copyright and help. HTML "
+"tags are not allowed."
+msgstr "Bloco personalizado opcional que é exibido no modal entre o copyright e a ajuda. Não são permitidas tags HTML."
+
+msgid ""
+"Use this field to briefly contextualize the attributions. A common use case "
+"is to present licensing notes."
+msgstr "Uso recomendado: documentar informações de copyright ou de licenciamento."
+
+msgid "Optional. Select a logo from file manager. It will be shown inside the modal."
+msgstr "Opcional. Selecione um logotipo no gerenciador de arquivos. Será mostrado dentro do modal."

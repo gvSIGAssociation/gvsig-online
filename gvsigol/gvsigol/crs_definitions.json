@@ -12361,7 +12361,7 @@
   },
   "4225": {
     "code": "EPSG:4225",
-    "title": "Corrego Alegre 1970-72",
+    "title": "Córrego Alegre 1970-72",
     "units": "degrees",
     "definition": "+proj=longlat +ellps=intl +towgs84=-205.57,168.77,-4.12,0,0,0,0 +no_defs "
   },
@@ -17731,7 +17731,7 @@
   },
   "5524": {
     "code": "EPSG:5524",
-    "title": "Corrego Alegre 1961",
+    "title": "Córrego Alegre 1961",
     "units": "degrees",
     "definition": "+proj=longlat +ellps=intl +no_defs "
   },
@@ -17779,25 +17779,25 @@
   },
   "5536": {
     "code": "EPSG:5536",
-    "title": "Corrego Alegre 1961 / UTM zone 21S",
+    "title": "Córrego Alegre 1961 / UTM zone 21S",
     "units": "meters",
     "definition": "+proj=utm +zone=21 +south +ellps=intl +units=m +no_defs "
   },
   "5537": {
     "code": "EPSG:5537",
-    "title": "Corrego Alegre 1961 / UTM zone 22S",
+    "title": "Córrego Alegre 1961 / UTM zone 22S",
     "units": "meters",
     "definition": "+proj=utm +zone=22 +south +ellps=intl +units=m +no_defs "
   },
   "5538": {
     "code": "EPSG:5538",
-    "title": "Corrego Alegre 1961 / UTM zone 23S",
+    "title": "Córrego Alegre 1961 / UTM zone 23S",
     "units": "meters",
     "definition": "+proj=utm +zone=23 +south +ellps=intl +units=m +no_defs "
   },
   "5539": {
     "code": "EPSG:5539",
-    "title": "Corrego Alegre 1961 / UTM zone 24S",
+    "title": "Córrego Alegre 1961 / UTM zone 24S",
     "units": "meters",
     "definition": "+proj=utm +zone=24 +south +ellps=intl +units=m +no_defs "
   },
@@ -29605,31 +29605,31 @@
   },
   "22521": {
     "code": "EPSG:22521",
-    "title": "Corrego Alegre 1970-72 / UTM zone 21S",
+    "title": "Córrego Alegre 1970-72 / UTM zone 21S",
     "units": "meters",
     "definition": "+proj=utm +zone=21 +south +ellps=intl +towgs84=-205.57,168.77,-4.12,0,0,0,0 +units=m +no_defs "
   },
   "22522": {
     "code": "EPSG:22522",
-    "title": "Corrego Alegre 1970-72 / UTM zone 22S",
+    "title": "Córrego Alegre 1970-72 / UTM zone 22S",
     "units": "meters",
     "definition": "+proj=utm +zone=22 +south +ellps=intl +towgs84=-205.57,168.77,-4.12,0,0,0,0 +units=m +no_defs "
   },
   "22523": {
     "code": "EPSG:22523",
-    "title": "Corrego Alegre 1970-72 / UTM zone 23S",
+    "title": "Córrego Alegre 1970-72 / UTM zone 23S",
     "units": "meters",
     "definition": "+proj=utm +zone=23 +south +ellps=intl +towgs84=-205.57,168.77,-4.12,0,0,0,0 +units=m +no_defs "
   },
   "22524": {
     "code": "EPSG:22524",
-    "title": "Corrego Alegre 1970-72 / UTM zone 24S",
+    "title": "Córrego Alegre 1970-72 / UTM zone 24S",
     "units": "meters",
     "definition": "+proj=utm +zone=24 +south +ellps=intl +towgs84=-205.57,168.77,-4.12,0,0,0,0 +units=m +no_defs "
   },
   "22525": {
     "code": "EPSG:22525",
-    "title": "Corrego Alegre 1970-72 / UTM zone 25S",
+    "title": "Córrego Alegre 1970-72 / UTM zone 25S",
     "units": "meters",
     "definition": "+proj=utm +zone=25 +south +ellps=intl +towgs84=-205.57,168.77,-4.12,0,0,0,0 +units=m +no_defs "
   },

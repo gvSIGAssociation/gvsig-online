@@ -143,7 +143,7 @@ msgstr ""
 #: templates/project_add.html:451 templates/project_clone.html:179
 #: templates/project_update.html:456
 msgid "Permissions"
-msgstr ""
+msgstr "Permissões"
 
 #: templates/application_add.html:229 templates/application_list.html:330
 #: templates/project_add.html:480 templates/project_clone.html:196
@@ -287,7 +287,7 @@ msgstr "Mostrando %(numrecords)s registros"
 #: templates/shared_view_list.html:332
 #, python-format
 msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
-msgstr "Mostrando desde %(start)s até %(end)s de %(numrecords)s registros"
+msgstr "Mostrando de %(start)s a %(end)s de %(numrecords)s registros"
 
 #: templates/application_list.html:398 templates/project_list.html:814
 #: templates/shared_view_list.html:333
@@ -327,7 +327,7 @@ msgstr "Anterior"
 #: templates/project_list.html:612 templates/project_list.html:823
 #: templates/shared_view_list.html:342
 msgid "Next"
-msgstr "Seguinte"
+msgstr "Próximo"
 
 #: templates/application_list.html:408 templates/project_list.html:610
 #: templates/project_list.html:613 templates/project_list.html:824
@@ -351,7 +351,7 @@ msgstr "%(sep)sSort descendente"
 #, fuzzy
 #| msgid "Web application"
 msgid "Update application"
-msgstr "Aplicação Web"
+msgstr "Aplicação web"
 
 #: templates/application_update.html:251 templates/project_update.html:439
 msgid "Update"
@@ -389,7 +389,7 @@ msgstr "Todos os direitos reservados"
 
 #: templates/dashboard_core_menu.html:9
 msgid "Shared views"
-msgstr "Vista compartilhada"
+msgstr "Visualização compartilhada"
 
 #: templates/dashboard_core_menu.html:14
 msgid "Applications"
@@ -397,27 +397,31 @@ msgstr "Aplicações"
 
 #: templates/documentation.html:256
 msgid "Web application"
-msgstr "Aplicação Web"
+msgstr "Aplicação web"
 
 #: templates/documentation.html:263
 msgid "User Manual - Classic Map Viewer"
-msgstr ""
+msgstr "Manual do usuário - Visualizador de mapa clássico"
 
 #: templates/documentation.html:264
 msgid ""
 "Comprehensive guide to explore and use the functionalities of the JQuery-"
 "based map viewer."
 msgstr ""
+"Guia completo para explorar e usar as funcionalidades do visualizador de "
+"mapa baseado em JQuery."
 
 #: templates/documentation.html:272
 msgid "User Manual - New Front Map Viewer"
-msgstr ""
+msgstr "Manual do usuário - Novo visualizador de mapa"
 
 #: templates/documentation.html:273
 msgid ""
 "Learn to navigate and leverage all features of the new map viewer with a "
 "modern interface."
 msgstr ""
+"Aprenda a navegar e aproveitar todos os recursos do novo visualizador de "
+"mapa com interface moderna."
 
 #: templates/documentation.html:283
 msgid "Administration Guide"
@@ -428,6 +432,8 @@ msgid ""
 "Manual for administrators: manage users, groups, services, symbology, and "
 "projects on the platform."
 msgstr ""
+"Manual para administradores: gerencie usuários, grupos, serviços, simbologia "
+"e projetos na plataforma."
 
 #: templates/documentation.html:306
 msgid "Mobile application"
@@ -445,20 +451,16 @@ msgstr ""
 "tablet"
 
 #: templates/home.html:807
-#, fuzzy
-#| msgid "Administration Guide"
 msgid "Administrator"
-msgstr "Guia de Administração"
+msgstr "Administrador"
 
 #: templates/home.html:809
 msgid "Manager"
 msgstr "Gestor"
 
 #: templates/home.html:811
-#, fuzzy
-#| msgid "Users"
 msgid "User"
-msgstr "Usuários"
+msgstr "Usuário"
 
 #: templates/home.html:815 templates/project_package_import_result.html:29
 #: templates/viewer.html:212 templates/viewer_compress.html:214
@@ -488,10 +490,8 @@ msgid "Update password"
 msgstr "Atualizar senha"
 
 #: templates/home.html:868 templates/home.html:1064
-#, fuzzy
-#| msgid "Applications"
 msgid "Projects & Applications"
-msgstr "Aplicações"
+msgstr "Projetos e aplicações"
 
 #: templates/home.html:871 templates/project_list.html:521
 #, fuzzy
@@ -532,37 +532,35 @@ msgstr ""
 
 #: templates/home.html:906
 msgid "Alphabetical"
-msgstr ""
+msgstr "Alfabética"
 
 #: templates/home.html:909
 msgid "Manual"
-msgstr ""
+msgstr "Ordem manual"
 
 #: templates/home.html:913
 msgid "Save order"
-msgstr ""
+msgstr "Salvar ordem"
 
 #: templates/home.html:916
 msgid "Edit global order (for all users) or your own order"
-msgstr ""
+msgstr "Editar a ordem global (para todos os usuários) ou a sua própria ordem"
 
 #: templates/home.html:917
 msgid "Global order"
-msgstr ""
+msgstr "Ordem global"
 
 #: templates/home.html:918
 msgid "My order"
-msgstr ""
+msgstr "Minha ordem"
 
 #: templates/home.html:922
 msgid "Show/hide hidden items"
-msgstr ""
+msgstr "Mostrar/ocultar itens ocultos"
 
 #: templates/home.html:923
-#, fuzzy
-#| msgid "Toc hidden"
 msgid "Hidden"
-msgstr "Toc escondido"
+msgstr "Ocultos"
 
 #: templates/home.html:927
 msgid "Cards"
@@ -582,7 +580,7 @@ msgstr "Aplicações"
 #, fuzzy
 #| msgid "Web application"
 msgid "Open application"
-msgstr "Aplicação Web"
+msgstr "Aplicação web"
 
 #: templates/home.html:963 templates/home.html:984 templates/home.html:1003
 #: templates/home.html:1400 templates/home.html:1406
@@ -606,16 +604,12 @@ msgid "No projects available."
 msgstr "Nenhum registro disponí­vel"
 
 #: templates/home.html:1311
-#, fuzzy
-#| msgid "Error loading layers"
 msgid "Error saving order."
-msgstr "Erro nas camadas carregadas"
+msgstr "Erro ao salvar a ordem."
 
 #: templates/home.html:1373
-#, fuzzy
-#| msgid "Save"
 msgid "Saved"
-msgstr "Salvar"
+msgstr "Salvo"
 
 #: templates/home.html:1456
 #, fuzzy
@@ -902,7 +896,7 @@ msgstr ""
 
 #: templates/project_add.html:817 templates/project_update.html:860
 msgid "Permission to manage"
-msgstr ""
+msgstr "Permissão de gerenciamento"
 
 #: templates/project_add.html:847 templates/project_update.html:1016
 msgid "Create new layer group"
@@ -1675,7 +1669,7 @@ msgstr "Não existem projectos públicos"
 #, fuzzy
 #| msgid "Web application"
 msgid "Application list"
-msgstr "Aplicação Web"
+msgstr "Aplicação web"
 
 #: templates/select_public_project.html:72 templates/viewer.html:176
 #: templates/viewer_compress.html:178
@@ -1785,7 +1779,7 @@ msgstr "Sobrenome"
 
 #: utils.py:502
 msgid "Email"
-msgstr "Correio electrónico"
+msgstr "E-mail"
 
 #: utils.py:503
 msgid "Password"
@@ -1817,7 +1811,7 @@ msgstr "Informações do mapa no ponto"
 
 #: utils.py:817
 msgid "Measure tools"
-msgstr "Ferramentas de medida"
+msgstr "Ferramentas de medição"
 
 #: utils.py:818
 msgid "It allows to measure areas and distances"
@@ -1933,7 +1927,7 @@ msgstr "Manual do usuário"
 
 #: views.py:2358 views.py:2360
 msgid "Shared view"
-msgstr "Vista compartilhada"
+msgstr "Visualização compartilhada"
 
 #: views.py:2361
 msgid "Link"
@@ -1973,3 +1967,12 @@ msgstr ""
 #| msgid "Project name already exists"
 msgid "Application name already exists"
 msgstr "O nome do projeto já existe"
+
+msgid "Filter roles by name or description"
+msgstr "Filtrar roles por nome ou descrição"
+
+msgid "No file selected"
+msgstr "Nenhum arquivo selecionado"
+
+msgid "role_default-roles"
+msgstr "Roles padrão"

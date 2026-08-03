@@ -180,19 +180,17 @@ list[str]
     The list of roles available on the system
 """
 
-get_all_roles_details  = auth_backend.get_all_roles_details
-"""
-Gets the list of the roles and details (id, name and description)
-available in the system. Note that id can be an integer or a string
-depending on the backend in use.
-
-Returns
--------
-list[dict()]
-    A list of dictionaries containing the role details. Example:
-    [{"id": 1, "name": "role_name1", "description": "bla bla bla"},
-    {"id": 2, "name": "role_name2", "description": "bla bla bla"}]
-"""
+def get_all_roles_details(exclude_system=False):
+    """
+    Gets the list of the roles and details (id, name and description)
+    available in the system. Note that id can be an integer or a string
+    depending on the backend in use. Keycloak i18n placeholders in
+    descriptions (e.g. ${role_default-roles}) are localized for display.
+    """
+    from gvsigol_auth.utils import localize_roles_details
+    return localize_roles_details(
+        auth_backend.get_all_roles_details(exclude_system=exclude_system)
+    )
 
 add_user  = auth_backend.add_user
 """

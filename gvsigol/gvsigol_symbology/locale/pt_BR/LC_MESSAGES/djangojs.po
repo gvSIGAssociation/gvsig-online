@@ -298,7 +298,7 @@ msgstr "Rotação"
 
 #: gvsigol_symbology/static/js/lib/symbology/MarkSymbolizer.js:82
 msgid "Select shape"
-msgstr "Seleccionar forma"
+msgstr "Selecionar forma"
 
 #: gvsigol_symbology/static/js/lib/symbology/MarkSymbolizer.js:96
 msgid "Size"
@@ -543,4 +543,4 @@ msgstr "Você deve selecionar um campo primeiro"
 
 #: gvsigol_symbology/templates/unique_values_update.html
 msgid "Drag to reorder"
-msgstr "Arraste para reordenar"
+msgstr "Arrastar para reordenar"

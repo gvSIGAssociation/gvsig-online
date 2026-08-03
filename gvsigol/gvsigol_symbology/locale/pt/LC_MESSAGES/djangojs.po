@@ -304,7 +304,7 @@ msgstr "Rotação"
 
 #: gvsigol_symbology/static/js/lib/symbology/MarkSymbolizer.js:82
 msgid "Select shape"
-msgstr "Seleccionar forma"
+msgstr "Selecionar forma"
 
 #: gvsigol_symbology/static/js/lib/symbology/MarkSymbolizer.js:96
 msgid "Size"
