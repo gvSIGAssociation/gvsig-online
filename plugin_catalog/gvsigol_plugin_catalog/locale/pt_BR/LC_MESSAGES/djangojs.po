@@ -81,7 +81,7 @@ msgstr "Download"
 
 #: static/js/catalog.js:498
 msgid "Metadatum"
-msgstr "Metadado"
+msgstr "Metadados"
 
 #: static/js/catalog.js:508 static/js/catalog.js:1291
 msgid "No results found"

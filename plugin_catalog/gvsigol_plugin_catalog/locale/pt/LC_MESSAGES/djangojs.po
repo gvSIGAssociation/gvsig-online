@@ -24,7 +24,7 @@ msgstr ""
 
 #: static/js/catalog.js:78
 msgid "Search..."
-msgstr "Procurar..."
+msgstr "Pesquisar..."
 
 #: static/js/catalog.js:88
 msgid "Clean current search, filters and order"
@@ -88,7 +88,7 @@ msgstr "Baixar"
 
 #: static/js/catalog.js:498
 msgid "Metadatum"
-msgstr "Metadado"
+msgstr "Metadados"
 
 #: static/js/catalog.js:508 static/js/catalog.js:1291
 msgid "No results found"

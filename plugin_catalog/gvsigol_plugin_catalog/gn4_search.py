@@ -249,7 +249,9 @@ def _build_aggregations():
 def _format_facet_label(value):
     if not value:
         return value
-    return value[0].upper() + value[1:]
+    # ISO maintenance codes arrive camelCase (e.g. asNeeded); expose a readable label.
+    spaced = re.sub(r'([a-z])([A-Z])', r'\1 \2', str(value))
+    return spaced[0].upper() + spaced[1:]
 
 
 def _aggregation_to_dimension(facet_name, aggregation):
