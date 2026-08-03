@@ -337,7 +337,7 @@ attributeTable.prototype.createTableUI = function(featureType) {
 	this.table = $('#table-' + this.layer.get("id")).DataTable({
 		language: {
     		processing		: gettext("Processing request") + "...",
-	        search			: gettext("Search") + "&nbsp;:",
+	        search			: gettext("Search") + ":",
 	        lengthMenu		: gettext("Showing") + " _MENU_ " + gettext("registers"),
 	        info			: gettext("Showing from") + " _START_ " + gettext("to") + " _END_" + gettext(" of") + " _TOTAL_ " + gettext("registers"),
 	        infoEmpty		: gettext("Showing from") + " 0 " + gettext("to") + " 0, " + gettext("of") + " 0 " + gettext("registers"),
