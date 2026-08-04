@@ -584,9 +584,22 @@ def _datastore_by_id(ds_id):
 
 
 def _embedded_target_datastore(ld, default_ws, gpkg_targets, datastore_map):
+    """Resolve the target Datastore for an embedded (GPKG) vector layer.
+
+    Foreign-source layers share one wizard choice per connection_key (gpkg_targets).
+    Local layers must use *this layer's* exported workspace/datastore: several local
+    layers can share connection_key ``local_cartodb`` while targeting different
+    workspaces (e.g. ws_emergencias vs ws_admin_guat). Looking up only by
+    connection_key would send every local layer to the first group's target.
+    """
     ck = ld.get('datastore_connection_key') or 'local_cartodb'
-    tgt = gpkg_targets.get(ck)
-    if not tgt:
+    is_foreign = ck != 'local_cartodb' or bool(ld.get('datastore_is_foreign'))
+    if is_foreign:
+        tgt = gpkg_targets.get(ck)
+        if not tgt:
+            wk, dk = _normalized_ws_ds_for_vector_layer(ld, default_ws)
+            tgt = {'workspace': wk, 'datastore': dk}
+    else:
         wk, dk = _normalized_ws_ds_for_vector_layer(ld, default_ws)
         tgt = {'workspace': wk, 'datastore': dk}
     ds = datastore_map.get((tgt['workspace'], tgt['datastore']))
@@ -596,6 +609,45 @@ def _embedded_target_datastore(ld, default_ws, gpkg_targets, datastore_map):
             % {'w': tgt['workspace'], 'd': tgt['datastore']}
         )
     return ds
+
+
+def _ensure_local_gpkg_layer_datastores(
+    server_id, username, layout, datastore_map, ws_objs, report, skipped_export_ids=None,
+):
+    """Create/reuse every distinct local GPKG layer workspace/datastore.
+
+    ``gpkg_connection_targets`` keeps a single (ws, ds) per connection_key, so
+    additional local targets that only appear on individual ``gpkg_layers`` rows
+    would otherwise be missing from ``datastore_map``.
+    """
+    skipped = set(skipped_export_ids or [])
+    workspaces_created = []
+    for ly in layout.get('gpkg_layers') or []:
+        if ly.get('is_foreign_source'):
+            continue
+        eid = ly.get('export_id') or ''
+        if eid and eid in skipped:
+            continue
+        wsn = (ly.get('exported_workspace') or '').strip()
+        dsn = (ly.get('exported_datastore') or '').strip()
+        if not wsn or not dsn:
+            continue
+        if not re.match(r'^[a-zA-Z0-9_\-]+$', wsn) or not re.match(r'^[a-zA-Z0-9_\-]+$', dsn):
+            raise ValueError(
+                _('Invalid workspace or datastore name for layer "%(layer)s"')
+                % {'layer': ly.get('title') or ly.get('name') or eid or wsn}
+            )
+        if wsn not in ws_objs:
+            ws, created = _get_or_create_workspace(server_id, wsn, username)
+            ws_objs[wsn] = ws
+            if created:
+                report.append({'workspace_created': wsn})
+                workspaces_created.append(ws)
+        key = (wsn, dsn)
+        if key not in datastore_map:
+            ds, _ds_created = _get_or_create_datastore(username, ws_objs[wsn], dsn, report)
+            datastore_map[key] = ds
+    return workspaces_created
 
 
 def _get_or_create_datastore(username, ws_obj, ds_name, report):
@@ -3001,6 +3053,20 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
                 server.id, username, gpkg_targets, report
             )
             workspaces_created.extend(ws_created_extra)
+        # Local GPKG layers can share connection_key local_cartodb while pointing at
+        # different exported workspace/datastore pairs — ensure all of them exist.
+        if layout.get('gpkg_layers'):
+            workspaces_created.extend(
+                _ensure_local_gpkg_layer_datastores(
+                    server.id,
+                    username,
+                    layout,
+                    datastore_map,
+                    ws_objs,
+                    report,
+                    skipped_export_ids=skipped_gpkg_layer_ids,
+                )
+            )
 
         import_permissions = _package_has_permissions(snapshot)
         clone_conf = CloneConf(
