@@ -96,7 +96,9 @@ exportToPDF.prototype.handler = function(e) {
 		$("#float-modal").modal('show');
 		
 		var osm = new ol.layer.Tile({
-    		source: new ol.source.OSM()
+    		source: new ol.source.OSM({
+			url: 'https://{a-c}.tile.openstreetmap.de/{z}/{x}/{y}.png'
+		})
     	});
 		var printMap = new ol.Map({
 	        layers: this.map.getLayers(),

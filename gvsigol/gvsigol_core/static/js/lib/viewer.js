@@ -718,7 +718,10 @@ viewer.core = {
     				crossOrigin: 'anonymous'
     			})
     		}else{
-    			osm_source = new ol.source.OSM();
+    			osm_source = new ol.source.OSM({
+    				url: 'https://{a-c}.tile.openstreetmap.de/{z}/{x}/{y}.png',
+    				crossOrigin: 'anonymous'
+    			});
     		}
     		var osm = new ol.layer.Tile({
         		id: layerId,
