@@ -365,3 +365,10 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
             if entries is not None:
                 for e in entries:
                     color_map.create_colormapentry(e.color, str(e.quantity), e.label, str(e.opacity))
+    # Labeling is stored as a dedicated rule (name ends with "_text"). Keep it
+    # on the map but exclude it from GetLegendGraphic so field names used as
+    # rule titles (e.g. ogc_fid) do not appear in the viewer legend.
+    rule_name = getattr(r, 'name', '') or ''
+    only_text = bool(symbolizers) and all(hasattr(s, 'textsymbolizer') for s in symbolizers)
+    if rule_name.endswith('_text') or only_text:
+        rule.create_vendoroption('inclusion', 'mapOnly')

@@ -73,16 +73,10 @@ var TextSymbolizer = function(rule, layerName, options, utils) {
 		this.layer = this.utils.layer;
 	}
 	
-	if(this.title == null && this.utils){
-		var language = $("#select-language").val();
-		var fields = this.utils.getAlphanumericFields();
-		if(fields.length>0){
-			if (fields[0]["title-"+language]) {
-				this.title = fields[0]["title-"+language];
-			}else{
-				this.title = fields[0].name;
-			}
-		}
+	// Labeling rules must not default to a field name (e.g. ogc_fid): that
+	// title is published into the SLD and appears in GetLegendGraphic.
+	if(this.title == null){
+		this.title = '';
 	}
 	
 	if(rule != null && rule.symbolizers){

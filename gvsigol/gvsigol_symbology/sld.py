@@ -1719,7 +1719,8 @@ class Rule(SLDNode):
         order = [
             'sld:Title', 'ogc:Filter', 'sld:MinScaleDenominator',
             'sld:MaxScaleDenominator', 'sld:PolygonSymbolizer',
-            'sld:LineSymbolizer', 'sld:TextSymbolizer', 'sld:PointSymbolizer']
+            'sld:LineSymbolizer', 'sld:TextSymbolizer', 'sld:PointSymbolizer',
+            'sld:VendorOption']
         for item in order:
             xpath = self._node.xpath(item, namespaces=SLDNode._nsmap)
             for xitem in xpath:
@@ -1728,6 +1729,21 @@ class Rule(SLDNode):
                 self._node.append(xitem)
 
         # no need to normalize children
+
+    def create_vendoroption(self, name=None, value=None):
+        """
+        Create a new L{VendorOption} node as a child of this Rule.
+        Used e.g. for GeoServer inclusion=mapOnly so labeling rules
+        are drawn on the map but omitted from GetLegendGraphic.
+        """
+        elem = self._node.makeelement('{%s}VendorOption' % SLDNode._nsmap['sld'], nsmap=SLDNode._nsmap)
+        self._node.append(elem)
+
+        if not (name is None or value is None):
+            elem.attrib['name'] = name
+            elem.text = value
+
+        return VendorOption(self, len(self._node) - 1)
 
     def create_filter(self, propname=None, comparitor=None, value=None):
         """
