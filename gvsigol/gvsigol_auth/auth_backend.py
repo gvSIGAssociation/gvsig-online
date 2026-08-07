@@ -137,6 +137,11 @@ list[str]
     The list of roles of the user
 """
 
+get_assigned_roles = getattr(auth_backend, 'get_assigned_roles', auth_backend.get_roles)
+"""Gets the roles directly assigned to the user (no composite/inherited).
+Falls back to get_roles for backends that do not distinguish assignments.
+"""
+
 get_all_groups  = auth_backend.get_all_groups
 """
 Gets the list of the groups and details (id, name and description)
