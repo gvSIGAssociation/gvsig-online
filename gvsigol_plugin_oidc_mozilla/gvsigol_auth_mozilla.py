@@ -339,7 +339,7 @@ class KeycloakAdminSession(OIDCSession):
             if superuser:
                 realm_roles = SUPERUSER_ROLES | {STAFF_ROLE} | roles
             elif staff:
-                realm_roles = {STAFF_ROLE} | roles - SUPERUSER_ROLES
+                realm_roles = ({STAFF_ROLE} | roles) - SUPERUSER_ROLES
             else:
                 realm_roles = roles - SUPERUSER_ROLES - {STAFF_ROLE}
             user_rep = {
@@ -354,7 +354,9 @@ class KeycloakAdminSession(OIDCSession):
                 user_rep["credentials"] = [{"value": password}]
             response = self.post(self.admin_url + '/users', json=user_rep)
             if response.status_code == 201:
-                set_roles(username, list(realm_roles))
+                if not set_roles(username, list(realm_roles)):
+                    from django.utils.translation import gettext as _
+                    raise UserUpdateError(_("Failed to update user roles."))
                 if groups is not None:
                     set_groups(username, groups)
                 User = get_user_model()
@@ -456,14 +458,16 @@ class KeycloakAdminSession(OIDCSession):
                         if superuser:
                             realm_roles = SUPERUSER_ROLES | {STAFF_ROLE} | roles
                         elif staff:
-                            realm_roles = {STAFF_ROLE} | roles - SUPERUSER_ROLES
+                            realm_roles = ({STAFF_ROLE} | roles) - SUPERUSER_ROLES
                         else:
                             realm_roles = roles - SUPERUSER_ROLES - {STAFF_ROLE}
-                        set_roles(username, list(realm_roles))
+                        if not set_roles(username, list(realm_roles)):
+                            from django.utils.translation import gettext as _
+                            raise UserUpdateError(_("Failed to update user roles."))
                 if groups is not None:
                     set_groups(username, groups)
 
-                signals.user_updated.send(sender=None, username=user.username, user_dict=user_rep, user_obj=user)
+                signals.user_updated.send(sender=None, username=username, user_dict=user_rep, user_obj=user)
                 return True
             else:
                 # Keycloak returns 400 for duplicate email, 409 for conflict, etc.
@@ -499,12 +503,22 @@ class KeycloakAdminSession(OIDCSession):
         response = self.get(url)
         if response.status_code == 200:
             return response.json()
+        return []
+
+    def _get_user_role_mappings_realm(self, user_id):
+        """Direct (non-composite) realm role mappings assigned to the user."""
+        url = "{base_url}/users/{user_id}/role-mappings/realm".format(base_url=self.admin_url, user_id=user_id)
+        response = self.get(url)
+        if response.status_code == 200:
+            return response.json()
+        return []
 
     def _get_user_role_mappings(self, user_id):
         url = "{base_url}/users/{user_id}/role-mappings".format(base_url=self.admin_url, user_id=user_id)
         response = self.get(url)
         if response.status_code == 200:
             return response.json()
+        return []
 
     def get_group_id(self, group_path):
         """
@@ -521,6 +535,8 @@ class KeycloakAdminSession(OIDCSession):
 
     def get_role_id(self, role_name):
         role_repr = self._get_role_repr(role_name)
+        if not role_repr:
+            return None
         return role_repr.get('id')
 
     def delete_user(self, user=None, user_id=None):
@@ -608,15 +624,24 @@ class KeycloakAdminSession(OIDCSession):
     def add_to_role(self, username, role_name):
         try:
             user_id = self.get_user_id(username)
+            if not user_id:
+                # e.g. users existing in gvSIG Online but never created in Keycloak
+                LOGGER.warning('Cannot add role %s: user %s does not exist in the authentication server', role_name, username)
+                return False
+            role_id = self.get_role_id(role_name)
+            if not role_id:
+                LOGGER.error('Cannot add role %s to user %s: the role does not exist in the authentication server', role_name, username)
+                return False
             # TODO: we could handle client roles too
             url = "{base}/users/{user_id}/role-mappings/realm".format(base=self.admin_url, user_id=user_id)
             body = [{
-                "id": self.get_role_id(role_name),
+                "id": role_id,
                 "name": role_name
             }]
             response = self.post(url, json=body)
             if response.status_code == 204:
                 return True
+            LOGGER.error('Error adding role %s to user %s: HTTP %s %s', role_name, username, response.status_code, response.text)
         except (ConnectionError, Timeout, TooManyRedirects) as e:
             raise BackendNotAvailable from e
         except RequestException:
@@ -626,15 +651,24 @@ class KeycloakAdminSession(OIDCSession):
     def remove_from_role(self, username, role_name):
         try:
             user_id = self.get_user_id(username)
+            if not user_id:
+                # e.g. users existing in gvSIG Online but never created in Keycloak
+                LOGGER.warning('Cannot remove role %s: user %s does not exist in the authentication server', role_name, username)
+                return False
+            role_id = self.get_role_id(role_name)
+            if not role_id:
+                LOGGER.error('Cannot remove role %s from user %s: the role does not exist in the authentication server', role_name, username)
+                return False
             # TODO: we could handle client roles too
             url = "{base}/users/{user_id}/role-mappings/realm".format(base=self.admin_url, user_id=user_id)
             body = [{
-                "id": self.get_role_id(role_name),
+                "id": role_id,
                 "name": role_name
             }]
             response = self.delete(url, json=body)
             if response.status_code == 204:
                 return True
+            LOGGER.error('Error removing role %s from user %s: HTTP %s %s', role_name, username, response.status_code, response.text)
         except (ConnectionError, Timeout, TooManyRedirects) as e:
             raise BackendNotAvailable from e
         except RequestException:
@@ -717,14 +751,25 @@ class KeycloakAdminSession(OIDCSession):
             return response.json()
 
     def _get_user_roles(self, user_id):
-        # FIXME: we could also include client mappings
-        role_mappings = self._get_user_role_mappings_realm_composite(user_id)
+        # Effective roles (includes composite/inherited). Used for authorization checks.
+        role_mappings = self._get_user_role_mappings_realm_composite(user_id) or []
+        return [r.get('name') for r in role_mappings]
+
+    def _get_user_assigned_roles(self, user_id):
+        # Direct realm role assignments only. Used when replacing roles via set_roles.
+        role_mappings = self._get_user_role_mappings_realm(user_id) or []
         return [r.get('name') for r in role_mappings]
     
     def get_roles(self, username):
         user_id = self.get_user_id(username)
         if user_id:
             return self._get_user_roles(user_id)
+        return []
+
+    def get_assigned_roles(self, username):
+        user_id = self.get_user_id(username)
+        if user_id:
+            return self._get_user_assigned_roles(user_id)
         return []
 
     def get_groups(self, username):
@@ -986,6 +1031,16 @@ def get_roles(request_or_user):
         else:
             return []
     return _get_admin_session().get_roles(username)
+
+def get_assigned_roles(username):
+    """
+    Gets the roles directly assigned to the user in the auth backend
+    (excludes composite/inherited roles). Prefer this when editing role
+    assignments; use get_roles() for authorization checks.
+    """
+    if not isinstance(username, str):
+        username = _get_user_name(username)
+    return _get_admin_session().get_assigned_roles(username)
 
 def get_all_groups(exclude_system=False):
     """
@@ -1307,9 +1362,24 @@ def set_roles(user, roles):
         True if the operation was successfull, False otherwise
     """
     username = _get_user_name(user)
-    old_roles = set(get_roles(username))
+    # Compare against direct assignments only. Composite/effective roles include
+    # inherited ones that cannot be removed via realm role-mappings and would
+    # make to_add/to_remove incorrect.
+    old_roles = set(_get_admin_session().get_assigned_roles(username))
     roles = set(roles)
-    to_remove = old_roles - roles
+    system_roles = set(get_system_roles())
+    managed_system = SUPERUSER_ROLES | {STAFF_ROLE}
+
+    def _is_protected(role_name):
+        # Keep Keycloak builtins / default composite roles untouched unless
+        # they are explicitly managed gvsigol staff/superuser roles.
+        if role_name.startswith('default-roles-'):
+            return True
+        if role_name in system_roles and role_name not in managed_system:
+            return True
+        return False
+
+    to_remove = {r for r in (old_roles - roles) if not _is_protected(r)}
     #TODO: improve error handling and op reversion
     success = True
     for role in to_remove:
