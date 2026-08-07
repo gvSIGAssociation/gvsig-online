@@ -10192,7 +10192,9 @@ trans_CorrectSpelling = draw2d.shape.layout.VerticalLayout.extend({
 
             var paramsCreateAttr = {"id": ID,
             "parameters": [
-                {"attr": $('#attr-'+ID).val(),
+                {"attr": (typeof getSelectValueOrStored === 'function'
+                    ? getSelectValueOrStored($('#attr-'+ID), ID, 'attr')
+                    : $('#attr-'+ID).val()),
                 "lang-option": $('#lang-option-'+ID).val(),
                 "accent-mark": $('#accent-mark-'+ID).val()}
             ]}
