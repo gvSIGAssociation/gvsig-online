@@ -687,12 +687,23 @@ def user_update(request, username):
 def user_delete(request, username):
     if request.method == 'POST':
         if not _is_user_editable(username):
-            return HttpResponse(json.dumps({'deleted': False, 'message': _("User is not editable")}, indent=4), content_type='application/json')
-        deleted = auth_backend.delete_user(user=username)
-        response = {
-            'deleted': deleted
-        }
-        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+            status = 403
+            response = {
+                'deleted': False,
+                'message': _("User is not editable")
+            }
+        elif auth_backend.delete_user(user=username):
+            status = 200
+            response = {
+                'deleted': True
+            }
+        else:
+            status = 400
+            response = {
+                'deleted': False,
+                'message': _("User deletion failed")
+            }
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json', status=status)
 
 def sort_by_name(a_dict):
     return a_dict.get('name')
