@@ -1,0 +1,75 @@
+#credentials:
+#  - !credential
+#    matchers:
+#      - !dnsMatch
+#        host: ##GVSIGOL_HOST##
+#        port: 443
+#        pathRegex : /geoserver.+
+#    password: ##GEOSERVER_PASSWD##
+#    username: root
+#proxies:
+#   - !proxy
+#     scheme: http
+#     host: proxy-te.nube.red.uy
+#     port: 3128
+#     matchers:
+#       - !localMatch
+#         reject: true
+#       - !dnsMatch
+#         host: www.camptocamp.org
+#         reject: true
+#       - !acceptAll {}
+#allowedReferers:
+#   - !hostnameMatch
+#     host: ##GVSIGOL_HOST##
+#     allowSubDomains: true
+allowedReferers:
+   - !acceptAll {}
+
+templates:
+  #===========================================================================
+  _libraemergencias_a4_landscape: !template
+  #===========================================================================
+    reportTemplate: a4_libraemergencias_landscape.jrxml
+    attributes:
+      datasource: !datasource
+        attributes:
+          table: !table {}
+      logo_izq: !string
+        default: "logo_izq.png"
+      logo_der: !string
+        default: "logo_der.png"
+      fecha: !string
+        default: ""
+      # Atributos para i18n
+      titulo: !string
+        default: "ESTADO DE LAS CARRETERAS - EMERGENCIAS ACTIVAS"
+      textoFechaImpresion: !string
+        default: "Fecha de impresión"
+      textoOrdenadas: !string
+        default: "Ordenadas por Carretera"
+      Locale: !string
+        default: "va"
+        
+    processors:
+    - !configureHttpRequests
+      httpProcessors:
+        - !restrictUris
+          matchers:
+            - !localMatch {}
+            - !acceptAll {}
+        - !forwardHeaders
+          headers: [Referer, User-Agent]
+        - !addHeaders
+          headers:
+            newHeader : 'headerValue'
+    - !reportBuilder
+      directory: '.'
+    - !createDataSource
+      reportTemplate: subreport_estado_carreteras.jrxml
+      reportKey: reportTemplate
+      processors:
+        - !prepareTable
+          dynamic: false
+    tableData: jrDataSource
+

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<jsonDataAdapter class="net.sf.jasperreports.data.json.JsonDataAdapterImpl">
+  <name>subreport_estado_carreteras_sample</name>
+  <dataFile type="repositoryDataLocation">
+    <location>subreport_estado_carreteras_sample.json</location>
+  </dataFile>
+  <selectExpression></selectExpression>
+  <locale>es_ES</locale>
+  <timeZone>Europe/Madrid</timeZone>
+  <useConnection>false</useConnection>
+  <language>json</language>
+</jsonDataAdapter>

@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.21.3.final using JasperReports Library version 6.21.3-4a3078d20785ebe464f18037d738d12fc98c13cf  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="a4_libraemergencias_landscape" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="832" leftMargin="5" rightMargin="5" topMargin="20" bottomMargin="20" uuid="a1b2c3d4-e5f6-7890-abcd-ef1234567890">
+	<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="NO_DATA_ADAPTER"/>
+	<parameter name="fecha" class="java.lang.String"/>
+	<parameter name="logo_izq" class="java.lang.String">
+		<defaultValueExpression><![CDATA["logo_izq.png"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="logo_der" class="java.lang.String">
+		<defaultValueExpression><![CDATA["logo_der.png"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="jrDataSource" class="net.sf.jasperreports.engine.JRDataSource"/>
+	<parameter name="titulo" class="java.lang.String">
+		<defaultValueExpression><![CDATA["ESTADO DE LAS CARRETERAS - EMERGENCIAS ACTIVAS"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="textoFechaImpresion" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Fecha de impresión"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="notaInformacion" class="java.lang.String">
+		<defaultValueExpression><![CDATA["La información que se publica es la facilitada por los titulares de las carreteras o, en su caso, por la autoridad de tránsito"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="notaCambios" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Registros marcados con aquellos que han variado desde el anterior informe emitido"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="descripcionEstados" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Descripción de los estados de las vías"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="estadoAbierta" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Carretera abierta sin problemas"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="estadoCondicionada" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Calzada viable con posible evolución negativa."]]></defaultValueExpression>
+	</parameter>
+	<parameter name="estadoIncidencias" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Calzada con diversos problemas que la hacen compleja y prohibición de circular vehículos pesados y articulados."]]></defaultValueExpression>
+	</parameter>
+	<parameter name="estadoProblemas" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Tramos dañados y/o viabilidad parcial."]]></defaultValueExpression>
+	</parameter>
+	<parameter name="estadoCerrada" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Imposibilidad de circular."]]></defaultValueExpression>
+	</parameter>
+	<parameter name="estadoCadenas" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Con nieve, circulación con cadenas y prohibición de circulación de vehículos pesados y articulados."]]></defaultValueExpression>
+	</parameter>
+	<parameter name="nombreCondicionada" class="java.lang.String">
+		<defaultValueExpression><![CDATA["CONDICIONADA"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="nombreIncidencias" class="java.lang.String">
+		<defaultValueExpression><![CDATA["INCIDENCIAS"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="nombreProblemas" class="java.lang.String">
+		<defaultValueExpression><![CDATA["PROBLEMAS GENERALES"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="nombreCadenas" class="java.lang.String">
+		<defaultValueExpression><![CDATA["CADENAS"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="nombreCerrada" class="java.lang.String">
+		<defaultValueExpression><![CDATA["CERRADA"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="colorVerde" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Verde"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="colorAmarillo" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Amarillo"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="colorRojo" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Rojo"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="colorNegro" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Negro"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="textoOrdenadas" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Ordenadas por Carretera"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="Locale" class="java.lang.String">
+		<defaultValueExpression><![CDATA["es"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="CustomProperties" class="java.util.Properties">
+		<defaultValueExpression><![CDATA[groovy.util.Eval.xy($P{JASPER_REPORTS_CONTEXT}, $P{Locale}, "import org.apache.commons.lang3.StringUtils; if (StringUtils.isBlank(y)){ y = \"es\"; }; def is = x.getExtensions(net.sf.jasperreports.repo.RepositoryService.class).get(0).getResource(\"variables-\"+y+\".properties\",net.sf.jasperreports.repo.InputStreamResource.class).getInputStream(); def r = new java.io.InputStreamReader(is, \"UTF-8\"); def props=new java.util.Properties(); props.load(r); r.close(); is.close(); props")]]></defaultValueExpression>
+	</parameter>
+	<queryString language="JSON">
+		<![CDATA[attributes]]>
+	</queryString>
+	<field name="fecha" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="fecha"/>
+		<fieldDescription><![CDATA[fecha]]></fieldDescription>
+	</field>
+	<field name="datasource" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="datasource"/>
+		<fieldDescription><![CDATA[datasource]]></fieldDescription>
+	</field>
+	<field name="tableDataSource" class="net.sf.jasperreports.engine.data.JRMapCollectionDataSource"/>
+	<pageHeader>
+		<band height="80">
+			<frame>
+				<reportElement x="0" y="0" width="832" height="75" uuid="763ca29e-6e9d-405c-b10b-4827d42c05e7">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<image scaleImage="RetainShape" hAlign="Center" vAlign="Middle">
+					<reportElement x="0" y="0" width="95" height="75" uuid="a50f789a-338d-4f35-8238-3af9be3054fe">
+						<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					</reportElement>
+					<imageExpression><![CDATA[$P{logo_izq}]]></imageExpression>
+				</image>
+				<image scaleImage="RetainShape" hAlign="Center" vAlign="Middle">
+					<reportElement x="747" y="0" width="80" height="75" uuid="f84b97b6-0607-49e7-b9c2-5c3ca46656ba">
+						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					</reportElement>
+					<imageExpression><![CDATA[$P{logo_der}]]></imageExpression>
+				</image>
+				<textField>
+					<reportElement x="100" y="12" width="642" height="15" uuid="8ff07b1c-95d9-481a-b7ab-445510476369">
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					</reportElement>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$P{titulo}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="100" y="28" width="642" height="12" uuid="c9e8f7d6-5a4b-3c2d-1e0f-9b8a7c6d5e4f">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					</reportElement>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="9" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$P{textoOrdenadas}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="100" y="42" width="642" height="13" uuid="b6d36c5f-789b-460e-b82e-da30f6e05000">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					</reportElement>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$P{textoFechaImpresion} + ": " + $P{fecha}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="360">
+			<subreport overflowType="Stretch">
+				<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="802" height="0" uuid="268941c8-dcf6-48de-be0a-00997f69007f">
+					<property name="local_mesure_unitwidth" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<subreportParameter name="CustomProperties">
+					<subreportParameterExpression><![CDATA[$P{CustomProperties}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[$F{tableDataSource}]]></dataSourceExpression>
+				<subreportExpression><![CDATA["subreport_estado_carreteras.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="110">
+			<frame>
+				<reportElement x="0" y="0" width="832" height="110" uuid="9e01f3a9-687e-4cb7-930f-8dae7e89431f">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textField>
+					<reportElement x="5" y="2" width="822" height="8" uuid="bb79f07a-4d7f-478c-93f5-6b62f6849f0c">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					</reportElement>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="6" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$P{CustomProperties}.getProperty("la_informacion_que_se_publica_es_la_facilitada_por_los_titulares_de_las_carreteras_o_en_su_caso_por_la_autoridad_de_transito")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="5" y="10" width="822" height="8" uuid="bb79f07a-4d7f-478c-93f5-6b62f6849f0d">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					</reportElement>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="6" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["*  " + $P{CustomProperties}.getProperty("registros_marcados_son_aquellos_que_han_variado_desde_el_anterior_informe_emitido")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement mode="Transparent" x="5" y="18" width="822" height="8" uuid="bb79f07a-4d7f-478c-93f5-6b62f6849f0e">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					</reportElement>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="6" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$P{CustomProperties}.getProperty("descripcion_de_los_estados_de_las_vias")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement mode="Opaque" x="5" y="28" width="100" height="12" backcolor="#E0E0E0" uuid="c1c1c1c1-d1d1-e1e1-f1f1-a1a1a1a1a1a1">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					</reportElement>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="7" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$P{CustomProperties}.getProperty("colEstado")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement mode="Opaque" x="105" y="28" width="602" height="12" backcolor="#E0E0E0" uuid="c2c2c2c2-d2d2-e2e2-f2f2-a2a2a2a2a2a2">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					</reportElement>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="7" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$P{CustomProperties}.getProperty("colDescripcion")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement mode="Opaque" x="707" y="28" width="120" height="12" backcolor="#E0E0E0" uuid="c3c3c3c3-d3d3-e3e3-f3f3-a3a3a3a3a3a3">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					</reportElement>
+					<box>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="7" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$P{CustomProperties}.getProperty("colEquivalencia")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="5" y="40" width="100" height="12" uuid="d1d1d1d1-e1e1-f1f1-a1a1-b1b1b1b1b1b1"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA["  " + $P{CustomProperties}.getProperty("condicionada")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="105" y="40" width="602" height="12" uuid="d2d2d2d2-e2e2-f2f2-a2a2-b2b2b2b2b2b2"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA["  " + $P{CustomProperties}.getProperty("calzada_viable_con_posible_evolucion_negativa")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="707" y="40" width="120" height="12" uuid="d3d3d3d3-e3e3-f3f3-a3a3-b3b3b3b3b3b3"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA["  " + $P{CustomProperties}.getProperty("verde")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="5" y="52" width="100" height="12" uuid="d4d4d4d4-e4e4-f4f4-a4a4-b4b4b4b4b4b4"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA["  " + $P{CustomProperties}.getProperty("incidencias")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="105" y="52" width="602" height="12" uuid="d5d5d5d5-e5e5-f5f5-a5a5-b5b5b5b5b5b5"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA["  " + $P{CustomProperties}.getProperty("calzada_con_diversos_problemas_que_la_hacen_compleja_y_prohibicion_de_circular_vehiculos_pesados_y_articulados")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="707" y="52" width="120" height="12" uuid="d6d6d6d6-e6e6-f6f6-a6a6-b6b6b6b6b6b6"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA["  " + $P{CustomProperties}.getProperty("amarillo")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="5" y="64" width="100" height="12" uuid="d7d7d7d7-e7e7-f7f7-a7a7-b7b7b7b7b7b7"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA["  " + $P{CustomProperties}.getProperty("problemasGenerales")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="105" y="64" width="602" height="12" uuid="d8d8d8d8-e8e8-f8f8-a8a8-b8b8b8b8b8b8"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA["  " + $P{CustomProperties}.getProperty("tramos_danyados_y_o_viabilidad_parcial")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="707" y="64" width="120" height="12" uuid="d9d9d9d9-e9e9-f9f9-a9a9-b9b9b9b9b9b9"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA["  " + $P{CustomProperties}.getProperty("rojo")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="5" y="76" width="100" height="12" uuid="e1e1e1e1-f1f1-a1a1-b1b1-c1c1c1c1c1c1"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA["  " + $P{CustomProperties}.getProperty("cadenas")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="105" y="76" width="602" height="12" uuid="e2e2e2e2-f2f2-a2a2-b2b2-c2c2c2c2c2c2"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA["  " + $P{CustomProperties}.getProperty("con_nieve_circulacion_con_cadenas_y_prohibicion_de_circulacion_de_vehiculos_pesados_y_articulados")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="707" y="76" width="120" height="12" uuid="e3e3e3e3-f3f3-a3a3-b3b3-c3c3c3c3c3c3"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA["  " + $P{CustomProperties}.getProperty("rojo")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="5" y="88" width="100" height="12" uuid="e4e4e4e4-f4f4-a4a4-b4b4-c4c4c4c4c4c4"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA["  " + $P{CustomProperties}.getProperty("cerrada")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="105" y="88" width="602" height="12" uuid="e5e5e5e5-f5f5-a5a5-b5b5-c5c5c5c5c5c5"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA["  " + $P{CustomProperties}.getProperty("imposibilidad_de_circular")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="707" y="88" width="120" height="12" uuid="e6e6e6e6-f6f6-a6a6-b6b6-c6c6c6c6c6c6"/>
+					<box>
+						<pen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA["  " + $P{CustomProperties}.getProperty("negro")]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="5" y="101" width="792" height="8" uuid="e7e7e7e7-f7f7-a7a7-b7b7-c7c7c7c7c7c7">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					</reportElement>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="6"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$P{CustomProperties}.getProperty("organismo")]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</pageFooter>
+</jasperReport>
