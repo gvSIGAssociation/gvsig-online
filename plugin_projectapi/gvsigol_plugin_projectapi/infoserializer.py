@@ -238,6 +238,10 @@ class LayerSerializer(serializers.ModelSerializer):
                         'editableactive': field_conf.get('editableactive', True),
                         'infovisible': field_conf.get('infovisible', True)
                     })
+                    if field_conf.get('unit'):
+                        field['unit'] = field_conf['unit']
+                    if field_conf.get('calculated_formula'):
+                        field['calculated_formula'] = field_conf['calculated_formula']
                 
                 field['pk'] = 'YES' if field_name in pks_set else 'NO'
                 field['translate'] = translations_dict.get(field_name, field_name)
@@ -557,7 +561,7 @@ class LayerSerializer(serializers.ModelSerializer):
         
     class Meta:
         model = Layer
-        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'real_time', 'vector_tile', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'is_view', 'public', 'external', 'service_version', 'description', 'wms_url', 'wfs_url', 'cache_url', 'tms_url', 'legend_url', 'styles', 'baselayer', 'default_baselayer', 'order', 'external_params', 'featureapi_endpoint', 'time_enabled', 'allow_download', 'detailed_info_button_title' ,'detailed_info_enabled' ,'detailed_info_html', 'metadata', 'metadata_url']
+        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'real_time', 'vector_tile', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'is_view', 'public', 'external', 'service_version', 'description', 'wms_url', 'wfs_url', 'cache_url', 'tms_url', 'legend_url', 'styles', 'baselayer', 'default_baselayer', 'order', 'external_params', 'featureapi_endpoint', 'time_enabled', 'allow_download', 'allow_calculated_fields', 'detailed_info_button_title' ,'detailed_info_enabled' ,'detailed_info_html', 'metadata', 'metadata_url']
 
 
 def _compute_allows_getmap(layers_qs):
