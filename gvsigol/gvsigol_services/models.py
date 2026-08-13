@@ -1232,6 +1232,7 @@ class Layer(models.Model):
     single_image = models.BooleanField(default=False)
     vector_tile = models.BooleanField(default=False)
     allow_download = models.BooleanField(default=False)
+    allow_calculated_fields = models.BooleanField(default=False)
     time_enabled = models.BooleanField(default=False)
     time_enabled_field = models.CharField(
         max_length=150, null=True, blank=True)

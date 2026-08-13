@@ -222,6 +222,14 @@
 										{% endif %}
 										<label for="allow_download">{% trans "Allow downloads" %}</label>
 									</div>
+									<div class="col-md-4 form-group">
+										{% if layer.allow_calculated_fields %}
+										<input type="checkbox" name="allow_calculated_fields"  id="allow_calculated_fields" checked/>
+										{% else %}
+										<input type="checkbox" name="allow_calculated_fields"  id="allow_calculated_fields"/>
+										{% endif %}
+										<label for="allow_calculated_fields">{% trans "Allow calculated attributes" %}</label>
+									</div>
 								</div>
 								<div class="row cached-single-image-notice-row">
 									<div class="col-md-12">

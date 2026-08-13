@@ -1496,6 +1496,10 @@ def layer_add_with_group(request, layergroup_id):
         if 'allow_download' in request.POST:
             allow_download = True
 
+        allow_calculated_fields = False
+        if 'allow_calculated_fields' in request.POST:
+            allow_calculated_fields = True
+
         real_time = False
         if 'real_time' in request.POST:
             real_time = True
@@ -1632,6 +1636,7 @@ def layer_add_with_group(request, layergroup_id):
                 newRecord.visible = is_visible
                 newRecord.queryable = is_queryable
                 newRecord.allow_download = allow_download
+                newRecord.allow_calculated_fields = allow_calculated_fields
                 newRecord.cached = cached
                 newRecord.single_image = single_image
                 newRecord.abstract = abstract
@@ -1799,6 +1804,10 @@ def layer_update(request, layer_id):
         if 'allow_download' in request.POST:
             allow_download = True
 
+        allow_calculated_fields = False
+        if 'allow_calculated_fields' in request.POST:
+            allow_calculated_fields = True
+
         real_time = False
         if 'real_time' in request.POST:
             real_time = True
@@ -1906,6 +1915,7 @@ def layer_update(request, layer_id):
             layer.abstract = abstract
             layer.queryable = is_queryable
             layer.allow_download = allow_download
+            layer.allow_calculated_fields = allow_calculated_fields
             layer.single_image = single_image
             layer.layer_group = layer_group
             max_order = layer_group.layer_set.aggregate(Max('order')).get('order__max')
@@ -4286,6 +4296,10 @@ def layer_create_with_group(request, layergroup_id):
         if 'allow_download' in request.POST:
             allow_download = True
 
+        allow_calculated_fields = False
+        if 'allow_calculated_fields' in request.POST:
+            allow_calculated_fields = True
+
         detailed_info_enabled = (request.POST.get('detailed_info_enabled') is not None)
         detailed_info_button_title = request.POST.get('detailed_info_button_title')
         detailed_info_html = request.POST.get('detailed_info_html')
@@ -4394,6 +4408,7 @@ def layer_create_with_group(request, layergroup_id):
                         visible = is_visible,
                         queryable = is_queryable,
                         allow_download = allow_download,
+                        allow_calculated_fields = allow_calculated_fields,
                         cached = cached,
                         single_image = single_image
                     )

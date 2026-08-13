@@ -168,6 +168,7 @@ class CreateFeatureTypeForm(forms.Form):
     cached = forms.BooleanField(label=_('Cached'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
     single_image = forms.BooleanField(label=_('Single image'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
     allow_download = forms.BooleanField(label=_('Allow downloads'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
+    allow_calculated_fields = forms.BooleanField(label=_('Allow calculated attributes'), required=False, initial=False, widget=forms.CheckboxInput(attrs={'class' : 'form-control'}))
     fields = forms.CharField(label=_('Fields'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     time_enabled_field = forms.CharField(label=_('Field'), required=False, widget=forms.Select(attrs={'class' : 'form-control'}))
     time_enabled_endfield = forms.CharField(label=_('End field'), required=False, widget=forms.Select(attrs={'class' : 'form-control'}))

@@ -238,6 +238,10 @@
 											<input type="checkbox" name="allow_download"  id="allow_download" {% if form.allow_download.value %}checked{% endif %}/>
 											<label for="allow_download">{% trans "Allow downloads" %}</label>
 										</div>
+										<div class="col-md-4 form-group">
+											<input type="checkbox" name="allow_calculated_fields"  id="allow_calculated_fields" {% if form.allow_calculated_fields.value %}checked{% endif %}/>
+											<label for="allow_calculated_fields">{% trans "Allow calculated attributes" %}</label>
+										</div>
 									</div>
 									<div class="box-body time_enabled-check">
 										<div class="row">

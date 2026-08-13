@@ -118,8 +118,8 @@ env = environ.Env(
     # UI
     IFRAME_MODE_UI=(bool,False),
     MANAGE_PERMISSION_UI=(bool,True),
-    #csrf
-    CSRF_TRUSTED_ORIGINS = (list,['localhost', 'localhost:9000', 'https:localhost']),
+    #csrf (Django 4+: each entry must be a full origin with scheme, e.g. http://localhost:9000)
+    CSRF_TRUSTED_ORIGINS = (list, ['http://localhost', 'http://localhost:9000', 'https://localhost']),
     CSRF_TRUSTED_ORIGINS_DJANGO2 = (list,None),
     #cors
     CORS_ALLOWED_ORIGINS = (list,['http://localhost:8000']),    
@@ -345,16 +345,39 @@ except ImportError:
 CORS_ORIGIN_ALLOW_ALL = env('CORS_ORIGIN_ALLOW_ALL')
 CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS')
 CORS_ALLOW_CREDENTIALS = env('CORS_ALLOW_CREDENTIALS')
-if env('CORS_REPLACE_HTTPS_REFERER'):
-    # django-cors-headers no longer provides CORS_REPLACE_HTTPS_REFERER and raises an error in last versions
-    CORS_REPLACE_HTTPS_REFERER = env('CORS_REPLACE_HTTPS_REFERER')
+# django-cors-headers removed CORS_REPLACE_HTTPS_REFERER; do not set it
 CORS_EXPOSE_HEADERS = ('X-Cache-Task-Id',)
 
 
+def _normalize_csrf_trusted_origin(entry):
+    """Django 4.0+ requires CSRF_TRUSTED_ORIGINS items to include a scheme (http:// or https://)."""
+    entry = (entry or '').strip()
+    if not entry:
+        return None
+    if entry.startswith('http://') or entry.startswith('https://'):
+        return entry
+    if entry.startswith('https:'):
+        rest = entry[len('https:'):].lstrip('/')
+        return 'https://' + rest
+    if entry.startswith('http:'):
+        rest = entry[len('http:'):].lstrip('/')
+        return 'http://' + rest
+    return 'http://' + entry
+
+
 if env('CSRF_TRUSTED_ORIGINS_DJANGO2') and django.VERSION[0] == 2:
-    CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS_DJANGO2')
+    _CSRF_RAW = env('CSRF_TRUSTED_ORIGINS_DJANGO2')
 else:
-    CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS')
+    _CSRF_RAW = env('CSRF_TRUSTED_ORIGINS')
+if isinstance(_CSRF_RAW, str):
+    _CSRF_ENTRIES = [x.strip() for x in _CSRF_RAW.split(',') if x.strip()]
+else:
+    _CSRF_ENTRIES = list(_CSRF_RAW or [])
+CSRF_TRUSTED_ORIGINS = [
+    normalized
+    for normalized in (_normalize_csrf_trusted_origin(x) for x in _CSRF_ENTRIES)
+    if normalized
+]
 
 CRONTAB_ACTIVE = True
 ROOT_URLCONF = 'gvsigol.urls'

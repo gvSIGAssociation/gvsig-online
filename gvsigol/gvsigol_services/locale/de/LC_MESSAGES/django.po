@@ -467,6 +467,11 @@ msgstr "Tipo de geometría"
 msgid "Allow downloads"
 msgstr "Permitir descargas"
 
+#: forms_geoserver.py:171 templates/layer_add.html:178
+#: templates/layer_create.html:243 templates/layer_update.html:231
+msgid "Allow calculated attributes"
+msgstr "Berechnete Attribute erlauben"
+
 #: forms_geoserver.py:171 forms_services.py:400
 #: templates/geoserver/create_layer_feature_type.html:66
 #: templates/geoserver/create_layer_sql_view.html:141

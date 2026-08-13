@@ -185,6 +185,7 @@ def _serialize_layer(layer: Layer, datastore):
         'single_image': layer.single_image,
         'vector_tile': layer.vector_tile,
         'allow_download': layer.allow_download,
+        'allow_calculated_fields': layer.allow_calculated_fields,
         'time_enabled': layer.time_enabled,
         'time_enabled_field': layer.time_enabled_field,
         'time_enabled_endfield': layer.time_enabled_endfield,

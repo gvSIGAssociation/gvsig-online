@@ -445,6 +445,13 @@ msgstr "Tipus de geometria"
 msgid "Allow downloads"
 msgstr "Permetre descàrregues"
 
+#: gvsigol_services/forms_geoserver.py:171
+#: gvsigol_services/templates/layer_add.html:178
+#: gvsigol_services/templates/layer_create.html:243
+#: gvsigol_services/templates/layer_update.html:231
+msgid "Allow calculated attributes"
+msgstr "Permetre atributs calculats"
+
 #: gvsigol_services/forms_geoserver.py:171 gvsigol_services/forms_services.py:406
 #: gvsigol_services/templates/geoserver/create_layer_feature_type.html:96
 #: gvsigol_services/templates/geoserver/create_layer_sql_view.html:171 gvsigol_services/templates/layer_create.html:123

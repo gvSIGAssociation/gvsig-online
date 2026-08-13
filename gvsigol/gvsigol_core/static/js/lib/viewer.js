@@ -1109,6 +1109,7 @@ viewer.core = {
 			wmsLayer.external = false;
 			wmsLayer.imported = false;
 			wmsLayer.allow_download = layerConf.allow_download;
+			wmsLayer.allow_calculated_fields = layerConf.allow_calculated_fields;
 
 			var latLong = new Array();
 			for (i in layerConf.latlong_extent.split(',')) {
