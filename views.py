@@ -1889,6 +1889,7 @@ def project_get_conf(request):
                         layer['type'] = l.type
                         layer['queryable'] = l.queryable
                         layer['allow_download'] = l.allow_download
+                        layer['allow_calculated_fields'] = l.allow_calculated_fields
                         layer['detailed_info_enabled'] = l.detailed_info_enabled
                         layer['detailed_info_button_title'] = l.detailed_info_button_title
                         layer['detailed_info_html'] = l.detailed_info_html
