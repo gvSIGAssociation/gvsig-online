@@ -379,6 +379,54 @@ def can_manage_layer(request_or_user, layer):
         print(e)
     return False
 
+def can_write_calculated_fields(request_or_user, layer):
+    """
+    Checks whether the user is allowed to write a calculated attribute into the
+    provided layer: superusers always, layer managers (owner or staff with the
+    manage role) and users with write permission on that specific layer. Being
+    staff is not enough on its own.
+
+    Parameters
+    ----------
+    request_or_user: Request | HttpRequest | User | str
+        A Django Request object | A DRF HttpRequest object | A Django User object | A username
+    layer: Layer | int
+        A Django Layer instance or a layer id
+    """
+    try:
+        user = _get_user(request_or_user)
+        if user is None or not user.is_authenticated:
+            return False
+        if user.is_superuser:
+            return True
+        # Checks are made against the authenticated user and never against the
+        # request: role claims live in the Django session, which may belong to
+        # a different login when the caller authenticates with a bearer token
+        if can_manage_layer(user, layer):
+            return True
+        return bool(can_write_layer(user, layer))
+    except Exception as e:
+        print(e)
+    return False
+
+def can_use_calculated_fields(request_or_user, layer):
+    """
+    Checks whether the calculator can act on the provided layer: the feature
+    has to be enabled on it, it must be a non external PostGIS layer and the
+    user needs write permissions on it.
+    """
+    try:
+        if not isinstance(layer, Layer):
+            layer = Layer.objects.get(id=layer)
+        if not layer.allow_calculated_fields or layer.external:
+            return False
+        if not layer.datastore or layer.datastore.type != 'v_PostGIS':
+            return False
+        return can_write_calculated_fields(request_or_user, layer)
+    except Exception as e:
+        print(e)
+    return False
+
 def can_manage_datastore(request_or_user, datastore):
     """
     Checks whether the user has permissions to manage the provided datastore.

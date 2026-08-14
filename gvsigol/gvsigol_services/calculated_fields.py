@@ -96,12 +96,42 @@ def _ensure_layers_in_project(project_layer_ids, *layers):
         raise FormulaError(_('All participating layers must belong to the current project'))
 
 
+def _request_user(request):
+    """
+    The authenticated principal of this request. Permissions must never be
+    resolved from the request itself: the role claims are read from the Django
+    session, which may belong to a different login when the frontend
+    authenticates with a bearer token.
+    """
+    user = getattr(request, 'user', None)
+    if user is None or not user.is_authenticated:
+        raise PermissionError(_('Not authorized'))
+    return user
+
+
+def _can_read(request, layer):
+    return utils.can_read_layer(_request_user(request), layer)
+
+
+def _can_write_calculated(request, layer):
+    return utils.can_write_calculated_fields(request, layer)
+
+
+def _can_receive_calculated(request, layer):
+    """
+    A layer can be offered as destination only when the feature is enabled on
+    it and the user has the very same write permissions required on the layer
+    the calculator was opened from.
+    """
+    return utils.can_use_calculated_fields(request, layer)
+
+
 def _ensure_manageable_postgis(request, layer, require_flag=True):
     if layer.external or not layer.datastore or layer.datastore.type != 'v_PostGIS':
         raise FormulaError(_('Only PostGIS layers support calculated attributes'))
     if require_flag and not layer.allow_calculated_fields:
         raise FormulaError(_('Calculated attributes are not enabled for this layer'))
-    if not utils.can_manage_layer(request, layer):
+    if not _can_write_calculated(request, layer):
         raise PermissionError(_('Not authorized'))
     iconn, source_name, schema = layer.get_db_connection()
     with iconn as con:
@@ -352,7 +382,7 @@ def calculated_field_joinable_layers(request):
             return _json_error(str(exc))
         return _json_error(_('Layer not found'), 404)
     try:
-        if not utils.can_manage_layer(request, layer):
+        if not _can_write_calculated(request, layer):
             return HttpResponseForbidden(json.dumps({'status': 'error', 'message': 'Not authorized'}),
                                          content_type='application/json')
         if not layer.datastore or layer.datastore.type != 'v_PostGIS':
@@ -366,7 +396,7 @@ def calculated_field_joinable_layers(request):
         ).select_related('datastore', 'datastore__workspace')
         result = []
         for candidate in candidates:
-            if not utils.can_read_layer(request, candidate):
+            if not _can_read(request, candidate):
                 continue
             cp = _layer_params(candidate)
             if cp.get('host') != host or str(cp.get('port')) != port or cp.get('database') != database:
@@ -385,7 +415,11 @@ def calculated_field_joinable_layers(request):
                 'schema': schema,
                 'is_view': is_view,
                 'allow_calculated_fields': candidate.allow_calculated_fields,
-                'can_manage': utils.can_manage_layer(request, candidate),
+                # Only layers flagged as destination-capable are offered to
+                # write the result into
+                'can_receive_calculated': (
+                    not is_view and _can_receive_calculated(request, candidate)
+                ),
                 'numeric_fields': numeric,
                 'fields': [f for f in all_fields if f],
                 'is_current': candidate.id == layer.id,
@@ -421,7 +455,7 @@ def calculated_field_validate(request):
                     _ensure_layers_in_project(project_layer_ids, other)
                     if not _same_connection(layer, other):
                         raise FormulaError(_('All layers must share the same database connection'))
-                    if not utils.can_read_layer(request, other):
+                    if not _can_read(request, other):
                         raise PermissionError(_('Not authorized to read related layer'))
                     o_source, o_schema = other.source_name or other.name, _layer_params(other).get('schema', 'public')
                     alias = src.get('alias') or ('t' + str(idx))
@@ -545,9 +579,11 @@ def calculated_field_create(request):
             title = field_name
         sources = data.get('sources') or []  # [{layer_id, alias, join_field_self, join_field_other}]
         destination_mode = data.get('destination_mode') or 'current_layer'
-        if mode == 'update':
-            # Updates always target the layer where the calculator was opened
-            destination_mode = 'current_layer'
+        if mode == 'update' and destination_mode != 'current_layer':
+            # Updating an existing column is only offered on the layer the
+            # calculator was opened from
+            raise FormulaError(
+                _('Existing attributes can only be updated on the current layer'))
         if destination_mode not in ('current_layer', 'existing_layer'):
             raise FormulaError(_('The result can only be stored in a participating layer'))
         target_layer_id = data.get('target_layer_id')
@@ -592,7 +628,7 @@ def calculated_field_create(request):
                 for idx, src in enumerate(sources):
                     other = Layer.objects.get(id=int(src['layer_id']))
                     _ensure_layers_in_project(project_layer_ids, other)
-                    if not utils.can_read_layer(request, other):
+                    if not _can_read(request, other):
                         raise PermissionError(_('Not authorized to read related layer'))
                     if not _same_connection(layer, other):
                         raise FormulaError(_('All layers must share the same database connection'))
