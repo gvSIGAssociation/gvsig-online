@@ -56,6 +56,7 @@ class LayerSerializer(serializers.ModelSerializer):
     external_tilematrixset = serializers.SerializerMethodField('get_external_tilematrixset_')
     workspace = serializers.SerializerMethodField('get_layer_workspace_')
     writable = serializers.SerializerMethodField('is_writable')
+    can_use_calculated_fields = serializers.SerializerMethodField('can_use_calculated_fields_')
     is_view = serializers.SerializerMethodField('get_is_view')
     public = serializers.SerializerMethodField('is_public')
     service_version = serializers.SerializerMethodField('get_external_service_version')
@@ -293,6 +294,20 @@ class LayerSerializer(serializers.ModelSerializer):
                 return services_utils.can_write_layer(self.context['request'], obj, user_profile=self.context.get('user_profile'))
             else:
                 return False
+        except Exception:
+            return False
+
+    def can_use_calculated_fields_(self, obj):
+        """
+        Indica si el usuario puede usar la calculadora de atributos sobre la
+        capa. Requiere el flag activo en la capa y permisos de escritura, así
+        que ser staff por sí solo no basta.
+        """
+        try:
+            request = self.context.get('request')
+            if not request:
+                return False
+            return services_utils.can_use_calculated_fields(request, obj)
         except Exception:
             return False
 
@@ -561,7 +576,7 @@ class LayerSerializer(serializers.ModelSerializer):
         
     class Meta:
         model = Layer
-        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'real_time', 'vector_tile', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'is_view', 'public', 'external', 'service_version', 'description', 'wms_url', 'wfs_url', 'cache_url', 'tms_url', 'legend_url', 'styles', 'baselayer', 'default_baselayer', 'order', 'external_params', 'featureapi_endpoint', 'time_enabled', 'allow_download', 'allow_calculated_fields', 'detailed_info_button_title' ,'detailed_info_enabled' ,'detailed_info_html', 'metadata', 'metadata_url']
+        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'real_time', 'vector_tile', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'is_view', 'public', 'external', 'service_version', 'description', 'wms_url', 'wfs_url', 'cache_url', 'tms_url', 'legend_url', 'styles', 'baselayer', 'default_baselayer', 'order', 'external_params', 'featureapi_endpoint', 'time_enabled', 'allow_download', 'allow_calculated_fields', 'can_use_calculated_fields', 'detailed_info_button_title' ,'detailed_info_enabled' ,'detailed_info_html', 'metadata', 'metadata_url']
 
 
 def _compute_allows_getmap(layers_qs):
