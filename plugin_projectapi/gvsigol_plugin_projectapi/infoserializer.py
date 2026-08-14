@@ -181,14 +181,6 @@ class LayerSerializer(serializers.ModelSerializer):
             fields_dict = {field['name']: field for field in result['fields']}
             fields_conf_dict = {field_conf['name']: field_conf for field_conf in fields} if fields else {}
 
-            conf_field_names = set()
-            if fields:
-                conf_field_names = {field_conf['name'] for field_conf in fields}
-            
-            db_field_names = set(fields_dict.keys())
-            
-            missing_fields = db_field_names - conf_field_names
-            
             ordered_field_names = []
             if form_groups:
                 for group in form_groups:
@@ -198,10 +190,11 @@ class LayerSerializer(serializers.ModelSerializer):
             if not ordered_field_names:
                 ordered_field_names = list(fields_dict.keys())
             
-            # añade campos que están en la BD pero no en conf (como la geometría o el ogc_fid),
-            # evitando duplicados con campos ya presentes (p.ej. ogc_fid en form_groups)
+            # añade los campos de la BD que no están en ningún grupo del formulario:
+            # tanto los que no están en conf (geometría, ogc_fid) como los añadidos
+            # después de crear los grupos (p.ej. atributos calculados)
             already_ordered = set(ordered_field_names)
-            ordered_field_names.extend([f for f in missing_fields if f not in already_ordered])
+            ordered_field_names.extend([f for f in fields_dict if f not in already_ordered])
 
             enumeration_fields = []
             for field_name in ordered_field_names:
