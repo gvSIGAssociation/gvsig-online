@@ -147,3 +147,145 @@ class FormulaUtilsTests(SimpleTestCase):
     def test_unary_minus(self):
         result = compile_formula('-a + 1.5', {'a'}, _resolver)
         self.assertIn('-', result['sql'])
+
+    def test_sum_requires_join_sources(self):
+        with self.assertRaises(FormulaError):
+            compile_formula('sum(t2.attribute)', {'t1.id', 't2.attribute'}, _resolver)
+
+    def test_sum_builds_correlated_subquery(self):
+        join_sources = {
+            't2': {
+                'schema': 'public',
+                'table': 'related_layer',
+                'join_self': 'join_key',
+                'join_other': 'join_key',
+                'is_many': True,
+            }
+        }
+        result = compile_formula(
+            'sum(t2.attribute)',
+            {'t1.join_key', 't2.attribute'},
+            _resolver,
+            join_sources=join_sources,
+        )
+        self.assertTrue(result['used_aggregates'])
+        self.assertIn('SUM(', result['sql'])
+        self.assertIn('FROM "public"."related_layer" AS "t2"', result['sql'])
+        self.assertIn('"t2"."join_key" = "t1"."join_key"', result['sql'])
+
+    def test_many_side_bare_field_requires_aggregate(self):
+        join_sources = {
+            't2': {
+                'schema': 'public',
+                'table': 'related_layer',
+                'join_self': 'join_key',
+                'join_other': 'join_key',
+                'is_many': True,
+            }
+        }
+        with self.assertRaises(FormulaError):
+            compile_formula(
+                't2.attribute',
+                {'t1.join_key', 't2.attribute'},
+                _resolver,
+                join_sources=join_sources,
+            )
+
+    def test_one_to_one_bare_field_becomes_scalar_subquery(self):
+        join_sources = {
+            't2': {
+                'schema': 'public',
+                'table': 'stats',
+                'join_self': 'code',
+                'join_other': 'code',
+                'is_many': False,
+            }
+        }
+        result = compile_formula(
+            't2.value',
+            {'t1.code', 't2.value'},
+            _resolver,
+            join_sources=join_sources,
+        )
+        self.assertFalse(result['used_aggregates'])
+        self.assertIn('LIMIT 1', result['sql'])
+        self.assertIn('FROM "public"."stats" AS "t2"', result['sql'])
+
+    def test_avg_min_max_count(self):
+        join_sources = {
+            't2': {
+                'schema': 'public',
+                'table': 'related_layer',
+                'join_self': 'join_key',
+                'join_other': 'join_key',
+                'is_many': True,
+            }
+        }
+        for fn, sql_fn in (
+            ('avg', 'AVG'),
+            ('min', 'MIN'),
+            ('max', 'MAX'),
+            ('count', 'COUNT'),
+        ):
+            result = compile_formula(
+                '{0}(t2.attribute)'.format(fn),
+                {'t2.attribute'},
+                _resolver,
+                join_sources=join_sources,
+            )
+            self.assertIn('{0}('.format(sql_fn), result['sql'])
+
+    def test_sum_mixed_with_base_field(self):
+        join_sources = {
+            't2': {
+                'schema': 'public',
+                'table': 'related_layer',
+                'join_self': 'join_key',
+                'join_other': 'join_key',
+                'is_many': True,
+            }
+        }
+        result = compile_formula(
+            'sum(t2.attribute) / t1.area',
+            {'t1.area', 't2.attribute'},
+            _resolver,
+            join_sources=join_sources,
+        )
+        self.assertIn('SUM(', result['sql'])
+        self.assertIn('"t1"."area"', result['sql'])
+
+    def test_nested_aggregates_rejected(self):
+        join_sources = {
+            't2': {
+                'schema': 'public',
+                'table': 'related_layer',
+                'join_self': 'join_key',
+                'join_other': 'join_key',
+                'is_many': True,
+            }
+        }
+        with self.assertRaises(FormulaError):
+            compile_formula(
+                'sum(avg(t2.attribute))',
+                {'t2.attribute'},
+                _resolver,
+                join_sources=join_sources,
+            )
+
+    def test_aggregate_expression_arg_rejected(self):
+        join_sources = {
+            't2': {
+                'schema': 'public',
+                'table': 'related_layer',
+                'join_self': 'join_key',
+                'join_other': 'join_key',
+                'is_many': True,
+            }
+        }
+        with self.assertRaises(FormulaError):
+            compile_formula(
+                'sum(t2.a + t2.b)',
+                {'t2.a', 't2.b'},
+                _resolver,
+                join_sources=join_sources,
+            )

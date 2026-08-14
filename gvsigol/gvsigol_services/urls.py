@@ -129,6 +129,7 @@ urlpatterns = [
     path('db_delete_field_format/', services_views.db_delete_field_format, name='db_delete_field_format'),
     path('db_field_add/', services_views.db_add_field, name='db_field_add'),
     path('api/calculated_field/joinable_layers/', calculated_fields.calculated_field_joinable_layers, name='calculated_field_joinable_layers'),
+    path('api/calculated_field/join_cardinality/', calculated_fields.calculated_field_join_cardinality, name='calculated_field_join_cardinality'),
     path('api/calculated_field/validate/', calculated_fields.calculated_field_validate, name='calculated_field_validate'),
     path('api/calculated_field/create/', calculated_fields.calculated_field_create, name='calculated_field_create'),
     path('db_fill_link_field/', services_views.db_fill_link_field, name='db_fill_link_field'),

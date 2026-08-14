@@ -4,7 +4,12 @@ Safe arithmetic formula parsing/compilation for calculated attributes.
 
 Expressions may only contain numbers, field identifiers (optionally
 qualified as alias.field), parentheses, the + - * / ** operators and a
-closed whitelist of mathematical functions (see FUNCTION_SIGNATURES).
+closed whitelist of mathematical and aggregate functions
+(see FUNCTION_SIGNATURES / AGGREGATE_FUNCTIONS).
+
+When ``join_sources`` is provided, fields from related aliases are compiled
+as correlated subqueries keyed by the join. One-to-many joins require an
+aggregate (sum/avg/min/max/count) so each base row receives a single value.
 """
 from __future__ import unicode_literals
 
@@ -35,6 +40,9 @@ _DIM_COMPATIBLE_OPS = {
     ast.Div: 'quotient',
 }
 
+# Aggregate functions for 1:N joins (compiled as correlated subqueries)
+AGGREGATE_FUNCTIONS = frozenset({'sum', 'avg', 'min', 'max', 'count'})
+
 # name -> (min_args, max_args or None for variadic)
 FUNCTION_SIGNATURES = {
     'sqrt': (1, 1),
@@ -48,16 +56,28 @@ FUNCTION_SIGNATURES = {
     'exp': (1, 1),
     'greatest': (2, None),
     'least': (2, None),
+    'sum': (1, 1),
+    'avg': (1, 1),
+    'min': (1, 1),
+    'max': (1, 1),
+    'count': (1, 1),
 }
 
 # Functions whose argument and result must be dimensionless
 _DIMENSIONLESS_FUNCTIONS = ('ln', 'log10', 'exp')
 # Functions that keep the dimension of their single argument
 _DIMENSION_PRESERVING_FUNCTIONS = ('abs', 'round', 'floor', 'ceil')
+_AGGREGATE_DIMENSION_PRESERVING = frozenset({'sum', 'avg', 'min', 'max'})
 
 
 def _as_double(sql):
     return '({0})::double precision'.format(sql)
+
+
+def _quote_ident(name):
+    if not name or not _FIELD_RE.match(name):
+        raise FormulaError(_('Invalid identifier: {0}').format(name))
+    return '"{0}"'.format(name)
 
 
 def _literal_number(node):
@@ -101,9 +121,13 @@ class _FormulaCompiler(ast.NodeVisitor):
     Field values with a known unit are converted to the catalogue base for
     their dimension before arithmetic; the caller may then convert the
     result into a requested unit.
+
+    When ``join_sources`` is set, joined fields become correlated subqueries
+    (scalar for 1:1, aggregate for 1:N).
     """
 
-    def __init__(self, allowed_fields, field_sql_resolver, field_units=None):
+    def __init__(self, allowed_fields, field_sql_resolver, field_units=None,
+                 join_sources=None, base_alias='t1'):
         """
         Parameters
         ----------
@@ -112,12 +136,20 @@ class _FormulaCompiler(ast.NodeVisitor):
         field_sql_resolver : callable(str) -> sqlbuilder composable or str
             Maps an identifier to a SQL fragment (already validated).
         field_units : dict[str, unit_meta] | None
+        join_sources : dict[str, dict] | None
+            alias -> {schema, table, join_self, join_other, is_many}
+        base_alias : str
+            Alias of the layer that owns each result row (usually t1).
         """
         self.allowed_fields = allowed_fields
         self.field_sql_resolver = field_sql_resolver
         self.field_units = field_units or {}
+        self.join_sources = join_sources or {}
+        self.base_alias = base_alias
         self.referenced_fields = set()
         self.result_dimension = None
+        self._aggregate_depth = 0
+        self.used_aggregates = False
 
     def compile(self, expression):
         expression = (expression or '').strip()
@@ -181,8 +213,90 @@ class _FormulaCompiler(ast.NodeVisitor):
         if len(node.args) < min_args or (max_args is not None and len(node.args) > max_args):
             raise FormulaError(
                 _('Wrong number of arguments for "{0}"').format(name))
+        if name in AGGREGATE_FUNCTIONS:
+            return self._compile_aggregate(name, node.args[0])
         args = [self.visit(arg) for arg in node.args]
         return self._compile_function(name, node, args)
+
+    def _qualified_field_from_node(self, node):
+        """Require a single field reference (bare or alias.field) as aggregate arg."""
+        if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
+            if not _FIELD_RE.match(node.value.id) or not _FIELD_RE.match(node.attr):
+                raise FormulaError(_('Invalid field reference'))
+            return '{0}.{1}'.format(node.value.id, node.attr)
+        if isinstance(node, ast.Name):
+            if not _FIELD_RE.match(node.id):
+                raise FormulaError(_('Invalid field reference'))
+            return node.id
+        raise FormulaError(
+            _('Aggregation arguments must be a single field reference '
+              '(e.g. sum(t2.attribute))'))
+
+    def _correlated_subquery(self, alias, select_sql, limit_one=False):
+        meta = self.join_sources[alias]
+        schema = _quote_ident(meta['schema'])
+        table = _quote_ident(meta['table'])
+        alias_q = _quote_ident(alias)
+        join_other = _quote_ident(meta['join_other'])
+        join_self = _quote_ident(meta['join_self'])
+        base = _quote_ident(self.base_alias)
+        limit = ' LIMIT 1' if limit_one else ''
+        return (
+            '(SELECT {select_sql} FROM {schema}.{table} AS {alias} '
+            'WHERE {alias}.{join_other} = {base}.{join_self}{limit})'
+        ).format(
+            select_sql=select_sql,
+            schema=schema,
+            table=table,
+            alias=alias_q,
+            join_other=join_other,
+            base=base,
+            join_self=join_self,
+            limit=limit,
+        )
+
+    def _compile_aggregate(self, name, arg_node):
+        if self._aggregate_depth:
+            raise FormulaError(_('Nested aggregations are not allowed'))
+        if not self.join_sources:
+            raise FormulaError(
+                _('Aggregations ({0}) can only be used with a JOIN').format(name))
+
+        qualified = self._qualified_field_from_node(arg_node)
+        if qualified not in self.allowed_fields:
+            raise FormulaError(_('Unknown or disallowed field: {0}').format(qualified))
+        if '.' not in qualified:
+            raise FormulaError(
+                _('Aggregations must target a field from a joined layer '
+                  '(e.g. {0}(t2.campo))').format(name))
+
+        alias, _field = qualified.split('.', 1)
+        if alias == self.base_alias:
+            raise FormulaError(
+                _('Aggregations must target a field from a joined layer, not {0}').format(
+                    self.base_alias))
+        if alias not in self.join_sources:
+            raise FormulaError(
+                _('Unknown join alias in aggregation: {0}').format(alias))
+
+        self.used_aggregates = True
+        self._aggregate_depth += 1
+        try:
+            # Resolve the field as a local column inside the subquery
+            # (alias.field → "alias"."field"), not as an outer reference.
+            field_sql, field_dim = self._resolve_field(qualified)
+        finally:
+            self._aggregate_depth -= 1
+
+        pg_fn = name.upper()
+        if name == 'count':
+            inner = 'COUNT({0})'.format(field_sql)
+            out_dim = None
+        else:
+            inner = '{0}({1})'.format(pg_fn, _as_double(field_sql))
+            out_dim = field_dim if name in _AGGREGATE_DIMENSION_PRESERVING else None
+
+        return self._correlated_subquery(alias, inner), out_dim
 
     def _compile_function(self, name, node, args):
         first_sql, first_dim = args[0]
@@ -241,11 +355,31 @@ class _FormulaCompiler(ast.NodeVisitor):
             sql = _as_double(sql)
         return sql, unit_info['dimension']
 
+    def _resolve_joined_or_local(self, qualified_or_bare):
+        """
+        Resolve a field. Joined aliases (when join_sources is active) become
+        correlated scalar subqueries, unless we are already inside an aggregate
+        (the aggregate builds its own subquery).
+        """
+        name = qualified_or_bare
+        if '.' in name and self.join_sources and not self._aggregate_depth:
+            alias, _field = name.split('.', 1)
+            if alias in self.join_sources:
+                meta = self.join_sources[alias]
+                if meta.get('is_many'):
+                    raise FormulaError(
+                        _('Field "{0}" comes from a one-to-many join; wrap it in '
+                          'sum(), avg(), min(), max() or count()').format(name))
+                field_sql, field_dim = self._resolve_field(name)
+                return self._correlated_subquery(
+                    alias, _as_double(field_sql), limit_one=True), field_dim
+        return self._resolve_field(name)
+
     def visit_Name(self, node):
         name = node.id
         if name not in self.allowed_fields:
             raise FormulaError(_('Unknown or disallowed field: {0}').format(name))
-        return self._resolve_field(name)
+        return self._resolve_joined_or_local(name)
 
     def visit_Attribute(self, node):
         # alias.field → Name(alias).attr
@@ -256,7 +390,7 @@ class _FormulaCompiler(ast.NodeVisitor):
             raise FormulaError(_('Unknown or disallowed field: {0}').format(qualified))
         if not _FIELD_RE.match(node.value.id) or not _FIELD_RE.match(node.attr):
             raise FormulaError(_('Invalid field reference'))
-        return self._resolve_field(qualified)
+        return self._resolve_joined_or_local(qualified)
 
     def visit_Num(self, node):  # py2/older ast
         return repr(float(node.n)), None
@@ -277,7 +411,7 @@ def validate_identifier(name):
 
 
 def compile_formula(expression, allowed_fields, field_sql_resolver, field_units=None,
-                    result_unit=None):
+                    result_unit=None, join_sources=None, base_alias='t1'):
     """
     Compile expression to a SQL fragment and return metadata.
 
@@ -285,12 +419,18 @@ def compile_formula(expression, allowed_fields, field_sql_resolver, field_units=
     If ``result_unit`` is provided and matches the resulting dimension, the
     SQL is converted from the base into that unit.
 
+    When ``join_sources`` is provided, related fields are emitted as
+    correlated subqueries so 1:N joins can be reduced with aggregates.
+
     Returns
     -------
-    dict with keys: sql, referenced_fields, result_dimension, result_unit
+    dict with keys: sql, referenced_fields, result_dimension, result_unit,
+    used_aggregates
     """
     allowed = set(allowed_fields)
-    compiler = _FormulaCompiler(allowed, field_sql_resolver, field_units=field_units)
+    compiler = _FormulaCompiler(
+        allowed, field_sql_resolver, field_units=field_units,
+        join_sources=join_sources, base_alias=base_alias)
     sql = compiler.compile(expression)
     sql, dimension, unit_code = apply_result_unit(
         sql, compiler.result_dimension, result_unit)
@@ -299,6 +439,7 @@ def compile_formula(expression, allowed_fields, field_sql_resolver, field_units=
         'referenced_fields': sorted(compiler.referenced_fields),
         'result_dimension': dimension,
         'result_unit': unit_code,
+        'used_aggregates': compiler.used_aggregates,
     }
 
 
@@ -309,4 +450,3 @@ def preview_units(expression, allowed_fields, field_units, result_unit=None):
     return compile_formula(
         expression, allowed_fields, resolver,
         field_units=field_units, result_unit=result_unit)
-

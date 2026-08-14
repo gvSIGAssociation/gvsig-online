@@ -31,8 +31,21 @@ _NUMERIC_TYPES = {
 }
 
 
-def _json_error(message, status=400):
-    return JsonResponse({'status': 'error', 'message': message}, status=status)
+def _json_error(message, status=400, extra=None):
+    payload = {'status': 'error', 'message': message}
+    if extra:
+        payload.update(extra)
+    return JsonResponse(payload, status=status)
+
+
+def _one_to_many_hint(join_sources):
+    """Aliases the frontend should aggregate, surfaced together with errors."""
+    if not join_sources:
+        return None
+    aliases = [
+        alias for alias, meta in join_sources.items() if meta.get('is_many')
+    ]
+    return {'one_to_many_aliases': aliases} if aliases else None
 
 
 def _parse_json_body(request):
@@ -313,8 +326,22 @@ def _store_field_meta(layer, field_name, formula, unit=None, dimension=None,
             entry['title-' + lang_code] = field_name
         fields.append(entry)
     conf['fields'] = fields
+    _sync_form_groups(conf)
     conf_manager.conf = conf
     layer.save()
+
+
+def _sync_form_groups(conf):
+    """
+    Fields missing from every form group are dropped by the project API, so the
+    new column would never reach the viewer nor the attribute table.
+    """
+    fields = conf.get('fields') or []
+    if not fields:
+        return
+    # Imported lazily: views.py pulls in the whole services stack
+    from gvsigol_services.views import _parse_form_groups
+    conf['form_groups'] = _parse_form_groups(conf.get('form_groups') or [], fields)
 
 
 def _refresh_layer_publication(layer):
@@ -328,7 +355,8 @@ def _refresh_layer_publication(layer):
     return conf_manager
 
 
-def _check_unique_join_keys(con, schema, table, join_field):
+def _join_key_is_unique(con, schema, table, join_field):
+    """True when every non-null join key appears at most once in the table."""
     query = sqlbuilder.SQL(
         "SELECT {field} FROM {schema}.{table} "
         "WHERE {field} IS NOT NULL "
@@ -339,11 +367,36 @@ def _check_unique_join_keys(con, schema, table, join_field):
         table=sqlbuilder.Identifier(table),
     )
     con.cursor.execute(query)
-    row = con.cursor.fetchone()
-    if row:
+    return con.cursor.fetchone() is None
+
+
+def _check_unique_join_keys(con, schema, table, join_field):
+    """Require a 1:1 / N:1 lookup key (used when writing into a joined layer)."""
+    if not _join_key_is_unique(con, schema, table, join_field):
         raise FormulaError(
             _('Join field "{0}" on "{1}" is not unique; ambiguous joins are not allowed').format(
                 join_field, table))
+
+
+def _build_join_sources(con, resolved_sources):
+    """
+    Build the join_sources map expected by compile_formula.
+
+    ``is_many`` is True when several related rows can match one base row
+    (classic 1:N), so those fields must be wrapped in aggregates.
+    """
+    join_sources = {}
+    for resolved in resolved_sources:
+        alias = resolved['alias']
+        join_sources[alias] = {
+            'schema': resolved['schema'],
+            'table': resolved['table'],
+            'join_self': resolved['join_self'],
+            'join_other': resolved['join_other'],
+            'is_many': not _join_key_is_unique(
+                con, resolved['schema'], resolved['table'], resolved['join_other']),
+        }
+    return join_sources
 
 
 def _build_same_layer_resolver(alias_or_none=None):
@@ -432,8 +485,62 @@ def calculated_field_joinable_layers(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+def calculated_field_join_cardinality(request):
+    """
+    Tell whether a join is 1:1 or 1:N as soon as the layer and both join fields
+    are known, so the UI can offer aggregations only when they are needed.
+    """
+    try:
+        data = _parse_json_body(request)
+        layer = Layer.objects.get(id=int(data.get('layer_id')))
+        project_layer_ids = _project_layer_ids(data.get('project_id'))
+        _ensure_layers_in_project(project_layer_ids, layer)
+        _ensure_manageable_postgis(request, layer, require_flag=True)
+
+        results = {}
+        iconn, _source_name, _schema = layer.get_db_connection()
+        with iconn as con:
+            for idx, src in enumerate(data.get('sources') or []):
+                if not src or not src.get('layer_id'):
+                    continue
+                join_self = src.get('join_field_self') or src.get('join_field_current')
+                join_other = src.get('join_field_other')
+                if not join_self or not join_other:
+                    continue
+                alias = validate_identifier(src.get('alias') or ('t' + str(idx + 2)))
+                validate_identifier(join_self)
+                validate_identifier(join_other)
+                other = Layer.objects.get(id=int(src['layer_id']))
+                _ensure_layers_in_project(project_layer_ids, other)
+                if not _same_connection(layer, other):
+                    raise FormulaError(_('All layers must share the same database connection'))
+                if not _can_read(request, other):
+                    raise PermissionError(_('Not authorized to read related layer'))
+                o_source = other.source_name or other.name
+                o_schema = _layer_params(other).get('schema', 'public')
+                results[alias] = not _join_key_is_unique(con, o_schema, o_source, join_other)
+
+        return JsonResponse({
+            'status': 'ok',
+            'cardinality': {alias: ('many' if is_many else 'one')
+                            for alias, is_many in results.items()},
+            'one_to_many_aliases': [a for a, is_many in results.items() if is_many],
+        })
+    except PermissionError as exc:
+        return HttpResponseForbidden(json.dumps({'status': 'error', 'message': str(exc)}),
+                                     content_type='application/json')
+    except (FormulaError, Layer.DoesNotExist, TypeError, ValueError) as exc:
+        return _json_error(str(exc) or _('Layer not found'))
+    except Exception as exc:
+        logger.exception('join cardinality')
+        return _json_error(str(exc))
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def calculated_field_validate(request):
     """Validate formula and optionally units; return compiled info / preview sample."""
+    join_sources = None
     try:
         data = _parse_json_body(request)
         layer = Layer.objects.get(id=int(data.get('layer_id')))
@@ -446,47 +553,77 @@ def calculated_field_validate(request):
 
         iconn, source_name, schema = layer.get_db_connection()
         with iconn as con:
-            numeric, _info = _get_numeric_fields(con, schema, source_name)
-            allowed = set(numeric)
-            aliases = {'t1': (schema, source_name, layer)}
+            numeric, info = _get_numeric_fields(con, schema, source_name)
+            allowed = set()
+            resolved = []
+
             if sources:
-                for idx, src in enumerate(sources, start=2):
+                base_alias = 't1'
+                for f in numeric:
+                    allowed.add('{0}.{1}'.format(base_alias, f))
+                for idx, src in enumerate(sources):
                     other = Layer.objects.get(id=int(src['layer_id']))
                     _ensure_layers_in_project(project_layer_ids, other)
                     if not _same_connection(layer, other):
                         raise FormulaError(_('All layers must share the same database connection'))
                     if not _can_read(request, other):
                         raise PermissionError(_('Not authorized to read related layer'))
-                    o_source, o_schema = other.source_name or other.name, _layer_params(other).get('schema', 'public')
-                    alias = src.get('alias') or ('t' + str(idx))
-                    validate_identifier(alias)
+                    o_source = other.source_name or other.name
+                    o_schema = _layer_params(other).get('schema', 'public')
+                    alias = validate_identifier(src.get('alias') or ('t' + str(idx + 2)))
                     onum, _oinfo = _get_numeric_fields(con, o_schema, o_source)
                     for f in onum:
                         allowed.add('{0}.{1}'.format(alias, f))
-                    aliases[alias] = (o_schema, o_source, other)
-                for f in numeric:
-                    allowed.add('t1.{0}'.format(f))
+                    join_self = validate_identifier(
+                        src.get('join_field_self') or src.get('join_field_current'))
+                    join_other = validate_identifier(src.get('join_field_other'))
+                    resolved.append({
+                        'alias': alias,
+                        'schema': o_schema,
+                        'table': o_source,
+                        'join_self': join_self,
+                        'join_other': join_other,
+                    })
+                join_sources = _build_join_sources(con, resolved)
             else:
                 for f in numeric:
                     allowed.add(f)
 
             def resolver(name):
-                return _safe_quote_ident(name) if '.' not in name else '"{0}"."{1}"'.format(
-                    *name.split('.', 1))
+                if '.' not in name:
+                    return _safe_quote_ident(name)
+                alias, field = name.split('.', 1)
+                return '"{0}"."{1}"'.format(alias, field)
 
             compiled = compile_formula(
                 formula, allowed, resolver,
-                field_units=field_units, result_unit=data.get('unit'))
+                field_units=field_units, result_unit=data.get('unit'),
+                join_sources=join_sources, base_alias='t1')
 
             # The preview must show the same rows the attribute table is showing
-            all_columns = {f.get('name') or f.get('column_name') for f in _info}
-            where = _build_filter_where(data.get('filter'), all_columns)
+            all_columns = {f.get('name') or f.get('column_name') for f in info}
+            where = _build_filter_where(
+                data.get('filter'), all_columns, alias='t1' if sources else None)
 
-            # sample preview values
+            # sample preview values (works with correlated join subqueries)
             preview_rows = []
             try:
-                if not sources:
-                    cols = [sqlbuilder.Identifier(f) for f in compiled['referenced_fields'] if '.' not in f]
+                if sources:
+                    q = sqlbuilder.SQL(
+                        'SELECT ({expr})::double precision AS __result '
+                        'FROM {schema}.{table} AS t1 {where} LIMIT 5'
+                    ).format(
+                        expr=sqlbuilder.SQL(compiled['sql']),
+                        schema=sqlbuilder.Identifier(schema),
+                        table=sqlbuilder.Identifier(source_name),
+                        where=sqlbuilder.SQL('WHERE {0}').format(where) if where
+                        else sqlbuilder.SQL(''),
+                    )
+                else:
+                    cols = [
+                        sqlbuilder.Identifier(f)
+                        for f in compiled['referenced_fields'] if '.' not in f
+                    ]
                     if cols:
                         q = sqlbuilder.SQL(
                             'SELECT {cols}, ({expr})::double precision AS __result '
@@ -499,19 +636,23 @@ def calculated_field_validate(request):
                             where=sqlbuilder.SQL('WHERE {0}').format(where) if where
                             else sqlbuilder.SQL(''),
                         )
-                        con.cursor.execute(q)
-                        colnames = [d[0] for d in con.cursor.description]
-                        for row in con.cursor.fetchall():
-                            preview_rows.append(dict(zip(colnames, row)))
+                    else:
+                        q = None
+                if q is not None:
+                    con.cursor.execute(q)
+                    colnames = [d[0] for d in con.cursor.description]
+                    for row in con.cursor.fetchall():
+                        preview_rows.append(dict(zip(colnames, row)))
             except Exception:
                 logger.exception('preview failed')
 
             row_count = None
             try:
+                bare_where = _build_filter_where(data.get('filter'), all_columns)
                 count_q = sqlbuilder.SQL('SELECT count(*) FROM {schema}.{table} {where}').format(
                     schema=sqlbuilder.Identifier(schema),
                     table=sqlbuilder.Identifier(source_name),
-                    where=sqlbuilder.SQL('WHERE {0}').format(where) if where
+                    where=sqlbuilder.SQL('WHERE {0}').format(bare_where) if bare_where
                     else sqlbuilder.SQL(''),
                 )
                 con.cursor.execute(count_q)
@@ -519,6 +660,9 @@ def calculated_field_validate(request):
             except Exception:
                 logger.exception('row count failed')
 
+        many_aliases = [
+            alias for alias, meta in (join_sources or {}).items() if meta.get('is_many')
+        ]
         return JsonResponse({
             'status': 'ok',
             'referenced_fields': compiled['referenced_fields'],
@@ -526,15 +670,17 @@ def calculated_field_validate(request):
             'preview': preview_rows,
             'filtered': where is not None,
             'row_count': row_count,
+            'used_aggregates': compiled.get('used_aggregates', False),
+            'one_to_many_aliases': many_aliases,
         })
     except PermissionError as exc:
         return HttpResponseForbidden(json.dumps({'status': 'error', 'message': str(exc)}),
                                      content_type='application/json')
     except (FormulaError, Layer.DoesNotExist, TypeError, ValueError) as exc:
-        return _json_error(str(exc))
+        return _json_error(str(exc), extra=_one_to_many_hint(join_sources))
     except Exception as exc:
         logger.exception('validate calculated field')
-        return _json_error(str(exc))
+        return _json_error(str(exc), extra=_one_to_many_hint(join_sources))
 
 
 @api_view(['POST'])
@@ -550,6 +696,7 @@ def calculated_field_create(request):
     """
     created_column = None
     target_layer = None
+    join_sources = None
     try:
         data = _parse_json_body(request)
         layer_id = int(data.get('layer_id'))
@@ -632,7 +779,6 @@ def calculated_field_create(request):
                         raise PermissionError(_('Not authorized to read related layer'))
                     if not _same_connection(layer, other):
                         raise FormulaError(_('All layers must share the same database connection'))
-                    o_iconn, o_source, o_schema = other.get_db_connection()
                     # same connection object already open; use schema/table from other
                     o_params = _layer_params(other)
                     o_schema = o_params.get('schema', 'public')
@@ -643,10 +789,9 @@ def calculated_field_create(request):
                         q = '{0}.{1}'.format(alias, f)
                         allowed.add(q)
                         field_map[q] = (o_schema, o_source, f, alias)
-                    join_self = validate_identifier(src.get('join_field_self') or src.get('join_field_current'))
+                    join_self = validate_identifier(
+                        src.get('join_field_self') or src.get('join_field_current'))
                     join_other = validate_identifier(src.get('join_field_other'))
-                    # Ambiguity: joined (other) side must be unique for N-1 / 1-1
-                    _check_unique_join_keys(con, o_schema, o_source, join_other)
                     src['_resolved'] = {
                         'alias': alias,
                         'schema': o_schema,
@@ -655,6 +800,22 @@ def calculated_field_create(request):
                         'join_other': join_other,
                         'layer': other,
                     }
+
+                # Writing back to the base layer supports 1:N via aggregates
+                # (correlated subqueries). Writing into a joined layer still
+                # requires a deterministic 1:1 / N:1 lookup.
+                if target_layer.id == layer.id:
+                    join_sources = _build_join_sources(
+                        con, [src['_resolved'] for src in sources])
+                else:
+                    for src in sources:
+                        r = src['_resolved']
+                        # Destination side can be N in an N:1 write-back; only
+                        # extra lookup joins must stay unique.
+                        if r['layer'].id == target_layer.id:
+                            continue
+                        _check_unique_join_keys(
+                            con, r['schema'], r['table'], r['join_other'])
 
             def resolver(name):
                 meta = field_map.get(name)
@@ -667,7 +828,12 @@ def calculated_field_create(request):
 
             compiled = compile_formula(
                 formula, allowed, resolver,
-                field_units=field_units, result_unit=data.get('unit'))
+                field_units=field_units, result_unit=data.get('unit'),
+                join_sources=join_sources, base_alias='t1')
+            if target_layer.id != layer.id and compiled.get('used_aggregates'):
+                raise FormulaError(
+                    _('Aggregations can only be used when the result is stored '
+                      'on the current layer'))
             result_sql = '({0})::double precision'.format(compiled['sql'])
 
             existing_info = con.get_fields_info(t_source, schema=t_schema)
@@ -715,51 +881,67 @@ def calculated_field_create(request):
                     else sqlbuilder.SQL(''),
                 )
                 con.cursor.execute(update_q)
+            elif target_layer.id == layer.id:
+                # Base-layer destination: expression already embeds correlated
+                # subqueries for joins / aggregates, so no FROM join is needed.
+                target_alias = '__calculated_target'
+                rewritten = compiled['sql'].replace(
+                    '"t1".', '"{0}".'.format(target_alias))
+                row_filter = _build_filter_where(
+                    table_filter, base_columns, alias=target_alias)
+                result_sql2 = '({0})::double precision'.format(rewritten)
+                update_q = sqlbuilder.SQL(
+                    'UPDATE {schema}.{table} AS {target} '
+                    'SET {field} = {expr} {where}'
+                ).format(
+                    schema=sqlbuilder.Identifier(t_schema),
+                    table=sqlbuilder.Identifier(t_source),
+                    target=sqlbuilder.Identifier(target_alias),
+                    field=sqlbuilder.Identifier(field_name),
+                    expr=sqlbuilder.SQL(result_sql2),
+                    where=sqlbuilder.SQL('WHERE {0}').format(row_filter) if row_filter
+                    else sqlbuilder.SQL(''),
+                )
+                con.cursor.execute(update_q)
             else:
-                # Every JOIN is defined from t1 (the layer where the calculator
-                # was opened) to another alias. The destination may be t1 or
-                # exactly one of those joined aliases.
+                # Writing into a joined layer: classic UPDATE ... FROM join.
+                # Requires unique keys on the lookup side (checked above).
                 target_alias = '__calculated_target'
                 target_sources = [
                     src for src in sources
                     if src['_resolved']['layer'].id == target_layer.id
                 ]
-                if target_layer.id != layer.id and len(target_sources) != 1:
+                if len(target_sources) != 1:
                     raise FormulaError(
                         _('The destination layer must occur exactly once in the JOIN'))
 
                 from_clauses = []
                 where_parts = []
-                rewritten = compiled['sql']
-                if target_layer.id == layer.id:
-                    rewritten = rewritten.replace(
-                        '"t1".', '"{0}".'.format(target_alias))
-                else:
-                    target_r = target_sources[0]['_resolved']
-                    # Updating the joined side is only deterministic for a
-                    # one-to-one relation in this direction.
-                    _check_unique_join_keys(
-                        con, schema, source_name, target_r['join_self'])
-                    rewritten = rewritten.replace(
-                        '"{0}".'.format(target_r['alias']),
-                        '"{0}".'.format(target_alias))
-                    from_clauses.append(sqlbuilder.SQL(
-                        '{schema}.{table} AS t1'
-                    ).format(
-                        schema=sqlbuilder.Identifier(schema),
-                        table=sqlbuilder.Identifier(source_name),
-                    ))
-                    where_parts.append(sqlbuilder.SQL(
-                        't1.{js} = {target}.{jo}'
-                    ).format(
-                        js=sqlbuilder.Identifier(target_r['join_self']),
-                        target=sqlbuilder.Identifier(target_alias),
-                        jo=sqlbuilder.Identifier(target_r['join_other']),
-                    ))
+                target_r = target_sources[0]['_resolved']
+                # Updating the joined side is only deterministic for a
+                # one-to-one relation in this direction.
+                _check_unique_join_keys(
+                    con, schema, source_name, target_r['join_self'])
+                rewritten = compiled['sql'].replace(
+                    '"{0}".'.format(target_r['alias']),
+                    '"{0}".'.format(target_alias))
+                from_clauses.append(sqlbuilder.SQL(
+                    '{schema}.{table} AS t1'
+                ).format(
+                    schema=sqlbuilder.Identifier(schema),
+                    table=sqlbuilder.Identifier(source_name),
+                ))
+                where_parts.append(sqlbuilder.SQL(
+                    't1.{js} = {target}.{jo}'
+                ).format(
+                    js=sqlbuilder.Identifier(target_r['join_self']),
+                    target=sqlbuilder.Identifier(target_alias),
+                    jo=sqlbuilder.Identifier(target_r['join_other']),
+                ))
 
                 for src in sources:
                     r = src['_resolved']
-                    if target_layer.id != layer.id and r['layer'].id == target_layer.id:
+                    if r['layer'].id == target_layer.id:
                         continue
                     from_clauses.append(sqlbuilder.SQL(
                         '{schema}.{table} AS {alias}'
@@ -769,21 +951,15 @@ def calculated_field_create(request):
                         alias=sqlbuilder.Identifier(r['alias']),
                     ))
                     where_parts.append(sqlbuilder.SQL(
-                        '{base}.{js} = {alias}.{jo}'
+                        't1.{js} = {alias}.{jo}'
                     ).format(
-                        base=sqlbuilder.Identifier(
-                            target_alias if target_layer.id == layer.id else 't1'),
                         js=sqlbuilder.Identifier(r['join_self']),
                         alias=sqlbuilder.Identifier(r['alias']),
                         jo=sqlbuilder.Identifier(r['join_other']),
                     ))
 
-                # The filter always refers to the layer the calculator was
-                # opened from, which is the update target itself when the
-                # result goes back to that layer
                 row_filter = _build_filter_where(
-                    table_filter, base_columns,
-                    alias=target_alias if target_layer.id == layer.id else 't1')
+                    table_filter, base_columns, alias='t1')
                 if row_filter is not None:
                     where_parts.append(row_filter)
 
@@ -822,6 +998,10 @@ def calculated_field_create(request):
             'layer_name': target_layer.name,
             'destination_mode': destination_mode,
             'result_dimension': compiled.get('result_dimension'),
+            'one_to_many_aliases': [
+                alias for alias, meta in (join_sources or {}).items()
+                if meta.get('is_many')
+            ],
         })
 
     except PermissionError as exc:
@@ -836,7 +1016,7 @@ def calculated_field_create(request):
                     con.delete_column(created_column[0], created_column[1], created_column[2])
         except Exception:
             logger.exception('cleanup column failed')
-        return _json_error(str(exc))
+        return _json_error(str(exc), extra=_one_to_many_hint(join_sources))
     except Exception as exc:
         logger.exception('create calculated field')
-        return _json_error(str(exc))
+        return _json_error(str(exc), extra=_one_to_many_hint(join_sources))
