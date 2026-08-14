@@ -1636,7 +1636,7 @@ def layer_add_with_group(request, layergroup_id):
                 newRecord.visible = is_visible
                 newRecord.queryable = is_queryable
                 newRecord.allow_download = allow_download
-                newRecord.allow_calculated_fields = allow_calculated_fields
+                newRecord.allow_calculated_fields = allow_calculated_fields if datastore.type == 'v_PostGIS' else False
                 newRecord.cached = cached
                 newRecord.single_image = single_image
                 newRecord.abstract = abstract
@@ -1915,7 +1915,7 @@ def layer_update(request, layer_id):
             layer.abstract = abstract
             layer.queryable = is_queryable
             layer.allow_download = allow_download
-            layer.allow_calculated_fields = allow_calculated_fields
+            layer.allow_calculated_fields = allow_calculated_fields if ds.type == 'v_PostGIS' else False
             layer.single_image = single_image
             layer.layer_group = layer_group
             max_order = layer_group.layer_set.aggregate(Max('order')).get('order__max')
@@ -4408,7 +4408,7 @@ def layer_create_with_group(request, layergroup_id):
                         visible = is_visible,
                         queryable = is_queryable,
                         allow_download = allow_download,
-                        allow_calculated_fields = allow_calculated_fields,
+                        allow_calculated_fields = allow_calculated_fields if datastore.type == 'v_PostGIS' else False,
                         cached = cached,
                         single_image = single_image
                     )

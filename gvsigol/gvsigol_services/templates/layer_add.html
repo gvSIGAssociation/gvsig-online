@@ -173,7 +173,7 @@
 										<input type="checkbox" name="allow_download"  id="allow_download"/>
 										<label for="allow_download">{% trans "Allow downloads" %}</label>
 									</div>
-									<div class="col-md-4 form-group">
+									<div class="col-md-4 form-group calculated_fields_property" style="display:none;">
 										<input type="checkbox" name="allow_calculated_fields"  id="allow_calculated_fields"/>
 										<label for="allow_calculated_fields">{% trans "Allow calculated attributes" %}</label>
 									</div>
@@ -659,6 +659,13 @@
 
 			if (id_datastore in datastore_types) {
 				var isVectorPostGIS = datastore_types[id_datastore] === 'v_PostGIS';
+
+				if (isVectorPostGIS) {
+					$(".calculated_fields_property").css("display", "block");
+				} else {
+					$(".calculated_fields_property").css("display", "none");
+					$("#allow_calculated_fields").prop('checked', false);
+				}
 				
 				if(datastore_types[id_datastore].startsWith('v_')){
 					$(".vector_fields").css("display", "block");
@@ -698,7 +705,7 @@
 				$(".image_mosaic_tmp_fields").css("display", "block");
 			}*/
 
-		});
+		}).trigger('change');
 
 		$("#id_name").change(function() {
 			var id_resource = $('option:selected', $(this)).val();

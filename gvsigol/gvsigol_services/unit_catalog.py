@@ -176,13 +176,17 @@ def power_dimension(base_dim, exponent):
 
 
 def apply_result_unit(sql, result_dimension, result_unit):
-    """Convert a SQL fragment from base units into ``result_unit`` when possible."""
+    """Convert a SQL fragment from base units into ``result_unit`` when possible.
+
+    If the formula has no dimension (a numeric literal, or fields without
+    units), there is nothing to convert: keep the requested unit as metadata
+    and leave the SQL unchanged.
+    """
     if not result_unit:
         return sql, result_dimension, None
     target = get_unit(result_unit)
     if result_dimension is None:
-        raise _formula_error(
-            _('The formula is dimensionless; a result unit cannot be applied'))
+        return sql, target['dimension'], target['code']
     if target['dimension'] != result_dimension:
         raise _formula_error(
             _('Result unit "{0}" does not match the formula dimension "{1}"').format(

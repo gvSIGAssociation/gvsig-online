@@ -270,7 +270,7 @@ class _FormulaCompiler(ast.NodeVisitor):
                 _('Aggregations must target a field from a joined layer '
                   '(e.g. {0}(t2.campo))').format(name))
 
-        alias, _field = qualified.split('.', 1)
+        alias, field = qualified.split('.', 1)
         if alias == self.base_alias:
             raise FormulaError(
                 _('Aggregations must target a field from a joined layer, not {0}').format(
@@ -288,12 +288,25 @@ class _FormulaCompiler(ast.NodeVisitor):
         finally:
             self._aggregate_depth -= 1
 
+        # Bare column used to skip NULLs explicitly. PostgreSQL aggregates
+        # already ignore NULLs, but we keep the filter so the intent is clear
+        # and COUNT can return NULL when every matched value is NULL.
+        bare_sql = '{0}.{1}'.format(_quote_ident(alias), _quote_ident(field))
         pg_fn = name.upper()
         if name == 'count':
-            inner = 'COUNT({0})'.format(field_sql)
+            # COUNT ignores NULLs; NULLIF turns "no non-null values" into NULL
+            # (same rule as AVG/SUM/MIN/MAX when every value is NULL).
+            inner = 'NULLIF(COUNT({0}) FILTER (WHERE {0} IS NOT NULL), 0)'.format(
+                bare_sql)
             out_dim = None
         else:
-            inner = '{0}({1})'.format(pg_fn, _as_double(field_sql))
+            inner = (
+                '{fn}({value}) FILTER (WHERE {bare} IS NOT NULL)'
+            ).format(
+                fn=pg_fn,
+                value=_as_double(field_sql),
+                bare=bare_sql,
+            )
             out_dim = field_dim if name in _AGGREGATE_DIMENSION_PRESERVING else None
 
         return self._correlated_subquery(alias, inner), out_dim
@@ -417,7 +430,9 @@ def compile_formula(expression, allowed_fields, field_sql_resolver, field_units=
 
     Field values are converted to catalogue base units before arithmetic.
     If ``result_unit`` is provided and matches the resulting dimension, the
-    SQL is converted from the base into that unit.
+    SQL is converted from the base into that unit. If the formula does not
+    use any field with a known unit, ``result_unit`` is stored as metadata
+    and the SQL is left unchanged.
 
     When ``join_sources`` is provided, related fields are emitted as
     correlated subqueries so 1:N joins can be reduced with aggregates.

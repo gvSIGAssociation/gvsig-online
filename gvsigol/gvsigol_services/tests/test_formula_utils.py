@@ -84,6 +84,31 @@ class FormulaUtilsTests(SimpleTestCase):
                 result_unit='hab',
             )
 
+    def test_literal_formula_keeps_result_unit_without_converting(self):
+        result = compile_formula('5', set(), _resolver, result_unit='m')
+        self.assertEqual(result['sql'], '5.0')
+        self.assertEqual(result['result_unit'], 'm')
+        self.assertEqual(result['result_dimension'], 'length')
+        self.assertEqual(result['referenced_fields'], [])
+
+    def test_field_without_units_keeps_result_unit_without_converting(self):
+        result = compile_formula('a', {'a'}, _resolver, result_unit='m')
+        self.assertEqual(result['sql'], '"a"')
+        self.assertEqual(result['result_unit'], 'm')
+        self.assertEqual(result['result_dimension'], 'length')
+
+    def test_dimensionless_ratio_keeps_result_unit_without_converting(self):
+        result = compile_formula(
+            'a / b',
+            {'a', 'b'},
+            _resolver,
+            field_units={'a': 'hab', 'b': 'hab'},
+            result_unit='m',
+        )
+        self.assertEqual(result['result_unit'], 'm')
+        self.assertEqual(result['result_dimension'], 'length')
+        self.assertNotIn('/ 1.0', result['sql'])
+
     def test_rejects_unknown_function_calls(self):
         with self.assertRaises(FormulaError):
             compile_formula('pg_sleep(a)', {'a'}, _resolver)
@@ -170,6 +195,7 @@ class FormulaUtilsTests(SimpleTestCase):
         )
         self.assertTrue(result['used_aggregates'])
         self.assertIn('SUM(', result['sql'])
+        self.assertIn('FILTER (WHERE "t2"."attribute" IS NOT NULL)', result['sql'])
         self.assertIn('FROM "public"."related_layer" AS "t2"', result['sql'])
         self.assertIn('"t2"."join_key" = "t1"."join_key"', result['sql'])
 
@@ -234,6 +260,38 @@ class FormulaUtilsTests(SimpleTestCase):
                 join_sources=join_sources,
             )
             self.assertIn('{0}('.format(sql_fn), result['sql'])
+            self.assertIn('FILTER (WHERE "t2"."attribute" IS NOT NULL)', result['sql'])
+            if fn == 'count':
+                self.assertIn('NULLIF(', result['sql'])
+
+    def test_aggregates_skip_nulls_explicitly(self):
+        """NULLs must not enter the aggregate; all-NULL groups yield NULL."""
+        join_sources = {
+            't2': {
+                'schema': 'public',
+                'table': 'related_layer',
+                'join_self': 'join_key',
+                'join_other': 'join_key',
+                'is_many': True,
+            }
+        }
+        result = compile_formula(
+            'avg(t2.attribute)',
+            {'t2.attribute'},
+            _resolver,
+            join_sources=join_sources,
+        )
+        self.assertIn('AVG(', result['sql'])
+        self.assertIn('FILTER (WHERE "t2"."attribute" IS NOT NULL)', result['sql'])
+        # COUNT of only NULLs (or no matches) must be NULL, not 0
+        count_result = compile_formula(
+            'count(t2.attribute)',
+            {'t2.attribute'},
+            _resolver,
+            join_sources=join_sources,
+        )
+        self.assertIn('NULLIF(COUNT("t2"."attribute") FILTER (WHERE "t2"."attribute" IS NOT NULL), 0)',
+                      count_result['sql'])
 
     def test_sum_mixed_with_base_field(self):
         join_sources = {
