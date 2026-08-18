@@ -272,6 +272,17 @@ def _build_filter_where(filter_data, columns, alias=None):
     return sqlbuilder.SQL('({0})').format(joiner.join(parts))
 
 
+def _zero_divisor_predicate(divisor_sqls):
+    """WHERE fragment true when any compiled divisor equals 0."""
+    if not divisor_sqls:
+        return None
+    parts = [
+        sqlbuilder.SQL('(({expr}) = 0)').format(expr=sqlbuilder.SQL(fragment))
+        for fragment in divisor_sqls
+    ]
+    return sqlbuilder.SQL('({0})').format(sqlbuilder.SQL(' OR ').join(parts))
+
+
 def _read_conf(conf_manager):
     """
     layer.conf holds a dict once refresh_field_conf() has run, but a repr
@@ -660,6 +671,35 @@ def calculated_field_validate(request):
             except Exception:
                 logger.exception('row count failed')
 
+            division_by_zero_count = 0
+            zero_pred = _zero_divisor_predicate(compiled.get('divisor_sqls'))
+            if zero_pred is not None:
+                try:
+                    if where is not None:
+                        zero_where = sqlbuilder.SQL('WHERE {0} AND {1}').format(where, zero_pred)
+                    else:
+                        zero_where = sqlbuilder.SQL('WHERE {0}').format(zero_pred)
+                    if sources:
+                        zero_q = sqlbuilder.SQL(
+                            'SELECT count(*) FROM {schema}.{table} AS t1 {where}'
+                        ).format(
+                            schema=sqlbuilder.Identifier(schema),
+                            table=sqlbuilder.Identifier(source_name),
+                            where=zero_where,
+                        )
+                    else:
+                        zero_q = sqlbuilder.SQL(
+                            'SELECT count(*) FROM {schema}.{table} {where}'
+                        ).format(
+                            schema=sqlbuilder.Identifier(schema),
+                            table=sqlbuilder.Identifier(source_name),
+                            where=zero_where,
+                        )
+                    con.cursor.execute(zero_q)
+                    division_by_zero_count = con.cursor.fetchone()[0]
+                except Exception:
+                    logger.exception('division by zero count failed')
+
         many_aliases = [
             alias for alias, meta in (join_sources or {}).items() if meta.get('is_many')
         ]
@@ -670,6 +710,7 @@ def calculated_field_validate(request):
             'preview': preview_rows,
             'filtered': where is not None,
             'row_count': row_count,
+            'division_by_zero_count': division_by_zero_count,
             'used_aggregates': compiled.get('used_aggregates', False),
             'one_to_many_aliases': many_aliases,
         })

@@ -150,6 +150,8 @@ class _FormulaCompiler(ast.NodeVisitor):
         self.result_dimension = None
         self._aggregate_depth = 0
         self.used_aggregates = False
+        # SQL fragments of divisors (before NULLIF) so callers can count zeros
+        self.divisor_sqls = []
 
     def compile(self, expression):
         expression = (expression or '').strip()
@@ -187,8 +189,11 @@ class _FormulaCompiler(ast.NodeVisitor):
             op = '*'
         else:
             op = '/'
-            # Guard division by zero at SQL level with NULLIF when right is a plain field/number is hard;
-            # wrap divisor.
+            if _literal_number(node.right) == 0:
+                raise FormulaError(_('Division by zero is not allowed'))
+            # Field/expression divisors: NULLIF turns 0 into NULL so PostgreSQL
+            # does not abort the whole UPDATE. Literal 0 is rejected above.
+            self.divisor_sqls.append(_as_double(right_sql))
             right_sql = 'NULLIF(({0})::double precision, 0)'.format(right_sql)
         return '(({0}) {1} ({2}))'.format(left_sql, op, right_sql), dim
 
@@ -440,7 +445,7 @@ def compile_formula(expression, allowed_fields, field_sql_resolver, field_units=
     Returns
     -------
     dict with keys: sql, referenced_fields, result_dimension, result_unit,
-    used_aggregates
+    used_aggregates, divisor_sqls
     """
     allowed = set(allowed_fields)
     compiler = _FormulaCompiler(
@@ -455,6 +460,7 @@ def compile_formula(expression, allowed_fields, field_sql_resolver, field_units=
         'result_dimension': dimension,
         'result_unit': unit_code,
         'used_aggregates': compiler.used_aggregates,
+        'divisor_sqls': list(compiler.divisor_sqls),
     }
 
 

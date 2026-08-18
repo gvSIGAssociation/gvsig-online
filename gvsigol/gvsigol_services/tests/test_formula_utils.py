@@ -347,3 +347,14 @@ class FormulaUtilsTests(SimpleTestCase):
                 _resolver,
                 join_sources=join_sources,
             )
+
+    def test_literal_division_by_zero_rejected(self):
+        for expression in ('a / 0', 'a / 0.0', 'a / (0)', 'a / +0'):
+            with self.assertRaises(FormulaError):
+                compile_formula(expression, {'a'}, _resolver)
+
+    def test_field_division_keeps_nullif_and_divisor_sqls(self):
+        result = compile_formula('a / b', {'a', 'b'}, _resolver)
+        self.assertIn('NULLIF', result['sql'])
+        self.assertEqual(len(result['divisor_sqls']), 1)
+        self.assertIn('"b"', result['divisor_sqls'][0])
