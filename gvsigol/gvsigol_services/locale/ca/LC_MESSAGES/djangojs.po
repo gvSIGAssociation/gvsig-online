@@ -438,6 +438,9 @@ msgstr "Seleccioneu un càlcul..."
 msgid "Please select a calculation for the calculated field"
 msgstr "Si us plau, seleccioneu un càlcul per al camp calculat"
 
+msgid "There is a conflict between the field type and the selected trigger."
+msgstr "Hi ha un conflicte entre el tipus de camp i el disparador seleccionat."
+
 #~ msgid "true"
 #~ msgstr "Veritable"
 

@@ -4459,6 +4459,10 @@ def layer_create_with_group(request, layergroup_id):
                             field_enum.multiple = True if i['type'] == 'multiple_enumeration' else False
                             field_enum.save()
                         if i.get('calculation'):
+                            conflict = utils.get_field_calculation_conflict(
+                                i.get('type'), i.get('calculation'), i.get('calculationLabel'))
+                            if conflict:
+                                raise ValueError(conflict)
                             try:
                                 calculation = i.get('calculation')
                                 procedure = TriggerProcedure.objects.get(signature=calculation)
@@ -4469,8 +4473,9 @@ def layer_create_with_group(request, layergroup_id):
                                 trigger.save()
 
                                 trigger.install()
-                            except:
+                            except Exception:
                                 logger.exception("Error creating trigger for calculated field")
+                                raise
 
                     featuretype = {
                         'max_features': maxFeatures
@@ -4504,7 +4509,7 @@ def layer_create_with_group(request, layergroup_id):
                 try:
                     msg = e.get_message()
                 except Exception:
-                    msg = _("Error: layer could not be published")
+                    msg = str(e) or _("Error: layer could not be published")
                 # FIXME: the backend should raise more specific exceptions to identify the cause (e.g. layer exists, backend is offline)
                 form.add_error(None, msg)
 
@@ -8637,6 +8642,17 @@ def layer_trigger_assign(request):
         # Si es campo calculado, el campo es obligatorio
         if trigger.is_calculated_field and not field_name:
             return JsonResponse({'error': _('Field name is required for calculated field triggers')}, status=400)
+
+        if trigger.is_calculated_field and field_name:
+            enum = LayerFieldEnumeration.objects.filter(layer=layer, field=field_name).first()
+            field_type = None
+            if enum:
+                field_type = 'multiple_enumeration' if enum.multiple else 'enumeration'
+            if field_type:
+                conflict = utils.get_field_calculation_conflict(
+                    field_type, trigger.name, trigger.description)
+                if conflict:
+                    return JsonResponse({'error': conflict}, status=400)
         
         # Verificar que el campo no esté ya usado por otro trigger calculado
         if trigger.is_calculated_field and field_name:
@@ -8836,6 +8852,11 @@ def field_add_with_trigger(request):
         # Verificar que es un trigger de campo calculado
         if not trigger.is_calculated_field:
             return JsonResponse({'error': _('Selected trigger is not a calculated field trigger')}, status=400)
+
+        conflict = utils.get_field_calculation_conflict(
+            field_type, trigger.name, trigger.description)
+        if conflict:
+            return JsonResponse({'error': conflict}, status=400)
         
         # Verificar que el campo no esté ya usado por otro trigger calculado
         if LayerConnectionTrigger.objects.filter(
@@ -9541,7 +9562,7 @@ def db_add_field(request):
         try:
             field_name = request.POST.get('field').lower()
             if _valid_sql_name_regex.search(field_name) == None:
-                utils.get_exception(400, 'Invalid field name: {fname}. Fields must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers'.format(fname=field_name))
+                return utils.get_exception(400, 'Invalid field name: {fname}. Fields must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers'.format(fname=field_name))
             field_type = request.POST.get('type')
             layer_id = request.POST.get('layer_id')
             enumkey = request.POST.get('enumkey')
@@ -9550,6 +9571,10 @@ def db_add_field(request):
             type_params = request.POST.get('type_params', '{}')
             field_format = request.POST.get('field_format', '{}')
             layer = Layer.objects.get(id=layer_id)
+
+            conflict = utils.get_field_calculation_conflict(field_type, calculation)
+            if conflict:
+                return utils.get_exception(400, conflict)
 
             for ctrl_field in settings.CONTROL_FIELDS:
                 if field_name == ctrl_field.get('name'):
@@ -9590,8 +9615,9 @@ def db_add_field(request):
                     trigger.save()
 
                     trigger.install()
-                except:
+                except Exception:
                     logger.exception("Error creating trigger for calculated field")
+                    raise
 
             expose_pks = gs.datastore_check_exposed_pks(layer.datastore)
             gs.reload_featuretype(layer, nativeBoundingBox=False, latLonBoundingBox=False)
@@ -9717,12 +9743,23 @@ def db_add_field(request):
             logger.exception(_('Error creating field. Cause: {0}').format(str(e)))
 
             # clean potential half created field
-            if layer:
-                LayerFieldEnumeration.objects.filter(layer=layer, field=field_name).delete()
-            iconn = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
-            with iconn as con:
-                schema = params.get('schema', 'public')
-                con.delete_column(schema, layer.source_name, field_name)
+            try:
+                if layer:
+                    LayerFieldEnumeration.objects.filter(layer=layer, field=field_name).delete()
+                    for trigger_def in Trigger.objects.filter(layer=layer, field=field_name):
+                        try:
+                            trigger_def.drop()
+                        except Exception:
+                            logger.exception("Error dropping trigger while rolling back field creation")
+                        trigger_def.delete()
+                    if 'params' in locals() and params:
+                        iconn = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
+                        with iconn as con:
+                            schema = params.get('schema', 'public')
+                            con.delete_column(schema, layer.source_name, field_name)
+            except Exception:
+                logger.exception("Error rolling back field creation")
+            return utils.get_exception(400, _('Error creating field. Cause: {0}').format(str(e)))
 
     return utils.get_exception(400, 'Error in the input params')
 

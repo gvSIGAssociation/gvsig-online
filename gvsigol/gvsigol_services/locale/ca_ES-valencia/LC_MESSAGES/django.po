@@ -4194,6 +4194,10 @@ msgstr "Error en obtenir el format del camp. Causa: {0}"
 msgid "Field type not supported"
 msgstr "Tipus de camp no admès"
 
+#: gvsigol_services/utils.py
+msgid "There is a conflict between the field type and the selected trigger."
+msgstr "Hi ha un conflicte entre el tipus de camp i el disparador seleccionat."
+
 #: gvsigol_services/views.py:9311
 #, python-brace-format
 msgid "Error adding field. Probably the field \"{0}\" already exists. Database message: {1}"

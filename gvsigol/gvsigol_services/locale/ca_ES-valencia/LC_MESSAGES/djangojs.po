@@ -75,6 +75,9 @@ msgstr ""
 "Nom no vàlid: els identificadors han de començar amb una lletra o un subratllat (_). Els caràcters posteriors poden ser lletres, guions "
 "baixos o números"
 
+msgid "There is a conflict between the field type and the selected trigger."
+msgstr "Hi ha un conflicte entre el tipus de camp i el disparador seleccionat."
+
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:2 gvsigol_services/static/js/lib/_trans.gvsigol.js:98
 msgid "Tiles processed"
 msgstr "Tessel·les processades"

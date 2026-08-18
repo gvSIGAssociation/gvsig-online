@@ -975,6 +975,58 @@ def get_exception(code, msg):
     response.status_code = code
     return response
 
+
+_ENUM_LIKE_FIELD_TYPES = {
+    'enumeration', 'multiple_enumeration', 'multiple enumeration',
+    'form', 'cd_json', 'cd json',
+}
+_NUMERIC_FIELD_TYPES = {
+    'integer', 'bigint', 'smallint', 'double', 'double precision',
+    'numeric', 'decimal', 'real', 'float', 'float4', 'float8',
+    'int2', 'int4', 'int8', 'serial', 'bigserial', 'smallserial',
+}
+_TEXT_FIELD_TYPES = {
+    'character varying', 'character_varying', 'varchar', 'character',
+    'char', 'text',
+}
+_NUMERIC_CALCULATION_HINTS = (
+    'area', 'length', 'perimeter', 'longitud', 'perimetro',
+    'coord', 'st_x', 'st_y', 'st_z', 'gol_area', 'calc_area',
+    'calc_length', 'calc_perimeter',
+)
+_TEXT_CALCULATION_HINTS = (
+    'geocoder', 'address', 'direccion', 'cartociudad',
+)
+
+
+def _normalize_field_type(field_type):
+    return ' '.join((field_type or '').strip().lower().replace('-', '_').replace('_', ' ').split())
+
+
+def get_field_calculation_conflict(field_type, calculation, calculation_label=None):
+    """
+    Return an error message when a calculated trigger is not compatible with
+    the chosen field type (e.g. enumeration + area), or None if valid.
+    """
+    if not calculation:
+        return None
+    ftype = _normalize_field_type(field_type)
+    calc_text = ' '.join(filter(None, [calculation, calculation_label])).lower()
+    conflict_msg = _('There is a conflict between the field type and the selected trigger.')
+
+    if ftype in _ENUM_LIKE_FIELD_TYPES or ftype.replace(' ', '_') in _ENUM_LIKE_FIELD_TYPES:
+        return conflict_msg
+
+    if any(hint in calc_text for hint in _NUMERIC_CALCULATION_HINTS):
+        if ftype not in _NUMERIC_FIELD_TYPES:
+            return conflict_msg
+
+    if any(hint in calc_text for hint in _TEXT_CALCULATION_HINTS):
+        if ftype not in _TEXT_FIELD_TYPES:
+            return conflict_msg
+
+    return None
+
 def check_schema_exists(schema):
     dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
     dbport = settings.GVSIGOL_USERS_CARTODB['dbport']
