@@ -4982,7 +4982,7 @@ msgstr ""
 
 #: gvsigol_services/views.py:3957 gvsigol_services/views.py:4096
 msgid "Layer group name already exists"
-msgstr "El nombre del grupo de capas ya exsite"
+msgstr "El nombre del grupo de capas ya existe"
 
 #: gvsigol_services/views.py:4457
 msgid ""

@@ -3979,7 +3979,7 @@ def layergroup_add_with_project(request, project_id):
                 response['redirect'] = from_redirect
             elif redirect_var:
                 response['redirect'] = redirect_var
-            return render(request, 'layergroup_add.html', redirect_var)
+            return render(request, 'layergroup_add.html', response)
 
         if LayerGroup.objects.filter(name=name).exists():
             message = _('Layer group name already exists')
@@ -3988,7 +3988,7 @@ def layergroup_add_with_project(request, project_id):
                 response['redirect'] = from_redirect
             elif redirect_var:
                 response['redirect'] = redirect_var
-            return render(request, 'layergroup_add.html', redirect_var)
+            return render(request, 'layergroup_add.html', response)
 
         layergroup = LayerGroup(
             server_id = server_id,
@@ -7775,12 +7775,24 @@ def connection_test(request):
         
         if conn_type in ('PostGIS', 'PostgreSQL'):
             try:
+                user = request.POST.get('user', '')
+                password = request.POST.get('password', '')
+                host = request.POST.get('host', '')
+                port = request.POST.get('port', '')
+                database = request.POST.get('database', '')
+                # DEBUG temporal: ver si el $ / \ de la contraseña llega bien
+                print('=== connection_test DEBUG ===')
+                print('host=%r port=%r database=%r user=%r' % (host, port, database, user))
+                print('password=%r' % (password,))
+                print('password chars:', [c for c in password])
+                print('password len:', len(password))
+                print('=============================')
                 conn = psycopg2.connect(
-                    user=request.POST.get('user', ''),
-                    password=request.POST.get('password', ''),
-                    host=request.POST.get('host', ''),
-                    port=request.POST.get('port', ''),
-                    database=request.POST.get('database', '')
+                    user=user,
+                    password=password,
+                    host=host,
+                    port=port,
+                    database=database
                 )
                 conn.close()
                 return JsonResponse({'success': True, 'message': _('Connection successful')})
