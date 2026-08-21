@@ -137,7 +137,8 @@ function getTaskParamsEntry(id) {
         return null;
     }
     for (var i = 0; i < jsonParams.length; i++) {
-        if (jsonParams[i].id === id) {
+        // Loose equality: draw2d / restored workspace ids may differ in type
+        if (jsonParams[i].id == id) {
             return jsonParams[i];
         }
     }
@@ -1066,6 +1067,33 @@ function applySchemaHandler(typeName, inputSchemas, params) {
 }
 
 /**
+ * True when the edge/input schema has at least one usable column name.
+ * Empty schemas (new mid-flow transformer not configured yet) must not
+ * wipe stored selections, overwrite schema-old, or mark nodes invalid.
+ */
+function hasUsableSchemaColumns(schema) {
+    if (schema === undefined || schema === null) {
+        return false;
+    }
+    // Multi-input: array of per-port column lists
+    if (Array.isArray(schema) && schema.length && Array.isArray(schema[0])) {
+        for (var i = 0; i < schema.length; i++) {
+            if (hasUsableSchemaColumns(schema[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+    var cols = schemaAsColumnList(schema);
+    for (var j = 0; j < cols.length; j++) {
+        if (cols[j] !== undefined && cols[j] !== null && String(cols[j]).length) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
  * Propagate schemas forward from startNodeId along the canvas DAG.
  * @param {string} startNodeId
  * @param {object} canvasCtxt draw2d canvas
@@ -1117,6 +1145,15 @@ function propagateSchemaFrom(startNodeId, canvasCtxt, options) {
             continue;
         }
 
+        // Upstream not ready (e.g. Calculator just inserted, not Accept'ed):
+        // keep previous schema / params / gear; only republish known output if any.
+        if (!hasUsableSchemaColumns(inputSchemas)) {
+            if (params.schema !== undefined) {
+                passSchemaToEdgeConnected(nodeId, listLabel, params.schema, canvasCtxt);
+            }
+            continue;
+        }
+
         var result = applySchemaHandler(typeName, inputSchemas, params);
 
         params['schema-old'] = result.schemaOld;
@@ -1157,6 +1194,8 @@ function commitTaskSchema(ID, taskJson, schemaOut, canvasCtxt, icon, configuredC
 
 /**
  * Refill a select with schema columns while preserving still-valid selections.
+ * If the incoming schema is empty (upstream not configured yet), leave the
+ * current options and selection untouched so mid-flow inserts do not wipe config.
  */
 function refillSelectPreserving($select, columns, previousSelected) {
     if (!$select || !$select.length) {
@@ -1169,10 +1208,37 @@ function refillSelectPreserving($select, columns, previousSelected) {
     } else if (columns.length && Array.isArray(columns[0])) {
         columns = columns[0].slice();
     }
+
+    var usable = [];
+    for (var u = 0; u < columns.length; u++) {
+        if (columns[u] !== undefined && columns[u] !== null && String(columns[u]).length) {
+            usable.push(columns[u]);
+        }
+    }
     var prev = previousSelected;
-    if (prev === undefined) {
+    if (prev === undefined || prev === null || prev === '') {
         prev = $select.val();
     }
+    // Upstream empty / not ready: do not destroy existing options or selection.
+    // If the select was already wiped, seed it with the stored value so the user
+    // still sees what was configured (e.g. after inserting a mid-flow transformer).
+    if (!usable.length) {
+        if (prev !== null && prev !== undefined && prev !== '') {
+            var existing = $select.find('option').length;
+            if (!existing) {
+                var seed = Array.isArray(prev) ? prev : [prev];
+                for (var s = 0; s < seed.length; s++) {
+                    if (seed[s] === undefined || seed[s] === null || seed[s] === '') {
+                        continue;
+                    }
+                    $select.append($('<option></option>').text(seed[s]).val(seed[s]));
+                }
+                $select.val(Array.isArray(prev) ? seed : prev);
+            }
+        }
+        return;
+    }
+    columns = usable;
     // Destroy select2 temporarily so option DOM updates apply cleanly
     var hadSelect2 = false;
     try {
@@ -1184,9 +1250,6 @@ function refillSelectPreserving($select, columns, previousSelected) {
 
     $select.empty();
     for (var i = 0; i < columns.length; i++) {
-        if (columns[i] === undefined || columns[i] === null) {
-            continue;
-        }
         $select.append($('<option></option>').text(columns[i]).val(columns[i]));
     }
     if (prev !== null && prev !== undefined && prev !== '') {
@@ -1202,6 +1265,15 @@ function refillSelectPreserving($select, columns, previousSelected) {
             }
         } else if (columns.indexOf(prev) !== -1) {
             $select.val(prev);
+        } else {
+            // Coerce string match (e.g. stored value vs option text)
+            var prevStr = String(prev);
+            for (var k = 0; k < columns.length; k++) {
+                if (String(columns[k]) === prevStr) {
+                    $select.val(columns[k]);
+                    break;
+                }
+            }
         }
     }
     if (hadSelect2) {
@@ -1224,4 +1296,22 @@ function getStoredParamValue(nodeId, paramKey) {
         return undefined;
     }
     return entry.parameters[0][paramKey];
+}
+
+/**
+ * Prefer the current select value; if empty (schema not ready when modal was
+ * opened), fall back to the last stored param so Accept does not wipe config.
+ */
+function getSelectValueOrStored($select, nodeId, paramKey) {
+    var val = $select && $select.length ? $select.val() : undefined;
+    if (val !== undefined && val !== null && val !== '') {
+        if (Array.isArray(val)) {
+            if (val.length) {
+                return val;
+            }
+        } else {
+            return val;
+        }
+    }
+    return getStoredParamValue(nodeId, paramKey);
 }
