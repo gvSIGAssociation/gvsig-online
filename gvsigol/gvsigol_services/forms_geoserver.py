@@ -28,7 +28,7 @@ from .models import Workspace, Datastore, LayerGroup
 from gvsigol.settings import SUPPORTED_ENCODINGS
 from gvsigol_core import utils as core_utils
 import json
-from gvsigol_services.utils import get_user_layergroups
+from gvsigol_services.utils import get_user_layergroups, get_field_calculation_conflict
 from .shp2postgis import MODE_APPEND, MODE_CREATE, MODE_OVERWRITE
 
 supported_encodings = tuple((x,x) for x in SUPPORTED_ENCODINGS)
@@ -225,4 +225,11 @@ class CreateFeatureTypeForm(forms.Form):
                 cleaned_data['fields'] = json.loads(fields)
             except:
                 self.add_error('connection_params', _("Error: Invalid field definition"))
+                return cleaned_data
+            for field in cleaned_data['fields']:
+                conflict = get_field_calculation_conflict(
+                    field.get('type'), field.get('calculation'), field.get('calculationLabel'))
+                if conflict:
+                    self.add_error(None, conflict)
+                    break
         return cleaned_data

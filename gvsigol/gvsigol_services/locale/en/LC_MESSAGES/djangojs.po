@@ -438,5 +438,8 @@ msgstr ""
 msgid "Please select a calculation for the calculated field"
 msgstr ""
 
+msgid "There is a conflict between the field type and the selected trigger."
+msgstr "There is a conflict between the field type and the selected trigger."
+
 #~ msgid "too_many_files"
 #~ msgstr "Too many files to download. Reduce the number of zoom levels or make the project size smaller"

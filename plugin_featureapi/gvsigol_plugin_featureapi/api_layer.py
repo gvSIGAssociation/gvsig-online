@@ -680,6 +680,10 @@ def layer_create(request, layer_group_id):
                         field_enum.multiple = True if i['type'] == 'multiple_enumeration' else False
                         field_enum.save()
                     if i.get('calculation'):
+                        conflict = services_utils.get_field_calculation_conflict(
+                            i.get('type'), i.get('calculation'), i.get('calculationLabel'))
+                        if conflict:
+                            raise HttpException(400, conflict)
                         try:
                             calculation = i.get('calculation')
                             procedure = TriggerProcedure.objects.get(signature=calculation)
@@ -690,6 +694,8 @@ def layer_create(request, layer_group_id):
                             trigger.save()
                             
                             trigger.install()
+                        except HttpException:
+                            raise
                         except:
                             raise HttpException(400, "Error creating trigger for calculated field")
                         

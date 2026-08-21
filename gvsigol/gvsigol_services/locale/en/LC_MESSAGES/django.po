@@ -4977,6 +4977,10 @@ msgstr ""
 msgid "Field type not supported"
 msgstr ""
 
+#: gvsigol_services/utils.py
+msgid "There is a conflict between the field type and the selected trigger."
+msgstr "There is a conflict between the field type and the selected trigger."
+
 #: gvsigol_services/views.py:9311
 #, python-brace-format
 msgid ""

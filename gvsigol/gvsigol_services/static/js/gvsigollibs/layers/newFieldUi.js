@@ -2,6 +2,103 @@ function validateRegex(pattern) {
   return /^[a-zA-Z_@][a-zA-Z0-9_@]*$/.test(pattern);
 }
 
+function normalizeFieldType(fieldType) {
+  return String(fieldType || "")
+    .trim()
+    .toLowerCase()
+    .replace(/-/g, "_")
+    .replace(/_/g, " ")
+    .replace(/\s+/g, " ");
+}
+
+function getFieldCalculationConflict(fieldType, calculation, calculationLabel) {
+  if (!calculation) {
+    return null;
+  }
+  var ftype = normalizeFieldType(fieldType);
+  var calcText = [calculation, calculationLabel]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  var conflictMsg = gettext(
+    "There is a conflict between the field type and the selected trigger."
+  );
+  var enumLike = {
+    enumeration: true,
+    "multiple enumeration": true,
+    form: true,
+    "cd json": true,
+  };
+  var numericTypes = {
+    integer: true,
+    bigint: true,
+    smallint: true,
+    double: true,
+    "double precision": true,
+    numeric: true,
+    decimal: true,
+    real: true,
+    float: true,
+    float4: true,
+    float8: true,
+    int2: true,
+    int4: true,
+    int8: true,
+    serial: true,
+    bigserial: true,
+    smallserial: true,
+  };
+  var textTypes = {
+    "character varying": true,
+    varchar: true,
+    character: true,
+    char: true,
+    text: true,
+  };
+  var numericHints = [
+    "area",
+    "length",
+    "perimeter",
+    "longitud",
+    "perimetro",
+    "coord",
+    "st_x",
+    "st_y",
+    "st_z",
+    "gol_area",
+    "calc_area",
+    "calc_length",
+    "calc_perimeter",
+  ];
+  var textHints = ["geocoder", "address", "direccion", "cartociudad"];
+
+  if (enumLike[ftype]) {
+    return conflictMsg;
+  }
+  if (numericHints.some(function (hint) { return calcText.indexOf(hint) !== -1; })) {
+    if (!numericTypes[ftype]) {
+      return conflictMsg;
+    }
+  }
+  if (textHints.some(function (hint) { return calcText.indexOf(hint) !== -1; })) {
+    if (!textTypes[ftype]) {
+      return conflictMsg;
+    }
+  }
+  return null;
+}
+
+function showFieldError(message) {
+  var suffix = /\.$/.test(message) ? "" : ".";
+  var error =
+    '<p class="text-muted" style="color: #ff0000; padding: 10px;">* ' +
+    message +
+    suffix +
+    "</p>";
+  $("#field-errors").empty();
+  $("#field-errors").append(error);
+}
+
 function getFieldTypes(enableEnums, enableForms) {
   var fieldTypes = [
     {
@@ -462,6 +559,11 @@ function createModalContent(fid, mode, title, config, fieldNames) {
     }
 
     if (validateRegex(name)) {
+      var conflict = getFieldCalculationConflict(type, calculation, calculationLabel);
+      if (conflict) {
+        showFieldError(conflict);
+        return;
+      }
       var gvsigolType = "";
       var typeParams = {};
       
@@ -504,14 +606,11 @@ function createModalContent(fid, mode, title, config, fieldNames) {
         $(modalSelector).modal("hide");
       }
     } else {
-      var error =
-        '<p class="text-muted" style="color: #ff0000; padding: 10px;">* ' +
+      showFieldError(
         gettext(
           "Invalid name: Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers"
-        ) +
-        ".</p>";
-      $("#field-errors").empty();
-      $("#field-errors").append(error);
+        )
+      );
     }
   });
 
@@ -529,6 +628,11 @@ function createModalContent(fid, mode, title, config, fieldNames) {
     }
 
     if (validateRegex(name)) {
+      var conflict = getFieldCalculationConflict(type, calculation, calculationLabel);
+      if (conflict) {
+        showFieldError(conflict);
+        return;
+      }
       var gvsigolType = "";
       var typeParams = {};
       
@@ -552,14 +656,11 @@ function createModalContent(fid, mode, title, config, fieldNames) {
 
       $(modalSelector).modal("hide");
     } else {
-      var error =
-        '<p class="text-muted" style="color: #ff0000; padding: 10px;">* ' +
+      showFieldError(
         gettext(
           "Invalid name: Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers"
-        ) +
-        ".</p>";
-      $("#field-errors").empty();
-      $("#field-errors").append(error);
+        )
+      );
     }
   });
 
