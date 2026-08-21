@@ -18352,6 +18352,7 @@ trans_IDW = draw2d.shape.layout.VerticalLayout.extend({
                         '<form>'+
                             '<label class="col-form-label">'+gettext('Value field')+':</label>'+
                             '<select id="value-field-'+ID+'" class="form-control"></select>'+
+                            '<p class="help-block" style="margin-top:4px;font-size:12px;color:#666">'+gettext('Must be a numeric attribute (measure). Text fields such as codes are not allowed even if they contain digits.')+'</p>'+
                             '<label class="col-form-label">'+gettext('Power')+':</label>'+
                             '<input id="power-'+ID+'" type="number" value="2.0" min="1" step="0.1" class="form-control" >'+
                             '<label class="col-form-label">'+gettext('Cell size')+':</label>'+
@@ -18643,6 +18644,7 @@ trans_Kriging = draw2d.shape.layout.VerticalLayout.extend({
                         '<form>'+
                             '<label class="col-form-label">'+gettext('Value field')+':</label>'+
                             '<select id="value-field-kriging-'+ID+'" class="form-control"></select>'+
+                            '<p class="help-block" style="margin-top:4px;font-size:12px;color:#666">'+gettext('Must be a numeric attribute (measure). Text fields such as codes are not allowed even if they contain digits.')+'</p>'+
                             '<label class="col-form-label">'+gettext('Cell size')+':</label>'+
                             '<input id="cell-size-kriging-'+ID+'" type="number" value="100.0" min="1" step="1" class="form-control" >'+
                             '<label class="col-form-label">'+gettext('Search radius')+':</label>'+

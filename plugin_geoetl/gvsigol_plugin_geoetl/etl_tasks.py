@@ -6607,6 +6607,73 @@ def input_PadronAtm(dicc):
     engine.dispose()
     return [table_name]
 
+
+# Tipos SQL aceptados como magnitud numérica en geoestadística (IDW, Kriging, …).
+# No se acepta text/varchar aunque el contenido “parezca” un número (p. ej. código INE).
+_GEOSTAT_NUMERIC_TYPES = (
+    'smallint', 'integer', 'bigint',
+    'decimal', 'numeric', 'real', 'double precision',
+    'float', 'float4', 'float8',
+)
+
+
+def assert_numeric_value_field(cur, table_name, value_field, transformer_label='geoestadístico'):
+    """
+    Comprueba que value_field exista en la tabla temporal y sea de tipo numérico.
+    Evita la coerción silenciosa texto→número en expresiones SQL de interpolación.
+    """
+    sqlCheckField = sql.SQL("""
+        SELECT column_name, data_type
+        FROM information_schema.columns
+        WHERE table_schema = %s AND table_name = %s
+        AND column_name = %s
+    """)
+    cur.execute(sqlCheckField, [GEOETL_DB["schema"], table_name, value_field])
+    field_info = cur.fetchone()
+
+    sqlNumericFields = sql.SQL("""
+        SELECT column_name, data_type
+        FROM information_schema.columns
+        WHERE table_schema = %s AND table_name = %s
+        AND data_type IN (
+            'smallint', 'integer', 'bigint',
+            'decimal', 'numeric', 'real', 'double precision'
+        )
+        ORDER BY column_name
+    """)
+    cur.execute(sqlNumericFields, [GEOETL_DB["schema"], table_name])
+    numeric_fields = cur.fetchall()
+    available_fields = [f[0] for f in numeric_fields]
+
+    if not field_info:
+        raise ValueError(
+            "ERROR: El campo '{field}' no existe en la tabla fuente del {label}. "
+            "Campos numéricos disponibles: {available}".format(
+                field=value_field,
+                label=transformer_label,
+                available=available_fields,
+            )
+        )
+
+    data_type = (field_info[1] or '').lower()
+    if data_type not in _GEOSTAT_NUMERIC_TYPES:
+        raise ValueError(
+            "ERROR: El campo '{field}' es de tipo '{dtype}' y no puede usarse en {label}. "
+            "Se requiere un campo numérico (integer, numeric, real, double precision, …). "
+            "Un texto con dígitos (p. ej. un código) no es una magnitud interpolable: "
+            "convierta el tipo explícitamente con 'Cambia tipo de atributo' solo si el "
+            "campo representa realmente una medida numérica. "
+            "Campos numéricos disponibles: {available}".format(
+                field=value_field,
+                dtype=data_type,
+                label=transformer_label,
+                available=available_fields,
+            )
+        )
+
+    return data_type
+
+
 def trans_IDW(dicc):
     """
     Transformador de Interpolación IDW (Inverse Distance Weighting)
@@ -6661,32 +6728,11 @@ def trans_IDW(dicc):
     geom_field_result = cur.fetchone()
     geom_field = geom_field_result[0] if geom_field_result else 'wkb_geometry'
     
-    # Validar que el campo de valores existe en la tabla fuente
-    sqlCheckField = sql.SQL("""
-        SELECT column_name 
-        FROM information_schema.columns 
-        WHERE table_schema = %s AND table_name = %s 
-        AND column_name = %s
-    """)
-    cur.execute(sqlCheckField, [GEOETL_DB["schema"], table_name_source, value_field])
-    field_exists = cur.fetchone()
+    field_dtype = assert_numeric_value_field(
+        cur, table_name_source, value_field, transformer_label='Interpolación IDW'
+    )
     
-    if not field_exists:
-        # Listar campos numéricos disponibles
-        sqlNumericFields = sql.SQL("""
-            SELECT column_name, data_type
-            FROM information_schema.columns 
-            WHERE table_schema = %s AND table_name = %s 
-            AND data_type IN ('integer', 'bigint', 'decimal', 'numeric', 'real', 'double precision')
-            ORDER BY column_name
-        """)
-        cur.execute(sqlNumericFields, [GEOETL_DB["schema"], table_name_source])
-        numeric_fields = cur.fetchall()
-        
-        available_fields = [f[0] for f in numeric_fields]
-        raise ValueError(f"ERROR: El campo '{value_field}' no existe en la tabla fuente. Campos numéricos disponibles: {available_fields}")
-    
-    print(f"[IDW DEBUG] Campo de geometría detectado: '{geom_field}', Campo de valores validado: '{value_field}'")
+    print(f"[IDW DEBUG] Campo de geometría detectado: '{geom_field}', Campo de valores validado: '{value_field}' (tipo={field_dtype})")
     
     # Obtener extent de los datos
     sqlExtent = sql.SQL("""
@@ -6865,6 +6911,10 @@ def trans_Kriging(dicc):
     cur.execute(sqlGeomField, [GEOETL_DB["schema"], table_name_source])
     geom_field_result = cur.fetchone()
     geom_field = geom_field_result[0] if geom_field_result else 'wkb_geometry'
+
+    assert_numeric_value_field(
+        cur, table_name_source, value_field, transformer_label='Interpolación Kriging'
+    )
 
     # Obtener datos fuente para kriging
     sqlData = sql.SQL("""
