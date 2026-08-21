@@ -61,6 +61,19 @@ from gvsigol_auth.models import UserCache
 
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
+def _is_user_editable(username):
+    """
+    Whether the given user can be edited from gvSIG Online.
+    Uses UserProperties when available, otherwise UserCache (users that never logged in).
+    """
+    try:
+        return User.objects.get(username=username).userproperties.editable
+    except Exception:
+        try:
+            return UserCache.objects.get(username=username).editable
+        except Exception:
+            return True
+
 def login_user(request):
     errors = []
     if request.method == "POST":
@@ -538,6 +551,26 @@ def user_add(request):
         return render(request, 'user_add.html', response)
     
     
+def _user_update_form_response(request, username, editable, message=None, selected_user_overrides=None):
+    selected_user = auth_backend.get_user_details(user=username)
+    selected_user = dict(selected_user) if selected_user else {}
+    if selected_user_overrides:
+        selected_user.update(selected_user_overrides)
+    roles = auth_utils.get_all_roles_checked_by_user(username)
+    response_ctx = {
+        'uid': username,
+        'selected_user': selected_user,
+        'user': request.user,
+        'roles': roles,
+        'read_only_users': settings.AUTH_READONLY_USERS,
+        'editable': editable,
+    }
+    if message:
+        response_ctx['message'] = message
+    if auth_backend.check_group_support():
+        response_ctx['groups'] = auth_utils.get_all_groups_checked_by_user(username)
+    return render(request, 'user_update.html', response_ctx)
+
 @login_required()
 @superuser_required
 def user_update(request, username):
@@ -545,12 +578,12 @@ def user_update(request, username):
         if request.method == 'POST':
             assigned_groups = []
             for key in request.POST:
-                if 'group-' in key:
+                if key.startswith('group-'):
                     assigned_groups.append(key[len('group-'):])
 
             assigned_roles = []
             for key in request.POST:
-                if 'role-' in key:
+                if key.startswith('role-'):
                     assigned_roles.append(key[len('role-'):])
                 
             is_staff = False
@@ -561,77 +594,84 @@ def user_update(request, username):
             if 'is_superuser' in request.POST:
                 is_superuser = True
                 is_staff = True
-            try:
-                editable = request.user.userproperties.editable
-            except:
-                editable = True
 
-            if editable:
-                try:
-                    if settings.AUTH_READONLY_USERS:
-                        success = auth_backend.update_user(
+            # Must check the target user, not the logged-in admin
+            editable = _is_user_editable(username)
+            if not editable:
+                return _user_update_form_response(
+                    request, username, editable,
+                    message=_("User is not editable"),
+                    selected_user_overrides={
+                        'email': request.POST.get('email'),
+                        'first_name': request.POST.get('first_name'),
+                        'last_name': request.POST.get('last_name'),
+                        'is_staff': is_staff,
+                        'is_superuser': is_superuser,
+                    },
+                )
+
+            try:
+                if settings.AUTH_READONLY_USERS:
+                    success = auth_backend.update_user(
+                        username,
+                        superuser=is_superuser,
+                        staff=is_staff,
+                        groups=assigned_groups,
+                        roles=assigned_roles
+                    )
+                else:
+                    success = auth_backend.update_user(
                             username,
+                            email=request.POST.get('email'),
+                            first_name=request.POST.get('first_name'),
+                            last_name=request.POST.get('last_name'),
                             superuser=is_superuser,
                             staff=is_staff,
                             groups=assigned_groups,
                             roles=assigned_roles
-                        )
-                    else:
-                        success = auth_backend.update_user(
-                                username,
-                                email=request.POST.get('email'),
-                                first_name=request.POST.get('first_name'),
-                                last_name=request.POST.get('last_name'),
-                                superuser=is_superuser,
-                                staff=is_staff,
-                                groups=assigned_groups,
-                                roles=assigned_roles
-                        )
-                except UserUpdateError as e:
-                    # e.g. duplicate email in Keycloak: keep form open and show message
-                    selected_user = auth_backend.get_user_details(user=username)
-                    selected_user = dict(selected_user)
-                    selected_user['email'] = request.POST.get('email') or selected_user.get('email')
-                    selected_user['first_name'] = request.POST.get('first_name') or selected_user.get('first_name')
-                    selected_user['last_name'] = request.POST.get('last_name') or selected_user.get('last_name')
-                    selected_user['is_staff'] = is_staff
-                    selected_user['is_superuser'] = is_superuser
-                    roles = auth_utils.get_all_roles_checked_by_user(username)
-                    response_ctx = {
-                        'uid': username,
-                        'selected_user': selected_user,
-                        'user': request.user,
-                        'roles': roles,
-                        'read_only_users': settings.AUTH_READONLY_USERS,
-                        'editable': editable,
-                        'message': str(e),
-                    }
-                    if auth_backend.check_group_support():
-                        response_ctx['groups'] = auth_utils.get_all_groups_checked_by_user(username)
-                    return render(request, 'user_update.html', response_ctx)
-            else:
-                # ignore update if user is not editable
-                success = False
-            if success and (is_superuser or is_staff):
-                auth_utils.config_staff_user(username)
+                    )
+            except UserUpdateError as e:
+                # e.g. duplicate email in Keycloak: keep form open and show message
+                return _user_update_form_response(
+                    request, username, editable,
+                    message=str(e),
+                    selected_user_overrides={
+                        'email': request.POST.get('email'),
+                        'first_name': request.POST.get('first_name'),
+                        'last_name': request.POST.get('last_name'),
+                        'is_staff': is_staff,
+                        'is_superuser': is_superuser,
+                    },
+                )
+
+            if not success:
+                return _user_update_form_response(
+                    request, username, editable,
+                    message=_("User update failed"),
+                    selected_user_overrides={
+                        'email': request.POST.get('email'),
+                        'first_name': request.POST.get('first_name'),
+                        'last_name': request.POST.get('last_name'),
+                        'is_staff': is_staff,
+                        'is_superuser': is_superuser,
+                    },
+                )
+
+            if is_superuser or is_staff:
+                try:
+                    auth_utils.config_staff_user(username)
+                except Exception:
+                    logger.exception("Error configuring staff user: %s", username)
 
             return redirect('user_list')
         else:
             selected_user = auth_backend.get_user_details(user=username)
-            roles = auth_utils.get_all_roles_checked_by_user(username)
-            try:
-                editable = User.objects.get(username=selected_user.get('username')).userproperties.editable
-            except:
-                try:
-                    # for users that never logged in gvSIG Online, UserProperties may not be exist yet, so check the cache
-                    editable = UserCache.objects.get(username=selected_user.get('username')).editable
-                except:
-                    editable = True
+            editable = _is_user_editable(selected_user.get('username') if selected_user else username)
             response = {
                 'uid': username,
                 'selected_user': selected_user,
                 'user': request.user,
-                'roles': roles,
+                'roles': auth_utils.get_all_roles_checked_by_user(username),
                 'read_only_users': settings.AUTH_READONLY_USERS,
                 'editable': editable
                 }
@@ -640,23 +680,30 @@ def user_update(request, username):
             return render(request, 'user_update.html', response)
     except BackendNotAvailable:
         message = _("The authentication server is not available. Try again later or contact system administrators.")
-        return render(request, 'user_update.html', {'uid': username, 'selected_user': None, 'user': None, 'groups': [], 'roles': [], 'read_only_users': settings.AUTH_READONLY_USERS, 'editable': False})
+        return render(request, 'user_update.html', {'uid': username, 'selected_user': None, 'user': None, 'groups': [], 'roles': [], 'read_only_users': settings.AUTH_READONLY_USERS, 'editable': False, 'message': message})
         
 @login_required()
 @superuser_required
 def user_delete(request, username):
     if request.method == 'POST':
-        try:
-            editable = request.user.userproperties.editable
-        except:
-            editable = True
-        if not editable:
-            return HttpResponse(json.dumps({'deleted': False, 'message': _("User is not editable")}, indent=4), content_type='application/json')
-        deleted = auth_backend.delete_user(user=username)
-        response = {
-            'deleted': deleted
-        }
-        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+        if not _is_user_editable(username):
+            status = 403
+            response = {
+                'deleted': False,
+                'message': _("User is not editable")
+            }
+        elif auth_backend.delete_user(user=username):
+            status = 200
+            response = {
+                'deleted': True
+            }
+        else:
+            status = 400
+            response = {
+                'deleted': False,
+                'message': _("User deletion failed")
+            }
+        return HttpResponse(json.dumps(response, indent=4), content_type='application/json', status=status)
 
 def sort_by_name(a_dict):
     return a_dict.get('name')

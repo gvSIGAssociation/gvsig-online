@@ -74,7 +74,8 @@ def get_all_groups_checked_by_user(username):  # FIXME OIDC CMI
 
 def get_all_roles_checked_by_user(username):  # FIXME OIDC CMI
     all_roles = auth_backend.get_all_roles_details(exclude_system=True)
-    user_roles = auth_backend.get_roles(username)
+    # Prefer direct assignments so the form matches what set_roles will persist
+    user_roles = auth_backend.get_assigned_roles(username)
     roles = []
     for role in sorted(all_roles, key=default_sorter):
         for user_role_name in user_roles:
@@ -191,13 +192,19 @@ def config_staff_user(username):
         Returns a tuple with the result of the role creation and the role name.
     """
     from gvsigol_services.utils import create_user_workspace
-    role = auth_backend.get_primary_role(username)
+    user_role_created = False
+    role = None
     try:
+        role = auth_backend.get_primary_role(username)
         user_role_created = auth_backend.add_role(role)
         auth_backend.add_to_role(username, role)
-    except:
-        logging.getLogger(LOGGER_NAME).error("Error configuring user roles: {username}")
-    create_user_workspace(username, role)
+    except Exception:
+        logging.getLogger(LOGGER_NAME).exception("Error configuring user roles: %s", username)
+    if role:
+        try:
+            create_user_workspace(username, role)
+        except Exception:
+            logging.getLogger(LOGGER_NAME).exception("Error creating user workspace for: %s", username)
     return (user_role_created, role)
 
 def ascii_norm_username(username):

@@ -264,15 +264,13 @@ $(document).ready(function() {
 	        "targets": -1,
 	        "data": null,
 	        "render": function(data, type, row, meta) {
+				{% if not read_only_users %}
 				var editable = row && row.length ? row[row.length - 1] : false;
 				if (editable) {
 					return '<button type="button" name="button-delete-user" data-toggle="modal" data-target="#modal-delete-user" data-placement="bottom" title="' + '{% trans "Delete user" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>';
 				}
-				{% if read_only_users %}
-				return '<button type="button" name="button-delete-user" data-toggle="modal" data-target="#modal-delete-user" data-placement="bottom" title="' + '{% trans "Delete user" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>';
-				{% else %}
-				return '';
 				{% endif %}
+				return '';
 			},
 			"sortable": false, "orderable": false
 	    },{
@@ -307,19 +305,24 @@ $(document).ready(function() {
 	}
 
 	function deleteUser(data, row){
-		$('#button-delete-user-accept').click( function() {
+		$('#button-delete-user-accept').off('click').on('click', function() {
 			$.ajax({
 				type: 'POST',
 				async: false,
 				url: '/gvsigonline/auth/user_delete/' + data[0] + '/',
 				beforeSend:function(xhr){
 				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-				},
-				success	:function(response){
-					$('#modal-delete-user').modal('hide');
-					location.reload();
-				},
-				error: function(){}
+				}
+			}).done(function(response){
+				$('#modal-delete-user').modal('hide');
+				location.reload();
+			}).fail(function(jqXHR){
+				$('#modal-delete-user').modal('hide');
+				if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+					messageBox.show("error", jqXHR.responseJSON.message);
+				} else {
+					messageBox.show("error", '{% trans "Error deleting user" %}');
+				}
 			});
 		});
 	}
