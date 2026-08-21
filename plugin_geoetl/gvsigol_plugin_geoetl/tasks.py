@@ -70,7 +70,8 @@ def run_canvas_background(**kwargs):
                     'name': ws_name,
                     'message': 'Running',
                     'status': 'Running',
-                    'last_exec': timezone.now()
+                    'last_exec': timezone.now(),
+                    'visualizer_session_id': None,
                 }
             )
         else:
@@ -81,13 +82,15 @@ def run_canvas_background(**kwargs):
                     'message': 'Running',
                     'status': 'Running',
                     'id_ws': None,
-                    'last_exec': timezone.now()
+                    'last_exec': timezone.now(),
+                    'visualizer_session_id': None,
                 }
             )
             if not created:
                 statusModel.message = 'Running'
                 statusModel.status = 'Running'
                 statusModel.last_exec = timezone.now()
+                statusModel.visualizer_session_id = None
                 statusModel.save()
         
         nodes=[]
@@ -141,7 +144,8 @@ def run_canvas_background(**kwargs):
             sortedList.append(ord[1])
         #### ####
 
-        #### Visualizer session setup ####
+        #### Visualizer: layer order only. Session is created lazily when data
+        #### actually arrives at an output_Visualizer node.
         visualizer_session = None
         visualizer_node_order = {}   # node_id -> layer_order (0-based)
         _vis_idx = 0
@@ -150,13 +154,6 @@ def run_canvas_background(**kwargs):
                 if s == n[0] and n[1]['type'] == 'output_Visualizer':
                     visualizer_node_order[n[1]['id']] = _vis_idx
                     _vis_idx += 1
-
-        if visualizer_node_order:
-            run_key = f"{id_ws}_{username}_{timezone.now().isoformat()}"
-            visualizer_session = ETLVisualizerSession.objects.create(
-                run_key=run_key,
-                expires_at=timezone.now() + timedelta(hours=get_ttl_hours()),
-            )
         #### ####
 
         try:
@@ -279,7 +276,18 @@ def run_canvas_background(**kwargs):
                                 method_to_call = getattr(etl_tasks, n[1]['type'])
                                 parameters['id'] = n[1]['id']
 
-                                if n[1]['type'] == 'output_Visualizer' and visualizer_session:
+                                if n[1]['type'] == 'output_Visualizer':
+                                    if not parameters.get('data'):
+                                        print('Task output_Visualizer ('+n[1]['id']+') skipped: no incoming data.')
+                                        continue
+
+                                    if visualizer_session is None:
+                                        run_key = f"{id_ws}_{username}_{timezone.now().isoformat()}"
+                                        visualizer_session = ETLVisualizerSession.objects.create(
+                                            run_key=run_key,
+                                            expires_at=timezone.now() + timedelta(hours=get_ttl_hours()),
+                                        )
+
                                     node_id = n[1]['id']
                                     layer_order = visualizer_node_order.get(node_id, 0)
                                     parameters['_session_id'] = str(visualizer_session.session_id)
@@ -313,8 +321,7 @@ def run_canvas_background(**kwargs):
                 if statusModel:
                     statusModel.message = 'Process has been executed successfully'
                     statusModel.status = 'Success'
-                    if visualizer_session:
-                        statusModel.visualizer_session_id = visualizer_session.session_id
+                    statusModel.visualizer_session_id = visualizer_session.session_id if visualizer_session else None
                     statusModel.save()
                 
                 try:
@@ -338,8 +345,7 @@ def run_canvas_background(**kwargs):
                 if statusModel:
                     statusModel.message = 'Process has been executed successfully'
                     statusModel.status = 'Success'
-                    if visualizer_session:
-                        statusModel.visualizer_session_id = visualizer_session.session_id
+                    statusModel.visualizer_session_id = visualizer_session.session_id if visualizer_session else None
                     statusModel.save()
             
             delete_tables(tables_list_name)

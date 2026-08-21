@@ -7102,6 +7102,10 @@ def output_Visualizer(dicc):
     import uuid as _uuid
     from .models import ETLVisualizerSession, ETLVisualizerLayer
 
+    if not dicc.get('data') or not dicc.get('_session_id'):
+        logger.warning("output_Visualizer skipped: no incoming data or no session")
+        return []
+
     source_table = dicc['data'][0]
     session_id   = dicc.get('_session_id')
     layer_name   = dicc.get('layer-name', 'Layer')
