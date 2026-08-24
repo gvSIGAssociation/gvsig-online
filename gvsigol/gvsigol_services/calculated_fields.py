@@ -366,6 +366,62 @@ def _refresh_layer_publication(layer):
     return conf_manager
 
 
+def _calculated_sources_meta(sources):
+    """
+    Join metadata stored on the field conf so the viewer can show which layers
+    were used when the user later updates the attribute.
+    """
+    meta = []
+    for src in sources or []:
+        resolved = src.get('_resolved') or {}
+        other = resolved.get('layer')
+        if other is None and src.get('layer_id'):
+            try:
+                other = Layer.objects.select_related(
+                    'datastore', 'datastore__workspace'
+                ).get(id=int(src['layer_id']))
+            except (Layer.DoesNotExist, TypeError, ValueError):
+                other = None
+        alias = resolved.get('alias') or src.get('alias')
+        join_self = (
+            resolved.get('join_self')
+            or src.get('join_field_self')
+            or src.get('join_field_current')
+        )
+        join_other = resolved.get('join_other') or src.get('join_field_other')
+        if not alias or not join_self or not join_other:
+            continue
+        workspace = None
+        if other is not None and other.datastore and other.datastore.workspace:
+            workspace = other.datastore.workspace.name
+        meta.append({
+            'alias': alias,
+            'layer_id': other.id if other is not None else (
+                int(src['layer_id']) if src.get('layer_id') else None
+            ),
+            'name': other.name if other is not None else None,
+            'title': (other.title or other.name) if other is not None else None,
+            'workspace': workspace,
+            'join_field_self': join_self,
+            'join_field_other': join_other,
+        })
+    return meta
+
+
+def _calculated_base_meta(layer):
+    """Base (t1) layer metadata stored next to calculated_sources."""
+    workspace = None
+    if layer.datastore and layer.datastore.workspace:
+        workspace = layer.datastore.workspace.name
+    return {
+        'alias': 't1',
+        'layer_id': layer.id,
+        'name': layer.name,
+        'title': layer.title or layer.name,
+        'workspace': workspace,
+    }
+
+
 def _join_key_is_unique(con, schema, table, join_field):
     """True when every non-null join key appears at most once in the table."""
     query = sqlbuilder.SQL(
@@ -1020,14 +1076,17 @@ def calculated_field_create(request):
                 con.cursor.execute(update_q)
 
             conf_manager = _refresh_layer_publication(target_layer)
-            titles = {
-                'title-' + lang_code: title
-                for lang_code, _lang_name in getattr(settings, 'LANGUAGES', (('es', 'Spanish'),))
-            } if title else None
+            extra = {
+                'calculated_sources': _calculated_sources_meta(sources),
+                'calculated_base': _calculated_base_meta(layer),
+            }
+            if title:
+                for lang_code, _lang_name in getattr(settings, 'LANGUAGES', (('es', 'Spanish'),)):
+                    extra['title-' + lang_code] = title
             _store_field_meta(
                 target_layer, field_name, formula, unit=unit,
                 dimension=compiled.get('result_dimension'),
-                extra=titles,
+                extra=extra,
                 conf_manager=conf_manager,
             )
 
