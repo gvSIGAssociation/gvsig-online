@@ -7046,7 +7046,8 @@ def layer_cache_config(request, layer_id):
                 "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
                 "format_choices": getattr(settings, 'SUPPORTED_FORMATS_CHOICES', [(f, f) for f in settings.CACHE_OPTIONS['FORMATS']]),
                 "tasks": tasks['long-array-array'],
-                "latlong_extent": layer.latlong_extent
+                "latlong_extent": layer.latlong_extent,
+                "supported_crs": json.dumps(core_utils.get_supported_crs()),
             }
 
             return render(request, 'layer_cache_config.html', response)
@@ -7119,7 +7120,8 @@ def group_cache_config(request, group_id):
                 "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
                 "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
                 "format_choices": getattr(settings, 'SUPPORTED_FORMATS_CHOICES', [(f, f) for f in settings.CACHE_OPTIONS['FORMATS']]),
-                "tasks": tasks['long-array-array']
+                "tasks": tasks['long-array-array'],
+                "supported_crs": json.dumps(core_utils.get_supported_crs()),
             }
 
             return render(request, 'group_cache_config.html', response)
@@ -7142,7 +7144,8 @@ def group_cache_config(request, group_id):
                 "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
                 "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
                 "format_choices": getattr(settings, 'SUPPORTED_FORMATS_CHOICES', [(f, f) for f in settings.CACHE_OPTIONS['FORMATS']]),
-                "tasks": tasks['long-array-array']
+                "tasks": tasks['long-array-array'],
+                "supported_crs": json.dumps(core_utils.get_supported_crs()),
             }
 
             return render(request, 'group_cache_config.html', response)
