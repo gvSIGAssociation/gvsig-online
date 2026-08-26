@@ -569,9 +569,12 @@ viewer.core = {
     	if (externalLayer['type'] == 'WMTS') {
 
 			if (externalLayer.wmts_options && externalLayer.wmts_options.tileGrid) {
+				// External WMTS is not registered in GWC; always use urls from
+				// wmts_options (remote service). Passing cache_url would rewrite
+				// requests to /gwc/service/wms and yield 400 Unknown layer.
 				var wmtsSource = this._createWMTSTileSourceFromOptions(
 					externalLayer.wmts_options,
-					externalLayer.cache_url || externalLayer.url
+					null
 				);
 			}
 			else {
