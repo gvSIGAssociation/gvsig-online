@@ -6941,11 +6941,28 @@ def layer_cache_config(request, layer_id):
         zoom_stop = request.POST.get('input_zoom_stop')
 
         try:
+            master_node = geographic_servers.get_instance().get_master_node(server.id)
+            master_url = master_node.getUrl()
+            if layer.external:
+                configured_grid_subsets = geowebcache.get_instance().get_configured_grid_subsets(
+                    None, layer, server, master_url
+                )
+            else:
+                configured_grid_subsets = geowebcache.get_instance().get_configured_grid_subsets(
+                    layer.datastore.workspace.name, layer, server, master_url
+                )
+            if grid_set and grid_set not in configured_grid_subsets:
+                raise geowebcache.FailedRequestError(
+                    -1,
+                    "Unknown grid set {grid_set}. Available: {available}".format(
+                        grid_set=grid_set,
+                        available=', '.join(configured_grid_subsets) or '(none)',
+                    ),
+                )
+
             if layer.external:
                 if settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ONLY_MASTER':
-                    master_node = geographic_servers.get_instance().get_master_node(server.id)
-                    url = master_node.getUrl()
-                    geowebcache.get_instance().execute_cache_operation(None, layer, server, url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
+                    geowebcache.get_instance().execute_cache_operation(None, layer, server, master_url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
 
                 elif settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ALL_NODES':
                     all_nodes = geographic_servers.get_instance().get_all_nodes(server.id)
@@ -6955,9 +6972,7 @@ def layer_cache_config(request, layer_id):
 
             else:
                 if settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ONLY_MASTER':
-                    master_node = geographic_servers.get_instance().get_master_node(server.id)
-                    url = master_node.getUrl()
-                    geowebcache.get_instance().execute_cache_operation(layer.datastore.workspace.name, layer, server, url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
+                    geowebcache.get_instance().execute_cache_operation(layer.datastore.workspace.name, layer, server, master_url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
 
                 elif settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ALL_NODES':
                     all_nodes = geographic_servers.get_instance().get_all_nodes(server.id)
@@ -7029,21 +7044,30 @@ def layer_cache_config(request, layer_id):
 
     else:
         try:
-            config = None
             tasks = None
             master_node = geographic_servers.get_instance().get_master_node(server.id)
+            master_url = master_node.getUrl()
             if layer.external:
-                #config = geowebcache.get_instance().get_layer(None, layer, server, master_node.getUrl()).get('wmsLayer')
-                tasks = geowebcache.get_instance().get_pending_and_running_tasks(None, layer, server, master_node.getUrl())
+                grid_subsets = geowebcache.get_instance().get_configured_grid_subsets(
+                    None, layer, server, master_url
+                )
+                tasks = geowebcache.get_instance().get_pending_and_running_tasks(
+                    None, layer, server, master_url
+                )
             else:
-                #config = geowebcache.get_instance().get_layer(layer.datastore.workspace.name, layer, server, master_node.getUrl()).get('GeoServerLayer')
-                tasks = geowebcache.get_instance().get_pending_and_running_tasks(layer.datastore.workspace.name, layer, server, master_node.getUrl())
+                ws_name = layer.datastore.workspace.name
+                grid_subsets = geowebcache.get_instance().get_configured_grid_subsets(
+                    ws_name, layer, server, master_url
+                )
+                tasks = geowebcache.get_instance().get_pending_and_running_tasks(
+                    ws_name, layer, server, master_url
+                )
 
             response = {
                 "layer_id": layer_id,
                 "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
-                "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
-                "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
+                "grid_subsets": grid_subsets,
+                "json_grid_subsets": json.dumps(grid_subsets),
                 "format_choices": getattr(settings, 'SUPPORTED_FORMATS_CHOICES', [(f, f) for f in settings.CACHE_OPTIONS['FORMATS']]),
                 "tasks": tasks['long-array-array'],
                 "latlong_extent": layer.latlong_extent,
@@ -7078,10 +7102,22 @@ def group_cache_config(request, group_id):
         zoom_stop = request.POST.get('input_zoom_stop')
 
         try:
+            master_node = geographic_servers.get_instance().get_master_node(server.id)
+            master_url = master_node.getUrl()
+            configured_grid_subsets = geowebcache.get_instance().get_group_configured_grid_subsets(
+                layer_group, server, master_url
+            )
+            if grid_set and grid_set not in configured_grid_subsets:
+                raise geowebcache.FailedRequestError(
+                    -1,
+                    "Unknown grid set {grid_set}. Available: {available}".format(
+                        grid_set=grid_set,
+                        available=', '.join(configured_grid_subsets) or '(none)',
+                    ),
+                )
+
             if settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ONLY_MASTER':
-                master_node = geographic_servers.get_instance().get_master_node(server.id)
-                url = master_node.getUrl()
-                geowebcache.get_instance().execute_group_cache_operation(layer_group, server, url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
+                geowebcache.get_instance().execute_group_cache_operation(layer_group, server, master_url, min_x, min_y, max_x, max_y, grid_set, zoom_start, zoom_stop, format, operation_type, number_of_tasks)
 
             elif settings.CACHE_OPTIONS['OPERATION_MODE'] == 'ALL_NODES':
                 all_nodes = geographic_servers.get_instance().get_all_nodes(server.id)
@@ -7106,19 +7142,22 @@ def group_cache_config(request, group_id):
 
         except Exception as e:
             message = e
-            config = None
             tasks = None
             master_node = geographic_servers.get_instance().get_master_node(server.id)
-
-            #config = geowebcache.get_instance().get_group(layer_group, server, master_node.getUrl()).get('GeoServerLayer')
-            tasks = geowebcache.get_instance().get_group_pending_and_running_tasks(layer_group, server, master_node.getUrl())
+            master_url = master_node.getUrl()
+            grid_subsets = geowebcache.get_instance().get_group_configured_grid_subsets(
+                layer_group, server, master_url
+            )
+            tasks = geowebcache.get_instance().get_group_pending_and_running_tasks(
+                layer_group, server, master_url
+            )
 
             response = {
                 "message": message,
                 "group_id": group_id,
                 "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
-                "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
-                "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
+                "grid_subsets": grid_subsets,
+                "json_grid_subsets": json.dumps(grid_subsets),
                 "format_choices": getattr(settings, 'SUPPORTED_FORMATS_CHOICES', [(f, f) for f in settings.CACHE_OPTIONS['FORMATS']]),
                 "tasks": tasks['long-array-array'],
                 "supported_crs": json.dumps(core_utils.get_supported_crs()),
@@ -7131,18 +7170,21 @@ def group_cache_config(request, group_id):
 
     else:
         try:
-            config = None
             tasks = None
             master_node = geographic_servers.get_instance().get_master_node(server.id)
-
-            #config = geowebcache.get_instance().get_group(layer_group, server, master_node.getUrl()).get('GeoServerLayer')
-            tasks = geowebcache.get_instance().get_group_pending_and_running_tasks(layer_group, server, master_node.getUrl())
+            master_url = master_node.getUrl()
+            grid_subsets = geowebcache.get_instance().get_group_configured_grid_subsets(
+                layer_group, server, master_url
+            )
+            tasks = geowebcache.get_instance().get_group_pending_and_running_tasks(
+                layer_group, server, master_url
+            )
 
             response = {
                 "group_id": group_id,
                 "max_zoom_level": list(range(settings.MAX_ZOOM_LEVEL + 1)),
-                "grid_subsets": settings.CACHE_OPTIONS['GRID_SUBSETS'],
-                "json_grid_subsets": json.dumps(settings.CACHE_OPTIONS['GRID_SUBSETS']),
+                "grid_subsets": grid_subsets,
+                "json_grid_subsets": json.dumps(grid_subsets),
                 "format_choices": getattr(settings, 'SUPPORTED_FORMATS_CHOICES', [(f, f) for f in settings.CACHE_OPTIONS['FORMATS']]),
                 "tasks": tasks['long-array-array'],
                 "supported_crs": json.dumps(core_utils.get_supported_crs()),
