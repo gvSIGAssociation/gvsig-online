@@ -886,6 +886,14 @@ msgstr "Cambiar contraseña"
 msgid "Passwords doesn't match"
 msgstr "Las contraseñas no coinciden"
 
+#: gvsigol_core/templates/home.html:852
+msgid "Password updated successfully. You will be signed out."
+msgstr "La contraseña se ha actualizado correctamente. Se cerrará la sesión."
+
+#: gvsigol_core/templates/home.html:1121
+msgid "Password could not be updated"
+msgstr "No se ha podido actualizar la contraseña"
+
 #: gvsigol_core/templates/home.html:853 gvsigol_core/templates/home.html:854
 msgid "New password"
 msgstr "Nueva contraseña"
