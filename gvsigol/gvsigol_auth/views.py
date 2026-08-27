@@ -231,23 +231,24 @@ def password_update(request):
     if request.method == 'POST':
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
-        
-        if password1 == password2:
-            auth_backend.update_user(
+
+        if not password1 or password1 != password2:
+            return JsonResponse({'success': False, 'error': 'mismatch'})
+
+        try:
+            result = auth_backend.update_user(
                 username=request.user.username,
                 password=password1)
-            """
-            user.set_password(password1)
-            user.save()
-            
-            auth_services.get_services().ldap_change_user_password(user, password1)
-            """
-            response = {'success': True}
-            
-        else:
-            response = {'success': False} 
-                
-        return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
+            if result is None or result is False:
+                return JsonResponse({'success': False, 'error': 'update_failed'})
+            return JsonResponse({'success': True})
+        except (UserUpdateError, BackendNotAvailable) as e:
+            logger.exception("Error updating password")
+            error_msg = str(e).strip() if str(e).strip() else 'update_failed'
+            return JsonResponse({'success': False, 'error': error_msg})
+        except Exception:
+            logger.exception("Error updating password")
+            return JsonResponse({'success': False, 'error': 'update_failed'})
 
   
 def password_reset(request):

@@ -1765,12 +1765,19 @@ def get_layer_styles(layer):
     for stllyr in stllyrs:
         stl=stllyr.style
         if not stl.name.endswith('__tmp'):
+            custom_legend_http_url = None
+            if stl.has_custom_legend and stl.custom_legend_url:
+                if stl.custom_legend_url.startswith('http://') or stl.custom_legend_url.startswith('https://'):
+                    custom_legend_http_url = stl.custom_legend_url
+                else:
+                    custom_legend_http_url = settings.BASE_URL.rstrip('/') + '/' + stl.custom_legend_url.lstrip('/')
             style={
                 'name' : stl.name,
                 'title' : stl.title,
                 'is_default': stl.is_default,
                 'has_custom_legend': stl.has_custom_legend,
-                'custom_legend_url': stl.custom_legend_url
+                'custom_legend_url': stl.custom_legend_url,
+                'custom_legend_http_url': custom_legend_http_url,
                 }
             styles.append(style)
     return styles
