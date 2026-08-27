@@ -881,6 +881,14 @@ msgstr "Nova contrasenya"
 msgid "Passwords doesn't match"
 msgstr "Les contrasenyes no coincideixen"
 
+#: gvsigol_core/templates/home.html:852
+msgid "Password updated successfully. You will be signed out."
+msgstr "La contrasenya s'ha actualitzat correctament. Es tancarà la sessió."
+
+#: gvsigol_core/templates/home.html:1121
+msgid "Password could not be updated"
+msgstr "No s'ha pogut actualitzar la contrasenya"
+
 #: gvsigol_core/templates/home.html:853 gvsigol_core/templates/home.html:854
 msgid "New password"
 msgstr "Nova contrasenya"
