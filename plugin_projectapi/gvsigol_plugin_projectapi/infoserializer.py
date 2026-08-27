@@ -442,7 +442,10 @@ class LayerSerializer(serializers.ModelSerializer):
                         'title': stl.title,
                         'is_default': stl.is_default,
                         'has_custom_legend': stl.has_custom_legend,
+                        # data URI for in-browser display (avoids auth/CORS on <img>)
                         'custom_legend_url': self._custom_legend_payload(stl.custom_legend_url),
+                        # absolute HTTP URL for MapFish Print (must be fetchable server-side)
+                        'custom_legend_http_url': self._absolute_custom_legend_url(stl.custom_legend_url) if stl.has_custom_legend else None,
                     })
         except Exception:
             pass
