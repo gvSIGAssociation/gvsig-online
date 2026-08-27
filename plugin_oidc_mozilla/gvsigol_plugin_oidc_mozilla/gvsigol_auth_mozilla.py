@@ -351,7 +351,7 @@ class KeycloakAdminSession(OIDCSession):
                 'emailVerified': True
             }
             if password is not None:
-                user_rep["credentials"] = [{"value": password}]
+                user_rep["credentials"] = [{"type": "password", "value": password, "temporary": False}]
             response = self.post(self.admin_url + '/users', json=user_rep)
             if response.status_code == 201:
                 if not set_roles(username, list(realm_roles)):
@@ -422,7 +422,7 @@ class KeycloakAdminSession(OIDCSession):
                 user_rep['lastName'] = last_name
             
             if password:
-                user_rep["credentials"] =  [{"value": password}]
+                user_rep["credentials"] = [{"type": "password", "value": password, "temporary": False}]
             url = "{base_url}/users/{user_id}".format(base_url=self.admin_url, user_id=user_id)
             response = self.put(url, json=user_rep)
             if response.status_code == 204:
