@@ -188,7 +188,7 @@ body.skin-black .home-page {
 	border-top: 1px solid var(--h-border);
 	margin-top: 12px;
 }
-.profile-bar__pass-form.pass-visible { max-height: 260px; }
+.profile-bar__pass-form.pass-visible { max-height: 320px; }
 .profile-bar__pass-form-inner { padding: 14px 0 0; max-width: 480px; }
 .profile-bar__pass-form-inner .form-group label {
 	font-size: 12px;
@@ -848,6 +848,9 @@ body.skin-black .home-page {
 					<div id="form-error" class="alert alert-danger" style="padding: 8px 12px; font-size: 12px; border-radius: 6px; margin-bottom: 12px;">
 						{% trans "Passwords doesn't match" %}
 					</div>
+					<div id="form-success" class="alert alert-success" style="padding: 8px 12px; font-size: 12px; border-radius: 6px; margin-bottom: 12px; display: none;">
+						{% trans "Password updated successfully. You will be signed out." %}
+					</div>
 					<div class="row">
 						<div class="col-sm-6 form-group" style="margin-bottom: 10px;">
 							<label for="password1">{% trans "New password" %}</label>
@@ -1109,32 +1112,62 @@ body.skin-black .home-page {
 	});
 
 	$('#update-password-submit').click(function() {
+		var $btn = $(this);
+		var $error = $('#form-error');
+		var $success = $('#form-success');
 		var pass1 = $('#password1').val();
 		var pass2 = $('#password2').val();
+		var mismatchMsg = '{% filter force_escape %}{% trans "Passwords doesn't match" %}{% endfilter %}';
+		var updateFailedMsg = '{% filter force_escape %}{% trans "Password could not be updated" %}{% endfilter %}';
+
+		$error.removeClass('pass-error-visible').text(mismatchMsg);
+		$success.hide();
+
+		if (!pass1 || pass1 !== pass2) {
+			$error.text(mismatchMsg).addClass('pass-error-visible');
+			return;
+		}
+
+		$btn.prop('disabled', true);
 		$.ajax({
 			type: 'POST',
-			async: false,
-			url: '/gvsigonline/auth/password_update/',
+			url: '{% url "password_update" %}',
 			beforeSend: function(xhr) {
 				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			data: { 'password1': pass1, 'password2': pass2 },
 			success: function(response) {
 				if (response.success == true) {
-					var logout_url = '{% url "gvsigol_logout_user" %}';
-					$.ajax({
-						type: 'POST', async: false, url: logout_url,
-						beforeSend: function(xhr) {
-							xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-						},
-						success: function() { location.href = '{% url "index" %}'; },
-						error: function() {}
+					$success.show();
+					// Full browser POST (not AJAX): required for OIDC logout redirect to the IdP
+					var $form = $('<form>', {
+						method: 'POST',
+						action: '{% url "gvsigol_logout_user" %}'
 					});
+					$form.append($('<input>', {
+						type: 'hidden',
+						name: 'csrfmiddlewaretoken',
+						value: Cookies.get('csrftoken')
+					}));
+					$('body').append($form);
+					setTimeout(function() {
+						$form.submit();
+					}, 800);
 				} else {
-					$('#form-error').addClass('pass-error-visible');
+					var msg = mismatchMsg;
+					if (response.error === 'update_failed') {
+						msg = updateFailedMsg;
+					} else if (response.error && response.error !== 'mismatch') {
+						msg = response.error;
+					}
+					$error.text(msg).addClass('pass-error-visible');
+					$btn.prop('disabled', false);
 				}
 			},
-			error: function() {}
+			error: function() {
+				$error.text(updateFailedMsg).addClass('pass-error-visible');
+				$btn.prop('disabled', false);
+			}
 		});
 	});
 
