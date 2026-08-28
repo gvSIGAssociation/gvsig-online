@@ -207,7 +207,7 @@ def get_rc_info(request):
 def get_rc_polygon(ref_catastral, srs='EPSG::4326'):
 
     catastral_url = 'http://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx?service=wfs&version=2&request=getfeature&STOREDQUERIE_ID=GetParcel&refcat='+ref_catastral+'&srsname='+srs
-    r = requests.get(url = catastral_url, params = {}, verify=False)
+    r = _catastro_get(catastral_url)
     tree = ElementTree.fromstring(r.content)
     features = []
 
