@@ -1929,7 +1929,10 @@ def project_get_conf(request):
                         layer['write_roles'] = write_roles
                         layer['public'] = l.public
                         layer['styles'] = get_layer_styles(l)
-                        
+
+                        # Always reset: previous loop iteration must not leak params
+                        # into a cached layer without external_params (NameError / wrong wmts_options).
+                        params = {}
                         if l.external_params:
                             params = json.loads(l.external_params)
                             layer['format'] = params.get('format')

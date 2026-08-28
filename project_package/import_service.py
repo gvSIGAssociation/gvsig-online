@@ -2851,6 +2851,28 @@ def _import_raster_layer(
                 i, lyr.name, _sld_exc,
             )
 
+    try:
+        gs.updateThumbnail(lyr, 'create')
+    except Exception as _thumb_exc:
+        LOG.warning('_import_raster_layer: could not create thumbnail for %s: %s', lyr.name, _thumb_exc)
+
+    core_utils.toc_add_layer(lyr)
+    gs.createOrUpdateGeoserverLayerGroup(lyr.layer_group)
+
+    # Same as vector import: cached layers need fresh wmts_options for the new
+    # workspace:layer name. Without this the viewer falls back to a synthetic
+    # tile grid and GWC returns 400 for GetTile requests.
+    if lyr.cached:
+        gs.reload_master()
+        try:
+            from gvsigol_services.tasks import update_internal_wmts_layer_options
+            update_internal_wmts_layer_options(lyr)
+        except Exception as _wmts_exc:
+            LOG.warning(
+                'Could not update WMTS options for cached raster layer %s: %s',
+                lyr.name, _wmts_exc,
+            )
+
     return lyr
 
 
