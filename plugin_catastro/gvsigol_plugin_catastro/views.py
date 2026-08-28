@@ -32,6 +32,22 @@ from xml.etree import ElementTree
 
 from django.contrib.gis.geos import Polygon, Point, MultiPoint, GeometryCollection
 import re
+import logging
+import time
+
+logger = logging.getLogger('gvsigol')
+
+def _catastro_get(url, params=None):
+    last_error = None
+    for attempt in range(2):
+        try:
+            return requests.get(url=url, params=params or {}, verify=False, timeout=10)
+        except (requests.ConnectionError, requests.Timeout) as e:
+            last_error = e
+            logger.warning('Catastro GET failed (attempt %s/2) %s: %s', attempt + 1, url, e)
+            if attempt == 0:
+                time.sleep(0.3)
+    raise last_error
 
 @csrf_exempt    
 def get_conf(request):
@@ -46,7 +62,7 @@ def get_conf(request):
 def get_provincias(request):
     if request.method == 'POST':
         provincias_url = settings.URL_API_CATASTRO + '/COVCCallejero.svc/rest/ObtenerProvincias';
-        r = requests.get(url = provincias_url, params = {}, verify=False, timeout=2)
+        r = _catastro_get(provincias_url)
         return HttpResponse(r.content, content_type='text/xml', charset=r.encoding)
 
 
@@ -55,9 +71,9 @@ def get_municipios(request):
     if request.method == 'POST':
         provincia = request.POST.get('provincia')
 
-        municipio_url = settings.URL_API_CATASTRO + '/COVCCallejero.svc/rest/ObtenerMunicipios?Provincia='+provincia+'&Municipio=';
+        municipio_url = settings.URL_API_CATASTRO + '/COVCCallejero.svc/rest/ObtenerMunicipios';
 
-        r = requests.get(url = municipio_url, params = {}, verify=False)
+        r = _catastro_get(municipio_url, params={'Provincia': provincia, 'Municipio': ''})
         return HttpResponse(r.content, content_type='text/xml', charset=r.encoding)
 
 
@@ -69,9 +85,9 @@ def get_vias(request):
         municipio = request.POST.get('municipio')
 
         # address_url = settings.URL_API_CATASTRO + '/OVCCallejero.asmx/ConsultaVia?Provincia='+provincia+'&Municipio='+municipio+"&TipoVia="+"&NombreVia=";
-        address_url = settings.URL_API_CATASTRO + '/COVCCallejero.svc/rest/ObtenerCallejero?Provincia='+provincia+'&Municipio='+municipio+"&TipoVia="+"&NombreVia=";
+        address_url = settings.URL_API_CATASTRO + '/COVCCallejero.svc/rest/ObtenerCallejero';
 
-        r = requests.get(url = address_url, params = {}, verify=False)
+        r = _catastro_get(address_url, params={'Provincia': provincia, 'Municipio': municipio, 'TipoVia': '', 'NombreVia': ''})
         return HttpResponse(r.content, content_type='text/xml', charset=r.encoding)
 
 
