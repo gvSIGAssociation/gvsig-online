@@ -148,6 +148,47 @@ def _crs_bounds_map(crs_list):
     return crs_bounds
 
 
+def _extract_grid_subset_names(gwc_layer_config):
+    """Extract ordered gridSetName values from a GWC layer/group JSON document."""
+    if not gwc_layer_config or not isinstance(gwc_layer_config, dict):
+        return []
+
+    layer_body = (
+        gwc_layer_config.get('wmsLayer')
+        or gwc_layer_config.get('GeoServerLayer')
+        or gwc_layer_config.get('geoServerLayer')
+        or gwc_layer_config
+    )
+    if not isinstance(layer_body, dict):
+        return []
+
+    grid_subsets = layer_body.get('gridSubsets') or {}
+    if isinstance(grid_subsets, dict):
+        items = grid_subsets.get('gridSubset') or []
+    elif isinstance(grid_subsets, list):
+        items = grid_subsets
+    else:
+        items = []
+
+    if isinstance(items, dict):
+        items = [items]
+
+    names = []
+    for item in items:
+        if isinstance(item, dict):
+            name = item.get('gridSetName') or item.get('name')
+        else:
+            name = item
+        name = _normalize_crs_key(name)
+        if name and name not in names:
+            names.append(name)
+    return names
+
+
+def _default_configured_grid_subsets():
+    return [_normalize_crs_key(gs) for gs in settings.CACHE_OPTIONS.get('GRID_SUBSETS', [])]
+
+
 class APIGeoWebCache():
     
     def __init__(self):
@@ -185,6 +226,37 @@ class APIGeoWebCache():
             return json.loads(response.content)
         
         raise FailedRequestError(response.status_code, response.content)
+
+    def get_configured_grid_subsets(self, ws, layer, server, master_node_url):
+        """Return gridsets actually registered on the GWC layer (seed-safe list).
+
+        Falls back to CACHE_OPTIONS['GRID_SUBSETS'] if the layer config cannot be read.
+        """
+        try:
+            names = _extract_grid_subset_names(self.get_layer(ws, layer, server, master_node_url))
+            if names:
+                return names
+        except Exception:
+            logger.warning(
+                "Could not read GWC gridSubsets for layer %s. Falling back to CACHE_OPTIONS['GRID_SUBSETS']",
+                getattr(layer, 'name', layer),
+                exc_info=True,
+            )
+        return _default_configured_grid_subsets()
+
+    def get_group_configured_grid_subsets(self, group, server, master_node_url):
+        """Return gridsets actually registered on the GWC layer group (seed-safe list)."""
+        try:
+            names = _extract_grid_subset_names(self.get_group(group, server, master_node_url))
+            if names:
+                return names
+        except Exception:
+            logger.warning(
+                "Could not read GWC gridSubsets for group %s. Falling back to CACHE_OPTIONS['GRID_SUBSETS']",
+                getattr(group, 'name', group),
+                exc_info=True,
+            )
+        return _default_configured_grid_subsets()
     
     def _get_gridset_names(self, server, master_node_url):
         """Return GeoWebCache gridset names advertised by the target GeoServer.

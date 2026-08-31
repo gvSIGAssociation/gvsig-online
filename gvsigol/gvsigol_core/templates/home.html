@@ -1143,6 +1143,8 @@ body.skin-black .home-page {
 		var activeFilter = 'all';
 		var currentOrderType = '{{ order_type }}';
 		var sortableEnabled = false;
+		// Tras Manual→Alfabético se expanden todos los ítems y el filtro va por DOM
+		var alphaPreviewExpanded = false;
 
 		// ---- Toggle vista Cards / Lista ----
 		var $gridEl = $('#all-items-panel ul.items-list');
@@ -1216,23 +1218,46 @@ body.skin-black .home-page {
 			}
 		}
 
+		/**
+		 * List.js quita del DOM los ítems no visibles (removeChild).
+		 * Antes de leer/restaurar orden o filtrar en modo manual hay que
+		 * devolver todos los nodos al <ul>.
+		 */
+		function ensureAllItemsInDom() {
+			itemList.i = 1;
+			itemList.page = itemList.items.length || 9999;
+			itemList.search('');
+			itemList.filter();
+			$('#all-items-panel ul.items-list > li').show();
+		}
+
+		function applyDomTypeAndTextFilter(filter) {
+			var q = $.trim($('.search-all').val()).toLowerCase();
+			$('#all-items-panel ul.items-list > li').each(function() {
+				var $el = $(this);
+				var typeOk = filter === 'all' || $el.data('item-type') === filter;
+				var title = ($el.find('.item-title').text() || '').toLowerCase();
+				var textOk = !q || title.indexOf(q) !== -1;
+				$el.toggle(typeOk && textOk);
+			});
+			$('#filter-empty-msg').toggle($('#all-items-panel ul.items-list > li:visible').length === 0);
+		}
+
 		function applyFilter(filter) {
 			activeFilter = filter;
 			updateSaveOrderButtonState();
 			if (sortableEnabled) {
-				// Modo manual: tipo + texto (List.js sigue enganchado al input; unificamos visibilidad aquí)
-				var q = $.trim($('.search-all').val()).toLowerCase();
-				$('.items-list > li').each(function() {
-					var $el = $(this);
-					var typeOk = filter === 'all' || $el.data('item-type') === filter;
-					var title = ($el.find('.item-title').text() || '').toLowerCase();
-					var textOk = !q || title.indexOf(q) !== -1;
-					$el.toggle(typeOk && textOk);
-				});
-				$('#filter-empty-msg').toggle($('.items-list > li:visible').length === 0);
+				// Modo manual: visibilidad solo por DOM (todos los <li> deben estar presentes)
+				ensureAllItemsInDom();
+				applyDomTypeAndTextFilter(filter);
 				updateSortableDragState();
+			} else if (alphaPreviewExpanded) {
+				// Preview alfabético (sin paginar): filtrar por DOM para no sacar nodos del <ul>
+				ensureAllItemsInDom();
+				applyAlphabeticalOrder();
+				applyDomTypeAndTextFilter(filter);
 			} else {
-				// Modo alfabético: usar List.js
+				// Modo alfabético con paginación List.js
 				if (filter === 'all') {
 					itemList.filter();
 				} else {
@@ -1252,7 +1277,17 @@ body.skin-black .home-page {
 
 		$('.search-all').on('keyup input', function() {
 			if (sortableEnabled) {
-				applyFilter(activeFilter);
+				// Deshacer el filtrado DOM de List.js (se ejecuta antes) y unificar con tipología
+				ensureAllItemsInDom();
+				applyDomTypeAndTextFilter(activeFilter);
+				updateSaveOrderButtonState();
+				updateSortableDragState();
+				return;
+			}
+			if (alphaPreviewExpanded) {
+				ensureAllItemsInDom();
+				applyAlphabeticalOrder();
+				applyDomTypeAndTextFilter(activeFilter);
 				return;
 			}
 			$('#filter-empty-msg').toggle(itemList.visibleItems.length === 0);
@@ -1286,6 +1321,7 @@ body.skin-black .home-page {
 		}
 
 		function restoreManualOrder() {
+			ensureAllItemsInDom();
 			if (lastManualOrderData.length === 0) return;
 			var $list = $('#all-items-panel ul.items-list');
 			if (!$list.length) return;
@@ -1296,13 +1332,21 @@ body.skin-black .home-page {
 			});
 			lastManualOrderData.forEach(function(entry) {
 				var key = entry.type + '-' + entry.id;
-				if (itemsByKey[key]) $list.append(itemsByKey[key]);
+				if (itemsByKey[key]) {
+					$list.append(itemsByKey[key]);
+					delete itemsByKey[key];
+				}
+			});
+			// No perder ítems ausentes del snapshot (p.ej. creados después o snapshot incompleto)
+			$.each(itemsByKey, function(_, $el) {
+				if ($el && $el.length) $list.append($el);
 			});
 		}
 
 		// ---- Orden manual: jQuery UI Sortable ----
 		function enableSortable() {
 			if (sortableEnabled) return;
+			ensureAllItemsInDom();
 			$('.items-list').sortable({
 				handle: '.drag-handle',
 				items: '> li',
@@ -1312,15 +1356,7 @@ body.skin-black .home-page {
 			});
 			$('.items-list').addClass('sortable-mode');
 			sortableEnabled = true;
-			// Mostrar TODOS los items expandiendo la página de List.js
-			itemList.page = itemList.items.length || 9999;
-			itemList.search();
-			itemList.filter();
-			itemList.update();
-			// Asegurar que todos los <li> sean visibles
-			$('.items-list > li').show();
 			$('.list-pagination').hide();
-			// Reaplicar filtro activo en modo DOM
 			applyFilter(activeFilter);
 		}
 
@@ -1330,13 +1366,7 @@ body.skin-black .home-page {
 			$('.items-list').sortable('destroy');
 			$('.items-list').removeClass('sortable-mode');
 			sortableEnabled = false;
-			// Restaurar paginación de List.js
-			itemList.page = 12;
-			$('.items-list > li').show();
 			$('.elegant-search').show();
-			$('.list-pagination').show();
-			// Reaplicar filtro activo vía List.js
-			applyFilter(activeFilter);
 		}
 
 		function saveOrderToServer(orderType, orderData, onSuccess) {
@@ -1356,8 +1386,10 @@ body.skin-black .home-page {
 		}
 
 		function setOrderMode(mode) {
-			currentOrderType = mode;
+			if (mode === currentOrderType) return;
 			if (mode === 'manual') {
+				currentOrderType = 'manual';
+				alphaPreviewExpanded = false;
 				$('#btn-sort-alpha').removeClass('active');
 				$('#btn-sort-manual').addClass('active');
 				$('#btn-save-order').addClass('visible');
@@ -1366,19 +1398,23 @@ body.skin-black .home-page {
 				if (lastManualOrderData.length === 0) {
 					applyAlphabeticalOrder();
 				}
+				applyFilter(activeFilter);
 			} else {
-				lastManualOrderData = getOrderDataFromDom();
+				// Solo capturar orden manual con el DOM completo (nunca con tipología List.js activa)
+				if (sortableEnabled) {
+					ensureAllItemsInDom();
+					lastManualOrderData = getOrderDataFromDom();
+				}
+				currentOrderType = 'alpha';
+				alphaPreviewExpanded = true;
 				$('#btn-sort-manual').removeClass('active');
 				$('#btn-sort-alpha').addClass('active');
 				$('#btn-save-order').addClass('visible');
 				disableSortable();
-				// Preview alfabético: mostrar todos sin paginar, luego reordenar DOM (después de update para que no lo pise)
-				itemList.page = itemList.items.length || 9999;
-				itemList.search();
-				itemList.filter();
-				itemList.update();
+				ensureAllItemsInDom();
 				$('.list-pagination').hide();
 				applyAlphabeticalOrder();
+				applyFilter(activeFilter);
 			}
 		}
 
@@ -1387,6 +1423,7 @@ body.skin-black .home-page {
 
 		// Inicializar según modo de orden
 		if (currentOrderType === 'manual') {
+			ensureAllItemsInDom();
 			lastManualOrderData = getOrderDataFromDom();
 			enableSortable();
 		} else {
@@ -1399,17 +1436,16 @@ body.skin-black .home-page {
 			if ($(this).hasClass('save-order--blocked')) return;
 			var orderData = [];
 			if (currentOrderType === 'manual') {
-				$('.items-list > li').each(function() {
-					orderData.push({
-						type: $(this).data('item-type'),
-						id: parseInt($(this).data('item-id'), 10)
-					});
-				});
+				ensureAllItemsInDom();
+				orderData = getOrderDataFromDom();
+				applyFilter(activeFilter);
 			}
 			saveOrderToServer(currentOrderType, orderData, function() {
 				if (currentOrderType === 'alpha') {
 					$('#btn-save-order').removeClass('visible');
 					lastManualOrderData = [];
+				} else {
+					lastManualOrderData = orderData.slice();
 				}
 			});
 			var btn = $(this);

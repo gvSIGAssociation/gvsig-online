@@ -253,6 +253,13 @@
 $('#menu-manage-services').addClass("active");
 $('#submenu-cache').addClass("active");
 $().ready(function() {
+	var supported_crs = {{ supported_crs|safe }};
+	for (var crs in supported_crs) {
+		if (supported_crs[crs].code && supported_crs[crs].definition) {
+			proj4.defs(supported_crs[crs].code, supported_crs[crs].definition);
+		}
+	}
+
 	/**
 	  * Create the map.
 	  */
@@ -275,6 +282,10 @@ $().ready(function() {
 	interaction.on('extentchanged', function(e) {
 		if (e.b) {
 			var epsg = $('option:selected', $('#input_grid_set')).val();
+			if (!ol.proj.get(epsg)) {
+				messageBox.show('warning', gettext('Unsupported coordinate reference system') + ': ' + epsg);
+				return;
+			}
 			var minXY = ol.proj.transform([e.b[0], e.b[1]], 'EPSG:3857', epsg);
 			var maxXY = ol.proj.transform([e.b[2], e.b[3]], 'EPSG:3857', epsg);
 			$('#min_x').val(minXY[0]);
@@ -282,13 +293,12 @@ $().ready(function() {
 			$('#max_x').val(maxXY[0]);
 			$('#max_y').val(maxXY[1]);
 
-			var epsg = $('option:selected', $('#input_grid_set')).val();
-			var minXY = ol.proj.transform([e.b[0], e.b[1]], 'EPSG:3857', 'EPSG:4326');
-			var maxXY = ol.proj.transform([e.b[2], e.b[3]], 'EPSG:3857', 'EPSG:4326');
-			$('#input_min_x').val(minXY[0]);
-			$('#input_min_y').val(minXY[1]);
-			$('#input_max_x').val(maxXY[0]);
-			$('#input_max_y').val(maxXY[1]);	
+			var minXY4326 = ol.proj.transform([e.b[0], e.b[1]], 'EPSG:3857', 'EPSG:4326');
+			var maxXY4326 = ol.proj.transform([e.b[2], e.b[3]], 'EPSG:3857', 'EPSG:4326');
+			$('#input_min_x').val(minXY4326[0]);
+			$('#input_min_y').val(minXY4326[1]);
+			$('#input_max_x').val(maxXY4326[0]);
+			$('#input_max_y').val(maxXY4326[1]);	
 		}
 	});
 	
