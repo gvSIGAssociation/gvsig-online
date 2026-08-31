@@ -1092,11 +1092,13 @@ class WmtsLayerOptions(APIView):
             if layer.external:
                 external_params = json.loads(layer.external_params)
                 crs = self.request.query_params.get('crs')
+                gwc_cached = layer.external and layer.type == 'WMS' and layer.cached
                 result = {
                     "content" : services_utils.wmts_options_for_openlayers(
                         external_params['wmts_options'],
                         external_params.get('format'),
                         projection=crs,
+                        gwc_cached=gwc_cached,
                     ),
                     "links" : [
                         {
