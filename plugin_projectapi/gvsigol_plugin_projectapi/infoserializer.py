@@ -550,6 +550,7 @@ class LayerSerializer(serializers.ModelSerializer):
                         external_params['wmts_options'],
                         external_params.get('format'),
                         projection=project_crs,
+                        gwc_cached=True,
                     )
                 except Exception:
                     logger.exception(
