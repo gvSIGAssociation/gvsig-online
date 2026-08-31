@@ -313,6 +313,7 @@ def update_external_cached_wms_wmts_options(layer):
                 wmts_options,
                 params.get('format'),
                 layer_styles=params.get('styles'),
+                gwc_cached=True,
             )
             params['wmts_options'] = wmts_options
             layer.external_params = json.dumps(params)

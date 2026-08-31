@@ -29,6 +29,9 @@ from xml.sax.saxutils import escape
 
 logger = logging.getLogger(__name__)
 
+# GeoWebCache external WMS layers are registered with this mime format only.
+GWC_EXTERNAL_WMS_MIME_FORMAT = 'image/png'
+
 
 def _gwc_rest_timeout():
     return int(getattr(settings, 'GWC_REST_TIMEOUT', 20))
@@ -393,7 +396,7 @@ class APIGeoWebCache():
         xml += "<wmsLayer>"
         xml +=  "<name>" + escape(layer_name) + "</name>"
         xml +=  "<mimeFormats>"
-        xml +=      "<string>image/png</string>"
+        xml +=      "<string>" + GWC_EXTERNAL_WMS_MIME_FORMAT + "</string>"
         xml +=  "</mimeFormats>"
         xml +=  "<gridSubsets>"
         for gs in grid_subsets:
@@ -454,7 +457,7 @@ class APIGeoWebCache():
         xml += "<wmsLayer>"
         xml +=  "<name>" + layer_name + "</name>"
         xml +=  "<mimeFormats>"
-        xml +=      "<string>image/png</string>"
+        xml +=      "<string>" + GWC_EXTERNAL_WMS_MIME_FORMAT + "</string>"
         xml +=  "</mimeFormats>"
         xml +=  "<gridSubsets>"
         xml +=      "<gridSubset>"

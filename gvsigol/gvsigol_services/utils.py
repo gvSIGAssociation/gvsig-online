@@ -1915,7 +1915,15 @@ def _normalize_wmts_style_identifier_for_kvp(wmts_options):
         wmts_options.pop('style', None)
 
 
-def wmts_options_for_openlayers(wmts_options, format=None, style=None, layer_styles=None, tilematrixsetname=None, projection=None):
+def wmts_options_for_openlayers(
+    wmts_options,
+    format=None,
+    style=None,
+    layer_styles=None,
+    tilematrixsetname=None,
+    projection=None,
+    gwc_cached=False,
+):
     if wmts_options.get('styles') is None:
         wmts_options['styles'] = {}
     _normalize_wmts_style_identifier_for_kvp(wmts_options)
@@ -1966,10 +1974,14 @@ def wmts_options_for_openlayers(wmts_options, format=None, style=None, layer_sty
             wmts_options['styles'] = new_styles
     else:
         wmts_options.pop('style', None)
+    if gwc_cached:
+        from gvsigol_services.rest_geowebcache import GWC_EXTERNAL_WMS_MIME_FORMAT
+        format = GWC_EXTERNAL_WMS_MIME_FORMAT
     if format:
-        fmts = wmts_options.get("formats")
-        if isinstance(fmts, (list, tuple)) and fmts and format not in fmts:
-            format = next((f for f in fmts if "png" in f.lower()), fmts[0])
+        if not gwc_cached:
+            fmts = wmts_options.get("formats")
+            if isinstance(fmts, (list, tuple)) and fmts and format not in fmts:
+                format = next((f for f in fmts if "png" in f.lower()), fmts[0])
         wmts_options['format'] = format
         try:
             del wmts_options['formats']

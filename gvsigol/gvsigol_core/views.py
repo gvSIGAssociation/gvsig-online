@@ -2146,7 +2146,8 @@ def project_get_conf(request):
                         try:
                             wmts_options = params['wmts_options']
                             params['wmts_options'] = services_utils.wmts_options_for_openlayers(
-                                wmts_options, params.get('format'), projection=project.viewer_default_crs
+                                wmts_options, params.get('format'), projection=project.viewer_default_crs,
+                                gwc_cached=True,
                             )
                         except Exception:
                             logger.exception(
