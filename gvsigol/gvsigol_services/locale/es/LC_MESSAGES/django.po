@@ -5384,6 +5384,14 @@ msgstr "Error borrando la vista: {0}"
 msgid "Attributions configuration created successfully."
 msgstr "La configuración de atribuciones se ha creado correctamente."
 
+#: gvsigol_services/views.py
+msgid "Numeric fields cannot be converted to enumeration. Change the field type to text first or create a new text field."
+msgstr "Los campos numéricos no pueden convertirse a enumeración. Cambie primero el tipo del campo a texto o cree un nuevo campo de texto."
+
+#: gvsigol_services/utils.py
+msgid "Value \"{value}\" is not valid for numeric field \"{field}\"."
+msgstr "El valor \"{value}\" no es válido para el campo numérico \"{field}\"."
+
 #: gvsigol_services/views.py:10547
 msgid "Attributions configuration updated successfully."
 msgstr "La configuración de atribuciones se ha actualizado correctamente."

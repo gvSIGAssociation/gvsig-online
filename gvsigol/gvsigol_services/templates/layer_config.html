@@ -195,7 +195,9 @@
 																				{% endif %}
 																				{% endif %}
 																				{% if not f.calculationLabel %}
+																				{% if f.type != 'integer' and f.type != 'bigint' and f.type != 'smallint' and f.type != 'bigserial' and f.type != 'serial' and f.type != 'smallserial' and f.type != 'double precision' and f.type != 'float' and f.type != 'real' and f.type != 'decimal' and f.type != 'double' and f.type != 'numeric' %}
 																				<li id="li-convert-to-enumerate"><a href="#" class="actions-menu-entry convert-to-enumerate"><i class="fa fa-list-alt" style="color: #3c8dbc;"></i> {% trans "Convert to enumerate" %}</a></li>
+																				{% endif %}
 																				{% endif %}
 																				<li><a href="#" class="actions-menu-entry delete-field"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete field" %}</a></li>
 																			</ul>

@@ -5044,3 +5044,11 @@ msgstr ""
 #, python-brace-format
 msgid "Error deleting view: {0}"
 msgstr ""
+
+#: gvsigol_services/views.py
+msgid "Numeric fields cannot be converted to enumeration. Change the field type to text first or create a new text field."
+msgstr "Numeric fields cannot be converted to enumeration. Change the field type to text first or create a new text field."
+
+#: gvsigol_services/utils.py
+msgid "Value \"{value}\" is not valid for numeric field \"{field}\"."
+msgstr "Value \"{value}\" is not valid for numeric field \"{field}\"."

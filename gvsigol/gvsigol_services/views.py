@@ -3642,6 +3642,20 @@ def convert_to_enumerate(request):
     if is_enum:
         return utils.get_exception(405, 'The field is already enumerated')
 
+    try:
+        i, table, schema = utils.get_db_connect_from_layer(layer_id)
+        with i as con:
+            table_info = con.get_table_info(table, schema=schema)
+            col_info = table_info.get_column_info(field)
+            if col_info and utils.is_numeric_field_type(col_info.get('type')):
+                return utils.get_exception(
+                    400,
+                    _('Numeric fields cannot be converted to enumeration. '
+                      'Change the field type to text first or create a new text field.')
+                )
+    except Exception:
+        logger.exception('Error checking field type before converting to enumeration')
+
     if autogen:
         params = json.loads(layer.datastore.connection_params)
         con = Introspect(database=params['database'], host=params['host'], port=params['port'], user=params['user'], password=params['passwd'])
@@ -5758,10 +5772,7 @@ def _describeFeatureType(layer, skip_pks):
                     layer_defs.remove(layer_def)
             enum, multiple = utils.is_field_enumerated(layer, layer_def['name'])
             if enum:
-                if multiple:
-                    layer_def['type'] = 'multiple_enumeration'
-                else:
-                    layer_def['type'] = 'enumeration'
+                utils.set_field_enumeration_type(layer_def, multiple=multiple)
 
         response = {'fields': layer_defs}
 
@@ -5802,10 +5813,7 @@ def describe_feature_type(lyr, workspace):
         for layer_def in layer_defs:
             enum, multiple = utils.is_field_enumerated(layer, layer_def['name'])
             if enum:
-                if multiple:
-                    layer_def['type'] = 'multiple_enumeration'
-                else:
-                    layer_def['type'] = 'enumeration'
+                utils.set_field_enumeration_type(layer_def, multiple=multiple)
 
         response = {'fields': layer_defs}
 

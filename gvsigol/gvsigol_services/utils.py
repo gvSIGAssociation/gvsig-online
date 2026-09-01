@@ -1027,6 +1027,92 @@ def get_field_calculation_conflict(field_type, calculation, calculation_label=No
 
     return None
 
+
+def is_numeric_field_type(field_type):
+    return _normalize_field_type(field_type) in _NUMERIC_FIELD_TYPES
+
+
+def is_integer_field_type(field_type):
+    ftype = _normalize_field_type(field_type)
+    return ftype in {
+        'integer', 'bigint', 'smallint', 'serial', 'bigserial', 'smallserial',
+        'int2', 'int4', 'int8',
+    }
+
+
+def set_field_enumeration_type(layer_def, multiple=False):
+    """
+    Override the logical field type to enumeration while preserving the
+    underlying PostgreSQL type in db_type.
+    """
+    if layer_def.get('db_type') is None:
+        layer_def['db_type'] = layer_def.get('type')
+    if multiple:
+        layer_def['type'] = 'multiple_enumeration'
+    else:
+        layer_def['type'] = 'enumeration'
+
+
+def normalize_property_value_for_column(value, column_info):
+    """
+    Coerce feature property values to match the PostgreSQL column type.
+    Raises ValueError when the value cannot be stored in the column.
+    """
+    if column_info is None:
+        return value
+
+    db_type = column_info.get('type')
+    if value is None:
+        return None
+
+    if value == '':
+        if is_numeric_field_type(db_type):
+            return None
+        return value
+
+    if not is_numeric_field_type(db_type):
+        return value
+
+    if isinstance(value, bool):
+        raise ValueError(
+            _('Value "{value}" is not valid for numeric field "{field}".').format(
+                value=value, field=column_info.get('name', ''))
+        )
+
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        if is_integer_field_type(db_type):
+            return int(value)
+        return float(value)
+
+    if isinstance(value, str):
+        stripped = value.strip()
+        if stripped == '':
+            return None
+        try:
+            if is_integer_field_type(db_type):
+                return int(stripped)
+            return float(stripped)
+        except (ValueError, TypeError):
+            raise ValueError(
+                _('Value "{value}" is not valid for numeric field "{field}".').format(
+                    value=value, field=column_info.get('name', ''))
+            )
+
+    return value
+
+
+def normalize_properties_for_db(properties, table_info, skip_fields=None):
+    skip_fields = skip_fields or set()
+    normalized = {}
+    for key, value in properties.items():
+        if key in skip_fields:
+            normalized[key] = value
+            continue
+        column_info = table_info.get_column_info(key)
+        normalized[key] = normalize_property_value_for_column(value, column_info)
+    return normalized
+
+
 def check_schema_exists(schema):
     dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
     dbport = settings.GVSIGOL_USERS_CARTODB['dbport']

@@ -4252,6 +4252,14 @@ msgstr "No permés"
 msgid "Error deleting view: {0}"
 msgstr "Error suprimint la vista: {0}"
 
+#: gvsigol_services/views.py
+msgid "Numeric fields cannot be converted to enumeration. Change the field type to text first or create a new text field."
+msgstr "Els camps numèrics no es poden convertir a enumeració. Canvie primer el tipus del camp a text o cree un camp de text nou."
+
+#: gvsigol_services/utils.py
+msgid "Value \"{value}\" is not valid for numeric field \"{field}\"."
+msgstr "El valor \"{value}\" no és vàlid per al camp numèric \"{field}\"."
+
 #~ msgid "Show in vector tile format"
 #~ msgstr "Mostrar en format vector tile"
 
