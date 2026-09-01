@@ -1424,7 +1424,9 @@ class FeatureSerializer(serializers.Serializer):
             return_crs = epsg
             geom = data.get('geometry')
             try:
-                sql, values = self._get_sql_update(con, table, schema, data['properties'], feat_id, geom, table_info, idfield, return_crs, use_versions=use_versions)
+                normalized_props = self._normalize_properties_for_db(
+                    data['properties'], table_info)
+                sql, values = self._get_sql_update(con, table, schema, normalized_props, feat_id, geom, table_info, idfield, return_crs, use_versions=use_versions)
                 con.cursor.execute(sql, values)
                 rows = con.cursor.fetchall()
                 con.conn.commit()
@@ -1495,7 +1497,9 @@ class FeatureSerializer(serializers.Serializer):
 
             return_crs = epsg
             try:
-                sql = self._get_sql_insert(table, schema, data['properties'], data['geometry'], table_info, idfield, pk_is_serial, return_crs, con, use_versions=use_versions)
+                normalized_props = self._normalize_properties_for_db(
+                    data['properties'], table_info)
+                sql = self._get_sql_insert(table, schema, normalized_props, data['geometry'], table_info, idfield, pk_is_serial, return_crs, con, use_versions=use_versions)
             except Exception as e:
                 if(hasattr(e, 'msg') and e.msg != ''):
                     raise e
@@ -1853,6 +1857,14 @@ class FeatureSerializer(serializers.Serializer):
             return False
         else:
             return True
+
+    def _normalize_properties_for_db(self, properties, table_info):
+        skip_fields = {settings.VERSION_FIELD, settings.DATE_FIELD}
+        try:
+            return services_utils.normalize_properties_for_db(
+                properties, table_info, skip_fields=skip_fields)
+        except ValueError as e:
+            raise HttpException(400, str(e))
 
     def _get_sql_insert(self, table, schema, props, geom, table_info, pk_field, pk_is_serial, return_crs, con, use_versions):
         #TODO:quitar para V2
