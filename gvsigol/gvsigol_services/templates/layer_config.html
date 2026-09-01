@@ -195,9 +195,7 @@
 																				{% endif %}
 																				{% endif %}
 																				{% if not f.calculationLabel %}
-																				{% if f.type != 'integer' and f.type != 'bigint' and f.type != 'smallint' and f.type != 'bigserial' and f.type != 'serial' and f.type != 'smallserial' and f.type != 'double precision' and f.type != 'float' and f.type != 'real' and f.type != 'decimal' and f.type != 'double' and f.type != 'numeric' %}
 																				<li id="li-convert-to-enumerate"><a href="#" class="actions-menu-entry convert-to-enumerate"><i class="fa fa-list-alt" style="color: #3c8dbc;"></i> {% trans "Convert to enumerate" %}</a></li>
-																				{% endif %}
 																				{% endif %}
 																				<li><a href="#" class="actions-menu-entry delete-field"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete field" %}</a></li>
 																			</ul>
@@ -1116,9 +1114,25 @@
 		$('#my-modal-dialog .modal-body').empty();
 		$('#my-modal-dialog .modal-title').text(gettext("Convert to enum"));
 
+		var $row = $('tr[data-fieldname="' + fieldName + '"]');
+		var fieldType = (($row.find('input[name^="field-type-"]').val() || '') + '').toLowerCase();
+		var numericTypes = {
+			'integer': true, 'bigint': true, 'smallint': true,
+			'bigserial': true, 'serial': true, 'smallserial': true,
+			'double precision': true, 'float': true, 'real': true,
+			'decimal': true, 'double': true, 'numeric': true
+		};
+		var isNumericField = !!numericTypes[fieldType];
+
 		var ui = '';
 		ui += '<div id="div-name" class="row">';
-
+		if (isNumericField) {
+			ui += '<div class="col-md-12">';
+			ui += 	'<div class="alert alert-warning" style="margin-bottom: 15px;">';
+			ui += 		gettext('Converting a numeric field to enumeration will change the database column type to text. Existing values will be kept as text.');
+			ui += 	'</div>';
+			ui += '</div>';
+		}
 		ui += '<div class="col-md-12 form-group">';
 		ui += 	'<label>' + gettext('Select enumeration') + '</label>';
 		ui += 	'<select id="enumeration-list" class="form-control">';
@@ -1137,56 +1151,52 @@
 		$('#my-modal-dialog .modal-footer').empty();
 		$('#my-modal-dialog .modal-footer').append(buttons);
 
-		$('#convert').on('click', function () {
-			$.ajax({
-				type: 'POST',
-				async: false,
-				url: '/gvsigonline/services/convert_to_enumerate/',
-				beforeSend:function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-				},
-			  	data:{
-			  		'field': fieldName,
-			  		'enum_id': $('#enumeration-list').val(),
-			  		'layer_id': "{{layer_id}}",
-			  		'layer_name': "{{layer}}",
-			  		'autogen': 'False'
-			  	},
-				success	:function(response) {
-					messageBox.show('info', gettext('Convert ok'));
-					$('#my-modal-dialog').modal('hide');
-				},
-				error: function() {
-					messageBox.show('error', files.responseText);
-					$('#my-modal-dialog').modal('hide');
+		function submitConvertToEnumerate(autogen) {
+			var doRequest = function () {
+				$.ajax({
+					type: 'POST',
+					async: false,
+					url: '/gvsigonline/services/convert_to_enumerate/',
+					beforeSend:function(xhr){
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+					},
+				  	data:{
+				  		'field': fieldName,
+				  		'enum_id': $('#enumeration-list').val(),
+				  		'layer_id': "{{layer_id}}",
+				  		'layer_name': "{{layer}}",
+				  		'autogen': autogen ? 'True' : 'False',
+				  		'confirm_type_change': isNumericField ? 'True' : 'False'
+				  	},
+					success	:function(response) {
+						messageBox.show('info', gettext(autogen ? 'Autogen ok' : 'Convert ok'));
+						$('#my-modal-dialog').modal('hide');
+						if (isNumericField) {
+							window.location.reload();
+						}
+					},
+					error: function(jqXHR) {
+						messageBox.show('error', jqXHR.responseText || gettext('The action failed'));
+						$('#my-modal-dialog').modal('hide');
+					}
+				});
+			};
+
+			if (isNumericField) {
+				if (window.confirm(gettext('Converting a numeric field to enumeration will change the database column type to text. Existing values will be kept as text. Do you want to continue?'))) {
+					doRequest();
 				}
-			});
+			} else {
+				doRequest();
+			}
+		}
+
+		$('#convert').on('click', function () {
+			submitConvertToEnumerate(false);
 		});
 
 		$('#autogen').on('click', function () {
-			$.ajax({
-				type: 'POST',
-				async: false,
-				url: '/gvsigonline/services/convert_to_enumerate/',
-				beforeSend:function(xhr){
-					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-				},
-			  	data:{
-			  		'field': fieldName,
-			  		'enum_id': $('#enumeration-list').val(),
-			  		'layer_id': "{{layer_id}}",
-			  		'layer_name': "{{layer}}",
-			  		'autogen': 'True'
-			  	},
-				success	:function(response) {
-					messageBox.show('info', gettext('Autogen ok'));
-					$('#my-modal-dialog').modal('hide');
-				},
-				error: function(jqXHR, status, errMsg) {
-					messageBox.show('error', jqXHR.responseText);
-					$('#my-modal-dialog').modal('hide');
-				}
-			});
+			submitConvertToEnumerate(true);
 		});
 
 		$('#my-modal-dialog').modal('show');

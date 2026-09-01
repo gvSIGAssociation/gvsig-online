@@ -4253,8 +4253,16 @@ msgid "Error deleting view: {0}"
 msgstr "Error suprimint la vista: {0}"
 
 #: gvsigol_services/views.py
-msgid "Numeric fields cannot be converted to enumeration. Change the field type to text first or create a new text field."
-msgstr "Els camps numèrics no es poden convertir a enumeració. Canvie primer el tipus del camp a text o cree un camp de text nou."
+msgid "Converting a numeric field to enumeration will change the database column type to text. Confirm to continue."
+msgstr "Convertir un camp numèric a enumeració canviarà el tipus de la columna en base de dades a text. Confirme per a continuar."
+
+#: gvsigol_services/views.py
+msgid "Error converting field to text: {0}"
+msgstr "Error en convertir el camp a text: {0}"
+
+#: gvsigol_services/views.py
+msgid "Error checking field type before converting to enumeration"
+msgstr "Error en comprovar el tipus de camp abans de convertir-lo a enumeració"
 
 #: gvsigol_services/utils.py
 msgid "Value \"{value}\" is not valid for numeric field \"{field}\"."

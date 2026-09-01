@@ -5046,8 +5046,16 @@ msgid "Error deleting view: {0}"
 msgstr ""
 
 #: gvsigol_services/views.py
-msgid "Numeric fields cannot be converted to enumeration. Change the field type to text first or create a new text field."
-msgstr "Numeric fields cannot be converted to enumeration. Change the field type to text first or create a new text field."
+msgid "Converting a numeric field to enumeration will change the database column type to text. Confirm to continue."
+msgstr "Converting a numeric field to enumeration will change the database column type to text. Confirm to continue."
+
+#: gvsigol_services/views.py
+msgid "Error converting field to text: {0}"
+msgstr "Error converting field to text: {0}"
+
+#: gvsigol_services/views.py
+msgid "Error checking field type before converting to enumeration"
+msgstr "Error checking field type before converting to enumeration"
 
 #: gvsigol_services/utils.py
 msgid "Value \"{value}\" is not valid for numeric field \"{field}\"."

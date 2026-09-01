@@ -3632,6 +3632,7 @@ def convert_to_enumerate(request):
         autogen = False if request.POST['autogen'] == 'False' else True
     except Exception:
         return utils.get_exception(400, 'Error in the input params')
+    confirm_type_change = request.POST.get('confirm_type_change', 'False') == 'True'
     usr = request.user
 
     layer = Layer.objects.get(id=layer_id)
@@ -3642,19 +3643,34 @@ def convert_to_enumerate(request):
     if is_enum:
         return utils.get_exception(405, 'The field is already enumerated')
 
+    type_changed = False
     try:
         i, table, schema = utils.get_db_connect_from_layer(layer_id)
         with i as con:
             table_info = con.get_table_info(table, schema=schema)
             col_info = table_info.get_column_info(field)
             if col_info and utils.is_numeric_field_type(col_info.get('type')):
-                return utils.get_exception(
-                    400,
-                    _('Numeric fields cannot be converted to enumeration. '
-                      'Change the field type to text first or create a new text field.')
-                )
+                if not confirm_type_change:
+                    return utils.get_exception(
+                        409,
+                        _('Converting a numeric field to enumeration will change the '
+                          'database column type to text. Confirm to continue.')
+                    )
+                try:
+                    con.alter_column_to_text(schema, table, field)
+                    type_changed = True
+                except Exception as e:
+                    logger.exception('Error converting numeric field to text before enumeration')
+                    return utils.get_exception(
+                        400,
+                        _('Error converting field to text: {0}').format(str(e))
+                    )
     except Exception:
         logger.exception('Error checking field type before converting to enumeration')
+        return utils.get_exception(
+            400,
+            _('Error checking field type before converting to enumeration')
+        )
 
     if autogen:
         params = json.loads(layer.datastore.connection_params)
@@ -3695,6 +3711,7 @@ def convert_to_enumerate(request):
                     #Si da un error insertando no se inserta ese elemento pero no se bloquea.
                     #Siempre los pueden añadir a mano si falta alguno
                     pass
+        con.close()
 
     if enum_id == None:
         return utils.get_exception(400, 'We cannot find a enumerated with this name')
@@ -3706,7 +3723,20 @@ def convert_to_enumerate(request):
     field_enum.multiple = False
     field_enum.save()
 
-    return HttpResponse('{"response": "ok"}', content_type='application/json')
+    try:
+        gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+        expose_pks = gs.datastore_check_exposed_pks(layer.datastore)
+        gs.reload_featuretype(layer, attributes=True, nativeBoundingBox=False, latLonBoundingBox=False)
+        gs.reload_nodes()
+        layer.get_config_manager().refresh_field_conf(include_pks=expose_pks)
+        layer.save()
+    except Exception:
+        logger.exception('Error refreshing layer after convert_to_enumerate')
+
+    return HttpResponse(
+        json.dumps({'response': 'ok', 'type_changed': type_changed}),
+        content_type='application/json'
+    )
 
 @require_http_methods(["POST"])
 @csrf_exempt

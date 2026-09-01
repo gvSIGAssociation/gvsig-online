@@ -233,6 +233,14 @@ msgstr "Enumed field successfully assigned"
 msgid "Autogen ok"
 msgstr "Enum field successfully generated"
 
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js
+msgid "Converting a numeric field to enumeration will change the database column type to text. Existing values will be kept as text."
+msgstr "Converting a numeric field to enumeration will change the database column type to text. Existing values will be kept as text."
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js
+msgid "Converting a numeric field to enumeration will change the database column type to text. Existing values will be kept as text. Do you want to continue?"
+msgstr "Converting a numeric field to enumeration will change the database column type to text. Existing values will be kept as text. Do you want to continue?"
+
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:53
 msgid "Delete field"
 msgstr ""

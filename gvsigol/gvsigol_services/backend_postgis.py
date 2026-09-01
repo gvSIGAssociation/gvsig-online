@@ -2119,6 +2119,23 @@ class Introspect:
             nullable=nullable_query,
             default=default_query)
         self.cursor.execute(query,  [])
+
+    def alter_column_to_text(self, schema, table_name, column_name):
+        """
+        Convert an existing column to character varying, casting current values to text.
+        Used when applying an enumeration to a numeric (or other non-text) column.
+        """
+        query = sqlbuilder.SQL(
+            "ALTER TABLE {schema}.{table} "
+            "ALTER COLUMN {column} TYPE character varying "
+            "USING ({column})::text"
+        ).format(
+            schema=sqlbuilder.Identifier(schema),
+            table=sqlbuilder.Identifier(table_name),
+            column=sqlbuilder.Identifier(column_name),
+        )
+        self.cursor.execute(query, [])
+
     """
     def allowed_conversion(self, new_type, old_type):
         " ""

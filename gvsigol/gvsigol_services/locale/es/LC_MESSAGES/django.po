@@ -5385,8 +5385,16 @@ msgid "Attributions configuration created successfully."
 msgstr "La configuración de atribuciones se ha creado correctamente."
 
 #: gvsigol_services/views.py
-msgid "Numeric fields cannot be converted to enumeration. Change the field type to text first or create a new text field."
-msgstr "Los campos numéricos no pueden convertirse a enumeración. Cambie primero el tipo del campo a texto o cree un nuevo campo de texto."
+msgid "Converting a numeric field to enumeration will change the database column type to text. Confirm to continue."
+msgstr "Convertir un campo numérico a enumeración cambiará el tipo de la columna en base de datos a texto. Confirme para continuar."
+
+#: gvsigol_services/views.py
+msgid "Error converting field to text: {0}"
+msgstr "Error al convertir el campo a texto: {0}"
+
+#: gvsigol_services/views.py
+msgid "Error checking field type before converting to enumeration"
+msgstr "Error al comprobar el tipo de campo antes de convertirlo a enumeración"
 
 #: gvsigol_services/utils.py
 msgid "Value \"{value}\" is not valid for numeric field \"{field}\"."

@@ -50,6 +50,8 @@ gettext('Convert');
 gettext('Autogen');
 gettext('Convert ok');
 gettext('Autogen ok');
+gettext('Converting a numeric field to enumeration will change the database column type to text. Existing values will be kept as text.');
+gettext('Converting a numeric field to enumeration will change the database column type to text. Existing values will be kept as text. Do you want to continue?');
 gettext("Delete field");
 gettext("Warning: the field will be deleted from the database. This operation cannot be undone. Type the name of the field to confirm the deletion:");
 gettext('Field to delete');
