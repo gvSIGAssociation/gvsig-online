@@ -21,7 +21,10 @@ from .utils import refresh_layers_by_params
 import requests
 import base64
 from datetime import date, datetime, timedelta
+from datetime import timezone as dt_timezone
 from sqlalchemy import create_engine, false, true
+from django.utils import timezone as dj_timezone
+from django.db import transaction
 from django.contrib.gis.gdal import DataSource
 import re
 from zipfile import ZipFile
@@ -1851,23 +1854,91 @@ def trans_Calculator(dicc):
 
     return [table_name_target]
 
+CADASTRAL_WINDOW_SECONDS = 3600.0
+CADASTRAL_MAX_REQUESTS = 3600
+CADASTRAL_MAX_WAITS_PER_ROW = 2
+
+
+def _seconds_since(moment):
+    """
+    Segundos transcurridos desde 'moment', tolerando que venga naive o aware.
+    Un valor naive procedente de la BD se interpreta como UTC, que es como lo
+    almacena Django con USE_TZ activo. Puede ser negativo si 'moment' está en el
+    futuro por un desajuste de relojes.
+    """
+    now = dj_timezone.now()
+
+    if moment is None:
+        return CADASTRAL_WINDOW_SECONDS
+
+    if dj_timezone.is_aware(now) and dj_timezone.is_naive(moment):
+        moment = dj_timezone.make_aware(moment, dt_timezone.utc)
+    elif dj_timezone.is_naive(now) and dj_timezone.is_aware(moment):
+        moment = dj_timezone.localtime(moment).replace(tzinfo=None)
+
+    return (now - moment).total_seconds()
+
+
+def _is_cadastral_window_expired(elapsed):
+    """
+    La ventana se considera agotada si ha pasado más de una hora o si la marca de
+    tiempo guardada no es fiable por estar en el futuro.
+    """
+    return elapsed < 0 or elapsed >= CADASTRAL_WINDOW_SECONDS
+
+
 def check_and_reset_cadastral_requests():
     """
     Verifica y resetea el contador de peticiones cadastrales si ha pasado 1 hora
     """
     try:
         cr_model = cadastral_requests.objects.get(name='cadastral_requests')
-        date_saved = (cr_model.lastRequest).replace(tzinfo=None)
-        
-        # Si han pasado más de 3600 segundos (1 hora), resetear contador
-        if (datetime.now() - date_saved).total_seconds() >= 3600:
-            cr_model.requests = 0
-            cr_model.lastRequest = datetime.now()
-            cr_model.save()
-            
     except cadastral_requests.DoesNotExist:
         # Si no existe el registro, no hacer nada (se creará cuando sea necesario)
-        pass
+        return
+
+    if _is_cadastral_window_expired(_seconds_since(cr_model.lastRequest)):
+        cr_model.requests = 0
+        cr_model.lastRequest = dj_timezone.now()
+        cr_model.save()
+
+
+def reserve_cadastral_request():
+    """
+    Reserva una petición a catastro dentro de la ventana horaria vigente.
+
+    'lastRequest' marca el inicio de la ventana, no la última petición, para que
+    la ventana pueda expirar aunque se estén lanzando peticiones sin pausa.
+
+    Devuelve los segundos que faltan para poder pedir (0.0 si ya se ha reservado).
+    """
+    # El lock de fila se libera al salir del bloque, antes de cualquier espera,
+    # para no bloquear a otros workers mientras se agota la ventana.
+    with transaction.atomic():
+        cadastral_requests.objects.get_or_create(
+            name='cadastral_requests',
+            defaults={'requests': 0})
+
+        cr_model = cadastral_requests.objects.select_for_update().filter(
+            name='cadastral_requests').first()
+
+        elapsed = _seconds_since(cr_model.lastRequest)
+
+        if _is_cadastral_window_expired(elapsed):
+            cr_model.requests = 0
+            cr_model.lastRequest = dj_timezone.now()
+            elapsed = 0.0
+
+        if cr_model.requests >= CADASTRAL_MAX_REQUESTS:
+            return max(0.0, CADASTRAL_WINDOW_SECONDS - elapsed)
+
+        if cr_model.requests == 0:
+            cr_model.lastRequest = dj_timezone.now()
+
+        cr_model.requests += 1
+        cr_model.save()
+
+    return 0.0
 
 def trans_CadastralGeom(dicc):
 
@@ -1941,103 +2012,96 @@ def trans_CadastralGeom(dicc):
     
     for row in cur:
 
+        wait = reserve_cadastral_request()
+        waits = 0
+
+        while wait > 0 and waits < CADASTRAL_MAX_WAITS_PER_ROW:
+            wait = min(wait, CADASTRAL_WINDOW_SECONDS)
+            logger.info('trans_CadastralGeom: cuota horaria de catastro alcanzada, esperando ' + str(round(wait / 60.0, 1)) + ' minutos.')
+            print("Take a coffee. The maximum number of requests to cadastre has been reached. The process will continue in "+str(round(wait / 60.0, 1))+" minutes.")
+
+            time.sleep(wait)
+            waits += 1
+            wait = reserve_cadastral_request()
+
+        if wait > 0:
+            logger.error('trans_CadastralGeom: cuota horaria de catastro agotada, se omite la referencia ' + str(row[0]))
+            continue
+
         try:
-            cr_model  = cadastral_requests.objects.get(name = 'cadastral_requests')
-            cadastral_requests_count = cr_model.requests
+            features = get_rc_polygon(row[0].replace(' ', ''))
 
-        except:
-            
-            cr_model = cadastral_requests(
-                name = 'cadastral_requests',
-                requests = 0,
-            )
-            cr_model.save()
+            if not features:
+                logger.warning('trans_CadastralGeom: catastro no devuelve geometria para la referencia ' + str(row[0]))
+                continue
 
-            cadastral_requests_count = 0
+            i ={}
+            coordinates =[]
+            srs = None
 
-        if cadastral_requests_count < 3600:
-            
-            try:
+            for feature in features:
+                edgeCoord = []
 
-                cadastral_requests_count += 1
+                coords = feature['coords'].split(" ")
+                srs = feature['srs'].split(":")[1]
 
-                cr_model.requests = cadastral_requests_count
-                cr_model.lastRequest = datetime.now()
-                cr_model.save()
-                
-                features = get_rc_polygon(row[0].replace(' ', ''))
-                
-                i ={}
-                coordinates =[]
-                
-                for feature in features:
-                    edgeCoord = []
-                    
-                    coords = feature['coords'].split(" ")
-                    srs = feature['srs'].split(":")[1]
-                    
-                    pairCoord = []
-                    for j in range (0, len(coords)):
-                        pairCoord.insert(0, float(coords[j]))
-                        
-                        if j != 0 and j % 2!=0:
-                            
-                            edgeCoord.append(pairCoord)
-                            pairCoord =[]
-                
-                    coordinates.append(edgeCoord)
+                pairCoord = []
+                for j in range (0, len(coords)):
+                    pairCoord.insert(0, float(coords[j]))
 
-                if len(coordinates) >= 1:
+                    if j != 0 and j % 2!=0:
 
-                    i['geometry'] = {"type": 'MultiPolygon',
-                                    'coordinates': [coordinates]
-                                    }
-            
-                sqlUpdate = sql.SQL('UPDATE {schema}.{tbl_target} SET wkb_geometry = ST_SetSRID(ST_GeomFromGeoJSON( %s), %s) WHERE "_id_temp" = %s').format(
-                        schema = sql.Identifier(GEOETL_DB["schema"]),
-                        tbl_target = sql.Identifier(table_name_target)
-                    )
-                
-                cur2.execute(sqlUpdate,[str(json.dumps(i["geometry"])), srs, str(row[1])])
-                conn.commit()
-        
-                insert = True
+                        edgeCoord.append(pairCoord)
+                        pairCoord =[]
 
-                sqlSelDup = sql.SQL('SELECT count(*) FROM {schema}.geometriacatastral WHERE refcat = %s').format(
+                coordinates.append(edgeCoord)
+
+            if len(coordinates) >= 1:
+
+                i['geometry'] = {"type": 'MultiPolygon',
+                                'coordinates': [coordinates]
+                                }
+
+            if 'geometry' not in i or srs is None:
+                logger.warning('trans_CadastralGeom: geometria vacia para la referencia ' + str(row[0]))
+                continue
+
+            sqlUpdate = sql.SQL('UPDATE {schema}.{tbl_target} SET wkb_geometry = ST_SetSRID(ST_GeomFromGeoJSON( %s), %s) WHERE "_id_temp" = %s').format(
+                    schema = sql.Identifier(GEOETL_DB["schema"]),
+                    tbl_target = sql.Identifier(table_name_target)
+                )
+
+            cur2.execute(sqlUpdate,[str(json.dumps(i["geometry"])), srs, str(row[1])])
+            conn.commit()
+
+            insert = True
+
+            sqlSelDup = sql.SQL('SELECT count(*) FROM {schema}.geometriacatastral WHERE refcat = %s').format(
+                    schema = sql.Identifier(GEOETL_DB["schema"])
+                )
+
+            cur2.execute(sqlSelDup, [row[0]])
+            conn.commit()
+
+            for d in cur2:
+                if int(d[0]) > 0:
+                    insert = False
+
+            if insert:
+
+                sqlInsert = sql.SQL('INSERT INTO {schema}.geometriacatastral(refcat, wkb_geometry) VALUES (%s, ST_SetSRID(ST_GeomFromGeoJSON( %s), %s))').format(
                         schema = sql.Identifier(GEOETL_DB["schema"])
                     )
 
-                cur2.execute(sqlSelDup, [row[0]])
+                cur2.execute(sqlInsert, [row[0], str(json.dumps(i["geometry"])), srs])
                 conn.commit()
 
-                for d in cur2:
-                    print(d)
-                    if int(d[0]) > 0:
-                        insert = False
 
-                if insert:
-                    
-                    sqlInsert = sql.SQL('INSERT INTO {schema}.geometriacatastral(refcat, wkb_geometry) VALUES (%s, ST_SetSRID(ST_GeomFromGeoJSON( %s), %s))').format(
-                            schema = sql.Identifier(GEOETL_DB["schema"])
-                        )
-                    
-                    cur2.execute(sqlInsert, [row[0], str(json.dumps(i["geometry"])), srs])
-                    conn.commit()
-            
-            
-            except Exception as e:
-                print(str(e))
+        except Exception as e:
+            logger.error('trans_CadastralGeom: error procesando la referencia ' + str(row[0]) + ': ' + str(e))
+            print(str(e))
+            conn.rollback()
 
-        else:
-
-            dif = 3600.0 - (datetime.now() - (cr_model.lastRequest).replace(tzinfo=None)).total_seconds()
-            print("Take a coffee. The maximum number of requests to cadastre has been reached. The process will continue in "+str(dif/60)+" minutes.")
-
-            time.sleep(dif)
-            cr_model.requests = 0
-            cr_model.lastRequest = datetime.now()
-            cr_model.save()
-    
     sqlDropCol = sql.SQL('ALTER TABLE {schema}.{tbl_target} DROP COLUMN _id_temp;').format(
         schema = sql.Identifier(GEOETL_DB["schema"]),
         tbl_target = sql.Identifier(table_name_target)
