@@ -1092,7 +1092,7 @@ def project_add(request):
     if request.method == 'POST':
         name = request.POST.get('project-name')
 
-        name = re.sub(r'[^a-zA-Z0-9 ]',r'',name) #for remove all characters
+        name = re.sub(r'[^a-zA-Z0-9_\- ]', r'', name)
         name = re.sub(' ','',name)
 
         logo_link = request.POST.get('project-logo-link')
@@ -1429,7 +1429,7 @@ def project_update(request, pid):
         if not old_order or (old_order != layer_group_order) or list(assigned_layergroups) != list(old_layer_groups):
             project.toc_order = core_utils.get_json_toc(assigned_layergroups, selected_base_group, json.loads(layer_group_order))
 
-        name = re.sub(r'[^a-zA-Z0-9 ]',r'',name) #for remove all characters
+        name = re.sub(r'[^a-zA-Z0-9_\- ]', r'', name)
         name = re.sub(' ','',name)
 
         project.name = name
@@ -2899,7 +2899,7 @@ def application_add(request):
     if request.method == 'POST':
         name = request.POST.get('application-name')
 
-        name = re.sub(r'[^a-zA-Z0-9 ]',r'',name) #for remove all characters
+        name = re.sub(r'[^a-zA-Z0-9_\- ]', r'', name)
         name = re.sub(' ','',name)
 
         title = request.POST.get('application-title')
@@ -3005,7 +3005,7 @@ def application_update(request, appid):
 
         app = Application.objects.get(id=int(appid))
 
-        name = re.sub(r'[^a-zA-Z0-9 ]',r'',name) #for remove all characters
+        name = re.sub(r'[^a-zA-Z0-9_\- ]', r'', name)
         name = re.sub(' ','',name)
 
         app.name = name
