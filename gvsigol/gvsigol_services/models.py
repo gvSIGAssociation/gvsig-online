@@ -1100,6 +1100,7 @@ class LayerConfig:
             field_conf['title-' + id] = get_field_title_for_lang(
                 field_conf, id, field_info['name'])
         field_conf['visible'] = field_conf.get('visible', True)
+        field_conf['visibleactive'] = field_conf.get('visibleactive', True)
         if field_conf['name'] in self.pks:
             field_conf['editable'] = field_conf.get('editable', False)
             field_conf['editableactive'] = True
@@ -1120,6 +1121,7 @@ class LayerConfig:
             field_conf['editable'] = field_conf.get('editable', True)
             field_conf['editableactive'] = True
         field_conf['infovisible'] = field_conf.get('infovisible', True)
+        field_conf['infovisibleactive'] = field_conf.get('infovisibleactive', True)
         field_conf['nullable'] = (field_info.get('nullable') != 'NO')
         if not field_conf['nullable']:
             field_conf['mandatory'] = True
@@ -1134,7 +1136,11 @@ class LayerConfig:
             field_conf['visible'] = control_field.get(
                 'visible', field_conf['visible'])
             field_conf['infovisible'] = control_field.get(
-                'visible', field_conf['infovisible'])
+                'infovisible', control_field.get('visible', field_conf['infovisible']))
+            field_conf['visibleactive'] = control_field.get(
+                'visibleactive', True)
+            field_conf['infovisibleactive'] = control_field.get(
+                'infovisibleactive', True)
             field_conf['nullable'] = control_field.get(
                 'nullable', field_conf['nullable'])
             field_conf['mandatory'] = control_field.get(

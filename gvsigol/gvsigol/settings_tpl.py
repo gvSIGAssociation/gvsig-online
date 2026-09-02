@@ -450,12 +450,18 @@ if 'gvsigol_plugin_restapi' in INSTALLED_APPS or 'gvsigol_plugin_featureapi' in 
         'name': DATE_FIELD,
         'type': 'timestamp_with_time_zone',
         'visible': False,
+        'infovisible': False,
+        'visibleactive': False,
+        'infovisibleactive': False,
         'nullable': False,
         'default':  'now()'
         },{
         'name': VERSION_FIELD,
         'type': 'integer',
         'visible': False,
+        'infovisible': False,
+        'visibleactive': False,
+        'infovisibleactive': False,
         'nullable': False,
         'default':  '1'
         }])

@@ -138,9 +138,9 @@
 																	<td><input title="{% trans 'Required in editing forms' %}" id="field-mandatory-{{counter}}" data-type="mandatory" data-fieldname="{{f.name}}" type="checkbox" name="field-mandatory-{{counter}}"/></td>
 																	{% endif %}
 																	{% if f.visible %}
-																	<td><input type="checkbox" name="field-visible-{{counter}}" checked/></td>
+																	<td><input type="checkbox" name="field-visible-{{counter}}" {% if f.visibleactive == False %}disabled title="{% trans 'Reserved field' %}"{% endif %} checked/></td>
 																	{% else %}
-																	<td><input type="checkbox" name="field-visible-{{counter}}"/></td>
+																	<td><input type="checkbox" name="field-visible-{{counter}}" {% if f.visibleactive == False %}disabled title="{% trans 'Reserved field' %}"{% endif %}/></td>
 																	{% endif %}
 																	{% if f.editable %}
 																	<td><input type="checkbox" name="field-editable-{{counter}}" checked/></td>
@@ -148,13 +148,13 @@
 																		{% if f.editableactive %}
 																		<td><input type="checkbox" name="field-editable-{{counter}}"/></td>
 																		{% else %}
-																		<td><input type="checkbox" disabled name="field-editable-{{counter}}"/></td>
+																		<td><input type="checkbox" disabled title="{% trans 'Reserved field' %}" name="field-editable-{{counter}}"/></td>
 																		{% endif %}
 																	{% endif %}
 																	{% if f.infovisible %}
-																	<td><input type="checkbox" name="field-infovisible-{{counter}}" checked/></td>
+																	<td><input type="checkbox" name="field-infovisible-{{counter}}" {% if f.infovisibleactive == False %}disabled title="{% trans 'Reserved field' %}"{% endif %} checked/></td>
 																	{% else %}
-																	<td><input type="checkbox" name="field-infovisible-{{counter}}"/></td>
+																	<td><input type="checkbox" name="field-infovisible-{{counter}}" {% if f.infovisibleactive == False %}disabled title="{% trans 'Reserved field' %}"{% endif %}/></td>
 																	{% endif %}
 																	<td>
 																	{% if f.editableactive or f.calculationLabel %}

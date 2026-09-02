@@ -3464,6 +3464,10 @@ def layer_config(request, layer_id):
                     field['editableactive'] = control_field.get('editableactive', False)
                     field['editable'] = control_field.get('editable', False)
                     field['visible'] = control_field.get('visible', field['visible'])
+                    field['infovisible'] = control_field.get(
+                        'infovisible', control_field.get('visible', field['infovisible']))
+                    field['visibleactive'] = control_field.get('visibleactive', True)
+                    field['infovisibleactive'] = control_field.get('infovisibleactive', True)
                     field['mandatory'] = control_field.get('mandatory', field['mandatory'])
                     field['nullable'] = control_field.get('nullable', field['nullable'])
                 if  Trigger.objects.filter(layer=layer, field=field['name']).exists():
