@@ -798,14 +798,26 @@ viewer.core = {
 			options.urls = this._browserWmtsUrlsFromCacheUrl(cacheUrl);
 		}
 		var origins = options.tileGrid.origins;
+		// GWC TileMatrixLimits / derived extent often clip valid tiles (missing vertical strip).
+		// For cached GWC layers use a wide CRS extent and do not apply fullTileRanges.
+		var gridExtent = options.tileGrid.extent;
+		var applyTileLimits = true;
+		if (cacheUrl) {
+			applyTileLimits = false;
+			var proj = ol.proj.get(options.projection);
+			gridExtent = proj && proj.getExtent ? proj.getExtent() : null;
+			if (!gridExtent) {
+				gridExtent = [-20026376.39, -20026376.39, 20026376.39, 20026376.39];
+			}
+		}
 		var tileGrid = new ol.tilegrid.WMTS({
-			extent: options.tileGrid.extent,
+			extent: gridExtent,
 			origins: origins,
 			resolutions: options.tileGrid.resolutions,
 			matrixIds: options.tileGrid.matrixIds,
 			tileSizes: options.tileGrid.tileSizes
 		});
-		if (options.tileGrid.fullTileRanges && options.tileGrid.fullTileRanges_ol4) {
+		if (applyTileLimits && options.tileGrid.fullTileRanges && options.tileGrid.fullTileRanges_ol4) {
 			var fullTileRanges = [];
 			for (var i=0; i<options.tileGrid.fullTileRanges_ol4.length; i++) {
 				fullTileRanges.push(new viewer.olcustom.TileRange(
