@@ -710,6 +710,10 @@
 			}
 		});
 
+		$("#id_name").on("change", function() {
+			$(this).val($(this).val().toLowerCase());
+		});
+
 		updateLayerGroupList($("#id_datastore").val());
 
 		$("#id_datastore").change(function() {

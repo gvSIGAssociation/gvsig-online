@@ -217,6 +217,12 @@ class CreateFeatureTypeForm(forms.Form):
             widget=forms.Select(attrs={'class':'form-control js-example-basic-single'})
         )
 
+    def clean_name(self):
+        # the rest of the layer flows (SHP import, ogr2ogr LAUNDER) work with
+        # lowercase identifiers, so an uppercase name here would not be found later
+        name = self.cleaned_data.get("name")
+        return name.lower() if name else name
+
     def clean(self):
         cleaned_data = super(CreateFeatureTypeForm, self).clean()
         fields = cleaned_data.get("fields")
