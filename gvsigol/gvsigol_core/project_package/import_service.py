@@ -2472,6 +2472,31 @@ def _import_wms_cascading_layer(
         )
         lyr.save()
 
+        try:
+            gs.updateThumbnail(lyr, 'create')
+        except Exception as _thumb_exc:
+            LOG.warning(
+                '_import_wms_cascading_layer: could not create thumbnail for %s: %s',
+                lyr.name, _thumb_exc,
+            )
+
+        core_utils.toc_add_layer(lyr)
+        gs.createOrUpdateGeoserverLayerGroup(lyr.layer_group)
+
+        # Same as vector/raster import: cached layers need fresh wmts_options for
+        # the new workspace:layer name. Without this the viewer falls back to a
+        # synthetic tile grid and GWC returns 400 for GetTile requests.
+        if lyr.cached:
+            gs.reload_master()
+            try:
+                from gvsigol_services.tasks import update_internal_wmts_layer_options
+                update_internal_wmts_layer_options(lyr)
+            except Exception as _wmts_exc:
+                LOG.warning(
+                    'Could not update WMTS options for cached WMS cascading layer %s: %s',
+                    lyr.name, _wmts_exc,
+                )
+
         id_map[layer_entry['export_id']] = lyr.id
         report.append({'wms_cascading_imported': {'layer': lyr.name, 'datastore': datastore.name}})
         return lyr
