@@ -32,6 +32,22 @@ msgstr "Importar arxiu vectorial"
 msgid "Error loading samplemenubutton plugin"
 msgstr ""
 
+#: static/js/lib/_trans.gvsigol.js:4
+msgid "Could not load the layer on the map"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:5
+msgid ""
+"Check that the file is valid: GeoJSON in .json or .geojson, KML or a ZIP "
+"that includes a complete shapefile (.shp, .dbf, .prj, etc.)."
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:6
+msgid ""
+"The ZIP includes more than one shapefile. Use a ZIP with a single complete "
+"shapefile (.shp, .dbf, .prj, etc.) or load each layer separately."
+msgstr ""
+
 #: static/js/lib/tools/importVector.js:77
 msgid "Vector file"
 msgstr "Arxiu vectorial"

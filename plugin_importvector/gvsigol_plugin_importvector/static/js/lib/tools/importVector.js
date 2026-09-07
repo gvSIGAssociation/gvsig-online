@@ -74,8 +74,8 @@ ImportVector.prototype.createUploadForm = function() {
 		self.modal += 					'<form id="addvector_form" class="addlayer">'; 
 		self.modal += 						'<div class="row">';
 		self.modal += 							'<div class="col-md-12 form-group">';	
-		self.modal += 								'<label for="vectorfile">' + gettext('Vector file') + ' (shp.zip, *.kml, .json)</label>';
-		self.modal += 								'<input class="form-control" id="vectorfile" name="vectorfile" type="file"  required="required" accept=".zip,.kml,.json">';
+						self.modal += 								'<label for="vectorfile">' + gettext('Vector file') + ' (shp.zip, *.kml, .json, .geojson)</label>';
+						self.modal += 								'<input class="form-control" id="vectorfile" name="vectorfile" type="file"  required="required" accept=".zip,.kml,.json,.geojson">';
 		self.modal +=								'<span id="vectorfile-error" style="display: none; color: red;">* ' + gettext('You must select a file') + '</span>';
 		self.modal +=								'<span id="vectorfilesize-error" style="display: none; color: red;">* ' + gettext('The file is too large. You can publish it from the administrator') + '</span>';
 		self.modal += 							'</div>';
@@ -127,9 +127,9 @@ ImportVector.prototype.createUploadForm = function() {
 						var sourceFormat = null;
 						var source = new ol.source.Vector();
 						var layerId = viewer.core._nextLayerId();
-						var name = file.name.split('.')[0];
-						var extension = file.name.split('.')[1];
-
+						var nameParts = file.name.split('.');
+						var extension = (nameParts.pop() || '').toLowerCase();
+						var name = nameParts.join('.') || file.name;
 						var style = self.getRandomStyle();	
 						
 						var vectorLayer = new ol.layer.Vector({
@@ -139,90 +139,7 @@ ImportVector.prototype.createUploadForm = function() {
 							style: style,
 							strategy: ol.loadingstrategy.bbox
 						});
-						
-						var geomType = null;
-						if (extension == 'zip') {
-							sourceFormat = new ol.format.GeoJSON();
-							vectorLayer.shape = true;
-							fr.onload = function (evt) {  
-								var vectorData = evt.target.result;
-								var dataProjection = sourceFormat.readProjection(vectorData) || currentProj;        
-								shp(vectorData).then(function (geojson) {   
-									vectorLayer.geojsonData = geojson;
-									geomType = geojson.features[0].geometry.type;
-									vectorLayer.randomStyle = self.getVectorStyle(geomType);
-									source.addFeatures(sourceFormat.readFeatures(geojson,  {                
-										dataProjection: dataProjection,                
-										featureProjection: currentProj            
-									}));   
-									$.overlayout();
-								});
-								
-								
-							};    
-							fr.readAsArrayBuffer(file);
-							
-						} else if (extension == 'kml') {
-							sourceFormat = new ol.format.KML({
-								extractStyles: false,
-					            extractAttributes: true
-							});
-							
-							fr.onload = function (evt) {       
-								var vectorData = evt.target.result;   
-								var dataProjection = sourceFormat.readProjection(vectorData) || currentProj;        
-								source.addFeatures(sourceFormat.readFeatures(vectorData,  {                
-									dataProjection: dataProjection,                
-									featureProjection: currentProj            
-								}));
-								geomType = 'LineString';
-								if (vectorData.indexOf('<Point') > -1 || vectorData.indexOf('<MultiPoint') > -1) {
-									geomType = 'Point';
-									
-								} else if (vectorData.indexOf('<LineString') > -1 || vectorData.indexOf('<MultiLineString') > -1) {
-									geomType = 'LineString';
-									
-								} else if (vectorData.indexOf('<Polygon') > -1 || vectorData.indexOf('<MultiPolygon') > -1) {
-									geomType = 'Polygon';
-								}
-								vectorLayer.randomStyle = self.getVectorStyle(geomType);
-								$.overlayout();
-								
-								
-							};    
-							fr.readAsText(file);
-							
-						} else if (extension == 'json') {
-							sourceFormat = new ol.format.GeoJSON();
-							
-							fr.onload = function (evt) {       
-								var vectorData = evt.target.result;
-								var jsonVectorData = JSON.parse(vectorData);
-								var dataProjection = 'EPSG:4326';
-								if (jsonVectorData.crs) {
-									if (jsonVectorData.crs.properties) {
-										if (jsonVectorData.crs.properties.name) {
-											var crsName = jsonVectorData.crs.properties.name.split('::');
-											if (crsName.length > 1) {
-												dataProjection = 'EPSG:' + jsonVectorData.crs.properties.name.split('::')[1];
-											}
-										}
-									} 
-								}
-								       
-								source.addFeatures(sourceFormat.readFeatures(vectorData,  {                
-									dataProjection: dataProjection,                
-									featureProjection: currentProj            
-								}));
-								geomType = jsonVectorData.features[0].geometry.type;
-								vectorLayer.randomStyle = self.getVectorStyle(geomType);
-								$.overlayout();
-								
-								
-							};    
-							fr.readAsText(file);
-						} 
-						
+
 						vectorLayer.baselayer = false;
 						vectorLayer.setZIndex(99999999);
 						vectorLayer.dataid = layerId;
@@ -235,10 +152,141 @@ ImportVector.prototype.createUploadForm = function() {
 						vectorLayer.is_vector = true;
 						vectorLayer.printable = true;
 
-						self.map.addLayer(vectorLayer);
-						self.createVectorLayerUI (vectorLayer, layerId);
-						$("#modal-importvector-dialog").modal('hide');
-						self.modal = null;
+						var finishSuccess = function() {
+							self.map.addLayer(vectorLayer);
+							self.createVectorLayerUI(vectorLayer, layerId);
+							$.overlayout();
+							$("#modal-importvector-dialog").modal('hide');
+							self.modal = null;
+						};
+
+						fr.onerror = function () {
+							self.showLoadFailed(new Error('FileReader error'));
+						};
+						
+						if (extension == 'zip') {
+							sourceFormat = new ol.format.GeoJSON();
+							vectorLayer.shape = true;
+							fr.onload = function (evt) {  
+								try {
+									var vectorData = evt.target.result;
+									var parsed = shp(vectorData);
+									var applyZipGeojson = function (rawData) {
+										try {
+											if (Array.isArray(rawData) && rawData.length > 1) {
+												var multiErr = new Error('Multiple shapefiles in ZIP');
+												multiErr.code = 'MULTIPLE_SHAPES';
+												throw multiErr;
+											}
+											var geojson = Array.isArray(rawData) ? rawData[0] : rawData;
+											if (!geojson || !geojson.features || !geojson.features.length) {
+												throw new Error('ZIP does not contain valid vector features (missing or empty shapefile)');
+											}
+											if (!geojson.features[0].geometry || !geojson.features[0].geometry.type) {
+												throw new Error('Invalid geometry in shapefile');
+											}
+											vectorLayer.geojsonData = geojson;
+											var geomType = geojson.features[0].geometry.type;
+											vectorLayer.randomStyle = self.getVectorStyle(geomType);
+											var projectionInput = typeof geojson === 'string' ? geojson : JSON.stringify(geojson);
+											var dataProjection = sourceFormat.readProjection(projectionInput) || currentProj;
+											source.addFeatures(sourceFormat.readFeatures(geojson, {
+												dataProjection: dataProjection,
+												featureProjection: currentProj
+											}));
+											finishSuccess();
+										} catch (err) {
+											self.showLoadFailed(err);
+										}
+									};
+									if (parsed && typeof parsed.then === 'function') {
+										parsed.then(applyZipGeojson).catch(function (err) {
+											self.showLoadFailed(err);
+										});
+									} else {
+										applyZipGeojson(parsed);
+									}
+								} catch (err) {
+									self.showLoadFailed(err);
+								}
+							};    
+							fr.readAsArrayBuffer(file);
+							
+						} else if (extension == 'kml') {
+							sourceFormat = new ol.format.KML({
+								extractStyles: false,
+					            extractAttributes: true
+							});
+							
+							fr.onload = function (evt) {
+								try {
+									var vectorData = evt.target.result;
+									var dataProjection = sourceFormat.readProjection(vectorData) || currentProj;
+									var features = sourceFormat.readFeatures(vectorData, {
+										dataProjection: dataProjection,
+										featureProjection: currentProj
+									});
+									if (!features || !features.length) {
+										throw new Error('Invalid KML: no features');
+									}
+									source.addFeatures(features);
+									var geomType = 'LineString';
+									if (vectorData.indexOf('<Point') > -1 || vectorData.indexOf('<MultiPoint') > -1) {
+										geomType = 'Point';
+									} else if (vectorData.indexOf('<LineString') > -1 || vectorData.indexOf('<MultiLineString') > -1) {
+										geomType = 'LineString';
+									} else if (vectorData.indexOf('<Polygon') > -1 || vectorData.indexOf('<MultiPolygon') > -1) {
+										geomType = 'Polygon';
+									} else if (features[0].getGeometry()) {
+										geomType = features[0].getGeometry().getType();
+									}
+									vectorLayer.randomStyle = self.getVectorStyle(geomType);
+									finishSuccess();
+								} catch (err) {
+									self.showLoadFailed(err);
+								}
+							};    
+							fr.readAsText(file);
+							
+						} else if (extension == 'json' || extension == 'geojson') {
+							sourceFormat = new ol.format.GeoJSON();
+							
+							fr.onload = function (evt) {
+								try {
+									var vectorData = evt.target.result;
+									var jsonVectorData = JSON.parse(vectorData);
+									var dataProjection = 'EPSG:4326';
+									if (jsonVectorData.crs) {
+										if (jsonVectorData.crs.properties) {
+											if (jsonVectorData.crs.properties.name) {
+												var crsName = jsonVectorData.crs.properties.name.split('::');
+												if (crsName.length > 1) {
+													dataProjection = 'EPSG:' + jsonVectorData.crs.properties.name.split('::')[1];
+												}
+											}
+										}
+									}
+
+									if (!jsonVectorData.features || !jsonVectorData.features.length ||
+										!jsonVectorData.features[0].geometry || !jsonVectorData.features[0].geometry.type) {
+										throw new Error('Invalid GeoJSON: no features or geometry');
+									}
+
+									source.addFeatures(sourceFormat.readFeatures(vectorData, {
+										dataProjection: dataProjection,
+										featureProjection: currentProj
+									}));
+									var geomType = jsonVectorData.features[0].geometry.type;
+									vectorLayer.randomStyle = self.getVectorStyle(geomType);
+									finishSuccess();
+								} catch (err) {
+									self.showLoadFailed(err);
+								}
+							};    
+							fr.readAsText(file);
+						} else {
+							self.showLoadFailed(new Error('Unsupported file extension'));
+						}
 						
 					} else {
 						$('#vectorfilesize-error').css('display', 'block');
@@ -263,6 +311,24 @@ ImportVector.prototype.createUploadForm = function() {
 		$("#modal-importvector-dialog").modal('hide');
 		self.modal = null;
 	}
+};
+
+/**
+ * Clears the loading overlay and shows the same style of error message as the SPA viewer.
+ */
+ImportVector.prototype.showLoadFailed = function(err) {
+	$.overlayout();
+	var title = gettext('Could not load the layer on the map');
+	var hint = gettext('Check that the file is valid: GeoJSON in .json or .geojson, KML or a ZIP that includes a complete shapefile (.shp, .dbf, .prj, etc.).');
+	if (err && err.code === 'MULTIPLE_SHAPES') {
+		hint = gettext('The ZIP includes more than one shapefile. Use a ZIP with a single complete shapefile (.shp, .dbf, .prj, etc.) or load each layer separately.');
+	}
+	if (typeof messageBox !== 'undefined' && messageBox.showMultiLine) {
+		messageBox.showMultiLine('error', [title, hint]);
+	} else {
+		alert(title + '. ' + hint);
+	}
+	console.error('[ImportVector]', err);
 };
 
 ImportVector.prototype.getVectorStyle = function(gtype) {
