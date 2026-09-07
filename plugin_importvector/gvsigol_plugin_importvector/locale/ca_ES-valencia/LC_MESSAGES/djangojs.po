@@ -34,19 +34,23 @@ msgstr ""
 
 #: static/js/lib/_trans.gvsigol.js:4
 msgid "Could not load the layer on the map"
-msgstr ""
+msgstr "No s'ha pogut carregar la capa al mapa"
 
 #: static/js/lib/_trans.gvsigol.js:5
 msgid ""
 "Check that the file is valid: GeoJSON in .json or .geojson, KML or a ZIP "
 "that includes a complete shapefile (.shp, .dbf, .prj, etc.)."
 msgstr ""
+"Comproveu que el fitxer és vàlid: GeoJSON en .json o .geojson, KML o un ZIP "
+"que inclou un shapefile complet (.shp, .dbf, .prj, etc.)."
 
 #: static/js/lib/_trans.gvsigol.js:6
 msgid ""
 "The ZIP includes more than one shapefile. Use a ZIP with a single complete "
 "shapefile (.shp, .dbf, .prj, etc.) or load each layer separately."
 msgstr ""
+"El ZIP inclou més d'un shapefile. Utilitzeu un ZIP amb un sol shapefile "
+"complet (.shp, .dbf, .prj, etc.) o carregueu cada capa per separat."
 
 #: static/js/lib/tools/importVector.js:77
 msgid "Vector file"
