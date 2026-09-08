@@ -113,6 +113,19 @@ class FormulaUtilsTests(SimpleTestCase):
         with self.assertRaises(FormulaError):
             compile_formula('pg_sleep(a)', {'a'}, _resolver)
 
+    def test_rejects_sql_injection_payloads(self):
+        payloads = (
+            'a; DROP TABLE sensitive_data',
+            'a OR 1 = 1',
+            "a + __import__('os').system('id')",
+            'a.__class__',
+            '(SELECT 1)',
+            'a -- comment',
+        )
+        for payload in payloads:
+            with self.subTest(payload=payload), self.assertRaises(FormulaError):
+                compile_formula(payload, {'a'}, _resolver)
+
     def test_power_operator_length_squared_is_area(self):
         result = compile_formula('a ** 2', {'a'}, _resolver, field_units={'a': 'm'},
                                  result_unit='m2')

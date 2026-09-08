@@ -153,6 +153,30 @@ def _ensure_manageable_postgis(request, layer, require_flag=True):
     return source_name, schema
 
 
+def _ensure_join_source(request, base_layer, other_layer, project_layer_ids):
+    _ensure_layers_in_project(project_layer_ids, other_layer)
+    if (
+        other_layer.external
+        or not other_layer.datastore
+        or other_layer.datastore.type != 'v_PostGIS'
+    ):
+        raise FormulaError(_('Only internal PostGIS layers can be used in a JOIN'))
+    if not _same_connection(base_layer, other_layer):
+        raise FormulaError(_('All layers must share the same database connection'))
+    if not _can_read(request, other_layer):
+        raise PermissionError(_('Not authorized to read related layer'))
+
+
+def _validate_source_aliases(sources):
+    aliases = set()
+    for idx, source in enumerate(sources or []):
+        alias = validate_identifier(source.get('alias') or ('t' + str(idx + 2)))
+        if alias in ('t1', '__calculated_target') or alias in aliases:
+            raise FormulaError(
+                _('JOIN aliases must be unique and cannot use reserved names'))
+        aliases.add(alias)
+
+
 def _get_numeric_fields(con, schema, table):
     info = con.get_fields_info(table, schema=schema)
     numeric = []
@@ -162,6 +186,17 @@ def _get_numeric_fields(con, schema, table):
         if name and dtype in _NUMERIC_TYPES:
             numeric.append(name)
     return numeric, info
+
+
+def _ensure_join_fields(base_info, other_info, join_self, join_other):
+    base_fields = {
+        field.get('name') or field.get('column_name') for field in base_info
+    }
+    other_fields = {
+        field.get('name') or field.get('column_name') for field in other_info
+    }
+    if join_self not in base_fields or join_other not in other_fields:
+        raise FormulaError(_('Unknown JOIN field'))
 
 
 def _sql_ident(name):
@@ -209,7 +244,7 @@ def _filter_condition(query, columns, alias):
         )
     elif operator in ('CONTAINS', 'NOT CONTAINS'):
         values = value if isinstance(value, (list, tuple)) else [value]
-        like = sqlbuilder.SQL('NOT LIKE') if operator == 'NOT CONTAINS' else sqlbuilder.SQL('LIKE')
+        like = sqlbuilder.SQL('NOT ILIKE') if operator == 'NOT CONTAINS' else sqlbuilder.SQL('ILIKE')
         joiner = sqlbuilder.SQL(' AND ') if operator == 'NOT CONTAINS' else sqlbuilder.SQL(' OR ')
         parts = [
             sqlbuilder.SQL('{col} {like} {val}').format(
@@ -245,6 +280,8 @@ def _build_filter_where(filter_data, columns, alias=None):
             return None
     if not isinstance(filter_data, dict):
         return None
+    if filter_data.get('match_none') is True:
+        return sqlbuilder.SQL('FALSE')
     queries = filter_data.get('filterQueries') or []
     if not queries:
         return None
@@ -502,11 +539,7 @@ def calculated_field_joinable_layers(request):
             return _json_error(str(exc))
         return _json_error(_('Layer not found'), 404)
     try:
-        if not _can_write_calculated(request, layer):
-            return HttpResponseForbidden(json.dumps({'status': 'error', 'message': 'Not authorized'}),
-                                         content_type='application/json')
-        if not layer.datastore or layer.datastore.type != 'v_PostGIS':
-            return _json_error(_('Only PostGIS layers are supported'))
+        _ensure_manageable_postgis(request, layer, require_flag=True)
         params = _layer_params(layer)
         host, port, database = params.get('host'), str(params.get('port')), params.get('database')
         candidates = Layer.objects.filter(
@@ -545,6 +578,9 @@ def calculated_field_joinable_layers(request):
                 'is_current': candidate.id == layer.id,
             })
         return JsonResponse({'status': 'ok', 'layers': result})
+    except PermissionError as exc:
+        return HttpResponseForbidden(json.dumps({'status': 'error', 'message': str(exc)}),
+                                     content_type='application/json')
     except Exception as exc:
         logger.exception('joinable layers')
         return _json_error(str(exc))
@@ -563,10 +599,12 @@ def calculated_field_join_cardinality(request):
         project_layer_ids = _project_layer_ids(data.get('project_id'))
         _ensure_layers_in_project(project_layer_ids, layer)
         _ensure_manageable_postgis(request, layer, require_flag=True)
+        _validate_source_aliases(data.get('sources') or [])
 
         results = {}
-        iconn, _source_name, _schema = layer.get_db_connection()
+        iconn, source_name, schema = layer.get_db_connection()
         with iconn as con:
+            _numeric, base_info = _get_numeric_fields(con, schema, source_name)
             for idx, src in enumerate(data.get('sources') or []):
                 if not src or not src.get('layer_id'):
                     continue
@@ -578,13 +616,12 @@ def calculated_field_join_cardinality(request):
                 validate_identifier(join_self)
                 validate_identifier(join_other)
                 other = Layer.objects.get(id=int(src['layer_id']))
-                _ensure_layers_in_project(project_layer_ids, other)
-                if not _same_connection(layer, other):
-                    raise FormulaError(_('All layers must share the same database connection'))
-                if not _can_read(request, other):
-                    raise PermissionError(_('Not authorized to read related layer'))
+                _ensure_join_source(request, layer, other, project_layer_ids)
                 o_source = other.source_name or other.name
                 o_schema = _layer_params(other).get('schema', 'public')
+                _onum, other_info = _get_numeric_fields(con, o_schema, o_source)
+                _ensure_join_fields(
+                    base_info, other_info, join_self, join_other)
                 results[alias] = not _join_key_is_unique(con, o_schema, o_source, join_other)
 
         return JsonResponse({
@@ -617,6 +654,7 @@ def calculated_field_validate(request):
         formula = data.get('formula') or ''
         field_units = data.get('field_units') or {}
         sources = data.get('sources') or []
+        _validate_source_aliases(sources)
 
         iconn, source_name, schema = layer.get_db_connection()
         with iconn as con:
@@ -630,20 +668,17 @@ def calculated_field_validate(request):
                     allowed.add('{0}.{1}'.format(base_alias, f))
                 for idx, src in enumerate(sources):
                     other = Layer.objects.get(id=int(src['layer_id']))
-                    _ensure_layers_in_project(project_layer_ids, other)
-                    if not _same_connection(layer, other):
-                        raise FormulaError(_('All layers must share the same database connection'))
-                    if not _can_read(request, other):
-                        raise PermissionError(_('Not authorized to read related layer'))
+                    _ensure_join_source(request, layer, other, project_layer_ids)
                     o_source = other.source_name or other.name
                     o_schema = _layer_params(other).get('schema', 'public')
                     alias = validate_identifier(src.get('alias') or ('t' + str(idx + 2)))
-                    onum, _oinfo = _get_numeric_fields(con, o_schema, o_source)
+                    onum, oinfo = _get_numeric_fields(con, o_schema, o_source)
                     for f in onum:
                         allowed.add('{0}.{1}'.format(alias, f))
                     join_self = validate_identifier(
                         src.get('join_field_self') or src.get('join_field_current'))
                     join_other = validate_identifier(src.get('join_field_other'))
+                    _ensure_join_fields(info, oinfo, join_self, join_other)
                     resolved.append({
                         'alias': alias,
                         'schema': o_schema,
@@ -822,6 +857,7 @@ def calculated_field_create(request):
         if not title and mode == 'create':
             title = field_name
         sources = data.get('sources') or []  # [{layer_id, alias, join_field_self, join_field_other}]
+        _validate_source_aliases(sources)
         destination_mode = data.get('destination_mode') or 'current_layer'
         if mode == 'update' and destination_mode != 'current_layer':
             # Updating an existing column is only offered on the layer the
@@ -871,17 +907,13 @@ def calculated_field_create(request):
                     field_map[q] = (schema, source_name, f, base_alias)
                 for idx, src in enumerate(sources):
                     other = Layer.objects.get(id=int(src['layer_id']))
-                    _ensure_layers_in_project(project_layer_ids, other)
-                    if not _can_read(request, other):
-                        raise PermissionError(_('Not authorized to read related layer'))
-                    if not _same_connection(layer, other):
-                        raise FormulaError(_('All layers must share the same database connection'))
+                    _ensure_join_source(request, layer, other, project_layer_ids)
                     # same connection object already open; use schema/table from other
                     o_params = _layer_params(other)
                     o_schema = o_params.get('schema', 'public')
                     o_source = other.source_name or other.name
                     alias = validate_identifier(src.get('alias') or ('t' + str(idx + 2)))
-                    onum, _oinfo = _get_numeric_fields(con, o_schema, o_source)
+                    onum, oinfo = _get_numeric_fields(con, o_schema, o_source)
                     for f in onum:
                         q = '{0}.{1}'.format(alias, f)
                         allowed.add(q)
@@ -889,6 +921,7 @@ def calculated_field_create(request):
                     join_self = validate_identifier(
                         src.get('join_field_self') or src.get('join_field_current'))
                     join_other = validate_identifier(src.get('join_field_other'))
+                    _ensure_join_fields(info, oinfo, join_self, join_other)
                     src['_resolved'] = {
                         'alias': alias,
                         'schema': o_schema,
