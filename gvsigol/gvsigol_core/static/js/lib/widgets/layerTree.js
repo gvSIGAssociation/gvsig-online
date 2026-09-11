@@ -136,7 +136,7 @@ layerTree.prototype.createTree = function() {
 				tree += '				<div data-grouporder="' + layerGroup.groupOrder + '" data-groupnumber="' + (groupCount++) * 100 + '" class="box-body layer-tree-groups" style="display: none;">';
 				var reversedLayers = layerGroup.layers;//.reverse();
 				for (var j=0; j<reversedLayers.length; j++) {
-					if (reversedLayers[j].name && reversedLayers[j].name.indexOf('_') === 0) {
+					if (reversedLayers[j].name && reversedLayers[j].name.indexOf('_') === 0 && reversedLayers[j].is_vector) {
 						continue;
 					}
 					tree += self.createOverlayUI(reversedLayers[j], layerGroup.visible);
@@ -203,7 +203,7 @@ layerTree.prototype.createTree = function() {
 							var layer = group.layers[j];
 							var layerCheckbox = document.getElementById(layer.id);
 							var layerMapLayer = self.getLayerFromMap(layer);
-							var isHiddenToc = layer.name && layer.name.indexOf('_') === 0;
+							var isHiddenToc = layer.name && layer.name.indexOf('_') === 0 && layer.is_vector;
 							if (!layerMapLayer) {
 								continue;
 							}
@@ -268,7 +268,7 @@ layerTree.prototype.createTree = function() {
 			if (!layerGroup.basegroup) {
 				for (var j=0; j<layerGroup.layers.length; j++) {	
 					var layer = layerGroup.layers[j];
-					if (layer.name && layer.name.indexOf('_') === 0) {
+					if (layer.name && layer.name.indexOf('_') === 0 && layer.is_vector) {
 						continue;
 					}
 					availableLayers.push({
