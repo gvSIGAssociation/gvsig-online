@@ -456,7 +456,7 @@ viewer.core = {
 	    } else {
 	    	visible = externalLayer['visible'];
 	    }
-	    if(group.visible && !(externalLayer['name'] && externalLayer['name'].indexOf('_') === 0)){ visible = false; }
+	    if(group.visible && !(externalLayer['name'] && externalLayer['name'].indexOf('_') === 0 && externalLayer['is_vector'])){ visible = false; }
 
 	    var layerId = this._nextLayerId();
 	    externalLayer.id = layerId;
@@ -899,7 +899,7 @@ viewer.core = {
 	    	visible = layerConf['visible'];
 			baselayer = false;
 	    }
-	    if(group.visible && !(layerConf['name'] && layerConf['name'].indexOf('_') === 0)){ visible = false; }
+	    if(group.visible && !(layerConf['name'] && layerConf['name'].indexOf('_') === 0 && layerConf['is_vector'])){ visible = false; }
 
 		if (!layerConf.public && visible) {
 			// visible authenticated layers should be loaded after login
