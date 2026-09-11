@@ -135,7 +135,10 @@ layerTree.prototype.createTree = function() {
 				tree += '				</div>';
 				tree += '				<div data-grouporder="' + layerGroup.groupOrder + '" data-groupnumber="' + (groupCount++) * 100 + '" class="box-body layer-tree-groups" style="display: none;">';
 				var reversedLayers = layerGroup.layers;//.reverse();
-				for (var j=0; j<reversedLayers.length; j++) {				
+				for (var j=0; j<reversedLayers.length; j++) {
+					if (reversedLayers[j].name && reversedLayers[j].name.indexOf('_') === 0) {
+						continue;
+					}
 					tree += self.createOverlayUI(reversedLayers[j], layerGroup.visible);
 				}
 				tree += '				</div>';
@@ -199,19 +202,26 @@ layerTree.prototype.createTree = function() {
 						for (var j=0; j<group.layers.length; j++) {
 							var layer = group.layers[j];
 							var layerCheckbox = document.getElementById(layer.id);
-							var mapLayer = self.getLayerFromMap(layer);
+							var layerMapLayer = self.getLayerFromMap(layer);
+							var isHiddenToc = layer.name && layer.name.indexOf('_') === 0;
+							if (!layerMapLayer) {
+								continue;
+							}
 							if (checked) {
-								mapLayer.setVisible(false);
-								layerCheckbox.checked = true;
-								layerCheckbox.disabled = true;
-								
-								$(".layer-opacity-slider[data-layerid='"+layer.id+"']").slider( "option", "disabled", true );
+								// Capas `_` compañeras siguen visibles; el resto lo pinta el WMS del grupo
+								layerMapLayer.setVisible(!!isHiddenToc);
+								if (layerCheckbox) {
+									layerCheckbox.checked = true;
+									layerCheckbox.disabled = true;
+									$(".layer-opacity-slider[data-layerid='"+layer.id+"']").slider( "option", "disabled", true );
+								}
 							} else {
-								mapLayer.setVisible(false);
-								layerCheckbox.checked = false;
-								layerCheckbox.disabled = false;
-								
-								$(".layer-opacity-slider[data-layerid='"+layer.id+"']").slider( "option", "disabled", false );
+								layerMapLayer.setVisible(false);
+								if (layerCheckbox) {
+									layerCheckbox.checked = false;
+									layerCheckbox.disabled = false;
+									$(".layer-opacity-slider[data-layerid='"+layer.id+"']").slider( "option", "disabled", false );
+								}
 							}
 						}
 					}
@@ -225,14 +235,20 @@ layerTree.prototype.createTree = function() {
 					for (var j=0; j<group.layers.length; j++) {
 						var layer = group.layers[j];
 						var layerCheckbox = document.getElementById(layer.id);
-						var mapLayer = self.getLayerFromMap(layer);
+						var layerMapLayer = self.getLayerFromMap(layer);
+						if (!layerMapLayer) {
+							continue;
+						}
 						if (checked) {
-							mapLayer.setVisible(true);
-							layerCheckbox.checked = true;
-							
+							layerMapLayer.setVisible(true);
+							if (layerCheckbox) {
+								layerCheckbox.checked = true;
+							}
 						} else {
-							mapLayer.setVisible(false);
-							layerCheckbox.checked = false;
+							layerMapLayer.setVisible(false);
+							if (layerCheckbox) {
+								layerCheckbox.checked = false;
+							}
 						}
 					}
 				}
@@ -252,6 +268,9 @@ layerTree.prototype.createTree = function() {
 			if (!layerGroup.basegroup) {
 				for (var j=0; j<layerGroup.layers.length; j++) {	
 					var layer = layerGroup.layers[j];
+					if (layer.name && layer.name.indexOf('_') === 0) {
+						continue;
+					}
 					availableLayers.push({
 						id: layer.id,
 				        text: layer.title,
