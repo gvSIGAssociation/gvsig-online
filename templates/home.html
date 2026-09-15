@@ -409,6 +409,7 @@ body.skin-black .home-page {
 .project-card__type-tag--private { background: #e8eef4; color: var(--h-accent-dk); }
 .project-card__type-tag--public  { background: #e4f3eb; color: #1e7a4d; }
 .project-card__type-tag--app     { background: #e6eef7; color: var(--h-blue); }
+.project-card__type-tag--panel   { background: #eee8f7; color: #65428a; }
 
 .project-card__desc {
 	font-size: 12px;
@@ -871,12 +872,12 @@ body.skin-black .home-page {
 	</div>
 
 	<!-- ===== PANEL UNIFICADO: proyectos + aplicaciones ===== -->
-	{% if projects or public_projects or applications %}
+	{% if projects or public_projects or applications or panels %}
 	<div id="all-items-panel" class="projects-panel">
 		<div class="projects-panel__header">
 			<div class="projects-panel__header-main">
 				<h3 class="projects-panel__title">
-					<i class="fa fa-th-large"></i>{% trans "Projects & Applications" %}
+					<i class="fa fa-th-large"></i>{% trans "Projects, panels & applications" %}
 				</h3>
 				<div class="elegant-search">
 					<input type="text" class="search-all form-control" placeholder="{% trans 'Search...' %}" />
@@ -909,6 +910,12 @@ body.skin-black .home-page {
 					<button class="filter-btn" data-filter="app">
 						<i class="fa fa-th-large"></i> {% trans "Apps" %}
 						<span class="filter-count">{{applications|length}}</span>
+					</button>
+					{% endif %}
+					{% if panels %}
+					<button class="filter-btn" data-filter="panel">
+						<i class="fa fa-dashboard"></i> {% trans "Panels" %}
+						<span class="filter-count">{{panels|length}}</span>
 					</button>
 					{% endif %}
 				</div>
@@ -958,6 +965,8 @@ body.skin-black .home-page {
 						<span class="project-card__type-tag project-card__type-tag--private"><i class="fa fa-lock"></i> {% trans "Private" %}</span>
 						{% elif item.item_type == 'public' %}
 						<span class="project-card__type-tag project-card__type-tag--public"><i class="fa fa-globe"></i> {% trans "Public" %}</span>
+						{% elif item.item_type == 'panel' %}
+						<span class="project-card__type-tag project-card__type-tag--panel"><i class="fa fa-dashboard"></i> {% trans "Panel" %}{% if item.is_public %} · {% trans "Public" %}{% endif %}</span>
 						{% else %}
 						<span class="project-card__type-tag project-card__type-tag--app"><i class="fa fa-th-large"></i> {% trans "Application" %}</span>
 						{% endif %}
@@ -968,6 +977,10 @@ body.skin-black .home-page {
 					{% if item.item_type == 'app' %}
 					<a href="{{ item.url }}" target="_blank" class="project-card__btn">
 						<i class="fa fa-rocket"></i> {% trans "Open application" %}
+					</a>
+					{% elif item.item_type == 'panel' %}
+					<a href="{{ item.url }}" target="_blank" class="project-card__btn">
+						<i class="fa fa-dashboard"></i> {% trans "Open panel" %}
 					</a>
 					{% else %}
 					<a href="{{ item.url }}" target="_blank" class="project-card__btn">
@@ -1031,6 +1044,25 @@ body.skin-black .home-page {
 					<div class="project-card__footer">
 						<a href="{{app.url}}" target="_blank" class="project-card__btn">
 							<i class="fa fa-rocket"></i> {% trans "Open application" %}
+						</a>
+					</div>
+				</div>
+			</li>
+			{% endfor %}
+			{% for item in panels %}
+			<li data-item-type="panel" data-item-id="{{ item.id }}">
+				<div class="project-card">
+					<span class="drag-handle"><i class="fa fa-bars"></i></span>
+					<img class="project-card__thumb" src="{{ item.image }}" alt="">
+					<div class="project-card__body">
+						<span class="item-title" style="display:none;">{{ item.title }}</span>
+						<span class="project-card__type-tag project-card__type-tag--panel"><i class="fa fa-dashboard"></i> {% trans "Panel" %}{% if item.is_public %} · {% trans "Public" %}{% endif %}</span>
+						<p class="project-card__name">{{ item.title }}</p>
+						<span class="project-card__desc">{{ item.description }}</span>
+					</div>
+					<div class="project-card__footer">
+						<a href="{{ item.url }}" target="_blank" class="project-card__btn">
+							<i class="fa fa-dashboard"></i> {% trans "Open panel" %}
 						</a>
 					</div>
 				</div>
@@ -1172,7 +1204,7 @@ body.skin-black .home-page {
 	});
 
 	$().ready(function() {
-		{% if projects or public_projects or applications %}
+		{% if projects or public_projects or applications or panels %}
 		var activeFilter = 'all';
 		var currentOrderType = '{{ order_type }}';
 		var sortableEnabled = false;

@@ -146,6 +146,26 @@ def home(request):
             'item_type': 'app',
         })
 
+    panels = []
+    if 'gvsigol_plugin_panels' in settings.INSTALLED_APPS:
+        from gvsigol_plugin_panels.models import Panel
+        from gvsigol_plugin_panels.utils import serialize_panel
+        panel_query = Panel.objects.select_related('project').all().order_by('title')
+        for panel_obj in panel_query:
+            if not panel_obj.can_read(request):
+                continue
+            panel_data = serialize_panel(panel_obj, include_widgets=False)
+            panels.append({
+                'id': panel_obj.id,
+                'name': panel_obj.name or panel_obj.slug,
+                'title': panel_obj.title,
+                'description': panel_obj.description or '',
+                'image': settings.STATIC_URL + 'panels/panel.svg',
+                'url': '/spa' + panel_data['public_path'],
+                'item_type': 'panel',
+                'is_public': panel_obj.is_public,
+            })
+
     order_type = UserHomeOrder.ORDER_ALPHA
     all_items_ordered = None
     editing_scope = 'my_order'  # 'global' | 'my_order'; only superuser can use 'global'
@@ -173,6 +193,8 @@ def home(request):
                 lookup[('public', p['id'])] = p
             for a in applications:
                 lookup[('app', a['id'])] = a
+            for panel_item in panels:
+                lookup[('panel', panel_item['id'])] = panel_item
             seen = set()
             all_items_ordered = []
             for entry in order_list:
@@ -192,7 +214,7 @@ def home(request):
                 return ''
             nfd = unicodedata.normalize('NFD', (s or '').lower())
             return ''.join(c for c in nfd if unicodedata.category(c) != 'Mn')
-        all_items_ordered = list(projects) + list(public_projects) + list(applications)
+        all_items_ordered = list(projects) + list(public_projects) + list(applications) + list(panels)
         all_items_ordered.sort(key=lambda item: _sort_key_no_accents(item.get('title') or item.get('name') or ''))
 
     manage_passwords_url = getattr(settings, 'MANAGE_PASSWORD_URL', None)
@@ -212,6 +234,7 @@ def home(request):
         'projects': projects,
         'public_projects': public_projects,
         'applications': applications,
+        'panels': panels,
         'all_items_ordered': all_items_ordered,
         'order_type': order_type,
         'editing_scope': editing_scope,
