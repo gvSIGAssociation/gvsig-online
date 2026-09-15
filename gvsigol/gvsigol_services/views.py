@@ -1841,6 +1841,20 @@ def layer_update(request, layer_id):
                     assigned_write_roles.append(key[len('write-usergroup-'):])
 
         is_public = (request.POST.get('resource-is-public') is not None)
+        if layer.public and not is_public and 'gvsigol_plugin_panels' in settings.INSTALLED_APPS:
+            from gvsigol_plugin_panels.models import Panel
+            dependent_panels = Panel.objects.filter(is_public=True).filter(
+                Q(widgets__layer=layer)
+                | Q(datasets__layer=layer)
+                | Q(widgets__dataset__layer=layer)
+            ).distinct()
+            if dependent_panels.exists():
+                names = ', '.join(dependent_panels.values_list('title', flat=True))
+                messages.error(
+                    request,
+                    _('This layer cannot be made private because it is used by public panels: {}').format(names),
+                )
+                return redirect(request.get_full_path())
 
         if layer.datastore.type.startswith('v_'):
             try:

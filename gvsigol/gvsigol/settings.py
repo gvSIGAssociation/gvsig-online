@@ -852,7 +852,7 @@ CHECK_TILELOAD_ERROR = False
 GRAPH_MODELS = {
     'all_applications': False,
     'group_models': True,
-    'app_labels': ['gvsigol_app_tocantins','gvsigol_plugin_print','gvsigol_plugin_edition','gvsigol_plugin_catalog','gvsigol_plugin_importvector','gvsigol_plugin_importfromservice','gvsigol_plugin_draw','gvsigol_plugin_geocoding','gvsigol_plugin_charts']
+    'app_labels': ['gvsigol_app_tocantins','gvsigol_plugin_print','gvsigol_plugin_edition','gvsigol_plugin_catalog','gvsigol_plugin_importvector','gvsigol_plugin_importfromservice','gvsigol_plugin_draw','gvsigol_plugin_geocoding','gvsigol_plugin_charts','gvsigol_plugin_panels']
     }
 
 GEOETL_DB = {
