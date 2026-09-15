@@ -26,6 +26,8 @@ from django.utils.translation import gettext as _
 from gvsigol.settings import GVSIGOL_LDAP
 from django.contrib.auth.models import User
 import ldap.modlist as modlist
+import ldap.ldapobject
+import ldap.filter
 from gvsigol import settings
 import shutil
 import ldap
@@ -51,10 +53,49 @@ class GvSigOnlineServices():
             imp.reload(sys)  # Reload does the trick!
             sys.setdefaultencoding('utf-8')
         
+        self.ldap = None
         if is_enabled:
-            self.ldap = ldap.initialize('ldap://' + host + ':' + port)
-            self.ldap.simple_bind_s(username, password)
-            
+            self.ldap = self._connect_ldap()
+
+    def _ldap_uri(self):
+        return 'ldap://{}:{}'.format(self.host, self.port)
+
+    def _connect_ldap(self):
+        """
+        python-ldap 3.4.x (SimpleLDAPObject from ldap.initialize) does not
+        recover a TCP session closed by idle timeout, NAT or slapd.
+        ReconnectLDAPObject rebinds and retries on SERVER_DOWN / TIMEOUT.
+        """
+        conn = ldap.ldapobject.ReconnectLDAPObject(
+            self._ldap_uri(),
+            retry_max=3,
+            retry_delay=1.0,
+        )
+        conn.set_option(ldap.OPT_PROTOCOL_VERSION, ldap.VERSION3)
+        conn.set_option(ldap.OPT_REFERRALS, 0)
+        conn.set_option(ldap.OPT_NETWORK_TIMEOUT, 10.0)
+        conn.set_option(ldap.OPT_TIMEOUT, 30.0)
+        conn.simple_bind_s(self.username, self.password)
+        return conn
+
+    def _ensure_ldap(self):
+        if self.ldap is None:
+            self.ldap = self._connect_ldap()
+        return self.ldap
+
+    def _search_attr_ints(self, base_dn, search_filter, attr_name):
+        result_data = self._ensure_ldap().search_s(
+            base_dn,
+            ldap.SCOPE_SUBTREE,
+            search_filter,
+            [attr_name],
+        )
+        values = []
+        for dn, attrs in result_data:
+            if not dn or not attrs or attr_name not in attrs:
+                continue
+            values.append(int(attrs[attr_name][0]))
+        return values
             
     def ldap_create_admin_group(self):
         # FIXME OIDC CMI: Role se debería usar a través de la API
@@ -300,96 +341,37 @@ class GvSigOnlineServices():
                 return False
         
     def ldap_get_last_gid(self):
-        
-        self.ldap.protocol_version = ldap.VERSION3        
-        baseDN = "ou=groups," + self.domain
-        searchScope = ldap.SCOPE_SUBTREE
-        searchFilter = "cn=*"
-        retrieveAttributes = None
-        
-        gids = []
         try:
-            ldap_result_id = self.ldap.search(baseDN, searchScope, searchFilter, retrieveAttributes)
-            while 1:
-                result_type, result_data = self.ldap.result(ldap_result_id, 0)
-                if (result_data == []):
-                    break
-                
-                else:            
-                    gid = result_data[0][1]['gidNumber'][0]
-                    gids.append(int(gid))
-            
-            last_gid = 500
-            if len(gids) > 0:
-                gids.sort()
-                last_gid = gids[-1]
-            return int(last_gid)
-            
+            gids = self._search_attr_ints("ou=groups," + self.domain, "cn=*", "gidNumber")
+            return max(gids) if gids else 500
         except ldap.LDAPError as e:
             logging.getLogger(LOGGER_NAME).exception(str(e))
             print(e)
+            raise
     
        
     def ldap_get_last_uid(self):
-        
-        self.ldap.protocol_version = ldap.VERSION3        
-        baseDN = "ou=users," + self.domain
-        searchScope = ldap.SCOPE_SUBTREE
-        searchFilter = "cn=*"
-        retrieveAttributes = None
-        
-        uids = []
         try:
-            ldap_result_id = self.ldap.search(baseDN, searchScope, searchFilter, retrieveAttributes)
-            while 1:
-                result_type, result_data = self.ldap.result(ldap_result_id, 0)
-                if (result_data == []):
-                    break
-                
-                else:            
-                    uid = result_data[0][1]['uidNumber'][0]
-                    uids.append(int(uid))
-            
-            last_uid = 5000
-            if len(uids) > 0:
-                uids.sort()
-                last_uid = uids[-1]
-            return int(last_uid)
-            
+            uids = self._search_attr_ints("ou=users," + self.domain, "cn=*", "uidNumber")
+            return max(uids) if uids else 5000
         except ldap.LDAPError as e:
             logging.getLogger(LOGGER_NAME).exception(str(e))
             print(e)
+            raise
             
             
     def ldap_get_uid(self, user_name):
-        
-        self.ldap.protocol_version = ldap.VERSION3        
-        baseDN = "ou=users," + self.domain
-        searchScope = ldap.SCOPE_SUBTREE
-        searchFilter = "cn=" + user_name
-        retrieveAttributes = None
-        
-        uids = []
         try:
-            ldap_result_id = self.ldap.search(baseDN, searchScope, searchFilter, retrieveAttributes)
-            while 1:
-                result_type, result_data = self.ldap.result(ldap_result_id, 0)
-                if (result_data == []):
-                    break
-                
-                else:            
-                    uid = result_data[0][1]['uidNumber'][0]
-                    uids.append(int(uid))
-            
-            last_uid = 5000
-            if len(uids) > 0:
-                uids.sort()
-                last_uid = uids[-1]
-            return int(last_uid)
-            
+            uids = self._search_attr_ints(
+                "ou=users," + self.domain,
+                "cn=" + ldap.filter.escape_filter_chars(user_name),
+                "uidNumber",
+            )
+            return max(uids) if uids else 5000
         except ldap.LDAPError as e:
             logging.getLogger(LOGGER_NAME).exception(str(e))
             print(e)
+            raise
             
             
     def ldap_change_user_password(self, user, password):
