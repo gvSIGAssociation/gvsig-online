@@ -238,6 +238,10 @@ class LayerSerializer(serializers.ModelSerializer):
                         field['dimension'] = field_conf['dimension']
                     if field_conf.get('calculated_formula'):
                         field['calculated_formula'] = field_conf['calculated_formula']
+                    if field_conf.get('calculated_sources'):
+                        field['calculated_sources'] = field_conf['calculated_sources']
+                    if field_conf.get('calculated_base'):
+                        field['calculated_base'] = field_conf['calculated_base']
                     if field_conf.get('calculated_sources') is not None:
                         field['calculated_sources'] = field_conf['calculated_sources']
                     if field_conf.get('calculated_base'):
