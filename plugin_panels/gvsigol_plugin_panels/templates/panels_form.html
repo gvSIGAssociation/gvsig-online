@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block header %}
+<style>
+:root {
+	--pl-accent:    #4a7fa5;
+	--pl-accent-dk: #2d5f80;
+	--pl-text:      #2e3a45;
+	--pl-muted:     #7b8a96;
+	--pl-border:    #e8ecef;
+	--pl-bg:        #f4f6f8;
+	--pl-white:     #ffffff;
+	--pl-radius:    10px;
+	--pl-shadow:    0 2px 12px rgba(0,0,0,0.08);
+	--pl-transition: 0.2s ease;
+}
+.pl-panel { background: var(--pl-white); border-radius: var(--pl-radius); box-shadow: var(--pl-shadow); border: 1px solid var(--pl-border); overflow: hidden; margin-bottom: 16px; }
+.pl-panel__header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--pl-border); gap: 12px; flex-wrap: wrap; }
+.pl-panel__title { font-size: 15px; font-weight: 700; color: var(--pl-text); display: flex; align-items: center; gap: 8px; margin: 0; }
+.pl-panel__title i { color: var(--pl-accent); }
+.pl-panel__actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pl-panel__body { padding: 20px; }
+.btn-pl-add { display: inline-flex; align-items: center; gap: 6px; background: var(--pl-accent); color: #fff !important; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; padding: 6px 14px; height: 34px; cursor: pointer; transition: background var(--pl-transition); text-decoration: none !important; white-space: nowrap; letter-spacing: 0.2px; }
+.btn-pl-add:hover { background: var(--pl-accent-dk); }
+.btn-pl-add--outline { background: transparent; color: var(--pl-muted) !important; border: 1px solid var(--pl-border); }
+.btn-pl-add--outline:hover { background: var(--pl-bg); border-color: var(--pl-accent); color: var(--pl-accent) !important; }
+.pl-form label { font-size: 12px; font-weight: 600; color: var(--pl-muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; display: block; }
+.pl-form .form-control { border-radius: 6px; border: 1px solid var(--pl-border); background: var(--pl-bg); font-size: 13px; color: var(--pl-text); box-shadow: none; transition: border-color var(--pl-transition), box-shadow var(--pl-transition); }
+.pl-form .form-control:focus { border-color: var(--pl-accent); background: var(--pl-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
+.pl-form .form-group { margin-bottom: 16px; }
+.pl-help { display: block; color: var(--pl-muted); font-size: 11px; margin-top: 4px; font-weight: 400; text-transform: none; letter-spacing: 0; }
+.pl-check { display: flex; align-items: flex-start; gap: 8px; padding: 12px 14px; background: var(--pl-bg); border-radius: 7px; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--pl-text); }
+.pl-check input { margin-top: 3px; }
+.pl-check strong { font-size: 13px; }
+.pl-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.pl-table thead th { background: var(--pl-bg); color: var(--pl-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; padding: 11px 16px; border-bottom: 1px solid var(--pl-border); text-align: left; }
+.pl-table tbody tr { border-bottom: 1px solid var(--pl-border); }
+.pl-table tbody tr:last-child { border-bottom: none; }
+.pl-table tbody tr:hover { background: #f0f6fb; }
+.pl-table tbody td { padding: 11px 16px; color: #4a5a68; vertical-align: middle; }
+.pl-role-name { font-weight: 600; color: var(--pl-text); }
+.pl-role-desc { font-size: 11px; color: var(--pl-muted); }
+.pl-role-check { text-align: center; width: 150px; }
+@media (max-width: 700px) { .pl-role-desc { display: none; } }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if user.is_staff %}
+<form class="pl-form" method="post">
+	{% csrf_token %}
+	<div class="row">
+		<div class="col-md-12">
+			<div class="pl-panel">
+				<div class="pl-panel__header">
+					<h3 class="pl-panel__title">
+						<i class="fa fa-info-circle"></i>
+						{% if panel %}{% trans "Edit panel" %}{% else %}{% trans "New panel" %}{% endif %}
+					</h3>
+					<div class="pl-panel__actions">
+						<a class="btn-pl-add btn-pl-add--outline" href="{% url 'panels_dashboard_list' %}">
+							<i class="fa fa-times"></i> {% trans "Cancel" %}
+						</a>
+						{% if private_layers %}
+						<button class="btn-pl-add" type="submit" name="confirm_public_layers" value="yes">
+							<i class="fa fa-globe"></i> {% trans "Make layers public and save" %}
+						</button>
+						{% else %}
+						<button class="btn-pl-add" type="submit">
+							<i class="fa fa-save"></i> {% trans "Save" %}
+						</button>
+						{% endif %}
+					</div>
+				</div>
+				<div class="pl-panel__body">
+					{% if private_layers %}
+					<div class="alert alert-warning">
+						<strong>{% trans "Confirmation required" %}</strong>
+						<p>{% trans "Publishing this panel will also make these layers public:" %}</p>
+						<ul>{% for layer in private_layers %}<li>{{ layer.title|default:layer.name }}</li>{% endfor %}</ul>
+					</div>
+					{% endif %}
+					{% if private_layers_forbidden %}
+					<div class="alert alert-danger">
+						{% trans "The panel cannot be public because you cannot manage all its private layers." %}
+					</div>
+					{% endif %}
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label for="panel-name">{% trans "Name" %}</label>
+								<input id="panel-name" class="form-control" name="name" required
+								       value="{{ panel.name|default:'' }}">
+								<span class="pl-help">{% trans "Internal name used to build the panel URL." %}</span>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								<label for="panel-title">{% trans "Title" %}</label>
+								<input id="panel-title" class="form-control" name="title" required
+								       value="{{ panel.title|default:'' }}">
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<div class="form-group">
+								<label for="panel-description">{% trans "Description" %}</label>
+								<textarea id="panel-description" class="form-control" name="description" rows="3">{{ panel.description|default:'' }}</textarea>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label for="panel-project">{% trans "Project" %}</label>
+								<select id="panel-project" class="form-control" name="project_id">
+									<option value="">{% trans "No project (global panel)" %}</option>
+									{% for project in projects %}
+										<option value="{{ project.id }}" {% if panel.project_id == project.id %}selected{% endif %}>{{ project.title }}</option>
+									{% endfor %}
+								</select>
+								<span class="pl-help">{% trans "Optional. Linked panels also appear in the panels menu of that project." %}</span>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								<label>{% trans "Access" %}</label>
+								<label class="pl-check">
+									<input type="checkbox" name="is_public" {% if panel.is_public %}checked{% endif %}>
+									<span>
+										<strong>{% trans "Public access" %}</strong>
+										<span class="pl-help">{% trans "Anyone with the link can open the panel. If disabled, only roles with access permission can open it." %}</span>
+									</span>
+								</label>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="pl-panel">
+				<div class="pl-panel__header">
+					<h3 class="pl-panel__title"><i class="fa fa-lock"></i> {% trans "Permissions by role" %}</h3>
+				</div>
+				<div class="pl-panel__body" style="padding:0;overflow-x:auto;">
+					<table class="pl-table">
+						<thead>
+							<tr>
+								<th>{% trans "Role" %}</th>
+								<th class="pl-role-check">{% trans "Can access" %}</th>
+								<th class="pl-role-check">{% trans "Can manage" %}</th>
+							</tr>
+						</thead>
+						<tbody>
+						{% for role in roles %}
+							<tr>
+								<td>
+									<div class="pl-role-name">{{ role.name }}</div>
+									{% if role.description %}<div class="pl-role-desc">{{ role.description }}</div>{% endif %}
+								</td>
+								<td class="pl-role-check">
+									<input class="pl-read" type="checkbox" name="read-role-{{ role.name }}"
+									       {% if role.read_checked %}checked{% endif %}>
+								</td>
+								<td class="pl-role-check">
+									<input class="pl-manage" type="checkbox" name="manage-role-{{ role.name }}"
+									       {% if role.manage_checked %}checked{% endif %}>
+								</td>
+							</tr>
+						{% empty %}
+							<tr><td colspan="3">{% trans "There are no roles available" %}</td></tr>
+						{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+{% endif %}
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+document.querySelectorAll('.pl-manage').forEach(function (manage) {
+	manage.addEventListener('change', function () {
+		if (manage.checked) {
+			manage.closest('tr').querySelector('.pl-read').checked = true;
+		}
+	});
+});
+</script>
+{% endblock %}

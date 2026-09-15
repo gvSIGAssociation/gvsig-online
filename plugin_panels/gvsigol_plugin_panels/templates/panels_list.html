@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block header %}
+<style>
+:root {
+	--pl-accent:    #4a7fa5;
+	--pl-accent-dk: #2d5f80;
+	--pl-text:      #2e3a45;
+	--pl-muted:     #7b8a96;
+	--pl-border:    #e8ecef;
+	--pl-bg:        #f4f6f8;
+	--pl-white:     #ffffff;
+	--pl-radius:    10px;
+	--pl-shadow:    0 2px 12px rgba(0,0,0,0.08);
+	--pl-transition: 0.2s ease;
+}
+.pl-panel { background: var(--pl-white); border-radius: var(--pl-radius); box-shadow: var(--pl-shadow); border: 1px solid var(--pl-border); overflow: hidden; }
+.pl-panel__header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--pl-border); gap: 12px; flex-wrap: wrap; }
+.pl-panel__title { font-size: 15px; font-weight: 700; color: var(--pl-text); display: flex; align-items: center; gap: 8px; margin: 0; }
+.pl-panel__title i { color: var(--pl-accent); }
+.pl-panel__actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pl-panel__body { padding: 0; }
+.pl-panel__footer { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-top: 1px solid var(--pl-border); flex-wrap: wrap; gap: 8px; }
+.pl-panel__footer .pagination { margin: 0; }
+.pl-panel__footer .text-muted { font-size: 12px; }
+.btn-pl-add { display: inline-flex; align-items: center; gap: 6px; background: var(--pl-accent); color: #fff !important; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; padding: 6px 14px; height: 34px; cursor: pointer; transition: background var(--pl-transition); text-decoration: none !important; white-space: nowrap; letter-spacing: 0.2px; }
+.btn-pl-add:hover { background: var(--pl-accent-dk); }
+.pl-search-wrap { display: flex; align-items: center; gap: 6px; }
+.pl-search-wrap .form-control { height: 34px; border-radius: 20px; border: 1px solid var(--pl-border); background: var(--pl-bg); font-size: 12px; padding: 0 14px; width: 200px; box-shadow: none; transition: border-color var(--pl-transition), box-shadow var(--pl-transition); }
+.pl-search-wrap .form-control:focus { border-color: var(--pl-accent); background: var(--pl-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
+.pl-search-wrap .btn-search { height: 34px; width: 34px; border-radius: 50%; border: 1px solid var(--pl-border); background: var(--pl-white); color: var(--pl-muted); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: background var(--pl-transition); padding: 0; }
+.pl-search-wrap .btn-search:hover { background: var(--pl-accent); color: #fff; border-color: var(--pl-accent); }
+.pl-table { width: 100%; border-collapse: collapse; font-size: 13px; font-weight: 400; -webkit-font-smoothing: antialiased; }
+.pl-table thead th { background: var(--pl-bg); color: var(--pl-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; padding: 11px 16px; border-bottom: 1px solid var(--pl-border); white-space: nowrap; }
+.pl-table tbody tr { border-bottom: 1px solid var(--pl-border); transition: background var(--pl-transition); }
+.pl-table tbody tr:last-child { border-bottom: none; }
+.pl-table tbody tr:hover { background: #f0f6fb; }
+.pl-table tbody td { padding: 11px 16px; color: #4a5a68; font-size: 13px; font-weight: 400; line-height: 1.5; vertical-align: middle; }
+.pl-name { font-weight: 600; color: var(--pl-text); }
+.pl-meta { display: block; color: var(--pl-muted); font-size: 12px; margin-top: 2px; }
+.pl-badge { display: inline-block; border-radius: 12px; padding: 3px 10px; font-size: 11px; font-weight: 600; }
+.pl-badge--public { background: #e9f2fb; color: #28658f; }
+.pl-badge--private { background: #f5f0e8; color: #87662c; }
+.pl-action-cell { white-space: nowrap; text-align: center; min-width: 90px; }
+.pl-table thead th.pl-action-cell { text-align: center; }
+#panels-table .btn { border-radius: 5px; font-size: 12px; padding: 4px 10px; transition: background var(--pl-transition), border-color var(--pl-transition); }
+#panels-table .btn-light { background: transparent; border: 1px solid var(--pl-border); color: var(--pl-accent); }
+#panels-table .btn-light:hover { background: #f0f6fb; border-color: var(--pl-accent); }
+#panels-table .btn-success { background: transparent; border: 1px solid #b7e5cc; color: #1a7a45; }
+#panels-table .btn-success:hover { background: #e6f7ee; border-color: #1a7a45; }
+#panels-table .btn-warning { background: transparent; border: 1px solid #f5d79e; color: #d08b00; }
+#panels-table .btn-warning:hover { background: #fef9ec; border-color: #d08b00; }
+#panels-table .btn-danger { background: transparent; border: 1px solid #e8bebe; color: #c0392b; }
+#panels-table .btn-danger:hover { background: #fde8e8; border-color: #c0392b; }
+table.dataTable { border-bottom: none !important; margin-top: 0 !important; margin-bottom: 0 !important; }
+table.dataTable thead th, table.dataTable thead td { border-bottom: 1px solid var(--pl-border) !important; }
+table.dataTable.no-footer { border-bottom: none !important; }
+.dataTables_wrapper { padding: 0; }
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_paginate { display: none; }
+.pl-empty { padding: 40px; text-align: center; color: var(--pl-muted); }
+.modal-content { border-radius: var(--pl-radius); border: none; box-shadow: 0 8px 32px rgba(0,0,0,0.18); }
+.modal-header { border-bottom: 1px solid var(--pl-border); padding: 16px 20px; }
+.modal-title { font-size: 15px; font-weight: 700; color: var(--pl-text); }
+.modal-body { padding: 20px; font-size: 13px; }
+.modal-footer { border-top: 1px solid var(--pl-border); padding: 14px 20px; display: flex; justify-content: flex-end; gap: 8px; }
+.modal-footer .btn { border-radius: 6px; font-size: 13px; font-weight: 600; padding: 6px 16px; }
+.modal-footer .btn-primary { background: var(--pl-accent); border-color: var(--pl-accent); color: #fff; }
+.modal-footer .btn-primary:hover { background: var(--pl-accent-dk); border-color: var(--pl-accent-dk); }
+@media (max-width: 900px) { .pl-table-wrap { overflow-x: auto; } .pl-table { min-width: 820px; } }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if user.is_staff %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="pl-panel">
+			<div class="pl-panel__header">
+				<h3 class="pl-panel__title">
+					<i class="fa fa-th-large"></i> {% trans "Panels list" %}
+				</h3>
+				<div class="pl-panel__actions">
+					<div class="pl-search-wrap">
+						<input type="text" class="form-control" id="panels-search" placeholder="{% trans 'Search...' %}">
+						<button class="btn-search" type="button" id="panels-search-btn"><i class="fa fa-search"></i></button>
+					</div>
+					<a class="btn-pl-add" href="{% url 'panels_dashboard_add' %}">
+						<i class="fa fa-plus"></i> {% trans "New" %}
+					</a>
+				</div>
+			</div>
+			<div class="pl-panel__body">
+				{% if panels %}
+				<div class="pl-table-wrap">
+					<table class="pl-table table" id="panels-table">
+						<thead>
+							<tr>
+								<th>{% trans "Name" %}</th>
+								<th>{% trans "Project" %}</th>
+								<th>{% trans "Access" %}</th>
+								<th>{% trans "Updated" %}</th>
+								<th class="pl-action-cell">{% trans "Open" %}</th>
+								<th class="pl-action-cell">{% trans "Design" %}</th>
+								<th class="pl-action-cell">{% trans "Configure" %}</th>
+								<th class="pl-action-cell">{% trans "Delete" %}</th>
+							</tr>
+						</thead>
+						<tbody>
+						{% for panel in panels %}
+							<tr>
+								<td>
+									<span class="pl-name">{{ panel.name|default:panel.slug }}</span>
+									<span class="pl-meta">{{ panel.title }}</span>
+								</td>
+								<td>{% if panel.project_id %}{{ panel.project.title }}{% else %}{% trans "Global" %}{% endif %}</td>
+								<td>
+									<span class="pl-badge {% if panel.is_public %}pl-badge--public{% else %}pl-badge--private{% endif %}">
+										{% if panel.is_public %}{% trans "Public" %}{% else %}{% trans "Restricted" %}{% endif %}
+									</span>
+								</td>
+								<td data-order="{{ panel.updated_at|date:'YmdHi' }}">{{ panel.updated_at|date:"d/m/Y H:i" }}</td>
+								<td class="pl-action-cell">
+									<a class="btn btn-success" target="_blank" rel="noopener"
+									   data-toggle="tooltip" data-placement="bottom" title="{% trans 'Open panel' %}"
+									   href="/spa/panel/{{ panel.slug }}/">
+										<i class="fa fa-external-link"></i>
+									</a>
+								</td>
+								<td class="pl-action-cell">
+									<a class="btn btn-light" target="_blank" rel="noopener"
+									   data-toggle="tooltip" data-placement="bottom" title="{% trans 'Edit design' %}"
+									   href="/spa/panel/{{ panel.slug }}/edit/">
+										<i class="fa fa-pencil"></i>
+									</a>
+								</td>
+								<td class="pl-action-cell">
+									<a class="btn btn-warning" data-toggle="tooltip" data-placement="bottom"
+									   title="{% trans 'Configure panel' %}"
+									   href="{% url 'panels_dashboard_update' panel.id %}">
+										<i class="fa fa-cog"></i>
+									</a>
+								</td>
+								<td class="pl-action-cell">
+									<button type="button" class="btn btn-danger" data-toggle="tooltip" data-placement="bottom"
+									        title="{% trans 'Delete panel' %}"
+									        data-panel-delete="{% url 'panels_dashboard_delete' panel.id %}">
+										<i class="fa fa-times"></i>
+									</button>
+								</td>
+							</tr>
+						{% endfor %}
+						</tbody>
+					</table>
+				</div>
+				{% else %}
+					<div class="pl-empty">{% trans "There are no panels yet" %}</div>
+				{% endif %}
+			</div>
+			<div class="pl-panel__footer" id="panels-pagination-footer" style="display:none;">
+				<span class="text-muted" id="panels-info"></span>
+				<ul class="pagination pagination-sm no-margin" id="panels-pagination"></ul>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="modal-delete-panel" tabindex="-1" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">{% trans "Delete panel" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "The panel and all its widgets will be deleted" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<form id="panel-delete-form" method="post">
+					{% csrf_token %}
+					<button type="submit" class="btn btn-primary">{% trans "Accept" %}</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+$(function () {
+	$('#panels-table').on('click', '[data-panel-delete]', function () {
+		$('#panel-delete-form').attr('action', $(this).data('panel-delete'));
+		$('#modal-delete-panel').modal('show');
+	});
+
+	if (!$('#panels-table').length) {
+		return;
+	}
+
+	var table = $('#panels-table').DataTable({
+		language: {
+			zeroRecords: '{% trans "No records available" %}',
+			emptyTable: '{% trans "No records available" %}',
+			aria: {
+				sortAscending: '{% blocktrans with sep=": " %}{{sep}}Sort ascending{% endblocktrans %}',
+				sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
+			}
+		},
+		/* Las cuatro últimas columnas son acciones: ni se ordenan ni se buscan. */
+		columnDefs: [{ targets: [-1, -2, -3, -4], orderable: false, searchable: false }],
+		order: [[0, 'asc']],
+		dom: 'rt',
+		paging: true,
+		pageLength: 10,
+		searching: true,
+		info: false,
+		drawCallback: function () {
+			updatePagination(this.api());
+			$('#panels-table [data-toggle="tooltip"]').tooltip({ container: 'body' });
+		}
+	});
+
+	function updatePagination(api) {
+		var info = api.page.info();
+		var $footer = $('#panels-pagination-footer');
+		var $pagination = $('#panels-pagination');
+
+		if (info.pages <= 1) {
+			$footer.hide();
+			return;
+		}
+		$footer.show();
+		$pagination.empty();
+		$('#panels-info').text(
+			'{% trans "Showing" %} ' + (info.start + 1) + ' {% trans "to" %} ' + info.end +
+			' {% trans "of" %} ' + info.recordsDisplay + ' {% trans "panels" %}'
+		);
+
+		if (info.page > 0) {
+			$pagination.append('<li><a href="#" data-page="' + (info.page - 1) + '">{% trans "Previous" %}</a></li>');
+		} else {
+			$pagination.append('<li class="disabled"><span>{% trans "Previous" %}</span></li>');
+		}
+		for (var i = Math.max(0, info.page - 2); i <= Math.min(info.pages - 1, info.page + 2); i++) {
+			if (i === info.page) {
+				$pagination.append('<li class="active"><span>' + (i + 1) + '</span></li>');
+			} else {
+				$pagination.append('<li><a href="#" data-page="' + i + '">' + (i + 1) + '</a></li>');
+			}
+		}
+		if (info.page < info.pages - 1) {
+			$pagination.append('<li><a href="#" data-page="' + (info.page + 1) + '">{% trans "Next" %}</a></li>');
+		} else {
+			$pagination.append('<li class="disabled"><span>{% trans "Next" %}</span></li>');
+		}
+	}
+
+	$('#panels-pagination').on('click', 'a', function (e) {
+		e.preventDefault();
+		var page = $(this).data('page');
+		if (page !== undefined) {
+			table.page(page).draw('page');
+		}
+	});
+
+	$('#panels-search').on('keyup', function () {
+		table.search($(this).val()).draw();
+	});
+	$('#panels-search-btn').on('click', function () {
+		table.search($('#panels-search').val()).draw();
+	});
+});
+</script>
+{% endblock %}

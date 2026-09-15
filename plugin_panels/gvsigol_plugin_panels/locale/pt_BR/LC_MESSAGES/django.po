@@ -1,0 +1,202 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: gvsigol_plugin_panels\n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "gvsigol_plugin_panels manual title"
+msgstr "Painéis"
+
+msgid "gvsigol_plugin_panels manual desc"
+msgstr "Construtor de painéis interativos do projeto"
+
+msgid "Paneles"
+msgstr "Painéis"
+
+msgid "Panels"
+msgstr "Painéis"
+
+msgid "Panels list"
+msgstr "Lista de painéis"
+
+msgid "New panel"
+msgstr "Novo painel"
+
+msgid "Edit panel"
+msgstr "Editar painel"
+
+msgid "New"
+msgstr "Novo"
+
+msgid "Search..."
+msgstr "Pesquisar..."
+
+msgid "Project"
+msgstr "Projeto"
+
+msgid "Access"
+msgstr "Acesso"
+
+msgid "Updated"
+msgstr "Atualizado"
+
+msgid "Public"
+msgstr "Público"
+
+msgid "Restricted"
+msgstr "Restrito"
+
+msgid "Open"
+msgstr "Abrir"
+
+msgid "Open panel"
+msgstr "Abrir painel"
+
+msgid "Design"
+msgstr "Design"
+
+msgid "Edit design"
+msgstr "Editar design"
+
+msgid "Configure"
+msgstr "Configurar"
+
+msgid "Configure panel"
+msgstr "Configurar painel"
+
+msgid "Delete"
+msgstr "Excluir"
+
+msgid "Delete panel"
+msgstr "Excluir painel"
+
+msgid "The panel and all its widgets will be deleted"
+msgstr "O painel e todos os seus elementos serão excluídos"
+
+msgid "Accept"
+msgstr "Aceitar"
+
+msgid "There are no panels yet"
+msgstr "Ainda não há painéis"
+
+msgid "No records available"
+msgstr "Não há registros disponíveis"
+
+msgid "Showing"
+msgstr "Mostrando"
+
+msgid "to"
+msgstr "a"
+
+msgid "of"
+msgstr "de"
+
+msgid "panels"
+msgstr "painéis"
+
+msgid "Previous"
+msgstr "Anterior"
+
+msgid "Next"
+msgstr "Próximo"
+
+msgid ": Sort ascending"
+msgstr ": Ordenar crescente"
+
+msgid ": Sort descending"
+msgstr ": Ordenar decrescente"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Save"
+msgstr "Salvar"
+
+msgid "Panel information"
+msgstr "Informações do painel"
+
+msgid "Name"
+msgstr "Nome"
+
+msgid "Internal name used to build the panel URL."
+msgstr "Nome interno usado para construir a URL do painel."
+
+msgid "Title"
+msgstr "Título"
+
+msgid "Description"
+msgstr "Descrição"
+
+msgid "The project cannot be changed after creating the panel because its widgets refer to project layers."
+msgstr "O projeto não pode ser alterado após a criação do painel porque seus elementos fazem referência às camadas do projeto."
+
+msgid "Select a project"
+msgstr "Selecione um projeto"
+
+msgid "Public access"
+msgstr "Acesso público"
+
+msgid "Anyone with the link can open the panel. If disabled, only roles with access permission can open it."
+msgstr "Qualquer pessoa com o link pode abrir o painel. Se desativado, somente funções com permissão de acesso poderão abri-lo."
+
+msgid "Permissions by role"
+msgstr "Permissões por função"
+
+msgid "Role"
+msgstr "Função"
+
+msgid "Can access"
+msgstr "Pode acessar"
+
+msgid "Can manage"
+msgstr "Pode gerenciar"
+
+msgid "There are no roles available"
+msgstr "Não há funções disponíveis"
+
+msgid "Name and title are required"
+msgstr "Nome e título são obrigatórios"
+
+msgid "Panel created successfully"
+msgstr "Painel criado com sucesso"
+
+msgid "Panel updated successfully"
+msgstr "Painel atualizado com sucesso"
+
+msgid "Panel deleted successfully"
+msgstr "Painel excluído com sucesso"
+
+msgid "No project (global panel)"
+msgstr "Sem projeto (painel global)"
+
+msgid "Optional. Linked panels also appear in the panels menu of that project."
+msgstr "Opcional. Os painéis vinculados também aparecem no menu de painéis desse projeto."
+
+msgid "Global"
+msgstr "Global"
+
+msgid "Make layers public and save"
+msgstr "Tornar camadas públicas e salvar"
+
+msgid "Confirmation required"
+msgstr "Confirmação necessária"
+
+msgid "Publishing this panel will also make these layers public:"
+msgstr "Ao publicar este painel, estas camadas também serão tornadas públicas:"
+
+msgid "The panel cannot be public because you cannot manage all its private layers."
+msgstr "O painel não pode ser público porque você não pode gerenciar todas as suas camadas privadas."
+
+msgid "You cannot publish this panel because you cannot manage all its private layers."
+msgstr "Você não pode publicar este painel porque não pode gerenciar todas as suas camadas privadas."
+
+msgid "Projects, panels & applications"
+msgstr "Projetos, painéis e aplicações"
+
+msgid "Panel"
+msgstr "Painel"
+
+msgid "This layer cannot be made private because it is used by public panels: {}"
+msgstr "Esta camada não pode se tornar privada porque é usada por painéis públicos: {}"

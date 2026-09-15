@@ -1,0 +1,49 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: gvsigol_plugin_panels\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "gvsigol_plugin_panels manual title"
+msgstr "Panels"
+
+msgid "gvsigol_plugin_panels manual desc"
+msgstr "Interactive project panel builder"
+
+msgid "Paneles"
+msgstr "Panels"
+
+msgid "No project (global panel)"
+msgstr "No project (global panel)"
+
+msgid "Optional. Linked panels also appear in the panels menu of that project."
+msgstr "Optional. Linked panels also appear in the panels menu of that project."
+
+msgid "Global"
+msgstr "Global"
+
+msgid "Make layers public and save"
+msgstr "Make layers public and save"
+
+msgid "Confirmation required"
+msgstr "Confirmation required"
+
+msgid "Publishing this panel will also make these layers public:"
+msgstr "Publishing this panel will also make these layers public:"
+
+msgid "The panel cannot be public because you cannot manage all its private layers."
+msgstr "The panel cannot be public because you cannot manage all its private layers."
+
+msgid "You cannot publish this panel because you cannot manage all its private layers."
+msgstr "You cannot publish this panel because you cannot manage all its private layers."
+
+msgid "Projects, panels & applications"
+msgstr "Projects, panels & applications"
+
+msgid "Panel"
+msgstr "Panel"
+
+msgid "This layer cannot be made private because it is used by public panels: {}"
+msgstr "This layer cannot be made private because it is used by public panels: {}"

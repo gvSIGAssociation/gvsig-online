@@ -1,0 +1,105 @@
+# -*- coding: utf-8 -*-
+from unittest import mock
+
+from django.contrib.auth.models import AnonymousUser, User
+from django.db import IntegrityError, transaction
+from django.test import RequestFactory, SimpleTestCase, TestCase
+from gvsigol_plugin_panels.utils import (
+    unique_slug, normalize_rows, apply_widget_payload, serialize_panel,
+)
+from gvsigol_plugin_panels.models import Panel, PanelWidget
+
+
+class FakeQuerySet:
+    def __init__(self, slugs):
+        self.slugs = set(slugs)
+
+    def exclude(self, pk=None):
+        return self
+
+    def filter(self, slug=None):
+        class R:
+            def __init__(self, exists):
+                self._exists = exists
+
+            def exists(self):
+                return self._exists
+        return R(slug in self.slugs)
+
+
+class FakeManager:
+    def __init__(self, slugs):
+        self._qs = FakeQuerySet(slugs)
+
+    def all(self):
+        return self._qs
+
+    def filter(self, slug=None):
+        return self._qs.filter(slug=slug)
+
+    def exclude(self, pk=None):
+        return self._qs.exclude(pk=pk)
+
+
+class UtilsTests(SimpleTestCase):
+    def test_unique_slug_increments(self):
+        with mock.patch.object(Panel, 'objects', FakeManager({'informe', 'informe-2'})):
+            self.assertEqual(unique_slug('Informe'), 'informe-3')
+
+    def test_normalize_rows_limit_and_keys(self):
+        rows = [{'A': 1}, 'skip', {None: 2, 'b': 3}]
+        out = normalize_rows(rows, limit=10)
+        self.assertEqual(len(out), 2)
+        self.assertEqual(out[0]['A'], 1)
+        self.assertIn('b', out[1])
+
+    def test_apply_widget_payload_defaults(self):
+        widget = PanelWidget(widget_type='bar', filter_mode='linked')
+        apply_widget_payload(widget, {
+            'widget_type': 'not-a-type',
+            'title': 'KPI',
+            'filter_mode': 'independent',
+            'x': 2,
+            'dataset_id': '',
+        }, index=4)
+        self.assertEqual(widget.widget_type, 'bar')
+        self.assertEqual(widget.title, 'KPI')
+        self.assertEqual(widget.filter_mode, 'independent')
+        self.assertEqual(widget.x, 2)
+        self.assertIsNone(widget.dataset_id)
+        self.assertEqual(widget.sort_order, 4)
+
+
+class StandalonePanelTests(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.owner = User.objects.create_user(username='panel-owner')
+
+    def request_for(self, user):
+        request = self.factory.get('/')
+        request.user = user
+        return request
+
+    def test_standalone_owner_can_manage_private_panel(self):
+        panel = Panel.objects.create(
+            title='Autonomous', slug='autonomous', created_by=self.owner.username)
+        self.assertTrue(panel.can_read(self.request_for(self.owner)))
+        self.assertTrue(panel.can_manage(self.request_for(self.owner)))
+        self.assertFalse(panel.can_read(self.request_for(AnonymousUser())))
+
+    def test_public_standalone_panel_is_anonymous_readable(self):
+        panel = Panel.objects.create(
+            title='Public', slug='public-panel', is_public=True)
+        self.assertTrue(panel.can_read(self.request_for(AnonymousUser())))
+
+    def test_standalone_paths_do_not_contain_project(self):
+        panel = Panel.objects.create(title='Global', slug='global-panel')
+        data = serialize_panel(panel, include_widgets=False)
+        self.assertEqual(data['public_path'], '/panel/global-panel/')
+        self.assertEqual(data['edit_path'], '/panel/global-panel/edit/')
+
+    def test_standalone_slug_is_unique(self):
+        Panel.objects.create(title='First', slug='same')
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Panel.objects.create(title='Second', slug='same')

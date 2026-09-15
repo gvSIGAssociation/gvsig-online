@@ -1,0 +1,32 @@
+{% load static %}
+{% load i18n %}
+{% if user.is_staff or user.is_superuser %}
+<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery-3.6.0.min.js" %}"></script>
+<script>
+if ($("#menu-manage-plugins").length) {
+	$("#menu-manage-plugins ul.treeview-menu").append(
+	'<li id="submenu-panels">'+
+	'	<a href="/gvsigonline/panels/">'+
+	'		<i class="fa fa-th"></i>{% trans "Paneles" %}'+
+	'	</a>'+
+	'</li>');
+} else {
+	$(".sidebar-menu").append(
+	'<li id="menu-manage-plugins" class="treeview"><a href="#">'+
+	'	<i class="fa fa-puzzle-piece" aria-hidden="true"></i><span>{% trans "Plugins" %}</span> <i class="fa fa-angle-left pull-right"></i></a>'+
+	'	<ul class="treeview-menu">'+
+	'		<li id="submenu-panels"><a href="/gvsigonline/panels/"><i class="fa fa-th"></i>{% trans "Paneles" %}</a></li>'+
+	'	</ul>'+
+	'</li>');
+}
+$(document).ready(function() {
+	var currentPath = window.location.pathname;
+	if (currentPath.indexOf('/gvsigonline/panels/') !== -1) {
+		var pluginsMenu = $('#menu-manage-plugins');
+		pluginsMenu.addClass('active');
+		pluginsMenu.find('.treeview-menu').addClass('menu-open').show();
+		$('#submenu-panels').addClass('active');
+	}
+});
+</script>
+{% endif %}
