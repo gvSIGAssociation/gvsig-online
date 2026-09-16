@@ -172,7 +172,7 @@ env = environ.Env(
     COUNTRIES_FIRST_BREAK = (str,"----"),
     GEOSERVER_USE_KEEPALIVE = (bool,True),
 
-    UI_HIDEN_PROJECTS_PREFIX=(str,'hidden'),
+    UI_HIDEN_PROJECTS_PREFIX=(str,'_'),
     GDALTOOLS_BASEPATH=(str,''),
     GDALTOOLS_CMD_PREFIX=(str,''),
     GDAL_LIBRARY_PATH=(str, ''),
