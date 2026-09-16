@@ -69,6 +69,27 @@ def _sort_key_no_accents(s):
     return ''.join(c for c in nfd if unicodedata.category(c) != 'Mn')
 
 
+def _include_hidden_items(request):
+    """
+    Query param ``hidden`` (default false).
+    When false, items whose name starts with UI_HIDEN_PROJECTS_PREFIX are excluded.
+    When true, those items are included. If the prefix setting is empty, nothing is filtered.
+    """
+    val = request.GET.get('hidden')
+    if val is None:
+        return False
+    return str(val).lower() in ('1', 'true', 'yes')
+
+
+def _filter_hidden_by_prefix(request, queryset):
+    if _include_hidden_items(request):
+        return queryset
+    prefix = getattr(core_settings, 'UI_HIDEN_PROJECTS_PREFIX', '')
+    if prefix:
+        return queryset.exclude(name__startswith=prefix)
+    return queryset
+
+
 def _order_projects_like_home(request, projects):
     """
     Order projects like home / home_order_get: user UserHomeOrder if set, else global (user=null).
@@ -419,6 +440,7 @@ class ProjectListView(ListAPIView):
             queryset = queryset.filter(labels__contains=label)
         now = datetime.now()
         queryset = queryset.filter(Q(expiration_date__gte=now) | Q(expiration_date=None))
+        queryset = _filter_hidden_by_prefix(request, queryset)
 
         projects_ordered = _order_projects_like_home(request, queryset)
         serializer = ProjectsSerializer(projects_ordered, many=True)
@@ -522,6 +544,7 @@ class PublicProjectListView(ListAPIView):
             queryset = Project.objects.filter(is_public=True, labels__contains=label, expiration_date__gte=now) | Project.objects.filter(is_public=True, labels__contains=label, expiration_date=None)
         else:
             queryset = Project.objects.filter(is_public=True, expiration_date__gte=now) | Project.objects.filter(is_public=True, expiration_date=None)
+        queryset = _filter_hidden_by_prefix(request, queryset)
 
         projects_ordered = _order_projects_like_home(request, queryset)
         serializer = ProjectsSerializer(projects_ordered, many=True)
@@ -876,6 +899,7 @@ class ApplicationListView(ListAPIView):
         
         applications_by_user = util.get_applications_ids_by_user(request)
         queryset = Application.objects.filter(id__in=applications_by_user)
+        queryset = _filter_hidden_by_prefix(request, queryset)
 
         serializer = ApplicationsSerializer(queryset, many=True)
         result = {
