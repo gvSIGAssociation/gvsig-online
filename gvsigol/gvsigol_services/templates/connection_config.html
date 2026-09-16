@@ -76,6 +76,13 @@
 .pf-card label { font-size: 12px; font-weight: 700; color: var(--pf-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
 .pf-card .form-control { border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; transition: border-color var(--pf-transition), box-shadow var(--pf-transition); padding: 6px 12px; }
 .pf-card .form-control:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
+.pf-flash { margin-bottom: 16px; }
+.pf-flash .alert { border-radius: 8px; border-top: none; border-right: none; border-bottom: none; border-left: 4px solid; font-size: 13px; padding: 12px 16px; margin-bottom: 8px; }
+.pf-flash .alert:last-child { margin-bottom: 0; }
+.pf-flash .alert-success { border-left-color: #27ae60; background: #f0faf4; color: #1e7e46; }
+.pf-flash .alert-warning { border-left-color: #d08b00; background: #fef9ec; color: #9a6800; }
+.pf-flash .alert-danger { border-left-color: #e74c3c; background: #fff5f5; color: #c0392b; }
+.pf-flash .alert-info { border-left-color: var(--pf-accent); background: #f0f6fb; color: var(--pf-accent-dk); }
 </style>
 {% endblock %}
 
@@ -89,6 +96,16 @@
 				</div>
 			</div>
 		</div>
+
+		{% if messages %}
+		<div class="pf-flash">
+			{% for message in messages %}
+			<div class="alert alert-{% if 'error' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'success' in message.tags %}success{% else %}info{% endif %}" role="alert">
+				{{ message }}
+			</div>
+			{% endfor %}
+		</div>
+		{% endif %}
 
 		<div class="box box-primary">
 			<div class="box-header with-border">

@@ -56,19 +56,25 @@ table.dataTable.no-footer { border-bottom: none !important; }
 .pl-table .btn-warning { background: transparent; border: 1px solid #f5d79e; color: #d08b00; border-radius: 5px; font-size: 12px; padding: 4px 10px; transition: background var(--pl-transition); }
 .pl-table .btn-warning:hover { background: #fef9ec; border-color: #d08b00; }
 .pl-cache-messages { margin-bottom: 16px; }
-.pl-cache-messages .alert { border-radius: 8px; border-left: 4px solid #e74c3c; background: #fff5f5; color: #c0392b; font-size: 13px; padding: 12px 16px; border-top: none; border-right: none; border-bottom: none; }
+.pl-cache-messages .alert { border-radius: 8px; border-top: none; border-right: none; border-bottom: none; border-left: 4px solid; font-size: 13px; padding: 12px 16px; margin-bottom: 8px; }
+.pl-cache-messages .alert:last-child { margin-bottom: 0; }
+.pl-cache-messages .alert-success { border-left-color: #27ae60; background: #f0faf4; color: #1e7e46; }
+.pl-cache-messages .alert-warning { border-left-color: #d08b00; background: #fef9ec; color: #9a6800; }
+.pl-cache-messages .alert-danger { border-left-color: #e74c3c; background: #fff5f5; color: #c0392b; }
+.pl-cache-messages .alert-info { border-left-color: var(--pl-accent); background: #f0f6fb; color: var(--pl-accent-dk); }
 </style>
 {% endblock %}
 
 {% block content %}
-{% for message in messages %}
+{% if messages %}
 <div class="pl-cache-messages">
-	<div class="alert alert-danger" role="alert">
-			<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-			<span class="sr-only">{% trans "Error:" %}</span>
-			{{message}}
-		</div>
-{% endfor %}
+	{% for message in messages %}
+	<div class="alert alert-{% if 'error' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'success' in message.tags %}success{% else %}info{% endif %}" role="alert">
+		{{ message }}
+	</div>
+	{% endfor %}
+</div>
+{% endif %}
 <div class="row">
 	<div class="col-md-12">
 	

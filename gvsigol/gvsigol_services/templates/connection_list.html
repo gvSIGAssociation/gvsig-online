@@ -84,10 +84,27 @@ table.dataTable.no-footer { border-bottom: none !important; }
 .modal-footer .btn-default { border-color: var(--pl-border); color: var(--pl-muted); }
 .modal-footer [id*="accept"] { background: var(--pl-accent); border-color: var(--pl-accent); color: #fff; }
 .modal-footer [id*="accept"]:hover { background: var(--pl-accent-dk); border-color: var(--pl-accent-dk); }
+.pl-flash { margin-bottom: 16px; }
+.pl-flash .alert { border-radius: 8px; border-top: none; border-right: none; border-bottom: none; border-left: 4px solid; font-size: 13px; padding: 12px 16px; margin-bottom: 0; }
+.pl-flash .alert-success { border-left-color: #27ae60; background: #f0faf4; color: #1e7e46; }
+.pl-flash .alert-warning { border-left-color: #d08b00; background: #fef9ec; color: #9a6800; }
+.pl-flash .alert-danger { border-left-color: #e74c3c; background: #fff5f5; color: #c0392b; }
+.pl-flash .alert-info { border-left-color: var(--pl-accent); background: #f0f6fb; color: var(--pl-accent-dk); }
 </style>
 {% endblock %}
 
 {% block content %}
+{% if messages %}
+<div class="row">
+	<div class="col-md-12 pl-flash">
+		{% for message in messages %}
+		<div class="alert alert-{% if 'error' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'success' in message.tags %}success{% else %}info{% endif %}" role="alert">
+			{{ message }}
+		</div>
+		{% endfor %}
+	</div>
+</div>
+{% endif %}
 <div class="row">
 	<div class="col-md-12">
 		<div class="pl-panel">
