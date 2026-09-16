@@ -122,11 +122,22 @@ class icv():
         
         
     def reverse(self, coordinate, exactly_one, language):
-
+        """
+        Geocodificador inverso ICV (API actual):
+        https://descargas.icv.gva.es/00/geoprocesos/geocodificador-inverso/
+        Params: tema, x, y, epsg
+        """
+        lon_wgs = float(coordinate[0])
+        lat_wgs = float(coordinate[1])
         in_proj = Proj(init='epsg:4326')
         out_proj = Proj(init='epsg:25830')
-        lng, lat = transform(in_proj, out_proj, float(coordinate[0]), float(coordinate[1]))
-        params = {'x': lng, 'y': lat}
+        x_25830, y_25830 = transform(in_proj, out_proj, lon_wgs, lat_wgs)
+        params = {
+            'tema': 'callejero',
+            'x': x_25830,
+            'y': y_25830,
+            'epsg': 25830,
+        }
         url = self.urls['reverse_url']
         try:
             json_res = requests.get(url=url, params=params)
@@ -136,38 +147,84 @@ class icv():
             print('Error en geocodificación inversa ICV:', e)
             return self._empty_reverse_suggestion()
 
-        cod_ine_val = json_results.get('cod_ine', '')
+        if not json_results.get('success'):
+            return self._empty_reverse_suggestion()
+
+        hit = self._first_reverse_hit(json_results, preferred_tema='callejero')
+        if not hit:
+            return self._empty_reverse_suggestion()
+
+        direccion = hit.get('direccion') or {}
+        municipio = hit.get('municipio') or {}
+        coords_pk = hit.get('coordenadasPortalPk') or {}
+
+        address = direccion.get('nombreCompleto') or ''
+        if not address:
+            tipo = (direccion.get('tipoVial') or '').strip()
+            via = (direccion.get('nombreVia') or '').strip()
+            numero = (direccion.get('numero') or '').strip()
+            parts = [p for p in (tipo, via) if p]
+            address = ' '.join(parts)
+            if numero:
+                address = (address + ', ' + numero).strip(', ')
+            if not address:
+                address = municipio.get('nombre', '') or ''
+
+        cod_ine_val = municipio.get('codigoIne', '') or ''
         suggestion = {
             'source': 'icv',
             'type': 'icv',
-            'address': json_results.get('nombre', ''),
-            'nombre': json_results.get('nombre', ''),
+            'address': address,
+            'nombre': address,
             'cod_ine': cod_ine_val,
             'codigo_ine': cod_ine_val,
-            'municipio': json_results.get('municipio', ''),
-            'cod_postal': json_results.get('cod_postal', ''),
+            'municipio': municipio.get('nombre', '') or '',
+            'cod_postal': municipio.get('codigoPostal', '') or '',
             'lat': '',
             'lng': '',
             'y': '',
             'x': '',
-            'srs': 'EPSG:4326'
+            'srs': 'EPSG:4326',
+            'clasificacion': direccion.get('clasificacion', '') or '',
         }
-        x_25830 = json_results.get('x_25830')
-        y_25830 = json_results.get('y_25830')
-        if x_25830 is not None and y_25830 is not None:
+
+        x_out = coords_pk.get('x')
+        y_out = coords_pk.get('y')
+        if x_out is not None and y_out is not None:
             try:
                 in_proj = Proj(init='epsg:25830')
                 out_proj = Proj(init='epsg:4326')
-                lng_wgs, lat_wgs = transform(in_proj, out_proj, float(x_25830), float(y_25830))
-                suggestion['x'] = str(x_25830)
-                suggestion['y'] = str(y_25830)
-                suggestion['lat'] = str(lat_wgs)
-                suggestion['lng'] = str(lng_wgs)
+                lng_out, lat_out = transform(in_proj, out_proj, float(x_out), float(y_out))
+                suggestion['x'] = str(x_out)
+                suggestion['y'] = str(y_out)
+                suggestion['lat'] = str(lat_out)
+                suggestion['lng'] = str(lng_out)
             except (TypeError, ValueError):
                 pass
-        # clasificacion al final, con el nombre que llega del API
-        suggestion['clasificacion'] = json_results.get('clasificacion', '')
+        if not suggestion['lat'] or not suggestion['lng']:
+            # Fallback: coordenadas de la consulta transformadas
+            suggestion['x'] = str(x_25830)
+            suggestion['y'] = str(y_25830)
+            suggestion['lat'] = str(lat_wgs)
+            suggestion['lng'] = str(lon_wgs)
         return suggestion
+
+    @staticmethod
+    def _first_reverse_hit(json_results, preferred_tema='callejero'):
+        """Extrae el primer resultado del tema preferido (o el primero disponible)."""
+        groups = json_results.get('results') or []
+        fallback = None
+        for group in groups:
+            if not group.get('success'):
+                continue
+            inner = group.get('results') or []
+            if not inner:
+                continue
+            if group.get('tema') == preferred_tema:
+                return inner[0]
+            if fallback is None:
+                fallback = inner[0]
+        return fallback
 
     def _empty_reverse_suggestion(self):
         return {

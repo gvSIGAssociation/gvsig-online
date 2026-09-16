@@ -65,7 +65,7 @@ GEOCODING_PROVIDER = {
     'icv': {
         'candidates_url': 'https://descargas.icv.gva.es/00/buscador',
         'find_url': 'https://descargas.icv.gva.es/00/buscador',
-        'reverse_url': 'https://descargas.icv.gva.es/00/geoprocesos/geocodificador/',
+        'reverse_url': 'https://descargas.icv.gva.es/00/geoprocesos/geocodificador-inverso/',
         'country_codes': 'es'
     },
     'googlemaps': {        
