@@ -2356,17 +2356,29 @@ def input_Oracle(dicc):
     conn_string_target = f"postgresql://{GEOETL_DB['user']}:{GEOETL_DB['password']}@{GEOETL_DB['host']}:{GEOETL_DB['port']}/{GEOETL_DB['database']}"
     db_target = create_engine(conn_string_target)
 
-    # Obtener columnas para el DataFrame
+    # Obtener columnas para el DataFrame (minúsculas: coherente con get_schema_oracle)
     df_sample = pd.read_sql(f"SELECT * FROM ({sql}) WHERE ROWNUM = 1", con=db_source.connect())
+    df_sample.columns = [str(c).lower() for c in df_sample.columns]
     columns = list(df_sample.columns)
+
+    # Crear la tabla temporal vacía antes de los lotes. Con vistas anchas,
+    # replace+append y method='multi' puede hacer INSERT sin que la tabla exista
+    # (o superar el límite de 65535 parámetros de PostgreSQL).
+    df_sample.head(0).to_sql(
+        table_name,
+        con=db_target,
+        schema=GEOETL_DB['schema'],
+        if_exists='replace',
+        index=False,
+    )
 
     # Conexión directa con Oracle
     conn_ora = cx_Oracle.connect(username, params['password'], params['dsn'])
     cursor = conn_ora.cursor()
     cursor.execute(sql)
 
-    batch_size = 1000
-    first_batch = True
+    ncols = max(len(columns), 1)
+    batch_size = max(1, min(1000, 30000 // ncols))
 
     while True:
         rows = cursor.fetchmany(batch_size)
@@ -2393,13 +2405,19 @@ def input_Oracle(dicc):
             print(df_obj.dtypes)
             pass
 
-
-        # Insertar en Postgres
-        df.to_sql(table_name, con=db_target, schema=GEOETL_DB['schema'], if_exists='replace' if first_batch else 'append', index=False, method='multi')
-        first_batch = False
+        df.to_sql(
+            table_name,
+            con=db_target,
+            schema=GEOETL_DB['schema'],
+            if_exists='append',
+            index=False,
+            method='multi',
+        )
 
     cursor.close()
     conn_ora.close()
+    db_source.dispose()
+    db_target.dispose()
 
     return [table_name]
 
@@ -4314,13 +4332,22 @@ def trans_Geocoder(dicc):
                 r = requests.get(URL_GEOCODER['icv-direct'] % address)
 
                 try:
-                    result = json.loads(r.content.decode('utf-8')[1:-1])['results'][0]['relacionespacial']
-
-                    if result.startswith('POINT'):
-                        coord = result[result.find("(")+1:result.find(")")].split(' ')
-
-                        cur_2.execute(sqlUpdate,[coord[0], coord[1],row[0]])
-                        conn_2.commit()
+                    payload = json.loads(r.content.decode('utf-8'))
+                    resp = payload.get('response', payload)
+                    results = resp.get('results') or []
+                    if not results:
+                        continue
+                    bbox_str = results[0].get('bbox', '')
+                    if not bbox_str:
+                        continue
+                    parts = [p.strip() for p in bbox_str.split(',')]
+                    if len(parts) < 4:
+                        continue
+                    xmin, ymin, xmax, ymax = float(parts[0]), float(parts[1]), float(parts[2]), float(parts[3])
+                    coord_x = (xmin + xmax) / 2
+                    coord_y = (ymin + ymax) / 2
+                    cur_2.execute(sqlUpdate, [coord_x, coord_y, row[0]])
+                    conn_2.commit()
                 except Exception as e:
                     print(e)
 
@@ -4379,10 +4406,30 @@ def trans_Geocoder(dicc):
                 
                 try:
                     result = json.loads(r.content.decode('utf-8'))
-                    address = str(result['dtipo_vial'])+' '+str(result['nombre'])+', '+str(result['dtipo_porpk'])+' '+str(result['numero'])+', '+str(result['municipio'])
-
-                    cur_2.execute(sqlUpdate,[address, row[0]])
-                    conn_2.commit()
+                    address = ''
+                    fallback = ''
+                    if result.get('success'):
+                        for group in (result.get('results') or []):
+                            if not group.get('success'):
+                                continue
+                            inner = group.get('results') or []
+                            if not inner:
+                                continue
+                            hit = inner[0]
+                            direccion = hit.get('direccion') or {}
+                            municipio = hit.get('municipio') or {}
+                            candidate = direccion.get('nombreCompleto') or municipio.get('nombre') or ''
+                            if not candidate:
+                                continue
+                            if group.get('tema') == 'callejero':
+                                address = candidate
+                                break
+                            if not fallback:
+                                fallback = candidate
+                    address = address or fallback
+                    if address:
+                        cur_2.execute(sqlUpdate, [address, row[0]])
+                        conn_2.commit()
                 except Exception as e:
                     print(e)
 

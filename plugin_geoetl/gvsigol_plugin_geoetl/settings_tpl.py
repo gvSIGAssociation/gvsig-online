@@ -2,8 +2,8 @@
 ETL_URL = '##ETL_URL##'
 
 URL_GEOCODER = {
-    'icv-direct': "http://descargas.icv.gva.es/server_api/geocodificador/solrgeocoderatmvcv.php?limit=1&query=%s&servicio=rtcv+nomenclator&start=0&",
-    'icv-reverse': "http://descargas.icv.gva.es/server_api/geocodificador/geocoder.php?&x=%s&y=%s"
+    'icv-direct': "https://descargas.icv.gva.es/00/buscador/?consulta=%s&limite=1&inicio=0",
+    'icv-reverse': "https://descargas.icv.gva.es/00/geoprocesos/geocodificador-inverso/?tema=callejero&epsg=25830&x=%s&y=%s"
 }
 
 GEOETL_DB = {
