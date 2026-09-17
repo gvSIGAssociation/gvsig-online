@@ -230,7 +230,7 @@ class Geocoder():
    
         return response
             
-    def get_location_address(self, query, type):
+    def get_location_address(self, query, type, temas=None):
         point = query.split(',')
         coordinate = [point[0], point[1]]
         loc = {}
@@ -238,7 +238,10 @@ class Geocoder():
         for geocoder_types in self.geocoders:
             geocoder = geocoder_types.get(type)
             if geocoder:
-                loc = geocoder.reverse(coordinate,exactly_one=True,language='es')
+                if type == 'icv' and temas:
+                    loc = geocoder.reverse(coordinate, exactly_one=True, language='es', temas=temas)
+                else:
+                    loc = geocoder.reverse(coordinate, exactly_one=True, language='es')
 
         return loc
     

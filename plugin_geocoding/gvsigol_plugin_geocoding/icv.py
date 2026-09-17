@@ -123,19 +123,21 @@ class icv():
         
     DEFAULT_REVERSE_TEMAS = 'callejero,municipios,catastro,forestal,espacios-protegidos'
 
-    def reverse(self, coordinate, exactly_one, language):
+    def reverse(self, coordinate, exactly_one, language, temas=None):
         """
         Geocodificador inverso ICV (API actual):
         https://descargas.icv.gva.es/00/geoprocesos/geocodificador-inverso/
         Params: tema (varios), x, y, epsg
+        temas: opcional, string o lista; si no se indica, usa settings.reverse_temas
         """
         lon_wgs = float(coordinate[0])
         lat_wgs = float(coordinate[1])
         in_proj = Proj(init='epsg:4326')
         out_proj = Proj(init='epsg:25830')
         x_25830, y_25830 = transform(in_proj, out_proj, lon_wgs, lat_wgs)
+        temas_param = self._reverse_temas_param(temas)
         params = {
-            'tema': self._reverse_temas_param(),
+            'tema': temas_param,
             'x': x_25830,
             'y': y_25830,
             'epsg': 25830,
@@ -153,14 +155,24 @@ class icv():
             return self._empty_reverse_suggestion()
 
         return self.suggestion_from_reverse_json(
-            json_results, lon_wgs=lon_wgs, lat_wgs=lat_wgs, x_25830=x_25830, y_25830=y_25830
+            json_results,
+            lon_wgs=lon_wgs,
+            lat_wgs=lat_wgs,
+            x_25830=x_25830,
+            y_25830=y_25830,
+            temas=temas_param,
         )
 
-    def _reverse_temas_param(self):
-        temas = self.urls.get('reverse_temas', self.DEFAULT_REVERSE_TEMAS)
+    def _reverse_temas_param(self, override=None):
+        allowed = set(t.strip() for t in self.DEFAULT_REVERSE_TEMAS.split(',') if t.strip())
+        temas = override if override not in (None, '') else self.urls.get('reverse_temas', self.DEFAULT_REVERSE_TEMAS)
         if isinstance(temas, (list, tuple)):
-            return ','.join(str(t).strip() for t in temas if str(t).strip())
-        return str(temas or self.DEFAULT_REVERSE_TEMAS).replace(' ', '')
+            cleaned = [str(t).strip() for t in temas if str(t).strip() and str(t).strip() in allowed]
+        else:
+            cleaned = [t.strip() for t in str(temas).split(',') if t.strip() and t.strip() in allowed]
+        if not cleaned:
+            cleaned = ['callejero']
+        return ','.join(cleaned)
 
     @classmethod
     def _hits_by_tema(cls, json_results):
@@ -218,8 +230,54 @@ class icv():
             address = cls._clean_str(mun)
         return address
 
+    # Campos propios de cada tema (más los CORE en _prune_suggestion_by_temas)
+    TEMA_EXTRA_FIELDS = {
+        'callejero': {
+            'municipio', 'cod_postal', 'cod_ine', 'codigo_ine', 'clasificacion', 'distancia_m',
+        },
+        'municipios': {
+            'municipio', 'comarca', 'provincia', 'cod_ine', 'codigo_ine',
+            'linea_limite', 'distancia_limite_m',
+        },
+        'catastro': {
+            'municipio', 'cod_postal', 'cod_ine', 'codigo_ine', 'ref_catastral',
+            'tipo_parcela', 'codigo_catastro',
+        },
+        'forestal': {
+            'demarcacion_forestal', 'tipo_forestal', 'provincia',
+        },
+        'espacios-protegidos': {
+            'espacios_protegidos',
+        },
+    }
+    CORE_SUGGESTION_FIELDS = {
+        'source', 'type', 'address', 'nombre', 'lat', 'lng', 'x', 'y', 'srs',
+    }
+
     @classmethod
-    def suggestion_from_reverse_json(cls, json_results, lon_wgs='', lat_wgs='', x_25830='', y_25830=''):
+    def _prune_suggestion_by_temas(cls, suggestion, temas_csv):
+        temas = [t.strip() for t in str(temas_csv or '').split(',') if t.strip()]
+        if not temas:
+            return suggestion
+        allowed = set(cls.CORE_SUGGESTION_FIELDS)
+        for tema in temas:
+            allowed |= cls.TEMA_EXTRA_FIELDS.get(tema, set())
+        return {k: v for k, v in suggestion.items() if k in allowed}
+
+    @classmethod
+    def _eepp_labels(cls, eepp_hits):
+        labels = []
+        for hit in eepp_hits or []:
+            figura = cls._clean_str(hit.get('figuraProteccion'))
+            nombre = cls._clean_str(hit.get('nombre'))
+            if figura and nombre:
+                labels.append('%s: %s' % (figura, nombre))
+            elif nombre:
+                labels.append(nombre)
+        return labels
+
+    @classmethod
+    def suggestion_from_reverse_json(cls, json_results, lon_wgs='', lat_wgs='', x_25830='', y_25830='', temas=None):
         hits_by_tema = cls._hits_by_tema(json_results)
         if not hits_by_tema:
             return cls._empty_reverse_suggestion()
@@ -229,6 +287,7 @@ class icv():
         catastro = cls._first_hit(hits_by_tema, 'catastro')
         forestal = cls._first_hit(hits_by_tema, 'forestal')
         eepp_hits = hits_by_tema.get('espacios-protegidos') or []
+        eepp_labels = cls._eepp_labels(eepp_hits)
 
         address, direccion = cls._address_from_callejero(callejero)
         if not address:
@@ -245,6 +304,10 @@ class icv():
         )
         if not address:
             address = municipio_nombre
+        if not address and forestal:
+            address = cls._clean_str(forestal.get('nombre'))
+        if not address and eepp_labels:
+            address = eepp_labels[0]
 
         cod_ine_val = (
             cls._clean_str(mun_callejero.get('codigoIne'))
@@ -274,7 +337,10 @@ class icv():
         }
 
         comarca = cls._clean_str(municipios.get('comarca'))
-        provincia = cls._clean_str(municipios.get('provincia'))
+        provincia = (
+            cls._clean_str(municipios.get('provincia'))
+            or cls._clean_str(forestal.get('provincia'))
+        )
         if comarca:
             suggestion['comarca'] = comarca
         if provincia:
@@ -306,17 +372,8 @@ class icv():
             if tipo_for:
                 suggestion['tipo_forestal'] = tipo_for
 
-        if eepp_hits:
-            labels = []
-            for hit in eepp_hits:
-                figura = cls._clean_str(hit.get('figuraProteccion'))
-                nombre = cls._clean_str(hit.get('nombre'))
-                if figura and nombre:
-                    labels.append('%s: %s' % (figura, nombre))
-                elif nombre:
-                    labels.append(nombre)
-            if labels:
-                suggestion['espacios_protegidos'] = '; '.join(labels)
+        if eepp_labels:
+            suggestion['espacios_protegidos'] = '; '.join(eepp_labels)
 
         distancia = callejero.get('distanciaMetros')
         if distancia is not None and distancia != '':
@@ -343,6 +400,9 @@ class icv():
             if lat_wgs != '' and lon_wgs != '':
                 suggestion['lat'] = str(lat_wgs)
                 suggestion['lng'] = str(lon_wgs)
+
+        if temas:
+            suggestion = cls._prune_suggestion_by_temas(suggestion, temas)
         return suggestion
 
     @classmethod

@@ -594,7 +594,8 @@ def get_location_address(request):
     if request.method == 'POST':
         coord = request.POST.get('coord')
         type = request.POST.get('type')
-        location = get_geocoder().get_location_address(str(coord), type)
+        temas = request.POST.get('temas') or None
+        location = get_geocoder().get_location_address(str(coord), type, temas=temas)
         
         return HttpResponse(json.dumps(location, indent=4), content_type='application/json')
 
