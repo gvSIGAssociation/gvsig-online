@@ -4406,27 +4406,11 @@ def trans_Geocoder(dicc):
                 
                 try:
                     result = json.loads(r.content.decode('utf-8'))
-                    address = ''
-                    fallback = ''
-                    if result.get('success'):
-                        for group in (result.get('results') or []):
-                            if not group.get('success'):
-                                continue
-                            inner = group.get('results') or []
-                            if not inner:
-                                continue
-                            hit = inner[0]
-                            direccion = hit.get('direccion') or {}
-                            municipio = hit.get('municipio') or {}
-                            candidate = direccion.get('nombreCompleto') or municipio.get('nombre') or ''
-                            if not candidate:
-                                continue
-                            if group.get('tema') == 'callejero':
-                                address = candidate
-                                break
-                            if not fallback:
-                                fallback = candidate
-                    address = address or fallback
+                    from gvsigol_plugin_geocoding.icv import icv as IcvGeocoder
+                    suggestion = IcvGeocoder.suggestion_from_reverse_json(
+                        result, x_25830=row[1], y_25830=row[2]
+                    )
+                    address = IcvGeocoder.format_etl_address(suggestion)
                     if address:
                         cur_2.execute(sqlUpdate, [address, row[0]])
                         conn_2.commit()
@@ -4445,6 +4429,10 @@ def trans_Geocoder(dicc):
 
                     if 'cartociudad' in engine:
                         address = str(result['tip_via'])+' '+str(result['address'])+', '+str(result['portalNumber'])+', '+str(result['muni'])
+
+                    elif engine == 'icv':
+                        from gvsigol_plugin_geocoding.icv import icv as IcvGeocoder
+                        address = IcvGeocoder.format_etl_address(result)
 
                     else:
                         address = result['address']

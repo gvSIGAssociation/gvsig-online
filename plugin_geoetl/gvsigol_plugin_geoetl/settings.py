@@ -10,7 +10,7 @@ ETL_URL = '/etlurl'
 
 URL_GEOCODER = {
     'icv-direct': "https://descargas.icv.gva.es/00/buscador/?consulta=%s&limite=1&inicio=0",
-    'icv-reverse': "https://descargas.icv.gva.es/00/geoprocesos/geocodificador-inverso/?tema=callejero&epsg=25830&x=%s&y=%s"
+    'icv-reverse': "https://descargas.icv.gva.es/00/geoprocesos/geocodificador-inverso/?tema=callejero,municipios,catastro,forestal,espacios-protegidos&epsg=25830&x=%s&y=%s"
 }
 
 env_plugin_geoetl = environ.Env(
