@@ -66,6 +66,8 @@ GEOCODING_PROVIDER = {
         'candidates_url': 'https://descargas.icv.gva.es/00/buscador',
         'find_url': 'https://descargas.icv.gva.es/00/buscador',
         'reverse_url': 'https://descargas.icv.gva.es/00/geoprocesos/geocodificador-inverso/',
+        # Temas del geocodificador-inverso (lista o string separado por comas)
+        'reverse_temas': 'callejero,municipios,catastro,forestal,espacios-protegidos',
         'country_codes': 'es'
     },
     'googlemaps': {        

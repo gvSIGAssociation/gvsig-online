@@ -121,11 +121,13 @@ class icv():
     
         
         
+    DEFAULT_REVERSE_TEMAS = 'callejero,municipios,catastro,forestal,espacios-protegidos'
+
     def reverse(self, coordinate, exactly_one, language):
         """
         Geocodificador inverso ICV (API actual):
         https://descargas.icv.gva.es/00/geoprocesos/geocodificador-inverso/
-        Params: tema, x, y, epsg
+        Params: tema (varios), x, y, epsg
         """
         lon_wgs = float(coordinate[0])
         lat_wgs = float(coordinate[1])
@@ -133,7 +135,7 @@ class icv():
         out_proj = Proj(init='epsg:25830')
         x_25830, y_25830 = transform(in_proj, out_proj, lon_wgs, lat_wgs)
         params = {
-            'tema': 'callejero',
+            'tema': self._reverse_temas_param(),
             'x': x_25830,
             'y': y_25830,
             'epsg': 25830,
@@ -150,27 +152,110 @@ class icv():
         if not json_results.get('success'):
             return self._empty_reverse_suggestion()
 
-        hit = self._first_reverse_hit(json_results, preferred_tema='callejero')
-        if not hit:
-            return self._empty_reverse_suggestion()
+        return self.suggestion_from_reverse_json(
+            json_results, lon_wgs=lon_wgs, lat_wgs=lat_wgs, x_25830=x_25830, y_25830=y_25830
+        )
 
+    def _reverse_temas_param(self):
+        temas = self.urls.get('reverse_temas', self.DEFAULT_REVERSE_TEMAS)
+        if isinstance(temas, (list, tuple)):
+            return ','.join(str(t).strip() for t in temas if str(t).strip())
+        return str(temas or self.DEFAULT_REVERSE_TEMAS).replace(' ', '')
+
+    @classmethod
+    def _hits_by_tema(cls, json_results):
+        by_tema = {}
+        for group in json_results.get('results') or []:
+            if not group.get('success'):
+                continue
+            tema = group.get('tema')
+            inner = group.get('results') or []
+            if tema and inner:
+                by_tema[tema] = inner
+        return by_tema
+
+    @staticmethod
+    def _first_hit(hits_by_tema, tema):
+        hits = hits_by_tema.get(tema) or []
+        return hits[0] if hits else {}
+
+    @staticmethod
+    def _clean_str(value):
+        if value is None:
+            return ''
+        return str(value).strip()
+
+    @classmethod
+    def _address_from_callejero(cls, hit):
         direccion = hit.get('direccion') or {}
-        municipio = hit.get('municipio') or {}
-        coords_pk = hit.get('coordenadasPortalPk') or {}
+        address = cls._clean_str(direccion.get('nombreCompleto'))
+        if address:
+            return address, direccion
+        tipo = cls._clean_str(direccion.get('tipoVial'))
+        via = cls._clean_str(direccion.get('nombreVia'))
+        numero = cls._clean_str(direccion.get('numero'))
+        parts = [p for p in (tipo, via) if p]
+        address = ' '.join(parts)
+        if numero:
+            address = (address + ', ' + numero).strip(', ')
+        return address, direccion
 
-        address = direccion.get('nombreCompleto') or ''
+    @classmethod
+    def _address_from_catastro(cls, hit):
+        direccion = hit.get('direccion') or {}
+        tipo = cls._clean_str(direccion.get('tipoVia'))
+        via = cls._clean_str(direccion.get('nombreVia'))
+        num = cls._clean_str(direccion.get('numeroPol1')).lstrip('0') or ''
+        letra = cls._clean_str(direccion.get('letra1'))
+        parts = [p for p in (tipo, via) if p]
+        address = ' '.join(parts)
+        if num:
+            address = (address + ' ' + num + letra).strip()
+        mun = (hit.get('municipio') or {}).get('nombre')
+        if mun and address:
+            address = '%s (%s)' % (address, mun)
+        elif mun:
+            address = cls._clean_str(mun)
+        return address
+
+    @classmethod
+    def suggestion_from_reverse_json(cls, json_results, lon_wgs='', lat_wgs='', x_25830='', y_25830=''):
+        hits_by_tema = cls._hits_by_tema(json_results)
+        if not hits_by_tema:
+            return cls._empty_reverse_suggestion()
+
+        callejero = cls._first_hit(hits_by_tema, 'callejero')
+        municipios = cls._first_hit(hits_by_tema, 'municipios')
+        catastro = cls._first_hit(hits_by_tema, 'catastro')
+        forestal = cls._first_hit(hits_by_tema, 'forestal')
+        eepp_hits = hits_by_tema.get('espacios-protegidos') or []
+
+        address, direccion = cls._address_from_callejero(callejero)
         if not address:
-            tipo = (direccion.get('tipoVial') or '').strip()
-            via = (direccion.get('nombreVia') or '').strip()
-            numero = (direccion.get('numero') or '').strip()
-            parts = [p for p in (tipo, via) if p]
-            address = ' '.join(parts)
-            if numero:
-                address = (address + ', ' + numero).strip(', ')
-            if not address:
-                address = municipio.get('nombre', '') or ''
+            address = cls._address_from_catastro(catastro)
 
-        cod_ine_val = municipio.get('codigoIne', '') or ''
+        mun_callejero = callejero.get('municipio') or {}
+        mun_muni = municipios.get('municipio') or {}
+        mun_catastro = catastro.get('municipio') or {}
+
+        municipio_nombre = (
+            cls._clean_str(mun_callejero.get('nombre'))
+            or cls._clean_str(mun_muni.get('nombre'))
+            or cls._clean_str(mun_catastro.get('nombre'))
+        )
+        if not address:
+            address = municipio_nombre
+
+        cod_ine_val = (
+            cls._clean_str(mun_callejero.get('codigoIne'))
+            or cls._clean_str(mun_muni.get('codigoIne'))
+            or cls._clean_str(mun_catastro.get('codigoIne'))
+        )
+        cod_postal = (
+            cls._clean_str(mun_callejero.get('codigoPostal'))
+            or cls._clean_str((catastro.get('direccion') or {}).get('codigoPostal'))
+        )
+
         suggestion = {
             'source': 'icv',
             'type': 'icv',
@@ -178,16 +263,66 @@ class icv():
             'nombre': address,
             'cod_ine': cod_ine_val,
             'codigo_ine': cod_ine_val,
-            'municipio': municipio.get('nombre', '') or '',
-            'cod_postal': municipio.get('codigoPostal', '') or '',
+            'municipio': municipio_nombre,
+            'cod_postal': cod_postal,
             'lat': '',
             'lng': '',
             'y': '',
             'x': '',
             'srs': 'EPSG:4326',
-            'clasificacion': direccion.get('clasificacion', '') or '',
+            'clasificacion': cls._clean_str(direccion.get('clasificacion')),
         }
 
+        comarca = cls._clean_str(municipios.get('comarca'))
+        provincia = cls._clean_str(municipios.get('provincia'))
+        if comarca:
+            suggestion['comarca'] = comarca
+        if provincia:
+            suggestion['provincia'] = provincia
+
+        linea = municipios.get('lineaLimiteMasCercana') or {}
+        linea_nombre = cls._clean_str(linea.get('nombre'))
+        if linea_nombre:
+            suggestion['linea_limite'] = linea_nombre
+            distancia_limite = linea.get('distanciaMetros')
+            if distancia_limite is not None and distancia_limite != '':
+                suggestion['distancia_limite_m'] = str(distancia_limite)
+
+        refcat = cls._clean_str(catastro.get('referenciaCatastral'))
+        if refcat:
+            suggestion['ref_catastral'] = refcat
+        tipo_parcela = cls._clean_str(catastro.get('tipo'))
+        if tipo_parcela:
+            suggestion['tipo_parcela'] = tipo_parcela
+        cod_catastro = cls._clean_str(mun_catastro.get('codigoCatastro')) or cls._clean_str(mun_muni.get('codigoCatastro'))
+        if cod_catastro:
+            suggestion['codigo_catastro'] = cod_catastro
+
+        if forestal:
+            dem = cls._clean_str(forestal.get('nombre'))
+            if dem:
+                suggestion['demarcacion_forestal'] = dem
+            tipo_for = cls._clean_str(forestal.get('tipo'))
+            if tipo_for:
+                suggestion['tipo_forestal'] = tipo_for
+
+        if eepp_hits:
+            labels = []
+            for hit in eepp_hits:
+                figura = cls._clean_str(hit.get('figuraProteccion'))
+                nombre = cls._clean_str(hit.get('nombre'))
+                if figura and nombre:
+                    labels.append('%s: %s' % (figura, nombre))
+                elif nombre:
+                    labels.append(nombre)
+            if labels:
+                suggestion['espacios_protegidos'] = '; '.join(labels)
+
+        distancia = callejero.get('distanciaMetros')
+        if distancia is not None and distancia != '':
+            suggestion['distancia_m'] = str(distancia)
+
+        coords_pk = callejero.get('coordenadasPortalPk') or {}
         x_out = coords_pk.get('x')
         y_out = coords_pk.get('y')
         if x_out is not None and y_out is not None:
@@ -202,31 +337,16 @@ class icv():
             except (TypeError, ValueError):
                 pass
         if not suggestion['lat'] or not suggestion['lng']:
-            # Fallback: coordenadas de la consulta transformadas
-            suggestion['x'] = str(x_25830)
-            suggestion['y'] = str(y_25830)
-            suggestion['lat'] = str(lat_wgs)
-            suggestion['lng'] = str(lon_wgs)
+            if x_25830 != '' and y_25830 != '':
+                suggestion['x'] = str(x_25830)
+                suggestion['y'] = str(y_25830)
+            if lat_wgs != '' and lon_wgs != '':
+                suggestion['lat'] = str(lat_wgs)
+                suggestion['lng'] = str(lon_wgs)
         return suggestion
 
-    @staticmethod
-    def _first_reverse_hit(json_results, preferred_tema='callejero'):
-        """Extrae el primer resultado del tema preferido (o el primero disponible)."""
-        groups = json_results.get('results') or []
-        fallback = None
-        for group in groups:
-            if not group.get('success'):
-                continue
-            inner = group.get('results') or []
-            if not inner:
-                continue
-            if group.get('tema') == preferred_tema:
-                return inner[0]
-            if fallback is None:
-                fallback = inner[0]
-        return fallback
-
-    def _empty_reverse_suggestion(self):
+    @classmethod
+    def _empty_reverse_suggestion(cls):
         return {
             'source': 'icv',
             'type': 'icv',
@@ -243,6 +363,29 @@ class icv():
             'srs': 'EPSG:4326',
             'clasificacion': ''
         }
+
+    @staticmethod
+    def format_etl_address(suggestion):
+        """Dirección enriquecida para nodos ETL (una sola columna _ADDRESS)."""
+        if not suggestion:
+            return ''
+        address = suggestion.get('address') or suggestion.get('nombre') or ''
+        extras = []
+        if suggestion.get('ref_catastral'):
+            extras.append('RC %s' % suggestion['ref_catastral'])
+        if suggestion.get('comarca'):
+            extras.append(suggestion['comarca'])
+        if suggestion.get('demarcacion_forestal'):
+            extras.append('Forestal: %s' % suggestion['demarcacion_forestal'])
+        if suggestion.get('espacios_protegidos'):
+            # En ETL acortar EEPP para no hinchar la celda
+            eepp = suggestion['espacios_protegidos']
+            if len(eepp) > 180:
+                eepp = eepp[:177] + '...'
+            extras.append('EEPP: %s' % eepp)
+        if extras:
+            return ('%s | %s' % (address, ' | '.join(extras))).strip(' |')
+        return address
     
     @staticmethod
     def get_json_from_url(url, params):
