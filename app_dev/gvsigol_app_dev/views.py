@@ -105,5 +105,9 @@ def index(request):
 
     resp['public_items'] = _get_public_items_ordered()
 
+    if 'gvsigol_plugin_panels' in settings.INSTALLED_APPS:
+        from gvsigol_plugin_panels.utils import home_panel_items
+        resp['panel_items'] = home_panel_items(request)
+
     return default_index(request, response=resp)
 

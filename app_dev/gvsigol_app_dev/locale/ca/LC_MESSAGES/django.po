@@ -200,6 +200,18 @@ msgstr "Comença ara"
 msgid "Sign in to access all the tools and services of the platform."
 msgstr "Inicia sessió per accedir a totes les eines i serveis de la plataforma."
 
+msgid "Panels"
+msgstr "Panells"
+
+msgid "Panel"
+msgstr "Panell"
+
+msgid "Dashboards that bring together maps, charts and indicators built from the platform data."
+msgstr "Quadres de comandament que reuneixen mapes, gràfiques i indicadors construïts amb les dades de la plataforma."
+
+msgid "Panels pagination"
+msgstr "Paginació de panells"
+
 #~ msgid ""
 #~ "New, attractive and enriched gvSIG Online documentation is now available "
 #~ "on-line"
