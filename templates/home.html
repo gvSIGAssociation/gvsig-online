@@ -1284,15 +1284,68 @@ body.skin-black .home-page {
 		}
 
 		/**
-		 * List.js quita del DOM los ítems no visibles (removeChild).
-		 * Antes de leer/restaurar orden o filtrar en modo manual hay que
-		 * devolver todos los nodos al <ul>.
+		 * List.js quita del DOM los ítems no visibles (removeChild) y, al
+		 * reinsertarlos (filter/search), usa el orden de itemList.items —
+		 * no el del DOM tras jQuery UI Sortable. Hay que preservar el orden
+		 * visual actual y sincronizar el array interno de List.js.
 		 */
+		function syncListJsItemsToDomOrder() {
+			var $lis = $('#all-items-panel ul.items-list > li');
+			if (!$lis.length) return;
+			var ordered = [];
+			var seen = [];
+			$lis.each(function() {
+				var elm = this;
+				for (var i = 0; i < itemList.items.length; i++) {
+					if (itemList.items[i].elm === elm) {
+						ordered.push(itemList.items[i]);
+						seen.push(itemList.items[i]);
+						break;
+					}
+				}
+			});
+			for (var j = 0; j < itemList.items.length; j++) {
+				if (seen.indexOf(itemList.items[j]) === -1) {
+					ordered.push(itemList.items[j]);
+				}
+			}
+			itemList.items = ordered;
+		}
+
 		function ensureAllItemsInDom() {
+			// Capturar orden visual antes de que List.js reescriba el <ul>
+			var orderKeys = [];
+			$('#all-items-panel ul.items-list > li').each(function() {
+				orderKeys.push(
+					$(this).attr('data-item-type') + '-' + $(this).attr('data-item-id')
+				);
+			});
+
 			itemList.i = 1;
 			itemList.page = itemList.items.length || 9999;
 			itemList.search('');
 			itemList.filter();
+
+			if (orderKeys.length) {
+				var $list = $('#all-items-panel ul.items-list');
+				var itemsByKey = {};
+				$list.children('li').each(function() {
+					var key = $(this).attr('data-item-type') + '-' + $(this).attr('data-item-id');
+					itemsByKey[key] = $(this).detach();
+				});
+				orderKeys.forEach(function(key) {
+					if (itemsByKey[key]) {
+						$list.append(itemsByKey[key]);
+						delete itemsByKey[key];
+					}
+				});
+				// Ítems que List.js reinsertó y no estaban en el snapshot (p.ej. otras páginas)
+				$.each(itemsByKey, function(_, $el) {
+					if ($el && $el.length) $list.append($el);
+				});
+				syncListJsItemsToDomOrder();
+			}
+
 			$('#all-items-panel ul.items-list > li').show();
 		}
 
@@ -1383,6 +1436,7 @@ body.skin-black .home-page {
 				return ta.localeCompare(tb, undefined, { sensitivity: 'base' });
 			});
 			$.each($items, function(i, el) { $list.append(el); });
+			syncListJsItemsToDomOrder();
 		}
 
 		function restoreManualOrder() {
@@ -1406,6 +1460,7 @@ body.skin-black .home-page {
 			$.each(itemsByKey, function(_, $el) {
 				if ($el && $el.length) $list.append($el);
 			});
+			syncListJsItemsToDomOrder();
 		}
 
 		// ---- Orden manual: jQuery UI Sortable ----
@@ -1418,6 +1473,9 @@ body.skin-black .home-page {
 				placeholder: 'projects-grid__placeholder ui-sortable-placeholder',
 				tolerance: 'pointer',
 				forcePlaceholderSize: true,
+				update: function() {
+					syncListJsItemsToDomOrder();
+				}
 			});
 			$('.items-list').addClass('sortable-mode');
 			sortableEnabled = true;
