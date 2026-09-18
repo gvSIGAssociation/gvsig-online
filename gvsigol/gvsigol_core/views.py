@@ -148,23 +148,8 @@ def home(request):
 
     panels = []
     if 'gvsigol_plugin_panels' in settings.INSTALLED_APPS:
-        from gvsigol_plugin_panels.models import Panel
-        from gvsigol_plugin_panels.utils import serialize_panel
-        panel_query = Panel.objects.select_related('project').all().order_by('title')
-        for panel_obj in panel_query:
-            if not panel_obj.can_read(request):
-                continue
-            panel_data = serialize_panel(panel_obj, include_widgets=False)
-            panels.append({
-                'id': panel_obj.id,
-                'name': panel_obj.name or panel_obj.slug,
-                'title': panel_obj.title,
-                'description': panel_obj.description or '',
-                'image': settings.STATIC_URL + 'panels/panel.svg',
-                'url': '/spa' + panel_data['public_path'],
-                'item_type': 'panel',
-                'is_public': panel_obj.is_public,
-            })
+        from gvsigol_plugin_panels.utils import home_panel_items
+        panels = home_panel_items(request)
 
     order_type = UserHomeOrder.ORDER_ALPHA
     all_items_ordered = None
