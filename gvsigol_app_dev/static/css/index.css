@@ -852,6 +852,15 @@ body.gol-landing footer a:hover { text-decoration: underline; }
 .pub-project-card--app { border: 1px solid #dce8f3; }
 .pub-project-card--app:hover { border-color: #a8c8e8; }
 
+/* Mismo morado con el que el escritorio distingue los paneles. */
+.pub-item-badge--panel {
+	background: rgba(101,66,138,0.88);
+	color: #fff;
+}
+.pub-item-badge--panel i { font-size: 10px; }
+.pub-project-card--panel { border: 1px solid #e4dcf0; }
+.pub-project-card--panel:hover { border-color: #c4b2dd; }
+
 @media (max-width: 1100px) {
 	.pub-projects-grid { grid-template-columns: repeat(3, 1fr); }
 }

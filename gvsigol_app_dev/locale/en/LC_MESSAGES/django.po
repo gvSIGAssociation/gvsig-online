@@ -188,3 +188,15 @@ msgstr ""
 
 msgid "Sign in to access all the tools and services of the platform."
 msgstr ""
+
+msgid "Panels"
+msgstr ""
+
+msgid "Panel"
+msgstr ""
+
+msgid "Dashboards that bring together maps, charts and indicators built from the platform data."
+msgstr ""
+
+msgid "Panels pagination"
+msgstr ""

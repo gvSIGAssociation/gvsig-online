@@ -238,6 +238,35 @@
 </section>
 {% endif %}
 
+{% if panel_items %}
+<!-- ====================================================================
+     SECCIÓN: PANELES
+     ==================================================================== -->
+<section id="panels" class="section section-white">
+	<div class="container">
+		<h2 class="section-heading">{% trans "Panels" %}</h2>
+		<p class="section-description">
+			{% trans "Dashboards that bring together maps, charts and indicators built from the platform data." %}
+		</p>
+		<div id="panels-grid" class="pub-projects-grid">
+			{% for item in panel_items %}
+			<a href="{{ item.url }}" class="pub-project-card pub-project-card--panel">
+				<div class="pub-project-card__img">
+					<img src="{{ item.image }}" alt="{{ item.title }}">
+					<span class="pub-item-badge pub-item-badge--panel"><i class="fa fa-dashboard"></i> {% trans "Panel" %}</span>
+				</div>
+				<div class="pub-project-card__body">
+					<h3>{{ item.title }}</h3>
+					{% if item.description %}<p>{{ item.description }}</p>{% endif %}
+				</div>
+			</a>
+			{% endfor %}
+		</div>
+		<nav id="panels-pagination" class="pub-pagination" aria-label="{% trans 'Panels pagination' %}"></nav>
+	</div>
+</section>
+{% endif %}
+
 <!-- ====================================================================
      SECCIÓN: GESTIONA Y COLABORA
      ==================================================================== -->
@@ -454,73 +483,78 @@ document.querySelectorAll('a[href^="#"]').forEach(function (a) {
 	});
 }());
 
-/* ── Paginación proyectos públicos ───────────────────────────────── */
+/* ── Paginación de tarjetas (visores públicos y paneles) ─────────── */
 (function () {
-	var grid = document.getElementById('pub-projects-grid');
-	var nav  = document.getElementById('pub-pagination');
-	if (!grid || !nav) return;
+	function paginate(gridId, navId, sectionId) {
+		var grid = document.getElementById(gridId);
+		var nav  = document.getElementById(navId);
+		if (!grid || !nav) return;
 
-	var cards    = Array.prototype.slice.call(grid.querySelectorAll('.pub-project-card'));
-	var perPage  = 8;
-	var total    = cards.length;
-	var pages    = Math.ceil(total / perPage);
-	if (pages <= 1) return; // sin paginación si caben en una página
+		var cards    = Array.prototype.slice.call(grid.querySelectorAll('.pub-project-card'));
+		var perPage  = 8;
+		var total    = cards.length;
+		var pages    = Math.ceil(total / perPage);
+		if (pages <= 1) return; // sin paginación si caben en una página
 
-	var current = 0;
+		var current = 0;
 
-	function showPage(page) {
-		current = page;
-		cards.forEach(function (card, i) {
-			card.style.display = (i >= page * perPage && i < (page + 1) * perPage) ? '' : 'none';
-		});
-		renderPagination();
-	}
-
-	function btn(label, page, disabled, active) {
-		var a = document.createElement('a');
-		a.href = '#public-viewers';
-		a.innerHTML = label;
-		if (disabled) { a.className = 'pub-page-btn disabled'; a.setAttribute('aria-disabled', 'true'); }
-		else if (active) { a.className = 'pub-page-btn active'; a.setAttribute('aria-current', 'page'); }
-		else { a.className = 'pub-page-btn'; }
-		if (!disabled && !active) {
-			a.addEventListener('click', function (e) {
-				e.preventDefault();
-				showPage(page);
-				document.getElementById('public-viewers').scrollIntoView({ behavior: 'smooth', block: 'start' });
+		function showPage(page) {
+			current = page;
+			cards.forEach(function (card, i) {
+				card.style.display = (i >= page * perPage && i < (page + 1) * perPage) ? '' : 'none';
 			});
-		} else {
-			a.addEventListener('click', function (e) { e.preventDefault(); });
-		}
-		return a;
-	}
-
-	function renderPagination() {
-		nav.innerHTML = '';
-		var ul = document.createElement('ul');
-		ul.className = 'pub-page-list';
-
-		// Prev
-		var liPrev = document.createElement('li');
-		liPrev.appendChild(btn('&laquo;', current - 1, current === 0, false));
-		ul.appendChild(liPrev);
-
-		// Page numbers
-		for (var p = 0; p < pages; p++) {
-			var li = document.createElement('li');
-			li.appendChild(btn(p + 1, p, false, p === current));
-			ul.appendChild(li);
+			renderPagination();
 		}
 
-		// Next
-		var liNext = document.createElement('li');
-		liNext.appendChild(btn('&raquo;', current + 1, current === pages - 1, false));
-		ul.appendChild(liNext);
+		function btn(label, page, disabled, active) {
+			var a = document.createElement('a');
+			a.href = '#' + sectionId;
+			a.innerHTML = label;
+			if (disabled) { a.className = 'pub-page-btn disabled'; a.setAttribute('aria-disabled', 'true'); }
+			else if (active) { a.className = 'pub-page-btn active'; a.setAttribute('aria-current', 'page'); }
+			else { a.className = 'pub-page-btn'; }
+			if (!disabled && !active) {
+				a.addEventListener('click', function (e) {
+					e.preventDefault();
+					showPage(page);
+					document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth', block: 'start' });
+				});
+			} else {
+				a.addEventListener('click', function (e) { e.preventDefault(); });
+			}
+			return a;
+		}
 
-		nav.appendChild(ul);
+		function renderPagination() {
+			nav.innerHTML = '';
+			var ul = document.createElement('ul');
+			ul.className = 'pub-page-list';
+
+			// Prev
+			var liPrev = document.createElement('li');
+			liPrev.appendChild(btn('&laquo;', current - 1, current === 0, false));
+			ul.appendChild(liPrev);
+
+			// Page numbers
+			for (var p = 0; p < pages; p++) {
+				var li = document.createElement('li');
+				li.appendChild(btn(p + 1, p, false, p === current));
+				ul.appendChild(li);
+			}
+
+			// Next
+			var liNext = document.createElement('li');
+			liNext.appendChild(btn('&raquo;', current + 1, current === pages - 1, false));
+			ul.appendChild(liNext);
+
+			nav.appendChild(ul);
+		}
+
+		showPage(0);
 	}
 
-	showPage(0);
+	paginate('pub-projects-grid', 'pub-pagination', 'public-viewers');
+	paginate('panels-grid', 'panels-pagination', 'panels');
 }());
 </script>
 
