@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.contrib.auth.models import User
@@ -19,6 +20,7 @@ class Panel(models.Model):
     name = models.CharField(max_length=150, blank=True)
     title = models.CharField(max_length=150)
     description = models.CharField(max_length=500, null=True, blank=True)
+    image = models.ImageField(upload_to='images', default='', null=True, blank=True)
     # El panel se abre siempre en /panel/<slug>/, con proyecto o sin él, así que
     # el slug identifica al panel en toda la instalación.
     slug = models.SlugField(max_length=160, unique=True)
@@ -36,6 +38,12 @@ class Panel(models.Model):
             self.title,
             self.project.name if self.project_id else 'standalone',
         )
+
+    @property
+    def image_url(self):
+        if not self.image:
+            return settings.STATIC_URL + 'panels/panel.svg'
+        return self.image.url.replace(settings.BASE_URL, '')
 
     def can_read(self, request_or_user):
         user = request_or_user if isinstance(request_or_user, User) else request_or_user.user

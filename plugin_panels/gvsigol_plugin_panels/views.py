@@ -2,7 +2,7 @@
 import logging
 from functools import wraps
 
-from django.conf import settings
+from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
@@ -281,6 +281,20 @@ def _admin_panel_context(request, panel=None):
     }
 
 
+def _uploaded_panel_image(request):
+    image = request.FILES.get('panel-image')
+    if not image:
+        return None
+    return forms.ImageField().clean(image)
+
+
+def _delete_replaced_image_on_commit(panel, old_name):
+    if not old_name or not panel.image or old_name == panel.image.name:
+        return
+    storage = panel.image.storage
+    transaction.on_commit(lambda: storage.delete(old_name))
+
+
 @login_required(login_url='/gvsigonline/auth/login_user/')
 @staff_required
 def dashboard_panels(request):
@@ -304,6 +318,11 @@ def dashboard_panel_add(request):
         if not name or not title:
             messages.error(request, _('Name and title are required'))
             return render(request, 'panels_form.html', _admin_panel_context(request))
+        try:
+            image = _uploaded_panel_image(request)
+        except forms.ValidationError:
+            messages.error(request, _('The selected file is not a valid image.'))
+            return render(request, 'panels_form.html', _admin_panel_context(request))
         panel = Panel.objects.create(
             project=project,
             name=name,
@@ -312,6 +331,7 @@ def dashboard_panel_add(request):
             slug=utils.unique_slug(name),
             is_public=request.POST.get('is_public') == 'on',
             created_by=request.user.username,
+            image=image,
         )
         _save_panel_roles(request, panel)
         messages.success(request, _('Panel created successfully'))
@@ -327,6 +347,7 @@ def dashboard_panel_update(request, panel_id):
     if not panel.can_manage(request):
         return _json_error('forbidden', 403)
     if request.method == 'POST':
+        old_image_name = panel.image.name if panel.image else None
         project = _selected_project(request)
         if request.POST.get('project_id') and project is None:
             return _json_error('forbidden', 403)
@@ -335,9 +356,16 @@ def dashboard_panel_update(request, panel_id):
         if not name or not title:
             messages.error(request, _('Name and title are required'))
             return render(request, 'panels_form.html', _admin_panel_context(request, panel))
+        try:
+            image = _uploaded_panel_image(request)
+        except forms.ValidationError:
+            messages.error(request, _('The selected file is not a valid image.'))
+            return render(request, 'panels_form.html', _admin_panel_context(request, panel))
         panel.name = name
         panel.title = title
         panel.description = (request.POST.get('description') or '').strip()
+        if image:
+            panel.image = image
         project_changed = panel.project_id != (project.id if project else None)
         panel.project = project
         panel.slug = utils.unique_slug(name, exclude_id=panel.id)
@@ -359,6 +387,8 @@ def dashboard_panel_update(request, panel_id):
             _rescope_panel_datasets(panel, project)
         panel.is_public = wants_public
         panel.save()
+        if image:
+            _delete_replaced_image_on_commit(panel, old_image_name)
         _save_panel_roles(request, panel)
         messages.success(request, _('Panel updated successfully'))
         return redirect('panels_dashboard_list')
@@ -388,8 +418,6 @@ def readable_panels(request):
             continue
         data = utils.serialize_panel(panel, include_widgets=False)
         data['can_edit'] = bool(panel.can_manage(request))
-        # La misma imagen que identifica a los paneles en la portada de Django.
-        data['image'] = settings.STATIC_URL + 'panels/panel.svg'
         panels.append(data)
     return _json_ok({'panels': panels})
 

@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
+from io import BytesIO
 from unittest import mock
 
+from PIL import Image
 from django.contrib.auth.models import AnonymousUser, User
+from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError, transaction
 from django.test import RequestFactory, SimpleTestCase, TestCase
 from gvsigol_plugin_panels.utils import (
@@ -9,7 +13,7 @@ from gvsigol_plugin_panels.utils import (
     is_vector_layer,
 )
 from gvsigol_plugin_panels.models import Panel, PanelWidget
-from gvsigol_plugin_panels.views import _reassignable_roles
+from gvsigol_plugin_panels.views import _reassignable_roles, _uploaded_panel_image
 
 
 class FakeQuerySet:
@@ -82,6 +86,28 @@ class UtilsTests(SimpleTestCase):
         self.assertTrue(is_vector_layer(vector))
         self.assertTrue(is_vector_layer(shapefile))
 
+    def test_panel_image_falls_back_to_default(self):
+        panel = Panel(title='Panel', slug='panel')
+        self.assertTrue(panel.image_url.endswith('/panels/panel.svg'))
+
+    def test_uploaded_panel_image_is_validated(self):
+        content = BytesIO()
+        Image.new('RGB', (2, 2), '#26648c').save(content, format='PNG')
+        request = RequestFactory().post('/', {
+            'panel-image': SimpleUploadedFile(
+                'panel.png', content.getvalue(), content_type='image/png'),
+        })
+        image = _uploaded_panel_image(request)
+        self.assertEqual(image.name, 'panel.png')
+
+    def test_invalid_panel_image_is_rejected(self):
+        request = RequestFactory().post('/', {
+            'panel-image': SimpleUploadedFile(
+                'panel.png', b'not an image', content_type='image/png'),
+        })
+        with self.assertRaises(ValidationError):
+            _uploaded_panel_image(request)
+
 
 class FakeRoleQuerySet:
     def __init__(self, roles):
@@ -132,6 +158,7 @@ class StandalonePanelTests(TestCase):
         data = serialize_panel(panel, include_widgets=False)
         self.assertEqual(data['public_path'], '/panel/global-panel/')
         self.assertEqual(data['edit_path'], '/panel/global-panel/edit/')
+        self.assertEqual(data['image'], panel.image_url)
 
     def test_standalone_slug_is_unique(self):
         Panel.objects.create(title='First', slug='same')

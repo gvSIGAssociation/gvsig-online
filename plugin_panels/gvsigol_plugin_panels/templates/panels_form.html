@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% load i18n %}
 
 {% block header %}
@@ -30,6 +31,9 @@
 .pl-form .form-control:focus { border-color: var(--pl-accent); background: var(--pl-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
 .pl-form .form-group { margin-bottom: 16px; }
 .pl-help { display: block; color: var(--pl-muted); font-size: 11px; margin-top: 4px; font-weight: 400; text-transform: none; letter-spacing: 0; }
+.pl-image-picker { display: flex; align-items: center; gap: 16px; padding: 12px; background: var(--pl-bg); border-radius: 7px; }
+.pl-image-preview { width: 96px; height: 64px; object-fit: contain; background: var(--pl-white); border: 1px solid var(--pl-border); border-radius: 6px; }
+.pl-image-picker input[type="file"] { max-width: 100%; font-size: 12px; }
 .pl-check { display: flex; align-items: flex-start; gap: 8px; padding: 12px 14px; background: var(--pl-bg); border-radius: 7px; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--pl-text); }
 .pl-check input { margin-top: 3px; }
 .pl-check strong { font-size: 13px; }
@@ -60,7 +64,7 @@
 
 {% block content %}
 {% if user.is_staff %}
-<form class="pl-form" method="post">
+<form class="pl-form" method="post" enctype="multipart/form-data">
 	{% csrf_token %}
 	<div class="row">
 		<div class="col-md-12">
@@ -130,6 +134,21 @@
 									<div class="form-group">
 										<label for="panel-description">{% trans "Description" %}</label>
 										<textarea id="panel-description" class="form-control" name="description" rows="3">{{ panel.description|default:'' }}</textarea>
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-12">
+									<div class="form-group">
+										<label for="panel-image">{% trans "Image" %}</label>
+										<div class="pl-image-picker">
+											<img id="panel-image-preview" class="pl-image-preview"
+											     src="{% if panel %}{{ panel.image_url }}{% else %}{% static 'panels/panel.svg' %}{% endif %}" alt="">
+											<div>
+												<input id="panel-image" name="panel-image" accept=".jpg,.jpeg,.png,.webp" type="file">
+												<span class="pl-help">{% trans "If no image is selected, the current image is kept; new panels use the default image." %}</span>
+											</div>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -219,6 +238,16 @@
 $(document).ready(function() {
 	var rolePermissions = {};
 	var $rolesBox = $('#panel-roles-box');
+
+	$('#panel-image').on('change', function() {
+		if (this.files && this.files[0]) {
+			var reader = new FileReader();
+			reader.onload = function(event) {
+				$('#panel-image-preview').attr('src', event.target.result);
+			};
+			reader.readAsDataURL(this.files[0]);
+		}
+	});
 
 	/* List.js quita del DOM las filas de otras páginas. Guardamos primero el
 	   estado completo para no perder permisos al guardar desde cualquier página. */

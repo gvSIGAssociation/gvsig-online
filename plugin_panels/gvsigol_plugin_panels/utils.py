@@ -381,6 +381,7 @@ def serialize_panel(panel, include_widgets=True):
         'name': panel.name or panel.slug,
         'title': panel.title,
         'description': panel.description or '',
+        'image': panel.image_url,
         'slug': panel.slug,
         'layout': panel.layout or {},
         'is_public': panel.is_public,
@@ -403,7 +404,6 @@ def home_panel_items(request):
     Un usuario anónimo sólo obtiene los paneles públicos, así que la misma
     lista sirve para la página de bienvenida y para el escritorio.
     """
-    from django.conf import settings
     from .models import Panel
     items = []
     for panel in Panel.objects.select_related('project').order_by('title'):
@@ -414,7 +414,7 @@ def home_panel_items(request):
             'name': panel.name or panel.slug,
             'title': panel.title,
             'description': panel.description or '',
-            'image': settings.STATIC_URL + 'panels/panel.svg',
+            'image': panel.image_url,
             'url': '/spa/panel/%s/' % panel.slug,
             'item_type': 'panel',
             'is_public': panel.is_public,

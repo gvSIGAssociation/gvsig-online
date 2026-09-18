@@ -208,5 +208,14 @@ msgstr "Proyectos, paneles de control y aplicaciones"
 msgid "Panel"
 msgstr "Panel"
 
+msgid "Image"
+msgstr "Imagen"
+
+msgid "If no image is selected, the current image is kept; new panels use the default image."
+msgstr "Si no seleccionas una imagen, se conserva la actual; los paneles nuevos usan la imagen predeterminada."
+
+msgid "The selected file is not a valid image."
+msgstr "El archivo seleccionado no es una imagen válida."
+
 msgid "This layer cannot be made private because it is used by public panels: {}"
 msgstr "Esta capa no puede hacerse privada porque la utilizan paneles públicos: {}"
