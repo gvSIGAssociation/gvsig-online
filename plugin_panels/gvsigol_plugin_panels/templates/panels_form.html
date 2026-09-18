@@ -42,6 +42,18 @@
 .pl-role-name { font-weight: 600; color: var(--pl-text); }
 .pl-role-desc { font-size: 11px; color: var(--pl-muted); }
 .pl-role-check { text-align: center; width: 150px; }
+.pl-tabs { border-bottom: 2px solid var(--pl-border); margin: 0; padding-left: 4px; }
+.pl-tabs > li > a { display: inline-flex; align-items: center; gap: 7px; color: var(--pl-muted); font-size: 13px; font-weight: 600; border: none; border-bottom: 2.5px solid transparent; padding: 11px 20px; margin-bottom: -2px; border-radius: 6px 6px 0 0; }
+.pl-tabs > li > a:hover { color: var(--pl-accent); background: rgba(74,127,165,0.06); border-color: transparent; }
+.pl-tabs > li.active > a,
+.pl-tabs > li.active > a:hover,
+.pl-tabs > li.active > a:focus { color: var(--pl-accent); background: rgba(74,127,165,0.06); border: none; border-bottom: 2.5px solid var(--pl-accent); }
+.pl-tab-content { padding: 20px; }
+.pl-role-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--pl-border); }
+.pl-role-search { max-width: 320px; margin: 0; }
+.pl-role-pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-top: 1px solid var(--pl-border); }
+.pl-role-pagination .pagination { margin: 0; }
+.pl-role-check input:disabled { cursor: not-allowed; opacity: 0.65; }
 @media (max-width: 700px) { .pl-role-desc { display: none; } }
 </style>
 {% endblock %}
@@ -73,107 +85,127 @@
 						{% endif %}
 					</div>
 				</div>
-				<div class="pl-panel__body">
-					{% if private_layers %}
-					<div class="alert alert-warning">
-						<strong>{% trans "Confirmation required" %}</strong>
-						<p>{% trans "Publishing this panel will also make these layers public:" %}</p>
-						<ul>{% for layer in private_layers %}<li>{{ layer.title|default:layer.name }}</li>{% endfor %}</ul>
-					</div>
-					{% endif %}
-					{% if private_layers_forbidden %}
-					<div class="alert alert-danger">
-						{% trans "The panel cannot be public because you cannot manage all its private layers." %}
-					</div>
-					{% endif %}
-					<div class="row">
-						<div class="col-md-6">
-							<div class="form-group">
-								<label for="panel-name">{% trans "Name" %}</label>
-								<input id="panel-name" class="form-control" name="name" required
-								       value="{{ panel.name|default:'' }}">
-								<span class="pl-help">{% trans "Internal name used to build the panel URL." %}</span>
+				<div class="pl-panel__body" style="padding:0;">
+					<ul class="nav nav-tabs pl-tabs">
+						<li class="active">
+							<a href="#tab-panel-data" data-toggle="tab"><i class="fa fa-info-circle"></i> {% trans "Panel data" %}</a>
+						</li>
+						<li>
+							<a href="#tab-panel-permissions" data-toggle="tab"><i class="fa fa-lock"></i> {% trans "Permissions by role" %}</a>
+						</li>
+					</ul>
+					<div class="tab-content">
+						<div class="tab-pane active pl-tab-content" id="tab-panel-data">
+							{% if private_layers %}
+							<div class="alert alert-warning">
+								<strong>{% trans "Confirmation required" %}</strong>
+								<p>{% trans "Publishing this panel will also make these layers public:" %}</p>
+								<ul>{% for layer in private_layers %}<li>{{ layer.title|default:layer.name }}</li>{% endfor %}</ul>
+							</div>
+							{% endif %}
+							{% if private_layers_forbidden %}
+							<div class="alert alert-danger">
+								{% trans "The panel cannot be public because you cannot manage all its private layers." %}
+							</div>
+							{% endif %}
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group">
+										<label for="panel-name">{% trans "Name" %}</label>
+										<input id="panel-name" class="form-control" name="name" required
+										       value="{{ panel.name|default:'' }}">
+										<span class="pl-help">{% trans "Internal name used to build the panel URL." %}</span>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group">
+										<label for="panel-title">{% trans "Title" %}</label>
+										<input id="panel-title" class="form-control" name="title" required
+										       value="{{ panel.title|default:'' }}">
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-12">
+									<div class="form-group">
+										<label for="panel-description">{% trans "Description" %}</label>
+										<textarea id="panel-description" class="form-control" name="description" rows="3">{{ panel.description|default:'' }}</textarea>
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group">
+										<label for="panel-project">{% trans "Project" %}</label>
+										<select id="panel-project" class="form-control" name="project_id">
+											<option value="">{% trans "No project (global panel)" %}</option>
+											{% for project in projects %}
+												<option value="{{ project.id }}" {% if panel.project_id == project.id %}selected{% endif %}>{{ project.title }}</option>
+											{% endfor %}
+										</select>
+										<span class="pl-help">{% trans "Optional. Linked panels also appear in the panels menu of that project." %}</span>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group">
+										<label>{% trans "Access" %}</label>
+										<label class="pl-check">
+											<input type="checkbox" name="is_public" {% if panel.is_public %}checked{% endif %}>
+											<span>
+												<strong>{% trans "Public access" %}</strong>
+												<span class="pl-help">{% trans "Anyone with the link can open the panel. If disabled, only roles with access permission can open it." %}</span>
+											</span>
+										</label>
+									</div>
+								</div>
 							</div>
 						</div>
-						<div class="col-md-6">
-							<div class="form-group">
-								<label for="panel-title">{% trans "Title" %}</label>
-								<input id="panel-title" class="form-control" name="title" required
-								       value="{{ panel.title|default:'' }}">
-							</div>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-12">
-							<div class="form-group">
-								<label for="panel-description">{% trans "Description" %}</label>
-								<textarea id="panel-description" class="form-control" name="description" rows="3">{{ panel.description|default:'' }}</textarea>
-							</div>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-6">
-							<div class="form-group">
-								<label for="panel-project">{% trans "Project" %}</label>
-								<select id="panel-project" class="form-control" name="project_id">
-									<option value="">{% trans "No project (global panel)" %}</option>
-									{% for project in projects %}
-										<option value="{{ project.id }}" {% if panel.project_id == project.id %}selected{% endif %}>{{ project.title }}</option>
-									{% endfor %}
-								</select>
-								<span class="pl-help">{% trans "Optional. Linked panels also appear in the panels menu of that project." %}</span>
-							</div>
-						</div>
-						<div class="col-md-6">
-							<div class="form-group">
-								<label>{% trans "Access" %}</label>
-								<label class="pl-check">
-									<input type="checkbox" name="is_public" {% if panel.is_public %}checked{% endif %}>
-									<span>
-										<strong>{% trans "Public access" %}</strong>
-										<span class="pl-help">{% trans "Anyone with the link can open the panel. If disabled, only roles with access permission can open it." %}</span>
-									</span>
-								</label>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
 
-			<div class="pl-panel">
-				<div class="pl-panel__header">
-					<h3 class="pl-panel__title"><i class="fa fa-lock"></i> {% trans "Permissions by role" %}</h3>
-				</div>
-				<div class="pl-panel__body" style="padding:0;overflow-x:auto;">
-					<table class="pl-table">
-						<thead>
-							<tr>
-								<th>{% trans "Role" %}</th>
-								<th class="pl-role-check">{% trans "Can access" %}</th>
-								<th class="pl-role-check">{% trans "Can manage" %}</th>
-							</tr>
-						</thead>
-						<tbody>
-						{% for role in roles %}
-							<tr>
-								<td>
-									<div class="pl-role-name">{{ role.name }}</div>
-									{% if role.description %}<div class="pl-role-desc">{{ role.description }}</div>{% endif %}
-								</td>
-								<td class="pl-role-check">
-									<input class="pl-read" type="checkbox" name="read-role-{{ role.name }}"
-									       {% if role.read_checked %}checked{% endif %}>
-								</td>
-								<td class="pl-role-check">
-									<input class="pl-manage" type="checkbox" name="manage-role-{{ role.name }}"
-									       {% if role.manage_checked %}checked{% endif %}>
-								</td>
-							</tr>
-						{% empty %}
-							<tr><td colspan="3">{% trans "There are no roles available" %}</td></tr>
-						{% endfor %}
-						</tbody>
-					</table>
+						<div class="tab-pane" id="tab-panel-permissions">
+							<div id="panel-roles-box">
+								<div class="pl-role-toolbar">
+									<input id="panel-role-search" type="text" class="search form-control pl-role-search"
+									       placeholder="{% trans 'Search user role...' %}">
+								</div>
+								<div style="overflow-x:auto;">
+									<table class="pl-table">
+										<thead>
+											<tr>
+												<th>{% trans "Role" %}</th>
+												<th class="pl-role-check">{% trans "Can access" %}</th>
+												<th class="pl-role-check">{% trans "Can manage" %}</th>
+											</tr>
+										</thead>
+										<tbody class="list">
+										{% for role in roles %}
+											<tr class="pl-role-row">
+												<td>
+													<div class="pl-role-name searchable-rolename">{{ role.name }}</div>
+													{% if role.description %}<div class="pl-role-desc searchable-roledesc">{{ role.description }}</div>{% endif %}
+												</td>
+												<td class="pl-role-check">
+													<input class="pl-read" type="checkbox" name="read-role-{{ role.name }}"
+													       {% if role.read_checked or role.manage_checked %}checked{% endif %}
+													       {% if role.manage_checked %}disabled{% endif %}>
+												</td>
+												<td class="pl-role-check">
+													<input class="pl-manage" type="checkbox" name="manage-role-{{ role.name }}"
+													       {% if role.manage_checked %}checked{% endif %}>
+												</td>
+											</tr>
+										{% empty %}
+											<tr><td colspan="3">{% trans "There are no roles available" %}</td></tr>
+										{% endfor %}
+										</tbody>
+									</table>
+								</div>
+								<div class="pl-role-pagination">
+									<span id="panel-roles-info" class="text-muted"></span>
+									<ul class="pagination pagination-sm"></ul>
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -184,11 +216,90 @@
 
 {% block extra-scripts %}
 <script>
-document.querySelectorAll('.pl-manage').forEach(function (manage) {
-	manage.addEventListener('change', function () {
-		if (manage.checked) {
-			manage.closest('tr').querySelector('.pl-read').checked = true;
+$(document).ready(function() {
+	var rolePermissions = {};
+	var $rolesBox = $('#panel-roles-box');
+
+	/* List.js quita del DOM las filas de otras páginas. Guardamos primero el
+	   estado completo para no perder permisos al guardar desde cualquier página. */
+	$rolesBox.find('.pl-manage').each(function() {
+		var $row = $(this).closest('tr');
+		var roleName = $(this).attr('name').replace('manage-role-', '');
+		var manage = $(this).is(':checked');
+		var $read = $row.find('.pl-read');
+		if (manage) {
+			$read.prop('checked', true).prop('disabled', true);
 		}
+		rolePermissions[roleName] = {
+			read: $read.is(':checked') || manage,
+			manage: manage
+		};
+	});
+
+	$rolesBox.on('change', '.pl-manage', function() {
+		var roleName = $(this).attr('name').replace('manage-role-', '');
+		var manage = $(this).is(':checked');
+		var $read = $(this).closest('tr').find('.pl-read');
+		if (manage) {
+			$read.prop('checked', true).prop('disabled', true);
+		} else {
+			/* Al retirar gestión se conserva acceso, pero vuelve a poder editarse. */
+			$read.prop('disabled', false);
+		}
+		rolePermissions[roleName].manage = manage;
+		rolePermissions[roleName].read = $read.is(':checked') || manage;
+	});
+
+	$rolesBox.on('change', '.pl-read', function() {
+		var roleName = $(this).attr('name').replace('read-role-', '');
+		rolePermissions[roleName].read = $(this).is(':checked');
+	});
+
+	if (typeof List !== 'undefined' && Object.keys(rolePermissions).length) {
+		var roleList = new List('panel-roles-box', {
+			valueNames: ['searchable-rolename', 'searchable-roledesc'],
+			page: 10,
+			pagination: true
+		});
+		var updateRoleInfo = function() {
+			var total = roleList.matchingItems.length;
+			$('#panel-roles-info').text(total + ' {% trans "roles" %}');
+			$('.pl-role-pagination').toggle(total > 10);
+		};
+		$('#panel-role-search').on('keyup', function() {
+			roleList.search($(this).val());
+			updateRoleInfo();
+		});
+		roleList.on('updated', updateRoleInfo);
+		updateRoleInfo();
+	} else {
+		$('.pl-role-pagination').hide();
+	}
+
+	$('.pl-form').on('submit', function() {
+		var $form = $(this);
+		$form.find('.pl-generated-role-permission').remove();
+		$.each(rolePermissions, function(roleName, permissions) {
+			$.each(['read', 'manage'], function(_, permission) {
+				if (!permissions[permission]) {
+					return;
+				}
+				var inputName = permission + '-role-' + roleName;
+				var $input = $form.find('input').filter(function() {
+					return $(this).attr('name') === inputName;
+				});
+				/* Las filas paginadas no están en el DOM y el acceso implícito
+				   queda disabled: en ambos casos se envía un input oculto. */
+				if (!$input.length || $input.is(':disabled')) {
+					$('<input>', {
+						type: 'hidden',
+						name: inputName,
+						value: 'on',
+						'class': 'pl-generated-role-permission'
+					}).appendTo($form);
+				}
+			});
+		});
 	});
 });
 </script>

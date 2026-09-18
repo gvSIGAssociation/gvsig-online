@@ -7,25 +7,34 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "gvsigol_plugin_panels manual title"
-msgstr "Paneles"
+msgstr "Paneles de control"
 
 msgid "gvsigol_plugin_panels manual desc"
-msgstr "Constructor de paneles interactivos del proyecto"
+msgstr "Constructor de paneles de control interactivos"
 
 msgid "Paneles"
-msgstr "Paneles"
+msgstr "Paneles de control"
 
 msgid "Panels"
-msgstr "Paneles"
+msgstr "Paneles de control"
 
 msgid "Panels list"
-msgstr "Listado de paneles"
+msgstr "Listado de paneles de control"
+
+msgid "Panel data"
+msgstr "Datos del panel de control"
+
+msgid "Search user role..."
+msgstr "Buscar rol de usuario..."
+
+msgid "roles"
+msgstr "roles"
 
 msgid "New panel"
-msgstr "Nuevo panel"
+msgstr "Nuevo panel de control"
 
 msgid "Edit panel"
-msgstr "Editar panel"
+msgstr "Editar panel de control"
 
 msgid "New"
 msgstr "Nuevo"
@@ -52,7 +61,7 @@ msgid "Open"
 msgstr "Abrir"
 
 msgid "Open panel"
-msgstr "Abrir panel"
+msgstr "Abrir panel de control"
 
 msgid "Design"
 msgstr "Diseño"
@@ -64,13 +73,13 @@ msgid "Configure"
 msgstr "Configurar"
 
 msgid "Configure panel"
-msgstr "Configurar panel"
+msgstr "Configurar panel de control"
 
 msgid "Delete"
 msgstr "Eliminar"
 
 msgid "Delete panel"
-msgstr "Eliminar panel"
+msgstr "Eliminar panel de control"
 
 msgid "The panel and all its widgets will be deleted"
 msgstr "Se eliminarán el panel y todos sus elementos"
@@ -79,7 +88,7 @@ msgid "Accept"
 msgstr "Aceptar"
 
 msgid "There are no panels yet"
-msgstr "Todavía no hay paneles"
+msgstr "Todavía no hay paneles de control"
 
 msgid "No records available"
 msgstr "No hay registros disponibles"
@@ -94,7 +103,7 @@ msgid "of"
 msgstr "de"
 
 msgid "panels"
-msgstr "paneles"
+msgstr "paneles de control"
 
 msgid "Previous"
 msgstr "Anterior"
@@ -115,7 +124,7 @@ msgid "Save"
 msgstr "Guardar"
 
 msgid "Panel information"
-msgstr "Información del panel"
+msgstr "Información del panel de control"
 
 msgid "Name"
 msgstr "Nombre"
@@ -193,8 +202,9 @@ msgid "You cannot publish this panel because you cannot manage all its private l
 msgstr "No puedes publicar este panel porque no puedes gestionar todas sus capas privadas."
 
 msgid "Projects, panels & applications"
-msgstr "Proyectos, paneles y aplicaciones"
+msgstr "Proyectos, paneles de control y aplicaciones"
 
+# Etiqueta de las tarjetas: se deja corta a propósito.
 msgid "Panel"
 msgstr "Panel"
 

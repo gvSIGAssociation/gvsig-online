@@ -4,6 +4,7 @@ import logging
 import math
 from urllib.parse import urlparse
 
+from django.db.models import Q
 from django.utils.text import slugify
 from gvsigol_core.models import ProjectLayerGroup
 from gvsigol_services import geographic_servers
@@ -82,23 +83,43 @@ def layer_in_project(project, layer):
     ).exists()
 
 
+def is_vector_layer(layer):
+    """Los paneles sólo usan capas vectoriales: las ráster no tienen atributos
+    consultables ni geometrías que un mapa, una tabla o una gráfica puedan
+    leer. En gvSIG Online las vectoriales se marcan con el prefijo `v_`."""
+    layer_type = getattr(layer, 'type', None) or ''
+    if str(layer_type).startswith('v_'):
+        return True
+    try:
+        datastore_type = layer.datastore.type or ''
+    except Exception:
+        datastore_type = ''
+    return str(datastore_type).startswith('v_')
+
+
+def vector_layers(qs):
+    return qs.filter(
+        Q(type__startswith='v_') | Q(datastore__type__startswith='v_')
+    )
+
+
 def project_operational_layers(project):
     group_ids = ProjectLayerGroup.objects.filter(
         project=project,
         baselayer_group=False,
     ).values_list('layer_group_id', flat=True)
-    return Layer.objects.filter(
+    return vector_layers(Layer.objects.filter(
         layer_group_id__in=group_ids,
         external=False,
         queryable=True,
-    ).select_related('datastore__workspace')
+    )).select_related('datastore__workspace')
 
 
 def global_operational_layers(request):
-    return services_utils.get_layerread_by_user(request).filter(
+    return vector_layers(services_utils.get_layerread_by_user(request).filter(
         external=False,
         queryable=True,
-    ).select_related('datastore__workspace').distinct()
+    )).select_related('datastore__workspace').distinct()
 
 
 def serialize_layer(layer):
@@ -138,6 +159,7 @@ def serialize_layer(layer):
         'styles': styles,
         'format': 'image/png',
         'type': layer.type,
+        'is_vector': is_vector_layer(layer),
     }
 
 
@@ -373,6 +395,31 @@ def serialize_panel(panel, include_widgets=True):
     else:
         data['widget_count'] = panel.widgets.count()
     return data
+
+
+def home_panel_items(request):
+    """Tarjetas de los paneles que el usuario puede leer, para las portadas.
+
+    Un usuario anónimo sólo obtiene los paneles públicos, así que la misma
+    lista sirve para la página de bienvenida y para el escritorio.
+    """
+    from django.conf import settings
+    from .models import Panel
+    items = []
+    for panel in Panel.objects.select_related('project').order_by('title'):
+        if not panel.can_read(request):
+            continue
+        items.append({
+            'id': panel.id,
+            'name': panel.name or panel.slug,
+            'title': panel.title,
+            'description': panel.description or '',
+            'image': settings.STATIC_URL + 'panels/panel.svg',
+            'url': '/spa/panel/%s/' % panel.slug,
+            'item_type': 'panel',
+            'is_public': panel.is_public,
+        })
+    return items
 
 
 def apply_widget_payload(widget, payload, index=0):

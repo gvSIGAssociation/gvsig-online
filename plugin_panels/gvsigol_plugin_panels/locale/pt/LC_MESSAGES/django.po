@@ -21,6 +21,15 @@ msgstr "Painéis"
 msgid "Panels list"
 msgstr "Lista de painéis"
 
+msgid "Panel data"
+msgstr "Dados do painel"
+
+msgid "Search user role..."
+msgstr "Pesquisar função de utilizador..."
+
+msgid "roles"
+msgstr "funções"
+
 msgid "New panel"
 msgstr "Novo painel"
 

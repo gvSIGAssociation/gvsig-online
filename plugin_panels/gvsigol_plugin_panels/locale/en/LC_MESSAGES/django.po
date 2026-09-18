@@ -15,6 +15,15 @@ msgstr "Interactive project panel builder"
 msgid "Paneles"
 msgstr "Panels"
 
+msgid "Panel data"
+msgstr "Panel data"
+
+msgid "Search user role..."
+msgstr "Search user role..."
+
+msgid "roles"
+msgstr "roles"
+
 msgid "No project (global panel)"
 msgstr "No project (global panel)"
 

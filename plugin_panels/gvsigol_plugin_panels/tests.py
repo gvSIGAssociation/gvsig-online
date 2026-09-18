@@ -6,8 +6,10 @@ from django.db import IntegrityError, transaction
 from django.test import RequestFactory, SimpleTestCase, TestCase
 from gvsigol_plugin_panels.utils import (
     unique_slug, normalize_rows, apply_widget_payload, serialize_panel,
+    is_vector_layer,
 )
 from gvsigol_plugin_panels.models import Panel, PanelWidget
+from gvsigol_plugin_panels.views import _reassignable_roles
 
 
 class FakeQuerySet:
@@ -68,6 +70,39 @@ class UtilsTests(SimpleTestCase):
         self.assertEqual(widget.x, 2)
         self.assertIsNone(widget.dataset_id)
         self.assertEqual(widget.sort_order, 4)
+
+    def test_raster_layers_are_not_vector(self):
+        raster = mock.Mock(type='c_GeoTIFF')
+        raster.datastore.type = 'c_GeoTIFF'
+        vector = mock.Mock(type='v_PostGIS')
+        vector.datastore.type = 'v_PostGIS'
+        shapefile = mock.Mock(type='')
+        shapefile.datastore.type = 'v_SHP'
+        self.assertFalse(is_vector_layer(raster))
+        self.assertTrue(is_vector_layer(vector))
+        self.assertTrue(is_vector_layer(shapefile))
+
+
+class FakeRoleQuerySet:
+    def __init__(self, roles):
+        self.roles = roles
+
+    def values_list(self, field, flat=False):
+        return list(self.roles)
+
+
+class PublishLayersTests(SimpleTestCase):
+    def test_reassignable_roles_drops_duplicates_and_admin(self):
+        roles = FakeRoleQuerySet(
+            ['GVSIGOL_DJANGO_SUPERUSER', 'tecnicos', 'tecnicos', 'consulta'])
+        self.assertEqual(
+            _reassignable_roles(roles, ('GVSIGOL_DJANGO_SUPERUSER',)),
+            ['tecnicos', 'consulta'])
+
+    def test_reassignable_roles_keeps_admin_when_not_skipped(self):
+        roles = FakeRoleQuerySet(['GVSIGOL_DJANGO_SUPERUSER'])
+        self.assertEqual(
+            _reassignable_roles(roles), ['GVSIGOL_DJANGO_SUPERUSER'])
 
 
 class StandalonePanelTests(TestCase):

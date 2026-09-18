@@ -112,22 +112,38 @@ def _private_layers(layer_ids):
         pk__in=set(layer_ids), public=False))
 
 
+def _reassignable_roles(queryset, skip_roles=()):
+    """Roles que se pueden reenviar a set_layer_permissions sin duplicarlos.
+
+    set_layer_permissions borra y recrea los permisos no externos y añade por su
+    cuenta el rol de administración, así que hay que quitar duplicados y el rol
+    de administración para no violar la restricción de unicidad.
+    """
+    roles = dict.fromkeys(queryset.values_list('role', flat=True))
+    return [role for role in roles if role not in skip_roles]
+
+
 def _publish_layers(request, layers):
     if any(not services_utils.can_manage_layer(request, layer) for layer in layers):
         return False
     from gvsigol_services.models import LayerManageRole, LayerReadRole, LayerWriteRole
-    try:
-        for layer in layers:
-            read_roles = list(LayerReadRole.objects.filter(layer=layer).values_list('role', flat=True))
-            write_roles = list(LayerWriteRole.objects.filter(layer=layer).values_list('role', flat=True))
-            manage_roles = list(LayerManageRole.objects.filter(layer=layer).values_list('role', flat=True))
-            services_utils.set_layer_permissions(
-                layer, True, read_roles, write_roles, manage_roles)
-            layer.refresh_from_db()
-        return True
-    except Exception:
-        logger.exception('Unable to publish layers required by a public panel')
-        return False
+    admin_roles = (auth_backend.get_admin_role(),)
+    for layer in layers:
+        read_roles = _reassignable_roles(
+            LayerReadRole.objects.filter(layer=layer, external=False), admin_roles)
+        write_roles = _reassignable_roles(
+            LayerWriteRole.objects.filter(layer=layer, external=False), admin_roles)
+        manage_roles = _reassignable_roles(LayerManageRole.objects.filter(layer=layer))
+        try:
+            # Savepoint propio para que un fallo no invalide la transacción del guardado.
+            with transaction.atomic():
+                services_utils.set_layer_permissions(
+                    layer, True, read_roles, write_roles, manage_roles)
+        except Exception:
+            logger.exception('Unable to publish layers required by a public panel')
+            return False
+        layer.refresh_from_db()
+    return True
 
 
 def _payload_layer_ids(panel, widgets_payload):
@@ -506,7 +522,7 @@ def panel_save(request, panel_id):
                 widget.dataset = ds if ds and _dataset_belongs_to_panel(ds, panel) else None
             if widget.layer_id:
                 layer = Layer.objects.filter(pk=widget.layer_id).first()
-                if not layer or not services_utils.can_read_layer(request, layer):
+                if not layer or not utils.is_vector_layer(layer) or not services_utils.can_read_layer(request, layer):
                     return _json_error('layer_forbidden', 403)
             widget.save()
             keep_ids.append(widget.id)
@@ -625,11 +641,11 @@ def panel_layers(request, panel_id):
     if panel.can_manage(request):
         layers = utils.global_operational_layers(request)
     else:
-        layers = Layer.objects.filter(
+        layers = utils.vector_layers(Layer.objects.filter(
             pk__in=utils.panel_layer_ids(panel),
             external=False,
             queryable=True,
-        ).select_related('datastore__workspace')
+        )).select_related('datastore__workspace')
         layers = [layer for layer in layers if services_utils.can_read_layer(request, layer)]
     return _json_ok({'layers': [utils.serialize_layer(layer) for layer in layers]})
 
@@ -641,6 +657,8 @@ def layer_fields(request, project_id, layer_id):
     if not can_read_project(request, project) and not project.is_public:
         return _json_error('forbidden', 403)
     layer = get_object_or_404(Layer, pk=layer_id)
+    if not utils.is_vector_layer(layer):
+        return _json_error('layer_not_vector', 400)
     if not utils.layer_in_project(project, layer):
         return _json_error('layer_not_in_project', 400)
     return _json_ok(utils.load_layer_fields(layer))
@@ -653,6 +671,8 @@ def panel_layer_fields(request, panel_id, layer_id):
     if not panel.can_manage(request):
         return _json_error('forbidden', 403)
     layer = get_object_or_404(Layer, pk=layer_id, external=False, queryable=True)
+    if not utils.is_vector_layer(layer):
+        return _json_error('layer_not_vector', 400)
     if not services_utils.can_read_layer(request, layer):
         return _json_error('forbidden', 403)
     return _json_ok(utils.load_layer_fields(layer))
@@ -682,6 +702,8 @@ def project_datasets(request, project_id):
         layer = get_object_or_404(Layer, pk=layer_id)
         if not utils.layer_in_project(project, layer):
             return _json_error('layer_not_in_project', 400)
+        if not utils.is_vector_layer(layer):
+            return _json_error('layer_not_vector', 400)
         dataset.layer = layer
         dataset.source_type = PanelDataset.SOURCE_WFS
     dataset.column_mapping = body.get('column_mapping') if isinstance(body.get('column_mapping'), dict) else {}
@@ -728,6 +750,8 @@ def panel_datasets(request, panel_id):
         layer = get_object_or_404(Layer, pk=layer_id)
         if not services_utils.can_read_layer(request, layer):
             return _json_error('forbidden', 403)
+        if not utils.is_vector_layer(layer):
+            return _json_error('layer_not_vector', 400)
         dataset.layer = layer
         dataset.source_type = PanelDataset.SOURCE_WFS
     dataset.column_mapping = body.get('column_mapping') if isinstance(body.get('column_mapping'), dict) else {}
