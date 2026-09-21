@@ -2344,6 +2344,10 @@ def ogc_services(request):
 def select_public_project(request):
     public_projects = Project.objects.filter(is_public=True)
     public_apps = Application.objects.filter(is_public=True)
+    hidden_prefix = getattr(settings, 'UI_HIDEN_PROJECTS_PREFIX', '')
+    if hidden_prefix:
+        public_projects = public_projects.exclude(name__startswith=hidden_prefix)
+        public_apps = public_apps.exclude(name__startswith=hidden_prefix)
 
     if len (public_projects) == 1 and len(public_apps) == 0:
         return redirect('load', project_name=public_projects[0].name)
@@ -2377,6 +2381,10 @@ def select_public_project(request):
 def select_public_mobile_project(request):
     public_projects = Project.objects.filter(is_public=True)
     public_apps = Application.objects.filter(is_public=True)
+    hidden_prefix = getattr(settings, 'UI_HIDEN_PROJECTS_PREFIX', '')
+    if hidden_prefix:
+        public_projects = public_projects.exclude(name__startswith=hidden_prefix)
+        public_apps = public_apps.exclude(name__startswith=hidden_prefix)
 
     if len (public_projects) == 1 and len(public_apps) == 0:
         return redirect(public_projects[0].url)
