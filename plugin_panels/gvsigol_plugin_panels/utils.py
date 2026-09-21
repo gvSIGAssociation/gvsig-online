@@ -4,6 +4,7 @@ import logging
 import math
 from urllib.parse import urlparse
 
+from django.conf import settings
 from django.db.models import Q
 from django.utils.text import slugify
 from gvsigol_core.models import ProjectLayerGroup
@@ -381,7 +382,10 @@ def serialize_panel(panel, include_widgets=True):
         'name': panel.name or panel.slug,
         'title': panel.title,
         'description': panel.description or '',
-        'image': panel.image_url,
+        # El SPA puede servirse desde otro origen, así que la imagen viaja
+        # absoluta igual que en proyectos y aplicaciones.
+        'image': settings.BASE_URL + panel.image_url,
+        'relative_image': panel.image_url,
         'slug': panel.slug,
         'layout': panel.layout or {},
         'is_public': panel.is_public,

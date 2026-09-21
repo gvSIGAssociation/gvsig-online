@@ -3,6 +3,7 @@ from io import BytesIO
 from unittest import mock
 
 from PIL import Image
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser, User
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -158,7 +159,9 @@ class StandalonePanelTests(TestCase):
         data = serialize_panel(panel, include_widgets=False)
         self.assertEqual(data['public_path'], '/panel/global-panel/')
         self.assertEqual(data['edit_path'], '/panel/global-panel/edit/')
-        self.assertEqual(data['image'], panel.image_url)
+        self.assertEqual(data['relative_image'], panel.image_url)
+        self.assertEqual(data['image'], settings.BASE_URL + panel.image_url)
+        self.assertTrue(data['image'].startswith(('http://', 'https://')))
 
     def test_standalone_slug_is_unique(self):
         Panel.objects.create(title='First', slug='same')
