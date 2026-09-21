@@ -42,10 +42,13 @@ def _sort_key_no_accents(s):
 
 def _get_public_items_ordered():
     """Return public projects and public applications merged, applying the global UserHomeOrder if set."""
+    hidden_prefix = getattr(settings, 'UI_HIDEN_PROJECTS_PREFIX', '')
     query = (
         Project.objects.filter(is_public=True, expiration_date__gte=datetime.datetime.now()) |
         Project.objects.filter(is_public=True, expiration_date=None)
     )
+    if hidden_prefix:
+        query = query.exclude(name__startswith=hidden_prefix)
     public_projects = []
     for p in query.order_by('title'):
         public_projects.append({
@@ -57,8 +60,11 @@ def _get_public_items_ordered():
             'item_type': 'public',
         })
 
+    apps_query = Application.objects.filter(is_public=True)
+    if hidden_prefix:
+        apps_query = apps_query.exclude(name__startswith=hidden_prefix)
     public_apps = []
-    for app in Application.objects.filter(is_public=True).order_by('title'):
+    for app in apps_query.order_by('title'):
         public_apps.append({
             'id': app.id,
             'title': app.title or app.name,
