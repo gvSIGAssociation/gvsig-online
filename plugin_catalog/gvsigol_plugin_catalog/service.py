@@ -29,9 +29,14 @@ import logging
 from gvsigol_plugin_catalog.mdstandards import registry
 import json
 import requests
-from  django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger("gvsigol")
+
+
+def _create_dataset_metadata(mdfields):
+    mdcode = (getattr(plugin_settings, 'CATALOG_METADATA_STANDARD', '') or '').strip() or None
+    return registry.create('dataset', mdfields, mdcode=mdcode)
 
 class UnsupportedRequestError(Exception):
     pass
@@ -164,7 +169,7 @@ class Geonetwork():
             'wfs_endpoint': None,
             'wcs_endpoint': None,
         }
-        return registry.create('dataset', mdfields)
+        return _create_dataset_metadata(mdfields)
 
     def create_metadata(self, layer, layer_info, ds_type):
         ws = layer.datastore.workspace
@@ -207,7 +212,7 @@ class Geonetwork():
             'wcs_endpoint': wcs_endpoint
             }
         
-        return registry.create('dataset', mdfields)
+        return _create_dataset_metadata(mdfields)
     
     def metadata_insert(self, layer):
         try:

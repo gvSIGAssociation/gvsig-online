@@ -46,3 +46,6 @@ GEONETWORK_USE_KEEPALIVE = env('GEONETWORK_USE_KEEPALIVE')
 # Los metadatos deberán crearse manualmente desde gvsigonline
 # Por defecto True para mantener el comportamiento actual
 CATALOG_AUTO_CREATE_METADATA = env('CATALOG_AUTO_CREATE_METADATA')
+# Standard used when creating new metadata records. Empty keeps ISO 19139:2007.
+# Aliases: iso19139, iso19115-3, iso19115-1, iso19115-3.mgb, mgb, mgb2, mgb-2.0
+CATALOG_METADATA_STANDARD = env('CATALOG_METADATA_STANDARD', default='')

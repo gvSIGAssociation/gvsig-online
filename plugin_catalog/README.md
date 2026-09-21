@@ -33,13 +33,34 @@ Con `openidconnect` (solo login web OIDC) **no** se aceptan Basic ni Bearer de f
 | `GEONETWORK_OIDC_CLIENT_SECRET` | Secret del client | *(secret)* |
 | `GEONETWORK_OIDC_SCOPE` | Scopes del password grant | `openid email profile offline_access` |
 | `GEONETWORK_EDITOR_PATH` | Ruta SPA del editor | `/srv/spa/catalog.search` |
-| `CATALOG_API_VERSION` | Versión API (`gn4`, `api0.1`, `legacy3.2`) | `gn4` |
+| `CATALOG_API_VERSION` | Versión API (`gn4`) | `gn4` |
 | `CATALOG_AUTO_CREATE_METADATA` | Crear metadatos al publicar capas | `True` / `False` |
+| `CATALOG_METADATA_STANDARD` | Estándar al crear metadatos nuevos | vacío (= ISO 19139:2007), `iso19115-3`, `mgb-2.0` |
 | `CATALOG_TIMEOUT` | Timeout HTTP (segundos) | `10` |
 
 Si no se define `GEONETWORK_OIDC_TOKEN_URL`, se construye a partir de `OIDC_OP_BASE_URL` + `OIDC_OP_REALM_NAME` de gvSIG Online.
 
 El plugin debe estar en `GVSIGOL_PLUGINS` (p.ej. `...,gvsigol_plugin_catalog`).
+
+### Estándares de metadatos
+
+La lectura y actualización de registros XML ya no asume ISO 19139. El plugin elige un gestor según el documento:
+
+| Gestor | Detección | Creación (`CATALOG_METADATA_STANDARD`) |
+|---|---|---|
+| ISO 19139:2007 | raíz `gmd:MD_Metadata` | vacío, `iso19139` |
+| ISO 19115-1 / 19115-3 | raíz `mdb:MD_Metadata` | `iso19115-3`, `iso19115-1` |
+| Perfil MGB 2.0 | 19115-3 con `mdb:metadataProfile` = `Perfil MGB 2.0` | `mgb-2.0`, `mgb`, `iso19115-3.mgb` |
+
+El gestor MGB 2.0 es una subclase del de 19115-3: solo cambia la plantilla, la detección del perfil y la lectura de `cit:CI_UFCode` / `cit:administrativeArea`.
+
+Las aplicaciones cliente (`gvsigol_app_*`) pueden sustituir las plantillas del plugin dejando ficheros en `mdtemplates/`:
+
+- `dataset.xml` o `dataset19139.xml` — ISO 19139
+- `dataset19115-3.xml` — ISO 19115-3
+- `dataset-mgb.xml` o `dataset19115-3.mgb.xml` — MGB 2.0
+
+Consulta y ficha de detalle usan el reader del estándar detectado; la búsqueda en GeoNetwork 4 (Elasticsearch) es independiente del XML.
 
 ---
 

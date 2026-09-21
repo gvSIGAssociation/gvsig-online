@@ -78,12 +78,11 @@ class XmlStandardReader(object):
             self.tree = metadata_record
         else:
             self.tree = ET.fromstring(metadata_record)
-    @abstractmethod
-    def get_title(self, extent_tuple, thumbnail_url):
-        pass
-    @abstractmethod
-    def get_abstract(self, extent_tuple, thumbnail_url):
-        pass
+    def get_title(self):
+        raise NotImplementedError
+
+    def get_abstract(self):
+        raise NotImplementedError
     
     @abstractmethod
     def get_identifier(self):
@@ -97,7 +96,20 @@ class XmlStandardReader(object):
     def get_transfer_options(self):
         pass
 
-    
+    def get_resource_identifier(self):
+        return ''
+
+    def get_graphic_overviews(self):
+        """List of {'url': ..., 'name': ...} from graphicOverview / browse graphics."""
+        return []
+
+    def as_catalog_record(self):
+        """
+        Structured dict consumed by views.get_metadata_as_html.
+        Standards that the catalog details view should render must implement this.
+        """
+        raise NotImplementedError
+
     def tostring(self, encoding='unicode'):
         return ET.tostring(self.tree, encoding=encoding)
 
@@ -110,23 +122,55 @@ def register(standard_manager, default=False):
     if default:
         _CONFIG['DEFAULT_MANAGER'] = standard_manager
 
+def _as_tree(metadata_record):
+    if ET.iselement(metadata_record):
+        return metadata_record
+    return ET.fromstring(metadata_record)
+
+
 def get_updater(metadata_record):
-    tree = ET.fromstring(metadata_record)
+    tree = _as_tree(metadata_record)
     for manager in _registry:
         updater = manager.get_updater(tree)
         if updater:
             return updater
 
+
 def get_reader(metadata_record):
-    tree = ET.fromstring(metadata_record)
+    tree = _as_tree(metadata_record)
     for manager in _registry:
         reader = manager.get_reader(tree)
         if reader:
             return reader
 
-def create(mdtype, mdfields, mdcode=None):
+
+MANAGER_ALIASES = {
+    'iso19139': 'Iso19139_2007Manager',
+    'iso19139:2007': 'Iso19139_2007Manager',
+    'iso19115-3': 'Iso19115_3Manager',
+    'iso19115-1': 'Iso19115_3Manager',
+    'iso19115-3.2018': 'Iso19115_3Manager',
+    'iso19115-3.mgb': 'Iso19115_3MgbManager',
+    'mgb': 'Iso19115_3MgbManager',
+    'mgb2': 'Iso19115_3MgbManager',
+    'mgb-2.0': 'Iso19115_3MgbManager',
+}
+
+
+def _resolve_mdcode(mdcode):
     if not mdcode:
+        return None
+    code = str(mdcode).strip()
+    if not code:
+        return None
+    return MANAGER_ALIASES.get(code.lower(), code)
+
+
+def create(mdtype, mdfields, mdcode=None):
+    resolved = _resolve_mdcode(mdcode)
+    if not resolved:
         return _CONFIG['DEFAULT_MANAGER'].create(mdtype, mdfields)
     for manager in _registry:
-        if manager.get_code() == mdcode:
+        if manager.get_code() == resolved:
             return manager.create(mdtype, mdfields)
+    return _CONFIG['DEFAULT_MANAGER'].create(mdtype, mdfields)
