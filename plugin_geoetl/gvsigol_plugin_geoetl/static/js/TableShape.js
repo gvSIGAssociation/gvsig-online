@@ -2683,6 +2683,18 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
 
         $('#input-excel-accept-'+ID).click(function() {
 
+            var excelPath = $('#excel-file-'+ID).val();
+            var sheetName = $('#sheet-name-'+ID).val();
+
+            if (!excelPath) {
+                alert(gettext('Please select an Excel file path.'));
+                return;
+            }
+            if (!sheetName) {
+                alert(gettext('Please load sheets and select a sheet before accepting.'));
+                return;
+            }
+
             if (typeof get_ === 'undefined'){
                 get_ = []
                 $("#sheet-name-"+ID+" option").each(function()
@@ -2694,8 +2706,8 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
             var paramsExcel = {"id": ID,
             "parameters": [
                 { "get_sheet-name":  get_ ,
-                "excel-file": $('#excel-file-'+ID).val(),
-                "sheet-name": $('#sheet-name-'+ID).val(),
+                "excel-file": excelPath,
+                "sheet-name": sheetName,
                 "usecols": $('#usecols-'+ID).val(),
                 "header": $('#header-'+ID).val(),
                 "reading": $('input:radio[name="reading-'+ID+'"]:checked').val(),
@@ -2723,15 +2735,20 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                     isAlreadyInCanvas(jsonParams, paramsExcel, ID)
                     passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
                     if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
-                    
-                    }
-                })
-            isAlreadyInCanvas(jsonParams, paramsExcel, ID)
-            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
-
-            icon.setColor('#01b0a0')
-
-            $('#dialog-input-excel-'+ID).modal('hide')
+                    icon.setColor('#01b0a0')
+                    $('#dialog-input-excel-'+ID).modal('hide')
+                },
+                error: function (xhr) {
+                    var msg = gettext('Could not read Excel schema. Check the file, sheet and columns.');
+                    try {
+                        var err = JSON.parse(xhr.responseText);
+                        if (err && err.error) {
+                            msg = err.error;
+                        }
+                    } catch (e) {}
+                    alert(msg);
+                }
+            })
         })
     },
     

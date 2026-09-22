@@ -25,8 +25,11 @@ from .settings import GEOETL_DB
 
 def get_sheets_excel(excel, r):
     import warnings
+    from .etl_tasks import excel_fs_path
 
     warnings.filterwarnings('ignore', category=UserWarning, module='openpyxl')
+
+    excel = excel_fs_path(excel)
 
     if r == 'single':
     
@@ -44,20 +47,22 @@ def get_sheets_excel(excel, r):
         
 
 def get_schema_excel(dicc):
+    """Return column names only (nrows=0). Data loading lives in etl_tasks."""
     import warnings
+    from .etl_tasks import read_excel_dataframe, excel_fs_path
 
     warnings.filterwarnings('ignore', category=UserWarning, module='openpyxl')
 
     if dicc['reading'] == 'single':
-    
-        xl = pd.read_excel(dicc["excel-file"], sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
+        xl = read_excel_dataframe(dicc["excel-file"], dicc, nrows=0)
         return list(xl.columns)
     
     else:
         column_array = []
-        for file in os.listdir(dicc["excel-file"]):
+        folder = excel_fs_path(dicc["excel-file"])
+        for file in os.listdir(folder):
             if file.endswith(".xls") or file.endswith(".xlsx"):
-                xl = pd.read_excel(dicc["excel-file"]+'//'+file, sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
+                xl = read_excel_dataframe(os.path.join(folder, file), dicc, nrows=0)
                 for col in list(xl.columns):
                     if col not in column_array:
                         column_array.append(col)

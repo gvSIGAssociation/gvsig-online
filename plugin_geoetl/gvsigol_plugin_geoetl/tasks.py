@@ -11,11 +11,12 @@ from gvsigol_services.models import Connection
 from gvsigol import settings
 
 from . import etl_tasks, views
-from .settings import GEOETL_DB
+from .settings import GEOETL_DB, ETL_CANVAS_MAX_DELIVERIES
 
 import psycopg2
 from psycopg2 import sql
 import json
+import os
 from datetime import date, datetime, timedelta
 import copy
 from django.utils import timezone
@@ -25,8 +26,102 @@ import re
 logger = get_task_logger(__name__)
 
 
-@celery_app.task
-def run_canvas_background(**kwargs):
+def _canvas_delivery_dir():
+    """Durable counter dir on MEDIA_ROOT (PVC) so OOM/restarts keep the count."""
+    base = getattr(settings, 'MEDIA_ROOT', '/tmp')
+    path = os.path.join(base, 'restricted', 'etl_canvas_deliveries')
+    try:
+        os.makedirs(path, exist_ok=True)
+    except OSError:
+        path = os.path.join('/tmp', 'etl_canvas_deliveries')
+        os.makedirs(path, exist_ok=True)
+    return path
+
+
+def _bump_canvas_delivery(task_id):
+    """Increment and return delivery count for a Celery task id."""
+    if not task_id:
+        return 1
+    path = os.path.join(_canvas_delivery_dir(), str(task_id))
+    count = 0
+    try:
+        if os.path.exists(path):
+            with open(path, 'r') as fh:
+                count = int((fh.read() or '0').strip() or '0')
+    except (OSError, ValueError):
+        count = 0
+    count += 1
+    try:
+        with open(path, 'w') as fh:
+            fh.write(str(count))
+    except OSError as exc:
+        logger.warning('Could not persist ETL delivery counter: %s', exc)
+    return count
+
+
+def _clear_canvas_delivery(task_id):
+    if not task_id:
+        return
+    path = os.path.join(_canvas_delivery_dir(), str(task_id))
+    try:
+        if os.path.exists(path):
+            os.remove(path)
+    except OSError:
+        pass
+
+
+def _mark_canvas_poison_error(kwargs, deliveries):
+    """Set ETLstatus to Error so the poison message can be acked safely."""
+    id_ws = kwargs.get('id_ws')
+    username = kwargs.get('username') or 'unknown'
+    msg = (
+        'ERROR: ETL canvas aborted after %s deliveries (likely OOM / poison message). '
+        'Message will be acknowledged to stop requeue. '
+        'Check Excel input size/sheet params; ops may need to purge residual queue messages.'
+        % deliveries
+    )
+    if id_ws:
+        statusModel = ETLstatus.objects.filter(id_ws=id_ws).first()
+        if statusModel:
+            statusModel.message = msg
+            statusModel.status = 'Error'
+            statusModel.save()
+    else:
+        statusModel = ETLstatus.objects.filter(name='current_canvas.' + username).first()
+        if statusModel:
+            statusModel.message = msg
+            statusModel.status = 'Error'
+            statusModel.save()
+        else:
+            ETLstatus.objects.create(
+                name='current_canvas.' + username,
+                message=msg,
+                status='Error',
+                id_ws=None,
+                last_exec=timezone.now(),
+            )
+    logger.error(msg)
+
+
+@celery_app.task(bind=True)
+def run_canvas_background(self, **kwargs):
+
+    task_id = getattr(getattr(self, 'request', None), 'id', None)
+    deliveries = _bump_canvas_delivery(task_id)
+    if deliveries > ETL_CANVAS_MAX_DELIVERIES:
+        _mark_canvas_poison_error(kwargs, deliveries)
+        _clear_canvas_delivery(task_id)
+        return
+
+    try:
+        _run_canvas_background_impl(kwargs)
+    finally:
+        # Clean exit (success or handled exception) → ack; drop counter.
+        # OOM/SIGKILL never reaches here, so the counter survives for redelivery.
+        _clear_canvas_delivery(task_id)
+
+
+def _run_canvas_background_impl(kwargs):
 
     if kwargs["concat"]:
         listConcatIds = kwargs["jsonCanvas"]

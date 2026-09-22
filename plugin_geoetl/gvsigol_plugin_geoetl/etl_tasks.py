@@ -2,7 +2,14 @@
 
 from copy import deepcopy
 from gvsigol import settings
-from .settings import URL_GEOCODER, GEOETL_DB
+from .settings import (
+    URL_GEOCODER,
+    GEOETL_DB,
+    ETL_EXCEL_SQL_CHUNKSIZE,
+    ETL_EXCEL_READ_CHUNKSIZE,
+    ETL_EXCEL_MAX_ROWS,
+    ETL_EXCEL_MAX_COLS,
+)
 
 import pandas as pd
 import psycopg2
@@ -226,53 +233,264 @@ def input_Xml(dicc):
 
 
 
-def input_Excel(dicc):
+def excel_fs_path(path):
+    """Strip file:// prefix used by the ETL file manager UI."""
+    if path and isinstance(path, str) and path.startswith('file://'):
+        return path[7:]
+    return path
 
+
+def normalize_excel_read_params(dicc):
+    """
+    Normalize sheet-name / usecols so pandas never gets sheet_name=None
+    (which means 'read all sheets') or usecols=''.
+    """
+    sheet_name = dicc.get("sheet-name")
+    if sheet_name is None or sheet_name == "":
+        sheet_name = 0
+
+    usecols = dicc.get("usecols")
+    if usecols == "" or usecols is None:
+        usecols = None
+
+    header = int(dicc.get("header", 0) or 0)
+    return sheet_name, usecols, header
+
+
+def resolve_excel_sheet(local_file, sheet_name):
+    """Match sheet name against workbook sheets; fall back to first sheet."""
+    xl_file = pd.ExcelFile(local_file)
+    available_sheets = xl_file.sheet_names
+
+    if isinstance(sheet_name, str) and sheet_name not in available_sheets:
+        sheet_name_clean = sheet_name.strip()
+        found = False
+        for available in available_sheets:
+            if available.strip() == sheet_name_clean:
+                sheet_name = available
+                found = True
+                break
+        if not found:
+            sheet_name = 0
+
+    return sheet_name, xl_file
+
+
+def preflight_excel_dimensions(local_file, sheet_name):
+    """
+    Check worksheet dimensions with openpyxl read_only before a full pandas load.
+    Raises ValueError if rows/cols exceed configured caps (pathological xlsx / OOM guard).
+    """
+    path = excel_fs_path(local_file)
+    if not path:
+        return
+
+    try:
+        size = os.path.getsize(path)
+    except OSError:
+        size = 0
+    if size > 200 * 1024 * 1024:
+        raise ValueError(
+            "Excel file is too large for ETL (%s bytes; max 200 MiB on disk)." % size
+        )
+
+    try:
+        from openpyxl import load_workbook
+    except ImportError:
+        return
+
+    if not str(path).lower().endswith(('.xlsx', '.xlsm')):
+        return
+
+    wb = load_workbook(filename=path, read_only=True, data_only=True)
+    try:
+        if isinstance(sheet_name, int):
+            ws = wb.worksheets[sheet_name]
+        else:
+            ws = wb[sheet_name]
+
+        max_row = ws.max_row or 0
+        max_col = ws.max_column or 0
+
+        if max_row > ETL_EXCEL_MAX_ROWS or max_col > ETL_EXCEL_MAX_COLS:
+            raise ValueError(
+                "Excel sheet dimensions too large for ETL "
+                "(rows=%s, cols=%s; max rows=%s, max cols=%s). "
+                "File may be corrupt or have an inflated used range."
+                % (max_row, max_col, ETL_EXCEL_MAX_ROWS, ETL_EXCEL_MAX_COLS)
+            )
+    finally:
+        wb.close()
+
+
+def clean_excel_dataframe(df):
+    """Normalize whitespace in string cells without whole-frame regex copy chains."""
+    for col in df.select_dtypes(['object']).columns:
+        series = df[col]
+        mask = series.map(lambda v: isinstance(v, str))
+        if not mask.any():
+            continue
+        cleaned = series.loc[mask]
+        cleaned = cleaned.str.replace('\n', ' ').str.replace('\r', '').str.replace('\t', '')
+        cleaned = cleaned.str.lstrip(' ')
+        df.loc[mask, col] = cleaned
+    return df
+
+
+def read_excel_dataframe(file_path, dicc, nrows=None):
+    """
+    Safe Excel read used by input tasks and by get_schema_excel (nrows=0).
+    Never passes sheet_name=None to pandas.
+    Full ETL loads should use iter_excel_chunks().
+    """
     import warnings
 
     warnings.filterwarnings('ignore', category=UserWarning, module='openpyxl')
 
-    if dicc['reading'] == 'single':
+    path = excel_fs_path(file_path)
+    sheet_name, usecols, header = normalize_excel_read_params(dicc)
+    sheet_name, _xl = resolve_excel_sheet(path, sheet_name)
+    preflight_excel_dimensions(path, sheet_name)
 
-        df = pd.read_excel(dicc["excel-file"], sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
-        df = df.replace('\n', ' ', regex=True).replace('\r', '', regex=True).replace('\t', '', regex=True)
-        df_obj = df.select_dtypes(['object'])
-        df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
-    
-    else:
-        x = 0
-        if not os.listdir(dicc["excel-file"]):
-            raise Exception("No Excel files in folder "+dicc["excel-file"])
-        for file in os.listdir(dicc["excel-file"]):
-            if file.endswith(".xls") or file.endswith(".xlsx"):
+    read_kwargs = {
+        'sheet_name': sheet_name,
+        'header': header,
+        'usecols': usecols,
+    }
+    if nrows is not None:
+        read_kwargs['nrows'] = nrows
 
-                if x == 0:
-                    df = pd.read_excel(dicc["excel-file"]+'//'+file, sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
-                    df = df.replace('\n', ' ', regex=True).replace('\r', '', regex=True).replace('\t', '', regex=True)
-                    df['_filename'] = file
-                    df_obj = df.select_dtypes(['object'])
-                    df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
-                else:
-                    dfx = pd.read_excel(dicc["excel-file"]+'//'+file, sheet_name=dicc["sheet-name"], header=int(dicc["header"]), usecols=dicc["usecols"])
-                    dfx = dfx.replace('\n', ' ', regex=True).replace('\r', '', regex=True).replace('\t', '', regex=True)
-                    dfx['_filename'] = file
-                    df_obj = dfx.select_dtypes(['object'])
-                    dfx[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
-                    df = pd.concat([df, dfx], sort=False)
-                x += 1
+    df = pd.read_excel(path, **read_kwargs)
+    if isinstance(df, dict):
+        raise ValueError(
+            "Excel read returned multiple sheets; a single sheet-name is required."
+        )
+    return clean_excel_dataframe(df)
+
+
+def iter_excel_chunks(file_path, dicc, chunksize=None):
+    """
+    Yield cleaned DataFrames of at most `chunksize` rows (same pattern as input_Csv).
+    Bounds peak RAM: never materializes the whole sheet in one DataFrame.
+    """
+    import warnings
+
+    warnings.filterwarnings('ignore', category=UserWarning, module='openpyxl')
+
+    if chunksize is None:
+        chunksize = ETL_EXCEL_READ_CHUNKSIZE
+
+    path = excel_fs_path(file_path)
+    sheet_name, usecols, header = normalize_excel_read_params(dicc)
+    sheet_name, _xl = resolve_excel_sheet(path, sheet_name)
+    preflight_excel_dimensions(path, sheet_name)
+
+    column_names = None
+    chunk_number = 0
+    rows_yielded = 0
+
+    while True:
+        if chunk_number == 0:
+            df = pd.read_excel(
+                path,
+                sheet_name=sheet_name,
+                header=header,
+                usecols=usecols,
+                nrows=chunksize,
+            )
+            if isinstance(df, dict):
+                raise ValueError(
+                    "Excel read returned multiple sheets; a single sheet-name is required."
+                )
+            column_names = list(df.columns)
+        else:
+            rows_to_skip = header + 1 + (chunk_number * chunksize)
+            df = pd.read_excel(
+                path,
+                sheet_name=sheet_name,
+                header=None,
+                names=column_names,
+                usecols=usecols,
+                skiprows=rows_to_skip,
+                nrows=chunksize,
+            )
+
+        n = df.shape[0]
+        if n == 0:
+            break
+
+        yield clean_excel_dataframe(df)
+
+        rows_yielded += n
+        if n < chunksize:
+            break
+        if rows_yielded >= ETL_EXCEL_MAX_ROWS:
+            raise ValueError(
+                "Excel row limit exceeded while reading in chunks "
+                "(max rows=%s)." % ETL_EXCEL_MAX_ROWS
+            )
+        chunk_number += 1
+
+
+def _excel_df_to_sql(df, table_name, if_exists='replace'):
+    """Write a DataFrame to the ETL temp schema using chunked to_sql."""
+    conn_string = (
+        'postgresql://' + GEOETL_DB['user'] + ':' + GEOETL_DB['password']
+        + '@' + GEOETL_DB['host'] + ':' + GEOETL_DB['port'] + '/' + GEOETL_DB['database']
+    )
+    db = create_engine(conn_string)
+    conn = db.connect()
+    try:
+        df.to_sql(
+            table_name,
+            con=conn,
+            schema=GEOETL_DB['schema'],
+            if_exists=if_exists,
+            index=False,
+            chunksize=ETL_EXCEL_SQL_CHUNKSIZE,
+        )
+    finally:
+        conn.close()
+        db.dispose()
+
+
+def input_Excel(dicc):
 
     table_name = dicc['id']
 
-    conn_string = 'postgresql://'+GEOETL_DB['user']+':'+GEOETL_DB['password']+'@'+GEOETL_DB['host']+':'+GEOETL_DB['port']+'/'+GEOETL_DB['database']
-  
-    db = create_engine(conn_string)
-    conn = db.connect()
+    if dicc['reading'] == 'single':
+        written = False
+        for df in iter_excel_chunks(dicc["excel-file"], dicc):
+            _excel_df_to_sql(
+                df,
+                table_name,
+                if_exists='replace' if not written else 'append',
+            )
+            written = True
+        if not written:
+            df = read_excel_dataframe(dicc["excel-file"], dicc, nrows=0)
+            _excel_df_to_sql(df, table_name, if_exists='replace')
 
-    df.to_sql(table_name, con=conn, schema= GEOETL_DB['schema'], if_exists='replace', index=False)
+    else:
+        folder = excel_fs_path(dicc["excel-file"])
+        if not os.listdir(folder):
+            raise Exception("No Excel files in folder " + dicc["excel-file"])
 
-    conn.close()
-    db.dispose()
-    
+        written = False
+        for file in os.listdir(folder):
+            if file.endswith(".xls") or file.endswith(".xlsx"):
+                for df in iter_excel_chunks(os.path.join(folder, file), dicc):
+                    df['_filename'] = file
+                    _excel_df_to_sql(
+                        df,
+                        table_name,
+                        if_exists='replace' if not written else 'append',
+                    )
+                    written = True
+
+        if not written:
+            raise Exception("No Excel files in folder " + dicc["excel-file"])
+
     return [table_name]
 
 def input_Sharepoint(dicc):
@@ -372,45 +590,7 @@ def input_Sharepoint(dicc):
 
 def _process_sharepoint_excel(dicc, local_file):
     """Procesa un archivo Excel descargado de SharePoint."""
-    # Si sheet-name está vacío o es None, usar índice 0 (primera hoja)
-    sheet_name = dicc.get("sheet-name")
-    if not sheet_name or sheet_name == "":
-        sheet_name = 0
-    
-    # Manejar usecols vacío
-    usecols = dicc.get("usecols")
-    if usecols == "" or usecols is None:
-        usecols = None
-    
-    # Verificar que la hoja existe y buscar coincidencia si es necesario
-    xl_file = pd.ExcelFile(local_file)
-    available_sheets = xl_file.sheet_names
-    
-    if isinstance(sheet_name, str) and sheet_name not in available_sheets:
-        # Buscar coincidencia aproximada (ignorando espacios)
-        sheet_name_clean = sheet_name.strip()
-        found = False
-        for available in available_sheets:
-            if available.strip() == sheet_name_clean:
-                sheet_name = available
-                found = True
-                break
-        if not found:
-            # Si sigue sin encontrarse, usar la primera hoja
-            sheet_name = 0
-    
-    # Leer Excel
-    df = pd.read_excel(
-        local_file, 
-        sheet_name=sheet_name, 
-        header=int(dicc.get("header", 0)), 
-        usecols=usecols
-    )
-    df = df.replace('\n', ' ', regex=True).replace('\r', '', regex=True).replace('\t', '', regex=True)
-    df_obj = df.select_dtypes(['object'])
-    df[df_obj.columns] = df_obj.apply(lambda x: x.str.lstrip(' '))
-    
-    return df
+    return read_excel_dataframe(local_file, dicc)
 
 
 # Future: CSV processor

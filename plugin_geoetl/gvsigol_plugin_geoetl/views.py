@@ -954,7 +954,14 @@ def etl_schema_excel(request):
         form = UploadFileForm(request.POST)
         if form.is_valid():
             jsParams = json.loads(request.POST['jsonParamsExcel'])
-            listSchema = etl_schema.get_schema_excel(jsParams['parameters'][0])
+            try:
+                listSchema = etl_schema.get_schema_excel(jsParams['parameters'][0])
+            except Exception as e:
+                return HttpResponse(
+                    json.dumps({'error': str(e)}),
+                    content_type="application/json",
+                    status=400,
+                )
             response = json.dumps(listSchema)
 
             return HttpResponse(response, content_type="application/json")
