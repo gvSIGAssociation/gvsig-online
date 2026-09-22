@@ -6,7 +6,7 @@ from django.core.mail import send_mail
 from celery.utils.log import get_task_logger
 from gvsigol_plugin_geoetl.utils import get_ttl_hours
 from .models import (ETLworkspaces, ETLstatus, cadastral_requests, SendEmails, SendEndpoint,
-                     TempETLTable, ETLVisualizerSession)
+                     TempETLTable, ETLVisualizerSession, ETLCanvasDelivery)
 from gvsigol_services.models import Connection
 from gvsigol import settings
 
@@ -16,58 +16,38 @@ from .settings import GEOETL_DB, ETL_CANVAS_MAX_DELIVERIES
 import psycopg2
 from psycopg2 import sql
 import json
-import os
 from datetime import date, datetime, timedelta
 import copy
 from django.utils import timezone
+from django.db import transaction
+from django.db.models import F
 import requests
 import re
 
 logger = get_task_logger(__name__)
 
 
-def _canvas_delivery_dir():
-    """Durable counter dir on MEDIA_ROOT (PVC) so OOM/restarts keep the count."""
-    base = getattr(settings, 'MEDIA_ROOT', '/tmp')
-    path = os.path.join(base, 'restricted', 'etl_canvas_deliveries')
-    try:
-        os.makedirs(path, exist_ok=True)
-    except OSError:
-        path = os.path.join('/tmp', 'etl_canvas_deliveries')
-        os.makedirs(path, exist_ok=True)
-    return path
-
-
 def _bump_canvas_delivery(task_id):
-    """Increment and return delivery count for a Celery task id."""
+    """Increment and return delivery count for a Celery task id (DB-backed)."""
     if not task_id:
         return 1
-    path = os.path.join(_canvas_delivery_dir(), str(task_id))
-    count = 0
-    try:
-        if os.path.exists(path):
-            with open(path, 'r') as fh:
-                count = int((fh.read() or '0').strip() or '0')
-    except (OSError, ValueError):
-        count = 0
-    count += 1
-    try:
-        with open(path, 'w') as fh:
-            fh.write(str(count))
-    except OSError as exc:
-        logger.warning('Could not persist ETL delivery counter: %s', exc)
-    return count
+    with transaction.atomic():
+        obj, _created = ETLCanvasDelivery.objects.select_for_update().get_or_create(
+            task_id=str(task_id),
+            defaults={'deliveries': 0},
+        )
+        ETLCanvasDelivery.objects.filter(pk=obj.pk).update(
+            deliveries=F('deliveries') + 1,
+            updated_at=timezone.now(),
+        )
+        obj.refresh_from_db(fields=['deliveries'])
+        return obj.deliveries
 
 
 def _clear_canvas_delivery(task_id):
     if not task_id:
         return
-    path = os.path.join(_canvas_delivery_dir(), str(task_id))
-    try:
-        if os.path.exists(path):
-            os.remove(path)
-    except OSError:
-        pass
+    ETLCanvasDelivery.objects.filter(task_id=str(task_id)).delete()
 
 
 def _mark_canvas_poison_error(kwargs, deliveries):
