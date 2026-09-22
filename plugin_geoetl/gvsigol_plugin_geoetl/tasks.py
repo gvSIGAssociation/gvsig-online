@@ -6,12 +6,12 @@ from django.core.mail import send_mail
 from celery.utils.log import get_task_logger
 from gvsigol_plugin_geoetl.utils import get_ttl_hours
 from .models import (ETLworkspaces, ETLstatus, cadastral_requests, SendEmails, SendEndpoint,
-                     TempETLTable, ETLVisualizerSession)
+                     TempETLTable, ETLVisualizerSession, ETLCanvasDelivery)
 from gvsigol_services.models import Connection
 from gvsigol import settings
 
 from . import etl_tasks, views
-from .settings import GEOETL_DB
+from .settings import GEOETL_DB, ETL_CANVAS_MAX_DELIVERIES
 
 import psycopg2
 from psycopg2 import sql
@@ -19,14 +19,89 @@ import json
 from datetime import date, datetime, timedelta
 import copy
 from django.utils import timezone
+from django.db import transaction
+from django.db.models import F
 import requests
 import re
 
 logger = get_task_logger(__name__)
 
 
-@celery_app.task
-def run_canvas_background(**kwargs):
+def _bump_canvas_delivery(task_id):
+    """Increment and return delivery count for a Celery task id (DB-backed)."""
+    if not task_id:
+        return 1
+    with transaction.atomic():
+        obj, _created = ETLCanvasDelivery.objects.select_for_update().get_or_create(
+            task_id=str(task_id),
+            defaults={'deliveries': 0},
+        )
+        ETLCanvasDelivery.objects.filter(pk=obj.pk).update(
+            deliveries=F('deliveries') + 1,
+            updated_at=timezone.now(),
+        )
+        obj.refresh_from_db(fields=['deliveries'])
+        return obj.deliveries
+
+
+def _clear_canvas_delivery(task_id):
+    if not task_id:
+        return
+    ETLCanvasDelivery.objects.filter(task_id=str(task_id)).delete()
+
+
+def _mark_canvas_poison_error(kwargs, deliveries):
+    """Set ETLstatus to Error so the poison message can be acked safely."""
+    id_ws = kwargs.get('id_ws')
+    username = kwargs.get('username') or 'unknown'
+    msg = (
+        'ERROR: ETL canvas aborted after %s deliveries (likely OOM / poison message). '
+        'Message will be acknowledged to stop requeue. '
+        'Check Excel input size/sheet params; ops may need to purge residual queue messages.'
+        % deliveries
+    )
+    if id_ws:
+        statusModel = ETLstatus.objects.filter(id_ws=id_ws).first()
+        if statusModel:
+            statusModel.message = msg
+            statusModel.status = 'Error'
+            statusModel.save()
+    else:
+        statusModel = ETLstatus.objects.filter(name='current_canvas.' + username).first()
+        if statusModel:
+            statusModel.message = msg
+            statusModel.status = 'Error'
+            statusModel.save()
+        else:
+            ETLstatus.objects.create(
+                name='current_canvas.' + username,
+                message=msg,
+                status='Error',
+                id_ws=None,
+                last_exec=timezone.now(),
+            )
+    logger.error(msg)
+
+
+@celery_app.task(bind=True)
+def run_canvas_background(self, **kwargs):
+
+    task_id = getattr(getattr(self, 'request', None), 'id', None)
+    deliveries = _bump_canvas_delivery(task_id)
+    if deliveries > ETL_CANVAS_MAX_DELIVERIES:
+        _mark_canvas_poison_error(kwargs, deliveries)
+        _clear_canvas_delivery(task_id)
+        return
+
+    try:
+        _run_canvas_background_impl(kwargs)
+    finally:
+        # Clean exit (success or handled exception) → ack; drop counter.
+        # OOM/SIGKILL never reaches here, so the counter survives for redelivery.
+        _clear_canvas_delivery(task_id)
+
+
+def _run_canvas_background_impl(kwargs):
 
     if kwargs["concat"]:
         listConcatIds = kwargs["jsonCanvas"]

@@ -264,6 +264,23 @@ class ETLVisualizerLayer(models.Model):
         return f"{self.name} ({self.session.session_id})"
 
 
+class ETLCanvasDelivery(models.Model):
+    """
+    Counts Celery redeliveries of run_canvas_background by task_id.
+    Survives worker OOM/SIGKILL so poison messages can be acked after N attempts.
+    """
+    task_id = models.CharField(max_length=255, unique=True, db_index=True)
+    deliveries = models.PositiveIntegerField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "ETL canvas Celery delivery"
+        verbose_name_plural = "ETL canvas Celery deliveries"
+
+    def __str__(self):
+        return f"{self.task_id}: {self.deliveries}"
+
+
 def translations_placeholder():
     test = _("gvsigol_plugin_geoetl manual title")
     test = _("gvsigol_plugin_geoetl manual desc")
