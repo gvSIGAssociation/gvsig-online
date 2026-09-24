@@ -295,7 +295,7 @@ def _delete_replaced_image_on_commit(panel, old_name):
     transaction.on_commit(lambda: storage.delete(old_name))
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required
 @staff_required
 def dashboard_panels(request):
     panels = [
@@ -305,7 +305,7 @@ def dashboard_panels(request):
     return render(request, 'panels_list.html', {'panels': panels})
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required
 @staff_required
 def dashboard_panel_add(request):
     projects = _manageable_projects(request)
@@ -339,7 +339,7 @@ def dashboard_panel_add(request):
     return render(request, 'panels_form.html', _admin_panel_context(request))
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required
 @staff_required
 @transaction.atomic
 def dashboard_panel_update(request, panel_id):
@@ -395,7 +395,7 @@ def dashboard_panel_update(request, panel_id):
     return render(request, 'panels_form.html', _admin_panel_context(request, panel))
 
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required
 @staff_required
 @require_http_methods(['POST'])
 def dashboard_panel_delete(request, panel_id):
