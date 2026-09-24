@@ -979,7 +979,7 @@ def etl_schema_shape(request):
 
             return HttpResponse(response, content_type="application/json")
 
-@login_required(login_url='/gvsigonline/auth/login_user/')
+@login_required
 @staff_required
 def test_conexion(request):
     if request.method == 'POST':
