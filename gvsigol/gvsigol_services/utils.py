@@ -596,6 +596,39 @@ def create_workspace(server_id, ws_name, uri, values, username):
         gs.reload_nodes()
         return newWs
 
+def _connection_passwd(params):
+    """Devuelve la contraseña de unos params de conexión, o '' si falta/está enmascarada."""
+    if not params:
+        return ''
+    passwd = params.get('passwd', params.get('password', '')) or ''
+    if passwd == '****':
+        return ''
+    return passwd
+
+
+def _ensure_connection_password_from_cartodb(conn):
+    """
+    Si la Connection del sistema no tiene password usable, la rellena desde
+    GVSIGOL_USERS_CARTODB. Evita que datastores nuevos (p.ej. al clonar un
+    proyecto) fallen al consultar/editar features con 'no password supplied'.
+    """
+    dbpassword = settings.GVSIGOL_USERS_CARTODB.get('dbpassword', '') or ''
+    if not dbpassword:
+        return conn
+    try:
+        params = conn.get_connection_params()
+    except Exception:
+        return conn
+    if _connection_passwd(params):
+        return conn
+    params['passwd'] = dbpassword
+    # Normalizar: preferimos 'passwd' (clave usada por GeoServer/PostGIS en gvsigol)
+    params.pop('password', None)
+    conn.connection_params = json.dumps(params)
+    conn.save()
+    return conn
+
+
 def get_system_connection():
     """
     Obtiene la conexión del sistema para datastores automáticos de usuarios.
@@ -603,6 +636,7 @@ def get_system_connection():
     haber sido creada por la migración 0088_create_system_connection.
     
     Busca una conexión existente con los mismos parámetros (host, port, database, user).
+    Prefiere conexiones con password; si la encontrada no tiene, la rellena desde settings.
     
     Returns:
         Connection: La conexión del sistema
@@ -617,6 +651,7 @@ def get_system_connection():
     
     # Buscar conexión existente con los mismos parámetros de conexión
     # Puede ser una conexión migrada (con_database_host) o del sistema (con_system_database_host)
+    candidates = []
     for conn in Connection.objects.filter(type='PostGIS'):
         try:
             params = conn.get_connection_params()
@@ -624,10 +659,14 @@ def get_system_connection():
                 str(params.get('port')) == str(dbport) and 
                 params.get('database') == dbname and 
                 params.get('user') == dbuser):
-                # Encontrada conexión con los mismos parámetros
-                return conn
-        except:
+                candidates.append((conn, _connection_passwd(params)))
+        except Exception:
             continue
+
+    if candidates:
+        # Preferir una Connection que ya tenga password
+        candidates.sort(key=lambda item: bool(item[1]), reverse=True)
+        return _ensure_connection_password_from_cartodb(candidates[0][0])
     
     # No se encontró ninguna conexión compatible
     raise Connection.DoesNotExist(
@@ -644,7 +683,8 @@ def create_datastore(username, ds_name, ws):
     ds_type = 'v_PostGIS'
     description = 'BBDD ' + ds_name
 
-    # Obtener la conexión del sistema (debe existir, creada por migración)
+    # Obtener la conexión del sistema (debe existir, creada por migración).
+    # get_system_connection garantiza password usable cuando está en settings.
     connection = get_system_connection()
     
     # Los parámetros de conexión para GeoServer (incluyen schema)
@@ -1211,12 +1251,9 @@ def clone_layer(target_datastore, layer, layer_group, clone_conf=None):
             dbpassword = settings.GVSIGOL_USERS_CARTODB['dbpassword']
             i = Introspect(database=dbname, host=dbhost, port=dbport, user=dbuser, password=dbpassword)
             table_name = layer.source_name if layer.source_name else layer.name
-            schema_name = layer.datastore.name
-            try:
-                schema_name = json.loads(layer.datastore.connection_params)["schema"]
-            except:
-                pass
-            new_table_name = i.clone_table(schema_name, table_name, target_datastore.name, table_name, copy_data=clone_conf.copy_data)
+            schema_name = layer.datastore.get_schema_name() if hasattr(layer.datastore, 'get_schema_name') else layer.datastore.name
+            target_schema = target_datastore.get_schema_name() if hasattr(target_datastore, 'get_schema_name') else target_datastore.name
+            new_table_name = i.clone_table(schema_name, table_name, target_schema, table_name, copy_data=clone_conf.copy_data)
             i.close()
 
             from gvsigol_services import views
@@ -1235,7 +1272,7 @@ def clone_layer(target_datastore, layer, layer_group, clone_conf=None):
                 new_name = base_name
                 i = 1
                 salt = ''
-                while Layer.objects.filter(name=layer.name, datastore=target_datastore).exists():
+                while Layer.objects.filter(name=new_name, datastore=target_datastore).exists():
                     new_name = base_name + '_' + str(i) + salt
                     i = i + 1
                     if (i%1000) == 0:

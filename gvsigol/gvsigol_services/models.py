@@ -798,6 +798,33 @@ class Datastore(models.Model):
         if self.is_using_connection():
             # Nuevo modelo: obtener de la Connection y añadir schema
             params = self.connection.get_connection_params()
+            # Si la Connection no tiene password usable (migración/JNDI/enmascarado),
+            # recuperar desde connection_params del datastore (p.ej. datastores
+            # creados al clonar proyectos, donde el JSON sí guarda passwd) o,
+            # si coincide con GVSIGOL_USERS_CARTODB, desde settings.
+            passwd = params.get('passwd', params.get('password', '')) or ''
+            if not passwd or passwd == '****':
+                try:
+                    legacy = json.loads(self.connection_params) if self.connection_params else {}
+                    legacy_passwd = legacy.get('passwd', legacy.get('password', '')) or ''
+                    if legacy_passwd and legacy_passwd != '****':
+                        params['passwd'] = legacy_passwd
+                        params.pop('password', None)
+                        passwd = legacy_passwd
+                except Exception:
+                    pass
+            if not passwd or passwd == '****':
+                try:
+                    cartodb = getattr(settings, 'GVSIGOL_USERS_CARTODB', None) or {}
+                    if (params.get('host') == cartodb.get('dbhost') and
+                            str(params.get('port')) == str(cartodb.get('dbport')) and
+                            params.get('database') == cartodb.get('dbname') and
+                            params.get('user') == cartodb.get('dbuser') and
+                            cartodb.get('dbpassword')):
+                        params['passwd'] = cartodb['dbpassword']
+                        params.pop('password', None)
+                except Exception:
+                    pass
             params['schema'] = self.schema or 'public'
             return params
         else:
