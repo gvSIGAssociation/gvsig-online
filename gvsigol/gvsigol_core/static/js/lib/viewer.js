@@ -460,6 +460,19 @@ viewer.core = {
 		if (!code) {
 			return null;
 		}
+		if (typeof code === 'number') {
+			code = 'EPSG:' + code;
+		} else {
+			code = String(code).trim();
+			if (/^\d+$/.test(code)) {
+				code = 'EPSG:' + code;
+			} else {
+				var normalized = this._normalizeProjectionCode(code);
+				if (normalized) {
+					code = normalized;
+				}
+			}
+		}
 		try {
 			var proj = ol.proj.get(code);
 			if (proj && proj.getUnits()) {
@@ -476,21 +489,44 @@ viewer.core = {
 			return 'm';
 		}
 		// Most projected EPSG codes used in gvSIG Online are metric (UTM, etc.)
-		var epsgMatch = /^EPSG:(\d+)$/.exec(code);
+		var epsgMatch = /^EPSG:(\d+)$/i.exec(code);
 		if (epsgMatch) {
 			var n = parseInt(epsgMatch[1], 10);
 			if (n !== 4326 && n !== 4258 && n !== 4269) {
 				return 'm';
 			}
+			return 'degrees';
 		}
 		return null;
 	},
 
+	_normalizeProjectionCode: function(code) {
+		if (code == null || code === '') {
+			return null;
+		}
+		if (typeof code === 'number') {
+			return 'EPSG:' + code;
+		}
+		code = String(code).trim();
+		if (/^\d+$/.test(code)) {
+			return 'EPSG:' + code;
+		}
+		var m = /^(?:EPSG:)?(\d+)$/i.exec(code);
+		if (m) {
+			return 'EPSG:' + m[1];
+		}
+		return code;
+	},
+
 	/**
-	 * Project CRS for incompatibility checks. Classic View often stays on EPSG:3857
-	 * while viewer_default_crs reflects the project setting shown in the UI.
+	 * Project CRS for incompatibility checks. Prefer the UI selector (what the user
+	 * sees as "map CRS"), then viewer_default_crs. Classic ol.View often stays on 3857.
 	 */
 	_getMapProjectionCodeForCheck: function() {
+		var select = document.getElementById('custom-mouse-position-projection');
+		if (select && select.value) {
+			return select.value;
+		}
 		if (this.conf && this.conf.viewer_default_crs) {
 			return this.conf.viewer_default_crs;
 		}
@@ -498,6 +534,27 @@ viewer.core = {
 			return this.map.getView().getProjection().getCode();
 		}
 		return 'EPSG:3857';
+	},
+
+	/**
+	 * CRS the layer is "defined in" for the warning message.
+	 * Prefer native_srs over wmts_options.projection: GWC options are often rewritten to
+	 * the project CRS (or 3857 fallback), which hides metric↔geographic mismatches.
+	 */
+	_getLayerDefinedProjectionCode: function(layerConf) {
+		if (!layerConf) {
+			return 'EPSG:3857';
+		}
+		if (layerConf.native_srs) {
+			return layerConf.native_srs;
+		}
+		if (layerConf.crs && layerConf.crs.crs) {
+			return layerConf.crs.crs;
+		}
+		if (layerConf.external_params && layerConf.external_params.srs) {
+			return layerConf.external_params.srs;
+		}
+		return this._getLayerTileProjectionCode(layerConf);
 	},
 
 	_getLayerTileProjectionCode: function(layerConf) {
@@ -527,6 +584,8 @@ viewer.core = {
 	},
 
 	_isMetricGeographicIncompatible: function(tileProjCode, mapProjCode) {
+		tileProjCode = this._normalizeProjectionCode(tileProjCode);
+		mapProjCode = this._normalizeProjectionCode(mapProjCode);
 		if (!tileProjCode || !mapProjCode || tileProjCode === mapProjCode) {
 			return false;
 		}
@@ -558,14 +617,23 @@ viewer.core = {
 	},
 
 	/**
-	 * If tile CRS and project/map CRS are metric <-> geographic incompatible,
+	 * If layer-defined CRS and project/map CRS are metric <-> geographic incompatible,
 	 * show the same warning as the SPA and return true (caller should skip the layer).
 	 */
 	_warnIfProjectionIncompatible: function(layerConf, tileProjCode) {
-		var mapProjCode = this._getMapProjectionCodeForCheck();
-		var tileCode = tileProjCode || this._getLayerTileProjectionCode(layerConf);
+		var mapProjCode = this._normalizeProjectionCode(this._getMapProjectionCodeForCheck());
+		// Use native/defined CRS for the check (not GWC-rewritten wmts_options.projection).
+		var tileCode = this._normalizeProjectionCode(
+			tileProjCode || this._getLayerDefinedProjectionCode(layerConf)
+		);
 		if (!this._isMetricGeographicIncompatible(tileCode, mapProjCode)) {
-			return false;
+			// Still check tile grid CRS when it differs (e.g. native missing, GWC on 3857)
+			var gridCode = this._normalizeProjectionCode(this._getLayerTileProjectionCode(layerConf));
+			if (!gridCode || gridCode === tileCode ||
+					!this._isMetricGeographicIncompatible(gridCode, mapProjCode)) {
+				return false;
+			}
+			tileCode = gridCode;
 		}
 		var layerTitle = (layerConf && (layerConf.title || layerConf.name)) || '';
 		var detail = this._formatProjectionIncompatibilityMessage(layerTitle, tileCode, mapProjCode);
@@ -1040,10 +1108,12 @@ viewer.core = {
 		var url = layerConf.wms_url;
 		if (layerConf.cached) {
 			url = layerConf.cache_url;
-			// Cached tiles cannot be safely reprojected metric <-> geographic (same as SPA).
-			if (this._warnIfProjectionIncompatible(layerConf)) {
-				return;
-			}
+		}
+		// Cached / GWC / WMTS tiles: warn when layer CRS vs project CRS is metric↔geographic.
+		var usesTileCache = !!(layerConf.cached || layerConf.wmts_options ||
+			(layerConf.cache_url && String(layerConf.cache_url).indexOf('/gwc/') !== -1));
+		if (usesTileCache && this._warnIfProjectionIncompatible(layerConf)) {
+			return;
 		}
 		var wmsLayer = null;
 
