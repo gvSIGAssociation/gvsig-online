@@ -1003,7 +1003,6 @@ msgstr "Debe rellenar todos los campos"
 msgid "Download Layer Resources"
 msgstr "Descargar recursos de capa"
 
-#, fuzzy
 
 #: gvsigol_core/static/js/lib/viewer.js
 msgid "Error loading the layer"
@@ -1021,6 +1020,7 @@ msgstr ""
 "costosa y podría bloquear el navegador. La capa no se mostrará en esta "
 "proyección."
 
+#, fuzzy
 #~| msgid "Select all"
 #~ msgid "Select"
 #~ msgstr "Seleccionar todo"
