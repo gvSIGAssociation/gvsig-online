@@ -1002,6 +1002,23 @@ msgid "You must fill in all fields"
 msgstr ""
 
 #, fuzzy
+
+#: gvsigol_core/static/js/lib/viewer.js
+msgid "Error loading the layer"
+msgstr "Error loading the layer"
+
+#: gvsigol_core/static/js/lib/viewer.js
+msgid ""
+"The layer '%(layer)s' is defined in %(tileProj)s but the map is in %(mapProj)s. "
+"Reprojection between metric and geographic systems is computationally very "
+"expensive and could freeze the browser. The layer will not be displayed in "
+"this projection."
+msgstr ""
+"The layer '%(layer)s' is defined in %(tileProj)s but the map is in %(mapProj)s. "
+"Reprojection between metric and geographic systems is computationally very "
+"expensive and could freeze the browser. The layer will not be displayed in "
+"this projection."
+
 #~| msgid "Select all"
 #~ msgid "Select"
 #~ msgstr "Select all"

@@ -1004,6 +1004,23 @@ msgid "Download Layer Resources"
 msgstr "Descargar recursos de capa"
 
 #, fuzzy
+
+#: gvsigol_core/static/js/lib/viewer.js
+msgid "Error loading the layer"
+msgstr "Error al cargar la capa"
+
+#: gvsigol_core/static/js/lib/viewer.js
+msgid ""
+"The layer '%(layer)s' is defined in %(tileProj)s but the map is in %(mapProj)s. "
+"Reprojection between metric and geographic systems is computationally very "
+"expensive and could freeze the browser. The layer will not be displayed in "
+"this projection."
+msgstr ""
+"La capa '%(layer)s' está definida en %(tileProj)s pero el mapa está en %(mapProj)s. "
+"La reproyección entre sistemas métricos y geográficos es computacionalmente muy "
+"costosa y podría bloquear el navegador. La capa no se mostrará en esta "
+"proyección."
+
 #~| msgid "Select all"
 #~ msgid "Select"
 #~ msgstr "Seleccionar todo"
