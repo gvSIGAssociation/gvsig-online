@@ -49,8 +49,11 @@ messageBox.prototype.createModal = function() {
 
 /**
  * TODO.
+ * @param {string} type - info|success|warning|error
+ * @param {string} msg
+ * @param {string} [customTitle] - optional title override (e.g. SPA parity messages)
  */
-messageBox.prototype.show = function(type, msg) {
+messageBox.prototype.show = function(type, msg, customTitle) {
 	this.createModal();
 	var title = '';
 	var style = '';
@@ -75,6 +78,10 @@ messageBox.prototype.show = function(type, msg) {
 		title = 'Error';
 		style = 'alert-danger';
 		icon = 'fa-ban';
+	}
+
+	if (customTitle) {
+		title = customTitle;
 	}
 
 	$('#modal-error .modal-body .alert').removeClass("alert-info alert-warning alert-danger alert-success").addClass(style);

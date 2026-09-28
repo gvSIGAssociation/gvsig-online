@@ -444,6 +444,149 @@ viewer.core = {
 		}
 	},
 
+	/**
+	 * Projection units helpers — aligned with SPA createExternalVectorTileLayer.
+	 * Metric <-> geographic tile reprojection is blocked (browser freeze risk).
+	 */
+	_isMetricProjectionUnits: function(units) {
+		return units === 'm' || units === 'ft' || units === 'us-ft';
+	},
+
+	_isGeographicProjectionUnits: function(units) {
+		return units === 'degrees';
+	},
+
+	_getProjectionUnits: function(code) {
+		if (!code) {
+			return null;
+		}
+		try {
+			var proj = ol.proj.get(code);
+			if (proj && proj.getUnits()) {
+				return proj.getUnits();
+			}
+		} catch (err) {
+			/* fall through to heuristics */
+		}
+		// Fallbacks when proj4 has not registered the CRS yet
+		if (code === 'EPSG:4326' || code === 'CRS:84' || code === 'EPSG:4258') {
+			return 'degrees';
+		}
+		if (code === 'EPSG:3857' || code === 'EPSG:900913') {
+			return 'm';
+		}
+		// Most projected EPSG codes used in gvSIG Online are metric (UTM, etc.)
+		var epsgMatch = /^EPSG:(\d+)$/.exec(code);
+		if (epsgMatch) {
+			var n = parseInt(epsgMatch[1], 10);
+			if (n !== 4326 && n !== 4258 && n !== 4269) {
+				return 'm';
+			}
+		}
+		return null;
+	},
+
+	/**
+	 * Project CRS for incompatibility checks. Classic View often stays on EPSG:3857
+	 * while viewer_default_crs reflects the project setting shown in the UI.
+	 */
+	_getMapProjectionCodeForCheck: function() {
+		if (this.conf && this.conf.viewer_default_crs) {
+			return this.conf.viewer_default_crs;
+		}
+		if (this.map && this.map.getView && this.map.getView().getProjection()) {
+			return this.map.getView().getProjection().getCode();
+		}
+		return 'EPSG:3857';
+	},
+
+	_getLayerTileProjectionCode: function(layerConf) {
+		if (!layerConf) {
+			return 'EPSG:3857';
+		}
+		if (layerConf.wmts_options && layerConf.wmts_options.projection) {
+			return layerConf.wmts_options.projection;
+		}
+		if (layerConf.external_params && layerConf.external_params.srs) {
+			return layerConf.external_params.srs;
+		}
+		if (layerConf.native_srs) {
+			return layerConf.native_srs;
+		}
+		if (layerConf.crs && layerConf.crs.crs) {
+			return layerConf.crs.crs;
+		}
+		if (layerConf.type === 'MVT') {
+			return 'EPSG:3857';
+		}
+		// Cached WMTS without wmts_options falls back to EPSG:3857 in _loadInternalLayer
+		if (layerConf.cached) {
+			return 'EPSG:3857';
+		}
+		return null;
+	},
+
+	_isMetricGeographicIncompatible: function(tileProjCode, mapProjCode) {
+		if (!tileProjCode || !mapProjCode || tileProjCode === mapProjCode) {
+			return false;
+		}
+		var tileUnits = this._getProjectionUnits(tileProjCode);
+		var mapUnits = this._getProjectionUnits(mapProjCode);
+		if (!tileUnits || !mapUnits) {
+			return false;
+		}
+		var tileIsMetric = this._isMetricProjectionUnits(tileUnits);
+		var tileIsGeographic = this._isGeographicProjectionUnits(tileUnits);
+		var mapIsMetric = this._isMetricProjectionUnits(mapUnits);
+		var mapIsGeographic = this._isGeographicProjectionUnits(mapUnits);
+		return (tileIsMetric && mapIsGeographic) || (tileIsGeographic && mapIsMetric);
+	},
+
+	_formatProjectionIncompatibilityMessage: function(layerTitle, tileProjCode, mapProjCode) {
+		var template = gettext("The layer '%(layer)s' is defined in %(tileProj)s but the map is in %(mapProj)s. Reprojection between metric and geographic systems is computationally very expensive and could freeze the browser. The layer will not be displayed in this projection.");
+		var params = {
+			layer: layerTitle || '',
+			tileProj: tileProjCode,
+			mapProj: mapProjCode
+		};
+		if (typeof interpolate === 'function') {
+			return interpolate(template, params, true);
+		}
+		return template.replace(/%\((\w+)\)s/g, function(_, key) {
+			return params[key] != null ? String(params[key]) : '';
+		});
+	},
+
+	/**
+	 * If tile CRS and project/map CRS are metric <-> geographic incompatible,
+	 * show the same warning as the SPA and return true (caller should skip the layer).
+	 */
+	_warnIfProjectionIncompatible: function(layerConf, tileProjCode) {
+		var mapProjCode = this._getMapProjectionCodeForCheck();
+		var tileCode = tileProjCode || this._getLayerTileProjectionCode(layerConf);
+		if (!this._isMetricGeographicIncompatible(tileCode, mapProjCode)) {
+			return false;
+		}
+		var layerTitle = (layerConf && (layerConf.title || layerConf.name)) || '';
+		var detail = this._formatProjectionIncompatibilityMessage(layerTitle, tileCode, mapProjCode);
+		console.error(
+			'CRITICAL: Cannot load layer "' + layerTitle + '" - incompatible projection units. ' +
+			'Tile projection: ' + tileCode + ', Map projection: ' + mapProjCode + '.'
+		);
+		if (typeof messageBox !== 'undefined' && messageBox.show) {
+			messageBox.show(
+				'warning',
+				detail,
+				gettext('Error loading the layer')
+			);
+		}
+		if (layerConf) {
+			layerConf.visible = false;
+			layerConf._projectionIncompatible = true;
+		}
+		return true;
+	},
+
     _loadExternalLayer: function(externalLayer, group, checkTileLoadError, layer_overview_id) {
 	    var self = this;
 	    var visible = false;
@@ -460,6 +603,20 @@ viewer.core = {
 
 	    var layerId = this._nextLayerId();
 	    externalLayer.id = layerId;
+
+		if (externalLayer['type'] == 'MVT') {
+			var mvtTileProj = (externalLayer.external_params && externalLayer.external_params.srs) || 'EPSG:3857';
+			this._warnIfProjectionIncompatible(externalLayer, mvtTileProj);
+			// Classic viewer does not render MVT; SPA handles VectorTile layers.
+			return;
+		}
+
+		if (externalLayer['cached'] || externalLayer['type'] == 'WMTS') {
+			var extTileProj = this._getLayerTileProjectionCode(externalLayer);
+			if (extTileProj && this._warnIfProjectionIncompatible(externalLayer, extTileProj)) {
+				return;
+			}
+		}
 
     	if (externalLayer['type'] == 'WMS') {
 			var wmsSource = new ol.source.TileWMS({
@@ -883,6 +1040,10 @@ viewer.core = {
 		var url = layerConf.wms_url;
 		if (layerConf.cached) {
 			url = layerConf.cache_url;
+			// Cached tiles cannot be safely reprojected metric <-> geographic (same as SPA).
+			if (this._warnIfProjectionIncompatible(layerConf)) {
+				return;
+			}
 		}
 		var wmsLayer = null;
 
