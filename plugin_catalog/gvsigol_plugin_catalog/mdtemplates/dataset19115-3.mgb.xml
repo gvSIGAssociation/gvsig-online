@@ -22,24 +22,24 @@
   <defaultLocale>
     <lan:PT_Locale>
       <lan:language>
-        <lan:LanguageCode codeList="codelist.xml#LanguageCode" codeListValue="por"/>
+        <lan:LanguageCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#LanguageCode" codeListValue="por"/>
       </lan:language>
       <lan:characterEncoding>
-        <lan:MD_CharacterSetCode codeList="codelist.xml#MD_CharacterSetCode" codeListValue="utf8"/>
+        <lan:MD_CharacterSetCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_CharacterSetCode" codeListValue="utf8"/>
       </lan:characterEncoding>
     </lan:PT_Locale>
   </defaultLocale>
   <metadataScope>
     <MD_MetadataScope>
       <resourceScope>
-        <mcc:MD_ScopeCode codeList="codelist.xml#MD_ScopeCode" codeListValue="dataset"/>
+        <mcc:MD_ScopeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ScopeCode" codeListValue="dataset"/>
       </resourceScope>
     </MD_MetadataScope>
   </metadataScope>
   <contact>
     <cit:CI_Responsibility>
       <cit:role>
-        <cit:CI_RoleCode codeList="codelist.xml#CI_RoleCode" codeListValue="originator"/>
+        <cit:CI_RoleCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_RoleCode" codeListValue="originator"/>
       </cit:role>
       <cit:party>
         <cit:CI_Organisation>
@@ -56,7 +56,7 @@
         <gco:DateTime></gco:DateTime>
       </cit:date>
       <cit:dateType>
-        <cit:CI_DateTypeCode codeList="codelist.xml#CI_DateTypeCode" codeListValue="creation"/>
+        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="creation"/>
       </cit:dateType>
     </cit:CI_Date>
   </dateInfo>
@@ -98,7 +98,7 @@
                 <gco:DateTime></gco:DateTime>
               </cit:date>
               <cit:dateType>
-                <cit:CI_DateTypeCode codeList="codelist.xml#CI_DateTypeCode" codeListValue="creation"/>
+                <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="creation"/>
               </cit:dateType>
             </cit:CI_Date>
           </cit:date>
@@ -115,12 +115,12 @@
         <gco:CharacterString>Resumo descritivo do conjunto de dados geoespaciais</gco:CharacterString>
       </mri:abstract>
       <mri:status>
-        <mcc:MD_ProgressCode codeList="codelist.xml#MD_ProgressCode" codeListValue="completed"/>
+        <mcc:MD_ProgressCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ProgressCode" codeListValue="completed"/>
       </mri:status>
       <mri:pointOfContact>
         <cit:CI_Responsibility>
           <cit:role>
-            <cit:CI_RoleCode codeList="codelist.xml#CI_RoleCode" codeListValue="originator"/>
+            <cit:CI_RoleCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_RoleCode" codeListValue="originator"/>
           </cit:role>
           <cit:party>
             <cit:CI_Organisation>
@@ -132,7 +132,7 @@
         </cit:CI_Responsibility>
       </mri:pointOfContact>
       <mri:spatialRepresentationType>
-        <mcc:MD_SpatialRepresentationTypeCode codeList="codelist.xml#MD_SpatialRepresentationTypeCode" codeListValue="vector"/>
+        <mcc:MD_SpatialRepresentationTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="vector"/>
       </mri:spatialRepresentationType>
       <mri:topicCategory>
         <mri:MD_TopicCategoryCode>imageryBaseMapsEarthCover</mri:MD_TopicCategoryCode>
@@ -152,10 +152,10 @@
       <mri:defaultLocale>
         <lan:PT_Locale>
           <lan:language>
-            <lan:LanguageCode codeList="codelist.xml#LanguageCode" codeListValue="por"/>
+            <lan:LanguageCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#LanguageCode" codeListValue="por"/>
           </lan:language>
           <lan:characterEncoding>
-            <lan:MD_CharacterSetCode codeList="codelist.xml#MD_CharacterSetCode" codeListValue="utf8"/>
+            <lan:MD_CharacterSetCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_CharacterSetCode" codeListValue="utf8"/>
           </lan:characterEncoding>
         </lan:PT_Locale>
       </mri:defaultLocale>
@@ -168,7 +168,7 @@
           <mrd:distributorContact>
             <cit:CI_Responsibility>
               <cit:role>
-                <cit:CI_RoleCode codeList="codelist.xml#CI_RoleCode" codeListValue="distributor"/>
+                <cit:CI_RoleCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_RoleCode" codeListValue="distributor"/>
               </cit:role>
               <cit:party>
                 <cit:CI_Organisation>
