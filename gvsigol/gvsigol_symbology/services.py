@@ -25,15 +25,19 @@
 from .models import Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, RasterSymbolizer, ColorMap, ColorMapEntry, TextSymbolizer as TextSymbolizerModel
 from django.db.models import Max
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 from gvsigol_core import geom
 from gvsigol_services.models import Layer
 from . import utils, sld_builder
 import tempfile
 import json
+import logging
 import os
 import re
 from lxml import etree
 from django.utils.crypto import get_random_string
+
+LOG = logging.getLogger('gvsigol')
 
 # Styles that store the full SLD document in style.sld (not built from Rule/Symbolizer rows).
 SLD_STORED_TYPES = ('CS', 'MC')
@@ -490,7 +494,47 @@ def _sld_user_style_title(sld_text):
     return None
 
 
-def sld_import(name, is_default, layer_id, file, mapservice, style_type=None, title=None):
+def _attach_imported_custom_legend(style, style_type, legend_bytes=None):
+    """Restore a packaged legend image and/or regenerate heatmap ColorMap PNG."""
+    from gvsigol_services.utils import set_default_permissions
+    legend_dir = utils.check_custom_legend_path()
+    legend_name = style.name + '.png'
+    legend_url = None
+
+    if legend_bytes:
+        try:
+            dest = os.path.join(legend_dir, legend_name)
+            with open(dest, 'wb') as fh:
+                fh.write(legend_bytes)
+            set_default_permissions(dest)
+            legend_url = settings.MEDIA_URL + 'custom_legends/' + legend_name
+        except Exception as exc:
+            LOG.warning(
+                'Could not restore packaged custom legend for style %s: %s',
+                style.name, exc,
+            )
+
+    if not legend_url and style_type == 'MC':
+        legend_url = utils.generate_heatmap_legend_from_sld(
+            legend_dir, style.sld, legend_name
+        )
+
+    if legend_url:
+        style.has_custom_legend = True
+        style.custom_legend_url = legend_url
+        style.save(update_fields=['has_custom_legend', 'custom_legend_url'])
+        return True
+
+    if style_type == 'MC':
+        LOG.warning(
+            'Heatmap style %s imported without custom legend '
+            '(GetLegendGraphic will show nodata swatch)',
+            style.name,
+        )
+    return False
+
+
+def sld_import(name, is_default, layer_id, file, mapservice, style_type=None, title=None, legend_bytes=None):
 
     layer = Layer.objects.get(id=int(layer_id))
     raw_sld_text = file.read()
@@ -517,15 +561,7 @@ def sld_import(name, is_default, layer_id, file, mapservice, style_type=None, ti
         # Align NamedLayer / UserStyle names with the imported layer & style
         # (same rewrite used when cloning heatmap/custom styles).
         style = clone_sld_style(style, layer, name)
-        if style_type == 'MC':
-            legend_path = utils.check_custom_legend_path()
-            legend_url = utils.generate_heatmap_legend_from_sld(
-                legend_path, style.sld, style.name + '.png'
-            )
-            if legend_url:
-                style.has_custom_legend = True
-                style.custom_legend_url = legend_url
-                style.save(update_fields=['has_custom_legend', 'custom_legend_url'])
+        _attach_imported_custom_legend(style, style_type, legend_bytes=legend_bytes)
         sld_body = utils.encode_xml(style.sld)
         if mapservice.createStyle(style.name, sld_body):
             mapservice.setLayerStyle(layer, style.name, style.is_default)

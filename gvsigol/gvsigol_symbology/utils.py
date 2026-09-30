@@ -30,11 +30,14 @@ from gvsigol import settings
 import tempfile, zipfile
 import os, shutil, errno
 import json
+import logging
 import re
 import gdaltools
 import xml.etree.ElementTree as ET
 
 from PIL import Image, ImageColor, ImageDraw, ImageFont
+
+LOG = logging.getLogger('gvsigol')
 
 def __get_uncompressed_file_upload_path(f):
     dir_path = tempfile.mkdtemp(suffix='', prefix='tmp-library-')
@@ -199,15 +202,23 @@ def check_library_path(library):
         return library_path
     
 def check_custom_legend_path():
+    """Ensure MEDIA_ROOT/custom_legends/ exists and is usable for writes."""
     legend_path = os.path.join(settings.MEDIA_ROOT, "custom_legends") + "/"
-    try:        
-        os.mkdir(legend_path)
-        os.chmod(legend_path, 0o750)
-        return legend_path
-     
+    try:
+        os.makedirs(legend_path, mode=0o775, exist_ok=True)
     except OSError as e:
-        print(('Info: %s' % e))
+        LOG.warning('Could not create custom_legends directory %s: %s', legend_path, e)
         return legend_path
+    try:
+        os.chmod(legend_path, 0o775)
+    except OSError:
+        pass
+    if not os.access(legend_path, os.W_OK):
+        LOG.warning(
+            'custom_legends directory is not writable by process user: %s',
+            legend_path,
+        )
+    return legend_path
     
 def save_custom_legend(legend_path, file, file_name):    
     try: 
@@ -343,7 +354,8 @@ def generate_heatmap_legend_from_sld(legend_path, sld, file_name):
         set_default_permissions(file_path)
         return settings.MEDIA_URL + "custom_legends/" + file_name
 
-    except Exception:
+    except Exception as e:
+        LOG.warning('generate_heatmap_legend_from_sld failed for %s: %s', file_name, e)
         return False
     
             
