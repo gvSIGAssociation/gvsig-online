@@ -302,12 +302,28 @@ def _styles_payload(layer, skip_db_sld=False):
                     layer.id, st.id, _sld_exc,
                 )
                 sld_errors.append({'style': st.name, 'error': str(_sld_exc)})
+        legend_abs = None
+        if st.has_custom_legend and st.custom_legend_url:
+            # Prefer the file named after the style (heatmap / color-table convention).
+            candidate = os.path.join(settings.MEDIA_ROOT, 'custom_legends', st.name + '.png')
+            if os.path.isfile(candidate):
+                legend_abs = candidate
+            else:
+                # Fall back to basename from custom_legend_url (/media/custom_legends/foo.png).
+                base = os.path.basename(st.custom_legend_url.split('?', 1)[0])
+                if base:
+                    alt = os.path.join(settings.MEDIA_ROOT, 'custom_legends', base)
+                    if os.path.isfile(alt):
+                        legend_abs = alt
         out.append({
             'name': st.name,
             'title': st.title,
             'is_default': st.is_default,
             'type': st.type,
             'sld': sld,
+            'has_custom_legend': bool(st.has_custom_legend and legend_abs),
+            'custom_legend_file': os.path.basename(legend_abs) if legend_abs else None,
+            '_custom_legend_abs': legend_abs,
         })
     return out, sld_errors
 
@@ -637,6 +653,22 @@ def build_project_zip(project: Project, export_options=None, progress_cb=None):
                 for i, st in enumerate(layer_entry['styles']):
                     with open(os.path.join(sld_dir, 'style_%d.sld' % i), 'w', encoding='utf-8') as fh:
                         fh.write(st.get('sld') or '')
+                    legend_abs = st.pop('_custom_legend_abs', None)
+                    if legend_abs and os.path.isfile(legend_abs):
+                        legend_name = 'style_%d_legend.png' % i
+                        try:
+                            shutil.copy2(legend_abs, os.path.join(sld_dir, legend_name))
+                            st['custom_legend_file'] = legend_name
+                            st['has_custom_legend'] = True
+                        except OSError as _leg_exc:
+                            LOG.warning(
+                                'Could not pack custom legend for layer %s style %s: %s',
+                                layer.name, st.get('name'), _leg_exc,
+                            )
+                            st['custom_legend_file'] = None
+                            st['has_custom_legend'] = False
+                    else:
+                        st.pop('_custom_legend_abs', None)
 
                 group_layers.append(layer_entry)
                 _done_layers += 1

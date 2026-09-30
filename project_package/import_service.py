@@ -1732,6 +1732,7 @@ def _import_vector_layer(
         sld_import(
             style_name, is_def, lyr.id, StringIO(sld_text), server,
             style_type=st.get('type'), title=st.get('title'),
+            legend_bytes=_style_legend_bytes(extract_dir, layer_entry, i, st),
         )
 
     _reload_geoserver_vector_layer(server, lyr)
@@ -2091,6 +2092,7 @@ def _import_postgis_definition_layer(
         sld_import(
             style_name, is_def, lyr.id, StringIO(sld_text), server,
             style_type=st.get('type'), title=st.get('title'),
+            legend_bytes=_style_legend_bytes(extract_dir, layer_entry, i, st),
         )
 
     _reload_geoserver_vector_layer(server, lyr)
@@ -2326,6 +2328,29 @@ def _import_definition_layer_entry(
             exc_info=True,
         )
         return None
+
+
+def _style_legend_bytes(extract_dir, layer_entry, style_index, st):
+    """Load packaged custom legend PNG for a style, if present in the ZIP."""
+    if not extract_dir:
+        return None
+    candidates = []
+    rel = st.get('custom_legend_file')
+    eid = layer_entry.get('export_id')
+    if rel and eid:
+        candidates.append(os.path.join(extract_dir, 'symbology', 'layers', eid, rel))
+    if eid:
+        candidates.append(
+            os.path.join(extract_dir, 'symbology', 'layers', eid, 'style_%d_legend.png' % style_index)
+        )
+    for path in candidates:
+        if path and os.path.isfile(path):
+            try:
+                with open(path, 'rb') as fh:
+                    return fh.read()
+            except OSError as exc:
+                LOG.warning('Could not read packaged legend %s: %s', path, exc)
+    return None
 
 
 def _unique_style_name(server, ws_name, base):
@@ -2877,6 +2902,7 @@ def _import_raster_layer(
             sld_import(
                 style_name, is_def, lyr.id, StringIO(sld_text), server_obj,
                 style_type=st.get('type'), title=st.get('title'),
+                legend_bytes=_style_legend_bytes(extract_dir, layer_entry, i, st),
             )
             default_done = default_done or is_def
         except Exception as _sld_exc:
