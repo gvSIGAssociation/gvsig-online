@@ -464,26 +464,69 @@ def create_default_style(layer_id, style_name, style_type, geom_type, count):
     sld_body = sld_builder.build_sld(layer, style)
     return sld_body
 
-def sld_import(name, is_default, layer_id, file, mapservice, style_type=None):
+def _sld_user_style_title(sld_text):
+    """Best-effort Title from UserStyle in a stored SLD document."""
+    if not sld_text:
+        return None
+    try:
+        try:
+            root = etree.fromstring(sld_text if isinstance(sld_text, (bytes, bytearray)) else sld_text.encode('utf-8'))
+        except Exception:
+            xml_str = re.sub(
+                r'^<\?xml[^>]*encoding=[\'"].*?[\'"][^>]*\?>',
+                '',
+                (sld_text if isinstance(sld_text, str) else sld_text.decode('utf-8', errors='replace')).strip(),
+            )
+            root = etree.fromstring(xml_str.encode('utf-8'))
+        titles = root.xpath(
+            '/*[local-name()="StyledLayerDescriptor"]/*[local-name()="NamedLayer"]'
+            '/*[local-name()="UserStyle"]/*[local-name()="Title"]'
+        )
+        if titles and titles[0].text:
+            t = titles[0].text.strip()
+            return t or None
+    except Exception:
+        return None
+    return None
+
+
+def sld_import(name, is_default, layer_id, file, mapservice, style_type=None, title=None):
 
     layer = Layer.objects.get(id=int(layer_id))
     raw_sld_text = file.read()
+    if isinstance(raw_sld_text, bytes):
+        raw_sld_text = raw_sld_text.decode('utf-8', errors='replace')
 
     # SLD_STORED_TYPES (MC heatmap, CS custom): the SLD is kept verbatim in
     # style.sld and sent directly to GeoServer — do NOT try to parse rules
     # because these styles use rendering transformations (ras:Heatmap etc.)
     # that are not representable in the Rule/Symbolizer model.
     if style_type in SLD_STORED_TYPES:
+        style_title = (title or '').strip() if title else ''
+        if not style_title:
+            style_title = _sld_user_style_title(raw_sld_text) or name
         style = Style(
             name=name,
-            title=name,
+            title=style_title,
             is_default=is_default,
             type=style_type,
             sld=raw_sld_text,
         )
         style.save()
         StyleLayer(style=style, layer=layer).save()
-        sld_body = utils.encode_xml(raw_sld_text)
+        # Align NamedLayer / UserStyle names with the imported layer & style
+        # (same rewrite used when cloning heatmap/custom styles).
+        style = clone_sld_style(style, layer, name)
+        if style_type == 'MC':
+            legend_path = utils.check_custom_legend_path()
+            legend_url = utils.generate_heatmap_legend_from_sld(
+                legend_path, style.sld, style.name + '.png'
+            )
+            if legend_url:
+                style.has_custom_legend = True
+                style.custom_legend_url = legend_url
+                style.save(update_fields=['has_custom_legend', 'custom_legend_url'])
+        sld_body = utils.encode_xml(style.sld)
         if mapservice.createStyle(style.name, sld_body):
             mapservice.setLayerStyle(layer, style.name, style.is_default)
             return True

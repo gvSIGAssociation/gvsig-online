@@ -1729,7 +1729,10 @@ def _import_vector_layer(
         is_def = bool(st.get('is_default')) and not default_done
         if is_def:
             default_done = True
-        sld_import(style_name, is_def, lyr.id, StringIO(sld_text), server, style_type=st.get('type'))
+        sld_import(
+            style_name, is_def, lyr.id, StringIO(sld_text), server,
+            style_type=st.get('type'), title=st.get('title'),
+        )
 
     _reload_geoserver_vector_layer(server, lyr)
     server.updateThumbnail(lyr, 'create')
@@ -2085,7 +2088,10 @@ def _import_postgis_definition_layer(
         is_def = bool(st.get('is_default')) and not default_done
         if is_def:
             default_done = True
-        sld_import(style_name, is_def, lyr.id, StringIO(sld_text), server, style_type=st.get('type'))
+        sld_import(
+            style_name, is_def, lyr.id, StringIO(sld_text), server,
+            style_type=st.get('type'), title=st.get('title'),
+        )
 
     _reload_geoserver_vector_layer(server, lyr)
     server.updateThumbnail(lyr, 'create')
@@ -2868,7 +2874,10 @@ def _import_raster_layer(
                 server_obj, ws_obj.name, st.get('name') or ('raster_imported_%d' % i)
             )
             is_def = bool(st.get('is_default')) and not default_done
-            sld_import(style_name, is_def, lyr.id, StringIO(sld_text), server_obj, style_type=st.get('type'))
+            sld_import(
+                style_name, is_def, lyr.id, StringIO(sld_text), server_obj,
+                style_type=st.get('type'), title=st.get('title'),
+            )
             default_done = default_done or is_def
         except Exception as _sld_exc:
             LOG.warning(

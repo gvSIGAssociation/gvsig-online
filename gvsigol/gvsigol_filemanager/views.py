@@ -295,7 +295,7 @@ class UploadView(FilemanagerMixin, TemplateView):
         'label': 'Upload'
     }]
 
-    @method_decorator(login_required(login_url='/gvsigonline/auth/login_user/'))
+    @method_decorator(login_required)
     @method_decorator(staff_required)
     def dispatch(self, request, *args, **kwargs):
         if not can_manage_path(self.request, self.request.GET.get('path')):

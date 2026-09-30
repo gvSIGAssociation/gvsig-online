@@ -879,7 +879,8 @@ $(document).ready(function() {
 				var filter = 'tr[data-projectid="' + data[0] + '"]';
 				var dataset = $('#projects-table').find(filter).data();
 				if (dataset['canmanage']) {
-                	return '<a {% if IFRAME_MODE_UI %} style="display: none" {% endif %} title="' + '{% trans "Clone project" %}' + '" href="/gvsigonline/core/project_clone/' + data[0] + '/" data-toggle="tooltip" data-placement="top" class="btn btn-primary clone-project-button"><i class="fa fa-clone"></i></a>';
+					var exportUrl = '{% url "project_package_export" 888888888 %}'.replace('888888888', data[0]);
+            		return '<a title="' + '{% trans "Export project package" %}' + '" href="' + exportUrl + '" data-toggle="tooltip" data-placement="top" class="btn btn-info project-package-export-btn"><i class="fa fa-download"></i></a>';
 				}
 				else {
 					return '';
@@ -892,7 +893,7 @@ $(document).ready(function() {
 				var filter = 'tr[data-projectid="' + data[0] + '"]';
 				var dataset = $('#projects-table').find(filter).data();
 				if (dataset['canmanage']) {
-            		return '<a title="' + '{% trans "Project layer groups" %}' + '" href="/gvsigonline/services/layergroup_list/?project_id='+ data[0] + '" data-toggle="tooltip" data-placement="top" class="btn btn-warning"><i class="fa fa-object-group"></i></a>';
+                	return '<a {% if IFRAME_MODE_UI %} style="display: none" {% endif %} title="' + '{% trans "Clone project" %}' + '" href="/gvsigonline/core/project_clone/' + data[0] + '/" data-toggle="tooltip" data-placement="top" class="btn btn-primary clone-project-button"><i class="fa fa-clone"></i></a>';
 				}
 				else {
 					return '';
@@ -905,7 +906,7 @@ $(document).ready(function() {
 				var filter = 'tr[data-projectid="' + data[0] + '"]';
 				var dataset = $('#projects-table').find(filter).data();
 				if (dataset['canmanage']) {
-            		return '<a title="' + '{% trans "Update project" %}' + '" href="/gvsigonline/core/project_update/' + data[0] + '/" data-toggle="tooltip" data-placement="top" class="btn btn-success"><i class="fa fa-edit"></i></a>';
+            		return '<a title="' + '{% trans "Project layer groups" %}' + '" href="/gvsigonline/services/layergroup_list/?project_id='+ data[0] + '" data-toggle="tooltip" data-placement="top" class="btn btn-warning"><i class="fa fa-object-group"></i></a>';
 				}
 				else {
 					return '';
@@ -918,8 +919,7 @@ $(document).ready(function() {
 				var filter = 'tr[data-projectid="' + data[0] + '"]';
 				var dataset = $('#projects-table').find(filter).data();
 				if (dataset['canmanage']) {
-					var exportUrl = '{% url "project_package_export" 888888888 %}'.replace('888888888', data[0]);
-            		return '<a title="' + '{% trans "Export project package" %}' + '" href="' + exportUrl + '" data-toggle="tooltip" data-placement="top" class="btn btn-info project-package-export-btn"><i class="fa fa-download"></i></a>';
+            		return '<a title="' + '{% trans "Update project" %}' + '" href="/gvsigonline/core/project_update/' + data[0] + '/" data-toggle="tooltip" data-placement="top" class="btn btn-success"><i class="fa fa-edit"></i></a>';
 				}
 				else {
 					return '';
