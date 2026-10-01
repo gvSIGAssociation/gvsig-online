@@ -5366,3 +5366,12 @@ msgstr "El valor \"{value}\" no es válido para el campo numérico \"{field}\"."
 #: gvsigol_services/views.py:10547
 msgid "Attributions configuration updated successfully."
 msgstr "La configuración de atribuciones se ha actualizado correctamente."
+
+msgid "Publish layer after export"
+msgstr "Publicar la capa tras exportar"
+
+msgid "This field is required when publishing the layer."
+msgstr "Este campo es obligatorio al publicar la capa."
+
+msgid "The selected layer group does not belong to the same server as the datastore."
+msgstr "El grupo de capas seleccionado no pertenece al mismo servidor que el almacén de datos."

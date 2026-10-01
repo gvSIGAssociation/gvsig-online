@@ -152,7 +152,7 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
         except UnicodeError:
             shp_columns = []
             column_name_error = _("The layer contains non-ASCII characters in field names and it is not suported. Rename the offending fields and try again. Allowed characters are a-z, A-Z, _ or numbers; the first character can't be a number.")
-        form = PostgisLayerUploadForm(user=self.request.user, source_columns=shp_columns)
+        form = PostgisLayerUploadForm(user=self.request.user, source_columns=shp_columns, request=self.request)
         context['file'] = file_details
         context['form'] = form
         context["back_url"] = '%s?path=%s' % (reverse_lazy('filemanager:browser'), file_details.get('directory'))

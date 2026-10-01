@@ -231,14 +231,56 @@ msgstr "Error descomprimiendo el recurso"
 #~ msgid "Historical Exports"
 #~ msgstr "Histórico de exportaciones"
 
-#~ msgid "Export process done successfully"
-#~ msgstr "Proceso de exportación realizado satisfactoriamente"
-
 #~ msgid "Export process completed with warnings:"
 #~ msgstr "El proceso de exportación se completó con avisos:"
 
 #~ msgid "Server error"
 #~ msgstr "Error del servidor"
 
-#~ msgid "You must fill in all fields"
-#~ msgstr "Debe rellenar todos los campos"
+msgid "Publish layer after export"
+msgstr "Publicar la capa tras exportar"
+
+msgid "Exports the data to the database and publishes the layer in one step."
+msgstr "Exporta los datos a la base de datos y publica la capa en un solo paso."
+
+msgid "Title"
+msgstr "Título"
+
+msgid "Layer group"
+msgstr "Grupo de capas"
+
+msgid "No layer groups available"
+msgstr "No hay grupos de capas disponibles"
+
+msgid "Export process done successfully"
+msgstr "Proceso de exportación realizado satisfactoriamente"
+
+msgid "Export process completed with warnings: "
+msgstr "El proceso de exportación se completó con avisos: "
+
+msgid "Export and publish completed successfully"
+msgstr "Exportación y publicación completadas satisfactoriamente"
+
+msgid "Export process done successfully. Layer was already published."
+msgstr "Proceso de exportación realizado satisfactoriamente. La capa ya estaba publicada."
+
+msgid "Layer was already published."
+msgstr "La capa ya estaba publicada."
+
+msgid "Layer published successfully."
+msgstr "Capa publicada correctamente."
+
+msgid "Export process done successfully, but the layer could not be published: %(error)s"
+msgstr "Proceso de exportación realizado satisfactoriamente, pero no se pudo publicar la capa: %(error)s"
+
+msgid "You must fill in all fields"
+msgstr "Debe rellenar todos los campos"
+
+msgid "You are not allowed to use the selected datastore"
+msgstr "No tiene permiso para usar el almacén de datos seleccionado"
+
+msgid "You are not allowed to manage the selected layergroup"
+msgstr "No tiene permiso para gestionar el grupo de capas seleccionado"
+
+msgid "The selected layer group does not belong to the same server as the datastore."
+msgstr "El grupo de capas seleccionado no pertenece al mismo servidor que el almacén de datos."

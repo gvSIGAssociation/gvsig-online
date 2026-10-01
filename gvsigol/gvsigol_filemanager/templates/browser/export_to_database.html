@@ -32,6 +32,13 @@
 .pf-messages { list-style: none; margin: 0 0 16px; padding: 0; }
 .pf-messages .msg-info { border-left: 4px solid #27ae60; background: #f0fdf4; color: #1e7e34; padding: 10px 14px; border-radius: 6px; margin-bottom: 6px; font-size: 13px; }
 .pf-messages .msg-error { border-left: 4px solid #e74c3c; background: #fff5f5; color: #c0392b; padding: 10px 14px; border-radius: 6px; margin-bottom: 6px; font-size: 13px; }
+#publish-options #id_layer_group,
+#publish-options .select2-container { width: 100% !important; max-width: 100%; }
+#publish-options .select2-container .select2-selection--single .select2-selection__rendered {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
 </style>
 {% endblock %}
 
@@ -146,6 +153,29 @@
 					</div>
 				</div>
 
+				<div class="row" style="margin-top: 8px;">
+					<div class="col-md-12 form-group">
+						<label for="id_publish" style="display: inline-flex; align-items: center; gap: 8px; text-transform: none; letter-spacing: 0; font-size: 13px; font-weight: 600; color: var(--pf-text); cursor: pointer;">
+							{{ form.publish }}
+							{% trans "Publish layer after export" %}
+						</label>
+						<p class="text-muted" style="font-size: 12px; margin-top: 4px; margin-bottom: 0;">{% trans "Exports the data to the database and publishes the layer in one step." %}</p>
+					</div>
+				</div>
+
+				<div id="publish-options" style="display: none;">
+					<div class="row">
+						<div class="col-md-6 form-group">
+							<label for="id_title">{% trans "Title" %}</label>
+							{{ form.title }}
+						</div>
+						<div class="col-md-6 form-group">
+							<label for="id_layer_group">{% trans "Layer group" %}</label>
+							{{ form.layer_group }}
+						</div>
+					</div>
+				</div>
+
 			</div>
 		</form>
 
@@ -175,18 +205,26 @@
 		}
 		setTruncate();
 
-		// translate default layer group
-		var lgs = $("#id_layer_group");
-		var lg_options = $("#id_layer_group option");
-		for (var i = 0; i < lg_options.length; i++) {
-			text = $(lg_options[i]).text();
-			if (text == "__default__") {
-				$(lg_options[i]).html('{% trans "Default" %}');
+		function translateDefaultLayerGroup(selectObj) {
+			var lg_options = selectObj.find("option");
+			for (var i = 0; i < lg_options.length; i++) {
+				var text = $(lg_options[i]).text();
+				if (text == "__default__") {
+					$(lg_options[i]).html('{% trans "Default" %}');
+				}
 			}
-			if (lgs.val() == "") {
-				lgs.val(1);
+		}
+
+		function initLayerGroupSelect() {
+			var selectObj = $('#id_layer_group');
+			if (selectObj.data('select2')) {
+				selectObj.select2('destroy');
 			}
-		};
+			selectObj.select2({
+				width: '100%',
+				dropdownAutoWidth: false
+			});
+		}
 
 		function rebuildSelect(selectObj, placeholderOptionText, placeholderSelected, extraOptions) {
 			selectObj.empty().html(' ');
@@ -216,8 +254,33 @@
 					const reStartsWithNumber = /^[0-9]/ ;
 					var fileName = path_components[path_components.length-1].split(".")[0].toLocaleLowerCase().replace(reNonAsciiChars, "").replace(reStartsWithNumber, "_");
 					$('#id_name').val(fileName);
+					if ($('#id_publish').is(':checked') && !$('#id_title').val()) {
+						$('#id_title').val(fileName);
+					}
 				}	
 			} catch (error) {}
+		}
+
+		function syncTitleFromName() {
+			if ($('#id_publish').is(':checked')) {
+				var currentTitle = $('#id_title').val();
+				var nameVal = $('#id_name').val();
+				if (!currentTitle || currentTitle === $('#id_title').data('auto-title')) {
+					$('#id_title').val(nameVal);
+					$('#id_title').data('auto-title', nameVal);
+				}
+			}
+		}
+
+		function updatePublishOptions() {
+			if ($('#id_publish').is(':checked')) {
+				$('#publish-options').show();
+				syncTitleFromName();
+				initLayerGroupSelect();
+				updateLayerGroups($('#id_datastore').val(), $('#id_layer_group'));
+			} else {
+				$('#publish-options').hide();
+			}
 		}
 
 		function updatePkSelect() {
@@ -294,6 +357,68 @@
 			}
 		};
 
+		function updateLayerGroups(id_datastore, selectObj) {
+			if (!$('#id_publish').is(':checked')) {
+				return;
+			}
+			if (id_datastore) {
+				var previousValue = selectObj.val();
+				$.getJSON("{% url 'layergroup_list_editable' %}", { id_datastore: id_datastore }, function (data) {
+					selectObj.empty();
+					if (data == null || data.length == 0) {
+						selectObj.append($('<option>', {
+							value: '',
+							text: "{% trans 'No layer groups available' %}",
+							disabled: 'disabled',
+							selected: 'selected'
+						}));
+						initLayerGroupSelect();
+						selectObj.trigger('change');
+						return;
+					}
+					var selected = false;
+					for (var i = 0; i < data.length; i++) {
+						var attribs = {
+							value: data[i].value,
+							text: data[i].text
+						};
+						if (String(previousValue) === String(data[i].value)) {
+							attribs['selected'] = 'selected';
+							selected = true;
+						}
+						selectObj.append($('<option>', attribs));
+					}
+					if (!selected && data.length > 0) {
+						selectObj.val(data[0].value);
+					}
+					translateDefaultLayerGroup(selectObj);
+					initLayerGroupSelect();
+					selectObj.trigger('change');
+				}).fail(function () {
+					selectObj.empty();
+					selectObj.append($('<option>', {
+						value: '',
+						text: "{% trans 'Service is unavailable' %}",
+						disabled: 'disabled',
+						selected: 'selected'
+					}));
+					initLayerGroupSelect();
+					selectObj.trigger('change');
+				});
+			}
+			else {
+				selectObj.empty();
+				selectObj.append($('<option>', {
+					value: '',
+					text: "{% trans 'No valid data store selected' %}",
+					disabled: 'disabled',
+					selected: 'selected'
+				}));
+				initLayerGroupSelect();
+				selectObj.trigger('change');
+			}
+		}
+
 		$('#upload-button').click(function (e) {
 			//$("body").overlay();
 		});
@@ -327,20 +452,19 @@
 			updatePkSelect();
 		});
 		$('#id_name').on("change", function() {
-			console.log($(this));
-			console.log($(this).val());
+			syncTitleFromName();
 		});
 
 		$('#id_datastore').on('change', function () {
-			var selectedOption = $(this).val();
 			var id_datastore = $('option:selected', $(this)).val();
 			updateTables(id_datastore, $('#table_name_select'));
+			updateLayerGroups(id_datastore, $('#id_layer_group'));
 		});
 
 		$('#id_datastore').click(function () {
-			var selectedOption = $(this).val();
 			var id_datastore = $('option:selected', $(this)).val();
 			updateTables(id_datastore, $('#table_name_select'));
+			updateLayerGroups(id_datastore, $('#id_layer_group'));
 		});
 
 		$('#table_name_select').on('change', function() {
@@ -348,13 +472,22 @@
 			console.log(selectedOption);
 			if (selectedOption !== null) {
 				$('#id_name').val(selectedOption);
+				syncTitleFromName();
 			}
 		});
 		$('#id_truncate').on('change', function() {
 			updatePkSelect();
-		})
+		});
+		$('#id_publish').on('change', function() {
+			updatePublishOptions();
+		});
+		$('#id_title').on('input', function() {
+			$(this).removeData('auto-title');
+		});
 		updateNameValue();
 		updatePkSelect();
+		translateDefaultLayerGroup($('#id_layer_group'));
+		updatePublishOptions();
 	});
 
 </script>

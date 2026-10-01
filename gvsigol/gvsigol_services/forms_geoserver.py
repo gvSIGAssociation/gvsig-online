@@ -24,11 +24,12 @@
 
 from django import forms
 from django.utils.translation import gettext as _
-from .models import Workspace, Datastore, LayerGroup
+from .models import Workspace, Datastore, LayerGroup, LayerGroupRole
 from gvsigol.settings import SUPPORTED_ENCODINGS
 from gvsigol_core import utils as core_utils
 import json
-from gvsigol_services.utils import get_user_layergroups, get_field_calculation_conflict
+from gvsigol_auth import auth_backend
+from gvsigol_services.utils import get_user_layergroups, get_field_calculation_conflict, can_use_layergroup
 from .shp2postgis import MODE_APPEND, MODE_CREATE, MODE_OVERWRITE
 
 supported_encodings = tuple((x,x) for x in SUPPORTED_ENCODINGS)
@@ -108,9 +109,15 @@ class PostgisLayerUploadForm(forms.Form):
     preserve_pk = forms.ChoiceField(label=_('Preserve primary key'), required=True, choices=preserve_pk_choices, initial=PRESERVE_PK, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     pk_column = forms.ChoiceField(label=_('Primary key column'), required=False, choices=[], widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
     truncate = forms.ChoiceField(label=_('Preserve table structure'), required=False, choices=preserve_table_choices, initial=PRESERVE_TABLE_NOT_APPLIC, widget=forms.Select(attrs={'class':'form-control  js-example-basic-single'}))
+    publish = forms.BooleanField(label=_('Publish layer after export'), required=False, initial=False, widget=forms.CheckboxInput())
+    title = forms.CharField(label=_('Title'), required=False, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    layer_group = forms.ModelChoiceField(label=_('Layer group'), required=False, queryset=LayerGroup.objects.none(), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
     
     def __init__(self, *args, **kwargs):
+        request = kwargs.pop('request', None)
         user = kwargs.pop('user', None)
+        if user is None and request is not None:
+            user = request.user
         source_columns = kwargs.pop('source_columns', [])
         if 'ogc_fid' in source_columns:
             pk_column = 'ogc_fid'
@@ -119,11 +126,14 @@ class PostgisLayerUploadForm(forms.Form):
             source_columns.insert(0, pk_column)
         pk_column_choices = [(col, col) for col in source_columns]
         super(PostgisLayerUploadForm, self).__init__(*args, **kwargs)
-        if user.is_superuser:
+        self._user = user
+        if user is not None and user.is_superuser:
             qs = Datastore.objects.filter(type="v_PostGIS").order_by('name')
-        else:
+        elif user is not None:
             qs = (Datastore.objects.filter(type="v_PostGIS", created_by=user.username) |
                   Datastore.objects.filter(type="v_PostGIS", defaultuserdatastore__username=user.username)).order_by('name').distinct()
+        else:
+            qs = Datastore.objects.none()
             
         self.fields["datastore"] = forms.ModelChoiceField(
             label=_('Datastore'), required=True,
@@ -136,9 +146,48 @@ class PostgisLayerUploadForm(forms.Form):
             initial = pk_column,
             widget=forms.Select(attrs={'class':'form-control js-example-basic-single'})
         )
+        self.fields["layer_group"] = forms.ModelChoiceField(
+            label=_('Layer group'), required=False,
+            queryset=self._layergroups_queryset(request, user),
+            widget=forms.Select(attrs={'class':'form-control js-example-basic-single'})
+        )
+
+    def _layergroups_queryset(self, request, user):
+        if request is not None:
+            return (get_user_layergroups(request, permissions=LayerGroupRole.PERM_INCLUDEINPROJECTS) |
+                    LayerGroup.objects.filter(name='__default__')).order_by('name').distinct()
+        if user is None:
+            return LayerGroup.objects.none()
+        if user.is_superuser:
+            return LayerGroup.objects.all().order_by('name')
+        user_roles = auth_backend.get_roles(user)
+        user_created_groups = LayerGroup.objects.filter(created_by=user.username)
+        allowed_groups = LayerGroup.objects.filter(
+            layergrouprole__role__in=user_roles,
+            layergrouprole__permission=LayerGroupRole.PERM_INCLUDEINPROJECTS
+        )
+        return (user_created_groups | allowed_groups | LayerGroup.objects.filter(name='__default__')).order_by('name').distinct()
     
     def clean(self):
         cleaned_data = super(PostgisLayerUploadForm, self).clean()
+        publish = cleaned_data.get('publish')
+        if publish:
+            title = cleaned_data.get('title')
+            name = cleaned_data.get('name')
+            if not title and name:
+                cleaned_data['title'] = name
+                title = name
+            if not title:
+                self.add_error('title', _('This field is required when publishing the layer.'))
+            layer_group = cleaned_data.get('layer_group')
+            if not layer_group:
+                self.add_error('layer_group', _('This field is required when publishing the layer.'))
+            else:
+                datastore = cleaned_data.get('datastore')
+                if datastore and layer_group.server_id != datastore.workspace.server.id:
+                    self.add_error('layer_group', _('The selected layer group does not belong to the same server as the datastore.'))
+                if self._user is not None and not can_use_layergroup(self._user, layer_group, permission=LayerGroupRole.PERM_INCLUDEINPROJECTS):
+                    self.add_error('layer_group', _('You are not allowed to manage the selected layergroup'))
         return cleaned_data
 
 class CreateSqlViewForm(forms.Form):

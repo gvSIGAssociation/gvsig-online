@@ -5068,3 +5068,12 @@ msgstr "Cannot convert a numeric column to text on a SQL view. Change the type o
 #: gvsigol_services/utils.py
 msgid "Value \"{value}\" is not valid for numeric field \"{field}\"."
 msgstr "Value \"{value}\" is not valid for numeric field \"{field}\"."
+
+msgid "Publish layer after export"
+msgstr "Publish layer after export"
+
+msgid "This field is required when publishing the layer."
+msgstr "This field is required when publishing the layer."
+
+msgid "The selected layer group does not belong to the same server as the datastore."
+msgstr "The selected layer group does not belong to the same server as the datastore."
