@@ -1054,13 +1054,9 @@ msgid "Preview"
 msgstr "Previsualitzar"
 
 #: gvsigol_core/templates/project_list.html:534
-#, fuzzy, python-format
-#| msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
-msgid ""
-"\n"
-"\t\t\t\t\tShowing %(start)s to %(end)s of %(total)s projects\n"
-"\t\t\t\t\t"
-msgstr "Mostrant des de %(start)s fins %(end)s de %(numrecords)s registres"
+#, python-format
+msgid "Showing %(start)s to %(end)s of %(total)s projects"
+msgstr "Mostrant %(start)s a %(end)s de %(total)s projectes"
 
 #: gvsigol_core/templates/project_list.html:577
 #: gvsigol_core/templates/project_list.html:685

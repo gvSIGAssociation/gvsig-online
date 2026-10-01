@@ -586,9 +586,7 @@ table.dataTable.no-footer {
 			{% if is_paginated|default:False %}
 			<div class="pl-panel__footer">
 				<span class="text-muted">
-					{% blocktrans with start=page_obj.start_index end=page_obj.end_index total=total_items %}
-					Showing {{ start }} to {{ end }} of {{ total }} projects
-					{% endblocktrans %}
+					{% blocktrans with start=page_obj.start_index end=page_obj.end_index total=total_items %}Showing {{ start }} to {{ end }} of {{ total }} projects{% endblocktrans %}
 				</span>
 				<ul class="pagination pagination-sm no-margin">
 					{% if page_obj.has_previous %}
