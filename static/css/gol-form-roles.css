@@ -1,0 +1,80 @@
+/* =================================================================
+   gvSIG Online — Listas de roles y chips de permisos
+   Compartido por los formularios de proyecto y de aplicación. Las
+   variantes proj- y app- son idénticas, de ahí los selectores
+   agrupados: cada pantalla solo usa el prefijo que le corresponde.
+
+   Requiere gol-tokens.css.
+   ================================================================= */
+
+/* ---- Fila de rol ---- */
+.proj-role-row,
+.app-role-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 8px;
+	width: 100%;
+}
+.proj-role-info,
+.app-role-info { flex: 1; min-width: 0; }
+.proj-role-name,
+.app-role-name {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--gol-text);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.proj-role-desc,
+.app-role-desc {
+	font-size: 12px;
+	color: var(--gol-muted);
+	margin-top: 1px;
+}
+
+/* ---- Chips de permisos ---- */
+.proj-perms {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-shrink: 0;
+}
+.proj-perm-chip,
+.app-public-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	border: 1px solid var(--gol-border);
+	border-radius: 20px;
+	padding: 3px 10px 3px 8px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--gol-muted);
+	background: var(--gol-bg);
+	cursor: pointer;
+	transition: background 0.15s, border-color 0.15s, color 0.15s;
+	user-select: none;
+	white-space: nowrap;
+	margin: 0;
+	text-transform: none;
+	letter-spacing: 0;
+}
+.proj-perm-chip input[type="checkbox"],
+.app-public-chip input[type="checkbox"] {
+	margin: 0;
+	cursor: pointer;
+	accent-color: var(--gol-accent);
+	width: 13px;
+	height: 13px;
+	flex-shrink: 0;
+}
+.proj-perm-chip:has(input:checked),
+.app-public-chip:has(input:checked) {
+	background: rgba(74,127,165,0.1);
+	border-color: var(--gol-accent);
+	color: var(--gol-accent-dk);
+}
+.proj-perm-chip:has(input:disabled) { opacity: 0.55; cursor: default; }

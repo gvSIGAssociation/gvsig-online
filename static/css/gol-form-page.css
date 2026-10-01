@@ -1,0 +1,185 @@
+/* =================================================================
+   gvSIG Online — Pantallas de formulario (prefijo pf-)
+   Base común de project_add, project_update, project_clone,
+   application_add y application_update.
+
+   Requiere gol-tokens.css. Se carga desde {% block header %} de cada
+   plantilla, por lo que los ajustes sobre Bootstrap/AdminLTE
+   (.nav-tabs, .tab-content, .products-list) solo se aplican en las
+   pantallas que la enlazan.
+   ================================================================= */
+
+/* ---- Barra de acciones superior ---- */
+.pf-topbar {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 16px;
+}
+.btn-pf-save {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: var(--pf-accent);
+	color: #fff;
+	border: none;
+	border-radius: 6px;
+	font-size: 13px;
+	font-weight: 600;
+	padding: 8px 20px;
+	cursor: pointer;
+	transition: background var(--pf-transition);
+}
+.btn-pf-save:hover { background: var(--pf-accent-dk); color: #fff; }
+
+/* ---- Botón secundario de acción ---- */
+.btn-pf-add {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: var(--pf-accent);
+	color: #fff;
+	border: none;
+	border-radius: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	padding: 7px 14px;
+	cursor: pointer;
+	transition: background var(--pf-transition);
+	white-space: nowrap;
+}
+.btn-pf-add:hover { background: var(--pf-accent-dk); color: #fff; }
+
+/* ---- Mensajes ---- */
+.pf-error-msg {
+	display: none;
+	background: #fde8e8;
+	border: 1px solid #f5c6c6;
+	border-left: 4px solid #c0392b;
+	border-radius: 6px;
+	padding: 10px 14px;
+	color: #c0392b;
+	font-size: 13px;
+}
+.pf-error-msg:has(li), .pf-error-msg:has(p:not(:empty)), .pf-error-msg:has(ul:not(:empty)) { display: block; }
+.pf-messages { list-style: none; padding: 0; margin: 0 0 16px; }
+.pf-messages li {
+	border-radius: 6px;
+	padding: 9px 14px;
+	font-size: 13px;
+	margin-bottom: 6px;
+}
+.pf-messages li.info  { background: #e6f4fb; border: 1px solid #a8d5ec; color: #1a6e96; }
+.pf-messages li.error { background: #fde8e8; border: 1px solid #f5c6c6; color: #c0392b; }
+
+/* ---- Tabs ---- */
+.nav-tabs {
+	border-bottom: 2px solid var(--pf-border);
+	margin-bottom: 0;
+	padding-left: 4px;
+}
+.nav-tabs > li > a {
+	color: var(--pf-muted);
+	font-size: 13px;
+	font-weight: 600;
+	border: none;
+	border-bottom: 2.5px solid transparent;
+	padding: 11px 20px;
+	margin-bottom: -2px;
+	border-radius: 6px 6px 0 0;
+	transition: color var(--pf-transition), border-color var(--pf-transition), background var(--pf-transition);
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+}
+.nav-tabs > li > a i.tab-icon {
+	font-size: 14px;
+	width: 16px;
+	text-align: center;
+	opacity: 0.7;
+	transition: opacity var(--pf-transition);
+}
+.nav-tabs > li > a:hover {
+	color: var(--pf-accent);
+	background: var(--pf-accent-lt);
+	border-color: transparent;
+}
+.nav-tabs > li > a:hover i.tab-icon { opacity: 1; }
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+	color: var(--pf-accent);
+	background: var(--pf-accent-lt);
+	border: none;
+	border-bottom: 2.5px solid var(--pf-accent);
+}
+.nav-tabs > li.active > a i.tab-icon { opacity: 1; color: var(--pf-accent); }
+
+/* ---- Panel de contenido de cada tab ---- */
+.tab-content > .tab-pane > .box,
+.tab-content > .tab-pane > .row > .col-md-9 > .box,
+.tab-content > .tab-pane > .row > .col-md-12 > .box {
+	border-radius: 0 0 var(--pf-radius) var(--pf-radius);
+	box-shadow: var(--pf-shadow);
+	border: 1px solid var(--pf-border);
+	border-top: none;
+}
+
+/* ---- Secciones de formulario ---- */
+.pf-divider {
+	border: none;
+	border-top: 1px solid var(--pf-border);
+	margin: 22px 0;
+}
+.pf-section-title {
+	font-size: 11px;
+	font-weight: 700;
+	color: var(--pf-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.8px;
+	margin-bottom: 14px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+.pf-section-title i { color: var(--pf-accent); font-size: 13px; }
+
+/* ---- Inputs ---- */
+.tab-content .form-control {
+	border-radius: 6px;
+	border-color: var(--pf-border);
+	font-size: 13px;
+	height: 36px;
+	color: var(--pf-text);
+	transition: border-color var(--pf-transition), box-shadow var(--pf-transition);
+}
+.tab-content textarea.form-control { height: auto; }
+.tab-content .form-control:focus {
+	border-color: var(--pf-accent);
+	box-shadow: 0 0 0 3px rgba(74,127,165,0.12);
+	outline: none;
+}
+.tab-content label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--pf-muted);
+}
+
+/* ---- Lista de items (grupos de capas, herramientas, roles) ---- */
+.tab-content .products-list > .item {
+	border-radius: 6px;
+	margin-bottom: 6px;
+	padding: 10px 12px;
+	background: var(--pf-white);
+	border: 1px solid var(--pf-border);
+}
+.tab-content .products-list > .item:hover { background: #f0f6fb; }
+
+/* ---- Lista de usuarios y roles ---- */
+#user-list-box .products-list > .item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+#user-list-box .products-list .product-img { flex-shrink: 0; width: 32px; height: 32px; }
+#user-list-box .products-list .product-img img { width: 20px; height: 20px; opacity: 0.5; }
+#user-list-box .products-list .product-info { flex: 1; min-width: 0; }
