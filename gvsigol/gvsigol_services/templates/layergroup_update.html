@@ -368,8 +368,12 @@
 		});
 	}
 
+	function removeLayerFromToc(layerId) {
+		$('.toc .layer-item[data-layerid="' + layerId + '"]').remove();
+	}
+
 	function deleteLayer(data){
-		$('#button-delete-layer-accept').click( function() {
+		$('#button-delete-layer-accept').off('click').on('click', function() {
 			$("body").overlay();
 			$.ajax({
 				type: 'POST',
@@ -380,8 +384,8 @@
 				},
 				success	:function(response){
 					$('#modal-delete-layer').modal('hide');
+					removeLayerFromToc(data);
 					$.overlayout();
-					location.reload();
 				},
 				error: function(){
 					$.overlayout();
@@ -391,7 +395,7 @@
 		});
 	}
 	function deleteExternalLayer(data){
-		$('#button-delete-layer-accept').click( function() {
+		$('#button-delete-layer-accept').off('click').on('click', function() {
 			$("body").overlay();
 			$.ajax({
 				type: 'POST',
@@ -402,8 +406,8 @@
 				},
 				success	:function(response){
 					$('#modal-delete-layer').modal('hide');
+					removeLayerFromToc(data);
 					$.overlayout();
-					location.reload();
 				},
 				error: function(){
 					$.overlayout();
