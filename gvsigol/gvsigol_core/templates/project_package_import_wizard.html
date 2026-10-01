@@ -105,7 +105,7 @@
 		</colgroup>
 		<thead>
 			<tr>
-				<th style="text-align:center">{% trans "Skip" %}</th>
+				<th class="th-toggle-all-skip" style="text-align:center;cursor:pointer;user-select:none" title="{% trans 'Click to select/deselect all' %}">{% trans "Skip" %}</th>
 				<th>{% trans "Type" %}</th>
 				<th>{% trans "Layer / Group" %}</th>
 				<th>{% trans "Details" %}</th>
@@ -119,7 +119,7 @@
 	{% for ly in package_layout.gpkg_layers %}
 	<tr>
 		<td style="text-align:center;vertical-align:middle">
-			<input type="checkbox" name="skip_gpkg_layer_{{ ly.export_id }}" value="1"
+			<input type="checkbox" class="skip-layer-checkbox" name="skip_gpkg_layer_{{ ly.export_id }}" value="1"
 				title="{% trans 'Skip this layer' %}">
 		</td>
 		<td style="vertical-align:middle">
@@ -146,14 +146,14 @@
 		<td style="vertical-align:middle">
 			{% if ly.is_foreign_source %}
 			<label class="control-label small" style="font-weight:normal;margin-bottom:2px">{% trans "Target datastore" %}</label>
-			<select class="form-control input-sm" name="gpkg_datastore_{{ ly.connection_key }}" style="max-width:100%">
+			<select class="form-control input-sm gpkg-datastore-select" name="gpkg_datastore_{{ ly.connection_key }}" data-connection-key="{{ ly.connection_key }}" style="max-width:100%">
 				<option value="">{% trans "— Select datastore —" %}</option>
 				{% for ds in server_datastores %}
 				<option value="{{ ds.id }}" {% if ly.selected_datastore_id == ds.id %}selected{% endif %}>{{ ds.workspace.name }} / {{ ds.name }}{% if ds.get_schema_name %} ({{ ds.get_schema_name }}){% endif %}</option>
 				{% endfor %}
 			</select>
 			{% else %}
-			<select class="form-control input-sm" name="local_ds_{{ ly.export_id }}" style="max-width:100%">
+			<select class="form-control input-sm layer-target-select" name="local_ds_{{ ly.export_id }}" style="max-width:100%">
 				<option value="" {% if not ly.existing_ds_id %}selected{% endif %}>
 					{{ ly.exported_workspace }} / {{ ly.exported_datastore }}{% if not ly.existing_ds_id %} ⚠ {% trans "(new)" %}{% endif %}
 				</option>
@@ -170,7 +170,7 @@
 		{% for fc in package_layout.foreign_connections %}
 		<tr>
 			<td style="text-align:center;vertical-align:middle">
-				<input type="checkbox" name="skip_foreign_connection_{{ fc.connection_key }}" value="1"
+				<input type="checkbox" class="skip-layer-checkbox" name="skip_foreign_connection_{{ fc.connection_key }}" value="1"
 					title="{% trans 'Do not import these layers' %}">
 			</td>
 			<td style="vertical-align:middle"><span class="label label-danger">{% trans "Ext. DB" %}</span></td>
@@ -187,7 +187,7 @@
 				<br><small class="text-muted">{% trans "No GPKG — definition only" %}</small>
 			</td>
 			<td style="vertical-align:middle">
-				<select class="form-control input-sm" name="foreign_connection_{{ fc.connection_key }}" style="max-width:100%">
+				<select class="form-control input-sm layer-target-select" name="foreign_connection_{{ fc.connection_key }}" style="max-width:100%">
 					<option value="">{% trans "— Select connection —" %}</option>
 					{% for c in postgis_connections %}
 					<option value="{{ c.id }}" {% if fc.selected_connection_id == c.id %}selected{% endif %}>{{ c.name }}</option>
@@ -201,7 +201,7 @@
 		{% for r in package_layout.raster_layers %}
 		<tr>
 			<td style="text-align:center;vertical-align:middle">
-				<input type="checkbox" name="skip_raster_{{ r.export_id }}" value="1"
+				<input type="checkbox" class="skip-layer-checkbox" name="skip_raster_{{ r.export_id }}" value="1"
 					title="{% trans 'Skip this raster layer' %}">
 			</td>
 			<td style="vertical-align:middle"><span class="label label-info">{% trans "Raster" %}</span></td>
@@ -223,7 +223,7 @@
 		{% for e in package_layout.external_layers %}
 		<tr>
 			<td style="text-align:center;vertical-align:middle">
-				<input type="checkbox" name="skip_external_{{ e.export_id }}" value="1"
+				<input type="checkbox" class="skip-layer-checkbox" name="skip_external_{{ e.export_id }}" value="1"
 					title="{% trans 'Skip this external layer' %}">
 			</td>
 			<td style="vertical-align:middle"><span class="label label-default">{{ e.type|upper }}</span></td>
@@ -244,7 +244,7 @@
 		{% for w in package_layout.wms_cascading_layers %}
 		<tr>
 			<td style="text-align:center;vertical-align:middle">
-				<input type="checkbox" name="skip_wms_cascading_{{ w.export_id }}" value="1"
+				<input type="checkbox" class="skip-layer-checkbox" name="skip_wms_cascading_{{ w.export_id }}" value="1"
 					title="{% trans 'Skip this WMS cascading layer' %}">
 			</td>
 			<td style="vertical-align:middle"><span class="label label-info">WMS</span></td>
@@ -266,7 +266,7 @@
 		{% for v in package_layout.view_sql_layers %}
 		<tr>
 			<td style="text-align:center;vertical-align:middle">
-				<input type="checkbox" name="skip_view_layer_{{ v.export_id }}" value="1"
+				<input type="checkbox" class="skip-layer-checkbox" name="skip_view_layer_{{ v.export_id }}" value="1"
 					title="{% trans 'Do not import this view' %}">
 			</td>
 			<td style="vertical-align:middle"><span class="label label-primary">{% trans "SQL View" %}</span></td>
@@ -283,7 +283,7 @@
 				{% endif %}
 			</td>
 			<td style="vertical-align:middle">
-				<select class="form-control input-sm" name="local_ds_{{ v.export_id }}" style="max-width:100%;margin-bottom:4px">
+				<select class="form-control input-sm layer-target-select" name="local_ds_{{ v.export_id }}" style="max-width:100%;margin-bottom:4px">
 					<option value="" {% if not v.existing_ds_id %}selected{% endif %}>
 						{{ v.exported_workspace }} / {{ v.exported_datastore }}{% if not v.existing_ds_id %} ⚠ {% trans "(new)" %}{% endif %}
 					</option>
@@ -355,8 +355,64 @@
 {% endblock %}
 
 {% block extra-scripts %}
+<style>
+#layers-package-table .th-toggle-all-skip:hover {
+	color: #3c8dbc;
+}
+#layers-package-table .th-toggle-all-skip::after {
+	content: "\f0c8";
+	font-family: FontAwesome;
+	font-size: 10px;
+	margin-left: 4px;
+	opacity: 0.45;
+	font-weight: normal;
+}
+#layers-package-table .th-toggle-all-skip:hover::after {
+	opacity: 0.85;
+}
+</style>
 <script>
 $(document).ready(function () {
+
+    function syncRowTargetSelect($checkbox) {
+        var $row = $checkbox.closest('tr');
+        var skipped = $checkbox.is(':checked');
+        $row.find('select.gpkg-datastore-select, select.layer-target-select').prop('disabled', skipped);
+    }
+
+    function syncAllSkipRows() {
+        $('#layers-package-table .skip-layer-checkbox').each(function () {
+            syncRowTargetSelect($(this));
+        });
+    }
+
+    /* Disable target selects on skipped rows so empty values are not posted */
+    $('#layers-package-table').on('change', '.skip-layer-checkbox', function () {
+        syncRowTargetSelect($(this));
+    });
+    syncAllSkipRows();
+
+    /* Keep shared gpkg_datastore_<connection_key> selects in sync */
+    $('#layers-package-table').on('change', '.gpkg-datastore-select', function () {
+        var $source = $(this);
+        var name = $source.attr('name');
+        var val = $source.val();
+        if (!name) {
+            return;
+        }
+        $('#layers-package-table select.gpkg-datastore-select[name="' + name + '"]').not($source).val(val);
+    });
+
+    /* Toggle all Skip checkboxes from the column header */
+    $('#layers-package-table .th-toggle-all-skip').on('click', function () {
+        var $checkboxes = $('#layers-package-table tbody input[type="checkbox"][name^="skip_"]:not(:disabled)');
+        if ($checkboxes.length === 0) {
+            return;
+        }
+        var checkAll = $checkboxes.filter(':checked').length < $checkboxes.length;
+        $checkboxes.prop('checked', checkAll);
+        syncAllSkipRows();
+    });
 
     /* ── SQL view editor modal ─────────────────────────────────────── */
     var _currentViewExportId = null;
