@@ -38,6 +38,25 @@
 .pf-card label { font-size: 12px; font-weight: 700; color: var(--pf-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
 .pf-card .form-control { border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; transition: border-color var(--pf-transition), box-shadow var(--pf-transition); padding: 6px 12px; }
 .pf-card .form-control:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
+#tab-layer-config .th-toggle-all {
+	cursor: pointer;
+	user-select: none;
+	white-space: nowrap;
+}
+#tab-layer-config .th-toggle-all:hover {
+	color: var(--pf-accent);
+}
+#tab-layer-config .th-toggle-all::after {
+	content: "\f0c8";
+	font-family: FontAwesome;
+	font-size: 10px;
+	margin-left: 5px;
+	opacity: 0.45;
+	font-weight: normal;
+}
+#tab-layer-config .th-toggle-all:hover::after {
+	opacity: 0.85;
+}
 </style>
 {% endblock %}
 
@@ -112,11 +131,11 @@
 														<th>{% trans "Field name" %}</th>
 														<th>{% trans "Type" %}</th>
 														<th>{% trans "Calculated" %}</th>
-														<th>{% trans "Nullable" %}</th>
-														<th>{% trans "mandatory" %}</th>
-														<th>{% trans "Is visible?" %}</th>
-														<th>{% trans "Is editable?" %}</th>
-														<th>{% trans "Is shown in getFeatureInfo?" %}</th>
+														<th class="th-toggle-all" data-toggle-checkbox="field-nullable" title="{% trans 'Click to select/deselect all' %}">{% trans "Nullable" %}</th>
+														<th class="th-toggle-all" data-toggle-checkbox="field-mandatory" title="{% trans 'Click to select/deselect all' %}">{% trans "mandatory" %}</th>
+														<th class="th-toggle-all" data-toggle-checkbox="field-visible" title="{% trans 'Click to select/deselect all' %}">{% trans "Is visible?" %}</th>
+														<th class="th-toggle-all" data-toggle-checkbox="field-editable" title="{% trans 'Click to select/deselect all' %}">{% trans "Is editable?" %}</th>
+														<th class="th-toggle-all" data-toggle-checkbox="field-infovisible" title="{% trans 'Click to select/deselect all' %}">{% trans "Is shown in getFeatureInfo?" %}</th>
 														<th>{% trans "Actions" %}</th>
 													</tr>
 												</thead>
@@ -1087,6 +1106,68 @@
 				document.getElementById("field-mandatory-"+counter).disabled = false;
 			}
 		}
+	});
+
+	// Toggle all checkboxes in a column when clicking its header
+	$('#tab-layer-config .th-toggle-all').on('click', function() {
+		var prefix = $(this).attr('data-toggle-checkbox');
+		if (!prefix) {
+			return;
+		}
+		var $checkboxes = $('#tab-layer-config #field-list-table-body input[type="checkbox"][name^="' + prefix + '-"]:not(:disabled)');
+		if ($checkboxes.length === 0) {
+			return;
+		}
+		var checkAll = $checkboxes.filter(':checked').length < $checkboxes.length;
+
+		if (prefix === 'field-nullable') {
+			var failedFields = [];
+			$checkboxes.each(function() {
+				var checkbox = this;
+				var counter = checkbox.getAttribute('data-counter');
+				var mandatory = document.getElementById('field-mandatory-' + counter);
+				if (checkAll) {
+					checkbox.checked = true;
+					if (mandatory) {
+						mandatory.disabled = false;
+					}
+					return;
+				}
+				var fieldName = checkbox.getAttribute('data-fieldname');
+				$.ajax({
+					type: 'POST',
+					async: false,
+					data: {
+						"layer_id": "{{layer_id}}",
+						"field_name": fieldName
+					},
+					url: '/gvsigonline/services/nullable_check/',
+					beforeSend: function(xhr) {
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+					},
+					success: function() {
+						checkbox.checked = false;
+						if (mandatory) {
+							mandatory.disabled = true;
+							mandatory.checked = true;
+						}
+					},
+					error: function() {
+						checkbox.checked = true;
+						if (mandatory) {
+							mandatory.disabled = false;
+						}
+						failedFields.push(fieldName);
+					}
+				});
+			});
+			if (failedFields.length > 0) {
+				messageBox.show('error', gettext('The field can not be set as mandatory at database level because some records contain NULL values in this column. Delete the NULL values and try again.') + ' (' + failedFields.join(', ') + ')');
+			}
+			return;
+		}
+
+		$checkboxes.prop('checked', checkAll);
 	});
 
 	$('.convert-to-enumerate').on('click', function (evt){
