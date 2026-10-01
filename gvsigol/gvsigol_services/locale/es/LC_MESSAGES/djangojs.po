@@ -252,9 +252,17 @@ msgstr ""
 msgid "Convert to enum"
 msgstr "Convertir a enumerado"
 
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js
+msgid "Change enumeration"
+msgstr "Cambiar enumeración"
+
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:49
 msgid "Convert"
 msgstr "Convertir"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js
+msgid "Update"
+msgstr "Actualizar"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:50
 msgid "Autogen"
@@ -263,6 +271,10 @@ msgstr "Autogenerar"
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:51
 msgid "Convert ok"
 msgstr "Se ha asignado el campo enumerado correctamente"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js
+msgid "Enumeration updated"
+msgstr "Se ha actualizado la enumeración del campo correctamente"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:52
 msgid "Autogen ok"
@@ -275,6 +287,10 @@ msgstr "Convertir un campo numérico a enumeración cambiará el tipo de la colu
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js
 msgid "Converting a numeric field to enumeration will change the database column type to text. Existing values will be kept as text. Do you want to continue?"
 msgstr "Convertir un campo numérico a enumeración cambiará el tipo de la columna en base de datos a texto. Los valores existentes se conservarán como texto. ¿Desea continuar?"
+
+#: gvsigol_services/static/js/lib/_trans.gvsigol.js
+msgid "This field is already enumerated. You can select another enumeration or the same one. If the database column is still numeric, it will be converted to text."
+msgstr "Este campo ya es un enumerado. Puede seleccionar otra enumeración o la misma. Si la columna en base de datos sigue siendo numérica, se convertirá a texto."
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:53
 msgid "Delete field"

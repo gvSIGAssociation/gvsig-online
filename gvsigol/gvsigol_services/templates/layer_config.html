@@ -142,7 +142,7 @@
 												<tbody id="field-list-table-body">
 													{% for f in fields %}
 														{% with counter=forloop.counter %}
-																<tr data-fieldname="{{f.name}}">
+																<tr data-fieldname="{{f.name}}" data-db-type="{{f.db_type|default:''}}" data-enumeration-id="{{f.enumeration_id|default_if_none:''}}">
 																	<td><input readonly name="field-name-{{counter}}" type="text" class="form-control" value="{{f.name}}"></td>
 																	<td><input readonly name="field-type-{{counter}}" type="text" class="form-control" value="{% if f.gvsigol_type == 'link' %}link{% else %}{{f.type}}{% endif %}"></td>
 																	<td><input readonly name="field-calculation-{{counter}}" type="text" class="form-control" value="{{f.calculationLabel}}"></td>
@@ -214,7 +214,7 @@
 																				{% endif %}
 																				{% endif %}
 																				{% if not f.calculationLabel %}
-																				<li id="li-convert-to-enumerate"><a href="#" class="actions-menu-entry convert-to-enumerate"><i class="fa fa-list-alt" style="color: #3c8dbc;"></i> {% trans "Convert to enumerate" %}</a></li>
+																				<li id="li-convert-to-enumerate"><a href="#" class="actions-menu-entry convert-to-enumerate"><i class="fa fa-list-alt" style="color: #3c8dbc;"></i> {% if f.enumeration_id %}{% trans "Change enumeration" %}{% else %}{% trans "Convert to enumerate" %}{% endif %}</a></li>
 																				{% endif %}
 																				<li><a href="#" class="actions-menu-entry delete-field"><i class="fa fa-times" style="color: #f56954;"></i> {% trans "Delete field" %}</a></li>
 																			</ul>
@@ -1193,20 +1193,37 @@
 
 	function converToEnumModal(fieldName){
 		$('#my-modal-dialog .modal-body').empty();
-		$('#my-modal-dialog .modal-title').text(gettext("Convert to enum"));
 
 		var $row = $('tr[data-fieldname="' + fieldName + '"]');
 		var fieldType = (($row.find('input[name^="field-type-"]').val() || '') + '').toLowerCase();
+		// Prefer real PostGIS type (needed when the UI already shows "enumerated (...)").
+		var dbType = (($row.attr('data-db-type') || '') + '').toLowerCase();
+		var typeForNumericCheck = dbType || fieldType;
+		var currentEnumId = ($row.attr('data-enumeration-id') || '').toString();
+		var alreadyEnumerated = !!currentEnumId;
 		var numericTypes = {
 			'integer': true, 'bigint': true, 'smallint': true,
 			'bigserial': true, 'serial': true, 'smallserial': true,
 			'double precision': true, 'float': true, 'real': true,
 			'decimal': true, 'double': true, 'numeric': true
 		};
-		var isNumericField = !!numericTypes[fieldType];
+		var isNumericField = !!numericTypes[typeForNumericCheck];
+
+		$('#my-modal-dialog .modal-title').text(
+			alreadyEnumerated
+				? gettext("Change enumeration")
+				: gettext("Convert to enum")
+		);
 
 		var ui = '';
 		ui += '<div id="div-name" class="row">';
+		if (alreadyEnumerated) {
+			ui += '<div class="col-md-12">';
+			ui += 	'<div class="alert alert-info" style="margin-bottom: 15px;">';
+			ui += 		gettext('This field is already enumerated. You can select another enumeration or the same one. If the database column is still numeric, it will be converted to text.');
+			ui += 	'</div>';
+			ui += '</div>';
+		}
 		if (isNumericField) {
 			ui += '<div class="col-md-12">';
 			ui += 	'<div class="alert alert-warning" style="margin-bottom: 15px;">';
@@ -1225,18 +1242,22 @@
 
 		ui += '</div>';
 		$('#my-modal-dialog .modal-body').append(ui);
+		if (currentEnumId) {
+			$('#enumeration-list').val(currentEnumId);
+		}
 		var buttons = '';
 		buttons += '<button id="enum-convert-cancel" type="button" class="btn btn-default" data-dismiss="modal">' + gettext('Cancel') + '</button>';
-		buttons += '<button id="convert" type="button" class="btn btn-default">' + gettext('Convert') + '</button>';
+		buttons += '<button id="convert" type="button" class="btn btn-default">' + gettext(alreadyEnumerated ? 'Update' : 'Convert') + '</button>';
 		buttons += '<button id="autogen" type="button" class="btn btn-default">' + gettext('Autogen') + '</button>';
 		$('#my-modal-dialog .modal-footer').empty();
 		$('#my-modal-dialog .modal-footer').append(buttons);
 
 		function submitConvertToEnumerate(autogen) {
-			var doRequest = function () {
+			var doRequest = function (forceConfirm) {
 				$.ajax({
 					type: 'POST',
 					async: false,
+					dataType: 'json',
 					url: '/gvsigonline/services/convert_to_enumerate/',
 					beforeSend:function(xhr){
 						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
@@ -1247,16 +1268,28 @@
 				  		'layer_id': "{{layer_id}}",
 				  		'layer_name': "{{layer}}",
 				  		'autogen': autogen ? 'True' : 'False',
-				  		'confirm_type_change': isNumericField ? 'True' : 'False'
+				  		'confirm_type_change': (isNumericField || forceConfirm) ? 'True' : 'False'
 				  	},
 					success	:function(response) {
-						messageBox.show('info', gettext(autogen ? 'Autogen ok' : 'Convert ok'));
+						var okMsg = autogen
+							? gettext('Autogen ok')
+							: (alreadyEnumerated ? gettext('Enumeration updated') : gettext('Convert ok'));
+						messageBox.show('info', okMsg);
 						$('#my-modal-dialog').modal('hide');
-						if (isNumericField) {
+						if (isNumericField || forceConfirm || (response && response.type_changed)) {
+							window.location.reload();
+						} else if (alreadyEnumerated) {
 							window.location.reload();
 						}
 					},
 					error: function(jqXHR) {
+						// Backend detected numeric column and asks for confirmation (409).
+						if (jqXHR.status === 409) {
+							if (window.confirm(gettext('Converting a numeric field to enumeration will change the database column type to text. Existing values will be kept as text. Do you want to continue?'))) {
+								doRequest(true);
+							}
+							return;
+						}
 						messageBox.show('error', jqXHR.responseText || gettext('The action failed'));
 						$('#my-modal-dialog').modal('hide');
 					}
@@ -1265,10 +1298,10 @@
 
 			if (isNumericField) {
 				if (window.confirm(gettext('Converting a numeric field to enumeration will change the database column type to text. Existing values will be kept as text. Do you want to continue?'))) {
-					doRequest();
+					doRequest(false);
 				}
 			} else {
-				doRequest();
+				doRequest(false);
 			}
 		}
 

@@ -3657,9 +3657,7 @@ def convert_to_enumerate(request):
     if not utils.can_manage_layer(request, layer):
         return HttpResponseForbidden('{"response": "error"}', content_type='application/json')
 
-    is_enum, _ = utils.is_field_enumerated(layer, field)
-    if is_enum:
-        return utils.get_exception(405, 'The field is already enumerated')
+    existing_lfe = LayerFieldEnumeration.objects.filter(layer=layer, field=field).first()
 
     type_changed = False
     try:
@@ -3668,6 +3666,12 @@ def convert_to_enumerate(request):
             table_info = con.get_table_info(table, schema=schema)
             col_info = table_info.get_column_info(field)
             if col_info and utils.is_numeric_field_type(col_info.get('type')):
+                if con.is_view(schema, table) or con.is_materialized_view(schema, table):
+                    return utils.get_exception(
+                        400,
+                        _('Cannot convert a numeric column to text on a SQL view. '
+                          'Change the type on the base table first.')
+                    )
                 if not confirm_type_change:
                     return utils.get_exception(
                         409,
@@ -3734,12 +3738,18 @@ def convert_to_enumerate(request):
     if enum_id == None:
         return utils.get_exception(400, 'We cannot find a enumerated with this name')
 
-    field_enum = LayerFieldEnumeration()
-    field_enum.layer = layer
-    field_enum.field = field
-    field_enum.enumeration_id = enum_id
-    field_enum.multiple = False
-    field_enum.save()
+    if existing_lfe:
+        # Re-apply: allow changing enumeration and/or migrating numeric→text.
+        existing_lfe.enumeration_id = enum_id
+        existing_lfe.multiple = False
+        existing_lfe.save()
+    else:
+        field_enum = LayerFieldEnumeration()
+        field_enum.layer = layer
+        field_enum.field = field
+        field_enum.enumeration_id = enum_id
+        field_enum.multiple = False
+        field_enum.save()
 
     try:
         gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
@@ -3752,7 +3762,11 @@ def convert_to_enumerate(request):
         logger.exception('Error refreshing layer after convert_to_enumerate')
 
     return HttpResponse(
-        json.dumps({'response': 'ok', 'type_changed': type_changed}),
+        json.dumps({
+            'response': 'ok',
+            'type_changed': type_changed,
+            'updated_existing': existing_lfe is not None,
+        }),
         content_type='application/json'
     )
 

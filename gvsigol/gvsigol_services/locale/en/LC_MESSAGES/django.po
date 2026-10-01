@@ -3728,6 +3728,10 @@ msgstr ""
 msgid "Convert to enumerate"
 msgstr ""
 
+#: gvsigol_services/templates/layer_config.html
+msgid "Change enumeration"
+msgstr "Change enumeration"
+
 #: gvsigol_services/templates/layer_config.html:205
 msgid "Reserved field"
 msgstr ""
@@ -5056,6 +5060,10 @@ msgstr "Error converting field to text: {0}"
 #: gvsigol_services/views.py
 msgid "Error checking field type before converting to enumeration"
 msgstr "Error checking field type before converting to enumeration"
+
+#: gvsigol_services/views.py
+msgid "Cannot convert a numeric column to text on a SQL view. Change the type on the base table first."
+msgstr "Cannot convert a numeric column to text on a SQL view. Change the type on the base table first."
 
 #: gvsigol_services/utils.py
 msgid "Value \"{value}\" is not valid for numeric field \"{field}\"."

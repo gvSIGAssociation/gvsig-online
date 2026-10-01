@@ -2949,6 +2949,10 @@ msgstr "Canviar tipus"
 msgid "Convert to enumerate"
 msgstr "Convertir a enumerat"
 
+#: gvsigol_services/templates/layer_config.html
+msgid "Change enumeration"
+msgstr "Canviar enumeració"
+
 #: gvsigol_services/templates/layer_config.html:205
 msgid "Reserved field"
 msgstr "Camp reservat"
@@ -4263,6 +4267,10 @@ msgstr "Error en convertir el camp a text: {0}"
 #: gvsigol_services/views.py
 msgid "Error checking field type before converting to enumeration"
 msgstr "Error en comprovar el tipus de camp abans de convertir-lo a enumeració"
+
+#: gvsigol_services/views.py
+msgid "Cannot convert a numeric column to text on a SQL view. Change the type on the base table first."
+msgstr "No es pot convertir a text una columna numèrica en una vista SQL. Canvieu primer el tipus en la taula base."
 
 #: gvsigol_services/utils.py
 msgid "Value \"{value}\" is not valid for numeric field \"{field}\"."

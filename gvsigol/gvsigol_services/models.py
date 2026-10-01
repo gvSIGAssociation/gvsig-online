@@ -1208,14 +1208,18 @@ class LayerConfig:
     def get_field_viewconf(self, include_pks=False):
         fields = self.get_updated_field_conf(include_pks=include_pks)
         for field in fields:
+            info = self.field_info_dict.get(field['name'], {})
+            # Keep real PostGIS type available for UI actions (e.g. re-apply enumeration).
+            field['db_type'] = info.get('type', '') or ''
+            field['enumeration_id'] = None
             try:
-                enum = LayerFieldEnumeration.objects.get(
-                    layer=self.layer, field=field['name']).enumeration
+                lfe = LayerFieldEnumeration.objects.select_related('enumeration').get(
+                    layer=self.layer, field=field['name'])
                 field['type'] = str(
-                    gettext('enumerated ({0})').format(enum.title))
-            except:
-                field['type'] = self.field_info_dict.get(
-                    field['name'], {}).get('type', '')
+                    gettext('enumerated ({0})').format(lfe.enumeration.title))
+                field['enumeration_id'] = lfe.enumeration_id
+            except Exception:
+                field['type'] = info.get('type', '')
             try:
                 trigger = Trigger.objects.get(
                     layer=self.layer, field=field['name'])
