@@ -1,0 +1,68 @@
+/* =================================================================
+   gvSIG Online — Tokens de diseño del panel de administración
+   Paleta, radios, sombras y transiciones compartidas por las
+   pantallas de formulario y de listado.
+
+   Los prefijos --pf-* (formularios), --pl-* (listados) y --h-* (home)
+   se mantienen como alias para que las plantillas que todavía
+   declaran su propio :root sigan funcionando sin cambios.
+   ================================================================= */
+
+:root {
+	/* ---- Paleta canónica ---- */
+	--gol-accent:     #4a7fa5;
+	--gol-accent-dk:  #2d5f80;
+	--gol-accent-lt:  rgba(74,127,165,0.06);
+	--gol-text:       #2e3a45;
+	--gol-muted:      #7b8a96;
+	--gol-border:     #e8ecef;
+	--gol-bg:         #f4f6f8;
+	--gol-white:      #ffffff;
+	--gol-green:      #28a064;
+	--gol-blue:       #3d7ab5;
+
+	/* ---- Geometría y movimiento ---- */
+	--gol-radius:     10px;
+	--gol-shadow:     0 2px 12px rgba(0,0,0,0.08);
+	--gol-shadow-hv:  0 6px 24px rgba(0,0,0,0.13);
+	--gol-transition: 0.2s ease;
+	--gol-transition-smooth: 0.22s cubic-bezier(.4,0,.2,1);
+
+	/* ---- Alias: pantallas de formulario ---- */
+	--pf-accent:     var(--gol-accent);
+	--pf-accent-dk:  var(--gol-accent-dk);
+	--pf-accent-lt:  var(--gol-accent-lt);
+	--pf-text:       var(--gol-text);
+	--pf-muted:      var(--gol-muted);
+	--pf-border:     var(--gol-border);
+	--pf-bg:         var(--gol-bg);
+	--pf-white:      var(--gol-white);
+	--pf-radius:     var(--gol-radius);
+	--pf-shadow:     var(--gol-shadow);
+	--pf-transition: var(--gol-transition);
+
+	/* ---- Alias: pantallas de listado ---- */
+	--pl-accent:     var(--gol-accent);
+	--pl-accent-dk:  var(--gol-accent-dk);
+	--pl-text:       var(--gol-text);
+	--pl-muted:      var(--gol-muted);
+	--pl-border:     var(--gol-border);
+	--pl-bg:         var(--gol-bg);
+	--pl-white:      var(--gol-white);
+	--pl-radius:     var(--gol-radius);
+	--pl-shadow:     var(--gol-shadow);
+	--pl-transition: var(--gol-transition);
+
+	/* ---- Alias: home ---- */
+	--h-text:       var(--gol-text);
+	--h-muted:      var(--gol-muted);
+	--h-border:     var(--gol-border);
+	--h-bg:         var(--gol-bg);
+	--h-white:      var(--gol-white);
+	--h-radius:     var(--gol-radius);
+	--h-shadow:     var(--gol-shadow);
+	--h-shadow-hv:  var(--gol-shadow-hv);
+	--h-transition: var(--gol-transition-smooth);
+	--h-green:      var(--gol-green);
+	--h-blue:       var(--gol-blue);
+}

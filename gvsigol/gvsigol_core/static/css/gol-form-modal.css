@@ -1,0 +1,20 @@
+/* =================================================================
+   gvSIG Online — Modales de las pantallas de formulario
+   Ajustes sobre los modales de Bootstrap. Se mantiene en una hoja
+   aparte porque solo deben aplicarse en las pantallas que abren
+   modales propios, no en todo el panel.
+
+   Requiere gol-tokens.css.
+   ================================================================= */
+
+.modal-content {
+	border-radius: var(--pf-radius);
+	border: none;
+	box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+.modal-header { border-bottom: 1px solid var(--pf-border); padding: 16px 20px; }
+.modal-title { font-size: 15px; font-weight: 700; color: var(--pf-text); }
+.modal-body { padding: 20px; font-size: 13px; color: var(--pf-muted); }
+.modal-footer { border-top: 1px solid var(--pf-border); padding: 14px 20px; }
+.modal-footer .btn { border-radius: 6px; font-size: 13px; font-weight: 600; padding: 6px 16px; }
+.modal-footer .btn-default { border-color: var(--pf-border); color: var(--pf-muted); }

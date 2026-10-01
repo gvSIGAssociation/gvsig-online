@@ -1,0 +1,183 @@
+/* =================================================================
+   gvSIG Online — Formulario de proyecto
+   Componentes compartidos por project_add y project_update:
+   interruptores, buscador, sidebar del TOC, mapa y zona de subida.
+
+   Requiere gol-tokens.css y gol-form-page.css.
+   ================================================================= */
+
+/* ---- Interruptores ---- */
+.pf-switch {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--pf-muted);
+	user-select: none;
+}
+.pf-switch input[type="checkbox"] {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	width: 40px;
+	height: 22px;
+	background: #cdd5db;
+	border-radius: 11px;
+	position: relative;
+	cursor: pointer;
+	transition: background var(--pf-transition);
+	flex-shrink: 0;
+	margin: 0;
+	border: none;
+	outline: none;
+	overflow: hidden;
+	box-sizing: border-box;
+	padding: 0;
+	vertical-align: middle;
+}
+.pf-switch input[type="checkbox"]::after {
+	content: '';
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 18px;
+	height: 18px;
+	background: var(--pf-white);
+	border-radius: 50%;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+	transition: left var(--pf-transition);
+}
+.pf-switch input[type="checkbox"]:checked { background: var(--pf-accent); }
+.pf-switch input[type="checkbox"]:checked::after { left: 20px; }
+
+/* ---- Barra de búsqueda ---- */
+.pf-search-bar {
+	position: relative;
+	max-width: 320px;
+	display: inline-block;
+}
+.pf-search-bar .form-control {
+	padding-left: 34px !important;
+	border-radius: 20px !important;
+	background: var(--pf-bg);
+	height: 36px;
+}
+.pf-search-bar .form-control:focus { background: var(--pf-white); }
+.pf-search-bar::before {
+	content: '\f002';
+	font-family: FontAwesome;
+	position: absolute;
+	left: 12px;
+	top: 50%;
+	transform: translateY(-50%);
+	color: var(--pf-muted);
+	font-size: 12px;
+	z-index: 1;
+	pointer-events: none;
+}
+
+/* ---- Iconos de la lista de items ---- */
+.tab-content .products-list .product-img {
+	width: 36px;
+	height: 36px;
+	background: var(--pf-bg);
+	border-radius: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.tab-content .products-list .product-img img {
+	width: 20px;
+	height: 20px;
+	opacity: 0.55;
+}
+
+/* ---- Sidebar TOC ---- */
+.pf-toc-sidebar {
+	background: var(--pf-bg);
+	border-radius: 0 0 var(--pf-radius) 0;
+	border-left: 1px solid var(--pf-border);
+	min-height: 200px;
+}
+.pf-toc-sidebar .toc-layergroup {
+	background: var(--pf-white);
+	border: 1px solid var(--pf-border) !important;
+	border-radius: 6px !important;
+	margin-bottom: 6px;
+	box-shadow: none !important;
+}
+.pf-toc-sidebar .toc-layergroup .box-header {
+	padding: 8px 10px;
+	min-height: auto;
+}
+.pf-toc-sidebar .handle {
+	color: var(--pf-muted);
+	cursor: grab;
+	transition: color var(--pf-transition);
+}
+.pf-toc-sidebar .handle:hover { color: var(--pf-accent); }
+.pf-toc-sidebar .text {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--pf-text);
+}
+
+/* ---- Mapa ---- */
+.mini-map {
+	border-radius: 8px;
+	border: 1px solid var(--pf-border);
+	overflow: hidden;
+	box-shadow: inset 0 1px 4px rgba(0,0,0,0.06);
+}
+
+/* ---- Zona de subida ---- */
+.pf-upload-area {
+	border: 2px dashed var(--pf-border);
+	border-radius: 8px;
+	padding: 16px 20px;
+	transition: border-color var(--pf-transition), background var(--pf-transition);
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+.pf-upload-area:hover {
+	border-color: var(--pf-accent);
+	background: rgba(74,127,165,0.02);
+}
+.pf-upload-area .provider-img { flex-shrink: 0; }
+.pf-upload-area .provider-img-change { flex: 1; }
+.pf-file-picker {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin-top: 6px;
+}
+.pf-file-picker__input {
+	position: absolute;
+	width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	z-index: -1;
+}
+.pf-file-picker__name {
+	font-size: 13px;
+	color: var(--pf-muted);
+}
+.pf-file-picker__btn { margin: 0; }
+
+/* ---- Botones de confirmación de los modales ---- */
+#button-add-layer-group-accept,
+#button-extend-to-layers-accept {
+	background: var(--pf-accent);
+	border-color: var(--pf-accent);
+	color: #fff;
+}
+#button-add-layer-group-accept:hover,
+#button-extend-to-layers-accept:hover {
+	background: var(--pf-accent-dk);
+	border-color: var(--pf-accent-dk);
+}

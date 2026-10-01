@@ -4,148 +4,22 @@
 {% load l10n %}
 
 {% block header %}
+<link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-roles.css" %}">
 <style>
-:root {
-	--pf-accent:    #4a7fa5;
-	--pf-accent-dk: #2d5f80;
-	--pf-accent-lt: rgba(74,127,165,0.06);
-	--pf-text:      #2e3a45;
-	--pf-muted:     #7b8a96;
-	--pf-border:    #e8ecef;
-	--pf-bg:        #f4f6f8;
-	--pf-white:     #ffffff;
-	--pf-radius:    10px;
-	--pf-shadow:    0 2px 12px rgba(0,0,0,0.08);
-	--pf-transition: 0.2s ease;
-}
-
 /* ---- Barra de acciones superior ---- */
-.pf-topbar {
-	display: flex;
-	align-items: center;
-	justify-content: flex-end;
-	margin-bottom: 16px;
-}
-.btn-pf-save {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	background: var(--pf-accent);
-	color: #fff;
-	border: none;
-	border-radius: 6px;
-	font-size: 13px;
-	font-weight: 600;
-	padding: 8px 20px;
-	cursor: pointer;
-	transition: background var(--pf-transition);
-	letter-spacing: 0.2px;
-}
-.btn-pf-save:hover { background: var(--pf-accent-dk); color: #fff; }
-
-/* ---- Mensaje de error ---- */
-.pf-error-msg {
-	display: none;
-	background: #fde8e8;
-	border: 1px solid #f5c6c6;
-	border-left: 4px solid #c0392b;
-	border-radius: 6px;
-	padding: 10px 14px;
-	color: #c0392b;
-	font-size: 13px;
-	margin-bottom: 16px;
-}
-.pf-error-msg:has(li), .pf-error-msg:has(p:not(:empty)), .pf-error-msg:has(ul:not(:empty)) { display: block; }
-
-/* ---- Tabs ---- */
-.nav-tabs {
-	border-bottom: 2px solid var(--pf-border);
-	margin-bottom: 0;
-	padding-left: 4px;
-}
-.nav-tabs > li > a {
-	color: var(--pf-muted);
-	font-size: 13px;
-	font-weight: 600;
-	border: none;
-	border-bottom: 2.5px solid transparent;
-	padding: 11px 20px;
-	margin-bottom: -2px;
-	border-radius: 6px 6px 0 0;
-	transition: color var(--pf-transition), border-color var(--pf-transition), background var(--pf-transition);
-	display: inline-flex;
-	align-items: center;
-	gap: 7px;
-}
-.nav-tabs > li > a i.tab-icon {
-	font-size: 14px;
-	width: 16px;
-	text-align: center;
-	opacity: 0.7;
-	transition: opacity var(--pf-transition);
-}
-.nav-tabs > li > a:hover {
-	color: var(--pf-accent);
-	background: var(--pf-accent-lt);
-	border-color: transparent;
-}
-.nav-tabs > li > a:hover i.tab-icon { opacity: 1; }
-.nav-tabs > li.active > a,
-.nav-tabs > li.active > a:hover,
-.nav-tabs > li.active > a:focus {
-	color: var(--pf-accent);
-	background: var(--pf-accent-lt);
-	border: none;
-	border-bottom: 2.5px solid var(--pf-accent);
-}
-.nav-tabs > li.active > a i.tab-icon { opacity: 1; color: var(--pf-accent); }
-
-/* ---- Panel de contenido de cada tab ---- */
-.tab-content > .tab-pane > .box,
-.tab-content > .tab-pane > .row > .col-md-9 > .box,
-.tab-content > .tab-pane > .row > .col-md-12 > .box {
-	border-radius: 0 0 var(--pf-radius) var(--pf-radius);
-	box-shadow: var(--pf-shadow);
-	border: 1px solid var(--pf-border);
-	border-top: none;
-}
-
-/* ---- Inputs ---- */
-.tab-content .form-control {
-	border-radius: 6px;
-	border-color: var(--pf-border);
-	font-size: 13px;
-	height: 36px;
-	color: var(--pf-text);
-	transition: border-color var(--pf-transition), box-shadow var(--pf-transition);
-}
-.tab-content textarea.form-control { height: auto; }
-.tab-content .form-control:focus {
-	border-color: var(--pf-accent);
-	box-shadow: 0 0 0 3px rgba(74,127,165,0.12);
-	outline: none;
-}
-.tab-content label {
-	font-size: 12px;
-	font-weight: 600;
-	color: var(--pf-muted);
-}
+.pf-topbar { align-items: center; }
+.btn-pf-save { letter-spacing: 0.2px; }
+.pf-error-msg { margin-bottom: 16px; }
 
 /* ---- Lista de items ---- */
 .tab-content .products-list > .item {
-	border-radius: 6px;
-	margin-bottom: 6px;
-	padding: 10px 12px;
-	background: var(--pf-white);
-	border: 1px solid var(--pf-border);
 	transition: background var(--pf-transition), border-color var(--pf-transition);
 }
-.tab-content .products-list > .item:hover {
-	background: #f0f6fb;
-	border-color: #c8dcec;
-}
+.tab-content .products-list > .item:hover { border-color: #c8dcec; }
 
-/* ---- Chips de permisos ---- */
+/* ---- Cabecera de la lista de usuarios ---- */
 #user-list-box .box-header {
 	display: flex;
 	align-items: center;
@@ -153,53 +27,6 @@
 	gap: 10px;
 	padding: 12px 16px;
 }
-#user-list-box .products-list > .item {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-}
-#user-list-box .products-list .product-img { flex-shrink: 0; width: 32px; height: 32px; }
-#user-list-box .products-list .product-img img { width: 20px; height: 20px; opacity: 0.5; }
-#user-list-box .products-list .product-info { flex: 1; min-width: 0; }
-.app-public-chip {
-	display: inline-flex;
-	align-items: center;
-	gap: 5px;
-	border: 1px solid #e8ecef;
-	border-radius: 20px;
-	padding: 3px 10px 3px 8px;
-	font-size: 12px;
-	font-weight: 600;
-	color: #7b8a96;
-	background: #f4f6f8;
-	cursor: pointer;
-	transition: background 0.15s, border-color 0.15s, color 0.15s;
-	user-select: none;
-	white-space: nowrap;
-	margin: 0;
-	text-transform: none;
-	letter-spacing: 0;
-}
-.app-public-chip input[type="checkbox"] {
-	margin: 0;
-	cursor: pointer;
-	accent-color: #4a7fa5;
-	width: 13px;
-	height: 13px;
-	flex-shrink: 0;
-}
-.app-public-chip:has(input:checked) { background: rgba(74,127,165,0.1); border-color: #4a7fa5; color: #2d5f80; }
-.app-role-row {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	flex-wrap: wrap;
-	gap: 8px;
-	width: 100%;
-}
-.app-role-info { flex: 1; min-width: 0; }
-.app-role-name { font-size: 13px; font-weight: 600; color: #2e3a45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.app-role-desc { font-size: 12px; color: #7b8a96; margin-top: 1px; }
 </style>
 {% endblock %}
 
