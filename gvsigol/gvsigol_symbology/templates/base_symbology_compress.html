@@ -66,6 +66,17 @@
 
 <body class="hold-transition {{GVSIGOL_SKIN}} sidebar-mini">
 
+	<script>
+		// Must run before the first paint, while hold-transition is still active
+		(function() {
+			try {
+				if (localStorage.getItem('gvsigol.sidebar.collapsed') === 'true') {
+					document.body.classList.add('sidebar-collapse');
+				}
+			} catch (e) {}
+		})();
+	</script>
+
 	<div class="wrapper">
 	
 		<header class="main-header" id="base-main-header" {% if IFRAME_MODE_UI %} style="display: none" {% endif %}>
@@ -218,6 +229,14 @@
 	    	$("#select-language").change(function() {
 	    		$("#select-language-form").submit();
 			});
+	    	
+	    	// Below screenSizes.sm the toggle uses sidebar-open, not the desktop preference
+	    	$('body').on('expanded.pushMenu collapsed.pushMenu', function(e) {
+	    		if ($(window).width() <= 767) { return; }
+	    		try {
+	    			localStorage.setItem('gvsigol.sidebar.collapsed', e.type === 'collapsed');
+	    		} catch (err) {}
+	    	});
 	    });
 		function authenticate(url) {
 			var self = this;
