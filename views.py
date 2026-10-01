@@ -719,11 +719,18 @@ def project_package_import_wizard(request, job_id):
         if foreign_connection_map:
             wiz['foreign_connection_map'] = foreign_connection_map
         gpkg_foreign_datastores = {}
-        for key, val in request.POST.items():
-            if key.startswith('gpkg_datastore_') and val:
-                ck = key[len('gpkg_datastore_'):]
+        for key in request.POST:
+            if not key.startswith('gpkg_datastore_'):
+                continue
+            ck = key[len('gpkg_datastore_'):]
+            # Multiple rows share the same name per connection_key; empty values
+            # from skipped/unconfigured rows must not overwrite a real choice.
+            for val in request.POST.getlist(key):
+                if not val:
+                    continue
                 try:
                     gpkg_foreign_datastores[ck] = int(val)
+                    break
                 except (TypeError, ValueError):
                     pass
         if gpkg_foreign_datastores:
