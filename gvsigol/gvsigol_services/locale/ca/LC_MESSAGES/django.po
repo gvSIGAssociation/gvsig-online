@@ -2695,16 +2695,9 @@ msgid "Options"
 msgstr "Opcions"
 
 #: gvsigol_services/templates/connection_list.html:193
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "\t\t\t\t\t\tShowing %(start)s to %(end)s of %(total)s connections\n"
-#| "\t\t\t\t\t\t"
+#, python-format
 msgid "Showing %(start)s to %(end)s of %(total)s connections"
-msgstr ""
-"\n"
-"\t\t\t\t\t\tMostrant %(start)s a %(end)s de %(total)s connexions\n"
-"\t\t\t\t\t\t"
+msgstr "Mostrant %(start)s a %(end)s de %(total)s connexions"
 
 #: gvsigol_services/templates/connection_list.html:209
 #: gvsigol_services/templates/connection_list.html:282
@@ -3062,16 +3055,9 @@ msgid "Using centralized connection"
 msgstr "Utilitzant connexió centralitzada"
 
 #: gvsigol_services/templates/datastore_list.html:169
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "\t\t\t\t\t\tShowing %(start)s to %(end)s of %(total)s datastores\n"
-#| "\t\t\t\t\t\t"
+#, python-format
 msgid "Showing %(start)s to %(end)s of %(total)s datastores"
-msgstr ""
-"\n"
-"\t\t\t\t\t\tMostrant %(start)s a %(end)s de %(total)s magatzems de dades\n"
-"\t\t\t\t\t\t"
+msgstr "Mostrant %(start)s a %(end)s de %(total)s magatzems de dades"
 
 #: gvsigol_services/templates/datastore_list.html:185
 msgid "Delete datastore"
@@ -3150,10 +3136,8 @@ msgid "Add item"
 msgstr "Afegir element"
 
 #: gvsigol_services/templates/enumeration_list.html:93
-#, fuzzy
-#| msgid "Enumeration list"
 msgid "Enumerations list"
-msgstr "Llistat de enumeracions"
+msgstr "Llistat d'enumeracions"
 
 #: gvsigol_services/templates/enumeration_list.html:95
 msgid "Add enumeration"
@@ -3381,10 +3365,8 @@ msgstr ""
 "tessel·les). S'ha desactivat la imatge única."
 
 #: gvsigol_services/templates/external_layer_list.html:93
-#, fuzzy
-#| msgid "External layers"
 msgid "External layers list"
-msgstr "Capes externes"
+msgstr "Llistat de capes externes"
 
 #: gvsigol_services/templates/external_layer_list.html:95
 msgid "Add external layer"
@@ -4256,16 +4238,9 @@ msgid "Datastore type"
 msgstr "Tipus de magatzem de dades"
 
 #: gvsigol_services/templates/layer_list.html:182
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "\t\t\t\t\t\tShowing %(start)s to %(end)s of %(total)s layers\n"
-#| "\t\t\t\t\t\t"
+#, python-format
 msgid "Showing %(start)s to %(end)s of %(total)s layers"
-msgstr ""
-"\n"
-"\t\t\t\t\t\tMostrant %(start)s a %(end)s de %(total)s capes\n"
-"\t\t\t\t\t\t"
+msgstr "Mostrant %(start)s a %(end)s de %(total)s capes"
 
 #: gvsigol_services/templates/layer_list.html:199
 #: gvsigol_services/templates/layer_list.html:284
@@ -4470,16 +4445,9 @@ msgid "Asigned to"
 msgstr "Assignat a"
 
 #: gvsigol_services/templates/layergroup_list.html:168
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "\t\t\t\t\t\tShowing %(start)s to %(end)s of %(total)s layer groups\n"
-#| "\t\t\t\t\t\t"
+#, python-format
 msgid "Showing %(start)s to %(end)s of %(total)s layer groups"
-msgstr ""
-"\n"
-"\t\t\t\t\t\tMostrant %(start)s a %(end)s de %(total)s grups de capes\n"
-"\t\t\t\t\t\t"
+msgstr "Mostrant %(start)s a %(end)s de %(total)s grups de capes"
 
 #: gvsigol_services/templates/layergroup_list.html:184
 #: gvsigol_services/templates/layergroup_list.html:237
@@ -4499,10 +4467,8 @@ msgid "Group layers"
 msgstr "Capes del grup"
 
 #: gvsigol_services/templates/lock_list.html:93
-#, fuzzy
-#| msgid "Locks"
 msgid "Locks list"
-msgstr "Bloquejos"
+msgstr "Llistat de bloquejos"
 
 #: gvsigol_services/templates/lock_list.html:104
 msgid "Layer"
@@ -4683,10 +4649,8 @@ msgid "Update server"
 msgstr "Actualitzar servidor"
 
 #: gvsigol_services/templates/service_url_list.html:93
-#, fuzzy
-#| msgid "Services URLs"
 msgid "Service URLs list"
-msgstr "URLs del serveis"
+msgstr "Llistat d'URLs dels serveis"
 
 #: gvsigol_services/templates/service_url_list.html:95
 msgid "Add service URL"
@@ -4763,10 +4727,8 @@ msgid "No valid table selected"
 msgstr "No s'ha seleccionat una taula vàlida"
 
 #: gvsigol_services/templates/sqlview_list.html:93
-#, fuzzy
-#| msgid "SQL Views"
 msgid "SQL Views list"
-msgstr "Vistes SQL"
+msgstr "Llistat de vistes SQL"
 
 #: gvsigol_services/templates/sqlview_list.html:95
 msgid "Add SQL View"
@@ -4806,16 +4768,9 @@ msgid "URI"
 msgstr "URI"
 
 #: gvsigol_services/templates/workspace_list.html:164
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "\t\t\t\t\t\tShowing %(start)s to %(end)s of %(total)s workspaces\n"
-#| "\t\t\t\t\t\t"
+#, python-format
 msgid "Showing %(start)s to %(end)s of %(total)s workspaces"
-msgstr ""
-"\n"
-"\t\t\t\t\t\tMostrant %(start)s a %(end)s de %(total)s espais de treball\n"
-"\t\t\t\t\t\t"
+msgstr "Mostrant %(start)s a %(end)s de %(total)s espais de treball"
 
 #: gvsigol_services/templates/workspace_list.html:181
 #: gvsigol_services/templates/workspace_list.html:235

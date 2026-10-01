@@ -8,7 +8,7 @@
 		<div class="pl-panel">
 			<div class="pl-panel__header">
 				<h3 class="pl-panel__title">
-					<i class="fa fa-paint-brush"></i>{% trans "Layer name" %}
+					<i class="fa fa-paint-brush"></i>{% trans "Layer styles list" %}
 				</h3>
 				<div class="pl-panel__actions">
 					<form method="get" action="" id="search-form" class="pl-search-form">
@@ -66,9 +66,7 @@
 			{% if is_paginated|default:False %}
 			<div class="pl-panel__footer">
 				<span class="text-muted">
-					{% blocktrans with start=page_obj.start_index end=page_obj.end_index total=total_items %}
-					Showing {{ start }} to {{ end }} of {{ total }} layers
-					{% endblocktrans %}
+					{% blocktrans with start=page_obj.start_index end=page_obj.end_index total=total_items %}Showing {{ start }} to {{ end }} of {{ total }} layers{% endblocktrans %}
 				</span>
 				<ul class="pagination pagination-sm no-margin">
 					{% if page_obj.has_previous %}

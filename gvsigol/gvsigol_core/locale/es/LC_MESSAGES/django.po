@@ -1503,14 +1503,8 @@ msgstr "Vista previa"
 
 #: gvsigol_core/templates/project_list.html:589
 #, python-format
-msgid ""
-"\n"
-"\t\t\t\t\tShowing %(start)s to %(end)s of %(total)s projects\n"
-"\t\t\t\t\t"
-msgstr ""
-"\n"
-"\t\t\t\t\tMostrando del %(start)s al %(end)s de %(total)s proyectos\n"
-"\t\t\t\t\t"
+msgid "Showing %(start)s to %(end)s of %(total)s projects"
+msgstr "Mostrando %(start)s a %(end)s de %(total)s proyectos"
 
 #: gvsigol_core/templates/project_list.html:632
 #: gvsigol_core/templates/project_list.html:862

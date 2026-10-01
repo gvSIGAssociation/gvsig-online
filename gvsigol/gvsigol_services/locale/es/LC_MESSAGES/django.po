@@ -2674,16 +2674,9 @@ msgid "Options"
 msgstr "Opciones"
 
 #: gvsigol_services/templates/connection_list.html:193
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "\t\t\t\t\t\tShowing %(start)s to %(end)s of %(total)s connections\n"
-#| "\t\t\t\t\t\t"
+#, python-format
 msgid "Showing %(start)s to %(end)s of %(total)s connections"
-msgstr ""
-"\n"
-"\t\t\t\t\t\tMostrando %(start)s a %(end)s de %(total)s conexiones\n"
-"\t\t\t\t\t\t"
+msgstr "Mostrando %(start)s a %(end)s de %(total)s conexiones"
 
 #: gvsigol_services/templates/connection_list.html:209
 #: gvsigol_services/templates/connection_list.html:282
@@ -3037,16 +3030,9 @@ msgid "Using centralized connection"
 msgstr "Usando conexión centralizada"
 
 #: gvsigol_services/templates/datastore_list.html:169
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "\t\t\t\t\t\tShowing %(start)s to %(end)s of %(total)s datastores\n"
-#| "\t\t\t\t\t\t"
+#, python-format
 msgid "Showing %(start)s to %(end)s of %(total)s datastores"
-msgstr ""
-"\n"
-"\t\t\t\t\t\tMostrando %(start)s a %(end)s de %(total)s almacenes de datos\n"
-"\t\t\t\t\t\t"
+msgstr "Mostrando %(start)s a %(end)s de %(total)s almacenes de datos"
 
 #: gvsigol_services/templates/datastore_list.html:185
 msgid "Delete datastore"
@@ -3124,8 +3110,6 @@ msgid "Add item"
 msgstr "Añadir elemento"
 
 #: gvsigol_services/templates/enumeration_list.html:93
-#, fuzzy
-#| msgid "Enumeration list"
 msgid "Enumerations list"
 msgstr "Lista de enumeraciones"
 
@@ -3357,10 +3341,8 @@ msgstr ""
 "opción de imagen simple se ha desactivado."
 
 #: gvsigol_services/templates/external_layer_list.html:93
-#, fuzzy
-#| msgid "External layers"
 msgid "External layers list"
-msgstr "Capas externas"
+msgstr "Lista de capas externas"
 
 #: gvsigol_services/templates/external_layer_list.html:95
 msgid "Add external layer"
@@ -4244,16 +4226,9 @@ msgid "Datastore type"
 msgstr "Tipo de almacén de datos"
 
 #: gvsigol_services/templates/layer_list.html:182
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "\t\t\t\t\t\tShowing %(start)s to %(end)s of %(total)s layers\n"
-#| "\t\t\t\t\t\t"
+#, python-format
 msgid "Showing %(start)s to %(end)s of %(total)s layers"
-msgstr ""
-"\n"
-"\t\t\t\t\t\tMostrando %(start)s a %(end)s de %(total)s capas\n"
-"\t\t\t\t\t\t"
+msgstr "Mostrando %(start)s a %(end)s de %(total)s capas"
 
 #: gvsigol_services/templates/layer_list.html:199
 #: gvsigol_services/templates/layer_list.html:284
@@ -4459,16 +4434,9 @@ msgid "Asigned to"
 msgstr "Asignado a"
 
 #: gvsigol_services/templates/layergroup_list.html:168
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "\t\t\t\t\t\tShowing %(start)s to %(end)s of %(total)s layer groups\n"
-#| "\t\t\t\t\t\t"
+#, python-format
 msgid "Showing %(start)s to %(end)s of %(total)s layer groups"
-msgstr ""
-"\n"
-"\t\t\t\t\t\tMostrando %(start)s a %(end)s de %(total)s grupos de capas\n"
-"\t\t\t\t\t\t"
+msgstr "Mostrando %(start)s a %(end)s de %(total)s grupos de capas"
 
 #: gvsigol_services/templates/layergroup_list.html:184
 #: gvsigol_services/templates/layergroup_list.html:237
@@ -4488,10 +4456,8 @@ msgid "Group layers"
 msgstr "Capas del grupo"
 
 #: gvsigol_services/templates/lock_list.html:93
-#, fuzzy
-#| msgid "Locks"
 msgid "Locks list"
-msgstr "Bloqueos"
+msgstr "Lista de bloqueos"
 
 #: gvsigol_services/templates/lock_list.html:104
 msgid "Layer"
@@ -4675,10 +4641,8 @@ msgid "Update server"
 msgstr "Actualizar servidor"
 
 #: gvsigol_services/templates/service_url_list.html:93
-#, fuzzy
-#| msgid "Services URLs"
 msgid "Service URLs list"
-msgstr "URLs de los servicios"
+msgstr "Lista de URLs de los servicios"
 
 #: gvsigol_services/templates/service_url_list.html:95
 msgid "Add service URL"
@@ -4755,10 +4719,8 @@ msgid "No valid table selected"
 msgstr "No ha seleccionado una tabla válida"
 
 #: gvsigol_services/templates/sqlview_list.html:93
-#, fuzzy
-#| msgid "SQL Views"
 msgid "SQL Views list"
-msgstr "Vistas SQL"
+msgstr "Lista de vistas SQL"
 
 #: gvsigol_services/templates/sqlview_list.html:95
 msgid "Add SQL View"
@@ -4797,16 +4759,9 @@ msgid "URI"
 msgstr "URI"
 
 #: gvsigol_services/templates/workspace_list.html:164
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "\t\t\t\t\t\tShowing %(start)s to %(end)s of %(total)s workspaces\n"
-#| "\t\t\t\t\t\t"
+#, python-format
 msgid "Showing %(start)s to %(end)s of %(total)s workspaces"
-msgstr ""
-"\n"
-"\t\t\t\t\t\tMostrando %(start)s a %(end)s de %(total)s espacios de trabajo\n"
-"\t\t\t\t\t\t"
+msgstr "Mostrando %(start)s a %(end)s de %(total)s espacios de trabajo"
 
 #: gvsigol_services/templates/workspace_list.html:181
 #: gvsigol_services/templates/workspace_list.html:235

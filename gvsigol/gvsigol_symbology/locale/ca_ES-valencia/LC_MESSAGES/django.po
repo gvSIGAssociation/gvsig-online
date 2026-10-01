@@ -1376,3 +1376,10 @@ msgstr "Introduïu el valor de l'atribut"
 #: gvsigol_symbology/templates/unique_values_update.html
 msgid "Add"
 msgstr "Afegir"
+
+#, python-format
+msgid "Showing %(start)s to %(end)s of %(total)s layers"
+msgstr "Mostrant %(start)s a %(end)s de %(total)s capes"
+
+msgid "Layer styles list"
+msgstr "Llistat d'estils de capa"

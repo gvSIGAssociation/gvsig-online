@@ -1236,13 +1236,9 @@ msgid "Styles"
 msgstr "Estils"
 
 #: gvsigol_symbology/templates/style_layer_list.html:69
-#, fuzzy, python-format
-#| msgid "Showing from %(start)s to %(end)s of %(numrecords)s records"
-msgid ""
-"\n"
-"\t\t\t\t\tShowing %(start)s to %(end)s of %(total)s layers\n"
-"\t\t\t\t\t"
-msgstr "Mostrant de %(start)s fins a %(end)s de %(numrecords)s registres"
+#, python-format
+msgid "Showing %(start)s to %(end)s of %(total)s layers"
+msgstr "Mostrant %(start)s a %(end)s de %(total)s capes"
 
 #: gvsigol_symbology/templates/style_layer_list.html:142
 msgid "Add style"
@@ -1329,3 +1325,6 @@ msgstr "Has d'introduir un nom per a la biblioteca i seleccioneu un arxiu"
 #: gvsigol_symbology/views.py:1607
 msgid "There is already a library with that name"
 msgstr ""
+
+msgid "Layer styles list"
+msgstr "Llistat d'estils de capa"
