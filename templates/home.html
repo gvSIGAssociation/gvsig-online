@@ -1125,7 +1125,10 @@ body.skin-black .home-page {
 
 {% block extra-scripts %}
 <script>
-	$('body').addClass('sidebar-collapse');
+	// Collapsed by default on first visit only, to give room to the projects grid
+	if (localStorage.getItem('gvsigol.sidebar.collapsed') === null) {
+		$('body').addClass('sidebar-collapse');
+	}
 
 	$('#menu-home').addClass("active");
 
