@@ -2112,28 +2112,38 @@ def wmts_options_for_openlayers(
             pass
 
     tilematrixset = None
-    if tilematrixsetname and wmts_options.get('tileGrids', {}).get(tilematrixsetname):
-        tilematrixset = wmts_options['tileGrids'][tilematrixsetname]
+    tile_grids = wmts_options.get('tileGrids') or {}
+    if tilematrixsetname and tile_grids.get(tilematrixsetname):
+        tilematrixset = tile_grids[tilematrixsetname]
     elif projection:
-        for tms_name, tms in wmts_options.get('tileGrids', {}).items():
+        for tms_name, tms in tile_grids.items():
             if tms.get('projection') == projection:
                 tilematrixset = tms
                 tilematrixsetname = tms_name
                 break
-        if not tilematrixset: # if not compatible matrixset is found, assume EPSG:3857
-            for tms_name, tms in wmts_options.get('tileGrids', {}).items():
-                if tms.get('projection') == 'EPSG:3857' or tms.get('projection') == 'EPSG:900913':
+        if not tilematrixset:  # prefer WebMercator when map CRS is unsupported
+            for tms_name, tms in tile_grids.items():
+                if tms.get('projection') in ('EPSG:3857', 'EPSG:900913'):
                     tilematrixset = tms
                     tilematrixsetname = tms_name
                     break
+
+    # Last resort: any usable matrix set (e.g. ArcGIS WMTS only in EPSG:25830).
+    # OpenLayers will reproject onto the map view CRS when they differ.
+    if not tilematrixset:
+        for tms_name, tms in tile_grids.items():
+            if tms and tms.get('tileGrid'):
+                tilematrixset = tms
+                tilematrixsetname = tms_name
+                break
 
     if tilematrixset:
         wmts_options['matrixSet'] = tilematrixsetname
         wmts_options['tileGrid'] = tilematrixset['tileGrid']
         wmts_options['tileMatrixSet'] = tilematrixset['tileGrid']
         wmts_options['projection'] = tilematrixset['projection']
-        del wmts_options['tileGrids']
-        del wmts_options['matrixSets']
+        wmts_options.pop('tileGrids', None)
+        wmts_options.pop('matrixSets', None)
 
     _normalize_wmts_style_identifier_for_kvp(wmts_options)
     return wmts_options
