@@ -1940,7 +1940,7 @@ class SqlView(models.Model):
             {
                 "schema": "sch1",
                 "name": "table2",
-                "alias": "t1",
+                "alias": "t2",
                 "join_type": "INNER",
                 "join_field1": {
                     "table_alias": "t1",
@@ -1952,12 +1952,19 @@ class SqlView(models.Model):
                 }
             }
         ],
-        "pks": ["f1"]
+        "pks": ["f1"],
+        "where": {
+            "operator": "AND",
+            "conditions": [
+                {"table_alias": "t1", "name": "estado", "op": "=", "value": "activo"},
+                {"table_alias": "t2", "name": "fecha", "op": ">=", "value": "2024-01-01"}
+            ]
+        }
     }
 
     The main limitations of this schema are:
     - complex ON conditions are not allowed (i.e. ON t1.f1 = t2.t1_id AND t1.type = t2.type)
-    - where clauses are not allowed (although the schema could be extended to accept WHERE clauses)
+    - WHERE is limited to structured conditions (field/op/value); free-form SQL is not allowed
     """
     json_def = JSONField()
     created_by = models.CharField(max_length=100, default='')

@@ -140,6 +140,109 @@ class SqlField():
             r["alias"] = self.alias
         return r
 
+
+# Operators accepted in structured SqlView WHERE definitions
+SQLVIEW_WHERE_OPS = frozenset({
+    '=', '<>', '<', '>', '<=', '>=', 'LIKE', 'ILIKE',
+    'IS NULL', 'IS NOT NULL', 'IN', 'CONTAINS', 'NOT CONTAINS',
+})
+SQLVIEW_WHERE_NULL_OPS = frozenset({'IS NULL', 'IS NOT NULL'})
+SQLVIEW_WHERE_JOINERS = frozenset({'AND', 'OR'})
+
+
+def _sqlview_qualified_column(table_alias, field_name):
+    return sqlbuilder.SQL('{alias}.{field}').format(
+        alias=sqlbuilder.Identifier(table_alias),
+        field=sqlbuilder.Identifier(field_name),
+    )
+
+
+def _sqlview_where_condition(condition):
+    """
+    Compile one structured WHERE condition to psycopg2.sql composable.
+    Expected keys: table_alias, name, op; optional value.
+    """
+    table_alias = (condition.get('table_alias') or '').strip()
+    field_name = (condition.get('name') or '').strip()
+    operator = str(condition.get('op') or '').strip().upper()
+    value = condition.get('value')
+
+    if not table_alias or not field_name or operator not in SQLVIEW_WHERE_OPS:
+        return None
+
+    column = _sqlview_qualified_column(table_alias, field_name)
+
+    if operator in SQLVIEW_WHERE_NULL_OPS:
+        return sqlbuilder.SQL('({col} {op})').format(
+            col=column, op=sqlbuilder.SQL(operator))
+
+    if operator == 'IN':
+        values = value if isinstance(value, (list, tuple)) else \
+            [v.strip() for v in str(value or '').split(',') if v.strip()]
+        if not values:
+            return None
+        cleaned = []
+        for raw in values:
+            text = str(raw).strip()
+            if len(text) >= 2 and text[0] == text[-1] and text[0] in ("'", '"'):
+                text = text[1:-1]
+            cleaned.append(text)
+        return sqlbuilder.SQL('({col} IN ({vals}))').format(
+            col=column,
+            vals=sqlbuilder.SQL(', ').join(
+                [sqlbuilder.Literal(v) for v in cleaned]),
+        )
+
+    if operator in ('CONTAINS', 'NOT CONTAINS'):
+        values = value if isinstance(value, (list, tuple)) else [value]
+        like = sqlbuilder.SQL('NOT ILIKE') if operator == 'NOT CONTAINS' else sqlbuilder.SQL('ILIKE')
+        joiner = sqlbuilder.SQL(' AND ') if operator == 'NOT CONTAINS' else sqlbuilder.SQL(' OR ')
+        parts = [
+            sqlbuilder.SQL('{col} {like} {val}').format(
+                col=column, like=like,
+                val=sqlbuilder.Literal('%{0}%'.format('' if v is None else v)),
+            )
+            for v in values
+        ]
+        return sqlbuilder.SQL('({0})').format(joiner.join(parts))
+
+    if operator in ('=', '<>', '<', '>', '<=', '>=', 'LIKE', 'ILIKE'):
+        return sqlbuilder.SQL('({col} {op} {val})').format(
+            col=column,
+            op=sqlbuilder.SQL(operator),
+            val=sqlbuilder.Literal('' if value is None else str(value)),
+        )
+    return None
+
+
+def build_sqlview_where(where_def):
+    """
+    Build a WHERE clause composable from a structured definition:
+      {"operator": "AND"|"OR", "conditions": [{table_alias, name, op, value?}, ...]}
+    Returns None when there is nothing usable.
+    """
+    if not where_def or not isinstance(where_def, dict):
+        return None
+    conditions = where_def.get('conditions') or []
+    if not conditions:
+        return None
+    joiner_key = str(where_def.get('operator') or 'AND').strip().upper()
+    if joiner_key not in SQLVIEW_WHERE_JOINERS:
+        joiner_key = 'AND'
+    joiner = sqlbuilder.SQL(' OR ') if joiner_key == 'OR' else sqlbuilder.SQL(' AND ')
+
+    parts = []
+    for item in conditions:
+        if not isinstance(item, dict):
+            continue
+        compiled = _sqlview_where_condition(item)
+        if compiled is not None:
+            parts.append(compiled)
+    if not parts:
+        return None
+    return sqlbuilder.SQL('({0})').format(joiner.join(parts))
+
+
 class TableInfo():
     def __init__(self, column_names, column_info, pks) -> None:
         self._info_dict = column_info
@@ -587,10 +690,12 @@ class Introspect:
         r = self.cursor.fetchone()
         return r[0] > 0
   
-    def create_view(self, schema, view_name, from_tables, fields):
+    def create_view(self, schema, view_name, from_tables, fields, where=None):
         """
-        Creates a SQL view that joins 2 tables using a joining field from
-        each table. Only the provided fields will be included in the created view.
+        Creates a SQL view that joins N tables using a joining field from
+        each consecutive pair. Only the provided fields will be included.
+        Optional structured ``where`` dict adds a WHERE clause
+        (see build_sqlview_where).
         """
         try:
             view_from_tables = []
@@ -637,15 +742,22 @@ class Introspect:
                     field_sql = sqlbuilder.SQL(" ").join([field_sql, sqlbuilder.SQL("{alias}").format(alias=sqlbuilder.Identifier(field.alias))])
                 view_fields.append(field_sql)
 
+            where_sql = build_sqlview_where(where)
+            if where_sql is not None:
+                where_clause = sqlbuilder.SQL(" WHERE {clause}").format(clause=where_sql)
+            else:
+                where_clause = sqlbuilder.SQL("")
+
             query = sqlbuilder.SQL("""
             CREATE VIEW {schema}.{view_name} AS
             SELECT {fields_sql}
-            {view_from}
+            {view_from}{where_clause}
             """).format(
                 schema=sqlbuilder.Identifier(schema),
                 view_name=sqlbuilder.Identifier(view_name),
                 fields_sql=sqlbuilder.SQL(', ').join(view_fields),
-                view_from = sqlbuilder.SQL(" ").join(view_from_tables)           
+                view_from=sqlbuilder.SQL(" ").join(view_from_tables),
+                where_clause=where_clause,
             )
             self.cursor.execute(query)
             return True

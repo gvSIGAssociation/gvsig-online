@@ -5375,3 +5375,75 @@ msgstr "Este campo es obligatorio al publicar la capa."
 
 msgid "The selected layer group does not belong to the same server as the datastore."
 msgstr "El grupo de capas seleccionado no pertenece al mismo servidor que el almacén de datos."
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Filters"
+msgstr "Filtros"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "WHERE filters"
+msgstr "Filtros WHERE"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Match conditions with"
+msgstr "Combinar condiciones con"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "AND (all)"
+msgstr "AND (todas)"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "OR (any)"
+msgstr "OR (cualquiera)"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Add at least one table before defining filters."
+msgstr "Añada al menos una tabla antes de definir filtros."
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Operator"
+msgstr "Operador"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Value"
+msgstr "Valor"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Add condition"
+msgstr "Añadir condición"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "contains"
+msgstr "contiene"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "does not contain"
+msgstr "no contiene"
+
+#: gvsigol_services/forms_services.py
+msgid "Invalid filter definition"
+msgstr "Definición de filtro no válida"
+
+#: gvsigol_services/forms_services.py
+msgid "Invalid filter operator"
+msgstr "Operador de filtro no válido"
+
+#: gvsigol_services/forms_services.py
+msgid "Invalid filter condition"
+msgstr "Condición de filtro no válida"
+
+#: gvsigol_services/forms_services.py
+msgid "Unsupported filter operator: {0}"
+msgstr "Operador de filtro no soportado: {0}"
+
+#: gvsigol_services/forms_services.py
+msgid "Filter value is required"
+msgstr "El valor del filtro es obligatorio"
+
+#: gvsigol_services/views.py
+msgid "Filter references unknown table alias: {alias}"
+msgstr "El filtro referencia un alias de tabla desconocido: {alias}"
+
+#: gvsigol_services/views.py
+msgid "Filter field does not exist: {field}"
+msgstr "El campo del filtro no existe: {field}"

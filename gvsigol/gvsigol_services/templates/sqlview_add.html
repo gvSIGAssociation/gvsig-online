@@ -117,6 +117,7 @@
 			<li class="active"><a href="#tab-sqlview-general" data-toggle="tab"><i class="fa fa-cog tab-icon"></i> {% trans "General" %}</a></li>
 			<li><a href="#tab-sqlview-tables" data-toggle="tab"><i class="fa fa-table tab-icon"></i> {% trans "Tables" %}</a></li>
 			<li><a href="#tab-sqlview-fields" data-toggle="tab"><i class="fa fa-list tab-icon"></i> {% trans "Fields" %}</a></li>
+			<li><a href="#tab-sqlview-filters" data-toggle="tab"><i class="fa fa-filter tab-icon"></i> {% trans "Filters" %}</a></li>
 		</ul>
 			<div class="tab-content">
 				<div class="tab-pane active" id="tab-sqlview-general">
@@ -210,6 +211,50 @@
 								</div>
 								<input type="hidden" name="fields" id="fields"
 									value="{{form.fields.value|default_if_none:''}}" />
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="tab-pane" id="tab-sqlview-filters">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="box">
+								<div class="box-header with-border">
+									<h3 class="box-title">{% trans "WHERE filters" %}</h3>
+								</div>
+								<div class="box-body">
+									<div class="row" style="margin-bottom: 12px;">
+										<div class="col-md-4 form-group">
+											<label for="where-operator">{% trans "Match conditions with" %}</label>
+											<select id="where-operator" class="form-control">
+												<option value="AND">{% trans "AND (all)" %}</option>
+												<option value="OR">{% trans "OR (any)" %}</option>
+											</select>
+										</div>
+									</div>
+									<p id="where-empty-msg" class="text-muted" style="display:none;">{% trans "Add at least one table before defining filters." %}</p>
+									<div class="table-responsive">
+										<table id="where-list-table" class="table no-margin">
+											<thead>
+												<tr>
+													<th>{% trans "Field" %}</th>
+													<th>{% trans "Operator" %}</th>
+													<th>{% trans "Value" %}</th>
+													<th></th>
+												</tr>
+											</thead>
+											<tbody id="where-list-table-body"></tbody>
+										</table>
+									</div>
+								</div>
+								<div class="box-footer clearfix" style="border-top: 0px">
+									<a id="add-where-button" href="javascript:void(0)"
+										class="btn btn-box-tool pull-left margin-r-5">
+										<i class="fa fa-plus margin-r-5"></i>{% trans "Add condition" %}
+									</a>
+								</div>
+								<input type="hidden" name="where_clause" id="where_clause"
+									value="{{form.where_clause.value|default_if_none:''}}" />
 							</div>
 						</div>
 					</div>
@@ -560,7 +605,9 @@
 			$(".delete-table-" + nextId).on('click', function (e) {
 				e.preventDefault();
 				$(this).closest('tr').remove();
-				//$('#from-table-list-table tr[data-rowid=' + nextId + ']').remove();
+				if (typeof pruneWhereConditions === 'function') {
+					pruneWhereConditions();
+				}
 			});
 		}
 
@@ -697,6 +744,251 @@
 			return JSON.stringify(fields);
 		}
 
+		var WHERE_OPS = [
+			{value: '=', label: '='},
+			{value: '<>', label: '≠'},
+			{value: '<', label: '<'},
+			{value: '>', label: '>'},
+			{value: '<=', label: '≤'},
+			{value: '>=', label: '≥'},
+			{value: 'LIKE', label: 'LIKE'},
+			{value: 'ILIKE', label: 'ILIKE'},
+			{value: 'IN', label: 'IN'},
+			{value: 'CONTAINS', label: '{% trans "contains" %}'},
+			{value: 'NOT CONTAINS', label: '{% trans "does not contain" %}'},
+			{value: 'IS NULL', label: 'IS NULL'},
+			{value: 'IS NOT NULL', label: 'IS NOT NULL'}
+		];
+		var whereFieldCache = {};
+		var whereNextId = 0;
+
+		function getFromTablesMeta() {
+			var fromTables = [];
+			$(".from-tables").each(function () {
+				var selection = $(".from-table-datastore option:selected", $(this));
+				fromTables.push({
+					"datastore_id": selection.val(),
+					"table_name": $(".from-table option:selected", $(this)).val(),
+					"table_alias": $(".from-table-alias", $(this)).val()
+				});
+			});
+			return fromTables;
+		}
+
+		function refreshWhereEmptyMsg() {
+			var hasTables = getFromTablesMeta().length > 0;
+			$("#where-empty-msg").toggle(!hasTables);
+			$("#add-where-button").toggle(hasTables);
+			$("#where-list-table").closest('.table-responsive').toggle(hasTables);
+		}
+
+		function isNullWhereOp(op) {
+			return op === 'IS NULL' || op === 'IS NOT NULL';
+		}
+
+		function toggleWhereValueInput(row) {
+			var op = row.find('.where-op').val();
+			var valueInput = row.find('.where-value');
+			if (isNullWhereOp(op)) {
+				valueInput.val('').prop('disabled', true);
+			} else {
+				valueInput.prop('disabled', false);
+			}
+		}
+
+		function loadWhereFieldOptions(selectObj, selectedKey, callback) {
+			var fromTables = getFromTablesMeta();
+			selectObj.empty();
+			selectObj.append($('<option>', {
+				value: '',
+				text: '{% trans "Choose field" %}',
+				disabled: 'disabled',
+				selected: selectedKey ? false : 'selected'
+			}));
+			if (fromTables.length === 0) {
+				if (typeof callback === 'function') { callback(); }
+				return;
+			}
+			var pending = fromTables.length;
+			var options = [];
+			function doneOne() {
+				pending -= 1;
+				if (pending <= 0) {
+					options.sort(function (a, b) {
+						return a.text.localeCompare(b.text);
+					});
+					for (var i = 0; i < options.length; i++) {
+						selectObj.append($('<option>', options[i]));
+					}
+					if (selectedKey) {
+						selectObj.val(selectedKey);
+					}
+					if (typeof callback === 'function') { callback(); }
+				}
+			}
+			for (var i = 0; i < fromTables.length; i++) {
+				(function (ft) {
+					var cacheKey = ft.datastore_id + '::' + ft.table_name;
+					function appendFields(fields) {
+						for (var j = 0; j < fields.length; j++) {
+							var fname = fields[j].name || fields[j];
+							var key = ft.table_alias + '.' + fname;
+							options.push({
+								value: key,
+								text: key,
+								selected: selectedKey === key
+							});
+						}
+						doneOne();
+					}
+					if (!ft.datastore_id || !ft.table_name) {
+						doneOne();
+						return;
+					}
+					if (whereFieldCache[cacheKey]) {
+						appendFields(whereFieldCache[cacheKey]);
+						return;
+					}
+					$.getJSON("{% url 'backend_fields_list' %}", {
+						datastore_id: ft.datastore_id,
+						table_name: ft.table_name
+					}, function (data) {
+						whereFieldCache[cacheKey] = data || [];
+						appendFields(whereFieldCache[cacheKey]);
+					}).fail(function () {
+						doneOne();
+					});
+				})(fromTables[i]);
+			}
+		}
+
+		function addWhereConditionUi(condition) {
+			whereNextId += 1;
+			var id = whereNextId;
+			var row = $('<tr class="where-condition" data-whereid="' + id + '"></tr>');
+			var fieldCol = $('<td class="form-group col-md-4"></td>');
+			var fieldSelect = $('<select class="form-control where-field"></select>');
+			fieldCol.append(fieldSelect);
+			row.append(fieldCol);
+
+			var opCol = $('<td class="form-group col-md-3"></td>');
+			var opSelect = $('<select class="form-control where-op"></select>');
+			for (var i = 0; i < WHERE_OPS.length; i++) {
+				opSelect.append($('<option>', {
+					value: WHERE_OPS[i].value,
+					text: WHERE_OPS[i].label
+				}));
+			}
+			opCol.append(opSelect);
+			row.append(opCol);
+
+			var valueCol = $('<td class="form-group col-md-4"></td>');
+			var valueInput = $('<input type="text" class="form-control where-value" placeholder="{% trans "Value" %}">');
+			valueCol.append(valueInput);
+			row.append(valueCol);
+
+			row.append($('<td class="col-md-1" style="padding-top: 12px;"><a class="delete-where" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>'));
+			$('#where-list-table-body').append(row);
+
+			opSelect.on('change', function () {
+				toggleWhereValueInput(row);
+			});
+			row.find('.delete-where').on('click', function (e) {
+				e.preventDefault();
+				row.remove();
+			});
+
+			var selectedKey = '';
+			if (condition) {
+				selectedKey = (condition.table_alias || '') + '.' + (condition.name || '');
+				if (condition.op) {
+					opSelect.val(condition.op);
+				}
+				if (typeof condition.value !== 'undefined' && condition.value !== null) {
+					if ($.isArray(condition.value)) {
+						valueInput.val(condition.value.join(', '));
+					} else {
+						valueInput.val(condition.value);
+					}
+				}
+			}
+			toggleWhereValueInput(row);
+			loadWhereFieldOptions(fieldSelect, selectedKey);
+			refreshWhereEmptyMsg();
+		}
+
+		function serializeWhere() {
+			var conditions = [];
+			$("#where-list-table-body tr.where-condition").each(function () {
+				var fieldKey = $(this).find('.where-field').val() || '';
+				var op = $(this).find('.where-op').val();
+				var value = $(this).find('.where-value').val();
+				var dot = fieldKey.indexOf('.');
+				if (dot < 1 || !op) {
+					return;
+				}
+				var item = {
+					table_alias: fieldKey.substring(0, dot),
+					name: fieldKey.substring(dot + 1),
+					op: op
+				};
+				if (!isNullWhereOp(op)) {
+					item.value = value;
+				}
+				conditions.push(item);
+			});
+			if (conditions.length === 0) {
+				return '{}';
+			}
+			return JSON.stringify({
+				operator: $("#where-operator").val() || 'AND',
+				conditions: conditions
+			});
+		}
+
+		function pruneWhereConditions() {
+			var aliases = {};
+			getFromTablesMeta().forEach(function (ft) {
+				if (ft.table_alias) {
+					aliases[ft.table_alias] = true;
+				}
+			});
+			$("#where-list-table-body tr.where-condition").each(function () {
+				var fieldKey = $(this).find('.where-field').val() || '';
+				var alias = fieldKey.split('.')[0];
+				if (!alias || !aliases[alias]) {
+					$(this).remove();
+				}
+			});
+			refreshWhereEmptyMsg();
+		}
+
+		function deserializeWhere(raw) {
+			$("#where-list-table-body").empty();
+			whereNextId = 0;
+			if (!raw || !String(raw).trim()) {
+				$("#where-operator").val('AND');
+				refreshWhereEmptyMsg();
+				return;
+			}
+			var whereDef;
+			try {
+				whereDef = JSON.parse(raw);
+			} catch (err) {
+				whereDef = {};
+			}
+			if (!whereDef || typeof whereDef !== 'object') {
+				refreshWhereEmptyMsg();
+				return;
+			}
+			$("#where-operator").val(whereDef.operator || 'AND');
+			var conditions = whereDef.conditions || [];
+			for (var i = 0; i < conditions.length; i++) {
+				addWhereConditionUi(conditions[i]);
+			}
+			refreshWhereEmptyMsg();
+		}
+
 		$('.js-example-basic-single').select2();
 		$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 			$('.js-example-basic-single').select2();
@@ -704,9 +996,22 @@
 		$('a[data-toggle="tab"][href="#tab-sqlview-fields"]').on('shown.bs.tab', function (e) {
 			udateFieldsTab();
 		});
+		$('a[data-toggle="tab"][href="#tab-sqlview-filters"]').on('shown.bs.tab', function (e) {
+			pruneWhereConditions();
+			$("#where-list-table-body tr.where-condition").each(function () {
+				var fieldSelect = $(this).find('.where-field');
+				var current = fieldSelect.val();
+				loadWhereFieldOptions(fieldSelect, current);
+			});
+			refreshWhereEmptyMsg();
+		});
 
 		$("#add-table-button").on('click', function (e) {
 			addTableUi();
+		});
+		$("#add-where-button").on('click', function (e) {
+			e.preventDefault();
+			addWhereConditionUi();
 		});
 
 		$("#all-fields").on('click', function (e) {
@@ -740,6 +1045,7 @@
 			function finishSave() {
 				$("#fields").val(serializeFields());
 				$("#from_tables").val(serializeTables());
+				$("#where_clause").val(serializeWhere());
 				$('#main_form')[0].submit();
 			}
 			var hasTables = $("#from-table-list-table tbody tr.from-tables").length > 0;
@@ -758,6 +1064,7 @@
 		var fieldsHiddenInitial = $("#fields").val();
 		deserializeTables($("#from_tables").val());
 		deserializeFields(fieldsHiddenInitial);
+		deserializeWhere($("#where_clause").val());
 		if (sqlViewFieldsHiddenEmpty(fieldsHiddenInitial) && $("#from-table-list-table tbody tr.from-tables").length > 0) {
 			udateFieldsTab(undefined, function () {
 				$("#fields").val(serializeFields());

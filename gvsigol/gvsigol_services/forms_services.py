@@ -399,11 +399,12 @@ class ServiceUrlForm(forms.ModelForm):
 class SqlViewForm(forms.ModelForm):
     class Meta:
         model = SqlView
-        fields = ['datastore', 'name', 'from_tables', 'fields']
+        fields = ['datastore', 'name', 'from_tables', 'fields', 'where_clause']
     datastore = forms.ModelChoiceField(label=_('Datastore'), required=True, queryset=None, widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
     name = forms.CharField(label=_('Name'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     from_tables = forms.CharField(label=_('Tables'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     fields = forms.CharField(label=_('Fields'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    where_clause = forms.CharField(label=_('Filters'), required=False, widget=forms.TextInput(attrs={'class' : 'form-control'}))
 
     def clean_from_tables(self):
         from_tables = json.loads(self.cleaned_data.get('from_tables', []))
@@ -442,6 +443,63 @@ class SqlViewForm(forms.ModelForm):
                 raise ValidationError(gettext_lazy('Duplicated alias'), code='view_field_alias')
             field_aliases.append(field.get('alias'))
         return fields
+
+    def clean_where_clause(self):
+        from .backend_postgis import SQLVIEW_WHERE_OPS, SQLVIEW_WHERE_NULL_OPS, SQLVIEW_WHERE_JOINERS
+        raw = self.cleaned_data.get('where_clause')
+        if not raw:
+            return {}
+        if isinstance(raw, dict):
+            where_def = raw
+        else:
+            try:
+                where_def = json.loads(raw)
+            except (TypeError, ValueError):
+                raise ValidationError(gettext_lazy('Invalid filter definition'), code='where_clause')
+        if not where_def:
+            return {}
+        if not isinstance(where_def, dict):
+            raise ValidationError(gettext_lazy('Invalid filter definition'), code='where_clause')
+        conditions = where_def.get('conditions') or []
+        if not conditions:
+            return {}
+        if not isinstance(conditions, list):
+            raise ValidationError(gettext_lazy('Invalid filter definition'), code='where_clause')
+        operator = str(where_def.get('operator') or 'AND').strip().upper()
+        if operator not in SQLVIEW_WHERE_JOINERS:
+            raise ValidationError(gettext_lazy('Invalid filter operator'), code='where_operator')
+        cleaned_conditions = []
+        for cond in conditions:
+            if not isinstance(cond, dict):
+                raise ValidationError(gettext_lazy('Invalid filter condition'), code='where_condition')
+            table_alias = (cond.get('table_alias') or '').strip()
+            name = (cond.get('name') or '').strip()
+            op = str(cond.get('op') or '').strip().upper()
+            if not table_alias or not name:
+                raise ValidationError(gettext_lazy('Invalid filter condition'), code='where_condition')
+            if op not in SQLVIEW_WHERE_OPS:
+                raise ValidationError(gettext_lazy('Unsupported filter operator: {0}').format(op), code='where_op')
+            item = {
+                'table_alias': table_alias,
+                'name': name,
+                'op': op,
+            }
+            if op not in SQLVIEW_WHERE_NULL_OPS:
+                if 'value' not in cond or cond.get('value') is None:
+                    raise ValidationError(gettext_lazy('Filter value is required'), code='where_value')
+                if op == 'IN':
+                    raw_val = cond.get('value')
+                    if isinstance(raw_val, (list, tuple)):
+                        if len(raw_val) == 0:
+                            raise ValidationError(gettext_lazy('Filter value is required'), code='where_value')
+                    elif not str(raw_val).strip():
+                        raise ValidationError(gettext_lazy('Filter value is required'), code='where_value')
+                item['value'] = cond.get('value')
+            cleaned_conditions.append(item)
+        return {
+            'operator': operator,
+            'conditions': cleaned_conditions,
+        }
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)

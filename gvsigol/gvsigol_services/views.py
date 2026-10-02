@@ -10012,6 +10012,16 @@ def _sqlview_update(request, is_update, sql_view=None):
 
                     field_objs.append(field_obj)
                     field_aliases[table_alias][field_name] = field_alias
+                where_def = form.cleaned_data.get('where_clause') or {}
+                for cond in where_def.get('conditions') or []:
+                    table_alias = cond.get('table_alias')
+                    field_name = cond.get('name')
+                    if table_alias not in table_fields:
+                        form.add_error(None, gettext_lazy('Filter references unknown table alias: {alias}').format(alias=table_alias))
+                        raise Exception
+                    if field_name not in table_fields[table_alias]:
+                        form.add_error(None, gettext_lazy('Filter field does not exist: {field}').format(field=field_name))
+                        raise Exception
                 try:
                     pk_aliases = [ field_aliases[main_table][p] for p in pks]
                 except:
@@ -10019,15 +10029,18 @@ def _sqlview_update(request, is_update, sql_view=None):
                     raise Exception
                 field_defs = [ f.to_json() for f in field_objs]
                 sql_view.json_def = {
-                    'fields':field_defs,
+                    'fields': field_defs,
                     'from': from_def,
-                    'pks': pk_aliases
+                    'pks': pk_aliases,
                 }
+                if where_def.get('conditions'):
+                    sql_view.json_def['where'] = where_def
                 sql_view.save()
                 view_id = sql_view.id
                 # re-set the form in case there are some error after this point
                 form.cleaned_data['from_tables'] = json.dumps(sql_view.json_def['from'])
                 form.cleaned_data['fields'] = json.dumps(sql_view.json_def['fields'])
+                form.cleaned_data['where_clause'] = json.dumps(sql_view.json_def.get('where', {}))
                 try:
                     i, params = sql_view.datastore.get_db_connection()
                     with i as c:
@@ -10037,7 +10050,7 @@ def _sqlview_update(request, is_update, sql_view=None):
                             else:
                                 form.add_error(None, gettext_lazy('An object already exists with name: {}').format(sql_view.name))
                                 raise Exception
-                        if not c.create_view(target_schema, sql_view.name, from_objs, field_objs):
+                        if not c.create_view(target_schema, sql_view.name, from_objs, field_objs, where=where_def or None):
                             msg = _check_join_field_types(from_def)
                             if msg:
                                 form.add_error(None, msg)
@@ -10073,7 +10086,11 @@ def _sqlview_update(request, is_update, sql_view=None):
         if sql_view is None:
             form = SqlViewForm(request.user)
         else:
-            initial = {'from_tables': json.dumps(sql_view.json_def['from']), 'fields': json.dumps(sql_view.json_def['fields'])}
+            initial = {
+                'from_tables': json.dumps(sql_view.json_def['from']),
+                'fields': json.dumps(sql_view.json_def['fields']),
+                'where_clause': json.dumps(sql_view.json_def.get('where', {})),
+            }
             form = SqlViewForm(request.user, initial=initial, instance=sql_view)
             view_id = sql_view.id
         if not request.user.is_superuser:

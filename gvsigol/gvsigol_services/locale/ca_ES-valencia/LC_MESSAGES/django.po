@@ -4366,3 +4366,75 @@ msgstr "El valor \"{value}\" no és vàlid per al camp numèric \"{field}\"."
 #~ "\t\t\t\t\t\t\t\ta aquest formulari. \n"
 #~ "\t\t\t\t\t\t\t\tPer favor contacti amb l'administrador del sistema si \n"
 #~ "\t\t\t\t\t\t\t\tla creació de la metadada contínua fallant"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Filters"
+msgstr "Filtres"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "WHERE filters"
+msgstr "Filtres WHERE"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Match conditions with"
+msgstr "Combinar condicions amb"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "AND (all)"
+msgstr "AND (totes)"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "OR (any)"
+msgstr "OR (qualsevol)"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Add at least one table before defining filters."
+msgstr "Afegiu almenys una taula abans de definir filtres."
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Operator"
+msgstr "Operador"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Value"
+msgstr "Valor"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Add condition"
+msgstr "Afegir condició"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "contains"
+msgstr "conté"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "does not contain"
+msgstr "no conté"
+
+#: gvsigol_services/forms_services.py
+msgid "Invalid filter definition"
+msgstr "Definició de filtre no vàlida"
+
+#: gvsigol_services/forms_services.py
+msgid "Invalid filter operator"
+msgstr "Operador de filtre no vàlid"
+
+#: gvsigol_services/forms_services.py
+msgid "Invalid filter condition"
+msgstr "Condició de filtre no vàlida"
+
+#: gvsigol_services/forms_services.py
+msgid "Unsupported filter operator: {0}"
+msgstr "Operador de filtre no suportat: {0}"
+
+#: gvsigol_services/forms_services.py
+msgid "Filter value is required"
+msgstr "El valor del filtre és obligatori"
+
+#: gvsigol_services/views.py
+msgid "Filter references unknown table alias: {alias}"
+msgstr "El filtre referencia un àlies de taula desconegut: {alias}"
+
+#: gvsigol_services/views.py
+msgid "Filter field does not exist: {field}"
+msgstr "El camp del filtre no existeix: {field}"
