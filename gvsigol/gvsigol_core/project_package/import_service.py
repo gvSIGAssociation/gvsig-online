@@ -481,8 +481,14 @@ def _get_or_create_connection_datastore(username, ws_obj, ds_name, connection, s
     )
 
 
-def _parse_gpkg_connection_targets(wizard, layout, server_id):
-    """Resolve GPKG load targets: local = exported ws/ds; foreign = existing datastore."""
+def _parse_gpkg_connection_targets(wizard, layout, server_id, skipped_layer_ids=None):
+    """Resolve GPKG load targets: local = exported ws/ds; foreign = existing datastore.
+
+    Connections whose layers are all skipped in the wizard are ignored — no
+    datastore selection is required for them.
+    """
+    skipped_layer_ids = set(skipped_layer_ids or [])
+    skipped_cks = set(wizard.get('skip_gpkg_connection_keys') or [])
     foreign_ds = dict(wizard.get('gpkg_foreign_datastores') or {})
     for key, val in wizard.items():
         if not val or not key.startswith('gpkg_datastore_'):
@@ -493,10 +499,25 @@ def _parse_gpkg_connection_targets(wizard, layout, server_id):
         except (TypeError, ValueError):
             pass
 
+    def _connection_fully_skipped(ck):
+        if ck in skipped_cks:
+            return True
+        if not skipped_layer_ids:
+            return False
+        layers_for_ck = [
+            ly for ly in (layout.get('gpkg_layers') or [])
+            if ly.get('connection_key') == ck
+        ]
+        if not layers_for_ck:
+            return False
+        return all((ly.get('export_id') or '') in skipped_layer_ids for ly in layers_for_ck)
+
     out = {}
     for row in layout.get('gpkg_connection_targets') or []:
         ck = row.get('connection_key')
         if not ck:
+            continue
+        if _connection_fully_skipped(ck):
             continue
         if row.get('is_foreign_source'):
             ds_id = foreign_ds.get(ck)
@@ -3048,7 +3069,9 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
         datastore_map = {}
         ws_objs = {}
         if layout.get('gpkg_connection_targets'):
-            gpkg_targets = _parse_gpkg_connection_targets(wiz, layout, server.id)
+            gpkg_targets = _parse_gpkg_connection_targets(
+                wiz, layout, server.id, skipped_layer_ids=skipped_gpkg_layer_ids
+            )
             datastore_map, ws_objs, ws_created_extra = _build_datastore_map_from_gpkg_targets(
                 server.id, username, gpkg_targets, report
             )
