@@ -1,0 +1,118 @@
+/* =================================================================
+   gvSIG Online — Gestor de ficheros
+   Migas de pan, acciones de fila con menú desplegable y avisos del
+   navegador de ficheros. Compartido por el navegador (en panel y en
+   ventana emergente) y por los formularios de subida y de creación
+   de directorio.
+   ================================================================= */
+
+/* Las acciones de cada fila abren un menú desplegable y Bootstrap 3 no
+   permite sacarlo del contenedor, así que el panel no puede recortar. */
+.pl-panel { overflow: visible; }
+
+/* El titulo del panel aloja las migas de pan, que pueden ser largas, asi que
+   ocupa el espacio libre en vez de ajustarse a su contenido. */
+.pl-panel__title { flex: 1; min-width: 0; }
+
+/* ---- Migas de pan ---- */
+.breadcrumb {
+	background: var(--gol-bg);
+	border: 1px solid var(--gol-border);
+	border-radius: 6px;
+	padding: 5px 12px;
+	margin: 0;
+	font-size: 12px;
+}
+.breadcrumb > li + li::before { color: var(--gol-muted); }
+.breadcrumb a { color: var(--gol-accent); font-weight: 600; }
+.breadcrumb > li:last-child { color: var(--gol-text); font-weight: 600; }
+
+/* Dentro del título del panel las migas conviven con el resto de la
+   cabecera, así que necesitan comportarse como caja flexible. */
+.pl-panel__title .breadcrumb {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+}
+.pl-panel__title .breadcrumb > li { display: inline-flex; align-items: center; }
+.pl-panel__title .breadcrumb > li + li::before { padding: 0 4px; }
+
+/* ---- Acción secundaria de la cabecera ---- */
+.btn-pl-secondary {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: var(--gol-bg);
+	color: var(--gol-muted) !important;
+	border: 1px solid var(--gol-border);
+	border-radius: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	padding: 6px 14px;
+	height: 34px;
+	cursor: pointer;
+	transition: background var(--gol-transition);
+	text-decoration: none !important;
+	white-space: nowrap;
+}
+.btn-pl-secondary:hover { background: var(--gol-border); color: var(--gol-text) !important; }
+
+/* ---- Celdas con enlace y menú de acciones ---- */
+.pl-table tbody td a { color: var(--gol-accent); text-decoration: none; }
+.pl-table tbody td a:hover { text-decoration: underline; }
+.pl-table .btn-group .btn-box-tool {
+	background: transparent;
+	border: 1px solid var(--gol-border);
+	border-radius: 5px;
+	color: var(--gol-muted);
+	padding: 4px 10px;
+	transition: background var(--gol-transition);
+}
+.pl-table .btn-group .btn-box-tool:hover {
+	background: var(--gol-bg);
+	color: var(--gol-accent);
+	border-color: var(--gol-accent);
+}
+.pl-table .dropdown-menu {
+	border-radius: 8px;
+	border: 1px solid var(--gol-border);
+	box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+	font-size: 13px;
+}
+.pl-table .dropdown-menu > li > a {
+	padding: 8px 16px;
+	color: var(--gol-text);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.pl-table .dropdown-menu > li > a:hover { background: var(--gol-bg); color: var(--gol-accent); }
+
+/* ---- Avisos ---- */
+/* Las pantallas de listado los llaman pl- y las de formulario pf-, pero se
+   dibujan igual. */
+.pl-messages,
+.pf-messages { list-style: none; margin: 0 0 16px; padding: 0; }
+.pl-messages .msg-info,
+.pl-messages .msg-error,
+.pf-messages .msg-info,
+.pf-messages .msg-error {
+	padding: 10px 14px;
+	border-radius: 6px;
+	margin-bottom: 6px;
+	font-size: 13px;
+}
+.pl-messages .msg-info,
+.pf-messages .msg-info { border-left: 4px solid #27ae60; background: #f0fdf4; color: #1e7e34; }
+.pl-messages .msg-error,
+.pf-messages .msg-error { border-left: 4px solid #e74c3c; background: #fff5f5; color: #c0392b; }
+.pl-delete-error {
+	display: none;
+	background: #fff5f5;
+	border-left: 4px solid #e74c3c;
+	border-radius: 6px;
+	padding: 12px 16px;
+	margin-bottom: 12px;
+	font-size: 13px;
+	color: #c0392b;
+}

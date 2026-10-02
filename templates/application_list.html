@@ -4,58 +4,8 @@
 
 {% block header %}
 <link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-modal.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-list-page.css" %}">
-<style>
-/* ---- Panel ---- */
-.pl-panel { overflow: hidden; }
-
-/* ---- Tabla de aplicaciones ---- */
-#applications-table_wrapper,
-#applications-table_wrapper .dataTables_scroll,
-#applications-table_wrapper .dataTables_scrollBody {
-	border: none !important;
-	box-shadow: none !important;
-}
-#applications-table .btn-danger {
-	background: transparent;
-	border: 1px solid #e8bebe;
-	color: #c0392b;
-	border-radius: 5px;
-	font-size: 12px;
-	padding: 4px 10px;
-	transition: background var(--pl-transition), color var(--pl-transition);
-}
-#applications-table .btn-danger:hover {
-	background: #fde8e8;
-	border-color: #c0392b;
-	color: #c0392b;
-}
-#applications-table .btn-success {
-	background: transparent;
-	border: 1px solid var(--pl-border);
-	color: var(--pl-accent);
-	border-radius: 5px;
-	font-size: 12px;
-	padding: 4px 10px;
-	transition: background var(--pl-transition), color var(--pl-transition);
-}
-#applications-table .btn-success:hover {
-	background: #f0f6fb;
-	border-color: var(--pl-accent);
-	color: var(--pl-accent-dk);
-}
-
-/* ---- Modales ---- */
-.modal-footer #button-delete-application-accept {
-	background: var(--pl-accent);
-	border-color: var(--pl-accent);
-	color: #fff;
-}
-.modal-footer #button-delete-application-accept:hover {
-	background: var(--pl-accent-dk);
-	border-color: var(--pl-accent-dk);
-}
-</style>
 {% endblock %}
 
 {% block content %}
@@ -64,9 +14,14 @@
 		<div class="pl-panel">
 			<div class="pl-panel__header">
 				<h3 class="pl-panel__title">
-					<i class="fa fa-th-list"></i>{% trans "Applications list" %}
+					<i class="fa fa-buysellads"></i>{% trans "Applications list" %}
 				</h3>
 				<div class="pl-panel__actions">
+					<form class="pl-search-form">
+						<input type="text" class="form-control" placeholder="{% trans 'Search...' %}">
+						<button type="submit" class="btn-search"><i class="fa fa-search"></i></button>
+						<a href="#" class="btn-clear"><i class="fa fa-times"></i></a>
+					</form>
 					<a href="/gvsigonline/core/application_add/" class="btn-pl-add"><i class="fa fa-plus"></i>{% trans "Add application" %}</a>
 				</div>
 			</div>
@@ -123,7 +78,7 @@
 			</div>
 			<div class="modal-footer">
 				<button id="button-delete-application-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
-				<button id="button-delete-application-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+				<button id="button-delete-application-accept" type="button" class="btn btn-modal-accept">{% trans "Accept" %}</button>
 			</div>
 		</div>
 	</div>
@@ -136,30 +91,8 @@
 </script>
 <script>
 $(document).ready(function() {
-	var table = $('#applications-table').DataTable({
-		responsive: true,
-	    language: {
-	    	processing		: '{% trans "Processing request..." %}',
-		    search			: '{% blocktrans with sep=":" %}Search{{sep}}{% endblocktrans %}',
-		    lengthMenu		: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
-		    info			: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
-		    infoEmpty		: '{% trans "Showing from 0 to 0 of 0 records" %}',
-		    infoFiltered	: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
-		    infoPostFix		: "",
-		    loadingRecords	: '{% trans "Loading..." %}',
-		    zeroRecords		: '{% trans "No records available" %}',
-		    emptyTable		: '{% trans "No records available" %}',
-		    paginate: {
-		    	first		: '{% trans "First" %}',
-		        previous	: '{% trans "Previous" %}',
-		        next		: '{% trans "Next" %}',
-		        last		: '{% trans "Last" %}'
-		    },
-		    aria: {
-		        sortAscending: '{% blocktrans with sep=": " %}{{sep}}Sort ascending{% endblocktrans %}',
-		        sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
-		    }
-		},
+	var table = golListTable('#applications-table', {
+		dt: {
 		"columnDefs": [{
 	        "targets": -1,
 	        "data": null,
@@ -170,9 +103,8 @@ $(document).ready(function() {
             "render": function ( data, type, row ) {
             	return '<a title="' + '{% trans "Update application" %}" ' + '" href="/gvsigonline/core/application_update/' + data[0] + '/" data-toggle="tooltip" data-placement="bottom" class="btn btn-success"><i class="fa fa-edit"></i></a>';
             }
-	    }],
-	    "dom": 'T<"clear">lfrtip',
-		"bLengthChange": false
+	    }]
+		}
 	});
 	
 	

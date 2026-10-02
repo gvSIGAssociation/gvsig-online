@@ -4,20 +4,9 @@
 
 {% block header %}
 <link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-modal.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-list-page.css" %}">
 <style>
-/* ---- Panel ---- */
-.pl-panel__footer {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 12px 20px;
-	border-top: 1px solid var(--pl-border);
-	flex-wrap: wrap;
-	gap: 8px;
-}
-.pl-panel__footer .pagination { margin: 0; }
-.pl-panel__footer .text-muted { font-size: 12px; }
 .pl-form-error {
 	background: #fde8e8;
 	border: 1px solid #f5c6c6;
@@ -26,198 +15,6 @@
 	color: #c0392b;
 	font-size: 13px;
 	margin-bottom: 14px;
-}
-
-/* ---- Buscador ---- */
-.pl-search-form {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-}
-.pl-search-form .form-control {
-	height: 34px;
-	border-radius: 20px;
-	border: 1px solid var(--pl-border);
-	background: var(--pl-bg);
-	font-size: 12px;
-	padding: 0 14px;
-	width: 200px;
-	transition: border-color var(--pl-transition), box-shadow var(--pl-transition);
-	box-shadow: none;
-}
-.pl-search-form .form-control:focus {
-	border-color: var(--pl-accent);
-	background: var(--pl-white);
-	box-shadow: 0 0 0 3px rgba(74,127,165,0.12);
-	outline: none;
-}
-.pl-search-form .btn-search {
-	height: 34px;
-	width: 34px;
-	border-radius: 50%;
-	border: 1px solid var(--pl-border);
-	background: var(--pl-white);
-	color: var(--pl-muted);
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	cursor: pointer;
-	transition: background var(--pl-transition), color var(--pl-transition);
-	padding: 0;
-}
-.pl-search-form .btn-search:hover {
-	background: var(--pl-accent);
-	color: #fff;
-	border-color: var(--pl-accent);
-}
-.pl-search-form .btn-clear {
-	height: 34px;
-	width: 34px;
-	border-radius: 50%;
-	border: 1px solid var(--pl-border);
-	background: var(--pl-white);
-	color: var(--pl-muted);
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	cursor: pointer;
-	transition: background var(--pl-transition);
-	padding: 0;
-	text-decoration: none;
-}
-.pl-search-form .btn-clear:hover {
-	background: #fde8e8;
-	color: #c0392b;
-	border-color: #e0b0b0;
-}
-
-/* ---- Botones de la barra de acciones ---- */
-.btn-pl-import {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	background: var(--pl-white);
-	color: var(--pl-accent) !important;
-	border: 1px solid var(--pl-accent);
-	border-radius: 6px;
-	font-size: 12px;
-	font-weight: 600;
-	padding: 6px 14px;
-	height: 34px;
-	cursor: pointer;
-	transition: background var(--pl-transition), color var(--pl-transition);
-	text-decoration: none !important;
-	white-space: nowrap;
-	letter-spacing: 0.2px;
-}
-.btn-pl-import:hover {
-	background: #eef4f8;
-	color: var(--pl-accent-dk) !important;
-	border-color: var(--pl-accent-dk);
-}
-.btn-pl-reports {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	background: var(--pl-bg);
-	color: var(--pl-text) !important;
-	border: 1px solid var(--pl-border);
-	border-radius: 6px;
-	font-size: 12px;
-	font-weight: 600;
-	padding: 6px 14px;
-	height: 34px;
-	transition: background var(--pl-transition), border-color var(--pl-transition);
-	text-decoration: none !important;
-	white-space: nowrap;
-}
-.btn-pl-reports:hover {
-	background: var(--pl-white);
-	border-color: var(--pl-accent);
-	color: var(--pl-accent) !important;
-}
-
-/* ---- Tabla de proyectos ---- */
-#projects-table_wrapper,
-#projects-table_wrapper .dataTables_scroll,
-#projects-table_wrapper .dataTables_scrollBody {
-	border: none !important;
-	box-shadow: none !important;
-}
-.dataTables_wrapper .dataTables_length select {
-	height: 30px;
-	border-radius: 5px;
-	border: 1px solid var(--pl-border);
-	background: var(--pl-bg);
-	font-size: 12px;
-	padding: 0 6px;
-	color: var(--pl-text);
-}
-#projects-table .btn-danger {
-	background: transparent;
-	border: 1px solid #e8bebe;
-	color: #c0392b;
-	border-radius: 5px;
-	font-size: 12px;
-	padding: 4px 10px;
-	transition: background var(--pl-transition), color var(--pl-transition);
-}
-#projects-table .btn-danger:hover {
-	background: #fde8e8;
-	border-color: #c0392b;
-	color: #c0392b;
-}
-#projects-table .btn-success {
-	background: transparent;
-	border: 1px solid var(--pl-border);
-	color: var(--pl-accent);
-	border-radius: 5px;
-	font-size: 12px;
-	padding: 4px 10px;
-	transition: background var(--pl-transition), color var(--pl-transition);
-}
-#projects-table .btn-success:hover {
-	background: #f0f6fb;
-	border-color: var(--pl-accent);
-	color: var(--pl-accent-dk);
-}
-#projects-table .btn-warning {
-	background: transparent;
-	border: 1px solid #e8d8a0;
-	color: #9a6c00;
-	border-radius: 5px;
-	font-size: 12px;
-	padding: 4px 10px;
-	transition: background var(--pl-transition), color var(--pl-transition);
-}
-#projects-table .btn-warning:hover {
-	background: #fff8e6;
-	border-color: #9a6c00;
-	color: #7a5600;
-}
-#projects-table .btn-primary {
-	background: transparent;
-	border: 1px solid var(--pl-border);
-	color: var(--pl-muted);
-	border-radius: 5px;
-	font-size: 12px;
-	padding: 4px 10px;
-}
-#projects-table .btn-primary.disabled { opacity: 0.5; cursor: not-allowed; }
-
-/* ---- Modales ---- */
-.modal-footer .btn-primary,
-.modal-footer #button-delete-project-accept,
-.modal-footer #button-clone-project-accept {
-	background: var(--pl-accent);
-	border-color: var(--pl-accent);
-	color: #fff;
-}
-.modal-footer .btn-primary:hover,
-.modal-footer #button-delete-project-accept:hover,
-.modal-footer #button-clone-project-accept:hover {
-	background: var(--pl-accent-dk);
-	border-color: var(--pl-accent-dk);
 }
 </style>
 {% endblock %}
@@ -228,7 +25,7 @@
 		<div class="pl-panel">
 			<div class="pl-panel__header">
 				<h3 class="pl-panel__title">
-					<i class="fa fa-folder-open"></i>{% trans "Projects list" %}
+					<i class="fa fa-cubes"></i>{% trans "Projects list" %}
 				</h3>
 				<div class="pl-panel__actions">
 					<form method="get" action="" id="search-form" class="pl-search-form">
@@ -244,7 +41,7 @@
 					<button type="button" class="btn-pl-import" data-toggle="modal" data-target="#modal-import-project-package" title="{% trans 'Import a project from a ZIP package file' %}">
 						<i class="fa fa-upload"></i>{% trans "Import project" %}
 					</button>
-					<a href="{% url 'project_package_activity_log' %}" class="btn-pl-reports" title="{% trans 'Import and export reports' %}">
+					<a href="{% url 'project_package_activity_log' %}" class="btn-pl-import" title="{% trans 'Import and export reports' %}">
 						<i class="fa fa-list-alt"></i>{% trans "Package reports" %}
 					</a>
 					<a href="/gvsigonline/core/project_add/" class="btn-pl-add"><i class="fa fa-plus"></i>{% trans "Add project" %}</a>
@@ -298,8 +95,8 @@
 				</table>
 			</div>
 			{% if is_paginated|default:False %}
-			<div class="pl-panel__footer">
-				<span class="text-muted">
+			<div class="pl-server-pagination">
+				<span class="pagination-info">
 					{% blocktrans with start=page_obj.start_index end=page_obj.end_index total=total_items %}Showing {{ start }} to {{ end }} of {{ total }} projects{% endblocktrans %}
 				</span>
 				<ul class="pagination pagination-sm no-margin">
@@ -348,7 +145,7 @@
 			</div>
 			<div class="modal-footer">
 				<button id="button-delete-project-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
-				<button id="button-delete-project-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+				<button id="button-delete-project-accept" type="button" class="btn btn-modal-accept">{% trans "Accept" %}</button>
 			</div>
 		</div>
 	</div>
@@ -399,7 +196,7 @@
 			</div>
 			<div class="modal-footer">
 				<button id="button-clone-project-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
-				<button id="button-clone-project-accept" type="button" class="btn btn-default">{% trans "Clone" %}</button>
+				<button id="button-clone-project-accept" type="button" class="btn btn-modal-accept">{% trans "Clone" %}</button>
 			</div>
 		</div>
 	</div>
@@ -512,7 +309,7 @@
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
-					<button type="submit" class="btn btn-primary" id="btn-export-package-submit" disabled>{% trans "Export ZIP" %}</button>
+					<button type="submit" class="btn btn-modal-accept" id="btn-export-package-submit" disabled>{% trans "Export ZIP" %}</button>
 				</div>
 			</form>
 		</div>
@@ -542,8 +339,9 @@
 </script>
 <script>
 $(document).ready(function() {
-	var table = $('#projects-table').DataTable({
-		responsive: true,
+	var table = golListTable('#projects-table', {
+		mode: 'server',
+		dt: {
 		{% if is_paginated|default:False %}
 		paging: false,  // Deshabilitar paginación de DataTables cuando hay paginación del servidor
 		info: false,    // Ocultar info de DataTables (ya lo mostramos en la paginación del servidor)
@@ -637,35 +435,10 @@ $(document).ready(function() {
 					return '';
 				}
             }
-	    }],
-	    "dom": 'T<"clear">rtip',
-		"bLengthChange": false
+	    }]
+		}
 	});
 	
-	{% if is_paginated|default:False %}
-	// Eliminar el campo de búsqueda de DataTables si aparece
-	function removeDataTablesSearch() {
-		$('#projects-table_filter').remove();
-		$('div.dataTables_filter').remove();
-		$('label[for*="projects-table"]').remove();
-		$('input[aria-controls="projects-table"][type="search"]').closest('div').remove();
-		$('input[aria-controls="projects-table"][type="search"]').parent().remove();
-		$('input[aria-controls="projects-table"][type="search"]').remove();
-		$('#projects-table_wrapper').find('div.dataTables_filter').remove();
-		$('#projects-table_wrapper').find('input[type="search"]').closest('div').remove();
-	}
-	
-	// Eliminar inmediatamente y después de eventos de DataTables
-	removeDataTablesSearch();
-	table.on('draw', function() {
-		removeDataTablesSearch();
-	});
-	setTimeout(removeDataTablesSearch, 0);
-	setTimeout(removeDataTablesSearch, 50);
-	setTimeout(removeDataTablesSearch, 100);
-	setTimeout(removeDataTablesSearch, 500);
-	setTimeout(removeDataTablesSearch, 1000);
-	{% endif %}
 	
 	function initTooltips() {
 		$('#projects-table [data-toggle="tooltip"]').tooltip({ container: 'body' });

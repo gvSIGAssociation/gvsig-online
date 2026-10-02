@@ -168,16 +168,3 @@
 	color: var(--pf-muted);
 }
 .pf-file-picker__btn { margin: 0; }
-
-/* ---- Botones de confirmación de los modales ---- */
-#button-add-layer-group-accept,
-#button-extend-to-layers-accept {
-	background: var(--pf-accent);
-	border-color: var(--pf-accent);
-	color: #fff;
-}
-#button-add-layer-group-accept:hover,
-#button-extend-to-layers-accept:hover {
-	background: var(--pf-accent-dk);
-	border-color: var(--pf-accent-dk);
-}

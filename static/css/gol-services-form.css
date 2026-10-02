@@ -1,0 +1,53 @@
+/* =================================================================
+   gvSIG Online — Formularios de gvsigol_services
+   Lo que services hace distinto de gvsigol_core y conviene mantener:
+   el panel es el propio .tab-content, la barra de acciones va separada
+   con padding en vez de margen y los campos tienen fondo gris que pasa
+   a blanco al enfocar.
+
+   Se carga después de gol-form-page.css.
+   Requiere gol-tokens.css.
+   ================================================================= */
+
+/* ---- Barra de acciones ---- */
+/* Separa con padding propio, así que anula el margen de la hoja base. */
+.pf-topbar {
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin-bottom: 0;
+	padding: 12px 0 16px;
+}
+.pf-error-msg { margin-bottom: 16px; }
+
+/* ---- Panel de contenido de las pestañas ---- */
+/* En core el marco lo pone la .box interior; aquí lo pone el contenedor. */
+.tab-content {
+	background: var(--pf-white);
+	border: 1px solid var(--pf-border);
+	border-top: none;
+	border-radius: 0 0 var(--pf-radius) var(--pf-radius);
+	box-shadow: var(--pf-shadow);
+	padding: 24px;
+}
+
+/* ---- Etiquetas y campos ---- */
+.tab-content label { display: block; margin-bottom: 5px; }
+.tab-content .form-control,
+.pf-card .form-control,
+.pf-card input[type="text"],
+.pf-card input[type="email"],
+.pf-card input[type="password"],
+.pf-card input[type="number"],
+.pf-card textarea,
+.pf-card select {
+	border: 1px solid var(--pf-border);
+	background: var(--pf-bg);
+	box-shadow: none;
+	padding: 6px 12px;
+}
+.tab-content .form-control:focus,
+.pf-card .form-control:focus,
+.pf-card input:focus,
+.pf-card textarea:focus,
+.pf-card select:focus { background: var(--pf-white); }

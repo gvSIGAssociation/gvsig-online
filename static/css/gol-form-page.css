@@ -10,26 +10,80 @@
    ================================================================= */
 
 /* ---- Barra de acciones superior ---- */
+/* Barra de acciones del formulario. El bloque .pf-topbar-left crece, asi que
+   con flex-end los botones quedan a la derecha y el titulo, si lo hay, a la
+   izquierda, sin necesidad de space-between. */
 .pf-topbar {
 	display: flex;
 	justify-content: flex-end;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
 	margin-bottom: 16px;
+}
+/* Cuando el aviso de error va dentro de la barra ocupa el hueco libre y no
+   separa por abajo: la barra ya es una fila. */
+.pf-topbar .pf-error-msg {
+	flex: 1;
+	margin-bottom: 0;
+}
+.pf-topbar-right {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.pf-topbar-left {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	gap: 8px;
 }
 .btn-pf-save {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
 	background: var(--pf-accent);
-	color: #fff;
+	color: #fff !important;
 	border: none;
 	border-radius: 6px;
 	font-size: 13px;
 	font-weight: 600;
+	letter-spacing: 0.2px;
 	padding: 8px 20px;
 	cursor: pointer;
+	white-space: nowrap;
 	transition: background var(--pf-transition);
 }
-.btn-pf-save:hover { background: var(--pf-accent-dk); color: #fff; }
+.btn-pf-save:hover { background: var(--pf-accent-dk); color: #fff !important; }
+
+/* ---- Botón de volver / acción no destructiva ---- */
+.btn-pf-back,
+.btn-pf-test,
+.btn-pf-secondary {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	border: 1px solid var(--pf-border);
+	border-radius: 6px;
+	font-size: 13px;
+	font-weight: 600;
+	padding: 8px 16px;
+	cursor: pointer;
+	letter-spacing: 0.2px;
+	white-space: nowrap;
+	text-decoration: none !important;
+	transition: background var(--pf-transition), color var(--pf-transition), border-color var(--pf-transition);
+}
+.btn-pf-back,
+.btn-pf-test { background: var(--pf-bg); color: var(--pf-muted) !important; }
+.btn-pf-back:hover,
+.btn-pf-test:hover { background: var(--pf-border); color: var(--pf-text) !important; }
+.btn-pf-secondary { background: var(--pf-white); color: var(--pf-muted); }
+.btn-pf-secondary:hover {
+	background: #f0f6fb;
+	color: var(--pf-accent);
+	border-color: var(--pf-accent);
+}
 
 /* ---- Botón secundario de acción ---- */
 .btn-pf-add {
@@ -59,8 +113,12 @@
 	padding: 10px 14px;
 	color: #c0392b;
 	font-size: 13px;
+	margin-bottom: 16px;
 }
 .pf-error-msg:has(li), .pf-error-msg:has(p:not(:empty)), .pf-error-msg:has(ul:not(:empty)) { display: block; }
+.pf-error-msg ul { margin: 0; padding-left: 18px; }
+.pf-error-msg p { margin: 0 0 4px; }
+.pf-error-msg > :last-child { margin-bottom: 0; }
 .pf-messages { list-style: none; padding: 0; margin: 0 0 16px; }
 .pf-messages li {
 	border-radius: 6px;
@@ -114,15 +172,26 @@
 }
 .nav-tabs > li.active > a i.tab-icon { opacity: 1; color: var(--pf-accent); }
 
-/* ---- Panel de contenido de cada tab ---- */
-.tab-content > .tab-pane > .box,
-.tab-content > .tab-pane > .row > .col-md-9 > .box,
-.tab-content > .tab-pane > .row > .col-md-12 > .box {
-	border-radius: 0 0 var(--pf-radius) var(--pf-radius);
-	box-shadow: var(--pf-shadow);
+/* ---- Tarjeta de formulario, para las pantallas sin pestañas ---- */
+.pf-card {
+	background: var(--pf-white);
 	border: 1px solid var(--pf-border);
-	border-top: none;
+	border-radius: var(--pf-radius);
+	box-shadow: var(--pf-shadow);
+	padding: 24px;
 }
+.pf-card-header {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--pf-muted);
+	margin-bottom: 16px;
+	padding-bottom: 12px;
+	border-bottom: 1px solid var(--pf-border);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.pf-card-header i { color: var(--pf-accent); }
 
 /* ---- Secciones de formulario ---- */
 .pf-divider {
@@ -143,6 +212,61 @@
 }
 .pf-section-title i { color: var(--pf-accent); font-size: 13px; }
 
+/* ---- Subpanel con cabecera y pie, para listas editables ---- */
+.pf-subpanel {
+	border: 1px solid var(--pf-border);
+	border-radius: 8px;
+	overflow: hidden;
+	margin-top: 8px;
+}
+.pf-subpanel__header {
+	background: var(--pf-bg);
+	padding: 10px 16px;
+	border-bottom: 1px solid var(--pf-border);
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--pf-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.6px;
+}
+.pf-subpanel__body { padding: 16px; min-height: 40px; }
+.pf-subpanel__footer {
+	background: var(--pf-bg);
+	padding: 10px 16px;
+	border-top: 1px solid var(--pf-border);
+}
+.btn-pf-add-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: transparent;
+	color: var(--pf-accent) !important;
+	border: 1px solid var(--pf-border);
+	border-radius: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	padding: 5px 14px;
+	cursor: pointer;
+	transition: background var(--pf-transition), border-color var(--pf-transition);
+	text-decoration: none !important;
+}
+.btn-pf-add-item:hover { background: #f0f6fb; border-color: var(--pf-accent); }
+.btn-delete-item {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	background: transparent;
+	border: 1px solid #e8bebe;
+	border-radius: 6px;
+	color: #c0392b;
+	cursor: pointer;
+	transition: background var(--pf-transition);
+	flex-shrink: 0;
+}
+.btn-delete-item:hover { background: #fde8e8; border-color: #c0392b; }
+
 /* ---- Inputs ---- */
 .tab-content .form-control {
 	border-radius: 6px;
@@ -152,34 +276,63 @@
 	color: var(--pf-text);
 	transition: border-color var(--pf-transition), box-shadow var(--pf-transition);
 }
-.tab-content textarea.form-control { height: auto; }
-.tab-content .form-control:focus {
+.pf-card .form-control,
+.pf-card input[type="text"],
+.pf-card input[type="email"],
+.pf-card input[type="password"],
+.pf-card input[type="number"],
+.pf-card textarea,
+.pf-card select {
+	width: 100%;
+	border-radius: 6px;
+	border: 1px solid var(--pf-border);
+	font-size: 13px;
+	height: 36px;
+	color: var(--pf-text);
+	box-shadow: none;
+	transition: border-color var(--pf-transition), box-shadow var(--pf-transition);
+}
+
+/* Las áreas de texto y los select múltiples crecen con su contenido: la
+   altura fija de arriba las dejaría recortadas a una sola línea. */
+.tab-content textarea,
+.tab-content textarea.form-control,
+.pf-card textarea,
+.pf-card textarea.form-control,
+.pf-card select[multiple],
+.pf-card select[size] { height: auto; }
+
+.tab-content .form-control:focus,
+.pf-card .form-control:focus,
+.pf-card input:focus,
+.pf-card textarea:focus,
+.pf-card select:focus {
 	border-color: var(--pf-accent);
 	box-shadow: 0 0 0 3px rgba(74,127,165,0.12);
 	outline: none;
 }
-.tab-content label {
+.tab-content .form-control[readonly],
+.tab-content .form-control[disabled],
+.pf-card .form-control[readonly],
+.pf-card .form-control[disabled],
+.pf-card input[readonly],
+.pf-card input[disabled],
+.pf-card textarea[readonly],
+.pf-card textarea[disabled],
+.pf-card select[disabled] {
+	background: #f0f3f5;
+	color: var(--pf-muted);
+	cursor: default;
+}
+/* Las etiquetas van en minúscula y sin tracking: es la variante elegida
+   como canónica frente a la versalita que usaban algunos formularios. */
+.tab-content label,
+.pf-card label {
 	font-size: 12px;
 	font-weight: 600;
 	color: var(--pf-muted);
+	text-transform: none;
+	letter-spacing: 0;
 }
+.pf-card label { display: block; margin-bottom: 5px; }
 
-/* ---- Lista de items (grupos de capas, herramientas, roles) ---- */
-.tab-content .products-list > .item {
-	border-radius: 6px;
-	margin-bottom: 6px;
-	padding: 10px 12px;
-	background: var(--pf-white);
-	border: 1px solid var(--pf-border);
-}
-.tab-content .products-list > .item:hover { background: #f0f6fb; }
-
-/* ---- Lista de usuarios y roles ---- */
-#user-list-box .products-list > .item {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-}
-#user-list-box .products-list .product-img { flex-shrink: 0; width: 32px; height: 32px; }
-#user-list-box .products-list .product-img img { width: 20px; height: 20px; opacity: 0.5; }
-#user-list-box .products-list .product-info { flex: 1; min-width: 0; }

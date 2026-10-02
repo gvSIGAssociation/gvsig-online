@@ -6,43 +6,13 @@
 {% block header %}
 <link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-tabs-box.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-core-form.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-roles.css" %}">
-<link rel="stylesheet" href="{% static "css/gol-form-modal.css" %}">
 <style>
-/* ---- Barra de acciones superior ---- */
-.pf-topbar {
-	align-items: flex-start;
-	gap: 12px;
-	flex-wrap: wrap;
-}
-.btn-pf-save { letter-spacing: 0.2px; white-space: nowrap; }
-
-/* ---- Lista de items ---- */
-.tab-content .products-list > .item {
-	transition: background var(--pf-transition), border-color var(--pf-transition);
-}
-.tab-content .products-list > .item:hover { border-color: #c8dcec; }
 
 /* ---- Cabecera de la lista de usuarios ---- */
-#user-list-box .box-header {
-	display: flex;
-	align-items: center;
-	flex-wrap: wrap;
-	gap: 10px;
-	padding: 12px 16px;
-}
 .app-public-chip:has(input:disabled) { opacity: 0.55; cursor: default; }
-
-/* ---- Modales ---- */
-#button-extend-to-layers-accept {
-	background: var(--pf-accent);
-	border-color: var(--pf-accent);
-	color: #fff;
-}
-#button-extend-to-layers-accept:hover {
-	background: var(--pf-accent-dk);
-	border-color: var(--pf-accent-dk);
-}
 </style>
 {% endblock %}
 
@@ -52,8 +22,9 @@
 			<form id="application-form" enctype="multipart/form-data" role="form" method="post" action="/gvsigonline/core/application_update/{{appid}}/">
 				<div class="pf-topbar">
 					{% csrf_token %}
+					<a href="{% url 'application_list' %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
 					{% if message %}
-					<div class="pf-error-msg" style="flex:1;">* {{ message }}</div>
+					<div class="pf-error-msg">* {{ message }}</div>
 					{% endif %}
 					<button id="save_button" class="save_button btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Update" %}</button>
 				</div>
@@ -128,9 +99,6 @@
 							<div id="user-list-box" class="box searchable-list-box">
 								<div class="box-header">
 									<input type="text" class="search form-control" style="flex:1; min-width:180px; max-width:320px; border-radius:20px;" placeholder="{% trans 'Search user group...' %}" />
-									{% if user.is_superuser %}
-									<button id="extend-to-lyrs-btn" type="button" class="btn-pf-add" data-toggle="modal" data-target="#modal-extend-to-layers"><i class="fa fa-cogs"></i> {% trans "Extend to layers" %}</button>
-									{% endif %}
 									<label class="app-public-chip" title="{% trans 'Application will be readable by everyone if public' %}">
 										<input type="checkbox" name="is_public" id="is_public" {% if application.is_public %}checked {% endif %}/>
 										<span>{% trans "Is public?" %}</span>

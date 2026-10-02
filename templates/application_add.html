@@ -6,28 +6,9 @@
 {% block header %}
 <link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-tabs-box.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-core-form.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-roles.css" %}">
-<style>
-/* ---- Barra de acciones superior ---- */
-.pf-topbar { align-items: center; }
-.btn-pf-save { letter-spacing: 0.2px; }
-.pf-error-msg { margin-bottom: 16px; }
-
-/* ---- Lista de items ---- */
-.tab-content .products-list > .item {
-	transition: background var(--pf-transition), border-color var(--pf-transition);
-}
-.tab-content .products-list > .item:hover { border-color: #c8dcec; }
-
-/* ---- Cabecera de la lista de usuarios ---- */
-#user-list-box .box-header {
-	display: flex;
-	align-items: center;
-	flex-wrap: wrap;
-	gap: 10px;
-	padding: 12px 16px;
-}
-</style>
 {% endblock %}
 
 {% block content %}	
@@ -36,6 +17,7 @@
 			<form id="application-form" enctype="multipart/form-data" role="form" method="post" action="/gvsigonline/core/application_add/">
 				<div class="pf-topbar">
 					{% csrf_token %}
+					<a href="{% url 'application_list' %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
 					{% if message %}
 					<div class="pf-error-msg" style="flex:1; margin-right:16px;">* {{ message }}</div>
 					{% endif %}

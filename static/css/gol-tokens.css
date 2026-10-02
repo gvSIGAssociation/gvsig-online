@@ -44,6 +44,7 @@
 	/* ---- Alias: pantallas de listado ---- */
 	--pl-accent:     var(--gol-accent);
 	--pl-accent-dk:  var(--gol-accent-dk);
+	--pl-accent-lt:  var(--gol-accent-lt);
 	--pl-text:       var(--gol-text);
 	--pl-muted:      var(--gol-muted);
 	--pl-border:     var(--gol-border);

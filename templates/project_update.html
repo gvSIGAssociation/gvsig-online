@@ -6,17 +6,12 @@
 {% block header %}
 <link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-tabs-box.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-core-form.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-roles.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-modal.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-project-form.css" %}">
 <style>
-/* ---- Barra de acciones superior ---- */
-.pf-topbar {
-	align-items: flex-start;
-	gap: 12px;
-	flex-wrap: wrap;
-}
-.btn-pf-save { letter-spacing: 0.2px; white-space: nowrap; }
 
 /* Neutralizar clearfix de AdminLTE en cabeceras flex */
 .searchable-list-box .box-header::before,
@@ -24,22 +19,6 @@
 	display: none !important;
 }
 
-/* ---- Lista de items ---- */
-.tab-content .products-list > .item {
-	transition: background var(--pf-transition), border-color var(--pf-transition), box-shadow var(--pf-transition);
-}
-.tab-content .products-list > .item:hover {
-	border-color: rgba(74,127,165,0.3);
-	box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-#user-list-box .products-list > .item { padding: 8px 12px; }
-
-/* ---- Modales ---- */
-.modal-footer {
-	display: flex;
-	justify-content: flex-end;
-	gap: 8px;
-}
 </style>
 {% endblock %}
 
@@ -49,8 +28,9 @@
 			<form id="project-form" enctype="multipart/form-data" role="form" method="post" onkeydown="return event.key != 'Enter';" action="/gvsigonline/core/project_update/{{pid}}/">
 				<div class="pf-topbar">
 					{% csrf_token %}
+					<a href="{% url 'project_list' %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
 					{% if message %}
-					<div class="pf-error-msg" style="flex:1;">* {{ message }}</div>
+					<div class="pf-error-msg">* {{ message }}</div>
 					{% endif %}
 					<button id="save_button" class="save_button btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Update" %}</button>
 				</div>
@@ -520,7 +500,7 @@
 				</div>
 				<div class="modal-footer">
 					<button id="button-add-layer-group-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
-					<button id="button-add-layer-group-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+					<button id="button-add-layer-group-accept" type="button" class="btn btn-modal-accept">{% trans "Accept" %}</button>
 				</div>
 			</div>
 		</div>
@@ -546,13 +526,12 @@
 				</div>
 				<div class="modal-footer">
 					<button id="button-extend-to-layers-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
-					<button id="button-extend-to-layers-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+					<button id="button-extend-to-layers-accept" type="button" class="btn btn-modal-accept">{% trans "Accept" %}</button>
 				</div>
 			</div>
 		</div>
 	</div>
 {% endblock %}
-
 
 {% block extra-scripts %}
 <script type="text/javascript">
@@ -832,7 +811,6 @@
 			}
 		});
 	}
-
 
 	$().ready(function() {	
 				
