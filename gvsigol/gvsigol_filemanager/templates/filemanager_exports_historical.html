@@ -3,35 +3,14 @@
 {% load i18n %}
 
 {% block header %}
+<link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-list-page.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-filemanager.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
 <style>
-:root {
-	--pl-accent:    #4a7fa5;
-	--pl-accent-dk: #2d5f80;
-	--pl-text:      #2e3a45;
-	--pl-muted:     #7b8a96;
-	--pl-border:    #e8ecef;
-	--pl-bg:        #f4f6f8;
-	--pl-white:     #ffffff;
-	--pl-radius:    10px;
-	--pl-shadow:    0 2px 12px rgba(0,0,0,0.08);
-	--pl-transition: 0.2s ease;
-}
-.pl-panel { background: var(--pl-white); border-radius: var(--pl-radius); box-shadow: var(--pl-shadow); border: 1px solid var(--pl-border); overflow: hidden; }
-.pl-panel__header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--pl-border); gap: 12px; flex-wrap: wrap; }
-.pl-panel__title { font-size: 15px; font-weight: 700; color: var(--pl-text); display: flex; align-items: center; gap: 8px; margin: 0; }
-.pl-panel__title i { color: var(--pl-accent); }
-.pl-panel__actions { display: flex; align-items: center; gap: 8px; }
-.pl-panel__body { padding: 0; }
-.btn-pf-back { display: inline-flex; align-items: center; gap: 7px; background: var(--pl-bg); color: var(--pl-muted) !important; border: 1px solid var(--pl-border); border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 16px; cursor: pointer; transition: background var(--pl-transition); text-decoration: none !important; }
-.btn-pf-back:hover { background: var(--pl-border); color: var(--pl-text) !important; }
+/* Reintentar una exportacion y marcar su estado: solo esta pantalla. */
 .btn-pf-try { display: inline-flex; align-items: center; gap: 6px; background: var(--pl-bg); color: var(--pl-accent) !important; border: 1px solid var(--pl-border); border-radius: 6px; font-size: 12px; font-weight: 600; padding: 5px 12px; cursor: pointer; transition: background var(--pl-transition); text-decoration: none !important; white-space: nowrap; }
 .btn-pf-try:hover { background: #f0f6fb; border-color: var(--pl-accent); }
-.pl-table { width: 100%; border-collapse: collapse; font-size: 13px; -webkit-font-smoothing: antialiased; }
-.pl-table thead th { background: var(--pl-bg); color: var(--pl-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; padding: 11px 16px; border-bottom: 1px solid var(--pl-border); white-space: nowrap; }
-.pl-table tbody tr { border-bottom: 1px solid var(--pl-border); transition: background var(--pl-transition); }
-.pl-table tbody tr:last-child { border-bottom: none; }
-.pl-table tbody tr:hover { background: #f0f6fb; }
-.pl-table tbody td { padding: 10px 16px; color: #4a5a68; font-size: 13px; vertical-align: middle; }
 .status-icon-success { color: #27ae60; font-size: 15px; }
 .status-icon-error { color: #e74c3c; font-size: 15px; }
 .status-icon-warning { color: #e67e22; font-size: 15px; }

@@ -2,29 +2,12 @@
 {% load i18n static %}
 
 {% block header %}
+<link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-filemanager.css" %}">
 <style>
-:root {
-	--pf-accent:    #4a7fa5;
-	--pf-accent-dk: #2d5f80;
-	--pf-text:      #2e3a45;
-	--pf-muted:     #7b8a96;
-	--pf-border:    #e8ecef;
-	--pf-bg:        #f4f6f8;
-	--pf-white:     #ffffff;
-	--pf-radius:    10px;
-	--pf-shadow:    0 2px 12px rgba(0,0,0,0.08);
-	--pf-transition: 0.2s ease;
-}
-.pf-topbar { display: flex; align-items: center; justify-content: flex-end; padding: 12px 0 16px; gap: 10px; }
-.btn-pf-save { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-accent); color: #fff !important; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 20px; cursor: pointer; transition: background var(--pf-transition); letter-spacing: 0.2px; }
-.btn-pf-save:hover { background: var(--pf-accent-dk); }
-.pf-card { background: var(--pf-white); border: 1px solid var(--pf-border); border-radius: var(--pf-radius); box-shadow: var(--pf-shadow); padding: 24px; }
-.pf-card-header { font-size: 13px; font-weight: 600; color: var(--pf-muted); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--pf-border); display: flex; align-items: center; gap: 8px; }
-.pf-card-header i { color: var(--pf-accent); }
-	.breadcrumb { background: var(--pf-bg); border: 1px solid var(--pf-border); border-radius: 6px; padding: 5px 12px; margin: 0; font-size: 12px; }
-	.breadcrumb > li + li::before { color: var(--pf-muted); }
-	.breadcrumb a { color: var(--pf-accent); font-weight: 600; }
-	.breadcrumb > li:last-child { color: var(--pf-text); font-weight: 600; }
+/* Reserva sitio para el area de arrastrar ficheros antes de que el plugin
+   de subida la rellene. */
 .fileupload-component { min-height: 120px; }
 </style>
 {% endblock %}
@@ -32,6 +15,7 @@
 {% block content %}
 
 <div class="pf-topbar">
+	<a href="{% url 'filemanager:browser' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
 	<button id="upload-button" type="button" class="btn-pf-save"><i class="fa fa-upload"></i> {% trans "Upload" %}</button>
 </div>
 

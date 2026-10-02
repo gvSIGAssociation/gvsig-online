@@ -1,0 +1,134 @@
+/* =================================================================
+   gvSIG Online — Parciales de selección de permisos
+   Cabecera, buscador y lista de los parciales de gvsigol_services:
+   select_layer_permissions, select_layergroup_permissions,
+   select_datastore_permissions y select_connection_permissions.
+
+   Los parciales se insertan con {% include %} y no pueden declarar
+   {% block header %}, así que esta hoja se enlaza desde la plantilla
+   que los incluye.
+
+   Las filas de rol y los chips viven en gol-form-roles.css.
+   Requiere gol-tokens.css.
+   ================================================================= */
+
+/* ---- Cabecera del bloque de permisos ---- */
+.lp-header,
+.cp-header,
+.dp-header {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	padding: 12px 16px;
+}
+.lp-search,
+.cp-search,
+.dp-search { flex: 1; min-width: 180px; max-width: 320px; }
+.cp-allow-all,
+.dp-allow-all {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+/* ---- Lista de roles sobre products-list de AdminLTE ---- */
+#read-list-box .products-list > .item,
+#connection-permissions-box .products-list > .item,
+#datastore-permissions-box .products-list > .item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 12px;
+}
+#read-list-box .products-list .product-img,
+#connection-permissions-box .products-list .product-img,
+#datastore-permissions-box .products-list .product-img {
+	flex-shrink: 0;
+	width: 32px;
+	height: 32px;
+}
+#read-list-box .products-list .product-img img,
+#connection-permissions-box .products-list .product-img img,
+#datastore-permissions-box .products-list .product-img img {
+	width: 20px;
+	height: 20px;
+	opacity: 0.5;
+}
+#read-list-box .products-list .product-info,
+#connection-permissions-box .products-list .product-info,
+#datastore-permissions-box .products-list .product-info { flex: 1; min-width: 0; }
+
+/* ---- Variante de grupo de capas: lista propia en vez de products-list ---- */
+.perm-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	flex-wrap: wrap;
+	padding: 12px 16px;
+}
+.perm-header__title {
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--pf-text);
+	margin: 0;
+}
+.perm-header__search {
+	position: relative;
+	min-width: 180px;
+	max-width: 280px;
+	flex: 1;
+}
+.perm-header__search .form-control {
+	height: 34px;
+	border-radius: 20px;
+	border: 1px solid var(--pf-border);
+	background: var(--pf-bg);
+	font-size: 12px;
+	padding: 0 14px;
+	box-shadow: none;
+}
+.perm-header__search .form-control:focus {
+	border-color: var(--pf-accent);
+	background: var(--gol-white);
+	box-shadow: 0 0 0 3px rgba(74,127,165,0.12);
+	outline: none;
+}
+.perm-list { list-style: none; padding: 0; margin: 0; }
+.perm-item {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 8px 16px;
+	border-bottom: 1px solid var(--pf-border);
+}
+.perm-item:last-child { border-bottom: none; }
+.perm-item__avatar {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	flex-shrink: 0;
+	object-fit: cover;
+	background: var(--pf-bg);
+	opacity: 0.5;
+}
+.perm-item__info { flex: 1; min-width: 0; }
+.perm-item__name {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--pf-text);
+	margin: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.perm-item__desc {
+	font-size: 12px;
+	color: var(--pf-muted);
+	margin: 1px 0 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}

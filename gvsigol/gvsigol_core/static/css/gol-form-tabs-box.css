@@ -1,0 +1,32 @@
+/* =================================================================
+   gvSIG Online — Panel de pestañas con el marco en la .box interior
+   Lo usan las pantallas en las que el contenido de cada pestaña va
+   dentro de una .box de AdminLTE: los formularios de gvsigol_core y los
+   de almacén de gvsigol_services.
+
+   Es incompatible con gol-services-form.css, que pone el marco en el
+   propio .tab-content: cargar las dos dejaría un borde dentro de otro.
+
+   Se carga después de gol-form-page.css.
+   Requiere gol-tokens.css.
+   ================================================================= */
+
+/* ---- Panel de contenido de cada tab ---- */
+.tab-content > .tab-pane > .box,
+.tab-content > .tab-pane > .row > .col-md-9 > .box,
+.tab-content > .tab-pane > .row > .col-md-12 > .box {
+	border-radius: 0 0 var(--pf-radius) var(--pf-radius);
+	box-shadow: var(--pf-shadow);
+	border: 1px solid var(--pf-border);
+	border-top: none;
+}
+
+/* Mismo relleno interior que .pf-card y que el .tab-content de los
+   formularios de services, para que las dos familias se vean iguales por
+   dentro. AdminLTE le da 10px a la .box-body, que queda muy apretado al
+   lado del resto de formularios. */
+.tab-content > .tab-pane > .box > .box-body,
+.tab-content > .tab-pane > .row > .col-md-9 > .box > .box-body,
+.tab-content > .tab-pane > .row > .col-md-12 > .box > .box-body {
+	padding: 24px;
+}

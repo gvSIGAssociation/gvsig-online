@@ -1,0 +1,264 @@
+/* =================================================================
+   gvSIG Online - Configuracion de capa (layer_config)
+   Reglas propias de esta pantalla: tabla de reglas de topologia,
+   controles de decimales y separadores, interruptores de disparadores y
+   avisos de limitaciones de geometria.
+
+   Se enlaza en el punto exacto donde estaba el <style> para no cambiar
+   su posicion en la cascada.
+   Requiere gol-tokens.css.
+   ================================================================= */
+
+/* Estilos para el toggle switch de triggers */
+.trigger-toggle-switch {
+	position: relative;
+	display: inline-block;
+	width: 42px;
+	height: 22px;
+	margin: 0;}
+
+.trigger-toggle-switch input {
+	opacity: 0;
+	width: 0;
+	height: 0;}
+
+.trigger-toggle-slider {
+	position: absolute;
+	cursor: pointer;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: #ccc;
+	transition: .3s;
+	border-radius: 22px;}
+
+.trigger-toggle-slider:before {
+	position: absolute;
+	content: "";
+	height: 16px;
+	width: 16px;
+	left: 3px;
+	bottom: 3px;
+	background-color: white;
+	transition: .3s;
+	border-radius: 50%;}
+
+.trigger-toggle-checkbox:checked + .trigger-toggle-slider {
+	background-color: #00a65a;}
+
+.trigger-toggle-checkbox:checked + .trigger-toggle-slider:before {
+	transform: translateX(20px);}
+
+.trigger-toggle-checkbox:disabled + .trigger-toggle-slider {
+	opacity: 0.6;
+	cursor: not-allowed;}
+
+/* Estilos para la pestaña de restricciones de edición */
+#topology-rules-table {
+	margin-bottom: 0;}
+
+#topology-rules-table tbody tr td:first-child {
+	font-weight: 500;
+	vertical-align: middle;}
+
+#topology-rules-table tbody tr td:nth-child(2) {
+	vertical-align: middle;
+	padding-right: 15px;}
+
+#topology-rules-table tbody tr td:nth-child(3) {
+	vertical-align: middle;
+	padding-right: 10px;
+	line-height: 1.3;}
+
+#topology-rules-table tbody tr td:nth-child(4) {
+	text-align: left;
+	vertical-align: middle;
+	width: 60px;
+	padding-left: 15px;}
+
+#topology-rules-table tbody tr td:nth-child(5) {
+	vertical-align: middle;}
+
+.geometry-limitations {
+	font-size: 11px;
+	line-height: 1.4;}
+
+.geometry-limitations .text-success {
+	color: #5cb85c !important;}
+
+.geometry-limitations .text-warning {
+	color: #f0ad4e !important;}
+
+.geometry-limitations .text-danger {
+	color: #d9534f !important;}
+
+.topology-control-group {
+	margin-top: 5px;}
+
+.topology-control-group.hidden {
+	display: none;}
+
+.rule-description {
+	vertical-align: middle !important;
+	padding-right: 10px;}
+
+.rule-description small {
+	line-height: 1.3;
+	color: #666;}
+
+#topology-rules-table .select2-container {
+	width: 100% !important;}
+
+#topology-rules-table input[type="checkbox"] {
+	transform: scale(1.3);
+	margin: 0;}
+
+#tolerance_group .input-group {
+	max-width: 200px;}
+
+#topology-rules-table .form-text {
+	margin-top: 5px;
+	font-size: 12px;}
+
+/* Espaciado mejorado para la tabla */
+#topology-rules-table tbody tr {
+	border-bottom: 1px solid #f4f4f4;}
+
+#topology-rules-table tbody tr:last-child {
+	border-bottom: none;}
+
+/* Estilo para botón deshabilitado */
+.save-button.disabled {
+	opacity: 0.6;
+	cursor: not-allowed !important;}
+
+/* Estilos para el modal de dar formato a campos */
+#symbol {
+	max-width: 100px;}
+
+#symbol-position {
+	max-width: 200px;}
+
+#symbol-position:disabled {
+	background-color: #f5f5f5;
+	color: #999;
+	cursor: not-allowed;
+	opacity: 0.6;}
+
+#decimal-places {
+	max-width: 200px;}
+
+#decrease-decimals, #increase-decimals {
+	min-width: 40px;
+	height: 34px;
+	border: 1px solid #ccc;}
+
+#decrease-decimals:hover, #increase-decimals:hover {
+	background-color: #e6e6e6;
+	border-color: #adadad;}
+
+#decrease-decimals:active, #increase-decimals:active {
+	background-color: #d4d4d4;
+	border-color: #8c8c8c;}
+
+#decimal-places {
+	text-align: center;
+	font-weight: bold;
+	background-color: #f9f9f9;}
+
+#thousands-separator {
+	margin-right: 8px;}
+
+.checkbox label {
+	font-weight: normal;
+	cursor: pointer;}
+
+.checkbox input[type="checkbox"] {
+	margin-top: 2px;}
+
+#decimal-separator {
+	max-width: 100%;}
+
+#decimal-separator:disabled {
+	background-color: #f5f5f5;
+	color: #999;
+	cursor: not-allowed;
+	opacity: 0.6;}
+
+#thousands-separator {
+	max-width: 45%;}
+
+.decimal-row .col-md-6:first-child {
+	padding-right: 10px;}
+
+.decimal-row .col-md-6:last-child {
+	padding-left: 10px;}
+
+.decimal-row label {
+	margin-bottom: 8px;
+	display: block;}
+
+.decimal-row .form-control {
+	margin-bottom: 5px;}
+
+.decimal-row .input-group {
+	display: flex;
+	align-items: stretch;
+	width: 100%;
+	max-width: 180px;
+	position: relative;}
+
+.decimal-row .input-group-btn {
+	display: flex;
+	flex-shrink: 0;
+	position: relative;
+	z-index: 2;}
+
+.decimal-row .input-group-btn button {
+	height: 34px;
+	width: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid #ccc;
+	position: relative;
+	z-index: 3;}
+
+.decimal-row .input-group input {
+	flex: 1;
+	text-align: center;
+	border-radius: 0;
+	position: relative;
+	z-index: 1;
+	min-width: 60px;}
+
+/* Asegurar que el botón izquierdo esté visible */
+.decimal-row .input-group-btn:first-child {
+	margin-right: -1px;}
+
+.decimal-row .input-group-btn:last-child {
+	margin-left: -1px;}
+
+.symbol-row .col-md-6:first-child {
+	padding-right: 10px;}
+
+.symbol-row .col-md-6:last-child {
+	padding-left: 10px;}
+
+.symbol-row label {
+	margin-bottom: 8px;
+	display: block;}
+
+.symbol-row .form-control {
+	margin-bottom: 5px;}
+
+.bg-info {
+	background-color: #d9edf7 !important;
+	border: 1px solid #bce8f1;
+	border-radius: 4px;}
+
+.form-text {
+	font-size: 12px;
+	color: #666;
+	margin-top: 5px;}

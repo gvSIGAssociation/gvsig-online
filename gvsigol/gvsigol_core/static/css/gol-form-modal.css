@@ -1,20 +1,43 @@
 /* =================================================================
-   gvSIG Online — Modales de las pantallas de formulario
-   Ajustes sobre los modales de Bootstrap. Se mantiene en una hoja
-   aparte porque solo deben aplicarse en las pantallas que abren
-   modales propios, no en todo el panel.
+   gvSIG Online — Modales
+   Ajustes sobre los modales de Bootstrap, tanto en los listados como
+   en los formularios. Se mantiene en una hoja aparte porque solo
+   deben aplicarse en las pantallas que abren modales propios.
 
    Requiere gol-tokens.css.
    ================================================================= */
 
 .modal-content {
-	border-radius: var(--pf-radius);
+	border-radius: var(--gol-radius);
 	border: none;
 	box-shadow: 0 8px 32px rgba(0,0,0,0.18);
 }
-.modal-header { border-bottom: 1px solid var(--pf-border); padding: 16px 20px; }
-.modal-title { font-size: 15px; font-weight: 700; color: var(--pf-text); }
-.modal-body { padding: 20px; font-size: 13px; color: var(--pf-muted); }
-.modal-footer { border-top: 1px solid var(--pf-border); padding: 14px 20px; }
+.modal-header { border-bottom: 1px solid var(--gol-border); padding: 16px 20px; }
+.modal-title { font-size: 15px; font-weight: 700; color: var(--gol-text); }
+.modal-body { padding: 20px; font-size: 13px; color: var(--gol-muted); }
+.modal-footer {
+	border-top: 1px solid var(--gol-border);
+	padding: 14px 20px;
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}
 .modal-footer .btn { border-radius: 6px; font-size: 13px; font-weight: 600; padding: 6px 16px; }
-.modal-footer .btn-default { border-color: var(--pf-border); color: var(--pf-muted); }
+.modal-footer .btn-default { border-color: var(--gol-border); color: var(--gol-muted); }
+
+/* La accion principal se marca con esta clase y no por el nombre del
+   identificador, porque hay botones de confirmar que no se llaman "accept".
+   Va despues de .btn-default a proposito: empatan en especificidad. */
+.modal-footer .btn-modal-accept:not(.btn-danger) {
+	background: var(--gol-accent);
+	border-color: var(--gol-accent);
+	color: #fff;
+}
+.modal-footer .btn-modal-accept:not(.btn-danger):hover,
+.modal-footer .btn-modal-accept:not(.btn-danger):focus {
+	background: var(--gol-accent-dk);
+	border-color: var(--gol-accent-dk);
+	color: #fff;
+}
+/* Las confirmaciones irreversibles conservan el rojo que pide el marcado. */
+.modal-footer .btn-modal-accept.btn-danger { color: #fff; }

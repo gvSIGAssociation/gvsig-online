@@ -1,15 +1,20 @@
 /* =================================================================
    gvSIG Online — Listas de roles y chips de permisos
-   Compartido por los formularios de proyecto y de aplicación. Las
-   variantes proj- y app- son idénticas, de ahí los selectores
-   agrupados: cada pantalla solo usa el prefijo que le corresponde.
+   Compartido por los formularios de proyecto, de aplicación y por los
+   parciales de permisos de gvsigol_services (capa, grupo de capas,
+   almacén y conexión). Todas las variantes son el mismo componente con
+   distinto prefijo, de ahí los selectores agrupados: cada pantalla solo
+   usa el prefijo que le corresponde.
 
    Requiere gol-tokens.css.
    ================================================================= */
 
 /* ---- Fila de rol ---- */
 .proj-role-row,
-.app-role-row {
+.app-role-row,
+.lp-role-row,
+.cp-role-row,
+.dp-role-row {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -18,9 +23,15 @@
 	width: 100%;
 }
 .proj-role-info,
-.app-role-info { flex: 1; min-width: 0; }
+.app-role-info,
+.lp-role-info,
+.cp-role-info,
+.dp-role-info { flex: 1; min-width: 0; }
 .proj-role-name,
-.app-role-name {
+.app-role-name,
+.lp-role-name,
+.cp-role-name,
+.dp-role-name {
 	font-size: 13px;
 	font-weight: 600;
 	color: var(--gol-text);
@@ -29,21 +40,33 @@
 	text-overflow: ellipsis;
 }
 .proj-role-desc,
-.app-role-desc {
+.app-role-desc,
+.lp-role-desc,
+.cp-role-desc,
+.dp-role-desc {
 	font-size: 12px;
 	color: var(--gol-muted);
 	margin-top: 1px;
 }
 
 /* ---- Chips de permisos ---- */
-.proj-perms {
+.proj-perms,
+.lp-perms,
+.cp-perms,
+.dp-perms,
+.perm-item__checks {
 	display: flex;
 	align-items: center;
 	gap: 6px;
 	flex-shrink: 0;
 }
 .proj-perm-chip,
-.app-public-chip {
+.app-public-chip,
+.lp-perm-chip,
+.lp-public,
+.cp-perm-chip,
+.dp-perm-chip,
+.perm-chip {
 	display: inline-flex;
 	align-items: center;
 	gap: 5px;
@@ -63,7 +86,12 @@
 	letter-spacing: 0;
 }
 .proj-perm-chip input[type="checkbox"],
-.app-public-chip input[type="checkbox"] {
+.app-public-chip input[type="checkbox"],
+.lp-perm-chip input[type="checkbox"],
+.lp-public input[type="checkbox"],
+.cp-perm-chip input[type="checkbox"],
+.dp-perm-chip input[type="checkbox"],
+.perm-chip input[type="checkbox"] {
 	margin: 0;
 	cursor: pointer;
 	accent-color: var(--gol-accent);
@@ -72,9 +100,18 @@
 	flex-shrink: 0;
 }
 .proj-perm-chip:has(input:checked),
-.app-public-chip:has(input:checked) {
+.app-public-chip:has(input:checked),
+.lp-perm-chip:has(input:checked),
+.lp-public:has(input:checked),
+.cp-perm-chip:has(input:checked),
+.dp-perm-chip:has(input:checked),
+.perm-chip:has(input:checked) {
 	background: rgba(74,127,165,0.1);
 	border-color: var(--gol-accent);
 	color: var(--gol-accent-dk);
 }
-.proj-perm-chip:has(input:disabled) { opacity: 0.55; cursor: default; }
+.proj-perm-chip:has(input:disabled),
+.lp-perm-chip:has(input:disabled),
+.cp-perm-chip:has(input:disabled),
+.dp-perm-chip:has(input:disabled),
+.perm-chip:has(input:disabled) { opacity: 0.55; cursor: default; }

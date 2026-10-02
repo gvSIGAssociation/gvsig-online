@@ -14,6 +14,7 @@
 	border-radius: var(--pl-radius);
 	box-shadow: var(--pl-shadow);
 	border: 1px solid var(--pl-border);
+	overflow: hidden;
 }
 .pl-panel__header {
 	display: flex;
@@ -42,26 +43,119 @@
 }
 .pl-panel__body { padding: 0; }
 
-/* ---- Botón de alta ---- */
-.btn-pl-add {
+/* ---- Botones de la barra de acciones ---- */
+/* Tres variantes con el mismo tronco: la maciza para la acción principal de
+   la pantalla, la de contorno para una acción secundaria y la discreta para
+   las de utilidad. Los nombres -import y -reports son los que ya usaba
+   project_list y se mantienen agrupados para no tocar su marcado. */
+.btn-pl-add,
+.btn-pl-outline,
+.btn-pl-import,
+.btn-pl-ghost,
+.btn-pl-reports {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
-	background: var(--pl-accent);
-	color: #fff !important;
-	border: none;
 	border-radius: 6px;
 	font-size: 12px;
 	font-weight: 600;
 	padding: 6px 14px;
 	height: 34px;
 	cursor: pointer;
-	transition: background var(--pl-transition);
 	text-decoration: none !important;
 	white-space: nowrap;
 	letter-spacing: 0.2px;
 }
+
+.btn-pl-add {
+	background: var(--pl-accent);
+	color: #fff !important;
+	border: none;
+	transition: background var(--pl-transition);
+}
 .btn-pl-add:hover { background: var(--pl-accent-dk); }
+
+.btn-pl-outline,
+.btn-pl-import {
+	background: var(--pl-white);
+	color: var(--pl-accent) !important;
+	border: 1px solid var(--pl-accent);
+	transition: background var(--pl-transition), color var(--pl-transition), border-color var(--pl-transition);
+}
+.btn-pl-outline:hover,
+.btn-pl-import:hover {
+	background: #eef4f8;
+	color: var(--pl-accent-dk) !important;
+	border-color: var(--pl-accent-dk);
+}
+
+.btn-pl-ghost,
+.btn-pl-reports {
+	background: var(--pl-bg);
+	color: var(--pl-text) !important;
+	border: 1px solid var(--pl-border);
+	transition: background var(--pl-transition), border-color var(--pl-transition), color var(--pl-transition);
+}
+.btn-pl-ghost:hover,
+.btn-pl-reports:hover {
+	background: var(--pl-white);
+	border-color: var(--pl-accent);
+	color: var(--pl-accent) !important;
+}
+
+/* ---- Buscador propio del panel (filtrado en servidor) ---- */
+.pl-search-form {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+/* El desplegable de filtro comparte la forma del campo de búsqueda: van uno
+   al lado del otro en la misma barra. */
+.pl-search-form .form-control,
+.pl-filter-select {
+	height: 34px;
+	border-radius: 20px;
+	border: 1px solid var(--pl-border);
+	background: var(--pl-bg);
+	font-size: 12px;
+	padding: 0 14px;
+	width: 200px;
+	transition: border-color var(--pl-transition), box-shadow var(--pl-transition);
+	box-shadow: none;
+}
+.pl-search-form .form-control:focus,
+.pl-filter-select:focus {
+	border-color: var(--pl-accent);
+	background: var(--pl-white);
+	box-shadow: 0 0 0 3px rgba(74,127,165,0.12);
+	outline: none;
+}
+.pl-search-form .btn-search,
+.pl-search-form .btn-clear {
+	height: 34px;
+	width: 34px;
+	border-radius: 50%;
+	border: 1px solid var(--pl-border);
+	background: var(--pl-white);
+	color: var(--pl-muted);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: background var(--pl-transition), color var(--pl-transition);
+	padding: 0;
+	text-decoration: none;
+}
+.pl-search-form .btn-search:hover {
+	background: var(--pl-accent);
+	color: #fff;
+	border-color: var(--pl-accent);
+}
+.pl-search-form .btn-clear:hover {
+	background: #fde8e8;
+	color: #c0392b;
+	border-color: #e0b0b0;
+}
 
 /* ---- Tabla ---- */
 .pl-table {
@@ -97,10 +191,9 @@
 	vertical-align: middle;
 }
 .pl-table tbody td:first-child { color: var(--pl-muted); font-size: 12px; }
-.pl-table tbody td:nth-child(2) { font-weight: 600; color: var(--pl-text); }
 .pl-table tbody td .btn { border-radius: 5px; font-size: 12px; padding: 4px 10px; }
 
-/* ---- DataTables ---- */
+/* ---- Tabla de DataTables ---- */
 table.dataTable {
 	border-bottom: none !important;
 	margin-top: 0 !important;
@@ -110,50 +203,41 @@ table.dataTable thead th,
 table.dataTable thead td { border-bottom: 1px solid var(--pl-border) !important; }
 table.dataTable.no-footer { border-bottom: none !important; }
 .dataTables_wrapper { padding: 0; }
-.dataTables_wrapper .dataTables_filter { padding: 12px 16px 0; text-align: right; }
-.dataTables_wrapper .dataTables_filter label {
-	font-size: 12px;
-	font-weight: 600;
-	color: var(--pl-muted);
+
+/* ---- Pie unico del listado ----
+   Lo comparten las dos familias: en los listados que filtran en cliente lo
+   monta DataTables con la opcion dom ('t<"pl-panel__foot"ip>'), y en los que
+   pagina Django viene en el marcado como .pl-server-pagination. Una sola
+   franja, con el recuento a la izquierda y las paginas a la derecha.
+   El buscador y el tamano de pagina no salen aqui: viven en la cabecera. */
+.pl-panel__foot,
+.pl-server-pagination {
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
 	gap: 8px;
-	justify-content: flex-end;
-}
-.dataTables_wrapper .dataTables_filter input {
-	height: 32px;
-	border-radius: 20px;
-	border: 1px solid var(--pl-border);
-	background: var(--pl-bg);
-	font-size: 12px;
-	padding: 0 12px;
-	width: 180px;
-	transition: border-color var(--pl-transition), box-shadow var(--pl-transition);
-	box-shadow: none;
-	outline: none;
-}
-.dataTables_wrapper .dataTables_filter input:focus {
-	border-color: var(--pl-accent);
-	background: var(--pl-white);
-	box-shadow: 0 0 0 3px rgba(74,127,165,0.12);
-}
-.dataTables_wrapper .dataTables_length {
-	padding: 12px 16px 0;
-	font-size: 12px;
-	color: var(--pl-muted);
-}
-.dataTables_wrapper .dataTables_info {
 	padding: 12px 16px;
+	border-top: 1px solid var(--pl-border);
+}
+/* Dentro del pie, los bloques de DataTables no ponen su propio marco. */
+.pl-panel__foot .dataTables_info,
+.pl-panel__foot .dataTables_paginate {
+	padding: 0;
+	margin: 0;
+	border-top: none;
+}
+.pl-panel__foot .dataTables_info,
+.pl-server-pagination .pagination-info {
 	font-size: 12px;
 	color: var(--pl-muted);
-	border-top: 1px solid var(--pl-border);
 }
-.dataTables_wrapper .dataTables_paginate {
-	padding: 8px 16px;
-	border-top: 1px solid var(--pl-border);
-	text-align: right;
-}
-.dataTables_wrapper .dataTables_paginate .paginate_button {
+.pl-server-pagination .pagination { margin: 0; }
+
+/* Mismo boton de pagina en las dos familias. */
+.pl-panel__foot .paginate_button,
+.pl-server-pagination .pagination > li > a,
+.pl-server-pagination .pagination > li > span {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -161,7 +245,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 	height: 30px;
 	padding: 0 8px;
 	margin: 0 2px;
-	border-radius: 5px;
+	border-radius: 5px !important;
 	border: 1px solid var(--pl-border);
 	background: var(--pl-white);
 	color: var(--pl-muted) !important;
@@ -170,40 +254,68 @@ table.dataTable.no-footer { border-bottom: none !important; }
 	cursor: pointer;
 	transition: background var(--pl-transition), border-color var(--pl-transition), color var(--pl-transition);
 }
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+.pl-panel__foot .paginate_button:hover,
+.pl-server-pagination .pagination > li > a:hover {
 	background: #f0f6fb;
 	border-color: var(--pl-accent);
 	color: var(--pl-accent) !important;
 }
-.dataTables_wrapper .dataTables_paginate .paginate_button.current,
-.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+.pl-panel__foot .paginate_button.current,
+.pl-panel__foot .paginate_button.current:hover,
+.pl-server-pagination .pagination > li.active > a,
+.pl-server-pagination .pagination > li.active > span {
 	background: var(--pl-accent) !important;
 	border-color: var(--pl-accent) !important;
 	color: #fff !important;
 }
-.dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
-.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
+.pl-panel__foot .paginate_button.disabled,
+.pl-panel__foot .paginate_button.disabled:hover,
+.pl-server-pagination .pagination > li.disabled > a,
+.pl-server-pagination .pagination > li.disabled > span {
 	background: var(--pl-bg);
 	border-color: var(--pl-border);
 	color: #ccc !important;
 	cursor: default;
 }
 
-/* ---- Modales de confirmación ---- */
-.modal-content {
-	border-radius: var(--pl-radius);
-	border: none;
-	box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+/* ---- Marco de la tabla dentro del panel ----
+   El panel ya pone el borde; el envoltorio de DataTables no debe repetirlo.
+   Antes lo resolvia cada listado con el id de su tabla. */
+.dataTables_wrapper,
+.dataTables_wrapper .dataTables_scroll,
+.dataTables_wrapper .dataTables_scrollBody {
+	border: none !important;
+	box-shadow: none !important;
 }
-.modal-header { border-bottom: 1px solid var(--pl-border); padding: 16px 20px; }
-.modal-title { font-size: 15px; font-weight: 700; color: var(--pl-text); }
-.modal-body { padding: 20px; font-size: 13px; color: var(--pl-muted); }
-.modal-footer {
-	border-top: 1px solid var(--pl-border);
-	padding: 14px 20px;
-	display: flex;
-	justify-content: flex-end;
-	gap: 8px;
+
+/* ---- Botones de acción de cada fila ---- */
+.pl-table .btn-success,
+.pl-table .btn-primary,
+.pl-table .btn-info,
+.pl-table .btn-warning,
+.pl-table .btn-danger,
+.pl-table .bg-purple,
+.pl-table .btn-configure {
+	background: transparent;
+	border-radius: 5px;
+	font-size: 12px;
+	padding: 4px 10px;
+	transition: background var(--pl-transition), border-color var(--pl-transition);
 }
-.modal-footer .btn { border-radius: 6px; font-size: 13px; font-weight: 600; padding: 6px 16px; }
-.modal-footer .btn-default { border-color: var(--pl-border); color: var(--pl-muted); }
+.pl-table .btn-success { border: 1px solid var(--pl-border); color: var(--pl-accent); }
+.pl-table .btn-success:hover { background: #f0f6fb; border-color: var(--pl-accent); }
+.pl-table .btn-primary { border: 1px solid #b8d4e8; color: var(--pl-accent); }
+.pl-table .btn-primary:hover { background: #f0f6fb; border-color: var(--pl-accent); }
+.pl-table .btn-info { border: 1px solid #a8d4e6; color: #2980b9; }
+.pl-table .btn-info:hover { background: #eaf4fb; border-color: #2980b9; }
+.pl-table .btn-warning { border: 1px solid #f5d79e; color: #d08b00; }
+.pl-table .btn-warning:hover { background: #fef9ec; border-color: #d08b00; }
+.pl-table .btn-danger { border: 1px solid #e8bebe; color: #c0392b; }
+.pl-table .btn-danger:hover { background: #fde8e8; border-color: #c0392b; }
+.pl-table .bg-purple,
+.pl-table .btn-configure { border: 1px solid #d0b8e8; color: #7b5ea7; }
+.pl-table .bg-purple:hover,
+.pl-table .btn-configure:hover { background: #f5f0fb; border-color: #7b5ea7; }
+
+/* Los modales de confirmación se estilan en gol-form-modal.css, que los
+   listados con modal enlazan antes de esta hoja. */

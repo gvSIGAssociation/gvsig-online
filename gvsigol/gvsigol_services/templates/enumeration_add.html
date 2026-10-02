@@ -3,43 +3,16 @@
 {% load i18n %}
 
 {% block header %}
+<link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
 <style>
-:root {
-	--pf-accent:    #4a7fa5;
-	--pf-accent-dk: #2d5f80;
-	--pf-text:      #2e3a45;
-	--pf-muted:     #7b8a96;
-	--pf-border:    #e8ecef;
-	--pf-bg:        #f4f6f8;
-	--pf-white:     #ffffff;
-	--pf-radius:    10px;
-	--pf-shadow:    0 2px 12px rgba(0,0,0,0.08);
-	--pf-transition: 0.2s ease;
-}
-.pf-topbar { display: flex; align-items: center; justify-content: flex-end; padding: 12px 0 16px; gap: 10px; flex-wrap: wrap; }
-.btn-pf-save { display: inline-flex; align-items: center; gap: 7px; background: var(--pf-accent); color: #fff !important; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; padding: 8px 20px; cursor: pointer; transition: background var(--pf-transition); letter-spacing: 0.2px; }
-.btn-pf-save:hover { background: var(--pf-accent-dk); }
-.pf-error-msg { display: none; background: #fff5f5; border-left: 4px solid #e74c3c; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #c0392b; }
-.pf-error-msg:has(li), .pf-error-msg:has(p:not(:empty)), .pf-error-msg:has(ul:not(:empty)) { display: block; }
-.pf-error-msg ul { margin: 0; padding-left: 18px; }
-.pf-error-msg p { margin: 0 0 4px; }
-.pf-card { background: var(--pf-white); border: 1px solid var(--pf-border); border-radius: var(--pf-radius); box-shadow: var(--pf-shadow); padding: 24px; }
-.pf-card label { font-size: 12px; font-weight: 700; color: var(--pf-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
-.pf-card .form-control { border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; transition: border-color var(--pf-transition), box-shadow var(--pf-transition); padding: 6px 12px; }
-.pf-card .form-control:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
 /* Subpanel de items */
-.pf-subpanel { border: 1px solid var(--pf-border); border-radius: 8px; overflow: hidden; margin-top: 8px; }
-.pf-subpanel__header { background: var(--pf-bg); padding: 10px 16px; border-bottom: 1px solid var(--pf-border); font-size: 12px; font-weight: 700; color: var(--pf-muted); text-transform: uppercase; letter-spacing: 0.6px; }
-.pf-subpanel__body { padding: 16px; min-height: 40px; }
-.pf-subpanel__footer { background: var(--pf-bg); padding: 10px 16px; border-top: 1px solid var(--pf-border); }
-.btn-pf-add-item { display: inline-flex; align-items: center; gap: 6px; background: transparent; color: var(--pf-accent) !important; border: 1px solid var(--pf-border); border-radius: 6px; font-size: 12px; font-weight: 600; padding: 5px 14px; cursor: pointer; transition: background var(--pf-transition), border-color var(--pf-transition); text-decoration: none !important; }
-.btn-pf-add-item:hover { background: #f0f6fb; border-color: var(--pf-accent); }
-.enum-item-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.enum-item-row:last-child { margin-bottom: 0; }
-.enum-item-row .form-control { border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; padding: 6px 12px; flex: 1; }
-.enum-item-row .form-control:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
-.btn-delete-item { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; background: transparent; border: 1px solid #e8bebe; border-radius: 6px; color: #c0392b; cursor: pointer; transition: background var(--pf-transition); flex-shrink: 0; }
-.btn-delete-item:hover { background: #fde8e8; border-color: #c0392b; }
+
+.enum-item-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px;}
+.enum-item-row:last-child { margin-bottom: 0;}
+.enum-item-row .form-control { border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; padding: 6px 12px; flex: 1;}
+.enum-item-row .form-control:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none;}
 </style>
 {% endblock %}
 
@@ -49,6 +22,7 @@
 		<div class="col-md-12">
 
 			<div class="pf-topbar">
+				<a href="{% url 'enumeration_list' %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
 				<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
 			</div>
 
