@@ -130,8 +130,18 @@ class PostgisLayerUploadForm(forms.Form):
         if user is not None and user.is_superuser:
             qs = Datastore.objects.filter(type="v_PostGIS").order_by('name')
         elif user is not None:
-            qs = (Datastore.objects.filter(type="v_PostGIS", created_by=user.username) |
-                  Datastore.objects.filter(type="v_PostGIS", defaultuserdatastore__username=user.username)).order_by('name').distinct()
+            from gvsigol_services.models import DatastoreRole
+            user_roles = auth_backend.get_roles(user)
+            permitted_ds_ids = DatastoreRole.objects.filter(
+                role__in=user_roles,
+                can_use=True
+            ).values_list('datastore_id', flat=True)
+            qs = (
+                Datastore.objects.filter(type="v_PostGIS", created_by=user.username) |
+                Datastore.objects.filter(type="v_PostGIS", defaultuserdatastore__username=user.username) |
+                Datastore.objects.filter(type="v_PostGIS", id__in=permitted_ds_ids) |
+                Datastore.objects.filter(type="v_PostGIS", allow_all=True)
+            ).order_by('name').distinct()
         else:
             qs = Datastore.objects.none()
             
