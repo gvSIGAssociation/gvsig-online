@@ -4,44 +4,12 @@
 
 {% block header %}
 <link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-modal.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-list-page.css" %}">
 <style>
-/* ---- Panel ---- */
-.pl-panel { overflow: hidden; }
+/* Las urls compartidas son largas y no tienen espacios. */
 .pl-table tbody td:nth-child(2) { word-break: break-all; }
 
-/* ---- Tabla de vistas compartidas ---- */
-#shared-views-table_wrapper,
-#shared-views-table_wrapper .dataTables_scroll,
-#shared-views-table_wrapper .dataTables_scrollBody {
-	border: none !important;
-	box-shadow: none !important;
-}
-#shared-views-table .btn-danger {
-	background: transparent;
-	border: 1px solid #e8bebe;
-	color: #c0392b;
-	border-radius: 5px;
-	font-size: 12px;
-	padding: 4px 10px;
-	transition: background var(--pl-transition), color var(--pl-transition);
-}
-#shared-views-table .btn-danger:hover {
-	background: #fde8e8;
-	border-color: #c0392b;
-	color: #c0392b;
-}
-
-/* ---- Modales ---- */
-#button-delete-view-accept {
-	background: var(--pl-accent);
-	border-color: var(--pl-accent);
-	color: #fff;
-}
-#button-delete-view-accept:hover {
-	background: var(--pl-accent-dk);
-	border-color: var(--pl-accent-dk);
-}
 </style>
 {% endblock %}
 
@@ -53,6 +21,13 @@
 				<h3 class="pl-panel__title">
 					<i class="fa fa-share-alt"></i> {% trans "Shared views list" %}
 				</h3>
+				<div class="pl-panel__actions">
+					<form class="pl-search-form">
+						<input type="text" class="form-control" placeholder="{% trans 'Search...' %}">
+						<button type="submit" class="btn-search"><i class="fa fa-search"></i></button>
+						<a href="#" class="btn-clear"><i class="fa fa-times"></i></a>
+					</form>
+				</div>
 			</div>
 			<div class="pl-panel__body">
 				<table class="pl-table table" id="shared-views-table">
@@ -96,7 +71,7 @@
 			</div>
 			<div class="modal-footer">
 				<button id="button-delete-view-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
-				<button id="button-delete-view-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+				<button id="button-delete-view-accept" type="button" class="btn btn-modal-accept">{% trans "Accept" %}</button>
 			</div>
 		</div>
 	</div>
@@ -110,37 +85,14 @@
 </script>
 <script>
 $(document).ready(function() {
-	var table = $('#shared-views-table').DataTable({
-		responsive: true,
-	    language: {
-	    	processing		: '{% trans "Processing request..." %}',
-		    search			: '{% blocktrans with sep=":" %}Search{{sep}}{% endblocktrans %}',
-		    lengthMenu		: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
-		    info			: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
-		    infoEmpty		: '{% trans "Showing from 0 to 0 of 0 records" %}',
-		    infoFiltered	: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
-		    infoPostFix		: "",
-		    loadingRecords	: '{% trans "Loading..." %}',
-		    zeroRecords		: '{% trans "No records available" %}',
-		    emptyTable		: '{% trans "No records available" %}',
-		    paginate: {
-		    	first		: '{% trans "First" %}',
-		        previous	: '{% trans "Previous" %}',
-		        next		: '{% trans "Next" %}',
-		        last		: '{% trans "Last" %}'
-		    },
-		    aria: {
-		        sortAscending: '{% blocktrans with sep=": " %}{{sep}}Sort ascending{% endblocktrans %}',
-		        sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
-		    }
-		},
+	var table = golListTable('#shared-views-table', {
+		dt: {
 		"columnDefs": [{
 	        "targets": -1,
 	        "data": null,
 	        "defaultContent": '<button type="button" name="button-delete-view" data-toggle="modal" data-target="#modal-delete-view" data-placement="bottom" title="' + '{% trans "Delete shared view" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
- 	    }],
-	    "dom": 'T<"clear">lfrtip',
-		"bLengthChange": false
+ 	    }]
+		}
 	});
 		 
 	$('#shared-views-table tbody').on('click', 'button', function (){
