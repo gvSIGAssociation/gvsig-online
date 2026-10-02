@@ -18,9 +18,10 @@ CATALOG_EDITOR_PATH = env('GEONETWORK_EDITOR_PATH', default='/srv/spa/catalog.se
 CATALOG_URL = CATALOG_BASE_URL + '/srv/eng/'
 # GeoNetwork 4.x no longer exposes /srv/eng/q; search is proxied via gvSIGOL backend.
 CATALOG_QUERY_URL = '/gvsigonline/catalog/get_query/'
+# Local GeoNetwork account. Used only when GEONETWORK_AUTH_TYPE=basic.
 CATALOG_USER = env('GEONETWORK_USER', default='admin')
 CATALOG_PASSWORD = env('GEONETWORK_PASS', default='admin')
-# Auth against GeoNetwork API: 'basic' (local DB user) or 'bearer' (OIDC access token)
+# Auth against GeoNetwork API: 'basic' (local DB user) or 'bearer' (OIDC service account)
 GEONETWORK_AUTH_TYPE = env('GEONETWORK_AUTH_TYPE', default='basic').lower()
 GEONETWORK_OIDC_TOKEN_URL = env('GEONETWORK_OIDC_TOKEN_URL', default='')
 GEONETWORK_OIDC_CLIENT_ID = env('GEONETWORK_OIDC_CLIENT_ID', default='geonetwork-client')
@@ -29,6 +30,10 @@ GEONETWORK_OIDC_SCOPE = env(
     'GEONETWORK_OIDC_SCOPE',
     default='openid email profile offline_access',
 )
+# Workspace group that owns new metadata records. GeoNetwork 4.4 rejects
+# an insert without it. Value is the group name. Creation fails if that
+# group does not exist or is not a workspace group.
+GEONETWORK_GROUP = env('GEONETWORK_GROUP', default='gvsigol')
 # valid values: 'legacy3.2', 'api0.1', 'gn4'
 CATALOG_API_VERSION = env('CATALOG_API_VERSION', default='gn4')
 CATALOG_FACETS_CONFIG = env('CATALOG_FACETS_CONFIG', default='{}')
@@ -46,6 +51,8 @@ GEONETWORK_USE_KEEPALIVE = env('GEONETWORK_USE_KEEPALIVE')
 # Los metadatos deberán crearse manualmente desde gvsigonline
 # Por defecto True para mantener el comportamiento actual
 CATALOG_AUTO_CREATE_METADATA = env('CATALOG_AUTO_CREATE_METADATA')
-# Standard used when creating new metadata records. Empty keeps ISO 19139:2007.
+# Used when the client app does not ship an mdtemplates file, and to choose
+# among several client templates of different standards.
+# Empty + no client template keeps the plugin ISO 19139:2007 template.
 # Aliases: iso19139, iso19115-3, iso19115-1, iso19115-3.mgb, mgb, mgb2, mgb-2.0
 CATALOG_METADATA_STANDARD = env('CATALOG_METADATA_STANDARD', default='')

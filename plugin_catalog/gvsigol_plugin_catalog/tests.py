@@ -106,6 +106,44 @@ class MetadataStandardsTests(SimpleTestCase):
         self.assertEqual(record['title'], 'Camada de teste')
         self.assertTrue(any(res.get('protocol') == 'OGC:WMS' for res in record['resources']))
 
+    def test_creation_uses_client_template_standard(self):
+        from unittest.mock import patch
+        mgb = plugin_mdtemplate('dataset19115-3.mgb.xml')
+
+        def only_mgb(name):
+            if name == 'dataset-mgb.xml':
+                return mgb
+            return None
+
+        with patch('gvsigol_plugin_catalog.mdstandards.templates.find_app_mdtemplate', side_effect=only_mgb):
+            self.assertEqual(registry.creation_mdcode(None), 'Iso19115_3MgbManager')
+            self.assertEqual(registry.creation_mdcode('iso19139'), 'Iso19115_3MgbManager')
+
+    def test_creation_setting_breaks_tie_between_client_templates(self):
+        from unittest.mock import patch
+        iso = plugin_mdtemplate('dataset19139.xml')
+        mgb = plugin_mdtemplate('dataset19115-3.mgb.xml')
+
+        def both(name):
+            if name == 'dataset.xml':
+                return iso
+            if name == 'dataset-mgb.xml':
+                return mgb
+            return None
+
+        with patch('gvsigol_plugin_catalog.mdstandards.templates.find_app_mdtemplate', side_effect=both):
+            self.assertEqual(registry.creation_mdcode(None), 'Iso19115_3MgbManager')
+            self.assertEqual(registry.creation_mdcode('iso19139'), 'Iso19139_2007Manager')
+
+    def test_creation_without_client_template_uses_setting(self):
+        from unittest.mock import patch
+        with patch('gvsigol_plugin_catalog.mdstandards.templates.find_app_mdtemplate', return_value=None):
+            self.assertIsNone(registry.creation_mdcode(None))
+            self.assertEqual(registry.creation_mdcode('iso19115-3'), 'Iso19115_3Manager')
+            xml = registry.create('dataset', _mdfields(), mdcode=registry.creation_mdcode(None))
+        root = ET.fromstring(xml)
+        self.assertEqual(ET.QName(root).namespace, 'http://www.isotc211.org/2005/gmd')
+
     def test_mgb_updater_rewrites_extent(self):
         xml = registry.create('dataset', _mdfields(), mdcode='iso19115-3.mgb')
         updater = registry.get_updater(xml)

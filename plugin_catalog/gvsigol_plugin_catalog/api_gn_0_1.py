@@ -260,11 +260,44 @@ class Geonetwork():
             return [uuid, id or uuid]
         return None
 
+    def _metadata_group_id(self):
+        """Id of the workspace group named by GEONETWORK_GROUP.
+
+        The setting is the group name. A numeric value is accepted as the id.
+        The insert is aborted when the group is missing or is not a workspace.
+        """
+        configured = (getattr(catalog_settings, 'GEONETWORK_GROUP', None) or '').strip()
+        if not configured:
+            raise FailedRequestError(400, b'GEONETWORK_GROUP is empty')
+        groups = self._request_json(
+            'GET',
+            ['/srv/api/groups'],
+            headers={'Accept': 'application/json'},
+        ) or []
+        for group in groups:
+            group_id = group.get('id')
+            if group_id is None:
+                continue
+            if group.get('name') != configured and str(group_id) != configured:
+                continue
+            if group.get('type') != 'Workspace':
+                raise FailedRequestError(
+                    400,
+                    ('GeoNetwork group %s is not a workspace group' % configured).encode('utf-8'),
+                )
+            return str(group_id)
+        raise FailedRequestError(
+            400,
+            ('GeoNetwork workspace group %s does not exist' % configured).encode('utf-8'),
+        )
+
     def gn_insert_metadata(self, md_record):
         #curl -X PUT --header 'Content-Type: application/xml' --header 'Accept: application/json' -d '.........XML_code............'
+        group_id = self._metadata_group_id()
+        group_query = '&group=' + quote(str(group_id), safe='')
         paths = [
-            "/srv/api/records?metadataType=METADATA&assignToCatalog=true&uuidProcessing=GENERATEUUID&transformWith=_none_",
-            "/srv/api/0.1/records?metadataType=METADATA&assignToCatalog=true&uuidProcessing=GENERATEUUID&transformWith=_none_",
+            "/srv/api/records?metadataType=METADATA&assignToCatalog=true&uuidProcessing=GENERATEUUID&transformWith=_none_" + group_query,
+            "/srv/api/0.1/records?metadataType=METADATA&assignToCatalog=true&uuidProcessing=GENERATEUUID&transformWith=_none_" + group_query,
         ]
         headers = self._apply_override_headers({
             'Content-Type': 'application/xml',

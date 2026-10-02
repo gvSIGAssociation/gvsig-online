@@ -13,7 +13,7 @@ Con GeoNetwork autenticado solo con usuarios locales, el plugin usa **HTTP Basic
 | `GEONETWORK_AUTH_TYPE` | Uso | GeoNetwork |
 |---|---|---|
 | `basic` (por defecto) | Usuario/contraseña locales de GeoNetwork | Seguridad `default` (o DB local habilitada) |
-| `bearer` | Access token OIDC de Keycloak (password grant) | `GEONETWORK_SECURITY_TYPE=openidconnectbearer` |
+| `bearer` | Access token OIDC de la service account de Keycloak (client credentials) | `GEONETWORK_SECURITY_TYPE=openidconnectbearer` |
 
 Con `openidconnect` (solo login web OIDC) **no** se aceptan Basic ni Bearer de forma usable para la API del plugin. Hay que usar `openidconnectbearer`.
 
@@ -26,16 +26,17 @@ Con `openidconnect` (solo login web OIDC) **no** se aceptan Basic ni Bearer de f
 | `GEONETWORK_BASE_URL` | URL pública de GeoNetwork (UI / enlaces) | `https://ejemplo.dominio/geonetwork` |
 | `GEONETWORK_INTERNAL_URL` | URL que usa el backend para llamar a la API | `http://geonetwork-headless:8080/geonetwork` |
 | `GEONETWORK_AUTH_TYPE` | `basic` o `bearer` | `bearer` |
-| `GEONETWORK_USER` | Usuario API (`basic`) o usuario Keycloak (`bearer`) | `catalog-api` |
-| `GEONETWORK_PASS` | Contraseña del usuario anterior | *(secret)* |
+| `GEONETWORK_USER` | Usuario local de GeoNetwork. Solo con `GEONETWORK_AUTH_TYPE=basic` | `admin` |
+| `GEONETWORK_PASS` | Contraseña de ese usuario. Solo con `basic` | *(secret)* |
 | `GEONETWORK_OIDC_TOKEN_URL` | Endpoint token de Keycloak | `https://ejemplo.dominio/auth/realms/gvsigonline/protocol/openid-connect/token` |
 | `GEONETWORK_OIDC_CLIENT_ID` | Client OIDC de GeoNetwork | `geonetwork-client` |
-| `GEONETWORK_OIDC_CLIENT_SECRET` | Secret del client | *(secret)* |
-| `GEONETWORK_OIDC_SCOPE` | Scopes del password grant | `openid email profile offline_access` |
+| `GEONETWORK_OIDC_CLIENT_SECRET` | Secret del client. En `bearer` es la credencial de la service account | *(secret)* |
+| `GEONETWORK_OIDC_SCOPE` | Scopes del grant client credentials. El plugin quita `offline_access` porque ese scope es el refresh token de un usuario | `openid email profile` |
+| `GEONETWORK_GROUP` | Nombre del grupo workspace donde se insertan los metadatos. Si no existe, la creación falla. Un valor numérico se acepta como id | `gvsigol` |
 | `GEONETWORK_EDITOR_PATH` | Ruta SPA del editor | `/srv/spa/catalog.search` |
 | `CATALOG_API_VERSION` | Versión API (`gn4`) | `gn4` |
 | `CATALOG_AUTO_CREATE_METADATA` | Crear metadatos al publicar capas | `True` / `False` |
-| `CATALOG_METADATA_STANDARD` | Estándar al crear metadatos nuevos | vacío (= ISO 19139:2007), `iso19115-3`, `mgb-2.0` |
+| `CATALOG_METADATA_STANDARD` | Estándar de las plantillas del plugin si el cliente no trae ninguna, o desempate si trae varias | vacío (= ISO 19139:2007), `iso19115-3`, `mgb-2.0` |
 | `CATALOG_TIMEOUT` | Timeout HTTP (segundos) | `10` |
 
 Si no se define `GEONETWORK_OIDC_TOKEN_URL`, se construye a partir de `OIDC_OP_BASE_URL` + `OIDC_OP_REALM_NAME` de gvSIG Online.
@@ -46,19 +47,27 @@ El plugin debe estar en `GVSIGOL_PLUGINS` (p.ej. `...,gvsigol_plugin_catalog`).
 
 La lectura y actualización de registros XML ya no asume ISO 19139. El plugin elige un gestor según el documento:
 
-| Gestor | Detección | Creación (`CATALOG_METADATA_STANDARD`) |
-|---|---|---|
-| ISO 19139:2007 | raíz `gmd:MD_Metadata` | vacío, `iso19139` |
-| ISO 19115-1 / 19115-3 | raíz `mdb:MD_Metadata` | `iso19115-3`, `iso19115-1` |
-| Perfil MGB 2.0 | 19115-3 con `mdb:metadataProfile` = `Perfil MGB 2.0` | `mgb-2.0`, `mgb`, `iso19115-3.mgb` |
+| Gestor | Detección (lectura y plantilla de cliente) |
+|---|---|
+| ISO 19139:2007 | raíz `gmd:MD_Metadata` |
+| ISO 19115-1 / 19115-3 | raíz `mdb:MD_Metadata` |
+| Perfil MGB 2.0 | 19115-3 con `mdb:metadataProfile` = `Perfil MGB 2.0` |
 
 El gestor MGB 2.0 es una subclase del de 19115-3: solo cambia la plantilla, la detección del perfil y la lectura de `cit:CI_UFCode` / `cit:administrativeArea`.
 
-Las aplicaciones cliente (`gvsigol_app_*`) pueden sustituir las plantillas del plugin dejando ficheros en `mdtemplates/`:
+Al crear un metadato el estándar sale de la plantilla, igual que al leer sale del XML:
 
-- `dataset.xml` o `dataset19139.xml` — ISO 19139
-- `dataset19115-3.xml` — ISO 19115-3
-- `dataset-mgb.xml` o `dataset19115-3.mgb.xml` — MGB 2.0
+1. Si la aplicación cliente (`gvsigol_app_*`) tiene ficheros en `mdtemplates/`, se detecta el estándar de ese XML y se rellena esa plantilla (contacto e institución del cliente).
+2. Si no hay plantilla de cliente, se usa la plantilla del plugin. `CATALOG_METADATA_STANDARD` elige cuál; vacío deja ISO 19139:2007.
+3. Si el cliente trae plantillas de más de un estándar, `CATALOG_METADATA_STANDARD` elige entre ellas. Si está vacío, se usa la más específica (MGB, luego 19115-3, luego 19139).
+
+Nombres que se buscan en `mdtemplates/`:
+
+- `dataset.xml` o `dataset19139.xml`
+- `dataset19115-3.xml`
+- `dataset-mgb.xml` o `dataset19115-3.mgb.xml`
+
+El nombre no fija el estándar: se mira la raíz y, en su caso, `metadataProfile`.
 
 Consulta y ficha de detalle usan el reader del estándar detectado; la búsqueda en GeoNetwork 4 (Elasticsearch) es independiente del XML.
 
@@ -72,16 +81,17 @@ Realm típico: `gvsigonline`. Client: `geonetwork-client`.
 
 1. **Client authentication**: ON (confidential).
 2. **Standard flow**: ON (login web en GeoNetwork).
-3. **Direct access grants**: ON (el plugin obtiene el Bearer con password grant).
-4. **Valid redirect URIs**: `https://<host>/geonetwork/*`
-5. **Valid post logout redirect URIs**: `https://<host>/geonetwork/*`
-6. **Web origins**: `https://<host>`
+3. **Service accounts**: ON (el plugin obtiene el Bearer con client credentials).
+4. **Direct access grants**: OFF.
+5. **Valid redirect URIs**: `https://<host>/geonetwork/*`
+6. **Valid post logout redirect URIs**: `https://<host>/geonetwork/*`
+7. **Web origins**: `https://<host>`
 
 ### Roles de cliente (perfiles GeoNetwork)
 
 Crear en el client: `Administrator`, `Reviewer`, `Editor`, `RegisteredUser`, `Guest`, `UserAdmin`, `Monitor`.
 
-Asignar al menos `Administrator` (o `Editor`) al usuario de servicio del plugin.
+Asignar al menos `Administrator` (o `Editor`) a la service account `service-account-geonetwork-client` (pestaña **Service account roles**).
 
 ### Mappers
 
@@ -94,11 +104,11 @@ Asignar al menos `Administrator` (o `Editor`) al usuario de servicio del plugin.
 
 GeoNetwork (`openidconnectbearer` + Keycloak) resuelve roles vía **userinfo**. Sin roles en userinfo, el usuario puede autenticarse con privilegios insuficientes.
 
-### Usuario de servicio
+### Service account
 
-Ejemplo: `catalog-api`, habilitado, con contraseña permanente y rol de cliente `Administrator` en `geonetwork-client`.
+Keycloak crea el usuario `service-account-geonetwork-client` al activar **Service accounts**. El plugin no envía usuario ni contraseña: el token sale de `client_id` + `client_secret`.
 
-Ese usuario y contraseña son `GEONETWORK_USER` / `GEONETWORK_PASS` del backend.
+Ese usuario debe tener el rol de cliente `Administrator` (o `Editor`). `GEONETWORK_USER` / `GEONETWORK_PASS` no intervienen en modo `bearer`.
 
 ---
 
@@ -135,9 +145,9 @@ Por eso `GEONETWORK_OIDC_TOKEN_URL` debe ser la URL pública (o una que emita el
 
 ```
 gvSIG Online (plugin_catalog)
-  │  password grant (GEONETWORK_USER / PASS + client secret)
+  │  client credentials (client id + secret de geonetwork-client)
   ▼
-Keycloak  ── access_token (roles Administrator en resource_access)
+Keycloak  ── access_token de service-account-geonetwork-client (roles Administrator)
   │  Authorization: Bearer <token>
   ▼
 GeoNetwork API (/srv/api/...)  ── valida JWT + userinfo ── usuario con perfil GN
@@ -156,9 +166,7 @@ GEONETWORK_AUTH_TYPE=bearer
 GEONETWORK_OIDC_TOKEN_URL=https://ejemplo.dominio/auth/realms/gvsigonline/protocol/openid-connect/token
 GEONETWORK_OIDC_CLIENT_ID=geonetwork-client
 GEONETWORK_OIDC_CLIENT_SECRET=<secret>
-GEONETWORK_OIDC_SCOPE=openid email profile offline_access
-GEONETWORK_USER=catalog-api
-GEONETWORK_PASS=<password>
+GEONETWORK_OIDC_SCOPE=openid email profile
 CATALOG_API_VERSION=gn4
 ```
 
@@ -179,12 +187,10 @@ GEONETWORK_INTERNAL_URL=http://geonetwork:8080/geonetwork
 
 ```bash
 curl -sk -X POST "$GEONETWORK_OIDC_TOKEN_URL" \
-  -d "grant_type=password" \
+  -d "grant_type=client_credentials" \
   -d "client_id=$GEONETWORK_OIDC_CLIENT_ID" \
   -d "client_secret=$GEONETWORK_OIDC_CLIENT_SECRET" \
-  -d "username=$GEONETWORK_USER" \
-  -d "password=$GEONETWORK_PASS" \
-  -d "scope=openid email profile offline_access"
+  -d "scope=openid email profile"
 ```
 
 El JWT debe incluir `resource_access.geonetwork-client.roles` con `Administrator` (o `Editor`), y `iss` igual al de la metadata OIDC.
@@ -216,7 +222,7 @@ Al borrar una capa desde **Servicios → Capas**, el plugin escucha la señal `l
 
 En despliegues con **OpenID (`GEONETWORK_AUTH_TYPE=bearer`)** el borrado exige:
 
-1. Token OIDC válido del usuario de servicio (`GEONETWORK_USER` / `GEONETWORK_PASS`).
+1. Token OIDC de la service account (`GEONETWORK_OIDC_CLIENT_ID` / `GEONETWORK_OIDC_CLIENT_SECRET`).
 2. Roles de cliente en **userinfo** (`Administrator` o al menos `Editor`).
 3. Cabecera CSRF (`X-XSRF-TOKEN`) alineada con la sesión autenticada.
 
@@ -227,7 +233,7 @@ Si el DELETE en GeoNetwork falla (403 CSRF / privilegios insuficientes), el meta
 | 403 al crear metadatos | Auth falsa/Guest, o usuario sin `Editor`/`Administrator` |
 | 401 Bearer `invalid_user_info_response` | Token con `iss` distinto al de la metadata (usar token URL pública) |
 | Token OK pero perfil Guest/RegisteredUser | Roles de cliente no van a **userinfo** |
-| `gn_auth` falla en modo bearer | Falta secret/user/pass, Direct Access Grants OFF, o URL de token incorrecta |
+| `gn_auth` falla en modo bearer | Falta secret, Service accounts OFF, o URL de token incorrecta |
 | Basic Auth con OIDC-only | GeoNetwork no acepta login local; cambiar a `bearer` + `openidconnectbearer` |
 | Capa borrada pero metadato sigue en GeoNetwork | DELETE falló con OIDC (CSRF/privilegios); ver logs `metadata delete failed` |
 

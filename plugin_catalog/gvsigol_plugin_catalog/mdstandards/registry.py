@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
+import logging
 from lxml import etree as ET
 from abc import ABCMeta, abstractmethod
+
+logger = logging.getLogger("gvsigol")
 
 _registry = []
 _CONFIG = {'DEFAULT_MANAGER': None}
@@ -174,3 +177,95 @@ def create(mdtype, mdfields, mdcode=None):
         if manager.get_code() == resolved:
             return manager.create(mdtype, mdfields)
     return _CONFIG['DEFAULT_MANAGER'].create(mdtype, mdfields)
+
+
+# Filenames a client app (gvsigol_app_*) may drop in mdtemplates/.
+# The standard is taken from the XML, not from the filename.
+_CLIENT_TEMPLATE_NAMES = (
+    'dataset-mgb.xml',
+    'dataset19115-3.mgb.xml',
+    'dataset19115-3.xml',
+    'dataset.xml',
+    'dataset19139.xml',
+)
+
+# When a client ships more than one standard and CATALOG_METADATA_STANDARD
+# does not pick one of them, prefer the more specific profile.
+_CREATION_PREFERENCE = (
+    'Iso19115_3MgbManager',
+    'Iso19115_3Manager',
+    'Iso19139_2007Manager',
+)
+
+
+def sniff_manager_code(metadata_record):
+    """Manager code for this XML, using the same detection as get_reader."""
+    tree = _as_tree(metadata_record)
+    for manager in _registry:
+        if manager.can_extract(tree):
+            return manager.get_code()
+    return None
+
+
+def client_template_standards():
+    """
+    Standards of the metadata templates shipped by installed client apps.
+
+    Returns a list of (manager_code, path), one entry per distinct standard.
+    """
+    from .templates import find_app_mdtemplate
+    found = []
+    seen_codes = set()
+    seen_paths = set()
+    for name in _CLIENT_TEMPLATE_NAMES:
+        path = find_app_mdtemplate(name)
+        if not path or path in seen_paths:
+            continue
+        seen_paths.add(path)
+        try:
+            code = sniff_manager_code(ET.parse(path).getroot())
+        except Exception:
+            logger.exception("Could not detect the standard of client template %s", path)
+            continue
+        if code and code not in seen_codes:
+            seen_codes.add(code)
+            found.append((code, path))
+    return found
+
+
+def creation_mdcode(explicit=None):
+    """
+    Standard to use when creating a new metadata record.
+
+    A client template decides the standard, because that file carries the
+    institution and contact data. Plugin templates are used only when the
+    client app does not ship any. ``explicit`` (CATALOG_METADATA_STANDARD)
+    selects the plugin default in that case, and picks among client
+    templates when the app ships more than one standard.
+    """
+    found = client_template_standards()
+    codes = [code for code, _path in found]
+    resolved_explicit = _resolve_mdcode(explicit)
+    if codes:
+        if resolved_explicit and resolved_explicit in codes:
+            return resolved_explicit
+        if len(codes) == 1:
+            if resolved_explicit and resolved_explicit != codes[0]:
+                logger.warning(
+                    "CATALOG_METADATA_STANDARD=%s does not match the client template (%s). "
+                    "Creating metadata with the client template standard.",
+                    explicit,
+                    codes[0],
+                )
+            return codes[0]
+        for preferred in _CREATION_PREFERENCE:
+            if preferred in codes:
+                logger.warning(
+                    "Client app ships several metadata standards %s. "
+                    "Using %s. Set CATALOG_METADATA_STANDARD to choose another.",
+                    codes,
+                    preferred,
+                )
+                return preferred
+        return codes[0]
+    return resolved_explicit

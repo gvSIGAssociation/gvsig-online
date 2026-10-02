@@ -38,12 +38,21 @@ def clear_token_cache():
         _cached_expiry = 0
 
 
+def _client_credentials_scope(scope):
+    """offline_access is a user refresh-token scope; this grant does not use it."""
+    parts = []
+    for part in (scope or '').split():
+        if part and part != 'offline_access':
+            parts.append(part)
+    return ' '.join(parts)
+
+
 def get_access_token(force_refresh=False):
     """
-    Return a Keycloak access token using the Resource Owner Password grant
-    against the GeoNetwork OIDC client.
+    Return a Keycloak access token for the GeoNetwork OIDC client's service account.
 
-    Tokens are cached in-process until near expiry.
+    Uses the client credentials grant (client id + secret). Tokens are cached
+    in-process until near expiry.
     """
     global _cached_token, _cached_expiry
     now = time.time()
@@ -58,9 +67,7 @@ def get_access_token(force_refresh=False):
     token_url = _default_token_url()
     client_id = catalog_settings.GEONETWORK_OIDC_CLIENT_ID
     client_secret = catalog_settings.GEONETWORK_OIDC_CLIENT_SECRET
-    username = catalog_settings.CATALOG_USER
-    password = catalog_settings.CATALOG_PASSWORD
-    scope = catalog_settings.GEONETWORK_OIDC_SCOPE
+    scope = _client_credentials_scope(catalog_settings.GEONETWORK_OIDC_SCOPE)
 
     if not token_url:
         raise RuntimeError(
@@ -70,19 +77,14 @@ def get_access_token(force_refresh=False):
         raise RuntimeError(
             'GEONETWORK_OIDC_CLIENT_ID / GEONETWORK_OIDC_CLIENT_SECRET are required for bearer auth'
         )
-    if not username or not password:
-        raise RuntimeError(
-            'GEONETWORK_USER / GEONETWORK_PASS are required for bearer auth'
-        )
 
     data = {
-        'grant_type': 'password',
+        'grant_type': 'client_credentials',
         'client_id': client_id,
         'client_secret': client_secret,
-        'username': username,
-        'password': password,
-        'scope': scope,
     }
+    if scope:
+        data['scope'] = scope
     verify = getattr(gvsigol_settings, 'OIDC_VERIFY_SSL', True)
     response = requests.post(
         token_url,
