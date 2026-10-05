@@ -164,7 +164,7 @@ msgid "Data Store"
 msgstr ""
 
 #: templates/provider_add.html:93 templates/provider_update.html:106
-msgid "Resource name"
+msgid "Table to be indexed"
 msgstr ""
 
 #: templates/provider_add.html:100 templates/provider_update.html:114

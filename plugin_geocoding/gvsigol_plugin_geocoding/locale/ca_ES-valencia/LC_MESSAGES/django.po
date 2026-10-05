@@ -163,7 +163,7 @@ msgid "Data Store"
 msgstr "Magatzem de dades"
 
 #: templates/provider_add.html:93 templates/provider_update.html:106
-msgid "Resource name"
+msgid "Table to be indexed"
 msgstr "Nom del recurs"
 
 #: templates/provider_add.html:100 templates/provider_update.html:114

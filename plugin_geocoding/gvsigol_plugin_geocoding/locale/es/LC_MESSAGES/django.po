@@ -162,8 +162,8 @@ msgid "Data Store"
 msgstr "Almacén de datos"
 
 #: templates/provider_add.html:93 templates/provider_update.html:106
-msgid "Resource name"
-msgstr "Tabla a indexar"
+msgid "Table to be indexed"
+msgstr "Nombre del recurso"
 
 #: templates/provider_add.html:100 templates/provider_update.html:114
 msgid "ID Field"
