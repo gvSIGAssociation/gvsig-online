@@ -23,7 +23,17 @@ CATALOG_USER = env('GEONETWORK_USER', default='admin')
 CATALOG_PASSWORD = env('GEONETWORK_PASS', default='admin')
 # Auth against GeoNetwork API: 'basic' (local DB user) or 'bearer' (OIDC service account)
 GEONETWORK_AUTH_TYPE = env('GEONETWORK_AUTH_TYPE', default='bearer').lower()
-GEONETWORK_OIDC_TOKEN_URL = env('GEONETWORK_OIDC_TOKEN_URL', default='')
+
+if env('OIDC_OP_TOKEN_ENDPOINT'):
+    DEFAULT_GEONETWORK_OIDC_TOKEN_URL=env('OIDC_OP_TOKEN_ENDPOINT')
+else:
+    OIDC_OP_BASE_URL = env('OIDC_OP_BASE_URL', default='')
+    OIDC_OP_REALM_NAME = env('OIDC_OP_REALM_NAME', default='gvsigonline')
+    if OIDC_OP_BASE_URL and OIDC_OP_REALM_NAME:
+        DEFAULT_GEONETWORK_OIDC_TOKEN_URL = f'{OIDC_OP_BASE_URL}/realms/{OIDC_OP_REALM_NAME}/protocol/openid-connect/token'
+    else:
+        DEFAULT_GEONETWORK_OIDC_TOKEN_URL = ''
+GEONETWORK_OIDC_TOKEN_URL = env('GEONETWORK_OIDC_TOKEN_URL', default=DEFAULT_GEONETWORK_OIDC_TOKEN_URL)
 GEONETWORK_OIDC_CLIENT_ID = env('GEONETWORK_OIDC_CLIENT_ID', default='geonetwork-client')
 GEONETWORK_OIDC_CLIENT_SECRET = env('GEONETWORK_OIDC_CLIENT_SECRET', default='')
 GEONETWORK_OIDC_SCOPE = env(
@@ -44,7 +54,7 @@ CATALOG_CUSTOM_FILTER_URL = env('CATALOG_CUSTOM_FILTER_URL', default='')
 
 METADATA_VIEWER_BUTTON = env('METADATA_VIEWER_BUTTON', default='LINK')
 DISABLE_CATALOG_NAVBAR_MENUS = env('DISABLE_CATALOG_NAVBAR_MENUS', default='False')
-CATALOG_TIMEOUT = env('CATALOG_TIMEOUT', default=10)
+CATALOG_TIMEOUT = env('CATALOG_TIMEOUT', default=25)
 
 GEONETWORK_USE_KEEPALIVE = env('GEONETWORK_USE_KEEPALIVE')
 # Si es False, no se crearán metadatos automáticamente para ninguna capa (ni públicas ni privadas)
