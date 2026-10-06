@@ -15,7 +15,7 @@ LOGGER.info('Loading plugin  plugin_oidc_mozilla.')
 
 env_plugin_oidc_mozilla = environ.Env(
     OIDC_OP_BASE_URL=(str, '/auth'), 
-    OIDC_OP_REALM_NAME=(str,'master'),
+    OIDC_OP_REALM_NAME=(str,'gvsigonline'),
     OIDC_OP_AUTHORIZATION_ENDPOINT=(str, None),
     OIDC_OP_TOKEN_ENDPOINT=(str, None),
     OIDC_OP_JWKS_ENDPOINT=(str, None),
