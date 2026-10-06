@@ -24,7 +24,7 @@ CATALOG_PASSWORD = env('GEONETWORK_PASS', default='admin')
 # Auth against GeoNetwork API: 'basic' (local DB user) or 'bearer' (OIDC service account)
 GEONETWORK_AUTH_TYPE = env('GEONETWORK_AUTH_TYPE', default='bearer').lower()
 
-if env('OIDC_OP_TOKEN_ENDPOINT'):
+if env('OIDC_OP_TOKEN_ENDPOINT', default=''):
     DEFAULT_GEONETWORK_OIDC_TOKEN_URL=env('OIDC_OP_TOKEN_ENDPOINT')
 else:
     OIDC_OP_BASE_URL = env('OIDC_OP_BASE_URL', default='')
