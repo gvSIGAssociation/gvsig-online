@@ -98,6 +98,8 @@ class Server(models.Model):
             base_url = self._get_relative_url(self.frontend_url)
         else:
             base_url = self.frontend_url
+        if workspace:
+            return base_url + f"/{workspace}/gwc/service/wmts"
         return base_url + "/gwc/service/wmts"
 
     def getCacheEndpoint(self, workspace=None, relative=False):
