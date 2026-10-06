@@ -126,33 +126,6 @@ $(document).ready(function() {
 	var table = golListTable('#workspaces-table', {
 		mode: 'server',
 		dt: {
-		{% if is_paginated|default:False %}
-		paging: false,  // Deshabilitar paginación de DataTables cuando hay paginación del servidor
-		info: false,    // Ocultar info de DataTables (ya lo mostramos en la paginación del servidor)
-		searching: false,  // Deshabilitar búsqueda de DataTables (usamos búsqueda del servidor)
-		{% endif %}
-	    language: {
-	    	processing		: '{% trans "Processing request..." %}',
-		    search			: '{% blocktrans with sep=":" %}Search{{sep}}{% endblocktrans %}',
-		    lengthMenu		: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
-		    info			: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
-		    infoEmpty		: '{% trans "Showing from 0 to 0 of 0 records" %}',
-		    infoFiltered	: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
-		    infoPostFix		: "",
-		    loadingRecords	: '{% trans "Loading..." %}',
-		    zeroRecords		: '{% trans "No records available" %}',
-		    emptyTable		: '{% trans "No records available" %}',
-		    paginate: {
-		    	first		: '{% trans "First" %}',
-		        previous	: '{% trans "Previous" %}',
-		        next		: '{% trans "Next" %}',
-		        last		: '{% trans "Last" %}'
-		    },
-		    aria: {
-		        sortAscending: '{% blocktrans with sep=": " %}{{sep}}Sort ascending{% endblocktrans %}',
-		        sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
-		    }
-		},
 		"columnDefs": [{
 	        "targets": -1,
 	        "data": null,

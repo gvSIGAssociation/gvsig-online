@@ -2,6 +2,12 @@
 {% load static %}
 {% load i18n %}
 
+{% block header %}
+<link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-modal.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-list-page.css" %}">
+{% endblock %}
+
 {% block content %}
 <div class="row">
 	<div class="col-md-12">
@@ -64,8 +70,8 @@
 				</table>
 			</div>
 			{% if is_paginated|default:False %}
-			<div class="pl-panel__footer">
-				<span class="text-muted">
+			<div class="pl-server-pagination">
+				<span class="pagination-info">
 					{% blocktrans with start=page_obj.start_index end=page_obj.end_index total=total_items %}Showing {{ start }} to {{ end }} of {{ total }} layers{% endblocktrans %}
 				</span>
 				<ul class="pagination pagination-sm no-margin">
@@ -105,35 +111,9 @@
 </script>
 <script>
 $(document).ready(function() {
-	var table = $('#layers-table').DataTable({
-		responsive: true,
-		{% if is_paginated|default:False %}
-		paging: false,  // Deshabilitar paginación de DataTables cuando hay paginación del servidor
-		info: false,    // Ocultar info de DataTables (ya lo mostramos en la paginación del servidor)
-		searching: false,  // Deshabilitar búsqueda de DataTables (usamos búsqueda del servidor)
-		{% endif %}
-	    language: {
-	    	processing		: '{% trans "Processing request..." %}',
-		    search			: '{% blocktrans with sep=":" %}Search{{sep}}{% endblocktrans %}',
-		    lengthMenu		: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
-		    info			: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
-		    infoEmpty		: '{% trans "Showing from 0 to 0 of 0 records" %}',
-		    infoFiltered	: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
-		    infoPostFix		: "",
-		    loadingRecords	: '{% trans "Loading..." %}',
-		    zeroRecords		: '{% trans "No records available" %}',
-		    emptyTable		: '{% trans "No records available" %}',
-		    paginate: {
-		        first		: '{% trans "First" %}',
-		        previous	: '{% trans "Previous" %}',
-		        next		: '{% trans "Next" %}',
-		   		last		: '{% trans "Last" %}'
-		 	},
-		  	aria: {
-		     	sortAscending: '{% blocktrans with sep=": " %}{{sep}}Sort ascending{% endblocktrans %}',
-		        sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
-		    }
-		},
+	var table = golListTable('#layers-table', {
+		mode: 'server',
+		dt: {
 		"columnDefs": [{
 	      	"targets": -4,
 	       	"data": null,
@@ -150,9 +130,8 @@ $(document).ready(function() {
 	      	"targets": -1,
 	       	"data": null,
 	        "defaultContent": '<button type="button" name="button-delete-style" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Delete style" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
-	  	}],
-	    "dom": 'T<"clear">rtip',
-		"bLengthChange": false
+	  	}]
+		}
 	});
 		 
 	$('#layers-table tbody').on('click', 'button', function (){

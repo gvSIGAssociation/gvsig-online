@@ -57,6 +57,7 @@
 							<th>{% trans "Description" %}</th>
 							<th>{% trans "Is public?" %}</th>
 							<th>{% trans "Preview" %}</th>
+							<th style="display:none">{% trans "Can manage" %}</th>
 							<th></th>
 							<th></th>
 							<th></th>
@@ -66,7 +67,7 @@
 					</thead>
 					<tbody>
 						{% for project in projects %}
-						<tr data-canmanage="{{project.can_manage}}" data-projectid="{{ project.id }}">
+						<tr>
 							<td>{{ project.id }}</td>
 							<td>{{ project.name }}</td>
 							<td>{{ project.title }}</td>
@@ -84,6 +85,7 @@
 								<a id="load_project_jquery" title="JQuery" target="_blank" href="/gvsigonline/core/load/{{project.name}}/" data-toggle="tooltip" data-placement="bottom" class="btn"><i class="fa fa-television" style="color: brown"></i></a>
 								{% endif %}
 							</td>
+						<td style="display:none">{{ project.can_manage }}</td>
 						<td></td>
 						<td></td>
 						<td></td>
@@ -339,43 +341,19 @@
 </script>
 <script>
 $(document).ready(function() {
+	/* can_manage viaja en una columna oculta. Leerlo de la fila y no del DOM
+	   evita que un selector que no encuentre el tr deje un undefined y rompa
+	   el draw entero, apagando los botones de todas las filas. */
+	function canManage(data) { return data[6] === 'true'; }
+
 	var table = golListTable('#projects-table', {
 		mode: 'server',
 		dt: {
-		{% if is_paginated|default:False %}
-		paging: false,  // Deshabilitar paginación de DataTables cuando hay paginación del servidor
-		info: false,    // Ocultar info de DataTables (ya lo mostramos en la paginación del servidor)
-		searching: false,  // Deshabilitar búsqueda de DataTables (usamos búsqueda del servidor)
-		{% endif %}
-	    language: {
-	    	processing		: '{% trans "Processing request..." %}',
-		    search			: '{% blocktrans with sep=":" %}Search{{sep}}{% endblocktrans %}',
-		    lengthMenu		: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
-		    info			: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
-		    infoEmpty		: '{% trans "Showing from 0 to 0 of 0 records" %}',
-		    infoFiltered	: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
-		    infoPostFix		: "",
-		    loadingRecords	: '{% trans "Loading..." %}',
-		    zeroRecords		: '{% trans "No records available" %}',
-		    emptyTable		: '{% trans "No records available" %}',
-		    paginate: {
-		    	first		: '{% trans "First" %}',
-		        previous	: '{% trans "Previous" %}',
-		        next		: '{% trans "Next" %}',
-		        last		: '{% trans "Last" %}'
-		    },
-		    aria: {
-		        sortAscending: '{% blocktrans with sep=": " %}{{sep}}Sort ascending{% endblocktrans %}',
-		        sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
-		    }
-		},
 		"columnDefs": [{
 	        "targets": -1,
 	        "data": null,
 			"render": function ( data, type, row ) {
-				var filter = 'tr[data-projectid="' + data[0] + '"]';
-				var dataset = $('#projects-table').find(filter).data();
-				if (dataset['canmanage']) {
+				if (canManage(data)) {
                 	return '<button type="button" name="button-delete-project" data-toggle="modal" data-target="#modal-delete-project" data-toggle="tooltip" data-placement="top" title="' + '{% trans "Delete project" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>';
 				}
 				else {
@@ -386,9 +364,7 @@ $(document).ready(function() {
 	        "targets": -2,
 	        "data": null,
             "render": function ( data, type, row ) {
-				var filter = 'tr[data-projectid="' + data[0] + '"]';
-				var dataset = $('#projects-table').find(filter).data();
-				if (dataset['canmanage']) {
+				if (canManage(data)) {
 					var exportUrl = '{% url "project_package_export" 888888888 %}'.replace('888888888', data[0]);
             		return '<a title="' + '{% trans "Export project package" %}' + '" href="' + exportUrl + '" data-toggle="tooltip" data-placement="top" class="btn btn-info project-package-export-btn"><i class="fa fa-download"></i></a>';
 				}
@@ -400,9 +376,7 @@ $(document).ready(function() {
 	        "targets": -3,
 	        "data": null,
             "render": function ( data, type, row ) {
-				var filter = 'tr[data-projectid="' + data[0] + '"]';
-				var dataset = $('#projects-table').find(filter).data();
-				if (dataset['canmanage']) {
+				if (canManage(data)) {
                 	return '<a {% if IFRAME_MODE_UI %} style="display: none" {% endif %} title="' + '{% trans "Clone project" %}' + '" href="/gvsigonline/core/project_clone/' + data[0] + '/" data-toggle="tooltip" data-placement="top" class="btn btn-primary clone-project-button"><i class="fa fa-clone"></i></a>';
 				}
 				else {
@@ -413,9 +387,7 @@ $(document).ready(function() {
 	        "targets": -4,
 	        "data": null,
             "render": function ( data, type, row ) {
-				var filter = 'tr[data-projectid="' + data[0] + '"]';
-				var dataset = $('#projects-table').find(filter).data();
-				if (dataset['canmanage']) {
+				if (canManage(data)) {
             		return '<a title="' + '{% trans "Project layer groups" %}' + '" href="/gvsigonline/services/layergroup_list/?project_id='+ data[0] + '" data-toggle="tooltip" data-placement="top" class="btn btn-warning"><i class="fa fa-object-group"></i></a>';
 				}
 				else {
@@ -426,9 +398,7 @@ $(document).ready(function() {
 	        "targets": -5,
 	        "data": null,
             "render": function ( data, type, row ) {
-				var filter = 'tr[data-projectid="' + data[0] + '"]';
-				var dataset = $('#projects-table').find(filter).data();
-				if (dataset['canmanage']) {
+				if (canManage(data)) {
             		return '<a title="' + '{% trans "Update project" %}' + '" href="/gvsigonline/core/project_update/' + data[0] + '/" data-toggle="tooltip" data-placement="top" class="btn btn-success"><i class="fa fa-edit"></i></a>';
 				}
 				else {
