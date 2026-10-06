@@ -1501,21 +1501,39 @@ viewer.core = {
 			if (!group.basegroup && group.allows_getmap) {
 				var url = null;
 				var params = null;
+				var sourceOptions = null;
 				var cached = group.cached;
 
 				if (cached) {
 					url = group.cache_endpoint;
 					params = {'LAYERS': group.groupName, 'FORMAT': 'image/png', 'VERSION': '1.1.1', 'TILED': 'TRUE', 'WIDTH': '256', 'HEIGHT': '256'};
+					// GeoWebCache only serves 256px tiles on EPSG:3857 / EPSG:4326.
+					// Request that grid (HiDPI off) and let OpenLayers reproject onto the view.
+					var mapUnits = this.map.getView().getProjection().getUnits();
+					var wmsProjection = ol.proj.get(mapUnits === 'm' ? 'EPSG:3857' : 'EPSG:4326');
+					sourceOptions = {
+						url: url,
+						params: params,
+						serverType: 'geoserver',
+						projection: wmsProjection,
+						tileGrid: ol.tilegrid.createXYZ({
+							extent: wmsProjection.getExtent(),
+							tileSize: 256,
+							maxZoom: 42
+						}),
+						hidpi: false
+					};
 				} else {
 					url = group.wms_endpoint;
 					params = {'LAYERS': group.groupName, 'FORMAT': 'image/png', 'VERSION': '1.1.0', 'WIDTH': '256', 'HEIGHT': '256'};
+					sourceOptions = {
+						url: url,
+						params: params,
+						serverType: 'geoserver'
+					};
 				}
 
-				var layerGroupSource = new ol.source.TileWMS({
-					url: url,
-					params: params,
-					serverType: 'geoserver'
-				});
+				var layerGroupSource = new ol.source.TileWMS(sourceOptions);
 				var layerGroup = new ol.layer.Tile({
 					id: group.groupName,
 					source: layerGroupSource,
