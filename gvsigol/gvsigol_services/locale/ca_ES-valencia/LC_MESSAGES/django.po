@@ -4438,3 +4438,74 @@ msgstr "El filtre referencia un àlies de taula desconegut: {alias}"
 #: gvsigol_services/views.py
 msgid "Filter field does not exist: {field}"
 msgstr "El camp del filtre no existeix: {field}"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "View primary key"
+msgstr "Clau primària de la vista"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Choose the field that identifies each row, or generate a unique integer key (gvol_pk). A generated key is recommended for joins, because source primary keys can repeat."
+msgstr "Trieu el camp que identifica cada fila, o genereu una clau entera única (gvol_pk). La clau generada és recomanable en joins, perquè les claus d'origen es poden repetir."
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Generate unique integer key (recommended for joins)"
+msgstr "Generar clau entera única (recomanat en joins)"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "table PK"
+msgstr "PK de taula"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "All conditions currently share the same AND or OR operator. Mixing both in groups is a planned improvement."
+msgstr "Ara totes les condicions usen el mateix operador AND o OR. Combinar tots dos per grups queda com a millora futura."
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Only one geometry can be included in the view. Other geometry columns will be omitted."
+msgstr "Només es pot incloure una geometria a la vista. La resta de columnes geomètriques s'ometran."
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "No geometry column"
+msgstr "Sense columna de geometria"
+
+#: gvsigol_services/views.py
+msgid "Multiple geometry columns were selected. Choose a single geometry for the view."
+msgstr "S'han seleccionat diverses columnes de geometria. Trieu una sola geometria per a la vista."
+
+#: gvsigol_services/views.py
+msgid "The selected geometry column does not exist: {field}"
+msgstr "La columna de geometria seleccionada no existeix: {field}"
+
+#: gvsigol_services/views.py
+msgid "The view could not be created: {error}"
+msgstr "No s'ha pogut crear la vista: {error}"
+
+#: gvsigol_services/views.py
+msgid "The selected primary key does not exist: {field}"
+msgstr "La clau primària seleccionada no existeix: {field}"
+
+#: gvsigol_services/views.py
+msgid "A primary key is required for the view"
+msgstr "La vista necessita una clau primària"
+
+#: gvsigol_services/forms_services.py
+msgid "Invalid geometry definition"
+msgstr "Definició de geometria no vàlida"
+
+#: gvsigol_services/forms_services.py
+msgid "Invalid primary key definition"
+msgstr "Definició de clau primària no vàlida"
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Match groups with"
+msgstr "Combinar grups amb"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Use groups to mix AND and OR, for example (A OR B) AND C."
+msgstr "Useu grups per barrejar AND i OR, per exemple (A OR B) AND C."
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Add group"
+msgstr "Afegir grup"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Group"
+msgstr "Grup"

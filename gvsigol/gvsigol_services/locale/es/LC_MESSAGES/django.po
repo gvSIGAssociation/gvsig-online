@@ -5447,3 +5447,74 @@ msgstr "El filtro referencia un alias de tabla desconocido: {alias}"
 #: gvsigol_services/views.py
 msgid "Filter field does not exist: {field}"
 msgstr "El campo del filtro no existe: {field}"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "View primary key"
+msgstr "Clave primaria de la vista"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Choose the field that identifies each row, or generate a unique integer key (gvol_pk). A generated key is recommended for joins, because source primary keys can repeat."
+msgstr "Elija el campo que identifica cada fila, o genere una clave entera única (gvol_pk). La clave generada es recomendable en joins, porque las claves de origen pueden repetirse."
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Generate unique integer key (recommended for joins)"
+msgstr "Generar clave entera única (recomendado en joins)"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "table PK"
+msgstr "PK de tabla"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "All conditions currently share the same AND or OR operator. Mixing both in groups is a planned improvement."
+msgstr "Ahora todas las condiciones usan el mismo operador AND u OR. Combinar ambos por grupos queda como mejora futura."
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Only one geometry can be included in the view. Other geometry columns will be omitted."
+msgstr "Solo se puede incluir una geometría en la vista. El resto de columnas geométricas se omitirán."
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "No geometry column"
+msgstr "Sin columna de geometría"
+
+#: gvsigol_services/views.py
+msgid "Multiple geometry columns were selected. Choose a single geometry for the view."
+msgstr "Se seleccionaron varias columnas de geometría. Elija una sola geometría para la vista."
+
+#: gvsigol_services/views.py
+msgid "The selected geometry column does not exist: {field}"
+msgstr "La columna de geometría seleccionada no existe: {field}"
+
+#: gvsigol_services/views.py
+msgid "The view could not be created: {error}"
+msgstr "No se pudo crear la vista: {error}"
+
+#: gvsigol_services/views.py
+msgid "The selected primary key does not exist: {field}"
+msgstr "La clave primaria seleccionada no existe: {field}"
+
+#: gvsigol_services/views.py
+msgid "A primary key is required for the view"
+msgstr "La vista necesita una clave primaria"
+
+#: gvsigol_services/forms_services.py
+msgid "Invalid geometry definition"
+msgstr "Definición de geometría no válida"
+
+#: gvsigol_services/forms_services.py
+msgid "Invalid primary key definition"
+msgstr "Definición de clave primaria no válida"
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Match groups with"
+msgstr "Combinar grupos con"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Use groups to mix AND and OR, for example (A OR B) AND C."
+msgstr "Use grupos para mezclar AND y OR, por ejemplo (A OR B) AND C."
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Add group"
+msgstr "Añadir grupo"
+
+#: gvsigol_services/templates/sqlview_add.html
+msgid "Group"
+msgstr "Grupo"

@@ -1954,19 +1954,30 @@ class SqlView(models.Model):
                 }
             }
         ],
-        "pks": ["f1"],
+        "pks": ["gvol_pk"],
+        "pk": {"mode": "generated", "alias": "gvol_pk", "components": [{"table_alias": "t1", "name": "ogc_fid"}]},
+        "geometry": {"table_alias": "t1", "name": "wkb_geometry", "alias": "wkb_geometry"},
         "where": {
             "operator": "AND",
             "conditions": [
                 {"table_alias": "t1", "name": "estado", "op": "=", "value": "activo"},
-                {"table_alias": "t2", "name": "fecha", "op": ">=", "value": "2024-01-01"}
+                {
+                    "type": "group",
+                    "operator": "OR",
+                    "conditions": [
+                        {"table_alias": "t2", "name": "fecha", "op": ">=", "value": "2024-01-01"},
+                        {"table_alias": "t2", "name": "fecha", "op": "IS NULL"}
+                    ]
+                }
             ]
         }
     }
 
     The main limitations of this schema are:
     - complex ON conditions are not allowed (i.e. ON t1.f1 = t2.t1_id AND t1.type = t2.type)
-    - WHERE is limited to structured conditions (field/op/value); free-form SQL is not allowed
+    - WHERE is limited to structured conditions and AND/OR groups; free-form SQL is not allowed
+    - only one geometry column is allowed in the view
+    - the view PK is a chosen field or a generated unique integer key gvol_pk = ROW_NUMBER() (recommended for joins)
     """
     json_def = JSONField()
     created_by = models.CharField(max_length=100, default='')

@@ -109,6 +109,18 @@
 									<h3 class="box-title">{% trans "Included fields" %}</h3>
 								</div>
 								<div class="box-body">
+									<div class="row" style="margin-bottom: 16px;">
+										<div class="col-md-6 form-group">
+											<label for="view-pk">{% trans "View primary key" %}</label>
+											<select id="view-pk" class="form-control"></select>
+											<p class="help-block" style="margin-top:6px;">{% trans "Choose the field that identifies each row, or generate a unique integer key (gvol_pk). A generated key is recommended for joins, because source primary keys can repeat." %}</p>
+										</div>
+										<div class="col-md-6 form-group">
+											<label for="view-geometry">{% trans "Geometry column" %}</label>
+											<select id="view-geometry" class="form-control"></select>
+											<p class="help-block" style="margin-top:6px;">{% trans "Only one geometry can be included in the view. Other geometry columns will be omitted." %}</p>
+										</div>
+									</div>
 									<div class="table-responsive">
 										<table id="field-list-table" class="table no-margin">
 											<thead>
@@ -137,6 +149,10 @@
 								</div>
 								<input type="hidden" name="fields" id="fields"
 									value="{{form.fields.value|default_if_none:''}}" />
+								<input type="hidden" name="geometry" id="geometry"
+									value="{{form.geometry.value|default_if_none:''}}" />
+								<input type="hidden" name="pk_clause" id="pk_clause"
+									value="{{form.pk_clause.value|default_if_none:''}}" />
 							</div>
 						</div>
 					</div>
@@ -151,32 +167,25 @@
 								<div class="box-body">
 									<div class="row" style="margin-bottom: 12px;">
 										<div class="col-md-4 form-group">
-											<label for="where-operator">{% trans "Match conditions with" %}</label>
+											<label for="where-operator">{% trans "Match groups with" %}</label>
 											<select id="where-operator" class="form-control">
 												<option value="AND">{% trans "AND (all)" %}</option>
 												<option value="OR">{% trans "OR (any)" %}</option>
 											</select>
+											<p class="help-block" style="margin-top:6px;">{% trans "Use groups to mix AND and OR, for example (A OR B) AND C." %}</p>
 										</div>
 									</div>
 									<p id="where-empty-msg" class="text-muted" style="display:none;">{% trans "Add at least one table before defining filters." %}</p>
-									<div class="table-responsive">
-										<table id="where-list-table" class="table no-margin">
-											<thead>
-												<tr>
-													<th>{% trans "Field" %}</th>
-													<th>{% trans "Operator" %}</th>
-													<th>{% trans "Value" %}</th>
-													<th></th>
-												</tr>
-											</thead>
-											<tbody id="where-list-table-body"></tbody>
-										</table>
-									</div>
+									<div id="where-builder"></div>
 								</div>
 								<div class="box-footer clearfix" style="border-top: 0px">
 									<a id="add-where-button" href="javascript:void(0)"
 										class="btn btn-box-tool pull-left margin-r-5">
 										<i class="fa fa-plus margin-r-5"></i>{% trans "Add condition" %}
+									</a>
+									<a id="add-where-group-button" href="javascript:void(0)"
+										class="btn btn-box-tool pull-left margin-r-5">
+										<i class="fa fa-object-group margin-r-5"></i>{% trans "Add group" %}
 									</a>
 								</div>
 								<input type="hidden" name="where_clause" id="where_clause"
@@ -393,9 +402,11 @@
 		function addFieldsUi(fromTable, selectedFieldAliases, previousValues, uiProcessor) {
 			$.getJSON("{% url 'backend_fields_list' %}", { datastore_id: fromTable.datastore_id, table_name: fromTable.table_name }, function (data) {
 				var rows = [];
-				var row, fieldName, previousVal, alias, selected;
+				var row, fieldName, previousVal, alias, selected, isGeom, isPk;
 				for (var i = 0; i < data.length; i++) {
 					fieldName = data[i]["name"];
+					isGeom = !!data[i]["is_geometry"];
+					isPk = !!data[i]["is_pk"];
 					if (previousValues !== null) {
 						try {
 							previousVal = previousValues[fromTable.table_alias][fieldName];
@@ -411,22 +422,16 @@
 						alias = fieldName;
 						selected = true;
 					}
-					var aliasSuffix = 1;
-					while (selectedFieldAliases.indexOf(alias) != -1) {
-						alias = fieldName + "_" + aliasSuffix++;
-					}
-					selectedFieldAliases.push(alias);
-					row = '<tr>';
+					var rowId = fromTable.table_alias + '-' + fieldName;
+					row = '<tr class="view-field-row" data-table-alias="' + fromTable.table_alias + '" data-field-name="' + fieldName + '" data-is-geometry="' + (isGeom ? '1' : '0') + '" data-is-pk="' + (isPk ? '1' : '0') + '">';
 					row += '<td class="form-group form-check col-md-3">';
 					if (selected) {
-						row += '<input type="checkbox" class="form-check-input selected-field" id="selected-field-' + i + '" checked>';
+						row += '<input type="checkbox" class="form-check-input selected-field" id="selected-field-' + rowId + '" checked>';
 					}
 					else {
-						row += '<input type="checkbox" class="form-check-input selected-field" id="selected-field-' + i + '">';
+						row += '<input type="checkbox" class="form-check-input selected-field" id="selected-field-' + rowId + '">';
 					}
 					row += '<label class="form-check-label field-name" style="font-weight:400">' + fieldName + '</label>';
-					//row += '<input type="checkbox" class="form-check-input" id="selected-field-' + j +'">';
-					//row += '<label class="form-check-label" for="selected-form-field-' + j +'">'+ data[j]["name"] + '</label>';
 					row += '</td>';
 					row += '<td class="form-group form-check col-md-3 datastore" data-datastoreid="' + fromTable.datastore_id + '">';
 					row += fromTable.datastore_name;
@@ -438,7 +443,7 @@
 					row += fromTable.table_alias;
 					row += '</td>';
 					row += '<td class="form-group form-check col-md-3">';
-					row += '<input type="text" class="form-control selected-field-alias" id="selected-field-alias-' + i + '" value="' + alias + '">';
+					row += '<input type="text" class="form-control selected-field-alias" id="selected-field-alias-' + rowId + '" value="' + alias + '">';
 					row += '</td></tr>';
 					rows.push(row);
 				}
@@ -475,8 +480,8 @@
 			row.append(tableCol);
 			var tableAliasCol = $('<td class="form-group col-md-2"></td>');
 			var tableAliasInput = $('<input class="form-control from-table-alias" value="t' + nextId + '" readonly>');
-			if (typeof(tableAlias) != "undefined") {
-				tableAliasInput.val(tableAlias);
+			if (typeof(tableAliasVal) != "undefined") {
+				tableAliasInput.val(tableAliasVal);
 			}
 			tableAliasCol.append(tableAliasInput);
 			row.append(tableAliasCol);
@@ -576,8 +581,6 @@
 				return;
 			}
 			var selectedFieldAliases = [];
-			// since getJSON is async and returns in random order, we use an ordered ui processor
-			// to ensure fields are always added in the same order
 			var uiProcessor = new OrderedAsyncProcessor(fromTables.length, function(sortedResults){
 				var row;
 				for (var i=0; i<sortedResults.length; i++) {
@@ -586,6 +589,10 @@
 						$("#field-list-table-body").append(row);
 					}
 				}
+				applyFieldAliases();
+				refreshPkSelect();
+				refreshGeometrySelect();
+				applyRequiredPk();
 				if (typeof callback === "function") {
 					callback();
 				}
@@ -623,6 +630,9 @@
 			var fieldsDict = {};
 			for (var i=0; i<fieldsArr.length; i++) {
 				field = fieldsArr[i];
+				if (field["generated"] || !field["table_alias"]) {
+					continue;
+				}
 				fieldsDict[field["table_alias"]] = fieldsDict[field["table_alias"]] || {};
 				fieldsDict[field["table_alias"]][field["name"]] = {
 					"selected": true,
@@ -657,10 +667,16 @@
 		function serializeFields() {
 			var fields = [];
 			var field;
+			var chosenGeom = $("#view-geometry").val() || '';
 			$("#field-list-table-body tr").has(".selected-field:checked").each(function () {
-				field = {};
-				var field_name = $(this).find(".field-name").text();
+				var isGeom = $(this).attr('data-is-geometry') === '1';
 				var table_alias = $(this).find(".table-alias").text();
+				var field_name = $(this).find(".field-name").text();
+				var fieldKey = table_alias + '.' + field_name;
+				if (isGeom && chosenGeom && fieldKey !== chosenGeom) {
+					return;
+				}
+				field = {};
 				var field_alias = $(this).find(".selected-field-alias").val();
 				field["table_alias"] = table_alias;
 				field["name"] = field_name;
@@ -668,6 +684,202 @@
 				fields.push(field);
 			});
 			return JSON.stringify(fields);
+		}
+
+		function uniquifyAlias(base, used) {
+			var alias = base || 'field';
+			if (used.indexOf(alias) === -1) {
+				used.push(alias);
+				return alias;
+			}
+			var n = 1;
+			while (used.indexOf(alias + '_' + n) !== -1) {
+				n += 1;
+			}
+			alias = alias + '_' + n;
+			used.push(alias);
+			return alias;
+		}
+
+		function applyFieldAliases() {
+			var used = [];
+			var pkVal = $("#view-pk").val() || '';
+			if (pkVal && pkVal !== '__generated__') {
+				$("#field-list-table-body tr.view-field-row").each(function () {
+					var key = $(this).attr('data-table-alias') + '.' + $(this).attr('data-field-name');
+					if (key === pkVal) {
+						var base = $(this).find('.selected-field-alias').val() || $(this).attr('data-field-name');
+						$(this).find('.selected-field-alias').val(uniquifyAlias(base, used));
+					}
+				});
+			}
+			$("#field-list-table-body tr.view-field-row").each(function () {
+				var key = $(this).attr('data-table-alias') + '.' + $(this).attr('data-field-name');
+				if (pkVal && pkVal !== '__generated__' && key === pkVal) {
+					return;
+				}
+				var base = $(this).find('.selected-field-alias').val() || $(this).attr('data-field-name');
+				$(this).find('.selected-field-alias').val(uniquifyAlias(base, used));
+			});
+		}
+
+		function storedPkValue() {
+			try {
+				var stored = JSON.parse($("#pk_clause").val() || '{}');
+				if (stored && stored.mode === 'generated') {
+					return '__generated__';
+				}
+				if (stored && stored.mode === 'field' && stored.table_alias && stored.name) {
+					return stored.table_alias + '.' + stored.name;
+				}
+			} catch (err) {}
+			return '';
+		}
+
+		function refreshPkSelect() {
+			var previous = $("#view-pk").val() || storedPkValue();
+			var tableCount = $(".from-tables").length;
+			var $sel = $("#view-pk");
+			$sel.empty();
+			$sel.append($('<option>', {
+				value: '__generated__',
+				text: '{% trans "Generate unique integer key (recommended for joins)" %}'
+			}));
+			$("#field-list-table-body tr.view-field-row").each(function () {
+				if ($(this).attr('data-is-geometry') === '1') {
+					return;
+				}
+				var key = $(this).attr('data-table-alias') + '.' + $(this).attr('data-field-name');
+				var label = key;
+				if ($(this).attr('data-is-pk') === '1') {
+					label = key + ' ({% trans "table PK" %})';
+				}
+				$sel.append($('<option>', {value: key, text: label}));
+			});
+			var chosen = previous;
+			if (!chosen) {
+				chosen = tableCount > 1 ? '__generated__' : ($sel.find('option[value$=".ogc_fid"]').first().val() || $sel.find('option').eq(1).val() || '__generated__');
+			}
+			if (chosen !== '__generated__' && $sel.find('option[value="' + chosen + '"]').length === 0) {
+				chosen = tableCount > 1 ? '__generated__' : '__generated__';
+			}
+			$sel.val(chosen);
+			applyRequiredPk();
+		}
+
+		function applyRequiredPk() {
+			$("#field-list-table-body .selected-field").prop('disabled', false).removeAttr('data-required-pk');
+			var val = $("#view-pk").val() || '';
+			if (!val || val === '__generated__') {
+				return;
+			}
+			$("#field-list-table-body tr.view-field-row").each(function () {
+				var key = $(this).attr('data-table-alias') + '.' + $(this).attr('data-field-name');
+				if (key === val) {
+					var $cb = $(this).find('.selected-field');
+					$cb.prop('checked', true).prop('disabled', true).attr('data-required-pk', '1');
+				}
+			});
+		}
+
+		function serializePk() {
+			var val = $("#view-pk").val();
+			if (!val || val === '__generated__') {
+				return JSON.stringify({mode: 'generated'});
+			}
+			var dot = val.indexOf('.');
+			if (dot < 1) {
+				return JSON.stringify({mode: 'generated'});
+			}
+			return JSON.stringify({
+				mode: 'field',
+				table_alias: val.substring(0, dot),
+				name: val.substring(dot + 1)
+			});
+		}
+
+		function serializeGeometry() {
+			var val = $("#view-geometry").val();
+			if (!val) {
+				return '{}';
+			}
+			var dot = val.indexOf('.');
+			if (dot < 1) {
+				return '{}';
+			}
+			return JSON.stringify({
+				table_alias: val.substring(0, dot),
+				name: val.substring(dot + 1)
+			});
+		}
+
+		function refreshGeometrySelect() {
+			var previous = '';
+			try {
+				var stored = JSON.parse($("#geometry").val() || '{}');
+				if (stored && stored.table_alias && stored.name) {
+					previous = stored.table_alias + '.' + stored.name;
+				}
+			} catch (err) {
+				previous = '';
+			}
+			if ($("#view-geometry").val()) {
+				previous = $("#view-geometry").val();
+			}
+			var options = [];
+			var mainAlias = $(".from-tables").first().find('.from-table-alias').val();
+			$("#field-list-table-body tr.view-field-row").each(function () {
+				if ($(this).attr('data-is-geometry') !== '1') {
+					return;
+				}
+				var key = $(this).attr('data-table-alias') + '.' + $(this).attr('data-field-name');
+				options.push({
+					key: key,
+					isMain: $(this).attr('data-table-alias') === mainAlias
+				});
+			});
+			var $sel = $("#view-geometry");
+			$sel.empty();
+			if (options.length === 0) {
+				$sel.append($('<option>', {value: '', text: '{% trans "No geometry column" %}'}));
+				applyChosenGeometry();
+				return;
+			}
+			for (var i = 0; i < options.length; i++) {
+				$sel.append($('<option>', {value: options[i].key, text: options[i].key}));
+			}
+			var chosen = previous;
+			if (!chosen || $sel.find('option[value="' + chosen + '"]').length === 0) {
+				var mainGeom = null;
+				for (var j = 0; j < options.length; j++) {
+					if (options[j].isMain) {
+						mainGeom = options[j].key;
+						break;
+					}
+				}
+				chosen = mainGeom || options[0].key;
+			}
+			$sel.val(chosen);
+			applyChosenGeometry();
+		}
+
+		function applyChosenGeometry() {
+			var chosen = $("#view-geometry").val() || '';
+			$("#field-list-table-body tr.view-field-row").each(function () {
+				if ($(this).attr('data-is-geometry') !== '1') {
+					return;
+				}
+				var key = $(this).attr('data-table-alias') + '.' + $(this).attr('data-field-name');
+				var $cb = $(this).find('.selected-field');
+				if (!chosen) {
+					return;
+				}
+				if (key === chosen) {
+					$cb.prop('checked', true);
+				} else {
+					$cb.prop('checked', false);
+				}
+			});
 		}
 
 		var WHERE_OPS = [
@@ -705,7 +917,8 @@
 			var hasTables = getFromTablesMeta().length > 0;
 			$("#where-empty-msg").toggle(!hasTables);
 			$("#add-where-button").toggle(hasTables);
-			$("#where-list-table").closest('.table-responsive').toggle(hasTables);
+			$("#add-where-group-button").toggle(hasTables);
+			$("#where-builder").toggle(hasTables);
 		}
 
 		function isNullWhereOp(op) {
@@ -788,16 +1001,54 @@
 			}
 		}
 
-		function addWhereConditionUi(condition) {
+		function serializeWhereItem($el) {
+			if ($el.hasClass('where-group')) {
+				var nested = [];
+				$el.children('.where-group-body').children('.where-condition, .where-group').each(function () {
+					var item = serializeWhereItem($(this));
+					if (item) {
+						nested.push(item);
+					}
+				});
+				if (nested.length === 0) {
+					return null;
+				}
+				return {
+					type: 'group',
+					operator: $el.find('> .where-group-header .where-group-operator').val() || 'AND',
+					conditions: nested
+				};
+			}
+			var fieldKey = $el.find('.where-field').val() || '';
+			var op = $el.find('.where-op').val();
+			var value = $el.find('.where-value').val();
+			var dot = fieldKey.indexOf('.');
+			if (dot < 1 || !op) {
+				return null;
+			}
+			var item = {
+				table_alias: fieldKey.substring(0, dot),
+				name: fieldKey.substring(dot + 1),
+				op: op
+			};
+			if (!isNullWhereOp(op)) {
+				item.value = value;
+			}
+			return item;
+		}
+
+		function addWhereConditionUi(condition, $parent) {
 			whereNextId += 1;
 			var id = whereNextId;
-			var row = $('<tr class="where-condition" data-whereid="' + id + '"></tr>');
-			var fieldCol = $('<td class="form-group col-md-4"></td>');
+			$parent = $parent || $('#where-builder');
+			var row = $('<div class="where-condition where-builder-item" data-whereid="' + id + '"></div>');
+			var inner = $('<div class="row" style="margin:0;"></div>');
+			var fieldCol = $('<div class="col-md-4 form-group"></div>');
 			var fieldSelect = $('<select class="form-control where-field"></select>');
 			fieldCol.append(fieldSelect);
-			row.append(fieldCol);
+			inner.append(fieldCol);
 
-			var opCol = $('<td class="form-group col-md-3"></td>');
+			var opCol = $('<div class="col-md-3 form-group"></div>');
 			var opSelect = $('<select class="form-control where-op"></select>');
 			for (var i = 0; i < WHERE_OPS.length; i++) {
 				opSelect.append($('<option>', {
@@ -806,15 +1057,16 @@
 				}));
 			}
 			opCol.append(opSelect);
-			row.append(opCol);
+			inner.append(opCol);
 
-			var valueCol = $('<td class="form-group col-md-4"></td>');
+			var valueCol = $('<div class="col-md-4 form-group"></div>');
 			var valueInput = $('<input type="text" class="form-control where-value" placeholder="{% trans "Value" %}">');
 			valueCol.append(valueInput);
-			row.append(valueCol);
+			inner.append(valueCol);
 
-			row.append($('<td class="col-md-1" style="padding-top: 12px;"><a class="delete-where" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>'));
-			$('#where-list-table-body').append(row);
+			inner.append($('<div class="col-md-1" style="padding-top: 8px;"><a class="delete-where" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></div>'));
+			row.append(inner);
+			$parent.append(row);
 
 			opSelect.on('change', function () {
 				toggleWhereValueInput(row);
@@ -843,25 +1095,58 @@
 			refreshWhereEmptyMsg();
 		}
 
+		function addWhereGroupUi(groupDef, $parent) {
+			whereNextId += 1;
+			$parent = $parent || $('#where-builder');
+			var $group = $('<div class="where-group where-builder-item" data-whereid="' + whereNextId + '"></div>');
+			var $header = $('<div class="where-group-header"></div>');
+			$header.append($('<label>{% trans "Group" %}</label>'));
+			var $op = $('<select class="form-control where-group-operator"></select>');
+			$op.append($('<option value="AND">{% trans "AND (all)" %}</option>'));
+			$op.append($('<option value="OR">{% trans "OR (any)" %}</option>'));
+			if (groupDef && groupDef.operator) {
+				$op.val(groupDef.operator);
+			}
+			$header.append($op);
+			$header.append($('<a href="javascript:void(0)" class="add-group-condition btn btn-box-tool"><i class="fa fa-plus"></i> {% trans "Add condition" %}</a>'));
+			$header.append($('<a href="javascript:void(0)" class="delete-where-group btn btn-box-tool"><i class="fa fa-times text-danger"></i></a>'));
+			var $body = $('<div class="where-group-body"></div>');
+			$group.append($header).append($body);
+			$parent.append($group);
+			$header.find('.add-group-condition').on('click', function (e) {
+				e.preventDefault();
+				addWhereConditionUi(null, $body);
+			});
+			$header.find('.delete-where-group').on('click', function (e) {
+				e.preventDefault();
+				$group.remove();
+			});
+			var nested = (groupDef && groupDef.conditions) || [];
+			if (nested.length === 0) {
+				addWhereConditionUi(null, $body);
+			} else {
+				for (var i = 0; i < nested.length; i++) {
+					appendWhereItem(nested[i], $body);
+				}
+			}
+			refreshWhereEmptyMsg();
+		}
+
+		function appendWhereItem(item, $parent) {
+			if (item && (item.type === 'group' || (item.conditions && !item.table_alias))) {
+				addWhereGroupUi(item, $parent);
+			} else {
+				addWhereConditionUi(item, $parent);
+			}
+		}
+
 		function serializeWhere() {
 			var conditions = [];
-			$("#where-list-table-body tr.where-condition").each(function () {
-				var fieldKey = $(this).find('.where-field').val() || '';
-				var op = $(this).find('.where-op').val();
-				var value = $(this).find('.where-value').val();
-				var dot = fieldKey.indexOf('.');
-				if (dot < 1 || !op) {
-					return;
+			$("#where-builder").children('.where-condition, .where-group').each(function () {
+				var item = serializeWhereItem($(this));
+				if (item) {
+					conditions.push(item);
 				}
-				var item = {
-					table_alias: fieldKey.substring(0, dot),
-					name: fieldKey.substring(dot + 1),
-					op: op
-				};
-				if (!isNullWhereOp(op)) {
-					item.value = value;
-				}
-				conditions.push(item);
 			});
 			if (conditions.length === 0) {
 				return '{}';
@@ -879,7 +1164,7 @@
 					aliases[ft.table_alias] = true;
 				}
 			});
-			$("#where-list-table-body tr.where-condition").each(function () {
+			$("#where-builder .where-condition").each(function () {
 				var fieldKey = $(this).find('.where-field').val() || '';
 				var alias = fieldKey.split('.')[0];
 				if (!alias || !aliases[alias]) {
@@ -890,7 +1175,7 @@
 		}
 
 		function deserializeWhere(raw) {
-			$("#where-list-table-body").empty();
+			$("#where-builder").empty();
 			whereNextId = 0;
 			if (!raw || !String(raw).trim()) {
 				$("#where-operator").val('AND');
@@ -910,7 +1195,7 @@
 			$("#where-operator").val(whereDef.operator || 'AND');
 			var conditions = whereDef.conditions || [];
 			for (var i = 0; i < conditions.length; i++) {
-				addWhereConditionUi(conditions[i]);
+				appendWhereItem(conditions[i], $('#where-builder'));
 			}
 			refreshWhereEmptyMsg();
 		}
@@ -924,7 +1209,7 @@
 		});
 		$('a[data-toggle="tab"][href="#tab-sqlview-filters"]').on('shown.bs.tab', function (e) {
 			pruneWhereConditions();
-			$("#where-list-table-body tr.where-condition").each(function () {
+			$("#where-builder .where-condition").each(function () {
 				var fieldSelect = $(this).find('.where-field');
 				var current = fieldSelect.val();
 				loadWhereFieldOptions(fieldSelect, current);
@@ -939,12 +1224,34 @@
 			e.preventDefault();
 			addWhereConditionUi();
 		});
+		$("#add-where-group-button").on('click', function (e) {
+			e.preventDefault();
+			addWhereGroupUi();
+		});
 
 		$("#all-fields").on('click', function (e) {
 			$("#field-list-table-body .form-check-input").prop('checked', true);
+			applyRequiredPk();
+			applyChosenGeometry();
 		});
 		$("#none-field").on('click', function (e) {
-			$("#field-list-table-body .form-check-input").prop('checked', false);
+			$("#field-list-table-body .form-check-input").not('[data-required-pk]').prop('checked', false);
+			applyRequiredPk();
+			applyChosenGeometry();
+		});
+		$("#view-geometry").on('change', function () {
+			applyChosenGeometry();
+		});
+		$("#view-pk").on('change', function () {
+			applyRequiredPk();
+			applyFieldAliases();
+		});
+		$("#field-list-table-body").on('change', '.selected-field', function () {
+			var $row = $(this).closest('tr');
+			if ($row.attr('data-is-geometry') === '1' && $(this).is(':checked')) {
+				$("#view-geometry").val($row.attr('data-table-alias') + '.' + $row.attr('data-field-name'));
+				applyChosenGeometry();
+			}
 		});
 		$("#id_datastore").change(function () {
 			updateDatastores($('option:selected', $(this)).val());
@@ -972,6 +1279,8 @@
 				$("#fields").val(serializeFields());
 				$("#from_tables").val(serializeTables());
 				$("#where_clause").val(serializeWhere());
+				$("#geometry").val(serializeGeometry());
+				$("#pk_clause").val(serializePk());
 				$('#main_form')[0].submit();
 			}
 			var hasTables = $("#from-table-list-table tbody tr.from-tables").length > 0;

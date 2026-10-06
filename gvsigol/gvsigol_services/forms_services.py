@@ -405,6 +405,8 @@ class SqlViewForm(forms.ModelForm):
     from_tables = forms.CharField(label=_('Tables'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     fields = forms.CharField(label=_('Fields'), required=True, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     where_clause = forms.CharField(label=_('Filters'), required=False, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    geometry = forms.CharField(label=_('Geometry column'), required=False, widget=forms.TextInput(attrs={'class' : 'form-control'}))
+    pk_clause = forms.CharField(label=_('View primary key'), required=False, widget=forms.TextInput(attrs={'class' : 'form-control'}))
 
     def clean_from_tables(self):
         from_tables = json.loads(self.cleaned_data.get('from_tables', []))
@@ -432,17 +434,77 @@ class SqlViewForm(forms.ModelForm):
         return from_tables
 
     def clean_fields(self):
-        fields = json.loads(self.cleaned_data.get('fields', []))
+        raw = self.cleaned_data.get('fields', '[]')
+        if not raw:
+            return []
+        fields = json.loads(raw) if not isinstance(raw, list) else raw
         if len(fields) == 0:
-            raise ValidationError(gettext_lazy('At least one field must be selected'), code='view_fields')
+            return []
         field_aliases = []
         for field in fields:
+            if field.get('generated'):
+                continue
             if not field.get('name') or not field.get('alias') or not field.get('table_alias'):
                 raise ValidationError(gettext_lazy('Invalid field definition'), code='view_fields')
             if field.get('alias') in field_aliases:
                 raise ValidationError(gettext_lazy('Duplicated alias'), code='view_field_alias')
             field_aliases.append(field.get('alias'))
         return fields
+
+    def clean_geometry(self):
+        raw = self.cleaned_data.get('geometry')
+        if not raw:
+            return {}
+        if isinstance(raw, dict):
+            geom = raw
+        else:
+            try:
+                geom = json.loads(raw)
+            except (TypeError, ValueError):
+                raise ValidationError(gettext_lazy('Invalid geometry definition'), code='geometry')
+        if not geom:
+            return {}
+        if not isinstance(geom, dict):
+            raise ValidationError(gettext_lazy('Invalid geometry definition'), code='geometry')
+        table_alias = (geom.get('table_alias') or '').strip()
+        name = (geom.get('name') or '').strip()
+        if not table_alias or not name:
+            return {}
+        cleaned = {
+            'table_alias': table_alias,
+            'name': name,
+        }
+        if geom.get('alias'):
+            cleaned['alias'] = geom.get('alias')
+        return cleaned
+
+    def clean_pk_clause(self):
+        raw = self.cleaned_data.get('pk_clause')
+        if not raw:
+            return {}
+        if isinstance(raw, dict):
+            pk_def = raw
+        else:
+            try:
+                pk_def = json.loads(raw)
+            except (TypeError, ValueError):
+                raise ValidationError(gettext_lazy('Invalid primary key definition'), code='pk_clause')
+        if not pk_def or not isinstance(pk_def, dict):
+            return {}
+        mode = str(pk_def.get('mode') or '').strip().lower()
+        if mode == 'generated':
+            return {'mode': 'generated'}
+        if mode == 'field':
+            table_alias = (pk_def.get('table_alias') or '').strip()
+            name = (pk_def.get('name') or '').strip()
+            if not table_alias or not name:
+                return {}
+            return {
+                'mode': 'field',
+                'table_alias': table_alias,
+                'name': name,
+            }
+        return {}
 
     def clean_where_clause(self):
         from .backend_postgis import SQLVIEW_WHERE_OPS, SQLVIEW_WHERE_NULL_OPS, SQLVIEW_WHERE_JOINERS
@@ -468,10 +530,30 @@ class SqlViewForm(forms.ModelForm):
         operator = str(where_def.get('operator') or 'AND').strip().upper()
         if operator not in SQLVIEW_WHERE_JOINERS:
             raise ValidationError(gettext_lazy('Invalid filter operator'), code='where_operator')
-        cleaned_conditions = []
+        return {
+            'operator': operator,
+            'conditions': self._clean_where_items(conditions),
+        }
+
+    def _clean_where_items(self, conditions):
+        from .backend_postgis import SQLVIEW_WHERE_OPS, SQLVIEW_WHERE_NULL_OPS, SQLVIEW_WHERE_JOINERS, _sqlview_is_where_group
+        cleaned = []
         for cond in conditions:
             if not isinstance(cond, dict):
                 raise ValidationError(gettext_lazy('Invalid filter condition'), code='where_condition')
+            if _sqlview_is_where_group(cond):
+                group_op = str(cond.get('operator') or 'AND').strip().upper()
+                if group_op not in SQLVIEW_WHERE_JOINERS:
+                    raise ValidationError(gettext_lazy('Invalid filter operator'), code='where_operator')
+                nested = cond.get('conditions') or []
+                if not isinstance(nested, list):
+                    raise ValidationError(gettext_lazy('Invalid filter definition'), code='where_clause')
+                cleaned.append({
+                    'type': 'group',
+                    'operator': group_op,
+                    'conditions': self._clean_where_items(nested),
+                })
+                continue
             table_alias = (cond.get('table_alias') or '').strip()
             name = (cond.get('name') or '').strip()
             op = str(cond.get('op') or '').strip().upper()
@@ -495,11 +577,8 @@ class SqlViewForm(forms.ModelForm):
                     elif not str(raw_val).strip():
                         raise ValidationError(gettext_lazy('Filter value is required'), code='where_value')
                 item['value'] = cond.get('value')
-            cleaned_conditions.append(item)
-        return {
-            'operator': operator,
-            'conditions': cleaned_conditions,
-        }
+            cleaned.append(item)
+        return cleaned
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)

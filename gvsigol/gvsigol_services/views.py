@@ -56,7 +56,7 @@ from requests_futures.sessions import FuturesSession
 from gvsigol.basetypes import BackendNotAvailable
 
 from .backend_postgis import Introspect
-from .backend_postgis import SqlFrom, SqlField, SqlJoinFields
+from .backend_postgis import SqlFrom, SqlField, SqlJoinFields, prepare_sqlview_select_fields, SqlViewFieldError
 from .forms_geoserver import CreateFeatureTypeForm
 from .forms_services import ServerForm, SqlViewForm, WorkspaceForm, DatastoreForm, LayerForm, LayerUpdateForm, DatastoreUpdateForm, ExternalLayerForm, ServiceUrlForm, ConnectionForm, ConnectionUpdateForm
 from gdaltools import gdalsrsinfo
@@ -1353,6 +1353,8 @@ def backend_fields_list(request):
         schema = params.get('schema', 'public')
         i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
         layer_defs = i.get_fields_info(name, schema)
+        geom_cols = set(i.get_geometry_columns(name, schema) or [])
+        pk_cols = set(i.get_pk_columns(name, schema) or [])
         i.close()
         result_resources = []
         conf = None
@@ -1360,26 +1362,28 @@ def backend_fields_list(request):
             conf = ast.literal_eval(layer.conf)
         for resource_def in layer_defs:
             resource = resource_def['name']
+            field = {
+                'name': resource,
+                'type': resource_def.get('type'),
+                'is_geometry': resource in geom_cols,
+                'is_pk': resource in pk_cols,
+            }
             if conf:
                 founded = False
                 for f in conf['fields']:
                     if f['name'] == resource:
-                        field = {}
                         field['name'] = f['name']
                         for id, language in LANGUAGES:
                             field['title-'+id] = utils.get_field_title_for_lang(
                                 f, id, field['name'])
                         result_resources.append(field)
                         founded = True
+                        break
                 if not founded:
-                    field = {}
-                    field['name'] = resource
                     for id, language in LANGUAGES:
                         field['title-'+id] = resource
                     result_resources.append(field)
             else:
-                field = {}
-                field['name'] = resource
                 for id, language in LANGUAGES:
                     field['title-'+id] = resource
                 result_resources.append(field)
@@ -9958,6 +9962,8 @@ def _sqlview_update(request, is_update, sql_view=None):
                 target_schema = target_datastore_params.get('schema', 'public')
                 from_objs = []
                 table_fields = {}
+                table_geoms = {}
+                table_pks = {}
                 field_aliases = {}
                 pks = []
                 main_table = None
@@ -9972,13 +9978,12 @@ def _sqlview_update(request, is_update, sql_view=None):
                     i, params = ds.get_db_connection()
                     schema = params.get('schema', 'public')
                     with i as c:
+                        table_pks[table_alias] = c.get_pk_columns(table_name, schema=schema) or []
                         if idx == 0:
-                            pks = c.get_pk_columns(table_name, schema=schema)
-                            if len(pks) == 0:
-                                form.add_error(None, gettext_lazy('The main table must have a primary key'))
-                                raise Exception
+                            pks = table_pks[table_alias]
                             main_table = table_alias
                         table_fields[table_alias] = c.get_fields(table_name, schema=schema)
+                        table_geoms[table_alias] = set(c.get_geometry_columns(table_name, schema=schema) or [])
 
                     if idx > 0:
                         join_field1 = table.get('join_field1')
@@ -10001,6 +10006,8 @@ def _sqlview_update(request, is_update, sql_view=None):
 
                 field_objs = []
                 for idx, field in enumerate(form.cleaned_data.get('fields')):
+                    if field.get('generated'):
+                        continue
                     table_alias = field.get('table_alias')
                     field_name = field.get('name')
                     field_alias = field.get('alias')
@@ -10013,19 +10020,55 @@ def _sqlview_update(request, is_update, sql_view=None):
                     field_objs.append(field_obj)
                     field_aliases[table_alias][field_name] = field_alias
                 where_def = form.cleaned_data.get('where_clause') or {}
-                for cond in where_def.get('conditions') or []:
-                    table_alias = cond.get('table_alias')
-                    field_name = cond.get('name')
-                    if table_alias not in table_fields:
-                        form.add_error(None, gettext_lazy('Filter references unknown table alias: {alias}').format(alias=table_alias))
-                        raise Exception
-                    if field_name not in table_fields[table_alias]:
-                        form.add_error(None, gettext_lazy('Filter field does not exist: {field}').format(field=field_name))
+
+                def _validate_where_items(items):
+                    for cond in items:
+                        if cond.get('type') == 'group' or ('conditions' in cond and not cond.get('table_alias')):
+                            _validate_where_items(cond.get('conditions') or [])
+                            continue
+                        table_alias = cond.get('table_alias')
+                        field_name = cond.get('name')
+                        if table_alias not in table_fields:
+                            form.add_error(None, gettext_lazy('Filter references unknown table alias: {alias}').format(alias=table_alias))
+                            raise Exception
+                        if field_name not in table_fields[table_alias]:
+                            form.add_error(None, gettext_lazy('Filter field does not exist: {field}').format(field=field_name))
+                            raise Exception
+
+                _validate_where_items(where_def.get('conditions') or [])
+                geometry_keys = set()
+                for table_alias, geoms in table_geoms.items():
+                    for geom_name in geoms:
+                        geometry_keys.add((table_alias, geom_name))
+                geometry_choice = form.cleaned_data.get('geometry') or {}
+                pk_choice = form.cleaned_data.get('pk_clause') or {}
+                if not pk_choice.get('mode'):
+                    if len(from_objs) > 1:
+                        pk_choice = {'mode': 'generated'}
+                    elif pks:
+                        pk_choice = {'mode': 'field', 'table_alias': main_table, 'name': pks[0]}
+                if pk_choice.get('mode') == 'field':
+                    t_alias = pk_choice.get('table_alias')
+                    f_name = pk_choice.get('name')
+                    if t_alias not in table_fields or f_name not in table_fields.get(t_alias, []):
+                        form.add_error(None, gettext_lazy('The selected primary key does not exist: {field}').format(field=f_name))
                         raise Exception
                 try:
-                    pk_aliases = [ field_aliases[main_table][p] for p in pks]
-                except:
-                    form.add_error(None, gettext_lazy('The field {field} is the primary key of main table and must be included').format(field=", ".join(pks)))
+                    field_objs, pk_aliases, geometry_json, pk_json = prepare_sqlview_select_fields(
+                        field_objs, main_table, pks, geometry_keys,
+                        geometry_choice=geometry_choice or None,
+                        pk_choice=pk_choice,
+                        table_pks=table_pks,
+                    )
+                except SqlViewFieldError as e:
+                    if e.code == 'missing_pk':
+                        form.add_error(None, gettext_lazy('A primary key is required for the view'))
+                    elif e.code == 'multiple_geometry':
+                        form.add_error(None, gettext_lazy('Multiple geometry columns were selected. Choose a single geometry for the view.'))
+                    elif e.code == 'unknown_geometry':
+                        form.add_error(None, gettext_lazy('The selected geometry column does not exist: {field}').format(field=e.params.get('field')))
+                    else:
+                        form.add_error(None, str(e))
                     raise Exception
                 field_defs = [ f.to_json() for f in field_objs]
                 sql_view.json_def = {
@@ -10033,6 +10076,10 @@ def _sqlview_update(request, is_update, sql_view=None):
                     'from': from_def,
                     'pks': pk_aliases,
                 }
+                if pk_json:
+                    sql_view.json_def['pk'] = pk_json
+                if geometry_json:
+                    sql_view.json_def['geometry'] = geometry_json
                 if where_def.get('conditions'):
                     sql_view.json_def['where'] = where_def
                 sql_view.save()
@@ -10041,6 +10088,8 @@ def _sqlview_update(request, is_update, sql_view=None):
                 form.cleaned_data['from_tables'] = json.dumps(sql_view.json_def['from'])
                 form.cleaned_data['fields'] = json.dumps(sql_view.json_def['fields'])
                 form.cleaned_data['where_clause'] = json.dumps(sql_view.json_def.get('where', {}))
+                form.cleaned_data['geometry'] = json.dumps(sql_view.json_def.get('geometry', {}))
+                form.cleaned_data['pk_clause'] = json.dumps(sql_view.json_def.get('pk', {}))
                 try:
                     i, params = sql_view.datastore.get_db_connection()
                     with i as c:
@@ -10054,6 +10103,8 @@ def _sqlview_update(request, is_update, sql_view=None):
                             msg = _check_join_field_types(from_def)
                             if msg:
                                 form.add_error(None, msg)
+                            elif getattr(c, 'last_error', None):
+                                form.add_error(None, gettext_lazy('The view could not be created: {error}').format(error=c.last_error))
                             else:
                                 form.add_error(None, gettext_lazy('The view could not be created'))
                             raise Exception
@@ -10090,6 +10141,8 @@ def _sqlview_update(request, is_update, sql_view=None):
                 'from_tables': json.dumps(sql_view.json_def['from']),
                 'fields': json.dumps(sql_view.json_def['fields']),
                 'where_clause': json.dumps(sql_view.json_def.get('where', {})),
+                'geometry': json.dumps(sql_view.json_def.get('geometry', {})),
+                'pk_clause': json.dumps(sql_view.json_def.get('pk', {})),
             }
             form = SqlViewForm(request.user, initial=initial, instance=sql_view)
             view_id = sql_view.id

@@ -126,11 +126,12 @@ class SqlFrom():
 
 class SqlField():
     """ Used to define View fields and alias """
-    def __init__(self, table_alias, field, alias=None):
+    def __init__(self, table_alias, field, alias=None, expression=None):
         self.table_alias = table_alias
         self.field = field
         self.alias = alias
-    
+        self.expression = expression
+
     def to_json(self):
         r = {
             "table_alias": self.table_alias,
@@ -138,7 +139,185 @@ class SqlField():
         }
         if self.alias:
             r["alias"] = self.alias
+        if self.expression is not None:
+            r["generated"] = True
         return r
+
+
+SQLVIEW_GENERATED_PK_ALIAS = 'gvol_pk'
+
+
+class SqlViewFieldError(Exception):
+    """Structured error while preparing SqlView SELECT fields."""
+    def __init__(self, code, **params):
+        self.code = code
+        self.params = params
+        super().__init__(code)
+
+
+def uniquify_sql_alias(base, used):
+    alias = base or 'field'
+    if alias not in used:
+        used.add(alias)
+        return alias
+    n = 1
+    while True:
+        candidate = '%s_%d' % (alias, n)
+        if candidate not in used:
+            used.add(candidate)
+            return candidate
+        n += 1
+
+
+def _sqlview_qualified_column(table_alias, field_name):
+    return sqlbuilder.SQL('{alias}.{field}').format(
+        alias=sqlbuilder.Identifier(table_alias),
+        field=sqlbuilder.Identifier(field_name),
+    )
+
+
+def build_generated_pk_expression(components):
+    """
+    Stable unique integer key for each view row.
+
+    Uses ROW_NUMBER() ordered by the source PK columns so each join result
+    gets a distinct bigint even when source PKs repeat after a 1-N join.
+    """
+    order_parts = []
+    for table_alias, field_name in components:
+        order_parts.append(_sqlview_qualified_column(table_alias, field_name))
+    if not order_parts:
+        return None
+    return sqlbuilder.SQL('ROW_NUMBER() OVER (ORDER BY {order})').format(
+        order=sqlbuilder.SQL(', ').join(order_parts),
+    )
+
+
+def prepare_sqlview_select_fields(field_objs, main_table, pks, geometry_keys,
+                                  geometry_choice=None, pk_choice=None, table_pks=None):
+    """
+    Prepare SELECT fields for a SqlView:
+    - at most one geometry column
+    - PK is either a chosen field, the main-table PK (default), or a generated unique key
+    """
+    pks = list(pks or [])
+    geometry_keys = set(tuple(k) for k in (geometry_keys or []))
+    field_objs = list(field_objs or [])
+    table_pks = table_pks or {}
+    pk_choice = pk_choice or {}
+
+    def _key(field_obj):
+        return (field_obj.table_alias, field_obj.field)
+
+    selected_geoms = [f for f in field_objs if _key(f) in geometry_keys]
+    chosen = None
+    if geometry_choice and geometry_choice.get('table_alias') and geometry_choice.get('name'):
+        chosen_key = (
+            geometry_choice.get('table_alias'),
+            geometry_choice.get('name'),
+        )
+        if chosen_key not in geometry_keys:
+            raise SqlViewFieldError('unknown_geometry', field=chosen_key[1])
+        chosen = next((f for f in field_objs if _key(f) == chosen_key), None)
+        if chosen is None:
+            chosen = SqlField(
+                chosen_key[0],
+                chosen_key[1],
+                geometry_choice.get('alias') or chosen_key[1],
+            )
+            field_objs.append(chosen)
+    elif len(selected_geoms) == 1:
+        chosen = selected_geoms[0]
+    elif len(selected_geoms) > 1:
+        raise SqlViewFieldError('multiple_geometry')
+
+    if chosen is not None:
+        keep_geom = _key(chosen)
+        field_objs = [
+            f for f in field_objs
+            if _key(f) not in geometry_keys or _key(f) == keep_geom
+        ]
+
+    mode = (pk_choice.get('mode') or '').strip().lower()
+    generated_field = None
+    required_pk_keys = []
+
+    if mode == 'generated':
+        components = []
+        for alias, pk_names in (table_pks or {}).items():
+            for pk_name in (pk_names or []):
+                components.append((alias, pk_name))
+        if not components:
+            for pk in pks:
+                components.append((main_table, pk))
+        if not components:
+            raise SqlViewFieldError('missing_pk', field='')
+        expr = build_generated_pk_expression(components)
+        generated_field = SqlField('', SQLVIEW_GENERATED_PK_ALIAS, SQLVIEW_GENERATED_PK_ALIAS, expression=expr)
+        generated_field._pk_components = [
+            {'table_alias': a, 'name': n} for a, n in components
+        ]
+    elif mode == 'field' and pk_choice.get('table_alias') and pk_choice.get('name'):
+        required_pk_keys = [(pk_choice.get('table_alias'), pk_choice.get('name'))]
+    else:
+        required_pk_keys = [(main_table, pk) for pk in pks]
+
+    for table_alias, pk_name in required_pk_keys:
+        match = next((f for f in field_objs if f.table_alias == table_alias and f.field == pk_name), None)
+        if match is None:
+            field_objs.append(SqlField(table_alias, pk_name, pk_name))
+
+    used = set()
+    alias_map = {}
+    if generated_field is not None:
+        generated_field.alias = uniquify_sql_alias(generated_field.alias or SQLVIEW_GENERATED_PK_ALIAS, used)
+
+    for table_alias, pk_name in required_pk_keys:
+        match = next((f for f in field_objs if f.table_alias == table_alias and f.field == pk_name), None)
+        if match is None:
+            raise SqlViewFieldError('missing_pk', field=pk_name)
+        alias_map[(table_alias, pk_name)] = uniquify_sql_alias(match.alias or pk_name, used)
+
+    result = []
+    if generated_field is not None:
+        result.append(generated_field)
+
+    for field_obj in field_objs:
+        key = _key(field_obj)
+        if key in alias_map:
+            alias = alias_map[key]
+        else:
+            alias = uniquify_sql_alias(field_obj.alias or field_obj.field, used)
+            alias_map[key] = alias
+        result.append(SqlField(field_obj.table_alias, field_obj.field, alias, expression=field_obj.expression))
+
+    if generated_field is not None:
+        pk_aliases = [generated_field.alias]
+        pk_json = {
+            'mode': 'generated',
+            'alias': generated_field.alias,
+            'components': generated_field._pk_components,
+        }
+    else:
+        pk_aliases = [alias_map[k] for k in required_pk_keys]
+        pk_json = {
+            'mode': 'field',
+            'table_alias': required_pk_keys[0][0] if required_pk_keys else main_table,
+            'name': required_pk_keys[0][1] if required_pk_keys else None,
+            'alias': pk_aliases[0] if pk_aliases else None,
+        }
+        if not required_pk_keys:
+            raise SqlViewFieldError('missing_pk', field='')
+
+    geom_json = None
+    if chosen is not None:
+        alias = alias_map[_key(chosen)]
+        geom_json = {
+            'table_alias': chosen.table_alias,
+            'name': chosen.field,
+            'alias': alias,
+        }
+    return result, pk_aliases, geom_json, pk_json
 
 
 # Operators accepted in structured SqlView WHERE definitions
@@ -148,13 +327,6 @@ SQLVIEW_WHERE_OPS = frozenset({
 })
 SQLVIEW_WHERE_NULL_OPS = frozenset({'IS NULL', 'IS NOT NULL'})
 SQLVIEW_WHERE_JOINERS = frozenset({'AND', 'OR'})
-
-
-def _sqlview_qualified_column(table_alias, field_name):
-    return sqlbuilder.SQL('{alias}.{field}').format(
-        alias=sqlbuilder.Identifier(table_alias),
-        field=sqlbuilder.Identifier(field_name),
-    )
 
 
 def _sqlview_where_condition(condition):
@@ -215,11 +387,21 @@ def _sqlview_where_condition(condition):
     return None
 
 
+def _sqlview_is_where_group(item):
+    if not isinstance(item, dict):
+        return False
+    if item.get('type') == 'group':
+        return True
+    return 'conditions' in item and not item.get('table_alias') and not item.get('name')
+
+
 def build_sqlview_where(where_def):
     """
-    Build a WHERE clause composable from a structured definition:
-      {"operator": "AND"|"OR", "conditions": [{table_alias, name, op, value?}, ...]}
-    Returns None when there is nothing usable.
+    Build a WHERE clause from a structured definition.
+
+    Leaves: {"table_alias", "name", "op", "value"?}
+    Groups:  {"type": "group", "operator": "AND"|"OR", "conditions": [...]}
+    Root:    {"operator": "AND"|"OR", "conditions": [leaf|group, ...]}
     """
     if not where_def or not isinstance(where_def, dict):
         return None
@@ -235,7 +417,10 @@ def build_sqlview_where(where_def):
     for item in conditions:
         if not isinstance(item, dict):
             continue
-        compiled = _sqlview_where_condition(item)
+        if _sqlview_is_where_group(item):
+            compiled = build_sqlview_where(item)
+        else:
+            compiled = _sqlview_where_condition(item)
         if compiled is not None:
             parts.append(compiled)
     if not parts:
@@ -734,10 +919,13 @@ class Introspect:
 
             view_fields = []
             for field in fields:
-                field_sql = sqlbuilder.SQL("{table_alias}.{field}").format(
-                    table_alias=sqlbuilder.Identifier(field.table_alias),
-                    field=sqlbuilder.Identifier(field.field)
-                )
+                if getattr(field, 'expression', None) is not None:
+                    field_sql = field.expression
+                else:
+                    field_sql = sqlbuilder.SQL("{table_alias}.{field}").format(
+                        table_alias=sqlbuilder.Identifier(field.table_alias),
+                        field=sqlbuilder.Identifier(field.field)
+                    )
                 if field.alias:
                     field_sql = sqlbuilder.SQL(" ").join([field_sql, sqlbuilder.SQL("{alias}").format(alias=sqlbuilder.Identifier(field.alias))])
                 view_fields.append(field_sql)
@@ -760,11 +948,11 @@ class Introspect:
                 where_clause=where_clause,
             )
             self.cursor.execute(query)
+            self.last_error = None
             return True
         except Exception as e:
-            import logging
-            logger = logging.getLogger()
-            logger.exception("error")
+            self.last_error = str(e)
+            logger.exception("error creating SQL view")
             print(str(e))
             return False
 
