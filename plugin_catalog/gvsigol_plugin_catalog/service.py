@@ -39,6 +39,7 @@ def _create_dataset_metadata(mdfields):
     mdcode = registry.creation_mdcode(explicit)
     return registry.create('dataset', mdfields, mdcode=mdcode)
 
+
 class UnsupportedRequestError(Exception):
     pass
 
@@ -184,6 +185,7 @@ class Geonetwork():
             crs = str(crs_object)
         
         wms_endpoint = ws.wms_endpoint
+        wmts_endpoint = ws.server.getWmtsEndpoint(ws.name)
         if ds_type == 'featureType':
             wfs_endpoint = ws.wfs_endpoint
             wcs_endpoint = None
@@ -209,6 +211,7 @@ class Geonetwork():
             # another path/host than /media.
             'thumbnail_url': self._thumbnail_url(layer),
             'wms_endpoint': wms_endpoint,
+            'wmts_endpoint': wmts_endpoint,
             'wfs_endpoint': wfs_endpoint,
             'wcs_endpoint': wcs_endpoint
             }

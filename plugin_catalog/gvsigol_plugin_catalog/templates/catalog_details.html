@@ -58,6 +58,10 @@
 			{% if resource.protocol == "OGC:WMS" %}
 				<a href="{{ resource.url }}?service=WMS&request=GetCapabilities" target="_blank" style="float:right; background-color:#eee; padding:5px; width:75px">OGC:WMS</a>
 			{% endif %}
+
+			{% if resource.protocol == "OGC:WMTS" %}
+				<a href="{{ resource.url }}?service=WMTS&request=GetCapabilities" target="_blank" style="float:right; background-color:#eee; padding:5px; width:75px">OGC:WMTS</a>
+			{% endif %}
 			
 			{% if resource.protocol == "OGC:WFS-1.0.0-http-get-capabilities" %}
 				<a href="{{ resource.url }}?service=WFS&version=1.0.0&request=GetFeature&typeName={{ resource.name }}&outputFormat=SHAPE-ZIP" target="_blank" style="float:right; background-color:#eee; padding:5px; width:75px">{% trans 'Get shape' %}</a>

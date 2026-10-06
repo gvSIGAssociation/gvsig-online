@@ -118,6 +118,7 @@ def create_dataset_metadata(mdfields, template_path=None):
         crs = mdfields.get('crs')
         thumbnail_url = mdfields.get('thumbnail_url')
         wms_endpoint = mdfields.get('wms_endpoint')
+        wmts_endpoint = mdfields.get('wmts_endpoint')
         wfs_endpoint = mdfields.get('wfs_endpoint')
         wcs_endpoint = mdfields.get('wcs_endpoint')
         spatial_representation_type = mdfields.get('spatial_representation_type', 'vector')
@@ -168,7 +169,7 @@ def create_dataset_metadata(mdfields, template_path=None):
 
         create_transfer_options(
             tree, qualified_name, spatial_representation_type,
-            title, wms_endpoint, wfs_endpoint, wcs_endpoint,
+            title, wms_endpoint, wfs_endpoint, wcs_endpoint, wmts_endpoint,
         )
         for res_code in tree.xpath("//*[text()='RESOURCE_CODE']"):
             res_code.text = qualified_name
@@ -282,7 +283,7 @@ def _tree_root(root_elem):
     return root_elem.getroot() if hasattr(root_elem, 'getroot') else root_elem
 
 
-def create_transfer_options(root_elem, qualified_name, spatial_representation_type, title, wms_endpoint, wfs_endpoint=None, wcs_endpoint=None):
+def create_transfer_options(root_elem, qualified_name, spatial_representation_type, title, wms_endpoint, wfs_endpoint=None, wcs_endpoint=None, wmts_endpoint=None):
     tree_root = _tree_root(root_elem)
     distribs = tree_root.findall('./mdb:distributionInfo/mrd:MD_Distribution', NS)
     if not distribs:
@@ -300,6 +301,8 @@ def create_transfer_options(root_elem, qualified_name, spatial_representation_ty
         options = ET.SubElement(transfer, q('mrd', 'MD_DigitalTransferOptions'))
         if wms_endpoint:
             create_online_resource(options, wms_endpoint, 'OGC:WMS', qualified_name, title)
+        if wmts_endpoint:
+            create_online_resource(options, wmts_endpoint, 'OGC:WMTS', qualified_name, title)
         if wfs_endpoint:
             create_online_resource(options, wfs_endpoint, 'OGC:WFS', qualified_name, title)
         if wcs_endpoint:

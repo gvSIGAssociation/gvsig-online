@@ -64,6 +64,7 @@ def create_datset_metadata(mdfields):
         crs = mdfields.get('crs')
         thumbnail_url = mdfields.get('thumbnail_url')
         wms_endpoint = mdfields.get('wms_endpoint')
+        wmts_endpoint = mdfields.get('wmts_endpoint')
         wfs_endpoint = mdfields.get('wfs_endpoint')
         wcs_endpoint = mdfields.get('wcs_endpoint')
         spatial_representation_type = mdfields.get('spatial_representation_type', 'vector')
@@ -102,7 +103,7 @@ def create_datset_metadata(mdfields):
         minx, miny, maxx, maxy = extent_tuple
         create_extent(tree, minx, miny, maxx, maxy)
         
-        create_transfer_options(tree, qualified_name, spatial_representation_type, title, wms_endpoint, wfs_endpoint, wcs_endpoint)
+        create_transfer_options(tree, qualified_name, spatial_representation_type, title, wms_endpoint, wfs_endpoint, wcs_endpoint, wmts_endpoint)
         resourceCodeElems = tree.xpath("//*[text()='RESOURCE_CODE']")
         for resCodeElem in resourceCodeElems:
             resCodeElem.text = qualified_name
@@ -251,7 +252,7 @@ def create_distrib_format(parent, name, version, specification=None):
         specificationElemCharStr.text = specification
     insertAfter(parent, distributionFormatElem, [], namespaces)
 
-def create_transfer_options(root_elem, qualified_name, spatialRepresentationType, title, wms_endpoint, wfs_endpoint=None, wcs_endpoint=None):
+def create_transfer_options(root_elem, qualified_name, spatialRepresentationType, title, wms_endpoint, wfs_endpoint=None, wcs_endpoint=None, wmts_endpoint=None):
     distribInfoElements = root_elem.findall('./gmd:distributionInfo/gmd:MD_Distribution', namespaces)
     
     if len(distribInfoElements) == 0:
@@ -270,6 +271,8 @@ def create_transfer_options(root_elem, qualified_name, spatialRepresentationType
         insertAfter(distribInfoElem, transferOptionsElem, prevSiblingNames, namespaces)
         MD_DigitalTransferOptionsElem = ET.SubElement(transferOptionsElem, "{http://www.isotc211.org/2005/gmd}MD_DigitalTransferOptions")
         create_online_resource(MD_DigitalTransferOptionsElem, wms_endpoint, 'OGC:WMS', qualified_name, title)
+        if wmts_endpoint:
+            create_online_resource(MD_DigitalTransferOptionsElem, wmts_endpoint, 'OGC:WMTS', qualified_name, title)
         if wfs_endpoint:
             create_online_resource(MD_DigitalTransferOptionsElem, wfs_endpoint, 'OGC:WFS', qualified_name, title)
         if wcs_endpoint:

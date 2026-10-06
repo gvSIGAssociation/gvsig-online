@@ -33,10 +33,15 @@ def _mdfields():
         'crs': 'EPSG:4674',
         'spatial_representation_type': 'vector',
         'thumbnail_url': 'https://example.test/thumb.png',
-        'wms_endpoint': 'https://example.test/wms',
+        'wms_endpoint': 'https://example.test/geoserver/workspace/wms',
+        'wmts_endpoint': 'https://example.test/geoserver/workspace/gwc/service/wmts',
         'wfs_endpoint': 'https://example.test/wfs',
         'wcs_endpoint': None,
     }
+
+
+def _wmts_resource(record):
+    return next((res for res in record['resources'] if res.get('protocol') == 'OGC:WMTS'), None)
 
 
 class MetadataStandardsTests(SimpleTestCase):
@@ -95,6 +100,11 @@ class MetadataStandardsTests(SimpleTestCase):
         self.assertEqual(record['title'], 'Camada de teste')
         self.assertEqual(record['resource_identifier'], 'workspace:layer')
         self.assertEqual(record['srs'], 'EPSG:4674')
+        wmts = _wmts_resource(record)
+        wms = next(res for res in record['resources'] if res.get('protocol') == 'OGC:WMS')
+        self.assertEqual(wmts['url'], 'https://example.test/geoserver/workspace/gwc/service/wmts')
+        self.assertEqual(wmts['name'], wms['name'])
+        self.assertEqual(wmts['description'], wms['description'])
 
     def test_create_mgb(self):
         xml = registry.create('dataset', _mdfields(), mdcode='mgb-2.0')
@@ -105,6 +115,34 @@ class MetadataStandardsTests(SimpleTestCase):
         self.assertEqual(record['metadata_profile'], MGB_PROFILE_TITLE)
         self.assertEqual(record['title'], 'Camada de teste')
         self.assertTrue(any(res.get('protocol') == 'OGC:WMS' for res in record['resources']))
+        wmts = _wmts_resource(record)
+        self.assertEqual(wmts['url'], 'https://example.test/geoserver/workspace/gwc/service/wmts')
+        self.assertEqual(wmts['name'], 'workspace:layer')
+        self.assertEqual(wmts['description'], 'Camada de teste')
+
+    def test_create_iso19139_includes_workspace_wmts(self):
+        xml = registry.create('dataset', _mdfields())
+        root = ET.fromstring(xml)
+        reader = registry.get_reader(root)
+        record = reader.as_catalog_record()
+        wmts = _wmts_resource(record)
+        wms = next(res for res in record['resources'] if res.get('protocol') == 'OGC:WMS')
+        self.assertEqual(wmts['url'], 'https://example.test/geoserver/workspace/gwc/service/wmts')
+        self.assertEqual(wmts['name'], wms['name'])
+        self.assertEqual(wmts['description'], wms['description'])
+        self.assertNotIn('/gwc/service/wmts', wms['url'])
+
+    def test_server_wmts_endpoint_includes_workspace(self):
+        from gvsigol_services.models import Server
+        server = Server(frontend_url='https://localhost/geoserver')
+        self.assertEqual(
+            server.getWmtsEndpoint('ws_cmartinez'),
+            'https://localhost/geoserver/ws_cmartinez/gwc/service/wmts',
+        )
+        self.assertEqual(
+            server.getWmtsEndpoint(),
+            'https://localhost/geoserver/gwc/service/wmts',
+        )
 
     def test_creation_uses_client_template_standard(self):
         from unittest.mock import patch

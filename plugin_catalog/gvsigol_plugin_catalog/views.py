@@ -256,6 +256,9 @@ def _build_online_services_html(resources):
         elif 'OGC:WCS' in protocol:
             service_type = 'WCS'
             capabilities_url = text(base_url) + '?service=WCS&request=GetCapabilities'
+        elif 'OGC:WMTS' in protocol:
+            service_type = 'WMTS'
+            capabilities_url = text(base_url) + '?service=WMTS&request=GetCapabilities'
         else:
             continue
         services_html += (
