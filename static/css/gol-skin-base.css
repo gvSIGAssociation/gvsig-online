@@ -1,0 +1,152 @@
+/* =================================================================
+   gvSIG Online — Capa base de tema sobre AdminLTE 2
+   Equivalente a los antiguos css/skins/skin-*.css, pero escrito una
+   sola vez y parametrizado con las variables de gol-themes.css.
+
+   El prefijo body[class*="skin-"] reproduce el ambito que tenian los
+   selectores .skin-<nombre>: las reglas solo se aplican si el <body>
+   lleva una clase de tema. Las paginas sin tema (select_public_*,
+   ogc_services, services_view, portadas de apps que ponen la clase
+   de tema en un elemento interno) quedan intactas.
+
+   Requiere gol-themes.css.
+   ================================================================= */
+
+/* -----------------------------------------------------------------
+   Cabecera
+   ----------------------------------------------------------------- */
+body[class*="skin-"] .main-header .navbar {
+	background-color: var(--hdr-bg);
+}
+body[class*="skin-"] .main-header .navbar .nav > li > a {
+	color: var(--hdr-text);
+}
+body[class*="skin-"] .main-header .navbar .nav > li > a:hover,
+body[class*="skin-"] .main-header .navbar .nav > li > a:active,
+body[class*="skin-"] .main-header .navbar .nav > li > a:focus,
+body[class*="skin-"] .main-header .navbar .nav .open > a,
+body[class*="skin-"] .main-header .navbar .nav .open > a:hover,
+body[class*="skin-"] .main-header .navbar .nav .open > a:focus,
+body[class*="skin-"] .main-header .navbar .nav > .active > a {
+	background: rgba(0, 0, 0, 0.1);
+	color: var(--hdr-text-dim);
+}
+body[class*="skin-"] .main-header .navbar .sidebar-toggle {
+	color: var(--hdr-text);
+}
+body[class*="skin-"] .main-header .navbar .sidebar-toggle:hover {
+	color: var(--hdr-text-dim);
+	background-color: var(--hdr-bg-dk);
+}
+
+@media (max-width: 767px) {
+	body[class*="skin-"] .main-header .navbar .dropdown-menu li.divider {
+		background-color: rgba(255, 255, 255, 0.1);
+	}
+	body[class*="skin-"] .main-header .navbar .dropdown-menu li a {
+		color: var(--hdr-text);
+	}
+	body[class*="skin-"] .main-header .navbar .dropdown-menu li a:hover {
+		background: var(--hdr-bg-dk);
+	}
+}
+
+body[class*="skin-"] .main-header .logo {
+	background-color: var(--hdr-bg-dk);
+	color: var(--hdr-text);
+	border-bottom: 0 solid transparent;
+}
+body[class*="skin-"] .main-header .logo:hover {
+	background-color: var(--hdr-logo-bg-hover);
+}
+body[class*="skin-"] .main-header li.user-header {
+	background-color: var(--hdr-bg);
+}
+body[class*="skin-"].layout-top-nav .main-header > .logo,
+body[class*="skin-"].layout-top-nav .main-header > .logo:hover {
+	background-color: var(--hdr-bg);
+	color: var(--hdr-text);
+	border-bottom: 0 solid transparent;
+}
+
+body[class*="skin-"] .content-header {
+	background: transparent;
+}
+
+/* -----------------------------------------------------------------
+   Sidebar
+   ----------------------------------------------------------------- */
+body[class*="skin-"] .wrapper,
+body[class*="skin-"] .main-sidebar,
+body[class*="skin-"] .left-side {
+	background-color: var(--sb-bg);
+}
+body[class*="skin-"] .user-panel > .info,
+body[class*="skin-"] .user-panel > .info > a {
+	color: var(--sb-user-text);
+}
+body[class*="skin-"] .sidebar a {
+	color: var(--sb-text);
+}
+body[class*="skin-"] .sidebar a:hover {
+	text-decoration: none;
+}
+body[class*="skin-"] .sidebar-menu > li.header {
+	color: var(--sb-text-muted);
+	background: var(--sb-bg-dark);
+}
+body[class*="skin-"] .sidebar-menu > li > a {
+	border-left: 3px solid transparent;
+}
+body[class*="skin-"] .sidebar-menu > li:hover > a,
+body[class*="skin-"] .sidebar-menu > li.active > a {
+	color: var(--sb-item-hover-text);
+	background: var(--sb-item-hover);
+	border-left-color: var(--sb-accent);
+}
+body[class*="skin-"] .sidebar-menu > li > .treeview-menu {
+	margin: 0 1px;
+	background: var(--sb-bg-dark);
+}
+body[class*="skin-"] .treeview-menu > li > a {
+	color: var(--sb-text-muted);
+}
+body[class*="skin-"] .treeview-menu > li.active > a,
+body[class*="skin-"] .treeview-menu > li > a:hover {
+	color: var(--sb-sub-hover-text);
+}
+
+/* -----------------------------------------------------------------
+   Buscador del sidebar (AdminLTE .sidebar-form)
+   ----------------------------------------------------------------- */
+body[class*="skin-"] .sidebar-form {
+	border-radius: 3px;
+	border: 1px solid var(--sb-border);
+	margin: 10px 10px;
+}
+body[class*="skin-"] .sidebar-form input[type="text"],
+body[class*="skin-"] .sidebar-form .btn {
+	box-shadow: none;
+	background-color: var(--sb-bg-dark);
+	border: 1px solid transparent;
+	height: 35px;
+	-webkit-transition: all 0.3s ease-in-out;
+	-o-transition: all 0.3s ease-in-out;
+	transition: all 0.3s ease-in-out;
+}
+body[class*="skin-"] .sidebar-form input[type="text"] {
+	color: #666;
+	border-radius: 2px 0 0 2px;
+}
+body[class*="skin-"] .sidebar-form input[type="text"]:focus,
+body[class*="skin-"] .sidebar-form input[type="text"]:focus + .input-group-btn .btn {
+	background-color: #fff;
+	color: #666;
+}
+body[class*="skin-"] .sidebar-form input[type="text"]:focus + .input-group-btn .btn {
+	border-left-color: #fff;
+}
+body[class*="skin-"] .sidebar-form .btn {
+	color: #999;
+	border-radius: 0 2px 2px 0;
+}

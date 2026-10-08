@@ -6,7 +6,7 @@
    Requiere gol-tokens.css, que define los tokens --h-*.
    ================================================================= */
 
-/* Acentos = cabecera del tema (sidebar-refinements.css define --hdr-bg / --hdr-bg-dk por skin) */
+/* Acentos = cabecera del tema (gol-themes.css define --hdr-bg / --hdr-bg-dk por tema) */
 .home-page {
 	padding: 20px 0;
 	--h-accent:    var(--hdr-bg, #4a7fa5);

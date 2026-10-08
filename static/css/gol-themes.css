@@ -1,0 +1,496 @@
+/* =================================================================
+   gvSIG Online — Temas (skins)
+   Unica fuente de verdad del color de cada tema. Solo declara
+   variables; las reglas que las consumen estan en gol-layout.css.
+
+   La clase del tema la pone GVSIGOL_SKIN en el <body>.
+
+   Para anadir un tema de cliente basta con un bloque nuevo aqui.
+   Si el tema es de fondo claro, anadir tambien su nombre a la lista
+   de "polaridad clara" que hay mas abajo.
+   ================================================================= */
+
+/* -----------------------------------------------------------------
+   Valores por defecto: paleta de skin-blue y polaridad oscura
+   (cabecera de color con texto blanco, sidebar oscuro).
+   ----------------------------------------------------------------- */
+:root {
+	/* Cabecera */
+	--hdr-bg:                 #2d5f80;
+	--hdr-bg-dk:              #23496a;
+	--hdr-text:               #ffffff;
+	--hdr-text-dim:           #f6f6f6;
+	--hdr-item-hover:         rgba(255,255,255,0.10);
+	--hdr-border:             0 solid transparent;
+	--hdr-shadow:             none;
+	--hdr-logo-border:        1px solid rgba(255,255,255,0.10);
+	--hdr-field-bg:           rgba(255,255,255,0.12);
+	--hdr-field-bg-focus:     rgba(255,255,255,0.22);
+	--hdr-field-border:       rgba(255,255,255,0.25);
+	--hdr-field-border-focus: rgba(255,255,255,0.55);
+	--hdr-field-text:         rgba(255,255,255,0.9);
+	--hdr-user-img-border:    rgba(255,255,255,0.45);
+
+	/* Sidebar */
+	--sb-bg:                  #1e2a35;
+	--sb-bg-dark:             #18222b;
+	--sb-accent:              #4a7fa5;
+	--sb-accent-lt:           #7eb8d4;
+	--sb-text:                #c8d6e0;
+	--sb-text-muted:          #7a96a8;
+	--sb-border:              rgba(255,255,255,0.07);
+	--sb-shadow:              2px 0 12px rgba(0,0,0,0.25);
+	--sb-user-text:           rgba(255,255,255,0.9);
+	--sb-item-hover:          rgba(255,255,255,0.06);
+	--sb-item-hover-text:     #ffffff;
+	--sb-item-active-text:    #ffffff;
+	--sb-sub-hover-bg:        rgba(255,255,255,0.05);
+	--sb-sub-hover-text:      #ffffff;
+	--sb-sub-active-bg:       rgba(255,255,255,0.07);
+	--sb-flyout-text:         rgba(255,255,255,0.78);
+	--sb-flyout-shadow:       4px 6px 16px rgba(0,0,0,0.28);
+	--sb-transition:          0.18s ease;
+}
+
+/* -----------------------------------------------------------------
+   Tokens derivados de la paleta.
+
+   Van en body y no en :root a proposito: un var() dentro de una
+   custom property se sustituye en el elemento donde se declara, y la
+   clase del tema esta en el <body>. Declarados en :root se
+   resolverian siempre contra los valores por defecto de arriba.
+   Cualquier tema puede redefinirlos: su selector .skin-<nombre> gana
+   a este.
+   ----------------------------------------------------------------- */
+body {
+	--hdr-logo-bg-hover:   var(--hdr-bg);
+	--hdr-field-option-bg: var(--hdr-bg-dk);
+	--hdr-usermenu-bg:     linear-gradient(135deg, var(--hdr-bg) 0%, var(--hdr-bg-dk) 100%);
+
+	--sb-item-active-bg:     var(--sb-accent);
+	--sb-item-active-border: var(--sb-accent-lt);
+	--sb-flyout-bg:          var(--sb-bg-dark);
+}
+
+/* =================================================================
+   TEMAS DE FONDO OSCURO
+   ================================================================= */
+
+.skin-blue {
+	--hdr-bg:        #2d5f80;
+	--hdr-bg-dk:     #23496a;
+	--sb-bg:         #1e2a35;
+	--sb-bg-dark:    #18222b;
+	--sb-accent:     #4a7fa5;
+	--sb-accent-lt:  #7eb8d4;
+	--gol-accent:    #4a7fa5;
+	--gol-accent-dk: #2d5f80;
+	--gol-accent-lt: rgba(74,127,165,0.06);
+}
+
+/* skin-black es el unico tema con cabecera blanca: ademas de la
+   paleta necesita invertir la polaridad de la cabecera. */
+.skin-black {
+	--hdr-bg:        #ffffff;
+	--hdr-bg-dk:     #f5f5f5;
+	--sb-bg:         #222d32;
+	--sb-bg-dark:    #1a2226;
+	--sb-accent:     #637a84;
+	--sb-accent-lt:  #b8c7ce;
+	--gol-accent:    #637a84;
+	--gol-accent-dk: #4b5f68;
+	--gol-accent-lt: rgba(99,122,132,0.06);
+
+	--hdr-text:               #444444;
+	--hdr-text-dim:           #222222;
+	--hdr-item-hover:         #f0f0f0;
+	--hdr-border:             1px solid #eeeeee;
+	--hdr-shadow:             0 1px 3px rgba(0,0,0,0.08);
+	--hdr-logo-border:        1px solid #dddddd;
+	--hdr-logo-bg-hover:      #ebebeb;
+	--hdr-field-bg:           #f0f0f0;
+	--hdr-field-bg-focus:     #ffffff;
+	--hdr-field-border:       #dddddd;
+	--hdr-field-border-focus: #cccccc;
+	--hdr-field-text:         #333333;
+	--hdr-field-option-bg:    #ffffff;
+	--hdr-user-img-border:    rgba(0,0,0,0.12);
+	--hdr-usermenu-bg:        linear-gradient(135deg, var(--sb-accent) 0%, var(--sb-bg-dark) 100%);
+}
+
+.skin-blue-dark {
+	--hdr-bg:        #011844;
+	--hdr-bg-dk:     #000e2e;
+	--sb-bg:         #0d1a2d;
+	--sb-bg-dark:    #071020;
+	--sb-accent:     #2a5080;
+	--sb-accent-lt:  #6090c0;
+	--gol-accent:    #2a5080;
+	--gol-accent-dk: #011844;
+	--gol-accent-lt: rgba(42,80,128,0.06);
+}
+
+.skin-gray-dark {
+	--hdr-bg:        #56676f;
+	--hdr-bg-dk:     #404e55;
+	--sb-bg:         #2a3035;
+	--sb-bg-dark:    #1e2428;
+	--sb-accent:     #737c82;
+	--sb-accent-lt:  #aab2b8;
+	--gol-accent:    #737c82;
+	--gol-accent-dk: #56676f;
+	--gol-accent-lt: rgba(115,124,130,0.06);
+}
+
+.skin-green {
+	--hdr-bg:        #007a40;
+	--hdr-bg-dk:     #005a2f;
+	--sb-bg:         #1a2e22;
+	--sb-bg-dark:    #122018;
+	--sb-accent:     #008d4c;
+	--sb-accent-lt:  #3fc07a;
+	--gol-accent:    #008d4c;
+	--gol-accent-dk: #007a40;
+	--gol-accent-lt: rgba(0,141,76,0.06);
+}
+
+.skin-red {
+	--hdr-bg:        #c0311e;
+	--hdr-bg-dk:     #9a2515;
+	--sb-bg:         #2e1a18;
+	--sb-bg-dark:    #221210;
+	--sb-accent:     #d73925;
+	--sb-accent-lt:  #f07060;
+	--gol-accent:    #d73925;
+	--gol-accent-dk: #c0311e;
+	--gol-accent-lt: rgba(215,57,37,0.06);
+}
+
+.skin-yellow {
+	--hdr-bg:        #c07c08;
+	--hdr-bg-dk:     #9a6005;
+	--sb-bg:         #2e2615;
+	--sb-bg-dark:    #221c0e;
+	--sb-accent:     #e08e0b;
+	--sb-accent-lt:  #f5b83a;
+	--gol-accent:    #e08e0b;
+	--gol-accent-dk: #c07c08;
+	--gol-accent-lt: rgba(224,142,11,0.06);
+}
+
+.skin-purple {
+	--hdr-bg:        #46437a;
+	--hdr-bg-dk:     #33305e;
+	--sb-bg:         #211f35;
+	--sb-bg-dark:    #181628;
+	--sb-accent:     #555299;
+	--sb-accent-lt:  #8e8bc8;
+	--gol-accent:    #555299;
+	--gol-accent-dk: #46437a;
+	--gol-accent-lt: rgba(85,82,153,0.06);
+}
+
+/* --- Temas de cliente ------------------------------------------- */
+
+.skin-albacete {
+	--hdr-bg:        #1f4968;
+	--hdr-bg-dk:     #163550;
+	--sb-bg:         #182435;
+	--sb-bg-dark:    #101828;
+	--sb-accent:     #1f4968;
+	--sb-accent-lt:  #5a8fb5;
+	--gol-accent:    #1f4968;
+	--gol-accent-dk: #163550;
+	--gol-accent-lt: rgba(31,73,104,0.06);
+}
+
+.skin-alzira {
+	--hdr-bg:        #a02739;
+	--hdr-bg-dk:     #7a1c2b;
+	--sb-bg:         #2a1018;
+	--sb-bg-dark:    #200a10;
+	--sb-accent:     #a02739;
+	--sb-accent-lt:  #d06070;
+	--gol-accent:    #a02739;
+	--gol-accent-dk: #7a1c2b;
+	--gol-accent-lt: rgba(160,39,57,0.06);
+}
+
+.skin-atlasrenewableenergy {
+	--hdr-bg:        #cc4700;
+	--hdr-bg-dk:     #a03800;
+	--sb-bg:         #2e2518;
+	--sb-bg-dark:    #221a10;
+	--sb-accent:     #ff5900;
+	--sb-accent-lt:  #ff8a45;
+	--gol-accent:    #ff5900;
+	--gol-accent-dk: #cc4700;
+	--gol-accent-lt: rgba(255,89,0,0.06);
+}
+
+.skin-cartagena {
+	--hdr-bg:        #004466;
+	--hdr-bg-dk:     #003050;
+	--sb-bg:         #0d2030;
+	--sb-bg-dark:    #081525;
+	--sb-accent:     #004466;
+	--sb-accent-lt:  #3a7fa0;
+	--gol-accent:    #004466;
+	--gol-accent-dk: #003050;
+	--gol-accent-lt: rgba(0,68,102,0.06);
+}
+
+.skin-csicgranada {
+	--hdr-bg:        #486e56;
+	--hdr-bg-dk:     #365240;
+	--sb-bg:         #1a2820;
+	--sb-bg-dark:    #121e18;
+	--sb-accent:     #568666;
+	--sb-accent-lt:  #88b898;
+	--gol-accent:    #568666;
+	--gol-accent-dk: #486e56;
+	--gol-accent-lt: rgba(86,134,102,0.06);
+}
+
+.skin-eliana {
+	--hdr-bg:        #b80025;
+	--hdr-bg-dk:     #8c001c;
+	--sb-bg:         #2a1015;
+	--sb-bg-dark:    #200810;
+	--sb-accent:     #d3002d;
+	--sb-accent-lt:  #f05070;
+	--gol-accent:    #d3002d;
+	--gol-accent-dk: #b80025;
+	--gol-accent-lt: rgba(211,0,45,0.06);
+}
+
+.skin-ideuy {
+	--hdr-bg:        #3155a6;
+	--hdr-bg-dk:     #26428a;
+	--sb-bg:         #182035;
+	--sb-bg-dark:    #101828;
+	--sb-accent:     #3155a6;
+	--sb-accent-lt:  #7090d0;
+	--gol-accent:    #3155a6;
+	--gol-accent-dk: #26428a;
+	--gol-accent-lt: rgba(49,85,166,0.06);
+}
+
+.skin-libra {
+	--hdr-bg:        #a80c26;
+	--hdr-bg-dk:     #80091c;
+	--sb-bg:         #280a12;
+	--sb-bg-dark:    #1e0610;
+	--sb-accent:     #c70f2d;
+	--sb-accent-lt:  #f04060;
+	--gol-accent:    #c70f2d;
+	--gol-accent-dk: #a80c26;
+	--gol-accent-lt: rgba(199,15,45,0.06);
+}
+
+.skin-mallorca {
+	--hdr-bg:        #005550;
+	--hdr-bg-dk:     #003d38;
+	--sb-bg:         #0d2220;
+	--sb-bg-dark:    #081818;
+	--sb-accent:     #00665f;
+	--sb-accent-lt:  #30a098;
+	--gol-accent:    #00665f;
+	--gol-accent-dk: #005550;
+	--gol-accent-lt: rgba(0,102,95,0.06);
+}
+
+.skin-ormusa {
+	--hdr-bg:        #5a1748;
+	--hdr-bg-dk:     #421035;
+	--sb-bg:         #20101e;
+	--sb-bg-dark:    #180c18;
+	--sb-accent:     #651b55;
+	--sb-accent-lt:  #a04888;
+	--gol-accent:    #651b55;
+	--gol-accent-dk: #5a1748;
+	--gol-accent-lt: rgba(101,27,85,0.06);
+}
+
+.skin-pobla {
+	--hdr-bg:        #a90000;
+	--hdr-bg-dk:     #800000;
+	--sb-bg:         #2a1010;
+	--sb-bg-dark:    #200808;
+	--sb-accent:     #d73925;
+	--sb-accent-lt:  #f07060;
+	--gol-accent:    #d73925;
+	--gol-accent-dk: #a90000;
+	--gol-accent-lt: rgba(215,57,37,0.06);
+}
+
+.skin-talavera {
+	--hdr-bg:        #4d9ab8;
+	--hdr-bg-dk:     #387a98;
+	--sb-bg:         #18282e;
+	--sb-bg-dark:    #101e24;
+	--sb-accent:     #61accb;
+	--sb-accent-lt:  #90cce0;
+	--gol-accent:    #61accb;
+	--gol-accent-dk: #4d9ab8;
+	--gol-accent-lt: rgba(97,172,203,0.06);
+}
+
+.skin-villarrobledo {
+	--hdr-bg:        #d06020;
+	--hdr-bg-dk:     #a84c18;
+	--sb-bg:         #2e1e0e;
+	--sb-bg-dark:    #221508;
+	--sb-accent:     #f27d37;
+	--sb-accent-lt:  #f5a872;
+	--gol-accent:    #f27d37;
+	--gol-accent-dk: #d06020;
+	--gol-accent-lt: rgba(242,125,55,0.06);
+}
+
+.skin-picanya {
+	--hdr-bg:        #009681;
+	--hdr-bg-dk:     #007A68;
+	--sb-bg:         #0f2420;
+	--sb-bg-dark:    #0a1a17;
+	--sb-accent:     #009681;
+	--sb-accent-lt:  #4db8a8;
+	--gol-accent:    #009681;
+	--gol-accent-dk: #007A68;
+	--gol-accent-lt: rgba(0,150,129,0.06);
+}
+
+/* =================================================================
+   TEMAS DE FONDO CLARO
+
+   La cabecera sigue siendo de color con texto blanco; lo que cambia
+   es el sidebar. Esta lista es el unico sitio donde hay que anadir
+   un tema claro nuevo ademas de su bloque de paleta.
+   ================================================================= */
+
+.skin-blue-light,
+.skin-black-light,
+.skin-black-light-dphuesca,
+.skin-green-light,
+.skin-red-light,
+.skin-purple-light,
+.skin-yellow-light {
+	--sb-shadow:             2px 0 10px rgba(0,0,0,0.10);
+	--sb-user-text:          var(--sb-text);
+	--sb-item-hover:         rgba(0,0,0,0.05);
+	--sb-item-hover-text:    var(--sb-text);
+	--sb-item-active-bg:     var(--sb-item-hover);
+	--sb-item-active-text:   var(--sb-accent-lt);
+	--sb-item-active-border: var(--sb-accent);
+	--sb-sub-hover-bg:       rgba(0,0,0,0.04);
+	--sb-sub-hover-text:     var(--sb-accent);
+	--sb-sub-active-bg:      transparent;
+	--sb-flyout-bg:          var(--sb-bg);
+	--sb-flyout-text:        var(--sb-text-muted);
+	--sb-flyout-shadow:      4px 6px 16px rgba(0,0,0,0.10);
+}
+
+.skin-blue-light {
+	--hdr-bg:        #3c8dbc;
+	--hdr-bg-dk:     #2a6f99;
+	--sb-bg:         #f0f4f7;
+	--sb-bg-dark:    #e4eaef;
+	--sb-accent:     #3c8dbc;
+	--sb-accent-lt:  #1b7baa;
+	--sb-text:       #3a3a3a;
+	--sb-text-muted: #7a96a8;
+	--sb-border:     rgba(0,0,0,0.07);
+	--gol-accent:    #3c8dbc;
+	--gol-accent-dk: #1b7baa;
+	--gol-accent-lt: rgba(60,141,188,0.06);
+}
+
+.skin-black-light {
+	--hdr-bg:        #333333;
+	--hdr-bg-dk:     #1a1a1a;
+	--sb-bg:         #f4f4f4;
+	--sb-bg-dark:    #ebebeb;
+	--sb-accent:     #444444;
+	--sb-accent-lt:  #222222;
+	--sb-text:       #333333;
+	--sb-text-muted: #888888;
+	--sb-border:     rgba(0,0,0,0.08);
+	--gol-accent:    #444444;
+	--gol-accent-dk: #222222;
+	--gol-accent-lt: rgba(68,68,68,0.06);
+}
+
+.skin-black-light-dphuesca {
+	--hdr-bg:        #c61919;
+	--hdr-bg-dk:     #a01010;
+	--sb-bg:         #f4f4f4;
+	--sb-bg-dark:    #ebebeb;
+	--sb-accent:     #c61919;
+	--sb-accent-lt:  #a01010;
+	--sb-text:       #333333;
+	--sb-text-muted: #888888;
+	--sb-border:     rgba(0,0,0,0.08);
+	--gol-accent:    #c61919;
+	--gol-accent-dk: #a01010;
+	--gol-accent-lt: rgba(198,25,25,0.06);
+}
+
+.skin-green-light {
+	--hdr-bg:        #00a65a;
+	--hdr-bg-dk:     #008046;
+	--sb-bg:         #f0f7f2;
+	--sb-bg-dark:    #e3f0e6;
+	--sb-accent:     #00a65a;
+	--sb-accent-lt:  #007a40;
+	--sb-text:       #3a3a3a;
+	--sb-text-muted: #7a9a82;
+	--sb-border:     rgba(0,0,0,0.07);
+	--gol-accent:    #00a65a;
+	--gol-accent-dk: #007a40;
+	--gol-accent-lt: rgba(0,166,90,0.06);
+}
+
+.skin-red-light {
+	--hdr-bg:        #dd4b39;
+	--hdr-bg-dk:     #b83525;
+	--sb-bg:         #f7f0f0;
+	--sb-bg-dark:    #f0e3e3;
+	--sb-accent:     #dd4b39;
+	--sb-accent-lt:  #b83525;
+	--sb-text:       #3a3a3a;
+	--sb-text-muted: #9a7a78;
+	--sb-border:     rgba(0,0,0,0.07);
+	--gol-accent:    #dd4b39;
+	--gol-accent-dk: #b83525;
+	--gol-accent-lt: rgba(221,75,57,0.06);
+}
+
+.skin-purple-light {
+	--hdr-bg:        #605ca8;
+	--hdr-bg-dk:     #46428a;
+	--sb-bg:         #f3f0f7;
+	--sb-bg-dark:    #eae3f0;
+	--sb-accent:     #605ca8;
+	--sb-accent-lt:  #46428a;
+	--sb-text:       #3a3a3a;
+	--sb-text-muted: #8a7aaa;
+	--sb-border:     rgba(0,0,0,0.07);
+	--gol-accent:    #605ca8;
+	--gol-accent-dk: #46428a;
+	--gol-accent-lt: rgba(96,92,168,0.06);
+}
+
+.skin-yellow-light {
+	--hdr-bg:        #f39c12;
+	--hdr-bg-dk:     #c07a08;
+	--sb-bg:         #f7f5f0;
+	--sb-bg-dark:    #f0ece3;
+	--sb-accent:     #f39c12;
+	--sb-accent-lt:  #c07a08;
+	--sb-text:       #3a3a3a;
+	--sb-text-muted: #9a8a60;
+	--sb-border:     rgba(0,0,0,0.07);
+	--gol-accent:    #f39c12;
+	--gol-accent-dk: #c07a08;
+	--gol-accent-lt: rgba(243,156,18,0.06);
+}
