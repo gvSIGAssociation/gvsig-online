@@ -6,10 +6,16 @@
    Los prefijos --pf-* (formularios), --pl-* (listados) y --h-* (home)
    se mantienen como alias para que las plantillas que todavía
    declaran su propio :root sigan funcionando sin cambios.
+
+   Los alias se declaran sobre <body> a propósito: la clase del tema
+   (GVSIGOL_SKIN) también está en el <body> y redefine --gol-accent
+   ahí, de modo que los alias se resuelven con el color del tema. Si
+   se declararan en :root se resolverían contra el valor por defecto.
+   Ver gol-themes.css.
    ================================================================= */
 
 :root {
-	/* ---- Paleta canónica ---- */
+	/* ---- Paleta canónica (valor por defecto; cada tema la redefine) ---- */
 	--gol-accent:     #4a7fa5;
 	--gol-accent-dk:  #2d5f80;
 	--gol-accent-lt:  rgba(74,127,165,0.06);
@@ -27,7 +33,9 @@
 	--gol-shadow-hv:  0 6px 24px rgba(0,0,0,0.13);
 	--gol-transition: 0.2s ease;
 	--gol-transition-smooth: 0.22s cubic-bezier(.4,0,.2,1);
+}
 
+body {
 	/* ---- Alias: pantallas de formulario ---- */
 	--pf-accent:     var(--gol-accent);
 	--pf-accent-dk:  var(--gol-accent-dk);

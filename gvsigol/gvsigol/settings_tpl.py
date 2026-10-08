@@ -416,18 +416,23 @@ GVSIGOL_TOOLS = {
 GVSIGOL_ENABLE_ENUMERATIONS = ##GVSIGOL_ENABLE_ENUMERATIONS##
 
 
-#skin-blue
-#skin-blue-light
-#skin-red
-#skin-red-light
-#skin-black
-#skin-black-light
-#skin-green
-#skin-green-light
-#skin-purple
-#skin-purple-light
-#skin-yellow
-#skin-yellow-light
+# Temas disponibles. La paleta de cada uno esta en
+# gvsigol_core/static/css/gol-themes.css; para anadir uno nuevo basta
+# con un bloque de variables ahi.
+#
+# Estandar (fondo oscuro):  skin-blue, skin-blue-dark, skin-black,
+#                           skin-gray-dark, skin-green, skin-red,
+#                           skin-purple, skin-yellow
+# Estandar (fondo claro):   skin-blue-light, skin-black-light,
+#                           skin-green-light, skin-red-light,
+#                           skin-purple-light, skin-yellow-light
+# Cliente:                  skin-albacete, skin-alzira,
+#                           skin-atlasrenewableenergy, skin-cartagena,
+#                           skin-csicgranada, skin-eliana, skin-ideuy,
+#                           skin-libra, skin-mallorca, skin-ormusa,
+#                           skin-picanya, skin-pobla, skin-talavera,
+#                           skin-villarrobledo,
+#                           skin-black-light-dphuesca
 GVSIGOL_SKIN = '##GVSIGOL_SKIN##'
 
 GVSIGOL_PATH = '##GVSIGOL_PATH##'

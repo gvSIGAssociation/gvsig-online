@@ -1,0 +1,409 @@
+/* =================================================================
+   gvSIG Online — Cabecera, menu lateral, contenido y pie del panel
+   de administracion, sobre AdminLTE 2. Sustituye a
+   sidebar-refinements.css: las mismas reglas, pero escritas una sola
+   vez y resueltas con las variables de gol-themes.css en lugar de
+   enumerar cada tema en cada selector.
+
+   El prefijo body[class*="skin-"] reproduce el ambito que tenian los
+   selectores .skin-<nombre>.
+
+   Requiere gol-themes.css y gol-skin-base.css.
+   ================================================================= */
+
+/* =================================================================
+   CABECERA
+   ================================================================= */
+
+body[class*="skin-"] .main-header .navbar {
+	background-color: var(--hdr-bg);
+	background-image: none;
+	border-bottom: var(--hdr-border);
+	box-shadow: var(--hdr-shadow);
+}
+
+body[class*="skin-"] .main-header .logo {
+	background-color: var(--hdr-bg-dk);
+	background-image: none;
+	border-right: var(--hdr-logo-border);
+	font-weight: 700;
+	letter-spacing: 0.5px;
+}
+body[class*="skin-"] .main-header .logo:hover {
+	background-color: var(--hdr-logo-bg-hover);
+}
+
+body[class*="skin-"] .main-header .navbar .sidebar-toggle:hover {
+	background-color: var(--hdr-item-hover);
+}
+
+/* Selector de idioma */
+body[class*="skin-"] .main-header .navbar-custom-menu .form-control {
+	background: var(--hdr-field-bg);
+	border: 1px solid var(--hdr-field-border);
+	color: var(--hdr-field-text);
+	border-radius: 5px;
+	font-size: 12px;
+	height: 30px;
+	padding: 0 8px;
+	margin-top: 10px;
+}
+body[class*="skin-"] .main-header .navbar-custom-menu .form-control option {
+	background: var(--hdr-field-option-bg);
+	color: var(--hdr-field-text);
+}
+
+/* =================================================================
+   SIDEBAR
+   ================================================================= */
+
+body[class*="skin-"] .main-sidebar {
+	background-color: var(--sb-bg);
+	background-image: none;
+	box-shadow: var(--sb-shadow);
+}
+
+/* --- Items de primer nivel -------------------------------------- */
+body[class*="skin-"] .sidebar-menu > li > a {
+	padding: 10px 12px 10px 15px;
+	color: var(--sb-text);
+	font-size: 13px;
+	font-weight: 500;
+	border-left: 3px solid transparent;
+	transition: background var(--sb-transition), border-color var(--sb-transition), color var(--sb-transition);
+	-webkit-font-smoothing: antialiased;
+}
+body[class*="skin-"] .sidebar-menu > li > a > .fa,
+body[class*="skin-"] .sidebar-menu > li > a > .glyphicon {
+	color: var(--sb-text-muted);
+	width: 20px;
+	font-size: 14px;
+	transition: color var(--sb-transition);
+}
+
+body[class*="skin-"] .sidebar-menu > li > a:hover {
+	background-color: var(--sb-item-hover);
+	color: var(--sb-item-hover-text);
+	border-left-color: var(--sb-accent);
+}
+body[class*="skin-"] .sidebar-menu > li > a:hover > .fa {
+	color: var(--sb-accent);
+}
+
+body[class*="skin-"] .sidebar-menu > li.active > a {
+	background-color: var(--sb-item-active-bg);
+	color: var(--sb-item-active-text);
+	border-left-color: var(--sb-item-active-border);
+}
+body[class*="skin-"] .sidebar-menu > li.active > a > .fa {
+	color: var(--sb-accent-lt);
+}
+
+/* --- Separadores de seccion ------------------------------------- */
+body[class*="skin-"] .sidebar-menu li.header {
+	color: var(--sb-text-muted);
+	font-size: 10px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	padding: 14px 12px 6px 15px;
+	background: transparent;
+}
+
+/* --- Submenus treeview ------------------------------------------ */
+body[class*="skin-"] .sidebar-menu .treeview-menu {
+	background: var(--sb-bg-dark);
+	padding-left: 0;
+	border-top: 1px solid var(--sb-border);
+	border-bottom: 1px solid var(--sb-border);
+}
+body[class*="skin-"] .sidebar-menu .treeview-menu > li > a {
+	padding: 7px 10px 7px 32px;
+	color: var(--sb-text-muted);
+	font-size: 12.5px;
+	font-weight: 400;
+	border-left: 3px solid transparent;
+	transition: background var(--sb-transition), color var(--sb-transition), border-color var(--sb-transition);
+	-webkit-font-smoothing: antialiased;
+}
+body[class*="skin-"] .sidebar-menu .treeview-menu > li > a:hover {
+	background-color: var(--sb-sub-hover-bg);
+	color: var(--sb-sub-hover-text);
+	border-left-color: var(--sb-accent);
+}
+body[class*="skin-"] .sidebar-menu .treeview-menu > li.active > a {
+	color: var(--sb-accent-lt);
+	background-color: var(--sb-sub-active-bg);
+	border-left-color: var(--sb-accent);
+	font-weight: 600;
+}
+
+/* --- Flecha de despliegue --------------------------------------- */
+body[class*="skin-"] .sidebar-menu li > a > .fa-angle-left {
+	color: var(--sb-text-muted);
+	opacity: 0.7;
+}
+body[class*="skin-"] .sidebar-menu li.active > a > .fa-angle-left {
+	color: var(--sb-accent);
+	opacity: 1;
+}
+
+/* --- Barra de scroll -------------------------------------------- */
+body[class*="skin-"] .main-sidebar ::-webkit-scrollbar {
+	width: 4px;
+}
+body[class*="skin-"] .main-sidebar ::-webkit-scrollbar-thumb {
+	background: var(--sb-accent);
+	border-radius: 2px;
+}
+
+/* =================================================================
+   AREA DE CONTENIDO Y PIE
+   ================================================================= */
+
+body[class*="skin-"] .content-wrapper {
+	background-color: #f0f3f6;
+}
+body[class*="skin-"] .main-footer {
+	background: #fff;
+	border-top: 1px solid #e0e6ea;
+	color: #9aabb5;
+	font-size: 12px;
+	padding: 10px 20px;
+	overflow: hidden;
+}
+
+/* =================================================================
+   CABECERA — Menu de usuario y selector de idioma
+   ================================================================= */
+
+.navbar-custom-menu #select-language {
+	height: 30px;
+	padding: 2px 8px;
+	font-size: 12px;
+	border-radius: 5px;
+	border: 1px solid var(--hdr-field-border);
+	background: var(--hdr-field-bg);
+	color: var(--hdr-field-text);
+	cursor: pointer;
+	/* el <select> lleva un margin-top en linea en la plantilla */
+	margin-top: 12px !important;
+	transition: background 0.2s, border-color 0.2s;
+	-webkit-appearance: none;
+	appearance: none;
+}
+.navbar-custom-menu #select-language:focus {
+	outline: none;
+	background: var(--hdr-field-bg-focus);
+	border-color: var(--hdr-field-border-focus);
+}
+.navbar-custom-menu #select-language option {
+	background: var(--hdr-field-option-bg);
+	color: var(--hdr-field-text);
+}
+
+/* Icono de ayuda */
+.navbar-custom-menu #help {
+	opacity: 0.75;
+	transition: opacity 0.2s;
+}
+.navbar-custom-menu #help:hover {
+	opacity: 1;
+}
+
+/* Trigger del dropdown de usuario */
+.navbar-custom-menu .user-menu > a {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	padding: 0 14px;
+	height: 50px;
+	transition: background 0.2s;
+}
+.navbar-custom-menu .user-menu > a:hover {
+	background: var(--hdr-item-hover);
+}
+.navbar-custom-menu .user-menu > a .user-image {
+	width: 26px;
+	height: 26px;
+	border-radius: 50%;
+	margin: 0;
+	flex-shrink: 0;
+	border: 2px solid var(--hdr-user-img-border);
+}
+.navbar-custom-menu .user-menu > a .hidden-xs {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--hdr-text);
+	letter-spacing: 0.2px;
+}
+
+/* Panel dropdown */
+.navbar-custom-menu .user-menu .dropdown-menu {
+	border: none;
+	border-radius: 10px;
+	box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+	overflow: hidden;
+	min-width: 220px;
+	padding: 0;
+	margin-top: 4px;
+	right: 0;
+	left: auto;
+}
+
+/* Cabecera del dropdown: avatar + nombre */
+.navbar-custom-menu .user-menu .dropdown-menu .user-header {
+	background: var(--hdr-usermenu-bg);
+	padding: 18px 16px 14px;
+	text-align: center;
+	border-bottom: none;
+}
+.navbar-custom-menu .user-menu .dropdown-menu .user-header img {
+	width: 52px;
+	height: 52px;
+	border: 3px solid rgba(255, 255, 255, 0.4);
+	margin-bottom: 8px;
+}
+.navbar-custom-menu .user-menu .dropdown-menu .user-header p {
+	font-size: 14px;
+	font-weight: 700;
+	color: #fff;
+	margin: 0;
+	line-height: 1.3;
+}
+.navbar-custom-menu .user-menu .dropdown-menu .user-header p small {
+	display: block;
+	font-size: 11px;
+	font-weight: 400;
+	color: rgba(255, 255, 255, 0.7);
+	margin-top: 2px;
+}
+
+/* Pie del dropdown: boton de salir */
+.navbar-custom-menu .user-menu .dropdown-menu .user-footer {
+	background: #f8fafb;
+	border-top: 1px solid #e8ecef;
+	padding: 10px 14px;
+	display: flex;
+	justify-content: flex-end;
+}
+.navbar-custom-menu .user-menu .dropdown-menu .user-footer #logout-form {
+	margin: 0;
+}
+.navbar-custom-menu .user-menu .dropdown-menu .user-footer .btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: transparent;
+	border: 1px solid #d0dae2;
+	border-radius: 6px;
+	color: #5a6e7a;
+	font-size: 12px;
+	font-weight: 600;
+	padding: 5px 14px;
+	transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.navbar-custom-menu .user-menu .dropdown-menu .user-footer .btn:hover {
+	background: #fee;
+	border-color: #e57373;
+	color: #c0392b;
+}
+
+/* =================================================================
+   SIDEBAR COLAPSADO — etiquetas flotantes y submenus emergentes
+   Con sidebar-mini + sidebar-collapse los spans de texto y los
+   treeview-menu flotan a la derecha del sidebar.
+   ================================================================= */
+
+/* Etiqueta de texto flotante (tooltip del item) */
+.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > a > span:not(.pull-right) {
+	background: var(--sb-flyout-bg);
+	color: var(--sb-item-hover-text);
+	font-size: 13px;
+	font-weight: 600;
+	padding: 0 20px 0 16px;
+	height: 44px;
+	line-height: 44px;
+	border-radius: 0 6px 0 0;
+	border-left: 3px solid var(--sb-accent);
+	box-shadow: 3px 0 12px rgba(0, 0, 0, 0.25);
+	white-space: nowrap;
+	max-width: calc(100vw - 70px);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	/* AdminLTE fuerza display:block con !important */
+	display: inline-block !important;
+}
+
+/* El titulo flotante de un treeview debe ser al menos tan ancho como su submenu */
+.sidebar-mini.sidebar-collapse .sidebar-menu > li.treeview:hover > a > span:not(.pull-right) {
+	min-width: 200px;
+	border-radius: 0 6px 0 0;
+}
+
+/* Submenu emergente */
+.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu {
+	background: var(--sb-flyout-bg);
+	border-radius: 0 0 8px 0;
+	border-left: 3px solid var(--sb-accent);
+	box-shadow: var(--sb-flyout-shadow);
+	padding: 6px 0;
+	min-width: 200px;
+	max-width: calc(100vw - 70px);
+}
+.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a {
+	color: var(--sb-flyout-text);
+	font-size: 12.5px;
+	padding: 8px 20px;
+	transition: background 0.15s, color 0.15s;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: block;
+}
+.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a:hover {
+	background: var(--sb-sub-hover-bg);
+	color: var(--sb-sub-hover-text);
+}
+.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li.active > a {
+	color: var(--sb-accent-lt);
+	font-weight: 600;
+}
+
+/* =================================================================
+   LOGO DE CABECERA — imagen + texto
+   ================================================================= */
+
+/* Logo expandido: imagen a la izquierda del nombre */
+.main-header .logo .logo-lg {
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+}
+.main-header .logo .logo-img-lg {
+	width: 28px;
+	height: 28px;
+	object-fit: contain;
+	flex-shrink: 0;
+	border-radius: 5px;
+}
+
+/* Logo colapsado: solo la imagen, centrada */
+.sidebar-mini.sidebar-collapse .main-header .logo .logo-mini {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+.main-header .logo .logo-img-mini {
+	width: 26px;
+	height: 26px;
+	object-fit: contain;
+	border-radius: 5px;
+}
+
+/* El panel de usuario del sidebar se oculta: el logo ya esta en la cabecera.
+   Su estilado vive en gol-skin-base.css, con los colores del tema, para
+   que siga siendo coherente si algun despliegue vuelve a mostrarlo. */
+.main-sidebar .user-panel {
+	display: none;
+}
