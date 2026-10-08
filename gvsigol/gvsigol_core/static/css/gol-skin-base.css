@@ -1,7 +1,7 @@
 /* =================================================================
    gvSIG Online — Capa base de tema sobre AdminLTE 2
-   Equivalente a los antiguos css/skins/skin-*.css, pero escrito una
-   sola vez y parametrizado con las variables de gol-themes.css.
+   Las reglas de tema escritas una sola vez y parametrizadas con las
+   variables de gol-themes.css, en lugar de una hoja por tema.
 
    El prefijo body[class*="skin-"] reproduce el ambito que tenian los
    selectores .skin-<nombre>: las reglas solo se aplican si el <body>
