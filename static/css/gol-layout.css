@@ -23,7 +23,7 @@ body[class*="skin-"] .main-header .navbar {
 }
 
 body[class*="skin-"] .main-header .logo {
-	background-color: var(--hdr-bg-dk);
+	background-color: var(--hdr-logo-bg);
 	background-image: none;
 	border-right: var(--hdr-logo-border);
 	font-weight: 700;
@@ -64,27 +64,55 @@ body[class*="skin-"] .main-sidebar {
 }
 
 /* --- Items de primer nivel -------------------------------------- */
+/* El margen de 8px mas el padding de 10px suman los mismos 18px de
+   sangrado que daban los 3px de borde transparente mas 15px de
+   padding, asi que los iconos no se desplazan. */
 body[class*="skin-"] .sidebar-menu > li > a {
-	padding: 10px 12px 10px 15px;
+	position: relative;
+	margin: 1px 8px;
+	padding: 10px;
+	border-radius: 8px;
+	border-left: 0;
 	color: var(--sb-text);
 	font-size: 13px;
 	font-weight: 500;
-	border-left: 3px solid transparent;
-	transition: background var(--sb-transition), border-color var(--sb-transition), color var(--sb-transition);
+	transition: background var(--sb-transition), color var(--sb-transition);
 	-webkit-font-smoothing: antialiased;
 }
 body[class*="skin-"] .sidebar-menu > li > a > .fa,
 body[class*="skin-"] .sidebar-menu > li > a > .glyphicon {
 	color: var(--sb-text-muted);
-	width: 20px;
-	font-size: 14px;
+	width: 22px;
+	font-size: 15px;
 	transition: color var(--sb-transition);
+}
+
+/* La flecha de los treeview es hija directa del <a>, asi que la regla
+   de iconos de arriba tambien la alcanza y le impone el ancho fijo.
+   AdminLTE la flota a la derecha con margin-right 10px y margin-top
+   3px, dos valores calibrados para el item a sangre que dentro de la
+   pildora la dejaban baja y corta.
+
+   Se saca del flujo y se centra a mano. La caja es cuadrada a
+   proposito: asi el rotate(-90deg) que AdminLTE aplica al abrir el
+   menu gira sobre si misma sin mover el glifo. Los 11px de right mas
+   los 7px de media caja dejan el glifo a 18px del borde del sidebar:
+   los 8px de margen de la pildora mas sus 10px de padding. */
+body[class*="skin-"] .sidebar-menu > li > a > .fa-angle-left {
+	position: absolute;
+	top: 50%;
+	right: 11px;
+	width: 14px;
+	height: 14px;
+	margin: -7px 0 0;
+	font-size: 14px;
+	line-height: 14px;
+	text-align: center;
 }
 
 body[class*="skin-"] .sidebar-menu > li > a:hover {
 	background-color: var(--sb-item-hover);
 	color: var(--sb-item-hover-text);
-	border-left-color: var(--sb-accent);
 }
 body[class*="skin-"] .sidebar-menu > li > a:hover > .fa {
 	color: var(--sb-accent);
@@ -93,48 +121,59 @@ body[class*="skin-"] .sidebar-menu > li > a:hover > .fa {
 body[class*="skin-"] .sidebar-menu > li.active > a {
 	background-color: var(--sb-item-active-bg);
 	color: var(--sb-item-active-text);
-	border-left-color: var(--sb-item-active-border);
+	font-weight: 600;
 }
 body[class*="skin-"] .sidebar-menu > li.active > a > .fa {
 	color: var(--sb-accent-lt);
 }
 
 /* --- Separadores de seccion ------------------------------------- */
+/* El sangrado de 18px alinea el separador con el texto de las
+   pildoras (8px de margen mas 10px de padding). */
 body[class*="skin-"] .sidebar-menu li.header {
 	color: var(--sb-text-muted);
 	font-size: 10px;
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 1px;
-	padding: 14px 12px 6px 15px;
+	padding: 14px 18px 6px;
 	background: transparent;
 }
 
 /* --- Submenus treeview ------------------------------------------ */
-body[class*="skin-"] .sidebar-menu .treeview-menu {
-	background: var(--sb-bg-dark);
-	padding-left: 0;
-	border-top: 1px solid var(--sb-border);
-	border-bottom: 1px solid var(--sb-border);
+/* En lugar de un bloque oscuro, una guia vertical de 1px que conecta
+   los subelementos y los relaciona con su item padre.
+
+   El `li >` del selector no es decorativo: gol-skin-base.css trae una
+   regla equivalente con ese mismo hijo directo, y sin el perderiamos
+   el desempate de especificidad en las plantillas que cargan las dos
+   hojas. Todo .treeview-menu es hijo de un li, asi que sigue
+   alcanzando a los submenus de cualquier nivel. */
+body[class*="skin-"] .sidebar-menu li > .treeview-menu {
+	background: transparent;
+	border-top: 0;
+	border-bottom: 0;
+	border-left: 1px solid var(--sb-border);
+	margin: 2px 8px 6px 20px;
+	padding-left: 12px;
 }
 body[class*="skin-"] .sidebar-menu .treeview-menu > li > a {
-	padding: 7px 10px 7px 32px;
+	padding: 6px 10px;
+	border-radius: 6px;
+	border-left: 0;
 	color: var(--sb-text-muted);
 	font-size: 12.5px;
 	font-weight: 400;
-	border-left: 3px solid transparent;
-	transition: background var(--sb-transition), color var(--sb-transition), border-color var(--sb-transition);
+	transition: background var(--sb-transition), color var(--sb-transition);
 	-webkit-font-smoothing: antialiased;
 }
 body[class*="skin-"] .sidebar-menu .treeview-menu > li > a:hover {
 	background-color: var(--sb-sub-hover-bg);
 	color: var(--sb-sub-hover-text);
-	border-left-color: var(--sb-accent);
 }
 body[class*="skin-"] .sidebar-menu .treeview-menu > li.active > a {
 	color: var(--sb-accent-lt);
 	background-color: var(--sb-sub-active-bg);
-	border-left-color: var(--sb-accent);
 	font-weight: 600;
 }
 
@@ -315,64 +354,145 @@ body[class*="skin-"] .main-footer {
    treeview-menu flotan a la derecha del sidebar.
    ================================================================= */
 
-/* Etiqueta de texto flotante (tooltip del item) */
-.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > a > span:not(.pull-right) {
-	background: var(--sb-flyout-bg);
-	color: var(--sb-item-hover-text);
-	font-size: 13px;
-	font-weight: 600;
-	padding: 0 20px 0 16px;
-	height: 44px;
-	line-height: 44px;
-	border-radius: 0 6px 0 0;
-	border-left: 3px solid var(--sb-accent);
-	box-shadow: 3px 0 12px rgba(0, 0, 0, 0.25);
-	white-space: nowrap;
-	max-width: calc(100vw - 70px);
-	overflow: hidden;
-	text-overflow: ellipsis;
-	/* AdminLTE fuerza display:block con !important */
-	display: inline-block !important;
-}
+/* Toda la seccion va acotada al escritorio, igual que las reglas de
+   AdminLTE que estira: por debajo de 768px el <body> puede llevar
+   sidebar-collapse heredado de localStorage mientras el sidebar se
+   muestra en offcanvas a pantalla completa. Ahi el texto no flota, las
+   pildoras si deben verse y nada de esto debe aplicarse.
 
-/* El titulo flotante de un treeview debe ser al menos tan ancho como su submenu */
-.sidebar-mini.sidebar-collapse .sidebar-menu > li.treeview:hover > a > span:not(.pull-right) {
-	min-width: 200px;
-	border-radius: 0 6px 0 0;
-}
+   Primero, con el sidebar reducido al icono la pildora y la guia del
+   submenu estorban, porque descuadran la etiqueta flotante y el
+   desplegable: se restauran los valores a sangre. */
+@media (min-width: 768px) {
+	body[class*="skin-"].sidebar-collapse .sidebar-menu > li > a {
+		margin: 0;
+		padding: 10px 12px 10px 15px;
+		border-radius: 0;
+		border-left: 3px solid transparent;
+		/* Devolver el contexto de posicionamiento al li. La etiqueta
+		   flotante de AdminLTE se coloca con left: 50px, que desde el
+		   <a> se mediria tras su borde izquierdo y la separaria 3px
+		   del sidebar. La flecha, que es quien necesitaba el
+		   relative, aqui esta oculta. */
+		position: static;
+	}
+	body[class*="skin-"].sidebar-collapse .sidebar-menu > li > a:hover {
+		border-left-color: var(--sb-accent);
+	}
+	body[class*="skin-"].sidebar-collapse .sidebar-menu > li.active > a {
+		border-left-color: var(--sb-item-active-border);
+	}
+	body[class*="skin-"].sidebar-collapse .sidebar-menu .treeview-menu {
+		margin: 0 1px;
+		padding-left: 0;
+		border-left: 0;
+	}
 
-/* Submenu emergente */
-.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu {
-	background: var(--sb-flyout-bg);
-	border-radius: 0 0 8px 0;
-	border-left: 3px solid var(--sb-accent);
-	box-shadow: var(--sb-flyout-shadow);
-	padding: 6px 0;
-	min-width: 200px;
-	max-width: calc(100vw - 70px);
-}
-.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a {
-	color: var(--sb-flyout-text);
-	font-size: 12.5px;
-	padding: 8px 20px;
-	transition: background 0.15s, color 0.15s;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	display: block;
-}
-.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a:hover {
-	background: var(--sb-sub-hover-bg);
-	color: var(--sb-sub-hover-text);
-}
-.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li.active > a {
-	color: var(--sb-accent-lt);
-	font-weight: 600;
+	/* --- La tarjeta flotante ---------------------------------------
+	   La etiqueta del item y su submenu son dos cajas absolutas
+	   hermanas que tienen que leerse como una sola tarjeta pegada al
+	   sidebar: misma anchura, mismo sangrado de texto, la franja de
+	   acento recorriendo el lateral y una sola sombra.
+
+	   AdminLTE las coloca a left: 50px y apila el submenu a top: 44px,
+	   la altura exacta de la etiqueta, asi que las dos piezas encajan
+	   mientras se respete esa altura. */
+
+	/* Cabecera: el nombre del item del que cuelga el menu */
+	.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > a > span:not(.pull-right) {
+		background: var(--sb-flyout-bg);
+		color: var(--sb-item-hover-text);
+		font-size: 13px;
+		font-weight: 600;
+		/* Los 3px del borde mas estos 16px dejan el texto a 19px del
+		   canto de la tarjeta, los mismos que suman abajo el padding
+		   del ul y el del enlace. */
+		padding: 0 16px;
+		width: 210px;
+		max-width: calc(100vw - 70px);
+		height: 44px;
+		/* Un pixel menos que la altura: el separador va por dentro. */
+		line-height: 43px;
+		/* AdminLTE desplaza la etiqueta con margin-left: -3px pero deja
+		   el submenu a 0, y de ahi venia el descuadre entre ambos. */
+		margin-left: 0;
+		border-radius: 0 8px 0 0;
+		border-left: 3px solid var(--sb-accent);
+		border-bottom: 1px solid var(--sb-border);
+		box-shadow: var(--sb-flyout-shadow);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		/* El !important no es decorativo: con el sidebar reducido
+		   AdminLTE oculta este span con display: none !important, y solo
+		   lo devuelve en :hover con otro !important. Al ser absoluto
+		   cualquier valor en linea se convertiria en block de todas
+		   formas, asi que se declara block directamente. */
+		display: block !important;
+	}
+
+	/* Un item sin submenu no despliega nada: su etiqueta cierra las dos
+	   esquinas de la derecha y no necesita separador.
+
+	   El :not(.treeview) que usa AdminLTE para esto no sirve, porque el
+	   menu trae items con clase treeview y sin <ul> dentro. Si el
+	   navegador no entiende :has() descarta la regla y queda el aspecto
+	   anterior, que solo pierde el redondeo de una esquina. */
+	.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover:not(:has(> .treeview-menu)) > a > span:not(.pull-right) {
+		border-radius: 0 8px 8px 0;
+		border-bottom: 0;
+		line-height: 44px;
+	}
+
+	/* Submenu: cuelga de la cabecera y comparte su anchura */
+	.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu {
+		background: var(--sb-flyout-bg);
+		width: 210px;
+		max-width: calc(100vw - 70px);
+		padding: 6px;
+		border-radius: 0 0 8px 0;
+		border-left: 3px solid var(--sb-accent);
+		box-shadow: var(--sb-flyout-shadow);
+	}
+	.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a {
+		color: var(--sb-flyout-text);
+		font-size: 12.5px;
+		/* Los 6px del ul mas estos 10px ponen el texto a plomo con el
+		   de la cabecera, y el hueco que dejan a los lados convierte el
+		   hover en una pildora como las del sidebar desplegado. */
+		padding: 7px 10px;
+		border-radius: 6px;
+		transition: background 0.15s, color 0.15s;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		display: block;
+	}
+	.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li > a:hover {
+		background: var(--sb-sub-hover-bg);
+		color: var(--sb-sub-hover-text);
+	}
+	.sidebar-mini.sidebar-collapse .sidebar-menu > li:hover > .treeview-menu > li.active > a {
+		color: var(--sb-accent-lt);
+		font-weight: 600;
+	}
 }
 
 /* =================================================================
    LOGO DE CABECERA — imagen + texto
    ================================================================= */
+
+/* Las plantillas pintan la misma imagen en los dos spans del logo, uno
+   por cada estado del sidebar, y solo se muestra el que toca. Por eso
+   las dos variantes se tratan igual y lo unico que las diferencia es el
+   tamano: si el filtro del tema alcanzara solo a una, el logo cambiaria
+   de aspecto al colapsar. */
+.main-header .logo .logo-img-lg,
+.main-header .logo .logo-img-mini {
+	object-fit: contain;
+	border-radius: 5px;
+	filter: var(--hdr-logo-filter);
+}
 
 /* Logo expandido: imagen a la izquierda del nombre */
 .main-header .logo .logo-lg {
@@ -383,9 +503,8 @@ body[class*="skin-"] .main-footer {
 .main-header .logo .logo-img-lg {
 	width: 28px;
 	height: 28px;
-	object-fit: contain;
+	/* Comparte el contenedor flex con el texto del nombre. */
 	flex-shrink: 0;
-	border-radius: 5px;
 }
 
 /* Logo colapsado: solo la imagen, centrada */
@@ -397,9 +516,6 @@ body[class*="skin-"] .main-footer {
 .main-header .logo .logo-img-mini {
 	width: 26px;
 	height: 26px;
-	object-fit: contain;
-	border-radius: 5px;
-	filter: var(--hdr-logo-filter);
 }
 
 /* Logotipo tipo wordmark: imagen ancha que sustituye al texto */

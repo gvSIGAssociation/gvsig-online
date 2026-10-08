@@ -22,8 +22,8 @@
 	--hdr-text-dim:           #f6f6f6;
 	--hdr-item-hover:         rgba(255,255,255,0.10);
 	--hdr-border:             0 solid transparent;
-	--hdr-shadow:             none;
-	--hdr-logo-border:        1px solid rgba(255,255,255,0.10);
+	--hdr-shadow:             0 1px 3px rgba(0,0,0,0.10);
+	--hdr-logo-border:        none;
 	--hdr-logo-filter:        none;
 	--hdr-field-bg:           rgba(255,255,255,0.12);
 	--hdr-field-bg-focus:     rgba(255,255,255,0.22);
@@ -44,7 +44,6 @@
 	--sb-user-text:           rgba(255,255,255,0.9);
 	--sb-item-hover:          rgba(255,255,255,0.06);
 	--sb-item-hover-text:     #ffffff;
-	--sb-item-active-text:    #ffffff;
 	--sb-sub-hover-bg:        rgba(255,255,255,0.05);
 	--sb-sub-hover-text:      #ffffff;
 	--sb-sub-active-bg:       rgba(255,255,255,0.07);
@@ -64,11 +63,18 @@
    a este.
    ----------------------------------------------------------------- */
 body {
-	--hdr-logo-bg-hover:   var(--hdr-bg);
+	/* El logo comparte superficie con la navbar: la cabecera es de un
+	   solo color. Un tema puede volver al bloque bicolor de AdminLTE
+	   poniendo --hdr-logo-bg: var(--hdr-bg-dk). */
+	--hdr-logo-bg:         var(--hdr-bg);
+	--hdr-logo-bg-hover:   var(--hdr-bg-dk);
 	--hdr-field-option-bg: var(--hdr-bg-dk);
 	--hdr-usermenu-bg:     linear-gradient(135deg, var(--hdr-bg) 0%, var(--hdr-bg-dk) 100%);
 
-	--sb-item-active-bg:     var(--sb-accent);
+	/* El item activo del menu es una pildora con el acento tintado,
+	   que funciona igual en las dos polaridades. */
+	--sb-item-active-bg:     color-mix(in srgb, var(--sb-accent) 22%, transparent);
+	--sb-item-active-text:   var(--sb-accent-lt);
 	--sb-item-active-border: var(--sb-accent-lt);
 	--sb-flyout-bg:          var(--sb-bg-dark);
 }
@@ -107,7 +113,6 @@ body {
 	--hdr-item-hover:         #f0f0f0;
 	--hdr-border:             1px solid #eeeeee;
 	--hdr-shadow:             0 1px 3px rgba(0,0,0,0.08);
-	--hdr-logo-border:        1px solid #dddddd;
 	--hdr-logo-bg-hover:      #ebebeb;
 	--hdr-field-bg:           #f0f0f0;
 	--hdr-field-bg-focus:     #ffffff;
@@ -376,6 +381,7 @@ body {
 .skin-blue-light,
 .skin-black-light,
 .skin-black-light-dphuesca,
+.skin-elegant,              /* claro aunque no lleve el sufijo -light */
 .skin-green-light,
 .skin-red-light,
 .skin-purple-light,
@@ -384,8 +390,6 @@ body {
 	--sb-user-text:          var(--sb-text);
 	--sb-item-hover:         rgba(0,0,0,0.05);
 	--sb-item-hover-text:    var(--sb-text);
-	--sb-item-active-bg:     var(--sb-item-hover);
-	--sb-item-active-text:   var(--sb-accent-lt);
 	--sb-item-active-border: var(--sb-accent);
 	--sb-sub-hover-bg:       rgba(0,0,0,0.04);
 	--sb-sub-hover-text:     var(--sb-accent);
@@ -498,4 +502,39 @@ body {
 	--gol-accent:    #f39c12;
 	--gol-accent-dk: #c07a08;
 	--gol-accent-lt: rgba(243,156,18,0.06);
+}
+
+/* Tema sobrio: acero azulado desaturado (familia HSL 209, saturacion
+   25 %) sobre un gris perla frio de la misma familia, para que el
+   sidebar y la cabecera no desentonen.
+
+   Es un tema de polaridad clara aunque su nombre no acabe en -light:
+   el sufijo es convencion, lo que cuenta es estar en la lista de
+   arriba. */
+.skin-elegant {
+	--hdr-bg:        #3f4d5a;
+	--hdr-bg-dk:     #323d48;
+	--sb-bg:         #f3f5f7;
+	--sb-bg-dark:    #e7ebef;
+	--sb-accent:     #54718c;
+	--sb-accent-lt:  #3e5974;
+	--sb-text:       #37424d;
+	--sb-text-muted: #5f7181;
+	--sb-border:     rgba(63,77,90,0.18);
+	--gol-accent:    #54718c;
+	--gol-accent-dk: #3e5974;
+	--gol-accent-lt: rgba(84,113,140,0.06);
+
+	/* Dos ajustes de refinamiento: las sombras se tinen con la
+	   familia cromatica en lugar de negro puro, y el sidebar se
+	   separa del contenido con una linea de 1px en vez de con una
+	   sombra difusa, que entre dos superficies claras ensucia. */
+	--hdr-shadow:    0 1px 2px rgba(63,77,90,0.14);
+	--sb-shadow:     1px 0 0 rgba(63,77,90,0.12);
+
+	/* La lista de polaridad clara usa --sb-accent para el hover de
+	   los subelementos, que con este acero se queda en 4,27:1 sobre
+	   el fondo del hover y no llega al 4,5:1 que pide AA para 12,5px.
+	   El tono oscuro lo sube a 6,09:1. */
+	--sb-sub-hover-text: var(--sb-accent-lt);
 }
