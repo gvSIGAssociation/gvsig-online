@@ -632,14 +632,24 @@
 			return orderData;
 		}
 
+		function homeAlphaKey(text) {
+			var s = (text || '').replace(/^\s+|\s+$/g, '').toLowerCase();
+			if (s.normalize) {
+				s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+			}
+			return s.replace(/^[^a-z0-9]+/, '');
+		}
+
 		function applyAlphabeticalOrder() {
 			var $list = $('#all-items-panel ul.items-list');
 			if (!$list.length) return;
 			var $items = $list.children('li').get();
 			$items.sort(function(a, b) {
-				var ta = $(a).find('.project-card__name').text().trim().toLowerCase();
-				var tb = $(b).find('.project-card__name').text().trim().toLowerCase();
-				return ta.localeCompare(tb, undefined, { sensitivity: 'base' });
+				var ta = homeAlphaKey($(a).find('.project-card__name').text());
+				var tb = homeAlphaKey($(b).find('.project-card__name').text());
+				if (ta < tb) return -1;
+				if (ta > tb) return 1;
+				return 0;
 			});
 			$.each($items, function(i, el) { $list.append(el); });
 			syncListJsItemsToDomOrder();
@@ -750,13 +760,14 @@
 		$('#btn-sort-alpha').on('click', function() { setOrderMode('alpha'); });
 		$('#btn-sort-manual').on('click', function() { setOrderMode('manual'); });
 
-		// Inicializar según modo de orden
+		// Inicializar según modo de orden.
+		// En alfabético el servidor ya ordena el catálogo completo. List.js deja
+		// en el DOM solo la primera página: reordenar aquí movería ítems dentro
+		// de esa página y no respecto al resto del listado.
 		if (currentOrderType === 'manual') {
 			ensureAllItemsInDom();
 			lastManualOrderData = getOrderDataFromDom();
 			enableSortable();
-		} else {
-			applyAlphabeticalOrder();
 		}
 		updateSaveOrderButtonState();
 

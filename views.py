@@ -94,6 +94,23 @@ def connect_signals():
 
 connect_signals()
 
+def _sort_key_no_accents(s):
+    """Clave alfabética estable: ignora espacios, marcas y prefijos de puntuación.
+
+    Un título como « Seccions…» o «*Seccions…» debe ordenarse con la S, no delante
+    de la A. La comparación es por puntos de código sobre el texto ya normalizado,
+    así el orden no depende de la collation de la base de datos.
+    """
+    if not s:
+        return ''
+    nfd = unicodedata.normalize('NFD', s.strip().casefold())
+    cleaned = ''.join(
+        c for c in nfd
+        if unicodedata.category(c) not in ('Mn', 'Cc', 'Cf')
+    )
+    return re.sub(r'^[^\w]+', '', cleaned, flags=re.UNICODE).strip()
+
+
 def not_found_view(request):
     return render(request, '404.html', {}, status=404)
 
@@ -194,11 +211,6 @@ def home(request):
         except Exception:
             all_items_ordered = None
     elif order_type == UserHomeOrder.ORDER_ALPHA:
-        def _sort_key_no_accents(s):
-            if not s:
-                return ''
-            nfd = unicodedata.normalize('NFD', (s or '').lower())
-            return ''.join(c for c in nfd if unicodedata.category(c) != 'Mn')
         all_items_ordered = list(projects) + list(public_projects) + list(applications) + list(panels)
         all_items_ordered.sort(key=lambda item: _sort_key_no_accents(item.get('title') or item.get('name') or ''))
 
