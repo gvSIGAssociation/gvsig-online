@@ -6,42 +6,67 @@
    Requiere gol-tokens.css, que define los tokens --h-*.
    ================================================================= */
 
-/* Acentos = cabecera del tema (gol-themes.css define --hdr-bg / --hdr-bg-dk por tema) */
+/* Acento = el de contenido del tema, el mismo que usan los
+   formularios y los listados. Antes salia de --hdr-bg, el color de la
+   cabecera, lo que obligaba a parchear cada tema de cabecera clara
+   para que los botones no quedaran blancos sobre blanco. */
 .home-page {
 	padding: 20px 0;
-	--h-accent:    var(--hdr-bg, #4a7fa5);
-	--h-accent-dk: var(--hdr-bg-dk, #2d5f80);
-}
-/* skin-black: cabecera clara; usar acento del sidebar para barra de perfil y controles */
-body.skin-black .home-page {
-	--h-accent:    var(--sb-accent, #637a84);
-	--h-accent-dk: #4d606a;
+	--h-accent:    var(--gol-accent, #4a7fa5);
+	--h-accent-dk: var(--gol-accent-dk, #2d5f80);
+
+	/* El acento de un tema puede ser desde #004466 hasta #f39c12, asi
+	   que su claridad no sirve de nada como garantia. De ahi que cada
+	   uso tenga su variable: el relleno solido lleva texto blanco
+	   encima y parte del tono oscuro, mientras que los tintes y los
+	   bordes parten del medio. El texto sobre fondo claro nunca usa
+	   el acento, va en --h-text. */
+	--h-fill:       var(--h-accent-dk);
+	--h-fill-hover: color-mix(in srgb, var(--h-accent-dk) 82%, #000000);
 }
 
 /* ============================================================
    PROFILE BAR – compacta
    ============================================================ */
+/* Superficie clara con un tinte apenas perceptible del acento, para
+   que hable el mismo lenguaje que las tarjetas del resto de la
+   pagina en lugar de ser la unica franja de color saturado.
+
+   El par de declaraciones de background y de border es un respaldo
+   real: la linea del color-mix() no lleva var(), asi que un navegador
+   que no entienda la funcion la descarta al parsear y se queda con la
+   anterior. */
 .profile-bar {
-	background: linear-gradient(135deg, var(--h-accent-dk) 0%, var(--h-accent) 100%);
+	background: var(--h-white);
+	background: color-mix(in srgb, var(--h-accent) 5%, var(--h-white));
+	border: 1px solid var(--h-border);
+	border: 1px solid color-mix(in srgb, var(--h-accent) 18%, var(--h-border));
+	border-bottom: none;
 	border-radius: var(--h-radius) var(--h-radius) 0 0;
-	box-shadow: 0 4px 18px color-mix(in srgb, var(--h-accent-dk) 35%, transparent);
-	border: none;
+	box-shadow: var(--h-shadow);
 	padding: 14px 20px;
 	display: flex;
 	align-items: center;
 	gap: 14px;
 	margin-bottom: 0;
 }
+/* Sin panel de detalles debajo, la barra se cierra por los cuatro
+   lados. */
 .profile-bar--no-details {
+	border-bottom: 1px solid var(--h-border);
+	border-bottom: 1px solid color-mix(in srgb, var(--h-accent) 18%, var(--h-border));
 	border-radius: var(--h-radius);
 	margin-bottom: 24px;
 }
 
+/* El anillo blanco separa el avatar del fondo tintado y el hilo gris
+   exterior le da el borde que antes hacia el blanco translucido. */
 .profile-bar__avatar {
-	width: 42px;
-	height: 42px;
+	width: 60px;
+	height: 60px;
 	border-radius: 50%;
-	border: 2px solid rgba(255,255,255,0.6);
+	border: 2px solid var(--h-white);
+	box-shadow: 0 0 0 1px var(--h-border);
 	flex-shrink: 0;
 	display: block;
 }
@@ -50,7 +75,7 @@ body.skin-black .home-page {
 .profile-bar__name {
 	font-size: 15px;
 	font-weight: 700;
-	color: #ffffff;
+	color: var(--h-text);
 	margin: 0 0 3px;
 	line-height: 1.2;
 }
@@ -63,28 +88,40 @@ body.skin-black .home-page {
 	padding: 2px 9px;
 	border-radius: 20px;
 }
+/* El color del tema va en el fondo y el borde, nunca en el texto: con
+   acentos claros o calidos (talavera, yellow, villarrobledo) el tono
+   oscuro del acento no llega al 4,5:1 que piden estos 10px. */
 .profile-bar__role-badge--admin,
 .profile-bar__role-badge--staff,
-.profile-bar__role-badge--user { background: rgba(255,255,255,0.2); color: #fff; }
+.profile-bar__role-badge--user {
+	background: var(--h-bg);
+	background: color-mix(in srgb, var(--h-accent) 14%, var(--h-white));
+	border: 1px solid var(--h-border);
+	border: 1px solid color-mix(in srgb, var(--h-accent) 25%, transparent);
+	color: var(--h-text);
+}
 
+/* Boton discreto: en reposo pasa desapercibido y al pasar el raton se
+   tine el fondo y el borde. El texto se mantiene oscuro por lo mismo
+   que el badge. */
 .profile-bar__details-btn {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
-	background: rgba(255,255,255,0.15);
-	border: 1px solid rgba(255,255,255,0.3);
+	background: var(--h-white);
+	border: 1px solid var(--h-border);
 	border-radius: 6px;
 	padding: 6px 14px;
 	font-size: 12px;
 	font-weight: 600;
-	color: #fff;
+	color: var(--h-text);
 	cursor: pointer;
 	transition: background var(--h-transition), border-color var(--h-transition);
 	flex-shrink: 0;
 }
 .profile-bar__details-btn:hover {
-	background: rgba(255,255,255,0.28);
-	border-color: rgba(255,255,255,0.6);
+	background: color-mix(in srgb, var(--h-accent) 8%, var(--h-white));
+	border-color: color-mix(in srgb, var(--h-accent) 35%, var(--h-border));
 }
 .profile-bar__details-btn i {
 	font-size: 10px;
@@ -95,12 +132,17 @@ body.skin-black .home-page {
 /* ============================================================
    PANEL DE DETALLES (desplegable)
    ============================================================ */
+/* Mismo borde tintado que la barra, que va pegada encima, para que
+   los laterales no cambien de color a media altura. El panel se queda
+   blanco: el 5 % de tinte de la barra ya separa las dos zonas sin
+   necesidad de una linea dura. */
 .profile-details-panel {
 	overflow: hidden;
 	max-height: 0;
 	transition: max-height 0.4s ease;
 	background: var(--h-white);
 	border: 1px solid var(--h-border);
+	border: 1px solid color-mix(in srgb, var(--h-accent) 18%, var(--h-border));
 	border-top: none;
 	border-radius: 0 0 var(--h-radius) var(--h-radius);
 	margin-bottom: 24px;
@@ -145,7 +187,7 @@ body.skin-black .home-page {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
-	background: var(--h-accent);
+	background: var(--h-fill);
 	border: none;
 	border-radius: 6px;
 	padding: 6px 14px;
@@ -158,7 +200,7 @@ body.skin-black .home-page {
 	text-decoration: none !important;
 }
 .profile-bar__pass-btn:hover {
-	background: var(--h-accent-dk);
+	background: var(--h-fill-hover);
 	color: #ffffff !important;
 }
 .profile-bar__pass-btn i { font-size: 12px; }
@@ -198,7 +240,7 @@ body.skin-black .home-page {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
-	background: var(--h-accent);
+	background: var(--h-fill);
 	border: none;
 	color: #fff;
 	font-size: 13px;
@@ -209,7 +251,7 @@ body.skin-black .home-page {
 	transition: background var(--h-transition);
 	margin-top: 10px;
 }
-.btn-pass-submit:hover { background: var(--h-accent-dk); }
+.btn-pass-submit:hover { background: var(--h-fill-hover); }
 
 /* ============================================================
    PANEL DE PROYECTOS – fondo transparente
@@ -251,7 +293,7 @@ body.skin-black .home-page {
 .projects-panel__title {
 	font-size: 16px;
 	font-weight: 700;
-	color: var(--h-accent-dk);
+	color: var(--h-text);
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -297,7 +339,7 @@ body.skin-black .home-page {
 	display: inline-flex;
 	align-items: center;
 	gap: 5px;
-	background: var(--h-accent);
+	background: var(--h-fill);
 	color: #fff;
 	border: none;
 	border-radius: 6px;
@@ -309,7 +351,7 @@ body.skin-black .home-page {
 	transition: background var(--h-transition);
 	white-space: nowrap;
 }
-#button-add-project:hover { background: var(--h-accent-dk); }
+#button-add-project:hover { background: var(--h-fill-hover); }
 
 /* ============================================================
    GRID DE CARDS – 4 columnas
@@ -352,7 +394,7 @@ body.skin-black .home-page {
 
 .project-card__thumb {
 	width: 100%;
-	height: 100px;
+	height: 90px;
 	object-fit: contain;
 	object-position: center;
 	background: var(--h-bg);
@@ -389,7 +431,7 @@ body.skin-black .home-page {
 	line-height: 1.4;
 	width: fit-content;
 }
-.project-card__type-tag--private { background: #e8eef4; color: var(--h-accent-dk); }
+.project-card__type-tag--private { background: #e8eef4; color: var(--h-text); }
 .project-card__type-tag--public  { background: #e4f3eb; color: #1e7a4d; }
 .project-card__type-tag--app     { background: #e6eef7; color: var(--h-blue); }
 .project-card__type-tag--panel   { background: #eee8f7; color: #65428a; }
@@ -415,7 +457,7 @@ body.skin-black .home-page {
 	background: var(--h-bg);
 	border: 1px solid var(--h-border);
 	border-radius: 6px;
-	color: var(--h-accent) !important;
+	color: var(--h-text) !important;
 	font-size: 12px;
 	font-weight: 600;
 	padding: 7px 0;
@@ -424,8 +466,8 @@ body.skin-black .home-page {
 	letter-spacing: 0.2px;
 }
 .project-card:hover .project-card__btn {
-	background: var(--h-accent);
-	border-color: var(--h-accent);
+	background: var(--h-fill);
+	border-color: var(--h-fill);
 	color: #fff !important;
 }
 
@@ -447,6 +489,46 @@ body.skin-black .home-page {
 	padding: 16px 0 4px;
 }
 .list-pagination .pagination { margin: 0; }
+
+/* Bootstrap trae #337ab7 cableado en .pagination, que no sigue al
+   tema. El marcado lo genera List.js con una plantilla fija, siempre
+   <li><a class="page">, y pone active y disabled en el li. */
+.list-pagination .pagination > li > a {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 30px;
+	height: 30px;
+	padding: 0 8px;
+	margin: 0 2px;
+	border: 1px solid var(--h-border);
+	border-radius: 6px;
+	background: var(--h-white);
+	color: var(--h-text);
+	font-size: 12px;
+	font-weight: 600;
+	transition: background var(--h-transition), border-color var(--h-transition);
+}
+.list-pagination .pagination > li > a:hover,
+.list-pagination .pagination > li > a:focus {
+	background: color-mix(in srgb, var(--h-accent) 10%, var(--h-white));
+	border-color: var(--h-accent);
+	color: var(--h-text);
+}
+.list-pagination .pagination > li.active > a,
+.list-pagination .pagination > li.active > a:hover,
+.list-pagination .pagination > li.active > a:focus {
+	background: var(--h-fill);
+	border-color: var(--h-fill);
+	color: #fff;
+}
+.list-pagination .pagination > li.disabled > a,
+.list-pagination .pagination > li.disabled > a:hover {
+	background: var(--h-bg);
+	border-color: var(--h-border);
+	color: var(--h-muted);
+	cursor: default;
+}
 
 /* ============================================================
    BARRA DE FILTROS
@@ -474,12 +556,12 @@ body.skin-black .home-page {
 }
 .filter-btn:hover {
 	border-color: var(--h-accent);
-	color: var(--h-accent);
+	color: var(--h-text);
 	background: color-mix(in srgb, var(--h-accent) 7%, var(--h-white));
 }
 .filter-btn.active {
-	background: var(--h-accent);
-	border-color: var(--h-accent);
+	background: var(--h-fill);
+	border-color: var(--h-fill);
 	color: #fff;
 }
 .filter-count {
@@ -533,8 +615,8 @@ body.skin-black .home-page {
 	transition: background var(--h-transition), color var(--h-transition);
 	white-space: nowrap;
 }
-.sort-btn.active { background: var(--h-accent); color: #fff; }
-.sort-btn:not(.active):hover { color: var(--h-accent); background: color-mix(in srgb, var(--h-accent) 10%, transparent); }
+.sort-btn.active { background: var(--h-fill); color: #fff; }
+.sort-btn:not(.active):hover { color: var(--h-text); background: color-mix(in srgb, var(--h-accent) 10%, transparent); }
 
 #btn-save-order {
 	display: none;
@@ -692,8 +774,8 @@ body.skin-black .home-page {
 	font-size: 13px;
 	transition: background var(--h-transition), color var(--h-transition);
 }
-.view-btn.active { background: var(--h-accent); color: #fff; }
-.view-btn:not(.active):hover { color: var(--h-accent); background: color-mix(in srgb, var(--h-accent) 10%, transparent); }
+.view-btn.active { background: var(--h-fill); color: #fff; }
+.view-btn:not(.active):hover { color: var(--h-text); background: color-mix(in srgb, var(--h-accent) 10%, transparent); }
 
 /* ---- Modo lista ---- */
 .projects-grid--list { margin: 0; }

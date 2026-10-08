@@ -52,7 +52,7 @@ body[class*="skin-"] .main-header .navbar .sidebar-toggle:hover {
 }
 
 body[class*="skin-"] .main-header .logo {
-	background-color: var(--hdr-bg-dk);
+	background-color: var(--hdr-logo-bg);
 	color: var(--hdr-text);
 	border-bottom: 0 solid transparent;
 }

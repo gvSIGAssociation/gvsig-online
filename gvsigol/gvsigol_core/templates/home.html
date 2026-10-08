@@ -11,7 +11,7 @@
 
 	<!-- ===== PROFILE BAR (compacta) ===== -->
 	<div class="profile-bar{% if not allow_password_update and not user.email %} profile-bar--no-details{% endif %}">
-		<img class="profile-bar__avatar" src="{% static "img/user.png" %}" alt="Avatar">
+		<img class="profile-bar__avatar" src="{% static "img/users_dashboard.png" %}" alt="Avatar">
 		<div class="profile-bar__identity">
 			<p class="profile-bar__name">{{user.first_name}} {{user.last_name}}</p>
 			{% if user.is_superuser %}
