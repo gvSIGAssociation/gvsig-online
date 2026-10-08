@@ -12,7 +12,7 @@
           skin-albacete, skin-alzira, skin-atlasrenewableenergy,
           skin-cartagena, skin-csicgranada, skin-eliana, skin-libra,
           skin-mallorca, skin-ormusa, skin-pobla, skin-talavera,
-          skin-villarrobledo
+          skin-villarrobledo, skin-picanya
    ----------------------------------------------------------------- */
 
 /* --- skin-blue --------------------------------------------------- */
@@ -215,6 +215,16 @@
   --hdr-bg-dk:    #a84c18;
 }
 
+/* --- skin-picanya ----------------------------------------------- */
+.skin-picanya {
+  --sb-bg:        #0f2420;
+  --sb-bg-dark:   #0a1a17;
+  --sb-accent:    #009681;
+  --sb-accent-lt: #4db8a8;
+  --hdr-bg:       #009681;
+  --hdr-bg-dk:    #007A68;
+}
+
 /* -----------------------------------------------------------------
    Shared vars para todos los skins (dark y light)
    ----------------------------------------------------------------- */
@@ -224,6 +234,7 @@
 .skin-cartagena, .skin-csicgranada, .skin-eliana, .skin-libra,
 .skin-mallorca, .skin-ormusa, .skin-pobla, .skin-talavera,
 .skin-villarrobledo,
+.skin-picanya,
 .skin-blue-light, .skin-black-light, .skin-black-light-dphuesca,
 .skin-green-light, .skin-red-light, .skin-purple-light, .skin-yellow-light {
   --sb-text:       #c8d6e0;
@@ -255,7 +266,8 @@
 .skin-ormusa .main-header .navbar,
 .skin-pobla .main-header .navbar,
 .skin-talavera .main-header .navbar,
-.skin-villarrobledo .main-header .navbar {
+.skin-villarrobledo .main-header .navbar,
+.skin-picanya .main-header .navbar {
   background-color: var(--hdr-bg) !important;
   background-image: none !important;
 }
@@ -279,7 +291,8 @@
 .skin-ormusa .main-header .logo,
 .skin-pobla .main-header .logo,
 .skin-talavera .main-header .logo,
-.skin-villarrobledo .main-header .logo {
+.skin-villarrobledo .main-header .logo,
+.skin-picanya .main-header .logo {
   background-color: var(--hdr-bg-dk) !important;
   background-image: none !important;
   border-right: 1px solid rgba(255,255,255,0.10) !important;
@@ -306,7 +319,8 @@
 .skin-ormusa .main-header .logo:hover,
 .skin-pobla .main-header .logo:hover,
 .skin-talavera .main-header .logo:hover,
-.skin-villarrobledo .main-header .logo:hover {
+.skin-villarrobledo .main-header .logo:hover,
+.skin-picanya .main-header .logo:hover {
   background-color: var(--hdr-bg) !important;
 }
 
@@ -330,7 +344,8 @@
 .skin-ormusa .main-header .navbar .sidebar-toggle:hover,
 .skin-pobla .main-header .navbar .sidebar-toggle:hover,
 .skin-talavera .main-header .navbar .sidebar-toggle:hover,
-.skin-villarrobledo .main-header .navbar .sidebar-toggle:hover {
+.skin-villarrobledo .main-header .navbar .sidebar-toggle:hover,
+.skin-picanya .main-header .navbar .sidebar-toggle:hover {
   background-color: rgba(255,255,255,0.10) !important;
 }
 
@@ -354,7 +369,8 @@
 .skin-ormusa .main-header .navbar-custom-menu .form-control,
 .skin-pobla .main-header .navbar-custom-menu .form-control,
 .skin-talavera .main-header .navbar-custom-menu .form-control,
-.skin-villarrobledo .main-header .navbar-custom-menu .form-control {
+.skin-villarrobledo .main-header .navbar-custom-menu .form-control,
+.skin-picanya .main-header .navbar-custom-menu .form-control {
   background: rgba(255,255,255,0.12) !important;
   border: 1px solid rgba(255,255,255,0.20) !important;
   color: #fff !important;
@@ -383,7 +399,8 @@
 .skin-ormusa .main-header .navbar-custom-menu .form-control option,
 .skin-pobla .main-header .navbar-custom-menu .form-control option,
 .skin-talavera .main-header .navbar-custom-menu .form-control option,
-.skin-villarrobledo .main-header .navbar-custom-menu .form-control option {
+.skin-villarrobledo .main-header .navbar-custom-menu .form-control option,
+.skin-picanya .main-header .navbar-custom-menu .form-control option {
   background: var(--hdr-bg-dk);
   color: #fff;
 }
@@ -408,7 +425,8 @@
 .skin-ormusa .main-sidebar,
 .skin-pobla .main-sidebar,
 .skin-talavera .main-sidebar,
-.skin-villarrobledo .main-sidebar {
+.skin-villarrobledo .main-sidebar,
+.skin-picanya .main-sidebar {
   background-color: var(--sb-bg) !important;
   background-image: none !important;
   box-shadow: 2px 0 12px rgba(0,0,0,0.25) !important;
@@ -434,7 +452,8 @@
 .skin-ormusa .user-panel,
 .skin-pobla .user-panel,
 .skin-talavera .user-panel,
-.skin-villarrobledo .user-panel {
+.skin-villarrobledo .user-panel,
+.skin-picanya .user-panel {
   display: flex !important;
   align-items: center !important;
   padding: 12px 10px !important;
@@ -462,7 +481,8 @@
 .skin-ormusa .user-panel > .image,
 .skin-pobla .user-panel > .image,
 .skin-talavera .user-panel > .image,
-.skin-villarrobledo .user-panel > .image {
+.skin-villarrobledo .user-panel > .image,
+.skin-picanya .user-panel > .image {
   float: none !important;
   flex-shrink: 0 !important;
   width: 36px !important;
@@ -490,7 +510,8 @@
 .skin-ormusa .user-panel > .image > img,
 .skin-pobla .user-panel > .image > img,
 .skin-talavera .user-panel > .image > img,
-.skin-villarrobledo .user-panel > .image > img {
+.skin-villarrobledo .user-panel > .image > img,
+.skin-picanya .user-panel > .image > img {
   width: 36px !important;
   height: 36px !important;
   border-radius: 6px !important;
@@ -517,7 +538,8 @@
 .skin-ormusa .user-panel > .info,
 .skin-pobla .user-panel > .info,
 .skin-talavera .user-panel > .info,
-.skin-villarrobledo .user-panel > .info {
+.skin-villarrobledo .user-panel > .info,
+.skin-picanya .user-panel > .info {
   float: none !important;
   padding: 0 0 0 10px !important;
   overflow: hidden !important;
@@ -541,7 +563,8 @@
 .skin-ormusa .user-panel > .info > p,
 .skin-pobla .user-panel > .info > p,
 .skin-talavera .user-panel > .info > p,
-.skin-villarrobledo .user-panel > .info > p {
+.skin-villarrobledo .user-panel > .info > p,
+.skin-picanya .user-panel > .info > p {
   color: rgba(255,255,255,0.9) !important;
   font-size: 13px !important;
   font-weight: 700 !important;
@@ -572,7 +595,8 @@
 .skin-ormusa .sidebar-menu > li > a,
 .skin-pobla .sidebar-menu > li > a,
 .skin-talavera .sidebar-menu > li > a,
-.skin-villarrobledo .sidebar-menu > li > a {
+.skin-villarrobledo .sidebar-menu > li > a,
+.skin-picanya .sidebar-menu > li > a {
   padding: 10px 12px 10px 15px !important;
   color: var(--sb-text) !important;
   font-size: 13px !important;
@@ -601,6 +625,7 @@
 .skin-pobla .sidebar-menu > li > a > .fa,
 .skin-talavera .sidebar-menu > li > a > .fa,
 .skin-villarrobledo .sidebar-menu > li > a > .fa,
+.skin-picanya .sidebar-menu > li > a > .fa,
 .skin-blue .sidebar-menu > li > a > .glyphicon,
 .skin-black .sidebar-menu > li > a > .glyphicon,
 .skin-blue-dark .sidebar-menu > li > a > .glyphicon,
@@ -620,7 +645,8 @@
 .skin-ormusa .sidebar-menu > li > a > .glyphicon,
 .skin-pobla .sidebar-menu > li > a > .glyphicon,
 .skin-talavera .sidebar-menu > li > a > .glyphicon,
-.skin-villarrobledo .sidebar-menu > li > a > .glyphicon {
+.skin-villarrobledo .sidebar-menu > li > a > .glyphicon,
+.skin-picanya .sidebar-menu > li > a > .glyphicon {
   color: var(--sb-text-muted) !important;
   width: 20px !important;
   font-size: 14px !important;
@@ -647,7 +673,8 @@
 .skin-ormusa .sidebar-menu > li > a:hover,
 .skin-pobla .sidebar-menu > li > a:hover,
 .skin-talavera .sidebar-menu > li > a:hover,
-.skin-villarrobledo .sidebar-menu > li > a:hover {
+.skin-villarrobledo .sidebar-menu > li > a:hover,
+.skin-picanya .sidebar-menu > li > a:hover {
   background-color: var(--sb-item-hover) !important;
   color: #fff !important;
   border-left-color: var(--sb-accent) !important;
@@ -671,7 +698,8 @@
 .skin-ormusa .sidebar-menu > li > a:hover > .fa,
 .skin-pobla .sidebar-menu > li > a:hover > .fa,
 .skin-talavera .sidebar-menu > li > a:hover > .fa,
-.skin-villarrobledo .sidebar-menu > li > a:hover > .fa {
+.skin-villarrobledo .sidebar-menu > li > a:hover > .fa,
+.skin-picanya .sidebar-menu > li > a:hover > .fa {
   color: var(--sb-accent) !important;
 }
 
@@ -695,7 +723,8 @@
 .skin-ormusa .sidebar-menu > li.active > a,
 .skin-pobla .sidebar-menu > li.active > a,
 .skin-talavera .sidebar-menu > li.active > a,
-.skin-villarrobledo .sidebar-menu > li.active > a {
+.skin-villarrobledo .sidebar-menu > li.active > a,
+.skin-picanya .sidebar-menu > li.active > a {
   background-color: var(--sb-accent-dk, var(--sb-accent)) !important;
   color: #fff !important;
   border-left-color: var(--sb-accent-lt) !important;
@@ -719,7 +748,8 @@
 .skin-ormusa .sidebar-menu > li.active > a > .fa,
 .skin-pobla .sidebar-menu > li.active > a > .fa,
 .skin-talavera .sidebar-menu > li.active > a > .fa,
-.skin-villarrobledo .sidebar-menu > li.active > a > .fa {
+.skin-villarrobledo .sidebar-menu > li.active > a > .fa,
+.skin-picanya .sidebar-menu > li.active > a > .fa {
   color: var(--sb-accent-lt) !important;
 }
 
@@ -743,7 +773,8 @@
 .skin-ormusa .sidebar-menu li.header,
 .skin-pobla .sidebar-menu li.header,
 .skin-talavera .sidebar-menu li.header,
-.skin-villarrobledo .sidebar-menu li.header {
+.skin-villarrobledo .sidebar-menu li.header,
+.skin-picanya .sidebar-menu li.header {
   color: var(--sb-text-muted) !important;
   font-size: 10px !important;
   font-weight: 700 !important;
@@ -773,7 +804,8 @@
 .skin-ormusa .sidebar-menu .treeview-menu,
 .skin-pobla .sidebar-menu .treeview-menu,
 .skin-talavera .sidebar-menu .treeview-menu,
-.skin-villarrobledo .sidebar-menu .treeview-menu {
+.skin-villarrobledo .sidebar-menu .treeview-menu,
+.skin-picanya .sidebar-menu .treeview-menu {
   background: var(--sb-bg-dark) !important;
   padding-left: 0 !important;
   border-top: 1px solid var(--sb-border) !important;
@@ -798,7 +830,8 @@
 .skin-ormusa .sidebar-menu .treeview-menu > li > a,
 .skin-pobla .sidebar-menu .treeview-menu > li > a,
 .skin-talavera .sidebar-menu .treeview-menu > li > a,
-.skin-villarrobledo .sidebar-menu .treeview-menu > li > a {
+.skin-villarrobledo .sidebar-menu .treeview-menu > li > a,
+.skin-picanya .sidebar-menu .treeview-menu > li > a {
   padding: 7px 10px 7px 32px !important;
   color: var(--sb-text-muted) !important;
   font-size: 12.5px !important;
@@ -826,7 +859,8 @@
 .skin-ormusa .sidebar-menu .treeview-menu > li > a:hover,
 .skin-pobla .sidebar-menu .treeview-menu > li > a:hover,
 .skin-talavera .sidebar-menu .treeview-menu > li > a:hover,
-.skin-villarrobledo .sidebar-menu .treeview-menu > li > a:hover {
+.skin-villarrobledo .sidebar-menu .treeview-menu > li > a:hover,
+.skin-picanya .sidebar-menu .treeview-menu > li > a:hover {
   background-color: rgba(255,255,255,0.05) !important;
   color: #fff !important;
   border-left-color: var(--sb-accent) !important;
@@ -850,7 +884,8 @@
 .skin-ormusa .sidebar-menu .treeview-menu > li.active > a,
 .skin-pobla .sidebar-menu .treeview-menu > li.active > a,
 .skin-talavera .sidebar-menu .treeview-menu > li.active > a,
-.skin-villarrobledo .sidebar-menu .treeview-menu > li.active > a {
+.skin-villarrobledo .sidebar-menu .treeview-menu > li.active > a,
+.skin-picanya .sidebar-menu .treeview-menu > li.active > a {
   color: var(--sb-accent-lt) !important;
   background-color: rgba(255,255,255,0.07) !important;
   border-left-color: var(--sb-accent) !important;
@@ -877,7 +912,8 @@
 .skin-ormusa .sidebar-menu li > a > .fa-angle-left,
 .skin-pobla .sidebar-menu li > a > .fa-angle-left,
 .skin-talavera .sidebar-menu li > a > .fa-angle-left,
-.skin-villarrobledo .sidebar-menu li > a > .fa-angle-left {
+.skin-villarrobledo .sidebar-menu li > a > .fa-angle-left,
+.skin-picanya .sidebar-menu li > a > .fa-angle-left {
   color: var(--sb-text-muted) !important;
   opacity: 0.7 !important;
 }
@@ -900,7 +936,8 @@
 .skin-ormusa .sidebar-menu li.active > a > .fa-angle-left,
 .skin-pobla .sidebar-menu li.active > a > .fa-angle-left,
 .skin-talavera .sidebar-menu li.active > a > .fa-angle-left,
-.skin-villarrobledo .sidebar-menu li.active > a > .fa-angle-left {
+.skin-villarrobledo .sidebar-menu li.active > a > .fa-angle-left,
+.skin-picanya .sidebar-menu li.active > a > .fa-angle-left {
   color: var(--sb-accent) !important;
   opacity: 1 !important;
 }
@@ -925,7 +962,8 @@
 .skin-ormusa .content-wrapper,
 .skin-pobla .content-wrapper,
 .skin-talavera .content-wrapper,
-.skin-villarrobledo .content-wrapper {
+.skin-villarrobledo .content-wrapper,
+.skin-picanya .content-wrapper {
   background-color: #f0f3f6 !important;
 }
 
@@ -948,7 +986,8 @@
 .skin-ormusa .main-footer,
 .skin-pobla .main-footer,
 .skin-talavera .main-footer,
-.skin-villarrobledo .main-footer {
+.skin-villarrobledo .main-footer,
+.skin-picanya .main-footer {
   background: #fff !important;
   border-top: 1px solid #e0e6ea !important;
   color: #9aabb5 !important;
@@ -978,6 +1017,7 @@
 .skin-pobla .main-sidebar ::-webkit-scrollbar,
 .skin-talavera .main-sidebar ::-webkit-scrollbar,
 .skin-villarrobledo .main-sidebar ::-webkit-scrollbar { width: 4px; }
+.skin-picanya .main-sidebar ::-webkit-scrollbar { width: 4px; }
 .skin-blue .main-sidebar ::-webkit-scrollbar-thumb,
 .skin-black .main-sidebar ::-webkit-scrollbar-thumb,
 .skin-blue-dark .main-sidebar ::-webkit-scrollbar-thumb,
@@ -997,7 +1037,8 @@
 .skin-ormusa .main-sidebar ::-webkit-scrollbar-thumb,
 .skin-pobla .main-sidebar ::-webkit-scrollbar-thumb,
 .skin-talavera .main-sidebar ::-webkit-scrollbar-thumb,
-.skin-villarrobledo .main-sidebar ::-webkit-scrollbar-thumb {
+.skin-villarrobledo .main-sidebar ::-webkit-scrollbar-thumb,
+.skin-picanya .main-sidebar ::-webkit-scrollbar-thumb {
   background: var(--sb-accent);
   border-radius: 2px;
 }
