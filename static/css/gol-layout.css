@@ -1,9 +1,9 @@
 /* =================================================================
    gvSIG Online — Cabecera, menu lateral, contenido y pie del panel
-   de administracion, sobre AdminLTE 2. Sustituye a
-   sidebar-refinements.css: las mismas reglas, pero escritas una sola
-   vez y resueltas con las variables de gol-themes.css en lugar de
-   enumerar cada tema en cada selector.
+   de administracion, sobre AdminLTE 2. Las reglas se escriben una
+   sola vez y se resuelven con las variables de gol-themes.css, en
+   lugar de enumerar cada tema en cada selector. Ninguna regla de
+   este fichero debe nombrar un tema concreto.
 
    El prefijo body[class*="skin-"] reproduce el ambito que tenian los
    selectores .skin-<nombre>.
@@ -399,6 +399,16 @@ body[class*="skin-"] .main-footer {
 	height: 26px;
 	object-fit: contain;
 	border-radius: 5px;
+	filter: var(--hdr-logo-filter);
+}
+
+/* Logotipo tipo wordmark: imagen ancha que sustituye al texto */
+.main-header .logo .logo-wordmark {
+	height: 40px;
+	width: auto;
+	max-width: 200px;
+	object-fit: contain;
+	border-radius: 0;
 }
 
 /* El panel de usuario del sidebar se oculta: el logo ya esta en la cabecera.

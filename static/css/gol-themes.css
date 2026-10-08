@@ -24,6 +24,7 @@
 	--hdr-border:             0 solid transparent;
 	--hdr-shadow:             none;
 	--hdr-logo-border:        1px solid rgba(255,255,255,0.10);
+	--hdr-logo-filter:        none;
 	--hdr-field-bg:           rgba(255,255,255,0.12);
 	--hdr-field-bg-focus:     rgba(255,255,255,0.22);
 	--hdr-field-border:       rgba(255,255,255,0.25);
@@ -348,6 +349,8 @@ body {
 	--gol-accent-lt: rgba(242,125,55,0.06);
 }
 
+/* El logotipo de Picanya viene en color y se necesita en blanco sobre
+   la franja de la cabecera. */
 .skin-picanya {
 	--hdr-bg:        #009681;
 	--hdr-bg-dk:     #007A68;
@@ -358,6 +361,8 @@ body {
 	--gol-accent:    #009681;
 	--gol-accent-dk: #007A68;
 	--gol-accent-lt: rgba(0,150,129,0.06);
+
+	--hdr-logo-filter: brightness(0) invert(1);
 }
 
 /* =================================================================
