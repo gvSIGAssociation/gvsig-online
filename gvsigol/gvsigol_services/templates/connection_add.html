@@ -2,7 +2,7 @@
 {% load static %}
 {% load i18n %}
 
-{% block extra-head %}
+{% block header %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/xq-dark.min.css">
 <link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
@@ -11,9 +11,6 @@
 <link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-roles.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-permissions.css" %}">
-{% endblock %}
-
-{% block header %}
 {% endblock %}
 
 {% block content %}
