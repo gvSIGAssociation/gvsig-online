@@ -4137,45 +4137,50 @@ def layergroup_add_with_project(request, project_id):
         return render(request, 'layergroup_add.html', response)
 
 def layergroup_mapserver_toc(group, toc_string):
-    if toc_string != None or toc_string != '':
-        layer_ids = toc_string.split(',')
-        layer_ids = layer_ids[::-1]
-        layers_dict = {}
-        last = None
-        i=0
-        for layer_id in layer_ids:
-            try:
-                layer = Layer.objects.get(id=int(layer_id))
-                layer_json = {
-                    'name': layer.name,
-                    'title': layer.title,
-                    'order': 1000+i
-                }
-                layer.order = i
-                layer.save()
-                i = i + 1
-                
-                if not layer.external:
-                    layers_dict[layer.name] = layer_json
-                    last = layer
-            except:
-                logger.exception("Getting layer to update layer group order")
-
-        if len(layers_dict)> 0:
-            toc_object = {
-                'name': group.name,
-                'title': group.title,
-                'order': 1000,
-                'layers': layers_dict
-
+    if not toc_string:
+        return
+    layer_ids = toc_string.split(',')
+    layer_ids = layer_ids[::-1]
+    layers_dict = {}
+    last = None
+    i=0
+    for layer_id in layer_ids:
+        try:
+            layer = Layer.objects.get(id=int(layer_id))
+            layer_json = {
+                'name': layer.name,
+                'title': layer.title,
+                'order': 1000+i
             }
+            layer.order = i
+            layer.save()
+            i = i + 1
 
-            toc={}
-            toc[group.name] = toc_object
-            gs = geographic_servers.get_instance().get_server_by_id(last.datastore.workspace.server.id)
-            gs.createOrUpdateSortedGeoserverLayerGroup(toc)
-            gs.set_gwclayer_dynamic_subsets(None, group.name)
-            gs.reload_nodes()
+            if not layer.external:
+                layers_dict[layer.name] = layer_json
+                last = layer
+        except:
+            logger.exception("Getting layer to update layer group order")
+
+    if len(layers_dict)> 0:
+        if last.datastore_id is None:
+            raise Exception("Layer '%s' (id=%s) is not external but has no datastore" % (last.name, last.id))
+        toc_object = {
+            'name': group.name,
+            'title': group.title,
+            'order': 1000,
+            'layers': layers_dict
+
+        }
+
+        toc={}
+        toc[group.name] = toc_object
+        gs = geographic_servers.get_instance().get_server_by_id(last.datastore.workspace.server.id)
+        if gs is None:
+            raise Exception("Geographic server %s not found for layer '%s'" % (last.datastore.workspace.server_id, last.name))
+        gs.createOrUpdateSortedGeoserverLayerGroup(toc)
+        gs.set_gwclayer_dynamic_subsets(None, group.name)
+        gs.reload_nodes()
 
 def _layergroup_update(request, lgid, project_id):
     redirect_var = request.GET.get('redirect')

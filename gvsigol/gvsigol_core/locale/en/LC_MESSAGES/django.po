@@ -553,6 +553,18 @@ msgstr ""
 msgid "Projects & Applications"
 msgstr ""
 
+msgid "Projects, panels & applications"
+msgstr "Projects, panels & applications"
+
+msgid "Panels"
+msgstr "Panels"
+
+msgid "Panel"
+msgstr "Panel"
+
+msgid "Open panel"
+msgstr "Open panel"
+
 #: gvsigol_core/templates/home.html:879
 #: gvsigol_core/templates/project_list.html:474
 msgid "Search..."

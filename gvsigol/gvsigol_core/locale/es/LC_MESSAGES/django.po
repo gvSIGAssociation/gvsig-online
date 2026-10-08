@@ -910,6 +910,18 @@ msgstr "Actualizar contraseña"
 msgid "Projects & Applications"
 msgstr "Proyectos y aplicaciones"
 
+msgid "Projects, panels & applications"
+msgstr "Proyectos, paneles y aplicaciones"
+
+msgid "Panels"
+msgstr "Paneles"
+
+msgid "Panel"
+msgstr "Panel"
+
+msgid "Open panel"
+msgstr "Abrir panel"
+
 #: gvsigol_core/templates/home.html:879
 #: gvsigol_core/templates/project_list.html:521
 #, fuzzy

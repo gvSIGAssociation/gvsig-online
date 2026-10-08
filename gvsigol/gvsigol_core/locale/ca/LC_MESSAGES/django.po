@@ -905,6 +905,18 @@ msgstr "Actualitzar contrasenya"
 msgid "Projects & Applications"
 msgstr "Projectes i aplicacions"
 
+msgid "Projects, panels & applications"
+msgstr "Projectes, panells i aplicacions"
+
+msgid "Panels"
+msgstr "Panells"
+
+msgid "Panel"
+msgstr "Panell"
+
+msgid "Open panel"
+msgstr "Obrir panell"
+
 #: gvsigol_core/templates/home.html:879
 #: gvsigol_core/templates/project_list.html:521
 msgid "Search..."
