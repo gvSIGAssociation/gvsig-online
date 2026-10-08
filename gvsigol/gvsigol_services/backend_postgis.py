@@ -47,14 +47,19 @@ _GEOMETRY_SUBTYPES_GEOSERVER = frozenset({
 
 def _normalize_geometry_subtype_for_geoserver(label):
     """
-    Map PostGIS ST_GeometryType / typmod labels (e.g. ST_MultiPolygonZ) to a plain
-    OGC name that matches geometry_columns / GeoServer (MULTIPOLYGON, ...).
+    Map PostGIS ST_GeometryType / typmod / geometry_columns labels to a plain
+    OGC name that matches GeoServer/JTS bindings (MULTIPOLYGON, MULTILINESTRING, ...).
+
+    Accepts dimension variants such as MULTILINESTRINGM, ST_MultiPolygonZ,
+    or "MultiLineString M" / "MultiLineString ZM".
     """
     if not label:
         return None
     s = str(label).strip().upper()
     if s.startswith('ST_'):
         s = s[3:]
+    # geometry_columns / typmod: MULTILINESTRINGM; WKT-style: "MULTILINESTRING M"
+    s = re.sub(r'\s+', '', s)
     for suffix in ('ZM', 'Z', 'M'):
         if len(s) > len(suffix) and s.endswith(suffix):
             base = s[: -len(suffix)]

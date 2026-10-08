@@ -31,7 +31,7 @@ from gvsigol_symbology.models import Symbolizer, Style, Rule, StyleLayer
 from gvsigol_symbology.services import create_default_style, clone_style
 from gvsigol_symbology import services as symbology_services
 from django.utils.translation import gettext_lazy as _
-from .backend_postgis import Introspect
+from .backend_postgis import Introspect, _normalize_geometry_subtype_for_geoserver
 import xml.etree.ElementTree as ET
 import geoserver.catalog as gscat
 from geoserver.support import DimensionInfo
@@ -841,7 +841,12 @@ class Geoserver():
             return "java.sql.Time"
         elif sql_type in ["timestamp without time zone", "timestamp with time zone", "timestamp"]:
             return "java.sql.Timestamp"
-        sql_type = sql_type.upper()
+        # PostGIS may report MULTILINESTRINGM / POINTZ / etc.; JTS bindings are the base type.
+        normalized_geom = _normalize_geometry_subtype_for_geoserver(sql_type)
+        if normalized_geom:
+            sql_type = normalized_geom
+        else:
+            sql_type = sql_type.upper()
         if sql_type == "POINT":
             """
             Note: Geoserver 2.14 migrated from com.vividsolutions.jts.geom JTS packages to 

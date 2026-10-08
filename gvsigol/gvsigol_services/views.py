@@ -1833,12 +1833,18 @@ def layer_update(request, layer_id):
                 assigned_manage_roles.append(key[len('manage-usergroup-'):])
 
         assigned_write_roles = []
+        is_view = False
         if layer.type == 'v_PostGIS':
-            dbi, src, schema = layer.get_db_connection()
-            with dbi as c:
-                is_view = c.is_view(schema, src)
-        else:
-            is_view = False
+            try:
+                dbi, src, schema = layer.get_db_connection()
+                with dbi as c:
+                    is_view = c.is_view(schema, src)
+            except Exception as e:
+                logger.warning(
+                    "layer_update POST: no se pudo comprobar si la capa %s es vista: %s",
+                    layer_id, e,
+                )
+                is_view = False
         if not is_view:
             for key in request.POST:
                 if 'write-usergroup-' in key:
@@ -1980,6 +1986,7 @@ def layer_update(request, layer_id):
                     gc_data = json.loads(geocopilot_config_raw)
                     gc_layer_desc = gc_data.get('layer_description', '')
                     gc_fields_list = gc_data.get('fields', [])
+                    gc_fields_loaded = bool(gc_data.get('_gc_loaded', True))
                     gc_fields_config = {}
                     for f in gc_fields_list:
                         fname = f.get('name', '')
@@ -2001,9 +2008,16 @@ def layer_update(request, layer_id):
                         }
                     )
                     gc_config.layer_description = gc_layer_desc
-                    gc_config.fields_config = gc_fields_config
+                    # Solo sustituir fields si la UI llegó a cargar la tabla de campos;
+                    # si no, conservar la config previa (evita borrarla al Guardar sin abrir la pestaña).
+                    if gc_fields_loaded or gc_fields_config:
+                        gc_config.fields_config = gc_fields_config
                     gc_config.updated_by = request.user.username
                     gc_config.save()
+                    logger.info(
+                        "GeoCopilot config guardada capa %s (desc_len=%s, fields=%s, loaded=%s)",
+                        layer.id, len(gc_layer_desc or ''), len(gc_fields_config), gc_fields_loaded,
+                    )
                 except Exception as e:
                     logger.warning(f"Error guardando config GeoCopilot para capa {layer.id}: {e}")
 
@@ -2077,18 +2091,32 @@ def _layer_update_build_render_context(request, layer, layer_id, layergroup_id, 
     if layer.type.startswith('v_'):
         layerConf['featuretype'] = layerConf.get('featuretype', {})
         layerConf['featuretype']['max_features'] = layerConf['featuretype'].get('max_features', 0)
+    is_view = False
     if layer.type == 'v_PostGIS':
-        aux_fields = get_date_fields(layer.id)
-        if 'fields' in layerConf:
-            for field in layerConf['fields']:
-                for data_field in aux_fields:
-                    if field['name'] == data_field:
-                        date_fields.append(field)
-        dbi, src, schema = layer.get_db_connection()
-        with dbi as c:
-            is_view = c.is_view(schema, src)
-    else:
-        is_view = False
+        # La BD del datastore puede ser remota e inaccesible en local (DNS/VPN).
+        # No tumbar la ficha de edición: degradar con valores seguros.
+        try:
+            aux_fields = get_date_fields(layer.id)
+            if 'fields' in layerConf:
+                for field in layerConf['fields']:
+                    for data_field in aux_fields:
+                        if field['name'] == data_field:
+                            date_fields.append(field)
+        except Exception as e:
+            logger.warning(
+                "layer_update: no se pudieron obtener campos de fecha para capa %s: %s",
+                layer_id, e,
+            )
+        try:
+            dbi, src, schema = layer.get_db_connection()
+            with dbi as c:
+                is_view = c.is_view(schema, src)
+        except Exception as e:
+            logger.warning(
+                "layer_update: no se pudo comprobar si la capa %s es vista: %s",
+                layer_id, e,
+            )
+            is_view = False
 
     md_uuid = core_utils.get_layer_metadata_uuid(layer)
     plugins_config = core_utils.get_plugins_config()

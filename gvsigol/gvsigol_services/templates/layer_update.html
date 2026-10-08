@@ -512,6 +512,14 @@
 			var desc = document.getElementById('geocopilot-layer-description');
 			if (desc) desc.value = data.layer_description || '';
 
+			if (data.warning) {
+				var warn = document.createElement('div');
+				warn.className = 'alert alert-warning';
+				warn.style.marginBottom = '10px';
+				warn.textContent = data.warning;
+				loading.parentNode.insertBefore(warn, loading);
+			}
+
 			var tbody = table.querySelector('tbody');
 			tbody.innerHTML = '';
 			var fields = data.fields || [];
@@ -563,7 +571,9 @@
 	}
 
 	function serializeGeoCopilotConfig() {
-		if (!gcLoaded) return;
+		// Importante: el botón Guardar usa jQuery $("#form").submit(), que NO dispara
+		// addEventListener('submit'). Por eso también se llama explícitamente desde
+		// el click de Guardar (window.serializeGeoCopilotConfig).
 		var layerDescription = (document.getElementById('geocopilot-layer-description') || {}).value || '';
 		var rows = document.querySelectorAll('#geocopilot-fields-table tbody tr');
 		var fieldsList = [];
@@ -589,16 +599,29 @@
 			fieldsList.push(entry);
 		}
 		var hidden = document.getElementById('geocopilot-config-hidden');
-		if (hidden) {
-			hidden.value = JSON.stringify({layer_description: layerDescription, fields: fieldsList});
+		if (!hidden) return;
+		// Si la pestaña nunca se cargó, no enviar fields vacíos que borrarían config previa.
+		if (!gcLoaded && !layerDescription && fieldsList.length === 0) {
+			return;
 		}
+		hidden.value = JSON.stringify({
+			layer_description: layerDescription,
+			fields: fieldsList,
+			_gc_loaded: !!gcLoaded
+		});
 	}
+	// Exponer para el handler jQuery del botón Guardar
+	window.serializeGeoCopilotConfig = serializeGeoCopilotConfig;
 
 	var tabLink = document.querySelector('a[href="#tab-layer-geocopilot"]');
 	if (tabLink) {
 		tabLink.addEventListener('click', function() {
 			if (!gcLoaded) { setTimeout(loadGeoCopilotConfig, 100); }
 		});
+		// Precargar al abrir la página para que Guardar no dependa de abrir la pestaña
+		setTimeout(function() {
+			if (!gcLoaded) loadGeoCopilotConfig();
+		}, 300);
 	}
 
 	var form = document.getElementById('layer-update-form');
@@ -606,6 +629,11 @@
 		form.addEventListener('submit', function() {
 			serializeGeoCopilotConfig();
 		});
+		if (window.jQuery) {
+			window.jQuery(form).on('submit', function() {
+				serializeGeoCopilotConfig();
+			});
+		}
 	}
 })();
 </script>
@@ -755,6 +783,10 @@ $('#submenu-layers').addClass("active");
 				item.show();
 			}
 			$(".layer-read-checkbox.gvsigol-checkable").prop("disabled", false);
+			// Serializar GeoCopilot ANTES del submit jQuery (no dispara addEventListener nativo)
+			if (typeof window.serializeGeoCopilotConfig === 'function') {
+				window.serializeGeoCopilotConfig();
+			}
 			$("body").overlay();
 			$("#layer-update-form").submit();
 			return false;
