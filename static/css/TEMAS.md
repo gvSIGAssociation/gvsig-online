@@ -20,11 +20,23 @@ Cuatro hojas, con responsabilidades separadas. Se cargan en este orden desde
 | `gol-skin-base.css` | Reglas de tema sobre AdminLTE 2, escritas una vez y resueltas con variables |
 | `gol-layout.css` | Cabecera, menú lateral, contenido y pie. Genérico: no nombra ningún tema |
 
+Además hay dos hojas de pantalla concreta, que no se cargan desde `base.html` sino
+desde las plantillas que las necesitan. Solo requieren `gol-tokens.css` y
+`gol-themes.css`, y tampoco nombran ningún tema:
+
+| Fichero | Quién la carga |
+|---|---|
+| `gol-home.css` | `home.html`, en su `{% block header %}` |
+| `gol-login.css` | Las cinco pantallas de autenticación, que son autónomas y no extienden `base.html`: `login.html`, `password_reset.html`, `password_reset2.html`, `password_reset_success.html` y `registration/password_reset_confirm.html` |
+
 La clase del tema la pone `GVSIGOL_SKIN` en el `<body>`:
 
 ```html
 <body class="hold-transition {{GVSIGOL_SKIN}} sidebar-mini">
 ```
+
+En las pantallas de autenticación, que no tienen cabecera ni menú lateral, es
+`<body class="login-page {{GVSIGOL_SKIN}}">`.
 
 `gol-skin-base.css` y `gol-layout.css` usan el prefijo `body[class*="skin-"]`, que
 reproduce el ámbito que tenían los antiguos selectores `.skin-<nombre>`: las reglas
@@ -262,7 +274,9 @@ convierte en variable**; nunca se añade un selector `.skin-<nombre>` a
 2. Abrir el panel con recarga forzada (`Ctrl+Shift+R`), porque el navegador cachea el CSS.
 3. Revisar cabecera, sidebar desplegado, sidebar colapsado (los desplegables flotantes
    usan variables propias), menú de usuario, un listado y un formulario.
-4. Revisar también la portada de alguna app de `restricted/`, que carga el shim
+4. Revisar la pantalla de acceso y el flujo de recuperación de contraseña, que llevan
+   su propia hoja y hay que mirar sin sesión iniciada.
+5. Revisar también la portada de alguna app de `restricted/`, que carga el shim
    `_all-skins.css` en lugar de las hojas directamente.
 
 En despliegue hace falta `collectstatic`. Si se han borrado ficheros, usar
