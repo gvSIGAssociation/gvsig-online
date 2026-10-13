@@ -95,9 +95,6 @@ msgstr "aplicació mòbil"
 #~ msgstr ""
 #~ "Benvinguts al Sistema d'Informació Geogràfica de La Pobla de Vallbona"
 
-#~ msgid "Documentation"
-#~ msgstr "Documentació"
-
 msgid "Public viewers pagination"
 msgstr "Paginació de visors públics"
 
@@ -123,7 +120,7 @@ msgid "Visualize, analyze and consult geographic information through interactive
 msgstr "Visualitza, analitza i consulta informació geogràfica a través de visors web interactius."
 
 msgid "Explore and navigate geographic data interactively"
-msgstr "Explora i navega dades geogràfiques de manera interactiva"
+msgstr "Explora i navega per les dades geogràfiques de manera interactiva"
 
 msgid "Previous"
 msgstr "Anterior"
@@ -211,6 +208,74 @@ msgstr "Quadres de comandament que reuneixen mapes, gràfiques i indicadors cons
 
 msgid "Panels pagination"
 msgstr "Paginació de panells"
+
+#: templates/index.html:165
+msgid "Publish your layers as standard WMS and WFS services"
+msgstr "Publica les teves capes com a serveis WMS i WFS estàndard"
+
+#: templates/index.html:177
+msgid "Edit information directly on the map, even from a mobile device"
+msgstr "Edita la informació directament sobre el mapa, fins i tot des del mòbil"
+
+#: templates/index.html:191
+msgid "Query, filter and analyze the geographic data of your territory"
+msgstr "Consulta, filtra i analitza les dades geogràfiques del teu territori"
+
+#: templates/index.html:204
+msgid "Generate printable maps and download the data"
+msgstr "Genera mapes imprimibles i descarrega les dades"
+
+#: templates/index.html:222
+msgid "Slide"
+msgstr "Diapositiva"
+
+#: templates/index.html:403
+msgid "Who is it for?"
+msgstr "Per a qui és?"
+
+#: templates/index.html:405
+msgid "A platform that adapts to the day-to-day work of any organization that manages territory."
+msgstr "Una plataforma que s'adapta al treball diari de qualsevol organització que gestiona territori."
+
+#: templates/index.html:418
+msgid "Local government"
+msgstr "Administració local"
+
+#: templates/index.html:419
+msgid "Urban planning, cadastre, licensing and public works, with up-to-date cartography shared across departments."
+msgstr "Urbanisme, cadastre, llicències i obra pública, amb la cartografia sempre actualitzada i compartida entre departaments."
+
+#: templates/index.html:429
+msgid "Environment and land management"
+msgstr "Medi ambient i territori"
+
+#: templates/index.html:430
+msgid "Forest management, protected areas and risk mapping, with field data collection and historical series."
+msgstr "Gestió forestal, espais protegits i cartografia de riscos, amb presa de dades de camp i sèries històriques."
+
+#: templates/index.html:443
+msgid "Infrastructure and utilities"
+msgstr "Infraestructures i serveis"
+
+#: templates/index.html:444
+msgid "Networks, inventory and maintenance of water, lighting, waste or roads, mapped and available from any device."
+msgstr "Xarxes, inventari i manteniment d'aigua, enllumenat, residus o vials, cartografiats i disponibles des de qualsevol dispositiu."
+
+#: templates/index.html:487
+msgid "Platform to create, manage and share geographic information, built on open standards."
+msgstr "Plataforma per crear, gestionar i compartir informació geogràfica, basada en estàndards oberts."
+
+#: templates/index.html:492
+msgid "Platform"
+msgstr "Plataforma"
+
+#: templates/index.html:505
+msgid "Resources"
+msgstr "Recursos"
+
+#: templates/index.html:507
+msgid "Documentation"
+msgstr "Documentació"
 
 #~ msgid ""
 #~ "New, attractive and enriched gvSIG Online documentation is now available "
