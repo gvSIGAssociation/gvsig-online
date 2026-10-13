@@ -589,166 +589,22 @@ body.gol-landing a {
 
 
 /* ====================================================================
-   FEATURE CARDS GRID
-   ==================================================================== */
-.features-grid {
-	display: grid;
-	gap: 32px;
-}
-.features-grid.four-cols  { grid-template-columns: repeat(4, 1fr); }
-.features-grid.three-cols { grid-template-columns: repeat(3, 1fr); }
-.features-grid.two-cols   { grid-template-columns: repeat(2, 1fr); }
-
-.feature-card {
-	text-align: center;
-	padding: 32px 24px;
-	border-radius: var(--ld-radius);
-	background-color: var(--ld-surface);
-	transition: all 0.3s ease;
-	border: 1px solid transparent;
-	display: block;
-	color: var(--ld-text) !important;
-	text-decoration: none !important;
-}
-
-.section-light .feature-card {
-	border: 1px solid var(--ld-line-soft);
-}
-
-.feature-card:hover {
-	box-shadow: var(--ld-shadow);
-	border-color: var(--ld-line);
-	transform: translateY(-4px);
-	text-decoration: none !important;
-}
-
-.section-light .feature-card:hover {
-	box-shadow: var(--ld-shadow-hv);
-	border-color: var(--ld-line);
-}
-
-/* Icono */
-/* Los circulos van en monocromo de acero. Las cuatro variantes de color
-   que habia antes se conservan como clase para no tener que tocar el
-   marcado de las secciones que ya existian, pero pintan lo mismo. */
-.feature-icon {
-	width: 56px;
-	height: 56px;
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	margin: 0 auto 20px;
-	background-color: var(--ld-surface-alt);
-	border: 1px solid var(--ld-line-soft);
-	color: var(--ld-accent);
-}
-.feature-icon-blue,
-.feature-icon-green,
-.feature-icon-yellow,
-.feature-icon-red {
-	background-color: var(--ld-surface-alt);
-	border-color: var(--ld-line-soft);
-	color: var(--ld-accent);
-}
-.section-light .feature-icon {
-	background-color: var(--ld-surface);
-}
-
-.feature-card h3 {
-	font-size: 1.125rem;
-	font-weight: 600;
-	color: var(--ld-ink);
-	margin-bottom: 10px;
-}
-.feature-card p {
-	font-size: 1rem;
-	color: var(--ld-muted);
-	line-height: 1.65;
-	margin: 0;
-}
-
-
-/* ====================================================================
-   CTA SECTION
-   ==================================================================== */
-.section-cta {
-	background: linear-gradient(135deg, var(--ld-deep) 0%, var(--ld-deep-dk) 100%);
-	padding: 80px 0;
-	text-align: center;
-}
-/* El selector lleva delante body.gol-landing a proposito. La regla que
-   da color a los titulares es "body.gol-landing h2", con dos elementos y
-   una clase, y le gana a un ".section-cta h2" a secas: el color: #fff no
-   llegaba a aplicarse y este titular se pintaba casi negro sobre el
-   fondo oscuro de la seccion. */
-body.gol-landing .section-cta h2 {
-	font-size: 2.25rem;
-	font-weight: 600;
-	color: #fff;
-	margin-bottom: 12px;
-	letter-spacing: -0.02em;
-}
-.cta-subtitle {
-	font-size: 1.125rem;
-	color: rgba(255,255,255,0.82);
-	margin-bottom: 32px;
-	line-height: 1.6;
-}
-.cta-buttons {
-	display: flex;
-	gap: 16px;
-	justify-content: center;
-	flex-wrap: wrap;
-}
-.btn-cta-primary {
-	padding: 13px 36px;
-	font-size: 1rem;
-	font-family: inherit;
-	font-weight: 600;
-	color: var(--ld-deep-dk) !important;
-	background-color: #fff;
-	border-radius: var(--ld-radius-sm);
-	text-decoration: none !important;
-	display: inline-flex;
-	align-items: center;
-	transition: all 0.2s;
-	letter-spacing: 0.2px;
-}
-.btn-cta-primary:hover {
-	background-color: var(--ld-surface-alt);
-	box-shadow: 0 2px 10px rgba(0,0,0,0.22);
-}
-.btn-cta-secondary {
-	padding: 13px 36px;
-	font-size: 1rem;
-	font-family: inherit;
-	font-weight: 600;
-	color: #fff !important;
-	background-color: transparent;
-	border: 1px solid rgba(255,255,255,0.55);
-	border-radius: var(--ld-radius-sm);
-	text-decoration: none !important;
-	display: inline-flex;
-	align-items: center;
-	transition: all 0.2s;
-	letter-spacing: 0.2px;
-}
-.btn-cta-secondary:hover {
-	background-color: rgba(255,255,255,0.12);
-	border-color: #fff;
-}
-
-
-/* ====================================================================
    FOOTER
    ==================================================================== */
-/* El pie se queda en claro a proposito, aunque un pie oscuro sea mas
-   habitual: justo encima esta la llamada a la accion en acero oscuro y
-   dos bloques oscuros seguidos se leerian como uno solo. */
+/* El pie lleva el mismo acero que tenia la llamada a la accion, que es de
+   donde viene este degradado. Antes se quedaba en claro porque el CTA se
+   le apoyaba justo encima y dos bloques oscuros seguidos se leerian como
+   uno solo; al desaparecer el CTA cierra la pagina el pie.
+
+   No lleva borde superior: la linea clara de antes separaba dos fondos
+   claros, y contra el acero no haria falta ni se veria.
+
+   Todo el texto de aqui abajo va en blanco o en blanco rebajado. Medido
+   sobre #3f4d5a, que es el extremo claro del degradado y por tanto el
+   peor caso, el minimo que aparece es 4,05:1 en los iconos, y el resto
+   pasa de 5:1. */
 body.gol-landing footer {
-	background-color: var(--ld-surface-alt);
-	border-top: 1px solid var(--ld-line-soft);
+	background: linear-gradient(135deg, var(--ld-deep) 0%, var(--ld-deep-dk) 100%);
 	padding: 56px 0 0;
 	margin-top: 0;
 }
@@ -773,12 +629,12 @@ body.gol-landing footer {
 .footer-brand__name {
 	font-size: 1.125rem;
 	font-weight: 600;
-	color: var(--ld-ink);
+	color: #fff;
 	letter-spacing: -0.015em;
 }
 .footer-brand__desc {
 	font-size: 0.9375rem;
-	color: var(--ld-muted);
+	color: rgba(255,255,255,0.82);
 	line-height: 1.65;
 	max-width: 340px;
 	margin: 0;
@@ -791,7 +647,7 @@ body.gol-landing footer {
 body.gol-landing .footer-col__title {
 	font-size: 0.8125rem;
 	font-weight: 700;
-	color: var(--ld-ink);
+	color: #fff;
 	text-transform: uppercase;
 	letter-spacing: 0.06em;
 	margin-bottom: 14px;
@@ -810,17 +666,19 @@ body.gol-landing .footer-col__title {
 	align-items: center;
 	gap: 8px;
 	font-size: 0.9375rem;
-	color: var(--ld-muted);
+	color: rgba(255,255,255,0.82);
 	transition: color 0.15s;
 }
+/* Tono propio y no var(--ld-accent): ese acento esta pensado para fondo
+   claro y sobre el acero se queda en 1,70:1, o sea invisible. */
 .footer-links a i {
 	width: 14px;
 	text-align: center;
 	font-size: 12px;
-	color: var(--ld-accent);
+	color: #9db4c9;
 }
 .footer-links a:hover {
-	color: var(--ld-accent-dk);
+	color: #fff;
 	text-decoration: none;
 }
 
@@ -830,16 +688,16 @@ body.gol-landing .footer-col__title {
 	justify-content: space-between;
 	align-items: center;
 	padding: 18px 0;
-	border-top: 1px solid var(--ld-line-soft);
+	border-top: 1px solid rgba(255,255,255,0.16);
 }
 .footer-left p,
 .footer-right p {
 	font-size: 0.875rem;
-	color: var(--ld-muted);
+	color: rgba(255,255,255,0.72);
 	margin: 0;
 }
 body.gol-landing footer a {
-	color: var(--ld-accent);
+	color: rgba(255,255,255,0.82);
 	font-size: 0.875rem;
 	text-decoration: none;
 }
@@ -858,12 +716,6 @@ body.gol-landing footer a:hover { text-decoration: underline; }
 	opacity: 1;
 	transform: translateY(0);
 }
-.feature-card.reveal:nth-child(1) { transition-delay: 0s; }
-.feature-card.reveal:nth-child(2) { transition-delay: 0.08s; }
-.feature-card.reveal:nth-child(3) { transition-delay: 0.16s; }
-.feature-card.reveal:nth-child(4) { transition-delay: 0.24s; }
-.feature-card.reveal:nth-child(5) { transition-delay: 0.32s; }
-.feature-card.reveal:nth-child(6) { transition-delay: 0.40s; }
 
 
 /* ====================================================================
@@ -872,8 +724,6 @@ body.gol-landing footer a:hover { text-decoration: underline; }
 
 /* Tablet */
 @media (max-width: 1024px) {
-	.features-grid.four-cols  { grid-template-columns: repeat(2, 1fr); }
-	.features-grid.three-cols { grid-template-columns: repeat(2, 1fr); }
 	.hero-title { font-size: 2.75rem; }
 	.section-heading { font-size: 1.875rem; }
 	.footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
@@ -908,25 +758,9 @@ body.gol-landing footer a:hover { text-decoration: underline; }
 	.section-heading { font-size: 1.625rem; }
 	.section-description { font-size: 1rem; margin-bottom: 40px; }
 
-	.features-grid.four-cols,
-	.features-grid.three-cols,
-	.features-grid.two-cols { grid-template-columns: 1fr; gap: 20px; }
-	.feature-card { padding: 24px 20px; }
-
 	.slide-bg { height: 240px; }
 	.slide-bg svg { width: 80px; height: 80px; }
 	.slider-btn { opacity: 1; width: 34px; height: 34px; }
-
-	.section-cta { padding: 56px 0; }
-	.section-cta h2 { font-size: 1.625rem; }
-	.cta-buttons {
-		flex-direction: column;
-		align-items: stretch;
-		max-width: 320px;
-		margin: 0 auto;
-	}
-	.btn-cta-primary,
-	.btn-cta-secondary { padding: 12px 32px; font-size: 0.9375rem; justify-content: center; }
 
 	body.gol-landing footer { padding-top: 40px; }
 	.footer-grid { grid-template-columns: 1fr; gap: 28px; padding-bottom: 28px; }
@@ -1135,6 +969,5 @@ body.gol-landing footer a:hover { text-decoration: underline; }
 		transition: none;
 	}
 	.slider-slide.active { animation: none; }
-	.feature-card:hover,
 	.pub-project-card:hover { transform: none; }
 }
