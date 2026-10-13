@@ -42,7 +42,6 @@
 			</div>
 
 			<div class="gol-nav__right">
-
 				<!-- Selector de idioma -->
 				<form id="select-language-form" action="{% url 'set_language' %}" method="post" class="gol-lang-form">
 					{% csrf_token %}
@@ -143,7 +142,7 @@
 				<div class="slider-track">
 
 					<div class="slider-slide active">
-						<div class="slide-bg" style="background: linear-gradient(135deg, #1a73e8 0%, #34a853 100%);">
+						<div class="slide-bg slide-bg--1">
 							<svg width="140" height="140" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
 								<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
 								<circle cx="12" cy="10" r="3"/>
@@ -151,6 +150,58 @@
 						</div>
 						<div class="slide-caption">
 							<span>{% trans "Explore and navigate geographic data interactively" %}</span>
+						</div>
+					</div>
+
+					<div class="slider-slide">
+						<div class="slide-bg slide-bg--2">
+							<svg width="140" height="140" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+								<polygon points="12 2 22 8.5 12 15 2 8.5 12 2"/>
+								<polyline points="2 15.5 12 22 22 15.5"/>
+								<polyline points="2 12 12 18.5 22 12"/>
+							</svg>
+						</div>
+						<div class="slide-caption">
+							<span>{% trans "Publish your layers as standard WMS and WFS services" %}</span>
+						</div>
+					</div>
+
+					<div class="slider-slide">
+						<div class="slide-bg slide-bg--3">
+							<svg width="140" height="140" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M12 20h9"/>
+								<path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+							</svg>
+						</div>
+						<div class="slide-caption">
+							<span>{% trans "Edit information directly on the map, even from a mobile device" %}</span>
+						</div>
+					</div>
+
+					<div class="slider-slide">
+						<div class="slide-bg slide-bg--4">
+							<svg width="140" height="140" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+								<line x1="18" y1="20" x2="18" y2="10"/>
+								<line x1="12" y1="20" x2="12" y2="4"/>
+								<line x1="6" y1="20" x2="6" y2="14"/>
+								<line x1="3" y1="20" x2="21" y2="20"/>
+							</svg>
+						</div>
+						<div class="slide-caption">
+							<span>{% trans "Query, filter and analyze the geographic data of your territory" %}</span>
+						</div>
+					</div>
+
+					<div class="slider-slide">
+						<div class="slide-bg slide-bg--5">
+							<svg width="140" height="140" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+								<polyline points="6 9 6 2 18 2 18 9"/>
+								<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+								<rect x="6" y="14" width="12" height="8"/>
+							</svg>
+						</div>
+						<div class="slide-caption">
+							<span>{% trans "Generate printable maps and download the data" %}</span>
 						</div>
 					</div>
 
@@ -168,42 +219,15 @@
 				</button>
 
 				<div class="slider-dots">
-					<button class="slider-dot active" aria-label="Slide 1"></button>
+					<button class="slider-dot active" aria-label="{% trans "Slide" %} 1"></button>
+					<button class="slider-dot" aria-label="{% trans "Slide" %} 2"></button>
+					<button class="slider-dot" aria-label="{% trans "Slide" %} 3"></button>
+					<button class="slider-dot" aria-label="{% trans "Slide" %} 4"></button>
+					<button class="slider-dot" aria-label="{% trans "Slide" %} 5"></button>
 				</div>
 			</div>
 		</div>
 
-		<!-- Feature cards -->
-		<div class="features-grid {% if CATALOG_URL and GVSIGOL_APP_DOWNLOAD_LINK %}two-cols{% elif CATALOG_URL or GVSIGOL_APP_DOWNLOAD_LINK %}two-cols{% else %}one-col{% endif %}">
-
-			{% if CATALOG_URL %}
-			<a href="{{ CATALOG_URL }}catalog.search#/home" target="_blank" class="feature-card">
-				<div class="feature-icon feature-icon-yellow">
-					<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<ellipse cx="12" cy="5" rx="9" ry="3"/>
-						<path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
-						<path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-					</svg>
-				</div>
-				<h3>{% trans "Metadata catalog" %}</h3>
-				<p>{% trans "Search the metadata catalog for information about datasets and SDI services." %}</p>
-			</a>
-			{% endif %}
-
-			{% if GVSIGOL_APP_DOWNLOAD_LINK %}
-			<a href="{{ GVSIGOL_APP_DOWNLOAD_LINK }}" class="feature-card">
-				<div class="feature-icon feature-icon-red">
-					<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
-						<line x1="12" y1="18" x2="12.01" y2="18"/>
-					</svg>
-				</div>
-				<h3>{% trans "Mobile app" %}</h3>
-				<p>{% trans "Download the mobile application and access geographic information from anywhere." %}</p>
-			</a>
-			{% endif %}
-
-		</div>
 	</div>
 </section>
 
@@ -372,6 +396,59 @@
 </section>
 
 <!-- ====================================================================
+     SECCIÓN: PARA QUIÉN ES
+     ==================================================================== -->
+<section class="section section-light">
+	<div class="container">
+		<h2 class="section-heading">{% trans "Who is it for?" %}</h2>
+		<p class="section-description">
+			{% trans "A platform that adapts to the day-to-day work of any organization that manages territory." %}
+		</p>
+
+		<div class="features-grid three-cols">
+
+			<div class="feature-card">
+				<div class="feature-icon">
+					<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M3 21h18"/>
+						<path d="M4 21V10l8-6 8 6v11"/>
+						<path d="M10 21v-6h4v6"/>
+					</svg>
+				</div>
+				<h3>{% trans "Local government" %}</h3>
+				<p>{% trans "Urban planning, cadastre, licensing and public works, with up-to-date cartography shared across departments." %}</p>
+			</div>
+
+			<div class="feature-card">
+				<div class="feature-icon">
+					<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/>
+						<path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+					</svg>
+				</div>
+				<h3>{% trans "Environment and land management" %}</h3>
+				<p>{% trans "Forest management, protected areas and risk mapping, with field data collection and historical series." %}</p>
+			</div>
+
+			<div class="feature-card">
+				<div class="feature-icon">
+					<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="18" cy="5" r="3"/>
+						<circle cx="6" cy="12" r="3"/>
+						<circle cx="18" cy="19" r="3"/>
+						<line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+						<line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+					</svg>
+				</div>
+				<h3>{% trans "Infrastructure and utilities" %}</h3>
+				<p>{% trans "Networks, inventory and maintenance of water, lighting, waste or roads, mapped and available from any device." %}</p>
+			</div>
+
+		</div>
+	</div>
+</section>
+
+<!-- ====================================================================
      CTA SECTION
      ==================================================================== -->
 <section class="section-cta">
@@ -398,6 +475,41 @@
      ==================================================================== -->
 <footer>
 	<div class="container">
+
+		<div class="footer-grid">
+
+			<div class="footer-brand">
+				<div class="footer-brand__head">
+					<img src="{% static "img/logo_small.png" %}" alt="gvSIG Online" class="footer-brand__logo">
+					<span class="footer-brand__name">gvSIG Online</span>
+				</div>
+				<p class="footer-brand__desc">
+					{% trans "Platform to create, manage and share geographic information, built on open standards." %}
+				</p>
+			</div>
+
+			<div class="footer-col">
+				<h4 class="footer-col__title">{% trans "Platform" %}</h4>
+				<ul class="footer-links">
+					<li><a href="{% url 'select_public_project' %}"><i class="fa fa-map-o"></i>{% trans "Public viewers" %}</a></li>
+					{% if user.is_authenticated %}
+					<li><a href="/gvsigonline/core/"><i class="fa fa-th-large"></i>{% trans "Dashboard" %}</a></li>
+					<li><a href="{% url 'gvsigol_logout_user' %}"><i class="fa fa-sign-out"></i>{% trans "Sign out" %}</a></li>
+					{% else %}
+					<li><a href="{% url 'gvsigol_authenticate_user' %}"><i class="fa fa-sign-in"></i>{% trans "Sign in" %}</a></li>
+					{% endif %}
+				</ul>
+			</div>
+
+			<div class="footer-col">
+				<h4 class="footer-col__title">{% trans "Resources" %}</h4>
+				<ul class="footer-links">
+					<li><a href="{% url 'documentation' %}" target="_blank"><i class="fa fa-book"></i>{% trans "Documentation" %}</a></li>
+				</ul>
+			</div>
+
+		</div>
+
 		<div class="footer-content">
 			<div class="footer-left">
 				<p>&copy; {% now "Y" %} gvSIG Online</p>
@@ -439,7 +551,11 @@ $(function () {
 		dots[current].classList.add('active');
 	}
 
-	function start() { timer = setInterval(function () { goTo(current + 1); }, 4000); }
+	/* Quien pide menos animacion no recibe el giro automatico. Las flechas
+	   y los puntos siguen funcionando: llaman a start(), que no hace nada. */
+	var quieto = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+	function start() { if (!quieto) { timer = setInterval(function () { goTo(current + 1); }, 4000); } }
 	function stop()  { clearInterval(timer); }
 
 	prevBtn.addEventListener('click', function () { stop(); goTo(current - 1); start(); });
@@ -494,7 +610,7 @@ document.querySelectorAll('a[href^="#"]').forEach(function (a) {
 		var perPage  = 8;
 		var total    = cards.length;
 		var pages    = Math.ceil(total / perPage);
-		if (pages <= 1) return; // sin paginación si caben en una página
+		if (pages <= 1) return;
 
 		var current = 0;
 
@@ -530,19 +646,16 @@ document.querySelectorAll('a[href^="#"]').forEach(function (a) {
 			var ul = document.createElement('ul');
 			ul.className = 'pub-page-list';
 
-			// Prev
 			var liPrev = document.createElement('li');
 			liPrev.appendChild(btn('&laquo;', current - 1, current === 0, false));
 			ul.appendChild(liPrev);
 
-			// Page numbers
 			for (var p = 0; p < pages; p++) {
 				var li = document.createElement('li');
 				li.appendChild(btn(p + 1, p, false, p === current));
 				ul.appendChild(li);
 			}
 
-			// Next
 			var liNext = document.createElement('li');
 			liNext.appendChild(btn('&raquo;', current + 1, current === pages - 1, false));
 			ul.appendChild(liNext);
