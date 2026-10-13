@@ -1,0 +1,244 @@
+/* =================================================================
+   gvSIG Online — Pantallas de autenticacion
+   Login y flujo de recuperacion de contrasena. Son paginas autonomas:
+   no extienden base.html, asi que no hay cabecera ni menu lateral y
+   el <body> solo lleva .login-page y la clase del tema.
+
+   Requiere gol-tokens.css y gol-themes.css.
+   Ninguna regla de este fichero debe nombrar un tema concreto.
+   ================================================================= */
+
+/* Los tokens derivados se declaran sobre el <body> y no en :root a
+   proposito: la clase del tema (GVSIGOL_SKIN) esta en el <body>, que
+   es donde --gol-accent toma el valor del tema. En :root se
+   resolverian contra el valor por defecto. Ver gol-tokens.css. */
+body.login-page {
+	--login-text:       var(--gol-text, #2e3a45);
+	--login-border:     var(--gol-border, #e8ecef);
+	--login-white:      var(--gol-white, #ffffff);
+	--login-radius:     12px;
+	--login-shadow:     0 8px 40px rgba(0, 0, 0, 0.13);
+	--login-transition: var(--gol-transition, 0.2s ease);
+
+	/* El acento de un tema puede ir desde #004466 hasta #f39c12, asi
+	   que su claridad no sirve como garantia y cada uso necesita su
+	   variable. El relleno solido lleva texto blanco encima y parte
+	   del tono oscuro: con el tono medio, 13 de los 30 temas no
+	   llegarian al 4,5:1 que pide AA, y con el oscuro fallan 4. El
+	   foco, que es un borde y no texto, si puede usar el medio. */
+	--login-fill:  var(--gol-accent-dk, #2d5f80);
+	--login-focus: var(--gol-accent, #4a7fa5);
+
+	/* Gris propio para el texto pequeno en lugar de --gol-muted: ese
+	   (#7b8a96) se queda en 3,55:1 sobre blanco, por debajo del AA que
+	   necesitan el enlace de 12px y el pie de 11px. Este da 5,22:1. */
+	--login-muted: #626e78;
+}
+
+html,
+body.login-page {
+	height: 100%;
+	margin: 0;
+}
+
+/* AdminLTE pinta .login-page de gris plano; el selector de aqui lleva
+   el elemento delante y gana sin necesidad de !important. */
+body.login-page {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 100vh;
+	font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	-webkit-font-smoothing: antialiased;
+	background: linear-gradient(135deg, #f7f9fb 0%, #eef2f6 60%, #e7edf3 100%);
+}
+
+/* El degradado se tine con el acento del tema. Va en @supports y no en
+   un par de declaraciones porque el respaldo de dos lineas solo
+   funciona cuando la del color-mix() no lleva var(): con var() dentro
+   la declaracion se acepta al parsear y gana la cascada, y si la
+   sustitucion resulta invalida la propiedad se queda en su valor
+   inicial en vez de volver a la linea anterior. */
+@supports (background: color-mix(in srgb, red 10%, white)) {
+	body.login-page {
+		background: linear-gradient(135deg,
+			color-mix(in srgb, var(--gol-accent) 10%, #ffffff) 0%,
+			color-mix(in srgb, var(--gol-accent) 5%, #f4f6f8) 60%,
+			color-mix(in srgb, var(--gol-accent) 15%, #ffffff) 100%);
+	}
+}
+
+.login-wrap {
+	width: 100%;
+	max-width: 420px;
+	padding: 20px;
+}
+
+/* ---- Logo ------------------------------------------------------- */
+/* Cada plantilla mantiene la imagen que ya referenciaba: ninguna esta
+   en el repositorio, las aporta cada despliegue. */
+.login-logo-wrap {
+	text-align: center;
+	margin-bottom: 28px;
+}
+.login-logo-wrap img {
+	max-width: 200px;
+	max-height: 80px;
+	object-fit: contain;
+}
+
+/* ---- Tarjeta ---------------------------------------------------- */
+.login-card {
+	background: var(--login-white);
+	border-radius: var(--login-radius);
+	box-shadow: var(--login-shadow);
+	border: 1px solid var(--login-border);
+	padding: 36px 36px 28px;
+}
+
+/* Instruccion breve que encabeza la tarjeta */
+.login-card__title {
+	font-size: 15px;
+	font-weight: 700;
+	color: var(--login-text);
+	margin: 0 0 22px;
+	text-align: center;
+	letter-spacing: -0.1px;
+}
+
+/* Parrafo informativo de las pantallas que no piden nada */
+.login-message {
+	font-size: 13px;
+	font-weight: 400;
+	color: var(--login-muted);
+	line-height: 1.55;
+	margin: 0;
+	text-align: center;
+}
+/* Icono que puede encabezar ese parrafo. Es decorativo, acompana al
+   texto sin aportar informacion propia, pero usa el tono oscuro para
+   que se vea bien en los temas de acento claro. */
+.login-message__icon {
+	display: block;
+	font-size: 26px;
+	color: var(--login-fill);
+	margin-bottom: 12px;
+}
+
+/* ---- Errores ---------------------------------------------------- */
+/* El rojo no sale del tema: un error tiene que leerse igual en los 30. */
+.login-error {
+	background: #fde8e8;
+	border: 1px solid #f5c6c6;
+	border-left: 4px solid #c0392b;
+	border-radius: 6px;
+	padding: 9px 13px;
+	color: #c0392b;
+	font-size: 13px;
+	margin-bottom: 18px;
+}
+.login-error .fa {
+	margin-right: 6px;
+}
+
+/* ---- Campos ----------------------------------------------------- */
+.login-field {
+	position: relative;
+	margin-bottom: 14px;
+}
+.login-field .form-control {
+	height: 42px;
+	border-radius: 8px;
+	border: 1px solid var(--login-border);
+	font-size: 13px;
+	color: var(--login-text);
+	padding: 0 14px 0 40px;
+	background: #f8fafc;
+	transition: border-color var(--login-transition),
+	            box-shadow var(--login-transition),
+	            background var(--login-transition);
+	box-shadow: none;
+}
+.login-field .form-control:focus {
+	border-color: var(--login-focus);
+	background: var(--login-white);
+	/* --gol-accent-lt es el acento con alfa que ya declara cada tema,
+	   asi que el halo sigue al tema sin depender de color-mix(). */
+	box-shadow: 0 0 0 3px var(--gol-accent-lt, rgba(74, 127, 165, 0.06));
+	outline: none;
+}
+.login-field .field-icon {
+	position: absolute;
+	left: 13px;
+	top: 50%;
+	transform: translateY(-50%);
+	color: var(--login-muted);
+	font-size: 14px;
+	pointer-events: none;
+}
+
+/* ---- Boton ------------------------------------------------------ */
+/* Sirve para un <button> y para un <div>: la pantalla de confirmacion
+   de contrasena usa un div porque su JS valida antes de enviar, asi
+   que el texto se centra con flex en lugar de confiar en el centrado
+   del boton nativo. */
+.btn-login {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 42px;
+	background: var(--login-fill);
+	color: #fff;
+	border: none;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 700;
+	letter-spacing: 0.3px;
+	cursor: pointer;
+	user-select: none;
+	-webkit-user-select: none;
+	margin-top: 8px;
+	transition: box-shadow var(--login-transition);
+}
+/* El hover oscurece con una capa en lugar de calcular otro color: no
+   necesita conocer el acento del tema, no deja el texto sin contraste
+   y funciona sin color-mix(). */
+.btn-login:hover,
+.btn-login:focus {
+	background: var(--login-fill);
+	color: #fff;
+	box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.14);
+	text-decoration: none;
+	outline: none;
+}
+
+/* ---- Enlaces secundarios ---------------------------------------- */
+.login-forgot {
+	text-align: center;
+	margin-top: 16px;
+}
+.login-forgot a {
+	font-size: 12px;
+	color: var(--login-muted);
+	text-decoration: none;
+	transition: color var(--login-transition);
+}
+/* El hover no usa el acento: sobre fondo claro el texto en acento se
+   queda por debajo de AA en buena parte de los temas. */
+.login-forgot a:hover,
+.login-forgot a:focus {
+	color: var(--login-text);
+	text-decoration: underline;
+}
+.login-forgot .fa {
+	margin-right: 4px;
+}
+
+/* ---- Pie -------------------------------------------------------- */
+.login-footer {
+	text-align: center;
+	margin-top: 20px;
+	font-size: 11px;
+	color: var(--login-muted);
+}
