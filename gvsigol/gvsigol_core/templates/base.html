@@ -69,6 +69,7 @@
 
 <body class="hold-transition {{GVSIGOL_SKIN}} sidebar-mini">
 
+	{% if not HIDE_DASHBOARD_SIDEBAR %}
 	<script>
 		// Must run before the first paint, while hold-transition is still active
 		(function() {
@@ -79,17 +80,18 @@
 			} catch (e) {}
 		})();
 	</script>
+	{% endif %}
 
 	<div class="wrapper">
 	
 		<header class="main-header" id="base-main-header" {% if IFRAME_MODE_UI %} style="display: none" {% endif %}>
-			<a href="/gvsigonline/" class="logo">
+			<a href="{% if HIDE_DASHBOARD_SIDEBAR %}{% url 'home' %}{% else %}/gvsigonline/{% endif %}" class="logo">
 				<span class="logo-mini"><img src="{% static "img/logo_custom_icon.png" %}" class="logo-img-mini" alt="Logo"></span>
-				<span class="logo-lg"><img src="{% static "img/logo_custom_icon.png" %}" class="logo-img-lg" alt="Logo"><b>{{GVSIGOL_NAME}}</b>{{GVSIGOL_SURNAME}}</span>
+				<span class="logo-lg"><img src="{% static "img/logo_custom_icon.png" %}" class="logo-img-lg" alt="Logo"><b>{{GVSIGOL_NAME}}</b><span class="logo-surname">{{GVSIGOL_SURNAME}}</span></span>
 			</a>
 
 			<nav class="navbar navbar-static-top" role="navigation">
-				<a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button"> <span class="sr-only">Toggle navigation</span></a>				
+				<a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button" {% if HIDE_DASHBOARD_SIDEBAR %} style="display: none" {% endif %}> <span class="sr-only">Toggle navigation</span></a>				
 				<div class="navbar-custom-menu">
 					<ul class="nav navbar-nav">
 						<li><a href="{% url 'documentation' %}" target="_blank" id="help" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-question-circle"></i></a></li>
@@ -138,7 +140,7 @@
 			</nav>
 		</header>
 
-		<aside class="main-sidebar" {% if IFRAME_MODE_UI %} style="display: none" {% endif %}>
+		<aside class="main-sidebar" {% if IFRAME_MODE_UI or HIDE_DASHBOARD_SIDEBAR %} style="display: none" {% endif %}>
 			<section class="sidebar">
 				<!-- Sidebar user panel -->
 				<div class="user-panel">
@@ -176,13 +178,13 @@
 			</section>			
 		</aside>
 
-		<div class="content-wrapper" id="base-content-wrapper" {% if IFRAME_MODE_UI %} style="margin-left: 0px !important;" {% endif %}>
+		<div class="content-wrapper" id="base-content-wrapper" {% if IFRAME_MODE_UI or HIDE_DASHBOARD_SIDEBAR %} style="margin-left: 0px !important;" {% endif %}>
 			<section class="content">
 				{% block content %}{% endblock %}
 			</section>
 		</div>
 
-		<footer class="main-footer" {% if IFRAME_MODE_UI %} style="display: none" {% endif %} >
+		<footer class="main-footer" {% if IFRAME_MODE_UI %} style="display: none" {% elif HIDE_DASHBOARD_SIDEBAR %} style="margin-left: 0px !important;" {% endif %} >
 			<div class="pull-right hidden-xs">
 				<b>{% trans "Version" %}</b> {{GVSIGOL_VERSION}}
 			</div>
@@ -246,6 +248,12 @@
 	    	
 	    	$(".js-example-basic-single").select2();
 	    	
+	    });
+	</script>
+
+	{% if not HIDE_DASHBOARD_SIDEBAR %}
+	<script type="text/javascript">
+		$(document).ready(function(){
 	    	// Below screenSizes.sm the toggle uses sidebar-open, not the desktop preference
 	    	$('body').on('expanded.pushMenu collapsed.pushMenu', function(e) {
 	    		if ($(window).width() <= 767) { return; }
@@ -253,9 +261,9 @@
 	    			localStorage.setItem('gvsigol.sidebar.collapsed', e.type === 'collapsed');
 	    		} catch (err) {}
 	    	});
-	    	
 	    });
 	</script>
+	{% endif %}
 
 	{% block extra-scripts %}{% endblock %}
 	

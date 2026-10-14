@@ -23,6 +23,10 @@ import gvsigol.settings
 from gvsigol_auth import auth_backend
 
 def global_settings(request):
+    # The dashboard menu is only populated for staff, so for the rest of users
+    # the sidebar is hidden instead of shown empty
+    user = getattr(request, 'user', None)
+    hide_dashboard_sidebar = not (user is not None and (user.is_staff or user.is_superuser))
     # return any necessary values
     return {
         'GVSIGOL_VERSION': gvsigol.settings.GVSIGOL_VERSION,
@@ -39,5 +43,6 @@ def global_settings(request):
         'AUTH_DASHBOARD_UI': gvsigol.settings.AUTH_DASHBOARD_UI,
         'IFRAME_MODE_UI':  gvsigol.settings.IFRAME_MODE_UI,
         'MANAGE_PERMISSION_UI': gvsigol.settings.MANAGE_PERMISSION_UI,
-        'GVSIGOL_CUSTOMER_NAME': gvsigol.settings.GVSIGOL_CUSTOMER_NAME
+        'GVSIGOL_CUSTOMER_NAME': gvsigol.settings.GVSIGOL_CUSTOMER_NAME,
+        'HIDE_DASHBOARD_SIDEBAR': hide_dashboard_sidebar
     }

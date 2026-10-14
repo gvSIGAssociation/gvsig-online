@@ -27,7 +27,7 @@ body[class*="skin-"] .main-header .logo {
 	background-image: none;
 	border-right: var(--hdr-logo-border);
 	font-weight: 700;
-	letter-spacing: 0.5px;
+	letter-spacing: -0.2px;
 }
 body[class*="skin-"] .main-header .logo:hover {
 	background-color: var(--hdr-logo-bg-hover);
@@ -483,6 +483,12 @@ body[class*="skin-"] .main-footer {
    LOGO DE CABECERA — imagen + texto
    ================================================================= */
 
+/* AdminLTE fija Helvetica Neue solo para este bloque, de modo que el
+   rotulo quedaba fuera de la familia que usa el resto del panel. */
+.main-header .logo {
+	font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
 /* Las plantillas pintan la misma imagen en los dos spans del logo, uno
    por cada estado del sidebar, y solo se muestra el que toca. Por eso
    las dos variantes se tratan igual y lo unico que las diferencia es el
@@ -499,13 +505,22 @@ body[class*="skin-"] .main-footer {
 .main-header .logo .logo-lg {
 	display: inline-flex;
 	align-items: center;
-	gap: 9px;
 }
 .main-header .logo .logo-img-lg {
 	width: 28px;
 	height: 28px;
 	/* Comparte el contenedor flex con el texto del nombre. */
 	flex-shrink: 0;
+	/* Antes era gap del contenedor, pero el nombre y el apellido son dos
+	   flex items y el hueco se colaba tambien entre ellos. */
+	margin-right: 9px;
+}
+
+/* El apellido comparte peso con el nombre y la jerarquia la marca el
+   tono. Se usa opacity y no un color fijo para que siga al tema, que
+   pinta el rotulo en blanco o en gris oscuro segun el caso. */
+.main-header .logo .logo-surname {
+	opacity: 0.85;
 }
 
 /* Logo colapsado: solo la imagen, centrada */
