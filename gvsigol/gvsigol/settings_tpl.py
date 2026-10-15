@@ -91,6 +91,8 @@ SECURE_PROXY_SSL_HEADER = ##SECURE_PROXY_SSL_HEADER##
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 2048
 DATA_UPLOAD_MAX_MEMORY_SIZE = int('##DATA_UPLOAD_MAX_MEMORY_SIZE##') #Tamaño máximo para la memoria del getcapabilities default 2621440 (2.5M) es muy poco y no se pueden añadir capas externas cuando el servidor tiene muchas capas
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o774
+FILE_DEFAULT_PERMISSIONS = ##FILE_DEFAULT_PERMISSIONS##
+FOLDER_DEFAULT_PERMISSIONS = ##FOLDER_DEFAULT_PERMISSIONS##
 
 # Maintain int PKs consistent with existing installations; migrate explicitly if needed in the future
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
@@ -446,7 +448,7 @@ GVSIGOL_CUSTOMER_NAME = '##GVSIGOL_CUSTOMER_NAME##'
 FILEMANAGER_DIRECTORY = '##FILEMANAGER_DIR##'
 FILEMANAGER_MEDIA_ROOT = os.path.join(MEDIA_ROOT, FILEMANAGER_DIRECTORY)
 FILEMANAGER_MEDIA_URL = os.path.join(MEDIA_URL, FILEMANAGER_DIRECTORY)
-FILEMANAGER_STORAGE = FileSystemStorage(location=FILEMANAGER_MEDIA_ROOT, base_url=FILEMANAGER_MEDIA_URL, file_permissions_mode=0o666)
+FILEMANAGER_STORAGE = FileSystemStorage(location=FILEMANAGER_MEDIA_ROOT, base_url=FILEMANAGER_MEDIA_URL, file_permissions_mode=FILE_DEFAULT_PERMISSIONS, directory_permissions_mode=FOLDER_DEFAULT_PERMISSIONS)
 
 CONTROL_FIELDS = [{
                 'name': 'modified_by',

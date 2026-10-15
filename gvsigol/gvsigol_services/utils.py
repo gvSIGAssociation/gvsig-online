@@ -871,14 +871,14 @@ def get_resources_dir(layer_id, resource_type):
         # makedirs permissions are umasked, so we need to explicitly set permissions afterwards
         for root, dirs, _ in os.walk(os.path.join(MEDIA_ROOT, resource_dir , str(layer_id)), followlinks=True):
             for d in dirs:
-                os.chmod(os.path.join(root, d), 0o0750)
+                os.chmod(os.path.join(root, d), settings.FOLDER_DEFAULT_PERMISSIONS)
     return the_path
 
 def get_historic_resources_dir(path, layer_id):
     historic_base_path = os.path.join(MEDIA_ROOT, 'historic_resources')
     if not os.path.exists(historic_base_path):
         os.makedirs(historic_base_path)
-        os.chmod(historic_base_path, 0o0750)
+        os.chmod(historic_base_path, settings.FOLDER_DEFAULT_PERMISSIONS)
     
     if not os.path.isabs(path):
         path = os.path.join(MEDIA_ROOT, path)
@@ -890,7 +890,7 @@ def get_historic_resources_dir(path, layer_id):
         # makedirs permissions are umasked, so we need to explicitly set permissions afterwards
         for root, dirs, _ in os.walk(os.path.join(MEDIA_ROOT, 'historic_resources' , str(layer_id)), followlinks=True):
             for d in dirs:
-                os.chmod(os.path.join(root, d), 0o0750)
+                os.chmod(os.path.join(root, d), settings.FOLDER_DEFAULT_PERMISSIONS)
     return historic_path
 
 def get_resource_type(content_type):
@@ -1551,11 +1551,12 @@ def get_layerread_by_role(role):
 
 def set_default_permissions(file_path):
     """
-    Sets the default permissions to the provided file. We set 0o644
-    so that the web server (e.g. Apache running as www-data) can read
-    the files served as public media (thumbnails, etc.).
+    Apply FILE_DEFAULT_PERMISSIONS to a file created under MEDIA.
+    Default is 0o640 (owner read/write, group read). Environments where
+    another user must read the file (Apache, GeoServer on NFS) override
+    the setting, for example to 0o666.
     """
-    os.chmod(file_path, 0o644)
+    os.chmod(file_path, settings.FILE_DEFAULT_PERMISSIONS)
 
 def get_datastore_name(username):
     """
