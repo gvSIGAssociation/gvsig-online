@@ -163,10 +163,6 @@ rtree==1.2.0
 langchain==0.3.27
 langchain-community==0.3.30
 
-# Soporte para Google Gemini
-langchain-google-genai==2.0.10
-google-generativeai==0.8.5  # Para integracion directa con Gemini
-
 # Soporte para OpenAI (GPT-4o, etc.)
 langchain-openai==0.3.35
 openai==2.2.0
