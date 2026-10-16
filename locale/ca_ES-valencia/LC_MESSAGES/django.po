@@ -1464,9 +1464,6 @@ msgstr "El nom de l'aplicació ja existeix"
 #~ msgid "Allow access to the application for the following user groups:"
 #~ msgstr "Permetre l'accés l'aplicació per als següents grups d'usuaris:"
 
-#~ msgid "App"
-#~ msgstr "Aplicacions"
-
 #~ msgid "expiration_date"
 #~ msgstr "Data d'expiració"
 
@@ -1545,3 +1542,18 @@ msgstr "El nom de l'aplicació ja existeix"
 
 #~ msgid "This is your new temporary password"
 #~ msgstr "Aquesta és la contrasenya provisionalment"
+
+
+# Public viewers landing section (includes/public_viewers_section.html)
+
+msgid "Public viewers"
+msgstr "Visors públics"
+
+msgid "Display the territory, orthophotos and thematic mapping through interactive viewers."
+msgstr "Visualitza el territori, ortofotografies i cartografia temàtica a través de visors interactius."
+
+msgid "Public viewers pagination"
+msgstr "Paginació de visors públics"
+
+msgid "App"
+msgstr "App"

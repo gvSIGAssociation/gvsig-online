@@ -1,0 +1,32 @@
+{% load static %}
+{% load i18n %}
+{% if public_items %}
+<section id="public-viewers" class="section section-light">
+	<div class="container">
+		<h2 class="section-heading">
+			{% if section_title %}{{ section_title }}{% else %}{% trans "Public viewers" %}{% endif %}
+		</h2>
+		<p class="section-description">
+			{% if section_description %}{{ section_description }}{% else %}{% trans "Display the territory, orthophotos and thematic mapping through interactive viewers." %}{% endif %}
+		</p>
+		<div id="pub-projects-grid" class="pub-projects-grid">
+			{% for item in public_items %}
+			<a href="{{ item.url }}" class="pub-project-card{% if item.item_type == 'app' %} pub-project-card--app{% endif %}" data-pub-idx="{{ forloop.counter0 }}">
+				<div class="pub-project-card__img">
+					<img src="{{ item.image }}" alt="{{ item.title }}">
+					{% if item.item_type == 'app' %}
+					<span class="pub-item-badge pub-item-badge--app"><i class="fa fa-rocket"></i> {% trans "App" %}</span>
+					{% endif %}
+				</div>
+				<div class="pub-project-card__body">
+					<h3>{{ item.title }}</h3>
+					{% if item.description %}<p>{{ item.description }}</p>{% endif %}
+				</div>
+			</a>
+			{% endfor %}
+		</div>
+		<nav id="pub-pagination" class="pub-pagination" aria-label="{% trans 'Public viewers pagination' %}"></nav>
+	</div>
+</section>
+<script src="{% static "js/lib/public_viewers_pagination.js" %}"></script>
+{% endif %}

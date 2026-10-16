@@ -26,7 +26,7 @@ from gvsigol_auth import auth_backend
 from django import apps
 from django.core.mail import send_mail
 from django.utils.translation import gettext as _
-from gvsigol_core.models import Project, ProjectRole, ProjectLayerGroup, Application, ApplicationRole
+from gvsigol_core.models import Project, ProjectRole, ProjectLayerGroup, Application, ApplicationRole, UserHomeOrder
 from gvsigol_services.models import LayerGroup, Layer, LayerGroupRole
 from gvsigol_services.authorization import can_use_layergroup
 from gvsigol import settings
@@ -40,8 +40,10 @@ from iso639 import languages
 from django.core.validators import URLValidator
 import logging
 import sys
+import datetime
+import unicodedata
 from threading import Lock
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 logger = logging.getLogger("gvsigol")
 
 
@@ -784,6 +786,71 @@ def get_user_projects(request, permissions=ProjectRole.PERM_READ):
         return projects.distinct()
     else:
         return public_projects
+
+
+def _sort_key_no_accents(s):
+    if not s:
+        return ''
+    nfd = unicodedata.normalize('NFD', (s or '').lower())
+    return ''.join(c for c in nfd if unicodedata.category(c) != 'Mn')
+
+
+def get_public_items_ordered():
+    """Public projects and applications for landing grids, respecting global UserHomeOrder."""
+    hidden_prefix = getattr(settings, 'UI_HIDEN_PROJECTS_PREFIX', '')
+    query = (
+        Project.objects.filter(is_public=True, expiration_date__gte=datetime.datetime.now()) |
+        Project.objects.filter(is_public=True, expiration_date=None)
+    )
+    if hidden_prefix:
+        query = query.exclude(name__startswith=hidden_prefix)
+    public_projects = []
+    for p in query.order_by('title'):
+        public_projects.append({
+            'id': p.id,
+            'title': p.title,
+            'description': p.description or '',
+            'image': unquote(p.image_url),
+            'url': p.url,
+            'item_type': 'public',
+        })
+
+    apps_query = Application.objects.filter(is_public=True)
+    if hidden_prefix:
+        apps_query = apps_query.exclude(name__startswith=hidden_prefix)
+    public_apps = []
+    for app in apps_query.order_by('title'):
+        public_apps.append({
+            'id': app.id,
+            'title': app.title or app.name,
+            'description': app.description or '',
+            'image': app.image_url,
+            'url': app.absurl,
+            'item_type': 'app',
+        })
+
+    all_items = sorted(public_projects + public_apps, key=lambda x: _sort_key_no_accents(x.get('title') or ''))
+
+    global_order = UserHomeOrder.objects.filter(user__isnull=True).first()
+    if global_order and global_order.order_type == UserHomeOrder.ORDER_MANUAL and global_order.order_data:
+        try:
+            order_list = json.loads(global_order.order_data)
+            lookup = {}
+            for item in all_items:
+                lookup[(item['item_type'], item['id'])] = item
+            seen = set()
+            ordered = []
+            for entry in order_list:
+                key = (entry.get('type'), entry['id'])
+                if key in lookup and key not in seen:
+                    ordered.append(lookup[key])
+                    seen.add(key)
+            ordered += [item for item in all_items if (item['item_type'], item['id']) not in seen]
+            all_items = ordered
+        except Exception:
+            pass
+
+    return all_items
 
 
 def get_user_applications(request):
