@@ -2453,13 +2453,54 @@ def get_manual(request, doc_name, forced_lang=None, default=None):
     return default
 
 
-def _get_project_enabled_plugins(project_id):
+def _plugin_dashboard_menu_source(app_name):
+    """Lee la plantilla del apartado de menú del plugin, si existe."""
+    from django.apps import apps
+    short_name = app_name.replace('gvsigol_plugin_', '', 1)
     try:
-        project = Project.objects.get(id=project_id)
-        tools = json.loads(project.tools)
-        return [tool['name'] for tool in tools if tool.get('checked')]
-    except Exception:
-        return []
+        app_config = apps.get_app_config(app_name)
+    except LookupError:
+        return None
+    path = os.path.join(app_config.path, 'templates', 'dashboard_%s_menu.html' % short_name)
+    if not os.path.isfile(path):
+        return None
+    try:
+        with open(path, 'r', encoding='utf-8') as handle:
+            return handle.read()
+    except OSError:
+        return None
+
+
+def _menu_source_allows_staff(source):
+    """
+    Un usuario staff puede usar el apartado si el menú del plugin se le muestra.
+    Los apartados exclusivos de administrador no cuentan.
+    """
+    if not source or not source.strip():
+        return False
+    cleaned = re.sub(r'\{#.*?#\}', '', source, flags=re.DOTALL)
+    cleaned = re.sub(r'\{%\s*comment\s*%\}.*?\{%\s*endcomment\s*%\}', '', cleaned, flags=re.DOTALL)
+    cleaned = re.sub(r'<!--.*?-->', '', cleaned, flags=re.DOTALL)
+    if 'user.is_staff' in cleaned:
+        return True
+    if 'user.is_superuser' in cleaned:
+        return False
+    return True
+
+
+def _user_can_see_plugin_manual(user, app_name):
+    """
+    Administrador: todos los manuales de plugins instalados.
+    Staff: solo los de apartados en los que puede hacer algo.
+    Usuario básico: ninguno (solo ve los manuales de visor).
+    """
+    if not getattr(user, 'is_authenticated', False):
+        return False
+    if user.is_superuser:
+        return True
+    if user.is_staff:
+        return _menu_source_allows_staff(_plugin_dashboard_menu_source(app_name))
+    return False
 
 
 def _find_plugin_manual(app_name, lang, plugins_base_path, base_docs_url):
@@ -2521,15 +2562,12 @@ def documentation(request):
     
     plugins_base_path = base_docs_url + '/plugins'
     plugin_manuals = []
-    project_id = request.GET.get('project_id')
-    if project_id:
-        enabled_plugins = _get_project_enabled_plugins(project_id)
-        apps_to_scan = [
-            app_name for app_name in enabled_plugins
-            if app_name.startswith('gvsigol_') and app_name in settings.INSTALLED_APPS
-        ]
-    else:
-        apps_to_scan = []
+    # Los manuales son los de los plugins instalados en el servidor, tanto
+    # desde el escritorio como desde un visor. El rol decide cuáles se ven.
+    apps_to_scan = [
+        app_name for app_name in settings.INSTALLED_APPS
+        if app_name.startswith('gvsigol_plugin_') and _user_can_see_plugin_manual(request.user, app_name)
+    ]
 
     for app_name in apps_to_scan:
         the_path, manual_lang = _find_plugin_manual(
