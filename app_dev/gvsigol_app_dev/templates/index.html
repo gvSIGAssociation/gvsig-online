@@ -18,6 +18,8 @@
 	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-3.3.7/css/bootstrap.min.css" %}">
 	<link rel="stylesheet" href="{% static "css/googlefonts.css" %}">
 	<link rel="stylesheet" href="{% static "css/index.css" %}">
+	{# CSS estructural de visores públicos (core); tema con --ld-* en index.css #}
+	<link rel="stylesheet" href="{% static "css/public_viewers.css" %}">
 
 	<!--[if lt IE 9]>
 	<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -231,36 +233,18 @@
 	</div>
 </section>
 
-{% if public_items %}
-<!-- ====================================================================
-     SECCIÓN: VISORES PÚBLICOS Y APLICACIONES
-     ==================================================================== -->
-<section id="public-viewers" class="section section-light">
-	<div class="container">
-		<h2 class="section-heading">{% trans "Public viewers" %}</h2>
-		<p class="section-description">
-			{% trans "Display the territory, orthophotos and thematic mapping through interactive viewers." %}
-		</p>
-		<div id="pub-projects-grid" class="pub-projects-grid">
-			{% for item in public_items %}
-			<a href="{{ item.url }}" class="pub-project-card{% if item.item_type == 'app' %} pub-project-card--app{% endif %}" data-pub-idx="{{ forloop.counter0 }}">
-				<div class="pub-project-card__img">
-					<img src="{{ item.image }}" alt="{{ item.title }}">
-					{% if item.item_type == 'app' %}
-					<span class="pub-item-badge pub-item-badge--app"><i class="fa fa-rocket"></i> App</span>
-					{% endif %}
-				</div>
-				<div class="pub-project-card__body">
-					<h3>{{ item.title }}</h3>
-					{% if item.description %}<p>{{ item.description }}</p>{% endif %}
-				</div>
-			</a>
-			{% endfor %}
-		</div>
-		<nav id="pub-pagination" class="pub-pagination" aria-label="{% trans 'Public viewers pagination' %}"></nav>
-	</div>
-</section>
-{% endif %}
+{% comment %}
+  Visores públicos: partial de gvsigol_core (includes/public_viewers_section.html).
+  Datos: default_index inyecta public_items (get_public_items_ordered).
+  Textos por defecto: los del core (gvsigol_core/locale).
+  Textos propios de esta app (msgid en locale/ de la app): traducir con "trans ... as"
+  y pasar el string ya traducido al include, p.ej.:
+    trans "Mi título de visores" as pub_title
+    trans "Mi descripción de visores." as pub_desc
+    include "includes/public_viewers_section.html" with section_title=pub_title section_description=pub_desc
+  Estilo: --ld-* en css/index.css; overrides opcionales en #public-viewers o .pub-*
+{% endcomment %}
+{% include "includes/public_viewers_section.html" %}
 
 {% if panel_items %}
 <!-- ====================================================================
@@ -420,77 +404,12 @@ document.querySelectorAll('a[href^="#"]').forEach(function (a) {
 	});
 }());
 
-/* ── Paginación de tarjetas (visores públicos y paneles) ─────────── */
-(function () {
-	function paginate(gridId, navId, sectionId) {
-		var grid = document.getElementById(gridId);
-		var nav  = document.getElementById(navId);
-		if (!grid || !nav) return;
-
-		var cards    = Array.prototype.slice.call(grid.querySelectorAll('.pub-project-card'));
-		var perPage  = 8;
-		var total    = cards.length;
-		var pages    = Math.ceil(total / perPage);
-		if (pages <= 1) return;
-
-		var current = 0;
-
-		function showPage(page) {
-			current = page;
-			cards.forEach(function (card, i) {
-				card.style.display = (i >= page * perPage && i < (page + 1) * perPage) ? '' : 'none';
-			});
-			renderPagination();
-		}
-
-		function btn(label, page, disabled, active) {
-			var a = document.createElement('a');
-			a.href = '#' + sectionId;
-			a.innerHTML = label;
-			if (disabled) { a.className = 'pub-page-btn disabled'; a.setAttribute('aria-disabled', 'true'); }
-			else if (active) { a.className = 'pub-page-btn active'; a.setAttribute('aria-current', 'page'); }
-			else { a.className = 'pub-page-btn'; }
-			if (!disabled && !active) {
-				a.addEventListener('click', function (e) {
-					e.preventDefault();
-					showPage(page);
-					document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth', block: 'start' });
-				});
-			} else {
-				a.addEventListener('click', function (e) { e.preventDefault(); });
-			}
-			return a;
-		}
-
-		function renderPagination() {
-			nav.innerHTML = '';
-			var ul = document.createElement('ul');
-			ul.className = 'pub-page-list';
-
-			var liPrev = document.createElement('li');
-			liPrev.appendChild(btn('&laquo;', current - 1, current === 0, false));
-			ul.appendChild(liPrev);
-
-			for (var p = 0; p < pages; p++) {
-				var li = document.createElement('li');
-				li.appendChild(btn(p + 1, p, false, p === current));
-				ul.appendChild(li);
-			}
-
-			var liNext = document.createElement('li');
-			liNext.appendChild(btn('&raquo;', current + 1, current === pages - 1, false));
-			ul.appendChild(liNext);
-
-			nav.appendChild(ul);
-		}
-
-		showPage(0);
-	}
-
-	paginate('pub-projects-grid', 'pub-pagination', 'public-viewers');
-	paginate('panels-grid', 'panels-pagination', 'panels');
-}());
 </script>
+
+{% if panel_items %}
+<script src="{% static "js/lib/public_viewers_pagination.js" %}"></script>
+<script>gvsigolPaginateCards('panels-grid', 'panels-pagination', 'panels');</script>
+{% endif %}
 
 {% for app in INSTALLED_APPS %}
 	{% if 'gvsigol_app_' in app %}
