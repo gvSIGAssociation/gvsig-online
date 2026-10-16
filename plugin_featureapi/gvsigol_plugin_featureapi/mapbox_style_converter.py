@@ -435,7 +435,7 @@ def convert_filter_to_mapbox(filter_json_str):
             
             if filter_type_lower in ['isequalto', 'propertyisequalto', 'equalto']:
                 mapbox_filters.append(["==", ["get", prop], value])
-            elif filter_type_lower in ['isnotequalto', 'propertyisnotequalto', 'notequalto']:
+            elif filter_type_lower in ['isnotequalto', 'propertyisnotequalto', 'notequalto', 'isnotequal']:
                 mapbox_filters.append(["!=", ["get", prop], value])
             elif filter_type_lower in ['islessthan', 'propertyislessthan', 'lessthan']:
                 try:
