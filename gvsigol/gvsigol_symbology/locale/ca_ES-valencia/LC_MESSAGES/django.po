@@ -1228,6 +1228,11 @@ msgstr "No es pot eliminar un estil per defecte"
 msgid "Error importing SLD"
 msgstr "Error en importar SLD"
 
+#: gvsigol_symbology/utils.py
+#: gvsigol_symbology/views.py
+msgid "Error creating style"
+msgstr "Error en crear la simbologia"
+
 #: gvsigol_symbology/views.py:1128 gvsigol_symbology/views.py:1153
 msgid ""
 "You must enter a correct name for the color ramp (without uppercases, "

@@ -120,6 +120,9 @@ ColorTable.prototype.getMinValueForInterval = function(min, max, it, numberOfInt
 };
 
 ColorTable.prototype.save = function(layerId) {
+	if (!beginStyleSave()) {
+		return;
+	}
 	$("body").overlay();
 	style = this.getStyleDef();
 	
@@ -144,20 +147,17 @@ ColorTable.prototype.save = function(layerId) {
 				},
 				data: formData,
 				success: function(response){
-					if (response.success) {
-						location.href = "/gvsigonline/symbology/style_layer_list/";
-					} else {
-						alert('Error');
-						$("body").overlayout();
-					}
-					
+					finishStyleSaveAttempt(response, function(){ $("body").overlayout(); });
 				},
-			    error: function(){}
+			    error: function(){
+					finishStyleSaveAttempt(null, function(){ $("body").overlayout(); });
+				}
 			});
 			
 		} else {
 			messageBox.show('warning', gettext('You must select a image'));
 			$.overlayout();
+			endStyleSave();
 		}
 
 		
@@ -178,15 +178,11 @@ ColorTable.prototype.save = function(layerId) {
 			},
 			data: formData,
 			success: function(response){
-				if (response.success) {
-					location.href = "/gvsigonline/symbology/style_layer_list/";
-				} else {
-					alert('Error');
-					$("body").overlayout();
-				}
-				
+				finishStyleSaveAttempt(response, function(){ $("body").overlayout(); });
 			},
-		    error: function(){}
+		    error: function(){
+				finishStyleSaveAttempt(null, function(){ $("body").overlayout(); });
+			}
 		});
 	}
 };

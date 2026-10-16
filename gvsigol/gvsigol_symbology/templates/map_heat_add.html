@@ -655,6 +655,9 @@ updatePreview(layerId, sld, map);
 });
 
 function save(layerId, sldg) {	
+	if (!beginStyleSave()) {
+		return;
+	}
 	var self = this;
 	var sld = sldg;
 	var isDefault = $('#style-is-default').is(":checked");
@@ -677,14 +680,11 @@ function save(layerId, sldg) {
 			sld: sld
 		},
 		success: function(response){
-			if (response.success) {
-				location.href = "/gvsigonline/symbology/style_layer_list/";
-			} else {
-				alert('Error');
-			}
-
+			finishStyleSaveAttempt(response);
 		},
-		error: function(){}
+		error: function(){
+			finishStyleSaveAttempt(null);
+		}
 	});
 }
 

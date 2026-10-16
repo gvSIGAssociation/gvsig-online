@@ -26,18 +26,127 @@ from gvsigol_symbology import sld_builder
 from gvsigol_services.backend_postgis import Introspect
 from gvsigol_services.utils import set_default_permissions
 from django.core import serializers
+from django.utils.translation import gettext as _
 from gvsigol import settings
 import tempfile, zipfile
 import os, shutil, errno
 import json
 import logging
 import re
+import threading
 import gdaltools
 import xml.etree.ElementTree as ET
 
 from PIL import Image, ImageColor, ImageDraw, ImageFont
 
 LOG = logging.getLogger('gvsigol')
+_style_error = threading.local()
+
+
+def clear_style_error():
+    _style_error.message = None
+
+
+def set_style_error(message):
+    _style_error.message = message
+
+
+def get_style_error():
+    return getattr(_style_error, 'message', None)
+
+
+def _short_style_error(exc):
+    text = str(exc).replace('\n', ' ').strip()
+    if len(text) > 300:
+        text = text[:300]
+    return text or _('Error creating style')
+
+
+def resolve_is_default(layer, is_default, is_preview=False):
+    """Decide si el estilo nuevo será el predeterminado, sin tocar el resto."""
+    if isinstance(is_default, str):
+        is_default = is_default.lower() == 'true'
+    if is_preview:
+        return False
+    if is_default:
+        return True
+    return not has_default_style(layer)
+
+
+def apply_default_style(layer, style):
+    if style is None or not style.is_default:
+        return
+    set_not_default_styles(layer)
+    style.is_default = True
+    style.save(update_fields=['is_default'])
+
+
+def begin_style_creation(gs, name, layer):
+    """
+    Evita insertar otra fila cuando el mismo formulario se envía dos veces.
+
+    Devuelve el Style ya asociado a la capa para reutilizarlo, False si el
+    nombre pertenece a otra capa, o None si hay que crear uno nuevo.
+    """
+    clear_style_error()
+    if gs is not None:
+        gs.last_style_error = None
+    if not name:
+        set_style_error(_('Error creating style'))
+        return False
+
+    matches = list(Style.objects.filter(name=name))
+    for style in matches:
+        if StyleLayer.objects.filter(style=style, layer=layer).exists():
+            return style
+    if matches:
+        message = _('There is already a style named') + ' ' + name
+        set_style_error(message)
+        if gs is not None:
+            gs.last_style_error = message
+        return False
+    return None
+
+
+def discard_unpublished_style(style):
+    try:
+        style.delete()
+    except Exception:
+        LOG.exception('Error eliminando el estilo no publicado %s', getattr(style, 'name', None))
+
+
+def publish_style(gs, layer, style, sld_body, is_preview=False, raw=False, overwrite=False):
+    """
+    Publica el estilo en GeoServer. Si falla, borra la fila recién creada
+    para que un reintento no deje el mismo nombre duplicado.
+    """
+    try:
+        if is_preview or overwrite:
+            created = gs.createOverwrittenStyle(style.name, sld_body, True, raw=raw)
+        else:
+            created = gs.createStyle(style.name, sld_body, raw=raw)
+    except Exception as exc:
+        message = _short_style_error(exc)
+        set_style_error(message)
+        if gs is not None:
+            gs.last_style_error = message
+        discard_unpublished_style(style)
+        return None
+    if not created:
+        message = getattr(gs, 'last_style_error', None) or _('Error creating style')
+        message = _short_style_error(message)
+        set_style_error(message)
+        if gs is not None:
+            gs.last_style_error = message
+        discard_unpublished_style(style)
+        return None
+    if not is_preview:
+        apply_default_style(layer, style)
+        try:
+            gs.setLayerStyle(layer, style.name, style.is_default)
+        except Exception:
+            LOG.exception('Error asignando el estilo %s a la capa %s', style.name, getattr(layer, 'name', ''))
+    return style
 
 def __get_uncompressed_file_upload_path(f):
     dir_path = tempfile.mkdtemp(suffix='', prefix='tmp-library-')

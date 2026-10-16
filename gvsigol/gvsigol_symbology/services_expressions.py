@@ -35,8 +35,13 @@ def create_style(request, json_data, layer, gs, is_preview=False):
     name = json_data.get('name')
     if is_preview:
         name = name + '__tmp'
+    claimed = utils.begin_style_creation(gs, name, layer)
+    if claimed is False:
+        return None
+    if claimed is not None:
+        return claimed
     is_default = json_data.get('is_default', False)
-    is_default = utils.set_default_style(layer, gs,is_preview=is_preview, is_default=is_default)
+    is_default = utils.resolve_is_default(layer, is_default, is_preview)
 
     style = Style(
         name = name,
@@ -156,14 +161,7 @@ def create_style(request, json_data, layer, gs, is_preview=False):
                 symbolizer.save()
 
     sld_body = sld_builder.build_sld(layer, style)
-    if is_preview:
-        if gs.createOverwrittenStyle(style.name, sld_body, True): 
-            return style
-    else:
-        if gs.createStyle(style.name, sld_body): 
-            if not is_preview:
-                gs.setLayerStyle(layer, style.name, style.is_default)
-            return style
+    return utils.publish_style(gs, layer, style, sld_body, is_preview=is_preview)
 
 def update_style(request, json_data, layer, gs, style, is_preview=False):
     is_default = json_data.get('is_default', False)

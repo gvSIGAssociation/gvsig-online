@@ -77,7 +77,13 @@ def delete_preview_style(request, name, gs):
             pass
         
     return success
-  
+
+
+def style_failure_response():
+    message = utils.get_style_error() or _('Error creating style')
+    utils.clear_style_error()
+    return HttpResponse(json.dumps({'success': False, 'message': message}, indent=4), content_type='application/json')
+
 @login_required()
 @staff_required
 def style_layer_list(request):
@@ -257,7 +263,7 @@ def custom_add(request, layer_id):
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
-            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+            return style_failure_response()
         
     else:                 
         response = services_custom.get_conf(request, layer_id)     
@@ -291,7 +297,7 @@ def custom_update(request, layer_id, style_id):
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
-            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+            return style_failure_response()
         
     else:
         style = Style.objects.get(id=int(style_id))
@@ -328,7 +334,7 @@ def map_heat_add(request, layer_id):
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
-            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+            return style_failure_response()
         
     else:                 
         response = services_map_heat.get_conf(request, layer_id)     
@@ -362,7 +368,7 @@ def map_heat_update(request, layer_id, style_id):
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
-            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+            return style_failure_response()
         
     else:
         style = Style.objects.get(id=int(style_id))
@@ -398,7 +404,7 @@ def unique_symbol_add(request, layer_id):
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
-            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+            return style_failure_response()
         
     else:                 
         response = services_unique_symbol.get_conf(request, layer_id)     
@@ -428,7 +434,7 @@ def unique_symbol_update(request, layer_id, style_id):
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
-            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+            return style_failure_response()
         
     else:
         style = Style.objects.get(id=int(style_id))
@@ -502,7 +508,7 @@ def unique_values_add(request, layer_id, style_id=None):
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
-            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+            return style_failure_response()
         
     else:             
         response = services_unique_values.get_conf(request, layer_id) 
@@ -537,7 +543,7 @@ def unique_values_update(request, layer_id, style_id):
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
-            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+            return style_failure_response()
         
     else:                
         style = Style.objects.get(id=int(style_id))
@@ -639,7 +645,7 @@ def intervals_add(request, layer_id):
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
-            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+            return style_failure_response()
         
     else:         
         response = services_intervals.get_conf(request, layer_id) 
@@ -745,12 +751,12 @@ def update_preview(request, layer_id):
                         gs.reload_nodes()
                         return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
-    return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+    return style_failure_response()
  
-   
+ 
 @login_required()
 @staff_required
-def intervals_update(request, layer_id, style_id):  
+def intervals_update(request, layer_id, style_id):
     if request.method == 'POST':
         style_data = request.POST['style_data']
         json_data = json.loads(style_data)
@@ -774,7 +780,7 @@ def intervals_update(request, layer_id, style_id):
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
-            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+            return style_failure_response()
         
     else:                
         style = Style.objects.get(id=int(style_id))
@@ -876,7 +882,7 @@ def clustered_points_add(request, layer_id):
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
-            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+            return style_failure_response()
         
     else:                 
         response = services_expressions.get_conf(request, layer_id) 
@@ -907,7 +913,7 @@ def clustered_points_update(request, layer_id, style_id):
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
-            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+            return style_failure_response()
         
     else:                
         style = Style.objects.get(id=int(style_id))
@@ -967,7 +973,7 @@ def expressions_add(request, layer_id):
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
-            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+            return style_failure_response()
         
     else:                 
         response = services_expressions.get_conf(request, layer_id) 
@@ -1015,7 +1021,7 @@ def expressions_update(request, layer_id, style_id):
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
-            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+            return style_failure_response()
         
     else:                
         style = Style.objects.get(id=int(style_id))
@@ -1079,7 +1085,7 @@ def color_table_add(request, layer_id):
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
-            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+            return style_failure_response()
         
     else:                 
         response = services_color_table.get_conf(request, layer_id)    
@@ -1112,7 +1118,7 @@ def color_table_update(request, layer_id, style_id):
             return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
             
         else:
-            return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
+            return style_failure_response()
         
     else:
         style = Style.objects.get(id=int(style_id))

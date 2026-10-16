@@ -68,10 +68,9 @@ msgstr ""
 #: gvsigol_symbology/services_library.py:86
 #: gvsigol_symbology/services_library.py:94
 #: gvsigol_symbology/services_library.py:216
-#, fuzzy
-#| msgid "There is already a library with that name"
+#: gvsigol_symbology/utils.py
 msgid "There is already a style named"
-msgstr "Ya existe una biblioteca con ese nombre"
+msgstr "Ya existe un estilo con el nombre"
 
 #: gvsigol_symbology/templates/base_symbology.html:116
 #: gvsigol_symbology/templates/base_symbology_compress.html:115
@@ -1296,6 +1295,11 @@ msgstr "No puede eliminar un estilo por defecto"
 #: gvsigol_symbology/views.py:1197
 msgid "Error importing SLD"
 msgstr "Error al importar SLD"
+
+#: gvsigol_symbology/utils.py
+#: gvsigol_symbology/views.py
+msgid "Error creating style"
+msgstr "Error al crear la simbología"
 
 #: gvsigol_symbology/views.py:1257 gvsigol_symbology/views.py:1282
 msgid ""

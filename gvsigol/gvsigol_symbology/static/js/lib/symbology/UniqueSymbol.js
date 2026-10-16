@@ -248,6 +248,9 @@ UniqueSymbol.prototype.refreshMap = function() {
 };
 
 UniqueSymbol.prototype.save = function(layerId) {
+	if (!beginStyleSave()) {
+		return;
+	}
 	$("body").overlay();
 	style = this.getStyleDef();
 
@@ -262,15 +265,11 @@ UniqueSymbol.prototype.save = function(layerId) {
 			style_data: JSON.stringify(style)
 		},
 		success: function(response){
-			if (response.success) {
-				location.href = "/gvsigonline/symbology/style_layer_list/";
-			} else {
-				alert('Error');
-				$("body").overlayout();
-			}
-
+			finishStyleSaveAttempt(response, function(){ $("body").overlayout(); });
 		},
-		error: function(){}
+		error: function(){
+			finishStyleSaveAttempt(null, function(){ $("body").overlayout(); });
+		}
 	});
 };
 

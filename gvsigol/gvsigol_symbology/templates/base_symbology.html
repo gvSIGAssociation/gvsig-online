@@ -344,6 +344,43 @@
 			}
 		}
 
+		function beginStyleSave() {
+			if (window.__gvsigolStyleSaveLock) {
+				return false;
+			}
+			window.__gvsigolStyleSaveLock = true;
+			var btn = document.getElementById('save-legend');
+			if (btn) {
+				btn.disabled = true;
+			}
+			return true;
+		}
+
+		function endStyleSave() {
+			window.__gvsigolStyleSaveLock = false;
+			var btn = document.getElementById('save-legend');
+			if (btn) {
+				btn.disabled = false;
+			}
+		}
+
+		function alertStyleError(response) {
+			var message = (response && response.message) ? response.message : 'Error';
+			alert(message);
+		}
+
+		function finishStyleSaveAttempt(response, onFail) {
+			if (response && response.success) {
+				location.href = "/gvsigonline/symbology/style_layer_list/";
+				return;
+			}
+			alertStyleError(response);
+			if (typeof onFail === 'function') {
+				onFail();
+			}
+			setTimeout(endStyleSave, 0);
+		}
+
 	</script>
 
 	{% block extra-scripts %}{% endblock %}

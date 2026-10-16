@@ -641,6 +641,7 @@ class Geoserver():
         """
         Create new style
         """
+        self.last_style_error = None
         try:
             self.getGsconfig().create_style(name, data, overwrite=overwrite, workspace=None, style_format="sld10", raw=raw)
             return True
@@ -648,21 +649,25 @@ class Geoserver():
         except Exception as e:
             logger.exception('Sobrescribiendo estilo: ' + name)
             error_message = str(e)
-            if error_message.startswith("There is already a style named"):
+            self.last_style_error = error_message
+            if "There is already a style named" in error_message:
                 if not overwrite:
                     # A GeoServer orphan style (no Django record) blocks creation.
                     # Overwrite it so the new Django-tracked style takes effect.
                     try:
                         self.getGsconfig().create_style(name, data, overwrite=True, workspace=None, style_format="sld10", raw=raw)
+                        self.last_style_error = None
                         return True
                     except Exception as e2:
                         logger.exception('Sobrescribiendo estilo (retry overwrite): ' + name)
+                        self.last_style_error = str(e2)
                 # overwrite=True was already tried and still failed – bubble up.
                 try:
                     msg_name = name.split('_')[2]
                 except IndexError:
                     msg_name = name
                 error = str(_("There is already a style named")) + " " + msg_name
+                self.last_style_error = error
                 raise Exception(error)
             return False
     

@@ -150,6 +150,9 @@ $(document).ready(function() {
 });
 
 function save(layerId, codemirror) {	
+	if (!beginStyleSave()) {
+		return;
+	}
 	var self = this;
 	
 	var sld = codemirror.getValue();
@@ -173,14 +176,11 @@ function save(layerId, codemirror) {
 			sld: sld
 		},
 		success: function(response){
-			if (response.success) {
-				location.href = "/gvsigonline/symbology/style_layer_list/";
-			} else {
-				alert('Error');
-			}
-
+			finishStyleSaveAttempt(response);
 		},
-		error: function(){}
+		error: function(){
+			finishStyleSaveAttempt(null);
+		}
 	});
 }
 
