@@ -1425,6 +1425,13 @@ class FeatureByPointView(ListAPIView):
                 except Exception:
                     raise HttpException(400, "Bad parameter getbuffer.")
 
+            filter = None
+            if 'filter' in self.request.GET:
+                try:
+                    filter = json.loads(self.request.GET['filter'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter filter. The value must be a JSON string")
+
             lyr = Layer.objects.get(id=lyr_id)
             if lyr is None:
                 raise HttpException(404, "Layer not found")
@@ -1432,9 +1439,9 @@ class FeatureByPointView(ListAPIView):
             serializer = FeatureSerializer()
             result = None
             if simplify:
-                result = serializer.info_by_point(validation, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer, cql_filter_read=restrictions.get('cql_filter_read'))
+                result = serializer.info_by_point(validation, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer, cql_filter_read=restrictions.get('cql_filter_read'), filter=filter)
             else:
-                result = serializer.info_by_point_without_simplify(validation, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer, cql_filter_read=restrictions.get('cql_filter_read'))
+                result = serializer.info_by_point_without_simplify(validation, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer, cql_filter_read=restrictions.get('cql_filter_read'), filter=filter)
             result['infoFormat'] = 'application/geojson'
             result['layerId'] = lyr.id
             result['layerTitle'] = lyr.title
@@ -1546,6 +1553,13 @@ class PublicFeatureByPointView(ListAPIView):
                 except Exception:
                     raise HttpException(400, "Bad parameter getbuffer.")
 
+            filter = None
+            if 'filter' in self.request.GET:
+                try:
+                    filter = json.loads(self.request.GET['filter'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter filter. The value must be a JSON string")
+
             lyr = Layer.objects.get(id=lyr_id)
             if lyr is None:
                 raise HttpException(404, "Layer not found")
@@ -1553,7 +1567,7 @@ class PublicFeatureByPointView(ListAPIView):
                 raise HttpException(403, "The user does not have permission to read this layer")
 
             serializer = FeatureSerializer()
-            result = serializer.info_by_point(None, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer)
+            result = serializer.info_by_point(None, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer, filter=filter)
 
             result = {
                 "content" : result,

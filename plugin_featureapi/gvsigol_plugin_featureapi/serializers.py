@@ -113,7 +113,23 @@ class FeatureSerializer(serializers.Serializer):
     geometry = GeometrySerializer()
     properties = serializers.DictField(child=serializers.CharField())
     
-    def info_by_point(self, validation, layer, lat, lon, epsg, buffer, return_geom, lang, blank, getbuffer, cql_filter_read=None):
+    def _compose_info_by_point_where_prefix(self, cql_filter_read=None, filter=None):
+        """
+        Attribute / permission predicates before the spatial intersect in
+        info_by_point queries. Same JSON ``filter`` shape as FeaturesView.
+        """
+        parts = []
+        if cql_filter_read:
+            parts.append(self._get_cql_permissions_filter(cql_filter_read))
+        if filter is not None:
+            parts.append(self._get_filter_where(filter))
+        if not parts:
+            return sqlbuilder.SQL('')
+        return sqlbuilder.SQL('{parts} AND').format(
+            parts=sqlbuilder.SQL(' AND ').join(parts)
+        )
+
+    def info_by_point(self, validation, layer, lat, lon, epsg, buffer, return_geom, lang, blank, getbuffer, cql_filter_read=None, filter=None):
         if layer.type != 'v_PostGIS':
             raise HttpException(400, "Wrong layer type. It must be a PostGIS type")
         try:
@@ -165,10 +181,7 @@ class FeatureSerializer(serializers.Serializer):
                 #get_buffer_params = " "
                 #if(getbuffer == True):
                 #    get_buffer_params = ", ST_AsGeoJSON(st_buffer('SRID={source_epsg};POINT({lon} {lat})'::geometry, {buffer}))"
-                if cql_filter_read:
-                    cql_filter = sqlbuilder.SQL('{cql_filter} AND').format(cql_filter=self._get_cql_permissions_filter(cql_filter_read))
-                else:
-                    cql_filter = sqlbuilder.SQL('')
+                cql_filter = self._compose_info_by_point_where_prefix(cql_filter_read, filter)
                 
                 # Cuando source es 4326 y native es geográfico (4326, 4258, etc.), usamos geography en WHERE y ORDER BY
                 # para operar en metros sobre el elipsoide y evitar mezcla geometry/geography.
@@ -319,7 +332,7 @@ class FeatureSerializer(serializers.Serializer):
                 raise e
             raise HttpException(400, "Features cannot be queried. Unexpected error: " + format(e))
         
-    def info_by_point_without_simplify(self, validation, layer, lat, lon, source_epsg, buffer, return_geom, lang, blank, getbuffer, cql_filter_read=None):
+    def info_by_point_without_simplify(self, validation, layer, lat, lon, source_epsg, buffer, return_geom, lang, blank, getbuffer, cql_filter_read=None, filter=None):
         if layer.type != 'v_PostGIS':
             raise HttpException(400, "Wrong layer type. It must be a PostGIS type")
         try:
@@ -345,10 +358,7 @@ class FeatureSerializer(serializers.Serializer):
                     native_epsg = int(native_epsg)
 
                 # Mantengo la lógica original pero con optimización mínima
-                if cql_filter_read:
-                    cql_filter = sqlbuilder.SQL('{cql_filter} AND').format(cql_filter=self._get_cql_permissions_filter(cql_filter_read))
-                else:
-                    cql_filter = sqlbuilder.SQL('')
+                cql_filter = self._compose_info_by_point_where_prefix(cql_filter_read, filter)
                 
                 # Consulta optimizada: mantiene lógica espacial original pero usa índices eficientemente
                 # Buffer siempre en metros (convención Web). Geográficos: geography. Proyectados: buffer directo en metros.
