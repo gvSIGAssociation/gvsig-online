@@ -38,7 +38,6 @@ router = routers.DefaultRouter()
 urlpatterns = [
     path('api/v1/layers/', api_layer.LayerListView.as_view(), name='get_layer_list,create_layer'),
     path('api/v1/layers/<int:lyr_id>/', api_layer.LayersView.as_view(), name='get_layer,delete_layer'), 
-    path('api/v1/layers/<int:lyr_id>/permissions/', api_layer.LayerPermissionsView.as_view(), name='update_layer_permissions'),
     path('api/v1/layers/<int:lyr_id>/timeinfo', api_layer.LayersTime.as_view(), name='get_layer_timeinfo'), 
     path('api/v1/layers/<int:lyr_id>/data/', api_layer.LayersData.as_view(), name='get_layer_data'),
     path('api/v1/layers/<int:lyr_id>/style/', api_layer.LayersStyle.as_view(), name='get_layer_style'),

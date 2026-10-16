@@ -40,7 +40,7 @@ from gvsigol_plugin_featureapi.serializers import LayerTimeSerializer
 from gvsigol_plugin_baseapi.validation import Validation, HttpException
 from gvsigol_services import geographic_servers
 from gvsigol_services import views as serviceviews
-from gvsigol_services.models import Layer, LayerReadRole, LayerWriteRole, LayerManageRole
+from gvsigol_services.models import Layer
 from gvsigol_symbology.models import StyleLayer, Style
 from . import serializers
 from . import util
@@ -709,62 +709,6 @@ def layer_create(request, layer_group_id):
             raise HttpException(400, "Error creating the layer: " + str(e))
     else:
         raise HttpException(400, "Error creating the layer. Form validation error: " + form.errors.as_text())
-
-
-#--------------------------------------------------
-#             Layer permissions management
-#--------------------------------------------------
-class LayerPermissionsView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, lyr_id):
-        layer = Layer.objects.filter(id=lyr_id).first()
-        if layer is None:
-            return Response(
-                {'detail': 'Layer not found'},
-                status=status.HTTP_404_NOT_FOUND)
-        if not services_utils.can_manage_layer(request.user, layer):
-            return Response(
-                {'detail': 'You cannot manage this layer'},
-                status=status.HTTP_403_FORBIDDEN)
-        return Response({
-            'is_public': layer.public,
-            'read_roles': list(LayerReadRole.objects.filter(
-                layer=layer).values_list('role', flat=True)),
-            'write_roles': list(LayerWriteRole.objects.filter(
-                layer=layer).values_list('role', flat=True)),
-            'manage_roles': list(LayerManageRole.objects.filter(
-                layer=layer).values_list('role', flat=True)),
-        })
-
-    def patch(self, request, lyr_id):
-        layer = Layer.objects.filter(id=lyr_id).first()
-        if layer is None:
-            return Response(
-                {'detail': 'Layer not found'},
-                status=status.HTTP_404_NOT_FOUND)
-        if not services_utils.can_manage_layer(request.user, layer):
-            return Response(
-                {'detail': 'You cannot manage this layer'},
-                status=status.HTTP_403_FORBIDDEN)
-
-        def role_values(key):
-            value = request.data.get(key, [])
-            return value if isinstance(value, list) else [value]
-
-        public_value = request.data.get('is_public', False)
-        is_public = (
-            public_value if isinstance(public_value, bool)
-            else str(public_value).lower() in ('1', 'true', 'yes', 'on')
-        )
-        services_utils.set_layer_permissions(
-            layer,
-            is_public,
-            role_values('read_roles'),
-            role_values('write_roles'),
-            role_values('manage_roles'),
-        )
-        return Response({'status': 'updated', 'layer_id': layer.id})
 
 
 #--------------------------------------------------
