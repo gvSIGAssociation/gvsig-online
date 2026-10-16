@@ -177,15 +177,15 @@
 					</div>
 					<div class="project-card__footer">
 					{% if item.item_type == 'app' %}
-					<a href="{{ item.url }}" target="_blank" class="project-card__btn">
+					<a href="{{ item.url }}" class="project-card__btn">
 						<i class="fa fa-rocket"></i> {% trans "Open application" %}
 					</a>
 					{% elif item.item_type == 'panel' %}
-					<a href="{{ item.url }}" target="_blank" class="project-card__btn">
+					<a href="{{ item.url }}" class="project-card__btn">
 						<i class="fa fa-dashboard"></i> {% trans "Open panel" %}
 					</a>
 					{% else %}
-					<a href="{{ item.url }}" target="_blank" class="project-card__btn">
+					<a href="{{ item.url }}" class="project-card__btn">
 						<i class="fa fa-map"></i> {% trans "Load project" %}
 					</a>
 					{% endif %}
@@ -206,7 +206,7 @@
 						<span class="project-card__desc">{{project.description}}</span>
 					</div>
 					<div class="project-card__footer">
-						<a href="{{project.url}}" target="_blank" class="project-card__btn">
+						<a href="{{project.url}}" class="project-card__btn">
 							<i class="fa fa-map"></i> {% trans "Load project" %}
 						</a>
 					</div>
@@ -225,7 +225,7 @@
 						<span class="project-card__desc">{{project.description}}</span>
 					</div>
 					<div class="project-card__footer">
-						<a href="{{project.url}}" target="_blank" class="project-card__btn">
+						<a href="{{project.url}}" class="project-card__btn">
 							<i class="fa fa-map"></i> {% trans "Load project" %}
 						</a>
 					</div>
@@ -244,7 +244,7 @@
 						<span class="project-card__desc">{{app.description}}</span>
 					</div>
 					<div class="project-card__footer">
-						<a href="{{app.url}}" target="_blank" class="project-card__btn">
+						<a href="{{app.url}}" class="project-card__btn">
 							<i class="fa fa-rocket"></i> {% trans "Open application" %}
 						</a>
 					</div>
@@ -263,7 +263,7 @@
 						<span class="project-card__desc">{{ item.description }}</span>
 					</div>
 					<div class="project-card__footer">
-						<a href="{{ item.url }}" target="_blank" class="project-card__btn">
+						<a href="{{ item.url }}" class="project-card__btn">
 							<i class="fa fa-dashboard"></i> {% trans "Open panel" %}
 						</a>
 					</div>
@@ -842,7 +842,7 @@
 						'<span class="project-card__desc">' + safeDesc + '</span>' +
 					'</div>' +
 					'<div class="project-card__footer">' +
-						'<a href="' + item.url + '" target="_blank" class="project-card__btn">' +
+						'<a href="' + item.url + '" class="project-card__btn">' +
 							'<i class="fa ' + btnIcon + '"></i> ' + btnLabel +
 						'</a>' +
 					'</div>' +

@@ -226,6 +226,12 @@ def logout_user(request):
     logout(request)
     return redirect(LOGOUT_REDIRECT_URL)
 
+@csrf_exempt
+@require_http_methods(["GET"])
+def logout_redirect(request):
+    logout(request)
+    return redirect("index")
+
 @login_required()
 def password_update(request):  
     if request.method == 'POST':

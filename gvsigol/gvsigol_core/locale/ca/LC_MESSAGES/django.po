@@ -2544,3 +2544,18 @@ msgstr "No s'ha pogut resoldre el workspace \"%(ws)s\" per a la capa WMS en casc
 
 msgid "Could not create WMS datastore \"%(ds)s\" for layer \"%(layer)s\". Check that the WMS URL is accessible from this server."
 msgstr "No s'ha pogut crear l'emmagatzematge WMS \"%(ds)s\" per a la capa \"%(layer)s\". Verifiqueu que la URL WMS és accessible des d'aquest servidor."
+
+
+# Public viewers landing section (includes/public_viewers_section.html)
+
+msgid "Public viewers"
+msgstr "Visors públics"
+
+msgid "Display the territory, orthophotos and thematic mapping through interactive viewers."
+msgstr "Visualitza el territori, ortofotografies i cartografia temàtica a través de visors interactius."
+
+msgid "Public viewers pagination"
+msgstr "Paginació de visors públics"
+
+msgid "App"
+msgstr "App"

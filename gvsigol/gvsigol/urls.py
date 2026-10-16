@@ -65,7 +65,9 @@ if 'gvsigol_core' in settings.INSTALLED_APPS:
     ]
   
 if 'gvsigol_auth' in settings.INSTALLED_APPS:
+    from gvsigol_auth.views import logout_redirect
     urlpatterns += [
+        path(GVSIGOL_URL_PREFIX + 'logout-redirect/', logout_redirect, name='gvsigol_logout_redirect'),
         path(GVSIGOL_URL_PREFIX + 'auth/', include('gvsigol_auth.urls')),
     ]
 

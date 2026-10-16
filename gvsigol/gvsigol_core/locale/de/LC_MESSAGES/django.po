@@ -1349,3 +1349,18 @@ msgstr "Anwendungsname existiert bereits"
 
 #~ msgid "Base layers"
 #~ msgstr "Basisschichten"
+
+
+# Public viewers landing section (includes/public_viewers_section.html)
+
+msgid "Public viewers"
+msgstr "Öffentliche Viewer"
+
+msgid "Display the territory, orthophotos and thematic mapping through interactive viewers."
+msgstr "Zeigen Sie das Gebiet, Orthofotos und thematische Kartografie über interaktive Viewer an."
+
+msgid "Public viewers pagination"
+msgstr "Paginierung öffentlicher Viewer"
+
+msgid "App"
+msgstr "App"

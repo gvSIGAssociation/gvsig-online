@@ -3104,8 +3104,13 @@ def application_delete(request, appid):
             return HttpResponseForbidden({"deleted": False, "error": "Not allowed"})
 
 
-def default_index(request, template="index.html", response={}):
+def default_index(request, template="index.html", response=None):
+    if response is None:
+        response = {}
     if settings.USE_SPA_PROJECT_LINKS and settings.FRONTEND_REDIRECT_URL:    
         return redirect(settings.FRONTEND_REDIRECT_URL)
     else:
-        return render(request, 'index.html', response)
+        if 'public_items' not in response:
+            from gvsigol_core.utils import get_public_items_ordered
+            response['public_items'] = get_public_items_ordered()
+        return render(request, template, response)

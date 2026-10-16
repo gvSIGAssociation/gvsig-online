@@ -1289,3 +1289,18 @@ msgstr ""
 #: gvsigol_core/views.py:1869
 msgid "Application name already exists"
 msgstr ""
+
+
+# Public viewers landing section (includes/public_viewers_section.html)
+
+msgid "Public viewers"
+msgstr "Ikusle publikoak"
+
+msgid "Display the territory, orthophotos and thematic mapping through interactive viewers."
+msgstr "Lurraldea, ortoargazkiak eta kartografia tematikoa ikusle interaktiboen bidez bistaratu."
+
+msgid "Public viewers pagination"
+msgstr "Ikusle publikoen orrikatzea"
+
+msgid "App"
+msgstr "App"

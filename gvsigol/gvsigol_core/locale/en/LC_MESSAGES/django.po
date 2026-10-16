@@ -1515,3 +1515,18 @@ msgstr ""
 
 #~ msgid "gvsigol_plugin_gpsganado manual desc"
 #~ msgstr "Guide for configuration and use of the GPS Ganado plugin"
+
+
+# Public viewers landing section (includes/public_viewers_section.html)
+
+msgid "Public viewers"
+msgstr ""
+
+msgid "Display the territory, orthophotos and thematic mapping through interactive viewers."
+msgstr ""
+
+msgid "Public viewers pagination"
+msgstr ""
+
+msgid "App"
+msgstr ""

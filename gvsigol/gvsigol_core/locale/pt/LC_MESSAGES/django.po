@@ -1976,3 +1976,18 @@ msgstr "Nenhum arquivo selecionado"
 
 msgid "role_default-roles"
 msgstr "Roles padrão"
+
+
+# Public viewers landing section (includes/public_viewers_section.html)
+
+msgid "Public viewers"
+msgstr "Visualizadores públicos"
+
+msgid "Display the territory, orthophotos and thematic mapping through interactive viewers."
+msgstr "Visualize o território, ortofotos e cartografia temática através de visualizadores interativos."
+
+msgid "Public viewers pagination"
+msgstr "Paginação de visualizadores públicos"
+
+msgid "App"
+msgstr "App"
