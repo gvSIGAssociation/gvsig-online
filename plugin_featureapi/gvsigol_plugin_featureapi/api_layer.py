@@ -40,7 +40,7 @@ from gvsigol_plugin_featureapi.serializers import LayerTimeSerializer
 from gvsigol_plugin_baseapi.validation import Validation, HttpException
 from gvsigol_services import geographic_servers
 from gvsigol_services import views as serviceviews
-from gvsigol_services.models import Layer
+from gvsigol_services.models import Layer, LayerReadRole, LayerWriteRole, LayerManageRole
 from gvsigol_symbology.models import StyleLayer, Style
 from . import serializers
 from . import util
@@ -712,6 +712,62 @@ def layer_create(request, layer_group_id):
 
 
 #--------------------------------------------------
+#             Layer permissions management
+#--------------------------------------------------
+class LayerPermissionsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, lyr_id):
+        layer = Layer.objects.filter(id=lyr_id).first()
+        if layer is None:
+            return Response(
+                {'detail': 'Layer not found'},
+                status=status.HTTP_404_NOT_FOUND)
+        if not services_utils.can_manage_layer(request.user, layer):
+            return Response(
+                {'detail': 'You cannot manage this layer'},
+                status=status.HTTP_403_FORBIDDEN)
+        return Response({
+            'is_public': layer.public,
+            'read_roles': list(LayerReadRole.objects.filter(
+                layer=layer).values_list('role', flat=True)),
+            'write_roles': list(LayerWriteRole.objects.filter(
+                layer=layer).values_list('role', flat=True)),
+            'manage_roles': list(LayerManageRole.objects.filter(
+                layer=layer).values_list('role', flat=True)),
+        })
+
+    def patch(self, request, lyr_id):
+        layer = Layer.objects.filter(id=lyr_id).first()
+        if layer is None:
+            return Response(
+                {'detail': 'Layer not found'},
+                status=status.HTTP_404_NOT_FOUND)
+        if not services_utils.can_manage_layer(request.user, layer):
+            return Response(
+                {'detail': 'You cannot manage this layer'},
+                status=status.HTTP_403_FORBIDDEN)
+
+        def role_values(key):
+            value = request.data.get(key, [])
+            return value if isinstance(value, list) else [value]
+
+        public_value = request.data.get('is_public', False)
+        is_public = (
+            public_value if isinstance(public_value, bool)
+            else str(public_value).lower() in ('1', 'true', 'yes', 'on')
+        )
+        services_utils.set_layer_permissions(
+            layer,
+            is_public,
+            role_values('read_roles'),
+            role_values('write_roles'),
+            role_values('manage_roles'),
+        )
+        return Response({'status': 'updated', 'layer_id': layer.id})
+
+
+#--------------------------------------------------
 #                  LayersView
 #--------------------------------------------------
 class LayersView(DestroyAPIView):
@@ -841,11 +897,12 @@ class LayersData(ListAPIView):
 class LayersTime(ListAPIView):
     serializer_class = LayerTimeSerializer
     pagination_class = None
+    permission_classes = [IsAuthenticated]
     
     @swagger_auto_schema(operation_id='get_layer_time_info', operation_summary='Gets the time information of a layer',
                          responses={404: "The layer has not datastore. Maybe is a external layer or a raster layer<br>Database connection NOT found<br>User NOT found<br>Layer NOT found", 
-                                    403: "The layer is not allowed to this user"})
-    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+                                    403: "The layer is not allowed to this user",
+                                    401: "The user is not authenticated"})
     def get(self, request, lyr_id):
         v = Validation(request)    
         try:

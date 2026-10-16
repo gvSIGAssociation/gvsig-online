@@ -2046,6 +2046,14 @@ class LayerSerializer(serializers.ModelSerializer):
     writable = serializers.SerializerMethodField('is_writable')
     service_version = serializers.SerializerMethodField('get_external_service_version')
     native_srs = serializers.SerializerMethodField('get_native_srs')
+    has_geometry = serializers.SerializerMethodField('get_has_geometry')
+
+    def get_has_geometry(self, obj):
+        try:
+            params = json.loads(obj.external_params or '{}')
+            return params.get('has_geometry', True)
+        except (TypeError, ValueError):
+            return True
 
     def is_writable(self, obj):
         try:
@@ -2140,7 +2148,7 @@ class LayerSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'created_by', 
                   'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 
                   'external_url', 'external_tilematrixset', 'external_tilematrix', 'workspace', 'image_type', 'writable', 'external', 'service_version', 
-                  'native_srs', 'time_enabled', 'allow_download']
+                  'native_srs', 'time_enabled', 'allow_download', 'has_geometry']
 
 
 class LayerTimeSerializer(serializers.ModelSerializer):
