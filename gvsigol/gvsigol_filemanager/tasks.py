@@ -2,15 +2,11 @@ from gvsigol.celery import app as celery_app
 from gvsigol_services.forms_geoserver import PostgisLayerUploadForm
 from gvsigol_services import geographic_servers
 from gvsigol_services import rest_geoserver
-from gvsigol_services.models import Layer, LayerGroupRole
-from gvsigol_services import utils as services_utils
-from gvsigol_auth import auth_backend
+from gvsigol_services.models import Layer
 
 from django.contrib.auth.models import User
-from django.db.models import Max, Q
 from django.utils.translation import gettext as _
 from .models import exports_historical
-import json
 
 from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__)
@@ -21,53 +17,20 @@ def _publish_exported_layer(user, cleaned_data):
     Publish a PostGIS table as a gvsigol layer after export.
     Returns 'published' or 'skipped' (layer already exists).
     """
-    from gvsigol_services.views import do_add_layer, do_config_layer, _get_default_abstract
+    from gvsigol_services.layer_publish import publish_postgis_resource
 
     datastore = cleaned_data['datastore']
     name = cleaned_data['name'].lower()
-    title = cleaned_data.get('title') or name
-    layer_group = cleaned_data['layer_group']
-
-    if Layer.objects.filter(datastore=datastore).filter(Q(name=name) | Q(source_name=name)).exists():
+    if Layer.objects.filter(datastore=datastore).filter(name=name).exists():
         return 'skipped'
-
-    if not services_utils.can_use_datastore(user, datastore):
-        raise ValueError(_("You are not allowed to use the selected datastore"))
-    if not services_utils.can_use_layergroup(user, layer_group, permission=LayerGroupRole.PERM_INCLUDEINPROJECTS):
-        raise ValueError(_("You are not allowed to manage the selected layergroup"))
-    if layer_group.server_id != datastore.workspace.server.id:
-        raise ValueError(_("The selected layer group does not belong to the same server as the datastore."))
-
-    server = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
-    do_add_layer(server, datastore, name, title, True, {'maxFeatures': 0})
-
-    new_record = Layer(
+    publish_postgis_resource(
+        user=user,
         datastore=datastore,
-        layer_group=layer_group,
+        layer_group=cleaned_data['layer_group'],
         name=name,
-        title=title,
-        abstract=_get_default_abstract(datastore.type, title),
-        created_by=user.username,
-        type=datastore.type,
-        visible=False,
-        queryable=True,
-        allow_download=False,
-        allow_calculated_fields=False,
-        cached=False,
-        single_image=False,
-        source_name=name,
-        external=False,
-        external_params=json.dumps({'format': 'image/png'}),
+        title=cleaned_data.get('title') or name,
+        properties={'visible': False, 'queryable': True},
     )
-    max_order = layer_group.layer_set.aggregate(Max('order')).get('order__max')
-    if max_order is not None:
-        new_record.order = max_order + 1
-    new_record.save()
-
-    primary_role = auth_backend.get_primary_role(user.username)
-    roles = [primary_role] if primary_role else []
-    services_utils.set_layer_permissions(new_record, False, roles, roles, roles)
-    do_config_layer(server, new_record, {'max_features': 0})
     return 'published'
 
 

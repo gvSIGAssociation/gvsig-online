@@ -5,15 +5,17 @@ import sys
 
 def initialize_debugger():
     import debugpy
-    
-    # RUN_MAIN envvar is set by the reloader to indicate that this is the 
-    # actual thread running Django. This code is in the parent process and
-    # initializes the debugger
+
+    # RUN_MAIN is set by the reloader for the actual Django worker. Listen only
+    # in the parent so the server can start even if the IDE attaches later.
+    # Do NOT wait_for_client(): that blocks runserver and makes "Start Debugging"
+    # look broken when the attach handshake fails once.
     if not os.getenv("RUN_MAIN"):
-        debugpy.listen(("0.0.0.0", 6000))
-        sys.stdout.write("Start the VS Code debugger now, waiting...\n")
-        debugpy.wait_for_client()
-        sys.stdout.write("Debugger attached, starting server...\n")
+        try:
+            debugpy.listen(("0.0.0.0", 6000))
+            sys.stdout.write("INFO: debugpy listening on 0.0.0.0:6000 — attach when ready\n")
+        except Exception as exc:
+            sys.stdout.write("WARNING: debugpy listen failed: {}\n".format(exc))
 
 def main():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gvsigol.settings")
