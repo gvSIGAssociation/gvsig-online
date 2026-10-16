@@ -360,6 +360,10 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
         elif hasattr(s, 'rastersymbolizer'):
             symbolizer = RasterSymbolizer(rule)
             color_map = ColorMap(symbolizer)
+            cmap_type = 'ramp'
+            if s.rastersymbolizer.color_map and s.rastersymbolizer.color_map.type:
+                cmap_type = s.rastersymbolizer.color_map.type
+            color_map._node.set('type', cmap_type)
             
             entries = ModelColorMapEntry.objects.filter(color_map=s.rastersymbolizer.color_map).order_by('order')
             if entries is not None:

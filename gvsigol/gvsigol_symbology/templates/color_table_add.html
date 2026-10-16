@@ -265,8 +265,7 @@ $(document).ready(function() {
 	var supported_crs = {{supported_crs|safe}};
 	var extentEpsg = "{{extent_epsg}}";
 	var extent = {{extent|safe}}
-	var min = null;
-	var max = null;
+	var rasterRange = {min: null, max: null};
 	
 	for (var crs in supported_crs) {
 		proj4.defs(supported_crs[crs].code, supported_crs[crs].definition);	
@@ -338,12 +337,12 @@ $(document).ready(function() {
 					
 					for(var i = 0; i < response.result.length; i++){
 						var min = response.result[i][0];
-						if(self.min == null || min < self.min){
-							self.min = min;
+						if(rasterRange.min == null || min < rasterRange.min){
+							rasterRange.min = min;
 						}
 						var max = response.result[i][1];
-						if(self.max == null || max > self.max){
-							self.max = max;
+						if(rasterRange.max == null || max > rasterRange.max){
+							rasterRange.max = max;
 						}
 						var avg = response.result[i][2];
 						var stv = response.result[i][3];
@@ -400,7 +399,7 @@ $(document).ready(function() {
 			messageBox.show('warning', gettext('The number of intervals must be greater than 0'));
 			
 		} else {
-			if(self.min == null || self.max == null){
+			if(rasterRange.min == null || rasterRange.max == null){
 				$.ajax({
 					type: 'POST',
 					async: false,
@@ -412,16 +411,16 @@ $(document).ready(function() {
 						if(response.result){
 							for(var i = 0; i < response.result.length; i++){
 								var min = response.result[i][0];
-								if(self.min == null || min < self.min){
-									self.min = min;
+								if(rasterRange.min == null || min < rasterRange.min){
+									rasterRange.min = min;
 								}
 								var max = response.result[i][1];
-								if(self.max == null || max > self.max){
-									self.max = max;
+								if(rasterRange.max == null || max > rasterRange.max){
+									rasterRange.max = max;
 								}
 							}
-							if(self.min != null && self.max != null){
-								window.colorTable.load(self.min, self.max, numberOfIntervals);	
+							if(rasterRange.min != null && rasterRange.max != null){
+								window.colorTable.load(rasterRange.min, rasterRange.max, numberOfIntervals);	
 								$(".delete-rule").on('click', function(e){
 									intervals.deleteRule(this.dataset.ruleid);
 								});
@@ -431,8 +430,8 @@ $(document).ready(function() {
 					error: function(){}
 				});
 			}else{
-				if(self.min != null && self.max != null){
-					colorTable.load(self.min, self.max, numberOfIntervals);	
+				if(rasterRange.min != null && rasterRange.max != null){
+					colorTable.load(rasterRange.min, rasterRange.max, numberOfIntervals);	
 					$(".delete-rule").on('click', function(e){
 						intervals.deleteRule(this.dataset.ruleid);
 					});
@@ -509,7 +508,7 @@ $(document).ready(function() {
 				 	var id = $(this).attr("id").replace("color-ramp-","");
 					if(self.color_ramp_data[id]){
 				 		var json_data = self.color_ramp_data[id]["data"];
-				 		if(document.min == null || document.max == null){
+				 		if(rasterRange.min == null || rasterRange.max == null){
 							$.ajax({
 								type: 'POST',
 								async: false,
@@ -521,24 +520,23 @@ $(document).ready(function() {
 									if(response.result){
 										for(var i = 0; i < response.result.length; i++){
 											var min = response.result[i][0];
-											if(document.min == null || min < document.min){
-												document.min = min;
+											if(rasterRange.min == null || min < rasterRange.min){
+												rasterRange.min = min;
 											}
 											var max = response.result[i][1];
-											if(document.max == null || max < document.max){
-												document.max = max;
+											if(rasterRange.max == null || max > rasterRange.max){
+												rasterRange.max = max;
 											}
-											
-											if(document.min != null && document.max != null){
-												self.colorTable.applyRampColor(json_data, document.min, document.max);
-											}
+										}
+										if(rasterRange.min != null && rasterRange.max != null){
+											self.colorTable.applyRampColor(json_data, rasterRange.min, rasterRange.max);
 										}
 									}
 								},
 								error: function(){}
 							});
 						}else{
-			 				self.colorTable.applyRampColor(json_data, document.min, document.max);
+			 				self.colorTable.applyRampColor(json_data, rasterRange.min, rasterRange.max);
 						}
 					}
 					$('#modal-select-ramp').modal('hide');

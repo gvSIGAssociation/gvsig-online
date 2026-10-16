@@ -91,15 +91,33 @@ ColorTable.prototype.applyRampColor = function(json_data, min, max) {
 	}
 };
 
+ColorTable.prototype.formatQuantity = function(value) {
+	var n = Number(value);
+	if (!isFinite(n)) {
+		return 0;
+	}
+	return Math.round(n * 1e6) / 1e6;
+};
+
 ColorTable.prototype.getMinValueForInterval = function(min, max, it, numberOfIntervals){
-	if(it == 0){
+	min = Number(min);
+	max = Number(max);
+	it = Number(it);
+	numberOfIntervals = Number(numberOfIntervals);
+	if (!isFinite(min)) {
+		min = 0;
+	}
+	if (!isFinite(max)) {
+		max = min;
+	}
+	if (!isFinite(it) || it <= 0 || !isFinite(numberOfIntervals) || numberOfIntervals <= 0) {
 		return min;
 	}
-	var gap = (max-min)/numberOfIntervals;
-	var value = min + (gap*it);
-
-	return value;
-}
+	if (it >= numberOfIntervals) {
+		return max;
+	}
+	return min + ((max - min) / numberOfIntervals) * it;
+};
 
 ColorTable.prototype.save = function(layerId) {
 	$("body").overlay();
@@ -176,14 +194,27 @@ ColorTable.prototype.save = function(layerId) {
 ColorTable.prototype.load = function(min_raster, max_raster, numberOfIntervals) {
 	$("#table-entries-body-" + this.rule.id).empty();
 	this.rule.removeAllEntries();
-	var colors = this.utils.createColorRange('intervals', numberOfIntervals);
+	var count = parseInt(numberOfIntervals, 10);
+	if (!isFinite(count) || count <= 0) {
+		return;
+	}
+	var minVal = Number(min_raster);
+	var maxVal = Number(max_raster);
+	if (!isFinite(minVal)) {
+		minVal = 0;
+	}
+	if (!isFinite(maxVal)) {
+		maxVal = minVal;
+	}
+	var steps = count > 1 ? count - 1 : 1;
+	var colors = this.utils.createColorRange('intervals', count);
 
-	for (var i=0; i<numberOfIntervals; i++) {
-		var min = this.getMinValueForInterval(min_raster, max_raster, i, numberOfIntervals-1);
-		this.rule.addColorMapEntry({quantity: min, color: colors[i]});
+	for (var i=0; i<count; i++) {
+		var quantity = this.formatQuantity(this.getMinValueForInterval(minVal, maxVal, i, steps));
+		this.rule.addColorMapEntry({quantity: quantity, label: String(quantity), color: colors[i]});
 	}
 	if(this.json_data != null){
-		this.applyRampColor(this.json_data, min_raster, max_raster);
+		this.applyRampColor(this.json_data, minVal, maxVal);
 	}
 };
 

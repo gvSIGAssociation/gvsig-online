@@ -76,7 +76,7 @@ ColorMapEntry.prototype.getColorMapEntryTabUI = function() {
 	ui += 	'<div class="row">';
 	ui += 		'<div class="col-md-12 form-group">';
 	ui += 			'<label>' + gettext('Quantity') + '</label>';
-	ui += 			'<input id="quantity" type="number" class="form-control" value="' + parseInt(this.quantity) + '">';					
+	ui += 			'<input id="quantity" type="number" step="any" class="form-control" value="' + this.quantity + '">';					
 	ui += 		'</div>';
 	ui += 	'</div>';
 	ui += 	'<div class="row">';
@@ -120,8 +120,18 @@ ColorMapEntry.prototype.registerEvents = function() {
 	});	
 	
 	$("#quantity").on('change', function(e) {
-		self.quantity = this.value;
-		$("#color-map-entry-preview-quantity-" + self.id).text(this.value);
+		var previous = self.quantity;
+		var next = parseFloat(this.value);
+		if (!isFinite(next)) {
+			return;
+		}
+		if (self.label === 'label' || String(self.label) === String(previous)) {
+			self.label = String(next);
+			$("#entry-label").val(self.label);
+			$("#color-map-entry-preview-label-" + self.id).text(self.label);
+		}
+		self.quantity = next;
+		$("#color-map-entry-preview-quantity-" + self.id).text(next);
 		self.updatePreview();	
 	});
 	
