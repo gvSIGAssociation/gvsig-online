@@ -11,7 +11,7 @@
 		</p>
 		<div id="pub-projects-grid" class="pub-projects-grid">
 			{% for item in public_items %}
-			<a href="{{ item.url }}" class="pub-project-card{% if item.item_type == 'app' %} pub-project-card--app{% endif %}" data-pub-idx="{{ forloop.counter0 }}">
+			<a href="{% if not user.is_authenticated and item.item_type != 'app' %}{{ item.url }}{% if '?' in item.url %}&{% else %}?{% endif %}anon=true{% else %}{{ item.url }}{% endif %}" class="pub-project-card{% if item.item_type == 'app' %} pub-project-card--app{% endif %}" data-pub-idx="{{ forloop.counter0 }}">
 				<div class="pub-project-card__img">
 					<img src="{{ item.image }}" alt="{{ item.title }}">
 					{% if item.item_type == 'app' %}
