@@ -11,16 +11,6 @@
 	}
 }
 
-/*input::-webkit-calendar-picker-indicator {
-	display: none;
-}
-.myarrow:after {
-	content: url(https://i.stack.imgur.com/i9WFO.png);
-	margin-left: -20px; 
-	padding: .1em;
-	pointer-events:none;
-}*/
-
 input::-webkit-calendar-picker-indicator {
 	display: none;
 }
