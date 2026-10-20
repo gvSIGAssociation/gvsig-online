@@ -1,0 +1,84 @@
+# credentials:
+#   - !credential
+#     matchers:
+#       - !dnsMatch
+#         host: ##GVSIGOL_HOST##
+#         port: 443
+#         pathRegex : /geoserver.+
+#     password: ##GEOSERVER_PASSWD##
+#     username: root
+#proxies:
+#   - !proxy
+#     scheme: http
+#     host: proxy-te.nube.red.uy
+#     port: 3128
+#     matchers:
+#       - !localMatch
+#         reject: true
+#       - !dnsMatch
+#         host: www.camptocamp.org
+#         reject: true
+#       - !acceptAll {}
+# allowedReferers:
+#    - !hostnameMatch
+#      host: ##GVSIGOL_HOST##
+#      allowSubDomains: true
+
+templates:
+  #===========================================================================
+  _ws_jjdelcerro-_-jj_vertices_geodesicos_20260420_v1-_-Reseña_de_vértice_de_topografía_att: !template
+  #===========================================================================
+    reportTemplate: Resena_de_vertice_de_topografia_att.jrxml
+    attributes:
+      PRINTMAP: !boolean
+        default: true
+      logo_url: !string
+        default: "logo.png"
+      datasource: !datasource
+        attributes:
+          Nombre: !string
+            default: ""
+          coord_x: !string
+            default: ""
+          coord_y: !string
+            default: ""
+          coord_z: !string
+            default: ""  
+          tipo_senal: !string
+            default: ""
+          precision: !string
+            default: ""
+          fecha: !string
+            default: ""
+          foto: !string
+            default: ""
+          enl_foto: !string
+            default: ""
+          map: !map
+            maxDpi: 400
+            width: 492
+            height: 187
+            default:
+              useAdjustBounds: true
+    processors:
+    - !configureHttpRequests
+      httpProcessors:
+        - !restrictUris
+          matchers:
+            - !localMatch {}
+            - !acceptAll {}              
+        - !forwardHeaders
+          headers: [Referer, User-Agent]
+        # Add a static header to all http requests
+        - !addHeaders
+          headers:
+            newHeader : 'headerValue'
+    - !reportBuilder # compile all reports in current directory
+      directory: '.'
+    - !createDataSource
+      processors:
+        - !createMap
+          inputMapper: {map: map}
+          outputMapper: {mapSubReport: mapSubReport}
+    tableData: jrDataSource
+            

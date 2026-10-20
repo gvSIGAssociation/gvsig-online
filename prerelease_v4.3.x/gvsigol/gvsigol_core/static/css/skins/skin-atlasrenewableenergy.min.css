@@ -1,0 +1,138 @@
+.skin-atlasrenewableenergy .main-header .navbar {
+    background-color: #FF5900;
+  }
+  .skin-atlasrenewableenergy .main-header .navbar .nav > li > a {
+    color: #ffffff;
+  }
+  .skin-atlasrenewableenergy .main-header .navbar .nav > li > a:hover,
+  .skin-atlasrenewableenergy .main-header .navbar .nav > li > a:active,
+  .skin-atlasrenewableenergy .main-header .navbar .nav > li > a:focus,
+  .skin-atlasrenewableenergy .main-header .navbar .nav .open > a,
+  .skin-atlasrenewableenergy .main-header .navbar .nav .open > a:hover,
+  .skin-atlasrenewableenergy .main-header .navbar .nav .open > a:focus,
+  .skin-atlasrenewableenergy .main-header .navbar .nav > .active > a {
+    background: rgba(0, 0, 0, 0.1);
+    color: #f6f6f6;
+  }
+  .skin-atlasrenewableenergy .main-header .navbar .sidebar-toggle {
+    color: #ffffff;
+  }
+  .skin-atlasrenewableenergy .main-header .navbar .sidebar-toggle:hover {
+    color: #f6f6f6;
+    background: rgba(0, 0, 0, 0.1);
+  }
+  .skin-atlasrenewableenergy .main-header .navbar .sidebar-toggle {
+    color: #fff;
+  }
+  .skin-atlasrenewableenergy .main-header .navbar .sidebar-toggle:hover {
+    background-color: #FF5900;
+  }
+  @media (max-width: 767px) {
+    .skin-atlasrenewableenergy .main-header .navbar .dropdown-menu li.divider {
+      background-color: #DDDDDD;
+    }
+    .skin-atlasrenewableenergy .main-header .navbar .dropdown-menu li a {
+      color: #fff;
+    }
+    .skin-atlasrenewableenergy .main-header .navbar .dropdown-menu li a:hover {
+      background: #FF5900;
+    }
+  }
+  .skin-atlasrenewableenergy .main-header .logo {
+    background-color: #FF5900;
+    color: #ffffff;
+    border-bottom: 0 solid transparent;
+  }
+  .skin-atlasrenewableenergy .main-header .logo:hover {
+    background-color: #c74906;
+  }
+  .skin-atlasrenewableenergy .main-header li.user-header {
+    background-color: #FF5900;
+  }
+  .skin-atlasrenewableenergy .content-header {
+    background: transparent;
+  }
+  .skin-atlasrenewableenergy .wrapper,
+  .skin-atlasrenewableenergy .main-sidebar,
+  .skin-atlasrenewableenergy .left-side {
+    background-color: #555555;
+  }
+  .skin-atlasrenewableenergy .user-panel > .info,
+  .skin-atlasrenewableenergy .user-panel > .info > a {
+    color: #fff;
+  }
+  .skin-atlasrenewableenergy .sidebar-menu > li.header {
+    color: #3d3d3d;
+    background: #3d3d3d;
+  }
+  .skin-atlasrenewableenergy .sidebar-menu > li > a {
+    border-left: 3px solid transparent;
+  }
+  .skin-atlasrenewableenergy .sidebar-menu > li:hover > a,
+  .skin-atlasrenewableenergy .sidebar-menu > li.active > a {
+    color: #ffffff;
+    background: #3d3d3d;
+    border-left-color: #FF5900;
+  }
+  .skin-atlasrenewableenergy .sidebar-menu > li > .treeview-menu {
+    margin: 0 1px;
+    background: #4a4949;
+  }
+  .skin-atlasrenewableenergy .sidebar a {
+    color: #e3d6cf;
+  }
+  .skin-atlasrenewableenergy .sidebar a:hover {
+    text-decoration: none;
+  }
+  .skin-atlasrenewableenergy .treeview-menu > li > a {
+    color: #9e9590;
+  }
+  .skin-atlasrenewableenergy .treeview-menu > li.active > a,
+  .skin-atlasrenewableenergy .treeview-menu > li > a:hover {
+    color: #ffffff;
+  }
+  .skin-atlasrenewableenergy .sidebar-form {
+    border-radius: 3px;
+    border: 1px solid #504437;
+    margin: 10px 10px;
+  }
+  .skin-atlasrenewableenergy .sidebar-form input[type="text"],
+  .skin-atlasrenewableenergy .sidebar-form .btn {
+    box-shadow: none;
+    background-color: #504437;
+    border: 1px solid transparent;
+    height: 35px;
+    -webkit-transition: all 0.3s ease-in-out;
+    -o-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+  }
+  .skin-atlasrenewableenergy .sidebar-form input[type="text"] {
+    color: #666;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 2px;
+  }
+  .skin-atlasrenewableenergy .sidebar-form input[type="text"]:focus,
+  .skin-atlasrenewableenergy .sidebar-form input[type="text"]:focus + .input-group-btn .btn {
+    background-color: #fff;
+    color: #666;
+  }
+  .skin-atlasrenewableenergy .sidebar-form input[type="text"]:focus + .input-group-btn .btn {
+    border-left-color: #fff;
+  }
+  .skin-atlasrenewableenergy .sidebar-form .btn {
+    color: #999;
+    border-top-left-radius: 0;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+    border-bottom-left-radius: 0;
+  }
+  .skin-atlasrenewableenergy.layout-top-nav .main-header > .logo {
+    background-color: #FF5900;
+    color: #ffffff;
+    border-bottom: 0 solid transparent;
+  }
+  .skin-atlasrenewableenergy.layout-top-nav .main-header > .logo:hover {
+    background-color: #504437;
+  }

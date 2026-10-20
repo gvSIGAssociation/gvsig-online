@@ -1,0 +1,596 @@
+#    gvSIG Online.
+#    Copyright (C) 2010-2017 SCOLAB.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-31 08:52+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Language: es\n"
+"X-Source-Language: C\n"
+
+#: mdstandards/iso19139_2007.py:22
+msgid "author"
+msgstr "autor"
+
+#: mdstandards/iso19139_2007.py:23
+msgid "owner"
+msgstr "propietario"
+
+#: mdstandards/iso19139_2007.py:24
+msgid "Contact"
+msgstr "Contacto"
+
+#: mdstandards/iso19139_2007.py:25
+msgid "resourceProvider"
+msgstr "proveedor del recurso"
+
+#: mdstandards/iso19139_2007.py:26
+msgid "custodian"
+msgstr "custodio"
+
+#: mdstandards/iso19139_2007.py:27
+msgid "originator"
+msgstr "creador"
+
+#: mdstandards/iso19139_2007.py:28
+msgid "publisher"
+msgstr "editor"
+
+#: templates/catalog_details.html:12
+msgid "About this resource"
+msgstr "Acerca de este recurso"
+
+#: templates/catalog_details.html:13 views.py:119
+msgid "Categories"
+msgstr "Categorias"
+
+#: templates/catalog_details.html:17 views.py:125
+msgid "Keywords"
+msgstr "Palabras clave"
+
+#: templates/catalog_details.html:21
+msgid "Legal constraints"
+msgstr "Restricciones legales"
+
+#: templates/catalog_details.html:25 views.py:171
+msgid "Technical information"
+msgstr "Información técnica"
+
+#: templates/catalog_details.html:27 views.py:174
+msgid "Representation type"
+msgstr "Tipo de representación"
+
+#: templates/catalog_details.html:31 views.py:179
+msgid "Scale"
+msgstr "Escala"
+
+#: templates/catalog_details.html:35 views.py:184
+msgid "Coordinate Reference System"
+msgstr "Sistema de referencia de coordenadas"
+
+#: templates/catalog_details.html:39 views.py:191
+msgid "Metadata identifier"
+msgstr "Identificador del metadato"
+
+#: templates/catalog_details.html:50 views.py:228
+msgid "Download and links"
+msgstr "Enlaces y descargas"
+
+#: templates/catalog_details.html:55
+msgid "Download"
+msgstr "Descargar"
+
+#: templates/catalog_details.html:63
+msgid "Get shape"
+msgstr "Obtener shape"
+
+#: templates/catalog_details.html:68 views.py:257
+msgid "Spatial Extent"
+msgstr "Extensión espacial"
+
+#: templates/catalog_details.html:71 views.py:271
+msgid "Temporal Extent"
+msgstr "Extensión temporal"
+
+#: templates/catalog_details.html:72 views.py:262
+msgid "Publication date"
+msgstr "Fecha de publicación"
+
+#: templates/catalog_details.html:76 views.py:267
+msgid "Period"
+msgstr "Periodo"
+
+#: views.py:140
+msgid "Resource Contacts"
+msgstr "Contactos del recurso"
+
+#: views.py:151
+msgid "Metadata Contacts"
+msgstr "Contactos del metadato"
+
+#: views.py:168
+msgid "Resource constraints"
+msgstr "Restricciones del recurso"
+
+#: views.py:193
+msgid " Show in Catalog"
+msgstr "Mostrar en Catálogo"
+
+#: views.py:201 views.py:235
+msgid "Resource"
+msgstr "Recurso"
+
+#: views.py:218
+msgid "Online services"
+msgstr "Servicios en línea"
+
+#: views.py:243 views.py:246 views.py:249
+msgid "Access resource"
+msgstr "Acceder al recurso"
+
+#: views.py:252
+msgid "No resources available"
+msgstr "No hay recursos disponibles"
+
+#: views.py:284
+msgid "Metadata detail not available"
+msgstr "El detalle del metadato no está disponible"
+
+msgid "gvsigol_plugin_catalog manual title"
+msgstr "Plugin Catálogo"
+
+msgid "gvsigol_plugin_catalog manual desc"
+msgstr "Manual del plugin de catálogo de metadatos de gvSIG Online"
+
+#: metadata_labels.py
+msgid "pointOfContact"
+msgstr "Punto de contacto"
+
+#: metadata_labels.py
+msgid "distributor"
+msgstr "Distribuidor"
+
+#: metadata_labels.py
+msgid "user"
+msgstr "Usuario"
+
+#: metadata_labels.py
+msgid "processor"
+msgstr "Procesador"
+
+#: metadata_labels.py
+msgid "sponsor"
+msgstr "Patrocinador"
+
+#: metadata_labels.py
+msgid "collaborator"
+msgstr "Colaborador"
+
+#: metadata_labels.py
+msgid "vector"
+msgstr "Vectorial"
+
+#: metadata_labels.py
+msgid "grid"
+msgstr "Raster"
+
+#: metadata_labels.py
+msgid "textTable"
+msgstr "Tabla de texto"
+
+#: metadata_labels.py
+msgid "tin"
+msgstr "Modelo TIN"
+
+#: metadata_labels.py
+msgid "stereoModel"
+msgstr "Modelo estéreo"
+
+#: metadata_labels.py
+msgid "video"
+msgstr "Vídeo"
+
+#: metadata_labels.py
+msgid "copyright"
+msgstr "Derechos de autor"
+
+#: metadata_labels.py
+msgid "patent"
+msgstr "Patente"
+
+#: metadata_labels.py
+msgid "patentPending"
+msgstr "Patente pendiente"
+
+#: metadata_labels.py
+msgid "trademark"
+msgstr "Marca registrada"
+
+#: metadata_labels.py
+msgid "license"
+msgstr "Licencia"
+
+#: metadata_labels.py
+msgid "intellectualPropertyRights"
+msgstr "Derechos de propiedad intelectual"
+
+#: metadata_labels.py
+msgid "restricted"
+msgstr "Restringido"
+
+#: metadata_labels.py
+msgid "otherRestrictions"
+msgstr "Otras restricciones"
+
+#: metadata_labels.py
+msgid "farming"
+msgstr "Agricultura"
+
+#: metadata_labels.py
+msgid "biota"
+msgstr "Biota"
+
+#: metadata_labels.py
+msgid "boundaries"
+msgstr "Límites administrativos"
+
+#: metadata_labels.py
+msgid "climatologyMeteorologyAtmosphere"
+msgstr "Climatología, meteorología y atmósfera"
+
+#: metadata_labels.py
+msgid "climateMeteorologyAtmosphere"
+msgstr "Climatología, meteorología y atmósfera"
+
+#: metadata_labels.py
+msgid "economy"
+msgstr "Economía"
+
+#: metadata_labels.py
+msgid "elevation"
+msgstr "Elevación"
+
+#: metadata_labels.py
+msgid "environment"
+msgstr "Medio ambiente"
+
+#: metadata_labels.py
+msgid "geoscientificInformation"
+msgstr "Información geocientífica"
+
+#: metadata_labels.py
+msgid "health"
+msgstr "Salud"
+
+#: metadata_labels.py
+msgid "imageryBaseMapsEarthCover"
+msgstr "Imágenes, mapas base y cubierta terrestre"
+
+#: metadata_labels.py
+msgid "intelligenceMilitary"
+msgstr "Inteligencia militar"
+
+#: metadata_labels.py
+msgid "inlandWaters"
+msgstr "Aguas continentales"
+
+#: metadata_labels.py
+msgid "location"
+msgstr "Localización"
+
+#: metadata_labels.py
+msgid "oceans"
+msgstr "Océanos"
+
+#: metadata_labels.py
+msgid "planningCadastre"
+msgstr "Ordenación territorial y catastro"
+
+#: metadata_labels.py
+msgid "society"
+msgstr "Sociedad"
+
+#: metadata_labels.py
+msgid "structure"
+msgstr "Estructuras"
+
+#: metadata_labels.py
+msgid "transportation"
+msgstr "Transporte"
+
+#: metadata_labels.py
+msgid "utilitiesCommunication"
+msgstr "Servicios públicos y comunicaciones"
+
+#: metadata_labels.py views.py
+msgid "Use limitation"
+msgstr "Limitación de uso"
+
+#: metadata_labels.py views.py
+msgid "Access constraint"
+msgstr "Restricción de acceso"
+
+#: metadata_labels.py views.py
+msgid "Use constraint type"
+msgstr "Tipo de restricción de uso"
+
+#: metadata_labels.py views.py
+msgid "Constraint description"
+msgstr "Descripción de la restricción"
+
+#: metadata_labels.py views.py
+msgid "Update frequency"
+msgstr "Frecuencia de actualización"
+
+#: metadata_labels.py views.py
+msgid "Place"
+msgstr "Lugar"
+
+#: metadata_labels.py views.py
+msgid "Resource identifier"
+msgstr "Identificador de recurso"
+
+#: metadata_labels.py views.py
+msgid "Language"
+msgstr "Idioma"
+
+#: metadata_labels.py
+msgid "continual"
+msgstr "Continua"
+
+#: metadata_labels.py
+msgid "daily"
+msgstr "Diaria"
+
+#: metadata_labels.py
+msgid "weekly"
+msgstr "Semanal"
+
+#: metadata_labels.py
+msgid "fortnightly"
+msgstr "Quincenal"
+
+#: metadata_labels.py
+msgid "monthly"
+msgstr "Mensual"
+
+#: metadata_labels.py
+msgid "quarterly"
+msgstr "Trimestral"
+
+#: metadata_labels.py
+msgid "biannually"
+msgstr "Semestral"
+
+#: metadata_labels.py
+msgid "annually"
+msgstr "Anual"
+
+#: metadata_labels.py
+msgid "asNeeded"
+msgstr "Según necesidad"
+
+#: metadata_labels.py
+msgid "irregular"
+msgstr "Irregular"
+
+#: metadata_labels.py
+msgid "never"
+msgstr "Nunca"
+
+#: metadata_labels.py
+msgid "unknown"
+msgstr "Desconocida"
+
+#: metadata_labels.py views.py
+msgid "Resource status"
+msgstr "Estado del recurso"
+
+#: metadata_labels.py views.py
+msgid "Hierarchy level"
+msgstr "Nivel jerárquico"
+
+#: metadata_labels.py views.py
+msgid "Character set"
+msgstr "Juego de caracteres"
+
+#: metadata_labels.py views.py
+msgid "Distribution format"
+msgstr "Formato de distribución"
+
+#: metadata_labels.py views.py
+msgid "Purpose"
+msgstr "Propósito"
+
+#: metadata_labels.py
+msgid "completed"
+msgstr "Completado"
+
+#: metadata_labels.py
+msgid "onHold"
+msgstr "En espera"
+
+#: metadata_labels.py
+msgid "planned"
+msgstr "Planificado"
+
+#: metadata_labels.py
+msgid "underDevelopment"
+msgstr "En desarrollo"
+
+#: metadata_labels.py
+msgid "required"
+msgstr "Obligatorio"
+
+#: metadata_labels.py
+msgid "final"
+msgstr "Final"
+
+#: metadata_labels.py
+msgid "historicalArchive"
+msgstr "Archivo histórico"
+
+#: metadata_labels.py
+msgid "obsolete"
+msgstr "Obsoleto"
+
+#: metadata_labels.py
+msgid "dataset"
+msgstr "Conjunto de datos"
+
+#: metadata_labels.py
+msgid "series"
+msgstr "Serie"
+
+#: metadata_labels.py
+msgid "service"
+msgstr "Servicio"
+
+#: metadata_labels.py
+msgid "utf8"
+msgstr "UTF-8"
+
+#: metadata_labels.py
+msgid "ucs2"
+msgstr "UCS-2"
+
+#: metadata_labels.py
+msgid "lang_eng"
+msgstr "Inglés"
+
+#: metadata_labels.py
+msgid "lang_spa"
+msgstr "Español"
+
+#: metadata_labels.py
+msgid "lang_cat"
+msgstr "Catalán"
+
+#: metadata_labels.py
+msgid "lang_glg"
+msgstr "Gallego"
+
+#: metadata_labels.py
+msgid "lang_eus"
+msgstr "Euskera"
+
+#: metadata_labels.py
+msgid "lang_por"
+msgstr "Portugués"
+
+#: metadata_labels.py
+msgid "lang_fra"
+msgstr "Francés"
+
+#: metadata_labels.py
+msgid "lang_deu"
+msgstr "Alemán"
+
+#: metadata_labels.py
+msgid "lang_ita"
+msgstr "Italiano"
+
+#: metadata_labels.py views.py
+msgid "Metadata standard"
+msgstr "Estándar de metadatos"
+
+#: metadata_labels.py views.py
+msgid "Metadata standard version"
+msgstr "Versión del estándar de metadatos"
+
+#: metadata_labels.py views.py
+msgid "Metadata date stamp"
+msgstr "Fecha de actualización del metadato"
+
+#: metadata_labels.py views.py
+msgid "Metadata update frequency"
+msgstr "Frecuencia de actualización del metadato"
+
+#: metadata_labels.py views.py
+msgid "Update scope"
+msgstr "Ámbito de actualización"
+
+#: metadata_labels.py views.py
+msgid "Geographic bounding box"
+msgstr "Caja geográfica"
+
+#: metadata_labels.py views.py
+msgid "West"
+msgstr "Oeste"
+
+#: metadata_labels.py views.py
+msgid "East"
+msgstr "Este"
+
+#: metadata_labels.py views.py
+msgid "South"
+msgstr "Sur"
+
+#: metadata_labels.py views.py
+msgid "North"
+msgstr "Norte"
+
+#: metadata_labels.py views.py
+msgid "Responsible parties"
+msgstr "Partes responsables"
+
+#: metadata_labels.py views.py
+msgid "Distributor contacts"
+msgstr "Contactos del distribuidor"
+
+#: metadata_labels.py views.py
+msgid "Metadata constraints"
+msgstr "Restricciones del metadato"
+
+#: metadata_labels.py views.py
+msgid "Thesaurus keywords"
+msgstr "Palabras clave de tesauro"
+
+#: metadata_labels.py views.py
+msgid "Copy URL"
+msgstr "Copiar URL"
+
+#: metadata_labels.py views.py
+msgid "Show in Catalog"
+msgstr "Mostrar en Catálogo"
+
+#: metadata_labels.py
+msgid "place"
+msgstr "Lugar"
+
+#: metadata_labels.py
+msgid "theme"
+msgstr "Tema"
+
+#: metadata_labels.py
+msgid "stratum"
+msgstr "Estrato"
+
+#: metadata_labels.py
+msgid "temporal"
+msgstr "Temporal"
+
+#: metadata_labels.py
+msgid "discipline"
+msgstr "Disciplina"

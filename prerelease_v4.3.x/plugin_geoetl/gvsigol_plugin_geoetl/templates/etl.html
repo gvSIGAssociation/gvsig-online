@@ -1,0 +1,1071 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block extra-head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/xq-dark.min.css">
+{% endblock %}
+
+{% block header %}
+<style>
+:root {
+	--pl-accent:    #4a7fa5;
+	--pl-accent-dk: #2d5f80;
+	--pl-text:      #2e3a45;
+	--pl-muted:     #7b8a96;
+	--pl-border:    #e8ecef;
+	--pl-bg:        #f4f6f8;
+	--pl-white:     #ffffff;
+	--pl-radius:    10px;
+	--pl-shadow:    0 2px 12px rgba(0,0,0,0.08);
+	--pl-transition: 0.2s ease;
+}
+
+/* Panel */
+.pl-panel { background: var(--pl-white); border-radius: var(--pl-radius); box-shadow: var(--pl-shadow); border: 1px solid var(--pl-border); overflow: visible; }
+.pl-panel__header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--pl-border); gap: 10px; flex-wrap: wrap; background: var(--pl-white); border-radius: var(--pl-radius) var(--pl-radius) 0 0; }
+.pl-panel__title { font-size: 15px; font-weight: 700; color: var(--pl-text); display: flex; align-items: center; gap: 8px; margin: 0; }
+.pl-panel__title i { color: var(--pl-accent); }
+.pl-panel__actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+/* Botón "Volver" */
+#toolbar-button-back {
+	display: inline-flex; align-items: center; gap: 6px;
+	background: transparent; color: var(--pl-muted);
+	border: 1px solid var(--pl-border); border-radius: 6px;
+	font-size: 12px; font-weight: 600; padding: 5px 12px; height: 32px;
+	cursor: pointer; transition: background var(--pl-transition), border-color var(--pl-transition), color var(--pl-transition);
+	white-space: nowrap;
+}
+#toolbar-button-back:hover { background: var(--pl-bg); border-color: var(--pl-accent); color: var(--pl-accent); }
+
+/* Barra de paleta ETL */
+.pl-panel__toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;   /* botones alineados a la IZQUIERDA */
+	gap: 6px;
+	padding: 8px 14px;
+	background: var(--pl-bg);
+	border-bottom: 1px solid var(--pl-border);
+	flex-wrap: wrap;
+	position: relative;            /* contexto de posicionamiento para el buscador */
+	overflow: visible;
+}
+
+/* Los btn-group NO son el contexto: el dropdown se posiciona relativo a la toolbar */
+.pl-panel__toolbar .btn-group { position: static; }
+/* Bootstrap aplana el lado derecho de los botones dentro de btn-group: lo revertimos */
+.pl-panel__toolbar .btn-group > .btn,
+.pl-panel__toolbar .btn-group > .btn:first-child,
+.pl-panel__toolbar .btn-group > .btn:last-child,
+.pl-panel__toolbar .btn-group > .btn:not(:first-child):not(:last-child) {
+	border-radius: 6px !important;
+}
+.pl-panel__toolbar .btn {
+	display: inline-flex; align-items: center; gap: 5px;
+	font-size: 12px; font-weight: 600; padding: 5px 11px; height: 32px;
+	border-radius: 6px; border: none; cursor: pointer;
+	transition: filter var(--pl-transition), box-shadow var(--pl-transition);
+	white-space: nowrap;
+}
+.pl-panel__toolbar .btn:hover { filter: brightness(0.9); }
+.pl-panel__toolbar .btn-success  { background: #27a065; color: #fff; }
+.pl-panel__toolbar .btn-creator  { background: #7b5ea7; color: #fff; }
+.pl-panel__toolbar .btn-primary  { background: var(--pl-accent); color: #fff; border: none; }
+.pl-panel__toolbar .btn-warning  { background: #d08b00; color: #fff; }
+.pl-panel__toolbar .btn:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
+
+/* Layout: columna lateral + canvas */
+#etl-body {
+	display: flex;
+	align-items: stretch;
+	height: 78vh;
+}
+
+/* Columna lateral: oculta por defecto, se abre al activar un botón de paleta */
+#etl-dropdown-col {
+	width: 0;
+	flex-shrink: 0;
+	background: var(--pl-bg);
+	border-right: 1px solid transparent;
+	overflow: hidden;                          /* clips durante la animación */
+	transition: width 0.18s ease, border-color 0.18s ease;
+}
+#etl-dropdown-col.is-open {
+	width: 160px;
+	border-right-color: var(--pl-border);
+}
+/* Lista de items dentro de la columna lateral */
+#etl-dropdown-col > ul {
+	width: 160px;      /* ancho fijo para que los items no se compriman durante la animación */
+	height: 100%;
+	overflow-y: auto;
+	overflow-x: hidden;
+	list-style: none;
+	margin: 0;
+	padding: 6px 0;
+}
+#etl-dropdown-col > ul li a {
+	display: block; padding: 7px 12px;
+	font-size: 13px; color: var(--pl-text);
+	text-decoration: none; cursor: move;
+	white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+	transition: background var(--pl-transition);
+}
+#etl-dropdown-col > ul li a:hover { background: #f0f6fb; color: var(--pl-accent); }
+/* Encabezado de grupo en la barra lateral */
+#etl-dropdown-col .sidebar-group-header {
+	padding: 8px 12px 3px;
+	font-size: 10px; font-weight: 700;
+	color: var(--pl-muted); text-transform: uppercase; letter-spacing: 0.6px;
+	border-top: 1px solid var(--pl-border); margin-top: 4px;
+	cursor: default; user-select: none;
+}
+#etl-dropdown-col .sidebar-group-header:first-child { border-top: none; margin-top: 0; }
+
+/* Los dropdown-menus Bootstrap ya no se usan como desplegables:
+   quedan ocultos en el DOM para que el buscador pueda leerlos */
+.pl-panel__toolbar .dropdown-menu { display: none !important; }
+
+/* Botón de paleta activo (presionado) */
+.pl-panel__toolbar .btn.btn-palette-active {
+	box-shadow: inset 0 2px 5px rgba(0,0,0,0.28) !important;
+	filter: brightness(0.80) !important;
+	outline: 2px solid rgba(255,255,255,0.4);
+	outline-offset: -3px;
+}
+
+/* Toolbar de acciones del canvas (guardar, ejecutar, etc.) generado por JS */
+#toolbar-etl { display: flex; align-items: center; gap: 6px; }
+
+/* Sistema de diseño compartido — botones de acción */
+.btn-pl-add { display: inline-flex; align-items: center; gap: 6px; background: var(--pl-accent); color: #fff !important; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; padding: 6px 14px; height: 34px; cursor: pointer; transition: background var(--pl-transition), border-color var(--pl-transition), color var(--pl-transition); text-decoration: none !important; white-space: nowrap; letter-spacing: 0.2px; }
+.btn-pl-add:hover { background: var(--pl-accent-dk); }
+.btn-pl-add--secondary { background: var(--pl-muted); }
+.btn-pl-add--secondary:hover { background: #5a6b78; }
+.btn-pl-add--outline { background: transparent; color: var(--pl-muted) !important; border: 1px solid var(--pl-border); }
+.btn-pl-add--outline:hover { background: var(--pl-bg); border-color: var(--pl-accent); color: var(--pl-accent) !important; }
+.btn-pl-add--danger { background: transparent; color: #c0392b !important; border: 1px solid #e8bebe; }
+.btn-pl-add--danger:hover { background: #fde8e8; border-color: #c0392b; }
+.btn-pl-add:disabled, .btn-pl-add.disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+
+/* Iconos de estado en el botón Run */
+#icon-success { color: #1a7a45; }
+#icon-error   { color: #c0392b; }
+
+/* Modales */
+.modal-content { border-radius: var(--pl-radius); border: none; box-shadow: 0 8px 32px rgba(0,0,0,0.18); }
+.modal-header { border-bottom: 1px solid var(--pl-border); padding: 16px 20px; }
+.modal-title { font-size: 15px; font-weight: 700; color: var(--pl-text); }
+.modal-body { padding: 20px; font-size: 13px; }
+.modal-body label { font-size: 12px; font-weight: 600; color: var(--pl-muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; display: block; }
+.modal-body .form-control { border-radius: 6px; border: 1px solid var(--pl-border); background: var(--pl-bg); font-size: 13px; color: var(--pl-text); box-shadow: none; transition: border-color var(--pl-transition), box-shadow var(--pl-transition); }
+.modal-body .form-control:focus { border-color: var(--pl-accent); background: var(--pl-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
+.modal-body .nav-tabs { border-bottom: 2px solid var(--pl-border); margin-bottom: 0; }
+.modal-body .nav-tabs > li > a { border-radius: 6px 6px 0 0; font-size: 12px; font-weight: 600; color: var(--pl-muted); padding: 8px 14px; border: 1px solid transparent; }
+.modal-body .nav-tabs > li > a:hover { background: var(--pl-bg); color: var(--pl-accent); }
+.modal-body .nav-tabs > li.active > a,
+.modal-body .nav-tabs > li.active > a:hover,
+.modal-body .nav-tabs > li.active > a:focus { color: var(--pl-accent); border: 1px solid var(--pl-border); border-bottom-color: var(--pl-white); background: var(--pl-white); font-weight: 700; }
+.modal-footer { border-top: 1px solid var(--pl-border); padding: 14px 20px; display: flex; justify-content: flex-end; gap: 8px; }
+.modal-footer .btn { border-radius: 6px; font-size: 13px; font-weight: 600; padding: 6px 16px; }
+.modal-footer .btn-default { border-color: var(--pl-border); color: var(--pl-muted); }
+.modal-footer .btn-primary { background: var(--pl-accent); border-color: var(--pl-accent); color: #fff; }
+.modal-footer .btn-primary:hover { background: var(--pl-accent-dk); border-color: var(--pl-accent-dk); }
+
+/* CodeMirror dentro de los nodos del canvas */
+.sql-editor-etl { border: 1px solid var(--pl-border); border-radius: 6px; height: 150px !important; font-size: 12px; }
+.sql-editor-etl .CodeMirror-gutters { left: 0 !important; }
+.sql-editor-etl .CodeMirror-linenumber { padding: 0 3px 0 5px !important; }
+.sql-editor-etl .CodeMirror-lines { padding-left: 0 !important; }
+
+/* Buscador de tareas en la paleta */
+#palette-search-wrap {
+	display: inline-flex;
+	align-items: center;
+	margin-right: 4px;
+	/* sin position:relative → los resultados se posicionan relativo a .pl-panel__toolbar */
+}
+#palette-search {
+	height: 30px;
+	border: 1px solid var(--pl-border);
+	border-radius: 6px;
+	padding: 0 10px 0 30px;
+	font-size: 12px;
+	width: 160px;
+	background: var(--pl-white);
+	color: var(--pl-text);
+	box-shadow: none;
+	transition: border-color var(--pl-transition), box-shadow var(--pl-transition);
+}
+#palette-search:focus {
+	outline: none;
+	border-color: var(--pl-accent);
+	box-shadow: 0 0 0 3px rgba(74,127,165,0.12);
+}
+#palette-search-wrap .palette-search-icon {
+	position: relative;
+	margin-right: -22px;
+	z-index: 1;
+	color: var(--pl-muted);
+	font-size: 11px;
+	pointer-events: none;
+}
+/* Dropdown de resultados de búsqueda: se posiciona relativo a .pl-panel__toolbar */
+#palette-search-results {
+	position: absolute !important;
+	left: 0 !important;
+	top: 100% !important;
+	right: auto !important;
+	margin: 0 !important;
+	width: 160px !important;
+	max-height: 78vh;
+	overflow-y: auto;
+	overflow-x: hidden;
+	z-index: 9999 !important;
+	display: none;
+	border: 1px solid var(--pl-border);
+	border-top: none;
+	border-radius: 0 0 6px 6px;
+	background: var(--pl-white);
+	box-shadow: 2px 4px 12px rgba(0,0,0,0.12);
+	padding: 4px 0;
+	list-style: none;
+}
+#palette-search-results li a {
+	display: block;
+	padding: 7px 12px;
+	font-size: 13px;
+	color: var(--pl-text);
+	text-decoration: none;
+	cursor: move;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	transition: background var(--pl-transition);
+}
+#palette-search-results li a:hover { background: #f0f6fb; color: var(--pl-accent); }
+#palette-search-results .search-no-results {
+	padding: 10px 14px;
+	font-size: 12px;
+	color: var(--pl-muted);
+	text-align: center;
+	cursor: default;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% if user.is_staff %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="pl-panel">
+                <div class="pl-panel__header">
+                    <h3 class="pl-panel__title">
+                        <i class="fa fa-cogs"></i> {% trans "ETL - Extract, Transform & Load" %}
+                    </h3>
+                    <div class="pl-panel__actions">
+                        <button id="toolbar-button-back"><i class="fa fa-list"></i> {% trans "Workspaces" %}</button>
+                        <div id="toolbar-etl"></div>
+                    </div>
+                </div>
+                <!-- Segunda fila: paleta de nodos ETL -->
+                <div class="pl-panel__toolbar" id="etl-palette">
+                    <!-- Buscador de tareas -->
+                    <div id="palette-search-wrap">
+                        <i class="fa fa-search palette-search-icon"></i>
+                        <input type="text" id="palette-search" placeholder="{% trans 'Search tasks...' %}" autocomplete="off">
+                        <ul id="palette-search-results"></ul>
+                    </div>
+                    <div class="btn-group" >
+                        <button class="btn btn-success" type="button" id="button-inputs"
+                        {% if editablerestrictedly == 'true' %} disabled {% endif %}><i class="fa fa-sign-in"></i> {% trans "Inputs" %}</button>
+                        <div class="dropdown-menu">
+                            <li><a data-shape="input_Csv" class="palette_node_element draw2d_droppable dropdown-item">CSV</a></li>
+                            <li><a data-shape="input_EnterApi" class="palette_node_element draw2d_droppable dropdown-item">EnterApi</a></li>
+                            <li><a data-shape="input_Excel" class="palette_node_element draw2d_droppable dropdown-item">Excel</a></li>
+                            <li><a data-shape="input_Indenova" class="palette_node_element draw2d_droppable dropdown-item">InDenova</a></li>
+                            <li><a data-shape="input_Json" class="palette_node_element draw2d_droppable dropdown-item">JSON</a></li>
+                            <li><a data-shape="input_Kml" class="palette_node_element draw2d_droppable dropdown-item">KML/KMZ</a></li>
+                            <li><a data-shape="input_Oracle" class="palette_node_element draw2d_droppable dropdown-item">Oracle</a></li>
+                            <li><a data-shape="input_PadronAlbacete" class="palette_node_element draw2d_droppable dropdown-item">Padrón Albacete</a></li>
+                            <li><a data-shape="input_PadronAtm" class="palette_node_element draw2d_droppable dropdown-item">Padrón ATM</a></li>
+                            <li><a data-shape="input_Postgis" class="palette_node_element draw2d_droppable dropdown-item">PgSQL/PostGIS</a></li>
+                            <li><a data-shape="input_Segex" class="palette_node_element draw2d_droppable dropdown-item">SEGEX</a></li>
+                            <li><a data-shape="input_Sharepoint" class="palette_node_element draw2d_droppable dropdown-item">SharePoint</a></li>
+                            <li><a data-shape="input_Shp" class="palette_node_element draw2d_droppable dropdown-item">Shapefile</a></li>
+                            <li><a data-shape="input_SqlServer" class="palette_node_element draw2d_droppable dropdown-item">SQL Server</a></li>
+                            <li><a data-shape="input_Xml" class="palette_node_element draw2d_droppable dropdown-item">XML</a></li>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-creator" type="button" id="button-creators"><i class="fa fa-pencil-square-o"></i> {% trans "Creators" %}</button>
+                        <div class="dropdown-menu">
+                            <li><a data-shape="crea_Grid" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Grid" %}</a></li>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-primary" type="button" id="button-alpha"><i class="fa fa-sort-alpha-asc"></i> {% trans "Alphanumeric" %}</button>
+                        <div class="dropdown-menu">
+                            <li><a data-shape="trans_Calculator" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Calculator" %}</a></li>
+                            <li><a data-shape="trans_ChangeAttrType" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Change Attribute Type" %}</a></li>
+                            <li><a data-shape="trans_CompareRows" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Compare Rows" %}</a></li>
+                            <li><a data-shape="trans_ConcatAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Concatenate Attributes" %}</a></li>
+                            <li><a data-shape="trans_Counter" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Counter" %}</a></li>
+                            <li><a data-shape="trans_CorrectSpelling" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Correct Spelling" %}</a></li>
+                            <li><a data-shape="trans_CurrentDate" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Current Date" %}</a></li>
+                            <li><a data-shape="trans_CreateAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Create Attribute" %}</a></li>
+                            <li><a data-shape="trans_ExposeAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Expose Attribute" %}</a></li>
+                            <li><a data-shape="trans_Filter" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Filter" %}</a></li>
+                            <li><a data-shape="trans_FilterDupli" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Filter Duplicates" %}</a></li>
+                            <li><a data-shape="trans_Join" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Join" %}</a></li>
+                            <li><a data-shape="trans_KeepAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Keep Attribute"%}</a></li>
+                            <li><a data-shape="trans_ModifyValue" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Modify Value" %}</a></li>
+                            <li><a data-shape="trans_PadAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Pad Attribute" %}</a></li>
+                            <li><a data-shape="trans_RemoveAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Remove Attribute" %}</a></li>
+                            <li><a data-shape="trans_RenameAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Rename Attribute" %}</a></li>
+                            <li><a data-shape="trans_Stats" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Statistics" %}</a></li>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-primary" type="button" id="button-geom"><i class="fa fa-globe"></i> {% trans "Geometric" %}</button>
+                        <div class="dropdown-menu">
+                            <li><a data-shape="trans_Buffer" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Buffer" %}</a></li>
+                            <li><a data-shape="trans_CadastralGeom" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Cadastral Geometry" %}</a></li>
+                            <li><a data-shape="trans_CalcArea" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Calculate Area" %}</a></li>
+                            <li><a data-shape="trans_CalcLength" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Calculate length" %}</a></li>
+                            <li><a data-shape="trans_Difference" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Difference" %}</a></li>
+                            <li><a data-shape="trans_ExplodeGeom" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Explode Geometry" %}</a></li>
+                            <li><a data-shape="trans_FilterGeom" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Filter Geometry" %}</a></li>
+                            <li><a data-shape="trans_Geocoder" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Geocoder" %}</a></li>
+                            <li><a data-shape="trans_Intersection" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Intersection" %}</a></li>
+                            <li><a data-shape="trans_LineEndPoints" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Line EndPoints" %}</a></li>
+                            <li><a data-shape="trans_MGRS" class="palette_node_element draw2d_droppable dropdown-item">MGRS</a></li>
+                            <li><a data-shape="trans_NearestNeighbor" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Nearest Neighbor" %}</a></li>
+                            <li><a data-shape="trans_RemoveGeom" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Remove Geometry" %}</a></li>
+                            <li><a data-shape="trans_Reproject" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Reproject" %}</a></li>
+                            <li><a data-shape="trans_SimpGeom" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Simple Geometry" %}</a></li>
+                            <li><a data-shape="trans_SpatialRel" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Spatial Relation" %}</a></li>
+                            <li><a data-shape="trans_TextToPoint" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Text to Point" %}</a></li>
+                            <li><a data-shape="trans_Union" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Union" %}</a></li>
+                            <li><a data-shape="trans_ValGeom" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Validate Geometry" %}</a></li>
+                            <li><a data-shape="trans_WktGeom" class="palette_node_element draw2d_droppable dropdown-item">{% trans "WKT to Geometry" %}</a></li>
+
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-primary" type="button" id="button-geostat"><i class="fa fa-pie-chart"></i> {% trans "Geostatistical" %}</button>
+                        <div class="dropdown-menu">
+                            <li><a data-shape="trans_Cluster" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Clustering" %}</a></li>
+                            <li><a data-shape="trans_IDW" class="palette_node_element draw2d_droppable dropdown-item">{% trans "IDW Interpolation" %}</a></li>
+                            <li><a data-shape="trans_Kriging" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Kriging Interpolation" %}</a></li>
+                            <li><a data-shape="trans_Voronoi" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Voronoi Diagram" %}</a></li>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-primary" type="button" id="button-list"><i class="fa fa-list-ol"></i> {% trans "List" %}</button>
+                        <div class="dropdown-menu">
+                            <li><a data-shape="trans_ExplodeList" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Explode List" %}</a></li>
+                            <li><a data-shape="trans_SplitAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Split Attribute" %}</a></li>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-primary" type="button" id="button-workflow"
+                        {% if editablerestrictedly == 'true' %} disabled {% endif %}><i class="fa fa-cog"></i> {% trans "Workflows" %}</button>
+                        <div class="dropdown-menu">
+                            <li><a data-shape="trans_ExecuteSQL" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Execute SQL" %}</a></li>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-warning" type="button" id="button-outputs"
+                        {% if editablerestrictedly == 'true' %} disabled {% endif %}><i class="fa fa-sign-out"></i> {% trans "Outputs" %}</button>
+                        <div class="dropdown-menu">
+                            <li><a data-shape="output_Postgis" class="palette_node_element draw2d_droppable dropdown-item">PgSQL/PostGIS</a></li>
+                            <li><a data-shape="output_Visualizer" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Visualizer" %}</a></li>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Fila: columna-dropdown + canvas -->
+            <div id="etl-body">
+                <div id="etl-dropdown-col"></div>
+                <div id="canvas-parent">
+                    <div id="canvas-etl"></div>
+                </div>
+            </div>
+            <div id="jsonCanvas"></div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Modal to save a workspace-->
+    <div id="dialog-save" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">{% trans "Save ETL workspace" %}</h4>
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#general">General</a></li>
+                        <li><a data-toggle="tab" href="#permission">Permisos</a></li>
+
+                    </ul>
+                </div>
+
+                <div class="modal-body">
+                    <div class="tab-content">
+                        <div id="general" class="tab-pane active">
+                    <form id="layer-group-form" role="form">
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="etl_id" >ID</label>
+                                <input value ="{{ id }}" placeholder="{% trans 'ETL Workspace ID' %}" name="etl_id" id="etl_id" type="text" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="etl_name">{% trans "Name" %}</label>
+                                <input value ="{{ name }}" placeholder="{% trans 'ETL Workspace name' %}" name="etl_name" id="etl_name" type="text" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="etl_desc">{% trans "Description" %}</label>
+                                <input value ="{{ description }}" placeholder="{% trans 'ETL Workspace description' %}" name="etl_desc" id="etl_desc" type="text" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <input type="checkbox" name="repeat_periodically" id="repeat_periodically"/>
+                                <label >{% trans "Run workspace every..." %}</label>
+                            </div>
+                            <div class="col-md-6 repeat_periodically_time" >
+                                <select class="form-control" style="width: 100%;" id="ws-program-day" name="ws-program-day">
+									<option value="all">{% trans 'All days' %}</option>
+									<option value="monday">{% trans 'Monday' %}</option>
+									<option value="tuesday">{% trans 'Tuesday' %}</option>
+									<option value="wednesday">{% trans 'Wednesday' %}</option>
+									<option value="thursday">{% trans 'Thursday' %}</option>
+									<option value="friday">{% trans 'Friday' %}</option>
+									<option value="saturday">{% trans 'Saturday' %}</option>
+									<option value="sunday">{% trans 'Sunday' %}</option>
+									<option value="every">{% trans 'Every' %} ...</option>
+                                </select>
+                            </div>
+                            <div class="more-hour-options">
+                                <div class="col-md-6 repeat_periodically_time">
+                                    <div class="form-group">
+                                        <div class="input-group date">
+                                            <input type="text" class="form-control" id="ws-program-time" name="ws-program-time" placeHolder="HH:mm:ss"/>
+                                            <span class="input-group-addon">
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="more-options">
+                                <div class="col-md-12 repeat_periodically_time">
+                                    <label>{% trans 'Run workspace every...' %}</label>
+                                </div>
+
+                                <div class="col-md-6 repeat_periodically_time">
+                                    <input placeholder="Select number of..." name="ws-program-interval" id="ws-program-interval" type="number" value=1 class="form-control">
+                                </div>
+                                <div class="col-md-6 repeat_periodically_time">
+                                    <select class="form-control" style="width: 100%;" id="ws-program-unit" name="ws-program-unit">
+										<option value="empty">{% trans '... time measure' %}</option>
+										<option value="minutes">{% trans 'minutes' %}</option>
+										<option value="hours">{% trans 'hours' %}</option>
+										<option value="days">{% trans 'days' %}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        {% if user.is_superuser %}
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <input type="checkbox" name="change_superuser" id="change_superuser"/>
+                                    <label for="change_superuser">{% trans 'Change to superuser?' %}</label>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </form>
+                </div>
+                <div id="permission" class="tab-pane">
+                </div>
+
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">{% trans 'Close' %}</button>
+            <button type="button" class="btn btn-primary" id="save-etl" title='{% trans "Set parameters of all tasks before save" %}'>{% trans 'Save' %}</button>
+        </div>
+    </div></div></div>
+
+<!-- Modal to make sure to overwrite workspace-->
+    <div class="modal fade" id="modal-overwrite-workspace-etl" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">{% trans 'Overwrite workspace?' %}</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <p style="font-weight: 600;">{% trans 'Workspace' %} {{ id }} {% trans 'will be overwritten. If you do not want to overwrite it the ID must be empty' %}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="button-overwrite-workspace-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans 'Cancel' %}</button>
+                    <button id="button-overwrite-workspace-accept" type="button" class="btn btn-primary">{% trans 'Accept' %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Modal to make sure to clean canvas-->
+    <div class="modal fade" id="modal-new-empy-canvas" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">{% trans 'Are you sure?' %}</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <p style="font-weight: 600;">{% trans 'If you open a new empty canvas you will lost your current canvas if you have not saved it before' %}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="button-empty-canvas-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans 'Cancel' %}</button>
+                    <button id="button-empty-canvas-accept" type="button" class="btn btn-primary">{% trans 'Accept' %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal name and user is already in database-->
+    <div class="modal fade" id="modal-ws-exists" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">{% trans 'Not allowed' %}</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <p style="font-weight: 600;">{% trans 'In database already exists a workspace with the same name and the same user' %}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="button-ws-exists-accept" type="button" class="btn btn-primary">{% trans 'Accept' %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- El modal de añadir conexión ha sido eliminado.
+         Las conexiones ahora se gestionan desde: /gvsigonline/services/connection_list/ -->
+
+{% endif %}
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+
+	$('#menu-plugin-etl').addClass("active");
+	$('#submenu-canvas').addClass("active");
+
+	// Mover los modales al <body> cuando se abren para evitar problemas de z-index
+	// con los contextos de apilamiento del panel ETL.
+	$(document).on('show.bs.modal', '.modal', function() {
+		if (!$(this).parent().is('body')) {
+			$(this).appendTo('body');
+		}
+	});
+
+	$(document).ready(function() {
+
+		// Ordenar alfabéticamente los items de cada desplegable de la paleta
+		$('#etl-palette .dropdown-menu').each(function() {
+			var $menu = $(this);
+			var $items = $menu.find('li').get();
+			$items.sort(function(a, b) {
+				return $(a).text().trim().toLowerCase().localeCompare($(b).text().trim().toLowerCase());
+			});
+			$.each($items, function(_, item) { $menu.append(item); });
+		});
+
+		// ---- Estado global ----
+		var $palSearch   = $('#palette-search');
+		var $sideCol     = $('#etl-dropdown-col');
+		var activeBtns   = [];   // IDs de botones activos (en orden de activación)
+		var isDragging   = false;
+
+		// ---- Helper: inicializar draggable ----
+		// isSearchMode=true → al soltar en el canvas, se borrar la búsqueda y
+		// se restaura la vista de grupos de botones activos.
+		function initResultDraggable($el, isSearchMode) {
+			var $ref = $('#etl-palette .draw2d_droppable').first();
+			var origStart = null, origDrag = null, origStop = null;
+
+			if ($ref.length && $.data($ref[0], 'ui-draggable')) {
+				origStart = $ref.draggable('option', 'start');
+				origDrag  = $ref.draggable('option', 'drag');
+				origStop  = $ref.draggable('option', 'stop');
+			}
+
+			$el.draggable({
+				helper:   $ref.length ? $ref.draggable('option', 'helper')   : 'clone',
+				appendTo: $ref.length ? ($ref.draggable('option', 'appendTo') || 'body') : 'body',
+				zIndex:   $ref.length ? ($ref.draggable('option', 'zIndex')   || 27000)  : 27000,
+				start: function(ev, ui) {
+					isDragging = true;
+					if (origStart) origStart.call(this, ev, ui);
+				},
+				drag: origDrag || null,
+				stop: function(ev, ui) {
+					if (origStop) origStop.call(this, ev, ui);
+					if (isSearchMode) {
+						$palSearch.val('');
+						renderSidebar();
+					}
+					// Diferir el reset: el 'click' que el navegador dispara tras el mouseup
+					// todavía ve isDragging=true → el panel no se cierra
+					setTimeout(function() { isDragging = false; }, 150);
+				}
+			});
+		}
+
+		// ---- Renderizado de la barra lateral ----
+
+		function closeSidebar() {
+			$sideCol.removeClass('is-open');
+			setTimeout(function() {
+				if (!$sideCol.hasClass('is-open')) { $sideCol.empty(); }
+			}, 200);
+		}
+
+		function renderSearchResults(query) {
+			var matches = [];
+			$('#etl-palette .dropdown-menu li a[data-shape]').each(function() {
+				var label = $(this).text().trim();
+				if (label.toLowerCase().indexOf(query) !== -1) {
+					matches.push({ label: label, shape: $(this).attr('data-shape') });
+				}
+			});
+
+			var $list = $('<ul>');
+			if (matches.length === 0) {
+				$('<li class="search-no-results">{% trans "No results" %}</li>').appendTo($list);
+			} else {
+				matches.sort(function(a, b) { return a.label.localeCompare(b.label); });
+				$.each(matches, function(_, m) {
+					var $a = $('<a>').attr('data-shape', m.shape)
+						.addClass('palette_node_element draw2d_droppable').text(m.label);
+					$('<li>').append($a).appendTo($list);
+					initResultDraggable($a, true);
+				});
+			}
+			$sideCol.empty().append($list).addClass('is-open');
+		}
+
+		function renderPaletteGroups() {
+			if (activeBtns.length === 0) { closeSidebar(); return; }
+
+			var $list = $('<ul>');
+			$.each(activeBtns, function(_, btnId) {
+				var $btn  = $('#' + btnId);
+				// Texto del botón sin el icono (FA usa CSS, no texto, pero por precaución)
+				var label = $btn.clone().find('i').remove().end().text().trim();
+				$('<li class="sidebar-group-header">').text(label).appendTo($list);
+
+				$btn.closest('.btn-group').find('.dropdown-menu li').each(function() {
+					var $origA = $(this).find('a');
+					var $a = $('<a>').attr('data-shape', $origA.attr('data-shape'))
+						.addClass('palette_node_element draw2d_droppable').text($origA.text().trim());
+					$('<li>').append($a).appendTo($list);
+					initResultDraggable($a, false);
+				});
+			});
+			$sideCol.empty().append($list).addClass('is-open');
+		}
+
+		function renderSidebar() {
+			var query = $palSearch.val().trim().toLowerCase();
+			if (query.length >= 3) {
+				renderSearchResults(query);
+			} else if (activeBtns.length > 0) {
+				renderPaletteGroups();
+			} else {
+				closeSidebar();
+			}
+		}
+
+		// ---- Buscador: muestra resultados en la barra lateral ----
+		$palSearch.on('input', renderSidebar);
+
+		// Al hacer clic fuera del buscador, solo limpia la query (no cierra la barra)
+		$(document).on('click.paletteSearch', function(e) {
+			if (isDragging) return;
+			if (!$(e.target).closest('#palette-search-wrap').length && $palSearch.val().trim().length >= 3) {
+				$palSearch.val('');
+				renderSidebar(); // vuelve a mostrar los grupos de botones activos
+			}
+		});
+
+		// ---- Botones de paleta: toggle multi-selección ----
+		$('#etl-palette .btn-group .btn').on('click', function() {
+			var $btn  = $(this);
+			var btnId = $btn.attr('id');
+
+			if ($btn.hasClass('btn-palette-active')) {
+				$btn.removeClass('btn-palette-active');
+				activeBtns = activeBtns.filter(function(id) { return id !== btnId; });
+			} else {
+				$btn.addClass('btn-palette-active');
+				activeBtns.push(btnId);
+			}
+
+			// Solo re-renderiza si no hay búsqueda activa (la búsqueda tiene prioridad visual)
+			if ($palSearch.val().trim().length < 3) {
+				renderSidebar();
+			}
+		});
+
+		// La barra lateral solo se cierra cuando el usuario desactiva los botones.
+		// No se cierra al hacer clic en el canvas ni al configurar nodos.
+
+	});
+
+    lgid = '{{ id }}'
+    name_ws = '{{ name }}'
+    description_ws = '{{ description }}'
+    workspace = '{{ workspace }}'
+    fm_directory = '{{ fm_directory }}'
+    username = '{{ user.username }}'
+    editablerestrictedly = '{{ editablerestrictedly }}'
+
+    if (editablerestrictedly){
+        $('#etl_id').prop("disabled", true)
+        $('#etl_name').prop("disabled", true)
+        $('#etl_desc').prop("disabled", true)
+        $('#repeat_periodically').prop("disabled", true)
+        $('#ws-program-day').prop("disabled", true)
+        $('#ws-program-time').prop("disabled", true)
+        $('#ws-program-interval').prop("disabled", true)
+        $('#ws-program-unit').prop("disabled", true)
+    }
+
+    if('{{day_of_week}}'){
+        dataPeriodic = '{{day_of_week}}'+' '+'{{hour}}'+':'+'{{minute}}'
+    }else if('{{every}}'){
+        dataPeriodic = '{{every}}'+' '+'{{period}}'
+    }else{
+        dataPeriodic = ''
+    }
+
+    if(workspace){
+        var cnv = JSON.parse({{ workspace|safe }})
+    };
+
+    var srs = {{ srs|safe }}
+
+    var dbc = {{dbc|safe}}
+
+    var providers = {{providers|safe}}
+
+    function actualizarInfoPanel(data){
+        if(data.status == ''){
+
+            $("#icon-success").css("display", "none");
+            $("#icon-running").css("display", "none");
+            $("#icon-error").css("display", "none");
+            $("#button-open-inspector").hide();
+
+        }
+
+        if(data.status == 'Running'){
+
+            $("#button-run").attr("title", data.message);
+            $("#icon-success").css("display", "none");
+            $("#icon-running").css("display", "inline-block");
+            $("#icon-error").css("display", "none");
+            $("#button-open-inspector").hide();
+
+        }
+        if(data.status == 'Success'){
+
+            $("#button-run").attr("title", data.message);
+            $("#icon-success").css("display", "inline");
+            $("#icon-running").css("display", "none");
+            $("#icon-error").css("display", "none");
+
+            if(data.visualizer_session_id){
+                var inspUrl = '{{ FRONTEND_BASE_URL }}/etl-visualizer/' + data.visualizer_session_id + '/';
+                $("#button-open-inspector").attr("href", inspUrl).show();
+            } else {
+                $("#button-open-inspector").hide();
+            }
+
+        }
+        if(data.status == 'Error'){
+
+            $("#button-run").attr("title", data.message);
+            $("#icon-success").css("display", "none");
+            $("#icon-running").css("display", "none");
+            $("#icon-error").css("display", "inline");
+            $("#button-open-inspector").hide();
+
+        }
+
+    }
+
+    function getCurrentCanvasStatus(){
+		$.ajax({
+			//type: 'GET',
+        	type: 'POST',
+			async: true,
+            data: {
+                "username": '{{ user.username }}',
+            },
+		  	url: '/gvsigonline/etl/etl_current_canvas_status/',
+		  	beforeSend:function(xhr){
+		    	xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+		  	},
+		  	success	:function(response){
+		  		actualizarInfoPanel(response);
+			},
+		  	error: function(response){
+				actualizarInfoPanel(response);
+		  	}
+		});
+		return false;
+    }
+
+	function startCurrentCanvasStatus(){
+		interval = setInterval(function(){
+			getCurrentCanvasStatus();
+		}, 5000);
+	}
+
+    startCurrentCanvasStatus();
+    getCurrentCanvasStatus()
+
+    $(".more-options").slideUp("slow")
+
+    if(dataPeriodic!=''){
+        $("#repeat_periodically").prop('checked', true)
+        $(".repeat_periodically_time").slideDown("slow");
+
+        if(dataPeriodic.includes(':')){
+
+            $(".more-options").slideUp("slow");
+            $(".more-hour-options").slideDown("slow");
+
+            $(".modal-body #ws-program-day").val(dataPeriodic.split(' ')[0])
+            $(".modal-body #ws-program-time").val(dataPeriodic.split(' ')[1]+':00')
+
+        }else{
+
+            $(".more-options").slideDown("slow");  // checked
+            $(".more-hour-options").slideUp("slow");
+
+            $(".modal-body #ws-program-day").val('every')
+            $(".modal-body #ws-program-interval").val(dataPeriodic.split(' ')[0])
+            $(".modal-body #ws-program-unit").val(dataPeriodic.split(' ')[1])
+
+        }
+
+    }else{
+        $("#repeat_periodically").prop('checked', false)
+        $(".repeat_periodically_time").slideUp("slow");
+    }
+
+    $("#save-etl").prop("disabled",false);
+    $('#save-etl').attr('data-toggle','');
+
+    $('#repeat_periodically').click(function() {
+
+            if($("#repeat_periodically").is(':checked')){
+                $(".repeat_periodically_time").slideDown("slow");  // checked
+            }
+
+            else{
+                $(".repeat_periodically_time").slideUp("slow");
+            }
+
+        });
+
+    function edit_progamming_form(value){
+        if(value == "every"){
+            $(".more-options").slideDown("slow");  // checked
+            $(".more-hour-options").slideUp("slow");
+        }else{
+            $(".more-options").slideUp("slow");
+            $(".more-hour-options").slideDown("slow");
+        }
+    }
+
+    $('#ws-program-time').datetimepicker({
+        format: 'HH:mm:ss'
+    });
+
+    $('#ws-program-day').on('change', function() {
+        edit_progamming_form($(this).val());
+    });
+
+
+    $('#button-ws-exists-accept').on('click', function(){
+        $('#modal-ws-exists').modal('hide')
+        $('#dialog-save').modal('show')
+
+    })
+
+    $('#button-db-exists-accept').on('click', function(){
+        $('#modal-db-exists').modal('hide')
+        $('#modal-add-db').modal('show')
+
+    })
+
+    // Los handlers del modal de añadir conexión han sido eliminados.
+    // Las conexiones ahora se gestionan desde: /gvsigonline/services/connection_list/
+
+    $('#dialog-save').on('hidden.bs.modal', function (e) {
+        // ensure the first tab is selected when the dialog is reopened
+        $('.nav-tabs li a[href="#general"]').tab('show');
+    });
+
+    $('#toolbar-button-back').click( function() {
+
+    location.href = '/gvsigonline/etl/etl_workspace_list/';
+    });
+
+</script>
+
+<script type="text/javascript" src="{% static "js/lib/draw2d.js" %}"></script>
+
+<script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+
+<!-- CodeMirror for SQL syntax highlighting -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/sql/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
+<script>
+// Almacenar las instancias de CodeMirror globalmente por ID
+window.etlSqlEditors = {};
+
+// Función para inicializar un editor SQL de ETL
+window.initEtlSqlEditor = function(textareaId, mode) {
+    // Si ya existe un editor para este ID, destruirlo primero
+    if (window.etlSqlEditors[textareaId]) {
+        window.etlSqlEditors[textareaId].toTextArea();
+        delete window.etlSqlEditors[textareaId];
+    }
+    
+    var textarea = document.getElementById(textareaId);
+    if (!textarea) return null;
+    
+    // Determinar el modo SQL según el tipo de base de datos
+    var sqlMode = 'text/x-pgsql'; // PostgreSQL por defecto
+    if (mode === 'oracle') {
+        sqlMode = 'text/x-plsql';
+    } else if (mode === 'sqlserver') {
+        sqlMode = 'text/x-mssql';
+    }
+    
+    var editor = CodeMirror.fromTextArea(textarea, {
+        mode: sqlMode,
+        theme: 'xq-dark',
+        lineNumbers: true,
+        autoCloseBrackets: true,
+        matchBrackets: true,
+        indentWithTabs: true,
+        smartIndent: true,
+        lineWrapping: true
+    });
+    
+    editor.setSize(null, 150);
+    editor.getWrapperElement().classList.add('sql-editor-etl');
+    
+    // Guardar referencia
+    window.etlSqlEditors[textareaId] = editor;
+    
+    // Refrescar después de un momento para asegurar el renderizado correcto
+    setTimeout(function() {
+        editor.refresh();
+    }, 100);
+    
+    return editor;
+};
+
+// Función para obtener el valor de un editor
+window.getEtlSqlEditorValue = function(textareaId) {
+    if (window.etlSqlEditors[textareaId]) {
+        return window.etlSqlEditors[textareaId].getValue();
+    }
+    var textarea = document.getElementById(textareaId);
+    return textarea ? textarea.value : '';
+};
+
+// Función para establecer el valor de un editor
+window.setEtlSqlEditorValue = function(textareaId, value) {
+    if (window.etlSqlEditors[textareaId]) {
+        window.etlSqlEditors[textareaId].setValue(value || '');
+    } else {
+        var textarea = document.getElementById(textareaId);
+        if (textarea) textarea.value = value || '';
+    }
+};
+
+// Función para refrescar un editor (cuando se muestra el modal)
+window.refreshEtlSqlEditor = function(textareaId) {
+    if (window.etlSqlEditors[textareaId]) {
+        setTimeout(function() {
+            window.etlSqlEditors[textareaId].refresh();
+        }, 100);
+    }
+};
+</script>
+
+<script type="text/javascript" src="{% static "js/Application.js" %}"></script>
+<script type="text/javascript" src="{% static "js/View.js" %}"></script>
+<script type="text/javascript" src="{% static "js/Toolbar.js" %}"></script>
+<script type="text/javascript" src="{% static "js/TableShape.js" %}"></script>
+<script type="text/javascript" src="{% static "js/SchemaPropagator.js" %}"></script>
+<script type="text/javascript" src="{% static "js/SchemaCanvas.js" %}"></script>
+
+
+
+{% endblock %}

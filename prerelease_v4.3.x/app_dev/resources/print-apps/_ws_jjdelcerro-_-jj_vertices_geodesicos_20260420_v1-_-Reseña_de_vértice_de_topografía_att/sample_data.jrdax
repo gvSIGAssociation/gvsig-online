@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<jsonDataAdapter class="net.sf.jasperreports.data.json.JsonDataAdapterImpl">
+  <name>sample-data</name>
+  <dataFile type="repositoryDataLocation">
+    <location>requestData-Default.json</location>
+  </dataFile>
+  <selectExpression></selectExpression>
+  <locale>es_ES</locale>
+  <timeZone>Europe/Madrid</timeZone>
+  <useConnection>true</useConnection>
+  <language>json</language>
+</jsonDataAdapter>

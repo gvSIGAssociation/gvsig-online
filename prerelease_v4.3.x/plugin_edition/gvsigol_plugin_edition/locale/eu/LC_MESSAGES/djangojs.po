@@ -1,0 +1,138 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-03-04 10:55+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: static/js/lib/_trans.gvsigol.js:2
+msgid "Edit layer"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:3
+msgid "You are editing the layer"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:95
+msgid "Add point"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:103
+msgid "Add line"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:111
+msgid "Add polygon"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:128
+msgid "Add point to center"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:139
+msgid "Edit feature"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:150
+#: static/js/lib/widgets/editionBar.js:2269
+msgid "Remove feature"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:161
+msgid "Stop edition"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:239
+#: static/js/lib/widgets/editionBar.js:245
+msgid "Error starting edition"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:616
+msgid "Select feature to edit"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:636
+msgid "More element info"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:646
+msgid "Attribute details"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1335
+#: static/js/lib/widgets/editionBar.js:1819
+#: static/js/lib/widgets/editionBar.js:2240
+msgid "Show form"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1362
+#: static/js/lib/widgets/editionBar.js:1854
+msgid "Feature properties"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1363
+#: static/js/lib/widgets/editionBar.js:1855
+msgid "Feature resources"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1373
+#: static/js/lib/widgets/editionBar.js:1865
+msgid "Save"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1374
+#: static/js/lib/widgets/editionBar.js:1866
+#: static/js/lib/widgets/editionBar.js:2280
+msgid "Cancel"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1465
+msgid ""
+"No hay ninguna encuesta activa para ser rellenada. Para responder encuesta, "
+"por favor activarla en Limesurvey"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1536
+#: static/js/lib/widgets/editionBar.js:2035
+msgid ""
+"Version conflict: the feature was edited concurrently. Restart your editing "
+"session to get the last version."
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1631
+#: static/js/lib/widgets/editionBar.js:2438
+#: static/js/lib/widgets/editionBar.js:2441
+msgid "Failed to save the new record. Please check values"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1671
+msgid "can't be null"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:1964
+msgid ""
+"There is no active survey to be filled out. To answer the survey, please "
+"activate it in Limesurvey"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:2279
+msgid "Remove"
+msgstr ""
+
+#: static/js/lib/widgets/editionBar.js:2580
+#: static/js/lib/widgets/editionBar.js:2582
+msgid "Error validating version"
+msgstr ""

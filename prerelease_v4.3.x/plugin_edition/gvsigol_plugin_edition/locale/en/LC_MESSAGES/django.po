@@ -1,0 +1,7 @@
+# gvSIG Online plugin edition — django domain (visor plantillas)
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Cannot edit this layer because it comes from a view"
+msgstr "Cannot edit this layer because it comes from a view"

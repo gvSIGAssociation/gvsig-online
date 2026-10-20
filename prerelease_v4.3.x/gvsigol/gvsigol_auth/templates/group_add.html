@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block header %}
+<link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
+{% endblock %}
+
+{% block content %}
+<form role="form" method="post" action="/gvsigonline/auth/group_add/">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="pf-topbar">
+				<a href="{% url 'group_list' %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
+				<button type="submit" class="btn-pf-save">
+					<i class="fa fa-floppy-o"></i> {% trans "Save" %}
+				</button>
+			</div>
+			<div class="pf-card">
+				{% csrf_token %}
+
+				{% if form.errors %}
+<div class="pf-error-msg">
+					<ul>
+					{% for field in form %}
+						{% if field.errors %}
+						<li>{{ field.label }}. {{ field.errors|striptags }}</li>
+						{% endif %}
+					{% endfor %}
+					</ul>
+				</div>
+				{% endif %}
+
+				{% if message %}
+<div class="pf-error-msg">
+					<p>* {{ message }}</p>
+				</div>
+{% endif %}
+
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label for="id_name">{% trans "Name" %}</label>
+						{{ form.name }}
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label for="id_description">{% trans "Description" %}</label>
+						{{ form.description }}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-group-users').addClass("active");
+	$('#submenu-groups').addClass("active");
+</script>
+{% endblock %}

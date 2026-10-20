@@ -1,0 +1,25 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  {% load i18n %}
+  <title>{% trans "Download Service notification" %}</title>
+</head>
+<body>
+
+<h2>{{ statusdesc }}</h2>
+<p>{{ statusdetails }}</p>
+{% if locators %}
+<p>{% trans "Included resources:" %}</p>
+<ul>
+	{% for locator in locators %}
+	<li>{{ locator.name }}
+		<ul>
+			<li>{% trans "Status: " %} {{ locator.status }}</li>
+		</ul>
+	</li>
+	{% endfor %}
+</ul>
+{% endif %}
+</body>

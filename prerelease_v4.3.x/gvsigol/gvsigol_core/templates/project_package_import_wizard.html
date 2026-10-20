@@ -1,0 +1,459 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="box box-primary">
+	<div class="box-header with-border">
+		<h3 class="box-title">{% trans "Import project package" %}</h3>
+		<div class="box-tools pull-right">
+			<a class="btn btn-default btn-sm" href="{% url 'project_package_activity_log' %}">{% trans "Import/export history" %}</a>
+		</div>
+	</div>
+	<div class="box-body">
+		{% if messages %}
+		{% for message in messages %}
+		<div class="alert alert-{% if 'error' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'success' in message.tags %}success{% else %}info{% endif %}" style="margin-bottom:12px">
+			{{ message }}
+		</div>
+		{% endfor %}
+		{% endif %}
+
+		{% if import_last_error %}
+		<div class="alert alert-danger">
+			<strong>{% trans "Last import error" %}:</strong> {{ import_last_error }}
+		</div>
+		{% endif %}
+
+		{% for w in import_report_warnings %}
+		<div class="alert alert-warning">{{ w }}</div>
+		{% endfor %}
+
+		<p class="text-muted">{% trans "Job" %}: {{ job.id }} — {% trans "status" %}: {{ job.status }}</p>
+
+		{% if recent_package_activity %}
+		<details style="margin-bottom:1em">
+			<summary>{% trans "Recent import/export operations" %} ({{ recent_package_activity|length }})</summary>
+			<table class="table table-condensed table-bordered" style="margin-top:0.5em;max-width:900px">
+				<thead><tr><th>{% trans "When" %}</th><th>{% trans "Op." %}</th><th>{% trans "Project" %}</th><th>{% trans "Status" %}</th><th></th></tr></thead>
+				<tbody>
+				{% for e in recent_package_activity %}
+				<tr>
+					<td><small>{{ e.created_at|date:"m-d H:i" }}</small></td>
+					<td>{{ e.operation }}</td>
+					<td>{{ e.project_name|default:"—"|truncatechars:40 }}</td>
+					<td>{{ e.status }}</td>
+					<td>
+						{% if e.operation == 'import' and e.import_job_id %}
+						<a href="{% url 'project_package_import_result' job_id=e.import_job_id %}">{% trans "Report" %}</a>
+						{% elif e.operation == 'export' and e.summary_json and 'report_lines' in e.summary_json %}
+						<a href="{% url 'project_package_export_result' log_id=e.pk %}">{% trans "Report" %}</a>
+						{% endif %}
+					</td>
+				</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+			<p><a href="{% url 'project_package_activity_log' %}">{% trans "View full history" %}</a></p>
+		</details>
+		{% endif %}
+
+		{% if job.manifest_json %}
+		<p><strong>{% trans "Package format" %}:</strong> {{ job.manifest_json.package_format_version }}</p>
+		<p><strong>{% trans "Source" %}:</strong> {{ job.manifest_json.source_base_url }}</p>
+		{% endif %}
+
+		{% if package_layout %}
+		<p><strong>{% trans "Primary workspace (for new layer groups)" %}:</strong> {{ package_layout.primary_workspace }}</p>
+		{% if package_layout.exported_project_name %}
+		<p><strong>{% trans "Exported project name" %}:</strong> {{ package_layout.exported_project_name }}
+			{% if package_layout.exported_project_title %}
+			— <strong>{% trans "title" %}:</strong> {{ package_layout.exported_project_title }}
+			{% endif %}
+		</p>
+		{% endif %}
+		{% endif %}
+
+		{% if job.report_json %}
+		<details style="margin:1em 0">
+			<summary>{% trans "Technical preflight log" %}</summary>
+			<pre style="max-height:200px;overflow:auto;">{{ job.report_json }}</pre>
+		</details>
+		{% endif %}
+
+		<form method="post" action="">
+			{% csrf_token %}
+
+			<div class="form-group">
+				<label for="target_server">{% trans "Select server" %}</label>
+				<select class="form-control" id="target_server" name="target_server" required style="max-width:480px">
+					{% for s in servers %}
+					<option value="{{ s.id }}" {% if wizard.target_server_id == s.id %}selected{% endif %}>{{ s.title }} [{{ s.name }}]</option>
+					{% endfor %}
+				</select>
+			</div>
+
+	{% if package_layout.gpkg_layers or package_layout.foreign_connections or package_layout.raster_layers or package_layout.external_layers or package_layout.view_sql_layers or package_layout.wms_cascading_layers %}
+	<h4>{% trans "Layers in this package" %}</h4>
+	<p class="text-muted small">{% trans "Check Skip to leave a layer or group out. The rest of the project imports normally." %}</p>
+	<table class="table table-bordered table-condensed" id="layers-package-table">
+		<colgroup>
+			<col style="width:6%">
+			<col style="width:12%">
+			<col style="width:26%">
+			<col style="width:30%">
+			<col style="width:26%">
+		</colgroup>
+		<thead>
+			<tr>
+				<th class="th-toggle-all-skip" style="text-align:center;cursor:pointer;user-select:none" title="{% trans 'Click to select/deselect all' %}">{% trans "Skip" %}</th>
+				<th>{% trans "Type" %}</th>
+				<th>{% trans "Layer / Group" %}</th>
+				<th>{% trans "Details" %}</th>
+				<th>{% trans "Target / Action" %}</th>
+			</tr>
+		</thead>
+		<tbody>
+
+	{# ── Individual GPKG layers (one row per layer) ── #}
+	{# For foreign-source layers the datastore selector is shown inline in Target/Action. #}
+	{% for ly in package_layout.gpkg_layers %}
+	<tr>
+		<td style="text-align:center;vertical-align:middle">
+			<input type="checkbox" class="skip-layer-checkbox" name="skip_gpkg_layer_{{ ly.export_id }}" value="1"
+				title="{% trans 'Skip this layer' %}">
+		</td>
+		<td style="vertical-align:middle">
+			{% if ly.is_foreign_source %}
+			<span class="label label-warning">GPKG</span>
+			{% else %}
+			<span class="label label-default">GPKG</span>
+			{% endif %}
+		</td>
+		<td style="vertical-align:middle">
+			<strong>{{ ly.title }}</strong>
+			{% if ly.title != ly.name %}<br><small class="text-muted">{{ ly.name }}</small>{% endif %}
+		</td>
+		<td style="vertical-align:middle">
+			{% if ly.is_foreign_source %}
+			<small class="text-warning"><strong>{% trans "Foreign DB connection" %}</strong></small><br>
+			{% endif %}
+			<code style="font-size:11px">{{ ly.connection_key }}</code>
+			{% if ly.connection_label != ly.connection_key %}<br><small class="text-muted">{{ ly.connection_label }}</small>{% endif %}
+			{% if ly.is_foreign_source %}
+			<br><small class="text-muted">{% trans "From" %}: <code>{{ ly.exported_workspace }}</code>/<code>{{ ly.exported_datastore }}</code></small>
+			{% endif %}
+		</td>
+		<td style="vertical-align:middle">
+			{% if ly.is_foreign_source %}
+			<label class="control-label small" style="font-weight:normal;margin-bottom:2px">{% trans "Target datastore" %}</label>
+			<select class="form-control input-sm gpkg-datastore-select" name="gpkg_datastore_{{ ly.connection_key }}" data-connection-key="{{ ly.connection_key }}" style="max-width:100%">
+				<option value="">{% trans "— Select datastore —" %}</option>
+				{% for ds in server_datastores %}
+				<option value="{{ ds.id }}" {% if ly.selected_datastore_id == ds.id %}selected{% endif %}>{{ ds.workspace.name }} / {{ ds.name }}{% if ds.get_schema_name %} ({{ ds.get_schema_name }}){% endif %}</option>
+				{% endfor %}
+			</select>
+			{% else %}
+			<select class="form-control input-sm layer-target-select" name="local_ds_{{ ly.export_id }}" style="max-width:100%">
+				<option value="" {% if not ly.existing_ds_id %}selected{% endif %}>
+					{{ ly.exported_workspace }} / {{ ly.exported_datastore }}{% if not ly.existing_ds_id %} ⚠ {% trans "(new)" %}{% endif %}
+				</option>
+				{% for ds in server_datastores %}
+				<option value="{{ ds.id }}" {% if ly.selected_local_ds_id == ds.id %}selected{% endif %}>{{ ds.workspace.name }} / {{ ds.name }}{% if ds.get_schema_name %} ({{ ds.get_schema_name }}){% endif %}</option>
+				{% endfor %}
+			</select>
+			{% endif %}
+		</td>
+	</tr>
+	{% endfor %}
+
+		{# ── Definition-only foreign connections ── #}
+		{% for fc in package_layout.foreign_connections %}
+		<tr>
+			<td style="text-align:center;vertical-align:middle">
+				<input type="checkbox" class="skip-layer-checkbox" name="skip_foreign_connection_{{ fc.connection_key }}" value="1"
+					title="{% trans 'Do not import these layers' %}">
+			</td>
+			<td style="vertical-align:middle"><span class="label label-danger">{% trans "Ext. DB" %}</span></td>
+			<td style="vertical-align:middle">
+				{% if fc.sample_layers %}
+					{{ fc.sample_layers|join:", " }}
+				{% else %}
+					{{ fc.layer_count }} {% trans "layer(s)" %}
+				{% endif %}
+			</td>
+			<td style="vertical-align:middle">
+				<code style="font-size:11px">{{ fc.connection_key }}</code>
+				{% if fc.connection_label != fc.connection_key %}<br><small class="text-muted">{{ fc.connection_label }}</small>{% endif %}
+				<br><small class="text-muted">{% trans "No GPKG — definition only" %}</small>
+			</td>
+			<td style="vertical-align:middle">
+				<select class="form-control input-sm layer-target-select" name="foreign_connection_{{ fc.connection_key }}" style="max-width:100%">
+					<option value="">{% trans "— Select connection —" %}</option>
+					{% for c in postgis_connections %}
+					<option value="{{ c.id }}" {% if fc.selected_connection_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+					{% endfor %}
+				</select>
+			</td>
+		</tr>
+		{% endfor %}
+
+		{# ── Raster layers ── #}
+		{% for r in package_layout.raster_layers %}
+		<tr>
+			<td style="text-align:center;vertical-align:middle">
+				<input type="checkbox" class="skip-layer-checkbox" name="skip_raster_{{ r.export_id }}" value="1"
+					title="{% trans 'Skip this raster layer' %}">
+			</td>
+			<td style="vertical-align:middle"><span class="label label-info">{% trans "Raster" %}</span></td>
+			<td style="vertical-align:middle">
+				<strong>{{ r.title }}</strong>
+				{% if r.title != r.name %}<br><small class="text-muted">{{ r.name }}</small>{% endif %}
+			</td>
+			<td style="vertical-align:middle">
+				<code style="font-size:11px">{{ r.primary_file }}</code>
+				<br><small class="text-muted">{{ r.file_count }} {% trans "file(s)" %}</small>
+			</td>
+			<td style="vertical-align:middle">
+				<span class="text-muted"><em><small>{% trans "Published automatically" %}</small></em></span>
+			</td>
+		</tr>
+		{% endfor %}
+
+		{# ── External service layers (WMS/WMTS) ── #}
+		{% for e in package_layout.external_layers %}
+		<tr>
+			<td style="text-align:center;vertical-align:middle">
+				<input type="checkbox" class="skip-layer-checkbox" name="skip_external_{{ e.export_id }}" value="1"
+					title="{% trans 'Skip this external layer' %}">
+			</td>
+			<td style="vertical-align:middle"><span class="label label-default">{{ e.type|upper }}</span></td>
+			<td style="vertical-align:middle">
+				<strong>{{ e.title }}</strong>
+				{% if e.title != e.name %}<br><small class="text-muted">{{ e.name }}</small>{% endif %}
+			</td>
+			<td style="vertical-align:middle">
+				<small class="text-muted">{% trans "External service" %}</small>
+			</td>
+			<td style="vertical-align:middle">
+				<span class="text-muted"><em><small>{% trans "Imported as-is (no data copied)" %}</small></em></span>
+			</td>
+		</tr>
+		{% endfor %}
+
+		{# ── WMS cascading layers (e_WMS datastore, not external) ── #}
+		{% for w in package_layout.wms_cascading_layers %}
+		<tr>
+			<td style="text-align:center;vertical-align:middle">
+				<input type="checkbox" class="skip-layer-checkbox" name="skip_wms_cascading_{{ w.export_id }}" value="1"
+					title="{% trans 'Skip this WMS cascading layer' %}">
+			</td>
+			<td style="vertical-align:middle"><span class="label label-info">WMS</span></td>
+			<td style="vertical-align:middle">
+				<strong>{{ w.title }}</strong>
+				{% if w.title != w.name %}<br><small class="text-muted">{{ w.name }}</small>{% endif %}
+			</td>
+			<td style="vertical-align:middle">
+				<small class="text-muted">{% trans "WMS cascading (GeoServer store)" %}</small><br>
+				<small class="text-muted">{{ w.exported_workspace }} / {{ w.exported_datastore }}</small>
+			</td>
+			<td style="vertical-align:middle">
+				<span class="text-muted"><em><small>{% trans "Recreated from WMS store URL" %}</small></em></span>
+			</td>
+		</tr>
+		{% endfor %}
+
+		{# ── SQL view layers ── #}
+		{% for v in package_layout.view_sql_layers %}
+		<tr>
+			<td style="text-align:center;vertical-align:middle">
+				<input type="checkbox" class="skip-layer-checkbox" name="skip_view_layer_{{ v.export_id }}" value="1"
+					title="{% trans 'Do not import this view' %}">
+			</td>
+			<td style="vertical-align:middle"><span class="label label-primary">{% trans "SQL View" %}</span></td>
+			<td style="vertical-align:middle">
+				<strong>{{ v.title }}</strong>
+				{% if v.title != v.name %}<br><small class="text-muted">{{ v.name }}</small>{% endif %}
+			</td>
+			<td style="vertical-align:middle">
+				<code style="font-size:11px">{{ v.schema }}.{{ v.view_name }}</code>
+				{% if v.gt_pk_metadata %}
+				<br><small class="text-muted">PK:
+					{% for pk in v.gt_pk_metadata %}<code>{{ pk.pk_column }}</code>{% if not forloop.last %}, {% endif %}{% endfor %}
+				</small>
+				{% endif %}
+			</td>
+			<td style="vertical-align:middle">
+				<select class="form-control input-sm layer-target-select" name="local_ds_{{ v.export_id }}" style="max-width:100%;margin-bottom:4px">
+					<option value="" {% if not v.existing_ds_id %}selected{% endif %}>
+						{{ v.exported_workspace }} / {{ v.exported_datastore }}{% if not v.existing_ds_id %} ⚠ {% trans "(new)" %}{% endif %}
+					</option>
+					{% for ds in server_datastores %}
+					<option value="{{ ds.id }}" {% if v.selected_local_ds_id == ds.id %}selected{% endif %}>{{ ds.workspace.name }} / {{ ds.name }}{% if ds.get_schema_name %} ({{ ds.get_schema_name }}){% endif %}</option>
+					{% endfor %}
+				</select>
+				{# Hidden textarea + Edit SQL button #}
+				<textarea name="view_sql_{{ v.export_id }}" id="view_sql_input_{{ v.export_id }}"
+					style="display:none">{{ v.sql }}</textarea>
+				<button type="button" class="btn btn-xs btn-default btn-edit-view-sql"
+					data-export-id="{{ v.export_id }}"
+					data-layer-title="{{ v.title|escapejs }}">
+					<i class="glyphicon glyphicon-pencil"></i> {% trans "Edit SQL" %}
+				</button>
+			</td>
+		</tr>
+		{% endfor %}
+
+		</tbody>
+	</table>
+	<p class="help-block small">{% trans "Skipped layers are left out entirely; the rest of the project still imports. For SQL views you can also edit the query before recreating the view." %}</p>
+	{% endif %}
+
+	{# Modal: SQL editor for view layers #}
+	<div class="modal fade" id="modal-edit-view-sql" tabindex="-1" role="dialog">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title" id="modal-edit-view-sql-title">{% trans "Edit view SQL" %}</h4>
+				</div>
+				<div class="modal-body">
+					<p class="text-muted small">
+						{% trans "Edit the SQL query that will be used to create the view. You can rename tables, change schemas, or modify the query to match the target environment." %}
+					</p>
+					<textarea id="modal-view-sql-editor" class="form-control"
+						style="font-family:monospace;min-height:280px;resize:vertical"></textarea>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+					<button type="button" class="btn btn-primary" id="btn-save-view-sql">{% trans "Apply" %}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+		<details style="margin-bottom:1em">
+			<summary>{% trans "Advanced overrides (optional)" %}</summary>
+				<p class="text-muted">{% trans "Leave empty to use names from the package." %}</p>
+				<div class="form-group">
+					<label for="override_project_name">{% trans "Override project name (internal id)" %}</label>
+					<input class="form-control" id="override_project_name" name="override_project_name" pattern="[a-zA-Z0-9_\-]+" style="max-width:480px" value="{{ wizard.override_project_name|default:'' }}">
+				</div>
+				<div class="form-group">
+					<label for="override_project_title">{% trans "Override project title" %}</label>
+					<input class="form-control" id="override_project_title" name="override_project_title" style="max-width:480px" value="{{ wizard.override_project_title|default:'' }}">
+				</div>
+			</details>
+
+			<p class="help-block small" style="margin-top:1em">
+				<strong>{% trans "Execute import" %}:</strong> {% trans "Loads GPKG into the target datastores, publishes layers, and creates the project. Role permissions from the package are applied when present; otherwise the project stays public." %}
+			</p>
+
+		<button type="submit" class="btn btn-primary" id="btn-execute-import">{% trans "Execute import" %}</button>
+	</form>
+</div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<style>
+#layers-package-table .th-toggle-all-skip:hover {
+	color: #3c8dbc;
+}
+#layers-package-table .th-toggle-all-skip::after {
+	content: "\f0c8";
+	font-family: FontAwesome;
+	font-size: 10px;
+	margin-left: 4px;
+	opacity: 0.45;
+	font-weight: normal;
+}
+#layers-package-table .th-toggle-all-skip:hover::after {
+	opacity: 0.85;
+}
+</style>
+<script>
+$(document).ready(function () {
+
+    function syncRowTargetSelect($checkbox) {
+        var $row = $checkbox.closest('tr');
+        var skipped = $checkbox.is(':checked');
+        $row.find('select.gpkg-datastore-select, select.layer-target-select').prop('disabled', skipped);
+    }
+
+    function syncAllSkipRows() {
+        $('#layers-package-table .skip-layer-checkbox').each(function () {
+            syncRowTargetSelect($(this));
+        });
+    }
+
+    /* Disable target selects on skipped rows so empty values are not posted */
+    $('#layers-package-table').on('change', '.skip-layer-checkbox', function () {
+        syncRowTargetSelect($(this));
+    });
+    syncAllSkipRows();
+
+    /* Keep shared gpkg_datastore_<connection_key> selects in sync */
+    $('#layers-package-table').on('change', '.gpkg-datastore-select', function () {
+        var $source = $(this);
+        var name = $source.attr('name');
+        var val = $source.val();
+        if (!name) {
+            return;
+        }
+        $('#layers-package-table select.gpkg-datastore-select[name="' + name + '"]').not($source).val(val);
+    });
+
+    /* Toggle all Skip checkboxes from the column header */
+    $('#layers-package-table .th-toggle-all-skip').on('click', function () {
+        var $checkboxes = $('#layers-package-table tbody input[type="checkbox"][name^="skip_"]:not(:disabled)');
+        if ($checkboxes.length === 0) {
+            return;
+        }
+        var checkAll = $checkboxes.filter(':checked').length < $checkboxes.length;
+        $checkboxes.prop('checked', checkAll);
+        syncAllSkipRows();
+    });
+
+    /* ── SQL view editor modal ─────────────────────────────────────── */
+    var _currentViewExportId = null;
+
+    $(document).on('click', '.btn-edit-view-sql', function () {
+        var eid   = $(this).data('export-id');
+        var title = $(this).data('layer-title');
+        _currentViewExportId = eid;
+        var currentSql = $('#view_sql_input_' + eid).val();
+        $('#modal-edit-view-sql-title').text('{% trans "Edit view SQL" %} — ' + title);
+        $('#modal-view-sql-editor').val(currentSql);
+        $('#modal-edit-view-sql').modal('show');
+    });
+
+    $('#btn-save-view-sql').on('click', function () {
+        if (_currentViewExportId) {
+            var editedSql = $('#modal-view-sql-editor').val();
+            $('#view_sql_input_' + _currentViewExportId).val(editedSql);
+            /* Mark the button to show the SQL was edited */
+            $('.btn-edit-view-sql[data-export-id="' + _currentViewExportId + '"]')
+                .addClass('btn-warning').removeClass('btn-default')
+                .text('{% trans "SQL edited" %} ✎');
+        }
+        $('#modal-edit-view-sql').modal('hide');
+    });
+
+    /* ── Form submission (fetch + immediate navigate, avoids Origin:null) ── */
+    $('form[method="post"]').on('submit', function (ev) {
+        ev.preventDefault();
+        var form = this;
+        $('#btn-execute-import').prop('disabled', true).text('{% trans "Importing…" %}');
+        fetch(window.location.href, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'X-CSRFToken': Cookies.get('csrftoken') },
+            body: new FormData(form),
+            keepalive: true
+        });
+        window.location = '{% url "project_package_activity_log" %}';
+    });
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,59 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  {% load i18n %}
+  <title>{% trans "Download Service notification" %}</title>
+</head>
+<body>
+
+<h2>{{ statusdesc }}</h2>
+<p>{{ statusdetails }}</p>
+{% if links %}
+<p>{% trans "You can use the following links to download the requested resources:" %}</p>
+<ol>
+	{% for link in links %}
+	<li>{{ link.name }}: <a href="{{ link.url }}">{{ link.url }}</a>
+		<ul>
+			{% if link.locators %}
+			<li>{% trans "Contents: " %}
+				<ul>
+					{% for locator in link.locators %}
+					<li>{{ locator.name }}</li>
+					{% endfor %}
+				</ul>
+			</li>
+			{% endif %}
+			<li>{% trans "Valid to:" %} {{ link.validto}}</li>
+		</ul>
+	</li>
+	{% endfor %}
+</ol>
+{% endif %}
+{% if pendinglocators %}
+<p>{% trans "The following resources are still being processed:" %}</p>
+<ul>
+	{% for locator in pendinglocators %}
+	<li>{{ locator.name }}
+		<ul>
+			<li>{% trans "Status: " %} {{ locator.status }}</li>
+		</ul>
+	</li>
+	{% endfor %}
+</ul>
+{% endif %}
+{% if failedlocators %}
+<p>{% trans "The following resources could not be processed:" %}</p>
+<ul>
+	{% for locator in failedlocators %}
+	<li>{{ locator.name }}
+		<ul>
+			<li>{% trans "Status: " %} {{ locator.status }}</li>
+		</ul>
+	</li>
+	{% endfor %}
+</ul>
+{% endif %}
+{% trans "You can also use this tracking link to check the status of your request:" %} <a href="{{ request_url }}">{{ request_url }}</a>
+</body>

@@ -1,0 +1,271 @@
+# -*- coding: utf-8 -*-
+import logging
+from lxml import etree as ET
+from abc import ABCMeta, abstractmethod
+
+logger = logging.getLogger("gvsigol")
+
+_registry = []
+_CONFIG = {'DEFAULT_MANAGER': None}
+
+
+class BaseStandardManager(metaclass=ABCMeta):
+    def get_code(self):
+        """
+        A string identifying the metadata standard managed by this class, e.g. "ISO19139:2007"
+        """
+        pass
+    
+    def get_priority(self):
+        """
+        The priority is used to decide which manager should be used to update a metadata record.
+        If several managers are able to update a record (according to the can_update() method,
+        then the one with higher priority will be selected.
+        """
+        return 100
+    
+    @abstractmethod
+    def get_updater_instance(self, metadata_record):
+        pass
+    @abstractmethod
+    def get_reader_instance(self, metadata_record):
+        pass
+    
+    def get_updater(self, metadata_record):
+        if self.can_update(metadata_record):
+            return self.get_updater_instance(metadata_record)
+        return None
+    def get_reader(self, metadata_record):
+        if self.can_extract(metadata_record):
+            return self.get_reader_instance(metadata_record)
+        return None
+    
+    @abstractmethod
+    def can_update(self, metadata_record):
+        """
+        Whether this manager is able to update the provided metadata record.
+        Note that a manager might be read/only, so it would be able to extract
+        information from the record but not to update it. 
+        """
+        pass
+    
+    @abstractmethod
+    def can_extract(self, metadata_record):
+        """
+        Whether this manager is able to parse and extract information from
+        the provided metadata record.
+        """
+        pass
+    
+    @abstractmethod
+    def create(self, mdtype, mdfields):
+        pass
+
+
+class XmlStandardUpdater(object):
+    def __init__(self, metadata_record):
+        if ET.iselement(metadata_record):
+            self.tree = metadata_record
+        else:
+            self.tree = ET.fromstring(metadata_record)
+            
+    def update_all(self, extent_tuple, thumbnail_url):
+        return self
+    
+    def tostring(self, encoding='unicode'):
+        return ET.tostring(self.tree, encoding=encoding)
+
+class XmlStandardReader(object):
+    def __init__(self, metadata_record):
+        if ET.iselement(metadata_record):
+            self.tree = metadata_record
+        else:
+            self.tree = ET.fromstring(metadata_record)
+    def get_title(self):
+        raise NotImplementedError
+
+    def get_abstract(self):
+        raise NotImplementedError
+    
+    @abstractmethod
+    def get_identifier(self):
+        pass
+
+    @abstractmethod
+    def get_crs(self):
+        pass
+
+    @abstractmethod
+    def get_transfer_options(self):
+        pass
+
+    def get_resource_identifier(self):
+        return ''
+
+    def get_graphic_overviews(self):
+        """List of {'url': ..., 'name': ...} from graphicOverview / browse graphics."""
+        return []
+
+    def as_catalog_record(self):
+        """
+        Structured dict consumed by views.get_metadata_as_html.
+        Standards that the catalog details view should render must implement this.
+        """
+        raise NotImplementedError
+
+    def tostring(self, encoding='unicode'):
+        return ET.tostring(self.tree, encoding=encoding)
+
+def _prioritysorter(item):
+    return item.get_priority()
+
+def register(standard_manager, default=False):
+    _registry.append(standard_manager)
+    _registry.sort(key=_prioritysorter, reverse=True)
+    if default:
+        _CONFIG['DEFAULT_MANAGER'] = standard_manager
+
+def _as_tree(metadata_record):
+    if ET.iselement(metadata_record):
+        return metadata_record
+    return ET.fromstring(metadata_record)
+
+
+def get_updater(metadata_record):
+    tree = _as_tree(metadata_record)
+    for manager in _registry:
+        updater = manager.get_updater(tree)
+        if updater:
+            return updater
+
+
+def get_reader(metadata_record):
+    tree = _as_tree(metadata_record)
+    for manager in _registry:
+        reader = manager.get_reader(tree)
+        if reader:
+            return reader
+
+
+MANAGER_ALIASES = {
+    'iso19139': 'Iso19139_2007Manager',
+    'iso19139:2007': 'Iso19139_2007Manager',
+    'iso19115-3': 'Iso19115_3Manager',
+    'iso19115-1': 'Iso19115_3Manager',
+    'iso19115-3.2018': 'Iso19115_3Manager',
+    'iso19115-3.mgb': 'Iso19115_3MgbManager',
+    'mgb': 'Iso19115_3MgbManager',
+    'mgb2': 'Iso19115_3MgbManager',
+    'mgb-2.0': 'Iso19115_3MgbManager',
+}
+
+
+def _resolve_mdcode(mdcode):
+    if not mdcode:
+        return None
+    code = str(mdcode).strip()
+    if not code:
+        return None
+    return MANAGER_ALIASES.get(code.lower(), code)
+
+
+def create(mdtype, mdfields, mdcode=None):
+    resolved = _resolve_mdcode(mdcode)
+    if not resolved:
+        return _CONFIG['DEFAULT_MANAGER'].create(mdtype, mdfields)
+    for manager in _registry:
+        if manager.get_code() == resolved:
+            return manager.create(mdtype, mdfields)
+    return _CONFIG['DEFAULT_MANAGER'].create(mdtype, mdfields)
+
+
+# Filenames a client app (gvsigol_app_*) may drop in mdtemplates/.
+# The standard is taken from the XML, not from the filename.
+_CLIENT_TEMPLATE_NAMES = (
+    'dataset-mgb.xml',
+    'dataset19115-3.mgb.xml',
+    'dataset19115-3.xml',
+    'dataset.xml',
+    'dataset19139.xml',
+)
+
+# When a client ships more than one standard and CATALOG_METADATA_STANDARD
+# does not pick one of them, prefer the more specific profile.
+_CREATION_PREFERENCE = (
+    'Iso19115_3MgbManager',
+    'Iso19115_3Manager',
+    'Iso19139_2007Manager',
+)
+
+
+def sniff_manager_code(metadata_record):
+    """Manager code for this XML, using the same detection as get_reader."""
+    tree = _as_tree(metadata_record)
+    for manager in _registry:
+        if manager.can_extract(tree):
+            return manager.get_code()
+    return None
+
+
+def client_template_standards():
+    """
+    Standards of the metadata templates shipped by installed client apps.
+
+    Returns a list of (manager_code, path), one entry per distinct standard.
+    """
+    from .templates import find_app_mdtemplate
+    found = []
+    seen_codes = set()
+    seen_paths = set()
+    for name in _CLIENT_TEMPLATE_NAMES:
+        path = find_app_mdtemplate(name)
+        if not path or path in seen_paths:
+            continue
+        seen_paths.add(path)
+        try:
+            code = sniff_manager_code(ET.parse(path).getroot())
+        except Exception:
+            logger.exception("Could not detect the standard of client template %s", path)
+            continue
+        if code and code not in seen_codes:
+            seen_codes.add(code)
+            found.append((code, path))
+    return found
+
+
+def creation_mdcode(explicit=None):
+    """
+    Standard to use when creating a new metadata record.
+
+    A client template decides the standard, because that file carries the
+    institution and contact data. Plugin templates are used only when the
+    client app does not ship any. ``explicit`` (CATALOG_METADATA_STANDARD)
+    selects the plugin default in that case, and picks among client
+    templates when the app ships more than one standard.
+    """
+    found = client_template_standards()
+    codes = [code for code, _path in found]
+    resolved_explicit = _resolve_mdcode(explicit)
+    if codes:
+        if resolved_explicit and resolved_explicit in codes:
+            return resolved_explicit
+        if len(codes) == 1:
+            if resolved_explicit and resolved_explicit != codes[0]:
+                logger.warning(
+                    "CATALOG_METADATA_STANDARD=%s does not match the client template (%s). "
+                    "Creating metadata with the client template standard.",
+                    explicit,
+                    codes[0],
+                )
+            return codes[0]
+        for preferred in _CREATION_PREFERENCE:
+            if preferred in codes:
+                logger.warning(
+                    "Client app ships several metadata standards %s. "
+                    "Using %s. Set CATALOG_METADATA_STANDARD to choose another.",
+                    codes,
+                    preferred,
+                )
+                return preferred
+        return codes[0]
+    return resolved_explicit

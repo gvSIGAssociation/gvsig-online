@@ -1,0 +1,7 @@
+PACKAGE_FORMAT_VERSION = '1.0.0'
+PACKAGE_FORMAT_VERSION_MIN = (1, 0, 0)
+PACKAGE_FORMAT_VERSION_MAX = (2, 0, 0)
+
+MANIFEST_PATH = 'META-INF/manifest.json'
+PROJECT_JSON = 'project/project.json'
+REPORTS_EXPORT_LOG = 'reports/export_log.jsonl'

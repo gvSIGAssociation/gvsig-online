@@ -1,0 +1,43 @@
+{% extends "filemanager_base.html" %}
+{% load i18n static %}
+
+{% block header %}
+<link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-filemanager.css" %}">
+<style>
+/* El formulario se pinta con {{form.as_p}}, asi que el campo no lleva la
+   clase form-control y hay que alcanzarlo por su etiqueta. */
+.pf-card p input[type="text"] { border-radius: 6px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; transition: border-color var(--pf-transition), box-shadow var(--pf-transition); padding: 6px 12px; width: 100%; display: block; }
+.pf-card p input[type="text"]:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="pf-topbar">
+	<a href="{% url 'filemanager:browser' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
+	<button type="submit" form="create-dir-form" class="btn-pf-save"><i class="fa fa-plus"></i> {% trans "Create directory" %}</button>
+</div>
+
+<div class="pf-card">
+	<div class="pf-card-header">
+		<i class="fa fa-folder-open"></i>
+		{% include "filemanager_breadcrumbs.html" %}
+	</div>
+
+	<form id="create-dir-form" method="post" action="{% url 'filemanager:create-directory' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}">
+		{% csrf_token %}
+		<input type="hidden" name="path" value="{{path}}">
+		{{form.as_p}}
+	</form>
+</div>
+
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+$('#menu-manage-files').addClass("active");
+</script>
+{% endblock %}

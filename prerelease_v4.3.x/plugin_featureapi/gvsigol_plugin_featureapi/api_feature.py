@@ -1,0 +1,1914 @@
+# -*- coding: utf-8 -*-
+
+'''
+    gvSIG Online.
+    Copyright (C) 2010-2019 SCOLAB.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+@author: Nacho Brodin <nbrodin@scolab.es>
+'''
+
+
+import os
+from wsgiref.util import FileWrapper
+import coreapi
+from django.http.response import HttpResponse, JsonResponse
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.filters import BaseFilterBackend
+from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveDestroyAPIView, ListCreateAPIView
+from rest_framework.parsers import MultiPartParser
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.response import Response
+from rest_framework.reverse import reverse
+from rest_framework.views import APIView
+from gvsigol import settings as core_settings
+from gvsigol_plugin_featureapi import settings
+from gvsigol_plugin_featureapi.models import FeatureVersions
+from gvsigol_plugin_featureapi.serializers import FeatureSerializer, FeatureChangeSerializer, FileUploadSerializer, EmptySerializer
+from gvsigol_plugin_baseapi.validation import Validation, HttpException
+from gvsigol_services.models import Layer, LayerResource
+from . import serializers
+from . import util
+from os import path
+from django.utils import timezone
+from gvsigol_services.backend_resources import resource_manager
+from gvsigol_services import utils as services_utils
+from django_sendfile import sendfile
+from pathlib import Path
+import json
+import logging
+
+LOGGER_NAME='gvsigol'
+
+
+def _layer_or_group_is_cached(lyr_id):
+    """
+    Return True if the layer exists and has cached=True, or its layer group has cached=True.
+    """
+    try:
+        layer = Layer.objects.select_related('layer_group').get(id=int(lyr_id))
+        return layer.cached or (layer.layer_group and layer.layer_group.cached)
+    except Layer.DoesNotExist:
+        return False
+
+
+def _trigger_cache_regeneration_for_edit(lyr_id, geometry, source_epsg=4326):
+    """
+    Trigger cache regeneration for the extent of an edited feature (async via Celery).
+    Runs if the layer has cached=True and/or its layer group has cached=True.
+    Returns the Celery task_id for the frontend to poll, or None if no regeneration needed.
+    """
+    try:
+        layer = Layer.objects.select_related('layer_group').get(id=int(lyr_id))
+    except Layer.DoesNotExist:
+        return None
+
+    if not layer.cached and not (layer.layer_group and layer.layer_group.cached):
+        return None
+
+    from gvsigol_services.cache_utils import get_geojson_geometry_extent
+    from gvsigol_services.tasks import regenerate_cache_for_extent_async
+
+    extent = get_geojson_geometry_extent(geometry)
+    if not extent:
+        return None
+    result = regenerate_cache_for_extent_async.delay(lyr_id, *extent, source_epsg=source_epsg)
+    return str(result.id) if result else None
+
+
+def _get_validation_geometry_for_layer(lyr_id):
+    """
+    Build a minimal valid GeoJSON geometry matching layer geometry type.
+    Used only to satisfy strict validation when request geometry is NULL.
+    """
+    default_geom = {"type": "Point", "coordinates": [0, 0]}
+    try:
+        i, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
+        with i as con:
+            geom_info = con.get_geometry_columns_info(table=table, schema=schema)
+            if not geom_info:
+                return default_geom
+            geom_type = (geom_info[0][5] or "").upper()
+
+            if "MULTIPOINT" in geom_type:
+                return {"type": "MultiPoint", "coordinates": [[0, 0]]}
+            if "LINESTRING" in geom_type and "MULTI" not in geom_type:
+                return {"type": "LineString", "coordinates": [[0, 0], [0.00001, 0.00001]]}
+            if "MULTILINESTRING" in geom_type:
+                return {"type": "MultiLineString", "coordinates": [[[0, 0], [0.00001, 0.00001]]]}
+            if "POLYGON" in geom_type and "MULTI" not in geom_type:
+                return {"type": "Polygon", "coordinates": [[[0, 0], [0.00001, 0], [0.00001, 0.00001], [0, 0.00001], [0, 0]]]}
+            if "MULTIPOLYGON" in geom_type:
+                return {"type": "MultiPolygon", "coordinates": [[[[0, 0], [0.00001, 0], [0.00001, 0.00001], [0, 0.00001], [0, 0]]]]}
+            if "GEOMETRYCOLLECTION" in geom_type:
+                return {"type": "GeometryCollection", "geometries": []}
+            return default_geom
+    except Exception:
+        return default_geom
+
+
+def handle_feature_error(e, lyr_id=None, target_epsg=None):
+    """
+    Maneja errores de operaciones con features de forma unificada.
+    Detecta y procesa errores de topología, triggers y otros errores de validación.
+    
+    El formato de respuesta es:
+    {
+        "error_code": "topology" | "trigger" | "validation",
+        "message": "mensaje del error",
+        "geometry": {...}  // opcional, para errores que incluyen geometría
+    }
+    
+    Args:
+        e: HttpException con el error
+        lyr_id: ID de la capa (opcional, necesario para transformar geometrías)
+        target_epsg: EPSG al que transformar la geometría (opcional)
+        
+    Returns:
+        JsonResponse con error estructurado, o None si no es un error reconocido
+    """
+    if not hasattr(e, 'msg'):
+        return None
+    
+    import re
+    error_msg = str(e.msg)
+    
+    # ========================================
+    # 1. Detectar errores de TOPOLOGÍA
+    # ========================================
+    if 'TOPOLOGY ERROR' in error_msg:
+        try:
+            from psycopg2 import sql as sqlbuilder
+            
+            # Extraer el mensaje desde después de los dos puntos hasta el primer punto
+            topology_pattern = r'TOPOLOGY ERROR: (.*?)\.'
+            topology_match = re.search(topology_pattern, error_msg)
+            message = topology_match.group(1) if topology_match else 'Unknown topology violation'
+            
+            # Extraer GeoJSON entre ##
+            geojson_obj = _extract_geojson(error_msg)
+            
+            # Transformar geometría si es necesario
+            if geojson_obj and target_epsg and lyr_id:
+                geojson_obj = _transform_geometry(geojson_obj, lyr_id, target_epsg)
+            
+            response_data = {
+                'error_code': 'topology',
+                'message': message
+            }
+            
+            if geojson_obj:
+                response_data['geometry'] = geojson_obj
+            
+            return JsonResponse(response_data, status=400)
+            
+        except Exception as ex:
+            logging.getLogger(LOGGER_NAME).warning(f"Error processing topology error: {str(ex)}")
+    
+    # ========================================
+    # 2. Detectar errores de TRIGGER
+    # ========================================
+    is_trigger_error = 'TRIGGER ERROR:' in error_msg
+    is_raise_exception = 'RAISE' in error_msg
+    
+    if is_trigger_error or is_raise_exception:
+        try:
+            # Extraer mensaje del trigger
+            if 'TRIGGER ERROR:' in error_msg:
+                trigger_pattern = r'TRIGGER ERROR:\s*(.+?)(?:\s*##|$)'
+                trigger_match = re.search(trigger_pattern, error_msg, re.DOTALL)
+                message = trigger_match.group(1).strip() if trigger_match else error_msg
+            else:
+                # Limpiar prefijos de PostgreSQL
+                message = re.sub(r'^(ERROR|CONTEXT|DETAIL):\s*', '', error_msg, flags=re.MULTILINE)
+                message = message.strip()
+                lines = [l.strip() for l in message.split('\n') if l.strip()]
+                message = lines[0] if lines else error_msg
+            
+            # Extraer GeoJSON si existe
+            geojson_obj = _extract_geojson(error_msg)
+            if geojson_obj:
+                message = re.sub(r'\s*##.*?##\s*', '', message).strip()
+            
+            # Transformar geometría si es necesario
+            if geojson_obj and target_epsg and lyr_id:
+                geojson_obj = _transform_geometry(geojson_obj, lyr_id, target_epsg)
+            
+            message = message.rstrip('. ')
+            
+            response_data = {
+                'error_code': 'trigger',
+                'message': message
+            }
+            
+            if geojson_obj:
+                response_data['geometry'] = geojson_obj
+            
+            return JsonResponse(response_data, status=400)
+            
+        except Exception as ex:
+            logging.getLogger(LOGGER_NAME).warning(f"Error processing trigger error: {str(ex)}")
+    
+    # ========================================
+    # 2.5. Detectar errores de PROGRAMACIÓN en funciones PL/pgSQL de trigger
+    #      (campo inexistente, tipo erróneo, etc. que se instalan bien pero
+    #       fallan en ejecución — no llevan RAISE ni TRIGGER ERROR)
+    # ========================================
+    is_plpgsql_trigger_error = (
+        'PL/pgSQL function' in error_msg and 'CONTEXT:' in error_msg
+    ) or (
+        'record "new" has no field' in error_msg.lower()
+    ) or (
+        'record "old" has no field' in error_msg.lower()
+    )
+
+    if is_plpgsql_trigger_error:
+        try:
+            # Eliminar prefijo añadido por el serializador si lo hay
+            raw = error_msg
+            for prefix in ('Unexpected error:', 'Feature change cannot be inserted in database.'):
+                if prefix in raw:
+                    raw = raw.split(prefix, 1)[-1].strip()
+
+            # Extraer nombre de la función trigger del CONTEXT (para orientar al desarrollador)
+            func_match = re.search(r'PL/pgSQL function\s+([\w.]+)\(', raw)
+            func_name = func_match.group(1) if func_match else None
+
+            # La primera línea de error real (descartar líneas CONTEXT/PL/pgSQL)
+            lines = [
+                l.strip() for l in raw.split('\n')
+                if l.strip()
+                and not l.strip().startswith('CONTEXT:')
+                and not l.strip().startswith('PL/pgSQL')
+            ]
+            message = lines[0].rstrip('. ') if lines else raw.split('\n')[0].strip()
+
+            if func_name:
+                message = f"{message} [{func_name}]"
+
+            return JsonResponse({
+                'error_code': 'trigger',
+                'message': message
+            }, status=400)
+
+        except Exception as ex:
+            logging.getLogger(LOGGER_NAME).warning(f"Error processing PL/pgSQL trigger error: {str(ex)}")
+
+    # ========================================
+    # 3. Detectar errores de VALIDACIÓN/CONSTRAINT
+    # ========================================
+    pg_error_patterns = [
+        'violates check constraint',
+        'violates foreign key constraint',
+        'violates unique constraint',
+        'violates not-null constraint',
+        'new row for relation',
+        'cannot insert',
+        'cannot update',
+    ]
+    is_validation_error = any(pattern in error_msg.lower() for pattern in pg_error_patterns)
+    
+    if is_validation_error:
+        try:
+            # Limpiar el mensaje
+            message = re.sub(r'^(ERROR|CONTEXT|DETAIL):\s*', '', error_msg, flags=re.MULTILINE)
+            message = message.strip()
+            lines = [l.strip() for l in message.split('\n') if l.strip()]
+            message = lines[0] if lines else error_msg
+            message = message.rstrip('. ')
+            
+            return JsonResponse({
+                'error_code': 'validation',
+                'message': message
+            }, status=400)
+            
+        except Exception as ex:
+            logging.getLogger(LOGGER_NAME).warning(f"Error processing validation error: {str(ex)}")
+    
+    # No es un error reconocido
+    return None
+
+
+def _extract_geojson(error_msg):
+    """
+    Extrae un objeto GeoJSON de un mensaje de error entre marcadores ##.
+    
+    Args:
+        error_msg: Mensaje de error que puede contener GeoJSON
+        
+    Returns:
+        dict con el GeoJSON parseado, o None si no se encuentra
+    """
+    import re
+    geojson_pattern = r'##(.*?)##'
+    geojson_match = re.search(geojson_pattern, error_msg)
+    if geojson_match:
+        geojson_str = geojson_match.group(1)
+        try:
+            return json.loads(geojson_str)
+        except json.JSONDecodeError:
+            pass
+    return None
+
+
+def _transform_geometry(geojson_obj, lyr_id, target_epsg):
+    """
+    Transforma la geometría GeoJSON al CRS especificado.
+    
+    Args:
+        geojson_obj: Objeto GeoJSON a transformar
+        lyr_id: ID de la capa para obtener conexión a BD
+        target_epsg: EPSG de destino
+        
+    Returns:
+        GeoJSON transformado o el original si falla
+    """
+    try:
+        from psycopg2 import sql as sqlbuilder
+        
+        source_epsg = None
+        if 'crs' in geojson_obj and geojson_obj['crs'] is not None:
+            crs_name = geojson_obj['crs'].get('properties', {}).get('name', '')
+            if crs_name.startswith('EPSG:'):
+                source_epsg = int(crs_name.split(':')[1])
+        
+        if not source_epsg:
+            layer = Layer.objects.get(id=lyr_id)
+            if layer.native_srs:
+                source_epsg = int(layer.native_srs.split(':')[1])
+            else:
+                source_epsg = 4326
+        
+        if source_epsg != target_epsg:
+            i, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
+            with i as con:
+                if 'crs' not in geojson_obj or geojson_obj['crs'] is None:
+                    sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(ST_Transform(ST_SetSRID(ST_GeomFromGeoJSON({geojson}), {source_epsg}), {target_epsg}))")
+                    query = sql.format(
+                        geojson=sqlbuilder.Literal(json.dumps(geojson_obj)),
+                        source_epsg=sqlbuilder.Literal(source_epsg),
+                        target_epsg=sqlbuilder.Literal(target_epsg)
+                    )
+                else:
+                    sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(ST_Transform(ST_GeomFromGeoJSON({geojson}), {target_epsg}))")
+                    query = sql.format(
+                        geojson=sqlbuilder.Literal(json.dumps(geojson_obj)),
+                        target_epsg=sqlbuilder.Literal(target_epsg)
+                    )
+                con.cursor.execute(query)
+                result = con.cursor.fetchone()
+                if result and result[0]:
+                    transformed_geojson = json.loads(result[0])
+                    transformed_geojson['crs'] = {'type': 'name', 'properties': {'name': f'EPSG:{target_epsg}'}}
+                    return transformed_geojson
+        elif 'crs' not in geojson_obj or geojson_obj['crs'] is None:
+            geojson_obj['crs'] = {'type': 'name', 'properties': {'name': f'EPSG:{target_epsg}'}}
+        
+        return geojson_obj
+        
+    except Exception as ex:
+        logging.getLogger(LOGGER_NAME).warning(f"Error transforming geometry: {str(ex)}")
+        return geojson_obj
+
+class CoordsFeatureFilter(BaseFilterBackend):
+    def get_schema_fields(self, view):
+        fields = [
+            coreapi.Field(name="lat", description="Latitude", required=True, location='query', example='39.469350'),
+            coreapi.Field(name="lon", description="Longitude", required=True, location='query', example='-0.390024'),
+            coreapi.Field(name="buffer", description="Diameter around the point in grades", required=True, location='query', example='0.01'),
+            coreapi.Field(name="geom", description="true to get the geometry. Default false", required=False, location='query', example='true'),
+            coreapi.Field(name="lang", description="Language (Ex: es, en, fr, val, etc). Default es", required=False, location='query', example='es'),
+            coreapi.Field(name="blank", description="True to get a blank registry. Default false", required=False, location='query', example='false'),
+            coreapi.Field(name="getbuffer", description="True to get the buffer geometry. Default false", required=False, location='query', example='false'),
+        ]
+        return fields
+
+class BBoxFeatureFilter(BaseFilterBackend):
+    def get_schema_fields(self, view):
+        fields = [
+            coreapi.Field(name="minlat", description="Latitude", required=True, location='query', example='39.469350'),
+            coreapi.Field(name="minlon", description="Longitude", required=True, location='query', example='-0.390024'),
+            coreapi.Field(name="maxlat", description="Latitude", required=True, location='query', example='39.469350'),
+            coreapi.Field(name="maxlon", description="Longitude", required=True, location='query', example='-0.390024'),
+            coreapi.Field(name="zip", description="true to get a zip file. Default false", required=False, location='query', example='true'),
+            coreapi.Field(name="resources", description="true to get the attached resources. Default false", required=False, location='query', example='true'),
+            coreapi.Field(name="epsg", description="if empty the request will use EPSG 4326 by default", required=False, location='query', example='4326'),
+            coreapi.Field(name="max", description="Maximum number of elements to return", required=False, location='query', example='100'),
+            coreapi.Field(name="page", description="Number of page", required=False, location='query', example='1'),
+        ]
+        return fields
+
+
+
+class PaginationFeatureFilter(BaseFilterBackend):
+    def get_schema_fields(self, view):
+        fields = [
+            coreapi.Field(name="max", description="Maximum number of elements to return", required=False, location='query', example='100'),
+            coreapi.Field(name="page", description="Number of page", required=False, location='query', example='1'),
+            coreapi.Field(name="date", description="Modification date", required=False, location='query', example='2020-01-13 14:54'),
+            coreapi.Field(name="onlyprops", description="True to get only the properties", required=False, location='query', example='true'),
+            coreapi.Field(name="text", description="Search by text", required=False, location='query', example='my text'),
+            coreapi.Field(name="sortfield", description="Field name to sort by", required=False, location='query', example='nombre'),
+            coreapi.Field(name="sortorder", description="Sort order: 'ascend' or 'descend'", required=False, location='query', example='ascend'),
+        ]
+        return fields
+
+
+class DateFeatureFilter(BaseFilterBackend):
+    def get_schema_fields(self, view):
+        fields = [
+            coreapi.Field(name="date", description="Modification date", required=False, location='query', example='2020-01-13 14:54'),
+        ]
+        return fields
+
+
+class Pagination():
+    def __init__(self, request):
+        self.request = request
+        self.max_ = settings.NUM_MAX_FEAT
+        self.page = 0
+
+    def get_pagination_params(self):
+        
+        if 'max' in self.request.GET:
+            try:
+                self.max_ = int(self.request.GET['max'])
+            except Exception:
+                raise HttpException(400, "Bad parameter max_feat. The value must be an integer")
+            
+        if 'page' in self.request.GET:
+            try:
+                self.page = int(self.request.GET['page'])
+            except Exception:
+                raise HttpException(400, "Bad parameter page. The value must be an integer")
+            
+        return self.max_, self.page
+    
+    def get_links(self, total):
+        links = [
+            {
+                "rel" : "self",
+                "href": self.request.build_absolute_uri()
+            }
+        ]
+        path = self.request.build_absolute_uri()
+        
+        extent = '?'
+        if 'minlat' in path:
+            extent = path[path.rfind('?'):path.rfind('&max=')]
+
+        path = path[:path.rfind('?')]
+        
+        path += extent
+        if extent != '?':
+            path += '&'
+        
+        if total > ((self.page + 1) * self.max_):
+            links.append({
+                "rel" : "next",
+                "href": path + "max=" + str(self.max_) + "&page=" + str(self.page + 1)
+            }) 
+        if self.page > 0:
+            links.append({
+                "rel" : "prev",
+                "href": path + "max=" + str(self.max_) + "&page=" + str(self.page - 1)
+            }) 
+        return links
+
+
+#--------------------------------------------------
+#                FeaturesView
+#--------------------------------------------------
+class FeaturesView(CreateAPIView):
+    serializer_class = FeatureSerializer
+    filter_backends = (PaginationFeatureFilter,)
+    permission_classes = [AllowAny]
+    pagination_class = None
+    
+    @swagger_auto_schema(operation_id='get_feature_list', operation_summary='Gets the feature list of a layer',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Page NOT found", 
+                                    403: "The layer is not allowed to this user", 
+                                    400: "Features cannot be obtained. Unexpected error:..."})
+    @action(detail=True, methods=['GET'])
+    def get(self, request, lyr_id):
+        """
+        This call returns a Geojson with a FeatureCollection. The maximum number of features is 100 but you can define this
+        value using the 'max' parameter. Moreover, you can get the features in pages selecting the number of page
+        in the 'page' parameter .
+        """
+        pagination = Pagination(request)
+        validation = Validation(request)
+          
+        try:
+            date = util.get_param_date(request) 
+            onlyprops = False
+            if 'onlyprops' in self.request.GET:
+                try:
+                    onlyprops = True if self.request.GET['onlyprops'] == 'true' else False
+                except Exception:
+                    raise HttpException(400, "Bad parameter onlyprops. The value must be a value true or false")
+
+            text = None
+            if 'text' in self.request.GET:
+                try:
+                    text = self.request.GET['text']
+                except Exception:
+                    raise HttpException(400, "Bad parameter text. The value must be a string")
+
+            strict_search = False
+            if 'strictsearch' in self.request.GET:
+                try:
+                    strict_search =  True if self.request.GET['strictsearch'] == 'true' else False
+                except Exception:
+                    raise HttpException(400, "Bad parameter strictsearch. The value must be a value true or false")
+
+            filter = None
+            if 'filter' in self.request.GET:
+                try:
+                    filter = json.loads(self.request.GET['filter'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter filter. The value must be a string")
+            
+            source_epsg = 4326
+            if 'source_epsg' in self.request.GET:
+                try:
+                    source_epsg = int(self.request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
+            
+            sortfield = None
+            if 'sortfield' in self.request.GET:
+                try:
+                    sortfield = self.request.GET['sortfield']
+                except Exception:
+                    raise HttpException(400, "Bad parameter sortfield. The value must be a string")
+            
+            sortorder = None
+            if 'sortorder' in self.request.GET:
+                try:
+                    sortorder = self.request.GET['sortorder']
+                    if sortorder not in ['ascend', 'descend']:
+                        raise ValueError()
+                except Exception:
+                    raise HttpException(400, "Bad parameter sortorder. The value must be 'ascend' or 'descend'")
+                    
+            restrictions = validation.check_read_restrictions(lyr_id)
+            result = serializers.FeatureSerializer().list(validation, lyr_id, pagination, source_epsg, date, strict_search, onlyprops, text, filter, restrictions.get('cql_filter_read'), sortfield, sortorder)
+            return JsonResponse(result, safe=False)
+        except HttpException as e:
+            return e.get_exception()
+        
+    
+    
+    @swagger_auto_schema(operation_id='create_feature', operation_summary='Creates a new feature in a layer',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
+                                    403: "The layer is not allowed to this user<br>The user does not have permission to edit this layer",
+                                    400: "Feature malformed. Geometry is not properly<br>Feature malformed. Fields geometry, type and properties are needed<br>Error checking version column:<br>Feature malformed. Wrong feature type<br>Feature malformed. Wrong coordinates"}) 
+    @action(detail=True, methods=['POST'], permission_classes=[IsAuthenticated])
+    def post(self, request, lyr_id):
+        epsg = 4326
+        try:
+            content = util.get_content(request)
+            if 'type' not in content:
+                content['type'] = 'Feature'
+            if 'properties' not in content or content['properties'] is None:
+                content['properties'] = {}
+            if 'geometry' not in content:
+                content['geometry'] = None
+            validation = Validation(request)
+            requested_null_geometry = (content.get('geometry') is None)
+            validation_content = content
+            if requested_null_geometry:
+                validation_content = dict(content)
+                validation_content['geometry'] = _get_validation_geometry_for_layer(lyr_id)
+            validation.check_create_feature(lyr_id, validation_content)
+            username = request.user.username
+            
+            # Manejar source_epsg (formato EPSG:3857) o epsg (entero) para compatibilidad
+            if 'source_epsg' in request.GET:
+                try:
+                    epsg = int(request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
+            elif 'epsg' in request.GET:
+                try:
+                    epsg = int(request.GET['epsg'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter epsg. The value must be an integer")
+            
+            if 'geometry' in content and content['geometry'] is not None:
+                if 'crs' in content['geometry'] and content['geometry']['crs'] is not None:
+                    try:
+                        crs_name = content['geometry']['crs'].get('properties', {}).get('name', '')
+                        if crs_name.startswith('EPSG:'):
+                            feature_epsg = int(crs_name.split(':')[1])
+                            if feature_epsg != 4326:
+                                epsg = feature_epsg
+                    except (ValueError, KeyError, AttributeError):
+                        pass
+            
+            feat = serializers.FeatureSerializer().create(validation, lyr_id, content, username, epsg)
+            cache_task_id = None
+            if 'geometry' in content and content['geometry'] and _layer_or_group_is_cached(lyr_id):
+                cache_task_id = _trigger_cache_regeneration_for_edit(lyr_id, content['geometry'], source_epsg=epsg)
+            if cache_task_id:
+                feat['cache_task_id'] = cache_task_id
+            resp = JsonResponse(feat, safe=False)
+            if cache_task_id:
+                resp['X-Cache-Task-Id'] = cache_task_id
+            return resp
+        except HttpException as e:
+            # Log del error para diagnóstico
+            logging.getLogger(LOGGER_NAME).warning(f"Error creating feature in layer {lyr_id}: [{e.code}] {e.msg}")
+            
+            # Intentar manejar como error estructurado (topología, trigger, validación)
+            error_response = handle_feature_error(e, lyr_id, epsg)
+            if error_response:
+                return error_response
+            
+            # Para errores no reconocidos
+            return e.get_exception()
+    
+    
+    @swagger_auto_schema(operation_id='update_feature', operation_summary='Updates a feature',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
+                                    403: "The layer is not allowed to this user<br>The user does not have permission to edit this layer",
+                                    400: "Feature malformed. Fields geometry, type and properties are needed<br>Error checking version column: <br>Feature malformed. Field properties is needed<br>Feature malformed. The field feat_version_gvol is needed for this call<br>Feature malformed. The field PK is needed for this call",
+                                    409: "Version conflict"})
+    @action(detail=True, methods=['PUT'], permission_classes=[IsAuthenticated])
+    def put(self, request, lyr_id):
+        try:
+            content = util.get_content(request)
+            validation = Validation(request)
+            override = False
+            version_to_overwrite = -1
+            
+            if 'conflicts' in content and 'data' in content:
+                if content['conflicts'] == 'override':
+                    override = True
+                    try:
+                        if 'version' in content:
+                            version_to_overwrite = int(content['version'])
+                    except Exception as e:
+                        print(e)
+                data = content['data']
+                while isinstance(data, str):
+                    data = json.loads(data)
+            else:
+                data = content
+            
+            validation.check_update_feature(lyr_id, data)
+            username = request.user.username
+            
+            # Manejar el parámetro epsg de la query
+            epsg = 4326
+            if 'epsg' in request.GET:
+                try:
+                    epsg = int(request.GET['epsg'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter epsg. The value must be an integer")
+            
+            if 'geometry' in data and data['geometry'] is not None:
+                if 'crs' in data['geometry'] and data['geometry']['crs'] is not None:
+                    try:
+                        crs_name = data['geometry']['crs'].get('properties', {}).get('name', '')
+                        if crs_name.startswith('EPSG:'):
+                            feature_epsg = int(crs_name.split(':')[1])
+                            if feature_epsg != 4326:
+                                epsg = feature_epsg
+                    except (ValueError, KeyError, AttributeError):
+                        pass
+            
+            feat = serializers.FeatureSerializer().update(validation, lyr_id, data, override, version_to_overwrite, username, epsg)
+            cache_task_id = None
+            if 'geometry' in data and data['geometry'] and _layer_or_group_is_cached(lyr_id):
+                cache_task_id = _trigger_cache_regeneration_for_edit(lyr_id, data['geometry'], source_epsg=epsg)
+            if cache_task_id:
+                feat['cache_task_id'] = cache_task_id
+            resp = JsonResponse(feat, safe=False)
+            if cache_task_id:
+                resp['X-Cache-Task-Id'] = cache_task_id
+            return resp
+        except HttpException as e:
+            # Log del error para diagnóstico
+            logging.getLogger(LOGGER_NAME).warning(f"Error updating feature in layer {lyr_id}: [{e.code}] {e.msg}")
+            
+            # Intentar manejar como error estructurado (topología, trigger, validación)
+            error_response = handle_feature_error(e, lyr_id, epsg)
+            if error_response:
+                return error_response
+            
+            # Para errores no reconocidos
+            return e.get_exception()
+
+
+#--------------------------------------------------
+#              FeaturesExtentView
+#--------------------------------------------------
+class FeaturesExtentView(ListAPIView):
+    serializer_class = FeatureSerializer
+    filter_backends = (BBoxFeatureFilter,)
+    pagination_class = None
+    
+    @swagger_auto_schema(operation_id='get_feature_list_by_extent', operation_summary='Gets the feature list of a layer',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Page NOT found", 
+                                    403: "The layer is not allowed to this user", 
+                                    400: "Features cannot be obtained. Unexpected error:..."})
+    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+    def get(self, request, lyr_id):
+
+        validation = Validation(request)
+        pagination = Pagination(request)
+
+        try:
+            minlon = 0
+            if 'minlon' in self.request.GET:
+                try:
+                    minlon = float(self.request.GET['minlon'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter lon. The value must be a float")
+
+            minlat = 0
+            if 'minlat' in self.request.GET:
+                try:
+                    minlat = float(self.request.GET['minlat'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter lat. The value must be a float")
+
+            maxlon = 0
+            if 'maxlon' in self.request.GET:
+                try:
+                    maxlon = float(self.request.GET['maxlon'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter lon. The value must be a float")
+
+            maxlat = 0
+            if 'maxlat' in self.request.GET:
+                try:
+                    maxlat = float(self.request.GET['maxlat'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter lat. The value must be a float")
+
+            zip = False
+            if 'zip' in self.request.GET:
+                try:
+                    zip = True if self.request.GET['zip'] == 'true' else False
+                except Exception:
+                    raise HttpException(400, "Bad parameter zip. The value must be a value true or false")
+
+             
+            resources = False
+            if 'resources' in self.request.GET:
+                try:
+                    resources = True if self.request.GET['resources'] == 'true' else False
+                except Exception:
+                    raise HttpException(400, "Bad parameter resources. The value must be a value true or false")
+
+            epsg = 4326
+            if 'source_epsg' in self.request.GET:
+                try:
+                    epsg = int(self.request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
+            elif 'epsg' in self.request.GET:
+                try:
+                    epsg = int(self.request.GET['epsg'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter epsg. The value must be an integer")
+
+            max_feat = None
+            if 'max' in self.request.GET:
+                try:
+                    max_feat = int(self.request.GET['max'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter max. The value must be an integer")
+
+            page = None
+            if 'page' in self.request.GET:
+                try:
+                    page = int(self.request.GET['page'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter page. The value must be an integer")
+
+
+            validation.check_feature_list(lyr_id)
+            result = serializers.FeatureSerializer().list_by_extent(validation, lyr_id, epsg, minlat, minlon, maxlat, maxlon, zip, resources, max_feat, page, pagination)
+            
+            if(zip):
+                response = HttpResponse(FileWrapper(open(result, 'rb')), content_type='application/zip')
+                values = result.split("/")
+                file_ = values[len(values) - 1]
+                response['Content-Disposition'] = 'attachment; filename=' + file_
+                response['Content-Type'] = 'application/zip'
+                return response
+            else:
+                return JsonResponse(result, safe=False)
+        except HttpException as e:
+            return e.get_exception()
+
+
+#--------------------------------------------------
+#                PublicFeaturesView
+#--------------------------------------------------
+class PublicFeaturesView(CreateAPIView):
+    serializer_class = FeatureSerializer
+    filter_backends = (PaginationFeatureFilter,)
+    permission_classes = [AllowAny]
+    pagination_class = None
+    
+    @swagger_auto_schema(operation_id='get_feature_list', operation_summary='Gets the feature list of a layer',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Page NOT found", 
+                                    403: "The layer is not allowed to this user", 
+                                    400: "Features cannot be obtained. Unexpected error:..."})
+    @action(detail=True, methods=['GET'])
+    def get(self, request, lyr_id):
+        """
+        This call returns a Geojson with a FeatureCollection. The maximum number of features is 100 but you can define this
+        value using the 'max' parameter. Moreover, you can get the features in pages selecting the number of page
+        in the 'page' parameter .
+        """
+        validation = Validation(request)
+        validation.is_public_layer(lyr_id)
+        pagination = Pagination(request)
+        try:
+            date = util.get_param_date(request) 
+            onlyprops = False
+            if 'onlyprops' in self.request.GET:
+                try:
+                    onlyprops = True if self.request.GET['onlyprops'] == 'true' else False
+                except Exception:
+                    raise HttpException(400, "Bad parameter onlyprops. The value must be a value true or false")
+
+            text = None
+            if 'text' in self.request.GET:
+                try:
+                    text = self.request.GET['text']
+                except Exception:
+                    raise HttpException(400, "Bad parameter text. The value must be a string")
+
+            strict_search = False
+            if 'strictsearch' in self.request.GET:
+                try:
+                    strict_search =  True if self.request.GET['strictsearch'] == 'true' else False
+                except Exception:
+                    raise HttpException(400, "Bad parameter strictsearch. The value must be a value true or false")
+
+            filter = None
+            if 'filter' in self.request.GET:
+                try:
+                    filter = json.loads(self.request.GET['filter'])
+                except Exception as e:
+                    print(e)
+                    raise HttpException(400, "Bad parameter filter. The value must be a string")
+
+            source_epsg = 4326
+            if 'source_epsg' in self.request.GET:
+                try:
+                    source_epsg = int(self.request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
+
+            result = serializers.FeatureSerializer().list(None, lyr_id, pagination, source_epsg, date, strict_search, onlyprops, text, filter)
+            return JsonResponse(result, safe=False)
+        except HttpException as e:
+            return e.get_exception()
+        
+    
+    
+    @swagger_auto_schema(operation_id='create_feature', operation_summary='Creates a new feature in a layer',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
+                                    403: "The layer is not allowed to this user<br>The user does not have permission to edit this layer",
+                                    400: "Feature malformed. Geometry is not properly<br>Feature malformed. Fields geometry, type and properties are needed<br>Error checking version column:<br>Feature malformed. Wrong feature type<br>Feature malformed. Wrong coordinates"}) 
+    @action(detail=True, methods=['POST'], permission_classes=[IsAuthenticated])
+    def post(self, request, lyr_id):
+        try:
+            content = util.get_content(request)
+            if 'type' not in content:
+                content['type'] = 'Feature'
+            if 'properties' not in content or content['properties'] is None:
+                content['properties'] = {}
+            if 'geometry' not in content:
+                content['geometry'] = None
+            validation = Validation(request)
+            requested_null_geometry = (content.get('geometry') is None)
+            validation_content = content
+            if requested_null_geometry:
+                validation_content = dict(content)
+                validation_content['geometry'] = _get_validation_geometry_for_layer(lyr_id)
+            validation.check_create_feature(lyr_id, validation_content)
+            feat = serializers.FeatureSerializer().create(validation, lyr_id, content, None)
+            cache_task_id = None
+            if 'geometry' in content and content['geometry'] and _layer_or_group_is_cached(lyr_id):
+                epsg = 4326
+                if 'source_epsg' in request.GET:
+                    try:
+                        epsg = int(request.GET['source_epsg'].split(":")[1])
+                    except Exception:
+                        pass
+                cache_task_id = _trigger_cache_regeneration_for_edit(lyr_id, content['geometry'], source_epsg=epsg)
+            if cache_task_id:
+                feat['cache_task_id'] = cache_task_id
+            resp = JsonResponse(feat, safe=False)
+            if cache_task_id:
+                resp['X-Cache-Task-Id'] = cache_task_id
+            return resp
+        except HttpException as e:
+            return e.get_exception()
+    
+    
+    @swagger_auto_schema(operation_id='update_feature', operation_summary='Updates a feature',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
+                                    403: "The layer is not allowed to this user<br>The user does not have permission to edit this layer",
+                                    400: "Feature malformed. Fields geometry, type and properties are needed<br>Error checking version column: <br>Feature malformed. Field properties is needed<br>Feature malformed. The field feat_version_gvol is needed for this call<br>Feature malformed. The field PK is needed for this call",
+                                    409: "Version conflict"})
+    @action(detail=True, methods=['PUT'], permission_classes=[IsAuthenticated])
+    def put(self, request, lyr_id):
+        try:
+            content = util.get_content(request)
+            validation = Validation(request)
+            override = False
+            version_to_overwrite = -1
+            
+            if 'conflicts' in content and 'data' in content:
+                if content['conflicts'] == 'override':
+                    override = True
+                    try:
+                        if 'version' in content:
+                            version_to_overwrite = int(content['version'])
+                    except Exception as e:
+                        print(e)
+                data = content['data']
+            else:
+                data = content
+            
+            validation.check_update_feature(lyr_id, data)
+            feat = serializers.FeatureSerializer().update(validation, lyr_id, data, override, version_to_overwrite, None)
+            cache_task_id = None
+            if 'geometry' in data and data['geometry'] and _layer_or_group_is_cached(lyr_id):
+                epsg = 4326
+                if 'epsg' in request.GET:
+                    try:
+                        epsg = int(request.GET['epsg'])
+                    except Exception:
+                        pass
+                cache_task_id = _trigger_cache_regeneration_for_edit(lyr_id, data['geometry'], source_epsg=epsg)
+            if cache_task_id:
+                feat['cache_task_id'] = cache_task_id
+            resp = JsonResponse(feat, safe=False)
+            if cache_task_id:
+                resp['X-Cache-Task-Id'] = cache_task_id
+            return resp
+        except HttpException as e:
+            return e.get_exception()
+
+
+
+
+#--------------------------------------------------
+#                FeaturesDeleteView
+#--------------------------------------------------
+class FeaturesDeleteView(RetrieveDestroyAPIView):
+    serializer_class = FeatureSerializer
+    pagination_class = None
+    def get_permissions(self):
+        if self.request._request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return [ AllowAny() ]
+        return [ IsAuthenticated() ]
+        
+    @swagger_auto_schema(operation_id='get_feature', operation_summary='Gets a feature from a layer',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Feature NOT found", 
+                                    403: "The layer is not allowed to this user"})
+    @action(detail=True, methods=['GET'])
+    def get(self, request, lyr_id, feat_id):
+        validation = Validation(request)
+        try:
+            validation.check_get_feature(lyr_id, feat_id)
+            source_epsg = 4326
+            if 'source_epsg' in self.request.GET:
+                try:
+                    source_epsg = int(self.request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
+
+            feat = serializers.FeatureSerializer().get(validation, lyr_id, feat_id, source_epsg)
+            result = {
+                "content" : feat,
+                "links" : [{
+                    "rel" : "self",
+                    "href": self.request.build_absolute_uri()
+                },
+                {
+                    "rel" : "versions",
+                    "href": self.request.build_absolute_uri() + "versions"
+                }
+                ]
+            }
+            return JsonResponse(result, safe=False)
+        except HttpException as e:
+            return e.get_exception() 
+    
+    @swagger_auto_schema(operation_id='delete_feature', operation_summary='Deletes a feature of a layer',
+                         responses={204: "Happy end",
+                                    404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Feature NOT found", 
+                                    403: "The layer is not allowed to this user<br>The user does not have permission to edit this layer",
+                                    409: "Version conflict"})
+    @action(detail=True, methods=['DELETE'])
+    def delete(self, request, lyr_id, feat_id):
+        validation = Validation(request)
+        try:
+            version = None
+            content = None
+            try:
+                content = util.get_content(request)
+            except Exception as e:
+                pass
+
+            if content and 'version' in content:
+                try:
+                    version = int(content['version'])
+                except Exception as e:
+                    pass
+
+            validation.check_delete_feature(lyr_id, feat_id)
+            source_epsg = 4326
+            if 'source_epsg' in self.request.GET:
+                try:
+                    source_epsg = int(self.request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
+            geom = None
+            if _layer_or_group_is_cached(lyr_id):
+                try:
+                    feat = serializers.FeatureSerializer().get(validation, lyr_id, feat_id, source_epsg)
+                    geom = feat.get('geometry') if feat else None
+                except Exception:
+                    pass
+            serializers.FeatureSerializer().delete(validation, lyr_id, feat_id, version)
+            cache_task_id = _trigger_cache_regeneration_for_edit(lyr_id, geom, source_epsg=source_epsg) if geom else None
+            resp = HttpException(204, "OK").get_exception()
+            if cache_task_id:
+                resp['X-Cache-Task-Id'] = cache_task_id
+            return resp
+        except HttpException as e:
+            return e.get_exception() 
+
+
+#--------------------------------------------------
+#                CacheTaskPollView
+#--------------------------------------------------
+class CacheTaskPollView(APIView):
+    """
+    Poll the status of a cache regeneration task (by task_id).
+    No DB storage: uses Celery result backend. When ready=true the frontend should refresh the layer.
+    Only relevant when the layer is cached and was edited (create/update/delete returned X-Cache-Task-Id).
+    """
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(operation_id='get_cache_task_status', operation_summary='Get cache regeneration task status',
+                         responses={200: "task_id, state (PENDING|SUCCESS|FAILURE), ready (bool)"})
+    def get(self, request, lyr_id, task_id):
+        try:
+            from celery.result import AsyncResult
+            from gvsigol.celery import app as celery_app
+            result = AsyncResult(task_id, app=celery_app)
+            return JsonResponse({
+                'task_id': task_id,
+                'state': result.state,
+                'ready': result.ready(),
+            })
+        except Exception as e:
+            logging.getLogger(LOGGER_NAME).warning("Cache task poll failed for task_id=%s: %s", task_id, e)
+            return JsonResponse({'task_id': task_id, 'state': 'UNKNOWN', 'ready': False}, status=200)
+
+
+#--------------------------------------------------
+#                FeatureGetView
+#--------------------------------------------------
+class FeatureGetView(RetrieveDestroyAPIView):
+    serializer_class = FeatureSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None
+        
+    @swagger_auto_schema(operation_id='get_feature', operation_summary='Gets a feature from a layer',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Feature NOT found", 
+                                    403: "The layer is not allowed to this user"})
+    @action(detail=True, methods=['GET'])
+    def get(self, request, lyr_id, feat_id):
+        validation = Validation(request)
+        validation.check_get_feature(lyr_id, feat_id)
+        try:
+            feat = serializers.FeatureSerializer().get(None, lyr_id, feat_id, 4326)
+            result = {
+                "content" : feat,
+                "links" : [{
+                    "rel" : "self",
+                    "href": self.request.build_absolute_uri()
+                },
+                {
+                    "rel" : "versions",
+                    "href": self.request.build_absolute_uri() + "versions"
+                }
+                ]
+            }
+            return JsonResponse(result, safe=False)
+            
+        except HttpException as e:
+            return e.get_exception()                          
+
+
+#--------------------------------------------------
+#                FeatureVersionsView
+#--------------------------------------------------
+class FeatureVersionsView(ListAPIView):
+    serializer_class = FeatureChangeSerializer
+    pagination_class = None    
+
+    @swagger_auto_schema(operation_id='get_feature_versions', operation_summary='Gets the list of versions of a feature',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Feature NOT found", 
+                                    403: "The layer is not allowed to this user"})
+    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+    def get(self, request, lyr_id, feat_id):
+        validation = Validation(request)
+        try:
+            validation.check_get_feature(lyr_id, feat_id)
+            feat_changes = FeatureVersions.objects.filter(feat_id = feat_id, layer_id=lyr_id)
+            serializer = FeatureChangeSerializer(feat_changes, many=True)
+        
+            result = {
+                "content" : serializer.data,
+                "links" : [{
+                    "rel" : "self",
+                    "href": self.request.build_absolute_uri()
+                }]
+            }
+            return JsonResponse(result, safe=False)
+        except HttpException as e:
+            return e.get_exception() 
+
+
+#--------------------------------------------------
+#             FeatureVersionsDeleted
+#--------------------------------------------------  
+class FeatureVersionsDeleted(ListAPIView):
+    serializer_class = FeatureChangeSerializer
+    filter_backends = (DateFeatureFilter,)   
+    pagination_class = None 
+
+    @swagger_auto_schema(operation_id='get_deleted_features', operation_summary='Gets the list of deleted features',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
+                                    403: "The layer is not allowed to this user"})
+    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+    def get(self, request, lyr_id):
+        validation = Validation(request)
+        try:
+            validation.check_get_layer_features(lyr_id)
+            date_ = util.get_param_date(request)
+            if date_ is None:
+                feat_changes = FeatureVersions.objects.filter(layer_id=lyr_id, operation=3)
+            else:
+                feat_changes = FeatureVersions.objects.filter(layer_id=lyr_id, operation=3, date__gte=date_)
+            serializer = FeatureChangeSerializer(feat_changes, many=True)
+        
+            result = {
+                "content" : serializer.data,
+                "links" : [{
+                    "rel" : "self",
+                    "href": self.request.build_absolute_uri()
+                }]
+            }
+            return JsonResponse(result, safe=False)
+        except HttpException as e:
+            return e.get_exception() 
+
+
+#--------------------------------------------------
+#             FeatureVersionsCreated
+#--------------------------------------------------
+class FeatureVersionsCreated(ListAPIView):
+    serializer_class = FeatureChangeSerializer
+    filter_backends = (DateFeatureFilter,)   
+    pagination_class = None 
+
+    @swagger_auto_schema(operation_id='get_created_features', operation_summary='Gets the list of created features',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
+                                    403: "The layer is not allowed to this user"})
+    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+    def get(self, request, lyr_id):
+        validation = Validation(request)
+        try:
+            validation.check_get_layer_features(lyr_id)
+            date_ = util.get_param_date(request)
+            if date_ is None:
+                feat_changes = FeatureVersions.objects.filter(layer_id=lyr_id, operation=1)
+            else:
+                feat_changes = FeatureVersions.objects.filter(layer_id=lyr_id, operation=1, date__gte=date_)
+            serializer = FeatureChangeSerializer(feat_changes, many=True)
+        
+            result = {
+                "content" : serializer.data,
+                "links" : [{
+                    "rel" : "self",
+                    "href": self.request.build_absolute_uri()
+                }]
+            }
+            return JsonResponse(result, safe=False)
+        except HttpException as e:
+            return e.get_exception()
+        
+
+#--------------------------------------------------
+#             FeatureVersionsUpdated
+#--------------------------------------------------
+class FeatureVersionsUpdated(ListAPIView):
+    serializer_class = FeatureChangeSerializer
+    filter_backends = (DateFeatureFilter,) 
+    pagination_class = None  
+
+    @swagger_auto_schema(operation_id='get_updated_features', operation_summary='Gets the list of updated features',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
+                                    403: "The layer is not allowed to this user"})
+    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+    def get(self, request, lyr_id):
+        validation = Validation(request)
+        try:
+            validation.check_get_layer_features(lyr_id)
+            date_ = util.get_param_date(request)
+            if date_ is None:
+                feat_changes = FeatureVersions.objects.filter(layer_id=lyr_id, operation=2)
+            else:
+                feat_changes = FeatureVersions.objects.filter(layer_id=lyr_id, operation=2, date__gte=date_)
+            serializer = FeatureChangeSerializer(feat_changes, many=True)
+        
+            result = {
+                "content" : serializer.data,
+                "links" : [{
+                    "rel" : "self",
+                    "href": self.request.build_absolute_uri()
+                }]
+            }
+            return JsonResponse(result, safe=False)
+        except HttpException as e:
+            return e.get_exception()
+        
+
+#--------------------------------------------------
+#           FeatureVersionsAddedResources
+#--------------------------------------------------
+class FeatureVersionsAddedResources(ListAPIView):
+    serializer_class = FeatureChangeSerializer
+    filter_backends = (DateFeatureFilter,)    
+    pagination_class = None
+
+    @swagger_auto_schema(operation_id='get_added_resources', operation_summary='Gets the list of resources added in the layer',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
+                                    403: "The layer is not allowed to this user"})
+    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+    def get(self, request, lyr_id):
+        validation = Validation(request)
+        try:
+            validation.check_get_layer_features(lyr_id)
+            date_ = util.get_param_date(request)
+            if date_ is None:
+                feat_changes = FeatureVersions.objects.filter(layer_id=lyr_id, operation=4)
+            else:
+                feat_changes = FeatureVersions.objects.filter(layer_id=lyr_id, operation=4, date__gte=date_)
+            serializer = FeatureChangeSerializer(feat_changes, many=True)
+        
+            result = {
+                "content" : serializer.data,
+                "links" : [{
+                    "rel" : "self",
+                    "href": self.request.build_absolute_uri()
+                }]
+            }
+            return JsonResponse(result, safe=False)
+        except HttpException as e:
+            return e.get_exception()
+        
+
+#--------------------------------------------------
+#         FeatureVersionsDeletedResources
+#--------------------------------------------------
+class FeatureVersionsDeletedResources(ListAPIView):
+    serializer_class = FeatureChangeSerializer
+    filter_backends = (DateFeatureFilter,)
+    pagination_class = None
+
+    @swagger_auto_schema(operation_id='get_deleted_resources', operation_summary='Gets the list of resources deleted in the layer',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
+                                    403: "The layer is not allowed to this user"})
+    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+    def get(self, request, lyr_id):
+        validation = Validation(request)
+        try:
+            validation.check_get_layer_features(lyr_id)
+            date_ = util.get_param_date(request)
+            if date_ is None:
+                feat_changes = FeatureVersions.objects.filter(layer_id=lyr_id, operation=5)
+            else:
+                feat_changes = FeatureVersions.objects.filter(layer_id=lyr_id, operation=5, date__gte=date_)
+            serializer = FeatureChangeSerializer(feat_changes, many=True)
+        
+            result = {
+                "content" : serializer.data,
+                "links" : [{
+                    "rel" : "self",
+                    "href": self.request.build_absolute_uri()
+                }]
+            }
+            return JsonResponse(result, safe=False)
+        except HttpException as e:
+            return e.get_exception()
+
+
+
+#--------------------------------------------------
+#                FeatureByPointView
+#--------------------------------------------------
+class FeatureByPointView(ListAPIView):
+    serializer_class = FeatureSerializer
+    filter_backends = (CoordsFeatureFilter,)
+    permission_classes = [AllowAny]
+    pagination_class = None
+        
+    @swagger_auto_schema(operation_id='get_feature_by_point', operation_summary='Gets a feature from a pair of coordinates',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Feature NOT found", 
+                                    403: "The layer is not allowed to this user",
+                                    400: "Bad parameter lon. The value must be a float<br>Bad parameter lat. The value must be a float"})
+    @action(detail=True, methods=['GET'], permission_classes=[AllowAny])
+    def get(self, request, lyr_id):
+        """
+        Gets the features in the coordinates (lan, lon)
+        - buffer: Diameter of the buffer in degrees. This buffer will be used to intersect the layer and get the features
+        - lang: Language of feature labels (es, val, en, and so on). Default 'es'
+        - geom: true to get the geometry. Default false
+        - blank: true to get an empty registry
+        """
+        validation = Validation(request)
+        try:
+            restrictions = validation.check_read_restrictions(lyr_id)
+
+            lon = 0
+            if 'lon' in self.request.GET:
+                try:
+                    lon = float(self.request.GET['lon'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter lon. The value must be a float")
+
+            lat = 0
+            if 'lat' in self.request.GET:
+                try:
+                    lat = float(self.request.GET['lat'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter lat. The value must be a float")
+
+            buffer = 0
+            if 'buffer' in self.request.GET:
+                try:
+                    buffer = float(self.request.GET['buffer'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter buffer. The value must be a float")
+
+            geom = False
+            if 'geom' in self.request.GET:
+                try:
+                    geom = True if self.request.GET['geom'] == 'true' else False
+                except Exception:
+                    raise HttpException(400, "Bad parameter geom. The value must be a value true or false")
+
+            lang = 'es'
+            if 'lang' in self.request.GET:
+                try:
+                    lang = self.request.GET['lang']
+                except Exception:
+                    raise HttpException(400, "Bad parameter lang")
+
+            blank = False
+            if 'blank' in self.request.GET:
+                try:
+                    blank = True if self.request.GET['blank'] == 'true' else False
+                except Exception:
+                    raise HttpException(400, "Bad parameter blank")
+                
+            simplify = True
+            if 'simplify' in self.request.GET:
+                try:
+                    simplify = True if self.request.GET['simplify'] == 'true' else False
+                except Exception:
+                    raise HttpException(400, "Bad parameter simplify")
+                
+            source_epsg = 4326
+            if 'source_epsg' in self.request.GET:
+                try:
+                    source_epsg = int(self.request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
+
+            getbuffer = False
+            if 'getbuffer' in self.request.GET:
+                try:
+                    getbuffer = True if self.request.GET['getbuffer'] == 'true' else False
+                except Exception:
+                    raise HttpException(400, "Bad parameter getbuffer.")
+
+            lyr = Layer.objects.get(id=lyr_id)
+            if lyr is None:
+                raise HttpException(404, "Layer not found")
+
+            serializer = FeatureSerializer()
+            result = None
+            if simplify:
+                result = serializer.info_by_point(validation, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer, cql_filter_read=restrictions.get('cql_filter_read'))
+            else:
+                result = serializer.info_by_point_without_simplify(validation, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer, cql_filter_read=restrictions.get('cql_filter_read'))
+            result['infoFormat'] = 'application/geojson'
+            result['layerId'] = lyr.id
+            result['layerTitle'] = lyr.title
+
+            result['actions'] = [{
+                'componentName': 'OpenDetails',
+                'componentPath': 'common',
+                'componentProps': {}
+            },{
+                'componentName': 'CopyCoordinate',
+                'componentPath': 'common',
+                'componentProps': {}
+            }, {
+                'componentName': 'OpenInGoogleMaps',
+                'componentPath': 'common',
+                'componentProps': {}
+            }]
+
+            result = {
+                "content" : result,
+                "links" : [{
+                    "rel" : "self",
+                    "href": self.request.build_absolute_uri()
+                }]
+            }
+            
+            return JsonResponse(result, safe=False)
+        except HttpException as e:
+            logging.getLogger(LOGGER_NAME).exception("Error getting features")
+            return e.get_exception() 
+
+
+#--------------------------------------------------
+#            PublicFeatureByPointView
+#--------------------------------------------------
+class PublicFeatureByPointView(ListAPIView):
+    serializer_class = FeatureSerializer
+    permission_classes=[AllowAny]
+    filter_backends = (CoordsFeatureFilter,)
+    pagination_class = None
+        
+    @swagger_auto_schema(operation_id='get_public_feature_by_point', operation_summary='Gets a feature from a pair of coordinates',
+                         responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Feature NOT found", 
+                                    403: "The layer is not allowed to this user",
+                                    400: "Bad parameter lon. The value must be a float<br>Bad parameter lat. The value must be a float"})
+    @action(detail=True, methods=['GET'])
+    def get(self, request, lyr_id):
+        """
+        Gets the features in the coordinates (lan, lon)
+        - buffer: Diameter of the buffer in degrees. This buffer will be used to intersect the layer and get the features
+        - lang: Language of feature labels (es, val, en, and so on). Default 'es'
+        - geom: true to get the geometry. Default false
+        - blank: true to get an empty registry
+        """
+        try:
+            lon = 0
+            if 'lon' in self.request.GET:
+                try:
+                    lon = float(self.request.GET['lon'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter lon. The value must be a float")
+
+            lat = 0
+            if 'lat' in self.request.GET:
+                try:
+                    lat = float(self.request.GET['lat'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter lat. The value must be a float")
+
+            buffer = 0
+            if 'buffer' in self.request.GET:
+                try:
+                    buffer = float(self.request.GET['buffer'])
+                except Exception:
+                    raise HttpException(400, "Bad parameter buffer. The value must be a float")
+
+            geom = False
+            if 'geom' in self.request.GET:
+                try:
+                    geom = True if self.request.GET['geom'] == 'true' else False
+                except Exception:
+                    raise HttpException(400, "Bad parameter geom. The value must be a value true or false")
+
+            lang = 'es'
+            if 'lang' in self.request.GET:
+                try:
+                    lang = self.request.GET['lang']
+                except Exception:
+                    raise HttpException(400, "Bad parameter lang")
+
+            blank = False
+            if 'blank' in self.request.GET:
+                try:
+                    blank = True if self.request.GET['blank'] == 'true' else False
+                except Exception:
+                    raise HttpException(400, "Bad parameter blank")
+
+            source_epsg = 4326
+            if 'source_epsg' in self.request.GET:
+                try:
+                    source_epsg = int(self.request.GET['source_epsg'].split(":")[1])
+                except Exception:
+                    raise HttpException(400, "Bad parameter source_epsg")
+
+            getbuffer = False
+            if 'getbuffer' in self.request.GET:
+                try:
+                    getbuffer = True if self.request.GET['getbuffer'] == 'true' else False
+                except Exception:
+                    raise HttpException(400, "Bad parameter getbuffer.")
+
+            lyr = Layer.objects.get(id=lyr_id)
+            if lyr is None:
+                raise HttpException(404, "Layer not found")
+            if not lyr.public:
+                raise HttpException(403, "The user does not have permission to read this layer")
+
+            serializer = FeatureSerializer()
+            result = serializer.info_by_point(None, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer)
+
+            result = {
+                "content" : result,
+                "links" : [{
+                    "rel" : "self",
+                    "href": self.request.build_absolute_uri()
+                }]
+            }
+            
+            return JsonResponse(result, safe=False)
+        except HttpException as e:
+            return e.get_exception() 
+
+
+#--------------------------------------------------
+#            FileUploadView
+#--------------------------------------------------
+class FileUploadView(ListCreateAPIView):
+    parser_classes = (MultiPartParser,)
+    serializer_class = FileUploadSerializer
+    pagination_class = None
+
+    def get_permissions(self):
+        if self.request._request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return [ AllowAny() ]
+        return [ IsAuthenticated() ]
+    
+    @swagger_auto_schema(operation_id='get_list_attached_files', operation_summary='Get the list of resources attached to the feature',
+                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
+                                    403: "The layer is not allowed to this user"})
+    @action(detail=True, methods=['GET'])
+    def get(self, request, lyr_id, feat_id):
+        v = Validation(request)    
+        try:
+            v.check_get_resource_list(lyr_id, feat_id)
+        except HttpException as e:
+            return e.get_exception()
+        resourceset = LayerResource.objects.filter(layer_id=lyr_id, feature=feat_id)
+        serializer = serializers.LayerResourceSerializer(resourceset, many=True)
+        result = {
+            "content" : serializer.data,
+            "links" : [
+                {
+                    "rel" : "self",
+                    "href": request.get_full_path()
+                }
+            ]
+        }
+        return JsonResponse(result, safe=False)
+    
+    @swagger_auto_schema(operation_id='uploaded_attached_file', operation_summary='Upload a resource attached to the feature',
+                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>File already exists", 
+                                     403: "The layer is not allowed to this user<br>The user does not have permission to edit this layer",
+                                     400: "Error in the input parameters. Image and title cannot be null<br>Error checking version column<br>Error saving the resource"})
+    @action(detail=True, methods=['POST'])
+    def post(self, request, lyr_id, feat_id):
+        try:
+            v = Validation(request)
+            try:
+                lyr = Layer.objects.get(id=lyr_id)
+            except Exception as e:
+                raise HttpException(400, "Layer NOT found")
+
+            v.check_uploaded_image(request, lyr_id, feat_id)
+            i, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
+            with i as con: # connection will auoclose
+                table_info = con.get_table_info(table, schema=schema)
+                use_versions = v.check_version_and_date_columns(lyr_id, con, schema, table, table_info)
+                
+                up_file = request.FILES['image']
+                
+                res_type = services_utils.get_resource_type(up_file.content_type)
+                saved, rel_path = resource_manager.save_resource(up_file, lyr_id, res_type)
+                if not saved:
+                    raise HttpException(400, "Error saving resource")
+                resource = LayerResource()
+                resource.type = res_type
+                resource.feature = feat_id
+                resource.path = rel_path
+                resource.title = request.POST['title']
+                resource.created = timezone.now()
+                resource.layer = lyr
+                resource.save()
+                url = os.path.join(core_settings.MEDIA_URL, rel_path)
+                if use_versions:
+                    util.update_feat_version(con, schema, table, feat_id)
+                    util.save_version_history(con, schema, table, lyr_id, feat_id, v.usr, 4, url)
+                external_url =  core_settings.BASE_URL + resource.get_url()
+            return Response({'id': resource.id, 'title':request.POST['title'], 'image' : external_url}, status.HTTP_201_CREATED)
+        except HttpException as e:
+            return e.get_exception()
+
+
+#--------------------------------------------------
+#            ResourcesView
+#--------------------------------------------------
+class ResourcesView(ListCreateAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = serializers.LayerResourceSerializer
+    pagination_class = None
+
+    @swagger_auto_schema(operation_id='get_list_attached_files', operation_summary='Get the list of resources attached to the feature',
+                          responses={404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
+                                    403: "The layer is not allowed to this user"})
+    @action(detail=True, methods=['GET'])
+    def get(self, request, lyr_id, feat_id):
+        v = Validation(request)
+        v.check_read_feature_permission(lyr_id, feat_id)
+        resourceset = LayerResource.objects.filter(layer_id=lyr_id, feature=feat_id)
+        serializer = serializers.LayerResourceSerializer(resourceset, many=True)
+        result = {
+            "content" : serializer.data,
+            "links" : [
+                {
+                    "rel" : "self",
+                    "href": request.get_full_path()
+                }
+            ]
+        }
+        return JsonResponse(result, safe=False)
+
+
+#--------------------------------------------------
+#            FileAttachedView
+#-------------------------------------------------- 
+class FileAttachedView(ListAPIView):
+    parser_classes = (MultiPartParser,)
+    serializer_class = FileUploadSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None
+    
+    @swagger_auto_schema(operation_id='get_attached_file', operation_summary='Get the resource attached to the feature',
+                          responses={
+                                    400: "The layer does not have this resource.<br>Resource NOT found",
+                                    404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
+                                    403: "The layer is not allowed to this user"})
+    @action(detail=True, methods=['GET'], permission_classes=[IsAuthenticated])
+    def get(self, request, resource_id):
+        validation = Validation(request)
+    
+        try:
+            lyr_resource = LayerResource.objects.get(id=resource_id)
+            try:
+                validation.check_read_feature_permission(lyr_resource.layer, lyr_resource.feature)
+            except HttpException as e:
+                return e.get_exception()
+        except Exception as e:
+            return HttpException(404, "Resource NOT found in database").get_exception()
+        if(lyr_resource is None):
+            return HttpException(404, "Resource NOT found in database").get_exception()
+        resource_path = lyr_resource.path
+        
+        if not os.path.isabs(resource_path):
+            resource_path = os.path.join(core_settings.MEDIA_ROOT, lyr_resource.path)
+        if(path.exists(resource_path)):
+            return sendfile(request, resource_path, attachment=False)
+        return HttpException(404, "Resource NOT found in disk").get_exception()
+
+
+#--------------------------------------------------
+#            FileDeleteView
+#--------------------------------------------------
+class FileDeleteView(RetrieveDestroyAPIView):
+    parser_classes = (MultiPartParser,)
+    serializer_class = FileUploadSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None
+    
+    @swagger_auto_schema(operation_id='get_attached_file_legacy', operation_summary='Get the resource attached to the feature',
+                          responses={
+                                    400: "The layer does not have this resource.<br>Resource NOT found",
+                                    404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
+                                    403: "The layer is not allowed to this user"})
+    @action(detail=True, methods=['GET'], permission_classes=[])
+    def get(self, request, lyr_id, feat_id, resource_id):
+        validation = Validation(request)
+        try:
+            validation.check_read_feature_permission(self, lyr_id, feat_id)
+        except HttpException as e:
+            return e.get_exception()
+        try:
+            lyr_resource = LayerResource.objects.get(id=resource_id)
+        except Exception as e:
+            return HttpException(404, "Resource NOT found in database").get_exception()
+        if(lyr_resource is None):
+            return HttpException(404, "Resource NOT found in database").get_exception()
+        resource_path = lyr_resource.path
+        
+        if not os.path.isabs(resource_path):
+            resource_path = os.path.join(core_settings.MEDIA_ROOT, lyr_resource.path)
+        if(path.exists(resource_path)):
+            return sendfile(request, resource_path, attachment=False)
+        return HttpException(404, "Resource NOT found in disk").get_exception()
+    
+    @swagger_auto_schema(operation_id='delete_attached_file', operation_summary='Deletes an attached resource of a feature',
+                         responses={204: "Happy end",
+                                    400: "The layer does not have this resource.<br>Resource NOT found",
+                                    404: "Database connection NOT found<br>User NOT found<br>Layer NOT found<br>Feature NOT found", 
+                                    403: "The layer is not allowed to this user<br>The user does not have permission to edit this layer"})
+    @action(detail=True, methods=['DELETE'], permission_classes=[IsAuthenticated])
+    def delete(self, request, lyr_id, feat_id, resource_id):
+        validation = Validation(request)
+        try:
+            resource = LayerResource.objects.get(id=resource_id)
+        except Exception as e:
+            return HttpException(400, "Resource NOT found").get_exception()
+        try:
+            path = resource.path
+            validation.check_delete_image(lyr_id, feat_id, resource)
+            
+            url_historical = resource_manager.store_historical(resource.path, resource.layer.id, resource.feature)
+            resource.delete()
+            if not LayerResource.objects.filter(path=path).exists():
+                # only deleted if there are no cloned resources that share the same path
+                if not os.path.isabs(path):
+                    path = os.path.join(core_settings.MEDIA_ROOT, path)
+                if os.path.isfile(path):
+                    os.remove(path)
+            con = None
+            i, table, schema = services_utils.get_db_connect_from_layer(lyr_id)
+            with i as con: # connection will autoclose
+                util.update_feat_version(con, schema, table, feat_id)
+                util.save_version_history(con, schema, table, lyr_id, feat_id, validation.usr, 5, url_historical)
+            return HttpException(204, "OK").get_exception()
+        except HttpException as e:
+            return e.get_exception()    
+        
+       
+#--------------------------------------------------
+#            FileAttachedFromLinkView
+#-------------------------------------------------- 
+class GetSignedUrlFromLinkView(ListAPIView):
+    parser_classes = (MultiPartParser,)
+    serializer_class = FileUploadSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None
+    
+    @swagger_auto_schema(operation_id='get_signed_url_from_link', operation_summary='Get signed URL for a link field',
+                          responses={
+                                    400: "The layer does not have this resource.<br>Resource NOT found",
+                                    404: "Database connection NOT found<br>User NOT found<br>Layer NOT found", 
+                                    403: "The layer is not allowed to this user<br>Layer is not public"})
+    def get(self, request, layer_id, feat_id, field_name):
+        validation = Validation(request)
+    
+        try:
+            layer = Layer.objects.get(id=layer_id)
+            lyr_conf = layer.conf
+            
+            if isinstance(lyr_conf, str):
+                import ast
+                try:
+                    lyr_conf = ast.literal_eval(lyr_conf)
+                except:
+                    lyr_conf = None
+            
+            try:
+                if not request.user.is_authenticated:
+                    validation.is_public_layer(layer_id)
+                validation.check_read_feature_permission(layer, feat_id)
+            except HttpException as e:
+                return e.get_exception()
+        except Layer.DoesNotExist:
+            return HttpException(404, "Layer not found or Resource not found in database").get_exception()
+        except HttpException as e:
+            return e.get_exception()
+        except Exception as e:
+            return HttpException(404, "Layer not found or Resource not found in database").get_exception()
+        
+        field_config = None
+        if lyr_conf and isinstance(lyr_conf, dict) and 'fields' in lyr_conf:
+            for field in lyr_conf['fields']:
+                if field.get('name') == field_name and field.get('gvsigol_type') == 'link':
+                    field_config = field
+                    break
+        
+        if not field_config:
+            return HttpException(404, "Field not found or is not a link type").get_exception()
+        
+        type_params = field_config.get('type_params', {})
+        base_folder = type_params.get('base_folder')
+        related_field = type_params.get('related_field')
+        
+        if not base_folder or not related_field:
+            return HttpException(400, "Missing base_folder or related_field in type_params").get_exception()
+        
+        try:
+            feature = serializers.FeatureSerializer().get(validation, layer_id, feat_id, 4326)
+            if not feature or 'properties' not in feature:
+                return HttpException(404, "Feature not found").get_exception()
+            
+            filename = feature['properties'].get(related_field)
+            if not filename:
+                return HttpException(404, f"Field {related_field} not found or is empty in feature").get_exception()
+            
+            base_folder = os.path.join(core_settings.MEDIA_ROOT, base_folder)
+            file_path = os.path.join(base_folder, filename)
+            
+            if not Path(base_folder) in Path(file_path).parents or not Path(core_settings.MEDIA_ROOT) in Path(file_path).parents:
+                return HttpException(404, "File NOT found in disk").get_exception()
+            
+            if(path.exists(file_path)):
+                base_url = request.build_absolute_uri(reverse('gvsigol_plugin_featureapi:get_signed_download', args=["TOKEN_PLACEHOLDER"]))
+                url_tpl = base_url.replace("TOKEN_PLACEHOLDER", "{token}")
+                signed_url = util.create_signed_url(file_path, url_tpl)                
+
+                return JsonResponse({
+                    "signed_url": signed_url,
+                    "filename": filename,
+                    "content_type": "application/json"
+                }, status=200)
+            return HttpException(404, "File NOT found in disk").get_exception()
+         
+        except HttpException as e:
+            return e.get_exception()
+        except Exception as e:
+            return HttpException(500, f"Error getting feature: {str(e)}").get_exception()
+
+class GetSignedDownloadView(APIView):
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_id='get_signed_download',
+        operation_summary='Downloads the file specified by token, if valid',
+        responses={404: "Token not found or expired<br>File NOT found in disk"}
+    )
+    def get(self, request, token):
+        path = util.signed_url_download(token)
+        if not path:
+            return HttpException(404, "Token not found or expired").get_exception()
+
+        if not Path(core_settings.MEDIA_ROOT) in Path(path).parents:
+            return HttpException(404, "File NOT found in disk").get_exception()
+
+        filename = Path(path).name
+        ext = os.path.splitext(filename)[1]
+        attachment = ext.lower() not in ['.png', '.jpg', '.jpeg', '.gif', '.pdf', '.txt']
+        return sendfile(request, path, attachment=attachment, attachment_filename=filename)
+
+class DownloadMVTStyleView(APIView):
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_id='download_mvt_style',
+        operation_summary='Downloads the MVT style file',
+        responses={404: "Style file NOT found in disk"}
+    )
+    def get(self, request, lyr_id, style_path):
+        style_path = style_path.rstrip('/')
+        file_path = os.path.join(core_settings.MEDIA_ROOT, style_path)
+        
+        if not Path(core_settings.MEDIA_ROOT) in Path(file_path).parents:
+            return HttpException(404, "Style file NOT found in disk").get_exception()
+        
+        if not path.exists(file_path):
+            return HttpException(404, "Style file NOT found in disk").get_exception()
+        
+        return sendfile(request, file_path, attachment=False)

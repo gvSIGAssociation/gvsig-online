@@ -1,0 +1,445 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block header %}
+<link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-roles.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-permissions.css" %}">
+<style>
+.pf-lyr-panel { background: var(--pf-white); border-radius: var(--pf-radius); box-shadow: var(--pf-shadow); border: 1px solid var(--pf-border); overflow: hidden;}
+.pf-lyr-panel__header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--pf-border); gap: 12px; flex-wrap: wrap;}
+.pf-lyr-panel__title { font-size: 14px; font-weight: 700; color: var(--pf-text); display: flex; align-items: center; gap: 8px; margin: 0;}
+.pf-lyr-panel__title i { color: var(--pf-accent);}
+.pf-lyr-panel__actions { display: flex; align-items: center; gap: 8px;}
+.btn-pf-action { display: inline-flex; align-items: center; gap: 6px; background: var(--pf-accent); color: #fff !important; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; padding: 6px 14px; height: 34px; cursor: pointer; transition: background var(--pf-transition); text-decoration: none !important; white-space: nowrap;}
+.btn-pf-action:hover { background: var(--pf-accent-dk);}
+.btn-pf-action--secondary { background: var(--pf-muted);}
+.btn-pf-action--secondary:hover { background: #5a6b78;}
+.pf-lyr-panel__body { padding: 0;}
+.pf-lyr-row { display: flex; align-items: center; padding: 10px 20px; border-bottom: 1px solid var(--pf-border); transition: background var(--pf-transition); gap: 12px;}
+.pf-lyr-row:last-child { border-bottom: none;}
+.pf-lyr-row:hover { background: #f0f6fb;}
+.pf-lyr-row__handle { display: flex; align-items: center; gap: 1px; color: var(--pf-muted); cursor: grab; flex-shrink: 0; padding: 4px 6px; font-size: 13px; opacity: 0.5; transition: opacity var(--pf-transition);}
+.pf-lyr-row:hover .pf-lyr-row__handle { opacity: 1;}
+.pf-lyr-row__info { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 8px;}
+.pf-lyr-row__name { font-size: 13px; font-weight: 600; color: var(--pf-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+.pf-lyr-row__fqn { font-size: 12px; color: var(--pf-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+.pf-lyr-row__btns { display: flex; align-items: center; gap: 4px; flex-shrink: 0;}
+.pf-lyr-row__btns .btn { background: transparent; border-radius: 5px; font-size: 12px; padding: 4px 10px; transition: background var(--pf-transition), border-color var(--pf-transition);}
+.pf-lyr-row__btns .btn-success { border: 1px solid var(--pf-border); color: var(--pf-accent);}
+.pf-lyr-row__btns .btn-success:hover { background: #f0f6fb; border-color: var(--pf-accent);}
+.pf-lyr-row__btns .bg-purple { border: 1px solid #d0b8e8; color: #7b5ea7;}
+.pf-lyr-row__btns .bg-purple:hover { background: #f5f0fb; border-color: #7b5ea7;}
+.pf-lyr-row__btns .btn-warning { border: 1px solid #f5d79e; color: #d08b00; background: transparent;}
+.pf-lyr-row__btns .btn-warning:hover { background: #fef9ec; border-color: #d08b00;}
+.pf-lyr-row__btns .btn-danger { border: 1px solid #e8bebe; color: #c0392b;}
+.pf-lyr-row__btns .btn-danger:hover { background: #fde8e8; border-color: #c0392b;}
+.pf-lyr-row__btns .btn[disabled] { opacity: 0.35; cursor: default; pointer-events: none;}
+.ui-sortable-placeholder.pf-lyr-placeholder { visibility: visible !important; background: #e8f0f7; border: 2px dashed #a8c8e8; border-radius: 6px; margin: 2px 0;}
+</style>
+{% endblock %}
+
+{% block content %}
+<form id="layer-group-form" role="form" method="post" action="/gvsigonline/services/layergroup_update/{{lgid}}/{% if project_id %}{{project_id}}/{% endif %}{% if redirect %}?redirect={{redirect}}{% endif %}">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="row">
+				<div class="col-md-12 form-group">
+					<div class="pf-topbar">
+					<a href="{{back_url}}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
+					<button id="save_button" type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+				</div>
+				</div>
+			</div>
+
+			<div class="row" style="padding-left: 30px;">
+				{% csrf_token %}
+				{% if form.errors or form.non_field_errors %}
+				<div class="pf-error-msg">
+					<ul>
+					{{ form.non_field_errors }}
+					{% for field in form %}
+						{% if field.errors %}
+							<li>{{field.label}}. {{ field.errors|striptags }}</li>
+						{% endif %}
+					{% endfor %}
+					</ul>
+				</div>
+				{% endif %}
+				{% if message %}
+<div class="pf-error-msg">
+					<p>* {{ message }}</p>
+				</div>
+{% endif %}
+			</div>
+
+			<ul class="nav nav-tabs">
+				<li class="active"><a href="#tab-layergroup-general" data-toggle="tab"><i class="fa fa-cog tab-icon"></i> {% trans "General" %}</a></li>
+				{% if MANAGE_PERMISSION_UI or user.is_superuser %}<li><a href="#tab-layergroup-permissions" data-toggle="tab"><i class="fa fa-lock tab-icon"></i> {% trans "Permissions" %}</a></li> {% endif %}
+			</ul>
+			<div class="tab-content">
+				<div class="tab-pane active" id="tab-layergroup-general">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="row">
+								<div class="col-md-12 form-group">
+									<label for="layergroup_server_id">{% trans "Select server" %}</label>
+									<select disabled class="form-control" id="layergroup_server_id" name="layergroup_server_id">
+									{% for server in servers %}
+										{% if server.id == layergroup.server_id %}
+											<option value="{{server.id}}" selected>{{server.title}}</option>
+										{% else %}
+											<option value="{{server.id}}">{{server.title}}</option>
+										{% endif %}
+									{% endfor %}
+									</select>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-md-12">
+									<label>{% trans "Name" %}</label>
+									<input readonly placeholder="{% trans 'Layer group name' %}" name="layergroup_name" id="layergroup_name" type="text" class="form-control" value="{{layergroup.name}}">
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-md-12">
+									<label>{% trans "Title" %}</label>
+									<input placeholder="{% trans 'Layer group title' %}" name="layergroup_title" id="layergroup_title" type="text" class="form-control" value="{{layergroup.title}}">
+								</div>
+							</div>
+							<br>
+
+							<div class="row">
+								<div class="checkbox col-md-6">
+									<label>
+										{% if layergroup.cached %}
+											<input type="checkbox" name="cached" id="cached" checked/>{% trans "Create cache for the layer group" %}
+										{% else %}
+											<input type="checkbox" name="cached" id="cached" />{% trans "Create cache for the layer group" %}
+										{% endif %}
+									</label>
+								</div>
+								<div class="checkbox col-md-6">
+									<label>
+										{% if layergroup.visible %}
+											<input type="checkbox" name="visible" id="visible" checked/>{% trans "Is visible" %}
+										{% else %}
+											<input type="checkbox" name="visible" id="visible" />{% trans "Is visible" %}
+										{% endif %}
+									</label>
+								</div>
+							</div>
+							<input type="hidden" name="toc" id="toc" value="">
+						</div>
+					</div>
+				</div>
+				<div class="tab-pane" id="tab-layergroup-permissions">
+					{% include "select_layergroup_permissions.html" %}
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+&nbsp;
+<div class="row">
+	<div class="col-md-12">
+		<div class="pf-lyr-panel">
+			<div class="pf-lyr-panel__header">
+				<h3 class="pf-lyr-panel__title"><i class="fa fa-bars"></i> {% trans "Group layers" %}</h3>
+				<div class="pf-lyr-panel__actions">
+					<div id="button-create-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn-pf-action btn-pf-action--secondary"><i class="fa fa-database"></i> {% trans "Create empty layer" %}</div>
+					<div id="button-import-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn-pf-action"><i class="fa fa-cloud-upload"></i> {% trans "Publish layer" %}</div>
+				</div>
+			</div>
+			<div class="pf-lyr-panel__body">
+				<div id="toc" class="toc">
+					{% for layer in layers %}
+					<div data-layerid="{{layer.id}}" data-name="{{layer.name}}" data-title="{{layer.title}}" data-order="{{layer.order}}" class="pf-lyr-row layer-item">
+						<div class="pf-lyr-row__handle handle">
+							<i class="fa fa-ellipsis-v"></i>
+							<i class="fa fa-ellipsis-v"></i>
+						</div>
+						<div class="pf-lyr-row__info">
+							<span class="pf-lyr-row__name">{{layer.title}}</span>
+							<span class="pf-lyr-row__fqn">[{{layer.fqn}}]</span>
+						</div>
+						<div class="box-tools-buttons pf-lyr-row__btns">
+							{% if not layer.can_manage %}
+							<button type="button" data-id="{{layer.id}}" name="button-update-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success" disabled><i class="fa fa-edit"></i></button>
+							<button type="button" data-id="{{layer.id}}" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Configure layer" %}" class="btn bg-purple" disabled><i class="fa fa-cogs"></i></button>
+							<button type="button" data-id="{{layer.id}}" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="{% trans "Clear cache" %}" class="btn btn-warning" disabled><i class="fa fa-refresh"></i></button>
+							<button type="button" data-id="{{layer.id}}" name="button-delete-layer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger" disabled><i class="fa fa-times"></i></button>
+							{% else %}
+							{% if layer.external %}
+							<button type="button" data-id="{{layer.id}}" name="button-update-externallayer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success"><i class="fa fa-edit"></i></button>
+							{% else %}
+							<button type="button" data-id="{{layer.id}}" name="button-update-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success"><i class="fa fa-edit"></i></button>
+							{% endif %}
+							{% if layer.type == 'v_PostGIS' %}
+							<button type="button" data-id="{{layer.id}}" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Configure layer" %}" class="btn bg-purple"><i class="fa fa-cogs"></i></button>
+							{% else %}
+							<button type="button" data-id="{{layer.id}}" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Configure layer" %}" class="btn bg-purple" disabled><i class="fa fa-cogs"></i></button>
+							{% endif %}
+							{% if layer.cached %}
+							<button type="button" data-id="{{layer.id}}" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="{% trans "Clear cache" %}" class="btn btn-warning"><i class="fa fa-refresh"></i></button>
+							{% else %}
+							<button type="button" data-id="{{layer.id}}" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="{% trans "Clear cache" %}" class="btn btn-warning" disabled><i class="fa fa-refresh"></i></button>
+							{% endif %}
+							{% if layer.external %}
+							<button type="button" data-id="{{layer.id}}" name="button-delete-externallayer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger"><i class="fa fa-times"></i></button>
+							{% else %}
+							<button type="button" data-id="{{layer.id}}" name="button-delete-layer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger"><i class="fa fa-times"></i></button>
+							{% endif %}
+							{% endif %}
+						</div>
+					</div>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-add-layer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel2">{% trans "Create new layer" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "Is needed to save this layer group first, Do you want continue?" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-add-layer-group-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-add-layer-group-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-delete-layer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Delete layer" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "The layer will be removed, Do you want continue?" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-delete-layer-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-delete-layer-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-layergroups').addClass("active");
+
+	$('#button-create-layer').click(function() {
+		$("#myModalLabel2").text(gettext("Create new layer"));
+		$('#button-add-layer-group-accept').off('click').click( function() {
+			var url = '/gvsigonline/services/layergroup_update/{{lgid}}/{% if project_id %}{{project_id}}/{% endif %}?redirect=create-layer';
+			const params = new URLSearchParams(window.location.search);
+			if (params.has('redirect')) {
+				url += '&from_redirect=' + params.get('redirect');
+			}
+			$('#layer-group-form').attr('action', url);
+			$('#save_button').trigger('click');
+		});
+	});
+
+	$('#button-import-layer').click(function() {
+		$("#myModalLabel2").text(gettext("Publish layer"));
+		$('#button-add-layer-group-accept').off('click').click( function() {
+			var url = '/gvsigonline/services/layergroup_update/{{lgid}}/{% if project_id %}{{project_id}}/{% endif %}?redirect=import-layer';
+			const params = new URLSearchParams(window.location.search);
+			if (params.has('redirect')) {
+				url += '&from_redirect=' + params.get('redirect');
+			}
+			$('#layer-group-form').attr('action', url);
+			$('#save_button').trigger('click');
+		});
+	});
+
+	function getQueryString() {
+		var queryString = '?redirect=layergroup-redirect';
+		const params = new URLSearchParams(window.location.search);
+		if (params.has('redirect')) {
+			queryString += '&from_redirect=' + params.get('redirect');
+		}
+		var project_id = {% if project_id %}{{project_id}}{% else %}null{% endif %};
+		if (project_id!==null) {
+			queryString += '&project_id=' + project_id;
+		}
+		var layergroup_id = {% if layergroup.id %}{{layergroup.id}}{% else %}null{% endif %};
+		if (layergroup_id!==null) {
+			queryString += '&layergroup_id=' + layergroup_id;
+		}
+		return queryString;
+	}
+
+	function updateLayer(data){
+		var url = '/gvsigonline/services/layer_update/' + data + '/' + getQueryString();
+		location.href = url;
+	}
+
+	function updateExternalLayer(data){
+		var url = '/gvsigonline/services/external_layer_update/' + data + '/' + getQueryString();
+		location.href = url;
+	}
+
+	function configLayer(data){
+		var url = '/gvsigonline/services/layer_config/' + data  + '/' + getQueryString();
+		location.href = url;
+	}
+
+	function clearCache(data){
+		$("body").overlay();
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/services/layer_cache_clear/' + data + '/',
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			success	:function(response){
+				$.overlayout();
+				messageBox.show('info', gettext('The action was successfully completed'));
+			},
+			error: function(){
+				$.overlayout();
+				messageBox.show('Error', gettext('The action failed'));
+			}
+		});
+	}
+
+	function removeLayerFromToc(layerId) {
+		$('.toc .layer-item[data-layerid="' + layerId + '"]').remove();
+	}
+
+	function deleteLayer(data){
+		$('#button-delete-layer-accept').off('click').on('click', function() {
+			$("body").overlay();
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/services/layer_delete/' + data + '/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				success	:function(response){
+					$('#modal-delete-layer').modal('hide');
+					removeLayerFromToc(data);
+					$.overlayout();
+				},
+				error: function(){
+					$.overlayout();
+					messageBox.show('Error', gettext('The action failed'));
+				}
+			});
+		});
+	}
+	function deleteExternalLayer(data){
+		$('#button-delete-layer-accept').off('click').on('click', function() {
+			$("body").overlay();
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/services/external_layer_delete/' + data + '/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				success	:function(response){
+					$('#modal-delete-layer').modal('hide');
+					removeLayerFromToc(data);
+					$.overlayout();
+				},
+				error: function(){
+					$.overlayout();
+					messageBox.show('Error', gettext('The action failed'));
+				}
+			});
+		});
+	}
+
+	$(document).ready(function() {
+
+		$('.box-tools-buttons button').on('click', function (){
+			var data = $(this).attr("data-id");
+			if (this.name == "button-update-layer") {
+				updateLayer(data);
+			} else if (this.name == "button-update-externallayer") {
+				updateExternalLayer(data);
+			} else if (this.name == "button-config-layer"){
+				configLayer(data);
+
+			} else if (this.name == "button-clear-cache"){
+				clearCache(data);
+
+			} else if (this.name == "button-delete-layer"){
+		        deleteLayer(data);
+		    } else if (this.name == "button-delete-externallayer"){
+		    	deleteExternalLayer(data);
+		    }
+		});
+
+		$(".toc").sortable({
+			placeholder: "pf-lyr-placeholder",
+			handle: ".handle",
+			forcePlaceholderSize: true,
+			zIndex: 999999
+		});
+
+		var searcheableList = new List('role-list-box', {
+			valueNames: ['searchable-rolename', 'searchable-roledesc'],
+			listClass:'list',
+			searchClass: 'search',
+			page: 6,
+			pagination: false
+		});
+
+		$('#save_button').click(function(e) {
+			e.preventDefault(); // prevents default
+			for(var i=0; i<searcheableList.items.length; i++){
+				var item = searcheableList.items[i];
+				item.show();
+			}
+			$('#toc').val("");
+			var isFirst = true;
+			$(".layer-item").each(function(){
+				var value = $(this).attr("data-layerid");
+				if(!isFirst){
+					$('#toc').val($('#toc').val()+',');
+				}
+				$('#toc').val($('#toc').val()+value);
+
+				isFirst = false;
+			});
+			$('#modal-add-layer').modal('hide');
+			$('#layer-group-form').submit();
+			return false;
+		});
+	});
+
+</script>
+{% endblock %}

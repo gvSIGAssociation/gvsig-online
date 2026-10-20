@@ -1,0 +1,651 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.21.3.final using JasperReports Library version 6.21.3-4a3078d20785ebe464f18037d738d12fc98c13cf  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="gmf16_A3_landscape" pageWidth="842" pageHeight="300" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" whenResourceMissingType="Key" uuid="3664412a-b6c6-4e1c-8c14-6c4af7e6efc2">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="subreport_estado_carreteras_sample.jrdax"/>
+	<property name="com.jaspersoft.studio.unit." value="cm"/>
+	<parameter name="recentlyModifiedMark" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["►"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="CustomProperties" class="java.util.Properties" isForPrompting="false"/>
+	<queryString language="JSON">
+		<![CDATA[]]>
+	</queryString>
+	<field name="Fecha" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="Fecha"/>
+		<fieldDescription><![CDATA[Fecha]]></fieldDescription>
+	</field>
+	<field name="Hora" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="Hora"/>
+		<fieldDescription><![CDATA[Hora]]></fieldDescription>
+	</field>
+	<field name="Carretera" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="Carretera"/>
+		<fieldDescription><![CDATA[Carretera]]></fieldDescription>
+	</field>
+	<field name="PK Inicial" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="PK Inicial"/>
+		<fieldDescription><![CDATA[PK Inicial]]></fieldDescription>
+	</field>
+	<field name="PK Final" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="PK Final"/>
+		<fieldDescription><![CDATA[PK Final]]></fieldDescription>
+	</field>
+	<field name="Descripcion" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="Descripcion"/>
+		<fieldDescription><![CDATA[Descripcion]]></fieldDescription>
+	</field>
+	<field name="Tipo" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="Tipo"/>
+		<fieldDescription><![CDATA[Tipo]]></fieldDescription>
+	</field>
+	<field name="Estado" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="Estado"/>
+		<fieldDescription><![CDATA[Estado]]></fieldDescription>
+	</field>
+	<field name="Titular" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="Titular"/>
+		<fieldDescription><![CDATA[Titular]]></fieldDescription>
+	</field>
+	<field name="Comarca Inicial" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="Comarca Inicial"/>
+		<fieldDescription><![CDATA[Comarca Inicial]]></fieldDescription>
+	</field>
+	<field name="Comarca Final" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="Comarca Final"/>
+		<fieldDescription><![CDATA[Comarca Final]]></fieldDescription>
+	</field>
+	<columnHeader>
+		<band height="12">
+			<textField>
+				<reportElement mode="Opaque" x="0" y="0" width="50" height="12" forecolor="#FFFFFF" backcolor="#FFA500" uuid="a85398c9-09ee-4824-b8c5-b8a16f4197bf">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f33ec788-6912-43dd-a627-330b1934405f"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{CustomProperties}.getProperty("colFecha")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="50" y="0" width="35" height="12" forecolor="#FFFFFF" backcolor="#FFA500" uuid="855ca43f-7a6f-4099-9053-dcfa3a9960b4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6aa14034-2a42-4225-958b-11cee12f18a9"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{CustomProperties}.getProperty("colHora")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="85" y="0" width="51" height="12" forecolor="#FFFFFF" backcolor="#FFA500" uuid="630f3e7c-68a4-465e-9670-81cb32fdf393">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="983ebd5b-3edf-4281-b9d6-9e6e3c334904"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{CustomProperties}.getProperty("colCarretera")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="136" y="0" width="40" height="12" forecolor="#FFFFFF" backcolor="#FFA500" uuid="697f7eed-f554-4e53-a377-abecdf1a63f8">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e1d66b3e-d775-45a8-bfb7-c7781988edf9"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{CustomProperties}.getProperty("colPKInicial")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="176" y="0" width="40" height="12" forecolor="#FFFFFF" backcolor="#FFA500" uuid="7c297396-a5fb-41d7-b7fe-27a32e4d2501">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d3832b60-c710-482a-b117-36d0e6fdf41d"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{CustomProperties}.getProperty("colPKFinal")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="216" y="0" width="220" height="12" forecolor="#FFFFFF" backcolor="#FFA500" uuid="4a2fde83-a757-46bb-a463-01335be3c6d0">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="049a668b-8abd-4763-b33a-a9c9147d4216"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{CustomProperties}.getProperty("colDescripcion")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="436" y="0" width="99" height="12" forecolor="#FFFFFF" backcolor="#FFA500" uuid="49589e6c-eda0-4cf5-9062-71c8d11dd627">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="04b4f3c7-b9a2-4b57-94a0-95f0afc0af4f"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{CustomProperties}.getProperty("colTipo")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="535" y="0" width="70" height="12" forecolor="#FFFFFF" backcolor="#FFA500" uuid="cc07b33c-b7c6-4d47-a1ba-7114de3dd09f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4577bc6a-5b35-4c5f-8ed4-30186d3e786a"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{CustomProperties}.getProperty("colEstado")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="605" y="0" width="49" height="12" forecolor="#FFFFFF" backcolor="#FFA500" uuid="b458225d-7f2a-4cae-8564-6afd587da15b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8e693fbc-372a-432e-906c-c0a7bc1b9138"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{CustomProperties}.getProperty("colTitular")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="654" y="0" width="89" height="12" forecolor="#FFFFFF" backcolor="#FFA500" uuid="9a6752c1-13d5-4723-a3ca-9bc4aaffa57f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a8fb75ce-7ed1-48c2-92e6-1bc6e0149fbd"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{CustomProperties}.getProperty("colComarcaInicial")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="743" y="0" width="89" height="12" forecolor="#FFFFFF" backcolor="#FFA500" uuid="34267daf-dad8-4483-aa26-dcbe5ad8d00e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1a3292a9-89d9-4161-8169-4cbcd4daae08"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{CustomProperties}.getProperty("colComarcaFinal")]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="12">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<textField>
+				<reportElement mode="Opaque" x="0" y="0" width="50" height="12" backcolor="#E0FFFF" uuid="a820d849-952f-46df-ba33-6df131ecc7d6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f33ec788-6912-43dd-a627-330b1934405f"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					<printWhenExpression><![CDATA[$F{Fecha}.startsWith( $P{recentlyModifiedMark} )]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[SUBSTITUTE($F{Fecha},$P{recentlyModifiedMark},"",1)]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="50" height="12" uuid="e841bc2d-e151-4106-a7b2-3d515094dfd5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f33ec788-6912-43dd-a627-330b1934405f"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<printWhenExpression><![CDATA[NOT($F{Fecha}.startsWith( $P{recentlyModifiedMark}))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Fecha}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="50" y="0" width="35" height="12" uuid="6870bdd1-f7bf-480a-9903-7604f3a0b398">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6aa14034-2a42-4225-958b-11cee12f18a9"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<printWhenExpression><![CDATA[NOT($F{Fecha}.startsWith( $P{recentlyModifiedMark}))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Hora}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="85" y="0" width="51" height="12" uuid="36a809c6-1499-4874-88bf-2df6fbdc3ca1">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="983ebd5b-3edf-4281-b9d6-9e6e3c334904"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<printWhenExpression><![CDATA[NOT($F{Fecha}.startsWith( $P{recentlyModifiedMark}))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Carretera}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="136" y="0" width="40" height="12" uuid="03906b1b-e44b-482e-94ed-36b69b144f0a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e1d66b3e-d775-45a8-bfb7-c7781988edf9"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<printWhenExpression><![CDATA[NOT($F{Fecha}.startsWith( $P{recentlyModifiedMark}))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PK Inicial}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="176" y="0" width="40" height="12" uuid="9bebd00d-fa15-424c-9d06-28e2f6782b7e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d3832b60-c710-482a-b117-36d0e6fdf41d"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<printWhenExpression><![CDATA[NOT($F{Fecha}.startsWith( $P{recentlyModifiedMark}))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PK Final}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="216" y="0" width="220" height="12" uuid="d44a7f21-8082-41e6-8a20-a113d0e3285f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="049a668b-8abd-4763-b33a-a9c9147d4216"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<printWhenExpression><![CDATA[NOT($F{Fecha}.startsWith( $P{recentlyModifiedMark}))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Descripcion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="436" y="0" width="99" height="12" uuid="9590a725-468d-4d6e-b8d0-c0e9a476788e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="04b4f3c7-b9a2-4b57-94a0-95f0afc0af4f"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<printWhenExpression><![CDATA[NOT($F{Fecha}.startsWith( $P{recentlyModifiedMark}))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Tipo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="535" y="0" width="70" height="12" uuid="921baad6-b57f-43fe-b937-e337009f3603">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4577bc6a-5b35-4c5f-8ed4-30186d3e786a"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					<printWhenExpression><![CDATA[NOT($F{Fecha}.startsWith( $P{recentlyModifiedMark}))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Estado}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="605" y="0" width="49" height="12" uuid="e0c8e979-d134-4f78-98bc-1731ba4a3211">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8e693fbc-372a-432e-906c-c0a7bc1b9138"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					<printWhenExpression><![CDATA[NOT($F{Fecha}.startsWith( $P{recentlyModifiedMark}))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Titular}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="654" y="0" width="89" height="12" uuid="b15e64fb-4b67-4598-97fc-d16651c0f5ec">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a8fb75ce-7ed1-48c2-92e6-1bc6e0149fbd"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					<printWhenExpression><![CDATA[NOT($F{Fecha}.startsWith( $P{recentlyModifiedMark}))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Comarca Inicial}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="743" y="0" width="89" height="12" uuid="621c8e22-ba29-4cef-996e-bb9857d850ba">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1a3292a9-89d9-4161-8169-4cbcd4daae08"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					<printWhenExpression><![CDATA[NOT($F{Fecha}.startsWith( $P{recentlyModifiedMark}))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Comarca Final}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="50" y="0" width="35" height="12" backcolor="#E0FFFF" uuid="fef52e3c-48c3-4644-a07b-d258f1979963">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6aa14034-2a42-4225-958b-11cee12f18a9"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<printWhenExpression><![CDATA[$F{Fecha}.startsWith( $P{recentlyModifiedMark} )]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Hora}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="85" y="0" width="51" height="12" backcolor="#E0FFFF" uuid="96ace3a5-8bd2-457d-87f5-9fe9a5799515">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="983ebd5b-3edf-4281-b9d6-9e6e3c334904"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					<printWhenExpression><![CDATA[$F{Fecha}.startsWith( $P{recentlyModifiedMark} )]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Carretera}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="136" y="0" width="40" height="12" backcolor="#E0FFFF" uuid="8ae427d3-b964-4e61-9440-9cf8db7bbdad">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e1d66b3e-d775-45a8-bfb7-c7781988edf9"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					<printWhenExpression><![CDATA[$F{Fecha}.startsWith( $P{recentlyModifiedMark} )]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PK Inicial}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="176" y="0" width="40" height="12" backcolor="#E0FFFF" uuid="ba840bb9-5a59-41ff-9d5e-418ea5072a48">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d3832b60-c710-482a-b117-36d0e6fdf41d"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					<printWhenExpression><![CDATA[$F{Fecha}.startsWith( $P{recentlyModifiedMark} )]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PK Final}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="216" y="0" width="220" height="12" backcolor="#E0FFFF" uuid="734c9bdf-c9d0-45cf-a49a-08e0671e5ab1">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="049a668b-8abd-4763-b33a-a9c9147d4216"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					<printWhenExpression><![CDATA[$F{Fecha}.startsWith( $P{recentlyModifiedMark} )]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Descripcion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="436" y="0" width="99" height="12" backcolor="#E0FFFF" uuid="9ee9a562-37a0-4e2d-8d0e-d37d41c9935d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="04b4f3c7-b9a2-4b57-94a0-95f0afc0af4f"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					<printWhenExpression><![CDATA[$F{Fecha}.startsWith( $P{recentlyModifiedMark} )]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Tipo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="535" y="0" width="70" height="12" backcolor="#E0FFFF" uuid="6d236e08-4aca-4167-bb47-85076ef5e666">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4577bc6a-5b35-4c5f-8ed4-30186d3e786a"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<printWhenExpression><![CDATA[$F{Fecha}.startsWith( $P{recentlyModifiedMark} )]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Estado}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="605" y="0" width="49" height="12" backcolor="#E0FFFF" uuid="5507e2cb-91e1-4b86-a4bf-f4bcbb6e0242">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8e693fbc-372a-432e-906c-c0a7bc1b9138"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<printWhenExpression><![CDATA[$F{Fecha}.startsWith( $P{recentlyModifiedMark} )]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Titular}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="654" y="0" width="89" height="12" backcolor="#E0FFFF" uuid="8b9d4f6e-788b-4f1e-bd7a-69d2b6d611d6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a8fb75ce-7ed1-48c2-92e6-1bc6e0149fbd"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<printWhenExpression><![CDATA[$F{Fecha}.startsWith( $P{recentlyModifiedMark} )]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Comarca Inicial}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="743" y="0" width="89" height="12" backcolor="#E0FFFF" uuid="44884cfb-47af-4dba-9207-585993df618b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1a3292a9-89d9-4161-8169-4cbcd4daae08"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<printWhenExpression><![CDATA[$F{Fecha}.startsWith( $P{recentlyModifiedMark} )]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Comarca Final}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

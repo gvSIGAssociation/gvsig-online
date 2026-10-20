@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block header %}
+<link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
+{% endblock %}
+
+{% block content %}	
+<form role="form" method="post" action="/gvsigonline/services/workspace_update/{{wid}}/">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="row">
+				<div class="col-md-12 form-group">
+					<div class="pf-topbar">
+						<a href="{% url 'workspace_list' %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
+					<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Update" %}</button>
+				</div>
+				</div>				
+			</div>	
+			<div class="pf-card">
+				{% csrf_token %}					
+				{% if message %}
+				<div class="pf-error-msg">
+					<p>* {{ message }}</p>
+				</div>
+				{% endif %}
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label for="workspace-uri">{% trans "Uri" %}</label>
+						<input type="text" name="workspace-uri" id="workspace-uri" maxlength="500" class="form-control" tabindex="3" value="{{workspace.uri}}">
+					</div>
+					<div class="col-md-12 form-group">
+						<label for="workspace-description">{% trans "Description" %}</label>
+						<input placeholder="{% trans 'Workspace description' %}" name="workspace-description" id="workspace-description" type="text" class="form-control" value="{{workspace.description}}">						
+					</div>
+				</div>
+					
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label for="is_public">{% trans "Is public?" %}</label>&nbsp;&nbsp;
+						{% if workspace.is_public %}
+						<input type="checkbox" name="is_public"  id="is_public" checked/>
+						{% else %}
+						<input type="checkbox" name="is_public"  id="is_public"/>
+						{% endif %}								
+					</div>
+				</div>	
+		    </div>
+		</div>				
+	</div>
+</form>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-workspaces').addClass("active");
+</script>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="box box-primary">
+	<div class="box-header with-border">
+		<h3 class="box-title">{% trans "Export report" %}</h3>
+	</div>
+	<div class="box-body">
+		<p class="text-muted">
+			{% trans "When" %}: {{ log_entry.created_at|date:"Y-m-d H:i" }} —
+			{% trans "status" %}: <strong>{{ log_entry.status }}</strong>
+			{% if log_entry.created_by %}— {% trans "user" %}: <code>{{ log_entry.created_by }}</code>{% endif %}
+		</p>
+
+		{% if summary.export_errors %}
+		<div class="alert alert-warning" style="margin-top:1em">
+			<strong>{% trans "Warning: the following layers could not be fully exported" %}:</strong>
+			<ul style="margin-top:0.5em;margin-bottom:0">
+				{% for e in summary.export_errors %}
+				<li><code>{{ e.layer }}</code> — {{ e.error }}</li>
+				{% endfor %}
+			</ul>
+			<p class="small" style="margin-top:0.5em;margin-bottom:0">{% trans "These layers are included in the package as metadata only (no GPKG data). Check the technical log for details." %}</p>
+		</div>
+		{% endif %}
+
+		{% if summary.export_permissions %}
+		<p><span class="label label-default">{% trans "Exported permissions (layer/project roles)" %}</span></p>
+		{% endif %}
+		{% if summary.layer_vector_modes %}
+		<h4>{% trans "Layer vector modes" %}</h4>
+		<ul>
+			{% for lid, mode in summary.layer_vector_modes.items %}
+			<li><code>{{ lid }}</code> → <strong>{{ mode }}</strong></li>
+			{% endfor %}
+		</ul>
+		{% endif %}
+
+		{% if project %}
+		<p>
+			<a class="btn btn-default" href="{% url 'project_update' pid=project.id %}">
+				{% trans "Open project" %}: {{ project.title|default:project.name }}
+			</a>
+		</p>
+		{% endif %}
+
+		<h4>{% trans "Technical export log" %}</h4>
+		<p class="text-muted">{% trans "Same content as reports/export_log.jsonl inside the downloaded ZIP." %}</p>
+		{% if 'report_lines' in summary %}
+		<details open style="margin-top:0.75em">
+			<summary>{% trans "Layer-level lines (JSON Lines)" %}</summary>
+			{% if report_lines %}
+			<pre style="max-height:420px;overflow:auto;margin-top:0.5em;white-space:pre-wrap;font-size:12px;">{% for line in report_lines %}{{ line }}
+{% endfor %}</pre>
+			{% else %}
+			<p class="text-muted" style="margin-top:0.5em;">{% trans "No layer-level log entries for this export." %}</p>
+			{% endif %}
+		</details>
+		{% else %}
+		<p class="text-muted">{% trans "No detailed log lines were recorded for this entry (older exports may lack this)." %}</p>
+		{% endif %}
+
+		<p style="margin-top:1.5em">
+			<a class="btn btn-default" href="{% url 'project_package_activity_log' %}">{% trans "Import/export history" %}</a>
+			<a class="btn btn-default" href="{% url 'project_list' %}">{% trans "Back to projects" %}</a>
+		</p>
+	</div>
+</div>
+{% endblock %}

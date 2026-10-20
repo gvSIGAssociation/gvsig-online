@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block header %}
+<link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
+<style>
+/* Subpanel de items */
+
+.enum-item-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px;}
+.enum-item-row:last-child { margin-bottom: 0;}
+.enum-item-row .form-control { border-radius: 7px; border: 1px solid var(--pf-border); background: var(--pf-bg); font-size: 13px; color: var(--pf-text); box-shadow: none; padding: 6px 12px; flex: 1;}
+.enum-item-row .form-control:focus { border-color: var(--pf-accent); background: var(--pf-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none;}
+</style>
+{% endblock %}
+
+{% block content %}
+<form role="form" method="post" action="/gvsigonline/services/enumeration_add/">
+	<div class="row">
+		<div class="col-md-12">
+
+			<div class="pf-topbar">
+				<a href="{% url 'enumeration_list' %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
+				<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+			</div>
+
+			<div class="pf-card">
+				{% csrf_token %}
+
+				{% if form.errors %}
+				<div class="pf-error-msg">
+					<ul>
+					{% for field in form %}
+						{% if field.errors %}
+							<li>{{field.label}}. {{ field.errors|striptags }}</li>
+						{% endif %}
+					{% endfor %}
+					</ul>
+				</div>
+				{% endif %}
+
+				{% if message %}
+				<div class="pf-error-msg">
+					<p>* {{ message }}</p>
+				</div>
+				{% endif %}
+
+				<div class="row form-group">
+					<div class="col-md-12">
+						<label for="enumeration_name">{% trans "Name" %}</label>
+						<input name="enumeration_name" id="enumeration_name" type="text" class="form-control" value="{{enum_name}}">
+					</div>
+				</div>
+
+				<div class="row form-group">
+					<div class="col-md-12">
+						<label for="enumeration_title">{% trans "Title" %}</label>
+						<input name="enumeration_title" id="enumeration_title" type="text" class="form-control">
+					</div>
+				</div>
+
+				<div class="row form-group">
+					<div class="col-md-6">
+						<label for="order_type">{% trans "Order type" %}</label>
+						<select class="form-control" id="order_type" name="order_type" tabindex="-1" aria-hidden="true">
+							<option value="{{ MANUAL }}">{% trans "Manual" %}</option>
+							<option value="{{ ALPHABETICAL }}">{% trans "Alphabetical" %}</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<input type="checkbox" name="show_first_value" id="show_first_value"/>
+						<label for="show_first_value" style="display: inline; text-transform: none; font-size: 13px; font-weight: 500; letter-spacing: 0;">{% trans "Show first value by default" %}</label>
+					</div>
+				</div>
+
+				<div id="enumeration-items" class="row" style="margin-top: 16px;">
+					<div class="col-md-12">
+						<div class="pf-subpanel">
+							<div class="pf-subpanel__header">{% trans "Enumeration items" %}</div>
+							<div id="enumeration-items-list" class="pf-subpanel__body"></div>
+							<div class="pf-subpanel__footer">
+								<a id="add-item-button" href="javascript:void(0)" class="btn-pf-add-item">
+									<i class="fa fa-plus"></i> {% trans "Add item" %}
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</form>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-datatypes').addClass("active");
+	$('#submenu-enumerations').addClass("active");
+
+	$(document).ready(function() {
+		var itemCount = 0;
+
+		$("#add-item-button").on('click', function(e){
+			var ui = '';
+			ui += '<div id="item-' + itemCount + '" class="enum-item-row">';
+			ui += 	'<input pattern="^[^;]+$" title="'+gettext("Enumeration cannot contain point-colon")+'" placeholder="' + gettext('Insert item name') + '" name="item-content-' + itemCount + '" id="item-content-' + itemCount + '" type="text" class="form-control">';
+			ui += 	'<button type="button" data-itemid="' + itemCount + '" id="delete-item-' + itemCount + '" class="delete-item btn-delete-item"><i class="fa fa-times"></i></button>';
+			ui += '</div>';
+
+			$('#enumeration-items-list').append(ui);
+
+			$(".delete-item").on('click', function(e){
+				$('#item-' + this.dataset.itemid).remove();
+			});
+
+			itemCount++;
+		});
+	});
+</script>
+{% endblock %}

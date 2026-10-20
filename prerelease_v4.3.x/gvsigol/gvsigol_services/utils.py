@@ -1,0 +1,2455 @@
+# -*- coding: utf-8 -*-
+
+'''
+    gvSIG Online.
+    Copyright (C) 2010-2017 SCOLAB.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+'''
+@author: Javier Rodrigo <jrodrigo@scolab.es>
+'''
+import django
+from django.conf import settings
+from django.http import response
+from gvsigol.basetypes import CloneConf
+from django.contrib.auth.models import AnonymousUser
+import hashlib
+import json
+import os
+from django.db import models
+from django.http.response import HttpResponse
+from django.db.models.query import QuerySet
+from django.db.models import Q
+import psycopg2
+from . import geographic_servers
+from gvsigol import settings
+from gvsigol.settings import MEDIA_ROOT, FILEMANAGER_DIRECTORY
+from gvsigol_auth.models import User
+from gvsigol_auth.auth_backend import get_roles
+from gvsigol_services.backend_postgis import Introspect
+from gvsigol_services.models import Datastore, LayerResource, \
+    LayerFieldEnumeration, EnumerationItem, Enumeration, Layer, LayerGroup, Workspace, Server, DefaultUserDatastore, Connection
+from .models import LayerReadRole, LayerWriteRole, LayerManageRole, LayerGroupRole
+from gvsigol_core.utils import toc_add_layer
+import ast
+from django.utils.crypto import get_random_string
+from psycopg2 import sql as sqlbuilder
+import logging
+from datetime import datetime
+from django.utils.translation import gettext as _
+
+logger = logging.getLogger("gvsigol")
+
+
+class TemporalValidationFailed(Exception):
+    """Interrumpe el flujo de publicación tras registrar error en el formulario."""
+    pass
+from gvsigol_auth import auth_backend
+from gvsigol_auth import services as auth_services
+from gvsigol_auth.utils import ascii_norm_username
+import re
+from gvsigol_services import apps as gvsigol_services_apps
+from gvsigol_services.authorization import _get_user, can_use_layergroup, get_authz_server_for_layer
+import requests
+from owslib.wmts import WebMapTileService
+from owslib.util import Authentication
+
+from urllib.parse import urlencode, urlparse, parse_qs, urlunparse, quote
+import copy
+
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import HttpRequest
+
+
+############ Paginación ############
+
+def paginate(request: HttpRequest,items,*,default_page_size: int = 10,max_page_size: int = 200,
+page_param: str = "page",page_size_param: str = "page_size",):
+    """
+    Pagina 'items' (QuerySet o lista).
+    Devuelve: (page_items, pagination_context)
+    - Lee ?page= y ?page_size= del request.
+    - Limita page_size a max_page_size.
+    - Maneja páginas inválidas sin reventar.
+    - Si recibe un QuerySet sin ordenamiento, agrega ordenamiento por 'id' para evitar warnings.
+    """
+    
+    if isinstance(items, models.QuerySet):
+        # Verificar si el QuerySet tiene ordenamiento definido
+        order_by = getattr(items.query, 'order_by', None)
+        if not order_by or (isinstance(order_by, (list, tuple)) and len(order_by) == 0):
+            # Si el QuerySet no tiene ordenamiento, agregar ordenamiento por 'id' por defecto
+            items = items.order_by('id')
+    
+    raw_page = request.GET.get(page_param, "1")
+    raw_size = request.GET.get(page_size_param, str(default_page_size))
+
+    try:
+        page_number = int(raw_page)
+    except (TypeError, ValueError):
+        page_number = 1
+
+    try:
+        page_size = int(raw_size)
+    except (TypeError, ValueError):
+        page_size = default_page_size
+
+    if page_size <= 0:
+        page_size = default_page_size
+    page_size = min(page_size, max_page_size)
+
+    paginator = Paginator(items, page_size)
+
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+
+        page_obj = paginator.page(paginator.num_pages)
+
+    def _qs(**override):
+        q = request.GET.copy()
+        for k, v in override.items():
+            q[k] = str(v)
+        return "?" + urlencode(q, doseq=True)
+
+    ctx = {
+        "paginator": paginator,
+        "page_obj": page_obj,
+        "is_paginated": paginator.num_pages > 1,
+        "page_number": page_obj.number,
+        "page_size": page_size,
+        "total_items": paginator.count,
+        "total_pages": paginator.num_pages,
+        "qs": _qs,  # helper para links en template
+    }
+    return page_obj.object_list, ctx
+
+_VALENCIAN_TITLE_LEGACY_KEYS = ('title-va', 'title-ca-es@valencia')
+
+
+def get_field_title_for_lang(field_conf, lang_id, default_name=None):
+    """
+    Resuelve el título de un campo para un idioma, con compatibilidad hacia atrás
+    para claves valencianas antiguas (title-va, title-ca-es@valencia).
+    """
+    if not field_conf:
+        return default_name or ''
+    title_key = 'title-' + lang_id
+    val = field_conf.get(title_key)
+    if val is not None and str(val).strip():
+        return str(val).strip()
+    if lang_id == 'ca-es-valencia':
+        for legacy_key in _VALENCIAN_TITLE_LEGACY_KEYS:
+            legacy_val = field_conf.get(legacy_key)
+            if legacy_val is not None and str(legacy_val).strip():
+                return str(legacy_val).strip()
+    if default_name is not None:
+        return default_name
+    return field_conf.get('name', '') or ''
+
+
+def _get_layer_obj(layer_or_id):
+    if isinstance(layer_or_id, Layer):
+        return layer_or_id
+    return Layer.objects.select_related("datastore__workspace__server").get(id=layer_or_id)
+
+def get_all_user_roles_checked_by_layer(layer, creator_user_role=None, creator_all=False):
+    if layer:
+        read_roles = LayerReadRole.objects.filter(layer=layer).values_list('role', flat=True)
+        write_roles = LayerWriteRole.objects.filter(layer=layer).values_list('role', flat=True)
+        manage_roles = LayerManageRole.objects.filter(layer=layer).values_list('role', flat=True)
+        external_perm_roles = list(
+                                    LayerReadRole.objects.filter(layer=layer, external=True).values_list('role', flat=True) \
+                                .union( \
+                                    LayerWriteRole.objects.filter(layer=layer, external=True).values_list('role', flat=True)
+                                )
+                                )
+    else:
+        read_roles = []
+        write_roles = []
+        manage_roles = []
+        external_perm_roles = []
+    return get_layer_checked_roles_from_user_input(read_roles, write_roles, manage_roles,
+                                                   creator_user_role=creator_user_role, creator_all=creator_all,
+                                                   external_perm_roles=external_perm_roles)
+
+def get_all_user_roles_checked_by_layergroup(layergroup, creator_user_role=None):
+    if layergroup:
+        includeinproject_roles = LayerGroupRole.objects.filter(layergroup=layergroup, permission=LayerGroupRole.PERM_INCLUDEINPROJECTS).values_list('role', flat=True)
+        manage_roles = LayerGroupRole.objects.filter(layergroup=layergroup, permission=LayerGroupRole.PERM_MANAGE).values_list('role', flat=True)
+    else:
+        includeinproject_roles = []
+        manage_roles = []
+    return get_layergroup_checked_roles_from_user_input(includeinproject_roles, manage_roles, creator_user_role=creator_user_role)
+ 
+def get_read_roles(layer):
+    return list(LayerReadRole.objects.filter(layer_id=layer.id).values_list('role', flat=True))
+
+def get_write_roles(layer):
+    return list(LayerWriteRole.objects.filter(layer_id=layer.id).values_list('role', flat=True))
+
+def get_read_restrictions(request_or_user, layer):
+    """
+    Checks any cql filter read restriction for the user.
+        {
+            "grant" : "ALLOW",
+            "catalogMode" : "CHALLENGE",
+            "cql_filter_read" : "(tipo_estfc=5) OR (tipo_estfc=3)",
+            "attributes" : [ {
+                "name" : "cod_est",
+                "dataType" : "String",
+                "access" : "READONLY" 
+            }, {
+                "name" : "estadofisd",
+                "dataType" : "String",
+                "access" : "READWRITE" 
+            }, {
+                "name" : "fecha_alta",
+                "dataType" : "Date",
+                "access" : "READONLY" 
+            }, {
+                "name" : "tipo_estfc",
+                "dataType" : "integer",
+                "access" : "NONE" 
+            }
+        }
+
+    Parameters
+    ----------
+    request_or_user: Request | HttpRequest | User | str
+        A Django Request object | A DRF HttpRequest object | A Django User object | A username
+    layer: Layer | int
+        A Django Layer instance or a layer id
+    """
+    try:
+        authz_service = get_authz_server_for_layer(layer)
+        return authz_service.get_read_restrictions(request_or_user, layer)
+    except Exception as e:
+        print(e)
+    return {
+            "grant" : "DENY",
+            "catalogMode" : "CHALLENGE"
+        }
+
+def get_write_restrictions(request_or_user, layer):
+    """
+    Checks any cql filter write restriction for the user.
+    Sample output:
+        {
+            "grant" : "ALLOW",
+            "catalogMode" : "CHALLENGE",
+            "cql_filter_read" : "(tipo_estfc=5) OR (tipo_estfc=3)",
+            "cql_filter_write" : "(tipo_estfc=5) OR (tipo_estfc=3)",
+            "attributes" : [ {
+                "name" : "cod_est",
+                "dataType" : "String",
+                "access" : "READONLY" 
+            }, {
+                "name" : "estadofisd",
+                "dataType" : "String",
+                "access" : "READWRITE" 
+            }, {
+                "name" : "fecha_alta",
+                "dataType" : "Date",
+                "access" : "READONLY" 
+            }, {
+                "name" : "tipo_estfc",
+                "dataType" : "integer",
+                "access" : "NONE" 
+            }
+        }
+
+    Parameters
+    ----------
+    request_or_user: Request | HttpRequest | User | str
+        A Django Request object | A DRF HttpRequest object | A Django User object | A username
+    layer: Layer | int
+        A Django Layer instance or a layer id
+    """
+    try:
+        authz_service = get_authz_server_for_layer(layer)
+        return authz_service.get_write_restrictions(request_or_user, layer)
+    except Exception as e:
+        print(e)
+    return {
+            "grant" : "DENY",
+            "catalogMode" : "CHALLENGE"
+        }
+
+def can_write_layer(request_or_user, layer, user_profile=None):
+    """
+    Checks whether the user has permissions to write the provided layer.
+
+    Parameters
+    ----------
+    request_or_user: Request | HttpRequest | User | str
+        A Django Request object | A DRF HttpRequest object | A Django User object | A username
+    layer: Layer | int
+        A Django Layer instance or a layer id
+    """
+    try:
+        authz_service = get_authz_server_for_layer(layer)
+        return authz_service.can_write_layer(request_or_user, layer, user_profile=user_profile)
+    except Exception as e:
+        print(e)
+    return False
+
+def can_read_layer(request_or_user, layer):
+    """
+    Checks whether the user has permissions to read the provided layer.
+
+    Parameters
+    ----------
+    request_or_user: Request | HttpRequest | User | str
+        A Django Request object | A DRF HttpRequest object | A Django User object | A username
+    layer: Layer | int
+        A Django Layer instance or a layer id
+    """
+    try:
+        layer = _get_layer_obj(layer)
+        if layer.public or layer.external:
+            return True
+        authz_service = get_authz_server_for_layer(layer)
+        return authz_service.can_read_layer(request_or_user, layer)
+    except Exception as e:
+        print(e)
+    return False
+
+def can_read_feature(request_or_user, layer, feature):
+    try:
+        authz_service = get_authz_server_for_layer(layer)
+        return authz_service.can_read_feature(request_or_user, layer, feature)
+    except Exception as e:
+        print(e)
+    return False
+
+def can_write_feature(request_or_user, layer, feature_id, geojson_feature=None):
+    try:
+        authz_service = get_authz_server_for_layer(layer)
+        return authz_service.can_write_feature(request_or_user, layer, feature_id, geojson_feature)
+    except Exception as e:
+        print(e)
+    return False
+
+def can_create_feature(request_or_user, layer, geojson_feature):
+    try:
+        authz_service = get_authz_server_for_layer(layer)
+        return authz_service.can_create_feature(request_or_user, layer, geojson_feature)
+    except Exception as e:
+        print(e)
+    return False
+
+def can_manage_layer(request_or_user, layer):
+    """
+    Checks whether the user has permissions to manage the provided layer.
+
+    Parameters
+    ----------
+    request_or_user: Request | HttpRequest | User | str
+        A Django Request object | A DRF HttpRequest object | A Django User object | A username
+    layer: Layer | int
+        A Django Layer instance or a layer id
+    """
+    try:
+        user = _get_user(request_or_user)
+        if not isinstance(layer, Layer):
+            layer = Layer.objects.get(id=layer)
+        if user.is_superuser:
+            return True
+        elif layer.created_by == user.username:
+            return True
+        elif user.is_staff:
+            user_roles = auth_backend.get_roles(request_or_user)
+            return layer.layermanagerole_set.filter(role__in=user_roles).exists()
+    except Exception as e:
+        print(e)
+    return False
+
+def can_write_calculated_fields(request_or_user, layer):
+    """
+    Checks whether the user is allowed to write a calculated attribute into the
+    provided layer: superusers always, layer managers (owner or staff with the
+    manage role) and users with write permission on that specific layer. Being
+    staff is not enough on its own.
+
+    Parameters
+    ----------
+    request_or_user: Request | HttpRequest | User | str
+        A Django Request object | A DRF HttpRequest object | A Django User object | A username
+    layer: Layer | int
+        A Django Layer instance or a layer id
+    """
+    try:
+        user = _get_user(request_or_user)
+        if user is None or not user.is_authenticated:
+            return False
+        if user.is_superuser:
+            return True
+        # Checks are made against the authenticated user and never against the
+        # request: role claims live in the Django session, which may belong to
+        # a different login when the caller authenticates with a bearer token
+        if can_manage_layer(user, layer):
+            return True
+        return bool(can_write_layer(user, layer))
+    except Exception as e:
+        print(e)
+    return False
+
+def can_use_calculated_fields(request_or_user, layer):
+    """
+    Checks whether the calculator can act on the provided layer: the feature
+    has to be enabled on it, it must be a non external PostGIS layer and the
+    user needs write permissions on it.
+    """
+    try:
+        if not isinstance(layer, Layer):
+            layer = Layer.objects.get(id=layer)
+        if not layer.allow_calculated_fields or layer.external:
+            return False
+        if not layer.datastore or layer.datastore.type != 'v_PostGIS':
+            return False
+        return can_write_calculated_fields(request_or_user, layer)
+    except Exception as e:
+        print(e)
+    return False
+
+def can_manage_datastore(request_or_user, datastore):
+    """
+    Checks whether the user has permissions to manage the provided datastore.
+    
+    A user can manage a datastore if:
+    - Is superuser
+    - Is the owner (created_by)
+    - Has DefaultUserDatastore
+    - allow_all_manage is True
+    - Has a role with can_manage=True
+
+    Parameters
+    ----------
+    request_or_user: Request | HttpRequest | User | str
+        A Django Request object | A DRF HttpRequest object | A Django User object | A username
+    datastore: Datastore | int
+        A Django Datastore instance or a Datastore id
+
+    """
+    try:
+        user = _get_user(request_or_user)
+        if not isinstance(datastore, Datastore):
+            datastore = Datastore.objects.get(id=datastore)
+        if user.is_superuser:
+            return True
+        if datastore.created_by == user.username:
+            return True
+        if DefaultUserDatastore.objects.filter(username=user.username, datastore=datastore).exists():
+            return True
+        # Verificar allow_all_manage
+        if hasattr(datastore, 'allow_all_manage') and datastore.allow_all_manage:
+            return True
+        # Verificar permisos por rol
+        from gvsigol_services.models import DatastoreRole
+        from gvsigol_auth import auth_backend
+        user_roles = auth_backend.get_roles(user)
+        if DatastoreRole.objects.filter(
+            datastore=datastore,
+            role__in=user_roles,
+            can_manage=True
+        ).exists():
+            return True
+    except Exception as e:
+        print(e)
+    return False
+
+
+def can_use_datastore(request_or_user, datastore):
+    """
+    Checks whether the user has permissions to use the provided datastore
+    (create layers in it).
+
+    Parameters
+    ----------
+    request_or_user: Request | HttpRequest | User | str
+        A Django Request object | A DRF HttpRequest object | A Django User object | A username
+    datastore: Datastore | int
+        A Django Datastore instance or a Datastore id
+
+    """
+    try:
+        user = _get_user(request_or_user)
+        if not isinstance(datastore, Datastore):
+            datastore = Datastore.objects.get(id=datastore)
+        if user.is_superuser:
+            return True
+        if datastore.created_by == user.username:
+            return True
+        if DefaultUserDatastore.objects.filter(username=user.username, datastore=datastore).exists():
+            return True
+        # Verificar allow_all
+        if datastore.allow_all:
+            return True
+        # Verificar permisos por rol
+        from gvsigol_services.models import DatastoreRole
+        from gvsigol_auth import auth_backend
+        user_roles = auth_backend.get_roles(user)
+        if DatastoreRole.objects.filter(
+            datastore=datastore,
+            role__in=user_roles,
+            can_use=True
+        ).exists():
+            return True
+    except Exception as e:
+        print(e)
+    return False
+
+def can_manage_layergroup(request_or_user, layergroup):
+    """
+    Checks whether the user has permissions to manage the provided layergroup.
+    It accepts a layergroup instance or a layergroup id.
+
+    Parameters
+    ----------
+    request_or_user: Request | HttpRequest | User | str
+        A Django Request object | A DRF HttpRequest object | A Django User object | A username
+    layergroup: LayerGroup | int
+        A Django LayerGroup instance or a LayerGroup id
+    """
+
+    return can_use_layergroup(request_or_user, layergroup, permission=LayerGroupRole.PERM_MANAGE)
+
+def get_user_layergroups(request, permissions=LayerGroupRole.PERM_MANAGE):
+    """
+    Returns a queryset with the layer groups that are available for a user
+    and a type of permission (currently only manage permission is defined
+    for layer groups).
+
+    Note that the queryset may include duplicates, so set distinct() on
+    the returned queryset if you want to remove them.
+    """
+    if request.user.is_superuser:
+        return LayerGroup.objects.all()
+    user_roles = auth_backend.get_roles(request)
+    user_created_groups = LayerGroup.objects.filter(created_by=request.user.username)
+    if isinstance(permissions, list):
+        allowed_groups = LayerGroup.objects.filter(layergrouprole__role__in=user_roles, layergrouprole__permission__in=permissions)
+    else:
+        allowed_groups = LayerGroup.objects.filter(layergrouprole__role__in=user_roles, layergrouprole__permission=permissions)
+    return (user_created_groups | allowed_groups)
+
+def add_datastore(workspace, type, name, description, connection_params, username, connection=None, schema=None):
+    """
+    Crea un datastore en GeoServer y lo guarda en la base de datos.
+    
+    Args:
+        workspace: Workspace donde crear el datastore
+        type: Tipo de datastore (ej: 'v_PostGIS')
+        name: Nombre del datastore
+        description: Descripción
+        connection_params: Parámetros de conexión en formato JSON string
+        username: Usuario que crea el datastore
+        connection: (Opcional) Objeto Connection para asociar al datastore
+        schema: (Opcional) Schema de la base de datos
+    """
+    gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+    # first create the datastore on the backend
+    if gs.createDatastore(workspace,
+                          type,
+                          name,
+                          description,
+                          connection_params):
+        
+        # save it on DB if successfully created
+        datastore = Datastore(
+            workspace=workspace,
+            type=type,
+            name=name,
+            description=description,
+            connection_params=connection_params,  # Siempre guardar los parámetros completos (incluyendo schema)
+            created_by=username,
+            connection=connection,
+            schema=schema,
+            legacy_mode=(connection is None)  # legacy_mode=True si no tiene connection
+        )
+        datastore.save()
+        return datastore
+
+def create_workspace(server_id, ws_name, uri, values, username):
+    # first create the ws on the backend
+    gs = geographic_servers.get_instance().get_server_by_id(server_id)
+    if gs.createWorkspace(ws_name, uri):
+        # save it on DB if successfully created
+        newWs = Workspace(**values)
+        newWs.created_by = username
+        newWs.save()
+        gs.reload_nodes()
+        return newWs
+
+def _connection_passwd(params):
+    """Devuelve la contraseña de unos params de conexión, o '' si falta/está enmascarada."""
+    if not params:
+        return ''
+    passwd = params.get('passwd', params.get('password', '')) or ''
+    if passwd == '****':
+        return ''
+    return passwd
+
+
+def _ensure_connection_password_from_cartodb(conn):
+    """
+    Si la Connection del sistema no tiene password usable, la rellena desde
+    GVSIGOL_USERS_CARTODB. Evita que datastores nuevos (p.ej. al clonar un
+    proyecto) fallen al consultar/editar features con 'no password supplied'.
+    """
+    dbpassword = settings.GVSIGOL_USERS_CARTODB.get('dbpassword', '') or ''
+    if not dbpassword:
+        return conn
+    try:
+        params = conn.get_connection_params()
+    except Exception:
+        return conn
+    if _connection_passwd(params):
+        return conn
+    params['passwd'] = dbpassword
+    # Normalizar: preferimos 'passwd' (clave usada por GeoServer/PostGIS en gvsigol)
+    params.pop('password', None)
+    conn.connection_params = json.dumps(params)
+    conn.save()
+    return conn
+
+
+def get_system_connection():
+    """
+    Obtiene la conexión del sistema para datastores automáticos de usuarios.
+    Esta conexión se basa en la configuración GVSIGOL_USERS_CARTODB y debe
+    haber sido creada por la migración 0088_create_system_connection.
+    
+    Busca una conexión existente con los mismos parámetros (host, port, database, user).
+    Prefiere conexiones con password; si la encontrada no tiene, la rellena desde settings.
+    
+    Returns:
+        Connection: La conexión del sistema
+        
+    Raises:
+        Connection.DoesNotExist: Si no se encuentra ninguna conexión compatible
+    """
+    dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
+    dbport = settings.GVSIGOL_USERS_CARTODB['dbport']
+    dbname = settings.GVSIGOL_USERS_CARTODB['dbname']
+    dbuser = settings.GVSIGOL_USERS_CARTODB['dbuser']
+    
+    # Buscar conexión existente con los mismos parámetros de conexión
+    # Puede ser una conexión migrada (con_database_host) o del sistema (con_system_database_host)
+    candidates = []
+    for conn in Connection.objects.filter(type='PostGIS'):
+        try:
+            params = conn.get_connection_params()
+            if (params.get('host') == dbhost and 
+                str(params.get('port')) == str(dbport) and 
+                params.get('database') == dbname and 
+                params.get('user') == dbuser):
+                candidates.append((conn, _connection_passwd(params)))
+        except Exception:
+            continue
+
+    if candidates:
+        # Preferir una Connection que ya tenga password
+        candidates.sort(key=lambda item: bool(item[1]), reverse=True)
+        return _ensure_connection_password_from_cartodb(candidates[0][0])
+    
+    # No se encontró ninguna conexión compatible
+    raise Connection.DoesNotExist(
+        f'No se encontró una conexión del sistema para {dbuser}@{dbhost}:{dbport}/{dbname}. '
+        'Ejecute las migraciones con: python manage.py migrate'
+    )
+
+
+def create_datastore(username, ds_name, ws):
+    """
+    Crea un datastore automático para un usuario (ds_<username>).
+    Usa la conexión del sistema basada en GVSIGOL_USERS_CARTODB.
+    """
+    ds_type = 'v_PostGIS'
+    description = 'BBDD ' + ds_name
+
+    # Obtener la conexión del sistema (debe existir, creada por migración).
+    # get_system_connection garantiza password usable cuando está en settings.
+    connection = get_system_connection()
+    
+    # Los parámetros de conexión para GeoServer (incluyen schema)
+    dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
+    dbport = settings.GVSIGOL_USERS_CARTODB['dbport']
+    dbname = settings.GVSIGOL_USERS_CARTODB['dbname']
+    dbuser = settings.GVSIGOL_USERS_CARTODB['dbuser']
+    dbpassword = settings.GVSIGOL_USERS_CARTODB['dbpassword']
+    jndiname = settings.GVSIGOL_USERS_CARTODB.get('jndiname', '')
+    
+    # Parámetros completos para GeoServer (incluye schema)
+    connection_params = f'{{"host": "{dbhost}", "port": "{dbport}", "database": "{dbname}", "schema": "{ds_name}", "user": "{dbuser}", "passwd": "{dbpassword}", "dbtype": "postgis", "jndiReferenceName": "{jndiname}"}}'
+    
+    if create_schema(ds_name):
+        return add_datastore(ws, ds_type, ds_name, description, connection_params, username, 
+                            connection=connection, schema=ds_name)
+
+#TODO: llevar al paquete del core
+def create_schema(ds_name):
+    dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
+    dbport = settings.GVSIGOL_USERS_CARTODB['dbport']
+    dbname = settings.GVSIGOL_USERS_CARTODB['dbname']
+    dbuser = settings.GVSIGOL_USERS_CARTODB['dbuser']
+    dbpassword = settings.GVSIGOL_USERS_CARTODB['dbpassword']
+
+    connection = get_connection(dbhost, dbport, dbname, dbuser, dbpassword)
+    cursor = connection.cursor()
+
+    try:
+        create_schema = "CREATE SCHEMA IF NOT EXISTS " + ds_name + " AUTHORIZATION " + dbuser + ";"
+        cursor.execute(create_schema)
+
+    except Exception as e:
+        print("SQL Error", e)
+        if e.pgcode == '42710':
+            return True
+        else:
+            return False
+
+    close_connection(cursor, connection)
+    return True
+
+#TODO: llevar al paquete del core
+def create_schema_for_datastore(connection_params):
+    host = connection_params.get('host')
+    port = connection_params.get('port')
+    database = connection_params.get('database')
+    user = connection_params.get('user')
+    passwd = connection_params.get('passwd')
+    schema = connection_params.get('schema')
+
+    connection = get_connection(host, port, database, user, passwd)
+    cursor = connection.cursor()
+
+    try:
+        create_schema = "CREATE SCHEMA IF NOT EXISTS " + schema + " AUTHORIZATION " + user + ";"
+        cursor.execute(create_schema)
+
+    except Exception as e:
+        print("SQL Error", e)
+        if e.pgcode == '42710':
+            return True
+        else:
+            return False
+
+    close_connection(cursor, connection)
+    return True
+
+PROTECTED_DATABASE_SCHEMAS = frozenset(['public'])
+
+
+def is_protected_database_schema(schema_name):
+    """Indica si un esquema de base de datos no puede eliminarse."""
+    if not schema_name:
+        return False
+    return schema_name.lower() in PROTECTED_DATABASE_SCHEMAS
+
+
+#TODO: llevar al paquete del core
+def delete_schema_for_datastore(connection_params):
+    host = connection_params.get('host')
+    port = connection_params.get('port')
+    database = connection_params.get('database')
+    user = connection_params.get('user')
+    passwd = connection_params.get('passwd')
+    schema = connection_params.get('schema')
+
+    if is_protected_database_schema(schema):
+        logger.warning(
+            "Blocked attempt to delete protected database schema '%s'", schema
+        )
+        return False
+
+    connection = get_connection(host, port, database, user, passwd)
+    cursor = connection.cursor()
+
+    try:
+        delete_schema = "DROP SCHEMA IF EXISTS " + schema +  " CASCADE ;"
+        cursor.execute(delete_schema)
+
+    except Exception as e:
+        print("SQL Error", e)
+        if e.pgcode == '42710':
+            return True
+        else:
+            return False
+
+    close_connection(cursor, connection)
+    return True
+
+#TODO: llevar al paquete del core
+def get_connection(host, port, database, user, password):
+    try:
+        conn = psycopg2.connect("host=" + host +" port=" + port +" dbname=" + database +" user=" + user +" password="+ password);
+        conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+        print("Connect ... ")
+
+    except Exception as e:
+        print("Failed to connect!", e)
+        return []
+
+    return conn
+
+def get_minmax_query(host, port, schema, database, user, password, layer, field):
+    conn = get_connection(host, port, database, user, password)
+    cursor = conn.cursor()
+
+    try:
+        sql = 'SELECT MIN("' + field + '") AS MinValue, MAX("' + field + '") AS MaxValue FROM ' + schema + '.' + layer + ' WHERE "' + field + '" IS NOT NULL;'
+
+        cursor.execute(sql);
+        rows = cursor.fetchall()
+
+    except Exception as e:
+        print("Fallo en el getMIN y getMAX", e)
+        return {}
+
+    close_connection(cursor, conn)
+
+    if len(rows) > 0:
+        minmax = rows[0]
+        if len(minmax) == 2:
+            min = minmax[0]
+            max = minmax[1]
+            return json.dumps({'min': float(min), 'max': float(max)})
+
+    return {}
+
+#TODO: llevar al paquete del core
+def close_connection(cursor, conn):
+    #Close connection and exit
+    cursor.close();
+    conn.close();
+
+def get_fields(resource):
+    fields = []
+    if resource != None:
+        fields = resource.get('featureType', {}).get('attributes', {}).get('attribute', [])
+
+    return fields
+
+def get_alphanumeric_fields(fields):
+    alphanumeric_fields = []
+    for field in fields:
+        if not 'jts.geom' in field.get('binding'):
+            alphanumeric_fields.append(field)
+
+    return alphanumeric_fields
+
+def get_resources_dir(layer_id, resource_type):
+    resource_dir='resources'
+    if resource_type == LayerResource.EXTERNAL_IMAGE:
+        the_path = os.path.join(MEDIA_ROOT, resource_dir , str(layer_id), "image")
+    elif  resource_type == LayerResource.EXTERNAL_PDF:
+        the_path = os.path.join(MEDIA_ROOT, resource_dir , str(layer_id), "pdf")
+    elif  resource_type == LayerResource.EXTERNAL_DOC:
+        the_path = os.path.join(MEDIA_ROOT, resource_dir , str(layer_id), "docs")
+    elif  resource_type == LayerResource.EXTERNAL_VIDEO:
+        the_path = os.path.join(MEDIA_ROOT, resource_dir , str(layer_id), "videos")
+    else:
+        the_path = os.path.join(MEDIA_ROOT, resource_dir , str(layer_id), "files")
+    if not os.path.exists(the_path):
+        os.makedirs(the_path)
+        # makedirs permissions are umasked, so we need to explicitly set permissions afterwards
+        for root, dirs, _ in os.walk(os.path.join(MEDIA_ROOT, resource_dir , str(layer_id)), followlinks=True):
+            for d in dirs:
+                os.chmod(os.path.join(root, d), 0o0750)
+    return the_path
+
+def get_historic_resources_dir(path, layer_id):
+    historic_base_path = os.path.join(MEDIA_ROOT, 'historic_resources')
+    if not os.path.exists(historic_base_path):
+        os.makedirs(historic_base_path)
+        os.chmod(historic_base_path, 0o0750)
+    
+    if not os.path.isabs(path):
+        path = os.path.join(MEDIA_ROOT, path)
+    rel_path = os.path.relpath(os.path.dirname(path), os.path.join(MEDIA_ROOT, 'resources'))
+    historic_path = os.path.join(historic_base_path, rel_path)
+    if not os.path.exists(historic_path):
+        os.makedirs(historic_path)
+        
+        # makedirs permissions are umasked, so we need to explicitly set permissions afterwards
+        for root, dirs, _ in os.walk(os.path.join(MEDIA_ROOT, 'historic_resources' , str(layer_id)), followlinks=True):
+            for d in dirs:
+                os.chmod(os.path.join(root, d), 0o0750)
+    return historic_path
+
+def get_resource_type(content_type):
+    if 'image/' in content_type:
+        return LayerResource.EXTERNAL_IMAGE
+    elif content_type == 'application/pdf':
+        return LayerResource.EXTERNAL_PDF
+    elif content_type in [ #.doc, .docx, .odt,
+                          'application/msword', 
+                          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                          'application/vnd.oasis.opendocument.text',
+                          # .xls, .xlsx, .ods
+                          'application/vnd.ms-excel',
+                          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                          'application/vnd.oasis.opendocument.spreadsheet',
+                          # .ppt, .pptx, .odp
+                          'application/vnd.ms-powerpoint',
+                          'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                          'application/vnd.oasis.opendocument.presentation'
+                          ]:
+        return LayerResource.EXTERNAL_DOC
+    elif 'video/' in content_type:
+        return LayerResource.EXTERNAL_VIDEO
+    else:
+        return LayerResource.EXTERNAL_FILE
+
+def get_resource_type_label(resource_type):
+    if resource_type == LayerResource.EXTERNAL_IMAGE:
+        return 'image'
+    elif resource_type == LayerResource.EXTERNAL_PDF:
+        return 'pdf'
+    elif resource_type == LayerResource.EXTERNAL_DOC:
+        return 'doc'
+    elif resource_type == LayerResource.EXTERNAL_VIDEO:
+        return 'video'
+    elif resource_type == LayerResource.EXTERNAL_ALFRESCO_DIR:
+        return 'alfresco_dir'
+    else:
+        return 'file'
+
+def is_field_enumerated(layer, column_name):
+    """
+    Returns true if the field is enumerated and false if not. The second parameter is true if the enumeration is multiple
+    """
+    enums = LayerFieldEnumeration.objects.filter(layer=layer, field=column_name)
+    if len(enums) > 0:
+        return True, enums[0].multiple
+    return False, False
+
+def get_enum_item_list(layer, column_name, enum=None):
+    """
+    Gets the list of items of a enumerated field
+    """
+    try:
+        if not enum:
+            enum = LayerFieldEnumeration.objects.get(layer=layer, field=column_name).enumeration
+        return enum.enumerationitem_set.all().order_by('order')
+    except:
+        pass
+    return []
+        
+def get_enum_entry(layer, column_name):
+    """
+    Gets the enumeration object associated to the provided column, or None if the field is not enumerated
+    """
+    try:
+        return LayerFieldEnumeration.objects.get(layer=layer, field=column_name).enumeration
+    except:
+        pass
+    
+def get_layer_img(layerid, filename):
+    """
+    Devuelve la ruta y la URL de un icono asociado a una capa. 
+    
+    Una imagen de una capa se guarda en media/images y su nombre es un md5 de layer + id de la capa. 
+    Cuando se sube el fichero este se guarda con la extensión del original ('png', 'jpg', 'jpeg', 'gif' o 'tif') 
+    pero cuando se consulta no se conoce la extensión con la que se guardó por lo que el parámetro filename será null. 
+    
+    Si quiero obtener la imagen de una capa se llamará a get_layer_img(idcapa, None)
+    """
+    path_ = None
+    url = None
+    m = hashlib.md5()
+    m.update(("layer" + str(layerid)).encode("utf-8"))
+    if filename is not None:
+        suffix = filename.split('.')
+        ext = ''
+        if(suffix is not None and len(suffix) > 0):
+            ext = suffix[-1]
+        filename = m.hexdigest() + "." + ext
+        path_ = os.path.join(settings.MEDIA_ROOT, "images", filename)
+        url = settings.MEDIA_URL.rstrip('/') + "/images/" + filename
+        url = url.replace(settings.BASE_URL, '')
+    else:
+        suffix_list = ['png', 'jpg', 'jpeg', 'gif', 'tif', 'svg']
+        filename = m.hexdigest()
+        for ext in suffix_list:
+            test = filename + "." + ext
+            path_ = os.path.join(settings.MEDIA_ROOT, "images", test)
+            if os.path.exists(path_):
+                url = settings.MEDIA_URL.rstrip('/') + "/images/" + test
+                url = url.replace(settings.BASE_URL, '')
+                break
+            else:
+                path_ = None
+            
+    
+    return path_, url
+
+def get_db_connect_from_datastore(datastore):
+    if not isinstance(datastore, Datastore):
+        datastore = Datastore.objects.get(id=int(datastore))
+    return datastore.get_db_connection()
+
+def get_db_connect_from_layer(layer):
+    if not isinstance(layer, Layer):
+        layer = Layer.objects.select_related('datastore').get(id=int(layer))
+    return layer.get_db_connection()
+     
+def get_exception(code, msg):
+    response = HttpResponse(msg)
+    response.status_code = code
+    return response
+
+
+_ENUM_LIKE_FIELD_TYPES = {
+    'enumeration', 'multiple_enumeration', 'multiple enumeration',
+    'form', 'cd_json', 'cd json',
+}
+_NUMERIC_FIELD_TYPES = {
+    'integer', 'bigint', 'smallint', 'double', 'double precision',
+    'numeric', 'decimal', 'real', 'float', 'float4', 'float8',
+    'int2', 'int4', 'int8', 'serial', 'bigserial', 'smallserial',
+}
+_TEXT_FIELD_TYPES = {
+    'character varying', 'character_varying', 'varchar', 'character',
+    'char', 'text',
+}
+_NUMERIC_CALCULATION_HINTS = (
+    'area', 'length', 'perimeter', 'longitud', 'perimetro',
+    'coord', 'st_x', 'st_y', 'st_z', 'gol_area', 'calc_area',
+    'calc_length', 'calc_perimeter',
+)
+_TEXT_CALCULATION_HINTS = (
+    'geocoder', 'address', 'direccion', 'cartociudad',
+)
+
+
+def _normalize_field_type(field_type):
+    return ' '.join((field_type or '').strip().lower().replace('-', '_').replace('_', ' ').split())
+
+
+def get_field_calculation_conflict(field_type, calculation, calculation_label=None):
+    """
+    Return an error message when a calculated trigger is not compatible with
+    the chosen field type (e.g. enumeration + area), or None if valid.
+    """
+    if not calculation:
+        return None
+    ftype = _normalize_field_type(field_type)
+    calc_text = ' '.join(filter(None, [calculation, calculation_label])).lower()
+    conflict_msg = _('There is a conflict between the field type and the selected trigger.')
+
+    if ftype in _ENUM_LIKE_FIELD_TYPES or ftype.replace(' ', '_') in _ENUM_LIKE_FIELD_TYPES:
+        return conflict_msg
+
+    if any(hint in calc_text for hint in _NUMERIC_CALCULATION_HINTS):
+        if ftype not in _NUMERIC_FIELD_TYPES:
+            return conflict_msg
+
+    if any(hint in calc_text for hint in _TEXT_CALCULATION_HINTS):
+        if ftype not in _TEXT_FIELD_TYPES:
+            return conflict_msg
+
+    return None
+
+
+def is_numeric_field_type(field_type):
+    return _normalize_field_type(field_type) in _NUMERIC_FIELD_TYPES
+
+
+def is_integer_field_type(field_type):
+    ftype = _normalize_field_type(field_type)
+    return ftype in {
+        'integer', 'bigint', 'smallint', 'serial', 'bigserial', 'smallserial',
+        'int2', 'int4', 'int8',
+    }
+
+
+def set_field_enumeration_type(layer_def, multiple=False):
+    """
+    Override the logical field type to enumeration while preserving the
+    underlying PostgreSQL type in db_type.
+    """
+    if layer_def.get('db_type') is None:
+        layer_def['db_type'] = layer_def.get('type')
+    if multiple:
+        layer_def['type'] = 'multiple_enumeration'
+    else:
+        layer_def['type'] = 'enumeration'
+
+
+def normalize_property_value_for_column(value, column_info):
+    """
+    Coerce feature property values to match the PostgreSQL column type.
+    Raises ValueError when the value cannot be stored in the column.
+    """
+    if column_info is None:
+        return value
+
+    db_type = column_info.get('type')
+    if value is None:
+        return None
+
+    if value == '':
+        if is_numeric_field_type(db_type):
+            return None
+        return value
+
+    if not is_numeric_field_type(db_type):
+        return value
+
+    if isinstance(value, bool):
+        raise ValueError(
+            _('Value "{value}" is not valid for numeric field "{field}".').format(
+                value=value, field=column_info.get('name', ''))
+        )
+
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        if is_integer_field_type(db_type):
+            return int(value)
+        return float(value)
+
+    if isinstance(value, str):
+        stripped = value.strip()
+        if stripped == '':
+            return None
+        try:
+            if is_integer_field_type(db_type):
+                return int(stripped)
+            return float(stripped)
+        except (ValueError, TypeError):
+            raise ValueError(
+                _('Value "{value}" is not valid for numeric field "{field}".').format(
+                    value=value, field=column_info.get('name', ''))
+            )
+
+    return value
+
+
+def normalize_properties_for_db(properties, table_info, skip_fields=None):
+    skip_fields = skip_fields or set()
+    normalized = {}
+    for key, value in properties.items():
+        if key in skip_fields:
+            normalized[key] = value
+            continue
+        column_info = table_info.get_column_info(key)
+        normalized[key] = normalize_property_value_for_column(value, column_info)
+    return normalized
+
+
+def check_schema_exists(schema):
+    dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
+    dbport = settings.GVSIGOL_USERS_CARTODB['dbport']
+    dbname = settings.GVSIGOL_USERS_CARTODB['dbname']
+    dbuser = settings.GVSIGOL_USERS_CARTODB['dbuser']
+    dbpassword = settings.GVSIGOL_USERS_CARTODB['dbpassword']
+    i = Introspect(database=dbname, host=dbhost, port=dbport, user=dbuser, password=dbpassword)
+    exists = i.schema_exists(schema)
+    i.close()
+    return exists
+
+
+def set_layer_extent(layer, ds_type, layer_info, server):
+    try:
+        if ds_type == 'imagemosaic':
+            ds_type = 'coverage'
+        layer.native_srs = layer_info[ds_type]['srs']
+        layer.native_extent = str(layer_info[ds_type]['nativeBoundingBox']['minx']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['miny']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['maxx']) + ',' + str(layer_info[ds_type]['nativeBoundingBox']['maxy'])
+        layer.latlong_extent = str(layer_info[ds_type]['latLonBoundingBox']['minx']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['miny']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['maxx']) + ',' + str(layer_info[ds_type]['latLonBoundingBox']['maxy'])
+        
+    except Exception as e:
+        logger.exception("Error setting layer extent: %s", layer.full_qualified_name)
+
+def validate_temporal_layer_post_params(time_enabled, time_field, time_presentation,
+                                        time_default_value_mode, time_default_value):
+    """
+    Validación de parámetros temporales enviados por POST antes de llamar a GeoServer.
+    Devuelve None si es válido, o un mensaje traducido para mostrar al usuario.
+    """
+    if not time_enabled:
+        return None
+    tf = (time_field or '').strip()
+    if not tf or tf == '__disabled__':
+        return _('Select a field for the temporal dimension.')
+    tp = (time_presentation or '').strip()
+    if not tp:
+        return _('Select a time presentation mode.')
+    mode = (time_default_value_mode or '').strip()
+    valid_modes = ('MINIMUM', 'MAXIMUM', 'NEAREST', 'FIXED')
+    if mode not in valid_modes:
+        return _('Select a valid default value mode for the temporal dimension.')
+    if mode in ('NEAREST', 'FIXED'):
+        dv = (time_default_value or '').strip()
+        if not dv:
+            return _('Enter a default date when using "nearest to the reference value" or "reference value" mode.')
+        try:
+            datetime.strptime(dv, '%d-%m-%Y %H:%M:%S')
+        except ValueError:
+            return _('Invalid default date format. Use DD-MM-YYYY HH:mm:ss.')
+    return None
+
+
+def set_time_enabled(server, layer):
+        time_resolution = 0
+        if (layer.time_resolution_year != None and layer.time_resolution_year > 0) or (layer.time_resolution_month != None and layer.time_resolution_month > 0) or (layer.time_resolution_week != None and layer.time_resolution_week > 0) or (layer.time_resolution_day != None and layer.time_resolution_day > 0):
+            if (layer.time_resolution_year != None and layer.time_resolution_year > 0):
+                time_resolution = time_resolution + (int(layer.time_resolution_year) * 3600 * 24 * 365)
+            if (layer.time_resolution_month != None and layer.time_resolution_month > 0):
+                time_resolution = time_resolution + (int(layer.time_resolution_month) * 3600 * 24 * 31)
+            if (layer.time_resolution_week != None and layer.time_resolution_week > 0):
+                time_resolution = time_resolution + (int(layer.time_resolution_week) * 3600 * 24 * 7)
+            if (layer.time_resolution_day != None and layer.time_resolution_day > 0):
+                time_resolution = time_resolution + (int(layer.time_resolution_day) * 3600 * 24 * 1)
+        if (layer.time_resolution_hour != None and layer.time_resolution_hour > 0) or (layer.time_resolution_minute != None and layer.time_resolution_minute > 0) or (layer.time_resolution_second != None and layer.time_resolution_second > 0):
+            if (layer.time_resolution_hour != None and layer.time_resolution_hour > 0):
+                time_resolution = time_resolution + (int(layer.time_resolution_hour) * 3600)
+            if (layer.time_resolution_minute != None and layer.time_resolution_minute > 0):
+                time_resolution = time_resolution + (int(layer.time_resolution_minute) * 60)
+            if (layer.time_resolution_second != None and layer.time_resolution_second > 0):
+                time_resolution = time_resolution + (int(layer.time_resolution_second))
+        server.setTimeEnabled(layer.datastore.workspace.name, layer.datastore.name, layer.datastore.type, layer.name, layer.time_enabled, layer.time_enabled_field, layer.time_enabled_endfield, layer.time_presentation, time_resolution, layer.time_default_value_mode, layer.time_default_value)
+
+def clone_layer(target_datastore, layer, layer_group, clone_conf=None):
+    old_id = layer.pk
+    old_name = layer.name
+    if not clone_conf:
+        clone_conf = CloneConf()
+    if layer.external:
+        if clone_conf.external_lyrs == CloneConf.LAYER_CLONE:
+            layer.pk = None
+            # lyr.name = new_name # TODO should we change name when cloning?
+            if layer_group is not None:
+                layer.layer_group = layer_group
+            layer.save()
+            new_layer_instance = Layer.objects.get(id=layer.pk)
+            new_layer_instance._cloned_from_name = old_name
+            new_layer_instance._cloned_from_instance = Layer.objects.get(id=old_id)
+            return new_layer_instance
+    elif layer.type == 'v_PostGIS':
+        if clone_conf.vector_lyrs == CloneConf.LAYER_CLONE:
+            # create the table
+            dbhost = settings.GVSIGOL_USERS_CARTODB['dbhost']
+            dbport = settings.GVSIGOL_USERS_CARTODB['dbport']
+            dbname = settings.GVSIGOL_USERS_CARTODB['dbname']
+            dbuser = settings.GVSIGOL_USERS_CARTODB['dbuser']
+            dbpassword = settings.GVSIGOL_USERS_CARTODB['dbpassword']
+            i = Introspect(database=dbname, host=dbhost, port=dbport, user=dbuser, password=dbpassword)
+            table_name = layer.source_name if layer.source_name else layer.name
+            schema_name = layer.datastore.get_schema_name() if hasattr(layer.datastore, 'get_schema_name') else layer.datastore.name
+            target_schema = target_datastore.get_schema_name() if hasattr(target_datastore, 'get_schema_name') else target_datastore.name
+            new_table_name = i.clone_table(schema_name, table_name, target_schema, table_name, copy_data=clone_conf.copy_data)
+            i.close()
+
+            from gvsigol_services import views
+            server = geographic_servers.get_instance().get_server_by_id(target_datastore.workspace.server.id)
+
+            layerConf = ast.literal_eval(layer.conf) if layer.conf else {}
+            extraParams = {
+                "max_features": layerConf.get('featuretype', {}).get('', 0)
+            }
+            # add layer to Geoserver
+            views.do_add_layer(server, target_datastore, new_table_name, layer.title, layer.queryable, extraParams)
+            
+            new_name = new_table_name
+            if Layer.objects.filter(name=new_name, datastore=target_datastore).exists():
+                base_name = target_datastore.workspace.name + "_" + layer.name
+                new_name = base_name
+                i = 1
+                salt = ''
+                while Layer.objects.filter(name=new_name, datastore=target_datastore).exists():
+                    new_name = base_name + '_' + str(i) + salt
+                    i = i + 1
+                    if (i%1000) == 0:
+                        salt = '_' + get_random_string(3)
+            
+            # clone layer
+            layer.pk = None
+            layer.name = new_name
+            # Ensure source_name points to the actual cloned DB table name so that
+            # all DB introspection (describe_feature_type, get_pk_columns, etc.) use
+            # the correct physical table name even when the Django layer name was
+            # changed to avoid naming conflicts.
+            layer.source_name = new_table_name
+            layer.datastore = target_datastore
+            if layer_group is not None:
+                layer.layer_group = layer_group
+            layer.save()
+
+            new_layer_instance = Layer.objects.get(id=layer.pk)
+            old_instance = Layer.objects.get(id=old_id)
+            
+            if clone_conf.permissions != CloneConf.PERMISSION_SKIP:
+                admin_role = auth_backend.get_admin_role()
+                read_roles = [ admin_role ]
+                write_roles = [ admin_role ]
+
+                for layer_read_role in LayerReadRole.objects.filter(layer=old_instance):
+                    layer_read_role.pk = None
+                    layer_read_role.layer = new_layer_instance
+                    layer_read_role.save()
+                    read_roles.append(layer_read_role.role)
+                
+                for layer_write_role in LayerWriteRole.objects.filter(layer=old_instance):
+                    layer_write_role.pk = None
+                    layer_write_role.layer = new_layer_instance
+                    layer_write_role.save()
+                    write_roles.append(layer_write_role.role)
+                for layer_manage_role in LayerManageRole.objects.filter(layer=old_instance):
+                    layer_manage_role.pk = None
+                    layer_manage_role.layer = new_layer_instance
+                    layer_manage_role.save()
+                server.setLayerDataRules(layer, read_roles, write_roles)
+            
+            set_time_enabled(server, new_layer_instance)
+            
+            for enum in LayerFieldEnumeration.objects.filter(layer=old_instance):
+                enum.pk = None
+                enum.layer = new_layer_instance
+                enum.save()
+            
+            from gvsigol_symbology.services import clone_layer_styles
+            clone_layer_styles(server, old_instance, new_layer_instance)
+            
+            for lyr_res in LayerResource.objects.filter(layer=old_instance):
+                lyr_res.pk = None
+                lyr_res.layer = new_layer_instance
+                lyr_res.save()
+            """
+            TODO:
+            - models from plugins (for instance metadata, charts, etc)
+            """
+            server.updateThumbnail(new_layer_instance, 'create')
+        
+            toc_add_layer(new_layer_instance)
+            server.createOrUpdateGeoserverLayerGroup(new_layer_instance.layer_group)
+
+            if new_layer_instance.vector_tile:
+                server.update_vector_tile_format(
+                    new_layer_instance.datastore.workspace,
+                    new_layer_instance.name,
+                    True
+                )
+
+            if new_layer_instance.cached:
+                # Reload GeoServer so the WMTS capabilities reflect the new layer name.
+                # The clone copies external_params verbatim, so wmts_options still points
+                # to the original layer's WMTS URL template; we must regenerate it here.
+                server.reload_master()
+                try:
+                    wmts_opts = get_wmts_options_from_layer(new_layer_instance)
+                    if wmts_opts is not None:
+                        ep = json.loads(new_layer_instance.external_params) if new_layer_instance.external_params else {}
+                        ep['wmts_options'] = wmts_opts
+                        new_layer_instance.external_params = json.dumps(ep)
+                        new_layer_instance.save()
+                except Exception:
+                    logger.exception("Could not refresh wmts_options for cloned cached layer %s", new_layer_instance.name)
+
+            new_layer_instance._cloned_from_name = old_name
+            new_layer_instance._cloned_from_instance = old_instance
+            return new_layer_instance
+    return layer
+
+def get_feat_version(introspect_con, schema, table, featid):
+    try:
+        pks = introspect_con.get_pk_columns(table, schema=schema)
+        if(pks and len(pks) == 1):
+            sqlst = "SELECT {version} FROM {schema}.{table} WHERE {pkfield} = %s"
+            query = sqlbuilder.SQL(sqlst).format(
+                version=sqlbuilder.Identifier(settings.VERSION_FIELD),
+                schema=sqlbuilder.Identifier(schema),
+                table=sqlbuilder.Identifier(table),
+                pkfield=sqlbuilder.Identifier(pks[0]))
+            introspect_con.cursor.execute(query, [featid])
+            for r in introspect_con.cursor.fetchall():
+                return r[0]
+    except Exception:
+        return None
+
+def check_feature_version(layer, feature_id, feat_version):
+    """
+    Returns True if the provided version matches the current feature version, False if
+    they don't match and None if the version could not be checked
+    """
+    i, table, schema = get_db_connect_from_layer(layer)
+    with i as con: # conn will autoclose
+        version = get_feat_version(i, schema, table, feature_id)
+        if version is not None:
+            if feat_version == version:
+                return True
+            return False
+
+
+def update_feat_version(layer, featid):
+    """
+    Increments the version of a feature and sets the current date.
+    Returns a tuple containing the new version and date,
+    or None if the version is not
+    updated (because the feature is not found, has no version field,
+    
+    """
+    try:
+        i, table, schema = get_db_connect_from_layer(layer)
+        with i as introspect_conn:
+            pks = introspect_conn.get_pk_columns(table, schema=schema)
+            if len(pks) != 1:
+                return None, None
+            pk = pks[0]
+            sql = """UPDATE {schema}.{table} SET {versionfield} = (COALESCE({versionfield}, 0)+1),
+                     {datefield} = now() WHERE {idfield} = %s
+                     RETURNING {versionfield}, {datefield}"""
+            query = sqlbuilder.SQL(sql).format(
+                versionfield = sqlbuilder.Identifier(settings.VERSION_FIELD),
+                datefield = sqlbuilder.Identifier(settings.DATE_FIELD),
+                schema = sqlbuilder.Identifier(schema),
+                table = sqlbuilder.Identifier(table),
+                idfield = sqlbuilder.Identifier(pk)
+                )
+            introspect_conn.cursor.execute(query, [featid])
+            for r in introspect_conn.cursor.fetchall():
+                return r[0], r[1]
+    except:
+        logger.exception("Error updating feature version")
+    return None, None
+
+def set_layer_permissions(layer, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles):
+    gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
+    authz = gs.getAuthorizationService()
+    authz.set_layer_permissions(layer, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles)
+
+def set_layergroup_permissions(layergroup, assigned_includeinproject_roles, assigned_manage_roles):
+    admin_role = auth_backend.get_admin_role()
+    assigned_includeinproject_roles.append(admin_role)
+    assigned_manage_roles.append(admin_role)
+
+    # clean existing groups and assign them again if necessary
+    LayerGroupRole.objects.filter(layergroup=layergroup).delete()
+    all_roles = auth_backend.get_all_roles()
+    for role in assigned_includeinproject_roles:
+        try:
+            if role in all_roles:
+                lyr_includeinproject_role = LayerGroupRole()
+                lyr_includeinproject_role.layergroup = layergroup
+                lyr_includeinproject_role.role = role
+                lyr_includeinproject_role.permission = LayerGroupRole.PERM_INCLUDEINPROJECTS
+                lyr_includeinproject_role.save()
+        except:
+            pass
+    
+    for role in assigned_manage_roles:
+        try:
+            if role in all_roles:
+                layer_manage_role = LayerGroupRole()
+                layer_manage_role.layergroup = layergroup
+                layer_manage_role.role = role
+                layer_manage_role.permission = LayerGroupRole.PERM_MANAGE
+                layer_manage_role.save()
+        except:
+            pass
+
+def get_layer_checked_roles_from_user_input(layer_read_roles, layer_write_roles, layer_manage_roles, creator_user_role=None, creator_all=False, external_perm_roles=[]):
+    role_list = auth_backend.get_all_roles_details(exclude_system=True)
+    roles = []
+    admin_roles = [ auth_backend.get_admin_role()]
+    for role in role_list:
+        if role['name'] not in admin_roles:
+            for layer_read_role in layer_read_roles:
+                if layer_read_role == role['name']:
+                    role['read_checked'] = True
+
+            for layer_write_role in layer_write_roles:
+                if layer_write_role == role['name']:
+                    role['write_checked'] = True
+            for layer_manage_role in layer_manage_roles:
+                if layer_manage_role == role['name']:
+                    role['manage_checked'] = True
+            if creator_user_role is not None and role['name'] == creator_user_role:
+                role['read_checked'] = True
+                role['manage_checked'] = True
+                if creator_all:
+                    role['write_checked'] = True
+            if role['name'] in external_perm_roles: # permission assigned by specific perm management plugins
+                role['external'] = True
+            roles.append(role)
+    return roles
+
+def get_layergroup_checked_roles_from_user_input(layergroup_includeinprojects_roles, layergroup_manage_roles, creator_user_role=None):
+    role_list = auth_backend.get_all_roles_details(exclude_system=True)
+    roles = []
+    admin_roles = [ auth_backend.get_admin_role()]
+    for role in role_list:
+        # FIXME OIDC CMI: ROLE_ prefix?
+        if role['name'] not in admin_roles:
+            for layergroup_includeinprojects_role in layergroup_includeinprojects_roles:
+                if layergroup_includeinprojects_role == role['name']:
+                    role['includeinprojects_checked'] = True
+            for layergroup_manage_role in layergroup_manage_roles:
+                if layergroup_manage_role == role['name']:
+                    role['manage_checked'] = True
+            if creator_user_role is not None and role['name'] == creator_user_role:
+                role['includeinprojects_checked'] = True
+                role['manage_checked'] = True
+            roles.append(role)
+    return roles
+
+def get_public_layers_query():
+    '''
+    Devuelve un objecto Q con la query para obtener las capas públicas.
+    '''
+    return Q(public=True)
+
+def get_layerread_by_user_query(user_roles):
+    '''
+    Devuelve un objecto Q con la query para obtener las capas sobre las que
+    el usuario tiene permisos explícitos de lectura.
+
+    Parámetros
+    ==========
+    user_roles: List[str]
+        Lista de roles del usuario
+    '''
+    return Q(layerreadrole__role__in=user_roles)
+
+
+def get_layerread_by_user(request, user_profile=None):
+    '''
+    Obtiene las capas en las que el usuario tiene permiso de lectura.
+    Estas son todas las públicas más todas las privadas sobre las que tiene permisos
+    explícitos de lectura.
+
+    Parámetros
+    ==========
+    request: HttpRequest
+        Objeto HttpRequest de Django con la petición en curso
+    '''    
+    if request.user.is_superuser:
+        return Layer.objects.all()
+    roles = get_roles(request)
+    return Layer.objects.filter(get_layerread_by_user_query(roles) \
+             | get_public_layers_query()).distinct()
+
+def get_layerread_by_role(role):
+    roles = [role]
+    return Layer.objects.filter(get_layerread_by_user_query(roles) \
+             | get_public_layers_query()).distinct()
+
+def set_default_permissions(file_path):
+    """
+    Sets the default permissions to the provided file. We set 0o644
+    so that the web server (e.g. Apache running as www-data) can read
+    the files served as public media (thumbnails, etc.).
+    """
+    os.chmod(file_path, 0o644)
+
+def get_datastore_name(username):
+    """
+    Returns the datastore name for the provided username.
+    The datastore name is the ascii normalized username prefixed with 'ds_'.
+    """
+    ascii_username = ascii_norm_username(username)
+    return 'ds_' + ascii_username
+
+def get_workspace_name(username):
+    """
+    Returns the workspace name for the provided username.
+    The workspace name is the ascii normalized username prefixed with 'ws_'.
+    """
+    ascii_username = ascii_norm_username(username)
+    return 'ws_' + ascii_username
+
+def create_user_workspace(username, role):
+    """
+    Creates the user workspace and datastore if they don't exist
+    """
+    gs = geographic_servers.get_instance().get_default_server()
+    server_object = Server.objects.get(id=int(gs.id))
+
+    auth_services.get_services().add_data_directory(role)
+    url = server_object.frontend_url + '/'
+    ws_name = get_workspace_name(username)
+    if gs.createWorkspace(ws_name, url + ws_name):
+        try:          
+            # save it on DB if successfully created
+            newWs = Workspace(
+                server = server_object,
+                name = ws_name,
+                description = '',
+                uri = url + ws_name,
+                wms_endpoint = url + ws_name + '/wms',
+                wfs_endpoint = url + ws_name + '/wfs',
+                wcs_endpoint = url + ws_name + '/wcs',
+                wmts_endpoint = url + 'gwc/service/wmts',
+                cache_endpoint = url + 'gwc/service/wms',
+                created_by = username,
+                is_public = False
+            )
+            newWs.save()
+        except django.db.utils.IntegrityError:
+            pass # ws exists
+        ds_name = get_datastore_name(username)
+        create_datastore(username, ds_name, newWs)
+        gs.reload_nodes()
+
+
+def _cleanup_layer_database_triggers(layer):
+    """
+    Limpia todos los triggers de base de datos asociados a una capa:
+    - LayerConnectionTrigger (triggers de conexión)
+    - Triggers topológicos
+    
+    Llamar antes de eliminar la capa.
+    """
+    from gvsigol_services.models import LayerConnectionTrigger
+    
+    # 1. Limpiar triggers de conexión (LayerConnectionTrigger)
+    try:
+        layer_triggers = LayerConnectionTrigger.objects.filter(layer=layer)
+        for lt in layer_triggers:
+            try:
+                # Forzar desinstalación del trigger de la base de datos
+                if lt.layer.datastore and lt.layer.datastore.connection:
+                    schema, table = lt.get_schema_and_table()
+                    i, params = lt.layer.datastore.connection.get_db_connection()
+                    if i:
+                        try:
+                            drop_trigger_sql = lt.trigger.generate_drop_trigger_sql(schema, table)
+                            drop_function_sql = lt.trigger.generate_drop_function_sql(schema, table)
+                            i.cursor.execute(drop_trigger_sql)
+                            i.cursor.execute(drop_function_sql)
+                            i.conn.commit()
+                            logger.info(f"Trigger {lt.trigger.name} desinstalado de capa {layer.name}")
+                        except Exception as e:
+                            logger.warning(f"Error ejecutando SQL de desinstalación para {lt.trigger.name}: {e}")
+                        finally:
+                            i.close()
+            except Exception as e:
+                logger.warning(f"Error desinstalando trigger {lt.trigger.name} de capa {layer.name}: {e}")
+    except Exception as e:
+        logger.warning(f"Error obteniendo triggers de conexión para capa {layer.id}: {e}")
+    
+    # 2. Limpiar triggers topológicos
+    try:
+        # Lista de todas las reglas topológicas posibles
+        topology_rules = [
+            "must_not_overlaps",
+            "must_not_have_gaps", 
+            "must_be_covered_by",
+            "must_not_overlap_with",
+            "must_be_contiguous"
+        ]
+        
+        # Obtener conexión a la base de datos
+        try:
+            i, source_name, schema = layer.get_db_connection()
+            if i:
+                # El nombre de la tabla se normaliza igual que en _get_topology_trigger_names
+                table_name = layer.name.replace(':', '_').lower()
+                
+                for rule_type in topology_rules:
+                    try:
+                        # Generar nombres de trigger y función topológica
+                        # Mismo formato que en views.py _get_topology_trigger_names
+                        function_name_simple = f"{rule_type}_{table_name}"
+                        trigger_name = f"trigger_{rule_type}_{table_name}"
+                        full_table_name = f"{schema}.{source_name}"
+                        
+                        # Eliminar trigger y función si existen
+                        drop_trigger_sql = f"DROP TRIGGER IF EXISTS {trigger_name} ON {full_table_name};"
+                        drop_function_sql = f"DROP FUNCTION IF EXISTS {schema}.{function_name_simple}();"
+                        
+                        i.cursor.execute(drop_trigger_sql)
+                        i.cursor.execute(drop_function_sql)
+                    except Exception as e:
+                        # Ignorar errores, el trigger puede no existir
+                        pass
+                
+                i.conn.commit()
+                i.close()
+                logger.info(f"Triggers topológicos limpiados para capa {layer.name}")
+        except Exception as e:
+            logger.warning(f"Error limpiando triggers topológicos para capa {layer.name}: {e}")
+    except Exception as e:
+        logger.warning(f"Error en limpieza de triggers topológicos para capa {layer.id}: {e}")
+
+
+def delete_datastore_elements(ds, gs=None):
+    if not gs:
+        gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
+    layers = Layer.objects.filter(external=False).filter(datastore=ds)
+    for l in layers:
+        gs.deleteLayerStyles(l)
+        # Limpiar triggers de conexión y topológicos antes de eliminar la capa
+        try:
+            _cleanup_layer_database_triggers(l)
+        except Exception as e:
+            logger.warning(f"Error limpiando triggers para capa {l.name}: {e}")
+
+    Datastore.objects.all().filter(name=ds.name).delete()
+    if ds.type == 'c_ImageMosaic':
+        got_params = json.loads(ds.connection_params)
+        mosaic_url = got_params["url"].replace("file://", "")
+        split_mosaic_url = mosaic_url.split("/")
+
+        mosaic_name = split_mosaic_url[split_mosaic_url.__len__()-1]
+
+        if os.path.isfile(mosaic_url + "/" + ds.name + ".properties"):
+            os.remove(mosaic_url + "/" + ds.name + ".properties")
+        if os.path.isfile(mosaic_url + "/" + mosaic_name + ".properties"):
+            os.remove(mosaic_url + "/" + mosaic_name + ".properties")
+        if os.path.isfile(mosaic_url + "/sample_image.dat"):
+            os.remove(mosaic_url + "/sample_image.dat")
+
+        host = MOSAIC_DB['host']
+        port = MOSAIC_DB['port']
+        dbname = MOSAIC_DB['database']
+        user = MOSAIC_DB['user']
+        passwd = MOSAIC_DB['passwd']
+        schema = 'imagemosaic'
+        i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+        i.delete_mosaic(ds.name, schema)
+        i.close()
+
+def _workspace_delete(ws, delete_data=False, reload_nodes=False):
+        gs = geographic_servers.get_instance().get_server_by_id(ws.server.id)
+        for ds in Datastore.objects.filter(workspace=ws):
+            try:
+                if delete_data:
+                    gs.deleteDatastore(ds.workspace, ds, delete_schema=True)
+                delete_datastore_elements(ds, gs=gs)
+            except:
+                logger.exception("Error deleting datastore")
+        gs.deleteWorkspace(ws)
+        ws.delete()
+        if reload_nodes:
+            gs.reload_nodes()
+
+def getAuthElements(request):
+    auth = None
+    headers = None
+    if request.session.get('username') is not None and request.session.get('password') is not None:
+        auth = (request.session['username'], request.session['password'])
+    elif request.headers.get("Authorization", '').startswith("Bearer "):
+        # Django stored token is only refreshed upon view load
+        # so it is not refreshed on the server side while a project is being used,
+        # then we prefer client-provided user token
+        headers = {'Authorization': request.headers.get("Authorization", '')}
+    elif request.session.get('oidc_access_token'):
+        headers = {'Authorization': 'Bearer ' + request.session.get('oidc_access_token')}
+    return auth, headers
+
+
+
+def getUserAuthSession(request):
+    session = requests.Session()
+    auth, headers = getAuthElements(request)
+    if auth:
+        session.auth = auth
+    if headers:
+        session.headers.update(headers)
+    return session
+
+
+
+PIXEL_SIZE_M = 0.00028  # 0.28 mm
+
+def _is_generic_wms_default_style_name(name, layer_name=None):
+    if not name:
+        return True
+    if name.lower() == 'default':
+        return True
+    if name.endswith('.Default'):
+        return True
+    if layer_name:
+        short_name = layer_name.split(':')[-1]
+        if name == short_name + '.Default':
+            return True
+    return False
+
+
+def mark_default_external_wms_style(styles, layer_name=None):
+    """
+    Mark the default WMS style for external layers.
+    Prefer the first thematic style (not generic Default/default names),
+    else the first generic default style, else the first style.
+    """
+    if not styles:
+        return styles
+    for style in styles:
+        if isinstance(style, dict):
+            style['is_default'] = False
+
+    default_idx = 0
+    for i, style in enumerate(styles):
+        if not isinstance(style, dict):
+            continue
+        name = style.get('name') or ''
+        if not _is_generic_wms_default_style_name(name, layer_name):
+            default_idx = i
+            break
+    else:
+        for i, style in enumerate(styles):
+            if not isinstance(style, dict):
+                continue
+            name = style.get('name') or ''
+            if _is_generic_wms_default_style_name(name, layer_name) and name:
+                default_idx = i
+                break
+
+    if isinstance(styles[default_idx], dict):
+        styles[default_idx]['is_default'] = True
+    return styles
+
+
+def get_wmts_options(
+    wmts, # owslib.wmts.WebMapTileService
+    layer_id: str
+):
+
+    layer = wmts.contents[layer_id]
+    request_encoding = "KVP"
+    urls = []
+
+    # ResourceURL (REST)
+    resource_urls = getattr(layer, "resourceURLs", None) or getattr(layer, "resourceURL", None)
+    if resource_urls:
+        for r in resource_urls:
+            if getattr(r, "resourceType", None) == "tile":
+                urls.append(r.template)
+        if urls:
+            request_encoding = "REST"
+
+    # KVP fallback
+    if not urls:
+        op = wmts.getOperationByName("GetTile")
+        for method in op.methods:
+            if method.get("type") == "Get":
+                kvp_url = method.get("url")
+                if kvp_url:
+                    if kvp_url.startswith("http://"):
+                        kvp_url = "https://" + kvp_url[7:] # avoid mixed origin errors
+                    urls = [kvp_url if kvp_url.endswith("?") else (kvp_url + ("&" if "?" in kvp_url else "?"))]
+                    
+
+    def _parse_tlc(tlc):
+        """Parse TopLeftCorner from various formats"""
+        if isinstance(tlc, (list, tuple)) and len(tlc) >= 2:
+            return [float(tlc[0]), float(tlc[1])]
+        if isinstance(tlc, str):
+            parts = tlc.replace(",", " ").split()
+            if len(parts) >= 2:
+                return [float(parts[0]), float(parts[1])]
+        return None
+
+    def _normalize_projection(crs):
+        """Normalize CRS to EPSG:xxxx format"""
+        if crs and "EPSG" in crs and ":" in crs:
+            parts = crs.split(":")
+            code = parts[-1]
+            if code.isdigit():
+                return f"EPSG:{code}"
+        return crs
+
+    # TileMatrixSet & tileGrid
+    tile_grids = {}
+    for current_matrix_set_id in layer.tilematrixsetlinks.keys():
+        tms = wmts.tilematrixsets[current_matrix_set_id]
+        # como tilematrix es un diccionario, necesitamos ordenar por scaledenominator para mas seguridad
+        matrix_ids_with_and_scale = sorted([
+            (matrix_id,
+                tms.tilematrix[matrix_id].scaledenominator)
+                for matrix_id in tms.tilematrix.keys() ], key=lambda x: x[1], reverse=True)
+                
+        matrices = [tms.tilematrix[matrix_id] for matrix_id, _ in matrix_ids_with_and_scale]
+
+        if not matrices:
+            continue
+
+        # matrixIds (identifiers tal cual)
+        matrix_ids = [m.identifier for m in matrices]
+
+        # resolutions (m/px) = ScaleDenominator * 0.00028
+        resolutions = [m.scaledenominator * PIXEL_SIZE_M for m in matrices]
+
+
+        #tile_sizes = [[m.tilewidth, m.tileheight] for m in matrices]
+        tile_sizes = [m.tilewidth for m in matrices]
+        origins = [m.topleftcorner for m in matrices]
+
+            # Obtener (matrix_id, limit_obj, scaledenominator) para cada límite y ordenar por escala
+        if hasattr(layer, "tilematrixsetlinks") and layer.tilematrixsetlinks.get(current_matrix_set_id) \
+            and getattr(layer.tilematrixsetlinks.get(current_matrix_set_id), "tilematrixlimits"):
+
+            tilematrixlimits_obj = layer.tilematrixsetlinks.get(current_matrix_set_id).tilematrixlimits
+            full_tile_ranges = []
+            full_tile_ranges_ol4 = []
+
+            for idx, m in enumerate(matrices):
+                
+                limit_obj = tilematrixlimits_obj.get(m.identifier, None)
+                if limit_obj:
+                    mintilecol = int(getattr(limit_obj, "mintilecol", getattr(limit_obj, "mincol", 0)))
+                    maxtilecol = int(getattr(limit_obj, "maxtilecol", getattr(limit_obj, "maxcol", 0)))
+                    mintilerow = int(getattr(limit_obj, "mintilerow", getattr(limit_obj, "minrow", 0)))
+                    maxtilerow = int(getattr(limit_obj, "maxtilerow", getattr(limit_obj, "maxrow", 0)))
+                    full_tile_ranges.append({
+                            "minX": mintilecol,
+                            "maxX": maxtilecol,
+                            "minY": mintilerow,
+                            "maxY": maxtilerow
+                        })
+                    full_tile_ranges_ol4.append({
+                        "minX": mintilecol,
+                        "maxX": maxtilecol,
+                        "minY": -(mintilerow+1),
+                        "maxY": -(maxtilerow+1)
+                    })
+
+                    if idx == len(matrices) - 1: # use the most detailed matrix to calculate the extent
+                        scale_denominator = tms.tilematrix[m.identifier].scaledenominator
+                        res = scale_denominator * PIXEL_SIZE_M
+                        origin = _parse_tlc(matrices[idx].topleftcorner)
+                        tile_w = int(matrices[idx].tilewidth)
+                        tile_h = int(matrices[idx].tileheight)
+                        minx = origin[0] + mintilecol * tile_w * res
+                        maxx = origin[0] + (maxtilecol + 1) * tile_w * res
+                        miny = origin[1] - (maxtilerow + 1) * tile_h * res
+                        maxy = origin[1] - mintilerow * tile_h * res
+                        extent = [minx, miny, maxx, maxy]
+                    
+                else:
+                    # when no limits are defined, calculate limits and extent from the matrix grid
+                    full_tile_ranges.append( {
+                        "minX": 0,
+                        "maxX": int(matrices[idx].matrixwidth)-1,
+                        "minY": 0,
+                        "maxY": -(int(matrices[idx].matrixheight)-1),
+                    })
+                    if idx == len(matrices) - 1: # use the most detailed matrix to calculate the extent
+                        mw = int(matrices[idx].matrixwidth)
+                        mh = int(matrices[idx].matrixheight)
+                        res = resolutions[idx]
+                        origin = _parse_tlc(matrices[idx].topleftcorner)
+                        tile_w = int(matrices[idx].tilewidth)
+                        tile_h = int(matrices[idx].tileheight)
+                        maxx = origin[0] + mw * tile_w * res
+                        miny = origin[1] - mh * tile_h * res
+                        extent = [origin[0], miny, maxx, origin[1]]
+                               
+        else:
+            # Si no hay límites, calcular extent desde el grid completo
+            #origins = [m.topleftcorner for m in matrices]
+            full_tile_ranges = None
+            origin = _parse_tlc(matrices[0].topleftcorner)
+            tile_w = int(matrices[0].tilewidth)
+            tile_h = int(matrices[0].tileheight)
+            mw = int(matrices[0].matrixwidth)
+            mh = int(matrices[0].matrixheight)
+            res0 = resolutions[0]
+            maxx = origin[0] + mw * tile_w * res0
+            miny = origin[1] - mh * tile_h * res0
+            extent = [origin[0], miny, maxx, origin[1]]
+
+        # Normalizar proyección
+        projection = _normalize_projection(getattr(tms, "crs", None))
+        tile_grid = {
+                "origin": None,
+                "origins": origins,
+                "minZoom": 0,
+                "maxZoom": len(resolutions) - 1,
+                "resolutions": resolutions,
+                "tileSize": None,
+                "tileSizes": tile_sizes,
+                "matrixIds": matrix_ids,
+            }
+
+        if full_tile_ranges is None:
+            tile_grid['extent'] = extent
+        else:
+            tile_grid['fullTileRanges'] = full_tile_ranges
+            tile_grid['fullTileRanges_ol4'] = full_tile_ranges_ol4
+            tile_grid['extent'] = extent
+        
+        tile_grids[current_matrix_set_id] = {
+            "matrixSet": current_matrix_set_id,
+            "projection": projection,
+            "tileGrid": tile_grid
+        }
+
+    options = {
+        "urls": urls,
+        "layer": layer_id,
+        "matrixSets": list(layer.tilematrixsetlinks.keys()),
+        "formats": layer.formats,
+        "requestEncoding": request_encoding,
+        "tileGrids": tile_grids,
+        "styles": layer.styles,
+        "dimensions": {}
+    }
+    
+    # Limpiar valores None
+    options = {k: v for k, v in options.items() if v is not None}
+    return options
+
+def _legend_url_for_style(legend_url, style_name):
+    """Set or replace STYLE parameter in a GetLegendGraphic-style URL"""
+    if not legend_url:
+        return legend_url
+    try:
+        parsed = urlparse(legend_url)
+        qs = parse_qs(parsed.query, keep_blank_values=True)
+        qs['STYLE'] = [style_name] if style_name else qs.get('STYLE', [])
+        qs.pop('style', None)  # avoid duplicate; OGC uses STYLE only
+        new_query = urlencode(qs, doseq=True)
+        return urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, new_query, parsed.fragment))
+    except Exception:
+        return legend_url
+
+
+def _normalize_wmts_style_identifier_for_kvp(wmts_options):
+    """
+    OWSLib may serialize a missing WMTS style Identifier as the string 'null'.
+    OpenLayers then requests STYLE=null and GeoServer returns blank tiles; default style needs ''.
+    """
+    styles = wmts_options.get('styles')
+    if isinstance(styles, dict) and 'null' in styles:
+        entry = styles.pop('null')
+        if '' not in styles:
+            styles[''] = entry
+    st = wmts_options.get('style')
+    if st is None or (isinstance(st, str) and st.strip().lower() == 'null'):
+        wmts_options.pop('style', None)
+    elif isinstance(st, str) and st.strip() == '':
+        wmts_options.pop('style', None)
+
+
+def wmts_options_for_openlayers(
+    wmts_options,
+    format=None,
+    style=None,
+    layer_styles=None,
+    tilematrixsetname=None,
+    projection=None,
+    gwc_cached=False,
+):
+    if wmts_options.get('styles') is None:
+        wmts_options['styles'] = {}
+    _normalize_wmts_style_identifier_for_kvp(wmts_options)
+    if len(wmts_options['styles']) > 0:
+        if style and wmts_options['styles'].get(style):
+            wmts_options['style'] = style
+        elif layer_styles:
+            for s in layer_styles:
+                if s.get('is_default', False):
+                    wmts_options['style'] = s.get('name')
+                    break
+        if not wmts_options.get('style'):
+            for name, s in wmts_options['styles'].items():
+                if s.get('isDefault', False):
+                    wmts_options['style'] = name
+                    break
+        if not wmts_options.get('style'):
+            wmts_options['style'] = list(wmts_options['styles'].keys())[0]
+        default_name = wmts_options.get('style')
+        # When layer_styles is provided, rebuild styles to only include DB styles and add missing ones
+        if layer_styles:
+            existing = wmts_options['styles']
+            template = next(iter(existing.values()), None) if existing else None
+            new_styles = {}
+            for s in layer_styles:
+                name = s.get('name')
+                if not name:
+                    continue
+                is_default = (name == default_name)
+                legend_url = s.get('custom_legend_url') or s.get('legend') or ''
+                if name in existing:
+                    entry = copy.deepcopy(existing[name])
+                    entry['isDefault'] = is_default
+                elif template:
+                    entry = copy.deepcopy(template)
+                    entry['isDefault'] = is_default
+                else:
+                    entry = {'isDefault': is_default, 'format': 'image/png', 'width': '20', 'height': '20', 'legend': ''}
+
+                if legend_url:
+                    entry['legend'] = _legend_url_for_style(legend_url, name)
+                elif entry.get('legend'):
+                    entry['legend'] = _legend_url_for_style(entry['legend'], name)
+                if s.get('title'):
+                    entry['title'] = s.get('title')
+
+                new_styles[name] = entry
+            wmts_options['styles'] = new_styles
+    else:
+        wmts_options.pop('style', None)
+    if gwc_cached:
+        from gvsigol_services.rest_geowebcache import GWC_EXTERNAL_WMS_MIME_FORMAT
+        format = GWC_EXTERNAL_WMS_MIME_FORMAT
+    if format:
+        if not gwc_cached:
+            fmts = wmts_options.get("formats")
+            if isinstance(fmts, (list, tuple)) and fmts and format not in fmts:
+                format = next((f for f in fmts if "png" in f.lower()), fmts[0])
+        wmts_options['format'] = format
+        try:
+            del wmts_options['formats']
+        except Exception:
+            pass
+
+    tilematrixset = None
+    tile_grids = wmts_options.get('tileGrids') or {}
+    if tilematrixsetname and tile_grids.get(tilematrixsetname):
+        tilematrixset = tile_grids[tilematrixsetname]
+    elif projection:
+        for tms_name, tms in tile_grids.items():
+            if tms.get('projection') == projection:
+                tilematrixset = tms
+                tilematrixsetname = tms_name
+                break
+        if not tilematrixset:  # prefer WebMercator when map CRS is unsupported
+            for tms_name, tms in tile_grids.items():
+                if tms.get('projection') in ('EPSG:3857', 'EPSG:900913'):
+                    tilematrixset = tms
+                    tilematrixsetname = tms_name
+                    break
+
+    # Last resort: any usable matrix set (e.g. ArcGIS WMTS only in EPSG:25830).
+    # OpenLayers will reproject onto the map view CRS when they differ.
+    if not tilematrixset:
+        for tms_name, tms in tile_grids.items():
+            if tms and tms.get('tileGrid'):
+                tilematrixset = tms
+                tilematrixsetname = tms_name
+                break
+
+    if tilematrixset:
+        wmts_options['matrixSet'] = tilematrixsetname
+        wmts_options['tileGrid'] = tilematrixset['tileGrid']
+        wmts_options['tileMatrixSet'] = tilematrixset['tileGrid']
+        wmts_options['projection'] = tilematrixset['projection']
+        wmts_options.pop('tileGrids', None)
+        wmts_options.pop('matrixSets', None)
+
+    _normalize_wmts_style_identifier_for_kvp(wmts_options)
+    return wmts_options
+
+
+def get_wmts_options_from_layer(layer # gvsigol_services.models.Layer object
+):
+    try:
+        url = layer.datastore.workspace.server.getWmtsEndpoint()
+        auth = AuthPatch(username=layer.datastore.workspace.server.user, password=layer.datastore.workspace.server.password, verify=False)
+        wmts = WebMapTileService(url, version=settings.WMTS_MAX_VERSION, auth=auth)
+        return get_wmts_options(wmts, layer.get_qualified_name())
+    except Exception as e:
+        logger.exception("Error getting wmts options")
+    return None
+
+class AuthPatch(Authentication):
+    """
+    Patch owslib.util.Authentication to circumvent _auth_delegate bug in older versions of owslib (<= 0.23.0)
+    """
+    def __init__(self, *args, **kwargs):
+        self._auth_delegate = kwargs.get('auth_delegate')
+        super().__init__(*args, **kwargs)
+
+
+# ---------------------------------------------------------------------------
+# Attributions resolution helpers
+# ---------------------------------------------------------------------------
+
+def get_attributions_for_project(project):
+    """
+    Devuelve la configuración de atribuciones aplicable a `project` siguiendo
+    las reglas de prioridad acordadas:
+
+    1. Si existe una configuración 'project_specific' activa para ese proyecto,
+       se devuelve esa.
+    2. Si no, se devuelve la primera configuración 'generic' activa que aplique
+       al proyecto (orden alfabético por `name` para que la elección sea
+       determinista). Una genérica aplica cuando `apply_to_all_projects=True` o
+       cuando el proyecto está incluido en su lista de memberships.
+    3. Si nada coincide, devuelve None.
+    """
+    if project is None:
+        return None
+
+    from .models import AttributionConfig
+
+    specific = (
+        AttributionConfig.objects
+        .filter(kind=AttributionConfig.KIND_PROJECT_SPECIFIC,
+                is_active=True,
+                project=project)
+        .first()
+    )
+    if specific is not None:
+        return specific
+
+    generic_qs = (
+        AttributionConfig.objects
+        .filter(kind=AttributionConfig.KIND_GENERIC, is_active=True)
+        .filter(Q(apply_to_all_projects=True) | Q(project_memberships__project=project))
+        .order_by('name')
+        .distinct()
+    )
+    return generic_qs.first()
+
+
+def normalize_attributions_filemanager_relative_path(internal_path):
+    """
+    Devuelve la ruta del fichero relativa a FILEMANAGER_DIRECTORY, con '/' como
+    separador. Tolera valores guardados como ruta absoluta y el caso legacy en
+    que se concatena el prefijo duplicado (p. ej. opt/gvsigol_data/data/...)
+    encima del directorio del filemanager.
+    """
+    from pathlib import Path
+
+    if internal_path is None:
+        return ''
+    s = str(internal_path).strip()
+    if not s:
+        return ''
+
+    fm_root = Path(FILEMANAGER_DIRECTORY).resolve()
+
+    def rel_to_fm(abs_path):
+        try:
+            r = Path(abs_path).resolve().relative_to(fm_root)
+            return str(r).replace('\\', '/')
+        except ValueError:
+            return None
+
+    p = Path(s.replace('\\', '/'))
+
+    if p.is_absolute():
+        rel = rel_to_fm(p)
+        if rel is not None:
+            return rel
+
+    rel_s = s.replace('\\', '/').lstrip('/')
+
+    fm_noprefix = str(fm_root).replace('\\', '/').lstrip('/')
+    low = rel_s.lower()
+    low_fm = fm_noprefix.lower()
+    if low.startswith(low_fm + '/'):
+        rel_s = rel_s[len(fm_noprefix) + 1:]
+    elif low == low_fm:
+        rel_s = ''
+
+    if not rel_s:
+        return ''
+
+    try:
+        cand = (fm_root / rel_s).resolve()
+        rel = rel_to_fm(cand)
+        if rel is not None:
+            return rel
+    except (OSError, RuntimeError):
+        pass
+
+    trial = Path('/') / rel_s
+    try:
+        rel = rel_to_fm(trial)
+        if rel is not None:
+            return rel
+    except (OSError, RuntimeError):
+        pass
+
+    return rel_s
+
+
+def attributions_attachment_matches_relative_path(norm_relative_path):
+    """
+    True si existe algún AttributionAttachment cuya internal_path
+    normalizada coincide con norm_relative_path (separadores '/').
+    """
+    from pathlib import Path
+    from .models import AttributionAttachment
+
+    norm = norm_relative_path.replace('\\', '/').strip('/')
+    if not norm:
+        return False
+
+    fm = Path(FILEMANAGER_DIRECTORY).resolve()
+    try:
+        abs_under_fm = str((fm / norm).resolve())
+    except (OSError, ValueError):
+        abs_under_fm = None
+
+    q = (
+        Q(internal_path__iendswith='/' + norm) |
+        Q(internal_path__iexact=norm)
+    )
+    if abs_under_fm:
+        q |= Q(internal_path__iexact=abs_under_fm)
+
+    for att in AttributionAttachment.objects.filter(q):
+        if normalize_attributions_filemanager_relative_path(att.internal_path) == norm:
+            return True
+
+    # Respaldo: internal_path en BD con prefijos distintos al esperado en q
+    bn = os.path.basename(norm)
+    if bn:
+        for att in AttributionAttachment.objects.filter(
+            Q(internal_path__iendswith='/' + bn) | Q(internal_path__iexact=bn)
+        ):
+            if normalize_attributions_filemanager_relative_path(att.internal_path) == norm:
+                return True
+    return False
+
+
+def attributions_logo_matches_relative_path(norm_relative_path):
+    """
+    True si existe alguna configuración de atribuciones cuyo
+    logo_internal_path normalizado coincide con norm_relative_path.
+    """
+    from .models import AttributionConfig
+
+    norm = (norm_relative_path or '').replace('\\', '/').strip('/')
+    if not norm:
+        return False
+
+    for cfg in AttributionConfig.objects.exclude(
+        Q(logo_internal_path__isnull=True) | Q(logo_internal_path__exact='')
+    ).only('logo_internal_path'):
+        if normalize_attributions_filemanager_relative_path(cfg.logo_internal_path) == norm:
+            return True
+    return False
+
+
+def build_attributions_public_url(internal_path):
+    """
+    Construye la URL pública para descargar un adjunto de atribuciones a
+    partir de su ruta interna en el file manager. La URL apunta al fileserver
+    de gvsigol_services y se sirve con sendfile y permission_classes=[AllowAny].
+    """
+    relative_path = normalize_attributions_filemanager_relative_path(internal_path)
+    if not relative_path:
+        return ''
+
+    base_url = (settings.BASE_URL or '').rstrip('/')
+    gvsigol_prefix = (getattr(settings, 'GVSIGOL_URL_PREFIX', 'gvsigonline/') or '').strip('/')
+    # Rutas en urls.py: include(prefix + 'fileserver/', gvsigol_services.urls_fileserver)
+    # → URL real: …/fileserver/attributions/download/<path>/ (sin segmento gvsigol_services).
+    # La ruta Django declara barra final; facilita coincidencia con APPEND_SLASH.
+    path_enc = quote(relative_path, safe='/')
+    return '{base}/{prefix}/fileserver/attributions/download/{path}/'.format(
+        base=base_url,
+        prefix=gvsigol_prefix,
+        path=path_enc,
+    )
+
+
+ATTRIBUTION_MODAL_SECTION_KEYS = (
+    'logo',
+    'copyright',
+    'other',
+    'help',
+    'contact',
+    'legal',
+    'links',
+    'attachments',
+)
+
+
+def normalize_attributions_modal_section_order(value):
+    """
+    Lista ordenada de ids de bloque válidos para el modal de atribuciones.
+    Si falta algún id conocido, se añade al final preservando el orden por defecto.
+    """
+    if value is None or value == '' or value == []:
+        return list(ATTRIBUTION_MODAL_SECTION_KEYS)
+    if isinstance(value, str):
+        try:
+            value = json.loads(value)
+        except (ValueError, TypeError):
+            return list(ATTRIBUTION_MODAL_SECTION_KEYS)
+    if not isinstance(value, list):
+        return list(ATTRIBUTION_MODAL_SECTION_KEYS)
+    allowed = set(ATTRIBUTION_MODAL_SECTION_KEYS)
+    seen = set()
+    out = []
+    for key in value:
+        if key in allowed and key not in seen:
+            out.append(key)
+            seen.add(key)
+    for key in ATTRIBUTION_MODAL_SECTION_KEYS:
+        if key not in seen:
+            out.append(key)
+            seen.add(key)
+    return out
+
+
+def serialize_attributions(config):
+    """
+    Genera la representación JSON-serializable de una `AttributionConfig`
+    para ser consumida por el visor React. Devuelve None si la configuración
+    es None.
+    """
+    if config is None:
+        return None
+
+    links = [
+        {
+            'url': link.url,
+            'description': link.description or '',
+        }
+        for link in config.links.all().order_by('order', 'id')
+    ]
+
+    attachments = [
+        {
+            'public_url': build_attributions_public_url(att.internal_path)
+                or (att.public_url or ''),
+            'description': att.description or '',
+        }
+        for att in config.attachments.all().order_by('order', 'id')
+    ]
+
+    return {
+        'id': config.id,
+        'title': config.name,
+        'name': config.name,
+        'description': config.description or '',
+        'other': {
+            'title': config.other_title or '',
+            'text': config.other_text or '',
+        },
+        'logo': {
+            'internal_path': config.logo_internal_path or '',
+            'public_url': build_attributions_public_url(config.logo_internal_path)
+                or (config.logo_public_url or ''),
+        },
+        'kind': config.kind,
+        'copyright_notice': config.copyright_notice or '',
+        'help_text': config.help_text or '',
+        'contact': {
+            'organization': config.contact_organization or '',
+            'person': config.contact_person or '',
+            'address': config.contact_address or '',
+            'phone': config.contact_phone or '',
+            'email': config.contact_email or '',
+            'legal_notice': config.legal_notice or '',
+        },
+        'links': links,
+        'attachments': attachments,
+        'modal_section_order': normalize_attributions_modal_section_order(
+            config.modal_section_order
+        ),
+    }

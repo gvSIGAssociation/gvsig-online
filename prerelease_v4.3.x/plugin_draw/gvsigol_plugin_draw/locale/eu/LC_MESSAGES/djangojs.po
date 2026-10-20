@@ -1,0 +1,146 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-03-04 10:55+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: static/js/lib/_trans.gvsigol.js:2
+msgid "Show draw tools"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:3
+msgid "Close"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:4
+#: static/js/lib/tools/InsertTextControl.js:37
+#: static/js/lib/tools/InsertTextControl.js:76
+#: static/js/lib/tools/StyleSettings.js:64
+msgid "Insert text"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:5
+msgid "Delete"
+msgstr ""
+
+#: static/js/lib/_trans.gvsigol.js:6
+msgid "Save"
+msgstr ""
+
+#: static/js/lib/tools/CleanDrawControl.js:33
+msgid "Clean drawings"
+msgstr ""
+
+#: static/js/lib/tools/CloseDrawControl.js:40
+msgid "Close draw bar"
+msgstr ""
+
+#: static/js/lib/tools/DrawLineControl.js:65
+msgid "Draw line"
+msgstr ""
+
+#: static/js/lib/tools/DrawPointControl.js:68
+msgid "Draw point"
+msgstr ""
+
+#: static/js/lib/tools/DrawPolygonControl.js:67
+msgid "Draw polygon"
+msgstr ""
+
+#: static/js/lib/tools/StyleSettings.js:134
+msgid "Style settings"
+msgstr ""
+
+#: static/js/lib/tools/StyleSettings.js:146
+msgid "Circle"
+msgstr ""
+
+#: static/js/lib/tools/StyleSettings.js:147
+msgid "Square"
+msgstr ""
+
+#: static/js/lib/tools/StyleSettings.js:148
+msgid "Triangle"
+msgstr ""
+
+#: static/js/lib/tools/StyleSettings.js:149
+msgid "Star"
+msgstr ""
+
+#: static/js/lib/tools/StyleSettings.js:150
+msgid "Cross"
+msgstr ""
+
+#: static/js/lib/tools/StyleSettings.js:169
+msgid "Point"
+msgstr ""
+
+#: static/js/lib/tools/StyleSettings.js:170
+msgid "Line"
+msgstr ""
+
+#: static/js/lib/tools/StyleSettings.js:172
+msgid "Polygon"
+msgstr ""
+
+#: static/js/lib/tools/StyleSettings.js:173
+msgid "Text"
+msgstr ""
+
+#: static/js/lib/tools/StyleSettings.js:196
+msgid "Select shape"
+msgstr ""
+
+#: static/js/lib/tools/StyleSettings.js:210
+msgid "Size"
+msgstr ""
+
+#: static/js/lib/tools/StyleSettings.js:216
+#: static/js/lib/tools/StyleSettings.js:334
+#: static/js/lib/tools/StyleSettings.js:378
+msgid "Fill color"
+msgstr ""
+
+#: static/js/lib/tools/StyleSettings.js:222
+#: static/js/lib/tools/StyleSettings.js:340
+msgid "Fill opacity"
+msgstr ""
+
+#: static/js/lib/tools/StyleSettings.js:228
+#: static/js/lib/tools/StyleSettings.js:254
+#: static/js/lib/tools/StyleSettings.js:294
+#: static/js/lib/tools/StyleSettings.js:346
+#: static/js/lib/tools/StyleSettings.js:384
+msgid "Stroke color"
+msgstr ""
+
+#: static/js/lib/tools/StyleSettings.js:234
+#: static/js/lib/tools/StyleSettings.js:260
+#: static/js/lib/tools/StyleSettings.js:300
+#: static/js/lib/tools/StyleSettings.js:352
+#: static/js/lib/tools/StyleSettings.js:390
+msgid "Stroke width"
+msgstr ""
+
+#: static/js/lib/tools/StyleSettings.js:272
+#: static/js/lib/tools/StyleSettings.js:312
+msgid "Select pattern"
+msgstr ""
+
+#: static/js/lib/tools/StyleSettings.js:372
+msgid "Font size"
+msgstr ""

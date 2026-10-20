@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block content %}
+<div id="sysadmin-tests-app"
+	data-discover-url="{% url 'sysadmin_tests_discover' %}"
+	data-run-url="{% url 'sysadmin_tests_run' %}"
+	data-status-url-template="{% url 'sysadmin_tests_status' 0 %}">
+<div class="row">
+	<div class="col-lg-12">
+		<p class="text-muted">{% trans "Tests run asynchronously via Celery; ensure a worker processes the application's queue." %}</p>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="box box-primary">
+			<div class="box-header with-border">
+				<h3 class="box-title">{% trans "Unit tests" %}</h3>
+				<div class="box-tools pull-right">
+					<a href="{% url 'sysadmin_home' %}" class="btn btn-default btn-sm"><i class="fa fa-chevron-left margin-r-5"></i> {% trans "Platform console" %}</a>
+					<a href="{% url 'home' %}" class="btn btn-default btn-sm"><i class="fa fa-home margin-r-5"></i> {% trans "Back to dashboard home" %}</a>
+				</div>
+			</div>
+
+			<div class="box-body">
+				<div id="sysadmin-discover-alert" class="alert alert-danger" style="display:none;"></div>
+				<div id="sysadmin-run-alert" class="alert alert-warning" style="display:none;"></div>
+
+				<div class="row" style="margin-bottom:14px;">
+					<div class="col-md-8">
+						<form class="form-inline" role="form" style="margin-bottom:10px;" onsubmit="return false;">
+							<div class="form-group" style="margin-right:10px;">
+								<label for="filter-needs-db" style="margin-right:6px;">{% trans "Requires DB" %}</label>
+								<select id="filter-needs-db" class="form-control input-sm">
+									<option value="all">{% trans "All" %}</option>
+									<option value="no">{% trans "No" %}</option>
+									<option value="yes">{% trans "Yes" %}</option>
+								</select>
+							</div>
+							<div class="form-group" style="margin-right:10px;">
+								<label for="filter-theme" style="margin-right:6px;">{% trans "Topic" %}</label>
+								<select id="filter-theme" class="form-control input-sm">
+									<option value="all">{% trans "All topics" %}</option>
+								</select>
+							</div>
+							<div class="form-group" style="margin-right:10px;">
+								<label for="filter-search" style="margin-right:6px;">{% trans "Search" %}</label>
+								<input type="search" id="filter-search" class="form-control input-sm" placeholder="{% trans "Module or test name" %}">
+							</div>
+							<button type="button" id="btn-refresh-discovery" class="btn btn-default btn-sm"><i class="fa fa-refresh"></i> {% trans "Reload catalog" %}</button>
+						</form>
+
+						<p class="text-muted"><span id="sysadmin-visible-count">0</span> / <span id="sysadmin-total-count">0</span> {% trans "tests visible" %} — <strong id="sysadmin-checked-count">0</strong> {% trans "selected" %}</p>
+
+						<p class="text-muted"><strong>{% trans "Presets:" %}</strong></p>
+						<p style="margin-bottom:8px;">
+							<button type="button" class="btn btn-default btn-sm sysadmin-preset" data-preset="all-visible">{% trans "All visible" %}</button>
+							<button type="button" class="btn btn-default btn-sm sysadmin-preset" data-preset="clear">{% trans "Clear" %}</button>
+							<button type="button" class="btn btn-default btn-sm sysadmin-preset" data-preset="no-db">{% trans "No DB (filter + select)" %}</button>
+							<button type="button" class="btn btn-default btn-sm sysadmin-preset" data-preset="only-db">{% trans "Only DB (filter + select)" %}</button>
+						</p>
+						<p class="text-muted"><strong>{% trans "By app:" %}</strong></p>
+						<div id="sysadmin-app-presets" style="margin-bottom:10px;"></div>
+					</div>
+
+					<div class="col-md-4">
+						<button type="button" id="btn-run-tests" class="btn btn-primary btn-block" disabled="disabled">
+							<i class="fa fa-play margin-r-5"></i> {% trans "Run selection" %}
+						</button>
+						<p class="text-muted" style="margin-top:8px;"><small>{% trans "You cannot queue a new run while another is pending or running." %}</small></p>
+						<div class="margin-top">
+							<span style="margin-right:6px;">{% trans "Run status:" %}</span>
+							<span id="sysadmin-run-status-label" class="label label-default">{% trans "Idle" %}</span>
+							<span id="sysadmin-run-id-hint" class="text-muted small" style="margin-left:8px;"></span>
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-7">
+						<div id="sysadmin-test-tree"></div>
+					</div>
+					<div class="col-md-5">
+						<div class="box box-solid box-default">
+							<div class="box-header with-border">
+								<h3 class="box-title">{% trans "Output" %}</h3>
+							</div>
+							<div class="box-body">
+								<div id="sysadmin-summary-wrap" style="display:none;">
+									<h5>{% trans "Summary" %}</h5>
+									<pre id="sysadmin-summary" class="small" style="max-height:160px;overflow:auto;background:#f9f9f9;padding:8px;"></pre>
+								</div>
+								<h5>{% trans "STDOUT" %}</h5>
+								<pre id="sysadmin-run-stdout" class="small" style="max-height:220px;overflow:auto;background:#111;color:#ddd;padding:8px;"></pre>
+								<h5>{% trans "STDERR" %}</h5>
+								<pre id="sysadmin-run-stderr" class="small" style="max-height:220px;overflow:auto;background:#2a0e0e;color:#ffcccc;padding:8px;"></pre>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script src="{% static 'gvsigol_plugin_sysadmin/js/sysadmin_tests.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,240 @@
+{% extends "base.html" %} 
+{% load static %} 
+{% load i18n %} 
+
+{% block header %}
+<link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-alerts.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-list-page.css" %}">
+<style>
+.tab-content { padding: 0;}
+</style>
+{% endblock %}
+
+{% block content %}
+{% if messages %}
+<div class="pl-cache-messages">
+	{% for message in messages %}
+	<div class="alert alert-{% if 'error' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'success' in message.tags %}success{% else %}info{% endif %}" role="alert">
+		{{ message }}
+	</div>
+	{% endfor %}
+</div>
+{% endif %}
+<div class="row">
+	<div class="col-md-12">
+	
+		<ul class="nav nav-tabs">
+	    	<li class="active"><a href="#tab-cached-layers" data-toggle="tab"><i class="fa fa-map tab-icon"></i> {% trans "Cached layers" %}</a></li>
+	        <li><a href="#tab-cached-groups" data-toggle="tab"><i class="fa fa-th-large tab-icon"></i> {% trans "Cached groups" %}</a></li>
+	    </ul>
+	       	
+	  	<div class="tab-content">
+	    	<div class="tab-pane active" id="tab-cached-layers">
+			<div class="pl-panel__header">
+				<h3 class="pl-panel__title"><i class="fa fa-map"></i>{% trans "Cached layers" %}</h3>
+				<div class="pl-panel__actions">
+					<form class="pl-search-form">
+						<input type="text" class="form-control" placeholder="{% trans 'Search...' %}">
+						<button type="submit" class="btn-search"><i class="fa fa-search"></i></button>
+						<a href="#" class="btn-clear"><i class="fa fa-times"></i></a>
+					</form>
+				</div>
+			</div>
+			<table class="pl-table table" style="width: 100%;" id="layers-table">
+									<thead>
+										<tr>
+											<th>ID</th>
+											<th>{% trans "Name" %}</th>
+											<th>{% trans "Title" %}</th>
+											<th>{% trans "Datastore" %}</th>
+											<th>{% trans "Layer group" %}</th>
+											<th>{% trans "Cached" %}</th>
+											<th></th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for layer in layers %}
+										<tr>
+											<td>{{ layer.id }}</td>
+											<td>{{ layer.name }}</td>
+											<td>{{ layer.title }}</td>
+											<td>{{ layer.datastore.name }}</td>
+											<td>{{ layer.layer_group.name }} ({{layer.layer_group.title }})</td>
+											{% if layer.cached %}
+											<td><input disabled type="checkbox" checked/></td>
+											{% else %}
+											<td><input disabled type="checkbox"/></td>
+											{% endif %}
+											<td></td>
+											<td></td>
+										</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+	         </div>
+	         
+	         <div class="tab-pane" id="tab-cached-groups">
+			<div class="pl-panel__header">
+				<h3 class="pl-panel__title"><i class="fa fa-th-large"></i>{% trans "Cached groups" %}</h3>
+				<div class="pl-panel__actions">
+					<form class="pl-search-form">
+						<input type="text" class="form-control" placeholder="{% trans 'Search...' %}">
+						<button type="submit" class="btn-search"><i class="fa fa-search"></i></button>
+						<a href="#" class="btn-clear"><i class="fa fa-times"></i></a>
+					</form>
+				</div>
+			</div>
+			<table class="pl-table table" style="width: 100%;" id="groups-table">
+									<thead>
+										<tr>
+											<th>ID</th>
+											<th>{% trans "Name" %}</th>
+											<th>{% trans "Title" %}</th>
+											<th>{% trans "Cached" %}</th>
+											<th></th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for group in groups %}
+										<tr>
+											<td>{{ group.id }}</td>
+											<td>{{ group.name }}</td>
+											<td>{{ group.title }}</td>
+											{% if group.cached %}
+											<td><input disabled type="checkbox" checked/></td>
+											{% else %}
+											<td><input disabled type="checkbox"/></td>
+											{% endif %}
+											<td></td>
+											<td></td>
+										</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+	         </div>
+	   	</div>
+		
+		
+	</div>
+</div>      
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-cache').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+	var layersTable = golListTable('#layers-table', {
+		dt: {
+		"columnDefs": [{
+	      	"targets": -1,
+	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-layer-cache-clear" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="' + '{% trans "Clear cache" %}' + '" class="btn btn-warning"><i class="fa fa-refresh"></i></button>'
+	  	},{
+	      	"targets": -2,
+	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-layer-cache-config" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Configure cache options" %}' + '" class="btn bg-purple"><i class="fa fa-cogs"></i></button>'
+	  	}]
+		}
+	});
+	
+	var groupsTable = golListTable('#groups-table', {
+		dt: {
+		"columnDefs": [{
+	      	"targets": -1,
+	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-group-cache-clear" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="' + '{% trans "Clear cache" %}' + '" class="btn btn-warning"><i class="fa fa-refresh"></i></button>'
+	  	},{
+	      	"targets": -2,
+	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-group-cache-config" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Configure cache options" %}' + '" class="btn bg-purple"><i class="fa fa-cogs"></i></button>'
+	  	}]
+		}
+	});
+		 
+	$('#layers-table tbody').on('click', 'button', function (){
+		var row = layersTable.row($(this).parents('tr'));
+	    var data = row.data();  
+	    if (this.name == "button-layer-cache-config"){
+	    	layerCacheConfig(data, row);
+			
+		} else if (this.name == "button-layer-cache-clear"){
+			layerCacheClear(data, row, $(this));
+			
+		}
+	});
+	
+	$('#groups-table tbody').on('click', 'button', function (){
+		var row = groupsTable.row($(this).parents('tr'));
+	    var data = row.data();  
+	    if (this.name == "button-group-cache-config"){
+	    	groupCacheConfig(data, row);
+			
+		} else if (this.name == "button-group-cache-clear"){
+			groupCacheClear(data, row, $(this));
+			
+		}
+	});
+	
+	
+	function layerCacheConfig(data){			
+		location.href = '/gvsigonline/services/layer_cache_config/' + data[0] + '/';
+	}
+	
+	function layerCacheClear(data, row, button){			
+		var _this = this;
+		var layerId = data[0];
+		button.find("i").addClass('fa-spin');
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/services/layer_cache_clear/' + layerId + '/',
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			success	:function(response){
+				button.find("i").removeClass('fa-spin');
+				messageBox.show("success", gettext("The layer cache was cleared"));
+			},
+			error: function(){
+				button.find("i").removeClass('fa-spin');
+				messageBox.show("error", gettext("The layer cache clearing failed"));
+			}
+		});
+	}
+	function groupCacheConfig(data){
+		location.href = '/gvsigonline/services/group_cache_config/' + data[0] + '/';
+	}
+	function groupCacheClear(data, row, button){
+		var _this = this;
+		var layerId = data[0];
+		button.find("i").addClass('fa-spin');
+		
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/services/layergroup_cache_clear/' + layerId + '/',
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			success	:function(response){
+				button.find("i").removeClass('fa-spin');
+				messageBox.show("success", gettext("The layergroup cache was cleared"));
+			},
+			error: function(){
+				button.find("i").removeClass('fa-spin');
+				messageBox.show("error", gettext("The layergroup cache clearing failed"));
+			}
+		});
+	}
+	    
+});
+</script>
+{% endblock %}

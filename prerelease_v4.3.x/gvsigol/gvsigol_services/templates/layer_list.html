@@ -1,0 +1,358 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block header %}
+<link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-modal.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-list-page.css" %}">
+<style>
+.pl-table.table > tbody > tr > td { padding: 11px 16px; color: #4a5a68; font-size: 13px; font-weight: 400; line-height: 1.5; vertical-align: middle !important;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="pl-panel">
+			<div id="form-error" style="color:#ff0000;display:none;"></div>
+			<div class="pl-panel__header">
+				<h3 class="pl-panel__title"><i class="icon-layers"></i>{% trans "Layers list" %}</h3>
+				<div class="pl-panel__actions">
+					<select name="project_id" id="select-project" class="form-control pl-filter-select">
+						<option value="__none__">{% trans "Filter by project" %} ...</option>
+						{% for project in projects_list %}
+							{% if project.id|stringformat:"s" == project_id %}
+								<option value="{{ project.id }}" selected>{{ project.title }}</option>
+							{% else %}
+								<option value="{{ project.id }}">{{ project.title }}</option>
+							{% endif %}
+						{% endfor %}
+					</select>
+					<form method="get" action="" id="search-form" class="pl-search-form">
+						<input type="text" name="search" class="form-control" placeholder="{% trans 'Search...' %}" value="{{ search_query|default:'' }}">
+						{% if request.GET.page_size %}<input type="hidden" name="page_size" value="{{ request.GET.page_size }}">{% endif %}
+						{% if project_id %}<input type="hidden" name="project_id" value="{{ project_id }}">{% endif %}
+						<button type="submit" class="btn-search"><i class="fa fa-search"></i></button>
+						{% if search_query or project_id %}<a href="?{% if request.GET.page_size %}page_size={{ request.GET.page_size }}{% endif %}" class="btn-clear"><i class="fa fa-times"></i></a>{% endif %}
+					</form>
+					<button id="button-clean-filter" class="btn-pl-outline"><i class="fa fa-eye"></i> {% trans "Show all layers" %}</button>
+					<button id="button-create-layer" class="btn-pl-outline"><i class="fa fa-database"></i> {% trans "Create empty layer" %}</button>
+					<button id="button-import-layer" class="btn-pl-add"><i class="fa fa-cloud-upload"></i> {% trans "Publish layer" %}</button>
+				</div>
+			</div>
+			<div class="pl-panel__body">
+				<table class="pl-table table" id="layers-table">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>{% trans "Preview" %}</th>
+							<th>{% trans "Name" %}</th>
+							<th>{% trans "Title" %}</th>
+							<th>{% trans "Datastore" %}</th>
+							<th>{% trans "Layer group" %}</th>
+							<th>{% trans "Projects" %}</th>
+							<th style="display:none">{% trans "Datastore type" %}</th>
+							<th></th>
+							<th></th>
+							<th></th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for layer in layers %}
+						<tr>
+							<td>{{ layer.id }}</td>
+							<td><img style="cursor: pointer;" id="layerpreview-{{ layer.id }}" data-origin="{{ layer.type }}" src="{{ layer.thumbnail_url }}" height="60" width="84" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2284%22 height=%2260%22 viewBox=%220 0 84 60%22%3E%3Crect width=%2284%22 height=%2260%22 rx=%224%22 fill=%22%23f4f6f8%22 stroke=%22%23e8ecef%22 stroke-width=%221%22/%3E%3Crect x=%2228%22 y=%2214%22 width=%2228%22 height=%2222%22 rx=%222%22 fill=%22none%22 stroke=%22%23cdd4da%22 stroke-width=%221.5%22/%3E%3Ccircle cx=%2234%22 cy=%2220%22 r=%222.5%22 fill=%22%23cdd4da%22/%3E%3Cpolyline points=%2228,36 36,26 43,32 50,24 56,36%22 fill=%22%23e2e8ed%22 stroke=%22%23cdd4da%22 stroke-width=%221.2%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E';"></td>
+							<td>{{ layer.name }}</td>
+							<td>{{ layer.title }}</td>
+							<td>{{ layer.datastore_name }}</td>
+							<td>{{ layer.lg_name }} ({{layer.lg_title }})</td>
+							<td>{{ layer.projects }}</td>
+							<td style="display:none">{{ layer.type }}</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+{% if is_paginated %}
+			<div class="pl-server-pagination">
+				<ul class="pagination pagination-sm">
+					{% if page_obj.has_previous %}
+						<li><a href="?page=1{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}">&laquo; {% trans "First" %}</a></li>
+						<li><a href="?page={{ page_obj.previous_page_number }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}">{% trans "Previous" %}</a></li>
+					{% else %}
+						<li class="disabled"><span>&laquo; {% trans "First" %}</span></li>
+						<li class="disabled"><span>{% trans "Previous" %}</span></li>
+					{% endif %}
+					{% for num in paginator.page_range %}
+						{% if page_obj.number == num %}
+							<li class="active"><span>{{ num }}</span></li>
+						{% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+							<li><a href="?page={{ num }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}">{{ num }}</a></li>
+						{% endif %}
+					{% endfor %}
+					{% if page_obj.has_next %}
+						<li><a href="?page={{ page_obj.next_page_number }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}">{% trans "Next" %}</a></li>
+						<li><a href="?page={{ paginator.num_pages }}{% if request.GET.page_size %}&page_size={{ request.GET.page_size }}{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if project_id %}&project_id={{ project_id }}{% endif %}">{% trans "Last" %} &raquo;</a></li>
+					{% else %}
+						<li class="disabled"><span>{% trans "Next" %}</span></li>
+						<li class="disabled"><span>{% trans "Last" %} &raquo;</span></li>
+					{% endif %}
+				</ul>
+				<div class="pagination-info">{% blocktrans with start=page_obj.start_index end=page_obj.end_index total=total_items %}Showing {{ start }} to {{ end }} of {{ total }} layers{% endblocktrans %}</div>
+			</div>
+			{% endif %}
+		</div>
+	</div>
+</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-delete-layer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="myModalLabel">{% trans "Delete layer" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p>{% trans "The layer will be removed, Do you want continue?" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button id="button-delete-layer-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-delete-layer-accept" type="button" class="btn btn-modal-accept">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-edit-layer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+
+			<div class="modal-body">
+				<h4>{% trans "Raster layers are not configurable" %}</h4>
+			</div>
+			<div class="modal-footer">
+				<button id="button-delete-layer-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-force-delete-layer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+
+			<div class="modal-body">
+				<h4>{% trans "The layer could not be removed from GeoServer, but it was deleted from the list anyway" %}</h4>
+			</div>
+			<div class="modal-footer">
+				<button id="button-force-delete-accept" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Accept" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-services').addClass("active");
+	$('#submenu-layers').addClass("active");
+</script>
+<script>
+$(document).ready(function() {
+	var projects = {{ projects|safe }};
+	
+	var table = golListTable('#layers-table', {
+		mode: 'server',
+		dt: {
+		"columnDefs": [{
+	        "targets": -1,
+	        "data": null,
+	        "defaultContent": '<button type="button" name="button-delete-layer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="' + '{% trans "Delete layer" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
+	    },{
+	      	"targets": -2,
+	       	"data": null,
+	       	"render": function ( data, type, row ) {
+	       		if (data[7] && data[7] == "v_PostGIS") {
+            		return '<a title="' + '{% trans "Configure layer" %}' + '" href="/gvsigonline/services/layer_config/' + data[0] + '/" data-toggle="tooltip" data-placement="bottom" class="btn btn-configure"><i class="fa fa-cogs"></i></a>';
+	       		}
+	       		else {
+	       			return '<button type="button" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Configure layer" %}' + '" class="btn btn-configure"><i class="fa fa-cogs"></i></button>'
+	       		}
+            }
+	  	},
+	  	{
+	      	"targets": -5,
+	       	"data": null,
+	       	"render": function ( data, type, row ) {
+            	return '<a title="' + '{% trans "Update layer" %}' + '" href="/gvsigonline/services/layer_update/' + data[0] + '/" data-toggle="tooltip" data-placement="bottom" class="btn btn-success"><i class="fa fa-edit"></i></a>';
+            }
+	  	},{
+	      	"targets": -3,
+	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-refresh-extent" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Refresh extent and layer definition" %}' + '" class="btn btn-info"><i class="fa fa-arrows-alt"></i></button>'
+	  	},{
+	      	"targets": -4,
+	       	"data": null,
+	        "defaultContent": '<button type="button" name="button-update-thumbnail" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update thumbnail" %}' + '" class="btn btn-primary"><i class="fa fa-file-image-o"></i></button>'
+	  	}]
+		}
+	});
+
+	$('#layers-table tbody').on('click', 'button', function (){
+		var row = table.row($(this).parents('tr'));
+	    var data = row.data();
+	    if (this.name == "button-config-layer"){
+	    	$('#modal-edit-layer').modal('show');
+		} else if (this.name == "button-update-thumbnail"){
+			updateThumbnail(data, row);
+
+		} else if (this.name == "button-delete-layer"){
+	        deleteLayer(data, row);
+	        
+	    } else if (this.name == "button-refresh-extent"){
+	        refreshExtent(data, row, $(this));
+	    }
+	});
+
+	$('#button-import-layer').click( function() {
+		location.href = '/gvsigonline/services/layer_add/';
+	});
+	$('#button-create-layer').click( function() {
+		location.href = "{% url 'layer_create'%}";
+	});
+	
+	// Filtro por proyecto - se envía automáticamente al servidor al cambiar
+	$('#select-project').on('change', function() {
+		var projectId = $(this).val();
+		var urlParams = new URLSearchParams(window.location.search);
+		
+		// Actualizar o eliminar el parámetro project_id
+		if (projectId && projectId !== '__none__') {
+			urlParams.set('project_id', projectId);
+		} else {
+			urlParams.delete('project_id');
+		}
+		
+		// Resetear a la primera página cuando se cambia el filtro
+		urlParams.set('page', '1');
+		
+		// Redirigir con los nuevos parámetros
+		window.location.href = '?' + urlParams.toString();
+	});
+	
+	// Botón para limpiar el filtro de proyecto
+	$('#button-clean-filter').on('click', function() {
+		var urlParams = new URLSearchParams(window.location.search);
+		urlParams.delete('project_id');
+		urlParams.set('page', '1'); // Resetear a la primera página
+		window.location.href = '?' + urlParams.toString();
+	});
+	
+	function updateThumbnail(data){
+		var _this = this;
+		var layerId = data[0];
+
+		$("#layerpreview-" + layerId).overlay();
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/services/update_thumbnail/' + layerId + '/',
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			success	:function(response){
+				if (response.success) {
+					document.getElementById("layerpreview-" + layerId).src = response.updated_thumbnail;
+				}
+				$("#layerpreview-" + layerId).overlayout();
+			},
+			error: function(){
+				$("#layerpreview-" + layerId).overlayout();
+			}
+		});
+	}
+
+	function refreshExtent(data, row, button){
+		var _this = this;
+		var layerId = data[0];
+		button.find("i").addClass('fa-spin');
+		
+		$.ajax({
+			type: 'POST',
+			async: false,
+			url: '/gvsigonline/services/layer_refresh_conf/' + layerId + '/',
+			beforeSend:function(xhr){
+			    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			success	:function(response){
+				button.find("i").removeClass('fa-spin');
+				messageBox.show("success", gettext("The layer definition was refreshed"));
+			},
+			error: function(){
+				button.find("i").removeClass('fa-spin');
+				messageBox.show("error", gettext("The layer refresh failed"));
+			}
+		});
+	}
+
+	function deleteLayer(data, row){
+		$('#button-delete-layer-accept').click( function() {
+			$("body").overlay();
+			$.ajax({
+				type: 'POST',
+				async: false,
+				url: '/gvsigonline/services/layer_delete/' + data[0] + '/',
+				beforeSend:function(xhr){
+				    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				success	:function(response){
+					try{
+						var json_response = JSON.parse(response);
+						if( json_response.hasOwnProperty("status") && json_response["status"] == "ERROR"){
+							if(json_response["status_code"] == 500){
+								$('#modal-force-delete-layer').modal('show');
+								$('#button-force-delete-accept').click(function(){
+									$('#modal-force-delete-layer').modal('hide');
+									$.overlayout();
+									location.reload();
+								})
+							}else{
+								$("#form-error").html("<br /><span style=\"margin: 25px\">" + json_response["message"] + "</span>");
+							}
+						}
+						$('#modal-delete-layer').modal('hide');
+						$.overlayout();
+
+					}catch(e){
+						$('#modal-delete-layer').modal('hide');
+						$.overlayout();
+						location.reload();
+					}
+				},
+				error: function(){
+					$('#modal-delete-layer').modal('hide');
+					$.overlayout();
+					location.reload();
+				}
+			});
+		});
+	}
+
+});
+</script>
+{% endblock %}

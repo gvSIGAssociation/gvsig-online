@@ -1,0 +1,114 @@
+.downman-link .control-label {
+	vertical-align: middle;
+	padding-left: 16px;
+	padding-right: 8px;
+	padding-top: 8px;
+	maring-top: 8px;
+	margin-bottom: 8px;
+	font-weight: 400;
+}
+
+.downman-link .download-resource, .downman-link {
+	margin-top: 8px;
+	margin-bottom: 8px;
+	padding-left: 0px;
+	padding-right: 0px;
+	font-weight: 700;
+}
+
+.download-resource-title {
+	display: inline;
+	margin-top: 8px;
+	margin-bottom: 8px;
+	padding-left: 0px;
+	padding-right: 15px;
+	font-weight: 700;
+}
+
+.download-resource-btn {
+	margin-top: 8px;
+	margin-bottom: 8px;
+}
+
+.downman-link .form-control {
+	margin-top: 8px;
+	margin-bottom: 8px;
+}
+
+.downman-link{
+	list-style-type:none;
+	padding: 10px 0px;
+	margin-top: 0px;
+}
+
+.downman-link i{
+	padding: 0px 10px;
+	font-size: 35px;
+	float: left;
+	width: 65px;
+	text-align: center;
+}
+
+.downman-link span{
+	float: left;
+	margin-top: 0px;
+}
+
+.downman-footer-button{
+	float:right;
+	margin-right: 20px;
+	margin-bottom: 15px;
+}
+
+.fa-icon-button-left {
+	margin-right: 8px;
+}
+
+.fa-icon-button-right {
+	margin-left: 8px;
+}
+
+.ng-scope {
+	margin-top:0px;
+}
+
+.downman-no-content{
+	padding: 10px;
+	border: solid 2px #faebcc;
+	background-color: #fcf8e3;
+	color: #8a6d3b; 
+}
+
+.ng-isolate-scope{
+	margin-bottom: 15px;	
+}
+
+.control-label.ng-scope {
+	padding: 0px;
+}
+
+.fa .fa-lock {
+	position: relative;
+	top: 13px;
+	left: -13px;
+}
+
+@media only screen and (max-width: 640px) {
+	.show_downloads_catalog_btn {
+		display: none !important;
+	}
+	.viewer-download-list-btn {
+		display: none !important;
+	}
+}
+
+/* iPads (portrait and landscape) ----------- */
+@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) {
+	.show_downloads_catalog_btn {
+		display: none !important;
+	}
+	.viewer-download-list-btn {
+		display: none !important;
+	}
+}
+
