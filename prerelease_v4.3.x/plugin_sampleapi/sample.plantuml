@@ -1,6 +1,0 @@
-@startuml
-class Example << (C,thistle) >>{
-name: CharField
-title: CharField 
-}
-@enduml
