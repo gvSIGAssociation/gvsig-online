@@ -911,16 +911,16 @@ msgid "Projects & Applications"
 msgstr "Proyectos y aplicaciones"
 
 msgid "Projects, panels & applications"
-msgstr "Proyectos, paneles y aplicaciones"
+msgstr "Proyectos, cuadros de mando y aplicaciones"
 
 msgid "Panels"
-msgstr "Paneles"
+msgstr "Cuadros de mando"
 
 msgid "Panel"
-msgstr "Panel"
+msgstr "Cuadro de mando"
 
 msgid "Open panel"
-msgstr "Abrir panel"
+msgstr "Abrir cuadro de mando"
 
 #: gvsigol_core/templates/home.html:879
 #: gvsigol_core/templates/project_list.html:521
