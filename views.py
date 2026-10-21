@@ -2503,6 +2503,35 @@ def _user_can_see_plugin_manual(user, app_name):
     return False
 
 
+def _docs_lang_codes(lang):
+    codes = []
+    normalized = (lang or '').strip().lower().replace('_', '-')
+    if normalized:
+        codes.append(normalized)
+        primary = normalized.split('-')[0]
+        if primary not in codes:
+            codes.append(primary)
+    if 'es' not in codes:
+        codes.append('es')
+    return codes
+
+
+def _first_pdf_in_docs(docs_root, lang):
+    """PDF en docs/<idioma>/; si no hay, el de es. Devuelve (ruta, idioma_marcado)."""
+    for code in _docs_lang_codes(lang):
+        folder = os.path.join(docs_root, code)
+        if not os.path.isdir(folder):
+            continue
+        try:
+            names = sorted(
+                name for name in os.listdir(folder) if name.lower().endswith('.pdf'))
+        except OSError:
+            continue
+        if names:
+            return os.path.join(folder, names[0]), (None if code == lang else code)
+    return None, None
+
+
 def _find_plugin_manual(app_name, lang, plugins_base_path, base_docs_url):
     lang_path = os.path.join(plugins_base_path, app_name, app_name + '_' + lang + '.pdf')
     if os.path.exists(lang_path):
@@ -2522,6 +2551,11 @@ def _find_plugin_manual(app_name, lang, plugins_base_path, base_docs_url):
         ):
             if os.path.isfile(candidate):
                 return candidate, None
+        # Algunos plugins dejan el PDF en docs/<idioma>/ junto al paquete.
+        docs_root = os.path.normpath(os.path.join(plugin_root, '..', 'docs'))
+        docs_pdf, docs_lang = _first_pdf_in_docs(docs_root, lang)
+        if docs_pdf:
+            return docs_pdf, docs_lang
     except Exception:
         pass
     return None, None
@@ -2562,12 +2596,29 @@ def documentation(request):
     
     plugins_base_path = base_docs_url + '/plugins'
     plugin_manuals = []
-    # Los manuales son los de los plugins instalados en el servidor, tanto
-    # desde el escritorio como desde un visor. El rol decide cuáles se ven.
-    apps_to_scan = [
-        app_name for app_name in settings.INSTALLED_APPS
-        if app_name.startswith('gvsigol_plugin_') and _user_can_see_plugin_manual(request.user, app_name)
-    ]
+    from_panels = request.GET.get('from') == 'panels'
+    project = None
+    project_id = request.GET.get('project_id')
+    if project_id:
+        try:
+            project = Project.objects.get(pk=int(project_id))
+        except (Project.DoesNotExist, TypeError, ValueError):
+            project = None
+    if from_panels:
+        # Desde un panel: el manual de paneles siempre, y el de otro plugin
+        # solo si ese plugin está añadido al proyecto.
+        allowed = set(core_utils.get_enabled_plugins(project)) if project else set()
+        allowed.add('gvsigol_plugin_panels')
+        apps_to_scan = [
+            app_name for app_name in settings.INSTALLED_APPS
+            if app_name in allowed
+        ]
+    else:
+        # Desde el escritorio o el visor el rol decide qué manuales se ven.
+        apps_to_scan = [
+            app_name for app_name in settings.INSTALLED_APPS
+            if app_name.startswith('gvsigol_plugin_') and _user_can_see_plugin_manual(request.user, app_name)
+        ]
 
     for app_name in apps_to_scan:
         the_path, manual_lang = _find_plugin_manual(
@@ -2579,6 +2630,8 @@ def documentation(request):
             the_url = settings.DOCS_URL + os.path.relpath(the_path, base_docs_url)
         elif app_name == 'gvsigol_plugin_libraemergencias':
             the_url = request.build_absolute_uri(reverse('servir_manual_emergencias'))
+        elif app_name == 'gvsigol_plugin_panels':
+            the_url = request.build_absolute_uri(reverse('panels_manual'))
         else:
             continue
         plugin_manuals.append({

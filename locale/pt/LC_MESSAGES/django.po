@@ -1991,3 +1991,16 @@ msgstr "Paginação de visualizadores públicos"
 
 msgid "App"
 msgstr "App"
+
+
+msgid "Projects, panels & applications"
+msgstr "Projetos, painéis de controlo e aplicações"
+
+msgid "Panels"
+msgstr "Painéis de controlo"
+
+msgid "Panel"
+msgstr "Painel de controlo"
+
+msgid "Open panel"
+msgstr "Abrir painel de controlo"
