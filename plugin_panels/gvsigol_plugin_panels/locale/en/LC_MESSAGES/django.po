@@ -7,16 +7,16 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "gvsigol_plugin_panels manual title"
-msgstr "Panels"
+msgstr "Dashboards"
 
 msgid "gvsigol_plugin_panels manual desc"
-msgstr "Interactive project panel builder"
+msgstr "Interactive project dashboard builder"
 
 msgid "Paneles"
-msgstr "Panels"
+msgstr "Dashboards"
 
 msgid "Panel data"
-msgstr "Panel data"
+msgstr "Dashboard data"
 
 msgid "Search user role..."
 msgstr "Search user role..."
@@ -25,10 +25,10 @@ msgid "roles"
 msgstr "roles"
 
 msgid "No project (global panel)"
-msgstr "No project (global panel)"
+msgstr "No project (global dashboard)"
 
 msgid "Optional. Linked panels also appear in the panels menu of that project."
-msgstr "Optional. Linked panels also appear in the panels menu of that project."
+msgstr "Optional. Linked dashboards also appear in the dashboards menu of that project."
 
 msgid "Global"
 msgstr "Global"
@@ -40,28 +40,82 @@ msgid "Confirmation required"
 msgstr "Confirmation required"
 
 msgid "Publishing this panel will also make these layers public:"
-msgstr "Publishing this panel will also make these layers public:"
+msgstr "Publishing this dashboard will also make these layers public:"
 
 msgid "The panel cannot be public because you cannot manage all its private layers."
-msgstr "The panel cannot be public because you cannot manage all its private layers."
+msgstr "The dashboard cannot be public because you cannot manage all its private layers."
 
 msgid "You cannot publish this panel because you cannot manage all its private layers."
-msgstr "You cannot publish this panel because you cannot manage all its private layers."
+msgstr "You cannot publish this dashboard because you cannot manage all its private layers."
 
 msgid "Projects, panels & applications"
-msgstr "Projects, panels & applications"
+msgstr "Projects, dashboards & applications"
 
 msgid "Panel"
-msgstr "Panel"
+msgstr "Dashboard"
 
 msgid "Image"
 msgstr "Image"
 
+msgid "Remove image"
+msgstr "Remove image"
+
 msgid "If no image is selected, the current image is kept; new panels use the default image."
-msgstr "If no image is selected, the current image is kept; new panels use the default image."
+msgstr "If no image is selected, the current image is kept; new dashboards use the default image."
 
 msgid "The selected file is not a valid image."
 msgstr "The selected file is not a valid image."
 
 msgid "This layer cannot be made private because it is used by public panels: {}"
-msgstr "This layer cannot be made private because it is used by public panels: {}"
+msgstr "This layer cannot be made private because it is used by public dashboards: {}"
+
+msgid "Panels"
+msgstr "Dashboards"
+
+msgid "Panels list"
+msgstr "Dashboards list"
+
+msgid "New panel"
+msgstr "New dashboard"
+
+msgid "Edit panel"
+msgstr "Edit dashboard"
+
+msgid "Open panel"
+msgstr "Open dashboard"
+
+msgid "Configure panel"
+msgstr "Configure dashboard"
+
+msgid "Delete panel"
+msgstr "Delete dashboard"
+
+msgid "The panel and all its widgets will be deleted"
+msgstr "The dashboard and all its widgets will be deleted"
+
+msgid "There are no panels yet"
+msgstr "There are no dashboards yet"
+
+msgid "panels"
+msgstr "dashboards"
+
+msgid "Panel information"
+msgstr "Dashboard information"
+
+msgid "Internal name used to build the panel URL."
+msgstr "Internal name used to build the dashboard URL."
+
+msgid "The project cannot be changed after creating the panel because its widgets refer to project layers."
+msgstr "The project cannot be changed after creating the dashboard because its widgets refer to project layers."
+
+msgid "Anyone with the link can open the panel. If disabled, only roles with access permission can open it."
+msgstr "Anyone with the link can open the dashboard. If disabled, only roles with access permission can open it."
+
+msgid "Panel created successfully"
+msgstr "Dashboard created successfully"
+
+msgid "Panel updated successfully"
+msgstr "Dashboard updated successfully"
+
+msgid "Panel deleted successfully"
+msgstr "Dashboard deleted successfully"

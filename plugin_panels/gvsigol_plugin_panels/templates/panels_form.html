@@ -147,6 +147,13 @@
 											<div>
 												<input id="panel-image" name="panel-image" accept=".jpg,.jpeg,.png,.webp" type="file">
 												<span class="pl-help">{% trans "If no image is selected, the current image is kept; new panels use the default image." %}</span>
+												{% if panel.image %}
+												<label class="pl-check" style="margin-top: 8px;">
+													<input id="panel-clear-image" name="clear_image" type="checkbox"
+													       data-default-src="{% static 'panels/panel.svg' %}">
+													<span>{% trans "Remove image" %}</span>
+												</label>
+												{% endif %}
 											</div>
 										</div>
 									</div>
@@ -241,11 +248,18 @@ $(document).ready(function() {
 
 	$('#panel-image').on('change', function() {
 		if (this.files && this.files[0]) {
+			$('#panel-clear-image').prop('checked', false);
 			var reader = new FileReader();
 			reader.onload = function(event) {
 				$('#panel-image-preview').attr('src', event.target.result);
 			};
 			reader.readAsDataURL(this.files[0]);
+		}
+	});
+	$('#panel-clear-image').on('change', function() {
+		if (this.checked) {
+			$('#panel-image').val('');
+			$('#panel-image-preview').attr('src', $(this).data('default-src'));
 		}
 	});
 

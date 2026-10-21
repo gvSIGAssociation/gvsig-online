@@ -150,6 +150,7 @@ class PanelWidget(models.Model):
         ('line', 'line'),
         ('pie', 'pie'),
         ('kpi', 'kpi'),
+        ('text', 'text'),
     ]
     FILTER_INDEPENDENT = 'independent'
     FILTER_LINKED = 'linked'

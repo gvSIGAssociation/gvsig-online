@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import os
 from functools import wraps
 
 from django import forms
@@ -7,7 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
@@ -26,6 +27,38 @@ from .models import Panel, PanelDataset, PanelRole, PanelWidget
 from . import utils
 
 logger = logging.getLogger(__name__)
+
+
+def _panel_manual_path(lang):
+    """PDF de plugin_panels/docs/<idioma>/. Si no hay uno para el idioma, el de es."""
+    docs_root = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'docs'))
+    codes = []
+    normalized = (lang or '').strip().lower().replace('_', '-')
+    if normalized:
+        codes.append(normalized)
+        primary = normalized.split('-')[0]
+        if primary not in codes:
+            codes.append(primary)
+    if 'es' not in codes:
+        codes.append('es')
+    for code in codes:
+        folder = os.path.join(docs_root, code)
+        if not os.path.isdir(folder):
+            continue
+        names = sorted(
+            name for name in os.listdir(folder) if name.lower().endswith('.pdf'))
+        if names:
+            return os.path.join(folder, names[0])
+    return None
+
+
+@require_http_methods(['GET'])
+def panel_manual(request):
+    lang = request.GET.get('lang') or getattr(request, 'LANGUAGE_CODE', None) or 'es'
+    path = _panel_manual_path(lang)
+    if not path:
+        raise Http404
+    return FileResponse(open(path, 'rb'), content_type='application/pdf')
 
 
 def _role_deleted_handler(sender, **kwargs):
@@ -366,6 +399,10 @@ def dashboard_panel_update(request, panel_id):
         panel.description = (request.POST.get('description') or '').strip()
         if image:
             panel.image = image
+        elif request.POST.get('clear_image') == 'on' and old_image_name:
+            storage = panel.image.storage
+            panel.image = None
+            transaction.on_commit(lambda: storage.delete(old_image_name))
         project_changed = panel.project_id != (project.id if project else None)
         panel.project = project
         panel.slug = utils.unique_slug(name, exclude_id=panel.id)

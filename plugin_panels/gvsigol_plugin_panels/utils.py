@@ -383,8 +383,14 @@ def serialize_panel(panel, include_widgets=True):
         'title': panel.title,
         'description': panel.description or '',
         # El SPA puede servirse desde otro origen, así que la imagen viaja
-        # absoluta igual que en proyectos y aplicaciones.
+        # absoluta igual que en proyectos y aplicaciones. image incluye la
+        # miniatura por defecto cuando no hay fichero propio. custom_image
+        # queda vacío en ese caso.
         'image': settings.BASE_URL + panel.image_url,
+        'custom_image': (
+            settings.BASE_URL + panel.image.url.replace(settings.BASE_URL, '')
+            if panel.image else ''
+        ),
         'relative_image': panel.image_url,
         'slug': panel.slug,
         'layout': panel.layout or {},

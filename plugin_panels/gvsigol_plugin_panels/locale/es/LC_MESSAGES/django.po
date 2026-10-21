@@ -7,22 +7,22 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "gvsigol_plugin_panels manual title"
-msgstr "Paneles de control"
+msgstr "Cuadros de mando"
 
 msgid "gvsigol_plugin_panels manual desc"
-msgstr "Constructor de paneles de control interactivos"
+msgstr "Constructor de cuadros de mando interactivos"
 
 msgid "Paneles"
-msgstr "Paneles de control"
+msgstr "Cuadros de mando"
 
 msgid "Panels"
-msgstr "Paneles de control"
+msgstr "Cuadros de mando"
 
 msgid "Panels list"
-msgstr "Listado de paneles de control"
+msgstr "Listado de cuadros de mando"
 
 msgid "Panel data"
-msgstr "Datos del panel de control"
+msgstr "Datos del cuadro de mando"
 
 msgid "Search user role..."
 msgstr "Buscar rol de usuario..."
@@ -31,10 +31,10 @@ msgid "roles"
 msgstr "roles"
 
 msgid "New panel"
-msgstr "Nuevo panel de control"
+msgstr "Nuevo cuadro de mando"
 
 msgid "Edit panel"
-msgstr "Editar panel de control"
+msgstr "Editar cuadro de mando"
 
 msgid "New"
 msgstr "Nuevo"
@@ -61,7 +61,7 @@ msgid "Open"
 msgstr "Abrir"
 
 msgid "Open panel"
-msgstr "Abrir panel de control"
+msgstr "Abrir cuadro de mando"
 
 msgid "Design"
 msgstr "Diseño"
@@ -73,22 +73,22 @@ msgid "Configure"
 msgstr "Configurar"
 
 msgid "Configure panel"
-msgstr "Configurar panel de control"
+msgstr "Configurar cuadro de mando"
 
 msgid "Delete"
 msgstr "Eliminar"
 
 msgid "Delete panel"
-msgstr "Eliminar panel de control"
+msgstr "Eliminar cuadro de mando"
 
 msgid "The panel and all its widgets will be deleted"
-msgstr "Se eliminarán el panel y todos sus elementos"
+msgstr "Se eliminarán el cuadro de mando y todos sus elementos"
 
 msgid "Accept"
 msgstr "Aceptar"
 
 msgid "There are no panels yet"
-msgstr "Todavía no hay paneles de control"
+msgstr "Todavía no hay cuadros de mando"
 
 msgid "No records available"
 msgstr "No hay registros disponibles"
@@ -103,7 +103,7 @@ msgid "of"
 msgstr "de"
 
 msgid "panels"
-msgstr "paneles de control"
+msgstr "cuadros de mando"
 
 msgid "Previous"
 msgstr "Anterior"
@@ -124,13 +124,13 @@ msgid "Save"
 msgstr "Guardar"
 
 msgid "Panel information"
-msgstr "Información del panel de control"
+msgstr "Información del cuadro de mando"
 
 msgid "Name"
 msgstr "Nombre"
 
 msgid "Internal name used to build the panel URL."
-msgstr "Nombre interno utilizado para construir la URL del panel."
+msgstr "Nombre interno utilizado para construir la URL del cuadro de mando."
 
 msgid "Title"
 msgstr "Título"
@@ -139,7 +139,7 @@ msgid "Description"
 msgstr "Descripción"
 
 msgid "The project cannot be changed after creating the panel because its widgets refer to project layers."
-msgstr "El proyecto no puede cambiarse después de crear el panel porque sus elementos hacen referencia a las capas del proyecto."
+msgstr "El proyecto no puede cambiarse después de crear el cuadro de mando porque sus elementos hacen referencia a las capas del proyecto."
 
 msgid "Select a project"
 msgstr "Selecciona un proyecto"
@@ -148,7 +148,7 @@ msgid "Public access"
 msgstr "Acceso público"
 
 msgid "Anyone with the link can open the panel. If disabled, only roles with access permission can open it."
-msgstr "Cualquiera con el enlace puede abrir el panel. Si se desactiva, sólo podrán abrirlo los roles con permiso de acceso."
+msgstr "Cualquiera con el enlace puede abrir el cuadro de mando. Si se desactiva, sólo podrán abrirlo los roles con permiso de acceso."
 
 msgid "Permissions by role"
 msgstr "Permisos por rol"
@@ -169,19 +169,19 @@ msgid "Name and title are required"
 msgstr "El nombre y el título son obligatorios"
 
 msgid "Panel created successfully"
-msgstr "Panel creado correctamente"
+msgstr "Cuadro de mando creado correctamente"
 
 msgid "Panel updated successfully"
-msgstr "Panel actualizado correctamente"
+msgstr "Cuadro de mando actualizado correctamente"
 
 msgid "Panel deleted successfully"
-msgstr "Panel eliminado correctamente"
+msgstr "Cuadro de mando eliminado correctamente"
 
 msgid "No project (global panel)"
-msgstr "Sin proyecto (panel global)"
+msgstr "Sin proyecto (cuadro de mando global)"
 
 msgid "Optional. Linked panels also appear in the panels menu of that project."
-msgstr "Opcional. Los paneles vinculados también aparecen en el menú de paneles de ese proyecto."
+msgstr "Opcional. Los cuadros de mando vinculados también aparecen en el menú de cuadros de mando de ese proyecto."
 
 msgid "Global"
 msgstr "Global"
@@ -193,29 +193,31 @@ msgid "Confirmation required"
 msgstr "Confirmación necesaria"
 
 msgid "Publishing this panel will also make these layers public:"
-msgstr "Al publicar este panel también se harán públicas estas capas:"
+msgstr "Al publicar este cuadro de mando también se harán públicas estas capas:"
 
 msgid "The panel cannot be public because you cannot manage all its private layers."
-msgstr "El panel no puede ser público porque no puedes gestionar todas sus capas privadas."
+msgstr "El cuadro de mando no puede ser público porque no puedes gestionar todas sus capas privadas."
 
 msgid "You cannot publish this panel because you cannot manage all its private layers."
-msgstr "No puedes publicar este panel porque no puedes gestionar todas sus capas privadas."
+msgstr "No puedes publicar este cuadro de mando porque no puedes gestionar todas sus capas privadas."
 
 msgid "Projects, panels & applications"
-msgstr "Proyectos, paneles de control y aplicaciones"
-
+msgstr "Proyectos, cuadros de mando y aplicaciones"
 # Etiqueta de las tarjetas: se deja corta a propósito.
 msgid "Panel"
-msgstr "Panel"
+msgstr "Cuadro de mando"
 
 msgid "Image"
 msgstr "Imagen"
 
+msgid "Remove image"
+msgstr "Quitar imagen"
+
 msgid "If no image is selected, the current image is kept; new panels use the default image."
-msgstr "Si no seleccionas una imagen, se conserva la actual; los paneles nuevos usan la imagen predeterminada."
+msgstr "Si no seleccionas una imagen, se conserva la actual; los cuadros de mando nuevos usan la imagen predeterminada."
 
 msgid "The selected file is not a valid image."
 msgstr "El archivo seleccionado no es una imagen válida."
 
 msgid "This layer cannot be made private because it is used by public panels: {}"
-msgstr "Esta capa no puede hacerse privada porque la utilizan paneles públicos: {}"
+msgstr "Esta capa no puede hacerse privada porque la utilizan cuadros de mando públicos: {}"

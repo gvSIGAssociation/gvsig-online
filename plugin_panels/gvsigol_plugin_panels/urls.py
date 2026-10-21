@@ -3,6 +3,7 @@ from gvsigol_plugin_panels import views
 
 urlpatterns = [
     path('panels/', views.dashboard_panels, name='panels_dashboard_list'),
+    path('panels/manual/', views.panel_manual, name='panels_manual'),
     path('panels/add/', views.dashboard_panel_add, name='panels_dashboard_add'),
     path('panels/<int:panel_id>/update/', views.dashboard_panel_update, name='panels_dashboard_update'),
     path('panels/<int:panel_id>/delete/', views.dashboard_panel_delete, name='panels_dashboard_delete'),

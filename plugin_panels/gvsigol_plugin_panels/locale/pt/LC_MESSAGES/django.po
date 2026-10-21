@@ -7,22 +7,22 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "gvsigol_plugin_panels manual title"
-msgstr "Painéis"
+msgstr "Painéis de controlo"
 
 msgid "gvsigol_plugin_panels manual desc"
-msgstr "Construtor de painéis interativos do projeto"
+msgstr "Construtor de painéis de controlo interativos do projeto"
 
 msgid "Paneles"
-msgstr "Painéis"
+msgstr "Painéis de controlo"
 
 msgid "Panels"
-msgstr "Painéis"
+msgstr "Painéis de controlo"
 
 msgid "Panels list"
-msgstr "Lista de painéis"
+msgstr "Lista de painéis de controlo"
 
 msgid "Panel data"
-msgstr "Dados do painel"
+msgstr "Dados do painel de controlo"
 
 msgid "Search user role..."
 msgstr "Pesquisar função de utilizador..."
@@ -31,10 +31,10 @@ msgid "roles"
 msgstr "funções"
 
 msgid "New panel"
-msgstr "Novo painel"
+msgstr "Novo painel de controlo"
 
 msgid "Edit panel"
-msgstr "Editar painel"
+msgstr "Editar painel de controlo"
 
 msgid "New"
 msgstr "Novo"
@@ -61,7 +61,7 @@ msgid "Open"
 msgstr "Abrir"
 
 msgid "Open panel"
-msgstr "Abrir painel"
+msgstr "Abrir painel de controlo"
 
 msgid "Design"
 msgstr "Desenho"
@@ -73,22 +73,22 @@ msgid "Configure"
 msgstr "Configurar"
 
 msgid "Configure panel"
-msgstr "Configurar painel"
+msgstr "Configurar painel de controlo"
 
 msgid "Delete"
 msgstr "Eliminar"
 
 msgid "Delete panel"
-msgstr "Eliminar painel"
+msgstr "Eliminar painel de controlo"
 
 msgid "The panel and all its widgets will be deleted"
-msgstr "O painel e todos os seus elementos serão eliminados"
+msgstr "O painel de controlo e todos os seus elementos serão eliminados"
 
 msgid "Accept"
 msgstr "Aceitar"
 
 msgid "There are no panels yet"
-msgstr "Ainda não há painéis"
+msgstr "Ainda não há painéis de controlo"
 
 msgid "No records available"
 msgstr "Não há registos disponíveis"
@@ -103,7 +103,7 @@ msgid "of"
 msgstr "de"
 
 msgid "panels"
-msgstr "painéis"
+msgstr "painéis de controlo"
 
 msgid "Previous"
 msgstr "Anterior"
@@ -124,13 +124,13 @@ msgid "Save"
 msgstr "Guardar"
 
 msgid "Panel information"
-msgstr "Informação do painel"
+msgstr "Informação do painel de controlo"
 
 msgid "Name"
 msgstr "Nome"
 
 msgid "Internal name used to build the panel URL."
-msgstr "Nome interno utilizado para construir o URL do painel."
+msgstr "Nome interno utilizado para construir o URL do painel de controlo."
 
 msgid "Title"
 msgstr "Título"
@@ -139,7 +139,7 @@ msgid "Description"
 msgstr "Descrição"
 
 msgid "The project cannot be changed after creating the panel because its widgets refer to project layers."
-msgstr "O projeto não pode ser alterado depois de criar o painel porque os seus elementos referem-se às camadas do projeto."
+msgstr "O projeto não pode ser alterado depois de criar o painel de controlo porque os seus elementos referem-se às camadas do projeto."
 
 msgid "Select a project"
 msgstr "Selecione um projeto"
@@ -148,7 +148,7 @@ msgid "Public access"
 msgstr "Acesso público"
 
 msgid "Anyone with the link can open the panel. If disabled, only roles with access permission can open it."
-msgstr "Qualquer pessoa com a ligação pode abrir o painel. Se estiver desativado, apenas os perfis com permissão de acesso o podem abrir."
+msgstr "Qualquer pessoa com a ligação pode abrir o painel de controlo. Se estiver desativado, apenas os perfis com permissão de acesso o podem abrir."
 
 msgid "Permissions by role"
 msgstr "Permissões por perfil"
@@ -169,19 +169,19 @@ msgid "Name and title are required"
 msgstr "O nome e o título são obrigatórios"
 
 msgid "Panel created successfully"
-msgstr "Painel criado com sucesso"
+msgstr "Painel de controlo criado com sucesso"
 
 msgid "Panel updated successfully"
-msgstr "Painel atualizado com sucesso"
+msgstr "Painel de controlo atualizado com sucesso"
 
 msgid "Panel deleted successfully"
-msgstr "Painel eliminado com sucesso"
+msgstr "Painel de controlo eliminado com sucesso"
 
 msgid "No project (global panel)"
-msgstr "Sem projeto (painel global)"
+msgstr "Sem projeto (painel de controlo global)"
 
 msgid "Optional. Linked panels also appear in the panels menu of that project."
-msgstr "Opcional. Os painéis vinculados também aparecem no menu de painéis desse projeto."
+msgstr "Opcional. Os painéis de controlo vinculados também aparecem no menu de painéis de controlo desse projeto."
 
 msgid "Global"
 msgstr "Global"
@@ -193,28 +193,31 @@ msgid "Confirmation required"
 msgstr "Confirmação necessária"
 
 msgid "Publishing this panel will also make these layers public:"
-msgstr "Ao publicar este painel, estas camadas também serão tornadas públicas:"
+msgstr "Ao publicar este painel de controlo, estas camadas também serão tornadas públicas:"
 
 msgid "The panel cannot be public because you cannot manage all its private layers."
-msgstr "O painel não pode ser público porque não pode gerir todas as suas camadas privadas."
+msgstr "O painel de controlo não pode ser público porque não pode gerir todas as suas camadas privadas."
 
 msgid "You cannot publish this panel because you cannot manage all its private layers."
-msgstr "Não pode publicar este painel porque não pode gerir todas as suas camadas privadas."
+msgstr "Não pode publicar este painel de controlo porque não pode gerir todas as suas camadas privadas."
 
 msgid "Projects, panels & applications"
-msgstr "Projetos, painéis e aplicações"
+msgstr "Projetos, painéis de controlo e aplicações"
 
 msgid "Panel"
-msgstr "Painel"
+msgstr "Painel de controlo"
 
 msgid "Image"
 msgstr "Imagem"
 
+msgid "Remove image"
+msgstr "Retirar imagem"
+
 msgid "If no image is selected, the current image is kept; new panels use the default image."
-msgstr "Se não selecionar uma imagem, a imagem atual é mantida; os novos painéis usam a imagem predefinida."
+msgstr "Se não selecionar uma imagem, a imagem atual é mantida; os novos painéis de controlo usam a imagem predefinida."
 
 msgid "The selected file is not a valid image."
 msgstr "O ficheiro selecionado não é uma imagem válida."
 
 msgid "This layer cannot be made private because it is used by public panels: {}"
-msgstr "Esta camada não pode tornar-se privada porque é utilizada por painéis públicos: {}"
+msgstr "Esta camada não pode tornar-se privada porque é utilizada por painéis de controlo públicos: {}"
