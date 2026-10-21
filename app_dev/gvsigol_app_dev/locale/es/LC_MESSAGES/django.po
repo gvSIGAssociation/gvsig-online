@@ -193,17 +193,17 @@ msgid "Sign in to access all the tools and services of the platform."
 msgstr "Inicia sesión para acceder a todas las herramientas y servicios de la plataforma."
 
 msgid "Panels"
-msgstr "Paneles de control"
+msgstr "Cuadros de mando"
 
 # Etiqueta de las tarjetas: se deja corta a propósito.
 msgid "Panel"
-msgstr "Panel"
+msgstr "Cuadro de mando"
 
 msgid "Dashboards that bring together maps, charts and indicators built from the platform data."
-msgstr "Paneles de control que reúnen mapas, gráficas e indicadores construidos con los datos de la plataforma."
+msgstr "Cuadros de mando que reúnen mapas, gráficas e indicadores construidos con los datos de la plataforma."
 
 msgid "Panels pagination"
-msgstr "Paginación de paneles de control"
+msgstr "Paginación de cuadros de mando"
 
 #: templates/index.html:165
 msgid "Publish your layers as standard WMS and WFS services"
