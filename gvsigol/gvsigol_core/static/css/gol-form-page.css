@@ -115,7 +115,7 @@
 	font-size: 13px;
 	margin-bottom: 16px;
 }
-.pf-error-msg:has(li), .pf-error-msg:has(p:not(:empty)), .pf-error-msg:has(ul:not(:empty)) { display: block; }
+.pf-error-msg:has(li), .pf-error-msg:has(p:not(:empty)) { display: block; }
 .pf-error-msg ul { margin: 0; padding-left: 18px; }
 .pf-error-msg p { margin: 0 0 4px; }
 .pf-error-msg > :last-child { margin-bottom: 0; }

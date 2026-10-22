@@ -33,6 +33,7 @@
 			<div class="pf-card">
 				{% csrf_token %}
 
+				{% if form.errors %}
 				<div class="pf-error-msg">
 					<ul>
 						{{ form.non_field_errors }}
@@ -43,6 +44,7 @@
 						{% endfor %}
 					</ul>
 				</div>
+				{% endif %}
 
 				{% if messages %}
 				<ul class="pf-messages">
