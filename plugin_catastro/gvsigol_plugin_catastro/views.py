@@ -92,6 +92,14 @@ def get_vias(request):
 
 
 
+def _catastro_error_response(exc):
+    if isinstance(exc, requests.Timeout):
+        return JsonResponse({'error': 'Catastro timeout'}, status=503)
+    if isinstance(exc, (requests.ConnectionError, requests.RequestException)):
+        return JsonResponse({'error': 'Catastro unavailable'}, status=502)
+    return JsonResponse({'error': 'Catastro response error'}, status=502)
+
+
 @csrf_exempt
 def get_rc_by_coords(request):
     if request.method == 'POST':
@@ -111,24 +119,28 @@ def get_rc_by_coords(request):
         #     'Coordenada_Y': ycen
         # }
         # r = requests.get(url = address_url, params = payload, timeout=10)
-        r = requests.get(url = address_url, timeout=10, verify=False) # timeout a 10 segundos, el servidor de catastro a veces tarda
+        try:
+            r = requests.get(url=address_url, timeout=10, verify=False)  # timeout a 10 segundos, el servidor de catastro a veces tarda
+            tree = ElementTree.fromstring(r.content)
 
-        tree = ElementTree.fromstring(r.content)
+            for aux1 in tree.iter('{http://www.catastro.meh.es/}coordenadas'):
+                for aux2 in aux1.iter('{http://www.catastro.meh.es/}coord'):
+                    for aux3 in aux2.iter('{http://www.catastro.meh.es/}pc'):
+                        for aux5 in aux3.iter('{http://www.catastro.meh.es/}pc1'):
+                            response['rc'] = aux5.text
+                            response['pc1'] = aux5.text
+                        for aux5 in aux3.iter('{http://www.catastro.meh.es/}pc2'):
+                            response['rc'] += aux5.text
+                            response['pc2'] = aux5.text
 
-        for aux1 in tree.iter('{http://www.catastro.meh.es/}coordenadas'):
-            for aux2 in aux1.iter('{http://www.catastro.meh.es/}coord'):
-                for aux3 in aux2.iter('{http://www.catastro.meh.es/}pc'):
-                    for aux5 in aux3.iter('{http://www.catastro.meh.es/}pc1'):
-                        response['rc'] = aux5.text
-                        response['pc1'] = aux5.text
-                    for aux5 in aux3.iter('{http://www.catastro.meh.es/}pc2'):
-                        response['rc'] += aux5.text
-                        response['pc2'] = aux5.text
+                    for aux3 in aux2.iter('{http://www.catastro.meh.es/}ldt'):
+                        response['address'] = aux3.text
 
-                for aux3 in aux2.iter('{http://www.catastro.meh.es/}ldt'):
-                    response['address'] = aux3.text
-
-        return JsonResponse(response)
+            return JsonResponse(response)
+        except (requests.Timeout, requests.ConnectionError, requests.RequestException,
+                ElementTree.ParseError, ValueError) as e:
+            logger.exception('get_rc_by_coords failed')
+            return _catastro_error_response(e)
 
 @csrf_exempt
 def get_rc_public_data(request):
@@ -142,10 +154,19 @@ def get_rc_public_data(request):
 
         address_url = settings.URL_API_CATASTRO + '/COVCCallejero.svc/rest/Consulta_DNPRC'
         # r = requests.post(address_url, data = body, verify = False)
-        r = requests.get(address_url, params={"RefCat":ref_catastral}, verify = False)
-
-        resp_obj = xmltodict.parse(r.content)
-        return JsonResponse(resp_obj)
+        try:
+            r = requests.get(
+                address_url,
+                params={"RefCat": ref_catastral},
+                verify=False,
+                timeout=10,
+            )
+            resp_obj = xmltodict.parse(r.content)
+            return JsonResponse(resp_obj)
+        except (requests.Timeout, requests.ConnectionError, requests.RequestException,
+                ElementTree.ParseError, ValueError, Exception) as e:
+            logger.exception('get_rc_public_data failed')
+            return _catastro_error_response(e)
 
 @csrf_exempt
 def get_rc_parcel_public_data(request):
@@ -236,15 +257,14 @@ def get_rc_polygon(ref_catastral, srs='EPSG::4326'):
 def get_referencia_catastral_polygon(request):
     if request.method == 'POST':
         ref_catastral = request.POST.get('ref_catastral').lstrip()
-        srs='EPSG::4326'
-
-        features = get_rc_polygon(ref_catastral, srs)
-
-        response = {
-            'featureCollection': features
-        }
-
-        return JsonResponse(response)
+        srs = 'EPSG::4326'
+        try:
+            features = get_rc_polygon(ref_catastral, srs)
+            return JsonResponse({'featureCollection': features})
+        except (requests.Timeout, requests.ConnectionError, requests.RequestException,
+                ElementTree.ParseError, ValueError, TypeError) as e:
+            logger.exception('get_referencia_catastral_polygon failed')
+            return _catastro_error_response(e)
 
 
 @csrf_exempt
