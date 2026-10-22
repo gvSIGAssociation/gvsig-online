@@ -7094,18 +7094,7 @@ def layer_cache_config(request, layer_id):
                 gs.updateBoundingBoxFromData(layer)
                 gs.updateThumbnail(layer, 'update')
 
-            layer_list = None
-            if request.user.is_superuser:
-                layer_list = Layer.objects.filter(cached=True).order_by('id')
-            else:
-                user_roles = auth_backend.get_roles(request)
-                layer_list = (Layer.objects.filter(created_by=request.user.username, cached=True)
-                    | Layer.objects.filter(layermanagerole__role__in=user_roles, cached=True)).exclude(type__in=['WMTS', 'XYZ']).order_by('id').distinct()
-
-            response = {
-                'layers': layer_list
-            }
-            return render(request, 'cache_list.html', response)
+            return redirect('cache_list')
 
         except Exception as e:
             error_message = gettext_lazy('Error configuring layer. Cause: {cause}.').format(cause=str(e))
@@ -7234,18 +7223,7 @@ def group_cache_config(request, group_id):
 
             gs = geographic_servers.get_instance().get_server_by_id(server.id)
             gs.reload_nodes()
-            layer_list = None
-            group_list = None
-            if request.user.is_superuser:
-                layer_list = Layer.objects.filter(cached=True)
-                group_list = LayerGroup.objects.filter(cached=True)
-            else:
-                group_list = utils.get_user_layergroups(request).filter(cached=True)
-            response = {
-                'layers': layer_list,
-                'groups': group_list
-            }
-            return render(request, 'cache_list.html', response)
+            return redirect('cache_list')
 
         except Exception as e:
             message = e
