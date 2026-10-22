@@ -421,9 +421,12 @@
 				rebuildSelect(name_select, text, placeholderSelected, options);
 				$.overlayout();
 
-			}).fail(function() {
+			}).fail(function(xhr) {
 				var name_select = $("#id_name");
 				var text = "{% trans 'Service is unavailable' %}";
+				if (xhr && xhr.responseJSON && xhr.responseJSON.message) {
+					text = xhr.responseJSON.message;
+				}
 				rebuildSelect(name_select, text, true);
 				$.overlayout();
 			});

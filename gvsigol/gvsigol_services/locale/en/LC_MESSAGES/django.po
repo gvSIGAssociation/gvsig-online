@@ -4929,6 +4929,12 @@ msgstr ""
 msgid "Connection failed"
 msgstr ""
 
+msgid "The WMS capabilities could not be read. Check that the capabilities URL is correct and that the remote service is available."
+msgstr "The WMS capabilities could not be read. Check that the capabilities URL is correct and that the remote service is available."
+
+msgid "The URL did not return a WMS GetCapabilities document."
+msgstr "The URL did not return a WMS GetCapabilities document."
+
 #: gvsigol_services/views.py:8844
 msgid "Status code: "
 msgstr ""

@@ -4127,6 +4127,12 @@ msgstr ""
 msgid "Connection failed"
 msgstr "La connexió ha fallat"
 
+msgid "The WMS capabilities could not be read. Check that the capabilities URL is correct and that the remote service is available."
+msgstr "No s'han pogut llegir les capabilities del WMS. Comprova que la URL és correcta i que el servici remot està disponible."
+
+msgid "The URL did not return a WMS GetCapabilities document."
+msgstr "La URL no ha tornat un document WMS GetCapabilities."
+
 #: gvsigol_services/views.py:8844
 msgid "Status code: "
 msgstr "Codi d'estat: "

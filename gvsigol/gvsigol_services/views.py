@@ -1227,6 +1227,32 @@ def backend_datastore_list(request):
     return HttpResponseBadRequest()
 
 
+def _resource_list_error_response(datastore):
+    """
+    Respuesta cuando GeoServer no puede enumerar los recursos del almacén.
+    En WMS en cascada suele deberse a una URL de capabilities incorrecta o
+    inalcanzable: GeoServer responde 500 y, si no se captura, el listado
+    acaba en un 500 opaco.
+    """
+    if getattr(datastore, 'type', None) == 'e_WMS':
+        message = _("The WMS capabilities could not be read. Check that the capabilities URL is correct and that the remote service is available.")
+    else:
+        message = _("Service is unavailable")
+    return JsonResponse({'message': message}, status=502)
+
+
+def _backend_resource_list_response(datastore, list_type):
+    gs = geographic_servers.get_instance().get_server_by_id(datastore.workspace.server.id)
+    try:
+        resources = gs.getResources(datastore.workspace, datastore, list_type)
+        if resources is None:
+            return _resource_list_error_response(datastore)
+        return HttpResponse(json.dumps(sorted(resources)))
+    except Exception:
+        logger.exception("Error getting resources for datastore %s", datastore.id)
+        return _resource_list_error_response(datastore)
+
+
 @login_required()
 @staff_required
 def backend_resource_list_available(request):
@@ -1241,10 +1267,7 @@ def backend_resource_list_available(request):
         if not utils.can_use_datastore(request.user, ds):
             return HttpResponseForbidden(json.dumps([]))
         if ds:
-            gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
-            resources = gs.getResources(ds.workspace, ds, 'available')
-            resources_sorted = sorted(resources)
-            return HttpResponse(json.dumps(resources_sorted))
+            return _backend_resource_list_response(ds, 'available')
     return HttpResponseBadRequest()
 
 @login_required()
@@ -1290,10 +1313,7 @@ def backend_resource_list_configurable(request):
         if not utils.can_use_datastore(request.user, ds):
             return HttpResponseForbidden("[]")
         if ds:
-            gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
-            resources = gs.getResources(ds.workspace, ds, 'configurable')
-            resources_sorted = sorted(resources)
-            return HttpResponse(json.dumps(resources_sorted))
+            return _backend_resource_list_response(ds, 'configurable')
     return HttpResponseBadRequest()
 
 
@@ -1314,10 +1334,7 @@ def backend_resource_list(request):
         if not utils.can_use_datastore(request.user, ds):
             return HttpResponseForbidden("[]")
         if ds:
-            gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
-            resources = gs.getResources(ds.workspace, ds, type)
-            resources_sorted = sorted(resources)
-            return HttpResponse(json.dumps(resources_sorted))
+            return _backend_resource_list_response(ds, type)
     return HttpResponseBadRequest()
 
 
@@ -9220,6 +9237,67 @@ def connection_params_for_etl(request, connection_id):
         return JsonResponse({'success': False, 'error': str(e)})
 
 
+def _wms_getcapabilities_url(raw_url):
+    """Asegura que la URL pide GetCapabilities, sin pisar un REQUEST ya indicado."""
+    raw_url = (raw_url or '').strip()
+    parts = urllib.parse.urlparse(raw_url)
+    query = urllib.parse.parse_qsl(parts.query, keep_blank_values=True)
+    keys = {key.lower() for key, _value in query}
+    if 'request' not in keys:
+        if 'service' not in keys:
+            query.append(('SERVICE', 'WMS'))
+        query.append(('REQUEST', 'GetCapabilities'))
+    return urllib.parse.urlunparse(parts._replace(query=urllib.parse.urlencode(query)))
+
+
+def _wms_capabilities_document(payload):
+    sample = payload[:8192].lower() if payload else b''
+    return b'wms_capabilities' in sample or b'wmt_ms_capabilities' in sample
+
+
+def _test_wms_connection(connection_params):
+    """
+    Comprueba que la URL responde con un documento GetCapabilities.
+    Un GET a la URL tal cual no basta: muchos servidores devuelven 200 con
+    una página de error, y un código distinto de 2xx también tiene que fallar.
+    """
+    try:
+        url = _wms_getcapabilities_url(connection_params.get('url'))
+        if not urllib.parse.urlparse(url).scheme or not urllib.parse.urlparse(url).netloc:
+            return {
+                'error': _('Connection failed') + '<br>' + _('The URL did not return a WMS GetCapabilities document.'),
+                'success': False
+            }
+        username = (connection_params.get('username') or '').strip()
+        password = connection_params.get('password') or ''
+        auth = (username, password) if username else None
+        response = requests.get(url, auth=auth, timeout=20, verify=False, stream=True)
+        try:
+            status_code = response.status_code
+            chunk = next(response.iter_content(8192), b'')
+            if isinstance(chunk, str):
+                chunk = chunk.encode('utf-8', 'replace')
+        finally:
+            response.close()
+        if status_code < 200 or status_code >= 300:
+            return {
+                'error': _('Connection failed') + '<br>' + _("Status code: ") + str(status_code),
+                'success': False
+            }
+        if not _wms_capabilities_document(chunk):
+            return {
+                'error': _('Connection failed') + '<br>' + _('The URL did not return a WMS GetCapabilities document.'),
+                'success': False
+            }
+        return {'success': True}
+    except Exception as e:
+        logger.exception("Error connecting WMS")
+        return {
+            'error': _('Connection failed') + '<br>' + escape(strip_tags(str(e))),
+            'success': False
+        }
+
+
 @login_required()
 @staff_required
 def test_connection(request):
@@ -9245,25 +9323,7 @@ def test_connection(request):
                     'success': False
                 }
         elif datastore_type == 'e_WMS':
-            try:
-                user = connection_params.get('username')
-                password = connection_params.get('password')
-                url = connection_params.get('url')
-
-                with requests.get(url, auth=(user, password), stream=True, verify=False) as r:
-                    if r.status_code >= 200 or r.status_code < 300:
-                        response = { 'success': True }
-                    else:
-                        response = {
-                                'error': _('Connection failed') + '<br>' + _("Status code: ") + str(r.status_code),
-                                'success': False
-                            }
-            except Exception as e:
-                logger.exception("Error connecting WMS")
-                response = {
-                    'error': _('Connection failed') + '<br>' + escape(strip_tags(str(e))),
-                    'success': False
-                }
+            response = _test_wms_connection(connection_params)
         else:
                 response = {
                     'error': _('Connection error'),

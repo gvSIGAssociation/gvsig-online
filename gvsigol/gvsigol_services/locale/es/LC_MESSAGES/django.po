@@ -5212,6 +5212,12 @@ msgstr "Acceso denegado"
 msgid "Connection failed"
 msgstr "La conexión falló"
 
+msgid "The WMS capabilities could not be read. Check that the capabilities URL is correct and that the remote service is available."
+msgstr "No se han podido leer las capabilities del WMS. Comprueba que la URL es correcta y que el servicio remoto está disponible."
+
+msgid "The URL did not return a WMS GetCapabilities document."
+msgstr "La URL no ha devuelto un documento WMS GetCapabilities."
+
 #: gvsigol_services/views.py:8794
 msgid "Status code: "
 msgstr "Código de estado: "
