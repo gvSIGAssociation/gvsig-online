@@ -2957,6 +2957,12 @@ def _import_raster_layer(
     return lyr
 
 
+def _tools_to_json(tools):
+    """Serialize tool definitions; AppConfig.verbose_name may be gettext_lazy."""
+    from django.core.serializers.json import DjangoJSONEncoder
+    return json.dumps(tools, cls=DjangoJSONEncoder)
+
+
 def _resolve_import_tools(raw_tools_json, report):
     """Merge exported tool states with the tools available on this server.
 
@@ -2977,14 +2983,14 @@ def _resolve_import_tools(raw_tools_json, report):
     if not raw_tools_json:
         # No tool configuration exported → use the same defaults as a new project:
         # core tools all enabled, plugin tools all disabled.
-        return json.dumps(get_available_tools(core_enabled=True, plugin_enabled=False))
+        return _tools_to_json(get_available_tools(core_enabled=True, plugin_enabled=False))
 
     try:
         exported = json.loads(raw_tools_json) if isinstance(raw_tools_json, str) else raw_tools_json
     except Exception:
-        return json.dumps(get_available_tools(core_enabled=True, plugin_enabled=False))
+        return _tools_to_json(get_available_tools(core_enabled=True, plugin_enabled=False))
     if not isinstance(exported, list):
-        return json.dumps(get_available_tools(core_enabled=True, plugin_enabled=False))
+        return _tools_to_json(get_available_tools(core_enabled=True, plugin_enabled=False))
 
     # Build two views: one with plugin tools disabled (used for "not in export" fallback)
     # and one with all tools enabled (used as metadata source for display properties).
@@ -3013,7 +3019,7 @@ def _resolve_import_tools(raw_tools_json, report):
             LOG.warning('Tool "%s" from package is not installed on this server; skipping.', name)
             report.append({'tool_not_installed': name})
 
-    return json.dumps(merged)
+    return _tools_to_json(merged)
 
 
 def _remap_toc_order(project, snapshot, id_map):
