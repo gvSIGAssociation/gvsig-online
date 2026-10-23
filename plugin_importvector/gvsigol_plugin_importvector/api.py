@@ -136,6 +136,15 @@ class ProjectLayerImportView(APIView):
         role_list = (
             lambda key: getlist(key) if getlist else request.data.get(key, [])
         )
+        # Prefer explicit auto_detect_wkt from the client. Empty wkt_column may
+        # be dropped by multipart parsers, so the flag is the reliable signal
+        # that the user cleared geometry in the wizard.
+        wkt_column = (request.data.get('wkt_column') or '').strip() or None
+        if 'auto_detect_wkt' in request.data:
+            auto_detect_wkt = _request_bool(request.data, 'auto_detect_wkt', True)
+        else:
+            # Legacy: presence of wkt_column (even empty) means "do not guess".
+            auto_detect_wkt = 'wkt_column' not in request.data
         options = {
             'name': request.data.get('name'),
             'title': request.data.get('title'),
@@ -145,7 +154,8 @@ class ProjectLayerImportView(APIView):
             'encoding': request.data.get('encoding', 'autodetect'),
             'format': request.data.get('format', 'image/png'),
             'delimiter': request.data.get('delimiter'),
-            'wkt_column': request.data.get('wkt_column'),
+            'wkt_column': wkt_column,
+            'auto_detect_wkt': auto_detect_wkt,
             'json_root': request.data.get('json_root'),
             'visible': _request_bool(request.data, 'visible', True),
             'queryable': _request_bool(request.data, 'queryable', True),

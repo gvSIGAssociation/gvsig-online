@@ -205,6 +205,39 @@ def _has_geometry(params, schema, table):
         connection.close()
 
 
+def _drop_geometry_columns(params, schema, table):
+    """Remove PostGIS geometry columns when importing CSV as a plain table."""
+    connection = psycopg2.connect(
+        host=params['host'], port=params['port'],
+        dbname=params['database'], user=params['user'],
+        password=params.get('passwd', params.get('password', '')),
+    )
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT f_geometry_column FROM geometry_columns
+                WHERE f_table_schema = %s AND f_table_name = %s
+                """,
+                [schema, table],
+            )
+            columns = [row[0] for row in cursor.fetchall()]
+            for column in columns:
+                cursor.execute(
+                    sql.SQL('ALTER TABLE {}.{} DROP COLUMN IF EXISTS {} CASCADE').format(
+                        sql.Identifier(schema),
+                        sql.Identifier(table),
+                        sql.Identifier(column),
+                    )
+                )
+        connection.commit()
+    except Exception:
+        connection.rollback()
+        raise
+    finally:
+        connection.close()
+
+
 def _table_exists(params, schema, table):
     connection = psycopg2.connect(
         host=params['host'], port=params['port'],
@@ -564,17 +597,26 @@ def import_uploaded_resource(upload, datastore, layer_group, user, options):
         srs = options.get('srs') or None
         encoding = options.get('encoding')
         wkt_column = options.get('wkt_column') or None
+        if isinstance(wkt_column, str):
+            wkt_column = wkt_column.strip() or None
+        # True unless the client explicitly sent wkt_column (even empty = no geom).
+        auto_detect_wkt = options.get('auto_detect_wkt', True)
         expected_geometry = False
+        force_tabular = False
         detected_geom_type = None
         open_options = []
         config_options = []
+        nlt = 'PROMOTE_TO_MULTI'
 
         if extension == '.csv' or (
                 extension == '.json' and not source_is_geojson):
             headers, detected_delimiter = _read_csv_headers(
                 source_path, options.get('delimiter') or None)
-            if not wkt_column:
+            if not wkt_column and auto_detect_wkt:
                 wkt_column = _guess_wkt_column(headers)
+            elif not wkt_column and not auto_detect_wkt:
+                # User cleared the WKT column → import as alphanumeric table.
+                force_tabular = True
             if wkt_column and wkt_column not in headers:
                 raise ValidationError(
                     'The selected WKT column "{}" was not found in the CSV'
@@ -597,8 +639,18 @@ def import_uploaded_resource(upload, datastore, layer_group, user, options):
                 source_path = _build_csv_wkt_vrt(
                     source_path, workdir, wkt_column, srs=srs,
                     geometry_type=detected_geom_type)
+            elif force_tabular:
+                # Plain alphanumeric table: keep every CSV column as text,
+                # including WKT/geometry fields the user chose not to map.
+                # GDAL still auto-probes names like wkt/geom/geometry unless we
+                # override GEOM_POSSIBLE_NAMES; that would eat the attribute.
+                nlt = 'NONE'
+                open_options.extend([
+                    '-oo', 'GEOM_POSSIBLE_NAMES=__no_geometry__',
+                    '-oo', 'KEEP_GEOM_COLUMNS=YES',
+                ])
             else:
-                # Still help GDAL autodetect common geometry column names.
+                # No explicit column: help GDAL autodetect common names.
                 open_options.extend([
                     '-oo',
                     'GEOM_POSSIBLE_NAMES={}'.format(
@@ -611,13 +663,13 @@ def import_uploaded_resource(upload, datastore, layer_group, user, options):
         command.extend([
             '-f', 'PostgreSQL', pg_dsn, source_path,
             '-nln', '{}.{}'.format(schema, name),
-            # Always promote Polygon→MultiPolygon etc.; concrete typmod is
-            # applied afterwards so GeoServer gets MultiPolygon/… bindings.
-            '-nlt', 'PROMOTE_TO_MULTI',
+            # PROMOTE_TO_MULTI for spatial layers; NONE for forced tabular CSV.
+            '-nlt', nlt,
             '-lco', 'FID=ogc_fid', '-lco', 'LAUNDER=YES',
-            '-lco', 'GEOMETRY_NAME=geom',
         ])
-        if srs:
+        if nlt != 'NONE':
+            command.extend(['-lco', 'GEOMETRY_NAME=geom'])
+        if srs and not force_tabular:
             command.extend(['-a_srs', srs])
         command.extend(open_options)
 
@@ -645,6 +697,11 @@ def import_uploaded_resource(upload, datastore, layer_group, user, options):
                     stderr.strip()[-1000:]))
 
         has_geometry = _has_geometry(params, schema, name)
+        if force_tabular:
+            # Honour explicit "no geometry" even if ogr left a residual geom col.
+            if has_geometry:
+                _drop_geometry_columns(params, schema, name)
+            has_geometry = False
         if not has_geometry and wkt_column:
             # Fallback: convert leftover text WKT into a real geometry column.
             try:
