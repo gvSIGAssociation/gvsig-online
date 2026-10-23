@@ -25,6 +25,7 @@ from gvsigol import settings
 import requests
 import json
 import logging
+import xml.etree.ElementTree as ET
 from xml.sax.saxutils import escape
 
 logger = logging.getLogger(__name__)
@@ -480,6 +481,82 @@ class APIGeoWebCache():
         
         raise FailedRequestError(response.status_code, response.content)
     
+    def ensure_geoserver_layer(self, ws, layer, server, master_node_url):
+        """Ensure an internal GeoServer layer is registered and enabled in GWC.
+
+        Integrated GWC normally auto-exposes published layers, but some workspaces
+        end up without a tile layer entry. Without it, WMTS GetTile returns
+        InvalidParameterValue for LAYER. This creates a GeoServerLayer via REST
+        when missing, or re-enables it when present but disabled.
+        """
+        if ws is None:
+            layer_name = layer.name
+        else:
+            layer_name = ws + ":" + layer.name
+
+        api_url = master_node_url + "/gwc/rest/layers/" + layer_name + ".xml"
+        auth = (server.user, server.password)
+        headers = {'content-type': 'text/xml'}
+
+        response = self.session.get(api_url, headers=headers, auth=auth, timeout=_gwc_rest_timeout())
+        if response.status_code == 200:
+            try:
+                root = ET.fromstring(response.content)
+                enabled = root.find('enabled')
+                if enabled is not None and (enabled.text or '').strip().lower() == 'false':
+                    enabled.text = 'true'
+                    r = self.session.post(
+                        api_url,
+                        data=ET.tostring(root, encoding='utf-8'),
+                        headers=headers,
+                        auth=auth,
+                        timeout=_gwc_rest_timeout(),
+                    )
+                    if r.status_code != 200:
+                        raise FailedRequestError(r.status_code, r.content)
+                    logger.info("Re-enabled GWC GeoServerLayer %s", layer_name)
+            except ET.ParseError:
+                logger.warning(
+                    "Could not parse GWC layer XML for %s; assuming it is usable",
+                    layer_name,
+                )
+            return True
+
+        if response.status_code not in (404, 400):
+            raise FailedRequestError(response.status_code, response.content)
+
+        grid_subsets = _default_configured_grid_subsets()
+        if not grid_subsets:
+            grid_subsets = ['EPSG:3857']
+
+        xml_parts = [
+            '<GeoServerLayer>',
+            '<enabled>true</enabled>',
+            '<name>' + escape(layer_name) + '</name>',
+            '<mimeFormats><string>image/png</string></mimeFormats>',
+            '<gridSubsets>',
+        ]
+        for gs in grid_subsets:
+            xml_parts.append(
+                '<gridSubset><gridSetName>' + escape(gs) + '</gridSetName></gridSubset>'
+            )
+        xml_parts.extend([
+            '</gridSubsets>',
+            '<metaWidthHeight><int>4</int><int>4</int></metaWidthHeight>',
+            '<gutter>0</gutter>',
+            '<autoCacheStyles>true</autoCacheStyles>',
+            '</GeoServerLayer>',
+        ])
+        payload = ''.join(xml_parts).encode('utf-8')
+
+        put_response = self.session.put(
+            api_url, data=payload, headers=headers, auth=auth, timeout=_gwc_rest_timeout()
+        )
+        if put_response.status_code == 200:
+            logger.info("Created GWC GeoServerLayer %s", layer_name)
+            return True
+        raise FailedRequestError(put_response.status_code, put_response.content)
+
     def delete_layer(self, ws, layer, server, master_node_url):
         layer_name = None
         if ws is None:

@@ -511,7 +511,52 @@ def get_relative_url(url):
     if url.startswith(settings.BASE_URL + '/'):
         return url[len(settings.BASE_URL):]
     return url
- 
+
+
+def localize_media_asset_url(url):
+    """Rewrite absolute/foreign media asset URLs to a local MEDIA_URL path.
+
+    Project packages often embed ExternalGraphic hrefs as absolute URLs from the
+    source server (e.g. https://demo.../media/symbol_libraries/lib/icon.png).
+    After import the files live under this server's MEDIA_ROOT; keep portable
+    relative paths so the viewer does not fetch from the old host (CORS).
+    """
+    if not url or not isinstance(url, str):
+        return url
+    url = url.strip()
+    if not url:
+        return url
+
+    media_url = (getattr(settings, 'MEDIA_URL', None) or '/media/').rstrip('/') + '/'
+    for marker in ('symbol_libraries/', 'custom_legends/'):
+        idx = url.find(marker)
+        if idx != -1:
+            return media_url + url[idx:]
+
+    # Same deployment absolute URL → relative; leave unrelated absolute URLs alone
+    return get_relative_url(url)
+
+
+def localize_media_urls_in_sld(sld_text):
+    """Rewrite absolute media asset hrefs inside an SLD document to local paths."""
+    if not sld_text or not isinstance(sld_text, str):
+        return sld_text
+    import re
+    media_url = (getattr(settings, 'MEDIA_URL', None) or '/media/').rstrip('/') + '/'
+
+    def _repl(match):
+        prefix, marker, rest = match.group(1), match.group(2), match.group(3)
+        return prefix + media_url + marker + rest
+
+    # href="https://host/.../media/symbol_libraries/..." or /media/...
+    return re.sub(
+        r'''((?:xlink:)?href\s*=\s*["'])(?:https?://[^"'>\s]+)?(?:/media/)?((?:symbol_libraries|custom_legends)/)([^"'>\s]*)''',
+        _repl,
+        sld_text,
+        flags=re.IGNORECASE,
+    )
+
+
 def get_online_resource(library, file_name):
     return settings.MEDIA_URL + "symbol_libraries/" + library.name + "/" + file_name
 

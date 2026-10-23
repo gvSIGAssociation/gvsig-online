@@ -225,8 +225,76 @@ def update_layer_info(self):
         server.reload_nodes()
 
 
+def ensure_internal_layer_in_gwc(layer):
+    """Register/enable the internal layer in GeoWebCache before WMTS use.
+
+    Marking cached=True alone does not guarantee a GWC tile layer exists.
+    External WMS layers already call geowebcache.add_layer(); internals need
+    the same guarantee via GeoServerLayer REST.
+    """
+    if layer.external or not getattr(layer, 'datastore_id', None):
+        return False
+
+    from gvsigol_services import rest_geowebcache as geowebcache
+    from gvsigol_symbology.models import StyleLayer
+
+    workspace = layer.datastore.workspace
+    server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+    master_node = geographic_servers.get_instance().get_master_node(server.id)
+    gwc = geowebcache.get_instance()
+
+    gwc.ensure_geoserver_layer(workspace.name, layer, server, master_node.getUrl())
+    server.set_gwclayer_dynamic_subsets(workspace, layer.name)
+
+    if getattr(layer, 'vector_tile', False) and layer.datastore.type.startswith('v_'):
+        try:
+            server.update_vector_tile_format(workspace, layer.name, True)
+        except Exception:
+            logger.exception(
+                "Could not enable MVT format in GWC for layer %s - %s",
+                layer.id,
+                layer.name,
+            )
+
+    try:
+        style_list = []
+        default_style = ''
+        for sl in StyleLayer.objects.filter(layer=layer).select_related('style'):
+            if sl.style.name.endswith('_tmp'):
+                continue
+            style_list.append(sl.style.name)
+            if sl.style.is_default:
+                default_style = sl.style.name
+        if style_list:
+            server.rest_catalog.update_layer_styles_configuration(
+                layer,
+                default_style or style_list[0],
+                default_style,
+                style_list,
+                user=server.user,
+                password=server.password,
+            )
+    except Exception:
+        logger.exception(
+            "Could not update GWC style filters for layer %s - %s",
+            layer.id,
+            layer.name,
+        )
+
+    try:
+        server.reload_nodes()
+    except Exception:
+        logger.exception(
+            "Could not reload GeoServer nodes after ensuring GWC layer %s - %s",
+            layer.id,
+            layer.name,
+        )
+    return True
+
+
 def update_internal_wmts_layer_options(layer):
     try:
+        ensure_internal_layer_in_gwc(layer)
         # logger.info(f"Updating wmts options for internal layer {layer.id} - {layer.name}")
         wmts_options = get_wmts_options_from_layer(layer)
         if wmts_options:
@@ -234,6 +302,13 @@ def update_internal_wmts_layer_options(layer):
             external_params['wmts_options'] = wmts_options
             layer.external_params = json.dumps(external_params)
             layer.save()
+        else:
+            logger.warning(
+                "No WMTS options for internal layer %s - %s after GWC ensure "
+                "(layer may still be missing from WMTS capabilities)",
+                layer.id,
+                layer.name,
+            )
     except Exception as e:
         logger.exception(f"Error getting wmts options for layer {layer.id} - {layer.name}")
 

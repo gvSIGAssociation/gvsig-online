@@ -25,6 +25,7 @@
 from gvsigol_auth import auth_backend
 from django import apps
 from django.core.mail import send_mail
+from django.utils.encoding import force_str
 from django.utils.translation import gettext as _
 from gvsigol_core.models import Project, ProjectRole, ProjectLayerGroup, Application, ApplicationRole, UserHomeOrder
 from gvsigol_services.models import LayerGroup, Layer, LayerGroupRole
@@ -863,51 +864,52 @@ def get_user_applications(request):
     return applications.distinct()
 
 def get_core_tools(enabled=True):
+    # force_str so titles/descriptions are plain str (safe for json.dumps / Project.tools)
     return [{
         'name': 'gvsigol_tool_navigationhistory',
         'checked': enabled,
-        'title': _('Navigation history'),
-        'description': _('Browse the view forward and backward')
+        'title': force_str(_('Navigation history')),
+        'description': force_str(_('Browse the view forward and backward'))
     },{
         'name': 'gvsigol_tool_zoom',
         'checked': enabled,
-        'title': _('Zoom tools'),
-        'description': _('Zoom in, zoom out, ...')
+        'title': force_str(_('Zoom tools')),
+        'description': force_str(_('Zoom in, zoom out, ...'))
     }, {
         'name': 'gvsigol_tool_info',
         'checked': enabled,
-        'title': _('Feature info'),
-        'description': _('Map information at point')
+        'title': force_str(_('Feature info')),
+        'description': force_str(_('Map information at point'))
     }, {
         'name': 'gvsigol_tool_measure',
         'checked': enabled,
-        'title': _('Measure tools'),
-        'description': _('It allows to measure areas and distances')
+        'title': force_str(_('Measure tools')),
+        'description': force_str(_('It allows to measure areas and distances'))
     }, {
         'name': 'gvsigol_tool_coordinate',
         'checked': enabled,
-        'title': _('Search coordinates'),
-        'description': _('Center the map at given coordinates')
+        'title': force_str(_('Search coordinates')),
+        'description': force_str(_('Center the map at given coordinates'))
     }, {
         'name': 'gvsigol_tool_coordinatecalc',
         'checked': enabled,
-        'title': _('Coordinate calculator'),
-        'description': _('Transform coordinates between different systems')
+        'title': force_str(_('Coordinate calculator')),
+        'description': force_str(_('Transform coordinates between different systems'))
     }, {
         'name': 'gvsigol_tool_location',
         'checked': enabled,
-        'title': _('Geolocation'),
-        'description': _('Center the map in the current position')
+        'title': force_str(_('Geolocation')),
+        'description': force_str(_('Center the map in the current position'))
     }, {
         'name': 'gvsigol_tool_shareview',
         'checked': enabled,
-        'title': _('Share view'),
-        'description': _('Allows you to share the view in its current state')
+        'title': force_str(_('Share view')),
+        'description': force_str(_('Allows you to share the view in its current state'))
     }, {
         'name': 'gvsigol_tool_selectfeature',
         'checked': enabled,
-        'title': _('Select feature'),
-        'description': _('Select features from current layers')
+        'title': force_str(_('Select feature')),
+        'description': force_str(_('Select features from current layers'))
     }]
 
 def get_plugin_tools(enabled=False):
@@ -915,11 +917,12 @@ def get_plugin_tools(enabled=False):
     for key in apps.apps.app_configs:
         app = apps.apps.app_configs[key]
         if 'gvsigol_plugin_' in app.name:
+            # AppConfig.verbose_name is often gettext_lazy (__proxy__), not JSON-serializable
             project_tools.append({
                 'name': app.name,
                 'checked': enabled,
                 'title': app.name,
-                'description': app.verbose_name
+                'description': force_str(app.verbose_name) if app.verbose_name else app.name,
             })
     return project_tools
 

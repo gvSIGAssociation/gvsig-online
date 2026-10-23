@@ -164,6 +164,9 @@ def _sld_import_symbolizers(rule_node, model_rule):
                             or or_nodes[0].get('href')
                             or ''
                         )
+                        # Package import often carries absolute source-server URLs;
+                        # keep portable local MEDIA_URL paths for symbol libraries.
+                        online_resource = utils.localize_media_asset_url(online_resource)
                     fmt = _sld_first_text(eg_node, 'sld:Format') or 'image/svg+xml'
                     if online_resource:
                         ExternalGraphicSymbolizer(
@@ -540,6 +543,9 @@ def sld_import(name, is_default, layer_id, file, mapservice, style_type=None, ti
     raw_sld_text = file.read()
     if isinstance(raw_sld_text, bytes):
         raw_sld_text = raw_sld_text.decode('utf-8', errors='replace')
+    # Always localize symbol-library / legend hrefs so imported packages do not
+    # keep pointing at the source server (CORS / broken icons on Vector Tiles).
+    raw_sld_text = utils.localize_media_urls_in_sld(raw_sld_text)
 
     # SLD_STORED_TYPES (MC heatmap, CS custom): the SLD is kept verbatim in
     # style.sld and sent directly to GeoServer — do NOT try to parse rules

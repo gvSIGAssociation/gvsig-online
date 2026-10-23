@@ -296,6 +296,11 @@ def _styles_payload(layer, skip_db_sld=False):
                         sld = body.decode('utf-8', errors='replace')
                     else:
                         sld = str(body)
+                # Keep ExternalGraphic hrefs portable (relative MEDIA_URL), not
+                # absolute source-host URLs that break after import (CORS).
+                if sld:
+                    from gvsigol_symbology.utils import localize_media_urls_in_sld
+                    sld = localize_media_urls_in_sld(sld)
             except Exception as _sld_exc:
                 LOG.warning(
                     'Could not serialize SLD for layer %s style %s (will export empty SLD): %s',

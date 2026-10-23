@@ -2072,6 +2072,14 @@ def layer_update(request, layer_id):
             utils.set_layer_permissions(layer, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles)
             
             if layer.cached:
+                # Ensure GWC tile layer exists before WMTS options (sync; async task refreshes options)
+                try:
+                    tasks.ensure_internal_layer_in_gwc(layer)
+                except Exception:
+                    logger.exception(
+                        'Could not ensure GWC registration for cached layer %s',
+                        layer.name,
+                    )
                 tasks.update_wmts_layer_info.apply_async(args=[layer.id])
             gs.reload_nodes()
         if from_redirect:
@@ -7072,6 +7080,8 @@ def layer_cache_config(request, layer_id):
                     None, layer, server, master_url
                 )
             else:
+                # Repair missing GWC tile layer before seed/truncate (same as cached=True flow)
+                tasks.ensure_internal_layer_in_gwc(layer)
                 configured_grid_subsets = geowebcache.get_instance().get_configured_grid_subsets(
                     layer.datastore.workspace.name, layer, server, master_url
                 )
@@ -7157,22 +7167,23 @@ def layer_cache_config(request, layer_id):
 
     else:
         try:
-            tasks = None
+            gwc_tasks = None
             master_node = geographic_servers.get_instance().get_master_node(server.id)
             master_url = master_node.getUrl()
             if layer.external:
                 grid_subsets = geowebcache.get_instance().get_configured_grid_subsets(
                     None, layer, server, master_url
                 )
-                tasks = geowebcache.get_instance().get_pending_and_running_tasks(
+                gwc_tasks = geowebcache.get_instance().get_pending_and_running_tasks(
                     None, layer, server, master_url
                 )
             else:
                 ws_name = layer.datastore.workspace.name
+                tasks.ensure_internal_layer_in_gwc(layer)
                 grid_subsets = geowebcache.get_instance().get_configured_grid_subsets(
                     ws_name, layer, server, master_url
                 )
-                tasks = geowebcache.get_instance().get_pending_and_running_tasks(
+                gwc_tasks = geowebcache.get_instance().get_pending_and_running_tasks(
                     ws_name, layer, server, master_url
                 )
 
@@ -7182,7 +7193,7 @@ def layer_cache_config(request, layer_id):
                 "grid_subsets": grid_subsets,
                 "json_grid_subsets": json.dumps(grid_subsets),
                 "format_choices": getattr(settings, 'SUPPORTED_FORMATS_CHOICES', [(f, f) for f in settings.CACHE_OPTIONS['FORMATS']]),
-                "tasks": tasks['long-array-array'],
+                "tasks": gwc_tasks['long-array-array'],
                 "latlong_extent": layer.latlong_extent,
                 "supported_crs": json.dumps(core_utils.get_supported_crs()),
             }
