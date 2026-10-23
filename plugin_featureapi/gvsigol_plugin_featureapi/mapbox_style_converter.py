@@ -729,6 +729,56 @@ def convert_text_symbolizer(symbolizer, layer_id, rule_name, source_layer):
     return layer
 
 
+def external_graphic_icon_name(online_resource):
+    """Derive Mapbox icon-image id from an ExternalGraphic onlineResource URL/path."""
+    if not online_resource:
+        return None
+    name = online_resource.rstrip('/').split('/')[-1]
+    if '.' in name:
+        name = name.rsplit('.', 1)[0]
+    return name or None
+
+
+def resolve_external_graphic_url(online_resource):
+    """Return a same-deployment path for a symbol-library graphic.
+
+    Prefer relative MEDIA_URL paths (e.g. /media/symbol_libraries/lib/icon.png).
+    Absolutizing with BASE_URL often yields a wrong host (e.g. https://localhost)
+    that then fails CORS when the SPA runs on another origin. The frontend
+    resolves relative paths against GVSIGOL_BASE / window.location.
+    """
+    if not online_resource:
+        return None
+    from gvsigol_symbology.utils import localize_media_asset_url
+    url = localize_media_asset_url(online_resource.strip())
+    if not url:
+        return None
+    if url.startswith('http://') or url.startswith('https://'):
+        # External (non-local-media) absolute URL — leave as-is
+        return url
+    if not url.startswith('/'):
+        media = getattr(settings, 'MEDIA_URL', '/media/') or '/media/'
+        url = media.rstrip('/') + '/' + url.lstrip('/')
+    return url
+
+
+def collect_external_graphic_icons(layer):
+    """
+    Map icon-image names used by ExternalGraphicSymbolizers to media URLs
+    (relative when local) for ol-mapbox-style getImage().
+    """
+    icons = {}
+    egs = ExternalGraphicSymbolizer.objects.filter(
+        rule__style__stylelayer__layer=layer
+    ).distinct()
+    for eg in egs:
+        icon_name = external_graphic_icon_name(eg.online_resource)
+        icon_url = resolve_external_graphic_url(eg.online_resource)
+        if icon_name and icon_url:
+            icons[icon_name] = icon_url
+    return icons
+
+
 def convert_external_graphic_symbolizer(symbolizer, layer_id, rule_name, source_layer):
     """Convierte ExternalGraphicSymbolizer a capa Mapbox GL (symbol con icon)."""
     layer = {
@@ -740,11 +790,11 @@ def convert_external_graphic_symbolizer(symbolizer, layer_id, rule_name, source_
         "paint": {}
     }
     
-    # Icon image (referencia al sprite)
+    # Icon image name; absolute URL is exposed in API response "icons" for getImage()
     if symbolizer.online_resource:
-        # Extraer nombre del icono de la URL
-        icon_name = symbolizer.online_resource.split('/')[-1].split('.')[0]
-        layer["layout"]["icon-image"] = icon_name
+        icon_name = external_graphic_icon_name(symbolizer.online_resource)
+        if icon_name:
+            layer["layout"]["icon-image"] = icon_name
     
     # Icon size
     if symbolizer.size:
@@ -1907,110 +1957,122 @@ def get_all_styles_for_layer(layer_id, tms_base_url=None, use_cache=True):
         raise ValueError(f"Layer with id {layer_id} not found")
     
     # Intentar obtener desde caché si use_cache=True
+    result = None
     if use_cache:
         try:
             cache = MapboxStyleCache.objects.get(layer=layer)
             logger.info(f"Returning cached Mapbox style for layer {layer_id} (cached at {cache.updated_at})")
-            return cache.json_cache
+            result = cache.json_cache
         except MapboxStyleCache.DoesNotExist:
             logger.info(f"No cache found for layer {layer_id}, generating...")
     else:
         logger.info(f"Cache disabled (use_cache=False), regenerating for layer {layer_id}...")
     
-    # Si no hay caché o use_cache=False, generar
-    # Validar que la capa tiene datastore y workspace
-    if not layer.datastore or not layer.datastore.workspace:
-        raise ValueError(f"Layer {layer_id} has no datastore or workspace")
-    
-    workspace = layer.datastore.workspace
-    workspace_name = workspace.name
-    
-    # Construir la URL de tiles según configuración (GWC vs WMS-MVT)
-    tile_url = build_tile_url(layer, workspace)
-    
-    if not tile_url:
-        raise ValueError(f"Layer {layer_id} does not have vector_tile enabled")
-    
-    # Detectar el source-layer real del MVT parseando un tile
-    source_layer = detect_source_layer_from_pbf(tile_url, workspace_name, layer.name)
-    
-    # Calcular minzoom y maxzoom basados en las escalas de los estilos
-    # Por defecto: 0-22 para MVT
-    minzoom = 0
-    maxzoom = 22
-    
-    # Obtener todos los StyleLayer asociados a esta capa
-    # Ordenar para que el estilo por defecto (is_default=True) aparezca primero
-    style_layers = StyleLayer.objects.filter(layer=layer).select_related('style').order_by('-style__is_default', 'style__name')
-    
-    if not style_layers.exists():
-        raise ValueError(f"No styles found for layer {layer_id}")
-    
-    result = {
-        "layer_id": layer_id,
-        "layer_name": layer.name,
-        "workspace": workspace_name,
-        "tile_url": tile_url,
-        "source_layer": source_layer,
-        "crs": "EPSG:3857",
-        "minzoom": minzoom,
-        "maxzoom": maxzoom,
-        "styles": []
-    }
-    
-    for style_layer in style_layers:
-        style = style_layer.style
+    if result is None:
+        # Si no hay caché o use_cache=False, generar
+        # Validar que la capa tiene datastore y workspace
+        if not layer.datastore or not layer.datastore.workspace:
+            raise ValueError(f"Layer {layer_id} has no datastore or workspace")
         
-        # Excluir estilos temporales
-        if style.name.endswith('__tmp'):
-            continue
+        workspace = layer.datastore.workspace
+        workspace_name = workspace.name
         
-        try:
-            # Convertir el estilo a Mapbox GL
-            mapbox_style = convert_style_to_mapbox(
-                layer_id=layer_id,
-                style_obj=style,
-                layer_obj=layer,
-                tms_base_url=tms_base_url
-            )
+        # Construir la URL de tiles según configuración (GWC vs WMS-MVT)
+        tile_url = build_tile_url(layer, workspace)
+        
+        if not tile_url:
+            raise ValueError(f"Layer {layer_id} does not have vector_tile enabled")
+        
+        # Detectar el source-layer real del MVT parseando un tile
+        source_layer = detect_source_layer_from_pbf(tile_url, workspace_name, layer.name)
+        
+        # Calcular minzoom y maxzoom basados en las escalas de los estilos
+        # Por defecto: 0-22 para MVT
+        minzoom = 0
+        maxzoom = 22
+        
+        # Obtener todos los StyleLayer asociados a esta capa
+        # Ordenar para que el estilo por defecto (is_default=True) aparezca primero
+        style_layers = StyleLayer.objects.filter(layer=layer).select_related('style').order_by('-style__is_default', 'style__name')
+        
+        if not style_layers.exists():
+            raise ValueError(f"No styles found for layer {layer_id}")
+        
+        result = {
+            "layer_id": layer_id,
+            "layer_name": layer.name,
+            "workspace": workspace_name,
+            "tile_url": tile_url,
+            "source_layer": source_layer,
+            "crs": "EPSG:3857",
+            "minzoom": minzoom,
+            "maxzoom": maxzoom,
+            "styles": []
+        }
+        
+        for style_layer in style_layers:
+            style = style_layer.style
             
-            # Normalizar el estilo (rgba -> rgb+opacity, IDs únicos, etc.)
-            mapbox_style = normalize_mapbox_style(mapbox_style, style_id=style.id)
+            # Excluir estilos temporales
+            if style.name.endswith('__tmp'):
+                continue
             
-            # Preparar para OpenLayers: actualizar source-layer, eliminar source
-            mapbox_style = prepare_mapbox_style_for_openlayers(mapbox_style, source_layer)
-            
-            result["styles"].append({
-                "style_id": style.id,
-                "style_name": style.name,
-                "style_title": style.title or style.name,
-                "default": style.is_default,
-                "style_type": style.type,
-                "mapbox_style": mapbox_style
-            })
-        except Exception as e:
-            logger.warning(f"Error converting style {style.id} for layer {layer_id}: {e}")
-            # Incluir el estilo aunque falle la conversión, con error
-            result["styles"].append({
-                "style_id": style.id,
-                "style_name": style.name,
-                "style_title": style.title or style.name,
-                "default": style.is_default,
-                "style_type": style.type,
-                "mapbox_style": None,
-                "error": str(e)
-            })
-    
-    # Guardar en caché si use_cache=True
-    if use_cache:
-        try:
-            MapboxStyleCache.objects.update_or_create(
-                layer=layer,
-                defaults={'json_cache': result}
-            )
-            logger.info(f"Cached Mapbox style for layer {layer_id}")
-        except Exception as e:
-            logger.error(f"Error caching Mapbox style for layer {layer_id}: {e}", exc_info=True)
-    
+            try:
+                # Convertir el estilo a Mapbox GL
+                mapbox_style = convert_style_to_mapbox(
+                    layer_id=layer_id,
+                    style_obj=style,
+                    layer_obj=layer,
+                    tms_base_url=tms_base_url
+                )
+                
+                # Normalizar el estilo (rgba -> rgb+opacity, IDs únicos, etc.)
+                mapbox_style = normalize_mapbox_style(mapbox_style, style_id=style.id)
+                
+                # Preparar para OpenLayers: actualizar source-layer, eliminar source
+                mapbox_style = prepare_mapbox_style_for_openlayers(mapbox_style, source_layer)
+                
+                result["styles"].append({
+                    "style_id": style.id,
+                    "style_name": style.name,
+                    "style_title": style.title or style.name,
+                    "default": style.is_default,
+                    "style_type": style.type,
+                    "mapbox_style": mapbox_style
+                })
+            except Exception as e:
+                logger.warning(f"Error converting style {style.id} for layer {layer_id}: {e}")
+                # Incluir el estilo aunque falle la conversión, con error
+                result["styles"].append({
+                    "style_id": style.id,
+                    "style_name": style.name,
+                    "style_title": style.title or style.name,
+                    "default": style.is_default,
+                    "style_type": style.type,
+                    "mapbox_style": None,
+                    "error": str(e)
+                })
+        
+        # Guardar en caché si use_cache=True
+        if use_cache:
+            try:
+                MapboxStyleCache.objects.update_or_create(
+                    layer=layer,
+                    defaults={'json_cache': result}
+                )
+                logger.info(f"Cached Mapbox style for layer {layer_id}")
+            except Exception as e:
+                logger.error(f"Error caching Mapbox style for layer {layer_id}: {e}", exc_info=True)
+
+    # Always attach absolute icon URLs (also for cached payloads) so ExternalGraphic
+    # symbols can be resolved via ol-mapbox-style getImage without a sprite sheet.
+    try:
+        result = dict(result) if result is not None else {}
+        result["icons"] = collect_external_graphic_icons(layer)
+    except Exception as e:
+        logger.warning(f"Could not collect ExternalGraphic icons for layer {layer_id}: {e}")
+        if isinstance(result, dict):
+            result.setdefault("icons", {})
+
     return result
 
