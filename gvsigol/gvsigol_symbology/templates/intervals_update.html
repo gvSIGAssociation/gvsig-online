@@ -200,7 +200,7 @@
 					<div class="col-md-12 form-group">
 						<label>{% trans "Select library" %}</label>
 						<select id="select-ramp-library" class="form-control">
-							<option disabled selected value> -- {% trans "Select ramp library" %} -- </option>
+							<option selected value=""> -- {% trans "Select ramp library" %} -- </option>
 							{% for ramp_library in ramp_libraries %}
 							<option value="{{ramp_library.id}}">{{ramp_library.name}}</option>
 							{% endfor %}
@@ -211,7 +211,7 @@
 					<div class="col-md-12 form-group">
 						<label>{% trans "Select category" %}</label>
 						<select id="select-category" class="form-control" disabled>
-							<option disabled selected value> -- {% trans "Select ramp category" %} -- </option>
+							<option selected value=""> -- {% trans "Select ramp category" %} -- </option>
 						</select>
 					</div>
 				</div>
@@ -489,8 +489,13 @@ $(document).ready(function() {
 				getFoldersFromLibrary(libraryId);
 			}
 			
-			$("#select-ramp-library").on('change', function(e) {
+			$("#select-ramp-library").off('change').on('change', function(e) {
 				$(".ramp-list").empty();
+				if (!this.value) {
+					$("#select-category").html('<option selected value=""> -- {% trans "Select ramp category" %} -- </option>');
+					$("#select-category").prop("disabled", true);
+					return;
+				}
 				getFoldersFromLibrary(this.value);
 			});
 		}else{
@@ -567,26 +572,32 @@ $(document).ready(function() {
 			success: function(response){
 				$("#select-category").empty();
 				var folders = response.library_folders;
-				var options = "";
+				var options = '<option value=""> -- {% trans "Select ramp category" %} -- </option>';
 				for(var i=0; i<folders.length; i++){
 					var folder = folders[i];
 					options += "<option value=\""+ folder.id +"\">"+folder.name+"</option>";
 				}
 				$("#select-category").prop("disabled", false);
-				$("#select-category").append(options);
-				$("#select-category").on('change', function(e) {
+				$("#select-category").html(options);
+				$("#select-category").off('change').on('change', function(e) {
 					$(".ramp-list").empty();
-					getRampFromFolder(this.value);
+					if (this.value) {
+						getRampFromFolder(this.value);
+					}
 				});
-				$("#select-category").trigger("change");
+				if (folders.length > 0) {
+					$("#select-category").val(folders[0].id).trigger("change");
+				}
 			},
 		    error: function(){}
 		});
 	};
 	
 	$("#invert-ramp").click(function(){
-		var folder_id = $("#select-category").val()
-		getRampFromFolder(folder_id);
+		var folder_id = $("#select-category").val();
+		if (folder_id) {
+			getRampFromFolder(folder_id);
+		}
 	});
 	
 	$(window).on("beforeunload", function(){
