@@ -429,7 +429,7 @@ GVSIGOL_ENABLE_ENUMERATIONS = ##GVSIGOL_ENABLE_ENUMERATIONS##
 #                           skin-green-light, skin-red-light,
 #                           skin-purple-light, skin-yellow-light,
 #                           skin-elegant
-# Cliente:                  skin-albacete, skin-alzira,
+# Cliente:                  skin-albacete, skin-almendralejo, skin-alzira,
 #                           skin-atlasrenewableenergy, skin-cartagena,
 #                           skin-csicgranada, skin-eliana, skin-ideuy,
 #                           skin-libra, skin-mallorca, skin-ormusa,

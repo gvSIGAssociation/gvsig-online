@@ -390,6 +390,20 @@ body {
 	--gol-accent-lt: rgba(242,125,55,0.06);
 }
 
+/* Ayuntamiento de Almendralejo. Rojo Pantone 187 C #BE1622.
+   El escudo de la cabecera ya es claro: no hace falta invertirlo. */
+.skin-almendralejo {
+	--hdr-bg:        #BE1622;
+	--hdr-bg-dk:     #8E1019;
+	--sb-bg:         #2a1214;
+	--sb-bg-dark:    #1c0c0e;
+	--sb-accent:     #BE1622;
+	--sb-accent-lt:  #f3b4b8;
+	--gol-accent:    #BE1622;
+	--gol-accent-dk: #8E1019;
+	--gol-accent-lt: rgba(190, 22, 34, 0.06);
+}
+
 /* El logotipo de Picanya viene en color y se necesita en blanco sobre
    la franja de la cabecera. */
 .skin-picanya {
