@@ -515,6 +515,14 @@ viewer.core = {
 		if (m) {
 			return 'EPSG:' + m[1];
 		}
+		// CRS:84 and http://www.opengis.net/def/crs/OGC/1.3/CRS84 are WGS84 lon/lat.
+		if (/(^|[/:])CRS:?84$/i.test(code)) {
+			return 'EPSG:4326';
+		}
+		var ogcEpsg = /EPSG[:\/]+(\d+)\s*$/i.exec(code);
+		if (ogcEpsg) {
+			return 'EPSG:' + ogcEpsg[1];
+		}
 		return code;
 	},
 
@@ -679,7 +687,9 @@ viewer.core = {
 			return;
 		}
 
-		if (externalLayer['cached'] || externalLayer['type'] == 'WMTS') {
+		// Raster WMTS is reprojected by OpenLayers (3857/4326 → project CRS). The
+		// metric↔geographic guard is for MVT, where that reprojection can freeze the browser.
+		if (externalLayer['cached'] && externalLayer['type'] != 'WMTS') {
 			var extTileProj = this._getLayerTileProjectionCode(externalLayer);
 			if (extTileProj && this._warnIfProjectionIncompatible(externalLayer, extTileProj)) {
 				return;
@@ -1016,12 +1026,42 @@ viewer.core = {
 		}
 		return [base];
 	},
+	_repairGeographicWmtsTileGrid: function(tileGrid, projection) {
+		var metersPerDegree = 111319.49079327358;
+		if (!tileGrid || (projection !== 'EPSG:4326' && projection !== 'EPSG:4258' && projection !== 'EPSG:4269')) {
+			return tileGrid;
+		}
+		var resolutions = tileGrid.resolutions;
+		if (!resolutions || !resolutions.length) {
+			return tileGrid;
+		}
+		var maxRes = Math.max.apply(null, resolutions);
+		if (!isFinite(maxRes)) {
+			return tileGrid;
+		}
+		var next = $.extend({}, tileGrid);
+		if (maxRes > 10) {
+			next.resolutions = resolutions.map(function(r) {
+				return Number(r) / metersPerDegree;
+			});
+		}
+		var extent = next.extent;
+		var invalidExtent = !extent || extent.length !== 4 ||
+			(extent[2] - extent[0]) > 360.1 || (extent[3] - extent[1]) > 180.1 ||
+			extent[0] < -180.1 || extent[2] > 180.1 ||
+			extent[1] < -90.1 || extent[3] > 90.1;
+		if (invalidExtent) {
+			next.extent = [-180, -90, 180, 90];
+		}
+		return next;
+	},
 	_createWMTSTileSourceFromOptions: function(wmtsOptions, cacheUrl) {
-		var options = wmtsOptions;
+		var options = $.extend({}, wmtsOptions);
 		if (cacheUrl) {
-			options = $.extend({}, wmtsOptions);
 			options.urls = this._browserWmtsUrlsFromCacheUrl(cacheUrl);
 		}
+		options.projection = this._normalizeProjectionCode(options.projection) || options.projection;
+		options.tileGrid = this._repairGeographicWmtsTileGrid(options.tileGrid, options.projection);
 		var origins = options.tileGrid.origins;
 		// GWC TileMatrixLimits / derived extent often clip valid tiles (missing vertical strip).
 		// For cached GWC layers use a wide CRS extent and do not apply fullTileRanges.
