@@ -1768,6 +1768,95 @@ def getUserAuthSession(request):
 
 
 PIXEL_SIZE_M = 0.00028  # 0.28 mm
+# WGS84 degrees → meters. OpenLayers uses the same value (2 * pi * 6378137 / 360).
+WGS84_METERS_PER_DEGREE = 111319.49079327358
+_GEOGRAPHIC_WMTS_EPSG = ('EPSG:4326', 'EPSG:4258', 'EPSG:4269')
+
+
+def normalize_wmts_projection(crs):
+    """Map a WMTS SupportedCRS to an EPSG code OpenLayers can transform.
+
+    INSPIRE quad grids advertise WGS84 longitude/latitude as ``CRS:84`` or as an
+    OGC URI such as ``http://www.opengis.net/def/crs/OGC/1.3/CRS84``. OpenLayers
+    has no transform for those identifiers. Its EPSG:4326 axis order is lon/lat,
+    the same order those tile matrices use.
+    """
+    if not crs:
+        return crs
+    text = str(crs).strip()
+    if re.search(r'(^|[/:])CRS:?84$', text, re.IGNORECASE):
+        return 'EPSG:4326'
+    if 'EPSG' in text.upper():
+        match = re.search(r'(\d+)\s*$', text)
+        if match:
+            return 'EPSG:{0}'.format(match.group(1))
+    return text
+
+
+def wmts_meters_per_unit(projection):
+    """CRS units for ScaleDenominator → resolution. Meters for projected CRS."""
+    if projection in _GEOGRAPHIC_WMTS_EPSG:
+        return WGS84_METERS_PER_DEGREE
+    return 1.0
+
+
+def repair_geographic_wmts_tile_grid(tile_grid, projection):
+    """Fix a geographic grid whose resolutions were stored in meters per pixel.
+
+    ScaleDenominator * 0.00028 is meters/pixel. Older wmts_options kept that
+    value for CRS:84 while origins stayed in degrees, so OpenLayers could not
+    place the tiles. Already-correct degree resolutions (well under 10 deg/px)
+    are left unchanged.
+    """
+    if not isinstance(tile_grid, dict) or projection not in _GEOGRAPHIC_WMTS_EPSG:
+        return tile_grid
+    resolutions = tile_grid.get('resolutions') or []
+    if not resolutions:
+        return tile_grid
+    try:
+        max_res = max(float(r) for r in resolutions)
+    except (TypeError, ValueError):
+        return tile_grid
+    if max_res > 10:
+        tile_grid['resolutions'] = [float(r) / WGS84_METERS_PER_DEGREE for r in resolutions]
+    extent = tile_grid.get('extent')
+    invalid_extent = (
+        not isinstance(extent, (list, tuple)) or len(extent) != 4 or
+        (extent[2] - extent[0]) > 360.1 or (extent[3] - extent[1]) > 180.1 or
+        extent[0] < -180.1 or extent[2] > 180.1 or
+        extent[1] < -90.1 or extent[3] > 90.1
+    )
+    if invalid_extent:
+        tile_grid['extent'] = [-180.0, -90.0, 180.0, 90.0]
+    return tile_grid
+
+
+def _normalize_wmts_option_projections(wmts_options):
+    if not isinstance(wmts_options, dict):
+        return wmts_options
+    if wmts_options.get('projection'):
+        wmts_options['projection'] = normalize_wmts_projection(wmts_options['projection'])
+    tile_grids = wmts_options.get('tileGrids')
+    if isinstance(tile_grids, dict):
+        for tms in tile_grids.values():
+            if isinstance(tms, dict) and tms.get('projection'):
+                tms['projection'] = normalize_wmts_projection(tms['projection'])
+    return wmts_options
+
+
+def _repair_wmts_option_grids(wmts_options):
+    if not isinstance(wmts_options, dict):
+        return wmts_options
+    if isinstance(wmts_options.get('tileGrid'), dict):
+        repair_geographic_wmts_tile_grid(
+            wmts_options['tileGrid'], wmts_options.get('projection'))
+        wmts_options['tileMatrixSet'] = wmts_options['tileGrid']
+    tile_grids = wmts_options.get('tileGrids')
+    if isinstance(tile_grids, dict):
+        for tms in tile_grids.values():
+            if isinstance(tms, dict) and isinstance(tms.get('tileGrid'), dict):
+                repair_geographic_wmts_tile_grid(tms['tileGrid'], tms.get('projection'))
+    return wmts_options
 
 def _is_generic_wms_default_style_name(name, layer_name=None):
     if not name:
@@ -1859,12 +1948,7 @@ def get_wmts_options(
 
     def _normalize_projection(crs):
         """Normalize CRS to EPSG:xxxx format"""
-        if crs and "EPSG" in crs and ":" in crs:
-            parts = crs.split(":")
-            code = parts[-1]
-            if code.isdigit():
-                return f"EPSG:{code}"
-        return crs
+        return normalize_wmts_projection(crs)
 
     # TileMatrixSet & tileGrid
     tile_grids = {}
@@ -1884,8 +1968,10 @@ def get_wmts_options(
         # matrixIds (identifiers tal cual)
         matrix_ids = [m.identifier for m in matrices]
 
-        # resolutions (m/px) = ScaleDenominator * 0.00028
-        resolutions = [m.scaledenominator * PIXEL_SIZE_M for m in matrices]
+        # ScaleDenominator * 0.28 mm is meters/pixel. Geographic grids need degrees.
+        projection = _normalize_projection(getattr(tms, "crs", None))
+        meters_per_unit = wmts_meters_per_unit(projection)
+        resolutions = [m.scaledenominator * PIXEL_SIZE_M / meters_per_unit for m in matrices]
 
 
         #tile_sizes = [[m.tilewidth, m.tileheight] for m in matrices]
@@ -1923,7 +2009,7 @@ def get_wmts_options(
 
                     if idx == len(matrices) - 1: # use the most detailed matrix to calculate the extent
                         scale_denominator = tms.tilematrix[m.identifier].scaledenominator
-                        res = scale_denominator * PIXEL_SIZE_M
+                        res = scale_denominator * PIXEL_SIZE_M / meters_per_unit
                         origin = _parse_tlc(matrices[idx].topleftcorner)
                         tile_w = int(matrices[idx].tilewidth)
                         tile_h = int(matrices[idx].tileheight)
@@ -1966,8 +2052,6 @@ def get_wmts_options(
             miny = origin[1] - mh * tile_h * res0
             extent = [origin[0], miny, maxx, origin[1]]
 
-        # Normalizar proyección
-        projection = _normalize_projection(getattr(tms, "crs", None))
         tile_grid = {
                 "origin": None,
                 "origins": origins,
@@ -2112,6 +2196,9 @@ def wmts_options_for_openlayers(
         except Exception:
             pass
 
+    _normalize_wmts_option_projections(wmts_options)
+    _repair_wmts_option_grids(wmts_options)
+
     tilematrixset = None
     tile_grids = wmts_options.get('tileGrids') or {}
     if tilematrixsetname and tile_grids.get(tilematrixsetname):
@@ -2145,6 +2232,11 @@ def wmts_options_for_openlayers(
         wmts_options['projection'] = tilematrixset['projection']
         wmts_options.pop('tileGrids', None)
         wmts_options.pop('matrixSets', None)
+
+    # Flattened options (already stored) skip the selection above. CRS:84 URIs and
+    # meter resolutions on a geographic grid still have to be readable by OpenLayers.
+    _normalize_wmts_option_projections(wmts_options)
+    _repair_wmts_option_grids(wmts_options)
 
     _normalize_wmts_style_identifier_for_kvp(wmts_options)
     return wmts_options
