@@ -2107,6 +2107,11 @@ def _layer_update_build_render_context(request, layer, layer_id, layergroup_id, 
         for key in params:
             form.initial[key] = params[key]
 
+    # vector_tile is stored separately; external_params.format stays image/png.
+    # Show "vector-tiles" in the Format select when MVT is enabled.
+    if getattr(layer, 'vector_tile', False):
+        form.initial['format'] = 'vector-tiles'
+
     try:
         layerConf = ast.literal_eval(layer.conf)
     except Exception:

@@ -1019,10 +1019,12 @@ $('#submenu-layers').addClass("active");
 		// Ejecutar al cargar la página
 		updateFormatOptions();
 		
-		// Si el campo vector_tile está marcado en el modelo, seleccionar vector-tiles en el desplegable
+		// Si el campo vector_tile está marcado en el modelo, seleccionar vector-tiles en el desplegable.
+		// Select2 ya está inicializado en base.html: hay que disparar change para que
+		// el texto cerrado coincida con la opción seleccionada (no solo al desplegar).
 		{% if layer.vector_tile %}
 		if (datastoreType === 'v_PostGIS') {
-			formatSelect.val('vector-tiles');
+			formatSelect.val('vector-tiles').trigger('change');
 		}
 		{% endif %}
 	});
