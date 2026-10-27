@@ -298,6 +298,11 @@
 	line-height: 1.5;
 	vertical-align: middle;
 }
+.pl-table thead th:first-child,
+.pl-table tbody td:first-child {
+	white-space: nowrap;
+	min-width: 3.2em;
+}
 .pl-table tbody td:first-child {
 	color: var(--pl-muted);
 	font-size: 12px;

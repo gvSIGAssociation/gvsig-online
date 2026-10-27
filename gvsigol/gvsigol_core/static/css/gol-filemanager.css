@@ -10,6 +10,9 @@
    permite sacarlo del contenedor, así que el panel no puede recortar. */
 .pl-panel { overflow: visible; }
 
+.pl-table thead th:first-child,
+.pl-table tbody td:first-child { white-space: normal; min-width: 0; }
+
 /* El titulo del panel aloja las migas de pan, que pueden ser largas, asi que
    ocupa el espacio libre en vez de ajustarse a su contenido. */
 .pl-panel__title { flex: 1; min-width: 0; }

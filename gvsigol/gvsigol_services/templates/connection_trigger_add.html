@@ -309,7 +309,7 @@ $(document).ready(function() {
 	var connectionId = {{ connection.id }};
 	
 	// Inicializar tooltips
-	$('[data-toggle="tooltip"]').tooltip();
+	$('[data-toggle="tooltip"]').tooltip({ container: 'body' });
 	
 	// Inicializar CodeMirror para SQL con sintaxis PostgreSQL
 	var sqlEditor = CodeMirror.fromTextArea(document.getElementById('sql_code'), {
