@@ -174,10 +174,10 @@ $(function () {
 		$.gvsigOL.pushMenu.activate(o.sidebarToggleSelector);
 	}
 
-	//Activate Bootstrap tooltip
 	if (o.enableBSToppltip) {
 		$('body').tooltip({
-			selector: o.BSTooltipSelector
+			selector: o.BSTooltipSelector,
+			container: 'body'
 		});
 	}
 
