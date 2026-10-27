@@ -387,7 +387,12 @@
   line-height: 1.5;
   vertical-align: middle;
 }
-/* Primera columna (ID) más tenue */
+/* Primera columna (ID): no partir el número */
+.pl-table thead th:first-child,
+.pl-table tbody td:first-child {
+  white-space: nowrap;
+  min-width: 3.2em;
+}
 .pl-table tbody td:first-child {
   color: var(--pl-muted);
   font-size: 12px;

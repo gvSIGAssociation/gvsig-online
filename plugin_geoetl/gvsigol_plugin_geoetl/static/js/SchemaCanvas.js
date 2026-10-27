@@ -1,4 +1,4 @@
-$('[data-toggle-second="tooltip"]').tooltip();
+$('[data-toggle-second="tooltip"]').tooltip({ container: 'body' });
 
 /** Resolve listLabel entry for a node id (last match wins — avoids stale ports after reload). */
 function getListLabelEntry(listLabel, id) {
