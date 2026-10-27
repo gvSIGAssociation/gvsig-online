@@ -764,8 +764,11 @@ def resolve_external_graphic_url(online_resource):
 
 def collect_external_graphic_icons(layer):
     """
-    Map icon-image names used by ExternalGraphicSymbolizers to media URLs
-    (relative when local) for ol-mapbox-style getImage().
+    Map icon-image names to media URL + SLD pixel size for ol-mapbox-style getImage().
+
+    Mapbox ``icon-size`` is a factor of the *image* dimensions. Library PNGs are
+    often much larger than the SLD Size (map pixels), so the viewer must scale
+    the loaded image to ``size`` and keep icon-size ≈ 1.
     """
     icons = {}
     egs = ExternalGraphicSymbolizer.objects.filter(
@@ -775,7 +778,14 @@ def collect_external_graphic_icons(layer):
         icon_name = external_graphic_icon_name(eg.online_resource)
         icon_url = resolve_external_graphic_url(eg.online_resource)
         if icon_name and icon_url:
-            icons[icon_name] = icon_url
+            try:
+                target_size = int(eg.size) if eg.size else 32
+            except (TypeError, ValueError):
+                target_size = 32
+            icons[icon_name] = {
+                "url": icon_url,
+                "size": max(1, target_size),
+            }
     return icons
 
 
@@ -790,15 +800,15 @@ def convert_external_graphic_symbolizer(symbolizer, layer_id, rule_name, source_
         "paint": {}
     }
     
-    # Icon image name; absolute URL is exposed in API response "icons" for getImage()
+    # Icon image name; URL + SLD size are in API response "icons" for getImage()
     if symbolizer.online_resource:
         icon_name = external_graphic_icon_name(symbolizer.online_resource)
         if icon_name:
             layer["layout"]["icon-image"] = icon_name
     
-    # Icon size
-    if symbolizer.size:
-        layer["layout"]["icon-size"] = symbolizer.size / 32.0  # Normalizar
+    # Display size is applied by pre-scaling the PNG to SLD Size in the viewer.
+    # icon-size is a multiplier of the image pixels; keep 1 to avoid huge icons.
+    layer["layout"]["icon-size"] = 1
     
     # Rotation
     if symbolizer.rotation:
