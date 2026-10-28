@@ -1469,6 +1469,7 @@ def get_layer_checked_roles_from_user_input(layer_read_roles, layer_write_roles,
     admin_roles = [ auth_backend.get_admin_role()]
     for role in role_list:
         if role['name'] not in admin_roles:
+            role['external'] = False
             for layer_read_role in layer_read_roles:
                 if layer_read_role == role['name']:
                     role['read_checked'] = True

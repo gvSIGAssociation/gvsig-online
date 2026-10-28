@@ -33,7 +33,7 @@
 								</div>
 								<div class="lp-perms">
 									<label class="lp-perm-chip">
-										<input class="layer-read-checkbox{% if role.external is False %} gvsigol-checkable{% endif %}" type="checkbox" name="read-usergroup-{{role.name}}" id="read-usergroup-{{role.name}}"{% if role.read_checked %} checked{% endif %}{% if role.external %} disabled{% endif %} />
+										<input class="layer-read-checkbox{% if not role.external %} gvsigol-checkable{% endif %}" type="checkbox" name="read-usergroup-{{role.name}}" id="read-usergroup-{{role.name}}"{% if role.read_checked %} checked{% endif %}{% if role.external %} disabled{% endif %} />
 										<span>{% trans "Read permission" %}</span>
 									</label>
 									<label class="lp-perm-chip">
