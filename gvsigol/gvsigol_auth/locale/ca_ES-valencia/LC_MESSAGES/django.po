@@ -450,6 +450,12 @@ msgstr ""
 msgid "User creation failed"
 msgstr "La creació de l'usuari ha fallat"
 
+msgid "User update failed"
+msgstr "L'actualització de l'usuari ha fallat"
+
+msgid "Could not update user roles. Check that the roles exist in the authentication backend."
+msgstr "No s'han pogut actualitzar els rols de l'usuari. Comproveu que els rols existixen en el sistema d'autenticació."
+
 msgid "A user with this email address already exists."
 msgstr "Ja existeix un usuari amb aquesta adreça de correu electrònic."
 

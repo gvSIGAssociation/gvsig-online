@@ -2,6 +2,8 @@ from rest_framework.request import Request
 from django.http import HttpRequest
 from django.db.utils import IntegrityError
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext as _
+from gvsigol.basetypes import UserUpdateError
 from gvsigol_auth.models import Role, UserProperties, UserCache
 import gvsigol_auth.services as auth_services
 from gvsigol_auth import signals
@@ -366,14 +368,18 @@ def update_user(
         "username": username,
         "user_obj": user
     }
+    roles_ok = True
     if roles is not None:
-        set_roles(username, roles)
+        roles_ok = set_roles(username, roles)
+        params["roles"] = list(get_roles(username))
     if superuser:
-        add_to_role(username, get_admin_role())
-    
-    if roles is not None:
-        params["roles"] = roles
+        if not add_to_role(username, get_admin_role()):
+            roles_ok = False
+            if "roles" in params:
+                params["roles"] = list(get_roles(username))
     signals.user_updated.send(**params)
+    if not roles_ok:
+        raise UserUpdateError(_("Could not update user roles. Check that the roles exist in the authentication backend."))
     return user
 
 def _get_user(user):
@@ -568,7 +574,12 @@ def set_roles(user, roles):
     for role in to_add:
         if not _add_to_role(user, role):
             success = False
-    signals.user_roles_updated.send(sender=user.__class__, username=_get_username(user), roles=roles)
+    # Use actual assigned roles so cache is not poisoned on partial failure
+    signals.user_roles_updated.send(
+        sender=user.__class__,
+        username=_get_username(user),
+        roles=list(get_roles(user)),
+    )
     return success
 
 def add_to_group(user, group):

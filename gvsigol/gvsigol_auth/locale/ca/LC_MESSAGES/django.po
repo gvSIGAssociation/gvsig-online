@@ -450,6 +450,12 @@ msgstr ""
 msgid "User creation failed"
 msgstr "La creació de l'usuari ha fallat"
 
+msgid "User update failed"
+msgstr "L'actualització de l'usuari ha fallat"
+
+msgid "Could not update user roles. Check that the roles exist in the authentication backend."
+msgstr "No s'han pogut actualitzar els rols de l'usuari. Comproveu que els rols existeixen al sistema d'autenticació."
+
 #: gvsigol_auth/views.py:561
 msgid ""
 "The authentication server is not available. Try again later or contact "

@@ -448,6 +448,12 @@ msgstr "Código inválido. Seu link expirou, você precisa solicitar outro"
 msgid "User creation failed"
 msgstr "A criação do usuário falhou"
 
+msgid "User update failed"
+msgstr "A atualização do usuário falhou"
+
+msgid "Could not update user roles. Check that the roles exist in the authentication backend."
+msgstr "Não foi possível atualizar os papéis do usuário. Verifique se os papéis existem no sistema de autenticação."
+
 #: gvsigol_auth/views.py:515
 msgid ""
 "The authentication server is not available. Try again later or contact "

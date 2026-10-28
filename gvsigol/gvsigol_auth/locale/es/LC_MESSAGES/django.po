@@ -451,6 +451,12 @@ msgstr "Token no válido. Su enlace ha caducado, debe solicitar otro."
 msgid "User creation failed"
 msgstr "La creación del usuario falló"
 
+msgid "User update failed"
+msgstr "La actualización del usuario falló"
+
+msgid "Could not update user roles. Check that the roles exist in the authentication backend."
+msgstr "No se han podido actualizar los roles del usuario. Compruebe que los roles existen en el sistema de autenticación."
+
 msgid "A user with this email address already exists."
 msgstr "Ya existe un usuario con esta dirección de correo electrónico."
 

@@ -452,6 +452,12 @@ msgstr ""
 msgid "User creation failed"
 msgstr "Benutzererstellung fehlgeschlagen"
 
+msgid "User update failed"
+msgstr "Benutzeraktualisierung fehlgeschlagen"
+
+msgid "Could not update user roles. Check that the roles exist in the authentication backend."
+msgstr "Die Benutzerrollen konnten nicht aktualisiert werden. Prüfen Sie, ob die Rollen im Authentifizierungs-Backend existieren."
+
 #: gvsigol_auth/views.py:513
 msgid ""
 "The authentication server is not available. Try again later or contact "
