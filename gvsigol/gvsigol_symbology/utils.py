@@ -545,12 +545,13 @@ def localize_media_urls_in_sld(sld_text):
     media_url = (getattr(settings, 'MEDIA_URL', None) or '/media/').rstrip('/') + '/'
 
     def _repl(match):
-        prefix, marker, rest = match.group(1), match.group(2), match.group(3)
-        return prefix + media_url + marker + rest
+        return match.group(1) + media_url + match.group(2)
 
-    # href="https://host/.../media/symbol_libraries/..." or /media/...
+    # https://host/.../symbol_libraries/..., file:///.../symbol_libraries/... or /media/...
+    # Anything before the marker is dropped so an exported or reimported SLD
+    # never keeps another server's host or disk path.
     return re.sub(
-        r'''((?:xlink:)?href\s*=\s*["'])(?:https?://[^"'>\s]+)?(?:/media/)?((?:symbol_libraries|custom_legends)/)([^"'>\s]*)''',
+        r'''((?:xlink:)?href\s*=\s*["'])[^"']*?((?:symbol_libraries|custom_legends)/[^"'>\s]*)''',
         _repl,
         sld_text,
         flags=re.IGNORECASE,
@@ -562,11 +563,13 @@ def get_online_resource(library, file_name):
 
 
 def geoserver_online_resource(url):
-    """Href that GeoServer can open.
+    """File href GeoServer can open for a graphic stored under MEDIA_ROOT.
 
-    The value stored for the browser is a web path (/media-libra/...).
-    GeoServer does not use that Apache alias. It reads the file on the
-    shared NFS, under MEDIA_ROOT.
+    The value kept in the database and in exported projects is the web path
+    (/media/ or /media-libra/). Apache serves that alias. GeoServer does not:
+    it reads the file on disk. Each environment has its own MEDIA_ROOT, so the
+    same rewrite works on every install. http(s) and file URLs are left as they
+    are, and nothing else is turned into an absolute host URL.
     """
     if not url or not isinstance(url, str):
         return url
@@ -577,10 +580,40 @@ def geoserver_online_resource(url):
     media_root = (getattr(settings, 'MEDIA_ROOT', None) or '').rstrip('/')
     if media_root and url.startswith(media_url):
         return 'file://' + media_root + '/' + url[len(media_url):]
-    base = (getattr(settings, 'BASE_URL', None) or '').rstrip('/')
-    if base and url.startswith('/'):
-        return base + url
     return url
+
+
+def geoserver_sld(sld_text):
+    """Copy of an SLD whose media graphics point at the local file.
+
+    Only the document sent to GeoServer is rewritten. Callers keep the
+    original text, which stays a portable web path.
+    """
+    if isinstance(sld_text, (bytes, bytearray)):
+        try:
+            text = sld_text.decode('utf-8')
+        except UnicodeDecodeError:
+            return sld_text
+        rewritten = geoserver_sld(text)
+        if rewritten == text:
+            return sld_text
+        return rewritten.encode('utf-8')
+    if not isinstance(sld_text, str) or not sld_text:
+        return sld_text
+
+    def _repl(match):
+        prefix, quote, url = match.group(1), match.group(2), match.group(3)
+        new_url = geoserver_online_resource(url)
+        if not new_url or new_url == url:
+            return match.group(0)
+        return prefix + quote + new_url + quote
+
+    return re.sub(
+        r'''((?:xlink:)?href\s*=\s*)(["'])([^"']*)\2''',
+        _repl,
+        sld_text,
+        flags=re.IGNORECASE,
+    )
 
 def get_fields(resource):
     fields = None

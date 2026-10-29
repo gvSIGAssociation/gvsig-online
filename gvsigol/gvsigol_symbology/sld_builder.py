@@ -304,7 +304,7 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
             gph.Opacity = str(s.externalgraphicsymbolizer.opacity)
             egph = ExternalGraphic(gph)
             egph.Format = s.externalgraphicsymbolizer.format
-            egph.create_onlineresource(utils.geoserver_online_resource(s.externalgraphicsymbolizer.online_resource))
+            egph.create_onlineresource(s.externalgraphicsymbolizer.online_resource)
             
         elif hasattr(s, 'textsymbolizer'):
             symbolizer = TextSymbolizer(rule)

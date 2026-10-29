@@ -62,9 +62,6 @@ ExternalGraphicSymbolizer.geoserverHref = function(url) {
 	if (mediaUrl && mediaRoot && url.indexOf(mediaUrl) === 0) {
 		return 'file://' + mediaRoot + '/' + url.substring(mediaUrl.length);
 	}
-	if (url.charAt(0) === '/' && window.location && window.location.origin) {
-		return window.location.origin + url;
-	}
 	return url;
 };
 
