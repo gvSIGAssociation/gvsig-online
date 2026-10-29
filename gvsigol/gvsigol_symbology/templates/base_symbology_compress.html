@@ -274,15 +274,22 @@
 			});
 		}
 
-		function imagePostFunction(image, src) {
-			var auth_token = "{{auth_token}}";
-			if (auth_token) {
-				return auth_token;
-			}
-			if (username && password) {
-				return "Basic " + btoa(username + ":" + password);
-			}
-			return null;
+
+		function getGeoserverAuthorization() {
+		    var auth_token = "{{auth_token|escapejs}}";
+
+		    if (auth_token) {
+		        return auth_token;
+		    }
+
+		    var username = '{{username|escapejs}}';
+		    var password = '{{password|escapejs}}';
+
+		    if (username && password) {
+		        return "Basic " + btoa(username + ":" + password);
+		    }
+
+		    return null;
 		}
 
 		function loadAuthenticatedImage(img, src) {
