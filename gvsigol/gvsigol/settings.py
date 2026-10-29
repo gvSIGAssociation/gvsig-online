@@ -48,7 +48,7 @@ def _parse_octal_mode(value):
     return int(text, 8)
 
 print ("INFO: Ejecutando settings.py !!...........................................")
-GVSIGOL_VERSION = '4.3.0-dev'
+GVSIGOL_VERSION = '4.3.0_rc4'
 print("INFO: gvSIG Online version: " + GVSIGOL_VERSION)
 if os.environ.get("DEBUG")=='True':
     print ("INFO: Current environment:")
