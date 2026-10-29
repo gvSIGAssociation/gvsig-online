@@ -319,14 +319,20 @@ $(document).ready(function() {
 		}
 	});
 	
-	// Búsqueda personalizada
-	$('#triggers-search').on('keyup', function() {
-		table.search($(this).val()).draw();
-	});
-	
-	$('#triggers-search-btn').on('click', function() {
+	// El filtrado redibuja la tabla. Hacerlo en cada tecla bloquea el input
+	// y se pierden letras. Solo al pulsar la lupa o Enter.
+	function aplicarBusquedaTriggers() {
 		table.search($('#triggers-search').val()).draw();
+	}
+
+	$('#triggers-search').on('keydown', function(e) {
+		if (e.key === 'Enter' || e.which === 13) {
+			e.preventDefault();
+			aplicarBusquedaTriggers();
+		}
 	});
+
+	$('#triggers-search-btn').on('click', aplicarBusquedaTriggers);
 	
 	// Confirmar eliminación
 	$('#triggers-table tbody').on('click', '.btn-delete-trigger', function() {
