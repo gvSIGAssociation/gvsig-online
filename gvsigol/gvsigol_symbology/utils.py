@@ -110,7 +110,7 @@ def copyrecursively(source_folder, destination_folder):
                 if not os.path.exists(os.path.dirname(dst_path)):
                     try:
                         os.makedirs(os.path.dirname(dst_path))
-                        os.chmod(os.path.dirname(dst_path), 0o750)
+                        os.chmod(os.path.dirname(dst_path), settings.FOLDER_DEFAULT_PERMISSIONS)
                     except OSError as exc: # Guard against race condition
                         if exc.errno != errno.EEXIST:
                             raise
@@ -121,7 +121,7 @@ def copyrecursively(source_folder, destination_folder):
             dst_path = os.path.join(destination_folder, src_path.replace(source_folder, ""))
             if not os.path.exists(dst_path):
                 os.mkdir(dst_path)
-                os.chmod(dst_path, 0o750)
+                os.chmod(dst_path, settings.FOLDER_DEFAULT_PERMISSIONS)
                 
 def copy_resources(symbol, resource_path):
     symbolizers = Symbolizer.objects.filter(rule = symbol)
@@ -141,7 +141,7 @@ def copy(src, dest):
                 local_dir_url = dest[:dest.rfind('/')]
                 if not os.path.exists(local_dir_url):
                     os.mkdir(local_dir_url)
-                    os.chmod(local_dir_url, 0o750)
+                    os.chmod(local_dir_url, settings.FOLDER_DEFAULT_PERMISSIONS)
             shutil.copy2(src, dest)
             set_default_permissions(dest)
     except OSError as e:
@@ -194,7 +194,7 @@ def check_library_path(library):
     library_path = os.path.join(settings.MEDIA_ROOT, "symbol_libraries", library.name) + "/"
     try:        
         os.mkdir(library_path)
-        os.chmod(library_path, 0o750)
+        os.chmod(library_path, settings.FOLDER_DEFAULT_PERMISSIONS)
         return library_path
      
     except OSError as e:
@@ -205,12 +205,12 @@ def check_custom_legend_path():
     """Ensure MEDIA_ROOT/custom_legends/ exists and is usable for writes."""
     legend_path = os.path.join(settings.MEDIA_ROOT, "custom_legends") + "/"
     try:
-        os.makedirs(legend_path, mode=0o775, exist_ok=True)
+        os.makedirs(legend_path, mode=settings.FOLDER_DEFAULT_PERMISSIONS, exist_ok=True)
     except OSError as e:
         LOG.warning('Could not create custom_legends directory %s: %s', legend_path, e)
         return legend_path
     try:
-        os.chmod(legend_path, 0o775)
+        os.chmod(legend_path, settings.FOLDER_DEFAULT_PERMISSIONS)
     except OSError:
         pass
     if not os.access(legend_path, os.W_OK):

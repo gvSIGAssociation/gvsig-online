@@ -1924,14 +1924,14 @@ class Geoserver():
             folder_path = zip_path.replace('file://','')
             try: 
                 try:
-                    os.chmod(folder_path, 0o775)
+                    os.chmod(folder_path, settings.FOLDER_DEFAULT_PERMISSIONS)
                 except Exception:
                     pass
                 filenames = os.listdir(folder_path)
                 founded = False
                 for filename in filenames:
                     try:
-                        os.chmod(folder_path+"/"+filename, 0o775)
+                        os.chmod(folder_path+"/"+filename, settings.FILE_DEFAULT_PERMISSIONS)
                         if (date_regex != "" and re.search(date_regex, filename) != None) or (ele_regex != "" and re.search(ele_regex, filename) != None):
                             founded = True
                     except:

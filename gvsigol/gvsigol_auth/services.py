@@ -401,7 +401,8 @@ class GvSigOnlineServices():
             aux = aux[:-1]
         path = aux + "/data/" + group
         try: 
-            os.makedirs(path, mode=0o777)
+            os.makedirs(path, mode=settings.FOLDER_DEFAULT_PERMISSIONS)
+            os.chmod(path, settings.FOLDER_DEFAULT_PERMISSIONS)
             
         except OSError as e:
             if not os.path.isdir(path):

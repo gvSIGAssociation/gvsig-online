@@ -38,6 +38,15 @@ import environ
 import json
 import sys
 
+def _parse_octal_mode(value):
+    """Parse a permission mode written as 640, 0640 or 0o640."""
+    if isinstance(value, int):
+        return value
+    text = str(value).strip().lower()
+    if text.startswith('0o'):
+        text = text[2:]
+    return int(text, 8)
+
 print ("INFO: Ejecutando settings.py !!...........................................")
 GVSIGOL_VERSION = '4.3.0-dev'
 print("INFO: gvSIG Online version: " + GVSIGOL_VERSION)
@@ -163,6 +172,8 @@ env = environ.Env(
     SENDFILE_BACKEND=(str,'django_sendfile.backends.simple'),
     DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 26214400), # The default size 2621440 (2.5M) is too small and prevents adding external layers from servers having large getcapabilites document
     FILE_UPLOAD_DIRECTORY_PERMISSIONS=(int, 0o774),
+    FILE_DEFAULT_PERMISSIONS=(_parse_octal_mode, 0o640),
+    FOLDER_DEFAULT_PERMISSIONS=(_parse_octal_mode, 0o750),
     #DRF
     DRF_PAGE_SIZE=(int,100),
     DRF_DEFAULT_AUTHENTICATION_CLASSES=(list,[]),
@@ -674,10 +685,18 @@ GVSIGOL_NAME_SHORT = 'g'
 GVSIGOL_SURNAME_SHORT = 'OL'
 GVSIGOL_CUSTOMER_NAME = env('GVSIGOL_CUSTOMER_NAME')
 
+FILE_DEFAULT_PERMISSIONS = env('FILE_DEFAULT_PERMISSIONS')
+FOLDER_DEFAULT_PERMISSIONS = env('FOLDER_DEFAULT_PERMISSIONS')
+
 FILEMANAGER_DIRECTORY = os.path.join(MEDIA_ROOT, 'data')
 FILEMANAGER_MEDIA_ROOT = os.path.join(MEDIA_ROOT, FILEMANAGER_DIRECTORY)
 FILEMANAGER_MEDIA_URL = os.path.join(MEDIA_URL, FILEMANAGER_DIRECTORY)
-FILEMANAGER_STORAGE = FileSystemStorage(location=FILEMANAGER_MEDIA_ROOT, base_url=FILEMANAGER_MEDIA_URL, file_permissions_mode=0o666)
+FILEMANAGER_STORAGE = FileSystemStorage(
+    location=FILEMANAGER_MEDIA_ROOT,
+    base_url=FILEMANAGER_MEDIA_URL,
+    file_permissions_mode=FILE_DEFAULT_PERMISSIONS,
+    directory_permissions_mode=FOLDER_DEFAULT_PERMISSIONS,
+)
 
 CONTROL_FIELDS = [{
                 'name': 'modified_by',
