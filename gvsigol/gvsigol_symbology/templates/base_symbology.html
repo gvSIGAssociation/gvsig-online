@@ -231,6 +231,10 @@
 	</script>	
 	
 	<script type="text/javascript" src="{% static "js/lib/symbology/MarkSymbolizer.js" %}"></script>
+	<script>
+		window.GVSIGOL_MEDIA_URL = "{{ MEDIA_URL|escapejs }}";
+		window.GVSIGOL_MEDIA_ROOT = "{{ MEDIA_ROOT|escapejs }}";
+	</script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/ExternalGraphicSymbolizer.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/LineSymbolizer.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/ClusteredPoints.js" %}"></script>

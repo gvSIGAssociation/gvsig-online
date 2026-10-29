@@ -44,5 +44,6 @@ def global_settings(request):
         'IFRAME_MODE_UI':  gvsigol.settings.IFRAME_MODE_UI,
         'MANAGE_PERMISSION_UI': gvsigol.settings.MANAGE_PERMISSION_UI,
         'GVSIGOL_CUSTOMER_NAME': gvsigol.settings.GVSIGOL_CUSTOMER_NAME,
-        'HIDE_DASHBOARD_SIDEBAR': hide_dashboard_sidebar
+        'HIDE_DASHBOARD_SIDEBAR': hide_dashboard_sidebar,
+        'MEDIA_ROOT': gvsigol.settings.MEDIA_ROOT,
     }

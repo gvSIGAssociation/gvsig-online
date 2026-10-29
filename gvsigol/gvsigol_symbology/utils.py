@@ -560,6 +560,28 @@ def localize_media_urls_in_sld(sld_text):
 def get_online_resource(library, file_name):
     return settings.MEDIA_URL + "symbol_libraries/" + library.name + "/" + file_name
 
+
+def geoserver_online_resource(url):
+    """Href that GeoServer can open.
+
+    The value stored for the browser is a web path (/media-libra/...).
+    GeoServer does not use that Apache alias. It reads the file on the
+    shared NFS, under MEDIA_ROOT.
+    """
+    if not url or not isinstance(url, str):
+        return url
+    url = url.strip()
+    if url.startswith(('http://', 'https://', 'file:')):
+        return url
+    media_url = (getattr(settings, 'MEDIA_URL', None) or '/media/').rstrip('/') + '/'
+    media_root = (getattr(settings, 'MEDIA_ROOT', None) or '').rstrip('/')
+    if media_root and url.startswith(media_url):
+        return 'file://' + media_root + '/' + url[len(media_url):]
+    base = (getattr(settings, 'BASE_URL', None) or '').rstrip('/')
+    if base and url.startswith('/'):
+        return base + url
+    return url
+
 def get_fields(resource):
     fields = None
     if resource != None:

@@ -50,13 +50,33 @@ ExternalGraphicSymbolizer.prototype.getTableUI = function() {
 	return ui;
 };
 
+ExternalGraphicSymbolizer.geoserverHref = function(url) {
+	if (!url) {
+		return url;
+	}
+	if (/^(https?:|file:)/i.test(url)) {
+		return url;
+	}
+	var mediaUrl = window.GVSIGOL_MEDIA_URL || '';
+	var mediaRoot = (window.GVSIGOL_MEDIA_ROOT || '').replace(/\/$/, '');
+	if (mediaUrl && mediaRoot && url.indexOf(mediaUrl) === 0) {
+		return 'file://' + mediaRoot + '/' + url.substring(mediaUrl.length);
+	}
+	if (url.charAt(0) === '/' && window.location && window.location.origin) {
+		return window.location.origin + url;
+	}
+	return url;
+};
+
 ExternalGraphicSymbolizer.prototype.toXML = function(){
-	
+	var href = ExternalGraphicSymbolizer.geoserverHref(this.online_resource);
+	href = String(href).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
 	var xml = '';
 	xml += '<PointSymbolizer>';
 	xml += 	'<Graphic>';
 	xml += 		'<ExternalGraphic>';
-	xml += 			'<OnlineResource xlink:type="simple" xlink:href="' + this.online_resource + '" />';
+	xml += 			'<OnlineResource xlink:type="simple" xlink:href="' + href + '" />';
 	xml += 			'<Format>' + this.format + '</Format>';
 	xml += 		'</ExternalGraphic>';
 	xml += 		'<Size>' + this.size + '</Size>';
