@@ -2058,9 +2058,19 @@ def layer_update(request, layer_id):
             # Actualizar formato MVT en GeoWebCache para capas vectoriales
             if ds.type.startswith('v_'):
                 try:
-                    gs.update_vector_tile_format(ds.workspace, layer.name, vector_tile)
+                    updated = gs.update_vector_tile_format(ds.workspace, layer.name, vector_tile)
+                    if vector_tile and not updated:
+                        messages.warning(
+                            request,
+                            _('Could not enable vector tile (MVT) format in GeoWebCache for layer "{}". The viewer will not be able to load it as vector tiles.').format(layer.name),
+                        )
                 except Exception as e:
                     logger.warning(f"No se pudo actualizar formato MVT para capa {layer.name}: {e}")
+                    if vector_tile:
+                        messages.warning(
+                            request,
+                            _('Could not enable vector tile (MVT) format in GeoWebCache for layer "{}". The viewer will not be able to load it as vector tiles.').format(layer.name),
+                        )
 
             new_layer_group = LayerGroup.objects.get(id=layer.layer_group_id)
 

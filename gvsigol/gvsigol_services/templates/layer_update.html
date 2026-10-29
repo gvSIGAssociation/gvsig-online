@@ -1018,15 +1018,26 @@ $('#submenu-layers').addClass("active");
 		
 		// Ejecutar al cargar la página
 		updateFormatOptions();
-		
-		// Si el campo vector_tile está marcado en el modelo, seleccionar vector-tiles en el desplegable.
-		// Select2 ya está inicializado en base.html: hay que disparar change para que
-		// el texto cerrado coincida con la opción seleccionada (no solo al desplegar).
+
+		// MVT se persiste en layer.vector_tile; external_params.format sigue siendo image/png.
+		// Select2 (base.html) pinta el texto cerrado con la opción que había al inicializarse
+		// y, al abrir, resalta la opción nativa. Hay que dejar una sola opción seleccionada
+		// y volver a crear el widget para que el texto cerrado coincida.
+		var selectedFormat = formatSelect.val() || 'image/png';
 		{% if layer.vector_tile %}
 		if (datastoreType === 'v_PostGIS') {
-			formatSelect.val('vector-tiles').trigger('change');
+			selectedFormat = 'vector-tiles';
 		}
 		{% endif %}
+		formatSelect.find('option').prop('selected', false);
+		formatSelect.val(selectedFormat);
+		formatSelect.find('option').filter(function() {
+			return this.value === selectedFormat;
+		}).prop('selected', true);
+		if (formatSelect.hasClass('select2-hidden-accessible')) {
+			formatSelect.select2('destroy');
+		}
+		formatSelect.select2();
 	});
 </script>
 {% endblock %}

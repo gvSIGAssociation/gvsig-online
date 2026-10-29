@@ -841,25 +841,42 @@ class Geoserver():
         
         try:
             root = ET.fromstring(r.content)
-            
-            # Buscar o crear el elemento mimeFormats
-            mime_formats = root.find('mimeFormats')
+            ns = root.tag.split('}')[0] + '}' if root.tag.startswith('{') else ''
+
+            def _local_name(tag):
+                return tag.split('}', 1)[-1] if tag else ''
+
+            def _child(parent, name):
+                for child in list(parent):
+                    if _local_name(child.tag) == name:
+                        return child
+                return None
+
+            # Buscar o crear mimeFormats en el mismo namespace que el documento.
+            # find('mimeFormats') no ve el nodo si GeoServer devuelve un namespace
+            # por defecto, y entonces el POST no activa el formato MVT.
+            mime_formats = _child(root, 'mimeFormats')
             if mime_formats is None:
-                mime_formats = ET.SubElement(root, 'mimeFormats')
-            
-            # Buscar si ya existe el formato MVT
+                mime_formats = ET.SubElement(root, ns + 'mimeFormats')
+
+            string_ns = ns
+            for existing in list(mime_formats):
+                if _local_name(existing.tag) == 'string':
+                    string_ns = existing.tag.split('}')[0] + '}' if existing.tag.startswith('{') else ''
+                    break
+
             mvt_exists = False
-            for string_elem in mime_formats.findall('string'):
+            for string_elem in list(mime_formats):
+                if _local_name(string_elem.tag) != 'string':
+                    continue
                 if string_elem.text == MVT_MIME_TYPE:
                     mvt_exists = True
                     if not enable_mvt:
-                        # Eliminar el formato MVT
                         mime_formats.remove(string_elem)
                     break
-            
-            # Añadir formato MVT si se debe habilitar y no existe
+
             if enable_mvt and not mvt_exists:
-                mvt_elem = ET.SubElement(mime_formats, 'string')
+                mvt_elem = ET.SubElement(mime_formats, string_ns + 'string')
                 mvt_elem.text = MVT_MIME_TYPE
             
             # Enviar la configuración actualizada
