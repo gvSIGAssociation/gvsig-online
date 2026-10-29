@@ -512,14 +512,20 @@ table.dataTable.no-footer { border-bottom: none !important; }
 			}
 		});
 
-		// Búsqueda personalizada
-		$('#etl-search').on('keyup', function() {
-			table.search($(this).val()).draw();
+		// El filtrado redibuja la tabla. Hacerlo en cada tecla bloquea el input
+		// y se pierden letras. Solo al pulsar la lupa o Enter.
+		function aplicarBusquedaEtl() {
+			table.search($('#etl-search').val()).draw();
+		}
+
+		$('#etl-search').on('keydown', function(e) {
+			if (e.key === 'Enter' || e.which === 13) {
+				e.preventDefault();
+				aplicarBusquedaEtl();
+			}
 		});
 
-		$('#etl-search-btn').on('click', function() {
-			table.search($('#etl-search').val()).draw();
-		});
+		$('#etl-search-btn').on('click', aplicarBusquedaEtl);
 
 
 		$('[data-toggle-second="tooltip"]').tooltip({ container: 'body' });
