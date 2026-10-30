@@ -588,9 +588,15 @@ Rule.prototype.addExternalGraphicSymbolizer = function(options) {
 	var self = this;
 	
 	var symbolizer = new ExternalGraphicSymbolizer(options.name, options.format, options.size, options.online_resource);
-	symbolizer.id = this.id;
+	symbolizer.rule = this;
+	var uuid = (this.utils && typeof this.utils.generateUUID === 'function') ? this.utils.generateUUID() : String(new Date().getTime());
+	symbolizer.id = 'externalgraphic' + uuid;
+	if (options && options.order !== undefined && options.order !== null && options.order !== '') {
+		symbolizer.order = options.order;
+	}
 	
-	$('#rule-' + this.id + '-symbolizers tbody').append(symbolizer.getTableUI());	
+	var row = $(symbolizer.getTableUI());
+	$('#rule-' + this.id + '-symbolizers tbody').append(row);	
 	$('#rule-' + this.id + '-symbolizers tbody').sortable({
 		placeholder: "sort-highlight",
 		handle: ".handle",
@@ -599,11 +605,11 @@ Rule.prototype.addExternalGraphicSymbolizer = function(options) {
 	});
 	$('#rule-' + this.id + '-symbolizers tbody').on("sortupdate", function(event, ui){});
 	
-	$(".edit-eg-link").on('click', function(e){	
+	row.find('.edit-eg-link').on('click', function(e){	
 		e.preventDefault();
 		messageBox.show('warning', gettext('Image symbols can only be edited from the library'));
 	});
-	$(".delete-symbolizer-link").one('click', function(e){	
+	row.find('.delete-symbolizer-link-' + this.id).on('click', function(e){	
 		e.preventDefault();
 		self.removeSymbolizer(this.dataset.symbolizerid);
 	});
@@ -751,12 +757,16 @@ Rule.prototype.removeSymbolizer = function(id) {
 	for (var i=0; i < this.symbolizers.length; i++) {
 		if (this.symbolizers[i].id == id) {
 			this.symbolizers.splice(i, 1);
+			break;
 		}
 	}
 	var tbody = document.getElementById('table-symbolizers-body-' + this.id);
-	for (var i=0; i<tbody.children.length; i++) {
-		if(tbody.children[i].dataset.rowid == id) {
-			tbody.removeChild(tbody.children[i]);
+	if (tbody) {
+		for (var i=0; i<tbody.children.length; i++) {
+			if(tbody.children[i].dataset.rowid == id) {
+				tbody.removeChild(tbody.children[i]);
+				break;
+			}
 		}
 	}
 	this.preview();

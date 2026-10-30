@@ -43,8 +43,12 @@ ExternalGraphicSymbolizer.prototype.getTableUI = function() {
 	ui += 		'</span>';
 	ui += 	'</td>';
 	ui += 	'<td id="symbolizer-preview"><img style="height: ' + this.size + 'px; width: auto;" src="' + this.online_resource + '" id="eg-preview-' + this.id + '" class="eg-preview-' + this.id + '"></img></td>';	
+	var deleteClass = 'delete-symbolizer-link';
+	if (this.rule) {
+		deleteClass += '-' + this.rule.id;
+	}
 	ui += 	'<td><a disabled class="edit-eg-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-edit text-default"></i></a></td>';
-	ui += 	'<td><a class="delete-symbolizer-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
+	ui += 	'<td><a class="' + deleteClass + '" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
 	ui += '</tr>';	
 	
 	return ui;
