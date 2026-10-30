@@ -1,0 +1,17 @@
+type: trans_Difference
+label: Difference
+family: transform
+summary: Diferencia geométrica. La entrada 0 es la geometría de la que se resta la
+  1.
+parameters:
+- name: schema
+ports:
+- direction: input
+  label: Main
+- direction: input
+  label: Secondary
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

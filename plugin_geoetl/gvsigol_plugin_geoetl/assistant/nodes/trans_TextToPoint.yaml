@@ -1,0 +1,18 @@
+type: trans_TextToPoint
+label: Text to Point
+family: transform
+summary: Crea un punto a partir de columnas de longitud y latitud.
+parameters:
+- name: epsg
+  summary: Código EPSG.
+- name: lon
+- name: lat
+- name: txt-to-point
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

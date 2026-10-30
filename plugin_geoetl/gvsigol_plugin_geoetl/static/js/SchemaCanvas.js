@@ -217,6 +217,7 @@ document.addEventListener("DOMContentLoaded",function () {
 
     var routerToUse = new draw2d.layout.connection.SplineConnectionRouter();
     var app  = new gvsigolETL.Application();
+    window.etlApp = app;
 
     app.view.installEditPolicy(new draw2d.policy.connection.DragConnectionCreatePolicy({
         createConnection: function(){

@@ -1,0 +1,24 @@
+type: input_Xml
+label: XML
+family: input
+summary: Lee un XML a partir de una etiqueta.
+parameters:
+- name: get_tag-list
+- name: xml-file
+  required: true
+- name: tag-list
+- name: selected-schema
+- name: add-tags
+- name: other-tags
+- name: reading
+  choices:
+  - single
+  - multiple
+- name: move
+- name: folder
+ports:
+- direction: output
+  label: Input
+connection_types: []
+connection_parameter: null
+sql_parameters: []

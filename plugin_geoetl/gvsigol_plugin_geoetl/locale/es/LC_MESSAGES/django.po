@@ -1077,3 +1077,96 @@ msgstr "Visualizador"
 
 msgid "Open Visualizer"
 msgstr "Abrir Visualizador"
+
+#: templates/etl.html
+msgid "Assistant"
+msgstr "Asistente"
+
+msgid "ETL assistant"
+msgstr "Asistente ETL"
+
+msgid "Resize assistant"
+msgstr "Cambiar el ancho del asistente"
+
+msgid "Clear conversation"
+msgstr "Borrar la conversación"
+
+msgid "Close assistant"
+msgstr "Cerrar el asistente"
+
+msgid "Message"
+msgstr "Mensaje"
+
+msgid "Send"
+msgstr "Enviar"
+
+msgid "Describe the flow…"
+msgstr "Describe el flujo…"
+
+msgid ""
+"Describe the data you have and the result you want. The assistant draws the "
+"flow on the canvas and you review it before saving."
+msgstr ""
+"Describe qué datos tienes y qué resultado quieres. El asistente dibuja el "
+"flujo en el canvas y tú lo revisas antes de guardar."
+
+msgid "CSV to PostGIS"
+msgstr "CSV a PostGIS"
+
+msgid "Load a CSV file into a new PostGIS table."
+msgstr "Carga un fichero CSV en una tabla nueva de PostGIS."
+
+msgid "Join two tables"
+msgstr "Cruzar dos tablas"
+
+msgid ""
+"Join two PostGIS tables on a common field and save the result in a new table."
+msgstr ""
+"Cruza dos tablas de PostGIS por un campo común y guarda el resultado en una "
+"tabla nueva."
+
+msgid "Geocode addresses"
+msgstr "Geocodificar direcciones"
+
+msgid ""
+"Geocode the addresses in an Excel file and publish the result in the viewer."
+msgstr ""
+"Geocodifica las direcciones de un Excel y publica el resultado en el "
+"visualizador."
+
+msgid "Reproject a layer"
+msgstr "Reproyectar una capa"
+
+msgid "Read a shapefile, reproject it to EPSG:25830 and write it to PostGIS."
+msgstr "Lee un shapefile, reproyéctalo a EPSG:25830 y escríbelo en PostGIS."
+
+msgid "Explain the flow"
+msgstr "Explicar el flujo"
+
+msgid "Explain what the flow on the canvas does, step by step."
+msgstr "Explica qué hace el flujo del canvas, paso a paso."
+
+msgid "Review the flow"
+msgstr "Revisar el flujo"
+
+msgid ""
+"Review the flow and tell me which parameters are missing or may cause errors."
+msgstr "Revisa el flujo y dime qué parámetros faltan o pueden dar error."
+
+msgid "Add after the selected node"
+msgstr "Añadir tras el seleccionado"
+
+msgid "Add a filter after the selected node."
+msgstr "Añade un filtro después del nodo seleccionado."
+
+msgid "Complete the flow"
+msgstr "Completar el flujo"
+
+msgid "Add whatever is missing so that the flow ends in an output."
+msgstr "Añade lo que falte para que el flujo termine en una salida."
+
+msgid "Save to PostGIS"
+msgstr "Guardar en PostGIS"
+
+msgid "Add an output to a new PostGIS table at the end of the flow."
+msgstr "Añade al final del flujo una salida a una tabla nueva de PostGIS."

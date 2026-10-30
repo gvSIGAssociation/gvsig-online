@@ -1,0 +1,15 @@
+type: trans_RenameAttr
+label: Rename Attribute
+family: transform
+summary: Renombra un atributo.
+parameters:
+- name: old-attr
+- name: new-attr
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

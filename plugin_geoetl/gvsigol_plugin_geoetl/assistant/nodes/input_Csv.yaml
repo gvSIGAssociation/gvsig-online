@@ -1,0 +1,29 @@
+type: input_Csv
+label: CSV
+family: input
+summary: Lee un fichero CSV o TXT. El esquema lo completa el usuario al aceptar el
+  modal.
+parameters:
+- name: csv-file
+  required: true
+- name: separator
+  choices:
+  - ;
+  - ','
+- name: header
+- name: schema-option
+  choices:
+  - has-schema
+  - no-schema
+- name: reading
+  choices:
+  - single
+  - multiple
+- name: move
+- name: folder
+ports:
+- direction: output
+  label: Input
+connection_types: []
+connection_parameter: null
+sql_parameters: []

@@ -1,0 +1,22 @@
+type: trans_SpatialRel
+label: Spatial Relation
+family: transform
+summary: Filtra la entrada 0 según una relación espacial con la entrada 1.
+parameters:
+- name: option
+  choices:
+  - ST_CONTAINS
+  - ST_EQUALS
+  - ST_INTERSECTS
+  - ST_TOUCHES
+  - ST_WITHIN
+ports:
+- direction: input
+  label: Main
+- direction: input
+  label: Secondary
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

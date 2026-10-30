@@ -8,6 +8,9 @@
 {% endblock %}
 
 {% block header %}
+{% if etl_assistant_enabled %}
+<link rel="stylesheet" href="{% static 'css/etl_assistant.css' %}">
+{% endif %}
 <style>
 :root {
 	--pl-accent:    #4a7fa5;
@@ -269,6 +272,11 @@
                     <div class="pl-panel__actions">
                         <button id="toolbar-button-back"><i class="fa fa-list"></i> {% trans "Workspaces" %}</button>
                         <div id="toolbar-etl"></div>
+                        {% if etl_assistant_enabled %}
+                        <button type="button" id="etl-assistant-open" aria-expanded="false" aria-controls="etl-assistant">
+                            <i class="fa fa-comments"></i> {% trans "Assistant" %}
+                        </button>
+                        {% endif %}
                     </div>
                 </div>
                 <!-- Segunda fila: paleta de nodos ETL -->
@@ -401,6 +409,37 @@
                 <div id="canvas-parent">
                     <div id="canvas-etl"></div>
                 </div>
+                {% if etl_assistant_enabled %}
+                <aside id="etl-assistant" class="pl-assistant is-collapsed" aria-label="{% trans 'ETL assistant' %}">
+                    <div class="pl-assistant__handle" role="separator" aria-orientation="vertical" aria-label="{% trans 'Resize assistant' %}"></div>
+                    <header class="pl-assistant__header">
+                        <h4 class="pl-assistant__title"><i class="fa fa-comments"></i> {% trans "Assistant" %}</h4>
+                        <div class="pl-assistant__header-actions">
+                            <button type="button" class="pl-assistant__icon-btn" id="etl-assistant-clear" aria-label="{% trans 'Clear conversation' %}"><i class="fa fa-trash"></i></button>
+                            <button type="button" class="pl-assistant__icon-btn" id="etl-assistant-close" aria-label="{% trans 'Close assistant' %}"><i class="fa fa-times"></i></button>
+                        </div>
+                    </header>
+                    <div class="pl-assistant__messages" id="etl-assistant-messages" aria-live="polite"></div>
+                    <div class="pl-assistant__examples" id="etl-assistant-examples">
+                        <p class="pl-assistant__intro">{% trans "Describe the data you have and the result you want. The assistant draws the flow on the canvas and you review it before saving." %}</p>
+                        <button type="button" class="pl-assistant__example" data-when="empty" data-example="{% trans "Load a CSV file into a new PostGIS table." %}"><i class="fa fa-file-text-o" aria-hidden="true"></i><span>{% trans "CSV to PostGIS" %}</span></button>
+                        <button type="button" class="pl-assistant__example" data-when="empty" data-example="{% trans "Join two PostGIS tables on a common field and save the result in a new table." %}"><i class="fa fa-link" aria-hidden="true"></i><span>{% trans "Join two tables" %}</span></button>
+                        <button type="button" class="pl-assistant__example" data-when="empty" data-example="{% trans "Geocode the addresses in an Excel file and publish the result in the viewer." %}"><i class="fa fa-map-marker" aria-hidden="true"></i><span>{% trans "Geocode addresses" %}</span></button>
+                        <button type="button" class="pl-assistant__example" data-when="empty" data-example="{% trans "Read a shapefile, reproject it to EPSG:25830 and write it to PostGIS." %}"><i class="fa fa-globe" aria-hidden="true"></i><span>{% trans "Reproject a layer" %}</span></button>
+                        <button type="button" class="pl-assistant__example" data-when="flow" data-example="{% trans "Explain what the flow on the canvas does, step by step." %}"><i class="fa fa-info-circle" aria-hidden="true"></i><span>{% trans "Explain the flow" %}</span></button>
+                        <button type="button" class="pl-assistant__example" data-when="flow" data-example="{% trans "Review the flow and tell me which parameters are missing or may cause errors." %}"><i class="fa fa-check-square-o" aria-hidden="true"></i><span>{% trans "Review the flow" %}</span></button>
+                        <button type="button" class="pl-assistant__example" data-when="flow" data-selection="yes" data-example="{% trans "Add a filter after the selected node." %}"><i class="fa fa-plus-circle" aria-hidden="true"></i><span>{% trans "Add after the selected node" %}</span></button>
+                        <button type="button" class="pl-assistant__example" data-when="flow" data-selection="no" data-example="{% trans "Add whatever is missing so that the flow ends in an output." %}"><i class="fa fa-flag-checkered" aria-hidden="true"></i><span>{% trans "Complete the flow" %}</span></button>
+                        <button type="button" class="pl-assistant__example" data-when="flow" data-example="{% trans "Add an output to a new PostGIS table at the end of the flow." %}"><i class="fa fa-database" aria-hidden="true"></i><span>{% trans "Save to PostGIS" %}</span></button>
+                    </div>
+                    <div class="pl-assistant__context" id="etl-assistant-context" hidden></div>
+                    <form class="pl-assistant__composer" id="etl-assistant-form">
+                        <label class="sr-only" for="etl-assistant-input">{% trans "Message" %}</label>
+                        <textarea id="etl-assistant-input" rows="1" placeholder="{% trans 'Describe the flow…' %}"></textarea>
+                        <button type="submit" id="etl-assistant-send" class="btn-pl-add" aria-label="{% trans 'Send' %}"><i class="fa fa-paper-plane"></i></button>
+                    </form>
+                </aside>
+                {% endif %}
             </div>
             <div id="jsonCanvas"></div>
         </div>
@@ -1065,6 +1104,12 @@ window.refreshEtlSqlEditor = function(textareaId) {
 <script type="text/javascript" src="{% static "js/TableShape.js" %}"></script>
 <script type="text/javascript" src="{% static "js/SchemaPropagator.js" %}"></script>
 <script type="text/javascript" src="{% static "js/SchemaCanvas.js" %}"></script>
+{% if etl_assistant_enabled %}
+<script type="text/javascript" src="{% static "js/lib/marked.min.js" %}"></script>
+<script type="text/javascript" src="{% static "js/lib/purify.min.js" %}"></script>
+<script type="text/javascript" src="{% static "js/DrawNodes.js" %}"></script>
+<script type="text/javascript" src="{% static "js/Assistant.js" %}"></script>
+{% endif %}
 
 
 

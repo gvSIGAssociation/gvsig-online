@@ -1,0 +1,24 @@
+type: trans_CompareRows
+label: Compare Rows
+family: transform
+summary: Compara filas de dos entradas por un atributo. Tiene dos entradas y varias
+  salidas.
+parameters:
+- name: attr
+  summary: Atributo sobre el que actúa la tarea.
+ports:
+- direction: input
+  label: Input Main
+- direction: input
+  label: Input to comp.
+- direction: output
+  label: Equals
+- direction: output
+  label: News
+- direction: output
+  label: Changes
+- direction: output
+  label: Comp. Not Used
+connection_types: []
+connection_parameter: null
+sql_parameters: []

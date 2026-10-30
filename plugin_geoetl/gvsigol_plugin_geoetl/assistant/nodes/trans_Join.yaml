@@ -1,0 +1,24 @@
+type: trans_Join
+label: Join
+family: transform
+summary: Cruza dos tablas por atributos. Entrada 0 es la principal y la 1 la secundaria.
+parameters:
+- name: attr1
+- name: attr2
+- name: attr-1
+- name: attr-2
+- name: schemas
+ports:
+- direction: input
+  label: Input Main
+- direction: input
+  label: Input Sec.
+- direction: output
+  label: Join
+- direction: output
+  label: Main Not Used
+- direction: output
+  label: Sec. Not Used
+connection_types: []
+connection_parameter: null
+sql_parameters: []

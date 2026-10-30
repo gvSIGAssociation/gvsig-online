@@ -1,0 +1,22 @@
+type: trans_Kriging
+label: Kriging Interpolation
+family: transform
+summary: Interpolación kriging. El resultado es una rejilla.
+parameters:
+- name: value-field
+- name: cell-size
+- name: search-radius
+- name: min-points
+- name: variogram-model
+  choices:
+  - spherical
+  - exponential
+  - gaussian
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

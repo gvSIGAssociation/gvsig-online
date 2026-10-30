@@ -1,0 +1,23 @@
+type: trans_ChangeAttrType
+label: Change Attribute Type
+family: transform
+summary: Cambia el tipo de un atributo.
+parameters:
+- name: attr
+  summary: Atributo sobre el que actúa la tarea.
+- name: data-type-option
+  choices:
+  - VARCHAR
+  - INTEGER
+  - FLOAT
+  - DATE
+  - TIMESTAMP
+  - BOOLEAN
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

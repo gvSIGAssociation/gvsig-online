@@ -1,0 +1,21 @@
+type: input_Shp
+label: Shapefile
+family: input
+summary: Lee un shapefile con su codificación y EPSG.
+parameters:
+- name: shp-file
+  required: true
+- name: encode
+  choices:
+  - LATIN1
+  - UTF-8
+  - ISO-8859-15
+  - WINDOWS-1252
+- name: epsg
+  summary: Código EPSG.
+ports:
+- direction: output
+  label: Input
+connection_types: []
+connection_parameter: null
+sql_parameters: []

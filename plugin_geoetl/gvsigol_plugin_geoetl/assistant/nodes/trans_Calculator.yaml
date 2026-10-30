@@ -1,0 +1,17 @@
+type: trans_Calculator
+label: Calculator
+family: transform
+summary: Crea o rellena un atributo con una expresión.
+parameters:
+- name: attr
+  summary: Atributo sobre el que actúa la tarea.
+- name: expression
+  summary: Expresión de cálculo.
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

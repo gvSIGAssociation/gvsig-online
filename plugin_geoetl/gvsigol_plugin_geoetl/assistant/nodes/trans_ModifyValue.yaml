@@ -1,0 +1,16 @@
+type: trans_ModifyValue
+label: Modify Value
+family: transform
+summary: Sustituye el valor de un atributo.
+parameters:
+- name: attr
+  summary: Atributo sobre el que actúa la tarea.
+- name: value
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

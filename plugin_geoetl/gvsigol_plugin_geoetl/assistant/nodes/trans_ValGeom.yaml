@@ -1,0 +1,16 @@
+type: trans_ValGeom
+label: Validate Geometry
+family: transform
+summary: Valida la geometría. stop detiene el flujo si no es válida.
+parameters:
+- name: stop
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Valid
+- direction: output
+  label: Invalid
+connection_types: []
+connection_parameter: null
+sql_parameters: []

@@ -1,0 +1,24 @@
+type: input_Oracle
+label: Oracle
+family: input
+summary: Lee una tabla o una consulta de Oracle.
+parameters:
+- name: db
+  summary: Nombre de la conexión.
+  required: true
+- name: owner-name
+  summary: Esquema (owner) de Oracle.
+- name: table-name
+  summary: Tabla.
+- name: checkbox
+  summary: Si es verdadero, se usa SQL libre en lugar de la tabla.
+- name: sql
+  summary: Consulta SQL.
+ports:
+- direction: output
+  label: Input
+connection_types:
+- Oracle
+connection_parameter: db
+sql_parameters:
+- sql

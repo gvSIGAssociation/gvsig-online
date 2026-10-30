@@ -1,0 +1,24 @@
+type: trans_FilterGeom
+label: Filter Geometry
+family: transform
+summary: 'Clasifica la geometría en seis salidas: punto, multipunto, línea, multilínea,
+  polígono y multipolígono.'
+parameters: []
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Points
+- direction: output
+  label: Multipoints
+- direction: output
+  label: Lines
+- direction: output
+  label: Multilines
+- direction: output
+  label: Polygons
+- direction: output
+  label: Multipolygons
+connection_types: []
+connection_parameter: null
+sql_parameters: []

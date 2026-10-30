@@ -16,9 +16,12 @@ class UUIDConverter:
 
 register_converter(UUIDConverter, 'uuid')
 
+from gvsigol_plugin_geoetl.assistant.views import etl_assistant
+
 urlpatterns = [
     path('etl/get_conf/', views.get_conf, name='geoetl_get_conf'),
     path('etl/etl_canvas/', views.etl_canvas, name='etl_canvas'),
+    path('etl/etl_assistant/', etl_assistant, name='etl_assistant'),
     path('etl/to_etl_canvas/', views.etl_canvas, name='to_etl_canvas'),
     path('etl/etl_read_canvas/', views.etl_read_canvas, name='etl_read_canvas'),
     path('etl/etl_sheet_excel/', views.etl_sheet_excel, name='etl_sheet_excel'),

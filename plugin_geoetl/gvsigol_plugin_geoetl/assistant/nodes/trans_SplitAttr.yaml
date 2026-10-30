@@ -1,0 +1,17 @@
+type: trans_SplitAttr
+label: Split Attribute
+family: transform
+summary: Parte un texto en varios atributos.
+parameters:
+- name: attr
+  summary: Atributo sobre el que actúa la tarea.
+- name: list
+- name: split
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

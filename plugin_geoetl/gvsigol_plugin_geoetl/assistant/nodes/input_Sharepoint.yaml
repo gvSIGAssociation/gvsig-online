@@ -1,0 +1,24 @@
+type: input_Sharepoint
+label: SharePoint
+family: input
+summary: Lee ficheros Excel de una biblioteca de SharePoint.
+parameters:
+- name: api
+  summary: Nombre de la conexión.
+  required: true
+- name: drive-id
+- name: file-paths
+- name: format
+  choices:
+  - excel
+- name: get_sheet-name
+- name: sheet-name
+- name: usecols
+- name: header
+ports:
+- direction: output
+  label: Input
+connection_types:
+- sharepoint
+connection_parameter: api
+sql_parameters: []

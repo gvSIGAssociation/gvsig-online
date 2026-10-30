@@ -1,0 +1,25 @@
+type: input_Indenova
+label: InDenova
+family: input
+summary: Lee expedientes de InDenova entre dos fechas.
+parameters:
+- name: get_proced-list
+- name: api
+  summary: Nombre de la conexión.
+  required: true
+- name: proced-list
+- name: init-date
+- name: end-date
+- name: checkbox-end
+- name: checkbox-init
+- name: date-indenova
+  choices:
+  - check-init-date
+  - check-init-end-date
+ports:
+- direction: output
+  label: Input
+connection_types:
+- indenova
+connection_parameter: api
+sql_parameters: []

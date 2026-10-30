@@ -1,0 +1,28 @@
+type: trans_ExecuteSQL
+label: Execute SQL
+family: transform
+summary: Ejecuta SQL contra una conexión. Puede leer y escribir; en edición restringida
+  no se puede cambiar.
+parameters:
+- name: get_schema-name
+  summary: Esquemas cargados en el desplegable. Lo rellena el servidor al aplicar.
+- name: get_tablename
+  summary: Tablas cargadas en el desplegable.
+- name: db
+  summary: Nombre de la conexión.
+  required: true
+- name: schema-name
+  summary: Esquema.
+- name: tablename
+  summary: Tabla.
+- name: query
+  summary: Sentencia SQL.
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: db
+sql_parameters:
+- query

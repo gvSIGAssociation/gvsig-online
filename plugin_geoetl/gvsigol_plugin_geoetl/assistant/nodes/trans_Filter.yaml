@@ -1,0 +1,31 @@
+type: trans_Filter
+label: Filter
+family: transform
+summary: Filtra filas. La salida 0 son las que cumplen y la 1 las que no.
+parameters:
+- name: attr
+  summary: Atributo sobre el que actúa la tarea.
+- name: option
+  choices:
+  - '='
+  - '!='
+  - <
+  - '>'
+  - <=
+  - '>='
+  - starts-with
+  - ends-with
+  - contains
+- name: value
+- name: filter-expression
+  summary: Expresión compuesta del filtro.
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: 'True'
+- direction: output
+  label: 'False'
+connection_types: []
+connection_parameter: null
+sql_parameters: []

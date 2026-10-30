@@ -1,0 +1,18 @@
+type: trans_Intersection
+label: Intersection
+family: transform
+summary: Intersección geométrica de dos entradas.
+parameters:
+- name: self-intersect
+- name: merge
+- name: schema
+ports:
+- direction: input
+  label: Main
+- direction: input
+  label: Secondary
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

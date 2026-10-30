@@ -24,6 +24,10 @@ env_plugin_geoetl = environ.Env(
     ETL_EXCEL_READ_CHUNKSIZE=(int, 10000),
     ETL_EXCEL_SQL_CHUNKSIZE=(int, 5000),
     ETL_CANVAS_MAX_DELIVERIES=(int, 2),
+    # El asistente del canvas está apagado hasta que la instalación lo active.
+    ETL_ASSISTANT_ENABLED=(bool, False),
+    # Vacío: se usa el modelo por defecto de GeoCopilot.
+    GEOETL_LLM_MODEL=(str, ''),
 )
 
 GEOETL_DB = {
@@ -42,6 +46,8 @@ ETL_EXCEL_READ_CHUNKSIZE = env_plugin_geoetl('ETL_EXCEL_READ_CHUNKSIZE')
 ETL_EXCEL_SQL_CHUNKSIZE = env_plugin_geoetl('ETL_EXCEL_SQL_CHUNKSIZE')
 # After this many Celery deliveries of the same task id, ack and mark Error (poison pill).
 ETL_CANVAS_MAX_DELIVERIES = env_plugin_geoetl('ETL_CANVAS_MAX_DELIVERIES')
+ETL_ASSISTANT_ENABLED = env_plugin_geoetl('ETL_ASSISTANT_ENABLED')
+GEOETL_LLM_MODEL = env_plugin_geoetl('GEOETL_LLM_MODEL')
 
 LOGGER.info("ETL_DB_HOST= %s",GEOETL_DB['host'])
 LOGGER.info("ETL_DB_PORT= %s",GEOETL_DB['port'])

@@ -1,0 +1,17 @@
+type: trans_Reproject
+label: Reproject
+family: transform
+summary: Reproyecta la geometría de un EPSG a otro.
+parameters:
+- name: source-epsg
+  summary: EPSG de origen.
+- name: target-epsg
+  summary: EPSG de destino.
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

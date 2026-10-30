@@ -1,0 +1,15 @@
+type: input_PadronAlbacete
+label: Padrón Albacete
+family: input
+summary: Lee el padrón de Albacete (servicio PRO o PRE).
+parameters:
+- name: service
+  choices:
+  - PRO
+  - PRE
+ports:
+- direction: output
+  label: Input
+connection_types: []
+connection_parameter: null
+sql_parameters: []

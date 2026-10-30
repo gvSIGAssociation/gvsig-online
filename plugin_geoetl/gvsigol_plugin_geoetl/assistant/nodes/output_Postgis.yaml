@@ -1,0 +1,37 @@
+type: output_Postgis
+label: PgSQL/PostGIS
+family: output
+summary: Escribe el resultado en una tabla PostgreSQL o PostGIS.
+parameters:
+- name: get_schema-name-option
+  summary: Esquemas cargados en el desplegable.
+- name: get_tablename
+  summary: Tablas cargadas en el desplegable.
+- name: db-option
+  summary: Nombre de la conexión.
+  required: true
+- name: schema-name-option
+  summary: Esquema de destino.
+- name: tablename
+  summary: Tabla.
+- name: match
+- name: operation
+  summary: Modo de escritura.
+  choices:
+  - CREATE
+  - DROPANDCREATE
+  - APPEND
+  - OVERWRITE
+  - UPDATE
+  - DELETE
+- name: order
+- name: preserve-fid
+- name: create-gvsigol-fields
+ports:
+- direction: input
+  label: Output
+connection_types:
+- PostgreSQL
+- PostGIS
+connection_parameter: db-option
+sql_parameters: []

@@ -1,0 +1,17 @@
+type: trans_ConcatAttr
+label: Concatenate Attributes
+family: transform
+summary: Concatena atributos en uno nuevo.
+parameters:
+- name: attr
+  summary: Atributo sobre el que actúa la tarea.
+- name: new-attr
+- name: separator
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

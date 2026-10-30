@@ -1,0 +1,24 @@
+type: trans_CreateAttr
+label: Create Attribute
+family: transform
+summary: Añade un atributo con un valor constante.
+parameters:
+- name: attr
+  summary: Atributo sobre el que actúa la tarea.
+- name: value
+- name: data-type
+  choices:
+  - VARCHAR
+  - INTEGER
+  - FLOAT
+  - DATE
+  - TIMESTAMP
+  - BOOLEAN
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

@@ -1,0 +1,15 @@
+type: trans_Union
+label: Union
+family: transform
+summary: Une geometrías, opcionalmente agrupando por un atributo.
+parameters:
+- name: group-by-attr
+- name: multi
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

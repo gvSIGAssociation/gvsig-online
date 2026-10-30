@@ -1,0 +1,16 @@
+type: trans_ExplodeList
+label: Explode List
+family: transform
+summary: Expande un atributo que contiene una lista en varias filas.
+parameters:
+- name: attr
+  summary: Atributo sobre el que actúa la tarea.
+- name: list
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

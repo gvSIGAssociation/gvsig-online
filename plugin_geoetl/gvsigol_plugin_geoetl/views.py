@@ -55,6 +55,23 @@ def _ctx(extra=None):
     if extra:
         ctx.update(extra)
     return ctx
+
+
+def _assistant_enabled(request):
+    try:
+        from gvsigol_plugin_geoetl.assistant.access import (
+            assistant_feature_enabled,
+            user_may_use,
+        )
+        user = request.user
+        return assistant_feature_enabled() and user_may_use(
+            user.is_authenticated,
+            user.is_staff,
+            user.is_superuser,
+        )
+    except Exception:
+        logger.exception('etl_assistant: no se pudo comprobar si está activo')
+        return False
 from gvsigol_services.models import Datastore, Connection
 from django.db.models import Q
 from django.contrib.auth.models import User
@@ -218,6 +235,8 @@ def etl_canvas(request):
             if instance.can_edit_restrictedly(request) and not instance.can_edit(request):
                 response['editablerestrictedly'] = 'true'
 
+            response['etl_assistant_enabled'] = _assistant_enabled(request)
+
             try:
                 periodicTask = PeriodicTask.objects.get(name = 'gvsigol_plugin_geoetl.'+instance.name+'.'+str(lgid))
             except PeriodicTask.DoesNotExist:
@@ -255,7 +274,8 @@ def etl_canvas(request):
                 'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
                 'srs': srs_string,
                 'dbc': dbc,
-                'providers': providers
+                'providers': providers,
+                'etl_assistant_enabled': _assistant_enabled(request),
             }
             return render(request, 'etl.html', _ctx(response))
 

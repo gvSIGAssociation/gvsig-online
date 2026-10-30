@@ -1,0 +1,13 @@
+type: trans_CalcLength
+label: Calculate length
+family: transform
+summary: Añade la longitud de la geometría en el atributo _length.
+parameters: []
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

@@ -1,0 +1,26 @@
+type: input_Segex
+label: SEGEX
+family: input
+summary: Lee trámites de SEGEX.
+parameters:
+- name: get_types-list
+- name: api
+  summary: Nombre de la conexión.
+  required: true
+- name: types-list
+- name: minute-before
+- name: init-date
+- name: end-date
+- name: checkbox-end
+- name: init-segex
+- name: date-segex
+  choices:
+  - check-init-date
+  - check-init-end-date
+ports:
+- direction: output
+  label: Input
+connection_types:
+- segex
+connection_parameter: api
+sql_parameters: []

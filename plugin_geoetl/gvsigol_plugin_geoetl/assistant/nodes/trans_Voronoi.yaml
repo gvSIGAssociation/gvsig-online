@@ -1,0 +1,14 @@
+type: trans_Voronoi
+label: Voronoi Diagram
+family: transform
+summary: Construye el diagrama de Voronoi de los puntos.
+parameters:
+- name: tolerance
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

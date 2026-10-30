@@ -1,0 +1,28 @@
+type: input_SqlServer
+label: SQL Server
+family: input
+summary: Lee una tabla o una consulta de SQL Server.
+parameters:
+- name: get_schema-name
+  summary: Esquemas cargados en el desplegable. Lo rellena el servidor al aplicar.
+- name: get_table-name
+  summary: Tablas cargadas en el desplegable.
+- name: db
+  summary: Nombre de la conexión.
+  required: true
+- name: schema-name
+  summary: Esquema.
+- name: table-name
+  summary: Tabla.
+- name: checkbox
+  summary: Si es verdadero, se usa SQL libre en lugar de la tabla.
+- name: sql
+  summary: Consulta SQL.
+ports:
+- direction: output
+  label: Input
+connection_types:
+- SQLServer
+connection_parameter: db
+sql_parameters:
+- sql

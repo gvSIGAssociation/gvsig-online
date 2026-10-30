@@ -1371,3 +1371,40 @@ msgstr "Grupo de la capa:"
 
 msgid "Epigraph:"
 msgstr "Epígrafe:"
+
+#: static/js/Assistant.js
+msgid "Apply"
+msgstr "Aplicar"
+
+msgid "Applied"
+msgstr "Aplicado"
+
+msgid "Discard"
+msgstr "Descartar"
+
+msgid "Discarded"
+msgstr "Descartado"
+
+msgid "Undone"
+msgstr "Deshecho"
+
+msgid "Retry"
+msgstr "Reintentar"
+
+msgid "Assumptions"
+msgstr "Supuestos"
+
+msgid "Warnings"
+msgstr "Avisos"
+
+msgid "Context"
+msgstr "Nodo seleccionado"
+
+msgid "The flow could not be drawn."
+msgstr "No se ha podido dibujar el flujo."
+
+msgid "The assistant could not be reached. Try again."
+msgstr "No se ha podido contactar con el asistente. Inténtalo de nuevo."
+
+msgid "You are not allowed to use the assistant on this workspace."
+msgstr "No tienes permiso para usar el asistente en este workspace."

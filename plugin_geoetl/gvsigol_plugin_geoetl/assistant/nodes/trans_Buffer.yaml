@@ -1,0 +1,41 @@
+type: trans_Buffer
+label: Buffer
+family: transform
+summary: Calcula un área de influencia. El radio puede ser fijo o un atributo.
+parameters:
+- name: mode-option
+  choices:
+  - radius
+  - reach-area
+- name: radio-radius
+- name: radius-value
+- name: radius-attr
+- name: current-area-attr
+- name: area-attr-reach
+- name: quad-segs
+- name: end-cap-option
+  choices:
+  - round
+  - flat
+  - square
+- name: join-option
+  choices:
+  - round
+  - mitre
+  - bevel
+- name: mitre-limit
+- name: side-option
+  choices:
+  - both
+  - left
+  - right
+- name: radius-increase
+- name: schema
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

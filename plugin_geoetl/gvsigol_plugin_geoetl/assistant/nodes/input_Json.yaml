@@ -1,0 +1,15 @@
+type: input_Json
+label: JSON
+family: input
+summary: Lee un fichero JSON o responde a una URL.
+parameters:
+- name: json-file
+  required: true
+- name: api-rest
+- name: url
+ports:
+- direction: output
+  label: Input
+connection_types: []
+connection_parameter: null
+sql_parameters: []

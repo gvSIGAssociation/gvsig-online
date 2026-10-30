@@ -1,0 +1,23 @@
+type: input_Excel
+label: Excel
+family: input
+summary: Lee una hoja de un fichero Excel. El esquema lo completa el usuario al aceptar.
+parameters:
+- name: get_sheet-name
+- name: excel-file
+  required: true
+- name: sheet-name
+- name: usecols
+- name: header
+- name: reading
+  choices:
+  - single
+  - multiple
+- name: move
+- name: folder
+ports:
+- direction: output
+  label: Input
+connection_types: []
+connection_parameter: null
+sql_parameters: []

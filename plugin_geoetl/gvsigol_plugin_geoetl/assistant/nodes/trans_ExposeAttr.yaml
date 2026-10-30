@@ -1,0 +1,17 @@
+type: trans_ExposeAttr
+label: Expose Attribute
+family: transform
+summary: Expone atributos anidados.
+parameters:
+- name: attr
+  summary: Atributo sobre el que actúa la tarea.
+- name: attrs
+- name: schema
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []
