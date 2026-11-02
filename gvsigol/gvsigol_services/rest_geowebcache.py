@@ -274,7 +274,9 @@ class APIGeoWebCache():
             if response.status_code != 200:
                 raise FailedRequestError(response.status_code, response.content)
             data = json.loads(response.content)
-            gridsets = data.get('gridSets') or data.get('gridsets') or data
+            gridsets = data
+            if isinstance(data, dict):
+                gridsets = data.get('gridSets') or data.get('gridsets') or data
             items = []
             if isinstance(gridsets, dict):
                 items = gridsets.get('gridSet') or gridsets.get('gridsets') or gridsets.get('items') or []
