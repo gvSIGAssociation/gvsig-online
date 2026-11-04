@@ -675,7 +675,9 @@ viewer.core = {
 	    } else {
 	    	visible = externalLayer['visible'];
 	    }
-	    if(group.visible && !(externalLayer['name'] && externalLayer['name'].indexOf('_') === 0 && externalLayer['is_vector'])){ visible = false; }
+	    if (self._selectableGroupDrawsChildren(group)) {
+	    	visible = true;
+	    } else if(group.visible && !(externalLayer['name'] && externalLayer['name'].indexOf('_') === 0 && externalLayer['is_vector'])){ visible = false; }
 
 	    var layerId = this._nextLayerId();
 	    externalLayer.id = layerId;
@@ -1170,7 +1172,9 @@ viewer.core = {
 	    	visible = layerConf['visible'];
 			baselayer = false;
 	    }
-	    if(group.visible && !(layerConf['name'] && layerConf['name'].indexOf('_') === 0 && layerConf['is_vector'])){ visible = false; }
+	    if (self._selectableGroupDrawsChildren(group)) {
+	    	visible = true;
+	    } else if(group.visible && !(layerConf['name'] && layerConf['name'].indexOf('_') === 0 && layerConf['is_vector'])){ visible = false; }
 
 		if (!layerConf.public && visible) {
 			// visible authenticated layers should be loaded after login
@@ -1534,11 +1538,15 @@ viewer.core = {
 		return ignore;		
 	},
 
+	_selectableGroupDrawsChildren: function(group) {
+		return !!(this.conf.selectable_groups && group && group.allows_getmap && group.visible);
+	},
+
 	_loadLayerGroups: function() {
 		var self = this;
 		for (var i=0; i<this.conf.layerGroups.length; i++) {
 			var group = this.conf.layerGroups[i];
-			if (!group.basegroup && group.allows_getmap) {
+			if (!group.basegroup && group.allows_getmap && !this.conf.selectable_groups) {
 				var url = null;
 				var params = null;
 				var sourceOptions = null;

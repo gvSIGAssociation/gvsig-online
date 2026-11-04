@@ -189,9 +189,8 @@ layerTree.prototype.createTree = function() {
 		for (var i=0; i<self.conf.layerGroups.length; i++) {			
 			var group = self.conf.layerGroups[i];
 			if (group.groupId == groupId) {
-				if (group.allows_getmap) {
-					var mapLayer = self.getGroupLayerFromMap(group.groupName);
-					if (mapLayer) {
+				var mapLayer = group.allows_getmap ? self.getGroupLayerFromMap(group.groupName) : null;
+				if (mapLayer) {
 						if (checked) {
 							mapLayer.setVisible(true);
 							self.changeState(group, 'layergroup', 'set-visibility', true);
@@ -224,8 +223,6 @@ layerTree.prototype.createTree = function() {
 								}
 							}
 						}
-					}
-					
 				} else {
 					if (checked) {
 						self.changeState(group, 'layergroup', 'set-visibility', true);
