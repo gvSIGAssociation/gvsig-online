@@ -880,6 +880,13 @@ class ConnectionForm(forms.ModelForm):
         max_length=100, 
         widget=forms.TextInput(attrs={'class': 'form-control api-padron-atm-field'})
     )
+    padron_atm_entorno = forms.ChoiceField(
+        label=_('Environment'),
+        required=False,
+        choices=(('PRO', _('Production (PRO)')), ('PRE', _('Pre-production (PRE)'))),
+        initial='PRO',
+        widget=forms.Select(attrs={'class': 'form-control api-padron-atm-field'})
+    )
 
     # ==================== CAMPOS PARA SGAREXWS ====================
     sgarexws_url = forms.URLField(
@@ -1056,6 +1063,7 @@ class ConnectionForm(forms.ModelForm):
                 'email': self.cleaned_data.get('padron_atm_email', ''),
                 'password': self.cleaned_data.get('padron_atm_password', ''),
                 'idacceso': self.cleaned_data.get('padron_atm_id_acceso', ''),
+                'entorno': self.cleaned_data.get('padron_atm_entorno') or 'PRO',
             })
 
         elif conn_type == 'sgarexws':
@@ -1361,6 +1369,13 @@ class ConnectionUpdateForm(forms.ModelForm):
         max_length=100, 
         widget=forms.TextInput(attrs={'class': 'form-control api-padron-atm-field'})
     )
+    padron_atm_entorno = forms.ChoiceField(
+        label=_('Environment'),
+        required=False,
+        choices=(('PRO', _('Production (PRO)')), ('PRE', _('Pre-production (PRE)'))),
+        initial='PRO',
+        widget=forms.Select(attrs={'class': 'form-control api-padron-atm-field'})
+    )
 
     # ==================== CAMPOS PARA SGAREXWS ====================
     sgarexws_url = forms.URLField(
@@ -1499,6 +1514,7 @@ class ConnectionUpdateForm(forms.ModelForm):
                 'email': self.cleaned_data.get('padron_atm_email', ''),
                 'password': password,
                 'idacceso': self.cleaned_data.get('padron_atm_id_acceso', ''),
+                'entorno': self.cleaned_data.get('padron_atm_entorno') or 'PRO',
             })
 
         elif conn_type == 'sgarexws':

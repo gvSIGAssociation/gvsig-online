@@ -7855,9 +7855,13 @@ def connection_update(request, connection_id):
         elif conn_type == 'padron-atm':
             # Soportar variantes del nombre del campo idacceso (la API usa 'idacceso')
             id_acceso = params.get('idacceso', '') or params.get('id_acceso', '') or params.get('idAcceso', '') or params.get('id-acceso', '')
+            entorno = (params.get('entorno') or 'PRO').upper()
+            if entorno not in ('PRO', 'PRE'):
+                entorno = 'PRO'
             initial_data.update({
                 'padron_atm_email': params.get('email', ''),
                 'padron_atm_id_acceso': id_acceso,
+                'padron_atm_entorno': entorno,
             })
         elif conn_type == 'sgarexws':
             initial_data.update({
@@ -8131,8 +8135,12 @@ def connection_test(request):
                     'password': request.POST.get('password', ''),
                     'idacceso': request.POST.get('idacceso', '')
                 }
-                
-                url_auth = "https://pmcloudserver.atm-maggioli.es/api/auth/login"
+                entorno = (request.POST.get('entorno') or 'PRO').upper()
+                if entorno == 'PRE':
+                    base_url = 'https://pre-pmcloudserver.atm-maggioli.es'
+                else:
+                    base_url = 'https://pmcloudserver.atm-maggioli.es'
+                url_auth = f"{base_url}/api/auth/login"
                 response = req.post(url_auth, json=credenciales)
                 
                 if response.status_code == 200:

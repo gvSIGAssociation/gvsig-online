@@ -260,6 +260,10 @@
 										<label for="id_padron_atm_id_acceso">{{ form.padron_atm_id_acceso.label }}</label>
 										{{ form.padron_atm_id_acceso }}
 									</div>
+									<div class="form-group">
+										<label for="id_padron_atm_entorno">{{ form.padron_atm_entorno.label }}</label>
+										{{ form.padron_atm_entorno }}
+									</div>
 								</div>
 
 								<!-- ==================== SGAREXWS ==================== -->
@@ -581,6 +585,7 @@ $(document).ready(function() {
 			postData.email = $('#id_padron_atm_email').val();
 			postData.password = $('#id_padron_atm_password').val();
 			postData.idacceso = $('#id_padron_atm_id_acceso').val();
+			postData.entorno = $('#id_padron_atm_entorno').val();
 		} else if (connType === 'sgarexws') {
 			postData.url = $('#id_sgarexws_url').val();
 			postData.username = $('#id_sgarexws_username').val();
