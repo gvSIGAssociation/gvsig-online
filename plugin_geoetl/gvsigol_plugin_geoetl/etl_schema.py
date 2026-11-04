@@ -1280,12 +1280,22 @@ def get_schema_padron_atm(dicc):
     
     try:
         api = Connection.objects.get(name=dicc['api'])
-        credenciales = json.loads(api.connection_params)
+        conn_params = json.loads(api.connection_params)
     except Exception as e:
         print(f"Error al obtener credenciales de la API: {e}")
         return None
-    
-    url_auth = "https://pmcloudserver.atm-maggioli.es/api/auth/login" 
+
+    entorno = (conn_params.get('entorno') or 'PRO').upper()
+    if entorno == 'PRE':
+        base_url = 'https://pre-pmcloudserver.atm-maggioli.es'
+    else:
+        base_url = 'https://pmcloudserver.atm-maggioli.es'
+    url_auth = f"{base_url}/api/auth/login"
+    credenciales = {
+        'email': conn_params.get('email', ''),
+        'password': conn_params.get('password', ''),
+        'idacceso': conn_params.get('idacceso', '') or conn_params.get('id_acceso', ''),
+    }
     first = True
 
     # Autenticación
@@ -1324,7 +1334,7 @@ def get_schema_padron_atm(dicc):
             }
     
         headers = {"Authorization": f"Bearer {token}"}
-        url_list = f"https://pmcloudserver.atm-maggioli.es/padron/api/habitante/GetList/"
+        url_list = f"{base_url}/padron/api/habitante/GetList/"
         
         
         try:
@@ -1359,7 +1369,7 @@ def get_schema_padron_atm(dicc):
                 try:
                     
                     if documento:
-                        url_modelos = f"https://pmcloudserver.atm-maggioli.es/padron/api/habitante/GetPorDocumento/{documento}"
+                        url_modelos = f"{base_url}/padron/api/habitante/GetPorDocumento/{documento}"
                         response_modelos = requests.get(url_modelos, headers=headers)
                         response_modelos.raise_for_status()
 
