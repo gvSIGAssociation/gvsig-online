@@ -1,0 +1,22 @@
+type: trans_StratifiedSample
+label: Stratified Sample
+family: transform
+summary: Elige puntos al azar de cada clase de un ráster clasificado (salida de Predict Raster o Clean
+  Raster), todos los píxeles de una clase con la misma probabilidad. La salida es una tabla de puntos con
+  id, map_class, map_code y una columna reference vacía, que el usuario rellena con la clase real (en campo
+  o con una ortofoto) para usarla en Estimate Areas. Es el diseño de muestreo que da validez estadística a
+  la exactitud y a las superficies.
+parameters:
+- name: per-class
+  summary: Puntos por clase, al menos 2; se recomiendan 50 o más (por defecto 50).
+- name: seed
+  summary: Semilla aleatoria (por defecto 42).
+ports:
+- direction: input
+  label: Raster
+  kind: raster
+- direction: output
+  label: Points
+connection_types: []
+connection_parameter: null
+sql_parameters: []

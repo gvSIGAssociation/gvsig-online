@@ -17,6 +17,10 @@ function getPerAttr(){
     }
 
     memento.name = this.classLabel.getText();
+    // id corto visible en la cabecera (n1, n2…), el mismo que usa el asistente
+    if (this.etlAlias) {
+        memento.alias = this.etlAlias;
+    }
     memento.entities   = [];
     
     try{

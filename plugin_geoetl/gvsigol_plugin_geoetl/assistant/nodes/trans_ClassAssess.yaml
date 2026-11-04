@@ -1,0 +1,27 @@
+type: trans_ClassAssess
+label: Assess Classification
+family: transform
+summary: Mide la calidad de un ráster clasificado (salida 0 de Predict Raster o de Clean Raster) con
+  muestras de validación independientes, es decir, que NO se usaron para entrenar. La entrada 0 es
+  el ráster clasificado y la 1 una tabla de polígonos o puntos con la clase real. La salida 0 es el
+  informe (exactitud, kappa, precisión y exhaustividad por clase) y la 1 la matriz de confusión
+  (columnas real, pred_<clase>, total, recall). El informe incluye intervalos del 95 % por bootstrap de
+  muestras enteras. Para una exactitud estadísticamente válida, las muestras deben ser aleatorias y
+  estratificadas por clase (Stratified Sample).
+parameters:
+- name: class-attr
+  required: true
+  summary: Columna de las muestras de validación con la clase real de cada una.
+ports:
+- direction: input
+  label: Raster
+  kind: raster
+- direction: input
+  label: Validation samples
+- direction: output
+  label: Report
+- direction: output
+  label: Confusion matrix
+connection_types: []
+connection_parameter: null
+sql_parameters: []

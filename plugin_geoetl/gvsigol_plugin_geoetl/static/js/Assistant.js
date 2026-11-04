@@ -9,6 +9,10 @@
 	var busy = false;
 	var examplesShown = false;
 	var aliasMap = {};
+	var currentXhr = null;       // petición en curso (para Detener)
+	var recall = -1;             // posición al recorrer las preguntas anteriores con ↑ / ↓
+	var MESSAGE_LIMIT = 8000;    // mismo límite que el servidor (agent.py)
+	var COUNTER_FROM = 7000;
 
 	function workspaceKey() {
 		var id = $('#etl_id').val();
@@ -85,10 +89,247 @@
 
 	function figureForAlias(alias) {
 		var canvasView = view();
-		if (!canvasView || !aliasMap[alias]) {
+		if (!canvasView) {
 			return null;
 		}
-		return canvasView.getFigure(aliasMap[alias]);
+		var found = null;
+		canvasView.getFigures().each(function (i, figure) {
+			if (!found && figure.etlAlias === alias) {
+				found = figure;
+			}
+		});
+		if (!found && aliasMap[alias]) {
+			found = canvasView.getFigure(aliasMap[alias]);
+		}
+		return found;
+	}
+
+	// Convierte los n3, n12… del texto en etiquetas que resaltan y centran su nodo.
+	function decorateAliases(container) {
+		var root = container && container[0];
+		if (!root || !document.createTreeWalker) {
+			return;
+		}
+		var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+		var targets = [];
+		var node;
+		while ((node = walker.nextNode())) {
+			if (/\bn\d+\b/.test(node.nodeValue) && !$(node.parentNode).closest('code, pre, a, .pl-assistant__alias').length) {
+				targets.push(node);
+			}
+		}
+		targets.forEach(function (textNode) {
+			var parts = textNode.nodeValue.split(/(\bn\d+\b)/);
+			var fragment = document.createDocumentFragment();
+			parts.forEach(function (part) {
+				if (/^n\d+$/.test(part) && figureForAlias(part)) {
+					var chip = document.createElement('span');
+					chip.className = 'pl-assistant__alias';
+					chip.setAttribute('role', 'button');
+					chip.setAttribute('tabindex', '0');
+					chip.setAttribute('data-alias', part);
+					chip.setAttribute('title', t('Show node on the canvas'));
+					chip.textContent = part;
+					fragment.appendChild(chip);
+				} else if (part) {
+					fragment.appendChild(document.createTextNode(part));
+				}
+			});
+			textNode.parentNode.replaceChild(fragment, textNode);
+		});
+	}
+
+	function copyText(text, button) {
+		function done() {
+			if (!button) {
+				return;
+			}
+			var icon = button.find('i');
+			icon.removeClass('fa-copy').addClass('fa-check');
+			setTimeout(function () {
+				icon.removeClass('fa-check').addClass('fa-copy');
+			}, 1500);
+		}
+		function fallback() {
+			var area = $('<textarea readonly></textarea>').val(text).css({position: 'fixed', top: '-1000px'});
+			$('body').append(area);
+			area[0].select();
+			try {
+				document.execCommand('copy');
+				done();
+			} catch (e) {
+			}
+			area.remove();
+		}
+		if (navigator.clipboard && navigator.clipboard.writeText) {
+			navigator.clipboard.writeText(text).then(done, fallback);
+		} else {
+			fallback();
+		}
+	}
+
+	function toolButton(icon, label, handler, extraClass) {
+		var button = $('<button type="button" class="pl-assistant__tool"></button>')
+			.attr('aria-label', label).attr('title', label)
+			.append($('<i class="fa" aria-hidden="true"></i>').addClass(icon));
+		if (extraClass) {
+			button.addClass(extraClass);
+		}
+		button.on('click', function (event) {
+			event.stopPropagation();
+			handler(button);
+		});
+		return button;
+	}
+
+	function messageTools(message) {
+		var bar = $('<div class="pl-assistant__tools"></div>');
+		var text = message.content || '';
+		if (message.role === 'user') {
+			bar.append(toolButton('fa-copy', t('Copy'), function (button) {
+				copyText(text, button);
+			}));
+			bar.append(toolButton('fa-pencil', t('Edit and resend'), function () {
+				setInput(text);
+			}));
+			bar.append(toolButton('fa-repeat', t('Ask again'), function () {
+				sendText(text);
+			}));
+		} else {
+			bar.append(toolButton('fa-copy', t('Copy'), function (button) {
+				copyText(assistantMarkdown(message), button);
+			}));
+			if (message.id && message.settled !== 'applied' && !(message.proposal && message.needsConfirmation && !message.settled)) {
+				bar.append(toolButton('fa-refresh', t('Regenerate answer'), function () {
+					regenerate(message.id);
+				}, 'js-regenerate'));
+			}
+		}
+		return bar;
+	}
+
+	function assistantMarkdown(message) {
+		var lines = [message.content || ''];
+		if (message.summary && message.summary.length) {
+			lines.push('', t('Changes') + ':');
+			message.summary.forEach(function (line) {
+				lines.push('- ' + line);
+			});
+		}
+		if (message.assumptions && message.assumptions.length) {
+			lines.push('', t('Assumptions') + ':');
+			message.assumptions.forEach(function (line) {
+				lines.push('- ' + line);
+			});
+		}
+		if (message.warnings && message.warnings.length) {
+			lines.push('', t('Warnings') + ':');
+			message.warnings.forEach(function (line) {
+				lines.push('- ' + line);
+			});
+		}
+		return lines.join('\n').trim();
+	}
+
+	function setInput(text) {
+		input.val(text);
+		input.trigger('input');
+		input.focus();
+		var end = text.length;
+		if (input[0].setSelectionRange) {
+			input[0].setSelectionRange(end, end);
+		}
+	}
+
+	// Quita la última respuesta (y su pregunta) y vuelve a preguntar.
+	function regenerate(messageId) {
+		if (busy) {
+			return;
+		}
+		var state = loadState();
+		var messages = state.messages || [];
+		var index = -1;
+		for (var i = 0; i < messages.length; i++) {
+			if (messages[i].id === messageId) {
+				index = i;
+			}
+		}
+		var question = -1;
+		for (var j = index - 1; j >= 0; j--) {
+			if (messages[j].role === 'user') {
+				question = j;
+				break;
+			}
+		}
+		if (index === -1 || question === -1) {
+			return;
+		}
+		var text = messages[question].content;
+		state.messages = messages.slice(0, question);
+		saveState(state);
+		renderAll();
+		sendText(text);
+	}
+
+	function userQuestions() {
+		return (loadState().messages || []).filter(function (message) {
+			return message.role === 'user' && message.content;
+		}).map(function (message) {
+			return message.content;
+		});
+	}
+
+	function updateCounter() {
+		var counter = $('#etl-assistant-counter');
+		var length = (input.val() || '').length;
+		var over = length > MESSAGE_LIMIT;
+		counter.toggleClass('is-over', over).prop('hidden', length < COUNTER_FROM)
+			.text(length.toLocaleString() + ' / ' + MESSAGE_LIMIT.toLocaleString());
+		if (!busy) {
+			sendBtn.prop('disabled', over);
+		}
+	}
+
+	function setBusy(on) {
+		busy = on;
+		input.prop('disabled', on);
+		sendBtn.prop('disabled', false).toggleClass('is-stop', on)
+			.attr('aria-label', on ? t('Stop') : t('Send')).attr('title', on ? t('Stop') : t('Send'));
+		sendBtn.find('i').toggleClass('fa-paper-plane', !on).toggleClass('fa-stop', on);
+		if (!on) {
+			updateCounter();
+		}
+	}
+
+	function exportConversation() {
+		var state = loadState();
+		var lines = ['# ' + t('Conversation with the ETL assistant'), ''];
+		var name = $('#etl_name').val();
+		if (name) {
+			lines.push('**' + t('Workspace') + ':** ' + name, '');
+		}
+		(state.messages || []).forEach(function (message) {
+			if (message.role === 'user') {
+				lines.push('**' + t('You') + ':** ' + (message.content || ''), '');
+			} else if (message.role === 'assistant') {
+				lines.push('**' + t('Assistant') + ':** ' + assistantMarkdown(message), '');
+				if (message.status) {
+					lines.push('_' + message.status + '_', '');
+				}
+			} else if (message.role === 'error') {
+				lines.push('> ' + (message.content || ''), '');
+			}
+		});
+		var blob = new Blob([lines.join('\n')], {type: 'text/markdown;charset=utf-8'});
+		var link = document.createElement('a');
+		link.href = URL.createObjectURL(blob);
+		link.download = 'asistente-etl-' + ($('#etl_id').val() || 'nuevo') + '.md';
+		document.body.appendChild(link);
+		link.click();
+		setTimeout(function () {
+			URL.revokeObjectURL(link.href);
+			link.remove();
+		}, 0);
 	}
 
 	function highlightAliases(aliases, on) {
@@ -171,6 +412,7 @@
 			row.addClass('pl-assistant__row--user');
 			avatar.append($('<i class="fa fa-user"></i>'));
 			body.append($('<div class="pl-assistant__bubble pl-assistant__bubble--user"></div>').text(message.content || ''));
+			body.append(messageTools(message));
 		} else if (message.role === 'error') {
 			avatar.append($('<i class="fa fa-exclamation"></i>'));
 			var errorBubble = $('<div class="pl-assistant__bubble pl-assistant__bubble--error"></div>').text(message.content || '');
@@ -189,6 +431,7 @@
 				bubble.append('<span class="pl-assistant__typing" aria-hidden="true"><span></span><span></span><span></span></span>');
 			} else {
 				bubble.html(renderMarkdown(message.content || ''));
+				decorateAliases(bubble);
 			}
 			body.append(bubble);
 			if (message.summary && message.summary.length) {
@@ -225,6 +468,11 @@
 			}
 			if (message.status) {
 				body.append($('<div class="pl-assistant__status"></div>').text(message.status));
+			}
+			if (!message.typing) {
+				// Solo la última respuesta se puede regenerar.
+				messagesEl.find('.js-regenerate').remove();
+				body.append(messageTools(message));
 			}
 		}
 		row.append(avatar).append(body);
@@ -281,8 +529,17 @@
 		var state = loadState();
 		var items = [];
 		(state.messages || []).forEach(function (message) {
-			if (message.role === 'user' || message.role === 'assistant') {
-				items.push({role: message.role, content: message.content || ''});
+			if (message.role === 'user') {
+				items.push({role: 'user', content: message.content || ''});
+			} else if (message.role === 'assistant') {
+				// Lo que propuso y qué hizo el usuario con ello, para que el modelo no lo suponga.
+				var status = message.settled || (message.proposal ? 'pending' : '');
+				items.push({
+					role: 'assistant',
+					content: message.content || '',
+					summary: message.summary || [],
+					status: status
+				});
 			}
 		});
 		return items.slice(-17);
@@ -297,21 +554,32 @@
 			return {nodes: nodes, edges: edges, selected: null};
 		}
 		var counter = 1;
+		var seen = {};
 		canvasView.getFigures().each(function (i, figure) {
 			if (figure instanceof draw2d.Connection) {
 				return;
 			}
-			var alias = 'n' + counter;
-			counter += 1;
+			// El alias es el id visible en la cabecera del nodo (NodeHeader.js)
+			var alias = figure.etlAlias;
+			if (!alias || seen[alias]) {
+				while (seen['n' + counter]) {
+					counter += 1;
+				}
+				alias = 'n' + counter;
+			}
+			seen[alias] = true;
 			localAlias[figure.id] = alias;
 			var parameters = {};
 			var schema = [];
 			var schemaold = [];
+			// Estado de la rueda: sin configurar (no hay tarea) o configuración que no encaja.
+			var status = 'unconfigured';
 			for (var k = 0; k < jsonParams.length; k++) {
 				if (jsonParams[k].id === figure.id) {
 					parameters = (jsonParams[k].parameters && jsonParams[k].parameters[0]) || {};
 					schema = jsonParams[k].schema || [];
 					schemaold = jsonParams[k]['schema-old'] || [];
+					status = jsonParams[k]._schemaValid === false ? 'invalid' : '';
 				}
 			}
 			var typeName = figure.NAME || figure.cssClass;
@@ -322,7 +590,10 @@
 				label: (figure.classLabel && figure.classLabel.getText) ? figure.classLabel.getText() : typeName,
 				parameters: parameters,
 				schema: schema,
-				schemaold: schemaold
+				schemaold: schemaold,
+				status: status,
+				x: Math.round(figure.getX ? figure.getX() : (figure.x || 0)),
+				y: Math.round(figure.getY ? figure.getY() : (figure.y || 0))
 			});
 		});
 		canvasView.getLines().each(function (i, line) {
@@ -352,7 +623,15 @@
 		if (selectedFigure && localAlias[selectedFigure.id]) {
 			selected = localAlias[selectedFigure.id];
 		}
-		return {nodes: nodes, edges: edges, selected: selected, aliasOfId: localAlias};
+		// Siguiente id libre: el editor no reutiliza los de nodos borrados (NodeHeader.js).
+		var top = canvasView._etlAliasTop || 0;
+		Object.keys(seen).forEach(function (alias) {
+			var number = parseInt(alias.slice(1), 10);
+			if (number > top) {
+				top = number;
+			}
+		});
+		return {nodes: nodes, edges: edges, selected: selected, aliasOfId: localAlias, nextAlias: 'n' + (top + 1)};
 	}
 
 	function updateContext() {
@@ -638,25 +917,44 @@
 		return bar;
 	}
 
+	function newId() {
+		return 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2);
+	}
+
 	function sendText(text) {
 		text = (text || '').trim();
 		if (!text || busy) {
 			return;
 		}
+		if (text.length > MESSAGE_LIMIT) {
+			updateCounter();
+			return;
+		}
+		recall = -1;
 		var summary = canvasSummary();
 		var types = {};
 		summary.nodes.forEach(function (node) {
 			types[node.alias] = node.type;
 		});
-		remember({role: 'user', content: text}, {types: types, aliasMap: invertAlias(summary)});
-		appendMessage({role: 'user', content: text});
+		var question = {id: newId(), role: 'user', content: text};
+		remember(question, {types: types, aliasMap: invertAlias(summary)});
+		appendMessage(question);
 		setExamplesVisible(false);
 		input.val('').css('height', 'auto');
-		busy = true;
-		sendBtn.prop('disabled', true);
-		input.prop('disabled', true);
+		updateCounter();
+		setBusy(true);
 		var typing = appendMessage({role: 'assistant', typing: true, content: ''});
-		$.ajax({
+		var started = Date.now();
+		var elapsed = $('<span class="pl-assistant__elapsed"></span>');
+		typing.find('.pl-assistant__bubble').append(elapsed);
+		var timer = setInterval(function () {
+			var seconds = Math.round((Date.now() - started) / 1000);
+			if (seconds >= 3) {
+				elapsed.text(t('Thinking…') + ' ' + seconds + ' s');
+			}
+		}, 1000);
+		var stopped = false;
+		currentXhr = $.ajax({
 			type: 'POST',
 			url: '/gvsigonline/etl/etl_assistant/',
 			contentType: 'application/json',
@@ -666,7 +964,8 @@
 				canvas: {
 					nodes: summary.nodes,
 					edges: summary.edges,
-					selected: summary.selected
+					selected: summary.selected,
+					next_alias: summary.nextAlias
 				},
 				workspace_id: $('#etl_id').val() || null
 			}),
@@ -679,7 +978,7 @@
 				var mergedTypes = typesFromProposal(proposal, types);
 				var actions = null;
 				var map = invertAlias(summary);
-				var messageId = 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2);
+				var messageId = newId();
 				if (proposal && !response.error) {
 					if (response.needs_confirmation) {
 						actions = actionBar(proposal, true, messageId);
@@ -710,10 +1009,12 @@
 				stored.actions = actions;
 				appendMessage(stored, mergedTypes);
 			},
-			error: function (xhr) {
+			error: function (xhr, textStatus) {
 				typing.remove();
 				var readable = t('The assistant could not be reached. Try again.');
-				if (xhr.status === 403) {
+				if (stopped || textStatus === 'abort') {
+					readable = t('Stopped. The canvas has not changed.');
+				} else if (xhr.status === 403) {
 					readable = t('You are not allowed to use the assistant on this workspace.');
 				}
 				var errorMessage = {role: 'error', content: readable, retry: text};
@@ -721,12 +1022,22 @@
 				appendMessage(errorMessage);
 			},
 			complete: function () {
-				busy = false;
-				sendBtn.prop('disabled', false);
-				input.prop('disabled', false);
+				clearInterval(timer);
+				currentXhr = null;
+				setBusy(false);
 				input.focus();
 			}
 		});
+		currentXhr.etlStop = function () {
+			stopped = true;
+			currentXhr.abort();
+		};
+	}
+
+	function stopRequest() {
+		if (currentXhr && currentXhr.etlStop) {
+			currentXhr.etlStop();
+		}
 	}
 
 	function invertAlias(summary) {
@@ -766,6 +1077,13 @@
 			return;
 		}
 		messagesEl = $('#etl-assistant-messages');
+		if (!$('#etl_id').val()) {
+			// Workspace nuevo: no se arrastra la conversación de otro workspace nuevo anterior.
+			try {
+				sessionStorage.removeItem(workspaceKey());
+			} catch (e) {
+			}
+		}
 		input = $('#etl-assistant-input');
 		examplesEl = $('#etl-assistant-examples');
 		contextEl = $('#etl-assistant-context');
@@ -779,26 +1097,72 @@
 			setOpen(false);
 		});
 		$('#etl-assistant-clear').on('click', function () {
-			saveState({messages: []});
-			aliasMap = {};
-			renderAll();
+			if (!(loadState().messages || []).length || window.confirm(t('Delete the whole conversation?'))) {
+				saveState({messages: []});
+				aliasMap = {};
+				renderAll();
+			}
+		});
+		$('#etl-assistant-export').on('click', function () {
+			if ((loadState().messages || []).length) {
+				exportConversation();
+			}
+		});
+		messagesEl.on('mouseenter', '.pl-assistant__alias', function () {
+			highlightAliases([$(this).attr('data-alias')], true);
+		}).on('mouseleave', '.pl-assistant__alias', function () {
+			highlightAliases([$(this).attr('data-alias')], false);
+		}).on('click keydown', '.pl-assistant__alias', function (event) {
+			if (event.type === 'keydown' && event.key !== 'Enter' && event.key !== ' ') {
+				return;
+			}
+			event.preventDefault();
+			focusAlias($(this).attr('data-alias'));
 		});
 		examplesEl.on('click', '.pl-assistant__example', function () {
 			sendText($(this).attr('data-example'));
 		});
 		$('#etl-assistant-form').on('submit', function (event) {
 			event.preventDefault();
+			if (busy) {
+				stopRequest();
+				return;
+			}
 			sendText(input.val());
 		});
 		input.on('keydown', function (event) {
 			if (event.key === 'Enter' && !event.shiftKey) {
 				event.preventDefault();
 				sendText(input.val());
+				return;
+			}
+			// ↑ / ↓ recorren las preguntas anteriores, como en una terminal.
+			var atStart = this.selectionStart === 0 && this.selectionEnd === 0;
+			if (event.key === 'ArrowUp' && (!input.val() || (recall !== -1 && atStart))) {
+				var questions = userQuestions();
+				if (!questions.length) {
+					return;
+				}
+				event.preventDefault();
+				recall = recall === -1 ? questions.length - 1 : Math.max(0, recall - 1);
+				input.val(questions[recall]).trigger('input');
+				this.setSelectionRange(0, 0);
+			} else if (event.key === 'ArrowDown' && recall !== -1 && this.selectionStart === input.val().length) {
+				var list = userQuestions();
+				event.preventDefault();
+				recall += 1;
+				if (recall >= list.length) {
+					recall = -1;
+					input.val('').trigger('input');
+				} else {
+					input.val(list[recall]).trigger('input');
+				}
 			}
 		});
 		input.on('input', function () {
 			this.style.height = 'auto';
 			this.style.height = Math.min(this.scrollHeight, 140) + 'px';
+			updateCounter();
 		});
 		$(document).on('keydown', function (event) {
 			if (event.key !== 'Escape' || panel.hasClass('is-collapsed')) {

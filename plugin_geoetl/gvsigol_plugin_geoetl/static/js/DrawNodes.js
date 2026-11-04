@@ -213,6 +213,10 @@ function drawNodes(cnv, options) {
 					break;
 				}
 			}
+			// conserva el id corto guardado (o el nN que propone el asistente)
+			if (typeof etlAliasFromDocument === 'function' && etlAliasFromDocument(cnv[o])) {
+				figure.etlAlias = etlAliasFromDocument(cnv[o]);
+			}
 			var oldId = cnv[o].id;
 			restored.push({
 				oldId: oldId,

@@ -1,0 +1,59 @@
+type: trans_RasterIndex
+label: Spectral Index
+family: transform
+summary: Añade a un ráster multibanda una banda nueva con un índice espectral. Conserva las bandas
+  originales, de modo que la nueva banda se usa después como cualquier otra variable en Sample
+  Raster y Random Forest. Para varios índices se encadenan varios nodos. Las bandas se indican
+  por el nombre que se les dio en Raster (GeoTIFF). En evi, los valores fuera de [-1, 1] quedan sin
+  dato. Una ortofoto no es reflectancia calibrada, así que el índice sirve para clasificar y no como medida física.
+parameters:
+- name: index
+  required: true
+  summary: Índice a calcular. ndvi (NIR, rojo), ndwi (verde, NIR), ndbi (SWIR, NIR), savi (NIR,
+    rojo), evi (NIR, rojo, azul), brightness (media de todas las bandas) o nd (diferencia
+    normalizada de dos bandas A y B).
+  choices:
+  - ndvi
+  - ndwi
+  - ndbi
+  - savi
+  - evi
+  - brightness
+  - nd
+- name: band-1
+  summary: Nombre de la primera banda del índice, en el orden en que se citan arriba (vacío en
+    brightness).
+- name: band-2
+  summary: Nombre de la segunda banda del índice (vacío en brightness).
+- name: band-3
+  summary: Nombre de la tercera banda; solo se usa en evi (azul).
+- name: name
+  summary: Nombre de la banda nueva. Por defecto el del índice.
+- name: reflectance
+  summary: Conversión de los valores a reflectancia antes de calcular, reflectancia = (valor + offset) /
+    escala. none los usa tal cual; uint8 divide por 255; sentinel2_l2a es (valor - 1000) / 10000 (desde
+    2022); sentinel2_l2a_pre2022 es valor / 10000; landsat_c2_l2 es valor * 0.0000275 - 0.2; custom usa
+    scale y offset. Por defecto none.
+  choices:
+  - none
+  - uint8
+  - sentinel2_l2a
+  - sentinel2_l2a_pre2022
+  - landsat_c2_l2
+  - custom
+- name: scale
+  summary: Con reflectance=custom, valor que equivale al 100 % de reflectancia (por defecto 1).
+- name: offset
+  summary: Con reflectance=custom, valor que se suma antes de dividir por la escala (por defecto 0).
+- name: savi-l
+  summary: Factor de ajuste del suelo de savi, de 0 a 1 (por defecto 0.5).
+ports:
+- direction: input
+  label: Raster
+  kind: raster
+- direction: output
+  label: Raster
+  kind: raster
+connection_types: []
+connection_parameter: null
+sql_parameters: []

@@ -1,0 +1,38 @@
+type: trans_RasterClip
+label: Clip Raster
+family: transform
+summary: Recorta un ráster con una máscara de polígonos (una capa vectorial) y, si se indica, cambia a la
+  vez el tamaño de píxel. La entrada 0 es el ráster y la 1 la tabla con los polígonos de la máscara, que
+  se reproyectan al sistema del ráster. Conserva el tipo de dato y las bandas (una ortofoto de 8 bits
+  sigue siendo de 8 bits) y los nombres de banda. Sirve para quedarse con la zona de estudio y aligerar
+  imágenes enormes antes de clasificar; un ráster clasificado usa siempre vecino más próximo al cambiar
+  de tamaño.
+parameters:
+- name: mode
+  summary: polygon deja sin dato lo que queda fuera de los polígonos; bbox solo recorta al rectángulo
+    que los contiene (por defecto polygon).
+  choices:
+  - polygon
+  - bbox
+- name: pixel-size
+  summary: Tamaño de píxel del resultado en unidades del sistema de coordenadas del ráster (metros en
+    UTM). Vacío = el del original. Un tamaño mayor reduce la imagen (1 en una ortofoto de 25 cm da 16
+    veces menos píxeles).
+- name: resampling
+  summary: Método al cambiar el tamaño de píxel (por defecto average, el mejor para reducir).
+  choices:
+  - average
+  - bilinear
+  - nearest
+ports:
+- direction: input
+  label: Raster
+  kind: raster
+- direction: input
+  label: Mask
+- direction: output
+  label: Raster
+  kind: raster
+connection_types: []
+connection_parameter: null
+sql_parameters: []

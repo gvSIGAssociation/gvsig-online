@@ -10,11 +10,18 @@ import re
 _PKG = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TABLESHAPE_PATH = os.path.join(_PKG, 'static', 'js', 'TableShape.js')
 PALETTE_PATH = os.path.join(_PKG, 'templates', 'etl.html')
+PREDICTIVE_PATH = os.path.join(_PKG, 'static', 'js', 'PredictiveShapes.js')
 
 _NODE_RE = re.compile(
     r'^([A-Za-z_][A-Za-z0-9_]*) = draw2d\.shape\.layout\.VerticalLayout\.extend\(\{',
     re.M,
 )
+# Nodos definidos con la fábrica de PredictiveShapes.js: defineEtlNode({ name: 'x', ... })
+_FACTORY_RE = re.compile(
+    r"^defineEtlNode\(\{\s*\n\s*name:\s*'([A-Za-z_][A-Za-z0-9_]*)'",
+    re.M,
+)
+_FACTORY_SECTION = ('/* Definición de los nodos', '/* Manejadores de esquema')
 _PORT_RE = re.compile(r'createPort\(\s*["\'](input|output)["\']\s*\)')
 _PARAM_RE = re.compile(r'"parameters"\s*:\s*\[')
 _KEY_RE = re.compile(r"""['"]([A-Za-z0-9_-]+)['"]\s*:""")
@@ -29,9 +36,27 @@ _SHAPE_RE = re.compile(
 _TRANS_RE = re.compile(r"""\{%\s*trans\s+(['"])(.*?)\1\s*%\}""", re.S)
 
 
+def read_predictive_nodes(path=None):
+    """Sección de PredictiveShapes.js con las llamadas a defineEtlNode (sin la fábrica)."""
+    try:
+        with open(path or PREDICTIVE_PATH, 'r', encoding='utf-8') as handle:
+            text = handle.read()
+    except OSError:
+        return ''
+    start = text.find(_FACTORY_SECTION[0])
+    end = text.find(_FACTORY_SECTION[1])
+    if start == -1 or end == -1 or end < start:
+        return ''
+    return text[start:end]
+
+
 def read_tableshape(path=None):
+    """Definiciones de nodos del editor: TableShape.js y, si no se da otra ruta, los nodos predictivos."""
     with open(path or TABLESHAPE_PATH, 'r', encoding='utf-8') as handle:
-        return handle.read()
+        source = handle.read()
+    if path is None:
+        source += '\n' + read_predictive_nodes()
+    return source
 
 
 def read_palette(path=None):
@@ -41,12 +66,13 @@ def read_palette(path=None):
 
 def split_node_blocks(source):
     """Devuelve [(nombre, bloque), ...] en el orden del fichero."""
-    matches = list(_NODE_RE.finditer(source))
+    matches = [(m.start(), m.group(1)) for m in _NODE_RE.finditer(source)]
+    matches += [(m.start(), m.group(1)) for m in _FACTORY_RE.finditer(source)]
+    matches.sort()
     blocks = []
-    for index, match in enumerate(matches):
-        start = match.start()
-        end = matches[index + 1].start() if index + 1 < len(matches) else len(source)
-        blocks.append((match.group(1), source[start:end]))
+    for index, (start, name) in enumerate(matches):
+        end = matches[index + 1][0] if index + 1 < len(matches) else len(source)
+        blocks.append((name, source[start:end]))
     return blocks
 
 
@@ -57,7 +83,71 @@ def node_block(source, type_name):
     raise KeyError(type_name)
 
 
+def _is_factory(block):
+    return bool(_FACTORY_RE.match(block))
+
+
+def _balanced(text, open_index, open_char, close_char):
+    """Texto desde open_index hasta su cierre, respetando cadenas."""
+    depth = 0
+    quote = None
+    escaped = False
+    for index in range(open_index, len(text)):
+        char = text[index]
+        if quote:
+            if escaped:
+                escaped = False
+            elif char == '\\':
+                escaped = True
+            elif char == quote:
+                quote = None
+            continue
+        if char in ('"', "'"):
+            quote = char
+        elif char == open_char:
+            depth += 1
+        elif char == close_char:
+            depth -= 1
+            if depth == 0:
+                return text[open_index:index + 1]
+    return text[open_index:]
+
+
+def _factory_array(block, key):
+    match = re.search(r'\b' + re.escape(key) + r':\s*\[', block)
+    if not match:
+        return ''
+    return _balanced(block, match.end() - 1, '[', ']')
+
+
+def _factory_ports(block):
+    """Puertos de un nodo de la fábrica: [{direction, label, kind}], entradas primero."""
+    ports = []
+    for key, direction in (('inputs', 'input'), ('outputs', 'output')):
+        array = _factory_array(block, key)
+        position = 1
+        while True:
+            brace = array.find('{', position)
+            if brace == -1:
+                break
+            item = _balanced(array, brace, '{', '}')
+            position = brace + len(item)
+            label = re.search(r"gettext\(\s*['\"]([^'\"]+)['\"]", item)
+            kind = re.search(r"kind:\s*['\"]([A-Za-z]+)['\"]", item)
+            ports.append({
+                'direction': direction,
+                'label': label.group(1) if label else '',
+                'kind': kind.group(1) if kind else 'table',
+            })
+    return ports
+
+
 def count_ports(block):
+    if _is_factory(block):
+        ports = _factory_ports(block)
+        return (sum(1 for p in ports if p['direction'] == 'input'),
+                sum(1 for p in ports if p['direction'] == 'output'))
+
     inputs = 0
     outputs = 0
     for match in _PORT_RE.finditer(block):
@@ -106,6 +196,8 @@ def _object_keys(text, open_brace):
 
 def parameter_keys(block):
     """Claves del último objeto `parameters` anterior a addEntity (el de Aceptar)."""
+    if _is_factory(block):
+        return re.findall(r"['\"]([^'\"]+)['\"]", _factory_array(block, 'paramKeys'))
     head = block.split('addEntity:', 1)[0]
     found = []
     merged_extra = False
@@ -163,6 +255,12 @@ def _add_entity_source(block):
 
 def port_specs(block):
     """Puertos en el orden de createPort dentro de addEntity, con su etiqueta."""
+    if _is_factory(block):
+        return [
+            dict({'direction': p['direction'], 'label': p['label']},
+                 **({'kind': p['kind']} if p['kind'] != 'table' else {}))
+            for p in _factory_ports(block)
+        ]
     source = _add_entity_source(block) or block
     labels = {}
     for match in re.finditer(

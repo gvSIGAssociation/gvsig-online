@@ -1,0 +1,19 @@
+type: input_Model
+label: Saved Model
+family: input
+summary: Entrega un modelo guardado antes con Save Model, sin volver a entrenarlo. Se conecta a la
+  entrada de modelo de Predict Raster o de Predict Table. Solo se pueden usar los modelos del propio
+  usuario (o del propietario del workspace al ejecutarlo).
+parameters:
+- name: model-name
+  required: true
+  summary: Nombre del modelo guardado.
+- name: model-version
+  summary: Versión del modelo, un número o latest para la más reciente (por defecto latest).
+ports:
+- direction: output
+  label: Model
+  kind: model
+connection_types: []
+connection_parameter: null
+sql_parameters: []

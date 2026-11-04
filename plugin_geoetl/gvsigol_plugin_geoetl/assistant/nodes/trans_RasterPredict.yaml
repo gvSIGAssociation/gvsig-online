@@ -1,0 +1,28 @@
+type: trans_RasterPredict
+label: Predict Raster
+family: transform
+summary: Aplica un modelo entrenado a todos los píxeles de un ráster. La entrada 0 es el ráster y
+  la 1 el modelo (salida 1 de Random Forest). El ráster debe tener las bandas con las que se
+  entrenó el modelo. La salida 0 es un ráster con la clase (o el valor) predicho por píxel. La
+  salida 1 es un ráster de seguridad del modelo (0-1, proporción de votos de los árboles para la clase
+  elegida, que no es una probabilidad calibrada; en regresión, la dispersión entre árboles) que se genera siempre y solo se conecta si hace falta, por ejemplo
+  a Publish Raster. No tiene parámetros.
+parameters:
+- name: configured
+  summary: Marca interna; poner "true".
+ports:
+- direction: input
+  label: Raster
+  kind: raster
+- direction: input
+  label: Model
+  kind: model
+- direction: output
+  label: Result
+  kind: raster
+- direction: output
+  label: Certainty
+  kind: raster
+connection_types: []
+connection_parameter: null
+sql_parameters: []

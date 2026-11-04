@@ -1,0 +1,33 @@
+type: trans_AreaEstimate
+label: Estimate Areas
+family: transform
+summary: Estima la superficie real de cada clase de un ráster clasificado corrigiendo los errores del mapa
+  con puntos de referencia de una muestra aleatoria estratificada (Olofsson et al., 2014), con su intervalo
+  de confianza y las exactitudes del usuario y del productor. La entrada 0 es el ráster clasificado (en un
+  sistema proyectado) y la 1 los puntos con la clase real. La salida 0 es la tabla de superficies (class,
+  map_area, estimated_area, se_area, ci_low, ci_high, users_accuracy, users_ci, producers_accuracy,
+  producers_ci, samples, reference_samples; superficies en unidades del sistema al cuadrado) y la 1 el
+  informe con la exactitud global y su intervalo.
+parameters:
+- name: reference-attr
+  required: true
+  summary: Columna de los puntos con la clase real (la columna reference de Stratified Sample).
+- name: confidence-level
+  summary: Nivel de confianza de los intervalos (por defecto 0.95).
+  choices:
+  - '0.90'
+  - '0.95'
+  - '0.99'
+ports:
+- direction: input
+  label: Raster
+  kind: raster
+- direction: input
+  label: Reference points
+- direction: output
+  label: Areas
+- direction: output
+  label: Report
+connection_types: []
+connection_parameter: null
+sql_parameters: []

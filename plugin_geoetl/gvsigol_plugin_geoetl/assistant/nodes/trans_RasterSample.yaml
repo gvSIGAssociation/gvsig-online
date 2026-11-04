@@ -1,0 +1,27 @@
+type: trans_RasterSample
+label: Sample Raster
+family: transform
+summary: Extrae los píxeles de un ráster que caen dentro de polígonos de muestra con clase. La
+  entrada 0 es el ráster y la 1 la tabla de polígonos de muestra. La salida es una tabla con
+  una fila por píxel, una columna por banda y la columna de clase; sirve para entrenar con
+  Random Forest.
+parameters:
+- name: class-attr
+  required: true
+  summary: Columna de la tabla de muestras con la clase de cada polígono. No puede llamarse
+    como una banda.
+- name: max-per-class
+  summary: Máximo de píxeles por clase, para equilibrar clases muy desiguales. Vacío = sin límite.
+- name: seed
+  summary: Semilla aleatoria (por defecto 42).
+ports:
+- direction: input
+  label: Raster
+  kind: raster
+- direction: input
+  label: Samples
+- direction: output
+  label: Pixels
+connection_types: []
+connection_parameter: null
+sql_parameters: []

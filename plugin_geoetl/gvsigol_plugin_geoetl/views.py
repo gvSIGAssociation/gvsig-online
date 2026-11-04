@@ -28,7 +28,7 @@ from urllib import response
 from django.shortcuts import HttpResponse, render, redirect
 
 logger = logging.getLogger(__name__)
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseNotAllowed
 from django.contrib.auth.decorators import login_required
 from gvsigol_auth.utils import superuser_required, staff_required
 from gvsigol_auth import auth_backend
@@ -1038,6 +1038,80 @@ def etl_schema_csv(request):
             response = etl_schema.get_schema_csv(jsParams['parameters'][0])
 
             return HttpResponse(json.dumps(response), content_type="application/json")
+
+@login_required()
+@staff_required
+def etl_schema_raster(request):
+    """Bandas, CRS y tamaño de un GeoTIFF para el diálogo de la entrada ráster."""
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    from . import etl_raster
+    try:
+        params = json.loads(request.POST['jsonParamsRaster'])['parameters'][0]
+        if not isinstance(params, dict):
+            raise TypeError
+    except (KeyError, ValueError, IndexError, TypeError):
+        return JsonResponse({'error': 'Petición no válida.'}, status=400)
+    try:
+        return JsonResponse(etl_raster.raster_schema(params))
+    except ValueError as e:
+        return JsonResponse({'error': str(e)}, status=400)
+    except Exception as e:
+        logger.exception('Error leyendo el ráster')
+        return JsonResponse({'error': 'No se puede leer el ráster: %s' % e}, status=400)
+
+
+@login_required()
+@staff_required
+def etl_raster_publish_targets(request):
+    """Workspaces y grupos de capas donde el usuario puede publicar un ráster."""
+    from . import etl_raster_publish
+    return JsonResponse(etl_raster_publish.publish_targets(request.user))
+
+
+def _models_target_owner(request):
+    """Propietario cuyos modelos se consultan: el propio usuario; un superusuario puede indicar otro."""
+    requested = request.GET.get('owner') or request.POST.get('owner')
+    if requested and requested != request.user.username and request.user.is_superuser:
+        return requested
+    return request.user.username
+
+
+@login_required()
+@staff_required
+def etl_models_list(request):
+    """Modelos predictivos guardados del usuario (con el resumen de cada versión)."""
+    from . import etl_models
+    if request.method != 'GET':
+        return HttpResponseNotAllowed(['GET'])
+    try:
+        return JsonResponse({'models': etl_models.list_models(_models_target_owner(request))})
+    except etl_models.ModelError as e:
+        return JsonResponse({'error': str(e)}, status=400)
+    except Exception:
+        logger.exception('Error listando los modelos guardados')
+        return JsonResponse({'error': 'No se pueden listar los modelos guardados.'}, status=500)
+
+
+@login_required()
+@staff_required
+def etl_models_delete(request):
+    """Borra un modelo guardado (o una de sus versiones). Solo los del propio usuario, o cualquiera un superusuario."""
+    from . import etl_models
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    name = request.POST.get('name')
+    if not name:
+        return JsonResponse({'error': 'Petición no válida.'}, status=400)
+    try:
+        deleted = etl_models.delete_model(_models_target_owner(request), name, request.POST.get('version') or None)
+        return JsonResponse({'deleted': deleted})
+    except etl_models.ModelError as e:
+        return JsonResponse({'error': str(e)}, status=400)
+    except Exception:
+        logger.exception('Error borrando un modelo guardado')
+        return JsonResponse({'error': 'No se puede borrar el modelo.'}, status=500)
+
 
 @login_required()
 @staff_required

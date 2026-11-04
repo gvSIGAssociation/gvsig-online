@@ -33,13 +33,32 @@ def port_count(spec, direction):
     return sum(1 for port in spec.get('ports') or [] if port.get('direction') == direction)
 
 
+def port_kind(spec, direction, index):
+    """Tipo de dato (table, raster o model) del puerto `index` de una dirección; table por defecto."""
+    ports = [port for port in spec.get('ports') or [] if port.get('direction') == direction]
+    if 0 <= index < len(ports):
+        return ports[index].get('kind') or 'table'
+    return 'table'
+
+
+def first_sentence(text, limit=160):
+    """Primera frase de un resumen, para el índice del prompt (la ficha completa va en get_node_specs)."""
+    text = ' '.join((text or '').split())
+    cut = text.find('. ')
+    if cut != -1:
+        text = text[:cut + 1]
+    if len(text) > limit:
+        text = text[:limit - 1].rstrip() + '…'
+    return text
+
+
 def index_lines(catalog):
-    """Índice corto para el prompt: tipo y una línea."""
+    """Índice corto para el prompt: tipo, nombre visible y la primera frase del resumen."""
     lines = []
     for type_name in sorted(catalog):
         spec = catalog[type_name]
-        summary = (spec.get('summary') or '').replace('\n', ' ')
-        lines.append('%s: %s' % (type_name, summary))
+        label = spec.get('label') or type_name
+        lines.append('%s (%s): %s' % (type_name, label, first_sentence(spec.get('summary'))))
     return lines
 
 

@@ -10,7 +10,7 @@ from .models import (ETLworkspaces, ETLstatus, cadastral_requests, SendEmails, S
 from gvsigol_services.models import Connection
 from gvsigol import settings
 
-from . import etl_tasks, views
+from . import etl_tasks, views, etl_raster
 from .settings import GEOETL_DB, ETL_CANVAS_MAX_DELIVERIES
 
 import psycopg2
@@ -168,6 +168,27 @@ def _run_canvas_background_impl(kwargs):
                 statusModel.visualizer_session_id = None
                 statusModel.save()
         
+        # Un nodo que no se ha aceptado en el editor llega como null: se avisa en lugar de romper el motor
+        # (antes la tarea fallaba al instante y el editor se quedaba en "Running" para siempre).
+        if any(item is None for item in jsonCanvas):
+            statusModel.message = ('ERROR: Hay nodos sin configurar. Abre los nodos cuya rueda esté en rojo, '
+                                   'revisa sus parámetros y pulsa Aceptar.')
+            statusModel.status = 'Error'
+            statusModel.save()
+            logger.error('ETL canvas con nodos sin configurar (elementos null)')
+            continue
+
+        # Propietario de los modelos guardados: el dueño del workspace (quien lo comparte da permiso de
+        # ejecución) o, en un canvas sin guardar, el usuario que ejecuta.
+        models_owner = username
+        if id_ws:
+            try:
+                workspace_owner = ETLworkspaces.objects.filter(id=id_ws).values_list('username', flat=True).first()
+                if workspace_owner:
+                    models_owner = workspace_owner
+            except Exception:
+                logger.exception('No se pudo determinar el propietario del workspace %s', id_ws)
+
         nodes=[]
         edges =[]
 
@@ -274,6 +295,8 @@ def _run_canvas_background_impl(kwargs):
                                     pass
 
                             parameters = copy.deepcopy(parameters_copy)
+                            if n[1]['type'] in ('input_Model', 'output_ModelSave'):
+                                parameters['_models_owner'] = models_owner
 
                             if params and not statusModel.name.startswith('current_canvas'):
                                 if json_user_params !={}:
@@ -372,6 +395,9 @@ def _run_canvas_background_impl(kwargs):
                                     if not parameters.get('layer-group', '').strip():
                                         parameters['layer-group'] = 'Visualizer'
 
+                                if n[1]['type'] == 'output_RasterPublish':
+                                    parameters['_username'] = username
+
                                 result = method_to_call(parameters)
                                 tables_list_name.append(result)
                                 
@@ -379,6 +405,9 @@ def _run_canvas_background_impl(kwargs):
                                     n.append(result)
                                     
                                     for table_name in result:
+                                        # Los ráster y modelos viajan como ruta de fichero: los limpia clean_old_temp_tables
+                                        if etl_raster.is_artifact_ref(table_name):
+                                            continue
                                         TempETLTable.objects.update_or_create(table_name=table_name)
             
             if move:
@@ -497,6 +526,11 @@ def delete_tables(nodes):
                 tables.append(n)
 
     for tbl in tables:
+
+        # Ráster y modelos viajan como ruta de fichero, no como tabla
+        if etl_raster.is_artifact_ref(tbl):
+            etl_raster.remove_artifact(tbl)
+            continue
 
         sqlDrop = sql.SQL('DROP TABLE IF EXISTS {}.{}').format(
             sql.Identifier(GEOETL_DB["schema"]),
@@ -794,6 +828,13 @@ def clean_old_temp_tables():
 
         cursor.close()
         conn_.close()
+
+        try:
+            removed = etl_raster.clean_old_artifacts(ttl_hours)
+            if removed:
+                print(f"Artefactos ráster/modelo eliminados: {removed}")
+        except Exception as e:
+            print(f"Error al limpiar artefactos: {e}")
 
     except Exception as e:
         print(f"Error en la tarea clean_old_temp_tables: {e}")

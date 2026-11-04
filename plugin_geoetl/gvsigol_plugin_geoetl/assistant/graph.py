@@ -3,7 +3,7 @@
 
 import re
 
-from .catalog import port_count
+from .catalog import port_count, port_kind
 
 _ALIAS_RE = re.compile(r'\bn\d+\b')
 _MAX_NODES = 40
@@ -200,6 +200,12 @@ def layout_nodes(nodes, edges):
             node['y'] = 60 + row * 160
 
 
+_COLUMN = 280          # separación horizontal entre columnas del flujo
+_ROW = 160             # separación vertical entre filas
+_NODE_W = 240          # caja aproximada de un nodo para no montar uno sobre otro
+_NODE_H = 140
+
+
 def _layout_patch(ops, canvas_nodes):
     fresh = []
     edges = []
@@ -210,13 +216,75 @@ def _layout_patch(ops, canvas_nodes):
             edges.append(op)
     if not fresh:
         return
-    known = set(canvas_nodes)
-    only_new = []
+    placed = _canvas_positions(canvas_nodes)
+    if not placed:
+        # Sin posiciones del canvas (editor antiguo): solo se ordenan los nodos nuevos entre sí.
+        known = set(canvas_nodes)
+        only_new = []
+        for edge in edges:
+            if edge.get('source') in known or edge.get('target') in known:
+                continue
+            only_new.append({'source': edge.get('source'), 'target': edge.get('target')})
+        layout_nodes(fresh, only_new)
+        return
+    place_near_neighbours(fresh, edges, placed)
+
+
+def place_near_neighbours(fresh, edges, placed):
+    """
+    Coloca cada nodo nuevo a la derecha del nodo del que recibe datos (o a la izquierda del que
+    alimenta) y lo baja de fila mientras choque con otro. ``placed`` es {id: (x, y)} y se amplía.
+    """
+    boxes = list(placed.values())
+    pending = list(fresh)
+    for final_pass in (False, True):
+        progress = True
+        while pending and progress:
+            progress = False
+            for node in list(pending):
+                spot = _spot_for(node['id'], edges, placed)
+                if spot is None and not final_pass:
+                    continue
+                if spot is None:
+                    right = max([x for x, _ in boxes] or [80 - _COLUMN])
+                    spot = (right + _COLUMN, 60)
+                x, y = _free_spot(spot, boxes)
+                node['x'], node['y'] = x, y
+                placed[node['id']] = (x, y)
+                boxes.append((x, y))
+                pending.remove(node)
+                progress = True
+
+
+def _spot_for(node_id, edges, placed):
     for edge in edges:
-        if edge.get('source') in known or edge.get('target') in known:
-            continue
-        only_new.append({'source': edge.get('source'), 'target': edge.get('target')})
-    layout_nodes(fresh, only_new)
+        if edge.get('target') == node_id and edge.get('source') in placed:
+            sx, sy = placed[edge.get('source')]
+            return sx + _COLUMN, sy
+    for edge in edges:
+        if edge.get('source') == node_id and edge.get('target') in placed:
+            tx, ty = placed[edge.get('target')]
+            return max(20, tx - _COLUMN), ty
+    return None
+
+
+def _free_spot(spot, boxes):
+    x, y = int(spot[0]), int(spot[1])
+    for _ in range(50):
+        if not any(abs(x - bx) < _NODE_W and abs(y - by) < _NODE_H for bx, by in boxes):
+            break
+        y += _ROW
+    return x, y
+
+
+def _canvas_positions(canvas_nodes):
+    placed = {}
+    for entry in canvas_nodes.values():
+        x, y = entry.get('x'), entry.get('y')
+        if isinstance(x, (int, float)) and isinstance(y, (int, float)) and not isinstance(x, bool):
+            placed[entry['canvas_id']] = (x, y)
+            placed[entry['alias']] = (x, y)
+    return placed
 
 
 def _clean_graph(raw_nodes, raw_edges, catalog, connections, warnings, removed):
@@ -455,6 +523,14 @@ def _ports_fit(source, target, source_port, target_port, catalog, warnings, sour
     # Un nodo ya presente sin ficha conserva sus conexiones: no se rechaza el puerto.
     if source_spec is None or target_spec is None:
         return True
+    # Tabla, ráster y modelo no se mezclan: el editor también lo impide al conectar.
+    source_kind = port_kind(source_spec, 'output', source_port)
+    target_kind = port_kind(target_spec, 'input', target_port)
+    if source_kind != target_kind:
+        warnings.append(
+            'No se conecta %s (salida %s, tipo %s) con %s (entrada %s, tipo %s): los tipos no coinciden.'
+            % (source_label, source_port, source_kind, target_label, target_port, target_kind))
+        return False
     return True
 
 
@@ -585,6 +661,8 @@ def _canvas_index(canvas):
             'type': node.get('type'),
             'label': node.get('label') or node.get('type'),
             'parameters': node.get('parameters') if isinstance(node.get('parameters'), dict) else {},
+            'x': node.get('x'),
+            'y': node.get('y'),
         }
         index[alias] = entry
         index[canvas_id] = entry

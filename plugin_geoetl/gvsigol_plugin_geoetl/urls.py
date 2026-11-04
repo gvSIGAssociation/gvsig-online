@@ -30,6 +30,10 @@ urlpatterns = [
     path('etl/test_conexion/', views.test_conexion, name='test_conexion'),
     # save_conexion eliminado - las conexiones se gestionan desde gvsigol_services
     path('etl/etl_schema_csv/', views.etl_schema_csv, name='etl_schema_csv'),
+    path('etl/etl_schema_raster/', views.etl_schema_raster, name='etl_schema_raster'),
+    path('etl/etl_raster_publish_targets/', views.etl_raster_publish_targets, name='etl_raster_publish_targets'),
+    path('etl/etl_models_list/', views.etl_models_list, name='etl_models_list'),
+    path('etl/etl_models_delete/', views.etl_models_delete, name='etl_models_delete'),
     path('etl/etl_workspace_list/', views.etl_workspace_list, name='etl_workspace_list'),
     path('etl/etl_workspace_add/', views.etl_workspace_add, name='etl_workspace_add'),
     path('etl/etl_workspace_delete/', views.etl_workspace_delete, name='etl_workspace_delete'),

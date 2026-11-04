@@ -1,0 +1,22 @@
+type: trans_TablePredict
+label: Predict Table
+family: transform
+summary: Aplica un modelo entrenado a cada fila de una tabla (parcelas, puntos, tramos...). La
+  entrada 0 es la tabla y la 1 el modelo (salida 1 de Random Forest o de Saved Model). La tabla debe
+  tener las columnas con las que se entrenó el modelo. La salida es la misma tabla, con su geometría,
+  más la columna de predicción y otra con la confianza (<columna>_confidence). Las filas con valores
+  nulos o no numéricos en las variables se quedan sin predicción.
+parameters:
+- name: column
+  summary: Nombre de la columna de predicción (por defecto prediction). No puede existir ya en la tabla.
+ports:
+- direction: input
+  label: Data
+- direction: input
+  label: Model
+  kind: model
+- direction: output
+  label: Table
+connection_types: []
+connection_parameter: null
+sql_parameters: []

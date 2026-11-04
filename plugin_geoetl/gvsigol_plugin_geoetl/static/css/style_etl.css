@@ -285,6 +285,26 @@
   border-color: #7a5aad !important;
   color: #7a5aad !important;
 }
+/* Raster — outline rosa frambuesa (el color de los puertos ráster) */
+.pl-panel__toolbar .btn-raster {
+  border: 1px solid #c2185b !important;
+  color: #c2185b !important;
+}
+.pl-panel__toolbar .btn-raster:hover {
+  background: #fce4ec !important;
+  border-color: #a0134b !important;
+  color: #a0134b !important;
+}
+/* Predictive — outline índigo */
+.pl-panel__toolbar .btn-predictive {
+  border: 1px solid #5c6bc0 !important;
+  color: #5c6bc0 !important;
+}
+.pl-panel__toolbar .btn-predictive:hover {
+  background: #f1f2fa !important;
+  border-color: #3f4fa0 !important;
+  color: #3f4fa0 !important;
+}
 /* Transformers — outline azul */
 .pl-panel__toolbar .btn-primary {
   border: 1px solid var(--pl-accent) !important;

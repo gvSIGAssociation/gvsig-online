@@ -15,6 +15,7 @@ from gvsigol_plugin_geoetl.assistant.shapes import (
     count_ports,
     node_block,
     palette_labels,
+    parameter_keys,
     read_tableshape,
 )
 
@@ -28,7 +29,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_every_palette_shape_has_a_yaml_spec(self):
         self.assertEqual(set(self.catalog), set(self.labels))
-        self.assertEqual(len(self.catalog), 63)
+        self.assertEqual(len(self.catalog), 79)
 
     def test_parameter_keys_and_port_counts_match_tableshape(self):
         for name in self.labels:
@@ -50,6 +51,34 @@ class CatalogTests(unittest.TestCase):
         geom = self.catalog['trans_FilterGeom']['ports']
         self.assertEqual(sum(1 for port in geom if port['direction'] == 'input'), 1)
         self.assertEqual(sum(1 for port in geom if port['direction'] == 'output'), 6)
+
+    def test_factory_nodes_are_read_from_predictive_shapes(self):
+        # Los nodos de PredictiveShapes.js (defineEtlNode) se leen igual que los de TableShape.js
+        for name, ports in {
+            'input_Raster': ([], ['raster']),
+            'trans_RasterSample': (['raster', 'table'], ['table']),
+            'trans_RandomForest': (['table'], ['table', 'model', 'table']),
+            'trans_RasterPredict': (['raster', 'model'], ['raster', 'raster']),
+            'trans_RasterMajority': (['raster'], ['raster']),
+            'trans_RasterIndex': (['raster'], ['raster']),
+            'trans_ClassAssess': (['raster', 'table'], ['table', 'table']),
+            'trans_RasterClip': (['raster', 'table'], ['raster']),
+            'trans_StratifiedSample': (['raster'], ['table']),
+            'trans_AreaEstimate': (['raster', 'table'], ['table', 'table']),
+            'trans_RasterStack': (['raster', 'raster', 'raster', 'raster'], ['raster']),
+            'trans_TablePredict': (['table', 'model'], ['table']),
+            'output_ModelSave': (['model'], []),
+            'input_Model': ([], ['model']),
+            'trans_RasterPolygonize': (['raster'], ['table']),
+            'output_RasterPublish': (['raster'], []),
+        }.items():
+            spec = self.catalog[name]
+            got_in = [p.get('kind', 'table') for p in spec['ports'] if p['direction'] == 'input']
+            got_out = [p.get('kind', 'table') for p in spec['ports'] if p['direction'] == 'output']
+            self.assertEqual((got_in, got_out), ports, name)
+            block = node_block(self.source, name)
+            self.assertEqual(sorted(p['name'] for p in spec['parameters']),
+                             sorted(parameter_keys(block)), name)
 
     def test_prompt_escapes_braces_and_percents(self):
         text = system_prompt(self.catalog)

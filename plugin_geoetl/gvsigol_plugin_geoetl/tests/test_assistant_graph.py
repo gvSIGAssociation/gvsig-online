@@ -172,6 +172,34 @@ class ValidatorTests(unittest.TestCase):
         self.assertEqual(boolean_port['proposal']['edges'], [])
         self.assertTrue(any('Puerto no válido' in line for line in boolean_port['warnings']))
 
+    def test_port_types_must_match(self):
+        def edges(source, target, source_port, target_port):
+            return validate_proposal({
+                'mode': 'replace',
+                'nodes': [
+                    {'id': 'n1', 'type': source, 'parameters': {}},
+                    {'id': 'n2', 'type': target, 'parameters': {}},
+                ],
+                'edges': [{'source': 'n1', 'target': 'n2',
+                           'source_port': source_port, 'target_port': target_port}],
+            }, self.catalog, self.connections, {'nodes': []})
+
+        # raster -> raster y model -> model: válidos
+        self.assertEqual(len(edges('input_Raster', 'trans_RasterPolygonize', 0, 0)['proposal']['edges']), 1)
+        self.assertEqual(len(edges('trans_RandomForest', 'trans_RasterPredict', 1, 1)['proposal']['edges']), 1)
+        # tabla -> tabla sigue igual
+        self.assertEqual(len(edges('input_Postgis', 'trans_RandomForest', 0, 0)['proposal']['edges']), 1)
+        # raster -> tabla, tabla -> raster y model -> tabla se rechazan con aviso
+        for source, target, sp, tp in (
+            ('input_Raster', 'trans_RandomForest', 0, 0),
+            ('input_Postgis', 'trans_RasterPolygonize', 0, 0),
+            ('trans_RandomForest', 'output_Postgis', 1, 0),
+            ('trans_RandomForest', 'trans_RasterPredict', 0, 1),   # el informe (tabla) no es un modelo
+        ):
+            result = edges(source, target, sp, tp)
+            self.assertEqual(result['proposal']['edges'], [], (source, target))
+            self.assertTrue(any('los tipos no coinciden' in line for line in result['warnings']), (source, target))
+
     def test_restricted_edit_blocks_replace_and_protected_nodes(self):
         self.assertTrue(is_protected('input_Csv'))
         self.assertTrue(is_protected('output_Postgis'))

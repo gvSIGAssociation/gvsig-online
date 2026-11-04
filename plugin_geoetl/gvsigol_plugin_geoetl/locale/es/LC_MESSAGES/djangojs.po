@@ -1408,3 +1408,942 @@ msgstr "No se ha podido contactar con el asistente. Inténtalo de nuevo."
 
 msgid "You are not allowed to use the assistant on this workspace."
 msgstr "No tienes permiso para usar el asistente en este workspace."
+
+# Nodos predictivos y ráster (PredictiveShapes.js / etl.html)
+msgid "a table"
+msgstr "una tabla"
+
+msgid "a raster"
+msgstr "un ráster"
+
+msgid "a model"
+msgstr "un modelo"
+
+msgid "Cannot connect {source} to an input that expects {target}."
+msgstr "No se puede conectar {source} a una entrada que espera {target}."
+
+msgid "Advanced parameters"
+msgstr "Parámetros avanzados"
+
+msgid "The node could not be configured."
+msgstr "No se ha podido configurar el nodo."
+
+msgid "The raster could not be read."
+msgstr "No se ha podido leer el ráster."
+
+msgid "Band"
+msgstr "Banda"
+
+msgid "bands"
+msgstr "bandas"
+
+msgid "no CRS"
+msgstr "sin sistema de coordenadas"
+
+msgid "Select a GeoTIFF file."
+msgstr "Elige un fichero GeoTIFF."
+
+msgid "Raster (GeoTIFF)"
+msgstr "Ráster (GeoTIFF)"
+
+msgid "Raster"
+msgstr "Ráster"
+
+msgid "GeoTIFF file"
+msgstr "Fichero GeoTIFF"
+
+msgid "Choose a .tif / .tiff file"
+msgstr "Elige un fichero .tif / .tiff"
+
+msgid "The file must be in the file manager. It can have any number of bands."
+msgstr "El fichero debe estar en el gestor de ficheros. Puede tener cualquier número de bandas."
+
+msgid "Band names (optional)"
+msgstr "Nombres de las bandas (opcional)"
+
+msgid "Name the bands so that later steps are easier to read, for example Red, Green, Infrared."
+msgstr "Ponles nombre a las bandas para que los pasos siguientes se lean mejor, por ejemplo Rojo, Verde, Infrarrojo."
+
+msgid "The selected file is not a GeoTIFF."
+msgstr "El fichero seleccionado no es un GeoTIFF."
+
+msgid "Sample Raster"
+msgstr "Muestrear ráster"
+
+msgid "Samples"
+msgstr "Muestras"
+
+msgid "Pixels"
+msgstr "Píxeles"
+
+msgid "Reads the raster pixels that fall inside each sample polygon. The result is a table with one row per pixel, one column per band and the class of the polygon."
+msgstr "Lee los píxeles del ráster que caen dentro de cada polígono de muestra. El resultado es una tabla con una fila por píxel, una columna por banda y la clase del polígono."
+
+msgid "Class column"
+msgstr "Columna de clase"
+
+msgid "Column of the sample polygons that says which class each one belongs to."
+msgstr "Columna de los polígonos de muestra que indica a qué clase pertenece cada uno."
+
+msgid "Maximum pixels per class"
+msgstr "Máximo de píxeles por clase"
+
+msgid "No limit"
+msgstr "Sin límite"
+
+msgid "Limits and balances the classes when some have many more pixels than others."
+msgstr "Limita y equilibra las clases cuando unas tienen muchos más píxeles que otras."
+
+msgid "Random seed"
+msgstr "Semilla aleatoria"
+
+msgid "Using the same seed gives the same sample every time."
+msgstr "Con la misma semilla se obtiene siempre la misma muestra."
+
+msgid "Connect and configure a raster first."
+msgstr "Conecta y configura primero un ráster."
+
+msgid "Connect the sample polygons first."
+msgstr "Conecta primero los polígonos de muestra."
+
+msgid "Choose the class column."
+msgstr "Elige la columna de clase."
+
+msgid "The class column has the same name as a raster band. Rename one of them."
+msgstr "La columna de clase se llama igual que una banda del ráster. Cambia el nombre de una de ellas."
+
+msgid "The maximum pixels per class must be a whole number greater than 0."
+msgstr "El máximo de píxeles por clase debe ser un número entero mayor que 0."
+
+msgid "The random seed must be a whole number."
+msgstr "La semilla aleatoria debe ser un número entero."
+
+msgid "Connect a table first."
+msgstr "Conecta primero una tabla."
+
+msgid "Random Forest"
+msgstr "Random Forest"
+
+msgid "Data"
+msgstr "Datos"
+
+msgid "Report"
+msgstr "Informe"
+
+msgid "Model"
+msgstr "Modelo"
+
+msgid "Learns from the rows that have a value in the variable to predict. It gives a report with the quality of the model and the importance of each variable, and the trained model to apply it elsewhere."
+msgstr "Aprende de las filas que tienen valor en la variable a predecir. Devuelve un informe con la calidad del modelo y la importancia de cada variable, y el modelo entrenado para aplicarlo en otro sitio."
+
+msgid "Variable to predict"
+msgstr "Variable a predecir"
+
+msgid "If it is text or has only a few whole values, the classes are predicted; if it is a continuous number, its value is estimated."
+msgstr "Si es texto o tiene pocos valores enteros, se predicen las clases; si es un número continuo, se estima su valor."
+
+msgid "Variables used to predict"
+msgstr "Variables para predecir"
+
+msgid "All"
+msgstr "Todas"
+
+msgid "None"
+msgstr "Ninguna"
+
+msgid "They must be numeric columns."
+msgstr "Deben ser columnas numéricas."
+
+msgid "Type of problem"
+msgstr "Tipo de problema"
+
+msgid "Number of trees"
+msgstr "Número de árboles"
+
+msgid "Maximum depth"
+msgstr "Profundidad máxima"
+
+msgid "Minimum samples per leaf"
+msgstr "Mínimo de muestras por hoja"
+
+msgid "% kept to evaluate"
+msgstr "% reservado para evaluar"
+
+msgid "Data not used for learning, to measure quality. 0 turns it off."
+msgstr "Datos que no se usan para aprender, para medir la calidad. Con 0 se desactiva."
+
+msgid "Choose…"
+msgstr "Elige…"
+
+msgid "Detect automatically"
+msgstr "Detectar automáticamente"
+
+msgid "Classification (categories)"
+msgstr "Clasificación (categorías)"
+
+msgid "Regression (number)"
+msgstr "Regresión (número)"
+
+msgid "Connect a table with data first."
+msgstr "Conecta primero una tabla con datos."
+
+msgid "Choose the variable to predict."
+msgstr "Elige la variable a predecir."
+
+msgid "Choose at least one variable used to predict."
+msgstr "Elige al menos una variable para predecir."
+
+msgid "The number of trees must be between 1 and 2000."
+msgstr "El número de árboles debe estar entre 1 y 2000."
+
+msgid "The maximum depth must be a whole number greater than 0."
+msgstr "La profundidad máxima debe ser un número entero mayor que 0."
+
+msgid "The minimum samples per leaf must be a whole number greater than 0."
+msgstr "El mínimo de muestras por hoja debe ser un número entero mayor que 0."
+
+msgid "The percentage kept to evaluate must be between 0 and 50."
+msgstr "El porcentaje reservado para evaluar debe estar entre 0 y 50."
+
+msgid "Predict Raster"
+msgstr "Predecir ráster"
+
+msgid "Result"
+msgstr "Resultado"
+
+msgid "Applies the model to every pixel of the raster. The result is a raster where each pixel holds the predicted class (or value). It needs no parameters."
+msgstr "Aplica el modelo a cada píxel del ráster. El resultado es un ráster donde cada píxel contiene la clase (o el valor) predicha. No necesita parámetros."
+
+msgid "Connect a raster and a trained model."
+msgstr "Conecta un ráster y un modelo entrenado."
+
+msgid "The raster does not have the bands the model was trained with:"
+msgstr "El ráster no tiene las bandas con las que se entrenó el modelo:"
+
+msgid "The raster has all the bands the model needs:"
+msgstr "El ráster tiene todas las bandas que necesita el modelo:"
+
+msgid "Raster to Polygons"
+msgstr "Ráster a polígonos"
+
+msgid "Turns a classified raster into polygons. Each polygon has its class and its area."
+msgstr "Convierte un ráster clasificado en polígonos. Cada polígono tiene su clase y su área."
+
+msgid "Classes to keep"
+msgstr "Clases a conservar"
+
+msgid "All classes"
+msgstr "Todas las clases"
+
+msgid "Names of the classes, separated by commas. Leave it empty to keep all of them."
+msgstr "Nombres de las clases, separados por comas. Déjalo vacío para conservarlas todas."
+
+msgid "Minimum area"
+msgstr "Área mínima"
+
+msgid "Polygons smaller than this are discarded, in squared units of the raster coordinate system (for example square metres). Useful to remove isolated pixels."
+msgstr "Los polígonos más pequeños que esto se descartan, en unidades cuadradas del sistema de coordenadas del ráster (por ejemplo metros cuadrados). Sirve para quitar píxeles aislados."
+
+msgid "Simplify"
+msgstr "Simplificar"
+
+msgid "Smooths the staircase edges. In units of the coordinate system; 0 leaves them as they are."
+msgstr "Suaviza los bordes en escalera. En unidades del sistema de coordenadas; con 0 se dejan como están."
+
+msgid "Pixels count as neighbours"
+msgstr "Los píxeles son vecinos"
+
+msgid "With 8, pixels touching only at a corner are joined into the same polygon."
+msgstr "Con 8, los píxeles que solo se tocan en una esquina se unen en el mismo polígono."
+
+msgid "Only along the sides (4)"
+msgstr "Solo por los lados (4)"
+
+msgid "Also at the corners (8)"
+msgstr "También por las esquinas (8)"
+
+msgid "Connect a classified raster first."
+msgstr "Conecta primero un ráster clasificado."
+
+msgid "The minimum area must be a number greater than or equal to 0."
+msgstr "El área mínima debe ser un número mayor o igual que 0."
+
+msgid "The simplification must be a number greater than or equal to 0."
+msgstr "La simplificación debe ser un número mayor o igual que 0."
+
+msgid "The workspaces and layer groups could not be loaded."
+msgstr "No se han podido cargar los workspaces y los grupos de capas."
+
+msgid "Publish Raster"
+msgstr "Publicar ráster"
+
+msgid "Publishes the raster as a layer, ready to add to a project. The classes get a colour style."
+msgstr "Publica el ráster como una capa, lista para añadir a un proyecto. Las clases reciben un estilo de colores."
+
+msgid "Workspace"
+msgstr "Workspace"
+
+msgid "Layer group"
+msgstr "Grupo de capas"
+
+msgid "Layer title"
+msgstr "Título de la capa"
+
+msgid "Layer name"
+msgstr "Nombre de la capa"
+
+msgid "Letters, digits and underscores. If you leave it empty it is made from the title."
+msgstr "Letras, dígitos y guiones bajos. Si lo dejas vacío se crea a partir del título."
+
+msgid "If the layer already exists"
+msgstr "Si la capa ya existe"
+
+msgid "Replacing keeps the layer, its permissions and its style: only the raster changes. If the classes change, check the style."
+msgstr "Al reemplazar se conservan la capa, sus permisos y su estilo: solo cambia el ráster. Si cambian las clases, revisa el estilo."
+
+msgid "Public layer"
+msgstr "Capa pública"
+
+msgid "Replace its raster"
+msgstr "Reemplazar su ráster"
+
+msgid "Stop with an error"
+msgstr "Parar con un error"
+
+msgid "Loading…"
+msgstr "Cargando…"
+
+msgid "Connect a raster first."
+msgstr "Conecta primero un ráster."
+
+msgid "Choose the workspace."
+msgstr "Elige el workspace."
+
+msgid "Choose the layer group."
+msgstr "Elige el grupo de capas."
+
+msgid "Write a title or a name for the layer."
+msgstr "Escribe un título o un nombre para la capa."
+
+# Nodos predictivos y ráster (PredictiveShapes.js / etl.html)
+msgid "(1 + L) · (NIR − Red) / (NIR + Red + L). Like NDVI but less affected by bare soil. Needs reflectance values."
+msgstr "(1 + L) · (NIR − Rojo) / (NIR + Rojo + L). Como el NDVI pero menos afectado por el suelo desnudo. Necesita valores de reflectancia."
+
+msgid "(A − B) / (A + B) for two bands you choose. Valid for any other normalized index."
+msgstr "(A − B) / (A + B) para dos bandas que elijas. Sirve para cualquier otro índice normalizado."
+
+msgid "(Green − NIR) / (Green + NIR). High values mean water."
+msgstr "(Verde − NIR) / (Verde + NIR). Los valores altos indican agua."
+
+msgid "(NIR − Red) / (NIR + Red). High values mean healthy vegetation."
+msgstr "(NIR − Rojo) / (NIR + Rojo). Los valores altos indican vegetación sana."
+
+msgid "(SWIR − NIR) / (SWIR + NIR). High values mean built-up areas and bare soil."
+msgstr "(SWIR − NIR) / (SWIR + NIR). Los valores altos indican zonas construidas y suelo desnudo."
+
+msgid "0.5 is suitable for most cases."
+msgstr "0,5 sirve para la mayoría de los casos."
+
+msgid "2.5 · (NIR − Red) / (NIR + 6 · Red − 7.5 · Blue + 1). Vegetation index that does not saturate in dense vegetation. Needs reflectance values."
+msgstr "2,5 · (NIR − Rojo) / (NIR + 6 · Rojo − 7,5 · Azul + 1). Índice de vegetación que no se satura en vegetación densa. Necesita valores de reflectancia."
+
+msgid "Adds a band with a spectral index to the raster. The original bands are kept, so the new band can be used to train the model like any other. To add several indices, chain several nodes."
+msgstr "Añade al ráster una banda con un índice espectral. Las bandas originales se conservan, así que la nueva banda se puede usar para entrenar el modelo como cualquier otra. Para añadir varios índices, encadena varios nodos."
+
+msgid "Applying it several times removes larger spots."
+msgstr "Aplicarlo varias veces elimina manchas más grandes."
+
+msgid "Band A"
+msgstr "Banda A"
+
+msgid "Band B"
+msgstr "Banda B"
+
+msgid "Block size"
+msgstr "Tamaño del bloque"
+
+msgid "Blue"
+msgstr "Azul"
+
+msgid "Brightness (mean of all bands)"
+msgstr "Brillo (media de todas las bandas)"
+
+msgid "Choose a different band for each role."
+msgstr "Elige una banda distinta para cada papel."
+
+msgid "Choose the band for:"
+msgstr "Elige la banda para:"
+
+msgid "Choose the index."
+msgstr "Elige el índice."
+
+msgid "Clean Raster"
+msgstr "Limpiar ráster"
+
+msgid "Confidence"
+msgstr "Confianza"
+
+msgid "Confusion matrix"
+msgstr "Matriz de confusión"
+
+msgid "EVI - enhanced vegetation"
+msgstr "EVI - vegetación mejorado"
+
+msgid "Each pixel takes the most frequent class of its neighbours. A bigger window cleans more but blurs small areas."
+msgstr "Cada píxel toma la clase más frecuente de sus vecinos. Una ventana mayor limpia más pero difumina las zonas pequeñas."
+
+msgid "Enter the block size, a number greater than 0."
+msgstr "Indica el tamaño del bloque, un número mayor que 0."
+
+msgid "Green"
+msgstr "Verde"
+
+msgid "Groups of connected pixels smaller than this are absorbed by their largest neighbour. The edges of the large areas are not changed."
+msgstr "Los grupos de píxeles conectados más pequeños que esto los absorbe su vecino mayor. Los bordes de las zonas grandes no cambian."
+
+msgid "How quality is measured"
+msgstr "Cómo se mide la calidad"
+
+msgid "Index"
+msgstr "Índice"
+
+msgid "Leave sample polygons out"
+msgstr "Dejar fuera polígonos de muestra"
+
+msgid "Leave spatial blocks out"
+msgstr "Dejar fuera bloques espaciales"
+
+msgid "Majority filter (smooths)"
+msgstr "Filtro de mayoría (suaviza)"
+
+msgid "Mean of all the bands of the raster."
+msgstr "Media de todas las bandas del ráster."
+
+msgid "Method"
+msgstr "Método"
+
+msgid "Minimum patch size (keeps the edges)"
+msgstr "Tamaño mínimo de parche (conserva los bordes)"
+
+msgid "Minimum patch size (pixels)"
+msgstr "Tamaño mínimo del parche (píxeles)"
+
+msgid "NDBI - built-up areas"
+msgstr "NDBI - zonas construidas"
+
+msgid "NDVI - vegetation"
+msgstr "NDVI - vegetación"
+
+msgid "NDWI - water"
+msgstr "NDWI - agua"
+
+msgid "Name of the new band"
+msgstr "Nombre de la banda nueva"
+
+msgid "Near infrared (NIR)"
+msgstr "Infrarrojo cercano (NIR)"
+
+msgid "Neighbouring pixels look alike, so a random split is optimistic. Leaving out whole polygons or blocks gives a more honest estimate."
+msgstr "Los píxeles vecinos se parecen, así que reservar datos al azar es optimista. Dejar fuera polígonos o bloques enteros da una estimación más honesta."
+
+msgid "Normalized difference of two bands"
+msgstr "Diferencia normalizada de dos bandas"
+
+msgid "Number of rounds"
+msgstr "Número de rondas"
+
+msgid "Random split"
+msgstr "Reserva aleatoria"
+
+msgid "Red"
+msgstr "Rojo"
+
+msgid "Reflectance scale"
+msgstr "Escala de reflectancia"
+
+msgid "Removes the isolated pixels (\"salt and pepper\") of a classified raster. Use it between Predict Raster and Raster to Polygons."
+msgstr "Elimina los píxeles aislados (\"sal y pimienta\") de un ráster clasificado. Úsalo entre Predecir ráster y Ráster a polígonos."
+
+msgid "Repetitions"
+msgstr "Repeticiones"
+
+msgid "SAVI - vegetation, soil adjusted"
+msgstr "SAVI - vegetación, ajustado al suelo"
+
+msgid "Shortwave infrared (SWIR)"
+msgstr "Infrarrojo de onda corta (SWIR)"
+
+msgid "Side of each square block, in the units of the raster coordinate system (for example metres)."
+msgstr "Lado de cada bloque cuadrado, en las unidades del sistema de coordenadas del ráster (por ejemplo metros)."
+
+msgid "Soil adjustment (L)"
+msgstr "Ajuste del suelo (L)"
+
+msgid "Spectral Index"
+msgstr "Índice espectral"
+
+msgid "The confusion matrix has one column per predicted class, named pred_ followed by the class."
+msgstr "La matriz de confusión tiene una columna por cada clase predicha, llamada pred_ seguido de la clase."
+
+msgid "The data is split into this many parts; each one is left out once."
+msgstr "Los datos se dividen en tantas partes; cada una se deja fuera una vez."
+
+msgid "The minimum patch size must be a whole number of at least 2 pixels."
+msgstr "El tamaño mínimo del parche debe ser un número entero de al menos 2 píxeles."
+
+msgid "The number of rounds must be between 2 and 10."
+msgstr "El número de rondas debe estar entre 2 y 10."
+
+msgid "The reflectance scale must be a number greater than 0."
+msgstr "La escala de reflectancia debe ser un número mayor que 0."
+
+msgid "The repetitions must be a whole number between 1 and 5."
+msgstr "Las repeticiones deben ser un número entero entre 1 y 5."
+
+msgid "The second output is a raster with how sure the model is of each pixel, from 0 to 1 (for a numeric model, the disagreement between the trees, in the units of the variable). It is always generated; connect it only if you need it."
+msgstr "La segunda salida es un ráster con lo seguro que está el modelo de cada píxel, de 0 a 1 (en un modelo numérico, el desacuerdo entre los árboles, en las unidades de la variable). Se genera siempre; conéctala solo si la necesitas."
+
+msgid "The soil adjustment must be between 0 and 1."
+msgstr "El ajuste del suelo debe estar entre 0 y 1."
+
+msgid "This is how the band will appear in the following steps."
+msgstr "Así aparecerá la banda en los pasos siguientes."
+
+msgid "Value that means 100% reflectance: 1 if the bands are already between 0 and 1, 10000 for Sentinel-2 L2A or 255 for 8-bit images."
+msgstr "Valor que significa el 100 % de reflectancia: 1 si las bandas ya están entre 0 y 1, 10000 en Sentinel-2 L2A o 255 en imágenes de 8 bits."
+
+msgid "Window"
+msgstr "Ventana"
+
+# Nodos predictivos y ráster (PredictiveShapes.js / etl.html)
+msgid "Add a new version (keeps the previous ones)"
+msgstr "Añadir una versión nueva (conserva las anteriores)"
+
+msgid "All bands"
+msgstr "Todas las bandas"
+
+msgid "Always regenerate it"
+msgstr "Regenerarlo siempre"
+
+msgid "Applies the model to every row of a table (parcels, points, sections…). The result is the same table, geometry included, with two new columns: the prediction and how sure the model is (for a numeric model, the disagreement between the trees)."
+msgstr "Aplica el modelo a cada fila de una tabla (parcelas, puntos, tramos…). El resultado es la misma tabla, con su geometría, y dos columnas nuevas: la predicción y lo seguro que está el modelo (en un modelo numérico, el desacuerdo entre los árboles)."
+
+msgid "Assess Classification"
+msgstr "Evaluar clasificación"
+
+msgid "Automatic"
+msgstr "Automático"
+
+msgid "Band to publish"
+msgstr "Banda a publicar"
+
+msgid "Bilinear"
+msgstr "Bilineal"
+
+msgid "Bilinear is smoother and suits imagery and continuous values. Nearest keeps the original values and is the one to use for classes."
+msgstr "Bilineal es más suave y sirve para imágenes y valores continuos. El vecino más próximo conserva los valores originales y es el que hay que usar con clases."
+
+msgid "Choose the saved model."
+msgstr "Elige el modelo guardado."
+
+msgid "Classes"
+msgstr "Clases"
+
+msgid "Classification"
+msgstr "Clasificación"
+
+msgid "Colour ramp: maximum"
+msgstr "Rampa de color: máximo"
+
+msgid "Colour ramp: minimum"
+msgstr "Rampa de color: mínimo"
+
+msgid "Column of the validation samples with the real class of each one."
+msgstr "Columna de las muestras de validación con la clase real de cada una."
+
+msgid "Combine Rasters"
+msgstr "Combinar ráster"
+
+msgid "Connect a table and a trained model."
+msgstr "Conecta una tabla y un modelo entrenado."
+
+msgid "Connect a trained model first."
+msgstr "Conecta primero un modelo entrenado."
+
+msgid "Connect and configure at least two rasters first."
+msgstr "Conecta y configura primero al menos dos ráster."
+
+msgid "Connect at least two rasters."
+msgstr "Conecta al menos dos ráster."
+
+msgid "Connect the validation samples first."
+msgstr "Conecta primero las muestras de validación."
+
+msgid "Delete the model and all its versions?"
+msgstr "¿Borrar el modelo y todas sus versiones?"
+
+msgid "Delete the whole model"
+msgstr "Borrar el modelo entero"
+
+msgid "Delete this version"
+msgstr "Borrar esta versión"
+
+msgid "Delete this version of the model?"
+msgstr "¿Borrar esta versión del modelo?"
+
+msgid "Description"
+msgstr "Descripción"
+
+msgid "Fill in both limits of the colour ramp, or leave both empty."
+msgstr "Rellena los dos límites de la rampa de color, o deja los dos vacíos."
+
+msgid "For a raster with several bands. By default it is published as it is."
+msgstr "Para un ráster con varias bandas. Por defecto se publica tal cual."
+
+msgid "For each class, \"precision\" is the accuracy for the user (of what the map says is that class, how much really is) and \"recall\" is the accuracy for the producer (of what really is that class, how much the map finds)."
+msgstr "En cada clase, \"precision\" es la exactitud del usuario (de lo que el mapa dice que es esa clase, cuánto lo es de verdad) y \"recall\" la exactitud del productor (de lo que realmente es esa clase, cuánto encuentra el mapa)."
+
+msgid "If the model already exists"
+msgstr "Si el modelo ya existe"
+
+msgid "It will be saved as:"
+msgstr "Se guardará como:"
+
+msgid "Joins the bands of several rasters (for example an orthophoto and a terrain model with another resolution) into one. The first connected raster is the reference: the others are reprojected and resampled to its grid. Where a raster does not cover the reference, its bands have no data."
+msgstr "Une las bandas de varios ráster (por ejemplo una ortofoto y un modelo del terreno con otra resolución) en uno solo. El primer ráster conectado es la referencia: los demás se reproyectan y remuestrean a su cuadrícula. Donde un ráster no cubre la referencia, sus bandas no tienen dato."
+
+msgid "Keeps the trained model so it can be applied later to other images or tables without training again. Models are private to the user who saves them."
+msgstr "Guarda el modelo entrenado para poder aplicarlo más tarde a otras imágenes o tablas sin volver a entrenar. Los modelos son privados del usuario que los guarda."
+
+msgid "Latest"
+msgstr "La última"
+
+msgid "Latest always uses the most recent version, even if you save a newer one later."
+msgstr "La última usa siempre la versión más reciente, aunque guardes otra más nueva después."
+
+msgid "Layer description"
+msgstr "Descripción de la capa"
+
+msgid "Measures how good a classified raster is using validation samples that were NOT used to train the model: polygons (all their pixels) or points, each with its real class. It gives the overall accuracy, kappa, the accuracy of each class and the confusion matrix."
+msgstr "Mide la calidad de un ráster clasificado con muestras de validación que NO se usaron para entrenar el modelo: polígonos (todos sus píxeles) o puntos, cada uno con su clase real. Da la exactitud global, el kappa, la exactitud de cada clase y la matriz de confusión."
+
+msgid "Model name"
+msgstr "Nombre del modelo"
+
+msgid "Name of the prediction column"
+msgstr "Nombre de la columna de predicción"
+
+msgid "Nearest neighbour"
+msgstr "Vecino más próximo"
+
+msgid "Never touch it"
+msgstr "No tocarlo nunca"
+
+msgid "Only for rasters with values (not classes). The confidence always goes from 0 to 1."
+msgstr "Solo para ráster de valores (no de clases). La confianza va siempre de 0 a 1."
+
+msgid "Optional. For example the image, the date or the samples used."
+msgstr "Opcional. Por ejemplo la imagen, la fecha o las muestras usadas."
+
+msgid "Optional. Useful when several rasters have bands with the same name, for example two dates."
+msgstr "Opcional. Útil cuando varios ráster tienen bandas con el mismo nombre, por ejemplo dos fechas."
+
+msgid "Predict Table"
+msgstr "Predecir tabla"
+
+msgid "Prefix for the bands of raster"
+msgstr "Prefijo de las bandas del ráster"
+
+msgid "Raster 1 (reference)"
+msgstr "Ráster 1 (referencia)"
+
+msgid "Raster 2"
+msgstr "Ráster 2"
+
+msgid "Raster 3"
+msgstr "Ráster 3"
+
+msgid "Raster 4"
+msgstr "Ráster 4"
+
+msgid "Regression"
+msgstr "Regresión"
+
+msgid "Replace it (deletes the previous versions)"
+msgstr "Reemplazarlo (borra las versiones anteriores)"
+
+msgid "Replacing keeps the layer and its permissions: only the raster changes."
+msgstr "Al reemplazar se conserva la capa y sus permisos: solo cambia el ráster."
+
+msgid "Resampling"
+msgstr "Remuestreo"
+
+msgid "Save Model"
+msgstr "Guardar modelo"
+
+msgid "Saved Model"
+msgstr "Modelo guardado"
+
+msgid "Style when replacing"
+msgstr "Estilo al reemplazar"
+
+msgid "Table"
+msgstr "Tabla"
+
+msgid "That model or version no longer exists."
+msgstr "Ese modelo o esa versión ya no existe."
+
+msgid "The colour ramp limits must be numbers."
+msgstr "Los límites de la rampa de color deben ser números."
+
+msgid "The confidence goes in a column with the same name followed by _confidence. Rows with empty or non-numeric values in the variables are left without prediction."
+msgstr "La confianza va en una columna con el mismo nombre seguido de _confidence. Las filas con valores vacíos o no numéricos en las variables se quedan sin predicción."
+
+msgid "The maximum of the colour ramp must be greater than the minimum."
+msgstr "El máximo de la rampa de color debe ser mayor que el mínimo."
+
+msgid "The model could not be deleted."
+msgstr "No se ha podido borrar el modelo."
+
+msgid "The saved models could not be loaded."
+msgstr "No se han podido cargar los modelos guardados."
+
+msgid "The style created by this node is updated when the classes or the value range change. Classes that already existed keep their colour. A style you made yourself is never touched."
+msgstr "El estilo creado por este nodo se actualiza cuando cambian las clases o el rango de valores. Las clases que ya existían conservan su color. Un estilo que hayas hecho tú nunca se toca."
+
+msgid "The table already has a column with that name. Choose another name."
+msgstr "La tabla ya tiene una columna con ese nombre. Elige otro nombre."
+
+msgid "The table does not have the columns the model was trained with:"
+msgstr "La tabla no tiene las columnas con las que se entrenó el modelo:"
+
+msgid "The table has all the columns the model needs:"
+msgstr "La tabla tiene todas las columnas que necesita el modelo:"
+
+msgid "There are no saved models yet. Train one and save it with Save Model."
+msgstr "Todavía no hay modelos guardados. Entrena uno y guárdalo con Guardar modelo."
+
+msgid "Update it only if the classes or the range change"
+msgstr "Actualizarlo solo si cambian las clases o el rango"
+
+msgid "Uses a model saved earlier with Save Model, without training again. Connect it to Predict Raster or Predict Table."
+msgstr "Usa un modelo guardado antes con Guardar modelo, sin volver a entrenar. Conéctalo a Predecir ráster o a Predecir tabla."
+
+msgid "Validation samples"
+msgstr "Muestras de validación"
+
+msgid "Variables"
+msgstr "Variables"
+
+msgid "Version"
+msgstr "Versión"
+
+msgid "Write a name for the model."
+msgstr "Escribe un nombre para el modelo."
+
+msgid "rows"
+msgstr "filas"
+
+# Nodos predictivos y ráster (PredictiveShapes.js / etl.html)
+msgid "Clip Raster"
+msgstr "Recortar ráster"
+
+msgid "Mask"
+msgstr "Máscara"
+
+msgid "Cuts a raster with a mask of polygons (a vector layer), keeping only your study area. If you want, it also changes the pixel size in the same step, which makes a large image much lighter."
+msgstr "Recorta un ráster con una máscara de polígonos (una capa vectorial), dejando solo tu zona de estudio. Si quieres, también cambia el tamaño de píxel en el mismo paso, lo que aligera mucho una imagen grande."
+
+msgid "What to keep"
+msgstr "Qué conservar"
+
+msgid "Inside the polygons only: what is outside has no data. The rectangle: the image is only cut to the extent of the polygons."
+msgstr "Solo dentro de los polígonos: lo que queda fuera no tiene dato. El rectángulo: la imagen solo se corta a la extensión de los polígonos."
+
+msgid "New pixel size"
+msgstr "Nuevo tamaño de píxel"
+
+msgid "Keep the original"
+msgstr "Mantener el original"
+
+msgid "In the units of the raster coordinate system (metres in UTM). For example 1 for a 25 cm orthophoto: the result has 16 times fewer pixels. Empty = keep the original."
+msgstr "En las unidades del sistema de coordenadas del ráster (metros en UTM). Por ejemplo 1 en una ortofoto de 25 cm: el resultado tiene 16 veces menos píxeles. Vacío = mantener el original."
+
+msgid "Resampling when the size changes"
+msgstr "Remuestreo al cambiar el tamaño"
+
+msgid "Average is the best way to reduce the size. A raster of classes always uses nearest neighbour, so classes are not mixed."
+msgstr "La media es la mejor forma de reducir el tamaño. Un ráster de clases usa siempre el vecino más próximo, para no mezclar clases."
+
+msgid "Inside the polygons only"
+msgstr "Solo dentro de los polígonos"
+
+msgid "The rectangle that contains them"
+msgstr "El rectángulo que los contiene"
+
+msgid "Average"
+msgstr "Media"
+
+msgid "Connect a raster and a mask of polygons first."
+msgstr "Conecta primero un ráster y una máscara de polígonos."
+
+msgid "The pixel size must be a number greater than 0."
+msgstr "El tamaño de píxel debe ser un número mayor que 0."
+
+# Nodos predictivos y ráster (PredictiveShapes.js / etl.html)
+msgid "8-bit image (0-255), for example an orthophoto"
+msgstr "Imagen de 8 bits (0-255), por ejemplo una ortofoto"
+
+msgid "A third of the variables"
+msgstr "Un tercio de las variables"
+
+msgid "Added to the value before dividing by the scale (for example -1000 in Sentinel-2 L2A)."
+msgstr "Se suma al valor antes de dividir por la escala (por ejemplo -1000 en Sentinel-2 L2A)."
+
+msgid "All the variables (bagging)"
+msgstr "Todas las variables (bagging)"
+
+msgid "Areas"
+msgstr "Superficies"
+
+msgid "At least 50 per class is the usual recommendation; more points give narrower intervals. Small classes get all their pixels if they have fewer."
+msgstr "Lo habitual es recomendar al menos 50 por clase; con más puntos, los intervalos son más estrechos. Las clases pequeñas aportan todos sus píxeles si tienen menos."
+
+msgid "Automatic (sample polygons out when possible)"
+msgstr "Automática (dejando fuera polígonos cuando se pueda)"
+
+msgid "Automatic (√p in classification, p/3 in regression)"
+msgstr "Automático (√p en clasificación, p/3 en regresión)"
+
+msgid "Automatic follows Breiman (2001): the square root of the number of variables in classification and a third of them in regression. All of them is not a random forest but bagged trees."
+msgstr "Automático sigue a Breiman (2001): la raíz cuadrada del número de variables en clasificación y un tercio en regresión. Usar todas no es un bosque aleatorio sino un conjunto de árboles por bagging."
+
+msgid "Certainty"
+msgstr "Seguridad"
+
+msgid "Choose the column with the real class."
+msgstr "Elige la columna con la clase real."
+
+msgid "Column with the real class"
+msgstr "Columna con la clase real"
+
+msgid "Confidence level"
+msgstr "Nivel de confianza"
+
+msgid "Connect the reference points first."
+msgstr "Conecta primero los puntos de referencia."
+
+msgid "Custom (scale and offset)"
+msgstr "Personalizada (escala y offset)"
+
+msgid "Estimate Areas"
+msgstr "Estimar superficies"
+
+msgid "Estimates the real area of each class, correcting the errors of the map with reference points, and gives its confidence interval (Olofsson et al., 2014). Counting the pixels of a class gives a biased area; this is the recommended way to report areas."
+msgstr "Estima la superficie real de cada clase corrigiendo los errores del mapa con puntos de referencia, y da su intervalo de confianza (Olofsson et al., 2014). Contar los píxeles de una clase da una superficie sesgada; esta es la forma recomendada de dar superficies."
+
+msgid "For a statistically valid accuracy of the map, the samples must be a random sample stratified by class (see Stratified Sample). Hand-drawn polygons only give an indication."
+msgstr "Para una exactitud del mapa estadísticamente válida, las muestras deben ser una muestra aleatoria estratificada por clase (ver Muestreo estratificado). Los polígonos dibujados a mano solo dan una orientación."
+
+msgid "How to turn the values of the image into reflectance (0-1) before computing the index: reflectance = (value + offset) / scale. With an offset (Sentinel-2 since 2022, Landsat Collection 2) not even the NDVI is right without it. Orthophotos (PNOA) are not calibrated reflectance: the index is useful to classify one image, not as a physical measure to compare dates or sheets."
+msgstr "Cómo convertir los valores de la imagen en reflectancia (0-1) antes de calcular el índice: reflectancia = (valor + offset) / escala. Con offset (Sentinel-2 desde 2022, Landsat Colección 2) ni siquiera el NDVI es correcto sin convertir. Las ortofotos (PNOA) no son reflectancia calibrada: el índice sirve para clasificar una imagen, no como medida física para comparar fechas u hojas."
+
+msgid "Landsat Collection 2 level 2: value × 0.0000275 - 0.2"
+msgstr "Landsat Colección 2 nivel 2: valor × 0,0000275 - 0,2"
+
+msgid "Measures how good a classified raster is using validation samples that were NOT used to train the model: polygons (all their pixels) or points, each with its real class. It gives the overall accuracy, the accuracy of each class, the confusion matrix and 95 % intervals obtained by resampling whole samples (bootstrap)."
+msgstr "Mide la calidad de un ráster clasificado con muestras de validación que NO se usaron para entrenar el modelo: polígonos (todos sus píxeles) o puntos, cada uno con su clase real. Da la exactitud global, la exactitud de cada clase, la matriz de confusión e intervalos del 95 % obtenidos remuestreando muestras enteras (bootstrap)."
+
+msgid "Offset"
+msgstr "Offset"
+
+msgid "Picks random points from each class of a classified map, all pixels of a class with the same chance. You then write the real class of each point in the \"reference\" column (in the field, or looking at an orthophoto) and use them in Estimate Areas. This is the sampling design that makes accuracy and areas statistically valid."
+msgstr "Elige puntos al azar de cada clase de un mapa clasificado, con la misma probabilidad para todos los píxeles de la clase. Después escribes la clase real de cada punto en la columna \"reference\" (en campo o mirando una ortofoto) y los usas en Estimar superficies. Es el diseño de muestreo que hace estadísticamente válidas la exactitud y las superficies."
+
+msgid "Points per class"
+msgstr "Puntos por clase"
+
+msgid "Reference points"
+msgstr "Puntos de referencia"
+
+msgid "SAVI and EVI need reflectance values between 0 and 1: choose how to convert the image, unless it already is."
+msgstr "SAVI y EVI necesitan valores de reflectancia entre 0 y 1: elige cómo convertir la imagen, salvo que ya lo sea."
+
+msgid "Sentinel-2 L2A before 2022: value / 10000"
+msgstr "Sentinel-2 L2A anterior a 2022: valor / 10000"
+
+msgid "Sentinel-2 L2A since 2022: (value - 1000) / 10000"
+msgstr "Sentinel-2 L2A desde 2022: (valor - 1000) / 10000"
+
+msgid "Square root of the number of variables"
+msgstr "Raíz cuadrada del número de variables"
+
+msgid "Stratified Sample"
+msgstr "Muestreo estratificado"
+
+msgid "The offset must be a number."
+msgstr "El offset debe ser un número."
+
+msgid "The points must come from a random sample stratified by map class, such as the one made by Stratified Sample."
+msgstr "Los puntos deben venir de una muestra aleatoria estratificada por clase del mapa, como la que hace Muestreo estratificado."
+
+msgid "The points per class must be a whole number of at least 2."
+msgstr "Los puntos por clase deben ser un número entero de al menos 2."
+
+msgid "The same seed gives the same points every time."
+msgstr "Con la misma semilla salen siempre los mismos puntos."
+
+msgid "The second output (Certainty) says how sure the model is of each pixel: the share of votes of the trees for the chosen class, from 0 to 1. It is a relative indicator, not a calibrated probability. For a numeric model it is the spread between the trees, in the units of the variable, which is smaller than a real prediction interval. It is always generated; connect it only if you need it."
+msgstr "La segunda salida (Seguridad) indica lo seguro que está el modelo de cada píxel: la proporción de votos de los árboles para la clase elegida, de 0 a 1. Es un indicador relativo, no una probabilidad calibrada. En un modelo numérico es la dispersión entre los árboles, en las unidades de la variable, que es menor que un intervalo de predicción real. Se genera siempre; conéctala solo si la necesitas."
+
+msgid "Use them as they are (already reflectance, or only to classify)"
+msgstr "Usarlos tal cual (ya son reflectancia, o solo para clasificar)"
+
+msgid "Value that means 100% reflectance."
+msgstr "Valor que equivale al 100 % de reflectancia."
+
+msgid "Values of the image"
+msgstr "Valores de la imagen"
+
+msgid "Variables tried at each split"
+msgstr "Variables por división"
+
+# Nodos predictivos y ráster (PredictiveShapes.js / etl.html)
+msgid "Show node on the canvas"
+msgstr "Ver el nodo en el canvas"
+
+msgid "Copy"
+msgstr "Copiar"
+
+msgid "Edit and resend"
+msgstr "Editar y reenviar"
+
+msgid "Ask again"
+msgstr "Volver a preguntar"
+
+msgid "Regenerate answer"
+msgstr "Regenerar la respuesta"
+
+msgid "Stop"
+msgstr "Detener"
+
+msgid "Send"
+msgstr "Enviar"
+
+msgid "Conversation with the ETL assistant"
+msgstr "Conversación con el asistente ETL"
+
+msgid "You"
+msgstr "Tú"
+
+msgid "Assistant"
+msgstr "Asistente"
+
+msgid "Thinking…"
+msgstr "Pensando…"
+
+msgid "Stopped. The canvas has not changed."
+msgstr "Detenido. El canvas no ha cambiado."
+
+msgid "Delete the whole conversation?"
+msgstr "¿Borrar toda la conversación?"

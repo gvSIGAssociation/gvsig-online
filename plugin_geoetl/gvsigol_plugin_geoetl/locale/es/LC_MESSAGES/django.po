@@ -1170,3 +1170,67 @@ msgstr "Guardar en PostGIS"
 
 msgid "Add an output to a new PostGIS table at the end of the flow."
 msgstr "Añade al final del flujo una salida a una tabla nueva de PostGIS."
+
+# Nodos predictivos y ráster (PredictiveShapes.js / etl.html)
+msgid "Predictive"
+msgstr "Predictivo"
+
+msgid "Raster (GeoTIFF)"
+msgstr "Ráster (GeoTIFF)"
+
+msgid "Sample Raster"
+msgstr "Muestrear ráster"
+
+msgid "Random Forest"
+msgstr "Random Forest"
+
+msgid "Predict Raster"
+msgstr "Predecir ráster"
+
+msgid "Raster to Polygons"
+msgstr "Ráster a polígonos"
+
+msgid "Publish Raster"
+msgstr "Publicar ráster"
+
+# Nodos predictivos y ráster (PredictiveShapes.js / etl.html)
+msgid "Spectral Index"
+msgstr "Índice espectral"
+
+msgid "Clean Raster"
+msgstr "Limpiar ráster"
+
+# Nodos predictivos y ráster (PredictiveShapes.js / etl.html)
+msgid "Assess Classification"
+msgstr "Evaluar clasificación"
+
+msgid "Combine Rasters"
+msgstr "Combinar ráster"
+
+msgid "Predict Table"
+msgstr "Predecir tabla"
+
+msgid "Save Model"
+msgstr "Guardar modelo"
+
+msgid "Saved Model"
+msgstr "Modelo guardado"
+
+# Nodos predictivos y ráster (PredictiveShapes.js / etl.html)
+msgid "Clip Raster"
+msgstr "Recortar ráster"
+
+# Nodos predictivos y ráster (PredictiveShapes.js / etl.html)
+msgid "Raster"
+msgstr "Ráster"
+
+# Nodos predictivos y ráster (PredictiveShapes.js / etl.html)
+msgid "Stratified Sample"
+msgstr "Muestreo estratificado"
+
+msgid "Estimate Areas"
+msgstr "Estimar superficies"
+
+# Nodos predictivos y ráster (PredictiveShapes.js / etl.html)
+msgid "Download conversation"
+msgstr "Descargar la conversación"

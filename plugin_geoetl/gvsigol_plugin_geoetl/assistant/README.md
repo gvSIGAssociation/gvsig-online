@@ -25,8 +25,10 @@ El asistente **nunca guarda ni ejecuta** nada: solo modifica el canvas abierto, 
 
 - **Crear un flujo desde cero** con el canvas vacío: "Carga un CSV en una tabla nueva de PostGIS".
 - **Modificar el flujo abierto**: añadir un nodo después del seleccionado, completar lo que falta hasta una salida, cambiar parámetros, quitar nodos o conexiones.
-- **Explicar o revisar** el flujo del canvas: qué hace paso a paso, qué parámetros faltan.
-- **Consultar las fuentes reales**: lista las conexiones ETL del usuario, sus esquemas, tablas y columnas, y deduce los nodos a partir de la diferencia entre entradas y destino.
+- **Explicar** el flujo del canvas paso a paso, citando cada nodo por su id.
+- **Revisar** el flujo con una comprobación exacta (`check_workspace`): nodos sin configurar, parámetros obligatorios vacíos, entradas sin conectar, tipos de puerto que no encajan, ciclos, salidas sin usar, conexiones no disponibles y flujos sin salida.
+- **Resolver dudas** sobre los nodos y sus opciones a partir de las fichas.
+- **Consultar las fuentes reales**: lista las conexiones ETL del usuario, sus esquemas, tablas y columnas, y los nombres de los ficheros de sus carpetas del gestor de ficheros (nunca el contenido). Deduce los nodos a partir de la diferencia entre entradas y destino.
 - **Preguntar** cuando una regla de negocio no se puede deducir (campo de cruce ambiguo, valor de un filtro…) y **declarar las suposiciones** que sí toma (`n3: cruce por cod_mun, único campo común`).
 
 Responde en el idioma de la interfaz (español por defecto) o en el que le escriba el usuario.
@@ -83,10 +85,15 @@ Si la comprobación falla por cualquier motivo (por ejemplo, un error al importa
 
 Detalles de la interfaz:
 
-- Los alias `n1`, `n2`… del texto resaltan el nodo al pasar el ratón y lo centran al hacer clic.
+- Cada nodo muestra su id (`n1`, `n2`…) en la cabecera; es el mismo que usa el asistente. Los ids del texto de las respuestas, del resumen y de las suposiciones son etiquetas que resaltan el nodo al pasar el ratón y lo centran al hacer clic.
+- Al pasar el ratón por un mensaje aparecen sus acciones: en las preguntas, **copiar**, **editar y reenviar** (la vuelve a poner en el cuadro) y **volver a preguntar**; en las respuestas, **copiar** (texto, cambios, suposiciones y avisos en Markdown) y, en la última, **regenerar** (no se ofrece si sus cambios ya se aplicaron o están pendientes de aplicar).
+- Con el cuadro vacío, **↑** recupera las preguntas anteriores y **↓** vuelve hacia las recientes.
+- Mientras el asistente piensa se ve el tiempo transcurrido y el botón de enviar pasa a **Detener**, que cancela la petición sin cambiar el canvas.
+- Cerca del límite de 8000 caracteres aparece un contador; por encima no se puede enviar.
+- El botón de descarga guarda la conversación en Markdown; la papelera la borra (pide confirmación).
 - Seleccionar un nodo en el canvas lo pasa como contexto ("después de este").
 - El panel se redimensiona arrastrando el borde izquierdo (320–600 px) y recuerda ancho y estado abierto (`localStorage`).
-- La conversación se guarda por workspace en `sessionStorage` (`etl-assistant-chat:<id>`); el botón de papelera la borra. Se envían como historial los últimos 16 mensajes.
+- La conversación se guarda por workspace en `sessionStorage` (`etl-assistant-chat:<id>`). La de un workspace nuevo sin guardar no se conserva al abrir otro nuevo. Se envían como historial los últimos 16 mensajes; cada respuesta lleva los cambios que propuso y si el usuario los aplicó, descartó o deshizo.
 - Escape cierra el panel (salvo que haya un modal abierto).
 
 ## Arquitectura
@@ -122,12 +129,14 @@ flowchart LR
 
 Flujo de una petición:
 
-1. `Assistant.js` resume el canvas (nodos con alias `n1…`, parámetros, esquema, aristas y nodo seleccionado) y lo envía con el mensaje y el historial.
+1. `Assistant.js` resume el canvas (nodos con su id `n1…`, parámetros, esquema, estado de la rueda, posición, aristas, nodo seleccionado y siguiente id libre) y lo envía con el mensaje y el historial.
 2. `views.etl_assistant` comprueba activación, usuario y permisos sobre el workspace (edición completa o restringida).
 3. `agent.run_assistant` monta un agente LangChain (`create_tool_calling_agent` + `AgentExecutor`) con el prompt de sistema, el historial y las herramientas.
-4. El LLM consulta fichas, conexiones y tablas, y termina llamando a `propose_workspace`.
-5. `graph.validate_proposal` limpia la propuesta contra el catálogo y las conexiones del usuario; si queda algo válido lo guarda como resultado del turno.
-6. El panel recibe la propuesta y la dibuja con `drawNodes` dentro de una transacción del CommandStack de draw2d (una sola entrada de deshacer).
+4. El prompt obliga al modelo a decidir primero la intención (construir o modificar, explicar, revisar, pregunta general). Solo construir o modificar termina llamando a `propose_workspace`.
+5. `graph.validate_proposal` limpia la propuesta contra el catálogo y las conexiones del usuario; si queda algo válido lo guarda como resultado del turno. Además `review.check_graph` revisa cómo quedaría el flujo y devuelve al modelo los errores con una instrucción: si la propuesta se rechaza o tiene errores corregibles, el modelo la corrige y la reenvía (como mucho tres intentos; la última válida sustituye a las anteriores).
+6. Comprobación de coherencia: si la respuesta final afirma un cambio ("he añadido…") y no hay propuesta, el agente pide al modelo una segunda pasada para que la haga o confirme que no pretendía cambiar nada. Si aun así no hay propuesta, el chat avisa de que el canvas sigue igual.
+7. Si se alcanza el límite de iteraciones o falla el proveedor después de validar una propuesta, la propuesta se conserva; sin propuesta, se devuelve un mensaje en español.
+8. El panel recibe la propuesta y la dibuja con `drawNodes` dentro de una transacción del CommandStack de draw2d (una sola entrada de deshacer).
 
 ### Ficheros
 
@@ -137,11 +146,12 @@ Backend (`gvsigol_plugin_geoetl/assistant/`):
 |---|---|
 | `views.py` | Endpoint `POST /etl/etl_assistant/`. Validación de la petición y permisos. Importa el agente de forma perezosa |
 | `access.py` | Reglas puras de activación y permisos (`assistant_feature_enabled`, `user_may_use`, `workspace_edit_mode`, `provider_is_ready`) |
-| `agent.py` | Construye el LLM, el prompt y el `AgentExecutor`; recorta historial y canvas; traduce errores del proveedor a mensajes legibles |
-| `prompt.py` | Prompt de sistema: reglas de trabajo, idioma e índice del catálogo |
-| `tools.py` | Herramientas que puede llamar el modelo |
-| `graph.py` | Validación, maquetación (x, y) y resumen de las propuestas |
-| `catalog.py` | Carga de las fichas YAML e índice para el prompt |
+| `agent.py` | Construye el LLM, el prompt y el `AgentExecutor`; canvas compacto, historial con el resultado de cada propuesta, comprobación de coherencia, límite de iteraciones, traza opcional y errores del proveedor legibles |
+| `prompt.py` | Prompt de sistema: intenciones, reglas de trabajo, autocorrección, idioma e índice del catálogo |
+| `tools.py` | Herramientas que puede llamar el modelo (cada una protegida: un fallo se devuelve como error y no tumba el turno) |
+| `review.py` | Revisión exacta de un flujo, del canvas o de cómo quedaría tras una propuesta |
+| `graph.py` | Validación, maquetación (x, y) y resumen de las propuestas. En un patch, cada nodo nuevo se coloca junto al que le da datos sin montarse sobre otro |
+| `catalog.py` | Carga de las fichas YAML e índice para el prompt (primera frase de cada ficha) |
 | `nodes/*.yaml` | Una ficha por tipo de nodo |
 | `shapes.py` | Lee `TableShape.js` y la paleta de `etl.html` para generar fichas |
 | `scaffold.py` | Genera borradores YAML (lo usa el comando de manage.py) |
@@ -150,7 +160,7 @@ Fuera de la carpeta:
 
 | Fichero | Cambio |
 |---|---|
-| `settings.py` | `ETL_ASSISTANT_ENABLED`, `GEOETL_LLM_MODEL` |
+| `settings.py` | `ETL_ASSISTANT_ENABLED`, `ETL_ASSISTANT_TRACE`, `GEOETL_LLM_MODEL` |
 | `urls.py` | Ruta `etl/etl_assistant/` |
 | `views.py` (plugin) | `_assistant_enabled(request)` pasa `etl_assistant_enabled` a la plantilla |
 | `templates/etl.html` | Botón, panel, CSS y scripts, todo dentro de `{% if etl_assistant_enabled %}` |
@@ -173,16 +183,17 @@ Petición:
   "message": "Añade un filtro después de este nodo",
   "history": [
     {"role": "user", "content": "..."},
-    {"role": "assistant", "content": "..."}
+    {"role": "assistant", "content": "...", "summary": ["Añado Filter (n2)."], "status": "applied"}
   ],
   "canvas": {
     "nodes": [
       {"alias": "n1", "id": "<uuid draw2d>", "type": "input_Postgis", "label": "PgSQL/PostGIS",
        "parameters": {"db": "mi_conexion", "schema-name": "public", "tablename": "municipios"},
-       "schema": ["cod_mun", "nombre", "geom"]}
+       "schema": ["cod_mun", "nombre", "geom"], "status": "", "x": 80, "y": 60}
     ],
     "edges": [{"source": "n1", "target": "n2", "source_port": 0, "target_port": 0}],
-    "selected": "n1"
+    "selected": "n1",
+    "next_alias": "n6"
   },
   "workspace_id": 42
 }
@@ -210,7 +221,9 @@ Respuesta (siempre 200 salvo errores de petición o permisos):
 | 404 (JSON) | `workspace_id` no existe |
 | 200 con `error: true` | Fallo del proveedor de IA (tiempo, clave, cuota) o error inesperado. El detalle va al log `gvsigol` |
 
-Límites: mensaje de 8000 caracteres, 16 mensajes de historial, canvas serializado de 24000 caracteres, 40 nodos por propuesta.
+Campos opcionales (los editores antiguos no los envían y todo sigue funcionando): `status` del nodo (`""` configurado, `unconfigured` rueda roja, `invalid` configuración que no encaja), `x`/`y`, `next_alias` (el editor no reutiliza los ids de nodos borrados) y, en el historial, `summary` y `status` (`applied`, `discarded`, `undone`, `pending`).
+
+Límites: mensaje de 8000 caracteres, 16 mensajes de historial, 40 nodos por propuesta. El canvas se envía al modelo en JSON siempre válido de hasta 24000 caracteres: si no cabe, primero sin esquemas, luego con los textos largos recortados y, por último, sin parámetros (el modelo los pide con `get_canvas_nodes`). Nunca se pierden nodos ni conexiones.
 
 ### Formato de la propuesta
 
@@ -290,7 +303,21 @@ Lo que más influye en la calidad de las respuestas son `summary` (de la ficha y
 | `update_node` / `remove_node` de un alias que no está en el canvas | Se ignora la operación |
 | Edición restringida | No se permite `replace` ni tocar nodos `input_*`, `output_*` y `trans_ExecuteSQL` |
 
-También asigna coordenadas por profundidad topológica (columnas de 280 px, filas de 160 px) y genera el `summary`.
+También asigna coordenadas y genera el `summary`. En un `replace`, por profundidad topológica (columnas de 280 px, filas de 160 px). En un `patch`, cada nodo nuevo va a la derecha del nodo del que recibe datos (o a la izquierda del que alimenta) y baja de fila mientras choque con otro; sin posiciones del canvas (editor antiguo) se usa la maquetación topológica.
+
+Después, `review.check_graph` revisa el flujo resultante (no modifica la propuesta): sus errores vuelven al modelo en `issues` para que los corrija. La misma revisión es la herramienta `check_workspace`.
+
+### Herramientas del modelo
+
+| Herramienta | Para qué |
+|---|---|
+| `list_connections` | Conexiones ETL del usuario (nombre y tipo, sin credenciales) |
+| `list_tables`, `get_table_schema` | Esquemas, tablas y columnas de una conexión autorizada |
+| `list_files` | Nombres de ficheros de las carpetas del gestor de ficheros a las que el usuario tiene acceso (mismos permisos que el gestor; ocultos excluidos; hasta 200, 4 niveles). Devuelve la ruta lista para el parámetro del nodo. Nunca lee el contenido |
+| `get_node_specs` | Ficha completa de hasta 12 tipos |
+| `get_canvas_nodes` | Parámetros y esquema completos de nodos del canvas, para canvas grandes |
+| `check_workspace` | Revisión exacta del canvas, o de cómo quedaría con una propuesta sin registrarla |
+| `propose_workspace` | Registra la propuesta validada; devuelve `accepted`, `errors`/`warnings`, `issues` e `instruction` |
 
 `needs_confirmation` es `true` en un `replace` con el canvas ocupado o en un `patch` con `remove_node` o `remove_edge`.
 
@@ -351,7 +378,7 @@ No hace falta tocar el prompt: el índice se genera desde el catálogo.
 ### Añadir una herramienta
 
 1. Definirla en `tools.build_tools` con `@tool`. El docstring es lo que lee el modelo: decir qué devuelve y cuándo usarla.
-2. Devolver siempre JSON (`_json(...)`) y errores como `{"error": "..."}`, nunca excepciones.
+2. Envolver el cuerpo con `_guarded(trace, nombre, body)` y devolver siempre JSON (`_json(...)`), con los errores como `{"error": "..."}`.
 3. Filtrar por las conexiones y permisos del usuario (`request`, `connections`, `restricted` llegan como argumentos).
 4. Añadirla a la lista que devuelve `build_tools`.
 5. Si cambia el modo de trabajo, mencionarla en `prompt.py`.
@@ -402,8 +429,14 @@ python3 -m unittest discover -t . -s gvsigol_plugin_geoetl/tests -p 'test_assist
 | `test_assistant_access.py` | Activación, proveedores, permisos de usuario y modo de edición |
 | `test_assistant_catalog.py` | Cada nodo de la paleta tiene ficha; parámetros y puertos coinciden con `TableShape.js`; escapado del prompt; comando scaffold |
 | `test_assistant_graph.py` | Validación: tipos, parámetros, puertos y conexiones; confirmaciones; alias a UUID; edición restringida |
+| `test_assistant_agent.py` | Revisión de flujos; colocación de nodos en un patch; canvas compacto; historial con el resultado de las propuestas; bucle del agente con un modelo simulado (autocorrección, comprobación de coherencia, límite de iteraciones, fallo del proveedor); herramientas nuevas y permisos de `list_files`; prompt y esquemas de herramientas válidos |
+| `tests/js/assistant.js` | Chat real en jsdom: workspace nuevo, datos enviados, ids clicables, Detener, ↑/↓, contador, copiar, editar, regenerar, historial y exportar |
 
-No necesitan Django ni LLM; el test del comando de manage.py se salta si Django no está instalado.
+Ninguno llama al proveedor de IA. `test_assistant_agent.py` necesita Django (`manage.py test gvsigol_plugin_geoetl.tests.test_assistant_agent`); los demás no. Los JS: `NODE_PATH=<jsdom+jquery>/node_modules node tests/js/assistant.js`.
+
+### Traza para diagnosticar
+
+Con `ETL_ASSISTANT_TRACE=True` cada turno deja una línea `etl_assistant trace {...}` en el log `gvsigol`: herramientas llamadas con su duración y si fallaron, número de propuestas, si hubo propuesta, si se llegó al límite de iteraciones y qué hizo la comprobación de coherencia (`nudged`, `fixed`, `no_change`, `warned`). No incluye textos del usuario ni datos de las tablas.
 
 ## Compatibilidad con workspaces existentes
 
@@ -424,6 +457,8 @@ Para desplegar en producción se recomienda subir primero con el asistente apaga
 | "No se ha podido consultar el asistente" | Error del proveedor o del agente. El traceback está en el log `gvsigol` (`etl_assistant: fallo al invocar el agente`) |
 | "La clave del proveedor de IA no es válida" | Clave de GeoCopilot caducada o incorrecta |
 | "Se ha superado la cuota" | Límite del proveedor de IA |
+| "El asistente no ha propuesto ningún cambio" | El modelo dijo que cambiaba algo sin hacerlo, incluso tras la segunda pasada. Reformular la petición con más detalle; con `ETL_ASSISTANT_TRACE` se ve qué herramientas usó |
+| "No he podido terminar: la petición necesita demasiados pasos" | Límite de iteraciones (`AGENT_MAX_ITERATIONS` de GeoCopilot, mínimo 20). Dividir la petición |
 | El panel aparece sin estilos | Caché del navegador: Ctrl+F5 |
 | Textos en inglés | `.mo` sin compilar o catálogo JS cacheado: compilar, reiniciar el backend y Ctrl+F5 |
 | El asistente no conoce un nodo | Falta su ficha en `nodes/`; ver [Añadir un nodo nuevo](#añadir-un-nodo-nuevo-al-asistente) |

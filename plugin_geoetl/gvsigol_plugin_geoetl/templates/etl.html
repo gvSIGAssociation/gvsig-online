@@ -301,6 +301,8 @@
                             <li><a data-shape="input_PadronAlbacete" class="palette_node_element draw2d_droppable dropdown-item">Padrón Albacete</a></li>
                             <li><a data-shape="input_PadronAtm" class="palette_node_element draw2d_droppable dropdown-item">Padrón ATM</a></li>
                             <li><a data-shape="input_Postgis" class="palette_node_element draw2d_droppable dropdown-item">PgSQL/PostGIS</a></li>
+                            <li><a data-shape="input_Model" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Saved Model" %}</a></li>
+                            <li><a data-shape="input_Raster" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Raster (GeoTIFF)" %}</a></li>
                             <li><a data-shape="input_Segex" class="palette_node_element draw2d_droppable dropdown-item">SEGEX</a></li>
                             <li><a data-shape="input_Sharepoint" class="palette_node_element draw2d_droppable dropdown-item">SharePoint</a></li>
                             <li><a data-shape="input_Shp" class="palette_node_element draw2d_droppable dropdown-item">Shapefile</a></li>
@@ -386,6 +388,32 @@
                     </div>
 
                     <div class="btn-group">
+                        <button class="btn btn-raster" type="button" id="button-raster"
+                        {% if editablerestrictedly == 'true' %} disabled {% endif %}><i class="fa fa-th"></i> {% trans "Raster" %}</button>
+                        <div class="dropdown-menu">
+                            <li><a data-shape="trans_RasterClip" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Clip Raster" %}</a></li>
+                            <li><a data-shape="trans_RasterStack" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Combine Rasters" %}</a></li>
+                            <li><a data-shape="trans_RasterIndex" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Spectral Index" %}</a></li>
+                            <li><a data-shape="trans_RasterMajority" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Clean Raster" %}</a></li>
+                            <li><a data-shape="trans_RasterPolygonize" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Raster to Polygons" %}</a></li>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-predictive" type="button" id="button-predictive"
+                        {% if editablerestrictedly == 'true' %} disabled {% endif %}><i class="fa fa-line-chart"></i> {% trans "Predictive" %}</button>
+                        <div class="dropdown-menu">
+                            <li><a data-shape="trans_RasterSample" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Sample Raster" %}</a></li>
+                            <li><a data-shape="trans_RandomForest" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Random Forest" %}</a></li>
+                            <li><a data-shape="trans_RasterPredict" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Predict Raster" %}</a></li>
+                            <li><a data-shape="trans_TablePredict" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Predict Table" %}</a></li>
+                            <li><a data-shape="trans_ClassAssess" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Assess Classification" %}</a></li>
+                            <li><a data-shape="trans_StratifiedSample" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Stratified Sample" %}</a></li>
+                            <li><a data-shape="trans_AreaEstimate" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Estimate Areas" %}</a></li>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
                         <button class="btn btn-primary" type="button" id="button-workflow"
                         {% if editablerestrictedly == 'true' %} disabled {% endif %}><i class="fa fa-cog"></i> {% trans "Workflows" %}</button>
                         <div class="dropdown-menu">
@@ -398,6 +426,8 @@
                         {% if editablerestrictedly == 'true' %} disabled {% endif %}><i class="fa fa-sign-out"></i> {% trans "Outputs" %}</button>
                         <div class="dropdown-menu">
                             <li><a data-shape="output_Postgis" class="palette_node_element draw2d_droppable dropdown-item">PgSQL/PostGIS</a></li>
+                            <li><a data-shape="output_ModelSave" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Save Model" %}</a></li>
+                            <li><a data-shape="output_RasterPublish" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Publish Raster" %}</a></li>
                             <li><a data-shape="output_Visualizer" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Visualizer" %}</a></li>
                         </div>
                     </div>
@@ -415,7 +445,8 @@
                     <header class="pl-assistant__header">
                         <h4 class="pl-assistant__title"><i class="fa fa-comments"></i> {% trans "Assistant" %}</h4>
                         <div class="pl-assistant__header-actions">
-                            <button type="button" class="pl-assistant__icon-btn" id="etl-assistant-clear" aria-label="{% trans 'Clear conversation' %}"><i class="fa fa-trash"></i></button>
+                            <button type="button" class="pl-assistant__icon-btn" id="etl-assistant-export" aria-label="{% trans 'Download conversation' %}" title="{% trans 'Download conversation' %}"><i class="fa fa-download"></i></button>
+                            <button type="button" class="pl-assistant__icon-btn" id="etl-assistant-clear" aria-label="{% trans 'Clear conversation' %}" title="{% trans 'Clear conversation' %}"><i class="fa fa-trash"></i></button>
                             <button type="button" class="pl-assistant__icon-btn" id="etl-assistant-close" aria-label="{% trans 'Close assistant' %}"><i class="fa fa-times"></i></button>
                         </div>
                     </header>
@@ -436,8 +467,9 @@
                     <form class="pl-assistant__composer" id="etl-assistant-form">
                         <label class="sr-only" for="etl-assistant-input">{% trans "Message" %}</label>
                         <textarea id="etl-assistant-input" rows="1" placeholder="{% trans 'Describe the flow…' %}"></textarea>
-                        <button type="submit" id="etl-assistant-send" class="btn-pl-add" aria-label="{% trans 'Send' %}"><i class="fa fa-paper-plane"></i></button>
+                        <button type="submit" id="etl-assistant-send" class="btn-pl-add" aria-label="{% trans 'Send' %}" title="{% trans 'Send' %}"><i class="fa fa-paper-plane"></i></button>
                     </form>
+                    <div class="pl-assistant__counter" id="etl-assistant-counter" aria-live="polite" hidden></div>
                 </aside>
                 {% endif %}
             </div>
@@ -1013,6 +1045,7 @@
 </script>
 
 <script type="text/javascript" src="{% static "js/lib/draw2d.js" %}"></script>
+<script type="text/javascript" src="{% static "js/NodeHeader.js" %}"></script>
 
 <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
 
@@ -1103,6 +1136,7 @@ window.refreshEtlSqlEditor = function(textareaId) {
 <script type="text/javascript" src="{% static "js/Toolbar.js" %}"></script>
 <script type="text/javascript" src="{% static "js/TableShape.js" %}"></script>
 <script type="text/javascript" src="{% static "js/SchemaPropagator.js" %}"></script>
+<script type="text/javascript" src="{% static "js/PredictiveShapes.js" %}"></script>
 <script type="text/javascript" src="{% static "js/SchemaCanvas.js" %}"></script>
 {% if etl_assistant_enabled %}
 <script type="text/javascript" src="{% static "js/lib/marked.min.js" %}"></script>
