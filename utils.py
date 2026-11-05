@@ -173,7 +173,7 @@ def get_json_toc(project_layergroups, base_group=None, layergroup_order={}):
         toc_layergroup['order'] = order
         
         toc_layers = {}
-        layers_in_group = Layer.objects.filter(layer_group_id=layer_group.id).order_by("order")
+        layers_in_group = Layer.objects.filter(layer_group_id=layer_group.id).order_by("order", "id")
         layer_count = 1
         for l in layers_in_group: 
             toc_layers[l.name] = {
@@ -206,7 +206,7 @@ def toc_add_layergroups(toc_structure, layer_groups):
         toc_layergroup['order'] = lg_count
         
         toc_layers = {}
-        layers_in_group = Layer.objects.filter(layer_group_id=layer_group.id)
+        layers_in_group = Layer.objects.filter(layer_group_id=layer_group.id).order_by("order", "id")
         count2 = 1
         for l in layers_in_group: 
             toc_layers[l.name] = {

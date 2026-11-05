@@ -1094,7 +1094,7 @@ def _get_prepared_layer_groups(request):
         layer_group['name'] = lg.name
         layer_group['title'] = lg.title
         layer_group['layers'] = []
-        layers = Layer.objects.filter(layer_group_id=lg.id)
+        layers = Layer.objects.filter(layer_group_id=lg.id).order_by('-order', '-id')
         for l in layers:
             layer_group['layers'].append({
                 'id': l.id,
@@ -1610,7 +1610,7 @@ def project_update(request, pid):
             projectTools = get_available_tools(True, True)
         for lg in layer_groups:
             lg['layers'] = []
-            layers = Layer.objects.filter(layer_group_id=lg['id'])
+            layers = Layer.objects.filter(layer_group_id=lg['id']).order_by('-order', '-id')
             for l in layers:   
                 baselayer = False           
                 if lg['baselayer_group']:
