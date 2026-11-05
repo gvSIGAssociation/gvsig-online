@@ -4322,7 +4322,7 @@ def _layergroup_update(request, lgid, project_id):
     else:
         layergroup = LayerGroup.objects.get(id=int(lgid))
         layers = []
-        for layer in  Layer.objects.filter(layer_group_id=layergroup.id).order_by('-order'):
+        for layer in  Layer.objects.filter(layer_group_id=layergroup.id).order_by('-order', '-id'):
             lyr_def = {
                 'id': layer.id,
                 'name': layer.name,
