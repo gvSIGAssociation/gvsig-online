@@ -910,6 +910,22 @@ class ConnectionForm(forms.ModelForm):
         widget=forms.PasswordInput(attrs={'class': 'form-control api-sgarexws-field'})
     )
 
+    # ==================== CAMPOS PARA GESTIONA ====================
+    gestiona_url = forms.URLField(
+        label=_('URL'),
+        required=False,
+        max_length=500,
+        widget=forms.URLInput(attrs={
+            'class': 'form-control api-gestiona-field',
+            'placeholder': 'https://02.g3stiona.com/'
+        }),
+    )
+    gestiona_access_token = forms.CharField(
+        label=_('Access Token'),
+        required=False,
+        widget=forms.PasswordInput(attrs={'class': 'form-control api-gestiona-field'})
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Pre-rellenar con valores por defecto de la BBDD de la aplicación
@@ -986,6 +1002,12 @@ class ConnectionForm(forms.ModelForm):
         elif conn_type == 'sgarexws':
             required = {'sgarexws_url': _('URL'), 'sgarexws_username': _('Username'),
                         'sgarexws_password': _('Password')}
+            for field, label in required.items():
+                if not cleaned_data.get(field):
+                    self.add_error(field, _('This field is required'))
+
+        elif conn_type == 'gestiona':
+            required = {'gestiona_url': _('URL'), 'gestiona_access_token': _('Access Token')}
             for field, label in required.items():
                 if not cleaned_data.get(field):
                     self.add_error(field, _('This field is required'))
@@ -1074,6 +1096,15 @@ class ConnectionForm(forms.ModelForm):
                 'url': url_val,
                 'username': self.cleaned_data.get('sgarexws_username', ''),
                 'password': self.cleaned_data.get('sgarexws_password', ''),
+            })
+
+        elif conn_type == 'gestiona':
+            url_val = (self.cleaned_data.get('gestiona_url') or '').strip()
+            if url_val and not url_val.endswith('/'):
+                url_val += '/'
+            return json.dumps({
+                'url': url_val,
+                'access-token': self.cleaned_data.get('gestiona_access_token', ''),
             })
         
         return '{}'
@@ -1402,6 +1433,25 @@ class ConnectionUpdateForm(forms.ModelForm):
         })
     )
 
+    # ==================== CAMPOS PARA GESTIONA ====================
+    gestiona_url = forms.URLField(
+        label=_('URL'),
+        required=False,
+        max_length=500,
+        widget=forms.URLInput(attrs={
+            'class': 'form-control api-gestiona-field',
+            'placeholder': 'https://02.g3stiona.com/'
+        })
+    )
+    gestiona_access_token = forms.CharField(
+        label=_('Access Token'),
+        required=False,
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control api-gestiona-field',
+            'placeholder': _('Leave empty to keep current password'),
+        })
+    )
+
     def clean_extra_params(self):
         """Valida que extra_params sea un JSON válido."""
         extra_params = self.cleaned_data.get('extra_params', '')
@@ -1420,6 +1470,9 @@ class ConnectionUpdateForm(forms.ModelForm):
                 self.add_error('sgarexws_url', _('This field is required'))
             if not (cleaned_data.get('sgarexws_username') or '').strip():
                 self.add_error('sgarexws_username', _('This field is required'))
+        elif conn_type == 'gestiona':
+            if not (cleaned_data.get('gestiona_url') or '').strip():
+                self.add_error('gestiona_url', _('This field is required'))
         return cleaned_data
 
     def get_connection_params(self, current_params=None):
@@ -1528,6 +1581,18 @@ class ConnectionUpdateForm(forms.ModelForm):
                 'url': url_val,
                 'username': self.cleaned_data.get('sgarexws_username', ''),
                 'password': password,
+            })
+
+        elif conn_type == 'gestiona':
+            access_token = self.cleaned_data.get('gestiona_access_token', '')
+            if not access_token and current_params:
+                access_token = current_params.get('access-token', '')
+            url_val = (self.cleaned_data.get('gestiona_url') or '').strip()
+            if url_val and not url_val.endswith('/'):
+                url_val += '/'
+            return json.dumps({
+                'url': url_val,
+                'access-token': access_token,
             })
         
         return '{}'

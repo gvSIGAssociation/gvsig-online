@@ -7868,6 +7868,10 @@ def connection_update(request, connection_id):
                 'sgarexws_url': params.get('url', ''),
                 'sgarexws_username': params.get('username', ''),
             })
+        elif conn_type == 'gestiona':
+            initial_data.update({
+                'gestiona_url': params.get('url', ''),
+            })
         
         form = ConnectionUpdateForm(instance=connection, initial=initial_data)
         
@@ -8191,6 +8195,42 @@ def connection_test(request):
                     return JsonResponse({'success': True, 'message': _('Connection successful')})
                 desc = resultado.get('descripcion') or body
                 return JsonResponse({'success': False, 'error': str(desc)})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
+
+        elif conn_type == 'gestiona':
+            try:
+                import requests as req
+                base_url = (request.POST.get('url', '') or '').strip().rstrip('/')
+                access_token = request.POST.get('access-token', '') or ''
+                connection_id = request.POST.get('connection_id')
+                if not access_token and connection_id:
+                    try:
+                        conn_obj = Connection.objects.get(pk=int(connection_id))
+                        if conn_obj.type == 'gestiona':
+                            saved = json.loads(conn_obj.connection_params or '{}')
+                            access_token = saved.get('access-token') or ''
+                    except (ValueError, Connection.DoesNotExist, json.JSONDecodeError, TypeError):
+                        access_token = ''
+                if not base_url or not access_token:
+                    return JsonResponse({'success': False, 'error': _('URL and Access Token are required')})
+                test_url = base_url + '/rest/files?max-results=1'
+                response = req.get(
+                    test_url,
+                    headers={
+                        'User-agent': 'gvSIG Online/2.6.1',
+                        'content-type': 'application/json',
+                        'X-Gestiona-Access-Token': access_token,
+                    },
+                    verify=False,
+                    timeout=30,
+                )
+                if response.status_code in (200, 204):
+                    return JsonResponse({'success': True, 'message': _('Connection successful')})
+                return JsonResponse({
+                    'success': False,
+                    'error': f'HTTP {response.status_code}: {response.text[:500]}'
+                })
             except Exception as e:
                 return JsonResponse({'success': False, 'error': str(e)})
         
@@ -9221,7 +9261,7 @@ def connection_list_for_etl(request):
         if category == 'database':
             connections = connections.filter(type__in=['PostGIS', 'Oracle', 'SQLServer', 'MySQL'])
         elif category == 'api':
-            connections = connections.filter(type__in=['indenova', 'segex', 'sharepoint', 'padron-atm', 'sgarexws'])
+            connections = connections.filter(type__in=['indenova', 'segex', 'sharepoint', 'padron-atm', 'sgarexws', 'gestiona'])
         
         result = []
         for conn in connections.order_by('name'):
