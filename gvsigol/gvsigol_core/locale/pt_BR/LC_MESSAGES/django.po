@@ -16,9 +16,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Poedit 2.4.3\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
-"X-Generator: Poedit 2.4.3\n"
 
 #: forms.py:17
 msgid "Clone project and layer permissions"
@@ -35,8 +35,8 @@ msgstr "Novo título do projeto"
 
 #: forms.py:31 forms.py:38 forms.py:46
 msgid ""
-"must start by a lower case alphanumeric and contain lower case alphanumerics "
-"or underscores"
+"must start by a lower case alphanumeric and contain lower case alphanumerics"
+" or underscores"
 msgstr ""
 "deve começar por um alfanumérico de minúsculas e conter alfanuméricos de "
 "minúsculas ou sublinhados"
@@ -452,8 +452,8 @@ msgid ""
 "Manual for administrators: manage users, groups, services, symbology, and "
 "projects on the platform."
 msgstr ""
-"Manual para administradores: gerencie usuários, grupos, serviços, simbologia "
-"e projetos na plataforma."
+"Manual para administradores: gerencie usuários, grupos, serviços, simbologia"
+" e projetos na plataforma."
 
 #: templates/documentation.html:306
 msgid "Mobile application"
@@ -948,8 +948,8 @@ msgstr ""
 
 #: templates/project_add.html:872 templates/project_update.html:1041
 msgid ""
-"If the project is public, all the layers assigned to the project will become "
-"public."
+"If the project is public, all the layers assigned to the project will become"
+" public."
 msgstr ""
 "Se o projeto for público, todas as camadas designadas para o projeto se "
 "tornarão públicas."
@@ -959,8 +959,8 @@ msgid ""
 "This action will operate on layers, layer groups and user groups currently "
 "selected, even if they have been not saved."
 msgstr ""
-"A ação operará em camadas, grupos de camadas e grupos de usuários atualmente "
-"selecionados, mesmo que não tenham sido salvos."
+"A ação operará em camadas, grupos de camadas e grupos de usuários atualmente"
+" selecionados, mesmo que não tenham sido salvos."
 
 #: templates/project_add.html:874 templates/project_update.html:1043
 msgid "Additional permissions existing on the layer will not be removed."
@@ -1150,7 +1150,7 @@ msgstr ""
 
 #: templates/project_list.html:772
 msgid "Export ZIP"
-msgstr "ZIP de exportação"
+msgstr "Exportar ZIP"
 
 #: templates/project_list.html:788
 msgid ""
@@ -1462,10 +1462,9 @@ msgid ""
 msgstr ""
 
 #: templates/project_package_import_wizard.html:144
-#, fuzzy
 #| msgid "Target server"
 msgid "Target datastore"
-msgstr "Servidor de destino"
+msgstr "Datastore de destino"
 
 #: templates/project_package_import_wizard.html:151
 msgid "Foreign DB"
@@ -1503,7 +1502,7 @@ msgstr "Conexão exportada"
 
 #: templates/project_package_import_wizard.html:186
 msgid "Target connection"
-msgstr "Conexão destino"
+msgstr "Conexão de destino"
 
 #: templates/project_package_import_wizard.html:193
 msgid "Do not import these layers"
@@ -1998,12 +1997,11 @@ msgstr "É  necessário inserir um nome de projeto"
 #: views.py:2689
 #, fuzzy, python-brace-format
 #| msgid ""
-#| "Invalid project name: '{value}'. Identifiers must begin with a letter or "
-#| "an underscore (_). Subsequent characters can be letters, underscores or "
-#| "numbers"
+#| "Invalid project name: '{value}'. Identifiers must begin with a letter or an "
+#| "underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgid ""
-"Invalid application name: '{value}'. Identifiers must begin with a letter or "
-"an underscore (_). Subsequent characters can be letters, underscores or "
+"Invalid application name: '{value}'. Identifiers must begin with a letter or"
+" an underscore (_). Subsequent characters can be letters, underscores or "
 "numbers"
 msgstr ""
 "Nome inválido do projeto: '{value}'. Os identificadores devem començar com "
@@ -2025,21 +2023,22 @@ msgstr "Nenhum arquivo selecionado"
 msgid "role_default-roles"
 msgstr "Roles padrão"
 
-
 # Public viewers landing section (includes/public_viewers_section.html)
-
 msgid "Public viewers"
 msgstr "Visualizadores públicos"
 
-msgid "Display the territory, orthophotos and thematic mapping through interactive viewers."
-msgstr "Visualize o território, ortofotos e cartografia temática através de visualizadores interativos."
+msgid ""
+"Display the territory, orthophotos and thematic mapping through interactive "
+"viewers."
+msgstr ""
+"Visualize o território, ortofotos e cartografia temática através de "
+"visualizadores interativos."
 
 msgid "Public viewers pagination"
 msgstr "Paginação de visualizadores públicos"
 
 msgid "App"
 msgstr "App"
-
 
 msgid "Projects, panels & applications"
 msgstr "Projetos, painéis de controle e aplicações"
@@ -2052,3 +2051,146 @@ msgstr "Painel de controle"
 
 msgid "Open panel"
 msgstr "Abrir painel de controle"
+
+msgid "Layer definition and connection"
+msgstr "Definição da camada e conexão"
+
+msgid "SQL view definition"
+msgstr "Definição SQL da visão"
+
+msgid "Definition"
+msgstr "Definição"
+
+msgid "Definition options"
+msgstr "Opções de definição"
+
+msgid "Do not import this layer"
+msgstr "Não importar esta camada"
+
+msgid "Do not import this model layer"
+msgstr "Não importar esta camada modelo"
+
+msgid "Do not import this view"
+msgstr "Não importar esta visão"
+
+msgid "Ext. DB"
+msgstr "BD ext."
+
+msgid "Model"
+msgstr "Modelo"
+
+msgid "SQL View"
+msgstr "Visão SQL"
+
+msgid "SQL view layers"
+msgstr "Camadas de visões SQL"
+
+msgid "SQL view layers (local database)"
+msgstr "Visões SQL (base de dados local)"
+
+msgid ""
+"Choose GeoPackage (data) or Definition. For SQL views, Definition lets you "
+"include the layer definition and connection and/or the SQL view definition."
+msgstr ""
+"Escolha GeoPackage (dados) ou Definição. Em visões SQL, Definição permite "
+"incluir a definição da camada e conexão e/ou a definição SQL da visão."
+
+msgid ""
+"These layers are PostgreSQL views on the local database. Choose GeoPackage "
+"(data) or Definition (SQL view definition). The connection is always the "
+"local database."
+msgstr ""
+"Estas camadas são visões PostgreSQL da base local. Escolha GeoPackage "
+"(dados) ou Definição (definição SQL da visão). A conexão é sempre a base "
+"local."
+
+msgid "Select a target datastore for external SQL view \"%(layer)s\"."
+msgstr "Selecione um datastore de destino para a visão SQL externa \"%(layer)s\"."
+
+msgid "Selected datastore for external SQL view \"%(layer)s\" was not found."
+msgstr ""
+"O datastore selecionado para a visão SQL externa \"%(layer)s\" não foi "
+"encontrado."
+
+msgid ""
+"Datastore \"%(ws)s/%(ds)s\" belongs to connection \"%(ds_conn)s\", but you "
+"selected \"%(sel_conn)s\". Pick a datastore of that connection."
+msgstr ""
+"O datastore \"%(ws)s/%(ds)s\" pertence à conexão \"%(ds_conn)s\", mas você "
+"selecionou \"%(sel_conn)s\". Escolha um datastore dessa conexão."
+
+msgid ""
+"Datastore \"%(ds)s\" in workspace \"%(ws)s\" is already registered with "
+"another database connection (\"%(other)s\"). Select that connection in the "
+"wizard, or skip this layer."
+msgstr ""
+"O datastore \"%(ds)s\" no workspace \"%(ws)s\" já está registrado com outra "
+"conexão de banco (\"%(other)s\"). Selecione essa conexão no assistente ou "
+"omita esta camada."
+
+msgid ""
+"View layer \"%(layer)s\" was not imported: could not create view "
+"\"%(schema)s\".\"%(view)s\": %(error)s"
+msgstr ""
+"A camada visão \"%(layer)s\" não foi importada: não foi possível criar a "
+"visão \"%(schema)s\".\"%(view)s\": %(error)s"
+
+msgid "View layer \"%(layer)s\" was not imported: no SQL definition available."
+msgstr ""
+"A camada visão \"%(layer)s\" não foi importada: não há definição SQL "
+"disponível."
+
+msgid "View layer \"%(layer)s\" was skipped by choice in the import wizard."
+msgstr ""
+"A camada visão \"%(layer)s\" foi omitida por escolha no assistente de "
+"importação."
+
+msgid "— Select connection —"
+msgstr "— Selecionar conexão —"
+
+msgid "— Select datastore —"
+msgstr "— Selecionar datastore —"
+
+msgid "No GPKG — definition only"
+msgstr "Sem GPKG — apenas definição"
+
+msgid "Edit SQL"
+msgstr "Editar SQL"
+
+msgid "Edit view SQL"
+msgstr "Editar SQL da visão"
+
+msgid "Layers in this package"
+msgstr "Camadas neste pacote"
+
+msgid "Target / Action"
+msgstr "Destino / Ação"
+
+msgid "Skip this layer"
+msgstr "Omitir esta camada"
+
+msgid "Skip this raster layer"
+msgstr "Omitir esta camada raster"
+
+msgid "failed"
+msgstr "falhou"
+
+msgid "cancelled"
+msgstr "cancelado"
+
+msgid "Imported from package (%(schema)s)"
+msgstr "Importado do pacote (%(schema)s)"
+
+msgid "Definition-only layer has no table name in package metadata"
+msgstr ""
+"A camada somente-definição não tem nome de tabela nos metadados do pacote"
+
+msgid ""
+"Definition-only layer \"%(layer)s\" was not imported. You can add it "
+"manually later."
+msgstr ""
+"A camada somente-definição \"%(layer)s\" não foi importada. Você pode "
+"adicioná-la manualmente depois."
+
+msgid "layer(s)"
+msgstr "camada(s)"

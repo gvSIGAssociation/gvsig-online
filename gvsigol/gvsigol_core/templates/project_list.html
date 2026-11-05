@@ -268,38 +268,39 @@
 					</label>
 					<p class="help-block small">{% trans "Export the exact set of tools (core and plugins) enabled for this project. On import, only tools available on the target server will be applied; missing tools will be logged as warnings. If unchecked, the imported project will use the server default tools." %}</p>
 				</div>
+					<div id="export-package-view-warnings" class="alert alert-warning" style="display:none"></div>
 					<div id="export-package-foreign-layers" style="display:none">
 						<h4>{% trans "Layers on external databases" %}</h4>
-						<p class="text-muted">{% trans "Choose whether to copy data into the package (GPKG) or export metadata only (destination must already have the tables)." %}</p>
+						<p class="text-muted">{% trans "Choose GeoPackage (data) or Definition. For SQL views, Definition lets you include the layer definition and connection and/or the SQL view definition." %}</p>
 						<table class="table table-bordered table-condensed">
 						<colgroup>
-							<col style="width:33%">
-							<col style="width:33%">
-							<col style="width:33%">
+							<col style="width:28%">
+							<col style="width:22%">
+							<col style="width:25%">
+							<col style="width:25%">
 						</colgroup>
 						<thead>
 							<tr>
 								<th>{% trans "Layer" %}</th>
 								<th>{% trans "Connection" %}</th>
 								<th>{% trans "Export" %}</th>
+								<th>{% trans "Definition options" %}</th>
 							</tr>
 						</thead>
 						<tbody id="export-package-foreign-tbody"></tbody>
 						</table>
 					</div>
 					<div id="export-package-view-layers" style="display:none">
-						<h4>{% trans "SQL view layers" %}</h4>
-						<p class="text-muted">{% trans "These layers are PostgreSQL views. Choose how to export each one: copy the data as a GeoPackage, or export the SQL view definition so it can be recreated on import." %}</p>
+						<h4>{% trans "SQL view layers (local database)" %}</h4>
+						<p class="text-muted">{% trans "These layers are PostgreSQL views on the local database. Choose GeoPackage (data) or Definition (SQL view definition). The connection is always the local database." %}</p>
 					<table class="table table-bordered table-condensed">
 						<colgroup>
-							<col style="width:33%">
-							<col style="width:33%">
-							<col style="width:33%">
+							<col style="width:55%">
+							<col style="width:45%">
 						</colgroup>
 						<thead>
 							<tr>
 								<th>{% trans "Layer" %}</th>
-								<th></th>
 								<th>{% trans "Export" %}</th>
 							</tr>
 						</thead>
@@ -460,11 +461,116 @@ $(document).ready(function() {
 		$('#export-package-preflight-error').hide().text('');
 		$('#export-package-options').hide();
 		$('#export-package-permissions-block').hide();
+		$('#export-package-view-warnings').hide().empty();
 		$('#export-package-foreign-layers').hide();
 		$('#export-package-foreign-tbody').empty();
 		$('#export-package-view-layers').hide();
 		$('#export-package-view-tbody').empty();
 		$('#btn-export-package-submit').prop('disabled', true);
+	}
+
+	var _lblGpkg = '{% filter escapejs %}{% trans "Data (GPKG)" %}{% endfilter %}';
+	var _lblDefinition = '{% filter escapejs %}{% trans "Definition" %}{% endfilter %}';
+	var _lblDefLayerConn = '{% filter escapejs %}{% trans "Layer definition and connection" %}{% endfilter %}';
+	var _lblDefView = '{% filter escapejs %}{% trans "SQL view definition" %}{% endfilter %}';
+	var _lblSqlView = '{% filter escapejs %}{% trans "SQL View" %}{% endfilter %}';
+
+	function syncExportLayerMode(layerId) {
+		var kind = $('input[name="layer_export_kind_' + layerId + '"]:checked').val();
+		var $hidden = $('#layer_vector_mode_hidden_' + layerId);
+		var localOnly = $hidden.data('local-view') === 1 || $hidden.data('local-view') === '1';
+		if (kind === 'embedded') {
+			$hidden.val('embedded');
+			$('.export-def-opts-' + layerId).css('visibility', 'hidden');
+			return;
+		}
+		if (localOnly) {
+			/* Local SQL views: Definition always means SQL view definition. */
+			$hidden.val('view_sql_definition');
+			return;
+		}
+		$('.export-def-opts-' + layerId).css('visibility', 'visible');
+		var wantLayer = $('#layer_def_layer_' + layerId).is(':checked');
+		var wantView = $('#layer_def_view_' + layerId).is(':checked');
+		if (!wantLayer && !wantView) {
+			$('#layer_def_layer_' + layerId).prop('checked', true);
+			wantLayer = true;
+		}
+		if (wantView) {
+			$hidden.val('view_sql_definition');
+		} else {
+			$hidden.val('definition_only');
+		}
+	}
+
+	function buildExportKindRadios(layerId, defaultKind) {
+		var $wrap = $('<div></div>');
+		$wrap.append(
+			$('<label class="radio-inline"></label>').append(
+				$('<input type="radio">').attr({
+					name: 'layer_export_kind_' + layerId,
+					value: 'embedded',
+					'class': 'export-kind-radio'
+				}).prop('checked', defaultKind === 'embedded').data('layer-id', layerId)
+			).append(' ' + _lblGpkg + ' ')
+		);
+		$wrap.append(
+			$('<label class="radio-inline"></label>').append(
+				$('<input type="radio">').attr({
+					name: 'layer_export_kind_' + layerId,
+					value: 'definition',
+					'class': 'export-kind-radio'
+				}).prop('checked', defaultKind !== 'embedded').data('layer-id', layerId)
+			).append(' ' + _lblDefinition + ' ')
+		);
+		$wrap.append(
+			$('<input type="hidden">').attr({
+				id: 'layer_vector_mode_hidden_' + layerId,
+				name: 'layer_vector_mode_' + layerId,
+				value: defaultKind === 'embedded' ? 'embedded' : 'definition_only'
+			})
+		);
+		return $wrap;
+	}
+
+	function buildDefinitionOptionCheckboxes(layerId, isView, defaults) {
+		/* Foreign layers only. defaults: { layer: bool, view: bool } when Definition is selected. */
+		var $wrap = $('<div class="export-def-opts-' + layerId + '"></div>');
+		if (!isView) {
+			$wrap.append($('<span class="text-muted small"></span>').text(_lblDefLayerConn));
+			$wrap.append(
+				$('<input type="checkbox">').attr({
+					id: 'layer_def_layer_' + layerId,
+					'class': 'export-def-cb',
+					style: 'display:none'
+				}).prop('checked', true).data('layer-id', layerId)
+			);
+			$wrap.append(
+				$('<input type="checkbox">').attr({
+					id: 'layer_def_view_' + layerId,
+					'class': 'export-def-cb',
+					style: 'display:none'
+				}).prop('checked', false).data('layer-id', layerId)
+			);
+			return $wrap;
+		}
+		$wrap.append(
+			$('<label class="checkbox-inline" style="margin-right:12px"></label>').append(
+				$('<input type="checkbox">').attr({
+					id: 'layer_def_layer_' + layerId,
+					'class': 'export-def-cb'
+				}).prop('checked', !!defaults.layer).data('layer-id', layerId)
+			).append(' ' + _lblDefLayerConn)
+		);
+		$wrap.append(
+			$('<label class="checkbox-inline"></label>').append(
+				$('<input type="checkbox">').attr({
+					id: 'layer_def_view_' + layerId,
+					'class': 'export-def-cb'
+				}).prop('checked', !!defaults.view).data('layer-id', layerId)
+			).append(' ' + _lblDefView)
+		);
+		return $wrap;
 	}
 
 	function fillExportPackageModal(data) {
@@ -474,31 +580,38 @@ $(document).ready(function() {
 		if (data.ask_export_permissions) {
 			$('#export-package-permissions-block').show();
 		}
+		var warnings = data.view_detection_warnings || [];
+		if (warnings.length) {
+			var $w = $('#export-package-view-warnings');
+			warnings.forEach(function (w) {
+				$w.append($('<p></p>').css('margin', '0 0 4px').text(w.message || ''));
+			});
+			$w.show();
+		}
 		var foreign = (data.vector_layers || []).filter(function (ly) { return ly.is_foreign; });
 		if (foreign.length) {
 			$('#export-package-foreign-layers').show();
 			var tbody = $('#export-package-foreign-tbody');
 			foreign.forEach(function (ly) {
+				var lid = ly.layer_id;
 				var defMode = ly.default_vector_mode || 'definition_only';
+				var defaultKind = defMode === 'embedded' ? 'embedded' : 'definition';
 				var row = $('<tr></tr>');
-				row.append($('<td></td>').text(ly.title + ' (' + ly.layer_group + ')'));
+				var titleCell = $('<td></td>').text(ly.title + ' (' + ly.layer_group + ')');
+				if (ly.is_view) {
+					titleCell.append(' ').append(
+						$('<span class="label label-primary"></span>').text(_lblSqlView)
+					);
+				}
+				row.append(titleCell);
 				row.append($('<td></td>').text(ly.connection_label || ''));
-				var cell = $('<td></td>');
-				var emb = $('<label class="radio-inline"></label>').append(
-					$('<input type="radio">').attr({
-						name: 'layer_vector_mode_' + ly.layer_id,
-						value: 'embedded'
-					}).prop('checked', defMode === 'embedded')
-				).append(' {% trans "Data (GPKG)" %} ');
-				var defn = $('<label class="radio-inline"></label>').append(
-					$('<input type="radio">').attr({
-						name: 'layer_vector_mode_' + ly.layer_id,
-						value: 'definition_only'
-					}).prop('checked', defMode === 'definition_only')
-				).append(' {% trans "Definition only" %} ');
-				cell.append(emb).append(defn);
-				row.append(cell);
+				row.append($('<td></td>').append(buildExportKindRadios(lid, defaultKind)));
+				row.append($('<td></td>').append(buildDefinitionOptionCheckboxes(lid, !!ly.is_view, {
+					layer: true,
+					view: defMode === 'view_sql_definition'
+				})));
 				tbody.append(row);
+				syncExportLayerMode(lid);
 			});
 		}
 		var views = (data.vector_layers || []).filter(function (ly) { return ly.is_view && !ly.is_foreign; });
@@ -506,28 +619,25 @@ $(document).ready(function() {
 			$('#export-package-view-layers').show();
 			var vtbody = $('#export-package-view-tbody');
 			views.forEach(function (ly) {
+				var lid = ly.layer_id;
 				var row = $('<tr></tr>');
 				row.append($('<td></td>').text(ly.title + ' (' + ly.layer_group + ')'));
-				row.append($('<td></td>'));
-				var cell = $('<td></td>');
-				var emb = $('<label class="radio-inline"></label>').append(
-					$('<input type="radio">').attr({
-						name: 'layer_vector_mode_' + ly.layer_id,
-						value: 'embedded'
-					}).prop('checked', true)
-				).append(' {% trans "Data (GPKG)" %} ');
-				var sqlv = $('<label class="radio-inline"></label>').append(
-					$('<input type="radio">').attr({
-						name: 'layer_vector_mode_' + ly.layer_id,
-						value: 'view_sql_definition'
-					})
-				).append(' {% trans "SQL view definition" %} ');
-				cell.append(emb).append(sqlv);
-				row.append(cell);
+				/* Local views: GPKG vs Definition only (Definition = SQL view definition). */
+				var $radios = buildExportKindRadios(lid, 'embedded');
+				$radios.find('#layer_vector_mode_hidden_' + lid).attr('data-local-view', '1');
+				row.append($('<td></td>').append($radios));
 				vtbody.append(row);
+				syncExportLayerMode(lid);
 			});
 		}
 	}
+
+	$(document).on('change', '.export-kind-radio, .export-def-cb', function () {
+		var lid = $(this).data('layer-id');
+		if (lid != null) {
+			syncExportLayerMode(lid);
+		}
+	});
 
 	$('#projects-table').on('click', 'a.project-package-export-btn', function (ev) {
 		if (ev.which !== 1 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) {
