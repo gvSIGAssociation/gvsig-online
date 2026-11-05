@@ -172,7 +172,14 @@
 							{% endwith %}
     					{% endif %}		    					
     				{% endfor %}
-				</ul>				
+				</ul>
+				<script>
+					// Mover el menú "Plugins" (creado por los plugins vía JS) al final del menú principal
+					(function() {
+						var pluginsMenu = document.getElementById('menu-manage-plugins');
+						if (pluginsMenu) { pluginsMenu.parentNode.appendChild(pluginsMenu); }
+					})();
+				</script>				
 			</section>			
 		</aside>
 
