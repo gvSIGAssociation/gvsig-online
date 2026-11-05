@@ -721,11 +721,17 @@ def project_package_import_wizard(request, job_id):
             'target_server_id': int(request.POST.get('target_server')),
         }
         foreign_connection_map = {}
-        for key, val in request.POST.items():
-            if key.startswith('foreign_connection_') and val:
-                ck = key[len('foreign_connection_'):]
+        for key in request.POST:
+            if not key.startswith('foreign_connection_'):
+                continue
+            ck = key[len('foreign_connection_'):]
+            # Several rows can share the same connection_key; ignore empties.
+            for val in request.POST.getlist(key):
+                if not val:
+                    continue
                 try:
                     foreign_connection_map[ck] = int(val)
+                    break
                 except (TypeError, ValueError):
                     pass
         if foreign_connection_map:
@@ -753,6 +759,12 @@ def project_package_import_wizard(request, job_id):
                 skip_foreign_connections.append(key[len('skip_foreign_connection_'):])
         if skip_foreign_connections:
             wiz['skip_foreign_connection_keys'] = skip_foreign_connections
+        skip_definition_layers = []
+        for key, val in request.POST.items():
+            if key.startswith('skip_definition_layer_') and val:
+                skip_definition_layers.append(key[len('skip_definition_layer_'):])
+        if skip_definition_layers:
+            wiz['skip_definition_layer_export_ids'] = skip_definition_layers
         skip_gpkg_connections = []
         for key, val in request.POST.items():
             if key.startswith('skip_gpkg_connection_') and val:
@@ -783,6 +795,18 @@ def project_package_import_wizard(request, job_id):
                 skip_view_layers.append(key[len('skip_view_layer_'):])
         if skip_view_layers:
             wiz['skip_view_layer_export_ids'] = skip_view_layers
+        skip_model_public = []
+        for key, val in request.POST.items():
+            if key.startswith('skip_model_public_') and val:
+                skip_model_public.append(key[len('skip_model_public_'):])
+        if skip_model_public:
+            wiz['skip_model_public_export_ids'] = skip_model_public
+        truncate_model_layers = []
+        for key, val in request.POST.items():
+            if key.startswith('truncate_model_layer_') and val:
+                truncate_model_layers.append(key[len('truncate_model_layer_'):])
+        if truncate_model_layers:
+            wiz['truncate_model_layer_export_ids'] = truncate_model_layers
         skip_wms_cascading = []
         for key, val in request.POST.items():
             if key.startswith('skip_wms_cascading_') and val:
@@ -854,10 +878,20 @@ def project_package_import_wizard(request, job_id):
     if not target_server_id and servers:
         target_server_id = servers[0].id
     server_datastores = []
+    foreign_view_datastores = []
     if target_server_id:
         from gvsigol_core.project_package.connection_utils import local_cartodb_datastores_for_server
 
         server_datastores = local_cartodb_datastores_for_server(target_server_id)
+        # Foreign SQL views can target any PostGIS store on the server (incl. external DBs).
+        foreign_view_datastores = list(
+            Datastore.objects.filter(
+                workspace__server_id=int(target_server_id),
+                type='v_PostGIS',
+            )
+            .select_related('workspace', 'connection')
+            .order_by('workspace__name', 'name')
+        )
     import_report_warnings = []
     import_last_error = None
     for row in job.report_json or []:
@@ -875,6 +909,23 @@ def project_package_import_wizard(request, job_id):
             ck = fc.get('connection_key')
             if ck:
                 fc['selected_connection_id'] = foreign_map.get(ck)
+        local_ds_overrides = wizard.get('local_datastore_overrides') or {}
+        foreign_ds_lookup = {
+            (ds.workspace.name, ds.name): ds.id
+            for ds in foreign_view_datastores
+        }
+        for fl in package_layout.get('foreign_layers') or []:
+            ck = fl.get('connection_key')
+            if ck:
+                fl['selected_connection_id'] = foreign_map.get(ck)
+            if fl.get('has_view_sql'):
+                eid = fl.get('export_id') or ''
+                fl['existing_ds_id'] = foreign_ds_lookup.get(
+                    (fl.get('exported_workspace') or '', fl.get('exported_datastore') or '')
+                )
+                fl['selected_local_ds_id'] = (
+                    local_ds_overrides.get(eid) or fl.get('existing_ds_id')
+                )
         gpkg_rows = package_layout.get('gpkg_connection_targets') or []
         package_layout['gpkg_local_targets'] = [r for r in gpkg_rows if not r.get('is_foreign_source')]
         package_layout['gpkg_foreign_targets'] = [r for r in gpkg_rows if r.get('is_foreign_source')]
@@ -896,7 +947,6 @@ def project_package_import_wizard(request, job_id):
             (ds.workspace.name, ds.name): ds.id
             for ds in server_datastores
         }
-        local_ds_overrides = (wizard.get('local_datastore_overrides') or {})
         for ly in package_layout.get('gpkg_layers') or []:
             if not ly.get('is_foreign_source'):
                 eid = ly.get('export_id') or ''
@@ -910,6 +960,43 @@ def project_package_import_wizard(request, job_id):
                 (v.get('exported_workspace', ''), v.get('exported_datastore', ''))
             )
             v['selected_local_ds_id'] = local_ds_overrides.get(eid) or v['existing_ds_id']
+        # Probe whether model/public tables already exist on the local CartoDB.
+        model_rows = package_layout.get('model_public_layers') or []
+        if model_rows:
+            try:
+                from gvsigol_services.models import Datastore
+                from gvsigol_core.project_package.connection_utils import (
+                    is_foreign_postgis_datastore,
+                )
+                probe_ds = None
+                for ds in server_datastores:
+                    if not is_foreign_postgis_datastore(ds):
+                        probe_ds = ds
+                        break
+                if probe_ds is None:
+                    probe_ds = Datastore.objects.filter(type='v_PostGIS').first()
+                if probe_ds is not None:
+                    intro = None
+                    try:
+                        intro, _ = probe_ds.get_db_connection()
+                        for m in model_rows:
+                            tname = (m.get('table_name') or '').strip()
+                            m['table_exists'] = bool(
+                                tname and intro and intro.object_exists('public', tname)
+                            )
+                    finally:
+                        if intro:
+                            try:
+                                intro.close()
+                            except Exception:
+                                pass
+                else:
+                    for m in model_rows:
+                        m['table_exists'] = False
+            except Exception:
+                logger.exception('model_public table_exists probe failed')
+                for m in model_rows:
+                    m.setdefault('table_exists', False)
     recent_package_activity = []
     try:
         from gvsigol_core.project_package.activity_log import recent_package_activity as _recent_activity
@@ -926,6 +1013,7 @@ def project_package_import_wizard(request, job_id):
             'servers': servers,
             'postgis_connections': postgis_connections,
             'server_datastores': server_datastores,
+            'foreign_view_datastores': foreign_view_datastores,
             'package_layout': package_layout,
             'wizard': wizard,
             'foreign_map': foreign_map,

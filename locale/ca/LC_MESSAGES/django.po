@@ -15,9 +15,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.4.2\n"
 "X-Language: ca_ES\n"
 "X-Source-Language: C\n"
-"X-Generator: Poedit 3.4.2\n"
 
 #: gvsigol_core/forms.py:17
 msgid "Clone project and layer permissions"
@@ -33,8 +33,8 @@ msgstr "Títol del nou projecte"
 
 #: gvsigol_core/forms.py:31 gvsigol_core/forms.py:38 gvsigol_core/forms.py:46
 msgid ""
-"must start by a lower case alphanumeric and contain lower case alphanumerics "
-"or underscores"
+"must start by a lower case alphanumeric and contain lower case alphanumerics"
+" or underscores"
 msgstr ""
 "ha de començar per un alfanumèric en minúscula i contenir alfanumèrics de "
 "minúscula o guions baixos"
@@ -109,6 +109,9 @@ msgid ""
 "another database connection (\"%(other)s\"). Select that connection in the "
 "wizard, or skip this layer."
 msgstr ""
+"El datastore \"%(ds)s\" de l’espai de treball \"%(ws)s\" ja està registrat "
+"amb una altra connexió de base de dades (\"%(other)s\"). Seleccioneu aquesta"
+" connexió a l’assistent o ometeu aquesta capa."
 
 #: gvsigol_core/project_package/import_service.py:423
 #, python-format
@@ -162,15 +165,13 @@ msgstr ""
 
 #: gvsigol_core/project_package/import_service.py:564
 #, python-format
-msgid ""
-"Missing datastore for GPKG target workspace \"%(w)s\" / datastore \"%(d)s\""
+msgid "Missing datastore for GPKG target workspace \"%(w)s\" / datastore \"%(d)s\""
 msgstr ""
 
 #: gvsigol_core/project_package/import_service.py:577
 #, python-format
 msgid "Could not create datastore \"%s\" in workspace \"%s\""
-msgstr ""
-"No s'ha pogut crear el magatzem de dades \"%s\" a l'espai de treball \"%s\""
+msgstr "No s'ha pogut crear el magatzem de dades \"%s\" a l'espai de treball \"%s\""
 
 #: gvsigol_core/project_package/import_service.py:595
 #, python-format
@@ -179,11 +180,11 @@ msgstr "No s'ha pogut assignar un nom de projecte únic a partir de \"%s\""
 
 #: gvsigol_core/project_package/import_service.py:642
 msgid ""
-"GDAL (pygdaltools) is not available on this server; vector GeoPackage import/"
-"export will fail."
+"GDAL (pygdaltools) is not available on this server; vector GeoPackage "
+"import/export will fail."
 msgstr ""
-"GDAL (pygdaltools) no està disponible en aquest servidor; la importació/"
-"exportació de GeoPackage vectorial fallarà."
+"GDAL (pygdaltools) no està disponible en aquest servidor; la "
+"importació/exportació de GeoPackage vectorial fallarà."
 
 #: gvsigol_core/project_package/import_service.py:730
 #, python-format
@@ -195,8 +196,8 @@ msgstr " (+%d més)"
 msgid ""
 "The reused layer group \"%(lg)s\" was linked to this project. It also "
 "contains %(n)d layer(s) that were not part of this package TOC block's "
-"reused definitions — they remain visible because they share the server layer "
-"group: %(layers)s."
+"reused definitions — they remain visible because they share the server layer"
+" group: %(layers)s."
 msgstr ""
 
 #: gvsigol_core/project_package/import_service.py:751
@@ -246,8 +247,7 @@ msgstr "No s'han pogut llegir les capes del GeoPackage \"%(path)s\"."
 
 #: gvsigol_core/project_package/import_service.py:1140
 #, python-format
-msgid ""
-"GeoPackage \"%(path)s\" contains layers %(layers)s; none match %(hints)s."
+msgid "GeoPackage \"%(path)s\" contains layers %(layers)s; none match %(hints)s."
 msgstr ""
 
 #: gvsigol_core/project_package/import_service.py:1160
@@ -278,7 +278,7 @@ msgstr "No s'ha seleccionat cap connexió de base de dades per a \"%(key)s\""
 
 #: gvsigol_core/project_package/import_service.py:1551
 msgid "Definition-only layer has no table name in package metadata"
-msgstr "La capa de definició no té nom de taula als metadades del paquet"
+msgstr "La capa només-definició no té nom de taula als metadades del paquet"
 
 #: gvsigol_core/project_package/import_service.py:1572
 #, python-format
@@ -292,8 +292,8 @@ msgid ""
 "Uses an existing LayerGroup on the server — the project will be linked to "
 "that group rather than stealing the Layer from another group."
 msgstr ""
-"Usa un grup de capes existent al servidor — el projecte s'enllaçarà a aquell "
-"grup en lloc de moure la capa d'un altre grup."
+"Usa un grup de capes existent al servidor — el projecte s'enllaçarà a aquell"
+" grup en lloc de moure la capa d'un altre grup."
 
 #: gvsigol_core/project_package/import_service.py:1656
 #, python-format
@@ -307,7 +307,7 @@ msgstr ""
 #, python-format
 msgid "View layer \"%(layer)s\" was not imported: no SQL definition available."
 msgstr ""
-"La capa vista \"%(layer)s\" no s'ha importat: no hi ha definició SQL "
+"La capa vista \"%(layer)s\" no s’ha importat: no hi ha definició SQL "
 "disponible."
 
 #: gvsigol_core/project_package/import_service.py:1899
@@ -316,6 +316,8 @@ msgid ""
 "View layer \"%(layer)s\" was not imported: could not create view "
 "\"%(schema)s\".\"%(view)s\": %(error)s"
 msgstr ""
+"La capa vista \"%(layer)s\" no s’ha importat: no s’ha pogut crear la vista "
+"\"%(schema)s\".\"%(view)s\": %(error)s"
 
 #: gvsigol_core/project_package/import_service.py:2000
 #, python-format
@@ -323,6 +325,8 @@ msgid ""
 "Definition-only layer \"%(layer)s\" was not imported. You can add it "
 "manually later."
 msgstr ""
+"La capa només-definició \"%(layer)s\" no s’ha importat. Podeu afegir-la "
+"manualment més tard."
 
 #: gvsigol_core/project_package/import_service.py:2312
 msgid "Job not extracted; run preflight first"
@@ -341,7 +345,9 @@ msgstr "La capa ja existeix en aquest grup (reutilitzada, no duplicada)."
 #: gvsigol_core/project_package/report_summary.py:43
 #, python-format
 msgid "View layer \"%(layer)s\" was skipped by choice in the import wizard."
-msgstr "La capa vista \"%(layer)s\" s'ha omès a l'assistent d'importació."
+msgstr ""
+"La capa vista \"%(layer)s\" s’ha omès per elecció a l’assistent "
+"d’importació."
 
 #: gvsigol_core/project_package/import_service.py:2612
 #: gvsigol_core/project_package/report_summary.py:33
@@ -349,8 +355,7 @@ msgstr "La capa vista \"%(layer)s\" s'ha omès a l'assistent d'importació."
 msgid ""
 "Definition-only layer \"%(layer)s\" was skipped by choice in the import "
 "wizard."
-msgstr ""
-"La capa de definició \"%(layer)s\" s'ha omès a l'assistent d'importació."
+msgstr "La capa de definició \"%(layer)s\" s'ha omès a l'assistent d'importació."
 
 #: gvsigol_core/project_package/report_summary.py:62
 msgid "Skipped by user"
@@ -1391,8 +1396,8 @@ msgstr ""
 #: gvsigol_core/templates/project_add.html:872
 #: gvsigol_core/templates/project_update.html:913
 msgid ""
-"If the project is public, all the layers assigned to the project will become "
-"public."
+"If the project is public, all the layers assigned to the project will become"
+" public."
 msgstr ""
 "Si el projecte és públic, totes les capes assignades al projecte seran "
 "públiques."
@@ -1609,7 +1614,7 @@ msgstr "Connexió"
 
 #: gvsigol_core/templates/project_list.html:774
 msgid "SQL view layers"
-msgstr "Capes de vista SQL"
+msgstr "Capes de vistes SQL"
 
 #: gvsigol_core/templates/project_list.html:775
 msgid ""
@@ -1622,18 +1627,17 @@ msgstr ""
 "es pugui recrear en importar."
 
 #: gvsigol_core/templates/project_list.html:796
-#, fuzzy
 #| msgid "Export"
 msgid "Export ZIP"
-msgstr "Exportar"
+msgstr "Exportar ZIP"
 
 #: gvsigol_core/templates/project_list.html:812
 msgid ""
 "Building the ZIP file. This may take several minutes for large projects. "
 "Please wait."
 msgstr ""
-"Generant el fitxer ZIP. Pot trigar diversos minuts en projectes grans. "
-"Si us plau, espereu."
+"Generant el fitxer ZIP. Pot trigar diversos minuts en projectes grans. Si us"
+" plau, espereu."
 
 #: gvsigol_core/templates/project_list.html:865
 msgid "You are not allowed to manage this project"
@@ -1781,8 +1785,8 @@ msgid ""
 "These layers are included in the package as metadata only (no GPKG data). "
 "Check the technical log for details."
 msgstr ""
-"Aquestes capes s'inclouen al paquet només com a metadades (sense dades GPKG). "
-"Consulteu el registre tècnic per a més detalls."
+"Aquestes capes s'inclouen al paquet només com a metadades (sense dades "
+"GPKG). Consulteu el registre tècnic per a més detalls."
 
 #: gvsigol_core/templates/project_package_export_result.html:29
 #, fuzzy
@@ -1847,16 +1851,14 @@ msgid "completed"
 msgstr "completat"
 
 #: gvsigol_core/templates/project_package_import_result.html:14
-#, fuzzy
 #| msgid "Failed"
 msgid "failed"
-msgstr "Fallat"
+msgstr "fallat"
 
 #: gvsigol_core/templates/project_package_import_result.html:15
-#, fuzzy
 #| msgid "Cancel"
 msgid "cancelled"
-msgstr "Cancel·lar"
+msgstr "cancel·lat"
 
 #: gvsigol_core/templates/project_package_import_result.html:24
 msgid "Open imported project"
@@ -1952,15 +1954,15 @@ msgstr "Registre tècnic de preflight"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:96
 msgid "Layers in this package"
-msgstr "Capes en aquest paquet"
+msgstr "Capes d’aquest paquet"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:97
 msgid ""
 "Check Skip to leave a layer or group out. The rest of the project imports "
 "normally."
 msgstr ""
-"Marca Omet per excloure una capa o grup. La resta del projecte s'importa "
-"amb normalitat."
+"Marca Omet per excloure una capa o grup. La resta del projecte s'importa amb"
+" normalitat."
 
 #: gvsigol_core/templates/project_package_import_wizard.html:108
 msgid "Skip"
@@ -1980,7 +1982,7 @@ msgstr "Destí / Acció"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:123
 msgid "Skip this layer"
-msgstr "Omet aquesta capa"
+msgstr "Ometre aquesta capa"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:138
 msgid "Foreign DB connection"
@@ -1991,14 +1993,13 @@ msgid "From"
 msgstr "Des de"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:148
-#, fuzzy
 #| msgid "Target server"
 msgid "Target datastore"
-msgstr "Servidor de destinació"
+msgstr "Datastore de destinació"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:150
 msgid "— Select datastore —"
-msgstr "— Seleccioneu el magatzem de dades —"
+msgstr "— Seleccionar datastore —"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:158
 #: gvsigol_core/templates/project_package_import_wizard.html:263
@@ -2014,10 +2015,9 @@ msgid "Ext. DB"
 msgstr "BD ext."
 
 #: gvsigol_core/templates/project_package_import_wizard.html:177
-#, fuzzy
 #| msgid "Base layers"
 msgid "layer(s)"
-msgstr "Capes base"
+msgstr "capa(es)"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:183
 msgid "No GPKG — definition only"
@@ -2025,13 +2025,12 @@ msgstr "Sense GPKG — només definició"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:187
 msgid "— Select connection —"
-msgstr "— Seleccioneu connexió —"
+msgstr "— Seleccionar connexió —"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:201
-#, fuzzy
 #| msgid "Package the base layer"
 msgid "Skip this raster layer"
-msgstr "Empaquetar la capa base"
+msgstr "Ometre aquesta capa ràster"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:210
 msgid "file(s)"
@@ -2055,13 +2054,12 @@ msgstr "Importada tal qual (sense copiar dades)"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:244
 msgid "Do not import this view"
-msgstr "No importeu aquesta vista"
+msgstr "No importar aquesta vista"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:246
-#, fuzzy
 #| msgid "Views"
 msgid "SQL View"
-msgstr "Vistes"
+msgstr "Vista SQL"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:272
 msgid "Edit SQL"
@@ -2069,8 +2067,8 @@ msgstr "Editar SQL"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:280
 msgid ""
-"Skipped layers are left out entirely; the rest of the project still imports. "
-"For SQL views you can also edit the query before recreating the view."
+"Skipped layers are left out entirely; the rest of the project still imports."
+" For SQL views you can also edit the query before recreating the view."
 msgstr ""
 "Les capes omeses s'exclouen completament; la resta del projecte s'importa "
 "igualment. Per a les vistes SQL també podeu editar la consulta abans de "
@@ -2086,8 +2084,8 @@ msgid ""
 "Edit the SQL query that will be used to create the view. You can rename "
 "tables, change schemas, or modify the query to match the target environment."
 msgstr ""
-"Editeu la consulta SQL que s'usarà per crear la vista. Podeu canviar noms de "
-"taules, esquemes o modificar la consulta per adaptar-la a l'entorn destí."
+"Editeu la consulta SQL que s'usarà per crear la vista. Podeu canviar noms de"
+" taules, esquemes o modificar la consulta per adaptar-la a l'entorn destí."
 
 #: gvsigol_core/templates/project_package_import_wizard.html:300
 msgid "Apply"
@@ -2125,8 +2123,8 @@ msgid ""
 "otherwise the project stays public."
 msgstr ""
 "Carrega el GPKG als magatzems de dades destí, publica les capes i crea el "
-"projecte. Els permisos de rols del paquet s'apliquen si estan presents; "
-"en cas contrari el projecte queda públic."
+"projecte. Els permisos de rols del paquet s'apliquen si estan presents; en "
+"cas contrari el projecte queda públic."
 
 #: gvsigol_core/templates/project_package_import_wizard.html:353
 msgid "SQL edited"
@@ -2244,7 +2242,8 @@ msgstr "Eliminar vista compartida"
 msgid "Update TOC"
 msgstr "Actualitzar TOC"
 
-#: gvsigol_core/templates/viewer.html:91 gvsigol_core/templates/viewer.html:552
+#: gvsigol_core/templates/viewer.html:91
+#: gvsigol_core/templates/viewer.html:552
 #: gvsigol_core/templates/viewer_compress.html:93
 #: gvsigol_core/templates/viewer_compress.html:510
 msgid "Close"
@@ -2414,8 +2413,8 @@ msgid ""
 "Project imported with warnings. Some layers were skipped — see the import "
 "report."
 msgstr ""
-"Projecte importat amb avisos. Algunes capes s'han omès — consulteu l'informe "
-"d'importació."
+"Projecte importat amb avisos. Algunes capes s'han omès — consulteu l'informe"
+" d'importació."
 
 #: gvsigol_core/views.py:535
 msgid "Import failed. Check server logs."
@@ -2434,8 +2433,8 @@ msgid ""
 "Project package import is not set up in the database. Run migrations on the "
 "server (for example: python manage.py migrate gvsigol_core)."
 msgstr ""
-"La importació del paquet de projecte no està configurada a la base de dades. "
-"Executeu les migracions al servidor (per exemple: python manage.py migrate "
+"La importació del paquet de projecte no està configurada a la base de dades."
+" Executeu les migracions al servidor (per exemple: python manage.py migrate "
 "gvsigol_core)."
 
 #: gvsigol_core/views.py:783
@@ -2491,8 +2490,8 @@ msgstr "Ha d'introduir un nom d'aplicació"
 #: gvsigol_core/views.py:2798
 #, python-brace-format
 msgid ""
-"Invalid application name: '{value}'. Identifiers must begin with a letter or "
-"an underscore (_). Subsequent characters can be letters, underscores or "
+"Invalid application name: '{value}'. Identifiers must begin with a letter or"
+" an underscore (_). Subsequent characters can be letters, underscores or "
 "numbers"
 msgstr ""
 "Nom d'aplicació invàlida: '{value}'. Els identificadors han de començar per "
@@ -2513,14 +2512,16 @@ msgstr "Inclou la configuració d'eines del projecte"
 #: gvsigol_core/project_package/report_summary.py
 #, python-format
 msgid "Tool \"%(tool)s\" is not installed on this server and was not applied."
-msgstr "L'eina \"%(tool)s\" no està instal·lada en aquest servidor i no s'ha aplicat."
+msgstr ""
+"L'eina \"%(tool)s\" no està instal·lada en aquest servidor i no s'ha "
+"aplicat."
 
 #: gvsigol_core/templates/project_list.html
 msgid ""
 "Export the exact set of tools (core and plugins) enabled for this project. "
-"On import, only tools available on the target server will be applied; missing "
-"tools will be logged as warnings. If unchecked, the imported project will use "
-"the server default tools."
+"On import, only tools available on the target server will be applied; "
+"missing tools will be logged as warnings. If unchecked, the imported project"
+" will use the server default tools."
 msgstr ""
 "Exporta el conjunt exacte d'eines (base i plugins) habilitades en aquest "
 "projecte. En importar, només s'aplicaran les eines disponibles al servidor "
@@ -2540,22 +2541,88 @@ msgid "WMS cascading layer \"%(layer)s\" could not be imported: %(error)s"
 msgstr "La capa WMS en cascada \"%(layer)s\" no s'ha pogut importar: %(error)s"
 
 msgid "Could not resolve workspace \"%(ws)s\" for WMS cascading layer \"%(layer)s\""
-msgstr "No s'ha pogut resoldre el workspace \"%(ws)s\" per a la capa WMS en cascada \"%(layer)s\""
+msgstr ""
+"No s'ha pogut resoldre el workspace \"%(ws)s\" per a la capa WMS en cascada "
+"\"%(layer)s\""
 
-msgid "Could not create WMS datastore \"%(ds)s\" for layer \"%(layer)s\". Check that the WMS URL is accessible from this server."
-msgstr "No s'ha pogut crear l'emmagatzematge WMS \"%(ds)s\" per a la capa \"%(layer)s\". Verifiqueu que la URL WMS és accessible des d'aquest servidor."
-
+msgid ""
+"Could not create WMS datastore \"%(ds)s\" for layer \"%(layer)s\". Check "
+"that the WMS URL is accessible from this server."
+msgstr ""
+"No s'ha pogut crear l'emmagatzematge WMS \"%(ds)s\" per a la capa "
+"\"%(layer)s\". Verifiqueu que la URL WMS és accessible des d'aquest "
+"servidor."
 
 # Public viewers landing section (includes/public_viewers_section.html)
-
 msgid "Public viewers"
 msgstr "Visors públics"
 
-msgid "Display the territory, orthophotos and thematic mapping through interactive viewers."
-msgstr "Visualitza el territori, ortofotografies i cartografia temàtica a través de visors interactius."
+msgid ""
+"Display the territory, orthophotos and thematic mapping through interactive "
+"viewers."
+msgstr ""
+"Visualitza el territori, ortofotografies i cartografia temàtica a través de "
+"visors interactius."
 
 msgid "Public viewers pagination"
 msgstr "Paginació de visors públics"
 
 msgid "App"
 msgstr "App"
+
+msgid "Layer definition and connection"
+msgstr "Definició de capa i connexió"
+
+msgid "Definition"
+msgstr "Definició"
+
+msgid "Definition options"
+msgstr "Opcions de definició"
+
+msgid "Target connection"
+msgstr "Connexió de destinació"
+
+msgid "Do not import this layer"
+msgstr "No importar aquesta capa"
+
+msgid "Do not import this model layer"
+msgstr "No importar aquesta capa model"
+
+msgid "Model"
+msgstr "Model"
+
+msgid "SQL view layers (local database)"
+msgstr "Vistes SQL (base de dades local)"
+
+msgid ""
+"Choose GeoPackage (data) or Definition. For SQL views, Definition lets you "
+"include the layer definition and connection and/or the SQL view definition."
+msgstr ""
+"Trieu GeoPackage (dades) o Definició. En vistes SQL, Definició permet "
+"incloure la definició de capa i connexió i/o la definició SQL de la vista."
+
+msgid ""
+"These layers are PostgreSQL views on the local database. Choose GeoPackage "
+"(data) or Definition (SQL view definition). The connection is always the "
+"local database."
+msgstr ""
+"Aquestes capes són vistes PostgreSQL de la base local. Trieu GeoPackage "
+"(dades) o Definició (definició SQL de la vista). La connexió és sempre la "
+"base local."
+
+msgid "Select a target datastore for external SQL view \"%(layer)s\"."
+msgstr ""
+"Seleccioneu un datastore de destinació per a la vista SQL externa "
+"\"%(layer)s\"."
+
+msgid "Selected datastore for external SQL view \"%(layer)s\" was not found."
+msgstr ""
+"No s’ha trobat el datastore seleccionat per a la vista SQL externa "
+"\"%(layer)s\"."
+
+msgid ""
+"Datastore \"%(ws)s/%(ds)s\" belongs to connection \"%(ds_conn)s\", but you "
+"selected \"%(sel_conn)s\". Pick a datastore of that connection."
+msgstr ""
+"El datastore \"%(ws)s/%(ds)s\" pertany a la connexió \"%(ds_conn)s\", però "
+"heu seleccionat \"%(sel_conn)s\". Trieu un datastore d’aquesta connexió."

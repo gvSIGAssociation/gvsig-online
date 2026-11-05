@@ -27,8 +27,8 @@ msgstr "Título del nuevo proyecto"
 
 #: gvsigol_core/forms.py:31 gvsigol_core/forms.py:38 gvsigol_core/forms.py:46
 msgid ""
-"must start by a lower case alphanumeric and contain lower case alphanumerics "
-"or underscores"
+"must start by a lower case alphanumeric and contain lower case alphanumerics"
+" or underscores"
 msgstr ""
 "debe comenzar por una minúscula alfanumérica y contener minúsculas "
 "alfanuméricas o subrayados"
@@ -82,7 +82,7 @@ msgstr "Clásico (Bootstrap)"
 #: gvsigol_core/project_package/import_service.py:332
 #, python-format
 msgid "Invalid workspace name in package: \"%s\""
-msgstr "Nombre de espacio de trabajo no válido en el paquete: \"%s\""
+msgstr "Nombre de workspace no válido en el paquete: \"%s\""
 
 #: gvsigol_core/project_package/import_service.py:339
 #, python-format
@@ -90,6 +90,8 @@ msgid ""
 "Workspace \"%(n)s\" already exists on another GeoServer instance. Use a "
 "different server or remove/rename that workspace."
 msgstr ""
+"El workspace \"%(n)s\" ya existe en otra instancia de GeoServer. Use otro "
+"servidor o elimine/renombre ese workspace."
 
 #: gvsigol_core/project_package/import_service.py:362
 #, python-format
@@ -103,12 +105,15 @@ msgid ""
 "another database connection (\"%(other)s\"). Select that connection in the "
 "wizard, or skip this layer."
 msgstr ""
+"El datastore \"%(ds)s\" del workspace \"%(ws)s\" ya está registrado con otra"
+" conexión de base de datos (\"%(other)s\"). Seleccione esa conexión en el "
+"asistente u omita esta capa."
 
 #: gvsigol_core/project_package/import_service.py:423
-#, fuzzy, python-format
+#, python-format
 #| msgid "Import project package"
 msgid "Imported from package (%(schema)s)"
-msgstr "Importar paquete de proyecto"
+msgstr "Importado desde paquete (%(schema)s)"
 
 #: gvsigol_core/project_package/import_service.py:449
 #, python-format
@@ -116,12 +121,14 @@ msgid ""
 "GeoServer store \"%(ws)s:%(ds)s\" already exists but is tied to another "
 "database connection. Select the matching connection or skip this layer."
 msgstr ""
+"El almacén de GeoServer \"%(ws)s:%(ds)s\" ya existe pero está ligado a otra "
+"conexión de base de datos. Seleccione la conexión correspondiente u omita "
+"esta capa."
 
 #: gvsigol_core/project_package/import_service.py:456
 #, python-format
 msgid "Could not create datastore \"%(ds)s\" for connection \"%(conn)s\""
-msgstr ""
-"No se pudo crear el almacén de datos \"%(ds)s\" para la conexión \"%(conn)s\""
+msgstr "No se pudo crear el datastore \"%(ds)s\" para la conexión \"%(conn)s\""
 
 #: gvsigol_core/project_package/import_service.py:482
 #, python-format
@@ -131,7 +138,7 @@ msgstr "Seleccione un almacén de datos para importar el GPKG (%(label)s)"
 #: gvsigol_core/project_package/import_service.py:488
 #, python-format
 msgid "Datastore \"%(ds)s\" is not on the selected server"
-msgstr "El almacén de datos \"%(ds)s\" no está en el servidor seleccionado"
+msgstr "El datastore \"%(ds)s\" no está en el servidor seleccionado"
 
 #: gvsigol_core/project_package/import_service.py:493
 #, python-format
@@ -139,6 +146,8 @@ msgid ""
 "Datastore \"%(ds)s\" uses a foreign database. Choose a local CartoDB "
 "datastore for GPKG import."
 msgstr ""
+"El datastore \"%(ds)s\" usa una base de datos externa. Elija un datastore "
+"CartoDB local para la importación GPKG."
 
 #: gvsigol_core/project_package/import_service.py:507
 #, python-format
@@ -150,21 +159,19 @@ msgstr ""
 #: gvsigol_core/project_package/import_service.py:512
 #, python-format
 msgid "Invalid workspace or datastore name for connection \"%(label)s\""
-msgstr ""
-"Nombre de espacio de trabajo o almacén de datos no válido para la conexión "
-"\"%(label)s\""
+msgstr "Nombre de workspace o datastore no válido para la conexión \"%(label)s\""
 
 #: gvsigol_core/project_package/import_service.py:564
 #, python-format
-msgid ""
-"Missing datastore for GPKG target workspace \"%(w)s\" / datastore \"%(d)s\""
+msgid "Missing datastore for GPKG target workspace \"%(w)s\" / datastore \"%(d)s\""
 msgstr ""
+"Falta el datastore destino GPKG para el workspace \"%(w)s\" / datastore "
+"\"%(d)s\""
 
 #: gvsigol_core/project_package/import_service.py:577
 #, python-format
 msgid "Could not create datastore \"%s\" in workspace \"%s\""
-msgstr ""
-"No se pudo crear el almacén de datos \"%s\" en el espacio de trabajo \"%s\""
+msgstr "No se pudo crear el datastore \"%s\" en el workspace \"%s\""
 
 #: gvsigol_core/project_package/import_service.py:595
 #, python-format
@@ -173,11 +180,11 @@ msgstr "No se pudo asignar un nombre de proyecto único a partir de \"%s\""
 
 #: gvsigol_core/project_package/import_service.py:642
 msgid ""
-"GDAL (pygdaltools) is not available on this server; vector GeoPackage import/"
-"export will fail."
+"GDAL (pygdaltools) is not available on this server; vector GeoPackage "
+"import/export will fail."
 msgstr ""
-"GDAL (pygdaltools) no está disponible en este servidor; la importación/exportación "
-"de GeoPackage vectorial fallará."
+"GDAL (pygdaltools) no está disponible en este servidor; fallará la "
+"importación/exportación vectorial de GeoPackage."
 
 #: gvsigol_core/project_package/import_service.py:730
 #, python-format
@@ -189,9 +196,13 @@ msgstr " (+%d más)"
 msgid ""
 "The reused layer group \"%(lg)s\" was linked to this project. It also "
 "contains %(n)d layer(s) that were not part of this package TOC block's "
-"reused definitions — they remain visible because they share the server layer "
-"group: %(layers)s."
+"reused definitions — they remain visible because they share the server layer"
+" group: %(layers)s."
 msgstr ""
+"El grupo de capas reutilizado \"%(lg)s\" se vinculó a este proyecto. También"
+" contiene %(n)d capa(s) que no formaban parte de las definiciones "
+"reutilizadas de este bloque del paquete; siguen visibles porque comparten el"
+" grupo de capas del servidor: %(layers)s."
 
 #: gvsigol_core/project_package/import_service.py:751
 #, python-format
@@ -199,6 +210,8 @@ msgid ""
 "This project already uses layer group \"%(lg)s\"; an extra empty TOC row "
 "from this package block was removed."
 msgstr ""
+"Este proyecto ya usa el grupo de capas \"%(lg)s\"; se eliminó una fila vacía"
+" extra del TOC de este bloque del paquete."
 
 #: gvsigol_core/project_package/import_service.py:776
 #, python-format
@@ -207,6 +220,9 @@ msgid ""
 "there, while other layers in this package block stay in the newly created "
 "group."
 msgstr ""
+"Grupo existente vinculado \"%(lg)s\": las capas de definición reutilizadas "
+"ya están ahí; el resto de capas de este bloque del paquete permanecen en el "
+"grupo recién creado."
 
 #: gvsigol_core/project_package/import_service.py:780
 msgid "Additional reused LayerGroup from this package block."
@@ -220,13 +236,13 @@ msgid ""
 "Layer \"%(wanted)s\" already exists in datastore \"%(ds)s\"; loading as "
 "\"%(actual)s\"."
 msgstr ""
-"La capa \"%(wanted)s\" ya existe en el almacén \"%(ds)s\"; se carga como "
+"La capa \"%(wanted)s\" ya existe en el datastore \"%(ds)s\"; se carga como "
 "\"%(actual)s\"."
 
 #: gvsigol_core/project_package/import_service.py:1071
 #, python-format
 msgid "Invalid or missing schema for datastore \"%(ds)s\""
-msgstr "Esquema no válido o ausente para el almacén de datos \"%(ds)s\""
+msgstr "Esquema no válido o ausente para el datastore \"%(ds)s\""
 
 #: gvsigol_core/project_package/import_service.py:1100
 #, python-format
@@ -240,9 +256,10 @@ msgstr "No se pudieron leer las capas del GeoPackage \"%(path)s\"."
 
 #: gvsigol_core/project_package/import_service.py:1140
 #, python-format
-msgid ""
-"GeoPackage \"%(path)s\" contains layers %(layers)s; none match %(hints)s."
+msgid "GeoPackage \"%(path)s\" contains layers %(layers)s; none match %(hints)s."
 msgstr ""
+"El GeoPackage \"%(path)s\" contiene las capas %(layers)s; ninguna coincide "
+"con %(hints)s."
 
 #: gvsigol_core/project_package/import_service.py:1160
 #, python-format
@@ -250,6 +267,8 @@ msgid ""
 "ogr2ogr created table \"%(table)s\" in schema \"public\" instead of "
 "\"%(schema)s\". Check datastore connection parameters."
 msgstr ""
+"ogr2ogr creó la tabla \"%(table)s\" en el esquema \"public\" en lugar de "
+"\"%(schema)s\". Revise los parámetros de conexión del datastore."
 
 #: gvsigol_core/project_package/import_service.py:1169
 #, python-format
@@ -257,6 +276,8 @@ msgid ""
 "ogr2ogr did not create table \"%(schema)s\".\"%(table)s\".%(hint)s Check "
 "server logs for ogr2ogr output."
 msgstr ""
+"ogr2ogr no creó la tabla \"%(schema)s\".\"%(table)s\".%(hint)s Consulte los "
+"logs del servidor para la salida de ogr2ogr."
 
 #: gvsigol_core/project_package/import_service.py:1205
 #, python-format
@@ -264,18 +285,20 @@ msgid ""
 "Could not read columns for table \"%(schema)s\".\"%(table)s\". Check that "
 "ogr2ogr loaded data into the datastore schema."
 msgstr ""
+"No se pudieron leer las columnas de la tabla \"%(schema)s\".\"%(table)s\". "
+"Compruebe que ogr2ogr cargó los datos en el esquema del datastore."
 
 #: gvsigol_core/project_package/import_service.py:1474
 #, python-format
 msgid "No database connection selected for \"%(key)s\""
-msgstr ""
-"No se ha seleccionado ninguna conexión de base de datos para \"%(key)s\""
+msgstr "No hay conexión de base de datos seleccionada para \"%(key)s\""
 
 #: gvsigol_core/project_package/import_service.py:1551
-#, fuzzy
 #| msgid "Definition-only layers (external database)"
 msgid "Definition-only layer has no table name in package metadata"
-msgstr "Capas solo de definición (base de datos externa)"
+msgstr ""
+"La capa de solo definición no tiene nombre de tabla en los metadatos del "
+"paquete"
 
 #: gvsigol_core/project_package/import_service.py:1572
 #, python-format
@@ -283,6 +306,9 @@ msgid ""
 "Definition-only layer \"%(layer)s\": table \"%(schema)s\".\"%(table)s\" was "
 "not found in connection \"%(connection)s\". The layer was not imported."
 msgstr ""
+"Capa de solo definición \"%(layer)s\": no se encontró la tabla "
+"\"%(schema)s\".\"%(table)s\" en la conexión \"%(connection)s\". La capa no "
+"se importó."
 
 #: gvsigol_core/project_package/import_service.py:1605
 msgid ""
@@ -298,6 +324,8 @@ msgid ""
 "Definition-only layer \"%(layer)s\": could not publish on GeoServer. The "
 "layer was not imported."
 msgstr ""
+"Capa de solo definición \"%(layer)s\": no se pudo publicar en GeoServer. La "
+"capa no se importó."
 
 #: gvsigol_core/project_package/import_service.py:1847
 #: gvsigol_core/project_package/report_summary.py:53
@@ -312,9 +340,11 @@ msgid ""
 "View layer \"%(layer)s\" was not imported: could not create view "
 "\"%(schema)s\".\"%(view)s\": %(error)s"
 msgstr ""
+"La capa vista \"%(layer)s\" no se importó: no se pudo crear la vista "
+"\"%(schema)s\".\"%(view)s\": %(error)s"
 
 #: gvsigol_core/project_package/import_service.py:2000
-#, fuzzy, python-format
+#, python-format
 #| msgid ""
 #| "Check Skip to leave definition-only layers out (you can add them manually "
 #| "later)."
@@ -322,8 +352,8 @@ msgid ""
 "Definition-only layer \"%(layer)s\" was not imported. You can add it "
 "manually later."
 msgstr ""
-"Marque Omitir para dejar fuera las capas solo-definición (puede añadirlas "
-"manualmente después)."
+"La capa de solo definición \"%(layer)s\" no se importó. Puede añadirla "
+"manualmente más tarde."
 
 #: gvsigol_core/project_package/import_service.py:2312
 msgid "Job not extracted; run preflight first"
@@ -342,7 +372,9 @@ msgstr "La capa ya existe en este grupo (reutilizada, no duplicada)."
 #: gvsigol_core/project_package/report_summary.py:43
 #, python-format
 msgid "View layer \"%(layer)s\" was skipped by choice in the import wizard."
-msgstr "La capa vista \"%(layer)s\" se omitió en el asistente de importación."
+msgstr ""
+"La capa vista \"%(layer)s\" se omitió por elección en el asistente de "
+"importación."
 
 #: gvsigol_core/project_package/import_service.py:2612
 #: gvsigol_core/project_package/report_summary.py:33
@@ -351,7 +383,8 @@ msgid ""
 "Definition-only layer \"%(layer)s\" was skipped by choice in the import "
 "wizard."
 msgstr ""
-"La capa de definición \"%(layer)s\" se omitió en el asistente de importación."
+"La capa de solo definición \"%(layer)s\" se omitió por elección en el "
+"asistente de importación."
 
 #: gvsigol_core/project_package/report_summary.py:62
 msgid "Skipped by user"
@@ -438,7 +471,8 @@ msgstr "Página no encontrada"
 msgid "We could not find the page you were looking for. Meanwhile, you may"
 msgstr ""
 "No se ha podido encontrar la página solicitada. Mientras tanto, puedeNo "
-"hemos podido encontrar la página que estabas buscando . Mientras tanto, puede"
+"hemos podido encontrar la página que estabas buscando . Mientras tanto, "
+"puede"
 
 #: gvsigol_core/templates/404.html:14 gvsigol_core/templates/500.html:14
 #: gvsigol_core/templates/not_found_sharedview.html:14
@@ -853,7 +887,6 @@ msgstr ""
 "tableta."
 
 #: gvsigol_core/templates/home.html:815
-#, fuzzy
 #| msgid "Administration Guide"
 msgid "Administrator"
 msgstr "Administrador"
@@ -863,7 +896,6 @@ msgid "Manager"
 msgstr "Gestor"
 
 #: gvsigol_core/templates/home.html:819
-#, fuzzy
 #| msgid "Users"
 msgid "User"
 msgstr "Usuario"
@@ -877,7 +909,6 @@ msgid "Details"
 msgstr "Detalles"
 
 #: gvsigol_core/templates/home.html:837 gvsigol_core/templates/home.html:841
-#, fuzzy
 #| msgid "New password"
 msgid "Change password"
 msgstr "Cambiar contraseña"
@@ -924,10 +955,9 @@ msgstr "Abrir cuadro de mando"
 
 #: gvsigol_core/templates/home.html:879
 #: gvsigol_core/templates/project_list.html:521
-#, fuzzy
 #| msgid "Search tool..."
 msgid "Search..."
-msgstr "Herramienta de búsqueda..."
+msgstr "Buscar..."
 
 #: gvsigol_core/templates/home.html:883 gvsigol_core/templates/home.html:1074
 #: gvsigol_core/templates/project_list.html:536
@@ -1001,10 +1031,9 @@ msgstr "Lista"
 
 #: gvsigol_core/templates/home.html:959 gvsigol_core/templates/home.html:1024
 #: gvsigol_core/templates/home.html:1453
-#, fuzzy
 #| msgid "Applications"
 msgid "Application"
-msgstr "Aplicaciones"
+msgstr "Aplicación"
 
 #: gvsigol_core/templates/home.html:967 gvsigol_core/templates/home.html:1030
 #: gvsigol_core/templates/home.html:1456
@@ -1028,7 +1057,6 @@ msgid "Hidden items"
 msgstr "Elementos ocultos"
 
 #: gvsigol_core/templates/home.html:1082
-#, fuzzy
 #| msgid "No records available"
 msgid "No projects available."
 msgstr "No hay proyectos disponibles."
@@ -1398,8 +1426,8 @@ msgstr ""
 #: gvsigol_core/templates/project_add.html:872
 #: gvsigol_core/templates/project_update.html:913
 msgid ""
-"If the project is public, all the layers assigned to the project will become "
-"public."
+"If the project is public, all the layers assigned to the project will become"
+" public."
 msgstr ""
 "Si el proyecto es público, todas las capas asignadas al proyecto pasarán a "
 "ser públicas."
@@ -1571,8 +1599,8 @@ msgid ""
 "Private project: export read/write/manage rules so they can be restored on "
 "import."
 msgstr ""
-"Proyecto privado: exporta las reglas de lectura/escritura/gestión para que "
-"puedan restaurarse en la importación."
+"Proyecto privado: exportar reglas de lectura/escritura/gestión para "
+"restaurarlas en la importación."
 
 #: gvsigol_core/templates/project_list.html:750
 msgid "Include raster files in the package"
@@ -1595,8 +1623,8 @@ msgid ""
 "Choose whether to copy data into the package (GPKG) or export metadata only "
 "(destination must already have the tables)."
 msgstr ""
-"Elija si copiar los datos en el paquete (GPKG) o exportar solo los metadatos "
-"(el destino debe tener ya las tablas)."
+"Elija si copiar los datos en el paquete (GPKG) o exportar solo los metadatos"
+" (el destino debe tener ya las tablas)."
 
 #: gvsigol_core/templates/project_list.html:765
 #: gvsigol_core/templates/project_list.html:784
@@ -1609,10 +1637,9 @@ msgid "Connection"
 msgstr "Conexión"
 
 #: gvsigol_core/templates/project_list.html:774
-#, fuzzy
 #| msgid "Skipped layers"
 msgid "SQL view layers"
-msgstr "Capas omitidas"
+msgstr "Capas de vistas SQL"
 
 #: gvsigol_core/templates/project_list.html:775
 msgid ""
@@ -1660,6 +1687,49 @@ msgstr "Solo definición"
 #: gvsigol_core/templates/project_list.html:1063
 msgid "SQL view definition"
 msgstr "Definición SQL de vista"
+
+msgid "Layer definition and connection"
+msgstr "Definición de capa y conexión"
+
+msgid ""
+"Choose GeoPackage (data) or Definition. For SQL views, Definition lets you "
+"include the layer definition and connection and/or the SQL view definition."
+msgstr ""
+"Elija GeoPackage (datos) o Definición. En vistas SQL, Definición permite "
+"incluir la definición de capa y conexión y/o la definición SQL de la vista."
+
+msgid ""
+"These layers are PostgreSQL views on the local database. Choose GeoPackage "
+"(data) or Definition (SQL view definition). The connection is always the "
+"local database."
+msgstr ""
+"Estas capas son vistas PostgreSQL de la base de datos local. Elija "
+"GeoPackage (datos) o Definición (definición SQL de la vista). La conexión es"
+" siempre la base de datos local."
+
+msgid "SQL view layers (local database)"
+msgstr "Vistas SQL (base de datos local)"
+
+msgid "Target connection"
+msgstr "Conexión destino"
+
+msgid "Do not import this layer"
+msgstr "No importar esta capa"
+
+msgid "Select a target datastore for external SQL view \"%(layer)s\"."
+msgstr "Seleccione un datastore destino para la vista SQL externa \"%(layer)s\"."
+
+msgid "Selected datastore for external SQL view \"%(layer)s\" was not found."
+msgstr ""
+"No se encontró el datastore seleccionado para la vista SQL externa "
+"\"%(layer)s\"."
+
+msgid ""
+"Datastore \"%(ws)s/%(ds)s\" belongs to connection \"%(ds_conn)s\", but you "
+"selected \"%(sel_conn)s\". Pick a datastore of that connection."
+msgstr ""
+"El datastore \"%(ws)s/%(ds)s\" pertenece a la conexión \"%(ds_conn)s\", pero"
+" seleccionó \"%(sel_conn)s\". Elija un datastore de esa conexión."
 
 #: gvsigol_core/templates/project_list.html:1098
 msgid "Could not load export options."
@@ -1793,8 +1863,8 @@ msgstr "Log técnico de exportación"
 #: gvsigol_core/templates/project_package_export_result.html:49
 msgid "Same content as reports/export_log.jsonl inside the downloaded ZIP."
 msgstr ""
-"Mismo contenido que reports/export_log.jsonl dentro del ZIP descargado.Mismo "
-"contenido que reports/export_log.jsonl dentro del ZIP descargado."
+"Mismo contenido que reports/export_log.jsonl dentro del ZIP descargado.Mismo"
+" contenido que reports/export_log.jsonl dentro del ZIP descargado."
 
 #: gvsigol_core/templates/project_package_export_result.html:52
 msgid "Layer-level lines (JSON Lines)"
@@ -1832,16 +1902,14 @@ msgid "completed"
 msgstr "completado"
 
 #: gvsigol_core/templates/project_package_import_result.html:14
-#, fuzzy
 #| msgid "Failed"
 msgid "failed"
-msgstr "Fallido"
+msgstr "fallido"
 
 #: gvsigol_core/templates/project_package_import_result.html:15
-#, fuzzy
 #| msgid "Cancel"
 msgid "cancelled"
-msgstr "Cancelar"
+msgstr "cancelado"
 
 #: gvsigol_core/templates/project_package_import_result.html:24
 msgid "Open imported project"
@@ -1929,15 +1997,15 @@ msgstr "Log técnico de preflight"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:96
 msgid "Layers in this package"
-msgstr "Capas en este paquete"
+msgstr "Capas de este paquete"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:97
 msgid ""
 "Check Skip to leave a layer or group out. The rest of the project imports "
 "normally."
 msgstr ""
-"Marca Omitir para excluir una capa o grupo. El resto del proyecto se importa "
-"con normalidad."
+"Marque Omitir para dejar fuera una capa o grupo. El resto del proyecto se "
+"importa con normalidad."
 
 #: gvsigol_core/templates/project_package_import_wizard.html:108
 msgid "Skip"
@@ -1961,7 +2029,7 @@ msgstr "Omitir esta capa"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:138
 msgid "Foreign DB connection"
-msgstr "Conexión BD foránea"
+msgstr "Conexión a BD externa"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:143
 msgid "From"
@@ -1969,13 +2037,12 @@ msgstr "Desde"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:148
 msgid "Target datastore"
-msgstr "Almacén de datos destino"
+msgstr "Datastore destino"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:150
-#, fuzzy
 #| msgid "— Select —"
 msgid "— Select datastore —"
-msgstr "— Seleccionar —"
+msgstr "— Seleccionar datastore —"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:158
 #: gvsigol_core/templates/project_package_import_wizard.html:263
@@ -1991,36 +2058,32 @@ msgid "Ext. DB"
 msgstr "BD ext."
 
 #: gvsigol_core/templates/project_package_import_wizard.html:177
-#, fuzzy
 #| msgid "Layers"
 msgid "layer(s)"
-msgstr "Capas"
+msgstr "capa(s)"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:183
-#, fuzzy
 #| msgid "Definition only"
 msgid "No GPKG — definition only"
-msgstr "Solo definición"
+msgstr "Sin GPKG — solo definición"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:187
-#, fuzzy
 #| msgid "— Select —"
 msgid "— Select connection —"
-msgstr "— Seleccionar —"
+msgstr "— Seleccionar conexión —"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:201
-#, fuzzy
 #| msgid "Package the base layer"
 msgid "Skip this raster layer"
-msgstr "Empaquetar la capa base"
+msgstr "Omitir esta capa ráster"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:210
 msgid "file(s)"
-msgstr "archivo(s)"
+msgstr "fichero(s)"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:213
 msgid "Published automatically"
-msgstr "Publicada automáticamente"
+msgstr "Publicado automáticamente"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:223
 msgid "Skip this external layer"
@@ -2032,19 +2095,17 @@ msgstr "Servicio externo"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:234
 msgid "Imported as-is (no data copied)"
-msgstr "Importada tal cual (sin copiar datos)"
+msgstr "Importado tal cual (sin copiar datos)"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:244
-#, fuzzy
 #| msgid "Do not import these layers"
 msgid "Do not import this view"
-msgstr "No importar estas capas"
+msgstr "No importar esta vista"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:246
-#, fuzzy
 #| msgid "Views"
 msgid "SQL View"
-msgstr "Vistas"
+msgstr "Vista SQL"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:272
 msgid "Edit SQL"
@@ -2052,12 +2113,12 @@ msgstr "Editar SQL"
 
 #: gvsigol_core/templates/project_package_import_wizard.html:280
 msgid ""
-"Skipped layers are left out entirely; the rest of the project still imports. "
-"For SQL views you can also edit the query before recreating the view."
+"Skipped layers are left out entirely; the rest of the project still imports."
+" For SQL views you can also edit the query before recreating the view."
 msgstr ""
-"Las capas omitidas se excluyen por completo; el resto del proyecto se importa "
-"igualmente. Para las vistas SQL también puedes editar la consulta antes de "
-"recrear la vista."
+"Las capas omitidas se excluyen por completo; el resto del proyecto se "
+"importa igualmente. Para las vistas SQL también puedes editar la consulta "
+"antes de recrear la vista."
 
 #: gvsigol_core/templates/project_package_import_wizard.html:289
 #: gvsigol_core/templates/project_package_import_wizard.html:341
@@ -2069,7 +2130,7 @@ msgid ""
 "Edit the SQL query that will be used to create the view. You can rename "
 "tables, change schemas, or modify the query to match the target environment."
 msgstr ""
-"Edita la consulta SQL que se usará para crear la vista. Puedes renombrar "
+"Edite la consulta SQL que se usará para crear la vista. Puede renombrar "
 "tablas, cambiar esquemas o modificar la consulta para adaptarla al entorno "
 "destino."
 
@@ -2216,7 +2277,8 @@ msgstr "Eliminar vista compartida"
 msgid "Update TOC"
 msgstr "Actualizar TOC"
 
-#: gvsigol_core/templates/viewer.html:91 gvsigol_core/templates/viewer.html:552
+#: gvsigol_core/templates/viewer.html:91
+#: gvsigol_core/templates/viewer.html:552
 #: gvsigol_core/templates/viewer_compress.html:93
 #: gvsigol_core/templates/viewer_compress.html:510
 msgid "Close"
@@ -2368,10 +2430,9 @@ msgid "Select features from current layers"
 msgstr "Seleccionar elementos de las capas actuales"
 
 #: gvsigol_core/views.py:402 gvsigol_core/views.py:405
-#, fuzzy
 #| msgid "Operation not allowed on project: "
 msgid "Operation not allowed on this project."
-msgstr "Operación no permitida en el proyecto: "
+msgstr "Operación no permitida en este proyecto."
 
 #: gvsigol_core/views.py:475
 msgid "Export failed. Check server logs."
@@ -2386,7 +2447,7 @@ msgid ""
 "Project imported with warnings. Some layers were skipped — see the import "
 "report."
 msgstr ""
-"Proyecto importado con avisos. Algunas capas se omitieron — consulte el "
+"Proyecto importado con avisos. Algunas capas se omitieron; consulte el "
 "informe de importación."
 
 #: gvsigol_core/views.py:535
@@ -2406,9 +2467,9 @@ msgid ""
 "Project package import is not set up in the database. Run migrations on the "
 "server (for example: python manage.py migrate gvsigol_core)."
 msgstr ""
-"La importación del paquete de proyecto no está configurada en la base de "
-"datos. Ejecute las migraciones en el servidor (por ejemplo: python manage.py "
-"migrate gvsigol_core)."
+"La importación de paquetes de proyecto no está configurada en la base de "
+"datos. Ejecute las migraciones en el servidor (por ejemplo: python manage.py"
+" migrate gvsigol_core)."
 
 #: gvsigol_core/views.py:783
 msgid "Package validation failed: "
@@ -2425,8 +2486,8 @@ msgid ""
 "underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgstr ""
 "Nombre de proyecto no válido: '{value}'. Los identificadores deben comenzar "
-"con una letra o guion bajo (_). Los siguientes caracteres pueden ser letras, "
-"guion bajo o números"
+"con una letra o guion bajo (_). Los siguientes caracteres pueden ser letras,"
+" guion bajo o números"
 
 #: gvsigol_core/views.py:1159
 msgid "Project name already exists"
@@ -2463,13 +2524,13 @@ msgstr "Debe introducir un nombre de aplicación"
 #: gvsigol_core/views.py:2798
 #, python-brace-format
 msgid ""
-"Invalid application name: '{value}'. Identifiers must begin with a letter or "
-"an underscore (_). Subsequent characters can be letters, underscores or "
+"Invalid application name: '{value}'. Identifiers must begin with a letter or"
+" an underscore (_). Subsequent characters can be letters, underscores or "
 "numbers"
 msgstr ""
-"Nombre de aplicación inválido: '{value}'. Los identificadores deben comenzar "
-"con una letra o guion bajo (_). Los siguientes caracteres pueden ser letras, "
-"guion bajo o números"
+"Nombre de aplicación inválido: '{value}'. Los identificadores deben comenzar"
+" con una letra o guion bajo (_). Los siguientes caracteres pueden ser "
+"letras, guion bajo o números"
 
 #: gvsigol_core/views.py:2802
 msgid "Application name already exists"
@@ -2485,26 +2546,27 @@ msgstr "Incluir configuración de herramientas del proyecto"
 #: gvsigol_core/project_package/report_summary.py
 #, python-format
 msgid "Tool \"%(tool)s\" is not installed on this server and was not applied."
-msgstr "La herramienta \"%(tool)s\" no está instalada en este servidor y no se ha aplicado."
+msgstr ""
+"La herramienta \"%(tool)s\" no está instalada en este servidor y no se ha "
+"aplicado."
 
 #: gvsigol_core/templates/project_list.html
 msgid ""
 "Export the exact set of tools (core and plugins) enabled for this project. "
-"On import, only tools available on the target server will be applied; missing "
-"tools will be logged as warnings. If unchecked, the imported project will use "
-"the server default tools."
+"On import, only tools available on the target server will be applied; "
+"missing tools will be logged as warnings. If unchecked, the imported project"
+" will use the server default tools."
 msgstr ""
-"Exporta el conjunto exacto de herramientas (base y plugins) habilitadas en "
-"este proyecto. Al importar, solo se aplicarán las herramientas disponibles en "
-"el servidor destino; las que no estén instaladas se registrarán como avisos. "
-"Si no se marca, el proyecto importado usará las herramientas por defecto del "
-"servidor."
+"Exporta el conjunto exacto de herramientas (núcleo y plugins) activas en "
+"este proyecto. En la importación solo se aplicarán las disponibles en el "
+"servidor destino; las faltantes se registrarán como avisos. Si no se marca, "
+"el proyecto importado usará las herramientas por defecto del servidor."
 
 msgid "WMS cascading (GeoServer store)"
-msgstr "WMS en cascada (almacén GeoServer)"
+msgstr "Cascada WMS (almacén GeoServer)"
 
 msgid "Recreated from WMS store URL"
-msgstr "Recreada desde la URL del almacén WMS"
+msgstr "Recreado desde la URL del almacén WMS"
 
 msgid "WMS cascading"
 msgstr "WMS en cascada"
@@ -2513,22 +2575,152 @@ msgid "WMS cascading layer \"%(layer)s\" could not be imported: %(error)s"
 msgstr "La capa WMS en cascada \"%(layer)s\" no se pudo importar: %(error)s"
 
 msgid "Could not resolve workspace \"%(ws)s\" for WMS cascading layer \"%(layer)s\""
-msgstr "No se pudo resolver el workspace \"%(ws)s\" para la capa WMS en cascada \"%(layer)s\""
+msgstr ""
+"No se pudo resolver el workspace \"%(ws)s\" para la capa WMS en cascada "
+"\"%(layer)s\""
 
-msgid "Could not create WMS datastore \"%(ds)s\" for layer \"%(layer)s\". Check that the WMS URL is accessible from this server."
-msgstr "No se pudo crear el almacén WMS \"%(ds)s\" para la capa \"%(layer)s\". Verifique que la URL WMS es accesible desde este servidor."
-
+msgid ""
+"Could not create WMS datastore \"%(ds)s\" for layer \"%(layer)s\". Check "
+"that the WMS URL is accessible from this server."
+msgstr ""
+"No se pudo crear el datastore WMS \"%(ds)s\" para la capa \"%(layer)s\". "
+"Compruebe que la URL WMS es accesible desde este servidor."
 
 # Public viewers landing section (includes/public_viewers_section.html)
-
 msgid "Public viewers"
 msgstr "Visores públicos"
 
-msgid "Display the territory, orthophotos and thematic mapping through interactive viewers."
-msgstr "Visualiza el territorio, ortofotos y cartografía temática a través de visores interactivos."
+msgid ""
+"Display the territory, orthophotos and thematic mapping through interactive "
+"viewers."
+msgstr ""
+"Visualiza el territorio, ortofotos y cartografía temática a través de "
+"visores interactivos."
 
 msgid "Public viewers pagination"
 msgstr "Paginación de visores públicos"
 
 msgid "App"
 msgstr "App"
+
+msgid ""
+"The reused layer group \"%(lg)s\" was linked to this project. It also "
+"contains %(n)d layer(s) that were not part of this package and remain in the"
+" group."
+msgstr ""
+"El grupo de capas reutilizado \"%(lg)s\" se vinculó a este proyecto. También"
+" contiene %(n)d capa(s) que no formaban parte de este paquete y permanecen "
+"en el grupo."
+
+msgid ""
+"Linked existing group \"%(lg)s\": reused definition layers already live "
+"there, while other layers in this package block were published separately."
+msgstr ""
+"Grupo existente vinculado \"%(lg)s\": las capas de definición reutilizadas "
+"ya están ahí; el resto de capas de este bloque del paquete se publicaron por"
+" separado."
+
+msgid ""
+"ogr2ogr created table \"%(table)s\" in schema \"public\" instead of "
+"\"%(schema)s\". Check datastore connection schema settings."
+msgstr ""
+"ogr2ogr creó la tabla \"%(table)s\" en el esquema \"public\" en lugar de "
+"\"%(schema)s\". Revise la configuración de esquema de la conexión del "
+"datastore."
+
+msgid ""
+"Could not read columns for table \"%(schema)s\".\"%(table)s\". Check that "
+"ogr2ogr loaded data into the datastore database."
+msgstr ""
+"No se pudieron leer las columnas de la tabla \"%(schema)s\".\"%(table)s\". "
+"Compruebe que ogr2ogr cargó los datos en la base de datos del datastore."
+
+msgid ""
+"Definition-only layer \"%(layer)s\": table \"%(schema)s\".\"%(table)s\" was "
+"not found in connection \"%(conn)s\"."
+msgstr ""
+"Capa de solo definición \"%(layer)s\": no se encontró la tabla "
+"\"%(schema)s\".\"%(table)s\" en la conexión \"%(conn)s\"."
+
+msgid "Definition"
+msgstr "Definición"
+
+msgid "Definition options"
+msgstr "Opciones de definición"
+
+msgid "Do not import this model layer"
+msgstr "No importar esta capa modelo"
+
+msgid "Model"
+msgstr "Modelo"
+
+msgid ""
+"Skipped layers are left out entirely; the rest of the project still imports."
+" For SQL views you can also edit the query before recreating the view. Model"
+" layers in public keep their exact table name and are never renamed."
+msgstr ""
+"Las capas omitidas se dejan fuera por completo; el resto del proyecto sí se "
+"importa. En las vistas SQL también puede editar la consulta antes de recrear"
+" la vista. Las capas modelo en public mantienen el nombre exacto de tabla y "
+"nunca se renombran."
+
+msgid "No GPKG in package — link existing table only."
+msgstr "No hay GPKG en el paquete — solo se enlaza la tabla existente."
+
+msgid ""
+"Will reuse the existing table (never renamed). Optionally empty it before "
+"loading package data:"
+msgstr ""
+"Se reutilizará la tabla existente (nunca se renombra). Opcionalmente vacíela"
+" antes de cargar los datos del paquete:"
+
+msgid "Platform / plugin table — exact name required"
+msgstr "Tabla de plataforma / plugin — se requiere el nombre exacto"
+
+msgid "Exists on target"
+msgstr "Existe en el destino"
+
+msgid "Not found on target"
+msgstr "No encontrada en el destino"
+
+msgid "TRUNCATE table before loading data"
+msgstr "TRUNCATE de la tabla antes de cargar datos"
+
+msgid "Includes SQL view definition(s) to recreate"
+msgstr "Incluye definición(es) SQL de vista para recrear"
+
+msgid "External connection"
+msgstr "Conexión externa"
+
+msgid "Skip this WMS cascading layer"
+msgstr "Omitir esta capa WMS en cascada"
+
+msgid "Click to select/deselect all"
+msgstr "Clic para seleccionar/deseleccionar todo"
+
+msgid ""
+"Loads GPKG into the target datastores, publishes layers, and creates the "
+"project. Role permissions from the package are applied when present."
+msgstr ""
+"Carga el GPKG en los datastores destino, publica capas y crea el proyecto. "
+"Los permisos de roles del paquete se aplican cuando existen."
+
+msgid "Package validation failed:"
+msgstr "Falló la validación del paquete:"
+
+msgid "Invalid workspace or datastore name for layer \"%(layer)s\""
+msgstr "Nombre de workspace o datastore no válido para la capa \"%(layer)s\""
+
+msgid ""
+"Model layer \"%(layer)s\": could not TRUNCATE %(schema)s.%(table)s: "
+"%(error)s"
+msgstr ""
+"Capa modelo \"%(layer)s\": no se pudo hacer TRUNCATE de "
+"%(schema)s.%(table)s: %(error)s"
+
+msgid ""
+"WMS cascading layer \"%(orig)s\" already exists in workspace \"%(ws)s\"; "
+"importing as \"%(new)s\"."
+msgstr ""
+"La capa WMS en cascada \"%(orig)s\" ya existe en el workspace \"%(ws)s\"; se"
+" importa como \"%(new)s\"."

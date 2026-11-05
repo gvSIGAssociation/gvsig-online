@@ -92,7 +92,7 @@
 				</select>
 			</div>
 
-	{% if package_layout.gpkg_layers or package_layout.foreign_connections or package_layout.raster_layers or package_layout.external_layers or package_layout.view_sql_layers or package_layout.wms_cascading_layers %}
+	{% if package_layout.gpkg_layers or package_layout.foreign_layers or package_layout.raster_layers or package_layout.external_layers or package_layout.view_sql_layers or package_layout.wms_cascading_layers or package_layout.model_public_layers %}
 	<h4>{% trans "Layers in this package" %}</h4>
 	<p class="text-muted small">{% trans "Check Skip to leave a layer or group out. The rest of the project imports normally." %}</p>
 	<table class="table table-bordered table-condensed" id="layers-package-table">
@@ -117,6 +117,7 @@
 	{# ── Individual GPKG layers (one row per layer) ── #}
 	{# For foreign-source layers the datastore selector is shown inline in Target/Action. #}
 	{% for ly in package_layout.gpkg_layers %}
+	{% if not ly.is_model_public_layer %}
 	<tr>
 		<td style="text-align:center;vertical-align:middle">
 			<input type="checkbox" class="skip-layer-checkbox" name="skip_gpkg_layer_{{ ly.export_id }}" value="1"
@@ -164,35 +165,68 @@
 			{% endif %}
 		</td>
 	</tr>
+	{% endif %}
 	{% endfor %}
 
-		{# ── Definition-only foreign connections ── #}
-		{% for fc in package_layout.foreign_connections %}
+		{# ── Foreign layers (definition-only and/or SQL view): one row each ── #}
+		{% for fl in package_layout.foreign_layers %}
 		<tr>
 			<td style="text-align:center;vertical-align:middle">
-				<input type="checkbox" class="skip-layer-checkbox" name="skip_foreign_connection_{{ fc.connection_key }}" value="1"
-					title="{% trans 'Do not import these layers' %}">
-			</td>
-			<td style="vertical-align:middle"><span class="label label-danger">{% trans "Ext. DB" %}</span></td>
-			<td style="vertical-align:middle">
-				{% if fc.sample_layers %}
-					{{ fc.sample_layers|join:", " }}
+				{% if fl.has_view_sql %}
+				<input type="checkbox" class="skip-layer-checkbox" name="skip_view_layer_{{ fl.export_id }}" value="1"
+					title="{% trans 'Do not import this view' %}">
 				{% else %}
-					{{ fc.layer_count }} {% trans "layer(s)" %}
+				<input type="checkbox" class="skip-layer-checkbox" name="skip_definition_layer_{{ fl.export_id }}" value="1"
+					title="{% trans 'Do not import this layer' %}">
 				{% endif %}
 			</td>
 			<td style="vertical-align:middle">
-				<code style="font-size:11px">{{ fc.connection_key }}</code>
-				{% if fc.connection_label != fc.connection_key %}<br><small class="text-muted">{{ fc.connection_label }}</small>{% endif %}
-				<br><small class="text-muted">{% trans "No GPKG — definition only" %}</small>
+				<span class="label label-danger">{% trans "Ext. DB" %}</span>
+				{% if fl.has_view_sql %}
+				<span class="label label-primary">{% trans "SQL View" %}</span>
+				{% endif %}
 			</td>
 			<td style="vertical-align:middle">
-				<select class="form-control input-sm layer-target-select" name="foreign_connection_{{ fc.connection_key }}" style="max-width:100%">
+				<strong>{{ fl.title }}</strong>
+				{% if fl.title != fl.name %}<br><small class="text-muted">{{ fl.name }}</small>{% endif %}
+			</td>
+			<td style="vertical-align:middle">
+				<code style="font-size:11px">{{ fl.connection_key }}</code>
+				{% if fl.connection_label != fl.connection_key %}<br><small class="text-muted">{{ fl.connection_label }}</small>{% endif %}
+				{% if fl.has_view_sql and fl.schema %}
+				<br><code style="font-size:11px">{{ fl.schema }}.{{ fl.view_name }}</code>
+				{% elif not fl.has_view_sql %}
+				<br><small class="text-muted">{% trans "No GPKG — definition only" %}</small>
+				{% endif %}
+			</td>
+			<td style="vertical-align:middle">
+				<label class="control-label small" style="font-weight:normal;margin-bottom:2px">{% trans "Target connection" %}</label>
+				<select class="form-control input-sm layer-target-select foreign-connection-select" name="foreign_connection_{{ fl.connection_key }}" data-connection-key="{{ fl.connection_key }}" data-export-id="{{ fl.export_id }}" style="max-width:100%;margin-bottom:4px">
 					<option value="">{% trans "— Select connection —" %}</option>
 					{% for c in postgis_connections %}
-					<option value="{{ c.id }}" {% if fc.selected_connection_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+					<option value="{{ c.id }}" {% if fl.selected_connection_id == c.id %}selected{% endif %}>{{ c.name }}</option>
 					{% endfor %}
 				</select>
+				{% if fl.has_view_sql %}
+				<label class="control-label small" style="font-weight:normal;margin:6px 0 2px">{% trans "Target datastore" %}</label>
+				<select class="form-control input-sm layer-target-select foreign-view-datastore-select" name="local_ds_{{ fl.export_id }}" data-export-id="{{ fl.export_id }}" data-connection-key="{{ fl.connection_key }}" style="max-width:100%;margin-bottom:4px">
+					<option value="">{% trans "— Select datastore —" %}</option>
+					{% for ds in foreign_view_datastores %}
+					<option value="{{ ds.id }}"
+						data-connection-id="{% if ds.connection_id %}{{ ds.connection_id }}{% endif %}"
+						{% if fl.selected_local_ds_id == ds.id %}selected{% endif %}>
+						{{ ds.workspace.name }} / {{ ds.name }}{% if ds.get_schema_name %} ({{ ds.get_schema_name }}){% endif %}{% if ds.connection %} — {{ ds.connection.name }}{% endif %}
+					</option>
+					{% endfor %}
+				</select>
+				<textarea name="view_sql_{{ fl.export_id }}" id="view_sql_input_{{ fl.export_id }}"
+					style="display:none">{{ fl.sql }}</textarea>
+				<button type="button" class="btn btn-xs btn-default btn-edit-view-sql"
+					data-export-id="{{ fl.export_id }}"
+					data-layer-title="{{ fl.title|escapejs }}">
+					<i class="glyphicon glyphicon-pencil"></i> {% trans "Edit SQL" %}
+				</button>
+				{% endif %}
 			</td>
 		</tr>
 		{% endfor %}
@@ -262,7 +296,7 @@
 		</tr>
 		{% endfor %}
 
-		{# ── SQL view layers ── #}
+		{# ── Local SQL view layers only (foreign views are under Ext. DB above) ── #}
 		{% for v in package_layout.view_sql_layers %}
 		<tr>
 			<td style="text-align:center;vertical-align:middle">
@@ -291,7 +325,6 @@
 					<option value="{{ ds.id }}" {% if v.selected_local_ds_id == ds.id %}selected{% endif %}>{{ ds.workspace.name }} / {{ ds.name }}{% if ds.get_schema_name %} ({{ ds.get_schema_name }}){% endif %}</option>
 					{% endfor %}
 				</select>
-				{# Hidden textarea + Edit SQL button #}
 				<textarea name="view_sql_{{ v.export_id }}" id="view_sql_input_{{ v.export_id }}"
 					style="display:none">{{ v.sql }}</textarea>
 				<button type="button" class="btn btn-xs btn-default btn-edit-view-sql"
@@ -303,9 +336,46 @@
 		</tr>
 		{% endfor %}
 
+		{# ── Model layers in public schema (reuse exact name; optional truncate) ── #}
+		{% for m in package_layout.model_public_layers %}
+		<tr>
+			<td style="text-align:center;vertical-align:middle">
+				<input type="checkbox" class="skip-layer-checkbox" name="skip_model_public_{{ m.export_id }}" value="1"
+					title="{% trans 'Do not import this model layer' %}">
+			</td>
+			<td style="vertical-align:middle"><span class="label label-warning">{% trans "Model" %}</span></td>
+			<td style="vertical-align:middle">
+				<strong>{{ m.title }}</strong>
+				{% if m.title != m.name %}<br><small class="text-muted">{{ m.name }}</small>{% endif %}
+			</td>
+			<td style="vertical-align:middle">
+				<code style="font-size:11px">public.{{ m.table_name }}</code>
+				<br><small class="text-muted">{% trans "Platform / plugin table — exact name required" %}</small>
+				{% if m.table_exists %}
+				<br><span class="label label-success">{% trans "Exists on target" %}</span>
+				{% else %}
+				<br><span class="label label-default">{% trans "Not found on target" %}</span>
+				{% endif %}
+			</td>
+			<td style="vertical-align:middle">
+				<small class="text-muted">{% trans "Will reuse the existing table (never renamed). Optionally empty it before loading package data:" %}</small>
+				{% if m.has_gpkg %}
+				<div class="checkbox" style="margin:6px 0 0">
+					<label>
+						<input type="checkbox" name="truncate_model_layer_{{ m.export_id }}" value="1">
+						{% trans "TRUNCATE table before loading data" %}
+					</label>
+				</div>
+				{% else %}
+				<small class="text-muted"><em>{% trans "No GPKG in package — link existing table only." %}</em></small>
+				{% endif %}
+			</td>
+		</tr>
+		{% endfor %}
+
 		</tbody>
 	</table>
-	<p class="help-block small">{% trans "Skipped layers are left out entirely; the rest of the project still imports. For SQL views you can also edit the query before recreating the view." %}</p>
+	<p class="help-block small">{% trans "Skipped layers are left out entirely; the rest of the project still imports. For SQL views you can also edit the query before recreating the view. Model layers in public keep their exact table name and are never renamed." %}</p>
 	{% endif %}
 
 	{# Modal: SQL editor for view layers #}
@@ -401,6 +471,49 @@ $(document).ready(function () {
             return;
         }
         $('#layers-package-table select.gpkg-datastore-select[name="' + name + '"]').not($source).val(val);
+    });
+
+    function filterForeignViewDatastores($connSelect) {
+        var connId = String($connSelect.val() || '');
+        var $row = $connSelect.closest('tr');
+        var $ds = $row.find('select.foreign-view-datastore-select');
+        if (!$ds.length) {
+            return;
+        }
+        var current = $ds.val();
+        var keep = '';
+        $ds.find('option').each(function () {
+            var $opt = $(this);
+            var val = $opt.attr('value');
+            if (!val) {
+                $opt.prop('hidden', false).prop('disabled', false);
+                return;
+            }
+            var optConn = String($opt.attr('data-connection-id') || '');
+            var match = !connId || !optConn || optConn === connId;
+            $opt.prop('hidden', !match).prop('disabled', !match);
+            if (match && val === current) {
+                keep = val;
+            }
+        });
+        $ds.val(keep);
+    }
+
+    /* Same connection_key → keep foreign_connection_* selects in sync */
+    $('#layers-package-table').on('change', '.foreign-connection-select', function () {
+        var $source = $(this);
+        var name = $source.attr('name');
+        var val = $source.val();
+        if (!name) {
+            return;
+        }
+        $('#layers-package-table select.foreign-connection-select[name="' + name + '"]').not($source).val(val);
+        $('#layers-package-table select.foreign-connection-select[name="' + name + '"]').each(function () {
+            filterForeignViewDatastores($(this));
+        });
+    });
+    $('#layers-package-table select.foreign-connection-select').each(function () {
+        filterForeignViewDatastores($(this));
     });
 
     /* Toggle all Skip checkboxes from the column header */

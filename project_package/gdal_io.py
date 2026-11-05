@@ -181,21 +181,26 @@ def export_postgis_to_gpkg(schema, table, dest_gpkg, pg_conn=None):
     return gpkg_layer
 
 
-def import_gpkg_to_postgis(gpkg_path, gpkg_layer, pg_conn, table_name, schema):
-    """Load one GPKG layer into PostGIS, overwriting if a table already exists."""
+def import_gpkg_to_postgis(gpkg_path, gpkg_layer, pg_conn, table_name, schema, append=False):
+    """Load one GPKG layer into PostGIS.
+
+    When append=False (default): create a new table (MODE_LAYER_CREATE).
+    When append=True: append rows into an existing table (MODE_LAYER_APPEND),
+    used after TRUNCATE for model/public layers that must keep their name.
+    """
     import gdaltools
 
     gpkg_path = os.path.abspath(gpkg_path)
     ogr = gdaltools.ogr2ogr()
     ogr.set_input(gpkg_path, table_name=gpkg_layer)
     ogr.set_output(pg_conn, table_name=table_name)
+    layer_mode = ogr.MODE_LAYER_APPEND if append else ogr.MODE_LAYER_CREATE
     ogr.set_output_mode(
-        layer_mode=ogr.MODE_LAYER_CREATE,
+        layer_mode=layer_mode,
         data_source_mode=ogr.MODE_DS_UPDATE,
     )
     ogr.layer_creation_options = {
         'SCHEMA': schema,
         'GEOMETRY_NAME': 'wkb_geometry',
-        'LAUNDER': 'NO',
-    }
+        'LAUNDER': 'NO',    }
     _execute_ogr(ogr, 'import_gpkg_to_postgis')

@@ -13,7 +13,6 @@ Import flow:
   3. Status polling endpoint reads job.status; on done redirects to result page
 """
 
-import logging
 import os
 
 from celery.utils.log import get_task_logger

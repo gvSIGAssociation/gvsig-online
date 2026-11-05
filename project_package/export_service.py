@@ -133,7 +133,7 @@ def _export_view_sql_definition(layer, ds, schema, report):
                 'layer': layer.name,
                 'export_error': (
                     'view_sql_definition requested but view "%s" was not found '
-                    'in schema "%s" or any other schema; falling back to GPKG.'
+                    'in schema "%s" or any other schema.'
                     % (source, schema)
                 ),
             }))
@@ -223,6 +223,11 @@ def _serialize_layer(layer: Layer, datastore):
         'datastore_is_foreign': is_foreign_postgis_datastore(datastore) if datastore else False,
         'datastore_type': datastore.type if datastore else '',
         'datastore_connection_params': datastore.connection_params if datastore else '',
+        'is_model_public_layer': bool(
+            datastore
+            and not is_foreign_postgis_datastore(datastore)
+            and (datastore.get_schema_name() or 'public').strip() == 'public'
+        ),
     }
     return scrub_json_tree(d)
 
@@ -561,14 +566,25 @@ def build_project_zip(project: Project, export_options=None, progress_cb=None):
                                     'view': table,
                                 }))
                             else:
-                                # Fallback to GPKG: SQL retrieval failed
-                                # (error already appended to log_lines by _export_view_sql_definition)
-                                LOG.warning(
-                                    'view_sql_definition requested for layer "%s" but SQL '
-                                    'could not be retrieved; falling back to GPKG export.',
-                                    layer.name,
-                                )
-                                vmode = 'embedded'
+                                # SQL retrieval failed (error already in log_lines).
+                                # Foreign: never fall back to GPKG (large/remote DBs).
+                                # Local: keep previous behaviour (embed as GPKG).
+                                is_foreign = is_foreign_postgis_datastore(ds)
+                                if is_foreign:
+                                    LOG.warning(
+                                        'view_sql_definition requested for foreign layer "%s" '
+                                        'but SQL could not be retrieved; falling back to '
+                                        'definition_only.',
+                                        layer.name,
+                                    )
+                                    vmode = 'definition_only'
+                                else:
+                                    LOG.warning(
+                                        'view_sql_definition requested for layer "%s" but SQL '
+                                        'could not be retrieved; falling back to GPKG export.',
+                                        layer.name,
+                                    )
+                                    vmode = 'embedded'
                                 layer_entry['vector_data_mode'] = vmode
                         if vmode == 'embedded':
                             gpkg_rel = 'data/vector/%s.gpkg' % eid
