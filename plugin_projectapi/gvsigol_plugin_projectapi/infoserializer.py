@@ -633,7 +633,7 @@ class LayerGroupSerializer(serializers.ModelSerializer):
         username = self.context.get('user')
         lang = self.context['lang']
         projectid = self.context['projectid']
-        queryset = self._get_readable_layers_queryset(obj).order_by("-order")
+        queryset = self._get_readable_layers_queryset(obj).order_by("-order", "-id")
         context={'request': request, 'user': username, 'lang': lang, 'projectid': projectid, 'user_profile': self.context.get('user_profile')}
         serializer = LayerSerializer(queryset, many=True, context=context)
         return serializer.data
@@ -673,7 +673,7 @@ class PublicLayerGroupSerializer(serializers.ModelSerializer):
     def get_layers_(self, obj):
         lang = self.context['lang']
         projectid = self.context['projectid']
-        queryset = self._get_readable_layers_queryset(obj)
+        queryset = self._get_readable_layers_queryset(obj).order_by("-order", "-id")
         serializer = LayerSerializer(queryset, many=True, context={'lang': lang, 'projectid': projectid})
         return serializer.data
 
@@ -719,7 +719,7 @@ class InfoSerializer(serializers.ModelSerializer):
         resultset = util.get_layergroups_by_user_and_project(request, obj.id, user_profile=user_profile)
         layer_groups = []
         for layer_group in resultset:
-            layers = util.get_layerread_by_user_and_group(request, layer_group.id, user_profile=user_profile).order_by("-order")
+            layers = util.get_layerread_by_user_and_group(request, layer_group.id, user_profile=user_profile).order_by("-order", "-id")
             if layers.exists():
                 context={'request': request, 'user': username, 'lang': lang, 'projectid': obj.id, 'user_profile': user_profile}
                 serializer = LayerGroupSerializer(layer_group, context=context)
@@ -798,12 +798,13 @@ class PublicInfoSerializer(serializers.ModelSerializer):
         resultset = util.get_layergroups_by_project(obj.id)        
         layer_groups = []
         for layer_group in resultset:
-            layers = util.get_layerread_by_group(layer_group.id)
+            layers = util.get_layerread_by_group(layer_group.id).order_by("-order", "-id")
             if layers.exists():
                 serializer = PublicLayerGroupSerializer(layer_group, context={'lang': lang, 'projectid': obj.id})
                 layer_groups.append(serializer.data)
-        
-        return layer_groups
+
+        ordered_layer_groups = sorted(layer_groups, key=itemgetter('order'), reverse=True)
+        return ordered_layer_groups
 
     def get_project_image(self, obj):
         # FIXME: we should to consider HTTP_ORIGIN and ALLOWED_HOST_NAMES to build the URL
