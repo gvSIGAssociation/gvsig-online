@@ -5,15 +5,15 @@
 {% block header %}
 <style>
 :root {
-	--pl-accent:    #4a7fa5;
-	--pl-accent-dk: #2d5f80;
-	--pl-text:      #2e3a45;
-	--pl-muted:     #7b8a96;
-	--pl-border:    #e8ecef;
-	--pl-bg:        #f4f6f8;
+	--pl-accent:    #54718c;
+	--pl-accent-dk: #3e5974;
+	--pl-text:      #37424d;
+	--pl-muted:     #5f7181;
+	--pl-border:    #e3e8ed;
+	--pl-bg:        #f3f5f7;
 	--pl-white:     #ffffff;
 	--pl-radius:    10px;
-	--pl-shadow:    0 2px 12px rgba(0,0,0,0.08);
+	--pl-shadow:    0 2px 12px rgba(63,77,90,0.10);
 	--pl-transition: 0.2s ease;
 }
 .pl-panel { background: var(--pl-white); border-radius: var(--pl-radius); box-shadow: var(--pl-shadow); border: 1px solid var(--pl-border); overflow: hidden; margin-bottom: 16px; }
@@ -28,7 +28,7 @@
 .btn-pl-add--outline:hover { background: var(--pl-bg); border-color: var(--pl-accent); color: var(--pl-accent) !important; }
 .pl-form label { font-size: 12px; font-weight: 600; color: var(--pl-muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; display: block; }
 .pl-form .form-control { border-radius: 6px; border: 1px solid var(--pl-border); background: var(--pl-bg); font-size: 13px; color: var(--pl-text); box-shadow: none; transition: border-color var(--pl-transition), box-shadow var(--pl-transition); }
-.pl-form .form-control:focus { border-color: var(--pl-accent); background: var(--pl-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
+.pl-form .form-control:focus { border-color: var(--pl-accent); background: var(--pl-white); box-shadow: 0 0 0 3px rgba(84,113,140,0.12); outline: none; }
 .pl-form .form-group { margin-bottom: 16px; }
 .pl-help { display: block; color: var(--pl-muted); font-size: 11px; margin-top: 4px; font-weight: 400; text-transform: none; letter-spacing: 0; }
 .pl-image-picker { display: flex; align-items: center; gap: 16px; padding: 12px; background: var(--pl-bg); border-radius: 7px; }
@@ -38,20 +38,20 @@
 .pl-check input { margin-top: 3px; }
 .pl-check strong { font-size: 13px; }
 .pl-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.pl-table thead th { background: var(--pl-bg); color: var(--pl-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; padding: 11px 16px; border-bottom: 1px solid var(--pl-border); text-align: left; }
+.pl-table thead th { background: #e9eef3; color: #3f4d5a; font-size: 12px; font-weight: 600; padding: 11px 16px; border-bottom: 1px solid #d3dbe3; white-space: nowrap; text-align: left; }
 .pl-table tbody tr { border-bottom: 1px solid var(--pl-border); }
 .pl-table tbody tr:last-child { border-bottom: none; }
-.pl-table tbody tr:hover { background: #f0f6fb; }
-.pl-table tbody td { padding: 11px 16px; color: #4a5a68; vertical-align: middle; }
+.pl-table tbody tr:hover { background: #eef2f6; }
+.pl-table tbody td { padding: 11px 16px; color: #37424d; vertical-align: middle; }
 .pl-role-name { font-weight: 600; color: var(--pl-text); }
 .pl-role-desc { font-size: 11px; color: var(--pl-muted); }
 .pl-role-check { text-align: center; width: 150px; }
 .pl-tabs { border-bottom: 2px solid var(--pl-border); margin: 0; padding-left: 4px; }
 .pl-tabs > li > a { display: inline-flex; align-items: center; gap: 7px; color: var(--pl-muted); font-size: 13px; font-weight: 600; border: none; border-bottom: 2.5px solid transparent; padding: 11px 20px; margin-bottom: -2px; border-radius: 6px 6px 0 0; }
-.pl-tabs > li > a:hover { color: var(--pl-accent); background: rgba(74,127,165,0.06); border-color: transparent; }
+.pl-tabs > li > a:hover { color: var(--pl-accent); background: rgba(84,113,140,0.06); border-color: transparent; }
 .pl-tabs > li.active > a,
 .pl-tabs > li.active > a:hover,
-.pl-tabs > li.active > a:focus { color: var(--pl-accent); background: rgba(74,127,165,0.06); border: none; border-bottom: 2.5px solid var(--pl-accent); }
+.pl-tabs > li.active > a:focus { color: var(--pl-accent); background: rgba(84,113,140,0.06); border: none; border-bottom: 2.5px solid var(--pl-accent); }
 .pl-tab-content { padding: 20px; }
 .pl-role-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--pl-border); }
 .pl-role-search { max-width: 320px; margin: 0; }

@@ -4,15 +4,15 @@
 {% block header %}
 <style>
 :root {
-	--pl-accent:    #4a7fa5;
-	--pl-accent-dk: #2d5f80;
-	--pl-text:      #2e3a45;
-	--pl-muted:     #7b8a96;
-	--pl-border:    #e8ecef;
-	--pl-bg:        #f4f6f8;
+	--pl-accent:    #54718c;
+	--pl-accent-dk: #3e5974;
+	--pl-text:      #37424d;
+	--pl-muted:     #5f7181;
+	--pl-border:    #e3e8ed;
+	--pl-bg:        #f3f5f7;
 	--pl-white:     #ffffff;
 	--pl-radius:    10px;
-	--pl-shadow:    0 2px 12px rgba(0,0,0,0.08);
+	--pl-shadow:    0 2px 12px rgba(63,77,90,0.10);
 	--pl-transition: 0.2s ease;
 }
 .pl-panel { background: var(--pl-white); border-radius: var(--pl-radius); box-shadow: var(--pl-shadow); border: 1px solid var(--pl-border); overflow: hidden; }
@@ -28,25 +28,25 @@
 .btn-pl-add:hover { background: var(--pl-accent-dk); }
 .pl-search-wrap { display: flex; align-items: center; gap: 6px; }
 .pl-search-wrap .form-control { height: 34px; border-radius: 20px; border: 1px solid var(--pl-border); background: var(--pl-bg); font-size: 12px; padding: 0 14px; width: 200px; box-shadow: none; transition: border-color var(--pl-transition), box-shadow var(--pl-transition); }
-.pl-search-wrap .form-control:focus { border-color: var(--pl-accent); background: var(--pl-white); box-shadow: 0 0 0 3px rgba(74,127,165,0.12); outline: none; }
+.pl-search-wrap .form-control:focus { border-color: var(--pl-accent); background: var(--pl-white); box-shadow: 0 0 0 3px rgba(84,113,140,0.12); outline: none; }
 .pl-search-wrap .btn-search { height: 34px; width: 34px; border-radius: 50%; border: 1px solid var(--pl-border); background: var(--pl-white); color: var(--pl-muted); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: background var(--pl-transition); padding: 0; }
 .pl-search-wrap .btn-search:hover { background: var(--pl-accent); color: #fff; border-color: var(--pl-accent); }
 .pl-table { width: 100%; border-collapse: collapse; font-size: 13px; font-weight: 400; -webkit-font-smoothing: antialiased; }
-.pl-table thead th { background: var(--pl-bg); color: var(--pl-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; padding: 11px 16px; border-bottom: 1px solid var(--pl-border); white-space: nowrap; }
+.pl-table thead th { background: #e9eef3; color: #3f4d5a; font-size: 12px; font-weight: 600; padding: 11px 16px; border-bottom: 1px solid #d3dbe3; white-space: nowrap; text-align: left; }
 .pl-table tbody tr { border-bottom: 1px solid var(--pl-border); transition: background var(--pl-transition); }
 .pl-table tbody tr:last-child { border-bottom: none; }
-.pl-table tbody tr:hover { background: #f0f6fb; }
-.pl-table tbody td { padding: 11px 16px; color: #4a5a68; font-size: 13px; font-weight: 400; line-height: 1.5; vertical-align: middle; }
+.pl-table tbody tr:hover { background: #eef2f6; }
+.pl-table tbody td { padding: 11px 16px; color: #37424d; font-size: 13px; font-weight: 400; line-height: 1.5; vertical-align: middle; }
 .pl-name { font-weight: 600; color: var(--pl-text); }
 .pl-meta { display: block; color: var(--pl-muted); font-size: 12px; margin-top: 2px; }
 .pl-badge { display: inline-block; border-radius: 12px; padding: 3px 10px; font-size: 11px; font-weight: 600; }
-.pl-badge--public { background: #e9f2fb; color: #28658f; }
+.pl-badge--public { background: #e9eef3; color: #3e5974; }
 .pl-badge--private { background: #f5f0e8; color: #87662c; }
 .pl-action-cell { white-space: nowrap; text-align: center; min-width: 90px; }
 .pl-table thead th.pl-action-cell { text-align: center; }
 #panels-table .btn { border-radius: 5px; font-size: 12px; padding: 4px 10px; transition: background var(--pl-transition), border-color var(--pl-transition); }
 #panels-table .btn-light { background: transparent; border: 1px solid var(--pl-border); color: var(--pl-accent); }
-#panels-table .btn-light:hover { background: #f0f6fb; border-color: var(--pl-accent); }
+#panels-table .btn-light:hover { background: #eef2f6; border-color: var(--pl-accent); }
 #panels-table .btn-success { background: transparent; border: 1px solid #b7e5cc; color: #1a7a45; }
 #panels-table .btn-success:hover { background: #e6f7ee; border-color: #1a7a45; }
 #panels-table .btn-warning { background: transparent; border: 1px solid #f5d79e; color: #d08b00; }
@@ -62,7 +62,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 .dataTables_wrapper .dataTables_info,
 .dataTables_wrapper .dataTables_paginate { display: none; }
 .pl-empty { padding: 40px; text-align: center; color: var(--pl-muted); }
-.modal-content { border-radius: var(--pl-radius); border: none; box-shadow: 0 8px 32px rgba(0,0,0,0.18); }
+.modal-content { border-radius: var(--pl-radius); border: none; box-shadow: 0 8px 32px rgba(63,77,90,0.20); }
 .modal-header { border-bottom: 1px solid var(--pl-border); padding: 16px 20px; }
 .modal-title { font-size: 15px; font-weight: 700; color: var(--pl-text); }
 .modal-body { padding: 20px; font-size: 13px; }
@@ -81,7 +81,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 		<div class="pl-panel">
 			<div class="pl-panel__header">
 				<h3 class="pl-panel__title">
-					<i class="fa fa-th-large"></i> {% trans "Panels list" %}
+					<i class="fa fa-dashboard"></i> {% trans "Panels list" %}
 				</h3>
 				<div class="pl-panel__actions">
 					<div class="pl-search-wrap">
