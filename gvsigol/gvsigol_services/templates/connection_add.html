@@ -264,6 +264,10 @@
 										<label for="id_padron_atm_id_acceso">{{ form.padron_atm_id_acceso.label }}</label>
 										{{ form.padron_atm_id_acceso }}
 									</div>
+									<div class="form-group">
+										<label for="id_padron_atm_entorno">{{ form.padron_atm_entorno.label }}</label>
+										{{ form.padron_atm_entorno }}
+									</div>
 								</div>
 
 								<!-- ==================== SGAREXWS ==================== -->
@@ -279,6 +283,18 @@
 									<div class="form-group">
 										<label for="id_sgarexws_password">{{ form.sgarexws_password.label }}</label>
 										{{ form.sgarexws_password }}
+									</div>
+								</div>
+
+								<!-- ==================== GESTIONA ==================== -->
+								<div id="params-gestiona" class="connection-params" style="display:none;">
+									<div class="form-group">
+										<label for="id_gestiona_url">{{ form.gestiona_url.label }}</label>
+										{{ form.gestiona_url }}
+									</div>
+									<div class="form-group">
+										<label for="id_gestiona_access_token">{{ form.gestiona_access_token.label }}</label>
+										{{ form.gestiona_access_token }}
 									</div>
 								</div>
 								
@@ -346,7 +362,7 @@ $(document).ready(function() {
 	// Tipos de base de datos
 	var databaseTypes = ['PostGIS', 'Oracle', 'SQLServer'];
 	// Tipos de API
-	var apiTypes = ['indenova', 'segex', 'sharepoint', 'padron-atm', 'sgarexws'];
+	var apiTypes = ['indenova', 'segex', 'sharepoint', 'padron-atm', 'sgarexws', 'gestiona'];
 	
 	// Mapeo de tipo a ID del div de parámetros
 	var typeToParamsDiv = {
@@ -357,7 +373,8 @@ $(document).ready(function() {
 		'segex': '#params-segex',
 		'sharepoint': '#params-sharepoint',
 		'padron-atm': '#params-padron-atm',
-		'sgarexws': '#params-sgarexws'
+		'sgarexws': '#params-sgarexws',
+		'gestiona': '#params-gestiona'
 	};
 	
 	// Iconos para cada tipo de conexión
@@ -378,7 +395,8 @@ $(document).ready(function() {
 		'segex': '<i class="fa fa-file-text" style="color: #27ae60;"></i>',
 		'sharepoint': '<i class="fa fa-cloud" style="color: #0078d4;"></i>',
 		'padron-atm': '<i class="fa fa-users" style="color: #8e44ad;"></i>',
-		'sgarexws': '<i class="fa fa-server" style="color: #16a085;"></i>'
+		'sgarexws': '<i class="fa fa-server" style="color: #16a085;"></i>',
+		'gestiona': '<i class="fa fa-folder-open" style="color: #c0392b;"></i>'
 	};
 	
 	// Actualizar opciones del desplegable de tipo según categoría
@@ -401,6 +419,7 @@ $(document).ready(function() {
 			typeSelect.append('<option value="sharepoint">SharePoint</option>');
 			typeSelect.append('<option value="padron-atm">Padrón ATM</option>');
 			typeSelect.append('<option value="sgarexws">SgaRexWS</option>');
+			typeSelect.append('<option value="gestiona">Gestiona</option>');
 		}
 		// Si categoría está vacía, tipo queda solo con "---"
 		
@@ -585,10 +604,14 @@ $(document).ready(function() {
 			postData.email = $('#id_padron_atm_email').val();
 			postData.password = $('#id_padron_atm_password').val();
 			postData.idacceso = $('#id_padron_atm_id_acceso').val();
+			postData.entorno = $('#id_padron_atm_entorno').val();
 		} else if (connType === 'sgarexws') {
 			postData.url = $('#id_sgarexws_url').val();
 			postData.username = $('#id_sgarexws_username').val();
 			postData.password = $('#id_sgarexws_password').val();
+		} else if (connType === 'gestiona') {
+			postData.url = $('#id_gestiona_url').val();
+			postData['access-token'] = $('#id_gestiona_access_token').val();
 		}
 		
 		$.ajax({

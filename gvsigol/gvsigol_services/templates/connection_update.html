@@ -323,6 +323,10 @@
 										<label for="id_padron_atm_id_acceso">{{ form.padron_atm_id_acceso.label }}</label>
 										{{ form.padron_atm_id_acceso }}
 									</div>
+									<div class="form-group">
+										<label for="id_padron_atm_entorno">{{ form.padron_atm_entorno.label }}</label>
+										{{ form.padron_atm_entorno }}
+									</div>
 								</div>
 								{% endif %}
 
@@ -340,6 +344,21 @@
 									<div class="form-group">
 										<label for="id_sgarexws_password">{{ form.sgarexws_password.label }}</label>
 										{{ form.sgarexws_password }}
+										<small class="text-muted">{% trans "Leave empty to keep current password" %}</small>
+									</div>
+								</div>
+								{% endif %}
+
+								<!-- ==================== GESTIONA ==================== -->
+								{% if connection.type == 'gestiona' %}
+								<div id="params-gestiona">
+									<div class="form-group">
+										<label for="id_gestiona_url">{{ form.gestiona_url.label }}</label>
+										{{ form.gestiona_url }}
+									</div>
+									<div class="form-group">
+										<label for="id_gestiona_access_token">{{ form.gestiona_access_token.label }}</label>
+										{{ form.gestiona_access_token }}
 										<small class="text-muted">{% trans "Leave empty to keep current password" %}</small>
 									</div>
 								</div>
@@ -457,11 +476,16 @@ $(document).ready(function() {
 			postData.email = $('#id_padron_atm_email').val();
 			postData.password = $('#id_padron_atm_password').val();
 			postData.idacceso = $('#id_padron_atm_id_acceso').val();
+			postData.entorno = $('#id_padron_atm_entorno').val();
 		} else if (connType === 'sgarexws') {
 			postData.url = $('#id_sgarexws_url').val();
 			postData.username = $('#id_sgarexws_username').val();
 			postData.password = $('#id_sgarexws_password').val();
 			//Si la contraseña está en blanco, connection_test necesita connection_id para obtenerla
+			postData.connection_id = '{{ connection.id }}';
+		} else if (connType === 'gestiona') {
+			postData.url = $('#id_gestiona_url').val();
+			postData['access-token'] = $('#id_gestiona_access_token').val();
 			postData.connection_id = '{{ connection.id }}';
 		}
 		

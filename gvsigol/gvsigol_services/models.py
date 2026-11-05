@@ -188,6 +188,7 @@ class Connection(models.Model):
         ('sharepoint', 'SharePoint'),
         ('padron-atm', 'Padrón ATM'),
         ('sgarexws', 'SgaRexWS'),
+        ('gestiona', 'Gestiona'),
     )
     
     # Todos los tipos combinados para el campo del modelo
@@ -195,7 +196,7 @@ class Connection(models.Model):
     
     # Listas para validación rápida
     DATABASE_TYPES = ('PostGIS', 'Oracle', 'SQLServer')
-    API_TYPES = ('indenova', 'segex', 'sharepoint', 'padron-atm', 'sgarexws')
+    API_TYPES = ('indenova', 'segex', 'sharepoint', 'padron-atm', 'sgarexws', 'gestiona')
     
     name = models.CharField(max_length=250, unique=True)
     description = models.TextField(null=True, blank=True)
@@ -308,6 +309,8 @@ class Connection(models.Model):
             params['passwd'] = '****'
         if 'password' in params:
             params['password'] = '****'
+        if 'access-token' in params:
+            params['access-token'] = '****'
         return params
 
     def get_db_connection(self):

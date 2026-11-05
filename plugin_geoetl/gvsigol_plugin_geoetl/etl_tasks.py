@@ -6723,15 +6723,25 @@ def trans_CalcLength(dicc):
 def input_PadronAtm(dicc):
     try:
         api = Connection.objects.get(name=dicc['api'])
-        credenciales = json.loads(api.connection_params)
+        params = json.loads(api.connection_params)
     except Exception as e:
         print(f"Error al obtener credenciales de la API: {e}")
         return None
 
     table_name = dicc['id']
-    url_auth = "https://pmcloudserver.atm-maggioli.es/api/auth/login"
-    url_list = "https://pmcloudserver.atm-maggioli.es/padron/api/habitante/GetList/"
-    url_detalle = "https://pmcloudserver.atm-maggioli.es/padron/api/habitante/GetPorDocumento/{}"
+    entorno = (params.get('entorno') or 'PRO').upper()
+    if entorno == 'PRE':
+        base_url = 'https://pre-pmcloudserver.atm-maggioli.es'
+    else:
+        base_url = 'https://pmcloudserver.atm-maggioli.es'
+    url_auth = f"{base_url}/api/auth/login"
+    url_list = f"{base_url}/padron/api/habitante/GetList/"
+    url_detalle = f"{base_url}/padron/api/habitante/GetPorDocumento/{{}}"
+    credenciales = {
+        'email': params.get('email', ''),
+        'password': params.get('password', ''),
+        'idacceso': params.get('idacceso', '') or params.get('id_acceso', ''),
+    }
 
     def obtener_token():
         try:
