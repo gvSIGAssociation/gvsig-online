@@ -4402,3 +4402,7 @@ msgstr "Uso recomendado: documentar informações de copyright ou de licenciamen
 
 msgid "Optional. Select a logo from file manager. It will be shown inside the modal."
 msgstr "Opcional. Selecione um logotipo no gerenciador de arquivos. Será mostrado dentro do modal."
+
+#: templates/connection_update.html
+msgid "External API"
+msgstr "API externa"

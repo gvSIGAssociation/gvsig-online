@@ -4073,3 +4073,7 @@ msgstr "Error borrando la vista: {0}"
 
 #~ msgid "Upload raster layer"
 #~ msgstr "Subir capa raster"
+
+#: templates/connection_update.html
+msgid "External API"
+msgstr "Externe API"

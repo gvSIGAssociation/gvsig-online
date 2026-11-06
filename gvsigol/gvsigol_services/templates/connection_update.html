@@ -24,24 +24,24 @@
 		flex-direction: column;
 		cursor: wait;}
 	#saving-overlay .saving-box {
-		background: #fff;
-		border-radius: 6px;
+		background: var(--pf-white, #fff);
+		border-radius: 10px;
 		padding: 30px 40px;
 		text-align: center;
 		box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 		max-width: 360px;}
 	#saving-overlay .saving-box .fa-spinner {
 		font-size: 36px;
-		color: #3c8dbc;
+		color: var(--pf-accent, #3c8dbc);
 		margin-bottom: 14px;}
 	#saving-overlay .saving-box p {
 		margin: 0;
 		font-size: 15px;
-		color: #444;}
+		color: var(--pf-text, #444);}
 	#saving-overlay .saving-box .saving-hint {
 		margin-top: 8px;
 		font-size: 12px;
-		color: #888;}
+		color: var(--pf-muted, #888);}
 </style>
 {% endblock %}
 
@@ -51,6 +51,7 @@
 {% with ds_count=connection.datastores.count %}
 <div id="saving-overlay" style="display:none">
 	<div class="saving-box">
+		<i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
 		<p><strong>{% trans "Saving..." %}</strong></p>
 		{% if ds_count > 0 %}
 		<p class="saving-hint">
@@ -110,9 +111,9 @@
 								<div class="form-group">
 									<label>{% trans "Category" %}</label>
 									{% if connection.type == 'PostGIS' or connection.type == 'Oracle' or connection.type == 'SQLServer' %}
-									<input type="text" class="form-control" readonly value="Base de datos">
+									<input type="text" class="form-control" readonly value="{% trans 'Database' %}">
 									{% else %}
-									<input type="text" class="form-control" readonly value="API externa">
+									<input type="text" class="form-control" readonly value="{% trans 'External API' %}">
 									{% endif %}
 								</div>
 								<div class="form-group">

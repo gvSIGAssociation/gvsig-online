@@ -5524,3 +5524,7 @@ msgstr "Añadir grupo"
 #: gvsigol_services/templates/sqlview_add.html
 msgid "Group"
 msgstr "Grupo"
+
+#: templates/connection_update.html
+msgid "External API"
+msgstr "API externa"

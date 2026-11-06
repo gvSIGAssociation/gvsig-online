@@ -6,15 +6,46 @@
 {% block header %}
 <link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-roles.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-permissions.css" %}">
 {% endblock %}
 
 {% block content %}
 <style>
 .CodeMirror {
-		border: 1px solid #d2d6de;
-		border-radius: 3px;
+		border: 1px solid var(--pf-border, #d2d6de);
+		border-radius: 6px;
 		min-height: 400px;
 		height: calc(100vh - 400px);}
+	/* Conexión a la que pertenece el disparador, en la barra superior */
+	.tr-context {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 2px 10px;
+		border: 1px solid var(--pf-border, #d2d6de);
+		border-radius: 11px;
+		background: var(--pf-white, #fff);
+		font-size: 12px;
+		font-weight: 600;
+		color: var(--pf-muted, #6b7a88);}
+	/* Bloques de la columna de configuración */
+	.tr-section-title { margin: 22px 0 10px; padding-top: 14px; border-top: 1px solid var(--pf-border, #e3e8ec); }
+	.tr-events { display: flex; flex-wrap: wrap; gap: 4px 16px; padding-top: 6px; }
+	.tr-events .checkbox-inline { margin: 0; padding-left: 20px; }
+	#compatible-datastores {
+		max-height: 150px;
+		overflow-y: auto;
+		margin: 0;
+		padding: 10px 12px;
+		border: 1px solid var(--pf-border, #e3e8ec);
+		border-radius: 6px;
+		background: var(--pf-bg, #f7f9fa);
+		box-shadow: none;}
+	#compatible-datastores p:last-child { margin-bottom: 0; }
+	.tr-sql-help { margin-top: 8px; font-size: 12.5px; }
+	.tr-sql-help p { margin-bottom: 5px; }
+	.tr-sql-help p:last-child { margin-bottom: 0; }
 </style>
 <div class="row">
 	<div class="col-md-12">
@@ -22,31 +53,20 @@
 			{% csrf_token %}
 			<input type="hidden" id="schemas-hidden" name="schemas_json" value="">
 			
-			<div class="row">
-				<div class="col-md-12 form-group">
-					<div class="box-tools pull-right">
-						<a href="{% url 'connection_config' connection.id %}" class="btn btn-default btn-sm">
-							<i class="fa fa-arrow-left margin-r-5"></i> {% trans "Cancel" %}
-						</a>
-						<button type="submit" class="btn btn-primary btn-sm">
-							<i class="fa fa-save margin-r-5"></i> {% trans "Save trigger" %}
-						</button>
-					</div>
+			<div class="pf-topbar">
+				<div class="pf-topbar-left">
+					<a href="{% url 'connection_config' connection.id %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Cancel" %}</a>
+					<span class="tr-context" title="{% trans 'Connection' %}"><i class="fa fa-plug"></i> {{ connection.name }}</span>
 				</div>
+				<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save trigger" %}</button>
 			</div>
 
 			{% if error_message %}
-			<div class="alert alert-danger alert-dismissible">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				<i class="icon fa fa-ban"></i> {{ error_message }}
+			<div class="pf-error-msg" style="display: block;" role="alert">
+				<i class="fa fa-exclamation-circle"></i> {{ error_message }}
 			</div>
 			{% endif %}
 
-			<div class="box box-primary">
-				<div class="box-header with-border">
-					<span class="label label-primary pull-right">{{ connection.name }}</span>
-				</div>
-				<div class="box-body">
 				<!-- Pestañas -->
 				<ul class="nav nav-tabs">
 					<li class="active">
@@ -57,10 +77,10 @@
 					</li>
 				</ul>
 					
-					<div class="tab-content" style="padding-top: 15px;">
+					<div class="tab-content">
 						<!-- Tab General -->
 						<div class="tab-pane active" id="tab-general">
-							<div class="row">
+							<div class="row" style="padding: 15px;">
 								<!-- Columna izquierda: Configuración -->
 								<div class="col-md-4">
 									<div class="form-group">
@@ -92,7 +112,7 @@
 										<div class="col-md-6">
 											<div class="form-group">
 												<label>{% trans "Events" %} <span class="text-danger">*</span></label>
-												<div>
+												<div class="tr-events">
 													<label class="checkbox-inline">
 														<input type="checkbox" name="events" value="INSERT"
 															{% if 'INSERT' in trigger_events %}checked{% endif %}>
@@ -113,8 +133,7 @@
 										</div>
 									</div>
 
-									<hr>
-									<h4>{% trans "Scope" %}</h4>
+									<h4 class="tr-section-title">{% trans "Scope" %}</h4>
 
 									<div class="form-group">
 										<label for="scope">{% trans "Apply to" %} <span class="text-danger">*</span></label>
@@ -136,8 +155,7 @@
 										<small class="text-muted">{% filter force_escape %}{% trans "Type schema names and press Enter to add" %}{% endfilter %}</small>
 									</div>
 
-									<hr>
-									<h4>{% trans "Options" %}</h4>
+									<h4 class="tr-section-title">{% trans "Options" %}</h4>
 
 									<div class="form-group">
 										<div class="checkbox">
@@ -150,9 +168,8 @@
 										<small class="text-muted">{% trans "Can be assigned to layer fields to auto-calculate values" %}</small>
 									</div>
 
-									<hr>
-									<h4>{% trans "Compatible datastores" %}</h4>
-									<div id="compatible-datastores" class="well" style="max-height: 150px; overflow-y: auto;">
+									<h4 class="tr-section-title">{% trans "Compatible datastores" %}</h4>
+									<div id="compatible-datastores">
 										<p class="text-muted"><em>{% trans "Loading..." %}</em></p>
 									</div>
 								</div>
@@ -171,11 +188,11 @@ BEGIN
     
     RETURN NEW;  -- Use RETURN OLD; for DELETE-only triggers
 END;{% endif %}</textarea>
-										<div class="help-block" style="margin-top: 5px;">
-											<p class="text-muted" style="margin-bottom: 5px;">
+										<div class="help-block tr-sql-help">
+											<p class="text-muted">
 												{% trans "Use NEW to reference the new row (INSERT/UPDATE) and OLD for the old row (UPDATE/DELETE)." %}
 											</p>
-											<p style="margin-bottom: 0;">
+											<p>
 												<strong>{% trans "Template variables" %}:</strong>
 												<code>{target_field}</code>, 
 												<code>{current_schema}</code>, 
@@ -200,21 +217,19 @@ END;{% endif %}</textarea>
 						
 						<!-- Tab Permisos -->
 						<div class="tab-pane" id="tab-permissions">
-							<div class="row">
+							<div class="row" style="padding: 15px;">
 								<div class="col-md-12">
-									<div id="trigger-permissions-box" class="box searchable-list-box">
-										<div class="box-header">
-											<h3 class="col-md-6 box-title" style="vertical-align: middle">{% trans "Select trigger permissions" %}</h3>
-											<div class="col-md-6">
+									<h4>{% trans "Select trigger permissions" %}</h4>
+									<div id="trigger-permissions-box" class="searchable-list-box">
+										<div class="box-header cp-header">
+											<div class="cp-search">
 												<input type="text" class="search form-control" placeholder="{% filter force_escape %}{% trans 'Search user role...' %}{% endfilter %}" id="role-search" />
 											</div>
-											<div class="col-md-12" style="margin-top: 10px;">
-												<div class="checkbox">
-													<label title="{% trans 'All staff users can use this trigger in their layers' %}">
-														<input type="checkbox" name="allow_all" id="allow_all" value="1" {% if trigger and trigger.allow_all %}checked{% endif %}/>
-														<span>{% trans "Allow all staff users" %}</span>
-													</label>
-												</div>
+											<div class="cp-allow-all">
+												<label class="cp-perm-chip" title="{% trans 'All staff users can use this trigger in their layers' %}">
+													<input type="checkbox" name="allow_all" id="allow_all" value="1" {% if trigger and trigger.allow_all %}checked{% endif %}/>
+													<span>{% trans "Allow all staff users" %}</span>
+												</label>
 											</div>
 										</div>
 										<div class="box-body" id="roles-list-container">
@@ -253,8 +268,6 @@ END;{% endif %}</textarea>
 						</div>
 						<!-- Fin Tab Permisos -->
 					</div>
-				</div>
-			</div>
 		</form>
 	</div>
 </div>

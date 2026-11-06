@@ -6,21 +6,38 @@
 <link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-alerts.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-modal.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-list-page.css" %}">
+<style>
+	/* Nombre de la conexión junto al título del panel */
+	.cc-chip {
+		display: inline-block;
+		margin-left: 6px;
+		padding: 1px 10px;
+		border-radius: 11px;
+		border: 1px solid var(--pl-border);
+		background: var(--pl-bg);
+		font-size: 12px;
+		font-weight: 600;
+		color: var(--pl-muted);
+	}
+	/* Pestañas sobre el panel, como en el listado de cachés */
+	.cc-tabs { margin-bottom: 0; }
+	.cc-tab-content > .tab-pane > .pl-panel { border-top-left-radius: 0; }
+	/* Pie de paginación propio de la página dentro del pie común de los listados */
+	#triggers-pagination-footer .pagination { margin: 0; }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="row">
 	<div class="col-md-12">
-		<div class="row">
-			<div class="col-md-12 form-group">
-				<div class="pf-topbar">
-					<a href="{% url 'connection_list' %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back to connections" %}</a>
-				</div>
-			</div>
+		<div class="pf-topbar">
+			<a href="{% url 'connection_list' %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back to connections" %}</a>
 		</div>
 
 		{% if messages %}
-		<div class="pf-flash">
+		<div class="pl-flash">
 			{% for message in messages %}
 			<div class="alert alert-{% if 'error' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'success' in message.tags %}success{% else %}info{% endif %}" role="alert">
 				{{ message }}
@@ -29,51 +46,38 @@
 		</div>
 		{% endif %}
 
-		<div class="box box-primary">
-			<div class="box-header with-border">
-				<span class="label label-primary pull-right">{{ connection.name }}</span>
-			</div>
-			<div class="box-body">
-			<ul class="nav nav-tabs">
-				<li class="active">
-					<a href="#tab-triggers" data-toggle="tab"><i class="fa fa-bolt tab-icon"></i> {% trans "Triggers" %}</a>
-				</li>
-				<!-- Futuras pestañas pueden añadirse aquí -->
-			</ul>
-				
-				<div class="tab-content" style="padding-top: 15px;">
-					<!-- Tab Triggers -->
-					<div class="tab-pane active" id="tab-triggers">
-						<div class="row" style="margin-bottom: 10px;">
-							<div class="col-md-6">
-								<div class="input-group input-group-sm" style="max-width: 300px;">
-									<input type="text" class="form-control" id="triggers-search" placeholder="{% trans 'Search...' %}">
-									<span class="input-group-btn">
-										<button class="btn btn-default" type="button" id="triggers-search-btn">
-											<i class="fa fa-search"></i>
-										</button>
-									</span>
-								</div>
+		<ul class="nav nav-tabs cc-tabs">
+			<li class="active">
+				<a href="#tab-triggers" data-toggle="tab"><i class="fa fa-bolt tab-icon"></i> {% trans "Triggers" %}</a>
+			</li>
+			<!-- Futuras pestañas pueden añadirse aquí -->
+		</ul>
+
+		<div class="tab-content cc-tab-content">
+			<!-- Tab Triggers -->
+			<div class="tab-pane active" id="tab-triggers">
+				<div class="pl-panel">
+					<div class="pl-panel__header">
+						<h3 class="pl-panel__title"><i class="fa fa-bolt"></i>{% trans "Triggers" %} <span class="cc-chip" title="{% trans 'Connection' %}"><i class="fa fa-plug"></i> {{ connection.name }}</span></h3>
+						<div class="pl-panel__actions">
+							<div class="pl-search-form">
+								<input type="text" class="form-control" id="triggers-search" placeholder="{% trans 'Search...' %}">
+								<button class="btn-search" type="button" id="triggers-search-btn"><i class="fa fa-search"></i></button>
 							</div>
-							<div class="col-md-6">
-								<div class="box-tools pull-right">
-									<a href="{% url 'connection_trigger_add' connection.id %}" class="btn btn-success btn-sm">
-										<i class="fa fa-plus margin-r-5"></i> {% trans "Add trigger" %}
-									</a>
-								</div>
-							</div>
+							<a href="{% url 'connection_trigger_add' connection.id %}" class="btn-pl-add"><i class="fa fa-plus"></i> {% trans "Add trigger" %}</a>
 						</div>
-						
-						<table class="table" id="triggers-table">
+					</div>
+					<div class="pl-panel__body">
+						<table class="pl-table table" id="triggers-table">
 							<thead>
 								<tr>
 									<th>{% trans "Name" %}</th>
 									<th>{% trans "Description" %}</th>
 									<th>{% trans "Event" %}</th>
 									<th>{% trans "Scope" %}</th>
-									<th></th>
-									<th></th>
-									<th></th>
+									<th class="pl-col-actions pl-col-actions--first"></th>
+									<th class="pl-col-actions"></th>
+									<th class="pl-col-actions pl-col-actions--last"></th>
 								</tr>
 							</thead>
 							<tbody>
@@ -103,20 +107,20 @@
 											</span>
 										{% endif %}
 									</td>
-									<td>
+									<td class="pl-col-actions pl-col-actions--first">
 										<a href="{% url 'connection_trigger_update' connection.id trigger.id %}" 
 											class="btn btn-success" title="{% trans 'Edit' %}">
 											<i class="fa fa-edit"></i>
 										</a>
 									</td>
-									<td>
+									<td class="pl-col-actions">
 										<button type="button" class="btn btn-info btn-duplicate-trigger" 
 											data-id="{{ trigger.id }}" data-name="{{ trigger.name }}"
 											title="{% trans 'Duplicate to another connection' %}">
 											<i class="fa fa-copy"></i>
 										</button>
 									</td>
-									<td>
+									<td class="pl-col-actions pl-col-actions--last">
 										<button type="button" class="btn btn-danger btn-delete-trigger" 
 											data-id="{{ trigger.id }}" data-name="{{ trigger.name }}"
 											title="{% trans 'Delete' %}">
@@ -127,19 +131,17 @@
 								{% endfor %}
 							</tbody>
 						</table>
-						
-						<!-- Paginación estilo Bootstrap -->
-						<div class="box-footer clearfix" id="triggers-pagination-footer" style="display: none;">
-							<ul class="pagination pagination-sm no-margin pull-right" id="triggers-pagination">
-							</ul>
-							<div class="pull-left" style="margin-top: 5px;">
-								<span class="text-muted" id="triggers-info"></span>
-							</div>
-						</div>
 					</div>
-					<!-- Fin Tab Triggers -->
+
+					<!-- Paginación: la monta el script de la página; el pie usa el estilo común de los listados -->
+					<div class="pl-server-pagination" id="triggers-pagination-footer" style="display: none;">
+						<span class="pagination-info" id="triggers-info"></span>
+						<ul class="pagination pagination-sm" id="triggers-pagination">
+						</ul>
+					</div>
 				</div>
 			</div>
+			<!-- Fin Tab Triggers -->
 		</div>
 	</div>
 </div>
@@ -160,7 +162,7 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
-				<button type="button" class="btn btn-danger" id="btn-confirm-delete-trigger">{% trans "Delete" %}</button>
+				<button type="button" class="btn btn-danger btn-modal-accept" id="btn-confirm-delete-trigger">{% trans "Delete" %}</button>
 			</div>
 		</div>
 	</div>
@@ -187,7 +189,7 @@
 						<option value="{{ conn.id }}">{{ conn.name }} ({{ conn.type }})</option>
 						{% endfor %}
 					</select>
-					<small class="text-muted">{% trans "Only PostGIS connections are shown" %}</small>
+					<small class="text-muted help-block">{% trans "Only PostGIS connections are shown" %}</small>
 				</div>
 				{% if not other_connections %}
 				<div class="alert alert-warning">
@@ -198,7 +200,7 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
-				<button type="button" class="btn btn-primary" id="btn-confirm-duplicate-trigger" {% if not other_connections %}disabled{% endif %}>
+				<button type="button" class="btn btn-primary btn-modal-accept" id="btn-confirm-duplicate-trigger" {% if not other_connections %}disabled{% endif %}>
 					{% trans "Duplicate" %}
 				</button>
 			</div>
