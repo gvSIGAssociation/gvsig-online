@@ -1364,3 +1364,53 @@ msgstr "Paginierung öffentlicher Viewer"
 
 msgid "App"
 msgstr "App"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Back to home"
+msgstr "Zur Startseite"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Help"
+msgstr "Hilfe"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Documentation"
+msgstr "Dokumentation"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "User and administration manuals of %(name)s. They open in a new tab."
+msgstr "Benutzer- und Administrationshandbücher von %(name)s. Sie werden in einem neuen Tab geöffnet."
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Map viewers"
+msgstr "Kartenviewer"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Administration"
+msgstr "Administration"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Plugins"
+msgstr "Plugins"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Not available in your language"
+msgstr "In Ihrer Sprache nicht verfügbar"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Open manual"
+msgstr "Handbuch öffnen"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "No manuals are available at the moment."
+msgstr "Derzeit sind keine Handbücher verfügbar."

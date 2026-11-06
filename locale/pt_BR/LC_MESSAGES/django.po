@@ -2194,3 +2194,53 @@ msgstr ""
 
 msgid "layer(s)"
 msgstr "camada(s)"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Back to home"
+msgstr "Voltar ao início"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Help"
+msgstr "Ajuda"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Documentation"
+msgstr "Documentação"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "User and administration manuals of %(name)s. They open in a new tab."
+msgstr "Manuais de uso e de administração do %(name)s. Abrem em uma nova aba."
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Map viewers"
+msgstr "Visualizadores de mapas"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Administration"
+msgstr "Administração"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Plugins"
+msgstr "Plugins"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Not available in your language"
+msgstr "Não disponível no seu idioma"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Open manual"
+msgstr "Abrir manual"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "No manuals are available at the moment."
+msgstr "Não há manuais disponíveis no momento."

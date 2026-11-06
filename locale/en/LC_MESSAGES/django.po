@@ -1530,3 +1530,53 @@ msgstr ""
 
 msgid "App"
 msgstr ""
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Back to home"
+msgstr "Back to home"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Help"
+msgstr "Help"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Documentation"
+msgstr "Documentation"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "User and administration manuals of %(name)s. They open in a new tab."
+msgstr "User and administration manuals of %(name)s. They open in a new tab."
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Map viewers"
+msgstr "Map viewers"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Administration"
+msgstr "Administration"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Plugins"
+msgstr "Plugins"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Not available in your language"
+msgstr "Not available in your language"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Open manual"
+msgstr "Open manual"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "No manuals are available at the moment."
+msgstr "No manuals are available at the moment."

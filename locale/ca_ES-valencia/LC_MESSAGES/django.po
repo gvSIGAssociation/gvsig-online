@@ -1557,3 +1557,53 @@ msgstr "Paginació de visors públics"
 
 msgid "App"
 msgstr "App"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Back to home"
+msgstr "Torna a l'inici"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Help"
+msgstr "Ajuda"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Documentation"
+msgstr "Documentació"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "User and administration manuals of %(name)s. They open in a new tab."
+msgstr "Manuals d'ús i d'administració de %(name)s. S'obren en una pestanya nova."
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Map viewers"
+msgstr "Visors de mapes"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Administration"
+msgstr "Administració"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Plugins"
+msgstr "Complements"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Not available in your language"
+msgstr "No disponible en el teu idioma"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Open manual"
+msgstr "Obri el manual"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "No manuals are available at the moment."
+msgstr "No hi ha manuals disponibles en este moment."

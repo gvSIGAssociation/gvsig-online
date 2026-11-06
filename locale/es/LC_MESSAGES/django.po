@@ -2724,3 +2724,53 @@ msgid ""
 msgstr ""
 "La capa WMS en cascada \"%(orig)s\" ya existe en el workspace \"%(ws)s\"; se"
 " importa como \"%(new)s\"."
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Back to home"
+msgstr "Volver al inicio"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Help"
+msgstr "Ayuda"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Documentation"
+msgstr "Documentación"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "User and administration manuals of %(name)s. They open in a new tab."
+msgstr "Manuales de uso y de administración de %(name)s. Se abren en una pestaña nueva."
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Map viewers"
+msgstr "Visores de mapas"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Administration"
+msgstr "Administración"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Plugins"
+msgstr "Complementos"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Not available in your language"
+msgstr "No disponible en tu idioma"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Open manual"
+msgstr "Abrir manual"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "No manuals are available at the moment."
+msgstr "No hay manuales disponibles en este momento."
