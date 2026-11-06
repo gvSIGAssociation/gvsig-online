@@ -1591,6 +1591,7 @@ def layer_add_with_group(request, layergroup_id):
                     raise ValueError(_("You are not allowed to manage the selected layergroup"))
                 workspace = datastore.workspace
                 extraParams = {}
+                has_geometry = True
                 
                 abstract = request.POST.get('md-abstract')
                 fields_info = None  # Para almacenar información detallada de campos
@@ -1618,6 +1619,7 @@ def layer_add_with_group(request, layergroup_id):
                     with i as c:
                         fields = c.get_fields(form.cleaned_data['name'], schema)
                         is_view = c.is_view(schema, form.cleaned_data['name'])
+                        has_geometry = bool(c.get_geometry_columns(form.cleaned_data['name'], schema))
                         # Obtener información detallada de campos para el abstract
                         if not abstract:
                             try:
@@ -1685,6 +1687,7 @@ def layer_add_with_group(request, layergroup_id):
 
                 params = {}
                 params['format'] = format_value
+                params['has_geometry'] = has_geometry
                 newRecord.external_params = json.dumps(params)
 
                 newRecord.save()
