@@ -77,6 +77,9 @@
 	<parameter name="Locale" class="java.lang.String">
 		<defaultValueExpression><![CDATA["es"]]></defaultValueExpression>
 	</parameter>
+	<parameter name="organismo" class="java.lang.String">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
 	<parameter name="CustomProperties" class="java.util.Properties">
 		<defaultValueExpression><![CDATA[groovy.util.Eval.xy($P{JASPER_REPORTS_CONTEXT}, $P{Locale}, "import org.apache.commons.lang3.StringUtils; if (StringUtils.isBlank(y)){ y = \"es\"; }; def is = x.getExtensions(net.sf.jasperreports.repo.RepositoryService.class).get(0).getResource(\"variables-\"+y+\".properties\",net.sf.jasperreports.repo.InputStreamResource.class).getInputStream(); def r = new java.io.InputStreamReader(is, \"UTF-8\"); def props=new java.util.Properties(); props.load(r); r.close(); is.close(); props")]]></defaultValueExpression>
 	</parameter>
@@ -417,7 +420,7 @@
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font size="6"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$P{CustomProperties}.getProperty("organismo")]]></textFieldExpression>
+					<textFieldExpression><![CDATA[($P{organismo} != null && !$P{organismo}.trim().isEmpty()) ? $P{organismo} : $P{CustomProperties}.getProperty("organismo")]]></textFieldExpression>
 				</textField>
 			</frame>
 		</band>

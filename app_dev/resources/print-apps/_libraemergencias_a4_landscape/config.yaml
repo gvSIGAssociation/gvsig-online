@@ -50,6 +50,8 @@ templates:
         default: "Ordenadas por Carretera"
       Locale: !string
         default: "va"
+      organismo: !string
+        default: ""
         
     processors:
     - !configureHttpRequests
