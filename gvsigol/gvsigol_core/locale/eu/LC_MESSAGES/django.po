@@ -1304,3 +1304,53 @@ msgstr "Ikusle publikoen orrikatzea"
 
 msgid "App"
 msgstr "App"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Back to home"
+msgstr "Itzuli hasierara"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Help"
+msgstr "Laguntza"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Documentation"
+msgstr "Dokumentazioa"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "User and administration manuals of %(name)s. They open in a new tab."
+msgstr "%(name)s-ren erabilera- eta administrazio-eskuliburuak. Fitxa berri batean irekitzen dira."
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Map viewers"
+msgstr "Mapa-ikustaileak"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Administration"
+msgstr "Administrazioa"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Plugins"
+msgstr "Pluginak"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Not available in your language"
+msgstr "Ez dago zure hizkuntzan eskuragarri"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "Open manual"
+msgstr "Ireki eskuliburua"
+
+#: templates/documentation.html
+msgctxt "documentation"
+msgid "No manuals are available at the moment."
+msgstr "Une honetan ez dago eskuliburu erabilgarririk."

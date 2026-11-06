@@ -19,6 +19,7 @@
 	<link rel="stylesheet" href="{% static "css/googlefonts.css" %}">
 	<link rel="stylesheet" href="{% static "css/gvsigOL.css" %}">
 	<link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
+	<link rel="stylesheet" href="{% static "css/gol-themes.css" %}">
 
 	<!--[if lt IE 9]>
 		<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -26,6 +27,11 @@
 	<![endif]-->
 
 	<style>
+	/* =================================================================
+	   Centro de documentación: cabecera con el título de la página y
+	   manuales agrupados por público en tarjetas. Colores del tema activo
+	   (tokens --pl-* y --gol-* de gol-tokens.css).
+	   ================================================================= */
 	*, *::before, *::after { box-sizing: border-box; }
 
 	body {
@@ -39,173 +45,199 @@
 		flex-direction: column;
 	}
 
-	/* ---- Header ---- */
-	.gol-header {
-		background-color: #fff;
+	/* ---- Barra superior: como la cabecera del core, con los colores del tema
+	   (variables --hdr-* de gol-themes.css, activas por la clase de tema del body) ---- */
+	.doc-topbar {
 		position: sticky;
 		top: 0;
 		z-index: 200;
-		border-bottom: 1px solid #e8eaed;
 		flex-shrink: 0;
+		background-color: var(--hdr-bg);
+		box-shadow: var(--hdr-shadow);
+		border-bottom: var(--hdr-border);
 	}
-	.gol-header nav { height: 64px; }
-	.gol-nav {
+	.doc-topbar__inner {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		height: 100%;
+		height: 50px;
 	}
-	.gol-nav__left,
-	.gol-nav__right {
-		display: flex;
+	.doc-topbar__logo {
+		display: inline-flex;
 		align-items: center;
-		gap: 12px;
-	}
-	.gol-logo {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		text-decoration: none !important;
-	}
-	.gol-logo__img {
-		height: 36px;
-		width: auto;
-	}
-	.gol-logo__text {
-		font-family: 'Google Sans', 'Roboto', sans-serif;
-		font-size: 1.375rem;
-		font-weight: 500;
-		color: #5f6368;
-		letter-spacing: -0.01em;
-	}
-	.gol-lang-form { margin: 0; }
-	.gol-lang-select {
-		height: 34px;
+		height: 50px;
 		padding: 0 10px;
+		margin-left: -10px;
+		font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+		font-size: 20px;
+		font-weight: 300;
+		line-height: 50px;
+		color: var(--hdr-text) !important;
+		text-decoration: none !important;
+		transition: background-color 0.15s;
+	}
+	.doc-topbar__logo:hover, .doc-topbar__logo:focus { background-color: var(--hdr-item-hover); }
+	.doc-topbar__logo-img {
+		width: 28px;
+		height: 28px;
+		margin-right: 9px;
+		flex-shrink: 0;
+		object-fit: contain;
+		border-radius: 5px;
+		filter: var(--hdr-logo-filter);
+	}
+	.doc-topbar__logo b { font-weight: 700; }
+	.doc-topbar__surname { margin-left: 4px; opacity: 0.85; }
+	.doc-topbar__link {
+		display: inline-flex;
+		align-items: center;
+		gap: 7px;
+		height: 50px;
+		padding: 0 15px;
+		margin-right: -15px;
 		font-size: 14px;
-		font-family: inherit;
-		border: 1px solid #dadce0;
-		border-radius: 4px;
-		background: #fff;
-		color: #3c4043;
-		cursor: pointer;
-		outline: none;
-		transition: border-color 0.15s;
+		color: var(--hdr-text) !important;
+		text-decoration: none !important;
+		transition: background-color 0.15s;
 	}
-	.gol-lang-select:focus { border-color: #1a73e8; }
+	.doc-topbar__link:hover, .doc-topbar__link:focus { background-color: var(--hdr-item-hover); color: var(--hdr-text-dim) !important; }
+	.doc-topbar a:focus-visible { outline: 2px solid var(--hdr-text); outline-offset: -2px; }
 
-	/* ---- Contenido principal ---- */
-	.doc-content {
-		flex: 1;
-		padding: 32px 24px;
+	/* ---- Cabecera de la página ---- */
+	.doc-hero {
+		background: linear-gradient(180deg, var(--gol-accent-lt, rgba(74, 127, 165, 0.06)) 0%, transparent 100%);
+		border-bottom: 1px solid var(--pl-border);
+		flex-shrink: 0;
 	}
-	.doc-content .container {
-		max-width: 780px;
-	}
-
-	/* ---- Título de sección ---- */
-	.doc-section-title {
-		font-size: 11px;
+	.doc-hero .container { max-width: 1040px; padding-top: 40px; padding-bottom: 32px; }
+	.doc-hero__eyebrow {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		margin-bottom: 10px;
+		font-size: 12px;
 		font-weight: 700;
+		letter-spacing: 0.08em;
 		text-transform: uppercase;
-		letter-spacing: 0.8px;
-		color: var(--pl-muted);
-		margin: 0 0 10px 4px;
+		color: var(--pl-accent);
 	}
+	.doc-hero__title {
+		margin: 0 0 6px;
+		font-size: 30px;
+		font-weight: 700;
+		line-height: 1.2;
+		color: var(--pl-text);
+	}
+	.doc-hero__lead { margin: 0; max-width: 62ch; font-size: 15px; line-height: 1.55; color: var(--pl-muted); }
 
-	/* ---- Panel ---- */
-	.pl-panel {
-		background: var(--pl-white);
-		border-radius: var(--pl-radius);
-		box-shadow: var(--pl-shadow);
-		border: 1px solid var(--pl-border);
-		margin-bottom: 24px;
-	}
-	.pl-panel__header {
+	/* ---- Contenido ---- */
+	.doc-content { flex: 1; padding: 32px 0 48px; }
+	.doc-content .container { max-width: 1040px; }
+	.doc-group + .doc-group { margin-top: 32px; }
+	.doc-group__title {
 		display: flex;
 		align-items: center;
 		gap: 10px;
-		padding: 14px 20px;
-		border-bottom: 1px solid var(--pl-border);
-	}
-	.pl-panel__header i {
-		color: var(--pl-accent);
-		font-size: 15px;
-		width: 18px;
-		text-align: center;
-	}
-	.pl-panel__title {
-		margin: 0;
-		font-size: 14px;
+		margin: 0 0 14px;
+		font-size: 12px;
 		font-weight: 700;
-		color: var(--pl-text);
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--pl-muted);
+	}
+	.doc-group__title::after { content: ""; flex: 1; height: 1px; background: var(--pl-border); }
+	.doc-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 16px;
 	}
 
-	/* ---- Items de documentación ---- */
-	.doc-list {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-	}
-	.doc-item {
+	/* ---- Tarjeta de manual (toda la tarjeta es el enlace) ---- */
+	.doc-card {
 		display: flex;
-		align-items: flex-start;
-		gap: 16px;
-		padding: 16px 20px;
-		border-bottom: 1px solid var(--pl-border);
-		transition: background var(--pl-transition);
+		flex-direction: column;
+		gap: 14px;
+		height: 100%;
+		padding: 20px 22px 18px;
+		background: var(--pl-white);
+		border: 1px solid var(--pl-border);
+		border-radius: var(--pl-radius);
+		box-shadow: var(--pl-shadow);
+		color: var(--pl-text);
+		text-decoration: none !important;
+		transition: border-color var(--pl-transition), box-shadow var(--pl-transition), transform var(--pl-transition);
 	}
-	.doc-item:last-child {
-		border-bottom: none;
+	.doc-card:hover, .doc-card:focus {
+		border-color: var(--pl-accent);
+		box-shadow: 0 6px 20px rgba(31, 45, 58, 0.10);
+		transform: translateY(-1px);
+		color: var(--pl-text);
 	}
-	.doc-item:hover {
-		background: #f0f6fb;
-	}
-	.doc-item__icon {
-		width: 36px;
-		height: 36px;
-		border-radius: 8px;
-		background: #eaf2f8;
+	.doc-card:focus { outline: none; }
+	.doc-card:focus-visible { outline: 2px solid var(--pl-accent); outline-offset: 2px; }
+	.doc-card__top { display: flex; align-items: flex-start; gap: 14px; }
+	.doc-card__icon {
+		flex: 0 0 44px;
+		height: 44px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		flex-shrink: 0;
-	}
-	.doc-item__icon i {
+		border-radius: 10px;
+		background: var(--gol-accent-lt, #eaf2f8);
+		box-shadow: inset 0 0 0 1px var(--pl-border);
 		color: var(--pl-accent);
-		font-size: 16px;
+		font-size: 19px;
+		transition: background var(--pl-transition), color var(--pl-transition);
 	}
-	.doc-item__body {
-		flex: 1;
-		min-width: 0;
+	.doc-card:hover .doc-card__icon, .doc-card:focus .doc-card__icon { background: var(--pl-accent); color: #fff; }
+	.doc-card__body { flex: 1; min-width: 0; }
+	.doc-card__title { display: block; margin: 2px 0 4px; font-size: 15px; font-weight: 700; line-height: 1.3; color: var(--pl-text); }
+	.doc-card__desc { display: block; font-size: 13px; line-height: 1.5; color: var(--pl-muted); }
+	.doc-card__foot {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		margin-top: auto;
+		padding-top: 12px;
+		border-top: 1px solid var(--pl-border);
 	}
-	.doc-item__title {
-		display: inline-block;
-		font-size: 14px;
+	.doc-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		padding: 1px 8px;
+		border-radius: 10px;
+		background: var(--pl-bg);
+		font-size: 11px;
+		font-weight: 700;
+		letter-spacing: 0.03em;
+		color: var(--pl-muted);
+	}
+	.doc-chip--lang { background: #fdf4e3; color: #8a5a00; }
+	.doc-card__open {
+		margin-left: auto;
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 13px;
 		font-weight: 600;
 		color: var(--pl-accent);
-		text-decoration: none;
-		margin-bottom: 3px;
-		transition: color var(--pl-transition);
 	}
-	.doc-item__title:hover {
-		color: var(--pl-accent-dk);
-		text-decoration: underline;
-	}
-	.doc-item__lang {
-		font-size: 11px;
-		color: var(--pl-muted);
-		font-weight: 400;
-		margin-left: 4px;
-	}
-	.doc-item__desc {
-		font-size: 12px;
-		color: var(--pl-muted);
-		line-height: 1.5;
-		margin: 0;
-	}
+	.doc-card:hover .doc-card__open { text-decoration: underline; }
 
-	/* ---- Footer ---- */
+	/* ---- Sin manuales ---- */
+	.doc-empty {
+		padding: 48px 24px;
+		border: 1.5px dashed var(--pl-border);
+		border-radius: var(--pl-radius);
+		background: var(--pl-white);
+		text-align: center;
+		color: var(--pl-muted);
+	}
+	.doc-empty .fa { font-size: 30px; opacity: 0.5; }
+	.doc-empty p { margin: 10px 0 0; font-size: 14px; }
+
+	/* ---- Pie ---- */
 	.doc-footer {
 		background: var(--pl-white);
 		border-top: 1px solid var(--pl-border);
@@ -217,97 +249,160 @@
 		justify-content: flex-end;
 		flex-shrink: 0;
 	}
+
+	@media (max-width: 767px) {
+		.doc-grid { grid-template-columns: minmax(0, 1fr); }
+		.doc-hero .container { padding-top: 28px; padding-bottom: 24px; }
+		.doc-hero__title { font-size: 24px; }
+		.doc-topbar__logo { font-size: 17px; }
+		.doc-topbar__link-text { display: none; }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.doc-card, .doc-card__icon { transition: none; }
+		.doc-card:hover, .doc-card:focus { transform: none; }
+	}
 	</style>
 
 </head>
 
-<body>
+<body class="{{GVSIGOL_SKIN}}">
 
-	<header class="gol-header">
-		<nav>
-			<div class="container gol-nav">
-				<div class="gol-nav__left">
-					<a href="/" class="gol-logo">
-						<img src="{% static "img/logo_small.png" %}" alt="{{GVSIGOL_NAME}}" class="gol-logo__img">
-						<span class="gol-logo__text">{{GVSIGOL_NAME}} {% if GVSIGOL_SURNAME %} {{GVSIGOL_SURNAME}}{% endif %}</span>
-					</a>
-				</div>
-			</div>
+	<header class="doc-topbar">
+		<nav class="container doc-topbar__inner">
+			<a href="/" class="doc-topbar__logo">
+				<img src="{% static "img/logo_custom_icon.png" %}" class="doc-topbar__logo-img" alt="Logo"><b>{{GVSIGOL_NAME}}</b>{% if GVSIGOL_SURNAME %}<span class="doc-topbar__surname">{{GVSIGOL_SURNAME}}</span>{% endif %}
+			</a>
+			<a href="/" class="doc-topbar__link" title="{% trans "Back to home" context "documentation" %}"><i class="fa fa-home" aria-hidden="true"></i><span class="doc-topbar__link-text">{% trans "Back to home" context "documentation" %}</span></a>
 		</nav>
 	</header>
 
-	<div class="doc-content">
+	<section class="doc-hero">
+		<div class="container">
+			<div class="doc-hero__eyebrow"><i class="fa fa-book" aria-hidden="true"></i> {% trans "Help" context "documentation" %}</div>
+			<h1 class="doc-hero__title">{% trans "Documentation" context "documentation" %}</h1>
+			<p class="doc-hero__lead">{% blocktrans with name=GVSIGOL_NAME context "documentation" %}User and administration manuals of {{ name }}. They open in a new tab.{% endblocktrans %}</p>
+		</div>
+	</section>
+
+	<main class="doc-content">
 		<div class="container">
 
-			<div class="pl-panel">
-				<div class="pl-panel__header">
-					<i class="fa fa-desktop"></i>
-					<h3 class="pl-panel__title">{% trans "Web application" %}</h3>
-				</div>
-				<ul class="doc-list">
+			{% if viewer or spaviewer %}
+			<section class="doc-group">
+				<h2 class="doc-group__title">{% trans "Map viewers" context "documentation" %}</h2>
+				<div class="doc-grid">
 					{% if viewer %}
-					<li class="doc-item">
-						<div class="doc-item__icon"><i class="fa fa-globe"></i></div>
-						<div class="doc-item__body">
-							<a href="{{viewer.url}}" target="_blank" class="doc-item__title">{% trans "User Manual - Classic Map Viewer" %}{% if viewer.lang %}<span class="doc-item__lang">[{{viewer.lang}}]</span>{% endif %}</a>
-							<p class="doc-item__desc">{% trans "Comprehensive guide to explore and use the functionalities of the JQuery-based map viewer." %}</p>
-						</div>
-					</li>
+					<a class="doc-card" href="{{viewer.url}}" target="_blank" rel="noopener">
+						<span class="doc-card__top">
+							<span class="doc-card__icon" aria-hidden="true"><i class="fa fa-globe"></i></span>
+							<span class="doc-card__body">
+								<span class="doc-card__title">{% trans "User Manual - Classic Map Viewer" %}</span>
+								<span class="doc-card__desc">{% trans "Comprehensive guide to explore and use the functionalities of the JQuery-based map viewer." %}</span>
+							</span>
+						</span>
+						<span class="doc-card__foot">
+							<span class="doc-chip">PDF</span>
+							{% if viewer.lang %}<span class="doc-chip doc-chip--lang" title="{% trans "Not available in your language" context "documentation" %}">{{viewer.lang|upper}}</span>{% endif %}
+							<span class="doc-card__open">{% trans "Open manual" context "documentation" %} <i class="fa fa-external-link" aria-hidden="true"></i></span>
+						</span>
+					</a>
 					{% endif %}
 					{% if spaviewer %}
-					<li class="doc-item">
-						<div class="doc-item__icon"><i class="fa fa-globe"></i></div>
-						<div class="doc-item__body">
-							<a href="{{spaviewer.url}}" target="_blank" class="doc-item__title">{% trans "User Manual - New Front Map Viewer" %}{% if spaviewer.lang %}<span class="doc-item__lang">[{{spaviewer.lang}}]</span>{% endif %}</a>
-							<p class="doc-item__desc">{% trans "Learn to navigate and leverage all features of the new map viewer with a modern interface." %}</p>
-						</div>
-					</li>
+					<a class="doc-card" href="{{spaviewer.url}}" target="_blank" rel="noopener">
+						<span class="doc-card__top">
+							<span class="doc-card__icon" aria-hidden="true"><i class="fa fa-map"></i></span>
+							<span class="doc-card__body">
+								<span class="doc-card__title">{% trans "User Manual - New Front Map Viewer" %}</span>
+								<span class="doc-card__desc">{% trans "Learn to navigate and leverage all features of the new map viewer with a modern interface." %}</span>
+							</span>
+						</span>
+						<span class="doc-card__foot">
+							<span class="doc-chip">PDF</span>
+							{% if spaviewer.lang %}<span class="doc-chip doc-chip--lang" title="{% trans "Not available in your language" context "documentation" %}">{{spaviewer.lang|upper}}</span>{% endif %}
+							<span class="doc-card__open">{% trans "Open manual" context "documentation" %} <i class="fa fa-external-link" aria-hidden="true"></i></span>
+						</span>
+					</a>
 					{% endif %}
-					{% if user.is_active %}
-					{% if user.is_superuser or user.is_staff %}
-					{% if admin %}
-					<li class="doc-item">
-						<div class="doc-item__icon"><i class="fa fa-cogs"></i></div>
-						<div class="doc-item__body">
-							<a href="{{admin.url}}" target="_blank" class="doc-item__title">{% trans "Administration Guide" %}{% if admin.lang %}<span class="doc-item__lang">[{{admin.lang}}]</span>{% endif %}</a>
-							<p class="doc-item__desc">{% trans "Manual for administrators: manage users, groups, services, symbology, and projects on the platform." %}</p>
-						</div>
-					</li>
-					{% endif %}
-					{% endif %}
-					{% endif %}
-					{% for plugin_manual in plugin_manuals %}
-					<li class="doc-item">
-						<div class="doc-item__icon"><i class="fa fa-cubes"></i></div>
-						<div class="doc-item__body">
-							<a href="{{plugin_manual.url}}" target="_blank" class="doc-item__title">{% trans plugin_manual.title %}{% if plugin_manual.lang %}<span class="doc-item__lang">[{{plugin_manual.lang}}]</span>{% endif %}</a>
-							<p class="doc-item__desc">{% trans plugin_manual.desc %}</p>
-						</div>
-					</li>
-					{% endfor %}
-				</ul>
-			</div>
-
-			{% if mobile %}
-			<div class="pl-panel">
-				<div class="pl-panel__header">
-					<i class="fa fa-mobile"></i>
-					<h3 class="pl-panel__title">{% trans "Mobile application" %}</h3>
 				</div>
-				<ul class="doc-list">
-					<li class="doc-item">
-						<div class="doc-item__icon"><i class="fa fa-mobile"></i></div>
-						<div class="doc-item__body">
-							<a href="{{mobile.url}}" target="_blank" class="doc-item__title">{% trans "User manual" %}{% if mobile.lang %}<span class="doc-item__lang">[{{mobile.lang}}]</span>{% endif %}</a>
-							<p class="doc-item__desc">{% trans "Learn how to manage geographic information from a mobile device or tablet" %}</p>
-						</div>
-					</li>
-				</ul>
-			</div>
+			</section>
 			{% endif %}
 
+			{% if admin and user.is_active %}{% if user.is_superuser or user.is_staff %}
+			<section class="doc-group">
+				<h2 class="doc-group__title">{% trans "Administration" context "documentation" %}</h2>
+				<div class="doc-grid">
+					<a class="doc-card" href="{{admin.url}}" target="_blank" rel="noopener">
+						<span class="doc-card__top">
+							<span class="doc-card__icon" aria-hidden="true"><i class="fa fa-cogs"></i></span>
+							<span class="doc-card__body">
+								<span class="doc-card__title">{% trans "Administration Guide" %}</span>
+								<span class="doc-card__desc">{% trans "Manual for administrators: manage users, groups, services, symbology, and projects on the platform." %}</span>
+							</span>
+						</span>
+						<span class="doc-card__foot">
+							<span class="doc-chip">PDF</span>
+							{% if admin.lang %}<span class="doc-chip doc-chip--lang" title="{% trans "Not available in your language" context "documentation" %}">{{admin.lang|upper}}</span>{% endif %}
+							<span class="doc-card__open">{% trans "Open manual" context "documentation" %} <i class="fa fa-external-link" aria-hidden="true"></i></span>
+						</span>
+					</a>
+				</div>
+			</section>
+			{% endif %}{% endif %}
+
+			{% if plugin_manuals %}
+			<section class="doc-group">
+				<h2 class="doc-group__title">{% trans "Plugins" context "documentation" %}</h2>
+				<div class="doc-grid">
+					{% for plugin_manual in plugin_manuals %}
+					<a class="doc-card" href="{{plugin_manual.url}}" target="_blank" rel="noopener">
+						<span class="doc-card__top">
+							<span class="doc-card__icon" aria-hidden="true"><i class="fa fa-cubes"></i></span>
+							<span class="doc-card__body">
+								<span class="doc-card__title">{% trans plugin_manual.title %}</span>
+								<span class="doc-card__desc">{% trans plugin_manual.desc %}</span>
+							</span>
+						</span>
+						<span class="doc-card__foot">
+							{% if plugin_manual.lang %}<span class="doc-chip doc-chip--lang" title="{% trans "Not available in your language" context "documentation" %}">{{plugin_manual.lang|upper}}</span>{% endif %}
+							<span class="doc-card__open">{% trans "Open manual" context "documentation" %} <i class="fa fa-external-link" aria-hidden="true"></i></span>
+						</span>
+					</a>
+					{% endfor %}
+				</div>
+			</section>
+			{% endif %}
+
+			{% if mobile %}
+			<section class="doc-group">
+				<h2 class="doc-group__title">{% trans "Mobile application" %}</h2>
+				<div class="doc-grid">
+					<a class="doc-card" href="{{mobile.url}}" target="_blank" rel="noopener">
+						<span class="doc-card__top">
+							<span class="doc-card__icon" aria-hidden="true"><i class="fa fa-mobile"></i></span>
+							<span class="doc-card__body">
+								<span class="doc-card__title">{% trans "User manual" %}</span>
+								<span class="doc-card__desc">{% trans "Learn how to manage geographic information from a mobile device or tablet" %}</span>
+							</span>
+						</span>
+						<span class="doc-card__foot">
+							<span class="doc-chip">PDF</span>
+							{% if mobile.lang %}<span class="doc-chip doc-chip--lang" title="{% trans "Not available in your language" context "documentation" %}">{{mobile.lang|upper}}</span>{% endif %}
+							<span class="doc-card__open">{% trans "Open manual" context "documentation" %} <i class="fa fa-external-link" aria-hidden="true"></i></span>
+						</span>
+					</a>
+				</div>
+			</section>
+			{% endif %}
+
+			{% if not viewer and not spaviewer and not mobile and not plugin_manuals %}{% if not admin or not user.is_active or not user.is_superuser and not user.is_staff %}
+			<div class="doc-empty">
+				<i class="fa fa-book" aria-hidden="true"></i>
+				<p>{% trans "No manuals are available at the moment." context "documentation" %}</p>
+			</div>
+			{% endif %}{% endif %}
+
 		</div>
-	</div>
+	</main>
 
 	<footer class="doc-footer">
 		<span><b>{% trans "Version" %}</b>&nbsp;{{GVSIGOL_VERSION}}</span>
