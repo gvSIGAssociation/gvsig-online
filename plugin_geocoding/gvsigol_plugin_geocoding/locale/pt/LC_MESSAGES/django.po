@@ -437,3 +437,48 @@ msgstr ""
 
 #~ msgid "Error: provider could not be published"
 #~ msgstr "Erro: o fornecedor não pôde ser publicado"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Back"
+msgstr "Voltar"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Service"
+msgstr "Serviço"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Data source"
+msgstr "Origem dos dados"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Image"
+msgstr "Imagem"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Projects in which this provider can be used."
+msgstr "Projetos em que este fornecedor pode ser utilizado."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Service that resolves the searches and category in which its results are grouped."
+msgstr "Serviço que resolve as pesquisas e categoria em que os seus resultados são agrupados."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Addresses of the geocoding service and maximum number of results."
+msgstr "Endereços do serviço de geocodificação e número máximo de resultados."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Table whose records are indexed for searching."
+msgstr "Tabela cujos registos são indexados para as pesquisas."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Icon shown next to the results of this provider."
+msgstr "Ícone mostrado junto aos resultados deste fornecedor."

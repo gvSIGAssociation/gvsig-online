@@ -443,3 +443,48 @@ msgstr "Por favor, seleccione al menos un proyecto o elija el modo 'Todos los pr
 
 #~ msgid "Servicios de Google Maps"
 #~ msgstr "Servicios de Google Maps"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Back"
+msgstr "Volver"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Service"
+msgstr "Servicio"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Data source"
+msgstr "Origen de datos"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Image"
+msgstr "Imagen"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Projects in which this provider can be used."
+msgstr "Proyectos en los que se puede usar este proveedor."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Service that resolves the searches and category in which its results are grouped."
+msgstr "Servicio que resuelve las búsquedas y categoría en la que se agrupan sus resultados."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Addresses of the geocoding service and maximum number of results."
+msgstr "Direcciones del servicio de geocodificación y número máximo de resultados."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Table whose records are indexed for searching."
+msgstr "Tabla cuyos registros se indexan para las búsquedas."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Icon shown next to the results of this provider."
+msgstr "Icono que se muestra junto a los resultados de este proveedor."

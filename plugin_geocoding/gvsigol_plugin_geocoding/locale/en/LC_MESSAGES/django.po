@@ -446,3 +446,48 @@ msgstr ""
 
 #~ msgid "Otras fuentes de datos"
 #~ msgstr "Another data stores"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Back"
+msgstr "Back"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Service"
+msgstr "Service"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Data source"
+msgstr "Data source"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Image"
+msgstr "Image"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Projects in which this provider can be used."
+msgstr "Projects in which this provider can be used."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Service that resolves the searches and category in which its results are grouped."
+msgstr "Service that resolves the searches and category in which its results are grouped."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Addresses of the geocoding service and maximum number of results."
+msgstr "Addresses of the geocoding service and maximum number of results."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Table whose records are indexed for searching."
+msgstr "Table whose records are indexed for searching."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Icon shown next to the results of this provider."
+msgstr "Icon shown next to the results of this provider."

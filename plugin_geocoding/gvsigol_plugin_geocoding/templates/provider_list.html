@@ -97,6 +97,15 @@
 .pl-table tbody td:nth-child(-n+2) { white-space: nowrap; min-width: 3.2em; }
 .pl-table tbody td .fa-sort { color: var(--pl-muted); cursor: grab; }
 .pl-table tbody td .default-field { color: var(--pl-muted); font-style: italic; }
+/* Columnas de botones (las 2 últimas, sin título): ajustadas a su contenido y juntas a la
+   derecha, a 48 px entre botones como en los demás listados. !important solo en el ancho:
+   DataTables (autoWidth) lo fija en línea en las cabeceras. */
+#providers-table > thead > tr > th:nth-last-child(-n+2),
+#providers-table > tbody > tr:not(.child) > td:nth-last-child(-n+2) { width: 1% !important; white-space: nowrap; padding-left: 24px; padding-right: 24px; }
+#providers-table > thead > tr > th:nth-last-child(2),
+#providers-table > tbody > tr:not(.child) > td:nth-last-child(2) { padding-left: 16px; }
+#providers-table > thead > tr > th:last-child,
+#providers-table > tbody > tr:not(.child) > td:last-child { padding-right: 16px; }
 table.dataTable { border-bottom: none !important; margin-top: 0 !important; margin-bottom: 0 !important; }
 table.dataTable thead th, table.dataTable thead td { border-bottom: 1px solid var(--pl-border) !important; }
 table.dataTable.no-footer { border-bottom: none !important; }

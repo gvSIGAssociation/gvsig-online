@@ -435,3 +435,48 @@ msgstr "5 segons"
 
 #~ msgid "Error: provider could not be published"
 #~ msgstr "Error: el proveïdor no s'ha pogut publicar"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Back"
+msgstr "Torna"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Service"
+msgstr "Servei"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Data source"
+msgstr "Origen de dades"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Image"
+msgstr "Imatge"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Projects in which this provider can be used."
+msgstr "Projectes en què es pot utilitzar este proveïdor."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Service that resolves the searches and category in which its results are grouped."
+msgstr "Servei que resol les busques i categoria en què s'agrupen els seus resultats."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Addresses of the geocoding service and maximum number of results."
+msgstr "Adreces del servei de geocodificació i nombre màxim de resultats."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Table whose records are indexed for searching."
+msgstr "Taula els registres de la qual s'indexen per a les busques."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Icon shown next to the results of this provider."
+msgstr "Icona que es mostra al costat dels resultats d'este proveïdor."

@@ -3,239 +3,298 @@
 {% load i18n %}
 
 {% block header %}
+<link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
 <style>
-:root {
-	--pf-accent:    #4a7fa5;
-	--pf-accent-dk: #2d5f80;
-	--pf-text:      #2e3a45;
-	--pf-muted:     #7b8a96;
-	--pf-border:    #e8ecef;
-	--pf-bg:        #f4f6f8;
-	--pf-white:     #ffffff;
-	--pf-radius:    10px;
-	--pf-shadow:    0 2px 12px rgba(0,0,0,0.08);
-	--pf-transition: 0.2s ease;
-}
-
-/* ---- Barra superior ---- */
-.pf-topbar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 12px 0 16px;
-	gap: 10px;
-	flex-wrap: wrap;
-}
-.pf-topbar__title {
-	font-size: 15px;
-	font-weight: 700;
-	color: var(--pf-text);
+/* =================================================================
+   Formularios de proveedores de geocodificación (alta y edición).
+   Colores del tema activo (--pf-* de gol-tokens.css): sin redefinir :root.
+   Una tarjeta con secciones (título y explicación a la izquierda, campos
+   a la derecha) y aparte los parámetros avanzados. Las clases *-param y
+   "hidden" las usa el JS para mostrar u ocultar según el tipo.
+   ================================================================= */
+.gp-page { max-width: 1200px; }
+.gp-topbar-title {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	margin: 0;
+	font-size: 16px;
+	font-weight: 700;
+	color: var(--pf-text);
 }
-.pf-topbar__title i { color: var(--pf-accent); }
-.btn-pf-save {
+.gp-topbar-title .fa { color: var(--pf-accent); }
+.gp-form .pf-error-msg { display: block; margin-bottom: 16px; }
+.gp-form .pf-error-msg ul { margin: 0; padding-left: 18px; }
+.gp-form .pf-error-msg p { margin: 0; }
+
+.gp-card {
+	background: var(--pf-white);
+	border: 1px solid var(--pf-border);
+	border-radius: var(--pf-radius, 10px);
+	box-shadow: var(--pf-shadow);
+	margin-bottom: 20px;
+}
+
+/* ---- Secciones de la tarjeta principal ---- */
+.gp-section {
+	display: grid;
+	grid-template-columns: 260px minmax(0, 1fr);
+	gap: 8px 40px;
+	padding: 24px 28px 10px;
+}
+.gp-section + .gp-section { border-top: 1px solid var(--pf-border); }
+.gp-section__title {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	margin: 2px 0 6px;
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--pf-text);
+}
+.gp-section__title .fa {
+	flex: 0 0 28px;
+	height: 28px;
 	display: inline-flex;
 	align-items: center;
-	gap: 7px;
-	background: var(--pf-accent);
-	color: #fff !important;
-	border: none;
-	border-radius: 7px;
-	font-size: 13px;
-	font-weight: 600;
-	padding: 8px 20px;
-	cursor: pointer;
-	transition: background var(--pf-transition);
-	text-decoration: none !important;
-}
-.btn-pf-save:hover { background: var(--pf-accent-dk); }
-
-/* ---- Tarjeta de contenido ---- */
-.pf-card {
-	background: var(--pf-white);
-	border: 1px solid var(--pf-border);
-	border-radius: var(--pf-radius);
-	padding: 28px 24px;
-	box-shadow: var(--pf-shadow);
-}
-
-/* ---- Mensajes de error ---- */
-.pf-error-msg {
-	background: #fff5f5;
-	border-left: 4px solid #e74c3c;
-	border-radius: 6px;
-	padding: 12px 16px;
-	margin-bottom: 20px;
-	font-size: 13px;
-	color: #c0392b;
-}
-.pf-error-msg ul { margin: 0; padding-left: 18px; }
-.pf-error-msg p  { margin: 0 0 4px; }
-
-/* ---- Campos de formulario ---- */
-.form-group label:not(.radio-label):not(.file) {
-	font-size: 12px;
-	font-weight: 700;
-	color: var(--pf-muted);
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
-	margin-bottom: 5px;
-	display: block;
-}
-.form-control {
-	border-radius: 7px;
-	border: 1px solid var(--pf-border);
+	justify-content: center;
+	border-radius: 8px;
 	background: var(--pf-bg);
+	color: var(--pf-accent);
+	font-size: 13px;
+}
+.gp-section__hint { margin: 0 0 14px 37px; font-size: 12.5px; line-height: 1.5; color: var(--pf-muted); }
+.gp-section__fields { min-width: 0; max-width: 760px; }
+
+/* Campos en dos columnas; los que necesitan todo el ancho, en una */
+.gp-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 20px; }
+.gp-grid > .gp-full { grid-column: 1 / -1; }
+.gp-grid > .gp-narrow .form-control { max-width: 140px; }
+.gp-form .form-group > label {
+	display: block;
+	margin-bottom: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--pf-text);
+	text-transform: none;
+	letter-spacing: 0;
+}
+
+/* ---- Controles: campos de texto, desplegables y select2 ---- */
+.gp-form input.form-control,
+.gp-form select.form-control {
+	height: 38px;
+	padding: 7px 12px;
+	border: 1px solid var(--pf-border);
+	border-radius: 8px;
+	background-color: var(--pf-white);
+	box-shadow: none;
 	font-size: 13px;
 	color: var(--pf-text);
-	height: 36px;
-	box-shadow: none;
 	transition: border-color var(--pf-transition), box-shadow var(--pf-transition);
-	padding: 6px 12px;
 }
-.form-control:focus {
+.gp-form select.form-control {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	padding-right: 36px;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%236b7a88' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 12px center;
+	background-size: 12px 12px;
+	cursor: pointer;
+}
+.gp-form select.form-control::-ms-expand { display: none; }
+.gp-form input.form-control:hover,
+.gp-form select.form-control:hover { border-color: var(--pf-muted); }
+.gp-form input.form-control:focus,
+.gp-form select.form-control:focus {
 	border-color: var(--pf-accent);
-	background: var(--pf-white);
-	box-shadow: 0 0 0 3px rgba(74,127,165,0.12);
+	box-shadow: 0 0 0 3px rgba(74, 127, 165, 0.15);
 	outline: none;
 }
-select.form-control { height: 36px; }
-textarea.form-control { height: auto; min-height: 80px; resize: vertical; }
-
-/* ---- Radios de selección de proyectos ---- */
-.radio-label {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	font-size: 13px;
-	font-weight: 400;
-	color: var(--pf-text);
-	margin-right: 20px;
-	cursor: pointer;
-}
-.radio-label input[type="radio"] {
-	accent-color: var(--pf-accent);
-	width: 14px;
-	height: 14px;
-}
-
-/* ---- Selector de proyectos ---- */
-#project-selector {
-	margin-top: 12px;
-	display: flex;
-	gap: 16px;
-	align-items: flex-start;
-	flex-wrap: wrap;
-}
-.pf-sub-card {
-	background: var(--pf-bg);
-	border: 1px solid var(--pf-border);
-	border-radius: 8px;
-	overflow: hidden;
-	margin-top: 12px;
-}
-.pf-sub-card__header {
-	padding: 10px 16px;
-	border-bottom: 1px solid var(--pf-border);
-	font-size: 12px;
-	font-weight: 700;
+.gp-form input.form-control[disabled],
+.gp-form input.form-control[readonly],
+.gp-form select.form-control[disabled] {
+	background-color: var(--pf-bg);
 	color: var(--pf-muted);
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
+	cursor: not-allowed;
 }
-.pf-sub-card__body {
-	padding: 12px 16px;
-	min-height: 48px;
-}
-.buttons-container {
-	display: flex;
-	flex-direction: column;
-	gap: 6px;
-	padding-top: 4px;
-}
-.buttons-container .btn {
-	border-radius: 6px;
-	font-size: 12px;
-	font-weight: 600;
-	padding: 5px 12px;
-	white-space: nowrap;
-	background: transparent;
+.gp-form .select2-container { width: 100% !important; }
+.gp-form .select2-container--default .select2-selection--single {
+	height: 38px;
 	border: 1px solid var(--pf-border);
-	color: var(--pf-text);
-	transition: background var(--pf-transition), border-color var(--pf-transition);
-}
-.buttons-container .btn:hover { background: #f0f6fb; border-color: var(--pf-accent); color: var(--pf-accent); }
-
-/* ---- Items de proyecto seleccionado ---- */
-.selected-project { margin-bottom: 6px; }
-.project-item {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
+	border-radius: 8px;
 	background: var(--pf-white);
-	border: 1px solid var(--pf-border);
-	border-radius: 6px;
-	padding: 6px 10px;
+	transition: border-color var(--pf-transition), box-shadow var(--pf-transition);
+}
+.gp-form .select2-container--default .select2-selection--single:hover { border-color: var(--pf-muted); }
+.gp-form .select2-container--default.select2-container--focus .select2-selection--single,
+.gp-form .select2-container--default.select2-container--open .select2-selection--single {
+	border-color: var(--pf-accent);
+	box-shadow: 0 0 0 3px rgba(74, 127, 165, 0.15);
+}
+.gp-form .select2-container--default .select2-selection--single .select2-selection__rendered {
+	padding-left: 12px;
+	padding-right: 36px;
+	line-height: 36px;
 	font-size: 13px;
 	color: var(--pf-text);
 }
-.project-name { flex: 1; }
-.remove-project {
-	background: transparent !important;
-	border: 1px solid #e8bebe !important;
-	color: #c0392b !important;
-	border-radius: 4px !important;
-	font-size: 11px !important;
-	padding: 2px 7px !important;
-	margin-left: 8px;
-	transition: background var(--pf-transition) !important;
-}
-.remove-project:hover { background: #fde8e8 !important; border-color: #c0392b !important; }
+.gp-form .select2-container--default .select2-selection--single .select2-selection__arrow { height: 36px; right: 8px; }
 
-/* ---- Imagen del proveedor ---- */
+/* ---- Imagen ---- */
+.gp-image { display: flex; align-items: center; gap: 18px; margin-bottom: 16px; }
 .provider-img {
-	width: 80px;
-	height: 80px;
-	border: 1px solid var(--pf-border);
-	border-radius: 8px;
-	overflow: hidden;
-	background: var(--pf-bg);
+	flex: 0 0 72px;
+	width: 72px;
+	height: 72px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	margin-bottom: 10px;
+	overflow: hidden;
+	border: 1px dashed var(--pf-border);
+	border-radius: 12px;
+	background: var(--pf-bg);
 }
 .provider-img img { max-width: 100%; max-height: 100%; object-fit: contain; }
-.provider-img-change label { font-size: 12px; font-weight: 700; color: var(--pf-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.provider-img img:not([src]), .provider-img img[src=""] { display: none; }
+.provider-img-change { flex: 1 1 auto; min-width: 0; }
+.provider-img-change label { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--pf-text); }
+.provider-img-change input[type="file"] { max-width: 100%; font-size: 12px; color: var(--pf-muted); }
+.provider-img-change input[type="file"]::file-selector-button {
+	margin-right: 12px;
+	padding: 7px 14px;
+	border: 1px solid var(--pf-accent);
+	border-radius: 7px;
+	background: var(--pf-white);
+	font-family: inherit;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--pf-accent);
+	cursor: pointer;
+	transition: background var(--pf-transition);
+}
+.provider-img-change input[type="file"]::file-selector-button:hover { background: var(--pf-bg); }
 
-/* ---- Parámetros avanzados ---- */
-#advanced-params-button {
+/* ---- Proyectos ---- */
+.gp-segmented {
+	display: inline-flex;
+	padding: 3px;
+	margin-bottom: 14px;
+	border: 1px solid var(--pf-border);
+	border-radius: 9px;
+	background: var(--pf-bg);
+}
+.gp-segmented .radio-label {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	margin: 0;
+	padding: 7px 16px;
+	border-radius: 7px;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--pf-muted);
+	cursor: pointer;
+	transition: background var(--pf-transition), color var(--pf-transition);
+}
+.gp-segmented .radio-label input[type="radio"] { margin: 0; accent-color: var(--pf-accent); }
+.gp-segmented .radio-label:has(input:checked) {
+	background: var(--pf-white);
+	color: var(--pf-accent);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+#project-selector { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 12px; align-items: start; margin-bottom: 16px; }
+#project-selector.hidden { display: none !important; }
+#project-selector > .pf-sub-card { grid-column: 1 / -1; }
+.buttons-container { display: flex; flex-wrap: wrap; gap: 6px; }
+.buttons-container .btn {
+	height: 38px;
+	padding: 0 12px;
+	border: 1px solid var(--pf-border);
+	border-radius: 8px;
+	background: var(--pf-white);
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--pf-text);
+	white-space: nowrap;
+}
+.buttons-container .btn:hover { border-color: var(--pf-accent); color: var(--pf-accent); }
+.pf-sub-card { overflow: hidden; border: 1px solid var(--pf-border); border-radius: 8px; background: var(--pf-bg); }
+.pf-sub-card__header {
+	padding: 8px 12px;
+	border-bottom: 1px solid var(--pf-border);
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.5px;
+	text-transform: uppercase;
+	color: var(--pf-muted);
+}
+.pf-sub-card__body {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	min-height: 46px;
+	max-height: 220px;
+	overflow-y: auto;
+	padding: 8px 10px;
+}
+.pf-sub-card__body:empty::before { content: "—"; align-self: center; color: var(--pf-muted); font-size: 12px; }
+.selected-project { margin: 0; }
+.project-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 3px 4px 3px 11px;
+	border: 1px solid var(--pf-border);
+	border-radius: 999px;
+	background: var(--pf-white);
+	font-size: 12.5px;
+	color: var(--pf-text);
+}
+.project-name { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.remove-project {
+	width: 20px;
+	height: 20px;
+	padding: 0 !important;
+	border: 0 !important;
+	border-radius: 50% !important;
+	background: transparent !important;
+	color: var(--pf-muted) !important;
+	font-size: 10px !important;
+	line-height: 20px !important;
+}
+.remove-project:hover { background: #fde8e8 !important; color: #c0392b !important; }
+
+/* ---- Parámetros avanzados: tarjeta aparte; la cabecera abre y cierra el editor ---- */
+.gp-card__header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	cursor: pointer;
-	padding: 10px 14px;
-	background: var(--pf-bg);
-	border: 1px solid var(--pf-border);
-	border-radius: 7px;
-	margin-bottom: 0;
-	transition: background var(--pf-transition);
+	gap: 10px;
+	padding: 14px 20px;
 }
-#advanced-params-button:hover { background: #f0f6fb; }
-#advanced-params-button label {
-	font-size: 12px !important;
-	font-weight: 700 !important;
-	color: var(--pf-muted) !important;
-	text-transform: uppercase !important;
-	letter-spacing: 0.5px !important;
-	margin: 0 !important;
-	cursor: pointer !important;
+.gp-card__title { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 14px; font-weight: 700; color: var(--pf-text); }
+.gp-card__title .fa { width: 16px; text-align: center; color: var(--pf-accent); }
+#advanced-params-button { cursor: pointer; user-select: none; }
+#advanced-params-button:hover .gp-card__title { color: var(--pf-accent); }
+#advanced-params-icon { color: var(--pf-muted); }
+#advanced-params { padding: 0 20px 18px; }
+#advanced-params .CodeMirror { border: 1px solid var(--pf-border); border-radius: 6px; }
+
+@media (max-width: 991px) {
+	.gp-section { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 20px 18px 6px; }
+	.gp-section__hint { margin-left: 37px; }
 }
-#advanced-params-icon { color: var(--pf-accent); }
-#advanced-params { margin-top: 8px; }
+@media (max-width: 767px) {
+	.gp-grid { grid-template-columns: minmax(0, 1fr); }
+	#project-selector { grid-template-columns: minmax(0, 1fr); }
+	.gp-image { flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+	.gp-form input.form-control, .gp-form select.form-control, .gp-segmented .radio-label { transition: none; }
+}
 </style>
 {% endblock %}
 
@@ -243,176 +302,207 @@ textarea.form-control { height: auto; min-height: 80px; resize: vertical; }
 <div class="row">
 	<div class="col-md-12">
 
-		<form id="provider-form" enctype="multipart/form-data" role="form" method="post" action="/gvsigonline/geocoding/provider_add/">
+		<form id="provider-form" class="gp-form" enctype="multipart/form-data" role="form" method="post" action="/gvsigonline/geocoding/provider_add/">
+			{% csrf_token %}
 
 			<div class="pf-topbar">
-				<h3 class="pf-topbar__title">
-					<i class="fa fa-search"></i> {% trans "Add provider" %}
-				</h3>
-				<button id="submit-button" type="submit" class="btn-pf-save">
-					<i class="fa fa-floppy-o"></i> {% trans "Save" %}
-				</button>
+				<div class="pf-topbar-left">
+					<a href="/gvsigonline/geocoding/provider_list/" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" context "geocoding" %}</a>
+					<h3 class="gp-topbar-title"><i class="fa fa-search"></i> {% trans "Add provider" %}</h3>
+				</div>
+				<button id="submit-button" type="submit" class="btn-pf-save"> <i class="fa fa-floppy-o"></i> {% trans "Save" %} </button>
 			</div>
 
-			<div class="pf-card">
-				{% csrf_token %}
+			{% if form.errors %}
+			<div class="pf-error-msg">
+				<ul>
+				{% for field in form %}
+					{% if field.errors %}
+						<li>{{field.label}}. {{ field.errors|striptags }}</li>
+					{% endif %}
+				{% endfor %}
+				</ul>
+				{% if form.errors %}{{ form.errors }}{% endif %}
+			</div>
+			{% endif %}
 
-				{% if form.errors %}
-				<div class="pf-error-msg">
-					<ul>
-					{% for field in form %}
-						{% if field.errors %}
-							<li>{{field.label}}. {{ field.errors|striptags }}</li>
-						{% endif %}
-					{% endfor %}
-					</ul>
-					{% if form.errors %}{{ form.errors }}{% endif %}
-				</div>
-				{% endif %}
+			{% if message %}
+			<div class="pf-error-msg">
+				<p>* {{ message }}</p>
+			</div>
+			{% endif %}
 
-				{% if message %}
-				<div class="pf-error-msg">
-					<p>* {{ message }}</p>
-				</div>
-				{% endif %}
-
-				<div class="row">
-					<div class="col-md-6 form-group">
-						<label for="id_type">{% trans "Type" %}</label>
-						{{ form.type }}
-					</div>
-				</div>
-
-				<div class="row generic-param hidden">
-					<div class="col-md-8 form-group">
-						<label for="id_candidates">{% trans "Candidates URL" %}</label>
-						{{ form.candidates_url }}
-					</div>
-				</div>
-
-				<div class="row generic-param hidden">
-					<div class="col-md-8 form-group">
-						<label for="id_find">{% trans "Find URL" %}</label>
-						{{ form.find_url }}
-					</div>
-				</div>
-
-				<div class="row generic-param hidden">
-					<div class="col-md-8 form-group">
-						<label for="id_reverse">{% trans "Reverse URL" %}</label>
-						{{ form.reverse_url }}
-					</div>
-				</div>
-
-				<div class="row generic-param hidden">
-					<div class="col-md-4 form-group">
-						<label for="id_limit">{% trans "Limit" %}</label>
-						{{ form.max_results }}
-					</div>
-				</div>
-
-				<div class="row user-param cartociudad-param postgres-param hidden">
-					<div class="col-md-6 form-group">
-						<label for="id_workspace">{% trans "Workspace" %}</label>
-						{{ form.workspace }}
-					</div>
-				</div>
-
-				<div class="row user-param cartociudad-param postgres-param hidden">
-					<div class="col-md-6 form-group">
-						<label for="id_datastore">{% trans "Data Store" %}</label>
-						{{ form.datastore }}
-					</div>
-				</div>
-
-				<div class="row user-param postgres-param hidden">
-					<div class="col-md-6 form-group">
-						<label for="id_resource">{% trans "Table to be indexed" %}</label>
-						{{ form.resource }}
-					</div>
-				</div>
-
-				<div class="row user-param postgres-param hidden">
-					<div class="col-md-6 form-group">
-						<label for="id_id_field">{% trans "ID Field" %}</label>
-						{{ form.id_field }}
-					</div>
-				</div>
-
-				<div class="row user-param postgres-param hidden">
-					<div class="col-md-6 form-group">
-						<label for="id_text_field">{% trans "Text Field" %}</label>
-						{{ form.text_field }}
-					</div>
-				</div>
-
-				<div class="row user-param postgres-param hidden">
-					<div class="col-md-6 form-group">
-						<label for="id_geom_field">{% trans "Geom Field" %}</label>
-						{{ form.geom_field }}
-					</div>
-				</div>
-
-				<div class="row">
-					<div class="col-md-4 form-group">
-						<label for="id_category">{% trans "Category" %}</label>
-						{{ form.category }}
-					</div>
-				</div>
-
-				<div class="row nominatim-param googlemaps-param icv-param new_cartociudad-param user-param postgres-param">
-					<div class="col-md-12" style="margin-bottom: 24px;">
-						<div class="provider-img">
-							<img id="image-preview" src="" alt="">
+			<div class="gp-page">
+				<section class="gp-card">
+					<div class="gp-section">
+						<div class="gp-section__intro">
+							<h4 class="gp-section__title"><i class="fa fa-map-marker"></i> {% trans "Provider" %}</h4>
+							<p class="gp-section__hint">{% trans "Service that resolves the searches and category in which its results are grouped." context "geocoding" %}</p>
 						</div>
-						<div class="provider-img-change">
-							<label>{% trans "Select image" %}</label>
-							<input id="id_image" name="image" type="file" class="file" data-show-preview="true">
+						<div class="gp-section__fields gp-grid">
+						<div class="">
+							<div class="form-group">
+								<label for="id_type">{% trans "Type" %}</label>
+								{{ form.type }}
+							</div>
+						
+						</div>
+						<div class="">
+							<div class="form-group">
+								<label for="id_category">{% trans "Category" %}</label>
+								{{ form.category }}
+							</div>
+						
+						</div>
 						</div>
 					</div>
-				</div>
 
-				<div class="row">
-					<div class="col-md-8 form-group">
-						<label>{% trans "Projects" %}</label>
-						<div>
-							<label class="radio-label">
-								<input type="radio" name="project_mode" value="all" checked> {% trans "All projects" %}
-							</label>
-							<label class="radio-label">
-								<input type="radio" name="project_mode" value="by_project"> {% trans "By project" %}
-							</label>
+					<div class="gp-section generic-param hidden">
+						<div class="gp-section__intro">
+							<h4 class="gp-section__title"><i class="fa fa-globe"></i> {% trans "Service" context "geocoding" %}</h4>
+							<p class="gp-section__hint">{% trans "Addresses of the geocoding service and maximum number of results." context "geocoding" %}</p>
 						</div>
-						<div id="project-selector" class="hidden">
-							<div style="flex: 1;">
+						<div class="gp-section__fields gp-grid">
+						<div class="gp-full generic-param hidden">
+							<div class="form-group">
+								<label for="id_candidates">{% trans "Candidates URL" %}</label>
+								{{ form.candidates_url }}
+							</div>
+						
+						</div>
+						<div class="gp-full generic-param hidden">
+							<div class="form-group">
+								<label for="id_find">{% trans "Find URL" %}</label>
+								{{ form.find_url }}
+							</div>
+						
+						</div>
+						<div class="gp-full generic-param hidden">
+							<div class="form-group">
+								<label for="id_reverse">{% trans "Reverse URL" %}</label>
+								{{ form.reverse_url }}
+							</div>
+						
+						</div>
+						<div class="gp-narrow generic-param hidden">
+							<div class="form-group">
+								<label for="id_limit">{% trans "Limit" %}</label>
+								{{ form.max_results }}
+							</div>
+						
+						</div>
+						</div>
+					</div>
+
+					<div class="gp-section user-param cartociudad-param postgres-param hidden">
+						<div class="gp-section__intro">
+							<h4 class="gp-section__title"><i class="fa fa-database"></i> {% trans "Data source" context "geocoding" %}</h4>
+							<p class="gp-section__hint">{% trans "Table whose records are indexed for searching." context "geocoding" %}</p>
+						</div>
+						<div class="gp-section__fields gp-grid">
+						<div class="user-param cartociudad-param postgres-param hidden">
+							<div class="form-group">
+								<label for="id_workspace">{% trans "Workspace" %}</label>
+								{{ form.workspace }}
+							</div>
+						
+						</div>
+						<div class="user-param cartociudad-param postgres-param hidden">
+							<div class="form-group">
+								<label for="id_datastore">{% trans "Data Store" %}</label>
+								{{ form.datastore }}
+							</div>
+						
+						</div>
+						<div class="gp-full user-param postgres-param hidden">
+							<div class="form-group">
+								<label for="id_resource">{% trans "Table to be indexed" %}</label>
+								{{ form.resource }}
+							</div>
+						
+						</div>
+						<div class="user-param postgres-param hidden">
+							<div class="form-group">
+								<label for="id_id_field">{% trans "ID Field" %}</label>
+								{{ form.id_field }}
+							</div>
+						
+						</div>
+						<div class="user-param postgres-param hidden">
+							<div class="form-group">
+								<label for="id_text_field">{% trans "Text Field" %}</label>
+								{{ form.text_field }}
+							</div>
+						
+						</div>
+						<div class="user-param postgres-param hidden">
+							<div class="form-group">
+								<label for="id_geom_field">{% trans "Geom Field" %}</label>
+								{{ form.geom_field }}
+							</div>
+						
+						</div>
+						</div>
+					</div>
+
+					<div class="gp-section nominatim-param googlemaps-param icv-param new_cartociudad-param user-param postgres-param">
+						<div class="gp-section__intro">
+							<h4 class="gp-section__title"><i class="fa fa-picture-o"></i> {% trans "Image" context "geocoding" %}</h4>
+							<p class="gp-section__hint">{% trans "Icon shown next to the results of this provider." context "geocoding" %}</p>
+						</div>
+						<div class="gp-section__fields">
+							<div class="gp-image">
+								<div class="provider-img">
+									<img id="image-preview" src="" alt="">
+								</div>
+								<div class="provider-img-change">
+									<label for="id_image">{% trans "Select image" %}</label>
+									<input id="id_image" name="image" type="file" class="file" data-show-preview="true">
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="gp-section">
+						<div class="gp-section__intro">
+							<h4 class="gp-section__title"><i class="fa fa-cubes"></i> {% trans "Projects" %}</h4>
+							<p class="gp-section__hint">{% trans "Projects in which this provider can be used." context "geocoding" %}</p>
+						</div>
+						<div class="gp-section__fields">
+							<div class="gp-segmented" role="radiogroup" aria-label="{% trans "Projects" %}">
+								<label class="radio-label">
+									<input type="radio" name="project_mode" value="all" checked> {% trans "All projects" %}
+								</label>
+								<label class="radio-label">
+									<input type="radio" name="project_mode" value="by_project"> {% trans "By project" %}
+								</label>
+							</div>
+							<div id="project-selector" class="hidden">
 								{{ form.projects }}
+								<div class="buttons-container">
+									<button type="button" id="add-selected" class="btn">{% trans "Add selected" %}</button>
+									<button type="button" id="add-all" class="btn">{% trans "Add all" %}</button>
+									<button type="button" id="clear-all" class="btn">{% trans "Delete all" %}</button>
+								</div>
 								<div class="pf-sub-card">
 									<div class="pf-sub-card__header">{% trans "Project list" %}</div>
 									<div class="pf-sub-card__body" id="selected-projects-list"></div>
 								</div>
 							</div>
-							<div class="buttons-container">
-								<button type="button" id="add-selected" class="btn">{% trans "Add selected" %}</button>
-								<button type="button" id="add-all" class="btn">{% trans "Add all" %}</button>
-								<button type="button" id="clear-all" class="btn">{% trans "Delete all" %}</button>
-							</div>
 						</div>
 					</div>
-				</div>
+				</section>
 
-				<div class="row nominatim-param googlemaps-param icv-param new_cartociudad-param" id="advanced-params-row">
-					<div class="col-md-8 form-group">
-						<div id="advanced-params-button">
-							<label>{% trans "Advanced params" %}</label>
-							<div><i id="advanced-params-icon" class="fa fa-plus"></i></div>
-						</div>
-						<div id="advanced-params">
-							<textarea id="params" name="params" form="provider-form">{{ form.params }}</textarea>
-						</div>
+				<section class="gp-card nominatim-param googlemaps-param icv-param new_cartociudad-param" id="advanced-params-row">
+					<div class="gp-card__header" id="advanced-params-button" role="button" tabindex="0">
+						<h4 class="gp-card__title"><i class="fa fa-sliders"></i> {% trans "Advanced params" %}</h4>
+						<i id="advanced-params-icon" class="fa fa-plus" aria-hidden="true"></i>
 					</div>
-				</div>
-
-			</div><!-- /.pf-card -->
+					<div id="advanced-params">
+						<textarea id="params" name="params" form="provider-form">{{ form.params }}</textarea>
+					</div>
+				</section>
+			</div>
 		</form>
 
 	</div>

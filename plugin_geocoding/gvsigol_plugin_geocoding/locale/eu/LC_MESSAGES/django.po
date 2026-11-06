@@ -424,3 +424,48 @@ msgstr ""
 #: views.py:456
 msgid "5 segs"
 msgstr ""
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Back"
+msgstr "Itzuli"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Service"
+msgstr "Zerbitzua"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Data source"
+msgstr "Datu-iturria"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Image"
+msgstr "Irudia"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Projects in which this provider can be used."
+msgstr "Hornitzaile hau erabil daitekeen proiektuak."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Service that resolves the searches and category in which its results are grouped."
+msgstr "Bilaketak ebazten dituen zerbitzua eta emaitzak taldekatzen diren kategoria."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Addresses of the geocoding service and maximum number of results."
+msgstr "Geokodetze-zerbitzuaren helbideak eta gehieneko emaitza kopurua."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Table whose records are indexed for searching."
+msgstr "Bilaketetarako indexatzen diren erregistroen taula."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Icon shown next to the results of this provider."
+msgstr "Hornitzaile honen emaitzen ondoan erakusten den ikonoa."

@@ -421,3 +421,48 @@ msgstr ""
 #: views.py:456
 msgid "5 segs"
 msgstr ""
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Back"
+msgstr "Zurück"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Service"
+msgstr "Dienst"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Data source"
+msgstr "Datenquelle"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Image"
+msgstr "Bild"
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Projects in which this provider can be used."
+msgstr "Projekte, in denen dieser Anbieter verwendet werden kann."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Service that resolves the searches and category in which its results are grouped."
+msgstr "Dienst, der die Suchen auflöst, und Kategorie, in der seine Ergebnisse gruppiert werden."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Addresses of the geocoding service and maximum number of results."
+msgstr "Adressen des Geokodierungsdienstes und maximale Anzahl an Ergebnissen."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Table whose records are indexed for searching."
+msgstr "Tabelle, deren Datensätze für die Suche indiziert werden."
+
+#: templates/provider_add.html
+msgctxt "geocoding"
+msgid "Icon shown next to the results of this provider."
+msgstr "Symbol, das neben den Ergebnissen dieses Anbieters angezeigt wird."
