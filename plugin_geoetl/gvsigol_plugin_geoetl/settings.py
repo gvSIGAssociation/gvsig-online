@@ -25,7 +25,7 @@ env_plugin_geoetl = environ.Env(
     ETL_EXCEL_SQL_CHUNKSIZE=(int, 5000),
     ETL_CANVAS_MAX_DELIVERIES=(int, 2),
     # El asistente del canvas está apagado hasta que la instalación lo active.
-    ETL_ASSISTANT_ENABLED=(bool, True),
+    ETL_ASSISTANT_ENABLED=(bool, False),
     # Traza de cada turno del asistente en el log (herramientas, tiempos, resultado). Sin textos del usuario.
     ETL_ASSISTANT_TRACE=(bool, False),
     # Vacío: se usa el modelo por defecto de GeoCopilot.
