@@ -3,64 +3,61 @@
 {% load i18n %}
 
 {% block content %}
-	<div class="row">
-		<div class="col-md-12">
-			<div class="pl-panel">
-
-				<form role="form" method="post" enctype="multipart/form-data" action="/gvsigonline/symbology/sld_import/{{layer_id}}/">
-					<div class="pl-panel__header">
-						<h3 class="pl-panel__title"><i class="fa fa-file-code-o"></i>{% trans "Import SLD" %}</h3>
-						<div class="pl-panel__actions">
-							<button type="submit" class="btn-pf-save save-button"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
-						</div>
-					</div>
-
-					<div class="pl-panel__body with-padding">
-					{% csrf_token %}
-						{% if form.errors %}
-						<div class="pf-error-msg force-show">
-							<ul>
-							{% for field in form %}
-								{% if field.errors %}
-									<li>{{field.label}}. {{ field.errors|striptags }}</li>
-								{% endif %}
-							{% endfor %}
-							</ul>
-						</div>
-						{% endif %}
-						{% if message %}
-						<div class="pf-error-msg force-show">
-							<p>* {{ message }}</p>
-						</div>
-						{% endif %}
-										
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label>{% trans "Name" %}</label>
-								<input readonly name="sld-name" id="sld-name" value="{{style_name}}" type="text" class="form-control">	
-							</div>
-						</div>
-						
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label>{% trans "Select SLD" %}</label>
-								<input id="library-file" name="sld-file" type="file" accept=".sld" class="file" data-show-preview="true">
-							</div>
-						</div>
-						
-						<div class="row">
-							<div class="checkbox col-md-12">								
-								<label>
-									<input type="checkbox" name="style-is-default" id="style-is-default"/>{% trans "Set as default style" %}
-								</label>
-							</div>
-						</div>
-											
-	            	</div>
-				</form>		
-			</div>
-		</div>				
+<form role="form" method="post" enctype="multipart/form-data" action="/gvsigonline/symbology/sld_import/{{layer_id}}/">
+{% csrf_token %}
+<div class="gol-sym-page">
+	<div class="gol-sym-page-header">
+		<nav aria-label="{% trans "Breadcrumb" context "symbology" %}">
+			<ol class="gol-sym-crumbs">
+				<li>{% trans "Symbology" %}</li>
+				<li><a href="{% url 'style_layer_list' %}">{% trans "Layer styles" %}</a></li>
+				<li aria-current="page">{% trans "Import SLD" %}</li>
+			</ol>
+		</nav>
+		<h1 class="gol-sym-page-title"><span class="gol-sym-page-icon" aria-hidden="true"><i class="fa fa-file-code-o"></i></span>{% trans "Import SLD" %}</h1>
+		<p class="gol-sym-page-lead">{% trans "Create a layer style from an SLD file." context "symbology" %}</p>
 	</div>
+	<div class="gol-sym-page-grid">
+		<div class="pl-panel gol-sym-form-card gol-sym-page-card">
+			<div class="pl-panel__body">
+				<h2 class="gol-sym-card-title">{% trans "Style details" context "symbology" %}</h2>
+				{% if message %}
+				<div class="pf-error-msg force-show gol-sym-alert" role="alert">
+					<i class="fa fa-exclamation-circle" aria-hidden="true"></i><span>{{ message }}</span>
+				</div>
+				{% endif %}
+				<div class="form-group">
+					<label for="sld-name">{% trans "Name" %}</label>
+					<input readonly name="sld-name" id="sld-name" value="{{style_name}}" type="text" class="form-control">
+					<p class="gol-sym-field-hint">{% trans "The name is assigned automatically from the layer." context "symbology" %}</p>
+				</div>
+				<div class="form-group">
+					<label for="library-file">{% trans "Select SLD" %} <span class="gol-sym-required" aria-hidden="true">*</span></label>
+					<input id="library-file" name="sld-file" type="file" accept=".sld" class="file" data-show-preview="true">
+					<p class="gol-sym-field-hint"><i class="fa fa-info-circle" aria-hidden="true"></i>{% blocktrans with ext=".sld" %}Accepted format: {{ ext }}{% endblocktrans %}</p>
+				</div>
+				<div class="checkbox gol-sym-default">
+					<label>
+						<input type="checkbox" name="style-is-default" id="style-is-default"/>{% trans "Set as default style" %}
+						</label>
+				</div>
+			</div>
+			<div class="gol-sym-form-footer">
+				<a href="{% url 'style_layer_list' %}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
+				<button type="submit" class="btn-pf-save save-button"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+			</div>
+		</div>
+		<aside class="gol-sym-aside">
+			<h2 class="gol-sym-aside-title"><i class="fa fa-file-code-o" aria-hidden="true"></i>{% trans "About the file" context "symbology" %}</h2>
+			<ul class="gol-sym-aside-list gol-sym-aside-list--info">
+				<li>{% trans "SLD 1.0 files are supported." context "symbology" %}</li>
+				<li>{% trans "Rules, filters, scales and symbols are imported." context "symbology" %}</li>
+				<li>{% trans "Labels exported from gvSIG Online keep their advanced options." context "symbology" %}</li>
+			</ul>
+		</aside>
+	</div>
+</div>
+</form>
 {% endblock %}
 {% block extra-scripts %}
 <script>

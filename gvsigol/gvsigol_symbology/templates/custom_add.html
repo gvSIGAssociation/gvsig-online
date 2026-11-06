@@ -5,48 +5,57 @@
 {% block content %}	  	  
 <div class="row">
 	<div class="col-md-12">
-		<div class="pl-panel">
+		<div class="pl-panel gol-sym-editor">
 		
 			<div class="pl-panel__header">
-				<h3 class="pl-panel__title"><i class="fa fa-paint-brush"></i>{% trans "Add new style" %}</h3>
+				<div class="gol-sym-heading">
+<a href="{% url 'style_layer_list' %}" class="gol-sym-back-btn" title="{% trans "Back to styles list" %}" aria-label="{% trans "Back to styles list" %}"><i class="fa fa-arrow-left" aria-hidden="true"></i></a>
+<div class="gol-sym-heading__text">
+{% block custom_v1 %}				<h3 class="pl-panel__title"><i class="fa fa-paint-brush"></i>{% trans "Add new style" %}</h3>
+{% endblock %}					<span class="gol-sym-subtitle">{% trans "Layer" %}: {{ layer_name }}</span>
+</div>
+				</div>
 				<div class="pl-panel__actions">
 					<button id="refresh-preview" class="btn-pf-secondary refresh-preview"><i class="fa fa-refresh"></i> {% trans "Update preview" %}</button>
 					<button id="save-legend" class="btn-pf-save save-legend"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>					
 				</div>
 			</div>
-
+{% block custom_v2 %}{% endblock %}
 			<div class="pl-panel__body with-padding">
 				<div class="row">
 					<div id="form-error" class="pf-error-msg"></div>
 				</div>
+				<h4 class="gol-sym-section-title">{% trans "Style properties" %}</h4>
 				<div class="row">
 					<div class="col-md-12 form-group">
 						<label>{% trans "Name" %}</label>
-						<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" value="{{style_name}}" type="text" class="form-control">	
-					</div>
+{% block custom_v3 %}						<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" value="{{style_name}}" type="text" class="form-control">	
+{% endblock %}					</div>
 				</div>
 				<div class="row">
 					<div class="col-md-12 form-group">
 						<label>{% trans "Title" %}</label>
-						<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" value="{{style_name}}" type="text" class="form-control">	
-					</div>
+{% block custom_v4 %}						<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" value="{{style_name}}" type="text" class="form-control">	
+{% endblock %}					</div>
 				</div>
 				<div class="row">
-					<div class="checkbox col-md-12">								
+					<div class="checkbox col-md-12 gol-sym-default">								
 						<label>
-							<input checked type="checkbox" name="style-is-default" id="style-is-default"/>{% trans "Set as default style" %}
-						</label>
+{% block custom_v5 %}							<input checked type="checkbox" name="style-is-default" id="style-is-default"/>{% trans "Set as default style" %}
+{% endblock %}						</label>
 					</div>
 				</div>
+				<h4 class="gol-sym-section-title">{% trans "Map preview" %}</h4>
 				<div class="row">
 					<div class="col-md-12">
 						<div id="map" class="preview-map"></div>
 					</div>
 				</div>
+				<h4 class="gol-sym-section-title">{% trans "Style definition (SLD)" %}</h4>
 				<div class="row">
 					<div class="col-md-12 form-group">
-						<textarea class="form-control" name="sld_content" id="sld_content" rows="10"></textarea>						
-					</div>
+{% block custom_v6 %}						<textarea class="form-control" name="sld_content" id="sld_content" rows="10"></textarea>						
+{% endblock %}					</div>
 				</div>
 			</div>
 		</div>
@@ -60,12 +69,12 @@
 	$('#submenu-styles').addClass("active");
 </script>
 <script>
-$(document).ready(function() {
+{% block custom_v7 %}{% endblock %}$(document).ready(function() {
 	
 	var layerId = "{{layer_id}}";
 	var layerUrl = "{{layer_url}}";
 	var layerName = "{{layer_name}}";
-	var authToken = "{{auth_token}}";
+{% block custom_v8 %}{% endblock %}	var authToken = "{{auth_token}}";
 	authenticate(layerUrl);
 	
 	var map = new ol.Map({
@@ -82,15 +91,15 @@ $(document).ready(function() {
 		    zoom: '2'
 		})
 	});
-	var wmsSource = new ol.source.TileWMS({
-		url: layerUrl,
+{% block custom_v9 %}	var wmsSource = new ol.source.TileWMS({
+{% endblock %}		url: layerUrl,
 		visible: true,
-		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
-		serverType: 'geoserver',
-		tileLoadFunction: imagePostFunction
-	});
-	wmsLayer = new ol.layer.Tile({
-		id: 'preview-layer',
+{% block custom_v10 %}		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
+{% endblock %}		serverType: 'geoserver',
+{% block custom_v11 %}		tileLoadFunction: imagePostFunction
+{% endblock %}	});
+{% block custom_v12 %}	wmsLayer = new ol.layer.Tile({
+{% endblock %}		id: 'preview-layer',
 		source: wmsSource,
 		visible: true
 	});
@@ -104,17 +113,17 @@ $(document).ready(function() {
 		lineNumbers: true
 	});
 	
-	var code = '';
+{% block custom_v13 %}	var code = '';
 	code += '<?xml version="1.0" encoding="UTF-8"?> \n';
 	code += '<sld:StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:sld="http://www.opengis.net/sld" xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc" version="1.0.0"> \n';
 	code += '\t <!--  Contenido SLD  --> \n';
 	code += '</sld:StyledLayerDescriptor> \n';
 	
 	codemirror.setValue(code);
-	codemirror.refresh();
+{% endblock %}	codemirror.refresh();
 
 	$("#save-legend").on('click', function(e){
-		if ($("#style-name").val() != '') {
+{% block custom_v14 %}		if ($("#style-name").val() != '') {
 			save(layerId, codemirror);
 			
 		} else {
@@ -122,7 +131,7 @@ $(document).ready(function() {
 			
 		}
 		
-	});
+{% endblock %}	});
 	
 	$("#refresh-preview").on('click', function(e){
 		updatePreview(layerId, codemirror, map);
@@ -137,8 +146,8 @@ $(document).ready(function() {
 				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			data: {
-				name: "{{style_name}}",
-				layer_id: "{{layer_id}}"
+{% block custom_v15 %}				name: "{{style_name}}",
+{% endblock %}				layer_id: "{{layer_id}}"
 			},
 			success: function(response){
 				
@@ -147,25 +156,25 @@ $(document).ready(function() {
 		});
 	});
 	
-});
+{% block custom_v16 %}{% endblock %}});
 
-function save(layerId, codemirror) {	
+{% block custom_v17 %}function save(layerId, codemirror) {	
 	if (!beginStyleSave()) {
 		return;
 	}
-	var self = this;
+{% endblock %}	var self = this;
 	
 	var sld = codemirror.getValue();
 	var isDefault = $('#style-is-default').is(":checked");
 	var styleName = $("#style-name").val();
 	var styleTitle = $("#style-title").val();
 
-	
-	$.ajax({
+{% block custom_v18 %}	
+{% endblock %}	$.ajax({
 		type: "POST",
 		async: false,
-		url: "/gvsigonline/symbology/custom_add/" + layerId + "/",
-		beforeSend:function(xhr){
+{% block custom_v19 %}		url: "/gvsigonline/symbology/custom_add/" + layerId + "/",
+{% endblock %}		beforeSend:function(xhr){
 			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		data: {
@@ -176,12 +185,12 @@ function save(layerId, codemirror) {
 			sld: sld
 		},
 		success: function(response){
-			finishStyleSaveAttempt(response);
-		},
-		error: function(){
+{% block custom_v20 %}			finishStyleSaveAttempt(response);
+{% endblock %}		},
+{% block custom_v21 %}		error: function(){
 			finishStyleSaveAttempt(null);
 		}
-	});
+{% endblock %}	});
 }
 
 function updatePreview(layerId, codemirror, map) {

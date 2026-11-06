@@ -156,6 +156,8 @@ env = environ.Env(
     CELERY_BROKER_URL=(str,'pyamqp://gvsigol:12345678@localhost:5672/gvsigol'),
     CELERY_TASK_ALWAYS_EAGER =(bool,False),
     CELERY_RESULT_EXPIRES=(int,259200),  # Resultados expiran en 3 días por defecto (259200 segundos)
+    # Caché compartida de GeoCopilot (DatabaseCache): ver CACHES más abajo
+    GEOCOPILOT_SHARED_CACHE=(bool,False),
     # Session
     SECRET_KEY=(str,'qz$rai5n3e1!13k&7ug1db72@-&g#r2o%bem68#-z+5um%etgk'),
     #Email    
@@ -818,6 +820,30 @@ CELERY_RESULT_EXPIRES = env('CELERY_RESULT_EXPIRES')  # Los resultados expiran e
 CELERY_TASK_ACKS_LATE = True
 CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_TASK_ALWAYS_EAGER = env('CELERY_TASK_ALWAYS_EAGER')
+
+# Caché compartida de GeoCopilot (plugin_geocopilot, utils/shared_cache).
+# La cancelación de consultas, el dueño de cada una y los límites por usuario
+# tienen que verse desde todos los procesos de uWSGI y desde los workers de
+# Celery, y la caché por defecto es local a cada proceso. Con
+# GEOCOPILOT_SHARED_CACHE=True se añade el alias 'geocopilot' sobre la tabla
+# geocopilot_cache (la crea una migración del plugin). La caché por defecto
+# sigue siendo la de siempre (LocMemCache): el núcleo guarda en ella
+# respuestas HTTP completas y no deben ir a la base de datos.
+if env('GEOCOPILOT_SHARED_CACHE'):
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        },
+        'geocopilot': {
+            'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+            'LOCATION': 'geocopilot_cache',
+            # Por defecto son 300 entradas y, al superarlas, DatabaseCache
+            # borra un tercio por orden de clave (no por antigüedad): podría
+            # llevarse el dueño de una consulta en curso. Cada consulta deja
+            # 2-3 entradas que caducan en 10 minutos como mucho.
+            'OPTIONS': {'MAX_ENTRIES': 10000},
+        },
+    }
 
 CACHE_OPTIONS = {
     'GRID_SUBSETS': [f'EPSG:{code}' for code in SUPPORTED_CRS],

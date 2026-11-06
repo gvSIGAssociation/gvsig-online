@@ -17,6 +17,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from django.db import transaction
 from doctest import master
 
 '''
@@ -34,6 +35,7 @@ import string
 import random
 import json
 
+@transaction.atomic
 def create_style(request, json_data, layer, gs, is_preview=False, has_custom_legend=None):
     name = json_data.get('name')
     if is_preview:
@@ -124,6 +126,7 @@ def create_style(request, json_data, layer, gs, is_preview=False, has_custom_leg
     sld_body = sld_builder.build_sld(layer, style)
     return utils.publish_style(gs, layer, style, sld_body, is_preview=is_preview, overwrite=True)
 
+@transaction.atomic
 def update_style(request, json_data, layer, gs, style, is_preview=False, has_custom_legend=None):   
     is_default = json_data.get('is_default', False)
     is_default = utils.set_default_style(layer, gs, style=style, is_preview=is_preview, is_default=is_default)
@@ -255,8 +258,8 @@ def get_conf(request, layer_id):
         'layer_name': workspace.name + ':' + layer.name,
         'style_name': workspace.name + '_' + layer.name + '_' + str(index),
         'libraries': Library.objects.all(),
-        'supported_crs': json.dumps(core_utils.get_supported_crs()),
-        'extent': json.dumps(resource.get('coverage').get('nativeBoundingBox')),
+        'supported_crs': utils.json_for_script(core_utils.get_supported_crs()),
+        'extent': utils.json_for_script(resource.get('coverage').get('nativeBoundingBox')),
         'extent_epsg': resource.get('coverage').get('grid').get('crs'),
         'preview_url': preview_url
     }    

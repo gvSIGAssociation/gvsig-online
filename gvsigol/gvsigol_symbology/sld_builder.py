@@ -27,6 +27,7 @@ from gvsigol_symbology.sld import StyledLayerDescriptor, PointSymbolizer, LineSy
     Graphic, Mark, Fill, Stroke, Label, Font, Halo, RasterSymbolizer, ColorMap, ExternalGraphic, Filter, PropertyCriterion, \
     Geometry, Function, LabelPlacement, LinePlacement, PointPlacement, AnchorPoint
 from . import utils
+from . import label_options, label_sld
 import json
 import sys
 import re
@@ -53,9 +54,13 @@ def build_sld(layer, style, single_symbol = False):
     #    tr = feature_type_style.create_transformation()
     
     rules = ModelRule.objects.filter(style=style)
+    # La geometría de la capa no cambia entre reglas: se consulta una sola vez
+    # (antes se abría una conexión a PostGIS por cada regla).
+    field_geom = None
     for r in rules:
         symbolizers = ModelSymbolizer.objects.filter(rule=r).order_by('-order')
-        field_geom = utils.get_geometry_field(layer)
+        if field_geom is None:
+            field_geom = utils.get_geometry_field(layer)
         create_rule(r, symbolizers, feature_type_style, field_geom)
     
     sld_body = style_layer_descriptor.as_sld(True)
@@ -118,7 +123,10 @@ def get_operation_symbol(op):
     elif op == 'is_less_than_or_equal_to':
         operation = '<='
     elif op == 'is_less_than':
-        operation = '>'
+        # Antes devolvía '>' (PropertyIsGreaterThan) en filtros de una sola condición,
+        # distinto de la previsualización del editor y del conversor Mapbox. Los estilos
+        # ya publicados se regeneran con: manage.py regenerate_symbology_sld --less-than
+        operation = '<'
     elif op == 'is_greater_than_or_equal_to':
         operation = '>='
     elif op == 'is_greater_than':
@@ -306,6 +314,10 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
             egph.Format = s.externalgraphicsymbolizer.format
             egph.create_onlineresource(s.externalgraphicsymbolizer.online_resource)
             
+        elif hasattr(s, 'textsymbolizer') and label_options.of(s.textsymbolizer) is not None:
+            # Etiqueta nueva (con opciones avanzadas): ver label_sld.py
+            label_sld.build_text_symbolizer(rule, s.textsymbolizer, geom_field, label_options.of(s.textsymbolizer))
+
         elif hasattr(s, 'textsymbolizer'):
             symbolizer = TextSymbolizer(rule)
             if geom_field:

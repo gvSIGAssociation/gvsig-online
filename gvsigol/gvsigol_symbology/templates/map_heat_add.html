@@ -5,44 +5,53 @@
 {% block content %}	  	  
 <div class="row">
 	<div class="col-md-12">
-		<div class="pl-panel">
+		<div class="pl-panel gol-sym-editor">
 		
 			<div class="pl-panel__header">
-				<h3 class="pl-panel__title"><i class="fa fa-paint-brush"></i>{% trans "Add new style" %}</h3>
+				<div class="gol-sym-heading">
+<a href="{% url 'style_layer_list' %}" class="gol-sym-back-btn" title="{% trans "Back to styles list" %}" aria-label="{% trans "Back to styles list" %}"><i class="fa fa-arrow-left" aria-hidden="true"></i></a>
+<div class="gol-sym-heading__text">
+{% block map_heat_v1 %}				<h3 class="pl-panel__title"><i class="fa fa-paint-brush"></i>{% trans "Add new style" %}</h3>
+{% endblock %}					<span class="gol-sym-subtitle">{% trans "Layer" %}: {{ layer_name }}</span>
+</div>
+				</div>
 				<div class="pl-panel__actions">
 					<button id="refresh-preview" class="btn-pf-secondary refresh-preview"><i class="fa fa-refresh"></i> {% trans "Update preview" %}</button>
 					<button id="save-legend" class="btn-pf-save save-legend"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>					
 				</div>
 			</div>
-
+{% block map_heat_v2 %}{% endblock %}
 			<div class="pl-panel__body with-padding">
 				<div class="row">
 					<div id="form-error" class="pf-error-msg"></div>
 				</div>
+				<h4 class="gol-sym-section-title">{% trans "Style properties" %}</h4>
 				<div class="row">
 					<div class="col-md-12 form-group">
 						<label>{% trans "Name" %}</label>
-						<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" value="{{style_name}}" type="text" class="form-control">	
-					</div>
+{% block map_heat_v3 %}						<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" value="{{style_name}}" type="text" class="form-control">	
+{% endblock %}					</div>
 				</div>
 				<div class="row">
 					<div class="col-md-12 form-group">
 						<label>{% trans "Title" %}</label>
-						<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" value="{{style_name}}" type="text" class="form-control">	
-					</div>
+{% block map_heat_v4 %}						<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" value="{{style_name}}" type="text" class="form-control">	
+{% endblock %}					</div>
 				</div>
 				<div class="row">
-					<div class="checkbox col-md-12">								
+					<div class="checkbox col-md-12 gol-sym-default">								
 						<label>
-							<input checked type="checkbox" name="style-is-default" id="style-is-default"/>{% trans "Set as default style" %}
-						</label>
+{% block map_heat_v5 %}							<input checked type="checkbox" name="style-is-default" id="style-is-default"/>{% trans "Set as default style" %}
+{% endblock %}						</label>
 					</div>
 				</div>
+				<h4 class="gol-sym-section-title">{% trans "Map preview" %}</h4>
 				<div class="row">
 					<div class="col-md-12">
 						<div id="map" class="preview-map"></div>
 					</div>
 				</div>
+{% block map_heat_v6 %}{% endblock %}				<h4 class="gol-sym-section-title">{% trans "Heatmap settings" %}</h4>
 				<!-- Agregado el formulario para generar el SLD -->
                 <div class="row">
 						
@@ -66,13 +75,13 @@
 						</div>
 					
 							<div class="col-md-8">
-								<label for="selector" style="font-size: 18px;">{% trans "Select an option" %}:</label>
+								<label for="selector" class="gol-sym-option-label">{% trans "Select an option" %}:</label>
 
-								<label style="margin-right: 20px; margin-left: 10px;">
+								<label class="gol-sym-radio">
 									<input type="radio" name="opcion" value="opcion1" checked> {% trans "Color gradient" %}
 								</label>
 								
-								<label >
+								<label class="gol-sym-radio">
 									<input type="radio" name="opcion" value="opcion2"> {% trans "Color table" %}
 								</label>
 							<div id="op1">
@@ -85,8 +94,8 @@
 									<!-- First entry group -->
 									<div class="col-md-12">
 										<label for="color1">{% trans "Cold Color" %}</label>
-										<input type="color" id="color1" name="color1" value="#FFEDED" class="form-control" required>
-									</div>
+{% block map_heat_v7 %}										<input type="color" id="color1" name="color1" value="#FFEDED" class="form-control" required>
+{% endblock %}									</div>
 								</div>
 							</div>
 						
@@ -95,8 +104,8 @@
 									<!-- Second entry group -->
 									<div class="col-md-12">
 										<label for="color2">{% trans "Warm Color" %}</label>
-										<input type="color" id="color2" name="color2" value="#B00A0A" class="form-control" required>
-									</div>
+{% block map_heat_v8 %}										<input type="color" id="color2" name="color2" value="#B00A0A" class="form-control" required>
+{% endblock %}									</div>
 									
 
 									
@@ -119,7 +128,7 @@
 									</div>
 									<div class="row">
 										<div class="col-md-12 form-group">
-											<button id="select-ramp-color" class="btn-pf-secondary" style="width:100%;"><i class="fa fa-barcode"></i> {% trans "Apply ramp color" %}</button>
+											<button id="select-ramp-color" class="btn-pf-secondary gol-sym-btn-block"><i class="fa fa-barcode"></i> {% trans "Apply ramp color" %}</button>
 										</div>
 									</div>
 								</div>
@@ -130,9 +139,9 @@
 						</div>
 					</div>
 				</div>   
-						     
+{% block map_heat_v9 %}						     
     
-			</div>
+{% endblock %}			</div>
 		</div>
 	</div>
 </div>
@@ -142,16 +151,16 @@
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<span style="font-size: 20px; font-weight: bold;">{% trans "Warning" %}</span>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
+				<h4 class="modal-title"><i class="fa fa-exclamation-triangle gol-sym-warn-icon" aria-hidden="true"></i> {% trans "Warning" %}</h4>
 			</div>
 			<div id="modal-edit-rule-content" class="modal-body">
 				{% trans "Rules needed to apply a color ramp" %}
-				<div class="modal-footer">
-					<button id="button-error-ramp-close" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
-				</div>
+			</div>
+			<div class="modal-footer">
+				<button id="button-error-ramp-close" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
 			</div>
 		</div>
 	</div>
@@ -196,8 +205,8 @@
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box">
-							<div class="box-body no-padding" style="max-height: 300px; overflow: auto;">
-								<ul class="ramp-list clearfix" style="padding-left: 0px;">
+							<div class="box-body no-padding gol-sym-scroll">
+								<ul class="ramp-list clearfix gol-sym-ramp-list">
 								</ul>
 							</div>
 						</div>
@@ -218,9 +227,9 @@
 	$('#menu-manage-symbology').addClass("active");
 	$('#submenu-styles').addClass("active");
 </script>
-
-<script>
-$(document).ready(function() {
+{% block map_heat_v10 %}{% endblock %}
+{% block map_heat_v11 %}<script>
+{% endblock %}$(document).ready(function() {
 	this.color_ramp_data = {};
 
 	$("#op1").show();
@@ -240,8 +249,8 @@ $(document).ready(function() {
 	this.color_ramp = new ColorRamp("", null);
 	
 	$("#steps-body").append(this.color_ramp.getColorRampTableUI());
-	this.color_ramp.addDefaultEntries();
-	
+{% block map_heat_v12 %}	this.color_ramp.addDefaultEntries();
+{% endblock %}	
 	
 	$("#add-step").on('click', function(e){
 		self.color_ramp.addColorRamp(100, "#000000", 1);
@@ -309,7 +318,7 @@ $(document).ready(function() {
 					options += '<div id="color-ramp-' + ramp.id + '" class="color-ramp-item col-md-4">'+
 					'<div id="color-ramp-preview-' + ramp.id + '" class="preview-ramp-color" style="'+ colorramp.getStyleForPreview(aux_json) +'">'+
 					'</div>'+
-					'<span class="color-ramp-name">' + ramp.name + '</span>'+
+					'<span class="color-ramp-name">' + symbologyEscapeHtml(ramp.name) + '</span>'+
 					'</div>';
 
 					self.color_ramp_data[""+ramp.id] = {
@@ -348,7 +357,7 @@ $(document).ready(function() {
 				var options = '<option value=""> -- {% trans "Select ramp category" %} -- </option>';
 				for(var i=0; i<folders.length; i++){
 					var folder = folders[i];
-					options += "<option value=\""+ folder.id +"\">"+folder.name+"</option>";
+					options += "<option value=\""+ folder.id +"\">"+symbologyEscapeHtml(folder.name)+"</option>";
 				}
 				$("#select-category").prop("disabled", false);
 				$("#select-category").html(options);
@@ -373,13 +382,13 @@ $(document).ready(function() {
 		}
 	});
 
+{% block map_heat_v13 %}{% endblock %}
 
 
-
-	var language = $("#select-language").val();
+{% block map_heat_v14 %}	var language = $("#select-language").val();
 	$("#select-numeric-field").prop("disabled", true);
 	var checkedVal= 1
-	$("#toggleCheckbox").change(function() {
+{% endblock %}	$("#toggleCheckbox").change(function() {
                 if ($(this).is(":checked")) {
                     $("#select-numeric-field").prop("disabled", false);
 					checkedVal = $("#select-numeric-field").val()
@@ -398,16 +407,16 @@ $(document).ready(function() {
                 }
             });
 
-	var layerId = "{{layer_id}}";
+{% block map_heat_v15 %}{% endblock %}	var layerId = "{{layer_id}}";
 	var layerUrl = "{{layer_url}}";
 	var layerName = "{{layer_name}}";
-	var authToken = "{{auth_token}}";
-	var jsonNumericFields = {{json_numeric_fields|safe}};
+{% block map_heat_v16 %}{% endblock %}	var authToken = "{{auth_token}}";
+{% block map_heat_v17 %}	var jsonNumericFields = {{json_numeric_fields|safe}};
 
-	authenticate(layerUrl);
-
+{% endblock %}	authenticate(layerUrl);
+{% block map_heat_v18 %}
   
-	
+{% endblock %}	
 	var map = new ol.Map({
 		layers: [
 		    new ol.layer.Tile({
@@ -422,39 +431,39 @@ $(document).ready(function() {
 		    zoom: '2'
 		})
 	});
-	var wmsSource = new ol.source.TileWMS({
-		url: layerUrl,
+{% block map_heat_v19 %}	var wmsSource = new ol.source.TileWMS({
+{% endblock %}		url: layerUrl,
 		visible: true,
-		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
-		serverType: 'geoserver',
-		tileLoadFunction: imagePostFunction
-	});
-	wmsLayer = new ol.layer.Tile({
-		id: 'preview-layer',
+{% block map_heat_v20 %}		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
+{% endblock %}		serverType: 'geoserver',
+{% block map_heat_v21 %}		tileLoadFunction: imagePostFunction
+{% endblock %}	});
+{% block map_heat_v22 %}	wmsLayer = new ol.layer.Tile({
+{% endblock %}		id: 'preview-layer',
 		source: wmsSource,
 		visible: true
 	});
 	map.addLayer(wmsLayer);
 
 
-	for(var idx in jsonNumericFields){
+{% block map_heat_v23 %}	for(var idx in jsonNumericFields){
 
 		var field_name = jsonNumericFields[idx]["name"];
 		var field_name_trans = jsonNumericFields[idx]["title-"+language];
 		if(!field_name_trans){
 			field_name_trans = field_name;
 		}
-		$("#select-numeric-field").append('<option value="' + field_name + '">' + field_name_trans + '</option>');
+		$("#select-numeric-field").append('<option value="' + symbologyEscapeHtml(field_name) + '">' + symbologyEscapeHtml(field_name_trans) + '</option>');
 	}
 
-
+{% endblock %}
 	$("#save-legend").on('click', function(e){
 
 
 		const selected = document.querySelector('input[name="opcion"]:checked');
-
+{% block map_heat_v24 %}
 		
-
+{% endblock %}
 		const nombre = document.getElementById('style-name').value;
 		const titulo = document.getElementById('style-title').value;
 		const radius = document.getElementById('radius').value;
@@ -468,8 +477,8 @@ $(document).ready(function() {
 		}else{
 			colorsRes =GenerateColorRamp()
 		}
-
-		
+{% block map_heat_v25 %}
+{% endblock %}		
 		
 
 		const sld=`<?xml version="1.0" encoding="UTF-8"?>
@@ -538,12 +547,12 @@ xmlns:ogc="http://www.opengis.net/ogc" version="1.0.0">
         </UserStyle>
       </NamedLayer>
 </sld:StyledLayerDescriptor>`		
-	
+{% block map_heat_v26 %}	
 			save(layerId, sld);
 			
 
 		
-	});
+{% endblock %}	});
 	
 	$("#refresh-preview").on('click', function(e){
 		const selected = document.querySelector('input[name="opcion"]:checked');
@@ -563,10 +572,10 @@ xmlns:ogc="http://www.opengis.net/ogc" version="1.0.0">
 		}else{
 			colorsRes =GenerateColorRamp()
 		}
-
+{% block map_heat_v27 %}
 
 	
-		
+{% endblock %}		
 		
 
 		const sld=`<?xml version="1.0" encoding="UTF-8"?>
@@ -636,9 +645,9 @@ xmlns:ogc="http://www.opengis.net/ogc" version="1.0.0">
       </NamedLayer>
 </sld:StyledLayerDescriptor>`	
 updatePreview(layerId, sld, map);
-
+{% block map_heat_v28 %}
 		
-	});
+{% endblock %}	});
 	
 	$(window).on("beforeunload", function(){
 		$.ajax({
@@ -649,8 +658,8 @@ updatePreview(layerId, sld, map);
 				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			data: {
-				name: "{{style_name}}",
-				layer_id: "{{layer_id}}"
+{% block map_heat_v29 %}				name: "{{style_name}}",
+{% endblock %}				layer_id: "{{layer_id}}"
 			},
 			success: function(response){
 				
@@ -659,24 +668,24 @@ updatePreview(layerId, sld, map);
 		});
 	});
 	
-});
+{% block map_heat_v30 %}{% endblock %}});
 
-function save(layerId, sldg) {	
+{% block map_heat_v31 %}function save(layerId, sldg) {	
 	if (!beginStyleSave()) {
 		return;
 	}
-	var self = this;
-	var sld = sldg;
+{% endblock %}	var self = this;
+{% block map_heat_v32 %}{% endblock %}	var sld = sldg;
 	var isDefault = $('#style-is-default').is(":checked");
 	var styleName = $("#style-name").val();
 	var styleTitle = $("#style-title").val();
 
-	
-	$.ajax({
+{% block map_heat_v33 %}	
+{% endblock %}	$.ajax({
 		type: "POST",
 		async: false,
-		url: "/gvsigonline/symbology/map_heat_add/" + layerId + "/",
-		beforeSend:function(xhr){
+{% block map_heat_v34 %}		url: "/gvsigonline/symbology/map_heat_add/" + layerId + "/",
+{% endblock %}		beforeSend:function(xhr){
 			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 		},
 		data: {
@@ -687,12 +696,12 @@ function save(layerId, sldg) {
 			sld: sld
 		},
 		success: function(response){
-			finishStyleSaveAttempt(response);
-		},
-		error: function(){
+{% block map_heat_v35 %}			finishStyleSaveAttempt(response);
+{% endblock %}		},
+{% block map_heat_v36 %}		error: function(){
 			finishStyleSaveAttempt(null);
 		}
-	});
+{% endblock %}	});
 }
 
 function updatePreview(layerId, sldg, map) {
@@ -723,8 +732,8 @@ function updatePreview(layerId, sldg, map) {
 				reloadLayerPreview(map);
 				
 			} else {
-				console.error("Error in response:", response);
-				alert('Error');
+{% block map_heat_v37 %}				console.error("Error in response:", response);
+{% endblock %}				alert('Error');
 			}
 
 		},
@@ -789,8 +798,8 @@ function GenerateColorRamp() {
         $(".color-ramp-data").each(function() {
             var quantity = $(this).find(".percentaje-chooser").val()/ 100;
             var color = $(this).find(".color-chooser").val();
-            var alpha = $(this).find(".alpha-chooser").val();
-            
+{% block map_heat_v38 %}            var alpha = $(this).find(".alpha-chooser").val();
+{% endblock %}            
             rampColorArray.push({
                 'quantity': quantity,
                 'color': color,
@@ -826,5 +835,5 @@ function GenerateColorRamp() {
     }
 }
 
-</script>
+{% block map_heat_v39 %}{% endblock %}</script>
 {% endblock %}

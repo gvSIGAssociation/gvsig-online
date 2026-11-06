@@ -259,7 +259,7 @@ def copy(src, dest):
             shutil.copy(src, dest)
             set_default_permissions(dest)
         else:
-            print(('Directory not copied. Error: %s' % e))
+            LOG.warning('Directory not copied. Error: %s', e)
 
 
 def sortFontsArray(array):
@@ -307,7 +307,7 @@ def check_library_path(library):
         return library_path
      
     except OSError as e:
-        print(('Info: %s' % e))
+        LOG.info('Info: %s', e)
         return library_path
     
 def check_custom_legend_path():
@@ -492,7 +492,7 @@ def delete_external_graphic_img(library, file_name):
         return True
      
     except Exception as e:
-        print(('Error: %s' % e))
+        LOG.warning('Error: %s', e)
         return False
     
 def delete_library_dir(library):    
@@ -504,7 +504,7 @@ def delete_library_dir(library):
         return True
      
     except Exception as e:
-        print(('Error: %s' % e))
+        LOG.warning('Error: %s', e)
         return False
 
 def get_relative_url(url):
@@ -662,6 +662,15 @@ def get_feature_type(fields):
                 featureType = "PolygonSymbolizer"
                 
     return featureType
+
+
+def json_for_script(obj):
+    """
+    JSON para incrustar en un <script> de plantilla con |safe: escapa <, > y & como
+    \\u003c, \\u003e y \\u0026. Sigue siendo JSON/JS válido y el navegador obtiene las
+    mismas cadenas, pero un valor con "</script>" ya no puede cerrar el bloque.
+    """
+    return json.dumps(obj).replace('<', '\\u003c').replace('>', '\\u003e').replace('&', '\\u0026')
 
 def symbolizer_to_json(symbolizer):
     json_symbolizer = {}
@@ -937,7 +946,10 @@ def set_auth_settings(request, conf):
     if request.session.get('oidc_access_token'):
         conf['auth_token'] = 'Bearer ' + request.session.get('oidc_access_token')
     else:
-        conf['password'] =  request.session.get('password', '')
+        # La contraseña ya no se envía al navegador: si la sesión la tiene, la
+        # previsualización pide a GeoServer a través de symbology_geoserver_proxy,
+        # que usa las credenciales de la sesión en el servidor.
+        conf['gs_proxy'] = bool(request.session.get('password'))
 
 def get_preview_url(workspace, feature_type):
     preview_url = ''

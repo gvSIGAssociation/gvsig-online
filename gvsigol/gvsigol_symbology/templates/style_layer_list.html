@@ -35,7 +35,7 @@
 						<th>ID</th>
 					    <th>{% trans "Layer name" %}</th>
 					    <th>{% trans "Asigned to layer group" %}</th>
-					    <th>{% trans "Styles" %}</th>
+					    <th>{% trans "Styles" %} <i class="fa fa-info-circle gol-sym-help" title="{% trans "Actions are applied to the style selected in each row" %}" aria-hidden="true"></i></th>
 					    <th></th>
 					    <th></th>
 					    <th></th>
@@ -47,12 +47,12 @@
 							<tr>
 							    <td>{{ layerStyle.layer.id }}</td>
 								<td>{{ layerStyle.layer.title }}</td>
-								<td>{{ layerStyle.layer.layer_group.name }}</td>
+								<td class="gol-sym-muted">{{ layerStyle.layer.layer_group.name }}</td>
 								<td>
-									<select class="form-control" style="width: 100%;" id="select-{{ layerStyle.layer.id }}">
+									<select class="form-control gol-sym-style-select" id="select-{{ layerStyle.layer.id }}" aria-label="{% trans "Styles" %}">
 									{% for style in layerStyle.styles %}
 										{% if style.is_default %}
-										<option value="{{ style.id }}" selected>{{ style.name }}</option>
+										<option value="{{ style.id }}" selected>{{ style.name }} {% trans "(default)" %}</option>
 										{% else %}
 										<option value="{{ style.id }}">{{ style.name }}</option>
 										{% endif %}

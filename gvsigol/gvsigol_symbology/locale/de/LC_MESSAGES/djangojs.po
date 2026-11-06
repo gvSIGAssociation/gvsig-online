@@ -505,3 +505,408 @@ msgstr "Sie müssen zuerst ein Feld auswählen"
 #: gvsigol_symbology/templates/unique_values_update.html
 msgid "Drag to reorder"
 msgstr "Zum Neuordnen ziehen"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "The web viewer (SPA) does not hide overlapping labels, so these options only affect WMS maps (GeoServer)."
+msgstr "Der Web-Viewer (SPA) blendet überlappende Beschriftungen nicht aus, daher wirken diese Optionen nur auf WMS-Karten (GeoServer)."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "WMS maps only"
+msgstr "Nur WMS-Karten"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "The label text is defined in the Content tab."
+msgstr "Der Beschriftungstext wird im Reiter Inhalt festgelegt."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Advanced label options"
+msgstr "Erweiterte Beschriftungsoptionen"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Compose the text, format numbers and dates, choose the position, a background and the priority."
+msgstr "Text zusammensetzen, Zahlen und Datumsangaben formatieren, Position, Hintergrund und Priorität wählen."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Classic label"
+msgstr "Klassische Beschriftung"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "This label keeps its current look. Advanced options let you compose the text, format numbers and dates, choose the position, add a background and set priorities."
+msgstr "Diese Beschriftung behält ihr aktuelles Aussehen. Mit den erweiterten Optionen können Sie den Text zusammensetzen, Zahlen und Datumsangaben formatieren, die Position wählen, einen Hintergrund hinzufügen und Prioritäten festlegen."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Back to classic label"
+msgstr "Zurück zur klassischen Beschriftung"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Use advanced options"
+msgstr "Erweiterte Optionen verwenden"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Content"
+msgstr "Inhalt"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Placement"
+msgstr "Platzierung"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Background"
+msgstr "Hintergrund"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Preview"
+msgstr "Vorschau"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Label text"
+msgstr "Beschriftungstext"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Combine fields and fixed text. Numbers and dates can be formatted."
+msgstr "Felder und festen Text kombinieren. Zahlen und Datumsangaben können formatiert werden."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Field"
+msgstr "Feld"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Text"
+msgstr "Text"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Capitalization"
+msgstr "Groß-/Kleinschreibung"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "As in the data"
+msgstr "Wie in den Daten"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "UPPERCASE"
+msgstr "GROSSBUCHSTABEN"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "lowercase"
+msgstr "kleinbuchstaben"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Letter spacing"
+msgstr "Zeichenabstand"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Wrap text at"
+msgstr "Zeilenumbruch bei"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Wrap: maximum line width before breaking the text into several lines (0 = never)."
+msgstr "Umbruch: maximale Zeilenbreite, bevor der Text auf mehrere Zeilen verteilt wird (0 = nie)."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "No format"
+msgstr "Ohne Format"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Number"
+msgstr "Zahl"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Date"
+msgstr "Datum"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Format"
+msgstr "Format"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Decimals"
+msgstr "Dezimalstellen"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Thousands separator"
+msgstr "Tausendertrennzeichen"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Language"
+msgstr "Sprache"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Date format"
+msgstr "Datumsformat"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "e.g. \" - \" or \" inhab.\""
+msgstr "z. B. \" - \" oder \" Einw.\""
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Move up"
+msgstr "Nach oben"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Move down"
+msgstr "Nach unten"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Remove"
+msgstr "Entfernen"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Position relative to the point"
+msgstr "Position relativ zum Punkt"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Horizontal offset"
+msgstr "Horizontaler Versatz"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Vertical offset"
+msgstr "Vertikaler Versatz"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Positive offsets move the label right and up."
+msgstr "Positive Werte verschieben die Beschriftung nach rechts und oben."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Labels on lines"
+msgstr "Beschriftung von Linien"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Follow the line (curved text)"
+msgstr "Der Linie folgen (gebogener Text)"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Maximum bend angle"
+msgstr "Maximaler Biegewinkel"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Repeat every"
+msgstr "Wiederholen alle"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Distance to the line"
+msgstr "Abstand zur Linie"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Repeat: 0 = one label per line. Distance: positive values place the label above the line."
+msgstr "Wiederholen: 0 = eine Beschriftung pro Linie. Abstand: positive Werte setzen die Beschriftung über die Linie."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Labels on polygons"
+msgstr "Beschriftung von Polygonen"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Position"
+msgstr "Position"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Always inside the polygon"
+msgstr "Immer innerhalb des Polygons"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Centroid (as classic labels)"
+msgstr "Schwerpunkt (wie klassische Beschriftungen)"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Rotation"
+msgstr "Drehung"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Angle"
+msgstr "Winkel"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Angle from a field"
+msgstr "Winkel aus einem Feld"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "— None —"
+msgstr "— Keines —"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Degrees, clockwise. If a field is chosen, its value is used instead of the fixed angle."
+msgstr "Grad im Uhrzeigersinn. Wird ein Feld gewählt, wird dessen Wert statt des festen Winkels verwendet."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Overlapping labels"
+msgstr "Überlappende Beschriftungen"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Draw even if it overlaps other labels"
+msgstr "Auch zeichnen, wenn sie andere Beschriftungen überlappt"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Minimum space around"
+msgstr "Mindestabstand ringsum"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Priority field"
+msgstr "Prioritätsfeld"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "When labels collide, those with a higher value in the priority field are drawn first."
+msgstr "Bei Kollisionen werden Beschriftungen mit einem höheren Wert im Prioritätsfeld zuerst gezeichnet."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Top left"
+msgstr "Oben links"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Top"
+msgstr "Oben"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Top right"
+msgstr "Oben rechts"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Left"
+msgstr "Links"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Center"
+msgstr "Mitte"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Right"
+msgstr "Rechts"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Bottom left"
+msgstr "Unten links"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Bottom"
+msgstr "Unten"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Bottom right"
+msgstr "Unten rechts"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Draw a box behind the label"
+msgstr "Kasten hinter der Beschriftung zeichnen"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Fill color"
+msgstr "Füllfarbe"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Fill opacity"
+msgstr "Deckkraft der Füllung"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Border color"
+msgstr "Randfarbe"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Border width"
+msgstr "Randbreite"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Inner margin"
+msgstr "Innenabstand"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "The advanced options of this label will be discarded and it will be drawn as a classic label. Continue?"
+msgstr "Die erweiterten Optionen dieser Beschriftung werden verworfen und sie wird als klassische Beschriftung gezeichnet. Fortfahren?"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Label"
+msgstr "Beschriftung"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "With a background, WMS maps (GeoServer) only split the text into several lines when the label is centered without rotation or placed to the right of the point; otherwise it is drawn on a single line."
+msgstr "Mit Hintergrund teilen WMS-Karten (GeoServer) den Text nur dann auf mehrere Zeilen auf, wenn die Beschriftung zentriert und nicht gedreht ist oder rechts vom Punkt steht; andernfalls wird sie einzeilig gezeichnet."
+
+#: static/js/lib/symbology/SymbologyForms.js
+msgctxt "symbology"
+msgid "This name is not valid."
+msgstr "Dieser Name ist ungültig."
+
+#: static/js/lib/symbology/SymbologyForms.js
+msgctxt "symbology"
+msgid "Use"
+msgstr "Verwenden:"
+
+#: static/js/lib/symbology/SymbologyForms.js
+msgctxt "symbology"
+msgid "Valid name"
+msgstr "Gültiger Name"

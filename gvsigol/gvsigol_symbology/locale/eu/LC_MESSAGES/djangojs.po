@@ -510,3 +510,408 @@ msgstr "Lehenik eremu bat hautatu behar duzu"
 #: gvsigol_symbology/templates/unique_values_update.html
 msgid "Drag to reorder"
 msgstr "Arrastatu berrantolatzeko"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "The web viewer (SPA) does not hide overlapping labels, so these options only affect WMS maps (GeoServer)."
+msgstr "Web bisoreak (SPA) ez ditu gainjarritako etiketak ezkutatzen; beraz, aukera hauek WMS mapetan (GeoServer) bakarrik eragiten dute."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "WMS maps only"
+msgstr "WMS mapak soilik"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "The label text is defined in the Content tab."
+msgstr "Etiketaren testua Edukia fitxan definitzen da."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Advanced label options"
+msgstr "Etiketaren aukera aurreratuak"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Compose the text, format numbers and dates, choose the position, a background and the priority."
+msgstr "Osatu testua, eman formatua zenbakiei eta datei, aukeratu kokapena, atzealdea eta lehentasuna."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Classic label"
+msgstr "Etiketa klasikoa"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "This label keeps its current look. Advanced options let you compose the text, format numbers and dates, choose the position, add a background and set priorities."
+msgstr "Etiketa honek bere egungo itxura mantentzen du. Aukera aurreratuekin testua osatu, zenbakiei eta datei formatua eman, kokapena aukeratu, atzealdea gehitu eta lehentasunak ezar daitezke."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Back to classic label"
+msgstr "Itzuli etiketa klasikora"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Use advanced options"
+msgstr "Erabili aukera aurreratuak"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Content"
+msgstr "Edukia"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Placement"
+msgstr "Kokapena"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Background"
+msgstr "Atzealdea"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Preview"
+msgstr "Aurrebista"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Label text"
+msgstr "Etiketaren testua"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Combine fields and fixed text. Numbers and dates can be formatted."
+msgstr "Konbinatu eremuak eta testu finkoa. Zenbakiei eta datei formatua eman dakieke."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Field"
+msgstr "Eremua"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Text"
+msgstr "Testua"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Capitalization"
+msgstr "Maiuskulak eta minuskulak"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "As in the data"
+msgstr "Datuetan bezala"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "UPPERCASE"
+msgstr "MAIUSKULAK"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "lowercase"
+msgstr "minuskulak"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Letter spacing"
+msgstr "Hizkien arteko tartea"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Wrap text at"
+msgstr "Zatitu testua hemen"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Wrap: maximum line width before breaking the text into several lines (0 = never)."
+msgstr "Zatitu: lerroaren gehieneko zabalera testua hainbat lerrotan banatu aurretik (0 = inoiz ez)."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "No format"
+msgstr "Formaturik gabe"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Number"
+msgstr "Zenbakia"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Date"
+msgstr "Data"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Format"
+msgstr "Formatua"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Decimals"
+msgstr "Hamartarrak"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Thousands separator"
+msgstr "Milakoen bereizlea"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Language"
+msgstr "Hizkuntza"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Date format"
+msgstr "Data formatua"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "e.g. \" - \" or \" inhab.\""
+msgstr "adib. \" - \" edo \" biz.\""
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Move up"
+msgstr "Igo"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Move down"
+msgstr "Jaitsi"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Remove"
+msgstr "Kendu"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Position relative to the point"
+msgstr "Kokapena puntuarekiko"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Horizontal offset"
+msgstr "Desplazamendu horizontala"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Vertical offset"
+msgstr "Desplazamendu bertikala"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Positive offsets move the label right and up."
+msgstr "Desplazamendu positiboek etiketa eskuinera eta gora mugitzen dute."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Labels on lines"
+msgstr "Etiketak lerroetan"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Follow the line (curved text)"
+msgstr "Jarraitu lerroari (testu kurbatua)"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Maximum bend angle"
+msgstr "Kurbadura-angelu maximoa"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Repeat every"
+msgstr "Errepikatu"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Distance to the line"
+msgstr "Lerrorako distantzia"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Repeat: 0 = one label per line. Distance: positive values place the label above the line."
+msgstr "Errepikatu: 0 = etiketa bat lerro bakoitzeko. Distantzia: balio positiboek etiketa lerroaren gainean jartzen dute."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Labels on polygons"
+msgstr "Etiketak poligonoetan"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Position"
+msgstr "Kokapena"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Always inside the polygon"
+msgstr "Beti poligonoaren barruan"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Centroid (as classic labels)"
+msgstr "Zentroidea (etiketa klasikoetan bezala)"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Rotation"
+msgstr "Biraketa"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Angle"
+msgstr "Angelua"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Angle from a field"
+msgstr "Angelua eremu batetik"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "— None —"
+msgstr "— Bat ere ez —"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Degrees, clockwise. If a field is chosen, its value is used instead of the fixed angle."
+msgstr "Graduak, erlojuaren orratzen noranzkoan. Eremu bat aukeratzen bada, haren balioa erabiltzen da angelu finkoaren ordez."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Overlapping labels"
+msgstr "Gainjarritako etiketak"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Draw even if it overlaps other labels"
+msgstr "Marraztu beste etiketa batzuekin gainjarri arren"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Minimum space around"
+msgstr "Inguruko gutxieneko tartea"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Priority field"
+msgstr "Lehentasun-eremua"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "When labels collide, those with a higher value in the priority field are drawn first."
+msgstr "Etiketak talka egiten dutenean, lehentasun-eremuan balio handiena dutenak marrazten dira lehenik."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Top left"
+msgstr "Goian ezkerrean"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Top"
+msgstr "Goian"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Top right"
+msgstr "Goian eskuinean"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Left"
+msgstr "Ezkerrean"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Center"
+msgstr "Erdian"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Right"
+msgstr "Eskuinean"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Bottom left"
+msgstr "Behean ezkerrean"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Bottom"
+msgstr "Behean"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Bottom right"
+msgstr "Behean eskuinean"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Draw a box behind the label"
+msgstr "Marraztu koadro bat etiketaren atzean"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Fill color"
+msgstr "Betegarriaren kolorea"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Fill opacity"
+msgstr "Betegarriaren opakutasuna"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Border color"
+msgstr "Ertzaren kolorea"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Border width"
+msgstr "Ertzaren lodiera"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Inner margin"
+msgstr "Barne-marjina"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "The advanced options of this label will be discarded and it will be drawn as a classic label. Continue?"
+msgstr "Etiketa honen aukera aurreratuak baztertu egingo dira eta etiketa klasiko gisa marraztuko da. Jarraitu nahi duzu?"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Label"
+msgstr "Etiketa"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "With a background, WMS maps (GeoServer) only split the text into several lines when the label is centered without rotation or placed to the right of the point; otherwise it is drawn on a single line."
+msgstr "Atzealdearekin, WMS mapek (GeoServer) testua hainbat lerrotan zatitzen dute soilik etiketa erdiratuta eta biratu gabe badago edo puntuaren eskuinean badago; bestela, lerro bakarrean marrazten da."
+
+#: static/js/lib/symbology/SymbologyForms.js
+msgctxt "symbology"
+msgid "This name is not valid."
+msgstr "Izen hau ez da baliozkoa."
+
+#: static/js/lib/symbology/SymbologyForms.js
+msgctxt "symbology"
+msgid "Use"
+msgstr "Erabili"
+
+#: static/js/lib/symbology/SymbologyForms.js
+msgctxt "symbology"
+msgid "Valid name"
+msgstr "Izen baliozkoa"

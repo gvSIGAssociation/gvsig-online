@@ -1173,3 +1173,481 @@ msgstr "Sartu atributuaren balioa"
 #: gvsigol_symbology/templates/unique_values_update.html
 msgid "Add"
 msgstr "Gehitu"
+
+#: gvsigol_symbology/templates/style_layer_list.html
+msgid "(default)"
+msgstr "(lehenetsia)"
+
+#: gvsigol_symbology/templates/style_layer_list.html
+msgid "Actions are applied to the style selected in each row"
+msgstr "Ekintzak errenkada bakoitzean hautatutako estiloari aplikatzen zaizkio"
+
+#: gvsigol_symbology/templates/select_legend_type.html
+msgid "Back to styles list"
+msgstr "Itzuli estiloen zerrendara"
+
+#: gvsigol_symbology/templates/select_legend_type.html
+msgid "Choose the type of legend to create"
+msgstr "Hautatu sortu nahi duzun legenda mota"
+
+#: gvsigol_symbology/templates/unique_values_add.html
+msgid "Style properties"
+msgstr "Estiloaren propietateak"
+
+#: gvsigol_symbology/templates/unique_values_add.html
+msgid "Map preview"
+msgstr "Mapako aurrebista"
+
+#: gvsigol_symbology/templates/unique_values_add.html
+msgid "Rules"
+msgstr "Arauak"
+
+#: gvsigol_symbology/templates/unique_symbol_add.html
+msgid "Symbol"
+msgstr "Ikurra"
+
+#: gvsigol_symbology/templates/custom_add.html
+msgid "Style definition (SLD)"
+msgstr "Estiloaren definizioa (SLD)"
+
+#: gvsigol_symbology/templates/map_heat_add.html
+msgid "Heatmap settings"
+msgstr "Bero-maparen ezarpenak"
+
+#: gvsigol_symbology/templates/unique_values_add.html
+msgid "Edit rule"
+msgstr "Editatu araua"
+
+#: gvsigol_symbology/templates/expressions_add.html
+msgid "Edit filter"
+msgstr "Editatu iragazkia"
+
+#: gvsigol_symbology/templates/library_add.html
+msgid "Back to list"
+msgstr "Itzuli zerrendara"
+
+#: gvsigol_symbology/templates/color_ramp_folder_add.html
+msgid "Back to library"
+msgstr "Itzuli liburutegira"
+
+#: gvsigol_symbology/templates/library_add.html
+msgid "Use only lowercase letters, numbers and underscores"
+msgstr "Erabili letra xeheak, zenbakiak eta azpimarrak soilik"
+
+#: gvsigol_symbology/templates/library_import.html
+msgid "Accepted format: %(ext)s"
+msgstr "Onartutako formatua: %(ext)s"
+
+#: gvsigol_symbology/templates/color_ramp_folder_update.html
+msgid "Update ramp category"
+msgstr "Eguneratu arrapa-kategoria"
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "Back to category"
+msgstr "Itzuli kategoriara"
+
+#: gvsigol_symbology/templates/symbol_add.html
+msgid "Library symbol"
+msgstr "Liburutegiko ikurra"
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "Color ramp"
+msgstr "Kolore-arrapa"
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "Ramp preview"
+msgstr "Arraparen aurrebista"
+
+#: gvsigol_symbology/templates/color_ramp_update.html
+msgid "Update color ramp"
+msgstr "Eguneratu kolore-arrapa"
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "Ramp name"
+msgstr "Arraparen izena"
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "How steps work"
+msgstr "Nola funtzionatzen duten urratsek"
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "Percentage"
+msgstr "Ehunekoa"
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "Color"
+msgstr "Kolorea"
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "Transparency"
+msgstr "Gardentasuna"
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "position of the color along the ramp (0 = start, 100 = end)."
+msgstr "koloreak arrapan duen posizioa (0 = hasiera, 100 = amaiera)."
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "color the ramp takes at that position; between steps it is interpolated."
+msgstr "arrapak posizio horretan duen kolorea; urratsen artean interpolatu egiten da."
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "from 0 (transparent) to 1 (opaque)."
+msgstr "0tik (gardena) 1era (opakua)."
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "Drag the handle of a row to reorder the steps. At least two steps are required."
+msgstr "Arrastatu errenkada baten heldulekua urratsak berrantolatzeko. Gutxienez bi urrats behar dira."
+
+#: gvsigol_symbology/templates/library_update.html
+msgid "This library has no symbols yet"
+msgstr "Liburutegi honek ez du ikurrik oraindik"
+
+#: gvsigol_symbology/templates/library_update.html
+msgid "Use the buttons above to add the first point, line, polygon or external graphic."
+msgstr "Erabili goiko botoiak lehen puntua, lerroa, poligonoa edo kanpoko grafikoa gehitzeko."
+
+#: gvsigol_symbology/templates/library_update.html
+msgctxt "symbology"
+msgid "Point"
+msgstr "Puntua"
+
+#: gvsigol_symbology/templates/library_update.html
+msgctxt "symbology"
+msgid "Line"
+msgstr "Lerroa"
+
+#: gvsigol_symbology/templates/library_update.html
+msgctxt "symbology"
+msgid "Polygon"
+msgstr "Poligonoa"
+
+#: gvsigol_symbology/templates/library_update.html
+msgctxt "symbology"
+msgid "External graphic"
+msgstr "Kanpoko grafikoa"
+
+#: gvsigol_symbology/templates/unique_values_add.html
+msgid "There are no rules yet. Use the toolbar above to create them."
+msgstr "Oraindik ez dago araurik. Erabili goiko tresna-barra horiek sortzeko."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "(optional)"
+msgstr "(aukerakoa)"
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "A new library is created; existing libraries are not modified."
+msgstr "Liburutegi berri bat sortzen da; lehendik daudenak ez dira aldatzen."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "About the file"
+msgstr "Fitxategiari buruz"
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Add color ramp library"
+msgstr "Gehitu arrapala-liburutegia"
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Add color ramps and use them in your legends."
+msgstr "Gehitu kolore-arrapalak eta erabili zure legendetan."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Add color ramps to it."
+msgstr "Gehitu kolore-arrapalak."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Add point, line and polygon symbols to it."
+msgstr "Gehitu puntu, lerro eta poligono ikurrak."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Breadcrumb"
+msgstr "Nabigazio-bidea"
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Categories organize the color ramps of a library."
+msgstr "Kategoriek liburutegi bateko kolore-arrapalak antolatzen dituzte."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Category details"
+msgstr "Kategoriaren datuak"
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Create a color ramp library from a file exported from gvSIG Online."
+msgstr "Sortu arrapala-liburutegi bat gvSIG Online-tik esportatutako fitxategi batetik."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Create a layer style from an SLD file."
+msgstr "Sortu geruza-estilo bat SLD fitxategi batetik."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Create a symbol library from a file exported from gvSIG Online."
+msgstr "Sortu ikur-liburutegi bat gvSIG Online-tik esportatutako fitxategi batetik."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Create categories to organize the ramps."
+msgstr "Sortu kategoriak arrapalak antolatzeko."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Edit the description and manage the categories of color ramps."
+msgstr "Editatu deskribapena eta kudeatu kolore-arrapalen kategoriak."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Edit the description and manage the color ramps of this category."
+msgstr "Editatu deskribapena eta kudeatu kategoria honetako kolore-arrapalak."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Group color ramps by category to use them in your legends."
+msgstr "Taldekatu kolore-arrapalak kategoriaka zure legendetan erabiltzeko."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Group reusable symbols to use them in any layer style."
+msgstr "Taldekatu ikur berrerabilgarriak edozein geruza-estilotan erabiltzeko."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Import color ramp library"
+msgstr "Inportatu arrapala-liburutegia"
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Labels exported from gvSIG Online keep their advanced options."
+msgstr "gvSIG Online-tik esportatutako etiketek beren aukera aurreratuak gordetzen dituzte."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Large files may take a while to import."
+msgstr "Fitxategi handiek denbora pixka bat behar dezakete inportatzeko."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Library details"
+msgstr "Liburutegiaren datuak"
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Next steps"
+msgstr "Hurrengo urratsak"
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Or import a library from a .zip file"
+msgstr "Edo inportatu liburutegi bat .zip fitxategi batetik"
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Rules, filters, scales and symbols are imported."
+msgstr "Arauak, iragazkiak, eskalak eta ikurrak inportatzen dira."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "SLD 1.0 files are supported."
+msgstr "SLD 1.0 fitxategiak onartzen dira."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Save the category."
+msgstr "Gorde kategoria."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Save the library."
+msgstr "Gorde liburutegia."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Style details"
+msgstr "Estiloaren datuak"
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "The name is assigned automatically from the layer."
+msgstr "Izena automatikoki esleitzen da geruzatik abiatuta."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Use the .zip file obtained when exporting a color ramp library."
+msgstr "Erabili arrapala-liburutegi bat esportatzean lortutako .zip fitxategia."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Use the .zip file obtained when exporting a symbol library."
+msgstr "Erabili ikur-liburutegi bat esportatzean lortutako .zip fitxategia."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Use them when you create interval legends."
+msgstr "Erabili tarteka egindako legendak sortzean."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Use them when you edit the style of a layer."
+msgstr "Erabili geruza baten estiloa editatzean."
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "Add symbol"
+msgstr "Gehitu ikurra"
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "All"
+msgstr "Guztiak"
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "Filter by type"
+msgstr "Iragazi motaren arabera"
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "No description"
+msgstr "Deskribapenik gabe"
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "No symbols match the filter."
+msgstr "Ez dago iragazkiarekin bat datorren ikurrik."
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "Search symbols"
+msgstr "Bilatu ikurrak"
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "Symbols by type"
+msgstr "Ikurrak motaren arabera"
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "This category has no color ramps yet."
+msgstr "Kategoria honek ez du oraindik kolore-arrapalarik."
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "Use «Add symbol» to add the first point, line, polygon or external graphic."
+msgstr "Erabili «Gehitu ikurra» lehen puntua, lerroa, poligonoa edo kanpoko grafikoa gehitzeko."
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "Edit description"
+msgstr "Editatu deskribapena"
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "All the features of the layer are drawn with the same symbol. It is the simplest option, ideal for showing where things are without distinguishing categories."
+msgstr "Geruzako elementu guztiak ikur berarekin marrazten dira. Aukerarik errazena da, gauzak non dauden erakusteko aproposa, kategoriak bereizi gabe."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Assigns a different symbol to each distinct value of a field. Use it when the data are classified in categories or types."
+msgstr "Ikur desberdin bat esleitzen dio eremu bateko balio bakoitzari. Erabili datuak kategoria edo motatan sailkatuta daudenean."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Assigns colors to the values of the raster, either by exact value or as a continuous ramp between values."
+msgstr "Rasterreko balioei koloreak esleitzen dizkie, balio zehatzaren arabera edo balioen arteko arrapala jarraitu gisa."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Each rule has its own filter combining fields and conditions (AND / OR), its own symbol and its own scales. It is the most flexible option."
+msgstr "Arau bakoitzak bere iragazkia du, eremuak eta baldintzak konbinatzen dituena (ETA / EDO), bere ikurra eta bere eskalak. Aukerarik malguena da."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Elevation models, land cover classes."
+msgstr "Altuera-ereduak, lurzoru-estalduraren klaseak."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Example"
+msgstr "Adibidea"
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Groups nearby points into a single symbol that shows how many there are, and separates them as you zoom in. Avoids overloaded maps."
+msgstr "Hurbileko puntuak ikur bakar batean taldekatzen ditu, zenbat dauden adierazten duena, eta hurbiltzean bereizten ditu. Mapa gainkargatuak saihesten ditu."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Groups the values of a numeric field into ranges and gives each range a symbol, with a color ramp if you wish. Suitable for quantities that vary continuously."
+msgstr "Eremu numeriko baten balioak tartetan taldekatzen ditu eta tarte bakoitzari ikur bat ematen dio, nahi izanez gero kolore-arrapala batekin. Modu jarraituan aldatzen diren kantitateetarako egokia."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Incidents, accidents, sightings."
+msgstr "Gorabeherak, istripuak, behaketak."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Land use, road type, protection category."
+msgstr "Lurzoruaren erabilera, bide mota, babes-kategoria."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Municipal boundaries, a road network, protected areas."
+msgstr "Udal-mugak, errepide-sare bat, eremu babestuak."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Population, density, area, income."
+msgstr "Biztanleria, dentsitatea, azalera, errenta."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Shows the density of the features as a continuous color surface instead of individual symbols. You choose the radius and, optionally, a field to weight each feature."
+msgstr "Elementuen dentsitatea kolore-gainazal jarraitu gisa erakusten du, banakako ikurren ordez. Erradioa aukeratzen duzu eta, nahi izanez gero, elementu bakoitza haztatzeko eremu bat."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Styles prepared in QGIS or GeoServer."
+msgstr "QGISen edo GeoServerren prestatutako estiloak."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Thousands of points of interest in a city."
+msgstr "Hiri bateko milaka interesgune."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Write or paste the SLD of the style directly in an editor. For advanced users who need options that the other legends do not offer."
+msgstr "Idatzi edo itsatsi estiloaren SLDa zuzenean editore batean. Beste legendek eskaintzen ez dituzten aukerak behar dituzten erabiltzaile aurreratuentzat."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "«type = school AND students > 500»."
+msgstr "«mota = ikastetxea ETA ikasleak > 500»."
+
+#: templates/external_graphic_add.html
+msgctxt "symbology"
+msgid "PNG or SVG. SVG symbols are scaled without losing quality; scripts and external references are removed when saving."
+msgstr "PNG edo SVG. SVG ikurrak kalitaterik galdu gabe eskalatzen dira; gordetzean scriptak eta kanpoko erreferentziak kentzen dira."
+
+#: external_graphics.py
+msgid "The SVG file is too large (maximum 1 MB)."
+msgstr "SVG fitxategia handiegia da (gehienez 1 MB)."
+
+#: external_graphics.py
+msgid "The SVG file is not valid."
+msgstr "SVG fitxategia ez da baliozkoa."
+
+#: external_graphics.py
+msgid "The SVG file must define its size (width and height, or a viewBox)."
+msgstr "SVG fitxategiak bere tamaina adierazi behar du (width eta height, edo viewBox bat)."

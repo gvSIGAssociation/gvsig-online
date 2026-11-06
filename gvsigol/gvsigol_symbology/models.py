@@ -147,6 +147,9 @@ class TextSymbolizer(Symbolizer):
     halo_fill_opacity = models.FloatField(default=1.0)
     anchor_point_x = models.FloatField(default=0.5)
     anchor_point_y = models.FloatField(default=-1.5)
+    # Opciones avanzadas de etiquetado (JSON en texto, compatible con Django 2; ver label_options.py).
+    # NULL = etiqueta "antigua": se genera exactamente como siempre.
+    options = models.TextField(null=True, blank=True)
 
 class ColorMap(models.Model):
     type = models.CharField(max_length=100)

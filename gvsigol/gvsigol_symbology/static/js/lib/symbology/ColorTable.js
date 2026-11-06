@@ -274,12 +274,15 @@ ColorTable.prototype.update = function(layerId, styleId) {
 					if (response.success) {
 						location.href = "/gvsigonline/symbology/style_layer_list/";
 					} else {
-						alert('Error');
+						alertStyleError(response);
 						$("body").overlayout();
 					}
 					
 				},
-			    error: function(){}
+			    error: function(){
+			    	alertStyleError(null);
+			    	$("body").overlayout();
+			    }
 			});
 			
 		} else {
@@ -308,12 +311,15 @@ ColorTable.prototype.update = function(layerId, styleId) {
 				if (response.success) {
 					location.href = "/gvsigonline/symbology/style_layer_list/";
 				} else {
-					alert('Error');
+					alertStyleError(response);
 					$("body").overlayout();
 				}
 				
 			},
-		    error: function(){}
+		    error: function(){
+		    	alertStyleError(null);
+		    	$("body").overlayout();
+		    }
 		});
 	}
 };

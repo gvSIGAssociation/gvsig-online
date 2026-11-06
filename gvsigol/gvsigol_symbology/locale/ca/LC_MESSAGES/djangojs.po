@@ -530,3 +530,408 @@ msgstr "Heu de seleccionar primer un camp"
 #: gvsigol_symbology/templates/unique_values_update.html
 msgid "Drag to reorder"
 msgstr "Arrossega per reordenar"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "The web viewer (SPA) does not hide overlapping labels, so these options only affect WMS maps (GeoServer)."
+msgstr "El visor web (SPA) no amaga les etiquetes que se superposen, així que aquestes opcions només afecten els mapes WMS (GeoServer)."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "WMS maps only"
+msgstr "Només mapes WMS"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "The label text is defined in the Content tab."
+msgstr "El text de l'etiqueta es defineix a la pestanya Contingut."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Advanced label options"
+msgstr "Opcions avançades d'etiqueta"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Compose the text, format numbers and dates, choose the position, a background and the priority."
+msgstr "Compon el text, dona format a nombres i dates, tria la posició, un fons i la prioritat."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Classic label"
+msgstr "Etiqueta clàssica"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "This label keeps its current look. Advanced options let you compose the text, format numbers and dates, choose the position, add a background and set priorities."
+msgstr "Aquesta etiqueta manté el seu aspecte actual. Les opcions avançades permeten compondre el text, donar format a nombres i dates, triar la posició, afegir un fons i fixar prioritats."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Back to classic label"
+msgstr "Tornar a etiqueta clàssica"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Use advanced options"
+msgstr "Utilitza opcions avançades"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Content"
+msgstr "Contingut"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Placement"
+msgstr "Col·locació"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Background"
+msgstr "Fons"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Preview"
+msgstr "Previsualització"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Label text"
+msgstr "Text de l'etiqueta"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Combine fields and fixed text. Numbers and dates can be formatted."
+msgstr "Combina camps i text fix. Els nombres i les dates es poden formatar."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Field"
+msgstr "Camp"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Text"
+msgstr "Text"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Capitalization"
+msgstr "Majúscules i minúscules"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "As in the data"
+msgstr "Com a les dades"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "UPPERCASE"
+msgstr "MAJÚSCULES"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "lowercase"
+msgstr "minúscules"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Letter spacing"
+msgstr "Espaiat entre lletres"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Wrap text at"
+msgstr "Partir el text a"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Wrap: maximum line width before breaking the text into several lines (0 = never)."
+msgstr "Partir: amplada màxima de línia abans de dividir el text en diverses línies (0 = mai)."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "No format"
+msgstr "Sense format"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Number"
+msgstr "Nombre"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Date"
+msgstr "Data"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Format"
+msgstr "Format"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Decimals"
+msgstr "Decimals"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Thousands separator"
+msgstr "Separador de milers"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Language"
+msgstr "Idioma"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Date format"
+msgstr "Format de data"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "e.g. \" - \" or \" inhab.\""
+msgstr "p. ex. \" - \" o \" hab.\""
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Move up"
+msgstr "Puja"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Move down"
+msgstr "Baixa"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Remove"
+msgstr "Treu"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Position relative to the point"
+msgstr "Posició respecte al punt"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Horizontal offset"
+msgstr "Desplaçament horitzontal"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Vertical offset"
+msgstr "Desplaçament vertical"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Positive offsets move the label right and up."
+msgstr "Els desplaçaments positius mouen l'etiqueta a la dreta i cap amunt."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Labels on lines"
+msgstr "Etiquetes en línies"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Follow the line (curved text)"
+msgstr "Seguir la línia (text corbat)"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Maximum bend angle"
+msgstr "Angle màxim de curvatura"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Repeat every"
+msgstr "Repetir cada"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Distance to the line"
+msgstr "Distància a la línia"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Repeat: 0 = one label per line. Distance: positive values place the label above the line."
+msgstr "Repetir: 0 = una etiqueta per línia. Distància: els valors positius col·loquen l'etiqueta per damunt de la línia."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Labels on polygons"
+msgstr "Etiquetes en polígons"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Position"
+msgstr "Posició"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Always inside the polygon"
+msgstr "Sempre dins del polígon"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Centroid (as classic labels)"
+msgstr "Centroide (com les etiquetes clàssiques)"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Rotation"
+msgstr "Rotació"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Angle"
+msgstr "Angle"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Angle from a field"
+msgstr "Angle des d'un camp"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "— None —"
+msgstr "— Cap —"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Degrees, clockwise. If a field is chosen, its value is used instead of the fixed angle."
+msgstr "Graus, en el sentit de les agulles del rellotge. Si es tria un camp, s'utilitza el seu valor en lloc de l'angle fix."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Overlapping labels"
+msgstr "Etiquetes superposades"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Draw even if it overlaps other labels"
+msgstr "Dibuixar encara que se superpose amb altres etiquetes"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Minimum space around"
+msgstr "Espai mínim al voltant"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Priority field"
+msgstr "Camp de prioritat"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "When labels collide, those with a higher value in the priority field are drawn first."
+msgstr "Quan les etiquetes xoquen, es dibuixen primer les que tenen un valor més gran al camp de prioritat."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Top left"
+msgstr "Dalt a l'esquerra"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Top"
+msgstr "Dalt"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Top right"
+msgstr "Dalt a la dreta"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Left"
+msgstr "Esquerra"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Center"
+msgstr "Centre"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Right"
+msgstr "Dreta"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Bottom left"
+msgstr "Baix a l'esquerra"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Bottom"
+msgstr "Baix"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Bottom right"
+msgstr "Baix a la dreta"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Draw a box behind the label"
+msgstr "Dibuixar un requadre darrere de l'etiqueta"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Fill color"
+msgstr "Color d'emplenament"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Fill opacity"
+msgstr "Opacitat de l'emplenament"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Border color"
+msgstr "Color de la vora"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Border width"
+msgstr "Gruix de la vora"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Inner margin"
+msgstr "Marge interior"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "The advanced options of this label will be discarded and it will be drawn as a classic label. Continue?"
+msgstr "Es descartaran les opcions avançades d'aquesta etiqueta i es dibuixarà com una etiqueta clàssica. Voleu continuar?"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Label"
+msgstr "Etiqueta"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "With a background, WMS maps (GeoServer) only split the text into several lines when the label is centered without rotation or placed to the right of the point; otherwise it is drawn on a single line."
+msgstr "Amb fons, els mapes WMS (GeoServer) només parteixen el text en diverses línies si l'etiqueta està centrada i sense rotació o a la dreta del punt; si no, es dibuixa en una sola línia."
+
+#: static/js/lib/symbology/SymbologyForms.js
+msgctxt "symbology"
+msgid "This name is not valid."
+msgstr "Aquest nom no és vàlid."
+
+#: static/js/lib/symbology/SymbologyForms.js
+msgctxt "symbology"
+msgid "Use"
+msgstr "Utilitza"
+
+#: static/js/lib/symbology/SymbologyForms.js
+msgctxt "symbology"
+msgid "Valid name"
+msgstr "Nom vàlid"

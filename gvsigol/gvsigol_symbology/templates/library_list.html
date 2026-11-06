@@ -2,6 +2,11 @@
 {% load static %}
 {% load i18n %}
 
+{% block header %}
+<link rel="stylesheet" href="{% static "css/gol-form-modal.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-list-page.css" %}">
+{% endblock %}
+
 {% block content %}
 <div class="row">
 	<div class="col-md-12">
@@ -11,8 +16,13 @@
 					<i class="fa fa-book"></i>{% trans "Library" %}
 				</h3>
 				<div class="pl-panel__actions">
+					<form class="pl-search-form">
+						<input type="text" class="form-control" placeholder="{% trans 'Search...' %}">
+						<button type="submit" class="btn-search"><i class="fa fa-search"></i></button>
+						<a href="#" class="btn-clear"><i class="fa fa-times"></i></a>
+					</form>
+					<button id="button-import-library" class="btn-pl-outline"><i class="fa fa-upload"></i> {% trans "Import library" %}</button>
 					<button id="button-add-library" class="btn-pl-add"><i class="fa fa-plus"></i> {% trans "Add library" %}</button>
-					<button id="button-import-library" class="btn-pl-add"><i class="fa fa-upload"></i> {% trans "Import library" %}</button>
 				</div>
 			</div>
 			<div class="pl-panel__body">
@@ -61,7 +71,7 @@
 			</div>
 			<div class="modal-footer">
 				<button id="button-delete-library-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
-				<button id="button-delete-library-accept" type="button" class="btn btn-default">{% trans "Accept" %}</button>
+				<button id="button-delete-library-accept" type="button" class="btn btn-modal-accept">{% trans "Accept" %}</button>
 			</div>
 		</div>
 	</div>
@@ -75,30 +85,8 @@
 </script>
 <script>
 $(document).ready(function() {
-	var table = $('#libraries-table').DataTable({
-		responsive: true,
-	    language: {
-	    	processing		: '{% trans "Processing request..." %}',
-		    search			: '{% blocktrans with sep=":" %}Search{{sep}}{% endblocktrans %}',
-		    lengthMenu		: '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
-		    info			: '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
-		    infoEmpty		: '{% trans "Showing from 0 to 0 of 0 records" %}',
-		    infoFiltered	: '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
-		    infoPostFix		: "",
-		    loadingRecords	: '{% trans "Loading..." %}',
-		    zeroRecords		: '{% trans "No records available" %}',
-		    emptyTable		: '{% trans "No records available" %}',
-		    paginate: {
-		        first		: '{% trans "First" %}',
-		        previous	: '{% trans "Previous" %}',
-		        next		: '{% trans "Next" %}',
-		   		last		: '{% trans "Last" %}'
-		 	},
-		  	aria: {
-		     	sortAscending: '{% blocktrans with sep=": " %}{{sep}}Sort ascending{% endblocktrans %}',
-		        sortDescending: '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
-		    }
-		},
+	var table = golListTable('#libraries-table', {
+		dt: {
 		"columnDefs": [{
 	        "targets": -1,
 	        "data": null,
@@ -111,9 +99,8 @@ $(document).ready(function() {
 	        "targets": -3,
 	        "data": null,
 	        "defaultContent": '<button type="button" name="button-update-library" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update library" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
-	    }],
-	    "dom": 'T<"clear">lfrtip',
-		"bLengthChange": false
+	    }]
+		}
 	});
 		 
 	$('#libraries-table tbody').on('click', 'button', function (){
@@ -148,7 +135,7 @@ $(document).ready(function() {
 	}
 		
 	function deleteLibrary(data){		
-		$('#button-delete-library-accept').click( function() {	
+		$('#button-delete-library-accept').off('click').on('click', function() {	
 			$("body").overlay();
 			$.ajax({
 				type: 'POST',

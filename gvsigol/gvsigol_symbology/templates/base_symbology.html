@@ -31,13 +31,14 @@
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror-5.49.0/lib/codemirror.css" %}" />
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror-5.49.0/addon/hint/show-hint.css" %}" />
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror-5.49.0/theme/xq-dark.css" %}" />
-	<link rel="stylesheet" href="{% static "css/symbology.css" %}">
+	<link rel="stylesheet" href="{% static "css/symbology.css" %}?v=20261106r">
 	<link rel="stylesheet" href="{% static "css/googlefonts.css" %}">
 	<link rel="stylesheet" href="{% static "css/gvsigOL.css" %}">
 	<link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
 	<link rel="stylesheet" href="{% static "css/gol-themes.css" %}">
 	<link rel="stylesheet" href="{% static "css/gol-skin-base.css" %}">
 	<link rel="stylesheet" href="{% static "css/gol-layout.css" %}">
+	<link rel="stylesheet" href="{% static "css/gol-form-modal.css" %}">
 	
 	{% for app in INSTALLED_APPS %}												  
 		{% if 'gvsigol_app_' in app %}	
@@ -66,7 +67,7 @@
     
 </head>
 
-<body class="hold-transition {{GVSIGOL_SKIN}} sidebar-mini">
+<body class="hold-transition {{GVSIGOL_SKIN}} sidebar-mini gol-symbology">
 
 	<script>
 		// Must run before the first paint, while hold-transition is still active
@@ -244,11 +245,13 @@
 	</script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/ExternalGraphicSymbolizer.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/LineSymbolizer.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/lib/symbology/ClusteredPoints.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/symbology/ClusteredPoints.js" %}?v=20261106d"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/PolygonSymbolizer.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/ColorMapEntry.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/ColorRamp.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/lib/symbology/TextSymbolizer.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/symbology/SymbologyForms.js" %}?v=20261106p"></script>
+	<script type="text/javascript" src="{% static "js/lib/symbology/LabelOptionsEditor.js" %}?v=20261106e"></script>
+	<script type="text/javascript" src="{% static "js/lib/symbology/TextSymbolizer.js" %}?v=20261106d"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/Rule.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/SymbologyUtils.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/LibraryUtils.js" %}"></script>
@@ -256,7 +259,6 @@
 	<script type="text/javascript" src="{% static "js/lib/symbology/UniqueValues.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/Intervals.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/Expressions.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/lib/symbology/Custom.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/ColorTable.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/LibrarySymbol.js" %}"></script>
 	
@@ -275,44 +277,61 @@
 	    	});
 	    });
 
+		// La contraseña de sesión ya no se envía al navegador. Sin token OIDC, si la
+		// sesión tiene contraseña, las peticiones a GeoServer van por el proxy del
+		// backend (window.GVSIGOL_GS_PROXY), que usa las credenciales en el servidor.
+		window.GVSIGOL_GS_PROXY = "{% if gs_proxy %}{% url 'symbology_geoserver_proxy' %}{% endif %}";
+
+		function geoserverProxyUrl(src) {
+			if (!window.GVSIGOL_GS_PROXY || !src) {
+				return src;
+			}
+			return window.GVSIGOL_GS_PROXY + '?url=' + encodeURIComponent(src);
+		}
+
 		function authenticate(url) {
-			var self = this;
-			var username = '{{username}}';
-			var password = '{{password}}';
-			if (!password || !username) {
+			// Se mantiene por compatibilidad con las plantillas que la llaman: ya no
+			// hay credenciales en el navegador (ver geoserverProxyUrl).
+		}
+
+		function getGeoserverAuthorization() {
+		    var auth_token = "{{auth_token|escapejs}}";
+
+		    if (auth_token) {
+		        return auth_token;
+		    }
+
+		    return null;
+		}
+
+		function loadAuthenticatedImage(img, src) {
+			var authorization = getGeoserverAuthorization();
+			if (!authorization) {
+				img.src = geoserverProxyUrl(src);
 				return;
 			}
-			
-			var headers;
-			headers = {
-				"Authorization": "Basic " + btoa(username + ":" + password)
-			};
-			$.ajax({
-				url: url,
-				params: {
-					'SERVICE': 'WMS',
-					'VERSION': '1.1.1',
-					'REQUEST': 'GetCapabilities'
-				},
-				async: true,
-				xhrFields: {
-					withCredentials: true
-				},
-				method: 'GET',
-				headers: headers,
-				error: function(jqXHR, textStatus, errorThrown){},
-				success: function(resp){
-					console.log('Authenticated');
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', src);
+			xhr.setRequestHeader('Authorization', authorization);
+			xhr.responseType = 'blob';
+			xhr.onload = function () {
+				if (xhr.status >= 200 && xhr.status < 300) {
+					var contentType = xhr.getResponseHeader("content-type") || '';
+					if (contentType.indexOf("image") !== -1) {
+						var urlCreator = window.URL || window.webkitURL;
+						img.src = urlCreator.createObjectURL(xhr.response);
+					}
 				}
-			});
+			};
+			xhr.send();
 		}
 
 		function imagePostFunction(image, src) {
-			var auth_token = "{{auth_token}}";
-			if (auth_token) {
+			var authorization = getGeoserverAuthorization();
+			if (authorization) {
 				var xhr = new XMLHttpRequest();
 				xhr.open('GET', src);
-				xhr.setRequestHeader('Authorization', auth_token);
+				xhr.setRequestHeader('Authorization', authorization);
 				xhr.responseType = 'blob';
 				xhr.onload = function () {
 					if (xhr.status == 401) {
@@ -351,7 +370,7 @@
 				}
 				xhr.send();
 			} else {
-				image.getImage().src = src;
+				image.getImage().src = geoserverProxyUrl(src);
 			}
 		}
 

@@ -5,69 +5,85 @@
 {% block content %}	  	  
 <div class="row">
 	<div class="col-md-12">
-		<div class="pl-panel">
+		<div class="pl-panel gol-sym-editor gol-sym-editor--cards">
 		
 			<div class="pl-panel__header">
-				<h3 class="pl-panel__title"><i class="fa fa-paint-brush"></i>{% trans "Add new style" %}</h3>
+				<div class="gol-sym-heading">
+<a href="{% url 'style_layer_list' %}" class="gol-sym-back-btn" title="{% trans "Back to styles list" %}" aria-label="{% trans "Back to styles list" %}"><i class="fa fa-arrow-left" aria-hidden="true"></i></a>
+<div class="gol-sym-heading__text">
+{% block clustered_points_v1 %}				<h3 class="pl-panel__title"><i class="fa fa-paint-brush"></i>{% trans "Add new style" %}</h3>
+{% endblock %}					<span class="gol-sym-subtitle">{% trans "Layer" %}: {{ layer_name }}</span>
+</div>
+				</div>
 				<div class="pl-panel__actions">
 					<button id="refresh-preview" class="btn-pf-secondary refresh-preview"><i class="fa fa-refresh"></i> {% trans "Update preview" %}</button>
-					<!-- <button id="show-label" class="btn-pf-secondary refresh-preview"><i class="fa fa-tags"></i> {% trans "Labeling" %}</button> -->
-					<button id="save-legend" class="btn-pf-save save-legend"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>					
+{% block clustered_points_v2 %}					<!-- <button id="show-label" class="btn-pf-secondary refresh-preview"><i class="fa fa-tags"></i> {% trans "Labeling" %}</button> -->
+{% endblock %}					<button id="save-legend" class="btn-pf-save save-legend"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>					
 				</div>
 			</div>
 
 			<div class="pl-panel__body with-padding">
 			
 				<div class="row">
-					<div class="col-md-6">
-						<div id="form-error" class="pf-error-msg"></div>
-						<div class="row">
+					<div class="col-md-6 gol-sym-props">
+						<div class="gol-sym-card">
+						<h4 class="gol-sym-section-title">{% trans "Style properties" %}</h4>
+{% block clustered_points_v3 %}						<div id="form-error" class="pf-error-msg"></div>
+{% endblock %}						<div class="row">
 							<div class="col-md-12 form-group">
 								<label>{% trans "Name" %}</label>
-								<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" value="{{style_name}}" type="text" class="form-control">	
-							</div>
+{% block clustered_points_v4 %}								<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" value="{{style_name}}" type="text" class="form-control">	
+{% endblock %}							</div>
 						</div>
 						<div class="row">
 							<div class="col-md-12 form-group">
 								<label>{% trans "Title" %}</label>
-								<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" type="text" class="form-control">	
-							</div>
+{% block clustered_points_v5 %}								<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" type="text" class="form-control">	
+{% endblock %}							</div>
 						</div>
 						<div class="row">
 							<div class="col-md-6 form-group">
 								<label>{% trans "Min. scale" %}</label>
-					    		<input placeholder="{% trans 'No limit' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="" class="form-control">
+								<div class="input-group gol-sym-scale"><span class="input-group-addon">1:</span>
+{% block clustered_points_v6 %}					    		<input placeholder="{% trans 'No limit' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="" class="form-control">
+{% endblock %}								</div>
 							</div>
 							<div class="col-md-6 form-group">
 								<label>{% trans "Max. scale" %}</label>
-					    		<input placeholder="{% trans 'No limit' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="" class="form-control">
+								<div class="input-group gol-sym-scale"><span class="input-group-addon">1:</span>
+{% block clustered_points_v7 %}					    		<input placeholder="{% trans 'No limit' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="" class="form-control">
+{% endblock %}								</div>
 							</div>
 							<div class="col-md-12 form-group">
-								<p class="text-muted">* {% trans "Specifies the minimum and maximum scale denominator (inclusive) for the scale range in which this rule applies" %}.</p>
+								<p class="text-muted gol-sym-help-text">* {% trans "Specifies the minimum and maximum scale denominator (inclusive) for the scale range in which this rule applies" %}.</p>
 							</div>
 						</div>
 						<div class="row">
-							<div class="checkbox col-md-12">								
-								<label>
+							<div class="checkbox col-md-12 gol-sym-default">								
+{% block clustered_points_v8 %}								<label>
 									<input type="checkbox" name="style-is-default" id="style-is-default"/>{% trans "Set as default style" %}
 								</label>
-							</div>
+{% endblock %}							</div>
+						</div>
 						</div>
 					</div>
-					<div class="col-md-6">
+					<div class="col-md-6 gol-sym-preview">
+						<div class="gol-sym-card">
+						<h4 class="gol-sym-section-title">{% trans "Map preview" %}</h4>
 						<div id="map" class="preview-map"></div>
+						</div>
 					</div>						
 				</div>
 				
-				<div class="row">
+				<h4 class="gol-sym-section-title gol-sym-section-title--rules">{% trans "Rules" %}</h4>
+				<div class="row gol-sym-rules-toolbar">
 					<div class="col-md-12 form-group">
 						<button id="add-expression" class="btn-pf-secondary refresh-preview"><i class="fa fa-plus"></i> {% trans "Add new rule" %}</button>
-						<span class="text-muted">{% trans "Creates a new rule for clustered points" %}</span>
-					</div>
+{% block clustered_points_v9 %}						<span class="text-muted">{% trans "Creates a new rule for clustered points" %}</span>
+{% endblock %}					</div>
 				</div>
 				
-				<div id="rules" class="row">
-				</div>
+				<div id="rules" class="row" data-empty-text="{% trans "There are no rules yet. Use the toolbar above to create them." %}"></div>
 				
 			</div>
 		</div>
@@ -99,7 +115,7 @@
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box">
-							<div class="box-body no-padding" style="max-height: 300px; overflow: auto;">
+							<div class="box-body no-padding gol-sym-scroll">
 								<ul class="users-list clearfix">
 								</ul>
 							</div>
@@ -118,10 +134,13 @@
 <div class="modal fade" id="modal-symbolizer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
-			<div class="modal-body">
+			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
+				<h4 class="modal-title">{% trans "Edit symbolizer" %}</h4>
+			</div>
+			<div class="modal-body">
 				<div class="nav-tabs-custom">
 	            	<ul id="tab-menu" class="nav nav-tabs">				                        
 	            	</ul>
@@ -141,6 +160,7 @@
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
+				<h4 class="modal-title">{% trans "Edit filter" %}</h4>
 			</div>
 			<div id="modal-expression-content" class="modal-body">
 			</div>
@@ -156,6 +176,7 @@
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
+				<h4 class="modal-title">{% trans "Edit rule" %}</h4>
 			</div>
 			<div id="modal-edit-rule-content" class="modal-body">
 			</div>
@@ -181,8 +202,8 @@ $(document).ready(function() {
 	var featureType = "{{featureType}}";
 	var jsonAlphanumericFields = {{json_alphanumeric_fields|safe}};
 	var fonts = {{ fonts|safe }};
-	var rule_opts = "";
-	var previewUrl = "{{preview_url}}";
+{% block clustered_points_v10 %}	var rule_opts = "";
+{% endblock %}	var previewUrl = "{{preview_url}}";
 	var supported_crs = {{supported_crs|safe}};
 	var authToken = "{{auth_token}}";
 	authenticate(layerUrl);
@@ -208,8 +229,8 @@ $(document).ready(function() {
 	var wmsSource = new ol.source.TileWMS({
 		url: layerUrl,
 		visible: true,
-		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
-		serverType: 'geoserver',
+{% block clustered_points_v11 %}		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
+{% endblock %}		serverType: 'geoserver',
 		tileLoadFunction: imagePostFunction
 	});
 	wmsLayer = new ol.layer.Tile({
@@ -222,8 +243,8 @@ $(document).ready(function() {
 	var utils = new SymbologyUtils(map, layerId, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
 	utils.setType("CP");
 	var clustered_points = new ClusteredPoints(featureType, layerName, utils, previewUrl);
-	
-	utils.centerMap(layerName, wfsUrl, authToken);
+{% block clustered_points_v12 %}	
+{% endblock %}	utils.centerMap(layerName, wfsUrl, authToken);
 	
 	var previous_minscale = $("#symbol-minscale").val();
 	var previous_maxscale = $("#symbol-maxscale").val();
@@ -258,8 +279,8 @@ $(document).ready(function() {
 	
 	$("#save-legend").on('click', function(e){
 		if ($("#style-name").val() != '') {
-			clustered_points.save(layerId);
-			
+{% block clustered_points_v13 %}			clustered_points.save(layerId);
+{% endblock %}			
 		} else {
 			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
 			
@@ -276,13 +297,13 @@ $(document).ready(function() {
 		$(".delete-rule").on('click', function(e){
 			clustered_points.deleteRule(this.dataset.ruleid);
 		});
-	});
+{% block clustered_points_v14 %}	});
 	
 	clustered_points.addNewRule(1,2);
 	clustered_points.addNewRule(2);
 	$(".delete-rule").on('click', function(e){
 		clustered_points.deleteRule(this.dataset.ruleid);
-	});
+{% endblock %}	});
 	
 	$(window).on("beforeunload", function(){
 		$.ajax({

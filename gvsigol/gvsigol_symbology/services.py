@@ -24,11 +24,12 @@
 
 from .models import Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, RasterSymbolizer, ColorMap, ColorMapEntry, TextSymbolizer as TextSymbolizerModel
 from django.db.models import Max
+from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from gvsigol_core import geom
 from gvsigol_services.models import Layer
-from . import utils, sld_builder
+from . import utils, sld_builder, label_sld, label_options
 import tempfile
 import json
 import logging
@@ -84,10 +85,13 @@ def _sld_float(val, default):
         return default
 
 
-def _sld_import_symbolizers(rule_node, model_rule):
+def _sld_import_symbolizers(rule_node, model_rule, geom_field=None):
     """
     Persist symbolizers from a Rule element using lxml (parse_sld uses sld.Rule
     wrappers, not generateDS).
+    geom_field: geometría de la capa destino (get_geometry_field). Si se indica, un
+    TextSymbolizer que sea exactamente el SLD de una etiqueta nueva conserva sus opciones
+    avanzadas; el resto se importa como siempre.
     """
     scount = 0
     sym_tags = (
@@ -301,7 +305,7 @@ def _sld_import_symbolizers(rule_node, model_rule):
                     elif k == 'fill-opacity':
                         text_fill_opacity = _sld_float(v, text_fill_opacity)
 
-            TextSymbolizerModel(
+            text_symbolizer = TextSymbolizerModel(
                 rule=model_rule,
                 order=scount,
                 is_actived=bool(label_pn),
@@ -317,7 +321,18 @@ def _sld_import_symbolizers(rule_node, model_rule):
                 halo_fill_opacity=halo_fill_opacity,
                 anchor_point_x=anchor_x,
                 anchor_point_y=anchor_y,
-            ).save()
+            )
+            if geom_field is not None:
+                # Etiqueta nueva exportada desde gvSIG Online: se recuperan sus opciones
+                options = label_sld.options_from_sld(child, text_symbolizer, geom_field)
+                if options is not None:
+                    text_symbolizer.options = label_options.dumps(options)
+                    first_field = next((p['name'] for p in options['content'].get('parts', [])
+                                        if p['type'] == 'field'), None)
+                    if first_field:
+                        text_symbolizer.label = first_field
+                    text_symbolizer.is_actived = True
+            text_symbolizer.save()
 
         elif tag == 'RasterSymbolizer':
             opacity = _sld_float(_sld_first_text(child, 'sld:Opacity'), 1.0)
@@ -617,6 +632,15 @@ def sld_import(name, is_default, layer_id, file, mapservice, style_type=None, ti
     )
     style_layer.save()
     
+    # Geometría de la capa, solo si hay etiquetas (para recuperar las etiquetas nuevas)
+    geom_field = None
+    if 'TextSymbolizer' in raw_sld_text:
+        try:
+            geom_field = utils.get_geometry_field(layer)
+        except Exception as e:
+            LOG.warning('sld_import: geometry field not available (%s); labels imported as classic', e)
+            geom_field = None
+
     rules_col = fts.Rules
     for r in rules_col:
         filt = utils.sld_filter_to_json(r.Filter)
@@ -635,7 +659,7 @@ def sld_import(name, is_default, layer_id, file, mapservice, style_type=None, ti
             order = 0
         )
         rule.save()
-        _sld_import_symbolizers(r._node, rule)
+        _sld_import_symbolizers(r._node, rule, geom_field=geom_field)
 
     # CP (clustered points) — for GeoServer upload use the ORIGINAL SLD verbatim
     # when available.  Rebuilding via build_sld loses compound ogc:Filter expressions
@@ -854,7 +878,7 @@ def clone_layer_styles(mapservice, source_layer, target_layer):
             mapservice.setLayerStyle(target_layer, new_style.name, new_style.is_default)
         else:
             # TODO: manage errors
-            print("DEBUG: Problem cloning style .." + new_style.name)
+            LOG.debug("Problem cloning style .. %s", new_style.name)
 
 
 def clone_style(mapservice, layer, original_style_name, cloned_style_name):
@@ -862,24 +886,24 @@ def clone_style(mapservice, layer, original_style_name, cloned_style_name):
     try:
         original_style = Style.objects.filter(name__exact=original_style_name)[0]
     except Exception as e:
-        print(str(e))
+        LOG.warning(str(e))
         return False
         
     try:
         style = Style.objects.filter(name__exact=cloned_style_name)[0] 
         exists_cloned_style = True   
     except Exception as e:
-        print("DEBUG: Problem getting style .." + cloned_style_name)
-        print(str(e))
+        LOG.debug("Problem getting style .. %s", cloned_style_name)
+        LOG.warning(str(e))
         
     if exists_cloned_style:
-        print("DEBUG: Exists cloned style .." + cloned_style_name)
+        LOG.debug("Exists cloned style .. %s", cloned_style_name)
         rule = Rule.objects.filter(style=style)[0]
         symbolizers_to_delete = Symbolizer.objects.filter(rule=rule)
         for i in symbolizers_to_delete:
             i.delete()
     else:           
-        print("DEBUG: Not existe cloned style .." + cloned_style_name)         
+        LOG.debug("Not exists cloned style .. %s", cloned_style_name)         
         style = Style(
             name = cloned_style_name,
             title = original_style_name,
@@ -967,13 +991,13 @@ def clone_style(mapservice, layer, original_style_name, cloned_style_name):
     sld_body = sld_builder.build_library_symbol(rule)
     s = mapservice.getStyle(style.name)
     if s is None:        
-        print("DEBUG: style not exists in Geoserver .. " + style.name)
+        LOG.debug("Style not exists in Geoserver .. %s", style.name)
         if mapservice.createStyle(style.name, sld_body):
             mapservice.setLayerStyle(layer, cloned_style_name, style.is_default)
         else:
             "DEBUG: problem creating style !!!!!" + style.name
     else:
-        print("DEBUG: Style exists in Geoserver .. " +style.name)
+        LOG.debug("Style exists in Geoserver .. %s", style.name)
         if not mapservice.createStyle(cloned_style_name, sld_body):
             mapservice.updateStyle(layer, cloned_style_name, sld_body)
         mapservice.setLayerStyle(layer, cloned_style_name, style.is_default)
@@ -1009,6 +1033,7 @@ def delete_style_name(name):
     except Exception as e:
         raise e
     
+@transaction.atomic
 def delete_style(style_id, mapservice):
     try:
         style = Style.objects.get(id=int(style_id))

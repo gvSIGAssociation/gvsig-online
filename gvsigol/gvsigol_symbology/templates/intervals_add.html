@@ -5,10 +5,16 @@
 {% block content %}	  	  
 <div class="row">
 	<div class="col-md-12">
-		<div class="pl-panel">
+		<div class="pl-panel gol-sym-editor gol-sym-editor--cards">
 		
 			<div class="pl-panel__header">
-				<h3 class="pl-panel__title"><i class="fa fa-paint-brush"></i>{% trans "Add new style" %}</h3>
+				<div class="gol-sym-heading">
+<a href="{% url 'style_layer_list' %}" class="gol-sym-back-btn" title="{% trans "Back to styles list" %}" aria-label="{% trans "Back to styles list" %}"><i class="fa fa-arrow-left" aria-hidden="true"></i></a>
+<div class="gol-sym-heading__text">
+{% block intervals_v1 %}				<h3 class="pl-panel__title"><i class="fa fa-paint-brush"></i>{% trans "Add new style" %}</h3>
+{% endblock %}					<span class="gol-sym-subtitle">{% trans "Layer" %}: {{ layer_name }}</span>
+</div>
+				</div>
 				<div class="pl-panel__actions">
 					<button id="refresh-preview" class="btn-pf-secondary refresh-preview"><i class="fa fa-refresh"></i> {% trans "Update preview" %}</button>
 					<button id="show-label" class="btn-pf-secondary refresh-preview"><i class="fa fa-tags"></i> {% trans "Labeling" %}</button>
@@ -19,47 +25,58 @@
 			<div class="pl-panel__body with-padding">
 			
 				<div class="row">
-					<div class="col-md-6">
+					<div class="col-md-6 gol-sym-props">
+						<div class="gol-sym-card">
+						<h4 class="gol-sym-section-title">{% trans "Style properties" %}</h4>
 						<div id="form-error" class="pf-error-msg"></div>
 						<div class="row">
 							<div class="col-md-12 form-group">
 								<label>{% trans "Name" %}</label>
-								<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" value="{{style_name}}" type="text" class="form-control">	
-							</div>
+{% block intervals_v2 %}								<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" value="{{style_name}}" type="text" class="form-control">	
+{% endblock %}							</div>
 						</div>
 						<div class="row">
 							<div class="col-md-12 form-group">
 								<label>{% trans "Title" %}</label>
-								<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" type="text" class="form-control">	
-							</div>
+{% block intervals_v3 %}								<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" type="text" class="form-control">	
+{% endblock %}							</div>
 						</div>
 						<div class="row">
 							<div class="col-md-6 form-group">
 								<label>{% trans "Min. scale" %}</label>
-					    		<input placeholder="{% trans 'No limit' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="" class="form-control">
+								<div class="input-group gol-sym-scale"><span class="input-group-addon">1:</span>
+{% block intervals_v4 %}					    		<input placeholder="{% trans 'No limit' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="" class="form-control">
+{% endblock %}								</div>
 							</div>
 							<div class="col-md-6 form-group">
 								<label>{% trans "Max. scale" %}</label>
-					    		<input placeholder="{% trans 'No limit' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="" class="form-control">
+								<div class="input-group gol-sym-scale"><span class="input-group-addon">1:</span>
+{% block intervals_v5 %}					    		<input placeholder="{% trans 'No limit' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="" class="form-control">
+{% endblock %}								</div>
 							</div>
 							<div class="col-md-12 form-group">
-								<p class="text-muted">* {% trans "Specifies the minimum and maximum scale denominator (inclusive) for the scale range in which this rule applies" %}.</p>
+								<p class="text-muted gol-sym-help-text">* {% trans "Specifies the minimum and maximum scale denominator (inclusive) for the scale range in which this rule applies" %}.</p>
 							</div>
 						</div>
 						<div class="row">
-							<div class="checkbox col-md-12">								
-								<label>
+							<div class="checkbox col-md-12 gol-sym-default">								
+{% block intervals_v6 %}								<label>
 									<input type="checkbox" name="style-is-default" id="style-is-default"/>{% trans "Set as default style" %}
 								</label>
-							</div>
+{% endblock %}							</div>
+						</div>
 						</div>
 					</div>
-					<div class="col-md-6">
+					<div class="col-md-6 gol-sym-preview">
+						<div class="gol-sym-card">
+						<h4 class="gol-sym-section-title">{% trans "Map preview" %}</h4>
 						<div id="map" class="preview-map"></div>
+						</div>
 					</div>						
 				</div>
 				
-				<div class="row">
+				<h4 class="gol-sym-section-title gol-sym-section-title--rules">{% trans "Rules" %}</h4>
+				<div class="row gol-sym-rules-toolbar">
 					<div class="col-md-6 form-group">
 						<label>{% trans "Select numeric field" %}</label>
 						<select id="select-numeric-field" class="form-control">
@@ -68,17 +85,16 @@
 					</div>
 					<div class="col-md-2 form-group">
 						<label>{% trans "Select number of intervals" %}</label>
-			    		<input name="number-of-intervals" id="number-of-intervals" type="number" step="any" value="0" class="form-control">
-					</div>
+{% block intervals_v7 %}			    		<input name="number-of-intervals" id="number-of-intervals" type="number" step="any" value="0" class="form-control">
+{% endblock %}					</div>
 					
 					<div class="col-md-4 form-group">
-						<label>{% trans " " %}</label>
-						<button id="select-ramp-color" class="btn-pf-secondary" style="width:100%;"><i class="fa fa-barcode"></i> {% trans "Apply ramp color" %}</button>
+						<label class="gol-sym-label-spacer" aria-hidden="true">&nbsp;</label>
+						<button id="select-ramp-color" class="btn-pf-secondary gol-sym-btn-block"><i class="fa fa-barcode"></i> {% trans "Apply ramp color" %}</button>
 					</div>
 				</div>
 				
-				<div id="rules" class="row">
-				</div>
+				<div id="rules" class="row" data-empty-text="{% trans "There are no rules yet. Use the toolbar above to create them." %}"></div>
 				
 			</div>
 		</div>
@@ -110,7 +126,7 @@
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box">
-							<div class="box-body no-padding" style="max-height: 300px; overflow: auto;">
+							<div class="box-body no-padding gol-sym-scroll">
 								<ul class="users-list clearfix">
 								</ul>
 							</div>
@@ -129,10 +145,13 @@
 <div class="modal fade" id="modal-symbolizer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
-			<div class="modal-body">
+			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
+				<h4 class="modal-title">{% trans "Edit symbolizer" %}</h4>
+			</div>
+			<div class="modal-body">
 				<div class="nav-tabs-custom">
 	            	<ul id="tab-menu" class="nav nav-tabs">				                        
 	            	</ul>
@@ -152,6 +171,7 @@
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
+				<h4 class="modal-title">{% trans "Edit rule" %}</h4>
 			</div>
 			<div id="modal-edit-rule-content" class="modal-body">
 			</div>
@@ -164,17 +184,17 @@
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<span style="font-size: 20px; font-weight: bold;">{% trans "Warning" %}</span>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
+				<h4 class="modal-title"><i class="fa fa-exclamation-triangle gol-sym-warn-icon" aria-hidden="true"></i> {% trans "Warning" %}</h4>
 			</div>
 			<div id="modal-edit-rule-content" class="modal-body">
 				{% trans "Rules needed to apply a color ramp" %}
-				<div class="modal-footer">
-					<!-- <button id="button-select-ramp-open" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Apply" %}</button> -->
-					<button id="button-error-ramp-close" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
-				</div>
+			</div>
+			<div class="modal-footer">
+				<!-- <button id="button-select-ramp-open" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Apply" %}</button> -->
+				<button id="button-error-ramp-close" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
 			</div>
 		</div>
 	</div>
@@ -221,8 +241,8 @@
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box">
-							<div class="box-body no-padding" style="max-height: 300px; overflow: auto;">
-								<ul class="ramp-list clearfix" style="padding-left: 0px;">
+							<div class="box-body no-padding gol-sym-scroll">
+								<ul class="ramp-list clearfix gol-sym-ramp-list">
 								</ul>
 							</div>
 						</div>
@@ -245,7 +265,7 @@
 </script>
 <script>
 
-this.color_ramp_data = {};
+{% block intervals_v8 %}{% endblock %}this.color_ramp_data = {};
 this.intervals = null;
 
 $(document).ready(function() {
@@ -260,12 +280,12 @@ $(document).ready(function() {
 	var jsonAlphanumericFields = {{json_alphanumeric_fields|safe}};
 	var jsonNumericFields = {{json_numeric_fields|safe}};
 	var fonts = {{ fonts|safe }};
-	var rule_opts = "";
-	var previewUrl = "{{preview_url}}";
+{% block intervals_v9 %}	var rule_opts = "";
+{% endblock %}	var previewUrl = "{{preview_url}}";
 	var supported_crs = {{supported_crs|safe}};
 	var authToken = "{{auth_token}}";
 	authenticate(layerUrl);
-	
+{% block intervals_v10 %}{% endblock %}	
 	for (var crs in supported_crs) {
 		proj4.defs(supported_crs[crs].code, supported_crs[crs].definition);	
 	}
@@ -287,8 +307,8 @@ $(document).ready(function() {
 	var wmsSource = new ol.source.TileWMS({
 		url: layerUrl,
 		visible: true,
-		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
-		serverType: 'geoserver',
+{% block intervals_v11 %}		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
+{% endblock %}		serverType: 'geoserver',
 		tileLoadFunction: imagePostFunction
 	});
 	wmsLayer = new ol.layer.Tile({
@@ -301,7 +321,7 @@ $(document).ready(function() {
 	var utils = new SymbologyUtils(map, layerId, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
 	window.intervals = new Intervals(featureType, layerName, utils, previewUrl);
 	var intervals = window.intervals;
-	
+{% block intervals_v12 %}{% endblock %}	
 	utils.centerMap(layerName, wfsUrl, authToken);
 	
 	var previous_minscale = $("#symbol-minscale").val();
@@ -347,8 +367,8 @@ $(document).ready(function() {
 				messageBox.show('warning', gettext('The number of intervals must be greater than 0'));
 				
 			} else {
-				intervals.save(layerId);
-			}
+{% block intervals_v13 %}				intervals.save(layerId);
+{% endblock %}			}
 			
 		} else {
 			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
@@ -385,9 +405,9 @@ $(document).ready(function() {
 		if(!field_name_trans){
 			field_name_trans = field_name;
 		}
-		$("#select-numeric-field").append('<option value="' + field_name + '">' + field_name_trans + '</option>');
+{% block intervals_v14 %}{% endblock %}		$("#select-numeric-field").append('<option value="' + symbologyEscapeHtml(field_name) + '">' + symbologyEscapeHtml(field_name_trans) + '</option>');
 	}
-	
+{% block intervals_v15 %}{% endblock %}	
 	$("#select-numeric-field").on('change', function(e) {
 		$(".users-list").empty();
 		var selectedField = this.value;
@@ -518,7 +538,7 @@ $(document).ready(function() {
 					options += '<div id="color-ramp-' + ramp.id + '" class="color-ramp-item col-md-4">'+
 					'<div id="color-ramp-preview-' + ramp.id + '" class="preview-ramp-color" style="'+ colorramp.getStyleForPreview(aux_json) +'">'+
 					'</div>'+
-					'<span class="color-ramp-name">' + ramp.name + '</span>'+ 
+					'<span class="color-ramp-name">' + symbologyEscapeHtml(ramp.name) + '</span>'+ 
 					'</div>';
 					
 					var aux_color_ramp = {
@@ -559,7 +579,7 @@ $(document).ready(function() {
 				var options = '<option value=""> -- {% trans "Select ramp category" %} -- </option>';
 				for(var i=0; i<folders.length; i++){
 					var folder = folders[i];
-					options += "<option value=\""+ folder.id +"\">"+folder.name+"</option>";
+					options += "<option value=\""+ folder.id +"\">"+symbologyEscapeHtml(folder.name)+"</option>";
 				}
 				$("#select-category").prop("disabled", false);
 				$("#select-category").html(options);

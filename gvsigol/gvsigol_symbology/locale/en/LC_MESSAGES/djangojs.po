@@ -516,3 +516,408 @@ msgstr "You must select a field first"
 #: gvsigol_symbology/templates/unique_values_update.html
 msgid "Drag to reorder"
 msgstr "Drag to reorder"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "The web viewer (SPA) does not hide overlapping labels, so these options only affect WMS maps (GeoServer)."
+msgstr "The web viewer (SPA) does not hide overlapping labels, so these options only affect WMS maps (GeoServer)."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "WMS maps only"
+msgstr "WMS maps only"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "The label text is defined in the Content tab."
+msgstr "The label text is defined in the Content tab."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Advanced label options"
+msgstr "Advanced label options"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Compose the text, format numbers and dates, choose the position, a background and the priority."
+msgstr "Compose the text, format numbers and dates, choose the position, a background and the priority."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Classic label"
+msgstr "Classic label"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "This label keeps its current look. Advanced options let you compose the text, format numbers and dates, choose the position, add a background and set priorities."
+msgstr "This label keeps its current look. Advanced options let you compose the text, format numbers and dates, choose the position, add a background and set priorities."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Back to classic label"
+msgstr "Back to classic label"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Use advanced options"
+msgstr "Use advanced options"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Content"
+msgstr "Content"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Placement"
+msgstr "Placement"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Background"
+msgstr "Background"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Preview"
+msgstr "Preview"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Label text"
+msgstr "Label text"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Combine fields and fixed text. Numbers and dates can be formatted."
+msgstr "Combine fields and fixed text. Numbers and dates can be formatted."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Field"
+msgstr "Field"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Text"
+msgstr "Text"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Capitalization"
+msgstr "Capitalization"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "As in the data"
+msgstr "As in the data"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "UPPERCASE"
+msgstr "UPPERCASE"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "lowercase"
+msgstr "lowercase"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Letter spacing"
+msgstr "Letter spacing"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Wrap text at"
+msgstr "Wrap text at"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Wrap: maximum line width before breaking the text into several lines (0 = never)."
+msgstr "Wrap: maximum line width before breaking the text into several lines (0 = never)."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "No format"
+msgstr "No format"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Number"
+msgstr "Number"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Date"
+msgstr "Date"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Format"
+msgstr "Format"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Decimals"
+msgstr "Decimals"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Thousands separator"
+msgstr "Thousands separator"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Language"
+msgstr "Language"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Date format"
+msgstr "Date format"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "e.g. \" - \" or \" inhab.\""
+msgstr "e.g. \" - \" or \" inhab.\""
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Move up"
+msgstr "Move up"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Move down"
+msgstr "Move down"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Remove"
+msgstr "Remove"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Position relative to the point"
+msgstr "Position relative to the point"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Horizontal offset"
+msgstr "Horizontal offset"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Vertical offset"
+msgstr "Vertical offset"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Positive offsets move the label right and up."
+msgstr "Positive offsets move the label right and up."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Labels on lines"
+msgstr "Labels on lines"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Follow the line (curved text)"
+msgstr "Follow the line (curved text)"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Maximum bend angle"
+msgstr "Maximum bend angle"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Repeat every"
+msgstr "Repeat every"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Distance to the line"
+msgstr "Distance to the line"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Repeat: 0 = one label per line. Distance: positive values place the label above the line."
+msgstr "Repeat: 0 = one label per line. Distance: positive values place the label above the line."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Labels on polygons"
+msgstr "Labels on polygons"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Position"
+msgstr "Position"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Always inside the polygon"
+msgstr "Always inside the polygon"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Centroid (as classic labels)"
+msgstr "Centroid (as classic labels)"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Rotation"
+msgstr "Rotation"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Angle"
+msgstr "Angle"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Angle from a field"
+msgstr "Angle from a field"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "— None —"
+msgstr "— None —"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Degrees, clockwise. If a field is chosen, its value is used instead of the fixed angle."
+msgstr "Degrees, clockwise. If a field is chosen, its value is used instead of the fixed angle."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Overlapping labels"
+msgstr "Overlapping labels"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Draw even if it overlaps other labels"
+msgstr "Draw even if it overlaps other labels"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Minimum space around"
+msgstr "Minimum space around"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Priority field"
+msgstr "Priority field"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "When labels collide, those with a higher value in the priority field are drawn first."
+msgstr "When labels collide, those with a higher value in the priority field are drawn first."
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Top left"
+msgstr "Top left"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Top"
+msgstr "Top"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Top right"
+msgstr "Top right"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Left"
+msgstr "Left"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Center"
+msgstr "Center"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Right"
+msgstr "Right"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Bottom left"
+msgstr "Bottom left"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Bottom"
+msgstr "Bottom"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Bottom right"
+msgstr "Bottom right"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Draw a box behind the label"
+msgstr "Draw a box behind the label"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Fill color"
+msgstr "Fill color"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Fill opacity"
+msgstr "Fill opacity"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Border color"
+msgstr "Border color"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Border width"
+msgstr "Border width"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Inner margin"
+msgstr "Inner margin"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "The advanced options of this label will be discarded and it will be drawn as a classic label. Continue?"
+msgstr "The advanced options of this label will be discarded and it will be drawn as a classic label. Continue?"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "Label"
+msgstr "Label"
+
+#: static/js/lib/symbology/LabelOptionsEditor.js
+msgctxt "symbology"
+msgid "With a background, WMS maps (GeoServer) only split the text into several lines when the label is centered without rotation or placed to the right of the point; otherwise it is drawn on a single line."
+msgstr "With a background, WMS maps (GeoServer) only split the text into several lines when the label is centered without rotation or placed to the right of the point; otherwise it is drawn on a single line."
+
+#: static/js/lib/symbology/SymbologyForms.js
+msgctxt "symbology"
+msgid "This name is not valid."
+msgstr "This name is not valid."
+
+#: static/js/lib/symbology/SymbologyForms.js
+msgctxt "symbology"
+msgid "Use"
+msgstr "Use"
+
+#: static/js/lib/symbology/SymbologyForms.js
+msgctxt "symbology"
+msgid "Valid name"
+msgstr "Valid name"

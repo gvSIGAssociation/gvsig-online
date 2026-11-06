@@ -389,10 +389,10 @@ Expressions.prototype.addExpression = function(expression) {
 			field_name_trans = field_name;
 		}
 		if (expression.field == fields[i].name) {
-			ui += 			'<option selected data-type="' + fields[i].binding + '" value="' + field_name + '">' + field_name_trans + '</option>';
+			ui += 			'<option selected data-type="' + fields[i].binding + '" value="' + symbologyEscapeHtml(field_name) + '">' + symbologyEscapeHtml(field_name_trans) + '</option>';
 			dataType = fields[i].binding;
 		} else {
-			ui += 			'<option data-type="' + fields[i].binding + '" value="' + field_name + '">' + field_name_trans + '</option>';
+			ui += 			'<option data-type="' + fields[i].binding + '" value="' + symbologyEscapeHtml(field_name) + '">' + symbologyEscapeHtml(field_name_trans) + '</option>';
 		}
 
 	}	
@@ -747,12 +747,15 @@ Expressions.prototype.update = function(layerId, styleId) {
 			if (response.success) {
 				location.href = "/gvsigonline/symbology/style_layer_list/";
 			} else {
-				alert('Error');
+				alertStyleError(response);
 				$("body").overlayout();
 			}
 
 		},
-		error: function(){}
+		error: function(){
+			alertStyleError(null);
+			$("body").overlayout();
+		}
 	});
 };
 

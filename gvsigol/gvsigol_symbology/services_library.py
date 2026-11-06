@@ -22,14 +22,15 @@
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 
-from .models import Style, Library, Rule, LibraryRule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, TextSymbolizer, ExternalGraphicSymbolizer, ColorRamp, ColorRampFolder, ColorRampLibrary
-from gvsigol_services.models import Layer
+from .models import Style, Library, Rule, LibraryRule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, ColorRamp, ColorRampFolder, ColorRampLibrary
 from gvsigol_services import geographic_servers
 from django.utils.translation import gettext as _
-from . import utils, sld_utils, sld_builder, sld_reader
+from . import utils, sld_utils, sld_builder, sld_reader, external_graphics
 from django.http import HttpResponse
 from gvsigol import settings
 from xml.dom import minidom
+import logging
+LOG = logging.getLogger('gvsigol')
 import tempfile, zipfile
 import io
 import json
@@ -66,6 +67,11 @@ def add_symbol(request, json_rule, library_id, symbol_type, gs):
 
     if _valid_name_regex.search(name) == None:
         raise InvalidValue(-1, _("Invalid name: '{value}'. Name should not contain any special characters").format(value=name))
+
+    # Gráfico externo: PNG (como siempre) o SVG limpio. Se valida antes de crear nada.
+    eg_upload = None
+    if symbol_type == 'ExternalGraphicSymbolizer':
+        eg_upload = external_graphics.prepare_upload(request.FILES['eg-file'])
         
     #if _valid_title_regex.search(title) == None:
     #    raise InvalidValue(-1, _("Invalid title: '{value}'. Title should not contain any special characters").format(value=title))
@@ -128,10 +134,13 @@ def add_symbol(request, json_rule, library_id, symbol_type, gs):
         json_sym = json.loads(sym.get('json'))
         if symbol_type == 'ExternalGraphicSymbolizer':
             library_path = utils.check_library_path(library)
-            file_name = prefix_name + name + '.png'
-            if utils.save_external_graphic(library_path, request.FILES['eg-file'], file_name):
+            eg_ext, eg_file, eg_format = eg_upload
+            file_name = prefix_name + name + eg_ext
+            if utils.save_external_graphic(library_path, eg_file, file_name):
                 online_resource = utils.get_online_resource(library, file_name)
                 json_sym['online_resource'] = json_sym['online_resource'].replace("online_resource_replace", online_resource)
+                if eg_format:
+                    json_sym['format'] = eg_format
                 
                 symbolizer = ExternalGraphicSymbolizer(
                     rule = rule,
@@ -244,14 +253,19 @@ def update_symbol(request, json_rule, rule, library_rule, gs):
         symbol_type = None
         eg_file = None
         
+        eg_ext = eg_format = None
         if 'eg-file' in request.FILES:  
             file_name = json_rule.get('file_name').split('/')[-1]
-            eg_file = request.FILES['eg-file']
+            # PNG (como siempre) o SVG limpio; se valida antes de borrar o cambiar nada
+            eg_ext, eg_file, eg_format = external_graphics.prepare_upload(request.FILES['eg-file'])
         
         for s in Symbolizer.objects.filter(rule=rule):
             if get_ftype(s) == 'ExternalGraphicSymbolizer':
                 symbol_type = get_ftype(s)
-                if eg_file is not None:
+                # Solo se borra si el nuevo fichero tiene el mismo nombre (se sobrescribe, como
+                # siempre). Si cambia la extensión (PNG <-> SVG) el antiguo se conserva: los
+                # estilos de capa que importaron este símbolo apuntan a ese fichero.
+                if eg_file is not None and file_name == name + eg_ext:
                     utils.delete_external_graphic_img(library_rule.library, file_name)
             s.delete()
             
@@ -260,11 +274,13 @@ def update_symbol(request, json_rule, rule, library_rule, gs):
             json_sym = json.loads(sym.get('json'))
             if json_sym.get('type') == 'ExternalGraphicSymbolizer':
                 library_path = utils.check_library_path(library_rule.library)
-                file_name = name + '.png'
                 if eg_file is not None:
-                    if utils.save_external_graphic(library_path, eg_file, file_name):
-                        online_resource = utils.get_online_resource(library_rule.library, file_name)
-                        json_sym['online_resource'] = json_sym['online_resource'].replace("online_resource_replace", online_resource)
+                    new_file_name = name + eg_ext
+                    if utils.save_external_graphic(library_path, eg_file, new_file_name):
+                        online_resource = utils.get_online_resource(library_rule.library, new_file_name)
+                        # Ruta y formato del fichero nuevo (con PNG -> PNG es la misma ruta de siempre)
+                        json_sym['online_resource'] = online_resource
+                        json_sym['format'] = eg_format or external_graphics.FORMAT_PNG
                     
                 symbolizer = ExternalGraphicSymbolizer(
                     rule = rule,
@@ -376,7 +392,7 @@ def get_symbol(r, ftype):
             'maxscale': r.maxscale,
             'order': r.order,
             'type': ftype,
-            'symbolizers': json.dumps(symbolizers)
+            'symbolizers': utils.json_for_script(symbolizers)
         }
         
     return symbol
@@ -463,7 +479,7 @@ def upload_color_ramp_library(name, description, file):
             
             
             for file in file_list: 
-                print(('start file: ' + file))
+                LOG.debug('start file: %s', file)
                 file_name = file
                 m = re.search('color_ramp-(.+?)-[0-9]+', file)
                 if m:
@@ -507,7 +523,7 @@ def upload_color_ramp_library(name, description, file):
                 )
                 color_ramp.save()
                     
-                print(('end file: ' + file))
+                LOG.debug('end file: %s', file)
 
     utils.__delete_temporaries(file_path)
 
@@ -616,6 +632,12 @@ def upload_library(name, description, file):
         library_path = utils.check_library_path(library)
         file_path = utils.__get_uncompressed_file_upload_path(file)
         utils.copyrecursively(file_path+"/resources/", library_path)
+        # Los SVG que vienen en el .zip se limpian igual que los subidos a mano; los que no
+        # se pueden limpiar se eliminan (su símbolo queda sin imagen, nunca con código).
+        for res in os.listdir(library_path):
+            if res.lower().endswith('.svg') and not external_graphics.sanitize_svg_file(os.path.join(library_path, res)):
+                os.remove(os.path.join(library_path, res))
+                LOG.warning('upload_library: SVG descartado al importar (%s)', res)
         
         file_list = os.listdir(file_path)
         for file in file_list:
@@ -785,120 +807,3 @@ def upload_sld(file):
     rules = []             
     return rules
 
-
-def get_sld(request, type, json_data, layer_id, single_symbol=False):
-
-    layer = Layer.objects.get(id=layer_id)
-    layer.name = layer.datastore.workspace.name+':'+layer.name
-    is_default = False
-    if json_data.get('is_default'):
-        is_default = json_data.get('is_default')
-    style = Style(
-        name = json_data.get('name'),
-        title = json_data.get('title'),
-        is_default = is_default,
-        type = type
-    )
-    style.save()
-            
-    for r in json_data.get('rules'):
-        json_rule = r.get('rule') 
-        
-        filter_text = ""
-        if json_rule.get('filter').__len__() != 0:
-            filter_text = str(json.dumps(json_rule.get('filter')))
-            
-        rule = Rule(
-            style = style,
-            name = json_rule.get('name'),
-            title = json_rule.get('title'),
-            abstract = '',
-            filter = filter_text,
-            minscale = json_rule.get('minscale'),
-            maxscale = json_rule.get('maxscale'),
-            order = json_rule.get('order')
-        )
-        rule.save()
-        
-        for sym in r.get('symbolizers'): 
-            if sym.get('type') == 'PolygonSymbolizer':
-                json_sym = json.loads(sym.get('json'))
-                symbolizer = PolygonSymbolizer(
-                    rule = rule,
-                    order = int(sym.get('order')),
-                    fill = json_sym.get('fill'),
-                    fill_opacity = json_sym.get('fill_opacity'),
-                    stroke = json_sym.get('stroke'),
-                    stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity'),
-                    stroke_dash_array = json_sym.get('stroke_dash_array')
-                )
-                symbolizer.save()
-            
-            elif sym.get('type') == 'LineSymbolizer':
-                json_sym = json.loads(sym.get('json'))
-                symbolizer = LineSymbolizer(
-                    rule = rule,
-                    order = int(sym.get('order')),
-                    stroke = json_sym.get('stroke'),
-                    stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity'),
-                    stroke_dash_array = json_sym.get('stroke_dash_array')
-                )
-                symbolizer.save()
-                
-            elif sym.get('type') == 'MarkSymbolizer':
-                json_sym = json.loads(sym.get('json'))
-                symbolizer = MarkSymbolizer(
-                    rule = rule,
-                    order = int(sym.get('order')),
-                    opacity = json_sym.get('opacity'),
-                    size = json_sym.get('size'),
-                    rotation = json_sym.get('rotation'),
-                    well_known_name = json_sym.get('well_known_name'),
-                    fill = json_sym.get('fill'),
-                    fill_opacity = json_sym.get('fill_opacity'),
-                    stroke = json_sym.get('stroke'),
-                    stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity'),
-                    stroke_dash_array = json_sym.get('stroke_dash_array')
-                )
-                symbolizer.save()
-                
-            elif sym.get('type') == 'ExternalGraphicSymbolizer':
-                json_sym = json.loads(sym.get('json'))
-                symbolizer = ExternalGraphicSymbolizer(
-                    rule = rule,
-                    order = int(sym.get('order')),
-                    opacity = json_sym.get('opacity'),
-                    size = json_sym.get('size'),
-                    rotation = json_sym.get('rotation'),
-                    online_resource = json_sym.get('online_resource'),
-                    format = json_sym.get('format')                 
-                )
-                symbolizer.save()
-                
-            elif sym.get('type') == 'TextSymbolizer':
-                json_sym = json.loads(sym.get('json'))
-                symbolizer = TextSymbolizer(
-                    rule = rule,
-                    order = int(sym.get('order')),
-                    label = json_sym.get('label'),
-                    font_family = json_sym.get('font_family'),
-                    font_size = json_sym.get('font_size'),
-                    font_weight = json_sym.get('font_weight'),
-                    font_style = json_sym.get('font_style'),
-                    halo_fill = json_sym.get('halo_fill'),
-                    halo_fill_opacity = json_sym.get('halo_fill_opacity'),     
-                    halo_radius = json_sym.get('halo_radius'),
-                    fill = json_sym.get('fill'),
-                    fill_opacity = json_sym.get('fill_opacity'),
-                    anchor_point_x = json_sym.get('anchor_point_x'),
-                    anchor_point_y = json_sym.get('anchor_point_y'),
-                )
-                symbolizer.save()
-    
-    sld_body = sld_builder.build_sld(layer, style, single_symbol)
-    
-    style.delete()
-    return sld_body

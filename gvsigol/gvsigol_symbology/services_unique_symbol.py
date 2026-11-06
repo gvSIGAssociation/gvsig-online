@@ -22,15 +22,13 @@
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 
-from .models import Library, Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, TextSymbolizer
-from gvsigol_services import geographic_servers
-from gvsigol_services.models import Layer, Datastore, Workspace
-from gvsigol_core import utils as core_utils
-from gvsigol import settings
+from django.db import transaction
+from . import symbolizer_factory, conf_builder
+from .models import Style, StyleLayer, Rule, Symbolizer
 from . import utils, sld_builder
 import json
-import ast
 
+@transaction.atomic
 def create_style(request, json_data, layer, gs, is_preview=False):
     name = json_data.get('name')
     if is_preview:
@@ -78,85 +76,12 @@ def create_style(request, json_data, layer, gs, is_preview=False):
         rule.save()
 
         for sym in r.get('symbolizers'):
-            if sym.get('type') == 'PolygonSymbolizer':
-                json_sym = json.loads(sym.get('json'))
-                symbolizer = PolygonSymbolizer(
-                    rule = rule,
-                    order = int(sym.get('order')),
-                    fill = json_sym.get('fill'),
-                    fill_opacity = json_sym.get('fill_opacity'),
-                    stroke = json_sym.get('stroke'),
-                    stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity'),
-                    stroke_dash_array = json_sym.get('stroke_dash_array')
-                )
-                symbolizer.save()
-
-            elif sym.get('type') == 'LineSymbolizer':
-                json_sym = json.loads(sym.get('json'))
-                symbolizer = LineSymbolizer(
-                    rule = rule,
-                    order = int(sym.get('order')),
-                    stroke = json_sym.get('stroke'),
-                    stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity'),
-                    stroke_dash_array = json_sym.get('stroke_dash_array')
-                )
-                symbolizer.save()
-
-            elif sym.get('type') == 'MarkSymbolizer':
-                json_sym = json.loads(sym.get('json'))
-                symbolizer = MarkSymbolizer(
-                    rule = rule,
-                    order = int(sym.get('order')),
-                    opacity = json_sym.get('opacity'),
-                    size = json_sym.get('size'),
-                    rotation = json_sym.get('rotation'),
-                    well_known_name = json_sym.get('well_known_name'),
-                    fill = json_sym.get('fill'),
-                    fill_opacity = json_sym.get('fill_opacity'),
-                    stroke = json_sym.get('stroke'),
-                    stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity'),
-                    stroke_dash_array = json_sym.get('stroke_dash_array')
-                )
-                symbolizer.save()
-
-            elif sym.get('type') == 'ExternalGraphicSymbolizer':
-                json_sym = json.loads(sym.get('json'))
-                symbolizer = ExternalGraphicSymbolizer(
-                    rule = rule,
-                    order = int(sym.get('order')),
-                    opacity = json_sym.get('opacity'),
-                    size = json_sym.get('size'),
-                    rotation = json_sym.get('rotation'),
-                    online_resource = json_sym.get('online_resource'),
-                    format = json_sym.get('format')
-                )
-                symbolizer.save()
-
-            elif sym.get('type') == 'TextSymbolizer':
-                json_sym = json.loads(sym.get('json'))
-                symbolizer = TextSymbolizer(
-                    rule = rule,
-                    order = int(sym.get('order')),
-                    label = json_sym.get('label'),
-                    font_family = json_sym.get('font_family'),
-                    font_size = json_sym.get('font_size'),
-                    font_weight = json_sym.get('font_weight'),
-                    font_style = json_sym.get('font_style'),
-                    halo_fill = json_sym.get('halo_fill'),
-                    halo_fill_opacity = json_sym.get('halo_fill_opacity'),
-                    halo_radius = json_sym.get('halo_radius'),
-                    fill = json_sym.get('fill'),
-                    fill_opacity = json_sym.get('fill_opacity'),
-
-                )
-                symbolizer.save()
+            symbolizer_factory.create_symbolizer_from_json(rule, sym)
 
     sld_body = sld_builder.build_sld(layer, style)
     return utils.publish_style(gs, layer, style, sld_body, is_preview=is_preview)
 
+@transaction.atomic
 def update_style(request, json_data, layer, gs, style, is_preview=False):
     is_default = json_data.get('is_default', False)
     is_default = utils.set_default_style(layer, gs, style=style, is_preview=is_preview, is_default=is_default)
@@ -209,81 +134,7 @@ def update_style(request, json_data, layer, gs, style, is_preview=False):
         rule.save()
 
         for sym in r.get('symbolizers'):
-            if sym.get('type') == 'PolygonSymbolizer':
-                json_sym = json.loads(sym.get('json'))
-                symbolizer = PolygonSymbolizer(
-                    rule = rule,
-                    order = int(sym.get('order')),
-                    fill = json_sym.get('fill'),
-                    fill_opacity = json_sym.get('fill_opacity'),
-                    stroke = json_sym.get('stroke'),
-                    stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity'),
-                    stroke_dash_array = json_sym.get('stroke_dash_array')
-                )
-                symbolizer.save()
-
-            elif sym.get('type') == 'LineSymbolizer':
-                json_sym = json.loads(sym.get('json'))
-                symbolizer = LineSymbolizer(
-                    rule = rule,
-                    order = int(sym.get('order')),
-                    stroke = json_sym.get('stroke'),
-                    stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity'),
-                    stroke_dash_array = json_sym.get('stroke_dash_array')
-                )
-                symbolizer.save()
-
-            elif sym.get('type') == 'MarkSymbolizer':
-                json_sym = json.loads(sym.get('json'))
-                symbolizer = MarkSymbolizer(
-                    rule = rule,
-                    order = int(sym.get('order')),
-                    opacity = json_sym.get('opacity'),
-                    size = json_sym.get('size'),
-                    rotation = json_sym.get('rotation'),
-                    well_known_name = json_sym.get('well_known_name'),
-                    fill = json_sym.get('fill'),
-                    fill_opacity = json_sym.get('fill_opacity'),
-                    stroke = json_sym.get('stroke'),
-                    stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity'),
-                    stroke_dash_array = json_sym.get('stroke_dash_array')
-                )
-                symbolizer.save()
-
-            elif sym.get('type') == 'ExternalGraphicSymbolizer':
-                json_sym = json.loads(sym.get('json'))
-                symbolizer = ExternalGraphicSymbolizer(
-                    rule = rule,
-                    order = int(sym.get('order')),
-                    opacity = json_sym.get('opacity'),
-                    size = json_sym.get('size'),
-                    rotation = json_sym.get('rotation'),
-                    online_resource = json_sym.get('online_resource'),
-                    format = json_sym.get('format')
-                )
-                symbolizer.save()
-
-            elif sym.get('type') == 'TextSymbolizer':
-                json_sym = json.loads(sym.get('json'))
-                symbolizer = TextSymbolizer(
-                    rule = rule,
-                    order = int(sym.get('order')),
-                    label = json_sym.get('label'),
-                    font_family = json_sym.get('font_family'),
-                    font_size = json_sym.get('font_size'),
-                    font_weight = json_sym.get('font_weight'),
-                    font_style = json_sym.get('font_style'),
-                    halo_fill = json_sym.get('halo_fill'),
-                    halo_fill_opacity = json_sym.get('halo_fill_opacity'),
-                    halo_radius = json_sym.get('halo_radius'),
-                    fill = json_sym.get('fill'),
-                    fill_opacity = json_sym.get('fill_opacity'),
-
-                )
-                symbolizer.save()
+            symbolizer_factory.create_symbolizer_from_json(rule, sym)
 
     sld_body = sld_builder.build_sld(layer, style)
 
@@ -302,55 +153,4 @@ def update_style(request, json_data, layer, gs, style, is_preview=False):
 
 
 def get_conf(request, layer_id):
-    layer = Layer.objects.get(id=int(layer_id))
-    datastore = Datastore.objects.get(id=layer.datastore_id)
-    workspace = Workspace.objects.get(id=datastore.workspace_id)
-    gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-    index = utils.get_next_index(layer)
-    (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
-    fields = utils.get_fields(resource)
-    if fields and layer.conf:
-        new_fields = []
-        conf = None
-        if layer and layer.conf:
-            conf = ast.literal_eval(layer.conf)
-        for field in fields:
-            if conf:
-                for f in conf['fields']:
-                    if f['name'] == field['name']:
-                        for id, language in settings.LANGUAGES:
-                            if 'title-'+id in f:
-                                field['title-'+id] = f.get('title-'+id, field['name'])
-                            else:
-                                field['title-'+id] = f['name']
-            else:
-                for id, language in settings.LANGUAGES:
-                    field['title-'+id] = field['name']
-            new_fields.append(field)
-        fields = new_fields
-
-    feature_type = utils.get_feature_type(fields) or 'PointSymbolizer'
-    alphanumeric_fields = utils.get_alphanumeric_fields(fields) if fields else []
-
-    supported_fonts_str = gs.getSupportedFonts()
-    supported_fonts = json.loads(supported_fonts_str)
-    sorted_fonts = utils.sortFontsArray(supported_fonts.get("fonts"))
-    
-    layer_url = core_utils.get_wms_url(workspace)
-    layer_wfs_url = core_utils.get_wfs_url(workspace)
-
-    conf = {
-        'featureType': feature_type,
-        'json_alphanumeric_fields': json.dumps(alphanumeric_fields),
-        'fonts': sorted_fonts,
-        'layer_id': layer_id,
-        'layer_url': layer_url,
-        'layer_wfs_url': layer_wfs_url,
-        'layer_name': workspace.name + ':' + layer.name,
-        'style_name': workspace.name + '_' + layer.name + '_' + str(index),
-        'libraries': Library.objects.all(),
-        'supported_crs': json.dumps(core_utils.get_supported_crs()),
-        'preview_url': utils.get_preview_url(workspace, feature_type)
-    }
-    utils.set_auth_settings(request, conf)
-    return conf
+    return conf_builder.build_vector_conf(request, layer_id, alphanumeric_list=False, tolerate_empty_fields=True)

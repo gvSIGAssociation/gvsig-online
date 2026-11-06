@@ -22,6 +22,7 @@
 @author: Javi Rodrigo <jrodrigo@scolab.es>
 '''
 
+from django.db import transaction
 from .models import Library, Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, TextSymbolizer
 from gvsigol_services import geographic_servers
 from gvsigol_services.models import Layer, Datastore, Workspace
@@ -31,6 +32,7 @@ from . import utils, sld_builder
 import json
 import ast
 
+@transaction.atomic
 def create_style(style_name, style_title, is_default, sld, layer, gs, is_preview=False):
     if is_preview:
         style_name = style_name + '__tmp'
@@ -60,6 +62,7 @@ def create_style(style_name, style_title, is_default, sld, layer, gs, is_preview
     sld_body = utils.encode_xml(sld)
     return utils.publish_style(gs, layer, style, sld_body, is_preview=is_preview)
 
+@transaction.atomic
 def update_style(style_title, is_default, sld, layer, gs, style, is_preview=False):
     is_default = utils.set_default_style(layer, gs, style=style, is_preview=is_preview, is_default=is_default)
 

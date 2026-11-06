@@ -69,6 +69,8 @@ ClusteredPoints.prototype.updateLabelForm = function() {
 	$('#tab-content').append(this.label.getHaloTabUI());
 	$('#tab-content').append(this.label.getFilterTabUI());
 	$('.nav-tabs a[href="#label-general-tab"]').tab('show');
+	// Las opciones avanzadas de etiquetado no se ofrecen en puntos agrupados
+	this.label.advancedDisabled = true;
 	this.label.registerEvents();
 
 };
@@ -811,12 +813,15 @@ ClusteredPoints.prototype.update = function(layerId, styleId) {
 			if (response.success) {
 				location.href = "/gvsigonline/symbology/style_layer_list/";
 			} else {
-				alert('Error');
+				alertStyleError(response);
 				$("body").overlayout();
 			}
 
 		},
-		error: function(){}
+		error: function(){
+			alertStyleError(null);
+			$("body").overlayout();
+		}
 	});
 };
 

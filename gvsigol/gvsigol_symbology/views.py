@@ -44,10 +44,43 @@ import ast
 from gvsigol_services.backend_postgis import Introspect
 import re
 import logging
+from functools import wraps
+from django.views.decorators.http import require_POST, require_GET
+from . import geoserver_proxy
 logger = logging.getLogger("gvsigol")
+
+
+def _forbidden(request):
+    if request.method == 'POST' or request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return HttpResponseForbidden(json.dumps({'success': False, 'message': _('Not allowed')}),
+                                     content_type='application/json')
+    return render(request, 'illegal_operation.html', {}, status=403)
+
+
+def layer_manager_required(view):
+    """
+    Exige que el usuario pueda gestionar la capa (mismo criterio que style_layer_list:
+    superusuario, creador de la capa o rol gestor) y, si la URL lleva style_id, que el
+    estilo pertenezca a esa capa. La capa se toma de la URL o, si no, de POST['layer_id'].
+    """
+    @wraps(view)
+    def wrap(request, *args, **kwargs):
+        layer_id = kwargs.get('layer_id') or request.POST.get('layer_id')
+        try:
+            layer_id = int(layer_id)
+        except (TypeError, ValueError):
+            return _forbidden(request)
+        if not service_utils.can_manage_layer(request, layer_id):
+            return _forbidden(request)
+        style_id = kwargs.get('style_id')
+        if style_id is not None and not StyleLayer.objects.filter(style_id=style_id, layer_id=layer_id).exists():
+            return _forbidden(request)
+        return view(request, *args, **kwargs)
+    return wrap
 
 @login_required()
 @staff_required
+@layer_manager_required
 def get_raster_statistics(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     datastore = Datastore.objects.get(id=layer.datastore_id)
@@ -77,6 +110,38 @@ def delete_preview_style(request, name, gs):
             pass
         
     return success
+
+
+def _style_saved_response(request, style, layer, gs, preview_name):
+    """Pasos comunes tras guardar un estilo: borrar el preview temporal, recargar los
+    nodos de GeoServer y, si es el estilo por defecto, regenerar la miniatura y vaciar
+    la caché de teselas de la capa."""
+    delete_preview_style(request, preview_name, gs)
+    gs.reload_nodes()
+    if style.is_default:
+        gs.updateThumbnail(layer)
+        if getattr(layer, 'cached', False):
+            try:
+                do_layer_cache_clear(layer, gs)
+            except Exception:
+                logger.exception('Error vaciando la caché de la capa %s', getattr(layer, 'name', ''))
+    return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+
+
+def _rule_to_dict(r):
+    """Serialización de una regla para los editores (vistas *_update)."""
+    return {
+        'id': r.id,
+        'name': r.name,
+        'title': r.title,
+        'abstract': '',
+        'filter': r.filter,
+        'minscale': r.minscale,
+        'maxscale': r.maxscale,
+        'order': r.order,
+        'symbolizers': [utils.symbolizer_to_json(s)
+                        for s in Symbolizer.objects.filter(rule=r).order_by('order')],
+    }
 
 
 def style_failure_response():
@@ -121,7 +186,8 @@ def style_layer_list(request):
     # Construir la lista solo para los layers de la página actual
     ls = []
     for lyr in page_layers:
-        layerStyles = StyleLayer.objects.filter(layer=lyr)
+        # Usa el prefetch de stylelayer_set__style (antes se relanzaba la consulta por capa)
+        layerStyles = lyr.stylelayer_set.all()
         styles = []
         for layerStyle in layerStyles:
             if not layerStyle.style.name.endswith('__tmp'):
@@ -138,6 +204,7 @@ def style_layer_list(request):
 
 @login_required()
 @staff_required
+@layer_manager_required
 def style_layer_update(request, layer_id, style_id):
     style = Style.objects.get(id=int(style_id))
     
@@ -164,9 +231,13 @@ def style_layer_update(request, layer_id, style_id):
     
     elif (style.type == 'MC'):
         return redirect('map_heat_update', layer_id=layer_id, style_id=style_id)
+
+    # Tipos sin editor propio (p. ej. 'CH'): antes la vista devolvía None (error 500)
+    return redirect('style_layer_list')
     
 @login_required()
 @staff_required
+@layer_manager_required
 def style_layer_delete(request):
     if request.method == 'POST':
         style_id = request.POST.get('style_id')
@@ -174,8 +245,10 @@ def style_layer_delete(request):
         
         style = Style.objects.get(id=int(style_id))
         layer = Layer.objects.get(id=int(layer_id))
+        if not StyleLayer.objects.filter(style=style, layer=layer).exists():
+            return _forbidden(request)
         layer_styles = StyleLayer.objects.filter(layer=layer)
-        
+
         message = ''
         success = False
         if len(layer_styles) <= 1:
@@ -198,6 +271,7 @@ def style_layer_delete(request):
 
 @login_required()
 @staff_required
+@layer_manager_required
 def select_legend_type(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     
@@ -220,7 +294,7 @@ def select_legend_type(request, layer_id):
                 if r[5] == 'MULTIPOINT' or r[5] == 'POINT':
                     is_points = True
         except Exception as e:
-            print(str(e))
+            logger.exception('Error obteniendo las columnas geométricas de la capa %s', layer.name)
             raise
         
     is_view = False
@@ -238,6 +312,7 @@ def select_legend_type(request, layer_id):
 
 @login_required()
 @staff_required
+@layer_manager_required
 def custom_add(request, layer_id):
     if request.method == 'POST':
         style_name = request.POST.get('style_name')
@@ -251,16 +326,7 @@ def custom_add(request, layer_id):
         server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
         style = services_custom.create_style(style_name, style_title, is_default, sld, layer, server)
         if style:
-            delete_preview_style(request, style_name, server)
-            server.reload_nodes()
-            if style.is_default:
-                server.updateThumbnail(layer)
-                if getattr(layer, 'cached', False):
-                    try:
-                        do_layer_cache_clear(layer, server)
-                    except Exception:
-                        pass
-            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            return _style_saved_response(request, style, layer, server, style_name)
             
         else:
             return style_failure_response()
@@ -271,6 +337,7 @@ def custom_add(request, layer_id):
     
 @login_required()
 @staff_required
+@layer_manager_required
 def custom_update(request, layer_id, style_id):  
     if request.method == 'POST':
         style_name = request.POST.get('style_name')
@@ -285,16 +352,7 @@ def custom_update(request, layer_id, style_id):
         gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
         style = services_custom.update_style(style_title, is_default, sld, layer, gs, style)
         if style:
-            delete_preview_style(request, style_name, gs)
-            gs.reload_nodes()
-            if style.is_default:
-                gs.updateThumbnail(layer)
-                if getattr(layer, 'cached', False):
-                    try:
-                        do_layer_cache_clear(layer, gs)
-                    except Exception:
-                        pass
-            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            return _style_saved_response(request, style, layer, gs, style_name)
             
         else:
             return style_failure_response()
@@ -309,6 +367,7 @@ def custom_update(request, layer_id, style_id):
     
 @login_required()
 @staff_required
+@layer_manager_required
 def map_heat_add(request, layer_id):
     if request.method == 'POST':
         style_name = request.POST.get('style_name')
@@ -322,16 +381,7 @@ def map_heat_add(request, layer_id):
         server = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
         style = services_map_heat.create_style(style_name, style_title, is_default, sld, layer, server)
         if style:
-            delete_preview_style(request, style_name, server)
-            server.reload_nodes()
-            if style.is_default:
-                server.updateThumbnail(layer)
-                if getattr(layer, 'cached', False):
-                    try:
-                        do_layer_cache_clear(layer, server)
-                    except Exception:
-                        pass
-            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            return _style_saved_response(request, style, layer, server, style_name)
             
         else:
             return style_failure_response()
@@ -342,6 +392,7 @@ def map_heat_add(request, layer_id):
     
 @login_required()
 @staff_required
+@layer_manager_required
 def map_heat_update(request, layer_id, style_id):  
     if request.method == 'POST':
         style_name = request.POST.get('style_name')
@@ -356,16 +407,7 @@ def map_heat_update(request, layer_id, style_id):
         gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
         style = services_map_heat.update_style(style_title, is_default, sld, layer, gs, style)
         if style:
-            delete_preview_style(request, style_name, gs)
-            gs.reload_nodes()
-            if style.is_default:
-                gs.updateThumbnail(layer)
-                if getattr(layer, 'cached', False):
-                    try:
-                        do_layer_cache_clear(layer, gs)
-                    except Exception:
-                        pass
-            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            return _style_saved_response(request, style, layer, gs, style_name)
             
         else:
             return style_failure_response()
@@ -381,6 +423,7 @@ def map_heat_update(request, layer_id, style_id):
 
 @login_required()
 @staff_required
+@layer_manager_required
 def unique_symbol_add(request, layer_id):
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -392,16 +435,7 @@ def unique_symbol_add(request, layer_id):
         gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
         style = services_unique_symbol.create_style(request, json_data, layer, gs)
         if style:
-            delete_preview_style(request, json_data.get('name'), gs)
-            gs.reload_nodes()
-            if style.is_default:
-                gs.updateThumbnail(layer)
-                if getattr(layer, 'cached', False):
-                    try:
-                        do_layer_cache_clear(layer, gs)
-                    except Exception:
-                        pass
-            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            return _style_saved_response(request, style, layer, gs, json_data.get('name'))
             
         else:
             return style_failure_response()
@@ -412,6 +446,7 @@ def unique_symbol_add(request, layer_id):
     
 @login_required()
 @staff_required
+@layer_manager_required
 def unique_symbol_update(request, layer_id, style_id):  
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -422,16 +457,7 @@ def unique_symbol_update(request, layer_id, style_id):
         gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
         style = services_unique_symbol.update_style(request, json_data, layer, gs, style)
         if style:
-            delete_preview_style(request, json_data.get('name'), gs)
-            gs.reload_nodes()
-            if style.is_default:
-                gs.updateThumbnail(layer)
-                if getattr(layer, 'cached', False):
-                    try:
-                        do_layer_cache_clear(layer, gs)
-                    except Exception:
-                        pass
-            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            return _style_saved_response(request, style, layer, gs, json_data.get('name'))
             
         else:
             return style_failure_response()
@@ -443,21 +469,7 @@ def unique_symbol_update(request, layer_id, style_id):
         rules = []
         rule = None
         for r in style_rules:
-            symbolizers = []
-            for s in Symbolizer.objects.filter(rule=r).order_by('order'):
-                symbolizers.append(utils.symbolizer_to_json(s))
-                
-            rule = {
-                'id': r.id,
-                'name': r.name,
-                'title': r.title,
-                'abstract': '',
-                'filter': r.filter,
-                'minscale': r.minscale,
-                'maxscale': r.maxscale,
-                'order': r.order,
-                'symbolizers': symbolizers
-            }
+            rule = _rule_to_dict(r)
             rules.append(rule)
                          
         response = services_unique_symbol.get_conf(request, layer_id)
@@ -467,7 +479,7 @@ def unique_symbol_update(request, layer_id, style_id):
             response['minscale'] = int(style.minscale)
         if style.maxscale and int(style.maxscale) >=0:
             response['maxscale'] = int(style.maxscale)
-        response['rules'] = json.dumps(rules)   
+        response['rules'] = utils.json_for_script(rules)   
         for r in rules:
             if r and r['filter']:
                 if r['filter'] != '':
@@ -485,6 +497,7 @@ def unique_symbol_update(request, layer_id, style_id):
     
 @login_required()
 @staff_required
+@layer_manager_required
 def unique_values_add(request, layer_id, style_id=None):
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -496,16 +509,7 @@ def unique_values_add(request, layer_id, style_id=None):
         gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
         style = services_unique_values.create_style(request, json_data, layer, gs)
         if style:
-            delete_preview_style(request, json_data.get('name'), gs)
-            gs.reload_nodes()
-            if style.is_default:
-                gs.updateThumbnail(layer)
-                if getattr(layer, 'cached', False):
-                    try:
-                        do_layer_cache_clear(layer, gs)
-                    except Exception:
-                        pass
-            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            return _style_saved_response(request, style, layer, gs, json_data.get('name'))
             
         else:
             return style_failure_response()
@@ -519,6 +523,7 @@ def unique_values_add(request, layer_id, style_id=None):
     
 @login_required()
 @staff_required
+@layer_manager_required
 def unique_values_update(request, layer_id, style_id):  
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -531,16 +536,7 @@ def unique_values_update(request, layer_id, style_id):
         gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
         style = services_unique_values.update_style(request, json_data, layer, gs, style)
         if style:
-            delete_preview_style(request, json_data.get('name'), gs)
-            gs.reload_nodes()
-            if style.is_default:
-                gs.updateThumbnail(layer)
-                if getattr(layer, 'cached', False):
-                    try:
-                        do_layer_cache_clear(layer, gs)
-                    except Exception:
-                        pass
-            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            return _style_saved_response(request, style, layer, gs, json_data.get('name'))
             
         else:
             return style_failure_response()
@@ -551,21 +547,7 @@ def unique_values_update(request, layer_id, style_id):
         style_rules = Rule.objects.filter(style=style)
         rules = []
         for r in style_rules:
-            symbolizers = []
-            for s in Symbolizer.objects.filter(rule=r).order_by('order'):
-                symbolizers.append(utils.symbolizer_to_json(s))
-                
-            rule = {
-                'id': r.id,
-                'name': r.name,
-                'title': r.title,
-                'abstract': '',
-                'filter': r.filter,
-                'minscale': r.minscale,
-                'maxscale': r.maxscale,
-                'order': r.order,
-                'symbolizers': symbolizers
-            }
+            rule = _rule_to_dict(r)
             rules.append(rule)
                          
         response = services_unique_values.get_conf(request, layer_id)
@@ -575,7 +557,7 @@ def unique_values_update(request, layer_id, style_id):
             response['minscale'] = int(style.minscale)
         if style.maxscale and int(style.maxscale) >=0:
             response['maxscale'] = int(style.maxscale)
-        response['rules'] = json.dumps(rules)   
+        response['rules'] = utils.json_for_script(rules)   
         for r in rules:
             if r and r['filter']:
                 if r['filter'] != '':
@@ -609,6 +591,7 @@ def get_unique_values(request):
 
 @login_required()
 @staff_required
+@layer_manager_required
 def remove_temporal_preview(request):
     if request.method == 'POST':
         name = request.POST['name']
@@ -622,6 +605,7 @@ def remove_temporal_preview(request):
     
 @login_required()
 @staff_required
+@layer_manager_required
 def intervals_add(request, layer_id):
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -632,17 +616,8 @@ def intervals_add(request, layer_id):
         workspace = datastore.workspace
         gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
         style = services_intervals.create_style(request, json_data, layer, gs)
-        if style: 
-            delete_preview_style(request, json_data.get('name'), gs)
-            gs.reload_nodes()
-            if style.is_default:
-                gs.updateThumbnail(layer)
-                if getattr(layer, 'cached', False):
-                    try:
-                        do_layer_cache_clear(layer, gs)
-                    except Exception:
-                        pass
-            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+        if style:
+            return _style_saved_response(request, style, layer, gs, json_data.get('name'))
             
         else:
             return style_failure_response()
@@ -657,6 +632,7 @@ def intervals_add(request, layer_id):
 
 @login_required()
 @staff_required
+@layer_manager_required
 def update_preview(request, layer_id):
     if request.method == 'POST':
         style_type = request.POST['style']
@@ -756,6 +732,7 @@ def update_preview(request, layer_id):
  
 @login_required()
 @staff_required
+@layer_manager_required
 def intervals_update(request, layer_id, style_id):
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -768,16 +745,7 @@ def intervals_update(request, layer_id, style_id):
         gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
         style = services_intervals.update_style(request, json_data, layer, gs, style)
         if style:
-            delete_preview_style(request, json_data.get('name'), gs)
-            gs.reload_nodes()
-            if style.is_default:
-                gs.updateThumbnail(layer)
-                if getattr(layer, 'cached', False):
-                    try:
-                        do_layer_cache_clear(layer, gs)
-                    except Exception:
-                        pass
-            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            return _style_saved_response(request, style, layer, gs, json_data.get('name'))
             
         else:
             return style_failure_response()
@@ -789,21 +757,7 @@ def intervals_update(request, layer_id, style_id):
         rules = []
         num_rules = 0
         for r in style_rules:
-            symbolizers = []
-            for s in Symbolizer.objects.filter(rule=r).order_by('order'):
-                symbolizers.append(utils.symbolizer_to_json(s))
-                
-            rule = {
-                'id': r.id,
-                'name': r.name,
-                'title': r.title,
-                'abstract': '',
-                'filter': r.filter,
-                'minscale': r.minscale,
-                'maxscale': r.maxscale,
-                'order': r.order,
-                'symbolizers': symbolizers
-            }
+            rule = _rule_to_dict(r)
             rules.append(rule)
             if not r.name.endswith('_text'):
                 num_rules = num_rules + 1 
@@ -815,7 +769,7 @@ def intervals_update(request, layer_id, style_id):
             response['minscale'] = int(style.minscale)
         if style.maxscale and int(style.maxscale) >=0:
             response['maxscale'] = int(style.maxscale)
-        response['rules'] = json.dumps(rules)
+        response['rules'] = utils.json_for_script(rules)
         if rule and rule['filter']:
             filter_json = json.loads(rule['filter'])
             response['property_name'] = filter_json.get('field') 
@@ -838,6 +792,7 @@ def intervals_update(request, layer_id, style_id):
     
 @login_required()
 @staff_required
+@layer_manager_required
 def get_minmax_values(request):
     layer_id = request.POST.get('layer_id')
     field = request.POST.get('field')
@@ -858,6 +813,7 @@ def get_minmax_values(request):
     
 @login_required()
 @staff_required
+@layer_manager_required
 def clustered_points_add(request, layer_id):
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -870,16 +826,7 @@ def clustered_points_add(request, layer_id):
         gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
         style = services_clustered_points.create_style(request, json_data, layer, gs)
         if style:
-            delete_preview_style(request, json_data.get('name'), gs)
-            gs.reload_nodes()
-            if style.is_default:
-                gs.updateThumbnail(layer)
-                if getattr(layer, 'cached', False):
-                    try:
-                        do_layer_cache_clear(layer, gs)
-                    except Exception:
-                        pass
-            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            return _style_saved_response(request, style, layer, gs, json_data.get('name'))
             
         else:
             return style_failure_response()
@@ -890,6 +837,7 @@ def clustered_points_add(request, layer_id):
 
 @login_required()
 @staff_required
+@layer_manager_required
 def clustered_points_update(request, layer_id, style_id):  
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -901,16 +849,7 @@ def clustered_points_update(request, layer_id, style_id):
         gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
         style = services_clustered_points.update_style(request, json_data, layer, gs, style)
         if style:
-            delete_preview_style(request, json_data.get('name'), gs)
-            gs.reload_nodes()
-            if style.is_default:
-                gs.updateThumbnail(layer)
-                if getattr(layer, 'cached', False):
-                    try:
-                        do_layer_cache_clear(layer, gs)
-                    except Exception:
-                        pass
-            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            return _style_saved_response(request, style, layer, gs, json_data.get('name'))
             
         else:
             return style_failure_response()
@@ -921,21 +860,7 @@ def clustered_points_update(request, layer_id, style_id):
         style_rules = Rule.objects.filter(style=style)
         rules = []
         for r in style_rules:
-            symbolizers = []
-            for s in Symbolizer.objects.filter(rule=r).order_by('order'):
-                symbolizers.append(utils.symbolizer_to_json(s))
-                
-            rule = {
-                'id': r.id,
-                'name': r.name,
-                'title': r.title,
-                'abstract': '',
-                'filter': r.filter,
-                'minscale': r.minscale,
-                'maxscale': r.maxscale,
-                'order': r.order,
-                'symbolizers': symbolizers
-            }
+            rule = _rule_to_dict(r)
             rules.append(rule)
                          
         response = services_expressions.get_conf(request, layer_id)
@@ -945,13 +870,14 @@ def clustered_points_update(request, layer_id, style_id):
             response['minscale'] = int(style.minscale)
         if style.maxscale and int(style.maxscale) >=0:
             response['maxscale'] = int(style.maxscale)
-        response['rules'] = json.dumps(rules)        
+        response['rules'] = utils.json_for_script(rules)        
         
         return render(request, 'clustered_points_update.html', response)
     
 
 @login_required()
 @staff_required
+@layer_manager_required
 def expressions_add(request, layer_id):
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -960,17 +886,8 @@ def expressions_add(request, layer_id):
         layer = Layer.objects.get(id=int(layer_id))
         gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
         style =services_expressions.create_style(request, json_data, layer, gs)
-        if style: 
-            delete_preview_style(request, json_data.get('name'), gs)
-            gs.reload_nodes()
-            if style.is_default:
-                gs.updateThumbnail(layer)
-                if getattr(layer, 'cached', False):
-                    try:
-                        do_layer_cache_clear(layer, gs)
-                    except Exception:
-                        pass
-            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+        if style:
+            return _style_saved_response(request, style, layer, gs, json_data.get('name'))
             
         else:
             return style_failure_response()
@@ -981,24 +898,7 @@ def expressions_add(request, layer_id):
     
 @login_required()
 @staff_required
-def create_sld(request):  
-    if request.method == 'POST':
-        style_data = request.POST['style_data']
-        layer_id = request.POST['layer_id']
-        json_data = json.loads(style_data)
-        
-        single_symbol=False
-        if 'single_symbol' in request.POST:
-            single_symbol = request.POST['single_symbol']
-        
-        sld = services_library.get_sld(request, type, json_data, layer_id, single_symbol=='true')           
-        return HttpResponse(json.dumps({'success': True, 'sld': sld}, indent=4), content_type='application/json')
-            
-    return HttpResponse(json.dumps({'success': False}, indent=4), content_type='application/json')
-        
-  
-@login_required()
-@staff_required
+@layer_manager_required
 def expressions_update(request, layer_id, style_id):  
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -1009,16 +909,7 @@ def expressions_update(request, layer_id, style_id):
         gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
         style = services_expressions.update_style(request, json_data, layer, gs, style)
         if style:
-            delete_preview_style(request, json_data.get('name'), gs)
-            gs.reload_nodes()
-            if style.is_default:
-                gs.updateThumbnail(layer)
-                if getattr(layer, 'cached', False):
-                    try:
-                        do_layer_cache_clear(layer, gs)
-                    except Exception:
-                        pass
-            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            return _style_saved_response(request, style, layer, gs, json_data.get('name'))
             
         else:
             return style_failure_response()
@@ -1029,21 +920,7 @@ def expressions_update(request, layer_id, style_id):
         style_rules = Rule.objects.filter(style=style)
         rules = []
         for r in style_rules:
-            symbolizers = []
-            for s in Symbolizer.objects.filter(rule=r).order_by('order'):
-                symbolizers.append(utils.symbolizer_to_json(s))
-                
-            rule = {
-                'id': r.id,
-                'name': r.name,
-                'title': r.title,
-                'abstract': '',
-                'filter': r.filter,
-                'minscale': r.minscale,
-                'maxscale': r.maxscale,
-                'order': r.order,
-                'symbolizers': symbolizers
-            }
+            rule = _rule_to_dict(r)
             rules.append(rule)
                          
         response = services_expressions.get_conf(request, layer_id)
@@ -1053,13 +930,14 @@ def expressions_update(request, layer_id, style_id):
             response['minscale'] = int(style.minscale)
         if style.maxscale and int(style.maxscale) >=0:
             response['maxscale'] = int(style.maxscale)
-        response['rules'] = json.dumps(rules)        
+        response['rules'] = utils.json_for_script(rules)        
         
         return render(request, 'expressions_update.html', response)
     
     
 @login_required()
 @staff_required
+@layer_manager_required
 def color_table_add(request, layer_id):
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -1073,16 +951,7 @@ def color_table_add(request, layer_id):
         gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
         style = services_color_table.create_style(request, json_data, layer, gs, False, has_custom_legend)
         if style:
-            delete_preview_style(request, json_data.get('name'), gs)
-            gs.reload_nodes()
-            if style.is_default:
-                gs.updateThumbnail(layer)
-                if getattr(layer, 'cached', False):
-                    try:
-                        do_layer_cache_clear(layer, gs)
-                    except Exception:
-                        pass
-            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            return _style_saved_response(request, style, layer, gs, json_data.get('name'))
             
         else:
             return style_failure_response()
@@ -1095,6 +964,7 @@ def color_table_add(request, layer_id):
     
 @login_required()
 @staff_required
+@layer_manager_required
 def color_table_update(request, layer_id, style_id):  
     if request.method == 'POST':
         style_data = request.POST['style_data']
@@ -1106,16 +976,7 @@ def color_table_update(request, layer_id, style_id):
         gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
         style = services_color_table.update_style(request, json_data, layer, gs, style, False, has_custom_legend)
         if style:
-            delete_preview_style(request, json_data.get('name'), gs)
-            gs.reload_nodes()
-            if style.is_default:
-                gs.updateThumbnail(layer)
-                if getattr(layer, 'cached', False):
-                    try:
-                        do_layer_cache_clear(layer, gs)
-                    except Exception:
-                        pass
-            return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
+            return _style_saved_response(request, style, layer, gs, json_data.get('name'))
             
         else:
             return style_failure_response()
@@ -1149,7 +1010,7 @@ def color_table_update(request, layer_id, style_id):
             response['minscale'] = int(style.minscale)
         if style.maxscale and int(style.maxscale) >=0:
             response['maxscale'] = int(style.maxscale)
-        response['rule'] = json.dumps(rule)        
+        response['rule'] = utils.json_for_script(rule)        
         
         color_ramps = ColorRampLibrary.objects.all()        
         response["ramp_libraries"] = color_ramps
@@ -1164,6 +1025,8 @@ def sld_download(request, style_id):
     style_layer = StyleLayer.objects.filter(style=style).select_related('layer').first()
     if style_layer is None:
         return HttpResponse(status=404)
+    if not service_utils.can_manage_layer(request, style_layer.layer):
+        return _forbidden(request)
     layer = style_layer.layer
     datastore = Datastore.objects.get(id=layer.datastore_id)
     workspace = Workspace.objects.get(id=datastore.workspace_id)
@@ -1179,6 +1042,7 @@ def sld_download(request, style_id):
 
 @login_required()
 @staff_required
+@layer_manager_required
 def sld_import(request, layer_id):
     layer = Layer.objects.get(id=int(layer_id))
     index = len(StyleLayer.objects.filter(layer=layer))
@@ -1223,14 +1087,6 @@ def sld_import(request, layer_id):
         }
         
         return render(request, 'sld_import.html', response)
-
-
-@staff_required
-def color_ramp_list(request):
-    response = {
-        'color_ramps': ColorRamp.objects.all()
-    }
-    return render(request, 'color_ramp_list.html', response)
 
 
 @login_required()
@@ -1322,6 +1178,7 @@ def color_ramp_library_export(request, color_ramp_library_id):
 
 @login_required()
 @staff_required
+@require_POST
 def color_ramp_delete(request, color_ramp_id):
     colorramp = ColorRamp.objects.get(id=int(color_ramp_id))
     folder_id = colorramp.color_ramp_folder.id
@@ -1386,6 +1243,7 @@ def color_ramp_library_update(request, color_ramp_library_id):
 
 @login_required()
 @staff_required
+@require_POST
 def color_ramp_library_delete(request, color_ramp_library_id):
     lib = ColorRampLibrary.objects.get(id=int(color_ramp_library_id))
     lib.delete()
@@ -1492,6 +1350,7 @@ def color_ramp_folder_update(request, color_ramp_folder_id):
 
 @login_required()
 @staff_required
+@require_POST
 def color_ramp_folder_delete(request, color_ramp_folder_id):
     folder = ColorRampFolder.objects.get(id=int(color_ramp_folder_id))
     library_id = folder.color_ramp_library.id
@@ -1563,7 +1422,7 @@ def library_update(request, library_id):
                 'minscale': -1,
                 'maxscale': -1,
                 'order': r.order,
-                'symbolizers': json.dumps(symbolizers)
+                'symbolizers': utils.json_for_script(symbolizers)
             }
             rules.append(rule)
         
@@ -1703,6 +1562,7 @@ def get_symbols_from_library(request):
     
 @login_required()
 @staff_required
+@require_POST
 def library_delete(request, library_id):
     gs = geographic_servers.get_instance().get_default_server()
     library_rules = LibraryRule.objects.filter(library_id=library_id)
@@ -1877,3 +1737,36 @@ def get_ol_style(layer):
     except Exception as e:
         return None
         
+
+
+@login_required()
+@staff_required
+@require_GET
+def geoserver_proxy_view(request):
+    """
+    Reenvía a GeoServer peticiones WMS/WFS de lectura de la previsualización con las
+    credenciales de la sesión del usuario (ver geoserver_proxy.py). Solo lo usa el
+    navegador cuando la sesión tiene contraseña y no hay token OIDC.
+    """
+    extra_params = [(k, v) for k, v in request.GET.items() if k != 'url']
+    servers = []
+    for srv in Server.objects.all():
+        if not srv.frontend_url:
+            continue
+        gs = geographic_servers.get_instance().get_server_by_id(srv.id)
+        servers.append((srv.frontend_url, getattr(gs, 'conf_url', None)))
+    try:
+        absolute_url, params = geoserver_proxy.resolve_target(
+            request.GET.get('url'), extra_params, servers)
+    except geoserver_proxy.ProxyNotAllowed as e:
+        logger.warning('geoserver_proxy rechazado: %s', e)
+        return HttpResponseForbidden()
+    try:
+        resp = geoserver_proxy.forward(service_utils.getUserAuthSession(request), absolute_url, params)
+    except Exception:
+        logger.exception('geoserver_proxy: error reenviando a %s', absolute_url)
+        return HttpResponse(status=502)
+    response = HttpResponse(resp.content, status=resp.status_code,
+                            content_type=resp.headers.get('Content-Type', 'application/octet-stream'))
+    response['Cache-Control'] = 'private, no-store'
+    return response

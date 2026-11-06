@@ -4,52 +4,58 @@
 
 {% block content %}
 <form role="form" method="post" enctype="multipart/form-data" action="/gvsigonline/symbology/library_import/">
-	<div class="row">
-		<div class="col-md-12">
-			<div class="pf-topbar">
-				{% csrf_token %}
+{% csrf_token %}
+<div class="gol-sym-page">
+	<div class="gol-sym-page-header">
+		<nav aria-label="{% trans "Breadcrumb" context "symbology" %}">
+			<ol class="gol-sym-crumbs">
+				<li>{% trans "Symbology" %}</li>
+				<li><a href="{% url 'library_list' %}">{% trans "Symbol libraries" %}</a></li>
+				<li aria-current="page">{% trans "Import library" %}</li>
+			</ol>
+		</nav>
+		<h1 class="gol-sym-page-title"><span class="gol-sym-page-icon" aria-hidden="true"><i class="fa fa-upload"></i></span>{% trans "Import library" %}</h1>
+		<p class="gol-sym-page-lead">{% trans "Create a symbol library from a file exported from gvSIG Online." context "symbology" %}</p>
+	</div>
+	<div class="gol-sym-page-grid">
+		<div class="pl-panel gol-sym-form-card gol-sym-page-card">
+			<div class="pl-panel__body">
+				<h2 class="gol-sym-card-title">{% trans "Library details" context "symbology" %}</h2>
+				{% if message %}
+				<div class="pf-error-msg force-show gol-sym-alert" role="alert">
+					<i class="fa fa-exclamation-circle" aria-hidden="true"></i><span>{{ message }}</span>
+				</div>
+				{% endif %}
+				<div class="form-group">
+					<label for="library-name">{% trans "Name" %} <span class="gol-sym-required" aria-hidden="true">*</span></label>
+					<input placeholder="{% trans 'Name' %}" name="library-name" id="library-name" type="text" class="form-control" maxlength="100" autocomplete="off" spellcheck="false" data-gol-sym-name aria-describedby="library-name-hint">
+					<p class="gol-sym-field-hint" id="library-name-hint">{% trans "Use only lowercase letters, numbers and underscores" %}</p>
+				</div>
+				<div class="form-group">
+					<label for="library-description">{% trans "Description" %} <span class="gol-sym-optional">{% trans "(optional)" context "symbology" %}</span></label>
+					<textarea placeholder="{% trans 'Description' %}" name="library-description" id="library-description" class="form-control gol-sym-textarea" rows="3" maxlength="500"></textarea>
+				</div>
+				<div class="form-group">
+					<label for="library-file">{% trans "Select file" %} <span class="gol-sym-required" aria-hidden="true">*</span></label>
+					<input id="library-file" name="library-file" type="file" accept=".zip" class="file" data-show-preview="true">
+					<p class="gol-sym-field-hint"><i class="fa fa-info-circle" aria-hidden="true"></i>{% blocktrans with ext=".zip" %}Accepted format: {{ ext }}{% endblocktrans %}</p>
+				</div>
+			</div>
+			<div class="gol-sym-form-footer">
+				<a href="{% url 'library_list' %}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
 				<button type="submit" class="btn-pf-save save-button"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
 			</div>
-			<div class="pl-panel">
-				{% if form.errors %}
-				<div class="pf-error-msg force-show">
-					<ul>
-					{% for field in form %}
-						{% if field.errors %}
-							<li>{{field.label}}. {{ field.errors|striptags }}</li>
-						{% endif %}
-					{% endfor %}
-					</ul>
-				</div>
-				{% endif %}
-				{% if message %}
-				<div class="pf-error-msg force-show">
-					<p>* {{ message }}</p>
-				</div>
-				{% endif %}
-				<div class="pl-panel__body with-padding">
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label>{% trans "Name" %}</label>
-							<input placeholder="{% trans 'Name' %}" name="library-name" id="library-name" type="text" class="form-control">
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label>{% trans "Description" %}</label>
-				    		<input placeholder="{% trans 'Description' %}" name="library-description" id="library-description" type="text" class="form-control">
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-12 form-group">
-							<label>{% trans "Select file" %}</label>
-							<input id="library-file" name="library-file" type="file" accept=".zip" class="file" data-show-preview="true">
-						</div>
-					</div>
-				</div>
-			</div>
 		</div>
+		<aside class="gol-sym-aside">
+			<h2 class="gol-sym-aside-title"><i class="fa fa-file-archive-o" aria-hidden="true"></i>{% trans "About the file" context "symbology" %}</h2>
+			<ul class="gol-sym-aside-list gol-sym-aside-list--info">
+				<li>{% trans "Use the .zip file obtained when exporting a symbol library." context "symbology" %}</li>
+				<li>{% trans "A new library is created; existing libraries are not modified." context "symbology" %}</li>
+				<li>{% trans "Large files may take a while to import." context "symbology" %}</li>
+			</ul>
+		</aside>
 	</div>
+</div>
 </form>
 {% endblock %}
 {% block extra-scripts %}

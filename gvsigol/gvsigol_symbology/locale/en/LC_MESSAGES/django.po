@@ -1255,3 +1255,481 @@ msgstr "Enter the attribute value"
 #: gvsigol_symbology/templates/unique_values_update.html
 msgid "Add"
 msgstr "Add"
+
+#: gvsigol_symbology/templates/style_layer_list.html
+msgid "(default)"
+msgstr "(default)"
+
+#: gvsigol_symbology/templates/style_layer_list.html
+msgid "Actions are applied to the style selected in each row"
+msgstr "Actions are applied to the style selected in each row"
+
+#: gvsigol_symbology/templates/select_legend_type.html
+msgid "Back to styles list"
+msgstr "Back to styles list"
+
+#: gvsigol_symbology/templates/select_legend_type.html
+msgid "Choose the type of legend to create"
+msgstr "Choose the type of legend to create"
+
+#: gvsigol_symbology/templates/unique_values_add.html
+msgid "Style properties"
+msgstr "Style properties"
+
+#: gvsigol_symbology/templates/unique_values_add.html
+msgid "Map preview"
+msgstr "Map preview"
+
+#: gvsigol_symbology/templates/unique_values_add.html
+msgid "Rules"
+msgstr "Rules"
+
+#: gvsigol_symbology/templates/unique_symbol_add.html
+msgid "Symbol"
+msgstr "Symbol"
+
+#: gvsigol_symbology/templates/custom_add.html
+msgid "Style definition (SLD)"
+msgstr "Style definition (SLD)"
+
+#: gvsigol_symbology/templates/map_heat_add.html
+msgid "Heatmap settings"
+msgstr "Heatmap settings"
+
+#: gvsigol_symbology/templates/unique_values_add.html
+msgid "Edit rule"
+msgstr "Edit rule"
+
+#: gvsigol_symbology/templates/expressions_add.html
+msgid "Edit filter"
+msgstr "Edit filter"
+
+#: gvsigol_symbology/templates/library_add.html
+msgid "Back to list"
+msgstr "Back to list"
+
+#: gvsigol_symbology/templates/color_ramp_folder_add.html
+msgid "Back to library"
+msgstr "Back to library"
+
+#: gvsigol_symbology/templates/library_add.html
+msgid "Use only lowercase letters, numbers and underscores"
+msgstr "Use only lowercase letters, numbers and underscores"
+
+#: gvsigol_symbology/templates/library_import.html
+msgid "Accepted format: %(ext)s"
+msgstr "Accepted format: %(ext)s"
+
+#: gvsigol_symbology/templates/color_ramp_folder_update.html
+msgid "Update ramp category"
+msgstr "Update ramp category"
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "Back to category"
+msgstr "Back to category"
+
+#: gvsigol_symbology/templates/symbol_add.html
+msgid "Library symbol"
+msgstr "Library symbol"
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "Color ramp"
+msgstr "Color ramp"
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "Ramp preview"
+msgstr "Ramp preview"
+
+#: gvsigol_symbology/templates/color_ramp_update.html
+msgid "Update color ramp"
+msgstr "Update color ramp"
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "Ramp name"
+msgstr "Ramp name"
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "How steps work"
+msgstr "How steps work"
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "Percentage"
+msgstr "Percentage"
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "Color"
+msgstr "Color"
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "Transparency"
+msgstr "Transparency"
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "position of the color along the ramp (0 = start, 100 = end)."
+msgstr "position of the color along the ramp (0 = start, 100 = end)."
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "color the ramp takes at that position; between steps it is interpolated."
+msgstr "color the ramp takes at that position; between steps it is interpolated."
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "from 0 (transparent) to 1 (opaque)."
+msgstr "from 0 (transparent) to 1 (opaque)."
+
+#: gvsigol_symbology/templates/color_ramp_add.html
+msgid "Drag the handle of a row to reorder the steps. At least two steps are required."
+msgstr "Drag the handle of a row to reorder the steps. At least two steps are required."
+
+#: gvsigol_symbology/templates/library_update.html
+msgid "This library has no symbols yet"
+msgstr "This library has no symbols yet"
+
+#: gvsigol_symbology/templates/library_update.html
+msgid "Use the buttons above to add the first point, line, polygon or external graphic."
+msgstr "Use the buttons above to add the first point, line, polygon or external graphic."
+
+#: gvsigol_symbology/templates/library_update.html
+msgctxt "symbology"
+msgid "Point"
+msgstr "Point"
+
+#: gvsigol_symbology/templates/library_update.html
+msgctxt "symbology"
+msgid "Line"
+msgstr "Line"
+
+#: gvsigol_symbology/templates/library_update.html
+msgctxt "symbology"
+msgid "Polygon"
+msgstr "Polygon"
+
+#: gvsigol_symbology/templates/library_update.html
+msgctxt "symbology"
+msgid "External graphic"
+msgstr "External graphic"
+
+#: gvsigol_symbology/templates/unique_values_add.html
+msgid "There are no rules yet. Use the toolbar above to create them."
+msgstr "There are no rules yet. Use the toolbar above to create them."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "(optional)"
+msgstr "(optional)"
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "A new library is created; existing libraries are not modified."
+msgstr "A new library is created; existing libraries are not modified."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "About the file"
+msgstr "About the file"
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Add color ramp library"
+msgstr "Add color ramp library"
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Add color ramps and use them in your legends."
+msgstr "Add color ramps and use them in your legends."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Add color ramps to it."
+msgstr "Add color ramps to it."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Add point, line and polygon symbols to it."
+msgstr "Add point, line and polygon symbols to it."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Breadcrumb"
+msgstr "Breadcrumb"
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Categories organize the color ramps of a library."
+msgstr "Categories organize the color ramps of a library."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Category details"
+msgstr "Category details"
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Create a color ramp library from a file exported from gvSIG Online."
+msgstr "Create a color ramp library from a file exported from gvSIG Online."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Create a layer style from an SLD file."
+msgstr "Create a layer style from an SLD file."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Create a symbol library from a file exported from gvSIG Online."
+msgstr "Create a symbol library from a file exported from gvSIG Online."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Create categories to organize the ramps."
+msgstr "Create categories to organize the ramps."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Edit the description and manage the categories of color ramps."
+msgstr "Edit the description and manage the categories of color ramps."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Edit the description and manage the color ramps of this category."
+msgstr "Edit the description and manage the color ramps of this category."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Group color ramps by category to use them in your legends."
+msgstr "Group color ramps by category to use them in your legends."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Group reusable symbols to use them in any layer style."
+msgstr "Group reusable symbols to use them in any layer style."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Import color ramp library"
+msgstr "Import color ramp library"
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Labels exported from gvSIG Online keep their advanced options."
+msgstr "Labels exported from gvSIG Online keep their advanced options."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Large files may take a while to import."
+msgstr "Large files may take a while to import."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Library details"
+msgstr "Library details"
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Next steps"
+msgstr "Next steps"
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Or import a library from a .zip file"
+msgstr "Or import a library from a .zip file"
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Rules, filters, scales and symbols are imported."
+msgstr "Rules, filters, scales and symbols are imported."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "SLD 1.0 files are supported."
+msgstr "SLD 1.0 files are supported."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Save the category."
+msgstr "Save the category."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Save the library."
+msgstr "Save the library."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Style details"
+msgstr "Style details"
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "The name is assigned automatically from the layer."
+msgstr "The name is assigned automatically from the layer."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Use the .zip file obtained when exporting a color ramp library."
+msgstr "Use the .zip file obtained when exporting a color ramp library."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Use the .zip file obtained when exporting a symbol library."
+msgstr "Use the .zip file obtained when exporting a symbol library."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Use them when you create interval legends."
+msgstr "Use them when you create interval legends."
+
+#: templates/library_add.html
+msgctxt "symbology"
+msgid "Use them when you edit the style of a layer."
+msgstr "Use them when you edit the style of a layer."
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "Add symbol"
+msgstr "Add symbol"
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "All"
+msgstr "All"
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "Filter by type"
+msgstr "Filter by type"
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "No description"
+msgstr "No description"
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "No symbols match the filter."
+msgstr "No symbols match the filter."
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "Search symbols"
+msgstr "Search symbols"
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "Symbols by type"
+msgstr "Symbols by type"
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "This category has no color ramps yet."
+msgstr "This category has no color ramps yet."
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "Use «Add symbol» to add the first point, line, polygon or external graphic."
+msgstr "Use «Add symbol» to add the first point, line, polygon or external graphic."
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "Edit description"
+msgstr "Edit description"
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "All the features of the layer are drawn with the same symbol. It is the simplest option, ideal for showing where things are without distinguishing categories."
+msgstr "All the features of the layer are drawn with the same symbol. It is the simplest option, ideal for showing where things are without distinguishing categories."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Assigns a different symbol to each distinct value of a field. Use it when the data are classified in categories or types."
+msgstr "Assigns a different symbol to each distinct value of a field. Use it when the data are classified in categories or types."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Assigns colors to the values of the raster, either by exact value or as a continuous ramp between values."
+msgstr "Assigns colors to the values of the raster, either by exact value or as a continuous ramp between values."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Each rule has its own filter combining fields and conditions (AND / OR), its own symbol and its own scales. It is the most flexible option."
+msgstr "Each rule has its own filter combining fields and conditions (AND / OR), its own symbol and its own scales. It is the most flexible option."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Elevation models, land cover classes."
+msgstr "Elevation models, land cover classes."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Example"
+msgstr "Example"
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Groups nearby points into a single symbol that shows how many there are, and separates them as you zoom in. Avoids overloaded maps."
+msgstr "Groups nearby points into a single symbol that shows how many there are, and separates them as you zoom in. Avoids overloaded maps."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Groups the values of a numeric field into ranges and gives each range a symbol, with a color ramp if you wish. Suitable for quantities that vary continuously."
+msgstr "Groups the values of a numeric field into ranges and gives each range a symbol, with a color ramp if you wish. Suitable for quantities that vary continuously."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Incidents, accidents, sightings."
+msgstr "Incidents, accidents, sightings."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Land use, road type, protection category."
+msgstr "Land use, road type, protection category."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Municipal boundaries, a road network, protected areas."
+msgstr "Municipal boundaries, a road network, protected areas."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Population, density, area, income."
+msgstr "Population, density, area, income."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Shows the density of the features as a continuous color surface instead of individual symbols. You choose the radius and, optionally, a field to weight each feature."
+msgstr "Shows the density of the features as a continuous color surface instead of individual symbols. You choose the radius and, optionally, a field to weight each feature."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Styles prepared in QGIS or GeoServer."
+msgstr "Styles prepared in QGIS or GeoServer."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Thousands of points of interest in a city."
+msgstr "Thousands of points of interest in a city."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "Write or paste the SLD of the style directly in an editor. For advanced users who need options that the other legends do not offer."
+msgstr "Write or paste the SLD of the style directly in an editor. For advanced users who need options that the other legends do not offer."
+
+#: templates/select_legend_type.html
+msgctxt "symbology"
+msgid "«type = school AND students > 500»."
+msgstr "«type = school AND students > 500»."
+
+#: templates/external_graphic_add.html
+msgctxt "symbology"
+msgid "PNG or SVG. SVG symbols are scaled without losing quality; scripts and external references are removed when saving."
+msgstr "PNG or SVG. SVG symbols are scaled without losing quality; scripts and external references are removed when saving."
+
+#: external_graphics.py
+msgid "The SVG file is too large (maximum 1 MB)."
+msgstr "The SVG file is too large (maximum 1 MB)."
+
+#: external_graphics.py
+msgid "The SVG file is not valid."
+msgstr "The SVG file is not valid."
+
+#: external_graphics.py
+msgid "The SVG file must define its size (width and height, or a viewBox)."
+msgstr "The SVG file must define its size (width and height, or a viewBox)."

@@ -3,56 +3,56 @@
 {% load i18n %}
 
 {% block content %}
-	<div class="row">
-		<div class="col-md-12">
-			<div class="pl-panel">
-
-				<form role="form" method="post" action="/gvsigonline/symbology/color_ramp_folder_add/{{library.id}}/">
-					<div class="pl-panel__header">
-						<h3 class="pl-panel__title"><i class="fa fa-folder-open"></i>{% trans "Add Ramp category" %}</h3>
-						<div class="pl-panel__actions">
-							<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
-						</div>
-					</div>
-
-					<div class="pl-panel__body with-padding">
-					{% csrf_token %}
-						{% if form.errors %}
-						<div class="pf-error-msg force-show">
-							<ul>
-							{% for field in form %}
-								{% if field.errors %}
-									<li>{{field.label}}. {{ field.errors|striptags }}</li>
-								{% endif %}
-							{% endfor %}
-							</ul>
-						</div>
-						{% endif %}
-						{% if message %}
-						<div class="pf-error-msg force-show">
-							<p>* {{ message }}</p>
-						</div>
-						{% endif %}
-										
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label>{% trans "Name" %}</label>
-								<input placeholder="{% trans 'Name' %}" name="library-name" id="library-name" type="text" class="form-control">	
-							</div>
-						</div>
-										
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label>{% trans "Description" %}</label>
-					    		<input placeholder="{% trans 'Description' %}" name="library-description" id="library-description" type="text" class="form-control">
-							</div>
-						</div>
-										
-	            	</div>
-				</form>		
-			</div>
-		</div>				
+<form role="form" method="post" action="/gvsigonline/symbology/color_ramp_folder_add/{{library.id}}/">
+{% csrf_token %}
+<div class="gol-sym-page">
+	<div class="gol-sym-page-header">
+		<nav aria-label="{% trans "Breadcrumb" context "symbology" %}">
+			<ol class="gol-sym-crumbs">
+				<li>{% trans "Symbology" %}</li>
+				<li><a href="{% url 'color_ramp_library_list' %}">{% trans "Color ramps" %}</a></li>
+				<li><a href="{% url 'color_ramp_library_update' library.id %}">{{ library.name }}</a></li>
+				<li aria-current="page">{% trans "Add Ramp category" %}</li>
+			</ol>
+		</nav>
+		<h1 class="gol-sym-page-title"><span class="gol-sym-page-icon" aria-hidden="true"><i class="fa fa-folder-open"></i></span>{% trans "Add Ramp category" %}</h1>
+		<p class="gol-sym-page-lead">{% trans "Categories organize the color ramps of a library." context "symbology" %}</p>
 	</div>
+	<div class="gol-sym-page-grid">
+		<div class="pl-panel gol-sym-form-card gol-sym-page-card">
+			<div class="pl-panel__body">
+				<h2 class="gol-sym-card-title">{% trans "Category details" context "symbology" %}</h2>
+				{% if message %}
+				<div class="pf-error-msg force-show gol-sym-alert" role="alert">
+					<i class="fa fa-exclamation-circle" aria-hidden="true"></i><span>{{ message }}</span>
+				</div>
+				{% endif %}
+				<div class="form-group">
+					<label for="library-name">{% trans "Name" %} <span class="gol-sym-required" aria-hidden="true">*</span></label>
+					<input placeholder="{% trans 'Name' %}" name="library-name" id="library-name" type="text" class="form-control" maxlength="100" autocomplete="off" spellcheck="false" data-gol-sym-name aria-describedby="library-name-hint">
+					<p class="gol-sym-field-hint" id="library-name-hint">{% trans "Use only lowercase letters, numbers and underscores" %}</p>
+				</div>
+				<div class="form-group">
+					<label for="library-description">{% trans "Description" %} <span class="gol-sym-optional">{% trans "(optional)" context "symbology" %}</span></label>
+					<textarea placeholder="{% trans 'Description' %}" name="library-description" id="library-description" class="form-control gol-sym-textarea" rows="3" maxlength="500"></textarea>
+				</div>
+			</div>
+			<div class="gol-sym-form-footer">
+				<a href="{% url 'color_ramp_library_update' library.id %}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
+				<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+			</div>
+		</div>
+		<aside class="gol-sym-aside">
+			<h2 class="gol-sym-aside-title"><i class="fa fa-lightbulb-o" aria-hidden="true"></i>{% trans "Next steps" context "symbology" %}</h2>
+			<ol class="gol-sym-aside-list">
+				<li>{% trans "Save the category." context "symbology" %}</li>
+				<li>{% trans "Add color ramps to it." context "symbology" %}</li>
+				<li>{% trans "Use them when you create interval legends." context "symbology" %}</li>
+			</ol>
+		</aside>
+	</div>
+</div>
+</form>
 {% endblock %}
 {% block extra-scripts %}
 <script>

@@ -3,71 +3,80 @@
 {% load i18n %}
 
 {% block content %}
-<form role="form" method="post" action="/gvsigonline/symbology/library_update/{{library.id}}/">
-	<div class="row">
-		<div class="col-md-12">
-			<div class="pf-topbar">
+<div class="gol-sym-page gol-sym-page--wide">
+	<div class="gol-sym-page-header gol-sym-page-header--actions">
+		<div class="gol-sym-page-header__main">
+			<nav aria-label="{% trans "Breadcrumb" context "symbology" %}">
+				<ol class="gol-sym-crumbs">
+					<li>{% trans "Symbology" %}</li>
+					<li><a href="{% url 'library_list' %}">{% trans "Symbol libraries" %}</a></li>
+					<li aria-current="page">{{ library.name }}</li>
+				</ol>
+			</nav>
+			<h1 class="gol-sym-page-title"><span class="gol-sym-page-icon" aria-hidden="true"><i class="fa fa-book"></i></span>{{ library.name }}</h1>
+			<form role="form" method="post" action="/gvsigonline/symbology/library_update/{{library.id}}/" class="gol-sym-inline-edit" data-gol-sym-inline-edit>
 				{% csrf_token %}
-				{% if form.errors or form.non_field_errors %}
-				<div id="form-error" class="pf-error-msg force-show" style="flex:1; margin-right:16px;">
-					<ul>
-					{{ form.non_field_errors }}
-					{% for field in form %}
-						{% if field.errors %}
-							<li>{{field.label}}. {{ field.errors|striptags }}</li>
-						{% endif %}
-					{% endfor %}
-					</ul>
+				<div class="gol-sym-inline-edit__view">
+					<p class="gol-sym-page-lead">{% if library.description %}<span class="gol-sym-inline-edit__text">{{ library.description }}</span>{% else %}<span class="gol-sym-muted">{% trans "No description" context "symbology" %}</span>{% endif %}<button type="button" class="gol-sym-inline-edit__open"><i class="fa fa-pencil" aria-hidden="true"></i> {% trans "Edit description" context "symbology" %}</button></p>
 				</div>
-				{% endif %}
-				<button id="update-library" type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Update" %}</button>
-			</div>
-
-			<div class="pl-panel">
-				<ul class="nav nav-tabs">
-					<li class="active"><a href="#tab-library-main" data-toggle="tab">{% trans "Library" %}</a></li>
-					<li><a href="#tab-library-symbols" data-toggle="tab">{% trans "Symbols" %}</a></li>
-				</ul>
-
-				<div class="tab-content">
-					<div class="tab-pane active" id="tab-library-main">
-						<div class="pl-panel__body with-padding">
-							<div class="row">
-								<div class="col-md-12 form-group">
-									<label>{% trans "Name" %}</label>
-									<input placeholder="{% trans 'Name' %}" name="library-name" id="library-name" type="text" class="form-control" disabled value="{{library.name}}">
-								</div>
-							</div>
-							<div class="row">
-								<div class="col-md-12 form-group">
-									<label>{% trans "Description" %}</label>
-									<input placeholder="{% trans 'Description' %}" name="library-description" id="library-description" type="text" class="form-control" value="{{library.description}}">
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="tab-pane" id="tab-library-symbols">
-						<div class="pl-panel__header">
-							<h3 class="pl-panel__title"><i class="fa fa-th"></i>{% trans "Library symbols" %}</h3>
-							<div class="pl-panel__actions">
-								<button id="add-new-external-graphic" class="btn-pl-add"><i class="fa fa-picture-o"></i> {% trans "Add external graphic" %}</button>
-								<button id="add-new-point" class="btn-pl-add"><i class="fa fa-circle"></i> {% trans "Add point" %}</button>
-								<button id="add-new-line" class="btn-pl-add"><i class="fa fa-code-fork"></i> {% trans "Add line" %}</button>
-								<button id="add-new-polygon" class="btn-pl-add"><i class="fa fa-square"></i> {% trans "Add polygon" %}</button>
-							</div>
-						</div>
-						<div class="pl-panel__body" style="padding: 10px;">
-							<ul class="users-list clearfix"></ul>
-						</div>
+				<div class="gol-sym-inline-edit__editor" hidden>
+					<label for="library-description" class="sr-only">{% trans "Description" %}</label>
+					<textarea placeholder="{% trans 'Description' %}" name="library-description" id="library-description" class="form-control gol-sym-textarea" rows="3" maxlength="500">{{ library.description|default_if_none:'' }}</textarea>
+					<div class="gol-sym-inline-edit__actions">
+						<button type="button" class="btn-pf-secondary gol-sym-inline-edit__cancel">{% trans "Cancel" %}</button>
+						<button id="update-library" type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
 					</div>
 				</div>
-			</div>
+			</form>
+		</div>
+		<div class="gol-sym-page-header__actions">
+			<a href="{% url 'library_export' library.id %}" class="btn-pl-outline"><i class="fa fa-download" aria-hidden="true"></i> {% trans "Export library" %}</a>
 		</div>
 	</div>
-</form>
-{% endblock %}
 
+	<div class="gol-sym-page-grid gol-sym-page-grid--detail">
+		<section class="pl-panel gol-sym-library gol-sym-symbols-panel" aria-labelledby="gol-sym-symbols-title">
+			<div class="gol-sym-symbols-toolbar">
+				<h2 class="gol-sym-card-title" id="gol-sym-symbols-title">{% trans "Library symbols" %} <span class="gol-sym-count">{{ rules|length }}</span></h2>
+				<div class="gol-sym-symbols-toolbar__tools">
+					<div class="gol-sym-type-filter" role="group" aria-label="{% trans "Filter by type" context "symbology" %}">
+						<button type="button" class="gol-sym-type-chip active" data-filter="all" aria-pressed="true">{% trans "All" context "symbology" %} <span class="gol-sym-chip-count" data-count="all">{{ rules|length }}</span></button>
+						<button type="button" class="gol-sym-type-chip" data-filter="MarkSymbolizer" aria-pressed="false"><i class="fa fa-circle" aria-hidden="true"></i> {% trans "Point" context "symbology" %} <span class="gol-sym-chip-count" data-count="MarkSymbolizer">0</span></button>
+						<button type="button" class="gol-sym-type-chip" data-filter="LineSymbolizer" aria-pressed="false"><i class="fa fa-code-fork" aria-hidden="true"></i> {% trans "Line" context "symbology" %} <span class="gol-sym-chip-count" data-count="LineSymbolizer">0</span></button>
+						<button type="button" class="gol-sym-type-chip" data-filter="PolygonSymbolizer" aria-pressed="false"><i class="fa fa-square" aria-hidden="true"></i> {% trans "Polygon" context "symbology" %} <span class="gol-sym-chip-count" data-count="PolygonSymbolizer">0</span></button>
+						<button type="button" class="gol-sym-type-chip" data-filter="ExternalGraphicSymbolizer" aria-pressed="false"><i class="fa fa-picture-o" aria-hidden="true"></i> {% trans "External graphic" context "symbology" %} <span class="gol-sym-chip-count" data-count="ExternalGraphicSymbolizer">0</span></button>
+					</div>
+					<div class="gol-sym-symbol-search">
+						<i class="fa fa-search" aria-hidden="true"></i>
+						<input type="search" id="gol-sym-symbol-search" class="form-control" placeholder="{% trans "Search symbols" context "symbology" %}" aria-label="{% trans "Search symbols" context "symbology" %}" autocomplete="off">
+					</div>
+					<div class="dropdown gol-sym-add-dropdown">
+						<button type="button" class="btn-pl-add dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-plus" aria-hidden="true"></i> {% trans "Add symbol" context "symbology" %} <span class="caret"></span></button>
+						<ul class="dropdown-menu dropdown-menu-right gol-sym-add-menu" aria-label="{% trans "Add" %}">
+							<li><button id="add-new-point" class="gol-sym-add-menu__item" title="{% trans "Add point" %}"><i class="fa fa-circle" aria-hidden="true"></i> {% trans "Point" context "symbology" %}</button></li>
+							<li><button id="add-new-line" class="gol-sym-add-menu__item" title="{% trans "Add line" %}"><i class="fa fa-code-fork" aria-hidden="true"></i> {% trans "Line" context "symbology" %}</button></li>
+							<li><button id="add-new-polygon" class="gol-sym-add-menu__item" title="{% trans "Add polygon" %}"><i class="fa fa-square" aria-hidden="true"></i> {% trans "Polygon" context "symbology" %}</button></li>
+							<li><button id="add-new-external-graphic" class="gol-sym-add-menu__item" title="{% trans "Add external graphic" %}"><i class="fa fa-picture-o" aria-hidden="true"></i> {% trans "External graphic" context "symbology" %}</button></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="gol-sym-symbol-grid">
+				<ul class="users-list clearfix"></ul>
+				<p class="gol-sym-filter-empty" hidden>{% trans "No symbols match the filter." context "symbology" %}</p>
+				{% if not rules %}
+				<div class="gol-sym-empty">
+					<i class="fa fa-th" aria-hidden="true"></i>
+					<p class="gol-sym-empty__title">{% trans "This library has no symbols yet" %}</p>
+					<p class="gol-sym-empty__text">{% trans "Use «Add symbol» to add the first point, line, polygon or external graphic." context "symbology" %}</p>
+				</div>
+				{% endif %}
+			</div>
+		</section>
+
+	</div>
+</div>
+{% endblock %}
 {% block extra-scripts %}
 <script>
 	$('#menu-manage-symbology').addClass("active");
@@ -82,6 +91,13 @@ $(document).ready(function() {
 	
 	var symbologyUtils = new SymbologyUtils(null, null, null, null, null, [],[]);
 	var librarySymbol = new LibrarySymbol(previewPointUrl, previewLineUrl, previewPolygonUrl, symbologyUtils);
+	// Etiqueta del tipo en cada tarjeta (textos de la plantilla, escapados para JS)
+	var typeLabels = {
+		MarkSymbolizer: "{% filter escapejs %}{% trans "Point" context "symbology" %}{% endfilter %}",
+		LineSymbolizer: "{% filter escapejs %}{% trans "Line" context "symbology" %}{% endfilter %}",
+		PolygonSymbolizer: "{% filter escapejs %}{% trans "Polygon" context "symbology" %}{% endfilter %}",
+		ExternalGraphicSymbolizer: "{% filter escapejs %}{% trans "External graphic" context "symbology" %}{% endfilter %}"
+	};
 	
 	"{% for rule in rules %}"
 		var rule_opts = {
@@ -119,18 +135,20 @@ $(document).ready(function() {
 			
 			if (isEG) {
 				var externalGraphic = json_symbolizers[0].fields;
-				symbol += '<li>';
+				symbol += '<li data-sym-type="ExternalGraphicSymbolizer">';
 				symbol += 	'<img style="height: ' + externalGraphic.size + 'px; width: auto;" src="' + externalGraphic.online_resource + '" class="preview-eg"></img>';
 				symbol += 	'<a class="users-list-name" href="/gvsigonline/symbology/symbol_update/{{rule.id}}/">{{rule.title}}</a>';
+				symbol += 	'<span class="gol-sym-symbol-type">' + typeLabels.ExternalGraphicSymbolizer + '</span>';
 				symbol += '</li>';
 				$(".users-list").append(symbol);
 				var r = new Rule("{{rule.id}}", "{{rule.name}}", "{{rule.title}}", rule_opts, symbologyUtils);
 				librarySymbol.addRule(r);
 				
 			} else {
-				symbol += '<li>';
+				symbol += '<li data-sym-type="' + featureType + '">';
 				symbol += 	'<div id="library-symbol-preview-div-{{rule.id}}"></div>';
 				symbol += 	'<a class="users-list-name" href="/gvsigonline/symbology/symbol_update/{{rule.id}}/">{{rule.title}}</a>';
+				symbol += 	'<span class="gol-sym-symbol-type">' + (typeLabels[featureType] || '') + '</span>';
 				symbol += '</li>';
 				$(".users-list").append(symbol);
 				var r = new Rule("{{rule.id}}", "{{rule.name}}", "{{rule.title}}", rule_opts, symbologyUtils);
@@ -140,6 +158,36 @@ $(document).ready(function() {
 		}			
 	"{% endfor %}"
 	
+	// Número de símbolos de cada tipo en los filtros
+	$('.gol-sym-type-filter [data-count]').each(function() {
+		var type = $(this).attr('data-count');
+		$(this).text(type === 'all' ? $('.users-list > li').length : $('.users-list > li[data-sym-type="' + type + '"]').length);
+	});
+	// Filtro por tipo y búsqueda por nombre: solo ocultan tarjetas en la página
+	var symbolFilter = 'all';
+	function applySymbolFilter() {
+		var q = $.trim($('#gol-sym-symbol-search').val() || '').toLowerCase();
+		var $items = $('.users-list > li');
+		var visible = 0;
+		$items.each(function() {
+			var $li = $(this);
+			var show = (symbolFilter === 'all' || $li.attr('data-sym-type') === symbolFilter) &&
+				(!q || $li.find('.users-list-name').text().toLowerCase().indexOf(q) !== -1);
+			$li.toggle(show);
+			if (show) { visible++; }
+		});
+		$('.gol-sym-filter-empty').prop('hidden', !($items.length > 0 && visible === 0));
+	}
+	$('.gol-sym-type-chip').on('click', function() {
+		symbolFilter = $(this).attr('data-filter');
+		$('.gol-sym-type-chip').removeClass('active').attr('aria-pressed', 'false');
+		$(this).addClass('active').attr('aria-pressed', 'true');
+		applySymbolFilter();
+	});
+	$('#gol-sym-symbol-search').on('input', applySymbolFilter).on('keydown', function(e) {
+		// Enter en el buscador no debe enviar el formulario de la biblioteca
+		if (e.key === 'Enter' || e.keyCode === 13) { e.preventDefault(); }
+	});
 	$("#add-new-external-graphic").on('click', function(e){
 		e.preventDefault();
 		location.href = "/gvsigonline/symbology/symbol_add/{{library.id}}/ExternalGraphicSymbolizer/";

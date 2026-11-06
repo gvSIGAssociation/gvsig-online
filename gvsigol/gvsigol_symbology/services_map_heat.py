@@ -22,15 +22,12 @@
 @author: Mehdi Jelassia <mjelassia@scolab.es>
 '''
 
-from .models import Library, Style, StyleLayer, Rule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, TextSymbolizer, ColorRampLibrary
-from gvsigol_services import geographic_servers
-from gvsigol_services.models import Layer, Datastore, Workspace
-from gvsigol_core import utils as core_utils
-from gvsigol import settings
-from . import utils, sld_builder
-import json
-import ast
+from django.db import transaction
+from . import conf_builder
+from .models import Style, StyleLayer
+from . import utils
 
+@transaction.atomic
 def create_style(style_name, style_title, is_default, sld, layer, gs, is_preview=False):
     if is_preview:
         style_name = style_name + '__tmp'
@@ -70,6 +67,7 @@ def create_style(style_name, style_title, is_default, sld, layer, gs, is_preview
     sld_body = utils.encode_xml(sld)
     return utils.publish_style(gs, layer, style, sld_body, is_preview=is_preview)
 
+@transaction.atomic
 def update_style(style_title, is_default, sld, layer, gs, style, is_preview=False):
     is_default = utils.set_default_style(layer, gs, style=style, is_preview=is_preview, is_default=is_default)
 
@@ -103,59 +101,4 @@ def update_style(style_title, is_default, sld, layer, gs, style, is_preview=Fals
 
 
 def get_conf(request, layer_id):
-    layer = Layer.objects.get(id=int(layer_id))
-    datastore = Datastore.objects.get(id=layer.datastore_id)
-    workspace = Workspace.objects.get(id=datastore.workspace_id)
-    gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
-    index = utils.get_next_index(layer)
-    (ds_type, resource) = gs.getResourceInfo(workspace.name, datastore, layer.name, "json")
-    fields = utils.get_fields(resource)
-    if layer.conf:
-        new_fields = []
-        conf = None
-        if layer and layer.conf:
-            conf = ast.literal_eval(layer.conf)
-        for field in fields:
-            if conf:
-                for f in conf['fields']:
-                    if f['name'] == field['name']:
-                        for id, language in settings.LANGUAGES:
-                            if 'title-'+id in f:
-                                field['title-'+id] = f.get('title-'+id, field['name'])
-                            else:
-                                field['title-'+id] = f['name']
-            else:
-                for id, language in settings.LANGUAGES:
-                    field['title-'+id] = field['name']
-            new_fields.append(field)
-        fields = new_fields
-
-    feature_type = utils.get_feature_type(fields)
-    alphanumeric_fields = utils.get_alphanumeric_fields(fields)
-
-    supported_fonts_str = gs.getSupportedFonts()
-    supported_fonts = json.loads(supported_fonts_str)
-    sorted_fonts = utils.sortFontsArray(supported_fonts.get("fonts"))
-    
-    layer_url = core_utils.get_wms_url(workspace)
-    layer_wfs_url = core_utils.get_wfs_url(workspace)
-    numeric_fields = utils.get_numeric_fields(fields)
-
-
-    conf = {
-        'featureType': feature_type,
-        'json_alphanumeric_fields': json.dumps(alphanumeric_fields),
-        'json_numeric_fields': json.dumps(numeric_fields),
-        'fonts': sorted_fonts,
-        'layer_id': layer_id,
-        'layer_url': layer_url,
-        'layer_wfs_url': layer_wfs_url,
-        'layer_name': workspace.name + ':' + layer.name,
-        'style_name': workspace.name + '_' + layer.name + '_' + str(index),
-        'libraries': Library.objects.all(),
-        'supported_crs': json.dumps(core_utils.get_supported_crs()),
-        'preview_url': utils.get_preview_url(workspace, feature_type)
-    }
-    conf['ramp_libraries'] = ColorRampLibrary.objects.all()
-    utils.set_auth_settings(request, conf)
-    return conf
+    return conf_builder.build_vector_conf(request, layer_id, alphanumeric_list=False, json_numeric=True, ramp_libraries=True)

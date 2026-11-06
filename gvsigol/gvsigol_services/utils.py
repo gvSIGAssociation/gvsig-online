@@ -813,7 +813,11 @@ def get_minmax_query(host, port, schema, database, user, password, layer, field)
     cursor = conn.cursor()
 
     try:
-        sql = 'SELECT MIN("' + field + '") AS MinValue, MAX("' + field + '") AS MaxValue FROM ' + schema + '.' + layer + ' WHERE "' + field + '" IS NOT NULL;'
+        # field llega del cliente: se escapa como identificador (antes se concatenaba
+        # entre comillas sin escapar -> inyección SQL). Para nombres válidos el SQL es idéntico.
+        sql = sqlbuilder.SQL(
+            'SELECT MIN({f}) AS MinValue, MAX({f}) AS MaxValue FROM ' + schema + '.' + layer + ' WHERE {f} IS NOT NULL;'
+        ).format(f=sqlbuilder.Identifier(field))
 
         cursor.execute(sql);
         rows = cursor.fetchall()

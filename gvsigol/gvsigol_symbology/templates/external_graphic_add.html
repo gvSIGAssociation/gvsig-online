@@ -6,44 +6,54 @@
 <form role="form">
 	<div class="row">
 		<div class="col-md-12">
-			<div class="pf-topbar">
-				<button id="save-symbol" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
-			</div>
-			<div class="pl-panel">
+			<div class="pl-panel gol-sym-detail">
+				<div class="pl-panel__header">
+<div class="gol-sym-heading">
+<a href="{% if library_id %}/gvsigonline/symbology/library_update/{{ library_id }}/{% else %}{% url 'library_list' %}{% endif %}" class="gol-sym-back-btn" title="{% if library_id %}{% trans "Back to library" %}{% else %}{% trans "Back to list" %}{% endif %}" aria-label="{% if library_id %}{% trans "Back to library" %}{% else %}{% trans "Back to list" %}{% endif %}"><i class="fa fa-arrow-left" aria-hidden="true"></i></a>
+<div class="gol-sym-heading__text">
+<h3 class="pl-panel__title"><i class="fa fa-picture-o"></i>{% trans "Library symbol" %}</h3>
+</div>
+</div>
+					<div class="pl-panel__actions">
+{% block external_graphic_v1 %}				<button id="save-symbol" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+{% endblock %}				</div>
+				</div>
 				<div class="pl-panel__body with-padding">
 					{% csrf_token %}
 					<div class="row">
 						<div class="col-md-2">
 							<div class="output-eg-div">
-								<img id="output-eg" class="output-eg"/>
-							</div>
+{% block external_graphic_v2 %}								<img id="output-eg" class="output-eg"/>
+{% endblock %}							</div>
 						</div>
 						<div class="col-md-10">
 							<div id="form-error" class="pf-error-msg"></div>
 							<div class="form-group">
 								<label>{% trans "Name" %}</label>
-								<input placeholder="{% trans 'Symbol name' %}" name="symbol-name" id="symbol-name" type="text" class="form-control">
-							</div>	
+{% block external_graphic_v3 %}								<input placeholder="{% trans 'Symbol name' %}" name="symbol-name" id="symbol-name" type="text" class="form-control">
+{% endblock %}							</div>	
 							<div class="form-group">
 								<label>{% trans "Title" %}</label>
-					    		<input placeholder="{% trans 'Symbol title' %}" name="symbol-title" id="symbol-title" type="text" class="form-control">
-							</div>
+{% block external_graphic_v4 %}					    		<input placeholder="{% trans 'Symbol title' %}" name="symbol-title" id="symbol-title" type="text" class="form-control">
+{% endblock %}							</div>
 							<div class="form-group">
 								<p class="text-muted">* {% trans "Specifies a title for the rule. The title is used in display lists and legends" %}.</p>
 							</div>
 							<div class="form-group">
 								<label>{% trans "Select image" %}</label>
-								<input id="eg-file" name="eg-file" type="file" accept=".png" onchange="loadFile(event)" class="file" data-show-preview="true">
+								<input id="eg-file" name="eg-file" type="file" accept=".png,.svg,image/png,image/svg+xml" onchange="loadFile(event)" class="file" data-show-preview="true">
+								<p class="gol-sym-field-hint"><i class="fa fa-info-circle" aria-hidden="true"></i>{% trans "PNG or SVG. SVG symbols are scaled without losing quality; scripts and external references are removed when saving." context "symbology" %}</p>
 							</div>
 							<div class="form-group">
 								<label>{% trans "Size" %}</label>
-					    		<input placeholder="{% trans 'Symbol size (in pixels)' %}" name="symbol-size" id="symbol-size" type="number" value="24" class="form-control">
-							</div>
+{% block external_graphic_v5 %}					    		<input placeholder="{% trans 'Symbol size (in pixels)' %}" name="symbol-size" id="symbol-size" type="number" value="24" class="form-control">
+{% endblock %}							</div>
 							<div class="form-group">
 								<label>{% trans "Select format" %}</label>
 								<select id="eg-format" class="form-control">
-									<option value="image/png" selected>image/png</option>
-								</select>
+{% block external_graphic_v6 %}									<option value="image/png" selected>image/png</option>
+									<option value="image/svg+xml">image/svg+xml</option>
+{% endblock %}								</select>
 							</div>
 						</div>						
 					</div>						
@@ -60,20 +70,24 @@
 	$('#submenu-libraries').addClass("active");
 	var loadFile = function(event) {
 		$("#form-error").empty();
-		if (event.target.files[0].type == 'image/png') {
+		var egFileObj = event.target.files[0];
+		var isSvg = egFileObj && (egFileObj.type == 'image/svg+xml' || /\.svg$/i.test(egFileObj.name));
+		if (egFileObj && (egFileObj.type == 'image/png' || isSvg)) {
 			var output = document.getElementById('output-eg');
-		   	output.src = URL.createObjectURL(event.target.files[0]);
+		   	output.src = URL.createObjectURL(egFileObj);
+		   	// El formato sigue al fichero (el servidor también lo comprueba)
+		   	$("#eg-format").val(isSvg ? 'image/svg+xml' : 'image/png');
 		   	
 		} else {
 			$("#eg-file").val("");
 			$("#form-error").append('<p>*{% trans "The file format is not supported" %}</p>');
 		}
-	   	
-	 };
+{% block external_graphic_v7 %}	   	
+{% endblock %}	 };
 </script>
 <script>
 $(document).ready(function() {
-	
+{% block external_graphic_v8 %}{% endblock %}	
 	var size = $("#symbol-size").val();
 	$('#output-eg').css("height",size+"px");
 	$('#output-eg').css("width","auto");
@@ -90,33 +104,33 @@ $(document).ready(function() {
 		$("#form-error").empty();
 		var name = $("#symbol-name").val();
 		var title = $("#symbol-title").val();
-		var egFile = $("#eg-file").val();
-		var format = $("#eg-format").val();
+{% block external_graphic_v9 %}		var egFile = $("#eg-file").val();
+{% endblock %}		var format = $("#eg-format").val();
 		var size = $("#symbol-size").val();
 		
 	   	var formData = new FormData($(this)[0]); 	   	
-	   	if (name != '' && egFile != '') {
+{% block external_graphic_v10 %}	   	if (name != '' && egFile != '') {
 	   		var externalGraphic = new ExternalGraphicSymbolizer(name, format, size, 'online_resource_replace');
-			var symbolizer = {
+{% endblock %}			var symbolizer = {
 				type: externalGraphic.type,
 				json: externalGraphic.toJSON(),
 				order: 0
 			};
 			
 			var symbol = {
-				name: name,
+{% block external_graphic_v11 %}{% endblock %}				name: name,
 				title: title,
 				order: 0,
-				minscale: -1,
+{% block external_graphic_v12 %}				minscale: -1,
 				maxscale: -1,
-				symbolizers: [symbolizer]
+{% endblock %}				symbolizers: [symbolizer]
 			};
 			
 			formData.append('rule', JSON.stringify(symbol));
 			
 			$.ajax({
-				url: "/gvsigonline/symbology/symbol_add/{{library_id}}/{{symbol_type}}/",
-				type: "POST",
+{% block external_graphic_v13 %}				url: "/gvsigonline/symbology/symbol_add/{{library_id}}/{{symbol_type}}/",
+{% endblock %}				type: "POST",
 				async: false,
 				cache: false,
 		     	contentType: false,
@@ -128,28 +142,28 @@ $(document).ready(function() {
 				data: formData,
 				success: function(response){
 					if (response.success) {
-						location.href = "/gvsigonline/symbology/library_update/{{library_id}}/";
-					} else {
-						$("#form-error").append('<p>*' + response.message + '</p>');
+{% block external_graphic_v14 %}						location.href = "/gvsigonline/symbology/library_update/{{library_id}}/";
+{% endblock %}					} else {
+						$("#form-error").append('<p>*' + symbologyEscapeHtml(response.message) + '</p>');
 					}
 					
 				},
 			    error: function(){}
 			});
 			
-	   	} else if (name == '' && egFile == '') {
+{% block external_graphic_v15 %}	   	} else if (name == '' && egFile == '') {
 			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
 			$("#form-error").append('<p>*{% trans "You must select a file" %}</p>');
-			
-		} else if (name == '' && egFile != '') {
+{% endblock %}			
+{% block external_graphic_v16 %}		} else if (name == '' && egFile != '') {
 			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
 			
 		} else if (name != '' && egFile == '') {
 			$("#form-error").append('<p>*{% trans "You must select a file" %}</p>');
-		}
+{% endblock %}		}
 	   	
-		return false;
-	});
+{% block external_graphic_v17 %}		return false;
+{% endblock %}	});
 
 });
 </script>

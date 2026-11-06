@@ -3,91 +3,78 @@
 {% load i18n %}
 
 {% block content %}
-	<div class="row">
-		<div class="col-md-12">
-			<div class="pl-panel">
-
-				<form role="form" method="post" action="/gvsigonline/symbology/color_ramp_library_update/{{library.id}}/">
-
-					<div class="pl-panel__header">
-						<h3 class="pl-panel__title"><i class="fa fa-tint"></i>{% trans "Update ramp color library" %}</h3>
-						<div class="pl-panel__actions">
-							<button id="update-library" type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
-						</div>
+<div class="gol-sym-page gol-sym-page--wide">
+	<div class="gol-sym-page-header gol-sym-page-header--actions">
+		<div class="gol-sym-page-header__main">
+			<nav aria-label="{% trans "Breadcrumb" context "symbology" %}">
+				<ol class="gol-sym-crumbs">
+					<li>{% trans "Symbology" %}</li>
+					<li><a href="{% url 'color_ramp_library_list' %}">{% trans "Color ramps" %}</a></li>
+					<li aria-current="page">{{ library.name }}</li>
+				</ol>
+			</nav>
+			<h1 class="gol-sym-page-title"><span class="gol-sym-page-icon" aria-hidden="true"><i class="fa fa-tint"></i></span>{{ library.name }}</h1>
+			<form role="form" method="post" action="/gvsigonline/symbology/color_ramp_library_update/{{library.id}}/" class="gol-sym-inline-edit" data-gol-sym-inline-edit{% if message %} data-open{% endif %}>
+				{% csrf_token %}
+				<div class="gol-sym-inline-edit__view">
+					<p class="gol-sym-page-lead">{% if library.description %}<span class="gol-sym-inline-edit__text">{{ library.description }}</span>{% else %}<span class="gol-sym-muted">{% trans "No description" context "symbology" %}</span>{% endif %}<button type="button" class="gol-sym-inline-edit__open"><i class="fa fa-pencil" aria-hidden="true"></i> {% trans "Edit description" context "symbology" %}</button></p>
+				</div>
+				<div class="gol-sym-inline-edit__editor" hidden>
+					{% if message %}
+					<div class="pf-error-msg force-show gol-sym-alert" role="alert">
+						<i class="fa fa-exclamation-circle" aria-hidden="true"></i><span>{{ message }}</span>
 					</div>
-
-					<div class="pl-panel__body with-padding">
-						{% csrf_token %}
-						{% if form.errors %}
-						<div class="pf-error-msg force-show">
-							<ul>
-							{% for field in form %}
-								{% if field.errors %}
-									<li>{{field.label}}. {{ field.errors|striptags }}</li>
-								{% endif %}
-							{% endfor %}
-							</ul>
-						</div>
-						{% endif %}
-						{% if message %}
-						<div class="pf-error-msg force-show">
-							<p>* {{ message }}</p>
-						</div>
-						{% endif %}
-									
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label>{% trans "Name" %}</label>
-								<input placeholder="{% trans 'Name' %}" name="library-name" id="library-name" type="text" class="form-control" disabled value="{{library.name}}">	
-							</div>
-						</div>
-										
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label>{% trans "Description" %}</label>
-					    		<input placeholder="{% trans 'Description' %}" name="library-description" id="library-description" type="text" class="form-control" value="{{library.description}}">
-							</div>
-						</div>
-						
-					</form>
-
-					<div class="pl-panel__header" style="border-top: 1px solid var(--pl-border);">
-						<h3 class="pl-panel__title"><i class="fa fa-folder-open"></i>{% trans "Categories" %}</h3>
-						<div class="pl-panel__actions">
-							<div id="add-folder" class="btn-pl-add"><i class="fa fa-plus"></i> {% trans "Add category" %}</div>
-						</div>
+					{% endif %}
+					<label for="library-description" class="sr-only">{% trans "Description" %}</label>
+					<textarea placeholder="{% trans 'Description' %}" name="library-description" id="library-description" class="form-control gol-sym-textarea" rows="3" maxlength="500">{{library.description|default_if_none:''}}</textarea>
+					<div class="gol-sym-inline-edit__actions">
+						<button type="button" class="btn-pf-secondary gol-sym-inline-edit__cancel">{% trans "Cancel" %}</button>
+						<button id="update-library" type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
 					</div>
-
-					<div class="pl-panel__body">
-						<table class="pl-table table" id="folders-table">
-							<thead>
-								<tr>
-									<th>ID</th>
-								    <th>{% trans "Category" %}</th>
-								    <th>{% trans "Description" %}</th>
-								    <th></th>
-								    <th></th>
-								</tr>
-							</thead>
-							<tbody>
-								{% for folder in folders %}
-									<tr>
-										<td>{{ folder.id }}</td>
-									    <td>{{ folder.name }}</td>
-										<td>{{ folder.description }}</td>
-										<td></td>
-										<td></td>
-									</tr>
-								{% endfor %}
-							</tbody>
-						</table>
-					</div>							
-            	</div>	
-			</div>
-		</div>				
+				</div>
+			</form>
+		</div>
+		<div class="gol-sym-page-header__actions">
+			<a href="{% url 'color_ramp_library_export' library.id %}" class="btn-pl-outline"><i class="fa fa-download" aria-hidden="true"></i> {% trans "Export library" %}</a>
+		</div>
 	</div>
-	
 
+	<div class="gol-sym-page-grid gol-sym-page-grid--detail">
+		<section class="pl-panel gol-sym-detail gol-sym-main-panel">
+			<div class="pl-panel__header">
+				<h2 class="pl-panel__title"><i class="fa fa-folder-open"></i>{% trans "Categories" %} <span class="gol-sym-count">{{ folders|length }}</span></h2>
+				<div class="pl-panel__actions">
+					<div id="add-folder" class="btn-pl-add"><i class="fa fa-plus"></i> {% trans "Add category" %}</div>
+				</div>
+			</div>
+			<div class="pl-panel__body">
+				<table class="pl-table table" id="folders-table">
+					<thead>
+						<tr>
+							<th>ID</th>
+						    <th>{% trans "Category" %}</th>
+						    <th>{% trans "Description" %}</th>
+						    <th></th>
+						    <th></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for folder in folders %}
+							<tr>
+								<td>{{ folder.id }}</td>
+							    <td>{{ folder.name }}</td>
+								<td>{{ folder.description }}</td>
+								<td></td>
+								<td></td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</section>
+
+	</div>
+</div>
 <!-- Modal -->
 <div class="modal fade" id="modal-delete-library" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 	<div class="modal-dialog" role="document">

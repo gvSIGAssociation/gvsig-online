@@ -76,7 +76,7 @@ Rule.prototype.getTableUI = function(allowImport, type, editableRule) {
 	if(type == 'unique_values') {
 		ui += 		'<i class="fa fa-bars unique-values-sort-handle" style="cursor:grab;cursor:-webkit-grab;margin-right:6px;color:#bbb;vertical-align:middle;" title="' + gettext('Drag to reorder') + '"></i>';
 	}
-	ui += 				'<h3 id="rule-title-' + this.id + '" class="box-title">' + this.title + '</h3>';
+	ui += 				'<h3 id="rule-title-' + this.id + '" class="box-title">' + symbologyEscapeHtml(this.title) + '</h3>';
 
 		ui += 			'<div class="box-tools pull-right">';
 	
@@ -146,7 +146,7 @@ Rule.prototype.getColorMapEntryUI = function() {
 	ui += 	'<div class="box">';
 	ui += 		'<div class="box-header with-border">';
 	ui += 			'<div class="rule-preview" id="rule-preview-' + this.id + '"></div>';
-	ui += 				'<h3 id="rule-title-' + this.id + '" class="box-title">' + this.title + '</h3>';
+	ui += 				'<h3 id="rule-title-' + this.id + '" class="box-title">' + symbologyEscapeHtml(this.title) + '</h3>';
 	ui += 				'<div class="box-tools pull-right">';
 	ui += 					'<button data-ruleid="' + this.id + '" style="color:#f56954;" class="btn btn-box-tool btn-box-tool-custom delete-rule">';
 	ui += 						'<i class="fa fa-times"></i>';
@@ -190,11 +190,11 @@ Rule.prototype.registerEvents = function(type) {
 		ui += 		'<div class="row">';
 		ui += 			'<div class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Rule name') + '</label>';
-		ui += 				'<input id="r-name-' + self.id + '" type="text" value="' + self.name + '" class="form-control">';
+		ui += 				'<input id="r-name-' + self.id + '" type="text" value="' + symbologyEscapeHtml(self.name) + '" class="form-control">';
 		ui += 			'</div>';
 		ui += 			'<div class="col-md-12 form-group">';
 		ui += 				'<label>' + gettext('Rule title') + '</label>';
-		ui += 				'<input id="r-title-' + self.id + '" type="text" value="' + self.title + '" class="form-control">';
+		ui += 				'<input id="r-title-' + self.id + '" type="text" value="' + symbologyEscapeHtml(self.title) + '" class="form-control">';
 		ui += 			'</div>';
 		ui += 		'</div>';
 		
@@ -417,14 +417,14 @@ Rule.prototype.getSymbolsFromLibrary = function(libraryId) {
 						var graphic = JSON.parse(symbolizers[0].json);
 						symbolView += '<li>';
 						symbolView += 	'<img style="height: ' + graphic[0].fields.size + 'px; width: auto;" src="' + graphic[0].fields.online_resource + '" class="preview-eg"></img>';
-						symbolView += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].title + '</a>';
+						symbolView += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + symbologyEscapeHtml(response.rules[i].title) + '</a>';
 						symbolView += '</li>';
 						$(".users-list").append(symbolView);
 						
 					} else {
 						symbolView += '<li>';
 						symbolView += 	'<div id="library-symbol-preview-div-' + response.rules[i].id + '"></div>';
-						symbolView += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + response.rules[i].title + '</a>';
+						symbolView += 	'<a class="users-list-name" data-rid="' + response.rules[i].id + '" href="">' + symbologyEscapeHtml(response.rules[i].title) + '</a>';
 						symbolView += '</li>';
 						$(".users-list").append(symbolView);
 						self.libraryPreview(symbol.id, symbolizers);

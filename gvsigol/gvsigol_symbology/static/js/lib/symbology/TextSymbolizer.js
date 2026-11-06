@@ -72,7 +72,22 @@ var TextSymbolizer = function(rule, layerName, options, utils) {
 	if(this.utils){
 		this.layer = this.utils.layer;
 	}
-	
+
+	// Opciones avanzadas de etiquetado (null = etiqueta clásica, se guarda como siempre).
+	// Se conservan aunque la página no cargue el editor (LabelOptionsEditor.js).
+	this.labelOptions = null;
+	if (this.options) {
+		if (typeof LabelOptionsEditor !== 'undefined') {
+			this.labelOptions = LabelOptionsEditor.parse(this.options);
+		} else {
+			try {
+				this.labelOptions = (typeof this.options === 'string') ? JSON.parse(this.options) : this.options;
+			} catch (e) {
+				this.labelOptions = null;
+			}
+		}
+	}
+
 	// Labeling rules must not default to a field name (e.g. ogc_fid): that
 	// title is published into the SLD and appears in GetLegendGraphic.
 	if(this.title == null){
@@ -184,9 +199,9 @@ TextSymbolizer.prototype.getFontTabUI = function(isClusteredPoint) {
 			}
 			
 			if (fields[i].name == this.label) {
-				ui += '<option value="' + field_name + '" selected>' + field_name_trans + '</option>';
+				ui += '<option value="' + symbologyEscapeHtml(field_name) + '" selected>' + symbologyEscapeHtml(field_name_trans) + '</option>';
 			} else {
-				ui += '<option value="' + field_name + '">' + field_name_trans + '</option>';
+				ui += '<option value="' + symbologyEscapeHtml(field_name) + '">' + symbologyEscapeHtml(field_name_trans) + '</option>';
 			}		
 		}	
 	}else{
@@ -440,10 +455,10 @@ TextSymbolizer.prototype.addExpression = function(expression) {
 			field_name_trans = field_name;
 		}
 		if (expression.field == fields[i].name) {
-			ui += 			'<option selected data-type="' + fields[i].binding + '" value="' + field_name + '">' + field_name_trans + '</option>';
+			ui += 			'<option selected data-type="' + fields[i].binding + '" value="' + symbologyEscapeHtml(field_name) + '">' + symbologyEscapeHtml(field_name_trans) + '</option>';
 			dataType = fields[i].binding;
 		} else {
-			ui += 			'<option data-type="' + fields[i].binding + '" value="' + field_name + '">' + field_name_trans + '</option>';
+			ui += 			'<option data-type="' + fields[i].binding + '" value="' + symbologyEscapeHtml(field_name) + '">' + symbologyEscapeHtml(field_name_trans) + '</option>';
 		}
 
 	}	
@@ -693,7 +708,12 @@ TextSymbolizer.prototype.loadUniqueValues = function(field, expressionId) {
 TextSymbolizer.prototype.registerEvents = function() {
 	var self = this;
 
-	
+	// Editor de opciones avanzadas: solo en el modal de etiqueta de las leyendas (pestaña General)
+	if (typeof LabelOptionsEditor !== 'undefined' && !this.advancedDisabled && $('#label-general-tab').length) {
+		this.advancedEditor = new LabelOptionsEditor(this);
+		this.advancedEditor.mount();
+	}
+
 	$('#label-has-label').on('change', function() {
 		self.is_actived = $(this).is(':checked');
 		self.initializeForm();
@@ -710,10 +730,11 @@ TextSymbolizer.prototype.registerEvents = function() {
 			$("#font-tab a").removeAttr("data-toggle");
 			$("#halo-tab a").removeAttr("data-toggle");
 			$("#filter-tab a").removeAttr("data-toggle");
+			$(".gol-lbl-tab a").removeAttr("data-toggle");
 			$("#text-title").prop("disabled",true);
 			$("#text-minscale").prop("disabled",true);
 			$("#text-maxscale").prop("disabled",true);
-		
+
 		}else{
 			$('#label-field0').prop("disabled",false);
 			$('#label-operation0').prop("disabled",false);
@@ -721,6 +742,7 @@ TextSymbolizer.prototype.registerEvents = function() {
 			$("#font-tab a").attr("data-toggle", "tab");
 			$("#halo-tab a").attr("data-toggle", "tab");
 			$("#filter-tab a").attr("data-toggle", "tab");
+			$(".gol-lbl-tab a").attr("data-toggle", "tab");
 			$("#text-title").prop("disabled",false);
 			$("#text-minscale").prop("disabled",false);
 			$('#label-has-label-on').prop('checked', true);
@@ -927,6 +949,8 @@ TextSymbolizer.prototype.initializeForm = function() {
 	    $("#font-tab a").removeAttr("data-toggle");
 	    $("#halo-tab a").removeAttr("data-toggle");
 	    $("#filter-tab a").removeAttr("data-toggle");
+	    $(".gol-lbl-tab a").removeAttr("data-toggle");
+	    $("#lbl-adv-enable, #lbl-adv-disable").prop("disabled",true);
 	    $("#text-title").prop("disabled",true);
 	    $("#text-minscale").prop("disabled",true);
 	    $("#text-maxscale").prop("disabled",true);
@@ -935,6 +959,8 @@ TextSymbolizer.prototype.initializeForm = function() {
 		$("#font-tab a").attr("data-toggle", "tab");
 		$("#halo-tab a").attr("data-toggle", "tab");
 	    $("#filter-tab a").attr("data-toggle", "tab");
+	    $(".gol-lbl-tab a").attr("data-toggle", "tab");
+	    $("#lbl-adv-enable, #lbl-adv-disable").prop("disabled",false);
 		$("#text-title").prop("disabled",false);
 	    $("#text-minscale").prop("disabled",false);
 	    $("#text-maxscale").prop("disabled",false);
@@ -1065,6 +1091,10 @@ TextSymbolizer.prototype.toJSON = function(){
 		filter : filter_cql,
 		order: this.order
 	};
-	
+	// Solo las etiquetas con opciones avanzadas envían «options»: las clásicas no cambian
+	if (this.labelOptions) {
+		object.options = this.labelOptions;
+	}
+
 	return JSON.stringify(object);
 };

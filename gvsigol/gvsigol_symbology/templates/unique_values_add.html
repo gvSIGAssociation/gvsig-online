@@ -5,10 +5,16 @@
 {% block content %}	  	  
 <div class="row">
 	<div class="col-md-12">
-		<div class="pl-panel">
+		<div class="pl-panel gol-sym-editor gol-sym-editor--cards">
 		
 			<div class="pl-panel__header">
-				<h3 class="pl-panel__title"><i class="fa fa-paint-brush"></i>{% trans "Add new style" %}</h3>
+				<div class="gol-sym-heading">
+<a href="{% url 'style_layer_list' %}" class="gol-sym-back-btn" title="{% trans "Back to styles list" %}" aria-label="{% trans "Back to styles list" %}"><i class="fa fa-arrow-left" aria-hidden="true"></i></a>
+<div class="gol-sym-heading__text">
+{% block unique_values_v1 %}				<h3 class="pl-panel__title"><i class="fa fa-paint-brush"></i>{% trans "Add new style" %}</h3>
+{% endblock %}					<span class="gol-sym-subtitle">{% trans "Layer" %}: {{ layer_name }}</span>
+</div>
+				</div>
 				<div class="pl-panel__actions">
 					<button id="refresh-preview" class="btn-pf-secondary refresh-preview"><i class="fa fa-refresh"></i> {% trans "Update preview" %}</button>
 					<button id="show-label" class="btn-pf-secondary refresh-preview"><i class="fa fa-tags"></i> {% trans "Labeling" %}</button>
@@ -19,47 +25,58 @@
 			<div class="pl-panel__body with-padding">
 			
 				<div class="row">
-					<div class="col-md-6">
-						<div id="form-error" class="pf-error-msg"></div>
-						<div class="row">
+					<div class="col-md-6 gol-sym-props">
+						<div class="gol-sym-card">
+						<h4 class="gol-sym-section-title">{% trans "Style properties" %}</h4>
+{% block unique_values_v2 %}						<div id="form-error" class="pf-error-msg"></div>
+{% endblock %}						<div class="row">
 							<div class="col-md-12 form-group">
 								<label>{% trans "Name" %}</label>
-								<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" value="{{style_name}}" type="text" class="form-control">	
-							</div>
+{% block unique_values_v3 %}								<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" value="{{style_name}}" type="text" class="form-control">	
+{% endblock %}							</div>
 						</div>
 						<div class="row">
 							<div class="col-md-12 form-group">
 								<label>{% trans "Title" %}</label>
-								<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" type="text" class="form-control">	
-							</div>
+{% block unique_values_v4 %}								<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" type="text" class="form-control">	
+{% endblock %}							</div>
 						</div>
 						<div class="row">
 							<div class="col-md-6 form-group">
 								<label>{% trans "Min. scale" %}</label>
-					    		<input placeholder="{% trans 'No limit' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="" class="form-control">
+								<div class="input-group gol-sym-scale"><span class="input-group-addon">1:</span>
+{% block unique_values_v5 %}					    		<input placeholder="{% trans 'No limit' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="" class="form-control">
+{% endblock %}								</div>
 							</div>
 							<div class="col-md-6 form-group">
 								<label>{% trans "Max. scale" %}</label>
-					    		<input placeholder="{% trans 'No limit' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="" class="form-control">
+								<div class="input-group gol-sym-scale"><span class="input-group-addon">1:</span>
+{% block unique_values_v6 %}					    		<input placeholder="{% trans 'No limit' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="" class="form-control">
+{% endblock %}								</div>
 							</div>
 							<div class="col-md-12 form-group">
-								<p class="text-muted">* {% trans "Specifies the minimum and maximum scale denominator (inclusive) for the scale range in which this rule applies" %}.</p>
+								<p class="text-muted gol-sym-help-text">* {% trans "Specifies the minimum and maximum scale denominator (inclusive) for the scale range in which this rule applies" %}.</p>
 							</div>
 						</div>
 						<div class="row">
-							<div class="checkbox col-md-12">								
-								<label>
+							<div class="checkbox col-md-12 gol-sym-default">								
+{% block unique_values_v7 %}								<label>
 									<input type="checkbox" name="style-is-default" id="style-is-default"/>{% trans "Set as default style" %}
 								</label>
-							</div>
+{% endblock %}							</div>
+						</div>
 						</div>
 					</div>
-					<div class="col-md-6">
+					<div class="col-md-6 gol-sym-preview">
+						<div class="gol-sym-card">
+						<h4 class="gol-sym-section-title">{% trans "Map preview" %}</h4>
 						<div id="map" class="preview-map"></div>
+						</div>
 					</div>						
 				</div>
 				
-				<div class="row">
+				<h4 class="gol-sym-section-title gol-sym-section-title--rules">{% trans "Rules" %}</h4>
+				<div class="row gol-sym-rules-toolbar">
 					<div class="col-md-6 form-group">
 						<label>{% trans "Select field to generate unique values" %}</label>
 						<select id="select-unique-values-field" class="form-control">
@@ -67,17 +84,16 @@
 						</select>
 					</div>
 					<div class="col-md-2 form-group">
-						<label>{% trans " " %}</label>
-						<button id="add-unique-value" class="btn-pf-secondary" style="width:100%;"><i class="fa fa-plus"></i> {% trans "Add value" %}</button>
+						<label class="gol-sym-label-spacer" aria-hidden="true">&nbsp;</label>
+						<button id="add-unique-value" class="btn-pf-secondary gol-sym-btn-block"><i class="fa fa-plus"></i> {% trans "Add value" %}</button>
 					</div>
 					<div class="col-md-4 form-group">
-						<label>{% trans " " %}</label>
-						<button id="select-ramp-color" class="btn-pf-secondary" style="width:100%;"><i class="fa fa-barcode"></i> {% trans "Apply ramp color" %}</button>
+						<label class="gol-sym-label-spacer" aria-hidden="true">&nbsp;</label>
+						<button id="select-ramp-color" class="btn-pf-secondary gol-sym-btn-block"><i class="fa fa-barcode"></i> {% trans "Apply ramp color" %}</button>
 					</div>
 				</div>
 				
-				<div id="rules" class="row">
-				</div>
+				<div id="rules" class="row" data-empty-text="{% trans "There are no rules yet. Use the toolbar above to create them." %}"></div>
 				
 			</div>
 		</div>
@@ -109,7 +125,7 @@
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box">
-							<div class="box-body no-padding" style="max-height: 300px; overflow: auto;">
+							<div class="box-body no-padding gol-sym-scroll">
 								<ul class="users-list clearfix">
 								</ul>
 							</div>
@@ -128,10 +144,13 @@
 <div class="modal fade" id="modal-symbolizer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
-			<div class="modal-body">
+			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
+				<h4 class="modal-title">{% trans "Edit symbolizer" %}</h4>
+			</div>
+			<div class="modal-body">
 				<div class="nav-tabs-custom">
 	            	<ul id="tab-menu" class="nav nav-tabs">				                        
 	            	</ul>
@@ -151,6 +170,7 @@
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
+				<h4 class="modal-title">{% trans "Edit rule" %}</h4>
 			</div>
 			<div id="modal-edit-rule-content" class="modal-body">
 			</div>
@@ -163,17 +183,17 @@
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<span style="font-size: 20px; font-weight: bold;">{% trans "Warning" %}</span>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
+				<h4 class="modal-title"><i class="fa fa-exclamation-triangle gol-sym-warn-icon" aria-hidden="true"></i> {% trans "Warning" %}</h4>
 			</div>
 			<div id="modal-edit-rule-content" class="modal-body">
 				{% trans "Rules needed to apply a color ramp" %}
-				<div class="modal-footer">
-					<!-- <button id="button-select-ramp-open" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Apply" %}</button> -->
-					<button id="button-error-ramp-close" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
-				</div>
+			</div>
+			<div class="modal-footer">
+				<!-- <button id="button-select-ramp-open" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Apply" %}</button> -->
+				<button id="button-error-ramp-close" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
 			</div>
 		</div>
 	</div>
@@ -199,8 +219,8 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button id="button-add-value-confirm" type="button" class="btn btn-primary">{% trans "Add" %}</button>
 				<button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-add-value-confirm" type="button" class="btn btn-primary btn-modal-accept">{% trans "Add" %}</button>
 			</div>
 		</div>
 	</div>
@@ -246,8 +266,8 @@
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box">
-							<div class="box-body no-padding" style="max-height: 300px; overflow: auto;">
-								<ul class="ramp-list clearfix" style="padding-left: 0px;">
+							<div class="box-body no-padding gol-sym-scroll">
+								<ul class="ramp-list clearfix gol-sym-ramp-list">
 								</ul>
 							</div>
 						</div>
@@ -269,7 +289,7 @@
 	$('#submenu-styles').addClass("active");
 </script>
 <script>
-this.color_ramp_data = {};
+{% block unique_values_v8 %}{% endblock %}this.color_ramp_data = {};
 this.uniqueValues = null;
 
 $(document).ready(function() {
@@ -282,10 +302,10 @@ $(document).ready(function() {
 	var featureType = "{{featureType}}";
 	var jsonAlphanumericFields = {{json_alphanumeric_fields|safe}};
 	var fonts = {{ fonts|safe }};
-	var rule_opts = "";
-	var previewUrl = "{{preview_url}}";
+{% block unique_values_v9 %}	var rule_opts = "";
+{% endblock %}	var previewUrl = "{{preview_url}}";
 	var supported_crs = {{supported_crs|safe}};
-	var authToken = "{{auth_token}}";
+{% block unique_values_v10 %}{% endblock %}	var authToken = "{{auth_token}}";
 	authenticate(layerUrl);
 	
 	for (var crs in supported_crs) {
@@ -309,8 +329,8 @@ $(document).ready(function() {
 	var wmsSource = new ol.source.TileWMS({
 		url: layerUrl,
 		visible: true,
-		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
-		serverType: 'geoserver',
+{% block unique_values_v11 %}		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
+{% endblock %}		serverType: 'geoserver',
 		tileLoadFunction: imagePostFunction
 	});
 	wmsLayer = new ol.layer.Tile({
@@ -323,7 +343,7 @@ $(document).ready(function() {
 	var utils = new SymbologyUtils(map, layerId, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
 	window.uniqueValues = new UniqueValues(featureType, layerName, utils, previewUrl);
 	var uniqueValues = window.uniqueValues;
-
+{% block unique_values_v12 %}{% endblock %}
 	$(document).on('click', '.delete-rule', function(e){
 		uniqueValues.deleteRule(this.dataset.ruleid);
 	});
@@ -389,8 +409,8 @@ $(document).ready(function() {
 				messageBox.show('warning', gettext('You must select a field'));
 				
 			} else {
-				uniqueValues.save(layerId);
-			}
+{% block unique_values_v13 %}				uniqueValues.save(layerId);
+{% endblock %}			}
 			
 		} else {
 			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
@@ -409,8 +429,8 @@ $(document).ready(function() {
 		if(!field_name_trans){
 			field_name_trans = field_name;
 		}
-		$("#select-unique-values-field").append('<option value="' + field_name + '">' + field_name_trans + '</option>');
-	}
+{% block unique_values_v14 %}{% endblock %}		$("#select-unique-values-field").append('<option value="' + symbologyEscapeHtml(field_name) + '">' + symbologyEscapeHtml(field_name_trans) + '</option>');
+{% block unique_values_v15 %}{% endblock %}	}
 	
 	$("#select-unique-values-field").on('change', function(e) {
 		$(".users-list").empty();
@@ -432,7 +452,7 @@ $(document).ready(function() {
 		    error: function(){}
 		});
 	});
-	
+{% block unique_values_v16 %}{% endblock %}	
 	$("#add-unique-value").on('click', function(e) {
 		e.preventDefault();
 		var selectedField = $('#select-unique-values-field').val();
@@ -516,7 +536,7 @@ $(document).ready(function() {
 					options += '<div id="color-ramp-' + ramp.id + '" class="color-ramp-item col-md-4">'+
 					'<div id="color-ramp-preview-' + ramp.id + '" class="preview-ramp-color" style="'+ colorramp.getStyleForPreview(aux_json) +'">'+
 					'</div>'+
-					'<span class="color-ramp-name">' + ramp.name + '</span>'+ 
+					'<span class="color-ramp-name">' + symbologyEscapeHtml(ramp.name) + '</span>'+ 
 					'</div>';
 					
 					var aux_color_ramp = {
@@ -557,7 +577,7 @@ $(document).ready(function() {
 				var options = '<option value=""> -- {% trans "Select ramp category" %} -- </option>';
 				for(var i=0; i<folders.length; i++){
 					var folder = folders[i];
-					options += "<option value=\""+ folder.id +"\">"+folder.name+"</option>";
+					options += "<option value=\""+ folder.id +"\">"+symbologyEscapeHtml(folder.name)+"</option>";
 				}
 				$("#select-category").prop("disabled", false);
 				$("#select-category").html(options);
@@ -582,8 +602,8 @@ $(document).ready(function() {
 		}
 	});
 	
-	
-	$(window).on("beforeunload", function(){
+{% block unique_values_v17 %}	
+{% endblock %}	$(window).on("beforeunload", function(){
 		$.ajax({
 			type: "POST",
 			async: false,

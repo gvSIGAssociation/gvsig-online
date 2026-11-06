@@ -5,24 +5,32 @@
 {% block content %}
 <div class="row">
 	<div class="col-md-12">
-		<div class="pf-topbar">
-			<button id="save-symbol" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
-		</div>
-		<div class="pl-panel">
+		<div class="pl-panel gol-sym-detail">
+			<div class="pl-panel__header">
+<div class="gol-sym-heading">
+<a href="{% if library_id %}/gvsigonline/symbology/library_update/{{ library_id }}/{% else %}{% url 'library_list' %}{% endif %}" class="gol-sym-back-btn" title="{% if library_id %}{% trans "Back to library" %}{% else %}{% trans "Back to list" %}{% endif %}" aria-label="{% if library_id %}{% trans "Back to library" %}{% else %}{% trans "Back to list" %}{% endif %}"><i class="fa fa-arrow-left" aria-hidden="true"></i></a>
+<div class="gol-sym-heading__text">
+<h3 class="pl-panel__title"><i class="fa fa-star-o"></i>{% trans "Library symbol" %}</h3>
+</div>
+</div>
+				<div class="pl-panel__actions">
+{% block symbol_v1 %}			<button id="save-symbol" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+{% endblock %}				</div>
+			</div>
 			<div class="pl-panel__body with-padding">
 				{% csrf_token %}
 				<div class="row">
 					<div class="col-md-12">
 						<div id="form-error" class="pf-error-msg"></div>
-						<div id="error-message" class="pf-error-msg"></div>
-						<div class="form-group">
+{% block symbol_v2 %}						<div id="error-message" class="pf-error-msg"></div>
+{% endblock %}						<div class="form-group">
 							<label>{% trans "Name" %}</label>
-							<input placeholder="{% trans 'Symbol name' %}" name="symbol-name" id="symbol-name" type="text" class="form-control">
-						</div>	
+{% block symbol_v3 %}							<input placeholder="{% trans 'Symbol name' %}" name="symbol-name" id="symbol-name" type="text" class="form-control">
+{% endblock %}						</div>	
 						<div class="form-group">
 							<label>{% trans "Title" %}</label>
-				    		<input placeholder="{% trans 'Symbol title' %}" name="symbol-title" id="symbol-title" type="text" class="form-control">
-						</div>
+{% block symbol_v4 %}				    		<input placeholder="{% trans 'Symbol title' %}" name="symbol-title" id="symbol-title" type="text" class="form-control">
+{% endblock %}						</div>
 						<div class="form-group">
 							<p class="text-muted">* {% trans "Specifies a title for the rule. The title is used in display lists and legends" %}.</p>
 						</div>
@@ -59,7 +67,7 @@
 		</div>
 	</div>
 </div>
-
+{% block symbol_v5 %}
  <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
 	<div class="modal-dialog" role="document">
 	  <div class="modal-content">
@@ -78,7 +86,7 @@
 	  </div>
 	</div>
   </div>
-{% endblock %}
+{% endblock %}{% endblock %}
 {% block extra-scripts %}
 <script>
 	$('#menu-manage-symbology').addClass("active");
@@ -93,16 +101,16 @@ $(document).ready(function() {
 	
 	var previewUrl = null;
 	var featureType = null;
-	if ("{{symbol_type}}" == "MarkSymbolizer") {
-		featureType = 'PointSymbolizer';
+{% block symbol_v6 %}	if ("{{symbol_type}}" == "MarkSymbolizer") {
+{% endblock %}		featureType = 'PointSymbolizer';
 		previewUrl = previewPointUrl;
 		
-	} else if ("{{symbol_type}}" == "LineSymbolizer") {
-		featureType = 'LineSymbolizer';
+{% block symbol_v7 %}	} else if ("{{symbol_type}}" == "LineSymbolizer") {
+{% endblock %}		featureType = 'LineSymbolizer';
 		previewUrl = previewLineUrl;
 		
-	} else if ("{{symbol_type}}" == "PolygonSymbolizer") {
-		featureType = 'PolygonSymbolizer';
+{% block symbol_v8 %}	} else if ("{{symbol_type}}" == "PolygonSymbolizer") {
+{% endblock %}		featureType = 'PolygonSymbolizer';
 		previewUrl = previewPolygonUrl;
 		
 	}
@@ -110,35 +118,35 @@ $(document).ready(function() {
 	var symbologyUtils = new SymbologyUtils(null, null, null, featureType, previewUrl, [],[]);
 	var librarySymbol = new LibrarySymbol(previewPointUrl, previewLineUrl, previewPolygonUrl, symbologyUtils);
 	
-	librarySymbol.addDefault();
-	
-	$("#save-symbol").on('click', function(e){
-		$("#form-error").empty();
+{% block symbol_v9 %}	librarySymbol.addDefault();
+{% endblock %}	
+{% block symbol_v10 %}	$("#save-symbol").on('click', function(e){
+{% endblock %}		$("#form-error").empty();
 		var name = $("#symbol-name").val();
 		var title = $("#symbol-title").val();
 		var filter = "";
 		
 		if (name != '') {
-			librarySymbol.save("{{library_id}}", name, title, filter);
-		} else {
+{% block symbol_v11 %}			librarySymbol.save("{{library_id}}", name, title, filter);
+{% endblock %}		} else {
 			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
-			
-		}
+{% block symbol_v12 %}			
+{% endblock %}		}
 		
 	});
 
-
-
+{% block symbol_v13 %}{% endblock %}
+{% block symbol_v14 %}{% endblock %}
 });
 </script>
-
+{% block symbol_v15 %}
 <script>
-    var errorMessage = "{{ error_message }}";
+    var errorMessage = "{{ error_message|escapejs }}";
     if (errorMessage) {
         var errorElement = document.getElementById("error-message");
-        errorElement.innerHTML = errorMessage;
+        errorElement.textContent = errorMessage;
     }
 </script>
 
 
-{% endblock %}
+{% endblock %}{% endblock %}

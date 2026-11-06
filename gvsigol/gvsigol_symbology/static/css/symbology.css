@@ -1,20 +1,7 @@
-.new-style-options-icon {
-    float: left;
-    height: 60px;
-    width: 60px;
-    text-align: center;
-    font-size: 32px;
-    color: #3c8dbc;
-}
-
 .preview-map{
 	height: 280px;
     width: 100%;
     margin-bottom: 30px;
-}
-
-#ex1Slider .slider-selection {
-	background: #BABABA;
 }
 
 .label-preview-svg{
@@ -35,15 +22,6 @@
 	color: #999 !important;
 }
 
-.link-selected {
-	color: #3c8dbc !important;
-	font-weight: bold;
-}
-
-.users-list > li {
-/*     width: auto !important; */
-}
-
 .library-symbol-preview-div {
 	text-align: center;
 }
@@ -53,10 +31,6 @@
 	max-width: 48px;
 }
 
-/* .output-eg{ */
-/* 	max-height: 8px; */
-/* 	max-width: 8px; */
-/* } */
 
 .output-eg-div {
 	text-align: center;
@@ -110,32 +84,10 @@
 }
 
 /* ===========================================================
-   Design System – pl-panel / pf-* components
-   Coherent with gvsigol_core templates
+   Componentes pl-panel / pf-* propios de simbología
+   (extienden gol-list-page.css / gol-form-page.css del core)
    =========================================================== */
-:root {
-	--pl-accent:    #4a7fa5;
-	--pl-accent-dk: #2d5f80;
-	--pl-text:      #2e3a45;
-	--pl-muted:     #7b8a96;
-	--pl-border:    #e8ecef;
-	--pl-bg:        #f4f6f8;
-	--pl-white:     #ffffff;
-	--pl-radius:    10px;
-	--pl-shadow:    0 2px 12px rgba(0,0,0,0.08);
-	--pl-transition: 0.2s ease;
-
-	--pf-accent:    #4a7fa5;
-	--pf-accent-dk: #2d5f80;
-	--pf-text:      #2e3a45;
-	--pf-muted:     #7b8a96;
-	--pf-border:    #e8ecef;
-	--pf-bg:        #f4f6f8;
-	--pf-white:     #ffffff;
-	--pf-radius:    10px;
-	--pf-shadow:    0 2px 12px rgba(0,0,0,0.08);
-	--pf-transition: 0.2s ease;
-}
+/* Las variables --pl-* y --pf-* vienen de gol-tokens.css (alias sobre <body> con el color del tema). */
 
 /* ---- Panel principal ---- */
 .pl-panel {
@@ -612,40 +564,7 @@
 	border-bottom: 2px solid var(--pf-accent);
 }
 
-/* ---- Inputs dentro de pl-panel ---- */
-.pl-panel .form-control {
-	border-radius: 6px;
-	border-color: var(--pf-border);
-	font-size: 13px;
-	height: 36px;
-	color: var(--pf-text);
-	transition: border-color var(--pf-transition), box-shadow var(--pf-transition);
-}
-.pl-panel textarea.form-control { height: auto; }
-.pl-panel .form-control:focus {
-	border-color: var(--pf-accent);
-	box-shadow: 0 0 0 3px rgba(74,127,165,0.12);
-	outline: none;
-}
-.pl-panel label {
-	font-size: 12px;
-	font-weight: 600;
-	color: var(--pf-muted);
-}
-
-/* ---- Items en products-list dentro de pl-panel ---- */
-.pl-panel .products-list > .item {
-	border-radius: 6px;
-	margin-bottom: 6px;
-	padding: 10px 12px;
-	background: var(--pf-white);
-	border: 1px solid var(--pf-border);
-	transition: background var(--pf-transition), border-color var(--pf-transition);
-}
-.pl-panel .products-list > .item:hover {
-	background: #f0f6fb;
-	border-color: #c8dcec;
-}
+/* Los campos de formulario se estilan en la sección «Fase 6a» (al final). */
 
 /* ---- Modales ---- */
 .pl-panel ~ .modal .modal-content,
@@ -707,3 +626,1918 @@
 	margin: 10px 20px;
 }
 .pl-panel #form-error p { margin: 2px 0; }
+
+/* =================================================================
+   Rediseño de simbología (prefijo gol-sym-).
+   Todo cuelga de .gol-symbology (clase del <body> de base_symbology)
+   y usa los tokens del tema (--gol-*), así que respeta el skin activo.
+   ================================================================= */
+
+/* ---- Cabecera con subtítulo (nombre de la capa) ---- */
+.gol-symbology .gol-sym-heading {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	min-width: 0;
+}
+.gol-symbology .gol-sym-heading__text {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+/* Botón de volver: a la izquierda del título */
+.gol-symbology .gol-sym-back-btn {
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	border: 1px solid var(--gol-border);
+	border-radius: 10px;
+	background: var(--gol-white);
+	color: var(--gol-muted);
+	font-size: 15px;
+	text-decoration: none;
+	transition: border-color var(--gol-transition), color var(--gol-transition), background var(--gol-transition);
+}
+.gol-symbology .gol-sym-back-btn:hover,
+.gol-symbology .gol-sym-back-btn:focus {
+	border-color: var(--gol-accent);
+	background: var(--gol-bg);
+	color: var(--gol-accent);
+	text-decoration: none;
+}
+.gol-symbology .gol-sym-back-btn:focus { outline: none; }
+.gol-symbology .gol-sym-back-btn:focus-visible {
+	outline: 2px solid var(--gol-accent);
+	outline-offset: 2px;
+}
+.gol-symbology .gol-sym-subtitle {
+	font-size: 12.5px;
+	color: var(--gol-muted);
+	padding-left: 2px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.gol-symbology a.btn-pl-outline,
+.gol-symbology a.btn-pl-outline:hover,
+.gol-symbology a.btn-pl-outline:focus {
+	text-decoration: none;
+}
+
+/* ---- Listados ---- */
+.gol-symbology .gol-sym-muted { color: var(--gol-muted); }
+.gol-symbology .gol-sym-help {
+	color: var(--gol-muted);
+	margin-left: 4px;
+	cursor: help;
+}
+.gol-symbology .gol-sym-style-select { width: 100%; }
+
+/* ---- Elegir tipo de leyenda: rejilla de tarjetas ---- */
+.gol-symbology .gol-sym-intro {
+	color: var(--gol-muted);
+	margin: 0 0 16px;
+}
+.gol-symbology .gol-sym-type-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+	gap: 14px;
+}
+.gol-symbology .gol-sym-type-card {
+	display: flex;
+	align-items: flex-start;
+	gap: 14px;
+	padding: 16px 18px;
+	background: var(--gol-white);
+	border: 1px solid var(--gol-border);
+	border-radius: var(--gol-radius);
+	color: var(--gol-text);
+	text-decoration: none;
+	transition: border-color var(--gol-transition), box-shadow var(--gol-transition), transform var(--gol-transition);
+}
+.gol-symbology .gol-sym-type-card:hover,
+.gol-symbology .gol-sym-type-card:focus {
+	border-color: var(--gol-accent);
+	box-shadow: var(--gol-shadow-hv);
+	color: var(--gol-text);
+	text-decoration: none;
+	transform: translateY(-1px);
+}
+.gol-symbology .gol-sym-type-card:focus { outline: none; }
+.gol-symbology .gol-sym-type-card:focus-visible {
+	outline: 2px solid var(--gol-accent);
+	outline-offset: 2px;
+}
+.gol-symbology .gol-sym-type-card__icon {
+	flex: 0 0 44px;
+	height: 44px;
+	border-radius: 10px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 20px;
+	color: var(--gol-accent);
+	background: var(--gol-accent-lt);
+	box-shadow: inset 0 0 0 1px var(--gol-border);
+	transition: background var(--gol-transition), color var(--gol-transition);
+}
+.gol-symbology .gol-sym-type-card:hover .gol-sym-type-card__icon,
+.gol-symbology .gol-sym-type-card:focus .gol-sym-type-card__icon {
+	background: var(--gol-accent);
+	color: #fff;
+}
+.gol-symbology .gol-sym-type-card__body { min-width: 0; }
+.gol-symbology .gol-sym-type-card__title {
+	display: block;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--gol-text);
+	margin-bottom: 3px;
+}
+.gol-symbology .gol-sym-type-card__desc {
+	display: block;
+	font-size: 12.5px;
+	line-height: 1.45;
+	color: var(--gol-muted);
+}
+@media (prefers-reduced-motion: reduce) {
+	.gol-symbology .gol-sym-type-card,
+	.gol-symbology .gol-sym-type-card__icon { transition: none; }
+	.gol-symbology .gol-sym-type-card:hover,
+	.gol-symbology .gol-sym-type-card:focus { transform: none; }
+}
+
+/* ---- Editores de leyenda (Fase 3) ---- */
+/* overflow visible: con hidden la cabecera sticky no se quedaría fija; las esquinas
+   superiores se redondean en la propia cabecera. */
+.gol-symbology .gol-sym-editor.pl-panel { overflow: visible; }
+.gol-symbology .gol-sym-editor > .pl-panel__header,
+.gol-symbology .gol-sym-editor > form > .pl-panel__header {
+	position: sticky;
+	top: 0;
+	z-index: 30;
+	background: var(--gol-white);
+	border-radius: var(--gol-radius) var(--gol-radius) 0 0;
+}
+.gol-symbology .gol-sym-back-link {
+	color: var(--gol-muted);
+	text-decoration: none;
+}
+.gol-symbology .gol-sym-back-link:hover,
+.gol-symbology .gol-sym-back-link:focus {
+	color: var(--gol-accent);
+	text-decoration: none;
+}
+.gol-symbology .gol-sym-sep {
+	margin: 0 8px;
+	color: var(--gol-muted);
+	opacity: 0.6;
+}
+
+.gol-symbology .gol-sym-section-title {
+	margin: 0 0 14px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--gol-border);
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--gol-muted);
+}
+.gol-symbology .gol-sym-section-title--rules { margin-top: 10px; }
+
+/* Vista previa enmarcada */
+.gol-symbology .gol-sym-preview .preview-map {
+	border: 1px solid var(--gol-border);
+	border-radius: var(--gol-radius);
+	overflow: hidden;
+	background: var(--gol-bg);
+}
+
+/* Escalas 1:N */
+.gol-symbology .gol-sym-scale { width: 100%; }
+.gol-symbology .gol-sym-scale .input-group-addon {
+	background: var(--gol-bg);
+	border-color: var(--gol-border);
+	color: var(--gol-muted);
+	font-weight: 600;
+	border-radius: 6px 0 0 6px;
+}
+.gol-symbology .gol-sym-scale .form-control { border-radius: 0 6px 6px 0; }
+.gol-symbology .gol-sym-help-text {
+	margin: -6px 0 0;
+	font-size: 12px;
+	line-height: 1.45;
+}
+
+/* Barra de herramientas de las reglas */
+.gol-symbology .gol-sym-rules-toolbar {
+	margin: 0 0 16px;
+	padding: 12px 0 0;
+	background: var(--gol-bg);
+	border: 1px solid var(--gol-border);
+	border-radius: var(--gol-radius);
+}
+.gol-symbology .gol-sym-label-spacer { display: block; }
+.gol-symbology .gol-sym-btn-block { width: 100%; }
+
+/* «Estilo por defecto» como interruptor (mismo checkbox, solo aspecto) */
+.gol-symbology .gol-sym-default > label {
+	padding-left: 0;
+	display: inline-flex;
+	align-items: center;
+	gap: 12px;
+	min-height: 24px;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--gol-text);
+	cursor: pointer;
+}
+.gol-symbology #style-is-default {
+	-webkit-appearance: none;
+	appearance: none;
+	position: relative;
+	flex: 0 0 auto;
+	box-sizing: border-box;
+	width: 42px;
+	height: 24px;
+	margin: 0;
+	border: 1px solid rgba(63, 77, 90, 0.28);
+	border-radius: 12px;
+	background: #dfe5ea;
+	box-shadow: inset 0 1px 2px rgba(63, 77, 90, 0.12);
+	cursor: pointer;
+	vertical-align: middle;
+	transition: background var(--gol-transition), border-color var(--gol-transition);
+}
+.gol-symbology #style-is-default::before {
+	content: '';
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(63, 77, 90, 0.08);
+	transition: transform var(--gol-transition);
+}
+.gol-symbology #style-is-default:hover { border-color: rgba(63, 77, 90, 0.45); }
+.gol-symbology #style-is-default:checked {
+	background: var(--gol-accent);
+	border-color: var(--gol-accent);
+	box-shadow: none;
+}
+.gol-symbology #style-is-default:checked::before { transform: translateX(18px); }
+.gol-symbology #style-is-default:disabled { cursor: not-allowed; opacity: 0.55; }
+.gol-symbology #style-is-default:focus { outline: none; }
+.gol-symbology #style-is-default:focus-visible {
+	outline: 2px solid var(--gol-accent);
+	outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+	.gol-symbology #style-is-default,
+	.gol-symbology #style-is-default::before { transition: none; }
+}
+
+/* Mapa de calor: etiquetas de opción sin estilos en línea */
+.gol-symbology .gol-sym-option-label {
+	font-size: 14px;
+	font-weight: 600;
+	margin-right: 8px;
+}
+.gol-symbology .gol-sym-radio {
+	font-weight: 400;
+	margin: 0 16px 0 0;
+	cursor: pointer;
+}
+.gol-symbology .gol-sym-radio input[type="radio"] { margin-right: 4px; }
+
+/* =================================================================
+   Fase 4: HTML generado por JS (Rule.js, *Symbolizer.js, ColorMapEntry.js).
+   Solo aspecto: no se cambia display ni el posicionamiento de los controles
+   (el plegado de AdminLTE y los desplegables siguen igual). Los !important
+   solo anulan colores que el JS pone en línea.
+   ================================================================= */
+
+/* ---- Tarjetas de regla ---- */
+.gol-symbology #rules > [data-ruleid] > .box {
+	border: 1px solid var(--gol-border);
+	border-radius: var(--gol-radius);
+	box-shadow: none;
+	margin-bottom: 12px;
+	transition: border-color var(--gol-transition), box-shadow var(--gol-transition);
+}
+.gol-symbology #rules > [data-ruleid] > .box:hover {
+	box-shadow: var(--gol-shadow);
+}
+.gol-symbology #rules .box > .box-header {
+	padding: 10px 14px;
+	border-radius: var(--gol-radius) var(--gol-radius) 0 0;
+}
+.gol-symbology #rules .box > .box-header.with-border { border-bottom-color: var(--gol-border); }
+.gol-symbology #rules .box.collapsed-box > .box-header.with-border { border-bottom-color: transparent; }
+.gol-symbology #rules .box > .box-header .box-title {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--gol-text);
+	vertical-align: middle;
+}
+.gol-symbology #rules .box > .box-header .rule-preview {
+	margin-right: 12px;
+	vertical-align: middle;
+}
+.gol-symbology #rules .box > .box-header .rule-preview img {
+	padding: 2px;
+	border-radius: 4px;
+	background: var(--gol-white);
+	box-shadow: 0 0 0 1px var(--gol-border);
+}
+.gol-symbology #rules .unique-values-sort-handle { color: var(--gol-muted) !important; }
+
+/* Herramientas de la regla */
+.gol-symbology #rules .btn-box-tool {
+	color: var(--gol-muted);
+	border-radius: 6px;
+	transition: background var(--gol-transition), color var(--gol-transition);
+}
+.gol-symbology #rules .btn-box-tool:hover,
+.gol-symbology #rules .btn-box-tool:focus {
+	color: var(--gol-accent);
+	background: var(--gol-bg);
+}
+.gol-symbology #rules .btn-box-tool.dropdown-toggle { color: var(--gol-accent) !important; }
+.gol-symbology #rules .btn-box-tool.delete-rule { color: #c0392b !important; }
+.gol-symbology #rules .btn-box-tool.delete-rule:hover,
+.gol-symbology #rules .btn-box-tool.delete-rule:focus { background: #fde8e8; }
+.gol-symbology #rules .box-tools .dropdown-menu {
+	padding: 4px 0;
+	border: 1px solid var(--gol-border);
+	border-radius: 8px;
+	box-shadow: var(--gol-shadow-hv);
+}
+.gol-symbology #rules .box-tools .dropdown-menu > li > a {
+	padding: 7px 14px;
+	color: var(--gol-text);
+}
+.gol-symbology #rules .box-tools .dropdown-menu > li > a:hover,
+.gol-symbology #rules .box-tools .dropdown-menu > li > a:focus {
+	background: var(--gol-bg);
+	color: var(--gol-accent);
+}
+
+/* Tabla de simbolizadores de la regla */
+.gol-symbology #rules .box > .box-body { padding: 6px 14px 10px; }
+.gol-symbology #rules .box > .box-body .table > thead > tr > th {
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--gol-muted);
+	border-bottom: 1px solid var(--gol-border);
+}
+.gol-symbology #rules .box > .box-body .table > tbody > tr > td {
+	vertical-align: middle;
+	border-top-color: var(--gol-border);
+}
+.gol-symbology #rules .box > .box-body .handle {
+	color: var(--gol-muted);
+	cursor: move;
+}
+
+/* Pie de la regla (añadir simbolizador, importar…) */
+.gol-symbology #rules .box > .box-footer {
+	padding: 8px 14px;
+	background: var(--gol-bg);
+	border-top: 1px solid var(--gol-border);
+	border-radius: 0 0 var(--gol-radius) var(--gol-radius);
+}
+.gol-symbology #rules .box > .box-footer .btn-default.btn-flat {
+	border: 1px solid var(--gol-border);
+	border-radius: 6px;
+	background: var(--gol-white);
+	color: var(--gol-text);
+	font-size: 12px;
+	transition: border-color var(--gol-transition), color var(--gol-transition);
+}
+.gol-symbology #rules .box > .box-footer .btn-default.btn-flat:hover,
+.gol-symbology #rules .box > .box-footer .btn-default.btn-flat:focus {
+	border-color: var(--gol-accent);
+	color: var(--gol-accent);
+}
+
+/* ---- Editor de símbolos (modales con pestañas) ---- */
+.gol-symbology .modal .nav-tabs-custom {
+	margin-bottom: 0;
+	box-shadow: none;
+}
+.gol-symbology .modal .nav-tabs-custom > .nav-tabs { border-bottom: 1px solid var(--gol-border); }
+.gol-symbology .modal .nav-tabs-custom > .nav-tabs > li {
+	border-top: 0;
+	margin-bottom: -1px;
+}
+.gol-symbology .modal .nav-tabs-custom > .nav-tabs > li > a {
+	border: 0;
+	border-bottom: 2px solid transparent;
+	border-radius: 0;
+	color: var(--gol-muted);
+	font-weight: 600;
+}
+.gol-symbology .modal .nav-tabs-custom > .nav-tabs > li > a:hover { color: var(--gol-accent); }
+.gol-symbology .modal .nav-tabs-custom > .nav-tabs > li.active > a,
+.gol-symbology .modal .nav-tabs-custom > .nav-tabs > li.active > a:hover,
+.gol-symbology .modal .nav-tabs-custom > .nav-tabs > li.active > a:focus {
+	border-bottom-color: var(--gol-accent);
+	background: transparent;
+	color: var(--gol-accent);
+}
+.gol-symbology .modal .nav-tabs-custom > .tab-content { padding: 16px 4px 4px; }
+
+/* Selectores de color */
+.gol-symbology .modal input[type="color"].form-control {
+	height: 36px;
+	padding: 3px 4px;
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+/* Deslizadores de opacidad, tamaño, etc. (jQuery UI) */
+.gol-symbology .modal .ui-slider-horizontal {
+	height: 6px;
+	margin: 12px 8px 6px;
+	border: 0;
+	border-radius: 3px;
+	background: var(--gol-border);
+}
+.gol-symbology .modal .ui-slider-horizontal .ui-slider-range {
+	border-radius: 3px;
+	background: var(--gol-accent);
+}
+.gol-symbology .modal .ui-slider-horizontal .ui-slider-handle {
+	top: -5px;
+	width: 16px;
+	height: 16px;
+	margin-left: -8px;
+	border: 2px solid var(--gol-accent);
+	border-radius: 50%;
+	background: var(--gol-white);
+	cursor: grab;
+}
+.gol-symbology .modal .ui-slider-horizontal .ui-slider-handle:focus {
+	outline: 2px solid var(--gol-accent);
+	outline-offset: 2px;
+}
+.gol-symbology .gol-slider-output {
+	display: inline-block;
+	min-width: 42px;
+	padding: 1px 8px;
+	border: 1px solid var(--gol-border);
+	border-radius: 10px;
+	background: var(--gol-bg);
+	color: var(--gol-accent);
+	font-size: 12px;
+	font-weight: 600;
+	text-align: center;
+}
+@media (prefers-reduced-motion: reduce) {
+	.gol-symbology #rules > [data-ruleid] > .box,
+	.gol-symbology #rules .btn-box-tool { transition: none; }
+}
+
+/* =================================================================
+   Fase 5: modales de los editores
+   ================================================================= */
+/* En los modales con formulario las etiquetas van en el color de texto
+   (el cuerpo es atenuado para los textos de confirmación). */
+.gol-symbology .modal .modal-body label { color: var(--gol-text); }
+.gol-symbology .modal .gol-sym-warn-icon { color: #d08b00; margin-right: 4px; }
+
+/* Listas con scroll (antes estilos en línea) */
+.gol-symbology .gol-sym-scroll { max-height: 300px; overflow: auto; }
+.gol-symbology .gol-sym-ramp-list { padding-left: 0; }
+.gol-symbology .modal .box {
+	margin-bottom: 0;
+	border: 1px solid var(--gol-border);
+	border-radius: 8px;
+	box-shadow: none;
+}
+
+/* Importar símbolo de una librería */
+.gol-symbology #modal-import-symbol .users-list > li {
+	border-radius: 8px;
+	transition: background var(--gol-transition);
+}
+.gol-symbology #modal-import-symbol .users-list > li:hover { background: var(--gol-bg); }
+.gol-symbology #modal-import-symbol .users-list-name {
+	margin-top: 6px;
+	font-size: 12px;
+	color: var(--gol-text);
+}
+.gol-symbology #modal-import-symbol .users-list > li:hover .users-list-name { color: var(--gol-accent); }
+
+/* Selección de rampa de color */
+.gol-symbology .ramp-list .color-ramp-item {
+	padding: 8px;
+	border: 1px solid var(--gol-border);
+	background: var(--gol-white);
+	cursor: pointer;
+	transition: background var(--gol-transition), border-color var(--gol-transition);
+}
+.gol-symbology .ramp-list .color-ramp-item:hover {
+	background: var(--gol-bg);
+	border-color: var(--gol-accent);
+}
+.gol-symbology .ramp-list .preview-ramp-color {
+	border-color: var(--gol-border);
+	border-radius: 4px;
+}
+.gol-symbology .ramp-list .color-ramp-name {
+	display: block;
+	font-size: 12px;
+	color: var(--gol-text);
+	text-align: center;
+}
+
+/* =================================================================
+   Fase 6a: sistema de controles de formulario de simbología.
+   Vale para todas las páginas y modales del módulo (.gol-symbology).
+   ================================================================= */
+.gol-symbology {
+	--gol-sym-input-border: rgba(63, 77, 90, 0.22);
+	--gol-sym-input-border-hv: rgba(63, 77, 90, 0.38);
+	--gol-sym-placeholder: #98a5b0;
+}
+.gol-symbology .form-group { margin-bottom: 14px; }
+.gol-symbology .pl-panel label,
+.gol-symbology .modal label {
+	margin-bottom: 5px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--gol-text);
+}
+.gol-symbology .checkbox label,
+.gol-symbology .radio label { font-weight: 400; }
+
+.gol-symbology .form-control {
+	height: 34px;
+	padding: 6px 11px;
+	border: 1px solid var(--gol-sym-input-border);
+	border-radius: 8px;
+	background-color: var(--gol-white);
+	box-shadow: none;
+	color: var(--gol-text);
+	font-size: 13px;
+	transition: border-color var(--gol-transition), box-shadow var(--gol-transition);
+}
+.gol-symbology .form-control:hover { border-color: var(--gol-sym-input-border-hv); }
+.gol-symbology .form-control:focus {
+	border-color: var(--gol-accent);
+	box-shadow: 0 0 0 1px var(--gol-accent);
+	outline: none;
+}
+.gol-symbology .form-control::placeholder { color: var(--gol-sym-placeholder); opacity: 1; }
+.gol-symbology .form-control[disabled],
+.gol-symbology .form-control[readonly] {
+	background-color: var(--gol-bg);
+	border-color: var(--gol-border);
+	color: var(--gol-muted);
+	cursor: not-allowed;
+}
+.gol-symbology textarea.form-control { height: auto; min-height: 80px; line-height: 1.5; }
+.gol-symbology input[type="color"].form-control { padding: 3px 4px; cursor: pointer; }
+
+/* Desplegables con flecha propia (no los múltiples ni los de tamaño fijo) */
+.gol-symbology select.form-control:not([multiple]):not([size]) {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	padding-right: 34px;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%237b8a96' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M2.5 4.5 6 8l3.5-3.5'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 12px center;
+	background-size: 12px 12px;
+}
+.gol-symbology select.form-control::-ms-expand { display: none; }
+
+/* Casillas y radios con el color del tema */
+.gol-symbology input[type="checkbox"],
+.gol-symbology input[type="radio"] { accent-color: var(--gol-accent); }
+
+/* Grupos con prefijo (escalas 1:N, etc.) */
+.gol-symbology .input-group-addon {
+	border-color: var(--gol-sym-input-border);
+	background: var(--gol-bg);
+	color: var(--gol-muted);
+	font-weight: 600;
+}
+.gol-symbology .input-group .form-control:first-child { border-radius: 8px 0 0 8px; }
+.gol-symbology .input-group .form-control:last-child { border-radius: 0 8px 8px 0; }
+.gol-symbology .input-group-addon:first-child { border-radius: 8px 0 0 8px; }
+.gol-symbology .gol-sym-scale .input-group-addon { border-radius: 8px 0 0 8px; }
+.gol-symbology .gol-sym-scale .form-control { border-radius: 0 8px 8px 0; }
+
+/* Selector de fichero como zona de carga */
+.gol-symbology input[type="file"] {
+	display: block;
+	width: 100%;
+	max-width: 560px;
+	padding: 14px;
+	border: 1.5px dashed var(--gol-sym-input-border-hv);
+	border-radius: 10px;
+	background: var(--gol-bg);
+	color: var(--gol-muted);
+	font-size: 13px;
+	cursor: pointer;
+	transition: border-color var(--gol-transition), background var(--gol-transition);
+}
+.gol-symbology input[type="file"]:hover,
+.gol-symbology input[type="file"]:focus {
+	border-color: var(--gol-accent);
+	background: var(--gol-white);
+	outline: none;
+}
+.gol-symbology input[type="file"]::file-selector-button {
+	margin-right: 14px;
+	padding: 7px 14px;
+	border: 1px solid var(--gol-sym-input-border);
+	border-radius: 6px;
+	background: var(--gol-white);
+	color: var(--gol-text);
+	font-weight: 600;
+	cursor: pointer;
+}
+.gol-symbology input[type="file"]::-webkit-file-upload-button {
+	margin-right: 14px;
+	padding: 7px 14px;
+	border: 1px solid var(--gol-sym-input-border);
+	border-radius: 6px;
+	background: var(--gol-white);
+	color: var(--gol-text);
+	font-weight: 600;
+	cursor: pointer;
+}
+
+/* Textos de ayuda */
+.gol-symbology .gol-sym-field-hint {
+	margin: 6px 0 0;
+	font-size: 12px;
+	line-height: 1.45;
+	color: var(--gol-muted);
+}
+.gol-symbology .gol-sym-field-hint .fa { margin-right: 4px; }
+
+/* Mensaje de error del formulario */
+.gol-symbology .gol-sym-alert {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin: 0 0 18px;
+	padding: 12px 14px;
+	border: 1px solid #f1c4c0;
+	border-left: 3px solid #c0392b;
+	border-radius: 8px;
+	background: #fdf3f2;
+	color: #8e2a20;
+	font-size: 13px;
+}
+.gol-symbology .gol-sym-alert .fa { margin-top: 2px; color: #c0392b; }
+
+/* ---- Formularios simples: tarjeta centrada con pie de acciones ---- */
+.gol-symbology .gol-sym-form-card {
+	max-width: 600px;
+	margin: 0 auto;
+}
+.gol-symbology .gol-sym-form-card > .pl-panel__body { padding: 20px 24px 6px; }
+.gol-symbology .gol-sym-form-footer {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 24px;
+	border-top: 1px solid var(--gol-border);
+	background: var(--gol-bg);
+}
+.gol-symbology .gol-sym-form-footer a.btn-pf-secondary,
+.gol-symbology .gol-sym-form-footer a.btn-pf-secondary:hover,
+.gol-symbology .gol-sym-form-footer a.btn-pf-secondary:focus { text-decoration: none; }
+@media (max-width: 767px) {
+	.gol-symbology .gol-sym-form-card > .pl-panel__body { padding: 18px 16px 4px; }
+	.gol-symbology .gol-sym-form-footer { padding: 12px 16px; }
+}
+
+/* =================================================================
+   Fase 6b: editores con secciones en tarjetas sobre fondo gris
+   (solo los que tienen columnas: .gol-sym-editor--cards)
+   ================================================================= */
+.gol-symbology .gol-sym-editor--cards > .pl-panel__body,
+.gol-symbology .gol-sym-editor--cards > form > .pl-panel__body {
+	background: var(--gol-bg);
+	border-radius: 0 0 var(--gol-radius) var(--gol-radius);
+}
+.gol-symbology .gol-sym-card {
+	margin-bottom: 18px;
+	padding: 16px 18px 4px;
+	background: var(--gol-white);
+	border: 1px solid var(--gol-border);
+	border-radius: var(--gol-radius);
+	box-shadow: 0 1px 2px rgba(63, 77, 90, 0.05);
+}
+.gol-symbology .gol-sym-card .preview-map { margin-bottom: 16px; }
+.gol-symbology .gol-sym-editor--cards .gol-sym-rules-toolbar {
+	background: var(--gol-white);
+	box-shadow: 0 1px 2px rgba(63, 77, 90, 0.05);
+}
+.gol-symbology .gol-sym-editor--cards #rules > [data-ruleid] > .box { background: var(--gol-white); }
+
+/* ---- Ajuste tras revisión: tabla de simbolizadores / entradas de color ----
+   La cabecera tiene menos celdas que las filas (asa, contenido…, editar, borrar):
+   sin fondo en la cabecera y columnas fijas para asa y acciones, de modo que la
+   vista previa ocupe el resto y las acciones queden a la derecha. */
+.gol-symbology #rules .box > .box-body .table > thead > tr > th {
+	background: transparent;
+	padding: 6px 8px;
+}
+.gol-symbology #rules .box > .box-body .table > tbody > tr > td { padding: 8px; }
+.gol-symbology #rules .box > .box-body .table > tbody > tr > td:first-child {
+	width: 28px;
+	text-align: center;
+}
+.gol-symbology #rules .box > .box-body .table > tbody > tr > td:nth-last-child(-n+2) {
+	width: 36px;
+	text-align: center;
+}
+.gol-symbology #rules .box > .box-body .table > tbody > tr > td:nth-last-child(-n+2) a {
+	display: inline-block;
+	padding: 4px 6px;
+	border-radius: 6px;
+	transition: background var(--gol-transition);
+}
+.gol-symbology #rules .box > .box-body .table > tbody > tr > td:nth-last-child(-n+2) a:hover { background: var(--gol-bg); }
+.gol-symbology #rules .box > .box-body .table > tbody > tr:hover > td { background: #fafbfc; }
+
+/* =================================================================
+   Fase 7: detalle de bibliotecas y editores de símbolos de biblioteca
+   ================================================================= */
+.gol-symbology .gol-sym-subheader { border-top: 1px solid var(--gol-border); }
+.gol-symbology .gol-sym-detail > .gol-sym-tabs { padding: 0 20px; }
+
+/* Símbolos de la biblioteca como rejilla de tarjetas (los <li> los añade el JS) */
+.gol-symbology .gol-sym-symbol-grid { padding: 18px 20px; }
+.gol-symbology .gol-sym-symbol-grid .users-list {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+	gap: 12px;
+	margin: 0;
+	padding: 0;
+}
+/* El clearfix de .users-list no debe ocupar celdas de la rejilla */
+.gol-symbology .gol-sym-symbol-grid .users-list::before,
+.gol-symbology .gol-sym-symbol-grid .users-list::after { display: none; }
+.gol-symbology .gol-sym-symbol-grid .users-list > li {
+	float: none;
+	width: auto;
+	padding: 16px 10px 12px;
+	background: var(--gol-white);
+	border: 1px solid var(--gol-border);
+	border-radius: var(--gol-radius);
+	text-align: center;
+	transition: border-color var(--gol-transition), box-shadow var(--gol-transition);
+}
+.gol-symbology .gol-sym-symbol-grid .users-list > li:hover {
+	border-color: var(--gol-accent);
+	box-shadow: var(--gol-shadow);
+}
+.gol-symbology .gol-sym-symbol-grid .users-list > li > div,
+.gol-symbology .gol-sym-symbol-grid .users-list > li > img { margin: 0 auto 8px; }
+.gol-symbology .gol-sym-symbol-grid .users-list-name {
+	display: block;
+	overflow: hidden;
+	font-size: 12.5px;
+	font-weight: 600;
+	color: var(--gol-text);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.gol-symbology .gol-sym-symbol-grid .users-list > li:hover .users-list-name { color: var(--gol-accent); }
+
+/* =================================================================
+   Editor de rampas de color (tras revisión del usuario)
+   La tabla de pasos la genera ColorRamp.js: solo CSS. El JS sustituye el
+   atributo style de .preview-ramp-color, así que tamaño y borde van aquí.
+   ================================================================= */
+.gol-symbology .gol-sym-ramp-editor .preview-ramp-color {
+	height: 72px;
+	margin: 0 0 16px;
+	border: 1px solid var(--gol-border);
+	border-radius: 8px;
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+.gol-symbology .gol-sym-steps { padding-bottom: 12px; }
+.gol-symbology .gol-sym-steps__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 4px;
+	border-bottom: 1px solid var(--gol-border);
+}
+.gol-symbology .gol-sym-steps__header .gol-sym-section-title {
+	margin: 0;
+	padding-bottom: 0;
+	border-bottom: 0;
+}
+.gol-symbology .gol-sym-steps__header .btn-pf-secondary { margin-bottom: 10px; }
+.gol-symbology .gol-sym-steps__body { overflow-x: auto; }
+
+/* Tabla de pasos (#colorramp-table) */
+.gol-symbology #colorramp-table {
+	width: auto !important;      /* el JS pone width:100% en línea */
+	min-width: 520px;
+	margin-top: 4px;
+	border-collapse: collapse;
+}
+.gol-symbology #colorramp-table th,
+.gol-symbology #colorramp-table td {
+	padding: 8px 12px;
+	text-align: left;
+	vertical-align: middle;
+	border-bottom: 1px solid var(--gol-border);
+}
+.gol-symbology #colorramp-table tr:first-child th {
+	padding-top: 10px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--gol-muted);
+}
+.gol-symbology #colorramp-table tr.color-ramp-data:last-child td { border-bottom: 0; }
+.gol-symbology #colorramp-table tr.color-ramp-data:hover td { background: #fafbfc; }
+.gol-symbology #colorramp-table td:first-child,
+.gol-symbology #colorramp-table th:first-child { width: 28px; padding-right: 0; }
+.gol-symbology #colorramp-table .handle { color: var(--gol-muted); }
+.gol-symbology #colorramp-table td[id^="color-map-entry-preview-div-"] {
+	width: 48px;
+	color: var(--gol-muted);
+	font-variant-numeric: tabular-nums;
+}
+.gol-symbology #colorramp-table .percentaje-chooser,
+.gol-symbology #colorramp-table .alpha-chooser {
+	display: inline-block;
+	width: 96px;
+}
+.gol-symbology #colorramp-table td[id^="color-map-entry-preview-quantity-"]::after {
+	content: '%';
+	margin-left: 6px;
+	color: var(--gol-muted);
+}
+.gol-symbology #colorramp-table .color-chooser {
+	width: 64px;
+	padding: 3px;
+}
+.gol-symbology #colorramp-table td:last-child,
+.gol-symbology #colorramp-table th:last-child { width: 56px; text-align: center; }
+.gol-symbology #colorramp-table .delete-color-map-entry {
+	display: inline-block;
+	padding: 4px 7px;
+	border-radius: 6px;
+	transition: background var(--gol-transition);
+}
+.gol-symbology #colorramp-table .delete-color-map-entry:hover { background: #fde8e8; }
+
+/* ---- Tarjetas de igual altura en una fila (escritorio) ---- */
+@media (min-width: 992px) {
+	.gol-symbology .gol-sym-row-eq { display: flex; }
+	.gol-symbology .gol-sym-row-eq::before,
+	.gol-symbology .gol-sym-row-eq::after { display: none; }
+	.gol-symbology .gol-sym-row-eq > [class*="col-"] {
+		float: none;
+		display: flex;
+		flex-direction: column;
+	}
+	.gol-symbology .gol-sym-row-eq > [class*="col-"] > .gol-sym-card { flex: 1 1 auto; }
+}
+
+/* ---- Pasos de la rampa: tabla + ayuda al lado ---- */
+.gol-symbology .gol-sym-steps__layout {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: 24px;
+}
+.gol-symbology .gol-sym-steps__layout > .gol-sym-steps__body { flex: 0 1 auto; max-width: 100%; }
+.gol-symbology .gol-sym-steps__help {
+	flex: 1 1 320px;          /* ocupa todo el espacio libre a la derecha de la tabla */
+	align-self: stretch;
+	margin-top: 8px;
+	padding: 14px 16px;
+	border: 1px solid var(--gol-border);
+	border-left: 3px solid var(--gol-accent);
+	border-radius: 8px;
+	background: var(--gol-bg);
+	color: var(--gol-muted);
+	font-size: 12.5px;
+	line-height: 1.5;
+}
+.gol-symbology .gol-sym-steps__help h5 {
+	margin: 0 0 8px;
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--gol-text);
+}
+.gol-symbology .gol-sym-steps__help h5 .fa { color: var(--gol-accent); margin-right: 4px; }
+.gol-symbology .gol-sym-steps__help ul { margin: 0; padding-left: 18px; }
+.gol-symbology .gol-sym-steps__help li { margin-bottom: 4px; }
+.gol-symbology .gol-sym-steps__help strong { color: var(--gol-text); font-weight: 600; }
+
+/* ---- Página de biblioteca de símbolos ---- */
+.gol-symbology .gol-sym-symbols-card { padding-bottom: 20px; }
+.gol-symbology .gol-sym-symbols-card__header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px 16px;
+	margin-bottom: 16px;
+	padding-bottom: 12px;
+	border-bottom: 1px solid var(--gol-border);
+}
+.gol-symbology .gol-sym-symbols-card__header .gol-sym-section-title {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+.gol-symbology .gol-sym-count {
+	display: inline-block;
+	min-width: 22px;
+	margin-left: 6px;
+	padding: 1px 7px;
+	border-radius: 10px;
+	background: var(--gol-bg);
+	border: 1px solid var(--gol-border);
+	color: var(--gol-text);
+	font-size: 11px;
+	text-align: center;
+	letter-spacing: 0;
+}
+.gol-symbology .gol-sym-add-group {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+}
+.gol-symbology .gol-sym-add-group__label {
+	margin-right: 2px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--gol-muted);
+}
+.gol-symbology .gol-sym-add-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	height: 32px;
+	padding: 0 12px;
+	border: 1px solid var(--gol-border);
+	border-radius: 8px;
+	background: var(--gol-white);
+	color: var(--gol-text);
+	font-size: 12.5px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: border-color var(--gol-transition), color var(--gol-transition), background var(--gol-transition);
+}
+.gol-symbology .gol-sym-add-btn .fa { color: var(--gol-accent); }
+.gol-symbology .gol-sym-add-btn:hover,
+.gol-symbology .gol-sym-add-btn:focus {
+	border-color: var(--gol-accent);
+	color: var(--gol-accent);
+	background: var(--gol-bg);
+	outline: none;
+}
+.gol-symbology .gol-sym-add-btn:focus-visible { outline: 2px solid var(--gol-accent); outline-offset: 2px; }
+.gol-symbology .gol-sym-library .gol-sym-symbol-grid { padding: 0; }
+/* Zona de vista previa fija en cada tarjeta de símbolo */
+.gol-symbology .gol-sym-library .gol-sym-symbol-grid .users-list > li > div,
+.gol-symbology .gol-sym-library .gol-sym-symbol-grid .users-list > li > img {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 56px;
+	margin: 0 auto 10px;
+}
+.gol-symbology .gol-sym-library .gol-sym-symbol-grid .users-list > li > img {
+	display: block;
+	width: auto;
+	max-width: 100%;
+	height: auto;
+	max-height: 56px;
+}
+/* Estado vacío */
+.gol-symbology .gol-sym-empty {
+	padding: 36px 16px;
+	border: 1.5px dashed var(--gol-border);
+	border-radius: var(--gol-radius);
+	text-align: center;
+	color: var(--gol-muted);
+}
+.gol-symbology .gol-sym-empty > .fa { font-size: 28px; opacity: 0.5; }
+.gol-symbology .gol-sym-empty__title {
+	margin: 10px 0 4px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--gol-text);
+}
+.gol-symbology .gol-sym-empty__text { margin: 0; font-size: 12.5px; }
+
+/* =================================================================
+   Fase 8: pulido (contraste, foco con teclado, pantallas estrechas,
+   estados vacíos)
+   ================================================================= */
+/* Texto atenuado pequeño con contraste AA (el --gol-muted del tema da ~3.6:1 en blanco) */
+.gol-symbology {
+	--gol-sym-muted-text: #5c6b78;
+}
+.gol-symbology .gol-sym-section-title,
+.gol-symbology .gol-sym-subtitle,
+.gol-symbology .gol-sym-field-hint,
+.gol-symbology .gol-sym-help-text,
+.gol-symbology .gol-sym-intro,
+.gol-symbology .gol-sym-type-card__desc,
+.gol-symbology .gol-sym-steps__help,
+.gol-symbology .gol-sym-empty__text,
+.gol-symbology .gol-sym-add-group__label,
+.gol-symbology #rules .box > .box-body .table > thead > tr > th,
+.gol-symbology #colorramp-table tr:first-child th { color: var(--gol-sym-muted-text); }
+
+/* Foco visible al navegar con teclado (no con ratón) */
+.gol-symbology .btn-pf-save:focus-visible,
+.gol-symbology .btn-pf-secondary:focus-visible,
+.gol-symbology .btn-pl-add:focus-visible,
+.gol-symbology .btn-pl-outline:focus-visible,
+.gol-symbology .modal-footer .btn:focus-visible,
+.gol-symbology #rules .btn-box-tool:focus-visible,
+.gol-symbology #rules .box-footer .btn:focus-visible,
+.gol-symbology .pl-table .btn:focus-visible,
+.gol-symbology .gol-sym-type-card:focus-visible,
+.gol-symbology .modal .nav-tabs > li > a:focus-visible,
+.gol-symbology .pl-panel .nav-tabs > li > a:focus-visible {
+	outline: 2px solid var(--gol-accent);
+	outline-offset: 2px;
+}
+
+/* Estado vacío de las reglas (el JS vacía/llena #rules; :empty muestra el aviso) */
+.gol-symbology #rules:empty {
+	margin: 0 0 8px;
+	padding: 28px 16px;
+	border: 1.5px dashed var(--gol-sym-input-border-hv);
+	border-radius: var(--gol-radius);
+	background: var(--gol-white);
+	text-align: center;
+}
+.gol-symbology #rules:empty::before {
+	content: attr(data-empty-text);
+	display: block;
+	color: var(--gol-sym-muted-text);
+	font-size: 13px;
+}
+.gol-symbology .gol-sym-editor--cards #rules:empty { margin-left: 0; margin-right: 0; }
+
+/* Pantallas estrechas */
+@media (max-width: 767px) {
+	/* La cabecera fija ocuparía media pantalla: en móvil vuelve a desplazarse */
+	.gol-symbology .gol-sym-editor > .pl-panel__header,
+	.gol-symbology .gol-sym-editor > form > .pl-panel__header { position: static; }
+	.gol-symbology .pl-panel__header .pl-panel__actions {
+		width: 100%;
+		flex-wrap: wrap;
+	}
+	.gol-symbology .gol-sym-card { padding: 14px 14px 2px; }
+	.gol-symbology .gol-sym-heading { gap: 10px; }
+	.gol-symbology .gol-sym-subtitle { white-space: normal; }
+	.gol-symbology .gol-sym-type-grid { grid-template-columns: 1fr; }
+	.gol-symbology .gol-sym-symbol-grid .users-list { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+}
+
+/* =================================================================
+   Formularios compactos: cada campo mide según lo que contiene
+   (etiqueta encima; los campos no se estiran a todo el ancho).
+   ================================================================= */
+.gol-symbology {
+	--gol-sym-w-num: 160px;     /* números cortos */
+	--gol-sym-w-scale: 220px;   /* escala 1:N con prefijo */
+	--gol-sym-w-color: 72px;    /* selector de color */
+	--gol-sym-w-select: 360px;  /* desplegables */
+	--gol-sym-w-text: 480px;    /* nombre, título, descripción */
+}
+.gol-symbology .form-control { max-width: var(--gol-sym-w-text); }
+.gol-symbology select.form-control { max-width: var(--gol-sym-w-select); }
+.gol-symbology input[type="number"].form-control { max-width: var(--gol-sym-w-num); }
+.gol-symbology input[type="color"].form-control { max-width: var(--gol-sym-w-color); }
+.gol-symbology textarea.form-control { max-width: none; }
+/* Dentro de un grupo con prefijo el ancho lo marca el grupo (Bootstrap usa display: table) */
+.gol-symbology .input-group .form-control { max-width: none; }
+.gol-symbology .gol-sym-scale { max-width: var(--gol-sym-w-scale); }
+/* Tablas generadas por JS con anchos propios (pasos de la rampa) */
+.gol-symbology #colorramp-table .form-control { max-width: none; }
+/* Buscadores de los listados: los dimensiona la hoja del core */
+.gol-symbology .pl-search-form .form-control { max-width: none; }
+
+/* Barra de herramientas de reglas: una fila compacta alineada por abajo */
+.gol-symbology .gol-sym-rules-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 10px 12px;
+	padding: 12px 16px;
+	margin-left: 0;
+	margin-right: 0;
+}
+.gol-symbology .gol-sym-rules-toolbar::before,
+.gol-symbology .gol-sym-rules-toolbar::after { display: none; }
+.gol-symbology .gol-sym-rules-toolbar > [class*="col-"] {
+	float: none;
+	width: auto;
+	min-width: 0;
+	padding: 0;
+	margin: 0;
+}
+.gol-symbology .gol-sym-rules-toolbar > [class*="col-"]:empty { display: none; }
+.gol-symbology .gol-sym-rules-toolbar .form-group { margin-bottom: 0; }
+.gol-symbology .gol-sym-rules-toolbar select.form-control { min-width: 260px; }
+.gol-symbology .gol-sym-rules-toolbar .gol-sym-label-spacer { display: none; }
+.gol-symbology .gol-sym-rules-toolbar .gol-sym-btn-block { width: auto; }
+.gol-symbology .gol-sym-rules-toolbar .text-muted { margin-left: 8px; }
+@media (max-width: 767px) {
+	.gol-symbology .gol-sym-rules-toolbar select.form-control { min-width: 0; }
+}
+
+/* =================================================================
+   Etiquetado avanzado (LabelOptionsEditor.js): selector de formato,
+   pestañas Contenido / Colocación / Fondo y vista previa.
+   Solo clases propias gol-lbl-*: no afecta al resto del modal.
+   ================================================================= */
+.gol-symbology .gol-lbl-mode {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	margin: 6px 0 4px;
+	padding: 12px 14px;
+	border: 1px solid var(--gol-border);
+	border-radius: var(--gol-radius);
+	background: var(--gol-bg);
+}
+.gol-symbology .gol-lbl-mode.is-advanced {
+	border-color: var(--gol-accent);
+	background: var(--gol-white);
+	box-shadow: inset 3px 0 0 var(--gol-accent);
+}
+.gol-symbology .gol-lbl-mode-icon {
+	flex: 0 0 34px;
+	height: 34px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--gol-white);
+	border: 1px solid var(--gol-border);
+	color: var(--gol-accent);
+}
+.gol-symbology .gol-lbl-mode-body { flex: 1 1 auto; min-width: 0; }
+.gol-symbology .gol-lbl-mode-body strong {
+	display: block;
+	font-size: 13px;
+	color: var(--gol-text);
+}
+.gol-symbology .gol-lbl-mode-body span {
+	display: block;
+	margin-top: 2px;
+	font-size: 12px;
+	line-height: 1.45;
+	color: var(--gol-sym-muted-text, var(--gol-muted));
+}
+.gol-symbology .gol-lbl-mode .btn { flex: 0 0 auto; white-space: nowrap; }
+
+/* Vista previa (encima de las pestañas, solo con opciones avanzadas) */
+.gol-symbology .gol-lbl-preview {
+	position: relative;
+	margin: 0 0 14px;
+	border: 1px solid var(--gol-border);
+	border-radius: var(--gol-radius);
+	overflow: hidden;
+}
+.gol-symbology .gol-lbl-preview-caption {
+	position: absolute;
+	top: 6px;
+	left: 10px;
+	font-size: 10px;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--gol-muted);
+}
+.gol-symbology .gol-lbl-preview-stage {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 92px;
+	padding: 26px 16px 16px;
+	background-color: #eef2f5;
+	background-image:
+		linear-gradient(45deg, #e4e9ee 25%, transparent 25%, transparent 75%, #e4e9ee 75%),
+		linear-gradient(45deg, #e4e9ee 25%, transparent 25%, transparent 75%, #e4e9ee 75%);
+	background-size: 16px 16px;
+	background-position: 0 0, 8px 8px;
+}
+.gol-symbology .gol-lbl-preview-text {
+	display: inline-block;
+	line-height: 1.2;
+	text-align: center;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+/* Secciones y rejilla compacta de campos */
+.gol-symbology .gol-lbl-section {
+	padding-bottom: 12px;
+	margin-bottom: 14px;
+	border-bottom: 1px solid var(--gol-border);
+}
+.gol-symbology .tab-pane > .gol-lbl-section:last-child { border-bottom: 0; margin-bottom: 0; }
+.gol-symbology .gol-lbl-section-title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 10px;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--gol-text);
+}
+.gol-symbology .gol-lbl-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0 18px;
+}
+.gol-symbology .gol-lbl-grid .gol-lbl-field { flex: 0 1 auto; min-width: 150px; }
+.gol-symbology .gol-lbl-field select.form-control { min-width: 200px; }
+.gol-symbology .gol-lbl-hint {
+	margin: -4px 0 8px;
+	font-size: 12px;
+	line-height: 1.45;
+	color: var(--gol-sym-muted-text, var(--gol-muted));
+}
+.gol-symbology .gol-lbl-hint .fa { color: var(--gol-accent); margin-right: 2px; }
+.gol-symbology #lbl-adv-label-hint { margin: 0 0 14px; }
+.gol-symbology .gol-lbl-check { margin: 0 0 12px; }
+.gol-symbology .gol-lbl-check label { font-weight: 500; }
+.gol-symbology .gol-lbl-check input[type="checkbox"] { margin-right: 6px; }
+.gol-symbology .gol-lbl-unit { display: flex; align-items: center; gap: 6px; }
+.gol-symbology .gol-lbl-unit .form-control { width: 110px; }
+.gol-symbology .gol-lbl-unit-text { font-size: 12px; color: var(--gol-muted); }
+.gol-symbology .gol-lbl-grid.is-disabled { opacity: 0.55; }
+.gol-symbology .gol-lbl-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	border-radius: 10px;
+	border: 1px solid var(--gol-border);
+	background: var(--gol-bg);
+	font-size: 11px;
+	font-weight: 500;
+	color: var(--gol-muted);
+	cursor: help;
+}
+
+/* Partes del texto (campos y texto fijo) */
+.gol-symbology .gol-lbl-parts { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.gol-symbology .gol-lbl-part {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 8px 8px 8px 10px;
+	border: 1px solid var(--gol-border);
+	border-radius: var(--gol-radius);
+	background: var(--gol-white);
+}
+.gol-symbology .gol-lbl-part-kind {
+	flex: 0 0 52px;
+	padding-top: 7px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--gol-accent);
+}
+.gol-symbology .gol-lbl-part-body {
+	flex: 1 1 auto;
+	min-width: 0;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+}
+.gol-symbology .gol-lbl-part-body > .form-control { width: auto; min-width: 180px; flex: 0 1 auto; }
+.gol-symbology .gol-lbl-part-body > .lbl-part-text { flex: 1 1 220px; max-width: none; }
+.gol-symbology .gol-lbl-part-format {
+	flex: 1 0 100%;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px 16px;
+}
+.gol-symbology .gol-lbl-part-format label {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0;
+	font-weight: 500;
+}
+.gol-symbology .gol-lbl-part-format .form-control { width: auto; height: 30px; padding: 4px 8px; }
+.gol-symbology .gol-lbl-part-format input[type="number"].form-control { width: 64px; }
+.gol-symbology .gol-lbl-part-tools { flex: 0 0 auto; display: flex; gap: 2px; padding-top: 3px; }
+.gol-symbology .gol-lbl-part-tools .btn-box-tool { color: var(--gol-muted); }
+.gol-symbology .gol-lbl-part-tools .btn-box-tool:hover:not([disabled]) { color: var(--gol-accent); }
+.gol-symbology .gol-lbl-part-tools .lbl-part-remove:hover:not([disabled]) { color: #c0392b; }
+.gol-symbology .gol-lbl-part-tools .btn-box-tool[disabled] { opacity: 0.35; }
+.gol-symbology .gol-lbl-actions { display: flex; gap: 8px; }
+
+/* Posición respecto al punto: rejilla 3 x 3 */
+.gol-symbology .gol-lbl-placement-point { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 18px; }
+.gol-symbology .gol-lbl-anchor-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 34px);
+	grid-template-rows: repeat(3, 34px);
+	gap: 4px;
+	padding: 6px;
+	border: 1px solid var(--gol-border);
+	border-radius: var(--gol-radius);
+	background:
+		radial-gradient(circle, var(--gol-text) 0, var(--gol-text) 3px, transparent 3.5px) center / 100% 100% no-repeat,
+		var(--gol-bg);
+	margin-bottom: 14px;
+}
+.gol-symbology .gol-lbl-anchor {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	background: transparent;
+	cursor: pointer;
+	transition: background var(--gol-transition), border-color var(--gol-transition);
+}
+.gol-symbology .gol-lbl-anchor span {
+	width: 18px;
+	height: 8px;
+	border-radius: 2px;
+	background: rgba(63, 77, 90, 0.25);
+}
+.gol-symbology .gol-lbl-anchor[data-position="center"] span { background: rgba(63, 77, 90, 0.18); }
+.gol-symbology .gol-lbl-anchor:hover { border-color: var(--gol-border); background: var(--gol-white); }
+.gol-symbology .gol-lbl-anchor.active { border-color: var(--gol-accent); background: var(--gol-white); }
+.gol-symbology .gol-lbl-anchor.active span { background: var(--gol-accent); }
+.gol-symbology .gol-lbl-anchor:focus { outline: none; }
+.gol-symbology .gol-lbl-anchor:focus-visible { outline: 2px solid var(--gol-accent); outline-offset: 1px; }
+
+@media (max-width: 767px) {
+	.gol-symbology .gol-lbl-mode { flex-wrap: wrap; }
+	.gol-symbology .gol-lbl-part { flex-wrap: wrap; }
+	.gol-symbology .gol-lbl-part-body > .form-control { min-width: 0; width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+	.gol-symbology .gol-lbl-anchor { transition: none; }
+}
+
+/* =================================================================
+   Formularios sencillos como página (opción A): cabecera de página con
+   ruta de navegación, tarjeta del formulario a la izquierda y panel de
+   ayuda a la derecha. Solo clases gol-sym-page*, gol-sym-aside*,
+   gol-sym-crumbs y gol-sym-name-*; los campos conservan id y name.
+   ================================================================= */
+.gol-symbology .gol-sym-page { max-width: 1120px; }
+
+/* Cabecera de página */
+.gol-symbology .gol-sym-page-header { margin: 2px 0 18px; }
+.gol-symbology .gol-sym-page-header--detail { max-width: none; }
+.gol-symbology .gol-sym-crumbs {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	margin: 0 0 8px;
+	padding: 0;
+	list-style: none;
+	font-size: 12px;
+	color: var(--gol-muted);
+}
+.gol-symbology .gol-sym-crumbs > li { display: inline-flex; align-items: center; }
+.gol-symbology .gol-sym-crumbs > li + li::before {
+	content: '';
+	width: 6px;
+	height: 6px;
+	margin: 0 10px 0 8px;
+	border-top: 1.5px solid currentColor;
+	border-right: 1.5px solid currentColor;
+	transform: rotate(45deg);
+	opacity: 0.6;
+}
+.gol-symbology .gol-sym-crumbs a {
+	color: var(--gol-accent);
+	font-weight: 600;
+	text-decoration: none;
+}
+.gol-symbology .gol-sym-crumbs a:hover,
+.gol-symbology .gol-sym-crumbs a:focus { text-decoration: underline; }
+.gol-symbology .gol-sym-crumbs > li[aria-current] { color: var(--gol-text); font-weight: 600; }
+.gol-symbology .gol-sym-page-title {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 0;
+	font-size: 22px;
+	font-weight: 700;
+	line-height: 1.25;
+	color: var(--gol-text);
+}
+.gol-symbology .gol-sym-page-icon {
+	flex: 0 0 38px;
+	height: 38px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 10px;
+	background: var(--gol-accent-lt, rgba(74, 127, 165, 0.08));
+	border: 1px solid var(--gol-border);
+	color: var(--gol-accent);
+	font-size: 17px;
+}
+.gol-symbology .gol-sym-page-lead {
+	margin: 6px 0 0 50px;
+	font-size: 13px;
+	line-height: 1.5;
+	color: var(--gol-sym-muted-text, var(--gol-muted));
+}
+.gol-symbology .gol-sym-page-chip {
+	display: inline-block;
+	margin-right: 8px;
+	padding: 1px 10px;
+	border-radius: 11px;
+	border: 1px solid var(--gol-border);
+	background: var(--gol-white);
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--gol-text);
+}
+
+/* Rejilla: formulario + ayuda */
+.gol-symbology .gol-sym-page-grid {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: 20px;
+}
+.gol-symbology .gol-sym-form-card.gol-sym-page-card {
+	flex: 1 1 560px;
+	max-width: 760px;
+	margin: 0;
+}
+.gol-symbology .gol-sym-page-card > .pl-panel__body { padding: 22px 28px 4px; }
+.gol-symbology .gol-sym-card-title {
+	margin: 0 0 18px;
+	padding-bottom: 12px;
+	border-bottom: 1px solid var(--gol-border);
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--gol-text);
+}
+/* Dentro de la tarjeta los campos ocupan todo el ancho (la tarjeta ya es estrecha) */
+.gol-symbology .gol-sym-page-card .form-control { max-width: none; }
+.gol-symbology .gol-sym-textarea { min-height: 76px; resize: vertical; }
+.gol-symbology .gol-sym-required { color: #c0392b; font-weight: 700; }
+.gol-symbology .gol-sym-optional { font-weight: 400; color: var(--gol-muted); }
+/* Pie de acciones ligero: sin franja gris */
+.gol-symbology .gol-sym-page-card > .gol-sym-form-footer {
+	margin: 6px 28px 0;
+	padding: 16px 0 22px;
+	background: transparent;
+}
+
+/* Panel de ayuda */
+.gol-symbology .gol-sym-aside {
+	flex: 0 1 300px;
+	min-width: 240px;
+	padding: 18px 20px;
+	border: 1px solid var(--gol-border);
+	border-radius: var(--gol-radius);
+	background: var(--gol-accent-lt, rgba(74, 127, 165, 0.06));
+	font-size: 13px;
+	line-height: 1.5;
+	color: var(--gol-text);
+}
+.gol-symbology .gol-sym-aside-title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 12px;
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--gol-text);
+}
+.gol-symbology .gol-sym-aside-title .fa { color: var(--gol-accent); }
+.gol-symbology .gol-sym-aside-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	counter-reset: golsymstep;
+}
+.gol-symbology .gol-sym-aside-list > li {
+	position: relative;
+	padding-left: 30px;
+	margin-bottom: 10px;
+}
+.gol-symbology .gol-sym-aside-list > li::before {
+	counter-increment: golsymstep;
+	content: counter(golsymstep);
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	background: var(--gol-white);
+	border: 1px solid var(--gol-border);
+	color: var(--gol-accent);
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 18px;
+	text-align: center;
+}
+.gol-symbology .gol-sym-aside-list--info > li { padding-left: 18px; }
+.gol-symbology .gol-sym-aside-list--info > li::before {
+	content: '';
+	top: 7px;
+	width: 6px;
+	height: 6px;
+	border: 0;
+	background: var(--gol-accent);
+}
+.gol-symbology .gol-sym-aside-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 4px;
+	padding-top: 12px;
+	border-top: 1px solid var(--gol-border);
+	width: 100%;
+	font-weight: 600;
+	color: var(--gol-accent);
+	text-decoration: none;
+}
+.gol-symbology .gol-sym-aside-link:hover,
+.gol-symbology .gol-sym-aside-link:focus { text-decoration: underline; }
+
+/* Validación visual del nombre (SymbologyForms.js) */
+.gol-symbology .form-control.gol-sym-input-valid { border-color: #2e8b57; }
+.gol-symbology .form-control.gol-sym-input-invalid { border-color: #c0392b; }
+.gol-symbology .form-control.gol-sym-input-invalid:focus { box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.12); }
+.gol-symbology .gol-sym-name-status {
+	margin: 4px 0 0;
+	font-size: 12px;
+	line-height: 1.45;
+}
+.gol-symbology .gol-sym-name-status:empty { display: none; }
+.gol-symbology .gol-sym-name-status.is-valid { color: #2e7d4f; }
+.gol-symbology .gol-sym-name-status.is-invalid { color: #a93226; }
+.gol-symbology .gol-sym-name-fix {
+	margin-left: 4px;
+	padding: 1px 8px;
+	border: 1px solid var(--gol-border);
+	border-radius: 11px;
+	background: var(--gol-white);
+	color: var(--gol-accent);
+	font-size: 12px;
+	font-weight: 600;
+	cursor: pointer;
+}
+.gol-symbology .gol-sym-name-fix:hover { border-color: var(--gol-accent); }
+.gol-symbology .gol-sym-name-fix:focus-visible { outline: 2px solid var(--gol-accent); outline-offset: 1px; }
+
+@media (max-width: 991px) {
+	.gol-symbology .gol-sym-aside { flex: 1 1 100%; }
+	.gol-symbology .gol-sym-form-card.gol-sym-page-card { max-width: none; }
+}
+@media (max-width: 767px) {
+	.gol-symbology .gol-sym-page-title { font-size: 19px; }
+	.gol-symbology .gol-sym-page-lead { margin-left: 0; }
+	.gol-symbology .gol-sym-page-card > .pl-panel__body { padding: 18px 16px 4px; }
+	.gol-symbology .gol-sym-page-card > .gol-sym-form-footer { margin: 6px 16px 0; }
+}
+
+/* Tablas de simbología con botones en columnas propias (bibliotecas de símbolos y de rampas: 3;
+   estilos de capa: 4; categorías de una biblioteca de rampas: 2): las columnas de botones se
+   ajustan a su contenido y quedan juntas a la derecha, a 48 px entre botones, en vez de
+   repartirse el ancho sobrante de la tabla.
+   !important solo en el ancho: DataTables (autoWidth) lo fija en línea en las cabeceras. */
+.gol-symbology #libraries-table > thead > tr > th:nth-last-child(-n+3),
+.gol-symbology #libraries-table > tbody > tr:not(.child) > td:nth-last-child(-n+3),
+.gol-symbology #layers-table > thead > tr > th:nth-last-child(-n+4),
+.gol-symbology #layers-table > tbody > tr:not(.child) > td:nth-last-child(-n+4),
+.gol-symbology #folders-table > thead > tr > th:nth-last-child(-n+2),
+.gol-symbology #folders-table > tbody > tr:not(.child) > td:nth-last-child(-n+2) {
+	width: 1% !important;
+	white-space: nowrap;
+	padding-left: 24px;
+	padding-right: 24px;
+}
+.gol-symbology #libraries-table > thead > tr > th:nth-last-child(3),
+.gol-symbology #libraries-table > tbody > tr:not(.child) > td:nth-last-child(3),
+.gol-symbology #layers-table > thead > tr > th:nth-last-child(4),
+.gol-symbology #layers-table > tbody > tr:not(.child) > td:nth-last-child(4),
+.gol-symbology #folders-table > thead > tr > th:nth-last-child(2),
+.gol-symbology #folders-table > tbody > tr:not(.child) > td:nth-last-child(2) { padding-left: 16px; }
+.gol-symbology #libraries-table > thead > tr > th:last-child,
+.gol-symbology #libraries-table > tbody > tr:not(.child) > td:last-child,
+.gol-symbology #layers-table > thead > tr > th:last-child,
+.gol-symbology #layers-table > tbody > tr:not(.child) > td:last-child,
+.gol-symbology #folders-table > thead > tr > th:last-child,
+.gol-symbology #folders-table > tbody > tr:not(.child) > td:last-child { padding-right: 16px; }
+
+/* =================================================================
+   Páginas de detalle (biblioteca de símbolos, biblioteca de rampas y
+   categoría de rampas): cabecera de página, contenido principal a la
+   izquierda y columna de datos de 320 px a la derecha.
+   ================================================================= */
+/* Las páginas de detalle ocupan todo el ancho disponible */
+.gol-symbology .gol-sym-page--wide { max-width: none; }
+/* Botón secundario de la cabecera (su estilo base solo se carga en los listados) */
+.gol-symbology .gol-sym-page-header__actions .btn-pl-outline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	height: 34px;
+	padding: 6px 14px;
+	border: 1px solid var(--gol-accent);
+	border-radius: 6px;
+	background: var(--gol-white);
+	color: var(--gol-accent);
+	font-size: 12px;
+	font-weight: 600;
+	white-space: nowrap;
+	text-decoration: none;
+	transition: background var(--gol-transition), border-color var(--gol-transition);
+}
+.gol-symbology .gol-sym-page-header__actions .btn-pl-outline:hover,
+.gol-symbology .gol-sym-page-header__actions .btn-pl-outline:focus {
+	background: var(--gol-accent-lt, #eef4f8);
+	color: var(--gol-accent);
+	text-decoration: none;
+}
+.gol-symbology .gol-sym-page-header--actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 12px 24px;
+}
+.gol-symbology .gol-sym-page-header__main { flex: 1 1 420px; min-width: 0; }
+.gol-symbology .gol-sym-page-header__actions { display: flex; gap: 8px; padding-bottom: 2px; }
+.gol-symbology .gol-sym-page-grid--detail { flex-wrap: nowrap; }
+.gol-symbology .gol-sym-page-grid--detail > .pl-panel { margin: 0; }
+.gol-symbology .gol-sym-page-grid--detail > section { flex: 1 1 auto; min-width: 0; }
+.gol-symbology .gol-sym-main-panel .pl-panel__title .gol-sym-count { font-weight: 600; }
+.gol-symbology .gol-sym-main-empty { margin: 8px 0; }
+
+/* Barra de la rejilla de símbolos: título, filtro por tipo, búsqueda y «Añadir símbolo» */
+.gol-symbology .gol-sym-symbols-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px 16px;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--gol-border);
+}
+.gol-symbology .gol-sym-symbols-toolbar .gol-sym-card-title { margin: 0; padding: 0; border: 0; }
+.gol-symbology .gol-sym-symbols-toolbar__tools {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+}
+.gol-symbology .gol-sym-type-filter {
+	display: inline-flex;
+	padding: 3px;
+	border: 1px solid var(--gol-border);
+	border-radius: 8px;
+	background: var(--gol-bg);
+}
+.gol-symbology .gol-sym-type-chip {
+	padding: 4px 10px;
+	border: 0;
+	border-radius: 6px;
+	background: transparent;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--gol-muted);
+	white-space: nowrap;
+	cursor: pointer;
+	transition: background var(--gol-transition), color var(--gol-transition);
+}
+.gol-symbology .gol-sym-type-chip .fa { font-size: 11px; }
+.gol-symbology .gol-sym-type-chip:hover { color: var(--gol-text); }
+.gol-symbology .gol-sym-type-chip.active {
+	background: var(--gol-white);
+	color: var(--gol-accent);
+	box-shadow: 0 1px 2px rgba(63, 77, 90, 0.15);
+}
+.gol-symbology .gol-sym-type-chip:focus { outline: none; }
+.gol-symbology .gol-sym-type-chip:focus-visible { outline: 2px solid var(--gol-accent); outline-offset: 1px; }
+.gol-symbology .gol-sym-symbol-search { position: relative; }
+.gol-symbology .gol-sym-symbol-search .fa {
+	position: absolute;
+	left: 10px;
+	top: 50%;
+	transform: translateY(-50%);
+	color: var(--gol-muted);
+	font-size: 12px;
+	pointer-events: none;
+}
+.gol-symbology .gol-sym-symbol-search .form-control { width: 200px; height: 32px; padding-left: 30px; }
+.gol-symbology .gol-sym-add-dropdown .btn-pl-add { height: 32px; }
+.gol-symbology .gol-sym-add-menu { min-width: 200px; padding: 6px; border-radius: 8px; }
+.gol-symbology .gol-sym-add-menu > li > .gol-sym-add-menu__item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	width: 100%;
+	padding: 8px 10px;
+	border: 0;
+	border-radius: 6px;
+	background: transparent;
+	text-align: left;
+	font-size: 13px;
+	color: var(--gol-text);
+	cursor: pointer;
+}
+.gol-symbology .gol-sym-add-menu__item .fa { width: 16px; color: var(--gol-accent); }
+.gol-symbology .gol-sym-add-menu__item:hover,
+.gol-symbology .gol-sym-add-menu__item:focus { background: var(--gol-bg); outline: none; }
+
+/* Rejilla de símbolos más grande, con el tipo en cada tarjeta */
+.gol-symbology .gol-sym-symbols-panel .gol-sym-symbol-grid { padding: 20px; }
+.gol-symbology .gol-sym-symbols-panel .gol-sym-symbol-grid .users-list {
+	grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+	gap: 14px;
+}
+.gol-symbology .gol-sym-symbols-panel .gol-sym-symbol-grid .users-list > li { padding: 0 0 12px; overflow: hidden; }
+.gol-symbology .gol-sym-symbols-panel .gol-sym-symbol-grid .users-list > li > div,
+.gol-symbology .gol-sym-symbols-panel .gol-sym-symbol-grid .users-list > li > img { margin: 0 0 10px; }
+.gol-symbology .gol-sym-symbols-panel .gol-sym-symbol-grid .users-list > li > div {
+	height: 84px;
+	background: var(--gol-bg);
+	border-bottom: 1px solid var(--gol-border);
+}
+.gol-symbology .gol-sym-symbols-panel .gol-sym-symbol-grid .users-list > li > img {
+	max-height: 64px;
+	margin: 10px auto 20px;
+}
+.gol-symbology .gol-sym-symbols-panel .gol-sym-symbol-grid .users-list-name { padding: 0 10px; font-size: 13px; }
+.gol-symbology .gol-sym-symbol-type {
+	display: inline-block;
+	margin-top: 4px;
+	padding: 0 8px;
+	border-radius: 10px;
+	background: var(--gol-bg);
+	font-size: 11px;
+	color: var(--gol-muted);
+}
+.gol-symbology .gol-sym-filter-empty { margin: 4px 0 0; color: var(--gol-muted); text-align: center; }
+
+@media (max-width: 991px) {
+	.gol-symbology .gol-sym-page-grid--detail { flex-wrap: wrap; }
+}
+@media (max-width: 767px) {
+	.gol-symbology .gol-sym-symbols-toolbar__tools,
+	.gol-symbology .gol-sym-symbol-search,
+	.gol-symbology .gol-sym-symbol-search .form-control { width: 100%; }
+	.gol-symbology .gol-sym-type-filter { flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+	.gol-symbology .gol-sym-type-chip { transition: none; }
+}
+
+
+/* Edición en línea de la descripción en la cabecera (SymbologyForms.js) */
+.gol-symbology .gol-sym-inline-edit { margin: 0; }
+.gol-symbology .gol-sym-inline-edit .gol-sym-page-lead {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 12px;
+}
+.gol-symbology .gol-sym-inline-edit__text { white-space: pre-line; }
+.gol-symbology .gol-sym-inline-edit__open {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 2px 8px;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	background: transparent;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--gol-accent);
+	cursor: pointer;
+	transition: background var(--gol-transition), border-color var(--gol-transition);
+}
+.gol-symbology .gol-sym-inline-edit__open:hover,
+.gol-symbology .gol-sym-inline-edit__open:focus {
+	background: var(--gol-white);
+	border-color: var(--gol-border);
+	outline: none;
+}
+.gol-symbology .gol-sym-inline-edit__open:focus-visible { outline: 2px solid var(--gol-accent); outline-offset: 1px; }
+.gol-symbology .gol-sym-inline-edit__editor {
+	max-width: 720px;
+	margin: 10px 0 0 50px;
+}
+.gol-symbology .gol-sym-inline-edit__editor .form-control { max-width: none; }
+.gol-symbology .gol-sym-inline-edit__editor .gol-sym-alert { margin-bottom: 10px; }
+.gol-symbology .gol-sym-inline-edit__actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	margin-top: 10px;
+}
+
+/* Número de símbolos en cada filtro de tipo */
+.gol-symbology .gol-sym-chip-count {
+	display: inline-block;
+	min-width: 18px;
+	margin-left: 4px;
+	padding: 0 5px;
+	border-radius: 9px;
+	background: rgba(63, 77, 90, 0.08);
+	font-size: 11px;
+	line-height: 16px;
+	text-align: center;
+}
+.gol-symbology .gol-sym-type-chip.active .gol-sym-chip-count { background: var(--gol-accent-lt, rgba(74, 127, 165, 0.12)); }
+
+@media (max-width: 767px) {
+	.gol-symbology .gol-sym-inline-edit__editor { margin-left: 0; }
+}
+
+/* Editor de rampas: la configuración de los pasos ocupa ~60 % del ancho y la ayuda el resto
+   (antes la tabla iba a su ancho mínimo y la ayuda se llevaba todo el espacio libre). */
+.gol-symbology .gol-sym-steps__layout { flex-wrap: nowrap; }
+.gol-symbology .gol-sym-steps__layout > .gol-sym-steps__body { flex: 0 0 60%; min-width: 0; }
+.gol-symbology .gol-sym-steps__layout > .gol-sym-steps__help { flex: 1 1 0; min-width: 240px; }
+.gol-symbology .gol-sym-steps__body #colorramp-table { width: 100% !important; }
+.gol-symbology .gol-sym-steps__body #colorramp-table .percentaje-chooser,
+.gol-symbology .gol-sym-steps__body #colorramp-table .alpha-chooser { width: 120px; }
+.gol-symbology .gol-sym-steps__body #colorramp-table .color-chooser { width: 96px; }
+@media (max-width: 1199px) {
+	.gol-symbology .gol-sym-steps__layout { flex-wrap: wrap; }
+	.gol-symbology .gol-sym-steps__layout > .gol-sym-steps__body,
+	.gol-symbology .gol-sym-steps__layout > .gol-sym-steps__help { flex: 1 1 100%; }
+}
+
+/* Elegir tipo de leyenda: 2 columnas con explicación amplia y ejemplo de uso */
+.gol-symbology .gol-sym-type-grid {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 16px;
+	max-width: 1400px;
+}
+.gol-symbology .gol-sym-type-card {
+	gap: 18px;
+	padding: 20px 22px;
+}
+.gol-symbology .gol-sym-type-card__icon {
+	flex: 0 0 52px;
+	height: 52px;
+	font-size: 22px;
+}
+.gol-symbology .gol-sym-type-card__title { font-size: 15px; margin-bottom: 6px; }
+.gol-symbology .gol-sym-type-card__desc {
+	display: block;
+	font-size: 13px;
+	line-height: 1.55;
+	color: var(--gol-sym-muted-text, var(--gol-muted));
+}
+.gol-symbology .gol-sym-type-card__example {
+	display: block;
+	margin-top: 10px;
+	padding-top: 8px;
+	border-top: 1px dashed var(--gol-border);
+	font-size: 12px;
+	line-height: 1.45;
+	color: var(--gol-muted);
+}
+.gol-symbology .gol-sym-type-card__example-label { font-weight: 600; color: var(--gol-text); }
+@media (max-width: 991px) {
+	.gol-symbology .gol-sym-type-grid { grid-template-columns: minmax(0, 1fr); }
+}

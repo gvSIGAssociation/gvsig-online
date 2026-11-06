@@ -1,147 +1,41 @@
-{% extends "base_symbology.html" %}
-{% load static %}
+{# Comparte la página con external_graphic_add.html; aquí solo van los tramos propios de la edición. #}
+{% extends "external_graphic_add.html" %}
 {% load i18n %}
-
-{% block content %}
-<form role="form">
-	<div class="row">
-		<div class="col-md-12">
-			<div class="pf-topbar">
-				<button id="delete-symbol" type="button" class="btn-pf-secondary" style="color:#c0392b; border-color:#e8bebe;"><i class="fa fa-times"></i> {% trans "Delete" %}</button>
+{% load static %}
+{% block external_graphic_v1 %}				<button id="delete-symbol" type="button" class="btn-pf-secondary" style="color:#c0392b; border-color:#e8bebe;"><i class="fa fa-times"></i> {% trans "Delete" %}</button>
 				<button id="save-symbol" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Update" %}</button>
-			</div>
-			<div class="pl-panel">
-				<div class="pl-panel__body with-padding">
-					{% csrf_token %}
-					<div class="row">
-						<div class="col-md-2">
-							<div class="output-eg-div">
-								<img id="output-eg" src="{{rule.symbolizer_online_resource}}" class="output-eg"/>
-							</div>
-						</div>
-						<div class="col-md-10">
-							<div id="form-error" class="pf-error-msg"></div>
-							<div class="form-group">
-								<label>{% trans "Name" %}</label>
-								<input disabled placeholder="{% trans 'Symbol name' %}" name="symbol-name" id="symbol-name" type="text" value="{{rule.name}}" class="form-control">
-							</div>	
-							<div class="form-group">
-								<label>{% trans "Title" %}</label>
-					    		<input placeholder="{% trans 'Symbol title' %}" name="symbol-title" id="symbol-title" type="text" value="{{rule.title}}" class="form-control">
-							</div>
-							<div class="form-group">
-								<p class="text-muted">* {% trans "Specifies a title for the rule. The title is used in display lists and legends" %}.</p>
-							</div>
-							<div class="form-group">
-								<label>{% trans "Select image" %}</label>
-								<input id="eg-file" name="eg-file" type="file" accept=".png" onchange="loadFile(event)" class="file" data-show-preview="true">
-							</div>
-							<div class="form-group">
-								<label>{% trans "Size" %}</label>
-					    		<input placeholder="{% trans 'Symbol size (in pixels)' %}" name="symbol-size" id="symbol-size" type="number" value="{{rule.symbolizer_size}}" class="form-control">
-							</div>
-							<div class="form-group">
-								<label>{% trans "Select format" %}</label>
-								<select id="eg-format" class="form-control">
-									<option value="image/png" selected>{{rule.symbolizer_format}}</option>
-								</select>
-							</div>
-						</div>						
-					</div>						
-				</div>
-			</div>
-		</div>
-	</div>
-</form>
 {% endblock %}
-
-{% block extra-scripts %}
-<script>
-	$('#menu-manage-symbology').addClass("active");
-	$('#submenu-libraries').addClass("active");
-	var loadFile = function(event) {
-		$("#form-error").empty();
-		if (event.target.files[0].type == 'image/png') {
-			var output = document.getElementById('output-eg');
-		   	output.src = URL.createObjectURL(event.target.files[0]);
-		   	
-		} else {
-			$("#eg-file").val("");
-			$("#form-error").append('<p>*{% trans "The file format is not supported" %}</p>');
-		}
-	 };
-</script>
-<script>
-$(document).ready(function() {
-	
+{% block external_graphic_v2 %}								<img id="output-eg" src="{{rule.symbolizer_online_resource}}" class="output-eg"/>
+{% endblock %}
+{% block external_graphic_v3 %}								<input disabled placeholder="{% trans 'Symbol name' %}" name="symbol-name" id="symbol-name" type="text" value="{{rule.name}}" class="form-control">
+{% endblock %}
+{% block external_graphic_v4 %}					    		<input placeholder="{% trans 'Symbol title' %}" name="symbol-title" id="symbol-title" type="text" value="{{rule.title}}" class="form-control">
+{% endblock %}
+{% block external_graphic_v5 %}					    		<input placeholder="{% trans 'Symbol size (in pixels)' %}" name="symbol-size" id="symbol-size" type="number" value="{{rule.symbolizer_size}}" class="form-control">
+{% endblock %}
+{% block external_graphic_v6 %}									<option value="image/png"{% if rule.symbolizer_format != 'image/svg+xml' %} selected{% endif %}>image/png</option>
+									<option value="image/svg+xml"{% if rule.symbolizer_format == 'image/svg+xml' %} selected{% endif %}>image/svg+xml</option>
+{% endblock %}
+{% block external_graphic_v7 %}{% endblock %}
+{% block external_graphic_v8 %}	
 	var output = document.getElementById('output-eg');
 	var old = output.src;
-	
-	var size = $("#symbol-size").val();
-	$('#output-eg').css("height",size+"px");
-	$('#output-eg').css("width","auto");
-	
-	$("#symbol-size").on('change', function(){
-		var size = $("#symbol-size").val();
-		$('#output-eg').css("height",size+"px");
-		$('#output-eg').css("width","auto");
-	});
-	
-	$("form").submit(function(evt){	 
-		evt.preventDefault();
-
-		$("#form-error").empty();
-		var name = $("#symbol-name").val();
-		var title = $("#symbol-title").val();
-		var format = $("#eg-format").val();
-		var size = $("#symbol-size").val();
-		
-	   	var formData = new FormData($(this)[0]); 	   	
-	   	
+{% endblock %}
+{% block external_graphic_v9 %}{% endblock %}
+{% block external_graphic_v10 %}	   	
    		var externalGraphic = new ExternalGraphicSymbolizer(name, format, size, '{{rule.symbolizer_online_resource}}');
-		var symbolizer = {
-			type: externalGraphic.type,
-			json: externalGraphic.toJSON(),
-			order: 0
-		};
-		
-		var symbol = {
-			file_name: old,
-			name: name,
-			title: title,
-			order: 0,
-			symbolizers: [symbolizer]
-		};
-		
-		formData.append('rule', JSON.stringify(symbol));
-		
-		$.ajax({
-			url: "/gvsigonline/symbology/symbol_update/{{rule.id}}/",
-			type: "POST",
-			async: false,
-			cache: false,
-	     	contentType: false,
-	     	enctype: 'multipart/form-data',
-	     	processData: false,			
-			beforeSend:function(xhr){
-				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-			},
-			data: formData,
-			success: function(response){
-				if (response.success) {
-					location.href = "/gvsigonline/symbology/library_update/" + response.library_id + "/";
-				} else {
-					$("#form-error").append('<p>*' + response.message + '</p>');
-				}
-				
-			},
-		    error: function(){}
-		});
-	   	
-		return false;
+{% endblock %}
+{% block external_graphic_v11 %}			file_name: old,
+{% endblock %}
+{% block external_graphic_v12 %}{% endblock %}
+{% block external_graphic_v13 %}			url: "/gvsigonline/symbology/symbol_update/{{rule.id}}/",
+{% endblock %}
+{% block external_graphic_v14 %}					location.href = "/gvsigonline/symbology/library_update/" + response.library_id + "/";
+{% endblock %}
+{% block external_graphic_v15 %}		return false;
 	});
-	
-	$("#delete-symbol").on('click', function(){
+{% endblock %}
+{% block external_graphic_v16 %}	$("#delete-symbol").on('click', function(){
 		$.ajax({
 			type: "POST",
 			async: false,
@@ -156,14 +50,9 @@ $(document).ready(function() {
 				if (response.success) {
 					location.href = "/gvsigonline/symbology/library_update/" + response.library_id + "/";
 				} else {
-					$("#form-error").append('<p>*' + response.message + '</p>');
-				}
-				
-			},
+					$("#form-error").append('<p>*' + symbologyEscapeHtml(response.message) + '</p>');
+{% endblock %}
+{% block external_graphic_v17 %}			},
 		    error: function(){}
 		});
-	});
-
-});
-</script>
 {% endblock %}

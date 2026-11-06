@@ -32,7 +32,6 @@ urlpatterns = [
     path('custom_add/<int:layer_id>/', symbology_views.custom_add, name='custom_add'),
     path('custom_update/<int:layer_id>/<int:style_id>/', symbology_views.custom_update, name='custom_update'),
     
-    path('create_sld/', symbology_views.create_sld, name='create_sld'),
     
     path('clustered_points_add/<int:layer_id>/', symbology_views.clustered_points_add, name='clustered_points_add'),
     path('clustered_points_update/<int:layer_id>/<int:style_id>/', symbology_views.clustered_points_update, name='clustered_points_update'),
@@ -40,7 +39,6 @@ urlpatterns = [
     path('color_table_add/<int:layer_id>/', symbology_views.color_table_add, name='color_table_add'),
     path('color_table_update/<int:layer_id>/<int:style_id>/', symbology_views.color_table_update, name='color_table_update'),
     
-    path('color_ramp_list/<int:color_ramp_folder_id>/', symbology_views.color_ramp_list, name='color_ramp_list'),
     path('color_ramp_add/<int:color_ramp_folder_id>/', symbology_views.color_ramp_add, name='color_ramp_add'),
     path('color_ramp_update/<int:color_ramp_id>/', symbology_views.color_ramp_update, name='color_ramp_update'),
     path('color_ramp_delete/<int:color_ramp_id>/', symbology_views.color_ramp_delete, name='color_ramp_delete'),
@@ -69,28 +67,8 @@ urlpatterns = [
     path('get_ramps_from_folder/', symbology_views.get_ramps_from_folder, name='get_ramps_from_folder'),
     
     path('get_wfs_style/', symbology_views.get_wfs_style, name='get_wfs_style'),
+    path('geoserver_proxy/', symbology_views.geoserver_proxy_view, name='symbology_geoserver_proxy'),
 
-    #path('style_label_update/<int:layer_id>/<int:style_id>/', symbology_views.style_label_update, name='style_label_update'),
-    #path('create_style/', symbology_views.create_style, name='create_style'),
-    #path('delete_style/<int:style_id>/', symbology_views.delete_style, name='delete_style'),
-    #path('get_library_symbols/<int:library_id>/', symbology_views.get_library_symbols, name='get_library_symbols'),
-    #path('get_libraries/', symbology_views.get_libraries, name='get_libraries'),   
-    #path('symbol_library_add/<int:library_id>/((?P<symbol_id>\w+)/)?$', symbology_views.symbol_library_add, name='symbol_library_add'),
-    #path('symbol_library_update/(?P<symbol_library_id>[0-9]+)/', symbology_views.symbol_library_update, name='symbol_library_update'),
-    #path('symbol_library_delete/(?P<symbol_library_id>[0-9]+)/', symbology_views.symbol_library_delete, name='symbol_library_delete'),
-    #path('get_sld_style/<int:layer_id>/<int:style_id>/', symbology_views.get_sld_style, name='get_sld_style'),
-    #path('get_sld_style2/<int:layer_id>/<int:style_id>/', 'gvsigol_symbology.sld_tools.get_sld_style2, name='get_sld_style2'),
-    #path('set_default_style/<int:layer_id>/<int:style_id>/', symbology_views.set_default_style, name='set_default_style'),
-    #path('save_legend/<int:layer_id>/<int:style_id>/', symbology_views.save_legend, name='save_legend'),   
-    #path('get_layer_field_description/<int:layer_id>/', symbology_views.get_layer_field_description, name='get_layer_field_description'),
-    #path('get_unique_values/<int:layer_id>/(?P<field>\w+)/', symbology_views.get_unique_values, name='get_unique_values'),
-    #path('get_minmax_values/<int:layer_id>/(?P<field>\w+)/', symbology_views.get_minmax_values, name='get_minmax_values'),
-    #path('get_minmax_rastervalues/<int:layer_id>/<int:style_id>/', symbology_views.get_minmax_rastervalues, name='get_minmax_rastervalues'),
-    #path('style_layer_add/<int:layer_id>/((?P<style_id>\w+)/)?$', symbology_views.style_layer_add, name='style_layer_add'),
-    #path('style_layer_change/<int:layer_id>/((?P<style_id>\w+)/)?$', symbology_views.style_layer_change, name='style_layer_change'),
-    #path('style_layer_update/<int:layer_id>/<int:style_id>/', symbology_views.style_layer_update, name='style_layer_update'),
-    #path('symbol_upload/', symbology_views.symbol_upload, name='symbol_upload'),
-    #path('load_rmf/', symbology_views.load_rmf, name='load_rmf'),
     
     path('get_raster_statistics/<int:layer_id>/', symbology_views.get_raster_statistics, name='get_raster_statistics'),
     
