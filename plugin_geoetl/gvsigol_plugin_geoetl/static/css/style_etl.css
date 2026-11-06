@@ -764,3 +764,19 @@ table.dataTable.no-footer {
 #canvas-parent {
   background: #fff;
 }
+
+/* ---- Listado de espacios de trabajo: columnas de botones ----
+   Las 5 últimas columnas (una por botón, sin título) se ajustan a su contenido y quedan
+   juntas a la derecha, a 48 px entre botones, como en los demás listados. !important solo
+   en el ancho: DataTables (autoWidth) lo fija en línea en las cabeceras. */
+#etl-table > thead > tr > th:nth-last-child(-n+5),
+#etl-table > tbody > tr:not(.child) > td:nth-last-child(-n+5) {
+	width: 1% !important;
+	white-space: nowrap;
+	padding-left: 24px;
+	padding-right: 24px;
+}
+#etl-table > thead > tr > th:nth-last-child(5),
+#etl-table > tbody > tr:not(.child) > td:nth-last-child(5) { padding-left: 16px; }
+#etl-table > thead > tr > th:last-child,
+#etl-table > tbody > tr:not(.child) > td:last-child { padding-right: 16px; }
