@@ -2081,6 +2081,11 @@ def project_get_conf(request):
                                         c.is_view(schema, src)
                                         or c.is_materialized_view(schema, src)
                                     )
+                                    # Admin/ETL publish does not store has_geometry.
+                                    # A PostGIS table with no geometry column is alphanumeric.
+                                    if 'has_geometry' not in params:
+                                        geom_cols = c.get_geometry_columns(src, schema) or []
+                                        layer['has_geometry'] = len(geom_cols) > 0
                             except Exception:
                                 logger.exception('Error checking is_view for layer %s', l.id)
                                 layer['is_view'] = False
