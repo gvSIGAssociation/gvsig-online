@@ -1617,8 +1617,8 @@ msgstr "Elementuen dentsitatea kolore-gainazal jarraitu gisa erakusten du, banak
 
 #: templates/select_legend_type.html
 msgctxt "symbology"
-msgid "Styles prepared in QGIS or GeoServer."
-msgstr "QGISen edo GeoServerren prestatutako estiloak."
+msgid "Styles prepared in gvSIG Desktop or GeoServer."
+msgstr "gvSIG Desktopen edo GeoServerren prestatutako estiloak."
 
 #: templates/select_legend_type.html
 msgctxt "symbology"

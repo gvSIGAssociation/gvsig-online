@@ -1777,8 +1777,8 @@ msgstr "Muestra la densidad de los elementos como una superficie continua de col
 
 #: templates/select_legend_type.html
 msgctxt "symbology"
-msgid "Styles prepared in QGIS or GeoServer."
-msgstr "Estilos preparados en QGIS o GeoServer."
+msgid "Styles prepared in gvSIG Desktop or GeoServer."
+msgstr "Estilos preparados en gvSIG Desktop o GeoServer."
 
 #: templates/select_legend_type.html
 msgctxt "symbology"

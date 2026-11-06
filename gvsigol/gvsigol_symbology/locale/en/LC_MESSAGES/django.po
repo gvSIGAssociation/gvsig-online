@@ -1699,8 +1699,8 @@ msgstr "Shows the density of the features as a continuous color surface instead 
 
 #: templates/select_legend_type.html
 msgctxt "symbology"
-msgid "Styles prepared in QGIS or GeoServer."
-msgstr "Styles prepared in QGIS or GeoServer."
+msgid "Styles prepared in gvSIG Desktop or GeoServer."
+msgstr "Styles prepared in gvSIG Desktop or GeoServer."
 
 #: templates/select_legend_type.html
 msgctxt "symbology"

@@ -1624,8 +1624,8 @@ msgstr "Zeigt die Dichte der Objekte als durchgehende Farbfläche statt einzelne
 
 #: templates/select_legend_type.html
 msgctxt "symbology"
-msgid "Styles prepared in QGIS or GeoServer."
-msgstr "In QGIS oder GeoServer erstellte Stile."
+msgid "Styles prepared in gvSIG Desktop or GeoServer."
+msgstr "In gvSIG Desktop oder GeoServer erstellte Stile."
 
 #: templates/select_legend_type.html
 msgctxt "symbology"
