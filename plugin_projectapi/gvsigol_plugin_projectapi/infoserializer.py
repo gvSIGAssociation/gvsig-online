@@ -72,6 +72,7 @@ class LayerSerializer(serializers.ModelSerializer):
     order = serializers.SerializerMethodField('get_order_')
     external_params = serializers.SerializerMethodField('get_external_params_')
     featureapi_endpoint = serializers.SerializerMethodField('get_featureapi_endpoint_')
+    has_geometry = serializers.SerializerMethodField('get_has_geometry')
     metadata = serializers.SerializerMethodField('get_metadata_')
     metadata_url = serializers.SerializerMethodField('get_metadata_url_')
 
@@ -329,6 +330,42 @@ class LayerSerializer(serializers.ModelSerializer):
             pass
         return False
 
+    def get_has_geometry(self, obj):
+        """
+        False when the PostGIS table has no geometry column.
+
+        Import stores the flag in external_params. Publishing a table from the
+        admin or from ETL does not, so the viewer must look at the table itself.
+        """
+        try:
+            stored = json.loads(obj.external_params or '{}')
+            if isinstance(stored, dict) and 'has_geometry' in stored:
+                return bool(stored.get('has_geometry'))
+        except Exception:
+            pass
+        if getattr(obj, 'type', None) != 'v_PostGIS' or not obj.datastore:
+            return True
+        try:
+            introspect, conn_params = obj.datastore.get_db_connection()
+            schema = (conn_params or {}).get('schema') or obj.datastore.get_schema_name() or 'public'
+            table_name = obj.source_name if obj.source_name else obj.name
+            with introspect as con:
+                con.cursor.execute(
+                    """
+                    SELECT 1
+                    FROM information_schema.columns
+                    WHERE table_schema = %s
+                      AND table_name = %s
+                      AND udt_name IN ('geometry', 'geography')
+                    LIMIT 1
+                    """,
+                    [schema, table_name],
+                )
+                return con.cursor.fetchone() is not None
+        except Exception:
+            logger.exception('Error checking has_geometry for layer %s', getattr(obj, 'id', None))
+            return True
+
     def is_public(self, obj):
         try:
             if(obj.public):
@@ -583,7 +620,7 @@ class LayerSerializer(serializers.ModelSerializer):
         
     class Meta:
         model = Layer
-        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'real_time', 'vector_tile', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'is_view', 'public', 'external', 'service_version', 'description', 'wms_url', 'wfs_url', 'cache_url', 'tms_url', 'legend_url', 'styles', 'baselayer', 'default_baselayer', 'order', 'external_params', 'featureapi_endpoint', 'time_enabled', 'allow_download', 'allow_calculated_fields', 'can_use_calculated_fields', 'detailed_info_button_title' ,'detailed_info_enabled' ,'detailed_info_html', 'metadata', 'metadata_url']
+        fields = ['id', 'name', 'title', 'abstract', 'type', 'visible', 'queryable', 'cached', 'single_image', 'real_time', 'vector_tile', 'created_by', 'thumbnail', 'layer_group_id', 'icon', 'last_change', 'latlong_extent', 'native_extent', 'external_layers', 'external_url', 'external_tilematrixset', 'workspace', 'image_type', 'writable', 'is_view', 'has_geometry', 'public', 'external', 'service_version', 'description', 'wms_url', 'wfs_url', 'cache_url', 'tms_url', 'legend_url', 'styles', 'baselayer', 'default_baselayer', 'order', 'external_params', 'featureapi_endpoint', 'time_enabled', 'allow_download', 'allow_calculated_fields', 'can_use_calculated_fields', 'detailed_info_button_title' ,'detailed_info_enabled' ,'detailed_info_html', 'metadata', 'metadata_url']
 
 
 def _compute_allows_getmap(layers_qs):
