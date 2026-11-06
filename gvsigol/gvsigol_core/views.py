@@ -2051,6 +2051,8 @@ def project_get_conf(request):
                         if l.external_params:
                             params = json.loads(l.external_params)
                             layer['format'] = params.get('format')
+                        # Absent flag means a spatial layer. Non-spatial imports store false.
+                        layer['has_geometry'] = params.get('has_geometry', True)
 
                         try:
                             json_conf = ast.literal_eval(l.conf)
