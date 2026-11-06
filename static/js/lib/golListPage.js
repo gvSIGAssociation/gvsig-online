@@ -108,6 +108,34 @@
 		});
 	}
 
+	/* Columnas de botones: las ULTIMAS columnas con la cabecera vacia (cada boton
+	   va en su columna, sin titulo). Se marcan con clases para que el CSS las
+	   ajuste a su contenido y las junte a la derecha (gol-list-page.css), en vez
+	   de repartirse el ancho sobrante de la tabla. Solo se anaden clases: ni el
+	   contenido ni los manejadores cambian. Se repite en cada redibujado porque
+	   DataTables crea las filas al paginar o al pedir datos al servidor. */
+	function markActionColumns(table, $table) {
+		var $ths = $table.find('> thead > tr').first().children('th');
+		var actions = [];
+		for (var i = $ths.length - 1; i >= 0; i--) {
+			var $th = $ths.eq(i);
+			if ($.trim($th.text()) !== '' || $th.find('input, select, button').length) { break; }
+			actions.unshift(i);
+		}
+		if (!actions.length) { return; }
+		function apply() {
+			$.each(actions, function (k, col) {
+				var cls = 'pl-col-actions' +
+					(k === 0 ? ' pl-col-actions--first' : '') +
+					(k === actions.length - 1 ? ' pl-col-actions--last' : '');
+				$(table.column(col).header()).addClass(cls);
+				table.column(col).nodes().to$().addClass(cls);
+			});
+		}
+		apply();
+		table.on('draw.dt', apply);
+	}
+
 	/**
 	 * @param {string} selector  tabla a inicializar
 	 * @param {Object} [opts]    mode: 'client' | 'server'
@@ -134,6 +162,7 @@
 		}
 
 		var table = $table.DataTable(conf);
+		markActionColumns(table, $table);
 		if (mode === 'client') {
 			/* Normalmente la cabecera es la del panel, pero cache_list lleva una
 			   tabla por pestana y ahi el ambito es el .tab-pane. */
