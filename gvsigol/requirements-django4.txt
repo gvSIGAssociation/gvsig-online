@@ -246,3 +246,10 @@ langsmith==0.4.32
 pydantic==2.11.5  # Para validacion de datos en LangChain
 
 sqlglot==26.21.0
+
+# LangGraph para el agente de plugin_geocopilot (plan P2 fase 1).
+# Version fijada para Python 3.9: langgraph 1.x exige 3.10.
+# NO anadir psycopg (v3) ni langgraph-checkpoint-postgres: si psycopg 3 esta
+# instalado, Django 4.2 lo usa en lugar de psycopg2 para TODO gvSIG. La memoria
+# persistente de GeoCopilot se guarda con el ORM de Django (psycopg2).
+langgraph==0.6.11
