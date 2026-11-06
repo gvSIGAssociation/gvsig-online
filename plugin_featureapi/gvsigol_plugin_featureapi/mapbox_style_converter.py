@@ -21,6 +21,7 @@
 '''
 
 import json
+import math
 import logging
 import xml.etree.ElementTree as ET
 import re
@@ -1556,6 +1557,198 @@ def apply_scale_to_layer(mapbox_layer, minscale, maxscale):
     return mapbox_layer
 
 
+# =============================================================================
+# Etiquetas NUEVAS (TextSymbolizer.options, ver gvsigol_symbology/label_options.py)
+# Las etiquetas antiguas (options vacío) siguen usando convert_text_symbolizer y
+# apply_scale_to_layer sin ningún cambio.
+# =============================================================================
+try:
+    from gvsigol_symbology import label_options as _label_options
+except Exception:  # pragma: no cover - simbología sin soporte de opciones
+    _label_options = None
+
+# Denominador de escala del zoom 0 (teselas de 256 px, EPSG:3857, 0,28 mm/píxel)
+ZOOM0_SCALE_DENOMINATOR = 559082264.028
+
+# Posición de la etiqueta respecto al punto -> text-anchor (punto de la etiqueta que se ancla)
+NEW_LABEL_TEXT_ANCHOR = {
+    'top-left': 'bottom-right', 'top': 'bottom', 'top-right': 'bottom-left',
+    'left': 'right', 'center': 'center', 'right': 'left',
+    'bottom-left': 'top-right', 'bottom': 'top', 'bottom-right': 'top-left',
+}
+
+
+def scale_to_zoom(scale_denominator):
+    """Denominador de escala -> nivel de zoom (fórmula logarítmica, con decimales)."""
+    return round(math.log2(ZOOM0_SCALE_DENOMINATOR / float(scale_denominator)), 2)
+
+
+def apply_scale_to_new_label_layer(mapbox_layer, minscale, maxscale):
+    """
+    Escalas de la regla -> minzoom/maxzoom con la conversión correcta (solo etiquetas nuevas).
+    MinScaleDenominator (visible si escala >= min) -> maxzoom; MaxScaleDenominator -> minzoom.
+    """
+    if minscale and minscale > 0:
+        mapbox_layer["maxzoom"] = max(0, min(24, scale_to_zoom(minscale)))
+    if maxscale and maxscale > 0:
+        mapbox_layer["minzoom"] = max(0, min(24, scale_to_zoom(maxscale)))
+    return mapbox_layer
+
+
+def new_label_options(symbolizer):
+    """Opciones normalizadas de una etiqueta, o None si es una etiqueta antigua."""
+    if _label_options is None:
+        return None
+    try:
+        return _label_options.of(symbolizer)
+    except Exception:
+        logger.exception("Opciones de etiqueta ilegibles (TextSymbolizer id=%s): se trata como antigua",
+                         getattr(symbolizer, 'id', None))
+        return None
+
+
+def layer_geometry_kind(layer):
+    """'point' | 'line' | 'polygon' de la capa (para elegir la colocación de las etiquetas nuevas)."""
+    try:
+        from gvsigol_symbology import utils as symbology_utils, label_sld
+        return label_sld.geometry_kind(symbology_utils.get_geometry_field(layer))
+    except Exception:
+        return 'point'
+
+
+def _new_label_part_expression(part):
+    """Una parte del contenido -> expresión Mapbox (aproximada para fechas y números sin miles)."""
+    if part['type'] == 'text':
+        return part['value']
+    value = ["get", part['name']]
+    if 'number' in part:
+        decimals = part['number']['decimals']
+        number = ["to-number", value, 0]
+        if part['number']['thousands']:
+            return ["number-format", number, {"locale": part['number'].get('locale', 'en'),
+                                              "min-fraction-digits": decimals, "max-fraction-digits": decimals}]
+        factor = 10 ** decimals
+        return ["to-string", ["/", ["round", ["*", number, factor]], factor]]
+    if 'date' in part:
+        return ["to-string", value]
+    return value
+
+
+def convert_new_text_symbolizer(symbolizer, options, layer_id, rule_name, source_layer, geom_kind):
+    """
+    Etiqueta nueva -> capa 'symbol' de Mapbox con las propiedades que entiende ol-mapbox-style.
+    Lo que ol-mapbox-style no traduce (fondo, solapes, prioridad, formato exacto de números y
+    fechas) viaja en metadata["gvsigol:label"] para la extensión del SPA (labelExtras.js).
+    """
+    # Como en las etiquetas antiguas, no se mira is_actived: el editor no lo guarda (queda
+    # False en BD) y una etiqueta desactivada no llega a guardarse como regla «_text».
+    parts = options['content'].get('parts') or (
+        [{'type': 'field', 'name': symbolizer.label}] if symbolizer.label else [])
+    if not parts:
+        return None
+
+    try:
+        size = int(float(symbolizer.font_size)) or 12
+    except (TypeError, ValueError):
+        size = 12
+    if len(parts) == 1:
+        text_field = _new_label_part_expression(parts[0])
+        if isinstance(text_field, str):
+            text_field = ["literal", text_field]
+    else:
+        text_field = ["concat"] + [_new_label_part_expression(p) for p in parts]
+
+    weight_map = {'normal': 'Regular', 'bold': 'Bold'}
+    weight = weight_map.get(str(symbolizer.font_weight or 'normal').lower(), 'Regular')
+    font_name = f"{symbolizer.font_family or 'Arial'} {weight}"
+    if str(symbolizer.font_style or '').lower() in ('italic', 'oblique'):
+        font_name += " Italic"
+
+    placement = options['placement']
+    layout = {
+        "text-field": text_field,
+        "text-font": [font_name, "Open Sans Regular", "Arial Unicode MS Regular"],
+        "text-size": size,
+        "text-allow-overlap": options['priority']['allow_overlap'],
+        "text-ignore-placement": False,
+        "text-optional": True,
+        "text-padding": options['priority']['space_around'],
+        "text-max-width": round(placement['wrap'] / float(size), 2) if placement['wrap'] else 1000,
+    }
+    case = options['content'].get('case', 'none')
+    if case in ('upper', 'lower'):
+        layout["text-transform"] = 'uppercase' if case == 'upper' else 'lowercase'
+    if options['style']['letter_spacing']:
+        layout["text-letter-spacing"] = round(options['style']['letter_spacing'] / float(size), 3)
+
+    rotation = placement['rotation']
+    if rotation.get('field'):
+        layout["text-rotate"] = ["to-number", ["get", rotation['field']], 0]
+    elif rotation.get('angle'):
+        layout["text-rotate"] = rotation['angle']
+
+    if geom_kind == 'line':
+        line = placement['line']
+        layout["symbol-placement"] = "line" if line['follow'] else "point"
+        if line['follow']:
+            layout["text-max-angle"] = line['max_angle']
+            layout["text-keep-upright"] = True
+            if line['repeat']:
+                layout["symbol-spacing"] = line['repeat']
+        if line['offset']:
+            # PerpendicularOffset (px, positivo = a la izquierda/arriba) -> desplazamiento en em
+            layout["text-offset"] = [0, round(-line['offset'] / float(size), 3)]
+    elif geom_kind == 'polygon':
+        layout["text-anchor"] = "center"
+    else:
+        point = placement['point']
+        layout["text-anchor"] = NEW_LABEL_TEXT_ANCHOR[point['position']]
+        if point['dx'] or point['dy']:
+            # dx a la derecha, dy hacia arriba (px) -> text-offset en em (y positiva hacia abajo)
+            layout["text-offset"] = [round(point['dx'] / float(size), 3), round(-point['dy'] / float(size), 3)]
+
+    if options['priority']['field']:
+        # Para renderizadores que lo soporten; en el SPA lo aplica labelExtras.js (metadata)
+        layout["symbol-sort-key"] = ["-", 0, ["to-number", ["get", options['priority']['field']], 0]]
+
+    paint = {"text-color": hex_to_rgba(symbolizer.fill) or "rgb(0, 0, 0)"}
+    if symbolizer.fill_opacity is not None and symbolizer.fill_opacity < 1.0:
+        paint["text-opacity"] = symbolizer.fill_opacity
+    if options['style']['halo'] and symbolizer.halo_radius and symbolizer.halo_fill:
+        halo_opacity = symbolizer.halo_fill_opacity if symbolizer.halo_fill_opacity is not None else 1.0
+        rgb = hex_to_rgba(symbolizer.halo_fill)
+        paint["text-halo-color"] = (rgb.replace('rgb(', 'rgba(').replace(')', ', %s)' % round(halo_opacity, 3))
+                                    if halo_opacity < 1.0 and rgb and rgb.startswith('rgb(') else rgb)
+        paint["text-halo-width"] = symbolizer.halo_radius
+
+    extras = {"v": 1}
+    if options['background']['type'] == 'box':
+        bg = options['background']
+        extras["background"] = {"fill": bg['fill'], "fillOpacity": bg['fill_opacity'], "stroke": bg['stroke'],
+                                "strokeWidth": bg['stroke_width'], "padding": bg['padding']}
+    if options['priority']['allow_overlap']:
+        extras["allowOverlap"] = True
+    if options['priority']['field']:
+        extras["priorityField"] = options['priority']['field']
+    if any(p['type'] == 'field' and ('number' in p or 'date' in p) for p in parts):
+        # labelExtras.js recompone el texto con el formato exacto: necesita también
+        # la transformación y el espaciado que ol-mapbox-style aplicaba sobre su texto
+        extras["parts"] = parts
+        extras["case"] = case
+        if "text-letter-spacing" in layout:
+            extras["letterSpacing"] = layout["text-letter-spacing"]
+
+    return {
+        "id": f"{layer_id}_{rule_name}_label",
+        "type": "symbol",
+        "source": "gvsigol",
+        "source-layer": source_layer,
+        "layout": layout,
+        "paint": paint,
+        "metadata": {"gvsigol:label": extras},
+    }
+
+
 def validate_text_layer(layer):
     """
     Valida que una capa de texto (symbol) tiene las propiedades mínimas necesarias.
@@ -1832,6 +2025,7 @@ def convert_style_to_mapbox(layer_id, style_id=None, tms_base_url=None, style_ob
                 logger.warning(f"Style {style.id} has no rules and type is {style.type}")
         return mapbox_style
     
+    geom_kind_cache = {}
     for rule in rules:
         rule_name = rule.name.replace(' ', '_').replace(':', '_')
         
@@ -1898,6 +2092,19 @@ def convert_style_to_mapbox(layer_id, style_id=None, tms_base_url=None, style_ob
                 mapbox_style["layers"].append(lyr)
         
         for sym in text_symbolizers:
+            label_opts = new_label_options(sym)
+            if label_opts is not None:
+                # Etiqueta nueva: conversión propia y escala con la fórmula correcta
+                if geom_kind_cache.get('kind') is None:
+                    geom_kind_cache['kind'] = layer_geometry_kind(layer)
+                lyr = convert_new_text_symbolizer(sym, label_opts, layer_id, rule_name, source_layer,
+                                                  geom_kind_cache['kind'])
+                if lyr:
+                    if mapbox_filter:
+                        lyr["filter"] = mapbox_filter
+                    lyr = apply_scale_to_new_label_layer(lyr, rule.minscale, rule.maxscale)
+                    mapbox_style["layers"].append(lyr)
+                continue
             lyr = convert_text_symbolizer(sym, layer_id, rule_name, source_layer)
             if lyr:
                 # Validar capa de texto antes de añadir
