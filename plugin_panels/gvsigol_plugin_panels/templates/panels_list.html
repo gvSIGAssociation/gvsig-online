@@ -42,7 +42,10 @@
 .pl-badge { display: inline-block; border-radius: 12px; padding: 3px 10px; font-size: 11px; font-weight: 600; }
 .pl-badge--public { background: #e9eef3; color: #3e5974; }
 .pl-badge--private { background: #f5f0e8; color: #87662c; }
-.pl-action-cell { white-space: nowrap; text-align: center; min-width: 90px; }
+/* Columnas de botones: ajustadas a su contenido y juntas a la derecha, a 48 px entre
+   botones como en los demás listados (!important: DataTables fija el ancho en línea). */
+.pl-table .pl-action-cell { white-space: nowrap; text-align: center; width: 1% !important; padding-left: 24px; padding-right: 24px; }
+.pl-table tr > .pl-action-cell:last-child { padding-right: 16px; }
 .pl-table thead th.pl-action-cell { text-align: center; }
 #panels-table .btn { border-radius: 5px; font-size: 12px; padding: 4px 10px; transition: background var(--pl-transition), border-color var(--pl-transition); }
 #panels-table .btn-light { background: transparent; border: 1px solid var(--pl-border); color: var(--pl-accent); }
