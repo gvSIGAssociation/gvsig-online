@@ -520,6 +520,16 @@
 /* Mensajes de error entre la cabecera y la tarjeta */
 .gol-pg-page > .pf-error-msg,
 .gol-pg-page > .gol-pg-errors > .pf-error-msg { margin: 0 0 16px; }
+/* Plantillas antiguas: los errores van en un <div class="row" style="padding-left: 30px;">,
+   que desplaza el aviso respecto a la tarjeta y lo saca por la derecha (márgenes -15px
+   de .row). Se anula la fila para que el aviso quede alineado con la tarjeta. */
+.gol-pg-page > .row:has(> .pf-error-msg) {
+	margin-left: 0;
+	margin-right: 0;
+	padding-left: 0 !important;
+	padding-right: 0 !important;
+}
+.gol-pg-page > .row > .pf-error-msg { margin: 0 0 16px; }
 
 @media (max-width: 767px) {
 	.gol-pg-footer--sticky { padding: 12px 16px; }
