@@ -1,0 +1,680 @@
+/* =================================================================
+   gvSIG Online — Formularios como página (prefijo gol-pg-)
+   Mismo diseño que los formularios sencillos de simbología
+   (library_add.html): cabecera de página con ruta de navegación,
+   tarjeta del formulario con pie de acciones y panel de ayuda a la
+   derecha. Lo usan user_add, user_update, role_add y group_add.
+
+   Solo da aspecto: los campos conservan id y name, y las pestañas son
+   las de Bootstrap. Se carga después de gol-form-page.css (botones
+   btn-pf-*, .nav-tabs) y, en los de usuario, de gol-auth-user-form.css.
+   Requiere gol-tokens.css y gol-themes.css (color de acento del tema).
+   ================================================================= */
+
+.gol-pg-page {
+	--gol-pg-input-border: rgba(63, 77, 90, 0.22);
+	--gol-pg-input-border-hv: rgba(63, 77, 90, 0.38);
+	--gol-pg-placeholder: #98a5b0;
+	/* Todas las páginas a todo el ancho: sin hueco vacío a la derecha */
+	max-width: none;
+}
+
+/* ---- Cabecera de página ---- */
+.gol-pg-header { margin: 2px 0 18px; }
+.gol-pg-crumbs {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	margin: 0 0 8px;
+	padding: 0;
+	list-style: none;
+	font-size: 12px;
+	color: var(--gol-muted);
+}
+.gol-pg-crumbs > li { display: inline-flex; align-items: center; }
+.gol-pg-crumbs > li + li::before {
+	content: '';
+	width: 6px;
+	height: 6px;
+	margin: 0 10px 0 8px;
+	border-top: 1.5px solid currentColor;
+	border-right: 1.5px solid currentColor;
+	transform: rotate(45deg);
+	opacity: 0.6;
+}
+.gol-pg-crumbs a {
+	color: var(--gol-accent);
+	font-weight: 600;
+	text-decoration: none;
+}
+.gol-pg-crumbs a:hover,
+.gol-pg-crumbs a:focus { text-decoration: underline; }
+.gol-pg-crumbs > li[aria-current] { color: var(--gol-text); font-weight: 600; }
+.gol-pg-title {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px;
+	margin: 0;
+	font-size: 22px;
+	font-weight: 700;
+	line-height: 1.25;
+	color: var(--gol-text);
+}
+.gol-pg-icon {
+	flex: 0 0 38px;
+	height: 38px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 10px;
+	background: var(--gol-accent-lt, rgba(74, 127, 165, 0.08));
+	border: 1px solid var(--gol-border);
+	color: var(--gol-accent);
+	font-size: 17px;
+}
+.gol-pg-chip {
+	display: inline-block;
+	max-width: 100%;
+	padding: 2px 11px;
+	border-radius: 12px;
+	border: 1px solid var(--gol-border);
+	background: var(--gol-white);
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--gol-muted);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.gol-pg-lead {
+	margin: 6px 0 0 50px;
+	font-size: 13px;
+	line-height: 1.5;
+	color: var(--gol-muted);
+}
+
+/* ---- Rejilla: formulario + ayuda ---- */
+.gol-pg-grid {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: 20px;
+}
+.gol-pg-card {
+	flex: 1 1 560px;
+	max-width: none;
+	min-width: 0;
+	background: var(--gol-white);
+	border: 1px solid var(--gol-border);
+	border-radius: var(--gol-radius);
+	box-shadow: var(--gol-shadow);
+	overflow: hidden;
+}
+.gol-pg-card--wide { max-width: none; }
+/* La tarjeta ocupa todo el hueco libre; los campos no se estiran más de lo
+   cómodo de leer (en dos columnas nunca llegan a este límite). */
+.gol-pg-card:not(.gol-pg-card--full) .form-control,
+.gol-pg-card:not(.gol-pg-card--full) .gol-pg-pass { max-width: 720px; }
+.gol-pg-card:not(.gol-pg-card--full) .gol-pg-pass > .form-control { max-width: none; }
+/* Formularios grandes (services): todo el ancho y sin recortar desplegables,
+   autocompletados ni selectores que sobresalgan de la tarjeta. */
+.gol-pg-page--wide { max-width: none; }
+.gol-pg-card--full {
+	flex: 1 1 100%;
+	max-width: none;
+	overflow: visible;
+}
+.gol-pg-card--full > .nav-tabs { border-radius: var(--gol-radius) var(--gol-radius) 0 0; }
+/* Formulario con pestañas y panel de ayuda al lado: crece como la tarjeta
+   normal pero sin recortar desplegables y con el pie fijo funcionando. */
+.gol-pg-card--grow { overflow: visible; }
+.gol-pg-card--grow > .nav-tabs { border-radius: var(--gol-radius) var(--gol-radius) 0 0; }
+.gol-pg-body { padding: 22px 28px 4px; }
+.gol-pg-card-title {
+	margin: 0 0 18px;
+	padding-bottom: 12px;
+	border-bottom: 1px solid var(--gol-border);
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--gol-text);
+}
+.gol-pg-section-title {
+	margin: 8px 0 12px;
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--gol-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+/* Pie de acciones ligero */
+.gol-pg-footer {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 8px;
+	margin: 6px 28px 0;
+	padding: 16px 0 22px;
+	border-top: 1px solid var(--gol-border);
+}
+.gol-pg-footer a.btn-pf-secondary,
+.gol-pg-footer a.btn-pf-secondary:hover,
+.gol-pg-footer a.btn-pf-secondary:focus { text-decoration: none; }
+
+/* ---- Pestañas dentro de la tarjeta ---- */
+.gol-pg-card > .nav-tabs {
+	margin: 0;
+	padding: 6px 20px 0;
+	border-bottom: 1px solid var(--gol-border);
+	background: var(--gol-bg);
+}
+.gol-pg-card > .nav-tabs > li > a { padding: 11px 16px; border-radius: 6px 6px 0 0; }
+.gol-pg-card > .nav-tabs > li.active > a,
+.gol-pg-card > .nav-tabs > li.active > a:hover,
+.gol-pg-card > .nav-tabs > li.active > a:focus { background: var(--gol-white); }
+.gol-pg-card > .tab-content {
+	padding: 22px 28px 4px;
+	background: transparent;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+/* ---- Campos ---- */
+.gol-pg-card:not(.gol-pg-card--keep-fields) .form-group { margin-bottom: 14px; }
+.gol-pg-card:not(.gol-pg-card--keep-fields) label {
+	display: block;
+	margin-bottom: 5px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--gol-text);
+	text-transform: none;
+	letter-spacing: 0;
+}
+.gol-pg-card:not(.gol-pg-card--keep-fields) .form-control {
+	width: 100%;
+	height: 34px;
+	padding: 6px 11px;
+	border: 1px solid var(--gol-pg-input-border);
+	border-radius: 8px;
+	background-color: var(--gol-white);
+	box-shadow: none;
+	color: var(--gol-text);
+	font-size: 13px;
+	transition: border-color var(--gol-transition), box-shadow var(--gol-transition);
+}
+.gol-pg-card:not(.gol-pg-card--keep-fields) .form-control:hover { border-color: var(--gol-pg-input-border-hv); }
+.gol-pg-card:not(.gol-pg-card--keep-fields) .form-control:focus {
+	border-color: var(--gol-accent);
+	background-color: var(--gol-white);
+	box-shadow: 0 0 0 1px var(--gol-accent);
+	outline: none;
+}
+.gol-pg-card:not(.gol-pg-card--keep-fields) .form-control::placeholder { color: var(--gol-pg-placeholder); opacity: 1; }
+.gol-pg-card:not(.gol-pg-card--keep-fields) .form-control[disabled],
+.gol-pg-card:not(.gol-pg-card--keep-fields) .form-control[readonly] {
+	background-color: var(--gol-bg);
+	border-color: var(--gol-border);
+	color: var(--gol-muted);
+	cursor: not-allowed;
+}
+.gol-pg-card:not(.gol-pg-card--keep-fields) input[type="checkbox"] { accent-color: var(--gol-accent); }
+.gol-pg-required { color: #c0392b; font-weight: 700; }
+.gol-pg-optional { font-weight: 400; color: var(--gol-muted); }
+.gol-pg-hint {
+	margin: 6px 0 0;
+	font-size: 12px;
+	line-height: 1.45;
+	color: var(--gol-muted);
+}
+.gol-pg-hint .fa { margin-right: 4px; }
+
+/* Avisos de validación mientras se escribe (gvsigol_auth/static/js/lib/authForms.js) */
+.gol-pg-card .form-control.gol-pg-input-valid { border-color: #2e8b57; }
+.gol-pg-card .form-control.gol-pg-input-invalid { border-color: #c0392b; }
+.gol-pg-card .form-control.gol-pg-input-invalid:focus { box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.12); }
+.gol-pg-status {
+	margin: 4px 0 0;
+	font-size: 12px;
+	line-height: 1.45;
+}
+.gol-pg-status:empty { display: none; }
+.gol-pg-status.is-valid { color: #2e7d4f; }
+.gol-pg-status.is-invalid { color: #a93226; }
+.gol-pg-status.is-info { color: var(--gol-muted); }
+.gol-pg-fix {
+	margin-left: 2px;
+	padding: 1px 8px;
+	border: 1px solid var(--gol-border);
+	border-radius: 11px;
+	background: var(--gol-white);
+	color: var(--gol-accent);
+	font-size: 12px;
+	font-weight: 600;
+	cursor: pointer;
+}
+.gol-pg-fix:hover { border-color: var(--gol-accent); }
+.gol-pg-fix:focus-visible { outline: 2px solid var(--gol-accent); outline-offset: 1px; }
+
+/* Requisitos de la contraseña */
+.gol-pg-checklist {
+	margin: 8px 0 0;
+	padding: 0;
+	list-style: none;
+	font-size: 12px;
+	line-height: 1.45;
+	color: var(--gol-muted);
+}
+.gol-pg-checklist > li {
+	position: relative;
+	padding-left: 18px;
+	margin-bottom: 2px;
+}
+.gol-pg-checklist > li::before {
+	content: '\f10c';
+	position: absolute;
+	left: 0;
+	top: 0;
+	font-family: FontAwesome;
+	font-size: 11px;
+	opacity: 0.7;
+}
+.gol-pg-checklist > li.is-ok { color: #2e7d4f; }
+.gol-pg-checklist > li.is-ok::before { content: '\f058'; opacity: 1; }
+.gol-pg-checklist > li.is-bad { color: #a93226; }
+.gol-pg-checklist > li.is-bad::before { content: '\f057'; opacity: 1; }
+.gol-pg-checklist > li.is-note::before { content: '\f05a'; }
+
+/* Contraseña con botón para verla */
+.gol-pg-pass { position: relative; display: block; }
+.gol-pg-card .gol-pg-pass > .form-control { padding-right: 40px; }
+.gol-pg-pass__toggle {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 38px;
+	height: 34px;
+	border: 0;
+	background: transparent;
+	color: var(--gol-muted);
+	cursor: pointer;
+}
+.gol-pg-pass__toggle:hover { color: var(--gol-accent); }
+.gol-pg-pass__toggle:focus-visible { outline: 2px solid var(--gol-accent); outline-offset: -2px; border-radius: 8px; }
+
+/* Casillas como opciones con explicación */
+.gol-pg-options {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+	margin: 4px 0 14px;
+}
+.gol-pg-card:not(.gol-pg-card--keep-fields) label.gol-pg-option {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin: 0;
+	padding: 12px 14px;
+	border: 1px solid var(--gol-border);
+	border-radius: 8px;
+	background: var(--gol-white);
+	font-weight: 400;
+	cursor: pointer;
+	transition: border-color var(--gol-transition), background var(--gol-transition);
+}
+.gol-pg-card:not(.gol-pg-card--keep-fields) label.gol-pg-option:hover { border-color: var(--gol-pg-input-border-hv); }
+.gol-pg-card:not(.gol-pg-card--keep-fields) label.gol-pg-option:has(input:checked) {
+	border-color: var(--gol-accent);
+	background: var(--gol-accent-lt, rgba(74, 127, 165, 0.06));
+}
+.gol-pg-card:not(.gol-pg-card--keep-fields) label.gol-pg-option:has(input:disabled) { cursor: not-allowed; opacity: 0.75; }
+.gol-pg-option input[type="checkbox"] {
+	flex: 0 0 auto;
+	width: 15px;
+	height: 15px;
+	margin: 2px 0 0;
+	cursor: inherit;
+}
+.gol-pg-option__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.gol-pg-option__title { font-size: 13px; font-weight: 600; color: var(--gol-text); }
+.gol-pg-option__desc { font-size: 12px; line-height: 1.4; color: var(--gol-muted); }
+
+/* Listas de asignación (roles y grupos) dentro de la tarjeta */
+.gol-pg-card .pf-search-bar { display: block; width: 100%; max-width: none; margin-bottom: 14px; }
+.gol-pg-card .pf-search-bar .form-control { width: 100%; box-sizing: border-box; height: 34px; }
+.gol-pg-card .assign-list { margin-bottom: 14px; }
+.gol-pg-card:not(.gol-pg-card--keep-fields) label.assign-list__check {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--gol-muted);
+	cursor: pointer;
+}
+.gol-pg-card .assign-list__item:has(input:checked) {
+	border-color: var(--gol-accent);
+	background: var(--gol-accent-lt, rgba(74, 127, 165, 0.06));
+}
+.gol-pg-empty {
+	margin: 0 0 14px;
+	padding: 18px;
+	border: 1px dashed var(--gol-border);
+	border-radius: 8px;
+	text-align: center;
+	font-size: 13px;
+	color: var(--gol-muted);
+}
+
+/* ---- Mensaje de error ---- */
+.gol-pg-alert {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin: 0 0 18px;
+	padding: 12px 14px;
+	border: 1px solid #f1c4c0;
+	border-left: 3px solid #c0392b;
+	border-radius: 8px;
+	background: #fdf3f2;
+	color: #8e2a20;
+	font-size: 13px;
+}
+.gol-pg-alert > .fa { margin-top: 2px; color: #c0392b; }
+.gol-pg-alert ul { margin: 0; padding-left: 18px; }
+.gol-pg-alert p { margin: 0 0 4px; }
+.gol-pg-alert > div > :last-child { margin-bottom: 0; }
+.gol-pg-card > .gol-pg-alert { margin: 18px 28px 0; }
+
+/* ---- Panel de ayuda ---- */
+.gol-pg-aside {
+	flex: 0 0 300px;
+	min-width: 240px;
+	padding: 18px 20px;
+	border: 1px solid var(--gol-border);
+	border-radius: var(--gol-radius);
+	background: var(--gol-accent-lt, rgba(74, 127, 165, 0.06));
+	font-size: 13px;
+	line-height: 1.5;
+	color: var(--gol-text);
+}
+.gol-pg-aside-title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 12px;
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--gol-text);
+}
+.gol-pg-aside-title .fa { color: var(--gol-accent); }
+.gol-pg-aside-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	counter-reset: golpgstep;
+}
+.gol-pg-aside-list > li {
+	position: relative;
+	padding-left: 30px;
+	margin-bottom: 10px;
+}
+.gol-pg-aside-list > li::before {
+	counter-increment: golpgstep;
+	content: counter(golpgstep);
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	background: var(--gol-white);
+	border: 1px solid var(--gol-border);
+	color: var(--gol-accent);
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 18px;
+	text-align: center;
+}
+.gol-pg-aside-list--info > li { padding-left: 18px; }
+.gol-pg-aside-list--info > li::before {
+	content: '';
+	top: 7px;
+	width: 6px;
+	height: 6px;
+	border: 0;
+	background: var(--gol-accent);
+}
+
+@media (max-width: 991px) {
+	.gol-pg-aside { flex: 1 1 100%; }
+	.gol-pg-card { max-width: none; }
+}
+@media (max-width: 767px) {
+	.gol-pg-title { font-size: 19px; }
+	.gol-pg-lead { margin-left: 0; }
+	.gol-pg-body,
+	.gol-pg-card > .tab-content { padding: 18px 16px 4px; }
+	.gol-pg-card > .nav-tabs { padding: 6px 8px 0; }
+	.gol-pg-footer { margin: 6px 16px 0; }
+	.gol-pg-card > .gol-pg-alert { margin: 16px 16px 0; }
+	.gol-pg-options { grid-template-columns: 1fr; }
+}
+
+/* =================================================================
+   Formularios de gvsigol_services (gol-pg-card--keep-fields)
+   Conservan su marcado y el estilo de sus campos (gol-form-page.css,
+   gol-services-form.css...): aquí solo se cambia el marco.
+   ================================================================= */
+
+/* Pie de acciones fijo: en los formularios largos Guardar sigue a la vista */
+.gol-pg-footer--sticky {
+	position: sticky;
+	bottom: 0;
+	z-index: 5;
+	margin: 0;
+	padding: 14px 28px;
+	border-top: 1px solid var(--gol-border);
+	border-radius: 0 0 var(--gol-radius) var(--gol-radius);
+	background: var(--gol-white);
+	box-shadow: 0 -8px 14px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Tarjetas propias de un plugin (.pl-panel) usadas como tarjeta del formulario:
+   sin recortar, para que el pie fijo funcione. */
+.gol-pg-page .pl-panel { overflow: visible; }
+
+/* Pie suelto bajo varias tarjetas (formularios con más de una tarjeta) */
+.gol-pg-footer--bar {
+	margin-top: 4px;
+	border: 1px solid var(--gol-border);
+	border-radius: var(--gol-radius);
+	box-shadow: var(--gol-shadow);
+}
+
+/* El marco lo pone la tarjeta: fuera los de .tab-content (gol-services-form.css),
+   la .box de cada pestaña (gol-form-tabs-box.css) y la .pf-card. */
+.gol-pg-card > .tab-content > .tab-pane > .box,
+.gol-pg-card > .tab-content > .tab-pane > .row > .col-md-12 > .box,
+.gol-pg-card > .tab-content > .tab-pane > .row > .col-md-9 > .box {
+	margin-bottom: 0;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	background: transparent;
+}
+.gol-pg-card > .tab-content > .tab-pane > .box > .box-body,
+.gol-pg-card > .tab-content > .tab-pane > .row > .col-md-12 > .box > .box-body,
+.gol-pg-card > .tab-content > .tab-pane > .row > .col-md-9 > .box > .box-body { padding: 0; }
+.gol-pg-card > .tab-content { padding: 22px 28px 12px; }
+.gol-pg-card > .pf-card {
+	padding: 22px 28px 12px;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	background: transparent;
+}
+
+/* Mensajes de error entre la cabecera y la tarjeta */
+.gol-pg-page > .pf-error-msg,
+.gol-pg-page > .gol-pg-errors > .pf-error-msg { margin: 0 0 16px; }
+
+@media (max-width: 767px) {
+	.gol-pg-footer--sticky { padding: 12px 16px; }
+	.gol-pg-card > .tab-content,
+	.gol-pg-card > .pf-card { padding: 18px 16px 8px; }
+}
+
+/* =================================================================
+   Pie fijo de verdad
+   AdminLTE pone overflow: hidden en .wrapper (gvsigOL.css). Eso lo convierte
+   en el contenedor de desplazamiento del pie «sticky», que como mide lo mismo
+   que la página nunca se quedaba fijo abajo. overflow: clip recorta igual pero
+   no crea contenedor de desplazamiento; flow-root mantiene el contexto de
+   bloque que daba hidden. Solo en páginas con este pie. Un navegador sin :has()
+   o sin clip ignora la regla y todo queda como antes.
+   ================================================================= */
+.wrapper:has(.gol-pg-footer--sticky) {
+	overflow: clip;
+	display: flow-root;
+}
+
+/* =================================================================
+   Secciones desplegables dentro de una pestaña (js/golFormSections.js)
+   <details class="gol-pg-section">: los campos solo se ocultan, siguen en el
+   formulario y se envían igual.
+   ================================================================= */
+.gol-pg-section {
+	margin: 14px 0 0;
+	border: 1px solid var(--gol-border);
+	border-radius: 8px;
+	background: var(--gol-white);
+}
+.gol-pg-section > summary {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 12px 16px;
+	list-style: none;
+	cursor: pointer;
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--gol-text);
+	border-radius: 8px;
+	user-select: none;
+}
+.gol-pg-section > summary::-webkit-details-marker { display: none; }
+.gol-pg-section > summary::before {
+	content: '\f105';
+	flex: 0 0 10px;
+	font-family: FontAwesome;
+	font-size: 14px;
+	color: var(--gol-muted);
+	transition: transform var(--gol-transition);
+}
+.gol-pg-section[open] > summary::before { transform: rotate(90deg); }
+.gol-pg-section > summary:hover { background: var(--gol-bg); }
+.gol-pg-section > summary:focus-visible { outline: 2px solid var(--gol-accent); outline-offset: -2px; }
+.gol-pg-section[open] > summary { border-bottom: 1px solid var(--gol-border); border-radius: 8px 8px 0 0; }
+.gol-pg-section__title { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.gol-pg-section__title .fa { color: var(--gol-accent); }
+.gol-pg-section__meta {
+	min-width: 0;
+	margin-left: auto;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 12px;
+	font-weight: 400;
+	color: var(--gol-muted);
+}
+.gol-pg-section__body { padding: 16px 16px 4px; }
+/* select2 calcula su ancho al iniciarse: si la sección estaba cerrada sería 0 */
+.gol-pg-section .select2-container { width: 100% !important; }
+@media (max-width: 767px) {
+	.gol-pg-section__meta { display: none; }
+}
+
+/* =================================================================
+   Interruptores con el color del tema para las casillas de una pestaña
+   (.gol-switches): «Propiedades de visualización» de layer_add y
+   layer_update. Solo aspecto (appearance: none): mismas casillas, con su
+   name, su estado y sus eventos. La etiqueta sigue siendo su <label for>.
+   ================================================================= */
+.gol-switches .form-group:has(> input[type="checkbox"]) {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.gol-switches .form-group > input[type="checkbox"] {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	position: relative;
+	display: inline-block;
+	flex-shrink: 0;
+	width: 34px;
+	height: 20px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 20px;
+	background: #c9d2da;
+	vertical-align: middle;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+.gol-switches .form-group > input[type="checkbox"]::before {
+	content: '';
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+	transition: transform 0.2s ease;
+}
+.gol-switches .form-group > input[type="checkbox"]:checked { background: var(--gol-accent); }
+.gol-switches .form-group > input[type="checkbox"]:checked::before { transform: translateX(14px); }
+.gol-switches .form-group > input[type="checkbox"]:disabled { opacity: 0.45; cursor: not-allowed; }
+.gol-switches .form-group > input[type="checkbox"]:focus-visible { outline: 2px solid var(--gol-accent); outline-offset: 2px; }
+.gol-switches .form-group > input[type="checkbox"] + label {
+	display: inline;
+	margin: 0;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--gol-text);
+	text-transform: none;
+	letter-spacing: 0;
+	cursor: pointer;
+}
+.gol-switches .form-group > input[type="checkbox"]:disabled + label { color: var(--gol-muted); cursor: not-allowed; }
+/* La casilla de dimensión temporal recibe .time_enabled-check (gvsigOL.css le
+   pone fondo gris y relleno para «unirla» a la caja de abajo): fuera ese adorno. */
+.gol-switches .form-group.time_enabled-check {
+	background: none;
+	padding-bottom: 0;
+	margin-bottom: 15px;
+}
+
+/* =================================================================
+   Vista previa de imagen vacía (js/golImagePreview.js): un hueco con
+   icono en lugar del icono de imagen rota.
+   ================================================================= */
+.provider-img > .gol-img-empty { display: none; }
+.provider-img.gol-img--empty > img { display: none; }
+.provider-img.gol-img--empty > .gol-img-empty {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: 1.5px dashed var(--gol-border);
+	border-radius: 8px;
+	background: var(--gol-white);
+	color: var(--gol-muted);
+	font-size: 20px;
+	vertical-align: middle;
+}

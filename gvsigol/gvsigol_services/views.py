@@ -88,6 +88,7 @@ import psycopg2
 from psycopg2 import sql
 
 from actstream import action
+from gvsigol_statistics.events import record_event, VERB_LAYER, CHANNEL_CLASSIC
 from actstream.models import Action
 from django_sendfile import sendfile
 from gvsigol_services.backend_geoserver import _valid_sql_name_regex
@@ -9429,9 +9430,9 @@ def register_action(request):
                 layer = Layer.objects.get(name=layer_name, external=True)
 
             if request.user.is_anonymous:
-                action.send(layer, verb="gvsigol_services/layer_activate", action_object=layer)
+                record_event(layer, VERB_LAYER, action_object=layer, channel=CHANNEL_CLASSIC)
             else:
-                action.send(request.user, verb="gvsigol_services/layer_activate", action_object=layer)
+                record_event(request.user, VERB_LAYER, action_object=layer, channel=CHANNEL_CLASSIC)
         except:
             logger.exception(f"register action - layer: {layer_name} - ws: {workspace}")
         return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')

@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-roles.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-permissions.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-with-aside.css" %}">
 {% endblock %}
 
 {% block content %}
@@ -48,17 +49,22 @@
 	.tr-sql-help p:last-child { margin-bottom: 0; }
 </style>
 <div class="row">
-	<div class="col-md-12">
+	<div class="gol-pg-page gol-pg-page--wide col-md-12">
 		<form id="trigger-form" method="post" action="">
 			{% csrf_token %}
 			<input type="hidden" id="schemas-hidden" name="schemas_json" value="">
 			
-			<div class="pf-topbar">
-				<div class="pf-topbar-left">
-					<a href="{% url 'connection_config' connection.id %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Cancel" %}</a>
-					<span class="tr-context" title="{% trans 'Connection' %}"><i class="fa fa-plug"></i> {{ connection.name }}</span>
-				</div>
-				<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save trigger" %}</button>
+			<div class="gol-pg-header">
+				<nav aria-label="{% trans "Breadcrumb" context "services" %}">
+					<ol class="gol-pg-crumbs">
+						<li>{% trans "Services" %}</li>
+						<li><a href="{% url 'connection_list' %}">{% trans "Connections" %}</a></li>
+						<li><a href="{% url 'connection_config' connection.id %}">{{ connection.name }}</a></li>
+						<li aria-current="page">{% trans "Add trigger" %}</li>
+					</ol>
+				</nav>
+				<h1 class="gol-pg-title"><span class="gol-pg-icon" aria-hidden="true"><i class="fa fa-bolt"></i></span>{% trans "Add trigger" %}<span class="gol-pg-chip" title="{% trans 'Connection' %}"><i class="fa fa-plug" aria-hidden="true"></i> {{ connection.name }}</span></h1>
+				<p class="gol-pg-lead">{% trans "SQL that the database runs on its own when rows of the chosen tables are inserted, updated or deleted." context "services" %}</p>
 			</div>
 
 			{% if error_message %}
@@ -68,6 +74,7 @@
 			{% endif %}
 
 				<!-- Pestañas -->
+				<div class="gol-pg-card gol-pg-card--full gol-pg-card--keep-fields">
 				<ul class="nav nav-tabs">
 					<li class="active">
 						<a href="#tab-general" data-toggle="tab"><i class="fa fa-cog tab-icon"></i> {% trans "General" %}</a>
@@ -268,6 +275,11 @@ END;{% endif %}</textarea>
 						</div>
 						<!-- Fin Tab Permisos -->
 					</div>
+					<div class="gol-pg-footer gol-pg-footer--sticky">
+						<a href="{% url 'connection_config' connection.id %}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
+						<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save trigger" %}</button>
+					</div>
+				</div>
 		</form>
 	</div>
 </div>

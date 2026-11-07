@@ -495,3 +495,196 @@ msgstr ""
 #: gvsigol_auth/views.py:619
 msgid "System roles can't be deleted"
 msgstr "Systemrollen können nicht gelöscht werden"
+
+msgctxt "auth"
+msgid "Breadcrumb"
+msgstr "Navigationspfad"
+
+msgctxt "auth"
+msgid "Users, groups and roles"
+msgstr "Benutzer, Gruppen und Rollen"
+
+msgctxt "auth"
+msgid "Groups bring together users that share the same permissions."
+msgstr "Gruppen fassen Benutzer mit denselben Berechtigungen zusammen."
+
+msgctxt "auth"
+msgid "Group details"
+msgstr "Gruppendaten"
+
+msgctxt "auth"
+msgid "Start with a letter or an underscore; then use only letters, numbers or underscores."
+msgstr "Mit einem Buchstaben oder Unterstrich beginnen; danach nur Buchstaben, Ziffern oder Unterstriche."
+
+msgctxt "auth"
+msgid "(optional)"
+msgstr "(optional)"
+
+msgctxt "auth"
+msgid "Next steps"
+msgstr "Nächste Schritte"
+
+msgctxt "auth"
+msgid "Save the group."
+msgstr "Gruppe speichern."
+
+msgctxt "auth"
+msgid "Add users to it from the user form."
+msgstr "Benutzer über das Benutzerformular hinzufügen."
+
+msgctxt "auth"
+msgid "Roles decide what users can see and edit in layers and projects."
+msgstr "Rollen legen fest, was Benutzer in Layern und Projekten sehen und bearbeiten dürfen."
+
+msgctxt "auth"
+msgid "Role details"
+msgstr "Rollendaten"
+
+msgctxt "auth"
+msgid "Save the role."
+msgstr "Rolle speichern."
+
+msgctxt "auth"
+msgid "Assign it to users from the user form."
+msgstr "Über das Benutzerformular Benutzern zuweisen."
+
+msgctxt "auth"
+msgid "Give it permissions on layers and projects."
+msgstr "Berechtigungen für Layer und Projekte vergeben."
+
+msgctxt "auth"
+msgid "Create an account and choose what the user can do."
+msgstr "Konto anlegen und festlegen, was der Benutzer tun darf."
+
+msgctxt "auth"
+msgid "Personal details"
+msgstr "Persönliche Daten"
+
+msgctxt "auth"
+msgid "It cannot be changed later."
+msgstr "Kann später nicht geändert werden."
+
+msgctxt "auth"
+msgid "Full access to the administration. It can also manage projects."
+msgstr "Voller Zugriff auf die Verwaltung. Kann auch Projekte verwalten."
+
+msgctxt "auth"
+msgid "Can create and edit projects."
+msgstr "Kann Projekte anlegen und bearbeiten."
+
+msgctxt "auth"
+msgid "There are no groups yet."
+msgstr "Noch keine Gruppen vorhanden."
+
+msgctxt "auth"
+msgid "There are no roles yet."
+msgstr "Noch keine Rollen vorhanden."
+
+msgctxt "auth"
+msgid "Good to know"
+msgstr "Gut zu wissen"
+
+msgctxt "auth"
+msgid "The password is managed by the corporate directory."
+msgstr "Das Passwort wird vom Unternehmensverzeichnis verwaltet."
+
+msgctxt "auth"
+msgid "Roles give access to layers and projects. Choose them in the Roles tab."
+msgstr "Rollen gewähren Zugriff auf Layer und Projekte. Wählen Sie sie im Reiter Rollen."
+
+msgctxt "auth"
+msgid "Edit the personal details, permissions and roles of the user."
+msgstr "Persönliche Daten, Berechtigungen und Rollen des Benutzers bearbeiten."
+
+msgctxt "auth"
+msgid "It cannot be changed."
+msgstr "Kann nicht geändert werden."
+
+msgctxt "auth"
+msgid "Personal details are read-only in this installation."
+msgstr "In dieser Installation sind die persönlichen Daten schreibgeschützt."
+
+msgctxt "auth"
+msgid "Changes are applied when you save."
+msgstr "Änderungen werden beim Speichern übernommen."
+
+msgid "User is not editable"
+msgstr "Benutzer ist nicht bearbeitbar"
+
+msgid "Role is not editable"
+msgstr "Rolle ist nicht bearbeitbar"
+
+msgctxt "auth"
+msgid "Everything can be changed later, except the username."
+msgstr "Alles kann später geändert werden, außer dem Benutzernamen."
+
+msgctxt "auth"
+msgid "Valid name"
+msgstr "Gültiger Name"
+
+msgctxt "auth"
+msgid "This name is not valid."
+msgstr "Dieser Name ist ungültig."
+
+msgctxt "auth"
+msgid "Use"
+msgstr "Verwenden:"
+
+msgctxt "auth"
+msgid "This name is reserved. Choose another one."
+msgstr "Dieser Name ist reserviert. Wählen Sie einen anderen."
+
+msgctxt "auth"
+msgid "Start with a letter or an underscore; then use only letters, numbers or underscores. The name «admin» is reserved."
+msgstr "Mit einem Buchstaben oder Unterstrich beginnen; danach nur Buchstaben, Ziffern oder Unterstriche. Der Name «admin» ist reserviert."
+
+msgctxt "auth"
+msgid "Avoid spaces in the username."
+msgstr "Vermeiden Sie Leerzeichen im Benutzernamen."
+
+msgctxt "auth"
+msgid "It will be saved as"
+msgstr "Wird gespeichert als"
+
+msgctxt "auth"
+msgid "It cannot be changed later and it is saved in lowercase."
+msgstr "Kann später nicht geändert werden und wird in Kleinbuchstaben gespeichert."
+
+msgctxt "auth"
+msgid "Check the format of the email address (name@domain.com)."
+msgstr "Prüfen Sie das Format der E-Mail-Adresse (name@domain.com)."
+
+msgctxt "auth"
+msgid "Show password"
+msgstr "Passwort anzeigen"
+
+msgctxt "auth"
+msgid "Hide password"
+msgstr "Passwort verbergen"
+
+msgctxt "auth"
+msgid "At least 8 characters"
+msgstr "Mindestens 8 Zeichen"
+
+msgctxt "auth"
+msgid "Not only numbers"
+msgstr "Nicht nur Ziffern"
+
+msgctxt "auth"
+msgid "Different from the username, name and email"
+msgstr "Anders als Benutzername, Name und E-Mail"
+
+msgctxt "auth"
+msgid "Not a common password (such as 12345678 or qwerty)"
+msgstr "Kein gängiges Passwort (wie 12345678 oder qwerty)"
+
+msgctxt "auth"
+msgid "Passwords match"
+msgstr "Die Passwörter stimmen überein"
+
+msgctxt "auth"
+msgid "Passwords do not match"
+msgstr "Die Passwörter stimmen nicht überein"
+
+msgid "Filter roles by name or description"
+msgstr "Rollen nach Name oder Beschreibung filtern"

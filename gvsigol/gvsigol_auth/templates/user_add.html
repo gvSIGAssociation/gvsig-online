@@ -4,49 +4,46 @@
 
 {% block header %}
 <link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
-<link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
-<link rel="stylesheet" href="{% static "css/gol-form-tabs-box.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-project-form.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-auth-user-form.css" %}">
-<style>
-/* La barra de busqueda ocupa el ancho de la pestana, a diferencia de la de
-   permisos de proyecto, que convive con otros controles. */
-.pf-search-bar { width: 100%; margin-bottom: 14px; }
-.pf-search-bar .form-control { width: 100%; box-sizing: border-box; }
-</style>
+<link rel="stylesheet" href="{% static "css/gol-form-with-aside.css" %}">
 {% endblock %}
 
 {% block content %}
 <form role="form" method="post" action="/gvsigonline/auth/user_add/">
-	<div class="row">
-		<div class="col-md-12">
+{% csrf_token %}
+<div class="gol-pg-page">
+	<div class="gol-pg-header">
+		<nav aria-label="{% trans "Breadcrumb" context "auth" %}">
+			<ol class="gol-pg-crumbs">
+				<li>{% trans "Users, groups and roles" context "auth" %}</li>
+				<li><a href="{% url 'user_list' %}">{% trans "Users" %}</a></li>
+				<li aria-current="page">{% trans "Add user" %}</li>
+			</ol>
+		</nav>
+		<h1 class="gol-pg-title"><span class="gol-pg-icon" aria-hidden="true"><i class="fa fa-user-plus"></i></span>{% trans "Add user" %}</h1>
+		<p class="gol-pg-lead">{% trans "Create an account and choose what the user can do." context "auth" %}</p>
+	</div>
+	<div class="gol-pg-grid">
+		<div class="gol-pg-card gol-pg-card--wide">
 
-			<div class="pf-topbar">
-				<a href="{% url 'user_list' %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
-				<button type="submit" class="btn-pf-save">
-					<i class="fa fa-floppy-o"></i> {% trans "Save" %}
-				</button>
-			</div>
-
-			{% csrf_token %}
-
-			{% if form.errors %}
-<div class="pf-error-msg">
-				<ul>
-				{% for field in form %}
-					{% if field.errors %}
-						<li>{{ field.label }}. {{ field.errors|striptags }}</li>
+			{% if form.errors or errors %}
+			<div class="gol-pg-alert" role="alert">
+				<i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+				<div>
+					{% if form.errors %}
+					<ul>
+					{% for field in form %}
+						{% if field.errors %}
+							<li>{{ field.label }}. {{ field.errors|striptags }}</li>
+						{% endif %}
+					{% endfor %}
+					</ul>
 					{% endif %}
-				{% endfor %}
-				</ul>
-			</div>
-			{% endif %}
-
-			{% if errors %}
-<div class="pf-error-msg">
-				{% for error in errors %}
-				<p>* {{ error.message }}</p>
-				{% endfor %}
+					{% for error in errors %}
+					<p>{{ error.message }}</p>
+					{% endfor %}
+				</div>
 			</div>
 			{% endif %}
 
@@ -61,34 +58,43 @@
 			<div class="tab-content">
 
 				<div class="tab-pane active" id="tab-general">
+					<p class="gol-pg-section-title">{% trans "Personal details" context "auth" %}</p>
 					<div class="row">
 						<div class="col-md-6 form-group">
-							<label for="id_first_name">{% trans "First Name" %}</label>
+							<label for="id_first_name">{% trans "First Name" %} <span class="gol-pg-required" aria-hidden="true">*</span></label>
 							{{ form.first_name }}
 						</div>
 						<div class="col-md-6 form-group">
-							<label for="id_last_name">{% trans "Last name" %}</label>
+							<label for="id_last_name">{% trans "Last name" %} <span class="gol-pg-required" aria-hidden="true">*</span></label>
 							{{ form.last_name }}
 						</div>
 					</div>
 					<div class="row">
-						<div class="col-md-6 form-group">
-							<label for="id_username">{% trans "Username" %}</label>
+						<div class="col-md-6 form-group" data-gol-auth-check="username" data-msg-spaces="{% trans "Avoid spaces in the username." context "auth" %}" data-msg-saved-as="{% trans "It will be saved as" context "auth" %}" data-msg-use="{% trans "Use" context "auth" %}">
+							<label for="id_username">{% trans "Username" %} <span class="gol-pg-required" aria-hidden="true">*</span></label>
 							{{ form.username }}
+							<p class="gol-pg-hint">{% trans "It cannot be changed later and it is saved in lowercase." context "auth" %}</p>
 						</div>
-						<div class="col-md-6 form-group">
-							<label for="id_email">{% trans "Email" %}</label>
+						<div class="col-md-6 form-group" data-gol-auth-check="email" data-msg-invalid="{% trans "Check the format of the email address (name@domain.com)." context "auth" %}">
+							<label for="id_email">{% trans "Email" %} <span class="gol-pg-required" aria-hidden="true">*</span></label>
 							{{ form.email }}
 						</div>
 					</div>
 					{% if show_pass_form %}
+					<p class="gol-pg-section-title">{% trans "Password" %}</p>
 					<div class="row">
-						<div class="col-md-6 form-group">
-							<label for="id_password">{% trans "Password" %}</label>
+						<div class="col-md-6 form-group" data-gol-auth-check="password" data-min-length="8" data-msg-show="{% trans "Show password" context "auth" %}" data-msg-hide="{% trans "Hide password" context "auth" %}">
+							<label for="id_password1">{% trans "Password" %} <span class="gol-pg-required" aria-hidden="true">*</span></label>
 							{{ form.password1 }}
+							<ul class="gol-pg-checklist" id="password1-rules">
+								<li data-rule="length">{% trans "At least 8 characters" context "auth" %}</li>
+								<li data-rule="numeric">{% trans "Not only numbers" context "auth" %}</li>
+								<li data-rule="similar">{% trans "Different from the username, name and email" context "auth" %}</li>
+								<li data-rule="common" class="is-note">{% trans "Not a common password (such as 12345678 or qwerty)" context "auth" %}</li>
+							</ul>
 						</div>
-						<div class="col-md-6 form-group">
-							<label for="id_password2">{% trans "Repeat password" %}</label>
+						<div class="col-md-6 form-group" data-gol-auth-check="password-repeat" data-match="password1" data-msg-show="{% trans "Show password" context "auth" %}" data-msg-hide="{% trans "Hide password" context "auth" %}" data-msg-match="{% trans "Passwords match" context "auth" %}" data-msg-mismatch="{% trans "Passwords do not match" context "auth" %}">
+							<label for="id_password2">{% trans "Repeat password" %} <span class="gol-pg-required" aria-hidden="true">*</span></label>
 							{{ form.password2 }}
 						</div>
 					</div>
@@ -96,23 +102,29 @@
 						<input type="hidden" name="password1" value="your_active_directory_password">
 						<input type="hidden" name="password2" value="your_active_directory_password">
 					{% endif %}
-					<div class="row" style="margin-top: 10px;">
-						<div class="checkbox col-md-6">
-							<label>
-								<input type="checkbox" name="is_superuser" id="is_superuser" />{% trans "Is superuser" %}
-							</label>
-						</div>
-						<div class="checkbox col-md-6">
-							<label>
-								<input type="checkbox" name="is_staff" id="is_staff" />{% trans "Can manage projects" %}
-							</label>
-						</div>
+					<p class="gol-pg-section-title">{% trans "Permissions" %}</p>
+					<div class="gol-pg-options">
+						<label class="gol-pg-option" for="is_superuser">
+							<input type="checkbox" name="is_superuser" id="is_superuser" />
+							<span class="gol-pg-option__text">
+								<span class="gol-pg-option__title">{% trans "Is superuser" %}</span>
+								<span class="gol-pg-option__desc">{% trans "Full access to the administration. It can also manage projects." context "auth" %}</span>
+							</span>
+						</label>
+						<label class="gol-pg-option" for="is_staff">
+							<input type="checkbox" name="is_staff" id="is_staff" />
+							<span class="gol-pg-option__text">
+								<span class="gol-pg-option__title">{% trans "Can manage projects" %}</span>
+								<span class="gol-pg-option__desc">{% trans "Can create and edit projects." context "auth" %}</span>
+							</span>
+						</label>
 					</div>
 				</div>
 
 				{% if AUTH_GROUPS %}
 				<div class="tab-pane" id="tab-user-groups">
-					<p class="tab-section-title">{% trans "Assign groups" %}</p>
+					<p class="gol-pg-section-title">{% trans "Assign groups" %}</p>
+					{% if not groups %}<p class="gol-pg-empty">{% trans "There are no groups yet." context "auth" %}</p>{% endif %}
 					<ul class="assign-list">
 						{% for group in groups %}
 						<li class="assign-list__item">
@@ -133,10 +145,11 @@
 				{% endif %}
 
 				<div class="tab-pane" id="tab-roles">
-					<p class="tab-section-title">{% trans "Assign roles" %}</p>
+					<p class="gol-pg-section-title">{% trans "Assign roles" %}</p>
 					<div class="pf-search-bar">
 						<input type="text" id="role-search-filter" class="search form-control" placeholder="{% trans 'Filter roles by name or description' %}" autocomplete="off" aria-label="{% trans 'Filter roles by name or description' %}" />
 					</div>
+					{% if not roles %}<p class="gol-pg-empty">{% trans "There are no roles yet." context "auth" %}</p>{% endif %}
 					<ul class="assign-list" id="role-assign-list">
 						{% for role in roles %}
 						<li class="assign-list__item">
@@ -156,12 +169,29 @@
 				</div>
 
 			</div><!-- /.tab-content -->
+
+			<div class="gol-pg-footer">
+				<a href="{% url 'user_list' %}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
+				<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+			</div>
 		</div>
+		<aside class="gol-pg-aside">
+			<h2 class="gol-pg-aside-title"><i class="fa fa-info-circle" aria-hidden="true"></i>{% trans "Good to know" context "auth" %}</h2>
+			<ul class="gol-pg-aside-list gol-pg-aside-list--info">
+				{% if not show_pass_form %}
+				<li>{% trans "The password is managed by the corporate directory." context "auth" %}</li>
+				{% endif %}
+				<li>{% trans "Roles give access to layers and projects. Choose them in the Roles tab." context "auth" %}</li>
+				<li>{% trans "Everything can be changed later, except the username." context "auth" %}</li>
+			</ul>
+		</aside>
 	</div>
+</div>
 </form>
 {% endblock %}
 
 {% block extra-scripts %}
+<script src="{% static "js/lib/authForms.js" %}"></script>
 <script>
 	$('#menu-manage-group-users').addClass("active");
 	$('#submenu-users').addClass("active");

@@ -262,3 +262,176 @@
 	font-size: 12px;
 	color: #666;
 	margin-top: 5px;}
+
+/* =================================================================
+   Interruptores con el color del tema: casillas de «Gestión de campos»
+   y de «Restricciones de edición». Solo aspecto (appearance: none): son
+   las mismas casillas, con su name, su estado y sus eventos.
+   ================================================================= */
+#tab-layer-config #field-list-table-body input[type="checkbox"],
+#topology-rules-table input[type="checkbox"] {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	position: relative;
+	display: inline-block;
+	flex-shrink: 0;
+	width: 34px;
+	height: 20px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 20px;
+	background: #c9d2da;
+	vertical-align: middle;
+	cursor: pointer;
+	transform: none;
+	transition: background-color 0.2s ease;
+}
+#tab-layer-config #field-list-table-body input[type="checkbox"]::before,
+#topology-rules-table input[type="checkbox"]::before {
+	content: '';
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+	transition: transform 0.2s ease;
+}
+#tab-layer-config #field-list-table-body input[type="checkbox"]:checked,
+#topology-rules-table input[type="checkbox"]:checked { background: var(--gol-accent, #4a7fa5); }
+#tab-layer-config #field-list-table-body input[type="checkbox"]:checked::before,
+#topology-rules-table input[type="checkbox"]:checked::before { transform: translateX(14px); }
+#tab-layer-config #field-list-table-body input[type="checkbox"]:disabled,
+#topology-rules-table input[type="checkbox"]:disabled { opacity: 0.45; cursor: not-allowed; }
+#tab-layer-config #field-list-table-body input[type="checkbox"]:focus-visible,
+#topology-rules-table input[type="checkbox"]:focus-visible {
+	outline: 2px solid var(--gol-accent, #4a7fa5);
+	outline-offset: 2px;
+}
+
+/* =================================================================
+   Grupos de campos: cabecera de grupo + sus campos debajo, arrastrables.
+   Solo CSS: el JS sigue creando, moviendo y leyendo los mismos elementos
+   (.sortable-fieldgroup / .sortable-fieldgroup-field) en el mismo orden.
+   ================================================================= */
+.gol-lc-hint {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	margin: 0 0 14px;
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--gol-muted, #7b8a96);
+}
+.gol-lc-hint .fa { margin-top: 2px; color: var(--gol-accent, #4a7fa5); }
+#field-groups-order > .box {
+	margin: 0 0 6px;
+	border-radius: 8px;
+	box-shadow: none;
+}
+/* Cabecera de grupo */
+#field-groups-order > .sortable-fieldgroup {
+	margin-top: 14px;
+	border: 1px solid var(--gol-border, #e8ecef) !important;
+	border-left: 3px solid var(--gol-accent, #4a7fa5) !important;
+	background: var(--gol-accent-lt, rgba(74, 127, 165, 0.06));
+}
+#field-groups-order > .sortable-fieldgroup:first-child { margin-top: 0; }
+#field-groups-order > .sortable-fieldgroup > .box-header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 10px 8px 12px;
+}
+#field-groups-order > .sortable-fieldgroup .handle {
+	display: flex;
+	flex: 1;
+	align-items: center;
+	gap: 10px;
+	min-width: 0;
+	cursor: grab;
+}
+#field-groups-order > .sortable-fieldgroup .handle .form-control {
+	width: 100%;
+	max-width: 360px;
+	height: 32px;
+	font-weight: 600;
+	background: var(--gol-white, #fff);
+}
+#field-groups-order .group-name-error { font-size: 12px; white-space: nowrap; }
+#field-groups-order > .sortable-fieldgroup .box-tools {
+	position: static;
+	margin-left: auto;
+}
+#field-groups-order .button-delete-group {
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	border: 1px solid var(--gol-border, #e8ecef);
+	border-radius: 6px;
+	background: var(--gol-white, #fff);
+	color: #c0392b;
+	cursor: pointer;
+	transition: background-color 0.15s, border-color 0.15s;
+}
+#field-groups-order .button-delete-group:hover,
+#field-groups-order .button-delete-group:focus-visible {
+	border-color: #c0392b;
+	background: #fdecea;
+	outline: none;
+}
+/* Campo dentro de un grupo */
+#field-groups-order > .sortable-fieldgroup-field {
+	margin-left: 22px;
+	padding-left: 0 !important;
+	border: 1px solid var(--gol-border, #e8ecef) !important;
+	background: var(--gol-white, #fff);
+}
+#field-groups-order > .sortable-fieldgroup-field > .box-header { padding: 7px 12px; }
+#field-groups-order > .sortable-fieldgroup-field .handle {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 13px;
+	color: var(--gol-text, #2e3a45);
+	cursor: grab;
+}
+#field-groups-order > .sortable-fieldgroup-field:hover { border-color: var(--gol-accent, #4a7fa5) !important; }
+/* Asa de arrastre (los dos fa-ellipsis-v) */
+#field-groups-order .handle > span:first-child {
+	margin-right: 0 !important;
+	color: var(--gol-muted, #7b8a96);
+	letter-spacing: -3px;
+	opacity: 0.8;
+}
+/* Mientras se arrastra */
+#field-groups-order > .ui-sortable-helper { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15); cursor: grabbing; }
+#field-groups-order > .sort-highlight {
+	margin: 0 0 6px;
+	border: 1.5px dashed var(--gol-accent, #4a7fa5);
+	border-radius: 8px;
+	background: var(--gol-accent-lt, rgba(74, 127, 165, 0.06));
+}
+/* Botón de añadir grupo */
+#add-field-group-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 7px 14px;
+	border: 1.5px dashed var(--gol-border, #e8ecef);
+	border-radius: 8px;
+	color: var(--gol-accent, #4a7fa5);
+	font-size: 12px;
+	font-weight: 600;
+}
+#add-field-group-button:hover,
+#add-field-group-button:focus-visible {
+	border-color: var(--gol-accent, #4a7fa5);
+	background: var(--gol-accent-lt, rgba(74, 127, 165, 0.06));
+	text-decoration: none;
+}
+#add-field-group-button .margin-r-5 { margin-right: 0; }

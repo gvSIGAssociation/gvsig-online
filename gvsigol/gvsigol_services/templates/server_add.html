@@ -5,18 +5,26 @@
 {% block header %}
 <link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-with-aside.css" %}">
 {% endblock %}
 
 {% block content %}	
 	<div class="row">
-		<div class="col-md-12">
+		<div class="gol-pg-page gol-pg-page--wide col-md-12">
 			<form id="server-form" role="form" method="post" action="/gvsigonline/services/server_add/">
 				<div class="row">
-					<div class="col-md-12 form-group">
-						<div class="pf-topbar">
-							<a href="{% url 'server_list' %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
-					<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>
-				</div>
+					<div class="col-md-12">
+						<div class="gol-pg-header">
+							<nav aria-label="{% trans "Breadcrumb" context "services" %}">
+								<ol class="gol-pg-crumbs">
+									<li>{% trans "Services" %}</li>
+									<li><a href="{% url 'server_list' %}">{% trans "Servers" %}</a></li>
+									<li aria-current="page">{% trans "Add server" %}</li>
+								</ol>
+							</nav>
+							<h1 class="gol-pg-title"><span class="gol-pg-icon" aria-hidden="true"><i class="fa fa-server"></i></span>{% trans "Add server" %}</h1>
+							<p class="gol-pg-lead">{% trans "A map server (GeoServer) and its nodes, where the layers of gvSIG Online are published." context "services" %}</p>
+						</div>
 					</div>
 					<div class="row" style="padding-left: 30px;">
 						{% csrf_token %}
@@ -35,6 +43,7 @@
 					</div>
 				</div>
 				
+				<div class="gol-pg-card gol-pg-card--full gol-pg-card--keep-fields">
 				<ul class="nav nav-tabs">
               		<li class="active"><a href="#tab-server-main" data-toggle="tab"><i class="fa fa-server tab-icon"></i> {% trans "Server" %}</a></li>
               		<li><a href="#tab-server-nodes" data-toggle="tab"><i class="fa fa-sitemap tab-icon"></i> {% trans "Nodes" %}</a></li>
@@ -86,6 +95,11 @@
 						</div>
               		</div>	
           		</div>
+					<div class="gol-pg-footer gol-pg-footer--sticky">
+						<a href="{% url 'server_list' %}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
+						<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>
+					</div>
+				</div>
           	</form>
 		</div>
 	</div>

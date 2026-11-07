@@ -65,6 +65,7 @@ import unicodedata
 
 from django.views.decorators.clickjacking import xframe_options_exempt
 from actstream import action
+from gvsigol_statistics.events import record_event, actor_for, VERB_PROJECT, CHANNEL_CLASSIC
 from actstream.models import Action
 from iso639 import languages
 from django.core.exceptions import PermissionDenied
@@ -1806,7 +1807,7 @@ def load_project(request, project_name):
         expires = datetime.datetime.strftime(tomorrow, "%a, %d-%b-%Y %H:%M:%S GMT")
         response.set_cookie('key', expires = expires)
 
-        action.send(request.user, verb="gvsigol_core/get_conf", action_object=project)
+        record_event(actor_for(request.user, project), VERB_PROJECT, action_object=project, channel=CHANNEL_CLASSIC)
 
         return response
 
@@ -1847,7 +1848,7 @@ def load_public_project(request, project_name):
     expires = datetime.datetime.strftime(tomorrow, "%a, %d-%b-%Y %H:%M:%S GMT")
     response.set_cookie('key', expires = expires)
 
-    action.send(project, verb="gvsigol_core/get_conf", action_object=project)
+    record_event(project, VERB_PROJECT, action_object=project, channel=CHANNEL_CLASSIC)
 
     return response
 

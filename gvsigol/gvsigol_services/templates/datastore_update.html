@@ -7,17 +7,27 @@
 <link rel="stylesheet" href="{% static "css/gol-form-tabs-box.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-roles.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-permissions.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-with-aside.css" %}">
 {% endblock %}
 
 {% block content %}
 	<div class="row">
-		<div class="col-md-12">
+		<div class="gol-pg-page gol-pg-page--wide col-md-12">
 			<form id="main_form" role="form" method="post" action="/gvsigonline/services/datastore_update/{{datastore_id}}/">
-				<div class="pf-topbar">
-					{% csrf_token %}
-					<a href="{% url 'datastore_list' %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
-					{% if form.errors %}
-					<div class="pf-error-msg" style="flex:1; margin-right:16px;">
+				<div class="gol-pg-header">
+					<nav aria-label="{% trans "Breadcrumb" context "services" %}">
+						<ol class="gol-pg-crumbs">
+							<li>{% trans "Services" %}</li>
+							<li><a href="{% url 'datastore_list' %}">{% trans "Datastores" %}</a></li>
+							<li aria-current="page">{% trans "Update datastore" %}</li>
+						</ol>
+					</nav>
+					<h1 class="gol-pg-title"><span class="gol-pg-icon" aria-hidden="true"><i class="fa fa-database"></i></span>{% trans "Update datastore" %}</h1>
+					<p class="gol-pg-lead">{% trans "Where GeoServer reads the data from: a PostGIS connection, raster files (GeoTIFF, ImageMosaic) or a remote WMS." context "services" %}</p>
+				</div>
+				{% csrf_token %}
+				{% if form.errors %}
+					<div class="pf-error-msg">
 						<ul>
 						{{ form.non_field_errors }}
 						{% for field in form %}
@@ -28,9 +38,8 @@
 						</ul>
 					</div>
 					{% endif %}
-					<button id="save_button" type="button" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Update" %}</button>
-				</div>
 
+				<div class="gol-pg-card gol-pg-card--full gol-pg-card--keep-fields">
 				<ul class="nav nav-tabs">
 					<li class="active"><a href="#tab-datastore" data-toggle="tab"><i class="fa fa-database tab-icon"></i> {% trans "Datastore" %}</a></li>
 					<li><a href="#tab-permissions" data-toggle="tab"><i class="fa fa-lock tab-icon"></i> {% trans "Permissions" %}</a></li>
@@ -151,6 +160,11 @@
 
 					<div class="tab-pane" id="tab-permissions">
 						{% include "select_datastore_permissions.html" %}
+					</div>
+				</div>
+					<div class="gol-pg-footer gol-pg-footer--sticky">
+						<a href="{% url 'datastore_list' %}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
+						<button id="save_button" type="button" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Update" %}</button>
 					</div>
 				</div>
 			</form>

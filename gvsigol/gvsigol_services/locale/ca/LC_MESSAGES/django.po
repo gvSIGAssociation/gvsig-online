@@ -5501,3 +5501,123 @@ msgstr "Grup"
 #: templates/connection_update.html
 msgid "External API"
 msgstr "API externa"
+
+msgctxt "services"
+msgid "Breadcrumb"
+msgstr "Ruta de navegació"
+
+msgctxt "services"
+msgid "Access data for a database or an external service, shared by the datastores that use it."
+msgstr "Dades d'accés a una base de dades o a un servei extern, compartides pels magatzems que la fan servir."
+
+msgctxt "services"
+msgid "SQL that the database runs on its own when rows of the chosen tables are inserted, updated or deleted."
+msgstr "SQL que la base de dades executa per si sola quan s'insereixen, s'actualitzen o s'esborren files de les taules triades."
+
+msgctxt "services"
+msgid "Update connection"
+msgstr "Actualitza la connexió"
+
+msgctxt "services"
+msgid "Where GeoServer reads the data from: a PostGIS connection, raster files (GeoTIFF, ImageMosaic) or a remote WMS."
+msgstr "D'on llegeix GeoServer les dades: una connexió PostGIS, fitxers ràster (GeoTIFF, ImageMosaic) o un WMS remot."
+
+msgctxt "services"
+msgid "A closed list of values that users can choose from when they edit a field."
+msgstr "Una llista tancada de valors entre els quals els usuaris trien en editar un camp."
+
+msgctxt "services"
+msgid "Good to know"
+msgstr "Per tenir en compte"
+
+msgctxt "services"
+msgid "The title is required: it is the name users will see."
+msgstr "El títol és obligatori: és el nom que veuran els usuaris."
+
+msgctxt "services"
+msgid "Items cannot contain semicolons (;)."
+msgstr "Els elements no poden contenir punt i coma (;)."
+
+msgctxt "services"
+msgid "With alphabetical order the items are sorted when you save."
+msgstr "Amb ordre alfabètic els elements s'ordenen en desar."
+
+msgctxt "services"
+msgid "With manual order, drag the items to sort them."
+msgstr "Amb ordre manual, arrossega els elements per ordenar-los."
+
+msgctxt "services"
+msgid "A layer served by another organisation (WMS, WMTS, XYZ tiles...) that is shown in the viewer without copying its data."
+msgstr "Una capa que serveix una altra organització (WMS, WMTS, tessel·les XYZ...) i que es mostra al visor sense copiar-ne les dades."
+
+msgctxt "services"
+msgid "Add layer"
+msgstr "Afegeix una capa"
+
+msgctxt "services"
+msgid "Publish a table or a file of a datastore as a layer."
+msgstr "Publica com a capa una taula o un fitxer d'un magatzem de dades."
+
+msgctxt "services"
+msgid "Create layer"
+msgstr "Crea una capa"
+
+msgctxt "services"
+msgid "Create an empty table with the fields you define and publish it as a layer."
+msgstr "Crea una taula buida amb els camps que defineixis i publica-la com a capa."
+
+msgctxt "services"
+msgid "How the layer is published, displayed and described."
+msgstr "Com es publica, es mostra i es descriu la capa."
+
+msgctxt "services"
+msgid "A group of layers: it is shown as a folder in the table of contents of the viewer."
+msgstr "Un grup de capes: es mostra com una carpeta a la taula de continguts del visor."
+
+msgctxt "services"
+msgid "A map server (GeoServer) and its nodes, where the layers of gvSIG Online are published."
+msgstr "Un servidor de mapes (GeoServer) i els seus nodes, on es publiquen les capes de gvSIG Online."
+
+msgctxt "services"
+msgid "Save the address of a WMS, WMTS, WFS or CSW service to have it at hand."
+msgstr "Desa l'adreça d'un servei WMS, WMTS, WFS o CSW per tenir-la a mà."
+
+msgctxt "services"
+msgid "The saved URLs are offered when adding layers from WMS, WFS or CSW services."
+msgstr "Les URL desades s'ofereixen en afegir capes des de serveis WMS, WFS o CSW."
+
+msgctxt "services"
+msgid "Use the base address of the service, without request parameters."
+msgstr "Fes servir l'adreça base del servei, sense paràmetres de petició."
+
+msgctxt "services"
+msgid "Update SQL view"
+msgstr "Actualitza la vista SQL"
+
+msgctxt "services"
+msgid "Add SQL view"
+msgstr "Afegeix una vista SQL"
+
+msgctxt "services"
+msgid "A layer defined by a query over one or more tables of a datastore: choose the tables, the fields and the filters."
+msgstr "Una capa definida per una consulta sobre una o diverses taules d'un magatzem: tria les taules, els camps i els filtres."
+
+msgctxt "services"
+msgid "Groups the datastores and layers of a server under a name and its own service addresses (WMS, WFS...)."
+msgstr "Agrupa els magatzems i les capes d'un servidor sota un nom i amb les seves pròpies adreces de servei (WMS, WFS...)."
+
+msgctxt "services"
+msgid "Choose the server first: the URI and the service addresses are filled in from it."
+msgstr "Tria primer el servidor: la URI i les adreces de servei s'emplenen a partir d'aquest."
+
+msgctxt "services"
+msgid "The name must start with a letter or an underscore; then use only letters, numbers or underscores."
+msgstr "El nom ha de començar per una lletra o un guió baix; després fes servir només lletres, números o guions baixos."
+
+msgctxt "services"
+msgid "The name and the server cannot be changed."
+msgstr "El nom i el servidor no es poden canviar."
+
+msgctxt "services"
+msgid "Drag a field below a group to include it in that group, and drag the groups to change their order in the editing form."
+msgstr "Arrossega un camp sota un grup per incloure'l, i arrossega els grups per canviar-ne l'ordre al formulari d'edició."

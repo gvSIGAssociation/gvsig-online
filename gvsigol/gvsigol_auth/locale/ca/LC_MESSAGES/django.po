@@ -528,3 +528,193 @@ msgstr "Els rols d'usuari no es poden eliminar"
 
 #~ msgid "Is admin?"
 #~ msgstr "És administrador?"
+
+msgctxt "auth"
+msgid "Breadcrumb"
+msgstr "Ruta de navegació"
+
+msgctxt "auth"
+msgid "Users, groups and roles"
+msgstr "Usuaris, grups i rols"
+
+msgctxt "auth"
+msgid "Groups bring together users that share the same permissions."
+msgstr "Els grups reuneixen usuaris que comparteixen els mateixos permisos."
+
+msgctxt "auth"
+msgid "Group details"
+msgstr "Dades del grup"
+
+msgctxt "auth"
+msgid "Start with a letter or an underscore; then use only letters, numbers or underscores."
+msgstr "Comença per una lletra o un guió baix; després fes servir només lletres, números o guions baixos."
+
+msgctxt "auth"
+msgid "(optional)"
+msgstr "(opcional)"
+
+msgctxt "auth"
+msgid "Next steps"
+msgstr "Passos següents"
+
+msgctxt "auth"
+msgid "Save the group."
+msgstr "Desa el grup."
+
+msgctxt "auth"
+msgid "Add users to it from the user form."
+msgstr "Afegeix-hi usuaris des del formulari d'usuari."
+
+msgctxt "auth"
+msgid "Roles decide what users can see and edit in layers and projects."
+msgstr "Els rols decideixen què poden veure i editar els usuaris en capes i projectes."
+
+msgctxt "auth"
+msgid "Role details"
+msgstr "Dades del rol"
+
+msgctxt "auth"
+msgid "Save the role."
+msgstr "Desa el rol."
+
+msgctxt "auth"
+msgid "Assign it to users from the user form."
+msgstr "Assigna'l a usuaris des del formulari d'usuari."
+
+msgctxt "auth"
+msgid "Give it permissions on layers and projects."
+msgstr "Dona-li permisos sobre capes i projectes."
+
+msgctxt "auth"
+msgid "Create an account and choose what the user can do."
+msgstr "Crea un compte i tria què pot fer l'usuari."
+
+msgctxt "auth"
+msgid "Personal details"
+msgstr "Dades personals"
+
+msgctxt "auth"
+msgid "It cannot be changed later."
+msgstr "No es podrà canviar després."
+
+msgctxt "auth"
+msgid "Full access to the administration. It can also manage projects."
+msgstr "Accés complet a l'administració. També pot gestionar projectes."
+
+msgctxt "auth"
+msgid "Can create and edit projects."
+msgstr "Pot crear i editar projectes."
+
+msgctxt "auth"
+msgid "There are no groups yet."
+msgstr "Encara no hi ha grups."
+
+msgctxt "auth"
+msgid "There are no roles yet."
+msgstr "Encara no hi ha rols."
+
+msgctxt "auth"
+msgid "Good to know"
+msgstr "Per tenir en compte"
+
+msgctxt "auth"
+msgid "The password is managed by the corporate directory."
+msgstr "La contrasenya la gestiona el directori corporatiu."
+
+msgctxt "auth"
+msgid "Roles give access to layers and projects. Choose them in the Roles tab."
+msgstr "Els rols donen accés a capes i projectes. Tria'ls a la pestanya Rols."
+
+msgctxt "auth"
+msgid "Edit the personal details, permissions and roles of the user."
+msgstr "Edita les dades personals, els permisos i els rols de l'usuari."
+
+msgctxt "auth"
+msgid "It cannot be changed."
+msgstr "No es pot canviar."
+
+msgctxt "auth"
+msgid "Personal details are read-only in this installation."
+msgstr "En aquesta instal·lació les dades personals són de només lectura."
+
+msgctxt "auth"
+msgid "Changes are applied when you save."
+msgstr "Els canvis s'apliquen en desar."
+
+msgid "User is not editable"
+msgstr "L'usuari no és editable"
+
+msgid "Role is not editable"
+msgstr "El rol no és editable"
+
+msgctxt "auth"
+msgid "Everything can be changed later, except the username."
+msgstr "Tot es pot canviar després, excepte el nom d'usuari."
+
+msgctxt "auth"
+msgid "Valid name"
+msgstr "Nom vàlid"
+
+msgctxt "auth"
+msgid "This name is not valid."
+msgstr "Aquest nom no és vàlid."
+
+msgctxt "auth"
+msgid "Use"
+msgstr "Utilitza"
+
+msgctxt "auth"
+msgid "This name is reserved. Choose another one."
+msgstr "Aquest nom està reservat. Tria'n un altre."
+
+msgctxt "auth"
+msgid "Start with a letter or an underscore; then use only letters, numbers or underscores. The name «admin» is reserved."
+msgstr "Comença per una lletra o un guió baix; després fes servir només lletres, números o guions baixos. El nom «admin» està reservat."
+
+msgctxt "auth"
+msgid "Avoid spaces in the username."
+msgstr "Evita els espais en el nom d'usuari."
+
+msgctxt "auth"
+msgid "It will be saved as"
+msgstr "Es desarà com a"
+
+msgctxt "auth"
+msgid "It cannot be changed later and it is saved in lowercase."
+msgstr "No es podrà canviar després i es desa en minúscules."
+
+msgctxt "auth"
+msgid "Check the format of the email address (name@domain.com)."
+msgstr "Revisa el format del correu (nom@domini.com)."
+
+msgctxt "auth"
+msgid "Show password"
+msgstr "Mostra la contrasenya"
+
+msgctxt "auth"
+msgid "Hide password"
+msgstr "Amaga la contrasenya"
+
+msgctxt "auth"
+msgid "At least 8 characters"
+msgstr "Almenys 8 caràcters"
+
+msgctxt "auth"
+msgid "Not only numbers"
+msgstr "No només números"
+
+msgctxt "auth"
+msgid "Different from the username, name and email"
+msgstr "Diferent del nom d'usuari, el nom i el correu"
+
+msgctxt "auth"
+msgid "Not a common password (such as 12345678 or qwerty)"
+msgstr "Que no sigui una contrasenya habitual (com 12345678 o qwerty)"
+
+msgctxt "auth"
+msgid "Passwords match"
+msgstr "Les contrasenyes coincideixen"
+
+msgctxt "auth"
+msgid "Passwords do not match"
+msgstr "Les contrasenyes no coincideixen"

@@ -5,6 +5,7 @@
 {% block header %}
 <link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-with-aside.css" %}">
 <style>
 /* Subpanel de items */
 
@@ -17,14 +18,20 @@
 
 {% block content %}
 <form role="form" method="post" action="/gvsigonline/services/enumeration_add/">
-	<div class="row">
-		<div class="col-md-12">
-
-			<div class="pf-topbar">
-				<a href="{% url 'enumeration_list' %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
-				<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
-			</div>
-
+<div class="gol-pg-page">
+	<div class="gol-pg-header">
+		<nav aria-label="{% trans "Breadcrumb" context "services" %}">
+			<ol class="gol-pg-crumbs">
+				<li>{% trans "Datatypes" %}</li>
+				<li><a href="{% url 'enumeration_list' %}">{% trans "Enumerations" %}</a></li>
+				<li aria-current="page">{% trans "Add enumeration" %}</li>
+			</ol>
+		</nav>
+		<h1 class="gol-pg-title"><span class="gol-pg-icon" aria-hidden="true"><i class="fa fa-list-ol"></i></span>{% trans "Add enumeration" %}</h1>
+		<p class="gol-pg-lead">{% trans "A closed list of values that users can choose from when they edit a field." context "services" %}</p>
+	</div>
+	<div class="gol-pg-grid">
+		<div class="gol-pg-card gol-pg-card--wide gol-pg-card--keep-fields">
 			<div class="pf-card">
 				{% csrf_token %}
 
@@ -92,8 +99,21 @@
 				</div>
 
 			</div>
+			<div class="gol-pg-footer">
+				<a href="{% url 'enumeration_list' %}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
+				<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+			</div>
 		</div>
+		<aside class="gol-pg-aside">
+			<h2 class="gol-pg-aside-title"><i class="fa fa-info-circle" aria-hidden="true"></i>{% trans "Good to know" context "services" %}</h2>
+			<ul class="gol-pg-aside-list gol-pg-aside-list--info">
+				<li>{% trans "The title is required: it is the name users will see." context "services" %}</li>
+				<li>{% trans "Items cannot contain semicolons (;)." context "services" %}</li>
+				<li>{% trans "With alphabetical order the items are sorted when you save." context "services" %}</li>
+			</ul>
+		</aside>
 	</div>
+</div>
 </form>
 {% endblock %}
 

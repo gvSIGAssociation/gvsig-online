@@ -523,3 +523,193 @@ msgstr "Nenhum arquivo selecionado"
 
 msgid "role_default-roles"
 msgstr "Roles padrão"
+
+msgctxt "auth"
+msgid "Breadcrumb"
+msgstr "Caminho de navegação"
+
+msgctxt "auth"
+msgid "Users, groups and roles"
+msgstr "Usuários, grupos e papéis"
+
+msgctxt "auth"
+msgid "Groups bring together users that share the same permissions."
+msgstr "Os grupos reúnem usuários que compartilham as mesmas permissões."
+
+msgctxt "auth"
+msgid "Group details"
+msgstr "Dados do grupo"
+
+msgctxt "auth"
+msgid "Start with a letter or an underscore; then use only letters, numbers or underscores."
+msgstr "Comece com uma letra ou um sublinhado; depois use apenas letras, números ou sublinhados."
+
+msgctxt "auth"
+msgid "(optional)"
+msgstr "(opcional)"
+
+msgctxt "auth"
+msgid "Next steps"
+msgstr "Próximos passos"
+
+msgctxt "auth"
+msgid "Save the group."
+msgstr "Salve o grupo."
+
+msgctxt "auth"
+msgid "Add users to it from the user form."
+msgstr "Adicione usuários pelo formulário de usuário."
+
+msgctxt "auth"
+msgid "Roles decide what users can see and edit in layers and projects."
+msgstr "Os papéis definem o que os usuários podem ver e editar em camadas e projetos."
+
+msgctxt "auth"
+msgid "Role details"
+msgstr "Dados do papel"
+
+msgctxt "auth"
+msgid "Save the role."
+msgstr "Salve o papel."
+
+msgctxt "auth"
+msgid "Assign it to users from the user form."
+msgstr "Atribua-o a usuários pelo formulário de usuário."
+
+msgctxt "auth"
+msgid "Give it permissions on layers and projects."
+msgstr "Dê a ele permissões sobre camadas e projetos."
+
+msgctxt "auth"
+msgid "Create an account and choose what the user can do."
+msgstr "Crie uma conta e escolha o que o usuário pode fazer."
+
+msgctxt "auth"
+msgid "Personal details"
+msgstr "Dados pessoais"
+
+msgctxt "auth"
+msgid "It cannot be changed later."
+msgstr "Não poderá ser alterado depois."
+
+msgctxt "auth"
+msgid "Full access to the administration. It can also manage projects."
+msgstr "Acesso total à administração. Também pode gerenciar projetos."
+
+msgctxt "auth"
+msgid "Can create and edit projects."
+msgstr "Pode criar e editar projetos."
+
+msgctxt "auth"
+msgid "There are no groups yet."
+msgstr "Ainda não há grupos."
+
+msgctxt "auth"
+msgid "There are no roles yet."
+msgstr "Ainda não há papéis."
+
+msgctxt "auth"
+msgid "Good to know"
+msgstr "Bom saber"
+
+msgctxt "auth"
+msgid "The password is managed by the corporate directory."
+msgstr "A senha é gerenciada pelo diretório corporativo."
+
+msgctxt "auth"
+msgid "Roles give access to layers and projects. Choose them in the Roles tab."
+msgstr "Os papéis dão acesso a camadas e projetos. Escolha-os na aba Roles."
+
+msgctxt "auth"
+msgid "Edit the personal details, permissions and roles of the user."
+msgstr "Edite os dados pessoais, as permissões e os papéis do usuário."
+
+msgctxt "auth"
+msgid "It cannot be changed."
+msgstr "Não pode ser alterado."
+
+msgctxt "auth"
+msgid "Personal details are read-only in this installation."
+msgstr "Nesta instalação os dados pessoais são somente leitura."
+
+msgctxt "auth"
+msgid "Changes are applied when you save."
+msgstr "As alterações são aplicadas ao salvar."
+
+msgid "User is not editable"
+msgstr "O usuário não é editável"
+
+msgid "Role is not editable"
+msgstr "O papel não é editável"
+
+msgctxt "auth"
+msgid "Everything can be changed later, except the username."
+msgstr "Tudo pode ser alterado depois, exceto o nome de usuário."
+
+msgctxt "auth"
+msgid "Valid name"
+msgstr "Nome válido"
+
+msgctxt "auth"
+msgid "This name is not valid."
+msgstr "Este nome não é válido."
+
+msgctxt "auth"
+msgid "Use"
+msgstr "Usar"
+
+msgctxt "auth"
+msgid "This name is reserved. Choose another one."
+msgstr "Este nome está reservado. Escolha outro."
+
+msgctxt "auth"
+msgid "Start with a letter or an underscore; then use only letters, numbers or underscores. The name «admin» is reserved."
+msgstr "Comece com uma letra ou um sublinhado; depois use apenas letras, números ou sublinhados. O nome «admin» está reservado."
+
+msgctxt "auth"
+msgid "Avoid spaces in the username."
+msgstr "Evite espaços no nome de usuário."
+
+msgctxt "auth"
+msgid "It will be saved as"
+msgstr "Será salvo como"
+
+msgctxt "auth"
+msgid "It cannot be changed later and it is saved in lowercase."
+msgstr "Não poderá ser alterado depois e é salvo em minúsculas."
+
+msgctxt "auth"
+msgid "Check the format of the email address (name@domain.com)."
+msgstr "Verifique o formato do e-mail (nome@dominio.com)."
+
+msgctxt "auth"
+msgid "Show password"
+msgstr "Mostrar senha"
+
+msgctxt "auth"
+msgid "Hide password"
+msgstr "Ocultar senha"
+
+msgctxt "auth"
+msgid "At least 8 characters"
+msgstr "Pelo menos 8 caracteres"
+
+msgctxt "auth"
+msgid "Not only numbers"
+msgstr "Não apenas números"
+
+msgctxt "auth"
+msgid "Different from the username, name and email"
+msgstr "Diferente do nome de usuário, do nome e do e-mail"
+
+msgctxt "auth"
+msgid "Not a common password (such as 12345678 or qwerty)"
+msgstr "Que não seja uma senha comum (como 12345678 ou qwerty)"
+
+msgctxt "auth"
+msgid "Passwords match"
+msgstr "As senhas coincidem"
+
+msgctxt "auth"
+msgid "Passwords do not match"
+msgstr "As senhas não coincidem"

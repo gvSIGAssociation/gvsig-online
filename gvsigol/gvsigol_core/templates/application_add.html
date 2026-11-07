@@ -8,21 +8,29 @@
 <link rel="stylesheet" href="{% static "css/gol-form-tabs-box.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-core-form.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-roles.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-with-aside.css" %}">
 {% endblock %}
 
 {% block content %}	
 	<div class="row">
-		<div class="col-md-12">
+		<div class="gol-pg-page gol-pg-page--wide col-md-12">
 			<form id="application-form" enctype="multipart/form-data" role="form" method="post" action="/gvsigonline/core/application_add/">
-				<div class="pf-topbar">
-					{% csrf_token %}
-					<a href="{% url 'application_list' %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
-					{% if message %}
-					<div class="pf-error-msg" style="flex:1; margin-right:16px;">* {{ message }}</div>
-					{% endif %}
-					<button id="save_button" class="save_button btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+				<div class="gol-pg-header">
+					<nav aria-label="{% trans "Breadcrumb" context "core" %}">
+						<ol class="gol-pg-crumbs">
+							<li><a href="{% url 'application_list' %}">{% trans "Applications" %}</a></li>
+							<li aria-current="page">{% trans "Add application" %}</li>
+						</ol>
+					</nav>
+					<h1 class="gol-pg-title"><span class="gol-pg-icon" aria-hidden="true"><i class="fa fa-buysellads"></i></span>{% trans "Add application" %}</h1>
+					<p class="gol-pg-lead">{% trans "A link to another web application, shown in the portal next to the projects." context "core" %}</p>
 				</div>
+				{% csrf_token %}
+				{% if message %}
+				<div class="pf-error-msg">* {{ message }}</div>
+				{% endif %}
 				
+				<div class="gol-pg-card gol-pg-card--full gol-pg-card--keep-fields">
 				<ul class="nav nav-tabs">
               		<li class="active"><a href="#tab-application-main" data-toggle="tab"><i class="fa fa-cog tab-icon"></i> {% trans "General" %}</a></li>
               		<li><a href="#tab-application-usergroups" data-toggle="tab"><i class="fa fa-lock tab-icon"></i> {% trans "Permissions" %}</a></li>
@@ -119,12 +127,18 @@
               		</div>
               		
           		</div>
+					<div class="gol-pg-footer gol-pg-footer--sticky">
+						<a href="{% url 'application_list' %}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
+						<button id="save_button" class="save_button btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+					</div>
+				</div>
           	</form>
 		</div>
 	</div>
 {% endblock %}
 
 {% block extra-scripts %}
+<script type="text/javascript" src="{% static "js/golImagePreview.js" %}"></script>
 <script type="text/javascript">
 	$('#menu-manage-applications').addClass("active");
 

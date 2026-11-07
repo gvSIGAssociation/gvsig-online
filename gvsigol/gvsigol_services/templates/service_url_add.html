@@ -5,20 +5,25 @@
 {% block header %}
 <link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-with-aside.css" %}">
 {% endblock %}
 
 {% block content %}	
 <form role="form" method="post" action="/gvsigonline/services/service_url_add/">
-	<div class="row">
-		<div class="col-md-12">	
-			<div class="row">
-				<div class="col-md-12 form-group">
-					<div class="pf-topbar">
-						<a href="{% url 'service_url_list' %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
-					<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>
-				</div>
-				</div>				
-			</div>
+<div class="gol-pg-page">
+	<div class="gol-pg-header">
+		<nav aria-label="{% trans "Breadcrumb" context "services" %}">
+			<ol class="gol-pg-crumbs">
+				<li>{% trans "Services" %}</li>
+				<li><a href="{% url 'service_url_list' %}">{% trans "Services URLs" %}</a></li>
+				<li aria-current="page">{% trans "Add service URL" %}</li>
+			</ol>
+		</nav>
+		<h1 class="gol-pg-title"><span class="gol-pg-icon" aria-hidden="true"><i class="fa fa-link"></i></span>{% trans "Add service URL" %}</h1>
+		<p class="gol-pg-lead">{% trans "Save the address of a WMS, WMTS, WFS or CSW service to have it at hand." context "services" %}</p>
+	</div>
+	<div class="gol-pg-grid">
+		<div class="gol-pg-card gol-pg-card--keep-fields">
 			<div class="pf-card">
 				{% csrf_token %}
 				{% if form.errors %}
@@ -36,9 +41,21 @@
 				<div class="box-body">				
 				{{ form }}				
 				</div>	
-			</div>			
-		</div>				
+			</div>
+			<div class="gol-pg-footer">
+				<a href="{% url 'service_url_list' %}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
+				<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o margin-r-5"></i> {% trans "Save" %}</button>
+			</div>
+		</div>
+		<aside class="gol-pg-aside">
+			<h2 class="gol-pg-aside-title"><i class="fa fa-info-circle" aria-hidden="true"></i>{% trans "Good to know" context "services" %}</h2>
+			<ul class="gol-pg-aside-list gol-pg-aside-list--info">
+				<li>{% trans "The saved URLs are offered when adding layers from WMS, WFS or CSW services." context "services" %}</li>
+				<li>{% trans "Use the base address of the service, without request parameters." context "services" %}</li>
+			</ul>
+		</aside>
 	</div>
+</div>
 </form>
 {% endblock %}
 

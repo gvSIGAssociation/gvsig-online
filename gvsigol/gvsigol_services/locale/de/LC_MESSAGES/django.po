@@ -4077,3 +4077,123 @@ msgstr "Error borrando la vista: {0}"
 #: templates/connection_update.html
 msgid "External API"
 msgstr "Externe API"
+
+msgctxt "services"
+msgid "Breadcrumb"
+msgstr "Navigationspfad"
+
+msgctxt "services"
+msgid "Access data for a database or an external service, shared by the datastores that use it."
+msgstr "Zugangsdaten zu einer Datenbank oder einem externen Dienst, gemeinsam genutzt von den Datenspeichern, die sie verwenden."
+
+msgctxt "services"
+msgid "SQL that the database runs on its own when rows of the chosen tables are inserted, updated or deleted."
+msgstr "SQL, das die Datenbank selbstständig ausführt, wenn Zeilen der gewählten Tabellen eingefügt, geändert oder gelöscht werden."
+
+msgctxt "services"
+msgid "Update connection"
+msgstr "Verbindung aktualisieren"
+
+msgctxt "services"
+msgid "Where GeoServer reads the data from: a PostGIS connection, raster files (GeoTIFF, ImageMosaic) or a remote WMS."
+msgstr "Woher GeoServer die Daten liest: eine PostGIS-Verbindung, Rasterdateien (GeoTIFF, ImageMosaic) oder ein entfernter WMS."
+
+msgctxt "services"
+msgid "A closed list of values that users can choose from when they edit a field."
+msgstr "Eine feste Werteliste, aus der Benutzer beim Bearbeiten eines Feldes wählen."
+
+msgctxt "services"
+msgid "Good to know"
+msgstr "Gut zu wissen"
+
+msgctxt "services"
+msgid "The title is required: it is the name users will see."
+msgstr "Der Titel ist Pflicht: Er ist der Name, den die Benutzer sehen."
+
+msgctxt "services"
+msgid "Items cannot contain semicolons (;)."
+msgstr "Einträge dürfen kein Semikolon (;) enthalten."
+
+msgctxt "services"
+msgid "With alphabetical order the items are sorted when you save."
+msgstr "Bei alphabetischer Reihenfolge werden die Einträge beim Speichern sortiert."
+
+msgctxt "services"
+msgid "With manual order, drag the items to sort them."
+msgstr "Bei manueller Reihenfolge die Einträge zum Sortieren ziehen."
+
+msgctxt "services"
+msgid "A layer served by another organisation (WMS, WMTS, XYZ tiles...) that is shown in the viewer without copying its data."
+msgstr "Ein Layer, den eine andere Organisation bereitstellt (WMS, WMTS, XYZ-Kacheln...) und der im Viewer angezeigt wird, ohne seine Daten zu kopieren."
+
+msgctxt "services"
+msgid "Add layer"
+msgstr "Layer hinzufügen"
+
+msgctxt "services"
+msgid "Publish a table or a file of a datastore as a layer."
+msgstr "Eine Tabelle oder Datei eines Datenspeichers als Layer veröffentlichen."
+
+msgctxt "services"
+msgid "Create layer"
+msgstr "Layer erstellen"
+
+msgctxt "services"
+msgid "Create an empty table with the fields you define and publish it as a layer."
+msgstr "Eine leere Tabelle mit den von Ihnen definierten Feldern anlegen und als Layer veröffentlichen."
+
+msgctxt "services"
+msgid "How the layer is published, displayed and described."
+msgstr "Wie der Layer veröffentlicht, dargestellt und beschrieben wird."
+
+msgctxt "services"
+msgid "A group of layers: it is shown as a folder in the table of contents of the viewer."
+msgstr "Eine Gruppe von Layern: Sie erscheint als Ordner im Inhaltsverzeichnis des Viewers."
+
+msgctxt "services"
+msgid "A map server (GeoServer) and its nodes, where the layers of gvSIG Online are published."
+msgstr "Ein Kartenserver (GeoServer) und seine Knoten, auf denen die Layer von gvSIG Online veröffentlicht werden."
+
+msgctxt "services"
+msgid "Save the address of a WMS, WMTS, WFS or CSW service to have it at hand."
+msgstr "Die Adresse eines WMS-, WMTS-, WFS- oder CSW-Dienstes speichern, um sie griffbereit zu haben."
+
+msgctxt "services"
+msgid "The saved URLs are offered when adding layers from WMS, WFS or CSW services."
+msgstr "Die gespeicherten URLs werden beim Hinzufügen von Layern aus WMS-, WFS- oder CSW-Diensten angeboten."
+
+msgctxt "services"
+msgid "Use the base address of the service, without request parameters."
+msgstr "Die Basisadresse des Dienstes ohne Anfrageparameter verwenden."
+
+msgctxt "services"
+msgid "Update SQL view"
+msgstr "SQL-Ansicht aktualisieren"
+
+msgctxt "services"
+msgid "Add SQL view"
+msgstr "SQL-Ansicht hinzufügen"
+
+msgctxt "services"
+msgid "A layer defined by a query over one or more tables of a datastore: choose the tables, the fields and the filters."
+msgstr "Ein Layer, der durch eine Abfrage über eine oder mehrere Tabellen eines Datenspeichers definiert ist: Tabellen, Felder und Filter wählen."
+
+msgctxt "services"
+msgid "Groups the datastores and layers of a server under a name and its own service addresses (WMS, WFS...)."
+msgstr "Fasst die Datenspeicher und Layer eines Servers unter einem Namen und mit eigenen Dienstadressen (WMS, WFS...) zusammen."
+
+msgctxt "services"
+msgid "Choose the server first: the URI and the service addresses are filled in from it."
+msgstr "Wählen Sie zuerst den Server: URI und Dienstadressen werden daraus ausgefüllt."
+
+msgctxt "services"
+msgid "The name must start with a letter or an underscore; then use only letters, numbers or underscores."
+msgstr "Der Name muss mit einem Buchstaben oder Unterstrich beginnen; danach nur Buchstaben, Ziffern oder Unterstriche."
+
+msgctxt "services"
+msgid "The name and the server cannot be changed."
+msgstr "Name und Server können nicht geändert werden."
+
+msgctxt "services"
+msgid "Drag a field below a group to include it in that group, and drag the groups to change their order in the editing form."
+msgstr "Ziehen Sie ein Feld unter eine Gruppe, um es ihr zuzuordnen, und ziehen Sie die Gruppen, um ihre Reihenfolge im Bearbeitungsformular zu ändern."

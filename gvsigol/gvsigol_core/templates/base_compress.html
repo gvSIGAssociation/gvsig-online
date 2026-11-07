@@ -174,10 +174,13 @@
     				{% endfor %}
 				</ul>
 				<script>
-					// Mover el menú "Plugins" (creado por los plugins vía JS) al final del menú principal
+					// Mover al final del menú principal, en este orden, el menú "Plugins" (creado por los plugins
+					// vía JS) y "Estadísticas", que debe quedar siempre el último
 					(function() {
-						var pluginsMenu = document.getElementById('menu-manage-plugins');
-						if (pluginsMenu) { pluginsMenu.parentNode.appendChild(pluginsMenu); }
+						['menu-manage-plugins', 'menu-manage-statistics'].forEach(function(id) {
+							var item = document.getElementById(id);
+							if (item) { item.parentNode.appendChild(item); }
+						});
 					})();
 				</script>				
 			</section>			

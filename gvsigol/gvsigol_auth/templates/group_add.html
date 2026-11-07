@@ -4,59 +4,74 @@
 
 {% block header %}
 <link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
-<link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-with-aside.css" %}">
 {% endblock %}
 
 {% block content %}
 <form role="form" method="post" action="/gvsigonline/auth/group_add/">
-	<div class="row">
-		<div class="col-md-12">
-			<div class="pf-topbar">
-				<a href="{% url 'group_list' %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
-				<button type="submit" class="btn-pf-save">
-					<i class="fa fa-floppy-o"></i> {% trans "Save" %}
-				</button>
-			</div>
-			<div class="pf-card">
-				{% csrf_token %}
-
-				{% if form.errors %}
-<div class="pf-error-msg">
-					<ul>
-					{% for field in form %}
-						{% if field.errors %}
-						<li>{{ field.label }}. {{ field.errors|striptags }}</li>
+{% csrf_token %}
+<div class="gol-pg-page">
+	<div class="gol-pg-header">
+		<nav aria-label="{% trans "Breadcrumb" context "auth" %}">
+			<ol class="gol-pg-crumbs">
+				<li>{% trans "Users, groups and roles" context "auth" %}</li>
+				<li><a href="{% url 'group_list' %}">{% trans "Groups" %}</a></li>
+				<li aria-current="page">{% trans "Add group" %}</li>
+			</ol>
+		</nav>
+		<h1 class="gol-pg-title"><span class="gol-pg-icon" aria-hidden="true"><i class="fa fa-object-group"></i></span>{% trans "Add group" %}</h1>
+		<p class="gol-pg-lead">{% trans "Groups bring together users that share the same permissions." context "auth" %}</p>
+	</div>
+	<div class="gol-pg-grid">
+		<div class="gol-pg-card">
+			<div class="gol-pg-body">
+				<h2 class="gol-pg-card-title">{% trans "Group details" context "auth" %}</h2>
+				{% if form.errors or message %}
+				<div class="gol-pg-alert" role="alert">
+					<i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+					<div>
+						{% if form.errors %}
+						<ul>
+						{% for field in form %}
+							{% if field.errors %}
+							<li>{{ field.label }}. {{ field.errors|striptags }}</li>
+							{% endif %}
+						{% endfor %}
+						</ul>
 						{% endif %}
-					{% endfor %}
-					</ul>
+						{% if message %}<p>{{ message }}</p>{% endif %}
+					</div>
 				</div>
 				{% endif %}
-
-				{% if message %}
-<div class="pf-error-msg">
-					<p>* {{ message }}</p>
+				<div class="form-group" data-gol-auth-check="identifier" data-msg-valid="{% trans "Valid name" context "auth" %}" data-msg-invalid="{% trans "This name is not valid." context "auth" %}" data-msg-use="{% trans "Use" context "auth" %}">
+					<label for="id_name">{% trans "Name" %} <span class="gol-pg-required" aria-hidden="true">*</span></label>
+					{{ form.name }}
+					<p class="gol-pg-hint">{% trans "Start with a letter or an underscore; then use only letters, numbers or underscores." context "auth" %}</p>
 				</div>
-{% endif %}
-
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<label for="id_name">{% trans "Name" %}</label>
-						{{ form.name }}
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<label for="id_description">{% trans "Description" %}</label>
-						{{ form.description }}
-					</div>
+				<div class="form-group">
+					<label for="id_description">{% trans "Description" %} <span class="gol-pg-optional">{% trans "(optional)" context "auth" %}</span></label>
+					{{ form.description }}
 				</div>
 			</div>
+			<div class="gol-pg-footer">
+				<a href="{% url 'group_list' %}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
+				<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+			</div>
 		</div>
+		<aside class="gol-pg-aside">
+			<h2 class="gol-pg-aside-title"><i class="fa fa-lightbulb-o" aria-hidden="true"></i>{% trans "Next steps" context "auth" %}</h2>
+			<ol class="gol-pg-aside-list">
+				<li>{% trans "Save the group." context "auth" %}</li>
+				<li>{% trans "Add users to it from the user form." context "auth" %}</li>
+			</ol>
+		</aside>
 	</div>
+</div>
 </form>
 {% endblock %}
 
 {% block extra-scripts %}
+<script src="{% static "js/lib/authForms.js" %}"></script>
 <script>
 	$('#menu-manage-group-users').addClass("active");
 	$('#submenu-groups').addClass("active");

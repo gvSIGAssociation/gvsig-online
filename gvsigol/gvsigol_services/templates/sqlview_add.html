@@ -5,6 +5,7 @@
 {% block header %}
 <link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-with-aside.css" %}">
 {% endblock %}
 
 {% block content %}
@@ -14,11 +15,19 @@
 <form id="main_form" role="form" method="post" action="{% url 'sqlview_add' %}">
 {% endif %}
 	<div class="row">
-		<div class="col-md-12">
+		<div class="gol-pg-page gol-pg-page--wide col-md-12">
 			<div class="row">
-				<div class="col-md-12 form-group">
-					<div class="pf-topbar"><a href="{% url 'sqlview_list' %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a><div id="save_button" class="btn-pf-save"><i class="fa fa-floppy-o margin-r-5"></i>
-							{% trans "Save" %}</div>
+				<div class="col-md-12">
+					<div class="gol-pg-header">
+						<nav aria-label="{% trans "Breadcrumb" context "services" %}">
+							<ol class="gol-pg-crumbs">
+								<li>{% trans "Services" %}</li>
+								<li><a href="{% url 'sqlview_list' %}">{% trans "SQL Views" %}</a></li>
+								<li aria-current="page">{% if is_update %}{% trans "Update SQL view" context "services" %}{% else %}{% trans "Add SQL view" context "services" %}{% endif %}</li>
+							</ol>
+						</nav>
+						<h1 class="gol-pg-title"><span class="gol-pg-icon" aria-hidden="true"><i class="fa fa-code"></i></span>{% if is_update %}{% trans "Update SQL view" context "services" %}{% else %}{% trans "Add SQL view" context "services" %}{% endif %}</h1>
+						<p class="gol-pg-lead">{% trans "A layer defined by a query over one or more tables of a datastore: choose the tables, the fields and the filters." context "services" %}</p>
 					</div>
 				</div>
 			</div>
@@ -38,6 +47,7 @@
 				{% endif %}
 			</div>
 
+		<div class="gol-pg-card gol-pg-card--full gol-pg-card--keep-fields">
 		<ul class="nav nav-tabs">
 			<li class="active"><a href="#tab-sqlview-general" data-toggle="tab"><i class="fa fa-cog tab-icon"></i> {% trans "General" %}</a></li>
 			<li><a href="#tab-sqlview-tables" data-toggle="tab"><i class="fa fa-table tab-icon"></i> {% trans "Tables" %}</a></li>
@@ -194,6 +204,12 @@
 					</div>
 				</div>
 			</div>
+			<div class="gol-pg-footer gol-pg-footer--sticky">
+				<a href="{% url 'sqlview_list' %}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
+				<div id="save_button" class="btn-pf-save"><i class="fa fa-floppy-o margin-r-5"></i>
+							{% trans "Save" %}</div>
+			</div>
+		</div>
 		</div>
 	</div>
 </form>

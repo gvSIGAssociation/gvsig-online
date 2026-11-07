@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-roles.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-permissions.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-with-aside.css" %}">
 {% endblock %}
 
 {% block content %}
@@ -17,13 +18,20 @@
 <form id="layer-create-form" role="form" method="post" action="/gvsigonline/services/layer_create/">
 {% endif %}
 	<div class="row">
-		<div class="col-md-12">
+		<div class="gol-pg-page gol-pg-page--wide col-md-12">
 			<div class="row">
-				<div class="col-md-12 form-group">
-					<div class="pf-topbar">
-					<a href="{{back_url}}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
-					<button type="button" id="save-layer-button" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
-				</div>
+				<div class="col-md-12">
+					<div class="gol-pg-header">
+						<nav aria-label="{% trans "Breadcrumb" context "services" %}">
+							<ol class="gol-pg-crumbs">
+								<li>{% trans "Services" %}</li>
+								<li><a href="{% url 'layer_list' %}">{% trans "Layers" %}</a></li>
+								<li aria-current="page">{% trans "Create layer" context "services" %}</li>
+							</ol>
+						</nav>
+						<h1 class="gol-pg-title"><span class="gol-pg-icon" aria-hidden="true"><i class="fa fa-map-o"></i></span>{% trans "Create layer" context "services" %}</h1>
+						<p class="gol-pg-lead">{% trans "Create an empty table with the fields you define and publish it as a layer." context "services" %}</p>
+					</div>
 				</div>
 			</div>
 
@@ -48,6 +56,7 @@
 {% endif %}
 			</div>
 
+		<div class="gol-pg-card gol-pg-card--full gol-pg-card--keep-fields">
 		<ul class="nav nav-tabs">
              	<li class="active"><a href="#tab-layer-general" data-toggle="tab"><i class="fa fa-cog tab-icon"></i> {% trans "General" %}</a></li>
              	<li><a href="#tab-layer-fields" data-toggle="tab"><i class="fa fa-list tab-icon"></i> {% trans "Fields" %}</a></li>
@@ -286,6 +295,11 @@
 	          	</div>
 
          	</div>
+			<div class="gol-pg-footer gol-pg-footer--sticky">
+				<a href="{{back_url}}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
+				<button type="button" id="save-layer-button" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+			</div>
+		</div>
 		</div>
 	</div>
 </form>

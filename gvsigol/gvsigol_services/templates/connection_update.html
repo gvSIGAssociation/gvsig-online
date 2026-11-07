@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-roles.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-permissions.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-with-aside.css" %}">
 <style>
 	/* Overlay de guardado */
 	#saving-overlay {
@@ -66,15 +67,21 @@
 
 <form id="connection-form" role="form" method="post" action="{% url 'connection_update' connection_id %}">
 	<div class="row">
-		<div class="col-md-12">	
+		<div class="gol-pg-page gol-pg-page--wide col-md-12">	
 			<div class="row">
-				<div class="col-md-12 form-group">
-					<div class="pf-topbar">
-						<a href="{% url 'connection_list' %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
-					<button type="button" id="btn-test-connection" class="btn-pf-test"><i class="fa fa-plug margin-r-5"></i> {% trans "Test connection" %}</button>
-					<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+				<div class="col-md-12">
+					<div class="gol-pg-header">
+						<nav aria-label="{% trans "Breadcrumb" context "services" %}">
+							<ol class="gol-pg-crumbs">
+								<li>{% trans "Services" %}</li>
+								<li><a href="{% url 'connection_list' %}">{% trans "Connections" %}</a></li>
+								<li aria-current="page">{% trans "Update connection" context "services" %}</li>
+							</ol>
+						</nav>
+						<h1 class="gol-pg-title"><span class="gol-pg-icon" aria-hidden="true"><i class="fa fa-plug"></i></span>{% trans "Update connection" context "services" %}</h1>
+						<p class="gol-pg-lead">{% trans "Access data for a database or an external service, shared by the datastores that use it." context "services" %}</p>
+					</div>
 				</div>
-				</div>				
 			</div>
 			{% csrf_token %}
 			{% if form.errors %}
@@ -90,6 +97,7 @@
 			</div>
 			{% endif %}
 			
+							<div class="gol-pg-card gol-pg-card--full gol-pg-card--keep-fields">
 							<ul class="nav nav-tabs">
 				<li class="active"><a href="#tab-connection" data-toggle="tab"><i class="fa fa-plug tab-icon"></i> {% trans "Connection" %}</a></li>
 				<li><a href="#tab-permissions" data-toggle="tab"><i class="fa fa-lock tab-icon"></i> {% trans "Permissions" %}</a></li>
@@ -371,6 +379,12 @@
 						{% include "select_connection_permissions.html" %}
 					</div>
 				</div>
+								<div class="gol-pg-footer gol-pg-footer--sticky">
+									<a href="{% url 'connection_list' %}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
+									<button type="button" id="btn-test-connection" class="btn-pf-test"><i class="fa fa-plug margin-r-5"></i> {% trans "Test connection" %}</button>
+					<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+								</div>
+							</div>
 			</div>			
 		</div>				
 	</div>

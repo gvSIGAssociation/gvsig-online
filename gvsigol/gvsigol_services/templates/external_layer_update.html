@@ -5,6 +5,7 @@
 {% block header %}
 <link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-with-aside.css" %}">
 {% endblock %}
 
 {% block content %}
@@ -15,12 +16,19 @@
 {% endif %}
 
 <div class="row">
-	<div class="col-md-12">
+	<div class="gol-pg-page gol-pg-page--wide col-md-12">
 		<div class="row">
-			<div class="col-md-12 form-group">
-				<div class="pf-topbar">
-					<a href="{{back_url}}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
-					<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+			<div class="col-md-12">
+				<div class="gol-pg-header">
+					<nav aria-label="{% trans "Breadcrumb" context "services" %}">
+						<ol class="gol-pg-crumbs">
+							<li>{% trans "Services" %}</li>
+							<li><a href="{% url 'external_layer_list' %}">{% trans "External layers" %}</a></li>
+							<li aria-current="page">{% trans "Update external layer" %}</li>
+						</ol>
+					</nav>
+					<h1 class="gol-pg-title"><span class="gol-pg-icon" aria-hidden="true"><i class="fa fa-globe"></i></span>{% trans "Update external layer" %}</h1>
+					<p class="gol-pg-lead">{% trans "A layer served by another organisation (WMS, WMTS, XYZ tiles...) that is shown in the viewer without copying its data." context "services" %}</p>
 				</div>
 			</div>
 			<div class="row" style="padding-left: 30px;">
@@ -50,6 +58,7 @@
 			</div>
 		</div>
 
+		<div class="gol-pg-card gol-pg-card--full gol-pg-card--keep-fields">
 		<ul class="nav nav-tabs">
           	<li class="active"><a href="#tab-layer-general" data-toggle="tab"><i class="fa fa-cog tab-icon"></i> {% trans "General" %}</a></li>
           	<li><a href="#tab-layer-properties" data-toggle="tab"><i class="fa fa-paint-brush tab-icon"></i> {% trans "Display properties" %}</a></li>
@@ -316,6 +325,11 @@
           	</div>
 
         </div>
+			<div class="gol-pg-footer gol-pg-footer--sticky">
+				<a href="{{back_url}}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
+				<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+			</div>
+		</div>
 	</div>
 </div>
 </form>
