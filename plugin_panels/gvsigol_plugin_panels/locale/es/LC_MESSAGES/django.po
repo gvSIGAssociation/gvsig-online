@@ -221,3 +221,11 @@ msgstr "El archivo seleccionado no es una imagen válida."
 
 msgid "This layer cannot be made private because it is used by public panels: {}"
 msgstr "Esta capa no puede hacerse privada porque la utilizan cuadros de mando públicos: {}"
+
+msgctxt "panels"
+msgid "Breadcrumb"
+msgstr "Ruta de navegación"
+
+msgctxt "panels"
+msgid "A page of its own with maps and data, open to anyone with the link or only to the roles you choose."
+msgstr "Una página propia con mapas y datos, abierta a cualquiera con el enlace o solo a los roles que elijas."

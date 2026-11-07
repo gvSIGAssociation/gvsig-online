@@ -3,6 +3,7 @@
 {% load i18n %}
 
 {% block header %}
+<link rel="stylesheet" href="{% static "css/gol-form-with-aside.css" %}">
 <style>
 :root {
 	--pl-accent:    #54718c;
@@ -67,28 +68,18 @@
 <form class="pl-form" method="post" enctype="multipart/form-data">
 	{% csrf_token %}
 	<div class="row">
-		<div class="col-md-12">
+		<div class="gol-pg-page gol-pg-page--wide col-md-12">
+			<div class="gol-pg-header">
+				<nav aria-label="{% trans "Breadcrumb" context "panels" %}">
+					<ol class="gol-pg-crumbs">
+						<li><a href="{% url 'panels_dashboard_list' %}">{% trans "Panels list" %}</a></li>
+						<li aria-current="page">{% if panel %}{% trans "Edit panel" %}{% else %}{% trans "New panel" %}{% endif %}</li>
+					</ol>
+				</nav>
+				<h1 class="gol-pg-title"><span class="gol-pg-icon" aria-hidden="true"><i class="fa fa-dashboard"></i></span>{% if panel %}{% trans "Edit panel" %}{% else %}{% trans "New panel" %}{% endif %}</h1>
+				<p class="gol-pg-lead">{% trans "A page of its own with maps and data, open to anyone with the link or only to the roles you choose." context "panels" %}</p>
+			</div>
 			<div class="pl-panel">
-				<div class="pl-panel__header">
-					<h3 class="pl-panel__title">
-						<i class="fa fa-info-circle"></i>
-						{% if panel %}{% trans "Edit panel" %}{% else %}{% trans "New panel" %}{% endif %}
-					</h3>
-					<div class="pl-panel__actions">
-						<a class="btn-pl-add btn-pl-add--outline" href="{% url 'panels_dashboard_list' %}">
-							<i class="fa fa-times"></i> {% trans "Cancel" %}
-						</a>
-						{% if private_layers %}
-						<button class="btn-pl-add" type="submit" name="confirm_public_layers" value="yes">
-							<i class="fa fa-globe"></i> {% trans "Make layers public and save" %}
-						</button>
-						{% else %}
-						<button class="btn-pl-add" type="submit">
-							<i class="fa fa-save"></i> {% trans "Save" %}
-						</button>
-						{% endif %}
-					</div>
-				</div>
 				<div class="pl-panel__body" style="padding:0;">
 					<ul class="nav nav-tabs pl-tabs">
 						<li class="active">
@@ -232,6 +223,20 @@
 							</div>
 						</div>
 					</div>
+				</div>
+				<div class="gol-pg-footer gol-pg-footer--sticky">
+					<a class="btn-pl-add btn-pl-add--outline" href="{% url 'panels_dashboard_list' %}">
+						<i class="fa fa-times"></i> {% trans "Cancel" %}
+					</a>
+					{% if private_layers %}
+					<button class="btn-pl-add" type="submit" name="confirm_public_layers" value="yes">
+						<i class="fa fa-globe"></i> {% trans "Make layers public and save" %}
+					</button>
+					{% else %}
+					<button class="btn-pl-add" type="submit">
+						<i class="fa fa-save"></i> {% trans "Save" %}
+					</button>
+					{% endif %}
 				</div>
 			</div>
 		</div>
