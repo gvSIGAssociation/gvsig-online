@@ -1372,6 +1372,11 @@ msgstr "Zur Startseite"
 
 #: templates/documentation.html
 msgctxt "documentation"
+msgid "Close"
+msgstr "Schließen"
+
+#: templates/documentation.html
+msgctxt "documentation"
 msgid "Help"
 msgstr "Hilfe"
 

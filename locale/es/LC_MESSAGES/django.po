@@ -2732,6 +2732,11 @@ msgstr "Volver al inicio"
 
 #: templates/documentation.html
 msgctxt "documentation"
+msgid "Close"
+msgstr "Cerrar"
+
+#: templates/documentation.html
+msgctxt "documentation"
 msgid "Help"
 msgstr "Ayuda"
 

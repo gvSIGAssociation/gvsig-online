@@ -101,7 +101,9 @@
 		transition: background-color 0.15s;
 	}
 	.doc-topbar__link:hover, .doc-topbar__link:focus { background-color: var(--hdr-item-hover); color: var(--hdr-text-dim) !important; }
-	.doc-topbar a:focus-visible { outline: 2px solid var(--hdr-text); outline-offset: -2px; }
+	button.doc-topbar__link { background: transparent; border: 0; cursor: pointer; }
+	.doc-topbar__link[hidden] { display: none; }
+	.doc-topbar a:focus-visible, .doc-topbar button:focus-visible { outline: 2px solid var(--hdr-text); outline-offset: -2px; }
 
 	/* ---- Cabecera de la página ---- */
 	.doc-hero {
@@ -272,7 +274,9 @@
 			<a href="/" class="doc-topbar__logo">
 				<img src="{% static "img/logo_custom_icon.png" %}" class="doc-topbar__logo-img" alt="Logo"><b>{{GVSIGOL_NAME}}</b>{% if GVSIGOL_SURNAME %}<span class="doc-topbar__surname">{{GVSIGOL_SURNAME}}</span>{% endif %}
 			</a>
-			<a href="/" class="doc-topbar__link" title="{% trans "Back to home" context "documentation" %}"><i class="fa fa-home" aria-hidden="true"></i><span class="doc-topbar__link-text">{% trans "Back to home" context "documentation" %}</span></a>
+			{# Se abre siempre en pestaña nueva: si se puede cerrar, se ofrece "Cerrar"; si no (acceso directo), "Volver al inicio" #}
+			<a href="/" id="doc-home" class="doc-topbar__link" title="{% trans "Back to home" context "documentation" %}"><i class="fa fa-home" aria-hidden="true"></i><span class="doc-topbar__link-text">{% trans "Back to home" context "documentation" %}</span></a>
+			<button type="button" id="doc-close" class="doc-topbar__link" title="{% trans "Close" context "documentation" %}" hidden><i class="fa fa-times" aria-hidden="true"></i><span class="doc-topbar__link-text">{% trans "Close" context "documentation" %}</span></button>
 		</nav>
 	</header>
 
@@ -425,6 +429,26 @@
 		var messageBox = new messageBox();
 	</script>
 	<script>
+		// La documentación se abre en una pestaña nueva: en ese caso "Cerrar" devuelve
+		// al usuario a la pestaña de origen en vez de duplicar la aplicación.
+		(function() {
+			var home = document.getElementById('doc-home');
+			var closeBtn = document.getElementById('doc-close');
+			if (!home || !closeBtn || window.history.length > 1) {
+				return;
+			}
+			home.hidden = true;
+			closeBtn.hidden = false;
+			closeBtn.addEventListener('click', function() {
+				window.close();
+				// Si el navegador no permite cerrar la pestaña, se vuelve al inicio
+				setTimeout(function() {
+					if (!window.closed) {
+						window.location.href = home.getAttribute('href');
+					}
+				}, 300);
+			});
+		})();
 		$('#select-language').on('change', function() {
 			$('#select-language-form').submit();
 		});

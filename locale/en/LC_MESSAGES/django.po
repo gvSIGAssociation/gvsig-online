@@ -1538,6 +1538,11 @@ msgstr "Back to home"
 
 #: templates/documentation.html
 msgctxt "documentation"
+msgid "Close"
+msgstr "Close"
+
+#: templates/documentation.html
+msgctxt "documentation"
 msgid "Help"
 msgstr "Help"
 

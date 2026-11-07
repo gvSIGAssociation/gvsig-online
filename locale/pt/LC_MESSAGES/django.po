@@ -2012,6 +2012,11 @@ msgstr "Voltar ao início"
 
 #: templates/documentation.html
 msgctxt "documentation"
+msgid "Close"
+msgstr "Fechar"
+
+#: templates/documentation.html
+msgctxt "documentation"
 msgid "Help"
 msgstr "Ajuda"
 

@@ -1312,6 +1312,11 @@ msgstr "Itzuli hasierara"
 
 #: templates/documentation.html
 msgctxt "documentation"
+msgid "Close"
+msgstr "Itxi"
+
+#: templates/documentation.html
+msgctxt "documentation"
 msgid "Help"
 msgstr "Laguntza"
 
