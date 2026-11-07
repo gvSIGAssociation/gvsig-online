@@ -26,6 +26,7 @@ from django.shortcuts import render, HttpResponse, redirect, render
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext as _
+from django.utils.translation import pgettext
 from django.contrib.auth.models import User
 from gvsigol_core.models import Project
 from gvsigol_auth import services as auth_services
@@ -40,10 +41,20 @@ from django.contrib.auth.tokens import default_token_generator
 import json
 import re
 
-from .utils import get_actions
+import logging
+from functools import wraps
+
+from django.http import JsonResponse
+from django.urls import reverse
+from django.utils import translation
+from django.views.decorators.http import require_POST
+
+from .services import get_allowed_target_fields, get_statistics_conf
+from .services import legacy_get_actions as get_actions
 
 from actstream import action
 from actstream.models import Action
+from actstream.registry import registry as actstream_registry
 
 from dateutil import parser
 from datetime import datetime
@@ -51,8 +62,52 @@ from importlib import import_module
 from django.contrib.contenttypes.models import ContentType
 from builtins import str as text
 
+logger = logging.getLogger('gvsigol')
+
+
+def _json_error(msg, status):
+    return JsonResponse({'status': 'ERROR', 'msg': msg}, status=status)
+
+
+def _json_login_required(view):
+    """Como login_required, pero responde 403 en JSON (las llamadas son AJAX)."""
+    @wraps(view)
+    def wrap(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return _json_error('Authentication required', 403)
+        return view(request, *args, **kwargs)
+    return wrap
+
+
+def _json_superuser_required(view):
+    """Como superuser_required, pero responde 403 en JSON (las llamadas son AJAX)."""
+    @wraps(view)
+    def wrap(request, *args, **kwargs):
+        if not request.user.is_authenticated or not request.user.is_superuser:
+            return _json_error('Permission denied', 403)
+        return view(request, *args, **kwargs)
+    return wrap
+
+
+def _is_actstream_model(model_class):
+    """Solo se aceptan los modelos registrados en actstream (Project, Layer, User…)."""
+    return model_class is not None and model_class in actstream_registry
+
+
+def _parse_date(value, field_name):
+    if not value:
+        return None
+    try:
+        dt = parser.parse(value)
+        return datetime(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
+    except Exception:
+        logger.warning("statistics: fecha no válida en %s: %r", field_name, value)
+        return None
+
 
 @csrf_exempt
+@require_POST
+@_json_login_required
 def register_action(request):
     if request.method == 'POST':
 
@@ -68,20 +123,12 @@ def register_action(request):
         action_object_type = request.POST.get('action_object_type')
         action_object_app = request.POST.get('action_object_app')
 
-        actor_class = get_class_from_content_type(actor_app, actor_type)
-        actor = None
-        if actor_class and actor_id:
-            actor = actor_class.objects.get(id=actor_id)
-
-        action_object_class = get_class_from_content_type(action_object_app, action_object_type)
-        action_object = None
-        if action_object_class and action_object_id:
-            action_object = action_object_class.objects.get(id=action_object_id)
-
-        target_class = get_class_from_content_type(target_app, target_type)
-        target = None
-        if target_class and target_id:
-            target = target_class.objects.get(id=target_id)
+        try:
+            actor = _get_actstream_instance(actor_app, actor_type, actor_id)
+            action_object = _get_actstream_instance(action_object_app, action_object_type, action_object_id)
+            target = _get_actstream_instance(target_app, target_type, target_id)
+        except ValueError as e:
+            return _json_error(str(e), 400)
 
         verb = request.POST.get('verb')
 
@@ -108,6 +155,8 @@ def register_action(request):
         return HttpResponse(json.dumps(result, indent=4), content_type='application/json')
 
 @csrf_exempt
+@require_POST
+@_json_superuser_required
 def get_registered_actions(request, plugin_name, action_name):
     if request.method == 'POST':
         operation_id = plugin_name +'/' + action_name
@@ -124,26 +173,9 @@ def get_registered_actions(request, plugin_name, action_name):
                     user_id = users[0].id
 
         #num_rows = request.POST.get('number_rows')
-        end_date = request.POST.get('end_date')
-        end_date_string = None
-        if end_date:
-            try:
-                dt = parser.parse(end_date)
-                end_date_py = datetime(dt.year, dt.month, dt.day,dt.hour, dt.minute, dt.second)
-                end_date_string = end_date_py.strftime("'%Y/%m/%d %H:%M:%S'")
-            except Exception as e:
-                print("Failed get end date", e)
-
-
-        start_date = request.POST.get('start_date')
-        start_date_string = None
-        if start_date:
-            try:
-                dt = parser.parse(start_date)
-                start_date_py = datetime(dt.year, dt.month, dt.day,dt.hour, dt.minute, dt.second)
-                start_date_string = start_date_py.strftime("'%Y/%m/%d %H:%M:%S'")
-            except Exception as e:
-                print("Failed get start date", e)
+        # Las fechas se pasan como datetime a la consulta parametrizada
+        end_date_string = _parse_date(request.POST.get('end_date'), 'end_date')
+        start_date_string = _parse_date(request.POST.get('start_date'), 'start_date')
 
 
         get_count = request.POST.get('get_count') == 'true'
@@ -154,7 +186,10 @@ def get_registered_actions(request, plugin_name, action_name):
 
         reverse = request.POST.get('reverse') == 'true'
 
-        actions = get_actions(operation_id, reverse, get_count, user_id, target_id, start_date_string, end_date_string, group_by_date, date_pattern)
+        try:
+            actions = get_actions(operation_id, reverse, get_count, user_id, target_id, start_date_string, end_date_string, group_by_date, date_pattern)
+        except ValueError as e:
+            return _json_error(str(e), 400)
 
         #Operate with the query results
         results = {}
@@ -194,28 +229,52 @@ def get_class_from_content_type(content_type_app, content_type_name):
             model_class = cctt[0].model_class()
             return model_class
 
-    if content_type_name and content_type_name.__len__() > 0:
-        cctt = ContentType.objects.get(id=content_type_name)
-        model_class = cctt.model_class()
-        return model_class
+    if content_type_name and content_type_name.isdigit():
+        cctt = ContentType.objects.filter(id=content_type_name).first()
+        if cctt:
+            return cctt.model_class()
 
     return None
 
+
+def _get_actstream_instance(content_type_app, content_type_name, object_id):
+    """
+    Devuelve la instancia indicada si su modelo está registrado en actstream,
+    None si no se ha indicado tipo o id, y ValueError si no es válida.
+    """
+    model_class = get_class_from_content_type(content_type_app, content_type_name)
+    if not model_class or not object_id:
+        return None
+    if not _is_actstream_model(model_class):
+        raise ValueError('Content type not allowed: %s' % content_type_name)
+    try:
+        return model_class.objects.get(id=object_id)
+    except (model_class.DoesNotExist, ValueError, TypeError):
+        raise ValueError('Object not found: %s %s' % (content_type_name, object_id))
+
+
 @csrf_exempt
+@require_POST
+@_json_superuser_required
 def get_targets_from_content_type(request):
     if request.method == 'POST':
         content_type_id = request.POST.get('content_type_id')
         field_name = request.POST.get('field_name')
+        # Solo campos de etiqueta conocidos; para cualquier otro se usa str(objeto)
+        if field_name not in get_allowed_target_fields():
+            field_name = None
 
         targets_bd = []
         if content_type_id and content_type_id.__len__() > 0:
-            cctt = ContentType.objects.get(id=content_type_id)
-            model_class = cctt.model_class()
+            cctt = ContentType.objects.filter(id=content_type_id).first() if content_type_id.isdigit() else None
+            model_class = cctt.model_class() if cctt else None
+            if not _is_actstream_model(model_class):
+                return _json_error('Content type not allowed', 400)
             targets_bd = model_class.objects.all()
 
         targets = {}
         for target_bd in targets_bd:
-            if hasattr(target_bd, field_name):
+            if field_name and hasattr(target_bd, field_name):
                 targets[target_bd.id] = text(getattr(target_bd, field_name))
             else:
                 targets[target_bd.id] = text(target_bd)
@@ -230,19 +289,16 @@ def get_targets_from_content_type(request):
 
 @login_required()
 @superuser_required
-def statistics_list(request):
+def statistics_legacy(request):
+    """Vista clásica (pestañas por métrica). Se conserva por compatibilidad."""
     statistics_conf = []
-    for app in settings.INSTALLED_APPS:
+    for stat in get_statistics_conf():
         try:
-            mod = import_module('%s.settings' % app)
-            if mod:
-                if hasattr(mod, 'STATISTICS'):
-                    for stat in mod.STATISTICS:
-                        stat["title"] = _(stat["title"])
-                        stat["target_title"] = _(stat["target_title"])
-                        statistics_conf.append(stat)
-        except:
-            pass
+            stat["title"] = _(stat["title"])
+            stat["target_title"] = _(stat["target_title"])
+            statistics_conf.append(stat)
+        except Exception:
+            logger.exception("statistics: entrada STATISTICS no válida: %r", stat)
 
     users = User.objects.all()
     response = {
@@ -250,3 +306,85 @@ def statistics_list(request):
         'statistics_conf': statistics_conf
     }
     return render(request, 'statistics_list.html', response)
+
+
+def _dashboard_i18n():
+    """Textos que usa el JS del panel (traducidos en el servidor, contexto 'statistics')."""
+    return {
+        'dataSince': pgettext('statistics', 'Data available since %s'),
+        'noData': pgettext('statistics', 'No activity has been recorded yet.'),
+        'coveragePartial': pgettext('statistics', 'Activity is only recorded since %s: earlier dates in the selected period have no data.'),
+        'coverageNone': pgettext('statistics', 'No activity has been recorded yet, so all figures are zero.'),
+        'unusedPartial': pgettext('statistics', 'Activity is only recorded since %s, so items used before that date may appear as unused.'),
+        'vsPrevious': pgettext('statistics', 'vs. previous period'),
+        'noPrevious': pgettext('statistics', 'no data in previous period'),
+        'loading': pgettext('statistics', 'Loading…'),
+        'error': pgettext('statistics', 'The data could not be loaded.'),
+        'retry': pgettext('statistics', 'Retry'),
+        'empty': pgettext('statistics', 'No activity in this period.'),
+        'emptyUnused': pgettext('statistics', 'All items have been used in this period.'),
+        'authenticated': pgettext('statistics', 'Authenticated'),
+        'anonymous': pgettext('statistics', 'Anonymous'),
+        'total': pgettext('statistics', 'Total'),
+        'period': pgettext('statistics', 'Period'),
+        'name': pgettext('statistics', 'Name'),
+        'title': pgettext('statistics', 'Title'),
+        'workspace': pgettext('statistics', 'Workspace'),
+        'lastUsed': pgettext('statistics', 'Last used'),
+        'never': pgettext('statistics', 'Never'),
+        'deleted': pgettext('statistics', '(deleted)'),
+        'lastSeen': pgettext('statistics', 'Last access'),
+        'uniqueUsersOne': pgettext('statistics', '1 user'),
+        'uniqueUsers': pgettext('statistics', '%s users'),
+        'anonymousAccesses': pgettext('statistics', 'Anonymous accesses (not included): %s'),
+        'search': pgettext('statistics', 'Search'),
+        'weekdays': [pgettext('statistics', 'Mon'), pgettext('statistics', 'Tue'), pgettext('statistics', 'Wed'), pgettext('statistics', 'Thu'), pgettext('statistics', 'Fri'), pgettext('statistics', 'Sat'), pgettext('statistics', 'Sun')],
+        'weekdaysLong': [pgettext('statistics', 'Monday'), pgettext('statistics', 'Tuesday'), pgettext('statistics', 'Wednesday'), pgettext('statistics', 'Thursday'), pgettext('statistics', 'Friday'), pgettext('statistics', 'Saturday'), pgettext('statistics', 'Sunday')],
+        'less': pgettext('statistics', 'Less'),
+        'moreActivity': pgettext('statistics', 'More'),
+        'eventOne': pgettext('statistics', 'event'),
+        'events': pgettext('statistics', 'events'),
+        'tableInfo': pgettext('statistics', 'Showing _START_ to _END_ of _TOTAL_'),
+        'tableInfoEmpty': pgettext('statistics', 'No items'),
+        'tableInfoFiltered': pgettext('statistics', '(filtered from _MAX_)'),
+        'tableZeroRecords': pgettext('statistics', 'No matching items'),
+        'tablePrevious': pgettext('statistics', 'Previous'),
+        'tableNext': pgettext('statistics', 'Next'),
+    }
+
+
+@login_required()
+@superuser_required
+def statistics_list(request):
+    """Panel de estadísticas (usa la API v1)."""
+    projects = [{'id': p['id'], 'label': p['title'] or p['name']}
+                for p in Project.objects.order_by('title', 'name').values('id', 'name', 'title')]
+    usernames = list(User.objects.order_by('username').values_list('username', flat=True))
+    kpis = [
+        ('project_views', pgettext('statistics', 'Project views'), 'fa-map-o'),
+        ('unique_users', pgettext('statistics', 'Unique users'), 'fa-users'),
+        ('logins', pgettext('statistics', 'Logins'), 'fa-sign-in'),
+        ('layer_activations', pgettext('statistics', 'Layer activations'), 'fa-clone'),
+        ('active_projects', pgettext('statistics', 'Projects used'), 'fa-folder-open-o'),
+        ('active_layers', pgettext('statistics', 'Layers used'), 'fa-th-list'),
+        ('anonymous_share', pgettext('statistics', 'Anonymous views'), 'fa-user-secret'),
+    ]
+    stats_config = {
+        'api': {
+            'metrics': reverse('statistics:api_metrics'),
+            'summary': reverse('statistics:api_summary'),
+            'timeseries': reverse('statistics:api_timeseries'),
+            'top': reverse('statistics:api_top'),
+            'heatmap': reverse('statistics:api_heatmap'),
+            'unused': reverse('statistics:api_unused'),
+        },
+        'coreVerbs': ['gvsigol_core/get_conf', 'gvsigol_services/layer_activate', 'gvsigol_auth/login'],
+        'language': translation.get_language() or 'es',
+        'i18n': _dashboard_i18n(),
+    }
+    return render(request, 'statistics_dashboard.html', {
+        'projects': projects,
+        'usernames': usernames,
+        'kpis': kpis,
+        'stats_config': stats_config,
+    })

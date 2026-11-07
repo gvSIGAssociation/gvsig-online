@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block header %}
+<link rel="stylesheet" href="{% static "css/gol-list-page.css" %}">
+<link rel="stylesheet" href="{% static "gvsigol_statistics/css/statistics-dashboard.css" %}">
+{% endblock %}
+
+{% block content %}
+<div class="gol-stats" id="gol-stats">
+
+	<!-- Cabecera y filtros -->
+	<div class="st-header">
+		<div class="st-header__titles">
+			<h1 class="st-header__title"><i class="fa fa-line-chart" aria-hidden="true"></i> {% trans "Statistics" %}</h1>
+			<p class="st-header__subtitle" data-st-coverage>&nbsp;</p>
+		</div>
+	</div>
+
+	<div class="st-filters" role="group" aria-label="{% trans 'Filters' context "statistics" %}">
+		<div class="st-segmented" data-st-period role="radiogroup" aria-label="{% trans 'Period' context "statistics" %}">
+			<button type="button" data-days="7" role="radio">{% trans "7 days" context "statistics" %}</button>
+			<button type="button" data-days="30" role="radio" class="is-active">{% trans "30 days" context "statistics" %}</button>
+			<button type="button" data-days="90" role="radio">{% trans "90 days" context "statistics" %}</button>
+			<button type="button" data-days="365" role="radio">{% trans "12 months" context "statistics" %}</button>
+			<button type="button" data-days="custom" role="radio">{% trans "Custom" context "statistics" %}</button>
+		</div>
+		<div class="st-daterange hidden" data-st-custom>
+			<label class="sr-only" for="st-from">{% trans "From" context "statistics" %}</label>
+			<input type="date" id="st-from" class="form-control" data-st-from>
+			<span aria-hidden="true">–</span>
+			<label class="sr-only" for="st-to">{% trans "To" context "statistics" %}</label>
+			<input type="date" id="st-to" class="form-control" data-st-to>
+		</div>
+		<div class="st-filters__spacer"></div>
+		<label class="sr-only" for="st-project">{% trans "Project" context "statistics" %}</label>
+		<select id="st-project" class="form-control st-select" data-st-project>
+			<option value="">{% trans "All projects" context "statistics" %}</option>
+			{% for project in projects %}
+			<option value="{{ project.id }}">{{ project.label }}</option>
+			{% endfor %}
+		</select>
+		<label class="sr-only" for="st-user">{% trans "User" context "statistics" %}</label>
+		<select id="st-user" class="form-control st-select" data-st-user>
+			<option value="">{% trans "All users" context "statistics" %}</option>
+			<option value="anonymous">{% trans "Anonymous" %}</option>
+			{% for username in usernames %}
+			<option value="{{ username }}">{{ username }}</option>
+			{% endfor %}
+		</select>
+	</div>
+
+	<!-- Avisos -->
+	<div class="st-notice" data-st-notice-changes hidden>
+		<i class="fa fa-info-circle" aria-hidden="true"></i>
+		<div>
+			<strong>{% trans "Improved calculation." context "statistics" %}</strong>
+			{% trans "Figures are now calculated in local time and per-user counts no longer skip any access, so they may differ slightly from those shown previously." context "statistics" %}
+		</div>
+		<button type="button" class="st-notice__close" data-st-dismiss aria-label="{% trans 'Close' context "statistics" %}">&times;</button>
+	</div>
+	<div class="st-notice st-notice--warn" data-st-notice-coverage hidden>
+		<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+		<div data-st-notice-coverage-text></div>
+	</div>
+
+	<!-- KPI -->
+	<div class="st-kpis" data-st-kpis aria-live="polite">
+		{% for key, label, icon in kpis %}
+		<div class="st-kpi" data-kpi="{{ key }}">
+			<div class="st-kpi__label"><i class="fa {{ icon }}" aria-hidden="true"></i> {{ label }}</div>
+			<div class="st-kpi__value" data-value>–</div>
+			<div class="st-kpi__delta" data-delta>&nbsp;</div>
+		</div>
+		{% endfor %}
+	</div>
+
+	<!-- Evolución -->
+	<section class="st-card" data-st-card="timeseries">
+		<header class="st-card__header">
+			<h2 class="st-card__title">{% trans "Activity over time" context "statistics" %}</h2>
+			<div class="st-card__actions">
+				<div class="st-segmented st-segmented--sm" data-st-verb role="radiogroup" aria-label="{% trans 'Metric' context "statistics" %}">
+					<button type="button" role="radio" data-verb="gvsigol_core/get_conf" class="is-active">{% trans "Projects" context "statistics" %}</button>
+					<button type="button" role="radio" data-verb="gvsigol_services/layer_activate">{% trans "Layers" context "statistics" %}</button>
+					<button type="button" role="radio" data-verb="gvsigol_auth/login">{% trans "Logins" context "statistics" %}</button>
+				</div>
+				<label class="sr-only" for="st-interval">{% trans "Interval" context "statistics" %}</label>
+				<select id="st-interval" class="form-control st-select st-select--sm" data-st-interval>
+					<option value="auto">{% trans "Automatic" context "statistics" %}</option>
+					<option value="day">{% trans "By day" context "statistics" %}</option>
+					<option value="week">{% trans "By week" context "statistics" %}</option>
+					<option value="month">{% trans "By month" context "statistics" %}</option>
+				</select>
+				<button type="button" class="btn-pl-ghost" data-st-toggle-table aria-pressed="false">
+					<i class="fa fa-table" aria-hidden="true"></i> {% trans "Table" context "statistics" %}
+				</button>
+				<a class="btn-pl-ghost" data-st-csv href="#"><i class="fa fa-download" aria-hidden="true"></i> CSV</a>
+			</div>
+		</header>
+		<div class="st-card__body">
+			<div class="st-chart" data-st-body><canvas data-st-canvas aria-label="{% trans 'Activity over time' context "statistics" %}" role="img"></canvas></div>
+			<div class="st-table-wrap hidden" data-st-table></div>
+		</div>
+	</section>
+
+	<!-- Rankings -->
+	<div class="st-grid">
+		<section class="st-card" data-st-card="top-projects">
+			<header class="st-card__header">
+				<h2 class="st-card__title">{% trans "Most visited projects" context "statistics" %}</h2>
+				<div class="st-card__actions">
+					<a class="btn-pl-ghost" data-st-csv href="#"><i class="fa fa-download" aria-hidden="true"></i> CSV</a>
+				</div>
+			</header>
+			<div class="st-card__body" data-st-body></div>
+		</section>
+
+		<section class="st-card" data-st-card="top-layers">
+			<header class="st-card__header">
+				<h2 class="st-card__title">{% trans "Most used layers" context "statistics" %}</h2>
+				<div class="st-card__actions">
+					<a class="btn-pl-ghost" data-st-csv href="#"><i class="fa fa-download" aria-hidden="true"></i> CSV</a>
+				</div>
+			</header>
+			<div class="st-card__body" data-st-body></div>
+		</section>
+
+		<section class="st-card" data-st-card="top-users">
+			<header class="st-card__header">
+				<h2 class="st-card__title">{% trans "Most active users" context "statistics" %}</h2>
+				<div class="st-card__actions">
+					<label class="sr-only" for="st-users-verb">{% trans "Metric" context "statistics" %}</label>
+					<select id="st-users-verb" class="form-control st-select st-select--sm" data-st-users-verb>
+						<option value="gvsigol_core/get_conf">{% trans "Project views" context "statistics" %}</option>
+						<option value="gvsigol_services/layer_activate">{% trans "Layer activations" context "statistics" %}</option>
+						<option value="gvsigol_auth/login">{% trans "Logins" context "statistics" %}</option>
+					</select>
+					<a class="btn-pl-ghost" data-st-csv href="#"><i class="fa fa-download" aria-hidden="true"></i> CSV</a>
+				</div>
+			</header>
+			<div class="st-card__body" data-st-body></div>
+		</section>
+
+		<section class="st-card" data-st-card="heatmap">
+			<header class="st-card__header">
+				<h2 class="st-card__title">{% trans "Activity by day and hour" context "statistics" %}</h2>
+				<div class="st-card__actions">
+					<label class="sr-only" for="st-heatmap-verb">{% trans "Metric" context "statistics" %}</label>
+					<select id="st-heatmap-verb" class="form-control st-select st-select--sm" data-st-heatmap-verb>
+						<option value="gvsigol_core/get_conf">{% trans "Project views" context "statistics" %}</option>
+						<option value="gvsigol_services/layer_activate">{% trans "Layer activations" context "statistics" %}</option>
+						<option value="gvsigol_auth/login">{% trans "Logins" context "statistics" %}</option>
+					</select>
+				</div>
+			</header>
+			<div class="st-card__body" data-st-body></div>
+		</section>
+	</div>
+
+	<!-- Sin uso -->
+	<section class="st-card" data-st-card="unused">
+		<header class="st-card__header">
+			<h2 class="st-card__title">{% trans "Unused items" context "statistics" %}</h2>
+			<div class="st-card__actions">
+				<div class="st-segmented st-segmented--sm" data-st-unused-type role="radiogroup" aria-label="{% trans 'Type' context "statistics" %}">
+					<button type="button" role="radio" data-type="project" class="is-active">{% trans "Projects" context "statistics" %}</button>
+					<button type="button" role="radio" data-type="layer">{% trans "Layers" context "statistics" %}</button>
+				</div>
+				<label class="sr-only" for="st-unused-days">{% trans "Without use for" context "statistics" %}</label>
+				<select id="st-unused-days" class="form-control st-select st-select--sm" data-st-unused-days>
+					<option value="30">{% trans "30 days without use" context "statistics" %}</option>
+					<option value="90" selected>{% trans "90 days without use" context "statistics" %}</option>
+					<option value="180">{% trans "180 days without use" context "statistics" %}</option>
+					<option value="365">{% trans "1 year without use" context "statistics" %}</option>
+				</select>
+				<a class="btn-pl-ghost" data-st-csv href="#"><i class="fa fa-download" aria-hidden="true"></i> CSV</a>
+			</div>
+		</header>
+		<div class="st-card__body" data-st-body></div>
+	</section>
+
+	<!-- Otras métricas (de plugins) -->
+	<section class="st-card hidden" data-st-card="metric">
+		<header class="st-card__header">
+			<h2 class="st-card__title">{% trans "Other metrics" context "statistics" %}</h2>
+			<div class="st-card__actions">
+				<label class="sr-only" for="st-metric">{% trans "Metric" context "statistics" %}</label>
+				<select id="st-metric" class="form-control st-select st-select--sm" data-st-metric></select>
+				<a class="btn-pl-ghost" data-st-csv href="#"><i class="fa fa-download" aria-hidden="true"></i> CSV</a>
+			</div>
+		</header>
+		<div class="st-card__body" data-st-body></div>
+	</section>
+
+	<div class="st-tooltip" data-st-tooltip role="tooltip" hidden></div>
+</div>
+
+{{ stats_config|json_script:"gol-stats-config" }}
+{% endblock %}
+
+{% block extra-scripts %}
+<script type="text/javascript">
+	$('#menu-manage-statistics').addClass("active");
+</script>
+<script type="text/javascript" src="{% static "gvsigol_statistics/js/statistics-dashboard.js" %}"></script>
+{% endblock %}

@@ -74,3 +74,497 @@ msgstr "Statistics"
 #: gvsigol_statistics/templates/dashboard_statistics_menu.html:8
 msgid "More Statistics"
 msgstr "More Statistics"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:24
+msgctxt "statistics"
+msgid "Filters"
+msgstr "Filter"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:25
+#: gvsigol_statistics/views.py:329
+msgctxt "statistics"
+msgid "Period"
+msgstr "Zeitraum"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:26
+msgctxt "statistics"
+msgid "7 days"
+msgstr "7 Tage"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:27
+msgctxt "statistics"
+msgid "30 days"
+msgstr "30 Tage"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:28
+msgctxt "statistics"
+msgid "90 days"
+msgstr "90 Tage"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:29
+msgctxt "statistics"
+msgid "12 months"
+msgstr "12 Monate"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:30
+msgctxt "statistics"
+msgid "Custom"
+msgstr "Benutzerdefiniert"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:33
+msgctxt "statistics"
+msgid "From"
+msgstr "Von"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:36
+msgctxt "statistics"
+msgid "To"
+msgstr "Bis"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:40
+msgctxt "statistics"
+msgid "Project"
+msgstr "Projekt"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:42
+msgctxt "statistics"
+msgid "All projects"
+msgstr "Alle Projekte"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:47
+msgctxt "statistics"
+msgid "User"
+msgstr "Benutzer"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:49
+msgctxt "statistics"
+msgid "All users"
+msgstr "Alle Benutzer"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:61
+msgctxt "statistics"
+msgid "Improved calculation."
+msgstr "Verbesserte Berechnung."
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:64
+msgctxt "statistics"
+msgid "Close"
+msgstr "Schließen"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:85
+#: gvsigol_statistics/templates/statistics_dashboard.html:106
+msgctxt "statistics"
+msgid "Activity over time"
+msgstr "Aktivität im Zeitverlauf"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:87
+#: gvsigol_statistics/templates/statistics_dashboard.html:137
+#: gvsigol_statistics/templates/statistics_dashboard.html:153
+#: gvsigol_statistics/templates/statistics_dashboard.html:192
+msgctxt "statistics"
+msgid "Metric"
+msgstr "Kennzahl"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:88
+#: gvsigol_statistics/templates/statistics_dashboard.html:171
+msgctxt "statistics"
+msgid "Projects"
+msgstr "Projekte"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:89
+#: gvsigol_statistics/templates/statistics_dashboard.html:172
+msgctxt "statistics"
+msgid "Layers"
+msgstr "Ebenen"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:90
+#: gvsigol_statistics/templates/statistics_dashboard.html:141
+#: gvsigol_statistics/templates/statistics_dashboard.html:157
+#: gvsigol_statistics/views.py:366
+msgctxt "statistics"
+msgid "Logins"
+msgstr "Anmeldungen"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:92
+msgctxt "statistics"
+msgid "Interval"
+msgstr "Intervall"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:94
+msgctxt "statistics"
+msgid "Automatic"
+msgstr "Automatisch"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:95
+msgctxt "statistics"
+msgid "By day"
+msgstr "Pro Tag"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:96
+msgctxt "statistics"
+msgid "By week"
+msgstr "Pro Woche"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:97
+msgctxt "statistics"
+msgid "By month"
+msgstr "Pro Monat"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:100
+msgctxt "statistics"
+msgid "Table"
+msgstr "Tabelle"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:115
+msgctxt "statistics"
+msgid "Most visited projects"
+msgstr "Meistbesuchte Projekte"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:125
+msgctxt "statistics"
+msgid "Most used layers"
+msgstr "Meistgenutzte Ebenen"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:135
+msgctxt "statistics"
+msgid "Most active users"
+msgstr "Aktivste Benutzer"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:139
+#: gvsigol_statistics/templates/statistics_dashboard.html:155
+#: gvsigol_statistics/views.py:364
+msgctxt "statistics"
+msgid "Project views"
+msgstr "Projektaufrufe"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:140
+#: gvsigol_statistics/templates/statistics_dashboard.html:156
+#: gvsigol_statistics/views.py:367
+msgctxt "statistics"
+msgid "Layer activations"
+msgstr "Ebenenaktivierungen"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:151
+msgctxt "statistics"
+msgid "Activity by day and hour"
+msgstr "Aktivität nach Tag und Uhrzeit"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:168
+msgctxt "statistics"
+msgid "Unused items"
+msgstr "Nicht genutzte Elemente"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:170
+msgctxt "statistics"
+msgid "Type"
+msgstr "Typ"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:174
+msgctxt "statistics"
+msgid "Without use for"
+msgstr "Ungenutzt seit"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:176
+msgctxt "statistics"
+msgid "30 days without use"
+msgstr "30 Tage ungenutzt"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:177
+msgctxt "statistics"
+msgid "90 days without use"
+msgstr "90 Tage ungenutzt"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:178
+msgctxt "statistics"
+msgid "180 days without use"
+msgstr "180 Tage ungenutzt"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:179
+msgctxt "statistics"
+msgid "1 year without use"
+msgstr "1 Jahr ungenutzt"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:190
+msgctxt "statistics"
+msgid "Other metrics"
+msgstr "Weitere Kennzahlen"
+
+#: gvsigol_statistics/views.py:314
+#, python-format
+msgctxt "statistics"
+msgid "Data available since %s"
+msgstr "Daten verfügbar seit %s"
+
+#: gvsigol_statistics/views.py:315
+msgctxt "statistics"
+msgid "No activity has been recorded yet."
+msgstr "Es wurde noch keine Aktivität erfasst."
+
+#: gvsigol_statistics/views.py:316
+#, python-format
+msgctxt "statistics"
+msgid "Activity is only recorded since %s: earlier dates in the selected period have no data."
+msgstr "Aktivität wird erst seit %s erfasst: frühere Tage im gewählten Zeitraum enthalten keine Daten."
+
+#: gvsigol_statistics/views.py:317
+msgctxt "statistics"
+msgid "No activity has been recorded yet, so all figures are zero."
+msgstr "Es wurde noch keine Aktivität erfasst, daher sind alle Werte null."
+
+#: gvsigol_statistics/views.py:318
+#, python-format
+msgctxt "statistics"
+msgid "Activity is only recorded since %s, so items used before that date may appear as unused."
+msgstr "Aktivität wird erst seit %s erfasst; vor diesem Datum genutzte Elemente können daher als ungenutzt erscheinen."
+
+#: gvsigol_statistics/views.py:319
+msgctxt "statistics"
+msgid "vs. previous period"
+msgstr "ggü. Vorzeitraum"
+
+#: gvsigol_statistics/views.py:320
+msgctxt "statistics"
+msgid "no data in previous period"
+msgstr "keine Daten im Vorzeitraum"
+
+#: gvsigol_statistics/views.py:321
+msgctxt "statistics"
+msgid "Loading…"
+msgstr "Wird geladen…"
+
+#: gvsigol_statistics/views.py:322
+msgctxt "statistics"
+msgid "The data could not be loaded."
+msgstr "Die Daten konnten nicht geladen werden."
+
+#: gvsigol_statistics/views.py:323
+msgctxt "statistics"
+msgid "Retry"
+msgstr "Erneut versuchen"
+
+#: gvsigol_statistics/views.py:324
+msgctxt "statistics"
+msgid "No activity in this period."
+msgstr "Keine Aktivität in diesem Zeitraum."
+
+#: gvsigol_statistics/views.py:325
+msgctxt "statistics"
+msgid "All items have been used in this period."
+msgstr "Alle Elemente wurden in diesem Zeitraum genutzt."
+
+#: gvsigol_statistics/views.py:326
+msgctxt "statistics"
+msgid "Authenticated"
+msgstr "Angemeldet"
+
+#: gvsigol_statistics/views.py:327
+msgctxt "statistics"
+msgid "Anonymous"
+msgstr "Anonym"
+
+#: gvsigol_statistics/views.py:328
+msgctxt "statistics"
+msgid "Total"
+msgstr "Gesamt"
+
+#: gvsigol_statistics/views.py:330
+msgctxt "statistics"
+msgid "Name"
+msgstr "Name"
+
+#: gvsigol_statistics/views.py:331
+msgctxt "statistics"
+msgid "Title"
+msgstr "Titel"
+
+#: gvsigol_statistics/views.py:332
+msgctxt "statistics"
+msgid "Workspace"
+msgstr "Arbeitsbereich"
+
+#: gvsigol_statistics/views.py:333
+msgctxt "statistics"
+msgid "Last used"
+msgstr "Zuletzt genutzt"
+
+#: gvsigol_statistics/views.py:334
+msgctxt "statistics"
+msgid "Never"
+msgstr "Nie"
+
+#: gvsigol_statistics/views.py:335
+msgctxt "statistics"
+msgid "(deleted)"
+msgstr "(gelöscht)"
+
+#: gvsigol_statistics/views.py:336
+msgctxt "statistics"
+msgid "Last access"
+msgstr "Letzter Zugriff"
+
+#: gvsigol_statistics/views.py:337
+msgctxt "statistics"
+msgid "1 user"
+msgstr "1 Benutzer"
+
+#: gvsigol_statistics/views.py:338
+#, python-format
+msgctxt "statistics"
+msgid "%s users"
+msgstr "%s Benutzer"
+
+#: gvsigol_statistics/views.py:339
+#, python-format
+msgctxt "statistics"
+msgid "Anonymous accesses (not included): %s"
+msgstr "Anonyme Zugriffe (nicht enthalten): %s"
+
+#: gvsigol_statistics/views.py:340
+msgctxt "statistics"
+msgid "Search"
+msgstr "Suchen"
+
+#: gvsigol_statistics/views.py:341
+msgctxt "statistics"
+msgid "Mon"
+msgstr "Mo"
+
+#: gvsigol_statistics/views.py:341
+msgctxt "statistics"
+msgid "Tue"
+msgstr "Di"
+
+#: gvsigol_statistics/views.py:341
+msgctxt "statistics"
+msgid "Wed"
+msgstr "Mi"
+
+#: gvsigol_statistics/views.py:341
+msgctxt "statistics"
+msgid "Thu"
+msgstr "Do"
+
+#: gvsigol_statistics/views.py:341
+msgctxt "statistics"
+msgid "Fri"
+msgstr "Fr"
+
+#: gvsigol_statistics/views.py:341
+msgctxt "statistics"
+msgid "Sat"
+msgstr "Sa"
+
+#: gvsigol_statistics/views.py:341
+msgctxt "statistics"
+msgid "Sun"
+msgstr "So"
+
+#: gvsigol_statistics/views.py:342
+msgctxt "statistics"
+msgid "Monday"
+msgstr "Montag"
+
+#: gvsigol_statistics/views.py:342
+msgctxt "statistics"
+msgid "Tuesday"
+msgstr "Dienstag"
+
+#: gvsigol_statistics/views.py:342
+msgctxt "statistics"
+msgid "Wednesday"
+msgstr "Mittwoch"
+
+#: gvsigol_statistics/views.py:342
+msgctxt "statistics"
+msgid "Thursday"
+msgstr "Donnerstag"
+
+#: gvsigol_statistics/views.py:342
+msgctxt "statistics"
+msgid "Friday"
+msgstr "Freitag"
+
+#: gvsigol_statistics/views.py:342
+msgctxt "statistics"
+msgid "Saturday"
+msgstr "Samstag"
+
+#: gvsigol_statistics/views.py:342
+msgctxt "statistics"
+msgid "Sunday"
+msgstr "Sonntag"
+
+#: gvsigol_statistics/views.py:343
+msgctxt "statistics"
+msgid "Less"
+msgstr "Weniger"
+
+#: gvsigol_statistics/views.py:344
+msgctxt "statistics"
+msgid "More"
+msgstr "Mehr"
+
+#: gvsigol_statistics/views.py:345
+msgctxt "statistics"
+msgid "event"
+msgstr "Ereignis"
+
+#: gvsigol_statistics/views.py:346
+msgctxt "statistics"
+msgid "events"
+msgstr "Ereignisse"
+
+#: gvsigol_statistics/views.py:347
+msgctxt "statistics"
+msgid "Showing _START_ to _END_ of _TOTAL_"
+msgstr "_START_ bis _END_ von _TOTAL_"
+
+#: gvsigol_statistics/views.py:348
+msgctxt "statistics"
+msgid "No items"
+msgstr "Keine Elemente"
+
+#: gvsigol_statistics/views.py:349
+msgctxt "statistics"
+msgid "(filtered from _MAX_)"
+msgstr "(gefiltert aus _MAX_)"
+
+#: gvsigol_statistics/views.py:350
+msgctxt "statistics"
+msgid "No matching items"
+msgstr "Keine passenden Elemente"
+
+#: gvsigol_statistics/views.py:351
+msgctxt "statistics"
+msgid "Previous"
+msgstr "Zurück"
+
+#: gvsigol_statistics/views.py:352
+msgctxt "statistics"
+msgid "Next"
+msgstr "Weiter"
+
+#: gvsigol_statistics/views.py:365
+msgctxt "statistics"
+msgid "Unique users"
+msgstr "Eindeutige Benutzer"
+
+#: gvsigol_statistics/views.py:368
+msgctxt "statistics"
+msgid "Projects used"
+msgstr "Genutzte Projekte"
+
+#: gvsigol_statistics/views.py:369
+msgctxt "statistics"
+msgid "Layers used"
+msgstr "Genutzte Ebenen"
+
+#: gvsigol_statistics/views.py:370
+msgctxt "statistics"
+msgid "Anonymous views"
+msgstr "Anonyme Aufrufe"
+
+#: gvsigol_statistics/templates/statistics_dashboard.html:59
+msgctxt "statistics"
+msgid "Figures are now calculated in local time and per-user counts no longer skip any access, so they may differ slightly from those shown previously."
+msgstr "Die Zahlen werden jetzt in Ortszeit berechnet und die Zählung pro Benutzer lässt keinen Zugriff mehr aus; daher können sie leicht von den bisher angezeigten abweichen."
