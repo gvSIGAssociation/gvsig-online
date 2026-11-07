@@ -38,6 +38,7 @@
 .pf-lyr-row__btns .btn-danger { border: 1px solid #e8bebe; color: #c0392b;}
 .pf-lyr-row__btns .btn-danger:hover { background: #fde8e8; border-color: #c0392b;}
 .pf-lyr-row__btns .btn[disabled] { opacity: 0.35; cursor: default; pointer-events: none;}
+.pf-lyr-count { display: inline-block; min-width: 18px; margin-left: 4px; padding: 0 6px; border-radius: 9px; background: var(--pf-border); color: var(--pf-text); font-size: 11px; font-weight: 600; line-height: 18px; text-align: center;}
 .ui-sortable-placeholder.pf-lyr-placeholder { visibility: visible !important; background: #e8f0f7; border: 2px dashed #a8c8e8; border-radius: 6px; margin: 2px 0;}
 </style>
 {% endblock %}
@@ -86,6 +87,7 @@
 			<div class="gol-pg-card gol-pg-card--full gol-pg-card--keep-fields">
 			<ul class="nav nav-tabs">
 				<li class="active"><a href="#tab-layergroup-general" data-toggle="tab"><i class="fa fa-cog tab-icon"></i> {% trans "General" %}</a></li>
+				<li><a href="#tab-layergroup-layers" data-toggle="tab"><i class="fa fa-bars tab-icon"></i> {% trans "Group layers" %} <span class="pf-lyr-count">{{ layers|length }}</span></a></li>
 				{% if MANAGE_PERMISSION_UI or user.is_superuser %}<li><a href="#tab-layergroup-permissions" data-toggle="tab"><i class="fa fa-lock tab-icon"></i> {% trans "Permissions" %}</a></li> {% endif %}
 			</ul>
 			<div class="tab-content">
@@ -146,6 +148,63 @@
 						</div>
 					</div>
 				</div>
+				<div class="tab-pane" id="tab-layergroup-layers">
+					<div class="pf-lyr-panel">
+						<div class="pf-lyr-panel__header">
+							<h3 class="pf-lyr-panel__title"><i class="fa fa-bars"></i> {% trans "Group layers" %}</h3>
+							<div class="pf-lyr-panel__actions">
+								<div id="button-create-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn-pf-action btn-pf-action--secondary"><i class="fa fa-database"></i> {% trans "Create empty layer" %}</div>
+								<div id="button-import-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn-pf-action"><i class="fa fa-cloud-upload"></i> {% trans "Publish layer" %}</div>
+							</div>
+						</div>
+						<div class="pf-lyr-panel__body">
+							{# Sin id="toc": ese id es del input oculto que envía el orden de las capas #}
+							<div class="toc">
+								{% for layer in layers %}
+								<div data-layerid="{{layer.id}}" data-name="{{layer.name}}" data-title="{{layer.title}}" data-order="{{layer.order}}" class="pf-lyr-row layer-item">
+									<div class="pf-lyr-row__handle handle">
+										<i class="fa fa-ellipsis-v"></i>
+										<i class="fa fa-ellipsis-v"></i>
+									</div>
+									<div class="pf-lyr-row__info">
+										<span class="pf-lyr-row__name">{{layer.title}}</span>
+										<span class="pf-lyr-row__fqn">[{{layer.fqn}}]</span>
+									</div>
+									<div class="box-tools-buttons pf-lyr-row__btns">
+										{% if not layer.can_manage %}
+										<button type="button" data-id="{{layer.id}}" name="button-update-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success" disabled><i class="fa fa-edit"></i></button>
+										<button type="button" data-id="{{layer.id}}" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Configure layer" %}" class="btn bg-purple" disabled><i class="fa fa-cogs"></i></button>
+										<button type="button" data-id="{{layer.id}}" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="{% trans "Clear cache" %}" class="btn btn-warning" disabled><i class="fa fa-refresh"></i></button>
+										<button type="button" data-id="{{layer.id}}" name="button-delete-layer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger" disabled><i class="fa fa-times"></i></button>
+										{% else %}
+										{% if layer.external %}
+										<button type="button" data-id="{{layer.id}}" name="button-update-externallayer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success"><i class="fa fa-edit"></i></button>
+										{% else %}
+										<button type="button" data-id="{{layer.id}}" name="button-update-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success"><i class="fa fa-edit"></i></button>
+										{% endif %}
+										{% if layer.type == 'v_PostGIS' %}
+										<button type="button" data-id="{{layer.id}}" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Configure layer" %}" class="btn bg-purple"><i class="fa fa-cogs"></i></button>
+										{% else %}
+										<button type="button" data-id="{{layer.id}}" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Configure layer" %}" class="btn bg-purple" disabled><i class="fa fa-cogs"></i></button>
+										{% endif %}
+										{% if layer.cached %}
+										<button type="button" data-id="{{layer.id}}" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="{% trans "Clear cache" %}" class="btn btn-warning"><i class="fa fa-refresh"></i></button>
+										{% else %}
+										<button type="button" data-id="{{layer.id}}" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="{% trans "Clear cache" %}" class="btn btn-warning" disabled><i class="fa fa-refresh"></i></button>
+										{% endif %}
+										{% if layer.external %}
+										<button type="button" data-id="{{layer.id}}" name="button-delete-externallayer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger"><i class="fa fa-times"></i></button>
+										{% else %}
+										<button type="button" data-id="{{layer.id}}" name="button-delete-layer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger"><i class="fa fa-times"></i></button>
+										{% endif %}
+										{% endif %}
+									</div>
+								</div>
+								{% endfor %}
+							</div>
+						</div>
+					</div>
+				</div>
 				<div class="tab-pane" id="tab-layergroup-permissions">
 					{% include "select_layergroup_permissions.html" %}
 				</div>
@@ -158,65 +217,6 @@
 		</div>
 	</div>
 </form>
-&nbsp;
-<div class="row">
-	<div class="col-md-12">
-		<div class="pf-lyr-panel">
-			<div class="pf-lyr-panel__header">
-				<h3 class="pf-lyr-panel__title"><i class="fa fa-bars"></i> {% trans "Group layers" %}</h3>
-				<div class="pf-lyr-panel__actions">
-					<div id="button-create-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn-pf-action btn-pf-action--secondary"><i class="fa fa-database"></i> {% trans "Create empty layer" %}</div>
-					<div id="button-import-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn-pf-action"><i class="fa fa-cloud-upload"></i> {% trans "Publish layer" %}</div>
-				</div>
-			</div>
-			<div class="pf-lyr-panel__body">
-				<div id="toc" class="toc">
-					{% for layer in layers %}
-					<div data-layerid="{{layer.id}}" data-name="{{layer.name}}" data-title="{{layer.title}}" data-order="{{layer.order}}" class="pf-lyr-row layer-item">
-						<div class="pf-lyr-row__handle handle">
-							<i class="fa fa-ellipsis-v"></i>
-							<i class="fa fa-ellipsis-v"></i>
-						</div>
-						<div class="pf-lyr-row__info">
-							<span class="pf-lyr-row__name">{{layer.title}}</span>
-							<span class="pf-lyr-row__fqn">[{{layer.fqn}}]</span>
-						</div>
-						<div class="box-tools-buttons pf-lyr-row__btns">
-							{% if not layer.can_manage %}
-							<button type="button" data-id="{{layer.id}}" name="button-update-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success" disabled><i class="fa fa-edit"></i></button>
-							<button type="button" data-id="{{layer.id}}" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Configure layer" %}" class="btn bg-purple" disabled><i class="fa fa-cogs"></i></button>
-							<button type="button" data-id="{{layer.id}}" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="{% trans "Clear cache" %}" class="btn btn-warning" disabled><i class="fa fa-refresh"></i></button>
-							<button type="button" data-id="{{layer.id}}" name="button-delete-layer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger" disabled><i class="fa fa-times"></i></button>
-							{% else %}
-							{% if layer.external %}
-							<button type="button" data-id="{{layer.id}}" name="button-update-externallayer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success"><i class="fa fa-edit"></i></button>
-							{% else %}
-							<button type="button" data-id="{{layer.id}}" name="button-update-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update layer" %}" class="btn btn-success"><i class="fa fa-edit"></i></button>
-							{% endif %}
-							{% if layer.type == 'v_PostGIS' %}
-							<button type="button" data-id="{{layer.id}}" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Configure layer" %}" class="btn bg-purple"><i class="fa fa-cogs"></i></button>
-							{% else %}
-							<button type="button" data-id="{{layer.id}}" name="button-config-layer" data-toggle="tooltip" data-placement="bottom" title="{% trans "Configure layer" %}" class="btn bg-purple" disabled><i class="fa fa-cogs"></i></button>
-							{% endif %}
-							{% if layer.cached %}
-							<button type="button" data-id="{{layer.id}}" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="{% trans "Clear cache" %}" class="btn btn-warning"><i class="fa fa-refresh"></i></button>
-							{% else %}
-							<button type="button" data-id="{{layer.id}}" name="button-clear-cache" data-toggle="tooltip" data-target="#modal-edit-layer" data-placement="bottom" title="{% trans "Clear cache" %}" class="btn btn-warning" disabled><i class="fa fa-refresh"></i></button>
-							{% endif %}
-							{% if layer.external %}
-							<button type="button" data-id="{{layer.id}}" name="button-delete-externallayer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger"><i class="fa fa-times"></i></button>
-							{% else %}
-							<button type="button" data-id="{{layer.id}}" name="button-delete-layer" data-toggle="modal" data-target="#modal-delete-layer" data-placement="bottom" title="{% trans "Delete layer" %}" class="btn btn-danger"><i class="fa fa-times"></i></button>
-							{% endif %}
-							{% endif %}
-						</div>
-					</div>
-					{% endfor %}
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
 
 <!-- Modal -->
 <div class="modal fade" id="modal-add-layer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -348,6 +348,7 @@
 
 	function removeLayerFromToc(layerId) {
 		$('.toc .layer-item[data-layerid="' + layerId + '"]').remove();
+		$('.pf-lyr-count').text($('.toc .layer-item').length);
 	}
 
 	function deleteLayer(data){
