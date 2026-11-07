@@ -2843,3 +2843,38 @@ msgstr "Apariencia"
 msgctxt "core"
 msgid "{n} selected"
 msgstr "{n} seleccionadas"
+
+#: templates/404.html
+msgctxt "errors"
+msgid "Page not found"
+msgstr "Página no encontrada"
+
+#: templates/404.html
+msgctxt "errors"
+msgid "The page you are looking for does not exist or has been moved. Check the address or go back to the home page."
+msgstr "La página que buscas no existe o se ha movido. Revisa la dirección o vuelve a la página de inicio."
+
+#: templates/404.html
+msgctxt "errors"
+msgid "Go back"
+msgstr "Volver"
+
+#: templates/404.html templates/500.html
+msgctxt "errors"
+msgid "Go to home"
+msgstr "Ir al inicio"
+
+#: templates/500.html
+msgctxt "errors"
+msgid "Something went wrong"
+msgstr "Algo ha salido mal"
+
+#: templates/500.html
+msgctxt "errors"
+msgid "An unexpected error occurred on the server. Please try again in a few moments. If the problem persists, contact the administrator."
+msgstr "Se ha producido un error inesperado en el servidor. Inténtalo de nuevo en unos momentos. Si el problema continúa, contacta con el administrador."
+
+#: templates/500.html
+msgctxt "errors"
+msgid "Try again"
+msgstr "Reintentar"

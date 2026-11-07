@@ -1676,3 +1676,38 @@ msgstr "Aparença"
 msgctxt "core"
 msgid "{n} selected"
 msgstr "{n} seleccionades"
+
+#: templates/404.html
+msgctxt "errors"
+msgid "Page not found"
+msgstr "Pàgina no trobada"
+
+#: templates/404.html
+msgctxt "errors"
+msgid "The page you are looking for does not exist or has been moved. Check the address or go back to the home page."
+msgstr "La pàgina que busques no existeix o s'ha mogut. Revisa l'adreça o torna a la pàgina d'inici."
+
+#: templates/404.html
+msgctxt "errors"
+msgid "Go back"
+msgstr "Torna"
+
+#: templates/404.html templates/500.html
+msgctxt "errors"
+msgid "Go to home"
+msgstr "Ves a l'inici"
+
+#: templates/500.html
+msgctxt "errors"
+msgid "Something went wrong"
+msgstr "Alguna cosa ha anat malament"
+
+#: templates/500.html
+msgctxt "errors"
+msgid "An unexpected error occurred on the server. Please try again in a few moments. If the problem persists, contact the administrator."
+msgstr "S'ha produït un error inesperat en el servidor. Torna-ho a provar d'ací a uns moments. Si el problema continua, contacta amb l'administrador."
+
+#: templates/500.html
+msgctxt "errors"
+msgid "Try again"
+msgstr "Torna-ho a provar"

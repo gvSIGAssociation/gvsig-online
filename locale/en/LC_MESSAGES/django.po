@@ -1585,3 +1585,38 @@ msgstr "Open manual"
 msgctxt "documentation"
 msgid "No manuals are available at the moment."
 msgstr "No manuals are available at the moment."
+
+#: templates/404.html
+msgctxt "errors"
+msgid "Page not found"
+msgstr "Page not found"
+
+#: templates/404.html
+msgctxt "errors"
+msgid "The page you are looking for does not exist or has been moved. Check the address or go back to the home page."
+msgstr "The page you are looking for does not exist or has been moved. Check the address or go back to the home page."
+
+#: templates/404.html
+msgctxt "errors"
+msgid "Go back"
+msgstr "Go back"
+
+#: templates/404.html templates/500.html
+msgctxt "errors"
+msgid "Go to home"
+msgstr "Go to home"
+
+#: templates/500.html
+msgctxt "errors"
+msgid "Something went wrong"
+msgstr "Something went wrong"
+
+#: templates/500.html
+msgctxt "errors"
+msgid "An unexpected error occurred on the server. Please try again in a few moments. If the problem persists, contact the administrator."
+msgstr "An unexpected error occurred on the server. Please try again in a few moments. If the problem persists, contact the administrator."
+
+#: templates/500.html
+msgctxt "errors"
+msgid "Try again"
+msgstr "Try again"
