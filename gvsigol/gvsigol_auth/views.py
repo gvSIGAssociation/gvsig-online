@@ -92,7 +92,7 @@ def login_user(request):
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    action.send(user, verb="gvsigol_auth/login")
+                    # El login se registra en estadísticas con la señal user_logged_in (gvsigol_statistics)
                     next = request.POST.get('next')
                     if next:
                         response = redirect(next)
@@ -211,7 +211,7 @@ def rest_session_login(request):
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    action.send(user, verb="gvsigol_auth/login")
+                    # El login se registra en estadísticas con la señal user_logged_in (gvsigol_statistics)
                     response = {'success': True}
                     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
                 else:
