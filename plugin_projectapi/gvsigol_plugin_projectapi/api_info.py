@@ -172,6 +172,26 @@ class CoordsFeatureFilter(BaseFilterBackend):
         return fields
           
 
+def _record_project_open(request, queryset, mobile):
+    """
+    Estadísticas: apertura de un proyecto desde la SPA o la app móvil.
+    Nunca rompe la petición; si el core no tiene la API de eventos, no hace nada.
+    """
+    try:
+        from gvsigol_statistics.events import (record_event, actor_for, VERB_PROJECT,
+                                               CHANNEL_SPA, CHANNEL_MOBILE)
+    except ImportError:
+        return
+    try:
+        project = queryset.first()
+        if project is not None:
+            # dedupe: la misma apertura repetida en pocos segundos (doble montaje) cuenta una vez
+            record_event(actor_for(request.user, project), VERB_PROJECT, action_object=project,
+                         channel=CHANNEL_MOBILE if mobile else CHANNEL_SPA, dedupe_seconds=10)
+    except Exception:
+        pass
+
+
 class ProjectConfView(ListAPIView):
     serializer_class = InfoSerializer
     filter_backends = (CoordsFeatureFilter,)
@@ -245,6 +265,9 @@ class ProjectConfView(ListAPIView):
             projects_data = serializer.data
             _apply_cached_external_wms_legend_compat(projects_data)
 
+            if projectid != 0:
+                _record_project_open(request, queryset, mobile)
+
             result = {
                 "projects" : projects_data,
             }
@@ -304,6 +327,8 @@ class PublicProjectConfView(ListAPIView):
 
             projects_data = serializer.data
             _apply_cached_external_wms_legend_compat(projects_data)
+
+            _record_project_open(request, queryset, mobile)
 
             result = {
                 "projects" : projects_data,
