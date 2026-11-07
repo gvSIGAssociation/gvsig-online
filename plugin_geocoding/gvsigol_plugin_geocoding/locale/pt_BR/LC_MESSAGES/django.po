@@ -482,3 +482,19 @@ msgstr "Tabela cujos registros são indexados para as buscas."
 msgctxt "geocoding"
 msgid "Icon shown next to the results of this provider."
 msgstr "Ícone exibido ao lado dos resultados deste provedor."
+
+msgctxt "geocoding"
+msgid "Breadcrumb"
+msgstr "Caminho de navegação"
+
+msgctxt "geocoding"
+msgid "Geocoding"
+msgstr "Geocodificação"
+
+msgctxt "geocoding"
+msgid "Providers"
+msgstr "Provedores"
+
+msgctxt "geocoding"
+msgid "A search service that the viewer uses to find addresses and places: Nominatim, Google Maps, CartoCiudad or your own data."
+msgstr "Um serviço de busca que o visualizador usa para encontrar endereços e lugares: Nominatim, Google Maps, CartoCiudad ou seus próprios dados."

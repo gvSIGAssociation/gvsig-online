@@ -480,3 +480,19 @@ msgstr "Taula els registres de la qual s'indexen per a les busques."
 msgctxt "geocoding"
 msgid "Icon shown next to the results of this provider."
 msgstr "Icona que es mostra al costat dels resultats d'este proveïdor."
+
+msgctxt "geocoding"
+msgid "Breadcrumb"
+msgstr "Ruta de navegació"
+
+msgctxt "geocoding"
+msgid "Geocoding"
+msgstr "Geocodificació"
+
+msgctxt "geocoding"
+msgid "Providers"
+msgstr "Proveïdors"
+
+msgctxt "geocoding"
+msgid "A search service that the viewer uses to find addresses and places: Nominatim, Google Maps, CartoCiudad or your own data."
+msgstr "Un servei de busca que utilitza el visor per a trobar adreces i llocs: Nominatim, Google Maps, CartoCiudad o les teues pròpies dades."

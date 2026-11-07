@@ -4,6 +4,7 @@
 
 {% block header %}
 <link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-with-aside.css" %}">
 <style>
 /* =================================================================
    Formularios de proveedores de geocodificación (alta y edición).
@@ -12,7 +13,7 @@
    a la derecha) y aparte los parámetros avanzados. Las clases *-param y
    "hidden" las usa el JS para mostrar u ocultar según el tipo.
    ================================================================= */
-.gp-page { max-width: 1200px; }
+.gp-page { max-width: none; }
 .gp-topbar-title {
 	display: flex;
 	align-items: center;
@@ -300,17 +301,21 @@
 
 {% block content %}
 <div class="row">
-	<div class="col-md-12">
+	<div class="gol-pg-page gol-pg-page--wide col-md-12">
 
 		<form id="provider-form" class="gp-form" enctype="multipart/form-data" role="form" method="post" action="/gvsigonline/geocoding/provider_add/">
 			{% csrf_token %}
 
-			<div class="pf-topbar">
-				<div class="pf-topbar-left">
-					<a href="/gvsigonline/geocoding/provider_list/" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" context "geocoding" %}</a>
-					<h3 class="gp-topbar-title"><i class="fa fa-search"></i> {% trans "Add provider" %}</h3>
-				</div>
-				<button id="submit-button" type="submit" class="btn-pf-save"> <i class="fa fa-floppy-o"></i> {% trans "Save" %} </button>
+			<div class="gol-pg-header">
+				<nav aria-label="{% trans "Breadcrumb" context "geocoding" %}">
+					<ol class="gol-pg-crumbs">
+						<li>{% trans "Geocoding" context "geocoding" %}</li>
+						<li><a href="/gvsigonline/geocoding/provider_list/">{% trans "Providers" context "geocoding" %}</a></li>
+						<li aria-current="page">{% trans "Add provider" %}</li>
+					</ol>
+				</nav>
+				<h1 class="gol-pg-title"><span class="gol-pg-icon" aria-hidden="true"><i class="fa fa-search"></i></span>{% trans "Add provider" %}</h1>
+				<p class="gol-pg-lead">{% trans "A search service that the viewer uses to find addresses and places: Nominatim, Google Maps, CartoCiudad or your own data." context "geocoding" %}</p>
 			</div>
 
 			{% if form.errors %}
@@ -502,6 +507,10 @@
 						<textarea id="params" name="params" form="provider-form">{{ form.params }}</textarea>
 					</div>
 				</section>
+				<div class="gol-pg-footer gol-pg-footer--sticky gol-pg-footer--bar">
+					<a href="/gvsigonline/geocoding/provider_list/" class="btn-pf-secondary">{% trans "Cancel" %}</a>
+					<button id="submit-button" type="submit" class="btn-pf-save"> <i class="fa fa-floppy-o"></i> {% trans "Save" %} </button>
+				</div>
 			</div>
 		</form>
 
