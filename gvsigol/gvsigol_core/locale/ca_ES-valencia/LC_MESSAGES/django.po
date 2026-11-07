@@ -1565,6 +1565,11 @@ msgstr "Torna a l'inici"
 
 #: templates/documentation.html
 msgctxt "documentation"
+msgid "Close"
+msgstr "Tanca"
+
+#: templates/documentation.html
+msgctxt "documentation"
 msgid "Help"
 msgstr "Ajuda"
 
