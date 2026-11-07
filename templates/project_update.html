@@ -154,7 +154,7 @@
 								</div>
 									</div>
 								</details>
-								<details class="gol-pg-section" data-gol-section="map" data-gol-section-resize data-gol-meta-fields="#id_srs, #restricted_extent" open>
+								<details class="gol-pg-section" data-gol-section="map" data-gol-section-resize data-gol-section-collapse data-gol-meta-fields="#id_srs, #restricted_extent" open>
 									<summary><span class="gol-pg-section__title"><i class="fa fa-globe" aria-hidden="true"></i> {% trans "Map and extent" context "core" %}</span><span class="gol-pg-section__meta" aria-hidden="true"></span></summary>
 									<div class="gol-pg-section__body">
 
@@ -1109,6 +1109,12 @@
 			var miny_4326 = parseFloat($("#extent4326_miny").val());
 			var maxy_4326 = parseFloat($("#extent4326_maxy").val());
 			if (isNaN(minx_4326) || isNaN(maxx_4326) || isNaN(miny_4326) || isNaN(maxy_4326)) {
+				// Con la sección del mapa cerrada el minimapa no tiene tamaño: se abre para calcular la extensión
+				var mapSection = document.querySelector('details.gol-pg-section[data-gol-section="map"]');
+				if (mapSection && !mapSection.open) {
+					mapSection.open = true;
+					map.updateSize();
+				}
 				// if the user did not set a valid extent, get extent for map view
 				var extent = map.getView().calculateExtent(map.getSize());
 				var normalizedExtent = getCanonicalExtent(extent, epsg3857Bounds);
