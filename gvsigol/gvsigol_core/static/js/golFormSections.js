@@ -27,8 +27,10 @@
  *    casilla marcada, el texto de su etiqueta; de un campo de texto, su valor.
  *    data-gol-meta-count + data-gol-meta-count-label ("{n} ...") añaden un recuento.
  *  - Recuerda abierta/cerrada por navegador (localStorage) en las secciones con
- *    data-gol-section-persist. Las que no lo llevan (la del minimapa) se abren siempre
- *    al cargar, porque OpenLayers y select2 calculan su tamaño al iniciarse.
+ *    data-gol-section-persist. Las que no lo llevan se abren siempre al cargar.
+ *  - data-gol-section-collapse (la del minimapa): se abre al cargar, porque OpenLayers
+ *    y select2 calculan su tamaño al iniciarse, y se cierra justo después de que la
+ *    página haya hecho su inicialización (ready).
  *  - Al abrir una sección con data-gol-section-resize avisa con un evento resize de la
  *    ventana, para que el minimapa recalcule su tamaño.
  *  - Si el navegador marca un campo como no válido dentro de una sección cerrada, la
@@ -130,9 +132,13 @@
 			init(this);
 		});
 		// Los valores que rellena el JS de la página al cargar (fecha de caducidad...)
+		// y cierre de las secciones que deben quedar colapsadas tras iniciarse
 		setTimeout(function () {
 			$('details.gol-pg-section').each(function () {
 				updateMeta($(this));
+			});
+			$('details.gol-pg-section[data-gol-section-collapse]').each(function () {
+				this.open = false;
 			});
 		}, 0);
 		// Un campo no válido dentro de una sección cerrada: se abre la sección
