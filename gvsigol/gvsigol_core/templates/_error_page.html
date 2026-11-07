@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+{% load static %}
+{% load i18n %}
+{% comment %}
+Plantilla común de las páginas de error (404.html, 500.html).
+
+No extiende base.html a propósito:
+- Django pinta 500.html sin RequestContext: no hay context processors (ni user,
+  ni GVSIGOL_*, ni csrf), así que la cabecera y el menú de base.html salían rotos.
+- Si el error viene de la BD o de un plugin, volver a pintar el menú del panel
+  (includes de plugins) puede fallar otra vez y Django acaba sirviendo un
+  "Server Error (500)" en texto plano.
+- Un 404 lo ven también usuarios anónimos: no tiene sentido enseñarles el menú
+  de administración ni un desplegable de usuario vacío.
+
+Por eso solo usa {% static %}, {% trans %} y valores con alternativa
+(firstof), y nada que consulte la BD.
+{% endcomment %}
+{% get_current_language as LANGUAGE_CODE %}
+{% url 'home' as home_url %}
+<html lang="{{ LANGUAGE_CODE|default:'es' }}">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="robots" content="noindex">
+	<title>{% block title %}{% endblock %} · {% firstof GVSIGOL_NAME "gvSIG Online" %}</title>
+
+	<link rel="shortcut icon" href="{% static "img/favicon.png" %}">
+	<link rel="stylesheet" href="{% static "css/font-awesome-4.4.0/css/font-awesome.min.css" %}">
+	<link rel="stylesheet" href="{% static "css/googlefonts.css" %}">
+	<link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
+	<link rel="stylesheet" href="{% static "css/gol-themes.css" %}">
+
+	<style>
+	/* =================================================================
+	   Páginas de error: cabecera con los colores del tema y una tarjeta
+	   centrada con el código, el mensaje y las acciones. Tokens --gol-*
+	   de gol-tokens.css; sin tema (500) se usan sus valores por defecto.
+	   ================================================================= */
+	*, *::before, *::after { box-sizing: border-box; }
+
+	body {
+		margin: 0;
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+		background: var(--gol-bg);
+		font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+		color: var(--gol-text);
+		-webkit-font-smoothing: antialiased;
+	}
+
+	/* ---- Cabecera ---- */
+	.err-topbar {
+		flex-shrink: 0;
+		height: 50px;
+		padding: 0 20px;
+		display: flex;
+		align-items: center;
+		background-color: var(--hdr-bg);
+		box-shadow: var(--hdr-shadow);
+		border-bottom: var(--hdr-border);
+	}
+	.err-topbar__logo {
+		display: inline-flex;
+		align-items: center;
+		gap: 9px;
+		font-size: 20px;
+		font-weight: 300;
+		color: var(--hdr-text);
+		text-decoration: none;
+	}
+	.err-topbar__logo img {
+		width: 28px;
+		height: 28px;
+		object-fit: contain;
+		border-radius: 5px;
+		filter: var(--hdr-logo-filter);
+	}
+	.err-topbar__logo b { font-weight: 700; }
+	.err-topbar__logo:focus-visible { outline: 2px solid var(--hdr-text); outline-offset: 4px; border-radius: 4px; }
+
+	/* ---- Contenido ---- */
+	.err-main {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 40px 16px;
+		background:
+			radial-gradient(ellipse 70% 55% at 50% 0%, var(--gol-accent-lt) 0%, transparent 70%),
+			var(--gol-bg);
+	}
+	.err-card {
+		width: 100%;
+		max-width: 520px;
+		padding: 44px 40px 40px;
+		background: var(--gol-white);
+		border: 1px solid var(--gol-border);
+		border-radius: 16px;
+		box-shadow: var(--gol-shadow);
+		text-align: center;
+		animation: err-in 0.35s cubic-bezier(.4,0,.2,1) both;
+	}
+	.err-card__icon {
+		width: 64px;
+		height: 64px;
+		margin: 0 auto 18px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+		font-size: 28px;
+		color: var(--err-tone);
+		background: var(--err-tone-lt);
+	}
+	.err-card__code {
+		margin: 0;
+		font-size: 72px;
+		font-weight: 700;
+		line-height: 1;
+		letter-spacing: -2px;
+		color: var(--gol-accent);
+		font-variant-numeric: tabular-nums;
+	}
+	.err-card__title {
+		margin: 12px 0 8px;
+		font-size: 24px;
+		font-weight: 600;
+		color: var(--gol-text);
+	}
+	.err-card__text {
+		margin: 0 auto;
+		max-width: 400px;
+		font-size: 15px;
+		line-height: 1.6;
+		color: var(--gol-muted);
+	}
+	.err-card__actions {
+		margin-top: 28px;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 10px;
+	}
+
+	/* ---- Botones ---- */
+	.err-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		min-height: 40px;
+		padding: 0 20px;
+		border-radius: 8px;
+		border: 1px solid transparent;
+		font: inherit;
+		font-size: 14px;
+		font-weight: 600;
+		text-decoration: none;
+		cursor: pointer;
+		transition: background-color var(--gol-transition), border-color var(--gol-transition), color var(--gol-transition);
+	}
+	.err-btn[hidden] { display: none; }
+	.err-btn--primary { background: var(--gol-accent); color: #fff; }
+	.err-btn--primary:hover { background: var(--gol-accent-dk); color: #fff; }
+	.err-btn--ghost { background: transparent; border-color: var(--gol-border); color: var(--gol-text); }
+	.err-btn--ghost:hover { border-color: var(--gol-accent); color: var(--gol-accent); }
+	.err-btn:focus-visible { outline: 2px solid var(--gol-accent); outline-offset: 2px; }
+
+	/* ---- Pie ---- */
+	.err-footer {
+		flex-shrink: 0;
+		padding: 12px 20px;
+		font-size: 12px;
+		text-align: right;
+		color: var(--gol-muted);
+	}
+
+	@keyframes err-in {
+		from { opacity: 0; transform: translateY(8px); }
+		to   { opacity: 1; transform: none; }
+	}
+	@media (max-width: 575px) {
+		.err-card { padding: 32px 20px 28px; border-radius: 12px; }
+		.err-card__code { font-size: 56px; }
+		.err-card__title { font-size: 20px; }
+		.err-card__actions { flex-direction: column-reverse; }
+		.err-btn { width: 100%; }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.err-card { animation: none; }
+		.err-btn { transition: none; }
+	}
+	</style>
+	{% block extra-style %}{% endblock %}
+</head>
+
+<body class="{{ GVSIGOL_SKIN }}">
+
+	<header class="err-topbar">
+		<a href="{% firstof home_url '/' %}" class="err-topbar__logo">
+			<img src="{% static "img/logo_custom_icon.png" %}" alt="">
+			<span><b>{% firstof GVSIGOL_NAME "gvSIG Online" %}</b>{% if GVSIGOL_SURNAME %} {{ GVSIGOL_SURNAME }}{% endif %}</span>
+		</a>
+	</header>
+
+	<main class="err-main">
+		<section class="err-card" aria-labelledby="err-title">
+			<div class="err-card__icon" aria-hidden="true"><i class="fa {% block icon %}{% endblock %}"></i></div>
+			<p class="err-card__code">{% block code %}{% endblock %}</p>
+			<h1 class="err-card__title" id="err-title">{% block heading %}{% endblock %}</h1>
+			<p class="err-card__text">{% block message %}{% endblock %}</p>
+			<div class="err-card__actions">
+				{% block actions %}{% endblock %}
+			</div>
+		</section>
+	</main>
+
+	{% if GVSIGOL_VERSION %}
+	<footer class="err-footer"><b>{% trans "Version" %}</b> {{ GVSIGOL_VERSION }}</footer>
+	{% endif %}
+
+	{% block scripts %}{% endblock %}
+</body>
+</html>

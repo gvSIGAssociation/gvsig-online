@@ -1359,3 +1359,38 @@ msgstr "Ireki eskuliburua"
 msgctxt "documentation"
 msgid "No manuals are available at the moment."
 msgstr "Une honetan ez dago eskuliburu erabilgarririk."
+
+#: templates/404.html
+msgctxt "errors"
+msgid "Page not found"
+msgstr "Ez da orria aurkitu"
+
+#: templates/404.html
+msgctxt "errors"
+msgid "The page you are looking for does not exist or has been moved. Check the address or go back to the home page."
+msgstr "Bilatzen ari zaren orria ez dago edo lekuz aldatu da. Egiaztatu helbidea edo itzuli hasierako orrira."
+
+#: templates/404.html
+msgctxt "errors"
+msgid "Go back"
+msgstr "Itzuli"
+
+#: templates/404.html templates/500.html
+msgctxt "errors"
+msgid "Go to home"
+msgstr "Joan hasierara"
+
+#: templates/500.html
+msgctxt "errors"
+msgid "Something went wrong"
+msgstr "Zerbait gaizki atera da"
+
+#: templates/500.html
+msgctxt "errors"
+msgid "An unexpected error occurred on the server. Please try again in a few moments. If the problem persists, contact the administrator."
+msgstr "Ustekabeko errore bat gertatu da zerbitzarian. Saiatu berriro une batzuk barru. Arazoak jarraitzen badu, jarri harremanetan administratzailearekin."
+
+#: templates/500.html
+msgctxt "errors"
+msgid "Try again"
+msgstr "Saiatu berriro"
