@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="{% static "css/gol-form-roles.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-modal.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-project-form.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-with-aside.css" %}">
 <style>
 
 /* Neutralizar clearfix de AdminLTE en cabeceras flex */
@@ -23,16 +24,22 @@
 
 {% block content %}	
 	<div class="row">
-		<div class="col-md-12">
+		<div class="gol-pg-page gol-pg-page--wide col-md-12">
 			<form id="project-form" enctype="multipart/form-data" role="form" method="post" onkeydown="return event.key != 'Enter';" action="/gvsigonline/core/project_update/{{pid}}/">
-				<div class="pf-topbar">
-					{% csrf_token %}
-					<a href="{% url 'project_list' %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
-					{% if message %}
-					<div class="pf-error-msg">* {{ message }}</div>
-					{% endif %}
-					<button id="save_button" class="save_button btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Update" %}</button>
+				<div class="gol-pg-header">
+					<nav aria-label="{% trans "Breadcrumb" context "core" %}">
+						<ol class="gol-pg-crumbs">
+							<li><a href="{% url 'project_list' %}">{% trans "Projects" %}</a></li>
+							<li aria-current="page">{% trans "Update project" context "core" %}</li>
+						</ol>
+					</nav>
+					<h1 class="gol-pg-title"><span class="gol-pg-icon" aria-hidden="true"><i class="fa fa-cubes"></i></span>{% trans "Update project" context "core" %}</h1>
+					<p class="gol-pg-lead">{% trans "A map viewer: the layer groups it shows, its tools, its base layers and who can open it." context "core" %}</p>
 				</div>
+				{% csrf_token %}
+				{% if message %}
+				<div class="pf-error-msg">* {{ message }}</div>
+				{% endif %}
 				{% if messages %}
 				<ul class="pf-messages">
 					{% for message in messages %}
@@ -44,6 +51,7 @@
 					{% endfor %}
 				</ul>
 				{% endif %}
+				<div class="gol-pg-card gol-pg-card--full gol-pg-card--keep-fields">
 				<ul id="project-update-tabs" class="nav nav-tabs">
               		<li class="active"><a data-id="0" href="#tab-project-main" data-toggle="tab"><i class="fa fa-cog tab-icon"></i> {% trans "General" %}</a></li>
               		<li><a  data-id="1" href="#tab-project-layergroups" data-toggle="tab"><i class="fa fa-object-group tab-icon"></i> {% trans "Layer groups" %}</a></li>
@@ -52,7 +60,7 @@
             	</ul>
             	
             	<div class="tab-content">
-              		<div class="tab-pane active" id="tab-project-main">
+              		<div class="tab-pane active" id="tab-project-main" data-gol-sections="project">
               			<div class="box">
               				<div class="box-body">
               					<input type="hidden" id="project-name" name="project-name" value="{{project.name}}"/>
@@ -96,8 +104,9 @@
 									</div>
 								</div>
 
-								<hr class="pf-divider">
-								<div class="pf-section-title"><i class="fa fa-sliders"></i> {% trans "Toc panel presentation" %}</div>
+								<details class="gol-pg-section" data-gol-section="toc" data-gol-section-persist data-gol-meta-fields="#id_toc_mode, #selectable_groups, #id_expiration_date">
+									<summary><span class="gol-pg-section__title"><i class="fa fa-sliders" aria-hidden="true"></i> {% trans "Table of contents and access" context "core" %}</span><span class="gol-pg-section__meta" aria-hidden="true"></span></summary>
+									<div class="gol-pg-section__body">
 
 								<div class="row">
 									<div class="col-md-6 form-group">
@@ -143,9 +152,11 @@
 										<input type="text" name="expiration_date_utc"  id="expiration_date_utc" class="form-control hide" />
 									</div>
 								</div>
-
-								<hr class="pf-divider">
-								<div class="pf-section-title"><i class="fa fa-globe"></i> {% trans "Coordinate reference system" %}</div>
+									</div>
+								</details>
+								<details class="gol-pg-section" data-gol-section="map" data-gol-section-resize data-gol-meta-fields="#id_srs, #restricted_extent" open>
+									<summary><span class="gol-pg-section__title"><i class="fa fa-globe" aria-hidden="true"></i> {% trans "Map and extent" context "core" %}</span><span class="gol-pg-section__meta" aria-hidden="true"></span></summary>
+									<div class="gol-pg-section__body">
 
 								<div class="row">
 									<div class="col-md-3 form-group">
@@ -196,9 +207,11 @@
 										{{ form.srs }}
 									</div>
 								</div>
-
-								<hr class="pf-divider">
-								<div class="pf-section-title"><i class="fa fa-image"></i> {% trans "Change image?" %}</div>
+									</div>
+								</details>
+								<details class="gol-pg-section" data-gol-section="appearance" data-gol-section-persist data-gol-meta-fields="#show_project_icon, #viewer_preferred_ui">
+									<summary><span class="gol-pg-section__title"><i class="fa fa-image" aria-hidden="true"></i> {% trans "Appearance" context "core" %}</span><span class="gol-pg-section__meta" aria-hidden="true"></span></summary>
+									<div class="gol-pg-section__body">
 
 								<div class="row">
 									<div class="col-md-12" style="margin-bottom: 20px;">
@@ -245,9 +258,11 @@
 										</select>
 									</div>
 								</div>
-
-								<hr class="pf-divider">
-								<div class="pf-section-title"><i class="fa fa-tags"></i> {% trans "Project tags" %}</div>
+									</div>
+								</details>
+								<details class="gol-pg-section" data-gol-section="tags" data-gol-section-persist data-gol-meta-count="input[name^='label_']:checked" data-gol-meta-count-label="{% trans "{n} selected" context "core" %}">
+									<summary><span class="gol-pg-section__title"><i class="fa fa-tags" aria-hidden="true"></i> {% trans "Project tags" %}</span><span class="gol-pg-section__meta" aria-hidden="true"></span></summary>
+									<div class="gol-pg-section__body">
 
 								<div class="row">
 									<div class="col-md-3 form-group">
@@ -264,6 +279,8 @@
 									</div>
 								</div>
 								{% endfor %}
+									</div>
+								</details>
 							</div>
               			</div>
               		</div>
@@ -287,21 +304,21 @@
 												</div>
 												<div class="product-info">
 													<span class="product-title"><span class="searchable-layer">{{layergroup.title}}</span></span>
-													<div style="margin-right: 10px;" class="radio pull-right{% if layergroup.editable is False %} disabled{% endif%}">													
-														<label>
+													<div style="margin-right: 10px;" class="proj-perms pull-right{% if layergroup.editable is False %} disabled{% endif%}">													
+														<label class="proj-perm-chip">
 															{% if layergroup.baselayer_group %}
-																<input type="radio" class="selected-base-group" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="selected-base-group-btn" id="selected-base-group-{{layergroup.id}}" value="{{layergroup.id}}" checked{% if layergroup.editable is False %} disabled{% endif%}/>{% trans "Base group" %}
+																<input type="radio" class="selected-base-group" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="selected-base-group-btn" id="selected-base-group-{{layergroup.id}}" value="{{layergroup.id}}" checked{% if layergroup.editable is False %} disabled{% endif%}/><span>{% trans "Base group" %}</span>
 															{% else %}
-																<input type="radio" class="selected-base-group" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="selected-base-group-btn" id="selected-base-group-{{layergroup.id}}" value="{{layergroup.id}}"{% if layergroup.editable is False %} disabled{% endif%}/>{% trans "Base group" %}
+																<input type="radio" class="selected-base-group" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="selected-base-group-btn" id="selected-base-group-{{layergroup.id}}" value="{{layergroup.id}}"{% if layergroup.editable is False %} disabled{% endif%}/><span>{% trans "Base group" %}</span>
 															{% endif %}
 														</label>
 													</div>
-													<div style="margin-right: 10px;" class="checkbox pull-right{% if layergroup.editable is False %} disabled{% endif%}">
-														<label>
+													<div style="margin-right: 10px;" class="proj-perms pull-right{% if layergroup.editable is False %} disabled{% endif%}">
+														<label class="proj-perm-chip">
 															{% if layergroup.checked %}
-																<input type="checkbox" class="layergroup-input" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}" checked{% if layergroup.editable is False %} disabled{% endif%}/>{% trans "Add" %}
+																<input type="checkbox" class="layergroup-input" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}" checked{% if layergroup.editable is False %} disabled{% endif%}/><span>{% trans "Add" %}</span>
 															{% else %}
-																<input type="checkbox" class="layergroup-input" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}"{% if layergroup.editable is False %} disabled{% endif%}/>{% trans "Add" %}
+																<input type="checkbox" class="layergroup-input" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}"{% if layergroup.editable is False %} disabled{% endif%}/><span>{% trans "Add" %}</span>
 															{% endif %}
 														</label>
 													</div>
@@ -321,15 +338,16 @@
 																		<span class="searchable-base-layer">{{l.title}}</span><br />
 																	</div>
 																</span>
-																<div class="checkbox pull-right{% if layergroup.editable is False %} disabled{% endif%}">
-																	<label>
+																<div class="proj-perms pull-right{% if layergroup.editable is False %} disabled{% endif%}">
+																	<label class="proj-perm-chip">
 																		{% if l.baselayer %}
-																			<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}-default" checked{% if layergroup.editable is False %} disabled{% endif%}/><span style="width:150px;">{% trans "Base by default" %}</span>
+																			<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}-default" checked{% if layergroup.editable is False %} disabled{% endif%}/><span>{% trans "Base by default" %}</span>
 																		{% else %}
-																			<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}-default"{% if layergroup.editable is False %} disabled{% endif%}/><span style="width:150px;">{% trans "Base by default" %}</span>
+																			<input type="radio" class="baselayers-default" name="baselayers-default" value="{{l.id}}" id="baselayer-{{l.id}}-default"{% if layergroup.editable is False %} disabled{% endif%}/><span>{% trans "Base by default" %}</span>
 																		{% endif %}
-																		
-																		<input type="radio" class="overview-layer" name="overview-layer" value="{{l.id}}" id="overview-{{l.id}}" /><span style="width:150px;" >{% trans "Overview" %}</span>
+																	</label>
+																	<label class="proj-perm-chip">
+																		<input type="radio" class="overview-layer" name="overview-layer" value="{{l.id}}" id="overview-{{l.id}}" /><span>{% trans "Overview" %}</span>
 
 																	</label>
 																</div>
@@ -388,12 +406,12 @@
 												</div>
 												<div class="product-info">
 													<span class="product-title"><span class="searchable-plugintitle">{{tool.title}}</span></span>
-													<div class="checkbox pull-right">
-														<label>
+													<div class="proj-perms pull-right">
+														<label class="proj-perm-chip">
 															{% if tool.checked %}
-																<input type="checkbox" class="project-tool" type="checkbox" data-title="{{tool.title}}" data-name="{{tool.name}}" data-description="{{tool.description}}" name="tool-{{tool.name}}" id="tool-{{tool.name}}" checked/>{% trans "Assign tool" %}
+																<input type="checkbox" class="project-tool" type="checkbox" data-title="{{tool.title}}" data-name="{{tool.name}}" data-description="{{tool.description}}" name="tool-{{tool.name}}" id="tool-{{tool.name}}" checked/><span>{% trans "Assign tool" %}</span>
 															{% else %}
-																<input type="checkbox" class="project-tool" type="checkbox" data-title="{{tool.title}}" data-name="{{tool.name}}" data-description="{{tool.description}}" name="tool-{{tool.name}}" id="tool-{{tool.name}}"/>{% trans "Assign tool" %}
+																<input type="checkbox" class="project-tool" type="checkbox" data-title="{{tool.title}}" data-name="{{tool.name}}" data-description="{{tool.description}}" name="tool-{{tool.name}}" id="tool-{{tool.name}}"/><span>{% trans "Assign tool" %}</span>
 															{% endif %}
 														</label>
 													</div>
@@ -478,6 +496,11 @@
 						</div>
               		</div>
           		</div>
+					<div class="gol-pg-footer gol-pg-footer--sticky">
+						<a href="{% url 'project_list' %}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
+						<button id="save_button" class="save_button btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Update" %}</button>
+					</div>
+				</div>
           	</form>
           	
 		</div>
@@ -533,6 +556,8 @@
 {% endblock %}
 
 {% block extra-scripts %}
+<script type="text/javascript" src="{% static "js/golImagePreview.js" %}"></script>
+<script type="text/javascript" src="{% static "js/golFormSections.js" %}"></script>
 <script type="text/javascript">
 
 	if ('{{project.custom_overview}}' == 'True'){

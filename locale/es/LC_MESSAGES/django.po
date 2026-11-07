@@ -2774,3 +2774,67 @@ msgstr "Abrir manual"
 msgctxt "documentation"
 msgid "No manuals are available at the moment."
 msgstr "No hay manuales disponibles en este momento."
+
+msgctxt "core"
+msgid "Breadcrumb"
+msgstr "Ruta de navegación"
+
+msgctxt "core"
+msgid "A link to another web application, shown in the portal next to the projects."
+msgstr "Un enlace a otra aplicación web, que se muestra en el portal junto a los proyectos."
+
+msgctxt "core"
+msgid "Add project"
+msgstr "Añadir proyecto"
+
+msgctxt "core"
+msgid "Update project"
+msgstr "Actualizar proyecto"
+
+msgctxt "core"
+msgid "A map viewer: the layer groups it shows, its tools, its base layers and who can open it."
+msgstr "Un visor de mapas: los grupos de capas que muestra, sus herramientas, sus capas base y quién puede abrirlo."
+
+msgctxt "core"
+msgid "Clone project"
+msgstr "Clonar proyecto"
+
+msgctxt "core"
+msgid "Creates a copy of the project, with its layers, in the workspace and datastore you choose."
+msgstr "Crea una copia del proyecto, con sus capas, en el espacio de trabajo y el almacén que elijas."
+
+msgctxt "core"
+msgid "Good to know"
+msgstr "Para tener en cuenta"
+
+msgctxt "core"
+msgid "The name, the workspace and the datastore are suggested from the title. You can change them."
+msgstr "El nombre, el espacio de trabajo y el almacén se proponen a partir del título. Puedes cambiarlos."
+
+msgctxt "core"
+msgid "Use lowercase letters, numbers and underscores, and start with a letter or a number."
+msgstr "Usa letras minúsculas, números y guiones bajos, y empieza por una letra o un número."
+
+msgctxt "core"
+msgid "The datastore is also the name of the database schema where the tables are copied."
+msgstr "El almacén es también el nombre del esquema de la base de datos donde se copian las tablas."
+
+msgctxt "core"
+msgid "Without «Copy data», the tables are created empty: only their structure is copied."
+msgstr "Sin «Copiar datos», las tablas se crean vacías: solo se copia su estructura."
+
+msgctxt "core"
+msgid "Table of contents and access"
+msgstr "Tabla de contenidos y acceso"
+
+msgctxt "core"
+msgid "Map and extent"
+msgstr "Mapa y extensión"
+
+msgctxt "core"
+msgid "Appearance"
+msgstr "Apariencia"
+
+msgctxt "core"
+msgid "{n} selected"
+msgstr "{n} seleccionadas"

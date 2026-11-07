@@ -2676,3 +2676,67 @@ msgstr "Obre el manual"
 msgctxt "documentation"
 msgid "No manuals are available at the moment."
 msgstr "No hi ha manuals disponibles en aquest moment."
+
+msgctxt "core"
+msgid "Breadcrumb"
+msgstr "Ruta de navegació"
+
+msgctxt "core"
+msgid "A link to another web application, shown in the portal next to the projects."
+msgstr "Un enllaç a una altra aplicació web, que es mostra al portal al costat dels projectes."
+
+msgctxt "core"
+msgid "Add project"
+msgstr "Afegeix un projecte"
+
+msgctxt "core"
+msgid "Update project"
+msgstr "Actualitza el projecte"
+
+msgctxt "core"
+msgid "A map viewer: the layer groups it shows, its tools, its base layers and who can open it."
+msgstr "Un visor de mapes: els grups de capes que mostra, les seves eines, les capes base i qui el pot obrir."
+
+msgctxt "core"
+msgid "Clone project"
+msgstr "Clona el projecte"
+
+msgctxt "core"
+msgid "Creates a copy of the project, with its layers, in the workspace and datastore you choose."
+msgstr "Crea una còpia del projecte, amb les seves capes, a l'espai de treball i el magatzem que triïs."
+
+msgctxt "core"
+msgid "Good to know"
+msgstr "Per tenir en compte"
+
+msgctxt "core"
+msgid "The name, the workspace and the datastore are suggested from the title. You can change them."
+msgstr "El nom, l'espai de treball i el magatzem es proposen a partir del títol. Els pots canviar."
+
+msgctxt "core"
+msgid "Use lowercase letters, numbers and underscores, and start with a letter or a number."
+msgstr "Fes servir lletres minúscules, números i guions baixos, i comença per una lletra o un número."
+
+msgctxt "core"
+msgid "The datastore is also the name of the database schema where the tables are copied."
+msgstr "El magatzem és també el nom de l'esquema de la base de dades on es copien les taules."
+
+msgctxt "core"
+msgid "Without «Copy data», the tables are created empty: only their structure is copied."
+msgstr "Sense «Copia les dades», les taules es creen buides: només se'n copia l'estructura."
+
+msgctxt "core"
+msgid "Table of contents and access"
+msgstr "Taula de continguts i accés"
+
+msgctxt "core"
+msgid "Map and extent"
+msgstr "Mapa i extensió"
+
+msgctxt "core"
+msgid "Appearance"
+msgstr "Aparença"
+
+msgctxt "core"
+msgid "{n} selected"
+msgstr "{n} seleccionades"
