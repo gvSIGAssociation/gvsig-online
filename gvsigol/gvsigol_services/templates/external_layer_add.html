@@ -43,7 +43,8 @@
 			</div>
 		</div>
 
-		<div class="gol-pg-card gol-pg-card--full gol-pg-card--keep-fields">
+		<div class="gol-pg-grid">
+		<div class="gol-pg-card gol-pg-card--full gol-pg-card--aside gol-pg-card--keep-fields">
 		<ul class="nav nav-tabs">
           	<li class="active"><a href="#tab-layer-general" data-toggle="tab"><i class="fa fa-cog tab-icon"></i> {% trans "General" %}</a></li>
           	<li><a href="#tab-layer-properties" data-toggle="tab"><i class="fa fa-paint-brush tab-icon"></i> {% trans "Display properties" %}</a></li>
@@ -267,6 +268,16 @@
 				<a href="{{back_url}}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
 				<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
 			</div>
+		</div>
+		<aside class="gol-pg-aside">
+			<h2 class="gol-pg-aside-title"><i class="fa fa-info-circle" aria-hidden="true"></i>{% trans "Good to know" context "services" %}</h2>
+			<ul class="gol-pg-aside-list gol-pg-aside-list--info">
+				<li>{% trans "The fields shown depend on the layer type." context "services" %}</li>
+				<li>{% trans "For WMS and WMTS services, the connect button reads the layers the service offers." context "services" %}</li>
+				<li>{% trans "The title is the name users see in the viewer. You can change it at any time." context "services" %}</li>
+				<li>{% trans "The data stays in the original service: if it is unavailable, the layer may not be displayed." context "services" %}</li>
+			</ul>
+		</aside>
 		</div>
 	</div>
 </div>

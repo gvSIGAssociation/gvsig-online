@@ -16,8 +16,7 @@
 .CodeMirror {
 		border: 1px solid var(--pf-border, #d2d6de);
 		border-radius: 6px;
-		min-height: 400px;
-		height: calc(100vh - 400px);}
+		height: 400px;}
 	/* Conexión a la que pertenece el disparador, en la barra superior */
 	.tr-context {
 		display: inline-flex;
@@ -89,7 +88,7 @@
 						<div class="tab-pane active" id="tab-general">
 							<div class="row" style="padding: 15px;">
 								<!-- Columna izquierda: Configuración -->
-								<div class="col-md-4">
+								<div class="col-md-4" id="trigger-config-column">
 									<div class="form-group">
 										<label for="name">{% trans "Name" %} <span class="text-danger">*</span></label>
 										<input type="text" class="form-control" id="name" name="name" required 
@@ -182,7 +181,7 @@
 								</div>
 
 								<!-- Columna derecha: Código SQL -->
-								<div class="col-md-8">
+								<div class="col-md-8" id="trigger-sql-column">
 									<div class="form-group" style="height: 100%;">
 										<label for="sql_code">{% trans "SQL Code" %} <span class="text-danger">*</span></label>
 										<textarea class="form-control" id="sql_code" name="sql_code"
@@ -247,16 +246,17 @@ END;{% endif %}</textarea>
 														<img src="{% static 'img/users.png' %}" alt="{% trans 'User role image' %}">
 													</div>
 													<div class="product-info">
-														<span class="product-title">
-															<span class="searchable-rolename">{{ role }}</span>
-															<div class="pull-right checkbox form-inline">
-																<label>
-																	<input type="checkbox" name="allowed_roles" value="{{ role }}" 
-																		{% if role in selected_roles %}checked{% endif %}/>
+														<div class="cp-role-row">
+															<div class="cp-role-info">
+																<div class="cp-role-name searchable-rolename">{{ role }}</div>
+															</div>
+															<div class="cp-perms">
+																<label class="cp-perm-chip">
+																	<input type="checkbox" name="allowed_roles" value="{{ role }}" {% if role in selected_roles %}checked{% endif %}/>
 																	<span>{% trans "Can use" %}</span>
 																</label>
 															</div>
-														</span>
+														</div>
 													</div>
 												</li>
 												{% empty %}
@@ -348,8 +348,34 @@ $(document).ready(function() {
 		autoRefresh: true
 	});
 	
-	// Ajustar altura del editor
-	sqlEditor.setSize(null, 'calc(100vh - 400px)');
+	// Igualar la columna del SQL (etiqueta + editor + ayuda) a la altura del formulario
+	var MIN_EDITOR_HEIGHT = 300;
+	var configColumn = document.getElementById('trigger-config-column');
+	var sqlColumn = document.getElementById('trigger-sql-column');
+	var sqlHelp = sqlColumn.querySelector('.tr-sql-help');
+	var twoColumnsQuery = window.matchMedia('(min-width: 992px)');
+
+	function syncEditorHeight() {
+		// En una sola columna se usa la altura definida en el CSS
+		if (!twoColumnsQuery.matches) {
+			sqlEditor.setSize(null, '');
+			return;
+		}
+		var configHeight = configColumn.getBoundingClientRect().height;
+		// Con la pestaña oculta las medidas son 0
+		if (configHeight === 0) {
+			return;
+		}
+		var editorRect = sqlEditor.getWrapperElement().getBoundingClientRect();
+		var spaceAbove = editorRect.top - sqlColumn.getBoundingClientRect().top;
+		var spaceBelow = sqlHelp.getBoundingClientRect().bottom - editorRect.bottom;
+		sqlEditor.setSize(null, Math.max(MIN_EDITOR_HEIGHT, Math.round(configHeight - spaceAbove - spaceBelow)));
+	}
+
+	// El formulario cambia de alto al mostrar esquemas o cargar datastores compatibles
+	var editorHeightObserver = new ResizeObserver(syncEditorHeight);
+	editorHeightObserver.observe(configColumn);
+	editorHeightObserver.observe(sqlHelp);
 	
 	// Esquemas disponibles de los datastores existentes (para sugerencias)
 	var availableSchemas = [

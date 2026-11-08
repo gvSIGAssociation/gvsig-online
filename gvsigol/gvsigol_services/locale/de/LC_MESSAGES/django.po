@@ -2094,9 +2094,8 @@ msgstr "Información detallada"
 msgid ""
 "Alert: this url is not in the same domain. Several browsers could not load "
 "this base layer due to cross-domain policy."
-msgstr "Alerta: esta URL no está en el mismo dominio. Algunos navegadores podrían no cargar esta capa base debido a la política de dominios cruzados."
-"Aviso: esta dirección no está en el mismo dominio. Algunos navegadores "
-"podrían no cargarla debido a la política de seguridad de dominio cruzado."
+msgstr ""
+"Alerta: esta URL no está en el mismo dominio. Algunos navegadores podrían no cargar esta capa base debido a la política de dominios cruzados."
 
 #: templates/external_layer_add.html:63 templates/external_layer_update.html:83
 msgid "Connect"
@@ -4197,3 +4196,79 @@ msgstr "Name und Server können nicht geändert werden."
 msgctxt "services"
 msgid "Drag a field below a group to include it in that group, and drag the groups to change their order in the editing form."
 msgstr "Ziehen Sie ein Feld unter eine Gruppe, um es ihr zuzuordnen, und ziehen Sie die Gruppen, um ihre Reihenfolge im Bearbeitungsformular zu ändern."
+
+msgctxt "services"
+msgid "The datastore and the resource name cannot be changed once the layer is saved."
+msgstr "Der Datenspeicher und der Ressourcenname können nach dem Speichern der Ebene nicht mehr geändert werden."
+
+msgctxt "services"
+msgid "The title is the name users see in the viewer. You can change it at any time."
+msgstr "Der Titel ist der Name, den die Benutzer im Viewer sehen. Sie können ihn jederzeit ändern."
+
+msgctxt "services"
+msgid "Some display properties are only available for certain datastore types."
+msgstr "Einige Anzeigeeigenschaften sind nur für bestimmte Datenspeichertypen verfügbar."
+
+msgctxt "services"
+msgid "Permissions define which roles can read, edit or manage the layer."
+msgstr "Berechtigungen legen fest, welche Rollen die Ebene lesen, bearbeiten oder verwalten können."
+
+msgctxt "services"
+msgid "Add the columns of the new table before saving the layer."
+msgstr "Fügen Sie die Spalten der neuen Tabelle hinzu, bevor Sie die Ebene speichern."
+
+msgctxt "services"
+msgid "The workspace, the datastore and the resource name cannot be changed."
+msgstr "Arbeitsbereich, Datenspeicher und Ressourcenname können nicht geändert werden."
+
+msgctxt "services"
+msgid "The fields shown depend on the layer type."
+msgstr "Die angezeigten Felder hängen vom Ebenentyp ab."
+
+msgctxt "services"
+msgid "For WMS and WMTS services, the connect button reads the layers the service offers."
+msgstr "Bei WMS- und WMTS-Diensten liest die Verbindungsschaltfläche die vom Dienst angebotenen Ebenen."
+
+msgctxt "services"
+msgid "The data stays in the original service: if it is unavailable, the layer may not be displayed."
+msgstr "Die Daten verbleiben im ursprünglichen Dienst: Ist er nicht verfügbar, wird die Ebene möglicherweise nicht angezeigt."
+
+msgctxt "services"
+msgid "The server and the name of the group cannot be changed once it is saved."
+msgstr "Server und Name der Gruppe können nach dem Speichern nicht mehr geändert werden."
+
+msgctxt "services"
+msgid "The server and the name of the group cannot be changed."
+msgstr "Server und Name der Gruppe können nicht geändert werden."
+
+msgctxt "services"
+msgid "Once the group is saved, edit it to create or publish its layers."
+msgstr "Bearbeiten Sie die Gruppe nach dem Speichern, um ihre Ebenen zu erstellen oder zu veröffentlichen."
+
+msgctxt "services"
+msgid "Drag the layers of the group to change their order."
+msgstr "Ziehen Sie die Ebenen der Gruppe, um ihre Reihenfolge zu ändern."
+
+msgctxt "services"
+msgid "Permissions define which roles can include the group in projects or manage it."
+msgstr "Berechtigungen legen fest, welche Rollen die Gruppe in Projekte aufnehmen oder verwalten können."
+
+msgctxt "services"
+msgid "The workspace, the type and the name cannot be changed once the datastore is saved."
+msgstr "Arbeitsbereich, Typ und Name können nach dem Speichern des Datenspeichers nicht mehr geändert werden."
+
+msgctxt "services"
+msgid "The workspace, the type and the name of the datastore cannot be changed."
+msgstr "Arbeitsbereich, Typ und Name des Datenspeichers können nicht geändert werden."
+
+msgctxt "services"
+msgid "PostGIS datastores use an existing database connection: if it is not listed, create it first."
+msgstr "PostGIS-Datenspeicher verwenden eine bestehende Datenbankverbindung: Falls sie nicht aufgeführt ist, erstellen Sie sie zuerst."
+
+msgctxt "services"
+msgid "Layers published from this datastore depend on it: changes here affect all of them."
+msgstr "Aus diesem Datenspeicher veröffentlichte Ebenen hängen von ihm ab: Änderungen wirken sich auf alle aus."
+
+msgctxt "services"
+msgid "Permissions define which roles can use the datastore or manage it."
+msgstr "Berechtigungen legen fest, welche Rollen den Datenspeicher verwenden oder verwalten können."

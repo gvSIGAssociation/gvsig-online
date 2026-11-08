@@ -51,7 +51,8 @@
 {% endif %}
 			</div>
 
-			<div class="gol-pg-card gol-pg-card--full gol-pg-card--keep-fields">
+			<div class="gol-pg-grid">
+			<div class="gol-pg-card gol-pg-card--full gol-pg-card--aside gol-pg-card--keep-fields">
 			<ul class="nav nav-tabs">
 				<li class="active"><a href="#tab-layergroup-general" data-toggle="tab"><i class="fa fa-cog tab-icon"></i> {% trans "General" %}</a></li>
 				{% if MANAGE_PERMISSION_UI or user.is_superuser %} <li><a href="#tab-layergroup-permissions" data-toggle="tab"><i class="fa fa-lock tab-icon"></i> {% trans "Permissions" %}</a></li> {% endif %}
@@ -120,6 +121,16 @@
 					<a href="{{back_url}}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
 					<button type="button" id="save_button" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
 				</div>
+			</div>
+			<aside class="gol-pg-aside">
+				<h2 class="gol-pg-aside-title"><i class="fa fa-info-circle" aria-hidden="true"></i>{% trans "Good to know" context "services" %}</h2>
+				<ul class="gol-pg-aside-list gol-pg-aside-list--info">
+					<li>{% trans "The server and the name of the group cannot be changed once it is saved." context "services" %}</li>
+					<li>{% trans "The title is the name users see in the viewer. You can change it at any time." context "services" %}</li>
+					<li>{% trans "Once the group is saved, edit it to create or publish its layers." context "services" %}</li>
+					{% if MANAGE_PERMISSION_UI or user.is_superuser %}<li>{% trans "Permissions define which roles can include the group in projects or manage it." context "services" %}</li>{% endif %}
+				</ul>
+			</aside>
 			</div>
 		</div>
 	</div>

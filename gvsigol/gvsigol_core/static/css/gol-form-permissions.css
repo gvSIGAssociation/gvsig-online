@@ -36,6 +36,7 @@
 /* ---- Lista de roles sobre products-list de AdminLTE ---- */
 #read-list-box .products-list > .item,
 #connection-permissions-box .products-list > .item,
+#trigger-permissions-box .products-list > .item,
 #datastore-permissions-box .products-list > .item {
 	display: flex;
 	align-items: center;
@@ -44,6 +45,7 @@
 }
 #read-list-box .products-list .product-img,
 #connection-permissions-box .products-list .product-img,
+#trigger-permissions-box .products-list .product-img,
 #datastore-permissions-box .products-list .product-img {
 	flex-shrink: 0;
 	width: 32px;
@@ -51,6 +53,7 @@
 }
 #read-list-box .products-list .product-img img,
 #connection-permissions-box .products-list .product-img img,
+#trigger-permissions-box .products-list .product-img img,
 #datastore-permissions-box .products-list .product-img img {
 	width: 20px;
 	height: 20px;
@@ -58,6 +61,7 @@
 }
 #read-list-box .products-list .product-info,
 #connection-permissions-box .products-list .product-info,
+#trigger-permissions-box .products-list .product-info,
 #datastore-permissions-box .products-list .product-info { flex: 1; min-width: 0; }
 
 /* ---- Variante de grupo de capas: lista propia en vez de products-list ---- */

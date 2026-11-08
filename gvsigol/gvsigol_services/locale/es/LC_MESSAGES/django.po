@@ -3168,10 +3168,7 @@ msgid ""
 "Alert: this url is not in the same domain. Several browsers could not load "
 "this base layer due to cross-domain policy."
 msgstr ""
-"Alerta: esta URL no está en el mismo dominio. Algunos navegadores podrían no "
-"cargar esta capa base debido a la política de dominios cruzados.Aviso: esta "
-"dirección no está en el mismo dominio. Algunos navegadores podrían no "
-"cargarla debido a la política de seguridad de dominio cruzado."
+"Alerta: esta URL no está en el mismo dominio. Algunos navegadores podrían no cargar esta capa base debido a la política de dominios cruzados."
 
 #: gvsigol_services/templates/external_layer_add.html:145
 #: gvsigol_services/templates/external_layer_update.html:124
@@ -5648,3 +5645,79 @@ msgstr "El nombre y el servidor no se pueden cambiar."
 msgctxt "services"
 msgid "Drag a field below a group to include it in that group, and drag the groups to change their order in the editing form."
 msgstr "Arrastra un campo debajo de un grupo para incluirlo en él, y arrastra los grupos para cambiar su orden en el formulario de edición."
+
+msgctxt "services"
+msgid "The datastore and the resource name cannot be changed once the layer is saved."
+msgstr "El almacén de datos y el nombre del recurso no se pueden cambiar una vez guardada la capa."
+
+msgctxt "services"
+msgid "The title is the name users see in the viewer. You can change it at any time."
+msgstr "El título es el nombre que ven los usuarios en el visor. Puedes cambiarlo cuando quieras."
+
+msgctxt "services"
+msgid "Some display properties are only available for certain datastore types."
+msgstr "Algunas propiedades de visualización solo están disponibles para determinados tipos de almacén."
+
+msgctxt "services"
+msgid "Permissions define which roles can read, edit or manage the layer."
+msgstr "Los permisos indican qué roles pueden leer, editar o administrar la capa."
+
+msgctxt "services"
+msgid "Add the columns of the new table before saving the layer."
+msgstr "Añade las columnas de la nueva tabla antes de guardar la capa."
+
+msgctxt "services"
+msgid "The workspace, the datastore and the resource name cannot be changed."
+msgstr "El espacio de trabajo, el almacén de datos y el nombre del recurso no se pueden cambiar."
+
+msgctxt "services"
+msgid "The fields shown depend on the layer type."
+msgstr "Los campos que se muestran dependen del tipo de capa."
+
+msgctxt "services"
+msgid "For WMS and WMTS services, the connect button reads the layers the service offers."
+msgstr "En los servicios WMS y WMTS, el botón de conectar lee las capas que ofrece el servicio."
+
+msgctxt "services"
+msgid "The data stays in the original service: if it is unavailable, the layer may not be displayed."
+msgstr "Los datos siguen en el servicio original: si no está disponible, la capa puede no mostrarse."
+
+msgctxt "services"
+msgid "The server and the name of the group cannot be changed once it is saved."
+msgstr "El servidor y el nombre del grupo no se pueden cambiar una vez guardado."
+
+msgctxt "services"
+msgid "The server and the name of the group cannot be changed."
+msgstr "El servidor y el nombre del grupo no se pueden cambiar."
+
+msgctxt "services"
+msgid "Once the group is saved, edit it to create or publish its layers."
+msgstr "Una vez guardado el grupo, edítalo para crear o publicar sus capas."
+
+msgctxt "services"
+msgid "Drag the layers of the group to change their order."
+msgstr "Arrastra las capas del grupo para cambiar su orden."
+
+msgctxt "services"
+msgid "Permissions define which roles can include the group in projects or manage it."
+msgstr "Los permisos indican qué roles pueden incluir el grupo en proyectos o administrarlo."
+
+msgctxt "services"
+msgid "The workspace, the type and the name cannot be changed once the datastore is saved."
+msgstr "El espacio de trabajo, el tipo y el nombre no se pueden cambiar una vez guardado el almacén."
+
+msgctxt "services"
+msgid "The workspace, the type and the name of the datastore cannot be changed."
+msgstr "El espacio de trabajo, el tipo y el nombre del almacén no se pueden cambiar."
+
+msgctxt "services"
+msgid "PostGIS datastores use an existing database connection: if it is not listed, create it first."
+msgstr "Los almacenes PostGIS usan una conexión a base de datos existente: si no aparece en la lista, créala antes."
+
+msgctxt "services"
+msgid "Layers published from this datastore depend on it: changes here affect all of them."
+msgstr "Las capas publicadas desde este almacén dependen de él: los cambios las afectan a todas."
+
+msgctxt "services"
+msgid "Permissions define which roles can use the datastore or manage it."
+msgstr "Los permisos indican qué roles pueden usar el almacén o administrarlo."

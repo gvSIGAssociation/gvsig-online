@@ -688,3 +688,107 @@
 	font-size: 20px;
 	vertical-align: middle;
 }
+
+/* =================================================================
+   Formularios de gvsigol_services con panel de ayuda (.gol-pg-card--aside)
+   Mismo aspecto que los de usuario, sobre tarjetas --full y --keep-fields:
+   solo se pasa la tarjeta a la rejilla y se cambian color, borde y altura
+   de los campos. Anchos, disposición y comportamiento no se tocan.
+   :where() mantiene la especificidad baja para que sigan mandando los
+   estados readonly/disabled y los input-group de Bootstrap. La pestaña
+   GeoCopilot de layer_update queda fuera a propósito.
+   ================================================================= */
+.gol-pg-card.gol-pg-card--aside { flex: 1 1 560px; }
+
+.gol-pg-card--aside :where(.tab-pane:not(#tab-layer-geocopilot)) .form-control:where(:not(.input-sm, .input-lg)) {
+	border-color: var(--gol-pg-input-border);
+	border-radius: 8px;
+	background-color: var(--gol-white);
+}
+/* Áreas de texto y select múltiples crecen con su contenido */
+.gol-pg-card--aside :where(.tab-pane:not(#tab-layer-geocopilot)) .form-control:where(:not(.input-sm, .input-lg)):where(:not(textarea, select[multiple], select[size])) { height: 34px; }
+.gol-pg-card--aside :where(.tab-pane:not(#tab-layer-geocopilot)) .form-control:where(:not(.input-sm, .input-lg)):where(:not([readonly], [disabled])):hover { border-color: var(--gol-pg-input-border-hv); }
+.gol-pg-card--aside :where(.tab-pane:not(#tab-layer-geocopilot)) .form-control:where(:not(.input-sm, .input-lg)):focus {
+	border-color: var(--gol-accent);
+	background-color: var(--gol-white);
+	box-shadow: 0 0 0 1px var(--gol-accent);
+}
+.gol-pg-card--aside :where(.tab-pane:not(#tab-layer-geocopilot)) .form-control:where(:not(.input-sm, .input-lg))::placeholder { color: var(--gol-pg-placeholder); opacity: 1; }
+
+/* Etiquetas de campo; los chips de permisos conservan su color */
+.gol-pg-card--aside :where(.tab-pane:not(#tab-layer-geocopilot)) :where(.form-group, [class*="col-md-"]) > label:where(:not([class*="chip"])) {
+	color: var(--gol-text);
+}
+
+/* Desplegables select2 con el mismo marco que los campos */
+.gol-pg-card--aside .select2-container--default .select2-selection--single,
+.gol-pg-card--aside .select2-container--default .select2-selection--multiple {
+	border-color: var(--gol-pg-input-border);
+	border-radius: 8px;
+}
+.gol-pg-card--aside .select2-container--default.select2-container--focus .select2-selection--single,
+.gol-pg-card--aside .select2-container--default.select2-container--focus .select2-selection--multiple,
+.gol-pg-card--aside .select2-container--default.select2-container--open .select2-selection--single,
+.gol-pg-card--aside .select2-container--default.select2-container--open .select2-selection--multiple {
+	border-color: var(--gol-accent);
+}
+
+/* =================================================================
+   Formularios de capa externa (external_layer_add y external_layer_update)
+   Solo aspecto. Tipo y Versión siguen siendo select nativos porque el JS
+   les cambia las opciones directamente; se dibujan como los select2.
+   ================================================================= */
+:is(#external-layer-add-form, #external-layer-update-form) select.form-control:not([multiple]):not([size]) {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	padding-right: 28px;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath fill='%23888' d='M0 0h8L4 5z'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 9px center;
+	background-size: 8px 5px;
+}
+/* select2 fija su ancho al iniciarse y quedaba más estrecho que los demás campos */
+:is(#external-layer-add-form, #external-layer-update-form) .select2-container { width: 100% !important; }
+:is(#external-layer-add-form, #external-layer-update-form) .select2-selection__rendered { font-size: 13px; color: var(--gol-text); }
+
+/* Botón Conectar */
+:is(#external-layer-add-form, #external-layer-update-form) #connect-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	height: 34px;
+	padding: 0 16px;
+	border: 1px solid var(--gol-accent);
+	border-radius: 8px;
+	background: var(--gol-accent-lt, rgba(74, 127, 165, 0.08));
+	color: var(--gol-accent);
+	font-size: 13px;
+	font-weight: 600;
+	box-shadow: none;
+	transition: background var(--gol-transition), color var(--gol-transition);
+}
+:is(#external-layer-add-form, #external-layer-update-form) #connect-button:hover,
+:is(#external-layer-add-form, #external-layer-update-form) #connect-button:focus {
+	background: var(--gol-accent);
+	color: var(--gol-white);
+}
+
+/* Avisos. No se fija display: el JS los muestra y oculta con display. */
+:is(#external-layer-add-form, #external-layer-update-form) .alert-box-message {
+	position: relative;
+	padding: 9px 14px 9px 36px;
+	border: 1px solid #f1dfba;
+	border-left: 3px solid #d9902f;
+	border-radius: 8px;
+	background: #fff9ee;
+	color: #7a5312;
+	font-size: 12px;
+	line-height: 1.45;
+}
+:is(#external-layer-add-form, #external-layer-update-form) .alert-box-message > .fa {
+	position: absolute;
+	top: 11px;
+	left: 13px;
+	color: #d9902f;
+}

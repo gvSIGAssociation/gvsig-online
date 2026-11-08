@@ -4639,3 +4639,79 @@ msgstr "El nom i el servidor no es poden canviar."
 msgctxt "services"
 msgid "Drag a field below a group to include it in that group, and drag the groups to change their order in the editing form."
 msgstr "Arrossega un camp davall d'un grup per a incloure'l, i arrossega els grups per a canviar-ne l'orde en el formulari d'edició."
+
+msgctxt "services"
+msgid "The datastore and the resource name cannot be changed once the layer is saved."
+msgstr "El magatzem de dades i el nom del recurs no es poden canviar una vegada guardada la capa."
+
+msgctxt "services"
+msgid "The title is the name users see in the viewer. You can change it at any time."
+msgstr "El títol és el nom que veuen els usuaris en el visor. El pots canviar quan vullgues."
+
+msgctxt "services"
+msgid "Some display properties are only available for certain datastore types."
+msgstr "Algunes propietats de visualització només estan disponibles per a determinats tipus de magatzem."
+
+msgctxt "services"
+msgid "Permissions define which roles can read, edit or manage the layer."
+msgstr "Els permisos indiquen quins rols poden llegir, editar o administrar la capa."
+
+msgctxt "services"
+msgid "Add the columns of the new table before saving the layer."
+msgstr "Afig les columnes de la nova taula abans de guardar la capa."
+
+msgctxt "services"
+msgid "The workspace, the datastore and the resource name cannot be changed."
+msgstr "L'espai de treball, el magatzem de dades i el nom del recurs no es poden canviar."
+
+msgctxt "services"
+msgid "The fields shown depend on the layer type."
+msgstr "Els camps que es mostren depenen del tipus de capa."
+
+msgctxt "services"
+msgid "For WMS and WMTS services, the connect button reads the layers the service offers."
+msgstr "En els servicis WMS i WMTS, el botó de connectar llig les capes que oferix el servici."
+
+msgctxt "services"
+msgid "The data stays in the original service: if it is unavailable, the layer may not be displayed."
+msgstr "Les dades continuen en el servici original: si no està disponible, pot ser que la capa no es mostre."
+
+msgctxt "services"
+msgid "The server and the name of the group cannot be changed once it is saved."
+msgstr "El servidor i el nom del grup no es poden canviar una vegada guardat."
+
+msgctxt "services"
+msgid "The server and the name of the group cannot be changed."
+msgstr "El servidor i el nom del grup no es poden canviar."
+
+msgctxt "services"
+msgid "Once the group is saved, edit it to create or publish its layers."
+msgstr "Una vegada guardat el grup, edita'l per a crear o publicar les seues capes."
+
+msgctxt "services"
+msgid "Drag the layers of the group to change their order."
+msgstr "Arrossega les capes del grup per a canviar-ne l'orde."
+
+msgctxt "services"
+msgid "Permissions define which roles can include the group in projects or manage it."
+msgstr "Els permisos indiquen quins rols poden incloure el grup en projectes o administrar-lo."
+
+msgctxt "services"
+msgid "The workspace, the type and the name cannot be changed once the datastore is saved."
+msgstr "L'espai de treball, el tipus i el nom no es poden canviar una vegada guardat el magatzem."
+
+msgctxt "services"
+msgid "The workspace, the type and the name of the datastore cannot be changed."
+msgstr "L'espai de treball, el tipus i el nom del magatzem no es poden canviar."
+
+msgctxt "services"
+msgid "PostGIS datastores use an existing database connection: if it is not listed, create it first."
+msgstr "Els magatzems PostGIS utilitzen una connexió existent a la base de dades: si no apareix en la llista, crea-la abans."
+
+msgctxt "services"
+msgid "Layers published from this datastore depend on it: changes here affect all of them."
+msgstr "Les capes publicades des d'este magatzem en depenen: els canvis les afecten totes."
+
+msgctxt "services"
+msgid "Permissions define which roles can use the datastore or manage it."
+msgstr "Els permisos indiquen quins rols poden utilitzar el magatzem o administrar-lo."

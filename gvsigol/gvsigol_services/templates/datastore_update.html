@@ -39,7 +39,8 @@
 					</div>
 					{% endif %}
 
-				<div class="gol-pg-card gol-pg-card--full gol-pg-card--keep-fields">
+				<div class="gol-pg-grid">
+				<div class="gol-pg-card gol-pg-card--full gol-pg-card--aside gol-pg-card--keep-fields">
 				<ul class="nav nav-tabs">
 					<li class="active"><a href="#tab-datastore" data-toggle="tab"><i class="fa fa-database tab-icon"></i> {% trans "Datastore" %}</a></li>
 					<li><a href="#tab-permissions" data-toggle="tab"><i class="fa fa-lock tab-icon"></i> {% trans "Permissions" %}</a></li>
@@ -166,6 +167,15 @@
 						<a href="{% url 'datastore_list' %}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
 						<button id="save_button" type="button" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Update" %}</button>
 					</div>
+				</div>
+				<aside class="gol-pg-aside">
+					<h2 class="gol-pg-aside-title"><i class="fa fa-info-circle" aria-hidden="true"></i>{% trans "Good to know" context "services" %}</h2>
+					<ul class="gol-pg-aside-list gol-pg-aside-list--info">
+						<li>{% trans "The workspace, the type and the name of the datastore cannot be changed." context "services" %}</li>
+						<li>{% trans "Layers published from this datastore depend on it: changes here affect all of them." context "services" %}</li>
+						<li>{% trans "Permissions define which roles can use the datastore or manage it." context "services" %}</li>
+					</ul>
+				</aside>
 				</div>
 			</form>
 		</div>

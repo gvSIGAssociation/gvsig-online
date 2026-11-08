@@ -3011,3 +3011,79 @@ msgstr "O nome e o servidor não podem ser alterados."
 msgctxt "services"
 msgid "Drag a field below a group to include it in that group, and drag the groups to change their order in the editing form."
 msgstr "Arraste um campo para baixo de um grupo para incluí-lo nele, e arraste os grupos para mudar sua ordem no formulário de edição."
+
+msgctxt "services"
+msgid "The datastore and the resource name cannot be changed once the layer is saved."
+msgstr "O armazém de dados e o nome do recurso não podem ser alterados depois que a camada for salva."
+
+msgctxt "services"
+msgid "The title is the name users see in the viewer. You can change it at any time."
+msgstr "O título é o nome que os usuários veem no visualizador. Você pode alterá-lo a qualquer momento."
+
+msgctxt "services"
+msgid "Some display properties are only available for certain datastore types."
+msgstr "Algumas propriedades de visualização só estão disponíveis para determinados tipos de armazém."
+
+msgctxt "services"
+msgid "Permissions define which roles can read, edit or manage the layer."
+msgstr "As permissões definem quais funções podem ler, editar ou gerenciar a camada."
+
+msgctxt "services"
+msgid "Add the columns of the new table before saving the layer."
+msgstr "Adicione as colunas da nova tabela antes de salvar a camada."
+
+msgctxt "services"
+msgid "The workspace, the datastore and the resource name cannot be changed."
+msgstr "O espaço de trabalho, o armazém de dados e o nome do recurso não podem ser alterados."
+
+msgctxt "services"
+msgid "The fields shown depend on the layer type."
+msgstr "Os campos exibidos dependem do tipo de camada."
+
+msgctxt "services"
+msgid "For WMS and WMTS services, the connect button reads the layers the service offers."
+msgstr "Nos serviços WMS e WMTS, o botão de conexão lê as camadas oferecidas pelo serviço."
+
+msgctxt "services"
+msgid "The data stays in the original service: if it is unavailable, the layer may not be displayed."
+msgstr "Os dados permanecem no serviço original: se ele não estiver disponível, a camada pode não ser exibida."
+
+msgctxt "services"
+msgid "The server and the name of the group cannot be changed once it is saved."
+msgstr "O servidor e o nome do grupo não podem ser alterados depois de salvo."
+
+msgctxt "services"
+msgid "The server and the name of the group cannot be changed."
+msgstr "O servidor e o nome do grupo não podem ser alterados."
+
+msgctxt "services"
+msgid "Once the group is saved, edit it to create or publish its layers."
+msgstr "Depois de salvar o grupo, edite-o para criar ou publicar suas camadas."
+
+msgctxt "services"
+msgid "Drag the layers of the group to change their order."
+msgstr "Arraste as camadas do grupo para alterar sua ordem."
+
+msgctxt "services"
+msgid "Permissions define which roles can include the group in projects or manage it."
+msgstr "As permissões definem quais funções podem incluir o grupo em projetos ou gerenciá-lo."
+
+msgctxt "services"
+msgid "The workspace, the type and the name cannot be changed once the datastore is saved."
+msgstr "O espaço de trabalho, o tipo e o nome não podem ser alterados depois de salvar o armazém."
+
+msgctxt "services"
+msgid "The workspace, the type and the name of the datastore cannot be changed."
+msgstr "O espaço de trabalho, o tipo e o nome do armazém não podem ser alterados."
+
+msgctxt "services"
+msgid "PostGIS datastores use an existing database connection: if it is not listed, create it first."
+msgstr "Os armazéns PostGIS usam uma conexão existente com o banco de dados: se ela não estiver na lista, crie-a primeiro."
+
+msgctxt "services"
+msgid "Layers published from this datastore depend on it: changes here affect all of them."
+msgstr "As camadas publicadas a partir deste armazém dependem dele: as alterações afetam todas."
+
+msgctxt "services"
+msgid "Permissions define which roles can use the datastore or manage it."
+msgstr "As permissões definem quais funções podem usar o armazém ou gerenciá-lo."
