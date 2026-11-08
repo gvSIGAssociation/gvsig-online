@@ -193,6 +193,13 @@ class NormalizationTests(SimpleTestCase):
         params = normalize_proposal(payload, load_catalog(), canvas)['ops'][0]['parameters']
         self.assertEqual(params, {'value': '2'})
 
+    def test_dropdowns_keep_their_list(self):
+        filled = self._node('output_Postgis', {'db-option': 'gis', 'schema-name-option': 'ds_a', 'tablename': 'cruce'})
+        self.assertEqual(filled['get_schema-name-option'], ['ds_a'])
+        self.assertEqual(filled['get_tablename'], ['cruce'])
+        kept = self._node('input_Postgis', {'schema-name': 'a', 'tablename': 't', 'get_tablename': ['t', 'otra']})
+        self.assertEqual(kept['get_tablename'], ['t', 'otra'])
+
     def test_update_keeps_list_format(self):
         payload = {'mode': 'patch', 'ops': [{'op': 'update_node', 'id': 'n1', 'parameters': {'attr': 'a b'}}]}
         canvas = {'nodes': [{'alias': 'n1', 'type': 'trans_KeepAttr'}]}

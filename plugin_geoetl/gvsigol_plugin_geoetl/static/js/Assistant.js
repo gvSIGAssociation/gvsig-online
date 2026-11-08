@@ -4,6 +4,12 @@
 	var STORAGE_WIDTH = 'etl-assistant-width';
 	var STORAGE_OPEN = 'etl-assistant-open';
 	var UNDO_LABEL = 'etl-assistant';
+	var COMPOSER_MAX_HEIGHT = 140;
+	var OPTION_LISTS = {
+		output_Postgis: {'schema-name-option': 'get_schema-name-option', tablename: 'get_tablename'},
+		input_Postgis: {'schema-name': 'get_schema-name', tablename: 'get_tablename'},
+		input_SqlServer: {'schema-name': 'get_schema-name', 'table-name': 'get_table-name'}
+	};
 	var UNDO_LABEL_PARAM = 'etl-assistant-param';   // cambio de un parámetro: no es la propuesta
 	var panel, messagesEl, input, examplesEl, contextEl, sendBtn;
 	var selectedFigure = null;
@@ -653,26 +659,45 @@
 	}
 
 	function wrongFileText(allowed) {
-		return t('The selected file is not valid. Expected type:') + ' ' + allowed.join(', ');
+		return t('That file is not valid. Choose a file of type:') + ' ' + allowed.map(function (extension) {
+			return '.' + extension;
+		}).join(', ');
 	}
 
 	/* Botón "Seleccionar fichero" con la ruta elegida al lado. onChange recibe {value, label}. */
 	function filePickerField(box, extensions, onChange) {
 		var chosen = null;
+		var kinds = (extensions || '').split(',').filter(Boolean).map(function (extension) {
+			return '.' + extension;
+		}).join(', ');
+		var error = $('<div class="pl-assistant__field-error"></div>').hide();
+		var pick = $('<button type="button" class="pl-assistant__file-drop js-file-picker"></button>')
+			.append('<i class="fa fa-folder-open-o" aria-hidden="true"></i> ')
+			.append($('<span></span>').text(t('Select file')));
+		if (kinds) {
+			pick.append($('<small></small>').text(kinds));
+		}
 		var name = $('<span class="pl-assistant__file-name"></span>');
-		var note = $('<div class="pl-assistant__issue-note"></div>').hide();
-		var button = $('<button type="button" class="btn-default btn-xs js-file-picker"></button>').text(t('Select file'));
-		button.on('click', function () {
-			note.hide();
+		var change = $('<button type="button" class="btn-link btn-xs js-file-change"></button>').text(t('Change file'));
+		var done = $('<div class="pl-assistant__file-chosen"></div>')
+			.append('<i class="fa fa-check-circle" aria-hidden="true"></i>').append(name).append(change).hide();
+
+		function open() {
+			error.hide();
 			openFileManager(extensions, function (value, label) {
 				chosen = {value: value, label: label};
-				name.text(label);
+				name.text(label).attr('title', label);
+				pick.hide();
+				done.css('display', 'flex');
 				onChange(chosen);
 			}, function (allowed) {
-				note.text(wrongFileText(allowed)).show();
+				error.text(wrongFileText(allowed)).show();
 			});
-		});
-		box.append($('<div class="pl-assistant__file"></div>').append(button).append(name)).append(note);
+		}
+
+		pick.on('click', open);
+		change.on('click', open);
+		box.append(pick).append(done).append(error);
 		return {value: function () {
 			return chosen;
 		}};
@@ -709,8 +734,13 @@
 		Object.keys(changes).forEach(function (key) {
 			if (changes[key] === undefined) {
 				delete params[key];
-			} else {
-				params[key] = changes[key];
+				return;
+			}
+			params[key] = changes[key];
+			// La lista del desplegable se guarda con el nodo: sin ella no se vería al reabrirlo
+			var listName = (OPTION_LISTS[figure.NAME] || {})[key];
+			if (listName && (params[listName] || []).indexOf(changes[key]) === -1) {
+				params[listName] = (params[listName] || []).concat([changes[key]]);
 			}
 		});
 		try {
@@ -916,21 +946,8 @@
 			}};
 		}
 
-		// Muchas opciones: buscador + lista
-		var search = $('<input type="search" class="form-control input-sm pl-assistant__search">')
-			.attr('placeholder', t('Search…')).attr('aria-label', t('Search…'));
-		var select = $('<select class="form-control input-sm pl-assistant__select" size="6"></select>')
-			.attr('aria-label', question.label || question.text);
-		options.forEach(function (option) {
-			select.append($('<option></option>').val(option.value).text(option.label).data('label', option.label));
-		});
-		search.on('input', function () {
-			var needle = search.val().trim().toLowerCase();
-			select.find('option').each(function () {
-				var match = !needle || $(this).text().toLowerCase().indexOf(needle) !== -1;
-				$(this).prop('hidden', !match);
-			});
-		});
+		// Muchas opciones: un desplegable con buscador
+		var select = selectWithSearch(box, options, question.label || question.text);
 		select.on('change', function () {
 			if (select.val()) {
 				other.val('');
@@ -939,10 +956,9 @@
 		});
 		other.on('input', function () {
 			if (other.val().trim()) {
-				select.val(null);
+				select.val('').trigger('change.select2');
 			}
 		});
-		box.append(search).append(select);
 		if (allowOther) {
 			box.append(other);
 		}
@@ -951,8 +967,7 @@
 			if (text) {
 				return [{value: text, label: text}];
 			}
-			var picked = select.find('option:selected');
-			return picked.length ? [{value: picked.val(), label: picked.data('label')}] : null;
+			return select.val() ? [{value: select.val(), label: select.find('option:selected').text()}] : null;
 		}};
 	}
 
@@ -964,15 +979,19 @@
 
 	function questionsCard(message) {
 		var card = $('<div class="pl-assistant__card pl-assistant__questions"></div>');
-		card.append($('<div class="pl-assistant__card-title"></div>').text(t('The assistant needs to know')));
+		var progress = $('<span class="pl-assistant__progress"></span>');
+		card.append($('<div class="pl-assistant__card-title pl-assistant__questions-head"></div>')
+			.append($('<span></span>').text(t('The assistant needs to know'))).append(progress));
 		var state = message.questionsState;
 		var controls = [];
-		var submit = $('<button type="button" class="btn-primary"></button>').text(t('Answer questions'));
+		var submit = $('<button type="button" class="btn-pl-add"></button>').text(t('Answer questions'));
 
 		function refresh() {
-			submit.prop('disabled', busy || controls.some(function (control) {
-				return !control.value();
-			}));
+			var answered = controls.filter(function (control) {
+				return control.value();
+			}).length;
+			progress.text(t('{done} of {total}').replace('{done}', answered).replace('{total}', controls.length));
+			submit.prop('disabled', busy || answered < controls.length);
 		}
 
 		/* Tras crear un almacén: la lista nueva, con el recién creado ya marcado. */
@@ -1002,7 +1021,7 @@
 					fresh.element.find('input, select').filter(function () {
 						return this.value === added.value;
 					}).prop('checked', true);
-					fresh.element.find('select').val(added.value);
+					fresh.element.find('select').val(added.value).trigger('change.select2');
 				}
 				refresh();
 			}, function () {
@@ -1069,7 +1088,7 @@
 				submit.trigger('click');
 			}
 		});
-		card.append($('<div class="pl-assistant__actions"></div>').append(submit));
+		card.append($('<div class="pl-assistant__actions pl-assistant__actions--end"></div>').append(submit));
 		refresh();
 		return card;
 	}
@@ -1233,25 +1252,17 @@
 		});
 	}
 
-	/* Lista desplegable; con muchas opciones lleva buscador. Se añade a box y devuelve el select. */
+	/* Desplegable con buscador integrado (Select2, como los nodos). Se añade a box y devuelve el select. */
 	function selectWithSearch(box, options, label) {
 		var select = $('<select class="form-control input-sm"></select>').attr('aria-label', label);
 		select.append($('<option value=""></option>').text(t('Choose an option…')));
 		options.forEach(function (option) {
 			select.append($('<option></option>').val(option.value).text(option.label));
 		});
-		if (options.length > RADIO_LIMIT) {
-			var search = $('<input type="search" class="form-control input-sm">')
-				.attr('placeholder', t('Search…')).attr('aria-label', t('Search…'));
-			search.on('input', function () {
-				var needle = search.val().trim().toLowerCase();
-				select.find('option').each(function () {
-					$(this).prop('hidden', !!this.value && $(this).text().toLowerCase().indexOf(needle) === -1);
-				});
-			});
-			box.append(search);
-		}
 		box.append(select);
+		if ($.fn.select2) {
+			select.select2({width: '100%', placeholder: t('Choose an option…')});
+		}
 		return select;
 	}
 
@@ -1437,7 +1448,7 @@
 		closeGuided();
 		var form = $('<div class="pl-assistant__card pl-assistant__guided"></div>');
 		var fields = {};
-		var submit = $('<button type="button" class="btn-primary"></button>').text(t('Create the flow')).prop('disabled', true);
+		var submit = $('<button type="button" class="btn-pl-add"></button>').text(t('Create the flow')).prop('disabled', true);
 		var note = $('<div class="pl-assistant__issue-note"></div>').hide();
 
 		function refresh() {
@@ -2001,7 +2012,7 @@
 		remember(question, {types: types, aliasMap: invertAlias(summary)});
 		appendMessage(question);
 		setExamplesVisible(false);
-		input.val('').css('height', 'auto');
+		input.val('').css({height: 'auto', overflowY: 'hidden'});
 		updateCounter();
 		setBusy(true);
 		var typing = appendMessage({role: 'assistant', typing: true, content: ''});
@@ -2472,8 +2483,12 @@
 			}
 		});
 		input.on('input', function () {
+			// scrollHeight no cuenta el borde: sin sumarlo sale la barra con la segunda línea
+			var border = this.offsetHeight - this.clientHeight;
 			this.style.height = 'auto';
-			this.style.height = Math.min(this.scrollHeight, 140) + 'px';
+			var needed = this.scrollHeight + border;
+			this.style.height = Math.min(needed, COMPOSER_MAX_HEIGHT) + 'px';
+			this.style.overflowY = needed > COMPOSER_MAX_HEIGHT ? 'auto' : 'hidden';
 			updateCounter();
 		});
 		$(document).on('keydown', function (event) {

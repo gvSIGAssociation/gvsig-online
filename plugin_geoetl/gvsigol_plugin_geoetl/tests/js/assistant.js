@@ -87,6 +87,8 @@ function makeEnv(opts = {}) {
     w.etlFindGear = (label) => label.__gear;                       // NodeHeader.js
     // Pila de Deshacer mínima de draw2d y lo que usa applyProposal
     w.__filled = [];
+    w.__select2 = [];
+    w.$.fn.select2 = function (options) { w.__select2.push({ el: this[0], options }); return this; };
     w.__stack = {
         done: [], label: null, inTx: false,
         addEventListener() {},
@@ -145,6 +147,10 @@ function makeEnv(opts = {}) {
     w.eval(read('Assistant.js'));
     return w;
 }
+
+// Parámetros del primer nodo, sin las listas de los desplegables (get_*)
+const params = (w) => JSON.stringify(Object.fromEntries(
+    Object.entries(JSON.parse(w.eval('JSON.stringify(jsonParams[0].parameters[0])'))).filter(([k]) => !k.startsWith('get_'))));
 
 const sse = (event) => 'data: ' + JSON.stringify(event) + '\n\n';
 
@@ -488,11 +494,14 @@ const reply = (extra) => Object.assign({ reply: '', warnings: [], assumptions: [
         assert.strictEqual(blocks.length, 4);
         assert.strictEqual(blocks.eq(0).find('legend').text(), '¿Qué separador usa el CSV?');
         assert.strictEqual(blocks.eq(0).find('input[type=radio]').length, 3);   // 2 + Otro
-        assert.strictEqual(blocks.eq(1).find('select option').length, 9);         // más de 6: lista
-        blocks.eq(1).find('.pl-assistant__search').val('_7').trigger('input');
-        assert.strictEqual(blocks.eq(1).find('option:not([hidden])').text(), 'campo_7');
+        const select = blocks.eq(1).find('select');
+        assert.strictEqual(select.find('option').length, 10);                     // más de 6: desplegable
+        assert.strictEqual(select.attr('size'), undefined);
+        assert.strictEqual(w.__select2[0].el, select[0]);                         // con buscador integrado
+        assert.strictEqual(blocks.eq(1).find('input[type=search]').length, 0);
+        assert.strictEqual(w.$('.pl-assistant__progress').text(), '0 of 4');
         assert.strictEqual(blocks.eq(3).find('input[type=text]').length, 1);     // sin opciones: texto libre
-        const submit = w.$('.pl-assistant__questions button.btn-primary');
+        const submit = w.$('.pl-assistant__questions button.btn-pl-add');
         assert.strictEqual(submit.prop('disabled'), true);
     });
 
@@ -502,7 +511,7 @@ const reply = (extra) => Object.assign({ reply: '', warnings: [], assumptions: [
         blocks.eq(0).find('input[type=radio]').eq(0).prop('checked', true).trigger('change');
         blocks.eq(1).find('select').val('campo_3').trigger('change');
         blocks.eq(2).find('input[type=radio]').eq(0).prop('checked', true).trigger('change');
-        const submit = w.$('.pl-assistant__questions button.btn-primary');
+        const submit = w.$('.pl-assistant__questions button.btn-pl-add');
         assert.strictEqual(submit.prop('disabled'), true);                      // falta el nombre
         blocks.eq(3).find('input[type=text]').val('padron_2025').trigger('input');
         assert.strictEqual(submit.prop('disabled'), false);
@@ -540,6 +549,22 @@ const reply = (extra) => Object.assign({ reply: '', warnings: [], assumptions: [
         assert.strictEqual(w.__ajax[1].body.message, 'Separador: |');
     });
 
+    await test('el cuadro de texto crece sin barra y la saca solo al llegar al máximo', async () => {
+        const w = makeEnv({ id: '7' });
+        await tick();
+        const input = w.$('#etl-assistant-input');
+        const box = input[0];
+        const size = (scroll) => Object.defineProperties(box, {
+            scrollHeight: { configurable: true, value: scroll }, offsetHeight: { configurable: true, value: 40 },
+            clientHeight: { configurable: true, value: 38 } });
+        size(58);
+        input.trigger('input');
+        assert.strictEqual([box.style.height, box.style.overflowY].join('|'), '60px|hidden');   // cuenta el borde
+        size(300);
+        input.trigger('input');
+        assert.strictEqual([box.style.height, box.style.overflowY].join('|'), '140px|auto');
+    });
+
     console.log('Administrador de archivos');
 
     async function fileQuestionEnv() {
@@ -556,7 +581,7 @@ const reply = (extra) => Object.assign({ reply: '', warnings: [], assumptions: [
     await test('pregunta de fichero: abre el administrador y usa la ruta elegida', async () => {
         const w = await fileQuestionEnv();
         const nodeCallback = w.filemanagerCallback;
-        const submit = w.$('.pl-assistant__questions .btn-primary');
+        const submit = w.$('.pl-assistant__questions .btn-pl-add');
         assert.strictEqual(w.$('.pl-assistant__question select').length, 0);    // no se listan
         w.$('.js-file-picker').trigger('click');
         assert.strictEqual(w.__opened[0], '/gvsigonline/filemanager/?popup=1');
@@ -564,6 +589,8 @@ const reply = (extra) => Object.assign({ reply: '', warnings: [], assumptions: [
         w.filemanagerCallback('rol_a/rios.shp', 'rios.shp');
         assert.strictEqual(w.filemanagerCallback, nodeCallback);               // devuelve la de los nodos
         assert.strictEqual(w.$('.pl-assistant__file-name').text(), 'rol_a/rios.shp');
+        assert.strictEqual(w.$('.pl-assistant__file-chosen').css('display'), 'flex');
+        assert.strictEqual(w.$('.js-file-picker').css('display'), 'none');        // se cambia con Cambiar
         assert.strictEqual(submit.prop('disabled'), false);
         submit.trigger('click');
         assert.strictEqual(w.__ajax[1].body.message, 'Shapefile: rol_a/rios.shp (file:///fm/rol_a/rios.shp)');
@@ -573,8 +600,8 @@ const reply = (extra) => Object.assign({ reply: '', warnings: [], assumptions: [
         const w = await fileQuestionEnv();
         w.$('.js-file-picker').trigger('click');
         w.filemanagerCallback('rol_a/datos.csv', 'datos.csv');
-        assert.ok(/Expected type: shp/.test(w.$('.pl-assistant__question .pl-assistant__issue-note').text()));
-        assert.strictEqual(w.$('.pl-assistant__questions .btn-primary').prop('disabled'), true);
+        assert.ok(/Choose a file of type: \.shp/.test(w.$('.pl-assistant__question .pl-assistant__field-error').text()));
+        assert.strictEqual(w.$('.pl-assistant__questions .btn-pl-add').prop('disabled'), true);
     });
 
     await test('cerrar el administrador sin elegir devuelve el callback de los nodos', async () => {
@@ -682,8 +709,7 @@ const reply = (extra) => Object.assign({ reply: '', warnings: [], assumptions: [
         selects.eq(0).val('pg').trigger('change');
         selects.eq(1).val('datos').trigger('change');
         w.$('.pl-assistant__alternative').eq(0).find('.pl-assistant__alternative-undo').trigger('click');
-        assert.strictEqual(w.eval('JSON.stringify(jsonParams[0].parameters[0])'),
-            JSON.stringify({ db: 'gis', 'schema-name': 'datos' }));
+        assert.strictEqual(params(w), JSON.stringify({ db: 'gis', 'schema-name': 'datos' }));
         assert.strictEqual(selects.eq(0).val(), 'gis');
         const saved = JSON.parse(w.sessionStorage.getItem('etl-assistant-chat:7'));
         assert.strictEqual(JSON.stringify(saved.messages[1].changes),
@@ -724,8 +750,7 @@ const reply = (extra) => Object.assign({ reply: '', warnings: [], assumptions: [
         const select = w.$('.pl-assistant__picker select');
         assert.strictEqual(select.find('option').length, 3);                  // con "Elige una opción"
         select.val('padron').trigger('change');
-        assert.strictEqual(w.eval('JSON.stringify(jsonParams[0].parameters[0])'),
-            JSON.stringify({ db: 'gis', 'schema-name': 'public', tablename: 'padron' }));
+        assert.strictEqual(params(w), JSON.stringify({ db: 'gis', 'schema-name': 'public', tablename: 'padron' }));
         const item = w.$('.pl-assistant__issue');
         assert.ok(item.hasClass('is-resolved'));
         assert.ok(/Value chosen: padron/.test(item.text()));
@@ -746,8 +771,7 @@ const reply = (extra) => Object.assign({ reply: '', warnings: [], assumptions: [
         w.__ajax[1].respond({ options: OPTIONS, needs: null, error: false });
         w.$('.pl-assistant__picker select').val('padron').trigger('change');
         w.$('.pl-assistant__issue-resolved button').trigger('click');
-        assert.strictEqual(w.eval('JSON.stringify(jsonParams[0].parameters[0])'),
-            JSON.stringify({ db: 'gis', 'schema-name': 'public' }));
+        assert.strictEqual(params(w), JSON.stringify({ db: 'gis', 'schema-name': 'public' }));
         assert.ok(!w.$('.pl-assistant__issue').hasClass('is-resolved'));
         assert.strictEqual(w.$('.js-pick').length, 1);
         const saved = JSON.parse(w.sessionStorage.getItem('etl-assistant-chat:7'));
@@ -773,14 +797,13 @@ const reply = (extra) => Object.assign({ reply: '', warnings: [], assumptions: [
         assert.strictEqual(w.$('.js-pick').prop('disabled'), false);
     });
 
-    await test('con muchas opciones hay buscador', async () => {
+    await test('Elegir usa el desplegable con buscador', async () => {
         const w = await pickerEnv();
         w.$('.js-pick').trigger('click');
         w.__ajax[1].respond({ options: MANY, needs: null, error: false });
         const box = w.$('.pl-assistant__picker');
-        box.find('input').val('_4').trigger('input');
-        assert.strictEqual(box.find('option:not([hidden])').map((i, el) => el.textContent).get().join('|'),
-            'Choose an option…|campo_4');
+        assert.strictEqual(box.find('option').length, MANY.length + 1);
+        assert.ok(w.__select2.some((entry) => entry.el === box.find('select')[0]));
     });
 
     await test('con la propuesta pendiente no se pide nada hasta aplicarla', async () => {
@@ -853,7 +876,7 @@ const reply = (extra) => Object.assign({ reply: '', warnings: [], assumptions: [
             JSON.stringify(['output_Postgis', 'db-option']));
         w.__ajax[0].respond({ options: PG, needs: null, error: false });
         const form = w.$('.pl-assistant__guided');
-        const submit = form.find('.btn-primary');
+        const submit = form.find('.btn-pl-add');
         assert.strictEqual(submit.prop('disabled'), true);
         form.find('.js-file-picker').trigger('click');
         w.filemanagerCallback('a.csv', 'a.csv');
@@ -925,7 +948,7 @@ const reply = (extra) => Object.assign({ reply: '', warnings: [], assumptions: [
         const w = await storeEnv(STORES);
         assert.strictEqual(w.$('.pl-assistant__question .js-other').length, 0);
         w.$('.pl-assistant__question input[type=radio]').eq(0).prop('checked', true).trigger('change');
-        w.$('.pl-assistant__questions .btn-primary').trigger('click');
+        w.$('.pl-assistant__questions .btn-pl-add').trigger('click');
         assert.strictEqual(w.__ajax[1].body.message, 'Destino: Cartografía · ws (connection=gis; schema=carto)');
     });
 
@@ -942,7 +965,7 @@ const reply = (extra) => Object.assign({ reply: '', warnings: [], assumptions: [
         const radios = w.$('.pl-assistant__question input[type=radio]');
         assert.strictEqual(radios.length, 2);
         assert.strictEqual(radios.eq(1).prop('checked'), true);
-        assert.strictEqual(w.$('.pl-assistant__questions .btn-primary').prop('disabled'), false);
+        assert.strictEqual(w.$('.pl-assistant__questions .btn-pl-add').prop('disabled'), false);
         const saved = JSON.parse(w.sessionStorage.getItem('etl-assistant-chat:7'));
         assert.strictEqual(saved.messages[1].questions[0].options.length, 2);
     });
@@ -962,6 +985,16 @@ const reply = (extra) => Object.assign({ reply: '', warnings: [], assumptions: [
         assert.strictEqual(w.eval('JSON.stringify(jsonParams[0].parameters[0])'), JSON.stringify({ tablename: 't' }));
         saved = JSON.parse(w.sessionStorage.getItem('etl-assistant-chat:7'));
         assert.strictEqual(saved.messages[1].changes.length, 0);
+    });
+
+    await test('Elegir el almacén deja el esquema en la lista del desplegable', async () => {
+        const w = await pickerEnv({ issues: [Object.assign({}, PICK, { param: 'db-option', pick: { type: 'output_Postgis' } })] });
+        w.eval('jsonParams[0].parameters = [{tablename: "t"}]');
+        w.__figures[0].NAME = 'output_Postgis';
+        w.$('.js-pick').trigger('click');
+        w.__ajax[1].respond({ options: STORES, needs: null, error: false, create_datastore: true });
+        w.$('.pl-assistant__picker select').val(STORES[0].value).trigger('change');
+        assert.strictEqual(w.eval('JSON.stringify(jsonParams[0].parameters[0]["get_schema-name-option"])'), JSON.stringify(['carto']));
     });
 
     await test('arranque guiado sin almacenes: se puede crear uno', async () => {

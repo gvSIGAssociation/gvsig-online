@@ -354,6 +354,103 @@
 /* Preguntas con opciones (ETL_ASSISTANT_QUESTIONS) */
 .pl-assistant__questions {
 	border-color: #b9cde3;
+	padding: 12px 14px;
+	counter-reset: question;
+}
+
+.pl-assistant__questions-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 10px;
+	font-size: 13px;
+}
+
+.pl-assistant__progress {
+	color: var(--pl-muted);
+	font-size: 11px;
+	font-weight: normal;
+}
+
+.pl-assistant__questions .pl-assistant__question {
+	counter-increment: question;
+	margin: 0;
+	padding: 10px 0;
+	border-top: 1px solid var(--pl-border);
+}
+
+.pl-assistant__questions .pl-assistant__question legend {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 6px;
+}
+
+.pl-assistant__questions .pl-assistant__question legend::before {
+	content: counter(question);
+	flex: 0 0 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: #eaf1f8;
+	color: #285a8c;
+	font-size: 11px;
+	line-height: 18px;
+	text-align: center;
+}
+
+.pl-assistant__questions .pl-assistant__question:only-of-type legend::before {
+	display: none;
+}
+
+.pl-assistant__actions--end {
+	justify-content: flex-end;
+}
+
+.pl-assistant__file-drop {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	width: 100%;
+	padding: 9px 10px;
+	background: var(--pl-bg);
+	border: 1px dashed #b9cde3;
+	border-radius: 8px;
+	color: #285a8c;
+	font-size: 12px;
+	cursor: pointer;
+}
+
+.pl-assistant__file-drop:hover,
+.pl-assistant__file-drop:focus {
+	background: #eaf1f8;
+	border-color: #285a8c;
+}
+
+.pl-assistant__file-drop small {
+	margin-left: auto;
+	color: var(--pl-muted);
+	font-size: 11px;
+}
+
+.pl-assistant__file-chosen {
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+}
+
+.pl-assistant__file-chosen .fa {
+	color: #2e9e5b;
+}
+
+.pl-assistant__file-chosen .pl-assistant__file-name {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.pl-assistant__field-error {
+	margin-top: 4px;
+	color: #c0392b;
+	font-size: 11px;
 }
 
 .pl-assistant__question {
@@ -390,9 +487,7 @@
 	margin: 0;
 }
 
-.pl-assistant__other,
-.pl-assistant__search,
-.pl-assistant__select {
+.pl-assistant__other {
 	font-size: 12px;
 }
 
@@ -720,7 +815,8 @@ details .pl-assistant__assumptions {
 	color: var(--pl-text);
 	font-size: 13px;
 	line-height: 1.4;
-	padding: 10px 46px 10px 12px;
+	padding: 10px 12px;
+	overflow-y: hidden;
 	transition: border-color var(--pl-transition), box-shadow var(--pl-transition), background var(--pl-transition);
 }
 
@@ -740,14 +836,12 @@ details .pl-assistant__assumptions {
 }
 
 .pl-assistant__composer #etl-assistant-send {
-	position: absolute;
-	right: 20px;
-	bottom: 20px;
-	width: 30px;
-	height: 30px;
+	flex: 0 0 auto;
+	width: 40px;
+	height: 40px;
 	padding: 0;
 	justify-content: center;
-	border-radius: 8px;
+	border-radius: 10px;
 }
 
 /* Escribiendo */

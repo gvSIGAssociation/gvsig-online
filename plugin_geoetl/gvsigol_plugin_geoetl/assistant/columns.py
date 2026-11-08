@@ -160,6 +160,15 @@ def read_file(path, sheet, context):
     return read_columns(type_name, params, context)
 
 
+# Desplegables que se llenan con un botón: la lista se guarda con el nodo, y sin ella el valor
+# no se vería al reabrir el diálogo
+OPTION_LISTS = {
+    'output_Postgis': {'schema-name-option': 'get_schema-name-option', 'tablename': 'get_tablename'},
+    'input_Postgis': {'schema-name': 'get_schema-name', 'tablename': 'get_tablename'},
+    'input_SqlServer': {'schema-name': 'get_schema-name', 'table-name': 'get_table-name'},
+}
+
+
 def _canvas_type(alias, canvas):
     for node in (canvas or {}).get('nodes') or []:
         if isinstance(node, dict) and alias in (node.get('alias'), node.get('id')):
@@ -177,6 +186,9 @@ def _normalize_parameters(params, spec, new_node):
             params[name] = [part for part in re.split(r'[,\s]+', value) if part]
         elif kind == 'spaced' and isinstance(value, list):
             params[name] = ' '.join(str(part) for part in value)
+    for name, list_name in OPTION_LISTS.get(spec.get('type'), {}).items():
+        if isinstance(params.get(name), str) and params[name] and not params.get(list_name):
+            params[list_name] = [params[name]]
     if spec.get('type') == 'trans_Join':
         # El cruce se ejecuta con attr-1 y attr-2: si el modelo solo manda attr1 y attr2, se copian
         for short, full in (('attr1', 'attr-1'), ('attr2', 'attr-2')):

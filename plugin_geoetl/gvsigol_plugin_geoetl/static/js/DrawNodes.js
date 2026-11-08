@@ -120,6 +120,17 @@ function etlFindLine(view, sourceId, targetId, sourcePort, targetPort) {
 	return found;
 }
 
+/** Añade la opción a un select si no la tiene; val() ignora en silencio un valor sin opción. */
+function etlEnsureOption($select, value, label) {
+	var text = String(value);
+	var exists = $select.find('option').filter(function () {
+		return this.value === text;
+	}).length > 0;
+	if (!exists) {
+		$select.append($('<option></option>').val(text).text(label === undefined ? text : label));
+	}
+}
+
 function fillEtlNodeForm(type, figure, parameters, schemaold) {
 	if (!parameters || !parameters.length || !parameters[0]) {
 		return;
@@ -134,7 +145,7 @@ function fillEtlNodeForm(type, figure, parameters, schemaold) {
 				if (typeof schemaold !== 'undefined' && schemaold) {
 					var options = Array.isArray(schemaold[multiIn]) ? schemaold[multiIn] : schemaold;
 					for (var k = 0; k < options.length; k++) {
-						$('#' + key + '-' + figure.id).append('<option>' + options[k] + '</option>');
+						etlEnsureOption($('#' + key + '-' + figure.id), options[k]);
 					}
 				}
 			}
@@ -142,11 +153,9 @@ function fillEtlNodeForm(type, figure, parameters, schemaold) {
 				var key_ = key.replace('get_', '');
 				for (var n = 0; n < parameters[0][key].length; n++) {
 					if (Array.isArray(parameters[0][key][n])) {
-						$('#' + key_ + '-' + figure.id).append(
-							'<option value ="' + parameters[0][key][n][0] + '">' + parameters[0][key][n][1] + '</option>'
-						);
+						etlEnsureOption($('#' + key_ + '-' + figure.id), parameters[0][key][n][0], parameters[0][key][n][1]);
 					} else {
-						$('#' + key_ + '-' + figure.id).append('<option>' + parameters[0][key][n] + '</option>');
+						etlEnsureOption($('#' + key_ + '-' + figure.id), parameters[0][key][n]);
 					}
 				}
 			}
@@ -158,7 +167,14 @@ function fillEtlNodeForm(type, figure, parameters, schemaold) {
 				$('#' + key + '-' + figure.id).attr('checked', true);
 				$('#' + key + '-' + figure.id).val(parameters[0][key]);
 			} else {
-				$('#' + key + '-' + figure.id).val(parameters[0][key]);
+				var field = $('#' + key + '-' + figure.id);
+				if (field.is('select')) {
+					// Esquema, tabla y similares se cargan con un botón: aún no tienen esa opción
+					[].concat(parameters[0][key]).forEach(function (value) {
+						etlEnsureOption(field, value);
+					});
+				}
+				field.val(parameters[0][key]);
 			}
 			if ((type.indexOf('input_') === 0 || type.indexOf('output_') === 0 || type === 'trans_ExecuteSQL') && editablerestrictedly) {
 				$('#' + key + '-' + figure.id).prop('disabled', true);
