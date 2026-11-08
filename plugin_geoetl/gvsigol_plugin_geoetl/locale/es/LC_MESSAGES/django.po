@@ -1234,3 +1234,6 @@ msgstr "Estimar superficies"
 # Nodos predictivos y ráster (PredictiveShapes.js / etl.html)
 msgid "Download conversation"
 msgstr "Descargar la conversación"
+
+msgid "Publish Layer"
+msgstr "Publicar capa"

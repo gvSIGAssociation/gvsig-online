@@ -12,8 +12,10 @@ parameters:
   summary: Tabla.
 - name: checkbox
   summary: Si es verdadero, se usa SQL libre en lugar de la tabla.
+  default: 'false'
 - name: sql
   summary: Consulta SQL.
+  default: ''
 ports:
 - direction: output
   label: Input

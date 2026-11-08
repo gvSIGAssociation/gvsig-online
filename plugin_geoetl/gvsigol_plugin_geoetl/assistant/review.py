@@ -27,6 +27,7 @@ def graph_from_canvas(canvas):
             'parameters': node.get('parameters') if isinstance(node.get('parameters'), dict) else {},
             # None: editor antiguo que no envía el estado (se deduce de si tiene parámetros)
             'status': node.get('status'),
+            'schema': node.get('schema') if isinstance(node.get('schema'), list) else [],
         }
     edges = []
     for edge in (canvas or {}).get('edges') or []:
@@ -53,6 +54,7 @@ def graph_after(proposal, canvas):
                 'type': node.get('type'),
                 'label': node.get('label') or node.get('type'),
                 'parameters': node.get('parameters') or {},
+                'schema': node.get('schema') or [],
                 'status': 'proposed',
             }
         edges = [dict(edge) for edge in proposal.get('edges') or []]
@@ -77,6 +79,7 @@ def graph_after(proposal, canvas):
                 'type': node.get('type'),
                 'label': node.get('label') or node.get('type'),
                 'parameters': node.get('parameters') or {},
+                'schema': node.get('schema') or [],
                 'status': 'proposed',
             }
         elif kind == 'update_node':
@@ -84,6 +87,8 @@ def graph_after(proposal, canvas):
             if alias in nodes:
                 nodes[alias]['parameters'] = op.get('parameters') or {}
                 nodes[alias]['status'] = 'proposed'
+                if op.get('schema'):
+                    nodes[alias]['schema'] = op.get('schema')
                 if op.get('label'):
                     nodes[alias]['label'] = op.get('label')
         elif kind == 'remove_node':
@@ -134,6 +139,7 @@ def check_graph(nodes, edges, catalog, connections=None):
                                      '%s: su configuración no encaja con lo que le llega; vuelve a abrirlo y aceptarlo.' % name))
             _check_parameters(alias, name, spec, params, connections, issues)
         _check_inputs(alias, name, spec, incoming.get(alias) or [], issues)
+        _check_columns(alias, name, spec, params, incoming.get(alias) or [], nodes, issues)
         _check_outputs(alias, name, spec, outgoing.get(alias) or [], len(nodes), issues)
 
     for edge in edges:
@@ -157,28 +163,64 @@ def summarize_issues(issues):
     return {'errors': errors, 'warnings': warnings, 'ok': errors == 0}
 
 
+def _column_values(value):
+    if isinstance(value, str):
+        return [part for part in value.split() if part != '-']
+    if isinstance(value, list):
+        return [part for part in value if isinstance(part, str) and part != '-']
+    return []
+
+
+def _check_columns(alias, name, spec, params, edges_in, nodes, issues):
+    """Los parámetros marcados con column en la ficha tienen que existir en lo que llega por esa entrada.
+
+    Solo se puede saber si el nodo anterior tiene una lista de columnas conocida: los que tienen una
+    por cada salida, o los recién propuestos, no se comprueban.
+    """
+    for item in spec.get('parameters') or []:
+        port = item.get('column')
+        values = _column_values(params.get(item.get('name'))) if port is not None else []
+        if not values:
+            continue
+        source = next((e.get('source') for e in edges_in if e.get('target_port', 0) == port), None)
+        schema = (nodes.get(source) or {}).get('schema')
+        if not isinstance(schema, list) or not schema or not all(isinstance(c, str) for c in schema):
+            continue
+        missing = [column for column in values if column not in schema]
+        if missing:
+            issues.append(_issue(ERROR, alias, 'unknown_column',
+                                 '%s: la columna "%s" no llega por la entrada %s.' % (name, ', '.join(missing), port),
+                                 param=item.get('name')))
+
+
 def _check_parameters(alias, name, spec, params, connections, issues):
+    if spec.get('type') == 'input_Excel' and params.get('excel-file') and not params.get('sheet-name') \
+            and params.get('reading') != 'multiple':
+        issues.append(_issue(ERROR, alias, 'missing_parameter', '%s: falta elegir la hoja del Excel.' % name,
+                             param='sheet-name'))
     for item in spec.get('parameters') or []:
         key = item.get('name')
         value = params.get(key)
         if item.get('required') and value in (None, '', []):
             issues.append(_issue(ERROR, alias, 'missing_parameter',
-                                 '%s: falta el parámetro obligatorio "%s".' % (name, key)))
+                                 '%s: falta el parámetro obligatorio "%s".' % (name, key), param=key))
         choices = item.get('choices')
         if choices and isinstance(value, str) and value and value not in choices:
             issues.append(_issue(ERROR, alias, 'invalid_choice',
-                                 '%s: "%s" no admite el valor "%s".' % (name, key, value)))
+                                 '%s: "%s" no admite el valor "%s".' % (name, key, value), param=key))
     field = spec.get('connection_parameter')
     value = params.get(field) if field else None
     if value not in (None, ''):
         names = {c.get('name'): c.get('type') for c in connections}
         if value not in names:
             issues.append(_issue(ERROR, alias, 'unknown_connection',
-                                 '%s: la conexión "%s" no está disponible para este usuario.' % (name, value)))
+                                 '%s: la conexión "%s" no está disponible para este usuario.' % (name, value),
+                                 param=field))
         elif spec.get('connection_types') and names[value] not in spec.get('connection_types'):
             issues.append(_issue(ERROR, alias, 'connection_type',
                                  '%s: la conexión "%s" es %s y el nodo admite %s.'
-                                 % (name, value, names[value], ', '.join(spec.get('connection_types')))))
+                                 % (name, value, names[value], ', '.join(spec.get('connection_types'))),
+                                 param=field))
 
 
 def _check_inputs(alias, name, spec, edges_in, issues):
@@ -275,5 +317,8 @@ def _same_edge(a, b):
         (b['source'], b['target'], b.get('source_port', 0), b.get('target_port', 0))
 
 
-def _issue(level, node, code, message):
-    return {'level': level, 'node': node, 'code': code, 'message': message}
+def _issue(level, node, code, message, param=None):
+    issue = {'level': level, 'node': node, 'code': code, 'message': message}
+    if param:
+        issue['param'] = param
+    return issue

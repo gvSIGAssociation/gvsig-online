@@ -4,7 +4,13 @@ family: transform
 summary: Conserva solo los atributos indicados.
 parameters:
 - name: attr
-  summary: Atributo sobre el que actúa la tarea.
+  required: true
+  summary: Columnas que se conservan; la geometría se conserva siempre.
+  format: list
+  example:
+  - id_zona
+  - nombre
+  column: 0
 ports:
 - direction: input
   label: Input

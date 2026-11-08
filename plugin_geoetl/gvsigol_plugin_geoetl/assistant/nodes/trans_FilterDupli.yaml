@@ -4,7 +4,12 @@ family: transform
 summary: Separa duplicados. La salida 0 son las filas únicas.
 parameters:
 - name: attr
-  summary: Atributo sobre el que actúa la tarea.
+  required: true
+  summary: Columnas cuya combinación debe ser única.
+  format: list
+  example:
+  - id_zona
+  column: 0
 ports:
 - direction: input
   label: Input

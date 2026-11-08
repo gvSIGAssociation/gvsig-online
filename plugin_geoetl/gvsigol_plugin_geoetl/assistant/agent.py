@@ -10,8 +10,10 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 from .catalog import load_catalog
+from .context import as_context
 from .prompt import NO_CHANGE_TOKEN, no_change_nudge, system_prompt
-from .tools import build_tools
+from .streaming import AssistantCancelled, callbacks_for
+from .tools import build_tools, redact_parameters
 
 LOGGER = logging.getLogger('gvsigol')
 
@@ -23,13 +25,15 @@ _LONG_VALUE = 300
 LIMIT_REPLY = ('No he podido terminar: la petición necesita demasiados pasos. '
                'Prueba a dividirla en partes más pequeñas.')
 NO_CHANGE_WARNING = 'El asistente no ha propuesto ningún cambio: el canvas sigue igual.'
+CANCELLED_REPLY = 'Detenido. El canvas no ha cambiado.'
 
 # Frases con las que el modelo afirma haber cambiado el canvas.
 _CLAIM_RE = re.compile(
     r'\b(?:he|hemos|ya)\s+(?:añadido|creado|conectado|eliminado|borrado|cambiado|modificado|actualizado|'
     r'quitado|puesto|sustituido|insertado|aplicado|configurado|rellenado|incorporado)\b'
     r'|\b(?:añado|conecto|elimino|actualizo|sustituyo|inserto|incorporo)\b'
-    r'|\bI(?:\'ve| have)\s+(?:added|created|connected|removed|deleted|updated|changed|inserted|replaced)\b',
+    r'|\bI(?:\'ve| have)\s+(?:added|created|connected|removed|deleted|updated|changed|inserted|replaced)\b'
+    r'|\b(?:he|hem)\s+(?:afegit|creat|connectat|eliminat|esborrat|canviat|modificat|actualitzat)\b',
     re.IGNORECASE)
 _LIMIT_MARKERS = ('agent stopped due to', 'max iterations', 'iteration limit', 'time limit')
 
@@ -116,24 +120,52 @@ def hit_iteration_limit(text):
     return any(marker in low for marker in _LIMIT_MARKERS)
 
 
-def run_assistant(request, message, history, canvas, restricted, connections):
+def run_assistant(request, message, history, canvas, restricted, connections, on_event=None, query_id=None):
+    """request es el request de Django o un AssistantContext (context.py).
+
+    on_event recibe los pasos ('step') mientras el agente trabaja; con
+    query_id el turno se corta si se marca como cancelado (streaming.py).
+    """
+    context = as_context(request, connections, restricted)
+    callbacks = callbacks_for(on_event, query_id)
     catalog = load_catalog()
     holder = []
     trace = Trace(_trace_enabled())
     canvas = canvas or {}
-    tools = build_tools(request, catalog, canvas, connections, restricted, holder, trace)
-    executor = _executor(_build_llm(), tools, _prompt(catalog))
+    reviews = []
+    asking = questions_enabled()
+    asked = [] if asking else None
+    alternatives = alternatives_enabled()
+    from .columns import columns_enabled
+    columns = columns_enabled()
+    tools = build_tools(context, catalog, canvas, None, None, holder, trace, reviews=reviews, asked=asked,
+                        alternatives=alternatives, columns=columns)
+
+    def finish(payload):
+        if asked:
+            payload['questions'] = asked[-1]
+            trace.note('questions', len(asked[-1]))
+        from .next_steps import attach_next_steps
+        attach_next_steps(payload, holder, canvas, catalog, context)
+        return _attach_issues(payload, holder, reviews, canvas, catalog, context)
+
+    executor = _executor(_build_llm(), tools, _prompt(catalog, context.language, asking, alternatives, columns))
+    trace.note('engine', getattr(executor, 'engine', 'legacy'))
+    live_text = _live_text(executor, on_event)
     user_input = _user_input(message, canvas)
     chat_history = _history(history)
     warnings = []
     try:
-        result = executor.invoke({'input': user_input, 'chat_history': chat_history})
+        result = _invoke(executor, {'input': user_input, 'chat_history': chat_history}, callbacks)
+    except AssistantCancelled:
+        trace.emit(cancelled=True, proposal=bool(holder))
+        return _empty(CANCELLED_REPLY, error=True)
     except Exception as exc:
         LOGGER.exception('etl_assistant: fallo al invocar el agente')
         trace.emit(error=type(exc).__name__, proposal=bool(holder))
         if holder:
             # La propuesta ya validada se conserva aunque falle la respuesta final.
-            return _with_proposal(holder[-1], '', [public_llm_error(exc)])
+            return finish(_with_proposal(holder[-1], '', [public_llm_error(exc)]))
         return _empty(public_llm_error(exc), error=True)
 
     reply = output_text(result.get('output'))
@@ -143,12 +175,19 @@ def run_assistant(request, message, history, canvas, restricted, connections):
     guard = None
     if not holder and not limited and claims_change(reply):
         guard = 'nudged'
+        if live_text:
+            # La segunda pasada no se enseña en vivo: su texto puede ser SIN_CAMBIOS.
+            # El resultado final decide qué texto ve el usuario.
+            executor.on_answer_delta = None
         try:
-            second = executor.invoke({
+            second = _invoke(executor, {
                 'input': no_change_nudge(),
                 'chat_history': chat_history + [HumanMessage(content=user_input), AIMessage(content=reply)],
-            })
+            }, callbacks)
             second_reply = output_text(second.get('output'))
+        except AssistantCancelled:
+            trace.emit(cancelled=True, proposal=bool(holder))
+            return _empty(CANCELLED_REPLY, error=True)
         except Exception:
             LOGGER.exception('etl_assistant: fallo en la segunda pasada')
             second_reply = ''
@@ -164,10 +203,101 @@ def run_assistant(request, message, history, canvas, restricted, connections):
     trace.emit(proposal=bool(holder), limit=limited, guard=guard)
 
     if holder:
-        return _with_proposal(holder[-1], reply, warnings)
+        return finish(_with_proposal(holder[-1], reply, warnings))
     if limited:
-        return _empty(LIMIT_REPLY, warnings=warnings)
-    return _empty(reply or '¿Puedes concretar un poco más qué quieres hacer?', warnings=warnings)
+        return finish(_empty(LIMIT_REPLY, warnings=warnings))
+    return finish(_empty(reply or '¿Puedes concretar un poco más qué quieres hacer?', warnings=warnings))
+
+
+# ============================================================================
+# PROBLEMAS CON BOTONES (usabilidad, fase 1: ETL_ASSISTANT_ACTIONS)
+# ============================================================================
+
+_MAX_ISSUES = 30
+
+
+def questions_enabled():
+    """Preguntas con opciones (usabilidad, fase 2): ETL_ASSISTANT_QUESTIONS."""
+    try:
+        from gvsigol_plugin_geoetl import settings as geoetl_settings
+        return bool(getattr(geoetl_settings, 'ETL_ASSISTANT_QUESTIONS', False))
+    except Exception:
+        return False
+
+
+def alternatives_enabled():
+    """Suposiciones cambiables con un clic (usabilidad, fase 3): ETL_ASSISTANT_ALTERNATIVES."""
+    try:
+        from gvsigol_plugin_geoetl import settings as geoetl_settings
+        return bool(getattr(geoetl_settings, 'ETL_ASSISTANT_ALTERNATIVES', False))
+    except Exception:
+        return False
+
+
+def actions_enabled():
+    try:
+        from gvsigol_plugin_geoetl import settings as geoetl_settings
+        return bool(getattr(geoetl_settings, 'ETL_ASSISTANT_ACTIONS', False))
+    except Exception:
+        return False
+
+
+def _attach_issues(payload, holder, reviews, canvas, catalog, context):
+    """Añade 'issues' (problemas estructurados) para que el panel ponga botones.
+
+    Con propuesta, los del flujo tal como quedará al aplicarla; sin ella, los de
+    la última revisión del canvas que hizo el agente en este turno. Sin el
+    interruptor la respuesta no cambia.
+    """
+    if not actions_enabled():
+        return payload
+    try:
+        from .review import check_graph, graph_after
+        if holder:
+            nodes, edges = graph_after(holder[-1]['proposal'], canvas)
+            issues = check_graph(nodes, edges, catalog, context.connections)
+        elif reviews:
+            issues = reviews[-1]
+        else:
+            return payload
+        ordered = sorted(issues, key=lambda item: 0 if item.get('level') == 'error' else 1)
+        payload['issues'] = [_with_picker(dict(item), holder, canvas, catalog, context)
+                             for item in ordered[:_MAX_ISSUES]]
+    except Exception:
+        LOGGER.exception('etl_assistant: no se pudieron preparar los problemas del flujo')
+    return payload
+
+
+def _with_picker(issue, holder, canvas, catalog, context):
+    """Marca los problemas que se resuelven eligiendo un valor (ETL_ASSISTANT_PARAM_PICKER)."""
+    from .alternatives import _canvas_node, _proposal_node
+    from .param_options import FILE_EXTENSIONS, SOURCE_FILES, can_pick, picker_enabled, picker_source
+
+    if not issue.get('param') or not issue.get('node') or not picker_enabled():
+        return issue
+    proposal = holder[-1]['proposal'] if holder else {}
+    found = _proposal_node(issue['node'], proposal) or _canvas_node(issue['node'], canvas)
+    if found and can_pick(catalog, found[0], issue['param'], context.restricted):
+        issue['pick'] = {'type': found[0]}
+        if picker_source(catalog.get(found[0]), found[0], issue['param']) == SOURCE_FILES:
+            issue['pick']['file_picker'] = {'extensions': FILE_EXTENSIONS[issue['param']]}
+    return issue
+
+
+def _live_text(executor, on_event):
+    """Activa el texto en vivo si hay a quién entregarlo, el motor es LangGraph y el interruptor está puesto."""
+    from .engine import ENGINE_LANGGRAPH, token_streaming_enabled
+    if on_event is None or getattr(executor, 'engine', None) != ENGINE_LANGGRAPH or not token_streaming_enabled():
+        return False
+    executor.on_answer_delta = on_event
+    return True
+
+
+def _invoke(executor, payload, callbacks):
+    """Sin callbacks, la llamada de siempre; con ellos, en la config (AgentExecutor y LangGraphExecutor)."""
+    if not callbacks:
+        return executor.invoke(payload)
+    return executor.invoke(payload, {'callbacks': callbacks})
 
 
 def _with_proposal(result, reply, extra_warnings):
@@ -190,9 +320,10 @@ def _empty(reply, warnings=None, error=False):
     }
 
 
-def _prompt(catalog):
+def _prompt(catalog, language=None, questions=False, alternatives=False, columns=False):
     return ChatPromptTemplate.from_messages([
-        ('system', system_prompt(catalog, _language())),
+        ('system', system_prompt(catalog, language or _language(), questions=questions,
+                                 alternatives=alternatives, columns=columns)),
         MessagesPlaceholder(variable_name='chat_history', optional=True),
         ('human', '{input}'),
         MessagesPlaceholder(variable_name='agent_scratchpad'),
@@ -219,19 +350,28 @@ def _build_llm():
     return build_llm(llm_model=model)
 
 
-def _executor(llm, tools, prompt):
-    from langchain.agents import AgentExecutor, create_tool_calling_agent
+def _max_iterations():
     try:
         from gvsigol_plugin_geocopilot.settings import LANGCHAIN_SETTINGS
         iterations = LANGCHAIN_SETTINGS.get('AGENT_MAX_ITERATIONS', 15)
     except Exception:
         iterations = 15
+    return max(int(iterations or 20), 20)
+
+
+def _executor(llm, tools, prompt):
+    """AgentExecutor (legacy) o LangGraph según ETL_ASSISTANT_ENGINE (engine.py)."""
+    from .engine import ENGINE_LANGGRAPH, LangGraphExecutor, max_seconds, selected_engine, system_prompt_text
+    if selected_engine() == ENGINE_LANGGRAPH:
+        return LangGraphExecutor(llm, tools, system_prompt_text(prompt), _max_iterations(), max_seconds())
+
+    from langchain.agents import AgentExecutor, create_tool_calling_agent
     agent = create_tool_calling_agent(llm=llm, tools=tools, prompt=prompt)
     return AgentExecutor(
         agent=agent,
         tools=tools,
         verbose=False,
-        max_iterations=max(int(iterations or 20), 20),
+        max_iterations=_max_iterations(),
         handle_parsing_errors=True,
         return_intermediate_steps=False,
     )
@@ -246,14 +386,45 @@ def _history(history):
         content = item.get('content')
         content = content.strip() if isinstance(content, str) else ''
         if item.get('role') == 'assistant':
-            note = _proposal_note(item)
-            if note:
-                content = (content + '\n\n' + note).strip()
+            for note in (_proposal_note(item), _questions_note(item), _changes_note(item)):
+                if note:
+                    content = (content + '\n\n' + note).strip()
             if content:
                 messages.append(AIMessage(content=content[:_MESSAGE_LIMIT]))
         elif item.get('role') == 'user' and content:
             messages.append(HumanMessage(content=content[:_MESSAGE_LIMIT]))
     return messages
+
+
+def _changes_note(item):
+    """Suposiciones que el usuario cambió con un clic (ETL_ASSISTANT_ALTERNATIVES), para no deshacerlas."""
+    parts = []
+    for change in (item.get('changes') or [])[:12]:
+        if not isinstance(change, dict):
+            continue
+        node = change.get('node') if isinstance(change.get('node'), str) else ''
+        param = change.get('param') if isinstance(change.get('param'), str) else ''
+        value = change.get('value') if isinstance(change.get('value'), str) else ''
+        if node and param:
+            parts.append('%s %s = %s' % (node[:20], param[:100], value[:300]))
+    if not parts:
+        return ''
+    return '[El usuario cambió: %s]' % '; '.join(parts)
+
+
+def _questions_note(item):
+    """Preguntas con opciones de esa respuesta (ETL_ASSISTANT_QUESTIONS), para entender la contestación."""
+    parts = []
+    for question in (item.get('questions') or [])[:4]:
+        if not isinstance(question, dict):
+            continue
+        label = question.get('label') if isinstance(question.get('label'), str) else ''
+        text = question.get('text') if isinstance(question.get('text'), str) else ''
+        if label or text:
+            parts.append('%s: %s' % (label[:60], text[:300]) if label else text[:300])
+    if not parts:
+        return ''
+    return '[Pregunté con opciones: %s]' % ' | '.join(parts)
 
 
 def _proposal_note(item):
@@ -310,7 +481,7 @@ def compact_canvas(canvas, budget=_CANVAS_BUDGET):
             if node.get('status'):
                 entry['status'] = node.get('status')
             params = node.get('parameters') if isinstance(node.get('parameters'), dict) else {}
-            params = {k: v for k, v in params.items() if v not in (None, '', [], {})}
+            params = {k: v for k, v in redact_parameters(params).items() if v not in (None, '', [], {})}
             if level < 3:
                 if level >= 2:
                     params = {k: _shorten(v) for k, v in params.items()}

@@ -4,8 +4,12 @@ family: transform
 summary: Numera filas, opcionalmente dentro de grupos.
 parameters:
 - name: attr
-  summary: Atributo sobre el que actúa la tarea.
+  summary: Nombre de la columna nueva con el contador.
+  example: orden
 - name: group-by-attr
+  summary: Columna por la que se reinicia el contador, o - para no agrupar.
+  default: '-'
+  column: 0
 ports:
 - direction: input
   label: Input

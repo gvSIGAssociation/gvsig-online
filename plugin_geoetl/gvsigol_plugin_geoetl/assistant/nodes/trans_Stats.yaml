@@ -4,8 +4,13 @@ family: transform
 summary: Calcula estadísticas de un atributo, opcionalmente por grupos.
 parameters:
 - name: attr
-  summary: Atributo sobre el que actúa la tarea.
+  summary: Columna numérica o de fecha sobre la que se calculan las estadísticas.
+  column: 0
+  example: poblacion
 - name: group-by-attr
+  summary: Columna por la que se agrupa, o - para no agrupar.
+  default: '-'
+  column: 0
 ports:
 - direction: input
   label: Input

@@ -42,6 +42,7 @@ from . import etl_schema
 # Nodos predictivos / ráster (el motor los resuelve con getattr(etl_tasks, tipo))
 from .etl_raster import input_Raster, trans_RasterSample, trans_RandomForest, trans_RasterPredict, trans_RasterPolygonize, trans_RasterMajority, trans_RasterIndex, trans_ClassAssess, trans_RasterStack, trans_TablePredict, trans_RasterClip, trans_StratifiedSample, trans_AreaEstimate  # noqa: F401
 from .etl_raster_publish import output_RasterPublish  # noqa: F401
+from .etl_layer_publish import output_LayerPublish  # noqa: F401
 from .etl_models import input_Model, output_ModelSave  # noqa: F401
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed

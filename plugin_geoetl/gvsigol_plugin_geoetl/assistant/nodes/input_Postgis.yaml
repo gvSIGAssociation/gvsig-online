@@ -11,11 +11,12 @@ parameters:
   summary: Nombre de la conexión.
   required: true
 - name: schema-name
-  summary: Esquema.
+  summary: Esquema de la tabla.
 - name: tablename
-  summary: Tabla.
+  summary: Tabla que se lee.
 - name: checkbox
   summary: Si es verdadero, se usa SQL libre en lugar de la tabla.
+  default: 'false'
 - name: clause
   summary: Cláusula SQL adicional (WHERE, etc.).
 ports:

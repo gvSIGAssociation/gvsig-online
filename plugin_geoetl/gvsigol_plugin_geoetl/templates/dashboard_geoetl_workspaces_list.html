@@ -692,6 +692,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 {% endblock %}
 
 {% block extra-scripts %}
+<script type="text/javascript" src="{% static "js/EtlRunError.js" %}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/sql/sql.min.js"></script>
 
@@ -2342,6 +2343,7 @@ function setSqlAfterValue(val) {
 
 				if(resp.status == 'Error'){
 					messageBox.show('error', resp.message)
+					EtlRunError.addCopyToMessageBox(resp.message)
 				} else if(resp.status == 'Success'){
 					messageBox.show('success', resp.message)
 				}else {

@@ -327,6 +327,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 {% endblock %}
 
 {% block extra-scripts %}
+<script type="text/javascript" src="{% static "js/EtlRunError.js" %}"></script>
 
 <script>
 	$('#menu-plugin-etl').addClass("active");
@@ -905,6 +906,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 
 				if(resp.status == 'Error'){
 					messageBox.show('error', resp.message)
+					EtlRunError.addCopyToMessageBox(resp.message)
 				} else if(resp.status == 'Success'){
 					messageBox.show('success', resp.message)
 				}else {

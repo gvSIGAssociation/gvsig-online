@@ -13,6 +13,14 @@ cd <repo>/plugin_geoetl/gvsigol_plugin_geoetl/tests/js
 NODE_PATH=/tmp/etl-js/node_modules node run.js
 ```
 
+## Tarjeta de error de ejecución
+
+`run_error.js` carga el `EtlRunError.js` real: nodo legible, copiar, cerrar, errores de otro flujo y sin repintar en cada consulta.
+
+```bash
+NODE_PATH=/tmp/etl-js/node_modules node run_error.js
+```
+
 ## Chat del asistente
 
 `assistant.js` carga el `Assistant.js` real (con `marked` y `DOMPurify` reales) y simula el canvas y el

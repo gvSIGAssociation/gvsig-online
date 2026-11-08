@@ -2347,3 +2347,204 @@ msgstr "Detenido. El canvas no ha cambiado."
 
 msgid "Delete the whole conversation?"
 msgstr "¿Borrar toda la conversación?"
+
+msgid "Checking the available connections"
+msgstr "Consultando las conexiones disponibles"
+
+msgid "Listing the tables of"
+msgstr "Listando las tablas de"
+
+msgid "Listing the schemas of"
+msgstr "Listando los esquemas de"
+
+msgid "Reading the columns of"
+msgstr "Leyendo las columnas de"
+
+msgid "Reading the node specs"
+msgstr "Leyendo las fichas de los nodos"
+
+msgid "Looking for files"
+msgstr "Buscando ficheros"
+
+msgid "Looking for files in"
+msgstr "Buscando ficheros en"
+
+msgid "Reading the nodes"
+msgstr "Leyendo los nodos"
+
+msgid "Checking the flow"
+msgstr "Revisando el flujo"
+
+msgid "Validating the proposal"
+msgstr "Validando la propuesta"
+
+msgid "Working…"
+msgstr "Trabajando…"
+
+msgid "Problems in the flow"
+msgstr "Problemas del flujo"
+
+msgid "Configure node"
+msgstr "Configurar"
+
+msgid "Fix problem"
+msgstr "Arreglar"
+
+msgid "Fix all problems"
+msgstr "Arreglar todo"
+
+msgid "The node is not on the canvas. Apply the changes first."
+msgstr "El nodo no está en el canvas. Aplica antes los cambios."
+
+msgid "Fix this problem:"
+msgstr "Arregla este problema:"
+
+msgid "Fix these problems:"
+msgstr "Arregla estos problemas:"
+
+msgid "The assistant needs to know"
+msgstr "El asistente necesita saber"
+
+msgid "Answer questions"
+msgstr "Responder"
+
+msgid "Other answer…"
+msgstr "Otra respuesta…"
+
+msgid "Write the answer…"
+msgstr "Escribe la respuesta…"
+
+msgid "Other…"
+msgstr "Otro…"
+
+msgid "Search…"
+msgstr "Buscar…"
+
+msgid "Answered in the text box."
+msgstr "Respondido en el cuadro de texto."
+
+msgid "Change this assumption"
+msgstr "Cambiar esta suposición"
+
+msgid "Apply the changes first."
+msgstr "Aplica antes los cambios."
+
+msgid "These changes are no longer on the canvas."
+msgstr "Estos cambios ya no están en el canvas."
+
+msgid "Choose a value"
+msgstr "Elegir"
+
+msgid "Choose an option…"
+msgstr "Elige una opción…"
+
+msgid "Choose the connection of the node first."
+msgstr "Elige antes la conexión del nodo."
+
+msgid "Choose the schema of the node first."
+msgstr "Elige antes el esquema del nodo."
+
+msgid "There are no options available."
+msgstr "No hay opciones disponibles."
+
+msgid "The options could not be loaded."
+msgstr "No se han podido cargar las opciones."
+
+msgid "Value chosen:"
+msgstr "Valor elegido:"
+
+msgid "Add a PostGIS output"
+msgstr "Añadir una salida a PostGIS"
+
+msgid "Add an output to a new PostGIS table at the end of the flow."
+msgstr "Añade una salida a una tabla nueva de PostGIS al final del flujo."
+
+msgid "Explain the flow"
+msgstr "Explicar el flujo"
+
+msgid "Explain what the flow on the canvas does, step by step."
+msgstr "Explica paso a paso qué hace el flujo del canvas."
+
+msgid "Review the flow"
+msgstr "Revisar el flujo"
+
+msgid "Review the flow and tell me which parameters are missing or may cause errors."
+msgstr "Revisa el flujo y dime qué parámetros faltan o pueden dar errores."
+
+msgid "Create the flow"
+msgstr "Crear el flujo"
+
+msgid "Ask the assistant"
+msgstr "Preguntar al asistente"
+
+msgid "CSV file"
+msgstr "Fichero CSV"
+
+msgid "You have no PostGIS connections available."
+msgstr "No tienes conexiones PostGIS disponibles."
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "You have no connections available."
+msgstr "No tienes conexiones disponibles."
+
+msgid "Change file"
+msgstr "Cambiar fichero"
+
+msgid "The selected file is not valid. Expected type:"
+msgstr "El fichero elegido no es válido. Tipo esperado:"
+
+msgid "Create a new data store…"
+msgstr "Crear un almacén nuevo…"
+
+msgid "Where to create the table"
+msgstr "Dónde crear la tabla"
+
+msgid "Load the CSV file {file} into a new table of the data store {store}."
+msgstr "Carga el fichero CSV {file} en una tabla nueva del almacén {store}."
+
+msgid "The run failed"
+msgstr "La ejecución ha fallado"
+
+msgid "Node:"
+msgstr "Nodo:"
+
+msgid "Copy error"
+msgstr "Copiar error"
+
+msgid "Copied"
+msgstr "Copiado"
+
+msgid "The last run failed. See the details above the canvas."
+msgstr "La última ejecución ha fallado. Consulta el detalle encima del canvas."
+
+msgid "The flow failed with this error. Explain the cause and how to fix it:"
+msgstr "El flujo ha fallado con este error. Explica la causa y cómo arreglarlo:"
+
+msgid "The columns of the node could not be read:"
+msgstr "No se han podido leer las columnas del nodo:"
+
+msgid "Publish Layer"
+msgstr "Publicar capa"
+
+msgid "Layer"
+msgstr "Capa"
+
+msgid "Data store"
+msgstr "Almacén"
+
+msgid "Saves the table in a data store and publishes it as a layer with a default style."
+msgstr "Guarda la tabla en un almacén y la publica como capa con un estilo por defecto."
+
+msgid "Replacing keeps the layer, its style and its permissions: only the data changes."
+msgstr "Al reemplazar se conservan la capa, su estilo y sus permisos: solo cambian los datos."
+
+msgid "Replace its data"
+msgstr "Reemplazar sus datos"
+
+msgid "Choose the data store."
+msgstr "Elige el almacén."
+
+msgid "The data stores and layer groups could not be loaded."
+msgstr "No se han podido cargar los almacenes y grupos de capas."

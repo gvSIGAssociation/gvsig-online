@@ -4,9 +4,14 @@ family: transform
 summary: Añade un atributo con un valor constante.
 parameters:
 - name: attr
-  summary: Atributo sobre el que actúa la tarea.
+  required: true
+  summary: Nombre de la columna nueva.
+  example: origen
 - name: value
+  summary: Valor inicial de todas las filas. Vacío la deja a NULL.
+  default: ''
 - name: data-type
+  required: true
   choices:
   - VARCHAR
   - INTEGER
@@ -14,6 +19,8 @@ parameters:
   - DATE
   - TIMESTAMP
   - BOOLEAN
+  summary: Tipo de la columna.
+  default: VARCHAR
 ports:
 - direction: input
   label: Input

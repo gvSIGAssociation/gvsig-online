@@ -4,7 +4,10 @@ family: transform
 summary: Filtra filas. La salida 0 son las que cumplen y la 1 las que no.
 parameters:
 - name: attr
-  summary: Atributo sobre el que actúa la tarea.
+  summary: Columna que se compara. Se usa si filter-expression va vacío.
+  default: ''
+  example: poblacion
+  column: 0
 - name: option
   choices:
   - '='
@@ -16,9 +19,17 @@ parameters:
   - starts-with
   - ends-with
   - contains
+  summary: Comparación. Se usa si filter-expression va vacío.
+  default: '='
 - name: value
+  summary: Valor con el que se compara, como texto.
+  default: ''
+  example: '1000'
 - name: filter-expression
-  summary: Expresión compuesta del filtro.
+  summary: Condición WHERE de SQL de PostgreSQL. Déjala vacía para las comparaciones
+    simples y usa attr, option y value; es solo para condiciones compuestas.
+  default: ''
+  example: '"poblacion" > 1000 AND "uso" = ''residencial'''
 ports:
 - direction: input
   label: Input
@@ -28,4 +39,5 @@ ports:
   label: 'False'
 connection_types: []
 connection_parameter: null
-sql_parameters: []
+sql_parameters:
+- filter-expression

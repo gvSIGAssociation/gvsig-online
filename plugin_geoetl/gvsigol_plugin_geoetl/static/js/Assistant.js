@@ -1,9 +1,10 @@
-/* global gettext, jsonParams, drawNodes, etlClearCanvas, etlFindLine, EtlApplyCommand, fillEtlNodeForm, propagateSchemaFrom */
+/* global gettext, fm_directory, setGearColorForNode, jsonParams, drawNodes, etlClearCanvas, etlFindLine, EtlApplyCommand, fillEtlNodeForm, propagateSchemaFrom, etlFindGear */
 
 (function () {
 	var STORAGE_WIDTH = 'etl-assistant-width';
 	var STORAGE_OPEN = 'etl-assistant-open';
 	var UNDO_LABEL = 'etl-assistant';
+	var UNDO_LABEL_PARAM = 'etl-assistant-param';   // cambio de un parámetro: no es la propuesta
 	var panel, messagesEl, input, examplesEl, contextEl, sendBtn;
 	var selectedFigure = null;
 	var busy = false;
@@ -228,6 +229,19 @@
 				lines.push('- ' + line);
 			});
 		}
+		if (message.issues && message.issues.length) {
+			lines.push('', t('Problems in the flow') + ':');
+			message.issues.forEach(function (issue) {
+				lines.push('- ' + issue.message);
+			});
+		}
+		if (message.questions && message.questions.length) {
+			lines.push('', t('The assistant needs to know') + ':');
+			message.questions.forEach(function (question) {
+				var answer = (message.answers || {})[question.id];
+				lines.push('- ' + (question.text || question.label) + (answer ? ' → ' + answer : ''));
+			});
+		}
 		return lines.join('\n').trim();
 	}
 
@@ -392,6 +406,9 @@
 		}
 		summary = summary || canvasSummary();
 		var mode = summary.nodes.length ? 'flow' : 'empty';
+		if (mode !== 'empty') {
+			closeGuided();
+		}
 		var selection = summary.selected ? 'yes' : 'no';
 		examplesEl.find('.pl-assistant__example').each(function () {
 			var button = $(this);
@@ -405,6 +422,8 @@
 	}
 
 	function appendMessage(message, types) {
+		// Las sugerencias solo tienen sentido en la última respuesta
+		messagesEl.find('.pl-assistant__next').remove();
 		var row = $('<div class="pl-assistant__row"></div>');
 		var avatar = $('<div class="pl-assistant__avatar"></div>');
 		var body = $('<div class="pl-assistant__body"></div>');
@@ -448,6 +467,12 @@
 				message.assumptions.forEach(function (line) {
 					var item = $('<li></li>').text(line);
 					bindAliasHover(item, line);
+					var choice = (message.assumptionChoices || []).filter(function (candidate) {
+						return candidate.text === line;
+					})[0];
+					if (choice) {
+						item.append(alternativeControl(message, choice));
+					}
 					assumptions.append(item);
 				});
 				details.append(assumptions);
@@ -463,11 +488,20 @@
 				warnings.append(warningList);
 				body.append(warnings);
 			}
+			if (message.issues && message.issues.length) {
+				body.append(issuesCard(message));
+			}
+			if (message.questions && message.questions.length) {
+				body.append(questionsCard(message));
+			}
 			if (message.actions) {
 				body.append(message.actions);
 			}
 			if (message.status) {
 				body.append($('<div class="pl-assistant__status"></div>').text(message.status));
+			}
+			if (message.nextSteps && message.nextSteps.length && message.settled !== 'undone' && message.settled !== 'discarded') {
+				body.append(nextStepsBar(message));
 			}
 			if (!message.typing) {
 				// Solo la última respuesta se puede regenerar.
@@ -479,6 +513,1016 @@
 		messagesEl.append(row);
 		messagesEl.scrollTop(messagesEl[0].scrollHeight);
 		return row;
+	}
+
+	// ------------------------------------------------------------------
+	// Problemas del flujo con botones (ETL_ASSISTANT_ACTIONS)
+	// ------------------------------------------------------------------
+
+	// Se resuelven en el engranaje del nodo: no hace falta el modelo
+	var CONFIGURE_CODES = ['unconfigured', 'missing_parameter', 'invalid_choice', 'invalid_schema',
+		'unknown_connection', 'connection_type', 'unknown_column'];
+	// Se piden al asistente
+	var FIX_CODES = ['unconnected_input', 'duplicated_input', 'dead_end', 'no_output', 'cycle',
+		'kind_mismatch', 'bad_port', 'source', 'target'];
+
+	/* Abre el engranaje de un nodo con su propio manejador de clic, como si lo pulsara el usuario. */
+	function openNodeConfig(alias) {
+		var figure = figureForAlias(alias);
+		if (!figure || typeof etlFindGear !== 'function') {
+			return false;
+		}
+		var gear = etlFindGear(figure.classLabel);
+		if (!gear || !gear.figure || typeof gear.figure.fireEvent !== 'function') {
+			return false;
+		}
+		focusAlias(alias);
+		try {
+			gear.figure.fireEvent('click');
+		} catch (e) {
+			// El diálogo del nodo ha fallado: es el mismo error que al pulsar la rueda a mano
+			return false;
+		}
+		return true;
+	}
+
+	function issuesCard(message) {
+		var issues = message.issues;
+		var card = $('<div class="pl-assistant__card pl-assistant__issues"></div>');
+		card.append($('<div class="pl-assistant__card-title"></div>').text(t('Problems in the flow')));
+		var list = $('<ul class="pl-assistant__issue-list"></ul>');
+		var fixable = [];
+		issues.forEach(function (issue, index) {
+			var item = $('<li class="pl-assistant__issue"></li>').addClass('is-' + (issue.level || 'warning'));
+			var text = $('<span class="pl-assistant__issue-text"></span>').text(issue.message || '');
+			bindAliasHover(text, issue.message || '');
+			item.append(text);
+			if (issue.node && CONFIGURE_CODES.indexOf(issue.code) !== -1) {
+				var configure = $('<button type="button" class="btn-default btn-xs"></button>').text(t('Configure node'));
+				configure.on('click', function () {
+					if (!openNodeConfig(issue.node)) {
+						showIssueNote(item, t('The node is not on the canvas. Apply the changes first.'));
+					}
+				});
+				item.append(configure);
+				if (issue.resolved) {
+					showResolved(item, message, issue, index);
+				} else if (issue.pick) {
+					addPicker(item, message, issue, index);
+				}
+			} else if (FIX_CODES.indexOf(issue.code) !== -1) {
+				fixable.push(issue);
+				var fix = $('<button type="button" class="btn-default btn-xs"></button>').text(t('Fix problem'));
+				fix.on('click', function () {
+					askToFix([issue]);
+				});
+				item.append(fix);
+			}
+			list.append(item);
+		});
+		card.append(list);
+		if (fixable.length > 1) {
+			var all = $('<button type="button" class="btn-default"></button>').text(t('Fix all problems'));
+			all.on('click', function () {
+				askToFix(fixable);
+			});
+			card.append($('<div class="pl-assistant__actions"></div>').append(all));
+		}
+		return card;
+	}
+
+	// ------------------------------------------------------------------
+	// Preguntas con opciones (ETL_ASSISTANT_QUESTIONS)
+	// ------------------------------------------------------------------
+
+	var RADIO_LIMIT = 6;      // hasta aquí, botones de opción; con más, lista con buscador
+	var questionSeq = 0;
+
+	function updateStored(id, change) {
+		var state = loadState();
+		(state.messages || []).forEach(function (item) {
+			if (item.id === id) {
+				change(item);
+			}
+		});
+		saveState(state);
+	}
+
+	// ------------------------------------------------------------------
+	// Elegir un fichero en el administrador de archivos, como los nodos
+	// ------------------------------------------------------------------
+
+	/*
+	 * El popup entrega la ruta a una función global que comparten los nodos: la del chat se instala solo
+	 * mientras se elige y luego vuelve la anterior (igual que el nodo ráster en PredictiveShapes.js).
+	 * onPick recibe (valor "file://…", ruta relativa); onInvalid, si el fichero no es del tipo esperado.
+	 */
+	function openFileManager(extensions, onPick, onInvalid) {
+		var allowed = (extensions || '').split(',').filter(Boolean);
+		var previous = window.filemanagerCallback;
+		var mine = function (url) {
+			window.filemanagerCallback = previous;
+			var lower = String(url).toLowerCase();
+			var valid = !allowed.length || allowed.some(function (extension) {
+				return lower.endsWith('.' + extension);
+			});
+			if (valid) {
+				onPick('file://' + fm_directory + url, url);
+			} else {
+				onInvalid(allowed);
+			}
+		};
+		window.filemanagerCallback = mine;
+		var popup = window.open('/gvsigonline/filemanager/?popup=1', 'etl-assistant-files',
+			'width=640, height=480,left=150,top=200,toolbar=0,status=0,scrollbars=1');
+		var restore = function () {
+			if (window.filemanagerCallback === mine) {
+				window.filemanagerCallback = previous;
+			}
+		};
+		if (!popup) {
+			restore();
+			return;
+		}
+		var watch = setInterval(function () {
+			if (popup.closed) {
+				clearInterval(watch);
+				restore();
+			}
+		}, 500);
+	}
+
+	function wrongFileText(allowed) {
+		return t('The selected file is not valid. Expected type:') + ' ' + allowed.join(', ');
+	}
+
+	/* Botón "Seleccionar fichero" con la ruta elegida al lado. onChange recibe {value, label}. */
+	function filePickerField(box, extensions, onChange) {
+		var chosen = null;
+		var name = $('<span class="pl-assistant__file-name"></span>');
+		var note = $('<div class="pl-assistant__issue-note"></div>').hide();
+		var button = $('<button type="button" class="btn-default btn-xs js-file-picker"></button>').text(t('Select file'));
+		button.on('click', function () {
+			note.hide();
+			openFileManager(extensions, function (value, label) {
+				chosen = {value: value, label: label};
+				name.text(label);
+				onChange(chosen);
+			}, function (allowed) {
+				note.text(wrongFileText(allowed)).show();
+			});
+		});
+		box.append($('<div class="pl-assistant__file"></div>').append(button).append(name)).append(note);
+		return {value: function () {
+			return chosen;
+		}};
+	}
+
+	// ------------------------------------------------------------------
+	// Suposiciones cambiables con un clic (ETL_ASSISTANT_ALTERNATIVES)
+	// ------------------------------------------------------------------
+
+	function currentParameters(figureId) {
+		for (var i = 0; i < jsonParams.length; i++) {
+			if (jsonParams[i].id === figureId) {
+				var params = jsonParams[i].parameters;
+				return $.extend({}, (params && params[0]) || {});
+			}
+		}
+		return {};
+	}
+
+	/* Cambia un parámetro de un nodo del canvas: un update_node con el resto de parámetros intactos. */
+	function applyParameter(alias, param, value) {
+		var changes = {};
+		changes[param] = value;
+		return applyParameters(alias, changes);
+	}
+
+	/* Varios parámetros de un nodo en un solo cambio; undefined quita el parámetro. */
+	function applyParameters(alias, changes) {
+		var figure = figureForAlias(alias);
+		if (!figure) {
+			return false;
+		}
+		var params = currentParameters(figure.id);
+		Object.keys(changes).forEach(function (key) {
+			if (changes[key] === undefined) {
+				delete params[key];
+			} else {
+				params[key] = changes[key];
+			}
+		});
+		try {
+			applyProposal({mode: 'patch', ops: [{op: 'update_node', id: figure.id, type: figure.NAME, parameters: params}]}, UNDO_LABEL_PARAM);
+		} catch (e) {
+			return false;
+		}
+		refreshColumns(figure);
+		return true;
+	}
+
+	/* Apunta en el mensaje un valor elegido con un clic; sin value, lo quita. Va al historial del modelo. */
+	function storeChange(message, node, param, value) {
+		updateStored(message.id, function (item) {
+			var changes = (item.changes || []).filter(function (change) {
+				return !(change.node === node && change.param === param);
+			});
+			if (value !== undefined) {
+				changes.push({node: node, param: param, value: value});
+			}
+			item.changes = changes;
+			message.changes = changes;
+		});
+	}
+
+	function recordChange(message, choice, value) {
+		updateStored(message.id, function (item) {
+			(item.assumptionChoices || []).forEach(function (candidate) {
+				if (candidate.text === choice.text) {
+					candidate.value = value;
+				}
+			});
+		});
+		storeChange(message, choice.node, choice.param, value);
+		choice.value = value;
+	}
+
+	/* Suposición sobre un fichero: se cambia en el administrador de archivos. */
+	function fileAlternativeControl(message, choice) {
+		var box = $('<span class="pl-assistant__alternative"></span>');
+		var name = $('<span class="pl-assistant__file-name"></span>').text(String(choice.value).split('/').pop());
+		var button = $('<button type="button" class="btn-default btn-xs js-file-picker"></button>').text(t('Change file'));
+		box.append(name).append(button);
+		var pending = message.proposal && message.needsConfirmation && !message.settled;
+		if (message.settled === 'discarded' || message.settled === 'undone') {
+			button.prop('disabled', true).attr('title', t('These changes are no longer on the canvas.'));
+			return box;
+		}
+		if (pending) {
+			button.prop('disabled', true).attr('title', t('Apply the changes first.')).attr('data-pending-for', message.id);
+		}
+		function note(text) {
+			box.find('.pl-assistant__issue-note').remove();
+			box.append($('<span class="pl-assistant__issue-note"></span>').text(text));
+		}
+		button.on('click', function () {
+			openFileManager((choice.file_picker || {}).extensions, function (value) {
+				var before = choice.value;
+				box.find('.pl-assistant__alternative-undo, .pl-assistant__issue-note').remove();
+				if (!applyParameter(choice.node, choice.param, value)) {
+					note(t('The node is not on the canvas. Apply the changes first.'));
+					return;
+				}
+				recordChange(message, choice, value);
+				name.text(String(value).split('/').pop());
+				var undo = $('<button type="button" class="btn-link btn-xs pl-assistant__alternative-undo"></button>').text(t('Undo'));
+				undo.on('click', function () {
+					if (!applyParameter(choice.node, choice.param, before)) {
+						return;
+					}
+					recordChange(message, choice, before);
+					storeChange(message, choice.node, choice.param, undefined);
+					name.text(String(before).split('/').pop());
+					undo.remove();
+				});
+				box.append(undo);
+			}, function (allowed) {
+				note(wrongFileText(allowed));
+			});
+		});
+		return box;
+	}
+
+	function alternativeControl(message, choice) {
+		if (choice.file_picker) {
+			return fileAlternativeControl(message, choice);
+		}
+		var box = $('<span class="pl-assistant__alternative"></span>');
+		var select = $('<select class="form-control input-sm"></select>')
+			.attr('aria-label', t('Change this assumption'));
+		(choice.options || []).forEach(function (option) {
+			select.append($('<option></option>').val(option.value).text(option.label));
+		});
+		select.val(choice.value);
+		box.append(select);
+		var pending = message.proposal && message.needsConfirmation && !message.settled;
+		var gone = message.settled === 'discarded' || message.settled === 'undone';
+		if (gone) {
+			select.prop('disabled', true).attr('title', t('These changes are no longer on the canvas.'));
+			return box;
+		}
+		if (pending) {
+			// Se activa al pulsar Aplicar (actionBar)
+			select.prop('disabled', true).attr('title', t('Apply the changes first.'))
+				.attr('data-pending-for', message.id);
+		}
+		var previous = choice.value;
+		select.on('change', function () {
+			var value = select.val();
+			box.find('.pl-assistant__alternative-undo, .pl-assistant__issue-note').remove();
+			if (!applyParameter(choice.node, choice.param, value)) {
+				select.val(previous);
+				box.append($('<span class="pl-assistant__issue-note"></span>')
+					.text(t('The node is not on the canvas. Apply the changes first.')));
+				return;
+			}
+			var before = previous;
+			previous = value;
+			recordChange(message, choice, value);
+			var undo = $('<button type="button" class="btn-link btn-xs pl-assistant__alternative-undo"></button>')
+				.text(t('Undo'));
+			undo.on('click', function () {
+				// Se repone el valor: la pila podría tener encima otro cambio distinto
+				if (!applyParameter(choice.node, choice.param, before)) {
+					return;
+				}
+				select.val(before);
+				previous = before;
+				recordChange(message, choice, before);
+				storeChange(message, choice.node, choice.param, undefined);
+				undo.remove();
+			});
+			box.append(undo);
+		});
+		return box;
+	}
+
+	/* Un control por pregunta. value() devuelve [{value, label}] o null si aún no hay respuesta. */
+	function questionControl(question, onChange) {
+		var name = 'etl-q' + (++questionSeq);
+		var box = $('<div class="pl-assistant__question-control"></div>');
+		var options = question.options || [];
+		var other = $('<input type="text" class="form-control input-sm pl-assistant__other">')
+			.attr('placeholder', t('Other answer…')).attr('aria-label', t('Other answer…'));
+		other.on('input', onChange);
+		var allowOther = question.source !== 'datastores';    // un destino tiene que ser un almacén
+
+		if (question.file_picker) {
+			var file = filePickerField(box, question.file_picker.extensions, onChange);
+			return {element: box, value: function () {
+				return file.value() ? [file.value()] : null;
+			}};
+		}
+
+		if (!options.length) {
+			if (question.empty) {
+				box.append($('<div class="pl-assistant__issue-note"></div>').text(question.empty === 'connections' ?
+					t('You have no connections available.') : t('There are no options available.')));
+			}
+			box.append(other.attr('placeholder', t('Write the answer…')));
+			return {element: box, value: function () {
+				var text = other.val().trim();
+				return text ? [{value: text, label: text}] : null;
+			}};
+		}
+
+		if (question.multiple || options.length <= RADIO_LIMIT) {
+			var type = question.multiple ? 'checkbox' : 'radio';
+			options.forEach(function (option) {
+				var input = $('<input>').attr({type: type, name: name}).val(option.value).data('label', option.label);
+				input.on('change', onChange);
+				box.append($('<label class="pl-assistant__option"></label>').append(input)
+					.append($('<span></span>').text(option.label)));
+			});
+			if (allowOther) {
+				var otherCheck = $('<input>').attr({type: type, name: name}).addClass('js-other');
+				otherCheck.on('change', function () {
+					other.prop('disabled', !otherCheck.prop('checked'));
+					if (otherCheck.prop('checked')) {
+						other.trigger('focus');
+					}
+					onChange();
+				});
+				other.prop('disabled', true);
+				box.append($('<label class="pl-assistant__option"></label>').append(otherCheck)
+					.append($('<span></span>').text(t('Other…'))));
+				box.append(other);
+			}
+			return {element: box, value: function () {
+				var chosen = [];
+				box.find('input[name="' + name + '"]:checked').each(function () {
+					var input = $(this);
+					if (input.hasClass('js-other')) {
+						var text = other.val().trim();
+						if (text) {
+							chosen.push({value: text, label: text});
+						}
+					} else {
+						chosen.push({value: input.val(), label: input.data('label')});
+					}
+				});
+				return chosen.length ? chosen : null;
+			}};
+		}
+
+		// Muchas opciones: buscador + lista
+		var search = $('<input type="search" class="form-control input-sm pl-assistant__search">')
+			.attr('placeholder', t('Search…')).attr('aria-label', t('Search…'));
+		var select = $('<select class="form-control input-sm pl-assistant__select" size="6"></select>')
+			.attr('aria-label', question.label || question.text);
+		options.forEach(function (option) {
+			select.append($('<option></option>').val(option.value).text(option.label).data('label', option.label));
+		});
+		search.on('input', function () {
+			var needle = search.val().trim().toLowerCase();
+			select.find('option').each(function () {
+				var match = !needle || $(this).text().toLowerCase().indexOf(needle) !== -1;
+				$(this).prop('hidden', !match);
+			});
+		});
+		select.on('change', function () {
+			if (select.val()) {
+				other.val('');
+			}
+			onChange();
+		});
+		other.on('input', function () {
+			if (other.val().trim()) {
+				select.val(null);
+			}
+		});
+		box.append(search).append(select);
+		if (allowOther) {
+			box.append(other);
+		}
+		return {element: box, value: function () {
+			var text = other.val().trim();
+			if (text) {
+				return [{value: text, label: text}];
+			}
+			var picked = select.find('option:selected');
+			return picked.length ? [{value: picked.val(), label: picked.data('label')}] : null;
+		}};
+	}
+
+	function answerText(chosen) {
+		return chosen.map(function (item) {
+			return item.value !== item.label ? item.label + ' (' + item.value + ')' : item.label;
+		}).join(', ');
+	}
+
+	function questionsCard(message) {
+		var card = $('<div class="pl-assistant__card pl-assistant__questions"></div>');
+		card.append($('<div class="pl-assistant__card-title"></div>').text(t('The assistant needs to know')));
+		var state = message.questionsState;
+		var controls = [];
+		var submit = $('<button type="button" class="btn-primary"></button>').text(t('Answer questions'));
+
+		function refresh() {
+			submit.prop('disabled', busy || controls.some(function (control) {
+				return !control.value();
+			}));
+		}
+
+		/* Tras crear un almacén: la lista nueva, con el recién creado ya marcado. */
+		function reloadDatastores(question, position) {
+			requestOptions({type: 'output_Postgis', param: 'db-option', parameters: {}}, function (response) {
+				if (response.error || !response.options) {
+					return;
+				}
+				var known = (question.options || []).map(function (option) {
+					return option.value;
+				});
+				var added = response.options.filter(function (option) {
+					return known.indexOf(option.value) === -1;
+				})[0];
+				question.options = response.options;
+				updateStored(message.id, function (item) {
+					item.questions.forEach(function (candidate) {
+						if (candidate.id === question.id) {
+							candidate.options = response.options;
+						}
+					});
+				});
+				var fresh = questionControl(question, refresh);
+				controls[position].element.replaceWith(fresh.element);
+				controls[position] = fresh;
+				if (added) {
+					fresh.element.find('input, select').filter(function () {
+						return this.value === added.value;
+					}).prop('checked', true);
+					fresh.element.find('select').val(added.value);
+				}
+				refresh();
+			}, function () {
+			});
+		}
+
+		message.questions.forEach(function (question) {
+			var block = $('<fieldset class="pl-assistant__question"></fieldset>');
+			block.append($('<legend></legend>').text(question.text || question.label));
+			if (state === 'answered') {
+				block.append($('<div class="pl-assistant__answer"></div>')
+					.text((message.answers || {})[question.id] || ''));
+			} else {
+				var control = questionControl(question, refresh);
+				controls.push(control);
+				block.append(control.element);
+				if (question.create_datastore) {
+					block.append(createDatastoreButton(reloadDatastores.bind(null, question, controls.length - 1)));
+				}
+			}
+			card.append(block);
+		});
+
+		if (state === 'answered') {
+			card.addClass('is-answered');
+			return card;
+		}
+		if (state === 'skipped') {
+			card.addClass('is-skipped');
+			card.find('input, select, button').prop('disabled', true);
+			card.append($('<div class="pl-assistant__issue-note"></div>').text(t('Answered in the text box.')));
+			return card;
+		}
+
+		submit.on('click', function () {
+			if (busy) {
+				return;
+			}
+			var answers = {};
+			var parts = [];
+			for (var i = 0; i < controls.length; i++) {
+				var chosen = controls[i].value();
+				if (!chosen) {
+					return;
+				}
+				var question = message.questions[i];
+				answers[question.id] = chosen.map(function (item) {
+					return item.label;
+				}).join(', ');
+				parts.push((question.label || question.text) + ': ' + answerText(chosen));
+			}
+			updateStored(message.id, function (item) {
+				item.questionsState = 'answered';
+				item.answers = answers;
+			});
+			message.questionsState = 'answered';
+			message.answers = answers;
+			card.replaceWith(questionsCard(message));
+			sendText(parts.join(' · '));
+		});
+		card.on('keydown', 'input[type=text]', function (event) {
+			if (event.key === 'Enter' && !submit.prop('disabled')) {
+				event.preventDefault();
+				submit.trigger('click');
+			}
+		});
+		card.append($('<div class="pl-assistant__actions"></div>').append(submit));
+		refresh();
+		return card;
+	}
+
+	/* Si el usuario escribe en el cuadro en lugar de responder, las preguntas abiertas quedan cerradas. */
+	function closeOpenQuestions() {
+		var state = loadState();
+		var changed = false;
+		(state.messages || []).forEach(function (item) {
+			if (item.questions && item.questions.length && !item.questionsState) {
+				item.questionsState = 'skipped';
+				changed = true;
+			}
+		});
+		if (changed) {
+			saveState(state);
+			messagesEl.find('.pl-assistant__questions').not('.is-answered').each(function () {
+				var card = $(this);
+				card.addClass('is-skipped').find('input, select, button').prop('disabled', true);
+				if (!card.find('.pl-assistant__issue-note').length) {
+					card.append($('<div class="pl-assistant__issue-note"></div>').text(t('Answered in the text box.')));
+				}
+			});
+		}
+	}
+
+	// ------------------------------------------------------------------
+	// Completar un parámetro desde el chat (ETL_ASSISTANT_PARAM_PICKER)
+	// ------------------------------------------------------------------
+
+	/* Por qué no se puede tocar aún el nodo de un mensaje; se mira el estado guardado, que cambia al aplicar. */
+	function blockedReason(message) {
+		var stored = (loadState().messages || []).filter(function (item) {
+			return item.id === message.id;
+		})[0] || message;
+		if (stored.proposal && stored.needsConfirmation && !stored.settled) {
+			return t('Apply the changes first.');
+		}
+		if (stored.settled === 'discarded' || stored.settled === 'undone') {
+			return t('These changes are no longer on the canvas.');
+		}
+		return '';
+	}
+
+	// ------------------------------------------------------------------
+	// Columnas de las entradas (ETL_ASSISTANT_COLUMNS)
+	// ------------------------------------------------------------------
+
+	var READABLE_INPUTS = ['input_Shp', 'input_Csv', 'input_Excel', 'input_Kml', 'input_Postgis', 'input_Oracle', 'input_SqlServer'];
+
+	function columnsEnabled() {
+		return panel.attr('data-columns') === '1';
+	}
+
+	function paramsEntry(figureId) {
+		return jsonParams.filter(function (entry) {
+			return entry.id === figureId;
+		})[0];
+	}
+
+	/* La rueda solo está en verde si la entrada tiene columnas de verdad. */
+	function markUnreadInputs(canvasView) {
+		if (!columnsEnabled() || typeof setGearColorForNode !== 'function') {
+			return;
+		}
+		canvasView.getFigures().each(function (i, figure) {
+			if (READABLE_INPUTS.indexOf(figure.NAME) !== -1) {
+				var entry = paramsEntry(figure.id);
+				if (!entry || !entry.schema || !entry.schema.length) {
+					setGearColorForNode(figure.id, figure, figure.NAME, false);
+				}
+			}
+		});
+	}
+
+	/* Tras cambiar el origen de una entrada: lee sus columnas y las pasa a los nodos siguientes. */
+	function refreshColumns(figure) {
+		if (!columnsEnabled() || READABLE_INPUTS.indexOf(figure.NAME) === -1) {
+			return;
+		}
+		$.ajax({
+			type: 'POST',
+			url: '/gvsigonline/etl/etl_assistant/columns/',
+			contentType: 'application/json',
+			data: JSON.stringify({
+				type: figure.NAME,
+				parameters: currentParameters(figure.id),
+				workspace_id: $('#etl_id').val() || null
+			}),
+			beforeSend: function (xhr) {
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			success: function (response) {
+				var entry = paramsEntry(figure.id);
+				var canvasView = view();
+				if (!entry || !canvasView) {
+					return;
+				}
+				$.extend(entry.parameters[0], response.params || {});
+				fillEtlNodeForm(figure.NAME, {id: figure.id}, entry.parameters, entry['schema-old']);
+				if (response.schema && response.schema.length) {
+					entry.schema = response.schema;
+					if (typeof propagateSchemaFrom === 'function') {
+						propagateSchemaFrom(figure.id, canvasView, {skipStart: false});
+					}
+				} else {
+					entry.schema = [];
+					markUnreadInputs(canvasView);
+					if (response.error) {
+						appendMessage({role: 'error', content: t('The columns of the node could not be read:') + ' ' + response.error});
+					}
+				}
+			}
+		});
+	}
+
+	/*
+	 * Formulario de siempre para crear un almacén, en una ventana aparte: conserva sus permisos y
+	 * validaciones. Al guardar redirige a la lista: se cierra y se recargan las opciones.
+	 */
+	function openDatastoreForm(onDone) {
+		var popup = window.open('/gvsigonline/services/datastore_add/', 'etl-assistant-datastore',
+			'width=900, height=700,left=150,top=100,toolbar=0,status=0,scrollbars=1');
+		if (!popup) {
+			return;
+		}
+		var watch = setInterval(function () {
+			var saved = false;
+			try {
+				saved = !popup.closed && popup.location.pathname.indexOf('datastore_list') !== -1;
+			} catch (e) {
+			}
+			if (saved) {
+				popup.close();
+			}
+			if (saved || popup.closed) {
+				clearInterval(watch);
+				onDone();
+			}
+		}, 500);
+	}
+
+	function createDatastoreButton(onDone) {
+		return $('<button type="button" class="btn-link btn-xs js-create-datastore"></button>')
+			.text(t('Create a new data store…')).on('click', function () {
+				openDatastoreForm(onDone);
+			});
+	}
+
+	function requestOptions(data, success, failure) {
+		$.ajax({
+			type: 'POST',
+			url: '/gvsigonline/etl/etl_assistant/options/',
+			contentType: 'application/json',
+			data: JSON.stringify($.extend({workspace_id: $('#etl_id').val() || null}, data)),
+			beforeSend: function (xhr) {
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			success: success,
+			error: failure
+		});
+	}
+
+	/* Lista desplegable; con muchas opciones lleva buscador. Se añade a box y devuelve el select. */
+	function selectWithSearch(box, options, label) {
+		var select = $('<select class="form-control input-sm"></select>').attr('aria-label', label);
+		select.append($('<option value=""></option>').text(t('Choose an option…')));
+		options.forEach(function (option) {
+			select.append($('<option></option>').val(option.value).text(option.label));
+		});
+		if (options.length > RADIO_LIMIT) {
+			var search = $('<input type="search" class="form-control input-sm">')
+				.attr('placeholder', t('Search…')).attr('aria-label', t('Search…'));
+			search.on('input', function () {
+				var needle = search.val().trim().toLowerCase();
+				select.find('option').each(function () {
+					$(this).prop('hidden', !!this.value && $(this).text().toLowerCase().indexOf(needle) === -1);
+				});
+			});
+			box.append(search);
+		}
+		box.append(select);
+		return select;
+	}
+
+	function addPicker(item, message, issue, index) {
+		var button = $('<button type="button" class="btn-default btn-xs js-pick"></button>').text(t('Choose a value'));
+		button.on('click', function () {
+			item.find('.pl-assistant__issue-note, .pl-assistant__picker').remove();
+			var reason = blockedReason(message);
+			if (reason) {
+				showIssueNote(item, reason);
+				return;
+			}
+			var figure = figureForAlias(issue.node);
+			if (!figure) {
+				showIssueNote(item, t('The node is not on the canvas. Apply the changes first.'));
+				return;
+			}
+			if (issue.pick.file_picker) {
+				openFileManager(issue.pick.file_picker.extensions, function (value, label) {
+					applyPick(item, message, issue, index, value, label);
+				}, function (allowed) {
+					showIssueNote(item, wrongFileText(allowed));
+				});
+				return;
+			}
+			load();
+		});
+		function load() {
+			var figure = figureForAlias(issue.node);
+			if (!figure) {
+				showIssueNote(item, t('The node is not on the canvas. Apply the changes first.'));
+				return;
+			}
+			item.find('.pl-assistant__picker').remove();
+			button.prop('disabled', true);
+			requestOptions({
+				type: issue.pick.type,
+				param: issue.param,
+				parameters: currentParameters(figure.id)
+			}, function (response) {
+				button.prop('disabled', false);
+				if (response.error) {
+					showIssueNote(item, t('The options could not be loaded.'));
+				} else if (response.needs === 'connection') {
+					showIssueNote(item, t('Choose the connection of the node first.'));
+				} else if (response.needs === 'schema') {
+					showIssueNote(item, t('Choose the schema of the node first.'));
+				} else if ((!response.options || !response.options.length) && !response.create_datastore) {
+					showIssueNote(item, t('There are no options available.'));
+				} else {
+					showPicker(item, message, issue, index, response.options || [], response.create_datastore ? load : null);
+				}
+			}, function () {
+				button.prop('disabled', false);
+				showIssueNote(item, t('The options could not be loaded.'));
+			});
+		}
+		item.append(button);
+	}
+
+	function applyPick(item, message, issue, index, value, label, params) {
+		var changes = params;
+		if (!changes) {
+			changes = {};
+			changes[issue.param] = value;
+		}
+		var figure = figureForAlias(issue.node);
+		var current = figure ? currentParameters(figure.id) : {};
+		var previous = {};
+		Object.keys(changes).forEach(function (key) {
+			previous[key] = current[key];
+		});
+		if (!applyParameters(issue.node, changes)) {
+			showIssueNote(item, t('The node is not on the canvas. Apply the changes first.'));
+			return false;
+		}
+		issue.resolved = {value: value, label: label, changed: Object.keys(changes), previous: previous};
+		updateStored(message.id, function (stored) {
+			stored.issues[index].resolved = issue.resolved;
+		});
+		Object.keys(changes).forEach(function (key) {
+			storeChange(message, issue.node, key, changes[key]);
+		});
+		showResolved(item, message, issue, index);
+		return true;
+	}
+
+	function showPicker(item, message, issue, index, options, reload) {
+		var box = $('<div class="pl-assistant__picker"></div>');
+		var select = selectWithSearch(box, options, t('Choose a value'));
+		select.on('change', function () {
+			var value = select.val();
+			if (!value) {
+				return;
+			}
+			var option = options.filter(function (candidate) {
+				return candidate.value === value;
+			})[0];
+			if (!applyPick(item, message, issue, index, value, select.find('option:selected').text(), option && option.params)) {
+				select.val('');
+			}
+		});
+		if (reload) {
+			box.append(createDatastoreButton(reload));
+		}
+		item.append(box);
+	}
+
+	function showResolved(item, message, issue, index) {
+		item.addClass('is-resolved');
+		item.find('.js-pick, .pl-assistant__picker, .pl-assistant__issue-note').remove();
+		var done = $('<div class="pl-assistant__issue-resolved"></div>')
+			.text(t('Value chosen:') + ' ' + issue.resolved.label + ' ');
+		var undo = $('<button type="button" class="btn-link btn-xs"></button>').text(t('Undo'));
+		undo.on('click', function () {
+			var resolved = issue.resolved;
+			var changed = resolved.changed || [issue.param];
+			var restore = {};
+			changed.forEach(function (key) {
+				restore[key] = resolved.previous ? resolved.previous[key] : resolved.before;
+			});
+			if (!applyParameters(issue.node, restore)) {
+				showIssueNote(item, t('The node is not on the canvas. Apply the changes first.'));
+				return;
+			}
+			delete issue.resolved;
+			updateStored(message.id, function (stored) {
+				delete stored.issues[index].resolved;
+			});
+			changed.forEach(function (key) {
+				storeChange(message, issue.node, key, undefined);
+			});
+			item.removeClass('is-resolved');
+			done.remove();
+			if (issue.pick) {
+				addPicker(item, message, issue, index);
+			}
+		});
+		item.append(done.append(undo));
+	}
+
+	// ------------------------------------------------------------------
+	// Siguiente paso y arranque guiado (ETL_ASSISTANT_NEXT_STEPS)
+	// ------------------------------------------------------------------
+
+	function nextStepText(code) {
+		if (code === 'add_output') {
+			return {label: t('Add a PostGIS output'), message: t('Add an output to a new PostGIS table at the end of the flow.')};
+		}
+		if (code === 'explain') {
+			return {label: t('Explain the flow'), message: t('Explain what the flow on the canvas does, step by step.')};
+		}
+		if (code === 'review') {
+			return {label: t('Review the flow'), message: t('Review the flow and tell me which parameters are missing or may cause errors.')};
+		}
+		return null;
+	}
+
+	function nextStepsBar(message) {
+		var bar = $('<div class="pl-assistant__next"></div>');
+		message.nextSteps.forEach(function (step) {
+			var text = nextStepText(step.code);
+			if (text) {
+				bar.append($('<button type="button" class="pl-assistant__next-step"></button>').text(text.label)
+					.on('click', function () {
+						sendText(text.message);
+					}));
+			}
+		});
+		return bar;
+	}
+
+	function guidedEnabled() {
+		return panel.attr('data-guided') === '1';
+	}
+
+	function closeGuided() {
+		examplesEl.find('.pl-assistant__guided').remove();
+	}
+
+	/* Formulario del ejemplo "CSV a PostGIS": elige fichero y conexión, y compone la petición. */
+	function openGuided(button) {
+		closeGuided();
+		var form = $('<div class="pl-assistant__card pl-assistant__guided"></div>');
+		var fields = {};
+		var submit = $('<button type="button" class="btn-primary"></button>').text(t('Create the flow')).prop('disabled', true);
+		var note = $('<div class="pl-assistant__issue-note"></div>').hide();
+
+		function refresh() {
+			submit.prop('disabled', !(fields.file && fields.file.value() && fields.connection && fields.connection.val()));
+		}
+
+		function fail(text) {
+			if (form.find('.js-guided-fallback').length) {
+				return;
+			}
+			submit.remove();
+			note.text(text).show();
+			note.after($('<button type="button" class="btn-default js-guided-fallback"></button>').text(t('Ask the assistant'))
+				.on('click', function () {
+					closeGuided();
+					sendText(button.attr('data-example'));
+				}));
+		}
+
+		function field(key, label, type, param, emptyText) {
+			var box = $('<div class="pl-assistant__guided-field"></div>')
+				.append($('<div class="pl-assistant__card-title"></div>').text(label));
+			form.append(box);
+			function load() {
+				box.find('select, input, .js-create-datastore').remove();
+				fields[key] = null;
+				refresh();
+				requestOptions({type: type, param: param, parameters: {}}, function (response) {
+					if (response.error) {
+						fail(t('The options could not be loaded.'));
+					} else if ((!response.options || !response.options.length) && !response.create_datastore) {
+						fail(emptyText);
+					} else {
+						fields[key] = selectWithSearch(box, response.options || [], label);
+						fields[key].on('change', refresh);
+						if (response.create_datastore) {
+							box.append(createDatastoreButton(load));
+						}
+					}
+				}, function () {
+					fail(t('The options could not be loaded.'));
+				});
+			}
+			load();
+		}
+
+		form.append($('<div class="pl-assistant__card-title"></div>').text(button.text()));
+		var fileBox = $('<div class="pl-assistant__guided-field"></div>')
+			.append($('<div class="pl-assistant__card-title"></div>').text(t('CSV file')));
+		form.append(fileBox);
+		fields.file = filePickerField(fileBox, 'csv,txt', refresh);
+		field('connection', t('Where to create the table'), 'output_Postgis', 'db-option', t('You have no PostGIS connections available.'));
+		submit.on('click', function () {
+			var file = fields.file.value();
+			var text = t('Load the CSV file {file} into a new table of the data store {store}.')
+				.replace('{file}', function () {
+					return answerText([file]);
+				})
+				.replace('{store}', function () {
+					return answerText([{value: fields.connection.val(), label: fields.connection.find('option:selected').text()}]);
+				});
+			closeGuided();
+			sendText(text);
+		});
+		var cancel = $('<button type="button" class="btn-default"></button>').text(t('Cancel')).on('click', closeGuided);
+		form.append(note).append($('<div class="pl-assistant__actions"></div>').append(submit).append(cancel));
+		button.after(form);
+	}
+
+	function showIssueNote(item, text) {
+		item.find('.pl-assistant__issue-note').remove();
+		item.append($('<div class="pl-assistant__issue-note"></div>').text(text));
+	}
+
+	function askToFix(issues) {
+		if (busy) {
+			return;
+		}
+		if (issues.length === 1) {
+			sendText(t('Fix this problem:') + ' ' + issues[0].message);
+			return;
+		}
+		sendText(t('Fix these problems:') + '\n' + issues.map(function (issue) {
+			return '- ' + issue.message;
+		}).join('\n'));
 	}
 
 	function renderAll() {
@@ -534,12 +1578,23 @@
 			} else if (message.role === 'assistant') {
 				// Lo que propuso y qué hizo el usuario con ello, para que el modelo no lo suponga.
 				var status = message.settled || (message.proposal ? 'pending' : '');
-				items.push({
+				var item = {
 					role: 'assistant',
 					content: message.content || '',
 					summary: message.summary || [],
 					status: status
-				});
+				};
+				if (message.changes && message.changes.length) {
+					// Suposiciones que el usuario cambió con un clic: que el modelo no las deshaga
+					item.changes = message.changes;
+				}
+				if (message.questions && message.questions.length) {
+					// Qué preguntó: la respuesta del usuario llega como "Etiqueta: valor"
+					item.questions = message.questions.map(function (question) {
+						return {label: question.label, text: question.text};
+					});
+				}
+				items.push(item);
 			}
 		});
 		return items.slice(-17);
@@ -800,7 +1855,7 @@
 		return types;
 	}
 
-	function applyProposal(proposal) {
+	function applyProposal(proposal, undoLabel) {
 		var canvasView = view();
 		if (!canvasView) {
 			throw new Error('canvas');
@@ -812,7 +1867,7 @@
 		(summary.nodes || []).forEach(function (node) {
 			map[node.alias] = node.id;
 		});
-		stack.startTransaction(UNDO_LABEL);
+		stack.startTransaction(undoLabel || UNDO_LABEL);
 		try {
 			var created = {};
 			if (proposal.mode === 'replace') {
@@ -858,6 +1913,7 @@
 			));
 			stack.commitTransaction();
 			propagateInputs(canvasView);
+			markUnreadInputs(canvasView);
 			fillEmptyNames(proposal);
 			return map;
 		} catch (err) {
@@ -885,6 +1941,9 @@
 					saveState(state);
 					settleMessage(messageId, 'applied', t('Applied'));
 					aliasMap = map;
+					// Las suposiciones de esta propuesta ya se pueden cambiar
+					messagesEl.find('[data-pending-for="' + messageId + '"]').prop('disabled', false)
+						.removeAttr('title').removeAttr('data-pending-for');
 				} catch (e) {
 					bar.after($('<div class="pl-assistant__bubble pl-assistant__bubble--error"></div>').text(t('The flow could not be drawn.')));
 				}
@@ -909,6 +1968,7 @@
 				}
 				stack.undo();
 				undoBtn.prop('disabled', true);
+				messagesEl.find('.pl-assistant__next').remove();
 				bar.after($('<div class="pl-assistant__status"></div>').text(t('Undone')));
 				settleMessage(messageId, 'undone', t('Undone'));
 			});
@@ -931,6 +1991,7 @@
 			return;
 		}
 		recall = -1;
+		closeOpenQuestions();
 		var summary = canvasSummary();
 		var types = {};
 		summary.nodes.forEach(function (node) {
@@ -954,84 +2015,325 @@
 			}
 		}, 1000);
 		var stopped = false;
+		var requestBody = {
+			message: text,
+			history: historyPayload().slice(0, -1),
+			canvas: {
+				nodes: summary.nodes,
+				edges: summary.edges,
+				selected: summary.selected,
+				next_alias: summary.nextAlias
+			},
+			workspace_id: $('#etl_id').val() || null
+		};
+
+		function showResponse(response) {
+			typing.remove();
+			var proposal = response.proposal;
+			var mergedTypes = typesFromProposal(proposal, types);
+			var actions = null;
+			var map = invertAlias(summary);
+			var messageId = newId();
+			if (proposal && !response.error) {
+				if (response.needs_confirmation) {
+					actions = actionBar(proposal, true, messageId);
+				} else {
+					try {
+						map = applyProposal(proposal);
+						actions = actionBar(proposal, false, messageId);
+					} catch (e) {
+						response.warnings = (response.warnings || []).concat([t('The flow could not be drawn.')]);
+					}
+				}
+			}
+			var stored = {
+				id: messageId,
+				role: 'assistant',
+				content: response.reply || '',
+				summary: response.summary || [],
+				assumptions: response.assumptions || [],
+				warnings: response.warnings || [],
+				proposal: proposal,
+				needsConfirmation: !!response.needs_confirmation
+			};
+			if (response.issues && response.issues.length) {
+				stored.issues = response.issues;
+			}
+			if (response.questions && response.questions.length) {
+				stored.questions = response.questions;
+			}
+			if (response.assumption_choices && response.assumption_choices.length) {
+				stored.assumptionChoices = response.assumption_choices;
+			}
+			if (response.next_steps && response.next_steps.length) {
+				stored.nextSteps = response.next_steps;
+			}
+			if (proposal && !response.error && !response.needs_confirmation) {
+				stored.settled = 'applied';
+				stored.status = t('Applied');
+			}
+			remember(stored, {aliasMap: map, types: mergedTypes});
+			stored.actions = actions;
+			appendMessage(stored, mergedTypes);
+		}
+
+		function showFailure(kind) {
+			typing.remove();
+			var readable = t('The assistant could not be reached. Try again.');
+			if (kind === 'stopped') {
+				readable = t('Stopped. The canvas has not changed.');
+			} else if (kind === 'forbidden') {
+				readable = t('You are not allowed to use the assistant on this workspace.');
+			}
+			var errorMessage = {role: 'error', content: readable, retry: text};
+			remember(errorMessage);
+			appendMessage(errorMessage);
+		}
+
+		function finish() {
+			clearInterval(timer);
+			currentXhr = null;
+			setBusy(false);
+			input.focus();
+		}
+
+		if (streamingEnabled()) {
+			currentXhr = streamRequest(requestBody, {
+				step: function (event) {
+					showStep(typing, event);
+				},
+				text: function (event) {
+					showLiveText(typing, event);
+				},
+				response: showResponse,
+				failure: showFailure,
+				done: finish
+			});
+			return;
+		}
+
 		currentXhr = $.ajax({
 			type: 'POST',
 			url: '/gvsigonline/etl/etl_assistant/',
 			contentType: 'application/json',
-			data: JSON.stringify({
-				message: text,
-				history: historyPayload().slice(0, -1),
-				canvas: {
-					nodes: summary.nodes,
-					edges: summary.edges,
-					selected: summary.selected,
-					next_alias: summary.nextAlias
-				},
-				workspace_id: $('#etl_id').val() || null
-			}),
+			data: JSON.stringify(requestBody),
 			beforeSend: function (xhr) {
 				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 			},
 			success: function (response) {
-				typing.remove();
-				var proposal = response.proposal;
-				var mergedTypes = typesFromProposal(proposal, types);
-				var actions = null;
-				var map = invertAlias(summary);
-				var messageId = newId();
-				if (proposal && !response.error) {
-					if (response.needs_confirmation) {
-						actions = actionBar(proposal, true, messageId);
-					} else {
-						try {
-							map = applyProposal(proposal);
-							actions = actionBar(proposal, false, messageId);
-						} catch (e) {
-							response.warnings = (response.warnings || []).concat([t('The flow could not be drawn.')]);
-						}
-					}
-				}
-				var stored = {
-					id: messageId,
-					role: 'assistant',
-					content: response.reply || '',
-					summary: response.summary || [],
-					assumptions: response.assumptions || [],
-					warnings: response.warnings || [],
-					proposal: proposal,
-					needsConfirmation: !!response.needs_confirmation
-				};
-				if (proposal && !response.error && !response.needs_confirmation) {
-					stored.settled = 'applied';
-					stored.status = t('Applied');
-				}
-				remember(stored, {aliasMap: map, types: mergedTypes});
-				stored.actions = actions;
-				appendMessage(stored, mergedTypes);
+				showResponse(response);
 			},
 			error: function (xhr, textStatus) {
-				typing.remove();
-				var readable = t('The assistant could not be reached. Try again.');
 				if (stopped || textStatus === 'abort') {
-					readable = t('Stopped. The canvas has not changed.');
+					showFailure('stopped');
 				} else if (xhr.status === 403) {
-					readable = t('You are not allowed to use the assistant on this workspace.');
+					showFailure('forbidden');
+				} else {
+					showFailure('network');
 				}
-				var errorMessage = {role: 'error', content: readable, retry: text};
-				remember(errorMessage);
-				appendMessage(errorMessage);
 			},
 			complete: function () {
-				clearInterval(timer);
-				currentXhr = null;
-				setBusy(false);
-				input.focus();
+				finish();
 			}
 		});
 		currentXhr.etlStop = function () {
 			stopped = true;
 			currentXhr.abort();
 		};
+	}
+
+	// ------------------------------------------------------------------
+	// Pasos en vivo y Detener real (ETL_ASSISTANT_STREAMING)
+	// ------------------------------------------------------------------
+
+	function streamingEnabled() {
+		return !!(panel && panel.attr('data-streaming') === '1' && window.fetch && window.AbortController &&
+			window.TextDecoder);
+	}
+
+	function newQueryId() {
+		return 'q' + Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
+	}
+
+	function cancelOnServer(queryId) {
+		try {
+			window.fetch('/gvsigonline/etl/etl_assistant/cancel/', {
+				method: 'POST',
+				credentials: 'same-origin',
+				headers: {'Content-Type': 'application/json', 'X-CSRFToken': Cookies.get('csrftoken')},
+				body: JSON.stringify({query_id: queryId})
+			}).catch(function () {
+			});
+		} catch (e) {
+		}
+	}
+
+	/*
+	 * POST al endpoint SSE. Llama a handlers.step con cada paso, a handlers.response con el resultado
+	 * (el mismo JSON que /etl_assistant/) o a handlers.failure('stopped' | 'forbidden' | 'network'), y
+	 * siempre a handlers.done al final. Devuelve un objeto con etlStop() para el botón Detener.
+	 */
+	function streamRequest(body, handlers) {
+		var controller = new window.AbortController();
+		var queryId = newQueryId();
+		var stopped = false;
+		var settled = false;
+		var request = {queryId: queryId};
+
+		function settle(fn, arg) {
+			if (settled) {
+				return;
+			}
+			settled = true;
+			fn(arg);
+			handlers.done();
+		}
+
+		function handleFrame(frame) {
+			var data = frame.split('\n').filter(function (line) {
+				return line.indexOf('data:') === 0;
+			}).map(function (line) {
+				return line.slice(5).replace(/^ /, '');
+			}).join('\n');
+			if (!data) {
+				return;
+			}
+			var event;
+			try {
+				event = JSON.parse(data);
+			} catch (e) {
+				return;
+			}
+			if (event.type === 'step') {
+				handlers.step(event);
+			} else if (event.type === 'answer_delta' && typeof event.delta === 'string') {
+				handlers.text(event);
+			} else if (event.type === 'result') {
+				settle(handlers.response, event.payload || {});
+			}
+		}
+
+		request.etlStop = function () {
+			stopped = true;
+			cancelOnServer(queryId);
+			controller.abort();
+			settle(handlers.failure, 'stopped');
+		};
+
+		window.fetch('/gvsigonline/etl/etl_assistant/stream/', {
+			method: 'POST',
+			credentials: 'same-origin',
+			signal: controller.signal,
+			headers: {'Content-Type': 'application/json', 'X-CSRFToken': Cookies.get('csrftoken'),
+				'Accept': 'text/event-stream'},
+			body: JSON.stringify($.extend({}, body, {query_id: queryId}))
+		}).then(function (response) {
+			if (response.status === 403) {
+				settle(handlers.failure, 'forbidden');
+				return null;
+			}
+			if (!response.ok || !response.body) {
+				settle(handlers.failure, 'network');
+				return null;
+			}
+			var type = response.headers.get('Content-Type') || '';
+			if (type.indexOf('application/json') === 0) {
+				// Error antes de empezar el turno: mismo JSON que /etl_assistant/
+				return response.json().then(function (json) {
+					settle(json && json.reply !== undefined ? handlers.response : handlers.failure,
+						json && json.reply !== undefined ? json : 'network');
+				});
+			}
+			var reader = response.body.getReader();
+			var decoder = new window.TextDecoder('utf-8');
+			var buffer = '';
+			function pump() {
+				return reader.read().then(function (chunk) {
+					if (chunk.done) {
+						buffer += decoder.decode();
+						if (buffer.trim()) {
+							handleFrame(buffer);
+						}
+						settle(handlers.failure, stopped ? 'stopped' : 'network');
+						return null;
+					}
+					buffer += decoder.decode(chunk.value, {stream: true});
+					var frames = buffer.split('\n\n');
+					buffer = frames.pop();
+					frames.forEach(handleFrame);
+					return settled ? reader.cancel() : pump();
+				});
+			}
+			return pump();
+		}).catch(function () {
+			settle(handlers.failure, stopped ? 'stopped' : 'network');
+		});
+		return request;
+	}
+
+	function stepText(event) {
+		var d = event.detail || {};
+		var table = [d.schema, d.table].filter(Boolean).join('.');
+		switch (event.tool) {
+		case 'list_connections':
+			return t('Checking the available connections');
+		case 'list_tables':
+			return d.schema ? t('Listing the tables of') + ' ' + [d.connection, d.schema].filter(Boolean).join('.')
+				: t('Listing the schemas of') + ' ' + (d.connection || '');
+		case 'get_table_schema':
+			return t('Reading the columns of') + ' ' + table;
+		case 'get_node_specs':
+			return t('Reading the node specs') + (d.types ? ': ' + d.types : '');
+		case 'list_files':
+			return d.folder ? t('Looking for files in') + ' ' + d.folder : t('Looking for files');
+		case 'get_canvas_nodes':
+			return t('Reading the nodes') + (d.ids ? ' ' + d.ids : '');
+		case 'check_workspace':
+			return t('Checking the flow');
+		case 'propose_workspace':
+			return t('Validating the proposal');
+		default:
+			return t('Working…');
+		}
+	}
+
+	var STEPS_SHOWN = 4;
+
+	/*
+	 * Texto de la respuesta mientras se genera (ETL_ASSISTANT_TOKEN_STREAMING). Con reset empieza de nuevo.
+	 * Es provisional: al llegar el resultado la burbuja se sustituye por el mensaje definitivo.
+	 */
+	function showLiveText(typing, event) {
+		var live = (event.reset ? '' : (typing.data('liveText') || '')) + event.delta;
+		typing.data('liveText', live);
+		var bubble = typing.find('.pl-assistant__bubble');
+		var box = bubble.find('.pl-assistant__live');
+		if (!box.length) {
+			box = $('<div class="pl-assistant__live"></div>');
+			bubble.append(box);
+		}
+		box.html(renderMarkdown(live));
+		messagesEl.scrollTop(messagesEl[0].scrollHeight);
+	}
+
+	function showStep(typing, event) {
+		var bubble = typing.find('.pl-assistant__bubble');
+		var list = bubble.find('.pl-assistant__steps');
+		if (!list.length) {
+			list = $('<ul class="pl-assistant__steps"></ul>');
+			bubble.append(list);
+		}
+		var label = stepText(event);
+		var last = list.children().last();
+		if (last.length && last.text() === label) {
+			return;
+		}
+		list.children().removeClass('is-current');
+		list.append($('<li class="pl-assistant__step is-current"></li>').text(label));
+		while (list.children().length > STEPS_SHOWN) {
+			list.children().first().remove();
+		}
+		messagesEl.scrollTop(messagesEl[0].scrollHeight);
 	}
 
 	function stopRequest() {
@@ -1090,6 +2392,11 @@
 		sendBtn = $('#etl-assistant-send');
 		renderAll();
 		bindResize();
+		// Tarjeta de error de ejecución (EtlRunError.js): Preguntar al asistente
+		window.etlAssistantAsk = function (text) {
+			setOpen(true);
+			sendText(text);
+		};
 		$('#etl-assistant-open').on('click', function () {
 			setOpen(panel.hasClass('is-collapsed'));
 		});
@@ -1120,6 +2427,11 @@
 			focusAlias($(this).attr('data-alias'));
 		});
 		examplesEl.on('click', '.pl-assistant__example', function () {
+			if ($(this).attr('data-guided-start') && guidedEnabled()) {
+				openGuided($(this));
+				return;
+			}
+			closeGuided();
 			sendText($(this).attr('data-example'));
 		});
 		$('#etl-assistant-form').on('submit', function (event) {

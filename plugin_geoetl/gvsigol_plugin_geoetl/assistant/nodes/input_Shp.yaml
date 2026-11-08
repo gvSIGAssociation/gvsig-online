@@ -5,14 +5,18 @@ summary: Lee un shapefile con su codificación y EPSG.
 parameters:
 - name: shp-file
   required: true
+  summary: Valor file:// del fichero .shp.
 - name: encode
   choices:
   - LATIN1
   - UTF-8
   - ISO-8859-15
   - WINDOWS-1252
+  summary: Codificación de los textos.
+  default: UTF-8
 - name: epsg
-  summary: Código EPSG.
+  summary: 'EPSG, solo el número. Vacío: se toma del propio shapefile.'
+  default: ''
 ports:
 - direction: output
   label: Input

@@ -8,6 +8,7 @@
 {% endblock %}
 
 {% block header %}
+<link rel="stylesheet" href="{% static 'css/etl_run_error.css' %}">
 {% if etl_assistant_enabled %}
 <link rel="stylesheet" href="{% static 'css/etl_assistant.css' %}">
 {% endif %}
@@ -428,11 +429,13 @@
                             <li><a data-shape="output_Postgis" class="palette_node_element draw2d_droppable dropdown-item">PgSQL/PostGIS</a></li>
                             <li><a data-shape="output_ModelSave" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Save Model" %}</a></li>
                             <li><a data-shape="output_RasterPublish" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Publish Raster" %}</a></li>
+                            <li><a data-shape="output_LayerPublish" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Publish Layer" %}</a></li>
                             <li><a data-shape="output_Visualizer" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Visualizer" %}</a></li>
                         </div>
                     </div>
                 </div>
             </div>
+            <div id="etl-run-error" hidden></div>
             <!-- Fila: columna-dropdown + canvas -->
             <div id="etl-body">
                 <div id="etl-dropdown-col"></div>
@@ -440,7 +443,7 @@
                     <div id="canvas-etl"></div>
                 </div>
                 {% if etl_assistant_enabled %}
-                <aside id="etl-assistant" class="pl-assistant is-collapsed" aria-label="{% trans 'ETL assistant' %}">
+                <aside id="etl-assistant" class="pl-assistant is-collapsed" aria-label="{% trans 'ETL assistant' %}"{% if etl_assistant_streaming %} data-streaming="1"{% endif %}{% if etl_assistant_next_steps %} data-guided="1"{% endif %}{% if etl_assistant_columns %} data-columns="1"{% endif %}>
                     <div class="pl-assistant__handle" role="separator" aria-orientation="vertical" aria-label="{% trans 'Resize assistant' %}"></div>
                     <header class="pl-assistant__header">
                         <h4 class="pl-assistant__title"><i class="fa fa-comments"></i> {% trans "Assistant" %}</h4>
@@ -453,7 +456,7 @@
                     <div class="pl-assistant__messages" id="etl-assistant-messages" aria-live="polite"></div>
                     <div class="pl-assistant__examples" id="etl-assistant-examples">
                         <p class="pl-assistant__intro">{% trans "Describe the data you have and the result you want. The assistant draws the flow on the canvas and you review it before saving." %}</p>
-                        <button type="button" class="pl-assistant__example" data-when="empty" data-example="{% trans "Load a CSV file into a new PostGIS table." %}"><i class="fa fa-file-text-o" aria-hidden="true"></i><span>{% trans "CSV to PostGIS" %}</span></button>
+                        <button type="button" class="pl-assistant__example" data-when="empty" data-guided-start="csv_postgis" data-example="{% trans "Load a CSV file into a new PostGIS table." %}"><i class="fa fa-file-text-o" aria-hidden="true"></i><span>{% trans "CSV to PostGIS" %}</span></button>
                         <button type="button" class="pl-assistant__example" data-when="empty" data-example="{% trans "Join two PostGIS tables on a common field and save the result in a new table." %}"><i class="fa fa-link" aria-hidden="true"></i><span>{% trans "Join two tables" %}</span></button>
                         <button type="button" class="pl-assistant__example" data-when="empty" data-example="{% trans "Geocode the addresses in an Excel file and publish the result in the viewer." %}"><i class="fa fa-map-marker" aria-hidden="true"></i><span>{% trans "Geocode addresses" %}</span></button>
                         <button type="button" class="pl-assistant__example" data-when="empty" data-example="{% trans "Read a shapefile, reproject it to EPSG:25830 and write it to PostGIS." %}"><i class="fa fa-globe" aria-hidden="true"></i><span>{% trans "Reproject a layer" %}</span></button>
@@ -920,6 +923,10 @@
 
         }
 
+        if (window.EtlRunError) {
+            EtlRunError.update(data);
+        }
+
     }
 
     function getCurrentCanvasStatus(){
@@ -1048,6 +1055,7 @@
 <script type="text/javascript" src="{% static "js/NodeHeader.js" %}"></script>
 
 <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+<script type="text/javascript" src="{% static "js/EtlRunError.js" %}"></script>
 
 <!-- CodeMirror for SQL syntax highlighting -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>

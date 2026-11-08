@@ -4,7 +4,12 @@ family: transform
 summary: Une geometrías, opcionalmente agrupando por un atributo.
 parameters:
 - name: group-by-attr
+  summary: Columna por la que se agrupa, o - para unir todo en una geometría.
+  default: '-'
+  column: 0
 - name: multi
+  summary: '"true" para obtener geometrías múltiples.'
+  default: 'false'
 ports:
 - direction: input
   label: Input

@@ -30,6 +30,31 @@ env_plugin_geoetl = environ.Env(
     ETL_ASSISTANT_TRACE=(bool, False),
     # Vacío: se usa el modelo por defecto de GeoCopilot.
     GEOETL_LLM_MODEL=(str, ''),
+    # Motor del agente del asistente: legacy (AgentExecutor, el de siempre) o langgraph.
+    ETL_ASSISTANT_ENGINE=(str, 'legacy'),
+    # Tiempo máximo de un turno del asistente con el motor langgraph (segundos). 0 = sin límite.
+    ETL_ASSISTANT_MAX_SECONDS=(int, 120),
+    # Dónde se ejecuta el turno: inline (en el proceso web, como siempre) o celery (en un worker; necesita
+    # GEOCOPILOT_SHARED_CACHE=True y un worker escuchando ETL_ASSISTANT_CELERY_QUEUE).
+    ETL_ASSISTANT_EXECUTION=(str, 'inline'),
+    # Cola de Celery del asistente. Por defecto la de GeoCopilot.
+    ETL_ASSISTANT_CELERY_QUEUE=(str, 'geocopilot'),
+    # Pasos en vivo y Detener real en el panel (endpoint SSE /etl/etl_assistant/stream/).
+    ETL_ASSISTANT_STREAMING=(bool, False),
+    # Texto de la respuesta en vivo. Solo con ETL_ASSISTANT_STREAMING=True y ETL_ASSISTANT_ENGINE=langgraph.
+    ETL_ASSISTANT_TOKEN_STREAMING=(bool, False),
+    # Usabilidad: problemas del flujo con botones Configurar / Arreglar en el panel.
+    ETL_ASSISTANT_ACTIONS=(bool, True),
+    # Usabilidad: el asistente pregunta con opciones para elegir con un clic (herramienta ask_user).
+    ETL_ASSISTANT_QUESTIONS=(bool, True),
+    # Usabilidad: las suposiciones sobre un parámetro se pueden cambiar con un clic en el panel.
+    ETL_ASSISTANT_ALTERNATIVES=(bool, True),
+    # Usabilidad: completar desde el chat los parámetros de una lista cerrada. Necesita ETL_ASSISTANT_ACTIONS=True.
+    ETL_ASSISTANT_PARAM_PICKER=(bool, True),
+    # Usabilidad: sugerencias de siguiente paso (por reglas) y arranque guiado con el canvas vacío.
+    ETL_ASSISTANT_NEXT_STEPS=(bool, True),
+    # El asistente lee las columnas de las entradas y pregunta por los campos con sus valores reales.
+    ETL_ASSISTANT_COLUMNS=(bool, True),
     # --- Nodos predictivos / ráster (etl_raster.py). 0 = sin límite ---
     # Píxeles máximos del ráster que procesa un nodo (alto x ancho).
     ETL_RASTER_MAX_PIXELS=(int, 4000000000),
@@ -82,6 +107,18 @@ ETL_MODELS_DIR = env_plugin_geoetl('ETL_MODELS_DIR')
 ETL_MODELS_KEEP_VERSIONS = env_plugin_geoetl('ETL_MODELS_KEEP_VERSIONS')
 ETL_MODELS_SIGNING_KEY = env_plugin_geoetl('ETL_MODELS_SIGNING_KEY')
 GEOETL_LLM_MODEL = env_plugin_geoetl('GEOETL_LLM_MODEL')
+ETL_ASSISTANT_ENGINE = env_plugin_geoetl('ETL_ASSISTANT_ENGINE')
+ETL_ASSISTANT_MAX_SECONDS = env_plugin_geoetl('ETL_ASSISTANT_MAX_SECONDS')
+ETL_ASSISTANT_EXECUTION = env_plugin_geoetl('ETL_ASSISTANT_EXECUTION')
+ETL_ASSISTANT_CELERY_QUEUE = env_plugin_geoetl('ETL_ASSISTANT_CELERY_QUEUE')
+ETL_ASSISTANT_STREAMING = env_plugin_geoetl('ETL_ASSISTANT_STREAMING')
+ETL_ASSISTANT_TOKEN_STREAMING = env_plugin_geoetl('ETL_ASSISTANT_TOKEN_STREAMING')
+ETL_ASSISTANT_ACTIONS = env_plugin_geoetl('ETL_ASSISTANT_ACTIONS')
+ETL_ASSISTANT_QUESTIONS = env_plugin_geoetl('ETL_ASSISTANT_QUESTIONS')
+ETL_ASSISTANT_ALTERNATIVES = env_plugin_geoetl('ETL_ASSISTANT_ALTERNATIVES')
+ETL_ASSISTANT_PARAM_PICKER = env_plugin_geoetl('ETL_ASSISTANT_PARAM_PICKER')
+ETL_ASSISTANT_NEXT_STEPS = env_plugin_geoetl('ETL_ASSISTANT_NEXT_STEPS')
+ETL_ASSISTANT_COLUMNS = env_plugin_geoetl('ETL_ASSISTANT_COLUMNS')
 
 LOGGER.info("ETL_DB_HOST= %s",GEOETL_DB['host'])
 LOGGER.info("ETL_DB_PORT= %s",GEOETL_DB['port'])

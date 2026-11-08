@@ -4,7 +4,18 @@ family: transform
 summary: Renombra un atributo.
 parameters:
 - name: old-attr
+  required: true
+  summary: Columnas que se renombran.
+  format: list
+  example:
+  - nom
+  - cod
+  column: 0
 - name: new-attr
+  required: true
+  summary: Nombres nuevos separados por espacio, en el mismo orden que old-attr.
+  format: spaced
+  example: nombre codigo
 ports:
 - direction: input
   label: Input

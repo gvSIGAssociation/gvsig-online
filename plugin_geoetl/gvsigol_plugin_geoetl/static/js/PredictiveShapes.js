@@ -1710,6 +1710,108 @@ defineEtlNode({
     outputSchema: function () { return []; }
 });
 
+/* ---------- Publicar capa (PostGIS) ---------- */
+
+var etlLayerTargets = {loadedAt: 0, data: null};
+
+function etlLoadLayerTargets(force) {
+    var d = $.Deferred();
+    if (!force && etlLayerTargets.data && Date.now() - etlLayerTargets.loadedAt < 60000) {
+        return d.resolve(etlLayerTargets.data).promise();
+    }
+    $.getJSON('/gvsigonline/etl/etl_layer_publish_targets/').done(function (data) {
+        etlLayerTargets = {loadedAt: Date.now(), data: data};
+        d.resolve(data);
+    }).fail(function () { d.reject(gettext('The data stores and layer groups could not be loaded.')); });
+    return d.promise();
+}
+
+/* Formulario de siempre para crear un almacén: al guardar redirige a la lista, se cierra y se recarga. */
+function etlOpenDatastoreForm(onDone) {
+    var popup = window.open('/gvsigonline/services/datastore_add/', 'etl-new-datastore',
+        'width=900, height=700,left=150,top=100,toolbar=0,status=0,scrollbars=1');
+    if (!popup) { return; }
+    var watch = setInterval(function () {
+        var saved = false;
+        try {
+            saved = !popup.closed && popup.location.pathname.indexOf('datastore_list') !== -1;
+        } catch (e) {}
+        if (saved) { popup.close(); }
+        if (saved || popup.closed) {
+            clearInterval(watch);
+            onDone();
+        }
+    }, 500);
+}
+
+defineEtlNode({
+    name: 'output_LayerPublish',
+    // Claves que devuelve collect(): las lee el catálogo del asistente (assistant/shapes.py)
+    paramKeys: ['datastore', 'layer-group', 'title', 'layer-name', 'on-existing', 'public', 'abstract'],
+    title: function () { return gettext('Publish Layer'); },
+    headerColor: '#e8ca93',
+    gearColor: '#e79600',
+    inputs: [{label: function () { return gettext('Layer'); }}],
+    outputs: [],
+    body: function (ID) {
+        return '<p class="text-muted">' +
+            gettext('Saves the table in a data store and publishes it as a layer with a default style.') + '</p>' +
+            '<div class="row"><div class="col-md-6">' +
+            etlRow(gettext('Data store'), '<select id="datastore-' + ID + '" class="form-control"></select>') +
+            '<a href="#" id="new-datastore-' + ID + '">' + gettext('Create a new data store…') + '</a></div>' +
+            '<div class="col-md-6">' +
+            etlRow(gettext('Layer group'), '<select id="layer-group-' + ID + '" class="form-control"></select>') + '</div></div>' +
+            etlRow(gettext('Layer title'), '<input type="text" id="title-' + ID + '" class="form-control" maxlength="150">') +
+            etlRow(gettext('Layer name'), '<input type="text" id="layer-name-' + ID + '" class="form-control" maxlength="60">',
+                gettext('Letters, digits and underscores. If you leave it empty it is made from the title.')) +
+            etlRow(gettext('If the layer already exists'), '<select id="on-existing-' + ID + '" class="form-control"></select>',
+                gettext('Replacing keeps the layer, its style and its permissions: only the data changes.')) +
+            '<div class="checkbox"><label><input type="checkbox" id="public-' + ID + '"> ' + gettext('Public layer') + '</label></div>' +
+            etlRow(gettext('Layer description'), '<input type="text" id="abstract-' + ID + '" class="form-control" maxlength="500">');
+    },
+    populate: function (ID, inputs, saved) {
+        etlFillSelect($('#on-existing-' + ID), [
+            {value: 'replace', text: gettext('Replace its data')},
+            {value: 'fail', text: gettext('Stop with an error')}], saved['on-existing'] || 'replace');
+        $('#title-' + ID).val(saved.title || '');
+        $('#layer-name-' + ID).val(saved['layer-name'] || '');
+        $('#public-' + ID).prop('checked', saved['public'] === 'true');
+        $('#abstract-' + ID).val(saved.abstract || '');
+        function fill(force) {
+            var current = $('#datastore-' + ID).val() || saved.datastore;
+            etlFillSelect($('#datastore-' + ID), [], '', gettext('Loading…'));
+            etlFillSelect($('#layer-group-' + ID), [], '', gettext('Loading…'));
+            etlLoadLayerTargets(force).done(function (data) {
+                etlFillSelect($('#datastore-' + ID), data.datastores, current, gettext('Choose…'));
+                etlFillSelect($('#layer-group-' + ID), data.layer_groups.map(function (g) { return {value: g.name, text: g.title}; }),
+                    saved['layer-group'], gettext('Choose…'));
+            }).fail(function (msg) { etlShowError(ID, msg); });
+        }
+        $('#new-datastore-' + ID).off('click').on('click', function (e) {
+            e.preventDefault();
+            etlOpenDatastoreForm(function () { fill(true); });
+        });
+        fill(false);
+    },
+    collect: function (ID, inputs) {
+        if (!inputs[0].length) { throw new Error(gettext('Connect a table first.')); }
+        var store = $('#datastore-' + ID).val();
+        var group = $('#layer-group-' + ID).val();
+        var title = $('#title-' + ID).val().trim();
+        var name = etlSafeLayerName($('#layer-name-' + ID).val().trim() || title);
+        if (!store) { throw new Error(gettext('Choose the data store.')); }
+        if (!group) { throw new Error(gettext('Choose the layer group.')); }
+        if (!name) { throw new Error(gettext('Write a title or a name for the layer.')); }
+        return {
+            datastore: store, 'layer-group': group, title: title || name, 'layer-name': name,
+            'on-existing': $('#on-existing-' + ID).val() || 'replace',
+            'public': $('#public-' + ID).is(':checked') ? 'true' : '',
+            abstract: $('#abstract-' + ID).val().trim()
+        };
+    },
+    outputSchema: function () { return []; }
+});
+
 etlInstallConnectionGuard();
 
 /* ------------------------------------------------------------------ */
@@ -1845,6 +1947,14 @@ etlInstallConnectionGuard();
     SCHEMA_HANDLERS.trans_RasterPolygonize = {
         computeOutputSchema: function () { return ETL_POLYGON_COLUMNS.slice(); },
         validateParams: function (inputs) { return etlPerPortSchemas(inputs, 1)[0].length > 0; }
+    };
+
+    SCHEMA_HANDLERS.output_LayerPublish = {
+        computeOutputSchema: function () { return []; },
+        validateParams: function (inputs, params) {
+            var p = params0(params);
+            return !!(p.datastore && p['layer-group'] && p['layer-name']);
+        }
     };
 
     SCHEMA_HANDLERS.output_RasterPublish = {

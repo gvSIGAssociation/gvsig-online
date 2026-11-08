@@ -8,15 +8,22 @@ parameters:
 - name: get_tablename
   summary: Tablas cargadas en el desplegable.
 - name: db-option
-  summary: Nombre de la conexión.
+  summary: Nombre de la conexión de destino.
   required: true
 - name: schema-name-option
+  required: true
   summary: Esquema de destino.
+  example: ds_usuario
 - name: tablename
-  summary: Tabla.
+  required: true
+  summary: Tabla de destino, en minúsculas y sin espacios.
+  example: cruce_zonas
 - name: match
+  summary: Columna que identifica las filas en UPDATE y DELETE.
+  default: ''
 - name: operation
-  summary: Modo de escritura.
+  summary: CREATE falla si la tabla ya existe. DROPANDCREATE la rehace, OVERWRITE
+    la vacía y carga, APPEND añade, UPDATE y DELETE usan match.
   choices:
   - CREATE
   - DROPANDCREATE
@@ -24,6 +31,7 @@ parameters:
   - OVERWRITE
   - UPDATE
   - DELETE
+  default: CREATE
 - name: order
 - name: preserve-fid
 - name: create-gvsigol-fields

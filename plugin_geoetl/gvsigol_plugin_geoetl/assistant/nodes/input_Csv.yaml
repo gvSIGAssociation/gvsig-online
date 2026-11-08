@@ -6,21 +6,32 @@ summary: Lee un fichero CSV o TXT. El esquema lo completa el usuario al aceptar 
 parameters:
 - name: csv-file
   required: true
+  summary: Valor file:// del fichero.
+  example: file:///ruta/datos.csv
 - name: separator
   choices:
   - ;
   - ','
+  summary: Separador de campos.
 - name: header
+  summary: Filas que se saltan antes de la cabecera.
+  default: '0'
 - name: schema-option
   choices:
   - has-schema
   - no-schema
+  summary: has-schema si la primera fila son los nombres de columna.
+  default: has-schema
 - name: reading
   choices:
   - single
   - multiple
+  summary: single para un fichero; multiple para todos los de una carpeta.
+  default: single
 - name: move
+  default: ''
 - name: folder
+  default: ''
 ports:
 - direction: output
   label: Input

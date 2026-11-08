@@ -29,7 +29,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_every_palette_shape_has_a_yaml_spec(self):
         self.assertEqual(set(self.catalog), set(self.labels))
-        self.assertEqual(len(self.catalog), 79)
+        self.assertEqual(len(self.catalog), 80)
 
     def test_parameter_keys_and_port_counts_match_tableshape(self):
         for name in self.labels:
@@ -71,6 +71,7 @@ class CatalogTests(unittest.TestCase):
             'input_Model': ([], ['model']),
             'trans_RasterPolygonize': (['raster'], ['table']),
             'output_RasterPublish': (['raster'], []),
+            'output_LayerPublish': (['table'], []),
         }.items():
             spec = self.catalog[name]
             got_in = [p.get('kind', 'table') for p in spec['ports'] if p['direction'] == 'input']

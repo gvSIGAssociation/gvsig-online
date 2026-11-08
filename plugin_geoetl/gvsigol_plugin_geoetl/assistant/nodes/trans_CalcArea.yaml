@@ -4,6 +4,7 @@ family: transform
 summary: Calcula el área y la guarda en un atributo.
 parameters:
 - name: attr
+  required: true
   summary: Atributo sobre el que actúa la tarea.
 ports:
 - direction: input

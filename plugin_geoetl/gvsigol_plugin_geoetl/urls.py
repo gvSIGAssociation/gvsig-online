@@ -16,12 +16,18 @@ class UUIDConverter:
 
 register_converter(UUIDConverter, 'uuid')
 
-from gvsigol_plugin_geoetl.assistant.views import etl_assistant
+from gvsigol_plugin_geoetl.assistant.views import (
+    etl_assistant, etl_assistant_cancel, etl_assistant_columns, etl_assistant_options, etl_assistant_stream,
+)
 
 urlpatterns = [
     path('etl/get_conf/', views.get_conf, name='geoetl_get_conf'),
     path('etl/etl_canvas/', views.etl_canvas, name='etl_canvas'),
     path('etl/etl_assistant/', etl_assistant, name='etl_assistant'),
+    path('etl/etl_assistant/stream/', etl_assistant_stream, name='etl_assistant_stream'),
+    path('etl/etl_assistant/cancel/', etl_assistant_cancel, name='etl_assistant_cancel'),
+    path('etl/etl_assistant/options/', etl_assistant_options, name='etl_assistant_options'),
+    path('etl/etl_assistant/columns/', etl_assistant_columns, name='etl_assistant_columns'),
     path('etl/to_etl_canvas/', views.etl_canvas, name='to_etl_canvas'),
     path('etl/etl_read_canvas/', views.etl_read_canvas, name='etl_read_canvas'),
     path('etl/etl_sheet_excel/', views.etl_sheet_excel, name='etl_sheet_excel'),
@@ -32,6 +38,7 @@ urlpatterns = [
     path('etl/etl_schema_csv/', views.etl_schema_csv, name='etl_schema_csv'),
     path('etl/etl_schema_raster/', views.etl_schema_raster, name='etl_schema_raster'),
     path('etl/etl_raster_publish_targets/', views.etl_raster_publish_targets, name='etl_raster_publish_targets'),
+    path('etl/etl_layer_publish_targets/', views.etl_layer_publish_targets, name='etl_layer_publish_targets'),
     path('etl/etl_models_list/', views.etl_models_list, name='etl_models_list'),
     path('etl/etl_models_delete/', views.etl_models_delete, name='etl_models_delete'),
     path('etl/etl_workspace_list/', views.etl_workspace_list, name='etl_workspace_list'),

@@ -4,8 +4,12 @@ family: transform
 summary: Cambia el tipo de un atributo.
 parameters:
 - name: attr
-  summary: Atributo sobre el que actúa la tarea.
+  required: true
+  summary: Columna a la que se le cambia el tipo.
+  column: 0
+  example: poblacion
 - name: data-type-option
+  required: true
   choices:
   - VARCHAR
   - INTEGER
@@ -13,6 +17,7 @@ parameters:
   - DATE
   - TIMESTAMP
   - BOOLEAN
+  summary: Tipo nuevo.
 ports:
 - direction: input
   label: Input

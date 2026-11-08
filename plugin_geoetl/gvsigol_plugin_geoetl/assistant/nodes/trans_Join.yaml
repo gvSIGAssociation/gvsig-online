@@ -4,9 +4,25 @@ family: transform
 summary: Cruza dos tablas por atributos. Entrada 0 es la principal y la 1 la secundaria.
 parameters:
 - name: attr1
+  summary: Campo de la entrada 0 elegido en el desplegable.
+  column: 0
 - name: attr2
+  summary: Campo de la entrada 1 elegido en el desplegable.
+  column: 1
 - name: attr-1
+  required: true
+  summary: Campos de la entrada 0 por los que se cruza, separados por espacio. Es
+    lo que se usa al ejecutar.
+  format: spaced
+  example: id_zona
+  column: 0
 - name: attr-2
+  required: true
+  summary: Campos de la entrada 1, separados por espacio y en el mismo orden que attr-1.
+    Es lo que se usa al ejecutar.
+  format: spaced
+  example: ID_ZONA
+  column: 1
 - name: schemas
 ports:
 - direction: input

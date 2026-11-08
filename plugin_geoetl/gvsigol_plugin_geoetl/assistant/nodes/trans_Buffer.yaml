@@ -7,30 +7,51 @@ parameters:
   choices:
   - radius
   - reach-area
+  summary: radius usa una distancia; reach-area busca alcanzar un área.
+  default: radius
 - name: radio-radius
+  summary: 'De dónde sale la distancia: value (radius-value) o attr (radius-attr).'
+  default: value
 - name: radius-value
+  summary: Distancia, en las unidades del EPSG de la capa.
+  default: ''
+  example: '100'
 - name: radius-attr
+  summary: Columna con la distancia.
+  default: ''
+  column: 0
 - name: current-area-attr
+  default: ''
 - name: area-attr-reach
+  default: ''
 - name: quad-segs
+  summary: Segmentos por cuarto de círculo.
+  default: '8'
 - name: end-cap-option
   choices:
   - round
   - flat
   - square
+  default: round
 - name: join-option
   choices:
   - round
   - mitre
   - bevel
+  default: round
 - name: mitre-limit
+  default: '5.0'
 - name: side-option
   choices:
   - both
   - left
   - right
+  default: both
 - name: radius-increase
+  default: '0.001'
 - name: schema
+  summary: 'Columnas de salida. Lo rellena el editor al pulsar Aceptar: avisa al usuario
+    de que abra el nodo y lo acepte.'
 ports:
 - direction: input
   label: Input

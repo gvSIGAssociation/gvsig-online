@@ -4,6 +4,7 @@ family: transform
 summary: Parte un texto en varios atributos.
 parameters:
 - name: attr
+  required: true
   summary: Atributo sobre el que actúa la tarea.
 - name: list
 - name: split

@@ -1,0 +1,32 @@
+type: output_LayerPublish
+label: Publish Layer
+family: output
+summary: Guarda el resultado en una tabla de un almacén PostGIS y lo publica como capa de gvSIG Online con un estilo por
+  defecto. Si la capa ya existe, por defecto reemplaza sus datos y conserva estilo y permisos.
+parameters:
+- name: datastore
+  required: true
+  summary: Almacén PostGIS donde se crea la capa, como workspace/nombre.
+- name: layer-group
+  required: true
+  summary: Nombre del grupo de capas.
+- name: title
+  summary: Título de la capa.
+- name: layer-name
+  required: true
+  summary: Nombre de la capa y de su tabla (minúsculas, dígitos y guion bajo).
+- name: on-existing
+  summary: Qué hacer si la capa ya existe.
+  choices:
+  - replace
+  - fail
+- name: public
+  summary: '"true" para que la capa sea pública; vacío para privada.'
+- name: abstract
+  summary: Descripción de la capa.
+ports:
+- direction: input
+  label: Layer
+connection_types: []
+connection_parameter: null
+sql_parameters: []

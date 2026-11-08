@@ -4,9 +4,19 @@ family: transform
 summary: Crea un punto a partir de columnas de longitud y latitud.
 parameters:
 - name: epsg
-  summary: Código EPSG.
+  required: true
+  summary: EPSG de las coordenadas, solo el número.
+  example: '4326'
 - name: lon
+  required: true
+  summary: Columna con la longitud o X.
+  column: 0
+  example: lon
 - name: lat
+  required: true
+  summary: Columna con la latitud o Y.
+  column: 0
+  example: lat
 - name: txt-to-point
 ports:
 - direction: input

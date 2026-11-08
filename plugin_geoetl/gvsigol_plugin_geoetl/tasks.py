@@ -395,7 +395,7 @@ def _run_canvas_background_impl(kwargs):
                                     if not parameters.get('layer-group', '').strip():
                                         parameters['layer-group'] = 'Visualizer'
 
-                                if n[1]['type'] == 'output_RasterPublish':
+                                if n[1]['type'] in ('output_RasterPublish', 'output_LayerPublish'):
                                     parameters['_username'] = username
 
                                 result = method_to_call(parameters)
@@ -838,3 +838,48 @@ def clean_old_temp_tables():
 
     except Exception as e:
         print(f"Error en la tarea clean_old_temp_tables: {e}")
+
+# ============================================================================
+# ASISTENTE DEL EDITOR ETL EN UN WORKER (ETL_ASSISTANT_EXECUTION=celery)
+# ============================================================================
+
+from .assistant.execution import task_time_limits as _assistant_time_limits  # noqa: E402
+
+
+def _assistant_emitter(events_queue):
+    """Entrega los eventos del turno a la cola de RabbitMQ del proceso web.
+
+    Un fallo al publicar no interrumpe el turno: se registra y el web acaba
+    por tiempo con un error claro.
+    """
+    def log_event(event):
+        logger.info('etl_assistant: evento %s', event.get('type'))
+
+    if not events_queue:
+        return log_event
+
+    from gvsigol_plugin_geocopilot.services.event_bus import publish
+
+    def publish_event(event):
+        try:
+            publish(events_queue, event)
+        except Exception:
+            logger.exception('etl_assistant: no se pudo publicar el evento %s en %s',
+                             event.get('type'), events_queue)
+    return publish_event
+
+
+@celery_app.task(
+    bind=True,
+    name='geoetl.run_assistant',
+    # Sin reintentos: repetir un turno cuesta tokens, y si el worker cae el
+    # usuario recibe un error claro. Sobrescribe CELERY_TASK_ACKS_LATE.
+    acks_late=False,
+    # El resultado viaja como evento por RabbitMQ: no se guarda en la BD
+    ignore_result=True,
+    **_assistant_time_limits()
+)
+def run_assistant_task(self, data, events_queue=None):
+    """Ejecuta un turno del asistente ETL (ver assistant/execution.execute)."""
+    from .assistant.execution import execute
+    execute(data, _assistant_emitter(events_queue))

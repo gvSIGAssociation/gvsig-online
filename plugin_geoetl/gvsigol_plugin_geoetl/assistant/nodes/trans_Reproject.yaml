@@ -4,9 +4,13 @@ family: transform
 summary: Reproyecta la geometría de un EPSG a otro.
 parameters:
 - name: source-epsg
-  summary: EPSG de origen.
+  required: true
+  summary: EPSG de origen, solo el número.
+  example: '4326'
 - name: target-epsg
-  summary: EPSG de destino.
+  required: true
+  summary: EPSG de destino, solo el número.
+  example: '25830'
 ports:
 - direction: input
   label: Input

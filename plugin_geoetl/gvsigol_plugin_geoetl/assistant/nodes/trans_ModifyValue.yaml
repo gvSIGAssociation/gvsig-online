@@ -4,8 +4,12 @@ family: transform
 summary: Sustituye el valor de un atributo.
 parameters:
 - name: attr
-  summary: Atributo sobre el que actúa la tarea.
+  required: true
+  summary: Columna a la que se le pone el mismo valor en todas las filas.
+  column: 0
 - name: value
+  summary: Valor nuevo. Puede ir vacío.
+  default: ''
 ports:
 - direction: input
   label: Input

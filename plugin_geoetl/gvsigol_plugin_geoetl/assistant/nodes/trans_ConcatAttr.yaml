@@ -4,9 +4,21 @@ family: transform
 summary: Concatena atributos en uno nuevo.
 parameters:
 - name: attr
-  summary: Atributo sobre el que actúa la tarea.
+  required: true
+  summary: Columnas que se unen, en orden.
+  format: list
+  example:
+  - municipio
+  - calle
+  column: 0
 - name: new-attr
+  required: true
+  summary: Nombre de la columna nueva.
+  example: direccion
 - name: separator
+  summary: Texto entre valores. Puede ir vacío.
+  default: ''
+  example: ', '
 ports:
 - direction: input
   label: Input

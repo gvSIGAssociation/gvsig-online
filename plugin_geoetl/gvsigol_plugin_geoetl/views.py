@@ -52,6 +52,12 @@ from .models import (ETLworkspaces, ETLstatus, EtlWorkspaceEditRole, EtlWorkspac
 def _ctx(extra=None):
     """Return a base template context that includes FRONTEND_BASE_URL."""
     ctx = {'FRONTEND_BASE_URL': settings.FRONTEND_BASE_URL.rstrip('/')}
+    # Pasos en vivo del asistente (el panel solo existe si el asistente está activo)
+    ctx['etl_assistant_streaming'] = bool(getattr(settings_geoetl, 'ETL_ASSISTANT_STREAMING', False))
+    # Arranque guiado del asistente
+    ctx['etl_assistant_next_steps'] = bool(getattr(settings_geoetl, 'ETL_ASSISTANT_NEXT_STEPS', False))
+    # Lectura automática de las columnas de las entradas
+    ctx['etl_assistant_columns'] = bool(getattr(settings_geoetl, 'ETL_ASSISTANT_COLUMNS', False))
     if extra:
         ctx.update(extra)
     return ctx
@@ -1059,6 +1065,21 @@ def etl_schema_raster(request):
     except Exception as e:
         logger.exception('Error leyendo el ráster')
         return JsonResponse({'error': 'No se puede leer el ráster: %s' % e}, status=400)
+
+
+@login_required()
+@staff_required
+def etl_layer_publish_targets(request):
+    """Almacenes y grupos de capas donde el usuario puede publicar una capa PostGIS."""
+    from . import etl_raster_publish
+    from .assistant.context import usable_datastores
+    from .assistant.questions import publish_datastore_options
+
+    datastores = publish_datastore_options(usable_datastores(request, get_etl_connections_list(request)))
+    return JsonResponse({
+        'datastores': [{'value': item['value'], 'text': item['label']} for item in datastores],
+        'layer_groups': etl_raster_publish.publish_targets(request.user)['layer_groups'],
+    })
 
 
 @login_required()
