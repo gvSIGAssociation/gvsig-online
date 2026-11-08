@@ -231,15 +231,14 @@
 									</div>
 									<input class="hide form-control" id="labels_added" name="labels_added" type="text" value="{{ labels_added_value|default:'' }}" />
 								</div>
-								{% for s in label_list %}
-								<div class="row">
-									<div class="col-md-6 form-group">
-										<div>
-											<input {{ s.checked }} type="checkbox" name="label_{{s.label}}" id="id_{{s.label}}" />&nbsp;&nbsp;&nbsp;{{ s.label }}
-										</div>
-									</div>
+								<div class="proj-perms" style="flex-wrap: wrap;">
+									{% for s in label_list %}
+									<label class="proj-perm-chip">
+										<input {{ s.checked }} type="checkbox" name="label_{{s.label}}" id="id_{{s.label}}" />
+										<span>{{ s.label }}</span>
+									</label>
+									{% endfor %}
 								</div>
-								{% endfor %}
 									</div>
 								</details>
 							</div>
