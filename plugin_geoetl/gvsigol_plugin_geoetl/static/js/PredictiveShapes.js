@@ -1757,10 +1757,10 @@ defineEtlNode({
         return '<p class="text-muted">' +
             gettext('Saves the table in a data store and publishes it as a layer with a default style.') + '</p>' +
             '<div class="row"><div class="col-md-6">' +
-            etlRow(gettext('Data store'), '<select id="datastore-' + ID + '" class="form-control"></select>') +
-            '<a href="#" id="new-datastore-' + ID + '">' + gettext('Create a new data store…') + '</a></div>' +
+            etlRow(gettext('Data store'), '<select id="datastore-' + ID + '" class="form-control"></select>') + '</div>' +
             '<div class="col-md-6">' +
             etlRow(gettext('Layer group'), '<select id="layer-group-' + ID + '" class="form-control"></select>') + '</div></div>' +
+            '<p><a href="#" id="new-datastore-' + ID + '">' + gettext('Create a new data store…') + '</a></p>' +
             etlRow(gettext('Layer title'), '<input type="text" id="title-' + ID + '" class="form-control" maxlength="150">') +
             etlRow(gettext('Layer name'), '<input type="text" id="layer-name-' + ID + '" class="form-control" maxlength="60">',
                 gettext('Letters, digits and underscores. If you leave it empty it is made from the title.')) +
