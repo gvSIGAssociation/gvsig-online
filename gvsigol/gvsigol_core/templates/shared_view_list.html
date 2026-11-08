@@ -103,7 +103,8 @@ $(document).ready(function() {
 	});
 
 	function deleteView(data, row){
-		$('#button-delete-view-accept').click( function() {
+		// off(): si se cancela y se abre otra fila, el manejador anterior también borraría la suya
+		$('#button-delete-view-accept').off('click').on('click', function() {
 			$.ajax({
 				type: 'POST',
 				async: false,

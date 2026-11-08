@@ -351,8 +351,18 @@
 		default:
 			return;
 		}
-		$input.on('input change', run);
-		run();
+		// change llega al salir del campo con un valor ya comprobado: repintar el aviso
+		// ahí sustituía el botón de corrección en mitad del clic y este se perdía
+		var lastValue;
+		function runIfChanged() {
+			var value = $input.val();
+			if (value !== lastValue) {
+				lastValue = value;
+				run();
+			}
+		}
+		$input.on('input change', runIfChanged);
+		runIfChanged();
 	}
 
 	$(function () {

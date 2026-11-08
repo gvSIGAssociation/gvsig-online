@@ -561,16 +561,6 @@
 	{% endif %}
 
 	
-	$('#expiration_date').on('dp.change', function(e){
-		if (!e.date) {
-			$("#expiration_date_utc").val('');
-			return;
-		}
-        var milliseconds = e.date.valueOf();
-		var utcMs = getUTCMillisFromLocal(milliseconds);
-		$("#expiration_date_utc").val(utcMs != null ? utcMs : '');
-	});
-
 	$('#expiration_date_clear_btn').on('click', function (ev) {
 		ev.preventDefault();
 		var dp = $('#expiration_date').data('DateTimePicker');
@@ -901,6 +891,17 @@
 		});
 		$("#extent4326_maxy").on('change', function(evt) {
 			updateMapSelectedExtent(map, vector_source);
+		});
+
+		// Dentro de ready: getUTCMillisFromLocal se declara aquí y, si no existe, el selector no se abre
+		$('#expiration_date').on('dp.change', function(e){
+			if (!e.date) {
+				$("#expiration_date_utc").val('');
+				return;
+			}
+			var milliseconds = e.date.valueOf();
+			var utcMs = getUTCMillisFromLocal(milliseconds);
+			$("#expiration_date_utc").val(utcMs != null ? utcMs : '');
 		});
 
 		$('#expiration_date input').on('change', function() {

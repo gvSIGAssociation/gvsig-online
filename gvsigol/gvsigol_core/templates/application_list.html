@@ -122,7 +122,8 @@ $(document).ready(function() {
 	});
 
 	function deleteApplication(data, row){
-		$('#button-delete-application-accept').click( function() {
+		// off(): si se cancela y se abre otra fila, el manejador anterior también borraría la suya
+		$('#button-delete-application-accept').off('click').on('click', function() {
 			$.ajax({
 				type: 'POST',
 				async: false,
