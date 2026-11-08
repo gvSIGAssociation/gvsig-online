@@ -2421,6 +2421,8 @@ def project_get_conf(request):
     return response
 
 
+@login_required()
+@staff_required
 def toc_update(request, pid):
     if request.method == 'POST':
         project = Project.objects.get(id=int(pid))
@@ -2428,10 +2430,8 @@ def toc_update(request, pid):
         project.toc_order = toc
         project.save()
 
-        toc_object = json.loads(toc)
-        server = geographic_servers.get_instance().get_server_by_id(id)
-        server.createOrUpdateSortedGeoserverLayerGroup(toc_object)
-
+        # The order of the groups only lives in toc_order: GeoServer layer groups
+        # do not depend on it, so there is nothing to publish here
         return HttpResponse(json.dumps({'success': True}, indent=4), content_type='application/json')
 
     else:
