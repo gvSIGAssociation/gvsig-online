@@ -21,6 +21,14 @@ NODE_PATH=/tmp/etl-js/node_modules node run.js
 NODE_PATH=/tmp/etl-js/node_modules node run_error.js
 ```
 
+## Relleno del formulario
+
+`fill_form.js` carga el `DrawNodes.js` real: valores sin opción en el desplegable, selección múltiple y opciones sin duplicar.
+
+```bash
+NODE_PATH=/tmp/etl-js/node_modules node fill_form.js
+```
+
 ## Chat del asistente
 
 `assistant.js` carga el `Assistant.js` real (con `marked` y `DOMPurify` reales) y simula el canvas y el
