@@ -105,14 +105,14 @@
 					<p class="gol-pg-section-title">{% trans "Permissions" %}</p>
 					<div class="gol-pg-options">
 						<label class="gol-pg-option" for="is_superuser">
-							<input type="checkbox" name="is_superuser" id="is_superuser" />
+							<input type="checkbox" name="is_superuser" id="is_superuser"{% if form.is_superuser.value %} checked{% endif %} />
 							<span class="gol-pg-option__text">
 								<span class="gol-pg-option__title">{% trans "Is superuser" %}</span>
 								<span class="gol-pg-option__desc">{% trans "Full access to the administration. It can also manage projects." context "auth" %}</span>
 							</span>
 						</label>
 						<label class="gol-pg-option" for="is_staff">
-							<input type="checkbox" name="is_staff" id="is_staff" />
+							<input type="checkbox" name="is_staff" id="is_staff"{% if form.is_staff.value %} checked{% endif %} />
 							<span class="gol-pg-option__text">
 								<span class="gol-pg-option__title">{% trans "Can manage projects" %}</span>
 								<span class="gol-pg-option__desc">{% trans "Can create and edit projects." context "auth" %}</span>
@@ -136,7 +136,7 @@
 								<div class="assign-list__desc">{{ group.description }}</div>
 							</div>
 							<label class="assign-list__check">
-								<input type="checkbox" name="group-{{ group.name }}" id="group-{{ group.name }}" />{% trans "Assign group" %}
+								<input type="checkbox" name="group-{{ group.name }}" id="group-{{ group.name }}"{% if group.checked %} checked{% endif %} />{% trans "Assign group" %}
 							</label>
 						</li>
 						{% endfor %}
@@ -161,7 +161,7 @@
 								<div class="assign-list__desc">{{ role.description }}</div>
 							</div>
 							<label class="assign-list__check">
-								<input type="checkbox" name="role-{{ role.name }}" id="role-{{ role.name }}" />{% trans "Assign role" %}
+								<input type="checkbox" name="role-{{ role.name }}" id="role-{{ role.name }}"{% if role.checked %} checked{% endif %} />{% trans "Assign role" %}
 							</label>
 						</li>
 						{% endfor %}

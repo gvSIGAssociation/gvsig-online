@@ -505,8 +505,6 @@ def user_add(request):
             except Exception as e:
                 logger.exception("ERROR: Problem creating user")
                 errors.append({'message': _("User creation failed") + ": " + str(e)})
-            roles = auth_backend.get_all_roles_details(exclude_system=True)
-
             # reverting changes
             if user:
                 user_roles = auth_backend.get_roles(user)
@@ -529,35 +527,36 @@ def user_add(request):
                         auth_backend.delete_user(user)
                     except:
                         pass
-            roles.sort(key=default_sorter)
-            response = {'form': form, 'roles': roles, 'errors': errors,'show_pass_form':show_pass_form}
-            if auth_backend.check_group_support():
-                groups = auth_backend.get_all_groups_details(exclude_system=True)
-                groups.sort(key=default_sorter)
-                response['groups'] = groups
-            return render(request, 'user_add.html', response)
+            return _user_add_form_response(request, form, show_pass_form, errors=errors)
 
         else:
-            roles = auth_backend.get_all_roles_details(exclude_system=True)
-            roles.sort(key=default_sorter)
-            response = {'form': form, 'roles': roles, 'show_pass_form':show_pass_form}
-            if auth_backend.check_group_support():
-                groups = auth_backend.get_all_groups_details(exclude_system=True)
-                groups.sort(key=default_sorter)
-                response['groups'] = groups
-            return render(request, 'user_add.html', response)
+            return _user_add_form_response(request, form, show_pass_form)
     else:
         form = UserCreateForm()
-        roles = auth_backend.get_all_roles_details(exclude_system=True)
-        roles.sort(key=default_sorter)
-        response = {'form': form, 'roles': roles, 'show_pass_form':show_pass_form}
-        if auth_backend.check_group_support():
-            groups = auth_backend.get_all_groups_details(exclude_system=True)
-            groups.sort(key=default_sorter)
-            response['groups'] = groups
-        return render(request, 'user_add.html', response)
+        return _user_add_form_response(request, form, show_pass_form)
     
     
+def _user_add_form_response(request, form, show_pass_form, errors=None):
+    """
+    Renders user_add.html. After a rejected POST, the roles and groups
+    selected by the admin are kept checked.
+    """
+    roles = auth_backend.get_all_roles_details(exclude_system=True)
+    for role in roles:
+        role['checked'] = ('role-' + role['name']) in request.POST
+    roles.sort(key=default_sorter)
+    response = {'form': form, 'roles': roles, 'show_pass_form': show_pass_form}
+    if errors is not None:
+        response['errors'] = errors
+    if auth_backend.check_group_support():
+        groups = auth_backend.get_all_groups_details(exclude_system=True)
+        for group in groups:
+            group['checked'] = ('group-' + group['name']) in request.POST
+        groups.sort(key=default_sorter)
+        response['groups'] = groups
+    return render(request, 'user_add.html', response)
+
+
 def _user_update_form_response(request, username, editable, message=None, selected_user_overrides=None):
     selected_user = auth_backend.get_user_details(user=username)
     selected_user = dict(selected_user) if selected_user else {}
@@ -583,11 +582,6 @@ def _user_update_form_response(request, username, editable, message=None, select
 def user_update(request, username):
     try:
         if request.method == 'POST':
-            assigned_groups = []
-            for key in request.POST:
-                if key.startswith('group-'):
-                    assigned_groups.append(key[len('group-'):])
-
             assigned_roles = []
             for key in request.POST:
                 if key.startswith('role-'):
@@ -617,13 +611,14 @@ def user_update(request, username):
                     },
                 )
 
+            # The groups tab is hidden in user_update.html, so the POST has no group
+            # data: 'groups' must not be passed or the backend would clear them
             try:
                 if settings.AUTH_READONLY_USERS:
                     success = auth_backend.update_user(
                         username,
                         superuser=is_superuser,
                         staff=is_staff,
-                        groups=assigned_groups,
                         roles=assigned_roles
                     )
                 else:
@@ -634,7 +629,6 @@ def user_update(request, username):
                             last_name=request.POST.get('last_name'),
                             superuser=is_superuser,
                             staff=is_staff,
-                            groups=assigned_groups,
                             roles=assigned_roles
                     )
             except UserUpdateError as e:
