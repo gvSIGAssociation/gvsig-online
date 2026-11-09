@@ -668,6 +668,71 @@ def input_Shp(dicc):
     _ogr.execute()
     
     return [table_name]
+
+
+def input_Gpkg(dicc):
+
+    table_name = dicc['id'].replace('-', '_')
+
+    gpkg = dicc['gpkg-file'][7:]
+    layer_name = (dicc.get('gpkg-layer') or '').strip()
+
+    dataSource = DataSource(gpkg)
+    layer = dataSource[0]
+    if layer_name:
+        for lyr in dataSource:
+            if lyr.name == layer_name:
+                layer = lyr
+                break
+    else:
+        layer_name = layer.name
+
+    epsg = str(dicc.get('epsg') or '')
+    if epsg == '':
+        try:
+            epsg = layer.srs['AUTHORITY', 1]
+        except Exception:
+            pass
+
+    srs = "EPSG:" + str(epsg)
+    schema = GEOETL_DB['schema']
+
+    conn = psycopg2.connect(
+        user=GEOETL_DB["user"], password=GEOETL_DB["password"],
+        host=GEOETL_DB["host"], port=GEOETL_DB["port"], database=GEOETL_DB["database"]
+    )
+    cur = conn.cursor()
+
+    sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
+        sql.Identifier(GEOETL_DB["schema"]),
+        sql.Identifier(table_name))
+    cur.execute(sqlDrop)
+    conn.commit()
+
+    encoding = dicc.get('encode') or 'UTF-8'
+
+    _ogr = gdaltools.ogr2ogr()
+    _ogr.set_encoding(encoding)
+    _ogr.set_input(gpkg, srs=srs, table_name=layer_name)
+    _conn = gdaltools.PgConnectionString(
+        host=GEOETL_DB["host"], port=GEOETL_DB["port"], dbname=GEOETL_DB["database"],
+        schema=schema, user=GEOETL_DB["user"], password=GEOETL_DB["password"]
+    )
+    _ogr.set_output(_conn, table_name=table_name)
+    _ogr.set_output_mode(layer_mode=_ogr.MODE_DS_CREATE_OR_UPDATE, data_source_mode=_ogr.MODE_DS_UPDATE)
+
+    _ogr.layer_creation_options = {
+        "LAUNDER": "YES",
+        "precision": "NO"
+    }
+    _ogr.config_options = {
+        "OGR_TRUNCATE": "NO"
+    }
+    _ogr.set_dim("2")
+    _ogr.geom_type = "PROMOTE_TO_MULTI"
+    _ogr.execute()
+
+    return [table_name]
     
 
 def trans_RemoveAttr(dicc):

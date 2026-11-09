@@ -64,7 +64,11 @@ table.dataTable.no-footer { border-bottom: none !important; }
 #etl-table .btn-primary { background: transparent; border: 1px solid #b8d4e8; color: var(--pl-accent); }
 #etl-table .btn-primary:hover { background: #f0f6fb; border-color: var(--pl-accent); }
 #etl-table .btn-light .fa-play { color: var(--pl-accent); }
-.etl-status-icons { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.etl-status-icons { display: flex; align-items: center; gap: 6px; white-space: nowrap; min-width: 120px; }
+.etl-ws-progress { display: none; width: 110px; }
+.etl-ws-progress .progress { height: 10px; margin: 0; background: #e8eef3; border-radius: 5px; overflow: hidden; }
+.etl-ws-progress .progress-bar { background-color: var(--pl-accent, #4a7fa5); transition: width 0.35s ease; }
+.etl-ws-progress-label { font-size: 11px; font-weight: 600; color: var(--pl-muted, #667); margin-left: 4px; min-width: 30px; }
 .modal-content { border-radius: var(--pl-radius); border: none; box-shadow: 0 8px 32px rgba(0,0,0,0.18); }
 .modal-header { border-bottom: 1px solid var(--pl-border); padding: 16px 20px; }
 .modal-title { font-size: 15px; font-weight: 700; color: var(--pl-text); }
@@ -87,7 +91,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 		<div class="pl-panel">
 			<div class="pl-panel__header">
 				<h3 class="pl-panel__title">
-					<i class="fa fa-th-list"></i> {% trans "Concatenated workspaces list" %}
+					<i class="fa fa-th-list"></i> {% trans "Concatenated workflows list" %}
 				</h3>
 				<div class="pl-panel__actions">
 					<div class="pl-search-wrap">
@@ -95,7 +99,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 						<button class="btn-search" type="button" id="etl-search-btn"><i class="fa fa-search"></i></button>
 					</div>
 					<button id="button-workpaces" class="btn-pl-add btn-pl-add--outline">
-						<i class="fa fa-list"></i> {% trans "Workspaces" %}
+						<i class="fa fa-list"></i> {% trans "Workflows" %}
 					</button>
 					<button id="button-add-concat" class="btn-pl-add btn-pl-add--secondary">
 						<i class="fa fa-plus"></i> {% trans "Add Concat." %}
@@ -130,8 +134,13 @@ table.dataTable.no-footer { border-bottom: none !important; }
 							<td>
 								<div class="etl-status-icons">
 									<i id="icon-success-{{ workspace.id }}" class="fa fa-check" style="color:#1a7a45;display:none" aria-hidden="true"></i>
-									<i id="icon-running-{{ workspace.id }}" class="fa fa-spinner fa-spin" style="display:none"></i>
 									<i id="icon-error-{{ workspace.id }}" class="fa fa-times" style="color:#c0392b;display:none" aria-hidden="true"></i>
+									<div id="progress-{{ workspace.id }}" class="etl-ws-progress">
+										<div class="progress">
+											<div id="progress-bar-{{ workspace.id }}" class="progress-bar progress-bar-striped active" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+										</div>
+									</div>
+									<span id="progress-label-{{ workspace.id }}" class="etl-ws-progress-label" style="display:none;">0%</span>
 									<button type="button" name="see-msg-status" id="see-msg-status-{{ workspace.id }}" data-toggle="tooltip" data-placement="bottom" title='{% trans "See status message" %}' class="btn btn-light" style="display:none" value="{{ workspace.id }}"><i class="fa fa-eye"></i></button>
 								</div>
 							</td>
@@ -175,10 +184,10 @@ table.dataTable.no-footer { border-bottom: none !important; }
 			<div class="modal-content">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-					<h4 class="modal-title">{% trans "Delete workspace" %}</h4>
+					<h4 class="modal-title">{% trans "Delete workflow" %}</h4>
 				</div>
 				<div class="modal-body">
-					<p>{% trans "The ETL workspace and its parameters will be deleted" %}</p>
+					<p>{% trans "The ETL workflow and its parameters will be deleted" %}</p>
 				</div>
 				<div class="modal-footer">
 					<button id="button-delete-workspace-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
@@ -194,26 +203,26 @@ table.dataTable.no-footer { border-bottom: none !important; }
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-				<h4 class="modal-title">{% trans "Update or Save ETL Workspace" %}</h4>
+				<h4 class="modal-title">{% trans "Update or Save ETL Workflow" %}</h4>
 			</div>
 			<div class="modal-body">
 				<form id="layer-group-form" role="form">
 					<div class="row">
 						<div class="col-md-12">
 							<label for="etl_id">ID</label>
-							<input placeholder="{% trans 'ETL Workspace ID' %}" name="etl_id" id="etl_id" type="text" class="form-control">
+							<input placeholder="{% trans 'ETL Workflow ID' %}" name="etl_id" id="etl_id" type="text" class="form-control">
 						</div>
 					</div>
 					<div class="row">
 						<div class="col-md-12">
 							<label for="etl_name">{% trans "Name" %}</label>
-							<input placeholder="{% trans 'ETL Workspace name' %}" name="etl_name" id="etl_name" type="text" class="form-control">
+							<input placeholder="{% trans 'ETL Workflow name' %}" name="etl_name" id="etl_name" type="text" class="form-control">
 						</div>
 					</div>
 					<div class="row">
 						<div class="col-md-12">
 							<label for="etl_desc">{% trans "Description" %}</label>
-							<input placeholder="{% trans 'ETL Workspace description' %}" name="etl_desc" id="etl_desc" type="text" class="form-control">
+							<input placeholder="{% trans 'ETL Workflow description' %}" name="etl_desc" id="etl_desc" type="text" class="form-control">
 						</div>
 					</div>
 					<div class="row">
@@ -248,7 +257,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 						</div>
 						<div class="more-options">
 							<div class="col-md-12 repeat_periodically_time">
-								<label>{% trans "Run workspace every..." %}</label>
+								<label>{% trans "Run workflow every..." %}</label>
 							</div>
 							<div class="col-md-6 repeat_periodically_time">
 								<input placeholder="{% trans 'Select number of...' %}" name="ws-program-interval" id="ws-program-interval" type="number" value="1" class="form-control">
@@ -265,11 +274,11 @@ table.dataTable.no-footer { border-bottom: none !important; }
 					</div>
 					<div class="row" style="margin-top:12px;">
 						<div class="col-sm-9">
-							<label>{% trans "Workspaces" %}</label>
+							<label>{% trans "Workflows" %}</label>
 							<select class="form-control" id="workspaces-to-concat"></select>
 						</div>
 						<div class="col-sm-3">
-							<label>{% trans "Get Workspaces" %}</label>
+							<label>{% trans "Get Workflows" %}</label>
 							<button type="button" class="btn-pl-add btn-pl-add--outline" style="height:34px;" id="get-workspaces">{% trans "Get workspaces" %}</button>
 						</div>
 					</div>
@@ -313,7 +322,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
                     <h4 class="modal-title">{% trans 'Not allowed' %}</h4>
                 </div>
                 <div class="modal-body">
-                    <p>{% trans 'In database already exists a workspace with the same name and the same user' %}</p>
+                    <p>{% trans 'In database already exists a workflow with the same name and the same user' %}</p>
                 </div>
                 <div class="modal-footer">
                     <button id="button-ws-exists-accept" type="button" class="btn btn-primary">{% trans 'Accept' %}</button>
@@ -417,7 +426,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 					var filter = 'tr[data-workspaceid="' + data[0] + '"]';
 					var dataset = $('#etl-table').find(filter).data();
 					if (dataset['editable']) {
-						return '<button type="button" name="button-delete-workspace-etl" data-toggle="modal" data-toggle-second="tooltip" data-target="#modal-delete-workspace-etl" data-placement="bottom" title="' + '{% trans "Delete workspace" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>';
+						return '<button type="button" name="button-delete-workspace-etl" data-toggle="modal" data-toggle-second="tooltip" data-target="#modal-delete-workspace-etl" data-placement="bottom" title="' + '{% trans "Delete workflow" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>';
 					}
 					else {
 						return '';
@@ -430,7 +439,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 					var filter = 'tr[data-workspaceid="' + data[0] + '"]';
 					var dataset = $('#etl-table').find(filter).data();
 					if (dataset['editable']) {
-						return '<button type="button" name="button-update-workspace-etl" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update workspace" %}' + '" class="btn btn-warning"><i class="fa fa-edit"></i></button>';
+						return '<button type="button" name="button-update-workspace-etl" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update workflow" %}' + '" class="btn btn-warning"><i class="fa fa-edit"></i></button>';
 					}
 					else {
 						return '';
@@ -439,7 +448,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 			},{
 				"targets": 1,
 				"data": null,
-				"defaultContent": '<button type="button" name="button-run-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Run workspace" %}' + '" class="btn btn-light"><i class="fa fa-play"></i></button>'
+				"defaultContent": '<button type="button" name="button-run-workspace-etl" data-toggle="tooltip"  data-placement="bottom" title="' + '{% trans "Run workflow" %}' + '" class="btn btn-light"><i class="fa fa-play"></i></button>'
 			}],
 			"dom": 'T<"clear">rt',
 			"paging": true,
@@ -625,12 +634,16 @@ table.dataTable.no-footer { border-bottom: none !important; }
 		});
 
 		function runWorkspace(data){
+			var id = data[0];
+			$("#icon-success-"+id).hide();
+			$("#icon-error-"+id).hide();
+			setWsProgress(id, 5, true);
 
 			$.ajax({
 				type: 'POST',
-				async: false,
+				async: true,
 				data: {
-					"id_ws": data[0],
+					"id_ws": id,
 					"username": '{{ user.username }}',
 					'jsonCanvas': false
 				},
@@ -638,8 +651,12 @@ table.dataTable.no-footer { border-bottom: none !important; }
 				beforeSend:function(xhr){
 					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 				},
-				success	:function(){},
-				error: function(){}
+				success	:function(){
+					getCurrentCanvasStatus();
+				},
+				error: function(){
+					getCurrentCanvasStatus();
+				}
 			});
 
 		}
@@ -723,7 +740,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 						location.reload();
 					},
 					error: function(xhr) {
-						var msg = '{% trans "Could not update the workspace." %}';
+						var msg = '{% trans "Could not update the workflow." %}';
 						try {
 							var data = JSON.parse(xhr.responseText);
 							if (data.error) {
@@ -813,6 +830,31 @@ table.dataTable.no-footer { border-bottom: none !important; }
 		return day + "/" + month + "/" + year + " " + hours + ":" + minutes + ":" + seconds;
 	}
 
+    function setWsProgress(id, progress, visible){
+		var wrap = $("#progress-"+id);
+		var bar = $("#progress-bar-"+id);
+		var label = $("#progress-label-"+id);
+		if(!wrap.length || !bar.length){
+			return;
+		}
+		var pct = Math.max(0, Math.min(100, parseInt(progress || 0, 10)));
+		if(visible && pct < 5){
+			pct = 5;
+		}
+		bar.css("width", pct + "%").attr("aria-valuenow", pct);
+		if(visible){
+			wrap.css("display", "inline-block");
+			if(label.length){
+				label.text(pct + "%").css("display", "inline");
+			}
+		} else {
+			wrap.hide();
+			if(label.length){
+				label.hide();
+			}
+		}
+	}
+
     function actualizarInfoPanel(data){
 
 		for(var i=0;i<data["workspaces"].length; i++){
@@ -822,36 +864,37 @@ table.dataTable.no-footer { border-bottom: none !important; }
 			var msg = workspace["message"];
 			var status = workspace['status'];
 			var last_exec = workspace['last_exec'];
+			var progress = workspace['progress'] || 0;
 
 			$("#see-msg-status-"+id).css("display", "inline-block");
 
 			if(status == ''){
 
 				$("#icon-success-"+id).css("display", "none");
-				$("#icon-running-"+id).css("display", "none");
 				$("#icon-error-"+id).css("display", "none");
+				setWsProgress(id, 0, false);
 
 			}
 
 			if(status == 'Running'){
 
 				$("#icon-success-"+id).css("display", "none");
-				$("#icon-running-"+id).css("display", "inline-block");
 				$("#icon-error-"+id).css("display", "none");
+				setWsProgress(id, progress, true);
 
 			}
 			if(status == 'Success'){
 
 				$("#icon-success-"+id).css("display", "inline");
-				$("#icon-running-"+id).css("display", "none");
 				$("#icon-error-"+id).css("display", "none");
+				setWsProgress(id, 100, false);
 
 			}
 			if(status == 'Error'){
 
 				$("#icon-success-"+id).css("display", "none");
-				$("#icon-running-"+id).css("display", "none");
 				$("#icon-error-"+id).css("display", "inline");
+				setWsProgress(id, 0, false);
 
 			}
 

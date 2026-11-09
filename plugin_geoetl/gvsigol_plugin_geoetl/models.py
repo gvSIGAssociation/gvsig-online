@@ -92,6 +92,8 @@ class ETLstatus(models.Model):
     id_ws = models.IntegerField(null=True, blank=True)
     last_exec = models.DateTimeField(auto_now_add=False, null=True, blank=True)
     visualizer_session_id = models.UUIDField(null=True, blank=True)
+    celery_task_id = models.CharField(max_length=250, null=True, blank=True, default='')
+
     
     class Meta:
         constraints = [

@@ -86,12 +86,107 @@ from . import etl_tasks
 from . import etl_schema
 from .tasks import run_canvas_background
 from .settings import GEOETL_DB
+from celery.result import AsyncResult
+from django.utils import timezone
 
 import psycopg2
 from psycopg2 import sql
 from datetime import datetime
 import json
 import os
+
+_ETL_CELERY_RUNNING = frozenset({
+    'PENDING', 'RECEIVED', 'STARTED', 'RETRY', 'PROCESSING', 'PROGRESS',
+})
+
+
+def _etl_progress_from_task(celery_task_id, db_status=''):
+    """Return (progress, status_detail) from Celery AsyncResult.
+
+    DB status wins when the run already finished (important with
+    CELERY_TASK_ALWAYS_EAGER, where the worker finishes before the view returns).
+    """
+    if db_status in ('Success', 'Warning'):
+        return 100, ''
+    if db_status == 'Error':
+        return 0, ''
+    if not celery_task_id:
+        return 0, ''
+    try:
+        result = AsyncResult(celery_task_id)
+        state = result.state
+        info = result.info if isinstance(result.info, dict) else {}
+        if state == 'SUCCESS':
+            return 100, ''
+        if state in ('FAILURE', 'REVOKED'):
+            return 0, info.get('status') or info.get('error') or ''
+        if state in _ETL_CELERY_RUNNING:
+            return info.get('progress', 0) or 0, info.get('status') or ''
+    except Exception:
+        logger.exception('Could not read ETL Celery progress for %s', celery_task_id)
+    return 0, ''
+
+
+def _mark_etl_running(id_ws, username, ws_name=None):
+    """Set Running before enqueue so eager/async runs share the same start state."""
+    if id_ws:
+        ETLstatus.objects.update_or_create(
+            id_ws=id_ws,
+            defaults={
+                'name': ws_name or ('workspace_' + str(id_ws)),
+                'message': 'Running',
+                'status': 'Running',
+                'last_exec': timezone.now(),
+                'visualizer_session_id': None,
+            },
+        )
+    else:
+        ETLstatus.objects.update_or_create(
+            name='current_canvas.' + username,
+            defaults={
+                'message': 'Running',
+                'status': 'Running',
+                'id_ws': None,
+                'last_exec': timezone.now(),
+                'visualizer_session_id': None,
+            },
+        )
+
+
+def _store_etl_celery_task_id(id_ws, username, task_id):
+    """Persist task id without clobbering Success/Error set by an eager task."""
+    if not task_id:
+        return
+    if id_ws:
+        qs = ETLstatus.objects.filter(id_ws=id_ws)
+    else:
+        qs = ETLstatus.objects.filter(name='current_canvas.' + username)
+    qs.update(celery_task_id=task_id)
+
+
+def _heal_etl_status_from_celery(sm):
+    """Repair rows left as Running after an eager task already finished."""
+    if not sm or sm.status != 'Running' or not sm.celery_task_id:
+        return sm
+    try:
+        result = AsyncResult(sm.celery_task_id)
+        state = result.state
+        if state == 'SUCCESS':
+            sm.status = 'Success'
+            if not sm.message or sm.message in ('Running', 'Running again'):
+                sm.message = 'Process has been executed successfully'
+            sm.save(update_fields=['status', 'message'])
+        elif state in ('FAILURE', 'REVOKED'):
+            sm.status = 'Error'
+            err = result.info
+            if isinstance(err, dict):
+                err = err.get('error') or err.get('status') or state
+            sm.message = str(err) if err else state
+            sm.save(update_fields=['status', 'message'])
+    except Exception:
+        logger.exception('Could not heal ETL status from Celery for %s', sm.celery_task_id)
+    return sm
+
 
 class EtlWorkspaceExists(Exception):
     pass
@@ -866,15 +961,22 @@ def etl_current_canvas_status(request):
     statusModel = ETLstatus.objects.filter(name='current_canvas.'+request.POST['username']).first()
     
     if statusModel:
+        statusModel = _heal_etl_status_from_celery(statusModel)
+        progress, detail = _etl_progress_from_task(statusModel.celery_task_id, statusModel.status)
+        message = detail or statusModel.message
         response = {
             'status': statusModel.status,
-            'message': statusModel.message,
+            'message': message,
+            'progress': progress,
+            'task_id': statusModel.celery_task_id or '',
             'visualizer_session_id': str(statusModel.visualizer_session_id) if statusModel.visualizer_session_id else None,
         }
     else:
         response = {
             'status': '',
             'message': '',
+            'progress': 0,
+            'task_id': '',
             'visualizer_session_id': None,
         }
 
@@ -890,11 +992,14 @@ def etl_list_canvas_status(request):
 
     for sm in statusModel:
         if not sm.name.startswith('current_canvas'):
-
+            sm = _heal_etl_status_from_celery(sm)
+            progress, detail = _etl_progress_from_task(sm.celery_task_id, sm.status)
             workspace = {}
             workspace['id_ws'] = sm.id_ws
             workspace['status'] = sm.status
-            workspace['message'] = sm.message
+            workspace['message'] = detail or sm.message
+            workspace['progress'] = progress
+            workspace['task_id'] = sm.celery_task_id or ''
             workspace['last_exec'] = sm.last_exec.isoformat() if sm.last_exec else None
             workspace['visualizer_session_id'] = str(sm.visualizer_session_id) if sm.visualizer_session_id else None
             workspaces.append(workspace)
@@ -906,9 +1011,37 @@ def etl_list_canvas_status(request):
 
     return HttpResponse(json.dumps(response, indent=4), content_type='application/json')
 
+
+@login_required()
+@staff_required
+def etl_task_status(request, task_id):
+    """Celery task status for ETL runs (vinya-style progress polling)."""
+    result = AsyncResult(task_id)
+    state = result.state
+    response = {
+        'task_id': task_id,
+        'state': state,
+        'progress': 0,
+        'status': '',
+    }
+    info = result.info if isinstance(result.info, dict) else {}
+    if state in _ETL_CELERY_RUNNING:
+        response['progress'] = info.get('progress', 0) or 0
+        response['status'] = info.get('status') or 'Running'
+    elif state == 'SUCCESS':
+        response['progress'] = 100
+        response['status'] = 'Success'
+        response['result'] = result.result if not isinstance(result.result, Exception) else None
+    elif state in ('FAILURE', 'REVOKED'):
+        response['status'] = 'Error'
+        response['error'] = str(result.info) if result.info else state
+    return HttpResponse(json.dumps(response), content_type='application/json')
+
+
 @login_required()
 @staff_required
 def etl_read_canvas(request):
+    task_id = ''
     if request.method == 'POST':
         form = UploadFileForm(request.POST)
 
@@ -932,21 +1065,33 @@ def etl_read_canvas(request):
                 id_ws = None
                 params = None
                 concat = False
+                ws = None
 
+            enqueue = False
             if id_ws:
                 if ws.can_execute(request) or ws.can_edit(request) or ws.can_edit_restrictedly(request):
-                    run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas,
-                                                                'id_ws': id_ws,
-                                                                'username': request.user.username,
-                                                                'parameters': params,
-                                                                'concat': concat})
-
+                    enqueue = True
             else: # executing a workspace that has not been saved yet
-                run_canvas_background.apply_async(kwargs = {'jsonCanvas': jsonCanvas,
-                                                            'id_ws': id_ws,
-                                                            'username': request.user.username,
-                                                            'parameters': params,
-                                                            'concat': concat})
+                enqueue = True
+
+            if enqueue:
+                # Mark Running BEFORE apply_async. With CELERY_TASK_ALWAYS_EAGER the
+                # task finishes inside apply_async and sets Success/Error; writing
+                # Running afterwards left the UI stuck forever.
+                _mark_etl_running(
+                    id_ws,
+                    request.user.username,
+                    ws_name=(ws.name if ws else None),
+                )
+                async_result = run_canvas_background.apply_async(kwargs={
+                    'jsonCanvas': jsonCanvas,
+                    'id_ws': id_ws,
+                    'username': request.user.username,
+                    'parameters': params,
+                    'concat': concat,
+                })
+                task_id = str(async_result.id)
+                _store_etl_celery_task_id(id_ws, request.user.username, task_id)
 
 
         else:
@@ -954,7 +1099,8 @@ def etl_read_canvas(request):
             print((form.errors))
 
     response = {
-           'refresh': True
+           'refresh': True,
+           'task_id': task_id,
        }
 
     return HttpResponse(json.dumps(response, indent=4), content_type='project/json')
@@ -1004,6 +1150,17 @@ def etl_schema_shape(request):
             response = json.dumps(listSchema)
 
             return HttpResponse(response, content_type="application/json")
+
+@login_required()
+@staff_required
+def etl_schema_gpkg(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST)
+        if form.is_valid():
+            f = request.POST['file']
+            layer = request.POST.get('layer') or None
+            payload = etl_schema.get_schema_gpkg(f, layer)
+            return HttpResponse(json.dumps(payload), content_type="application/json")
 
 @login_required
 @staff_required

@@ -70,16 +70,25 @@
 .pl-panel__toolbar .btn {
 	display: inline-flex; align-items: center; gap: 5px;
 	font-size: 12px; font-weight: 600; padding: 5px 11px; height: 32px;
-	border-radius: 6px; border: none; cursor: pointer;
-	transition: filter var(--pl-transition), box-shadow var(--pl-transition);
+	border-radius: 6px; cursor: pointer;
+	background: #fff !important;
+	transition: filter 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease, background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
 	white-space: nowrap;
 }
-.pl-panel__toolbar .btn:hover { filter: brightness(0.9); }
-.pl-panel__toolbar .btn-success  { background: #27a065; color: #fff; }
-.pl-panel__toolbar .btn-creator  { background: #7b5ea7; color: #fff; }
-.pl-panel__toolbar .btn-primary  { background: var(--pl-accent); color: #fff; border: none; }
-.pl-panel__toolbar .btn-warning  { background: #d08b00; color: #fff; }
-.pl-panel__toolbar .btn:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
+.pl-panel__toolbar .btn:hover { filter: brightness(0.97); }
+.pl-panel__toolbar .btn:active:not(:disabled):not(.disabled) {
+	filter: brightness(0.9);
+	transform: translateY(1px);
+	box-shadow: inset 0 2px 5px rgba(0,0,0,0.18);
+}
+/* Estilo outline de siempre; solo cambian los tonos */
+.pl-panel__toolbar .btn-success    { border: 1px solid #1a9a6c !important; color: #1a9a6c !important; }
+.pl-panel__toolbar .btn-creator    { border: 1px solid #2d6a4f !important; color: #2d6a4f !important; }
+.pl-panel__toolbar .btn-raster     { border: 1px solid #8f5a5c !important; color: #8f5a5c !important; }
+.pl-panel__toolbar .btn-predictive { border: 1px solid #5b6fa8 !important; color: #5b6fa8 !important; }
+.pl-panel__toolbar .btn-primary    { border: 1px solid #4682B4 !important; color: #4682B4 !important; }
+.pl-panel__toolbar .btn-warning    { border: 1px solid #e8832a !important; color: #e8832a !important; }
+.pl-panel__toolbar .btn:disabled { opacity: 0.5; cursor: not-allowed; filter: none; transform: none; box-shadow: none; }
 
 /* Layout: columna lateral + canvas */
 #etl-body {
@@ -144,20 +153,130 @@
 /* Toolbar de acciones del canvas (guardar, ejecutar, etc.) generado por JS */
 #toolbar-etl { display: flex; align-items: center; gap: 6px; }
 
+/* Pestaña de estado del Run (refuerzo por si style_etl.css está en caché) */
+#etl-canvas-shell { position: relative; flex: 1; min-width: 0; height: 100%; }
+#etl-run-status-dock {
+	position: absolute; right: 10px; left: auto; bottom: 10px; z-index: 40;
+	width: 300px; max-width: calc(100% - 20px);
+	background: #fff; border: 1px solid #cfd8df; border-right: 4px solid #9aa8b5;
+	border-radius: 8px; box-shadow: 0 2px 10px rgba(30,40,50,0.14); overflow: hidden;
+	font-size: 12px; line-height: 1.3;
+}
+#etl-run-status-dock.is-running { border-right-color: #4a7fa5; }
+#etl-run-status-dock.is-success { border-right-color: #1a7a45; }
+#etl-run-status-dock.is-error { border-right-color: #c0392b; }
+#etl-run-status-dock.is-collapsed { width: auto; max-width: 220px; }
+#etl-run-status-dock__header {
+	display: flex; align-items: center; gap: 7px; padding: 6px 8px;
+	background: #fff; cursor: pointer; user-select: none;
+}
+#etl-run-status-dock:not(.is-collapsed) #etl-run-status-dock__header {
+	border-bottom: 1px solid #e8ecef; background: #f7f9fb;
+}
+#etl-run-status-dock__icons { display: inline-flex; width: 14px; justify-content: center; flex-shrink: 0; }
+#etl-run-status-dock__icons i { display: none; font-size: 13px; }
+#etl-run-status-dock__title { font-weight: 700; color: #2e3a45; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#etl-run-status-dock__toggle {
+	border: 1px solid #d5dee5; background: #fff; color: #6b7a86;
+	width: 22px; height: 22px; border-radius: 4px; padding: 0; cursor: pointer;
+	display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+#etl-run-status-dock__body { display: block; padding: 8px; background: #fff; }
+#etl-run-status-dock.is-collapsed #etl-run-status-dock__body { display: none !important; }
+#etl-run-status-dock__progress-wrap { display: none !important; align-items: center; gap: 6px; margin-bottom: 8px; }
+#etl-run-status-dock__progress-wrap.is-visible { display: flex !important; }
+#etl-run-status-dock__progress-wrap .progress { flex: 1; height: 10px; margin: 0; background: #e8eef3; border-radius: 5px; overflow: hidden; box-shadow: none; }
+#etl-run-status-dock__progress-bar { background-color: #4a7fa5 !important; }
+#etl-run-status-dock__pct { font-size: 11px; font-weight: 600; color: #667788; min-width: 32px; text-align: right; }
+#etl-run-status-dock__message {
+	margin: 0; padding: 7px 8px; background: #fafbfc; border: 1px solid #e8ecef; border-radius: 5px;
+	color: #2e3a45; font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 11px;
+	line-height: 1.4; white-space: pre-wrap; word-break: break-word; max-height: 88px; overflow: auto;
+	user-select: text; cursor: text;
+}
+
+/* Leyenda de colores (misma familia visual que el dock de estado) */
+#etl-color-legend {
+	position: absolute; left: 10px; right: auto; bottom: 10px; z-index: 40;
+	width: 280px; max-width: calc(100% - 20px);
+	background: #fff; border: 1px solid #cfd8df; border-left: 4px solid #4a7fa5;
+	border-radius: 8px; box-shadow: 0 2px 10px rgba(30,40,50,0.14); overflow: hidden;
+	font-size: 12px; line-height: 1.3;
+}
+#etl-color-legend.is-collapsed { width: auto; max-width: 160px; }
+#etl-color-legend__header {
+	display: flex; align-items: center; gap: 7px; padding: 6px 8px;
+	background: #fff; cursor: pointer; user-select: none;
+}
+#etl-color-legend:not(.is-collapsed) #etl-color-legend__header {
+	border-bottom: 1px solid #e8ecef; background: #f7f9fb;
+}
+#etl-color-legend__title { font-weight: 700; color: #2e3a45; flex: 1; min-width: 0; }
+#etl-color-legend__toggle {
+	border: 1px solid #d5dee5; background: #fff; color: #6b7a86;
+	width: 22px; height: 22px; border-radius: 4px; padding: 0; cursor: pointer;
+	display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+#etl-color-legend__body { display: block; padding: 8px 10px 10px; background: #fff; }
+#etl-color-legend.is-collapsed #etl-color-legend__body { display: none !important; }
+.etl-legend-section { margin: 0 0 8px; }
+.etl-legend-section:last-child { margin-bottom: 0; }
+.etl-legend-section__title {
+	font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+	color: #7b8a96; margin: 0 0 5px;
+}
+.etl-legend-row {
+	display: flex; align-items: center; gap: 8px;
+	padding: 3px 0; color: #2e3a45; font-size: 11px;
+}
+.etl-legend-swatch {
+	width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0;
+	border: 1px solid rgba(0,0,0,0.12);
+}
+.etl-legend-swatch--round { border-radius: 50%; }
+
 /* Sistema de diseño compartido — botones de acción */
-.btn-pl-add { display: inline-flex; align-items: center; gap: 6px; background: var(--pl-accent); color: #fff !important; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; padding: 6px 14px; height: 34px; cursor: pointer; transition: background var(--pl-transition), border-color var(--pl-transition), color var(--pl-transition); text-decoration: none !important; white-space: nowrap; letter-spacing: 0.2px; }
+.btn-pl-add {
+	display: inline-flex; align-items: center; gap: 6px;
+	background: var(--pl-accent); color: #fff !important; border: none; border-radius: 6px;
+	font-size: 12px; font-weight: 600; padding: 6px 14px; height: 34px; cursor: pointer;
+	transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease, filter 0.12s ease;
+	text-decoration: none !important; white-space: nowrap; letter-spacing: 0.2px;
+}
 .btn-pl-add:hover { background: var(--pl-accent-dk); }
+.btn-pl-add:active:not(:disabled):not(.disabled) {
+	background: #244d68;
+	transform: translateY(1px);
+	box-shadow: inset 0 2px 5px rgba(0,0,0,0.32);
+	filter: brightness(0.92);
+}
 .btn-pl-add--secondary { background: var(--pl-muted); }
 .btn-pl-add--secondary:hover { background: #5a6b78; }
+.btn-pl-add--secondary:active:not(:disabled):not(.disabled) { background: #4a5965; }
 .btn-pl-add--outline { background: transparent; color: var(--pl-muted) !important; border: 1px solid var(--pl-border); }
 .btn-pl-add--outline:hover { background: var(--pl-bg); border-color: var(--pl-accent); color: var(--pl-accent) !important; }
+.btn-pl-add--outline:active:not(:disabled):not(.disabled) { background: #e8eef3; color: var(--pl-accent-dk) !important; }
 .btn-pl-add--danger { background: transparent; color: #c0392b !important; border: 1px solid #e8bebe; }
 .btn-pl-add--danger:hover { background: #fde8e8; border-color: #c0392b; }
-.btn-pl-add:disabled, .btn-pl-add.disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+.btn-pl-add--danger:active:not(:disabled):not(.disabled) { background: #f5c6c6; }
+.btn-pl-add:disabled, .btn-pl-add.disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; transform: none; box-shadow: none; }
 
-/* Iconos de estado en el botón Run */
-#icon-success { color: #1a7a45; }
-#icon-error   { color: #c0392b; }
+/* Feedback de pulsación también en Volver / modales del canvas */
+#toolbar-button-back:active:not(:disabled) {
+	transform: translateY(1px);
+	background: #e8eef3 !important;
+	box-shadow: inset 0 2px 4px rgba(0,0,0,0.14);
+}
+.modal-footer .btn:active:not(:disabled):not(.disabled) {
+	transform: translateY(1px);
+	box-shadow: inset 0 2px 5px rgba(0,0,0,0.22);
+	filter: brightness(0.9);
+}
+#etl-run-status-dock__toggle:active {
+	transform: translateY(1px);
+	background: #e8eef3;
+	box-shadow: inset 0 1px 3px rgba(0,0,0,0.18);
+}
 
 /* Modales */
 .modal-content { border-radius: var(--pl-radius); border: none; box-shadow: 0 8px 32px rgba(0,0,0,0.18); }
@@ -268,10 +387,10 @@
             <div class="pl-panel">
                 <div class="pl-panel__header">
                     <h3 class="pl-panel__title">
-                        <i class="fa fa-cogs"></i> {% trans "ETL - Extract, Transform & Load" %}
+                        <i class="fa fa-cogs"></i> {% trans "ETL - Canvas" %}
                     </h3>
                     <div class="pl-panel__actions">
-                        <button id="toolbar-button-back"><i class="fa fa-list"></i> {% trans "Workspaces" %}</button>
+                        <button id="toolbar-button-back"><i class="fa fa-list"></i> {% trans "Workflows" %}</button>
                         <div id="toolbar-etl"></div>
                         {% if etl_assistant_enabled %}
                         <button type="button" id="etl-assistant-open" aria-expanded="false" aria-controls="etl-assistant">
@@ -306,6 +425,7 @@
                             <li><a data-shape="input_Raster" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Raster (GeoTIFF)" %}</a></li>
                             <li><a data-shape="input_Segex" class="palette_node_element draw2d_droppable dropdown-item">SEGEX</a></li>
                             <li><a data-shape="input_Sharepoint" class="palette_node_element draw2d_droppable dropdown-item">SharePoint</a></li>
+                            <li><a data-shape="input_Gpkg" class="palette_node_element draw2d_droppable dropdown-item">GeoPackage</a></li>
                             <li><a data-shape="input_Shp" class="palette_node_element draw2d_droppable dropdown-item">Shapefile</a></li>
                             <li><a data-shape="input_SqlServer" class="palette_node_element draw2d_droppable dropdown-item">SQL Server</a></li>
                             <li><a data-shape="input_Xml" class="palette_node_element draw2d_droppable dropdown-item">XML</a></li>
@@ -439,8 +559,57 @@
             <!-- Fila: columna-dropdown + canvas -->
             <div id="etl-body">
                 <div id="etl-dropdown-col"></div>
+                <div id="etl-canvas-shell">
                 <div id="canvas-parent">
                     <div id="canvas-etl"></div>
+                </div>
+                <aside id="etl-color-legend" class="is-collapsed" aria-label="{% trans 'Color legend' %}">
+                    <div id="etl-color-legend__header" title="{% trans 'Show or hide color legend' %}">
+                        <i class="fa fa-info-circle" style="color:#4a7fa5" aria-hidden="true"></i>
+                        <span id="etl-color-legend__title">{% trans "Legend" %}</span>
+                        <button type="button" id="etl-color-legend__toggle" aria-expanded="false" aria-controls="etl-color-legend__body" title="{% trans 'Show or hide color legend' %}">
+                            <i class="fa fa-chevron-up"></i>
+                        </button>
+                    </div>
+                    <div id="etl-color-legend__body">
+                        <div class="etl-legend-section">
+                            <p class="etl-legend-section__title">{% trans "Ports (data type)" %}</p>
+                            <div class="etl-legend-row"><span class="etl-legend-swatch etl-legend-swatch--round" style="background:#111111"></span>{% trans "Table / PostGIS" %}</div>
+                            <div class="etl-legend-row"><span class="etl-legend-swatch etl-legend-swatch--round" style="background:#8f5a5c"></span>{% trans "Raster" %}</div>
+                        </div>
+                        <div class="etl-legend-section">
+                            <p class="etl-legend-section__title">{% trans "Node headers" %}</p>
+                            <div class="etl-legend-row"><span class="etl-legend-swatch" style="background:#83d0c9"></span>{% trans "Inputs" %}</div>
+                            <div class="etl-legend-row"><span class="etl-legend-swatch" style="background:#5fad7e"></span>{% trans "Creators" %}</div>
+                            <div class="etl-legend-row"><span class="etl-legend-swatch" style="background:#71c7ec"></span>{% trans "Transformers" %}</div>
+                            <div class="etl-legend-row"><span class="etl-legend-swatch" style="background:#5b6fa8"></span>{% trans "Predictive" %}</div>
+                            <div class="etl-legend-row"><span class="etl-legend-swatch" style="background:#c9898a"></span>{% trans "Raster tools" %}</div>
+                            <div class="etl-legend-row"><span class="etl-legend-swatch" style="background:#e8832a"></span>{% trans "Outputs / Visualizer" %}</div>
+                        </div>
+                    </div>
+                </aside>
+                <aside id="etl-run-status-dock" class="is-idle is-collapsed" aria-live="polite">
+                    <div id="etl-run-status-dock__header" title="{% trans 'Show or hide run status' %}">
+                        <span id="etl-run-status-dock__icons">
+                            <i id="etl-dock-icon-success" class="fa fa-check" style="color:#1a7a45" aria-hidden="true"></i>
+                            <i id="etl-dock-icon-error" class="fa fa-times" style="color:#c0392b" aria-hidden="true"></i>
+                            <i id="etl-dock-icon-running" class="fa fa-play-circle" style="color:#4a7fa5" aria-hidden="true"></i>
+                        </span>
+                        <span id="etl-run-status-dock__title">{% trans "Run status" %}</span>
+                        <button type="button" id="etl-run-status-dock__toggle" aria-expanded="false" aria-controls="etl-run-status-dock__body" title="{% trans 'Show or hide run status' %}">
+                            <i class="fa fa-chevron-up"></i>
+                        </button>
+                    </div>
+                    <div id="etl-run-status-dock__body">
+                        <div id="etl-run-status-dock__progress-wrap">
+                            <div class="progress">
+                                <div id="etl-run-status-dock__progress-bar" class="progress-bar progress-bar-striped active" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <span id="etl-run-status-dock__pct">0%</span>
+                        </div>
+                        <pre id="etl-run-status-dock__message">{% trans "No run yet." %}</pre>
+                    </div>
+                </aside>
                 </div>
                 {% if etl_assistant_enabled %}
                 <aside id="etl-assistant" class="pl-assistant is-collapsed" aria-label="{% trans 'ETL assistant' %}"{% if etl_assistant_streaming %} data-streaming="1"{% endif %}{% if etl_assistant_next_steps %} data-guided="1"{% endif %}{% if etl_assistant_columns %} data-columns="1"{% endif %}>
@@ -489,7 +658,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
-                    <h4 class="modal-title">{% trans "Save ETL workspace" %}</h4>
+                    <h4 class="modal-title">{% trans "Save ETL workflow" %}</h4>
                     <ul class="nav nav-tabs">
                         <li class="active"><a data-toggle="tab" href="#general">General</a></li>
                         <li><a data-toggle="tab" href="#permission">Permisos</a></li>
@@ -505,28 +674,28 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <label for="etl_id" >ID</label>
-                                <input value ="{{ id }}" placeholder="{% trans 'ETL Workspace ID' %}" name="etl_id" id="etl_id" type="text" class="form-control">
+                                <input value ="{{ id }}" placeholder="{% trans 'ETL Workflow ID' %}" name="etl_id" id="etl_id" type="text" class="form-control">
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-12">
                                 <label for="etl_name">{% trans "Name" %}</label>
-                                <input value ="{{ name }}" placeholder="{% trans 'ETL Workspace name' %}" name="etl_name" id="etl_name" type="text" class="form-control">
+                                <input value ="{{ name }}" placeholder="{% trans 'ETL Workflow name' %}" name="etl_name" id="etl_name" type="text" class="form-control">
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-12">
                                 <label for="etl_desc">{% trans "Description" %}</label>
-                                <input value ="{{ description }}" placeholder="{% trans 'ETL Workspace description' %}" name="etl_desc" id="etl_desc" type="text" class="form-control">
+                                <input value ="{{ description }}" placeholder="{% trans 'ETL Workflow description' %}" name="etl_desc" id="etl_desc" type="text" class="form-control">
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-12">
                                 <input type="checkbox" name="repeat_periodically" id="repeat_periodically"/>
-                                <label >{% trans "Run workspace every..." %}</label>
+                                <label >{% trans "Run workflow every..." %}</label>
                             </div>
                             <div class="col-md-6 repeat_periodically_time" >
                                 <select class="form-control" style="width: 100%;" id="ws-program-day" name="ws-program-day">
@@ -555,7 +724,7 @@
 
                             <div class="more-options">
                                 <div class="col-md-12 repeat_periodically_time">
-                                    <label>{% trans 'Run workspace every...' %}</label>
+                                    <label>{% trans 'Run workflow every...' %}</label>
                                 </div>
 
                                 <div class="col-md-6 repeat_periodically_time">
@@ -600,12 +769,12 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
-                    <h4 class="modal-title" id="myModalLabel">{% trans 'Overwrite workspace?' %}</h4>
+                    <h4 class="modal-title" id="myModalLabel">{% trans 'Overwrite workflow?' %}</h4>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12 form-group">
-                            <p style="font-weight: 600;">{% trans 'Workspace' %} {{ id }} {% trans 'will be overwritten. If you do not want to overwrite it the ID must be empty' %}</p>
+                            <p style="font-weight: 600;">{% trans 'Workflow' %} {{ id }} {% trans 'will be overwritten. If you do not want to overwrite it the ID must be empty' %}</p>
                         </div>
                     </div>
                 </div>
@@ -657,7 +826,7 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12 form-group">
-                            <p style="font-weight: 600;">{% trans 'In database already exists a workspace with the same name and the same user' %}</p>
+                            <p style="font-weight: 600;">{% trans 'In database already exists a workflow with the same name and the same user' %}</p>
                         </div>
                     </div>
                 </div>
@@ -879,31 +1048,110 @@
 
     var providers = {{providers|safe}}
 
+    function setEtlRunStatusDockExpanded(expanded){
+        var dock = $("#etl-run-status-dock");
+        var toggle = $("#etl-run-status-dock__toggle");
+        if(expanded){
+            dock.removeClass("is-collapsed");
+            toggle.attr("aria-expanded", "true")
+                .find("i").removeClass("fa-chevron-up").addClass("fa-chevron-down");
+        } else {
+            dock.addClass("is-collapsed");
+            toggle.attr("aria-expanded", "false")
+                .find("i").removeClass("fa-chevron-down").addClass("fa-chevron-up");
+        }
+    }
+
+    function etlRunningNodeLabel(message){
+        // "Running: n2 trans_Union (2/3)" → "n2 · trans_Union"
+        var m = String(message || '').match(/Running:\s*(n\d+)\s+(\S+)/i);
+        if(m){
+            return m[1] + ' · ' + m[2];
+        }
+        return '';
+    }
+
+    function setEtlRunStatusDock(data){
+        var dock = $("#etl-run-status-dock");
+        if(!dock.length){
+            return;
+        }
+        var status = data.status || '';
+        var message = data.message || '';
+        var progress = parseInt(data.progress || 0, 10);
+        if(isNaN(progress)){
+            progress = 0;
+        }
+
+        dock.removeClass("is-idle is-running is-success is-error");
+        $("#etl-dock-icon-success, #etl-dock-icon-error, #etl-dock-icon-running").hide();
+        $("#etl-run-status-dock__progress-wrap").removeClass("is-visible");
+        $("#etl-run-status-dock__progress-bar").css("width", "0%").attr("aria-valuenow", 0);
+        $("#etl-run-status-dock__pct").text("0%");
+
+        if(status == 'Running'){
+            if(progress < 5){
+                progress = 5;
+            }
+            dock.addClass("is-running");
+            $("#etl-dock-icon-running").show();
+            $("#etl-run-status-dock__progress-wrap").addClass("is-visible");
+            $("#etl-run-status-dock__progress-bar").css("width", progress + "%").attr("aria-valuenow", progress);
+            $("#etl-run-status-dock__pct").text(progress + "%");
+            var nodeLabel = etlRunningNodeLabel(message);
+            $("#etl-run-status-dock__title").text(nodeLabel || "{% trans 'Running' %}");
+            setEtlRunStatusDockExpanded(true);
+            setCurrentCanvasStatusInterval(1500);
+        } else if(status == 'Success'){
+            dock.addClass("is-success");
+            $("#etl-dock-icon-success").show();
+            $("#etl-run-status-dock__title").text("{% trans 'Success' %}");
+            // Chip compacto; el mensaje sigue disponible al expandir
+            setEtlRunStatusDockExpanded(false);
+            setCurrentCanvasStatusInterval(5000);
+        } else if(status == 'Error'){
+            dock.addClass("is-error");
+            $("#etl-dock-icon-error").show();
+            $("#etl-run-status-dock__title").text("{% trans 'Error' %}");
+            setEtlRunStatusDockExpanded(true);
+            setCurrentCanvasStatusInterval(5000);
+        } else {
+            dock.addClass("is-idle");
+            $("#etl-run-status-dock__title").text("{% trans 'Run status' %}");
+            setEtlRunStatusDockExpanded(false);
+            setCurrentCanvasStatusInterval(5000);
+            if(!message){
+                message = "{% trans 'No run yet.' %}";
+            }
+        }
+
+        if(message){
+            $("#etl-run-status-dock__message").text(message);
+        }
+    }
+    window.setEtlRunStatusDock = setEtlRunStatusDock;
+
     function actualizarInfoPanel(data){
         if(data.status == ''){
-
-            $("#icon-success").css("display", "none");
-            $("#icon-running").css("display", "none");
-            $("#icon-error").css("display", "none");
             $("#button-open-inspector").hide();
-
+            setEtlRunStatusDock({ status: '', message: '', progress: 0 });
+            return;
         }
 
         if(data.status == 'Running'){
-
-            $("#button-run").attr("title", data.message);
-            $("#icon-success").css("display", "none");
-            $("#icon-running").css("display", "inline-block");
-            $("#icon-error").css("display", "none");
             $("#button-open-inspector").hide();
-
+            setEtlRunStatusDock({
+                status: 'Running',
+                message: data.message || '',
+                progress: data.progress || 0
+            });
         }
         if(data.status == 'Success'){
-
-            $("#button-run").attr("title", data.message);
-            $("#icon-success").css("display", "inline");
-            $("#icon-running").css("display", "none");
-            $("#icon-error").css("display", "none");
+            setEtlRunStatusDock({
+                status: 'Success',
+                message: data.message || '',
+                progress: 100
+            });
 
             if(data.visualizer_session_id){
                 var inspUrl = '{{ FRONTEND_BASE_URL }}/etl-visualizer/' + data.visualizer_session_id + '/';
@@ -911,23 +1159,49 @@
             } else {
                 $("#button-open-inspector").hide();
             }
-
         }
         if(data.status == 'Error'){
-
-            $("#button-run").attr("title", data.message);
-            $("#icon-success").css("display", "none");
-            $("#icon-running").css("display", "none");
-            $("#icon-error").css("display", "inline");
             $("#button-open-inspector").hide();
-
+            setEtlRunStatusDock({
+                status: 'Error',
+                message: data.message || '',
+                progress: 0
+            });
         }
+    }
 
+    $(document).on("click", "#etl-run-status-dock__header", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        setEtlRunStatusDockExpanded($("#etl-run-status-dock").hasClass("is-collapsed"));
+    });
+    $(document).on("mousedown", "#etl-run-status-dock__message", function(e){
+        // Permitir seleccionar/copiar el mensaje sin plegar el panel
+        e.stopPropagation();
+    });
+
+    function setEtlColorLegendExpanded(expanded){
+        var dock = $("#etl-color-legend");
+        var toggle = $("#etl-color-legend__toggle");
+        if(expanded){
+            dock.removeClass("is-collapsed");
+            toggle.attr("aria-expanded", "true")
+                .find("i").removeClass("fa-chevron-up").addClass("fa-chevron-down");
+        } else {
+            dock.addClass("is-collapsed");
+            toggle.attr("aria-expanded", "false")
+                .find("i").removeClass("fa-chevron-down").addClass("fa-chevron-up");
+        }
         if (window.EtlRunError) {
             EtlRunError.update(data);
         }
 
     }
+    $(document).on("click", "#etl-color-legend__header", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        setEtlColorLegendExpanded($("#etl-color-legend").hasClass("is-collapsed"));
+    });
 
     function getCurrentCanvasStatus(){
 		$.ajax({
@@ -951,10 +1225,23 @@
 		return false;
     }
 
-	function startCurrentCanvasStatus(){
+	var _etlCanvasStatusIntervalMs = 5000;
+	function setCurrentCanvasStatusInterval(ms){
+		ms = ms || 5000;
+		if(_etlCanvasStatusIntervalMs === ms && typeof interval !== 'undefined' && interval){
+			return;
+		}
+		_etlCanvasStatusIntervalMs = ms;
+		if(typeof interval !== 'undefined' && interval){
+			clearInterval(interval);
+		}
 		interval = setInterval(function(){
 			getCurrentCanvasStatus();
-		}, 5000);
+		}, ms);
+	}
+
+	function startCurrentCanvasStatus(){
+		setCurrentCanvasStatusInterval(5000);
 	}
 
     startCurrentCanvasStatus();
@@ -1140,16 +1427,16 @@ window.refreshEtlSqlEditor = function(textareaId) {
 </script>
 
 <script type="text/javascript" src="{% static "js/Application.js" %}"></script>
-<script type="text/javascript" src="{% static "js/View.js" %}"></script>
-<script type="text/javascript" src="{% static "js/Toolbar.js" %}"></script>
-<script type="text/javascript" src="{% static "js/TableShape.js" %}"></script>
-<script type="text/javascript" src="{% static "js/SchemaPropagator.js" %}"></script>
-<script type="text/javascript" src="{% static "js/PredictiveShapes.js" %}"></script>
+<script type="text/javascript" src="{% static "js/View.js" %}?v=etl-chrome-14"></script>
+<script type="text/javascript" src="{% static "js/Toolbar.js" %}?v=etl-chrome-14"></script>
+<script type="text/javascript" src="{% static "js/TableShape.js" %}?v=etl-chrome-14"></script>
+<script type="text/javascript" src="{% static "js/SchemaPropagator.js" %}?v=etl-chrome-14"></script>
+<script type="text/javascript" src="{% static "js/PredictiveShapes.js" %}?v=etl-chrome-14"></script>
 <script type="text/javascript" src="{% static "js/SchemaCanvas.js" %}"></script>
 {% if etl_assistant_enabled %}
 <script type="text/javascript" src="{% static "js/lib/marked.min.js" %}"></script>
 <script type="text/javascript" src="{% static "js/lib/purify.min.js" %}"></script>
-<script type="text/javascript" src="{% static "js/DrawNodes.js" %}"></script>
+<script type="text/javascript" src="{% static "js/DrawNodes.js" %}?v=etl-chrome-14"></script>
 <script type="text/javascript" src="{% static "js/Assistant.js" %}"></script>
 {% endif %}
 

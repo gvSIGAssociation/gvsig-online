@@ -18,6 +18,7 @@ SUMMARIES = {
     'input_Json': 'Lee un fichero JSON o responde a una URL.',
     'input_Xml': 'Lee un XML a partir de una etiqueta.',
     'input_Shp': 'Lee un shapefile con su codificación y EPSG.',
+    'input_Gpkg': 'Lee una capa de un GeoPackage con su codificación y EPSG.',
     'input_Kml': 'Lee un KML o KMZ.',
     'input_Postgis': 'Lee una tabla o una consulta de una conexión PostgreSQL o PostGIS.',
     'input_Oracle': 'Lee una tabla o una consulta de Oracle.',

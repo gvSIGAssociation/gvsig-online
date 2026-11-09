@@ -1644,6 +1644,7 @@ class PaletteTest(SimpleTestCase):
         self.assertIn('input_Raster', groups['inputs'])
         self.assertIn('input_Model', groups['inputs'])
         self.assertIn('output_RasterPublish', groups['outputs'])
+        self.assertIn('output_LayerPublish', groups['outputs'])
         self.assertIn('output_ModelSave', groups['outputs'])
 
     def test_raster_button_is_locked_in_restricted_mode_like_the_others(self):

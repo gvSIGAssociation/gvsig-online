@@ -41,8 +41,8 @@ msgid "Workpaces"
 msgstr ""
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_concat_workspaces.html:25
-msgid "Concatenated workspaces list"
-msgstr ""
+msgid "Concatenated workflows list"
+msgstr "Concatenated workflows list"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_concat_workspaces.html:31
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:33
@@ -103,13 +103,13 @@ msgstr ""
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_concat_workspaces.html:367
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:104
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:1034
-msgid "Delete workspace"
-msgstr ""
+msgid "Delete workflow"
+msgstr "Delete workflow"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_concat_workspaces.html:103
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:109
-msgid "The ETL workspace and its parameters will be deleted"
-msgstr ""
+msgid "The ETL workflow and its parameters will be deleted"
+msgstr "The ETL workflow and its parameters will be deleted"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_concat_workspaces.html:108
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:114
@@ -131,29 +131,29 @@ msgid "Accept"
 msgstr ""
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_concat_workspaces.html:125
-msgid "Update or Save ETL Workspace"
-msgstr ""
+msgid "Update or Save ETL Workflow"
+msgstr "Update or Save ETL Workflow"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_concat_workspaces.html:134
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:145
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:401
 #: gvsigol_plugin_geoetl/templates/etl.html:161
-msgid "ETL Workspace ID"
-msgstr ""
+msgid "ETL Workflow ID"
+msgstr "ETL Workflow ID"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_concat_workspaces.html:141
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:153
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:286
 #: gvsigol_plugin_geoetl/templates/etl.html:168
-msgid "ETL Workspace name"
-msgstr ""
+msgid "ETL Workflow name"
+msgstr "ETL Workflow name"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_concat_workspaces.html:148
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:161
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:293
 #: gvsigol_plugin_geoetl/templates/etl.html:175
-msgid "ETL Workspace description"
-msgstr ""
+msgid "ETL Workflow description"
+msgstr "ETL Workflow description"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_concat_workspaces.html:155
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:169
@@ -218,8 +218,8 @@ msgstr ""
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:201
 #: gvsigol_plugin_geoetl/templates/etl.html:182
 #: gvsigol_plugin_geoetl/templates/etl.html:211
-msgid "Run workspace every..."
-msgstr ""
+msgid "Run workflow every..."
+msgstr "Run workflow every..."
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_concat_workspaces.html:189
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:205
@@ -253,12 +253,12 @@ msgstr ""
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_concat_workspaces.html:205
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_menu.html:30
 #: gvsigol_plugin_geoetl/templates/etl.html:11
-msgid "Workspaces"
-msgstr ""
+msgid "Workflows"
+msgstr "Workflows"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_concat_workspaces.html:210
-msgid "Get Workspaces"
-msgstr ""
+msgid "Get Workflows"
+msgstr "Get Workflows"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_concat_workspaces.html:211
 msgid "Get workspaces"
@@ -385,8 +385,8 @@ msgstr ""
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_concat_workspaces.html:389
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:1082
-msgid "Run workspace"
-msgstr ""
+msgid "Run workflow"
+msgstr "Run workflow"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_menu.html:10
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_menu.html:18
@@ -423,13 +423,13 @@ msgid "Concat. workspaces"
 msgstr ""
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:27
-msgid "Workspaces list"
-msgstr ""
+msgid "Workflows list"
+msgstr "Workflows list"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:130
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:277
-msgid "Upload ETL Workspace"
-msgstr ""
+msgid "Upload ETL Workflow"
+msgstr "Upload ETL Workflow"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:237
 msgid "Update"
@@ -437,8 +437,8 @@ msgstr ""
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:299
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:303
-msgid "ETL Workspace JSON"
-msgstr ""
+msgid "ETL Workflow JSON"
+msgstr "ETL Workflow JSON"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:324
 msgid "Set time (in hours)"
@@ -622,8 +622,8 @@ msgid "Open workspace"
 msgstr ""
 
 #: gvsigol_plugin_geoetl/templates/etl.html:17
-msgid "ETL - Extract, Transform & Load"
-msgstr ""
+msgid "ETL - Canvas"
+msgstr "ETL - Canvas"
 
 #: gvsigol_plugin_geoetl/templates/etl.html:20
 msgid "Inputs"
@@ -838,20 +838,20 @@ msgid "Outputs"
 msgstr ""
 
 #: gvsigol_plugin_geoetl/templates/etl.html:145
-msgid "Save ETL workspace"
-msgstr ""
+msgid "Save ETL workflow"
+msgstr "Save ETL workflow"
 
 #: gvsigol_plugin_geoetl/templates/etl.html:244
 msgid "Set parameters of all tasks before save"
 msgstr ""
 
 #: gvsigol_plugin_geoetl/templates/etl.html:256
-msgid "Overwrite workspace?"
-msgstr ""
+msgid "Overwrite workflow?"
+msgstr "Overwrite workflow?"
 
 #: gvsigol_plugin_geoetl/templates/etl.html:261
-msgid "Workspace"
-msgstr ""
+msgid "Workflow"
+msgstr "Workflow"
 
 #: gvsigol_plugin_geoetl/templates/etl.html:261
 msgid ""
@@ -1028,3 +1028,87 @@ msgstr "Close without saving"
 
 msgid "Apply"
 msgstr "Apply"
+
+msgid "Concat. workflows"
+msgstr "Concat. workflows"
+
+msgid "Update ETL Workflow"
+msgstr "Update ETL Workflow"
+
+msgid "Set parameters for workflow"
+msgstr "Set parameters for workflow"
+
+msgid "SQL before running workflow"
+msgstr "SQL before running workflow"
+
+msgid "SQL after running workflow"
+msgstr "SQL after running workflow"
+
+msgid "There are variable parameters (The workflow will be executed in a loop)"
+msgstr "There are variable parameters (The workflow will be executed in a loop)"
+
+msgid "Download workflow"
+msgstr "Download workflow"
+
+msgid "Update workflow"
+msgstr "Update workflow"
+
+msgid "Open workflow"
+msgstr "Open workflow"
+
+msgid "workflows"
+msgstr "workflows"
+
+msgid "Could not update the workflow."
+msgstr "Could not update the workflow."
+
+msgid "Some ETL workflow is running. Are you sure you want to drop the temporary tables?"
+msgstr "Some ETL workflow is running. Are you sure you want to drop the temporary tables?"
+
+msgid "Legend"
+msgstr "Legend"
+
+msgid "Color legend"
+msgstr "Color legend"
+
+msgid "Show or hide color legend"
+msgstr "Show or hide color legend"
+
+msgid "Ports (data type)"
+msgstr "Ports (data type)"
+
+msgid "Node headers"
+msgstr "Node headers"
+
+msgid "Table / PostGIS"
+msgstr "Table / PostGIS"
+
+msgid "Raster tools"
+msgstr "Raster tools"
+
+msgid "Transformers"
+msgstr "Transformers"
+
+msgid "Run status"
+msgstr "Run status"
+
+msgid "Show or hide run status"
+msgstr "Show or hide run status"
+
+msgid "No run yet."
+msgstr "No run yet."
+
+msgid "Running"
+msgstr "Running"
+
+msgid "Success"
+msgstr "Success"
+
+msgid "Error"
+msgstr "Error"
+
+msgid "Alphanumeric"
+msgstr "Alphanumeric"
+
+msgid "Outputs / Visualizer"
+msgstr "Outputs / Visualizer"

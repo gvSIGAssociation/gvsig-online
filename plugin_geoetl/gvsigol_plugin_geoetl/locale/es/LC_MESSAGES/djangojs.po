@@ -1680,8 +1680,8 @@ msgstr "Publicar ráster"
 msgid "Publishes the raster as a layer, ready to add to a project. The classes get a colour style."
 msgstr "Publica el ráster como una capa, lista para añadir a un proyecto. Las clases reciben un estilo de colores."
 
-msgid "Workspace"
-msgstr "Workspace"
+msgid "Workflow"
+msgstr "Flujo de trabajo"
 
 msgid "Layer group"
 msgstr "Grupo de capas"

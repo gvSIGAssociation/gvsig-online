@@ -33,6 +33,8 @@ urlpatterns = [
     path('etl/etl_sheet_excel/', views.etl_sheet_excel, name='etl_sheet_excel'),
     path('etl/etl_schema_excel/', views.etl_schema_excel, name='etl_schema_excel'),
     path('etl/etl_schema_shape/', views.etl_schema_shape, name='etl_schema_shape'),
+    path('etl/etl_schema_gpkg/', views.etl_schema_gpkg, name='etl_schema_gpkg'),
+
     path('etl/test_conexion/', views.test_conexion, name='test_conexion'),
     # save_conexion eliminado - las conexiones se gestionan desde gvsigol_services
     path('etl/etl_schema_csv/', views.etl_schema_csv, name='etl_schema_csv'),
@@ -52,6 +54,8 @@ urlpatterns = [
     path('etl/get_workspaces/', views.get_workspaces, name='get_workspaces'),
     path('etl/etl_current_canvas_status/', views.etl_current_canvas_status, name='etl_current_canvas_status'),
     path('etl/etl_list_canvas_status/', views.etl_list_canvas_status, name='etl_list_canvas_status'),
+    path('etl/etl_task_status/<str:task_id>/', views.etl_task_status, name='etl_task_status'),
+
     path('etl/etl_owners_oracle/', views.etl_owners_oracle, name='etl_owners_oracle'),
     path('etl/etl_tables_oracle/', views.etl_tables_oracle, name='etl_tables_oracle'),
     path('etl/etl_schema_oracle/', views.etl_schema_oracle, name='etl_schema_oracle'),

@@ -6,16 +6,138 @@ var listLabel=[];
 
 var paramsTransTpl = gettext('Parameters: {}');
 
+/*
+ * Paleta de nodos (cabecera = categoría del nodo; puerto = tipo de dato):
+ *  - Toda entrada (incluida ráster) → verde
+ *  - Creadores → verde más oscuro
+ *  - Transformadores clásicos → azul claro
+ *  - Predictivo → índigo pizarra (combina con el resto)
+ *  - Herramientas ráster (no inputs) → rosa polvo (menos chillón que el fucsia)
+ *  - Salidas → ámbar; visualizer → naranja
+ * Puertos: tabla/PostGIS → casi negro; ráster → rosa polvo; modelo → índigo
+ */
+var ETL_NODE_STYLE = {
+    input:      { header: '#83d0c9', gear: '#1a9a6c' },
+    creator:    { header: '#5fad7e', gear: '#2d6a4f' },
+    predictive: { header: '#5b6fa8', gear: '#3a4a78' },
+    transform:  { header: '#71c7ec', gear: '#4682B4' },
+    // Todas las salidas (PostGIS, modelo, ráster, visualizer) → naranja suave
+    output:     { header: '#e8832a', gear: '#b8651a' },
+    visualizer: { header: '#e8832a', gear: '#b8651a' },
+    raster:     { header: '#c9898a', gear: '#8f5a5c' },
+    error:      '#e2504c'
+};
+window.ETL_NODE_STYLE = ETL_NODE_STYLE;
+window.ETL_PREDICTIVE_TYPES = window.ETL_PREDICTIVE_TYPES || {};
+
+/* Puertos: todos negros salvo ráster (rosa polvo). Se aplica a TODOS los nodos. */
+var ETL_PORT_COLOR_DEFAULT = '#111111';
+var ETL_PORT_COLOR_RASTER = '#8f5a5c';
+window.ETL_PORT_COLOR_DEFAULT = ETL_PORT_COLOR_DEFAULT;
+window.ETL_PORT_COLOR_RASTER = ETL_PORT_COLOR_RASTER;
+
+function etlPaintPort(port, kind) {
+    if (!port) {
+        return port;
+    }
+    var k = kind || port.etlKind || 'table';
+    port.etlKind = k;
+    var color = (k === 'raster') ? ETL_PORT_COLOR_RASTER : ETL_PORT_COLOR_DEFAULT;
+    try {
+        if (typeof port.setBackgroundColor === 'function') {
+            port.setBackgroundColor(color);
+        }
+        if (typeof port.setColor === 'function') {
+            // Borde del mismo tono (más visible sobre el fondo blanco)
+            port.setColor(color);
+        }
+        if (typeof port.setStroke === 'function') {
+            port.setStroke(1.5);
+        }
+        if (typeof port.setDiameter === 'function') {
+            port.setDiameter(12);
+        }
+        if (typeof port.repaint === 'function') {
+            port.repaint();
+        }
+    } catch (err) { /* ignore */ }
+    return port;
+}
+window.etlPaintPort = etlPaintPort;
+
+(function etlPatchCreatePort() {
+    if (typeof draw2d === 'undefined') {
+        return;
+    }
+    function wrap(proto) {
+        if (!proto || typeof proto.createPort !== 'function' || proto._etlCreatePortPatched) {
+            return;
+        }
+        var original = proto.createPort;
+        proto.createPort = function () {
+            var port = original.apply(this, arguments);
+            etlPaintPort(port, 'table');
+            return port;
+        };
+        proto._etlCreatePortPatched = true;
+    }
+    if (draw2d.shape && draw2d.shape.basic && draw2d.shape.basic.Label) {
+        wrap(draw2d.shape.basic.Label.prototype);
+    }
+    if (draw2d.shape && draw2d.shape.node && draw2d.shape.node.Node) {
+        wrap(draw2d.shape.node.Node.prototype);
+    }
+})();
+
+function etlChromeForType(type) {
+    var t = String(type || '');
+    if (t.indexOf('crea_') === 0) {
+        return ETL_NODE_STYLE.creator;
+    }
+    // Todas las entradas comparten el verde (también input_Raster)
+    if (t.indexOf('input_') === 0) {
+        return ETL_NODE_STYLE.input;
+    }
+    if (t.indexOf('output_') === 0) {
+        return ETL_NODE_STYLE.output;
+    }
+    if (window.ETL_PREDICTIVE_TYPES[t]) {
+        return ETL_NODE_STYLE.predictive;
+    }
+    if (t.indexOf('Raster') !== -1) {
+        return ETL_NODE_STYLE.raster;
+    }
+    if (/Model|Predict|Stratified|RandomForest/i.test(t)) {
+        return ETL_NODE_STYLE.predictive;
+    }
+    return ETL_NODE_STYLE.transform;
+}
+
+function etlApplyConfiguredChrome(icon, type, classLabel) {
+    var chrome = etlChromeForType(type);
+    if (icon && typeof icon.setColor === 'function') {
+        icon.setColor(chrome.gear);
+    }
+    if (classLabel && typeof classLabel.setBackgroundColor === 'function') {
+        classLabel.setBackgroundColor(chrome.header);
+    }
+    return chrome;
+}
+window.etlChromeForType = etlChromeForType;
+window.etlApplyConfiguredChrome = etlApplyConfiguredChrome;
+
 function getPerAttr(){
     var memento= this._super();
+    var parametros;
     
-    for (i = 0; i < jsonParams.length; i++) {
+    for (var i = 0; i < jsonParams.length; i++) {
         if(this.id == jsonParams[i]["id"]){
-            var parametros = jsonParams[i]
-            break
+            parametros = jsonParams[i];
+            break;
         }
     }
 
+    // Título editable de la cajita (debe persistir al guardar el flujo)
     memento.name = this.classLabel.getText();
     // id corto visible en la cabecera (n1, n2…), el mismo que usa el asistente
     if (this.etlAlias) {
@@ -24,26 +146,22 @@ function getPerAttr(){
     memento.entities   = [];
     
     try{
-        
         this.children.each(function(i,e){
-            
             if(i>0){ // skip the header of the figure
                 memento.entities.push({
                     text:e.figure.getText(),
                     id: e.figure.id,
-                    parameters: parametros["parameters"],
-                    schema: parametros["schema"],
-                    schemaold: parametros["schema-old"]
+                    parameters: parametros ? parametros["parameters"] : undefined,
+                    schema: parametros ? parametros["schema"] : undefined,
+                    schemaold: parametros ? parametros["schema-old"] : undefined
                 });
             }
         });
-
-        
-        return memento;
     }
-    catch{
-
+    catch(err){
+        // Seguir devolviendo memento (con name) aunque fallen entidades
     }
+    return memento;
 };
 
 function isAlreadyInCanvas(jsonParams, jsonTask, ID){
@@ -76,7 +194,7 @@ function isAlreadyInCanvas(jsonParams, jsonTask, ID){
 
 
 
-function setColorIfIsOpened(jsonParams, type, ID, icon){
+function setColorIfIsOpened(jsonParams, type, ID, icon, classLabel){
     if (typeof registerEtlGearIcon === 'function') {
         registerEtlGearIcon(ID, icon);
     } else {
@@ -84,30 +202,29 @@ function setColorIfIsOpened(jsonParams, type, ID, icon){
         window._etlGearById = window._etlGearById || {};
         window._etlGearById[ID] = icon;
     }
+
+    // Cabecera siempre en el tono de categoría (aunque aún no esté configurado)
+    var label = classLabel;
+    if (!label && icon && icon.getParent) {
+        label = icon.getParent();
+    }
+    var chrome = etlChromeForType(type);
+    if (label && typeof label.setBackgroundColor === 'function') {
+        label.setBackgroundColor(chrome.header);
+    }
     
     setTimeout(function(){
-        
-        for(k=0;k<jsonParams.length;k++){
-            if (jsonParams[k]['id'] == ID){
-
+        for (var k = 0; k < jsonParams.length; k++) {
+            if (jsonParams[k]['id'] == ID) {
                 if (jsonParams[k]._schemaValid === false) {
-                    icon.setColor('#e2504c');
+                    icon.setColor(ETL_NODE_STYLE.error);
                     break;
                 }
-
-                if (type.startsWith('input')){ 
-                    icon.setColor('#01b0a0')
-                }else if (type.startsWith('output')){ 
-                    icon.setColor("#e79600")
-                }else if (type.startsWith('trans')){ 
-                    icon.setColor("#4682B4")
-                }else if (type.startsWith('crea')){ 
-                    icon.setColor("#8e57eb")
-                }
+                etlApplyConfiguredChrome(icon, type, label);
                 break;
             }
-        } },1)
-
+        }
+    }, 1);
 };
 
 function getPathFile(fileType, ID){
@@ -133,6 +250,11 @@ function getPathFile(fileType, ID){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
         } else if(fileType == 'shp' && urlLower.endsWith('.shp')){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
+        } else if(fileType == 'gpkg' && urlLower.endsWith('.gpkg')){
+            $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
+            if (window._gpkgFileSelectedHandlers && typeof window._gpkgFileSelectedHandlers[ID] === 'function') {
+                window._gpkgFileSelectedHandlers[ID]($("#"+fileType+"-file-"+ID).val());
+            }
         } else if(fileType == 'kml-kmz' && (urlLower.endsWith('.kml') || urlLower.endsWith('.kmz'))){
             $("#"+fileType+"-file-"+ID).val("file://" + fm_directory + url)
         } else if(fileType == 'json' && urlLower.endsWith('.json') && ID == '0'){
@@ -162,7 +284,8 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text:"InDenova",
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#83d0c9", 
             radius: this.getRadius(), 
             padding:10,
@@ -477,7 +600,7 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
                     isAlreadyInCanvas(jsonParams, paramsIndenova, ID)
                     if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
-                    icon.setColor('#01b0a0')
+                    icon.setColor('#1a9a6c')
                     
                     $('#dialog-input-indenova-'+ID).modal('hide')
 
@@ -502,7 +625,7 @@ input_Indenova = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:40, top:3, right:10, bottom:5},
-	   	     fontColor:"#009688",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -606,7 +729,8 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text:"SEGEX",
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#83d0c9", 
             radius: this.getRadius(), 
             padding:10,
@@ -976,7 +1100,7 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
             isAlreadyInCanvas(jsonParams, paramsSegex, ID)
             if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
-            icon.setColor('#01b0a0')
+            icon.setColor('#1a9a6c')
             
             $('#dialog-input-segex-'+ID).modal('hide')
         });
@@ -997,7 +1121,7 @@ input_Segex = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:40, top:3, right:10, bottom:5},
-	   	     fontColor:"#009688",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -1133,7 +1257,8 @@ input_EnterApi = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text:"EnterApi",
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#83d0c9", 
             radius: this.getRadius(), 
             padding:10,
@@ -1278,7 +1403,7 @@ input_EnterApi = draw2d.shape.layout.VerticalLayout.extend({
             
             isAlreadyInCanvas(jsonParams, paramsEnterApi, ID)
 
-            icon.setColor('#01b0a0')
+            icon.setColor('#1a9a6c')
             
             $('#dialog-input-enterapi-'+ID).modal('hide')
         });
@@ -1299,7 +1424,7 @@ input_EnterApi = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:40, top:3, right:10, bottom:5},
-	   	     fontColor:"#009688",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -1403,7 +1528,8 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text:"CSV", 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#83d0c9", 
             radius: this.getRadius(), 
             padding:10,
@@ -1630,7 +1756,7 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
             isAlreadyInCanvas(jsonParams, paramsCSV, ID)
             if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
-            icon.setColor('#01b0a0')
+            icon.setColor('#1a9a6c')
             
             $('#dialog-input-csv-'+ID).modal('hide')
         });
@@ -1651,7 +1777,7 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:40, top:3, right:10, bottom:5},
-	   	     fontColor:"#009688",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -1755,7 +1881,8 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text:"JSON", 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#83d0c9", 
             radius: this.getRadius(), 
             padding:10,
@@ -1893,7 +2020,7 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
             isAlreadyInCanvas(jsonParams, paramsJSON, ID)
             if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
-            icon.setColor('#01b0a0')
+            icon.setColor('#1a9a6c')
             
             $('#dialog-input-json-'+ID).modal('hide')
         });
@@ -1914,7 +2041,7 @@ input_Json = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:40, top:3, right:10, bottom:5},
-	   	     fontColor:"#009688",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -2019,7 +2146,8 @@ input_PadronAlbacete = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text:"Padrón Albacete", 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#83d0c9", 
             radius: this.getRadius(), 
             padding:10,
@@ -2114,7 +2242,7 @@ input_PadronAlbacete = draw2d.shape.layout.VerticalLayout.extend({
             isAlreadyInCanvas(jsonParams, paramsJSON, ID)
             if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
-            icon.setColor('#01b0a0')
+            icon.setColor('#1a9a6c')
             
             $('#dialog-input-padron-alba-'+ID).modal('hide')
         });
@@ -2135,7 +2263,7 @@ input_PadronAlbacete = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:40, top:3, right:10, bottom:5},
-	   	     fontColor:"#009688",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -2241,7 +2369,8 @@ input_PadronAtm = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text:"Padrón ATM", 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#83d0c9", 
             radius: this.getRadius(), 
             padding:10,
@@ -2340,7 +2469,7 @@ input_PadronAtm = draw2d.shape.layout.VerticalLayout.extend({
                     isAlreadyInCanvas(jsonParams, paramsJSON, ID)
                     if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
-                    icon.setColor('#01b0a0')
+                    icon.setColor('#1a9a6c')
                     
                     $('#dialog-input-padron-atm-'+ID).modal('hide')
 
@@ -2365,7 +2494,7 @@ input_PadronAtm = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:40, top:3, right:10, bottom:5},
-	   	     fontColor:"#009688",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -2471,7 +2600,8 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text:"Excel", 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#83d0c9", 
             radius: this.getRadius(), 
             padding:10,
@@ -2739,7 +2869,7 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
                     isAlreadyInCanvas(jsonParams, paramsExcel, ID)
                     passSchemaToEdgeConnected(ID, listLabel, data, context.canvas)
                     if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
-                    icon.setColor('#01b0a0')
+                    icon.setColor('#1a9a6c')
                     $('#dialog-input-excel-'+ID).modal('hide')
                 },
                 error: function (xhr) {
@@ -2771,7 +2901,7 @@ input_Excel = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:40, top:3, right:10, bottom:5},
-	   	     fontColor:"#009688",
+	   	     fontColor:"#111111",
 	   	     resizeable:true
 	   	 });
 
@@ -2876,7 +3006,8 @@ input_Sharepoint = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text:"SharePoint", 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#83d0c9", 
             radius: this.getRadius(), 
             padding:10,
@@ -3338,7 +3469,7 @@ input_Sharepoint = draw2d.shape.layout.VerticalLayout.extend({
 
             isAlreadyInCanvas(jsonParams, paramsSharepoint, ID);
             if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
-            icon.setColor('#01b0a0');
+            icon.setColor('#1a9a6c');
             $('#dialog-input-sharepoint-'+ID).modal('hide');
         });
     },
@@ -3351,7 +3482,7 @@ input_Sharepoint = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:40, top:3, right:10, bottom:5},
-	   	     fontColor:"#009688",
+	   	     fontColor:"#111111",
 	   	     resizeable:true
 	   	 });
 
@@ -3418,7 +3549,8 @@ input_Xml = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text:"XML", 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#83d0c9", 
             radius: this.getRadius(), 
             padding:10,
@@ -3756,7 +3888,7 @@ input_Xml = draw2d.shape.layout.VerticalLayout.extend({
             isAlreadyInCanvas(jsonParams, paramsXml, ID)
             if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
-            icon.setColor('#01b0a0')
+            icon.setColor('#1a9a6c')
 
             $('#dialog-input-xml-'+ID).modal('hide')
         })
@@ -3777,7 +3909,7 @@ input_Xml = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:40, top:3, right:10, bottom:5},
-	   	     fontColor:"#009688",
+	   	     fontColor:"#111111",
 	   	     resizeable:true
 	   	 });
 
@@ -3881,7 +4013,8 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text:"Shapefile", 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#83d0c9", 
             radius: this.getRadius(), 
             padding:10,
@@ -4006,7 +4139,7 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
             isAlreadyInCanvas(jsonParams, paramsSHP, ID)
             if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
-            icon.setColor('#01b0a0')
+            icon.setColor('#1a9a6c')
             
             $('#dialog-input-shp-'+ID).modal('hide')
         });
@@ -4027,7 +4160,7 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:40, top:3, right:10, bottom:5},
-	   	     fontColor:"#009688",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -4118,6 +4251,262 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
 
 });
 
+//// INPUT GEOPACKAGE ////
+
+input_Gpkg = draw2d.shape.layout.VerticalLayout.extend({
+
+	NAME: "input_Gpkg",
+	
+    init : function(attr)
+    {
+    	this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+      
+        this.classLabel = new draw2d.shape.basic.Label({
+            text:"GeoPackage", 
+            stroke:1,
+            fontColor:"#ffffff",
+            bold:true,  
+            bgColor:"#83d0c9", 
+            radius: this.getRadius(), 
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+       
+        var icon = new draw2d.shape.icon.Gear({ 
+            minWidth:13, 
+            minHeight:13, 
+            width:13, 
+            height:13, 
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        $('#canvas-parent').append('<div id="dialog-input-gpkg-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title">'+paramsTransTpl.replace('{}', gettext('GeoPackage'))+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-3">'+
+                                    '<label class="col-form-label">'+gettext('Choose GeoPackage:')+'</label><br>'+
+                                    '<a href="#" id="select-file-button-'+ID+'" class="btn btn-default btn-sm"><i class="fa fa-folder-open margin-r-5"></i>'+gettext('Select file')+'</a>'+
+                                '</div>'+
+                                '<div class="col-md-9">'+
+                                    '<label class="col-form-label">'+gettext('Path:')+'</label>'+
+                                    '<input type="text" id="gpkg-file-'+ID+'" name="file" class="form-control">'+
+                                '</div>'+
+                            '</div>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-12">'+
+                                    '<label class="col-form-label">'+gettext('GeoPackage layer:')+'</label>'+
+                                    '<select id="gpkg-layer-'+ID+'" class="form-control">'+
+                                        '<option value="">'+gettext('Select a layer')+'</option>'+
+                                    '</select>'+
+                                '</div>'+
+                            '</div>'+
+                            '<div class="row" style="margin-top:8px">'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Encoding:')+'</label>'+
+                                    '<select id="encode-gpkg-'+ID+'" class="form-control">'+
+                                        '<option value="UTF-8">UTF-8</option>'+
+                                        '<option value="LATIN1">LATIN1</option>'+
+                                        '<option value="ISO-8859-15">ISO-8859-15</option>'+
+                                        '<option value="WINDOWS-1252">WINDOWS-1252</option>'+
+                                    '</select>'+
+                                '</div>'+
+                                '<div class="col-md-8">'+
+                                    '<label class="col-form-label">EPSG:</label>'+
+                                    '<select id="epsg-gpkg-'+ID+'" class="form-control">'+
+                                        '<option value="">'+gettext('Insert if CRS is not detected')+'</option>'+
+                                    '</select>'+
+                                '</div>'+
+                            '</div>'+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="input-gpkg-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+
+        for(i=0;i<srs.length;i++){
+
+            epsg = srs[i].code.split(":")[1]
+
+            $('#epsg-gpkg-'+ID).append(
+                '<option value="'+epsg+'">'+srs[i].code+' - '+srs[i].title+'</option>'
+            );
+        }
+
+        function loadGpkgLayers(fileVal, preferredLayer){
+            var formData = new FormData();
+            formData.append('file', fileVal);
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_schema_gpkg/',
+                data: formData,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    var layers = (data && data.layers) ? data.layers : [];
+                    var select = $('#gpkg-layer-'+ID);
+                    select.empty();
+                    select.append('<option value="">'+gettext('Select a layer')+'</option>');
+                    for (var li = 0; li < layers.length; li++) {
+                        select.append('<option value="'+layers[li]+'">'+layers[li]+'</option>');
+                    }
+                    if (preferredLayer && layers.indexOf(preferredLayer) >= 0) {
+                        select.val(preferredLayer);
+                    } else if (layers.length === 1) {
+                        select.val(layers[0]);
+                    }
+                }
+            });
+        }
+
+        if (!window._gpkgFileSelectedHandlers) {
+            window._gpkgFileSelectedHandlers = {};
+        }
+        window._gpkgFileSelectedHandlers[ID] = function(fileVal){
+            loadGpkgLayers(fileVal);
+        };
+
+        getPathFile('gpkg', ID)
+
+        var context = this
+
+        icon.on("click", function(){
+
+            $('#dialog-input-gpkg-'+ID).modal('show')
+
+        });
+
+        $('#input-gpkg-accept-'+ID).click(function() {
+
+            var paramsGPKG = {"id": ID,
+            "parameters": [
+            { "gpkg-file": $('#gpkg-file-'+ID).val(),
+              "gpkg-layer": $('#gpkg-layer-'+ID).val(),
+              "encode": $('#encode-gpkg-'+ID).val(),
+              "epsg": $('#epsg-gpkg-'+ID).val()}
+            ]}
+
+            var formDataSchemaGpkg = new FormData();
+            formDataSchemaGpkg.append('file', $('#gpkg-file-'+ID).val())
+            formDataSchemaGpkg.append('layer', $('#gpkg-layer-'+ID).val())
+
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_schema_gpkg/',
+                data: formDataSchemaGpkg,
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+                },
+                cache: false, 
+                contentType: false, 
+                processData: false,
+                success: function (data) {
+                    var schema = (data && data.schema) ? data.schema.slice() : [];
+                    schema.unshift('ogc_fid')
+                    paramsGPKG['schema'] = schema
+                    isAlreadyInCanvas(jsonParams, paramsGPKG, ID)
+                    passSchemaToEdgeConnected(ID, listLabel, schema, context.canvas)
+                    if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
+                    }
+                })
+    
+            isAlreadyInCanvas(jsonParams, paramsGPKG, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
+
+            icon.setColor('#1a9a6c')
+            
+            $('#dialog-input-gpkg-'+ID).modal('hide')
+        });
+    },
+     
+    addEntity: function(optionalIndex)
+    {
+	   	 var label =new draw2d.shape.basic.Label({
+	   	     text:gettext("Input"),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:40, top:3, right:10, bottom:5},
+	   	     fontColor:"#111111",
+             resizeable:true
+	   	 });
+
+	     var output= label.createPort("output");
+	     
+         output.setName("output_"+label.id);
+         
+	     if($.isNumeric(optionalIndex)){
+             this.add(label, null, optionalIndex+1);
+	     }
+	     else{
+	         this.add(label);
+	     }
+         
+         listLabel.push([this.id, [], [output.name]])
+         
+         return label;
+    },
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+         
+         return this;
+     },
+     getPersistentAttributes : getPerAttr,
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+         
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }  
+
+});
+window.input_Gpkg = input_Gpkg;
+
 //// INPUT ORACLE ////
 
 input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
@@ -4131,7 +4520,8 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text:"Oracle", 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#83d0c9", 
             radius: this.getRadius(), 
             padding:10,
@@ -4388,7 +4778,7 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
             isAlreadyInCanvas(jsonParams, paramsOracle, ID)
             if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
-            icon.setColor('#01b0a0')
+            icon.setColor('#1a9a6c')
 
             $('#dialog-input-oracle-'+ID).modal('hide')
         });
@@ -4410,7 +4800,7 @@ input_Oracle = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:40, top:3, right:10, bottom:5},
-	   	     fontColor:"#009688",
+	   	     fontColor:"#111111",
 	   	     resizeable:true
 	   	 });
 
@@ -4514,7 +4904,8 @@ input_SqlServer = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text:"SQL Server", 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#83d0c9", 
             radius: this.getRadius(), 
             padding:10,
@@ -4806,7 +5197,7 @@ input_SqlServer = draw2d.shape.layout.VerticalLayout.extend({
             isAlreadyInCanvas(jsonParams, paramsDataSchemaSqlServer, ID)
             if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
-            icon.setColor('#01b0a0')
+            icon.setColor('#1a9a6c')
 
             $('#dialog-input-sql-server-'+ID).modal('hide')
         });
@@ -4828,7 +5219,7 @@ input_SqlServer = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:40, top:3, right:10, bottom:5},
-	   	     fontColor:"#009688",
+	   	     fontColor:"#111111",
 	   	     resizeable:true
 	   	 });
 
@@ -4934,7 +5325,8 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text:"PgSQL/PostGIS", 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#83d0c9", 
             radius: this.getRadius(), 
             padding:10,
@@ -5246,7 +5638,7 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
                     isAlreadyInCanvas(jsonParams, paramsPostgis, ID)
                     if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
                     
-                    icon.setColor('#01b0a0')
+                    icon.setColor('#1a9a6c')
                     
                     $('#dialog-input-postgis-'+ID).modal('hide')
                     
@@ -5270,7 +5662,7 @@ input_Postgis = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:40, top:3, right:10, bottom:5},
-	   	     fontColor:"#009688",
+	   	     fontColor:"#111111",
 	   	     resizeable:true
 	   	 });
 
@@ -5374,7 +5766,8 @@ input_Kml = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text:"KML/KMZ",
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#83d0c9", 
             radius: this.getRadius(), 
             padding:10,
@@ -5563,7 +5956,7 @@ input_Kml = draw2d.shape.layout.VerticalLayout.extend({
             isAlreadyInCanvas(jsonParams, paramsKml, ID)
             if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
-            icon.setColor('#01b0a0')
+            icon.setColor('#1a9a6c')
             
             $('#dialog-input-kml-'+ID).modal('hide')
         })
@@ -5586,7 +5979,7 @@ input_Kml = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:40, top:3, right:10, bottom:5},
-	   	     fontColor:"#009688",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -5691,8 +6084,9 @@ crea_Grid = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Grid"), 
             stroke:1,
-            fontColor:"#ffffff",  
-            bgColor:"#c1a7ed",
+            fontColor:"#ffffff",
+            bold:true,  
+            bgColor:"#5fad7e",
             radius: this.getRadius(), 
             padding:10,
             resizeable:true,
@@ -5867,7 +6261,7 @@ crea_Grid = draw2d.shape.layout.VerticalLayout.extend({
             isAlreadyInCanvas(jsonParams, paramsGrid, ID)
             if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
             
-            icon.setColor('#8e57eb')
+            icon.setColor('#2d6a4f')
                     
             $('#dialog-create-grid-'+ID).modal('hide')
         });
@@ -5888,7 +6282,7 @@ crea_Grid = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:10, top:3, right:10, bottom:5},
-            fontColor:"#8e57eb",
+            fontColor:"#111111",
          resizeable:true
         });
 
@@ -5898,7 +6292,7 @@ crea_Grid = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:40, top:3, right:10, bottom:5},
-	   	     fontColor:"#8e57eb",
+	   	     fontColor:"#111111",
 	   	     resizeable:true
 	   	 });
 
@@ -6009,7 +6403,8 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext('Join'), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -6193,7 +6588,7 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -6203,7 +6598,7 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:10, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -6213,7 +6608,7 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -6223,7 +6618,7 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -6233,7 +6628,7 @@ trans_Join = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -6359,7 +6754,8 @@ trans_NearestNeighbor = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext('Nearest Neighbor'), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -6498,7 +6894,7 @@ trans_NearestNeighbor = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -6508,7 +6904,7 @@ trans_NearestNeighbor = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:10, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -6518,7 +6914,7 @@ trans_NearestNeighbor = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -6528,7 +6924,7 @@ trans_NearestNeighbor = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -6538,7 +6934,7 @@ trans_NearestNeighbor = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -6663,7 +7059,8 @@ trans_CompareRows = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext('Compare Rows'), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -6786,7 +7183,7 @@ trans_CompareRows = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -6796,7 +7193,7 @@ trans_CompareRows = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:10, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -6806,7 +7203,7 @@ trans_CompareRows = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -6816,7 +7213,7 @@ trans_CompareRows = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -6826,7 +7223,7 @@ trans_CompareRows = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -6836,7 +7233,7 @@ trans_CompareRows = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -6966,7 +7363,8 @@ trans_RemoveAttr = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Remove Attribute"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -7106,7 +7504,7 @@ trans_RemoveAttr = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -7116,7 +7514,7 @@ trans_RemoveAttr = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -7225,7 +7623,8 @@ trans_RenameAttr = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Rename Attribute"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -7355,7 +7754,7 @@ trans_RenameAttr = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -7365,7 +7764,7 @@ trans_RenameAttr = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -7473,7 +7872,8 @@ trans_ConcatAttr = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Concatenate Attr."), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -7604,7 +8004,7 @@ trans_ConcatAttr = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -7614,7 +8014,7 @@ trans_ConcatAttr = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -7722,7 +8122,8 @@ trans_PadAttr = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Pad Attribute"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -7857,7 +8258,7 @@ trans_PadAttr = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -7867,7 +8268,7 @@ trans_PadAttr = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -7975,7 +8376,8 @@ trans_FilterDupli = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Filter Duplicate"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -8101,7 +8503,7 @@ trans_FilterDupli = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -8111,7 +8513,7 @@ trans_FilterDupli = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -8121,7 +8523,7 @@ trans_FilterDupli = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -8235,7 +8637,8 @@ trans_ValGeom = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Validate Geometry"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -8373,7 +8776,7 @@ trans_ValGeom = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -8383,7 +8786,7 @@ trans_ValGeom = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -8393,7 +8796,7 @@ trans_ValGeom = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -8507,7 +8910,8 @@ trans_SimpGeom = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Simple Geometry"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -8641,7 +9045,7 @@ trans_SimpGeom = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -8651,7 +9055,7 @@ trans_SimpGeom = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -8661,7 +9065,7 @@ trans_SimpGeom = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -8776,7 +9180,8 @@ trans_ModifyValue = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Modify Value"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -8896,7 +9301,7 @@ trans_ModifyValue = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -8906,7 +9311,7 @@ trans_ModifyValue = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -9015,7 +9420,8 @@ trans_Counter = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Counter"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -9142,7 +9548,7 @@ trans_Counter = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -9152,7 +9558,7 @@ trans_Counter = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -9263,7 +9669,8 @@ trans_Stats = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Statistics"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -9405,7 +9812,7 @@ trans_Stats = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -9415,7 +9822,7 @@ trans_Stats = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -9524,7 +9931,8 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Calculator"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -9735,7 +10143,7 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -9745,7 +10153,7 @@ trans_Calculator = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -9856,7 +10264,8 @@ trans_ChangeAttrType = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Change Attr. Type"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -9989,7 +10398,7 @@ trans_ChangeAttrType = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -9999,7 +10408,7 @@ trans_ChangeAttrType = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -10107,7 +10516,8 @@ trans_CorrectSpelling = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Correct Spelling"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -10254,7 +10664,7 @@ trans_CorrectSpelling = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -10264,7 +10674,7 @@ trans_CorrectSpelling = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -10372,7 +10782,8 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Execute SQL"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -10795,7 +11206,7 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -10805,7 +11216,7 @@ trans_ExecuteSQL = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -10916,7 +11327,8 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Create Attribute"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -11047,7 +11459,7 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -11057,7 +11469,7 @@ trans_CreateAttr = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -11165,7 +11577,8 @@ trans_ExposeAttr = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Expose Attributes"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -11318,7 +11731,7 @@ trans_ExposeAttr = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -11328,7 +11741,7 @@ trans_ExposeAttr = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -11437,7 +11850,8 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Filter"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -11622,7 +12036,7 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -11632,7 +12046,7 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -11642,7 +12056,7 @@ trans_Filter = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -11758,7 +12172,8 @@ trans_Intersection = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Intersection"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -11932,7 +12347,7 @@ trans_Intersection = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -11942,7 +12357,7 @@ trans_Intersection = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:10, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -11952,7 +12367,7 @@ trans_Intersection = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -12068,7 +12483,8 @@ trans_SpatialRel = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Spatial Relation"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -12185,7 +12601,7 @@ trans_SpatialRel = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -12195,7 +12611,7 @@ trans_SpatialRel = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:10, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -12205,7 +12621,7 @@ trans_SpatialRel = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -12321,7 +12737,8 @@ trans_Cluster = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Clustering"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -12504,7 +12921,7 @@ trans_Cluster = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -12515,7 +12932,7 @@ trans_Cluster = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -12627,7 +13044,8 @@ trans_Difference = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Difference"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -12712,7 +13130,7 @@ trans_Difference = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -12722,7 +13140,7 @@ trans_Difference = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:10, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -12732,7 +13150,7 @@ trans_Difference = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -12848,7 +13266,8 @@ trans_Voronoi = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Voronoi Diagram"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -12960,7 +13379,7 @@ trans_Voronoi = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -12970,7 +13389,7 @@ trans_Voronoi = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -13081,7 +13500,8 @@ trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Keep Attribute"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -13208,7 +13628,7 @@ trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -13218,7 +13638,7 @@ trans_KeepAttr = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -13326,7 +13746,8 @@ trans_Reproject = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Reproject"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -13469,7 +13890,7 @@ trans_Reproject = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -13479,7 +13900,7 @@ trans_Reproject = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -13587,7 +14008,8 @@ trans_CadastralGeom = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Cadastral Geom."), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -13713,7 +14135,7 @@ trans_CadastralGeom = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -13723,7 +14145,7 @@ trans_CadastralGeom = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -13833,7 +14255,8 @@ trans_MGRS = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("MGRS"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -14006,7 +14429,7 @@ trans_MGRS = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -14016,7 +14439,7 @@ trans_MGRS = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -14127,7 +14550,8 @@ trans_TextToPoint = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Text to Point"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -14340,7 +14764,7 @@ trans_TextToPoint = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -14350,7 +14774,7 @@ trans_TextToPoint = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -14459,7 +14883,8 @@ trans_WktGeom = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("WKT Geom."), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -14607,7 +15032,7 @@ trans_WktGeom = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -14617,7 +15042,7 @@ trans_WktGeom = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -14726,7 +15151,8 @@ trans_SplitAttr = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Split Attribute"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -14871,7 +15297,7 @@ trans_SplitAttr = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -14881,7 +15307,7 @@ trans_SplitAttr = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -14990,7 +15416,8 @@ trans_ExplodeList = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Explode List"),
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -15130,7 +15557,7 @@ trans_ExplodeList = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -15140,7 +15567,7 @@ trans_ExplodeList = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -15250,7 +15677,8 @@ trans_Union = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Union"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -15383,7 +15811,7 @@ trans_Union = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -15393,7 +15821,7 @@ trans_Union = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -15502,7 +15930,8 @@ trans_RemoveGeom = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext('Remove Geom.'), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -15565,7 +15994,7 @@ trans_RemoveGeom = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -15575,7 +16004,7 @@ trans_RemoveGeom = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -15685,7 +16114,8 @@ trans_FilterGeom = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext('Filter Geom.'), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -15752,7 +16182,7 @@ trans_FilterGeom = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -15762,7 +16192,7 @@ trans_FilterGeom = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -15772,7 +16202,7 @@ trans_FilterGeom = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -15782,7 +16212,7 @@ trans_FilterGeom = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -15792,7 +16222,7 @@ trans_FilterGeom = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -15802,7 +16232,7 @@ trans_FilterGeom = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -15812,7 +16242,7 @@ trans_FilterGeom = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -15948,7 +16378,8 @@ trans_ExplodeGeom = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Explode Geometry"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -16024,7 +16455,7 @@ trans_ExplodeGeom = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -16034,7 +16465,7 @@ trans_ExplodeGeom = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -16143,7 +16574,8 @@ trans_LineEndPoints = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Line EndPoints"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -16226,7 +16658,7 @@ trans_LineEndPoints = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -16236,7 +16668,7 @@ trans_LineEndPoints = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -16346,7 +16778,8 @@ trans_CalcLength = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Calculate length"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -16426,7 +16859,7 @@ trans_CalcLength = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -16436,7 +16869,7 @@ trans_CalcLength = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -16547,7 +16980,8 @@ trans_CalcArea = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Calculate Area"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -16662,7 +17096,7 @@ trans_CalcArea = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -16672,7 +17106,7 @@ trans_CalcArea = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -16783,7 +17217,8 @@ trans_CurrentDate = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Current Date"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -16913,7 +17348,7 @@ trans_CurrentDate = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -16923,7 +17358,7 @@ trans_CurrentDate = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -17036,7 +17471,8 @@ trans_Geocoder = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Geocoder"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -17271,7 +17707,7 @@ trans_Geocoder = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -17281,7 +17717,7 @@ trans_Geocoder = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -17394,7 +17830,8 @@ trans_Buffer = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Buffer"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -17680,7 +18117,7 @@ trans_Buffer = draw2d.shape.layout.VerticalLayout.extend({
 	   	     radius:0,
 	   	     bgColor:"#ffffff",
 	   	     padding:{left:10, top:3, right:10, bottom:5},
-	   	     fontColor:"#107dac",
+	   	     fontColor:"#111111",
              resizeable:true
 	   	 });
 
@@ -17690,7 +18127,7 @@ trans_Buffer = draw2d.shape.layout.VerticalLayout.extend({
             radius:0,
             bgColor:"#ffffff",
             padding:{left:40, top:3, right:10, bottom:5},
-            fontColor:"#107dac",
+            fontColor:"#111111",
             resizeable:true
         });
 
@@ -17804,8 +18241,9 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text:"PgSQL/PostGIS", 
             stroke:1,
-            fontColor:"#ffffff",  
-            bgColor:"#e8ca93", 
+            fontColor:"#ffffff",
+            bold:true,  
+            bgColor: (ETL_NODE_STYLE.output && ETL_NODE_STYLE.output.header) || "#e8832a", 
             radius: this.getRadius(), 
             padding:10,
             resizeable:true,
@@ -18207,7 +18645,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
             isAlreadyInCanvas(jsonParams, paramsPostgis, ID)
             if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
-            icon.setColor('#e79600')
+            icon.setColor((ETL_NODE_STYLE.output && ETL_NODE_STYLE.output.gear) || '#b8651a')
             
             $('#dialog-output-postgis-'+ID).modal('hide')
 
@@ -18229,7 +18667,7 @@ output_Postgis = draw2d.shape.layout.VerticalLayout.extend({
 	   	    radius:0,
 	   	    bgColor:"#ffffff",
 	   	    padding:{left:10, top:3, right:40, bottom:5},
-	   	    fontColor:"#9a8262",
+	   	    fontColor:"#111111",
             resizeable:true
             
 	   	 });
@@ -18336,7 +18774,8 @@ trans_IDW = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("IDW Interpolation"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -18471,7 +18910,7 @@ trans_IDW = draw2d.shape.layout.VerticalLayout.extend({
             radius: 0,
             bgColor: "#ffffff",
             padding: {left: 10, top: 3, right: 10, bottom: 5},
-            fontColor: "#107dac",
+            fontColor: "#111111",
             resizeable: true
         });
 
@@ -18481,7 +18920,7 @@ trans_IDW = draw2d.shape.layout.VerticalLayout.extend({
             radius: 0,
             bgColor: "#ffffff",
             padding: {left: 40, top: 3, right: 10, bottom: 5},
-            fontColor: "#107dac",
+            fontColor: "#111111",
             resizeable: true
         });
 
@@ -18628,7 +19067,8 @@ trans_Kriging = draw2d.shape.layout.VerticalLayout.extend({
         this.classLabel = new draw2d.shape.basic.Label({
             text: gettext("Kriging Interpolation"), 
             stroke:1,
-            fontColor:"#ffffff",  
+            fontColor:"#ffffff",
+            bold:true,  
             bgColor:"#71c7ec", 
             radius: this.getRadius(), 
             padding:10,
@@ -18769,7 +19209,7 @@ trans_Kriging = draw2d.shape.layout.VerticalLayout.extend({
             radius: 0,
             bgColor: "#ffffff",
             padding: {left: 10, top: 3, right: 10, bottom: 5},
-            fontColor: "#107dac",
+            fontColor: "#111111",
             resizeable: true
         });
 
@@ -18779,7 +19219,7 @@ trans_Kriging = draw2d.shape.layout.VerticalLayout.extend({
             radius: 0,
             bgColor: "#ffffff",
             padding: {left: 40, top: 3, right: 10, bottom: 5},
-            fontColor: "#107dac",
+            fontColor: "#111111",
             resizeable: true
         });
 
@@ -18926,7 +19366,8 @@ output_Visualizer = draw2d.shape.layout.VerticalLayout.extend({
             text: gettext("Visualizer"),
             stroke: 1,
             fontColor: "#ffffff",
-            bgColor: "#e8ca93",
+            bold: true,
+            bgColor: (ETL_NODE_STYLE.output && ETL_NODE_STYLE.output.header) || "#e8832a",
             radius: this.getRadius(),
             padding: 10,
             resizeable: true,
@@ -19005,7 +19446,7 @@ output_Visualizer = draw2d.shape.layout.VerticalLayout.extend({
             isAlreadyInCanvas(jsonParams, paramsVisualizer, ID);
             if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
-            icon.setColor('#e79600');
+            icon.setColor((ETL_NODE_STYLE.output && ETL_NODE_STYLE.output.gear) || '#b8651a');
 
             $('#dialog-output-visualizer-' + ID).modal('hide');
         });
@@ -19018,7 +19459,7 @@ output_Visualizer = draw2d.shape.layout.VerticalLayout.extend({
             radius: 0,
             bgColor: "#ffffff",
             padding: {left: 10, top: 3, right: 40, bottom: 5},
-            fontColor: "#9a8262",
+            fontColor: "#111111",
             resizeable: true
         });
 

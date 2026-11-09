@@ -262,8 +262,8 @@ gvsigolETL.Toolbar = Class.extend({
 			});
 		});
 
-		// Inject the RUN Button
-		this.runButton  = $('<button id="button-run" class="btn-pl-add"><i class="fa fa-play"></i>' + gettext('Run') + '<i id="icon-success" class="fa fa-check" aria-hidden="true"></i><i id="icon-running" class="fa fa-spinner fa-spin"></i><i id="icon-error" class="fa fa-times" aria-hidden="true"></i></button>');
+		// Inject the RUN Button (status lives in #etl-run-status-dock on the canvas)
+		this.runButton  = $('<button id="button-run" class="btn-pl-add"><i class="fa fa-play"></i>' + gettext('Run') + '</button>');
 		this.html.append(this.runButton);
 
 		// Inject the OPEN INSPECTOR Button (hidden by default; shown after successful run with visualizer)
@@ -272,10 +272,13 @@ gvsigolETL.Toolbar = Class.extend({
 
 		this.runButton.click(function(){
 
-            $("#button-run").attr("title", 'Running');
-            $("#icon-success").css("display", "none");
-            $("#icon-running").css("display", "inline-block");
-            $("#icon-error").css("display", "none");
+            if (typeof window.setEtlRunStatusDock === 'function') {
+                window.setEtlRunStatusDock({
+                    status: 'Running',
+                    message: gettext('Running'),
+                    progress: 5
+                });
+            }
 
 			var writer = new draw2d.io.json.Writer();
 
@@ -296,8 +299,18 @@ gvsigolETL.Toolbar = Class.extend({
 					cache: false,
                     contentType: false,
                     processData: false,
-					success: function () {
-
+					success: function (resp) {
+						if (resp && resp.task_id) {
+							window._etlCurrentTaskId = resp.task_id;
+						}
+						if (typeof getCurrentCanvasStatus === 'function') {
+							getCurrentCanvasStatus();
+						}
+					},
+					error: function () {
+						if (typeof getCurrentCanvasStatus === 'function') {
+							getCurrentCanvasStatus();
+						}
 					}
 				});
 			});
@@ -410,6 +423,14 @@ gvsigolETL.Toolbar = Class.extend({
 					var figure = eval("new "+type+"();");
 
 					figure.addEntity("id");
+
+					// Restaurar título editable de la cajita (si el usuario lo renombró)
+					if (text && typeof figure.setName === 'function') {
+						figure.setName(text);
+					}
+					if (typeof etlAliasFromDocument === 'function' && etlAliasFromDocument(cnv[o])) {
+						figure.etlAlias = etlAliasFromDocument(cnv[o]);
+					}
 
 					for(j=0;j<listLabel.length;j++){
 						if(listLabel[j][0]==figure.id){

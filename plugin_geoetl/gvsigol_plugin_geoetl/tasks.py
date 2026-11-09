@@ -83,6 +83,18 @@ def _mark_canvas_poison_error(kwargs, deliveries):
     logger.error(msg)
 
 
+def _set_etl_celery_progress(task, progress, status_text):
+    if task is None:
+        return
+    try:
+        task.update_state(
+            state='PROCESSING',
+            meta={'status': status_text, 'progress': int(progress)},
+        )
+    except Exception:
+        logger.exception('Could not update ETL Celery progress')
+
+
 @celery_app.task(bind=True)
 def run_canvas_background(self, **kwargs):
 
@@ -94,14 +106,14 @@ def run_canvas_background(self, **kwargs):
         return
 
     try:
-        _run_canvas_background_impl(kwargs)
+        _run_canvas_background_impl(kwargs, task=self)
     finally:
         # Clean exit (success or handled exception) → ack; drop counter.
         # OOM/SIGKILL never reaches here, so the counter survives for redelivery.
         _clear_canvas_delivery(task_id)
 
 
-def _run_canvas_background_impl(kwargs):
+def _run_canvas_background_impl(kwargs, task=None):
 
     if kwargs["concat"]:
         listConcatIds = kwargs["jsonCanvas"]
@@ -138,34 +150,44 @@ def _run_canvas_background_impl(kwargs):
             except:
                 ws_name = 'workspace_' + str(id_ws)
             
+            celery_task_id = getattr(getattr(task, 'request', None), 'id', None) if task else None
             # Usar update_or_create para evitar duplicados (thread-safe)
+            defaults = {
+                'name': ws_name,
+                'message': 'Running',
+                'status': 'Running',
+                'last_exec': timezone.now(),
+                'visualizer_session_id': None,
+            }
+            if celery_task_id:
+                defaults['celery_task_id'] = str(celery_task_id)
             statusModel, created = ETLstatus.objects.update_or_create(
                 id_ws=id_ws,
-                defaults={
-                    'name': ws_name,
-                    'message': 'Running',
-                    'status': 'Running',
-                    'last_exec': timezone.now(),
-                    'visualizer_session_id': None,
-                }
+                defaults=defaults,
             )
         else:
+            celery_task_id = getattr(getattr(task, 'request', None), 'id', None) if task else None
             # Para canvas actuales (no guardados), usar get_or_create
+            defaults = {
+                'message': 'Running',
+                'status': 'Running',
+                'id_ws': None,
+                'last_exec': timezone.now(),
+                'visualizer_session_id': None,
+            }
+            if celery_task_id:
+                defaults['celery_task_id'] = str(celery_task_id)
             statusModel, created = ETLstatus.objects.get_or_create(
                 name='current_canvas.' + username,
-                defaults={
-                    'message': 'Running',
-                    'status': 'Running',
-                    'id_ws': None,
-                    'last_exec': timezone.now(),
-                    'visualizer_session_id': None,
-                }
+                defaults=defaults,
             )
             if not created:
                 statusModel.message = 'Running'
                 statusModel.status = 'Running'
                 statusModel.last_exec = timezone.now()
                 statusModel.visualizer_session_id = None
+                if celery_task_id:
+                    statusModel.celery_task_id = str(celery_task_id)
                 statusModel.save()
         
         # Un nodo que no se ha aceptado en el editor llega como null: se avisa en lugar de romper el motor
@@ -177,6 +199,8 @@ def _run_canvas_background_impl(kwargs):
             statusModel.save()
             logger.error('ETL canvas con nodos sin configurar (elementos null)')
             continue
+
+        _set_etl_celery_progress(task, 5, 'Running')
 
         # Propietario de los modelos guardados: el dueño del workspace (quien lo comparte da permiso de
         # ejecución) o, en un canvas sin guardar, el usuario que ejecuta.
@@ -275,6 +299,8 @@ def _run_canvas_background_impl(kwargs):
                         json_user_params[params['loop-user-params']] = iter_value
 
                 #going down the sorted list of tasks and executing them
+                total_nodes = max(len(sortedList), 1)
+                node_idx = 0
                 for s in sortedList:
                     for n in nodes:
                         if s == n[0]:
@@ -319,6 +345,18 @@ def _run_canvas_background_impl(kwargs):
 
                             print('Task ' + n[1]['type'] +' ('+n[1]['id']+ ') starts.')
                             errormsg = 'ERROR: In '+n[1]['type'] +' ('+n[1]['id']+ ')' +' Node. '
+                            node_idx += 1
+                            pct = min(95, int(10 + (80 * node_idx / total_nodes)))
+                            step_msg = 'Running: n%s %s (%s/%s)' % (
+                                node_idx, n[1]['type'], node_idx, total_nodes
+                            )
+                            _set_etl_celery_progress(task, pct, step_msg)
+                            try:
+                                statusModel.message = step_msg
+                                statusModel.save(update_fields=['message'])
+                            except Exception:
+                                pass
+
                             #execute input task
                             if n[1]['type'].startswith('input'):
 
@@ -418,6 +456,8 @@ def _run_canvas_background_impl(kwargs):
             if params:
                 if len(params['sql-after']) > 0:
                     executeSQL(params['db'], params['sql-after'])
+
+            _set_etl_celery_progress(task, 100, 'Process has been executed successfully')
 
             if id_ws:
                 # Actualizar el status a Success (usar filter().first() por si hay duplicados residuales)

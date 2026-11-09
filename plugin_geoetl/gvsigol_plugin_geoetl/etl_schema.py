@@ -117,6 +117,35 @@ def get_schema_shape(file):
 
     return schema
 
+
+def _gpkg_path_from_file_url(file):
+    if file.startswith('file://'):
+        return file[7:]
+    return file
+
+
+def list_gpkg_layers_for_etl(file):
+    gpkg = _gpkg_path_from_file_url(file)
+    dataSource = DataSource(gpkg)
+    return [lyr.name for lyr in dataSource]
+
+
+def get_schema_gpkg(file, layer_name=None):
+    gpkg = _gpkg_path_from_file_url(file)
+    dataSource = DataSource(gpkg)
+    layer = dataSource[0]
+    if layer_name:
+        for lyr in dataSource:
+            if lyr.name == layer_name:
+                layer = lyr
+                break
+    schema = [x.lower() for x in layer.fields]
+    return {
+        'layers': [lyr.name for lyr in dataSource],
+        'schema': schema,
+        'layer': layer.name,
+    }
+
 #test if connection postgres is valid
 def test_oracle(dicc):
     try:

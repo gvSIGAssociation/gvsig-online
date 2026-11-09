@@ -4,12 +4,12 @@
  * per-task schema handlers so column lists reach all downstream nodes.
  */
 
-var SCHEMA_GEAR_RED = '#e2504c';
+var SCHEMA_GEAR_RED = (window.ETL_NODE_STYLE && window.ETL_NODE_STYLE.error) || '#e2504c';
 var SCHEMA_GEAR_COLORS = {
-    input: '#01b0a0',
-    output: '#e79600',
-    trans: '#4682B4',
-    crea: '#8e57eb'
+    input:  (window.ETL_NODE_STYLE && window.ETL_NODE_STYLE.input.gear) || '#1a9a6c',
+    output: (window.ETL_NODE_STYLE && window.ETL_NODE_STYLE.output.gear) || '#b8651a',
+    trans:  (window.ETL_NODE_STYLE && window.ETL_NODE_STYLE.transform.gear) || '#4682B4',
+    crea:   (window.ETL_NODE_STYLE && window.ETL_NODE_STYLE.creator.gear) || '#2d6a4f'
 };
 
 /** Gear icons keyed by figure id — set from TableShape via registerEtlGearIcon. */
@@ -155,6 +155,9 @@ function getNodeTypeFromCanvas(canvasJson, nodeId) {
 }
 
 function getConfiguredGearColor(typeName) {
+    if (typeof etlChromeForType === 'function') {
+        return etlChromeForType(typeName).gear;
+    }
     if (!typeName) {
         return SCHEMA_GEAR_COLORS.trans;
     }
@@ -318,7 +321,7 @@ var SCHEMA_HANDLERS = {};
 (function registerSchemaHandlers() {
     var inputs = [
         'input_Indenova', 'input_Segex', 'input_Csv', 'input_Json', 'input_PadronAlbacete',
-        'input_PadronAtm', 'input_Excel', 'input_Sharepoint', 'input_Xml', 'input_Shp',
+        'input_PadronAtm', 'input_Excel', 'input_Sharepoint', 'input_Xml', 'input_Shp', 'input_Gpkg',
         'input_Oracle', 'input_SqlServer', 'input_Postgis', 'input_Kml', 'crea_Grid'
     ];
     for (var i = 0; i < inputs.length; i++) {

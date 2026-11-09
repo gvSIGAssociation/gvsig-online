@@ -13,13 +13,160 @@
 	stroke:#d7d7d7;
  }
 
-#canvas-parent {
-	height: 100%;   /* hereda los 78vh de #etl-body */
+#etl-canvas-shell {
+	height: 100%;
 	flex: 1;
 	min-width: 0;
 	position: relative;
+}
+
+#canvas-parent {
+	height: 100%;   /* hereda los 78vh de #etl-body */
+	width: 100%;
+	position: relative;
 	overflow: scroll;
 	background-color: #fff;
+}
+
+/* Pestaña de estado de ejecución: abajo-derecha, no tapa el canvas */
+#etl-run-status-dock {
+	position: absolute;
+	right: 10px;
+	left: auto;
+	bottom: 10px;
+	z-index: 40;
+	width: 300px;
+	max-width: calc(100% - 20px);
+	background: #fff;
+	border: 1px solid #cfd8df;
+	border-right: 4px solid #9aa8b5;
+	border-radius: 8px;
+	box-shadow: 0 2px 10px rgba(30, 40, 50, 0.14);
+	overflow: hidden;
+	font-size: 12px;
+	line-height: 1.3;
+	pointer-events: auto;
+}
+#etl-run-status-dock.is-idle {
+	border-right-color: #9aa8b5;
+	opacity: 0.88;
+}
+#etl-run-status-dock.is-running { border-right-color: #4a7fa5; }
+#etl-run-status-dock.is-success { border-right-color: #1a7a45; }
+#etl-run-status-dock.is-error { border-right-color: #c0392b; }
+#etl-run-status-dock.is-collapsed {
+	width: auto;
+	min-width: 0;
+	max-width: 220px;
+}
+#etl-run-status-dock__header {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	padding: 6px 8px;
+	background: #fff;
+	cursor: pointer;
+	user-select: none;
+}
+#etl-run-status-dock:not(.is-collapsed) #etl-run-status-dock__header {
+	border-bottom: 1px solid #e8ecef;
+	background: #f7f9fb;
+}
+#etl-run-status-dock__icons {
+	display: inline-flex;
+	align-items: center;
+	width: 14px;
+	justify-content: center;
+	flex-shrink: 0;
+}
+#etl-run-status-dock__icons i {
+	display: none;
+	font-size: 13px;
+}
+#etl-run-status-dock__icons .fa-check { color: #1a7a45 !important; }
+#etl-run-status-dock__icons .fa-times { color: #c0392b !important; }
+#etl-run-status-dock__icons .fa-play-circle { color: #4a7fa5 !important; }
+#etl-run-status-dock__title {
+	font-weight: 700;
+	color: #2e3a45;
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+#etl-run-status-dock__toggle {
+	border: 1px solid #d5dee5;
+	background: #fff;
+	color: #6b7a86;
+	width: 22px;
+	height: 22px;
+	border-radius: 4px;
+	padding: 0;
+	line-height: 1;
+	cursor: pointer;
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+#etl-run-status-dock__toggle:hover {
+	border-color: #4a7fa5;
+	color: #4a7fa5;
+}
+#etl-run-status-dock__body {
+	display: block;
+	padding: 8px;
+	background: #fff;
+}
+#etl-run-status-dock.is-collapsed #etl-run-status-dock__body {
+	display: none !important;
+}
+#etl-run-status-dock__progress-wrap {
+	display: none !important;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 8px;
+}
+#etl-run-status-dock__progress-wrap.is-visible {
+	display: flex !important;
+}
+#etl-run-status-dock__progress-wrap .progress {
+	flex: 1;
+	height: 10px;
+	margin: 0;
+	background: #e8eef3;
+	border-radius: 5px;
+	overflow: hidden;
+	box-shadow: none;
+}
+#etl-run-status-dock__progress-bar {
+	background-color: #4a7fa5 !important;
+	transition: width 0.35s ease;
+}
+#etl-run-status-dock__pct {
+	font-size: 11px;
+	font-weight: 600;
+	color: #667788;
+	min-width: 32px;
+	text-align: right;
+}
+#etl-run-status-dock__message {
+	margin: 0;
+	padding: 7px 8px;
+	background: #fafbfc;
+	border: 1px solid #e8ecef;
+	border-radius: 5px;
+	color: #2e3a45;
+	font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+	font-size: 11px;
+	line-height: 1.4;
+	white-space: pre-wrap;
+	word-break: break-word;
+	max-height: 88px;
+	overflow: auto;
+	user-select: text;
+	cursor: text;
 }
 
 #canvas-etl{
@@ -168,8 +315,8 @@
 
 .btn-creator {
 	color: #ffffff !important;
-	background-color: #b295e4 !important;
-	border-color: #aa87e7;
+	background-color: #5fad7e !important;
+	border-color: #4e9a6a;
 }
 
 .disabled {
@@ -251,7 +398,7 @@
   z-index: 9999 !important;
   position: absolute;
 }
-/* Botones de la paleta ETL — todos en estilo outline */
+/* Botones de la paleta ETL — estilo outline; solo tonos alineados con las cajitas */
 .pl-panel__toolbar .btn {
   border-radius: 5px;
   font-size: 12px;
@@ -265,65 +412,59 @@
   background: var(--pl-white) !important;
   transition: background var(--pl-transition), border-color var(--pl-transition), color var(--pl-transition);
 }
-/* Inputs — outline verde */
 .pl-panel__toolbar .btn-success {
-  border: 1px solid #27ae60 !important;
-  color: #27ae60 !important;
+  border: 1px solid #1a9a6c !important;
+  color: #1a9a6c !important;
 }
 .pl-panel__toolbar .btn-success:hover {
-  background: #f0faf4 !important;
-  border-color: #219a52 !important;
-  color: #219a52 !important;
+  background: #eaf8f2 !important;
+  border-color: #15855c !important;
+  color: #15855c !important;
 }
-/* Creators — outline morado */
 .pl-panel__toolbar .btn-creator {
-  border: 1px solid #8e6bbf !important;
-  color: #8e6bbf !important;
+  border: 1px solid #2d6a4f !important;
+  color: #2d6a4f !important;
 }
 .pl-panel__toolbar .btn-creator:hover {
-  background: #f5f0fb !important;
-  border-color: #7a5aad !important;
-  color: #7a5aad !important;
+  background: #eaf3ee !important;
+  border-color: #24563f !important;
+  color: #24563f !important;
 }
-/* Raster — outline rosa frambuesa (el color de los puertos ráster) */
 .pl-panel__toolbar .btn-raster {
-  border: 1px solid #c2185b !important;
-  color: #c2185b !important;
+  border: 1px solid #8f5a5c !important;
+  color: #8f5a5c !important;
 }
 .pl-panel__toolbar .btn-raster:hover {
-  background: #fce4ec !important;
-  border-color: #a0134b !important;
-  color: #a0134b !important;
+  background: #f6eeee !important;
+  border-color: #7a4c4e !important;
+  color: #7a4c4e !important;
 }
-/* Predictive — outline índigo */
 .pl-panel__toolbar .btn-predictive {
-  border: 1px solid #5c6bc0 !important;
-  color: #5c6bc0 !important;
+  border: 1px solid #5b6fa8 !important;
+  color: #5b6fa8 !important;
 }
 .pl-panel__toolbar .btn-predictive:hover {
-  background: #f1f2fa !important;
-  border-color: #3f4fa0 !important;
-  color: #3f4fa0 !important;
+  background: #eef1f7 !important;
+  border-color: #3a4a78 !important;
+  color: #3a4a78 !important;
 }
-/* Transformers — outline azul */
 .pl-panel__toolbar .btn-primary {
-  border: 1px solid var(--pl-accent) !important;
-  color: var(--pl-accent) !important;
+  border: 1px solid #4682B4 !important;
+  color: #4682B4 !important;
 }
 .pl-panel__toolbar .btn-primary:hover {
-  background: #f0f6fb !important;
-  border-color: var(--pl-accent-dk) !important;
-  color: var(--pl-accent-dk) !important;
+  background: #eef5fb !important;
+  border-color: #3a6d99 !important;
+  color: #3a6d99 !important;
 }
-/* Outputs — outline naranja */
 .pl-panel__toolbar .btn-warning {
-  border: 1px solid #e67e22 !important;
-  color: #e67e22 !important;
+  border: 1px solid #e8832a !important;
+  color: #e8832a !important;
 }
 .pl-panel__toolbar .btn-warning:hover {
   background: #fdf3e7 !important;
-  border-color: #ca6f1e !important;
-  color: #ca6f1e !important;
+  border-color: #b8651a !important;
+  color: #b8651a !important;
 }
 .pl-panel__toolbar .dropdown-item {
   font-size: 13px;
@@ -350,12 +491,18 @@
   padding: 6px 14px;
   height: 34px;
   cursor: pointer;
-  transition: background var(--pl-transition);
+  transition: background 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease, filter 0.12s ease;
   text-decoration: none !important;
   white-space: nowrap;
   letter-spacing: 0.2px;
 }
 .btn-pl-add:hover { background: var(--pl-accent-dk); }
+.btn-pl-add:active:not(:disabled):not(.disabled) {
+  background: #244d68;
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.32);
+  filter: brightness(0.92);
+}
 
 /* ---- Botón default refinado ---- */
 .btn-default {

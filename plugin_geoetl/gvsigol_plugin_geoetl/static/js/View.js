@@ -39,8 +39,25 @@ gvsigolETL.View = draw2d.Canvas.extend({
     {
     
         var type = $(droppedDomNode).data("shape");
-        
-        var figure = eval("new "+type+"();");
+        var figure = null;
+        if (typeof createEtlFigure === 'function') {
+            figure = createEtlFigure(type);
+        }
+        if (!figure) {
+            // Fallback for older nodes; prefer window[type] over eval.
+            var Ctor = window[type];
+            if (typeof Ctor === 'function') {
+                figure = new Ctor();
+            }
+        }
+        if (!figure) {
+            if (typeof messageBox !== 'undefined' && messageBox.show) {
+                messageBox.show('error', gettext('Unknown ETL node') + ': ' + type);
+            } else {
+                console.error('Unknown ETL node:', type, '- reload the page to refresh TableShape.js');
+            }
+            return;
+        }
         
         figure.addEntity("id");
         

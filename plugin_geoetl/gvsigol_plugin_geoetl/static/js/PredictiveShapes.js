@@ -24,9 +24,10 @@
 /* ------------------------------------------------------------------ */
 
 var ETL_PORT_KINDS = {
-    table: {color: null, label: 'Table'},
-    raster: {color: '#c2185b', label: 'Raster'},
-    model: {color: '#7e57c2', label: 'Model'}
+    // Todos los puertos negros salvo ráster (rosa polvo)
+    table:  {color: '#111111', label: 'Table'},
+    raster: {color: '#8f5a5c', label: 'Raster'},
+    model:  {color: '#111111', label: 'Model'}
 };
 
 /** Tipo de dato que transporta un puerto; los puertos de los nodos antiguos son tablas. */
@@ -285,6 +286,24 @@ function etlFillSelect($select, options, selected, placeholder) {
     } else {
         $select.val('');
     }
+    if ($select.data('select2')) {
+        $select.trigger('change.select2');
+    }
+}
+
+/** Select2 con búsqueda; dropdownParent evita que el modal robe el foco al escribir. */
+function etlEnableSearchSelect($select, $modal) {
+    if (!$select.length || typeof $select.select2 !== 'function') {
+        return;
+    }
+    if ($select.data('select2')) {
+        $select.select2('destroy');
+    }
+    $select.select2({
+        width: '100%',
+        allowClear: true,
+        dropdownParent: $modal && $modal.length ? $modal : $select.closest('.modal')
+    });
 }
 
 function etlSavedParams(ID) {
@@ -319,6 +338,16 @@ function etlRestricted(type) {
  *   outputSchema(inputs, params): esquema de salida (o una promesa)
  */
 function defineEtlNode(cfg) {
+    // Tuerca más oscura que la cabecera (misma familia, se distingue al configurar)
+    if (!cfg.gearColor) {
+        var chrome = (typeof etlChromeForType === 'function') ? etlChromeForType(cfg.name) : null;
+        cfg.gearColor = (chrome && chrome.gear) || cfg.headerColor;
+    }
+    if (cfg.category === 'predictive') {
+        window.ETL_PREDICTIVE_TYPES = window.ETL_PREDICTIVE_TYPES || {};
+        window.ETL_PREDICTIVE_TYPES[cfg.name] = 1;
+    }
+
     window[cfg.name] = draw2d.shape.layout.VerticalLayout.extend({
 
         NAME: cfg.name,
@@ -330,6 +359,7 @@ function defineEtlNode(cfg) {
                 text: cfg.title(),
                 stroke: 1,
                 fontColor: '#ffffff',
+                bold: true,
                 bgColor: cfg.headerColor,
                 radius: this.getRadius(),
                 padding: 10,
@@ -338,7 +368,8 @@ function defineEtlNode(cfg) {
             });
 
             var icon = new draw2d.shape.icon.Gear({
-                minWidth: 13, minHeight: 13, width: 13, height: 13, color: '#e2504c'
+                minWidth: 13, minHeight: 13, width: 13, height: 13,
+                color: (window.ETL_NODE_STYLE && window.ETL_NODE_STYLE.error) || '#C0392B'
             });
             this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8));
             this.add(this.classLabel);
@@ -355,7 +386,7 @@ function defineEtlNode(cfg) {
                     schema: cfg.defaultSchema ? cfg.defaultSchema.slice() : [], 'schema-old': []
                 }, ID);
             }
-            setColorIfIsOpened(jsonParams, this.cssClass, ID, icon);
+            setColorIfIsOpened(jsonParams, this.cssClass, ID, icon, this.classLabel);
 
             $('#canvas-parent').append(
                 '<div id="dialog-' + cfg.name + '-' + ID + '" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">' +
@@ -429,7 +460,14 @@ function defineEtlNode(cfg) {
                     if (typeof propagateSchemaFrom === 'function' && context.canvas) {
                         propagateSchemaFrom(ID, context.canvas, {skipStart: true});
                     }
-                    icon.setColor(cfg.gearColor || '#4682B4');
+                    if (typeof etlApplyConfiguredChrome === 'function') {
+                        etlApplyConfiguredChrome(icon, cfg.name, context.classLabel);
+                    } else {
+                        icon.setColor(cfg.gearColor || cfg.headerColor);
+                        if (context.classLabel && context.classLabel.setBackgroundColor) {
+                            context.classLabel.setBackgroundColor(cfg.headerColor);
+                        }
+                    }
                     $('#dialog-' + cfg.name + '-' + ID).modal('hide');
                 }).fail(function (message) {
                     etlShowError(ID, message || gettext('The node could not be configured.'));
@@ -450,13 +488,15 @@ function defineEtlNode(cfg) {
                     radius: 0,
                     bgColor: '#ffffff',
                     padding: {left: isInput ? 10 : 40, top: 3, right: 10, bottom: 5},
-                    fontColor: kind.color || '#107dac',
+                    fontColor: (def.kind === 'raster' ? '#6b3f41' : '#111111'),
                     resizeable: true
                 });
                 var port = label.createPort(isInput ? 'input' : 'output');
                 port.setName((isInput ? 'input_' : 'output_') + label.id);
                 port.etlKind = def.kind || 'table';
-                if (kind.color) {
+                if (typeof etlPaintPort === 'function') {
+                    etlPaintPort(port, port.etlKind);
+                } else if (kind.color) {
                     port.setBackgroundColor(kind.color);
                 }
                 (isInput ? inputNames : outputNames).push(port.name);
@@ -500,9 +540,9 @@ function defineEtlNode(cfg) {
 /* Definición de los nodos                                             */
 /* ------------------------------------------------------------------ */
 
-var ETL_PREDICTIVE_COLOR = '#b7a5e0';
-// Nodos de la categoría Ráster: rosa frambuesa claro, a juego con el botón y con los puertos ráster
-var ETL_RASTER_COLOR = '#f06292';
+// Predictivo = navy acero (distinto del plum de Creadores). Ráster = taupe.
+var ETL_PREDICTIVE_COLOR = (window.ETL_NODE_STYLE && window.ETL_NODE_STYLE.predictive.header) || '#5b6fa8';
+var ETL_RASTER_COLOR = (window.ETL_NODE_STYLE && window.ETL_NODE_STYLE.raster.header) || '#c9898a';
 
 /* ---------- Entrada ráster ---------- */
 
@@ -569,8 +609,8 @@ defineEtlNode({
     // Claves que devuelve collect(): las lee el catálogo del asistente (assistant/shapes.py)
     paramKeys: ['raster-file', 'band-names'],
     title: function () { return gettext('Raster (GeoTIFF)'); },
-    headerColor: '#83d0c9',
-    gearColor: '#01b0a0',
+    headerColor: (window.ETL_NODE_STYLE && window.ETL_NODE_STYLE.input.header) || '#83d0c9',
+    gearColor: (window.ETL_NODE_STYLE && window.ETL_NODE_STYLE.input.gear) || '#1a9a6c',
     inputs: [],
     outputs: [{label: function () { return gettext('Raster'); }, kind: 'raster'}],
     body: function (ID) {
@@ -642,6 +682,7 @@ defineEtlNode({
 
 defineEtlNode({
     name: 'trans_RasterSample',
+    category: 'predictive',
     // Claves que devuelve collect(): las lee el catálogo del asistente (assistant/shapes.py)
     paramKeys: ['class-attr', 'max-per-class', 'seed'],
     title: function () { return gettext('Sample Raster'); },
@@ -713,6 +754,7 @@ function etlCheckedFeatures(ID) {
 
 defineEtlNode({
     name: 'trans_RandomForest',
+    category: 'predictive',
     // Claves que devuelve collect(): las lee el catálogo del asistente (assistant/shapes.py)
     paramKeys: ['target', 'features', 'problem', 'n-estimators', 'max-depth', 'min-samples-leaf', 'test-percent', 'seed', 'validation', 'folds', 'block-size', 'max-features'],
     title: function () { return gettext('Random Forest'); },
@@ -851,6 +893,7 @@ defineEtlNode({
 
 defineEtlNode({
     name: 'trans_RasterPredict',
+    category: 'predictive',
     // Claves que devuelve collect(): las lee el catálogo del asistente (assistant/shapes.py)
     paramKeys: ['configured'],
     defaults: {configured: 'true'},
@@ -898,6 +941,7 @@ defineEtlNode({
 
 defineEtlNode({
     name: 'trans_RasterPolygonize',
+    category: 'raster',
     // Claves que devuelve collect(): las lee el catálogo del asistente (assistant/shapes.py)
     paramKeys: ['classes', 'min-area', 'simplify', 'connectivity'],
     defaults: {classes: '', 'min-area': '0', simplify: '0', connectivity: '4'},
@@ -945,6 +989,7 @@ defineEtlNode({
 
 defineEtlNode({
     name: 'trans_RasterMajority',
+    category: 'raster',
     // Claves que devuelve collect(): las lee el catálogo del asistente (assistant/shapes.py)
     paramKeys: ['mode', 'window', 'iterations', 'min-pixels', 'connectivity'],
     defaults: {mode: 'majority', window: '3', iterations: '1', 'min-pixels': '4', connectivity: '4'},
@@ -1068,6 +1113,7 @@ function etlRenderIndexBands(ID, bands, saved) {
 
 defineEtlNode({
     name: 'trans_RasterIndex',
+    category: 'raster',
     // Claves que devuelve collect(): las lee el catálogo del asistente (assistant/shapes.py)
     paramKeys: ['index', 'band-1', 'band-2', 'band-3', 'name', 'reflectance', 'scale', 'offset', 'savi-l'],
     title: function () { return gettext('Spectral Index'); },
@@ -1174,6 +1220,7 @@ defineEtlNode({
 
 defineEtlNode({
     name: 'trans_RasterClip',
+    category: 'raster',
     // Claves que devuelve collect(): las lee el catálogo del asistente (assistant/shapes.py)
     paramKeys: ['mode', 'pixel-size', 'resampling'],
     defaults: {mode: 'polygon', 'pixel-size': '', resampling: 'average'},
@@ -1218,6 +1265,7 @@ defineEtlNode({
 
 defineEtlNode({
     name: 'trans_ClassAssess',
+    category: 'predictive',
     // Claves que devuelve collect(): las lee el catálogo del asistente (assistant/shapes.py)
     paramKeys: ['class-attr'],
     title: function () { return gettext('Assess Classification'); },
@@ -1251,6 +1299,7 @@ defineEtlNode({
 
 defineEtlNode({
     name: 'trans_RasterStack',
+    category: 'raster',
     // Claves que devuelve collect(): las lee el catálogo del asistente (assistant/shapes.py)
     paramKeys: ['resampling', 'prefix-1', 'prefix-2', 'prefix-3', 'prefix-4'],
     defaults: {resampling: 'bilinear', 'prefix-1': '', 'prefix-2': '', 'prefix-3': '', 'prefix-4': ''},
@@ -1307,6 +1356,7 @@ defineEtlNode({
 
 defineEtlNode({
     name: 'trans_TablePredict',
+    category: 'predictive',
     // Claves que devuelve collect(): las lee el catálogo del asistente (assistant/shapes.py)
     paramKeys: ['column'],
     title: function () { return gettext('Predict Table'); },
@@ -1361,8 +1411,8 @@ defineEtlNode({
     // Claves que devuelve collect(): las lee el catálogo del asistente (assistant/shapes.py)
     paramKeys: ['model-name', 'description', 'on-existing'],
     title: function () { return gettext('Save Model'); },
-    headerColor: '#e8ca93',
-    gearColor: '#e79600',
+    headerColor: (window.ETL_NODE_STYLE && window.ETL_NODE_STYLE.output.header) || '#e8832a',
+    gearColor: (window.ETL_NODE_STYLE && window.ETL_NODE_STYLE.output.gear) || '#b8651a',
     inputs: [{label: function () { return gettext('Model'); }, kind: 'model'}],
     outputs: [],
     body: function (ID) {
@@ -1452,8 +1502,8 @@ defineEtlNode({
     // Claves que devuelve collect(): las lee el catálogo del asistente (assistant/shapes.py)
     paramKeys: ['model-name', 'model-version'],
     title: function () { return gettext('Saved Model'); },
-    headerColor: '#83d0c9',
-    gearColor: '#01b0a0',
+    headerColor: (window.ETL_NODE_STYLE && window.ETL_NODE_STYLE.input.header) || '#83d0c9',
+    gearColor: (window.ETL_NODE_STYLE && window.ETL_NODE_STYLE.input.gear) || '#1a9a6c',
     inputs: [],
     outputs: [{label: function () { return gettext('Model'); }, kind: 'model'}],
     body: function (ID) {
@@ -1541,6 +1591,7 @@ var ETL_AREA_COLUMNS = ['class', 'map_area', 'estimated_area', 'se_area', 'ci_lo
 
 defineEtlNode({
     name: 'trans_StratifiedSample',
+    category: 'predictive',
     // Claves que devuelve collect(): las lee el catálogo del asistente (assistant/shapes.py)
     paramKeys: ['per-class', 'seed'],
     defaults: {'per-class': '50', seed: '42'},
@@ -1576,6 +1627,7 @@ defineEtlNode({
 
 defineEtlNode({
     name: 'trans_AreaEstimate',
+    category: 'predictive',
     // Claves que devuelve collect(): las lee el catálogo del asistente (assistant/shapes.py)
     paramKeys: ['reference-attr', 'confidence-level'],
     title: function () { return gettext('Estimate Areas'); },
@@ -1628,8 +1680,8 @@ defineEtlNode({
     // Claves que devuelve collect(): las lee el catálogo del asistente (assistant/shapes.py)
     paramKeys: ['workspace', 'layer-group', 'title', 'layer-name', 'on-existing', 'public', 'update-style', 'band', 'ramp-min', 'ramp-max', 'abstract'],
     title: function () { return gettext('Publish Raster'); },
-    headerColor: '#e8ca93',
-    gearColor: '#e79600',
+    headerColor: (window.ETL_NODE_STYLE && window.ETL_NODE_STYLE.output.header) || '#e8832a',
+    gearColor: (window.ETL_NODE_STYLE && window.ETL_NODE_STYLE.output.gear) || '#b8651a',
     inputs: [{label: function () { return gettext('Raster'); }, kind: 'raster'}],
     outputs: [],
     body: function (ID) {
@@ -1675,12 +1727,16 @@ defineEtlNode({
         $('#ramp-min-' + ID).val(saved['ramp-min'] || '');
         $('#ramp-max-' + ID).val(saved['ramp-max'] || '');
         $('#abstract-' + ID).val(saved.abstract || '');
+        var $modalRaster = $('#dialog-output_RasterPublish-' + ID);
         etlFillSelect($('#workspace-' + ID), [], '', gettext('Loading…'));
         etlFillSelect($('#layer-group-' + ID), [], '', gettext('Loading…'));
+        etlEnableSearchSelect($('#workspace-' + ID), $modalRaster);
+        etlEnableSearchSelect($('#layer-group-' + ID), $modalRaster);
         etlLoadPublishTargets().done(function (data) {
             etlFillSelect($('#workspace-' + ID), data.workspaces.map(function (w) { return w.name; }), saved.workspace, gettext('Choose…'));
-            etlFillSelect($('#layer-group-' + ID), data.layer_groups.map(function (g) { return {value: g.name, text: g.title}; }),
-                saved['layer-group'], gettext('Choose…'));
+            etlFillSelect($('#layer-group-' + ID), data.layer_groups.map(function (g) {
+                return {value: g.name, text: etlLayerGroupLabel(g)};
+            }), saved['layer-group'], gettext('Choose…'));
         }).fail(function (msg) { etlShowError(ID, msg); });
     },
     collect: function (ID, inputs) {
@@ -1709,6 +1765,15 @@ defineEtlNode({
     },
     outputSchema: function () { return []; }
 });
+
+function etlLayerGroupLabel(g) {
+    var name = g.name || '';
+    var title = g.title || '';
+    if (name && title && name !== title) {
+        return name + ' — ' + title;
+    }
+    return name || title;
+}
 
 /* ---------- Publicar capa (PostGIS) ---------- */
 
@@ -1749,8 +1814,8 @@ defineEtlNode({
     // Claves que devuelve collect(): las lee el catálogo del asistente (assistant/shapes.py)
     paramKeys: ['datastore', 'layer-group', 'title', 'layer-name', 'on-existing', 'public', 'abstract'],
     title: function () { return gettext('Publish Layer'); },
-    headerColor: '#e8ca93',
-    gearColor: '#e79600',
+    headerColor: (window.ETL_NODE_STYLE && window.ETL_NODE_STYLE.output.header) || '#e8832a',
+    gearColor: (window.ETL_NODE_STYLE && window.ETL_NODE_STYLE.output.gear) || '#b8651a',
     inputs: [{label: function () { return gettext('Layer'); }}],
     outputs: [],
     body: function (ID) {
@@ -1783,8 +1848,9 @@ defineEtlNode({
             etlFillSelect($('#layer-group-' + ID), [], '', gettext('Loading…'));
             etlLoadLayerTargets(force).done(function (data) {
                 etlFillSelect($('#datastore-' + ID), data.datastores, current, gettext('Choose…'));
-                etlFillSelect($('#layer-group-' + ID), data.layer_groups.map(function (g) { return {value: g.name, text: g.title}; }),
-                    saved['layer-group'], gettext('Choose…'));
+                etlFillSelect($('#layer-group-' + ID), data.layer_groups.map(function (g) {
+                    return {value: g.name, text: etlLayerGroupLabel(g)};
+                }), saved['layer-group'], gettext('Choose…'));
             }).fail(function (msg) { etlShowError(ID, msg); });
         }
         $('#new-datastore-' + ID).off('click').on('click', function (e) {
