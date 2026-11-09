@@ -1,4 +1,4 @@
-// Tarjeta de error de ejecución: carga el EtlRunError.js REAL en jsdom con jQuery real.
+// Acciones de error en el panel de estado: carga el EtlRunError.js REAL en jsdom con jQuery real.
 //   NODE_PATH=/tmp/etl-js/node_modules node run_error.js
 const assert = require('assert');
 const fs = require('fs');
@@ -19,7 +19,8 @@ const error = (message) => ({ status: 'Error', message: message || MESSAGE });
 
 function makeEnv(opts = {}) {
     const dom = new JSDOM('<!doctype html><body><button id="button-run" title="x"></button><div id="canvas-parent"></div>' +
-        '<div id="etl-run-error" hidden></div></body>', { runScripts: 'outside-only', url: 'https://localhost/gvsigonline/etl/' });
+        '<div id="etl-run-error" hidden></div>' +
+        '<div id="etl-run-status-dock__actions" hidden></div></body>', { runScripts: 'outside-only', url: 'https://localhost/gvsigonline/etl/' });
     const w = dom.window;
     w.eval(fs.readFileSync(require.resolve('jquery/dist/jquery.js'), 'utf8'));
     w.gettext = (s) => s;
@@ -33,7 +34,7 @@ function makeEnv(opts = {}) {
     w.eval(read('EtlRunError.js'));
     return w;
 }
-const card = (w) => w.$('#etl-run-error .etl-run-error');
+const dock = (w) => w.$('#etl-run-status-dock__actions');
 
 (async () => {
     console.log('Error de ejecución');
@@ -50,94 +51,89 @@ const card = (w) => w.$('#etl-run-error .etl-run-error');
         assert.strictEqual(w.EtlRunError.parse('ERROR: Hay nodos sin configurar').detail, 'ERROR: Hay nodos sin configurar');
     });
 
-    await test('tarjeta con nodo legible, detalle y copia del mensaje completo', async () => {
+    await test('no pinta franja arriba; botones solo en el panel de estado', async () => {
         const w = makeEnv();
         w.EtlRunError.update(error());
-        assert.strictEqual(w.$('#etl-run-error').prop('hidden'), false);
-        assert.ok(/Cruce por campo \(n3\)/.test(card(w).find('.etl-run-error__node').text()));
-        assert.ok(card(w).find('pre').text().startsWith('zero-length'));
-        assert.ok(!card(w).find('pre').text().includes(ID));
-        card(w).find('.js-copy-error').trigger('click');
+        assert.strictEqual(w.$('#etl-run-error').prop('hidden'), true);
+        assert.strictEqual(w.$('#etl-run-error .etl-run-error').length, 0);
+        assert.strictEqual(dock(w).prop('hidden'), false);
+        assert.strictEqual(dock(w).find('.js-copy-error').length, 1);
+        assert.ok(/Cruce por campo \(n3\)/.test(dock(w).find('.js-focus-node').text()));
+        dock(w).find('.js-copy-error').trigger('click');
         await tick();
         assert.strictEqual(w.__copied[0], MESSAGE);
-        assert.strictEqual(card(w).find('.js-copy-error span').text(), 'Copied');
-        assert.ok(/details above the canvas/.test(w.$('#button-run').attr('title')));
+        assert.ok(/run status panel/.test(w.$('#button-run').attr('title')));
     });
 
-    await test('el nodo se centra y resalta al pulsarlo', async () => {
+    await test('el nodo se centra y resalta al pulsarlo en el panel', async () => {
         const w = makeEnv();
         w.EtlRunError.update(error());
-        card(w).find('.etl-run-error__node button').trigger('click');
+        dock(w).find('.js-focus-node').trigger('click');
         assert.strictEqual(w.__selected.etlAlias, 'n3');
         assert.strictEqual(w.__figure.glow, true);
     });
 
-    await test('no repinta en cada consulta, para no perder la selección', async () => {
+    await test('no repinta los botones en cada consulta', async () => {
         const w = makeEnv();
         w.EtlRunError.update(error());
-        const before = card(w)[0];
+        const before = dock(w).find('.js-copy-error')[0];
         w.EtlRunError.update(error());
-        assert.strictEqual(card(w)[0], before);
+        assert.strictEqual(dock(w).find('.js-copy-error')[0], before);
     });
 
-    await test('el error de otro flujo no se enseña', async () => {
+    await test('error de otro flujo: sin ir al nodo, pero sí Copiar en el panel', async () => {
         const w = makeEnv({ otherFlow: true });
         w.EtlRunError.update(error());
-        assert.strictEqual(card(w).length, 0);
-        assert.strictEqual(w.$('#button-run').attr('title'), 'x');
+        assert.strictEqual(dock(w).find('.js-focus-node').length, 0);
+        assert.strictEqual(dock(w).find('.js-copy-error').length, 1);
     });
 
-    await test('sin id de nodo se enseña tal cual', async () => {
+    await test('sin id de nodo: Copiar con el mensaje tal cual', async () => {
         const w = makeEnv();
         w.EtlRunError.update(error('ERROR: Hay nodos sin configurar.'));
-        assert.strictEqual(card(w).find('pre').text(), 'ERROR: Hay nodos sin configurar.');
-        assert.strictEqual(card(w).find('.etl-run-error__node').length, 0);
-    });
-
-    await test('Cerrar no vuelve por el mismo error; sí tras lanzar otra ejecución', async () => {
-        const w = makeEnv();
-        w.EtlRunError.update(error());
-        card(w).find('.etl-run-error__close').trigger('click');
-        assert.strictEqual(card(w).length, 0);
-        w.EtlRunError.update(error());
-        assert.strictEqual(card(w).length, 0);
-        w.EtlRunError.update(error('ERROR: otro distinto'));
-        assert.strictEqual(card(w).length, 1);
-        w.EtlRunError.update({ status: 'Running', message: '' });
-        assert.strictEqual(card(w).length, 0);
-        w.EtlRunError.update(error());
-        assert.strictEqual(card(w).length, 1);
-    });
-
-    await test('al ejecutar de nuevo se olvida el cierre, aunque no se llegue a ver Running', async () => {
-        const w = makeEnv();
-        w.EtlRunError.update(error());
-        card(w).find('.etl-run-error__close').trigger('click');
-        w.$(w.document).trigger('ready');
+        assert.strictEqual(dock(w).find('.js-focus-node').length, 0);
+        dock(w).find('.js-copy-error').trigger('click');
         await tick();
-        w.$('#button-run').trigger('click');
-        w.EtlRunError.update(error());
-        assert.strictEqual(card(w).length, 1);
+        assert.strictEqual(w.__copied[0], 'ERROR: Hay nodos sin configurar.');
     });
 
-    await test('una respuesta fallida de la consulta no toca la tarjeta', async () => {
+    await test('al pasar a Running o Success se ocultan los botones', async () => {
+        const w = makeEnv();
+        w.EtlRunError.update(error());
+        w.EtlRunError.update({ status: 'Running', message: '' });
+        assert.strictEqual(dock(w).prop('hidden'), true);
+        w.EtlRunError.update(error());
+        assert.strictEqual(dock(w).find('.js-copy-error').length, 1);
+        w.EtlRunError.update({ status: 'Success', message: 'ok' });
+        assert.strictEqual(dock(w).prop('hidden'), true);
+    });
+
+    await test('una respuesta fallida de la consulta no toca el panel', async () => {
         const w = makeEnv();
         w.EtlRunError.update(error());
         w.EtlRunError.update({ status: 500 });
-        assert.strictEqual(card(w).length, 1);
-        w.EtlRunError.update({ status: 'Success', message: 'ok' });
-        assert.strictEqual(card(w).length, 0);
+        assert.strictEqual(dock(w).find('.js-copy-error').length, 1);
     });
 
     await test('Preguntar al asistente solo si está activo, y sin ids internos', async () => {
         const off = makeEnv();
         off.EtlRunError.update(error());
-        assert.strictEqual(card(off).find('.js-ask-assistant').length, 0);
+        assert.strictEqual(dock(off).find('.js-ask-assistant').length, 0);
         const w = makeEnv({ assistant: true });
         w.EtlRunError.update(error());
-        card(w).find('.js-ask-assistant').trigger('click');
+        dock(w).find('.js-ask-assistant').trigger('click');
         assert.ok(w.__asked[0].includes('n3: zero-length'));
         assert.ok(!w.__asked[0].includes(ID));
+    });
+
+    await test('si el asistente llega después, aparece Preguntar en el panel', async () => {
+        const w = makeEnv();
+        w.EtlRunError.update(error());
+        assert.strictEqual(dock(w).find('.js-ask-assistant').length, 0);
+        w.__asked = [];
+        w.etlAssistantAsk = (t) => w.__asked.push(t);
+        w.EtlRunError.update(error());
+        assert.strictEqual(dock(w).find('.js-ask-assistant').length, 1);
     });
 
     await test('lista de workspaces: Copiar en el mensaje', async () => {
@@ -147,6 +143,15 @@ const card = (w) => w.$('#etl-run-error .etl-run-error');
         w.$('#modal-error .js-copy-error').trigger('click');
         await tick();
         assert.strictEqual(w.__copied[0], 'ERROR: uno');
+        assert.strictEqual(w.$('#modal-error .js-ask-assistant').length, 0);
+    });
+
+    await test('lista de workspaces: Preguntar si hay asistente', async () => {
+        const w = makeEnv({ assistant: true });
+        w.$('body').append('<div id="modal-error"><div class="messageBoxMsg">x</div></div>');
+        w.EtlRunError.addCopyToMessageBox('ERROR: uno');
+        w.$('#modal-error .js-ask-assistant').trigger('click');
+        assert.ok(w.__asked[0].includes('ERROR: uno'));
     });
 
     console.log('\n' + passed + ' correctos, ' + failed + ' fallidos');

@@ -54,6 +54,9 @@
 #etl-run-status-dock.is-running { border-right-color: #4a7fa5; }
 #etl-run-status-dock.is-success { border-right-color: #1a7a45; }
 #etl-run-status-dock.is-error { border-right-color: #c0392b; }
+#etl-run-status-dock.is-error:not(.is-collapsed) {
+	width: 420px;
+}
 #etl-run-status-dock.is-collapsed {
 	width: auto;
 	min-width: 0;
@@ -163,10 +166,38 @@
 	line-height: 1.4;
 	white-space: pre-wrap;
 	word-break: break-word;
-	max-height: 88px;
+	max-height: 120px;
 	overflow: auto;
 	user-select: text;
 	cursor: text;
+}
+#etl-run-status-dock__actions {
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: center;
+	gap: 4px;
+	margin-top: 8px;
+	white-space: nowrap;
+}
+#etl-run-status-dock__actions[hidden] {
+	display: none !important;
+}
+#etl-run-status-dock__actions .btn {
+	font-size: 11px;
+	padding: 2px 6px;
+	flex: 0 0 auto;
+	white-space: nowrap;
+}
+#etl-run-status-dock__actions .btn-link {
+	padding: 0 4px 0 0;
+	border: 0;
+	font-weight: 600;
+	color: #4a7fa5;
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	text-align: left;
 }
 
 #canvas-etl{

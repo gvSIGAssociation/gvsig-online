@@ -286,13 +286,20 @@ gvsigolETL.Toolbar = Class.extend({
 
 				jsonCanvas = JSON.stringify(json)
 
-				formData.append('jsonCanvas',jsonCanvas)
-				formData.append('username',username)
+				// FormData propio por ejecución: el global se reutiliza y acumula campos.
+				var runData = new FormData();
+				runData.append('jsonCanvas', jsonCanvas);
+				runData.append('username', username);
+				var etlId = ($('#etl_id').val() || '').trim();
+				if (etlId) {
+					// Liga el estado a este workspace; otras pestañas no lo verán.
+					runData.append('id_ws', etlId);
+				}
 
 				$.ajax({
 					type: 'POST',
 					url: '/gvsigonline/etl/etl_read_canvas/',
-					data: formData,
+					data: runData,
 					beforeSend:function(xhr){
 						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
 					},

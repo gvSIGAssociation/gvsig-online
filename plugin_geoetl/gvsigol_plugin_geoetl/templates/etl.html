@@ -608,6 +608,7 @@
                             <span id="etl-run-status-dock__pct">0%</span>
                         </div>
                         <pre id="etl-run-status-dock__message">{% trans "No run yet." %}</pre>
+                        <div id="etl-run-status-dock__actions" hidden></div>
                     </div>
                 </aside>
                 </div>
@@ -1168,6 +1169,9 @@
                 progress: 0
             });
         }
+        if (window.EtlRunError) {
+            EtlRunError.update(data);
+        }
     }
 
     $(document).on("click", "#etl-run-status-dock__header", function(e){
@@ -1175,8 +1179,8 @@
         e.stopPropagation();
         setEtlRunStatusDockExpanded($("#etl-run-status-dock").hasClass("is-collapsed"));
     });
-    $(document).on("mousedown", "#etl-run-status-dock__message", function(e){
-        // Permitir seleccionar/copiar el mensaje sin plegar el panel
+    $(document).on("mousedown", "#etl-run-status-dock__message, #etl-run-status-dock__actions", function(e){
+        // Permitir seleccionar/copiar el mensaje y usar los botones sin plegar el panel
         e.stopPropagation();
     });
 
@@ -1192,10 +1196,6 @@
             toggle.attr("aria-expanded", "false")
                 .find("i").removeClass("fa-chevron-down").addClass("fa-chevron-up");
         }
-        if (window.EtlRunError) {
-            EtlRunError.update(data);
-        }
-
     }
     $(document).on("click", "#etl-color-legend__header", function(e){
         e.preventDefault();
@@ -1204,13 +1204,19 @@
     });
 
     function getCurrentCanvasStatus(){
+		var statusData = {
+			"username": '{{ user.username }}',
+		};
+		// Solo el estado de ESTE workspace (o canvas sin guardar si no hay id)
+		var etlId = ($('#etl_id').val() || '').trim();
+		if (etlId) {
+			statusData.id_ws = etlId;
+		}
 		$.ajax({
 			//type: 'GET',
         	type: 'POST',
 			async: true,
-            data: {
-                "username": '{{ user.username }}',
-            },
+            data: statusData,
 		  	url: '/gvsigonline/etl/etl_current_canvas_status/',
 		  	beforeSend:function(xhr){
 		    	xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));

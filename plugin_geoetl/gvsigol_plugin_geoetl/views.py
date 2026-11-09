@@ -301,21 +301,6 @@ def etl_canvas(request):
     except:
         providers = json.dumps([])
 
-    # Usar get_or_create para evitar duplicados
-    statusModel, created = ETLstatus.objects.get_or_create(
-        name='current_canvas.' + username,
-        defaults={
-            'message': '',
-            'status': '',
-            'id_ws': None
-        }
-    )
-    if not created:
-        statusModel.message = ''
-        statusModel.status = ''
-        statusModel.id_ws = None
-        statusModel.save()
-
     try:
         lgid = request.GET['lgid']
 
@@ -372,6 +357,23 @@ def etl_canvas(request):
         if str(e) == 'ETLworkspaces matching query does not exist.':
             return redirect('etl_workspace_list')
         else:
+            # Canvas nuevo sin guardar: limpia solo el estado "current_canvas" del usuario.
+            # No tocar estados por id_ws (otras pestañas con workspaces guardados).
+            statusModel, created = ETLstatus.objects.get_or_create(
+                name='current_canvas.' + username,
+                defaults={
+                    'message': '',
+                    'status': '',
+                    'id_ws': None
+                }
+            )
+            if not created:
+                statusModel.message = ''
+                statusModel.status = ''
+                statusModel.id_ws = None
+                statusModel.celery_task_id = ''
+                statusModel.visualizer_session_id = None
+                statusModel.save()
             response = {
                 'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
                 'srs': srs_string,
@@ -957,9 +959,19 @@ def etl_workspace_add(request):
 @login_required()
 @staff_required
 def etl_current_canvas_status(request):
-    # Usar filter().first() para evitar MultipleObjectsReturned
-    statusModel = ETLstatus.objects.filter(name='current_canvas.'+request.POST['username']).first()
-    
+    # Estado del workspace abierto (id_ws) o, si es canvas sin guardar, current_canvas.user
+    id_ws = (request.POST.get('id_ws') or '').strip()
+    statusModel = None
+    if id_ws:
+        try:
+            statusModel = ETLstatus.objects.filter(id_ws=int(id_ws)).first()
+        except (TypeError, ValueError):
+            statusModel = None
+    if statusModel is None and not id_ws:
+        statusModel = ETLstatus.objects.filter(
+            name='current_canvas.' + request.POST.get('username', '')
+        ).first()
+
     if statusModel:
         statusModel = _heal_etl_status_from_celery(statusModel)
         progress, detail = _etl_progress_from_task(statusModel.celery_task_id, statusModel.status)
@@ -1060,12 +1072,25 @@ def etl_read_canvas(request):
                 concat = ws.concat
 
             else:
-
+                # Ejecución desde el editor: usa el JSON del canvas actual.
+                # Si el workspace ya está guardado, el estado va ligado a ese id_ws
+                # para no mezclar ejecuciones entre pestañas/workspaces del mismo usuario.
                 jsonCanvas = json.loads(request.POST['jsonCanvas'])
+                id_ws_raw = (request.POST.get('id_ws') or '').strip()
                 id_ws = None
                 params = None
                 concat = False
                 ws = None
+                if id_ws_raw:
+                    try:
+                        id_ws = int(id_ws_raw)
+                        ws = ETLworkspaces.objects.get(id=id_ws)
+                        if ws.parameters:
+                            params = json.loads(ws.parameters)
+                        concat = bool(ws.concat)
+                    except (TypeError, ValueError, ETLworkspaces.DoesNotExist):
+                        id_ws = None
+                        ws = None
 
             enqueue = False
             if id_ws:

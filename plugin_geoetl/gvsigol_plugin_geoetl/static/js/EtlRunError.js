@@ -1,20 +1,19 @@
 /* global gettext */
 
 /*
- * Error de la última ejecución del editor ETL, en una tarjeta legible y que se puede copiar.
- * Antes solo estaba en el tooltip del botón Ejecutar, que no se puede seleccionar.
+ * Acciones sobre el error de la última ejecución en el panel de estado (abajo a la derecha):
+ * Copiar error y, si el asistente ETL (GeoCopilot) está activo, Preguntar al asistente.
  *
- * El estado de ejecución es por usuario, no por workspace: un error con id de nodo solo se enseña
- * si ese nodo está en el canvas abierto. Mientras no esté (el canvas aún se está cargando, o el
- * error es de otro flujo) no se pinta nada y se vuelve a mirar en la siguiente consulta de estado.
+ * El mensaje del error ya lo pinta el dock (#etl-run-status-dock). Aquí solo van los botones,
+ * para no ocupar el canvas con otra franja arriba.
  */
 var EtlRunError = (function () {
-	var DISMISSED_KEY = 'etl-run-error-dismissed';
 	var PATTERN = /^\s*ERROR:\s*In\s+(\S+?)(?:\s+\(([^)]+)\))?\s+Node\.\s*([\s\S]*)$/;
 	var COPIED_MS = 2000;
 	var GLOW_MS = 2500;
 	var ASK_LIMIT = 6000;
-	var shown = null;
+	var dockMessage = null;
+	var dockAsk = null;
 
 	function t(text) {
 		return (typeof gettext === 'function') ? gettext(text) : text;
@@ -29,25 +28,6 @@ var EtlRunError = (function () {
 		return {type: match[1], id: match[2] || null, detail: match[3] || text};
 	}
 
-	function dismissed() {
-		try {
-			return sessionStorage.getItem(DISMISSED_KEY);
-		} catch (e) {
-			return null;
-		}
-	}
-
-	function setDismissed(message) {
-		try {
-			if (message === null) {
-				sessionStorage.removeItem(DISMISSED_KEY);
-			} else {
-				sessionStorage.setItem(DISMISSED_KEY, message);
-			}
-		} catch (e) {
-		}
-	}
-
 	function view() {
 		return window.etlApp && window.etlApp.view;
 	}
@@ -55,6 +35,10 @@ var EtlRunError = (function () {
 	function figureOf(id) {
 		var canvas = view();
 		return (canvas && id) ? canvas.getFigure(id) : null;
+	}
+
+	function assistantReady() {
+		return typeof window.etlAssistantAsk === 'function';
 	}
 
 	function copy(text, done) {
@@ -82,7 +66,9 @@ var EtlRunError = (function () {
 		var button = $('<button type="button"></button>').addClass(classes)
 			.append('<i class="fa fa-clipboard" aria-hidden="true"></i> ')
 			.append($('<span></span>').text(label));
-		button.on('click', function () {
+		button.on('click', function (e) {
+			e.preventDefault();
+			e.stopPropagation();
 			copy(text, function (ok) {
 				if (ok) {
 					button.find('span').text(t('Copied'));
@@ -93,6 +79,30 @@ var EtlRunError = (function () {
 			});
 		});
 		return button;
+	}
+
+	function askPrompt(parsed, figure) {
+		var where = figure && figure.etlAlias ? figure.etlAlias + ': ' : '';
+		return t('The flow failed with this error. Explain the cause and how to fix it:') + '\n' +
+			where + String(parsed.detail).slice(0, ASK_LIMIT);
+	}
+
+	function askAssistant(message, parsed, figure) {
+		if (!assistantReady()) {
+			return;
+		}
+		window.etlAssistantAsk(askPrompt(parsed, figure));
+	}
+
+	function askButton(message, parsed, figure, classes) {
+		return $('<button type="button"></button>').addClass(classes)
+			.append('<i class="fa fa-comments" aria-hidden="true"></i> ')
+			.append($('<span></span>').text(t('Ask the assistant')))
+			.on('click', function (e) {
+				e.preventDefault();
+				e.stopPropagation();
+				askAssistant(message, parsed, figure);
+			});
 	}
 
 	function focusNode(figure) {
@@ -119,92 +129,76 @@ var EtlRunError = (function () {
 		return figure.etlAlias ? label + ' (' + figure.etlAlias + ')' : label;
 	}
 
-	function hide() {
-		shown = null;
+	function clearDockActions() {
+		dockMessage = null;
+		dockAsk = null;
+		$('#etl-run-status-dock__actions').empty().prop('hidden', true);
 		$('#etl-run-error').empty().prop('hidden', true);
 	}
 
-	function askAssistant(message, parsed, figure) {
-		var where = figure && figure.etlAlias ? figure.etlAlias + ': ' : '';
-		window.etlAssistantAsk(t('The flow failed with this error. Explain the cause and how to fix it:') + '\n' +
-			where + String(parsed.detail).slice(0, ASK_LIMIT));
-	}
-
-	function render(message, parsed, figure) {
-		var card = $('<div class="etl-run-error" role="alert"></div>');
-		var close = $('<button type="button" class="etl-run-error__close"></button>').attr('aria-label', t('Close'))
-			.append('<i class="fa fa-times" aria-hidden="true"></i>');
-		close.on('click', function () {
-			setDismissed(message);
-			hide();
-		});
-		card.append($('<div class="etl-run-error__head"></div>')
-			.append('<i class="fa fa-times-circle" aria-hidden="true"></i>')
-			.append($('<strong></strong>').text(t('The run failed')))
-			.append(close));
-		if (figure) {
-			card.append($('<div class="etl-run-error__node"></div>').append($('<span></span>').text(t('Node:') + ' '))
-				.append($('<button type="button" class="btn-link"></button>').text(nodeName(figure)).on('click', function () {
-					focusNode(figure);
-				})));
-		} else if (parsed.type) {
-			card.append($('<div class="etl-run-error__node"></div>').text(t('Node:') + ' ' + parsed.type));
+	function syncDockActions(message) {
+		var $actions = $('#etl-run-status-dock__actions');
+		if (!$actions.length) {
+			return;
 		}
-		card.append($('<pre class="etl-run-error__detail" tabindex="0"></pre>').text(parsed.detail));
-		var actions = $('<div class="etl-run-error__actions"></div>')
-			.append(copyButton(message, 'btn btn-default btn-sm js-copy-error', t('Copy error')));
-		if (typeof window.etlAssistantAsk === 'function') {
-			actions.append($('<button type="button" class="btn btn-default btn-sm js-ask-assistant"></button>')
-				.text(t('Ask the assistant')).on('click', function () {
-					askAssistant(message, parsed, figure);
+		if (!message) {
+			clearDockActions();
+			return;
+		}
+		var ask = assistantReady();
+		if (dockMessage === message && dockAsk === ask) {
+			return;
+		}
+		dockMessage = message;
+		dockAsk = ask;
+		var parsed = parse(message);
+		var figure = figureOf(parsed.id);
+		$actions.empty().prop('hidden', false);
+		if (figure) {
+			$actions.append($('<button type="button" class="btn btn-link btn-sm js-focus-node"></button>')
+				.text(t('Node:') + ' ' + nodeName(figure))
+				.on('click', function (e) {
+					e.preventDefault();
+					e.stopPropagation();
+					focusNode(figure);
 				}));
 		}
-		$('#etl-run-error').empty().append(card.append(actions)).prop('hidden', false);
+		$actions.append(copyButton(message, 'btn btn-default btn-sm js-copy-error', t('Copy error')));
+		if (ask) {
+			$actions.append(askButton(message, parsed, figure, 'btn btn-default btn-sm js-ask-assistant'));
+		}
 	}
 
-	/* Se llama con la respuesta de la consulta de estado, cada 5 s: no repinta si nada cambia,
-	   para no perder el texto que el usuario esté seleccionando. */
+	/* Se llama con la respuesta de la consulta de estado. */
 	function update(data) {
 		if (!data || ['', 'Running', 'Success', 'Error'].indexOf(data.status) === -1) {
 			return;
 		}
+		// Ya no hay franja arriba: dejar el contenedor vacío por si quedó algo antiguo en caché
+		$('#etl-run-error').empty().prop('hidden', true);
+
 		if (data.status !== 'Error') {
-			if (data.status === 'Running') {
-				setDismissed(null);
-			}
-			hide();
+			clearDockActions();
 			return;
 		}
 		var message = String(data.message || '');
-		if (message === dismissed()) {
-			hide();
-			return;
-		}
-		if (message !== shown) {
-			var parsed = parse(message);
-			var figure = figureOf(parsed.id);
-			if (parsed.id && !figure) {
-				hide();
-				return;
-			}
-			render(message, parsed, figure);
-			shown = message;
-		}
-		// La tarjeta ya enseña el error: el tooltip del botón no tiene que repetirlo entero
-		$('#button-run').attr('title', t('The last run failed. See the details above the canvas.'));
+		syncDockActions(message);
+		$('#button-run').attr('title', t('The last run failed. See the details in the run status panel.'));
 	}
 
-	/* Lista de workspaces: añade Copiar al mensaje que acaba de abrir messageBox. */
+	/* Lista de workspaces / messageBox: Copiar y, si hay asistente, Preguntar. */
 	function addCopyToMessageBox(message) {
-		$('#modal-error .messageBoxMsg').append($('<div style="margin-top:10px"></div>')
-			.append(copyButton(String(message || ''), 'btn btn-default btn-xs js-copy-error', t('Copy error'))));
+		var text = String(message || '');
+		var parsed = parse(text);
+		var row = $('<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px"></div>')
+			.append(copyButton(text, 'btn btn-default btn-xs js-copy-error', t('Copy error')));
+		if (assistantReady()) {
+			row.append(askButton(text, parsed, null, 'btn btn-default btn-xs js-ask-assistant'));
+		}
+		$('#modal-error .messageBoxMsg').append(row);
 	}
 
 	function init() {
-		// Una ejecución nueva puede fallar igual antes de la siguiente consulta: que vuelva a verse
-		$('#button-run').on('click', function () {
-			setDismissed(null);
-		});
 	}
 
 	return {parse: parse, update: update, addCopyToMessageBox: addCopyToMessageBox, init: init};
