@@ -69,7 +69,11 @@
 						<div class="alert alert-warning alert-dismissible">
 							<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
 							<h4><i class="icon fa fa-warning"></i>{% trans "Warning!" %}</h4>
+							{% if is_gpkg %}
+							{% trans "Before exporting the GeoPackage check the name of the columns. Column names can not contain spaces or special characters. Select the layer to export if the file contains more than one." %}
+							{% else %}
 							{% trans "Before exporting the shapefile check the name of the columns. Column names can not contain spaces or special characters." %}
+							{% endif %}
 						</div>
 						{% endif %}
 					</div>
@@ -78,6 +82,16 @@
 				<input type="hidden" name="directory_path" value="{{file.directory}}">
 				<input type="hidden" name="file_path" value="{{file.filepath}}">
 				<input id="id_file" class="form-control" type="hidden" name="file" value="{{file.fileurl}}">
+
+				{% if is_gpkg %}
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label for="id_gpkg_layer">{% trans "GeoPackage layer" %}</label>
+						{{ form.gpkg_layer }}
+						<p class="text-muted" style="font-size: 12px; margin-top: 4px;">{% trans "Each export loads one layer from the GeoPackage into PostGIS." %}</p>
+					</div>
+				</div>
+				{% endif %}
 
 				<div class="row">
 					<div class="col-md-12 form-group">
@@ -167,6 +181,20 @@
 	$(document).ready(function () {
 		$('#table_name_select').next('.select2-container').hide();
 		var ds_options = $("#id_datastore option");
+		if ($('#id_gpkg_layer').length) {
+			$('#id_gpkg_layer').select2({ width: '100%' });
+			$('#id_gpkg_layer').on('change', function () {
+				try {
+					const params = new URLSearchParams(window.location.search);
+					params.set('gpkg_layer', $(this).val());
+					window.location.search = params.toString();
+				} catch (error) {
+					window.location.href = window.location.pathname + '?path=' + encodeURIComponent(
+						(new URLSearchParams(window.location.search)).get('path') || ''
+					) + '&gpkg_layer=' + encodeURIComponent($(this).val());
+				}
+			});
+		}
 		function setTruncate() {
 			if ($('#id_mode').val() == 'OW') {
 				$('#id_truncate').prop('disabled', false);

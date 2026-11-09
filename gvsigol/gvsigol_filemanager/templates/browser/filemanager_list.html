@@ -80,6 +80,8 @@
 							<td><a href="{{download_url}}"><img width="24" src="{% static "img/shp.png" %}" style="margin-right: 5px; vertical-align: middle;">{{file.filename}}</a></td>
 						{% elif file.extension|lower == "dbf" %}
 							<td><a href="{{download_url}}"><img width="24" src="{% static "img/dbf.png" %}" style="margin-right: 5px; vertical-align: middle;">{{file.filename}}</a></td>
+						{% elif file.extension|lower == "gpkg" %}
+							<td><a href="{{download_url}}"><img width="24" src="{% static "img/file.png" %}" style="margin-right: 5px; vertical-align: middle;">{{file.filename}}</a></td>
 						{% elif file.extension|lower == "tif" or file.extension|lower == "tiff" or file.extension|lower == "geotiff" %}
 							<td><a href="{{download_url}}"><img width="24" src="{% static "img/tiff.png" %}" style="margin-right: 5px; vertical-align: middle;">{{file.filename}}</a></td>
 						{% elif file.extension|lower == "xlsx" or file.extension|lower == "xls" or file.extension|lower == "csv" %}
@@ -103,7 +105,7 @@
 								{% if file.filetype == "Directory" %}
 									<li><a href="#" data-filepath="{{file.filepath}}" class="delete-file"><i class="fa fa-times" style="color: #e74c3c;"></i> {% trans "Delete directory" %}</a></li>
 								{% else %}
-									{% if file.extension|lower == "shp" or file.extension|lower == "dbf" %}
+									{% if file.extension|lower == "shp" or file.extension|lower == "dbf" or file.extension|lower == "gpkg" %}
 										<li><a href="{% url 'filemanager:export-to-database' %}?path={{file.filepath}}" class="export-to-database"><i class="fa fa-upload" style="color: #3c8dbc;"></i> {% trans "Export to database" %}</a></li>
 										<li class="divider"></li>
 									{% endif %}

@@ -204,7 +204,7 @@ def _append_overwrite_fieldmapping(creation_mode, shp_fields, table_name, host, 
             fields.append(quote_identifier_ogr(shp_field_def.name))
     return fields, db_pk
 
-def fieldmapping_sql(creation_mode, shp_path, shp_fields, table_name, host, port, db, schema, user, password, default_creation_options, default_column_types, pk_column):
+def fieldmapping_sql(creation_mode, shp_path, shp_fields, table_name, host, port, db, schema, user, password, default_creation_options, default_column_types, pk_column, source_layer_name=None):
     if creation_mode == MODE_CREATE:
         if not pk_column:
             db_pk = 'ogc_fid'
@@ -219,16 +219,20 @@ def fieldmapping_sql(creation_mode, shp_path, shp_fields, table_name, host, port
         #   fields = _append_overwrite_fieldmapping(creation_mode, shp_fields, table_name, host, port, db, schema, user, password, default_creation_options, default_column_types)
         fields, db_pk = _append_overwrite_fieldmapping(creation_mode, shp_fields, table_name, host, port, db, schema, user, password, default_creation_options, default_column_types, pk_column)
     
-    shp_name = os.path.splitext(os.path.basename(shp_path))[0]
-    sql = "SELECT " + ",".join(fields) + " FROM " + shp_name
+    if source_layer_name:
+        from_clause = quote_identifier_ogr(source_layer_name)
+    else:
+        from_clause = os.path.splitext(os.path.basename(shp_path))[0]
+    sql = "SELECT " + ",".join(fields) + " FROM " + from_clause
     return sql, db_pk
 
-def create_vrt_shp(shp_path, target_folder, pk_column, encoding, srs):
+def create_vrt_shp(shp_path, target_folder, pk_column, encoding, srs, source_layer_name=None):
     lyr_basename = os.path.basename(shp_path)
-    lyr_name = os.path.splitext(lyr_basename)[0]
+    lyr_name = source_layer_name or os.path.splitext(lyr_basename)[0]
+    vrt_layer_name = re.sub(r'[^\w\-]', '_', lyr_name) or 'layer'
     root = ET.Element('OGRVRTDataSource')
     lyr = ET.SubElement(root, 'OGRVRTLayer', attrib={
-        "name": lyr_name
+        "name": vrt_layer_name
     })
     src_ds = ET.SubElement(lyr, 'SrcDataSource')
     src_ds.text = shp_path
@@ -244,7 +248,7 @@ def create_vrt_shp(shp_path, target_folder, pk_column, encoding, srs):
     fid = ET.SubElement(lyr, 'FID')
     fid.text = pk_column
     tree = ElementTree(root)
-    vrt_path = os.path.join(target_folder, lyr_name + ".vrt")
+    vrt_path = os.path.join(target_folder, vrt_layer_name + ".vrt")
     with open(vrt_path, 'wb') as f:
         tree.write(f, encoding='utf-8')
     return vrt_path
@@ -449,4 +453,212 @@ def do_export_to_postgis(gs, name, datastore, creation_mode, shp_path, shp_field
                 pass
     raise rest_geoserver.RequestWarning(stderr)
 
+
+class SimpleFieldDef(object):
+    """Minimal DBF-like field definition for GPKG / OGR sources."""
+    def __init__(self, name, type_code='C', length=0, decimal_count=0):
+        self.name = name
+        self.type = type_code
+        self.length = length
+        self.decimal_count = decimal_count
+
+
+def list_gpkg_layers(gpkg_path):
+    """Return layer names inside a GeoPackage."""
+    gpkg_path = os.path.abspath(gpkg_path)
+    try:
+        from gvsigol_core.project_package.gdal_io import list_gpkg_layers as _list_gpkg_layers
+        layers = _list_gpkg_layers(gpkg_path)
+        if layers:
+            return layers
+    except Exception:
+        logger.exception('list_gpkg_layers via gdal_io failed, falling back to DataSource')
+    try:
+        from django.contrib.gis.gdal import DataSource
+        ds = DataSource(gpkg_path)
+        return [lyr.name for lyr in ds]
+    except Exception:
+        logger.exception('list_gpkg_layers via DataSource failed')
+        return []
+
+
+def get_fields_from_gpkg(gpkg_path, layer_name=None):
+    """Return SimpleFieldDef list for a GeoPackage layer (attribute fields only)."""
+    from django.contrib.gis.gdal import DataSource
+    try:
+        from django.contrib.gis.gdal.field import OFTInteger, OFTInteger64, OFTReal
+    except ImportError:
+        OFTInteger = type('OFTInteger', (), {})
+        OFTInteger64 = type('OFTInteger64', (), {})
+        OFTReal = type('OFTReal', (), {})
+
+    gpkg_path = os.path.abspath(gpkg_path)
+    ds = DataSource(gpkg_path)
+    layer = None
+    if layer_name:
+        for lyr in ds:
+            if lyr.name == layer_name:
+                layer = lyr
+                break
+    if layer is None:
+        if len(ds) < 1:
+            raise InvalidValue(-1, _("GeoPackage has no layers"))
+        layer = ds[0]
+
+    fields = []
+    for i, fname in enumerate(layer.fields):
+        ftype = layer.field_types[i]
+        try:
+            width = layer.field_widths[i]
+        except Exception:
+            width = 0
+        try:
+            precision = layer.field_precisions[i]
+        except Exception:
+            precision = 0
+
+        if ftype == OFTInteger or getattr(ftype, '__name__', '') == 'OFTInteger':
+            fields.append(SimpleFieldDef(fname, 'N', length=max(width, 10), decimal_count=0))
+        elif ftype == OFTInteger64 or getattr(ftype, '__name__', '') == 'OFTInteger64':
+            fields.append(SimpleFieldDef(fname, 'N', length=max(width, 19), decimal_count=0))
+        elif ftype == OFTReal or getattr(ftype, '__name__', '') == 'OFTReal':
+            fields.append(SimpleFieldDef(fname, 'N', length=max(width, 20), decimal_count=max(precision, 1)))
+        else:
+            fields.append(SimpleFieldDef(fname, 'C', length=width or 254, decimal_count=0))
+    return fields
+
+
+def do_export_gpkg_to_postgis(gs, name, datastore, creation_mode, gpkg_path, gpkg_layer, gpkg_fields, srs, encoding, pk_column=None, preserve_pk=None, truncate=None):
+    """Export one GeoPackage layer to PostGIS with the same semantics as shapefile export."""
+    tmp_folder = None
+    db_pk = pk_column or 'ogc_fid'
+    try:
+        tmp_folder = get_tmp_folder()
+        ds_params = json.loads(datastore.connection_params)
+        db = ds_params.get('database')
+        host = ds_params.get('host')
+        port = ds_params.get('port')
+        schema = ds_params.get('schema', "public")
+        port = str(int(port))
+        user = ds_params.get('user')
+        password = ds_params.get('passwd')
+        if _valid_sql_name_regex.search(name) is None:
+            raise InvalidValue(-1, _("Invalid layer name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name))
+        if not gpkg_layer:
+            raise InvalidValue(-1, _("A GeoPackage layer name is required"))
+
+        creation_options = {}
+        column_types = {}
+        check_field_names(gpkg_fields)
+        if encoding == 'autodetect':
+            encoding = 'UTF-8'
+
+        src_path = create_symlinks(gpkg_path, tmp_folder) or gpkg_path
+        sql, db_pk = fieldmapping_sql(
+            creation_mode, src_path, gpkg_fields, name, host, port, db, schema, user, password,
+            creation_options, column_types, pk_column, source_layer_name=gpkg_layer
+        )
+        config_options = {}
+        if creation_mode == MODE_OVERWRITE and truncate:
+            config_options["OGR_TRUNCATE"] = "YES"
+        if preserve_pk:
+            if creation_mode == MODE_APPEND or (creation_mode == MODE_OVERWRITE and truncate):
+                preserve_fid = True
+                src_path = create_vrt_shp(src_path, tmp_folder, db_pk, encoding, srs, source_layer_name=gpkg_layer)
+                vrt_layer = os.path.splitext(os.path.basename(src_path))[0]
+                creation_options = {}
+                column_types = {}
+                sql, db_pk = fieldmapping_sql(
+                    creation_mode, src_path, gpkg_fields, name, host, port, db, schema, user, password,
+                    creation_options, column_types, pk_column, source_layer_name=vrt_layer
+                )
+            else:
+                preserve_fid = False
+        else:
+            if creation_mode == MODE_APPEND:
+                preserve_fid = False
+            else:
+                preserve_fid = True
+
+        creation_options['COLUMN_TYPES'] = ",".join(list(column_types.values()))
+        stderr = shp2postgis(
+            src_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding,
+            sql=sql, preserve_fid=preserve_fid, creation_options=creation_options, config_options=config_options
+        )
+        if stderr.startswith("ERROR"):
+            raise rest_geoserver.RequestError(-1, stderr)
+        with Introspect(db, host=host, port=port, user=user, password=password) as i:
+            db_fields = i.get_fields(name, schema=schema)
+            for control_field in settings.CONTROL_FIELDS:
+                has_control_field = False
+                for field in db_fields:
+                    if field == control_field['name']:
+                        try:
+                            i.set_field_default(schema, name, control_field['name'], control_field.get('default'))
+                        except Exception:
+                            logger.exception("Error setting default value for control field: " + control_field['name'])
+                        has_control_field = True
+                if not has_control_field:
+                    try:
+                        i.add_column(schema, name, control_field['name'], control_field['type'], nullable=control_field.get('nullable', True), default=control_field.get('default'))
+                    except Exception:
+                        logger.exception("Error adding control field: " + control_field['name'])
+            i.update_pk_sequences(name, schema=schema)
+
+        if creation_mode == MODE_OVERWRITE:
+            for trigger in Trigger.objects.filter(layer__datastore=datastore, layer__source_name=name):
+                try:
+                    trigger.drop()
+                    trigger.install()
+                except Exception:
+                    logger.exception("Failed to install trigger: " + str(trigger))
+
+        for layer in Layer.objects.filter(datastore=datastore, source_name=name):
+            gs.reload_featuretype(layer)
+            expose_pks = gs.datastore_check_exposed_pks(datastore)
+            layer.get_config_manager().refresh_field_conf(include_pks=expose_pks)
+            layer.save()
+        if not stderr:
+            return True
+    except rest_geoserver.RequestError as e:
+        logger.exception(e)
+        raise
+    except gdaltools.GdalToolsError as e:
+        logger.exception(str(e))
+        if e.code > 0:
+            if creation_mode == MODE_OVERWRITE:
+                params = json.loads(datastore.connection_params)
+                host = params['host']
+                port = params['port']
+                dbname = params['database']
+                user = params['user']
+                passwd = params['passwd']
+                schema = params.get('schema', 'public')
+                i = Introspect(database=dbname, host=host, port=port, user=user, password=passwd)
+                i.delete_table(schema, name)
+                i.close()
+                try:
+                    stderr = shp2postgis(gpkg_path, name, srs, host, port, dbname, schema, user, passwd, creation_mode, encoding)
+                    if stderr:
+                        raise rest_geoserver.RequestError(-1, stderr)
+                    return True
+                except gdaltools.GdalToolsError as e2:
+                    raise rest_geoserver.RequestError(e2.code, str(e2))
+            elif hasattr(e, 'message') and e.message and (
+                b'pkey' in e.message or b'duplicate key' in e.message or b'lave duplicada' in e.message
+            ):
+                msg = _("The export has failed because it would create duplicate values in the {pkfield} field, which does not allow duplicate values. Consider correcting the data or read the User Manual for the option 'Do not preserve primary key'. Details: {details}").format(pkfield=db_pk, details=str(e))
+                raise rest_geoserver.RequestError(e.code, msg)
+        raise rest_geoserver.RequestError(getattr(e, 'code', -1), str(e))
+    except Exception as e:
+        logger.exception(str(e))
+        message = _("Error uploading the layer. Review the file format. Cause: ") + str(e)
+        raise rest_geoserver.RequestError(-1, message)
+    finally:
+        if tmp_folder:
+            try:
+                shutil.rmtree(tmp_folder)
+            except Exception:
+                pass
+    raise rest_geoserver.RequestWarning(stderr)
 

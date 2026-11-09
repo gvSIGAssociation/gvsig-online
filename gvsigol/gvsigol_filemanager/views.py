@@ -32,8 +32,8 @@ from django.utils.decorators import method_decorator
 from django.shortcuts import render
 from .tasks import postBackground
 from .models import exports_historical
-from gvsigol.celery import app as celery_app
-from gvsigol_services.shp2postgis import get_fields_from_shape
+from celery.result import AsyncResult
+from gvsigol_services.shp2postgis import get_fields_from_shape, get_fields_from_gpkg, list_gpkg_layers
 from gvsigol_plugin_baseapi.validation import Validation, HttpException
 import re
 
@@ -41,6 +41,57 @@ logger = logging.getLogger("gvsigol")
 ABS_FILEMANAGER_DIRECTORY = os.path.abspath(FILEMANAGER_DIRECTORY)
 SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
 _valid_name_regex=re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
+_CELERY_RUNNING_STATES = frozenset({
+    'PENDING', 'RECEIVED', 'STARTED', 'RETRY', 'PROCESSING', 'PROGRESS',
+})
+_LEGACY_LOST_MESSAGES = frozenset({
+    'Exportation task has been lost',
+})
+
+
+def _export_lost_message():
+    return str(_("The export task was lost or the worker did not respond"))
+
+
+def _resolve_export_progress(ex):
+    """
+    Resolve Running export status from Celery AsyncResult instead of fragile inspect().
+    Returns (status, message, progress, persist_error).
+    """
+    lost_msg = _export_lost_message()
+    if not ex.task_id:
+        return 'Error', lost_msg, 0, True
+
+    result = AsyncResult(ex.task_id)
+    state = result.state
+    info = result.info if isinstance(result.info, dict) else {}
+    progress = info.get('progress', 0) or 0
+    detail = info.get('status') or ''
+
+    if state in _CELERY_RUNNING_STATES:
+        return 'Running', detail or _('Running'), progress, False
+
+    if state == 'SUCCESS':
+        ex.refresh_from_db()
+        if ex.status == 'Running':
+            return 'Running', _('Finalizing...'), max(progress, 95), False
+        return ex.status, ex.message, 100, False
+
+    if state in ('FAILURE', 'REVOKED'):
+        err = _('Export task failed')
+        if isinstance(result.info, Exception):
+            err = str(result.info)
+        elif isinstance(result.info, dict):
+            err = result.info.get('error') or result.info.get('status') or err
+        elif result.info:
+            err = str(result.info)
+        return 'Error', err, 0, True
+
+    # Unknown / expired result backend entry: keep Running if DB says so,
+    # only mark lost when previously flagged as lost with no recoverable state.
+    if ex.message in _LEGACY_LOST_MESSAGES or ex.message == lost_msg:
+        return 'Error', lost_msg, 0, True
+    return 'Running', detail or _('Running'), progress, False
 
 def can_manage_path(request, path):
     if path is not None:
@@ -134,15 +185,33 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
 
     def get_context_data(self, **kwargs):
         context = super(ExportToDatabaseView, self).get_context_data(**kwargs)
-        
+
         file_details = self.fm.file_details()
+        fileurl = file_details.get('fileurl') or ''
+        filepath = file_details.get('filepath') or ''
+        is_gpkg = filepath.lower().endswith('.gpkg') or fileurl.lower().endswith('.gpkg')
         column_name_error = None
+        gpkg_layers = []
+        selected_gpkg_layer = self.request.GET.get('gpkg_layer') or ''
+        source_columns = []
+
         try:
-            shp_def = get_fields_from_shape(file_details.get('fileurl'))
-            shp_columns = [col.name for col in shp_def]
+            if is_gpkg:
+                gpkg_layers = list_gpkg_layers(fileurl)
+                if not gpkg_layers:
+                    column_name_error = _("Could not read layers inside the GeoPackage.")
+                else:
+                    if selected_gpkg_layer not in gpkg_layers:
+                        selected_gpkg_layer = gpkg_layers[0]
+                    field_defs = get_fields_from_gpkg(fileurl, selected_gpkg_layer)
+                    source_columns = [col.name for col in field_defs]
+            else:
+                field_defs = get_fields_from_shape(fileurl)
+                source_columns = [col.name for col in field_defs]
+
             offending_fields = []
-            for name in shp_columns:
-                if _valid_name_regex.search(name) == None:
+            for name in source_columns:
+                if _valid_name_regex.search(name) is None:
                     offending_fields.append(name)
             if len(offending_fields) > 0:
                 column_name_error = ngettext(
@@ -150,11 +219,29 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
                         "Fields [{}] contain non-ASCII characters in field name and are not suported. Rename these fields and try again. Allowed characters are a-z, A-Z, _ or numbers; the first character can't be a number.",
                         len(offending_fields)).format(", ".join(offending_fields))
         except UnicodeError:
-            shp_columns = []
+            source_columns = []
             column_name_error = _("The layer contains non-ASCII characters in field names and it is not suported. Rename the offending fields and try again. Allowed characters are a-z, A-Z, _ or numbers; the first character can't be a number.")
-        form = PostgisLayerUploadForm(user=self.request.user, source_columns=shp_columns, request=self.request)
+        except Exception as exc:
+            logger.exception(exc)
+            source_columns = []
+            if not column_name_error:
+                column_name_error = _("Could not read the file. Review the format and try again.")
+
+        form = PostgisLayerUploadForm(
+            user=self.request.user,
+            source_columns=source_columns,
+            request=self.request,
+            gpkg_layers=gpkg_layers,
+            selected_gpkg_layer=selected_gpkg_layer,
+            is_gpkg=is_gpkg,
+        )
+        if is_gpkg and selected_gpkg_layer and 'encoding' in form.fields:
+            form.fields['encoding'].initial = 'UTF-8'
         context['file'] = file_details
         context['form'] = form
+        context['is_gpkg'] = is_gpkg
+        context['gpkg_layers'] = gpkg_layers
+        context['selected_gpkg_layer'] = selected_gpkg_layer
         context["back_url"] = '%s?path=%s' % (reverse_lazy('filemanager:browser'), file_details.get('directory'))
         if column_name_error:
             context["not_supported_error"] = column_name_error
@@ -176,19 +263,27 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
                 i+=1
 
         e = datetime.now()
+        file_path = request.POST.get('file_path') or ''
         export_md = exports_historical(
             time = "%s-%s-%s %s:%s:%s" % (e.day, e.month, e.year, e.hour, e.minute, e.second),
-            file = request.POST.get('file_path'),
+            file = file_path,
             status = 'Running',
-            message = 'Running',
+            message = str(_('Running')),
             username = request.user.username,
-            redirect = "/gvsigonline/filemanager/export_to_database/?path=" + request.POST.get('file_path')
+            redirect = "/gvsigonline/filemanager/export_to_database/?path=" + file_path
         )
 
         export_md.save()
 
         try:
-            postBackground.apply_async(kwargs = {'id': export_md.id, 'post': request.POST, 'files': request.FILES, 'username': request.user.username})
+            async_result = postBackground.apply_async(kwargs={
+                'id': export_md.id,
+                'post': request.POST,
+                'files': request.FILES,
+                'username': request.user.username,
+            })
+            export_md.task_id = str(async_result.id)
+            export_md.save(update_fields=['task_id'])
             return redirect('/gvsigonline/filemanager/list_exports/')
         
         except Exception as e:
@@ -205,73 +300,48 @@ def list_exports(request):
     exports_model = exports_historical.objects.order_by('-id')
 
     exportations = []
-
-    i = celery_app.control.inspect()
-
-    actives = i.active()
-
-    actives_list = []
-
-    if actives:
-        key = list(actives.keys())[0]
-        if len(actives[key]) > 0:
-
-            for act in actives[key]:
-                if act['name'] == 'gvsigol_filemanager.tasks.postBackground':
-                    actives_list.append(act['id'])
+    lost_msg = _export_lost_message()
 
     for ex in exports_model:
-        export = {}
-        export['id'] = ex.id
-        export['file'] = ex.file
-        export['time'] = ex.time
-        
-        if ex.status == 'Running' or ex.message == 'Exportation task has been lost':
+        export = {
+            'id': ex.id,
+            'file': ex.file,
+            'time': ex.time,
+            'redirect': ex.redirect,
+            'username': ex.username,
+            'progress': 0,
+        }
 
-            if ex.task_id:
+        is_running_like = (
+            ex.status == 'Running'
+            or ex.message in _LEGACY_LOST_MESSAGES
+            or ex.message == lost_msg
+        )
 
-                if ex.task_id not in actives_list:
-                    export['status'] = 'Error'
-                    export['message'] = 'Exportation task has been lost'
-
-                    ex.status = 'Error'
-                    ex.message = 'Exportation task has been lost'
-                    ex.save()
-
-                elif ex.message == 'Exportation task has been lost' or ex.message == 'Running again':
-
-                    export['status'] = 'Running'
-                    export['message'] = 'Running again'
-
-                    ex.status = 'Running'
-                    ex.message = 'Running again'
-                    ex.save()
-
-                else:
-
-                    export['status'] = 'Running'
-                    export['message'] = 'Running'
-
-                    ex.status = 'Running'
-                    ex.message = 'Running'
-                    ex.save()
-
-            else:
-                export['status'] = 'Error'
-                export['message'] = 'Exportation task has been lost'
+        if is_running_like:
+            status, message, progress, persist_error = _resolve_export_progress(ex)
+            export['status'] = status
+            export['message'] = message
+            export['progress'] = progress
+            if persist_error and (ex.status != 'Error' or ex.message != message):
                 ex.status = 'Error'
-                ex.message = 'Exportation task has been lost'
-                ex.save()
-
+                ex.message = message
+                ex.save(update_fields=['status', 'message'])
+            elif status == 'Running' and (
+                ex.status != 'Running'
+                or ex.message in _LEGACY_LOST_MESSAGES
+                or ex.message == lost_msg
+            ):
+                ex.status = 'Running'
+                ex.message = str(_('Running'))
+                ex.save(update_fields=['status', 'message'])
         else:
-        
             export['status'] = ex.status
             export['message'] = ex.message
-        
-        export['redirect'] = ex.redirect
-        export['username'] = ex.username
-        
-        if '/' in ex.file:
+            if ex.status in ('Success', 'Warning'):
+                export['progress'] = 100
+
+        if '/' in (ex.file or ''):
             export['back'] = '/'.join(ex.file.split('/')[:-1])
         else:
             export['back'] = ''

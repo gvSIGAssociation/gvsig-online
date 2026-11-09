@@ -112,13 +112,17 @@ class PostgisLayerUploadForm(forms.Form):
     publish = forms.BooleanField(label=_('Publish layer after export'), required=False, initial=False, widget=forms.CheckboxInput())
     title = forms.CharField(label=_('Title'), required=False, max_length=150, widget=forms.TextInput(attrs={'class' : 'form-control'}))
     layer_group = forms.ModelChoiceField(label=_('Layer group'), required=False, queryset=LayerGroup.objects.none(), widget=forms.Select(attrs={'class' : 'form-control js-example-basic-single'}))
+    gpkg_layer = forms.ChoiceField(label=_('GeoPackage layer'), required=False, choices=[], widget=forms.Select(attrs={'class':'form-control js-example-basic-single'}))
     
     def __init__(self, *args, **kwargs):
         request = kwargs.pop('request', None)
         user = kwargs.pop('user', None)
         if user is None and request is not None:
             user = request.user
-        source_columns = kwargs.pop('source_columns', [])
+        source_columns = list(kwargs.pop('source_columns', []) or [])
+        gpkg_layers = kwargs.pop('gpkg_layers', None) or []
+        selected_gpkg_layer = kwargs.pop('selected_gpkg_layer', '') or ''
+        is_gpkg = kwargs.pop('is_gpkg', False)
         if 'ogc_fid' in source_columns:
             pk_column = 'ogc_fid'
         else:
@@ -127,6 +131,7 @@ class PostgisLayerUploadForm(forms.Form):
         pk_column_choices = [(col, col) for col in source_columns]
         super(PostgisLayerUploadForm, self).__init__(*args, **kwargs)
         self._user = user
+        self._is_gpkg = is_gpkg
         if user is not None and user.is_superuser:
             qs = Datastore.objects.filter(type="v_PostGIS").order_by('name')
         elif user is not None:
@@ -161,6 +166,16 @@ class PostgisLayerUploadForm(forms.Form):
             queryset=self._layergroups_queryset(request, user),
             widget=forms.Select(attrs={'class':'form-control js-example-basic-single'})
         )
+        gpkg_choices = [(lyr, lyr) for lyr in gpkg_layers]
+        self.fields["gpkg_layer"] = forms.ChoiceField(
+            label=_('GeoPackage layer'),
+            required=is_gpkg,
+            choices=gpkg_choices,
+            initial=selected_gpkg_layer if selected_gpkg_layer in gpkg_layers else (gpkg_layers[0] if gpkg_layers else ''),
+            widget=forms.Select(attrs={'class':'form-control js-example-basic-single'})
+        )
+        if not is_gpkg:
+            self.fields["gpkg_layer"].required = False
 
     def _layergroups_queryset(self, request, user):
         if request is not None:
@@ -180,6 +195,8 @@ class PostgisLayerUploadForm(forms.Form):
     
     def clean(self):
         cleaned_data = super(PostgisLayerUploadForm, self).clean()
+        if getattr(self, '_is_gpkg', False) and not cleaned_data.get('gpkg_layer'):
+            self.add_error('gpkg_layer', _('This field is required for GeoPackage exports.'))
         publish = cleaned_data.get('publish')
         if publish:
             title = cleaned_data.get('title')

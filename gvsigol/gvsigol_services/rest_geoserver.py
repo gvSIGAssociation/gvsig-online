@@ -643,6 +643,8 @@ class Geoserver():
                     layer["href"] = self.service_url + '/layers/' + l.name + '.json'
                     layers.append(layer)
 
+            # GeoServer exige un estilo por publishable; sin "styles" falla con
+            # NPE ("styles" is null). "" = estilo por defecto de cada capa.
             data = {
                 "layerGroup": {
                     "name": lg_name,
@@ -650,6 +652,9 @@ class Geoserver():
                     "title": lg_title,
                     "publishables": {
                         "published": layers
+                    },
+                    "styles": {
+                        "style": [""] * len(layers)
                     }
                 }
             }
@@ -704,7 +709,10 @@ class Geoserver():
                         "title": group.name,
                         "publishables": {
                             "published": layers
-                            }
+                        },
+                        "styles": {
+                            "style": [""] * len(layers)
+                        }
                     }
                 }
                 r = self.session.post(self.service_url + "/layergroups/", json=data, auth=auth)

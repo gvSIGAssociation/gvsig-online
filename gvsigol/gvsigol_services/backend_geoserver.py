@@ -62,7 +62,10 @@ from . import geographic_servers
 from requests.exceptions import RetryError, ConnectionError, Timeout, TooManyRedirects
 import psycopg2.errors
 from urllib.parse import urlparse, ParseResult
-from .shp2postgis import _valid_sql_name_regex, shp2postgis, do_export_to_postgis, get_fields_from_shape
+from .shp2postgis import (
+    _valid_sql_name_regex, shp2postgis, do_export_to_postgis, do_export_gpkg_to_postgis,
+    get_fields_from_shape, get_fields_from_gpkg,
+)
 from .exceptions import UnsupportedRequestError, BadFormat, WrongElevationPattern, WrongTimePattern, InvalidValue, UserInputError
 import importlib
 from gvsigol_services.authorization import PlainAuthorizationService, get_authz_servers, get_authz_server_for_layer
@@ -1487,6 +1490,44 @@ class Geoserver():
             raise rest_geoserver.RequestError(server_message=msg)
 
         return do_export_to_postgis(self, name, ds, creation_mode, shp_path, fields, srs, encoding, pk_column, preserve_pk, truncate)
+
+    def exportGpkgToPostgis(self, form_data):
+        name = form_data['name']
+        ds = form_data['datastore']
+        gpkg_path = form_data['file']
+        gpkg_layer = form_data.get('gpkg_layer')
+        pk_column = form_data.get('pk_column')
+        preserve_pk = (form_data.get('preserve_pk') != forms_geoserver.DO_NOT_PRESERVE_PK)
+        truncate = (form_data.get('truncate') == forms_geoserver.PRESERVE_TABLE)
+
+        if not gpkg_layer:
+            raise InvalidValue(-1, _("A GeoPackage layer name is required"))
+
+        fields = get_fields_from_gpkg(gpkg_path, gpkg_layer)
+        for field in fields:
+            if ' ' in field.name:
+                raise InvalidValue(-1, _("Invalid layer fields: '{value}'. Layer can't have fields with whitespaces").format(value=field.name))
+
+        if _valid_sql_name_regex.search(name) is None:
+            raise InvalidValue(-1, _("Invalid layer name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name))
+
+        name = name.lower()
+        srs = form_data.get('srs')
+        encoding = form_data.get('encoding') or 'UTF-8'
+        creation_mode = form_data.get('mode')
+        if encoding != 'autodetect' and encoding not in self.supported_encodings_plain:
+            msg = _("Error uploading the layer. Review the file format. Cause: ") + "Unsupported encoding"
+            logger.error(msg)
+            raise rest_geoserver.RequestError(server_message="Unsupported encoding")
+        if not srs in self.supported_srs_plain:
+            msg = _("Error uploading the layer. Review the file format. Cause: ") + "Unsupported SRS"
+            logger.error(msg)
+            raise rest_geoserver.RequestError(server_message=msg)
+
+        return do_export_gpkg_to_postgis(
+            self, name, ds, creation_mode, gpkg_path, gpkg_layer, fields, srs, encoding,
+            pk_column, preserve_pk, truncate
+        )
 
     
     def shpdir2postgis(self, request, datastore, application, dir_path, layergroup, table_definition,creation_mode, defaults):

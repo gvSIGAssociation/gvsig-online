@@ -69,66 +69,115 @@ def _finalize_export_status(export, post, export_message, publish_requested, use
         export.save()
 
 
-@celery_app.task
-def postBackground(**kwargs):
+def _set_progress(task, progress, status):
+    try:
+        task.update_state(state='PROCESSING', meta={'status': status, 'progress': progress})
+    except Exception:
+        logger.exception('Could not update export task progress')
+
+
+def _is_gpkg_export(post):
+    file_path = (post.get('file_path') or post.get('file') or '').lower()
+    return file_path.endswith('.gpkg') or bool(post.get('gpkg_layer'))
+
+
+@celery_app.task(bind=True)
+def postBackground(self, **kwargs):
 
     _id = kwargs['id']
     post = kwargs['post']
     files = kwargs['files']
     username = kwargs['username']
 
-    task_id = postBackground.request.id
+    task_id = self.request.id
 
-    export = exports_historical.objects.get(id = _id)
+    export = exports_historical.objects.get(id=_id)
 
-    export.task_id = str(task_id)
-    export.save()
+    if not export.task_id:
+        export.task_id = str(task_id)
+        export.save(update_fields=['task_id'])
 
-    user = User.objects.get(username = username)
-    form = PostgisLayerUploadForm(post, files, user=user, source_columns=[post.get('pk_column', '')])
+    _set_progress(self, 5, _('Validating export parameters'))
+
+    user = User.objects.get(username=username)
+    source_columns = [post.get('pk_column', '')] if post.get('pk_column') else []
+    is_gpkg = _is_gpkg_export(post)
+    gpkg_layers = []
+    selected_gpkg_layer = post.get('gpkg_layer') or ''
+    if is_gpkg:
+        from gvsigol_services.shp2postgis import list_gpkg_layers, get_fields_from_gpkg
+        try:
+            gpkg_layers = list_gpkg_layers(post.get('file'))
+            if selected_gpkg_layer and selected_gpkg_layer in gpkg_layers:
+                source_columns = [col.name for col in get_fields_from_gpkg(post.get('file'), selected_gpkg_layer)]
+            elif gpkg_layers:
+                selected_gpkg_layer = gpkg_layers[0]
+                source_columns = [col.name for col in get_fields_from_gpkg(post.get('file'), selected_gpkg_layer)]
+        except Exception:
+            logger.exception('Could not load GeoPackage layers for form validation')
+    form = PostgisLayerUploadForm(
+        post, files, user=user, source_columns=source_columns,
+        gpkg_layers=gpkg_layers, selected_gpkg_layer=selected_gpkg_layer, is_gpkg=is_gpkg,
+    )
     if form.is_valid():
         publish_requested = bool(form.cleaned_data.get('publish'))
         try:
-            gs = geographic_servers.get_instance().get_server_by_id(form.cleaned_data['datastore'].workspace.server.id)
-            if gs.exportShpToPostgis(form.cleaned_data):
+            _set_progress(self, 20, _('Connecting to geographic server'))
+            gs = geographic_servers.get_instance().get_server_by_id(
+                form.cleaned_data['datastore'].workspace.server.id
+            )
+            _set_progress(self, 40, _('Exporting data to PostGIS'))
+            if _is_gpkg_export(post):
+                ok = gs.exportGpkgToPostgis(form.cleaned_data)
+            else:
+                ok = gs.exportShpToPostgis(form.cleaned_data)
+            if ok:
+                if publish_requested:
+                    _set_progress(self, 85, _('Publishing layer'))
+                else:
+                    _set_progress(self, 90, _('Finalizing export'))
                 _finalize_export_status(
                     export, post,
                     _('Export process done successfully'),
                     publish_requested, user, form.cleaned_data,
                     had_export_warning=False
                 )
-               
+                _set_progress(self, 100, _('Done'))
+
         except rest_geoserver.RequestWarning as e:
             logger.exception(e)
             msg = _('Export process completed with warnings: ') + str(e)
+            if publish_requested:
+                _set_progress(self, 85, _('Publishing layer'))
             _finalize_export_status(
                 export, post, msg,
                 publish_requested, user, form.cleaned_data,
                 had_export_warning=True
             )
-                
+            _set_progress(self, 100, _('Done with warnings'))
+
         except rest_geoserver.RequestError as e:
             logger.exception(e)
             try:
                 from ast import literal_eval as make_tuple
-                
+
                 msg = make_tuple(e.server_message.replace('\n', ""))
                 export.message = msg[1].decode("utf-8")
-            except:
+            except Exception:
                 msg = e.server_message
                 export.message = msg
 
             export.status = 'Error'
-            export.redirect = "/gvsigonline/filemanager/export_to_database/?path=" + post.get('file_path')
+            export.redirect = "/gvsigonline/filemanager/export_to_database/?path=" + (post.get('file_path') or '')
             export.save()
-            
+
         except Exception as exc:
             logger.exception(exc)
             export.status = 'Error'
-            export.message = 'Server error'+  ": " + str(exc)
-            export.redirect = "/gvsigonline/filemanager/export_to_database/?path=" + post.get('file_path')
+            export.message = 'Server error' + ": " + str(exc)
+            export.redirect = "/gvsigonline/filemanager/export_to_database/?path=" + (post.get('file_path') or '')
             export.save()
-            
+
     else:
 
         export.status = 'Error'
@@ -140,5 +189,5 @@ def postBackground(**kwargs):
                 else:
                     errors.append('%s: %s' % (field, err))
         export.message = '; '.join(errors) if errors else _('You must fill in all fields')
-        export.redirect = "/gvsigonline/filemanager/export_to_database/?path=" + post.get('file_path')
+        export.redirect = "/gvsigonline/filemanager/export_to_database/?path=" + (post.get('file_path') or '')
         export.save()
