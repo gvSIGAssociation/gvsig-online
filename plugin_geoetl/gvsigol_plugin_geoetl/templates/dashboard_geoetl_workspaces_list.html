@@ -110,6 +110,44 @@ table.dataTable.no-footer { border-bottom: none !important; }
 .sql-editor-small .CodeMirror-gutters { left: 0 !important; }
 .sql-editor-small .CodeMirror-linenumber { padding: 0 3px 0 5px !important; min-width: 20px !important; }
 .sql-editor-small .CodeMirror-lines { padding-left: 0 !important; }
+.pl-tabs { display: flex; gap: 0; margin: 0; padding: 0 20px; border-bottom: 1px solid var(--pl-border); background: var(--pl-white); list-style: none; }
+.pl-tabs > li { margin: 0; }
+.pl-tabs > li > a { display: inline-flex; align-items: center; gap: 6px; padding: 12px 16px; font-size: 13px; font-weight: 600; color: var(--pl-muted); text-decoration: none !important; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.pl-tabs > li > a:hover { color: var(--pl-accent); }
+.pl-tabs > li.active > a { color: var(--pl-accent); border-bottom-color: var(--pl-accent); }
+/* Mantener ambas tablas en layout (no display:none) para que DataTables
+   calcule anchos al cambiar de pestaña. */
+.pl-panel__body { position: relative; }
+.pl-tab-pane {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	visibility: hidden;
+	pointer-events: none;
+	height: 0;
+	overflow: hidden;
+	opacity: 0;
+}
+.pl-tab-pane.active {
+	position: relative;
+	visibility: visible;
+	pointer-events: auto;
+	height: auto;
+	overflow: visible;
+	opacity: 1;
+}
+.pl-tab-pane .dataTables_wrapper,
+.pl-tab-pane table.dataTable {
+	width: 100% !important;
+}
+.pl-actions-tab { display: none; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pl-actions-tab.active { display: flex; }
+#etl-concat-table .btn { border-radius: 5px; font-size: 12px; padding: 4px 10px; }
+#etl-concat-table .btn-light { background: transparent; border: 1px solid var(--pl-border); color: var(--pl-accent); }
+#etl-concat-table .btn-warning { background: transparent; border: 1px solid #f5d79e; color: #d08b00; }
+#etl-concat-table .btn-danger { background: transparent; border: 1px solid #e8bebe; color: #c0392b; }
+#etl-concat-table .btn-light .fa-play { color: var(--pl-accent); }
 </style>
 {% endblock %}
 
@@ -127,22 +165,38 @@ table.dataTable.no-footer { border-bottom: none !important; }
 						<input type="text" class="form-control" id="etl-search" placeholder="{% trans 'Search...' %}">
 						<button class="btn-search" type="button" id="etl-search-btn"><i class="fa fa-search"></i></button>
 					</div>
-					<button id="button-concat-workspaces" class="btn-pl-add btn-pl-add--outline" data-toggle="tooltip" data-placement="top" title='{% trans "Concat. workflows" %}'>
-						<i class="fa fa-th-list"></i> {% trans "Concat. workflows" %}
-					</button>
-					<button id="button-clean" class="btn-pl-add btn-pl-add--outline" data-toggle="tooltip" data-placement="top" title='{% trans "Clean temporal tables" %}'>
-						<i class="fa fa-trash"></i> {% trans "Clean" %}
-					</button>
-					<button id="button-upload-workspace-etl" class="btn-pl-add btn-pl-add--secondary">
-						<i class="fa fa-upload"></i> {% trans "Upload" %}
-					</button>
-					<button id="button-new-empty-canvas" class="btn-pl-add">
-						<i class="fa fa-file-o"></i> {% trans "New" %}
-					</button>
+					<div class="pl-actions-tab {% if active_tab != 'concat' %}active{% endif %}" data-tab-actions="workflows">
+						<button id="button-clean" class="btn-pl-add btn-pl-add--outline" data-toggle="tooltip" data-placement="top" title='{% trans "Clean temporal tables" %}'>
+							<i class="fa fa-trash"></i> {% trans "Clean" %}
+						</button>
+						<button id="button-upload-workspace-etl" class="btn-pl-add btn-pl-add--secondary">
+							<i class="fa fa-upload"></i> {% trans "Upload" %}
+						</button>
+						<button id="button-new-empty-canvas" class="btn-pl-add">
+							<i class="fa fa-file-o"></i> {% trans "New" %}
+						</button>
+					</div>
+					<div class="pl-actions-tab {% if active_tab == 'concat' %}active{% endif %}" data-tab-actions="concat">
+						<button id="button-add-concat" class="btn-pl-add btn-pl-add--secondary">
+							<i class="fa fa-plus"></i> {% trans "Add Concat." %}
+						</button>
+						<button id="button-new-empty-canvas-concat" class="btn-pl-add">
+							<i class="fa fa-file-o"></i> {% trans "New" %}
+						</button>
+					</div>
 				</div>
 			</div>
+			<ul class="pl-tabs" id="etl-workspace-tabs" role="tablist">
+				<li class="{% if active_tab != 'concat' %}active{% endif %}" data-tab="workflows">
+					<a href="#etl-tab-workflows" role="tab"><i class="fa fa-random"></i> {% trans "Workflows" %}</a>
+				</li>
+				<li class="{% if active_tab == 'concat' %}active{% endif %}" data-tab="concat">
+					<a href="#etl-tab-concat" role="tab"><i class="fa fa-th-list"></i> {% trans "Concat. workflows" %}</a>
+				</li>
+			</ul>
 			<div class="pl-panel__body">
-				<table class="pl-table table" id="etl-table">
+				<div id="etl-tab-workflows" class="pl-tab-pane {% if active_tab != 'concat' %}active{% endif %}">
+				<table class="pl-table table" id="etl-table" style="width:100%">
 					<thead>
 						<tr>
 							<th>{% trans "ID" %}</th>
@@ -207,10 +261,77 @@ table.dataTable.no-footer { border-bottom: none !important; }
 						{% endfor %}
 					</tbody>
 				</table>
-			</div>
-			<div class="pl-panel__footer" id="etl-pagination-footer" style="display:none;">
-				<span class="text-muted" id="etl-info"></span>
-				<ul class="pagination pagination-sm no-margin" id="etl-pagination"></ul>
+				<div class="pl-panel__footer" id="etl-pagination-footer" style="display:none;">
+					<span class="text-muted" id="etl-info"></span>
+					<ul class="pagination pagination-sm no-margin" id="etl-pagination"></ul>
+				</div>
+				</div>
+
+				<div id="etl-tab-concat" class="pl-tab-pane {% if active_tab == 'concat' %}active{% endif %}">
+				<table class="pl-table table" id="etl-concat-table" style="width:100%">
+					<thead>
+						<tr>
+							<th>{% trans "ID" %}</th>
+							<th></th>
+							<th>{% trans "Status" %}</th>
+							<th>{% trans "Last execution" %}</th>
+							<th>{% trans "Name" %}</th>
+							<th>{% trans "Description" %}</th>
+							<th>{% trans "Periodicity" %}</th>
+							<th>{% trans "User" %}</th>
+							<th>{% trans "Concatenation" %}</th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for workspace in concat_workspaces %}
+						<tr data-workspaceid="{{ workspace.id }}" data-editable="{{workspace.editable}}">
+							<td>{{ workspace.id }}</td>
+							<td></td>
+							<td>
+								<div class="etl-status-icons">
+									<i id="icon-success-{{ workspace.id }}" class="fa fa-check" style="color:#1a7a45;display:none" aria-hidden="true"></i>
+									<i id="icon-error-{{ workspace.id }}" class="fa fa-times" style="color:#c0392b;display:none" aria-hidden="true"></i>
+									<div id="progress-{{ workspace.id }}" class="etl-ws-progress">
+										<div class="progress">
+											<div id="progress-bar-{{ workspace.id }}" class="progress-bar progress-bar-striped active" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+										</div>
+									</div>
+									<span id="progress-label-{{ workspace.id }}" class="etl-ws-progress-label" style="display:none;">0%</span>
+									<button type="button" name="see-msg-status" id="see-msg-status-{{ workspace.id }}" data-toggle="tooltip" data-placement="bottom" title='{% trans "See status message" %}' class="btn btn-light" style="display:none" value="{{ workspace.id }}"><i class="fa fa-eye"></i></button>
+								</div>
+							</td>
+							<td>
+								<div id="last-run-{{ workspace.id }}">
+									{% load tz %}
+									{% timezone "Europe/Madrid" %}
+										{{ workspace.last_run|date:"d/m/Y H:i:s" }}
+									{% endtimezone %}
+								</div>
+							</td>
+							<td>{{ workspace.name }}</td>
+							<td>{{ workspace.description }}</td>
+							{% if workspace.every %}
+								<td>{{ workspace.every }} {{ workspace.period }}</td>
+							{% elif workspace.day_of_week %}
+								<td>{{ workspace.day_of_week }} {{ workspace.hour }}:{{ workspace.minute }}</td>
+							{% else %}
+								<td></td>
+							{% endif %}
+							<td>{{ workspace.username }}</td>
+							<td>{{ workspace.workspace }}</td>
+							<td></td>
+							<td></td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				<div class="pl-panel__footer" id="etl-concat-pagination-footer" style="display:none;">
+					<span class="text-muted" id="etl-concat-info"></span>
+					<ul class="pagination pagination-sm no-margin" id="etl-concat-pagination"></ul>
+				</div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -356,6 +477,122 @@ table.dataTable.no-footer { border-bottom: none !important; }
             </div>
         </div>
     </div>
+
+<!-- Modal to create/update a concatenated workspace -->
+<div id="modal-update-concat-workspace-etl" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">{% trans "Update or Save ETL Workflow" %}</h4>
+			</div>
+			<div class="modal-body">
+				<form id="concat-workspace-form" role="form">
+					<div class="row">
+						<div class="col-md-12">
+							<label for="concat-etl-id">ID</label>
+							<input placeholder="{% trans 'ETL Workflow ID' %}" name="concat-etl-id" id="concat-etl-id" type="text" class="form-control">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<label for="concat-etl-name">{% trans "Name" %}</label>
+							<input placeholder="{% trans 'ETL Workflow name' %}" name="concat-etl-name" id="concat-etl-name" type="text" class="form-control">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<label for="concat-etl-desc">{% trans "Description" %}</label>
+							<input placeholder="{% trans 'ETL Workflow description' %}" name="concat-etl-desc" id="concat-etl-desc" type="text" class="form-control">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<label style="font-weight:400;text-transform:none;letter-spacing:0;">
+								<input type="checkbox" name="concat-repeat-periodically" id="concat-repeat-periodically" />
+								{% trans "Run periodically?" %}
+							</label>
+						</div>
+						<div class="col-md-6 concat-repeat-periodically-time">
+							<select class="form-control" id="concat-ws-program-day" name="concat-ws-program-day">
+								<option value="all">{% trans 'All days' %}</option>
+								<option value="monday">{% trans 'Monday' %}</option>
+								<option value="tuesday">{% trans 'Tuesday' %}</option>
+								<option value="wednesday">{% trans 'Wednesday' %}</option>
+								<option value="thursday">{% trans 'Thursday' %}</option>
+								<option value="friday">{% trans 'Friday' %}</option>
+								<option value="saturday">{% trans 'Saturday' %}</option>
+								<option value="sunday">{% trans 'Sunday' %}</option>
+								<option value="every">{% trans 'Every' %} ...</option>
+							</select>
+						</div>
+						<div class="concat-more-hour-options">
+							<div class="col-md-6 concat-repeat-periodically-time">
+								<div class="form-group">
+									<div class="input-group date">
+										<input type="text" class="form-control" id="concat-ws-program-time" name="concat-ws-program-time" placeholder="HH:mm:ss" />
+										<span class="input-group-addon"></span>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="concat-more-options">
+							<div class="col-md-12 concat-repeat-periodically-time">
+								<label>{% trans "Run workflow every..." %}</label>
+							</div>
+							<div class="col-md-6 concat-repeat-periodically-time">
+								<input placeholder="{% trans 'Select number of...' %}" name="concat-ws-program-interval" id="concat-ws-program-interval" type="number" value="1" class="form-control">
+							</div>
+							<div class="col-md-6 concat-repeat-periodically-time">
+								<select class="form-control" id="concat-ws-program-unit" name="concat-ws-program-unit">
+									<option value="empty">{% trans '... time measure' %}</option>
+									<option value="minutes">{% trans 'minutes' %}</option>
+									<option value="hours">{% trans 'hours' %}</option>
+									<option value="days">{% trans 'days' %}</option>
+								</select>
+							</div>
+						</div>
+					</div>
+					<div class="row" style="margin-top:12px;">
+						<div class="col-sm-9">
+							<label>{% trans "Workflows" %}</label>
+							<select class="form-control" id="workspaces-to-concat"></select>
+						</div>
+						<div class="col-sm-3">
+							<label>{% trans "Get Workflows" %}</label>
+							<button type="button" class="btn-pl-add btn-pl-add--outline" style="height:34px;" id="get-workspaces">{% trans "Get workspaces" %}</button>
+						</div>
+					</div>
+					<div class="row" style="margin-top:8px;">
+						<div class="col-sm-12" style="display:flex;justify-content:flex-end;gap:4px;">
+							<button type="button" class="btn-pl-add btn-pl-add--outline" style="height:30px;padding:4px 10px;" id="quit-concat-wks"><i class="fa fa-minus"></i></button>
+							<button type="button" class="btn-pl-add" style="height:30px;padding:4px 10px;" id="add-concat-wks"><i class="fa fa-plus"></i></button>
+						</div>
+					</div>
+					<div class="row" style="margin-top:8px;">
+						<div class="col-sm-12">
+							<input type="text" id="wks-concatenated" class="form-control" readonly value="[]">
+						</div>
+					</div>
+					{% if user.is_superuser %}
+					<div class="row" style="margin-top:10px;">
+						<div class="col-md-12">
+							<label style="font-weight:400;text-transform:none;letter-spacing:0;">
+								<input type="checkbox" name="concat-change-superuser" id="concat-change-superuser" />
+								{% trans 'Change to superuser?' %}
+							</label>
+						</div>
+					</div>
+					{% endif %}
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
+				<button type="button" class="btn btn-primary" id="update-etl-concat-workspace">{% trans "Save" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
 
 	<div id="modal-upload-workspace-etl" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
 		<div class="modal-dialog" role="document">
@@ -1443,10 +1680,165 @@ function setSqlAfterValue(val) {
 			}
 		});
 		
+		var concatTable = $('#etl-concat-table').DataTable({
+			responsive: true,
+			language: {
+				processing: '{% trans "Processing request..." %}',
+				search: '',
+				lengthMenu: '',
+				info: '',
+				infoEmpty: '',
+				infoFiltered: '',
+				infoPostFix: '',
+				loadingRecords: '{% trans "Loading..." %}',
+				zeroRecords: '{% trans "No records available" %}',
+				emptyTable: '{% trans "No records available" %}',
+				paginate: {
+					first: '{% trans "First" %}',
+					previous: '{% trans "Previous" %}',
+					next: '{% trans "Next" %}',
+					last: '{% trans "Last" %}'
+				}
+			},
+			columnDefs: [{
+				targets: -1,
+				data: null,
+				render: function (data) {
+					var dataset = $('#etl-concat-table').find('tr[data-workspaceid="' + data[0] + '"]').data();
+					return (dataset && dataset.editable)
+						? '<button type="button" name="button-delete-concat-workspace" data-toggle="modal" data-toggle-second="tooltip" data-target="#modal-delete-workspace-etl" data-placement="bottom" title="{% trans "Delete workflow" %}" class="btn btn-danger"><i class="fa fa-times"></i></button>'
+						: '';
+				}
+			}, {
+				targets: -2,
+				data: null,
+				render: function (data) {
+					var dataset = $('#etl-concat-table').find('tr[data-workspaceid="' + data[0] + '"]').data();
+					return (dataset && dataset.editable)
+						? '<button type="button" name="button-update-concat-workspace" data-toggle="tooltip" data-placement="bottom" title="{% trans "Update workflow" %}" class="btn btn-warning"><i class="fa fa-edit"></i></button>'
+						: '';
+				}
+			}, {
+				targets: 1,
+				data: null,
+				defaultContent: '<button type="button" name="button-run-concat-workspace" data-toggle="tooltip" data-placement="bottom" title="{% trans "Run workflow" %}" class="btn btn-light"><i class="fa fa-play"></i></button>'
+			}],
+			dom: 'T<"clear">rt',
+			paging: true,
+			pageLength: 10,
+			bLengthChange: false,
+			searching: true,
+			info: false,
+			drawCallback: function () {
+				updateConcatPagination(this.api());
+			}
+		});
+
+		function updateConcatPagination(api) {
+			var info = api.page.info();
+			var $footer = $('#etl-concat-pagination-footer');
+			var $pagination = $('#etl-concat-pagination');
+			var $info = $('#etl-concat-info');
+			if (info.pages <= 1) {
+				$footer.hide();
+				return;
+			}
+			$footer.show();
+			$pagination.empty();
+			$info.text('{% trans "Showing" %} ' + (info.start + 1) + ' {% trans "to" %} ' + info.end + ' {% trans "of" %} ' + info.recordsDisplay + ' {% trans "workspaces" %}');
+			if (info.page > 0) {
+				$pagination.append('<li><a href="#" data-page="0">&laquo; {% trans "First" %}</a></li>');
+				$pagination.append('<li><a href="#" data-page="' + (info.page - 1) + '">{% trans "Previous" %}</a></li>');
+			} else {
+				$pagination.append('<li class="disabled"><span>&laquo; {% trans "First" %}</span></li>');
+				$pagination.append('<li class="disabled"><span>{% trans "Previous" %}</span></li>');
+			}
+			var startPage = Math.max(0, info.page - 2);
+			var endPage = Math.min(info.pages - 1, info.page + 2);
+			for (var i = startPage; i <= endPage; i++) {
+				$pagination.append(i === info.page
+					? '<li class="active"><span>' + (i + 1) + '</span></li>'
+					: '<li><a href="#" data-page="' + i + '">' + (i + 1) + '</a></li>');
+			}
+			if (info.page < info.pages - 1) {
+				$pagination.append('<li><a href="#" data-page="' + (info.page + 1) + '">{% trans "Next" %}</a></li>');
+				$pagination.append('<li><a href="#" data-page="' + (info.pages - 1) + '">{% trans "Last" %} &raquo;</a></li>');
+			} else {
+				$pagination.append('<li class="disabled"><span>{% trans "Next" %}</span></li>');
+				$pagination.append('<li class="disabled"><span>{% trans "Last" %} &raquo;</span></li>');
+			}
+		}
+
+		$('#etl-concat-pagination').on('click', 'a', function (e) {
+			e.preventDefault();
+			var page = $(this).data('page');
+			if (page !== undefined) {
+				concatTable.page(page).draw('page');
+			}
+		});
+
+		function activeWorkspaceTab() {
+			return $('#etl-workspace-tabs > li.active').data('tab') || 'workflows';
+		}
+
+		function refreshWorkspaceTableLayout(dt) {
+			if (!dt) {
+				return;
+			}
+			// Esperar a que el pane activo tenga tamaño real
+			setTimeout(function () {
+				dt.columns.adjust();
+				try {
+					if (dt.responsive && typeof dt.responsive.recalc === 'function') {
+						dt.responsive.recalc();
+					}
+				} catch (e) {}
+				$(window).trigger('resize');
+			}, 0);
+		}
+
+		function switchWorkspaceTab(tab) {
+			tab = tab === 'concat' ? 'concat' : 'workflows';
+			$('#etl-workspace-tabs > li').removeClass('active');
+			$('#etl-workspace-tabs > li[data-tab="' + tab + '"]').addClass('active');
+			$('.pl-tab-pane').removeClass('active');
+			$('#etl-tab-' + tab).addClass('active');
+			$('.pl-actions-tab').removeClass('active');
+			$('.pl-actions-tab[data-tab-actions="' + tab + '"]').addClass('active');
+			if (window.history && window.history.replaceState) {
+				var url = new URL(window.location.href);
+				if (tab === 'concat') {
+					url.searchParams.set('tab', 'concat');
+				} else {
+					url.searchParams.delete('tab');
+				}
+				window.history.replaceState({}, '', url.pathname + url.search);
+			}
+			$('#etl-search').val('');
+			table.search('');
+			concatTable.search('');
+			var activeTable = tab === 'concat' ? concatTable : table;
+			activeTable.draw(false);
+			refreshWorkspaceTableLayout(activeTable);
+		}
+
+		// Recalcular anchos de la pestaña visible tras init
+		refreshWorkspaceTableLayout(activeWorkspaceTab() === 'concat' ? concatTable : table);
+
+		$('#etl-workspace-tabs').on('click', 'a', function (e) {
+			e.preventDefault();
+			switchWorkspaceTab($(this).closest('li').data('tab'));
+		});
+
 		// El filtrado redibuja la tabla. Hacerlo en cada tecla bloquea el input
 		// y se pierden letras. Solo al pulsar la lupa o Enter.
 		function aplicarBusquedaEtl() {
-			table.search($('#etl-search').val()).draw();
+			var q = $('#etl-search').val();
+			if (activeWorkspaceTab() === 'concat') {
+				concatTable.search(q).draw();
+			} else {
+				table.search(q).draw();
+			}
 		}
 
 		$('#etl-search').on('keydown', function(e) {
@@ -1458,8 +1850,202 @@ function setSqlAfterValue(val) {
 
 		$('#etl-search-btn').on('click', aplicarBusquedaEtl);
 
-
 		$('[data-toggle-second="tooltip"]').tooltip({ container: 'body' });
+
+		$('.concat-repeat-periodically-time').hide();
+		$('.concat-more-hour-options').hide();
+
+		$('#button-new-empty-canvas-concat').on('click', function () {
+			location.href = '/gvsigonline/etl/etl_canvas/';
+		});
+
+		$('#button-add-concat').on('click', function () {
+			$('#concat-etl-id').val('');
+			$('#concat-etl-name').val('');
+			$('#concat-etl-desc').val('');
+			$('#wks-concatenated').val('[]');
+			$('#concat-repeat-periodically').prop('checked', false);
+			$('.concat-repeat-periodically-time').slideUp('slow');
+			$('#modal-update-concat-workspace-etl').modal('show');
+			bindConcatWorkspaceSave();
+		});
+
+		$('#add-concat-wks').on('click', function () {
+			var value = $('#workspaces-to-concat').val();
+			var json = JSON.parse($('#wks-concatenated').val() || '[]');
+			json.push(value);
+			$('#wks-concatenated').val(JSON.stringify(json));
+		});
+
+		$('#quit-concat-wks').on('click', function () {
+			var json = JSON.parse($('#wks-concatenated').val() || '[]');
+			json.pop();
+			$('#wks-concatenated').val(JSON.stringify(json));
+		});
+
+		$('#get-workspaces').on('click', function () {
+			$.ajax({
+				type: 'POST',
+				url: '/gvsigonline/etl/get_workspaces/',
+				beforeSend: function (xhr) {
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				cache: false,
+				contentType: false,
+				processData: false,
+				success: function (response) {
+					var data = response.workspaces || [];
+					$('#workspaces-to-concat').empty();
+					for (var i = 0; i < data.length; i++) {
+						$('#workspaces-to-concat').append(
+							'<option value="' + data[i].id + '">' + data[i].id + ' - ' + data[i].name + '</option>'
+						);
+					}
+				}
+			});
+		});
+
+		$('#concat-repeat-periodically').on('click', function () {
+			if ($('#concat-repeat-periodically').is(':checked')) {
+				$('.concat-repeat-periodically-time').slideDown('slow');
+			} else {
+				$('.concat-repeat-periodically-time').slideUp('slow');
+			}
+		});
+
+		function editConcatProgrammingForm(value) {
+			if (value === 'every') {
+				$('.concat-more-options').slideDown('slow');
+				$('.concat-more-hour-options').slideUp('slow');
+			} else {
+				$('.concat-more-options').slideUp('slow');
+				$('.concat-more-hour-options').slideDown('slow');
+			}
+		}
+
+		$('#concat-ws-program-day').on('change', function () {
+			editConcatProgrammingForm($(this).val());
+		});
+
+		if ($.fn.datetimepicker) {
+			$('#concat-ws-program-time').datetimepicker({ format: 'HH:mm:ss' });
+		}
+
+		function validateConcatPeriodicSchedule() {
+			if (!$('#concat-repeat-periodically').is(':checked')) {
+				return true;
+			}
+			var day = $('#concat-ws-program-day').val();
+			var programUnit = $('#concat-ws-program-unit').val();
+			var intervalVal = $('#concat-ws-program-interval').val();
+			var timeVal = ($('#concat-ws-program-time').val() || '').trim();
+			if (day === 'every') {
+				if (!programUnit || programUnit === 'empty') {
+					messageBox.show('error', '{% trans "Select a time unit (minutes, hours or days)." %}');
+					return false;
+				}
+				var n = parseInt(intervalVal, 10);
+				if (!intervalVal || isNaN(n) || n < 1) {
+					messageBox.show('error', '{% trans "Enter a valid interval number (1 or greater)." %}');
+					return false;
+				}
+			} else if (!timeVal) {
+				messageBox.show('error', '{% trans "Enter a time of day (HH:mm:ss)." %}');
+				return false;
+			}
+			return true;
+		}
+
+		function bindConcatWorkspaceSave() {
+			$('#update-etl-concat-workspace').off('click.concatSave').on('click.concatSave', function () {
+				if (!validateConcatPeriodicSchedule()) {
+					return;
+				}
+				var updateData = {
+					id: $('#concat-etl-id').val(),
+					name: $('#concat-etl-name').val(),
+					description: $('#concat-etl-desc').val(),
+					workspace: $('#wks-concatenated').val(),
+					day: $('#concat-ws-program-day').val(),
+					time: $('#concat-ws-program-time').val(),
+					interval: $('#concat-ws-program-interval').val(),
+					unit: $('#concat-ws-program-unit').val(),
+					username: username,
+					checked: $('#concat-repeat-periodically').is(':checked'),
+					superuser: $('#concat-change-superuser').is(':checked')
+				};
+				$.ajax({
+					type: 'POST',
+					async: false,
+					data: updateData,
+					url: '/gvsigonline/etl/etl_concatenate_workspace_update/',
+					beforeSend: function (xhr) {
+						xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+					},
+					success: function (response) {
+						try {
+							var data = typeof response === 'string' ? JSON.parse(response) : response;
+							if (data && data.error) {
+								messageBox.show('error', data.error);
+								return;
+							}
+							if (data && data.exists === 'true') {
+								$('#modal-update-concat-workspace-etl').modal('hide');
+								window._reopenConcatModal = true;
+								$('#modal-ws-exists').modal('show');
+								return;
+							}
+						} catch (e) {}
+						$('#modal-update-concat-workspace-etl').modal('hide');
+						location.href = '/gvsigonline/etl/etl_workspace_list/?tab=concat';
+					},
+					error: function (xhr) {
+						var msg = '{% trans "Could not update the workflow." %}';
+						try {
+							var data = JSON.parse(xhr.responseText);
+							if (data.error) { msg = data.error; }
+						} catch (e) {}
+						messageBox.show('error', msg);
+					}
+				});
+			});
+		}
+
+		$('#etl-concat-table tbody').on('click', 'button', function () {
+			var row = concatTable.row($(this).parents('tr'));
+			var data = row.data();
+			if (this.name === 'button-update-concat-workspace') {
+				$('#concat-etl-id').val(data[0]);
+				$('#concat-etl-name').val(data[4]);
+				$('#concat-etl-desc').val(data[5]);
+				$('#wks-concatenated').val(data[8] || '[]');
+				if (data[6]) {
+					$('#concat-repeat-periodically').prop('checked', true);
+					$('.concat-repeat-periodically-time').slideDown('slow');
+					if (String(data[6]).indexOf(':') !== -1) {
+						$('.concat-more-options').slideUp('slow');
+						$('.concat-more-hour-options').slideDown('slow');
+						$('#concat-ws-program-day').val(String(data[6]).split(' ')[0]);
+						$('#concat-ws-program-time').val(String(data[6]).split(' ')[1] + ':00');
+					} else {
+						$('.concat-more-options').slideDown('slow');
+						$('.concat-more-hour-options').slideUp('slow');
+						$('#concat-ws-program-day').val('every');
+						$('#concat-ws-program-interval').val(String(data[6]).split(' ')[0]);
+						$('#concat-ws-program-unit').val(String(data[6]).split(' ')[1]);
+					}
+				} else {
+					$('#concat-repeat-periodically').prop('checked', false);
+					$('.concat-repeat-periodically-time').slideUp('slow');
+				}
+				$('#modal-update-concat-workspace-etl').modal('show');
+				bindConcatWorkspaceSave();
+			} else if (this.name === 'button-delete-concat-workspace') {
+				deleteWorkspace(data);
+			} else if (this.name === 'button-run-concat-workspace') {
+				runWorkspace(data);
+			}
+		});
 
 
 			$('#button-clean').on('click', function () {
@@ -1521,12 +2107,6 @@ function setSqlAfterValue(val) {
 		$('#accept-clean-tmp').on('click', function (){
 			CleanTemporalTables()
 		})
-
-
-		$('#button-concat-workspaces').on('click', function (){
-
-			location.href = '/gvsigonline/etl/etl_concat_workspaces/';
-		});
 
 
 		function CleanTemporalTables(){
@@ -2025,7 +2605,7 @@ function setSqlAfterValue(val) {
 		}
 
 		function deleteWorkspace(data){
-			$('#button-delete-workspace-accept').click( function() {
+			$('#button-delete-workspace-accept').off('click').on('click', function() {
 				$.ajax({
 					type: 'POST',
 					async: false,
@@ -2038,7 +2618,9 @@ function setSqlAfterValue(val) {
 					},
 					success	:function(response){
 						$('#modal-delete-workspace-etl').modal('hide');
-						location.reload();
+						location.href = activeWorkspaceTab() === 'concat'
+							? '/gvsigonline/etl/etl_workspace_list/?tab=concat'
+							: '/gvsigonline/etl/etl_workspace_list/';
 					},
 					error: function(){}
 				});
@@ -2051,7 +2633,10 @@ function setSqlAfterValue(val) {
 		if (upload == true){
 			$('#modal-upload-workspace-etl').modal('show')
 			upload = false
-		}else{
+		} else if (window._reopenConcatModal) {
+			window._reopenConcatModal = false;
+			$('#modal-update-concat-workspace-etl').modal('show')
+		} else {
 			$('#modal-update-workspace-etl').modal('show')
 		}
     })

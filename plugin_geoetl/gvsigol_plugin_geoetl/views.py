@@ -26,6 +26,7 @@ import logging
 from operator import concat
 from urllib import response
 from django.shortcuts import HttpResponse, render, redirect
+from django.urls import reverse
 
 logger = logging.getLogger(__name__)
 from django.http import JsonResponse, HttpResponseNotAllowed
@@ -508,8 +509,14 @@ def etl_workspace_list(request):
 
     create_schema(GEOETL_DB)
 
+    tab = (request.GET.get('tab') or 'workflows').strip().lower()
+    if tab not in ('workflows', 'concat'):
+        tab = 'workflows'
+
     response = {
         'workspaces': get_list(request),
+        'concat_workspaces': get_list(request, True),
+        'active_tab': tab,
         'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
     }
 
@@ -518,15 +525,8 @@ def etl_workspace_list(request):
 @login_required()
 @staff_required
 def etl_concat_workspaces(request):
-
-    create_schema(GEOETL_DB)
-
-    response = {
-        'workspaces': get_list(request, True),
-        'fm_directory': settings.FILEMANAGER_DIRECTORY + "/",
-    }
-
-    return render(request, 'dashboard_geoetl_concat_workspaces.html', response)
+    """Compatibilidad: la lista concatenada vive ahora en etl_workspace_list (pestaña concat)."""
+    return redirect(reverse('etl_workspace_list') + '?tab=concat')
 
 @transaction.atomic
 def save_periodic_workspace(request, workspace):
@@ -1836,8 +1836,7 @@ def etl_concatenate_workspace_update(request):
                 content_type='application/json',
             )
 
-    response = {}
-    return render(request, 'dashboard_geoetl_concat_workspaces.html', response)
+    return redirect(reverse('etl_workspace_list') + '?tab=concat')
 
 @login_required()
 @staff_required
