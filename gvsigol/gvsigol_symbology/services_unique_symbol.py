@@ -29,6 +29,8 @@ from . import symbolizer_factory, conf_builder
 from .models import Style, StyleLayer, Rule, Symbolizer
 from . import utils, sld_builder
 import json
+import re
+import unicodedata
 
 @transaction.atomic
 def create_style(request, json_data, layer, gs, is_preview=False):
@@ -199,6 +201,31 @@ def _simple_symbolizer(geom_type, params):
     return None, None
 
 
+def _slugify_style_name(value, fallback='style'):
+    text = unicodedata.normalize('NFD', str(value or ''))
+    text = ''.join(ch for ch in text if unicodedata.category(ch) != 'Mn')
+    text = text.lower()
+    text = re.sub(r'[^a-z0-9_]+', '_', text)
+    text = re.sub(r'_+', '_', text).strip('_')
+    if not text:
+        text = fallback
+    if not re.match(r'^[a-z]', text):
+        text = 's_' + text
+    return text[:80]
+
+
+def _unique_style_name(layer, requested_name, index):
+    workspace = layer.datastore.workspace
+    slug = _slugify_style_name(requested_name, fallback='style')
+    base = (workspace.name + '_' + layer.name + '_' + slug)[:90]
+    name = base
+    suffix = index
+    while Style.objects.filter(name=name).exists():
+        name = (base + '_' + str(suffix))[:100]
+        suffix += 1
+    return name
+
+
 def create_simple_style(layer, gs, params):
     """
     Crea una leyenda de símbolo único con parámetros básicos y la asigna por defecto.
@@ -217,9 +244,10 @@ def create_simple_style(layer, gs, params):
         return None
 
     index = utils.get_next_index(layer)
-    workspace = layer.datastore.workspace
-    name = (params or {}).get('name') or (workspace.name + '_' + layer.name + '_' + str(index))
-    title = (params or {}).get('title') or (_('Simple style') + ' ' + str(index + 1))
+    params = params or {}
+    title = params.get('title') or (_('Simple style') + ' ' + str(index + 1))
+    requested_name = params.get('name') or title
+    name = _unique_style_name(layer, requested_name, index)
 
     json_data = {
         'name': name,
