@@ -28,15 +28,16 @@
 	background-color: #fff;
 }
 
-/* Pestaña de estado de ejecución: abajo-derecha, no tapa el canvas */
+/* Pestaña de estado de ejecución: abajo-derecha, no tapa el canvas.
+   28px = 10px de margen + las barras de scroll de #canvas-parent */
 #etl-run-status-dock {
 	position: absolute;
-	right: 10px;
+	right: 28px;
 	left: auto;
-	bottom: 10px;
+	bottom: 28px;
 	z-index: 40;
 	width: 300px;
-	max-width: calc(100% - 20px);
+	max-width: calc(100% - 38px);
 	background: #fff;
 	border: 1px solid #cfd8df;
 	border-right: 4px solid #9aa8b5;
