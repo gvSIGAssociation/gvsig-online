@@ -112,6 +112,11 @@ def _sort_key_no_accents(s):
     return re.sub(r'^[^\w]+', '', cleaned, flags=re.UNICODE).strip()
 
 
+def _layer_group_sort_key(layer_group):
+    """Orden de los grupos en los formularios de proyecto; sin título, usa el nombre."""
+    return _sort_key_no_accents(layer_group.get('title') or layer_group.get('name') or '')
+
+
 def not_found_view(request):
     return render(request, '404.html', {}, status=404)
 
@@ -1190,6 +1195,7 @@ def _get_prepared_layer_groups(request):
                 'title': l.title
             })
         prepared_layer_groups.append(layer_group)
+    prepared_layer_groups.sort(key=_layer_group_sort_key)
     return prepared_layer_groups
 
 @login_required()
@@ -1660,6 +1666,7 @@ def project_update(request, pid):
         creator_role = auth_backend.get_primary_role(project.created_by)
         roles = core_utils.get_all_roles_checked_by_project(project, creator_user_role=creator_role)
         layer_groups = core_utils.get_all_layer_groups_checked_by_project(request, project)
+        layer_groups.sort(key=_layer_group_sort_key)
 
         if project.toc_order:
             toc = json.loads(project.toc_order)

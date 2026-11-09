@@ -101,27 +101,108 @@
 	border-left: 1px solid var(--pf-border);
 	min-height: 200px;
 }
+/* Sin marco propio: las filas se apoyan directamente en el fondo de la columna */
+.pf-toc-sidebar .searchable-list-box {
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	margin: 0;
+}
+.pf-toc-sidebar .toc-layer-update { padding: 14px 6px 14px 0; }
+.pf-toc-sidebar .toc { counter-reset: pf-toc-position; }
+
+/* Fila de grupo */
 .pf-toc-sidebar .toc-layergroup {
+	counter-increment: pf-toc-position;
 	background: var(--pf-white);
 	border: 1px solid var(--pf-border) !important;
-	border-radius: 6px !important;
-	margin-bottom: 6px;
-	box-shadow: none !important;
+	border-radius: 8px !important;
+	margin-bottom: 8px;
+	box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+	transition: border-color var(--pf-transition), box-shadow var(--pf-transition);
+}
+.pf-toc-sidebar .toc-layergroup:hover {
+	border-color: var(--pf-accent) !important;
+	box-shadow: 0 2px 6px rgba(0,0,0,0.08) !important;
 }
 .pf-toc-sidebar .toc-layergroup .box-header {
-	padding: 8px 10px;
+	display: flex;
+	align-items: center;
+	padding: 10px 12px;
 	min-height: auto;
+	border-bottom: none;
 }
+
+/* Asa: los dos fa-ellipsis-v forman el icono de arrastre. El margen vence
+   al style en línea del marcado, repetido en el HTML que genera el JS. */
 .pf-toc-sidebar .handle {
+	display: inline-flex;
+	flex: none;
+	margin-right: 10px !important;
+	font-size: 13px;
+	line-height: 1;
 	color: var(--pf-muted);
 	cursor: grab;
-	transition: color var(--pf-transition);
+	opacity: 0.7;
+	transition: color var(--pf-transition), opacity var(--pf-transition);
 }
-.pf-toc-sidebar .handle:hover { color: var(--pf-accent); }
+.pf-toc-sidebar .handle i + i { margin-left: 2px; }
+/* Extiende la zona de agarre del asa a toda la fila */
+.pf-toc-sidebar .handle::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+}
+.pf-toc-sidebar .toc-layergroup:hover .handle {
+	color: var(--pf-accent);
+	opacity: 1;
+}
+
+/* Título con su posición en la lista. Los títulos largos pasan a otra línea. */
 .pf-toc-sidebar .text {
-	font-size: 12px;
+	display: flex;
+	align-items: baseline;
+	flex: 1;
+	min-width: 0;
+	font-size: 13px;
 	font-weight: 600;
+	line-height: 1.35;
 	color: var(--pf-text);
+	overflow-wrap: anywhere;
+}
+.pf-toc-sidebar .text::before {
+	content: counter(pf-toc-position);
+	flex: none;
+	min-width: 16px;
+	margin-right: 8px;
+	font-size: 11px;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	text-align: right;
+	color: var(--pf-muted);
+}
+
+/* Mientras se arrastra */
+.pf-toc-sidebar .toc-layergroup.ui-sortable-helper {
+	counter-increment: none;
+	border-color: var(--pf-accent) !important;
+	box-shadow: 0 6px 18px rgba(0,0,0,0.15) !important;
+}
+.pf-toc-sidebar .ui-sortable-helper .handle {
+	color: var(--pf-accent);
+	cursor: grabbing;
+	opacity: 1;
+}
+.pf-toc-sidebar .ui-sortable-helper .text::before { visibility: hidden; }
+.pf-toc-sidebar .sort-highlight {
+	counter-increment: pf-toc-position;
+	margin: 0 0 8px;
+	border: 1.5px dashed var(--pf-accent);
+	border-radius: 8px;
+	background: var(--pf-accent-lt);
 }
 
 /* ---- Mapa ---- */
