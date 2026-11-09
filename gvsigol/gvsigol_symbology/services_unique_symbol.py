@@ -23,6 +23,8 @@
 '''
 
 from django.db import transaction
+from django.utils.translation import gettext as _
+from gvsigol_core import geom
 from . import symbolizer_factory, conf_builder
 from .models import Style, StyleLayer, Rule, Symbolizer
 from . import utils, sld_builder
@@ -154,3 +156,92 @@ def update_style(request, json_data, layer, gs, style, is_preview=False):
 
 def get_conf(request, layer_id):
     return conf_builder.build_vector_conf(request, layer_id, alphanumeric_list=False, tolerate_empty_fields=True)
+
+
+def _simple_symbolizer(geom_type, params):
+    """Construye el simbolizador de símbolo único a partir de parámetros simples."""
+    stroke = params.get('stroke') or '#000000'
+    stroke_width = int(float(params.get('stroke_width', 1)))
+    stroke_opacity = float(params.get('stroke_opacity', 1.0))
+    fill = params.get('fill') or '#3388ff'
+    fill_opacity = float(params.get('fill_opacity', 0.5))
+    size = int(float(params.get('size', 8)))
+
+    if geom.isPoint(geom_type):
+        return 'MarkSymbolizer', {
+            'opacity': 1,
+            'size': size,
+            'rotation': 0,
+            'well_known_name': params.get('well_known_name') or 'circle',
+            'fill': fill,
+            'fill_opacity': fill_opacity,
+            'stroke': stroke,
+            'stroke_width': stroke_width,
+            'stroke_opacity': stroke_opacity,
+            'stroke_dash_array': 'none',
+        }
+    if geom.isLine(geom_type):
+        return 'LineSymbolizer', {
+            'stroke': stroke,
+            'stroke_width': stroke_width,
+            'stroke_opacity': stroke_opacity,
+            'stroke_dash_array': 'none',
+        }
+    if geom.isPolygon(geom_type):
+        return 'PolygonSymbolizer', {
+            'fill': fill,
+            'fill_opacity': fill_opacity,
+            'stroke': stroke,
+            'stroke_width': stroke_width,
+            'stroke_opacity': stroke_opacity,
+            'stroke_dash_array': 'none',
+        }
+    return None, None
+
+
+def create_simple_style(layer, gs, params):
+    """
+    Crea una leyenda de símbolo único con parámetros básicos y la asigna por defecto.
+
+    params: stroke, stroke_width, stroke_opacity, fill, fill_opacity,
+            name? (opcional), title? (opcional), size? (puntos), well_known_name? (puntos)
+    """
+    geom_type = gs.get_geometry_type(layer) if gs else None
+    if not geom_type or geom.isRaster(geom_type):
+        utils.set_style_error(_('Unsupported geometry type for simple legend'))
+        return None
+
+    sym_type, sym_json = _simple_symbolizer(geom_type, params or {})
+    if not sym_type:
+        utils.set_style_error(_('Unsupported geometry type for simple legend'))
+        return None
+
+    index = utils.get_next_index(layer)
+    workspace = layer.datastore.workspace
+    name = (params or {}).get('name') or (workspace.name + '_' + layer.name + '_' + str(index))
+    title = (params or {}).get('title') or (_('Simple style') + ' ' + str(index + 1))
+
+    json_data = {
+        'name': name,
+        'title': title,
+        'is_default': True,
+        'minscale': -1,
+        'maxscale': -1,
+        'rules': [{
+            'rule': {
+                'name': name,
+                'title': title,
+                'abstract': '',
+                'filter': '',
+                'minscale': -1,
+                'maxscale': -1,
+                'order': 0,
+            },
+            'symbolizers': [{
+                'type': sym_type,
+                'order': 0,
+                'json': json.dumps(sym_json),
+            }],
+        }],
+    }
+    return create_style(None, json_data, layer, gs)
