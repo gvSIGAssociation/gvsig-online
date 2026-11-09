@@ -1816,7 +1816,7 @@ defineEtlNode({
     title: function () { return gettext('Publish Layer'); },
     headerColor: (window.ETL_NODE_STYLE && window.ETL_NODE_STYLE.output.header) || '#e8832a',
     gearColor: (window.ETL_NODE_STYLE && window.ETL_NODE_STYLE.output.gear) || '#b8651a',
-    inputs: [{label: function () { return gettext('Layer'); }}],
+    inputs: [{label: function () { return gettext('Output'); }}],
     outputs: [],
     body: function (ID) {
         return '<p class="text-muted">' +

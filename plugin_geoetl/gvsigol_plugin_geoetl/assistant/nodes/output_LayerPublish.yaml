@@ -26,7 +26,7 @@ parameters:
   summary: Descripción de la capa.
 ports:
 - direction: input
-  label: Layer
+  label: Output
 connection_types: []
 connection_parameter: null
 sql_parameters: []
