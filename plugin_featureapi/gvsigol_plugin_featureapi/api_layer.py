@@ -24,6 +24,7 @@ from wsgiref.util import FileWrapper
 import ast
 import coreapi
 from django.http.response import HttpResponse, JsonResponse
+from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import action, api_view, permission_classes
@@ -349,6 +350,82 @@ class Legend(APIView):
         except Exception as e:
             return HttpException(404, "Resource NOT found").get_exception()
 
+    @swagger_auto_schema(
+        operation_id='create_simple_legend',
+        operation_summary='Creates a simple unique-symbol legend and sets it as default',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'stroke': openapi.Schema(type=openapi.TYPE_STRING, example='#000000'),
+                'stroke_width': openapi.Schema(type=openapi.TYPE_NUMBER, example=1),
+                'stroke_opacity': openapi.Schema(type=openapi.TYPE_NUMBER, example=1.0),
+                'fill': openapi.Schema(type=openapi.TYPE_STRING, example='#3388ff'),
+                'fill_opacity': openapi.Schema(type=openapi.TYPE_NUMBER, example=0.5),
+                'name': openapi.Schema(type=openapi.TYPE_STRING),
+                'title': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        ),
+        responses={
+            200: "Style created",
+            400: "Invalid parameters or style creation failed",
+            403: "The user does not have permission to edit this layer",
+            404: "Layer NOT found",
+        }
+    )
+    def post(self, request, lyr_id):
+        """
+        Crea una leyenda de símbolo único (US) con parámetros simples y la asigna
+        por defecto a la capa. No modifica leyendas existentes: inserta Style,
+        StyleLayer, Rule y Symbolizer nuevos y publica el SLD en GeoServer.
+        """
+        validation = Validation(request)
+        try:
+            validation.check_edit_permission(lyr_id)
+        except HttpException as e:
+            return e.get_exception()
+
+        try:
+            lyr = Layer.objects.get(id=lyr_id)
+        except Layer.DoesNotExist:
+            return HttpException(404, "Layer NOT found").get_exception()
+
+        if lyr.datastore is None:
+            return HttpException(400, "Layer has no datastore").get_exception()
+
+        params = {}
+        try:
+            if isinstance(getattr(request, 'data', None), dict) and request.data:
+                params = dict(request.data)
+            elif request.body:
+                body = request.body.decode('utf-8') if isinstance(request.body, (bytes, bytearray)) else request.body
+                params = json.loads(body) if body else {}
+        except Exception:
+            return HttpException(400, "Invalid JSON body").get_exception()
+
+        if isinstance(params.get('style'), dict):
+            params = params.get('style')
+
+        try:
+            workspace = lyr.datastore.workspace
+            gs = geographic_servers.get_instance().get_server_by_id(workspace.server.id)
+            from gvsigol_symbology import services_unique_symbol
+            from gvsigol_symbology import utils as symb_utils
+            style = services_unique_symbol.create_simple_style(lyr, gs, params)
+            if not style:
+                msg = symb_utils.get_style_error() or "Error creating style"
+                return HttpException(400, str(msg)).get_exception()
+            return JsonResponse({
+                "id": style.id,
+                "name": style.name,
+                "title": style.title,
+                "is_default": style.is_default,
+            }, safe=False)
+        except HttpException as e:
+            return e.get_exception()
+        except Exception as e:
+            print(e)
+            return HttpException(400, "Error creating style: " + str(e)).get_exception()
+
 
 #--------------------------------------------------
 #                 PublicLegend
@@ -588,11 +665,100 @@ class LayerListView(ListCreateAPIView):
             return(e)
     
     
+def _parse_extent_csv(value):
+    """
+    Parsea 'minx,miny,maxx,maxy' (coma). Devuelve (csv_normalizado, dict_bbox) o None.
+    """
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    parts = [p.strip() for p in text.split(',')]
+    if len(parts) != 4:
+        raise HttpException(400, "Bad extent parameter. Expected minx,miny,maxx,maxy")
+    try:
+        nums = [float(p) for p in parts]
+    except (TypeError, ValueError):
+        raise HttpException(400, "Bad extent parameter. Coordinates must be numbers")
+    csv = '{0},{1},{2},{3}'.format(nums[0], nums[1], nums[2], nums[3])
+    bbox = {
+        'minx': nums[0], 'miny': nums[1], 'maxx': nums[2], 'maxy': nums[3]
+    }
+    return csv, bbox
+
+
+def _apply_requested_layer_extents(server, layer, srs, latlong_extent, native_extent):
+    """
+    Si el cliente envía latlong_extent / native_extent en el POST de create,
+    los aplica en BD (tras do_config_layer, que suele dejar bbox vacío) y en GeoServer.
+    Sin esos parámetros el comportamiento queda igual que antes.
+    """
+    if latlong_extent is None and native_extent is None:
+        return
+
+    srs_norm = (srs or layer.native_srs or 'EPSG:4326').strip() or 'EPSG:4326'
+    latlong_csv = None
+    native_csv = None
+    latlon_bb = None
+    native_bb = None
+
+    if latlong_extent is not None:
+        parsed = _parse_extent_csv(latlong_extent)
+        if parsed:
+            latlong_csv, latlon_bb = parsed
+            latlon_bb['crs'] = 'EPSG:4326'
+            layer.latlong_extent = latlong_csv
+
+    if native_extent is not None:
+        parsed = _parse_extent_csv(native_extent)
+        if parsed:
+            native_csv, native_bb = parsed
+            native_bb['crs'] = srs_norm
+            layer.native_extent = native_csv
+    elif latlong_csv is not None and srs_norm.upper() in ('EPSG:4326', 'EPSG:CRS84'):
+        # Si solo mandan latlong y el SRS es geográfico, reutilizarlo como native.
+        layer.native_extent = latlong_csv
+        native_bb = dict(latlon_bb)
+        native_bb['crs'] = srs_norm
+
+    if latlong_csv is None and native_csv is None:
+        return
+
+    layer.native_srs = srs_norm
+    layer.save()
+
+    updated = {'srs': srs_norm}
+    if native_bb is not None:
+        updated['nativeBoundingBox'] = native_bb
+    if latlon_bb is not None:
+        updated['latLonBoundingBox'] = latlon_bb
+    if len(updated) == 1:
+        return
+
+    try:
+        workspace_name = layer.datastore.workspace.name
+        datastore_name = layer.datastore.name
+        resource_name = layer.source_name or layer.name
+        server.updateResource(
+            workspace_name,
+            datastore_name,
+            layer.datastore.type,
+            resource_name,
+            updated,
+        )
+    except Exception as e:
+        print('Warning: could not update GeoServer bbox from request extents: ' + str(e))
+
+
 def layer_create(request, layer_group_id):
 
     layer_type = "gs_vector_layer"
 
     abstract = request.POST.get('md-abstract')
+    # Opcionales: si vienen, se aplican tras do_config_layer (clientes antiguos no los envían).
+    latlong_extent = request.POST.get('latlong_extent') or None
+    native_extent = request.POST.get('native_extent') or None
     is_visible = False
     if 'visible' in request.POST:
         is_visible = True
@@ -704,7 +870,16 @@ def layer_create(request, layer_group_id):
                 }
                 services_utils.set_layer_permissions(newRecord, is_public, assigned_read_roles, assigned_write_roles, [])
                 services_views.do_config_layer(server, newRecord, featuretype)
+                _apply_requested_layer_extents(
+                    server,
+                    newRecord,
+                    form.cleaned_data.get('srs'),
+                    latlong_extent,
+                    native_extent,
+                )
                 return newRecord.id
+        except HttpException:
+            raise
         except Exception as e:
             raise HttpException(400, "Error creating the layer: " + str(e))
     else:

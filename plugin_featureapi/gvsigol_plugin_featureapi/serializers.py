@@ -1845,15 +1845,32 @@ class FeatureSerializer(serializers.Serializer):
 
     def _get_search_where_trigram(self, introspect, order, schema, tablename, text, exclude_cols=[]):
         fields = introspect.get_fields_by_datatype('character varying', tablename, schema=schema)
-        colnames = [ f for f in fields if f not in exclude_cols]
-
-        where_parts = [ sqlbuilder.SQL("{column} % unaccent({text})").format(column=sqlbuilder.Identifier(column), text=sqlbuilder.Literal(text))
-                    for column in colnames]
-        where = sqlbuilder.SQL("({condition})").format(condition=sqlbuilder.SQL(" OR ").join(where_parts))
-        if order == True:
-            order_by_parts = [sqlbuilder.SQL(" SIMILARITY( unaccent({column}), unaccent({text}))").format(column=sqlbuilder.Identifier(column),
-                                                                                                          text=sqlbuilder.Literal(text))
-                                                                                                          for column in colnames]
+        text_cols = [ f for f in fields if f not in exclude_cols]
+        all_fields = introspect.get_fields(tablename, schema=schema)
+        all_cols = [ f for f in all_fields if f not in exclude_cols]
+        plain_text = sqlbuilder.Literal(text)
+        like_text = sqlbuilder.Literal("%" + text + "%")
+        parts = [
+            sqlbuilder.SQL("unaccent({column}::text) % unaccent({text})").format(
+                column=sqlbuilder.Identifier(column),
+                text=plain_text,
+            )
+            for column in text_cols
+        ]
+        parts.extend([
+            sqlbuilder.SQL("(lower(unaccent(CAST({column} AS VARCHAR))) LIKE lower(unaccent({text})))").format(
+                column=sqlbuilder.Identifier(column),
+                text=like_text,
+            )
+            for column in all_cols
+        ])
+        if len(parts) == 0:
+            return sqlbuilder.SQL('(1 = 0)')
+        where = sqlbuilder.SQL("({condition})").format(condition=sqlbuilder.SQL(" OR ").join(parts))
+        if order == True and len(text_cols) > 0:
+            order_by_parts = [sqlbuilder.SQL(" SIMILARITY( unaccent({column}::text), unaccent({text}))").format(column=sqlbuilder.Identifier(column),
+                                                                                                          text=plain_text)
+                                                                                                          for column in text_cols]
             order_by = sqlbuilder.SQL(" ORDER BY (SELECT max(x) FROM unnest(ARRAY[{cols}]) as x) DESC").format(cols=sqlbuilder.SQL(" , ").join(order_by_parts))
             where = where + order_by
         return where

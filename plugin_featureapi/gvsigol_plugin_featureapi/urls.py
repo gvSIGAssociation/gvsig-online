@@ -64,7 +64,7 @@ urlpatterns = [
     path('api/v1/layers/<int:lyr_id>/addedresources/', api_feature.FeatureVersionsAddedResources.as_view(), name='get_added_resources'),
     path('api/v1/layers/<int:lyr_id>/deletedresources/', api_feature.FeatureVersionsDeletedResources.as_view(), name='get_deleted_resources'),
 
-    path('api/v1/layers/<int:lyr_id>/legend/', api_layer.Legend.as_view(), name='get_geoserver_legend'),
+    path('api/v1/layers/<int:lyr_id>/legend/', api_layer.Legend.as_view(), name='get_geoserver_legend,create_simple_legend'),
     path('api/v1/layers/<int:lyr_id>/checkchanges/', api_layer.LayerChanges.as_view(), name='check_changes'),
     path('api/v1/layers/get_capabilities_from_url/', api_layer.CapabilitiesFromUrlView.as_view(), name='external_layer_get_capabilities'),
     
