@@ -28,7 +28,7 @@ from django.contrib.auth.models import User
 from gvsigol_core.models import Project, ProjectLayerGroup, ProjectZone, ZoneLayers, Application, SharedView
 from gvsigol_plugin_projectapi import util
 from gvsigol_plugin_baseapi.validation import HttpException
-from gvsigol_services.models import LayerGroup, Layer, Server, Marker, Category, FavoriteFilter
+from gvsigol_services.models import LayerGroup, Layer, Server, Marker, Category, FavoriteFilter, Datastore, DefaultUserDatastore, DatastoreRole
 from gvsigol import settings
 from datetime import datetime
 import time
@@ -50,15 +50,90 @@ class EmptySerializer(serializers.Serializer):
     """Serializer sin campos; útil para endpoints sin body."""
     pass
 
+
+def get_user_postgis_datastores_qs(user):
+    """
+    Datastores PostGIS que el usuario puede usar para crear capas.
+    Misma lógica que la UI de publicación/creación (propios, default, roles, allow_all).
+    """
+    if user.is_superuser:
+        return Datastore.objects.filter(type='v_PostGIS').order_by('name')
+
+    user_roles = auth_backend.get_roles(user)
+    permitted_ds_ids = DatastoreRole.objects.filter(
+        role__in=user_roles,
+        can_use=True
+    ).values_list('datastore_id', flat=True)
+
+    return (
+        Datastore.objects.filter(type='v_PostGIS', created_by=user.username) |
+        Datastore.objects.filter(type='v_PostGIS', defaultuserdatastore__username=user.username) |
+        Datastore.objects.filter(type='v_PostGIS', id__in=permitted_ds_ids) |
+        Datastore.objects.filter(type='v_PostGIS', allow_all=True)
+    ).order_by('name').distinct()
+
+
 class UserSerializer(serializers.ModelSerializer):
     roles = serializers.SerializerMethodField('get_roles_')
+    default_datastore_id = serializers.SerializerMethodField('get_default_datastore_id_')
+    datastores = serializers.SerializerMethodField('get_datastores_')
 
     def get_roles_(self, obj):
         return auth_backend.get_roles(obj.username)
 
+    def _default_datastore_from_qs(self, obj, qs):
+        dud = DefaultUserDatastore.objects.filter(username=obj.username).first()
+        if dud and dud.datastore_id and qs.filter(id=dud.datastore_id).exists():
+            return dud.datastore_id
+        first = qs.first()
+        return first.id if first else None
+
+    def get_default_datastore_id_(self, obj):
+        """
+        Datastore PostGIS preferido al crear capas desde móvil.
+        Prioridad: DefaultUserDatastore (si usable) → primer usable del usuario.
+        """
+        try:
+            qs = get_user_postgis_datastores_qs(obj)
+            return self._default_datastore_from_qs(obj, qs)
+        except Exception:
+            logger.exception('get_default_datastore_id_')
+        return None
+
+    def get_datastores_(self, obj):
+        """
+        Lista de datastores PostGIS disponibles para crear capas.
+        La presencia de este campo en /api/v1/user/ indica soporte móvil de creación de capas.
+        """
+        try:
+            qs = get_user_postgis_datastores_qs(obj)
+            result = []
+            for ds in qs:
+                label = ds.description or ds.name
+                try:
+                    workspace_name = ds.workspace.name if ds.workspace_id else None
+                except Exception:
+                    workspace_name = None
+                if workspace_name:
+                    label = '%s (%s)' % (label, workspace_name)
+                result.append({
+                    'id': ds.id,
+                    'name': ds.name,
+                    'description': ds.description,
+                    'workspace': workspace_name,
+                    'label': label,
+                })
+            return result
+        except Exception:
+            logger.exception('get_datastores_')
+            return []
+
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'email', 'is_staff', 'is_superuser', 'last_login', 'roles']
+        fields = [
+            'username', 'first_name', 'last_name', 'email', 'is_staff', 'is_superuser',
+            'last_login', 'roles', 'default_datastore_id', 'datastores',
+        ]
 
 
 class ZoneLayersSerializer(serializers.ModelSerializer):
