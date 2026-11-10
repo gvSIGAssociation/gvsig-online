@@ -29,7 +29,7 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from gvsigol_core import geom
 from gvsigol_services.models import Layer
-from . import utils, sld_builder, label_sld, label_options
+from . import utils, sld_builder, label_sld, label_options, default_style_palette
 import tempfile
 import json
 import logging
@@ -375,6 +375,16 @@ def _sld_import_symbolizers(rule_node, model_rule, geom_field=None):
 
 
 
+def _default_style_color(layer):
+    # El color es estético: un fallo al calcularlo nunca debe impedir publicar la capa.
+    try:
+        layers_in_group = Layer.objects.filter(layer_group_id=layer.layer_group_id).count()
+        return default_style_palette.pick_color(layer.layer_group.name, layers_in_group)
+    except Exception:
+        LOG.exception('Could not choose the default style color for layer %s', layer.name)
+        return default_style_palette.PALETTE[0]
+
+
 def create_default_style(layer_id, style_name, style_type, geom_type, count):
     layer = Layer.objects.get(id=int(layer_id))
 
@@ -426,42 +436,44 @@ def create_default_style(layer_id, style_name, style_type, geom_type, count):
         order = 0
     )
     rule.save()
-  
+
+    color = _default_style_color(layer)
+
     if symbol_type == 'PolygonSymbolizer':
         symbolizer = PolygonSymbolizer(
             rule = rule,
             order = 0,
-            fill = '#383838',
-            fill_opacity = 0.6,
-            stroke = '#000000',
+            fill = color,
+            fill_opacity = 0.45,
+            stroke = default_style_palette.darken(color),
             stroke_width = 1,
             stroke_opacity = 1.0 ,
-            stroke_dash_array = 'none'                  
+            stroke_dash_array = 'none'
         )
         symbolizer.save()
-    
+
     elif symbol_type == 'LineSymbolizer':
         symbolizer = LineSymbolizer(
             rule = rule,
             order = 0,
-            stroke = '#000000',
-            stroke_width = 1,
+            stroke = color,
+            stroke_width = 2,
             stroke_opacity = 1.0,
-            stroke_dash_array = 'none'                 
+            stroke_dash_array = 'none'
         )
-        symbolizer.save()      
-        
+        symbolizer.save()
+
     elif symbol_type == 'MarkSymbolizer':
         symbolizer = MarkSymbolizer(
             rule = rule,
             order = 0,
             opacity = 1.0,
-            size= 8,
+            size= 10,
             rotation = 0,
             well_known_name = 'circle',
-            fill = '#383838',
-            fill_opacity = 0.6,
-            stroke = '#000000',
+            fill = color,
+            fill_opacity = 0.9,
+            stroke = '#ffffff',
             stroke_width = 1,
             stroke_opacity = 1.0,
             stroke_dash_array = 'none'                 

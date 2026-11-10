@@ -1179,3 +1179,94 @@ class ExternalGraphicSvgTest(TestCase):
             self.assertTrue(eg.sanitize_svg_file(good))
             self.assertNotIn('script', open(good).read())
             self.assertFalse(eg.sanitize_svg_file(bad))
+
+
+class DefaultStylePaletteTest(TestCase):
+    """Elección del color del estilo por defecto."""
+
+    def test_palette_has_valid_distinct_colors(self):
+        from gvsigol_symbology import default_style_palette as dsp
+        self.assertEqual(len(set(dsp.PALETTE)), len(dsp.PALETTE))
+        for color in dsp.PALETTE:
+            self.assertRegex(color, r'^#[0-9A-Fa-f]{6}$')
+
+    def test_layers_of_a_group_get_different_colors(self):
+        from gvsigol_symbology import default_style_palette as dsp
+        colors = [dsp.pick_color('grupo', n) for n in range(len(dsp.PALETTE))]
+        self.assertEqual(len(set(colors)), len(dsp.PALETTE))
+
+    def test_color_is_reproducible(self):
+        from gvsigol_symbology import default_style_palette as dsp
+        self.assertEqual(dsp.pick_color('grupo', 3), dsp.pick_color('grupo', 3))
+
+    def test_missing_group_data_still_returns_a_color(self):
+        from gvsigol_symbology import default_style_palette as dsp
+        self.assertIn(dsp.pick_color(None, None), dsp.PALETTE)
+
+    def test_darken(self):
+        from gvsigol_symbology import default_style_palette as dsp
+        self.assertEqual(dsp.darken('#64C8FF', 0.5), '#32647F')
+        self.assertEqual(dsp.darken('#000000'), '#000000')
+
+
+class CreateDefaultStyleTest(TestCase):
+    """Lo que create_default_style guarda en BD y el SLD que genera, por geometría."""
+
+    def _create(self, geom_type, geom_field, count=None, filter_side_effect=None):
+        from gvsigol_services.models import LayerGroup
+        from gvsigol_symbology import services
+        layer = Layer(name='capa', title='Capa', type='v_PostGIS', layer_group=LayerGroup(name='grupo'))
+        with mock.patch.object(services, 'Layer') as layer_model, \
+                mock.patch.object(services, 'StyleLayer'), \
+                mock.patch.object(utils, 'get_geometry_field', return_value=geom_field):
+            layer_model.objects.get.return_value = layer
+            layer_model.objects.filter.return_value.count.return_value = 2
+            if filter_side_effect:
+                layer_model.objects.filter.side_effect = filter_side_effect
+            sld = services.create_default_style(1, 'estilo', 'US', geom_type, count)
+        return Style.objects.get(name='estilo'), sld.decode('utf-8')
+
+    def _symbolizer(self, style, model):
+        return model.objects.get(rule__style=style)
+
+    def test_polygon(self):
+        from gvsigol_core import geom
+        from gvsigol_symbology import default_style_palette as dsp
+        style, sld = self._create(geom.MULTIPOLYGON, POLYGON_GEOM)
+        sym = self._symbolizer(style, PolygonSymbolizer)
+        self.assertIn(sym.fill, dsp.PALETTE)
+        self.assertEqual(sym.fill_opacity, 0.45)
+        self.assertEqual(sym.stroke, dsp.darken(sym.fill))
+        self.assertEqual(sym.stroke_width, 1)
+        self.assertIn(sym.fill, sld)
+
+    def test_line(self):
+        from gvsigol_core import geom
+        from gvsigol_symbology import default_style_palette as dsp
+        style, sld = self._create(geom.MULTILINESTRING, LINE_GEOM)
+        sym = self._symbolizer(style, LineSymbolizer)
+        self.assertIn(sym.stroke, dsp.PALETTE)
+        self.assertEqual(sym.stroke_width, 2)
+        self.assertEqual(sym.stroke_opacity, 1.0)
+        self.assertIn(sym.stroke, sld)
+
+    def test_point(self):
+        from gvsigol_core import geom
+        from gvsigol_symbology import default_style_palette as dsp
+        style, sld = self._create(geom.POINT, POINT_GEOM)
+        sym = self._symbolizer(style, MarkSymbolizer)
+        self.assertIn(sym.fill, dsp.PALETTE)
+        self.assertEqual((sym.size, sym.fill_opacity, sym.stroke), (10, 0.9, '#ffffff'))
+        self.assertEqual(sym.well_known_name, 'circle')
+        self.assertIn(sym.fill, sld)
+
+    def test_large_layer_keeps_scale_limits(self):
+        from gvsigol_core import geom
+        style, _sld = self._create(geom.POINT, POINT_GEOM, count=200001)
+        self.assertEqual((style.minscale, style.maxscale), (0, 50000))
+
+    def test_failure_choosing_color_does_not_block_publication(self):
+        from gvsigol_core import geom
+        from gvsigol_symbology import default_style_palette as dsp
+        style, _sld = self._create(geom.MULTIPOLYGON, POLYGON_GEOM, filter_side_effect=RuntimeError('fallo'))
+        self.assertEqual(self._symbolizer(style, PolygonSymbolizer).fill, dsp.PALETTE[0])
