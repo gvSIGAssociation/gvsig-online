@@ -64,10 +64,36 @@ def _normalize_geometry_subtype_for_geoserver(label):
         if len(s) > len(suffix) and s.endswith(suffix):
             base = s[: -len(suffix)]
             if base in _GEOMETRY_SUBTYPES_GEOSERVER:
-                return base
+                return force_multi_geometry_subtype(base)
     if s in _GEOMETRY_SUBTYPES_GEOSERVER:
-        return s
+        return force_multi_geometry_subtype(s)
     return None
+
+
+def force_multi_geometry_subtype(label):
+    """
+    gvSIG Online layers must never use unconstrained GEOMETRY nor single-part
+    Point/LineString/Polygon typmods — always the Multi* equivalent.
+    """
+    if not label:
+        return None
+    s = str(label).strip().upper()
+    if s.startswith('ST_'):
+        s = s[3:]
+    s = re.sub(r'\s+', '', s)
+    for suffix in ('ZM', 'Z', 'M'):
+        if len(s) > len(suffix) and s.endswith(suffix):
+            s = s[: -len(suffix)]
+            break
+    mapping = {
+        'POINT': 'MULTIPOINT',
+        'MULTIPOINT': 'MULTIPOINT',
+        'LINESTRING': 'MULTILINESTRING',
+        'MULTILINESTRING': 'MULTILINESTRING',
+        'POLYGON': 'MULTIPOLYGON',
+        'MULTIPOLYGON': 'MULTIPOLYGON',
+    }
+    return mapping.get(s)
 
 
 def _geometry_typmod_subtype_is_generic(raw_subtype):
@@ -702,7 +728,8 @@ class Introspect:
             if not (generic_by_catalog or generic_by_typmod):
                 continue
             concrete = self.resolve_concrete_geometry_type(schema, table, geom_col)
-            if not concrete or concrete == 'GEOMETRY' or concrete not in _GEOMETRY_SUBTYPES_GEOSERVER:
+            concrete = force_multi_geometry_subtype(concrete)
+            if not concrete or concrete not in _GEOMETRY_SUBTYPES_GEOSERVER:
                 continue
             try:
                 srid_val = int(srid) if srid is not None else 0
@@ -715,9 +742,10 @@ class Introspect:
                 except ValueError:
                     pass
             sub_sql = sqlbuilder.SQL(concrete)
+            # ST_Multi: Polygon→MultiPolygon cast via typmod alone often fails in PostGIS.
             stmt = sqlbuilder.SQL(
                 'ALTER TABLE {sch}.{tbl} ALTER COLUMN {geom} TYPE geometry({sub}, {srid}) '
-                'USING {geom}::geometry({sub}, {srid})'
+                'USING ST_Multi({geom})::geometry({sub}, {srid})'
             ).format(
                 sch=sqlbuilder.Identifier(schema),
                 tbl=sqlbuilder.Identifier(table),
@@ -762,6 +790,9 @@ class Introspect:
             format_type = (ft_row[0] or '').strip() if ft_row and ft_row[0] else ''
             if not _geometry_format_type_needs_concrete_subtype(format_type):
                 continue
+            geom_subtype = force_multi_geometry_subtype(geom_subtype)
+            if not geom_subtype or geom_subtype not in _GEOMETRY_SUBTYPES_GEOSERVER:
+                continue
             m = re.search(r'geometry\s*\(\s*[^,)\s]+\s*,\s*(-?\d+)', format_type, flags=re.IGNORECASE)
             try:
                 srid_val = int(m.group(1)) if m else (int(srid) if srid is not None else 0)
@@ -770,7 +801,7 @@ class Introspect:
             sub_sql = sqlbuilder.SQL(geom_subtype)
             stmt = sqlbuilder.SQL(
                 'ALTER TABLE {sch}.{tbl} ALTER COLUMN {geom} TYPE geometry({sub}, {srid}) '
-                'USING {geom}::geometry({sub}, {srid})'
+                'USING ST_Multi({geom})::geometry({sub}, {srid})'
             ).format(
                 sch=sqlbuilder.Identifier(schema),
                 tbl=sqlbuilder.Identifier(table),

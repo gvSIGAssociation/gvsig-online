@@ -275,7 +275,7 @@ def _inject_ogr_sql_dialect(ogr, sql_dialect):
     ogr._do_execute = _do_execute_with_dialect
 
 
-def shp2postgis(shp_path, table_name, srs, host, port, dbname, schema, user, password, creation_mode=MODE_CREATE, encoding="autodetect", sql=None, preserve_fid=False, creation_options={}, config_options={}, sql_dialect=None):
+def shp2postgis(shp_path, table_name, srs, host, port, dbname, schema, user, password, creation_mode=MODE_CREATE, encoding="autodetect", sql=None, preserve_fid=False, creation_options={}, config_options={}, sql_dialect=None, geom_type="PROMOTE_TO_MULTI"):
     ogr = gdaltools.ogr2ogr()
     if encoding != 'autodetect':
         ogr.set_encoding(encoding)
@@ -309,7 +309,8 @@ def shp2postgis(shp_path, table_name, srs, host, port, dbname, schema, user, pas
     ogr.config_options = config_options
     ogr.set_sql(sql)
     ogr.set_dim("2")
-    ogr.geom_type = "PROMOTE_TO_MULTI"
+    # Never leave unconstrained Geometry: prefer concrete Multi* when known.
+    ogr.geom_type = geom_type or "PROMOTE_TO_MULTI"
     _inject_ogr_sql_dialect(ogr, sql_dialect)
     try:
         ogr.execute()
@@ -550,6 +551,91 @@ def get_fields_from_gpkg(gpkg_path, layer_name=None):
     return fields
 
 
+def _map_label_to_multi_nlt(label):
+    """Map GPKG/OGR geometry labels to an ogr2ogr -nlt Multi* type (never Geometry)."""
+    from gvsigol_services.backend_postgis import force_multi_geometry_subtype
+    multi = force_multi_geometry_subtype(label)
+    return multi  # MULTIPOLYGON / MULTILINESTRING / MULTIPOINT or None
+
+
+def detect_gpkg_output_geom_type(gpkg_path, layer_name=None, sample_limit=50):
+    """
+    Resolve a concrete Multi* type for ogr2ogr -nlt.
+
+    Many GPKGs declare Geometry: Unknown (any) even when all features are Polygon;
+    PROMOTE_TO_MULTI alone then creates PostGIS geometry(Geometry,srid). Prefer a
+    concrete MULTIPOLYGON / MULTILINESTRING / MULTIPOINT when detectable.
+    """
+    gpkg_path = os.path.abspath(gpkg_path)
+    # 1) Official GeoPackage metadata
+    try:
+        import sqlite3
+        with sqlite3.connect(gpkg_path) as con:
+            if layer_name:
+                row = con.execute(
+                    "SELECT geometry_type_name FROM gpkg_geometry_columns WHERE table_name = ?",
+                    (layer_name,),
+                ).fetchone()
+            else:
+                row = con.execute(
+                    "SELECT geometry_type_name FROM gpkg_geometry_columns LIMIT 1"
+                ).fetchone()
+            if row and row[0]:
+                mapped = _map_label_to_multi_nlt(row[0])
+                if mapped:
+                    return mapped
+    except Exception:
+        logger.exception('detect_gpkg_output_geom_type: gpkg_geometry_columns failed')
+
+    # 2) Sample feature geometries (handles Unknown layer type)
+    try:
+        from django.contrib.gis.gdal import DataSource
+        ds = DataSource(gpkg_path)
+        layer = None
+        if layer_name:
+            for lyr in ds:
+                if lyr.name == layer_name:
+                    layer = lyr
+                    break
+        if layer is None:
+            layer = ds[0] if len(ds) else None
+        if layer is None:
+            return 'PROMOTE_TO_MULTI'
+        # Layer-declared type when concrete
+        try:
+            declared = getattr(layer, 'geom_name', None) or str(getattr(layer, 'geom_type', '') or '')
+            mapped = _map_label_to_multi_nlt(declared)
+            if mapped:
+                return mapped
+        except Exception:
+            pass
+        types = set()
+        for i, feat in enumerate(layer):
+            if i >= sample_limit:
+                break
+            try:
+                geom = feat.geom
+            except Exception:
+                geom = None
+            if geom is None:
+                continue
+            name = getattr(geom, 'geom_name', None) or str(getattr(geom, 'geom_type', '') or '')
+            mapped = _map_label_to_multi_nlt(name)
+            if mapped:
+                types.add(mapped)
+        if len(types) == 1:
+            return next(iter(types))
+        if types:
+            # Prefer areal > linear > point if somehow mixed in the sample
+            for preferred in ('MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'):
+                if preferred in types:
+                    return preferred
+    except Exception:
+        logger.exception('detect_gpkg_output_geom_type: feature sample failed')
+
+    return 'PROMOTE_TO_MULTI'
+
+
 def do_export_gpkg_to_postgis(gs, name, datastore, creation_mode, gpkg_path, gpkg_layer, gpkg_fields, srs, encoding, pk_column=None, preserve_pk=None, truncate=None):
     """Export one GeoPackage layer to PostGIS with the same semantics as shapefile export."""
     tmp_folder = None
@@ -603,11 +689,13 @@ def do_export_gpkg_to_postgis(gs, name, datastore, creation_mode, gpkg_path, gpk
                 preserve_fid = True
 
         creation_options['COLUMN_TYPES'] = ",".join(list(column_types.values()))
+        # Concrete Multi* when detectable (GPKG "Unknown" + polygons → MULTIPOLYGON).
+        nlt = detect_gpkg_output_geom_type(gpkg_path, gpkg_layer)
         # GPKG defaults to SQLite SQL dialect; field-only mapping SQL would drop geometry.
         stderr = shp2postgis(
             src_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding,
             sql=sql, preserve_fid=preserve_fid, creation_options=creation_options, config_options=config_options,
-            sql_dialect='OGRSQL'
+            sql_dialect='OGRSQL', geom_type=nlt
         )
         if stderr.startswith("ERROR"):
             raise rest_geoserver.RequestError(-1, stderr)
@@ -627,6 +715,14 @@ def do_export_gpkg_to_postgis(gs, name, datastore, creation_mode, gpkg_path, gpk
                         i.add_column(schema, name, control_field['name'], control_field['type'], nullable=control_field.get('nullable', True), default=control_field.get('default'))
                     except Exception:
                         logger.exception("Error adding control field: " + control_field['name'])
+            # Narrow geometry(Geometry,srid) → geometry(Multi*,srid); never leave generic Geometry.
+            try:
+                i.promote_untyped_geometry_columns(schema, name)
+            except Exception:
+                logger.exception(
+                    "promote_untyped_geometry_columns failed for %s.%s after GPKG import",
+                    schema, name,
+                )
             i.update_pk_sequences(name, schema=schema)
 
         if creation_mode == MODE_OVERWRITE:

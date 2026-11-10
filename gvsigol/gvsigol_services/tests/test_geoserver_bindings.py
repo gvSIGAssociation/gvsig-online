@@ -7,9 +7,13 @@ from gvsigol_services.backend_geoserver import Geoserver
 
 class GeometrySubtypeNormalizeTests(SimpleTestCase):
 
-    def test_plain_types(self):
-        for t in ('POINT', 'MULTILINESTRING', 'MULTIPOLYGON'):
-            self.assertEqual(_normalize_geometry_subtype_for_geoserver(t), t)
+    def test_plain_types_forced_to_multi(self):
+        # Single-part types are always promoted to Multi* for PostGIS layers.
+        self.assertEqual(_normalize_geometry_subtype_for_geoserver('POINT'), 'MULTIPOINT')
+        self.assertEqual(_normalize_geometry_subtype_for_geoserver('LINESTRING'), 'MULTILINESTRING')
+        self.assertEqual(_normalize_geometry_subtype_for_geoserver('POLYGON'), 'MULTIPOLYGON')
+        self.assertEqual(_normalize_geometry_subtype_for_geoserver('MULTILINESTRING'), 'MULTILINESTRING')
+        self.assertEqual(_normalize_geometry_subtype_for_geoserver('MULTIPOLYGON'), 'MULTIPOLYGON')
 
     def test_postgis_measure_and_z_suffixes(self):
         self.assertEqual(
@@ -18,7 +22,7 @@ class GeometrySubtypeNormalizeTests(SimpleTestCase):
         )
         self.assertEqual(
             _normalize_geometry_subtype_for_geoserver('POINTZ'),
-            'POINT',
+            'MULTIPOINT',
         )
         self.assertEqual(
             _normalize_geometry_subtype_for_geoserver('MULTIPOLYGONZM'),
