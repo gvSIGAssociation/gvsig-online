@@ -294,24 +294,6 @@ body {
 	--gol-accent-lt: rgba(199,15,45,0.06);
 }
 
-.skin-libra-blue {
-	--hdr-bg:        #003da5;
-    --hdr-bg-dk:     #002d7a;
-    --sb-bg:         #f3f5f7;
-    --sb-bg-dark:    #e7ebef;
-    --sb-accent:     #003da5;
-    --sb-accent-lt:  #002d7a;
-    --sb-text:       #37424d;
-    --sb-text-muted: #5f7181;
-    --sb-border:     rgba(63,77,90,0.18);
-    --gol-accent:    #003da5;
-    --gol-accent-dk: #002d7a;
-    --gol-accent-lt: rgba(0,61,165,0.06);
-    --hdr-shadow:    0 1px 2px rgba(63,77,90,0.14);
-    --sb-shadow:     1px 0 0 rgba(63,77,90,0.12);
-    --sb-sub-hover-text: var(--sb-accent-lt);
-}
-
 .skin-libra-red {
     --hdr-bg:        #c8102e;
     --hdr-bg-dk:     #a00d25;
@@ -432,6 +414,7 @@ body {
 .skin-black-light,
 .skin-black-light-dphuesca,
 .skin-elegant,              /* claro aunque no lleve el sufijo -light */
+.skin-libra-blue,           /* claro aunque no lleve el sufijo -light */
 .skin-green-light,
 .skin-red-light,
 .skin-purple-light,
@@ -586,5 +569,26 @@ body {
 	   los subelementos, que con este acero se queda en 4,27:1 sobre
 	   el fondo del hover y no llega al 4,5:1 que pide AA para 12,5px.
 	   El tono oscuro lo sube a 6,09:1. */
+	--sb-sub-hover-text: var(--sb-accent-lt);
+}
+
+/* Libra azul: cabecera corporativa y el sidebar claro de skin-elegant.
+   Este bloque tiene que ir detras de la lista de polaridad clara para
+   poder redefinir --sb-shadow y --sb-sub-hover-text. */
+.skin-libra-blue {
+	--hdr-bg:        #003da5;
+	--hdr-bg-dk:     #002d7a;
+	--sb-bg:         #f3f5f7;
+	--sb-bg-dark:    #e7ebef;
+	--sb-accent:     #003da5;
+	--sb-accent-lt:  #002d7a;
+	--sb-text:       #37424d;
+	--sb-text-muted: #5f7181;
+	--sb-border:     rgba(63,77,90,0.18);
+	--gol-accent:    #003da5;
+	--gol-accent-dk: #002d7a;
+	--gol-accent-lt: rgba(0,61,165,0.06);
+	--hdr-shadow:    0 1px 2px rgba(63,77,90,0.14);
+	--sb-shadow:     1px 0 0 rgba(63,77,90,0.12);
 	--sb-sub-hover-text: var(--sb-accent-lt);
 }
