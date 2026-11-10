@@ -254,7 +254,28 @@ def create_vrt_shp(shp_path, target_folder, pk_column, encoding, srs, source_lay
     return vrt_path
     
 
-def shp2postgis(shp_path, table_name, srs, host, port, dbname, schema, user, password, creation_mode=MODE_CREATE, encoding="autodetect", sql=None, preserve_fid=False, creation_options={}, config_options={}):
+def _inject_ogr_sql_dialect(ogr, sql_dialect):
+    """
+    pygdaltools has no set_dialect(); wrap _do_execute to pass -dialect.
+
+    Required for GeoPackage: GDAL defaults to the SQLite dialect for GPKG, and a
+    field-only SELECT then drops geometry (Geometry: None). OGRSQL keeps geometry
+    even when the SELECT lists attributes only — same semantics as shapefile import.
+    """
+    if not sql_dialect:
+        return
+    real_do_execute = ogr._do_execute
+
+    def _do_execute_with_dialect(args):
+        if '-sql' in args and '-dialect' not in args:
+            sql_idx = args.index('-sql')
+            args = args[:sql_idx] + ['-dialect', sql_dialect] + args[sql_idx:]
+        return real_do_execute(args)
+
+    ogr._do_execute = _do_execute_with_dialect
+
+
+def shp2postgis(shp_path, table_name, srs, host, port, dbname, schema, user, password, creation_mode=MODE_CREATE, encoding="autodetect", sql=None, preserve_fid=False, creation_options={}, config_options={}, sql_dialect=None):
     ogr = gdaltools.ogr2ogr()
     if encoding != 'autodetect':
         ogr.set_encoding(encoding)
@@ -289,6 +310,7 @@ def shp2postgis(shp_path, table_name, srs, host, port, dbname, schema, user, pas
     ogr.set_sql(sql)
     ogr.set_dim("2")
     ogr.geom_type = "PROMOTE_TO_MULTI"
+    _inject_ogr_sql_dialect(ogr, sql_dialect)
     try:
         ogr.execute()
     except:
@@ -581,9 +603,11 @@ def do_export_gpkg_to_postgis(gs, name, datastore, creation_mode, gpkg_path, gpk
                 preserve_fid = True
 
         creation_options['COLUMN_TYPES'] = ",".join(list(column_types.values()))
+        # GPKG defaults to SQLite SQL dialect; field-only mapping SQL would drop geometry.
         stderr = shp2postgis(
             src_path, name, srs, host, port, db, schema, user, password, creation_mode, encoding,
-            sql=sql, preserve_fid=preserve_fid, creation_options=creation_options, config_options=config_options
+            sql=sql, preserve_fid=preserve_fid, creation_options=creation_options, config_options=config_options,
+            sql_dialect='OGRSQL'
         )
         if stderr.startswith("ERROR"):
             raise rest_geoserver.RequestError(-1, stderr)
