@@ -32,10 +32,13 @@ Convenciones (las mismas que ya usaba gvSIG Online):
 
 import datetime
 import hashlib
+import json
 import logging
 
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import TextField
+from django.db.models.functions import Cast
 from django.utils import timezone
 
 logger = logging.getLogger('gvsigol')
@@ -68,6 +71,22 @@ def hash_key(value):
     return hashlib.sha256(str(value).encode('utf-8')).hexdigest()[:24]
 
 
+def _filter_data(qs, values):
+    """
+    Filtra las acciones cuyo Action.data contiene esos pares clave/valor.
+
+    No usa data__clave porque en las instalaciones antiguas (p. ej. LIBRA) la
+    columna es text y no jsonb, y el operador -> no existe para text. Comparar
+    el JSON como texto funciona con ambos tipos y no falla con filas antiguas
+    que no sean JSON válido. Basta para los valores que se deduplican aquí
+    (canal y hash de sesión): cadenas ASCII en el nivel superior de data.
+    """
+    qs = qs.annotate(_data_text=Cast('data', TextField()))
+    for key, value in values.items():
+        qs = qs.filter(_data_text__contains='%s: %s' % (json.dumps(key), json.dumps(value)))
+    return qs
+
+
 def record_event(actor, verb, action_object=None, target=None, channel=None,
                  dedupe_seconds=0, dedupe_data=None, **extra):
     """
@@ -92,12 +111,12 @@ def record_event(actor, verb, action_object=None, target=None, channel=None,
                 actor_content_type=ContentType.objects.get_for_model(actor),
                 actor_object_id=str(actor.pk)).order_by()
             if dedupe_data:
-                if qs.filter(**{'data__%s' % k: v for k, v in dedupe_data.items()}).exists():
+                if _filter_data(qs, dedupe_data).exists():
                     return False
             if dedupe_seconds and _is_user(actor):
                 recent = qs.filter(timestamp__gte=timezone.now() - datetime.timedelta(seconds=dedupe_seconds))
                 if channel:
-                    recent = recent.filter(data__channel=channel)
+                    recent = _filter_data(recent, {'channel': channel})
                 if action_object is not None:
                     recent = recent.filter(
                         action_object_content_type=ContentType.objects.get_for_model(action_object),

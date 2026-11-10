@@ -334,6 +334,15 @@ class EventsTest(SimpleTestCase):
             self.assertTrue(self.events.record_event(actor, 'a/b', action_object=obj, channel='spa'))
         send.assert_called_once_with(actor, verb='a/b', action_object=obj, channel='spa')
 
+    def test_filter_data_works_with_text_column(self):
+        # En LIBRA Action.data es text: el operador -> de jsonb no existe ahí
+        from actstream.models import Action
+        qs = self.events._filter_data(Action.objects.order_by(), {'session': 'abc'})
+        sql, params = qs.query.sql_with_params()
+        self.assertNotIn('->', sql)
+        self.assertIn('::text', sql)
+        self.assertEqual(params, ('%"session": "abc"%',))
+
     def test_actor_for(self):
         project = object()
         self.assertIs(self.events.actor_for(AnonymousUser(), project), project)
