@@ -23,6 +23,7 @@ urlpatterns = LOGIN_PATHS + [
     path('api-token-auth/', obtain_jwt_token, name='api-token-auth'),
     path('api-token-refresh/', refresh_jwt_token, name='api-token-refresh'),
     path('api-token-verify/', verify_jwt_token, name='api-token-verify'),
+    path('geoserver-authkey/', auth_views.geoserver_authkey, name='geoserver-authkey'),
 
     path('has-role/', auth_views.has_role, name='auth-has-role'),
     path('has-group/', auth_views.has_group, name='auth-has-group'),

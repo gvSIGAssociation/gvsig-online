@@ -848,6 +848,74 @@ def get_groups(request):
     """
     return JsonResponse(auth_backend.get_groups(request), safe=False)
 
+def _user_from_jwt(token):
+    """
+    Validate a JWT with the same decoder as the REST API and return the user.
+    Returns None when the token is missing, expired, badly signed or the user
+    is disabled.
+    """
+    from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+    from rest_framework_jwt.settings import api_settings
+
+    if token.startswith('JWT '):
+        token = token[4:]
+    elif token.startswith('Bearer '):
+        token = token[7:]
+    token = token.strip()
+    if not token:
+        return None
+    try:
+        payload = api_settings.JWT_DECODE_HANDLER(token)
+        return JSONWebTokenAuthentication().authenticate_credentials(payload)
+    except Exception:
+        logger.info('GeoServer authkey rejected an invalid JWT')
+        return None
+
+def _roles_for_geoserver(user):
+    """
+    Role names as stored in gvSIG Online. GeoServer's authkey user-group
+    service uppercases each name and prefixes ROLE_, which is the same
+    transformation used when layer rules are written.
+    """
+    roles = []
+    seen = set()
+    for role in auth_backend.get_roles(user):
+        if not isinstance(role, str):
+            continue
+        role = role.strip()
+        if not role or ',' in role or '"' in role:
+            logger.warning('Skipping role %r for GeoServer authkey', role)
+            continue
+        if role not in seen:
+            seen.add(role)
+            roles.append(role)
+    return roles
+
+@require_http_methods(["GET"])
+def geoserver_authkey(request):
+    """
+    GET /gvsigonline/auth/geoserver-authkey/?authkey=<jwt>
+
+    Called by GeoServer's authkey web-service mapper. Returns
+    {"user": "<username>", "roles": "role1,role2"} when the JWT is valid.
+    Roles are the names stored in gvSIG Online. GeoServer adds the ROLE_ prefix.
+    Returns 403 when the token is missing or not valid. The error body has
+    no "user" property, so the mapper does not authenticate the request.
+    """
+    logger.info('Petición de authkey recibida')
+    user = _user_from_jwt(request.GET.get('authkey', ''))
+    if user is None or not user.is_active:
+        return JsonResponse({}, status=403)
+    username = user.get_username()
+    if not username or '"' in username:
+        return JsonResponse({}, status=403)
+    payload = {'user': username}
+    roles = _roles_for_geoserver(user)
+    if roles:
+        payload['roles'] = ','.join(roles)
+    logger.info('geoserver_authkey respuesta: %s', payload)
+    return JsonResponse(payload)
+
 @login_required()
 def get_roles(request):
     """
