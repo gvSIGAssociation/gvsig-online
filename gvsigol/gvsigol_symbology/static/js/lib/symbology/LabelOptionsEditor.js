@@ -229,7 +229,7 @@ function lblNumber(id, label, value, min, max, step, unit) {
 }
 
 function lblWmsOnly() {
-	return '<span class="gol-lbl-badge" title="' + lblEsc(lblT('The web viewer (SPA) does not hide overlapping labels, so these options only affect WMS maps (GeoServer).')) + '">' + lblT('WMS maps only') + '</span>';
+	return '<span class="gol-lbl-badge" title="' + lblEsc(lblT('GeoServer applies these options to WMS maps. The web viewer also applies them to layers shown as vector tiles, except in applications that create their own map.')) + '">' + lblT('WMS and vector tiles') + '</span>';
 }
 
 /* ------------------------------------------------------------------ montaje */

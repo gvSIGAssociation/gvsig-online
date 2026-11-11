@@ -513,13 +513,13 @@ msgstr "Arrastatu berrantolatzeko"
 
 #: static/js/lib/symbology/LabelOptionsEditor.js
 msgctxt "symbology"
-msgid "The web viewer (SPA) does not hide overlapping labels, so these options only affect WMS maps (GeoServer)."
-msgstr "Web bisoreak (SPA) ez ditu gainjarritako etiketak ezkutatzen; beraz, aukera hauek WMS mapetan (GeoServer) bakarrik eragiten dute."
+msgid "GeoServer applies these options to WMS maps. The web viewer also applies them to layers shown as vector tiles, except in applications that create their own map."
+msgstr "GeoServer-ek aukera hauek WMS mapetan aplikatzen ditu. Web bisoreak ere aplikatzen ditu tesela bektorial gisa erakutsitako geruzetan, mapa propioa sortzen duten aplikazioetan izan ezik."
 
 #: static/js/lib/symbology/LabelOptionsEditor.js
 msgctxt "symbology"
-msgid "WMS maps only"
-msgstr "WMS mapak soilik"
+msgid "WMS and vector tiles"
+msgstr "WMS eta tesela bektorialak"
 
 #: static/js/lib/symbology/LabelOptionsEditor.js
 msgctxt "symbology"

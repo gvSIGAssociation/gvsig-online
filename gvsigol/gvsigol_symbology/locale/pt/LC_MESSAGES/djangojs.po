@@ -549,13 +549,13 @@ msgstr "Arrastar para reordenar"
 
 #: static/js/lib/symbology/LabelOptionsEditor.js
 msgctxt "symbology"
-msgid "The web viewer (SPA) does not hide overlapping labels, so these options only affect WMS maps (GeoServer)."
-msgstr "O visualizador web (SPA) não oculta as etiquetas sobrepostas, por isso estas opções só afetam os mapas WMS (GeoServer)."
+msgid "GeoServer applies these options to WMS maps. The web viewer also applies them to layers shown as vector tiles, except in applications that create their own map."
+msgstr "O GeoServer aplica estas opções aos mapas WMS. O visualizador web também as aplica às camadas mostradas como mosaicos vetoriais, exceto nas aplicações que criam o seu próprio mapa."
 
 #: static/js/lib/symbology/LabelOptionsEditor.js
 msgctxt "symbology"
-msgid "WMS maps only"
-msgstr "Só mapas WMS"
+msgid "WMS and vector tiles"
+msgstr "WMS e mosaicos vetoriais"
 
 #: static/js/lib/symbology/LabelOptionsEditor.js
 msgctxt "symbology"
