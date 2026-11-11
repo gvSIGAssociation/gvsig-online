@@ -382,6 +382,34 @@ def prepare_mapbox_style_for_openlayers(mapbox_style, source_layer_name):
     return style
 
 
+def equality_filter(prop, value):
+    """
+    Igualdad tolerante con el tipo, como GeoServer: el filtro guarda el valor como texto o
+    como número según cómo lo haya leído el editor, y en el MVT el atributo puede venir con
+    el otro tipo. Coincide si es igual tal cual, como texto o, si el valor es numérico, como
+    número (5, "5" y "5.0" valen para un campo numérico con valor 5).
+    """
+    if value is None or isinstance(value, (dict, list)):
+        return ["==", ["get", prop], value]
+    as_text = value if isinstance(value, str) else (
+        ('true' if value else 'false') if isinstance(value, bool) else
+        (str(int(value)) if isinstance(value, float) and value.is_integer() else str(value)))
+    exprs = [["==", ["get", prop], value]]
+    if as_text != value:
+        exprs.append(["==", ["get", prop], as_text])
+    if as_text != '':
+        # to-string(null) es "": con el texto vacío no se usa, para que no coincida con los nulos
+        exprs.append(["==", ["to-string", ["get", prop]], as_text])
+    if not isinstance(value, bool):
+        try:
+            number = float(value)
+            if math.isfinite(number) and number != value:
+                exprs.append(["==", ["get", prop], int(number) if number.is_integer() else number])
+        except (TypeError, ValueError):
+            pass
+    return ["any"] + exprs
+
+
 def convert_filter_to_mapbox(filter_json_str):
     """
     Convierte un filtro JSON de gvSIG Online a formato de filtro Mapbox GL.
@@ -435,9 +463,9 @@ def convert_filter_to_mapbox(filter_json_str):
             filter_type_lower = filter_type.lower().replace('_', '').replace(' ', '')
             
             if filter_type_lower in ['isequalto', 'propertyisequalto', 'equalto']:
-                mapbox_filters.append(["==", ["get", prop], value])
+                mapbox_filters.append(equality_filter(prop, value))
             elif filter_type_lower in ['isnotequalto', 'propertyisnotequalto', 'notequalto', 'isnotequal']:
-                mapbox_filters.append(["!=", ["get", prop], value])
+                mapbox_filters.append(["!", equality_filter(prop, value)])
             elif filter_type_lower in ['islessthan', 'propertyislessthan', 'lessthan']:
                 try:
                     mapbox_filters.append(["<", ["get", prop], float(value)])
@@ -464,6 +492,8 @@ def convert_filter_to_mapbox(filter_json_str):
                 mapbox_filters.append(["in", clean_value, ["get", prop]])
             elif filter_type_lower in ['isnull', 'propertyisnull', 'null']:
                 mapbox_filters.append(["==", ["get", prop], None])
+            elif filter_type_lower in ['isnotnull', 'propertyisnotnull', 'notnull']:
+                mapbox_filters.append(["!=", ["get", prop], None])
             elif filter_type_lower in ['isbetween', 'propertyisbetween', 'between']:
                 lower = f.get('value', f.get('value1', f.get('lowerBoundary', '')))
                 upper = f.get('value2', f.get('upperBoundary', ''))
@@ -492,8 +522,119 @@ def convert_filter_to_mapbox(filter_json_str):
         return None
 
 
+# ---------------------------------------------------------------------------
+# Marcas que no son círculo (cuadrado, triángulo, estrella, cruz)
+# ---------------------------------------------------------------------------
+# Mapbox solo tiene círculos. El resto de formas se pintan como icono: el conversor genera
+# un SVG con la forma (data: URI) y lo publica en "icons" con su tamaño, como las imágenes
+# externas; el visor ya los carga y los escala a ese tamaño (mapboxExternalIcons.js).
+# Los círculos siguen como capa "circle", exactamente como antes.
+
+_SVG_COLOR_RE = re.compile(r'^(#[0-9A-Fa-f]{3}|#[0-9A-Fa-f]{6}|[A-Za-z]{3,20})$')
+
+
+def _svg_color(value):
+    value = (value or '').strip()
+    return value if _SVG_COLOR_RE.match(value) and value.lower() != 'none' else None
+
+
+def _svg_number(value, default):
+    try:
+        n = float(value)
+    except (TypeError, ValueError):
+        return default
+    return n if n == n else default  # NaN -> default
+
+
+def _mark_shape_points(name, size):
+    """Vértices de la forma centrada en (0, 0) para una marca de `size` px (como GeoTools)."""
+    r = size / 2.0
+    if name == 'square':
+        return [(-r, -r), (r, -r), (r, r), (-r, r)]
+    if name == 'triangle':
+        # equilátero inscrito en la circunferencia, con un vértice arriba
+        return [(r * math.cos(math.radians(a)), r * math.sin(math.radians(a))) for a in (-90, 30, 150)]
+    if name == 'star':
+        pts = []
+        for i in range(10):
+            radius = r if i % 2 == 0 else r * 0.382
+            a = math.radians(-90 + i * 36)
+            pts.append((radius * math.cos(a), radius * math.sin(a)))
+        return pts
+    if name == 'cross':
+        t = size * 0.125  # media anchura del brazo (cruz de GeoTools: brazo de 1/4 del tamaño)
+        return [(-t, -r), (t, -r), (t, -t), (r, -t), (r, t), (t, t), (t, r), (-t, r), (-t, t), (-r, t),
+                (-r, -t), (-t, -t)]
+    return None
+
+
+def mark_icon_spec(symbolizer):
+    """
+    (nombre, {"url": data URI SVG, "size": px}) para una marca que no es círculo, o None.
+    El nombre depende solo del aspecto, así que marcas iguales comparten icono.
+    """
+    name = (getattr(symbolizer, 'well_known_name', None) or 'circle').strip().lower()
+    if name == 'circle':
+        return None
+    size = max(1.0, _svg_number(getattr(symbolizer, 'size', None), 8))
+    points = _mark_shape_points(name, size)
+    if not points:
+        return None
+    fill = _svg_color(getattr(symbolizer, 'fill', None))
+    stroke = _svg_color(getattr(symbolizer, 'stroke', None))
+    stroke_width = max(0.0, _svg_number(getattr(symbolizer, 'stroke_width', None), 0))
+    if not stroke:
+        stroke_width = 0.0
+    fill_opacity = min(1.0, max(0.0, _svg_number(getattr(symbolizer, 'fill_opacity', None), 1.0)))
+    stroke_opacity = min(1.0, max(0.0, _svg_number(getattr(symbolizer, 'stroke_opacity', None), 1.0)))
+    dash = parse_dash_array(getattr(symbolizer, 'stroke_dash_array', None))
+
+    # El borde sobresale media anchura por cada lado: el lienzo lo incluye
+    canvas = int(math.ceil(size + stroke_width))
+    c = canvas / 2.0
+    d = ' '.join('%s%s,%s' % ('M' if i == 0 else 'L', round(c + x, 3), round(c + y, 3))
+                 for i, (x, y) in enumerate(points)) + ' Z'
+    attrs = ['d="%s"' % d,
+             'fill="%s"' % (fill or 'none')]
+    if fill:
+        attrs.append('fill-opacity="%s"' % round(fill_opacity, 3))
+    if stroke and stroke_width > 0:
+        attrs += ['stroke="%s"' % stroke, 'stroke-width="%s"' % round(stroke_width, 3),
+                  'stroke-opacity="%s"' % round(stroke_opacity, 3), 'stroke-linejoin="round"']
+        if dash:
+            attrs.append('stroke-dasharray="%s"' % ' '.join(str(round(v, 3)) for v in dash))
+    svg = ('<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d">'
+           '<path %s/></svg>') % (canvas, canvas, canvas, canvas, ' '.join(attrs))
+
+    import base64
+    import hashlib
+    url = 'data:image/svg+xml;base64,' + base64.b64encode(svg.encode('utf-8')).decode('ascii')
+    icon_name = 'gvsigol-mark-' + hashlib.sha1(svg.encode('utf-8')).hexdigest()[:12]
+    return icon_name, {"url": url, "size": canvas}
+
+
 def convert_mark_symbolizer(symbolizer, layer_id, rule_name, source_layer):
-    """Convierte MarkSymbolizer a capa Mapbox GL (circle)."""
+    """Convierte MarkSymbolizer a capa Mapbox GL: "circle" para círculos, "symbol" con icono SVG para el resto."""
+    icon = mark_icon_spec(symbolizer)
+    if icon is not None:
+        layout = {
+            "icon-image": icon[0],
+            "icon-size": 1,
+            # Como los círculos: nunca se ocultan por colisión con otros símbolos
+            "icon-allow-overlap": True,
+            "icon-ignore-placement": True,
+        }
+        rotation = _svg_number(getattr(symbolizer, 'rotation', None), 0)
+        if rotation:
+            layout["icon-rotate"] = rotation
+        return {
+            "id": f"{layer_id}_{rule_name}_point",
+            "type": "symbol",
+            "source": "gvsigol",
+            "source-layer": source_layer,
+            "layout": layout,
+            "paint": {}
+        }
     layer = {
         "id": f"{layer_id}_{rule_name}_point",
         "type": "circle",
@@ -787,6 +928,13 @@ def collect_external_graphic_icons(layer):
                 "url": icon_url,
                 "size": max(1, target_size),
             }
+    marks = MarkSymbolizer.objects.filter(
+        rule__style__stylelayer__layer=layer
+    ).exclude(well_known_name='circle').distinct()
+    for mark in marks:
+        spec = mark_icon_spec(mark)
+        if spec:
+            icons[spec[0]] = spec[1]
     return icons
 
 
@@ -810,6 +958,10 @@ def convert_external_graphic_symbolizer(symbolizer, layer_id, rule_name, source_
     # Display size is applied by pre-scaling the PNG to SLD Size in the viewer.
     # icon-size is a multiplier of the image pixels; keep 1 to avoid huge icons.
     layer["layout"]["icon-size"] = 1
+    # Como los círculos: el icono nunca se oculta por colisión (el visor activa declutter en
+    # las capas de teselas vectoriales para que no se pisen las etiquetas)
+    layer["layout"]["icon-allow-overlap"] = True
+    layer["layout"]["icon-ignore-placement"] = True
     
     # Rotation
     if symbolizer.rotation:
@@ -1534,33 +1686,21 @@ def create_heatmap_from_sld(style, layer_id, source_layer):
 
 
 def apply_scale_to_layer(mapbox_layer, minscale, maxscale):
-    """Aplica restricciones de escala a una capa Mapbox."""
-    # Mapbox usa zoom levels (0-22), SLD usa denominadores de escala
-    # Conversión aproximada: zoom = log2(559082264 / scale)
-    
-    if minscale and minscale > 0:
-        try:
-            max_zoom = int(round(19 - (minscale / 50000000 * 19)))
-            max_zoom = max(0, min(22, max_zoom))
-            mapbox_layer["maxzoom"] = max_zoom
-        except:
-            pass
-    
-    if maxscale and maxscale > 0:
-        try:
-            min_zoom = int(round(19 - (maxscale / 50000000 * 19)))
-            min_zoom = max(0, min(22, min_zoom))
-            mapbox_layer["minzoom"] = min_zoom
-        except:
-            pass
-    
-    return mapbox_layer
+    """
+    Escalas de la regla (denominadores de SLD) -> minzoom/maxzoom de la capa Mapbox.
+
+    Usa la conversión logarítmica zoom = log2(559082264.028 / escala), la misma que las
+    etiquetas nuevas. La fórmula lineal anterior daba zoom 19 para cualquier escala
+    realista, y las reglas con escala solo se veían en el zoom 19.
+    MinScaleDenominator (visible si escala >= min) -> maxzoom; MaxScaleDenominator -> minzoom.
+    """
+    return apply_scale_to_new_label_layer(mapbox_layer, minscale, maxscale)
 
 
 # =============================================================================
 # Etiquetas NUEVAS (TextSymbolizer.options, ver gvsigol_symbology/label_options.py)
-# Las etiquetas antiguas (options vacío) siguen usando convert_text_symbolizer y
-# apply_scale_to_layer sin ningún cambio.
+# Las etiquetas antiguas (options vacío) siguen usando convert_text_symbolizer.
+# Las escalas usan la misma conversión para todas las capas (apply_scale_to_layer).
 # =============================================================================
 try:
     from gvsigol_symbology import label_options as _label_options
@@ -1747,6 +1887,23 @@ def convert_new_text_symbolizer(symbolizer, options, layer_id, rule_name, source
         "paint": paint,
         "metadata": {"gvsigol:label": extras},
     }
+
+
+def mark_label_aligned_to_line(mapbox_layer, geom_kind):
+    """
+    Etiqueta de una capa de líneas que no sigue la línea -> metadata["gvsigol:label"]["alignToLine"].
+
+    GeoServer pone esas etiquetas rectas, en el centro de la línea y giradas según el tramo
+    (LinePlacement sin followLine). Mapbox no tiene esa colocación: el visor (labelExtras.js)
+    la reproduce con esta marca. Las que siguen la línea (symbol-placement "line") no cambian.
+    """
+    if geom_kind != 'line' or not mapbox_layer or mapbox_layer.get("type") != "symbol":
+        return mapbox_layer
+    if (mapbox_layer.get("layout") or {}).get("symbol-placement", "point") != "point":
+        return mapbox_layer
+    metadata = mapbox_layer.setdefault("metadata", {})
+    metadata.setdefault("gvsigol:label", {})["alignToLine"] = True
+    return mapbox_layer
 
 
 def validate_text_layer(layer):
@@ -2099,6 +2256,7 @@ def convert_style_to_mapbox(layer_id, style_id=None, tms_base_url=None, style_ob
                     geom_kind_cache['kind'] = layer_geometry_kind(layer)
                 lyr = convert_new_text_symbolizer(sym, label_opts, layer_id, rule_name, source_layer,
                                                   geom_kind_cache['kind'])
+                lyr = mark_label_aligned_to_line(lyr, geom_kind_cache['kind'])
                 if lyr:
                     if mapbox_filter:
                         lyr["filter"] = mapbox_filter
@@ -2116,11 +2274,28 @@ def convert_style_to_mapbox(layer_id, style_id=None, tms_base_url=None, style_ob
                     if mapbox_filter:
                         lyr["filter"] = mapbox_filter
                     lyr = apply_scale_to_layer(lyr, rule.minscale, rule.maxscale)
+                    if geom_kind_cache.get('kind') is None:
+                        geom_kind_cache['kind'] = layer_geometry_kind(layer)
+                    lyr = mark_label_aligned_to_line(lyr, geom_kind_cache['kind'])
                     mapbox_style["layers"].append(lyr)
                 else:
                     logger.error(f"Skipping invalid text layer: {lyr.get('id')}")
     
     return mapbox_style
+
+
+# Versión de la conversión. Se guarda en MapboxStyleCache; si la caché es de otra versión
+# se regenera, para que los cambios del conversor lleguen sin volver a guardar cada estilo.
+# 2: escalas de todas las reglas con la fórmula logarítmica.
+# 3: formas de las marcas (iconos SVG) e igualdad tolerante con el tipo en los filtros.
+# 4: las imágenes externas nunca se ocultan por colisión (declutter en el visor).
+# 5: etiquetas de líneas que no siguen la línea, giradas según el tramo (alignToLine).
+CONVERTER_VERSION = 5
+
+
+def cache_is_current(json_cache):
+    """True si el JSON guardado en MapboxStyleCache lo generó esta versión del conversor."""
+    return isinstance(json_cache, dict) and json_cache.get("converter_version") == CONVERTER_VERSION
 
 
 def get_all_styles_for_layer(layer_id, tms_base_url=None, use_cache=True):
@@ -2178,8 +2353,11 @@ def get_all_styles_for_layer(layer_id, tms_base_url=None, use_cache=True):
     if use_cache:
         try:
             cache = MapboxStyleCache.objects.get(layer=layer)
-            logger.info(f"Returning cached Mapbox style for layer {layer_id} (cached at {cache.updated_at})")
-            result = cache.json_cache
+            if cache_is_current(cache.json_cache):
+                logger.info(f"Returning cached Mapbox style for layer {layer_id} (cached at {cache.updated_at})")
+                result = cache.json_cache
+            else:
+                logger.info(f"Cached Mapbox style for layer {layer_id} is from another converter version, regenerating...")
         except MapboxStyleCache.DoesNotExist:
             logger.info(f"No cache found for layer {layer_id}, generating...")
     else:
@@ -2224,6 +2402,7 @@ def get_all_styles_for_layer(layer_id, tms_base_url=None, use_cache=True):
             "crs": "EPSG:3857",
             "minzoom": minzoom,
             "maxzoom": maxzoom,
+            "converter_version": CONVERTER_VERSION,
             "styles": []
         }
         
