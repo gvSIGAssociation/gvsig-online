@@ -361,6 +361,7 @@ class Legend(APIView):
                 'stroke_opacity': openapi.Schema(type=openapi.TYPE_NUMBER, example=1.0),
                 'fill': openapi.Schema(type=openapi.TYPE_STRING, example='#3388ff'),
                 'fill_opacity': openapi.Schema(type=openapi.TYPE_NUMBER, example=0.5),
+                'size': openapi.Schema(type=openapi.TYPE_NUMBER, example=12, description='Point marker size (points only)'),
                 'name': openapi.Schema(type=openapi.TYPE_STRING),
                 'title': openapi.Schema(type=openapi.TYPE_STRING),
             }
