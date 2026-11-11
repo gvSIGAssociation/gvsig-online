@@ -167,7 +167,9 @@ def _simple_symbolizer(geom_type, params):
     stroke_opacity = float(params.get('stroke_opacity', 1.0))
     fill = params.get('fill') or '#3388ff'
     fill_opacity = float(params.get('fill_opacity', 0.5))
-    size = int(float(params.get('size', 8)))
+    size = int(float(params.get('size', 12)))
+    if size <= 0:
+        size = 12
 
     if geom.isPoint(geom_type):
         return 'MarkSymbolizer', {
