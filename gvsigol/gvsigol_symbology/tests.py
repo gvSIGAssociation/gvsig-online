@@ -1052,6 +1052,19 @@ class LabelSldImportTest(TestCase):
         # sin geometría conocida (llamadas antiguas): exactamente como antes
         self.assertIsNone(self._import('newlabel_point_default.sld', None).options)
 
+    def test_new_label_exported_with_partials_true_is_still_recognised(self):
+        # Los SLD exportados antes del cambio a partials=false siguen importándose como etiqueta nueva
+        rule_node = self._text_rules('newlabel_background_box.sld')
+        ns = {'sld': 'http://www.opengis.net/sld'}
+        partials = rule_node.xpath('sld:TextSymbolizer/sld:VendorOption[@name="partials"]', namespaces=ns)
+        self.assertEqual(len(partials), 1)
+        partials[0].text = 'true'
+        from gvsigol_symbology import services
+        style = _style('imp_partials', 'EX')
+        rule = _rule(style, 'imp_partials_text')
+        services._sld_import_symbolizers(rule_node, rule, geom_field=self.GEOMS['point'])
+        self.assertIsNotNone(TextSymbolizer.objects.get(rule=rule).options)
+
     def test_modified_new_label_imports_as_classic(self):
         from lxml import etree
         rule_node = self._text_rules('newlabel_background_box.sld')

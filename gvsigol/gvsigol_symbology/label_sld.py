@@ -217,14 +217,15 @@ def build_text_symbolizer(rule, s, geom_field, options):
         _el(prio, OGC, 'PropertyName', options['priority']['field'])
 
     # Opciones de GeoServer (todas tienen equivalente en el SPA salvo «partials» y «group»,
-    # que se mantienen como en las etiquetas antiguas)
+    # que se mantienen como en las etiquetas antiguas). partials=false: en las teselas WMS
+    # una etiqueta que cruza el borde no se pinta, en vez de salir cortada.
     bg = options['background']
     layout = box_layout(kind, placement) if bg['type'] == 'box' else None
     _vendor(node, 'conflictResolution', 'false' if options['priority']['allow_overlap'] else 'true')
     if placement['wrap'] and layout != 'single_line':
         _vendor(node, 'autoWrap', str(placement['wrap']))
     _vendor(node, 'spaceAround', str(options['priority']['space_around']))
-    _vendor(node, 'partials', 'true')
+    _vendor(node, 'partials', 'false')
     if options['style']['letter_spacing']:
         _vendor(node, 'charSpacing', _fmt(options['style']['letter_spacing']))
     if bg['type'] == 'box':
@@ -395,13 +396,23 @@ def parse_options(node):
             'style': style, 'background': background}
 
 
+# Opciones que no forman parte de las opciones de la etiqueta y han cambiado con el tiempo:
+# no cuentan al comparar (un SLD exportado con partials=true sigue siendo una etiqueta nueva).
+_IGNORED_VENDOR_OPTIONS = ('partials',)
+
+
+def _is_ignored(elem):
+    return (_q(elem).namespace == SLD and _q(elem).localname == 'VendorOption'
+            and elem.get('name') in _IGNORED_VENDOR_OPTIONS)
+
+
 def _canonical(elem):
-    '''Árbol comparable: sin prefijos, sin espacios de formato y sin comentarios.'''
+    '''Árbol comparable: sin prefijos, sin espacios de formato, sin comentarios y sin opciones ignoradas.'''
     text = elem.text or ''
     if not text.strip():
         text = ''
     return (elem.tag, tuple(sorted(elem.attrib.items())), text,
-            tuple(_canonical(c) for c in elem if isinstance(c.tag, str)))
+            tuple(_canonical(c) for c in elem if isinstance(c.tag, str) and not _is_ignored(c)))
 
 
 class _RuleHolder(object):

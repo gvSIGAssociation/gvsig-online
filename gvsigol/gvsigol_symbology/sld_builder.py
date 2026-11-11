@@ -362,11 +362,12 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
             symbolizer.create_vendoroption('autoWrap', '120')
             symbolizer.create_vendoroption('spaceAround', '0')
             symbolizer.create_vendoroption('polygonAlign', 'mbr')
-            symbolizer.create_vendoroption('partials', 'true')
+            # partials=false: en las teselas WMS una etiqueta que cruza el borde no se pinta
+            # (antes salía cortada y se pisaba con las de la tesela vecina)
+            symbolizer.create_vendoroption('partials', 'false')
             
             if geom_field['field_type'] == 'MULTILINESTRING' or geom_field['field_type'] == 'LINESTRING':
                 symbolizer.create_vendoroption('group', 'yes')
-                #symbolizer.create_vendoroption('partials', 'true')
                 symbolizer.create_vendoroption('forceLeftToRight', 'true')
                 
         elif hasattr(s, 'rastersymbolizer'):
