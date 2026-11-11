@@ -782,6 +782,51 @@ def convert_polygon_symbolizer(symbolizer, layer_id, rule_name, source_layer):
     return layers
 
 
+# ---------------------------------------------------------------------------
+# Fuentes de las etiquetas en el navegador
+# ---------------------------------------------------------------------------
+# Las fuentes del editor son las del servidor de GeoServer (Linux: DejaVu, Liberation...).
+# Si el navegador no la tiene, usa la siguiente de la lista: se pone la equivalente más
+# parecida que suele haber en Windows/Mac y después el tipo genérico, en vez de Open Sans/Arial
+# para todo. El grosor y la cursiva se repiten en cada fuente porque mapbox-to-css-font (SPA)
+# toma el de la ÚLTIMA de la lista: con "... Regular" al final la negrita se perdía.
+FONT_EQUIVALENTS = {
+    'dejavu sans': 'Verdana',
+    'bitstream vera sans': 'Verdana',
+    'dejavu serif': 'Georgia',
+    'bitstream vera serif': 'Georgia',
+    'dejavu sans mono': 'Consolas',
+    'bitstream vera sans mono': 'Consolas',
+    'liberation sans': 'Arial',
+    'liberation serif': 'Times New Roman',
+    'liberation mono': 'Courier New',
+}
+
+
+def _generic_font_family(family):
+    name = family.lower()
+    if 'mono' in name or name in ('dialoginput', 'courier', 'courier new', 'consolas'):
+        return 'monospace'
+    if ('serif' in name and 'sans' not in name) or name in ('times', 'times new roman', 'georgia'):
+        return 'serif'
+    return 'sans-serif'
+
+
+def font_stack(family, suffix):
+    """
+    text-font de Mapbox: la fuente elegida, su equivalente habitual en el navegador y el
+    genérico, todas con el mismo sufijo de grosor/estilo ("Regular", "Bold", "Bold Italic"...).
+    """
+    family = (family or 'Arial').strip() or 'Arial'
+    suffix = (suffix or 'Regular').strip() or 'Regular'
+    stack = [family]
+    equivalent = FONT_EQUIVALENTS.get(family.lower())
+    if equivalent and equivalent.lower() != family.lower():
+        stack.append(equivalent)
+    stack.append(_generic_font_family(family))
+    return [f"{f} {suffix}" for f in stack]
+
+
 def convert_text_symbolizer(symbolizer, layer_id, rule_name, source_layer):
     """Convierte TextSymbolizer a capa Mapbox GL (symbol)."""
     # NOTA: Si existe TextSymbolizer en BD, se dibuja. No validar is_actived (bug legacy).
@@ -819,11 +864,7 @@ def convert_text_symbolizer(symbolizer, layer_id, rule_name, source_layer):
     normalized_weight = font_weight_map.get(font_weight.lower(), font_weight) if isinstance(font_weight, str) else 'Regular'
     
     # Usar array de fuentes con fallbacks para OpenLayers/ol-mapbox-style
-    layer["layout"]["text-font"] = [
-        f"{font_family} {normalized_weight}",
-        "Open Sans Regular",
-        "Arial Unicode MS Regular"
-    ]
+    layer["layout"]["text-font"] = font_stack(font_family, normalized_weight)
     
     # Font size
     if symbolizer.font_size:
@@ -1472,11 +1513,7 @@ def parse_text_symbolizer_from_sld(symbolizer, namespaces, layer_id, rule_name, 
         normalized_weight = font_weight_map.get(weight_text.lower(), weight_text) if isinstance(weight_text, str) else 'Regular'
         
         # Array con fallbacks para compatibilidad
-        layer["layout"]["text-font"] = [
-            f"{font_family.text} {normalized_weight}",
-            "Open Sans Regular",
-            "Arial Unicode MS Regular"
-        ]
+        layer["layout"]["text-font"] = font_stack(font_family.text, normalized_weight)
     else:
         # Fuentes por defecto si no se especifica en SLD
         layer["layout"]["text-font"] = ["Open Sans Regular", "Arial Unicode MS Regular"]
@@ -1800,14 +1837,14 @@ def convert_new_text_symbolizer(symbolizer, options, layer_id, rule_name, source
 
     weight_map = {'normal': 'Regular', 'bold': 'Bold'}
     weight = weight_map.get(str(symbolizer.font_weight or 'normal').lower(), 'Regular')
-    font_name = f"{symbolizer.font_family or 'Arial'} {weight}"
+    font_suffix = weight
     if str(symbolizer.font_style or '').lower() in ('italic', 'oblique'):
-        font_name += " Italic"
+        font_suffix += " Italic"
 
     placement = options['placement']
     layout = {
         "text-field": text_field,
-        "text-font": [font_name, "Open Sans Regular", "Arial Unicode MS Regular"],
+        "text-font": font_stack(symbolizer.font_family, font_suffix),
         "text-size": size,
         "text-allow-overlap": options['priority']['allow_overlap'],
         "text-ignore-placement": False,
@@ -2290,7 +2327,8 @@ def convert_style_to_mapbox(layer_id, style_id=None, tms_base_url=None, style_ob
 # 3: formas de las marcas (iconos SVG) e igualdad tolerante con el tipo en los filtros.
 # 4: las imágenes externas nunca se ocultan por colisión (declutter en el visor).
 # 5: etiquetas de líneas que no siguen la línea, giradas según el tramo (alignToLine).
-CONVERTER_VERSION = 5
+# 6: fuentes de las etiquetas con equivalente para el navegador y la negrita conservada.
+CONVERTER_VERSION = 6
 
 
 def cache_is_current(json_cache):
