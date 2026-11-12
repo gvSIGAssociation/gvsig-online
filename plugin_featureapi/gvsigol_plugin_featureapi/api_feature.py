@@ -651,6 +651,9 @@ class FeaturesView(CreateAPIView):
                                     409: "Version conflict"})
     @action(detail=True, methods=['PUT'], permission_classes=[IsAuthenticated])
     def put(self, request, lyr_id):
+        # Antes del try: si check_update_feature lanza (p.ej. falta
+        # feat_version_gvol), el except llama a handle_feature_error con epsg.
+        epsg = 4326
         try:
             content = util.get_content(request)
             validation = Validation(request)
@@ -675,7 +678,6 @@ class FeaturesView(CreateAPIView):
             username = request.user.username
             
             # Manejar el parámetro epsg de la query
-            epsg = 4326
             if 'epsg' in request.GET:
                 try:
                     epsg = int(request.GET['epsg'])
