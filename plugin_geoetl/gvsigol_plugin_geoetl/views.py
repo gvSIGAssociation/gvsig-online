@@ -284,21 +284,26 @@ def etl_canvas(request):
 
     try:
 
+        from django.utils.encoding import force_str
         from gvsigol_plugin_geocoding.models import Provider
         from gvsigol_plugin_geocoding.settings import GEOCODING_SUPPORTED_TYPES
 
-        providers_list = []
-        providers_obj  = Provider.objects.all()
-
-        for pr in providers_obj:
-            for engine in GEOCODING_SUPPORTED_TYPES:
-                if engine[0] == pr.type:
-                    name = engine[1]
-                    break
-            providers_list.append({"type": pr.type, 'name': name})
+        # Los nombres de GEOCODING_SUPPORTED_TYPES son gettext_lazy.
+        # json.dumps no los serializa y, si falla, el desplegable se queda solo con el ICV fijo.
+        type_names = {
+            engine_type: force_str(label)
+            for engine_type, label in GEOCODING_SUPPORTED_TYPES
+        }
+        providers_list = [
+            {"type": pr.type, "name": type_names.get(pr.type, pr.type)}
+            for pr in Provider.objects.all()
+        ]
         providers = json.dumps(providers_list)
 
-    except:
+    except ImportError:
+        providers = json.dumps([])
+    except Exception:
+        logger.exception('ETL canvas: no se pudieron cargar los motores de geocodificación')
         providers = json.dumps([])
 
     try:
