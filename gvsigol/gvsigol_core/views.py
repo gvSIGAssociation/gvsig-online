@@ -1200,6 +1200,17 @@ def _get_prepared_layer_groups(request):
 
 @login_required()
 @staff_required
+
+def _notify_project_form_saved(request, project, created):
+    """Avisa a los plugins (gvsigol_core.signals.project_form_saved). Un fallo en un plugin no
+    impide guardar el proyecto: se registra y se informa al usuario."""
+    from gvsigol_core.signals import project_form_saved
+    for receiver, result in project_form_saved.send_robust(sender=Project, project=project,
+                                                           request=request, created=created):
+        if isinstance(result, Exception):
+            logger.error('project_form_saved: %s', receiver, exc_info=(type(result), result, result.__traceback__))
+            messages.warning(request, _('Some plugin settings of the project could not be saved'))
+
 def project_add(request):
 
     has_geocoding_plugin = False
@@ -1419,6 +1430,8 @@ def project_add(request):
                     permission = ProjectRole.PERM_MANAGE
                 )
                 project_role.save()
+
+        _notify_project_form_saved(request, project, created=True)
 
         if 'redirect' in request.GET:
             redirect_var = request.GET.get('redirect')
@@ -1652,6 +1665,8 @@ def project_update(request, pid):
             permission = ProjectRole.PERM_MANAGE
         )
         project_role.save()
+
+        _notify_project_form_saved(request, project, created=False)
 
         if 'redirect' in request.GET:
             redirect_var = request.GET.get('redirect')

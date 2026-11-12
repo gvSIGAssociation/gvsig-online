@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% load i18n %}
+{% load include_if_exists %}
 
 {% block header %}
 <link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
@@ -156,6 +157,8 @@
 							<div class="pf-lyr-panel__actions">
 								<div id="button-create-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn-pf-action btn-pf-action--secondary"><i class="fa fa-database"></i> {% trans "Create empty layer" %}</div>
 								<div id="button-import-layer" data-toggle="modal" data-target="#modal-add-layer" class="btn-pf-action"><i class="fa fa-cloud-upload"></i> {% trans "Publish layer" %}</div>
+								{# Botones aportados por plugins: layergroup_actions_<plugin>.html (p. ej. «Añadir capa 3D») #}
+								{% for plugin in INSTALLED_APPS %}{% if 'gvsigol_plugin_' in plugin %}{% with "layergroup_actions_"|add:plugin|cut:"gvsigol_plugin_"|add:".html" as aux %}{% include_if_exists aux %}{% endwith %}{% endif %}{% endfor %}
 							</div>
 						</div>
 						<div class="pf-lyr-panel__body">

@@ -321,8 +321,17 @@ def can_read_layer(request_or_user, layer):
     """
     try:
         layer = _get_layer_obj(layer)
-        if layer.public or layer.external:
+        if layer.public:
             return True
+        if layer.external:
+            # Las capas externas son de lectura libre, salvo los tipos registrados por plugins
+            # que exigen roles (p. ej. 3D Tiles protegidos). Para esos se usan los roles de
+            # gvSIG (LayerReadRole): no tienen datastore, así que el ACL de GeoServer no aplica.
+            from gvsigol_services.external_layer_types import enforces_read_roles
+            if not enforces_read_roles(layer):
+                return True
+            from gvsigol_services.authorization import PlainAuthorizationService
+            return PlainAuthorizationService().can_read_layer(request_or_user, layer)
         authz_service = get_authz_server_for_layer(layer)
         return authz_service.can_read_layer(request_or_user, layer)
     except Exception as e:

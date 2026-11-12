@@ -6013,8 +6013,11 @@ def describeFeatureTypeWithPk(request):
 @require_safe
 @staff_required
 def external_layer_list(request):
+    # Los tipos gestionados por plugins (p. ej. capas 3D) tienen su propia sección
+    from gvsigol_services.external_layer_types import get_registered_types
+    plugin_types = [code for code, h in get_registered_types().items() if h.managed_by_plugin]
     if request.user.is_superuser:
-        external_layer_list = Layer.objects.filter(external=True).order_by('id')
+        external_layer_list = Layer.objects.filter(external=True).exclude(type__in=plugin_types).order_by('id')
 
         response = {
             'external_layers': external_layer_list
@@ -6023,7 +6026,7 @@ def external_layer_list(request):
     else:
         user_roles = auth_backend.get_roles(request)
         external_layer_list = (Layer.objects.filter(created_by=request.user.username, external=True)
-            | Layer.objects.filter(layermanagerole__role__in=user_roles, external=True)).order_by('id').distinct()
+            | Layer.objects.filter(layermanagerole__role__in=user_roles, external=True)).exclude(type__in=plugin_types).order_by('id').distinct()
         response = {
             'external_layers': external_layer_list
         }
@@ -6371,6 +6374,16 @@ def external_layer_update(request, external_layer_id):
     external_layer = Layer.objects.get(id=external_layer_id)
     if not utils.can_manage_layer(request, external_layer):
         return forbidden_view(request)
+
+    # Tipos aportados por plugins (p. ej. 3D Tiles): se editan desde el propio plugin
+    from gvsigol_services.external_layer_types import get_handler
+    plugin_handler = get_handler(external_layer.type)
+    if plugin_handler and plugin_handler.managed_by_plugin:
+        edit_url = plugin_handler.admin_edit_url(external_layer)
+        if edit_url:
+            # Se conservan los parámetros (redirect, layergroup_id, project_id) para volver al origen
+            query = request.GET.urlencode()
+            return redirect(edit_url + ('?' + query if query else ''))
 
     if redirect_to_layergroup:
         if from_redirect:
