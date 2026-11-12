@@ -609,6 +609,16 @@ class LayerSerializer(serializers.ModelSerializer):
                 external_params['wmts_options'] = services_utils.wmts_options_for_openlayers(
                     external_params['wmts_options'], projection=project_crs, layer_styles=layer_styles
                 )
+        if obj.external:
+            # Tipos de capa externa aportados por plugins (p. ej. 3D Tiles): el plugin decide qué
+            # parámetros ve el cliente (URL pública o protegida, estilo...). Sin plugins, no cambia nada.
+            from gvsigol_services.external_layer_types import get_handler
+            handler = get_handler(obj.type)
+            if handler:
+                try:
+                    external_params = handler.serialize_params(obj, external_params, self.context)
+                except Exception:
+                    logger.exception('serialize_params failed for external layer id=%s type=%s', obj.id, obj.type)
         return external_params
     
     def get_featureapi_endpoint_(self, obj):
