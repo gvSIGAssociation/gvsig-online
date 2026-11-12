@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% load i18n %}
+{% load include_if_exists %}
 {% load l10n %}
 
 {% block header %}
@@ -56,6 +57,8 @@
               		<li class="active"><a data-id="0" href="#tab-project-main" data-toggle="tab"><i class="fa fa-cog tab-icon"></i> {% trans "General" %}</a></li>
               		<li><a  data-id="1" href="#tab-project-layergroups" data-toggle="tab"><i class="fa fa-object-group tab-icon"></i> {% trans "Layer groups" %}</a></li>
               		<li><a  data-id="2" href="#tab-project-tools" data-toggle="tab"><i class="fa fa-wrench tab-icon"></i> {% trans "Tools" %}</a></li>              		
+					{# Pestañas aportadas por plugins: project_tab_<plugin>.html (p. ej. «Vista 3D») #}
+					{% for plugin in INSTALLED_APPS %}{% if 'gvsigol_plugin_' in plugin %}{% with "project_tab_"|add:plugin|cut:"gvsigol_plugin_"|add:".html" as aux %}{% include_if_exists aux with part="tab" %}{% endwith %}{% endif %}{% endfor %}
 					{% if MANAGE_PERMISSION_UI or user.is_superuser %} <li><a href="#tab-project-usergroups" data-toggle="tab"><i class="fa fa-lock tab-icon"></i> {% trans "Permissions" %}</a></li> {% endif %}
             	</ul>
             	
@@ -427,6 +430,7 @@
 						</div>
               		</div>
               		
+              		{% for plugin in INSTALLED_APPS %}{% if 'gvsigol_plugin_' in plugin %}{% with "project_tab_"|add:plugin|cut:"gvsigol_plugin_"|add:".html" as aux %}{% include_if_exists aux with part="pane" %}{% endwith %}{% endif %}{% endfor %}
               		<div class="tab-pane" id="tab-project-usergroups">
               			<div class="row">
 							<div class="col-md-12">
