@@ -637,7 +637,7 @@ USE_DEFAULT_SUPPORTED_CRS = True
 
 SUPPORTED_CRS = {}
 path_crs_definitions_json = os.path.join(os.path.dirname(__file__), 'crs_definitions.json')
-with open(path_crs_definitions_json, 'r') as file:
+with open(path_crs_definitions_json, 'r', encoding='utf-8') as file:
     crs_definitions_json = json.load(file)
 if '3857' not in env('SUPPORTED_CRS'):
     SUPPORTED_CRS['3857'] = crs_definitions_json['3857']
