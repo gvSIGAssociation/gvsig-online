@@ -13,12 +13,14 @@ from django.shortcuts import HttpResponse, redirect
 from django.utils.translation import gettext as _, ngettext
 from gvsigol.settings import FILEMANAGER_DIRECTORY, INSTALLED_APPS
 from django.urls import reverse_lazy
-from django.http import HttpResponseBadRequest, HttpResponseForbidden
+from django.http import HttpResponseBadRequest, HttpResponseForbidden, Http404
+from django.utils.translation import gettext_lazy
+from django.conf import settings
 from gvsigol_services import rest_geoserver
 from django.views.generic.base import View
 from .forms import DirectoryCreateForm
 from django.contrib import messages
-from .core import Filemanager
+from .core import Filemanager, UnzipError, RESERVED_NAMES
 from zipfile import ZipFile
 import json
 import os
@@ -96,8 +98,12 @@ def _resolve_export_progress(ex):
 def can_manage_path(request, path):
     if path is not None:
         full_path = os.path.abspath(os.path.join(ABS_FILEMANAGER_DIRECTORY, path))
-        if not full_path.startswith(ABS_FILEMANAGER_DIRECTORY):
+        # Con el separador: sin él, una carpeta hermana como «data_x» pasaría por «data»
+        if full_path != ABS_FILEMANAGER_DIRECTORY and not full_path.startswith(ABS_FILEMANAGER_DIRECTORY + os.sep):
             logger.warning("Suspicious path provided: " + path)
+            return False
+        # La papelera y demás carpetas reservadas solo se manejan desde la API (ver fsops)
+        if os.path.relpath(full_path, ABS_FILEMANAGER_DIRECTORY).split(os.sep)[0] in RESERVED_NAMES:
             return False
         if request.user:
             if request.user.is_superuser:
@@ -159,6 +165,10 @@ class BrowserView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, Tem
     def get_context_data(self, **kwargs):
         context = super(BrowserView, self).get_context_data(**kwargs)
         
+        # Una carpeta que no existe (o un fichero) daba un error 500 al listarla
+        if not os.path.isdir(self.fm.location):
+            raise Http404('Directory not found')
+
         context['first_level'] = False
         if self.fm.location == FILEMANAGER_DIRECTORY:
             context['first_level'] = True
@@ -167,10 +177,65 @@ class BrowserView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, Tem
             context['extends_template'] = 'filemanager_base2.html'
         else:
             context['extends_template'] = 'filemanager_base.html'
-        context['files'] = self.fm.directory_list(self.request, context['first_level'])
         context['is_etl_plugin_installed'] = 'gvsigol_plugin_etl' in INSTALLED_APPS
-        
+        if self.use_explorer():
+            # La interfaz nueva carga el contenido por la API (api.py)
+            context.update(self.explorer_context())
+        else:
+            context['files'] = self.fm.directory_list(self.request, context['first_level'])
+
         return context
+
+    def use_explorer(self):
+        """
+        Interfaz nueva (explorador) o clásica. ?ui=new / ?ui=classic eligen en cada visita; si no,
+        manda FILEMANAGER_NEW_UI para la página y FILEMANAGER_NEW_POPUP para el selector (?popup=1),
+        que se activan por separado.
+        """
+        ui = self.request.GET.get('ui')
+        if ui in ('new', 'classic'):
+            return ui == 'new'
+        setting = 'FILEMANAGER_NEW_POPUP' if self.popup else 'FILEMANAGER_NEW_UI'
+        return bool(getattr(settings, setting, False))
+
+    def picker_extensions(self):
+        """?ext=tif,tiff: el selector solo muestra (y deja elegir) esos ficheros."""
+        raw = self.request.GET.get('ext') or ''
+        return sorted({e.strip().lower().lstrip('.') for e in raw.split(',') if e.strip().lstrip('.')})
+
+    def get_template_names(self):
+        if self.use_explorer():
+            return ['browser/filemanager_explorer.html']
+        return super(BrowserView, self).get_template_names()
+
+    def explorer_context(self):
+        from . import fsops
+        from .ui_strings import ui_strings
+        from django.utils import translation
+        try:
+            transform_url = str(reverse_lazy('transform-to-database')) if 'gvsigol_plugin_etl' in INSTALLED_APPS else None
+        except Exception:
+            transform_url = None
+        browser_url = str(reverse_lazy('filemanager:browser'))
+        return {
+            'fm_config': {
+                'api': browser_url + 'api/',
+                'browserUrl': browser_url,
+                'keepUiParam': self.request.GET.get('ui') == 'new',
+                'downloadUrl': str(reverse_lazy('fsfilemanager:fdownload', args=['x']))[:-1],
+                'exportUrl': str(reverse_lazy('filemanager:export-to-database')),
+                'transformUrl': transform_url,
+                'exportsUrl': str(reverse_lazy('filemanager:list_exports')),
+                'path': self.fm.path,
+                'trashDays': fsops.retention_days(),
+                'language': translation.get_language() or 'es',
+                'isSuperuser': self.request.user.is_superuser,
+                # Selector: misma respuesta que el clásico, window.opener.filemanagerCallback(ruta)
+                'popup': bool(self.popup),
+                'extensions': self.picker_extensions() if self.popup else [],
+            },
+            'fm_i18n': ui_strings(),
+        }
  
 class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, TemplateView):
     template_name = 'browser/export_to_database.html'
@@ -295,6 +360,8 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
             return redirect('/gvsigonline/filemanager/list_exports/')
 
 
+@login_required
+@staff_required
 def list_exports(request):
 
     exports_model = exports_historical.objects.order_by('-id')
@@ -362,7 +429,7 @@ class UploadView(FilemanagerMixin, TemplateView):
     template_name = 'filemanager_upload.html'
     extra_breadcrumbs = [{
         'path': '#',
-        'label': 'Upload'
+        'label': gettext_lazy('Upload')
     }]
 
     @method_decorator(login_required)
@@ -381,8 +448,7 @@ class UploadFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, 
         if len(request.FILES) != 1:
             return HttpResponseBadRequest("Just a single file please.")
         
-        file = request.FILES['files']
-        extension = file.name.split(".")[1]
+        # Aquí se calculaba la extensión con split(".")[1], que fallaba (500) con ficheros sin ella
         '''
         if extension == "zip":
             folder = file.name.split(".")[0]
@@ -399,20 +465,51 @@ class UploadFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, 
             'path': request.POST.get('path'),
         }))
         
+def raster_datastore_paths():
+    """
+    (nombre, ruta absoluta, es_mosaico) de los almacenes GeoTIFF e ImageMosaic. Guardan la ruta como
+    'file:///.../data/...' (el selector antepone file:// y FILEMANAGER_DIRECTORY).
+    """
+    result = []
+    for datastore in Datastore.objects.filter(type__in=['c_GeoTIFF', 'c_ImageMosaic']):
+        try:
+            url = json.loads(datastore.connection_params).get('url') or ''
+        except Exception:
+            continue
+        if url.startswith('file://'):
+            url = url[len('file://'):]
+        if url:
+            result.append((datastore.name, os.path.abspath(url), datastore.type == 'c_ImageMosaic'))
+    return result
+
+
+def datastore_using_path(abs_path, datastores=None):
+    """
+    Nombre del almacén raster que depende de esta ruta, o None. Depende si la ruta es su fichero,
+    una carpeta que lo contiene o, en un mosaico, algo dentro de su carpeta.
+    """
+    target = os.path.abspath(abs_path)
+    for name, url, is_mosaic in (raster_datastore_paths() if datastores is None else datastores):
+        if url == target or url.startswith(target + os.sep):
+            return name
+        if is_mosaic and target.startswith(url + os.sep):
+            return name
+    return None
+
+
 class DeleteFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, View):
     raise_exception = False
     def test_func(self):
         return can_manage_path(self.request, self.request.POST.get('path'))
-    
+
     def post(self, request, *args, **kwargs):
         path = FILEMANAGER_DIRECTORY +'/'+ request.POST.get('path')
-        geotiffs = Datastore.objects.filter(type__in=['c_GeoTIFF','c_ImageMosaic'])
-        for geotiff in geotiffs:
-            params = json.loads(geotiff.connection_params)
-            if 'url' in params and params['url'].startswith(path) or (geotiff.type == 'c_ImageMosaic' and path.startswith(params['url'])) :
+        # Antes comparaba sin quitar el 'file://' de la URL del almacén y nunca bloqueaba
+        datastore_name = datastore_using_path(path)
+        if datastore_name:
                 return HttpResponse(json.dumps({
                     'success': False,
-                    'message': _('Error deleting resource') + ' ' + path + ' ' + _('exists in datastore') + ': ' + geotiff.name 
+                    'message': _('Error deleting resource') + ' ' + path + ' ' + _('exists in datastore') + ': ' + datastore_name
                 }))
         
         if self.fm.delete(path):
@@ -433,15 +530,22 @@ class UnzipFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, V
     
     def post(self, request, *args, **kwargs):
         path = os.path.join(FILEMANAGER_DIRECTORY, request.POST.get('path'))
-        
+
         try:
-            folder = os.path.join(os.path.dirname(path), os.path.basename(path).split(".")[0])
-            self.fm.extract_zip(path, folder)
+            # Descomprime en una carpeta nueva (nombre_1... si ya existe) tras comprobar el tamaño
+            self.fm.unzip(path)
 
             return HttpResponse(json.dumps({
                 'success': True
             }))
-            
+
+        except UnzipError as e:
+            logger.warning("Error unzipping file %s: %s", path, e)
+            return HttpResponse(json.dumps({
+                'success': False,
+                'message': str(e)
+            }))
+
         except Exception as e:
             logger.exception("Error unzipping file")
             return HttpResponse(json.dumps({
@@ -454,7 +558,7 @@ class DirectoryCreateView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMi
     form_class = DirectoryCreateForm
     extra_breadcrumbs = [{
         'path': '#',
-        'label': 'Create directory'
+        'label': gettext_lazy('Create directory')
     }]
     raise_exception = False
     def test_func(self):

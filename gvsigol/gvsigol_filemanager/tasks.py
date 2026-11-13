@@ -191,3 +191,35 @@ def postBackground(self, **kwargs):
         export.message = '; '.join(errors) if errors else _('You must fill in all fields')
         export.redirect = "/gvsigonline/filemanager/export_to_database/?path=" + (post.get('file_path') or '')
         export.save()
+
+
+@celery_app.task(bind=True)
+def unzip_task(self, zip_rel, language=None):
+    """
+    Descomprime un zip del gestor en segundo plano (API unzip con background). Informa del
+    progreso en PROCESSING ({'progress': 0-100}) y devuelve {'ok', 'item'} o {'ok': False, 'error'}.
+    Los permisos se comprueban en la API antes de lanzarla.
+    """
+    from django.utils import translation
+    from . import fsops
+    from .core import Filemanager, UnzipError
+
+    if language:
+        translation.activate(language)
+    state = {'last': -1}
+
+    def progress(done, total):
+        percent = int(done * 100 / total) if total else 100
+        # Solo cuando cambia el porcentaje, para no saturar el backend de resultados
+        if percent != state['last']:
+            state['last'] = percent
+            _set_progress(self, percent, 'unzipping')
+
+    try:
+        folder = Filemanager().unzip(fsops.existing(zip_rel), progress=progress)
+        return {'ok': True, 'item': fsops.entry(folder)}
+    except (UnzipError, fsops.OperationError) as e:
+        return {'ok': False, 'error': str(e)}
+    except Exception:
+        logger.exception('Error unzipping %s', zip_rel)
+        return {'ok': False, 'error': str(_('Error unzipping resource'))}

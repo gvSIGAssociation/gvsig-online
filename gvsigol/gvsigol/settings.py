@@ -186,6 +186,8 @@ env = environ.Env(
     GEOSERVER_USE_KEEPALIVE = (bool,True),
 
     UI_HIDEN_PROJECTS_PREFIX=(str,'_'),
+    FILEMANAGER_NEW_UI=(bool, False),  # interfaz nueva del gestor de ficheros (explorador)
+    FILEMANAGER_NEW_POPUP=(bool, False),  # selector de ficheros (?popup=1) con la interfaz nueva
     GDALTOOLS_BASEPATH=(str,''),
     GDALTOOLS_CMD_PREFIX=(str,''),
     GDAL_LIBRARY_PATH=(str, ''),
@@ -309,6 +311,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    #'gvsigol_core.db_session_user.DbSessionUserMiddleware',  # usuario de la petición en las conexiones a datastores
     'gvsigol_audit.audit_middleware.AuditMiddleware',  # Auditoría de APIs REST y vistas Django
     'django.contrib.auth.middleware.PersistentRemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -670,6 +673,11 @@ FOLDER_DEFAULT_PERMISSIONS = env('FOLDER_DEFAULT_PERMISSIONS')
 FILEMANAGER_DIRECTORY = os.path.join(MEDIA_ROOT, 'data')
 FILEMANAGER_MEDIA_ROOT = os.path.join(MEDIA_ROOT, FILEMANAGER_DIRECTORY)
 FILEMANAGER_MEDIA_URL = os.path.join(MEDIA_URL, FILEMANAGER_DIRECTORY)
+# Interfaz nueva del gestor de ficheros. Con False se sigue viendo la clásica; ?ui=new y
+# ?ui=classic permiten elegir en cada página.
+FILEMANAGER_NEW_UI = env('FILEMANAGER_NEW_UI')
+# Lo mismo para el selector que abren otras pantallas (?popup=1); se activa por separado.
+FILEMANAGER_NEW_POPUP = env('FILEMANAGER_NEW_POPUP')
 FILEMANAGER_STORAGE = FileSystemStorage(
     location=FILEMANAGER_MEDIA_ROOT,
     base_url=FILEMANAGER_MEDIA_URL,

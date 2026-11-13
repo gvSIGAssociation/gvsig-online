@@ -284,3 +284,488 @@ msgstr "No tiene permiso para gestionar el grupo de capas seleccionado"
 
 msgid "The selected layer group does not belong to the same server as the datastore."
 msgstr "El grupo de capas seleccionado no pertenece al mismo servidor que el almacén de datos."
+
+#, python-format
+msgid "The zip file takes %(size)s uncompressed, more than the allowed %(limit)s"
+msgstr "El zip ocupa %(size)s descomprimido, más que el máximo permitido (%(limit)s)"
+
+#, python-format
+msgid "There is not enough free disk space to unzip the file (%(size)s needed)"
+msgstr "No hay espacio libre suficiente en el disco para descomprimir el fichero (se necesitan %(size)s)"
+
+msgid "The zip file is damaged or is not a valid zip file"
+msgstr "El fichero zip está dañado o no es un zip válido"
+
+msgid "A folder cannot be moved or copied into itself"
+msgstr "Una carpeta no se puede mover ni copiar dentro de sí misma"
+
+msgid "An item with that name already exists"
+msgstr "Ya existe un elemento con ese nombre"
+
+msgid "Authentication required"
+msgstr "Debe iniciar sesión"
+
+#, python-format
+msgid "In use by the datastore %(name)s"
+msgstr "En uso por el almacén de datos %(name)s"
+
+msgid "Invalid name"
+msgstr "Nombre no válido"
+
+msgid "Invalid path"
+msgstr "Ruta no válida"
+
+msgid "Invalid request"
+msgstr "Petición no válida"
+
+msgid "Method not allowed"
+msgstr "Método no permitido"
+
+msgid "Not enough free disk space"
+msgstr "No hay espacio libre suficiente en el disco"
+
+msgid "The destination is not a folder"
+msgstr "El destino no es una carpeta"
+
+msgid "The item does not exist"
+msgstr "El elemento no existe"
+
+msgid "The item is no longer in the trash"
+msgstr "El elemento ya no está en la papelera"
+
+#, python-format
+msgid "The selection takes %(size)s, more than the allowed %(limit)s"
+msgstr "La selección ocupa %(size)s, más que el máximo permitido (%(limit)s)"
+
+msgid "Unexpected error"
+msgstr "Error inesperado"
+
+msgid "You do not have permission for this location"
+msgstr "No tiene permiso en esta ubicación"
+
+msgid "The upload does not exist or has expired"
+msgstr "La subida no existe o ha caducado"
+
+#, python-format
+msgid "The file exceeds the maximum upload size (%(limit)s)"
+msgstr "El fichero supera el tamaño máximo de subida (%(limit)s)"
+
+msgid "The received data does not match the expected position"
+msgstr "Los datos recibidos no coinciden con la posición esperada"
+
+msgid "The upload is not complete"
+msgstr "La subida no está completa"
+
+msgid "Filter this folder"
+msgstr "Filtrar esta carpeta"
+
+msgid "New folder"
+msgstr "Nueva carpeta"
+
+msgid "Upload files"
+msgstr "Subir ficheros"
+
+msgid "Upload folder"
+msgstr "Subir carpeta"
+
+msgid "Show or hide the folder tree"
+msgstr "Mostrar u ocultar el árbol de carpetas"
+
+msgid "Show or hide the details panel"
+msgstr "Mostrar u ocultar el panel de detalles"
+
+msgid "Classic view"
+msgstr "Vista clásica"
+
+msgid "Folders"
+msgstr "Carpetas"
+
+msgid "Trash"
+msgstr "Papelera"
+
+msgid "Loading…"
+msgstr "Cargando…"
+
+msgid "Modified"
+msgstr "Modificado"
+
+msgid "Select all"
+msgstr "Seleccionar todo"
+
+msgid "Select {name}"
+msgstr "Seleccionar {name}"
+
+msgid "More actions"
+msgstr "Más acciones"
+
+msgid "Details"
+msgstr "Detalles"
+
+msgid "This folder is empty"
+msgstr "Esta carpeta está vacía"
+
+msgid "Drag files here or use «Upload»."
+msgstr "Arrastra ficheros aquí o usa «Subir»."
+
+msgid "Nothing in this folder matches «{q}»"
+msgstr "Nada en esta carpeta coincide con «{q}»"
+
+msgid "{n} items"
+msgstr "{n} elementos"
+
+msgid "1 item"
+msgstr "1 elemento"
+
+msgid "{n} folders"
+msgstr "{n} carpetas"
+
+msgid "{n} selected"
+msgstr "{n} seleccionados"
+
+msgid "Drag rows onto a folder to move them"
+msgstr "Arrastra filas sobre una carpeta para moverlas"
+
+msgid "+{n} related"
+msgstr "+{n} asociados"
+
+msgid "Shapefile related files: {names}"
+msgstr "Ficheros asociados del shapefile: {names}"
+
+msgid "In use"
+msgstr "En uso"
+
+msgid "Used by the datastore {name}"
+msgstr "Lo usa el almacén de datos {name}"
+
+msgid "You can view this folder but not change it"
+msgstr "Puedes ver esta carpeta pero no modificarla"
+
+msgid "Open"
+msgstr "Abrir"
+
+msgid "Download"
+msgstr "Descargar"
+
+msgid "Download as zip"
+msgstr "Descargar como zip"
+
+msgid "Unzip here"
+msgstr "Descomprimir aquí"
+
+msgid "Rename"
+msgstr "Renombrar"
+
+msgid "Move to…"
+msgstr "Mover a…"
+
+msgid "Copy to…"
+msgstr "Copiar a…"
+
+msgid "Move to trash"
+msgstr "Enviar a la papelera"
+
+msgid "Clear selection"
+msgstr "Quitar selección"
+
+msgid "In use by the datastore {name}"
+msgstr "En uso por el almacén de datos {name}"
+
+msgid "You cannot change this item"
+msgstr "No puedes modificar este elemento"
+
+msgid "Select an item to see its details."
+msgstr "Selecciona un elemento para ver sus detalles."
+
+msgid "Type"
+msgstr "Tipo"
+
+msgid "Folder"
+msgstr "Carpeta"
+
+msgid "Path"
+msgstr "Ruta"
+
+msgid "Related files"
+msgstr "Ficheros asociados"
+
+msgid "{n} items selected"
+msgstr "{n} elementos seleccionados"
+
+msgid "Files"
+msgstr "Ficheros"
+
+msgid "Total size"
+msgstr "Tamaño total"
+
+msgid "Used by the datastore {name}. It cannot be moved, renamed or sent to the trash while a layer uses it."
+msgstr "Lo usa el almacén de datos {name}. No se puede mover, renombrar ni enviar a la papelera mientras lo use una capa."
+
+msgid "Vector"
+msgstr "Vectorial"
+
+msgid "Raster"
+msgstr "Ráster"
+
+msgid "Table"
+msgstr "Tabla"
+
+msgid "Compressed"
+msgstr "Comprimido"
+
+msgid "Point cloud"
+msgstr "Nube de puntos"
+
+msgid "Image"
+msgstr "Imagen"
+
+msgid "Document"
+msgstr "Documento"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Create"
+msgstr "Crear"
+
+msgid "Move"
+msgstr "Mover"
+
+msgid "Copy"
+msgstr "Copiar"
+
+msgid "Folder name"
+msgstr "Nombre de la carpeta"
+
+msgid "New name"
+msgstr "Nuevo nombre"
+
+msgid "Spaces become underscores and special characters are removed, as when uploading."
+msgstr "Los espacios se cambian por guiones bajos y se quitan los caracteres especiales, igual que al subir."
+
+msgid "Its related files (.dbf, .shx, .prj…) are renamed too."
+msgstr "También se renombran sus ficheros asociados (.dbf, .shx, .prj…)."
+
+msgid "Choose the destination folder"
+msgstr "Elige la carpeta de destino"
+
+msgid "Move {n} items"
+msgstr "Mover {n} elementos"
+
+msgid "Copy {n} items"
+msgstr "Copiar {n} elementos"
+
+msgid "Move «{name}»"
+msgstr "Mover «{name}»"
+
+msgid "Copy «{name}»"
+msgstr "Copiar «{name}»"
+
+msgid "Destination: {path}"
+msgstr "Destino: {path}"
+
+msgid "Send {n} items to the trash?"
+msgstr "¿Enviar {n} elementos a la papelera?"
+
+msgid "Send «{name}» to the trash?"
+msgstr "¿Enviar «{name}» a la papelera?"
+
+msgid "You can restore them from the trash for {days} days."
+msgstr "Podrás restaurarlos desde la papelera durante {days} días."
+
+msgid "related file"
+msgstr "fichero asociado"
+
+msgid "folder"
+msgstr "carpeta"
+
+msgid "Send to trash"
+msgstr "Enviar a la papelera"
+
+msgid "«{name}» already exists"
+msgstr "Ya existe «{name}»"
+
+msgid "There is already an item with that name in {path}. What should be done with the one you are uploading?"
+msgstr "En {path} ya hay un elemento con ese nombre. ¿Qué hacemos con el que estás subiendo?"
+
+msgid "Keep both"
+msgstr "Conservar los dos"
+
+msgid "The new one is saved with a numbered name (_1, _2…)"
+msgstr "El nuevo se guarda con un nombre numerado (_1, _2…)"
+
+msgid "Replace"
+msgstr "Reemplazar"
+
+msgid "The current file is replaced by the new one"
+msgstr "El fichero actual se sustituye por el nuevo"
+
+msgid "Skip"
+msgstr "Omitir"
+
+msgid "This file is not uploaded"
+msgstr "Este fichero no se sube"
+
+msgid "Do the same with the other repeated files"
+msgstr "Hacer lo mismo con los demás ficheros repetidos"
+
+msgid "Continue"
+msgstr "Continuar"
+
+msgid "Cancel the remaining uploads"
+msgstr "Cancelar las subidas que faltan"
+
+msgid "Some items already exist in the destination"
+msgstr "Algunos elementos ya existen en el destino"
+
+msgid "{names} already exist in {path}."
+msgstr "{names} ya existen en {path}."
+
+msgid "Keep both (numbered name)"
+msgstr "Conservar los dos (nombre numerado)"
+
+msgid "Uploads"
+msgstr "Subidas"
+
+msgid "Uploading {n} files"
+msgstr "Subiendo {n} ficheros"
+
+msgid "Uploads finished"
+msgstr "Subidas terminadas"
+
+msgid "Waiting"
+msgstr "En espera"
+
+msgid "Uploaded"
+msgstr "Subido"
+
+msgid "Skipped"
+msgstr "Omitido"
+
+msgid "Cancelled"
+msgstr "Cancelado"
+
+msgid "Interrupted at {p} %. It will resume from there."
+msgstr "Se cortó al {p} %. Se reanudará desde ahí."
+
+msgid "Retry"
+msgstr "Reintentar"
+
+msgid "Close"
+msgstr "Cerrar"
+
+msgid "Unzipping {name}"
+msgstr "Descomprimiendo {name}"
+
+msgid "Unzipped into {name}"
+msgstr "Descomprimido en {name}"
+
+msgid "Waiting for the task queue…"
+msgstr "Esperando a la cola de tareas…"
+
+msgid "There are uploads in progress. If you leave the page they will stop."
+msgstr "Hay subidas en curso. Si sales de la página se detendrán."
+
+msgid "Drop to upload to {name}"
+msgstr "Suelta para subir a {name}"
+
+msgid "Files or whole folders"
+msgstr "Ficheros o carpetas enteras"
+
+msgid "You cannot upload to this folder"
+msgstr "No puedes subir a esta carpeta"
+
+msgid "Undo"
+msgstr "Deshacer"
+
+msgid "{n} items sent to the trash"
+msgstr "{n} elementos enviados a la papelera"
+
+msgid "«{name}» sent to the trash"
+msgstr "«{name}» enviado a la papelera"
+
+msgid "{n} items moved to {name}"
+msgstr "{n} elementos movidos a {name}"
+
+msgid "{n} items copied to {name}"
+msgstr "{n} elementos copiados en {name}"
+
+msgid "Folder «{name}» created"
+msgstr "Carpeta «{name}» creada"
+
+msgid "Renamed to «{name}»"
+msgstr "Renombrado como «{name}»"
+
+msgid "{n} items restored"
+msgstr "{n} elementos restaurados"
+
+msgid "{n} items deleted permanently"
+msgstr "{n} elementos borrados definitivamente"
+
+msgid "Undone"
+msgstr "Deshecho"
+
+msgid "The request failed. Check the connection and try again."
+msgstr "La petición ha fallado. Comprueba la conexión y vuelve a intentarlo."
+
+msgid "{n} items could not be processed:"
+msgstr "{n} elementos no se han podido procesar:"
+
+msgid "Deleted items are kept here for {days} days. A shapefile goes in with all its related files."
+msgstr "Lo que se borra se guarda aquí {days} días. Un shapefile entra con todos sus ficheros asociados."
+
+msgid "Empty trash"
+msgstr "Vaciar papelera"
+
+msgid "Original location"
+msgstr "Ubicación original"
+
+msgid "Deleted"
+msgstr "Borrado"
+
+msgid "Restore"
+msgstr "Restaurar"
+
+msgid "Delete permanently"
+msgstr "Borrar definitivamente"
+
+msgid "Delete {n} items permanently?"
+msgstr "¿Borrar definitivamente {n} elementos?"
+
+msgid "Empty the trash?"
+msgstr "¿Vaciar la papelera?"
+
+msgid "This cannot be undone."
+msgstr "No se puede deshacer."
+
+msgid "The trash is empty"
+msgstr "La papelera está vacía"
+
+msgid "{n} days left"
+msgstr "quedan {n} días"
+
+msgid "Deleted today at the latest"
+msgstr "Se borrará hoy"
+
+msgid "by {user}"
+msgstr "por {user}"
+
+msgid "Back to the files"
+msgstr "Volver a los ficheros"
+
+msgid "Choose a file or folder"
+msgstr "Elige un fichero o una carpeta"
+
+msgid "Choose a file"
+msgstr "Elige un fichero"
+
+msgid "Selected: {path}"
+msgstr "Seleccionado: {path}"
+
+msgid "Showing only: {exts}"
+msgstr "Solo se muestran: {exts}"
+
+msgid "Double-click a file to choose it"
+msgstr "Haz doble clic en un fichero para elegirlo"
+
+msgid "This window was not opened from another page, so there is nowhere to send the selection."
+msgstr "Esta ventana no se ha abierto desde otra página, así que no hay dónde enviar la selección."

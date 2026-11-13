@@ -239,3 +239,488 @@ msgstr "Error descomprimint el recurs"
 
 #~ msgid "You must fill in all fields"
 #~ msgstr "Ha d'omplir tots els camps"
+
+#, python-format
+msgid "The zip file takes %(size)s uncompressed, more than the allowed %(limit)s"
+msgstr "El zip ocupa %(size)s descomprimit, més que el màxim permès (%(limit)s)"
+
+#, python-format
+msgid "There is not enough free disk space to unzip the file (%(size)s needed)"
+msgstr "No hi ha prou espai lliure al disc per a descomprimir el fitxer (calen %(size)s)"
+
+msgid "The zip file is damaged or is not a valid zip file"
+msgstr "El fitxer zip està danyat o no és un zip vàlid"
+
+msgid "A folder cannot be moved or copied into itself"
+msgstr "Una carpeta no es pot moure ni copiar dins de si mateixa"
+
+msgid "An item with that name already exists"
+msgstr "Ja existeix un element amb aquest nom"
+
+msgid "Authentication required"
+msgstr "Cal iniciar la sessió"
+
+#, python-format
+msgid "In use by the datastore %(name)s"
+msgstr "En ús pel magatzem de dades %(name)s"
+
+msgid "Invalid name"
+msgstr "Nom no vàlid"
+
+msgid "Invalid path"
+msgstr "Ruta no vàlida"
+
+msgid "Invalid request"
+msgstr "Petició no vàlida"
+
+msgid "Method not allowed"
+msgstr "Mètode no permès"
+
+msgid "Not enough free disk space"
+msgstr "No hi ha prou espai lliure al disc"
+
+msgid "The destination is not a folder"
+msgstr "La destinació no és una carpeta"
+
+msgid "The item does not exist"
+msgstr "L'element no existeix"
+
+msgid "The item is no longer in the trash"
+msgstr "L'element ja no és a la paperera"
+
+#, python-format
+msgid "The selection takes %(size)s, more than the allowed %(limit)s"
+msgstr "La selecció ocupa %(size)s, més que el màxim permès (%(limit)s)"
+
+msgid "Unexpected error"
+msgstr "Error inesperat"
+
+msgid "You do not have permission for this location"
+msgstr "No teniu permís en aquesta ubicació"
+
+msgid "The upload does not exist or has expired"
+msgstr "La pujada no existeix o ha caducat"
+
+#, python-format
+msgid "The file exceeds the maximum upload size (%(limit)s)"
+msgstr "El fitxer supera la mida màxima de pujada (%(limit)s)"
+
+msgid "The received data does not match the expected position"
+msgstr "Les dades rebudes no coincideixen amb la posició esperada"
+
+msgid "The upload is not complete"
+msgstr "La pujada no està completa"
+
+msgid "Filter this folder"
+msgstr "Filtra aquesta carpeta"
+
+msgid "New folder"
+msgstr "Carpeta nova"
+
+msgid "Upload files"
+msgstr "Puja fitxers"
+
+msgid "Upload folder"
+msgstr "Puja una carpeta"
+
+msgid "Show or hide the folder tree"
+msgstr "Mostra o amaga l'arbre de carpetes"
+
+msgid "Show or hide the details panel"
+msgstr "Mostra o amaga el tauler de detalls"
+
+msgid "Classic view"
+msgstr "Vista clàssica"
+
+msgid "Folders"
+msgstr "Carpetes"
+
+msgid "Trash"
+msgstr "Paperera"
+
+msgid "Loading…"
+msgstr "S'està carregant…"
+
+msgid "Modified"
+msgstr "Modificat"
+
+msgid "Select all"
+msgstr "Selecciona-ho tot"
+
+msgid "Select {name}"
+msgstr "Selecciona {name}"
+
+msgid "More actions"
+msgstr "Més accions"
+
+msgid "Details"
+msgstr "Detalls"
+
+msgid "This folder is empty"
+msgstr "Aquesta carpeta és buida"
+
+msgid "Drag files here or use «Upload»."
+msgstr "Arrossega fitxers aquí o fes servir «Puja»."
+
+msgid "Nothing in this folder matches «{q}»"
+msgstr "No hi ha res en aquesta carpeta que coincideixi amb «{q}»"
+
+msgid "{n} items"
+msgstr "{n} elements"
+
+msgid "1 item"
+msgstr "1 element"
+
+msgid "{n} folders"
+msgstr "{n} carpetes"
+
+msgid "{n} selected"
+msgstr "{n} seleccionats"
+
+msgid "Drag rows onto a folder to move them"
+msgstr "Arrossega files sobre una carpeta per moure-les"
+
+msgid "+{n} related"
+msgstr "+{n} associats"
+
+msgid "Shapefile related files: {names}"
+msgstr "Fitxers associats del shapefile: {names}"
+
+msgid "In use"
+msgstr "En ús"
+
+msgid "Used by the datastore {name}"
+msgstr "L'utilitza el magatzem de dades {name}"
+
+msgid "You can view this folder but not change it"
+msgstr "Pots veure aquesta carpeta però no modificar-la"
+
+msgid "Open"
+msgstr "Obre"
+
+msgid "Download"
+msgstr "Descarrega"
+
+msgid "Download as zip"
+msgstr "Descarrega com a zip"
+
+msgid "Unzip here"
+msgstr "Descomprimeix aquí"
+
+msgid "Rename"
+msgstr "Canvia el nom"
+
+msgid "Move to…"
+msgstr "Mou a…"
+
+msgid "Copy to…"
+msgstr "Copia a…"
+
+msgid "Move to trash"
+msgstr "Envia a la paperera"
+
+msgid "Clear selection"
+msgstr "Treu la selecció"
+
+msgid "In use by the datastore {name}"
+msgstr "En ús pel magatzem de dades {name}"
+
+msgid "You cannot change this item"
+msgstr "No pots modificar aquest element"
+
+msgid "Select an item to see its details."
+msgstr "Selecciona un element per veure'n els detalls."
+
+msgid "Type"
+msgstr "Tipus"
+
+msgid "Folder"
+msgstr "Carpeta"
+
+msgid "Path"
+msgstr "Ruta"
+
+msgid "Related files"
+msgstr "Fitxers associats"
+
+msgid "{n} items selected"
+msgstr "{n} elements seleccionats"
+
+msgid "Files"
+msgstr "Fitxers"
+
+msgid "Total size"
+msgstr "Mida total"
+
+msgid "Used by the datastore {name}. It cannot be moved, renamed or sent to the trash while a layer uses it."
+msgstr "L'utilitza el magatzem de dades {name}. No es pot moure, canviar de nom ni enviar a la paperera mentre l'utilitzi una capa."
+
+msgid "Vector"
+msgstr "Vectorial"
+
+msgid "Raster"
+msgstr "Ràster"
+
+msgid "Table"
+msgstr "Taula"
+
+msgid "Compressed"
+msgstr "Comprimit"
+
+msgid "Point cloud"
+msgstr "Núvol de punts"
+
+msgid "Image"
+msgstr "Imatge"
+
+msgid "Document"
+msgstr "Document"
+
+msgid "Cancel"
+msgstr "Cancel·la"
+
+msgid "Create"
+msgstr "Crea"
+
+msgid "Move"
+msgstr "Mou"
+
+msgid "Copy"
+msgstr "Copia"
+
+msgid "Folder name"
+msgstr "Nom de la carpeta"
+
+msgid "New name"
+msgstr "Nom nou"
+
+msgid "Spaces become underscores and special characters are removed, as when uploading."
+msgstr "Els espais es canvien per guions baixos i es treuen els caràcters especials, igual que en pujar."
+
+msgid "Its related files (.dbf, .shx, .prj…) are renamed too."
+msgstr "També es canvia el nom dels fitxers associats (.dbf, .shx, .prj…)."
+
+msgid "Choose the destination folder"
+msgstr "Tria la carpeta de destinació"
+
+msgid "Move {n} items"
+msgstr "Mou {n} elements"
+
+msgid "Copy {n} items"
+msgstr "Copia {n} elements"
+
+msgid "Move «{name}»"
+msgstr "Mou «{name}»"
+
+msgid "Copy «{name}»"
+msgstr "Copia «{name}»"
+
+msgid "Destination: {path}"
+msgstr "Destinació: {path}"
+
+msgid "Send {n} items to the trash?"
+msgstr "Vols enviar {n} elements a la paperera?"
+
+msgid "Send «{name}» to the trash?"
+msgstr "Vols enviar «{name}» a la paperera?"
+
+msgid "You can restore them from the trash for {days} days."
+msgstr "Els podràs restaurar des de la paperera durant {days} dies."
+
+msgid "related file"
+msgstr "fitxer associat"
+
+msgid "folder"
+msgstr "carpeta"
+
+msgid "Send to trash"
+msgstr "Envia a la paperera"
+
+msgid "«{name}» already exists"
+msgstr "Ja existeix «{name}»"
+
+msgid "There is already an item with that name in {path}. What should be done with the one you are uploading?"
+msgstr "A {path} ja hi ha un element amb aquest nom. Què fem amb el que estàs pujant?"
+
+msgid "Keep both"
+msgstr "Conserva tots dos"
+
+msgid "The new one is saved with a numbered name (_1, _2…)"
+msgstr "El nou es desa amb un nom numerat (_1, _2…)"
+
+msgid "Replace"
+msgstr "Substitueix"
+
+msgid "The current file is replaced by the new one"
+msgstr "El fitxer actual se substitueix pel nou"
+
+msgid "Skip"
+msgstr "Omet"
+
+msgid "This file is not uploaded"
+msgstr "Aquest fitxer no es puja"
+
+msgid "Do the same with the other repeated files"
+msgstr "Fes el mateix amb la resta de fitxers repetits"
+
+msgid "Continue"
+msgstr "Continua"
+
+msgid "Cancel the remaining uploads"
+msgstr "Cancel·la les pujades pendents"
+
+msgid "Some items already exist in the destination"
+msgstr "Alguns elements ja existeixen a la destinació"
+
+msgid "{names} already exist in {path}."
+msgstr "{names} ja existeixen a {path}."
+
+msgid "Keep both (numbered name)"
+msgstr "Conserva tots dos (nom numerat)"
+
+msgid "Uploads"
+msgstr "Pujades"
+
+msgid "Uploading {n} files"
+msgstr "S'estan pujant {n} fitxers"
+
+msgid "Uploads finished"
+msgstr "Pujades acabades"
+
+msgid "Waiting"
+msgstr "En espera"
+
+msgid "Uploaded"
+msgstr "Pujat"
+
+msgid "Skipped"
+msgstr "Omès"
+
+msgid "Cancelled"
+msgstr "Cancel·lat"
+
+msgid "Interrupted at {p} %. It will resume from there."
+msgstr "S'ha interromput al {p} %. Es reprendrà des d'allà."
+
+msgid "Retry"
+msgstr "Torna-ho a provar"
+
+msgid "Close"
+msgstr "Tanca"
+
+msgid "Unzipping {name}"
+msgstr "S'està descomprimint {name}"
+
+msgid "Unzipped into {name}"
+msgstr "Descomprimit a {name}"
+
+msgid "Waiting for the task queue…"
+msgstr "S'està esperant la cua de tasques…"
+
+msgid "There are uploads in progress. If you leave the page they will stop."
+msgstr "Hi ha pujades en curs. Si surts de la pàgina s'aturaran."
+
+msgid "Drop to upload to {name}"
+msgstr "Deixa anar per pujar a {name}"
+
+msgid "Files or whole folders"
+msgstr "Fitxers o carpetes senceres"
+
+msgid "You cannot upload to this folder"
+msgstr "No pots pujar a aquesta carpeta"
+
+msgid "Undo"
+msgstr "Desfés"
+
+msgid "{n} items sent to the trash"
+msgstr "{n} elements enviats a la paperera"
+
+msgid "«{name}» sent to the trash"
+msgstr "«{name}» enviat a la paperera"
+
+msgid "{n} items moved to {name}"
+msgstr "{n} elements moguts a {name}"
+
+msgid "{n} items copied to {name}"
+msgstr "{n} elements copiats a {name}"
+
+msgid "Folder «{name}» created"
+msgstr "Carpeta «{name}» creada"
+
+msgid "Renamed to «{name}»"
+msgstr "Nom canviat a «{name}»"
+
+msgid "{n} items restored"
+msgstr "{n} elements restaurats"
+
+msgid "{n} items deleted permanently"
+msgstr "{n} elements esborrats definitivament"
+
+msgid "Undone"
+msgstr "Desfet"
+
+msgid "The request failed. Check the connection and try again."
+msgstr "La petició ha fallat. Comprova la connexió i torna-ho a provar."
+
+msgid "{n} items could not be processed:"
+msgstr "{n} elements no s'han pogut processar:"
+
+msgid "Deleted items are kept here for {days} days. A shapefile goes in with all its related files."
+msgstr "El que s'esborra es guarda aquí {days} dies. Un shapefile hi entra amb tots els fitxers associats."
+
+msgid "Empty trash"
+msgstr "Buida la paperera"
+
+msgid "Original location"
+msgstr "Ubicació original"
+
+msgid "Deleted"
+msgstr "Esborrat"
+
+msgid "Restore"
+msgstr "Restaura"
+
+msgid "Delete permanently"
+msgstr "Esborra definitivament"
+
+msgid "Delete {n} items permanently?"
+msgstr "Vols esborrar definitivament {n} elements?"
+
+msgid "Empty the trash?"
+msgstr "Vols buidar la paperera?"
+
+msgid "This cannot be undone."
+msgstr "No es pot desfer."
+
+msgid "The trash is empty"
+msgstr "La paperera és buida"
+
+msgid "{n} days left"
+msgstr "queden {n} dies"
+
+msgid "Deleted today at the latest"
+msgstr "S'esborrarà avui"
+
+msgid "by {user}"
+msgstr "per {user}"
+
+msgid "Back to the files"
+msgstr "Torna als fitxers"
+
+msgid "Choose a file or folder"
+msgstr "Tria un fitxer o una carpeta"
+
+msgid "Choose a file"
+msgstr "Tria un fitxer"
+
+msgid "Selected: {path}"
+msgstr "Seleccionat: {path}"
+
+msgid "Showing only: {exts}"
+msgstr "Només es mostren: {exts}"
+
+msgid "Double-click a file to choose it"
+msgstr "Fes doble clic en un fitxer per triar-lo"
+
+msgid "This window was not opened from another page, so there is nowhere to send the selection."
+msgstr "Aquesta finestra no s'ha obert des d'una altra pàgina, així que no hi ha on enviar la selecció."

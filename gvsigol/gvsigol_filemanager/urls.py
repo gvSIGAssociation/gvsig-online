@@ -3,6 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .views import BrowserView, ExportToDatabaseView, UploadView, UploadFileView, DeleteFileView, DirectoryCreateView, UnzipFileView, download_file
 from . import views
+from . import api
 from gvsigol_services import views as services_views
 
 app_name="gvsigol_filemanager"
@@ -20,5 +21,25 @@ urlpatterns = [
     #path('list_datastore_tables/', services_views.list_datastore_tables, name='list_datastore_tables'),
 
     # Deprecated urls since they have been moved under de fileserver prefix. See urls_fileserver.py
-    path('download/<path:filepath>', download_file, name='fmdownload')
+    path('download/<path:filepath>', download_file, name='fmdownload'),
+
+    # API JSON para la interfaz nueva (ver api.py). Las URL anteriores no cambian.
+    path('api/list/', api.list_directory, name='api-list'),
+    path('api/mkdir/', api.make_directory, name='api-mkdir'),
+    path('api/rename/', api.rename, name='api-rename'),
+    path('api/move/', api.move, name='api-move'),
+    path('api/copy/', api.copy, name='api-copy'),
+    path('api/delete/', api.delete, name='api-delete'),
+    path('api/unzip/', api.unzip, name='api-unzip'),
+    path('api/download/', api.download, name='api-download'),
+    path('api/trash/', api.trash_list, name='api-trash'),
+    path('api/trash/restore/', api.trash_restore, name='api-trash-restore'),
+    path('api/trash/delete/', api.trash_delete, name='api-trash-delete'),
+    path('api/trash/empty/', api.trash_empty, name='api-trash-empty'),
+    path('api/task/<str:task_id>/', api.task_status, name='api-task'),
+    path('api/upload/', api.upload_init, name='api-upload-init'),
+    path('api/upload/<str:upload_id>/', api.upload_status, name='api-upload-status'),
+    path('api/upload/<str:upload_id>/chunk/', api.upload_chunk, name='api-upload-chunk'),
+    path('api/upload/<str:upload_id>/complete/', api.upload_complete, name='api-upload-complete'),
+    path('api/upload/<str:upload_id>/cancel/', api.upload_cancel, name='api-upload-cancel'),
 ]

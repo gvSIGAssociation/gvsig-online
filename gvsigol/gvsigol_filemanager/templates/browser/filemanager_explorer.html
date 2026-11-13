@@ -1,0 +1,46 @@
+{% extends extends_template %}
+{% load i18n static %}
+
+{% comment %}
+Interfaz nueva del gestor de ficheros (explorador con árbol). Todo el contenido lo pinta
+filemanager-explorer.js a partir de la API (gvsigol_filemanager/api.py). Se activa con
+FILEMANAGER_NEW_UI (página) / FILEMANAGER_NEW_POPUP (selector ?popup=1) o con ?ui=new;
+?ui=classic vuelve a la clásica. En el selector, extends_template es filemanager_base2.html
+(sin menú lateral) y la elección se devuelve con window.opener.filemanagerCallback(ruta).
+{% endcomment %}
+
+{% block header %}
+<link rel="stylesheet" href="{% static "css/gol-list-page.css" %}">
+<link rel="stylesheet" href="{% static "css/filemanager-explorer.css" %}">
+{% if popup %}
+<style>
+/* filemanager_base2.html no tiene menú lateral, pero AdminLTE reserva su hueco (230px) a partir
+   de 768px de ancho. El selector nuevo agranda la ventana, así que hay que quitarlo. */
+.content-wrapper, .main-footer { margin-left: 0 !important; }
+</style>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="fx{% if popup %} fx-popup no-details{% endif %}" id="fx" data-testid="{% if popup %}fm-picker{% else %}fm-explorer{% endif %}">
+	<div class="fx-head" id="fx-head"></div>
+	<div class="fx-body">
+		<aside class="fx-tree" id="fx-tree" aria-label="{% trans "Folders" %}"></aside>
+		<section class="fx-list" id="fx-list" tabindex="-1"></section>
+		<aside class="fx-details" id="fx-details" aria-label="{% trans "Details" %}"></aside>
+	</div>
+	<div class="fx-status" id="fx-status"></div>
+	{% if popup %}<div class="fx-pick" id="fx-pick"></div>{% endif %}
+	<input type="file" id="fx-input-files" multiple hidden>
+	<input type="file" id="fx-input-folder" multiple webkitdirectory hidden>
+</div>
+<div id="fx-layer" class="fx-layer"></div>
+<noscript><p><a href="?ui=classic{% if popup %}&amp;popup=1{% endif %}&amp;path={{ path|urlencode }}">{% trans "Classic view" %}</a></p></noscript>
+{{ fm_config|json_script:"fm-config" }}
+{{ fm_i18n|json_script:"fm-i18n" }}
+{% endblock %}
+
+{% block extra-scripts %}
+{% if not popup %}<script>$('#menu-manage-files').addClass("active");</script>{% endif %}
+<script src="{% static "js/filemanager-explorer.js" %}"></script>
+{% endblock %}

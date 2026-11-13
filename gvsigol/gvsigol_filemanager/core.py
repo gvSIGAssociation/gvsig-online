@@ -2,6 +2,7 @@ import os
 
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.utils.translation import gettext as _
 
 from gvsigol_auth import auth_backend
 
@@ -11,6 +12,37 @@ from .utils import sizeof_fmt
 from gvsigol_core import utils as core_utils
 import zipfile
 import shutil
+import logging
+import stat
+
+logger = logging.getLogger("gvsigol")
+
+# Ficheros que acompañan a un .shp y se borran con él (extensión sin el punto, en minúsculas)
+SHAPEFILE_COMPANION_EXTENSIONS = frozenset({
+    'dbf', 'shx', 'prj', 'cpg', 'qpj', 'sbn', 'sbx', 'qix', 'fix',
+    'aih', 'ain', 'atx', 'ixs', 'mxs', 'xml', 'shp.xml',
+})
+
+# Nombres reservados en la raíz del gestor: no se listan ni se pueden abrir, crear ni descargar
+TRASH_DIRNAME = '.gvsigol_trash'
+UPLOADS_DIRNAME = '.gvsigol_uploads'
+RESERVED_NAMES = frozenset({TRASH_DIRNAME, UPLOADS_DIRNAME})
+
+# Tamaño máximo descomprimido de un zip. Se puede cambiar con FILEMANAGER_UNZIP_MAX_SIZE en settings.
+DEFAULT_UNZIP_MAX_SIZE = 20 * 1024 ** 3
+
+
+class UnzipError(Exception):
+    """Error de descompresión con un mensaje apto para el usuario."""
+
+
+def get_extension(filename):
+    """
+    Extensión sin el punto: la última parte del nombre ('varios.puntos.shp' -> 'shp').
+    Devuelve '' si no tiene ('notas', '.oculto').
+    """
+    return os.path.splitext(filename)[1][1:]
+
 
 def sorter(item):
     return item.get('filename', '').lower()
@@ -87,6 +119,8 @@ class Filemanager(object):
 
         groups = auth_backend.get_roles(request)
         dir_list = []
+        if self.path == '':
+            directories = [d for d in directories if d not in RESERVED_NAMES]
         for directoryname in directories:
             if request.user.is_superuser:
                 dir_list.append(_helper(directoryname, 'Directory', ''))
@@ -98,10 +132,7 @@ class Filemanager(object):
                     dir_list.append(_helper(directoryname, 'Directory', ''))
         file_list = []
         for filename in files:
-            parts = filename.split('.')
-            if len(parts) > 1:
-                extension = parts[1]
-                file_list.append(_helper(filename, 'File', extension))
+            file_list.append(_helper(filename, 'File', get_extension(filename)))
         listing = sorted(dir_list, key=sorter) + sorted(file_list, key=sorter)
         return listing
 
@@ -116,39 +147,66 @@ class Filemanager(object):
     def extract_zip(self, file, folder):
         zfile = zipfile.ZipFile(file)
         zfile.extractall(folder)
-    
-    def delete(self, name):
+
+    def unzip(self, zip_path, progress=None):
+        """
+        Descomprime un zip junto a él, en una carpeta con su nombre sin la extensión. Si ya existe
+        algo con ese nombre usa nombre_1, nombre_2... para no sobrescribir nada. Comprueba antes el
+        tamaño descomprimido (límite y espacio libre). Devuelve la ruta de la carpeta creada.
+        Lanza UnzipError con un mensaje para el usuario si no se puede.
+        `progress(bytes_hechos, bytes_totales)`, si se indica, se llama tras cada fichero.
+        """
+        zip_path = os.path.abspath(zip_path)
+        if not _is_inside_root(zip_path) or not os.path.isfile(zip_path):
+            raise UnzipError(_('Error unzipping resource'))
         try:
-            file = name.split('/')[-1]
-            filename = file.split('.')[0]
-            path = os.path.dirname(name)
-            directories, files = FILEMANAGER_STORAGE.listdir(path)
-            if len(files) >= 1:
-                for f in files:
-                    if filename == f.split('.')[0]:
-                        FILEMANAGER_STORAGE.delete(os.path.join(path, f))
-                        
-            if len(directories) >= 1:
-                for d in directories:
-                    if filename == d.split('.')[0]:
-                        FILEMANAGER_STORAGE.delete(os.path.join(path, d))
-            return True
-            
-        except Exception as e:
-            if e.errno == 21:
-                path = name.replace('file://', '')
-                self.set_permission_to_dir(path, 775)
-                shutil.rmtree(path)
-                return True
-            if e.errno == 1:
-                path = name.replace('file://', '')
-                self.set_permission_to_dir(path, 775)
-                shutil.rmtree(path)
-                return True
+            with zipfile.ZipFile(zip_path) as zfile:
+                total_size = sum(info.file_size for info in zfile.infolist())
+                max_size = getattr(settings, 'FILEMANAGER_UNZIP_MAX_SIZE', DEFAULT_UNZIP_MAX_SIZE)
+                if max_size and total_size > max_size:
+                    raise UnzipError(_('The zip file takes %(size)s uncompressed, more than the allowed %(limit)s') % {
+                        'size': sizeof_fmt(total_size), 'limit': sizeof_fmt(max_size)})
+                parent = os.path.dirname(zip_path)
+                if shutil.disk_usage(parent).free < total_size:
+                    raise UnzipError(_('There is not enough free disk space to unzip the file (%(size)s needed)') % {
+                        'size': sizeof_fmt(total_size)})
+                folder = _unique_path(os.path.join(parent, os.path.splitext(os.path.basename(zip_path))[0]))
+                # extract (como extractall) descarta rutas absolutas y componentes '..' de los nombres
+                done = 0
+                for member in zfile.infolist():
+                    zfile.extract(member, folder)
+                    done += member.file_size
+                    if progress:
+                        progress(done, total_size)
+                if not os.path.isdir(folder):
+                    # Un zip vacío: deja igualmente su carpeta
+                    os.makedirs(folder)
+                return folder
+        except zipfile.BadZipFile:
+            raise UnzipError(_('The zip file is damaged or is not a valid zip file'))
+
+    def delete(self, name):
+        """
+        Borra el fichero o la carpeta (con todo su contenido) de la ruta absoluta `name`, que debe
+        estar dentro de FILEMANAGER_DIRECTORY. Al borrar un .shp borra también sus ficheros
+        asociados (.dbf, .shx, .prj...). Borrar algo que ya no existe se considera correcto.
+        Devuelve True si ha ido bien.
+        """
+        target = os.path.abspath(name)
+        if not _is_inside_root(target):
+            logger.warning("Filemanager: refusing to delete outside the file manager: %s", name)
             return False
-        
-        
-    
+        try:
+            if os.path.isdir(target) and not os.path.islink(target):
+                _rmtree(target)
+            elif os.path.lexists(target):
+                for path in _files_to_delete(target):
+                    os.remove(path)
+            return True
+        except Exception:
+            logger.exception("Filemanager: error deleting %s", name)
+            return False
+
     def set_permission_to_dir(self, directory_path, permission):
         for root, dirs, files in os.walk(directory_path):  
             for momo in dirs:  
@@ -170,3 +228,61 @@ class Filemanager(object):
 
         FILEMANAGER_STORAGE.save(path, ContentFile(''))
         FILEMANAGER_STORAGE.delete(path)
+
+
+def _root():
+    return os.path.abspath(FILEMANAGER_DIRECTORY)
+
+
+def _is_inside_root(path):
+    """True si la ruta absoluta está dentro de FILEMANAGER_DIRECTORY, sin ser la propia raíz."""
+    return os.path.abspath(path).startswith(_root() + os.sep)
+
+
+def _unique_path(path):
+    """La ruta tal cual si no existe; si no, ruta_1, ruta_2... la primera libre."""
+    if not os.path.lexists(path):
+        return path
+    i = 1
+    while os.path.lexists('%s_%d' % (path, i)):
+        i += 1
+    return '%s_%d' % (path, i)
+
+
+def file_group(path):
+    """El fichero y, si es un .shp, los ficheros de su mismo nombre que lo acompañan."""
+    return _files_to_delete(path)
+
+
+def _files_to_delete(path):
+    """El fichero y, si es un .shp, los ficheros de su mismo nombre que lo acompañan."""
+    files = [path]
+    directory, filename = os.path.split(path)
+    stem, extension = os.path.splitext(filename)
+    if extension.lower() != '.shp' or not stem:
+        return files
+    prefix = stem + '.'
+    for other in os.listdir(directory):
+        if other == filename or not other.startswith(prefix):
+            continue
+        other_path = os.path.join(directory, other)
+        if other[len(prefix):].lower() in SHAPEFILE_COMPANION_EXTENSIONS and not os.path.isdir(other_path):
+            files.append(other_path)
+    return files
+
+
+def _rmtree(path):
+    """
+    Borra una carpeta con todo su contenido. Si falta permiso en alguna subcarpeta, lo da al
+    propietario y lo reintenta (como hacía antes set_permission_to_dir).
+    """
+    def _retry_with_permission(func, failed_path, exc_info):
+        if not isinstance(exc_info[1], PermissionError):
+            raise exc_info[1]
+        parent = os.path.dirname(failed_path)
+        for target in (parent, failed_path):
+            if os.path.isdir(target) and not os.path.islink(target):
+                os.chmod(target, os.stat(target).st_mode | stat.S_IRWXU)
+        func(failed_path)
+
+    shutil.rmtree(path, onerror=_retry_with_permission)
