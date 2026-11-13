@@ -47,7 +47,7 @@
 	min-height: 460px;
 	position: relative;
 }
-.fx-body { display: grid; grid-template-columns: 250px minmax(0, 1fr) 290px; min-height: 0; }
+.fx-body { display: grid; grid-template-columns: 250px minmax(0, 1fr) 290px; min-height: 0; position: relative; }
 .fx.no-tree .fx-body { grid-template-columns: minmax(0, 1fr) 290px; }
 .fx.no-details .fx-body { grid-template-columns: 250px minmax(0, 1fr); }
 .fx.no-tree.no-details .fx-body { grid-template-columns: minmax(0, 1fr); }
@@ -55,7 +55,8 @@
 @media (max-width: 1100px) {
 	.fx .fx-body, .fx.no-tree .fx-body, .fx.no-details .fx-body { grid-template-columns: minmax(0, 1fr); }
 	.fx .fx-tree, .fx .fx-details { display: none; }
-	.fx.tree-overlay .fx-tree { display: block; position: absolute; z-index: 20; top: 62px; bottom: 34px; left: 0; width: min(280px, 85%); box-shadow: var(--fx-shadow-pop); }
+	/* Dentro del cuerpo (position: relative): nunca tapa la barra superior, que puede ocupar varias líneas */
+	.fx.tree-overlay .fx-tree { display: block; position: absolute; z-index: 20; top: 0; bottom: 0; left: 0; width: min(280px, 85%); box-shadow: var(--fx-shadow-pop); }
 }
 
 /* Cabecera y barra de selección */
@@ -255,11 +256,10 @@
 
 /* Selector (?popup=1): ventana pequeña, sin casillas ni acciones por fila, con barra de elección */
 .fx.fx-popup { grid-template-rows: auto minmax(0, 1fr) auto auto; height: calc(100vh - 40px); min-height: 360px; }
-.fx-popup .fx-table .chk, .fx-popup .fx-rowacts, .fx-popup .fx-table th:last-child, .fx-popup .fx-table td:last-child { display: none; }
+.fx-popup:not(.fx-multi) .fx-table .chk, .fx-popup .fx-rowacts, .fx-popup .fx-table th:last-child, .fx-popup .fx-table td:last-child { display: none; }
 .fx-popup .fx-table tbody tr { cursor: pointer; }
 .fx-popup .fx-search input { width: 120px; }
 .fx-popup .fx-name { min-width: 180px; }
-.fx-popup.tree-overlay .fx-tree { bottom: 90px; }
 .fx-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--fx-border); background: var(--fx-white); }
 .fx-pick .chosen { flex: 1 1 200px; min-width: 0; font-size: 12.5px; color: var(--fx-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fx-pick .chosen b { color: var(--fx-text); font-family: var(--fx-mono); font-weight: 600; }

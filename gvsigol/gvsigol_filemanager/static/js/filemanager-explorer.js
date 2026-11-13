@@ -25,6 +25,11 @@
 	// Sin acciones que cambien o borren datos; ?ext=tif,tiff limita lo que se muestra y se elige.
 	var POPUP = !!CFG.popup;
 	var EXTS = CFG.extensions || [];
+	// ?multiple=1: el selector deja elegir varios y los envía todos juntos
+	var MULTI = POPUP && !!CFG.multiple;
+	if (MULTI) {
+		fx.classList.add('fx-multi');
+	}
 
 	// --- Utilidades -----------------------------------------------------------------------------
 
@@ -304,6 +309,9 @@
 			p.set('popup', '1');
 			if (EXTS.length) {
 				p.set('ext', EXTS.join(','));
+			}
+			if (MULTI) {
+				p.set('multiple', '1');
 			}
 		}
 		if (CFG.keepUiParam) {
@@ -730,7 +738,7 @@
 		}
 		var right = S.canWrite ? t('dragHint') : (S.loading ? '' : t('readOnlyFolder'));
 		if (POPUP) {
-			right = EXTS.length ? t('pickOnly', { exts: EXTS.map(function (x) { return '.' + x; }).join(', ') }) : t('pickHint');
+			right = EXTS.length ? t('pickOnly', { exts: EXTS.map(function (x) { return '.' + x; }).join(', ') }) : t(MULTI ? 'pickHintMulti' : 'pickHint');
 		}
 		el.innerHTML = '<span>' + esc(left) + '</span><span>' + esc(right) + '</span>';
 	}
@@ -742,7 +750,7 @@
 		if (!fromCheckbox) {
 			list.focus({ preventScroll: true });
 		}
-		if (POPUP) {
+		if (POPUP && !MULTI) {
 			S.selected = new Set([path]);
 			S.anchor = path;
 			syncSelection();
@@ -980,6 +988,10 @@
 	});
 
 	var list = document.getElementById('fx-list');
+	// El árbol superpuesto (ventanas estrechas) se cierra al volver a la lista
+	list.addEventListener('mousedown', function () {
+		fx.classList.remove('tree-overlay');
+	});
 	list.addEventListener('click', function (e) {
 		if (S.view === 'trash') {
 			return handleTrashClick(e);
@@ -1050,7 +1062,7 @@
 		if (it.type === 'directory') {
 			navigate(it.path);
 		} else if (POPUP) {
-			pick(it);
+			pick([it]);
 		} else {
 			downloadItems([it]);
 		}
@@ -1092,13 +1104,17 @@
 		}
 		var items = selectedItems();
 		if (POPUP) {
-			if (e.key === 'Enter' && items.length === 1 && !e.target.closest('button,a')) {
+			if (e.key === 'Enter' && items.length && !e.target.closest('button,a')) {
 				e.preventDefault();
-				if (items[0].type === 'directory') {
+				if (items.length === 1 && items[0].type === 'directory') {
 					navigate(items[0].path);
 				} else {
-					pick(items[0]);
+					pick(items);
 				}
+			} else if (MULTI && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a' && fx.contains(e.target)) {
+				e.preventDefault();
+				S.selected = new Set(visibleItems().filter(pickable).map(function (i) { return i.path; }));
+				syncSelection();
 			}
 			return;
 		}
@@ -2269,10 +2285,15 @@
 		return true;
 	}
 
-	function pick(item) {
-		if (!pickable(item)) {
+	function pick(items) {
+		items = (items || []).filter(pickable);
+		if (!items.length) {
 			return;
 		}
+		if (!MULTI) {
+			items = items.slice(0, 1);
+		}
+		var paths = items.map(function (i) { return i.path; });
 		var opener = null;
 		try {
 			opener = window.opener;
@@ -2284,7 +2305,16 @@
 			return;
 		}
 		try {
-			opener.filemanagerCallback(item.path, window.name);
+			if (MULTI && typeof opener.filemanagerMultipleCallback === 'function') {
+				opener.filemanagerMultipleCallback(paths, window.name);
+			} else {
+				// Una llamada por fichero; se vuelve a leer porque la pantalla puede cambiarla
+				paths.forEach(function (p) {
+					if (typeof opener.filemanagerCallback === 'function') {
+						opener.filemanagerCallback(p, window.name);
+					}
+				});
+			}
 		} catch (e) {
 			// Un fallo en la pantalla que abrió el selector no debe dejarlo abierto sin más
 			if (window.console) {
@@ -2299,10 +2329,20 @@
 		if (!el) {
 			return;
 		}
-		var items = selectedItems();
-		var it = items.length === 1 ? items[0] : null;
-		var ok = S.view === 'files' && pickable(it);
-		el.innerHTML = '<span class="chosen">' + (ok ? esc(t('pickChosen', { path: '' })) + '<b>' + esc(displayPath(it.path)) + '</b>' : esc(EXTS.length ? t('pickNoneFile') : t('pickNone'))) + '</span>' +
+		var items = selectedItems().filter(pickable);
+		if (!MULTI && selectedItems().length !== 1) {
+			items = [];
+		}
+		var ok = S.view === 'files' && items.length > 0;
+		var label;
+		if (!ok) {
+			label = esc(EXTS.length ? t('pickNoneFile') : t('pickNone'));
+		} else if (items.length === 1) {
+			label = esc(t('pickChosen', { path: '' })) + '<b>' + esc(displayPath(items[0].path)) + '</b>';
+		} else {
+			label = '<b>' + esc(t('pickChosenN', { n: items.length })) + '</b>';
+		}
+		el.innerHTML = '<span class="chosen">' + label + '</span>' +
 			'<button type="button" class="fx-btn" data-pick="cancel">' + esc(t('cancel')) + '</button>' +
 			'<button type="button" class="fx-btn primary" data-pick="ok"' + (ok ? '' : ' disabled') + '>' + esc(t('pickSelect')) + '</button>';
 	}
@@ -2356,7 +2396,7 @@
 			if (b.getAttribute('data-pick') === 'cancel') {
 				window.close();
 			} else {
-				pick(selectedItems()[0]);
+				pick(selectedItems());
 			}
 		});
 	}

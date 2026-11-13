@@ -147,6 +147,8 @@ UI_STRINGS = {
     'pickChosen': _('Selected: {path}'),
     'pickOnly': _('Showing only: {exts}'),
     'pickHint': _('Double-click a file to choose it'),
+    'pickChosenN': _('{n} items selected'),
+    'pickHintMulti': _('Use Ctrl or Shift to choose several files'),
     'pickNoOpener': _('This window was not opened from another page, so there is nowhere to send the selection.'),
     # Papelera
     'trashNote': _('Deleted items are kept here for {days} days. A shapefile goes in with all its related files.'),

@@ -193,8 +193,15 @@ class BrowserView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, Tem
         que se activan por separado.
         """
         ui = self.request.GET.get('ui')
+        session = getattr(self.request, 'session', None)
         if ui in ('new', 'classic'):
+            # Se recuerda en la sesión del usuario: así los selectores que abren otras pantallas
+            # (que no pasan ?ui=) también salen con la interfaz elegida, solo para él.
+            if session is not None and session.get('filemanager_ui') != ui:
+                session['filemanager_ui'] = ui
             return ui == 'new'
+        if session is not None and session.get('filemanager_ui') in ('new', 'classic'):
+            return session.get('filemanager_ui') == 'new'
         setting = 'FILEMANAGER_NEW_POPUP' if self.popup else 'FILEMANAGER_NEW_UI'
         return bool(getattr(settings, setting, False))
 
@@ -233,6 +240,9 @@ class BrowserView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, Tem
                 # Selector: misma respuesta que el clásico, window.opener.filemanagerCallback(ruta)
                 'popup': bool(self.popup),
                 'extensions': self.picker_extensions() if self.popup else [],
+                # ?multiple=1: varios ficheros a la vez (filemanagerMultipleCallback(rutas) si existe,
+                # si no, filemanagerCallback(ruta) una vez por fichero)
+                'multiple': bool(self.popup) and self.request.GET.get('multiple') in ('1', 'true'),
             },
             'fm_i18n': ui_strings(),
         }

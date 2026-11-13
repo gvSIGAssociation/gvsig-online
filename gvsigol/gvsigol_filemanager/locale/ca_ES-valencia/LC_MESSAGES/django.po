@@ -721,3 +721,9 @@ msgstr "Fes doble clic en un fitxer per a triar-lo"
 
 msgid "This window was not opened from another page, so there is nowhere to send the selection."
 msgstr "Esta finestra no s'ha obert des d'una altra pàgina, així que no hi ha on enviar la selecció."
+
+msgid "Use Ctrl or Shift to choose several files"
+msgstr "Utilitza Ctrl o Maj per a triar diversos fitxers"
+
+msgid "The server is not allowed to write in this location. Contact the administrator."
+msgstr "El servidor no té permís per a escriure en esta ubicació. Avisa l'administrador."

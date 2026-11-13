@@ -769,3 +769,9 @@ msgstr "Haz doble clic en un fichero para elegirlo"
 
 msgid "This window was not opened from another page, so there is nowhere to send the selection."
 msgstr "Esta ventana no se ha abierto desde otra página, así que no hay dónde enviar la selección."
+
+msgid "Use Ctrl or Shift to choose several files"
+msgstr "Usa Ctrl o Mayús para elegir varios ficheros"
+
+msgid "The server is not allowed to write in this location. Contact the administrator."
+msgstr "El servidor no tiene permiso para escribir en esta ubicación. Avisa al administrador."

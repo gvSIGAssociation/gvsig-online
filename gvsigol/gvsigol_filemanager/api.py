@@ -101,6 +101,10 @@ def api_view(methods):
                 return _error(e.message, e.status, **e.extra)
             except RequestDataTooBig:
                 return _error(_('Invalid request'), 413)
+            except PermissionError:
+                # Normalmente, carpetas del gestor con otro propietario que el del servidor
+                logger.exception("Filemanager API permission error in %s", view.__name__)
+                return _error(_('The server is not allowed to write in this location. Contact the administrator.'), 500)
             except Exception:
                 logger.exception("Filemanager API error in %s", view.__name__)
                 return _error(_('Unexpected error'), 500)
