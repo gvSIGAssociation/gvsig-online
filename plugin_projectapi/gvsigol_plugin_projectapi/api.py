@@ -1011,6 +1011,9 @@ class LoadSharedViewAPI(APIView):
     """
     API endpoint para cargar una vista compartida por nombre (view_name).
     """
+    # El permiso global de DRF es IsAuthenticated. Esta lectura la puede hacer
+    # un visitante sin sesión; el propio get rechaza proyectos no públicos.
+    permission_classes = [AllowAny]
 
     def get(self, request, view_name, *args, **kwargs):
         try:
