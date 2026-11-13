@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from gvsigol_filemanager import fsops, uploads
+from gvsigol_filemanager import fsops, processes, uploads
 
 
 class Command(BaseCommand):
@@ -11,5 +11,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         purged = fsops.purge_expired()
         stale = uploads.purge_stale()
+        tasks = processes.purge_stale()
         self.stdout.write('Elementos purgados de la papelera: %d' % purged)
         self.stdout.write('Subidas abandonadas borradas: %d' % stale)
+        self.stdout.write('Registros de tareas antiguos borrados: %d' % tasks)

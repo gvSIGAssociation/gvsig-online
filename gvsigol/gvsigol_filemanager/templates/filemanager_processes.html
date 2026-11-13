@@ -1,0 +1,39 @@
+{% extends "filemanager_base2.html" %}
+{% load i18n static %}
+
+{% comment %}
+Ventana de subidas y procesos del gestor de ficheros (ProcessesView). Se abre aparte desde el
+gestor o desde el indicador de la barra superior y sigue subiendo mientras el usuario navega por
+el resto de la aplicación. Lo pinta filemanager-processes.js con el motor de filemanager-common.js.
+{% endcomment %}
+
+{% block header %}
+<link rel="stylesheet" href="{% static "css/filemanager-explorer.css" %}">
+<style>
+.content-wrapper, .main-footer { margin-left: 0 !important; }
+.content { padding: 10px !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fx-proc" id="fx-proc" data-testid="fm-processes">
+	<header class="fx-proc-head">
+		<h1>{% trans "Uploads and processes" %}</h1>
+		<div class="fx-proc-tools" id="fx-proc-tools"></div>
+		<p>{% trans "Keep this window open while uploading. You can go on working in gvSIG Online." %}</p>
+	</header>
+	<div id="fx-proc-notice" aria-live="polite"></div>
+	<section aria-labelledby="fx-proc-active-h"><h2 id="fx-proc-active-h">{% trans "In progress and recent" %}</h2><div id="fx-proc-active"></div></section>
+	<section aria-labelledby="fx-proc-paused-h" id="fx-proc-paused-box" hidden><h2 id="fx-proc-paused-h">{% trans "Paused" %}</h2><p class="fx-proc-hint">{% trans "Choose the same file again to continue where it stopped." %}</p><div id="fx-proc-paused"></div></section>
+	<section aria-labelledby="fx-proc-tasks-h" id="fx-proc-tasks-box" hidden><h2 id="fx-proc-tasks-h">{% trans "Tasks on the server" %}</h2><div id="fx-proc-tasks"></div></section>
+	<input type="file" id="fx-proc-resume" hidden>
+</div>
+<div id="fx-layer" class="fx-layer"></div>
+{{ fm_config|json_script:"fm-config" }}
+{{ fm_i18n|json_script:"fm-i18n" }}
+{% endblock %}
+
+{% block extra-scripts %}
+<script src="{% static "js/filemanager-common.js" %}"></script>
+<script src="{% static "js/filemanager-processes.js" %}"></script>
+{% endblock %}

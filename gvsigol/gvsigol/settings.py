@@ -47,6 +47,16 @@ def _parse_octal_mode(value):
         text = text[2:]
     return int(text, 8)
 
+def _parse_size(value):
+    """Tamaño en bytes escrito como 53687091200, 500M, 50G o 1T (múltiplos de 1024). 0 = sin límite."""
+    if isinstance(value, int):
+        return value
+    text = str(value).strip().upper().rstrip('B')
+    units = {'K': 1024, 'M': 1024 ** 2, 'G': 1024 ** 3, 'T': 1024 ** 4}
+    if text and text[-1] in units:
+        return int(float(text[:-1]) * units[text[-1]])
+    return int(text)
+
 print ("INFO: Ejecutando settings.py !!...........................................")
 GVSIGOL_VERSION = '4.4.0-dev'
 print("INFO: gvSIG Online version: " + GVSIGOL_VERSION)
@@ -188,6 +198,7 @@ env = environ.Env(
     UI_HIDEN_PROJECTS_PREFIX=(str,'_'),
     FILEMANAGER_NEW_UI=(bool, False),  # interfaz nueva del gestor de ficheros (explorador)
     FILEMANAGER_NEW_POPUP=(bool, False),  # selector de ficheros (?popup=1) con la interfaz nueva
+    FILEMANAGER_UPLOAD_MAX_SIZE=(_parse_size, 50 * 1024 ** 3),  # tamaño máximo por fichero en la subida por trozos
     GDALTOOLS_BASEPATH=(str,''),
     GDALTOOLS_CMD_PREFIX=(str,''),
     GDAL_LIBRARY_PATH=(str, ''),
@@ -678,6 +689,8 @@ FILEMANAGER_MEDIA_URL = os.path.join(MEDIA_URL, FILEMANAGER_DIRECTORY)
 FILEMANAGER_NEW_UI = env('FILEMANAGER_NEW_UI')
 # Lo mismo para el selector que abren otras pantallas (?popup=1); se activa por separado.
 FILEMANAGER_NEW_POPUP = env('FILEMANAGER_NEW_POPUP')
+# Tamaño máximo de cada fichero en la subida por trozos de la interfaz nueva (la clásica no lo usa).
+FILEMANAGER_UPLOAD_MAX_SIZE = env('FILEMANAGER_UPLOAD_MAX_SIZE')
 FILEMANAGER_STORAGE = FileSystemStorage(
     location=FILEMANAGER_MEDIA_ROOT,
     base_url=FILEMANAGER_MEDIA_URL,

@@ -775,3 +775,102 @@ msgstr "Usa Ctrl o Mayús para elegir varios ficheros"
 
 msgid "The server is not allowed to write in this location. Contact the administrator."
 msgstr "El servidor no tiene permiso para escribir en esta ubicación. Avisa al administrador."
+
+msgid "Continues in the uploads window"
+msgstr "Continúa en la ventana de subidas"
+
+msgid "Continue in the background"
+msgstr "Continuar en segundo plano"
+
+msgid "The uploads go on in a separate window, so you can use the rest of gvSIG Online."
+msgstr "Las subidas siguen en una ventana aparte y puedes usar el resto de gvSIG Online."
+
+msgid "There are uploads in progress in this window. If you close it they will pause."
+msgstr "Hay subidas en curso en esta ventana. Si la cierras, se pausarán."
+
+msgid "{n} files sent to the uploads window"
+msgstr "{n} ficheros enviados a la ventana de subidas"
+
+msgid "Show"
+msgstr "Ver"
+
+msgid "The browser blocked the uploads window. Allow pop-up windows for this site and try again."
+msgstr "El navegador ha bloqueado la ventana de subidas. Permite las ventanas emergentes para este sitio y vuelve a intentarlo."
+
+msgid "Nothing is uploading right now."
+msgstr "Ahora no se está subiendo nada."
+
+msgid "Choose the file"
+msgstr "Elegir el fichero"
+
+msgid "Discard"
+msgstr "Descartar"
+
+msgid "Discard this upload?"
+msgstr "¿Descartar esta subida?"
+
+msgid "What has been received so far is deleted. To upload it later it will start from the beginning."
+msgstr "Se borra lo recibido hasta ahora. Si la vuelves a subir, empezará desde el principio."
+
+msgid "That is not the same file: «{name}» was {size}."
+msgstr "No es el mismo fichero: «{name}» ocupaba {size}."
+
+msgid "Uploads and processes"
+msgstr "Subidas y procesos"
+
+msgid "Keep this window open while the files are uploading. You can go on working in gvSIG Online in the other window."
+msgstr "Mantén esta ventana abierta mientras se suben los ficheros. Puedes seguir trabajando en gvSIG Online en la otra ventana."
+
+msgid "In progress and recent"
+msgstr "En curso y recientes"
+
+msgid "Paused"
+msgstr "En pausa"
+
+msgid "These uploads were interrupted. Choose the same file again to continue from where it stopped."
+msgstr "Estas subidas se interrumpieron. Elige de nuevo el mismo fichero para continuar desde donde se quedó."
+
+msgid "Tasks on the server"
+msgstr "Tareas en el servidor"
+
+msgid "Uploads and processes in progress"
+msgstr "Subidas y procesos en curso"
+
+msgid "Uploads and processes finished"
+msgstr "Subidas y procesos terminados"
+
+msgid "Some uploads failed"
+msgstr "Algunas subidas han fallado"
+
+msgid "Passing to the uploads window…"
+msgstr "Pasando a la ventana de subidas…"
+
+msgid "There are uploads in progress"
+msgstr "Hay subidas en curso"
+
+msgid "If you leave this page they will stop. They can go on in the background in a separate window."
+msgstr "Si sales de esta página se detendrán. Pueden seguir en segundo plano en una ventana aparte."
+
+msgid "Stay here"
+msgstr "Quedarme aquí"
+
+msgid "Leave and stop them"
+msgstr "Salir y detenerlas"
+
+msgid "Continue in the background and go"
+msgstr "Seguir en segundo plano e ir"
+
+msgid "Clear completed"
+msgstr "Borrar completados"
+
+msgid "Everything has finished. This window will close in {n} s."
+msgstr "Todo ha terminado. Esta ventana se cerrará en {n} s."
+
+msgid "Keep open"
+msgstr "Mantener abierta"
+
+msgid "Keep this window open while uploading. You can go on working in gvSIG Online."
+msgstr "Deja esta ventana abierta mientras se sube. Puedes seguir trabajando en gvSIG Online."
+
+msgid "Choose the same file again to continue where it stopped."
+msgstr "Elige otra vez el mismo fichero para continuar donde se quedó."

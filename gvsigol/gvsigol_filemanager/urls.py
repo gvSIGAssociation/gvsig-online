@@ -37,6 +37,10 @@ urlpatterns = [
     path('api/trash/delete/', api.trash_delete, name='api-trash-delete'),
     path('api/trash/empty/', api.trash_empty, name='api-trash-empty'),
     path('api/task/<str:task_id>/', api.task_status, name='api-task'),
+    path('api/processes/', api.process_list, name='api-processes'),
+    path('api/processes/clear/', api.process_clear, name='api-processes-clear'),
+    # Ventana de subidas y procesos (sigue subiendo mientras se navega por el resto de la aplicación)
+    path('processes/', views.ProcessesView.as_view(), name='processes'),
     path('api/upload/', api.upload_init, name='api-upload-init'),
     path('api/upload/<str:upload_id>/', api.upload_status, name='api-upload-status'),
     path('api/upload/<str:upload_id>/chunk/', api.upload_chunk, name='api-upload-chunk'),

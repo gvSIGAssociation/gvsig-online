@@ -21,7 +21,7 @@ from django.utils.http import content_disposition_header
 from django.utils import translation
 from django.utils.translation import gettext as _
 
-from . import fsops, uploads
+from . import fsops, processes, uploads
 from .core import Filemanager, UnzipError
 from .fsops import OperationError
 from .views import can_browse_path, can_manage_path, datastore_using_path, raster_datastore_paths
@@ -159,7 +159,7 @@ def _maybe_purge_trash():
     _last_purge[0] = now
     try:
         purged = fsops.purge_expired()
-        stale = uploads.purge_stale()
+        stale = uploads.purge_stale() + processes.purge_stale()
         if purged or stale:
             logger.info("Filemanager: purged %d expired trash entries and %d stale uploads", purged, stale)
     except Exception:
@@ -279,6 +279,8 @@ def unzip(request, data):
         # En segundo plano con Celery: el progreso se consulta en task/<id>/
         from .tasks import unzip_task
         result = unzip_task.apply_async(kwargs={'zip_rel': rel, 'language': translation.get_language()})
+        # Para el visor de procesos, aunque se cierre la página que la lanzó
+        processes.record(result.id, request.user.username, 'unzip', rel.rsplit('/', 1)[-1], rel)
         return JsonResponse({'ok': True, 'task_id': result.id}, status=202)
     try:
         folder = Filemanager().unzip(zip_path)
@@ -291,6 +293,9 @@ def unzip(request, data):
 def task_status(request, data, task_id):
     """Estado de una tarea en segundo plano del gestor (de momento, descomprimir)."""
     from celery.result import AsyncResult
+    task_owner = processes.owner(task_id)
+    if task_owner and task_owner != request.user.username and not request.user.is_superuser:
+        raise OperationError(_('You do not have permission for this location'), 403)
     result = AsyncResult(task_id)
     state = result.state
     response = {'ok': True, 'task_id': task_id, 'state': state, 'progress': 0}
@@ -302,6 +307,23 @@ def task_status(request, data, task_id):
     elif state in ('FAILURE', 'REVOKED'):
         response['result'] = {'ok': False, 'error': _('Unexpected error')}
     return JsonResponse(response)
+
+
+@api_view(['GET'])
+def process_list(request, data):
+    """Visor de procesos: subidas pendientes del usuario (en pausa o en curso) y sus tareas."""
+    _maybe_purge_trash()
+    return JsonResponse({
+        'ok': True,
+        'uploads': uploads.list_pending(request.user.username),
+        'tasks': processes.list_tasks(request.user.username),
+    })
+
+
+@api_view(['POST'])
+def process_clear(request, data):
+    """Quita del visor las tareas terminadas del usuario (las subidas terminadas no se guardan)."""
+    return JsonResponse({'ok': True, 'cleared': processes.clear_finished(request.user.username)})
 
 
 # --- Subida por trozos (ver uploads.py) ---------------------------------------------------------

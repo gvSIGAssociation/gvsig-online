@@ -11,6 +11,10 @@ Subida de ficheros por trozos, reanudable, para la API (la subida clásica no ca
 Lo pendiente vive en FILEMANAGER_DIRECTORY/.gvsigol_uploads/<id>/ (meta.json y data.part).
 Lo abandonado se borra pasadas STALE_HOURS horas sin recibir nada (purge_stale).
 
+Reanudar: si el mismo usuario vuelve a iniciar la subida del mismo fichero (carpeta, nombre y
+tamaño) mientras la anterior sigue pendiente, init devuelve esa subida con lo ya recibido. Así se
+continúa tras cerrar la ventana o al pasar las subidas a la ventana de procesos.
+
 El nombre puede llevar subcarpetas ('fotos/2024/a.jpg') para subir carpetas enteras: se crean
 al completar.
 """
@@ -142,6 +146,44 @@ def _status(entry_dir, meta):
     }
 
 
+def _pending_entries():
+    base = uploads_root()
+    if not os.path.isdir(base):
+        return
+    for upload_id in os.listdir(base):
+        entry_dir = os.path.join(base, upload_id)
+        if not _ID_RE.match(upload_id):
+            continue
+        try:
+            with open(os.path.join(entry_dir, 'meta.json'), encoding='utf-8') as f:
+                yield entry_dir, json.load(f)
+        except Exception:
+            continue
+
+
+def find_pending(username, dest_rel, name, size):
+    """Subida pendiente del mismo usuario para el mismo fichero y destino, o None."""
+    for entry_dir, meta in _pending_entries() or []:
+        if (meta.get('username') == username and meta.get('path') == dest_rel
+                and meta.get('name') == name and meta.get('size') == size):
+            return entry_dir, meta
+    return None
+
+
+def list_pending(username):
+    """Subidas pendientes del usuario (para el visor de procesos), las más recientes primero."""
+    items = []
+    for entry_dir, meta in _pending_entries() or []:
+        if meta.get('username') != username:
+            continue
+        status = _status(entry_dir, meta)
+        part = os.path.join(entry_dir, 'data.part')
+        status['updated'] = datetime.datetime.fromtimestamp(
+            os.path.getmtime(part if os.path.exists(part) else entry_dir), datetime.timezone.utc).isoformat()
+        items.append(status)
+    return sorted(items, key=lambda i: i['updated'], reverse=True)
+
+
 def get(upload_id, username):
     """Estado de una subida (para reanudarla), con sus datos de destino."""
     entry_dir, meta = _load(upload_id, username)
@@ -165,6 +207,21 @@ def init(dest_rel, name, size, username, policy='error'):
             'limit': sizeof_fmt(limit)}, 413)
     dest_rel = fsops.normalize(dest_rel)
     name = clean_relative_name(name)
+    pending = find_pending(username, dest_rel, name, size)
+    if pending:
+        # Reanudar: misma subida, con lo ya recibido. Se guarda la política nueva si la hay.
+        entry_dir, meta = pending
+        if policy != 'error' and meta.get('on_conflict') != policy:
+            meta['on_conflict'] = policy
+            with open(os.path.join(entry_dir, 'meta.json'), 'w', encoding='utf-8') as f:
+                json.dump(meta, f, ensure_ascii=False)
+        if meta.get('on_conflict', 'error') == 'error':
+            # El nombre puede haberse ocupado mientras tanto: se avisa igual que al empezar
+            resolve(dest_rel, name, 'error')
+        status = _status(entry_dir, meta)
+        status['resumed'] = status['received'] > 0
+        status['final_name'] = os.path.basename(name)
+        return status
     target, decision = resolve(dest_rel, name, policy)
     if decision == 'skip':
         return {'skipped': True, 'name': name, 'path': dest_rel}

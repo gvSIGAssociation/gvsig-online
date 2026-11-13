@@ -247,6 +247,35 @@ class BrowserView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, Tem
             'fm_i18n': ui_strings(),
         }
  
+class ProcessesView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    """
+    Ventana de subidas y procesos del gestor. Se abre aparte y sigue subiendo mientras el usuario
+    navega por el resto de la aplicación (ver static/js/filemanager-processes.js).
+    """
+    template_name = 'filemanager_processes.html'
+    raise_exception = False
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def get_context_data(self, **kwargs):
+        from . import fsops
+        from .ui_strings import ui_strings
+        from django.utils import translation
+        context = super(ProcessesView, self).get_context_data(**kwargs)
+        browser_url = str(reverse_lazy('filemanager:browser'))
+        context['fm_config'] = {
+            'api': browser_url + 'api/',
+            'browserUrl': browser_url,
+            'language': translation.get_language() or 'es',
+            'trashDays': fsops.retention_days(),
+            # filemanager-common.js: esta ventana recibe y hace las subidas de las demás páginas
+            'role': 'processes',
+        }
+        context['fm_i18n'] = ui_strings()
+        return context
+
+
 class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, TemplateView):
     template_name = 'browser/export_to_database.html'
     raise_exception = False

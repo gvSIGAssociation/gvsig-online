@@ -727,3 +727,102 @@ msgstr "Utilitza Ctrl o Maj per a triar diversos fitxers"
 
 msgid "The server is not allowed to write in this location. Contact the administrator."
 msgstr "El servidor no té permís per a escriure en esta ubicació. Avisa l'administrador."
+
+msgid "Continues in the uploads window"
+msgstr "Continua en la finestra de pujades"
+
+msgid "Continue in the background"
+msgstr "Continua en segon pla"
+
+msgid "The uploads go on in a separate window, so you can use the rest of gvSIG Online."
+msgstr "Les pujades continuen en una finestra a banda i pots utilitzar la resta de gvSIG Online."
+
+msgid "There are uploads in progress in this window. If you close it they will pause."
+msgstr "Hi ha pujades en curs en esta finestra. Si la tanques, es posaran en pausa."
+
+msgid "{n} files sent to the uploads window"
+msgstr "{n} fitxers enviats a la finestra de pujades"
+
+msgid "Show"
+msgstr "Mostra"
+
+msgid "The browser blocked the uploads window. Allow pop-up windows for this site and try again."
+msgstr "El navegador ha bloquejat la finestra de pujades. Permet les finestres emergents per a este lloc i torna-ho a provar."
+
+msgid "Nothing is uploading right now."
+msgstr "Ara no s'està pujant res."
+
+msgid "Choose the file"
+msgstr "Tria el fitxer"
+
+msgid "Discard"
+msgstr "Descarta"
+
+msgid "Discard this upload?"
+msgstr "Vols descartar esta pujada?"
+
+msgid "What has been received so far is deleted. To upload it later it will start from the beginning."
+msgstr "S'esborra el que s'ha rebut fins ara. Si la tornes a pujar, començarà des del principi."
+
+msgid "That is not the same file: «{name}» was {size}."
+msgstr "No és el mateix fitxer: «{name}» ocupava {size}."
+
+msgid "Uploads and processes"
+msgstr "Pujades i processos"
+
+msgid "Keep this window open while the files are uploading. You can go on working in gvSIG Online in the other window."
+msgstr "Mantín esta finestra oberta mentres es pugen els fitxers. Pots continuar treballant en gvSIG Online en l'altra finestra."
+
+msgid "In progress and recent"
+msgstr "En curs i recents"
+
+msgid "Paused"
+msgstr "En pausa"
+
+msgid "These uploads were interrupted. Choose the same file again to continue from where it stopped."
+msgstr "Estes pujades es van interrompre. Torna a triar el mateix fitxer per a continuar des d'on es va quedar."
+
+msgid "Tasks on the server"
+msgstr "Tasques en el servidor"
+
+msgid "Uploads and processes in progress"
+msgstr "Pujades i processos en curs"
+
+msgid "Uploads and processes finished"
+msgstr "Pujades i processos acabats"
+
+msgid "Some uploads failed"
+msgstr "Algunes pujades han fallat"
+
+msgid "Passing to the uploads window…"
+msgstr "S'està passant a la finestra de pujades…"
+
+msgid "There are uploads in progress"
+msgstr "Hi ha pujades en curs"
+
+msgid "If you leave this page they will stop. They can go on in the background in a separate window."
+msgstr "Si ixes d'esta pàgina s'aturaran. Poden continuar en segon pla en una finestra a banda."
+
+msgid "Stay here"
+msgstr "Queda't ací"
+
+msgid "Leave and stop them"
+msgstr "Ix i atura-les"
+
+msgid "Continue in the background and go"
+msgstr "Continua en segon pla i ves-hi"
+
+msgid "Clear completed"
+msgstr "Esborra els completats"
+
+msgid "Everything has finished. This window will close in {n} s."
+msgstr "Tot ha acabat. Esta finestra es tancarà d'ací a {n} s."
+
+msgid "Keep open"
+msgstr "Mantín-la oberta"
+
+msgid "Keep this window open while uploading. You can go on working in gvSIG Online."
+msgstr "Deixa esta finestra oberta mentres es puja. Pots continuar treballant en gvSIG Online."
+
+msgid "Choose the same file again to continue where it stopped."
+msgstr "Torna a triar el mateix fitxer per a continuar on es va quedar."

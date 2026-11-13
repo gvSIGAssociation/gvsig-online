@@ -42,5 +42,6 @@ FILEMANAGER_NEW_UI (página) / FILEMANAGER_NEW_POPUP (selector ?popup=1) o con ?
 
 {% block extra-scripts %}
 {% if not popup %}<script>$('#menu-manage-files').addClass("active");</script>{% endif %}
+<script src="{% static "js/filemanager-common.js" %}"></script>
 <script src="{% static "js/filemanager-explorer.js" %}"></script>
 {% endblock %}
