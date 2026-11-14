@@ -7,6 +7,7 @@ from gvsigol_services.models import Layer
 from django.contrib.auth.models import User
 from django.utils.translation import gettext as _
 from .models import exports_historical
+from .utils import export_redirect
 
 from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__)
@@ -35,7 +36,7 @@ def _publish_exported_layer(user, cleaned_data):
 
 
 def _finalize_export_status(export, post, export_message, publish_requested, user, cleaned_data, had_export_warning=False):
-    redirect = "/gvsigonline/filemanager/?path=" + (post.get('directory_path') or '')
+    redirect = export_redirect("/gvsigonline/filemanager/?path=", post.get('directory_path'))
     if not publish_requested:
         export.status = 'Warning' if had_export_warning else 'Success'
         export.message = export_message
@@ -67,6 +68,10 @@ def _finalize_export_status(export, post, export_message, publish_requested, use
         ) % {'error': str(exc)}
         export.redirect = redirect
         export.save()
+
+
+def _retry_redirect(post):
+    return export_redirect("/gvsigonline/filemanager/export_to_database/?path=", post.get('file_path'))
 
 
 def _set_progress(task, progress, status):
@@ -168,14 +173,14 @@ def postBackground(self, **kwargs):
                 export.message = msg
 
             export.status = 'Error'
-            export.redirect = "/gvsigonline/filemanager/export_to_database/?path=" + (post.get('file_path') or '')
+            export.redirect = _retry_redirect(post)
             export.save()
 
         except Exception as exc:
             logger.exception(exc)
             export.status = 'Error'
             export.message = 'Server error' + ": " + str(exc)
-            export.redirect = "/gvsigonline/filemanager/export_to_database/?path=" + (post.get('file_path') or '')
+            export.redirect = _retry_redirect(post)
             export.save()
 
     else:
@@ -189,7 +194,7 @@ def postBackground(self, **kwargs):
                 else:
                     errors.append('%s: %s' % (field, err))
         export.message = '; '.join(errors) if errors else _('You must fill in all fields')
-        export.redirect = "/gvsigonline/filemanager/export_to_database/?path=" + (post.get('file_path') or '')
+        export.redirect = _retry_redirect(post)
         export.save()
 
 

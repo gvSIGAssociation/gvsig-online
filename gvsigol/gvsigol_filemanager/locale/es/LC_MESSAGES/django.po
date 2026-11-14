@@ -874,3 +874,8 @@ msgstr "Deja esta ventana abierta mientras se sube. Puedes seguir trabajando en 
 
 msgid "Choose the same file again to continue where it stopped."
 msgstr "Elige otra vez el mismo fichero para continuar donde se quedó."
+
+#: core.py
+#, python-format
+msgid "The zip file has %(count)d items, more than the allowed %(limit)d"
+msgstr "El zip tiene %(count)d elementos, más que el máximo permitido (%(limit)d)"

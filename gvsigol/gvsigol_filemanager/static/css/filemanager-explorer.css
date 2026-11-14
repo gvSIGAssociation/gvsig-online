@@ -87,6 +87,11 @@
 .fx-btn.on { background: var(--fx-accent-lt); color: var(--fx-accent-dk); border-color: var(--fx-accent-md); }
 .fx-btn[disabled] { opacity: .45; cursor: not-allowed; }
 .fx-btn.icon-only { padding: 6px 8px; }
+.fx-procbtn { position: relative; }
+.fx-procbadge { position: absolute; top: -6px; right: -6px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; font-size: 10px; font-weight: 700; line-height: 16px; text-align: center; color: #fff; background: var(--fx-accent); font-variant-numeric: tabular-nums; pointer-events: none; }
+.fx-procbadge[hidden] { display: none; }
+.fx-procbadge.err { background: var(--fx-danger); }
+.fx-procbadge.ok { background: #2e7d32; }
 .fx-search { display: flex; align-items: center; gap: 6px; border: 1px solid var(--fx-border-strong); border-radius: 6px; padding: 0 9px; background: var(--fx-white); color: var(--fx-muted); }
 .fx-search input { border: 0; outline: 0; padding: 6px 0; width: 150px; font: inherit; color: var(--fx-text); background: none; box-shadow: none; }
 .fx-dropdown { position: relative; display: inline-flex; }

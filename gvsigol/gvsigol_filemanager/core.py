@@ -14,6 +14,8 @@ import zipfile
 import shutil
 import logging
 import stat
+import copy
+import re
 
 logger = logging.getLogger("gvsigol")
 
@@ -30,6 +32,46 @@ RESERVED_NAMES = frozenset({TRASH_DIRNAME, UPLOADS_DIRNAME})
 
 # Tamaño máximo descomprimido de un zip. Se puede cambiar con FILEMANAGER_UNZIP_MAX_SIZE en settings.
 DEFAULT_UNZIP_MAX_SIZE = 20 * 1024 ** 3
+# Número máximo de entradas de un zip (un zip con millones de entradas vacías no ocupa nada pero
+# agota el disco de inodos). Se puede cambiar con FILEMANAGER_UNZIP_MAX_ENTRIES en settings.
+DEFAULT_UNZIP_MAX_ENTRIES = 200000
+
+# Caracteres que no se dejan en los nombres que trae un zip (la subida ya los quita con
+# get_valid_name): los que sirven para inyectar HTML/JS (< > " `), la barra invertida (la API la
+# trata como separador) y los de control. Se mantienen espacios, tildes y apóstrofos.
+_UNSAFE_ZIP_NAME_CHARS = re.compile(r'[<>"`\\\x00-\x1f\x7f]')
+
+
+def safe_zip_component(name):
+    """Parte de una ruta de un zip con los caracteres peligrosos cambiados por '_'."""
+    return _UNSAFE_ZIP_NAME_CHARS.sub('_', name)
+
+
+def _safe_member_names(members):
+    """
+    Nombre limpio de cada entrada (lista paralela). Si dos entradas distintas quedan con el mismo
+    nombre al limpiarlas, la segunda pasa a nombre_1, nombre_2... para no sobrescribir la primera.
+    """
+    used = {}
+    names = []
+    for member in members:
+        is_dir = member.filename.endswith('/')
+        parts = [safe_zip_component(p) for p in member.filename.split('/')]
+        clean = '/'.join(parts)
+        key = clean.rstrip('/')
+        if key in used and used[key] != member.filename.rstrip('/'):
+            stem, ext = os.path.splitext(parts[-2] if is_dir else parts[-1])
+            i = 1
+            while True:
+                candidate_last = '%s_%d%s' % (stem, i, ext)
+                candidate = '/'.join(parts[:-2] + [candidate_last, ''] if is_dir else parts[:-1] + [candidate_last])
+                if candidate.rstrip('/') not in used:
+                    clean = candidate
+                    break
+                i += 1
+        used.setdefault(clean.rstrip('/'), member.filename.rstrip('/'))
+        names.append(clean)
+    return names
 
 
 class UnzipError(Exception):
@@ -131,6 +173,9 @@ class Filemanager(object):
                 else:
                     dir_list.append(_helper(directoryname, 'Directory', ''))
         file_list = []
+        if self.path == '' and not request.user.is_superuser:
+            # En la raíz, solo las carpetas de sus roles (como la API): los ficheros sueltos no son suyos
+            files = []
         for filename in files:
             file_list.append(_helper(filename, 'File', get_extension(filename)))
         listing = sorted(dir_list, key=sorter) + sorted(file_list, key=sorter)
@@ -161,7 +206,12 @@ class Filemanager(object):
             raise UnzipError(_('Error unzipping resource'))
         try:
             with zipfile.ZipFile(zip_path) as zfile:
-                total_size = sum(info.file_size for info in zfile.infolist())
+                members = zfile.infolist()
+                max_entries = getattr(settings, 'FILEMANAGER_UNZIP_MAX_ENTRIES', DEFAULT_UNZIP_MAX_ENTRIES)
+                if max_entries and len(members) > max_entries:
+                    raise UnzipError(_('The zip file has %(count)d items, more than the allowed %(limit)d') % {
+                        'count': len(members), 'limit': max_entries})
+                total_size = sum(info.file_size for info in members)
                 max_size = getattr(settings, 'FILEMANAGER_UNZIP_MAX_SIZE', DEFAULT_UNZIP_MAX_SIZE)
                 if max_size and total_size > max_size:
                     raise UnzipError(_('The zip file takes %(size)s uncompressed, more than the allowed %(limit)s') % {
@@ -173,7 +223,11 @@ class Filemanager(object):
                 folder = _unique_path(os.path.join(parent, os.path.splitext(os.path.basename(zip_path))[0]))
                 # extract (como extractall) descarta rutas absolutas y componentes '..' de los nombres
                 done = 0
-                for member in zfile.infolist():
+                for member, clean_name in zip(members, _safe_member_names(members)):
+                    if clean_name != member.filename:
+                        # Misma entrada (se lee por orig_filename) con el nombre limpio en disco
+                        member = copy.copy(member)
+                        member.filename = clean_name
                     zfile.extract(member, folder)
                     done += member.file_size
                     if progress:

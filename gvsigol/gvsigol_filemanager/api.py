@@ -294,7 +294,8 @@ def task_status(request, data, task_id):
     """Estado de una tarea en segundo plano del gestor (de momento, descomprimir)."""
     from celery.result import AsyncResult
     task_owner = processes.owner(task_id)
-    if task_owner and task_owner != request.user.username and not request.user.is_superuser:
+    # Solo las tareas del gestor registradas a su nombre (no cualquier tarea de Celery por su id)
+    if task_owner != request.user.username and not (task_owner and request.user.is_superuser):
         raise OperationError(_('You do not have permission for this location'), 403)
     result = AsyncResult(task_id)
     state = result.state

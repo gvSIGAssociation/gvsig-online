@@ -377,6 +377,7 @@
 				'<button type="button" class="fx-btn icon-only" data-act="toggle-tree" title="' + esc(t('toggleTree')) + '" aria-label="' + esc(t('toggleTree')) + '">' + ICON.tree + '</button>' +
 				'<button type="button" class="fx-btn icon-only" data-act="new-folder" title="' + esc(t('newFolder')) + '" aria-label="' + esc(t('newFolder')) + '"' + pdis + '>' + ICON.plus + '</button>' +
 				'<button type="button" class="fx-btn" data-act="upload-menu" aria-haspopup="menu"' + pdis + '>' + ICON.upload + esc(t('upload')) + ICON.chevDown + '</button>' +
+				procBtnHtml() +
 				'<button type="button" class="fx-btn icon-only ghost" data-act="classic" title="' + esc(t('classicView')) + '" aria-label="' + esc(t('classicView')) + '">' + ICON.classic + '</button>';
 		} else {
 			var dis = S.canWrite ? '' : ' disabled title="' + esc(t('readOnlyFolder')) + '"';
@@ -384,11 +385,70 @@
 				'<button type="button" class="fx-btn icon-only" data-act="toggle-tree" title="' + esc(t('toggleTree')) + '" aria-label="' + esc(t('toggleTree')) + '">' + ICON.tree + '</button>' +
 				'<button type="button" class="fx-btn" data-act="new-folder"' + dis + '>' + ICON.plus + esc(t('newFolder')) + '</button>' +
 				'<button type="button" class="fx-btn primary" data-act="upload-menu" aria-haspopup="menu"' + dis + '>' + ICON.upload + esc(t('upload')) + ICON.chevDown + '</button>' +
+				procBtnHtml() +
 				'<button type="button" class="fx-btn icon-only' + (fx.classList.contains('no-details') ? '' : ' on') + '" data-act="toggle-details" title="' + esc(t('toggleDetails')) + '" aria-label="' + esc(t('toggleDetails')) + '">' + ICON.panel + '</button>' +
 				'<button type="button" class="fx-btn icon-only ghost" data-act="page-menu" aria-haspopup="menu" title="' + esc(t('moreActions')) + '" aria-label="' + esc(t('moreActions')) + '">' + ICON.more + '</button>';
 		}
 		el.innerHTML = '<div class="fx-headbar">' + crumbsHtml() + '<div class="fx-tools">' + tools + '</div></div>';
 	}
+
+	// --- Botón de subidas y procesos ----------------------------------------------------------------
+	// Abre la ventana de subidas (sigue subiendo aunque se salga del gestor). Muestra lo que le
+	// cuenta esa ventana por BroadcastChannel: nº en curso, '!' si hay errores o '✓' al terminar.
+
+	var PROC = { active: 0, percent: null, errors: 0, finished: false };
+	var procHideTimer = null;
+
+	function procBadge() {
+		if (PROC.active > 0) {
+			return { text: String(PROC.active), cls: 'run', title: t('processesRunning') + (PROC.percent != null ? ' · ' + PROC.percent + ' %' : '') };
+		}
+		if (PROC.errors > 0) {
+			return { text: '!', cls: 'err', title: t('processesFailed') };
+		}
+		if (PROC.finished) {
+			return { text: '✓', cls: 'ok', title: t('processesFinished') };
+		}
+		return { text: '', cls: '', title: t('processes') };
+	}
+
+	function procBtnHtml() {
+		var b = procBadge();
+		return '<button type="button" class="fx-btn icon-only fx-procbtn" data-act="processes" title="' + esc(b.title) + '" aria-label="' + esc(t('processes')) + '">' +
+			ICON.cloud + '<span class="fx-procbadge ' + b.cls + '"' + (b.text ? '' : ' hidden') + '>' + esc(b.text) + '</span></button>';
+	}
+
+	/** Actualiza el botón sin repintar la barra (repintarla a cada aviso se comería los clics). */
+	function updateProcBtn() {
+		var btn = document.querySelector('#fx-head [data-act="processes"]');
+		if (!btn) {
+			return;
+		}
+		var b = procBadge();
+		var badge = btn.querySelector('.fx-procbadge');
+		btn.title = b.title;
+		badge.className = 'fx-procbadge ' + b.cls;
+		badge.textContent = b.text;
+		badge.hidden = !b.text;
+	}
+
+	G.hooks.onProcesses = function (st) {
+		var wasActive = PROC.active > 0;
+		PROC.active = st.active || 0;
+		PROC.percent = st.percent;
+		PROC.errors = st.errors || 0;
+		clearTimeout(procHideTimer);
+		if (wasActive && !PROC.active && !PROC.errors) {
+			PROC.finished = true;
+			procHideTimer = setTimeout(function () {
+				PROC.finished = false;
+				updateProcBtn();
+			}, 10000);
+		} else if (PROC.active) {
+			PROC.finished = false;
+		}
+		updateProcBtn();
+	};
 
 	function selbarHtml() {
 		var items = selectedItems();
@@ -795,6 +855,10 @@
 			fx.classList.toggle('no-details');
 			savePref('details', !fx.classList.contains('no-details'));
 			renderHead();
+		} else if (act === 'processes') {
+			if (!G.openProcessesWindow()) {
+				toast(t('popupBlocked'));
+			}
 		} else if (act === 'new-folder') {
 			newFolder();
 		} else if (act === 'clear') {
@@ -1705,4 +1769,6 @@
 	history.replaceState({ fxPath: S.path }, '', urlFor(S.path));
 	loadFolder(false);
 	expandTo(S.path);
+	// Si la ventana de subidas ya está abierta, responde con su estado y se pinta en el botón
+	G.processesWindowAlive(500);
 })();

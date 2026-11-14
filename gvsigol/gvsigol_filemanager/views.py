@@ -38,6 +38,7 @@ from celery.result import AsyncResult
 from gvsigol_services.shp2postgis import get_fields_from_shape, get_fields_from_gpkg, list_gpkg_layers
 from gvsigol_plugin_baseapi.validation import Validation, HttpException
 import re
+from .utils import export_redirect, safe_redirect
 
 logger = logging.getLogger("gvsigol")
 ABS_FILEMANAGER_DIRECTORY = os.path.abspath(FILEMANAGER_DIRECTORY)
@@ -284,7 +285,9 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
         if self.request.user.is_superuser or self.request.user.is_staff:
             if self.request.method in SAFE_METHODS:
                 return can_manage_path(self.request, self.request.GET.get('path'))
-            return can_manage_path(self.request, self.request.POST.get('file'))
+            file_path = self.request.POST.get('file_path')
+            return (can_manage_path(self.request, self.request.POST.get('file'))
+                    and (not file_path or can_manage_path(self.request, file_path)))
         return False
 
     def get_context_data(self, **kwargs):
@@ -346,14 +349,15 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
         context['is_gpkg'] = is_gpkg
         context['gpkg_layers'] = gpkg_layers
         context['selected_gpkg_layer'] = selected_gpkg_layer
-        context["back_url"] = '%s?path=%s' % (reverse_lazy('filemanager:browser'), file_details.get('directory'))
+        context["back_url"] = export_redirect('%s?path=' % reverse_lazy('filemanager:browser'), file_details.get('directory'))
         if column_name_error:
             context["not_supported_error"] = column_name_error
         return context
     
     def post(self, request, *args, **kwargs):
 
-        exports_model = exports_historical.objects.order_by('id')
+        # Se guardan las 20 últimas de cada usuario (antes, 20 en total: las de uno borraban las de otro)
+        exports_model = exports_historical.objects.filter(username=request.user.username).order_by('id')
 
         if exports_model.count() >= 20:
 
@@ -374,7 +378,7 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
             status = 'Running',
             message = str(_('Running')),
             username = request.user.username,
-            redirect = "/gvsigonline/filemanager/export_to_database/?path=" + file_path
+            redirect = export_redirect("/gvsigonline/filemanager/export_to_database/?path=", file_path)
         )
 
         export_md.save()
@@ -404,6 +408,9 @@ class ExportToDatabaseView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerM
 def list_exports(request):
 
     exports_model = exports_historical.objects.order_by('-id')
+    if not request.user.is_superuser:
+        # Cada usuario ve sus exportaciones (rutas y errores); el superusuario, todas
+        exports_model = exports_model.filter(username=request.user.username)
 
     exportations = []
     lost_msg = _export_lost_message()
@@ -413,7 +420,8 @@ def list_exports(request):
             'id': ex.id,
             'file': ex.file,
             'time': ex.time,
-            'redirect': ex.redirect,
+            # Las filas antiguas pueden traer la ruta sin codificar: solo rutas de la aplicación
+            'redirect': safe_redirect(ex.redirect),
             'username': ex.username,
             'progress': 0,
         }
@@ -486,6 +494,14 @@ class UploadFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, 
     def post(self, request, *args, **kwargs):
         if len(request.FILES) != 1:
             return HttpResponseBadRequest("Just a single file please.")
+        # El mismo tamaño máximo que la subida por trozos (FILEMANAGER_UPLOAD_MAX_SIZE)
+        from . import uploads
+        limit = uploads.max_size()
+        upload = request.FILES.get('files')
+        if upload is not None and limit and upload.size > limit:
+            from .utils import sizeof_fmt
+            return HttpResponse(_('The file exceeds the maximum upload size (%(limit)s)') % {'limit': sizeof_fmt(limit)},
+                                status=413)
         
         # Aquí se calculaba la extensión con split(".")[1], que fallaba (500) con ficheros sin ella
         '''
@@ -542,13 +558,14 @@ class DeleteFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, 
         return can_manage_path(self.request, self.request.POST.get('path'))
 
     def post(self, request, *args, **kwargs):
-        path = FILEMANAGER_DIRECTORY +'/'+ request.POST.get('path')
+        rel_path = request.POST.get('path')
+        path = FILEMANAGER_DIRECTORY +'/'+ rel_path
         # Antes comparaba sin quitar el 'file://' de la URL del almacén y nunca bloqueaba
         datastore_name = datastore_using_path(path)
         if datastore_name:
                 return HttpResponse(json.dumps({
                     'success': False,
-                    'message': _('Error deleting resource') + ' ' + path + ' ' + _('exists in datastore') + ': ' + datastore_name
+                    'message': _('Error deleting resource') + ' ' + rel_path + ' ' + _('exists in datastore') + ': ' + datastore_name
                 }))
         
         if self.fm.delete(path):
@@ -559,7 +576,7 @@ class DeleteFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, 
         else:
             return HttpResponse(json.dumps({
                 'success': False,
-                'message': _('Error deleting resource') + ' ' + path
+                'message': _('Error deleting resource') + ' ' + rel_path
             }))
 
 class UnzipFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, View):
@@ -589,7 +606,7 @@ class UnzipFileView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, V
             logger.exception("Error unzipping file")
             return HttpResponse(json.dumps({
                 'success': False,
-                'message': _('Error unzipping resource') + ' ' + path
+                'message': _('Error unzipping resource') + ' ' + request.POST.get('path')
             }))
 
 class DirectoryCreateView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, FormView):
@@ -606,7 +623,7 @@ class DirectoryCreateView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMi
         return can_manage_path(self.request, self.request.POST.get('path'))
 
     def get_success_url(self):
-        url = '%s?path=%s' % (reverse_lazy('filemanager:browser'), self.fm.path)
+        url = export_redirect('%s?path=' % reverse_lazy('filemanager:browser'), self.fm.path)
         if hasattr(self, 'popup') and self.popup:
             url += '&popup=1'
         return url
@@ -624,10 +641,11 @@ def download_file(request, filepath):
     except:
         logger.exception('xsendfile error')
     abs_path = os.path.abspath(os.path.join(ABS_FILEMANAGER_DIRECTORY, filepath))
-    if not os.path.exists(abs_path) or not os.path.isfile(abs_path):
-        return HttpResponseBadRequest()
+    # Primero los permisos: si no, la respuesta (400/403) dice qué existe a quien no puede verlo
     if not can_manage_path(request, filepath):
         return HttpResponseForbidden()
+    if not os.path.exists(abs_path) or not os.path.isfile(abs_path):
+        return HttpResponseBadRequest()
     try:
         print('xsendfile served file: ' + abs_path)
     except:

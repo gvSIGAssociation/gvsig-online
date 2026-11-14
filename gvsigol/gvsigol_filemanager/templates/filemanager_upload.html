@@ -14,7 +14,7 @@
 {% block content %}
 
 <div class="pf-topbar">
-	<a href="{% url 'filemanager:browser' %}?path={{path}}{% if popup %}&amp;popup=1{% endif %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
+	<a href="{% url 'filemanager:browser' %}?path={{path|urlencode}}{% if popup %}&amp;popup=1{% endif %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
 	<button id="upload-button" type="button" class="btn-pf-save"><i class="fa fa-upload"></i> {% trans "Upload" %}</button>
 </div>
 
@@ -44,6 +44,10 @@ $(document).ready(function(){
 	const csrftoken = $.gvsigOL.getCsrfCookie();
 	var fileupload = $('#fileupload-component');
 	var path = '';
+	// Cada parte de la ruta codificada: un nombre con & o # no añade parámetros a la URL
+	function encodePath(p) {
+		return String(p || '').split('/').map(encodeURIComponent).join('/');
+	}
 	fileupload.uploadFile({
 		url: "{% url 'filemanager:upload-file' %}",
 		fileName: "files",
@@ -59,9 +63,9 @@ $(document).ready(function(){
 		afterUploadAll: function(files, data, xhr){
 			$.overlayout();
 			if (window.location.href.includes("popup=1")){
-				location.href = '/gvsigonline/filemanager/?path=' + path + '&popup=1';
+				location.href = '/gvsigonline/filemanager/?path=' + encodePath(path) + '&popup=1';
 			} else {
-				location.href = '/gvsigonline/filemanager/?path=' + path;
+				location.href = '/gvsigonline/filemanager/?path=' + encodePath(path);
 			}
 		},
 		onError: function(files, status, errMsg){}
@@ -70,7 +74,7 @@ $(document).ready(function(){
 	$('#upload-button').on('click', function () {
 		if (fileupload.getFileCount() >= 1) {
 			$("body").overlay();
-			fileupload.appendExtraParams({'path': "{{path}}"});
+			fileupload.appendExtraParams({'path': "{{path|escapejs}}"});
 			fileupload.startUpload();
 		} else {
 			messageBox.show('warning', gettext('You must select a file'));

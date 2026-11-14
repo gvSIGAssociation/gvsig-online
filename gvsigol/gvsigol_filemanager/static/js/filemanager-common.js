@@ -27,7 +27,10 @@
 		// Se llama al terminar una subida o descompresión: (carpeta de destino, elemento)
 		onDone: function () {},
 		// Se llama cuando cambia la lista de subidas (lo usa la ventana de procesos para pintarla)
-		onChange: function () {}
+		onChange: function () {},
+		// Resumen que emite la ventana de procesos ({active, percent, errors}); lo usa el botón
+		// de subidas de la barra del gestor
+		onProcesses: function () {}
 	};
 
 	// --- Utilidades -----------------------------------------------------------------------------
@@ -157,7 +160,8 @@
 		history: svg('<path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/>'),
 		classic: svg('<path d="M4 6h16M4 12h16M4 18h16"/>'),
 		chevDown: svg('<path d="m6 9 6 6 6-6"/>'),
-		minus: svg('<path d="M5 12h14"/>')
+		minus: svg('<path d="M5 12h14"/>'),
+		cloud: svg('<path d="M7 18a4.5 4.5 0 0 1-.7-8.95A6 6 0 0 1 17.8 8.6 4.5 4.5 0 0 1 17 18"/><path d="M12 20v-8M9 15l3-3 3 3"/>')
 	};
 
 	var KINDS = {
@@ -853,7 +857,7 @@
 	var channel = window.BroadcastChannel ? new BroadcastChannel(CHANNEL_NAME) : null;
 	var stateTimer = null;
 
-	/** Resumen para el indicador de la barra superior y las otras páginas. */
+	/** Resumen para el botón de subidas del gestor y las otras páginas. */
 	function stateSummary() {
 		var uploadsActive = U.items.filter(function (i) { return i.kind === 'upload' && (i.status === 'waiting' || i.status === 'running'); });
 		var tasksActive = U.items.filter(function (i) { return i.kind === 'task' && i.status === 'running'; });
@@ -1146,6 +1150,8 @@
 			} else if (msg.type === 'uploaded') {
 				// Subida terminada en la ventana de procesos: la página actualiza su carpeta
 				hooks.onDone(msg.dest, msg.item);
+			} else if ((msg.type === 'state' || msg.type === 'pong') && msg.role === 'processes') {
+				hooks.onProcesses(msg);
 			}
 		});
 	}
