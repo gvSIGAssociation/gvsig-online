@@ -322,7 +322,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    #'gvsigol_core.db_session_user.DbSessionUserMiddleware',  # usuario de la petición en las conexiones a datastores
+    'gvsigol_core.db_session_user.DbSessionUserMiddleware',  # usuario de la petición en las conexiones a datastores
     'gvsigol_audit.audit_middleware.AuditMiddleware',  # Auditoría de APIs REST y vistas Django
     'django.contrib.auth.middleware.PersistentRemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
