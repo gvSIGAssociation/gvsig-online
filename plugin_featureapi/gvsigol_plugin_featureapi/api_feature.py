@@ -39,6 +39,7 @@ from gvsigol import settings as core_settings
 from gvsigol_plugin_featureapi import settings
 from gvsigol_plugin_featureapi.models import FeatureVersions
 from gvsigol_plugin_featureapi.serializers import FeatureSerializer, FeatureChangeSerializer, FileUploadSerializer, EmptySerializer
+from gvsigol_plugin_featureapi.wms_time import parse_wms_time
 from gvsigol_plugin_baseapi.validation import Validation, HttpException
 from gvsigol_services.models import Layer, LayerResource
 from . import serializers
@@ -53,6 +54,17 @@ import json
 import logging
 
 LOGGER_NAME='gvsigol'
+
+
+def _read_wms_time_param(request):
+    raw = request.GET.get('time')
+    if raw is None or str(raw).strip() == '':
+        return None
+    try:
+        parse_wms_time(raw)
+    except ValueError:
+        raise HttpException(400, "Bad parameter time. The value must be a WMS TIME instant or range")
+    return raw
 
 
 def _layer_or_group_is_cached(lyr_id):
@@ -1434,6 +1446,8 @@ class FeatureByPointView(ListAPIView):
                 except Exception:
                     raise HttpException(400, "Bad parameter filter. The value must be a JSON string")
 
+            time_value = _read_wms_time_param(self.request)
+
             lyr = Layer.objects.get(id=lyr_id)
             if lyr is None:
                 raise HttpException(404, "Layer not found")
@@ -1441,9 +1455,9 @@ class FeatureByPointView(ListAPIView):
             serializer = FeatureSerializer()
             result = None
             if simplify:
-                result = serializer.info_by_point(validation, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer, cql_filter_read=restrictions.get('cql_filter_read'), filter=filter)
+                result = serializer.info_by_point(validation, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer, cql_filter_read=restrictions.get('cql_filter_read'), filter=filter, time=time_value)
             else:
-                result = serializer.info_by_point_without_simplify(validation, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer, cql_filter_read=restrictions.get('cql_filter_read'), filter=filter)
+                result = serializer.info_by_point_without_simplify(validation, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer, cql_filter_read=restrictions.get('cql_filter_read'), filter=filter, time=time_value)
             result['infoFormat'] = 'application/geojson'
             result['layerId'] = lyr.id
             result['layerTitle'] = lyr.title
@@ -1562,6 +1576,8 @@ class PublicFeatureByPointView(ListAPIView):
                 except Exception:
                     raise HttpException(400, "Bad parameter filter. The value must be a JSON string")
 
+            time_value = _read_wms_time_param(self.request)
+
             lyr = Layer.objects.get(id=lyr_id)
             if lyr is None:
                 raise HttpException(404, "Layer not found")
@@ -1569,7 +1585,7 @@ class PublicFeatureByPointView(ListAPIView):
                 raise HttpException(403, "The user does not have permission to read this layer")
 
             serializer = FeatureSerializer()
-            result = serializer.info_by_point(None, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer, filter=filter)
+            result = serializer.info_by_point(None, lyr, lat, lon, source_epsg, buffer, geom, lang, blank, getbuffer, filter=filter, time=time_value)
 
             result = {
                 "content" : result,

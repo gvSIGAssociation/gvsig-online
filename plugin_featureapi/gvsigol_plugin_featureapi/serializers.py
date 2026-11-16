@@ -38,6 +38,7 @@ from gvsigol_services import utils as services_utils
 from django.utils import timezone
 from django.urls import reverse
 from psycopg2 import sql as sqlbuilder
+from gvsigol_plugin_featureapi.wms_time import is_time_field_name, parse_wms_time
 from pyproj import Proj, transform, CRS
 from gvsigol_services.tasks import tiling_layer
 import logging
@@ -113,7 +114,7 @@ class FeatureSerializer(serializers.Serializer):
     geometry = GeometrySerializer()
     properties = serializers.DictField(child=serializers.CharField())
     
-    def _compose_info_by_point_where_prefix(self, cql_filter_read=None, filter=None):
+    def _compose_info_by_point_where_prefix(self, cql_filter_read=None, filter=None, time_predicate=None):
         """
         Attribute / permission predicates before the spatial intersect in
         info_by_point queries. Same JSON ``filter`` shape as FeaturesView.
@@ -123,13 +124,43 @@ class FeatureSerializer(serializers.Serializer):
             parts.append(self._get_cql_permissions_filter(cql_filter_read))
         if filter is not None:
             parts.append(self._get_filter_where(filter))
+        if time_predicate is not None:
+            parts.append(time_predicate)
         if not parts:
             return sqlbuilder.SQL('')
         return sqlbuilder.SQL('{parts} AND').format(
             parts=sqlbuilder.SQL(' AND ').join(parts)
         )
 
-    def info_by_point(self, validation, layer, lat, lon, epsg, buffer, return_geom, lang, blank, getbuffer, cql_filter_read=None, filter=None):
+    def _wms_time_predicate(self, layer, time_value):
+        if time_value is None or str(time_value).strip() == '':
+            return None
+        try:
+            start, end = parse_wms_time(time_value)
+        except ValueError:
+            raise HttpException(400, "Bad parameter time. The value must be a WMS TIME instant or range")
+        field = (getattr(layer, 'time_enabled_field', None) or '').strip()
+        if not is_time_field_name(field):
+            return None
+        end_field = (getattr(layer, 'time_enabled_endfield', None) or '').strip()
+        if is_time_field_name(end_field):
+            return sqlbuilder.SQL(
+                "({start_field} < {req_end} AND {end_field} >= {req_start})"
+            ).format(
+                start_field=sqlbuilder.Identifier(field),
+                end_field=sqlbuilder.Identifier(end_field),
+                req_end=sqlbuilder.Literal(end),
+                req_start=sqlbuilder.Literal(start),
+            )
+        return sqlbuilder.SQL(
+            "({field} >= {req_start} AND {field} < {req_end})"
+        ).format(
+            field=sqlbuilder.Identifier(field),
+            req_start=sqlbuilder.Literal(start),
+            req_end=sqlbuilder.Literal(end),
+        )
+
+    def info_by_point(self, validation, layer, lat, lon, epsg, buffer, return_geom, lang, blank, getbuffer, cql_filter_read=None, filter=None, time=None):
         if layer.type != 'v_PostGIS':
             raise HttpException(400, "Wrong layer type. It must be a PostGIS type")
         try:
@@ -181,7 +212,9 @@ class FeatureSerializer(serializers.Serializer):
                 #get_buffer_params = " "
                 #if(getbuffer == True):
                 #    get_buffer_params = ", ST_AsGeoJSON(st_buffer('SRID={source_epsg};POINT({lon} {lat})'::geometry, {buffer}))"
-                cql_filter = self._compose_info_by_point_where_prefix(cql_filter_read, filter)
+                cql_filter = self._compose_info_by_point_where_prefix(
+                    cql_filter_read, filter, self._wms_time_predicate(layer, time)
+                )
                 
                 # Cuando source es 4326 y native es geográfico (4326, 4258, etc.), usamos geography en WHERE y ORDER BY
                 # para operar en metros sobre el elipsoide y evitar mezcla geometry/geography.
@@ -332,7 +365,7 @@ class FeatureSerializer(serializers.Serializer):
                 raise e
             raise HttpException(400, "Features cannot be queried. Unexpected error: " + format(e))
         
-    def info_by_point_without_simplify(self, validation, layer, lat, lon, source_epsg, buffer, return_geom, lang, blank, getbuffer, cql_filter_read=None, filter=None):
+    def info_by_point_without_simplify(self, validation, layer, lat, lon, source_epsg, buffer, return_geom, lang, blank, getbuffer, cql_filter_read=None, filter=None, time=None):
         if layer.type != 'v_PostGIS':
             raise HttpException(400, "Wrong layer type. It must be a PostGIS type")
         try:
@@ -358,7 +391,9 @@ class FeatureSerializer(serializers.Serializer):
                     native_epsg = int(native_epsg)
 
                 # Mantengo la lógica original pero con optimización mínima
-                cql_filter = self._compose_info_by_point_where_prefix(cql_filter_read, filter)
+                cql_filter = self._compose_info_by_point_where_prefix(
+                    cql_filter_read, filter, self._wms_time_predicate(layer, time)
+                )
                 
                 # Consulta optimizada: mantiene lógica espacial original pero usa índices eficientemente
                 # Buffer siempre en metros (convención Web). Geográficos: geography. Proyectados: buffer directo en metros.
