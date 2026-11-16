@@ -513,6 +513,9 @@ class Introspect:
             delattr(self, 'password')
             self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
             self.cursor = self.conn.cursor()
+            # Las vistas filtradas por usuario leen gvsigol.user (ver gvsigol_core.db_session_user)
+            from gvsigol_core.db_session_user import apply_session_user
+            apply_session_user(self.cursor)
         return self
     
     def __exit__(self, exc_type, exc_val, exc_tb):
