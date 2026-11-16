@@ -19,7 +19,7 @@
 
 @author: Nacho Brodin <nbrodin@scolab.es>
 '''
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 import json
 import os
 import unicodedata
@@ -942,6 +942,7 @@ class SharedViewManager:
             shared_project.expiration_date = expiration
         except SharedView.DoesNotExist:
             # Si no existe, se crea una nueva instancia.
+            created_by = user.username if user.is_authenticated else 'anonymous'
             shared_project = SharedView(
                 name=name,
                 project_id=int(pid),
@@ -949,7 +950,7 @@ class SharedViewManager:
                 url=shared_url,
                 state=view_state,
                 expiration_date=expiration,
-                created_by=user.username,
+                created_by=created_by,
                 internal=internal
             )
         
@@ -961,7 +962,9 @@ class CreateSharedViewAPI(APIView):
     API endpoint para crear una vista compartida.
     Devuelve un JSON con el shared_url generado.
     """
-    permission_classes = [IsAuthenticated]
+    # El permiso global de DRF es IsAuthenticated. Crear la URL lo puede hacer
+    # un visitante sin sesión; can_read_project rechaza los proyectos privados.
+    permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         pid = request.data.get('pid')
@@ -979,20 +982,23 @@ class SaveSharedViewAPI(APIView):
     API endpoint para guardar una vista compartida.
     Procesa los datos recibidos por POST y devuelve el shared_url generado.
     """
+    # El permiso global de DRF es IsAuthenticated. Guardar lo puede hacer un
+    # visitante sin sesión si puede leer el proyecto.
+    permission_classes = [AllowAny]
+
     def post(self, request, *args, **kwargs):
-        try:
-            pid = request.data.get('pid')
-        except (TypeError, ValueError):
+        pid = request.data.get('pid')
+        if not pid:
             return Response({'result': 'illegal_operation', 'shared_url': ''}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Verificar permisos o si el usuario puede leer el proyecto
-        # if not core_utils.can_read_project(request, pid):
-        #    return Response({'result': 'illegal_operation', 'shared_url': ''}, status=status.HTTP_403_FORBIDDEN)
+        project = get_object_or_404(Project, id=pid)
+        if not core_utils.can_read_project(request, project):
+            return Response({'result': 'illegal_operation', 'shared_url': ''}, status=status.HTTP_403_FORBIDDEN)
         
         description = request.data.get('description')
         view_state = request.data.get('view_state')
         
-        if request.data.get('checked') == 'false':
+        # Sin sesión se ignora "No expira": la caducidad la fija el servidor.
+        if not request.user.is_authenticated or request.data.get('checked') == 'false':
             expiration_date = datetime.now() + timedelta(days=core_settings.SHARED_VIEW_EXPIRATION_TIME)
         else:
             expiration_date = datetime.max
@@ -1003,6 +1009,8 @@ class SaveSharedViewAPI(APIView):
         else:
             shared_view = SharedViewManager.save_shared_view(pid, description, view_state, expiration_date, request.user)
             shared_url = shared_view.url
+
+        SharedView.objects.filter(expiration_date__lt=date.today()).delete()
         
         return Response({'shared_url': shared_url}, status=status.HTTP_200_OK)
     
@@ -1019,6 +1027,10 @@ class LoadSharedViewAPI(APIView):
         try:
             shared_view = get_object_or_404(SharedView, name=view_name)
         except SharedView.DoesNotExist:
+            return Response({'error': 'Shared view not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if shared_view.expiration_date < date.today():
+            shared_view.delete()
             return Response({'error': 'Shared view not found'}, status=status.HTTP_404_NOT_FOUND)
 
         try:
