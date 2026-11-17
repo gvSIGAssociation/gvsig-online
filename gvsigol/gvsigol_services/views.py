@@ -2391,7 +2391,7 @@ def _generate_topology_trigger_sql(rule_type, layer, **kwargs):
                 import json
                 import os
                 crs_file_path = os.path.join(settings.BASE_DIR, 'gvsigol', 'crs_definitions.json')
-                with open(crs_file_path, 'r') as f:
+                with open(crs_file_path, 'r', encoding='utf-8') as f:
                     crs_definitions = json.load(f)
                 
                 srid_str = str(layer_srid)
