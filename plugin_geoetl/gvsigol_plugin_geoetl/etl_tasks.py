@@ -711,6 +711,11 @@ def input_Gpkg(dicc):
 
     encoding = dicc.get('encode') or 'UTF-8'
 
+    # Many GPKGs declare Geometry: Unknown; PROMOTE_TO_MULTI alone leaves
+    # PostGIS geometry(Geometry,srid). Prefer a concrete Multi* when detectable.
+    from gvsigol_services.shp2postgis import detect_gpkg_output_geom_type
+    nlt = detect_gpkg_output_geom_type(gpkg, layer_name)
+
     _ogr = gdaltools.ogr2ogr()
     _ogr.set_encoding(encoding)
     _ogr.set_input(gpkg, srs=srs, table_name=layer_name)
@@ -721,16 +726,87 @@ def input_Gpkg(dicc):
     _ogr.set_output(_conn, table_name=table_name)
     _ogr.set_output_mode(layer_mode=_ogr.MODE_DS_CREATE_OR_UPDATE, data_source_mode=_ogr.MODE_DS_UPDATE)
 
+    # GPKG geometry columns are often named "geom"; ETL nodes and LayerPublish
+    # expect wkb_geometry (same convention as SHP/KML inputs).
     _ogr.layer_creation_options = {
         "LAUNDER": "YES",
-        "precision": "NO"
+        "precision": "NO",
+        "GEOMETRY_NAME": "wkb_geometry",
     }
     _ogr.config_options = {
         "OGR_TRUNCATE": "NO"
     }
     _ogr.set_dim("2")
-    _ogr.geom_type = "PROMOTE_TO_MULTI"
+    _ogr.geom_type = nlt
     _ogr.execute()
+
+    # Belt-and-suspenders: rename any leftover geometry column to wkb_geometry
+    # (GDAL may keep the source name if GEOMETRY_NAME is ignored).
+    sqlDatetype = (
+        'SELECT column_name, data_type FROM information_schema.columns '
+        'WHERE table_schema = %s AND table_name = %s'
+    )
+    cur.execute(sqlDatetype, [GEOETL_DB["schema"], table_name])
+    for row in cur.fetchall():
+        if row[1] in ('USER-DEFINED', 'geometry') and row[0] != 'wkb_geometry':
+            cur.execute(sql.SQL(
+                'ALTER TABLE {sch}.{tbl} RENAME COLUMN {attr} TO wkb_geometry'
+            ).format(
+                sch=sql.Identifier(GEOETL_DB["schema"]),
+                tbl=sql.Identifier(table_name),
+                attr=sql.Identifier(row[0]),
+            ))
+            conn.commit()
+            break
+
+    # Narrow geometry(Geometry,srid) → concrete Multi* when ogr2ogr left it generic.
+    srid, type_geom = get_type_n_srid(table_name)
+    if type_geom and str(type_geom).upper() in ('GEOMETRY', 'GEOM', ''):
+        from gvsigol_services.backend_postgis import force_multi_geometry_subtype
+        cur.execute(sql.SQL(
+            'SELECT DISTINCT upper(GeometryType({g})) FROM {s}.{t} WHERE {g} IS NOT NULL'
+        ).format(
+            g=sql.Identifier('wkb_geometry'),
+            s=sql.Identifier(GEOETL_DB["schema"]),
+            t=sql.Identifier(table_name),
+        ))
+        kinds = [r[0] for r in cur.fetchall() if r and r[0]]
+        concrete = None
+        mapped = {force_multi_geometry_subtype(k) for k in kinds}
+        mapped.discard(None)
+        if len(mapped) == 1:
+            concrete = next(iter(mapped))
+        elif mapped:
+            for preferred in ('MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'):
+                if preferred in mapped:
+                    concrete = preferred
+                    break
+        if concrete and srid:
+            cur.execute(sql.SQL(
+                'ALTER TABLE {s}.{t} ALTER COLUMN {g} TYPE geometry(%s, %s) USING ST_Multi({g})'
+                % (concrete, int(srid))
+            ).format(
+                s=sql.Identifier(GEOETL_DB["schema"]),
+                t=sql.Identifier(table_name),
+                g=sql.Identifier('wkb_geometry'),
+            ))
+            conn.commit()
+    elif type_geom and srid:
+        from gvsigol_services.backend_postgis import force_multi_geometry_subtype
+        concrete = force_multi_geometry_subtype(type_geom) or type_geom
+        if concrete and str(concrete).upper() != str(type_geom).upper():
+            cur.execute(sql.SQL(
+                'ALTER TABLE {s}.{t} ALTER COLUMN {g} TYPE geometry(%s, %s) USING ST_Multi({g})'
+                % (concrete, int(srid))
+            ).format(
+                s=sql.Identifier(GEOETL_DB["schema"]),
+                t=sql.Identifier(table_name),
+                g=sql.Identifier('wkb_geometry'),
+            ))
+            conn.commit()
+
+    conn.close()
+    cur.close()
 
     return [table_name]
     

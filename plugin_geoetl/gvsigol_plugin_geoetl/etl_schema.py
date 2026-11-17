@@ -139,7 +139,26 @@ def get_schema_gpkg(file, layer_name=None):
             if lyr.name == layer_name:
                 layer = lyr
                 break
+    # layer.fields omits the geometry column; ETL input_Gpkg always materialises
+    # it as wkb_geometry when the GPKG layer is spatial (even if OGR reports Unknown).
     schema = [x.lower() for x in layer.fields]
+    has_geom = False
+    try:
+        gt = str(getattr(layer, 'geom_type', '') or '')
+        if gt and gt.lower() not in ('none',):
+            has_geom = True
+    except Exception:
+        pass
+    if not has_geom:
+        try:
+            for feat in layer:
+                if getattr(feat, 'geom', None) is not None:
+                    has_geom = True
+                break
+        except Exception:
+            pass
+    if has_geom and 'wkb_geometry' not in schema:
+        schema.append('wkb_geometry')
     return {
         'layers': [lyr.name for lyr in dataSource],
         'schema': schema,
