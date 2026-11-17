@@ -152,10 +152,9 @@ msgid "Name"
 msgstr "Nome"
 
 #: templates/application_add.html:230
-#, fuzzy
 #| msgid "Web application"
 msgid "Application name"
-msgstr "Aplicação web"
+msgstr "Nome da aplicação"
 
 #: templates/application_add.html:235 templates/application_list.html:331
 #: templates/application_update.html:277 templates/project_add.html:486
@@ -167,10 +166,9 @@ msgid "Title"
 msgstr "Título"
 
 #: templates/application_add.html:236 templates/application_update.html:278
-#, fuzzy
 #| msgid "Web application"
 msgid "Application title"
-msgstr "Aplicação web"
+msgstr "Título da aplicação"
 
 #: templates/application_add.html:241 templates/application_update.html:284
 #: templates/project_add.html:492 templates/project_list.html:546
@@ -179,10 +177,9 @@ msgid "Description"
 msgstr "Descrição"
 
 #: templates/application_add.html:242 templates/application_update.html:285
-#, fuzzy
 #| msgid "Project description"
 msgid "Application description"
-msgstr "Descrição do projeto"
+msgstr "Descrição da aplicação"
 
 #: templates/application_add.html:247 templates/application_list.html:332
 #: templates/application_update.html:291 templates/services_view.html:72
@@ -192,10 +189,9 @@ msgid "URL"
 msgstr "URL"
 
 #: templates/application_add.html:248 templates/application_update.html:292
-#, fuzzy
 #| msgid "Web application"
 msgid "Application URL"
-msgstr "Aplicação web"
+msgstr "URL da aplicação"
 
 #: templates/application_add.html:253 templates/application_update.html:298
 msgid "Settings"
@@ -234,28 +230,24 @@ msgid "Assign user group"
 msgstr "Atribuir grupo de usuários"
 
 #: templates/application_list.html:319
-#, fuzzy
 #| msgid "Web application"
 msgid "Applications list"
-msgstr "Aplicação web"
+msgstr "Lista de aplicações"
 
 #: templates/application_list.html:322
-#, fuzzy
 #| msgid "Web application"
 msgid "Add application"
-msgstr "Aplicação web"
+msgstr "Adicionar aplicação"
 
 #: templates/application_list.html:333
-#, fuzzy
 #| msgid "Web application"
 msgid "application.Is public?"
-msgstr "Aplicação web"
+msgstr "É pública?"
 
 #: templates/application_list.html:371 templates/application_list.html:418
-#, fuzzy
 #| msgid "Web application"
 msgid "Delete application"
-msgstr "Aplicação web"
+msgstr "Eliminar a aplicação"
 
 #: templates/application_list.html:374
 #, fuzzy
@@ -410,10 +402,9 @@ msgid "Shared views"
 msgstr "Compartilhar visualização"
 
 #: templates/dashboard_core_menu.html:14
-#, fuzzy
 #| msgid "Web application"
 msgid "Applications"
-msgstr "Aplicação web"
+msgstr "Aplicações"
 
 #: templates/documentation.html:256
 msgid "Web application"
@@ -846,10 +837,9 @@ msgid "Restricted extent"
 msgstr "Extensão restrita"
 
 #: templates/project_add.html:574 templates/project_update.html:595
-#, fuzzy
 #| msgid "Mark as default"
 msgid "by default"
-msgstr "Marcar como padrão"
+msgstr "padrão"
 
 #: templates/project_add.html:599 templates/project_update.html:625
 msgid "Show project icon in TOC"
@@ -879,16 +869,14 @@ msgstr "Grupo base"
 
 #: templates/project_add.html:683 templates/project_update.html:721
 #: templates/project_update.html:723
-#, fuzzy
 #| msgid "Mark as default"
 msgid "Base by default"
-msgstr "Marcar como padrão"
+msgstr "Base padrão"
 
 #: templates/project_add.html:684 templates/project_update.html:726
-#, fuzzy
 #| msgid "Share view"
 msgid "Overview"
-msgstr "Compartilhar visualização"
+msgstr "Localizador"
 
 #: templates/project_add.html:731 templates/project_update.html:774
 msgid "Search tool..."
@@ -911,10 +899,9 @@ msgstr "Clonar projeto e permissões de camadas"
 
 #: templates/project_add.html:781 templates/project_add.html:790
 #: templates/project_update.html:824 templates/project_update.html:833
-#, fuzzy
 #| msgid "Search tool..."
 msgid "Search role..."
-msgstr "Ferramenta de busca..."
+msgstr "Buscar função..."
 
 #: templates/project_add.html:813 templates/project_update.html:856
 #, fuzzy
@@ -1033,13 +1020,12 @@ msgstr "Lista de projetos"
 
 #: templates/project_list.html:530
 msgid "Import a project from a ZIP package file"
-msgstr "Importar um projeto de um arquivo ZIP"
+msgstr "Importar um projeto a partir de um arquivo ZIP"
 
 #: templates/project_list.html:531 templates/project_list.html:704
-#, fuzzy
 #| msgid "Update project"
 msgid "Import project"
-msgstr "Atualizar projeto"
+msgstr "Importar projeto"
 
 #: templates/project_list.html:533
 #: templates/project_package_activity_log.html:7
@@ -1090,6 +1076,8 @@ msgid ""
 "Select a project package file (.zip) exported from another gvSIG Online "
 "server."
 msgstr ""
+"Selecione um arquivo de pacote de projeto (.zip) exportado de outro servidor"
+" gvSIG Online."
 
 #: templates/project_list.html:711
 msgid "Package file"
@@ -1208,10 +1196,9 @@ msgid "Cancel this job?"
 msgstr "Cancelar esta tarefa?"
 
 #: templates/project_package_activity_log.html:59
-#, fuzzy
 #| msgid "Process running"
 msgid "running"
-msgstr "Processo em execução"
+msgstr "a executar"
 
 #: templates/project_package_activity_log.html:60
 msgid "pending"
@@ -1554,7 +1541,7 @@ msgstr "Opções avançadas (opcional)"
 
 #: templates/project_package_import_wizard.html:266
 msgid "Leave empty to use names from the package."
-msgstr "Deixar vazio para usar os nomes do pacote."
+msgstr "Deixe vazio para usar os nomes do pacote."
 
 #: templates/project_package_import_wizard.html:268
 msgid "Override project name (internal id)"
@@ -1896,7 +1883,7 @@ msgstr "Permite compartilhar a visualização em seu estado atual"
 
 #: utils.py:842
 msgid "Select feature"
-msgstr "Seleccionar característica"
+msgstr "Selecionar característica"
 
 #: utils.py:843
 msgid "Select features from current layers"
@@ -2161,7 +2148,7 @@ msgid "Edit view SQL"
 msgstr "Editar SQL da visão"
 
 msgid "Layers in this package"
-msgstr "Camadas neste pacote"
+msgstr "Camadas deste pacote"
 
 msgid "Target / Action"
 msgstr "Destino / Ação"
@@ -2255,8 +2242,10 @@ msgid "Breadcrumb"
 msgstr "Caminho de navegação"
 
 msgctxt "core"
-msgid "A link to another web application, shown in the portal next to the projects."
-msgstr "Um link para outro aplicativo web, exibido no portal junto aos projetos."
+msgid ""
+"A link to another web application, shown in the portal next to the projects."
+msgstr ""
+"Um link para outro aplicativo web, exibido no portal junto aos projetos."
 
 msgctxt "core"
 msgid "Add project"
@@ -2267,36 +2256,60 @@ msgid "Update project"
 msgstr "Atualizar projeto"
 
 msgctxt "core"
-msgid "A map viewer: the layer groups it shows, its tools, its base layers and who can open it."
-msgstr "Um visualizador de mapas: os grupos de camadas que exibe, suas ferramentas, suas camadas base e quem pode abri-lo."
+msgid ""
+"A map viewer: the layer groups it shows, its tools, its base layers and who "
+"can open it."
+msgstr ""
+"Um visualizador de mapas: os grupos de camadas que exibe, suas ferramentas, "
+"suas camadas base e quem pode abri-lo."
 
 msgctxt "core"
 msgid "Clone project"
 msgstr "Clonar projeto"
 
 msgctxt "core"
-msgid "Creates a copy of the project, with its layers, in the workspace and datastore you choose."
-msgstr "Cria uma cópia do projeto, com suas camadas, no espaço de trabalho e no armazenamento que você escolher."
+msgid ""
+"Creates a copy of the project, with its layers, in the workspace and "
+"datastore you choose."
+msgstr ""
+"Cria uma cópia do projeto, com suas camadas, no espaço de trabalho e no "
+"armazenamento que você escolher."
 
 msgctxt "core"
 msgid "Good to know"
 msgstr "Bom saber"
 
 msgctxt "core"
-msgid "The name, the workspace and the datastore are suggested from the title. You can change them."
-msgstr "O nome, o espaço de trabalho e o armazenamento são sugeridos a partir do título. Você pode alterá-los."
+msgid ""
+"The name, the workspace and the datastore are suggested from the title. You "
+"can change them."
+msgstr ""
+"O nome, o espaço de trabalho e o armazenamento são sugeridos a partir do "
+"título. Você pode alterá-los."
 
 msgctxt "core"
-msgid "Use lowercase letters, numbers and underscores, and start with a letter or a number."
-msgstr "Use letras minúsculas, números e sublinhados, e comece com uma letra ou um número."
+msgid ""
+"Use lowercase letters, numbers and underscores, and start with a letter or a"
+" number."
+msgstr ""
+"Use letras minúsculas, números e sublinhados, e comece com uma letra ou um "
+"número."
 
 msgctxt "core"
-msgid "The datastore is also the name of the database schema where the tables are copied."
-msgstr "O armazenamento é também o nome do esquema do banco de dados onde as tabelas são copiadas."
+msgid ""
+"The datastore is also the name of the database schema where the tables are "
+"copied."
+msgstr ""
+"O armazenamento é também o nome do esquema do banco de dados onde as tabelas"
+" são copiadas."
 
 msgctxt "core"
-msgid "Without «Copy data», the tables are created empty: only their structure is copied."
-msgstr "Sem «Copiar dados», as tabelas são criadas vazias: apenas sua estrutura é copiada."
+msgid ""
+"Without «Copy data», the tables are created empty: only their structure is "
+"copied."
+msgstr ""
+"Sem «Copiar dados», as tabelas são criadas vazias: apenas sua estrutura é "
+"copiada."
 
 msgctxt "core"
 msgid "Table of contents and access"
@@ -2321,8 +2334,12 @@ msgstr "Página não encontrada"
 
 #: templates/404.html
 msgctxt "errors"
-msgid "The page you are looking for does not exist or has been moved. Check the address or go back to the home page."
-msgstr "A página que você procura não existe ou foi movida. Verifique o endereço ou volte para a página inicial."
+msgid ""
+"The page you are looking for does not exist or has been moved. Check the "
+"address or go back to the home page."
+msgstr ""
+"A página que você procura não existe ou foi movida. Verifique o endereço ou "
+"volte para a página inicial."
 
 #: templates/404.html
 msgctxt "errors"
@@ -2341,10 +2358,29 @@ msgstr "Algo deu errado"
 
 #: templates/500.html
 msgctxt "errors"
-msgid "An unexpected error occurred on the server. Please try again in a few moments. If the problem persists, contact the administrator."
-msgstr "Ocorreu um erro inesperado no servidor. Tente novamente em alguns instantes. Se o problema persistir, entre em contato com o administrador."
+msgid ""
+"An unexpected error occurred on the server. Please try again in a few "
+"moments. If the problem persists, contact the administrator."
+msgstr ""
+"Ocorreu um erro inesperado no servidor. Tente novamente em alguns instantes."
+" Se o problema persistir, entre em contato com o administrador."
 
 #: templates/500.html
 msgctxt "errors"
 msgid "Try again"
 msgstr "Tentar novamente"
+
+msgid ""
+"Choose the field that identifies each row, or generate a unique integer key "
+"(gvol_pk). A generated key is recommended for joins, because source primary "
+"keys can repeat."
+msgstr ""
+"Escolha o campo que identifica cada linha, ou gere uma chave inteira única "
+"(gvol_pk). A chave gerada é recomendável em joins, porque as chaves de "
+"origem podem se repetir."
+
+msgid "Generate unique integer key (recommended for joins)"
+msgstr "Gerar chave inteira única (recomendado em joins)"
+
+msgid "Package validation failed:"
+msgstr "A validação do pacote falhou:"

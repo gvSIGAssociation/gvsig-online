@@ -23,7 +23,7 @@
 '''
 
 from django import forms
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from .models import Workspace, Datastore, LayerGroup, LayerGroupRole
 from gvsigol.settings import SUPPORTED_ENCODINGS
 from gvsigol_core import utils as core_utils

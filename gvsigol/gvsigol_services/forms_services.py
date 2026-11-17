@@ -22,7 +22,7 @@
 '''
 from xml.dom import ValidationErr
 from .models import Workspace, Datastore, Layer, LayerGroup, Server, ServiceUrl, SqlView, Connection, ConnectionRole
-from django.utils.translation import gettext as _, gettext_lazy
+from django.utils.translation import gettext_lazy as _, gettext_lazy
 from gvsigol_services import geographic_servers
 from django import forms
 from django.db import models as db_models

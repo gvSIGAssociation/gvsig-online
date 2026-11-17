@@ -17,9 +17,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Gtranslator 2.91.7\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
-"X-Generator: Gtranslator 2.91.7\n"
 
 #: backend_geoserver.py:96 backend_geoserver.py:147 forms_services.py:65
 msgid "PostGIS vector"
@@ -69,10 +69,9 @@ msgid "Error: layer group could not be published"
 msgstr "Erro: o grupo de camadas não pôde ser publicado"
 
 #: backend_geoserver.py:955
-#, fuzzy
 #| msgid "Error: layer group could not be published"
 msgid "Error: layer group could not be published. Error: "
-msgstr "Erro: o grupo de camadas não pôde ser publicado"
+msgstr "Erro: o grupo de camadas não pôde ser publicado. Erro: "
 
 #: backend_geoserver.py:1008 backend_geoserver.py:1018
 #, python-brace-format
@@ -90,16 +89,16 @@ msgid ""
 "Identifiers must begin with a letter or an underscore (_). Subsequent "
 "characters can be letters, underscores or numbers"
 msgstr ""
-"Os parâmetros de conexão contêm um nome de banco de dados inválido: {value}. "
-"Os identificadores devem começar com uma letra ou um sublinhado (_). Os "
+"Os parâmetros de conexão contêm um nome de banco de dados inválido: {value}."
+" Os identificadores devem começar com uma letra ou um sublinhado (_). Os "
 "caracteres subsequentes podem ser letras, sublinhados ou números"
 
 #: backend_geoserver.py:1220 shp2postgis.py:339
 #, python-brace-format
 msgid ""
-"The connection parameters contain an invalid user name: {value}. Identifiers "
-"must begin with a letter or an underscore (_). Subsequent characters can be "
-"letters, underscores or numbers"
+"The connection parameters contain an invalid user name: {value}. Identifiers"
+" must begin with a letter or an underscore (_). Subsequent characters can be"
+" letters, underscores or numbers"
 msgstr ""
 "Os parâmetros de conexão contêm um nome de usuário inválido: {value}. Os "
 "identificadores devem começar com uma letra ou um traço (_). Os caracteres "
@@ -134,8 +133,8 @@ msgid ""
 "Invalid layer name: '{value}'. Identifiers must begin with a letter or an "
 "underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgstr ""
-"Nome da camada inválido: '{value}'. Os identificadores devem começar com uma "
-"letra ou um sublinhado (_). Os caracteres subsequentes podem ser letras, "
+"Nome da camada inválido: '{value}'. Os identificadores devem começar com uma"
+" letra ou um sublinhado (_). Os caracteres subsequentes podem ser letras, "
 "sublinhados ou números"
 
 #: backend_geoserver.py:1426 backend_geoserver.py:1430 shp2postgis.py:442
@@ -187,15 +186,15 @@ msgid ""
 "Invalid field name: '{value}'. Identifiers must begin with a letter or an "
 "underscore (_). Subsequent characters can be letters, underscores or numbers"
 msgstr ""
-"Nome da camada inválido: '{value}'. Os identificadores devem começar com uma "
-"letra ou um sublinhado (_). Os caracteres subsequentes podem ser letras, "
+"Nome da camada inválido: '{value}'. Os identificadores devem começar com uma"
+" letra ou um sublinhado (_). Os caracteres subsequentes podem ser letras, "
 "sublinhados ou números"
 
 #: backend_geoserver.py:1917
 msgid ""
 "Bad file format. The provided zip file must not contain any subdirectory."
 msgstr ""
-"Formato de ficheiro defeituoso. O arquivo zip fornecido não deve conter "
+"Formato de arquivo defeituoso. O arquivo zip fornecido não deve conter "
 "nenhum subdiretório."
 
 #: forms_geoserver.py:35
@@ -239,31 +238,28 @@ msgid "Multipolygon"
 msgstr "Multipolígono"
 
 #: forms_geoserver.py:46
-#, fuzzy
 #| msgid "Primary key column"
 msgid "Preserve primary key values"
-msgstr "Coluna chave primária"
+msgstr "Conservar os valores da chave primária"
 
 #: forms_geoserver.py:46
 msgid "Do not preserve primary key values"
-msgstr ""
+msgstr "Não conservar os valores da chave primária"
 
 #: forms_geoserver.py:52 templates/layer_config.html:365
 #: templates/layer_config.html:430
-#, fuzzy
 #| msgid "Not allowed"
 msgid "Not applicable"
-msgstr "Não permitido"
+msgstr "Não aplicável"
 
 #: forms_geoserver.py:52
 msgid "Preserve table structure (truncate mode)"
-msgstr ""
+msgstr "Conservar a estrutura da tabela (modo truncate)"
 
 #: forms_geoserver.py:52
-#, fuzzy
 #| msgid "Default date value"
 msgid "Delete and recreate table"
-msgstr "Avaliação da data predefinida"
+msgstr "Excluir e recriar a tabela"
 
 #: forms_geoserver.py:55 forms_services.py:45
 msgid "continuous interval"
@@ -314,11 +310,11 @@ msgstr "Arquivo"
 #: templates/geoserver/create_layer_feature_type.html:145
 #: templates/geoserver/layer_upload_imagemosaic.html:57
 #: templates/geoserver/layer_upload_postgis.html:62
-#: templates/geoserver/layer_upload_raster.html:57 templates/layer_list.html:26
-#: templates/layergroup_add.html:62 templates/layergroup_list.html:26
-#: templates/layergroup_update.html:66 templates/server_list.html:23
-#: templates/sqlview_add.html:56 templates/sqlview_list.html:22
-#: templates/workspace_list.html:22
+#: templates/geoserver/layer_upload_raster.html:57
+#: templates/layer_list.html:26 templates/layergroup_add.html:62
+#: templates/layergroup_list.html:26 templates/layergroup_update.html:66
+#: templates/server_list.html:23 templates/sqlview_add.html:56
+#: templates/sqlview_list.html:22 templates/workspace_list.html:22
 msgid "Name"
 msgstr "Nome"
 
@@ -371,8 +367,9 @@ msgstr "Grupo de camadas"
 #: templates/geoserver/layer_upload_imagemosaic.html:104
 #: templates/geoserver/layer_upload_postgis.html:102
 #: templates/geoserver/layer_upload_raster.html:86
-#: templates/geoserver/layer_upload_vector.html:97 templates/layer_add.html:105
-#: templates/layer_create.html:140 templates/layer_update.html:131
+#: templates/geoserver/layer_upload_vector.html:97
+#: templates/layer_add.html:105 templates/layer_create.html:140
+#: templates/layer_update.html:131
 msgid "Visible"
 msgstr "Visível"
 
@@ -441,7 +438,7 @@ msgstr "SRS"
 
 #: forms_geoserver.py:108
 msgid "Preserve primary key"
-msgstr ""
+msgstr "Conservar a chave primária"
 
 #: forms_geoserver.py:109 forms_geoserver.py:134 forms_geoserver.py:148
 #: templates/geoserver/create_layer_sql_view.html:62
@@ -450,7 +447,7 @@ msgstr "Coluna chave primária"
 
 #: forms_geoserver.py:110
 msgid "Preserve table structure"
-msgstr ""
+msgstr "Conservar a estrutura da tabela"
 
 #: forms_geoserver.py:147
 msgid "SQL Statement"
@@ -712,7 +709,7 @@ msgstr "Matrixset"
 #: forms_services.py:251 templates/external_layer_add.html:119
 #: templates/external_layer_update.html:134
 msgid "Tilematrix"
-msgstr ""
+msgstr "Tilematrix"
 
 #: forms_services.py:252
 msgid "Apikey"
@@ -759,7 +756,7 @@ msgstr "Geocoder Inverso ICV"
 
 #: migrations/0057_golfunc_area_m2.py:39
 msgid "Area (m2)"
-msgstr ""
+msgstr "Área (m2)"
 
 #: models.py:381
 #, python-brace-format
@@ -783,11 +780,13 @@ msgid ""
 "gvSIG Online only supports overwriting/appending tables with primary key "
 "named ogc_fid due to the version of gdal/ogr installed on the server."
 msgstr ""
+"gvSIG Online só suporta sobrescrever/anexar tabelas com chave primária "
+"chamada ogc_fid devido à versão de gdal/ogr instalada no servidor."
 
 #: shp2postgis.py:149
 #, python-brace-format
 msgid "Overwrite or append was specified but the table does not exist: {0}"
-msgstr ""
+msgstr "Foi especificado sobrescrever ou anexar, mas a tabela não existe: {0}"
 
 #: shp2postgis.py:437
 #, python-brace-format
@@ -797,6 +796,10 @@ msgid ""
 "the data or read the User Manual for the option 'Do not preserve primary "
 "key'. Details: {details}"
 msgstr ""
+"A exportação falhou porque criaria valores duplicados no campo {pkfield}, "
+"que não permite valores duplicados. Considere corrigir os dados ou consulte "
+"o Manual do Usuário para a opção 'Não preservar chave primária'. Detalhes: "
+"{details}"
 
 #: templates/base_layer_list.html:11
 msgid "Add base layer"
@@ -1121,7 +1124,8 @@ msgstr "O armazém de dados e seus recursos registrados serão excluídos"
 
 #: templates/datastore_list.html:69
 msgid "Check this option to remove the schema associated with the datastore"
-msgstr "Marque esta opção para remover o esquema associado ao armazém de dados"
+msgstr ""
+"Marque esta opção para remover o esquema associado ao armazém de dados"
 
 #: templates/datastore_list.html:116
 msgid "Remove datastore"
@@ -1168,43 +1172,47 @@ msgstr "Enumeração não pode conter ponto-colon"
 msgid "Delete"
 msgstr "Apagar"
 
-#: templates/external_layer_add.html:12 templates/external_layer_update.html:17
-#: templates/layer_add.html:17 templates/layer_config.html:18
-#: templates/layer_create.html:17 templates/layer_update.html:17
-#: templates/layergroup_add.html:13 templates/layergroup_update.html:12
+#: templates/external_layer_add.html:12
+#: templates/external_layer_update.html:17 templates/layer_add.html:17
+#: templates/layer_config.html:18 templates/layer_create.html:17
+#: templates/layer_update.html:17 templates/layergroup_add.html:13
+#: templates/layergroup_update.html:12
 msgid "Back"
-msgstr ""
+msgstr "Voltar"
 
-#: templates/external_layer_add.html:32 templates/external_layer_update.html:46
-#: templates/layer_add.html:37 templates/layer_create.html:45
-#: templates/layer_update.html:37 templates/layergroup_add.html:40
-#: templates/layergroup_update.html:40 templates/sqlview_add.html:38
+#: templates/external_layer_add.html:32
+#: templates/external_layer_update.html:46 templates/layer_add.html:37
+#: templates/layer_create.html:45 templates/layer_update.html:37
+#: templates/layergroup_add.html:40 templates/layergroup_update.html:40
+#: templates/sqlview_add.html:38
 msgid "General"
 msgstr "Geral"
 
-#: templates/external_layer_add.html:33 templates/external_layer_update.html:47
-#: templates/layer_add.html:38 templates/layer_create.html:47
-#: templates/layer_update.html:38
+#: templates/external_layer_add.html:33
+#: templates/external_layer_update.html:47 templates/layer_add.html:38
+#: templates/layer_create.html:47 templates/layer_update.html:38
 msgid "Display properties"
 msgstr "Propriedades da camada"
 
-#: templates/external_layer_add.html:34 templates/external_layer_update.html:48
-#: templates/layer_add.html:40 templates/layer_create.html:49
-#: templates/layer_update.html:40
+#: templates/external_layer_add.html:34
+#: templates/external_layer_update.html:48 templates/layer_add.html:40
+#: templates/layer_create.html:49 templates/layer_update.html:40
 msgid "Metadata"
 msgstr "Metadados"
 
-#: templates/external_layer_add.html:35 templates/external_layer_update.html:49
-#: templates/layer_add.html:41 templates/layer_create.html:50
-#: templates/layer_update.html:41
+#: templates/external_layer_add.html:35
+#: templates/external_layer_update.html:49 templates/layer_add.html:41
+#: templates/layer_create.html:50 templates/layer_update.html:41
 msgid "Detailed information"
 msgstr "Informações detalhadas"
 
-#: templates/external_layer_add.html:53 templates/external_layer_update.html:68
+#: templates/external_layer_add.html:53
+#: templates/external_layer_update.html:68
 msgid "Url"
 msgstr "Url"
 
-#: templates/external_layer_add.html:60 templates/external_layer_update.html:75
+#: templates/external_layer_add.html:60
+#: templates/external_layer_update.html:75
 msgid ""
 "Alert: this url is not in the same domain. Several browsers could not load "
 "this base layer due to cross-domain policy."
@@ -1212,7 +1220,8 @@ msgstr ""
 "Alerta: esta url não está no mesmo domínio. Vários navegadores não podem "
 "carregar esta camada base devido à política de domínio cruzado."
 
-#: templates/external_layer_add.html:63 templates/external_layer_update.html:78
+#: templates/external_layer_add.html:63
+#: templates/external_layer_update.html:78
 msgid "Connect"
 msgstr "Conexão"
 
@@ -1505,8 +1514,9 @@ msgid "Select row"
 msgstr "Marcar linha"
 
 #: templates/geoserver/layer_upload_imagemosaic.html:13
-#: templates/geoserver/layer_upload_raster.html:13 templates/layer_list.html:12
-#: templates/layergroup_add.html:93 templates/layergroup_update.html:120
+#: templates/geoserver/layer_upload_raster.html:13
+#: templates/layer_list.html:12 templates/layergroup_add.html:93
+#: templates/layergroup_update.html:120
 msgid "Publish layer"
 msgstr "Publicar camada"
 
@@ -1554,7 +1564,7 @@ msgstr "Codificação de caracteres"
 #: templates/geoserver/layer_upload_vector.html:76
 #: templates/geoserver/layer_upload_vector.html:81
 msgid "Select style"
-msgstr "Seleccionar estilo"
+msgstr "Selecionar estilo"
 
 #: templates/geoserver/layer_upload_vector.html:153
 msgid "Uploading layer. Please wait..."
@@ -1691,10 +1701,9 @@ msgid "time_enabled field"
 msgstr "campo temporal"
 
 #: templates/layer_add.html:159
-#, fuzzy
 #| msgid "End time_enabled field"
 msgid "End time enabled field"
-msgstr "Campo temporal (intervalo final)"
+msgstr "Campo de tempo final ativado"
 
 #: templates/layer_add.html:166 templates/layer_create.html:180
 #: templates/layer_update.html:217
@@ -1720,10 +1729,9 @@ msgstr "Modo para atribuir valores padrão"
 
 #: templates/layer_add.html:243 templates/layer_create.html:255
 #: templates/layer_update.html:322
-#, fuzzy
 #| msgid "Detailed information"
 msgid "Enable detailed information"
-msgstr "Informações detalhadas"
+msgstr "Ativar informações detalhadas"
 
 #: templates/layer_add.html:327 templates/layer_create.html:477
 #: templates/layer_update.html:427
@@ -1923,7 +1931,8 @@ msgstr "Não deve ter lacunas"
 
 #: templates/layer_config.html:355
 msgid ""
-"The layer coverage must be continuous without empty spaces between geometries"
+"The layer coverage must be continuous without empty spaces between "
+"geometries"
 msgstr ""
 "A cobertura da camada deve ser contínua sem espaços vazios entre geometrias"
 
@@ -1980,10 +1989,8 @@ msgid "Must be contiguous"
 msgstr "Deve ser contíguo"
 
 #: templates/layer_config.html:422
-msgid ""
-"Geometries must be connected."
-msgstr ""
-"As geometrias devem estar conectadas."
+msgid "Geometries must be connected."
+msgstr "As geometrias devem estar conectadas."
 
 #: templates/layer_config.html:427
 msgid "Suitable for networks"
@@ -1998,10 +2005,9 @@ msgid "Tolerance distance for contiguity check"
 msgstr "Distância de tolerância para verificação de contiguidade"
 
 #: templates/layer_config.html:1350
-#, fuzzy
 #| msgid "Select a layer"
 msgid "Select layers"
-msgstr "Selecionar uma camada"
+msgstr "Selecionar camadas"
 
 #: templates/layer_create.html:104
 msgid "Field list"
@@ -2047,8 +2053,8 @@ msgid ""
 "The layer could not be removed from GeoServer, but it was deleted from the "
 "list anyway"
 msgstr ""
-"Essa camada não pode ser removida do GeoServer, mas foi excluída da lista de "
-"qualquer maneira"
+"Essa camada não pode ser removida do GeoServer, mas foi excluída da lista de"
+" qualquer maneira"
 
 #: templates/layer_list.html:159 templates/layer_list.html:162
 #: templates/layergroup_update.html:139 templates/layergroup_update.html:149
@@ -2110,7 +2116,7 @@ msgstr ""
 
 #: templates/layergroup_list.html:12
 msgid "Return to project list"
-msgstr ""
+msgstr "Voltar à lista de projetos"
 
 #: templates/layergroup_list.html:16
 msgid "Add layer group"
@@ -2166,10 +2172,9 @@ msgstr "Selecionar permissões da camada"
 
 #: templates/select_layer_permissions.html:8
 #: templates/select_layergroup_permissions.html:8
-#, fuzzy
 #| msgid "Search user group..."
 msgid "Search user role..."
-msgstr "Pesquisar grupo de usuários..."
+msgstr "Buscar função..."
 
 #: templates/select_layer_permissions.html:12
 msgid "Layer will be readable by everyone if public"
@@ -2184,12 +2189,13 @@ msgid ""
 "Non editable permissions since they have been set by a specific permission "
 "tool"
 msgstr ""
+"Permissões não editáveis pois foram definidas por uma ferramenta de "
+"permissões específica"
 
 #: templates/select_layer_permissions.html:27
-#, fuzzy
 #| msgid "Search user group..."
 msgid "Generic user role image"
-msgstr "Pesquisar grupo de usuários..."
+msgstr "Imagem genérica de função de usuário"
 
 #: templates/select_layer_permissions.html:35
 msgid "Read permission"
@@ -2205,14 +2211,15 @@ msgid "Permission to manage"
 msgstr "Permissão de gerenciamento"
 
 #: templates/select_layergroup_permissions.html:7
-#, fuzzy
-#| msgid "Give the selected groups permissions to read or write the layer"
+#| msgid ""
+#| "Give the selected groups permissions to read or write the layer"
 msgid "Give the selected roles permissions to manage the layergroup"
-msgstr "Dar aos grupos selecionados permissão para ler ou escrever a camada"
+msgstr ""
+"Conceder às funções selecionadas permissões para gerir o grupo de camadas"
 
 #: templates/select_layergroup_permissions.html:23
 msgid "Permission to include in projects"
-msgstr ""
+msgstr "Permissão para incluir em projetos"
 
 #: templates/server_add.html:32 templates/server_update.html:32
 msgid "Nodes"
@@ -2356,7 +2363,8 @@ msgstr "Excluir Vista SQL"
 
 #: templates/sqlview_list.html:59
 msgid "The SQL View and all layers using this view will be deleted"
-msgstr "A Vista SQL e todas as camadas que utilizam esta vista serão excluídas"
+msgstr ""
+"A Vista SQL e todas as camadas que utilizam esta vista serão excluídas"
 
 #: templates/sqlview_list.html:104
 msgid "Remove SQL View"
@@ -2386,8 +2394,8 @@ msgstr "Excluir espaço de trabalho"
 msgid ""
 "The workspace and its registered data stores and resources will be deleted"
 msgstr ""
-"O espaço de trabalho e as suas reservas e recursos de dados registados serão "
-"eliminados"
+"O espaço de trabalho e as suas reservas e recursos de dados registados serão"
+" eliminados"
 
 #: templates/workspace_list.html:117
 msgid "Update workspace"
@@ -2409,8 +2417,8 @@ msgid ""
 "numbers"
 msgstr ""
 "Nome inválido da área de trabalho: '{value}'. Os identificadores devem "
-"começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem "
-"ser letras, sublinhados ou números"
+"começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem"
+" ser letras, sublinhados ou números"
 
 #: views.py:372
 msgid "Error: workspace could not be created"
@@ -2424,13 +2432,15 @@ msgid ""
 "numbers"
 msgstr ""
 "Nome do armazém de dados inválido: '{value}'. Os identificadores devem "
-"começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem "
-"ser letras, sublinhados ou números"
+"começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem"
+" ser letras, sublinhados ou números"
 
 #: views.py:530
 #, python-brace-format
 msgid "Invalid datastore name: '{value}'. Identifiers must be in lowercase."
 msgstr ""
+"Nome de armazém de dados inválido: '{value}'. Os identificadores devem estar"
+" em minúsculas."
 
 #: views.py:551
 msgid "Error: Data store could not be created"
@@ -2459,14 +2469,13 @@ msgid "ERROR User is not authorized to perform this operation"
 msgstr "ERRO: O usuário não está autorizado a realizar esta operação"
 
 #: views.py:1167 views.py:3320
-#, fuzzy
 #| msgid "Layer will be uploaded to the selected data store"
 msgid "You are not allowed to manage the selected datastore"
-msgstr "A camada será carregada para o armazém de dados selecionados"
+msgstr "Você não tem permissão para gerenciar o armazém de dados selecionado"
 
 #: views.py:1169 views.py:3323
 msgid "You are not allowed to manage the selected layergroup"
-msgstr ""
+msgstr "Não tem permissão para gerir o grupo de camadas selecionado"
 
 #: views.py:2818 views.py:2834
 #, python-brace-format
@@ -2484,13 +2493,13 @@ msgstr "É necessário inserir um nome para o grupo de camadas"
 #: views.py:2939 views.py:3091
 #, python-brace-format
 msgid ""
-"Invalid layer group name: '{value}'. Identifiers must begin with a letter or "
-"an underscore (_). Subsequent characters can be letters, underscores or "
+"Invalid layer group name: '{value}'. Identifiers must begin with a letter or"
+" an underscore (_). Subsequent characters can be letters, underscores or "
 "numbers"
 msgstr ""
 "Nome inválido do grupo de camadas: '{value}'. Os identificadores devem "
-"começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem "
-"ser letras, sublinhados ou números"
+"começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem"
+" ser letras, sublinhados ou números"
 
 #: views.py:2948 views.py:3087
 msgid "Layer group name already exists"
@@ -2498,9 +2507,10 @@ msgstr "O nome do grupo de camadas já existe"
 
 #: views.py:3417
 msgid ""
-"Error: table already exists. Try to publish the layer instead of creating an "
-"empty one."
+"Error: table already exists. Try to publish the layer instead of creating an"
+" empty one."
 msgstr ""
+"Erro: a tabela já existe. Tente publicar a camada em vez de criar uma vazia."
 
 #: views.py:3580
 msgid "You must enter a title for enumeration"
@@ -2601,8 +2611,8 @@ msgstr "Campo de criação de erros. Causa: {0}"
 msgid ""
 "Join fields must have the same type: {field1}({type1}) - {field2}({type2})"
 msgstr ""
-"Os campos do JOIN devem ter o mesmo tipo: {field1}({type1}) - {field2}"
-"({type2})"
+"Os campos do JOIN devem ter o mesmo tipo: {field1}({type1}) - "
+"{field2}({type2})"
 
 #: views.py:5987
 msgid "The user can't manage this SQL view"
@@ -2619,7 +2629,8 @@ msgstr "O campo não existe: {field}"
 
 #: views.py:6055
 #, python-brace-format
-msgid "The field {field} is the primary key of main table and must be included"
+msgid ""
+"The field {field} is the primary key of main table and must be included"
 msgstr ""
 "O campo {field} é a chave primária da tabela principal e deve ser incluído"
 
@@ -2647,46 +2658,6 @@ msgstr "Erro ao excluir a vista: {0}"
 #: gvsigol_services/templates/layer_config.html
 msgid "Only superusers can modify topology rules"
 msgstr "Somente superusuários podem modificar regras topológicas"
-
-#~ msgid "Locks"
-#~ msgstr "Bloqueios"
-
-#~ msgid "Convert to enum"
-#~ msgstr "Converter para enumeração"
-
-#~ msgid ""
-#~ "Warning: the field will be deleted from the database. This operation "
-#~ "cannot be undone. Type the name of the field to confirm the deletion:"
-#~ msgstr ""
-#~ "Atenção: o campo será excluído do banco de dados. A operação não pode ser "
-#~ "desfeita. Digite o nome do campo e confirme a exclusão:"
-
-#~ msgid "Rename field"
-#~ msgstr "Renomear campo"
-
-#~ msgid ""
-#~ "Warning: renaming a field may have side effects, such as breaking a field-"
-#~ "based legend."
-#~ msgstr ""
-#~ "Aviso: a renomeação de um campo pode ter efeitos colaterais, tais como "
-#~ "quebrar uma lenda baseada no campo"
-
-#, fuzzy
-#~| msgid "Read permissions"
-#~ msgid "Manage permission"
-#~ msgstr "Ler permissões"
-
-#~ msgid "def"
-#~ msgstr "def"
-
-#~ msgid "String"
-#~ msgstr "String"
-
-#~ msgid "Field \"{0}\" exists"
-#~ msgstr "Campo \"{0}\" existe"
-
-#~ msgid "Error uploading the layer. Review the file format."
-#~ msgstr "Erro ao carregar a camada. Revisar o formato do arquivo"
 
 msgid "Filter roles by name or description"
 msgstr "Filtrar roles por nome ou descrição"
@@ -2773,7 +2744,9 @@ msgid "Notice text"
 msgstr "Texto do aviso"
 
 msgid "Free text shown to viewer users. HTML tags are not allowed."
-msgstr "Texto livre que será mostrado aos usuários do visualizador. Não são permitidas tags HTML."
+msgstr ""
+"Texto livre que será mostrado aos usuários do visualizador. Não são "
+"permitidas tags HTML."
 
 msgid "Others"
 msgstr "Outros"
@@ -2785,7 +2758,9 @@ msgid "Help text"
 msgstr "Texto de ajuda"
 
 msgid "Help text shown to viewer users. HTML tags are not allowed."
-msgstr "Texto de ajuda que será mostrado aos usuários do visualizador. Não são permitidas tags HTML."
+msgstr ""
+"Texto de ajuda que será mostrado aos usuários do visualizador. Não são "
+"permitidas tags HTML."
 
 msgid "Contact information"
 msgstr "Informações de contato"
@@ -2857,36 +2832,54 @@ msgid ""
 "There is no generic attributions configuration yet. We recommend creating a "
 "generic configuration first; you can later create project specific "
 "configurations or copy from the generic one."
-msgstr "Ainda não há nenhuma configuração genérica de atribuições. Recomendamos criar primeiro uma genérica para que possa ser reutilizada como base nas configurações específicas de projeto."
+msgstr ""
+"Ainda não há nenhuma configuração genérica de atribuições. Recomendamos "
+"criar primeiro uma genérica para que possa ser reutilizada como base nas "
+"configurações específicas de projeto."
 
 msgid ""
 "When this generic configuration is enabled for all projects it is used as "
 "the default attributions whenever no project specific configuration exists."
-msgstr "Quando esta configuração genérica estiver ativa para todos os projetos, será usada como atribuições padrão sempre que não houver uma configuração específica."
+msgstr ""
+"Quando esta configuração genérica estiver ativa para todos os projetos, será"
+" usada como atribuições padrão sempre que não houver uma configuração "
+"específica."
 
 msgid ""
 "Files are not uploaded here. Use the file manager selector to choose an "
 "existing file. The public download URL will be stored automatically so "
 "attachments can be downloaded even when the project is private."
-msgstr "Os arquivos não são enviados por aqui. Use o seletor do gerenciador de arquivos para escolher um arquivo já existente. A URL pública de download será salva automaticamente."
+msgstr ""
+"Os arquivos não são enviados por aqui. Use o seletor do gerenciador de "
+"arquivos para escolher um arquivo já existente. A URL pública de download "
+"será salva automaticamente."
 
 msgid ""
 "Drag each row by the grip icon to set the order of blocks in the viewer "
 "modal. Empty sections are not shown."
-msgstr "Arraste cada linha pelo ícone de alça para definir a ordem dos blocos no modal do visualizador. Seções vazias não são exibidas."
+msgstr ""
+"Arraste cada linha pelo ícone de alça para definir a ordem dos blocos no "
+"modal do visualizador. Seções vazias não são exibidas."
 
 msgid ""
 "Optional custom block shown in the modal between copyright and help. HTML "
 "tags are not allowed."
-msgstr "Bloco personalizado opcional que é exibido no modal entre o copyright e a ajuda. Não são permitidas tags HTML."
+msgstr ""
+"Bloco personalizado opcional que é exibido no modal entre o copyright e a "
+"ajuda. Não são permitidas tags HTML."
 
 msgid ""
 "Use this field to briefly contextualize the attributions. A common use case "
 "is to present licensing notes."
-msgstr "Uso recomendado: documentar informações de copyright ou de licenciamento."
+msgstr ""
+"Uso recomendado: documentar informações de copyright ou de licenciamento."
 
-msgid "Optional. Select a logo from file manager. It will be shown inside the modal."
-msgstr "Opcional. Selecione um logotipo no gerenciador de arquivos. Será mostrado dentro do modal."
+msgid ""
+"Optional. Select a logo from file manager. It will be shown inside the "
+"modal."
+msgstr ""
+"Opcional. Selecione um logotipo no gerenciador de arquivos. Será mostrado "
+"dentro do modal."
 
 #: templates/connection_update.html
 msgid "External API"
@@ -2897,24 +2890,39 @@ msgid "Breadcrumb"
 msgstr "Caminho de navegação"
 
 msgctxt "services"
-msgid "Access data for a database or an external service, shared by the datastores that use it."
-msgstr "Dados de acesso a um banco de dados ou a um serviço externo, compartilhados pelos armazenamentos que o usam."
+msgid ""
+"Access data for a database or an external service, shared by the datastores "
+"that use it."
+msgstr ""
+"Dados de acesso a um banco de dados ou a um serviço externo, compartilhados "
+"pelos armazenamentos que o usam."
 
 msgctxt "services"
-msgid "SQL that the database runs on its own when rows of the chosen tables are inserted, updated or deleted."
-msgstr "SQL que o banco de dados executa sozinho quando linhas das tabelas escolhidas são inseridas, atualizadas ou excluídas."
+msgid ""
+"SQL that the database runs on its own when rows of the chosen tables are "
+"inserted, updated or deleted."
+msgstr ""
+"SQL que o banco de dados executa sozinho quando linhas das tabelas "
+"escolhidas são inseridas, atualizadas ou excluídas."
 
 msgctxt "services"
 msgid "Update connection"
 msgstr "Atualizar conexão"
 
 msgctxt "services"
-msgid "Where GeoServer reads the data from: a PostGIS connection, raster files (GeoTIFF, ImageMosaic) or a remote WMS."
-msgstr "De onde o GeoServer lê os dados: uma conexão PostGIS, arquivos raster (GeoTIFF, ImageMosaic) ou um WMS remoto."
+msgid ""
+"Where GeoServer reads the data from: a PostGIS connection, raster files "
+"(GeoTIFF, ImageMosaic) or a remote WMS."
+msgstr ""
+"De onde o GeoServer lê os dados: uma conexão PostGIS, arquivos raster "
+"(GeoTIFF, ImageMosaic) ou um WMS remoto."
 
 msgctxt "services"
-msgid "A closed list of values that users can choose from when they edit a field."
-msgstr "Uma lista fechada de valores entre os quais os usuários escolhem ao editar um campo."
+msgid ""
+"A closed list of values that users can choose from when they edit a field."
+msgstr ""
+"Uma lista fechada de valores entre os quais os usuários escolhem ao editar "
+"um campo."
 
 msgctxt "services"
 msgid "Good to know"
@@ -2937,8 +2945,12 @@ msgid "With manual order, drag the items to sort them."
 msgstr "Com ordem manual, arraste os itens para ordená-los."
 
 msgctxt "services"
-msgid "A layer served by another organisation (WMS, WMTS, XYZ tiles...) that is shown in the viewer without copying its data."
-msgstr "Uma camada servida por outra organização (WMS, WMTS, blocos XYZ...) que é exibida no visualizador sem copiar seus dados."
+msgid ""
+"A layer served by another organisation (WMS, WMTS, XYZ tiles...) that is "
+"shown in the viewer without copying its data."
+msgstr ""
+"Uma camada servida por outra organização (WMS, WMTS, blocos XYZ...) que é "
+"exibida no visualizador sem copiar seus dados."
 
 msgctxt "services"
 msgid "Add layer"
@@ -2946,35 +2958,51 @@ msgstr "Adicionar camada"
 
 msgctxt "services"
 msgid "Publish a table or a file of a datastore as a layer."
-msgstr "Publique como camada uma tabela ou um arquivo de um armazenamento de dados."
+msgstr ""
+"Publique como camada uma tabela ou um arquivo de um armazenamento de dados."
 
 msgctxt "services"
 msgid "Create layer"
 msgstr "Criar camada"
 
 msgctxt "services"
-msgid "Create an empty table with the fields you define and publish it as a layer."
-msgstr "Crie uma tabela vazia com os campos que você definir e publique-a como camada."
+msgid ""
+"Create an empty table with the fields you define and publish it as a layer."
+msgstr ""
+"Crie uma tabela vazia com os campos que você definir e publique-a como "
+"camada."
 
 msgctxt "services"
 msgid "How the layer is published, displayed and described."
 msgstr "Como a camada é publicada, exibida e descrita."
 
 msgctxt "services"
-msgid "A group of layers: it is shown as a folder in the table of contents of the viewer."
-msgstr "Um grupo de camadas: é exibido como uma pasta no sumário do visualizador."
+msgid ""
+"A group of layers: it is shown as a folder in the table of contents of the "
+"viewer."
+msgstr ""
+"Um grupo de camadas: é exibido como uma pasta no sumário do visualizador."
 
 msgctxt "services"
-msgid "A map server (GeoServer) and its nodes, where the layers of gvSIG Online are published."
-msgstr "Um servidor de mapas (GeoServer) e seus nós, onde as camadas do gvSIG Online são publicadas."
+msgid ""
+"A map server (GeoServer) and its nodes, where the layers of gvSIG Online are"
+" published."
+msgstr ""
+"Um servidor de mapas (GeoServer) e seus nós, onde as camadas do gvSIG Online"
+" são publicadas."
 
 msgctxt "services"
-msgid "Save the address of a WMS, WMTS, WFS or CSW service to have it at hand."
-msgstr "Salve o endereço de um serviço WMS, WMTS, WFS ou CSW para tê-lo à mão."
+msgid ""
+"Save the address of a WMS, WMTS, WFS or CSW service to have it at hand."
+msgstr ""
+"Salve o endereço de um serviço WMS, WMTS, WFS ou CSW para tê-lo à mão."
 
 msgctxt "services"
-msgid "The saved URLs are offered when adding layers from WMS, WFS or CSW services."
-msgstr "As URLs salvas são oferecidas ao adicionar camadas de serviços WMS, WFS ou CSW."
+msgid ""
+"The saved URLs are offered when adding layers from WMS, WFS or CSW services."
+msgstr ""
+"As URLs salvas são oferecidas ao adicionar camadas de serviços WMS, WFS ou "
+"CSW."
 
 msgctxt "services"
 msgid "Use the base address of the service, without request parameters."
@@ -2989,44 +3017,76 @@ msgid "Add SQL view"
 msgstr "Adicionar visão SQL"
 
 msgctxt "services"
-msgid "A layer defined by a query over one or more tables of a datastore: choose the tables, the fields and the filters."
-msgstr "Uma camada definida por uma consulta sobre uma ou mais tabelas de um armazenamento: escolha as tabelas, os campos e os filtros."
+msgid ""
+"A layer defined by a query over one or more tables of a datastore: choose "
+"the tables, the fields and the filters."
+msgstr ""
+"Uma camada definida por uma consulta sobre uma ou mais tabelas de um "
+"armazenamento: escolha as tabelas, os campos e os filtros."
 
 msgctxt "services"
-msgid "Groups the datastores and layers of a server under a name and its own service addresses (WMS, WFS...)."
-msgstr "Agrupa os armazenamentos e as camadas de um servidor sob um nome e com seus próprios endereços de serviço (WMS, WFS...)."
+msgid ""
+"Groups the datastores and layers of a server under a name and its own "
+"service addresses (WMS, WFS...)."
+msgstr ""
+"Agrupa os armazenamentos e as camadas de um servidor sob um nome e com seus "
+"próprios endereços de serviço (WMS, WFS...)."
 
 msgctxt "services"
-msgid "Choose the server first: the URI and the service addresses are filled in from it."
-msgstr "Escolha primeiro o servidor: o URI e os endereços de serviço são preenchidos a partir dele."
+msgid ""
+"Choose the server first: the URI and the service addresses are filled in "
+"from it."
+msgstr ""
+"Escolha primeiro o servidor: o URI e os endereços de serviço são preenchidos"
+" a partir dele."
 
 msgctxt "services"
-msgid "The name must start with a letter or an underscore; then use only letters, numbers or underscores."
-msgstr "O nome deve começar com uma letra ou um sublinhado; depois use apenas letras, números ou sublinhados."
+msgid ""
+"The name must start with a letter or an underscore; then use only letters, "
+"numbers or underscores."
+msgstr ""
+"O nome deve começar com uma letra ou um sublinhado; depois use apenas "
+"letras, números ou sublinhados."
 
 msgctxt "services"
 msgid "The name and the server cannot be changed."
 msgstr "O nome e o servidor não podem ser alterados."
 
 msgctxt "services"
-msgid "Drag a field below a group to include it in that group, and drag the groups to change their order in the editing form."
-msgstr "Arraste um campo para baixo de um grupo para incluí-lo nele, e arraste os grupos para mudar sua ordem no formulário de edição."
+msgid ""
+"Drag a field below a group to include it in that group, and drag the groups "
+"to change their order in the editing form."
+msgstr ""
+"Arraste um campo para baixo de um grupo para incluí-lo nele, e arraste os "
+"grupos para mudar sua ordem no formulário de edição."
 
 msgctxt "services"
-msgid "The datastore and the resource name cannot be changed once the layer is saved."
-msgstr "O armazém de dados e o nome do recurso não podem ser alterados depois que a camada for salva."
+msgid ""
+"The datastore and the resource name cannot be changed once the layer is "
+"saved."
+msgstr ""
+"O armazém de dados e o nome do recurso não podem ser alterados depois que a "
+"camada for salva."
 
 msgctxt "services"
-msgid "The title is the name users see in the viewer. You can change it at any time."
-msgstr "O título é o nome que os usuários veem no visualizador. Você pode alterá-lo a qualquer momento."
+msgid ""
+"The title is the name users see in the viewer. You can change it at any "
+"time."
+msgstr ""
+"O título é o nome que os usuários veem no visualizador. Você pode alterá-lo "
+"a qualquer momento."
 
 msgctxt "services"
-msgid "Some display properties are only available for certain datastore types."
-msgstr "Algumas propriedades de visualização só estão disponíveis para determinados tipos de armazém."
+msgid ""
+"Some display properties are only available for certain datastore types."
+msgstr ""
+"Algumas propriedades de visualização só estão disponíveis para determinados "
+"tipos de armazém."
 
 msgctxt "services"
 msgid "Permissions define which roles can read, edit or manage the layer."
-msgstr "As permissões definem quais funções podem ler, editar ou gerenciar a camada."
+msgstr ""
+"As permissões definem quais funções podem ler, editar ou gerenciar a camada."
 
 msgctxt "services"
 msgid "Add the columns of the new table before saving the layer."
@@ -3034,22 +3094,33 @@ msgstr "Adicione as colunas da nova tabela antes de salvar a camada."
 
 msgctxt "services"
 msgid "The workspace, the datastore and the resource name cannot be changed."
-msgstr "O espaço de trabalho, o armazém de dados e o nome do recurso não podem ser alterados."
+msgstr ""
+"O espaço de trabalho, o armazém de dados e o nome do recurso não podem ser "
+"alterados."
 
 msgctxt "services"
 msgid "The fields shown depend on the layer type."
 msgstr "Os campos exibidos dependem do tipo de camada."
 
 msgctxt "services"
-msgid "For WMS and WMTS services, the connect button reads the layers the service offers."
-msgstr "Nos serviços WMS e WMTS, o botão de conexão lê as camadas oferecidas pelo serviço."
+msgid ""
+"For WMS and WMTS services, the connect button reads the layers the service "
+"offers."
+msgstr ""
+"Nos serviços WMS e WMTS, o botão de conexão lê as camadas oferecidas pelo "
+"serviço."
 
 msgctxt "services"
-msgid "The data stays in the original service: if it is unavailable, the layer may not be displayed."
-msgstr "Os dados permanecem no serviço original: se ele não estiver disponível, a camada pode não ser exibida."
+msgid ""
+"The data stays in the original service: if it is unavailable, the layer may "
+"not be displayed."
+msgstr ""
+"Os dados permanecem no serviço original: se ele não estiver disponível, a "
+"camada pode não ser exibida."
 
 msgctxt "services"
-msgid "The server and the name of the group cannot be changed once it is saved."
+msgid ""
+"The server and the name of the group cannot be changed once it is saved."
 msgstr "O servidor e o nome do grupo não podem ser alterados depois de salvo."
 
 msgctxt "services"
@@ -3058,32 +3129,1673 @@ msgstr "O servidor e o nome do grupo não podem ser alterados."
 
 msgctxt "services"
 msgid "Once the group is saved, edit it to create or publish its layers."
-msgstr "Depois de salvar o grupo, edite-o para criar ou publicar suas camadas."
+msgstr ""
+"Depois de salvar o grupo, edite-o para criar ou publicar suas camadas."
 
 msgctxt "services"
 msgid "Drag the layers of the group to change their order."
 msgstr "Arraste as camadas do grupo para alterar sua ordem."
 
 msgctxt "services"
-msgid "Permissions define which roles can include the group in projects or manage it."
-msgstr "As permissões definem quais funções podem incluir o grupo em projetos ou gerenciá-lo."
+msgid ""
+"Permissions define which roles can include the group in projects or manage "
+"it."
+msgstr ""
+"As permissões definem quais funções podem incluir o grupo em projetos ou "
+"gerenciá-lo."
 
 msgctxt "services"
-msgid "The workspace, the type and the name cannot be changed once the datastore is saved."
-msgstr "O espaço de trabalho, o tipo e o nome não podem ser alterados depois de salvar o armazém."
+msgid ""
+"The workspace, the type and the name cannot be changed once the datastore is"
+" saved."
+msgstr ""
+"O espaço de trabalho, o tipo e o nome não podem ser alterados depois de "
+"salvar o armazém."
 
 msgctxt "services"
-msgid "The workspace, the type and the name of the datastore cannot be changed."
-msgstr "O espaço de trabalho, o tipo e o nome do armazém não podem ser alterados."
+msgid ""
+"The workspace, the type and the name of the datastore cannot be changed."
+msgstr ""
+"O espaço de trabalho, o tipo e o nome do armazém não podem ser alterados."
 
 msgctxt "services"
-msgid "PostGIS datastores use an existing database connection: if it is not listed, create it first."
-msgstr "Os armazéns PostGIS usam uma conexão existente com o banco de dados: se ela não estiver na lista, crie-a primeiro."
+msgid ""
+"PostGIS datastores use an existing database connection: if it is not listed,"
+" create it first."
+msgstr ""
+"Os armazéns PostGIS usam uma conexão existente com o banco de dados: se ela "
+"não estiver na lista, crie-a primeiro."
 
 msgctxt "services"
-msgid "Layers published from this datastore depend on it: changes here affect all of them."
-msgstr "As camadas publicadas a partir deste armazém dependem dele: as alterações afetam todas."
+msgid ""
+"Layers published from this datastore depend on it: changes here affect all "
+"of them."
+msgstr ""
+"As camadas publicadas a partir deste armazém dependem dele: as alterações "
+"afetam todas."
 
 msgctxt "services"
 msgid "Permissions define which roles can use the datastore or manage it."
-msgstr "As permissões definem quais funções podem usar o armazém ou gerenciá-lo."
+msgstr ""
+"As permissões definem quais funções podem usar o armazém ou gerenciá-lo."
+
+msgid ""
+"Choose the field that identifies each row, or generate a unique integer key "
+"(gvol_pk). A generated key is recommended for joins, because source primary "
+"keys can repeat."
+msgstr ""
+"Escolha o campo que identifica cada linha, ou gere uma chave inteira única "
+"(gvol_pk). A chave gerada é recomendável em joins, porque as chaves de "
+"origem podem se repetir."
+
+msgid "Generate unique integer key (recommended for joins)"
+msgstr "Gerar chave inteira única (recomendado em joins)"
+
+#: gvsigol_services/backend_geoserver.py:651
+msgid "There is already a style named"
+msgstr "Já existe um estilo com o nome"
+
+#: gvsigol_services/forms_attributions.py:95
+#: gvsigol_services/templates/attributions_form.html:188
+#: gvsigol_services/templates/attributions_list.html:126
+#: gvsigol_services/templates/layer_config.html:536
+msgid "Enabled"
+msgstr "Ativado"
+
+#: gvsigol_services/forms_services.py:52
+msgid "Other"
+msgstr "Outro"
+
+#: gvsigol_services/forms_services.py:136
+#: gvsigol_services/forms_services.py:237 gvsigol_services/models.py:228
+#: gvsigol_services/templates/connection_add.html:154
+#: gvsigol_services/templates/connection_update.html:188
+#: gvsigol_services/templates/datastore_add.html:203
+#: gvsigol_services/templates/datastore_list.html:115
+#: gvsigol_services/templates/datastore_update.html:203
+msgid "Connection"
+msgstr "Conexão"
+
+#: gvsigol_services/forms_services.py:207
+msgid "Please select a connection"
+msgstr "Por favor, selecione uma conexão"
+
+#: gvsigol_services/forms_services.py:209
+msgid "Please select a schema"
+msgstr "Por favor, selecione um esquema"
+
+#: gvsigol_services/forms_services.py:274
+msgid "Connection params are required"
+msgstr "Os parâmetros de conexão são obrigatórios"
+
+#: gvsigol_services/forms_services.py:384
+msgid "Custom SRS"
+msgstr "SRS personalizado"
+
+#: gvsigol_services/forms_services.py:528
+#: gvsigol_services/forms_services.py:582
+#: gvsigol_services/forms_services.py:788
+#: gvsigol_services/forms_services.py:794
+#: gvsigol_services/forms_services.py:822
+#: gvsigol_services/forms_services.py:951
+#: gvsigol_services/forms_services.py:1010
+msgid "Host"
+msgstr "Servidor"
+
+#: gvsigol_services/forms_services.py:565
+#: gvsigol_services/forms_services.py:990
+msgid "Optional parameters in JSON format"
+msgstr "Parâmetros opcionais em formato JSON"
+
+#: gvsigol_services/forms_services.py:601
+#: gvsigol_services/forms_services.py:795
+#: gvsigol_services/forms_services.py:1028
+msgid "Service name"
+msgstr "Nome do serviço"
+
+#: gvsigol_services/forms_services.py:635
+#: gvsigol_services/forms_services.py:1065
+msgid "TDS Version"
+msgstr "Versão TDS"
+
+#: gvsigol_services/forms_services.py:648
+#: gvsigol_services/forms_services.py:673
+#: gvsigol_services/forms_services.py:808
+#: gvsigol_services/forms_services.py:1078
+#: gvsigol_services/forms_services.py:1106
+msgid "Domain"
+msgstr "Domínio"
+
+#: gvsigol_services/forms_services.py:654
+#: gvsigol_services/forms_services.py:808
+#: gvsigol_services/forms_services.py:1084
+msgid "API Key"
+msgstr "Chave API"
+
+#: gvsigol_services/forms_services.py:660
+#: gvsigol_services/forms_services.py:711
+#: gvsigol_services/forms_services.py:809
+#: gvsigol_services/forms_services.py:821
+#: gvsigol_services/forms_services.py:1090
+#: gvsigol_services/forms_services.py:1147
+msgid "Client ID"
+msgstr "ID do cliente"
+
+#: gvsigol_services/forms_services.py:666
+#: gvsigol_services/forms_services.py:809
+#: gvsigol_services/forms_services.py:1096
+msgid "Secret"
+msgstr "Segredo"
+
+#: gvsigol_services/forms_services.py:682
+#: gvsigol_services/forms_services.py:1115
+#: gvsigol_services/templates/connection_add.html:293
+#: gvsigol_services/templates/connection_update.html:341
+msgid "Entity"
+msgstr "Entidade"
+
+#: gvsigol_services/forms_services.py:686
+#: gvsigol_services/forms_services.py:1119
+msgid "Entity code from SEDIPUALB@"
+msgstr "Código de entidade de SEDIPUALB@"
+
+#: gvsigol_services/forms_services.py:689
+#: gvsigol_services/forms_services.py:1122
+msgid "User (wsSegUser)"
+msgstr "Usuário (wsSegUser)"
+
+#: gvsigol_services/forms_services.py:702
+#: gvsigol_services/forms_services.py:821
+#: gvsigol_services/forms_services.py:1138
+msgid "Tenant ID"
+msgstr "ID do inquilino"
+
+#: gvsigol_services/forms_services.py:720
+#: gvsigol_services/forms_services.py:822
+#: gvsigol_services/forms_services.py:1156
+msgid "Client Secret"
+msgstr "Segredo do cliente"
+
+#: gvsigol_services/forms_services.py:725
+#: gvsigol_services/forms_services.py:1164
+msgid "SharePoint Host"
+msgstr "Host do SharePoint"
+
+#: gvsigol_services/forms_services.py:734
+#: gvsigol_services/forms_services.py:1173
+msgid "Site Path"
+msgstr "Caminho do site"
+
+#: gvsigol_services/forms_services.py:745
+#: gvsigol_services/forms_services.py:828
+#: gvsigol_services/forms_services.py:1184
+msgid "E-mail"
+msgstr "E-mail"
+
+#: gvsigol_services/forms_services.py:755
+#: gvsigol_services/forms_services.py:829
+#: gvsigol_services/forms_services.py:1197
+msgid "Id Acceso"
+msgstr "Id de Acesso"
+
+#: gvsigol_services/forms_services.py:779
+#: gvsigol_services/forms_services.py:1210
+msgid "Invalid JSON format"
+msgstr "Formato JSON inválido"
+
+#: gvsigol_services/forms_services.py:791
+#: gvsigol_services/forms_services.py:798
+#: gvsigol_services/forms_services.py:805
+#: gvsigol_services/forms_services.py:812
+#: gvsigol_services/forms_services.py:818
+#: gvsigol_services/forms_services.py:825
+#: gvsigol_services/forms_services.py:832
+msgid "This field is required"
+msgstr "Este campo é obrigatório"
+
+#: gvsigol_services/forms_services.py:979
+#: gvsigol_services/forms_services.py:1005
+#: gvsigol_services/forms_services.py:1055
+#: gvsigol_services/forms_services.py:1132
+#: gvsigol_services/forms_services.py:1193
+#: gvsigol_services/templates/connection_update.html:245
+#: gvsigol_services/templates/connection_update.html:266
+#: gvsigol_services/templates/connection_update.html:297
+#: gvsigol_services/templates/connection_update.html:369
+#: gvsigol_services/templates/connection_update.html:411
+msgid "Leave empty to keep current password"
+msgstr "Deixe vazio para manter a senha atual"
+
+#: gvsigol_services/forms_services.py:1100
+#: gvsigol_services/forms_services.py:1160
+#: gvsigol_services/templates/connection_update.html:328
+#: gvsigol_services/templates/connection_update.html:388
+msgid "Leave empty to keep current secret"
+msgstr "Deixe vazio para manter o segredo atual"
+
+#: gvsigol_services/models.py:200
+msgid "JSON with connection parameters"
+msgstr "JSON com parâmetros de conexão"
+
+#: gvsigol_services/models.py:211
+msgid "Allow all users to create datastores with this connection"
+msgstr ""
+"Permitir que todos os usuários criem armazéns de dados com esta conexão"
+
+#: gvsigol_services/models.py:215
+msgid "Allow all users to use this connection in ETL"
+msgstr "Permitir que todos os usuários usem esta conexão em ETL"
+
+#: gvsigol_services/models.py:219
+msgid "Allow all users to manage this connection (edit, delete)"
+msgstr ""
+"Permitir que todos os usuários gerenciem esta conexão (editar, excluir)"
+
+#: gvsigol_services/models.py:229
+#: gvsigol_services/templates/dashboard_services_menu.html:10
+msgid "Connections"
+msgstr "Conexões"
+
+#: gvsigol_services/models.py:387
+msgid "This role can create datastores with this connection"
+msgstr "Este papel pode criar armazéns de dados com esta conexão"
+
+#: gvsigol_services/models.py:391
+msgid "This role can use this connection in ETL"
+msgstr "Este papel pode usar esta conexão em ETL"
+
+#: gvsigol_services/models.py:395
+msgid "This role can manage this connection (edit, delete)"
+msgstr "Este papel pode gerenciar esta conexão (editar, excluir)"
+
+#: gvsigol_services/models.py:406
+msgid "Connection Role"
+msgstr "Papel de Conexão"
+
+#: gvsigol_services/models.py:407
+msgid "Connection Roles"
+msgstr "Papéis de Conexão"
+
+#: gvsigol_services/models.py:431
+#: gvsigol_services/templates/connection_trigger_add.html:150
+msgid "Insert"
+msgstr "Inserir"
+
+#: gvsigol_services/models.py:440
+#: gvsigol_services/templates/connection_trigger_add.html:138
+msgid "Before"
+msgstr "Antes"
+
+#: gvsigol_services/models.py:441
+#: gvsigol_services/templates/connection_trigger_add.html:139
+msgid "After"
+msgstr "Depois"
+
+#: gvsigol_services/models.py:448
+#: gvsigol_services/templates/connection_trigger_add.html:174
+msgid "Global (all schemas)"
+msgstr "Global (todos os esquemas)"
+
+#: gvsigol_services/models.py:449
+#: gvsigol_services/templates/connection_trigger_add.html:177
+msgid "Specific schemas"
+msgstr "Esquemas específicos"
+
+#: gvsigol_services/models.py:456
+msgid "PL/pgSQL (database trigger)"
+msgstr "PL/pgSQL (disparador de base de dados)"
+
+#: gvsigol_services/models.py:457
+msgid "Python (application-level)"
+msgstr "Python (nível de aplicação)"
+
+#: gvsigol_services/models.py:465
+msgid "Connection where this trigger will be executed"
+msgstr "Conexão onde este disparador será executado"
+
+#: gvsigol_services/models.py:469
+msgid "Unique name for this trigger"
+msgstr "Nome único para este disparador"
+
+#: gvsigol_services/models.py:474
+msgid "Description of what this trigger does"
+msgstr "Descrição do que este disparador faz"
+
+#: gvsigol_services/models.py:479
+msgid ""
+"Events that activate this trigger (comma-separated: INSERT,UPDATE,DELETE)"
+msgstr ""
+"Eventos que ativam este disparador (separados por vírgulas: "
+"INSERT,UPDATE,DELETE)"
+
+#: gvsigol_services/models.py:485
+msgid "When the trigger executes relative to the event"
+msgstr "Quando o disparador é executado relativo ao evento"
+
+#: gvsigol_services/models.py:488
+#: gvsigol_services/templates/connection_trigger_add.html:216
+msgid ""
+"SQL code to execute. Use NEW for inserted/updated row, OLD for "
+"deleted/updated row."
+msgstr ""
+"Código SQL a executar. Use NEW para linha inserida/atualizada, OLD para "
+"linha excluída/atualizada."
+
+#: gvsigol_services/models.py:495
+msgid "Whether the trigger applies to all schemas or specific ones"
+msgstr ""
+"Se o disparador se aplica a todos os esquemas ou a esquemas específicos"
+
+#: gvsigol_services/models.py:501
+msgid "JSON array of schema names if scope is \"schemas\""
+msgstr "Array JSON de nomes de esquemas se o escopo for \"schemas\""
+
+#: gvsigol_services/models.py:506
+msgid "If enabled, this trigger can be used as a calculated field in layers"
+msgstr ""
+"Se ativado, este disparador pode ser usado como campo calculado nas camadas"
+
+#: gvsigol_services/models.py:513
+msgid ""
+"Language of the trigger code: PL/pgSQL for database triggers, Python for "
+"application-level triggers"
+msgstr ""
+"Linguagem do código do disparador: PL/pgSQL para disparadores de base de "
+"dados, Python para disparadores de nível de aplicação"
+
+#: gvsigol_services/models.py:518
+msgid "Allow all staff users to use this trigger in their layers"
+msgstr ""
+"Permitir que todos os usuários staff usem este disparador nas suas camadas"
+
+#: gvsigol_services/models.py:525
+msgid "Connection Trigger"
+msgstr "Disparador de Conexão"
+
+#: gvsigol_services/models.py:526
+#: gvsigol_services/templates/layer_config.html:522
+msgid "Connection Triggers"
+msgstr "Disparadores de Conexão"
+
+#: gvsigol_services/models.py:751
+msgid "Reference to centralized connection"
+msgstr "Referência à conexão centralizada"
+
+#: gvsigol_services/models.py:757
+msgid "Database schema for this datastore"
+msgstr "Esquema de base de dados para este armazém de dados"
+
+#: gvsigol_services/models.py:761
+msgid ""
+"True if using connection_params directly, False if using Connection "
+"reference"
+msgstr ""
+"Verdadeiro se usar connection_params diretamente, Falso se usar referência "
+"de Conexão"
+
+#: gvsigol_services/models.py:765
+msgid "If enabled, all staff users can use this datastore"
+msgstr "Se ativado, todos os usuários staff podem usar este armazém de dados"
+
+#: gvsigol_services/models.py:769
+msgid "If enabled, all staff users can manage (edit) this datastore"
+msgstr ""
+"Se ativado, todos os usuários staff podem gerir (editar) este armazém de "
+"dados"
+
+#: gvsigol_services/models.py:928
+msgid "Can use this datastore to create layers"
+msgstr "Pode usar este armazém de dados para criar camadas"
+
+#: gvsigol_services/models.py:932
+msgid "Can manage (edit description) this datastore"
+msgstr "Pode gerir (editar descrição) este armazém de dados"
+
+#: gvsigol_services/models.py:937
+msgid "Datastore Role"
+msgstr "Papel de armazém de dados"
+
+#: gvsigol_services/models.py:938
+msgid "Datastore Roles"
+msgstr "Papéis de armazém de dados"
+
+#: gvsigol_services/models.py:1401
+msgid ""
+"Name of the field that will be calculated by this trigger (only for "
+"calculated field triggers)"
+msgstr ""
+"Nome do campo que será calculado por este disparador (apenas para "
+"disparadores de campo calculado)"
+
+#: gvsigol_services/models.py:1405
+msgid "Whether the trigger is currently installed in the database"
+msgstr "Se o disparador está atualmente instalado na base de dados"
+
+#: gvsigol_services/models.py:1409
+msgid "Whether the trigger is enabled (active) or disabled in the database"
+msgstr "Se o disparador está ativado (ativo) ou desativado na base de dados"
+
+#: gvsigol_services/models.py:1416
+msgid "Layer Connection Trigger"
+msgstr "Disparador de conexão de camada"
+
+#: gvsigol_services/models.py:1417
+msgid "Layer Connection Triggers"
+msgstr "Disparadores de conexão de camada"
+
+#: gvsigol_services/models.py:1497 gvsigol_services/models.py:1557
+#: gvsigol_services/models.py:1596 gvsigol_services/models.py:1626
+msgid "Layer datastore has no associated connection"
+msgstr "O armazém de dados da camada não tem conexão associada"
+
+#: gvsigol_services/models.py:1500
+msgid "Trigger installation is only supported for PostGIS connections"
+msgstr "A instalação de disparadores só é suportada para conexões PostGIS"
+
+#: gvsigol_services/models.py:1509 gvsigol_services/models.py:1565
+#: gvsigol_services/models.py:1605 gvsigol_services/models.py:1635
+#: gvsigol_services/views.py:8543
+msgid "Could not connect to database"
+msgstr "Não foi possível conectar à base de dados"
+
+#: gvsigol_services/models.py:1543
+msgid "Trigger installed successfully"
+msgstr "Disparador instalado com sucesso"
+
+#: gvsigol_services/models.py:1554
+msgid "Trigger was not installed"
+msgstr "O disparador não foi instalado"
+
+#: gvsigol_services/models.py:1581
+msgid "Trigger uninstalled successfully"
+msgstr "Disparador desinstalado com sucesso"
+
+#: gvsigol_services/models.py:1593 gvsigol_services/models.py:1623
+msgid "Trigger is not installed"
+msgstr "O disparador não está instalado"
+
+#: gvsigol_services/models.py:1611 gvsigol_services/views.py:8467
+msgid "Trigger enabled successfully"
+msgstr "Disparador ativado com sucesso"
+
+#: gvsigol_services/models.py:1641 gvsigol_services/views.py:8482
+msgid "Trigger disabled successfully"
+msgstr "Disparador desativado com sucesso"
+
+#: gvsigol_services/models.py:1745
+#: gvsigol_services/templates/enumeration_add.html:95
+#: gvsigol_services/templates/enumeration_update.html:104
+#: gvsigol_services/templates/enumeration_update.html:106
+msgid "Alphabetical"
+msgstr "Alfabética"
+
+#: gvsigol_services/models.py:1747
+#: gvsigol_services/templates/enumeration_add.html:94
+#: gvsigol_services/templates/enumeration_update.html:99
+#: gvsigol_services/templates/enumeration_update.html:101
+msgid "Manual"
+msgstr "Ordem manual"
+
+#: gvsigol_services/templates/attributions_form.html:204
+#: gvsigol_services/templates/attributions_form.html:205
+#: gvsigol_services/templates/attributions_form.html:225
+#: gvsigol_services/templates/attributions_form.html:226
+#: gvsigol_services/templates/connection_config.html:111
+#: gvsigol_services/templates/connection_list.html:98
+#: gvsigol_services/templates/datastore_list.html:98
+#: gvsigol_services/templates/layer_list.html:107
+#: gvsigol_services/templates/layergroup_list.html:99
+#: gvsigol_services/templates/workspace_list.html:96
+msgid "Search..."
+msgstr "Pesquisar..."
+
+#: gvsigol_services/templates/attributions_list.html:133
+#: gvsigol_services/templates/connection_config.html:169
+msgid "Edit"
+msgstr "Editar"
+
+#: gvsigol_services/templates/connection_add.html:162
+#: gvsigol_services/templates/connection_update.html:196
+msgid "Connection details"
+msgstr "Detalhes da conexão"
+
+#: gvsigol_services/templates/connection_add.html:186
+#: gvsigol_services/templates/connection_update.html:221
+msgid "Connection parameters"
+msgstr "Parâmetros de conexão"
+
+#: gvsigol_services/templates/connection_add.html:293
+#: gvsigol_services/templates/connection_update.html:341
+msgid "Municipality"
+msgstr "Município"
+
+#: gvsigol_services/templates/connection_add.html:297
+#: gvsigol_services/templates/connection_add.html:693
+msgid "Select domain first and click Load"
+msgstr "Selecione o domínio primeiro e clique em Carregar"
+
+#: gvsigol_services/templates/connection_add.html:302
+#: gvsigol_services/templates/connection_add.html:735
+#: gvsigol_services/templates/connection_update.html:354
+#: gvsigol_services/templates/connection_update.html:613
+msgid "Load"
+msgstr "Carregar"
+
+#: gvsigol_services/templates/connection_add.html:306
+msgid ""
+"Select the domain and click Load. You can type to search by code or name."
+msgstr ""
+"Selecione o domínio e clique em Carregar. Pode escrever para pesquisar por "
+"código ou nome."
+
+#: gvsigol_services/templates/connection_add.html:362
+msgid "Select a category and type to see the connection parameters"
+msgstr "Selecione uma categoria e tipo para ver os parâmetros de conexão"
+
+#: gvsigol_services/templates/connection_add.html:608
+msgid "Please select a connection type"
+msgstr "Por favor, selecione um tipo de conexão"
+
+#: gvsigol_services/templates/connection_add.html:614
+#: gvsigol_services/templates/connection_update.html:486
+msgid "Testing..."
+msgstr "Testando..."
+
+#: gvsigol_services/templates/connection_add.html:672
+#: gvsigol_services/templates/connection_update.html:544
+#: gvsigol_services/views.py:7534 gvsigol_services/views.py:7548
+#: gvsigol_services/views.py:7563 gvsigol_services/views.py:7596
+#: gvsigol_services/views.py:7616 gvsigol_services/views.py:7659
+#: gvsigol_services/views.py:7682
+msgid "Connection successful"
+msgstr "Conexão bem-sucedida"
+
+#: gvsigol_services/templates/connection_add.html:681
+#: gvsigol_services/templates/connection_update.html:553
+msgid "Error testing connection"
+msgstr "Erro ao testar conexão"
+
+#: gvsigol_services/templates/connection_add.html:714
+#: gvsigol_services/templates/connection_update.html:591
+msgid "Select entity"
+msgstr "Selecionar entidade"
+
+#: gvsigol_services/templates/connection_add.html:721
+#: gvsigol_services/templates/connection_update.html:599
+msgid "No entities found"
+msgstr "Nenhuma entidade encontrada"
+
+#: gvsigol_services/templates/connection_add.html:730
+#: gvsigol_services/templates/connection_update.html:608
+msgid "Error loading entities"
+msgstr "Erro ao carregar entidades"
+
+#: gvsigol_services/templates/connection_config.html:88
+msgid "Back to connections"
+msgstr "Voltar às conexões"
+
+#: gvsigol_services/templates/connection_config.html:100
+#: gvsigol_services/templates/layer_config.html:98
+msgid "Triggers"
+msgstr "Disparadores"
+
+#: gvsigol_services/templates/connection_config.html:122
+msgid "Add trigger"
+msgstr "Adicionar disparador"
+
+#: gvsigol_services/templates/connection_config.html:133
+msgid "Event"
+msgstr "Evento"
+
+#: gvsigol_services/templates/connection_config.html:134
+#: gvsigol_services/templates/connection_trigger_add.html:168
+msgid "Scope"
+msgstr "Âmbito"
+
+#: gvsigol_services/templates/connection_config.html:146
+msgid "Can be used as calculated field"
+msgstr "Pode ser usado como campo calculado"
+
+#: gvsigol_services/templates/connection_config.html:160
+msgid "Global"
+msgstr "Global"
+
+#: gvsigol_services/templates/connection_config.html:163
+#: gvsigol_services/templates/connection_trigger_add.html:184
+msgid "Schemas"
+msgstr "Esquemas"
+
+#: gvsigol_services/templates/connection_config.html:176
+msgid "Duplicate to another connection"
+msgstr "Duplicar para outra conexão"
+
+#: gvsigol_services/templates/connection_config.html:216
+msgid "Delete trigger"
+msgstr "Excluir disparador"
+
+#: gvsigol_services/templates/connection_config.html:219
+msgid ""
+"Are you sure you want to delete this trigger? This action cannot be undone."
+msgstr ""
+"Tem a certeza de que deseja excluir este disparador? Esta ação não pode ser "
+"desfeita."
+
+#: gvsigol_services/templates/connection_config.html:238
+msgid "Duplicate trigger"
+msgstr "Duplicar disparador"
+
+#: gvsigol_services/templates/connection_config.html:241
+msgid "Select the target connection to duplicate this trigger:"
+msgstr "Selecione a conexão de destino para duplicar este disparador:"
+
+#: gvsigol_services/templates/connection_config.html:244
+msgid "Target connection"
+msgstr "Conexão de destino"
+
+#: gvsigol_services/templates/connection_config.html:246
+msgid "Select a connection..."
+msgstr "Selecione uma conexão..."
+
+#: gvsigol_services/templates/connection_config.html:251
+msgid "Only PostGIS connections are shown"
+msgstr "Apenas são mostradas conexões PostGIS"
+
+#: gvsigol_services/templates/connection_config.html:256
+msgid "No other PostGIS connections available."
+msgstr "Nenhuma outra conexão PostGIS disponível."
+
+#: gvsigol_services/templates/connection_config.html:263
+#: gvsigol_services/templates/connection_config.html:455
+#: gvsigol_services/templates/connection_config.html:462
+msgid "Duplicate"
+msgstr "Duplicar"
+
+#: gvsigol_services/templates/connection_config.html:296
+msgid "No triggers defined for this connection"
+msgstr "Nenhum disparador definido para esta conexão"
+
+#: gvsigol_services/templates/connection_config.html:341
+msgid "Showing"
+msgstr "Mostrando"
+
+#: gvsigol_services/templates/connection_config.html:341
+msgid "to"
+msgstr "a"
+
+#: gvsigol_services/templates/connection_config.html:341
+msgid "of"
+msgstr "de"
+
+#: gvsigol_services/templates/connection_config.html:341
+msgid "triggers"
+msgstr "disparadores"
+
+#: gvsigol_services/templates/connection_config.html:416
+msgid "Error deleting trigger"
+msgstr "Erro ao excluir disparador"
+
+#: gvsigol_services/templates/connection_config.html:436
+msgid "Please select a target connection"
+msgstr "Por favor, selecione uma conexão de destino"
+
+#: gvsigol_services/templates/connection_config.html:441
+msgid "Duplicating..."
+msgstr "Duplicando..."
+
+#: gvsigol_services/templates/connection_config.html:457
+msgid "Trigger duplicated successfully as:"
+msgstr "Disparador duplicado com sucesso como:"
+
+#: gvsigol_services/templates/connection_config.html:463
+msgid "Error duplicating trigger"
+msgstr "Erro ao duplicar disparador"
+
+#: gvsigol_services/templates/connection_list.html:103
+msgid "Add connection"
+msgstr "Adicionar conexão"
+
+#: gvsigol_services/templates/connection_list.html:137
+msgid "All users can create datastores"
+msgstr "Todos os usuários podem criar armazéns de dados"
+
+#: gvsigol_services/templates/connection_list.html:140
+msgid "All users can use in ETL"
+msgstr "Todos os usuários podem usar em ETL"
+
+#: gvsigol_services/templates/connection_list.html:140
+#: gvsigol_services/templates/select_connection_permissions.html:145
+msgid "ETL"
+msgstr "ETL"
+
+#: gvsigol_services/templates/connection_list.html:143
+msgid "All users can manage"
+msgstr "Todos os usuários podem gerir"
+
+#: gvsigol_services/templates/connection_list.html:143
+msgid "Manage"
+msgstr "Gerir"
+
+#: gvsigol_services/templates/connection_list.html:146
+msgid "Permissions by role only"
+msgstr "Permissões apenas por função"
+
+#: gvsigol_services/templates/connection_list.html:146
+msgid "By role"
+msgstr "Por função"
+
+#: gvsigol_services/templates/connection_list.html:153
+msgid "Not compatible"
+msgstr "Não compatível"
+
+#: gvsigol_services/templates/connection_list.html:158
+#: gvsigol_services/templates/connection_trigger_add.html:191
+msgid "Options"
+msgstr "Opções"
+
+#: gvsigol_services/templates/connection_list.html:209
+#: gvsigol_services/templates/connection_list.html:282
+msgid "Delete connection"
+msgstr "Excluir conexão"
+
+#: gvsigol_services/templates/connection_list.html:213
+msgid "The connection will be deleted. Do you want to continue?"
+msgstr "A conexão será excluída. Deseja continuar?"
+
+#: gvsigol_services/templates/connection_list.html:220
+msgid "The connection and all associated resources will be deleted:"
+msgstr "A conexão e todos os recursos associados serão excluídos:"
+
+#: gvsigol_services/templates/connection_list.html:222
+msgid "All datastores linked to this connection"
+msgstr "Todos os armazéns de dados ligados a esta conexão"
+
+#: gvsigol_services/templates/connection_list.html:223
+msgid "All layers in those datastores"
+msgstr "Todas as camadas nesses armazéns de dados"
+
+#: gvsigol_services/templates/connection_list.html:224
+msgid "All triggers and topology rules of those layers"
+msgstr "Todos os disparadores e regras topológicas dessas camadas"
+
+#: gvsigol_services/templates/connection_list.html:229
+msgid "I understand that this action cannot be undone"
+msgstr "Entendo que esta ação não pode ser desfeita"
+
+#: gvsigol_services/templates/connection_list.html:286
+msgid "Edit connection"
+msgstr "Editar conexão"
+
+#: gvsigol_services/templates/connection_list.html:366
+msgid "This connection has"
+msgstr "Esta conexão tem"
+
+#: gvsigol_services/templates/connection_list.html:366
+msgid "datastore(s) and"
+msgstr "armazém(ns) de dados e"
+
+#: gvsigol_services/templates/connection_list.html:367
+msgid "layer(s) associated."
+msgstr "camada(s) associada(s)."
+
+#: gvsigol_services/templates/connection_list.html:410
+msgid "Error deleting connection"
+msgstr "Erro ao excluir conexão"
+
+#: gvsigol_services/templates/connection_trigger_add.html:83
+msgid "Save trigger"
+msgstr "Guardar disparador"
+
+#: gvsigol_services/templates/connection_trigger_add.html:121
+msgid "Unique identifier for this trigger"
+msgstr "Identificador único para este disparador"
+
+#: gvsigol_services/templates/connection_trigger_add.html:123
+msgid ""
+"Only letters, numbers and underscores. Must start with letter or underscore."
+msgstr ""
+"Apenas letras, números e sublinhados. Deve começar por letra ou sublinhado."
+
+#: gvsigol_services/templates/connection_trigger_add.html:124
+msgid "Only letters, numbers and underscores"
+msgstr "Apenas letras, números e sublinhados"
+
+#: gvsigol_services/templates/connection_trigger_add.html:130
+msgid "Brief description of what this trigger does"
+msgstr "Breve descrição do que este disparador faz"
+
+#: gvsigol_services/templates/connection_trigger_add.html:136
+msgid "Timing"
+msgstr "Temporização"
+
+#: gvsigol_services/templates/connection_trigger_add.html:145
+#: gvsigol_services/templates/layer_config.html:533
+msgid "Events"
+msgstr "Eventos"
+
+#: gvsigol_services/templates/connection_trigger_add.html:171
+msgid "Apply to"
+msgstr "Aplicar a"
+
+#: gvsigol_services/templates/connection_trigger_add.html:180
+msgid "Choose whether this trigger applies to all schemas or specific ones"
+msgstr ""
+"Escolha se este disparador se aplica a todos os esquemas ou a alguns "
+"específicos"
+
+#: gvsigol_services/templates/connection_trigger_add.html:187
+msgid "Type schema names and press Enter to add"
+msgstr "Digite nomes de esquemas e pressione Enter para adicionar"
+
+#: gvsigol_services/templates/connection_trigger_add.html:198
+#: gvsigol_services/templates/layer_config.html:646
+msgid "Calculated field"
+msgstr "Campo calculado"
+
+#: gvsigol_services/templates/connection_trigger_add.html:201
+msgid "Can be assigned to layer fields to auto-calculate values"
+msgstr ""
+"Pode ser atribuído a campos de camada para calcular valores automaticamente"
+
+#: gvsigol_services/templates/connection_trigger_add.html:205
+msgid "Compatible datastores"
+msgstr "Armazéns de dados compatíveis"
+
+#: gvsigol_services/templates/connection_trigger_add.html:214
+msgid "SQL Code"
+msgstr "Código SQL"
+
+#: gvsigol_services/templates/connection_trigger_add.html:227
+msgid ""
+"Use NEW to reference the new row (INSERT/UPDATE) and OLD for the old row "
+"(UPDATE/DELETE)."
+msgstr ""
+"Use NEW para referenciar a nova linha (INSERT/UPDATE) e OLD para a linha "
+"antiga (UPDATE/DELETE)."
+
+#: gvsigol_services/templates/connection_trigger_add.html:230
+msgid "Template variables"
+msgstr "Variáveis de modelo"
+
+#: gvsigol_services/templates/connection_trigger_add.html:237
+msgid "The field selected by the user when assigning the trigger"
+msgstr "O campo selecionado pelo usuário ao atribuir o disparador"
+
+#: gvsigol_services/templates/connection_trigger_add.html:238
+msgid "The schema where the layer is located"
+msgstr "O esquema onde a camada está localizada"
+
+#: gvsigol_services/templates/connection_trigger_add.html:239
+msgid "The table name of the layer"
+msgstr "O nome da tabela da camada"
+
+#: gvsigol_services/templates/connection_trigger_add.html:240
+msgid "The geometry field name of the layer"
+msgstr "O nome do campo de geometria da camada"
+
+#: gvsigol_services/templates/connection_trigger_add.html:241
+msgid "The primary key field of the layer"
+msgstr "O campo de chave primária da camada"
+
+#: gvsigol_services/templates/connection_trigger_add.html:258
+msgid "Select trigger permissions"
+msgstr "Selecionar permissões do disparador"
+
+#: gvsigol_services/templates/connection_trigger_add.html:264
+msgid "All staff users can use this trigger in their layers"
+msgstr "Todos os usuários staff podem usar este disparador nas suas camadas"
+
+#: gvsigol_services/templates/connection_trigger_add.html:266
+msgid "Allow all staff users"
+msgstr "Permitir todos os usuários staff"
+
+#: gvsigol_services/templates/connection_trigger_add.html:276
+#: gvsigol_services/templates/select_connection_permissions.html:130
+#: gvsigol_services/templates/select_datastore_permissions.html:109
+msgid "User role image"
+msgstr "Imagem da função de usuário"
+
+#: gvsigol_services/templates/connection_trigger_add.html:285
+#: gvsigol_services/templates/select_datastore_permissions.html:120
+msgid "Can use"
+msgstr "Pode usar"
+
+#: gvsigol_services/templates/connection_trigger_add.html:294
+msgid "No roles available"
+msgstr "Nenhuma função disponível"
+
+#: gvsigol_services/templates/connection_trigger_add.html:355
+msgid "Type schema name and press Enter"
+msgstr "Digite o nome do esquema e pressione Enter"
+
+#: gvsigol_services/templates/connection_trigger_add.html:466
+#: gvsigol_services/views.py:7790 gvsigol_services/views.py:7912
+msgid "SQL code is required"
+msgstr "O código SQL é obrigatório"
+
+#: gvsigol_services/templates/connection_trigger_add.html:501
+msgid "Select at least one schema to see compatible datastores"
+msgstr ""
+"Selecione pelo menos um esquema para ver armazéns de dados compatíveis"
+
+#: gvsigol_services/templates/connection_trigger_add.html:521
+msgid "No datastores in this connection yet"
+msgstr "Ainda não há armazéns de dados nesta conexão"
+
+#: gvsigol_services/templates/connection_trigger_add.html:523
+msgid "No datastores match the selected schemas"
+msgstr "Nenhum armazém de dados corresponde aos esquemas selecionados"
+
+#: gvsigol_services/templates/connection_trigger_add.html:529
+msgid "Error loading datastores"
+msgstr "Erro ao carregar armazéns de dados"
+
+#: gvsigol_services/templates/connection_update.html:150
+#: gvsigol_services/templates/connection_update.html:475
+msgid "Saving..."
+msgstr "Guardando..."
+
+#: gvsigol_services/templates/connection_update.html:153
+msgid ""
+"Synchronizing %(count)s datastore(s) with GeoServer. This may take a few "
+"seconds."
+msgstr ""
+"Sincronizando %(count)s armazém(ns) de dados com o GeoServer. Isto pode "
+"demorar alguns segundos."
+
+#: gvsigol_services/templates/connection_update.html:348
+#: gvsigol_services/templates/connection_update.html:566
+msgid "Click Load to get entities"
+msgstr "Clique em Carregar para obter entidades"
+
+#: gvsigol_services/templates/connection_update.html:358
+msgid "You can type to search by code or name."
+msgstr "Pode escrever para pesquisar por código ou nome."
+
+#: gvsigol_services/templates/datastore_add.html:328
+msgid "Select a connection"
+msgstr "Selecione uma conexão"
+
+#: gvsigol_services/templates/datastore_add.html:404
+msgid "Select or type a new schema name"
+msgstr "Selecione ou digite um novo nome de esquema"
+
+#: gvsigol_services/templates/datastore_add.html:418
+msgid "(new)"
+msgstr "(novo)"
+
+#: gvsigol_services/templates/datastore_add.html:440
+msgid "Connecting to database..."
+msgstr "Conectando à base de dados..."
+
+#: gvsigol_services/templates/datastore_add.html:463
+msgid "Select existing or type new name"
+msgstr "Selecione existente ou digite novo nome"
+
+#: gvsigol_services/templates/datastore_add.html:470
+msgid "No schemas found. Type a name to create one."
+msgstr "Nenhum esquema encontrado. Digite um nome para criar um."
+
+#: gvsigol_services/templates/datastore_add.html:472
+msgid "Unknown error"
+msgstr "Erro desconhecido"
+
+#: gvsigol_services/templates/datastore_add.html:480
+msgid "Connection error. You can type a schema name."
+msgstr "Erro de conexão. Pode digitar um nome de esquema."
+
+#: gvsigol_services/templates/datastore_add.html:482
+msgid "Connection timeout. You can type a schema name."
+msgstr "Tempo limite de conexão. Pode digitar um nome de esquema."
+
+#: gvsigol_services/templates/datastore_list.html:129
+msgid "Using centralized connection"
+msgstr "Usando conexão centralizada"
+
+#: gvsigol_services/templates/datastore_update.html:205
+msgid "This datastore uses a centralized connection"
+msgstr "Este armazém de dados usa uma conexão centralizada"
+
+#: gvsigol_services/templates/datastore_update.html:217
+msgid ""
+"Connection parameters are managed from the Connections section. To modify "
+"them, edit the connection:"
+msgstr ""
+"Os parâmetros de conexão são geridos na seção Conexões. Para modificá-los, "
+"edite a conexão:"
+
+#: gvsigol_services/templates/enumeration_add.html:92
+#: gvsigol_services/templates/enumeration_update.html:96
+msgid "Order type"
+msgstr "Tipo de ordem"
+
+#: gvsigol_services/templates/enumeration_add.html:103
+#: gvsigol_services/templates/enumeration_update.html:119
+msgid "Show first value by default"
+msgstr "Mostrar primeiro valor por defeito"
+
+#: gvsigol_services/templates/enumeration_update.html:144
+msgid "Insert item name"
+msgstr "Inserir nome do item"
+
+#: gvsigol_services/templates/external_layer_add.html:224
+#: gvsigol_services/templates/external_layer_update.html:203
+msgid "Clear file"
+msgstr "Limpar arquivo"
+
+#: gvsigol_services/templates/external_layer_add.html:233
+#: gvsigol_services/templates/external_layer_update.html:212
+msgid "by default"
+msgstr "por defeito"
+
+#: gvsigol_services/templates/external_layer_add.html:239
+#: gvsigol_services/templates/external_layer_update.html:218
+msgid "Specify custom SRS"
+msgstr "Especificar SRS personalizado"
+
+#: gvsigol_services/templates/layer_add.html:303
+msgid ""
+"Para generar automáticamente metadatos enriquecidos con descripción y campos"
+" de la base de datos:"
+msgstr ""
+"Para gerar automaticamente metadados enriquecidos com descrição e campos da "
+"base de dados:"
+
+#: gvsigol_services/templates/layer_add.html:305
+msgid "Guarda esta capa primero"
+msgstr "Guarde esta camada primeiro"
+
+#: gvsigol_services/templates/layer_add.html:306
+msgid "Ve a 'Editar capa' → pestaña 'Información Detallada'"
+msgstr "Vá a 'Editar camada' → separador 'Informação Detalhada'"
+
+#: gvsigol_services/templates/layer_add.html:307
+msgid "Usa el botón 'Generar Metadatos Enriquecidos con Campos'"
+msgstr "Use o botão 'Gerar Metadados Enriquecidos com Campos'"
+
+#: gvsigol_services/templates/layer_config.html:173
+#: gvsigol_services/templates/layer_config.html:194
+msgid "Manage format"
+msgstr "Gerir formato"
+
+#: gvsigol_services/templates/layer_config.html:524
+msgid ""
+"Assign triggers to fields. These triggers will execute automatically when "
+"data is inserted, updated or deleted."
+msgstr ""
+"Atribua disparadores a campos. Estes disparadores serão executados "
+"automaticamente quando os dados são inseridos, atualizados ou eliminados."
+
+#: gvsigol_services/templates/layer_config.html:532
+#: gvsigol_services/templates/layer_config.html:636
+msgid "Trigger"
+msgstr "Disparador"
+
+#: gvsigol_services/templates/layer_config.html:534
+#: gvsigol_services/templates/layer_config.html:656
+msgid "Target field"
+msgstr "Campo de destino"
+
+#: gvsigol_services/templates/layer_config.html:570
+#: gvsigol_services/views.py:8447
+msgid "You do not have permission to modify this trigger"
+msgstr "Não tem permissão para modificar este disparador"
+
+#: gvsigol_services/templates/layer_config.html:586
+#: gvsigol_services/views.py:8401
+msgid "You do not have permission to remove this trigger"
+msgstr "Não tem permissão para remover este disparador"
+
+#: gvsigol_services/templates/layer_config.html:595
+msgid "No triggers assigned to this layer yet"
+msgstr "Ainda não há disparadores atribuídos a esta camada"
+
+#: gvsigol_services/templates/layer_config.html:606
+msgid "Assign trigger to field"
+msgstr "Atribuir disparador a campo"
+
+#: gvsigol_services/templates/layer_config.html:611
+msgid ""
+"No triggers available. Create triggers with 'Calculated field' option in the"
+" connection configuration."
+msgstr ""
+"Nenhum disparador disponível. Crie disparadores com a opção 'Campo "
+"calculado' na configuração da conexão."
+
+#: gvsigol_services/templates/layer_config.html:632
+msgid "Assign trigger"
+msgstr "Atribuir disparador"
+
+#: gvsigol_services/templates/layer_config.html:638
+msgid "Select a trigger..."
+msgstr "Selecione um disparador..."
+
+#: gvsigol_services/templates/layer_config.html:658
+msgid "Select a field..."
+msgstr "Selecione um campo..."
+
+#: gvsigol_services/templates/layer_config.html:665
+msgid "Select the field that will be calculated by this trigger"
+msgstr "Selecione o campo que será calculado por este disparador"
+
+#: gvsigol_services/templates/layer_config.html:670
+msgid "Assign"
+msgstr "Atribuir"
+
+#: gvsigol_services/templates/layer_list.html:97
+msgid "Filter by project"
+msgstr "Filtrar por projeto"
+
+#: gvsigol_services/templates/layer_list.html:112
+msgid "Show all layers"
+msgstr "Mostrar todas as camadas"
+
+#: gvsigol_services/templates/layer_update.html:391
+msgid "Generar Metadatos Enriquecidos con Campos"
+msgstr "Gerar Metadados Enriquecidos com Campos"
+
+#: gvsigol_services/templates/layer_update.html:394
+msgid ""
+"Este botón generará automáticamente una estructura con descripción y lista "
+"de campos de la base de datos"
+msgstr ""
+"Este botão irá gerar automaticamente uma estrutura com descrição e lista de "
+"campos da base de dados"
+
+#: gvsigol_services/templates/layer_update.html:901
+msgid "Generando..."
+msgstr "Gerando..."
+
+#: gvsigol_services/templates/layer_update.html:926
+msgid ""
+"Metadatos enriquecidos generados correctamente. Puedes editarlos antes de "
+"guardar la capa."
+msgstr ""
+"Metadados enriquecidos gerados corretamente. Pode editá-los antes de guardar"
+" a camada."
+
+#: gvsigol_services/templates/layer_update.html:939
+msgid "Error al generar metadatos enriquecidos"
+msgstr "Erro ao gerar metadados enriquecidos"
+
+#: gvsigol_services/templates/layer_update.html:942
+msgid ""
+"Error 404: La URL no fue encontrada. Asegúrate de que el plugin GeoCopilot "
+"está instalado y el servidor está reiniciado."
+msgstr ""
+"Erro 404: O URL não foi encontrado. Certifique-se de que o plugin GeoCopilot"
+" está instalado e o servidor está reiniciado."
+
+#: gvsigol_services/templates/layer_update.html:944
+msgid "Error 403: No tienes permisos para realizar esta acción."
+msgstr "Erro 403: Não tem permissões para realizar esta ação."
+
+#: gvsigol_services/templates/layer_update.html:946
+msgid "Error 500: Error interno del servidor."
+msgstr "Erro 500: Erro interno do servidor."
+
+#: gvsigol_services/templates/select_connection_permissions.html:111
+msgid "All users can create datastores with this connection"
+msgstr "Todos os usuários podem criar armazéns de dados com esta conexão"
+
+#: gvsigol_services/templates/select_connection_permissions.html:113
+msgid "Allow all - Datastores"
+msgstr "Permitir todos - Armazéns de dados"
+
+#: gvsigol_services/templates/select_connection_permissions.html:115
+msgid "All users can use this connection in ETL"
+msgstr "Todos os usuários podem usar esta conexão em ETL"
+
+#: gvsigol_services/templates/select_connection_permissions.html:117
+msgid "Allow all - ETL"
+msgstr "Permitir todos - ETL"
+
+#: gvsigol_services/templates/select_connection_permissions.html:119
+msgid "All users can manage this connection"
+msgstr "Todos os usuários podem gerir esta conexão"
+
+#: gvsigol_services/templates/select_connection_permissions.html:121
+#: gvsigol_services/templates/select_datastore_permissions.html:100
+msgid "Allow all - Management"
+msgstr "Permitir todos - Gestão"
+
+#: gvsigol_services/templates/select_connection_permissions.html:149
+#: gvsigol_services/templates/select_datastore_permissions.html:124
+msgid "Management"
+msgstr "Gestão"
+
+#: gvsigol_services/templates/select_datastore_permissions.html:94
+msgid "All staff users can use this datastore to create layers"
+msgstr ""
+"Todos os usuários staff podem usar este armazém de dados para criar camadas"
+
+#: gvsigol_services/templates/select_datastore_permissions.html:96
+msgid "Allow all - Use"
+msgstr "Permitir todos - Uso"
+
+#: gvsigol_services/templates/select_datastore_permissions.html:98
+msgid "All staff users can manage (edit) this datastore"
+msgstr "Todos os usuários staff podem gerir (editar) este armazém de dados"
+
+#: gvsigol_services/views.py:611
+msgid "Schema name is required"
+msgstr "O nome do esquema é obrigatório"
+
+#: gvsigol_services/views.py:613
+msgid ""
+"Invalid schema name. Use only letters, numbers and underscores, starting "
+"with a letter or underscore."
+msgstr ""
+"Nome de esquema inválido. Use apenas letras, números e sublinhados, "
+"começando por uma letra ou sublinhado."
+
+#: gvsigol_services/views.py:634
+msgid ""
+"You do not have permission to use this schema. You can only use your own "
+"schema ({user_schema}) or create a new one."
+msgstr ""
+"Não tem permissão para usar este esquema. Só pode usar o seu próprio esquema"
+" ({user_schema}) ou criar um novo."
+
+#: gvsigol_services/views.py:681
+msgid "Error creating schema: "
+msgstr "Erro ao criar esquema: "
+
+#: gvsigol_services/views.py:1427
+msgid "Vector layer containing information on {}"
+msgstr "Camada vetorial contendo informações sobre {}"
+
+#: gvsigol_services/views.py:1429
+msgid "Raster layer containing information on {}"
+msgstr "Camada raster contendo informações sobre {}"
+
+#: gvsigol_services/views.py:1431
+msgid "External layer providing information on {}"
+msgstr "Camada externa fornecendo informações sobre {}"
+
+#: gvsigol_services/views.py:1432
+msgid "Layer containing information on {}"
+msgstr "Camada contendo informações sobre {}"
+
+#: gvsigol_services/views.py:1544 gvsigol_services/views.py:4330
+msgid "You are not allowed to use the selected datastore"
+msgstr "Não tem permissão para usar o armazém de dados selecionado"
+
+#: gvsigol_services/views.py:4687
+msgid "Name and title are required"
+msgstr "Nome e título são obrigatórios"
+
+#: gvsigol_services/views.py:4777
+msgid "Error updating enumeration: "
+msgstr "Erro ao atualizar enumeração: "
+
+#: gvsigol_services/views.py:6314
+msgid ""
+"The layer was saved successfully, but there was an error uploading the style"
+" file. Please try uploading it again."
+msgstr ""
+"A camada foi guardada com sucesso, mas ocorreu um erro ao carregar o arquivo"
+" de estilo. Por favor, tente carregá-lo novamente."
+
+#: gvsigol_services/views.py:7153
+msgid "Connection created successfully"
+msgstr "Conexão criada com sucesso"
+
+#: gvsigol_services/views.py:7181 gvsigol_services/views.py:7477
+#: gvsigol_services/views.py:7511 gvsigol_services/views.py:7729
+#: gvsigol_services/views.py:7845 gvsigol_services/views.py:8003
+#: gvsigol_services/views.py:8037 gvsigol_services/views.py:8180
+#: gvsigol_services/views.py:8653 gvsigol_services/views.py:8753
+msgid "Connection not found"
+msgstr "Conexão não encontrada"
+
+#: gvsigol_services/views.py:7195
+msgid "You do not have permission to manage this connection"
+msgstr "Não tem permissão para gerir esta conexão"
+
+#: gvsigol_services/views.py:7285
+msgid ""
+"Connection updated but some datastores could not be synchronized with "
+"GeoServer: "
+msgstr ""
+"Conexão atualizada mas alguns armazéns de dados não puderam ser "
+"sincronizados com GeoServer: "
+
+#: gvsigol_services/views.py:7328
+msgid "Connection updated successfully"
+msgstr "Conexão atualizada com sucesso"
+
+#: gvsigol_services/views.py:7447
+msgid "Cannot delete connection. It is being used by {0} datastore(s)."
+msgstr ""
+"Não é possível excluir a conexão. Está a ser usada por {0} armazém(ns) de "
+"dados."
+
+#: gvsigol_services/views.py:7474
+msgid "Connection and all associated resources deleted successfully"
+msgstr "Conexão e todos os recursos associados excluídos com sucesso"
+
+#: gvsigol_services/views.py:7635
+msgid "Entity is required for testing SEGEX connection"
+msgstr "É necessária uma entidade para testar a conexão SEGEX"
+
+#: gvsigol_services/views.py:7691
+msgid "Connection type not supported for testing"
+msgstr "Tipo de conexão não suportado para testes"
+
+#: gvsigol_services/views.py:7712
+msgid "Configuration is only available for PostGIS connections"
+msgstr "A configuração só está disponível para conexões PostGIS"
+
+#: gvsigol_services/views.py:7744 gvsigol_services/views.py:7861
+#: gvsigol_services/views.py:8057 gvsigol_services/views.py:8211
+msgid "Triggers are only available for PostGIS connections"
+msgstr "Os disparadores só estão disponíveis para conexões PostGIS"
+
+#: gvsigol_services/views.py:7772 gvsigol_services/views.py:7891
+msgid "Name is required"
+msgstr "O nome é obrigatório"
+
+#: gvsigol_services/views.py:7781 gvsigol_services/views.py:7902
+#: gvsigol_services/views.py:8096 gvsigol_services/views.py:8127
+msgid "A trigger with this name already exists"
+msgstr "Já existe um disparador com este nome"
+
+#: gvsigol_services/views.py:7799 gvsigol_services/views.py:7922
+msgid "At least one event must be selected"
+msgstr "Pelo menos um evento deve ser selecionado"
+
+#: gvsigol_services/views.py:7827 gvsigol_services/views.py:8112
+msgid "Trigger created successfully"
+msgstr "Disparador criado com sucesso"
+
+#: gvsigol_services/views.py:7978
+msgid "Trigger updated but some layer triggers could not be reinstalled: "
+msgstr ""
+"Disparador atualizado mas alguns disparadores de camada não puderam ser "
+"reinstalados: "
+
+#: gvsigol_services/views.py:7980
+msgid "Trigger updated and reinstalled in %(count)d layer(s)"
+msgstr "Disparador atualizado e reinstalado em %(count)d camada(s)"
+
+#: gvsigol_services/views.py:7982 gvsigol_services/views.py:8139
+msgid "Trigger updated successfully"
+msgstr "Disparador atualizado com sucesso"
+
+#: gvsigol_services/views.py:8006 gvsigol_services/views.py:8182
+#: gvsigol_services/views.py:8373 gvsigol_services/views.py:8597
+msgid "Trigger not found"
+msgstr "Disparador não encontrado"
+
+#: gvsigol_services/views.py:8118 gvsigol_services/views.py:8145
+msgid "Trigger ID is required"
+msgstr "O ID do disparador é obrigatório"
+
+#: gvsigol_services/views.py:8167
+msgid "Trigger deleted but some layer triggers could not be uninstalled: "
+msgstr ""
+"Disparador excluído mas alguns disparadores de camada não puderam ser "
+"desinstalados: "
+
+#: gvsigol_services/views.py:8168
+msgid "Trigger deleted"
+msgstr "Disparador excluído"
+
+#: gvsigol_services/views.py:8173
+msgid "Trigger deleted successfully"
+msgstr "Disparador excluído com sucesso"
+
+#: gvsigol_services/views.py:8177
+msgid "Method not allowed"
+msgstr "Método não permitido"
+
+#: gvsigol_services/views.py:8203 gvsigol_services/views.py:8308
+#: gvsigol_services/views.py:8507 gvsigol_services/views.py:8841
+msgid "Missing required parameters"
+msgstr "Parâmetros obrigatórios em falta"
+
+#: gvsigol_services/views.py:8215
+msgid "You do not have permission to duplicate this trigger"
+msgstr "Não tem permissão para duplicar este disparador"
+
+#: gvsigol_services/views.py:8228
+msgid "You do not have permission to manage the target connection"
+msgstr "Não tem permissão para gerir a conexão de destino"
+
+#: gvsigol_services/views.py:8282
+msgid "Trigger duplicated successfully"
+msgstr "Disparador duplicado com sucesso"
+
+#: gvsigol_services/views.py:8286
+msgid "Source trigger not found"
+msgstr "Disparador de origem não encontrado"
+
+#: gvsigol_services/views.py:8288
+msgid "Target connection not found"
+msgstr "Conexão de destino não encontrada"
+
+#: gvsigol_services/views.py:8315 gvsigol_services/views.py:8397
+#: gvsigol_services/views.py:8443 gvsigol_services/views.py:8514
+msgid "Permission denied"
+msgstr "Permissão negada"
+
+#: gvsigol_services/views.py:8319 gvsigol_services/views.py:8518
+msgid "Layer has no associated connection"
+msgstr "A camada não tem conexão associada"
+
+#: gvsigol_services/views.py:8322 gvsigol_services/views.py:8521
+msgid "Trigger does not belong to the layer connection"
+msgstr "O disparador não pertence à conexão da camada"
+
+#: gvsigol_services/views.py:8326
+msgid "Field name is required for calculated field triggers"
+msgstr "O nome do campo é obrigatório para disparadores de campo calculado"
+
+#: gvsigol_services/views.py:8335 gvsigol_services/views.py:8533
+msgid "This field is already assigned to another calculated field trigger"
+msgstr "Este campo já está atribuído a outro disparador de campo calculado"
+
+#: gvsigol_services/views.py:8339 gvsigol_services/views.py:8537
+msgid "This trigger is already assigned to this layer"
+msgstr "Este disparador já está atribuído a esta camada"
+
+#: gvsigol_services/views.py:8367
+msgid "Trigger assigned and installed successfully"
+msgstr "Disparador atribuído e instalado com sucesso"
+
+#: gvsigol_services/views.py:8371 gvsigol_services/views.py:8595
+#: gvsigol_services/views.py:8846
+msgid "Layer not found"
+msgstr "Camada não encontrada"
+
+#: gvsigol_services/views.py:8391 gvsigol_services/views.py:8437
+msgid "Missing assignment ID"
+msgstr "ID de atribuição em falta"
+
+#: gvsigol_services/views.py:8413
+msgid "Trigger removed successfully"
+msgstr "Disparador removido com sucesso"
+
+#: gvsigol_services/views.py:8417 gvsigol_services/views.py:8486
+msgid "Assignment not found"
+msgstr "Atribuição não encontrada"
+
+#: gvsigol_services/views.py:8525
+msgid "Selected trigger is not a calculated field trigger"
+msgstr "O disparador selecionado não é um disparador de campo calculado"
+
+#: gvsigol_services/views.py:8562
+msgid "Error creating field: "
+msgstr "Erro ao criar campo: "
+
+#: gvsigol_services/views.py:8591
+msgid "Field created and trigger assigned successfully"
+msgstr "Campo criado e disparador atribuído com sucesso"
+
+#: gvsigol_services/views.py:8626 gvsigol_services/views.py:8740
+msgid "Access denied"
+msgstr "Acesso negado"
+
+#: gvsigol_services/views.py:9083
+msgid "Error saving field format. Cause: {0}"
+msgstr "Erro ao guardar formato de campo. Causa: {0}"
+
+#: gvsigol_services/views.py:9161
+msgid "Error deleting field format. Cause: {0}"
+msgstr "Erro ao excluir formato de campo. Causa: {0}"
+
+#: gvsigol_services/views.py:9218
+msgid "Error getting field format. Cause: {0}"
+msgstr "Erro ao obter formato de campo. Causa: {0}"
+
+msgid "View primary key"
+msgstr "Chave primária da visão"
+
+msgid ""
+"Only one geometry can be included in the view. Other geometry columns will "
+"be omitted."
+msgstr ""
+"Só é possível incluir uma geometria na visão. As demais colunas geométricas "
+"serão omitidas."
+
+msgid "Filters"
+msgstr "Filtros"
+
+msgid "WHERE filters"
+msgstr "Filtros WHERE"
+
+msgid "Match conditions with"
+msgstr "Combinar condições com"
+
+msgid "Match groups with"
+msgstr "Combinar grupos com"
+
+msgid "AND (all)"
+msgstr "AND (todas)"
+
+msgid "OR (any)"
+msgstr "OR (qualquer)"
+
+msgid "Add at least one table before defining filters."
+msgstr "Adicione ao menos uma tabela antes de definir filtros."
+
+msgid "Operator"
+msgstr "Operador"
+
+msgid "Value"
+msgstr "Valor"
+
+msgid "Add condition"
+msgstr "Adicionar condição"
+
+msgid "Add group"
+msgstr "Adicionar grupo"
+
+msgid "Group"
+msgstr "Grupo"
+
+msgid "contains"
+msgstr "contém"
+
+msgid "does not contain"
+msgstr "não contém"
+
+msgid "table PK"
+msgstr "PK da tabela"
+
+msgid ""
+"All conditions currently share the same AND or OR operator. Mixing both in "
+"groups is a planned improvement."
+msgstr ""
+"Por enquanto, todas as condições usam o mesmo operador AND ou OR. Misturar "
+"ambos em grupos é uma melhoria planejada."
+
+msgid "Use groups to mix AND and OR, for example (A OR B) AND C."
+msgstr "Use grupos para misturar AND e OR, por exemplo (A OR B) AND C."
+
+msgid "No geometry column"
+msgstr "Sem coluna de geometria"
+
+msgid ""
+"Multiple geometry columns were selected. Choose a single geometry for the "
+"view."
+msgstr ""
+"Foram selecionadas várias colunas de geometria. Escolha uma única geometria "
+"para a visão."
+
+msgid "The selected geometry column does not exist: {field}"
+msgstr "A coluna de geometria selecionada não existe: {field}"
+
+msgid "The view could not be created: {error}"
+msgstr "Não foi possível criar a visão: {error}"
+
+msgid "The selected primary key does not exist: {field}"
+msgstr "A chave primária selecionada não existe: {field}"
+
+msgid "A primary key is required for the view"
+msgstr "A visão precisa de uma chave primária"
+
+msgid "Invalid geometry definition"
+msgstr "Definição de geometria inválida"
+
+msgid "Invalid primary key definition"
+msgstr "Definição de chave primária inválida"
+
+msgid "Invalid filter definition"
+msgstr "Definição de filtro inválida"
+
+msgid "Invalid filter operator"
+msgstr "Operador de filtro inválido"
+
+msgid "Invalid filter condition"
+msgstr "Condição de filtro inválida"
+
+msgid "Unsupported filter operator: {0}"
+msgstr "Operador de filtro não suportado: {0}"
+
+msgid "Filter value is required"
+msgstr "O valor do filtro é obrigatório"
+
+msgid "Filter references unknown table alias: {alias}"
+msgstr "O filtro referencia um alias de tabela desconhecido: {alias}"
+
+msgid "Filter field does not exist: {field}"
+msgstr "O campo do filtro não existe: {field}"
+
+#~ msgid "Locks"
+#~ msgstr "Bloqueios"
+
+#~ msgid "Convert to enum"
+#~ msgstr "Converter para enumeração"
+
+#~ msgid ""
+#~ "Warning: the field will be deleted from the database. This operation cannot "
+#~ "be undone. Type the name of the field to confirm the deletion:"
+#~ msgstr ""
+#~ "Atenção: o campo será excluído do banco de dados. A operação não pode ser "
+#~ "desfeita. Digite o nome do campo e confirme a exclusão:"
+
+#~ msgid "Rename field"
+#~ msgstr "Renomear campo"
+
+#~ msgid ""
+#~ "Warning: renaming a field may have side effects, such as breaking a field-"
+#~ "based legend."
+#~ msgstr ""
+#~ "Aviso: a renomeação de um campo pode ter efeitos colaterais, tais como "
+#~ "quebrar uma lenda baseada no campo"
+
+#~ msgid "Manage permission"
+#~ msgstr "Permissão de gerenciamento"
+
+#~ msgid "def"
+#~ msgstr "def"
+
+#~ msgid "String"
+#~ msgstr "String"
+
+#~ msgid "Field \"{0}\" exists"
+#~ msgstr "Campo \"{0}\" existe"
+
+#~ msgid "Error uploading the layer. Review the file format."
+#~ msgstr "Erro ao carregar a camada. Revisar o formato do arquivo"

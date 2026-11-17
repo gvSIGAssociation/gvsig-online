@@ -16,9 +16,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Poedit 3.0.1\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
-"X-Generator: Poedit 3.0.1\n"
 
 #: gvsigol_auth/forms.py:30 gvsigol_auth/templates/user_list.html:24
 #: gvsigol_auth/templates/user_update.html:39
@@ -276,7 +276,8 @@ msgid "Contact the system administrator"
 msgstr "Contactar com o administrador do sistema"
 
 #: gvsigol_auth/templates/password_reset_success.html:40
-msgid "We've sent an email to your account with a link to set the new password"
+msgid ""
+"We've sent an email to your account with a link to set the new password"
 msgstr ""
 "Mandamos um e-mail para a sua conta com um link para definir a nova senha"
 
@@ -406,8 +407,8 @@ msgid ""
 "You are receiving this email because we received a password reset request "
 "for your account."
 msgstr ""
-"Você está recebendo este e-mail porque recebemos um pedido de redefinição de "
-"senha para sua conta."
+"Você está recebendo este e-mail porque recebemos um pedido de redefinição de"
+" senha para sua conta."
 
 #: gvsigol_auth/utils.py:123
 msgid "You can reset your password by clicking the link bellow"
@@ -418,10 +419,11 @@ msgid ""
 "If you did not request a password reset, please ignore this email. Your "
 "password will not change."
 msgstr ""
-"Se você não solicitou uma redefinição de senha, por favor, ignore este e-"
-"mail. Sua senha não será alterada."
+"Se você não solicitou uma redefinição de senha, por favor, ignore este "
+"e-mail. Sua senha não será alterada."
 
-#: gvsigol_auth/views.py:86 gvsigol_auth/views.py:172 gvsigol_auth/views.py:300
+#: gvsigol_auth/views.py:86 gvsigol_auth/views.py:172
+#: gvsigol_auth/views.py:300
 msgid "Your account has been disabled"
 msgstr "Sua conta foi desativada"
 
@@ -451,8 +453,12 @@ msgstr "A criação do usuário falhou"
 msgid "User update failed"
 msgstr "A atualização do usuário falhou"
 
-msgid "Could not update user roles. Check that the roles exist in the authentication backend."
-msgstr "Não foi possível atualizar os papéis do usuário. Verifique se os papéis existem no sistema de autenticação."
+msgid ""
+"Could not update user roles. Check that the roles exist in the "
+"authentication backend."
+msgstr ""
+"Não foi possível atualizar os papéis do usuário. Verifique se os papéis "
+"existem no sistema de autenticação."
 
 #: gvsigol_auth/views.py:515
 msgid ""
@@ -470,8 +476,8 @@ msgid ""
 "numbers"
 msgstr ""
 "Nome de grupo de usuários inválido: '{value}'. Os identificadores devem "
-"começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem "
-"ser letras, sublinhados ou números"
+"começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem"
+" ser letras, sublinhados ou números"
 
 #: gvsigol_auth/views.py:592
 msgid "Admin is a reserved role"
@@ -485,35 +491,12 @@ msgid ""
 "numbers"
 msgstr ""
 "Nome de grupo de usuários inválido: '{value}'. Os identificadores devem "
-"começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem "
-"ser letras, sublinhados ou números"
+"começar com uma letra ou um sublinhado (_). Os caracteres subsequentes podem"
+" ser letras, sublinhados ou números"
 
 #: gvsigol_auth/views.py:621
 msgid "System roles can't be deleted"
 msgstr "Os roles do sistema podem ser excluídas"
-
-#~ msgid "Users and groups"
-#~ msgstr "Usuários e grupos"
-
-#~ msgid "User group for"
-#~ msgstr "Grupo de usuários para"
-
-#, fuzzy
-#~| msgid "Repeat password"
-#~ msgid "Reset password"
-#~ msgstr "Repita a senha"
-
-#~ msgid "New password"
-#~ msgstr "Nova senha"
-
-#~ msgid "This is your new temporary password"
-#~ msgstr "Esta é a sua nova senha temporária"
-
-#~ msgid "%(sep)sSort descendente"
-#~ msgstr "%(sep)sSort descendente"
-
-#~ msgid "There must be at least one server"
-#~ msgstr "Deve haver pelo menos um servidor"
 
 msgid "Filter roles by name or description"
 msgstr "Filtrar roles por nome ou descrição"
@@ -541,8 +524,12 @@ msgid "Group details"
 msgstr "Dados do grupo"
 
 msgctxt "auth"
-msgid "Start with a letter or an underscore; then use only letters, numbers or underscores."
-msgstr "Comece com uma letra ou um sublinhado; depois use apenas letras, números ou sublinhados."
+msgid ""
+"Start with a letter or an underscore; then use only letters, numbers or "
+"underscores."
+msgstr ""
+"Comece com uma letra ou um sublinhado; depois use apenas letras, números ou "
+"sublinhados."
 
 msgctxt "auth"
 msgid "(optional)"
@@ -562,7 +549,9 @@ msgstr "Adicione usuários pelo formulário de usuário."
 
 msgctxt "auth"
 msgid "Roles decide what users can see and edit in layers and projects."
-msgstr "Os papéis definem o que os usuários podem ver e editar em camadas e projetos."
+msgstr ""
+"Os papéis definem o que os usuários podem ver e editar em camadas e "
+"projetos."
 
 msgctxt "auth"
 msgid "Role details"
@@ -617,7 +606,8 @@ msgid "The password is managed by the corporate directory."
 msgstr "A senha é gerenciada pelo diretório corporativo."
 
 msgctxt "auth"
-msgid "Roles give access to layers and projects. Choose them in the Roles tab."
+msgid ""
+"Roles give access to layers and projects. Choose them in the Roles tab."
 msgstr "Os papéis dão acesso a camadas e projetos. Escolha-os na aba Roles."
 
 msgctxt "auth"
@@ -663,8 +653,12 @@ msgid "This name is reserved. Choose another one."
 msgstr "Este nome está reservado. Escolha outro."
 
 msgctxt "auth"
-msgid "Start with a letter or an underscore; then use only letters, numbers or underscores. The name «admin» is reserved."
-msgstr "Comece com uma letra ou um sublinhado; depois use apenas letras, números ou sublinhados. O nome «admin» está reservado."
+msgid ""
+"Start with a letter or an underscore; then use only letters, numbers or "
+"underscores. The name «admin» is reserved."
+msgstr ""
+"Comece com uma letra ou um sublinhado; depois use apenas letras, números ou "
+"sublinhados. O nome «admin» está reservado."
 
 msgctxt "auth"
 msgid "Avoid spaces in the username."
@@ -713,3 +707,25 @@ msgstr "As senhas coincidem"
 msgctxt "auth"
 msgid "Passwords do not match"
 msgstr "As senhas não coincidem"
+
+#~ msgid "Users and groups"
+#~ msgstr "Usuários e grupos"
+
+#~ msgid "User group for"
+#~ msgstr "Grupo de usuários para"
+
+#, fuzzy
+#~ msgid "Reset password"
+#~ msgstr "Repita a senha"
+
+#~ msgid "New password"
+#~ msgstr "Nova senha"
+
+#~ msgid "This is your new temporary password"
+#~ msgstr "Esta é a sua nova senha temporária"
+
+#~ msgid "%(sep)sSort descendente"
+#~ msgstr "%(sep)sSort descendente"
+
+#~ msgid "There must be at least one server"
+#~ msgstr "Deve haver pelo menos um servidor"

@@ -26,9 +26,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Poedit 2.4.3\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
-"X-Generator: Poedit 2.4.3\n"
 
 #: gvsigol_symbology/models.py:31
 msgid "Circle"
@@ -60,7 +60,8 @@ msgstr "Símbolo padrão"
 
 #: gvsigol_symbology/services_library.py:68
 #, python-brace-format
-msgid "Invalid name: '{value}'. Name should not contain any special characters"
+msgid ""
+"Invalid name: '{value}'. Name should not contain any special characters"
 msgstr "Nome inválido: '{value}'. O nome não deve conter caracteres especiais"
 
 #: gvsigol_symbology/templates/base_symbology.html:110
@@ -485,12 +486,12 @@ msgstr "Adicionar novo degradê de cores"
 #: gvsigol_symbology/templates/color_ramp_add.html:40
 #: gvsigol_symbology/templates/color_ramp_update.html:40
 msgid "Steps"
-msgstr "Etapas"
+msgstr "Passos"
 
 #: gvsigol_symbology/templates/color_ramp_add.html:41
 #: gvsigol_symbology/templates/color_ramp_update.html:41
 msgid "Add step"
-msgstr "Adicionar etapa"
+msgstr "Adicionar passo"
 
 #: gvsigol_symbology/templates/color_ramp_add.html:63
 #: gvsigol_symbology/templates/color_ramp_update.html:62
@@ -818,7 +819,7 @@ msgstr ""
 #: gvsigol_symbology/templates/unique_values_add.html:73
 #: gvsigol_symbology/templates/unique_values_update.html:76
 msgid "Apply ramp color"
-msgstr "Aplique o degradê de cores"
+msgstr "Aplicar rampa de cores"
 
 #: gvsigol_symbology/templates/color_table_add.html:113
 #: gvsigol_symbology/templates/color_table_update.html:134
@@ -921,7 +922,7 @@ msgstr "Simbologia"
 
 #: gvsigol_symbology/templates/dashboard_symbology_menu.html:6
 msgid "Layer styles"
-msgstr "Estilos de camadas"
+msgstr "Estilos de camada"
 
 #: gvsigol_symbology/templates/dashboard_symbology_menu.html:8
 msgid "Symbol libraries"
@@ -994,7 +995,7 @@ msgstr "Selecionar campo numérico"
 #: gvsigol_symbology/templates/unique_values_add.html:66
 #: gvsigol_symbology/templates/unique_values_update.html:69
 msgid "Select field"
-msgstr "Marcar campo"
+msgstr "Selecione o campo"
 
 #: gvsigol_symbology/templates/library_update.html:32
 msgid "Symbols"
@@ -1085,7 +1086,8 @@ msgstr "Tabela de cores"
 #: gvsigol_symbology/templates/select_legend_type.html:91
 msgid "Creates a legend for a raster layer defined by a color table"
 msgstr ""
-"Cria uma legenda para uma camada rasterizada definida por uma tabela de cores"
+"Cria uma legenda para uma camada rasterizada definida por uma tabela de "
+"cores"
 
 #: gvsigol_symbology/templates/select_legend_type.html:111
 msgid "Clustered Points"
@@ -1178,76 +1180,6 @@ msgstr "É necessário entrar um nome para a biblioteca e selecionar um arquivo"
 #: gvsigol_symbology/views.py:1388
 msgid "There is already a library with that name"
 msgstr ""
-
-#~ msgid "Library will be removed, Do you want continue?"
-#~ msgstr "A biblioteca será removida. Quer continuar?"
-
-#, fuzzy, python-format
-#~| msgid "Library will be removed, Do you want continue?"
-#~ msgid " Library %(library_name)s will be removed, Do you want continue?."
-#~ msgstr "A biblioteca será removida. Quer continuar?"
-
-#, fuzzy, python-format
-#~| msgid "Library will be removed, Do you want continue?"
-#~ msgid "Library %(library_name)s will be removed, Do you want continue?"
-#~ msgstr "A biblioteca será removida. Quer continuar?"
-
-#, fuzzy
-#~| msgid "Library will be removed, Do you want continue?"
-#~ msgid "Library {{ id }} will be removed, Do you want continue?"
-#~ msgstr "A biblioteca será removida. Quer continuar?"
-
-#, fuzzy, python-format
-#~| msgid "Library will be removed, Do you want continue?"
-#~ msgid " Library  %(library_name)s will be removed, Do you want continue? "
-#~ msgstr "A biblioteca será removida. Quer continuar?"
-
-#, fuzzy
-#~| msgid "Library will be removed, Do you want continue?"
-#~ msgid "Library library_name will be removed, Do you want continue?"
-#~ msgstr "A biblioteca será removida. Quer continuar?"
-
-#, fuzzy, python-format
-#~| msgid "Library will be removed, Do you want continue?"
-#~ msgid "%(Library)s: %(variable)s will be removed, Do you want continue?"
-#~ msgstr "A biblioteca será removida. Quer continuar?"
-
-#, fuzzy
-#~| msgid "Library"
-#~ msgid "Library "
-#~ msgstr "Biblioteca"
-
-#, fuzzy
-#~| msgid "Folder will be removed, Do you want continue?"
-#~ msgid " will be removed, Do you want continue?"
-#~ msgstr "A pasta será removida. Quer continuar?"
-
-#, fuzzy, python-format
-#~| msgid "Library will be removed, Do you want continue?"
-#~ msgid "Library  %(library_name)s will be removed, Do you want continue?"
-#~ msgstr "A biblioteca será removida. Quer continuar?"
-
-#, fuzzy, python-format
-#~| msgid "Library will be removed, Do you want continue?"
-#~ msgid ""
-#~ " Library id  %(library_id)s and name %(library_name)s will be removed, Do "
-#~ "you want continue? "
-#~ msgstr "A biblioteca será removida. Quer continuar?"
-
-#, fuzzy
-#~| msgid "Library will be removed, Do you want continue?"
-#~ msgid "Library ' + data[0] +' will be removed, Do you want continue?"
-#~ msgstr "A biblioteca será removida. Quer continuar?"
-
-#, fuzzy
-#~| msgid "Library will be removed, Do you want continue?"
-#~ msgid ""
-#~ "Library with id ' + data[0] +' and name ' + data[1] +  ' will be removed, "
-#~ "Do you want continue?"
-#~ msgstr "A biblioteca será removida. Quer continuar?"
-
-#~ msgid "gvsigonline docs"
-#~ msgstr "gvsigonline docs"
 
 #: gvsigol_symbology/templates/unique_values_update.html
 msgid "Add value"
@@ -1381,7 +1313,8 @@ msgid "position of the color along the ramp (0 = start, 100 = end)."
 msgstr "posição da cor ao longo da rampa (0 = início, 100 = fim)."
 
 #: gvsigol_symbology/templates/color_ramp_add.html
-msgid "color the ramp takes at that position; between steps it is interpolated."
+msgid ""
+"color the ramp takes at that position; between steps it is interpolated."
 msgstr "cor que a rampa assume nessa posição; entre as etapas é interpolada."
 
 #: gvsigol_symbology/templates/color_ramp_add.html
@@ -1389,16 +1322,24 @@ msgid "from 0 (transparent) to 1 (opaque)."
 msgstr "de 0 (transparente) a 1 (opaco)."
 
 #: gvsigol_symbology/templates/color_ramp_add.html
-msgid "Drag the handle of a row to reorder the steps. At least two steps are required."
-msgstr "Arraste a alça de uma linha para reordenar as etapas. São necessárias pelo menos duas etapas."
+msgid ""
+"Drag the handle of a row to reorder the steps. At least two steps are "
+"required."
+msgstr ""
+"Arraste a alça de uma linha para reordenar as etapas. São necessárias pelo "
+"menos duas etapas."
 
 #: gvsigol_symbology/templates/library_update.html
 msgid "This library has no symbols yet"
 msgstr "Esta biblioteca ainda não possui símbolos"
 
 #: gvsigol_symbology/templates/library_update.html
-msgid "Use the buttons above to add the first point, line, polygon or external graphic."
-msgstr "Use os botões acima para adicionar o primeiro ponto, linha, polígono ou gráfico externo."
+msgid ""
+"Use the buttons above to add the first point, line, polygon or external "
+"graphic."
+msgstr ""
+"Use os botões acima para adicionar o primeiro ponto, linha, polígono ou "
+"gráfico externo."
 
 #: gvsigol_symbology/templates/library_update.html
 msgctxt "symbology"
@@ -1477,7 +1418,9 @@ msgstr "Dados da categoria"
 #: templates/library_add.html
 msgctxt "symbology"
 msgid "Create a color ramp library from a file exported from gvSIG Online."
-msgstr "Crie uma biblioteca de rampas a partir de um arquivo exportado do gvSIG Online."
+msgstr ""
+"Crie uma biblioteca de rampas a partir de um arquivo exportado do gvSIG "
+"Online."
 
 #: templates/library_add.html
 msgctxt "symbology"
@@ -1487,7 +1430,9 @@ msgstr "Crie um estilo de camada a partir de um arquivo SLD."
 #: templates/library_add.html
 msgctxt "symbology"
 msgid "Create a symbol library from a file exported from gvSIG Online."
-msgstr "Crie uma biblioteca de símbolos a partir de um arquivo exportado do gvSIG Online."
+msgstr ""
+"Crie uma biblioteca de símbolos a partir de um arquivo exportado do gvSIG "
+"Online."
 
 #: templates/library_add.html
 msgctxt "symbology"
@@ -1512,7 +1457,8 @@ msgstr "Agrupe rampas de cor por categorias para usá-las em suas legendas."
 #: templates/library_add.html
 msgctxt "symbology"
 msgid "Group reusable symbols to use them in any layer style."
-msgstr "Agrupe símbolos reutilizáveis para usá-los em qualquer estilo de camada."
+msgstr ""
+"Agrupe símbolos reutilizáveis para usá-los em qualquer estilo de camada."
 
 #: templates/library_add.html
 msgctxt "symbology"
@@ -1636,8 +1582,11 @@ msgstr "Esta categoria ainda não tem rampas de cor."
 
 #: templates/library_update.html
 msgctxt "symbology"
-msgid "Use «Add symbol» to add the first point, line, polygon or external graphic."
-msgstr "Use «Adicionar símbolo» para adicionar o primeiro ponto, linha, polígono ou gráfico externo."
+msgid ""
+"Use «Add symbol» to add the first point, line, polygon or external graphic."
+msgstr ""
+"Use «Adicionar símbolo» para adicionar o primeiro ponto, linha, polígono ou "
+"gráfico externo."
 
 #: templates/library_update.html
 msgctxt "symbology"
@@ -1646,23 +1595,41 @@ msgstr "Editar descrição"
 
 #: templates/select_legend_type.html
 msgctxt "symbology"
-msgid "All the features of the layer are drawn with the same symbol. It is the simplest option, ideal for showing where things are without distinguishing categories."
-msgstr "Todos os elementos da camada são desenhados com o mesmo símbolo. É a opção mais simples, ideal para mostrar onde as coisas estão sem distinguir categorias."
+msgid ""
+"All the features of the layer are drawn with the same symbol. It is the "
+"simplest option, ideal for showing where things are without distinguishing "
+"categories."
+msgstr ""
+"Todos os elementos da camada são desenhados com o mesmo símbolo. É a opção "
+"mais simples, ideal para mostrar onde as coisas estão sem distinguir "
+"categorias."
 
 #: templates/select_legend_type.html
 msgctxt "symbology"
-msgid "Assigns a different symbol to each distinct value of a field. Use it when the data are classified in categories or types."
-msgstr "Atribui um símbolo diferente a cada valor distinto de um campo. Use-a quando os dados estiverem classificados em categorias ou tipos."
+msgid ""
+"Assigns a different symbol to each distinct value of a field. Use it when "
+"the data are classified in categories or types."
+msgstr ""
+"Atribui um símbolo diferente a cada valor distinto de um campo. Use-a quando"
+" os dados estiverem classificados em categorias ou tipos."
 
 #: templates/select_legend_type.html
 msgctxt "symbology"
-msgid "Assigns colors to the values of the raster, either by exact value or as a continuous ramp between values."
-msgstr "Atribui cores aos valores do raster, por valor exato ou como uma rampa contínua entre valores."
+msgid ""
+"Assigns colors to the values of the raster, either by exact value or as a "
+"continuous ramp between values."
+msgstr ""
+"Atribui cores aos valores do raster, por valor exato ou como uma rampa "
+"contínua entre valores."
 
 #: templates/select_legend_type.html
 msgctxt "symbology"
-msgid "Each rule has its own filter combining fields and conditions (AND / OR), its own symbol and its own scales. It is the most flexible option."
-msgstr "Cada regra tem seu próprio filtro, que combina campos e condições (E / OU), seu próprio símbolo e suas próprias escalas. É a opção mais flexível."
+msgid ""
+"Each rule has its own filter combining fields and conditions (AND / OR), its"
+" own symbol and its own scales. It is the most flexible option."
+msgstr ""
+"Cada regra tem seu próprio filtro, que combina campos e condições (E / OU), "
+"seu próprio símbolo e suas próprias escalas. É a opção mais flexível."
 
 #: templates/select_legend_type.html
 msgctxt "symbology"
@@ -1676,13 +1643,23 @@ msgstr "Exemplo"
 
 #: templates/select_legend_type.html
 msgctxt "symbology"
-msgid "Groups nearby points into a single symbol that shows how many there are, and separates them as you zoom in. Avoids overloaded maps."
-msgstr "Agrupa os pontos próximos em um único símbolo que indica quantos são, e os separa ao aproximar. Evita mapas sobrecarregados."
+msgid ""
+"Groups nearby points into a single symbol that shows how many there are, and"
+" separates them as you zoom in. Avoids overloaded maps."
+msgstr ""
+"Agrupa os pontos próximos em um único símbolo que indica quantos são, e os "
+"separa ao aproximar. Evita mapas sobrecarregados."
 
 #: templates/select_legend_type.html
 msgctxt "symbology"
-msgid "Groups the values of a numeric field into ranges and gives each range a symbol, with a color ramp if you wish. Suitable for quantities that vary continuously."
-msgstr "Agrupa os valores de um campo numérico em faixas e atribui a cada faixa um símbolo, com uma rampa de cor se desejar. Adequada para quantidades que variam de forma contínua."
+msgid ""
+"Groups the values of a numeric field into ranges and gives each range a "
+"symbol, with a color ramp if you wish. Suitable for quantities that vary "
+"continuously."
+msgstr ""
+"Agrupa os valores de um campo numérico em faixas e atribui a cada faixa um "
+"símbolo, com uma rampa de cor se desejar. Adequada para quantidades que "
+"variam de forma contínua."
 
 #: templates/select_legend_type.html
 msgctxt "symbology"
@@ -1706,8 +1683,14 @@ msgstr "População, densidade, área, renda."
 
 #: templates/select_legend_type.html
 msgctxt "symbology"
-msgid "Shows the density of the features as a continuous color surface instead of individual symbols. You choose the radius and, optionally, a field to weight each feature."
-msgstr "Mostra a densidade dos elementos como uma superfície contínua de cor em vez de símbolos individuais. Você escolhe o raio e, se quiser, um campo para ponderar cada elemento."
+msgid ""
+"Shows the density of the features as a continuous color surface instead of "
+"individual symbols. You choose the radius and, optionally, a field to weight"
+" each feature."
+msgstr ""
+"Mostra a densidade dos elementos como uma superfície contínua de cor em vez "
+"de símbolos individuais. Você escolhe o raio e, se quiser, um campo para "
+"ponderar cada elemento."
 
 #: templates/select_legend_type.html
 msgctxt "symbology"
@@ -1721,8 +1704,12 @@ msgstr "Milhares de pontos de interesse em uma cidade."
 
 #: templates/select_legend_type.html
 msgctxt "symbology"
-msgid "Write or paste the SLD of the style directly in an editor. For advanced users who need options that the other legends do not offer."
-msgstr "Escreva ou cole diretamente o SLD do estilo em um editor. Para usuários avançados que precisam de opções que as outras legendas não oferecem."
+msgid ""
+"Write or paste the SLD of the style directly in an editor. For advanced "
+"users who need options that the other legends do not offer."
+msgstr ""
+"Escreva ou cole diretamente o SLD do estilo em um editor. Para usuários "
+"avançados que precisam de opções que as outras legendas não oferecem."
 
 #: templates/select_legend_type.html
 msgctxt "symbology"
@@ -1731,8 +1718,12 @@ msgstr "«tipo = escola E alunos > 500»."
 
 #: templates/external_graphic_add.html
 msgctxt "symbology"
-msgid "PNG or SVG. SVG symbols are scaled without losing quality; scripts and external references are removed when saving."
-msgstr "PNG ou SVG. Os símbolos SVG são escalados sem perder qualidade; ao salvar, scripts e referências externas são removidos."
+msgid ""
+"PNG or SVG. SVG symbols are scaled without losing quality; scripts and "
+"external references are removed when saving."
+msgstr ""
+"PNG ou SVG. Os símbolos SVG são escalados sem perder qualidade; ao salvar, "
+"scripts e referências externas são removidos."
 
 #: external_graphics.py
 msgid "The SVG file is too large (maximum 1 MB)."
@@ -1744,4 +1735,108 @@ msgstr "O arquivo SVG não é válido."
 
 #: external_graphics.py
 msgid "The SVG file must define its size (width and height, or a viewBox)."
-msgstr "O arquivo SVG deve indicar seu tamanho (width e height, ou uma viewBox)."
+msgstr ""
+"O arquivo SVG deve indicar seu tamanho (width e height, ou uma viewBox)."
+
+msgid "Create heatmap"
+msgstr "Criar mapa de calor"
+
+msgid "Heatmap"
+msgstr "Mapa de calor"
+
+msgid "Cold Color"
+msgstr "Cor fria"
+
+msgid "Warm Color"
+msgstr "Cor quente"
+
+msgid "Radius (pixels)"
+msgstr "Raio (pixels)"
+
+msgid "Pixels per Cell"
+msgstr "Pixels por célula"
+
+msgid "Use a field to weight the heatmap"
+msgstr "Usar um campo para ponderar o mapa de calor"
+
+msgid "Showing %(start)s to %(end)s of %(total)s layers"
+msgstr "Mostrando %(start)s a %(end)s de %(total)s camadas"
+
+msgid "Layer styles list"
+msgstr "Lista de estilos de camada"
+
+msgid "Color gradient"
+msgstr "Gradiente de cores"
+
+msgid "Select an option"
+msgstr "Selecione uma opção"
+
+msgid ""
+"Shows the density of the features as a continuous color surface instead of "
+"individual symbols. You choose the radius and, optionally, a field to weight"
+" each feature."
+msgstr ""
+"Mostra a densidade dos elementos como uma superfície contínua de cor em vez "
+"de símbolos individuais. Você escolhe o raio e, opcionalmente, um campo para"
+" ponderar cada elemento."
+
+msgid "Layer"
+msgstr "Camada"
+
+#~ msgid "Library will be removed, Do you want continue?"
+#~ msgstr "A biblioteca será removida. Quer continuar?"
+
+#, fuzzy, python-format
+#~ msgid " Library %(library_name)s will be removed, Do you want continue?."
+#~ msgstr "A biblioteca será removida. Quer continuar?"
+
+#, fuzzy, python-format
+#~ msgid "Library %(library_name)s will be removed, Do you want continue?"
+#~ msgstr "A biblioteca será removida. Quer continuar?"
+
+#, fuzzy
+#~ msgid "Library {{ id }} will be removed, Do you want continue?"
+#~ msgstr "A biblioteca será removida. Quer continuar?"
+
+#, fuzzy, python-format
+#~ msgid " Library  %(library_name)s will be removed, Do you want continue? "
+#~ msgstr "A biblioteca será removida. Quer continuar?"
+
+#, fuzzy
+#~ msgid "Library library_name will be removed, Do you want continue?"
+#~ msgstr "A biblioteca será removida. Quer continuar?"
+
+#, fuzzy, python-format
+#~ msgid "%(Library)s: %(variable)s will be removed, Do you want continue?"
+#~ msgstr "A biblioteca será removida. Quer continuar?"
+
+#, fuzzy
+#~ msgid "Library "
+#~ msgstr "Biblioteca"
+
+#, fuzzy
+#~ msgid " will be removed, Do you want continue?"
+#~ msgstr "A pasta será removida. Quer continuar?"
+
+#, fuzzy, python-format
+#~ msgid "Library  %(library_name)s will be removed, Do you want continue?"
+#~ msgstr "A biblioteca será removida. Quer continuar?"
+
+#, fuzzy, python-format
+#~ msgid ""
+#~ " Library id  %(library_id)s and name %(library_name)s will be removed, Do "
+#~ "you want continue? "
+#~ msgstr "A biblioteca será removida. Quer continuar?"
+
+#, fuzzy
+#~ msgid "Library ' + data[0] +' will be removed, Do you want continue?"
+#~ msgstr "A biblioteca será removida. Quer continuar?"
+
+#, fuzzy
+#~ msgid ""
+#~ "Library with id ' + data[0] +' and name ' + data[1] +  ' will be removed, Do"
+#~ " you want continue?"
+#~ msgstr "A biblioteca será removida. Quer continuar?"
+
+#~ msgid "gvsigonline docs"
+#~ msgstr "gvsigonline docs"

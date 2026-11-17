@@ -119,7 +119,7 @@ msgstr "Estado da tarefa"
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:103
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:104
 msgid "Error getting tasks"
-msgstr ""
+msgstr "Erro ao obter tarefas"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:9
 msgid "You must select an extent on the map using the control"
@@ -127,18 +127,17 @@ msgstr "Você deve selecionar uma extensão no mapa usando o controle"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:10
 msgid "URL to capabilities document"
-msgstr ""
+msgstr "URL do documento de capabilities"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:11
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:12
 msgid "Only required if service is authenticated"
-msgstr ""
+msgstr "Obrigatório apenas se o serviço estiver autenticado"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:13
-#, fuzzy
 #| msgid "Connection has been success"
 msgid "Connection has been successful"
-msgstr "A conexão tem sido um sucesso"
+msgstr "A conexão foi bem-sucedida"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:14
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:105
@@ -165,7 +164,7 @@ msgstr "Erro na obtenção de capacidades"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:18
 msgid "You must select a layer"
-msgstr ""
+msgstr "Você deve selecionar uma camada"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:19
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:36
@@ -199,7 +198,7 @@ msgstr "Inativo"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:25
 msgid "error"
-msgstr ""
+msgstr "erro"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:26
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:28
@@ -293,10 +292,9 @@ msgid "Field to delete"
 msgstr "Campo para excluir"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:59
-#, fuzzy
 #| msgid "Field to delete"
 msgid "Field was deleted"
-msgstr "Campo para excluir"
+msgstr "O campo foi excluído"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:60
 #| msgid "Save field"
@@ -324,16 +322,14 @@ msgid "Rename"
 msgstr "Renomear"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:67
-#, fuzzy
 #| msgid "Field name"
 msgid "Field was renamed"
-msgstr "Nome do campo"
+msgstr "O campo foi renomeado"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:69
-#, fuzzy
 #| msgid "Field name"
 msgid "Field was added"
-msgstr "Nome do campo"
+msgstr "O campo foi adicionado"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:70
 #| msgid "Save field"
@@ -342,33 +338,29 @@ msgstr "Novo campo"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:71
 msgid "Group names must be unique"
-msgstr ""
+msgstr "Os nomes dos grupos devem ser únicos"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:72
-#, fuzzy
 #| msgid "The layer definition was refreshed"
 msgid "The layer cache was cleared"
-msgstr "A definição da camada foi atualizada"
+msgstr "O cache da camada foi limpo"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:73
-#, fuzzy
 #| msgid "The layer refresh failed"
 msgid "The layer cache clearing failed"
-msgstr "A atualização da camada falhou"
+msgstr "Falha ao limpar o cache da camada"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:74
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:96
-#, fuzzy
 #| msgid "The layer definition was refreshed"
 msgid "The layergroup cache was cleared"
-msgstr "A definição da camada foi atualizada"
+msgstr "O cache do grupo de camadas foi limpo"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:75
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:97
-#, fuzzy
 #| msgid "The layer refresh failed"
 msgid "The layergroup cache clearing failed"
-msgstr "A atualização da camada falhou"
+msgstr "Falha ao limpar o cache do grupo de camadas"
 
 #: gvsigol_services/static/js/lib/_trans.gvsigol.js:76
 msgid "Show all layers"
@@ -396,6 +388,138 @@ msgid ""
 msgstr ""
 "Você não pode atualizar um tipo de armazenamento de dados GeoTIFF. Exclua-o "
 "e crie-o novamente"
+
+msgid "Manage format"
+msgstr "Gerenciar formato"
+
+msgid "Delete format"
+msgstr "Excluir formato"
+
+msgid ""
+"Configure the display format for numeric fields will affect how values are "
+"shown in forms and reports."
+msgstr ""
+"Configurar o formato de exibição para campos numéricos afetará como os "
+"valores são mostrados em formulários e relatórios."
+
+msgid "Symbol"
+msgstr "Símbolo"
+
+msgid "e.g., €, $, m, kg, °"
+msgstr "ex., €, $, m, kg, °"
+
+msgid "Symbol position"
+msgstr "Posição do símbolo"
+
+msgid "After number"
+msgstr "Após o número"
+
+msgid "Before number"
+msgstr "Antes do número"
+
+msgid "Decimal places"
+msgstr "Casas decimais"
+
+msgid "Decimal separator"
+msgstr "Separador decimal"
+
+msgid "Comma (,)"
+msgstr "Vírgula (,)"
+
+msgid "Point (.)"
+msgstr "Ponto (.)"
+
+msgid "Thousands separator"
+msgstr "Separador de milhar"
+
+msgid "No separator"
+msgstr "Sem separador"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Field format was saved successfully"
+msgstr "O formato do campo foi guardado com sucesso"
+
+msgid "Attention"
+msgstr "Atenção"
+
+msgid "This field has associated triggers that will also be deleted"
+msgstr "Este campo tem gatilhos associados que também serão excluídos"
+
+msgid "Calculated field"
+msgstr "Campo calculado"
+
+msgid "Remove trigger"
+msgstr "Remover gatilho"
+
+msgid "Are you sure you want to remove the trigger"
+msgstr "Tem certeza de que deseja remover o gatilho"
+
+msgid "from this layer?"
+msgstr "desta camada?"
+
+msgid "The trigger will be uninstalled from the database."
+msgstr "O gatilho será desinstalado do banco de dados."
+
+msgid "Remove"
+msgstr "Remover"
+
+msgid "Please select a trigger"
+msgstr "Por favor, selecione um gatilho"
+
+msgid "Please select a target field for the calculated field trigger"
+msgstr ""
+"Por favor, selecione um campo de destino para o gatilho de campo calculado"
+
+msgid "Error assigning trigger"
+msgstr "Erro ao atribuir o gatilho"
+
+msgid ""
+"SQL syntax error in trigger. Please check the trigger code and fix it before"
+" assigning."
+msgstr ""
+"Erro de sintaxe SQL no gatilho. Por favor, verifique o código do gatilho e "
+"corrija o erro antes de atribuí-lo."
+
+msgid "Error creating field with trigger"
+msgstr "Erro ao criar o campo com o gatilho"
+
+msgid "Field created and trigger assigned successfully"
+msgstr "Campo criado e gatilho atribuído com sucesso"
+
+msgid "Field and associated triggers were deleted"
+msgstr "O campo e os gatilhos associados foram eliminados"
+
+msgid "Error removing trigger"
+msgstr "Erro ao remover o gatilho"
+
+msgid "Error toggling trigger"
+msgstr "Erro ao ativar/desativar o gatilho"
+
+msgid "Trigger enabled successfully"
+msgstr "Gatilho habilitado com sucesso"
+
+msgid "Trigger disabled successfully"
+msgstr "Gatilho desabilitado com sucesso"
+
+msgid "Select a calculation..."
+msgstr "Selecione um cálculo..."
+
+msgid "Please select a calculation for the calculated field"
+msgstr "Por favor, selecione um cálculo para o campo calculado"
+
+msgid ""
+"Choose the field that identifies each row, or generate a unique integer key "
+"(gvol_pk). A generated key is recommended for joins, because source primary "
+"keys can repeat."
+msgstr ""
+"Escolha o campo que identifica cada linha, ou gere uma chave inteira única "
+"(gvol_pk). A chave gerada é recomendável em joins, porque as chaves de "
+"origem podem se repetir."
+
+msgid "Generate unique integer key (recommended for joins)"
+msgstr "Gerar chave inteira única (recomendado em joins)"
 
 #~ msgid "true"
 #~ msgstr "Verdadeiro"
