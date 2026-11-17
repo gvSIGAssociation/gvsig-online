@@ -26,9 +26,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Poedit 3.4.2\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
-"X-Generator: Poedit 3.4.2\n"
 
 #: cartociudad2.py:129 googlemaps.py:130 nominatim.py:124
 msgid "Not founded"
@@ -76,25 +76,24 @@ msgstr "Parâmetros"
 #: forms_services.py:50 forms_services.py:75 templates/provider_add.html:50
 #: templates/provider_update.html:56
 msgid "Candidates URL"
-msgstr ""
+msgstr "URL de candidatos"
 
 #: forms_services.py:51 forms_services.py:76 templates/provider_add.html:57
 #: templates/provider_update.html:64
 msgid "Find URL"
-msgstr ""
+msgstr "URL de busca"
 
 #: forms_services.py:52 forms_services.py:77 templates/provider_add.html:64
 #: templates/provider_update.html:72
 msgid "Reverse URL"
-msgstr ""
+msgstr "URL inversa"
 
 #: forms_services.py:53 forms_services.py:78 templates/provider_add.html:71
 #: templates/provider_update.html:80
 msgid "Limit"
-msgstr ""
+msgstr "Limite"
 
 #: generic.py:132 ide_uy.py:156
-#, fuzzy
 #| msgid "Not founded"
 msgid "Not found"
 msgstr "Não encontrado"
@@ -105,11 +104,11 @@ msgstr "Não encontrado. O limite de taxa é excedido para esta API"
 
 #: models.py:69
 msgid "gvsigol_plugin_geocoding manual title"
-msgstr ""
+msgstr "Manual do plugin de geocodificação"
 
 #: models.py:70
 msgid "gvsigol_plugin_geocoding manual desc"
-msgstr ""
+msgstr "Configuração de provedores de geocodificação para o visualizador."
 
 #: settings.py:34 settings_tpl.py:31
 msgid "Google Maps services"
@@ -133,15 +132,15 @@ msgstr "Outras fontes de dados"
 
 #: settings.py:39 settings_tpl.py:36
 msgid "IDE Uruguay Geocoder"
-msgstr ""
+msgstr "Geocodificador IDE Uruguay"
 
 #: settings.py:40 settings_tpl.py:37
 msgid "Simple Geocoder"
-msgstr ""
+msgstr "Geocodificador simples"
 
 #: settings.py:41 settings_tpl.py:38
 msgid "Generic API Service Geocoder"
-msgstr ""
+msgstr "Geocodificador de API genérica"
 
 #: templates/dashboard_geocoding_menu.html:10
 #: templates/dashboard_geocoding_menu.html:18
@@ -182,7 +181,7 @@ msgstr "Campo Geométrico"
 
 #: templates/provider_add.html:131
 msgid "Select image"
-msgstr "Selecione a imagem"
+msgstr "Selecionar imagem"
 
 #: templates/provider_add.html:139 templates/provider_update.html:157
 msgid "Projects"
@@ -405,7 +404,7 @@ msgstr "Atualizar dados"
 
 #: templates/provider_update.html:250
 msgid "Create fulltext index"
-msgstr ""
+msgstr "Criar índice fulltext"
 
 #: templates/provider_update.html:252
 msgid "Upload full data"
@@ -417,7 +416,8 @@ msgstr "Duração"
 
 #: views.py:142 views.py:309
 msgid "Error: DataStore has not a valid CartoCiudad schema (Needed , "
-msgstr "Erro: O armazém de dados não possui um esquema CartoCiudad válido (Needed , "
+msgstr ""
+"Erro: O armazém de dados não possui um esquema CartoCiudad válido (Needed , "
 
 #: views.py:154
 msgid "Error: this type of provider is already added to the project"
@@ -433,10 +433,7 @@ msgstr "Provedor não encontrado"
 
 #: views.py:456
 msgid "5 segs"
-msgstr ""
-
-#~ msgid "Error: provider could not be published"
-#~ msgstr "Erro: o fornecedor não pôde ser publicado"
+msgstr "5 segs"
 
 #: templates/provider_add.html
 msgctxt "geocoding"
@@ -465,8 +462,12 @@ msgstr "Projetos em que este provedor pode ser usado."
 
 #: templates/provider_add.html
 msgctxt "geocoding"
-msgid "Service that resolves the searches and category in which its results are grouped."
-msgstr "Serviço que resolve as buscas e categoria em que seus resultados são agrupados."
+msgid ""
+"Service that resolves the searches and category in which its results are "
+"grouped."
+msgstr ""
+"Serviço que resolve as buscas e categoria em que seus resultados são "
+"agrupados."
 
 #: templates/provider_add.html
 msgctxt "geocoding"
@@ -496,5 +497,21 @@ msgid "Providers"
 msgstr "Provedores"
 
 msgctxt "geocoding"
-msgid "A search service that the viewer uses to find addresses and places: Nominatim, Google Maps, CartoCiudad or your own data."
-msgstr "Um serviço de busca que o visualizador usa para encontrar endereços e lugares: Nominatim, Google Maps, CartoCiudad ou seus próprios dados."
+msgid ""
+"A search service that the viewer uses to find addresses and places: "
+"Nominatim, Google Maps, CartoCiudad or your own data."
+msgstr ""
+"Um serviço de busca que o visualizador usa para encontrar endereços e "
+"lugares: Nominatim, Google Maps, CartoCiudad ou seus próprios dados."
+
+#: templates/provider_add.html:493 templates/provider_update.html:724
+msgid "Please select at least one project or choose 'All projects' mode"
+msgstr ""
+"Por favor, selecione al menos un proyecto o elija el modo 'Todos los "
+"proyectos'"
+
+msgid "Servicios de Google Maps"
+msgstr "Serviços do Google Maps"
+
+#~ msgid "Error: provider could not be published"
+#~ msgstr "Erro: o provedor não pôde ser publicado"

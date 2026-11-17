@@ -26,9 +26,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Poedit 2.4.3\n"
 "X-Language: pt_BR\n"
 "X-Source-Language: C\n"
-"X-Generator: Poedit 2.4.3\n"
 
 #: static/js/lib/_trans.gvsigol.js:2 static/js/lib/_trans.gvsigol.js:3
 msgid "Search"
@@ -43,10 +43,9 @@ msgid "Continue"
 msgstr "Continuar"
 
 #: static/js/lib/widgets/search.js:47
-#, fuzzy
 #| msgid "inverse geocoding"
 msgid "Inverse geocoding"
-msgstr "geocodificação inversa"
+msgstr "Geocodificação inversa"
 
 #: static/js/lib/widgets/search.js:153
 msgid "There is no active geocoder"
