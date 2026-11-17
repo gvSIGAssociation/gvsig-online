@@ -3574,8 +3574,16 @@ def merge_tables(_list):
     conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
 
-    attr_target_list = list(pd.read_sql(sql.SQL('SELECT * FROM {schema}.{table}').format(schema = sql.Identifier(GEOETL_DB['schema']), table = sql.Identifier(table_name_target)), con = conn).columns)
-    attr_source_list = list(pd.read_sql(sql.SQL('SELECT * FROM {schema}.{table}').format(schema = sql.Identifier(GEOETL_DB['schema']), table = sql.Identifier(table_name_source)), con = conn).columns)
+    # pd.read_sql requires a string (or SQLAlchemy); do not pass psycopg2.sql.Composable
+    sql_cols = (
+        'SELECT column_name FROM information_schema.columns '
+        'WHERE table_schema = %s AND table_name = %s '
+        'ORDER BY ordinal_position'
+    )
+    cur.execute(sql_cols, [GEOETL_DB['schema'], table_name_target])
+    attr_target_list = [row[0] for row in cur.fetchall()]
+    cur.execute(sql_cols, [GEOETL_DB['schema'], table_name_source])
+    attr_source_list = [row[0] for row in cur.fetchall()]
     
     attr_select = deepcopy(attr_target_list)
 
