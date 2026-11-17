@@ -2600,6 +2600,48 @@ msgstr ""
 msgid "Public viewers pagination"
 msgstr "Paginación de visores públicos"
 
+msgid "Search viewers"
+msgstr "Buscar visores"
+
+msgid "No viewers match the search."
+msgstr "Ningún visor coincide con la búsqueda."
+
+msgid "Mapping services"
+msgstr "Servicios de mapa"
+
+msgid "Look up OGC services available"
+msgstr "Consulta los servicios OGC disponibles"
+
+msgid "Public layers"
+msgstr "Listado de datos geográficos"
+
+msgid "Geographic data published in the public viewers"
+msgstr "Datos geográficos publicados en los visores públicos"
+
+msgid "Layer group"
+msgstr "Grupo de capas"
+
+msgid "No map services are published."
+msgstr "No hay servicios de mapa publicados."
+
+msgid "No public layers are published."
+msgstr "No hay capas públicas publicadas."
+
+msgid "Map services published by this platform. Each one opens its capabilities document."
+msgstr "Servicios de mapa publicados por esta plataforma. Cada uno abre su documento de capacidades."
+
+msgid "Geographic layers published in the public viewers. Choose a viewer to see the layer on the map."
+msgstr "Capas geográficas publicadas en los visores públicos. Elige un visor para ver la capa en el mapa."
+
+msgid "Public layers pagination"
+msgstr "Paginación del listado de datos geográficos"
+
+msgid "Search geographic data"
+msgstr "Buscar datos geográficos"
+
+msgid "No geographic data match the search."
+msgstr "Ningún dato geográfico coincide con la búsqueda."
+
 msgid "App"
 msgstr "App"
 

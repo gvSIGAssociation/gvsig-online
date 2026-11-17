@@ -2780,3 +2780,45 @@ msgstr "S'ha produït un error inesperat al servidor. Torna-ho a provar d'aquí 
 msgctxt "errors"
 msgid "Try again"
 msgstr "Torna-ho a provar"
+
+msgid "Mapping services"
+msgstr "Serveis de mapes"
+
+msgid "Look up OGC services available"
+msgstr "Consulta els serveis OGC disponibles"
+
+msgid "Public layers"
+msgstr "Llistat de dades geogràfiques"
+
+msgid "Geographic data published in the public viewers"
+msgstr "Dades geogràfiques publicades als visors públics"
+
+msgid "Layer group"
+msgstr "Grup de capes"
+
+msgid "No map services are published."
+msgstr "No hi ha serveis de mapes publicats."
+
+msgid "No public layers are published."
+msgstr "No hi ha capes públiques publicades."
+
+msgid "Geographic layers published in the public viewers. Choose a viewer to see the layer on the map."
+msgstr "Capes geogràfiques publicades als visors públics. Trieu un visor per veure la capa al mapa."
+
+msgid "Map services published by this platform. Each one opens its capabilities document."
+msgstr "Serveis de mapes publicats per aquesta plataforma. Cadascun obre el seu document de capacitats."
+
+msgid "Public layers pagination"
+msgstr "Paginació del llistat de dades geogràfiques"
+
+msgid "Search viewers"
+msgstr "Cerca visors"
+
+msgid "No viewers match the search."
+msgstr "Cap visor coincideix amb la cerca."
+
+msgid "Search geographic data"
+msgstr "Cerca dades geogràfiques"
+
+msgid "No geographic data match the search."
+msgstr "Cap dada geogràfica coincideix amb la cerca."

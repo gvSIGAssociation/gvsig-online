@@ -2472,11 +2472,16 @@ def export(request, pid):
     return render(request, 'app_print_template.html', {'print_logo_url': unquote(image)})
 
 def ogc_services(request):
-    wms = ServiceUrl.objects.filter(type='WMS')
-    wmts = ServiceUrl.objects.filter(type='WMTS')
-    wfs = ServiceUrl.objects.filter(type='WFS')
-    csw = ServiceUrl.objects.filter(type='CSW')
-    return render(request, 'services_view.html', {'wms': wms, 'wmts': wmts, 'wfs': wfs, 'csw': csw})
+    groups = []
+    for service_type, label in (('WMS', _('WMS Services')), ('WMTS', _('WMTS Services')), ('WFS', _('WFS Services')), ('CSW', _('CSW Services'))):
+        services = list(ServiceUrl.objects.filter(type=service_type))
+        if services:
+            groups.append({'type': service_type, 'label': label, 'services': services})
+    return render(request, 'services_view.html', {'groups': groups})
+
+def public_layers(request):
+    rows = core_utils.get_public_layer_catalog()
+    return render(request, 'public_layers.html', {'layers': rows})
 
 def select_public_project(request):
     public_projects = Project.objects.filter(is_public=True)
@@ -3313,6 +3318,26 @@ def application_delete(request, appid):
             return HttpResponseForbidden({"deleted": False, "error": "Not allowed"})
 
 
+def _landing_shortcuts(request, response):
+    items = []
+    if ServiceUrl.objects.exists():
+        items.append({
+            'title': _('Mapping services'),
+            'description': _('Look up OGC services available'),
+            'url': reverse('ogc_services'),
+            'icon': 'fa-globe',
+            'external': False,
+        })
+    if response.get('show_public_layers') and core_utils.get_public_layer_catalog():
+        items.append({
+            'title': _('Public layers'),
+            'description': _('Geographic data published in the public viewers'),
+            'url': reverse('public_layers'),
+            'icon': 'fa-clone',
+            'external': False,
+        })
+    return items + list(response.get('landing_shortcuts', []))
+
 def default_index(request, template="index.html", response=None):
     if response is None:
         response = {}
@@ -3322,4 +3347,5 @@ def default_index(request, template="index.html", response=None):
         if 'public_items' not in response:
             from gvsigol_core.utils import get_public_items_ordered
             response['public_items'] = get_public_items_ordered()
+        response['landing_shortcuts'] = _landing_shortcuts(request, response)
         return render(request, template, response)

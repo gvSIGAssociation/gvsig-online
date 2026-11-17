@@ -854,6 +854,71 @@ def get_public_items_ordered():
     return all_items
 
 
+def _viewer_is_spa(project):
+    preferred = project.viewer_preferred_ui or getattr(settings, 'FALLBACK_VIEWER_UI', '')
+    return preferred == Project.REACT_SPA_UI
+
+
+def get_public_layer_catalog():
+    """Public layers an anonymous user can open, one entry per layer.
+
+    A layer is listed when it is public and its group is linked to at least
+    one non-expired public project as a non-base group. Each entry carries
+    the viewers that include it.
+    """
+    now = datetime.datetime.now()
+    hidden_prefix = getattr(settings, 'UI_HIDEN_PROJECTS_PREFIX', '')
+    projects = (
+        Project.objects.filter(is_public=True, expiration_date__gte=now) |
+        Project.objects.filter(is_public=True, expiration_date=None)
+    )
+    if hidden_prefix:
+        projects = projects.exclude(name__startswith=hidden_prefix)
+    project_ids = list(projects.values_list('id', flat=True))
+    if not project_ids:
+        return []
+
+    links = (
+        ProjectLayerGroup.objects.filter(project_id__in=project_ids, baselayer_group=False)
+        .select_related('project', 'layer_group')
+    )
+    viewers_by_group = {}
+    for link in links:
+        bucket = viewers_by_group.setdefault(link.layer_group_id, {})
+        if link.project_id in bucket:
+            continue
+        project = link.project
+        bucket[link.project_id] = {
+            'id': project.id,
+            'title': project.title or project.name,
+            'url': project.url,
+            'spa': _viewer_is_spa(project),
+        }
+    if not viewers_by_group:
+        return []
+
+    layers = (
+        Layer.objects.filter(public=True, layer_group_id__in=list(viewers_by_group.keys()))
+        .select_related('layer_group')
+    )
+    items = []
+    for layer in layers:
+        viewers = list(viewers_by_group.get(layer.layer_group_id, {}).values())
+        if not viewers:
+            continue
+        viewers.sort(key=lambda viewer: _sort_key_no_accents(viewer.get('title') or ''))
+        group = layer.layer_group
+        items.append({
+            'id': layer.id,
+            'title': layer.title or layer.name,
+            'group': (group.title or group.name) if group else '',
+            'thumbnail': layer.thumbnail_relurl,
+            'viewers': viewers,
+        })
+    items.sort(key=lambda item: _sort_key_no_accents(item.get('title') or ''))
+    return items
+
+
 def get_user_applications(request):
     roles = auth_backend.get_roles(request)
     applications = Application.objects.filter(applicationrole__role__in=roles) \

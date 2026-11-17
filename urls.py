@@ -14,6 +14,7 @@ urlpatterns = [
     path('toc_update/<int:pid>/', core_views.toc_update, name='toc_update'),
     path('export/<int:pid>/', core_views.export, name='export'),
     path('ogc_services/', core_views.ogc_services, name='ogc_services'),
+    path('public_layers/', core_views.public_layers, name='public_layers'),
     path('select_public_project/', core_views.select_public_project, name='select_public_project'),
     path('select_public_mobile_project/', core_views.select_public_mobile_project, name='select_public_mobile_project'),
     path('documentation/', core_views.documentation, name='documentation'),

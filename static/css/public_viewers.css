@@ -112,6 +112,30 @@
 	.pub-projects-grid { grid-template-columns: 1fr; }
 }
 
+.pub-search {
+	display: block;
+	width: 100%;
+	max-width: 420px;
+	margin: 28px auto 0;
+	padding: 10px 14px;
+	border: 1px solid var(--ld-line);
+	border-radius: var(--ld-radius-sm);
+	background: var(--ld-surface);
+	color: var(--ld-text);
+	font: inherit;
+	font-size: 0.9375rem;
+}
+.pub-search:focus {
+	outline: 2px solid var(--ld-accent);
+	outline-offset: 1px;
+	border-color: var(--ld-accent);
+}
+.pub-empty {
+	margin: 24px 0 0;
+	text-align: center;
+	color: var(--ld-muted);
+}
+
 .pub-pagination {
 	margin-top: 32px;
 	display: flex;
@@ -168,4 +192,82 @@
 
 @media (prefers-reduced-motion: reduce) {
 	.pub-project-card:hover { transform: none; }
+}
+
+/* Landing shortcut cards. Same card language as the public viewers grid. */
+.ld-shortcuts-section { padding: 48px 0; }
+
+.ld-shortcuts {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 24px;
+	align-items: stretch;
+}
+
+.ld-shortcut {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	background: var(--ld-surface);
+	border-radius: var(--ld-radius);
+	overflow: hidden;
+	box-shadow: var(--ld-shadow);
+	color: inherit;
+	text-decoration: none;
+	transition: box-shadow 0.2s, transform 0.2s;
+}
+.ld-shortcut:hover,
+.ld-shortcut:focus {
+	box-shadow: var(--ld-shadow-hv);
+	transform: translateY(-3px);
+	color: inherit;
+	text-decoration: none;
+}
+.ld-shortcut:focus { outline: none; }
+.ld-shortcut:focus-visible { outline: 2px solid var(--ld-accent); outline-offset: 2px; }
+
+.ld-shortcut__icon {
+	height: 120px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--ld-surface-dim);
+	color: var(--ld-accent);
+	font-size: 52px;
+	flex-shrink: 0;
+}
+.ld-shortcut:hover .ld-shortcut__icon,
+.ld-shortcut:focus .ld-shortcut__icon {
+	color: var(--ld-accent-dk);
+}
+
+.ld-shortcut__body {
+	padding: 16px;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+.ld-shortcut__title {
+	display: block;
+	font-size: 1rem;
+	font-weight: 600;
+	line-height: 1.3;
+	color: var(--ld-ink);
+	margin: 0 0 6px;
+}
+.ld-shortcut__desc {
+	display: block;
+	margin: 0;
+	font-size: 0.875rem;
+	line-height: 1.5;
+	color: var(--ld-muted);
+}
+
+@media (max-width: 768px) {
+	.ld-shortcuts { grid-template-columns: 1fr; gap: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+	.ld-shortcut { transition: none; }
+	.ld-shortcut:hover,
+	.ld-shortcut:focus { transform: none; }
 }
