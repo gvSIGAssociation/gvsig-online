@@ -2384,3 +2384,45 @@ msgstr "Gerar chave inteira única (recomendado em joins)"
 
 msgid "Package validation failed:"
 msgstr "A validação do pacote falhou:"
+
+msgid "Mapping services"
+msgstr "Serviços de mapas"
+
+msgid "Look up OGC services available"
+msgstr "Consulte os serviços OGC disponíveis"
+
+msgid "Public layers"
+msgstr "Listagem de dados geográficos"
+
+msgid "Geographic data published in the public viewers"
+msgstr "Dados geográficos publicados nos visualizadores públicos"
+
+msgid "Layer group"
+msgstr "Grupo de camadas"
+
+msgid "No map services are published."
+msgstr "Não há serviços de mapas publicados."
+
+msgid "No public layers are published."
+msgstr "Não há camadas públicas publicadas."
+
+msgid "Geographic layers published in the public viewers. Choose a viewer to see the layer on the map."
+msgstr "Camadas geográficas publicadas nos visualizadores públicos. Escolha um visualizador para ver a camada no mapa."
+
+msgid "Map services published by this platform. Each one opens its capabilities document."
+msgstr "Serviços de mapas publicados por esta plataforma. Cada um abre o seu documento de capacidades."
+
+msgid "Public layers pagination"
+msgstr "Paginação da listagem de dados geográficos"
+
+msgid "Search viewers"
+msgstr "Pesquisar visualizadores"
+
+msgid "No viewers match the search."
+msgstr "Nenhum visualizador corresponde à pesquisa."
+
+msgid "Search geographic data"
+msgstr "Pesquisar dados geográficos"
+
+msgid "No geographic data match the search."
+msgstr "Nenhum dado geográfico corresponde à pesquisa."

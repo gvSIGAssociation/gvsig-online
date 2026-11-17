@@ -1,22 +1,31 @@
 (function (global) {
+	function fold(value) {
+		return (value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+	}
+
 	function paginateCards(gridId, navId, sectionId, perPage) {
 		var grid = document.getElementById(gridId);
 		var nav = document.getElementById(navId);
 		if (!grid || !nav) return;
 
 		var cards = Array.prototype.slice.call(grid.querySelectorAll('.pub-project-card'));
+		var search = document.getElementById(gridId + '-search');
+		var empty = document.getElementById(gridId + '-empty');
 		perPage = perPage || 8;
-		var total = cards.length;
-		var pages = Math.ceil(total / perPage);
-		if (pages <= 1) return;
+		if (!search && Math.ceil(cards.length / perPage) <= 1) return;
 
+		var filtered = cards.slice();
 		var current = 0;
+		var pages = 1;
 
 		function showPage(page) {
 			current = page;
-			cards.forEach(function (card, i) {
+			pages = Math.ceil(filtered.length / perPage) || 1;
+			cards.forEach(function (card) { card.style.display = 'none'; });
+			filtered.forEach(function (card, i) {
 				card.style.display = (i >= page * perPage && i < (page + 1) * perPage) ? '' : 'none';
 			});
+			if (empty) empty.hidden = filtered.length !== 0;
 			renderPagination();
 		}
 
@@ -44,6 +53,7 @@
 
 		function renderPagination() {
 			nav.innerHTML = '';
+			if (pages <= 1) return;
 			var ul = document.createElement('ul');
 			ul.className = 'pub-page-list';
 
@@ -62,6 +72,16 @@
 			ul.appendChild(liNext);
 
 			nav.appendChild(ul);
+		}
+
+		if (search) {
+			search.addEventListener('input', function () {
+				var query = fold(search.value.trim());
+				filtered = query ? cards.filter(function (card) {
+					return fold(card.textContent).indexOf(query) !== -1;
+				}) : cards.slice();
+				showPage(0);
+			});
 		}
 
 		showPage(0);

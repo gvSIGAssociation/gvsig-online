@@ -1,0 +1,17 @@
+{% if landing_shortcuts %}
+<section class="ld-shortcuts-section">
+	<div class="container">
+		<div class="ld-shortcuts">
+			{% for item in landing_shortcuts %}
+			<a href="{{ item.url }}" class="ld-shortcut"{% if item.external %} target="_blank" rel="noopener"{% endif %}>
+				<span class="ld-shortcut__icon" aria-hidden="true"><i class="fa {{ item.icon }}"></i></span>
+				<span class="ld-shortcut__body">
+					<span class="ld-shortcut__title">{{ item.title }}</span>
+					{% if item.description %}<span class="ld-shortcut__desc">{{ item.description }}</span>{% endif %}
+				</span>
+			</a>
+			{% endfor %}
+		</div>
+	</div>
+</section>
+{% endif %}
