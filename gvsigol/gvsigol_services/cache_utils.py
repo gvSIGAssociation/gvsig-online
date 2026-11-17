@@ -158,7 +158,7 @@ def _get_min_buffer_for_epsg(target_epsg):
             import json
             import os
             path = os.path.join(os.path.dirname(settings.__file__), 'crs_definitions.json')
-            with open(path, 'r') as f:
+            with open(path, 'r', encoding='utf-8') as f:
                 crs_def = json.load(f)
         except Exception as e:
             logger.warning("Could not load crs_definitions.json for buffer units: %s", e)
