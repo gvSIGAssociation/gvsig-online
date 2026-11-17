@@ -21,72 +21,72 @@ msgstr ""
 
 #: static/js/TableShape.js:7
 msgid "Parameters: {}"
-msgstr ""
+msgstr "Parámetros: {}"
 
 #: static/js/TableShape.js:127
 msgid "File selected is not a "
-msgstr ""
+msgstr "O arquivo selecionado não é um "
 
 #: static/js/TableShape.js:177
 msgid "InDenova"
-msgstr ""
+msgstr "InDenova"
 
 #: static/js/TableShape.js:182 static/js/TableShape.js:628
 msgid "Domain:"
-msgstr ""
+msgstr "Dominio:"
 
 #: static/js/TableShape.js:186
 msgid "API Key:"
-msgstr ""
+msgstr "Chave de API:"
 
 #: static/js/TableShape.js:190
 msgid "Client ID:"
-msgstr ""
+msgstr "ID do cliente:"
 
 #: static/js/TableShape.js:194
 msgid "Secret:"
-msgstr ""
+msgstr "Segredo:"
 
 #: static/js/TableShape.js:198
 msgid "List urban procedures:"
-msgstr ""
+msgstr "Lista de procedimientos urbanísticos:"
 
 #: static/js/TableShape.js:199
 msgid "Get procedures"
-msgstr ""
+msgstr "Obter procedimentos"
 
 #: static/js/TableShape.js:203 static/js/TableShape.js:353
 #: static/js/TableShape.js:661 static/js/TableShape.js:887
 msgid "ALL"
-msgstr ""
+msgstr "TODOS"
 
 #: static/js/TableShape.js:207
 msgid "idTram:"
-msgstr ""
+msgstr "idTram:"
 
 #: static/js/TableShape.js:211
 msgid "Description:"
-msgstr ""
+msgstr "Descrição:"
 
 #: static/js/TableShape.js:215
 msgid "Add Procedure:"
-msgstr ""
+msgstr "Añade Proced.:"
 
 #: static/js/TableShape.js:222 static/js/TableShape.js:673
 msgid "From an initial date"
-msgstr ""
+msgstr "A partir de uma data inicial"
 
 #: static/js/TableShape.js:226 static/js/TableShape.js:676
 msgid "Between dates"
-msgstr ""
+msgstr "Entre datas"
 
 #: static/js/TableShape.js:238
 msgid "Current date for initial"
-msgstr ""
+msgstr "Data atual para início"
 
 #: static/js/TableShape.js:241 static/js/TableShape.js:703
 msgid "Current date for end"
-msgstr ""
+msgstr "Data atual para fim"
 
 #: static/js/TableShape.js:247 static/js/TableShape.js:708
 #: static/js/TableShape.js:1220 static/js/TableShape.js:1460
@@ -111,7 +111,7 @@ msgstr ""
 #: static/js/TableShape.js:13137 static/js/TableShape.js:13375
 #: static/js/TableShape.js:13666 static/js/TableShape.js:14031
 msgid "Close"
-msgstr ""
+msgstr "Fechar"
 
 #: static/js/TableShape.js:248 static/js/TableShape.js:709
 #: static/js/TableShape.js:1221 static/js/TableShape.js:1461
@@ -136,7 +136,7 @@ msgstr ""
 #: static/js/TableShape.js:13138 static/js/TableShape.js:13376
 #: static/js/TableShape.js:13667 static/js/TableShape.js:14032
 msgid "Accept"
-msgstr ""
+msgstr "Aceitar"
 
 #: static/js/TableShape.js:483 static/js/TableShape.js:1056
 #: static/js/TableShape.js:1284 static/js/TableShape.js:1579
@@ -160,78 +160,80 @@ msgstr ""
 #: static/js/TableShape.js:12970 static/js/TableShape.js:13204
 #: static/js/TableShape.js:13454 static/js/TableShape.js:13813
 msgid "Input"
-msgstr ""
+msgstr "Entrada"
 
 #: static/js/TableShape.js:623
 msgid "SEGEX"
-msgstr ""
+msgstr "SEGEX"
 
 #: static/js/TableShape.js:635
 msgid "Entities with website in SEDIPUALB@"
-msgstr ""
+msgstr "Entidades con sede electrónica en SEDIPUALB@"
 
 #: static/js/TableShape.js:638
 msgid "Get entities"
-msgstr ""
+msgstr "Obter entidades"
 
 #: static/js/TableShape.js:647
 msgid "User"
-msgstr ""
+msgstr "Usuário"
 
 #: static/js/TableShape.js:651
 msgid "Password:"
-msgstr ""
+msgstr "Senha:"
 
 #: static/js/TableShape.js:656
 msgid "Types of georeferences in the entity"
-msgstr ""
+msgstr "Tipos de georreferencias en la entidad"
 
 #: static/js/TableShape.js:657
 msgid "Get types"
-msgstr ""
+msgstr "Obter tipos"
 
 #: static/js/TableShape.js:666
 msgid "Choose date"
-msgstr ""
+msgstr "Escolher data"
 
 #: static/js/TableShape.js:670
 msgid "No date, download all"
-msgstr ""
+msgstr "Sem data, baixar tudo"
 
 #: static/js/TableShape.js:683
 msgid "Init date"
-msgstr ""
+msgstr "Data inicial"
 
 #: static/js/TableShape.js:687
 msgid "End date"
-msgstr ""
+msgstr "Data final"
 
 #: static/js/TableShape.js:695
 msgid "Minutes before the current date for the init date"
-msgstr ""
+msgstr "Minutos antes de la data atual para la data de inicio"
 
 #: static/js/TableShape.js:699
 msgid ""
 "If files of the selected type of georeference have not been previously "
 "requested, this option will fail."
 msgstr ""
+"Si no se han hecho peticiones de expedientes del tipo seleccionado "
+"previamente, está opción fallará"
 
 #: static/js/TableShape.js:699
 msgid "Last date guaranteed for the init date."
-msgstr ""
+msgstr "Última data garantizada para la data de inicio"
 
 #: static/js/TableShape.js:1197
 msgid "CSV"
-msgstr ""
+msgstr "CSV"
 
 #: static/js/TableShape.js:1202
 msgid "Choose csv file:"
-msgstr ""
+msgstr "Elige csv:"
 
 #: static/js/TableShape.js:1203 static/js/TableShape.js:1431
 #: static/js/TableShape.js:2776 static/js/TableShape.js:3769
 msgid "Select file"
-msgstr ""
+msgstr "Elige arquivo"
 
 #: static/js/TableShape.js:1206 static/js/TableShape.js:1434
 #: static/js/TableShape.js:1948 static/js/TableShape.js:1992
@@ -239,240 +241,242 @@ msgstr ""
 #: static/js/TableShape.js:2779 static/js/TableShape.js:3772
 #: static/js/TableShape.js:3805
 msgid "Path:"
-msgstr ""
+msgstr "Ruta:"
 
 #: static/js/TableShape.js:1210
 msgid "Separator:"
-msgstr ""
+msgstr "Separador:"
 
 #: static/js/TableShape.js:1425
 msgid "JSON"
-msgstr ""
+msgstr "JSON"
 
 #: static/js/TableShape.js:1430
 msgid "Choose JSON file"
-msgstr ""
+msgstr "Elige .JSON"
 
 #: static/js/TableShape.js:1439
 msgid "Do you want to load JSON data from an API REST?"
-msgstr ""
+msgstr "¿Quer cargar datos JSON desde una API REST"
 
 #: static/js/TableShape.js:1442
 msgid "URL:"
-msgstr ""
+msgstr "URL:"
 
 #: static/js/TableShape.js:1939
 msgid "Excel"
-msgstr ""
+msgstr "Excel"
 
 #: static/js/TableShape.js:1944 static/js/TableShape.js:1988
 #: static/js/TableShape.js:2320 static/js/TableShape.js:2370
 #: static/js/TableShape.js:3801
 msgid "Choose path:"
-msgstr ""
+msgstr "Elige ruta:"
 
 #: static/js/TableShape.js:1945 static/js/TableShape.js:2321
 msgid "Select path"
-msgstr ""
+msgstr "Elige ruta"
 
 #: static/js/TableShape.js:1952 static/js/TableShape.js:1953
 msgid "Load sheets"
-msgstr ""
+msgstr "Carga hojas"
 
 #: static/js/TableShape.js:1956
 msgid "Sheet:"
-msgstr ""
+msgstr "Hoja:"
 
 #: static/js/TableShape.js:1960
 msgid "Attribute columns:"
-msgstr ""
+msgstr "Columnas de atributos:"
 
 #: static/js/TableShape.js:1964
 msgid "Skip header:"
-msgstr ""
+msgstr "Salta cabecera:"
 
 #: static/js/TableShape.js:1969 static/js/TableShape.js:2351
 #: static/js/TableShape.js:3793
 msgid "Advanced Parameters"
-msgstr ""
+msgstr "Parámetros Avanzados"
 
 #: static/js/TableShape.js:1973 static/js/TableShape.js:2355
 msgid "Reading options:"
-msgstr ""
+msgstr "Opciones de lectura:"
 
 #: static/js/TableShape.js:1976
 msgid "Single excel file"
-msgstr ""
+msgstr "Arquivo excel único"
 
 #: static/js/TableShape.js:1980 static/js/TableShape.js:2362
 msgid "All files in a folder"
-msgstr ""
+msgstr "Todos los de una carpeta"
 
 #: static/js/TableShape.js:1985 static/js/TableShape.js:2367
 #: static/js/TableShape.js:3798
 msgid "Do you want to (re)-move the files after the process is over?"
-msgstr ""
+msgstr "¿Quer excluir/mover los arquivos tras acabar el proceso?"
 
 #: static/js/TableShape.js:1989 static/js/TableShape.js:2371
 #: static/js/TableShape.js:3802
 msgid "Select folder"
-msgstr ""
+msgstr "Elige carpeta"
 
 #: static/js/TableShape.js:1993 static/js/TableShape.js:2375
 #: static/js/TableShape.js:3806
 msgid "For removing files leave this input empty"
-msgstr ""
+msgstr "Para eliminarlos deja esta campo vacío"
 
 #: static/js/TableShape.js:2315
 msgid "XML"
-msgstr ""
+msgstr "XML"
 
 #: static/js/TableShape.js:2328 static/js/TableShape.js:2329
 msgid "Get tags"
-msgstr ""
+msgstr "Obtén etiquetas"
 
 #: static/js/TableShape.js:2340 static/js/TableShape.js:3390
 #: static/js/TableShape.js:7992 static/js/TableShape.js:13988
 msgid "Schema:"
-msgstr ""
+msgstr "Esquema:"
 
 #: static/js/TableShape.js:2345
 msgid "Add other different tags than the selected schema to all records"
 msgstr ""
+"Añade otras etiquetas diferentes al esquema seleccionado a todos los "
+"registros"
 
 #: static/js/TableShape.js:2358
 msgid "Single XML file"
-msgstr ""
+msgstr "Archivo XML único"
 
 #: static/js/TableShape.js:2770
 msgid "Shapefile"
-msgstr ""
+msgstr "Shapefile"
 
 #: static/js/TableShape.js:2775
 msgid "Choose shapefile:"
-msgstr ""
+msgstr "Elige shapefile:"
 
 #: static/js/TableShape.js:2783 static/js/TableShape.js:3776
 msgid "Encoding:"
-msgstr ""
+msgstr "Codificación:"
 
 #: static/js/TableShape.js:2794
 msgid "Insert if PRJ is not loaded"
-msgstr ""
+msgstr "Insertar si no se carga el PRJ"
 
 #: static/js/TableShape.js:3013
 msgid "Oracle"
-msgstr ""
+msgstr "Oracle"
 
 #: static/js/TableShape.js:3018 static/js/TableShape.js:3381
 #: static/js/TableShape.js:7983 static/js/TableShape.js:13978
 msgid "DB Connection:"
-msgstr ""
+msgstr "Conexão BBDD"
 
 #: static/js/TableShape.js:3022 static/js/TableShape.js:3023
 msgid "Get owners"
-msgstr ""
+msgstr "Obtén prop."
 
 #: static/js/TableShape.js:3026
 msgid "Owners:"
-msgstr ""
+msgstr "Propietarios:"
 
 #: static/js/TableShape.js:3030 static/js/TableShape.js:3031
 #: static/js/TableShape.js:3395 static/js/TableShape.js:3396
 #: static/js/TableShape.js:7997 static/js/TableShape.js:7998
 msgid "Get tables"
-msgstr ""
+msgstr "Obtén tabelas"
 
 #: static/js/TableShape.js:3034
 msgid "Tables:"
-msgstr ""
+msgstr "Tabelas:"
 
 #: static/js/TableShape.js:3040
 msgid "Do you want to write a SQL statement?"
-msgstr ""
+msgstr "¿Quer escribir una sentencia SQL?"
 
 #: static/js/TableShape.js:3043
 msgid "SQL statement:"
-msgstr ""
+msgstr "Sentencia SQL:"
 
 #: static/js/TableShape.js:3376 static/js/TableShape.js:13973
 msgid "PostGIS"
-msgstr ""
+msgstr "PostGIS"
 
 #: static/js/TableShape.js:3385 static/js/TableShape.js:3386
 #: static/js/TableShape.js:7987 static/js/TableShape.js:7988
 #: static/js/TableShape.js:13983 static/js/TableShape.js:13984
 msgid "Get schemas"
-msgstr ""
+msgstr "Obtén esquema"
 
 #: static/js/TableShape.js:3400 static/js/TableShape.js:8002
 #: static/js/TableShape.js:13993
 msgid "Table name:"
-msgstr ""
+msgstr "Nome de la tabela:"
 
 #: static/js/TableShape.js:3405
 msgid "Do you want to write a SQL WHERE Clause?"
-msgstr ""
+msgstr "¿Quer escribir una cláusula WHERE SQL?"
 
 #: static/js/TableShape.js:3408
 msgid "SQL WHERE Clause:"
-msgstr ""
+msgstr "Cláusula WHERE SQL:"
 
 #: static/js/TableShape.js:3763
 msgid "KML/KMZ"
-msgstr ""
+msgstr "KML/KMZ"
 
 #: static/js/TableShape.js:3768
 msgid "Choose file:"
-msgstr ""
+msgstr "Elige arquivo"
 
 #: static/js/TableShape.js:3787
 msgid "Insert if needed"
-msgstr ""
+msgstr "Inserta si se necesita"
 
 #: static/js/TableShape.js:4041 static/js/TableShape.js:4074
 msgid "Grid"
-msgstr ""
+msgstr "Grade"
 
 #: static/js/TableShape.js:4080
 msgid "How to create the grid?"
-msgstr ""
+msgstr "¿Cómo criar la cuadrícula?"
 
 #: static/js/TableShape.js:4083
 msgid "Grid from extent of input geometry"
-msgstr ""
+msgstr "Cuadrícula a partir de la extensión de la geometria de entrada"
 
 #: static/js/TableShape.js:4088
 msgid "Grid from initial coordinates (Lower left corner)"
-msgstr ""
+msgstr "Cuadrícula a partir de coordenadas (Esquina inferior izquierda)"
 
 #: static/js/TableShape.js:4093
 msgid "Rows"
-msgstr ""
+msgstr "Linhas"
 
 #: static/js/TableShape.js:4098
 msgid "Columns"
-msgstr ""
+msgstr "Columnas"
 
 #: static/js/TableShape.js:4103
 msgid "Width"
-msgstr ""
+msgstr "Anchura"
 
 #: static/js/TableShape.js:4108
 msgid "Height"
-msgstr ""
+msgstr "Altura"
 
 #: static/js/TableShape.js:4113
 msgid "Initial X"
-msgstr ""
+msgstr "X inicial"
 
 #: static/js/TableShape.js:4118
 msgid "Initial Y"
-msgstr ""
+msgstr "Y inicial"
 
 #: static/js/TableShape.js:4123
 msgid "EPSG"
-msgstr ""
+msgstr "EPSG"
 
 #: static/js/TableShape.js:4243 static/js/TableShape.js:5167
 #: static/js/TableShape.js:5420 static/js/TableShape.js:5671
@@ -490,692 +494,693 @@ msgstr ""
 #: static/js/TableShape.js:13214 static/js/TableShape.js:13464
 #: static/js/TableShape.js:13823 static/js/TableShape.js:14188
 msgid "Output"
-msgstr ""
+msgstr "Salida"
 
 #: static/js/TableShape.js:4357 static/js/TableShape.js:4390
 #: static/js/TableShape.js:4561
 msgid "Join"
-msgstr ""
+msgstr "Join"
 
 #: static/js/TableShape.js:4395
 msgid "Main table attribute:"
-msgstr ""
+msgstr "Atributo tabela principal:"
 
 #: static/js/TableShape.js:4399
 msgid "Secondary table attribute:"
-msgstr ""
+msgstr "Atributo tabela secundaria:"
 
 #: static/js/TableShape.js:4541 static/js/TableShape.js:4833
 msgid "Input Main"
-msgstr ""
+msgstr "Entrada Pr."
 
 #: static/js/TableShape.js:4551
 msgid "Input Sec."
-msgstr ""
+msgstr "Entrada Sec."
 
 #: static/js/TableShape.js:4571
 msgid "Main Not Used"
-msgstr ""
+msgstr "Pr. Sin Usar"
 
 #: static/js/TableShape.js:4581
 msgid "Sec. Not Used"
-msgstr ""
+msgstr "Sec. Sin Usar"
 
 #: static/js/TableShape.js:4710 static/js/TableShape.js:4743
 msgid "Compare Rows"
-msgstr ""
+msgstr "Comparar linhas"
 
 #: static/js/TableShape.js:4748 static/js/TableShape.js:7369
 #: static/js/TableShape.js:9011 static/js/TableShape.js:13635
 msgid "Attribute:"
-msgstr ""
+msgstr "Atributo:"
 
 #: static/js/TableShape.js:4843
 msgid "Input to comp."
-msgstr ""
+msgstr "Entrada a comp."
 
 #: static/js/TableShape.js:4853 static/js/TableShape.js:9646
 msgid "Equals"
-msgstr ""
+msgstr "Igual"
 
 #: static/js/TableShape.js:4863
 msgid "News"
-msgstr ""
+msgstr "Nuevos"
 
 #: static/js/TableShape.js:4873
 msgid "Changes"
-msgstr ""
+msgstr "Cambios"
 
 #: static/js/TableShape.js:4883
 msgid "Comp. Not Used"
-msgstr ""
+msgstr "Comp. sin usar"
 
 #: static/js/TableShape.js:5016 static/js/TableShape.js:5052
 msgid "Remove Attribute"
-msgstr ""
+msgstr "Remover atributo"
 
 #: static/js/TableShape.js:5056
 msgid "Attribute to remove:"
-msgstr ""
+msgstr "Atributo a excluir:"
 
 #: static/js/TableShape.js:5279 static/js/TableShape.js:5312
 msgid "Rename Attribute"
-msgstr ""
+msgstr "Renomear atributo"
 
 #: static/js/TableShape.js:5317
 msgid "Attribute to rename:"
-msgstr ""
+msgstr "Atributo a renomear:"
 
 #: static/js/TableShape.js:5321
 msgid "New name:"
-msgstr ""
+msgstr "Novo nome:"
 
 #: static/js/TableShape.js:5322
 msgid "New name"
-msgstr ""
+msgstr "Novo nome"
 
 #: static/js/TableShape.js:5531
 msgid "Concatenate Attr."
-msgstr ""
+msgstr "Concatena Atr."
 
 #: static/js/TableShape.js:5564
 msgid "Concatenate Attributes"
-msgstr ""
+msgstr "Concatenar atributos"
 
 #: static/js/TableShape.js:5569
 msgid "Attributes to concatenate:"
-msgstr ""
+msgstr "Atributos a concatenar:"
 
 #: static/js/TableShape.js:5573
 msgid "New attribute name:"
-msgstr ""
+msgstr "Novo nome de atributo"
 
 #: static/js/TableShape.js:5574 static/js/TableShape.js:8495
 msgid "New attribute name"
-msgstr ""
+msgstr "Novo nome de atributo"
 
 #: static/js/TableShape.js:5577
 msgid "Separator (opt.):"
-msgstr ""
+msgstr "Separador (opc.)"
 
 #: static/js/TableShape.js:5578
 msgid "Separator"
-msgstr ""
+msgstr "Separador"
 
 #: static/js/TableShape.js:5782 static/js/TableShape.js:5815
 msgid "Pad Attribute"
-msgstr ""
+msgstr "Preencher atributo"
 
 #: static/js/TableShape.js:5820
 msgid "Attribute to pad:"
-msgstr ""
+msgstr "Atributo a rellenar:"
 
 #: static/js/TableShape.js:5824
 msgid "Length desired:"
-msgstr ""
+msgstr "Comprimento deseada"
 
 #: static/js/TableShape.js:5828
 msgid "Side to pad:"
-msgstr ""
+msgstr "Lado a rellenar:"
 
 #: static/js/TableShape.js:5830
 msgid "Right"
-msgstr ""
+msgstr "Derecha"
 
 #: static/js/TableShape.js:5831
 msgid "Left"
-msgstr ""
+msgstr "Izquierda"
 
 #: static/js/TableShape.js:5835
 msgid "Pad String:"
-msgstr ""
+msgstr "Texto de relleno:"
 
 #: static/js/TableShape.js:6039 static/js/TableShape.js:6075
 msgid "Filter Duplicate"
-msgstr ""
+msgstr "Filtra Duplicados"
 
 #: static/js/TableShape.js:6079
 msgid "Attributes that must be uniques:"
-msgstr ""
+msgstr "Atributos que deben ser únicos:"
 
 #: static/js/TableShape.js:6176
 msgid "Unique"
-msgstr ""
+msgstr "Únicos"
 
 #: static/js/TableShape.js:6186
 msgid "Duplicated"
-msgstr ""
+msgstr "Duplicados"
 
 #: static/js/TableShape.js:6303 static/js/TableShape.js:6339
 msgid "Validate Geometry"
-msgstr ""
+msgstr "Validar geometria"
 
 #: static/js/TableShape.js:6345
 msgid "Stop workspace if there are invalid geometries"
-msgstr ""
+msgstr "Detén el espacio de trabajo si hay geometrias no válidas"
 
 #: static/js/TableShape.js:6447
 msgid "Valid"
-msgstr ""
+msgstr "Válida"
 
 #: static/js/TableShape.js:6457
 msgid "Invalid"
-msgstr ""
+msgstr "No válida"
 
 #: static/js/TableShape.js:6574 static/js/TableShape.js:6610
 msgid "Simple Geometry"
-msgstr ""
+msgstr "Geometria simples"
 
 #: static/js/TableShape.js:6616
 msgid "Stop workspace if some geometry is not simple"
-msgstr ""
+msgstr "Detén el espacio de trabajo si alguna geometria no es simple"
 
 #: static/js/TableShape.js:6715
 msgid "Simple"
-msgstr ""
+msgstr "Simples"
 
 #: static/js/TableShape.js:6725
 msgid "No simple"
-msgstr ""
+msgstr "Não simples"
 
 #: static/js/TableShape.js:6843 static/js/TableShape.js:6876
 msgid "Modify Value"
-msgstr ""
+msgstr "Modificar valor"
 
 #: static/js/TableShape.js:6881
 msgid "Attribute to modify:"
-msgstr ""
+msgstr "Atributo a modificar:"
 
 #: static/js/TableShape.js:6885
 msgid "New value:"
-msgstr ""
+msgstr "Novo valor:"
 
 #: static/js/TableShape.js:6886 static/js/TableShape.js:8510
 #: static/js/TableShape.js:9030
 msgid "New attribute value"
-msgstr ""
+msgstr "Novo valor de atributo"
 
 #: static/js/TableShape.js:7084 static/js/TableShape.js:7117
 msgid "Counter"
-msgstr ""
+msgstr "Contador"
 
 #: static/js/TableShape.js:7122
 msgid "New counter attribute:"
-msgstr ""
+msgstr "Novo atributo contador:"
 
 #: static/js/TableShape.js:7126 static/js/TableShape.js:12235
 msgid "Group by:"
-msgstr ""
+msgstr "Agrupa por:"
 
 #: static/js/TableShape.js:7330 static/js/TableShape.js:7364
 msgid "Calculator"
-msgstr ""
+msgstr "Calculadora"
 
 #: static/js/TableShape.js:7371
 msgid "Attributes:"
-msgstr ""
+msgstr "Atributos:"
 
 #: static/js/TableShape.js:7378
 msgid "Math functions:"
-msgstr ""
+msgstr "Funciones matemáticas:"
 
 #: static/js/TableShape.js:7415
 msgid "String functions:"
-msgstr ""
+msgstr "Funciones con textos:"
 
 #: static/js/TableShape.js:7444
 msgid "Expression:"
-msgstr ""
+msgstr "Expresión:"
 
 #: static/js/TableShape.js:7445
 msgid "For more math functions check above link."
-msgstr ""
+msgstr "Para más funciones matemáticas consulta el enlace de arriba."
 
 #: static/js/TableShape.js:7688
 msgid "Change Attr. Type"
-msgstr ""
+msgstr "Cambia Tipo Atr."
 
 #: static/js/TableShape.js:7721
 msgid "Change Attribute Type"
-msgstr ""
+msgstr "Alterar tipo de atributo"
 
 #: static/js/TableShape.js:7726
 msgid "Attribute to change type:"
-msgstr ""
+msgstr "Atributo a cambiar el tipo:"
 
 #: static/js/TableShape.js:7730
 msgid "To data type:"
-msgstr ""
+msgstr "Al tipo de dato:"
 
 #: static/js/TableShape.js:7732 static/js/TableShape.js:8500
 msgid "Varchar"
-msgstr ""
+msgstr "Cadena de Texto"
 
 #: static/js/TableShape.js:7733 static/js/TableShape.js:8501
 msgid "Integer"
-msgstr ""
+msgstr "Entero"
 
 #: static/js/TableShape.js:7734 static/js/TableShape.js:8502
 msgid "Float"
-msgstr ""
+msgstr "Decimales"
 
 #: static/js/TableShape.js:7735 static/js/TableShape.js:8503
 msgid "Date"
-msgstr ""
+msgstr "Data"
 
 #: static/js/TableShape.js:7736 static/js/TableShape.js:8504
 #: static/js/TableShape.js:13369
 msgid "Time Stamp"
-msgstr ""
+msgstr "Data y hora"
 
 #: static/js/TableShape.js:7737 static/js/TableShape.js:8505
 msgid "Boolean"
-msgstr ""
+msgstr "Booleano"
 
 #: static/js/TableShape.js:7943 static/js/TableShape.js:7976
 msgid "Execute SQL"
-msgstr ""
+msgstr "Executar SQL"
 
 #: static/js/TableShape.js:8007
 msgid "Get attributes"
-msgstr ""
+msgstr "Obtén atributos"
 
 #: static/js/TableShape.js:8011
 msgid "Attributes from input:"
-msgstr ""
+msgstr "Atributos de la entrada:"
 
 #: static/js/TableShape.js:8019
 msgid "Attributes from new connection:"
-msgstr ""
+msgstr "Atributos de la nova conexão:"
 
 #: static/js/TableShape.js:8029
 msgid "Query:"
-msgstr ""
+msgstr "Consulta:"
 
 #: static/js/TableShape.js:8456 static/js/TableShape.js:8489
 msgid "Create Attribute"
-msgstr ""
+msgstr "Criar atributo"
 
 #: static/js/TableShape.js:8494
 msgid "New attribute:"
-msgstr ""
+msgstr "Novo atributo:"
 
 #: static/js/TableShape.js:8498
 msgid "Data type:"
-msgstr ""
+msgstr "Tipo de dado:"
 
 #: static/js/TableShape.js:8509 static/js/TableShape.js:9029
 msgid "Value:"
-msgstr ""
+msgstr "Valor:"
 
 #: static/js/TableShape.js:8702
 msgid "Expose Attributes"
-msgstr ""
+msgstr "Expón Atributos"
 
 #: static/js/TableShape.js:8735
 msgid "Expose Attribute"
-msgstr ""
+msgstr "Expor atributo"
 
 #: static/js/TableShape.js:8740
 msgid "Attribute to expose:"
-msgstr ""
+msgstr "Atributos a exponer:"
 
 #: static/js/TableShape.js:8741
 msgid "Write attributes to expose separated by space"
-msgstr ""
+msgstr "Escribe los atributos a exponer separados por un espacio"
 
 #: static/js/TableShape.js:8973 static/js/TableShape.js:9006
 msgid "Filter"
-msgstr ""
+msgstr "Filtro"
 
 #: static/js/TableShape.js:9015
 msgid "Operator:"
-msgstr ""
+msgstr "Operador:"
 
 #: static/js/TableShape.js:9023
 msgid "Starts with"
-msgstr ""
+msgstr "Empieza por"
 
 #: static/js/TableShape.js:9024
 msgid "Ends with"
-msgstr ""
+msgstr "Acaba por"
 
 #: static/js/TableShape.js:9025 static/js/TableShape.js:9645
 msgid "Contains"
-msgstr ""
+msgstr "Contiene"
 
 #: static/js/TableShape.js:9039
 msgid "Composite Filter:"
-msgstr ""
+msgstr "Filtro Compuesto:"
 
 #: static/js/TableShape.js:9167
 msgid "True"
-msgstr ""
+msgstr "Verdadero"
 
 #: static/js/TableShape.js:9177
 msgid "False"
-msgstr ""
+msgstr "Falso"
 
 #: static/js/TableShape.js:9296 static/js/TableShape.js:9329
 msgid "Intersection"
-msgstr ""
+msgstr "Interseção"
 
 #: static/js/TableShape.js:9335
 msgid "Self intersect layer (Use only data from main input)"
 msgstr ""
+"Autointersecta camada (Utiliza solo los datos de la entrada principal)"
 
 #: static/js/TableShape.js:9339
 msgid "Merge attributes of the secondary input to the final output"
-msgstr ""
+msgstr "Fusiona atributos de la entrada secundaria a la salida final"
 
 #: static/js/TableShape.js:9466 static/js/TableShape.js:9645
 #: static/js/TableShape.js:9646 static/js/TableShape.js:9647
 #: static/js/TableShape.js:9648 static/js/TableShape.js:9649
 #: static/js/TableShape.js:9718 static/js/TableShape.js:9940
 msgid "Main"
-msgstr ""
+msgstr "Principal"
 
 #: static/js/TableShape.js:9476 static/js/TableShape.js:9645
 #: static/js/TableShape.js:9646 static/js/TableShape.js:9647
 #: static/js/TableShape.js:9648 static/js/TableShape.js:9649
 #: static/js/TableShape.js:9728 static/js/TableShape.js:9950
 msgid "Secondary"
-msgstr ""
+msgstr "Secundaria"
 
 #: static/js/TableShape.js:9605 static/js/TableShape.js:9638
 #: static/js/TableShape.js:9643
 msgid "Spatial Relation"
-msgstr ""
+msgstr "Relação espacial"
 
 #: static/js/TableShape.js:9647
 msgid "Intersects"
-msgstr ""
+msgstr "Intersecta"
 
 #: static/js/TableShape.js:9648
 msgid "Touches"
-msgstr ""
+msgstr "Toca"
 
 #: static/js/TableShape.js:9649
 msgid "Within"
-msgstr ""
+msgstr "Dentro de"
 
 #: static/js/TableShape.js:9857
 msgid "Difference"
-msgstr ""
+msgstr "Diferença"
 
 #: static/js/TableShape.js:10079 static/js/TableShape.js:10112
 msgid "Keep Attribute"
-msgstr ""
+msgstr "Manter atributo"
 
 #: static/js/TableShape.js:10116
 msgid "Attribute to keep:"
-msgstr ""
+msgstr "Atributo a manetener:"
 
 #: static/js/TableShape.js:10316 static/js/TableShape.js:10350
 msgid "Reproject"
-msgstr ""
+msgstr "Reprojetar"
 
 #: static/js/TableShape.js:10355
 msgid "Source EPSG:"
-msgstr ""
+msgstr "EPSG origen:"
 
 #: static/js/TableShape.js:10357
 msgid "Empty to read from input layer"
-msgstr ""
+msgstr "Vacío para leer el de la entrada"
 
 #: static/js/TableShape.js:10361
 msgid "Target EPSG:"
-msgstr ""
+msgstr "EPSG destino:"
 
 #: static/js/TableShape.js:10574
 msgid "Cadastral Geom."
-msgstr ""
+msgstr "Geom. Cadastral"
 
 #: static/js/TableShape.js:10610
 msgid "Cadastral Geometry"
-msgstr ""
+msgstr "Geometria cadastral"
 
 #: static/js/TableShape.js:10614
 msgid "Cadastral Reference Attribute (output in EPSG - 4326):"
-msgstr ""
+msgstr "Atributo de la Referencia Cadastral (salida en EPSG - 4326):"
 
 #: static/js/TableShape.js:10824 static/js/TableShape.js:10860
 msgid "MGRS"
-msgstr ""
+msgstr "MGRS"
 
 #: static/js/TableShape.js:10864
 msgid "Select mode:"
-msgstr ""
+msgstr "Selecciona el modo:"
 
 #: static/js/TableShape.js:10866
 msgid "MGRS to geographic coordinates (EPSG - 4326):"
-msgstr ""
+msgstr "MGRS a coordenadas geográficas (EPSG - 4326):"
 
 #: static/js/TableShape.js:10867
 msgid "Geographic coordinates (EPSG - 4326) to MGRS:"
-msgstr ""
+msgstr "Coordenadas geográficas (EPSG - 4326) a MGRS:"
 
 #: static/js/TableShape.js:10870
 msgid "MGRS grid attribute:"
-msgstr ""
+msgstr "Atributo del grid MGRS:"
 
 #: static/js/TableShape.js:10874 static/js/TableShape.js:11163
 #: static/js/TableShape.js:13654
 msgid "Longitude attribute:"
-msgstr ""
+msgstr "Atributo de comprimento"
 
 #: static/js/TableShape.js:10876 static/js/TableShape.js:11167
 #: static/js/TableShape.js:13658
 msgid "Latitude attribute:"
-msgstr ""
+msgstr "Atributo de latitud"
 
 #: static/js/TableShape.js:11122 static/js/TableShape.js:11158
 msgid "Text to Point"
-msgstr ""
+msgstr "Texto para ponto"
 
 #: static/js/TableShape.js:11171 static/js/TableShape.js:11445
 msgid "Insert EPSG:"
-msgstr ""
+msgstr "Inserta EPSG:"
 
 #: static/js/TableShape.js:11400
 msgid "WKT Geom."
-msgstr ""
+msgstr "Geom. WKT"
 
 #: static/js/TableShape.js:11436
 msgid "WKT to Geometry"
-msgstr ""
+msgstr "WKT para geometria"
 
 #: static/js/TableShape.js:11441
 msgid "WKT string Attribute:"
-msgstr ""
+msgstr "Atributo texto WKT:"
 
 #: static/js/TableShape.js:11669 static/js/TableShape.js:11705
 msgid "Split Attribute"
-msgstr ""
+msgstr "Dividir atributo"
 
 #: static/js/TableShape.js:11710
 msgid "String Attribute:"
-msgstr ""
+msgstr "Atributo Texto:"
 
 #: static/js/TableShape.js:11714 static/js/TableShape.js:11976
 msgid "List Name:"
-msgstr ""
+msgstr "Nome de la lista:"
 
 #: static/js/TableShape.js:11718
 msgid "Split by:"
-msgstr ""
+msgstr "Partir por:"
 
 #: static/js/TableShape.js:11935 static/js/TableShape.js:11971
 msgid "Explode List"
-msgstr ""
+msgstr "Explodir lista"
 
 #: static/js/TableShape.js:11980
 msgid "Attribute Name:"
-msgstr ""
+msgstr "Nome del atributo:"
 
 #: static/js/TableShape.js:12197 static/js/TableShape.js:12230
 msgid "Union"
-msgstr ""
+msgstr "União"
 
 #: static/js/TableShape.js:12240
 msgid "Multigeometry for all features of the output"
-msgstr ""
+msgstr "Multigeometría para todos los registros de la salida"
 
 #: static/js/TableShape.js:12454
 msgid "Remove Geom."
-msgstr ""
+msgstr "Elimina Geom."
 
 #: static/js/TableShape.js:12636
 msgid "Filter Geom."
-msgstr ""
+msgstr "Filtra Geom."
 
 #: static/js/TableShape.js:12709
 msgid "Points"
-msgstr ""
+msgstr "Puntos"
 
 #: static/js/TableShape.js:12719
 msgid "Multipoints"
-msgstr ""
+msgstr "Multipuntos"
 
 #: static/js/TableShape.js:12729
 msgid "Lines"
-msgstr ""
+msgstr "Líneas"
 
 #: static/js/TableShape.js:12739
 msgid "Multilines"
-msgstr ""
+msgstr "Multilíneas"
 
 #: static/js/TableShape.js:12749
 msgid "Polygons"
-msgstr ""
+msgstr "Polígonos"
 
 #: static/js/TableShape.js:12759
 msgid "Multipolygons"
-msgstr ""
+msgstr "Multipolígonos"
 
 #: static/js/TableShape.js:12898
 msgid "Explode Geometry"
-msgstr ""
+msgstr "Explodir geometria"
 
 #: static/js/TableShape.js:13093 static/js/TableShape.js:13126
 msgid "Calculate Area"
-msgstr ""
+msgstr "Calcular área"
 
 #: static/js/TableShape.js:13131
 msgid "New area attribute:"
-msgstr ""
+msgstr "Novo atributo área:"
 
 #: static/js/TableShape.js:13328 static/js/TableShape.js:13361
 msgid "Current Date"
-msgstr ""
+msgstr "Data atual"
 
 #: static/js/TableShape.js:13366
 msgid "New date attribute"
-msgstr ""
+msgstr "Novo atributo data"
 
 #: static/js/TableShape.js:13580 static/js/TableShape.js:13613
 msgid "Geocoder"
-msgstr ""
+msgstr "Geocodificador"
 
 #: static/js/TableShape.js:13618
 msgid "Engine"
-msgstr ""
+msgstr "Motor"
 
 #: static/js/TableShape.js:13625
 msgid "Mode"
-msgstr ""
+msgstr "Modo"
 
 #: static/js/TableShape.js:13627
 msgid "Direct"
-msgstr ""
+msgstr "Directo"
 
 #: static/js/TableShape.js:13628
 msgid "Reverse"
-msgstr ""
+msgstr "Inverso"
 
 #: static/js/TableShape.js:13646
 msgid "Attributes selected:"
-msgstr ""
+msgstr "Atributos seleccionados:"
 
 #: static/js/TableShape.js:13997
 msgid "Operation:"
-msgstr ""
+msgstr "Operación:"
 
 #: static/js/TableShape.js:14000
 msgid "CREATE"
-msgstr ""
+msgstr "CREAR"
 
 #: static/js/TableShape.js:14004
 msgid "APPEND"
-msgstr ""
+msgstr "AÑADIR"
 
 #: static/js/TableShape.js:14008
 msgid "OVERWRITE"
-msgstr ""
+msgstr "SOBRESCRIBIR"
 
 #: static/js/TableShape.js:14015
 msgid "UPDATE"
-msgstr ""
+msgstr "ACTUALIZAR"
 
 #: static/js/TableShape.js:14019
 msgid "DELETE"
-msgstr ""
+msgstr "ELIMINAR"
 
 #: static/js/TableShape.js:14023
 msgid "Match column:"
-msgstr ""
+msgstr "Columna coincidente:"
 
 #: static/js/TableShape.js:14025
 msgid "Order"
-msgstr ""
+msgstr "Orden"
 
 #: static/js/Toolbar.js:20
 msgid "New"
-msgstr ""
+msgstr "Novo"
 
 #: static/js/Toolbar.js:34
 msgid "Open"
-msgstr ""
+msgstr "Abrir"
 
 #: static/js/Toolbar.js:43
 msgid "Save"
-msgstr ""
+msgstr "Salvar"
 
 #: static/js/Toolbar.js:176
 msgid "Run"
-msgstr ""
+msgstr "Executar"
 
 #: static/js/Toolbar.js:213
 msgid "Add DB"
-msgstr ""
+msgstr "Añade BBDD"
 
 #: static/js/Toolbar.js:220
 msgid "Remove"
-msgstr ""
+msgstr "Excluir"
 
 #: static/js/Toolbar.js:231
 msgid "Undo"
-msgstr ""
+msgstr "Deshacer"
 
 #: static/js/Toolbar.js:238
 msgid "Redo"
-msgstr ""
+msgstr "Rehacer"
 
 #: static/js/Toolbar.js:245
 msgid "Zoom In"
-msgstr ""
+msgstr "Acercar"
 
 #: static/js/Toolbar.js:265
 msgid "Zoom Out"
-msgstr ""
+msgstr "Alejar"
 
 #: static/js/lib/_trans.gvsigol.js:2
 msgid "Connection parameters are valid."
-msgstr ""
+msgstr "Los parámetros de conexão son válidos."
 
 #: static/js/lib/_trans.gvsigol.js:3
 msgid "Connection parameters are not valid."
-msgstr ""
+msgstr "Los parámetros de conexão no son válidos."
 
 msgid "IDW Interpolation"
 msgstr "Interpolação IDW"
@@ -1200,3 +1205,1748 @@ msgstr "Pontos mínimos"
 
 msgid "Epigraph:"
 msgstr "Epígrafe:"
+
+#: static/js/TableShape.js:9297 static/js/TableShape.js:9330
+msgid "Line EndPoints"
+msgstr "Extremos de linha"
+
+msgid "Point to text"
+msgstr "Punto a texto"
+
+#: static/js/TableShape.js:13094 static/js/TableShape.js:13127
+msgid "Calculate length"
+msgstr "Calcular comprimento"
+
+msgid "DROP AND CREATE"
+msgstr "BORRAR Y CREAR"
+
+msgid "Buffer"
+msgstr "Buffer"
+
+msgid "Insert radius value"
+msgstr "Inserta el valor del radio"
+
+msgid "Make buffer to reach an area"
+msgstr "Hacer el área de influencia hasta alcanzar un área"
+
+msgid "Radius"
+msgstr "Radio"
+
+msgid "Select attribute with the radius value"
+msgstr "Selecciona atributo con el valor del radio"
+
+msgid "Radius value"
+msgstr "Valor del radio"
+
+msgid "Radius attribute"
+msgstr "Atributo de radio"
+
+msgid "Area attribute to reach"
+msgstr "Atributo del área a alcanzar"
+
+msgid "Radius increase"
+msgstr "Aumento de radio"
+
+msgid "Buffer style parameters"
+msgstr "Parámetros del estilo del área de influencia"
+
+msgid "Quadrant segments"
+msgstr "Segmentos del cuadrante"
+
+msgid "End cap style"
+msgstr "Estilo en los bordes"
+
+msgid "Round"
+msgstr "Redondo"
+
+msgid "Flat"
+msgstr "Plano"
+
+msgid "Square"
+msgstr "Cuadrado"
+
+msgid "Join style"
+msgstr "Estilo en la unión"
+
+msgid "Mitre"
+msgstr "Esquina"
+
+msgid "Bevel"
+msgstr "Bisel"
+
+msgid "Mitre limit"
+msgstr "Límite de la esquina"
+
+msgid "Side"
+msgstr "Lado"
+
+msgid "Both"
+msgstr "Ambos"
+
+msgid "Nearest Neighbor"
+msgstr "Vizinho mais próximo"
+
+msgid "Tolerance"
+msgstr "Tolerância"
+
+msgid "Matched"
+msgstr "Emparelhados"
+
+msgid "Correct Spelling"
+msgstr "Corrigir ortografia"
+
+msgid "Language"
+msgstr "Idioma"
+
+msgid "Spanish"
+msgstr "Español"
+
+msgid "Spain"
+msgstr "España"
+
+msgid "English"
+msgstr "Inglés"
+
+msgid "British"
+msgstr "Británico"
+
+msgid "String attribute to correct"
+msgstr "Atributo con el texto a corregir"
+
+msgid "Correct only the accent marks"
+msgstr "Corrige únicamente las tildes"
+
+msgid "API Connection:"
+msgstr "Conexão API:"
+
+msgid "Add connection"
+msgstr "Añade conexão"
+
+msgid "Clustering"
+msgstr "Agrupamento"
+
+msgid "Algorithm"
+msgstr "Algoritmo"
+
+msgid "DBSCAN"
+msgstr "DBSCAN"
+
+msgid "K-means"
+msgstr "K-means"
+
+msgid "Desire distance"
+msgstr "Distância desejada"
+
+msgid "Density (Minimum points)"
+msgstr "Densidade (Mínimo de pontos)"
+
+msgid "Number of clusters"
+msgstr "Número de agrupamentos"
+
+msgid "Maximum radius"
+msgstr "Raio máximo"
+
+msgid "Weight attribute"
+msgstr "Atributo de Peso"
+
+msgid "Voronoi Diagram"
+msgstr "Diagrama de Voronoi"
+
+msgid "Thiessen Polygons"
+msgstr "Polígonos Thiessen"
+
+msgid "Note"
+msgstr "Nota"
+
+msgid ""
+"Returns a collection of polygons without attributes. If the geometry only "
+"contains one vertex it will return an empty geometry. If you want a diagram "
+"of all the flow records, try to do a geometry union first."
+msgstr ""
+"Retorna uma coleção de polígonos sem atributos. Se a geometria contiver "
+"apenas um vértice, irá devolver uma geometria vazia. Se pretender um "
+"diagrama de todos os registos de fluxo, tente primeiro fazer uma fusão de "
+"geometria."
+
+msgid "Preserve FID"
+msgstr "Preservar FID"
+
+msgid "Auto-create gvSIG Online fields"
+msgstr "Criar automaticamente campos do gvSIG Online"
+
+msgid "Create feat_date_gvol and feat_version_gvol fields"
+msgstr "Criar campos feat_date_gvol e feat_version_gvol"
+
+msgid "Statistics"
+msgstr "Estatísticas"
+
+msgid "Numeric attribute"
+msgstr "Atributo numérico"
+
+msgid "Optional"
+msgstr "Opcional"
+
+msgid "Variogram model"
+msgstr "Modelo de variograma"
+
+msgid "SharePoint Connection:"
+msgstr "Conexão SharePoint:"
+
+msgid "Document Library:"
+msgstr "Biblioteca de documentos:"
+
+msgid "File format:"
+msgstr "Formato de archivo:"
+
+msgid "Browse files:"
+msgstr "Explorar archivos:"
+
+msgid "Click to select/deselect multiple files"
+msgstr "Clic para selecionar/deseleccionar múltiples archivos"
+
+msgid "Selected files:"
+msgstr "Archivos seleccionados:"
+
+msgid "No files selected"
+msgstr "Ningún archivo seleccionado"
+
+msgid "No files found in this folder"
+msgstr "No se encontraron archivos en esta carpeta"
+
+msgid "No common sheets found"
+msgstr "No se encontraron hojas comunes"
+
+msgid "Please select at least one file first"
+msgstr "Por favor selecciona al menos un archivo primero"
+
+msgid "Please select at least one file"
+msgstr "Por favor selecciona al menos un archivo"
+
+msgid "Error loading libraries"
+msgstr "Error al cargar bibliotecas"
+
+msgid "Error loading folder contents"
+msgstr "Error al cargar contenido de la carpeta"
+
+msgid "Error loading sheets"
+msgstr "Error al cargar hojas"
+
+msgid "Loading..."
+msgstr "Cargando..."
+
+msgid "Select a connection and library, then click refresh."
+msgstr "Selecciona una conexão y biblioteca, luego haz clic en actualizar."
+
+msgid "Choose csv/txt file:"
+msgstr "Elige archivo csv/txt:"
+
+msgid "Schema options:"
+msgstr "Opciones de esquema:"
+
+msgid "File has schema"
+msgstr "El archivo tiene esquema"
+
+msgid "File has not schema"
+msgstr "El archivo no tiene esquema"
+
+msgid "Single csv/txt file"
+msgstr "Archivo csv/txt único"
+
+msgid "Visualizer"
+msgstr "Visualizador"
+
+msgid "Open Visualizer"
+msgstr "Abrir Visualizador"
+
+msgid "Layer name:"
+msgstr "Nome da camada:"
+
+msgid "Layer group:"
+msgstr "Grupo de camadas:"
+
+#: static/js/Assistant.js
+msgid "Apply"
+msgstr "Aplicar"
+
+msgid "Applied"
+msgstr "Aplicado"
+
+msgid "Discard"
+msgstr "Descartar"
+
+msgid "Discarded"
+msgstr "Descartado"
+
+msgid "Undone"
+msgstr "Deshecho"
+
+msgid "Retry"
+msgstr "Reintentar"
+
+msgid "Assumptions"
+msgstr "Supuestos"
+
+msgid "Warnings"
+msgstr "Avisos"
+
+msgid "Context"
+msgstr "Nodo seleccionado"
+
+msgid "The flow could not be drawn."
+msgstr "No se ha podido dibujar el flujo."
+
+msgid "The assistant could not be reached. Try again."
+msgstr "No se ha podido contactar con el asistente. Inténtalo de novo."
+
+msgid "You are not allowed to use the assistant on this workspace."
+msgstr "No tienes permiso para usar el asistente en este workspace."
+
+msgid "a table"
+msgstr "una tabela"
+
+msgid "a raster"
+msgstr "un raster"
+
+msgid "a model"
+msgstr "un modelo"
+
+msgid "Cannot connect {source} to an input that expects {target}."
+msgstr "No se puede conectar {source} a una entrada que espera {target}."
+
+msgid "Advanced parameters"
+msgstr "Parámetros avanzados"
+
+msgid "The node could not be configured."
+msgstr "No se ha podido configurar el nodo."
+
+msgid "The raster could not be read."
+msgstr "No se ha podido leer el raster."
+
+msgid "Band"
+msgstr "Banda"
+
+msgid "bands"
+msgstr "bandas"
+
+msgid "no CRS"
+msgstr "sin sistema de coordenadas"
+
+msgid "Select a GeoTIFF file."
+msgstr "Elige un arquivo GeoTIFF."
+
+msgid "Raster (GeoTIFF)"
+msgstr "Raster (GeoTIFF)"
+
+msgid "Raster"
+msgstr "Raster"
+
+msgid "GeoTIFF file"
+msgstr "Arquivo GeoTIFF"
+
+msgid "Choose a .tif / .tiff file"
+msgstr "Elige un arquivo .tif / .tiff"
+
+msgid "The file must be in the file manager. It can have any number of bands."
+msgstr ""
+"El arquivo debe estar en el gestor de arquivos. Puede tener cualquier número"
+" de bandas."
+
+msgid "Band names (optional)"
+msgstr "Nombres de las bandas (opcional)"
+
+msgid ""
+"Name the bands so that later steps are easier to read, for example Red, "
+"Green, Infrared."
+msgstr ""
+"Ponles nome a las bandas para que los pasos siguientes se lean mejor, por "
+"ejemplo Rojo, Verde, Infrarrojo."
+
+msgid "The selected file is not a GeoTIFF."
+msgstr "El arquivo seleccionado no es un GeoTIFF."
+
+msgid "Sample Raster"
+msgstr "Amostrar raster"
+
+msgid "Samples"
+msgstr "Muestras"
+
+msgid "Pixels"
+msgstr "Píxeles"
+
+msgid ""
+"Reads the raster pixels that fall inside each sample polygon. The result is "
+"a table with one row per pixel, one column per band and the class of the "
+"polygon."
+msgstr ""
+"Lee los píxeles del raster que caen dentro de cada polígono de muestra. El "
+"resultado es una tabela con una fila por píxel, una columna por banda y la "
+"clase del polígono."
+
+msgid "Class column"
+msgstr "Columna de clase"
+
+msgid ""
+"Column of the sample polygons that says which class each one belongs to."
+msgstr ""
+"Columna de los polígonos de muestra que indica a qué clase pertenece cada "
+"uno."
+
+msgid "Maximum pixels per class"
+msgstr "Máximo de píxeles por clase"
+
+msgid "No limit"
+msgstr "Sin límite"
+
+msgid ""
+"Limits and balances the classes when some have many more pixels than others."
+msgstr ""
+"Limita y equilibra las clases cuando unas tienen muchos más píxeles que "
+"otras."
+
+msgid "Random seed"
+msgstr "Semilla aleatoria"
+
+msgid "Using the same seed gives the same sample every time."
+msgstr "Con la mesma semilla se obtiene siempre la mesma muestra."
+
+msgid "Connect and configure a raster first."
+msgstr "Conecta y configura primero un raster."
+
+msgid "Connect the sample polygons first."
+msgstr "Conecta primero los polígonos de muestra."
+
+msgid "Choose the class column."
+msgstr "Elige la columna de clase."
+
+msgid ""
+"The class column has the same name as a raster band. Rename one of them."
+msgstr ""
+"La columna de clase se llama igual que una banda del raster. Cambia el nome "
+"de una de ellas."
+
+msgid "The maximum pixels per class must be a whole number greater than 0."
+msgstr "El máximo de píxeles por clase debe ser un número entero mayor que 0."
+
+msgid "The random seed must be a whole number."
+msgstr "La semilla aleatoria debe ser un número entero."
+
+msgid "Connect a table first."
+msgstr "Conecta primero una tabela."
+
+msgid "Random Forest"
+msgstr "Random Forest"
+
+msgid "Data"
+msgstr "Datos"
+
+msgid "Report"
+msgstr "Informe"
+
+msgid "Model"
+msgstr "Modelo"
+
+msgid ""
+"Learns from the rows that have a value in the variable to predict. It gives "
+"a report with the quality of the model and the importance of each variable, "
+"and the trained model to apply it elsewhere."
+msgstr ""
+"Aprende de las linhas que tienen valor en la variable a predecir. Devuelve "
+"un informe con la calidad del modelo y la importancia de cada variable, y el"
+" modelo entrenado para aplicarlo en otro sitio."
+
+msgid "Variable to predict"
+msgstr "Variable a predecir"
+
+msgid ""
+"If it is text or has only a few whole values, the classes are predicted; if "
+"it is a continuous number, its value is estimated."
+msgstr ""
+"Si es texto o tiene pocos valores enteros, se predicen las clases; si es un "
+"número continuo, se estima su valor."
+
+msgid "Variables used to predict"
+msgstr "Variables para predecir"
+
+msgid "All"
+msgstr "Todas"
+
+msgid "None"
+msgstr "Ninguna"
+
+msgid "They must be numeric columns."
+msgstr "Deben ser columnas numéricas."
+
+msgid "Type of problem"
+msgstr "Tipo de problema"
+
+msgid "Number of trees"
+msgstr "Número de árboles"
+
+msgid "Maximum depth"
+msgstr "Profundidad máxima"
+
+msgid "Minimum samples per leaf"
+msgstr "Mínimo de muestras por hoja"
+
+msgid "% kept to evaluate"
+msgstr "% reservado para evaluar"
+
+msgid "Data not used for learning, to measure quality. 0 turns it off."
+msgstr ""
+"Datos que no se usan para aprender, para medir la calidad. Con 0 se "
+"desactiva."
+
+msgid "Choose…"
+msgstr "Elige…"
+
+msgid "Detect automatically"
+msgstr "Detectar automáticamente"
+
+msgid "Classification (categories)"
+msgstr "Classificação (categorías)"
+
+msgid "Regression (number)"
+msgstr "Regresión (número)"
+
+msgid "Connect a table with data first."
+msgstr "Conecta primero una tabela con datos."
+
+msgid "Choose the variable to predict."
+msgstr "Elige la variable a predecir."
+
+msgid "Choose at least one variable used to predict."
+msgstr "Elige al menos una variable para predecir."
+
+msgid "The number of trees must be between 1 and 2000."
+msgstr "El número de árboles debe estar entre 1 y 2000."
+
+msgid "The maximum depth must be a whole number greater than 0."
+msgstr "La profundidad máxima debe ser un número entero mayor que 0."
+
+msgid "The minimum samples per leaf must be a whole number greater than 0."
+msgstr "El mínimo de muestras por hoja debe ser un número entero mayor que 0."
+
+msgid "The percentage kept to evaluate must be between 0 and 50."
+msgstr "El porcentaje reservado para evaluar debe estar entre 0 y 50."
+
+msgid "Predict Raster"
+msgstr "Prever raster"
+
+msgid "Result"
+msgstr "Resultado"
+
+msgid ""
+"Applies the model to every pixel of the raster. The result is a raster where"
+" each pixel holds the predicted class (or value). It needs no parameters."
+msgstr ""
+"Aplica el modelo a cada píxel del raster. El resultado es un raster donde "
+"cada píxel contiene la clase (o el valor) predicha. No necesita parámetros."
+
+msgid "Connect a raster and a trained model."
+msgstr "Conecta un raster y un modelo entrenado."
+
+msgid "The raster does not have the bands the model was trained with:"
+msgstr "El raster no tiene las bandas con las que se entrenó el modelo:"
+
+msgid "The raster has all the bands the model needs:"
+msgstr "El raster tiene todas las bandas que necesita el modelo:"
+
+msgid "Raster to Polygons"
+msgstr "Raster para polígonos"
+
+msgid ""
+"Turns a classified raster into polygons. Each polygon has its class and its "
+"area."
+msgstr ""
+"Convierte un raster clasificado en polígonos. Cada polígono tiene su clase y"
+" su área."
+
+msgid "Classes to keep"
+msgstr "Clases a conservar"
+
+msgid "All classes"
+msgstr "Todas las clases"
+
+msgid ""
+"Names of the classes, separated by commas. Leave it empty to keep all of "
+"them."
+msgstr ""
+"Nombres de las clases, separados por comas. Déjalo vacío para conservarlas "
+"todas."
+
+msgid "Minimum area"
+msgstr "Área mínima"
+
+msgid ""
+"Polygons smaller than this are discarded, in squared units of the raster "
+"coordinate system (for example square metres). Useful to remove isolated "
+"pixels."
+msgstr ""
+"Los polígonos más pequeños que esto se descartan, en unidades cuadradas del "
+"sistema de coordenadas del raster (por ejemplo metros cuadrados). Sirve para"
+" quitar píxeles aislados."
+
+msgid "Simplify"
+msgstr "Simplificar"
+
+msgid ""
+"Smooths the staircase edges. In units of the coordinate system; 0 leaves "
+"them as they are."
+msgstr ""
+"Suaviza los bordes en escalera. En unidades del sistema de coordenadas; con "
+"0 se dejan como están."
+
+msgid "Pixels count as neighbours"
+msgstr "Los píxeles son vecinos"
+
+msgid ""
+"With 8, pixels touching only at a corner are joined into the same polygon."
+msgstr ""
+"Con 8, los píxeles que solo se tocan en una esquina se unen en el mesmo "
+"polígono."
+
+msgid "Only along the sides (4)"
+msgstr "Solo por los lados (4)"
+
+msgid "Also at the corners (8)"
+msgstr "Também por las esquinas (8)"
+
+msgid "Connect a classified raster first."
+msgstr "Conecta primero un raster clasificado."
+
+msgid "The minimum area must be a number greater than or equal to 0."
+msgstr "El área mínima debe ser un número mayor o igual que 0."
+
+msgid "The simplification must be a number greater than or equal to 0."
+msgstr "La simplificación debe ser un número mayor o igual que 0."
+
+msgid "The workspaces and layer groups could not be loaded."
+msgstr "No se han podido cargar los workspaces y los grupos de camadas."
+
+msgid "Publish Raster"
+msgstr "Publicar raster"
+
+msgid ""
+"Publishes the raster as a layer, ready to add to a project. The classes get "
+"a colour style."
+msgstr ""
+"Publica el raster como una camada, lista para adicionar a un proyecto. Las "
+"clases reciben un estilo de colores."
+
+msgid "Workflow"
+msgstr "Fluxo de trabalho"
+
+msgid "Layer group"
+msgstr "Grupo de camadas"
+
+msgid "Layer title"
+msgstr "Título de la camada"
+
+msgid "Layer name"
+msgstr "Nome de la camada"
+
+msgid ""
+"Letters, digits and underscores. If you leave it empty it is made from the "
+"title."
+msgstr ""
+"Letras, dígitos y guiones bajos. Si lo dejas vacío se crea a partir del "
+"título."
+
+msgid "If the layer already exists"
+msgstr "Si la camada já existe"
+
+msgid ""
+"Replacing keeps the layer, its permissions and its style: only the raster "
+"changes. If the classes change, check the style."
+msgstr ""
+"Al reemplazar se conservan la camada, sus permisos y su estilo: solo cambia "
+"el raster. Si cambian las clases, revisa el estilo."
+
+msgid "Public layer"
+msgstr "Camada pública"
+
+msgid "Replace its raster"
+msgstr "Reemplazar su raster"
+
+msgid "Stop with an error"
+msgstr "Parar con un error"
+
+msgid "Loading…"
+msgstr "Cargando…"
+
+msgid "Connect a raster first."
+msgstr "Conecta primero un raster."
+
+msgid "Choose the workspace."
+msgstr "Elige el workspace."
+
+msgid "Choose the layer group."
+msgstr "Elige el grupo de camadas."
+
+msgid "Write a title or a name for the layer."
+msgstr "Escribe un título o un nome para la camada."
+
+msgid ""
+"(1 + L) · (NIR − Red) / (NIR + Red + L). Like NDVI but less affected by bare"
+" soil. Needs reflectance values."
+msgstr ""
+"(1 + L) · (NIR − Rojo) / (NIR + Rojo + L). Como el NDVI pero menos afectado "
+"por el suelo desnudo. Necesita valores de reflectancia."
+
+msgid ""
+"(A − B) / (A + B) for two bands you choose. Valid for any other normalized "
+"index."
+msgstr ""
+"(A − B) / (A + B) para dos bandas que elijas. Sirve para cualquier otro "
+"índice normalizado."
+
+msgid "(Green − NIR) / (Green + NIR). High values mean water."
+msgstr "(Verde − NIR) / (Verde + NIR). Los valores altos indican agua."
+
+msgid "(NIR − Red) / (NIR + Red). High values mean healthy vegetation."
+msgstr ""
+"(NIR − Rojo) / (NIR + Rojo). Los valores altos indican vegetación sana."
+
+msgid ""
+"(SWIR − NIR) / (SWIR + NIR). High values mean built-up areas and bare soil."
+msgstr ""
+"(SWIR − NIR) / (SWIR + NIR). Los valores altos indican zonas construidas y "
+"suelo desnudo."
+
+msgid "0.5 is suitable for most cases."
+msgstr "0,5 sirve para la mayoría de los casos."
+
+msgid ""
+"2.5 · (NIR − Red) / (NIR + 6 · Red − 7.5 · Blue + 1). Vegetation index that "
+"does not saturate in dense vegetation. Needs reflectance values."
+msgstr ""
+"2,5 · (NIR − Rojo) / (NIR + 6 · Rojo − 7,5 · Azul + 1). Índice de vegetación"
+" que no se satura en vegetación densa. Necesita valores de reflectancia."
+
+msgid ""
+"Adds a band with a spectral index to the raster. The original bands are "
+"kept, so the new band can be used to train the model like any other. To add "
+"several indices, chain several nodes."
+msgstr ""
+"Añade al raster una banda con un índice espectral. Las bandas originales se "
+"conservan, así que la nova banda se puede usar para entrenar el modelo como "
+"cualquier otra. Para adicionar varios índices, encadena varios nodos."
+
+msgid "Applying it several times removes larger spots."
+msgstr "Aplicarlo varias veces elimina manchas más grandes."
+
+msgid "Band A"
+msgstr "Banda A"
+
+msgid "Band B"
+msgstr "Banda B"
+
+msgid "Block size"
+msgstr "Tamaño del bloque"
+
+msgid "Blue"
+msgstr "Azul"
+
+msgid "Brightness (mean of all bands)"
+msgstr "Brillo (media de todas las bandas)"
+
+msgid "Choose a different band for each role."
+msgstr "Elige una banda distinta para cada papel."
+
+msgid "Choose the band for:"
+msgstr "Elige la banda para:"
+
+msgid "Choose the index."
+msgstr "Elige el índice."
+
+msgid "Clean Raster"
+msgstr "Limpar raster"
+
+msgid "Confidence"
+msgstr "Confianza"
+
+msgid "Confusion matrix"
+msgstr "Matriz de confusión"
+
+msgid "EVI - enhanced vegetation"
+msgstr "EVI - vegetación mejorado"
+
+msgid ""
+"Each pixel takes the most frequent class of its neighbours. A bigger window "
+"cleans more but blurs small areas."
+msgstr ""
+"Cada píxel toma la clase más frecuente de sus vecinos. Una ventana mayor "
+"limpa más pero difumina las zonas pequeñas."
+
+msgid "Enter the block size, a number greater than 0."
+msgstr "Indica el tamaño del bloque, un número mayor que 0."
+
+msgid "Green"
+msgstr "Verde"
+
+msgid ""
+"Groups of connected pixels smaller than this are absorbed by their largest "
+"neighbour. The edges of the large areas are not changed."
+msgstr ""
+"Los grupos de píxeles conectados más pequeños que esto los absorbe su vecino"
+" mayor. Los bordes de las zonas grandes no cambian."
+
+msgid "How quality is measured"
+msgstr "Cómo se mide la calidad"
+
+msgid "Index"
+msgstr "Índice"
+
+msgid "Leave sample polygons out"
+msgstr "Dejar fuera polígonos de muestra"
+
+msgid "Leave spatial blocks out"
+msgstr "Dejar fuera bloques espaciales"
+
+msgid "Majority filter (smooths)"
+msgstr "Filtro de mayoría (suaviza)"
+
+msgid "Mean of all the bands of the raster."
+msgstr "Media de todas las bandas del raster."
+
+msgid "Method"
+msgstr "Método"
+
+msgid "Minimum patch size (keeps the edges)"
+msgstr "Tamaño mínimo de parche (conserva los bordes)"
+
+msgid "Minimum patch size (pixels)"
+msgstr "Tamaño mínimo del parche (píxeles)"
+
+msgid "NDBI - built-up areas"
+msgstr "NDBI - zonas construidas"
+
+msgid "NDVI - vegetation"
+msgstr "NDVI - vegetación"
+
+msgid "NDWI - water"
+msgstr "NDWI - agua"
+
+msgid "Name of the new band"
+msgstr "Nome de la banda nova"
+
+msgid "Near infrared (NIR)"
+msgstr "Infrarrojo cercano (NIR)"
+
+msgid ""
+"Neighbouring pixels look alike, so a random split is optimistic. Leaving out"
+" whole polygons or blocks gives a more honest estimate."
+msgstr ""
+"Los píxeles vecinos se parecen, así que reservar datos al azar es optimista."
+" Dejar fuera polígonos o bloques enteros da una estimación más honesta."
+
+msgid "Normalized difference of two bands"
+msgstr "Diferença normalizada de dos bandas"
+
+msgid "Number of rounds"
+msgstr "Número de rondas"
+
+msgid "Random split"
+msgstr "Reserva aleatoria"
+
+msgid "Red"
+msgstr "Rojo"
+
+msgid "Reflectance scale"
+msgstr "Escala de reflectancia"
+
+msgid ""
+"Removes the isolated pixels (\"salt and pepper\") of a classified raster. "
+"Use it between Predict Raster and Raster to Polygons."
+msgstr ""
+"Elimina los píxeles aislados (\"sal y pimienta\") de un raster clasificado. "
+"Úsalo entre Prever raster y Raster a polígonos."
+
+msgid "Repetitions"
+msgstr "Repeticiones"
+
+msgid "SAVI - vegetation, soil adjusted"
+msgstr "SAVI - vegetación, ajustado al suelo"
+
+msgid "Shortwave infrared (SWIR)"
+msgstr "Infrarrojo de onda corta (SWIR)"
+
+msgid ""
+"Side of each square block, in the units of the raster coordinate system (for"
+" example metres)."
+msgstr ""
+"Lado de cada bloque cuadrado, en las unidades del sistema de coordenadas del"
+" raster (por ejemplo metros)."
+
+msgid "Soil adjustment (L)"
+msgstr "Ajuste del suelo (L)"
+
+msgid "Spectral Index"
+msgstr "Índice espectral"
+
+msgid ""
+"The confusion matrix has one column per predicted class, named pred_ "
+"followed by the class."
+msgstr ""
+"La matriz de confusión tiene una columna por cada clase predicha, llamada "
+"pred_ seguido de la clase."
+
+msgid "The data is split into this many parts; each one is left out once."
+msgstr ""
+"Los datos se dividen en tantas partes; cada una se deja fuera una vez."
+
+msgid "The minimum patch size must be a whole number of at least 2 pixels."
+msgstr ""
+"El tamaño mínimo del parche debe ser un número entero de al menos 2 píxeles."
+
+msgid "The number of rounds must be between 2 and 10."
+msgstr "El número de rondas debe estar entre 2 y 10."
+
+msgid "The reflectance scale must be a number greater than 0."
+msgstr "La escala de reflectancia debe ser un número mayor que 0."
+
+msgid "The repetitions must be a whole number between 1 and 5."
+msgstr "Las repeticiones deben ser un número entero entre 1 y 5."
+
+msgid ""
+"The second output is a raster with how sure the model is of each pixel, from"
+" 0 to 1 (for a numeric model, the disagreement between the trees, in the "
+"units of the variable). It is always generated; connect it only if you need "
+"it."
+msgstr ""
+"La segunda salida es un raster con lo seguro que está el modelo de cada "
+"píxel, de 0 a 1 (en un modelo numérico, el desacuerdo entre los árboles, en "
+"las unidades de la variable). Se genera siempre; conéctala solo si la "
+"necesitas."
+
+msgid "The soil adjustment must be between 0 and 1."
+msgstr "El ajuste del suelo debe estar entre 0 y 1."
+
+msgid "This is how the band will appear in the following steps."
+msgstr "Así aparecerá la banda en los pasos siguientes."
+
+msgid ""
+"Value that means 100% reflectance: 1 if the bands are already between 0 and "
+"1, 10000 for Sentinel-2 L2A or 255 for 8-bit images."
+msgstr ""
+"Valor que significa el 100 % de reflectancia: 1 si las bandas ya están entre"
+" 0 y 1, 10000 en Sentinel-2 L2A o 255 en imágenes de 8 bits."
+
+msgid "Window"
+msgstr "Ventana"
+
+msgid "Add a new version (keeps the previous ones)"
+msgstr "Adicionar una versión nova (conserva las anteriores)"
+
+msgid "All bands"
+msgstr "Todas las bandas"
+
+msgid "Always regenerate it"
+msgstr "Regenerarlo siempre"
+
+msgid ""
+"Applies the model to every row of a table (parcels, points, sections…). The "
+"result is the same table, geometry included, with two new columns: the "
+"prediction and how sure the model is (for a numeric model, the disagreement "
+"between the trees)."
+msgstr ""
+"Aplica el modelo a cada fila de una tabela (parcelas, puntos, tramos…). El "
+"resultado es la mesma tabela, con su geometria, y dos columnas nuevas: la "
+"predicción y lo seguro que está el modelo (en un modelo numérico, el "
+"desacuerdo entre los árboles)."
+
+msgid "Assess Classification"
+msgstr "Avaliar classificação"
+
+msgid "Automatic"
+msgstr "Automático"
+
+msgid "Band to publish"
+msgstr "Banda a publicar"
+
+msgid "Bilinear"
+msgstr "Bilineal"
+
+msgid ""
+"Bilinear is smoother and suits imagery and continuous values. Nearest keeps "
+"the original values and is the one to use for classes."
+msgstr ""
+"Bilineal es más suave y sirve para imágenes y valores continuos. El vecino "
+"más próximo conserva los valores originales y es el que hay que usar con "
+"clases."
+
+msgid "Choose the saved model."
+msgstr "Elige el modelo guardado."
+
+msgid "Classes"
+msgstr "Clases"
+
+msgid "Classification"
+msgstr "Classificação"
+
+msgid "Colour ramp: maximum"
+msgstr "Rampa de color: máximo"
+
+msgid "Colour ramp: minimum"
+msgstr "Rampa de color: mínimo"
+
+msgid "Column of the validation samples with the real class of each one."
+msgstr "Columna de las muestras de validación con la clase real de cada una."
+
+msgid "Combine Rasters"
+msgstr "Combinar rasters"
+
+msgid "Connect a table and a trained model."
+msgstr "Conecta una tabela y un modelo entrenado."
+
+msgid "Connect a trained model first."
+msgstr "Conecta primero un modelo entrenado."
+
+msgid "Connect and configure at least two rasters first."
+msgstr "Conecta y configura primero al menos dos raster."
+
+msgid "Connect at least two rasters."
+msgstr "Conecta al menos dos raster."
+
+msgid "Connect the validation samples first."
+msgstr "Conecta primero las muestras de validación."
+
+msgid "Delete the model and all its versions?"
+msgstr "¿Apagar el modelo y todas sus versiones?"
+
+msgid "Delete the whole model"
+msgstr "Apagar el modelo entero"
+
+msgid "Delete this version"
+msgstr "Apagar esta versión"
+
+msgid "Delete this version of the model?"
+msgstr "¿Apagar esta versión del modelo?"
+
+msgid "Description"
+msgstr "Descrição"
+
+msgid "Fill in both limits of the colour ramp, or leave both empty."
+msgstr "Rellena los dos límites de la rampa de color, o deja los dos vacíos."
+
+msgid "For a raster with several bands. By default it is published as it is."
+msgstr "Para un raster con varias bandas. Por defecto se publica tal cual."
+
+msgid ""
+"For each class, \"precision\" is the accuracy for the user (of what the map "
+"says is that class, how much really is) and \"recall\" is the accuracy for "
+"the producer (of what really is that class, how much the map finds)."
+msgstr ""
+"En cada clase, \"precision\" es la exactitud del usuário (de lo que el mapa "
+"dice que es esa clase, cuánto lo es de verdad) y \"recall\" la exactitud del"
+" productor (de lo que realmente es esa clase, cuánto encuentra el mapa)."
+
+msgid "If the model already exists"
+msgstr "Si el modelo já existe"
+
+msgid "It will be saved as:"
+msgstr "Se guardará como:"
+
+msgid ""
+"Joins the bands of several rasters (for example an orthophoto and a terrain "
+"model with another resolution) into one. The first connected raster is the "
+"reference: the others are reprojected and resampled to its grid. Where a "
+"raster does not cover the reference, its bands have no data."
+msgstr ""
+"Une las bandas de varios raster (por ejemplo una ortofoto y un modelo del "
+"terreno con otra resolución) en uno solo. El primer raster conectado es la "
+"referencia: los demás se reproyectan y remuestrean a su cuadrícula. Donde un"
+" raster no cubre la referencia, sus bandas no tienen dato."
+
+msgid ""
+"Keeps the trained model so it can be applied later to other images or tables"
+" without training again. Models are private to the user who saves them."
+msgstr ""
+"Guarda el modelo entrenado para poder aplicarlo más tarde a otras imágenes o"
+" tabelas sin volver a entrenar. Los modelos son privados del usuário que los"
+" guarda."
+
+msgid "Latest"
+msgstr "La última"
+
+msgid ""
+"Latest always uses the most recent version, even if you save a newer one "
+"later."
+msgstr ""
+"La última usa siempre la versión más reciente, aunque guardes otra más nova "
+"depois."
+
+msgid "Layer description"
+msgstr "Descrição de la camada"
+
+msgid ""
+"Measures how good a classified raster is using validation samples that were "
+"NOT used to train the model: polygons (all their pixels) or points, each "
+"with its real class. It gives the overall accuracy, kappa, the accuracy of "
+"each class and the confusion matrix."
+msgstr ""
+"Mide la calidad de un raster clasificado con muestras de validación que NO "
+"se usaron para entrenar el modelo: polígonos (todos sus píxeles) o puntos, "
+"cada uno con su clase real. Da la exactitud global, el kappa, la exactitud "
+"de cada clase y la matriz de confusión."
+
+msgid "Model name"
+msgstr "Nome del modelo"
+
+msgid "Name of the prediction column"
+msgstr "Nome de la columna de predicción"
+
+msgid "Nearest neighbour"
+msgstr "Vecino más próximo"
+
+msgid "Never touch it"
+msgstr "No tocarlo nunca"
+
+msgid ""
+"Only for rasters with values (not classes). The confidence always goes from "
+"0 to 1."
+msgstr ""
+"Solo para raster de valores (no de clases). La confianza va siempre de 0 a "
+"1."
+
+msgid "Optional. For example the image, the date or the samples used."
+msgstr "Opcional. Por ejemplo la imagen, la data o las muestras usadas."
+
+msgid ""
+"Optional. Useful when several rasters have bands with the same name, for "
+"example two dates."
+msgstr ""
+"Opcional. Útil cuando varios raster tienen bandas con el mesmo nome, por "
+"ejemplo dos fechas."
+
+msgid "Predict Table"
+msgstr "Prever tabela"
+
+msgid "Prefix for the bands of raster"
+msgstr "Prefijo de las bandas del raster"
+
+msgid "Raster 1 (reference)"
+msgstr "Raster 1 (referencia)"
+
+msgid "Raster 2"
+msgstr "Raster 2"
+
+msgid "Raster 3"
+msgstr "Raster 3"
+
+msgid "Raster 4"
+msgstr "Raster 4"
+
+msgid "Regression"
+msgstr "Regresión"
+
+msgid "Replace it (deletes the previous versions)"
+msgstr "Reemplazarlo (borra las versiones anteriores)"
+
+msgid ""
+"Replacing keeps the layer and its permissions: only the raster changes."
+msgstr ""
+"Al reemplazar se conserva la camada y sus permisos: solo cambia el raster."
+
+msgid "Resampling"
+msgstr "Remuestreo"
+
+msgid "Save Model"
+msgstr "Salvar modelo"
+
+msgid "Saved Model"
+msgstr "Modelo salvo"
+
+msgid "Style when replacing"
+msgstr "Estilo al reemplazar"
+
+msgid "Table"
+msgstr "Tabela"
+
+msgid "That model or version no longer exists."
+msgstr "Ese modelo o esa versión ya no existe."
+
+msgid "The colour ramp limits must be numbers."
+msgstr "Los límites de la rampa de color deben ser números."
+
+msgid ""
+"The confidence goes in a column with the same name followed by _confidence. "
+"Rows with empty or non-numeric values in the variables are left without "
+"prediction."
+msgstr ""
+"La confianza va en una columna con el mesmo nome seguido de _confidence. Las"
+" linhas con valores vacíos o no numéricos en las variables se quedan sin "
+"predicción."
+
+msgid "The maximum of the colour ramp must be greater than the minimum."
+msgstr "El máximo de la rampa de color debe ser mayor que el mínimo."
+
+msgid "The model could not be deleted."
+msgstr "No se ha podido apagar el modelo."
+
+msgid "The saved models could not be loaded."
+msgstr "No se han podido cargar los modelos guardados."
+
+msgid ""
+"The style created by this node is updated when the classes or the value "
+"range change. Classes that already existed keep their colour. A style you "
+"made yourself is never touched."
+msgstr ""
+"El estilo creado por este nodo se actualiza cuando cambian las clases o el "
+"rango de valores. Las clases que ya existían conservan su color. Un estilo "
+"que hayas hecho tú nunca se toca."
+
+msgid "The table already has a column with that name. Choose another name."
+msgstr "La tabela ya tiene una columna con ese nome. Elige otro nome."
+
+msgid "The table does not have the columns the model was trained with:"
+msgstr "La tabela no tiene las columnas con las que se entrenó el modelo:"
+
+msgid "The table has all the columns the model needs:"
+msgstr "La tabela tiene todas las columnas que necesita el modelo:"
+
+msgid "There are no saved models yet. Train one and save it with Save Model."
+msgstr ""
+"Todavía no hay modelos guardados. Entrena uno y guárdalo con Salvar modelo."
+
+msgid "Update it only if the classes or the range change"
+msgstr "Actualizarlo solo si cambian las clases o el rango"
+
+msgid ""
+"Uses a model saved earlier with Save Model, without training again. Connect "
+"it to Predict Raster or Predict Table."
+msgstr ""
+"Usa un modelo guardado antes con Salvar modelo, sin volver a entrenar. "
+"Conéctalo a Prever raster o a Prever tabela."
+
+msgid "Validation samples"
+msgstr "Muestras de validación"
+
+msgid "Variables"
+msgstr "Variables"
+
+msgid "Version"
+msgstr "Versión"
+
+msgid "Write a name for the model."
+msgstr "Escribe un nome para el modelo."
+
+msgid "rows"
+msgstr "linhas"
+
+msgid "Clip Raster"
+msgstr "Recortar raster"
+
+msgid "Mask"
+msgstr "Máscara"
+
+msgid ""
+"Cuts a raster with a mask of polygons (a vector layer), keeping only your "
+"study area. If you want, it also changes the pixel size in the same step, "
+"which makes a large image much lighter."
+msgstr ""
+"Recorta un raster con una máscara de polígonos (una camada vectorial), "
+"dejando solo tu zona de estudio. Si quer, também cambia el tamaño de píxel "
+"en el mesmo paso, lo que aligera mucho una imagen grande."
+
+msgid "What to keep"
+msgstr "Qué conservar"
+
+msgid ""
+"Inside the polygons only: what is outside has no data. The rectangle: the "
+"image is only cut to the extent of the polygons."
+msgstr ""
+"Solo dentro de los polígonos: lo que queda fuera no tiene dato. El "
+"rectángulo: la imagen solo se corta a la extensión de los polígonos."
+
+msgid "New pixel size"
+msgstr "Novo tamaño de píxel"
+
+msgid "Keep the original"
+msgstr "Manter el original"
+
+msgid ""
+"In the units of the raster coordinate system (metres in UTM). For example 1 "
+"for a 25 cm orthophoto: the result has 16 times fewer pixels. Empty = keep "
+"the original."
+msgstr ""
+"En las unidades del sistema de coordenadas del raster (metros en UTM). Por "
+"ejemplo 1 en una ortofoto de 25 cm: el resultado tiene 16 veces menos "
+"píxeles. Vacío = mantener el original."
+
+msgid "Resampling when the size changes"
+msgstr "Remuestreo al cambiar el tamaño"
+
+msgid ""
+"Average is the best way to reduce the size. A raster of classes always uses "
+"nearest neighbour, so classes are not mixed."
+msgstr ""
+"La media es la mejor forma de reducir el tamaño. Un raster de clases usa "
+"siempre el vecino más próximo, para no mezclar clases."
+
+msgid "Inside the polygons only"
+msgstr "Solo dentro de los polígonos"
+
+msgid "The rectangle that contains them"
+msgstr "El rectángulo que los contiene"
+
+msgid "Average"
+msgstr "Media"
+
+msgid "Connect a raster and a mask of polygons first."
+msgstr "Conecta primero un raster y una máscara de polígonos."
+
+msgid "The pixel size must be a number greater than 0."
+msgstr "El tamaño de píxel debe ser un número mayor que 0."
+
+msgid "8-bit image (0-255), for example an orthophoto"
+msgstr "Imagen de 8 bits (0-255), por ejemplo una ortofoto"
+
+msgid "A third of the variables"
+msgstr "Un tercio de las variables"
+
+msgid ""
+"Added to the value before dividing by the scale (for example -1000 in "
+"Sentinel-2 L2A)."
+msgstr ""
+"Se suma al valor antes de dividir por la escala (por ejemplo -1000 en "
+"Sentinel-2 L2A)."
+
+msgid "All the variables (bagging)"
+msgstr "Todas las variables (bagging)"
+
+msgid "Areas"
+msgstr "Superficies"
+
+msgid ""
+"At least 50 per class is the usual recommendation; more points give narrower"
+" intervals. Small classes get all their pixels if they have fewer."
+msgstr ""
+"Lo habitual es recomendar al menos 50 por clase; con más puntos, los "
+"intervalos son más estrechos. Las clases pequeñas aportan todos sus píxeles "
+"si tienen menos."
+
+msgid "Automatic (sample polygons out when possible)"
+msgstr "Automática (dejando fuera polígonos cuando se pueda)"
+
+msgid "Automatic (√p in classification, p/3 in regression)"
+msgstr "Automático (√p en clasificación, p/3 en regresión)"
+
+msgid ""
+"Automatic follows Breiman (2001): the square root of the number of variables"
+" in classification and a third of them in regression. All of them is not a "
+"random forest but bagged trees."
+msgstr ""
+"Automático sigue a Breiman (2001): la raíz cuadrada del número de variables "
+"en clasificación y un tercio en regresión. Usar todas no es un bosque "
+"aleatorio sino un conjunto de árboles por bagging."
+
+msgid "Certainty"
+msgstr "Seguridad"
+
+msgid "Choose the column with the real class."
+msgstr "Elige la columna con la clase real."
+
+msgid "Column with the real class"
+msgstr "Columna con la clase real"
+
+msgid "Confidence level"
+msgstr "Nivel de confianza"
+
+msgid "Connect the reference points first."
+msgstr "Conecta primero los puntos de referencia."
+
+msgid "Custom (scale and offset)"
+msgstr "Personalizada (escala y offset)"
+
+msgid "Estimate Areas"
+msgstr "Estimar áreas"
+
+msgid ""
+"Estimates the real area of each class, correcting the errors of the map with"
+" reference points, and gives its confidence interval (Olofsson et al., "
+"2014). Counting the pixels of a class gives a biased area; this is the "
+"recommended way to report areas."
+msgstr ""
+"Estima la superficie real de cada clase corrigiendo los errores del mapa con"
+" puntos de referencia, y da su intervalo de confianza (Olofsson et al., "
+"2014). Contar los píxeles de una clase da una superficie sesgada; esta es la"
+" forma recomendada de dar superficies."
+
+msgid ""
+"For a statistically valid accuracy of the map, the samples must be a random "
+"sample stratified by class (see Stratified Sample). Hand-drawn polygons only"
+" give an indication."
+msgstr ""
+"Para una exactitud del mapa estadísticamente válida, las muestras deben ser "
+"una muestra aleatoria estratificada por clase (ver Muestreo estratificado). "
+"Los polígonos dibujados a mano solo dan una orientación."
+
+msgid ""
+"How to turn the values of the image into reflectance (0-1) before computing "
+"the index: reflectance = (value + offset) / scale. With an offset "
+"(Sentinel-2 since 2022, Landsat Collection 2) not even the NDVI is right "
+"without it. Orthophotos (PNOA) are not calibrated reflectance: the index is "
+"useful to classify one image, not as a physical measure to compare dates or "
+"sheets."
+msgstr ""
+"Cómo convertir los valores de la imagen en reflectancia (0-1) antes de "
+"calcular el índice: reflectancia = (valor + offset) / escala. Con offset "
+"(Sentinel-2 desde 2022, Landsat Colección 2) ni siquiera el NDVI es correcto"
+" sin convertir. Las ortofotos (PNOA) no son reflectancia calibrada: el "
+"índice sirve para clasificar una imagen, no como medida física para comparar"
+" fechas u hojas."
+
+msgid "Landsat Collection 2 level 2: value × 0.0000275 - 0.2"
+msgstr "Landsat Colección 2 nivel 2: valor × 0,0000275 - 0,2"
+
+msgid ""
+"Measures how good a classified raster is using validation samples that were "
+"NOT used to train the model: polygons (all their pixels) or points, each "
+"with its real class. It gives the overall accuracy, the accuracy of each "
+"class, the confusion matrix and 95 % intervals obtained by resampling whole "
+"samples (bootstrap)."
+msgstr ""
+"Mide la calidad de un raster clasificado con muestras de validación que NO "
+"se usaron para entrenar el modelo: polígonos (todos sus píxeles) o puntos, "
+"cada uno con su clase real. Da la exactitud global, la exactitud de cada "
+"clase, la matriz de confusión e intervalos del 95 % obtenidos remuestreando "
+"muestras enteras (bootstrap)."
+
+msgid "Offset"
+msgstr "Offset"
+
+msgid ""
+"Picks random points from each class of a classified map, all pixels of a "
+"class with the same chance. You then write the real class of each point in "
+"the \"reference\" column (in the field, or looking at an orthophoto) and use"
+" them in Estimate Areas. This is the sampling design that makes accuracy and"
+" areas statistically valid."
+msgstr ""
+"Elige puntos al azar de cada clase de un mapa clasificado, con la mesma "
+"probabilidad para todos los píxeles de la clase. Depois escribes la clase "
+"real de cada punto en la columna \"reference\" (en campo o mirando una "
+"ortofoto) y los usas en Estimar superficies. Es el diseño de muestreo que "
+"hace estadísticamente válidas la exactitud y las superficies."
+
+msgid "Points per class"
+msgstr "Puntos por clase"
+
+msgid "Reference points"
+msgstr "Puntos de referencia"
+
+msgid ""
+"SAVI and EVI need reflectance values between 0 and 1: choose how to convert "
+"the image, unless it already is."
+msgstr ""
+"SAVI y EVI necesitan valores de reflectancia entre 0 y 1: elige cómo "
+"convertir la imagen, salvo que ya lo sea."
+
+msgid "Sentinel-2 L2A before 2022: value / 10000"
+msgstr "Sentinel-2 L2A anterior a 2022: valor / 10000"
+
+msgid "Sentinel-2 L2A since 2022: (value - 1000) / 10000"
+msgstr "Sentinel-2 L2A desde 2022: (valor - 1000) / 10000"
+
+msgid "Square root of the number of variables"
+msgstr "Raíz cuadrada del número de variables"
+
+msgid "Stratified Sample"
+msgstr "Amostra estratificada"
+
+msgid "The offset must be a number."
+msgstr "El offset debe ser un número."
+
+msgid ""
+"The points must come from a random sample stratified by map class, such as "
+"the one made by Stratified Sample."
+msgstr ""
+"Los puntos deben venir de una muestra aleatoria estratificada por clase del "
+"mapa, como la que hace Muestreo estratificado."
+
+msgid "The points per class must be a whole number of at least 2."
+msgstr "Los puntos por clase deben ser un número entero de al menos 2."
+
+msgid "The same seed gives the same points every time."
+msgstr "Con la mesma semilla salen siempre los mismos puntos."
+
+msgid ""
+"The second output (Certainty) says how sure the model is of each pixel: the "
+"share of votes of the trees for the chosen class, from 0 to 1. It is a "
+"relative indicator, not a calibrated probability. For a numeric model it is "
+"the spread between the trees, in the units of the variable, which is smaller"
+" than a real prediction interval. It is always generated; connect it only if"
+" you need it."
+msgstr ""
+"La segunda salida (Seguridad) indica lo seguro que está el modelo de cada "
+"píxel: la proporción de votos de los árboles para la clase elegida, de 0 a "
+"1. Es un indicador relativo, no una probabilidad calibrada. En un modelo "
+"numérico es la dispersión entre los árboles, en las unidades de la variable,"
+" que es menor que un intervalo de predicción real. Se genera siempre; "
+"conéctala solo si la necesitas."
+
+msgid "Use them as they are (already reflectance, or only to classify)"
+msgstr "Usarlos tal cual (ya son reflectancia, o solo para clasificar)"
+
+msgid "Value that means 100% reflectance."
+msgstr "Valor que equivale al 100 % de reflectancia."
+
+msgid "Values of the image"
+msgstr "Valores de la imagen"
+
+msgid "Variables tried at each split"
+msgstr "Variables por división"
+
+msgid "Show node on the canvas"
+msgstr "Ver el nodo en el canvas"
+
+msgid "Copy"
+msgstr "Copiar"
+
+msgid "Edit and resend"
+msgstr "Editar y reenviar"
+
+msgid "Ask again"
+msgstr "Volver a preguntar"
+
+msgid "Regenerate answer"
+msgstr "Regenerar la respuesta"
+
+msgid "Stop"
+msgstr "Detener"
+
+msgid "Send"
+msgstr "Enviar"
+
+msgid "Conversation with the ETL assistant"
+msgstr "Conversa con el asistente ETL"
+
+msgid "You"
+msgstr "Tú"
+
+msgid "Assistant"
+msgstr "Assistente"
+
+msgid "Thinking…"
+msgstr "Pensando…"
+
+msgid "Stopped. The canvas has not changed."
+msgstr "Detenido. El canvas no ha cambiado."
+
+msgid "Delete the whole conversation?"
+msgstr "¿Apagar toda la conversa?"
+
+msgid "Checking the available connections"
+msgstr "Consultando las conexões disponibles"
+
+msgid "Listing the tables of"
+msgstr "Listando las tabelas de"
+
+msgid "Listing the schemas of"
+msgstr "Listando los esquemas de"
+
+msgid "Reading the columns of"
+msgstr "Leyendo las columnas de"
+
+msgid "Reading the node specs"
+msgstr "Leyendo las fichas de los nodos"
+
+msgid "Looking for files"
+msgstr "Buscando arquivos"
+
+msgid "Looking for files in"
+msgstr "Buscando arquivos en"
+
+msgid "Reading the nodes"
+msgstr "Leyendo los nodos"
+
+msgid "Checking the flow"
+msgstr "Revisando el flujo"
+
+msgid "Validating the proposal"
+msgstr "Validando la propuesta"
+
+msgid "Working…"
+msgstr "Trabajando…"
+
+msgid "Problems in the flow"
+msgstr "Problemas del flujo"
+
+msgid "Configure node"
+msgstr "Configurar"
+
+msgid "Fix problem"
+msgstr "Arreglar"
+
+msgid "Fix all problems"
+msgstr "Arreglar todo"
+
+msgid "The node is not on the canvas. Apply the changes first."
+msgstr "El nodo no está en el canvas. Aplica antes los cambios."
+
+msgid "Fix this problem:"
+msgstr "Arregla este problema:"
+
+msgid "Fix these problems:"
+msgstr "Arregla estos problemas:"
+
+msgid "The assistant needs to know"
+msgstr "Necesito estos datos"
+
+msgid "Answer questions"
+msgstr "Responder"
+
+msgid "Other answer…"
+msgstr "Otra respuesta…"
+
+msgid "Write the answer…"
+msgstr "Escribe la respuesta…"
+
+msgid "Other…"
+msgstr "Otro…"
+
+msgid "Search…"
+msgstr "Buscar…"
+
+msgid "Answered in the text box."
+msgstr "Respondido en el cuadro de texto."
+
+msgid "Change this assumption"
+msgstr "Cambiar esta suposición"
+
+msgid "Apply the changes first."
+msgstr "Aplica antes los cambios."
+
+msgid "These changes are no longer on the canvas."
+msgstr "Estos cambios ya no están en el canvas."
+
+msgid "Choose a value"
+msgstr "Elegir"
+
+msgid "Choose an option…"
+msgstr "Elige una opción…"
+
+msgid "Choose the connection of the node first."
+msgstr "Elige antes la conexão del nodo."
+
+msgid "Choose the schema of the node first."
+msgstr "Elige antes el esquema del nodo."
+
+msgid "There are no options available."
+msgstr "No hay opciones disponibles."
+
+msgid "The options could not be loaded."
+msgstr "No se han podido cargar las opciones."
+
+msgid "Value chosen:"
+msgstr "Valor elegido:"
+
+msgid "Add a PostGIS output"
+msgstr "Adicionar una salida a PostGIS"
+
+msgid "Add an output to a new PostGIS table at the end of the flow."
+msgstr "Añade una salida a una tabela nova de PostGIS al final del flujo."
+
+msgid "Explain the flow"
+msgstr "Explicar el flujo"
+
+msgid "Explain what the flow on the canvas does, step by step."
+msgstr "Explique o que o fluxo no canvas faz, passo a passo."
+
+msgid "Review the flow"
+msgstr "Revisar el flujo"
+
+msgid ""
+"Review the flow and tell me which parameters are missing or may cause "
+"errors."
+msgstr "Revisa el flujo y dime qué parámetros faltan o pueden dar errores."
+
+msgid "Create the flow"
+msgstr "Criar el flujo"
+
+msgid "Ask the assistant"
+msgstr "Preguntar al asistente"
+
+msgid "CSV file"
+msgstr "Arquivo CSV"
+
+msgid "You have no PostGIS connections available."
+msgstr "No tienes conexões PostGIS disponibles."
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "You have no connections available."
+msgstr "No tienes conexões disponibles."
+
+msgid "Change file"
+msgstr "Cambiar arquivo"
+
+msgid "Create a new data store…"
+msgstr "Criar un almacén novo…"
+
+msgid "Where to create the table"
+msgstr "Dónde criar la tabela"
+
+msgid "Load the CSV file {file} into a new table of the data store {store}."
+msgstr "Carga el arquivo CSV {file} en una tabela nova del almacén {store}."
+
+msgid "The run failed"
+msgstr "La execução ha fallado"
+
+msgid "Node:"
+msgstr "Nodo:"
+
+msgid "Copy error"
+msgstr "Copiar error"
+
+msgid "Copied"
+msgstr "Copiado"
+
+msgid "The last run failed. See the details above the canvas."
+msgstr "La última execução ha fallado. Consulta el detalle encima del canvas."
+
+msgid "The flow failed with this error. Explain the cause and how to fix it:"
+msgstr ""
+"El flujo ha fallado con este error. Explica la causa y cómo arreglarlo:"
+
+msgid "The columns of the node could not be read:"
+msgstr "No se han podido leer las columnas del nodo:"
+
+msgid "Publish Layer"
+msgstr "Publicar camada"
+
+msgid "Layer"
+msgstr "Camada"
+
+msgid "Data store"
+msgstr "Almacén"
+
+msgid ""
+"Saves the table in a data store and publishes it as a layer with a default "
+"style."
+msgstr ""
+"Guarda la tabela en un almacén y la publica como camada con un estilo por "
+"defecto."
+
+msgid ""
+"Replacing keeps the layer, its style and its permissions: only the data "
+"changes."
+msgstr ""
+"Al reemplazar se conservan la camada, su estilo y sus permisos: solo cambian"
+" los datos."
+
+msgid "Replace its data"
+msgstr "Reemplazar sus datos"
+
+msgid "Choose the data store."
+msgstr "Elige el almacén."
+
+msgid "The data stores and layer groups could not be loaded."
+msgstr "No se han podido cargar los almacenes y grupos de camadas."
+
+msgid "That file is not valid. Choose a file of type:"
+msgstr "Ese arquivo no es válido. Elige un arquivo de tipo:"
+
+msgid "{done} of {total}"
+msgstr "{done} de {total}"
