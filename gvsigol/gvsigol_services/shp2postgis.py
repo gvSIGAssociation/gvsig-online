@@ -669,24 +669,22 @@ def do_export_gpkg_to_postgis(gs, name, datastore, creation_mode, gpkg_path, gpk
         config_options = {}
         if creation_mode == MODE_OVERWRITE and truncate:
             config_options["OGR_TRUNCATE"] = "YES"
-        if preserve_pk:
-            if creation_mode == MODE_APPEND or (creation_mode == MODE_OVERWRITE and truncate):
-                preserve_fid = True
-                src_path = create_vrt_shp(src_path, tmp_folder, db_pk, encoding, srs, source_layer_name=gpkg_layer)
-                vrt_layer = os.path.splitext(os.path.basename(src_path))[0]
-                creation_options = {}
-                column_types = {}
-                sql, db_pk = fieldmapping_sql(
-                    creation_mode, src_path, gpkg_fields, name, host, port, db, schema, user, password,
-                    creation_options, column_types, pk_column, source_layer_name=vrt_layer
-                )
-            else:
-                preserve_fid = False
-        else:
-            if creation_mode == MODE_APPEND:
-                preserve_fid = False
-            else:
-                preserve_fid = True
+        # GPKG FID is usually the internal "fid" column, not a regular attribute. A VRT
+        # <FID>ogc_fid</FID> (shapefile trick) fails with "Unable to identify FID field"
+        # and drops geometry (Geometry: None). Preserve values with -preserve_fid and
+        # force the PostGIS FID column name via -lco FID= instead — never use that VRT.
+        preserve_fid = bool(preserve_pk)
+
+        # Recreate (CREATE / OVERWRITE without truncate) must use ogc_fid — gvSIG Online
+        # and GeoServer expect that name. Truncate/append keeps the existing table PK.
+        recreating = creation_mode == MODE_CREATE or (
+            creation_mode == MODE_OVERWRITE and not truncate
+        )
+        if recreating:
+            db_pk = pk_column or 'ogc_fid'
+        creation_options['FID'] = db_pk
+        if 'GEOMETRY_NAME' not in creation_options:
+            creation_options['GEOMETRY_NAME'] = 'wkb_geometry'
 
         creation_options['COLUMN_TYPES'] = ",".join(list(column_types.values()))
         # Concrete Multi* when detectable (GPKG "Unknown" + polygons → MULTIPOLYGON).
@@ -758,7 +756,14 @@ def do_export_gpkg_to_postgis(gs, name, datastore, creation_mode, gpkg_path, gpk
                 i.delete_table(schema, name)
                 i.close()
                 try:
-                    stderr = shp2postgis(gpkg_path, name, srs, host, port, dbname, schema, user, passwd, creation_mode, encoding)
+                    nlt = detect_gpkg_output_geom_type(gpkg_path, gpkg_layer)
+                    stderr = shp2postgis(
+                        gpkg_path, name, srs, host, port, dbname, schema, user, passwd,
+                        creation_mode, encoding,
+                        preserve_fid=bool(preserve_pk),
+                        creation_options={'FID': 'ogc_fid', 'GEOMETRY_NAME': 'wkb_geometry'},
+                        geom_type=nlt,
+                    )
                     if stderr:
                         raise rest_geoserver.RequestError(-1, stderr)
                     return True
