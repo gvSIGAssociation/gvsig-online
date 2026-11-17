@@ -1219,9 +1219,17 @@ class LayerCapabilities(APIView):
     def get(self, request, lyr_id):
         layer = Layer.objects.get(id = int(lyr_id))
         if layer.external:
-            external_params = json.loads(layer.external_params)
+            try:
+                external_params = json.loads(layer.external_params) if layer.external_params else {}
+            except (json.JSONDecodeError, TypeError):
+                external_params = {}
+            capabilities = external_params.get('capabilities') if isinstance(external_params, dict) else None
+            if isinstance(capabilities, str):
+                capabilities = capabilities.strip()
+            if not capabilities or (isinstance(capabilities, str) and capabilities.lower() in ('null', 'none')):
+                return HttpException(404, "Data NOT exists for this layer").get_exception()
             result = {
-                "content" : external_params['capabilities'],
+                "content" : capabilities,
                 "links" : [
                     {
                         "rel" : "self",

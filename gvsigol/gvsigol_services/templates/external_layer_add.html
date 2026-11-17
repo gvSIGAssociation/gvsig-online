@@ -547,14 +547,6 @@ $(document).ready(function(){
 					}
 				}
 
-				if (data.capabilities) {
-					$('<input>').attr({
-					    type: 'hidden',
-					    id: 'capabilities',
-					    name: 'capabilities',
-					    value: JSON.stringify(data.capabilities)
-					}).appendTo('#external-layer-add-form');
-				}
 				if (data.wmts_options) {
 					$('<input>').attr({
 					    type: 'hidden',

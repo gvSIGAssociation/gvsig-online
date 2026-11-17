@@ -6259,7 +6259,6 @@ def external_layer_add(request):
             if external_layer.type == 'WMTS':
                 params['matrixset'] = request.POST.get('matrixset')
                 params['tilematrix'] = request.POST.get('tilematrix')
-                params['capabilities'] = request.POST.get('capabilities') ## TODO remove this
                 wmts_options = json.loads(request.POST.get('wmts_options'))
                 wmts_options = utils.wmts_options_for_openlayers(
                     wmts_options,
@@ -6510,7 +6509,6 @@ def external_layer_update(request, external_layer_id):
             if external_layer.type == 'WMTS':
                 params['matrixset'] = request.POST.get('matrixset')
                 params['tilematrix'] = request.POST.get('tilematrix')
-                params['capabilities'] = request.POST.get('capabilities') ## TODO remove this
                 try:
                     wmts_options = json.loads(request.POST.get('wmts_options'))
                     wmts_options = utils.wmts_options_for_openlayers(
