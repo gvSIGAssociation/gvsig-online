@@ -184,6 +184,7 @@ class BrowserView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, Tem
             context.update(self.explorer_context())
         else:
             context['files'] = self.fm.directory_list(self.request, context['first_level'])
+            context['new_ui_link'] = self.new_ui_link()
 
         return context
 
@@ -195,16 +196,38 @@ class BrowserView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, Tem
         """
         ui = self.request.GET.get('ui')
         session = getattr(self.request, 'session', None)
+        # La página y el selector se recuerdan por separado: elegir la clásica en uno no debe
+        # cambiar el otro (antes, pulsar «Vista clásica» en la página dejaba todos los selectores
+        # en la clásica). Así, los selectores que abren otras pantallas (sin ?ui=) siguen la
+        # elección hecha en un selector.
+        key = self.ui_session_key()
         if ui in ('new', 'classic'):
-            # Se recuerda en la sesión del usuario: así los selectores que abren otras pantallas
-            # (que no pasan ?ui=) también salen con la interfaz elegida, solo para él.
-            if session is not None and session.get('filemanager_ui') != ui:
-                session['filemanager_ui'] = ui
+            if session is not None and session.get(key) != ui:
+                session[key] = ui
             return ui == 'new'
-        if session is not None and session.get('filemanager_ui') in ('new', 'classic'):
-            return session.get('filemanager_ui') == 'new'
+        if session is not None and session.get(key) in ('new', 'classic'):
+            return session.get(key) == 'new'
         setting = 'FILEMANAGER_NEW_POPUP' if self.popup else 'FILEMANAGER_NEW_UI'
         return bool(getattr(settings, setting, False))
+
+    def ui_session_key(self):
+        return 'filemanager_ui_popup' if self.popup else 'filemanager_ui'
+
+    def picker_select(self):
+        """?select=folder: el selector elige carpetas (los ficheros se ven, pero no se eligen)."""
+        return 'folder' if self.request.GET.get('select') == 'folder' else ''
+
+    def new_ui_link(self):
+        """
+        En la clásica, enlace para volver a la nueva, solo si el usuario la dejó a mano (?ui=classic,
+        recordado en la sesión): así no aparece a quien no tiene activada la interfaz nueva.
+        """
+        session = getattr(self.request, 'session', None)
+        if session is None or session.get(self.ui_session_key()) != 'classic':
+            return None
+        params = self.request.GET.copy()
+        params['ui'] = 'new'
+        return '?' + params.urlencode()
 
     def picker_extensions(self):
         """?ext=tif,tiff: el selector solo muestra (y deja elegir) esos ficheros."""
@@ -244,6 +267,8 @@ class BrowserView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, Tem
                 # ?multiple=1: varios ficheros a la vez (filemanagerMultipleCallback(rutas) si existe,
                 # si no, filemanagerCallback(ruta) una vez por fichero)
                 'multiple': bool(self.popup) and self.request.GET.get('multiple') in ('1', 'true'),
+                # ?select=folder: elegir una carpeta (la marcada o, sin marcar nada, en la que se está)
+                'select': self.picker_select() if self.popup else '',
             },
             'fm_i18n': ui_strings(),
         }

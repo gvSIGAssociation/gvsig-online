@@ -17,12 +17,28 @@ from functools import wraps
 
 from django.core.exceptions import RequestDataTooBig
 from django.http import JsonResponse, StreamingHttpResponse
-from django.utils.http import content_disposition_header
 from django.utils import translation
 from django.utils.translation import gettext as _
 
 from . import fsops, processes, uploads
 from .core import Filemanager, UnzipError
+
+try:
+    from django.utils.http import content_disposition_header
+except ImportError:  # Django < 4.2
+    from urllib.parse import quote
+
+    def content_disposition_header(as_attachment, filename):
+        """Copia de django.utils.http.content_disposition_header (Django 4.2)."""
+        if not (as_attachment or filename):
+            return None
+        disposition = 'attachment' if as_attachment else 'inline'
+        try:
+            filename.encode('ascii')
+            file_expr = 'filename="{}"'.format(filename.replace('\\', '\\\\').replace('"', r'\"'))
+        except UnicodeEncodeError:
+            file_expr = "filename*=utf-8''{}".format(quote(filename))
+        return '{}; {}'.format(disposition, file_expr)
 from .fsops import OperationError
 from .views import can_browse_path, can_manage_path, datastore_using_path, raster_datastore_paths
 

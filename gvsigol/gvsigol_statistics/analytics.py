@@ -33,7 +33,7 @@ from typing import Optional
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count, F, Max, Min, Q
-from django.db.models.functions import (ExtractHour, ExtractIsoWeekDay, TruncDay,
+from django.db.models.functions import (ExtractHour, ExtractWeekDay, TruncDay,
                                         TruncMonth, TruncWeek)
 from django.utils import timezone as dj_timezone
 
@@ -109,7 +109,9 @@ def _parse_day(value, name):
 
 
 def _local_midnight(day, tz):
-    return datetime.datetime(day.year, day.month, day.day, tzinfo=tz)
+    # make_aware y no tzinfo=tz: con Django 2.2 la zona es de pytz y tzinfo=tz
+    # aplicaría el desfase LMT (-0:14:44 en Madrid) en vez de CET/CEST.
+    return dj_timezone.make_aware(datetime.datetime(day.year, day.month, day.day), tz)
 
 
 def parse_query(params, today=None):
@@ -448,12 +450,13 @@ def top(query, verb, by, limit):
 
 def heatmap(query, verb):
     rows = (events(verb, query)
-            .annotate(weekday=ExtractIsoWeekDay('timestamp', tzinfo=query.tz),
+            # ExtractWeekDay (domingo=1..sábado=7) y no ExtractIsoWeekDay, que es de Django 3.0
+            .annotate(weekday=ExtractWeekDay('timestamp', tzinfo=query.tz),
                       hour=ExtractHour('timestamp', tzinfo=query.tz))
             .values('weekday', 'hour').annotate(count=Count('id')).order_by())
     matrix = [[0] * 24 for _ in range(7)]  # lunes..domingo x 0..23 h
     for row in rows:
-        matrix[row['weekday'] - 1][row['hour']] = row['count']
+        matrix[(row['weekday'] + 5) % 7][row['hour']] = row['count']  # domingo(1) -> 6, lunes(2) -> 0
     return {
         'meta': dict(query.as_meta(), verb=verb, tracking_since=tracking_since([verb])),
         'matrix': matrix,

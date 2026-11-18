@@ -171,6 +171,8 @@ UI_STRINGS = {
     'pickSelect': _('Select'),
     'pickNone': _('Choose a file or folder'),
     'pickNoneFile': _('Choose a file'),
+    'pickNoneFolder': _('Open or mark a folder'),
+    'pickFolderHint': _('Mark a folder, or open it and press Select'),
     'pickChosen': _('Selected: {path}'),
     'pickOnly': _('Showing only: {exts}'),
     'pickHint': _('Double-click a file to choose it'),

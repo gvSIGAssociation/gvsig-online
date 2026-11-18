@@ -30,6 +30,9 @@
 	if (MULTI) {
 		fx.classList.add('fx-multi');
 	}
+	// ?select=folder: se eligen carpetas. Los ficheros se ven (filtrados por ext) pero no se eligen;
+	// sin nada marcado, «Seleccionar» elige la carpeta en la que se está.
+	var FOLDERS = POPUP && CFG.select === 'folder';
 
 	// Piezas comunes (filemanager-common.js): utilidades, iconos, API, avisos, diálogos y subidas
 	var G = window.GolFm;
@@ -144,6 +147,9 @@
 			}
 			if (MULTI) {
 				p.set('multiple', '1');
+			}
+			if (FOLDERS) {
+				p.set('select', 'folder');
 			}
 		}
 		if (CFG.keepUiParam) {
@@ -510,7 +516,7 @@
 		list.forEach(function (it) {
 			var sel = S.selected.has(it.path);
 			var isDir = it.type === 'directory';
-			h += '<tr data-path="' + esc(it.path) + '" class="' + (sel ? 'sel' : '') + '"' + (canChange(it) && !POPUP ? ' draggable="true"' : '') + (isDir ? ' data-drop-path="' + esc(it.path) + '"' : '') + '>' +
+			h += '<tr data-path="' + esc(it.path) + '" class="' + (sel ? 'sel' : '') + (FOLDERS && !isDir ? ' fx-off' : '') + '"' + (canChange(it) && !POPUP ? ' draggable="true"' : '') + (isDir ? ' data-drop-path="' + esc(it.path) + '"' : '') + '>' +
 				'<td class="chk"><input type="checkbox" data-role="check" aria-label="' + esc(t('selectItem', { name: it.name })) + '"' + (sel ? ' checked' : '') + '></td>' +
 				'<td><div class="fx-name">' + typeIcon(it) + '<span class="lbl' + (isDir ? ' dir" data-role="open' : '') + '" title="' + esc(it.name) + '">' + esc(it.name) + '</span>' + badgesHtml(it) + '</div></td>' +
 				'<td class="num muted">' + esc(isDir ? '' : fmtSize(it.size)) + '</td>' +
@@ -630,7 +636,7 @@
 		}
 		var right = S.canWrite ? t('dragHint') : (S.loading ? '' : t('readOnlyFolder'));
 		if (POPUP) {
-			right = EXTS.length ? t('pickOnly', { exts: EXTS.map(function (x) { return '.' + x; }).join(', ') }) : t(MULTI ? 'pickHintMulti' : 'pickHint');
+			right = FOLDERS ? t('pickFolderHint') : EXTS.length ? t('pickOnly', { exts: EXTS.map(function (x) { return '.' + x; }).join(', ') }) : t(MULTI ? 'pickHintMulti' : 'pickHint');
 		}
 		el.innerHTML = '<span>' + esc(left) + '</span><span>' + esc(right) + '</span>';
 	}
@@ -800,7 +806,11 @@
 				location.href = CFG.exportsUrl;
 				break;
 			case 'classic':
-				location.href = CFG.browserUrl + '?' + query({ popup: POPUP ? 1 : null, ui: 'classic', path: S.path || null });
+				// En el selector se conservan ext, multiple y select para poder volver a la nueva igual
+				location.href = CFG.browserUrl + '?' + query({
+					popup: POPUP ? 1 : null, ui: 'classic', path: S.path || null,
+					ext: POPUP && EXTS.length ? EXTS.join(',') : null, multiple: MULTI ? 1 : null, select: FOLDERS ? 'folder' : null
+				});
 				break;
 			case 'show-trash':
 				showTrash();
@@ -947,12 +957,16 @@
 		}
 		// En el selector, si las carpetas no se pueden elegir (?ext=...), un clic en cualquier parte
 		// de su fila entra en ella. Si se pueden elegir, un clic la selecciona y doble clic entra.
-		if (POPUP && EXTS.length && plain) {
+		if (POPUP && EXTS.length && plain && !FOLDERS) {
 			var clicked = byPath(path);
 			if (clicked && clicked.type === 'directory') {
 				navigate(path);
 				return;
 			}
+		}
+		// Eligiendo carpetas, los ficheros solo se ven
+		if (FOLDERS && byPath(path) && byPath(path).type !== 'directory') {
+			return;
 		}
 		clickSelect(path, e, false);
 	});
@@ -1641,6 +1655,9 @@
 		if (!item) {
 			return false;
 		}
+		if (FOLDERS) {
+			return item.type === 'directory';
+		}
 		if (EXTS.length) {
 			return item.type !== 'directory' && EXTS.indexOf(item.extension) >= 0;
 		}
@@ -1687,19 +1704,29 @@
 		window.close();
 	}
 
+	/** Lo que se devolvería ahora: lo marcado que se puede elegir o, eligiendo carpetas, la actual. */
+	function pickTargets() {
+		var items = selectedItems().filter(pickable);
+		if (!MULTI && selectedItems().length !== 1) {
+			items = [];
+		}
+		if (FOLDERS && !items.length && !selectedItems().length && S.path) {
+			// La raíz no: es la lista de carpetas de rol, no una carpeta que se pueda usar
+			items = [{ path: S.path, type: 'directory' }];
+		}
+		return items;
+	}
+
 	function renderPick() {
 		var el = document.getElementById('fx-pick');
 		if (!el) {
 			return;
 		}
-		var items = selectedItems().filter(pickable);
-		if (!MULTI && selectedItems().length !== 1) {
-			items = [];
-		}
+		var items = pickTargets();
 		var ok = S.view === 'files' && items.length > 0;
 		var label;
 		if (!ok) {
-			label = esc(EXTS.length ? t('pickNoneFile') : t('pickNone'));
+			label = esc(FOLDERS ? t('pickNoneFolder') : EXTS.length ? t('pickNoneFile') : t('pickNone'));
 		} else if (items.length === 1) {
 			label = esc(t('pickChosen', { path: '' })) + '<b>' + esc(displayPath(items[0].path)) + '</b>';
 		} else {
@@ -1759,7 +1786,7 @@
 			if (b.getAttribute('data-pick') === 'cancel') {
 				window.close();
 			} else {
-				pick(selectedItems());
+				pick(pickTargets());
 			}
 		});
 	}

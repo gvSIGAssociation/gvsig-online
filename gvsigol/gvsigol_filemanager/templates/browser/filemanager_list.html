@@ -15,6 +15,12 @@
 			<i class="fa fa-folder-open"></i>
 			{% include "filemanager_breadcrumbs.html" %}
 		</div>
+		{% if new_ui_link %}
+		{# Solo si el usuario dejó la vista nueva a mano: vuelve a ella (lo recuerda la sesión) #}
+		<div class="pl-panel__actions">
+			<a href="{{ new_ui_link }}" class="btn-pl-secondary" data-testid="fm-new-ui"><i class="fa fa-th-large"></i> {% trans "New view" %}</a>
+		</div>
+		{% endif %}
 		{% if not popup %}
 			{% if user.is_superuser or not first_level %}
 			<div class="pl-panel__actions">

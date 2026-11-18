@@ -265,6 +265,8 @@
 .fx.fx-popup { grid-template-rows: auto minmax(0, 1fr) auto auto; height: calc(100vh - 40px); min-height: 360px; }
 .fx-popup:not(.fx-multi) .fx-table .chk, .fx-popup .fx-rowacts, .fx-popup .fx-table th:last-child, .fx-popup .fx-table td:last-child { display: none; }
 .fx-popup .fx-table tbody tr { cursor: pointer; }
+/* ?select=folder: los ficheros se ven, pero no se eligen */
+.fx-popup .fx-table tbody tr.fx-off { opacity: .55; cursor: default; }
 .fx-popup .fx-search input { width: 120px; }
 .fx-popup .fx-name { min-width: 180px; }
 .fx-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--fx-border); background: var(--fx-white); }

@@ -879,3 +879,12 @@ msgstr "Elige otra vez el mismo fichero para continuar donde se quedó."
 #, python-format
 msgid "The zip file has %(count)d items, more than the allowed %(limit)d"
 msgstr "El zip tiene %(count)d elementos, más que el máximo permitido (%(limit)d)"
+
+msgid "New view"
+msgstr "Vista nueva"
+
+msgid "Open or mark a folder"
+msgstr "Abre o marca una carpeta"
+
+msgid "Mark a folder, or open it and press Select"
+msgstr "Marca una carpeta, o ábrela y pulsa Seleccionar"
