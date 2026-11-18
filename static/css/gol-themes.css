@@ -199,7 +199,6 @@ body {
 /* --- Temas de cliente ------------------------------------------- */
 
 .skin-albacete {
-	--hdr-logo-filter: brightness(0) invert(1);
 	--hdr-bg:        #1f4968;
 	--hdr-bg-dk:     #163550;
 	--sb-bg:         #182435;

@@ -48,6 +48,9 @@ body.cat-page {
 	object-fit: contain;
 	filter: var(--hdr-logo-filter);
 }
+.skin-albacete .cat-topbar__logo-img {
+	filter: brightness(0) invert(1);
+}
 .cat-topbar__logo b { font-weight: 700; }
 .cat-topbar__surname { margin-left: 4px; opacity: 0.85; }
 .cat-topbar__link {
