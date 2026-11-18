@@ -158,7 +158,6 @@
 		warn: svg('<path d="M12 4 2.5 20h19L12 4Z"/><path d="M12 10v4M12 17v.5"/>'),
 		check: svg('<path d="m5 12 5 5 9-10"/>', ' stroke-width="2.4"'),
 		history: svg('<path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/>'),
-		classic: svg('<path d="M4 6h16M4 12h16M4 18h16"/>'),
 		chevDown: svg('<path d="m6 9 6 6 6-6"/>'),
 		minus: svg('<path d="M5 12h14"/>'),
 		cloud: svg('<path d="M7 18a4.5 4.5 0 0 1-.7-8.95A6 6 0 0 1 17.8 8.6 4.5 4.5 0 0 1 17 18"/><path d="M12 20v-8M9 15l3-3 3 3"/>')

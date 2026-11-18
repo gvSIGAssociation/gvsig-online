@@ -152,9 +152,6 @@
 				p.set('select', 'folder');
 			}
 		}
-		if (CFG.keepUiParam) {
-			p.set('ui', 'new');
-		}
 		var s = p.toString();
 		return CFG.browserUrl + (s ? '?' + s : '');
 	}
@@ -383,8 +380,7 @@
 				'<button type="button" class="fx-btn icon-only" data-act="toggle-tree" title="' + esc(t('toggleTree')) + '" aria-label="' + esc(t('toggleTree')) + '">' + ICON.tree + '</button>' +
 				'<button type="button" class="fx-btn icon-only" data-act="new-folder" title="' + esc(t('newFolder')) + '" aria-label="' + esc(t('newFolder')) + '"' + pdis + '>' + ICON.plus + '</button>' +
 				'<button type="button" class="fx-btn" data-act="upload-menu" aria-haspopup="menu"' + pdis + '>' + ICON.upload + esc(t('upload')) + ICON.chevDown + '</button>' +
-				procBtnHtml() +
-				'<button type="button" class="fx-btn icon-only ghost" data-act="classic" title="' + esc(t('classicView')) + '" aria-label="' + esc(t('classicView')) + '">' + ICON.classic + '</button>';
+				procBtnHtml();
 		} else {
 			var dis = S.canWrite ? '' : ' disabled title="' + esc(t('readOnlyFolder')) + '"';
 			tools = '<label class="fx-search">' + ICON.search + '<input type="search" id="fx-filter" placeholder="' + esc(t('search')) + '" aria-label="' + esc(t('search')) + '" value="' + esc(S.filter) + '"></label>' +
@@ -805,13 +801,6 @@
 			case 'exports':
 				location.href = CFG.exportsUrl;
 				break;
-			case 'classic':
-				// En el selector se conservan ext, multiple y select para poder volver a la nueva igual
-				location.href = CFG.browserUrl + '?' + query({
-					popup: POPUP ? 1 : null, ui: 'classic', path: S.path || null,
-					ext: POPUP && EXTS.length ? EXTS.join(',') : null, multiple: MULTI ? 1 : null, select: FOLDERS ? 'folder' : null
-				});
-				break;
 			case 'show-trash':
 				showTrash();
 				break;
@@ -851,7 +840,7 @@
 		if (act === 'upload-menu') {
 			openMenu(menuButton('upload-files', ICON.upload, t('uploadFiles')) + menuButton('upload-folder', ICON.folder, t('uploadFolder')), r.left, r.bottom + 4, runAction);
 		} else if (act === 'page-menu') {
-			openMenu(menuButton('show-trash', ICON.trash, t('trash')) + menuButton('exports', ICON.history, t('exportHistory')) + '<hr>' + menuButton('classic', ICON.classic, t('classicView')), r.right - 230, r.bottom + 4, runAction);
+			openMenu(menuButton('show-trash', ICON.trash, t('trash')) + menuButton('exports', ICON.history, t('exportHistory')), r.right - 230, r.bottom + 4, runAction);
 		} else if (act === 'toggle-tree') {
 			if (narrow.matches) {
 				fx.classList.toggle('tree-overlay');

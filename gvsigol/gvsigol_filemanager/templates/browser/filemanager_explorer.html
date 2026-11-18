@@ -3,9 +3,9 @@
 
 {% comment %}
 Interfaz nueva del gestor de ficheros (explorador con árbol). Todo el contenido lo pinta
-filemanager-explorer.js a partir de la API (gvsigol_filemanager/api.py). Se activa con
-FILEMANAGER_NEW_UI (página) / FILEMANAGER_NEW_POPUP (selector ?popup=1) o con ?ui=new;
-?ui=classic vuelve a la clásica. En el selector, extends_template es filemanager_base2.html
+filemanager-explorer.js a partir de la API (gvsigol_filemanager/api.py). Se activa solo con las
+variables de entorno FILEMANAGER_NEW_UI (página) / FILEMANAGER_NEW_POPUP (selector ?popup=1);
+no se puede cambiar en tiempo de ejecución. En el selector, extends_template es filemanager_base2.html
 (sin menú lateral) y la elección se devuelve con window.opener.filemanagerCallback(ruta).
 {% endcomment %}
 
@@ -35,7 +35,6 @@ FILEMANAGER_NEW_UI (página) / FILEMANAGER_NEW_POPUP (selector ?popup=1) o con ?
 	<input type="file" id="fx-input-folder" multiple webkitdirectory hidden>
 </div>
 <div id="fx-layer" class="fx-layer"></div>
-<noscript><p><a href="?ui=classic{% if popup %}&amp;popup=1{% endif %}&amp;path={{ path|urlencode }}">{% trans "Classic view" %}</a></p></noscript>
 {{ fm_config|json_script:"fm-config" }}
 {{ fm_i18n|json_script:"fm-i18n" }}
 {% endblock %}

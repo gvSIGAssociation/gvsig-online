@@ -15,7 +15,6 @@ UI_STRINGS = {
     'toggleTree': _('Show or hide the folder tree'),
     'toggleDetails': _('Show or hide the details panel'),
     'exportHistory': _('Export history'),
-    'classicView': _('Classic view'),
     'folders': _('Folders'),
     'trash': _('Trash'),
     'loading': _('Loading…'),

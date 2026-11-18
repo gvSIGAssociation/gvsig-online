@@ -184,50 +184,21 @@ class BrowserView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, Tem
             context.update(self.explorer_context())
         else:
             context['files'] = self.fm.directory_list(self.request, context['first_level'])
-            context['new_ui_link'] = self.new_ui_link()
 
         return context
 
     def use_explorer(self):
         """
-        Interfaz nueva (explorador) o clásica. ?ui=new / ?ui=classic eligen en cada visita; si no,
-        manda FILEMANAGER_NEW_UI para la página y FILEMANAGER_NEW_POPUP para el selector (?popup=1),
-        que se activan por separado.
+        Interfaz nueva (explorador) o clásica. La deciden solo las variables de entorno:
+        FILEMANAGER_NEW_UI para la página y FILEMANAGER_NEW_POPUP para el selector (?popup=1).
+        No se puede cambiar en tiempo de ejecución.
         """
-        ui = self.request.GET.get('ui')
-        session = getattr(self.request, 'session', None)
-        # La página y el selector se recuerdan por separado: elegir la clásica en uno no debe
-        # cambiar el otro (antes, pulsar «Vista clásica» en la página dejaba todos los selectores
-        # en la clásica). Así, los selectores que abren otras pantallas (sin ?ui=) siguen la
-        # elección hecha en un selector.
-        key = self.ui_session_key()
-        if ui in ('new', 'classic'):
-            if session is not None and session.get(key) != ui:
-                session[key] = ui
-            return ui == 'new'
-        if session is not None and session.get(key) in ('new', 'classic'):
-            return session.get(key) == 'new'
         setting = 'FILEMANAGER_NEW_POPUP' if self.popup else 'FILEMANAGER_NEW_UI'
         return bool(getattr(settings, setting, False))
-
-    def ui_session_key(self):
-        return 'filemanager_ui_popup' if self.popup else 'filemanager_ui'
 
     def picker_select(self):
         """?select=folder: el selector elige carpetas (los ficheros se ven, pero no se eligen)."""
         return 'folder' if self.request.GET.get('select') == 'folder' else ''
-
-    def new_ui_link(self):
-        """
-        En la clásica, enlace para volver a la nueva, solo si el usuario la dejó a mano (?ui=classic,
-        recordado en la sesión): así no aparece a quien no tiene activada la interfaz nueva.
-        """
-        session = getattr(self.request, 'session', None)
-        if session is None or session.get(self.ui_session_key()) != 'classic':
-            return None
-        params = self.request.GET.copy()
-        params['ui'] = 'new'
-        return '?' + params.urlencode()
 
     def picker_extensions(self):
         """?ext=tif,tiff: el selector solo muestra (y deja elegir) esos ficheros."""
@@ -252,7 +223,6 @@ class BrowserView(LoginRequiredMixin, UserPassesTestMixin, FilemanagerMixin, Tem
             'fm_config': {
                 'api': browser_url + 'api/',
                 'browserUrl': browser_url,
-                'keepUiParam': self.request.GET.get('ui') == 'new',
                 'downloadUrl': str(reverse_lazy('fsfilemanager:fdownload', args=['x']))[:-1],
                 'exportUrl': str(reverse_lazy('filemanager:export-to-database')),
                 'transformUrl': transform_url,
