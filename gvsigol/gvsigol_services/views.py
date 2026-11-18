@@ -92,7 +92,7 @@ from gvsigol_statistics.events import record_event, VERB_LAYER, CHANNEL_CLASSIC
 from actstream.models import Action
 from django_sendfile import sendfile
 from gvsigol_services.backend_geoserver import _valid_sql_name_regex
-from lxml import etree, html
+from lxml import html
 from django.contrib import messages
 
 
@@ -6856,7 +6856,6 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
     infoformats = []
     styles = []
     matrixsets = []
-    capabilities = None
     wmts_options = None
     title = ''
     crs_list = None
@@ -6927,11 +6926,6 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
                 version = WMTS_MAX_VERSION
             wmts = WebMapTileService(url, version=version, auth=auth)
             title = wmts.identification.title
-            try:
-                capabilities = etree.tostring(wmts._capabilities, encoding='unicode')
-            except:
-                capabilities = wmts.getServiceXML()
-                capabilities = capabilities.decode('utf-8')
 
             layers = list(wmts.contents)
             if (not layer) and len(layers) > 0:
@@ -6996,7 +6990,6 @@ def ows_get_capabilities(url, service, version, layer, remove_extra_params=True)
         'styles': styles,
         'title': title,
         'matrixsets': matrixsets,
-        'capabilities': capabilities,
         'crs_list': crs_list,
         'get_map_url': get_map_url,
         'tilematrix' : matrix

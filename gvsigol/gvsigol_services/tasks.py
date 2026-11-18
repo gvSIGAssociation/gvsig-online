@@ -300,6 +300,7 @@ def update_internal_wmts_layer_options(layer):
         if wmts_options:
             external_params = json.loads(layer.external_params) if layer.external_params else {}
             external_params['wmts_options'] = wmts_options
+            external_params.pop('capabilities', None)
             layer.external_params = json.dumps(external_params)
             layer.save()
         else:
@@ -324,6 +325,7 @@ def update_external_wmts_layer_options(layer):
                 wmts_options = get_wmts_options(wmts, params['layers'])
                 if wmts_options:
                     params['wmts_options'] = wmts_options
+                    params.pop('capabilities', None)
                     layer.external_params = json.dumps(params)
                     layer.save()
     except Exception as e:
@@ -391,6 +393,7 @@ def update_external_cached_wms_wmts_options(layer):
                 gwc_cached=True,
             )
             params['wmts_options'] = wmts_options
+            params.pop('capabilities', None)
             layer.external_params = json.dumps(params)
             layer.save(update_fields=['external_params'])
             return True
