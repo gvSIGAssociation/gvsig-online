@@ -23,7 +23,7 @@
 	<header class="cat-topbar">
 		<nav class="container cat-topbar__inner">
 			<a href="{% url 'index' %}" class="cat-topbar__logo">
-				<img src="{% static "img/logo_custom_icon.png" %}" class="cat-topbar__logo-img" alt="Logo"><b>{{GVSIGOL_NAME}}</b>{% if GVSIGOL_SURNAME %}<span class="cat-topbar__surname">{{GVSIGOL_SURNAME}}</span>{% endif %}
+				<img src="{% static "img/logo_small.png" %}" class="cat-topbar__logo-img" alt="{{GVSIGOL_NAME}}">
 			</a>
 			<a href="{% url 'index' %}" class="cat-topbar__link"><i class="fa fa-home" aria-hidden="true"></i><span class="cat-topbar__link-text">{% trans "Back to home" %}</span></a>
 		</nav>

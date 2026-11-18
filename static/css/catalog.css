@@ -42,11 +42,10 @@ body.cat-page {
 }
 .cat-topbar__logo:hover { background-color: var(--hdr-item-hover); }
 .cat-topbar__logo-img {
-	width: 28px;
-	height: 28px;
-	margin-right: 9px;
+	height: 36px;
+	width: auto;
+	max-width: 180px;
 	object-fit: contain;
-	border-radius: 5px;
 	filter: var(--hdr-logo-filter);
 }
 .cat-topbar__logo b { font-weight: 700; }
