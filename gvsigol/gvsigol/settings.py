@@ -684,12 +684,12 @@ FOLDER_DEFAULT_PERMISSIONS = env('FOLDER_DEFAULT_PERMISSIONS')
 FILEMANAGER_DIRECTORY = os.path.join(MEDIA_ROOT, 'data')
 FILEMANAGER_MEDIA_ROOT = os.path.join(MEDIA_ROOT, FILEMANAGER_DIRECTORY)
 FILEMANAGER_MEDIA_URL = os.path.join(MEDIA_URL, FILEMANAGER_DIRECTORY)
-# Interfaz nueva del gestor de ficheros. Con False se sigue viendo la clásica; ?ui=new y
-# ?ui=classic permiten elegir en cada página.
+# Interfaz nueva del gestor de ficheros. Con False se ve la clásica. Solo se elige aquí: no se puede
+# cambiar en tiempo de ejecución.
 FILEMANAGER_NEW_UI = env('FILEMANAGER_NEW_UI')
 # Lo mismo para el selector que abren otras pantallas (?popup=1); se activa por separado.
 FILEMANAGER_NEW_POPUP = env('FILEMANAGER_NEW_POPUP')
-# Tamaño máximo de cada fichero en la subida por trozos de la interfaz nueva (la clásica no lo usa).
+# Tamaño máximo de cada fichero subido (la subida por trozos de la nueva y la subida clásica).
 FILEMANAGER_UPLOAD_MAX_SIZE = env('FILEMANAGER_UPLOAD_MAX_SIZE')
 FILEMANAGER_STORAGE = FileSystemStorage(
     location=FILEMANAGER_MEDIA_ROOT,
