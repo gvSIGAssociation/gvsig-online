@@ -28,6 +28,18 @@ def _check_project_access(request, project_id):
     return get_object_or_404(Project, id=project_id)
 
 
+def _check_project_publish_access(request, project_id):
+    """
+    Persisting layers into a project is restricted to superusers.
+    Staff (non-superuser) must never publish, even if they can read the project.
+    """
+    project = _check_project_access(request, project_id)
+    if not getattr(request.user, 'is_superuser', False):
+        raise PermissionDenied(
+            'Only superusers can publish layers into a project')
+    return project
+
+
 def _request_bool(data, key, default=False):
     value = data.get(key, default)
     if isinstance(value, bool):
@@ -40,9 +52,11 @@ class ProjectLayerImportOptionsView(APIView):
 
     def get(self, request, project_id):
         try:
-            project = _check_project_access(request, project_id)
+            project = _check_project_publish_access(request, project_id)
         except HttpException as exc:
             return exc.get_exception()
+        except PermissionDenied as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_403_FORBIDDEN)
 
         datastores = [
             datastore for datastore in
@@ -102,9 +116,11 @@ class ProjectLayerImportView(APIView):
 
     def post(self, request, project_id):
         try:
-            project = _check_project_access(request, project_id)
+            project = _check_project_publish_access(request, project_id)
         except HttpException as exc:
             return exc.get_exception()
+        except PermissionDenied as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_403_FORBIDDEN)
         upload = request.FILES.get('file')
         if not upload:
             return Response(
