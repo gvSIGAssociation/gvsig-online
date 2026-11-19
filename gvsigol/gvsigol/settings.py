@@ -58,7 +58,7 @@ def _parse_size(value):
     return int(text)
 
 print ("INFO: Ejecutando settings.py !!...........................................")
-GVSIGOL_VERSION = '4.4.0-dev'
+GVSIGOL_VERSION = '4.5.0-dev'
 print("INFO: gvSIG Online version: " + GVSIGOL_VERSION)
 if os.environ.get("DEBUG")=='True':
     print ("INFO: Current environment:")
