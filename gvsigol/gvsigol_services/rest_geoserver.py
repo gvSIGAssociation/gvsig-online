@@ -766,6 +766,10 @@ class Geoserver():
         r = self.session.post(url, data=xml, headers=headers, auth=auth)
         if r.status_code==200:
             return True
+        body = r.content or b''
+        if r.status_code == 400 and b'Could not find layer' in body:
+            logger.info('GeoWebCache has no tile layer to truncate: %s', gwc_layer_name)
+            return False
         raise FailedRequestError(r.status_code, r.content)
     
     def clear_layergroup_cache(self, name, user=None, password=None):
