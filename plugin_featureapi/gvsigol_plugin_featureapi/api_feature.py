@@ -436,6 +436,7 @@ class PaginationFeatureFilter(BaseFilterBackend):
             coreapi.Field(name="text", description="Search by text", required=False, location='query', example='my text'),
             coreapi.Field(name="sortfield", description="Field name to sort by", required=False, location='query', example='nombre'),
             coreapi.Field(name="sortorder", description="Sort order: 'ascend' or 'descend'", required=False, location='query', example='ascend'),
+            coreapi.Field(name="priority_ids", description="Comma-separated primary key values to return first", required=False, location='query', example='1,2,3'),
         ]
         return fields
 
@@ -577,9 +578,20 @@ class FeaturesView(CreateAPIView):
                         raise ValueError()
                 except Exception:
                     raise HttpException(400, "Bad parameter sortorder. The value must be 'ascend' or 'descend'")
+
+            priority_ids = None
+            if 'priority_ids' in self.request.GET:
+                raw_priority = self.request.GET.get('priority_ids') or ''
+                priority_ids = [part.strip() for part in raw_priority.split(',') if part.strip()]
+                if len(priority_ids) > 5000:
+                    raise HttpException(400, "Bad parameter priority_ids. Too many values (max 5000)")
                     
             restrictions = validation.check_read_restrictions(lyr_id)
-            result = serializers.FeatureSerializer().list(validation, lyr_id, pagination, source_epsg, date, strict_search, onlyprops, text, filter, restrictions.get('cql_filter_read'), sortfield, sortorder)
+            result = serializers.FeatureSerializer().list(
+                validation, lyr_id, pagination, source_epsg, date, strict_search,
+                onlyprops, text, filter, restrictions.get('cql_filter_read'),
+                sortfield, sortorder, priority_ids
+            )
             return JsonResponse(result, safe=False)
         except HttpException as e:
             return e.get_exception()

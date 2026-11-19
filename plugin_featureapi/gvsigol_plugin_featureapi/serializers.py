@@ -21,6 +21,7 @@
 '''
 import json
 import math
+import re
 
 from rest_framework import serializers
 
@@ -880,7 +881,7 @@ class FeatureSerializer(serializers.Serializer):
                 raise e
             raise HttpException(400, "Features cannot be queried. Unexpected error: " + format(e))
         
-    def list(self, validation, lyr_id, pagination, epsg, date, strict_search, onlyprops = False, text = None, filter = None, cql_filter_read=None, sortfield=None, sortorder=None):
+    def list(self, validation, lyr_id, pagination, epsg, date, strict_search, onlyprops = False, text = None, filter = None, cql_filter_read=None, sortfield=None, sortorder=None, priority_ids=None):
         layer = Layer.objects.get(id = int(lyr_id))
         if layer.type != 'v_PostGIS':
             raise HttpException(400, "La capa no es del tipo correcto. Debería ser una capa PostGIS")
@@ -962,8 +963,28 @@ class FeatureSerializer(serializers.Serializer):
                 else:
                     where = sqlbuilder.SQL('')
                 
-                # Construir ORDER BY si se especifica ordenamiento
-                order_by = sqlbuilder.SQL('')
+                # ORDER BY: optional priority_ids first, then optional sortfield
+                order_parts = []
+                cleaned_priority_ids = []
+                if priority_ids:
+                    for raw_id in priority_ids:
+                        value = str(raw_id).strip()
+                        if not value:
+                            continue
+                        # Accept integers and simple alphanumeric/uuid-like PKs only
+                        if re.fullmatch(r'-?\d+', value):
+                            cleaned_priority_ids.append(int(value))
+                        elif re.fullmatch(r'[A-Za-z0-9_\-:.\|]{1,128}', value):
+                            cleaned_priority_ids.append(value)
+                    if cleaned_priority_ids:
+                        pk_field = util.get_layer_pk_name(con, schema, table)
+                        id_literals = [sqlbuilder.Literal(v) for v in cleaned_priority_ids]
+                        order_parts.append(
+                            sqlbuilder.SQL("CASE WHEN {pk} IN ({ids}) THEN 0 ELSE 1 END").format(
+                                pk=sqlbuilder.Identifier(pk_field),
+                                ids=sqlbuilder.SQL(', ').join(id_literals)
+                            )
+                        )
                 if sortfield and sortorder:
                     # Obtener todas las columnas de la tabla para validar
                     table_fields = con.get_fields(table, schema=schema)
@@ -971,10 +992,17 @@ class FeatureSerializer(serializers.Serializer):
                     # Validar que el campo existe y no es una geometría
                     if sortfield in table_fields and sortfield not in (geom_cols or []):
                         direction = sqlbuilder.SQL("ASC") if sortorder == 'ascend' else sqlbuilder.SQL("DESC")
-                        order_by = sqlbuilder.SQL(" ORDER BY {field} {direction}").format(
-                            field=sqlbuilder.Identifier(sortfield),
-                            direction=direction
+                        order_parts.append(
+                            sqlbuilder.SQL("{field} {direction}").format(
+                                field=sqlbuilder.Identifier(sortfield),
+                                direction=direction
+                            )
                         )
+                order_by = sqlbuilder.SQL('')
+                if order_parts:
+                    order_by = sqlbuilder.SQL(" ORDER BY {parts}").format(
+                        parts=sqlbuilder.SQL(', ').join(order_parts)
+                    )
                 
                 if onlyprops == False:
                     sql = sqlbuilder.SQL("SELECT ST_AsGeoJSON(ST_Transform({geom}, {epsg})), row_to_json((SELECT d FROM (SELECT {properties}) d)) as props FROM {schema}.{table} {where}{order_by} {limit_offset}")
