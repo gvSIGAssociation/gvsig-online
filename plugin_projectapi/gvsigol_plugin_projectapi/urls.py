@@ -27,6 +27,7 @@ from rest_framework import routers
 
 from gvsigol_plugin_projectapi import api
 from gvsigol_plugin_projectapi import api_info
+from gvsigol_plugin_projectapi import layer_import_api
 from gvsigol import settings
 from gvsigol_plugin_projectapi import views
 import gvsigol_plugin_projectapi.settings as settings_local
@@ -44,6 +45,21 @@ urlpatterns = [
     path('api/v1/projects/<int:project_id>/', api.ProjectView.as_view(), name='get_project'),
     path('api/v1/projects/<int:project_id>/layers/', api.ProjectLayersView.as_view(), name='get_layers_from_project'),
     path('api/v1/projects/<int:project_id>/layers/field-format/', api.ProjectLayersFieldFormatsView.as_view(), name='get_layers_field_format_from_project'),
+    path(
+        'api/v1/projects/<int:project_id>/layers/import-options/',
+        layer_import_api.ProjectLayerImportOptionsView.as_view(),
+        name='project_layer_import_options',
+    ),
+    path(
+        'api/v1/projects/<int:project_id>/layers/import/',
+        layer_import_api.ProjectLayerImportView.as_view(),
+        name='project_layer_import',
+    ),
+    path(
+        'api/v1/projects/<int:project_id>/layers/import/<uuid:job_id>/',
+        layer_import_api.ProjectLayerImportStatusView.as_view(),
+        name='project_layer_import_status',
+    ),
     path('api/v1/projects/<int:project_id>/groups/', api.ProjectGroupsView.as_view(), name='get_groups_from_project'),
     path('api/v1/projects/<int:project_id>/data/', api.ProjectBaseLayerData.as_view(), name='get_base_layer_data'),
     path('api/v1/projects/shared_view/create/', api.CreateSharedViewAPI.as_view(), name='projectapi_create_shared_view'),
