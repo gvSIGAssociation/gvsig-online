@@ -192,6 +192,16 @@ def summarize_import_report(report_json):
                 _('Tool "%(tool)s" is not installed on this server and was not applied.')
                 % {'tool': tool_name}
             )
+        elif 'style_import_failed' in row:
+            d = row['style_import_failed']
+            warnings.append(
+                _('Style "%(style)s" for layer "%(layer)s" could not be imported: %(error)s')
+                % {
+                    'style': d.get('style') or '',
+                    'layer': d.get('layer') or '',
+                    'error': d.get('error') or '',
+                }
+            )
         elif row.get('warning'):
             warnings.append(_retranslate(str(row['warning'])))
         elif 'definition_shared_layer_group_added' in row:
