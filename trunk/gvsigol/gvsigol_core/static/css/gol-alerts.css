@@ -1,0 +1,45 @@
+/* =================================================================
+   gvSIG Online — Avisos de resultado de una acción
+   El mismo componente aparecía con tres nombres distintos: .pf-flash en
+   los formularios, .pl-flash en los listados y .pl-cache-messages en la
+   gestión de caché. Se agrupan para tener una sola definición.
+
+   Requiere gol-tokens.css.
+   ================================================================= */
+
+.pf-flash,
+.pl-flash,
+.pl-cache-messages { margin-bottom: 16px; }
+
+.pf-flash .alert,
+.pl-flash .alert,
+.pl-cache-messages .alert {
+	border-radius: 8px;
+	border-top: none;
+	border-right: none;
+	border-bottom: none;
+	border-left: 4px solid;
+	font-size: 13px;
+	padding: 12px 16px;
+}
+/* Los avisos pueden apilarse; el último no separa para que el hueco inferior
+   lo marque solo el contenedor. */
+.pf-flash .alert,
+.pl-flash .alert,
+.pl-cache-messages .alert { margin-bottom: 8px; }
+.pf-flash .alert:last-child,
+.pl-flash .alert:last-child,
+.pl-cache-messages .alert:last-child { margin-bottom: 0; }
+
+.pf-flash .alert-success,
+.pl-flash .alert-success,
+.pl-cache-messages .alert-success { border-left-color: #27ae60; background: #f0faf4; color: #1e7e46; }
+.pf-flash .alert-warning,
+.pl-flash .alert-warning,
+.pl-cache-messages .alert-warning { border-left-color: #d08b00; background: #fef9ec; color: #9a6800; }
+.pf-flash .alert-danger,
+.pl-flash .alert-danger,
+.pl-cache-messages .alert-danger { border-left-color: #e74c3c; background: #fff5f5; color: #c0392b; }
+.pf-flash .alert-info,
+.pl-flash .alert-info,
+.pl-cache-messages .alert-info { border-left-color: var(--pl-accent); background: #f0f6fb; color: var(--pl-accent-dk); }

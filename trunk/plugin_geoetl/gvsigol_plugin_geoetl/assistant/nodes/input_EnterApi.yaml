@@ -1,0 +1,22 @@
+type: input_EnterApi
+label: EnterApi
+family: input
+summary: Lee datos de EnterApi (epígrafe, por ejemplo inmuebles).
+parameters:
+- name: api
+  summary: Nombre de la conexión.
+  required: true
+- name: epigrafe
+- name: incluir_bajas
+- name: modificado-desde
+- name: date-enterapi
+  choices:
+  - check-no-date
+  - check-init-date
+ports:
+- direction: output
+  label: Input
+connection_types:
+- sgarexws
+connection_parameter: api
+sql_parameters: []

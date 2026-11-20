@@ -1,0 +1,46 @@
+@media only screen and (max-width: 640px) {
+	#importvector {
+		display: none
+	}
+}
+
+/* iPads (portrait and landscape) ----------- */
+@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) {
+	#importvector {
+		display: none
+	}
+}
+
+.btn-social.btn-select select.select-chart{
+    border-color: rgba(0,0,0,0);
+    padding-left: 40px;
+}
+
+.ol-search {
+	box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+	left: 6px !important;
+}
+
+#gvsigol-navbar-views-dropdown {
+	display: block
+} 
+
+.ui-dialog-titlebar-close {
+	border: none;
+}
+
+.ui-dialog-titlebar-collapse {
+	background: #ffffff;
+	border: none;
+	color: rgb(133, 133, 133);
+	top: 42% !important;
+	font-size: 18px !important;
+}
+
+.ui-dialog-titlebar-collapse-restore {
+	background: #ffffff;
+	border: none;
+	color: rgb(133, 133, 133);
+	top: 42% !important;
+	font-size: 18px !important;
+}

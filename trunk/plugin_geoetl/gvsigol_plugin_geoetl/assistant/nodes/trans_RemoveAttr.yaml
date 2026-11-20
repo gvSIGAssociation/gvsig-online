@@ -1,0 +1,20 @@
+type: trans_RemoveAttr
+label: Remove Attribute
+family: transform
+summary: Elimina atributos.
+parameters:
+- name: attr
+  required: true
+  summary: Columnas que se eliminan.
+  format: list
+  example:
+  - campo_temporal
+  column: 0
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

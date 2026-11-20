@@ -1,0 +1,95 @@
+.input-group.pick-a-color-markup{
+	width: 50%;
+}
+
+#colorChooserModal .input-group.pick-a-color-markup{
+	width: 100%;
+}
+
+#colorChooserModal .btn.btn-default.color-dropdown.dropdown-toggle.no-hex,
+#colorChooserModal .color-select.btn.btn-mini.advanced{
+	display: none;
+}
+
+
+#form-modal.color-chooser.modal{
+	width: 400px;
+}
+
+#colorChooserModal.color-chooser.modal{
+	width: 350px;
+}
+
+.color-preview.current-color{
+	width: 100%;
+	height: 100%;
+}
+
+.pick-a-color-markup .input-group-btn .color-dropdown.no-hex{
+	padding: 0px;
+	width: 100%;
+}
+
+
+#point-color.pick-a-color-markup .highlight-band-stripe,
+#point-color.pick-a-color-markup .advanced-content .hue-text,
+#point-color.pick-a-color-markup .advanced-content .lightness-text,
+.saturation-item{
+	display: none;
+}
+
+#point-color.pick-a-color-markup .color-box{
+	height: 30px;
+}
+
+#point-color.pick-a-color-markup .highlight-band {
+	height: 29px;
+}
+
+#point-color.pick-a-color-markup .advanced-content li {
+	padding-left: 0px;
+	padding-right: 0px;
+	background-color: white;
+	height: 50px;
+}
+
+.color-menu .preview-item .preview-text {
+	display:none;
+}
+
+.tabs .tab.col {
+	height: 70px;
+}
+
+.tabs .tab.col a{
+	padding: 0px;
+}
+
+ul.tabs{
+	margin-bottom:15px;
+}
+
+.tabs .tab.col a i{
+	padding-top: 14px;
+}
+
+#point-color.pick-a-color-markup .advanced-content .color-box,
+#point-color.pick-a-color-markup .advanced-content .color-preview {
+    left: 0px;
+    top: 0px;
+    width: 100%;
+}
+
+#point-color.pick-a-color-markup .color-menu {
+	width: 100%;
+}
+
+#point-color.pick-a-color-markup .color-menu .btn.color-select {
+    height: 32px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+#point-color.pick-a-color-markup .advanced-content .color-preview .color-select.btn.advanced {
+    margin-top: 8px;
+}

@@ -1,0 +1,17 @@
+type: trans_WktGeom
+label: WKT to Geometry
+family: transform
+summary: Convierte un atributo WKT en geometría.
+parameters:
+- name: attr
+  summary: Atributo sobre el que actúa la tarea.
+- name: epsg
+  summary: Código EPSG.
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

@@ -1,0 +1,15 @@
+type: input_PadronAtm
+label: Padrón ATM
+family: input
+summary: Lee el padrón ATM a través de su conexión.
+parameters:
+- name: api
+  summary: Nombre de la conexión.
+  required: true
+ports:
+- direction: output
+  label: Input
+connection_types:
+- padron-atm
+connection_parameter: api
+sql_parameters: []

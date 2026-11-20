@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+{% load static %}
+{% load i18n %}
+<html lang="{{ LANGUAGE_CODE|default:'es' }}">
+<head>
+	<title>{{GVSIGOL_NAME}}</title>
+	<link rel="shortcut icon" href="{% static "img/favicon.png" %}">
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta content="width=device-width, initial-scale=1" name="viewport">
+
+	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-3.3.7/css/bootstrap.min.css" %}">
+	<link rel="stylesheet" href="{% static "css/font-awesome-4.4.0/css/font-awesome.min.css" %}">
+	<link rel="stylesheet" href="{% static "css/googlefonts.css" %}">
+	<link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
+	<link rel="stylesheet" href="{% static "css/gol-themes.css" %}">
+	<link rel="stylesheet" href="{% static "css/public_viewers.css" %}">
+	<link rel="stylesheet" href="{% static "css/catalog.css" %}">
+</head>
+
+<body class="cat-page {{GVSIGOL_SKIN}}">
+
+	<header class="cat-topbar">
+		<nav class="container cat-topbar__inner">
+			<a href="{% url 'index' %}" class="cat-topbar__logo">
+				<img src="{% static "img/logo_small.png" %}" class="cat-topbar__logo-img" alt="{{GVSIGOL_NAME}}">
+			</a>
+			<a href="{% url 'index' %}" class="cat-topbar__link"><i class="fa fa-home" aria-hidden="true"></i><span class="cat-topbar__link-text">{% trans "Back to home" %}</span></a>
+		</nav>
+	</header>
+
+	<section class="cat-hero">
+		<div class="container">
+			<h1 class="cat-hero__title">{% trans "Mapping services" %}</h1>
+			<p class="cat-hero__lead">{% trans "Map services published by this platform. Each one opens its capabilities document." %}</p>
+		</div>
+	</section>
+
+	<main class="cat-content">
+		<div class="container">
+
+			{% for group in groups %}
+			<section class="cat-group">
+				<h2 class="cat-group__title">{{ group.label }}</h2>
+				<div class="cat-grid">
+					{% for s in group.services %}
+					<a class="cat-card" href="{{ s.url_path }}?service={{ group.type }}&amp;request=getCapabilities" target="_blank" rel="noopener">
+						<span class="cat-card__title">{{ s.title }}</span>
+						<span class="cat-card__meta">{{ s.url_path }}</span>
+						<span class="cat-card__foot">
+							<span class="cat-chip">{{ group.type }}</span>
+							<span class="cat-card__open">{% trans "Show capabilities" %} <i class="fa fa-external-link" aria-hidden="true"></i></span>
+						</span>
+					</a>
+					{% endfor %}
+				</div>
+			</section>
+			{% empty %}
+			<div class="cat-empty">
+				<i class="fa fa-globe" aria-hidden="true"></i>
+				<p>{% trans "No map services are published." %}</p>
+			</div>
+			{% endfor %}
+
+		</div>
+	</main>
+
+	<footer class="cat-footer">
+		<span><b>{% trans "Version" %}</b>&nbsp;{{GVSIGOL_VERSION}}</span>
+	</footer>
+
+</body>
+</html>

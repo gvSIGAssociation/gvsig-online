@@ -1,0 +1,60 @@
+{% load i18n %}
+<table class="table table-bordered table-striped table-condensed" style="margin-bottom:0;font-size:12px">
+	<thead>
+		<tr>
+			<th>{% trans "When" %}</th>
+			<th>{% trans "Operation" %}</th>
+			<th>{% trans "Status" %}</th>
+			<th>{% trans "Project" %}</th>
+			<th>{% trans "Summary" %}</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for row in report_rows %}
+		<tr>
+			<td nowrap><small>{{ row.created_at|date:"Y-m-d H:i" }}</small></td>
+			<td>
+				{% if row.operation == 'import' %}
+				<span class="label label-primary">{% trans "Import" %}</span>
+				{% else %}
+				<span class="label label-info">{% trans "Export" %}</span>
+				{% endif %}
+			</td>
+			<td>
+				{% if row.status == 'ok' %}
+				<span class="label label-success">OK</span>
+				{% elif row.status == 'partial' %}
+				<span class="label label-warning">{% trans "Partial" %}</span>
+				{% else %}
+				<span class="label label-danger">{% trans "Failed" %}</span>
+				{% endif %}
+			</td>
+			<td>{{ row.project_name|default:"—"|truncatechars:50 }}</td>
+			<td>
+				{% with s=row.summary %}
+				{% if row.operation == 'import' %}
+					{% if s.counts.imported %}{{ s.counts.imported }} {% trans "imported" %}{% endif %}
+					{% if s.counts.skipped %}, {{ s.counts.skipped }} {% trans "skipped" %}{% endif %}
+				{% else %}
+					{% trans "Package downloaded" %}
+				{% endif %}
+				{% endwith %}
+			</td>
+			<td nowrap>
+				{% if row.has_report and row.import_job_id %}
+				<a class="btn btn-xs btn-default" href="{% url 'project_package_import_result' job_id=row.import_job_id %}">{% trans "View report" %}</a>
+				{% elif row.has_report and row.activity_log_id %}
+				<a class="btn btn-xs btn-default" href="{% url 'project_package_export_result' log_id=row.activity_log_id %}">{% trans "View report" %}</a>
+				{% elif row.project_id %}
+				<a class="btn btn-xs btn-link" href="{% url 'project_update' pid=row.project_id %}">{% trans "Project" %}</a>
+				{% endif %}
+			</td>
+		</tr>
+		{% empty %}
+		<tr>
+			<td colspan="6" class="text-muted">{% trans "No import or export reports yet." %}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>

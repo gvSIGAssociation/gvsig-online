@@ -1,0 +1,43 @@
+/* =================================================================
+   gvSIG Online — Listas de items de los formularios de gvsigol_core
+   Las products-list de AdminLTE que usan las pestañas de grupos de
+   capas, herramientas y roles. En gvsigol_services las listas de
+   permisos no llevan este marco, así que estas reglas no pueden vivir
+   en gol-form-page.css.
+
+   Se carga después de gol-form-page.css.
+   Requiere gol-tokens.css.
+   ================================================================= */
+
+/* ---- Lista de items (grupos de capas, herramientas, roles) ---- */
+.tab-content .products-list > .item {
+	border-radius: 6px;
+	margin-bottom: 6px;
+	padding: 10px 12px;
+	background: var(--pf-white);
+	border: 1px solid var(--pf-border);
+	transition: background var(--pf-transition), border-color var(--pf-transition), box-shadow var(--pf-transition);
+}
+.tab-content .products-list > .item:hover {
+	background: #f0f6fb;
+	border-color: rgba(74,127,165,0.3);
+	box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* ---- Lista de usuarios y roles ---- */
+#user-list-box .box-header {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	padding: 12px 16px;
+}
+#user-list-box .products-list > .item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 12px;
+}
+#user-list-box .products-list .product-img { flex-shrink: 0; width: 32px; height: 32px; }
+#user-list-box .products-list .product-img img { width: 20px; height: 20px; opacity: 0.5; }
+#user-list-box .products-list .product-info { flex: 1; min-width: 0; }

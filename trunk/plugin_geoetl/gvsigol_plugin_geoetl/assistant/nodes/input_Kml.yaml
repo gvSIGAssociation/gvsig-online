@@ -1,0 +1,27 @@
+type: input_Kml
+label: KML/KMZ
+family: input
+summary: Lee un KML o KMZ.
+parameters:
+- name: kml-kmz-file
+  required: true
+- name: encode
+  choices:
+  - LATIN1
+  - UTF-8
+  - ISO-8859-15
+  - WINDOWS-1252
+- name: epsg
+  summary: Código EPSG.
+- name: reading
+  choices:
+  - single
+  - multiple
+- name: move
+- name: folder
+ports:
+- direction: output
+  label: Input
+connection_types: []
+connection_parameter: null
+sql_parameters: []

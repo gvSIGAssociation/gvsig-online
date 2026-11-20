@@ -1,0 +1,20 @@
+type: trans_ModifyValue
+label: Modify Value
+family: transform
+summary: Sustituye el valor de un atributo.
+parameters:
+- name: attr
+  required: true
+  summary: Columna a la que se le pone el mismo valor en todas las filas.
+  column: 0
+- name: value
+  summary: Valor nuevo. Puede ir vacío.
+  default: ''
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

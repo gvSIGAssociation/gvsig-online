@@ -1,0 +1,24 @@
+type: trans_Calculator
+label: Calculator
+family: transform
+summary: Crea o rellena un atributo con una expresión.
+parameters:
+- name: attr
+  required: true
+  summary: 'Columna que se rellena. Tiene que existir: si es nueva, créala antes con
+    trans_CreateAttr.'
+  column: 0
+  example: densidad
+- name: expression
+  required: true
+  summary: Expresión SQL de PostgreSQL con las columnas entre comillas dobles.
+  example: '"poblacion" / NULLIF("superficie", 0)'
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters:
+- expression

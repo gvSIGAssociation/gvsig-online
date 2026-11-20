@@ -1,0 +1,29 @@
+{# Comparte la página con color_ramp_add.html; aquí solo van los tramos propios de la edición. #}
+{% extends "color_ramp_add.html" %}
+{% load i18n %}
+{% load static %}
+{% block color_ramp_v1 %}		<form id="color_ramp_form" role="form" method="post" action="/gvsigonline/symbology/color_ramp_update/{{color_ramp.id}}/">
+{% endblock %}
+{% block color_ramp_v2 %}				<h3 class="pl-panel__title"><i class="fa fa-tint"></i>{% trans "Update color ramp" %}</h3>
+{% endblock %}
+{% block color_ramp_v3 %}								<input placeholder="{% trans 'Ramp name' %}" name="colorramp-name" id="colorramp-name" value="{{color_ramp.name}}" type="text" class="form-control">
+{% endblock %}
+{% block color_ramp_v4 %}{% endblock %}
+{% block color_ramp_v5 %}	this.colorRamp = new ColorRamp("", null);
+{% endblock %}
+{% block color_ramp_v6 %}	$("#steps-body").append(this.colorRamp.getColorRampTableUI());
+	var json_data = {{color_ramp.definition | safe}};
+	if('definition' in json_data){
+		for(var i = 0; i<json_data['definition'].length; i++){
+			var quatity = json_data['definition'][i]['quantity'];
+			var color = json_data['definition'][i]['color'];
+			var alpha = json_data['definition'][i]['alpha'];
+			self.colorRamp.addColorRamp(quatity, color, alpha);
+		}
+	}
+	this.colorRamp.refreshPreview();
+{% endblock %}
+{% block color_ramp_v7 %}		self.colorRamp.addColorRamp(100, "#000000", 1);
+		self.colorRamp.refreshPreview();
+{% endblock %}
+{% block color_ramp_v8 %}{% endblock %}

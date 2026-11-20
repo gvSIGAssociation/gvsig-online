@@ -1,0 +1,12 @@
+msgid "Show values"
+msgstr "Mostrar valores"
+
+
+msgid "All"
+msgstr "Todos"
+
+msgid "Average"
+msgstr "Promedio"
+
+msgid "Last"
+msgstr "Último"

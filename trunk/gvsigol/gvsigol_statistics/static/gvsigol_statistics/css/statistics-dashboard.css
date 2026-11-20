@@ -1,0 +1,430 @@
+/* =================================================================
+   gvSIG Online — Panel de estadísticas (prefijo st-)
+   Requiere gol-tokens.css (colores del tema activo) y gol-list-page.css
+   (botones btn-pl-*). Todo cuelga de .gol-stats.
+
+   Colores de datos (paleta validada para daltonismo y contraste):
+   - serie 1 (autenticados, barras): #2a78d6
+   - serie 2 (anónimos):             #eb6834
+   - mapa de calor: rampa secuencial azul #cde2fb → #0d366b
+   ================================================================= */
+
+.gol-stats {
+	--st-series-1: #2a78d6;
+	--st-series-2: #eb6834;
+	--st-bar-bg: var(--gol-bg);
+	--st-up: #1e7d4f;
+	--st-down: #b23b3b;
+	color: var(--gol-text);
+	padding-bottom: 24px;
+}
+.gol-stats [hidden],
+.gol-stats .hidden { display: none !important; }
+
+/* ---- Cabecera ---- */
+.st-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 12px 0 14px;
+	flex-wrap: wrap;
+}
+.st-header__title {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 700;
+	color: var(--gol-text);
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.st-header__title i { color: var(--gol-accent); }
+.st-header__subtitle {
+	margin: 4px 0 0;
+	font-size: 12px;
+	color: var(--gol-muted);
+}
+
+/* ---- Barra de filtros ---- */
+.st-filters {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	background: var(--gol-white);
+	border: 1px solid var(--gol-border);
+	border-radius: var(--gol-radius);
+	box-shadow: var(--gol-shadow);
+	padding: 10px 12px;
+	margin-bottom: 16px;
+}
+.st-filters__spacer { flex: 1 1 auto; }
+.st-daterange {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	color: var(--gol-muted);
+}
+.gol-stats .form-control.st-select,
+.st-daterange .form-control {
+	height: 34px;
+	border-radius: 7px;
+	border: 1px solid var(--gol-border);
+	box-shadow: none;
+	font-size: 13px;
+	color: var(--gol-text);
+	padding: 5px 10px;
+	width: auto;
+	max-width: 260px;
+}
+.gol-stats .form-control.st-select--sm { height: 30px; font-size: 12px; padding: 3px 8px; }
+.gol-stats .form-control:focus {
+	border-color: var(--gol-accent);
+	outline: 2px solid var(--gol-accent);
+	outline-offset: 0;
+	box-shadow: none;
+}
+
+/* Control segmentado (radio en botones) */
+.st-segmented {
+	display: inline-flex;
+	background: var(--gol-bg);
+	border: 1px solid var(--gol-border);
+	border-radius: 8px;
+	padding: 2px;
+	gap: 2px;
+}
+.st-segmented button {
+	border: 0;
+	background: transparent;
+	color: var(--gol-muted);
+	font-size: 13px;
+	font-weight: 600;
+	padding: 5px 12px;
+	border-radius: 6px;
+	cursor: pointer;
+	white-space: nowrap;
+	transition: background var(--gol-transition), color var(--gol-transition);
+}
+.st-segmented--sm button { font-size: 12px; padding: 3px 10px; }
+.st-segmented button:hover { color: var(--gol-text); }
+.st-segmented button.is-active {
+	background: var(--gol-white);
+	color: var(--gol-accent-dk);
+	box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+.st-segmented button:focus-visible { outline: 2px solid var(--gol-accent); outline-offset: 1px; }
+
+/* ---- Avisos ---- */
+.st-notice {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 10px 14px;
+	margin-bottom: 14px;
+	border-radius: 8px;
+	border: 1px solid var(--gol-border);
+	border-left: 4px solid var(--gol-accent);
+	background: var(--gol-white);
+	font-size: 13px;
+	line-height: 1.5;
+}
+.st-notice > i { color: var(--gol-accent); margin-top: 3px; }
+.st-notice > div { flex: 1 1 auto; }
+.st-notice--warn { border-left-color: #c98500; }
+.st-notice--warn > i { color: #c98500; }
+.st-notice__close {
+	border: 0;
+	background: transparent;
+	font-size: 20px;
+	line-height: 1;
+	color: var(--gol-muted);
+	cursor: pointer;
+	padding: 0 2px;
+}
+.st-notice__close:hover { color: var(--gol-text); }
+
+/* ---- KPI ---- */
+.st-kpis {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+	gap: 12px;
+	margin-bottom: 16px;
+}
+.st-kpi {
+	background: var(--gol-white);
+	border: 1px solid var(--gol-border);
+	border-radius: var(--gol-radius);
+	box-shadow: var(--gol-shadow);
+	padding: 14px 16px;
+	min-width: 0;
+}
+.st-kpi__label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--gol-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.st-kpi__label i { color: var(--gol-accent); width: 16px; }
+.st-kpi__value {
+	font-size: 28px;
+	font-weight: 700;
+	line-height: 1.2;
+	margin-top: 6px;
+	color: var(--gol-text);
+	font-variant-numeric: tabular-nums;
+}
+.st-kpi__delta {
+	font-size: 12px;
+	color: var(--gol-muted);
+	margin-top: 2px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.st-kpi__delta .st-up { color: var(--st-up); font-weight: 700; }
+.st-kpi__delta .st-down { color: var(--st-down); font-weight: 700; }
+.st-kpi__delta .st-flat { color: var(--gol-text); font-weight: 700; }
+
+/* ---- Tarjetas ---- */
+.st-card {
+	background: var(--gol-white);
+	border: 1px solid var(--gol-border);
+	border-radius: var(--gol-radius);
+	box-shadow: var(--gol-shadow);
+	margin-bottom: 16px;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+}
+.st-card__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	flex-wrap: wrap;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--gol-border);
+}
+.st-card__title {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 700;
+	color: var(--gol-text);
+}
+.st-card__actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+.st-card__body {
+	padding: 14px 16px;
+	position: relative;
+	flex: 1 1 auto;
+	min-height: 120px;
+}
+.st-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 16px;
+}
+.st-grid > .st-card { margin-bottom: 0; }
+.st-grid + .st-card { margin-top: 16px; }
+@media (max-width: 991px) {
+	.st-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+.st-chart { position: relative; height: 300px; }
+
+/* Estados */
+.st-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	min-height: 120px;
+	color: var(--gol-muted);
+	font-size: 13px;
+	text-align: center;
+}
+.st-state i { font-size: 22px; color: var(--gol-accent); }
+.st-state--error i { color: var(--st-down); }
+.st-state .btn-pl-outline { margin-top: 4px; }
+.st-loading-overlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(255,255,255,0.6);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--gol-accent);
+	font-size: 20px;
+	z-index: 2;
+}
+
+/* ---- Rankings (lista de barras) ---- */
+.st-bars { list-style: none; margin: 0; padding: 0; }
+.st-bars li {
+	display: grid;
+	grid-template-columns: 22px minmax(0, 1fr) auto;
+	align-items: center;
+	column-gap: 10px;
+	row-gap: 4px;
+	padding: 7px 0;
+	border-bottom: 1px solid var(--gol-border);
+}
+.st-bars li:last-child { border-bottom: 0; }
+.st-bars__pos {
+	grid-row: span 2;
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--gol-muted);
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+.st-bars__label {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--gol-text);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.st-bars__label small { font-weight: 400; color: var(--gol-muted); }
+.st-bars__value {
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--gol-text);
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+.st-bars__value small { font-weight: 400; color: var(--gol-muted); margin-left: 4px; }
+.st-bars__track {
+	grid-column: 2 / 4;
+	height: 8px;
+	border-radius: 4px;
+	background: var(--st-bar-bg);
+	overflow: hidden;
+}
+.st-bars__fill {
+	height: 100%;
+	border-radius: 4px;
+	background: var(--st-series-1);
+	min-width: 2px;
+}
+.st-bars__meta {
+	grid-column: 2 / 4;
+	font-size: 11px;
+	color: var(--gol-muted);
+}
+.st-footnote {
+	margin: 10px 0 0;
+	font-size: 12px;
+	color: var(--gol-muted);
+}
+
+/* ---- Mapa de calor ---- */
+.st-heatmap {
+	display: grid;
+	grid-template-columns: 34px repeat(24, minmax(0, 1fr));
+	gap: 2px;
+	font-size: 11px;
+	color: var(--gol-muted);
+}
+.st-heatmap__cell {
+	aspect-ratio: 1 / 1;
+	min-height: 12px;
+	border-radius: 3px;
+	background: var(--gol-bg);
+}
+.st-heatmap__cell:hover { outline: 2px solid var(--gol-text); outline-offset: -1px; }
+.st-heatmap__day { align-self: center; font-weight: 600; }
+.st-heatmap__hour { text-align: center; }
+.st-heatmap-legend {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 3px;
+	margin-top: 10px;
+	font-size: 11px;
+	color: var(--gol-muted);
+}
+.st-heatmap-legend span.st-swatch { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+.st-heatmap-legend .st-heatmap-legend__text { margin: 0 6px; }
+
+/* ---- Tablas (cabecera acero) ---- */
+.st-table-wrap { overflow-x: auto; }
+.gol-stats table.st-table {
+	width: 100% !important;
+	border-collapse: collapse;
+	font-size: 13px;
+	border: 1px solid var(--gol-border);
+	border-radius: 8px;
+}
+.gol-stats table.st-table thead th {
+	background: #e9eef3;
+	color: var(--gol-text);
+	font-size: 12px;
+	font-weight: 700;
+	padding: 8px 12px;
+	border-bottom: 1px solid var(--gol-border) !important;
+	white-space: nowrap;
+	text-align: left;
+}
+.gol-stats table.st-table tbody td {
+	padding: 7px 12px;
+	border-bottom: 1px solid var(--gol-border);
+	color: var(--gol-text);
+}
+.gol-stats table.st-table tbody tr:nth-child(even) td { background: #f8fafb; }
+.gol-stats table.st-table tbody tr:hover td { background: #eef2f6; }
+.gol-stats table.st-table .st-num { text-align: right; font-variant-numeric: tabular-nums; }
+.gol-stats table.st-table .st-muted { color: var(--gol-muted); }
+.gol-stats .dataTables_wrapper .dataTables_filter input {
+	border: 1px solid var(--gol-border);
+	border-radius: 7px;
+	height: 30px;
+	padding: 3px 8px;
+	margin-left: 6px;
+}
+.gol-stats .dataTables_wrapper .dataTables_filter,
+.gol-stats .dataTables_wrapper .dataTables_info,
+.gol-stats .dataTables_wrapper .dataTables_paginate { font-size: 12px; color: var(--gol-muted); margin: 8px 0; }
+.gol-stats .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.gol-stats .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+	background: var(--gol-accent) !important;
+	border-color: var(--gol-accent) !important;
+	color: #fff !important;
+	border-radius: 5px;
+}
+
+/* ---- Tooltip ---- */
+.st-tooltip {
+	position: fixed;
+	z-index: 2000;
+	pointer-events: none;
+	background: #2e3a45;
+	color: #fff;
+	font-size: 12px;
+	line-height: 1.4;
+	padding: 6px 9px;
+	border-radius: 6px;
+	box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+	max-width: 260px;
+}
+.st-tooltip strong { display: block; }
+
+@media (max-width: 767px) {
+	.st-filters__spacer { display: none; }
+	.gol-stats .form-control.st-select { max-width: 100%; flex: 1 1 140px; }
+	.st-kpi__value { font-size: 24px; }
+	.st-heatmap { grid-template-columns: 26px repeat(24, minmax(0, 1fr)); gap: 1px; }
+	.st-heatmap__hour { visibility: hidden; }
+	.st-heatmap__hour:nth-child(6n+2) { visibility: visible; }
+}

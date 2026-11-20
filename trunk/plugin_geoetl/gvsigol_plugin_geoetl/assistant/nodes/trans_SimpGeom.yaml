@@ -1,0 +1,16 @@
+type: trans_SimpGeom
+label: Simple Geometry
+family: transform
+summary: Comprueba que la geometría es simple. stop detiene el flujo si no lo es.
+parameters:
+- name: stop
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Simple
+- direction: output
+  label: No simple
+connection_types: []
+connection_parameter: null
+sql_parameters: []

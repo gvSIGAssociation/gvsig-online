@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block header %}
+<link rel="stylesheet" href="{% static "css/gol-list-page.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-filemanager.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
+<style>
+/* Reintentar una exportacion y marcar su estado: solo esta pantalla. */
+.btn-pf-try { display: inline-flex; align-items: center; gap: 6px; background: var(--pl-bg); color: var(--pl-accent) !important; border: 1px solid var(--pl-border); border-radius: 6px; font-size: 12px; font-weight: 600; padding: 5px 12px; cursor: pointer; transition: background var(--pl-transition); text-decoration: none !important; white-space: nowrap; }
+.btn-pf-try:hover { background: #f0f6fb; border-color: var(--pl-accent); }
+.status-icon-success { color: #27ae60; font-size: 15px; }
+.status-icon-error { color: #e74c3c; font-size: 15px; }
+.status-icon-warning { color: #e67e22; font-size: 15px; }
+.status-icon-running { color: var(--pl-accent); font-size: 15px; }
+.export-progress-wrap { min-width: 140px; max-width: 220px; margin-top: 6px; }
+.export-progress-wrap .progress { height: 10px; margin-bottom: 0; background-color: #e9ecef; border-radius: 4px; overflow: hidden; }
+.export-progress-wrap .progress-bar { line-height: 10px; font-size: 0; transition: width 0.3s ease; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if user.is_staff %}
+<div class="row">
+	<div class="col-md-12">
+
+		<div class="pl-panel">
+
+			<div class="pl-panel__header">
+				<div class="pl-panel__title">
+					<i class="fa fa-list"></i>
+					{% trans "Export history" %}
+				</div>
+				<div class="pl-panel__actions">
+					<a href="/gvsigonline/filemanager/?path={{ exportations.0.back|urlencode }}" class="btn-pf-back">
+						<i class="fa fa-arrow-left"></i> {% trans "Back" %}
+					</a>
+				</div>
+			</div>
+
+			<div class="pl-panel__body">
+				<table class="pl-table table" id="exportations-table">
+					<thead>
+						<tr>
+							<th>{% trans "ID" %}</th>
+							<th>{% trans "Status" %}</th>
+							<th>{% trans "File" %}</th>
+							<th>{% trans "Time" %}</th>
+							<th>{% trans "Message" %}</th>
+							<th>{% trans "User" %}</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for export in exportations %}
+						<tr>
+							<td>{{ export.id }}</td>
+							<td>
+								{% if export.status == "Success" %}
+									<i id="icon-{{ export.id }}" class="fa fa-check status-icon-success" aria-hidden="true"></i>
+								{% elif export.status == "Error" %}
+									<i id="icon-{{ export.id }}" class="fa fa-times status-icon-error" aria-hidden="true"></i>
+								{% elif export.status == "Running" %}
+									<i id="icon-{{ export.id }}" class="fa fa-spinner fa-spin status-icon-running"></i>
+								{% elif export.status == "Warning" %}
+									<i id="icon-{{ export.id }}" class="fa fa-exclamation-triangle status-icon-warning" aria-hidden="true"></i>
+								{% endif %}
+							</td>
+							<td>{{ export.file }}</td>
+							<td>{{ export.time }}</td>
+							<td>
+								<p id="msg-{{ export.id }}" style="margin: 0;">{{ export.message }}</p>
+								<div id="progress-{{ export.id }}" class="export-progress-wrap"{% if export.status != "Running" %} style="display:none;"{% endif %}>
+									<div class="progress">
+										<div id="progress-bar-{{ export.id }}" class="progress-bar progress-bar-striped active" role="progressbar"
+											aria-valuenow="{{ export.progress|default:0 }}" aria-valuemin="0" aria-valuemax="100"
+											style="width: {{ export.progress|default:0 }}%;"></div>
+									</div>
+								</div>
+							</td>
+							<td>{{ export.username }}</td>
+							<td>
+								<div id="btn-{{ export.id }}">
+									{% if export.status == "Error" %}
+									<a href="{{ export.redirect }}" class="btn-pf-try">
+										<i class="fa fa-upload"></i> {% trans "Try again" %}
+									</a>
+									{% endif %}
+								</div>
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+
+		</div>
+
+	</div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+function setProgress(id, progress, visible){
+	var wrap = $("#progress-"+id);
+	var bar = $("#progress-bar-"+id);
+	if(!wrap.length || !bar.length){
+		return;
+	}
+	var pct = Math.max(0, Math.min(100, parseInt(progress || 0, 10)));
+	bar.css("width", pct + "%").attr("aria-valuenow", pct);
+	if(visible){
+		wrap.show();
+	} else {
+		wrap.hide();
+	}
+}
+
+function actualizarInfoPanel(data){
+	for(var i=0; i<data["exportations"].length; i++){
+		var _export = data["exportations"][i];
+		var id = _export["id"];
+		var msg = _export["message"];
+		var status = _export['status'];
+		var redirect = _export['redirect'];
+		var progress = _export['progress'] || 0;
+
+		if(status == 'Warning'){
+			$("#icon-"+id).removeClass("fa fa-spinner fa-spin status-icon-running status-icon-error status-icon-success");
+			$("#icon-"+id).addClass("fa fa-exclamation-triangle status-icon-warning");
+			$("#icon-"+id).css("display", "inline");
+			$("#msg-"+id).text(msg);
+			setProgress(id, 100, false);
+		}
+
+		if(status == 'Success'){
+			$("#icon-"+id).removeClass("fa fa-spinner fa-spin status-icon-running status-icon-error status-icon-warning");
+			$("#icon-"+id).addClass("fa fa-check status-icon-success");
+			$("#icon-"+id).css("display", "inline");
+			$("#msg-"+id).text(msg);
+			$("#btn-"+id).remove();
+			setProgress(id, 100, false);
+		}
+
+		if(status == 'Running'){
+			$("#icon-"+id).removeClass("fa fa-check status-icon-success status-icon-error status-icon-warning");
+			$("#icon-"+id).addClass("fa fa-spinner fa-spin status-icon-running");
+			$("#icon-"+id).css("display", "inline-block");
+			$("#msg-"+id).text(msg);
+			setProgress(id, progress, true);
+		}
+
+		if(status == 'Error'){
+			$("#icon-"+id).removeClass("fa fa-spinner fa-spin status-icon-running status-icon-success status-icon-warning");
+			$("#icon-"+id).addClass("fa fa-times status-icon-error");
+			$("#icon-"+id).css("display", "inline");
+			$("#msg-"+id).text(msg);
+			setProgress(id, 0, false);
+			$("#btn-"+id).empty();
+			// Con DOM y no pegando HTML: la URL lleva el nombre del fichero, que puede traer comillas.
+			// Solo rutas de esta aplicación (empiezan por una sola barra).
+			if (typeof redirect === 'string' && redirect.charAt(0) === '/' && redirect.charAt(1) !== '/' && redirect.charAt(1) !== '\\') {
+				$('<a>', {href: redirect, 'class': 'btn-pf-try'})
+					.append($('<i>', {'class': 'fa fa-upload'}))
+					.append(document.createTextNode(' ' + gettext("Try again")))
+					.appendTo("#btn-"+id);
+			}
+		}
+	}
+}
+
+function getCurrentStatus(){
+	$.ajax({
+		type: 'POST',
+		data: { 'status': 'true' },
+		async: true,
+		url: '/gvsigonline/filemanager/list_exports/',
+		beforeSend: function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+		},
+		success: function(response){
+			actualizarInfoPanel(response);
+		},
+		error: function(response){
+			actualizarInfoPanel(response);
+		}
+	});
+	return false;
+}
+
+function startCurrentStatus(){
+	interval = setInterval(function(){
+		getCurrentStatus();
+	}, 3000);
+}
+
+startCurrentStatus();
+</script>
+{% endblock %}

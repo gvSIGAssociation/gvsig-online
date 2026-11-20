@@ -1,0 +1,18 @@
+type: trans_IDW
+label: IDW Interpolation
+family: transform
+summary: Interpolación IDW. El resultado es una rejilla.
+parameters:
+- name: value-field
+- name: power
+- name: cell-size
+- name: search-radius
+- name: min-points
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

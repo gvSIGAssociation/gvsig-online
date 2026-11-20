@@ -1,0 +1,23 @@
+type: trans_Geocoder
+label: Geocoder
+family: transform
+summary: Geocodifica una dirección o hace geocodificación inversa.
+parameters:
+- name: engine-option
+- name: mode-option
+  choices:
+  - direct
+  - reverse
+- name: attr
+  summary: Atributo sobre el que actúa la tarea.
+- name: attr-selected
+- name: x
+- name: y
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

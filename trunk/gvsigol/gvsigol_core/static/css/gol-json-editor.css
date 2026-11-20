@@ -1,0 +1,18 @@
+/* =================================================================
+   gvSIG Online — Editor JSON compacto
+   Ajustes sobre CodeMirror para los campos de parámetros de conexión.
+   Compartido por connection_add y connection_update.
+   ================================================================= */
+
+.json-editor-small {
+	border: 1px solid #d2d6de;
+	border-radius: 3px;
+	height: 50px !important;
+	font-size: 12px;
+}
+.json-editor-small .CodeMirror-gutters { left: 0 !important; }
+.json-editor-small .CodeMirror-linenumber {
+	padding: 0 3px 0 5px !important;
+	min-width: 20px !important;
+}
+.json-editor-small .CodeMirror-lines { padding-left: 0 !important; }

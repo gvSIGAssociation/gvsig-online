@@ -1,0 +1,86 @@
+{% extends "filemanager_base.html" %}
+{% load i18n static %}
+
+{% block header %}
+<link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-filemanager.css" %}">
+<style>
+/* Reserva sitio para el area de arrastrar ficheros antes de que el plugin
+   de subida la rellene. */
+.fileupload-component { min-height: 120px; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="pf-topbar">
+	<a href="{% url 'filemanager:browser' %}?path={{path|urlencode}}{% if popup %}&amp;popup=1{% endif %}" class="btn-pf-back"><i class="fa fa-chevron-left"></i> {% trans "Back" %}</a>
+	<button id="upload-button" type="button" class="btn-pf-save"><i class="fa fa-upload"></i> {% trans "Upload" %}</button>
+</div>
+
+<div class="pf-card">
+	<div class="pf-card-header">
+		<i class="fa fa-folder-open"></i>
+		{% include "filemanager_breadcrumbs.html" %}
+	</div>
+
+	<div id="fileupload-component" class="fileupload-component"></div>
+</div>
+
+{% endblock %}
+
+{% block extra-scripts %}
+
+<script src="{% static "js/vendors/jQueryUI/jquery.ui.widget.js" %} "></script>
+<script src="{% static "js/jquery.iframe-transport.js" %} "></script>
+{% comment %}Copia local de jquery.form (la misma 3.51). Sin ella jquery.uploadfile.js la descarga de
+malsup.github.io y, sin acceso a internet, el formulario de subida no aparece.{% endcomment %}
+<script src="{% static "js/vendors/jQuery/jquery.form.js" %}"></script>
+<script src="{% static "js/jquery.uploadfile.js" %} "></script>
+
+<script>
+$('#menu-manage-files').addClass("active");
+$(document).ready(function(){
+	const csrftoken = $.gvsigOL.getCsrfCookie();
+	var fileupload = $('#fileupload-component');
+	var path = '';
+	// Cada parte de la ruta codificada: un nombre con & o # no añade parámetros a la URL
+	function encodePath(p) {
+		return String(p || '').split('/').map(encodeURIComponent).join('/');
+	}
+	fileupload.uploadFile({
+		url: "{% url 'filemanager:upload-file' %}",
+		fileName: "files",
+		multiple: true,
+		autoSubmit: false,
+		formData: {
+			'csrfmiddlewaretoken': csrftoken
+		},
+		onSuccess: function(files, data, xhr){
+			var json = JSON.parse(data);
+			path = json.path;
+		},
+		afterUploadAll: function(files, data, xhr){
+			$.overlayout();
+			if (window.location.href.includes("popup=1")){
+				location.href = '/gvsigonline/filemanager/?path=' + encodePath(path) + '&popup=1';
+			} else {
+				location.href = '/gvsigonline/filemanager/?path=' + encodePath(path);
+			}
+		},
+		onError: function(files, status, errMsg){}
+	});
+
+	$('#upload-button').on('click', function () {
+		if (fileupload.getFileCount() >= 1) {
+			$("body").overlay();
+			fileupload.appendExtraParams({'path': "{{path|escapejs}}"});
+			fileupload.startUpload();
+		} else {
+			messageBox.show('warning', gettext('You must select a file'));
+		}
+	});
+});
+</script>
+
+{% endblock %}

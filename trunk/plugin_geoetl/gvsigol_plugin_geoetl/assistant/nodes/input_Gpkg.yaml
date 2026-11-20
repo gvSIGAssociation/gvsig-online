@@ -1,0 +1,24 @@
+type: input_Gpkg
+label: GeoPackage
+family: input
+summary: Lee una capa de un GeoPackage con su codificación y EPSG.
+parameters:
+- name: gpkg-file
+  required: true
+- name: gpkg-layer
+  required: true
+  summary: Nombre de la capa dentro del GeoPackage.
+- name: encode
+  choices:
+  - UTF-8
+  - LATIN1
+  - ISO-8859-15
+  - WINDOWS-1252
+- name: epsg
+  summary: Código EPSG.
+ports:
+- direction: output
+  label: Input
+connection_types: []
+connection_parameter: null
+sql_parameters: []

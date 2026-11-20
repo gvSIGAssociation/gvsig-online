@@ -1,0 +1,13 @@
+type: trans_ExplodeGeom
+label: Explode Geometry
+family: transform
+summary: Separa las partes de una geometría múltiple.
+parameters: []
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

@@ -1,0 +1,22 @@
+type: crea_Grid
+label: Grid
+family: creator
+summary: Crea una malla de celdas rectangulares a partir de un origen, tamaño y EPSG.
+parameters:
+- name: create
+- name: rows
+- name: columns
+- name: width
+- name: height
+- name: init-x
+- name: init-y
+- name: epsg
+  summary: Código EPSG.
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

@@ -1,0 +1,26 @@
+type: output_ModelSave
+label: Save Model
+family: output
+summary: Guarda de forma permanente el modelo entrenado (salida 1 de Random Forest) para aplicarlo
+  más tarde, con el nodo Saved Model, a otras imágenes o tablas sin volver a entrenar. Los modelos son
+  privados del usuario y se versionan.
+parameters:
+- name: model-name
+  required: true
+  summary: Nombre del modelo (se guarda en minúsculas, con dígitos y guion bajo).
+- name: description
+  summary: Descripción opcional.
+- name: on-existing
+  summary: Qué hacer si ya existe un modelo con ese nombre. version añade una versión nueva (por
+    defecto), replace borra las anteriores y fail detiene la ejecución.
+  choices:
+  - version
+  - replace
+  - fail
+ports:
+- direction: input
+  label: Model
+  kind: model
+connection_types: []
+connection_parameter: null
+sql_parameters: []

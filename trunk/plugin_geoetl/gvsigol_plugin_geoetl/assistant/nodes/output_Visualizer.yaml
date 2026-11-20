@@ -1,0 +1,13 @@
+type: output_Visualizer
+label: Visualizer
+family: output
+summary: Publica el resultado en el visualizador con un nombre de capa y un grupo.
+parameters:
+- name: layer-name
+- name: layer-group
+ports:
+- direction: input
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

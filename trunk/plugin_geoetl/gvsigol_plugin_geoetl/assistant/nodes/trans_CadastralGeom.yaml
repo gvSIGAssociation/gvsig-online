@@ -1,0 +1,15 @@
+type: trans_CadastralGeom
+label: Cadastral Geometry
+family: transform
+summary: Obtiene la geometría catastral a partir de la referencia catastral.
+parameters:
+- name: attr
+  summary: Atributo sobre el que actúa la tarea.
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

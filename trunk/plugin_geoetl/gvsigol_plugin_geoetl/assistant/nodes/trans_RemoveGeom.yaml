@@ -1,0 +1,13 @@
+type: trans_RemoveGeom
+label: Remove Geometry
+family: transform
+summary: Quita la geometría y deja solo los atributos.
+parameters: []
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

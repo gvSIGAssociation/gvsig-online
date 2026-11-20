@@ -1,0 +1,28 @@
+type: trans_RasterPolygonize
+label: Raster to Polygons
+family: transform
+summary: Convierte un ráster clasificado (salida de Predict Raster) en polígonos con las
+  columnas class_name, class_code, area y wkb_geometry. Permite quedarse con algunas clases,
+  descartar polígonos pequeños y simplificar. No sirve con rásters de regresión.
+parameters:
+- name: classes
+  summary: Nombres de las clases a conservar, separados por comas. Vacío = todas.
+- name: min-area
+  summary: Área mínima de cada polígono, en unidades cuadradas del sistema de coordenadas del
+    ráster. Útil para quitar píxeles aislados (por defecto 0).
+- name: simplify
+  summary: Tolerancia de simplificación en unidades del sistema de coordenadas; 0 = sin simplificar.
+- name: connectivity
+  summary: Vecindad de píxeles. 4 une solo por los lados y 8 también por las esquinas.
+  choices:
+  - '4'
+  - '8'
+ports:
+- direction: input
+  label: Raster
+  kind: raster
+- direction: output
+  label: Polygons
+connection_types: []
+connection_parameter: null
+sql_parameters: []

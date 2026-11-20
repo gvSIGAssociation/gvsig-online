@@ -1,0 +1,34 @@
+type: input_Excel
+label: Excel
+family: input
+summary: Lee una hoja de un fichero Excel. El esquema lo completa el usuario al aceptar.
+parameters:
+- name: get_sheet-name
+- name: excel-file
+  required: true
+  summary: Valor file:// del fichero.
+- name: sheet-name
+  summary: Hoja que se lee.
+- name: usecols
+  summary: 'Columnas de Excel que se leen. Vacío: todas.'
+  default: ''
+  example: A:H
+- name: header
+  summary: Filas que se saltan antes de la cabecera.
+  default: '0'
+- name: reading
+  choices:
+  - single
+  - multiple
+  summary: single para un fichero; multiple para todos los de una carpeta.
+  default: single
+- name: move
+  default: ''
+- name: folder
+  default: ''
+ports:
+- direction: output
+  label: Input
+connection_types: []
+connection_parameter: null
+sql_parameters: []

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title></title>
+        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/black-tie/jquery-ui.css" />
+        <link rel="stylesheet" href="css/jquery.ui.dialog-collapse.css" />
+
+        <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+        <script type="text/javascript" src="js/jquery.ui.dialog-collapse.js"></script>
+
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $('#jquery-ui-collapse-dialog').dialog({
+                    collapseEnabled: true,
+                    beforeCollapse: function(event, ui) {
+                        console.log('beforeCollapse');
+                    },
+                    collapse: function(event, ui) {
+                        console.log('collapse');
+                    },
+                    beforeCollapseRestore: function(event, ui) {
+                        console.log('beforeCollapseRestore');
+                    },
+                    collapseRestore: function(event, ui) {
+                        console.log('collapseRestore');
+                    }
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <div id="jquery-ui-collapse-dialog" title="jQuery UI Dialog Collapse">
+            <p>This is the jQuery UI Dialog Collapse dialog.</p>
+        </div>
+    </body>
+</html>

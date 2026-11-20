@@ -1,0 +1,288 @@
+{% extends "base_symbology.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+<div class="row">
+	<div class="col-md-12">
+		<div class="pl-panel gol-sym-editor gol-sym-editor--cards">
+
+			<div class="pl-panel__header">
+				<div class="gol-sym-heading">
+<a href="{% url 'style_layer_list' %}" class="gol-sym-back-btn" title="{% trans "Back to styles list" %}" aria-label="{% trans "Back to styles list" %}"><i class="fa fa-arrow-left" aria-hidden="true"></i></a>
+<div class="gol-sym-heading__text">
+{% block unique_symbol_v1 %}				<h3 class="pl-panel__title"><i class="fa fa-paint-brush"></i>{% trans "Add new style" %}</h3>
+{% endblock %}					<span class="gol-sym-subtitle">{% trans "Layer" %}: {{ layer_name }}</span>
+</div>
+				</div>
+				<div class="pl-panel__actions">
+					<button id="refresh-preview" class="btn-pf-secondary refresh-preview"><i class="fa fa-refresh"></i> {% trans "Update preview" %}</button>
+					<button id="show-label" class="btn-pf-secondary refresh-preview"><i class="fa fa-tags"></i> {% trans "Labeling" %}</button>
+					<button id="save-legend" class="btn-pf-save save-legend"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+				</div>
+			</div>
+
+			<div class="pl-panel__body with-padding">
+
+				<div class="row">
+					<div class="col-md-6 gol-sym-props">
+						<div class="gol-sym-card">
+						<h4 class="gol-sym-section-title">{% trans "Style properties" %}</h4>
+{% block unique_symbol_v2 %}						<div id="form-error" class="pf-error-msg"></div>
+{% endblock %}						<div class="row">
+							<div class="col-md-12 form-group">
+								<label>{% trans "Name" %}</label>
+{% block unique_symbol_v3 %}								<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" value="{{style_name}}" type="text" class="form-control">	
+{% endblock %}							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 form-group">
+								<label>{% trans "Title" %}</label>
+{% block unique_symbol_v4 %}								<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" type="text" class="form-control">	
+{% endblock %}							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-6 form-group">
+								<label>{% trans "Min. scale" %}</label>
+								<div class="input-group gol-sym-scale"><span class="input-group-addon">1:</span>
+{% block unique_symbol_v5 %}					    		<input placeholder="{% trans 'No limit' %}" name="symbol-minscale" id="symbol-minscale" type="number" step="any" value="" class="form-control">
+{% endblock %}								</div>
+							</div>
+							<div class="col-md-6 form-group">
+								<label>{% trans "Max. scale" %}</label>
+								<div class="input-group gol-sym-scale"><span class="input-group-addon">1:</span>
+{% block unique_symbol_v6 %}					    		<input placeholder="{% trans 'No limit' %}" name="symbol-maxscale" id="symbol-maxscale" type="number" step="any" value="" class="form-control">
+{% endblock %}								</div>
+							</div>
+							<div class="col-md-12 form-group">
+								<p class="text-muted gol-sym-help-text">* {% trans "Specifies the minimum and maximum scale denominator (inclusive) for the scale range in which this rule applies" %}.</p>
+							</div>
+						</div>
+						<div class="row">
+							<div class="checkbox col-md-12 gol-sym-default">								
+{% block unique_symbol_v7 %}								<label>
+									<input type="checkbox" name="style-is-default" id="style-is-default"/>{% trans "Set as default style" %}
+								</label>
+{% endblock %}							</div>
+						</div>
+						</div>
+					</div>
+					<div class="col-md-6 gol-sym-preview">
+						<div class="gol-sym-card">
+						<h4 class="gol-sym-section-title">{% trans "Map preview" %}</h4>
+						<div id="map" class="preview-map"></div>
+						</div>
+					</div>						
+				</div>
+				
+				<h4 class="gol-sym-section-title gol-sym-section-title--rules">{% trans "Symbol" %}</h4>
+				<div id="rules" class="row" data-empty-text="{% trans "There are no rules yet. Use the toolbar above to create them." %}"></div>
+				
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-edit-rule" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title">{% trans "Edit rule" %}</h4>
+			</div>
+			<div id="modal-edit-rule-content" class="modal-body">
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-import-symbol" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title">{% trans "Import symbol" %}</h4>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label>{% trans "Select library" %}</label>
+						<select id="select-library" class="form-control">
+							<option disabled selected value> -- {% trans "Select symbol library" %} -- </option>
+							{% for library in libraries %}
+							<option value="{{library.id}}">{{library.name}}</option>
+							{% endfor %}
+						</select>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<div class="box">
+							<div class="box-body no-padding gol-sym-scroll">
+								<ul class="users-list clearfix">
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button id="button-import-symbol-close" type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
+			</div>
+		</div>
+	</div>
+</div>    	
+
+<!-- Modal -->
+<div class="modal fade" id="modal-symbolizer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title">{% trans "Edit symbolizer" %}</h4>
+			</div>
+			<div class="modal-body">
+				<div class="nav-tabs-custom">
+	            	<ul id="tab-menu" class="nav nav-tabs">				                        
+	            	</ul>
+	            	<div id="tab-content" class="tab-content">
+	            	</div>
+       			</div>
+			</div>
+		</div>
+	</div>
+</div> 
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-symbology').addClass("active");
+	$('#submenu-styles').addClass("active");
+</script>
+<script>
+{% block unique_symbol_v8 %}
+{% endblock %}$(document).ready(function() {
+	
+	var layerId = "{{layer_id}}";
+	var layerUrl = "{{layer_url}}";
+	var wfsUrl = "{{layer_wfs_url}}";
+	var layerName = "{{layer_name}}";
+	var styleId = "{{style.id}}";
+	var featureType = "{{featureType}}";
+	var jsonAlphanumericFields = {{json_alphanumeric_fields|safe}};
+	var fonts = {{ fonts|safe }};
+{% block unique_symbol_v9 %}	var rule_opts = "";
+{% endblock %}	var previewUrl = "{{preview_url}}";
+	var supported_crs = {{supported_crs|safe}};
+	var authToken = "{{auth_token}}";
+	authenticate(layerUrl);
+	
+	for (var crs in supported_crs) {
+		proj4.defs(supported_crs[crs].code, supported_crs[crs].definition);	
+	}
+	
+	var map = new ol.Map({
+		layers: [
+		    new ol.layer.Tile({
+            	source: new ol.source.OSM({
+            		url: 'https://{a-c}.tile.openstreetmap.de/{z}/{x}/{y}.png'
+            	})
+          	})
+		],
+		target: "map",
+		view: new ol.View({
+		    center:[0,0],
+		    zoom: '2'
+		})
+	});
+{% block unique_symbol_v10 %}	var wmsSource = new ol.source.TileWMS({
+{% endblock %}		url: layerUrl,
+		visible: true,
+{% block unique_symbol_v11 %}		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
+{% endblock %}		serverType: 'geoserver',
+{% block unique_symbol_v12 %}		tileLoadFunction: imagePostFunction
+{% endblock %}	});
+{% block unique_symbol_v13 %}	wmsLayer = new ol.layer.Tile({
+{% endblock %}		id: 'preview-layer',
+		source: wmsSource,
+		visible: true
+	});
+	map.addLayer(wmsLayer);
+	
+	var utils = new SymbologyUtils(map, layerId, wmsLayer, featureType, previewUrl, fonts, jsonAlphanumericFields);
+{% block unique_symbol_v14 %}	var uniqueSymbol = new UniqueSymbol(featureType, layerName, utils, null);
+	uniqueSymbol.addDefault();
+{% endblock %}	
+	utils.centerMap(layerName, wfsUrl, authToken);
+{% block unique_symbol_v15 %}{% endblock %}	
+	$("#show-label").on('click', function(e){
+		uniqueSymbol.showLabel();
+	});
+	
+	$("#style-title").on('change', function(e){
+		var rules = uniqueSymbol.getRules();
+		for (var i=0; i<rules.length; i++) {
+			rules[i].title = this.value;
+		}
+	});
+	
+	$("#symbol-minscale").on('change', function(e){
+		var rules = uniqueSymbol.getRules();
+		for (var i=0; i<rules.length; i++) {
+			rules[i].minscale = this.value;
+		}
+	});
+	
+	$("#symbol-maxscale").on('change', function(e){
+		var rules = uniqueSymbol.getRules();
+		for (var i=0; i<rules.length; i++) {
+			rules[i].maxscale = this.value;
+		}
+	});
+
+	$("#save-legend").on('click', function(e){
+{% block unique_symbol_v16 %}		if ($("#style-name").val() != '') {
+			uniqueSymbol.save(layerId);
+			
+		} else {
+			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
+			
+		}
+		
+{% endblock %}	});
+	
+	$("#refresh-preview").on('click', function(e){
+		uniqueSymbol.updatePreview(layerId);
+	});
+{% block unique_symbol_v17 %}	
+{% endblock %}	
+	$(window).on("beforeunload", function(){
+		$.ajax({
+			type: "POST",
+			async: false,
+			url: "/gvsigonline/symbology/remove_temporal_preview/",
+			beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			data: {
+				name: "{{style.name}}",
+				layer_id: "{{layer_id}}"
+			},
+			success: function(response){
+				
+			},
+		    error: function(){}
+		});
+	});
+	
+{% block unique_symbol_v18 %}{% endblock %}});
+</script>
+{% endblock %}

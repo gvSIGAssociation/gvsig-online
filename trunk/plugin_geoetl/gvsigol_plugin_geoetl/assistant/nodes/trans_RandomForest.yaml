@@ -1,0 +1,69 @@
+type: trans_RandomForest
+label: Random Forest
+family: transform
+summary: Entrena un Random Forest (clasificación o regresión, detectada automáticamente) con las
+  filas que tienen valor en la variable objetivo. La salida 0 es una tabla informe (métricas,
+  balance de clases, matriz de confusión, métricas por clase, kappa e importancia de variables),
+  la salida 1 es el modelo entrenado, de tipo model, que solo se conecta a Predict Raster, y la
+  salida 2 es la matriz de confusión en tabla ancha (una fila por clase real, columnas pred_<clase>,
+  total y recall; en regresión, las métricas r2/rmse/mae). El informe incluye la importancia por
+  impureza y, si hay evaluación, la importancia por permutación medida con los datos de evaluación.
+parameters:
+- name: target
+  required: true
+  summary: Columna a predecir.
+- name: features
+  required: true
+  summary: Lista de columnas numéricas con las que predecir. No debe incluir el objetivo.
+- name: problem
+  summary: Tipo de problema.
+  choices:
+  - auto
+  - classification
+  - regression
+- name: n-estimators
+  summary: Número de árboles (por defecto 100).
+- name: max-depth
+  summary: Profundidad máxima de los árboles. Vacío = sin límite.
+- name: min-samples-leaf
+  summary: Mínimo de muestras por hoja (por defecto 1).
+- name: test-percent
+  summary: Porcentaje de datos reservado para evaluar, de 0 a 50 (por defecto 20).
+- name: seed
+  summary: Semilla aleatoria (por defecto 42).
+- name: validation
+  summary: Cómo se mide la calidad. auto (por defecto) deja fuera polígonos de muestra si la tabla viene
+    de Sample Raster y cada clase tiene al menos 2 polígonos, y si no reserva al azar; random reserva un
+    porcentaje al azar (optimista con píxeles vecinos); polygon deja fuera polígonos de muestra enteros y
+    block deja fuera bloques de una cuadrícula. polygon y block necesitan la tabla de Sample Raster.
+  choices:
+  - auto
+  - random
+  - polygon
+  - block
+- name: folds
+  summary: Número de rondas de la validación polygon o block, de 2 a 10 (por defecto 5).
+- name: block-size
+  summary: Lado del bloque de la validación block, en unidades del sistema de coordenadas del
+    ráster (por ejemplo metros). Obligatorio con block.
+- name: max-features
+  summary: Variables que prueba cada división. auto (por defecto) sigue a Breiman (raíz cuadrada en
+    clasificación, un tercio en regresión); sqrt; third; all (todas, equivale a bagging de árboles).
+  choices:
+  - auto
+  - sqrt
+  - third
+  - all
+ports:
+- direction: input
+  label: Data
+- direction: output
+  label: Report
+- direction: output
+  label: Model
+  kind: model
+- direction: output
+  label: Confusion matrix
+connection_types: []
+connection_parameter: null
+sql_parameters: []

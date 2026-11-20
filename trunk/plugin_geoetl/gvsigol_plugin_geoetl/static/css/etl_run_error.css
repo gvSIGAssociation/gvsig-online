@@ -1,0 +1,66 @@
+/* Error de la última ejecución del editor ETL */
+#etl-run-error[hidden] {
+	display: none;
+}
+
+.etl-run-error {
+	margin: 8px 16px;
+	padding: 10px 14px;
+	background: #fbeaea;
+	border: 1px solid #e9b8b5;
+	border-left: 4px solid #d0423a;
+	border-radius: 6px;
+	font-size: 13px;
+	color: #444;
+}
+
+.etl-run-error__head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: #b03029;
+}
+
+.etl-run-error__close {
+	margin-left: auto;
+	padding: 0 4px;
+	background: none;
+	border: 0;
+	color: #888;
+	cursor: pointer;
+}
+
+.etl-run-error__close:hover,
+.etl-run-error__close:focus {
+	color: #333;
+}
+
+.etl-run-error__node {
+	margin-top: 4px;
+}
+
+.etl-run-error__node .btn-link {
+	padding: 0;
+	border: 0;
+	font-weight: 600;
+}
+
+.etl-run-error__detail {
+	max-height: 160px;
+	margin: 6px 0 8px;
+	padding: 8px 10px;
+	overflow: auto;
+	background: #fff;
+	border: 1px solid #eed2d0;
+	border-radius: 4px;
+	font-size: 12px;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	user-select: text;
+}
+
+.etl-run-error__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}

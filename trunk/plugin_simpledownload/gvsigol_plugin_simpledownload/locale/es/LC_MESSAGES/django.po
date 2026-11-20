@@ -1,0 +1,101 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-12-22 10:22+0100\n"
+"PO-Revision-Date: 2025-11-04 12:10+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.4.2\n"
+
+msgid "Simple download"
+msgstr "Descarga simple"
+
+msgid "Plugins"
+msgstr "Plugins"
+
+msgid "Add configuration"
+msgstr "Añadir configuración"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Project"
+msgstr "Proyecto"
+
+msgid "Select a project..."
+msgstr "Seleccionar un proyecto..."
+
+msgid "Add file"
+msgstr "Añadir archivo"
+
+msgid "Added files"
+msgstr "Archivos añadidos"
+
+msgid "No files added yet"
+msgstr "No hay archivos añadidos"
+
+msgid "Title"
+msgstr "Título"
+
+msgid "Description"
+msgstr "Descripción"
+
+msgid "File URL"
+msgstr "URL del archivo"
+
+msgid "Or upload your file"
+msgstr "O suba un archivo"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Clear file"
+msgstr "Quitar archivo"
+
+msgid "Delete configuration"
+msgstr "Eliminar configuración"
+
+msgid "Are you sure you want to delete the simple download configuration for project"
+msgstr "¿Está seguro de que quiere eliminar la configuración de descarga simple para el proyecto"
+
+msgid "Delete"
+msgstr "Eliminar"
+
+msgid "Update configuration"
+msgstr "Actualizar configuración"
+
+msgid "Updated at"
+msgstr "Actualizado el"
+
+msgid "Simple download configurations"
+msgstr "Configuraciones de descarga simple"
+
+msgid "ID"
+msgstr "ID"
+
+msgid "Created"
+msgstr "Creado"
+
+msgid "Updated"
+msgstr "Actualizado"
+
+msgid "No configurations found. Click 'Add configuration' to create one."
+msgstr "No se encontraron configuraciones. Haga clic en 'Añadir configuración' para crear una."
+
+msgid "The configuration will be removed. Do you want to continue?"
+msgstr "La configuración será eliminada. ¿Quiere continuar?"
+
+msgid "Accept"
+msgstr "Aceptar"

@@ -1,0 +1,25 @@
+{
+ "pixel_m2": 1.0,
+ "superficie_total_m2": {
+  "suelo": 65217,
+  "vegetacion": 21784,
+  "agua": 2999
+ },
+ "superficie_por_tramo_m2": {
+  "Tramo 1": {
+   "suelo": 21039,
+   "vegetacion": 7962,
+   "agua": 999
+  },
+  "Tramo 2": {
+   "suelo": 22400,
+   "vegetacion": 6600,
+   "agua": 1000
+  },
+  "Tramo 3": {
+   "suelo": 21778,
+   "vegetacion": 7222,
+   "agua": 1000
+  }
+ }
+}

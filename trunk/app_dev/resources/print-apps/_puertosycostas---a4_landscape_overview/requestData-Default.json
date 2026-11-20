@@ -1,0 +1,48 @@
+{
+  "layout": "A4 landscape with Overview",
+  "outputFilename": "A4 landscape with Overview",
+  "outputFormat": "pdf",
+  "attributes": {
+    "title": "Proyecto gvSIG Online",
+    "lang": "es",
+    "scale": "1: 58.935",
+    "map": {
+      "projection": "EPSG:3857",
+      "dpi": "320",
+      "rotation": 0,
+      "useNearestScale": false,
+      "layers": [
+        {
+          "name": "OSM",
+          "baseURL": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+          "type": "OSM",
+          "imageExtension": "png"
+        }
+
+      ],
+      "bbox": [7675.0, 4670000.0, 7875.5, 4670250.0]
+    },
+    "logo_url": "logo.png",
+    "legend": {
+      "name": "",
+      "classes": [
+      ]
+    },
+    "crs": "EPSG:3857",
+    "legalWarning": "Esto es el aviso legal",
+    "overviewMap": {
+      "projection": "EPSG:3857",
+      "center": [-51139.9732243557, 4790832.86391251],
+      "rotation": 0,
+      "scale": 1178700,
+      "layers": [
+        {
+          "name": "OSM",
+          "baseURL": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+          "type": "OSM",
+          "imageExtension": "png"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,39 @@
+type: trans_RasterMajority
+label: Clean Raster
+family: transform
+summary: Elimina el ruido de sal y pimienta de un ráster clasificado (salida 0 de Predict Raster).
+  Se coloca entre Predict Raster y Raster to Polygons o Publish Raster. Con mode=majority cada
+  píxel toma la clase más frecuente de su ventana (suaviza); con mode=sieve se eliminan los
+  grupos de píxeles conectados menores que min-pixels sin tocar los bordes de las zonas grandes.
+  El sin dato se conserva. Conserva las clases del ráster de entrada.
+parameters:
+- name: mode
+  summary: Método de limpieza (por defecto majority).
+  choices:
+  - majority
+  - sieve
+- name: window
+  summary: Lado de la ventana de mayoría en píxeles (por defecto 3).
+  choices:
+  - '3'
+  - '5'
+  - '7'
+- name: iterations
+  summary: Veces que se aplica la mayoría, de 1 a 5 (por defecto 1).
+- name: min-pixels
+  summary: Con sieve, tamaño mínimo del parche en píxeles, al menos 2 (por defecto 4).
+- name: connectivity
+  summary: Con sieve, vecindad de los píxeles, 4 (lados) u 8 (también esquinas) (por defecto 4).
+  choices:
+  - '4'
+  - '8'
+ports:
+- direction: input
+  label: Raster
+  kind: raster
+- direction: output
+  label: Raster
+  kind: raster
+connection_types: []
+connection_parameter: null
+sql_parameters: []

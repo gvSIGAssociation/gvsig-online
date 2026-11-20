@@ -1,0 +1,31 @@
+type: trans_CreateAttr
+label: Create Attribute
+family: transform
+summary: Añade un atributo con un valor constante.
+parameters:
+- name: attr
+  required: true
+  summary: Nombre de la columna nueva.
+  example: origen
+- name: value
+  summary: Valor inicial de todas las filas. Vacío la deja a NULL.
+  default: ''
+- name: data-type
+  required: true
+  choices:
+  - VARCHAR
+  - INTEGER
+  - FLOAT
+  - DATE
+  - TIMESTAMP
+  - BOOLEAN
+  summary: Tipo de la columna.
+  default: VARCHAR
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

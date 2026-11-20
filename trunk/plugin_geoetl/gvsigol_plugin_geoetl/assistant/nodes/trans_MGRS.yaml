@@ -1,0 +1,20 @@
+type: trans_MGRS
+label: MGRS
+family: transform
+summary: Convierte entre coordenada MGRS y longitud/latitud.
+parameters:
+- name: select
+  choices:
+  - mgrstolatlon
+  - latlontomgrs
+- name: mgrs
+- name: lon
+- name: lat
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

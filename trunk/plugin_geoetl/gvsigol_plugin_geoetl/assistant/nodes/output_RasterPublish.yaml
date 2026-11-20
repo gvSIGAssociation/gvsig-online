@@ -1,0 +1,48 @@
+type: output_RasterPublish
+label: Publish Raster
+family: output
+summary: Publica un ráster como capa de gvSIG Online (GeoServer), con un estilo de colores por
+  clase. Si la capa ya existe, por defecto reemplaza su ráster, conserva permisos y mantiene el
+  estilo actualizado (las clases conservan su color).
+parameters:
+- name: workspace
+  required: true
+  summary: Nombre del workspace donde se crea la capa.
+- name: layer-group
+  required: true
+  summary: Nombre del grupo de capas.
+- name: title
+  summary: Título de la capa.
+- name: layer-name
+  required: true
+  summary: Nombre técnico de la capa (minúsculas, dígitos y guion bajo).
+- name: on-existing
+  summary: Qué hacer si la capa ya existe.
+  choices:
+  - replace
+  - fail
+- name: public
+  summary: '"true" para que la capa sea pública; vacío para privada.'
+- name: update-style
+  summary: Qué hacer con el estilo propio de la capa al reemplazar su ráster. auto lo actualiza solo
+    si cambian las clases o el rango (las clases que ya existían conservan su color), yes lo
+    regenera siempre y no no lo toca (por defecto auto).
+  choices:
+  - auto
+  - 'yes'
+  - 'no'
+- name: band
+  summary: Nombre de la banda a publicar de un ráster multibanda. Vacío = se publica entero.
+- name: ramp-min
+  summary: Mínimo de la rampa de color de un ráster de valores. Vacío = automático.
+- name: ramp-max
+  summary: Máximo de la rampa de color; debe indicarse junto con ramp-min.
+- name: abstract
+  summary: Descripción de la capa.
+ports:
+- direction: input
+  label: Raster
+  kind: raster
+connection_types: []
+connection_parameter: null
+sql_parameters: []

@@ -1,0 +1,1 @@
+default_app_config = 'gvsigol_plugin_projectapi.apps.GvsigolViewerApiConfig'

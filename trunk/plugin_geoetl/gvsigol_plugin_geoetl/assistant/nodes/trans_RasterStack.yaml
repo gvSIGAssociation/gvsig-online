@@ -1,0 +1,42 @@
+type: trans_RasterStack
+label: Combine Rasters
+family: transform
+summary: Une las bandas de varios ráster (de 2 a 4, por ejemplo una ortofoto y un modelo digital del
+  terreno con otra resolución) en un único ráster multibanda. El primer ráster conectado es el de
+  referencia; los demás se reproyectan y remuestrean a su cuadrícula, y donde no lo cubren quedan
+  sin dato. Se conecta cada ráster a una entrada distinta.
+parameters:
+- name: resampling
+  summary: Método de remuestreo de los ráster que no son el de referencia (por defecto bilinear).
+  choices:
+  - bilinear
+  - nearest
+- name: prefix-1
+  summary: Prefijo opcional para los nombres de banda del primer ráster conectado.
+- name: prefix-2
+  summary: Prefijo opcional para los nombres de banda del segundo ráster conectado.
+- name: prefix-3
+  summary: Prefijo opcional para los nombres de banda del tercer ráster conectado.
+- name: prefix-4
+  summary: Prefijo opcional para los nombres de banda del cuarto ráster conectado.
+ports:
+- direction: input
+  label: Raster 1 (reference)
+  kind: raster
+- direction: input
+  label: Raster 2
+  kind: raster
+- direction: input
+  label: Raster 3
+  kind: raster
+  optional: true
+- direction: input
+  label: Raster 4
+  kind: raster
+  optional: true
+- direction: output
+  label: Raster
+  kind: raster
+connection_types: []
+connection_parameter: null
+sql_parameters: []

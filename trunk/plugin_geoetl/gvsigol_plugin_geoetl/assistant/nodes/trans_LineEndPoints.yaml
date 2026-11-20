@@ -1,0 +1,13 @@
+type: trans_LineEndPoints
+label: Line EndPoints
+family: transform
+summary: Añade las coordenadas de los extremos de una línea.
+parameters: []
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

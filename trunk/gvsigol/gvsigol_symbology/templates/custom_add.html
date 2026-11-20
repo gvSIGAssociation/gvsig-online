@@ -1,0 +1,245 @@
+{% extends "base_symbology.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}	  	  
+<div class="row">
+	<div class="col-md-12">
+		<div class="pl-panel gol-sym-editor">
+		
+			<div class="pl-panel__header">
+				<div class="gol-sym-heading">
+<a href="{% url 'style_layer_list' %}" class="gol-sym-back-btn" title="{% trans "Back to styles list" %}" aria-label="{% trans "Back to styles list" %}"><i class="fa fa-arrow-left" aria-hidden="true"></i></a>
+<div class="gol-sym-heading__text">
+{% block custom_v1 %}				<h3 class="pl-panel__title"><i class="fa fa-paint-brush"></i>{% trans "Add new style" %}</h3>
+{% endblock %}					<span class="gol-sym-subtitle">{% trans "Layer" %}: {{ layer_name }}</span>
+</div>
+				</div>
+				<div class="pl-panel__actions">
+					<button id="refresh-preview" class="btn-pf-secondary refresh-preview"><i class="fa fa-refresh"></i> {% trans "Update preview" %}</button>
+					<button id="save-legend" class="btn-pf-save save-legend"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>					
+				</div>
+			</div>
+{% block custom_v2 %}{% endblock %}
+			<div class="pl-panel__body with-padding">
+				<div class="row">
+					<div id="form-error" class="pf-error-msg"></div>
+				</div>
+				<h4 class="gol-sym-section-title">{% trans "Style properties" %}</h4>
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label>{% trans "Name" %}</label>
+{% block custom_v3 %}						<input disabled placeholder="{% trans 'Style name' %}" name="style-name" id="style-name" value="{{style_name}}" type="text" class="form-control">	
+{% endblock %}					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label>{% trans "Title" %}</label>
+{% block custom_v4 %}						<input placeholder="{% trans 'Style title' %}" name="style-title" id="style-title" value="{{style_name}}" type="text" class="form-control">	
+{% endblock %}					</div>
+				</div>
+				<div class="row">
+					<div class="checkbox col-md-12 gol-sym-default">								
+						<label>
+{% block custom_v5 %}							<input checked type="checkbox" name="style-is-default" id="style-is-default"/>{% trans "Set as default style" %}
+{% endblock %}						</label>
+					</div>
+				</div>
+				<h4 class="gol-sym-section-title">{% trans "Map preview" %}</h4>
+				<div class="row">
+					<div class="col-md-12">
+						<div id="map" class="preview-map"></div>
+					</div>
+				</div>
+				<h4 class="gol-sym-section-title">{% trans "Style definition (SLD)" %}</h4>
+				<div class="row">
+					<div class="col-md-12 form-group">
+{% block custom_v6 %}						<textarea class="form-control" name="sld_content" id="sld_content" rows="10"></textarea>						
+{% endblock %}					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block extra-scripts %}
+<script>
+	$('#menu-manage-symbology').addClass("active");
+	$('#submenu-styles').addClass("active");
+</script>
+<script>
+{% block custom_v7 %}{% endblock %}$(document).ready(function() {
+	
+	var layerId = "{{layer_id}}";
+	var layerUrl = "{{layer_url}}";
+	var layerName = "{{layer_name}}";
+{% block custom_v8 %}{% endblock %}	var authToken = "{{auth_token}}";
+	authenticate(layerUrl);
+	
+	var map = new ol.Map({
+		layers: [
+		    new ol.layer.Tile({
+            	source: new ol.source.OSM({
+            		url: 'https://{a-c}.tile.openstreetmap.de/{z}/{x}/{y}.png'
+            	})
+          	})
+		],
+		target: "map",
+		view: new ol.View({
+		    center:[0,0],
+		    zoom: '2'
+		})
+	});
+{% block custom_v9 %}	var wmsSource = new ol.source.TileWMS({
+{% endblock %}		url: layerUrl,
+		visible: true,
+{% block custom_v10 %}		params: {'LAYERS': layerName, 'FORMAT': 'image/png', 'VERSION': '1.1.1'},
+{% endblock %}		serverType: 'geoserver',
+{% block custom_v11 %}		tileLoadFunction: imagePostFunction
+{% endblock %}	});
+{% block custom_v12 %}	wmsLayer = new ol.layer.Tile({
+{% endblock %}		id: 'preview-layer',
+		source: wmsSource,
+		visible: true
+	});
+	map.addLayer(wmsLayer);
+
+	var sldContent = document.getElementById('sld_content');
+	var codemirror = CodeMirror.fromTextArea(sldContent, {
+		mode: "text/xml",
+        extraKeys: {"Ctrl-Space": "autocomplete"},
+		theme: "xq-dark",
+		lineNumbers: true
+	});
+	
+{% block custom_v13 %}	var code = '';
+	code += '<?xml version="1.0" encoding="UTF-8"?> \n';
+	code += '<sld:StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:sld="http://www.opengis.net/sld" xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc" version="1.0.0"> \n';
+	code += '\t <!--  Contenido SLD  --> \n';
+	code += '</sld:StyledLayerDescriptor> \n';
+	
+	codemirror.setValue(code);
+{% endblock %}	codemirror.refresh();
+
+	$("#save-legend").on('click', function(e){
+{% block custom_v14 %}		if ($("#style-name").val() != '') {
+			save(layerId, codemirror);
+			
+		} else {
+			$("#form-error").append('<p>*{% trans "Field name is required" %}</p>');
+			
+		}
+		
+{% endblock %}	});
+	
+	$("#refresh-preview").on('click', function(e){
+		updatePreview(layerId, codemirror, map);
+	});
+	
+	$(window).on("beforeunload", function(){
+		$.ajax({
+			type: "POST",
+			async: false,
+			url: "/gvsigonline/symbology/remove_temporal_preview/",
+			beforeSend:function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			data: {
+{% block custom_v15 %}				name: "{{style_name}}",
+{% endblock %}				layer_id: "{{layer_id}}"
+			},
+			success: function(response){
+				
+			},
+		    error: function(){}
+		});
+	});
+	
+{% block custom_v16 %}{% endblock %}});
+
+{% block custom_v17 %}function save(layerId, codemirror) {	
+	if (!beginStyleSave()) {
+		return;
+	}
+{% endblock %}	var self = this;
+	
+	var sld = codemirror.getValue();
+	var isDefault = $('#style-is-default').is(":checked");
+	var styleName = $("#style-name").val();
+	var styleTitle = $("#style-title").val();
+
+{% block custom_v18 %}	
+{% endblock %}	$.ajax({
+		type: "POST",
+		async: false,
+{% block custom_v19 %}		url: "/gvsigonline/symbology/custom_add/" + layerId + "/",
+{% endblock %}		beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+		},
+		data: {
+			style: 'CS',
+			style_name: styleName,
+			style_title: styleTitle,
+			is_default: isDefault,
+			sld: sld
+		},
+		success: function(response){
+{% block custom_v20 %}			finishStyleSaveAttempt(response);
+{% endblock %}		},
+{% block custom_v21 %}		error: function(){
+			finishStyleSaveAttempt(null);
+		}
+{% endblock %}	});
+}
+
+function updatePreview(layerId, codemirror, map) {
+	var self = this;
+	
+	var sld = codemirror.getValue();
+	var isDefault = $('#style-is-default').is(":checked");
+	var styleName = $("#style-name").val();
+	var styleTitle = $("#style-title").val();
+	
+	$.ajax({
+		type: "POST",
+		async: false,
+		url: "/gvsigonline/symbology/update_preview/" + layerId +  "/",
+		beforeSend:function(xhr){
+			xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+		},
+		data: {
+			style: 'CS',
+			style_name: styleName,
+			style_title: styleTitle,
+			is_default: isDefault,
+			sld: sld
+			
+		},
+		success: function(response){
+			if (response.success) {
+				reloadLayerPreview(map);
+				
+			} else {
+				alert('Error');
+			}
+
+		},
+		error: function(){}
+	});
+}
+
+function reloadLayerPreview (map){
+	var styleName = $("#style-name").val();
+	var layers = map.getLayers();
+	layers.forEach(function(layer){
+		if (!layer.baselayer && !layer.external) {
+			if (layer.get("id") === 'preview-layer') {
+				layer.getSource().updateParams({'STYLES': styleName + "__tmp", "_time": (new Date()).getTime()});
+				map.render();
+			}
+		};
+	}, this);
+}
+</script>
+{% endblock %}

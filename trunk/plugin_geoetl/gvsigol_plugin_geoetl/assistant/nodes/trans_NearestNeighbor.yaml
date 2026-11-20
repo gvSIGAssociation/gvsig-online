@@ -1,0 +1,22 @@
+type: trans_NearestNeighbor
+label: Nearest Neighbor
+family: transform
+summary: Asigna a cada fila de la entrada 0 el vecino más cercano de la entrada 1.
+parameters:
+- name: attr
+  summary: Atributo sobre el que actúa la tarea.
+- name: tol
+ports:
+- direction: input
+  label: Input Main
+- direction: input
+  label: Input Sec.
+- direction: output
+  label: Matched
+- direction: output
+  label: Main Not Used
+- direction: output
+  label: Sec. Not Used
+connection_types: []
+connection_parameter: null
+sql_parameters: []

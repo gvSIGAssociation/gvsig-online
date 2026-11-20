@@ -1,0 +1,20 @@
+type: trans_CorrectSpelling
+label: Correct Spelling
+family: transform
+summary: Corrige la ortografía de un atributo de texto.
+parameters:
+- name: attr
+  summary: Atributo sobre el que actúa la tarea.
+- name: lang-option
+  choices:
+  - es_ES
+  - en_GB
+- name: accent-mark
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

@@ -1,0 +1,19 @@
+type: input_Raster
+label: Raster (GeoTIFF)
+family: input
+summary: Lee un GeoTIFF multibanda del gestor de ficheros. Su salida es de tipo raster y solo se
+  conecta a entradas raster. El esquema que transporta son los nombres de banda.
+parameters:
+- name: raster-file
+  required: true
+  summary: Ruta del GeoTIFF (.tif o .tiff) dentro del gestor de ficheros.
+- name: band-names
+  summary: Nombres de banda separados por comas, en orden (por ejemplo Rojo,Verde,IR). Las
+    vacías se llaman b1, b2... Opcional.
+ports:
+- direction: output
+  label: Raster
+  kind: raster
+connection_types: []
+connection_parameter: null
+sql_parameters: []

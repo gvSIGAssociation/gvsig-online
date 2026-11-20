@@ -1,0 +1,20 @@
+type: trans_Counter
+label: Counter
+family: transform
+summary: Numera filas, opcionalmente dentro de grupos.
+parameters:
+- name: attr
+  summary: Nombre de la columna nueva con el contador.
+  example: orden
+- name: group-by-attr
+  summary: Columna por la que se reinicia el contador, o - para no agrupar.
+  default: '-'
+  column: 0
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

@@ -1,0 +1,33 @@
+{% load i18n %}
+{% comment %}
+Textos de DataTables, antes repetidos en las 18 plantillas de listado.
+
+Van en una plantilla y no en golListPage.js porque estas cadenas pertenecen al
+dominio "django": gettext() en JavaScript lee el dominio "djangojs", que no las
+tiene, y moverlas ahi dejaria los listados sin traducir en todos los idiomas.
+Los msgid se conservan tal cual estaban para no tocar ningun catalogo.
+{% endcomment %}
+<script>
+window.GOL_DT_LANG = {
+	processing   : '{% trans "Processing request..." %}',
+	search       : '{% blocktrans with sep=":" %}Search{{sep}}{% endblocktrans %}',
+	lengthMenu   : '{% blocktrans with numrecords="_MENU_" %}Showing {{numrecords}} records{% endblocktrans %}',
+	info         : '{% blocktrans with start="_START_" end="_END_" numrecords="_TOTAL_" %}Showing from {{start}} to {{end}} of {{numrecords}} records{% endblocktrans %}',
+	infoEmpty    : '{% trans "Showing from 0 to 0 of 0 records" %}',
+	infoFiltered : '{% blocktrans with max="_MAX_" %}Filtering {{max}} records{% endblocktrans %}',
+	infoPostFix  : "",
+	loadingRecords : '{% trans "Loading..." %}',
+	zeroRecords  : '{% trans "No records available" %}',
+	emptyTable   : '{% trans "No records available" %}',
+	paginate: {
+		first    : '{% trans "First" %}',
+		previous : '{% trans "Previous" %}',
+		next     : '{% trans "Next" %}',
+		last     : '{% trans "Last" %}'
+	},
+	aria: {
+		sortAscending  : '{% blocktrans with sep=": " %}{{sep}}Sort ascending{% endblocktrans %}',
+		sortDescending : '{% blocktrans with sep=": " %}{{sep}}Sort descending{% endblocktrans %}'
+	}
+};
+</script>

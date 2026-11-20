@@ -1,0 +1,23 @@
+type: trans_Cluster
+label: Clustering
+family: transform
+summary: Agrupa puntos con DBSCAN o K-means.
+parameters:
+- name: option
+  choices:
+  - ST_ClusterDBSCAN
+  - ST_ClusterKMeans
+- name: eps
+- name: minpoints
+- name: number-clusters
+- name: max-radius
+- name: attr
+  summary: Atributo sobre el que actúa la tarea.
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

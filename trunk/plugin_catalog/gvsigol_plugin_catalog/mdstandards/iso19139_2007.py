@@ -1,0 +1,605 @@
+# -*- coding: utf-8 -*-
+from lxml import etree as ET
+from builtins import str as text
+from .registry import XmlStandardUpdater, BaseStandardManager, XmlStandardReader
+from datetime import datetime
+from django.utils.translation import gettext as _
+from gvsigol_plugin_catalog.xmlutils import getTextFromXMLNode, getXMLCodeText, sanitizeXmlText, insertAfter, namespacedTag, setLocalisedCharacterString
+from django.conf import settings
+import collections
+import logging
+logger = logging.getLogger("gvsigol")
+
+
+def define_translations():
+    """
+    Force some strings to be detected by gettext/makemessages
+    """
+    _('author')
+    _('owner')
+    _('Contact')
+    _('resourceProvider')
+    _('custodian')
+    _('originator')
+    _('publisher')
+
+namespaces = {
+    'gmd': 'http://www.isotc211.org/2005/gmd',
+    'gco': 'http://www.isotc211.org/2005/gco',
+    'gmx': 'http://www.isotc211.org/2005/gmx',
+    'xlink': 'http://www.w3.org/1999/xlink'
+}
+
+def get_template(md_type):
+    """
+    Allows the default templates to be replaced by templates defined by the client gvsigol app
+
+    md_type: Specifies the type of template to be retrieved (dataset, series, service, etc). Ignored for the moment
+    """
+    from .templates import plugin_mdtemplate, resolve_mdtemplate
+    return resolve_mdtemplate(
+        ['dataset.xml', 'dataset19139.xml'],
+        plugin_mdtemplate('dataset19139.xml'),
+    )
+
+def getCrsCodeAnchor(crs):
+    code = ET.Element(namespacedTag('gmd', 'code', namespaces))
+    anchor = ET.Element(namespacedTag('gmx', 'Anchor', namespaces))
+    if crs.startswith('EPSG:'):
+        crs_uri = "http://www.opengis.net/def/crs/EPSG/0/" + crs[5:]
+    else:
+        crs_uri = crs
+    anchor.attrib[namespacedTag('xlink', 'title', namespaces)] = crs_uri
+    anchor.attrib[namespacedTag('xlink', 'href', namespaces)] = crs_uri
+    anchor.text = crs
+    code.append(anchor)
+    return code
+                 
+def create_datset_metadata(mdfields):
+    try:
+        qualified_name = mdfields.get('qualified_name')
+        title = mdfields.get('title')
+        abstract = mdfields.get('abstract')
+        extent_tuple = mdfields.get('extent_tuple', (0.0, 0.0, 0.0, 0.0))
+        crs = mdfields.get('crs')
+        thumbnail_url = mdfields.get('thumbnail_url')
+        wms_endpoint = mdfields.get('wms_endpoint')
+        wmts_endpoint = mdfields.get('wmts_endpoint')
+        wfs_endpoint = mdfields.get('wfs_endpoint')
+        wcs_endpoint = mdfields.get('wcs_endpoint')
+        spatial_representation_type = mdfields.get('spatial_representation_type', 'vector')
+        current_datetime = datetime.now()
+        
+        tpl_path = get_template('dataset')
+        tree = ET.parse(tpl_path)
+        
+        spatialRepresentationTypeCode = tree.find('//gmd:MD_SpatialRepresentationTypeCode', namespaces)
+        spatialRepresentationTypeCode.set('codeListValue', spatial_representation_type)
+        
+        titleElem = tree.find('/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title', namespaces)
+        setLocalisedCharacterString(titleElem, title, settings.LANGUAGE_CODE, namespaces)
+        
+        abstractElem = tree.find('/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract', namespaces)
+        setLocalisedCharacterString(abstractElem, abstract, settings.LANGUAGE_CODE, namespaces)
+        
+        crsElem = tree.find('/gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code/gco:CharacterString', namespaces)
+        if crsElem is not None:
+            crsElem.text = crs
+        else:
+            crsCodeElem = tree.find('/gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code', namespaces)
+            rs_identifier = crsCodeElem.getparent()
+            rs_identifier.remove(crsCodeElem)
+            rs_identifier.append(getCrsCodeAnchor(crs))
+        
+        dateTime = tree.find('/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/gco:DateTime', namespaces)
+        if dateTime is not None:
+            dateTime.text = text(current_datetime.isoformat())
+        else:
+            dateTime = tree.find('/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/gco:Date', namespaces)
+            dateTime.text = text(current_datetime.date().isoformat())
+        
+        if thumbnail_url:
+            create_thumbnail(tree, thumbnail_url, title)
+        minx, miny, maxx, maxy = extent_tuple
+        create_extent(tree, minx, miny, maxx, maxy)
+        
+        create_transfer_options(tree, qualified_name, spatial_representation_type, title, wms_endpoint, wfs_endpoint, wcs_endpoint, wmts_endpoint)
+        resourceCodeElems = tree.xpath("//*[text()='RESOURCE_CODE']")
+        for resCodeElem in resourceCodeElems:
+            resCodeElem.text = qualified_name
+        return ET.tostring(tree, encoding='unicode')
+    except:
+        logger.exception("Error creating metadata")
+
+
+class Iso19139_2007Manager(BaseStandardManager):
+    def get_code(self):
+        return 'Iso19139_2007Manager'
+
+    def get_priority(self):
+        return 100
+
+    def get_updater_instance(self, metadata_record):
+        return Iso19139_2007Updater(metadata_record)
+    
+    def get_reader_instance(self, metadata_record):
+        return Iso19139_2007Reader(metadata_record)
+    
+    def can_update(self, metadata_record):
+        return self.can_extract(metadata_record)
+
+    def create(self, mdtype, mdfields):
+        if mdtype == 'dataset':
+            return create_datset_metadata(mdfields)
+        elif mdtype == 'service':
+            pass # TODO
+    
+    def can_extract(self, metadata_record):
+        root_qname = ET.QName(metadata_record)
+        if root_qname.localname == 'MD_Metadata' and root_qname.namespace == namespaces['gmd']:
+            return True
+        return False
+
+def update_extent(geo_bb_elem, extent_tuple):
+    minx, miny, maxx, maxy = extent_tuple
+    for bound in geo_bb_elem:
+        if bound.tag == '{http://www.isotc211.org/2005/gmd}westBoundLongitude':
+            bound[0].text = minx
+        elif bound.tag == '{http://www.isotc211.org/2005/gmd}eastBoundLongitude':
+            bound[0].text = maxx
+        elif bound.tag == '{http://www.isotc211.org/2005/gmd}southBoundLatitude':
+            bound[0].text = miny
+        elif bound.tag == '{http://www.isotc211.org/2005/gmd}northBoundLatitude':
+            bound[0].text = maxy
+
+def create_thumbnail(root_elem, thumbnail_url, thumbnail_desc=None):
+    data_ident_elements = root_elem.findall('./gmd:identificationInfo/gmd:MD_DataIdentification', namespaces)
+    for data_ident_elem in data_ident_elements:
+        prevSiblingNames = ['gmd:citation',
+                            'gmd:abstract',
+                            'gmd:purpose',
+                            'gmd:credit',
+                            'gmd:status',
+                            'gmd:pointOfContact',
+                            'gmd:resourceMaintenance']
+        graphicOverviewElem = ET.Element("{http://www.isotc211.org/2005/gmd}graphicOverview")
+        insertAfter(data_ident_elem, graphicOverviewElem, prevSiblingNames, namespaces)
+        #grov = ET.SubElement(data_ident_elements[0], "{http://www.isotc211.org/2005/gmd}graphicOverview")
+        brgr = ET.SubElement(graphicOverviewElem, "{http://www.isotc211.org/2005/gmd}MD_BrowseGraphic")
+        file_name = ET.SubElement(brgr, "{http://www.isotc211.org/2005/gmd}fileName")
+        file_name_str = ET.SubElement(file_name, "{http://www.isotc211.org/2005/gco}CharacterString")
+        file_name_str.text = thumbnail_url
+        if thumbnail_desc:
+            file_desc = ET.SubElement(brgr, "{http://www.isotc211.org/2005/gmd}fileDescription")
+            file_desc_str = ET.SubElement(file_desc, "{http://www.isotc211.org/2005/gco}CharacterString")
+            file_desc_str.text = thumbnail_desc
+        file_type = ET.SubElement(brgr, "{http://www.isotc211.org/2005/gmd}fileType")
+        file_type_str = ET.SubElement(file_type, "{http://www.isotc211.org/2005/gco}CharacterString")
+        file_type_str.text = 'gvsigol thumbnail'
+
+def create_extent(root_elem, minx, miny, maxx, maxy):
+    data_ident_elements = root_elem.findall('./gmd:identificationInfo/gmd:MD_DataIdentification', namespaces)
+    for data_ident_elem in data_ident_elements:
+        prevSiblingNames = ['gmd:citation',
+                            'gmd:abstract',
+                            'gmd:purpose',
+                            'gmd:credit',
+                            'gmd:status',
+                            'gmd:pointOfContact',
+                            'gmd:resourceMaintenance',
+                            'gmd:spatialRepresentationType',
+                            'gmd:spatialResolution',
+                            'gmd:language',
+                            'gmd:characterSet',
+                            'gmd:topicCategory',
+                            'gmd:environmentDescription'
+                            ]
+        extentElem = ET.Element("{http://www.isotc211.org/2005/gmd}extent")
+        insertAfter(data_ident_elem, extentElem, prevSiblingNames, namespaces)
+        #extentElem = ET.SubElement(data_ident_elem, "{http://www.isotc211.org/2005/gmd}extent")
+        exExtentElem = ET.SubElement(extentElem, "{http://www.isotc211.org/2005/gmd}EX_Extent")
+        geogExtentElem = ET.SubElement(exExtentElem, "{http://www.isotc211.org/2005/gmd}geographicElement")
+        exGeogBBElem = ET.SubElement(geogExtentElem, "{http://www.isotc211.org/2005/gmd}EX_GeographicBoundingBox")
+        westBoundLongElem = ET.SubElement(exGeogBBElem, "{http://www.isotc211.org/2005/gmd}westBoundLongitude")
+        decimalElem = ET.SubElement(westBoundLongElem, "{http://www.isotc211.org/2005/gco}Decimal")
+        decimalElem.text = minx
+        eastBoundLongElem = ET.SubElement(exGeogBBElem, "{http://www.isotc211.org/2005/gmd}eastBoundLongitude")
+        decimalElem = ET.SubElement(eastBoundLongElem, "{http://www.isotc211.org/2005/gco}Decimal")
+        decimalElem.text = maxx
+        southBoundLatElem = ET.SubElement(exGeogBBElem, "{http://www.isotc211.org/2005/gmd}southBoundLatitude")
+        decimalElem = ET.SubElement(southBoundLatElem, "{http://www.isotc211.org/2005/gco}Decimal")
+        decimalElem.text = miny
+        northBoundLatElem = ET.SubElement(exGeogBBElem, "{http://www.isotc211.org/2005/gmd}northBoundLatitude")
+        decimalElem = ET.SubElement(northBoundLatElem, "{http://www.isotc211.org/2005/gco}Decimal")
+        decimalElem.text = maxy
+
+def create_online_resource(parent, url, protocol, name, description, application_profile=None, function=None):
+    onlineElem = ET.SubElement(parent, "{http://www.isotc211.org/2005/gmd}onLine")
+    onlineResElem = ET.SubElement(onlineElem, "{http://www.isotc211.org/2005/gmd}CI_OnlineResource")
+    linkageElem = ET.SubElement(onlineResElem, "{http://www.isotc211.org/2005/gmd}linkage")
+    urlElem = ET.SubElement(linkageElem, "{http://www.isotc211.org/2005/gmd}URL")
+    urlElem.text = url
+    protocolElem = ET.SubElement(onlineResElem, "{http://www.isotc211.org/2005/gmd}protocol")
+    charStr = ET.SubElement(protocolElem, "{http://www.isotc211.org/2005/gco}CharacterString")
+    charStr.text = protocol
+    if application_profile:
+        applicationProfileElem = ET.SubElement(onlineResElem, "{http://www.isotc211.org/2005/gmd}applicationProfile")
+        charStr = ET.SubElement(applicationProfileElem, "{http://www.isotc211.org/2005/gco}CharacterString")
+        charStr.text = application_profile
+    nameElem = ET.SubElement(onlineResElem, "{http://www.isotc211.org/2005/gmd}name")
+    charStr = ET.SubElement(nameElem, "{http://www.isotc211.org/2005/gco}CharacterString")
+    charStr.text = name
+    descriptionElem = ET.SubElement(onlineResElem, "{http://www.isotc211.org/2005/gmd}description")
+    charStr = ET.SubElement(descriptionElem, "{http://www.isotc211.org/2005/gco}CharacterString")
+    charStr.text = description
+    if function:
+        functionElem = ET.SubElement(onlineResElem, "{http://www.isotc211.org/2005/gmd}function")
+        charStr = ET.SubElement(functionElem, "{http://www.isotc211.org/2005/gco}CharacterString")
+        charStr.text = function
+
+def create_distrib_format(parent, name, version, specification=None):
+    distributionFormatElem = ET.Element("{http://www.isotc211.org/2005/gmd}distributionFormat")
+    MD_FormatElem = ET.SubElement(distributionFormatElem, "{http://www.isotc211.org/2005/gmd}MD_Format")
+    nameElem = ET.SubElement(MD_FormatElem, "{http://www.isotc211.org/2005/gmd}name")
+    nameElemCharStr = ET.SubElement(nameElem, "{http://www.isotc211.org/2005/gco}CharacterString")
+    nameElemCharStr.text = name
+    versionElem = ET.SubElement(MD_FormatElem, "{http://www.isotc211.org/2005/gmd}version")
+    versionElemCharStr = ET.SubElement(versionElem, "{http://www.isotc211.org/2005/gco}CharacterString")
+    versionElemCharStr.text = version
+    if specification is not None:
+        specificationElem = ET.SubElement(MD_FormatElem, "{http://www.isotc211.org/2005/gmd}specification")
+        specificationElemCharStr = ET.SubElement(specificationElem, "{http://www.isotc211.org/2005/gco}CharacterString")
+        specificationElemCharStr.text = specification
+    insertAfter(parent, distributionFormatElem, [], namespaces)
+
+def create_transfer_options(root_elem, qualified_name, spatialRepresentationType, title, wms_endpoint, wfs_endpoint=None, wcs_endpoint=None, wmts_endpoint=None):
+    distribInfoElements = root_elem.findall('./gmd:distributionInfo/gmd:MD_Distribution', namespaces)
+    
+    if len(distribInfoElements) == 0:
+        distributionInfoElem = ET.SubElement(root_elem, "{http://www.isotc211.org/2005/gmd}distributionInfo")
+        MD_DistributionElem = ET.SubElement(distributionInfoElem, "{http://www.isotc211.org/2005/gmd}MD_Distribution")
+        distribInfoElements = [MD_DistributionElem]
+        
+    for distribInfoElem in distribInfoElements:
+        if spatialRepresentationType == 'vector':
+            create_distrib_format(distribInfoElem, 'Shapefile', 'SHP 1.0')
+        elif spatialRepresentationType == 'grid':
+            create_distrib_format(distribInfoElem, 'TIF', 'GeoTiff 1.0')
+        prevSiblingNames = ['gmd:distributionFormat',
+                            'gmd:distributor']
+        transferOptionsElem = ET.Element("{http://www.isotc211.org/2005/gmd}transferOptions")
+        insertAfter(distribInfoElem, transferOptionsElem, prevSiblingNames, namespaces)
+        MD_DigitalTransferOptionsElem = ET.SubElement(transferOptionsElem, "{http://www.isotc211.org/2005/gmd}MD_DigitalTransferOptions")
+        create_online_resource(MD_DigitalTransferOptionsElem, wms_endpoint, 'OGC:WMS', qualified_name, title)
+        if wmts_endpoint:
+            create_online_resource(MD_DigitalTransferOptionsElem, wmts_endpoint, 'OGC:WMTS', qualified_name, title)
+        if wfs_endpoint:
+            create_online_resource(MD_DigitalTransferOptionsElem, wfs_endpoint, 'OGC:WFS', qualified_name, title)
+        if wcs_endpoint:
+            create_online_resource(MD_DigitalTransferOptionsElem, wcs_endpoint, 'OGC:WCS', qualified_name, title)
+
+class Iso19139_2007Updater(XmlStandardUpdater):
+    def update_dateStamp(self):
+        dateTime = self.tree.find('./gmd:dateStamp/gco:DateTime', namespaces)
+        str_timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
+        if dateTime is not None:
+            dateTime.text = str_timestamp
+        else:
+            dateStamp = ET.Element(namespacedTag('gmd', 'dateStamp', namespaces))
+            dateTime = ET.Element(namespacedTag('gco', 'DateTime', namespaces))
+            dateTime.text =  str_timestamp
+            dateStamp.insert(0, dateTime)
+            prevSiblingNames = ['gmd:contact']
+            insertAfter(self.tree, dateStamp, prevSiblingNames, namespaces)
+        return self
+    
+    def update_extent(self, extent_tuple):
+        for geog_bounding_box_element in self.tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox', namespaces):
+            update_extent(geog_bounding_box_element, extent_tuple)
+        return self
+        
+    def update_thumbnail(self, thumbnail_url):
+        graphicOverviews = self.tree.findall('./gmd:identificationInfo/gmd:MD_DataIdentification/gmd:graphicOverview', namespaces)
+        to_remove = []
+        updated = False
+        for overview in graphicOverviews:
+            file_name = overview.find('./gmd:MD_BrowseGraphic/gmd:fileName/gco:CharacterString', namespaces)
+            file_text = (file_name.text or '').strip() if file_name is not None else ''
+            if file_text == '' or file_text == 'n/a' or 'no_thumbnail' in file_text:
+                to_remove.append(overview)
+                continue
+            ftype = overview.find('./gmd:MD_BrowseGraphic/gmd:fileType/gco:CharacterString', namespaces)
+            desc = overview.find('./gmd:MD_BrowseGraphic/gmd:fileDescription/gco:CharacterString', namespaces)
+            is_gvsigol = (
+                (ftype is not None and ftype.text == 'gvsigol thumbnail')
+                or (desc is not None and desc.text == 'gvsigol thumbnail')
+            )
+            if is_gvsigol and thumbnail_url:
+                file_name.text = thumbnail_url
+                updated = True
+            elif is_gvsigol and not thumbnail_url:
+                # Drop stale gvsigol overview when layer has no real thumbnail
+                to_remove.append(overview)
+        for el in to_remove:
+            el.getparent().remove(el)
+        # Previous logic skipped create when another overview existed but was
+        # not marked as gvsigol thumbnail — rasters often kept a bad/empty
+        # overview and never got the real /media/thumbnails URL.
+        if thumbnail_url and not updated:
+            create_thumbnail(self.tree, thumbnail_url)
+        return self
+
+        
+    def update_all(self, extent_tuple, thumbnail_url):
+        self.update_extent(extent_tuple)
+        self.update_thumbnail(thumbnail_url)
+        self.update_dateStamp()
+        return self
+
+class Iso19139_2007Reader(XmlStandardReader):
+    def get_title(self):
+        return getTextFromXMLNode(self.tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/', namespaces)
+    def get_abstract(self):
+        return getTextFromXMLNode(self.tree, './gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/', namespaces)
+    def get_identifier(self):
+        return getTextFromXMLNode(self.tree, './gmd:fileIdentifier/', namespaces)
+    def get_crs(self):
+        return getTextFromXMLNode(self.tree, './gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code/', namespaces)
+    def get_resource_identifier(self):
+        return getTextFromXMLNode(
+            self.tree,
+            './gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:identifier/*/gmd:code/',
+            namespaces,
+        )
+    def get_graphic_overviews(self):
+        result = []
+        for browse in self.tree.findall(
+            './gmd:identificationInfo/*/gmd:graphicOverview/gmd:MD_BrowseGraphic',
+            namespaces,
+        ):
+            url = getTextFromXMLNode(browse, './gmd:fileName', namespaces)
+            if not url:
+                continue
+            name = getTextFromXMLNode(browse, './gmd:fileDescription', namespaces)
+            result.append({'url': sanitizeXmlText(url), 'name': sanitizeXmlText(name)})
+        return result
+    def get_transfer_options(self):
+        result = []
+        OnlineResource = collections.namedtuple('OnlineResource', ['url', 'protocol', 'app_profile', 'name', 'desc', 'function', 'transfer_size'])
+        for transferOption in self.tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions', namespaces):
+            transferSizeNode = transferOption.find('./gmd:transferSize/gco:Real', namespaces)
+            transferSize = None
+            if transferSizeNode is not None and transferSizeNode.text != '':
+                try:
+                    transferSize = float(transferSizeNode.text)
+                except:
+                    pass
+            for online in transferOption.findall('./gmd:onLine/gmd:CI_OnlineResource', namespaces):
+                protocol = getTextFromXMLNode(online, './gmd:protocol/', namespaces)
+                name = getTextFromXMLNode(online, './gmd:name/', namespaces)
+                url = getTextFromXMLNode(online, './gmd:linkage/', namespaces)
+                desc = getTextFromXMLNode(online, './gmd:description/', namespaces)
+                app_profile = getTextFromXMLNode(online, './gmd:applicationProfile/', namespaces)
+                functionNode = online.find('./gmd:function/gmd:CI_OnLineFunctionCode', namespaces)
+                if functionNode is not None:
+                    function = functionNode.get('codeListValue', '')
+                else:
+                    function = ''
+                onlineObj = OnlineResource(url, protocol, app_profile, name, desc, function, transferSize)
+                result.append(onlineObj)
+        return result
+
+    def _code(self, node):
+        return sanitizeXmlText(getXMLCodeText(node)) if node is not None else ''
+
+    def _parse_online_resource(self, node):
+        url = getTextFromXMLNode(node, './gmd:linkage/gmd:URL', namespaces)
+        protocol = getTextFromXMLNode(node, './gmd:protocol/gco:CharacterString', namespaces)
+        name = getTextFromXMLNode(node, './gmd:name/gco:CharacterString', namespaces)
+        description = getTextFromXMLNode(node, './gmd:description/gco:CharacterString', namespaces)
+        application_profile = getTextFromXMLNode(node, './gmd:applicationProfile/gco:CharacterString', namespaces)
+        function_node = node.find('./gmd:function/gmd:CI_OnLineFunctionCode', namespaces)
+        if function_node is not None:
+            function = function_node.get('codeListValue', '')
+        else:
+            function = getTextFromXMLNode(node, './gmd:function/gco:CharacterString', namespaces)
+        return {
+            'name': sanitizeXmlText(name),
+            'description': sanitizeXmlText(description),
+            'applicationProfile': sanitizeXmlText(application_profile),
+            'function': sanitizeXmlText(function),
+            'protocol': sanitizeXmlText(protocol),
+            'url': sanitizeXmlText(url),
+        }
+
+    def _parse_constraints(self, xpath_filter):
+        from .catalog_record import empty_constraints
+        result = empty_constraints()
+        for constraints_node in self.tree.findall(xpath_filter, namespaces):
+            for node in constraints_node.findall('./gmd:MD_Constraints/gmd:useLimitation/gco:CharacterString', namespaces):
+                if node.text:
+                    result['useLimitations'].append(sanitizeXmlText(node.text))
+            for node in constraints_node.findall('./gmd:MD_LegalConstraints/gmd:accessConstraints/gmd:MD_RestrictionCode', namespaces):
+                result['accessConstraints'].append(self._code(node))
+            for node in constraints_node.findall('./gmd:MD_LegalConstraints/gmd:useConstraints/gmd:MD_RestrictionCode', namespaces):
+                result['useConstraints'].append(self._code(node))
+            for node in constraints_node.findall('./gmd:MD_LegalConstraints/gmd:otherConstraints/gco:CharacterString', namespaces):
+                if node.text:
+                    result['otherConstraints'].append(sanitizeXmlText(node.text))
+        return result
+
+    def _parse_responsible_party(self, node):
+        organisation = getTextFromXMLNode(node, './gmd:organisationName/gco:CharacterString/', namespaces)
+        individual = getTextFromXMLNode(node, './gmd:individualName/gco:CharacterString/', namespaces)
+        role_node = node.find('./gmd:role/gmd:CI_RoleCode', namespaces)
+        email = getTextFromXMLNode(node, './gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString/', namespaces)
+        phone = getTextFromXMLNode(node, './gmd:contactInfo/gmd:CI_Contact/gmd:phone/gmd:CI_Telephone/gmd:voice/gco:CharacterString/', namespaces)
+        url = getTextFromXMLNode(node, './gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource/gmd:linkage/gmd:URL/', namespaces)
+        online_resource = None
+        for online_node in node.findall('./gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource', namespaces):
+            online_resource = self._parse_online_resource(online_node)
+            if online_resource.get('url'):
+                break
+        return {
+            'organisation': sanitizeXmlText(organisation or individual),
+            'role': sanitizeXmlText(self._code(role_node)),
+            'email': sanitizeXmlText(email),
+            'phone': sanitizeXmlText(phone),
+            'url': sanitizeXmlText(url),
+            'onlineResource': online_resource,
+        }
+
+    def _contacts_from_xpath(self, xpath):
+        contacts = []
+        for wrapper in self.tree.findall(xpath, namespaces):
+            party = wrapper
+            if not wrapper.tag.endswith('CI_ResponsibleParty'):
+                party = wrapper.find('./gmd:CI_ResponsibleParty', namespaces)
+            if party is None:
+                continue
+            parsed = self._parse_responsible_party(party)
+            if not parsed.get('organisation'):
+                continue
+            contacts.append(parsed)
+        return contacts
+
+    def as_catalog_record(self):
+        from .catalog_record import empty_catalog_record
+        record = empty_catalog_record()
+        ident_path = './gmd:identificationInfo/gmd:MD_DataIdentification'
+        publish_date = ''
+        for date_elem in self.tree.findall(ident_path + '/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date', namespaces):
+            date_type = self._code(date_elem.find('./gmd:dateType/gmd:CI_DateTypeCode', namespaces))
+            value = getTextFromXMLNode(date_elem, './gmd:date/', namespaces)
+            if date_type == 'publication' and value:
+                publish_date = sanitizeXmlText(value)
+                break
+            if not publish_date and value:
+                publish_date = sanitizeXmlText(value)
+
+        period_start = ''
+        period_end = ''
+        aux = self.tree.findall(ident_path + '/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_TemporalExtent/gmd:extent/', namespaces)
+        if len(aux) > 0 and len(aux[0]) == 2:
+            period_start = aux[0][0].text or ''
+            period_end = aux[0][1].text or ''
+
+        categories = []
+        for category in self.tree.findall(ident_path + '/gmd:topicCategory/gmd:MD_TopicCategoryCode', namespaces):
+            if category.text:
+                categories.append(sanitizeXmlText(category.text))
+
+        keywords = []
+        keyword_groups = []
+        for kw_block in self.tree.findall(ident_path + '/gmd:descriptiveKeywords/gmd:MD_Keywords', namespaces):
+            group_keywords = []
+            for keyword in kw_block.findall('./gmd:keyword/gco:CharacterString', namespaces):
+                if keyword.text and keyword.text.strip():
+                    group_keywords.append(sanitizeXmlText(keyword.text))
+                    keywords.append(sanitizeXmlText(keyword.text))
+            if not group_keywords:
+                continue
+            type_node = kw_block.find('./gmd:type/gmd:MD_KeywordTypeCode', namespaces)
+            thesaurus = getTextFromXMLNode(kw_block, './gmd:thesaurusName/gmd:CI_Citation/gmd:title/gco:CharacterString', namespaces)
+            keyword_groups.append({
+                'type': self._code(type_node),
+                'keywords': group_keywords,
+                'thesaurus': sanitizeXmlText(thesaurus),
+            })
+
+        representation_type = ''
+        aux = self.tree.findall(ident_path + '/gmd:spatialRepresentationType/', namespaces)
+        if aux:
+            representation_type = aux[0].get('codeListValue', '')
+
+        languages = []
+        for path in ('./gmd:language', ident_path + '/gmd:language'):
+            for lang_node in self.tree.findall(path, namespaces):
+                code_node = lang_node.find('./gmd:LanguageCode', namespaces)
+                value = self._code(code_node) if code_node is not None else sanitizeXmlText(getTextFromXMLNode(lang_node, './gco:CharacterString', namespaces))
+                if value and value not in languages:
+                    languages.append(value)
+
+        geographic_place = []
+        extent_desc = getTextFromXMLNode(self.tree, ident_path + '/gmd:extent/gmd:EX_Extent/gmd:description/gco:CharacterString', namespaces)
+        if extent_desc:
+            geographic_place.append(sanitizeXmlText(extent_desc))
+        for group in keyword_groups:
+            if group.get('type') != 'place':
+                continue
+            for keyword in group.get('keywords', []):
+                if keyword not in geographic_place:
+                    geographic_place.append(keyword)
+
+        formats = []
+        for fmt in self.tree.findall('./gmd:distributionInfo/gmd:MD_Distribution/gmd:distributionFormat/gmd:MD_Format', namespaces):
+            name = getTextFromXMLNode(fmt, './gmd:name/gco:CharacterString', namespaces)
+            version = getTextFromXMLNode(fmt, './gmd:version/gco:CharacterString', namespaces)
+            if not name:
+                continue
+            label = sanitizeXmlText(name)
+            if version:
+                label += ' (' + sanitizeXmlText(version) + ')'
+            if label not in formats:
+                formats.append(label)
+
+        resources = []
+        for online in self.tree.findall(
+            './gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource',
+            namespaces,
+        ):
+            resources.append(self._parse_online_resource(online))
+
+        freq = self.tree.find(ident_path + '/gmd:resourceMaintenance/gmd:MD_MaintenanceInformation/gmd:maintenanceAndUpdateFrequency/gmd:MD_MaintenanceFrequencyCode', namespaces)
+        if freq is None:
+            freq = self.tree.find('./gmd:metadataMaintenance/gmd:MD_MaintenanceInformation/gmd:maintenanceAndUpdateFrequency/gmd:MD_MaintenanceFrequencyCode', namespaces)
+
+        charset = self.tree.find(ident_path + '/gmd:characterSet/gmd:MD_CharacterSetCode', namespaces)
+        if charset is None:
+            charset = self.tree.find('./gmd:characterSet/gmd:MD_CharacterSetCode', namespaces)
+
+        record.update({
+            'metadata_id': sanitizeXmlText(self.get_identifier()),
+            'title': sanitizeXmlText(self.get_title()),
+            'abstract': sanitizeXmlText(self.get_abstract()),
+            'publish_date': publish_date,
+            'update_frequency': self._code(freq),
+            'resource_identifier': sanitizeXmlText(self.get_resource_identifier()),
+            'languages': languages,
+            'geographic_place': geographic_place,
+            'resource_status': self._code(self.tree.find(ident_path + '/gmd:status/gmd:MD_ProgressCode', namespaces)),
+            'hierarchy_level': self._code(self.tree.find('./gmd:hierarchyLevel/gmd:MD_ScopeCode', namespaces)),
+            'character_set': self._code(charset),
+            'distribution_formats': formats,
+            'purpose': sanitizeXmlText(getTextFromXMLNode(self.tree, ident_path + '/gmd:purpose/gco:CharacterString', namespaces)),
+            'metadata_standard_name': sanitizeXmlText(getTextFromXMLNode(self.tree, './gmd:metadataStandardName/gco:CharacterString', namespaces)),
+            'metadata_standard_version': sanitizeXmlText(getTextFromXMLNode(self.tree, './gmd:metadataStandardVersion/gco:CharacterString', namespaces)),
+            'date_stamp': sanitizeXmlText(getTextFromXMLNode(self.tree, './gmd:dateStamp/gco:DateTime', namespaces)),
+            'metadata_update_frequency': self._code(self.tree.find('./gmd:metadataMaintenance/gmd:MD_MaintenanceInformation/gmd:maintenanceAndUpdateFrequency/gmd:MD_MaintenanceFrequencyCode', namespaces)),
+            'update_scope': self._code(self.tree.find(ident_path + '/gmd:resourceMaintenance/gmd:MD_MaintenanceInformation/gmd:updateScope/gmd:MD_ScopeCode', namespaces)),
+            'keyword_groups': keyword_groups,
+            'period_start': sanitizeXmlText(period_start),
+            'period_end': sanitizeXmlText(period_end),
+            'categories': categories,
+            'keywords': keywords,
+            'representation_type': sanitizeXmlText(representation_type),
+            'scale': sanitizeXmlText(getTextFromXMLNode(self.tree, ident_path + '/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/', namespaces)),
+            'srs': sanitizeXmlText(self.get_crs()),
+            'extent_west': getTextFromXMLNode(self.tree, ident_path + '/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:westBoundLongitude/', namespaces),
+            'extent_east': getTextFromXMLNode(self.tree, ident_path + '/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:eastBoundLongitude/', namespaces),
+            'extent_south': getTextFromXMLNode(self.tree, ident_path + '/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:southBoundLatitude/', namespaces),
+            'extent_north': getTextFromXMLNode(self.tree, ident_path + '/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:northBoundLatitude/', namespaces),
+            'thumbnails': self.get_graphic_overviews(),
+            'resources': resources,
+            'resource_constraints': self._parse_constraints(ident_path + '/gmd:resourceConstraints'),
+            'metadata_constraints': self._parse_constraints('./gmd:metadataConstraints'),
+            'contacts': {
+                'resource_contacts': self._contacts_from_xpath(ident_path + '/gmd:pointOfContact'),
+                'metadata_contacts': self._contacts_from_xpath('./gmd:contact'),
+                'responsible_parties': self._contacts_from_xpath(ident_path + '/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty'),
+                'distributor_contacts': self._contacts_from_xpath('./gmd:distributionInfo/gmd:MD_Distribution/gmd:distributor/gmd:MD_Distributor/gmd:distributorContact'),
+            },
+        })
+        return record
+
+    
