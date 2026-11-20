@@ -61,7 +61,7 @@ def build_sld(layer, style, single_symbol = False):
         symbolizers = ModelSymbolizer.objects.filter(rule=r).order_by('-order')
         if field_geom is None:
             field_geom = utils.get_geometry_field(layer)
-        create_rule(r, symbolizers, feature_type_style, field_geom)
+        create_rule(r, symbolizers, feature_type_style, field_geom, style.type)
     
     sld_body = style_layer_descriptor.as_sld(True)
     if style.type == 'CP' and not single_symbol:
@@ -208,7 +208,7 @@ def build_complex_filter(filters, rule):
     return complex_filter
         
 
-def create_rule(r, symbolizers, feature_type_style, geom_field=None):
+def create_rule(r, symbolizers, feature_type_style, geom_field=None, style_type=None):
     min_scale_denominator = None
     max_scale_denominator = None
     if r.minscale >= 0:
@@ -343,7 +343,10 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
                 pointplacement = PointPlacement(labelplacement)
                 anchorpoint = AnchorPoint(pointplacement)
                 if geom_field['field_type'] == 'POINT' or geom_field['field_type'] == 'MULTIPOINT':
-                    anchorpoint.AnchorPointY = "-1.5"
+                    if style_type == 'CP':
+                        anchorpoint.AnchorPointY = str(s.textsymbolizer.anchor_point_y)
+                    else:
+                        anchorpoint.AnchorPointY = "-1.5"
                 else:
                     #anchorpoint.AnchorPointY = str(s.textsymbolizer.anchor_point_y)
                     anchorpoint.AnchorPointY = "0.8"

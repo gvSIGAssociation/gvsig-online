@@ -301,6 +301,7 @@ Rule.prototype.registerEvents = function(type) {
 		var textsymbolizer = self.addTextSymbolizer();
 		textsymbolizer.fill = "#ffffff";
 		textsymbolizer.label = "count";
+		textsymbolizer.is_actived = true;
 		textsymbolizer.AnchorPointX = 0.5;
 		textsymbolizer.AnchorPointY = 0.8;
 	});
@@ -457,30 +458,59 @@ Rule.prototype.getSymbolsFromLibrary = function(libraryId) {
 
 
 Rule.prototype.loadLibrarySymbol = function(symbolizers) {
-	
+	var self = this;
+	var texts = [];
+	for (var t = 0; t < this.symbolizers.length; t++) {
+		if (this.symbolizers[t].type == 'TextSymbolizer') {
+			texts.push(this.symbolizers[t]);
+		}
+	}
 	$("#table-symbolizers-body-" + this.id).empty();
-	this.removeAllSymbolizers();
-	this.removeLabel();
+	this.symbolizers = [];
 	
 	symbolizers.sort(function(a, b) {
 	    return a.order - b.order;
 	});
-	for (var i=0; i<symbolizers.length; i++) {
-		
-		var symbolizer = JSON.parse(symbolizers[i].json);
-		var order = symbolizers[i].order;
-		var options = symbolizer[0].fields;
-		options['order'] = order;
-		
-		if (symbolizer[0].model == 'gvsigol_symbology.externalgraphicsymbolizer') {
-			this.addExternalGraphicSymbolizer(options);
+	try {
+		for (var i=0; i<symbolizers.length; i++) {
 			
-		} else {
-			this.addSymbolizer(options);
-		}	
-		
+			var symbolizer = JSON.parse(symbolizers[i].json);
+			var order = symbolizers[i].order;
+			var options = symbolizer[0].fields;
+			options['order'] = order;
+			
+			if (symbolizer[0].model == 'gvsigol_symbology.externalgraphicsymbolizer') {
+				this.addExternalGraphicSymbolizer(options);
+				
+			} else if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer') {
+				continue;
+			} else {
+				this.addSymbolizer(options);
+			}	
+			
+		}
+	} finally {
+		for (var k = 0; k < texts.length; k++) {
+			var text = texts[k];
+			var row = $(text.getTableUI());
+			$('#rule-' + this.id + '-symbolizers tbody').append(row);
+			row.find('.edit-label-link-' + text.id).on('click', function(e){
+				e.preventDefault();
+				self.setSelected(self.getSymbolizerById($(this).attr("data-labelid")));
+				self.updateForm();
+				$('#modal-symbolizer').modal('show');
+			});
+			row.find('.delete-label-link-' + text.id).on('click', function(e){
+				e.preventDefault();
+				self.removeSymbolizer($(this).attr("data-labelid"));
+			});
+			this.symbolizers.push(text);
+			if (typeof text.updatePreview === 'function') {
+				text.updatePreview();
+			}
+		}
+		this.preview();
 	}
-	this.preview();
 };
 
 Rule.prototype.addSymbolizer = function(options) {
@@ -594,6 +624,12 @@ Rule.prototype.addExternalGraphicSymbolizer = function(options) {
 	if (options && options.order !== undefined && options.order !== null && options.order !== '') {
 		symbolizer.order = options.order;
 	}
+	if (options && options.opacity !== undefined && options.opacity !== null && options.opacity !== '') {
+		symbolizer.opacity = options.opacity;
+	}
+	if (options && options.rotation !== undefined && options.rotation !== null && options.rotation !== '') {
+		symbolizer.rotation = options.rotation;
+	}
 	
 	var row = $(symbolizer.getTableUI());
 	$('#rule-' + this.id + '-symbolizers tbody').append(row);	
@@ -607,7 +643,9 @@ Rule.prototype.addExternalGraphicSymbolizer = function(options) {
 	
 	row.find('.edit-eg-link').on('click', function(e){	
 		e.preventDefault();
-		messageBox.show('warning', gettext('Image symbols can only be edited from the library'));
+		self.setSelected(self.getSymbolizerById(this.dataset.symbolizerid));
+		self.updateForm();
+		$('#modal-symbolizer').modal('show');
 	});
 	row.find('.delete-symbolizer-link-' + this.id).on('click', function(e){	
 		e.preventDefault();
@@ -687,6 +725,8 @@ Rule.prototype.updateForm = function() {
 		
 	} else if (this.selected.type == 'ExternalGraphicSymbolizer') {
 		$('#tab-menu').append(this.selected.getTabMenu());
+		$('#tab-content').append(this.selected.getSizeTabUI());
+		$('.nav-tabs a[href="#eg-size-tab"]').tab('show');
 		this.selected.registerEvents();
 		
 	} else if (this.selected.type == 'LineSymbolizer') {

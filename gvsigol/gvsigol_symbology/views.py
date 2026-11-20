@@ -857,7 +857,7 @@ def clustered_points_update(request, layer_id, style_id):
     else:                
         style = Style.objects.get(id=int(style_id))
         
-        style_rules = Rule.objects.filter(style=style)
+        style_rules = Rule.objects.filter(style=style).order_by('order', 'id')
         rules = []
         for r in style_rules:
             rule = _rule_to_dict(r)

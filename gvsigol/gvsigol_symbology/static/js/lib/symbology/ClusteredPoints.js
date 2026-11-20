@@ -164,7 +164,9 @@ ClusteredPoints.prototype.addNewRule = function(filter_value, filter_value2) {
 	
 	for(var i = 0; i< rule.symbolizers.length; i++){
 		var sym = rule.symbolizers[i];
-		sym.updatePreview();
+		if (sym && typeof sym.updatePreview === 'function') {
+			sym.updatePreview();
+		}
 	}
 
 	$(".create-expression").on('click', function(e){
@@ -176,9 +178,10 @@ ClusteredPoints.prototype.addNewRule = function(filter_value, filter_value2) {
 	rule.setFilter(this.expressions);
 	if(!is_single){
 		mainpoint.size = 30
-		textsymbolizer = rule.addTextSymbolizer(options);
+		textsymbolizer = rule.addTextSymbolizer();
 		textsymbolizer.fill = "#ffffff";
 		textsymbolizer.label = "count";
+		textsymbolizer.is_actived = true;
 		textsymbolizer.AnchorPointX = 0.5;
 		textsymbolizer.AnchorPointY = 0.8;
 	}
@@ -685,9 +688,18 @@ ClusteredPoints.prototype.loadRules = function(rules) {
 	$('#rules').empty();
 	this.rules.splice(0, this.rules.length);
 	for (var i=0; i<rules.length; i++) {
+		try {
 		var filter = "";
-		if(rules[i].filter != ""){
-			filter = JSON.parse(rules[i].filter);
+		if(rules[i].filter != null && rules[i].filter !== ""){
+			if (typeof rules[i].filter === 'object') {
+				filter = rules[i].filter;
+			} else {
+				try {
+					filter = JSON.parse(rules[i].filter);
+				} catch (e) {
+					filter = "";
+				}
+			}
 		}
 		var options = {
 				"id" : rules[i].id,
@@ -701,8 +713,7 @@ ClusteredPoints.prototype.loadRules = function(rules) {
 		}
 
 		var rule = new Rule(rules[i].id, rules[i].name, rules[i].title, options, this.utils);
-		if(rules[i].filter != ""){
-			var filter = JSON.parse(rules[i].filter);
+		if(filter !== ""){
 			rule.setFilter(filter);
 		}
 		rule.removeAllSymbolizers();
@@ -713,20 +724,18 @@ ClusteredPoints.prototype.loadRules = function(rules) {
 		}
 
 		for (var j=0; j<rules[i].symbolizers.length; j++) {
+		 try {
 			var symbolizer = JSON.parse(rules[i].symbolizers[j].json);
 			var order = rules[i].symbolizers[j].order;
 			var options = symbolizer[0].fields;
 			options['order'] = order;
 
-			if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer' && rules[i].name.endsWith("_text")) {
+			if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer' && rules[i].name && rules[i].name.endsWith("_text")) {
 				options['is_actived'] = true;
 				options['title'] = rules[i].title;
 				options['minscale'] = rules[i].minscale;
 				options['maxscale'] = rules[i].maxscale;
-				options['filter'] = "";
-				if(rules[i].filter && rules[i].filter.length>0){
-					options['filter'] = JSON.parse(rules[i].filter);
-				}
+				options['filter'] = filter || "";
 				this.loadLabel(options);
 
 			} else if (symbolizer[0].model == 'gvsigol_symbology.externalgraphicsymbolizer') {
@@ -735,15 +744,19 @@ ClusteredPoints.prototype.loadRules = function(rules) {
 			} else {
 				if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer') {
 					textsymbolizer = rule.addTextSymbolizer(options);
-//					textsymbolizer.fill = "#ffffff";
-//					textsymbolizer.label = "count";
-//					textsymbolizer.AnchorPointX = 0.5;
-//					textsymbolizer.AnchorPointY = 0.8;
+					if (textsymbolizer) {
+						textsymbolizer.is_actived = true;
+					}
 
 				}else{
 					rule.addSymbolizer(options);
 				}
-			}	
+			}
+		 } catch (symbolizerError) {
+			if (window.console && console.warn) {
+				console.warn(symbolizerError);
+			}
+		 }
 
 		}
 
@@ -753,7 +766,11 @@ ClusteredPoints.prototype.loadRules = function(rules) {
 		
 		for(var k = 0; k< rule.symbolizers.length; k++){
 			var sym = rule.symbolizers[k];
-			sym.updatePreview();
+			if (sym && typeof sym.updatePreview === 'function') {
+				try {
+					sym.updatePreview();
+				} catch (previewError) {}
+			}
 		}
 
 		$(".create-expression").on('click', function(e){
@@ -761,6 +778,11 @@ ClusteredPoints.prototype.loadRules = function(rules) {
 			self.getFilterFormUI(this.dataset.ruleid);
 			$('#modal-expression').modal('show');
 		});
+		} catch (ruleError) {
+			if (window.console && console.warn) {
+				console.warn(ruleError);
+			}
+		}
 	}
 };
 

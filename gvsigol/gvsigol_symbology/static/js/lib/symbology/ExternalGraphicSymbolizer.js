@@ -47,7 +47,7 @@ ExternalGraphicSymbolizer.prototype.getTableUI = function() {
 	if (this.rule) {
 		deleteClass += '-' + this.rule.id;
 	}
-	ui += 	'<td><a disabled class="edit-eg-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-edit text-default"></i></a></td>';
+	ui += 	'<td><a class="edit-eg-link" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-edit text-primary"></i></a></td>';
 	ui += 	'<td><a class="' + deleteClass + '" data-symbolizerid="' + this.id + '" href="javascript:void(0)"><i class="fa fa-times text-danger"></i></a></td>';
 	ui += '</tr>';	
 	
@@ -69,6 +69,60 @@ ExternalGraphicSymbolizer.geoserverHref = function(url) {
 	return url;
 };
 
+ExternalGraphicSymbolizer.prototype.getTabMenu = function() {
+	var ui = '';
+	ui += '<li class="active"><a href="#eg-size-tab" data-toggle="tab">' + gettext('Size') + '</a></li>';
+	return ui;
+};
+
+ExternalGraphicSymbolizer.prototype.getSizeTabUI = function() {
+	var size = parseInt(this.size, 10);
+	if (isNaN(size) || size < 1) {
+		size = 1;
+	}
+	var ui = '';
+	ui += '<div class="tab-pane active" id="eg-size-tab">';
+	ui += 	'<div class="row">';
+	ui += 		'<div class="col-md-12 form-group">';
+	ui += 			'<label>' + gettext('Size') + '</label>';
+	ui += 			'<input id="eg-size" type="number" min="1" class="form-control" value="' + size + '">';
+	ui += 		'</div>';
+	ui += 	'</div>';
+	ui += '</div>';
+	return ui;
+};
+
+ExternalGraphicSymbolizer.prototype.registerEvents = function() {
+	var self = this;
+	$('#eg-size').on('change', function() {
+		var size = parseInt(this.value, 10);
+		if (isNaN(size) || size < 1) {
+			size = 1;
+			this.value = size;
+		}
+		self.size = size;
+		self.updatePreview();
+		if (self.rule && typeof self.rule.preview === 'function') {
+			self.rule.preview();
+		}
+	});
+};
+
+ExternalGraphicSymbolizer.prototype.updatePreview = function() {
+	var size = parseInt(this.size, 10);
+	if (isNaN(size) || size < 1) {
+		size = this.size;
+	}
+	var preview = document.getElementById('eg-preview-' + this.id);
+	if (!preview) {
+		return;
+	}
+	preview.style.height = size + 'px';
+	if (this.online_resource) {
+		preview.src = this.online_resource;
+	}
+};
+
 ExternalGraphicSymbolizer.prototype.toXML = function(){
 	var href = ExternalGraphicSymbolizer.geoserverHref(this.online_resource);
 	href = String(href).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
@@ -81,6 +135,8 @@ ExternalGraphicSymbolizer.prototype.toXML = function(){
 	xml += 			'<Format>' + this.format + '</Format>';
 	xml += 		'</ExternalGraphic>';
 	xml += 		'<Size>' + this.size + '</Size>';
+	xml += 		'<Rotation>' + this.rotation + '</Rotation>';
+	xml += 		'<Opacity>' + this.opacity + '</Opacity>';
 	xml += 	'</Graphic>';
 	xml += '</PointSymbolizer>';
 	

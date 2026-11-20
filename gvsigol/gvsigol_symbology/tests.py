@@ -183,6 +183,41 @@ class BuildSldCharacterizationTest(GoldenMixin, TestCase):
         self.assertGolden('cp_single_symbol.sld',
                           self.build(style, geom=POINT_GEOM, single_symbol=True))
 
+    def test_clustered_points_graphic_keeps_size_and_count_anchor(self):
+        style = _style('cp_eg', 'CP')
+        single = _rule(style, 'cp_single', [{'type': 'expression', 'field': 'count',
+                                             'operation': 'is_equal_to', 'value': '1'}], order=0)
+        _mark(single, order=0)
+        group = _rule(style, 'cp_group', [{'type': 'expression', 'field': 'count',
+                                           'operation': 'is_greater_than_or_equal_to', 'value': '2'}], order=1)
+        ExternalGraphicSymbolizer.objects.create(
+            rule=group, order=0, opacity=1, size=48, rotation=0,
+            online_resource='http://example.org/tree.png', format='image/png')
+        TextSymbolizer.objects.create(
+            rule=group, order=1, is_actived=True, label='count', font_family='Arial',
+            font_size=12, font_style='normal', font_weight='bold', fill='#ffffff',
+            fill_opacity=1.0, halo_radius=1, halo_fill='#000000', halo_fill_opacity=0.6,
+            anchor_point_x=0.5, anchor_point_y=0.8)
+        sld = self.build(style, geom=POINT_GEOM).decode('utf-8')
+        self.assertIn('tree.png', sld)
+        self.assertIn('>48<', sld)
+        self.assertIn('count', sld)
+        self.assertIn('>0.8<', sld)
+        self.assertEqual(sld.count('FeatureTypeStyle'), 1)
+
+    def test_point_label_anchor_stays_fixed_outside_clusters(self):
+        style = _style('us_anchor', 'US')
+        rule = _rule(style, 'us_anchor_rule')
+        _mark(rule)
+        TextSymbolizer.objects.create(
+            rule=rule, order=1, is_actived=True, label='nombre', font_family='Arial',
+            font_size=12, font_style='normal', font_weight='bold', fill='#000000',
+            fill_opacity=1.0, halo_radius=1, halo_fill='#ffffff', halo_fill_opacity=1.0,
+            anchor_point_x=0.5, anchor_point_y=0.8)
+        sld = self.build(style, geom=POINT_GEOM).decode('utf-8')
+        self.assertIn('-1.5', sld)
+        self.assertNotIn('>0.8<', sld)
+
     def test_color_table_raster(self):
         style = _style('ct', 'CT')
         r = _rule(style, 'ct_rule')

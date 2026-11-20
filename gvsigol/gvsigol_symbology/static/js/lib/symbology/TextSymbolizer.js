@@ -57,7 +57,14 @@ var TextSymbolizer = function(rule, layerName, options, utils) {
 	this.expressions_counter = 0;
 	
 	if (options) {
-		$.extend(this, options);
+		var blocked = {id: true, rule: true, utils: true, type: true, symbolizers: true, codemirror: true, expressions: true, labelOptions: true};
+		var safe = {};
+		for (var key in options) {
+			if (options.hasOwnProperty(key) && !blocked[key]) {
+				safe[key] = options[key];
+			}
+		}
+		$.extend(this, safe);
 		if(this.minscale<0){
 			this.minscale = "";
 		}
