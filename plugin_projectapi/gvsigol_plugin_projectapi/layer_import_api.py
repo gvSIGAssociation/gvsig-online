@@ -33,13 +33,18 @@ def _check_project_access(request, project_id):
 
 def _check_project_publish_access(request, project_id):
     """
-    Persisting layers into a project is restricted to superusers.
-    Staff (non-superuser) must never publish, even if they can read the project.
+    Persisting layers into a project is allowed for staff and superusers.
+    Concrete destinations are further filtered by can_use_datastore /
+    can_use_layergroup on import-options and on POST.
     """
     project = _check_project_access(request, project_id)
-    if not getattr(request.user, 'is_superuser', False):
+    user = request.user
+    if not (
+        getattr(user, 'is_superuser', False)
+        or getattr(user, 'is_staff', False)
+    ):
         raise PermissionDenied(
-            'Only superusers can publish layers into a project')
+            'Only staff or superusers can publish layers into a project')
     return project
 
 
