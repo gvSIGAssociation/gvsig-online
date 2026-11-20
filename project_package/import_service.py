@@ -47,6 +47,48 @@ from gvsigol_symbology.models import Library
 from gvsigol_symbology.services import sld_import
 
 from gvsigol_core.project_package.connection_utils import _params_fingerprint
+
+
+def _import_layer_style(server, lyr, style_name, is_def, sld_text, style_type, title,
+                        legend_bytes, report):
+    """Import one style via sld_import and record failures in *report*.
+
+    A False return or exception used to be silent: the layer kept GeoServer's
+    default grey symbol while the package report still looked successful.
+    """
+    try:
+        ok = sld_import(
+            style_name, is_def, lyr.id, StringIO(sld_text), server,
+            style_type=style_type, title=title, legend_bytes=legend_bytes,
+        )
+    except Exception as exc:
+        LOG.warning(
+            'sld_import raised for layer %s style %s: %s',
+            lyr.name, style_name, exc, exc_info=True,
+        )
+        report.append({
+            'style_import_failed': {
+                'layer': lyr.name,
+                'style': style_name,
+                'error': str(exc),
+            },
+        })
+        return False
+    if not ok:
+        gs_err = getattr(server, 'last_style_error', None)
+        LOG.warning(
+            'sld_import returned False for layer %s style %s (geoserver=%s)',
+            lyr.name, style_name, gs_err,
+        )
+        report.append({
+            'style_import_failed': {
+                'layer': lyr.name,
+                'style': style_name,
+                'error': gs_err or 'sld_import returned False',
+            },
+        })
+        return False
+    return True
 from gvsigol_core.project_package.gdal_io import (
     import_gpkg_to_postgis,
     is_gdal_available,
@@ -1563,17 +1605,31 @@ def _import_symbol_libraries(snapshot, extract_dir, report):
 
     Files are stored in the ZIP under  symbology/libraries/{lib_name}/{file}.
     They are extracted to  MEDIA_ROOT/symbol_libraries/{lib_name}/{file}.
+
+    Permissions must match a normal library upload (FILE/FOLDER_DEFAULT_PERMISSIONS).
+    On shared NFS, GeoServer runs as another user and reads ExternalGraphic icons
+    via file://MEDIA_ROOT/...; without world/group-readable modes it falls back
+    to the default grey square even though the Django library looks fine.
     """
     libs = snapshot.get('symbol_libraries') or []
     if not libs:
         return
+    folder_mode = getattr(settings, 'FOLDER_DEFAULT_PERMISSIONS', 0o750)
+    # Ensure the parent symbol_libraries dir is traversable by GeoServer/Apache.
+    parent_dir = os.path.join(settings.MEDIA_ROOT, 'symbol_libraries')
+    try:
+        os.makedirs(parent_dir, exist_ok=True)
+        os.chmod(parent_dir, folder_mode)
+    except Exception as _parent_exc:
+        LOG.warning('Could not prepare symbol_libraries dir %s: %s', parent_dir, _parent_exc)
     for lib_data in libs:
         lib_name = (lib_data.get('name') or '').strip()
         if not lib_name:
             continue
-        dest_dir = os.path.join(settings.MEDIA_ROOT, 'symbol_libraries', lib_name)
+        dest_dir = os.path.join(parent_dir, lib_name)
         try:
             os.makedirs(dest_dir, exist_ok=True)
+            os.chmod(dest_dir, folder_mode)
         except Exception as _mk_exc:
             LOG.warning('Could not create symbol library dir %s: %s', dest_dir, _mk_exc)
             continue
@@ -1586,8 +1642,11 @@ def _import_symbol_libraries(snapshot, extract_dir, report):
                 LOG.warning('Symbol library file missing in package: %s', src)
                 continue
             try:
-                import shutil as _shutil
-                _shutil.copy2(src, os.path.join(dest_dir, fname))
+                dest_file = os.path.join(dest_dir, fname)
+                shutil.copy2(src, dest_file)
+                # copy2 preserves zip/umask modes; force the env default so
+                # GeoServer can open file:///…/symbol_libraries/… icons.
+                services_utils.set_default_permissions(dest_file)
                 copied += 1
             except Exception as _cp_exc:
                 LOG.warning('Could not restore symbol library file %s: %s', fname, _cp_exc)
@@ -2015,10 +2074,11 @@ def _import_vector_layer(
         is_def = bool(st.get('is_default')) and not default_done
         if is_def:
             default_done = True
-        sld_import(
-            style_name, is_def, lyr.id, StringIO(sld_text), server,
-            style_type=st.get('type'), title=st.get('title'),
-            legend_bytes=_style_legend_bytes(extract_dir, layer_entry, i, st),
+        _import_layer_style(
+            server, lyr, style_name, is_def, sld_text,
+            st.get('type'), st.get('title'),
+            _style_legend_bytes(extract_dir, layer_entry, i, st),
+            report,
         )
 
     _reload_geoserver_vector_layer(server, lyr)
@@ -2375,10 +2435,11 @@ def _import_postgis_definition_layer(
         is_def = bool(st.get('is_default')) and not default_done
         if is_def:
             default_done = True
-        sld_import(
-            style_name, is_def, lyr.id, StringIO(sld_text), server,
-            style_type=st.get('type'), title=st.get('title'),
-            legend_bytes=_style_legend_bytes(extract_dir, layer_entry, i, st),
+        _import_layer_style(
+            server, lyr, style_name, is_def, sld_text,
+            st.get('type'), st.get('title'),
+            _style_legend_bytes(extract_dir, layer_entry, i, st),
+            report,
         )
 
     _reload_geoserver_vector_layer(server, lyr)
@@ -3180,22 +3241,17 @@ def _import_raster_layer(
         sld_text = sld_text.strip()
         if not sld_text:
             continue
-        try:
-            style_name = _unique_style_name(
-                server_obj, ws_obj.name, st.get('name') or ('raster_imported_%d' % i)
-            )
-            is_def = bool(st.get('is_default')) and not default_done
-            sld_import(
-                style_name, is_def, lyr.id, StringIO(sld_text), server_obj,
-                style_type=st.get('type'), title=st.get('title'),
-                legend_bytes=_style_legend_bytes(extract_dir, layer_entry, i, st),
-            )
+        style_name = _unique_style_name(
+            server_obj, ws_obj.name, st.get('name') or ('raster_imported_%d' % i)
+        )
+        is_def = bool(st.get('is_default')) and not default_done
+        if _import_layer_style(
+            server_obj, lyr, style_name, is_def, sld_text,
+            st.get('type'), st.get('title'),
+            _style_legend_bytes(extract_dir, layer_entry, i, st),
+            report,
+        ):
             default_done = default_done or is_def
-        except Exception as _sld_exc:
-            LOG.warning(
-                '_import_raster_layer: could not import style %d for %s: %s',
-                i, lyr.name, _sld_exc,
-            )
 
     try:
         gs.updateThumbnail(lyr, 'create')
