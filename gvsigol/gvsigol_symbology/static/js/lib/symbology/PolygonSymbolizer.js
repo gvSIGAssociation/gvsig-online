@@ -41,6 +41,8 @@ var PolygonSymbolizer = function(rule, options, utils) {
 		}
 	}
 	this.type = 'PolygonSymbolizer';
+	// opciones avanzadas (campo options del servidor); ver SymbolOptionsEditor.js
+	SymbolOptions.init(this);
 };
 
 PolygonSymbolizer.prototype.getTableUI = function() {
@@ -69,129 +71,79 @@ PolygonSymbolizer.prototype.getTabMenu = function() {
 };
 
 PolygonSymbolizer.prototype.getFillTabUI = function() {
-	var ui = '';
-	ui += '<div class="tab-pane active" id="fill-tab">';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label>' + gettext('Fill color') + '</label>';
-	ui += 			'<input id="fill-color-chooser" type="color" value="' + this.fill + '" class="form-control color-chooser">';					
-	ui += 		'</div>';
-	ui += 	'</div>';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label style="display: block;">' + gettext('Fill opacity') + '<span id="fill-opacity-output" class="margin-l-15 gol-slider-output">' + (this.fill_opacity * 100) + '%</span>' + '</label>';
-	ui += 			'<div id="fill-opacity-slider"><div/>';
-	ui += 		'</div>';				 
-	ui += 	'</div>';
+	var o = this.symbolOptions;
+	var hatch = o.fill.hatch || {pattern: 'slash', color: '#000000', width: 1, spacing: 10, background: true};
+	var types = [['solid', symoptT('Solid'), symoptT('Solid')], ['hatch', symoptT('Hatch'), symoptT('Hatch')],
+		['none', symoptT('No fill'), symoptT('No fill')]];
+	var patterns = $.map(SymbolOptions.HATCHES, function(h) { return [[h[0], SymbolOptions.hatchSvg(h[0]), symoptT(h[1])]]; });
+	var ui = '<div class="tab-pane active gol-symopt-pane" id="fill-tab">';
+	ui += SymbolOptions.ui.choice('opt:fill.type', symoptT('Fill type'), types, o.fill.type, 'gol-symopt-segmented');
+	ui += '<div data-symopt-show="opt:fill.type=hatch">';
+	ui += SymbolOptions.ui.choice('opt:fill.hatch.pattern', symoptT('Pattern'), patterns, hatch.pattern, 'gol-symopt-hatches');
+	ui += SymbolOptions.ui.row(
+		SymbolOptions.ui.color('hatch-color', 'opt:fill.hatch.color', symoptT('Pattern color'), hatch.color),
+		SymbolOptions.ui.number('hatch-width', 'opt:fill.hatch.width', symoptT('Line width'), hatch.width, 0.25, 10, 0.25, 'px'),
+		SymbolOptions.ui.number('hatch-spacing', 'opt:fill.hatch.spacing', symoptT('Spacing'), hatch.spacing, 2, 100, 1, 'px'));
+	ui += SymbolOptions.ui.toggle('hatch-background', 'opt:fill.hatch.background', symoptT('Background color under the pattern'), hatch.background);
 	ui += '</div>';
-	
+	ui += SymbolOptions.ui.row(
+		SymbolOptions.ui.color('fill-color-chooser', 'col:fill', gettext('Fill color'), this.fill, 'opt:fill.type=solid'),
+		SymbolOptions.ui.opacity('fill-opacity', 'col:fill_opacity', gettext('Fill opacity'), this.fill_opacity, 'opt:fill.type=solid'));
+	ui += SymbolOptions.ui.row(
+		SymbolOptions.ui.color('fill-bg-color', 'col:fill', symoptT('Background color'), this.fill, 'opt:fill.hatch.background'),
+		SymbolOptions.ui.opacity('fill-bg-opacity', 'col:fill_opacity', symoptT('Background opacity'), this.fill_opacity, 'opt:fill.hatch.background'));
+	ui += '</div>';
 	return ui;
 };
 
 PolygonSymbolizer.prototype.getStrokeTabUI = function() {
-	var ui = '';
-	ui += '<div class="tab-pane" id="stroke-tab">';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label>' + gettext('Stroke color') + '</label>';
-	ui += 			'<input id="stroke-color-chooser" type="color" value="' + this.stroke + '" class="form-control color-chooser">';					
-	ui += 		'</div>';
-	ui += 	'</div>';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label>' + gettext('Stroke width') + '</label>';
-	ui += 			'<input id="stroke-width" type="number" class="form-control" value="' + parseInt(this.stroke_width) + '">';					
-	ui += 		'</div>';
-	ui += 	'</div>';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label style="display: block;">' + gettext('Stroke opacity') + '<span id="stroke-opacity-output" class="margin-l-15 gol-slider-output">' + (this.stroke_opacity * 100) + '%</span>' + '</label>';
-	ui += 			'<div id="stroke-opacity-slider"></div>';
-	ui += 		'</div>';					 
-	ui += 	'</div>';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label>' + gettext('Select pattern') + '</label>';
-	ui += 			'<select id="line-dash-array" class="form-control">';
-	for (var i=0; i < this.utils.linePatterns.length; i++) {
-		if (this.utils.linePatterns[i].value == this.stroke_dash_array) {
-			ui += '<option value="' + this.utils.linePatterns[i].value + '" data-imagesrc="' + this.utils.linePatterns[i].imgsrc + '" selected></option>';
-		} else {
-			ui += '<option value="' + this.utils.linePatterns[i].value + '" data-imagesrc="' + this.utils.linePatterns[i].imgsrc + '"></option>';
-		}
-	}
-	ui += 			'</select>';
-	ui += 		'</div>';
-	ui += 	'</div>';
+	var o = this.symbolOptions;
+	var ui = '<div class="tab-pane gol-symopt-pane" id="stroke-tab">';
+	ui += SymbolOptions.ui.row(
+		SymbolOptions.ui.color('stroke-color-chooser', 'col:stroke', gettext('Stroke color'), this.stroke),
+		SymbolOptions.ui.number('stroke-width', 'col:stroke_width', gettext('Stroke width'), this.stroke_width, 0, 50, 0.5, 'px'),
+		SymbolOptions.ui.opacity('stroke-opacity', 'col:stroke_opacity', gettext('Stroke opacity'), this.stroke_opacity));
+	ui += SymbolOptions.ui.dashChoice('stroke-dash-custom', this.stroke_dash_array);
+	ui += SymbolOptions.ui.capJoin('opt:stroke', o.stroke);
+	ui += SymbolOptions.ui.row(
+		SymbolOptions.ui.number('stroke-dash-offset', 'opt:stroke.dash_offset', symoptT('Dash offset'), o.stroke.dash_offset, 0, 1000, 1, 'px', '!col:stroke_dash_array=none'));
 	ui += '</div>';
-	
 	return ui;
+};
+
+PolygonSymbolizer.prototype.afterChoice = function(path, value) {
+	// con trama sin fondo no hay color de relleno que mostrar; con «sin relleno», tampoco
+	if (path === 'opt:fill.type' && value === 'hatch' && !this.symbolOptions.fill.hatch) {
+		this.symbolOptions.fill.hatch = {pattern: 'slash', color: '#000000', width: 1, spacing: 10, background: true};
+	}
 };
 
 PolygonSymbolizer.prototype.registerEvents = function() {
 	var self = this;
-
-	$( "#fill-opacity-slider" ).slider({
-	    min: 0,
-	    max: 100,
-	    value: (self.fill_opacity * 100),
-	    change: function( event, ui ) {
-	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
-	    	self.fill_opacity = opacity;
-	    	self.updatePreview();
-	    	self.rule.preview();
-	    },
-	    slide: function( event, ui ) {
-	    	$("#fill-opacity-output").text(ui.value + '%');
-	    }
-	});	
-	$("#fill-color-chooser").on('change', function(e) {
-		self.fill = this.value;
-		self.updatePreview();	
-		self.rule.preview();
-	});	
-	$("#stroke-color-chooser").on('change', function(e) {
-		self.stroke = this.value;
+	SymbolOptions.openDialog();
+	SymbolOptions.bind(this, function() {
 		self.updatePreview();
 		self.rule.preview();
+		SymbolOptions.livePreview(self);
 	});
-	$( "#stroke-opacity-slider" ).slider({
-	    min: 0,
-	    max: 100,
-	    value: (self.stroke_opacity * 100),
-	    change: function( event, ui ) {
-	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
-	    	self.stroke_opacity = opacity;
-	    	self.updatePreview();
-	    	self.rule.preview();
-	    },
-	    slide: function( event, ui ) {
-	    	$("#stroke-opacity-output").text(ui.value + '%');
-	    }
-	});
-	$("#stroke-width").on('change', function(e) {
-		self.stroke_width = this.value;
-		self.updatePreview();	
-		self.rule.preview();
-	});
-	
-	$('#line-dash-array').ddslick({
-	    onSelected: function(selectedData){
-	    	self.stroke_dash_array = selectedData.selectedData.value;
-	    	self.updatePreview();	
-			self.rule.preview();
-	    }   
-	});
+	SymbolOptions.livePreview(this);
 };
 
 PolygonSymbolizer.prototype.updatePreview = function() {	
-	var sldBody = this.toSLDBody();
-	if(sldBody != null){
-		var url = this.utils.getPreviewUrl() + '&SLD_BODY=' + encodeURIComponent(sldBody);
-		var ui = '<img id="symbolizer-preview-' + this.id + '" src="' + url + '" class="symbolizer-preview-' + this.id + '"></img>';
-		$("#symbolizer-preview-div-" + this.id).empty();
-		$("#symbolizer-preview-div-" + this.id).append(ui);
+	var url;
+	if (SymbolOptions.needed(this)) {
+		// símbolo avanzado: la vista previa la genera el servidor con el SLD que se publica
+		url = SymbolOptions.previewUrl(this.utils.getPreviewUrl(), [this]);
+	} else {
+		var sldBody = this.toSLDBody();
+		if (sldBody == null) {
+			return;
+		}
+		url = this.utils.getPreviewUrl() + '&SLD_BODY=' + encodeURIComponent(sldBody);
 	}
+	var ui = '<img id="symbolizer-preview-' + this.id + '" src="' + url + '" class="symbolizer-preview-' + this.id + '"></img>';
+	$("#symbolizer-preview-div-" + this.id).empty();
+	$("#symbolizer-preview-div-" + this.id).append(ui);
 };
 
 PolygonSymbolizer.prototype.toSLDBody = function(){
@@ -264,6 +216,8 @@ PolygonSymbolizer.prototype.toJSON = function(){
 		stroke_width: this.stroke_width,
 		stroke_opacity: this.stroke_opacity,
 		stroke_dash_array: this.stroke_dash_array,
+		// solo si usa algo que el simbolizador clásico no puede expresar (si no, null)
+		options: SymbolOptions.forJSON(this),
 		order: this.order
 	};
 	

@@ -949,3 +949,540 @@ msgstr "Utilitza"
 msgctxt "symbology"
 msgid "Valid name"
 msgstr "Nom vàlid"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Add angle from field"
+msgstr "Sumar l'angle d'un camp"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Advanced symbol"
+msgstr "Símbol avançat"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Arrowhead"
+msgstr "Punta de fletxa"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Background color"
+msgstr "Color de fons"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Background color under the pattern"
+msgstr "Color de fons davall de la trama"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Background opacity"
+msgstr "Opacitat del fons"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Backslash"
+msgstr "Barra invertida"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Bevel"
+msgstr "Bisellada"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Butt"
+msgstr "Recte"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Circle"
+msgstr "Cercle"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Closed arrow"
+msgstr "Fletxa tancada"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Color"
+msgstr "Color"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Corners"
+msgstr "Cantons"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Cross"
+msgstr "Creu"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Custom pattern"
+msgstr "Patró personalitzat"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Dash and gap lengths in pixels, separated by spaces."
+msgstr "Longituds de traç i d'espai en píxels, separades per espais."
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Dash offset"
+msgstr "Desfasament del guió"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Dash pattern"
+msgstr "Patró de guions"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Decoration"
+msgstr "Decoració"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Diagonal /"
+msgstr "Diagonal /"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Diagonal \\"
+msgstr "Diagonal \\"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Diagonal grid"
+msgstr "Quadrícula diagonal"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Diamond"
+msgstr "Rombe"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Dots"
+msgstr "Punts"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Draw the line"
+msgstr "Dibuixar la línia"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "End of the line"
+msgstr "Final de la línia"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Equilateral triangle"
+msgstr "Triangle equilàter"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Fill the shape"
+msgstr "Omplir la forma"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Fill type"
+msgstr "Tipus d'emplenament"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Gap between marks"
+msgstr "Separació entre marques"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Grid"
+msgstr "Quadrícula"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Hatch"
+msgstr "Trama"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Hexagon"
+msgstr "Hexàgon"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Horizontal"
+msgstr "Horitzontal"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Initial offset"
+msgstr "Desplaçament inicial"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Line ends"
+msgstr "Extrems"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Line width"
+msgstr "Grossària de línia"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Marks along the line"
+msgstr "Marques al llarg de la línia"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Marks follow the direction of the line: use them for railways, arrows showing the flow, or boundaries."
+msgstr "Les marques seguixen la direcció de la línia: utilitzeu-les per a vies de tren, fletxes que indiquen el sentit o límits."
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Miter"
+msgstr "En angle"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "No field"
+msgstr "Cap camp"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "No fill"
+msgstr "Sense emplenament"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "None"
+msgstr "Cap"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "North arrow"
+msgstr "Fletxa cap amunt"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Offset"
+msgstr "Desplaçament"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Open arrow"
+msgstr "Fletxa oberta"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Pattern"
+msgstr "Patró"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Pattern color"
+msgstr "Color de la trama"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Pentagon"
+msgstr "Pentàgon"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Plus"
+msgstr "Més"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Rectangle"
+msgstr "Rectangle"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Round"
+msgstr "Arredonit"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Semicircle"
+msgstr "Semicercle"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Shape"
+msgstr "Forma"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Side offset"
+msgstr "Desplaçament lateral"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Side offset moves the line to the left (positive) or to the right (negative) of its direction, for example to draw parallel lines or the edge of a road."
+msgstr "El desplaçament lateral mou la línia a l'esquerra (positiu) o a la dreta (negatiu) del seu sentit, per exemple per a dibuixar línies paral·leles o la vora d'una carretera."
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Slash"
+msgstr "Barra"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Solid"
+msgstr "Sòlid"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "South arrow"
+msgstr "Fletxa cap avall"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Spacing"
+msgstr "Separació"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Square"
+msgstr "Quadrat"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Star"
+msgstr "Estrela"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Start of the line"
+msgstr "Inici de la línia"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Symbol opacity"
+msgstr "Opacitat del símbol"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Symbol preview"
+msgstr "Previsualització del símbol"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "This shape is drawn with its stroke only."
+msgstr "Esta forma només es dibuixa amb la vora."
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Times"
+msgstr "Aspa"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Triangle"
+msgstr "Triangle"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Vertical"
+msgstr "Vertical"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Vertical (up)"
+msgstr "Vertical (cap amunt)"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Vertical line"
+msgstr "Línia vertical"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "X"
+msgstr "X"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "e.g. 10 4 2 4"
+msgstr "p. ex. 10 4 2 4"
+
+#: templates/library_list.html
+msgctxt "symbology"
+msgid "This library has %s symbol with advanced symbology."
+msgid_plural "This library has %s symbols with advanced symbology."
+msgstr[0] "Esta biblioteca té %s símbol amb simbologia avançada."
+msgstr[1] "Esta biblioteca té %s símbols amb simbologia avançada."
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Administrative boundary"
+msgstr "Límit administratiu"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Building"
+msgstr "Edificació"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Canal"
+msgstr "Canal"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Choose a preset to replace the symbolizers of the rule. The label is kept, and you can edit the symbolizers afterwards."
+msgstr "Trieu un símbol predefinit per a substituir els simbolitzadors de la regla. L'etiqueta es conserva i després podeu editar els simbolitzadors."
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Crops"
+msgstr "Cultiu"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Dashed outline"
+msgstr "Contorn discontinu"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Double line"
+msgstr "Línia doble"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Fence"
+msgstr "Tanca"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Flood zone"
+msgstr "Zona inundable"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Footpath"
+msgstr "Senda"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Green area"
+msgstr "Zona verda"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Highlighted star"
+msgstr "Estrela destacada"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Line with end arrow"
+msgstr "Línia amb fletxa final"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Main road"
+msgstr "Carretera principal"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Municipal boundary"
+msgstr "Límit municipal"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Parcel outline"
+msgstr "Contorn de parcel·la"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Point of interest"
+msgstr "Punt d'interés"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Power line"
+msgstr "Línia elèctrica"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Presets"
+msgstr "Predefinits"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Protected area"
+msgstr "Espai protegit"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Railway"
+msgstr "Ferrocarril"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Railway (classic)"
+msgstr "Ferrocarril (clàssic)"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Restricted area"
+msgstr "Àrea restringida"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "River"
+msgstr "Riu"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "River with flow direction"
+msgstr "Riu amb sentit del corrent"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Secondary road"
+msgstr "Carretera secundària"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Survey point"
+msgstr "Vèrtex geodèsic"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Symbol presets"
+msgstr "Símbols predefinits"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Target"
+msgstr "Diana"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Track"
+msgstr "Camí"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Vegetation"
+msgstr "Vegetació"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Water body"
+msgstr "Làmina d'aigua"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "X mark"
+msgstr "Aspa"

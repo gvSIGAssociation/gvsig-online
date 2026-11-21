@@ -31,7 +31,7 @@
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror-5.49.0/lib/codemirror.css" %}" />
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror-5.49.0/addon/hint/show-hint.css" %}" />
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror-5.49.0/theme/xq-dark.css" %}" />
-	<link rel="stylesheet" href="{% static "css/symbology.css" %}?v=20261106r">
+	<link rel="stylesheet" href="{% static "css/symbology.css" %}?v=20261120d">
 	<link rel="stylesheet" href="{% static "css/googlefonts.css" %}">
 	<link rel="stylesheet" href="{% static "css/gvsigOL.css" %}">
 	<link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
@@ -241,21 +241,23 @@
 		var messageBox = new messageBox();
 	</script>	
 	
-	<script type="text/javascript" src="{% static "js/lib/symbology/MarkSymbolizer.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/symbology/SymbolOptionsEditor.js" %}?v=20261120c"></script>
+	<script type="text/javascript" src="{% static "js/lib/symbology/MarkSymbolizer.js" %}?v=20261120a"></script>
+	<script type="text/javascript" src="{% static "js/lib/symbology/SymbolPresets.js" %}?v=20261120b"></script>
 	<script>
 		window.GVSIGOL_MEDIA_URL = "{{ MEDIA_URL|escapejs }}";
 		window.GVSIGOL_MEDIA_ROOT = "{{ MEDIA_ROOT|escapejs }}";
 	</script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/ExternalGraphicSymbolizer.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/lib/symbology/LineSymbolizer.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/symbology/LineSymbolizer.js" %}?v=20261120a"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/ClusteredPoints.js" %}?v=20261106d"></script>
-	<script type="text/javascript" src="{% static "js/lib/symbology/PolygonSymbolizer.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/symbology/PolygonSymbolizer.js" %}?v=20261120a"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/ColorMapEntry.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/ColorRamp.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/SymbologyForms.js" %}?v=20261106p"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/LabelOptionsEditor.js" %}?v=20261106e"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/TextSymbolizer.js" %}?v=20261106d"></script>
-	<script type="text/javascript" src="{% static "js/lib/symbology/Rule.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/symbology/Rule.js" %}?v=20261120d"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/SymbologyUtils.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/LibraryUtils.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/UniqueSymbol.js" %}"></script>
@@ -263,7 +265,7 @@
 	<script type="text/javascript" src="{% static "js/lib/symbology/Intervals.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/Expressions.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/lib/symbology/ColorTable.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/lib/symbology/LibrarySymbol.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/symbology/LibrarySymbol.js" %}?v=20261120c"></script>
 	
 	<script type="text/javascript">
 		$(document).ready(function(){

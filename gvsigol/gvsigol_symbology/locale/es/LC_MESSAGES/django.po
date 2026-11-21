@@ -1811,3 +1811,25 @@ msgstr "El fichero SVG no es válido."
 #: external_graphics.py
 msgid "The SVG file must define its size (width and height, or a viewBox)."
 msgstr "El fichero SVG debe indicar su tamaño (width y height, o un viewBox)."
+
+#: templates/library_update.html templates/library_list.html
+msgctxt "symbology"
+msgid "Advanced symbols are exported as classic symbols (shape, colours and dashes)"
+msgstr "Los símbolos avanzados se exportan como símbolos clásicos (forma, colores y guiones)"
+
+#: templates/library_update.html templates/library_list.html
+msgctxt "symbology"
+msgid "Earlier versions of gvSIG Online cannot import advanced symbols correctly. If the library is for one of them, export it for earlier versions: advanced symbols become classic symbols (shape, colours and dashes)."
+msgstr "Las versiones anteriores de gvSIG Online no pueden importar correctamente los símbolos avanzados. Si la biblioteca es para una de ellas, expórtala para versiones anteriores: los símbolos avanzados se convierten en símbolos clásicos (forma, colores y guiones)."
+
+#: templates/library_update.html templates/library_list.html
+msgctxt "symbology"
+msgid "Export for earlier versions"
+msgstr "Exportar para versiones anteriores"
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "This library has %(counter)s symbol with advanced symbology. Earlier versions of gvSIG Online cannot import it correctly: to use the library there, export it for earlier versions."
+msgid_plural "This library has %(counter)s symbols with advanced symbology. Earlier versions of gvSIG Online cannot import them correctly: to use the library there, export it for earlier versions."
+msgstr[0] "Esta biblioteca tiene %(counter)s símbolo con simbología avanzada. Las versiones anteriores de gvSIG Online no pueden importarlo correctamente: para usar la biblioteca en ellas, expórtala para versiones anteriores."
+msgstr[1] "Esta biblioteca tiene %(counter)s símbolos con simbología avanzada. Las versiones anteriores de gvSIG Online no pueden importarlos correctamente: para usar la biblioteca en ellas, expórtala para versiones anteriores."

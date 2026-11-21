@@ -25,7 +25,8 @@
 from .models import Style, Library, Rule, LibraryRule, Symbolizer, PolygonSymbolizer, LineSymbolizer, MarkSymbolizer, ExternalGraphicSymbolizer, ColorRamp, ColorRampFolder, ColorRampLibrary
 from gvsigol_services import geographic_servers
 from django.utils.translation import gettext as _
-from . import utils, sld_utils, sld_builder, sld_reader, external_graphics
+from . import utils, sld_utils, sld_builder, sld_reader, external_graphics, symbol_sld
+from .symbolizer_factory import create_library_geometry_symbolizer
 from django.http import HttpResponse
 from gvsigol import settings
 from xml.dom import minidom
@@ -153,46 +154,13 @@ def add_symbol(request, json_rule, library_id, symbol_type, gs):
                 )
                 symbolizer.save()
                 
+        # Marca, línea o polígono: mismos campos y orden (el del JSON del simbolizador) que antes
         if symbol_type == 'PolygonSymbolizer':
-            symbolizer = PolygonSymbolizer(
-                rule = rule,
-                order = json_sym.get('order'),
-                fill = json_sym.get('fill'),
-                fill_opacity = json_sym.get('fill_opacity'),
-                stroke = json_sym.get('stroke'),
-                stroke_width = json_sym.get('stroke_width'),
-                stroke_opacity = json_sym.get('stroke_opacity'),
-                stroke_dash_array = json_sym.get('stroke_dash_array')              
-            )
-            symbolizer.save()
-        
+            create_library_geometry_symbolizer(rule, 'PolygonSymbolizer', json_sym, json_sym.get('order'))
         elif symbol_type == 'LineSymbolizer':
-            symbolizer = LineSymbolizer(
-                rule = rule,
-                order = json_sym.get('order'),
-                stroke = json_sym.get('stroke'),
-                stroke_width = json_sym.get('stroke_width'),
-                stroke_opacity = json_sym.get('stroke_opacity'),
-                stroke_dash_array = json_sym.get('stroke_dash_array')                 
-            )
-            symbolizer.save()      
-            
+            create_library_geometry_symbolizer(rule, 'LineSymbolizer', json_sym, json_sym.get('order'))
         elif symbol_type == 'MarkSymbolizer' or symbol_type == 'PointSymbolizer':
-            symbolizer = MarkSymbolizer(
-                rule = rule,
-                order = json_sym.get('order'),
-                opacity = json_sym.get('opacity'),
-                size = json_sym.get('size'),
-                rotation = json_sym.get('rotation'),
-                well_known_name = json_sym.get('well_known_name'),
-                fill = json_sym.get('fill'),
-                fill_opacity = json_sym.get('fill_opacity'),
-                stroke = json_sym.get('stroke'),
-                stroke_width = json_sym.get('stroke_width'),
-                stroke_opacity = json_sym.get('stroke_opacity'),
-                stroke_dash_array = json_sym.get('stroke_dash_array')                  
-            )
-            symbolizer.save()  
+            create_library_geometry_symbolizer(rule, 'MarkSymbolizer', json_sym, json_sym.get('order'))
             
     sld_body = sld_builder.build_library_symbol(rule)
 
@@ -293,46 +261,9 @@ def update_symbol(request, json_rule, rule, library_rule, gs):
                 )
                 symbolizer.save()
                     
-            if json_sym.get('type') == 'PolygonSymbolizer':
-                symbolizer = PolygonSymbolizer(
-                    rule = rule,
-                    order = json_sym.get('order'),
-                    fill = json_sym.get('fill'),
-                    fill_opacity = json_sym.get('fill_opacity'),
-                    stroke = json_sym.get('stroke'),
-                    stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity'),
-                    stroke_dash_array = json_sym.get('stroke_dash_array')                  
-                )
-                symbolizer.save()
-            
-            elif json_sym.get('type') == 'LineSymbolizer':
-                symbolizer = LineSymbolizer(
-                    rule = rule,
-                    order = json_sym.get('order'),
-                    stroke = json_sym.get('stroke'),
-                    stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity'),
-                    stroke_dash_array = json_sym.get('stroke_dash_array')                 
-                )
-                symbolizer.save()      
-                
-            elif json_sym.get('type') == 'MarkSymbolizer':
-                symbolizer = MarkSymbolizer(
-                    rule = rule,
-                    order = json_sym.get('order'),
-                    opacity = json_sym.get('opacity'),
-                    size = json_sym.get('size'),
-                    rotation = json_sym.get('rotation'),
-                    well_known_name = json_sym.get('well_known_name'),
-                    fill = json_sym.get('fill'),
-                    fill_opacity = json_sym.get('fill_opacity'),
-                    stroke = json_sym.get('stroke'),
-                    stroke_width = json_sym.get('stroke_width'),
-                    stroke_opacity = json_sym.get('stroke_opacity'),
-                    stroke_dash_array = json_sym.get('stroke_dash_array')                  
-                )
-                symbolizer.save()
+            # Marca, línea o polígono: mismos campos y orden (el del JSON del simbolizador) que antes
+            if json_sym.get('type') in ('PolygonSymbolizer', 'LineSymbolizer', 'MarkSymbolizer'):
+                create_library_geometry_symbolizer(rule, json_sym.get('type'), json_sym, json_sym.get('order'))
     
         style = Style.objects.get(id=rule.style.id)
 
@@ -413,7 +344,21 @@ def get_ftype(s):
     
     return ftype
 
-def export_library(library, library_rules):
+def advanced_symbol_count(library):
+    '''Símbolos de la biblioteca con simbología avanzada (opciones en marcas, líneas o polígonos).'''
+    rules = LibraryRule.objects.filter(library=library).values_list('rule_id', flat=True)
+    with_options = set()
+    for model in (MarkSymbolizer, LineSymbolizer, PolygonSymbolizer):
+        with_options.update(model.objects.filter(rule_id__in=list(rules), options__isnull=False)
+                            .exclude(options='').values_list('rule_id', flat=True))
+    return len(with_options)
+
+
+def export_library(library, library_rules, compat=False):
+    '''
+    compat=True: los símbolos con simbología avanzada se exportan como clásicos, para poder
+    importarlos en versiones anteriores de gvSIG Online (que leerían mal los nuevos).
+    '''
     dir_path = tempfile.mkdtemp(suffix='', prefix='tmp-library-')
     resource_path = dir_path+"/resources/"
     os.makedirs(resource_path)
@@ -421,7 +366,7 @@ def export_library(library, library_rules):
     for library_rule in library_rules:
         try:
             file = open(dir_path+"/symbol-"+library_rule.rule.name+"-"+str(i)+".sld",'wb+')
-            file.write(sld_builder.build_library_symbol(library_rule.rule))
+            file.write(sld_builder.build_library_symbol(library_rule.rule, ignore_options=compat))
             file.close()
             sld_utils.copy_resources(library_rule.rule, resource_path)
             
@@ -613,6 +558,36 @@ def remove_accents(string):
 
     return string
 
+def _symbol_groups(sld_path, expected_count):
+    """
+    Grupos de simbolizadores nuevos (symbol_sld) de la primera regla de un SLD de biblioteca:
+    ({índice inicial: (instancia, nodos)}, índices ocupados por esos grupos sin contar el inicial).
+    Si el fichero no se puede leer o no cuadra con el lector antiguo: ({}, set()), como siempre.
+    """
+    from lxml import etree
+    try:
+        with open(sld_path, 'rb') as f:
+            if symbol_sld.MARKER.encode('utf-8') not in f.read():
+                return {}, set()
+        root = etree.parse(sld_path).getroot()
+        rules = root.xpath('//sld:Rule', namespaces={'sld': symbol_sld.SLD})
+        if not rules:
+            return {}, set()
+        nodes = [c for c in rules[0] if isinstance(c.tag, str)
+                 and etree.QName(c).localname in symbol_sld.SYMBOLIZER_TAGS]
+        if len(nodes) != expected_count:
+            return {}, set()
+        groups = symbol_sld.plan_groups(nodes, {'PointSymbolizer': MarkSymbolizer, 'LineSymbolizer': LineSymbolizer,
+                                                'PolygonSymbolizer': PolygonSymbolizer})
+    except Exception as e:
+        LOG.warning('upload_library: símbolos nuevos no reconocidos en %s (%s)', sld_path, e)
+        return {}, set()
+    consumed = set()
+    for start, (instance, used) in groups.items():
+        consumed.update(range(start + 1, start + used))
+    return groups, consumed
+
+
 def upload_library(name, description, file):
     gs = geographic_servers.get_instance().get_default_server()
 
@@ -677,7 +652,20 @@ def upload_library(name, description, file):
                 library_rule.save()
                 
                 scount = r.Symbolizer.__len__()-1
-                for s in r.Symbolizer:
+                # Símbolos nuevos exportados desde gvSIG Online (marcador gvsigol-symbol): se
+                # recuperan con sus opciones; el resto se lee como siempre.
+                groups, consumed = _symbol_groups(file_path + "/" + file, r.Symbolizer.__len__())
+                for index, s in enumerate(r.Symbolizer):
+                    if index in groups:
+                        instance = groups[index][0]
+                        instance.rule = rule
+                        instance.order = scount
+                        instance.save()
+                        scount -= 1
+                        continue
+                    if index in consumed:
+                        scount -= 1
+                        continue
                     if s.original_tagname_ == 'PointSymbolizer':
                         opacity = s.Graphic.Opacity.valueOf_
                         rotation = s.Graphic.Rotation.valueOf_
@@ -793,10 +781,14 @@ def upload_library(name, description, file):
                         
                     scount-= 1
                     
-                output = io.StringIO()
-                sld.export(output, 0)
-                sld_body = output.getvalue()
-                output.close()
+                if groups:
+                    # el lector antiguo no conserva lo nuevo (tramas, marcas...): se genera de nuevo
+                    sld_body = sld_builder.build_library_symbol(rule)
+                else:
+                    output = io.StringIO()
+                    sld.export(output, 0)
+                    sld_body = output.getvalue()
+                    output.close()
             
                 gs.createStyle(style.name, sld_body)
         gs.reload_nodes()

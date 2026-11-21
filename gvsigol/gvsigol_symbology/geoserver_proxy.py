@@ -74,3 +74,14 @@ def forward(session, absolute_url, params):
     return session.get(absolute_url, params=params, verify=False,
                        proxies=getattr(settings, 'PROXIES', None),
                        timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+
+
+def forward_form(session, absolute_url, params):
+    """
+    Igual que forward, pero por POST (formulario): GeoServer lo trata como KVP. Lo usa la vista previa
+    de símbolos, cuyo SLD_BODY puede superar con las cabeceras de la sesión el límite de cabecera de
+    Tomcat (8 KB) en una petición GET.
+    """
+    return session.post(absolute_url, data=params, verify=False,
+                        proxies=getattr(settings, 'PROXIES', None),
+                        timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))

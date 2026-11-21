@@ -76,6 +76,27 @@
 		</div>
 	</div>
 </div>
+<div class="modal fade" id="modal-export-library" tabindex="-1" role="dialog" aria-labelledby="modal-export-library-title">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="modal-export-library-title">{% trans "Export library" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p class="gol-sym-export-count"></p>
+				<p>{% trans "Earlier versions of gvSIG Online cannot import advanced symbols correctly. If the library is for one of them, export it for earlier versions: advanced symbols become classic symbols (shape, colours and dashes)." context "symbology" %}</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button id="button-export-library-compat" type="button" class="btn btn-default"><i class="fa fa-history"></i> {% trans "Export for earlier versions" context "symbology" %}</button>
+				<button id="button-export-library-current" type="button" class="btn btn-modal-accept"><i class="fa fa-download"></i> {% trans "Export library" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
 {% endblock %}
 
 {% block extra-scripts %}
@@ -130,8 +151,27 @@ $(document).ready(function() {
 		location.href = '/gvsigonline/symbology/library_update/' + data[0] + '/';
 	}
 	
+	// Bibliotecas con simbología avanzada: se avisa y se ofrece la exportación para versiones anteriores
+	var advancedCounts = {{ advanced_counts|safe }};
 	function exportLibrary(data){
-		location.href = '/gvsigonline/symbology/library_export/' + data[0] + '/';
+		var url = '/gvsigonline/symbology/library_export/' + data[0] + '/';
+		var count = advancedCounts[String(data[0])] || 0;
+		if (!count) {
+			location.href = url;
+			return;
+		}
+		$('#modal-export-library .gol-sym-export-count').text(
+			interpolate(npgettext('symbology', 'This library has %s symbol with advanced symbology.',
+				'This library has %s symbols with advanced symbology.', count), [count]));
+		$('#button-export-library-current').off('click').on('click', function() {
+			$('#modal-export-library').modal('hide');
+			location.href = url;
+		});
+		$('#button-export-library-compat').off('click').on('click', function() {
+			$('#modal-export-library').modal('hide');
+			location.href = url + '?compat=1';
+		});
+		$('#modal-export-library').modal('show');
 	}
 		
 	function deleteLibrary(data){		

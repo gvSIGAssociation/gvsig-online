@@ -1733,3 +1733,25 @@ msgstr "The SVG file is not valid."
 #: external_graphics.py
 msgid "The SVG file must define its size (width and height, or a viewBox)."
 msgstr "The SVG file must define its size (width and height, or a viewBox)."
+
+#: templates/library_update.html templates/library_list.html
+msgctxt "symbology"
+msgid "Advanced symbols are exported as classic symbols (shape, colours and dashes)"
+msgstr "Advanced symbols are exported as classic symbols (shape, colours and dashes)"
+
+#: templates/library_update.html templates/library_list.html
+msgctxt "symbology"
+msgid "Earlier versions of gvSIG Online cannot import advanced symbols correctly. If the library is for one of them, export it for earlier versions: advanced symbols become classic symbols (shape, colours and dashes)."
+msgstr "Earlier versions of gvSIG Online cannot import advanced symbols correctly. If the library is for one of them, export it for earlier versions: advanced symbols become classic symbols (shape, colours and dashes)."
+
+#: templates/library_update.html templates/library_list.html
+msgctxt "symbology"
+msgid "Export for earlier versions"
+msgstr "Export for earlier versions"
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "This library has %(counter)s symbol with advanced symbology. Earlier versions of gvSIG Online cannot import it correctly: to use the library there, export it for earlier versions."
+msgid_plural "This library has %(counter)s symbols with advanced symbology. Earlier versions of gvSIG Online cannot import them correctly: to use the library there, export it for earlier versions."
+msgstr[0] "This library has %(counter)s symbol with advanced symbology. Earlier versions of gvSIG Online cannot import it correctly: to use the library there, export it for earlier versions."
+msgstr[1] "This library has %(counter)s symbols with advanced symbology. Earlier versions of gvSIG Online cannot import them correctly: to use the library there, export it for earlier versions."

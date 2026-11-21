@@ -1866,3 +1866,25 @@ msgstr "El fitxer SVG no és vàlid."
 #: external_graphics.py
 msgid "The SVG file must define its size (width and height, or a viewBox)."
 msgstr "El fitxer SVG ha d'indicar la seua grandària (width i height, o un viewBox)."
+
+#: templates/library_update.html templates/library_list.html
+msgctxt "symbology"
+msgid "Advanced symbols are exported as classic symbols (shape, colours and dashes)"
+msgstr "Els símbols avançats s'exporten com a símbols clàssics (forma, colors i guions)"
+
+#: templates/library_update.html templates/library_list.html
+msgctxt "symbology"
+msgid "Earlier versions of gvSIG Online cannot import advanced symbols correctly. If the library is for one of them, export it for earlier versions: advanced symbols become classic symbols (shape, colours and dashes)."
+msgstr "Les versions anteriors de gvSIG Online no poden importar correctament els símbols avançats. Si la biblioteca és per a una d'elles, exporteu-la per a versions anteriors: els símbols avançats es convertixen en símbols clàssics (forma, colors i guions)."
+
+#: templates/library_update.html templates/library_list.html
+msgctxt "symbology"
+msgid "Export for earlier versions"
+msgstr "Exportar per a versions anteriors"
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "This library has %(counter)s symbol with advanced symbology. Earlier versions of gvSIG Online cannot import it correctly: to use the library there, export it for earlier versions."
+msgid_plural "This library has %(counter)s symbols with advanced symbology. Earlier versions of gvSIG Online cannot import them correctly: to use the library there, export it for earlier versions."
+msgstr[0] "Esta biblioteca té %(counter)s símbol amb simbologia avançada. Les versions anteriors de gvSIG Online no el poden importar correctament: per a utilitzar-hi la biblioteca, exporteu-la per a versions anteriors."
+msgstr[1] "Esta biblioteca té %(counter)s símbols amb simbologia avançada. Les versions anteriors de gvSIG Online no els poden importar correctament: per a utilitzar-hi la biblioteca, exporteu-la per a versions anteriors."

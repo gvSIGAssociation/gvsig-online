@@ -68,6 +68,7 @@ urlpatterns = [
     
     path('get_wfs_style/', symbology_views.get_wfs_style, name='get_wfs_style'),
     path('geoserver_proxy/', symbology_views.geoserver_proxy_view, name='symbology_geoserver_proxy'),
+    path('symbol_preview/', symbology_views.symbol_preview_view, name='symbology_symbol_preview'),
 
     
     path('get_raster_statistics/<int:layer_id>/', symbology_views.get_raster_statistics, name='get_raster_statistics'),

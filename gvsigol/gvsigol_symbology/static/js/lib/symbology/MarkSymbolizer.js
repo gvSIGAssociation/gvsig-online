@@ -45,6 +45,8 @@ var MarkSymbolizer = function(rule, options, utils) {
 		}
 	}
 	this.type = 'MarkSymbolizer';
+	// opciones avanzadas (campo options del servidor); ver SymbolOptionsEditor.js
+	SymbolOptions.init(this);
 };
 
 MarkSymbolizer.prototype.getTableUI = function() {
@@ -66,202 +68,108 @@ MarkSymbolizer.prototype.getTableUI = function() {
 
 MarkSymbolizer.prototype.getTabMenu = function() {
 	var ui = '';
-	ui += '<li class="active"><a href="#graphic-tab" data-toggle="tab">' + gettext('Graphic') + '</a></li>';
+	ui += '<li class="active"><a href="#graphic-tab" data-toggle="tab">' + symoptT('Shape') + '</a></li>';
 	ui += '<li><a href="#fill-tab" data-toggle="tab">' + gettext('Fill') + '</a></li>';
 	ui += '<li><a href="#stroke-tab" data-toggle="tab">' + gettext('Stroke') + '</a></li>';
-	ui += '<li><a href="#rotation-tab" data-toggle="tab">' + gettext('Rotation') + '</a></li>';
 	
 	return ui;	
 };
 
-MarkSymbolizer.prototype.getGraphicTabUI = function() {
-	var ui = '';
-	ui += '<div class="tab-pane active" id="graphic-tab">';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label>' + gettext('Select shape') + '</label>';
-	ui += 			'<select id="well-known-name" class="form-control">';
-	for (var i=0; i < this.utils.shapes.length; i++) {
-		if (this.utils.shapes[i].value == this.well_known_name) {
-			ui += '<option value="' + this.utils.shapes[i].value + '" selected>' + this.utils.shapes[i].title + '</option>';
-		} else {
-			ui += '<option value="' + this.utils.shapes[i].value + '">' + this.utils.shapes[i].title + '</option>';
+MarkSymbolizer.prototype.numericFields = function() {
+	var fields = (this.utils && this.utils.getAlphanumericFields && this.utils.getAlphanumericFields()) || [];
+	var result = [['', symoptT('No field')]];
+	for (var i = 0; i < fields.length; i++) {
+		var f = fields[i];
+		if (f && f.name && SymbolOptions.isNumericBinding(f.binding)) {
+			result.push([f.name, f.name]);
 		}
 	}
-	ui += 			'</select>';
-	ui += 		'</div>';
-	ui += 	'</div>';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label>' + gettext('Size') + '</label>';
-	ui += 			'<input id="graphic-size" type="number" class="form-control" value="' + parseInt(this.size) + '">';					
-	ui += 		'</div>';
-	ui += 	'</div>';
+	return result;
+};
+
+MarkSymbolizer.prototype.getGraphicTabUI = function() {
+	var o = this.symbolOptions;
+	var shapes = $.map(SymbolOptions.SHAPES, function(s) { return s[0]; });
+	var ui = '<div class="tab-pane active gol-symopt-pane" id="graphic-tab">';
+	ui += SymbolOptions.ui.shapeChoice('opt:shape', symoptT('Shape'), shapes, o.shape, false);
+	ui += SymbolOptions.ui.row(
+		SymbolOptions.ui.number('graphic-size', 'col:size', gettext('Size'), this.size, 1, 200, 0.5, 'px'),
+		SymbolOptions.ui.opacity('graphic-opacity', 'col:opacity', symoptT('Symbol opacity'), this.opacity));
+	var rotation = SymbolOptions.ui.number('graphic-rotation', 'col:rotation', gettext('Rotation'), this.rotation, -360, 360, 1, 'º');
+	var fields = this.numericFields();
+	if (fields.length > 1) {
+		rotation += SymbolOptions.ui.select('graphic-rotation-field', 'opt:rotation_field', symoptT('Add angle from field'), fields, o.rotation_field || '');
+	}
+	ui += SymbolOptions.ui.section(gettext('Rotation'), SymbolOptions.ui.row(rotation));
+	ui += SymbolOptions.ui.section(symoptT('Offset'), SymbolOptions.ui.row(
+		SymbolOptions.ui.number('graphic-dx', 'opt:displacement.x', symoptT('Horizontal'), o.displacement.x, -200, 200, 1, 'px'),
+		SymbolOptions.ui.number('graphic-dy', 'opt:displacement.y', symoptT('Vertical (up)'), o.displacement.y, -200, 200, 1, 'px')));
 	ui += '</div>';
-	
 	return ui;
 };
 
 MarkSymbolizer.prototype.getFillTabUI = function() {
-	var ui = '';
-	ui += '<div class="tab-pane" id="fill-tab">';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label>' + gettext('Fill color') + '</label>';
-	ui += 			'<input id="fill-color-chooser" type="color" value="' + this.fill + '" class="form-control color-chooser">';					
-	ui += 		'</div>';
-	ui += 	'</div>';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label style="display: block;">' + gettext('Fill opacity') + '<span id="fill-opacity-output" class="margin-l-15 gol-slider-output">' + (this.fill_opacity * 100) + '%</span>' + '</label>';
-	ui += 			'<div id="fill-opacity-slider"><div/>';
-	ui += 		'</div>';				 
-	ui += 	'</div>';
+	var o = this.symbolOptions;
+	var ui = '<div class="tab-pane gol-symopt-pane" id="fill-tab">';
+	ui += '<p class="gol-symopt-hint" data-symopt-show="opt:shape=shape://oarrow|shape://vertline|shape://slash|shape://backslash|shape://plus|shape://times">' +
+		symoptT('This shape is drawn with its stroke only.') + '</p>';
+	ui += SymbolOptions.ui.toggle('fill-enabled', 'opt:fill', symoptT('Fill the shape'), o.fill);
+	ui += SymbolOptions.ui.row(
+		SymbolOptions.ui.color('fill-color-chooser', 'col:fill', gettext('Fill color'), this.fill, 'opt:fill'),
+		SymbolOptions.ui.opacity('fill-opacity', 'col:fill_opacity', gettext('Fill opacity'), this.fill_opacity, 'opt:fill'));
 	ui += '</div>';
-	
 	return ui;
 };
 
 MarkSymbolizer.prototype.getStrokeTabUI = function() {
-	var ui = '';
-	ui += '<div class="tab-pane" id="stroke-tab">';
-	ui += 		'<div class="row">';
-	ui += 			'<div class="col-md-12 form-group">';
-	ui += 				'<label>' + gettext('Stroke color') + '</label>';
-	ui += 				'<input id="stroke-color-chooser" type="color" value="' + this.stroke + '" class="form-control color-chooser">';					
-	ui += 			'</div>';
-	ui += 		'</div>';
-	ui += 		'<div class="row">';
-	ui += 			'<div class="col-md-12 form-group">';
-	ui += 				'<label>' + gettext('Stroke width') + '</label>';
-	ui += 				'<input id="stroke-width" type="number" class="form-control" value="' + parseInt(this.stroke_width) + '">';					
-	ui += 			'</div>';
-	ui += 		'</div>';
-	ui += 		'<div class="row">';
-	ui += 			'<div class="col-md-12 form-group">';
-	ui += 				'<label style="display: block;">' + gettext('Stroke opacity') + '<span id="stroke-opacity-output" class="margin-l-15 gol-slider-output">' + (this.stroke_opacity * 100) + '%</span>' + '</label>';
-	ui += 				'<div id="stroke-opacity-slider"></div>';
-	ui += 			'</div>';					 
-	ui += 		'</div>';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label>' + gettext('Select pattern') + '</label>';
-	ui += 			'<select id="line-dash-array" class="form-control">';
-	for (var i=0; i < this.utils.linePatterns.length; i++) {
-		if (this.utils.linePatterns[i].value == this.stroke_dash_array) {
-			ui += '<option value="' + this.utils.linePatterns[i].value + '" data-imagesrc="' + this.utils.linePatterns[i].imgsrc + '" selected></option>';
-		} else {
-			ui += '<option value="' + this.utils.linePatterns[i].value + '" data-imagesrc="' + this.utils.linePatterns[i].imgsrc + '"></option>';
-		}
-	}
-	ui += 			'</select>';
-	ui += 		'</div>';
-	ui += 	'</div>';
+	var ui = '<div class="tab-pane gol-symopt-pane" id="stroke-tab">';
+	ui += SymbolOptions.ui.row(
+		SymbolOptions.ui.color('stroke-color-chooser', 'col:stroke', gettext('Stroke color'), this.stroke),
+		SymbolOptions.ui.number('stroke-width', 'col:stroke_width', gettext('Stroke width'), this.stroke_width, 0, 50, 0.5, 'px'),
+		SymbolOptions.ui.opacity('stroke-opacity', 'col:stroke_opacity', gettext('Stroke opacity'), this.stroke_opacity));
+	ui += SymbolOptions.ui.dashChoice('stroke-dash-custom', this.stroke_dash_array);
 	ui += '</div>';
-	
 	return ui;
 };
 
+/** La rotación va en la pestaña de la forma (se mantiene el método: Rule.updateForm lo llama). */
 MarkSymbolizer.prototype.getRotationTabUI = function() {
-	var ui = '';
-	ui += '<div class="tab-pane" id="rotation-tab">';
-	ui += 	'<div class="row">';
-	ui += 		'<div class="col-md-12 form-group">';
-	ui += 			'<label style="display: block;">' + gettext('Rotation') + '<span id="rotation-output" class="margin-l-15 gol-slider-output">' + this.rotation + 'º</span>' + '</label>';
-	ui += 			'<div id="rotation-slider"><div/>';
-	ui += 		'</div>';			 
-	ui += 	'</div>';
-	ui += '</div>';
-	
-	return ui;
+	return '';
+};
+
+MarkSymbolizer.prototype.afterChoice = function(path, value) {
+	if (path === 'opt:shape') {
+		// forma clásica equivalente para quien no conoce las opciones (y la propia, si es clásica)
+		this.well_known_name = SymbolOptions.legacyShape(value);
+	}
 };
 
 MarkSymbolizer.prototype.registerEvents = function() {
 	var self = this;
-	
-	$("#graphic-size").on('change', function(e) {
-		self.size = this.value;
-		self.updatePreview();	
+	SymbolOptions.openDialog();
+	SymbolOptions.bind(this, function() {
+		self.updatePreview();
 		self.rule.preview();
+		SymbolOptions.livePreview(self);
 	});
-
-	$("#well-known-name").on('change', function(e) {
-		self.well_known_name = this.value;
-		self.updatePreview();	
-		self.rule.preview();
-	});
-	$( "#fill-opacity-slider" ).slider({
-	    min: 0,
-	    max: 100,
-	    value: (self.fill_opacity * 100),
-	    change: function( event, ui ) {
-	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
-	    	self.fill_opacity = opacity;
-	    	self.updatePreview();
-	    	self.rule.preview();
-	    },
-	    slide: function( event, ui ) {
-	    	$("#fill-opacity-output").text(ui.value + '%');
-	    }
-	});	
-	$("#fill-color-chooser").on('change', function(e) {
-		self.fill = this.value;
-		self.updatePreview();	
-		self.rule.preview();
-	});	
-	$("#stroke-color-chooser").on('change', function(e) {
-		self.stroke = this.value;
-		self.updatePreview();	
-		self.rule.preview();
-	});
-	$( "#stroke-opacity-slider" ).slider({
-	    min: 0,
-	    max: 100,
-	    value: (self.stroke_opacity * 100),
-	    change: function( event, ui ) {
-	    	var opacity = parseFloat((ui.value / 100)).toFixed(1);
-	    	self.stroke_opacity = opacity;
-	    	self.updatePreview();
-	    	self.rule.preview();
-	    },
-	    slide: function( event, ui ) {
-	    	$("#stroke-opacity-output").text(ui.value + '%');
-	    }
-	});
-	$("#stroke-width").on('change', function(e) {
-		self.stroke_width = this.value;
-		self.updatePreview();	
-		self.rule.preview();
-	});
-	
-	$('#line-dash-array').ddslick({
-	    onSelected: function(selectedData){
-	    	self.stroke_dash_array = selectedData.selectedData.value;
-	    	self.updatePreview();	
-			self.rule.preview();
-	    }   
-	});
-	
-	$( "#rotation-slider" ).slider({
-	    min: 0,
-	    max: 360,
-	    value: self.rotation,
-	    slide: function( event, ui ) {
-	    	var rotation = ui.value;
-	    	$("#rotation-output").text(rotation + 'º');
-	    	self.rotation = rotation;
-	    }
-	});
+	SymbolOptions.livePreview(this);
 };
 
 MarkSymbolizer.prototype.updatePreview = function() {	
-	var sldBody = this.toSLDBody();
-	if(sldBody != null){
-		var url = this.utils.getPreviewUrl() + '&SLD_BODY=' + encodeURIComponent(sldBody);
-		var ui = '<img id="symbolizer-preview-' + this.id + '" src="' + url + '" class="symbolizer-preview-' + this.id + '"></img>';
-		$("#symbolizer-preview-div-" + this.id).empty();
-		$("#symbolizer-preview-div-" + this.id).append(ui);
+	var url;
+	if (SymbolOptions.needed(this)) {
+		// símbolo avanzado: la vista previa la genera el servidor con el SLD que se publica
+		url = SymbolOptions.previewUrl(this.utils.getPreviewUrl(), [this]);
+	} else {
+		var sldBody = this.toSLDBody();
+		if (sldBody == null) {
+			return;
+		}
+		url = this.utils.getPreviewUrl() + '&SLD_BODY=' + encodeURIComponent(sldBody);
 	}
+	var ui = '<img id="symbolizer-preview-' + this.id + '" src="' + url + '" class="symbolizer-preview-' + this.id + '"></img>';
+	$("#symbolizer-preview-div-" + this.id).empty();
+	$("#symbolizer-preview-div-" + this.id).append(ui);
 };
 
 MarkSymbolizer.prototype.toXML = function(){
@@ -352,6 +260,8 @@ MarkSymbolizer.prototype.toJSON = function(){
 		stroke_opacity: this.stroke_opacity,
 		stroke_dash_array: this.stroke_dash_array,
 		rotation: this.rotation,
+		// solo si usa algo que el simbolizador clásico no puede expresar (si no, null)
+		options: SymbolOptions.forJSON(this),
 		order: this.order,
 		size: this.size,
 		opacity: this.opacity

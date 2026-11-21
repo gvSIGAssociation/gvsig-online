@@ -41,12 +41,13 @@ from django.views.decorators.csrf import csrf_exempt
 from . import utils
 import json
 import ast
+import html
 from gvsigol_services.backend_postgis import Introspect
 import re
 import logging
 from functools import wraps
 from django.views.decorators.http import require_POST, require_GET
-from . import geoserver_proxy
+from . import geoserver_proxy, symbol_preview
 logger = logging.getLogger("gvsigol")
 
 
@@ -1365,8 +1366,12 @@ def color_ramp_folder_delete(request, color_ramp_folder_id):
   
 @staff_required
 def library_list(request):
+    libraries = Library.objects.all()
     response = {
-        'libraries': Library.objects.all()
+        'libraries': libraries,
+        # símbolos avanzados por biblioteca: al exportar se avisa y se ofrece la exportación compatible
+        'advanced_counts': utils.json_for_script(
+            dict((str(lib.id), services_library.advanced_symbol_count(lib)) for lib in libraries)),
     }
     return render(request, 'library_list.html', response)
 
@@ -1432,6 +1437,7 @@ def library_update(request, library_id):
         response = {
             'library': library,
             'rules': rules,
+            'advanced_symbols': services_library.advanced_symbol_count(library),
             'preview_point_url': wms_url + '?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
             'preview_line_url': wms_url + '?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
             'preview_polygon_url': wms_url + '?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
@@ -1483,7 +1489,9 @@ def library_export(request, library_id):
     library_rules = LibraryRule.objects.filter(library_id=library.id)
     
     try:
-        response = services_library.export_library(library, library_rules)
+        # compat=1: símbolos avanzados como clásicos, para versiones anteriores de gvSIG Online
+        compat = request.GET.get('compat') == '1'
+        response = services_library.export_library(library, library_rules, compat=compat)
         return response
         
     except Exception as e:
@@ -1770,3 +1778,73 @@ def geoserver_proxy_view(request):
                             content_type=resp.headers.get('Content-Type', 'application/octet-stream'))
     response['Cache-Control'] = 'private, no-store'
     return response
+
+
+
+@login_required()
+@staff_required
+@require_GET
+def symbol_preview_view(request):
+    """
+    Vista previa de un simbolizador (o de los de una regla) con el SLD que se publica
+    (symbol_preview.py). Parámetros: url (la URL de vista previa del editor), symbolizers
+    (JSON [{type, json}]), width y height opcionales.
+
+    - La leyenda (GetLegendGraphic) se pide con las credenciales de la sesión del usuario, como
+      geoserver_proxy_view.
+    - El GetMap de las líneas con decoraciones (sobre una línea quebrada) se pide con las credenciales
+      de servicio del servidor: solo afecta a las capas técnicas preview:preview_* (datos sintéticos)
+      con un SLD normalizado, y el token OIDC guardado en la sesión puede haber caducado.
+    """
+    candidates = []
+    for srv in Server.objects.all():
+        if not srv.frontend_url:
+            continue
+        gs = geographic_servers.get_instance().get_server_by_id(srv.id)
+        candidates.append((srv.frontend_url, getattr(gs, 'conf_url', None), gs))
+    # La URL de vista previa del editor sale de la plantilla escapada como HTML ("{{ preview_url }}"
+    # -> &amp;): en un <img src> el navegador lo deshace, aquí llega tal cual.
+    url = html.unescape(request.GET.get('url') or '')
+    target = None
+    try:
+        for frontend_url, internal_url, gs in candidates:
+            try:
+                absolute_url, params = geoserver_proxy.resolve_target(
+                    url, [('SERVICE', 'WMS')], [(frontend_url, internal_url)])
+            except geoserver_proxy.ProxyNotAllowed:
+                continue
+            target = (absolute_url, params, gs)
+            break
+        if target is None:
+            raise geoserver_proxy.ProxyNotAllowed('servidor no permitido')
+        absolute_url, params, gs = target
+        instances = symbol_preview.parse_symbolizers(request.GET.get('symbolizers'))
+        attempts = symbol_preview.requests_for(params, instances, request.GET.get('width'),
+                                               request.GET.get('height'))
+    except (geoserver_proxy.ProxyNotAllowed, symbol_preview.PreviewError) as e:
+        logger.warning('symbol_preview rechazado: %s', e)
+        return HttpResponseForbidden()
+    user_session = service_utils.getUserAuthSession(request)
+    service_session = None
+    if getattr(gs, 'user', None):
+        import requests as http_requests
+        service_session = http_requests.Session()
+        service_session.auth = (gs.user, gs.password)
+    last = None
+    for query, is_map in attempts:
+        session = service_session if (is_map and service_session is not None) else user_session
+        try:
+            # por POST: con las cabeceras de la sesión, un SLD_BODY grande supera el límite de Tomcat en GET
+            last = geoserver_proxy.forward_form(session, absolute_url, query)
+        except Exception:
+            logger.exception('symbol_preview: error pidiendo la vista previa a %s', absolute_url)
+            continue
+        if last.status_code == 200 and last.headers.get('Content-Type', '').startswith('image/'):
+            response = HttpResponse(last.content, content_type=last.headers.get('Content-Type'))
+            response['Cache-Control'] = 'private, max-age=300'
+            return response
+        logger.warning('symbol_preview: %s sin imagen (HTTP %s, %s)', 'GetMap' if is_map else 'leyenda',
+                       last.status_code, last.headers.get('Content-Type', ''))
+    if last is None:
+        return HttpResponse(status=502)
+    return HttpResponse(status=502)

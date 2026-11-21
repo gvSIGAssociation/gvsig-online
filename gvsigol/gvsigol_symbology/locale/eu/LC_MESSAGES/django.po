@@ -1651,3 +1651,25 @@ msgstr "SVG fitxategia ez da baliozkoa."
 #: external_graphics.py
 msgid "The SVG file must define its size (width and height, or a viewBox)."
 msgstr "SVG fitxategiak bere tamaina adierazi behar du (width eta height, edo viewBox bat)."
+
+#: templates/library_update.html templates/library_list.html
+msgctxt "symbology"
+msgid "Advanced symbols are exported as classic symbols (shape, colours and dashes)"
+msgstr "Ikur aurreratuak ikur klasiko gisa esportatzen dira (forma, koloreak eta marrak)"
+
+#: templates/library_update.html templates/library_list.html
+msgctxt "symbology"
+msgid "Earlier versions of gvSIG Online cannot import advanced symbols correctly. If the library is for one of them, export it for earlier versions: advanced symbols become classic symbols (shape, colours and dashes)."
+msgstr "gvSIG Onlineren aurreko bertsioek ezin dituzte ikur aurreratuak behar bezala inportatu. Liburutegia horietako baterako bada, esportatu aurreko bertsioetarako: ikur aurreratuak ikur klasiko bihurtzen dira (forma, koloreak eta marrak)."
+
+#: templates/library_update.html templates/library_list.html
+msgctxt "symbology"
+msgid "Export for earlier versions"
+msgstr "Esportatu aurreko bertsioetarako"
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "This library has %(counter)s symbol with advanced symbology. Earlier versions of gvSIG Online cannot import it correctly: to use the library there, export it for earlier versions."
+msgid_plural "This library has %(counter)s symbols with advanced symbology. Earlier versions of gvSIG Online cannot import them correctly: to use the library there, export it for earlier versions."
+msgstr[0] "Liburutegi honek sinbologia aurreratuko %(counter)s ikur du. gvSIG Onlineren aurreko bertsioek ezin dute behar bezala inportatu: liburutegia haietan erabiltzeko, esportatu aurreko bertsioetarako."
+msgstr[1] "Liburutegi honek sinbologia aurreratuko %(counter)s ikur ditu. gvSIG Onlineren aurreko bertsioek ezin dituzte behar bezala inportatu: liburutegia haietan erabiltzeko, esportatu aurreko bertsioetarako."

@@ -29,7 +29,7 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from gvsigol_core import geom
 from gvsigol_services.models import Layer
-from . import utils, sld_builder, label_sld, label_options, default_style_palette
+from . import utils, sld_builder, label_sld, label_options, default_style_palette, symbol_sld
 import tempfile
 import json
 import logging
@@ -85,6 +85,20 @@ def _sld_float(val, default):
         return default
 
 
+_SYMBOL_GROUP_MODELS = {'PointSymbolizer': MarkSymbolizer, 'LineSymbolizer': LineSymbolizer,
+                        'PolygonSymbolizer': PolygonSymbolizer}
+
+
+def _is_empty_line_symbolizer(node):
+    """
+    <sld:LineSymbolizer/> sin nada dentro: sld.py lo añade delante de cada LineSymbolizer que
+    genera gvSIG Online y GeoServer no pinta nada con él. Antes se importaba como una línea
+    invisible más (blanca, opacidad 0); ahora se ignora, con el mismo resultado en el mapa.
+    """
+    return (etree.QName(node).localname == 'LineSymbolizer'
+            and not any(isinstance(c.tag, str) for c in node))
+
+
 def _sld_import_symbolizers(rule_node, model_rule, geom_field=None):
     """
     Persist symbolizers from a Rule element using lxml (parse_sld uses sld.Rule
@@ -101,12 +115,29 @@ def _sld_import_symbolizers(rule_node, model_rule, geom_field=None):
         'TextSymbolizer',
         'RasterSymbolizer',
     )
-    for child in rule_node:
-        if not isinstance(child.tag, str):
-            continue
-        if etree.QName(child).localname not in sym_tags:
+    children = [c for c in rule_node
+                if isinstance(c.tag, str) and etree.QName(c).localname in sym_tags
+                and not _is_empty_line_symbolizer(c)]
+    skip = 0
+    for index, child in enumerate(children):
+        if skip:
+            skip -= 1
             continue
         tag = etree.QName(child).localname
+
+        # Marca, línea o polígono nuevo exportado desde gvSIG Online (puede ocupar varios
+        # simbolizadores SLD): se recupera con sus opciones solo si coincide exactamente.
+        group_model = _SYMBOL_GROUP_MODELS.get(tag)
+        if group_model is not None and symbol_sld.read_marker(child) is not None:
+            found = symbol_sld.import_group(children[index:], group_model, geom_field)
+            if found is not None:
+                instance, used = found
+                instance.rule = model_rule
+                instance.order = scount
+                instance.save()
+                skip = used - 1
+                scount += 1
+                continue
 
         if tag == 'PointSymbolizer':
             g = child.xpath('sld:Graphic', namespaces=_SLD_NS)
@@ -372,6 +403,23 @@ def _sld_import_symbolizers(rule_node, model_rule, geom_field=None):
             ).save()
 
         scount += 1
+
+    _reverse_imported_order(model_rule)
+
+
+def _reverse_imported_order(model_rule):
+    '''
+    El SLD se genera de mayor a menor «order» (sld_builder: order_by('-order')): el primer
+    simbolizador del documento se pinta debajo y el de order 0 encima, igual que en el editor
+    (la fila de arriba es la 0). Al importar se numeraban en orden de documento, así que los
+    simbolizadores apilados quedaban al revés tras exportar e importar. Solo afecta a la regla
+    que se acaba de importar; lo ya guardado no se toca.
+    '''
+    created = list(Symbolizer.objects.filter(rule=model_rule).order_by('order', 'id'))
+    last = len(created) - 1
+    for position, sym in enumerate(created):
+        if sym.order != last - position:
+            Symbolizer.objects.filter(pk=sym.pk).update(order=last - position)
 
 
 
@@ -646,7 +694,7 @@ def sld_import(name, is_default, layer_id, file, mapservice, style_type=None, ti
     
     # Geometría de la capa, solo si hay etiquetas (para recuperar las etiquetas nuevas)
     geom_field = None
-    if 'TextSymbolizer' in raw_sld_text:
+    if 'TextSymbolizer' in raw_sld_text or symbol_sld.MARKER in raw_sld_text:
         try:
             geom_field = utils.get_geometry_field(layer)
         except Exception as e:
