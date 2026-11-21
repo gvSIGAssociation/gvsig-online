@@ -253,7 +253,15 @@ sqlglot==26.21.0
 # instalado, Django 4.2 lo usa en lugar de psycopg2 para TODO gvSIG. La memoria
 # persistente de GeoCopilot se guarda con el ORM de Django (psycopg2).
 langgraph==0.6.11
+# Fijadas: langgraph 0.6.11 admite rangos amplios y el checkpointer de GeoAgents
+# (agents/checkpointer.py) replica la logica interna de langgraph-checkpoint 2.1.
+langgraph-checkpoint==2.1.2
+langgraph-prebuilt==0.6.5
 # Cliente Redis de GeoAgents y GeoInsights (bus de eventos, cancelación y cachés
 # compartidas; docs/adr/0003 de plugin_geoagents). 5.2.1 admite Python 3.9.
 # Es opcional: sin él, esas funciones se desactivan y el resto funciona igual.
 redis==5.2.1
+# Centro de documentación (gvsigol_core/docs): Markdown a HTML (el mismo motor que MkDocs) y
+# limpieza del HTML resultante. Las dos admiten Python 3.9 (3.9 y 0.3.8 son las últimas que lo hacen).
+Markdown==3.9
+nh3==0.3.8
