@@ -1,0 +1,91 @@
+{# Estilos comunes del centro de documentación (portada y lector): cuerpo, barra superior y pie.
+   Se incluye dentro del <style> de cada página. #}
+	*, *::before, *::after { box-sizing: border-box; }
+
+	body {
+		margin: 0;
+		padding: 0;
+		background: var(--pl-bg);
+		font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+		color: var(--pl-text);
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+	}
+
+	/* ---- Barra superior: como la cabecera del core, con los colores del tema
+	   (variables --hdr-* de gol-themes.css, activas por la clase de tema del body) ---- */
+	.doc-topbar {
+		position: sticky;
+		top: 0;
+		z-index: 200;
+		flex-shrink: 0;
+		background-color: var(--hdr-bg);
+		box-shadow: var(--hdr-shadow);
+		border-bottom: var(--hdr-border);
+	}
+	.doc-topbar__inner {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		height: 50px;
+	}
+	.doc-topbar__logo {
+		display: inline-flex;
+		align-items: center;
+		height: 50px;
+		padding: 0 10px;
+		margin-left: -10px;
+		font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+		font-size: 20px;
+		font-weight: 300;
+		line-height: 50px;
+		color: var(--hdr-text) !important;
+		text-decoration: none !important;
+		transition: background-color 0.15s;
+	}
+	.doc-topbar__logo:hover, .doc-topbar__logo:focus { background-color: var(--hdr-item-hover); }
+	.doc-topbar__logo-img {
+		width: 28px;
+		height: 28px;
+		margin-right: 9px;
+		flex-shrink: 0;
+		object-fit: contain;
+		border-radius: 5px;
+		filter: var(--hdr-logo-filter);
+	}
+	.doc-topbar__logo b { font-weight: 700; }
+	.doc-topbar__surname { margin-left: 4px; opacity: 0.85; }
+	.doc-topbar__link {
+		display: inline-flex;
+		align-items: center;
+		gap: 7px;
+		height: 50px;
+		padding: 0 15px;
+		margin-right: -15px;
+		font-size: 14px;
+		color: var(--hdr-text) !important;
+		text-decoration: none !important;
+		transition: background-color 0.15s;
+	}
+	.doc-topbar__link:hover, .doc-topbar__link:focus { background-color: var(--hdr-item-hover); color: var(--hdr-text-dim) !important; }
+	button.doc-topbar__link { background: transparent; border: 0; cursor: pointer; }
+	.doc-topbar__link[hidden] { display: none; }
+	.doc-topbar a:focus-visible, .doc-topbar button:focus-visible { outline: 2px solid var(--hdr-text); outline-offset: -2px; }
+
+	/* ---- Pie ---- */
+	.doc-footer {
+		background: var(--pl-white);
+		border-top: 1px solid var(--pl-border);
+		padding: 12px 24px;
+		font-size: 12px;
+		color: var(--pl-muted);
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		flex-shrink: 0;
+	}
+	@media (max-width: 767px) {
+		.doc-topbar__logo { font-size: 17px; }
+		.doc-topbar__link-text { display: none; }
+	}

@@ -2920,3 +2920,230 @@ msgstr "Se ha producido un error inesperado en el servidor. Inténtalo de nuevo 
 msgctxt "errors"
 msgid "Try again"
 msgstr "Reintentar"
+
+msgctxt "documentation"
+msgid "Online"
+msgstr "En línea"
+
+msgctxt "documentation"
+msgid "Read manual"
+msgstr "Leer el manual"
+
+msgctxt "documentation"
+msgid "Manuals"
+msgstr "Manuales"
+
+msgctxt "documentation"
+msgid "All manuals"
+msgstr "Todos los manuales"
+
+msgctxt "documentation"
+msgid "Print"
+msgstr "Imprimir"
+
+msgctxt "documentation"
+msgid "Pages"
+msgstr "Páginas"
+
+msgctxt "documentation"
+msgid "Previous"
+msgstr "Anterior"
+
+msgctxt "documentation"
+msgid "Next"
+msgstr "Siguiente"
+
+msgctxt "documentation"
+msgid "On this page"
+msgstr "En esta página"
+
+msgctxt "documentation"
+msgid "This page is not available in your language yet. It is shown in %(lang)s."
+msgstr "Esta página aún no está disponible en su idioma. Se muestra en %(lang)s."
+
+msgctxt "documentation"
+msgid "Edit"
+msgstr "Editar"
+
+msgctxt "documentation"
+msgid "This page was edited on the web by %(user)s (%(date)s). Export it from the editor to keep it in the repository."
+msgstr "Esta página se editó en la web (%(user)s, %(date)s). Expórtela desde el editor para conservarla en el repositorio."
+
+msgctxt "documentation"
+msgid "The repository version of this page has changed since it was edited on the web. Review the editor before exporting."
+msgstr "La versión del repositorio de esta página ha cambiado desde que se editó en la web. Revísela en el editor antes de exportar."
+
+msgctxt "documentation"
+msgid "Repository file"
+msgstr "Fichero del repositorio"
+
+msgctxt "documentation"
+msgid "Download the page and the uploaded images to add them to the repository"
+msgstr "Descarga la página y las imágenes subidas para añadirlas al repositorio"
+
+msgctxt "documentation"
+msgid "Export ZIP"
+msgstr "Exportar ZIP"
+
+msgctxt "documentation"
+msgid "View page"
+msgstr "Ver la página"
+
+msgctxt "documentation"
+msgid "The repository version of this page has changed since it was edited on the web. Compare both before saving or exporting."
+msgstr "La versión del repositorio de esta página ha cambiado desde que se editó en la web. Compare ambas antes de guardar o exportar."
+
+msgctxt "documentation"
+msgid "You are editing the web version saved by %(user)s (%(date)s)."
+msgstr "Está editando la versión web guardada por %(user)s (%(date)s)."
+
+msgctxt "documentation"
+msgid "Insert image"
+msgstr "Insertar imagen"
+
+msgctxt "documentation"
+msgid "Paste a screenshot (Ctrl+V) or drag an image onto the text to upload it and insert it where the cursor is."
+msgstr "Pegue una captura (Ctrl+V) o arrastre una imagen sobre el texto para subirla e insertarla donde esté el cursor."
+
+msgctxt "documentation"
+msgid "Preview"
+msgstr "Vista previa"
+
+msgctxt "documentation"
+msgid "Images of the page"
+msgstr "Imágenes de la página"
+
+msgctxt "documentation"
+msgid "This page has no images yet. Paste or drag a screenshot onto the text to add one."
+msgstr "Esta página aún no tiene imágenes. Pegue o arrastre una captura sobre el texto para añadir una."
+
+msgctxt "documentation"
+msgid "History"
+msgstr "Historial"
+
+msgctxt "documentation"
+msgid "Load into the editor"
+msgstr "Cargar en el editor"
+
+msgctxt "documentation"
+msgid "What did you change? (optional)"
+msgstr "¿Qué ha cambiado? (opcional)"
+
+msgctxt "documentation"
+msgid "The web version is discarded and the page goes back to the repository version. The history and the uploaded images are kept. Continue?"
+msgstr "Se descarta la versión web y la página vuelve a la del repositorio. Se conservan el historial y las imágenes subidas. ¿Continuar?"
+
+msgctxt "documentation"
+msgid "Back to the repository version"
+msgstr "Volver a la versión del repositorio"
+
+msgctxt "documentation"
+msgid "Updating…"
+msgstr "Actualizando…"
+
+msgctxt "documentation"
+msgid "Uploading image…"
+msgstr "Subiendo imagen…"
+
+msgctxt "documentation"
+msgid "Image uploaded"
+msgstr "Imagen subida"
+
+msgctxt "documentation"
+msgid "The image could not be uploaded"
+msgstr "No se ha podido subir la imagen"
+
+msgctxt "documentation"
+msgid "In the repository"
+msgstr "En el repositorio"
+
+msgctxt "documentation"
+msgid "Uploaded on the web"
+msgstr "Subida en la web"
+
+msgctxt "documentation"
+msgid "Missing"
+msgstr "Falta"
+
+msgctxt "documentation"
+msgid "Upload"
+msgstr "Subir"
+
+msgctxt "documentation"
+msgid "Replace"
+msgstr "Reemplazar"
+
+msgctxt "documentation"
+msgid "Replace the text of the editor with this version?"
+msgstr "¿Sustituir el texto del editor por esta versión?"
+
+msgctxt "documentation"
+msgid "There are unsaved changes."
+msgstr "Hay cambios sin guardar."
+
+msgctxt "documentation"
+msgid "Someone else saved this page while you were editing it. Copy your changes, reload and apply them again."
+msgstr "Otra persona ha guardado esta página mientras la editaba. Copie sus cambios, recargue y vuelva a aplicarlos."
+
+msgctxt "documentation"
+msgid "The page cannot be empty."
+msgstr "La página no puede estar vacía."
+
+msgctxt "documentation"
+msgid "No file was received."
+msgstr "No se ha recibido ningún fichero."
+
+msgctxt "documentation"
+msgid "Only PNG, JPG, GIF or WEBP images can be uploaded."
+msgstr "Solo se pueden subir imágenes PNG, JPG, GIF o WEBP."
+
+msgctxt "documentation"
+msgid "The image is larger than 10 MB."
+msgstr "La imagen ocupa más de 10 MB."
+
+msgctxt "documentation"
+msgid "The file is not a valid image."
+msgstr "El fichero no es una imagen válida."
+
+msgctxt "documentation"
+msgid "Invalid image path."
+msgstr "Ruta de imagen no válida."
+
+#: templates/documentation_page.html
+msgctxt "documentation"
+msgid "Download PDF"
+msgstr "Descargar PDF"
+
+#: views_docs.py
+msgctxt "documentation"
+msgid "Contents"
+msgstr "Índice"
+
+#: views_docs.py
+msgctxt "documentation"
+msgid "Updated on {date}"
+msgstr "Actualizado el {date}"
+
+#: views_docs.py
+msgctxt "documentation"
+msgid "The PDF could not be generated. Use Print instead."
+msgstr "No se ha podido generar el PDF. Use «Imprimir» en su lugar."
+
+#: templates/documentation_page.html
+msgctxt "documentation"
+msgid "Generating PDF…"
+msgstr "Generando PDF…"
+
+#: templates/documentation_page.html
+msgctxt "documentation"
+msgid "Export web changes"
+msgstr "Exportar cambios web"
+
+#: templates/documentation_page.html
+msgctxt "documentation"
+msgid "ZIP with every page edited and image uploaded on the web for this package, with their paths in the repository"
+msgstr "ZIP con todas las páginas editadas y las imágenes subidas desde la web en este paquete, con sus rutas en el repositorio"
+
+#: templates/shared_view_list.html
+msgid "Only its creator or a superuser can delete it"
+msgstr "Solo puede eliminarla quien la creó o un superusuario"

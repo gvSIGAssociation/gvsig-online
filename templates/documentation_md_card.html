@@ -1,0 +1,14 @@
+{% load i18n %}{# Tarjeta de un manual en Markdown (se lee en esta misma pestaña). Recibe «manual». #}
+<a class="doc-card doc-card--online" href="{{ manual.url }}">
+	<span class="doc-card__top">
+		<span class="doc-card__icon" aria-hidden="true"><i class="fa {{ manual.icon }}"></i></span>
+		<span class="doc-card__body">
+			<span class="doc-card__title">{{ manual.title }}</span>
+			<span class="doc-card__desc">{{ manual.desc }}</span>
+		</span>
+	</span>
+	<span class="doc-card__foot">
+		<span class="doc-chip">{% trans "Online" context "documentation" %}</span>
+		<span class="doc-card__open">{% trans "Read manual" context "documentation" %} <i class="fa fa-arrow-right" aria-hidden="true"></i></span>
+	</span>
+</a>

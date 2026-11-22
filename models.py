@@ -1,3 +1,6 @@
+import os
+from django.core.files.storage import FileSystemStorage
+from django.utils.deconstruct import deconstructible
 import uuid
 
 try:
@@ -663,3 +666,78 @@ class ProjectPackageExportJob(models.Model):
 
     def __str__(self):
         return 'ProjectPackageExportJob %s (%s)' % (self.id, self.status)
+
+
+# --------------------------------------------------------------------------------------------
+# Centro de documentación: ediciones hechas desde la web (capa sobre <paquete>/docs/)
+# --------------------------------------------------------------------------------------------
+
+@deconstructible
+class DocsStorage(FileSystemStorage):
+    """Imágenes de los manuales subidas desde la web, fuera de /media pública: /media/restricted lo
+    deniega Apache y las sirve views_docs. Es una instancia y no una función porque Django 2.2 no
+    admite storage invocable (llegó en la 3.1); la carpeta se calcula al usarla."""
+
+    @property
+    def base_location(self):
+        return os.path.join(settings.MEDIA_ROOT, 'restricted', 'docs')
+
+
+def _doc_asset_upload_to(instance, filename):
+    return '%s/%s' % (instance.app, instance.path)
+
+
+class DocPageEdit(models.Model):
+    """Versión editada desde la web de una página de un manual. Mientras exista, sustituye al
+    fichero del repositorio; borrarla devuelve la página a la versión del repositorio."""
+    app = models.CharField(max_length=150)
+    manual = models.CharField(max_length=100)
+    page = models.CharField(max_length=100)
+    lang = models.CharField(max_length=20)
+    content = models.TextField()
+    # sha1 del fichero del repositorio sobre el que se editó (vacío si no existía): si el fichero
+    # cambia después, la edición se hizo sobre una versión antigua
+    base_hash = models.CharField(max_length=40, blank=True, default='')
+    updated_by = models.CharField(max_length=150)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'gvsigol_core_docpageedit'
+        unique_together = ('app', 'manual', 'page', 'lang')
+
+    def __str__(self):
+        return '%s/%s/%s (%s)' % (self.app, self.manual, self.page, self.lang)
+
+
+class DocPageRevision(models.Model):
+    """Historial de una página editada: cada guardado deja una revisión."""
+    app = models.CharField(max_length=150)
+    manual = models.CharField(max_length=100)
+    page = models.CharField(max_length=100)
+    lang = models.CharField(max_length=20)
+    content = models.TextField()
+    comment = models.CharField(max_length=250, blank=True, default='')
+    created_by = models.CharField(max_length=150)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'gvsigol_core_docpagerevision'
+        ordering = ['-created_at']
+        indexes = [models.Index(fields=['app', 'manual', 'page', 'lang'])]
+
+
+class DocAsset(models.Model):
+    """Imagen subida desde la web para los manuales de una app. path es relativo a docs/
+    (p. ej. es/img/proyectos-lista.png): si coincide con un fichero del repositorio, lo sustituye."""
+    app = models.CharField(max_length=150)
+    path = models.CharField(max_length=300)
+    file = models.FileField(upload_to=_doc_asset_upload_to, storage=DocsStorage(), max_length=500)
+    uploaded_by = models.CharField(max_length=150)
+    uploaded_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'gvsigol_core_docasset'
+        unique_together = ('app', 'path')
+
+    def __str__(self):
+        return '%s/%s' % (self.app, self.path)
