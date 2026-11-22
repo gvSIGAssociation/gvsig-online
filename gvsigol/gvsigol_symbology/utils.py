@@ -943,13 +943,13 @@ def get_declared_xml_encoding(xml_string):
 
 def set_auth_settings(request, conf):
     conf['username'] = request.session.get('username', '')
-    if request.session.get('oidc_access_token'):
-        conf['auth_token'] = 'Bearer ' + request.session.get('oidc_access_token')
-    else:
-        # La contraseña ya no se envía al navegador: si la sesión la tiene, la
-        # previsualización pide a GeoServer a través de symbology_geoserver_proxy,
-        # que usa las credenciales de la sesión en el servidor.
-        conf['gs_proxy'] = bool(request.session.get('password'))
+    # El navegador nunca recibe credenciales de GeoServer: la previsualización pide siempre a través de
+    # symbology_geoserver_proxy. Con contraseña en la sesión el proxy usa las del usuario; con Keycloak,
+    # cuyo token de acceso caduca antes de que Django lo renueve (y daba «Geoserver session has expired»),
+    # comprueba los permisos en gvSIG y usa las credenciales de servicio (ver geoserver_proxy.py).
+    conf['gs_proxy'] = bool(request.session.get('password') or request.session.get('oidc_access_token')
+                            or getattr(getattr(request, 'user', None), 'is_authenticated', False))
+
 
 def get_preview_url(workspace, feature_type):
     preview_url = ''

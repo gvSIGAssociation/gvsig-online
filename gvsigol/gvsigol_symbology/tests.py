@@ -467,11 +467,53 @@ class GeoserverProxyTest(TestCase):
         utils.set_auth_settings(req, conf)
         self.assertNotIn('secreto', json.dumps(conf))
         self.assertTrue(conf['gs_proxy'])
+        # Keycloak: el token tampoco llega al navegador (caduca antes de renovarse); va por el proxy
         req.session = {'username': 'u', 'oidc_access_token': 'tok'}
         conf = {}
         utils.set_auth_settings(req, conf)
-        self.assertEqual(conf['auth_token'], 'Bearer tok')
-        self.assertNotIn('gs_proxy', conf)
+        self.assertNotIn('tok', json.dumps(conf))
+        self.assertNotIn('auth_token', conf)
+        self.assertTrue(conf['gs_proxy'])
+
+    def test_path_workspace(self):
+        from gvsigol_symbology import geoserver_proxy as gp
+        base = 'https://gvsigol.example.org/geoserver'
+        self.assertEqual(gp.path_workspace('/geoserver/ws1/wms?x=1', base), 'ws1')
+        self.assertEqual(gp.path_workspace(base + '/ws1/wfs', base), 'ws1')
+        self.assertIsNone(gp.path_workspace('/geoserver/wms', base))
+        self.assertIsNone(gp.path_workspace('/geoserver/ws1/gwc/service/wms', base))
+        # GeoServer en la raíz del dominio
+        self.assertEqual(gp.path_workspace('https://gs.example.org/ws1/ows', 'https://gs.example.org'), 'ws1')
+        self.assertIsNone(gp.path_workspace('https://gs.example.org/wms', 'https://gs.example.org'))
+
+    def test_requested_layers(self):
+        from gvsigol_symbology import geoserver_proxy as gp
+        params = [('LAYERS', 'ws1:a, b'), ('typename', 'ws2:c'), ('STYLES', 'x')]
+        self.assertEqual(gp.requested_layers(params, 'wsp'), [('ws1', 'a'), ('wsp', 'b'), ('ws2', 'c')])
+
+    def test_check_service_request(self):
+        from gvsigol_symbology import geoserver_proxy as gp
+        readable = {('ws1', 'capa')}
+        can_read = lambda ws, name: (ws, name) in readable
+
+        def ok(params, ws=None):
+            gp.check_service_request(params, ws, can_read)
+
+        def rejected(params, ws=None):
+            with self.assertRaises(gp.ProxyNotAllowed):
+                gp.check_service_request(params, ws, can_read)
+
+        ok([('SERVICE', 'WMS'), ('REQUEST', 'GetMap'), ('LAYERS', 'ws1:capa'), ('STYLES', 'ws1_capa__tmp')])
+        ok([('service', 'WFS'), ('request', 'GetFeature'), ('typename', 'capa')], ws='ws1')
+        ok([('REQUEST', 'GetLegendGraphic'), ('LAYER', 'preview_polygon')])
+        rejected([('REQUEST', 'GetMap'), ('LAYERS', 'ws1:otra')])                  # sin permiso
+        rejected([('REQUEST', 'GetMap'), ('LAYERS', 'ws1:capa,ws1:otra')])         # una de ellas sin permiso
+        rejected([('REQUEST', 'GetMap'), ('LAYERS', 'capa')])                      # sin espacio de trabajo
+        rejected([('REQUEST', 'GetMap')])                                          # sin capas
+        rejected([('REQUEST', 'GetCapabilities'), ('LAYERS', 'ws1:capa')])
+        rejected([('REQUEST', 'GetMap'), ('LAYER', 'otro:preview_point')])         # no es la capa técnica
+        for param in ('SLD', 'SLD_BODY', 'cql_filter', 'FILTER', 'viewparams', 'FEATUREID'):
+            rejected([('REQUEST', 'GetMap'), ('LAYERS', 'ws1:capa'), (param, 'x')])
 
     def test_view_forwards_with_session_credentials(self):
         from django.contrib.auth.models import User
@@ -481,6 +523,9 @@ class GeoserverProxyTest(TestCase):
         frontend = Server.objects.exclude(frontend_url='').values_list('frontend_url', flat=True).first()
         if not frontend:
             self.skipTest('No hay Server configurado')
+        session = self.client.session
+        session['password'] = 'secreto'   # sesión con contraseña: credenciales del propio usuario
+        session.save()
         fake = mock.Mock(status_code=200, content=b'PNG', headers={'Content-Type': 'image/png'})
         with mock.patch('gvsigol_symbology.views.service_utils.getUserAuthSession') as sess:
             sess.return_value.get.return_value = fake
@@ -491,6 +536,36 @@ class GeoserverProxyTest(TestCase):
         self.assertEqual(resp['Content-Type'], 'image/png')
         resp = self.client.get('/gvsigonline/symbology/geoserver_proxy/', {'url': 'http://169.254.169.254/?SERVICE=WMS&REQUEST=GetMap'})
         self.assertEqual(resp.status_code, 403)
+
+    def test_view_keycloak_session_uses_service_credentials_after_permission_check(self):
+        from django.contrib.auth.models import User
+        from gvsigol_services.models import Server
+        user = User.objects.create(username='zz_symb_proxy_oidc', is_staff=True)
+        self.client.force_login(user, backend='django.contrib.auth.backends.ModelBackend')
+        session = self.client.session
+        session['oidc_access_token'] = 'caducado'   # sin contraseña: modo servicio
+        session.save()
+        frontend = Server.objects.exclude(frontend_url='').values_list('frontend_url', flat=True).first()
+        if not frontend:
+            self.skipTest('No hay Server configurado')
+        url = frontend.rstrip('/') + '/ws1/wms?SERVICE=WMS&REQUEST=GetMap&LAYERS=ws1:capa'
+        fake = mock.Mock(status_code=200, content=b'PNG', headers={'Content-Type': 'image/png'})
+        with mock.patch('gvsigol_symbology.views._service_session') as service, \
+                mock.patch('gvsigol_symbology.views.service_utils.getUserAuthSession') as user_session, \
+                mock.patch('gvsigol_symbology.views._can_read_layer_fn') as can_read_fn:
+            service.return_value.get.return_value = fake
+            can_read_fn.return_value = lambda ws, name: (ws, name) == ('ws1', 'capa')
+            resp = self.client.get('/gvsigonline/symbology/geoserver_proxy/', {'url': url})
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.content, b'PNG')
+            user_session.assert_not_called()   # el token caducado de la sesión no se usa
+            # Capa sin permiso, o parámetros que podrían leer otras capas: rechazado antes de pedir nada
+            service.reset_mock()
+            for bad in (url.replace('ws1:capa', 'ws1:otra'), url + '&SLD_BODY=x', url + '&CQL_FILTER=x',
+                        url.replace('GetMap', 'GetCapabilities')):
+                resp = self.client.get('/gvsigonline/symbology/geoserver_proxy/', {'url': bad})
+                self.assertEqual(resp.status_code, 403, bad)
+            service.return_value.get.assert_not_called()
 
 
 class RegenerateCommandDetectionTest(TestCase):
@@ -2131,7 +2206,7 @@ class SymbolPreviewTest(TestCase):
         self.assertEqual(len(attempts), 1)
         self.assertEqual(dict(attempts[0][0])['REQUEST'], 'GetLegendGraphic')
 
-    def _view(self, params, forward):
+    def _view(self, params, forward, password=None):
         from django.contrib.auth.models import User
         from django.test import Client
         from gvsigol_symbology import views
@@ -2140,6 +2215,10 @@ class SymbolPreviewTest(TestCase):
                 or User.objects.create_superuser('preview_admin_test', 'p@example.org', 'x'))
         client = Client()
         client.force_login(user)
+        if password:   # sesión con contraseña (LDAP/local); sin ella es una sesión de Keycloak
+            session = client.session
+            session['password'] = password
+            session.save()
         gs = mock.Mock(conf_url='http://gs-internal:8080/geoserver', user='svc', password='svc-pass')
         servers = [mock.Mock(id=1, frontend_url='/geoserver')]
         with mock.patch.object(Server.objects, 'all', return_value=servers), \
@@ -2154,7 +2233,8 @@ class SymbolPreviewTest(TestCase):
         denied = mock.Mock(status_code=401, content=b'', headers={'Content-Type': 'text/html'})
         resp, fwd = self._view({'url': self.URL % 'line', 'width': '160', 'height': '80',
                                 'symbolizers': json.dumps([_preview_item('line_arrows')])},
-                               lambda session, url, query: denied if dict(query)['REQUEST'] == 'GetMap' else png)
+                               lambda session, url, query: denied if dict(query)['REQUEST'] == 'GetMap' else png,
+                               password='secreto')
         self.assertEqual((resp.status_code, resp.content), (200, b'PNG'))
         self.assertEqual(fwd.call_count, 2)
         self.assertEqual(fwd.call_args[0][1], 'http://gs-internal:8080/geoserver/wms')
@@ -2162,6 +2242,17 @@ class SymbolPreviewTest(TestCase):
         getmap_session, legend_session = fwd.call_args_list[0][0][0], fwd.call_args_list[1][0][0]
         self.assertEqual(getmap_session.auth, ('svc', 'svc-pass'))
         self.assertIsNot(legend_session, getmap_session)
+
+    def test_view_keycloak_session_legend_uses_service_credentials(self):
+        # Sin contraseña (Keycloak): el token de la sesión puede haber caducado, así que la leyenda de la
+        # capa técnica también va con las credenciales de servicio
+        png = mock.Mock(status_code=200, content=b'PNG', headers={'Content-Type': 'image/png'})
+        denied = mock.Mock(status_code=401, content=b'', headers={'Content-Type': 'text/html'})
+        resp, fwd = self._view({'url': self.URL % 'line', 'width': '160', 'height': '80',
+                                'symbolizers': json.dumps([_preview_item('line_arrows')])},
+                               lambda session, url, query: denied if dict(query)['REQUEST'] == 'GetMap' else png)
+        self.assertEqual((resp.status_code, resp.content), (200, b'PNG'))
+        self.assertEqual([call[0][0].auth for call in fwd.call_args_list], [('svc', 'svc-pass')] * 2)
 
     def test_view_accepts_html_escaped_preview_url(self):
         # Así llega desde el editor: la plantilla escapa la URL ("{{ preview_url }}" -> &amp;)

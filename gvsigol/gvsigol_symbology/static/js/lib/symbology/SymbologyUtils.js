@@ -196,7 +196,7 @@ SymbologyUtils.prototype.centerMap = function(layerName, wfsUrl, auth_token) {
 				console.log(jqXHR.getAllResponseHeaders());
 				messageBox.show("error", "Geoserver session has expired. Logout from gvSIG Online and login again to reset the session");
 			}
-			else if (xjqXHRhr.status == 403) {
+			else if (jqXHR.status == 403) {
 				console.log(jqXHR.getAllResponseHeaders());
 				messageBox.show("error", "You are not allowed to read the layer or Geoserver session has expired. Logout from gvSIG Online and login again to reset the session");
 			}

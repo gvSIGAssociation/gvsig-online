@@ -1752,25 +1752,21 @@ def get_ol_style(layer):
 @require_GET
 def geoserver_proxy_view(request):
     """
-    Reenvía a GeoServer peticiones WMS/WFS de lectura de la previsualización con las
-    credenciales de la sesión del usuario (ver geoserver_proxy.py). Solo lo usa el
-    navegador cuando la sesión tiene contraseña y no hay token OIDC.
+    Reenvía a GeoServer peticiones WMS/WFS de lectura de la previsualización (ver geoserver_proxy.py).
+
+    - Sesión con contraseña (LDAP/local): con las credenciales del usuario; GeoServer aplica sus permisos.
+    - Sesión de Keycloak: el token de la sesión caduca antes de que Django lo renueve, así que se comprueba
+      en gvSIG que el usuario puede leer las capas pedidas y se pide con las credenciales de servicio.
     """
     extra_params = [(k, v) for k, v in request.GET.items() if k != 'url']
-    servers = []
-    for srv in Server.objects.all():
-        if not srv.frontend_url:
-            continue
-        gs = geographic_servers.get_instance().get_server_by_id(srv.id)
-        servers.append((srv.frontend_url, getattr(gs, 'conf_url', None)))
     try:
-        absolute_url, params = geoserver_proxy.resolve_target(
-            request.GET.get('url'), extra_params, servers)
+        absolute_url, params, gs, frontend_url = _resolve_proxy_target(request.GET.get('url'), extra_params)
+        session = _preview_session(request, gs, params, request.GET.get('url'), frontend_url)
     except geoserver_proxy.ProxyNotAllowed as e:
         logger.warning('geoserver_proxy rechazado: %s', e)
         return HttpResponseForbidden()
     try:
-        resp = geoserver_proxy.forward(service_utils.getUserAuthSession(request), absolute_url, params)
+        resp = geoserver_proxy.forward(session, absolute_url, params)
     except Exception:
         logger.exception('geoserver_proxy: error reenviando a %s', absolute_url)
         return HttpResponse(status=502)
@@ -1778,6 +1774,55 @@ def geoserver_proxy_view(request):
                             content_type=resp.headers.get('Content-Type', 'application/octet-stream'))
     response['Cache-Control'] = 'private, no-store'
     return response
+
+
+def _resolve_proxy_target(url, extra_params):
+    """(url interna, parámetros, servidor geográfico, frontend_url) del GeoServer al que va la petición."""
+    for srv in Server.objects.all():
+        if not srv.frontend_url:
+            continue
+        gs = geographic_servers.get_instance().get_server_by_id(srv.id)
+        try:
+            absolute_url, params = geoserver_proxy.resolve_target(
+                url, extra_params, [(srv.frontend_url, getattr(gs, 'conf_url', None))])
+        except geoserver_proxy.ProxyNotAllowed:
+            continue
+        return absolute_url, params, gs, srv.frontend_url
+    raise geoserver_proxy.ProxyNotAllowed('servidor no permitido')
+
+
+def _uses_service_credentials(request):
+    """Sin contraseña en la sesión (Keycloak): las peticiones van con las credenciales de servicio."""
+    return not request.session.get('password')
+
+
+def _can_read_layer_fn(request):
+    def can_read(workspace, name):
+        layers = Layer.objects.filter(name=name).select_related('datastore__workspace')
+        if workspace:
+            layers = layers.filter(datastore__workspace__name=workspace)
+        layers = list(layers)
+        # Sin espacio de trabajo puede haber varias con el mismo nombre: tienen que poder leerse todas
+        return bool(layers) and all(service_utils.can_read_layer(request.user, layer) for layer in layers)
+    return can_read
+
+
+def _service_session(gs):
+    if not getattr(gs, 'user', None):
+        raise geoserver_proxy.ProxyNotAllowed('el servidor no tiene credenciales de servicio')
+    import requests as http_requests
+    session = http_requests.Session()
+    session.auth = (gs.user, gs.password)
+    return session
+
+
+def _preview_session(request, gs, params, url, frontend_url):
+    """Sesión HTTP para pedir a GeoServer, validando la petición si va con credenciales de servicio."""
+    if not _uses_service_credentials(request):
+        return service_utils.getUserAuthSession(request)
+    geoserver_proxy.check_service_request(params, geoserver_proxy.path_workspace(url, frontend_url),
+                                          _can_read_layer_fn(request))
+    return _service_session(gs)
 
 
 
@@ -1790,8 +1835,8 @@ def symbol_preview_view(request):
     (symbol_preview.py). Parámetros: url (la URL de vista previa del editor), symbolizers
     (JSON [{type, json}]), width y height opcionales.
 
-    - La leyenda (GetLegendGraphic) se pide con las credenciales de la sesión del usuario, como
-      geoserver_proxy_view.
+    - La leyenda (GetLegendGraphic) se pide como en geoserver_proxy_view: con las credenciales de la
+      sesión si tiene contraseña; con Keycloak, con las de servicio tras comprobar los permisos en gvSIG.
     - El GetMap de las líneas con decoraciones (sobre una línea quebrada) se pide con las credenciales
       de servicio del servidor: solo afecta a las capas técnicas preview:preview_* (datos sintéticos)
       con un SLD normalizado, y el token OIDC guardado en la sesión puede haber caducado.
@@ -1813,23 +1858,33 @@ def symbol_preview_view(request):
                     url, [('SERVICE', 'WMS')], [(frontend_url, internal_url)])
             except geoserver_proxy.ProxyNotAllowed:
                 continue
-            target = (absolute_url, params, gs)
+            target = (absolute_url, params, gs, frontend_url)
             break
         if target is None:
             raise geoserver_proxy.ProxyNotAllowed('servidor no permitido')
-        absolute_url, params, gs = target
+        absolute_url, params, gs, frontend_url = target
         instances = symbol_preview.parse_symbolizers(request.GET.get('symbolizers'))
         attempts = symbol_preview.requests_for(params, instances, request.GET.get('width'),
                                                request.GET.get('height'))
     except (geoserver_proxy.ProxyNotAllowed, symbol_preview.PreviewError) as e:
         logger.warning('symbol_preview rechazado: %s', e)
         return HttpResponseForbidden()
-    user_session = service_utils.getUserAuthSession(request)
     service_session = None
     if getattr(gs, 'user', None):
-        import requests as http_requests
-        service_session = http_requests.Session()
-        service_session.auth = (gs.user, gs.password)
+        service_session = _service_session(gs)
+    if _uses_service_credentials(request):
+        # Keycloak: la leyenda tampoco puede ir con el token de la sesión (caduca); solo capas que pueda leer
+        try:
+            geoserver_proxy.check_service_request(params, geoserver_proxy.path_workspace(url, frontend_url),
+                                                  _can_read_layer_fn(request))
+        except geoserver_proxy.ProxyNotAllowed as e:
+            logger.warning('symbol_preview rechazado: %s', e)
+            return HttpResponseForbidden()
+        if service_session is None:
+            return HttpResponse(status=502)
+        user_session = service_session
+    else:
+        user_session = service_utils.getUserAuthSession(request)
     last = None
     for query, is_map in attempts:
         session = service_session if (is_map and service_session is not None) else user_session
