@@ -5697,3 +5697,29 @@ msgstr "Les capes publicades des d'aquest magatzem en depenen: els canvis les af
 msgctxt "services"
 msgid "Permissions define which roles can use the datastore or manage it."
 msgstr "Els permisos indiquen quins rols poden utilitzar el magatzem o administrar-lo."
+
+#: gvsigol_services/views.py
+#, python-format
+msgid "The schema \"%(schema)s\" is also used by other datastores (%(datastores)s) and cannot be deleted. Uncheck the schema deletion option to remove only this datastore."
+msgstr "L'esquema «%(schema)s» també l'usen altres magatzems de dades (%(datastores)s) i no es pot eliminar. Desmarqueu l'opció d'eliminar l'esquema per a esborrar només aquest magatzem."
+
+
+#: gvsigol_services/templates/server_update.html
+msgid "Leave blank to keep the current password"
+msgstr "Deixeu-la en blanc per a conservar la contrasenya actual"
+
+#: gvsigol_services/templates/server_update.html
+msgid "For security, the saved password is not shown. Leave the field blank to keep it, or type a new one to change it."
+msgstr "Per seguretat, la contrasenya guardada no es mostra. Deixeu el camp en blanc per a conservar-la o escriviu-ne una de nova per a canviar-la."
+
+#: gvsigol_services/templates/sqlview_list.html
+msgid "The SQL view will be deleted from the database. Layers that use it are not deleted, but they will stop working."
+msgstr "La vista SQL s'esborrarà de la base de dades. Les capes que la usen no s'esborren, però deixaran de funcionar."
+
+#: gvsigol_services/templates/layer_cache_config.html
+msgid "Select extent"
+msgstr "Seleccionar extensió"
+
+#: gvsigol_services/templates/server_update.html
+msgid "This is the default server. To change it, mark another server as default."
+msgstr "Aquest és el servidor per defecte. Per a canviar-lo, marqueu un altre servidor com a servidor per defecte."

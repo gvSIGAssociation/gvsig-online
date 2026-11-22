@@ -728,3 +728,7 @@ msgstr "Las contraseñas coinciden"
 msgctxt "auth"
 msgid "Passwords do not match"
 msgstr "Las contraseñas no coinciden"
+
+#: gvsigol_auth/views.py
+msgid "The role could not be deleted"
+msgstr "No se ha podido eliminar el rol"

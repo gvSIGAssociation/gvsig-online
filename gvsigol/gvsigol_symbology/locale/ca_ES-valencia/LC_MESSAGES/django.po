@@ -1888,3 +1888,11 @@ msgid "This library has %(counter)s symbol with advanced symbology. Earlier vers
 msgid_plural "This library has %(counter)s symbols with advanced symbology. Earlier versions of gvSIG Online cannot import them correctly: to use the library there, export it for earlier versions."
 msgstr[0] "Esta biblioteca té %(counter)s símbol amb simbologia avançada. Les versions anteriors de gvSIG Online no el poden importar correctament: per a utilitzar-hi la biblioteca, exporteu-la per a versions anteriors."
 msgstr[1] "Esta biblioteca té %(counter)s símbols amb simbologia avançada. Les versions anteriors de gvSIG Online no els poden importar correctament: per a utilitzar-hi la biblioteca, exporteu-la per a versions anteriors."
+
+#: gvsigol_symbology/templates/style_layer_list.html
+msgid "Delete the selected style? This cannot be undone."
+msgstr "Vol eliminar l'estil seleccionat? No es pot desfer."
+
+#: gvsigol_symbology/templates/symbol_update.html
+msgid "Delete this symbol? This cannot be undone."
+msgstr "Vol eliminar este símbol? No es pot desfer."

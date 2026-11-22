@@ -23,6 +23,7 @@
 
 import ast
 from datetime import datetime
+import copy
 import json
 import logging
 import os
@@ -125,6 +126,14 @@ def role_deleted_handler(sender, **kwargs):
         role = kwargs['role']
         LayerReadRole.objects.filter(role=role).delete()
         LayerWriteRole.objects.filter(role=role).delete()
+        # El resto de permisos por rol: si no, quedan huérfanos y un rol nuevo con el mismo nombre
+        # los heredaría
+        from gvsigol_services.models import LayerManageRole, ConnectionTriggerRole
+        LayerManageRole.objects.filter(role=role).delete()
+        LayerGroupRole.objects.filter(role=role).delete()
+        DatastoreRole.objects.filter(role=role).delete()
+        ConnectionRole.objects.filter(role=role).delete()
+        ConnectionTriggerRole.objects.filter(role=role).delete()
     except Exception as e:
         print(e)
         pass
@@ -260,7 +269,9 @@ def server_update(request, svid):
         server.description = description
         server.frontend_url = frontend_url
         server.user = user
-        server.password = password
+        # El formulario no muestra la contraseña guardada: si se deja vacía, se conserva
+        if password:
+            server.password = password
         server.save()
 
         workspaces = Workspace.objects.filter(server_id=server.id)
@@ -710,8 +721,6 @@ def datastore_add(request):
 
     else:
         form = DatastoreForm(user=request.user)
-        if not request.user.is_superuser:
-            form.fields['workspace'].queryset = Workspace.objects.filter(created_by__exact=request.user.username).order_by('name')
     
     # Obtener roles para la pestaña de permisos
     all_roles = auth_backend.get_all_roles_details(exclude_system=True)
@@ -942,6 +951,17 @@ def datastore_delete(request, dsid):
                 ) % {'schema': schema_name}
             }, status=400)
 
+        if delete_schema:
+            sharing = utils.datastores_sharing_schema(ds)
+            if sharing:
+                return JsonResponse({
+                    'success': False,
+                    'error': _(
+                        'The schema "%(schema)s" is also used by other datastores (%(datastores)s) and '
+                        'cannot be deleted. Uncheck the schema deletion option to remove only this datastore.'
+                    ) % {'schema': schema_name, 'datastores': ', '.join(str(d) for d in sharing)}
+                }, status=400)
+
         gs = geographic_servers.get_instance().get_server_by_id(ds.workspace.server.id)
         gs.deleteDatastore(ds.workspace, ds, delete_schema=delete_schema)
         utils.delete_datastore_elements(ds, gs=gs)
@@ -1151,7 +1171,7 @@ def layer_delete_operation(request, layer_id):
                     'status_code': 403,
                     'message': msg,
                 }
-            return HttpResponse(json.dumps(data), status_code=403)
+            return JsonResponse(data, status=403)
         gs = geographic_servers.get_instance().get_server_by_id(layer.datastore.workspace.server.id)
         if layer.layer_group.name != '__default__':
             try:
@@ -1788,7 +1808,11 @@ def layer_update(request, layer_id):
         datastore = request.POST.get('datastore')
         name = request.POST.get('name')
         title = request.POST.get('title')
-        abstract = request.POST.get('md-abstract')
+        if 'md-abstract' in request.POST:
+            abstract = request.POST.get('md-abstract')
+        else:
+            # Con el plugin de catálogo el formulario no lleva el resumen: se conserva el que hay
+            abstract = layer.abstract
         if not abstract:
             abstract = _get_default_abstract(layer.type, title)
 
@@ -1962,9 +1986,12 @@ def layer_update(request, layer_id):
             layer.allow_download = allow_download
             layer.allow_calculated_fields = allow_calculated_fields if ds.type == 'v_PostGIS' else False
             layer.single_image = single_image
+            # Solo al cambiar de grupo se coloca al final del nuevo; si no, conserva su posición
+            group_changed = layer.layer_group_id != layer_group.id
             layer.layer_group = layer_group
-            max_order = layer_group.layer_set.aggregate(Max('order')).get('order__max')
-            layer.order = max_order + 1 if max_order is not None else layer.order
+            if group_changed:
+                max_order = layer_group.layer_set.aggregate(Max('order')).get('order__max')
+                layer.order = max_order + 1 if max_order is not None else layer.order
             layer.time_enabled = time_enabled
             layer.time_enabled_field = time_field
             layer.time_enabled_endfield = time_endfield
@@ -3706,7 +3733,7 @@ def check_nullable(request):
     layer_id = request.POST['layer_id']
     field_name = request.POST['field_name']
     if not utils.can_manage_layer(request, int(layer_id)):
-        return JsonResponse({"response": "Error: not allowed"}, status_code=403)
+        return JsonResponse({"response": "Error: not allowed"}, status=403)
     i, layername, dsname = utils.get_db_connect_from_layer(layer_id)
     hasnullvalues = i.check_has_null_values(dsname, layername, field_name)
     if(hasnullvalues):
@@ -4287,6 +4314,7 @@ def _layergroup_update(request, lgid, project_id):
             visible = True
 
         if layergroup.name != name: # name changed
+            layers = Layer.objects.filter(layer_group_id=layergroup.id)
             if LayerGroup.objects.filter(name=name).exists():
                 message = _('Layer group name already exists')
                 return render(request, 'layergroup_update.html', {'message': message, 'layergroup': layergroup, 'layers': layers, 'roles': roles, 'workspaces': list(Workspace.objects.values()),'servers': list(Server.objects.values()), 'project_id': project_id, 'redirect': redirect_var, 'back_url': back_url})
@@ -4864,9 +4892,21 @@ def enumeration_add(request):
         })
 
 
+def _can_manage_enumeration(user, eid):
+    """Modifica o borra una enumeración quien la creó o un superusuario (la lista ya filtra así)."""
+    if user.is_superuser:
+        return True
+    try:
+        return Enumeration.objects.filter(id=int(eid), created_by__exact=user.username).exists()
+    except (TypeError, ValueError):
+        return False
+
+
 @login_required()
 @staff_required
 def enumeration_update(request, eid):
+    if not _can_manage_enumeration(request.user, eid):
+        return forbidden_view(request)
     if request.method == 'POST':
         name = request.POST.get('enumeration_name')
         title = request.POST.get('enumeration_title')
@@ -5040,6 +5080,8 @@ def get_enumeration(request):
 @login_required()
 @staff_required
 def enumeration_delete(request, eid):
+    if not _can_manage_enumeration(request.user, eid):
+        return HttpResponseForbidden()
     if request.method == 'POST':
         enum = Enumeration.objects.get(id=int(eid))
         enum.delete()
@@ -6470,6 +6512,10 @@ def external_layer_update(request, external_layer_id):
             external_layer.detailed_info_button_title = detailed_info_button_title
             external_layer.detailed_info_html = detailed_info_html
             external_layer.timeout = request.POST.get('timeout')
+            # El resumen se editaba en el formulario pero no se guardaba
+            if 'md-abstract' in request.POST:
+                external_layer.abstract = request.POST.get('md-abstract') or \
+                    _get_default_abstract("e_", external_layer.title)
 
             layer_md_uuid = request.POST.get('uuid', '').strip()
             core_utils.update_layer_metadata_uuid(external_layer, layer_md_uuid)
@@ -6835,8 +6881,10 @@ def external_layer_delete(request, external_layer_id):
         return redirect('external_layer_list')
 
     except Exception as e:
-        if e.server_message:
-            if 'Unknown layer' in e.server_message:
+        # Solo los errores de GeoServer traen server_message
+        server_message = getattr(e, 'server_message', None) or ''
+        if server_message:
+            if 'Unknown layer' in server_message:
                 _delete_local_style_file(layer_id=external_layer_id)
                 
                 external_layer.delete()
@@ -7347,6 +7395,8 @@ def group_cache_config(request, group_id):
 def get_cache_tasks(request):
     layer_id = request.POST.get('layer_id')
     layer = Layer.objects.get(id=int(layer_id))
+    if not utils.can_manage_layer(request, layer):
+        return HttpResponseForbidden()
     layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
     server = Server.objects.get(id=layer_group.server_id)
     master_node = geographic_servers.get_instance().get_master_node(server.id)
@@ -7365,6 +7415,8 @@ def get_cache_tasks(request):
 def get_group_cache_tasks(request):
     group_id = request.POST.get('group_id')
     layer_group = LayerGroup.objects.get(id=int(group_id))
+    if not utils.can_manage_layergroup(request.user, layer_group):
+        return HttpResponseForbidden()
     server = Server.objects.get(id=layer_group.server_id)
     master_node = geographic_servers.get_instance().get_master_node(server.id)
 
@@ -7378,6 +7430,8 @@ def get_group_cache_tasks(request):
 def kill_all_tasks(request):
     layer_id = request.POST.get('layer_id')
     layer = Layer.objects.get(id=int(layer_id))
+    if not utils.can_manage_layer(request, layer):
+        return HttpResponseForbidden()
     layer_group = LayerGroup.objects.get(id=layer.layer_group.id)
     server = Server.objects.get(id=layer_group.server_id)
     master_node = geographic_servers.get_instance().get_master_node(server.id)
@@ -7397,6 +7451,8 @@ def kill_all_tasks(request):
 def kill_all_group_tasks(request):
     group_id = request.POST.get('group_id')
     layer_group = LayerGroup.objects.get(id=int(group_id))
+    if not utils.can_manage_layergroup(request.user, layer_group):
+        return HttpResponseForbidden()
     server = Server.objects.get(id=layer_group.server_id)
     master_node = geographic_servers.get_instance().get_master_node(server.id)
 
@@ -7992,13 +8048,6 @@ def connection_test(request):
                 host = request.POST.get('host', '')
                 port = request.POST.get('port', '')
                 database = request.POST.get('database', '')
-                # DEBUG temporal: ver si el $ / \ de la contraseña llega bien
-                print('=== connection_test DEBUG ===')
-                print('host=%r port=%r database=%r user=%r' % (host, port, database, user))
-                print('password=%r' % (password,))
-                print('password chars:', [c for c in password])
-                print('password len:', len(password))
-                print('=============================')
                 conn = psycopg2.connect(
                     user=user,
                     password=password,
@@ -9555,7 +9604,7 @@ def db_field_rename(request):
             field = request.POST.get('field')
             new_field_name = request.POST.get('new_field_name').lower()
             if _valid_sql_name_regex.search(new_field_name) == None:
-                utils.get_exception(400, 'Invalid field name: {fname}. Fields must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers'.format(fname=new_field_name))
+                return utils.get_exception(400, 'Invalid field name: {fname}. Fields must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers'.format(fname=new_field_name))
             layer_id = request.POST.get('layer_id')
             layer = Layer.objects.get(id=layer_id)
             if not utils.can_manage_layer(request, layer):
@@ -10102,6 +10151,24 @@ def _check_join_field_types(from_def):
     return ""
 
 
+def _drop_renamed_sqlview(previous):
+    """Tras renombrar una vista SQL (o moverla de almacén), borra la vista con el nombre anterior
+    si ninguna capa la usa. Si alguna la usa, se conserva para no romperla."""
+    try:
+        old_ds = Datastore.objects.get(pk=previous['datastore_id'])
+        if Layer.objects.filter(datastore=old_ds, source_name=previous['name']).exists() or \
+                Layer.objects.filter(datastore=old_ds, name=previous['name']).exists():
+            logger.warning("SQL view %s renamed: the old view is kept because a layer uses it", previous['name'])
+            return
+        old_schema = json.loads(old_ds.connection_params or '{}').get('schema', 'public')
+        i, params = old_ds.get_db_connection()
+        with i as c:
+            c.delete_view(old_schema, previous['name'])
+            c.delete_geoserver_view_pk_columns(old_schema, previous['name'])
+    except Exception:
+        logger.exception("error dropping renamed SQL view %s", previous.get('name'))
+
+
 def _sqlview_update(request, is_update, sql_view=None):
     view_id = ''
     if request.method == 'POST':
@@ -10110,10 +10177,13 @@ def _sqlview_update(request, is_update, sql_view=None):
             sql_view.created_by = request.user.username
             form = SqlViewForm(request.user, request.POST)
         else:
-            form = SqlViewForm(request.user, request.POST, instance=sql_view)
             if not request.user.is_superuser and sql_view.created_by != request.user.username:
-                form.add_error(None, gettext_lazy("The user can't manage this SQL view"))
-                raise Exception
+                return forbidden_view(request)
+            # Lo guardado antes de cambiar nada: el formulario modifica la instancia al validar y,
+            # si la vista nueva no se puede crear, se vuelve a esto
+            previous = {'name': sql_view.name, 'datastore_id': sql_view.datastore_id,
+                        'json_def': copy.deepcopy(sql_view.json_def)}
+            form = SqlViewForm(request.user, request.POST, instance=sql_view)
             view_id = sql_view.id
         if form.is_valid():
             try:
@@ -10251,16 +10321,28 @@ def _sqlview_update(request, is_update, sql_view=None):
                 form.cleaned_data['where_clause'] = json.dumps(sql_view.json_def.get('where', {}))
                 form.cleaned_data['geometry'] = json.dumps(sql_view.json_def.get('geometry', {}))
                 form.cleaned_data['pk_clause'] = json.dumps(sql_view.json_def.get('pk', {}))
+                # Misma vista (ni nombre ni almacén cambian): se sustituye. Si cambian, el nombre nuevo
+                # tiene que estar libre, como al crearla (antes se borraba lo que hubiera con ese nombre)
+                same_object = is_update and previous['name'] == sql_view.name \
+                    and previous['datastore_id'] == sql_view.datastore_id
                 try:
                     i, params = sql_view.datastore.get_db_connection()
                     with i as c:
+                        previous_sql = None
                         if c.object_exists(target_schema, sql_view.name):
-                            if is_update:
+                            if same_object:
+                                previous_sql = c.get_view_definition(target_schema, sql_view.name)
                                 c.delete_view(target_schema, sql_view.name)
                             else:
                                 form.add_error(None, gettext_lazy('An object already exists with name: {}').format(sql_view.name))
                                 raise Exception
                         if not c.create_view(target_schema, sql_view.name, from_objs, field_objs, where=where_def or None):
+                            if previous_sql:
+                                # La vista anterior se borró para crear la nueva: se restaura
+                                try:
+                                    c.create_view_from_sql(target_schema, sql_view.name, previous_sql)
+                                except Exception:
+                                    logger.exception("error restoring previous SQL view %s", sql_view.name)
                             msg = _check_join_field_types(from_def)
                             if msg:
                                 form.add_error(None, msg)
@@ -10269,11 +10351,13 @@ def _sqlview_update(request, is_update, sql_view=None):
                             else:
                                 form.add_error(None, gettext_lazy('The view could not be created'))
                             raise Exception
-                        if is_update: # delete and insert again in case the pk field has a new alias
+                        if same_object: # delete and insert again in case the pk field has a new alias
                             c.delete_geoserver_view_pk_columns(target_schema, sql_view.name)
                         if not c.insert_geoserver_view_pk_columns(target_schema, sql_view.name, pk_aliases):
                             form.add_error(None, gettext_lazy('Pk columns could not be inserted'))
                             raise Exception
+                    if is_update and not same_object:
+                        _drop_renamed_sqlview(previous)
                         # TODO: we should add indexes to the join fields to ensure optimal performance
                         # TODO: maybe we should warn the user if a view name is changed and some layer relies in the old name
                         # TODO: maybe we should warn the user if a view is deleted and some layer relies in the old name
@@ -10289,6 +10373,10 @@ def _sqlview_update(request, is_update, sql_view=None):
                             c.delete_geoserver_view_pk_columns(target_schema, sql_view.name)
                         sql_view.delete()
                         view_id = ''
+                    else:
+                        # El registro ya se guardó con la definición nueva: vuelve a la anterior,
+                        # que es la que sigue en la base de datos
+                        SqlView.objects.filter(pk=sql_view.pk).update(**previous)
 
             except Exception as e:
                 logger.exception(str(e))

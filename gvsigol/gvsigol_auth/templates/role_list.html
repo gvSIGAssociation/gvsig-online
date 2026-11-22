@@ -98,7 +98,8 @@ $(document).ready(function() {
 	});
 
 	function deleteRole(data, row){
-		$('#button-delete-role-accept').click( function() {
+		// off(): si se cancela y se borra otro rol, el manejador anterior borraría también el primero
+		$('#button-delete-role-accept').off('click').on('click', function() {
 			$.ajax({
 				type: 'POST',
 				async: false,
@@ -111,7 +112,7 @@ $(document).ready(function() {
 				location.reload();
 			}).fail(function(jqXHR){
 				$('#modal-delete-role').modal('hide');
-				if (jqXHR.responseJSON.message) {
+				if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
 					messageBox.show("error", jqXHR.responseJSON.message);
 				} else {
 					messageBox.show("error", gettext('Error deleting role'));

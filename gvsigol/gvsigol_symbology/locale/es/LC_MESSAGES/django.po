@@ -344,9 +344,7 @@ msgstr "Escala max"
 msgid ""
 "Specifies the minimum and maximum scale denominator (inclusive) for the "
 "scale range in which this rule applies"
-msgstr ""
-"Especifíca el mínimo y máximo denominador de la escala (inclusivos) para el "
-"rango de esclas en el cual la regla se aplica"
+msgstr "Especifica el denominador de escala mínimo y máximo (incluidos) del rango de escalas en el que se aplica la regla"
 
 #: gvsigol_symbology/templates/clustered_points_add.html:52
 #: gvsigol_symbology/templates/clustered_points_update.html:52
@@ -1305,9 +1303,7 @@ msgstr "Error al crear la simbología"
 msgid ""
 "You must enter a correct name for the color ramp (without uppercases, "
 "whitespaces or other special characters)"
-msgstr ""
-"Debes introducir un nombre correcto para la librería (sin mayúsculas, "
-"espacios en blanco o caracteres especiales)"
+msgstr "Debes introducir un nombre correcto para la rampa de color (sin mayúsculas, espacios en blanco o caracteres especiales)"
 
 #: gvsigol_symbology/views.py:1352 gvsigol_symbology/views.py:1399
 #: gvsigol_symbology/views.py:1447 gvsigol_symbology/views.py:1524
@@ -1833,3 +1829,11 @@ msgid "This library has %(counter)s symbol with advanced symbology. Earlier vers
 msgid_plural "This library has %(counter)s symbols with advanced symbology. Earlier versions of gvSIG Online cannot import them correctly: to use the library there, export it for earlier versions."
 msgstr[0] "Esta biblioteca tiene %(counter)s símbolo con simbología avanzada. Las versiones anteriores de gvSIG Online no pueden importarlo correctamente: para usar la biblioteca en ellas, expórtala para versiones anteriores."
 msgstr[1] "Esta biblioteca tiene %(counter)s símbolos con simbología avanzada. Las versiones anteriores de gvSIG Online no pueden importarlos correctamente: para usar la biblioteca en ellas, expórtala para versiones anteriores."
+
+#: gvsigol_symbology/templates/style_layer_list.html
+msgid "Delete the selected style? This cannot be undone."
+msgstr "¿Eliminar el estilo seleccionado? No se puede deshacer."
+
+#: gvsigol_symbology/templates/symbol_update.html
+msgid "Delete this symbol? This cannot be undone."
+msgstr "¿Eliminar este símbolo? No se puede deshacer."

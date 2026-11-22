@@ -265,6 +265,9 @@ redis==5.2.1
 # limpieza del HTML resultante. Las dos admiten Python 3.9 (3.9 y 0.3.8 son las últimas que lo hacen).
 Markdown==3.9
 nh3==0.3.8
+# PDF de los manuales del centro de documentación. Necesita Pango en la imagen (libpango-1.0-0,
+# libpangoft2-1.0-0, libharfbuzz-subset0; ver docker/gvsigol-back/Dockerfile). 66.0 es la última con Python 3.9.
+WeasyPrint==66.0
 # Mallas hexagonales H3 (gvsigol_plugin_h3): calculo de celdas en Python, sin depender de la
 # extension h3-pg en la BD. 4.4.2 es la ultima que admite Python 3.9 (4.5+ exige 3.10).
 # Sin dependencias obligatorias (numpy es opcional).

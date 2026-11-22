@@ -44,7 +44,7 @@
 							<td>{{ sv.id }}</td>
 							<td>{{ sv.url }}</td>
 							<td>{{ sv.expiration_date }}</td>
-							<td></td>
+							<td>{% if sv.can_delete %}1{% endif %}</td>
 						</tr>
 						{% endfor %}
 					</tbody>
@@ -88,8 +88,14 @@ $(document).ready(function() {
 		dt: {
 		"columnDefs": [{
 	        "targets": -1,
-	        "data": null,
-	        "defaultContent": '<button type="button" name="button-delete-view" data-toggle="modal" data-target="#modal-delete-view" data-placement="bottom" title="' + '{% trans "Delete shared view" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
+	        // La celda trae «1» si el usuario puede borrarla (quien la creó o un superusuario)
+	        "render": function (data, type) {
+	            if (type !== 'display') { return data; }
+	            if (String(data).trim() === '1') {
+	                return '<button type="button" name="button-delete-view" data-toggle="modal" data-target="#modal-delete-view" data-placement="bottom" title="' + '{% trans "Delete shared view" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>';
+	            }
+	            return '<button type="button" disabled title="' + '{% trans "Only its creator or a superuser can delete it" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>';
+	        }
  	    }]
 		}
 	});

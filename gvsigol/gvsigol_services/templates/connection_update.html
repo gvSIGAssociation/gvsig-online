@@ -381,7 +381,7 @@
 				</div>
 								<div class="gol-pg-footer gol-pg-footer--sticky">
 									<a href="{% url 'connection_list' %}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
-									<button type="button" id="btn-test-connection" class="btn-pf-test"><i class="fa fa-plug margin-r-5"></i> {% trans "Test connection" %}</button>
+									{% if user.is_superuser %}<button type="button" id="btn-test-connection" class="btn-pf-test"><i class="fa fa-plug margin-r-5"></i> {% trans "Test connection" %}</button>{% endif %}
 					<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
 								</div>
 							</div>

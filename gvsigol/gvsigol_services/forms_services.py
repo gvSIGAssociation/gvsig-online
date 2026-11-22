@@ -153,6 +153,12 @@ class DatastoreForm(forms.Form):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super(DatastoreForm, self).__init__(*args, **kwargs)
+
+        # El personal solo crea almacenes en sus espacios de trabajo (antes solo se filtraba la
+        # lista del formulario; ahora también se rechaza al guardar)
+        if user and not user.is_superuser:
+            self.fields['workspace'].queryset = Workspace.objects.filter(
+                created_by__exact=user.username).order_by('name')
         
         # Filtrar conexiones según permisos del usuario
         if user:

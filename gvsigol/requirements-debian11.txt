@@ -177,3 +177,11 @@ pydantic==2.11.5  # Para validacion de datos en LangChain
 sqlglot==26.21.0
 
 
+
+# Centro de documentación (gvsigol_core/docs): manuales en Markdown (Markdown, nh3) y su PDF
+# (WeasyPrint). Son opcionales: sin Markdown/nh3 se muestran los PDF de siempre y sin WeasyPrint no
+# aparece el botón «Descargar PDF». WeasyPrint necesita Pango del sistema (apt: libpango-1.0-0
+# libpangoft2-1.0-0 libharfbuzz-subset0 fonts-liberation). Últimas versiones con Python 3.9.
+Markdown==3.9
+nh3==0.3.8
+WeasyPrint==66.0

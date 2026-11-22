@@ -2394,7 +2394,7 @@ msgstr "Limpiar caché"
 #: gvsigol_services/templates/cache_list.html:207
 #: gvsigol_services/templates/cache_list.html:244
 msgid "Configure cache options"
-msgstr "Configurar opciones de cache"
+msgstr "Configurar opciones de caché"
 
 #: gvsigol_services/templates/connection_add.html:133
 #: gvsigol_services/templates/connection_add.html:686
@@ -3278,7 +3278,7 @@ msgstr "Habilitar información detallada"
 #: gvsigol_services/templates/layer_create.html:337
 #: gvsigol_services/templates/layer_update.html:373
 msgid "Button title in the TOC"
-msgstr "Título del botón el el TOC"
+msgstr "Título del botón en el TOC"
 
 #: gvsigol_services/templates/external_layer_add.html:315
 #: gvsigol_services/templates/external_layer_update.html:335
@@ -3592,7 +3592,7 @@ msgstr "Crear nueva tarea"
 #: gvsigol_services/templates/group_cache_config.html:98
 #: gvsigol_services/templates/layer_cache_config.html:98
 msgid "Currently executing tasks"
-msgstr "Tareas actualemente en ejecución"
+msgstr "Tareas actualmente en ejecución"
 
 #: gvsigol_services/templates/group_cache_config.html:108
 #: gvsigol_services/templates/layer_cache_config.html:108
@@ -4249,10 +4249,7 @@ msgstr "Las capas ráster no son configurables"
 msgid ""
 "The layer could not be removed from GeoServer, but it was deleted from the "
 "list anyway"
-msgstr ""
-"La capa no pudo eliminarse de GeoServer, pero se eliminó de la lista de "
-"todos modosEsta capa no se pudo eliminar de GeoServer, pero se eliminó de la "
-"lista de todos modos"
+msgstr "La capa no se pudo eliminar de GeoServer, pero se ha quitado de la lista igualmente"
 
 #: gvsigol_services/templates/layer_list.html:290
 #: gvsigol_services/templates/layer_list.html:293
@@ -4275,7 +4272,7 @@ msgstr "Refrescar extensión y definición de capa"
 
 #: gvsigol_services/templates/layer_list.html:310
 msgid "Update thumbnail"
-msgstr "Actualizar preview"
+msgstr "Actualizar vista previa"
 
 #: gvsigol_services/templates/layer_update.html:143
 msgid "Icon"
@@ -4584,7 +4581,7 @@ msgstr "Estado"
 #: gvsigol_services/templates/server_add.html:144
 #: gvsigol_services/templates/server_update.html:175
 msgid "Is master?"
-msgstr "Es maestro?"
+msgstr "¿Es maestro?"
 
 #: gvsigol_services/templates/server_add.html:154
 #: gvsigol_services/templates/server_update.html:185
@@ -5721,3 +5718,29 @@ msgstr "Las capas publicadas desde este almacén dependen de él: los cambios la
 msgctxt "services"
 msgid "Permissions define which roles can use the datastore or manage it."
 msgstr "Los permisos indican qué roles pueden usar el almacén o administrarlo."
+
+#: gvsigol_services/views.py
+#, python-format
+msgid "The schema \"%(schema)s\" is also used by other datastores (%(datastores)s) and cannot be deleted. Uncheck the schema deletion option to remove only this datastore."
+msgstr "El esquema «%(schema)s» lo usan también otros almacenes de datos (%(datastores)s) y no se puede eliminar. Desmarque la opción de eliminar el esquema para borrar solo este almacén."
+
+
+#: gvsigol_services/templates/server_update.html
+msgid "Leave blank to keep the current password"
+msgstr "Déjela en blanco para conservar la contraseña actual"
+
+#: gvsigol_services/templates/server_update.html
+msgid "For security, the saved password is not shown. Leave the field blank to keep it, or type a new one to change it."
+msgstr "Por seguridad, la contraseña guardada no se muestra. Deje el campo en blanco para conservarla o escriba una nueva para cambiarla."
+
+#: gvsigol_services/templates/sqlview_list.html
+msgid "The SQL view will be deleted from the database. Layers that use it are not deleted, but they will stop working."
+msgstr "La vista SQL se borrará de la base de datos. Las capas que la usan no se borran, pero dejarán de funcionar."
+
+#: gvsigol_services/templates/layer_cache_config.html
+msgid "Select extent"
+msgstr "Seleccionar extensión"
+
+#: gvsigol_services/templates/server_update.html
+msgid "This is the default server. To change it, mark another server as default."
+msgstr "Este es el servidor por defecto. Para cambiarlo, marque otro servidor como servidor por defecto."

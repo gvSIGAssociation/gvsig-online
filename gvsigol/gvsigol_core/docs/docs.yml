@@ -1,0 +1,43 @@
+# Manifiesto de la documentación de gvsigol_core.
+#
+# Convención (la misma en el core, en cada plugin y en cada app de proyecto):
+#
+#   <paquete>/docs/docs.yml        este fichero: qué manuales hay y quién los ve
+#   <paquete>/docs/<idioma>/*.md   páginas en Markdown (es obligatorio; el resto, opcional)
+#   <paquete>/docs/<idioma>/img/   capturas e imágenes de ese idioma
+#   <paquete>/docs/assets/         ficheros comunes a todos los idiomas (SLD, plantillas…)
+#
+# - Si una página no existe en el idioma del usuario se muestra la de «es», marcada como tal.
+# - El título de cada página es su primer encabezado «# ...».
+# - Enlaces: relativos dentro del mismo manual (otra.md#ancla, img/x.png, ../assets/y.sld);
+#   a otro manual, doc:<paquete>/<página>.md#ancla (p. ej. doc:gvsigol_plugin_viewer3d/index.md).
+# - audience: public (cualquiera, también sin iniciar sesión) | user (con sesión) |
+#   staff (personal y superusuarios) | superuser. Una página puede restringirse más que su manual.
+# - Los textos con varios idiomas se escriben como {es: ..., en: ...}; si falta el idioma, se usa es.
+
+manuals:
+  - slug: admin
+    title:
+      es: Guía de administración
+      en: Administration guide
+    description:
+      es: Gestión de proyectos, capas, usuarios y servicios de la plataforma.
+      en: Managing projects, layers, users and services on the platform.
+    icon: fa-cogs
+    audience: staff
+    order: 20
+    pages:
+      - file: introduccion.md
+      - file: proyectos.md
+      - file: usuarios.md
+        audience: superuser
+      - file: servidores.md
+      - file: grupos-capas.md
+      - file: capas.md
+      - file: capas-externas.md
+      - file: simbologia.md
+      - file: servicios-avanzados.md
+      - file: gestor-archivos.md
+      - file: vistas-compartidas.md
+      - file: estadisticas.md
+        audience: superuser

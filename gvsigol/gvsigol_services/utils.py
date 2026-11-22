@@ -772,6 +772,34 @@ def is_protected_database_schema(schema_name):
     return schema_name.lower() in PROTECTED_DATABASE_SCHEMAS
 
 
+_PLAIN_SCHEMA_RE = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*$')
+
+
+def _schema_key(params, schema):
+    return (str(params.get('host') or '').lower(), str(params.get('port') or '5432'),
+            str(params.get('database') or params.get('dbname') or ''), (schema or '').lower())
+
+
+def datastores_sharing_schema(datastore):
+    """Otros almacenes que usan el mismo esquema de la misma base de datos que datastore."""
+    try:
+        params = datastore.get_connection_params_dict()
+    except Exception:
+        return []
+    if not params.get('host'):
+        return []
+    key = _schema_key(params, datastore.get_schema_name())
+    sharing = []
+    for other in Datastore.objects.exclude(id=datastore.id).select_related('workspace', 'connection'):
+        try:
+            other_params = other.get_connection_params_dict()
+        except Exception:
+            continue
+        if other_params.get('host') and _schema_key(other_params, other.get_schema_name()) == key:
+            sharing.append(other)
+    return sharing
+
+
 #TODO: llevar al paquete del core
 def delete_schema_for_datastore(connection_params):
     host = connection_params.get('host')
@@ -785,6 +813,10 @@ def delete_schema_for_datastore(connection_params):
         logger.warning(
             "Blocked attempt to delete protected database schema '%s'", schema
         )
+        return False
+    # El nombre va sin comillas en el SQL (como al crearlo): solo se aceptan identificadores simples
+    if not schema or not _PLAIN_SCHEMA_RE.match(schema):
+        logger.warning("Blocked attempt to delete schema with an unexpected name: %r", schema)
         return False
 
     connection = get_connection(host, port, database, user, passwd)
@@ -1715,7 +1747,9 @@ def delete_datastore_elements(ds, gs=None):
         except Exception as e:
             logger.warning(f"Error limpiando triggers para capa {l.name}: {e}")
 
-    Datastore.objects.all().filter(name=ds.name).delete()
+    # Solo este almacén: el nombre se repite en otros espacios de trabajo (borrar por nombre
+    # eliminaba también esos almacenes y, en cascada, sus capas)
+    Datastore.objects.filter(id=ds.id).delete()
     if ds.type == 'c_ImageMosaic':
         got_params = json.loads(ds.connection_params)
         mosaic_url = got_params["url"].replace("file://", "")

@@ -34,6 +34,8 @@
 {% endblock %}
 {% block symbol_v12 %}{% endblock %}
 {% block symbol_v13 %}	$("#delete-symbol").on('click', function(e){
+		{% trans "Delete this symbol? This cannot be undone." as confirm_symbol %}
+		if (!window.confirm('{{ confirm_symbol|escapejs }}')) { return false; }
 		$.ajax({
 			type: "POST",
 			async: false,

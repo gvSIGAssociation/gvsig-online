@@ -235,7 +235,7 @@ msgstr "Cruz"
 #: static/js/lib/symbology/MarkSymbolizer.js:71
 #: static/js/lib/symbology/PolygonSymbolizer.js:66
 msgid "Stroke"
-msgstr "Linea"
+msgstr "Línea"
 
 #: static/js/lib/symbology/LineSymbolizer.js:73
 #: static/js/lib/symbology/MarkSymbolizer.js:130
@@ -452,7 +452,7 @@ msgstr "Campo de etiqueta"
 
 #: static/js/lib/symbology/TextSymbolizer.js:207
 msgid "Font family"
-msgstr "Família de fuente"
+msgstr "Familia de fuente"
 
 #: static/js/lib/symbology/TextSymbolizer.js:221
 msgid "Font size"

@@ -278,7 +278,8 @@ def select_legend_type(request, layer_id):
     
     is_vectorial = False
     is_points = False
-    if layer.type == 'v_PostGIS':
+    # Las capas de vistas SQL también son vectoriales (antes se les ofrecían las leyendas ráster)
+    if layer.type in ('v_PostGIS', 'v_PostGIS_View'):
         is_vectorial = True
         try:
             params = json.loads(layer.datastore.connection_params)
@@ -296,7 +297,8 @@ def select_legend_type(request, layer_id):
                     is_points = True
         except Exception as e:
             logger.exception('Error obteniendo las columnas geométricas de la capa %s', layer.name)
-            raise
+            if layer.type == 'v_PostGIS':
+                raise
         
     is_view = False
     if layer.type == 'v_PostGIS_View':

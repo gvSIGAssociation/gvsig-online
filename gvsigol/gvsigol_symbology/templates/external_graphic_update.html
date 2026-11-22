@@ -36,6 +36,8 @@
 	});
 {% endblock %}
 {% block external_graphic_v16 %}	$("#delete-symbol").on('click', function(){
+		{% trans "Delete this symbol? This cannot be undone." as confirm_symbol %}
+		if (!window.confirm('{{ confirm_symbol|escapejs }}')) { return false; }
 		$.ajax({
 			type: "POST",
 			async: false,

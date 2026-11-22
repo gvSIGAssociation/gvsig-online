@@ -90,7 +90,7 @@
 								{% endif %}
 							</td>
 							<td>
-								{% if conn.type == 'PostGIS' %}
+								{% if conn.type == 'PostGIS' and user.is_superuser %}
 									<button type="button" name="button-options-connection" data-toggle="tooltip" data-placement="top" title="{% trans 'Options' %}" class="btn btn-default"><i class="fa fa-cog"></i></button>
 								{% endif %}
 							</td>
@@ -189,7 +189,7 @@ $(document).ready(function() {
 		"columnDefs": [{
             "targets": -1,
             "data": null,
-            "defaultContent": '<button type="button" name="button-delete-connection" data-toggle="modal" data-target="#modal-delete-connection" data-toggle="tooltip" data-placement="top" title="' + '{% trans "Delete connection" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
+            "defaultContent": {% if user.is_superuser %}'<button type="button" name="button-delete-connection" data-toggle="modal" data-target="#modal-delete-connection" data-toggle="tooltip" data-placement="top" title="' + '{% trans "Delete connection" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'{% else %}''{% endif %}
         },{
 	      	"targets": -2,
 	       	"data": null,

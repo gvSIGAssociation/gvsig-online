@@ -1,0 +1,73 @@
+{% comment %}
+Hoja de estilos del PDF de los manuales (gvsigol_core/docs_pdf.py, WeasyPrint 66).
+
+- Es una plantilla de Django: se puede sobrescribir desde una app de proyecto (gvsigol_app_*)
+  con su propio templates/documentation_pdf.css. Variables: {{ lang }}.
+- El PDF guardado se regenera solo al cambiar este fichero o documentation_pdf.html.
+- Cabecera y pie: string(manual) es el título del manual, string(chapter) el de la página
+  actual, counter(page) y counter(pages) la página y el total.
+- Fuentes disponibles en el contenedor: Liberation (Sans, Serif, Mono) y DejaVu.
+{% endcomment %}
+@page {
+    size: A4;
+    margin: 22mm 18mm 20mm;
+    @top-left { content: string(manual); font-size: 8.5pt; color: #6b7785; }
+    @top-right { content: string(chapter); font-size: 8.5pt; color: #6b7785; }
+    @bottom-center { content: counter(page) " / " counter(pages); font-size: 8.5pt; color: #6b7785; }
+}
+@page cover { @top-left { content: none; } @top-right { content: none; } @bottom-center { content: none; } }
+@page toc { @top-right { content: none; } }
+
+html { font-family: "Liberation Sans", "DejaVu Sans", sans-serif; font-size: 10.5pt; line-height: 1.5; color: #1f2933; }
+body { margin: 0; }
+
+/* Portada */
+.cover { page: cover; height: 240mm; display: flex; flex-direction: column; justify-content: center;
+         border-left: 6px solid #285a8c; padding-left: 14mm; break-after: page; }
+.cover-site { margin: 0 0 10mm; font-size: 11pt; letter-spacing: 0.08em; text-transform: uppercase; color: #4a7fa5; }
+.cover-title { string-set: manual content(); margin: 0 0 6mm; font-size: 30pt; line-height: 1.15; color: #285a8c; bookmark-level: none; }
+.cover-desc { margin: 0 0 14mm; font-size: 13pt; color: #3e4c59; }
+.cover-date { margin: 0; font-size: 10pt; color: #6b7785; }
+
+/* Índice */
+.toc { page: toc; break-after: page; }
+.toc-title { margin: 0 0 8mm; font-size: 20pt; color: #285a8c; border: 0; bookmark-level: none; }
+.toc ul { margin: 0; padding: 0; list-style: none; }
+.toc-chapter { margin: 0 0 3mm; font-weight: 700; }
+.toc-chapter ul { margin: 1.5mm 0 0 6mm; }
+.toc-sub { margin: 0 0 1mm; font-weight: 400; font-size: 9.5pt; }
+.toc a { color: inherit; text-decoration: none; }
+.toc a::after { content: leader('.') target-counter(attr(href), page); color: #6b7785; }
+
+/* Capítulos */
+.chapter { break-before: page; }
+h1, h2, h3, h4 { color: #285a8c; line-height: 1.25; break-after: avoid; }
+h1 { string-set: chapter content(); margin: 0 0 6mm; font-size: 22pt; bookmark-level: 1; }
+h2 { margin: 8mm 0 3mm; padding-bottom: 1.5mm; border-bottom: 0.5pt solid #d3dbe3; font-size: 15pt; bookmark-level: 2; }
+h3 { margin: 6mm 0 2mm; font-size: 12.5pt; bookmark-level: 3; }
+h4 { margin: 5mm 0 2mm; font-size: 11pt; bookmark-level: none; }
+h5, h6 { bookmark-level: none; }
+p, ul, ol, dl, table, pre, blockquote, .admonition { margin: 0 0 3.5mm; }
+p, li { orphans: 3; widows: 3; hyphens: auto; }
+li { margin: 1mm 0; }
+a { color: #285a8c; text-decoration: none; }
+.doc-broken-link { color: #b94a48; text-decoration: line-through; }
+img { display: block; max-width: 100%; height: auto; margin: 2mm 0; border: 0.5pt solid #d3dbe3; break-inside: avoid; }
+code { font-family: "Liberation Mono", "DejaVu Sans Mono", monospace; font-size: 0.88em; background: #f2f5f8;
+       padding: 0 1mm; border-radius: 1mm; }
+pre { padding: 3mm; border: 0.5pt solid #d3dbe3; border-radius: 1.5mm; background: #f2f5f8; font-size: 8.5pt;
+      white-space: pre-wrap; break-inside: avoid; }
+pre code { padding: 0; background: none; }
+blockquote { padding: 1mm 4mm; border-left: 1mm solid #d3dbe3; color: #52606d; }
+table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+th, td { padding: 1.5mm 2.5mm; border: 0.5pt solid #d3dbe3; vertical-align: top; text-align: left; }
+th { background: #f2f5f8; }
+thead { display: table-header-group; }
+tr { break-inside: avoid; }
+.admonition { padding: 2.5mm 4mm; border-left: 1mm solid #4a7fa5; background: #eaf2f8; break-inside: avoid; }
+.admonition-title { margin: 0 0 1mm; font-weight: 700; }
+.admonition.warning, .admonition.caution { border-left-color: #e0a100; background: #fdf4e3; }
+.admonition.danger, .admonition.error { border-left-color: #b94a48; background: #fbeaea; }
+dt { font-weight: 700; }
+dd { margin: 0 0 2mm 6mm; }
+.footnote { font-size: 8.5pt; color: #52606d; }
