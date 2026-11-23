@@ -8,7 +8,7 @@ Hay dos fuentes de manuales:
   ``<DOCS_ROOT>/docs/<idioma>/<path>/``. Cada manual declara la app a la que pertenece y solo
   aparece si esa app está instalada;
 - la carpeta ``docs/`` de cada app (el core, un plugin o una app de proyecto) con su manifiesto
-  ``docs.yml`` (convención descrita en ``gvsigol_core/docs/docs.yml``), para manuales que no se
+  ``docs.yml`` (convención descrita en ``gvsigol_core/docs/docs.yml``, que no trae manuales), para manuales que no se
   publican (p. ej. plugins de proyectos restringidos).
 
 Si un manual (app + slug) está en las dos, manda el central. Este módulo localiza los manuales,
