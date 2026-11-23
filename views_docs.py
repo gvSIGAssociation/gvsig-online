@@ -257,7 +257,7 @@ def _images(manual, text, lang_code):
     images = []
     for rel, alt in dc.referenced_images(text, lang_code):
         uploaded = dc.asset(manual.app, rel)
-        in_repo = os.path.isfile(os.path.join(manual.root, rel))
+        in_repo = bool(manual.resolve(rel)) and os.path.isfile(manual.resolve(rel))
         images.append({
             'path': rel,
             'name': rel.rsplit('/', 1)[-1],
@@ -392,7 +392,7 @@ def documentation_upload(request, app, manual, page):
         rel = '%s/img/%s' % (lang_code, name)
         # Una imagen nueva no pisa otra con el mismo nombre
         stem, n = rel[:-len(ext)], 2
-        while dc.asset(found.app, rel) or os.path.exists(os.path.join(found.root, rel)):
+        while dc.asset(found.app, rel) or os.path.exists(found.resolve(rel) or ''):
             rel = '%s-%d%s' % (stem, n, ext)
             n += 1
 
@@ -430,7 +430,8 @@ def documentation_restore(request, app, manual, page):
 @require_safe
 def documentation_export(request, app, manual, page):
     """ZIP con la página tal como se ve (edición web o repositorio) y las imágenes subidas de la
-    app, con las rutas del paquete: se descomprime sobre la carpeta del paquete en el repositorio."""
+    app, con sus rutas en el repositorio del manual: se descomprime en la raíz de ese repositorio
+    (gvsigol/, plugin_x/ o gvsig_doc/)."""
     target = _editable(request, app, manual, page)
     if target is None:
         return HttpResponseForbidden()
@@ -438,10 +439,11 @@ def documentation_export(request, app, manual, page):
     text, used_lang, _v = dc.page_source(found, current, lang_code)
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr('%s/docs/%s/%s' % (found.app, used_lang, current.file), text or '')
+        # Rutas dentro del repositorio del manual: <paquete>/docs/... o gvSIG/docs/<idioma>/<path>/...
+        zf.writestr(found.repo_path('%s/%s' % (used_lang, current.file)), text or '')
         for item in DocAsset.objects.filter(app=found.app):
             with item.file.open('rb') as f:
-                zf.writestr('%s/docs/%s' % (found.app, item.path), f.read())
+                zf.writestr(found.repo_path(item.path), f.read())
     response = HttpResponse(buffer.getvalue(), content_type='application/zip')
     response['Content-Disposition'] = 'attachment; filename="%s-%s-%s.zip"' % (found.app, current.slug, used_lang)
     return response

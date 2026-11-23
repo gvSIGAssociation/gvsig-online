@@ -1,10 +1,19 @@
 """
 Centro de documentación: manuales en Markdown dentro de cada paquete.
 
-Cada app (el core, un plugin o una app de proyecto) puede traer una carpeta ``docs/`` con un
-manifiesto ``docs.yml`` (la convención está descrita en ``gvsigol_core/docs/docs.yml``). Este
-módulo localiza los manuales de las apps instaladas, decide quién puede verlos, elige el idioma
-y convierte las páginas a HTML limpio con los enlaces ya resueltos.
+Hay dos fuentes de manuales:
+
+- la documentación central (repositorio gvsig_doc, la misma que se publica en
+  docs.gvsig-services.com): ``<DOCS_ROOT>/manuales.yml`` y las páginas en
+  ``<DOCS_ROOT>/docs/<idioma>/<path>/``. Cada manual declara la app a la que pertenece y solo
+  aparece si esa app está instalada;
+- la carpeta ``docs/`` de cada app (el core, un plugin o una app de proyecto) con su manifiesto
+  ``docs.yml`` (convención descrita en ``gvsigol_core/docs/docs.yml``), para manuales que no se
+  publican (p. ej. plugins de proyectos restringidos).
+
+Si un manual (app + slug) está en las dos, manda el central. Este módulo localiza los manuales,
+decide quién puede verlos, elige el idioma y convierte las páginas a HTML limpio con los enlaces
+ya resueltos.
 
 No depende de la petición salvo para el usuario y el idioma: las vistas están en ``views_docs``.
 Markdown y nh3 se importan al convertir una página: si faltan en la imagen, solo falla el lector,
@@ -21,12 +30,14 @@ from xml.etree import ElementTree
 
 import yaml
 from django.apps import apps
+from django.conf import settings
 from django.urls import reverse
 
 logger = logging.getLogger('gvsigol')
 
 DOCS_DIRNAME = 'docs'
 MANIFEST_NAME = 'docs.yml'
+CENTRAL_MANIFEST_NAME = 'manuales.yml'
 DEFAULT_LANG = 'es'
 AUDIENCES = ('public', 'user', 'staff', 'superuser')
 FILES_SEGMENT = '_files'
@@ -53,11 +64,21 @@ class Page:
 
 
 class Manual:
+    """Un manual. Sus ficheros se nombran siempre con rutas «<idioma>/<resto>» o «assets/<resto>»
+    (las mismas en las URLs _files, en las imágenes subidas desde la web y en las exportaciones);
+    resolve() las traduce a la carpeta real según de dónde venga el manual:
+
+    - de un paquete: root es <paquete>/docs y la ruta cuelga de ahí;
+    - central: root es <DOCS_ROOT>/docs y la ruta es <idioma>/<path>/<resto> (assets/<path>/<resto>).
+    """
     def __init__(self, app: str, slug: str, root: str, title: Dict[str, str], description: Dict[str, str],
-                 icon: str, audience: str, order: int, pages: Optional[List[Page]] = None):
+                 icon: str, audience: str, order: int, pages: Optional[List[Page]] = None,
+                 path: str = '', repo_root: str = ''):
         self.app = app              # nombre de la app (gvsigol_core, gvsigol_plugin_viewer3d…)
         self.slug = slug
-        self.root = root            # ruta absoluta de la carpeta docs/
+        self.root = root            # carpeta docs/ (del paquete o de la documentación central)
+        self.path = path            # solo en los centrales: carpeta del manual dentro de docs/<idioma>/
+        self.repo_root = repo_root  # raíz del repositorio que contiene root (para exportar y avisos)
         self.title = title
         self.description = description
         self.icon = icon
@@ -66,7 +87,43 @@ class Manual:
         self.pages = pages if pages is not None else []
 
     def __repr__(self):
-        return 'Manual(%r, %r)' % (self.app, self.slug)
+        return 'Manual(%r, %r%s)' % (self.app, self.slug, ', central' if self.is_central else '')
+
+    @property
+    def is_central(self) -> bool:
+        return bool(self.path)
+
+    def resolve(self, rel: Optional[str]) -> Optional[str]:
+        """Ruta absoluta de «<idioma>/<resto>» (exista o no), o None si sale de la carpeta."""
+        rel = safe_relpath(rel or '')
+        if not rel:
+            return None
+        if self.is_central:
+            first, _, rest = rel.partition('/')
+            if not rest:
+                return None
+            rel = posixpath.join(first, self.path, rest)
+        root = os.path.realpath(self.root)
+        full = os.path.realpath(os.path.join(root, rel))
+        return full if full.startswith(root + os.sep) else None
+
+    def langs(self) -> List[str]:
+        """Idiomas que tienen carpeta para este manual."""
+        try:
+            names = os.listdir(self.root)
+        except OSError:
+            return [DEFAULT_LANG]
+        result = []
+        for name in names:
+            folder = os.path.join(self.root, name, self.path) if self.is_central else os.path.join(self.root, name)
+            if name != 'assets' and os.path.isdir(folder):
+                result.append(name)
+        return sorted(result)
+
+    def repo_path(self, rel: str) -> str:
+        """Ruta de un fichero del manual dentro de su repositorio (para el ZIP y los avisos)."""
+        full = self.resolve(rel) or ''
+        return os.path.relpath(full, self.repo_root).replace(os.sep, '/') if full else rel
 
     @property
     def is_core(self) -> bool:
@@ -96,60 +153,118 @@ def _stricter(a: str, b: str) -> str:
     return a if AUDIENCES.index(a) >= AUDIENCES.index(b) else b
 
 
+def _manual_from(item: dict, app: str, root: str, path: str = '', repo_root: str = '') -> Optional[Manual]:
+    slug = str(item.get('slug') or '')
+    if not _SLUG_RE.match(slug):
+        raise ValueError('slug de manual no válido: «%s»' % slug)
+    audience = _audience(item.get('audience'))
+    manual = Manual(app=app, slug=slug, root=root, title=_texts(item.get('title')) or {DEFAULT_LANG: slug},
+                    description=_texts(item.get('description')), icon=str(item.get('icon') or 'fa-book'),
+                    audience=audience, order=int(item.get('order') or 100), path=path, repo_root=repo_root)
+    for entry in item.get('pages') or []:
+        if isinstance(entry, str):
+            entry = {'file': entry}
+        name = str(entry.get('file') or '')
+        page_slug = name[:-3] if name.endswith('.md') else ''
+        if not _SLUG_RE.match(page_slug):
+            raise ValueError('página no válida en %s: «%s»' % (slug, name))
+        manual.pages.append(Page(file=name, slug=page_slug,
+                                 audience=_stricter(_audience(entry.get('audience'), audience), audience)))
+    return manual if manual.pages else None
+
+
 def _parse_manifest(app: str, root: str) -> List[Manual]:
+    """docs.yml de un paquete."""
     with open(os.path.join(root, MANIFEST_NAME), encoding='utf-8') as f:
         data = yaml.safe_load(f) or {}
     manuals = []
     for item in data.get('manuals') or []:
-        slug = str(item.get('slug') or '')
-        if not _SLUG_RE.match(slug):
-            raise ValueError('slug de manual no válido: «%s»' % slug)
-        audience = _audience(item.get('audience'))
-        manual = Manual(app=app, slug=slug, root=root, title=_texts(item.get('title')) or {DEFAULT_LANG: slug},
-                        description=_texts(item.get('description')), icon=str(item.get('icon') or 'fa-book'),
-                        audience=audience, order=int(item.get('order') or 100))
-        for entry in item.get('pages') or []:
-            if isinstance(entry, str):
-                entry = {'file': entry}
-            name = str(entry.get('file') or '')
-            page_slug = name[:-3] if name.endswith('.md') else ''
-            if not _SLUG_RE.match(page_slug):
-                raise ValueError('página no válida en %s: «%s»' % (slug, name))
-            manual.pages.append(Page(file=name, slug=page_slug,
-                                     audience=_stricter(_audience(entry.get('audience'), audience), audience)))
-        if manual.pages:
+        manual = _manual_from(item, app, root, repo_root=os.path.dirname(os.path.dirname(root)))
+        if manual:
             manuals.append(manual)
     return manuals
 
 
+def _parse_central(docs_root: str) -> List[Manual]:
+    """manuales.yml de la documentación central. Un manual con errores se omite (con aviso en el
+    log) sin afectar a los demás."""
+    with open(os.path.join(docs_root, CENTRAL_MANIFEST_NAME), encoding='utf-8') as f:
+        data = yaml.safe_load(f) or {}
+    manuals = []
+    for item in data.get('manuals') or []:
+        try:
+            app = str(item.get('app') or '')
+            path = safe_relpath(str(item.get('path') or ''))
+            if not app or not path:
+                raise ValueError('faltan app o path')
+            manual = _manual_from(item, app, os.path.join(docs_root, DOCS_DIRNAME), path=path,
+                                  repo_root=os.path.dirname(os.path.realpath(docs_root)))
+            if manual:
+                manuals.append(manual)
+        except Exception:
+            logger.exception('Manual no válido en %s: %r', os.path.join(docs_root, CENTRAL_MANIFEST_NAME),
+                             item.get('slug') if isinstance(item, dict) else item)
+    return manuals
+
+
+def central_root() -> Optional[str]:
+    """Carpeta de la documentación central (la que contiene manuales.yml), o None.
+
+    Ajuste DOCS_ROOT: una ruta, u «off» para no usarla. Sin ajuste se busca un checkout o paquete
+    de gvsig_doc junto al de gvsigol (<carpeta de gvsigol>/../gvsig_doc/gvSIG): así funciona sin
+    configurar en desarrollo y en las imágenes que lo incluyan, y en el resto todo sigue igual."""
+    configured = str(getattr(settings, 'DOCS_ROOT', '') or '').strip()
+    if configured.lower() in ('off', 'none', 'false', '0'):
+        return None
+    if configured:
+        candidate = configured
+    else:
+        base = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        candidate = os.path.join(base, 'gvsig_doc', 'gvSIG')
+    return candidate if os.path.isfile(os.path.join(candidate, CENTRAL_MANIFEST_NAME)) else None
+
+
 _cache_lock = threading.Lock()
-_manifest_cache: Dict[str, Tuple[float, List[Manual]]] = {}
+_manifest_cache = {}  # type: Dict[str, Tuple[float, List[Manual]]]
+
+
+def _cached(manifest: str, parse) -> List[Manual]:
+    """Manuales de un manifiesto, releídos solo si cambia el fichero."""
+    try:
+        mtime = os.path.getmtime(manifest)
+    except OSError:
+        return []
+    with _cache_lock:
+        cached = _manifest_cache.get(manifest)
+    if not cached or cached[0] != mtime:
+        try:
+            cached = (mtime, parse())
+        except Exception:
+            logger.exception('Manifiesto de documentación no válido: %s', manifest)
+            cached = (mtime, [])
+        with _cache_lock:
+            _manifest_cache[manifest] = cached
+    return cached[1]
 
 
 def all_manuals() -> List[Manual]:
-    """Manuales de todas las apps instaladas (releídos solo si cambia su docs.yml)."""
-    manuals = []
+    """Manuales de las apps instaladas: los centrales y los de la carpeta docs/ de cada app. Si un
+    manual (app + slug) está en los dos sitios, manda el central."""
+    manuals = {}
     for config in apps.get_app_configs():
         if not config.name.startswith('gvsigol'):
             continue
         root = os.path.join(config.path, DOCS_DIRNAME)
         manifest = os.path.join(root, MANIFEST_NAME)
-        try:
-            mtime = os.path.getmtime(manifest)
-        except OSError:
-            continue
-        with _cache_lock:
-            cached = _manifest_cache.get(manifest)
-        if not cached or cached[0] != mtime:
-            try:
-                cached = (mtime, _parse_manifest(config.name, root))
-            except Exception:
-                logger.exception('Manifiesto de documentación no válido: %s', manifest)
-                cached = (mtime, [])
-            with _cache_lock:
-                _manifest_cache[manifest] = cached
-        manuals.extend(cached[1])
-    return sorted(manuals, key=lambda m: (m.order, m.app, m.slug))
+        for manual in _cached(manifest, lambda c=config, r=root: _parse_manifest(c.name, r)):
+            manuals[(manual.app, manual.slug)] = manual
+    docs_root = central_root()
+    if docs_root:
+        manifest = os.path.join(docs_root, CENTRAL_MANIFEST_NAME)
+        for manual in _cached(manifest, lambda: _parse_central(docs_root)):
+            if apps.is_installed(manual.app):
+                manuals[(manual.app, manual.slug)] = manual
+    return sorted(manuals.values(), key=lambda m: (m.order, m.app, m.slug))
 
 
 def find_manual(app: str, slug: str) -> Optional[Manual]:
@@ -245,8 +360,8 @@ def text_for(texts: Dict[str, str], lang: str) -> str:
 def page_file(manual: Manual, page: Page, lang: str) -> Tuple[Optional[str], Optional[str]]:
     """(ruta, idioma) de la página en el idioma pedido o, si no existe, en el de por defecto."""
     for code in lang_codes(lang):
-        path = os.path.join(manual.root, code, page.file)
-        if os.path.isfile(path):
+        path = manual.resolve('%s/%s' % (code, page.file))
+        if path and os.path.isfile(path):
             return path, code
     return None, None
 
@@ -272,8 +387,8 @@ def file_sha1(path: Optional[str]) -> str:
 
 
 def repo_file(manual: Manual, page: Page, lang_code: str) -> Optional[str]:
-    path = os.path.join(manual.root, lang_code, page.file)
-    return path if os.path.isfile(path) else None
+    path = manual.resolve('%s/%s' % (lang_code, page.file))
+    return path if path and os.path.isfile(path) else None
 
 
 def page_source(manual: Manual, page: Page, lang: str) -> Tuple[Optional[str], Optional[str], float]:
@@ -331,11 +446,11 @@ def locate_file(app: str, rel: Optional[str]):
     uploaded = asset(app, rel) or (asset(app, fallback) if fallback else None)
     if uploaded is not None:
         return 'asset', uploaded
-    root = os.path.realpath(manuals[0].root)
     for candidate in [rel] + ([fallback] if fallback else []):
-        full = os.path.realpath(os.path.join(root, candidate))
-        if full.startswith(root + os.sep) and os.path.isfile(full):
-            return 'path', full
+        for manual in manuals:
+            full = manual.resolve(candidate)
+            if full and os.path.isfile(full):
+                return 'path', full
     return None
 
 
