@@ -9,7 +9,7 @@ import time
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
-from .catalog import load_catalog
+from .catalog import available, load_catalog
 from .context import as_context
 from .prompt import NO_CHANGE_TOKEN, no_change_nudge, system_prompt
 from .streaming import AssistantCancelled, callbacks_for
@@ -128,7 +128,7 @@ def run_assistant(request, message, history, canvas, restricted, connections, on
     """
     context = as_context(request, connections, restricted)
     callbacks = callbacks_for(on_event, query_id)
-    catalog = load_catalog()
+    catalog = available(load_catalog())
     holder = []
     trace = Trace(_trace_enabled())
     canvas = canvas or {}

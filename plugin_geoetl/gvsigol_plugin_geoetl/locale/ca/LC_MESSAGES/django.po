@@ -584,7 +584,7 @@ msgstr "Programa e-mails"
 #| msgid "SQL Parameters"
 
 msgid "Endpoint Parameters"
-msgstr "Paràmetres SQL"
+msgstr "Paràmetres de l'endpoint"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:430
 
@@ -706,12 +706,12 @@ msgstr "Envia e-mail si el procés falla"
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:599
 
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:605
 
 msgid "Method"
-msgstr ""
+msgstr "Mètode"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:618
 
@@ -723,14 +723,14 @@ msgstr ""
 #| msgid "Send e-mail after process finishes correctly"
 
 msgid "Send to endpoint after process finishes correctly"
-msgstr "Envia e-mail desrpés de que el procés finalitzi correctament"
+msgstr "Envia a l'endpoint quan el procés finalitzi correctament"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:632
 #, fuzzy
 #| msgid "Send e-mail if process fails"
 
 msgid "Send to endpoint if process fails"
-msgstr "Envia e-mail si el procés falla"
+msgstr "Envia a l'endpoint si el procés falla"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:641
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:1073
@@ -1377,3 +1377,45 @@ msgstr "Error"
 
 msgid "Outputs / Visualizer"
 msgstr "Sortides / Visualitzador"
+
+msgid "Overwrite"
+msgstr "Sobreescriu"
+
+msgid "Save as new"
+msgstr "Desa com a nou"
+
+msgid "This workflow is already saved. You can overwrite it or save it as a new workflow (with another name)."
+msgstr "Aquest flux ja està desat. Pots sobreescriure'l o desar-lo com un flux nou (amb un altre nom)."
+
+msgid "The saved workflow will be replaced by the current one. To keep it, cancel and use \"Save as new\"."
+msgstr "El flux desat se substituirà per l'actual. Per a conservar-lo, cancel·la i fes servir \"Desa com a nou\"."
+
+msgid "AI Text"
+msgstr "Text amb IA"
+
+msgid "Stop"
+msgstr "Atura"
+
+msgid "Stopped"
+msgstr "Aturat"
+
+msgid "Stop the running process"
+msgstr "Atura el procés en marxa"
+
+msgid "Stopping…"
+msgstr "Aturant…"
+
+msgid "Stopping the process. It will stop as soon as the current step allows it."
+msgstr "S'està aturant el procés. S'aturarà tan bon punt el pas actual ho permeta."
+
+msgid "The process was stopped by the user."
+msgstr "L'usuari ha aturat el procés."
+
+msgid "Could not stop the process"
+msgstr "No s'ha pogut aturar el procés"
+
+msgid "Workspace not found"
+msgstr "No s'ha trobat el workspace"
+
+msgid "Permission denied"
+msgstr "Permís denegat"

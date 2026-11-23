@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+{% load static %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+	<title>{% trans "Edit" context "documentation" %} · {{ page_title }} · {{GVSIGOL_NAME}}</title>
+	<link rel="shortcut icon" href="{% static "img/favicon.png" %}">
+	<meta charset="utf-8">
+	<meta content="width=device-width, initial-scale=1" name="viewport">
+
+	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-3.3.7/css/bootstrap.min.css" %}">
+	<link rel="stylesheet" href="{% static "css/font-awesome-4.4.0/css/font-awesome.min.css" %}">
+	<link rel="stylesheet" href="{% static "css/googlefonts.css" %}">
+	<link rel="stylesheet" href="{% static "css/gvsigOL.css" %}">
+	<link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
+	<link rel="stylesheet" href="{% static "css/gol-themes.css" %}">
+
+	<style>
+	/* =================================================================
+	   Editor de una página de manual: Markdown a la izquierda, vista previa
+	   a la derecha e imágenes de la página debajo. Las capturas se suben
+	   pegándolas o arrastrándolas al texto, o desde la lista de imágenes.
+	   ================================================================= */
+	{% include "documentation_common_styles.html" %}
+
+	.ed-wrap { flex: 1; width: 100%; max-width: 1500px; margin: 0 auto; padding: 20px 24px 40px; }
+	.ed-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+	.ed-breadcrumb { margin: 0 0 4px; font-size: 13px; color: var(--pl-muted); }
+	.ed-breadcrumb a { color: var(--pl-muted); }
+	.ed-title { margin: 0; font-size: 24px; font-weight: 700; color: var(--pl-text); }
+	.ed-file { margin: 4px 0 0; font-size: 12px; color: var(--pl-muted); }
+	.ed-file code { padding: 1px 5px; border-radius: 4px; background: var(--pl-bg); color: inherit; }
+
+	.ed-notice { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 14px; padding: 10px 14px; border-radius: 6px; font-size: 14px; background: #fdf4e3; color: #6b4600; }
+	.ed-notice--error { background: #fbeaea; color: #8a2a28; }
+
+	.ed-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+	.ed-pane { display: flex; flex-direction: column; min-width: 0; border: 1px solid var(--pl-border); border-radius: 8px; background: var(--pl-white); overflow: hidden; }
+	.ed-pane__bar { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 1px solid var(--pl-border); background: var(--pl-bg); font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--pl-muted); }
+	.ed-pane__bar .ed-spacer { flex: 1; }
+	.ed-btn {
+		display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px;
+		border: 1px solid var(--pl-border); border-radius: 6px; background: var(--pl-white);
+		font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--pl-text) !important; cursor: pointer; text-decoration: none !important;
+	}
+	.ed-btn:hover { border-color: var(--pl-accent); color: var(--pl-accent) !important; }
+	.ed-btn--primary { background: var(--pl-accent); border-color: var(--pl-accent); color: #fff !important; }
+	.ed-btn--primary:hover { color: #fff !important; filter: brightness(1.08); }
+	.ed-btn--danger:hover { border-color: #b94a48; color: #b94a48 !important; }
+	.ed-text {
+		flex: 1; width: 100%; min-height: 62vh; padding: 14px 16px; border: 0; resize: vertical; outline: none;
+		font-family: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace; font-size: 13px; line-height: 1.6;
+		color: var(--pl-text); background: var(--pl-white);
+	}
+	.ed-text.is-dragging { background: var(--gol-accent-lt, #eaf2f8); }
+	.ed-hint { padding: 6px 12px; border-top: 1px solid var(--pl-border); font-size: 12px; color: var(--pl-muted); }
+	.ed-preview { flex: 1; min-height: 62vh; max-height: 75vh; overflow-y: auto; padding: 16px 20px; }
+
+	/* Vista previa con el mismo estilo que el lector */
+	.doc-body { font-size: 15px; line-height: 1.6; color: var(--pl-text); }
+	.doc-body h1 { margin: 0 0 14px; font-size: 26px; font-weight: 700; }
+	.doc-body h2 { margin: 28px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--pl-border); font-size: 20px; font-weight: 700; }
+	.doc-body h3 { margin: 20px 0 8px; font-size: 17px; font-weight: 700; }
+	.doc-body .headerlink { display: none; }
+	.doc-body img { display: block; max-width: 100%; height: auto; margin: 8px 0; border: 1px solid var(--pl-border); border-radius: 6px; }
+	.doc-body table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; font-size: 13px; margin-bottom: 14px; }
+	.doc-body th, .doc-body td { padding: 6px 10px; border: 1px solid var(--pl-border); vertical-align: top; }
+	.doc-body th { background: var(--pl-bg); }
+	.doc-body code { padding: 1px 5px; border-radius: 4px; background: var(--pl-bg); color: inherit; }
+	.doc-body pre { padding: 10px 12px; border: 1px solid var(--pl-border); border-radius: 6px; background: var(--pl-bg); }
+	.doc-body .doc-broken-link { color: #b94a48; text-decoration: line-through; }
+	.doc-body .admonition { margin: 0 0 14px; padding: 8px 14px; border-left: 4px solid var(--pl-accent); background: var(--gol-accent-lt, #eaf2f8); }
+
+	/* Imágenes de la página */
+	.ed-section { margin-top: 20px; }
+	.ed-section__title { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--pl-muted); }
+	.ed-section__title::after { content: ""; flex: 1; height: 1px; background: var(--pl-border); }
+	.ed-images { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+	.ed-image { display: flex; flex-direction: column; border: 1px solid var(--pl-border); border-radius: 8px; background: var(--pl-white); overflow: hidden; }
+	.ed-image__thumb { display: flex; align-items: center; justify-content: center; height: 130px; background: var(--pl-bg); color: var(--pl-muted); font-size: 28px; }
+	.ed-image__thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
+	.ed-image__body { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; font-size: 12px; }
+	.ed-image__name { font-weight: 700; color: var(--pl-text); word-break: break-all; }
+	.ed-badge { align-self: flex-start; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+	.ed-badge--repo { background: var(--pl-bg); color: var(--pl-muted); }
+	.ed-badge--web { background: var(--gol-accent-lt, #eaf2f8); color: var(--pl-accent); }
+	.ed-badge--missing { background: #fbeaea; color: #8a2a28; }
+	.ed-empty { padding: 16px; border: 1.5px dashed var(--pl-border); border-radius: 8px; font-size: 13px; color: var(--pl-muted); }
+
+	/* Pie: comentario y acciones */
+	.ed-foot { position: sticky; bottom: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 20px; padding: 12px 0; border-top: 1px solid var(--pl-border); background: var(--pl-bg); }
+	.ed-foot input[type=text] { flex: 1; min-width: 220px; padding: 6px 10px; border: 1px solid var(--pl-border); border-radius: 6px; font-size: 13px; }
+	.ed-revisions { font-size: 13px; }
+	.ed-revisions table { width: 100%; border-collapse: collapse; }
+	.ed-revisions td { padding: 6px 8px; border-bottom: 1px solid var(--pl-border); }
+	.ed-toast { position: fixed; right: 20px; bottom: 80px; z-index: 500; max-width: 380px; padding: 10px 14px; border-radius: 6px; background: #1f2d3a; color: #fff; font-size: 13px; box-shadow: var(--pl-shadow); }
+	.ed-toast[hidden] { display: none; }
+
+	@media (max-width: 991px) {
+		.ed-grid { grid-template-columns: minmax(0, 1fr); }
+		.ed-preview { max-height: none; }
+	}
+	</style>
+</head>
+
+<body class="{{GVSIGOL_SKIN}}">
+
+	<header class="doc-topbar">
+		<nav class="doc-topbar__inner" style="max-width:1500px;margin:0 auto;padding:0 24px;">
+			<a href="/" class="doc-topbar__logo">
+				<img src="{% static "img/logo_custom_icon.png" %}" class="doc-topbar__logo-img" alt="Logo"><b>{{GVSIGOL_NAME}}</b>{% if GVSIGOL_SURNAME %}<span class="doc-topbar__surname">{{GVSIGOL_SURNAME}}</span>{% endif %}
+			</a>
+			<a href="{% url 'documentation' %}" class="doc-topbar__link"><i class="fa fa-book" aria-hidden="true"></i><span class="doc-topbar__link-text">{% trans "Documentation" context "documentation" %}</span></a>
+		</nav>
+	</header>
+
+	<form class="ed-wrap" id="ed-form" method="post">
+		{% csrf_token %}
+		<input type="hidden" name="edit_version" value="{{ edit_version }}">
+		<input type="hidden" name="base_hash" value="{{ base_hash }}">
+
+		<div class="ed-head">
+			<div>
+				<p class="ed-breadcrumb"><a href="{% url 'documentation' %}">{% trans "Documentation" context "documentation" %}</a> › {{ manual_title }}</p>
+				<h1 class="ed-title">{% trans "Edit" context "documentation" %}: {{ page_title }}</h1>
+				<p class="ed-file">{% trans "Repository file" context "documentation" %}: <code>{{ file_label }}</code></p>
+			</div>
+			<div style="display:flex;gap:8px;flex-wrap:wrap;">
+				<a class="ed-btn" href="{{ export_url }}" title="{% trans "Download the page and the uploaded images to add them to the repository" context "documentation" %}"><i class="fa fa-download" aria-hidden="true"></i> {% trans "Export ZIP" context "documentation" %}</a>
+				<a class="ed-btn" href="{{ page_url }}"><i class="fa fa-eye" aria-hidden="true"></i> {% trans "View page" context "documentation" %}</a>
+			</div>
+		</div>
+
+		{% if error %}<p class="ed-notice ed-notice--error"><i class="fa fa-times-circle" aria-hidden="true"></i> {{ error }}</p>{% endif %}
+		{% if base_changed %}<p class="ed-notice"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans "The repository version of this page has changed since it was edited on the web. Compare both before saving or exporting." context "documentation" %}</p>{% endif %}
+		{% if edit %}<p class="ed-notice" style="background:var(--gol-accent-lt,#eaf2f8);color:var(--pl-text);"><i class="fa fa-pencil" aria-hidden="true"></i> {% blocktrans with user=edit.updated_by date=edit.updated_at|date:"SHORT_DATETIME_FORMAT" context "documentation" %}You are editing the web version saved by {{ user }} ({{ date }}).{% endblocktrans %}</p>{% endif %}
+
+		<div class="ed-grid">
+			<section class="ed-pane">
+				<div class="ed-pane__bar">
+					Markdown
+					<span class="ed-spacer"></span>
+					<button type="button" class="ed-btn" id="ed-insert-image"><i class="fa fa-image" aria-hidden="true"></i> {% trans "Insert image" context "documentation" %}</button>
+				</div>
+				<textarea class="ed-text" id="ed-text" name="content" spellcheck="true" lang="{{ lang_code }}">{{ content }}</textarea>
+				<div class="ed-hint"><i class="fa fa-info-circle" aria-hidden="true"></i> {% trans "Paste a screenshot (Ctrl+V) or drag an image onto the text to upload it and insert it where the cursor is." context "documentation" %}</div>
+			</section>
+			<section class="ed-pane">
+				<div class="ed-pane__bar">{% trans "Preview" context "documentation" %}<span class="ed-spacer"></span><span id="ed-preview-state"></span></div>
+				<div class="ed-preview"><article class="doc-body" id="ed-preview"></article></div>
+			</section>
+		</div>
+
+		<section class="ed-section">
+			<h2 class="ed-section__title">{% trans "Images of the page" context "documentation" %}</h2>
+			<div class="ed-images" id="ed-images"></div>
+			<p class="ed-empty" id="ed-images-empty" hidden>{% trans "This page has no images yet. Paste or drag a screenshot onto the text to add one." context "documentation" %}</p>
+		</section>
+
+		{% if revisions %}
+		<section class="ed-section ed-revisions">
+			<h2 class="ed-section__title">{% trans "History" context "documentation" %}</h2>
+			<table>
+				{% for r in revisions %}
+				<tr>
+					<td style="white-space:nowrap">{{ r.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
+					<td>{{ r.created_by }}</td>
+					<td style="width:100%">{{ r.comment }}</td>
+					<td><button type="button" class="ed-btn" data-revision="{{ r.id }}">{% trans "Load into the editor" context "documentation" %}</button></td>
+				</tr>
+				{% endfor %}
+			</table>
+		</section>
+		{% endif %}
+
+		<div class="ed-foot">
+			<input type="text" name="comment" maxlength="250" placeholder="{% trans "What did you change? (optional)" context "documentation" %}">
+			<a class="ed-btn" href="{{ page_url }}">{% trans "Cancel" %}</a>
+			{% if edit and has_repo_file %}
+			<button type="submit" class="ed-btn ed-btn--danger" formaction="{{ restore_url }}" formnovalidate
+				onclick="return confirm('{% filter escapejs %}{% trans "The web version is discarded and the page goes back to the repository version. The history and the uploaded images are kept. Continue?" context "documentation" %}{% endfilter %}');">
+				<i class="fa fa-undo" aria-hidden="true"></i> {% trans "Back to the repository version" context "documentation" %}</button>
+			{% endif %}
+			<button type="submit" class="ed-btn ed-btn--primary"><i class="fa fa-floppy-o" aria-hidden="true"></i> {% trans "Save" %}</button>
+		</div>
+	</form>
+
+	<input type="file" id="ed-file" accept="image/png,image/jpeg,image/gif,image/webp" hidden>
+	<div class="ed-toast" id="ed-toast" role="status" hidden></div>
+
+	{{ revisions_json|json_script:"ed-revisions" }}
+	<script>
+	(function () {
+		var text = document.getElementById('ed-text');
+		var preview = document.getElementById('ed-preview');
+		var state = document.getElementById('ed-preview-state');
+		var imagesBox = document.getElementById('ed-images');
+		var imagesEmpty = document.getElementById('ed-images-empty');
+		var fileInput = document.getElementById('ed-file');
+		var toast = document.getElementById('ed-toast');
+		var csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+		var revisions = JSON.parse(document.getElementById('ed-revisions').textContent);
+		var dirty = false;
+		var T = {
+			updating: "{% filter escapejs %}{% trans "Updating…" context "documentation" %}{% endfilter %}",
+			uploading: "{% filter escapejs %}{% trans "Uploading image…" context "documentation" %}{% endfilter %}",
+			uploaded: "{% filter escapejs %}{% trans "Image uploaded" context "documentation" %}{% endfilter %}",
+			failed: "{% filter escapejs %}{% trans "The image could not be uploaded" context "documentation" %}{% endfilter %}",
+			repo: "{% filter escapejs %}{% trans "In the repository" context "documentation" %}{% endfilter %}",
+			web: "{% filter escapejs %}{% trans "Uploaded on the web" context "documentation" %}{% endfilter %}",
+			missing: "{% filter escapejs %}{% trans "Missing" context "documentation" %}{% endfilter %}",
+			upload: "{% filter escapejs %}{% trans "Upload" context "documentation" %}{% endfilter %}",
+			replace: "{% filter escapejs %}{% trans "Replace" context "documentation" %}{% endfilter %}",
+			loadRevision: "{% filter escapejs %}{% trans "Replace the text of the editor with this version?" context "documentation" %}{% endfilter %}",
+			leave: "{% filter escapejs %}{% trans "There are unsaved changes." context "documentation" %}{% endfilter %}"
+		};
+
+		function showToast(message) {
+			toast.textContent = message;
+			toast.hidden = false;
+			clearTimeout(showToast.timer);
+			showToast.timer = setTimeout(function () { toast.hidden = true; }, 3500);
+		}
+
+		function post(url, body) {
+			body.append('csrfmiddlewaretoken', csrf);
+			return fetch(url, { method: 'POST', body: body, credentials: 'same-origin', headers: { 'X-CSRFToken': csrf } })
+				.then(function (r) { return r.json().then(function (data) { if (!r.ok) { throw new Error(data.error || r.status); } return data; }); });
+		}
+
+		// ---- Vista previa (en el servidor, igual que el lector) ----
+		var bust = Date.now();
+		function renderImages(images) {
+			imagesBox.innerHTML = '';
+			imagesEmpty.hidden = images.length > 0;
+			images.forEach(function (img) {
+				var card = document.createElement('div');
+				card.className = 'ed-image';
+				var thumb = document.createElement('div');
+				thumb.className = 'ed-image__thumb';
+				if (img.source === 'missing') {
+					thumb.innerHTML = '<i class="fa fa-picture-o" aria-hidden="true"></i>';
+				} else {
+					var el = document.createElement('img');
+					el.src = img.url + '?v=' + bust;
+					el.alt = img.alt;
+					thumb.appendChild(el);
+				}
+				var body = document.createElement('div');
+				body.className = 'ed-image__body';
+				var name = document.createElement('span');
+				name.className = 'ed-image__name';
+				name.textContent = img.name;
+				var badge = document.createElement('span');
+				badge.className = 'ed-badge ed-badge--' + img.source;
+				badge.textContent = T[img.source];
+				var button = document.createElement('button');
+				button.type = 'button';
+				button.className = 'ed-btn';
+				button.innerHTML = '<i class="fa fa-upload" aria-hidden="true"></i> ';
+				button.appendChild(document.createTextNode(img.source === 'missing' ? T.upload : T.replace));
+				button.addEventListener('click', function () { pickFile(img.path); });
+				body.appendChild(name);
+				body.appendChild(badge);
+				body.appendChild(button);
+				card.appendChild(thumb);
+				card.appendChild(body);
+				imagesBox.appendChild(card);
+			});
+		}
+
+		var timer = null;
+		function refresh() {
+			state.textContent = T.updating;
+			var body = new FormData();
+			body.append('content', text.value);
+			post('{{ preview_url }}', body).then(function (data) {
+				// Las imágenes recién subidas pueden tener el mismo nombre: se fuerza a recargarlas
+				preview.innerHTML = data.html.replace(/(<img[^>]+src="[^"?]+)"/g, '$1?v=' + bust + '"');
+				renderImages(data.images);
+				state.textContent = '';
+			}).catch(function (e) { state.textContent = e.message; });
+		}
+		text.addEventListener('input', function () {
+			dirty = true;
+			clearTimeout(timer);
+			timer = setTimeout(refresh, 700);
+		});
+
+		// ---- Subida de imágenes ----
+		function insertAtCursor(snippet) {
+			var start = text.selectionStart, end = text.selectionEnd;
+			var before = text.value.slice(0, start), after = text.value.slice(end);
+			var pad = before && !/\n\n$/.test(before) ? (/\n$/.test(before) ? '\n' : '\n\n') : '';
+			text.value = before + pad + snippet + '\n' + after;
+			text.selectionStart = text.selectionEnd = (before + pad + snippet).length + 1;
+			text.focus();
+			dirty = true;
+		}
+
+		function upload(file, path) {
+			showToast(T.uploading);
+			var body = new FormData();
+			body.append('file', file, file.name || 'captura.png');
+			if (path) {
+				body.append('path', path);
+			} else if (!file.name || /^image\.\w+$/i.test(file.name)) {
+				// Captura pegada del portapapeles: sin nombre propio
+				var d = new Date(), z = function (n) { return (n < 10 ? '0' : '') + n; };
+				body.append('name', 'captura-' + d.getFullYear() + z(d.getMonth() + 1) + z(d.getDate()) + '-' + z(d.getHours()) + z(d.getMinutes()) + z(d.getSeconds()));
+			}
+			return post('{{ upload_url }}', body).then(function (data) {
+				bust = Date.now();
+				if (!path) { insertAtCursor(data.markdown); }
+				showToast(T.uploaded);
+				refresh();
+			}).catch(function (e) { showToast(T.failed + ': ' + e.message); });
+		}
+
+		var pendingPath = null;
+		function pickFile(path) {
+			pendingPath = path || null;
+			fileInput.value = '';
+			fileInput.click();
+		}
+		fileInput.addEventListener('change', function () {
+			if (fileInput.files[0]) { upload(fileInput.files[0], pendingPath); }
+		});
+		document.getElementById('ed-insert-image').addEventListener('click', function () { pickFile(null); });
+
+		text.addEventListener('paste', function (e) {
+			var items = (e.clipboardData && e.clipboardData.items) || [];
+			for (var i = 0; i < items.length; i++) {
+				if (items[i].kind === 'file' && /^image\//.test(items[i].type)) {
+					e.preventDefault();
+					upload(items[i].getAsFile(), null);
+					return;
+				}
+			}
+		});
+		text.addEventListener('dragover', function (e) {
+			if (e.dataTransfer && Array.prototype.some.call(e.dataTransfer.types || [], function (t) { return t === 'Files'; })) {
+				e.preventDefault();
+				text.classList.add('is-dragging');
+			}
+		});
+		text.addEventListener('dragleave', function () { text.classList.remove('is-dragging'); });
+		text.addEventListener('drop', function (e) {
+			text.classList.remove('is-dragging');
+			var files = Array.prototype.filter.call((e.dataTransfer && e.dataTransfer.files) || [], function (f) { return /^image\//.test(f.type); });
+			if (!files.length) { return; }
+			e.preventDefault();
+			files.reduce(function (chain, f) { return chain.then(function () { return upload(f, null); }); }, Promise.resolve());
+		});
+
+		// ---- Historial ----
+		document.querySelectorAll('[data-revision]').forEach(function (button) {
+			button.addEventListener('click', function () {
+				var id = Number(button.getAttribute('data-revision'));
+				var revision = revisions.filter(function (r) { return r.id === id; })[0];
+				if (revision && confirm(T.loadRevision)) {
+					text.value = revision.content;
+					dirty = true;
+					refresh();
+				}
+			});
+		});
+
+		// ---- Cambios sin guardar ----
+		document.getElementById('ed-form').addEventListener('submit', function () { dirty = false; });
+		window.addEventListener('beforeunload', function (e) {
+			if (dirty) { e.preventDefault(); e.returnValue = T.leave; return T.leave; }
+		});
+
+		refresh();
+	})();
+	</script>
+</body>
+</html>

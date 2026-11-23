@@ -229,3 +229,54 @@ class ValidatorTests(unittest.TestCase):
         self.assertIn('no se cambia', text)
         self.assertIn('no se elimina', text)
         self.assertIn('no se cambian las conexiones', text)
+
+
+class PostgisWhereTests(unittest.TestCase):
+    """clause de input_Postgis es solo la condición del WHERE y checkbox dice si se aplica."""
+
+    CANVAS = {'nodes': [{'alias': 'n1', 'id': 'u1', 'type': 'input_Postgis', 'label': 'PostGIS', 'status': '',
+                         'parameters': {'db': 'gis', 'schema-name': 'ds_brasil', 'tablename': 'limitesmunicipais',
+                                        'checkbox': 'true', 'clause': 'SELECT "ogc_fid" FROM x'}}],
+              'edges': []}
+
+    def _update(self, parameters):
+        result = validate_proposal({'mode': 'patch', 'ops': [{'op': 'update_node', 'id': 'n1', 'parameters': parameters}]},
+                                   load_catalog(), [{'name': 'gis', 'type': 'PostGIS'}], self.CANVAS)
+        return result['proposal']['ops'][0]['parameters'], result['warnings']
+
+    def test_emptied_clause_turns_the_filter_off(self):
+        params, _ = self._update({'clause': ''})
+        self.assertEqual((params['clause'], params['checkbox']), ('', ''))
+
+    def test_leading_where_is_removed_and_the_filter_turned_on(self):
+        params, warnings = self._update({'clause': 'WHERE "pop_2008" > 1000', 'checkbox': ''})
+        self.assertEqual((params['clause'], params['checkbox']), ('"pop_2008" > 1000', 'true'))
+        self.assertTrue(any('WHERE' in w for w in warnings))
+
+
+class ExposeAndSchemaTests(unittest.TestCase):
+
+    CANVAS = {'nodes': [
+        {'alias': 'n1', 'id': 'u1', 'type': 'input_Postgis', 'label': 'e', 'status': '',
+         'parameters': {'db': 'gis', 'tablename': 't'}, 'schema': ['ogc_fid', 'nome']},
+        {'alias': 'n2', 'id': 'u2', 'type': 'trans_ExposeAttr', 'label': 'x', 'status': '',
+         'parameters': {'attr': 'a', 'attrs': 'a', 'schema': ['ogc_fid', 'a']}, 'schema': ['ogc_fid', 'a']}],
+        'edges': []}
+
+    def _patch(self, ops):
+        return validate_proposal({'mode': 'patch', 'ops': ops}, load_catalog(),
+                                 [{'name': 'gis', 'type': 'PostGIS'}], self.CANVAS)['proposal']['ops']
+
+    def test_expose_fills_attr_and_attrs_and_leaves_schema_to_the_editor(self):
+        ops = self._patch([{'op': 'add_node', 'node': {'id': 'n3', 'type': 'trans_ExposeAttr',
+                                                         'parameters': {'attrs': ['wkb_geometry']}}},
+                           {'op': 'update_node', 'id': 'n2', 'parameters': {'attr': 'wkb_geometry, b'}}])
+        added, updated = ops[0]['node']['parameters'], ops[1]['parameters']
+        self.assertEqual((added['attr'], added['attrs']), ('wkb_geometry', 'wkb_geometry'))
+        self.assertEqual((updated['attr'], updated['attrs']), ('wkb_geometry b', 'wkb_geometry b'))
+        self.assertNotIn('schema', updated)
+
+    def test_update_does_not_wipe_the_columns_of_an_input(self):
+        ops = self._patch([{'op': 'update_node', 'id': 'n1', 'parameters': {'clause': ''}, 'schema': []},
+                           {'op': 'update_node', 'id': 'n2', 'parameters': {}, 'schema': []}])
+        self.assertTrue(all('schema' not in op for op in ops))

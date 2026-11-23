@@ -1791,13 +1791,13 @@
 			jsonParams.push(entry);
 		}
 		entry.parameters = [op.parameters || {}];
-		if (op.schema) {
+		if (op.schema && op.schema.length) {
 			entry.schema = op.schema;
 		}
-		if (op.schemaold) {
+		if (op.schemaold && op.schemaold.length) {
 			entry['schema-old'] = op.schemaold;
 		}
-		fillEtlNodeForm(op.type || (figure && figure.NAME) || '', {id: op.id}, entry.parameters, entry['schema-old']);
+		fillEtlNodeForm(op.type || (figure && figure.NAME) || '', {id: op.id}, entry.parameters, entry['schema-old'], true);
 	}
 
 	function removeNode(canvasView, id) {

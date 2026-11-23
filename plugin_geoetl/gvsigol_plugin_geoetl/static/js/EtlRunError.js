@@ -171,7 +171,7 @@ var EtlRunError = (function () {
 
 	/* Se llama con la respuesta de la consulta de estado. */
 	function update(data) {
-		if (!data || ['', 'Running', 'Success', 'Error'].indexOf(data.status) === -1) {
+		if (!data || ['', 'Running', 'Stopping', 'Cancelled', 'Success', 'Error'].indexOf(data.status) === -1) {
 			return;
 		}
 		// Ya no hay franja arriba: dejar el contenedor vacío por si quedó algo antiguo en caché

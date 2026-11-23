@@ -721,3 +721,7 @@ msgstr "Les contrasenyes coincidixen"
 msgctxt "auth"
 msgid "Passwords do not match"
 msgstr "Les contrasenyes no coincidixen"
+
+#: gvsigol_auth/views.py
+msgid "The role could not be deleted"
+msgstr "No s'ha pogut eliminar el rol"

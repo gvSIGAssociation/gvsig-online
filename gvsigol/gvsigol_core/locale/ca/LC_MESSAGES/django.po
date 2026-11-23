@@ -2822,3 +2822,234 @@ msgstr "Cerca dades geogràfiques"
 
 msgid "No geographic data match the search."
 msgstr "Cap dada geogràfica coincideix amb la cerca."
+
+msgctxt "documentation"
+msgid "Online"
+msgstr "En línia"
+
+msgctxt "documentation"
+msgid "Read manual"
+msgstr "Llegir el manual"
+
+msgctxt "documentation"
+msgid "Manuals"
+msgstr "Manuals"
+
+msgctxt "documentation"
+msgid "All manuals"
+msgstr "Tots els manuals"
+
+msgctxt "documentation"
+msgid "Print"
+msgstr "Imprimir"
+
+msgctxt "documentation"
+msgid "Pages"
+msgstr "Pàgines"
+
+msgctxt "documentation"
+msgid "Previous"
+msgstr "Anterior"
+
+msgctxt "documentation"
+msgid "Next"
+msgstr "Següent"
+
+msgctxt "documentation"
+msgid "On this page"
+msgstr "En aquesta pàgina"
+
+msgctxt "documentation"
+msgid "This page is not available in your language yet. It is shown in %(lang)s."
+msgstr "Aquesta pàgina encara no està disponible en el vostre idioma. Es mostra en %(lang)s."
+
+msgctxt "documentation"
+msgid "Edit"
+msgstr "Editar"
+
+msgctxt "documentation"
+msgid "This page was edited on the web by %(user)s (%(date)s). Export it from the editor to keep it in the repository."
+msgstr "Aquesta pàgina es va editar al web (%(user)s, %(date)s). Exporteu-la des de l'editor per conservar-la al repositori."
+
+msgctxt "documentation"
+msgid "The repository version of this page has changed since it was edited on the web. Review the editor before exporting."
+msgstr "La versió del repositori d'aquesta pàgina ha canviat des que es va editar al web. Reviseu-la a l'editor abans d'exportar."
+
+msgctxt "documentation"
+msgid "Repository file"
+msgstr "Fitxer del repositori"
+
+msgctxt "documentation"
+msgid "Download the page and the uploaded images to add them to the repository"
+msgstr "Descarrega la pàgina i les imatges pujades per afegir-les al repositori"
+
+msgctxt "documentation"
+msgid "Export ZIP"
+msgstr "Exportar ZIP"
+
+msgctxt "documentation"
+msgid "View page"
+msgstr "Veure la pàgina"
+
+msgctxt "documentation"
+msgid "The repository version of this page has changed since it was edited on the web. Compare both before saving or exporting."
+msgstr "La versió del repositori d'aquesta pàgina ha canviat des que es va editar al web. Compareu-les abans de desar o exportar."
+
+msgctxt "documentation"
+msgid "You are editing the web version saved by %(user)s (%(date)s)."
+msgstr "Esteu editant la versió web desada per %(user)s (%(date)s)."
+
+msgctxt "documentation"
+msgid "Insert image"
+msgstr "Insereix una imatge"
+
+msgctxt "documentation"
+msgid "Paste a screenshot (Ctrl+V) or drag an image onto the text to upload it and insert it where the cursor is."
+msgstr "Enganxeu una captura (Ctrl+V) o arrossegueu una imatge sobre el text per pujar-la i inserir-la on és el cursor."
+
+msgctxt "documentation"
+msgid "Preview"
+msgstr "Previsualització"
+
+msgctxt "documentation"
+msgid "Images of the page"
+msgstr "Imatges de la pàgina"
+
+msgctxt "documentation"
+msgid "This page has no images yet. Paste or drag a screenshot onto the text to add one."
+msgstr "Aquesta pàgina encara no té imatges. Enganxeu o arrossegueu una captura sobre el text per afegir-ne una."
+
+msgctxt "documentation"
+msgid "History"
+msgstr "Historial"
+
+msgctxt "documentation"
+msgid "Load into the editor"
+msgstr "Carrega a l'editor"
+
+msgctxt "documentation"
+msgid "What did you change? (optional)"
+msgstr "Què heu canviat? (opcional)"
+
+msgctxt "documentation"
+msgid "The web version is discarded and the page goes back to the repository version. The history and the uploaded images are kept. Continue?"
+msgstr "Es descarta la versió web i la pàgina torna a la del repositori. Es conserven l'historial i les imatges pujades. Voleu continuar?"
+
+msgctxt "documentation"
+msgid "Back to the repository version"
+msgstr "Torna a la versió del repositori"
+
+msgctxt "documentation"
+msgid "Updating…"
+msgstr "S'està actualitzant…"
+
+msgctxt "documentation"
+msgid "Uploading image…"
+msgstr "S'està pujant la imatge…"
+
+msgctxt "documentation"
+msgid "Image uploaded"
+msgstr "Imatge pujada"
+
+msgctxt "documentation"
+msgid "The image could not be uploaded"
+msgstr "No s'ha pogut pujar la imatge"
+
+msgctxt "documentation"
+msgid "In the repository"
+msgstr "Al repositori"
+
+msgctxt "documentation"
+msgid "Uploaded on the web"
+msgstr "Pujada al web"
+
+msgctxt "documentation"
+msgid "Missing"
+msgstr "Falta"
+
+msgctxt "documentation"
+msgid "Upload"
+msgstr "Puja"
+
+msgctxt "documentation"
+msgid "Replace"
+msgstr "Substitueix"
+
+msgctxt "documentation"
+msgid "Replace the text of the editor with this version?"
+msgstr "Voleu substituir el text de l'editor per aquesta versió?"
+
+msgctxt "documentation"
+msgid "There are unsaved changes."
+msgstr "Hi ha canvis sense desar."
+
+msgctxt "documentation"
+msgid "Someone else saved this page while you were editing it. Copy your changes, reload and apply them again."
+msgstr "Una altra persona ha desat aquesta pàgina mentre l'editàveu. Copieu els vostres canvis, recarregueu i torneu-los a aplicar."
+
+msgctxt "documentation"
+msgid "The page cannot be empty."
+msgstr "La pàgina no pot estar buida."
+
+msgctxt "documentation"
+msgid "No file was received."
+msgstr "No s'ha rebut cap fitxer."
+
+msgctxt "documentation"
+msgid "Only PNG, JPG, GIF or WEBP images can be uploaded."
+msgstr "Només es poden pujar imatges PNG, JPG, GIF o WEBP."
+
+msgctxt "documentation"
+msgid "The image is larger than 10 MB."
+msgstr "La imatge ocupa més de 10 MB."
+
+msgctxt "documentation"
+msgid "The file is not a valid image."
+msgstr "El fitxer no és una imatge vàlida."
+
+msgctxt "documentation"
+msgid "Invalid image path."
+msgstr "Ruta d'imatge no vàlida."
+
+#: templates/documentation_page.html
+msgctxt "documentation"
+msgid "Download PDF"
+msgstr "Descarregar PDF"
+
+#: views_docs.py
+msgctxt "documentation"
+msgid "Contents"
+msgstr "Índex"
+
+#: views_docs.py
+msgctxt "documentation"
+msgid "Updated on {date}"
+msgstr "Actualitzat el {date}"
+
+#: views_docs.py
+msgctxt "documentation"
+msgid "The PDF could not be generated. Use Print instead."
+msgstr "No s'ha pogut generar el PDF. Feu servir «Imprimir»."
+
+#: templates/documentation_page.html
+msgctxt "documentation"
+msgid "Generating PDF…"
+msgstr "S'està generant el PDF…"
+
+#: templates/documentation_page.html
+msgctxt "documentation"
+msgid "Export web changes"
+msgstr "Exportar canvis web"
+
+#: templates/documentation_page.html
+msgctxt "documentation"
+msgid "ZIP with every page edited and image uploaded on the web for this package, with their paths in the repository"
+msgstr "ZIP amb totes les pàgines editades i les imatges pujades des del web en aquest paquet, amb les seues rutes al repositori"
+
+#: templates/shared_view_list.html
+msgid "Only its creator or a superuser can delete it"
+msgstr "Només la pot eliminar qui la va crear o un superusuari"
+
+#: templates/project_list.html
+msgid "Only the creator of the project or a superuser can delete it"
+msgstr "Només qui ha creat el projecte o un superusuari el pot eliminar"

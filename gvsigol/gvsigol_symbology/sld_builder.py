@@ -27,7 +27,7 @@ from gvsigol_symbology.sld import StyledLayerDescriptor, PointSymbolizer, LineSy
     Graphic, Mark, Fill, Stroke, Label, Font, Halo, RasterSymbolizer, ColorMap, ExternalGraphic, Filter, PropertyCriterion, \
     Geometry, Function, LabelPlacement, LinePlacement, PointPlacement, AnchorPoint
 from . import utils
-from . import label_options, label_sld
+from . import label_options, label_sld, symbol_options, symbol_sld
 import json
 import sys
 import re
@@ -61,7 +61,7 @@ def build_sld(layer, style, single_symbol = False):
         symbolizers = ModelSymbolizer.objects.filter(rule=r).order_by('-order')
         if field_geom is None:
             field_geom = utils.get_geometry_field(layer)
-        create_rule(r, symbolizers, feature_type_style, field_geom)
+        create_rule(r, symbolizers, feature_type_style, field_geom, style.type)
     
     sld_body = style_layer_descriptor.as_sld(True)
     if style.type == 'CP' and not single_symbol:
@@ -103,14 +103,19 @@ def build_sld(layer, style, single_symbol = False):
 
     return sld_body
 
-def build_library_symbol(rule):
+def build_library_symbol(rule, ignore_options=False):
+    '''
+    SLD de un símbolo de biblioteca. ignore_options=True genera los simbolizadores nuevos como
+    clásicos (forma, colores y guiones básicos), para exportar bibliotecas que puedan importar
+    las versiones anteriores de gvSIG Online.
+    '''
     style_layer_descriptor = StyledLayerDescriptor()
     named_layer = style_layer_descriptor.create_namedlayer(rule.name)
     user_style = named_layer.create_userstyle(rule.name, rule.name)
     feature_type_style = user_style.create_featuretypestyle()
 
     symbolizers = ModelSymbolizer.objects.filter(rule=rule).order_by('-order')
-    create_rule(rule, symbolizers, feature_type_style)
+    create_rule(rule, symbolizers, feature_type_style, ignore_options=ignore_options)
     
     sld_body = style_layer_descriptor.as_sld(True)
     
@@ -208,7 +213,18 @@ def build_complex_filter(filters, rule):
     return complex_filter
         
 
-def create_rule(r, symbolizers, feature_type_style, geom_field=None):
+def _new_geometry_symbolizer(s):
+    '''(simbolizador hijo, opciones) si es una marca, línea o polígono con opciones; si no, None.'''
+    for attr in ('marksymbolizer', 'linesymbolizer', 'polygonsymbolizer'):
+        if hasattr(s, attr):
+            child = getattr(s, attr)
+            options = symbol_options.of(child)
+            return (child, options) if options is not None else None
+    return None
+
+
+# style_type va en quinta posición (build_sld lo pasa así, r10287); ignore_options, siempre por nombre
+def create_rule(r, symbolizers, feature_type_style, geom_field=None, style_type=None, ignore_options=False):
     min_scale_denominator = None
     max_scale_denominator = None
     if r.minscale >= 0:
@@ -265,7 +281,12 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
                         rule.create_filter(f.get('field'), get_operation_symbol(f.get('operation')), f.get('value'))
     
     for s in symbolizers:
-        if hasattr(s, 'marksymbolizer'):
+        geometry_symbolizer = None if ignore_options else _new_geometry_symbolizer(s)
+        if geometry_symbolizer is not None:
+            # Marca, línea o polígono nuevo (con opciones avanzadas): ver symbol_sld.py
+            symbol_sld.build_symbolizer(rule, geometry_symbolizer[0], geometry_symbolizer[1], geom_field)
+
+        elif hasattr(s, 'marksymbolizer'):
             symbolizer = PointSymbolizer(rule)
             gph = Graphic(symbolizer)
             mrk = Mark(gph)
@@ -343,7 +364,10 @@ def create_rule(r, symbolizers, feature_type_style, geom_field=None):
                 pointplacement = PointPlacement(labelplacement)
                 anchorpoint = AnchorPoint(pointplacement)
                 if geom_field['field_type'] == 'POINT' or geom_field['field_type'] == 'MULTIPOINT':
-                    anchorpoint.AnchorPointY = "-1.5"
+                    if style_type == 'CP':
+                        anchorpoint.AnchorPointY = str(s.textsymbolizer.anchor_point_y)
+                    else:
+                        anchorpoint.AnchorPointY = "-1.5"
                 else:
                     #anchorpoint.AnchorPointY = str(s.textsymbolizer.anchor_point_y)
                     anchorpoint.AnchorPointY = "0.8"

@@ -915,3 +915,540 @@ msgstr "Erabili"
 msgctxt "symbology"
 msgid "Valid name"
 msgstr "Izen baliozkoa"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Add angle from field"
+msgstr "Gehitu eremu bateko angelua"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Advanced symbol"
+msgstr "Ikur aurreratua"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Arrowhead"
+msgstr "Gezi-punta"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Background color"
+msgstr "Atzeko planoaren kolorea"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Background color under the pattern"
+msgstr "Atzeko kolorea ereduaren azpian"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Background opacity"
+msgstr "Atzeko planoaren opakotasuna"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Backslash"
+msgstr "Alderantzizko barra"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Bevel"
+msgstr "Alakatua"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Butt"
+msgstr "Zuzena"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Circle"
+msgstr "Zirkulua"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Closed arrow"
+msgstr "Gezi itxia"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Color"
+msgstr "Kolorea"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Corners"
+msgstr "Izkinak"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Cross"
+msgstr "Gurutzea"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Custom pattern"
+msgstr "Eredu pertsonalizatua"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Dash and gap lengths in pixels, separated by spaces."
+msgstr "Marren eta tarteen luzerak pixeletan, zuriunez bereizita."
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Dash offset"
+msgstr "Marraren desplazamendua"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Dash pattern"
+msgstr "Marra-eredua"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Decoration"
+msgstr "Apaingarriak"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Diagonal /"
+msgstr "Diagonala /"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Diagonal \\"
+msgstr "Diagonala \\"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Diagonal grid"
+msgstr "Sare diagonala"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Diamond"
+msgstr "Erronboa"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Dots"
+msgstr "Puntuak"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Draw the line"
+msgstr "Marraztu lerroa"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "End of the line"
+msgstr "Lerroaren amaiera"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Equilateral triangle"
+msgstr "Triangelu aldeberdina"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Fill the shape"
+msgstr "Bete forma"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Fill type"
+msgstr "Betegarri mota"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Gap between marks"
+msgstr "Marken arteko tartea"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Grid"
+msgstr "Sarea"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Hatch"
+msgstr "Trama"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Hexagon"
+msgstr "Hexagonoa"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Horizontal"
+msgstr "Horizontala"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Initial offset"
+msgstr "Hasierako desplazamendua"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Line ends"
+msgstr "Muturrak"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Line width"
+msgstr "Lerroaren lodiera"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Marks along the line"
+msgstr "Markak lerroan zehar"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Marks follow the direction of the line: use them for railways, arrows showing the flow, or boundaries."
+msgstr "Markek lerroaren norabidea jarraitzen dute: erabili trenbideetarako, noranzkoa adierazteko geziak egiteko edo mugak marrazteko."
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Miter"
+msgstr "Angeluzkoa"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "No field"
+msgstr "Eremurik ez"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "No fill"
+msgstr "Betegarririk gabe"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "None"
+msgstr "Bat ere ez"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "North arrow"
+msgstr "Gezia gorantz"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Offset"
+msgstr "Desplazamendua"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Open arrow"
+msgstr "Gezi irekia"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Pattern"
+msgstr "Eredua"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Pattern color"
+msgstr "Ereduaren kolorea"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Pentagon"
+msgstr "Pentagonoa"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Plus"
+msgstr "Gehi"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Rectangle"
+msgstr "Laukizuzena"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Round"
+msgstr "Biribildua"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Semicircle"
+msgstr "Erdizirkulua"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Shape"
+msgstr "Forma"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Side offset"
+msgstr "Alboko desplazamendua"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Side offset moves the line to the left (positive) or to the right (negative) of its direction, for example to draw parallel lines or the edge of a road."
+msgstr "Alboko desplazamenduak lerroa bere noranzkoaren ezkerrera (positiboa) edo eskuinera (negatiboa) mugitzen du; adibidez, lerro paraleloak edo errepide baten ertza marrazteko."
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Slash"
+msgstr "Barra"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Solid"
+msgstr "Solidoa"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "South arrow"
+msgstr "Gezia beherantz"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Spacing"
+msgstr "Tartea"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Square"
+msgstr "Karratua"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Star"
+msgstr "Izarra"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Start of the line"
+msgstr "Lerroaren hasiera"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Symbol opacity"
+msgstr "Ikurraren opakotasuna"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Symbol preview"
+msgstr "Ikurraren aurrebista"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "This shape is drawn with its stroke only."
+msgstr "Forma hau ertzarekin soilik marrazten da."
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Times"
+msgstr "Biderketa-ikurra"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Triangle"
+msgstr "Triangelua"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Vertical"
+msgstr "Bertikala"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Vertical (up)"
+msgstr "Bertikala (gorantz)"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Vertical line"
+msgstr "Lerro bertikala"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "X"
+msgstr "X"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "e.g. 10 4 2 4"
+msgstr "adib. 10 4 2 4"
+
+#: templates/library_list.html
+msgctxt "symbology"
+msgid "This library has %s symbol with advanced symbology."
+msgid_plural "This library has %s symbols with advanced symbology."
+msgstr[0] "Liburutegi honek sinbologia aurreratuko %s ikur du."
+msgstr[1] "Liburutegi honek sinbologia aurreratuko %s ikur ditu."
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Administrative boundary"
+msgstr "Administrazio-muga"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Building"
+msgstr "Eraikina"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Canal"
+msgstr "Ubidea"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Choose a preset to replace the symbolizers of the rule. The label is kept, and you can edit the symbolizers afterwards."
+msgstr "Aukeratu ikur aurrezarri bat arauaren sinbolizatzaileak ordezteko. Etiketa mantendu egiten da, eta ondoren sinbolizatzaileak edita ditzakezu."
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Crops"
+msgstr "Laborantza"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Dashed outline"
+msgstr "Ingerada etena"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Double line"
+msgstr "Lerro bikoitza"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Fence"
+msgstr "Hesia"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Flood zone"
+msgstr "Uholde-eremua"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Footpath"
+msgstr "Bidezidorra"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Green area"
+msgstr "Berdegunea"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Highlighted star"
+msgstr "Izar nabarmendua"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Line with end arrow"
+msgstr "Lerroa amaierako geziarekin"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Main road"
+msgstr "Errepide nagusia"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Municipal boundary"
+msgstr "Udal-muga"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Parcel outline"
+msgstr "Lursailaren ingerada"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Point of interest"
+msgstr "Interesgunea"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Power line"
+msgstr "Linea elektrikoa"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Presets"
+msgstr "Aurrezarpenak"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Protected area"
+msgstr "Gune babestua"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Railway"
+msgstr "Trenbidea"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Railway (classic)"
+msgstr "Trenbidea (klasikoa)"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Restricted area"
+msgstr "Eremu mugatua"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "River"
+msgstr "Ibaia"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "River with flow direction"
+msgstr "Ibaia korronte-noranzkoarekin"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Secondary road"
+msgstr "Bigarren mailako errepidea"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Survey point"
+msgstr "Erpin geodesikoa"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Symbol presets"
+msgstr "Ikur aurrezarriak"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Target"
+msgstr "Itua"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Track"
+msgstr "Bidea"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Vegetation"
+msgstr "Landaredia"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Water body"
+msgstr "Ur-azalera"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "X mark"
+msgstr "X ikurra"

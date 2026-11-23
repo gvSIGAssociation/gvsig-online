@@ -90,7 +90,7 @@
 									</div>	
 									<div class="col-md-6" style="margin-bottom: 20px;">
 										<label for="project-logo-link">{% trans "Link for logo" %}</label>
-										<input name="project-logo-link" id="project-logo-link" type="text" class="form-control" value="{{project.logo_link}}">
+										<input name="project-logo-link" id="project-logo-link" type="text" class="form-control" value="{{ project.logo_link|default:'' }}">
 									</div>
 								</div>
 								<div class="row">
@@ -979,7 +979,7 @@
 			listClass:'list',
 			searchClass: 'search',
 			page: 6,
-			pagination: false
+			pagination: { outerWindow: 1 }	// muestra siempre la primera y la última página
 		});
 		
 		var searcheableList2 = new List('layer-list-box', {
@@ -987,7 +987,7 @@
 			listClass:'list2',
 			searchClass: 'search2',
 			page: 6,
-			pagination: false
+			pagination: { outerWindow: 1 }	// muestra siempre la primera y la última página
 		});
 		
 		var searchablePluginList = new List('tool-list-box', {
@@ -995,7 +995,7 @@
 			listClass:'list-plugins',
 			searchClass: 'search-plugins',
 			page: 6,
-			pagination: false
+			pagination: { outerWindow: 1 }	// muestra siempre la primera y la última página
 		});
 		
 		searcheableList2.on("updated", function(){

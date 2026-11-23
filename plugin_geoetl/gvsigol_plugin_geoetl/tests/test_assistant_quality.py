@@ -97,6 +97,89 @@ class SecurityTests(SimpleTestCase):
         self.assertIn('no la sigas', system_prompt(load_catalog(), 'es'))
 
 
+class NotFoundTests(SimpleTestCase):
+    """Un esquema o una tabla que no existen no se devuelven como una lista vacía: se ofrecen los parecidos."""
+
+    LEVELS = {('gis', ''): ['public', 'ds_44523361f', 'ds_otro'],
+              ('gis', 'ds_44523361f'): ['viajeros', 'municipios'], ('gis', 'ds_otro'): ['x'],
+              ('gis2', ''): ['44523361f'], ('gis3', ''): ['public', 'ds_44523361f']}
+
+    def _tools(self, connections=CONNECTIONS):
+        context = AssistantContext.from_payload({'is_superuser': True, 'connections': connections})
+        return {t.name: t for t in build_tools(context, load_catalog(), {'nodes': [], 'edges': []}, None, None, [])}
+
+    def _level(self, connection, name, schema):
+        return self.LEVELS.get((name, schema), [])
+
+    def test_missing_schema_offers_the_prefixed_one_that_has_the_table(self):
+        with mock.patch.object(tools_module, '_list_level', side_effect=self._level), \
+                mock.patch.object(tools_module, '_columns', return_value=[]):
+            out = json.loads(self._tools()['get_table_schema'].invoke(
+                {'connection': 'gis', 'schema': '44523361f', 'table': 'viajeros'}))
+        self.assertIn('44523361f no existe', out['error'])
+        self.assertEqual(out['similar_schemas'][0], 'ds_44523361f')
+        self.assertEqual(out['suggestions'], ['ds_44523361f.viajeros'])
+        # La pregunta va lista para ask_user y confirma esquema y tabla a la vez
+        self.assertEqual(out['ask']['source'], 'custom')
+        self.assertEqual(out['ask']['options'], ['ds_44523361f.viajeros'])
+        self.assertIn('44523361f.viajeros no existe', out['ask']['text'])
+
+    def test_schemas_with_the_table_go_first(self):
+        levels = {('gis', ''): ['ds_44523361f_old', 'ds_44523361f'],
+                  ('gis', 'ds_44523361f_old'): ['viajeros_2019'], ('gis', 'ds_44523361f'): ['viajeros']}
+        with mock.patch.object(tools_module, '_list_level', side_effect=lambda c, n, s: levels.get((n, s), [])), \
+                mock.patch.object(tools_module, '_columns', return_value=[]):
+            out = json.loads(self._tools()['get_table_schema'].invoke(
+                {'connection': 'gis', 'schema': '44523361f', 'table': 'viajeros'}))
+        self.assertEqual(out['suggestions'], ['ds_44523361f.viajeros', 'ds_44523361f_old.viajeros_2019'])
+
+    def test_table_in_a_similar_schema_of_another_connection(self):
+        connections = CONNECTIONS + [{'name': 'gis3', 'type': 'PostGIS'}]
+        levels = dict(self.LEVELS)
+        levels.update({('gis', ''): ['public'], ('gis3', 'ds_44523361f'): ['viajeros']})
+        with mock.patch.object(tools_module, '_list_level', side_effect=lambda c, n, s: levels.get((n, s), [])), \
+                mock.patch.object(tools_module, '_columns', return_value=[]):
+            out = json.loads(self._tools(connections)['get_table_schema'].invoke(
+                {'connection': 'gis', 'schema': '44523361f', 'table': 'viajeros'}))
+        self.assertEqual(out['suggestions'], ['ds_44523361f.viajeros (conexión gis3)'])
+
+    def test_tables_question_only_offers_the_searched_table(self):
+        from gvsigol_plugin_geoetl.assistant.questions import resolve_questions
+        context = AssistantContext.from_payload({'is_superuser': True, 'connections': CONNECTIONS})
+        with mock.patch.object(tools_module, '_list_level', side_effect=self._level):
+            questions, _ = resolve_questions([{'label': 'Tabla', 'text': '¿Qué tabla?', 'source': 'tables',
+                                               'connection': 'gis', 'schema': 'ds_44523361f', 'table': 'viajeros'}],
+                                             load_catalog(), {'nodes': [], 'edges': []}, context)
+        self.assertEqual([o['value'] for o in questions[0]['options']], ['viajeros'])
+
+    def test_missing_table_offers_similar_tables(self):
+        with mock.patch.object(tools_module, '_list_level', side_effect=self._level), \
+                mock.patch.object(tools_module, '_columns', return_value=[]):
+            out = json.loads(self._tools()['get_table_schema'].invoke(
+                {'connection': 'gis', 'schema': 'ds_44523361f', 'table': 'viajero'}))
+        self.assertEqual(out['similar_tables'], ['viajeros'])
+        self.assertEqual(out['ask']['options'], ['ds_44523361f.viajeros'])
+
+    def test_list_tables_of_a_missing_schema(self):
+        with mock.patch.object(tools_module, '_list_level', side_effect=self._level):
+            out = json.loads(self._tools()['list_tables'].invoke({'connection': 'gis', 'schema': '44523361f'}))
+        self.assertEqual(out['similar_schemas'][0], 'ds_44523361f')
+
+    def test_schema_in_another_connection_of_the_user(self):
+        connections = CONNECTIONS + [{'name': 'gis2', 'type': 'PostGIS'}, {'name': 'gis3', 'type': 'PostGIS'},
+                                     {'name': 'ora', 'type': 'Oracle'}]
+        with mock.patch.object(tools_module, '_list_level', side_effect=self._level):
+            out = json.loads(self._tools(connections)['list_tables'].invoke({'connection': 'gis', 'schema': '44523361f'}))
+        self.assertEqual(out['connections_with_schema'], [{'connection': 'gis2', 'schemas': ['44523361f']},
+                                                          {'connection': 'gis3', 'schemas': ['ds_44523361f']}])
+
+    def test_existing_but_empty_schema_is_not_an_error(self):
+        with mock.patch.object(tools_module, '_list_level', side_effect=self._level):
+            out = json.loads(self._tools()['list_tables'].invoke({'connection': 'gis', 'schema': 'public'}))
+        self.assertEqual(out['items'], [])
+        self.assertNotIn('error', out)
+
+
 class ConcurrencyTests(SimpleTestCase):
 
     def test_parallel_calls_are_attended_one_at_a_time(self):

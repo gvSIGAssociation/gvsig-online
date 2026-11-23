@@ -31,7 +31,13 @@
 		</div>
 		<div class="gol-sym-page-header__actions">
 			<a href="{% url 'library_export' library.id %}" class="btn-pl-outline"><i class="fa fa-download" aria-hidden="true"></i> {% trans "Export library" %}</a>
+			{% if advanced_symbols %}
+			<a href="{% url 'library_export' library.id %}?compat=1" class="btn-pl-outline gol-sym-export-compat" title="{% trans "Advanced symbols are exported as classic symbols (shape, colours and dashes)" context "symbology" %}"><i class="fa fa-history" aria-hidden="true"></i> {% trans "Export for earlier versions" context "symbology" %}</a>
+			{% endif %}
 		</div>
+		{% if advanced_symbols %}
+		<p class="gol-sym-alert gol-sym-export-note"><i class="fa fa-info-circle" aria-hidden="true"></i> {% blocktrans count counter=advanced_symbols context "symbology" %}This library has {{ counter }} symbol with advanced symbology. Earlier versions of gvSIG Online cannot import it correctly: to use the library there, export it for earlier versions.{% plural %}This library has {{ counter }} symbols with advanced symbology. Earlier versions of gvSIG Online cannot import them correctly: to use the library there, export it for earlier versions.{% endblocktrans %}</p>
+		{% endif %}
 	</div>
 
 	<div class="gol-sym-page-grid gol-sym-page-grid--detail">

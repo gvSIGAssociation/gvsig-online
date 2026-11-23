@@ -65,6 +65,8 @@ class QuestionIn(_Open):
     node: Optional[str] = Field(None, description='Id del nodo, si es un parámetro de un nodo.')
     param: Optional[str] = Field(None, description='Parámetro del nodo.')
     type: Optional[str] = Field(None, description='Tipo de nodo, si aún no está en el canvas.')
+    connection_type: Optional[str] = Field(None, description='Con connections y sin nodo: tipo de conexión que sirve '
+                                                             '(PostGIS, Oracle, SQLServer), si el usuario lo ha dicho.')
     multiple: Optional[bool] = Field(None, description='True si puede elegir varias.')
     options: Optional[List[Any]] = Field(None, description='Con custom: hasta 8 textos cortos.')
     connection: Optional[str] = None

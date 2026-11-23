@@ -1,7 +1,9 @@
 type: trans_Stats
 label: Statistics
 family: transform
-summary: Calcula estadísticas de un atributo, opcionalmente por grupos.
+summary: Calcula estadísticas de un atributo, opcionalmente por grupos. Solo devuelve la columna de agrupación y
+  _max, _min, _count, _sum, _mean, _median, _mode y _desv; la columna original (attr) ya no sale, así que los nodos
+  siguientes deben usar _sum, _mean, etc.
 parameters:
 - name: attr
   summary: Columna numérica o de fecha sobre la que se calculan las estadísticas.

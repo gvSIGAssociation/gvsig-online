@@ -29,10 +29,11 @@ from gdaltools.metadata import project
 from gvsigol_core.models import SharedView
 from django.http.response import JsonResponse
 from gvsigol_core import forms
+from gvsigol_core import docs_center
 from gvsigol.basetypes import CloneConf
 from gvsigol_auth import auth_backend
 from django.shortcuts import render, HttpResponse, redirect, get_object_or_404
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponseForbidden
 from .models import Project, ProjectLayerGroup, ProjectRole, Application, ApplicationRole, UserHomeOrder
 from gvsigol_services.models import Server, Workspace, Datastore, Layer, LayerGroup, ServiceUrl, LayerReadRole, LayerGroupRole, SqlView
 from django.contrib.auth.decorators import login_required
@@ -86,6 +87,7 @@ def role_deleted_handler(sender, **kwargs):
     try:
         role = kwargs['role']
         ProjectRole.objects.filter(role=role).delete()
+        ApplicationRole.objects.filter(role=role).delete()
     except Exception as e:
         print(e)
         pass
@@ -370,6 +372,7 @@ def project_list(request):
         project['is_public'] = p.is_public
         can_manage = 'true' if p.can_manage(request) else 'false'
         project['can_manage'] = can_manage
+        project['can_delete'] = 'true' if _can_delete_project(request.user, p) else 'false'
         projects.append(project)
 
     # temporalmente mostramos todos los proyectos ignorando VIEWER_UI_CHOICES para poder comparar
@@ -1470,6 +1473,11 @@ def project_add(request):
 @login_required()
 @staff_required
 def project_update(request, pid):
+    # La lista solo enseña «Modificar» a quien puede gestionar el proyecto; aquí se exige también,
+    # para que no baste con escribir la URL (GET y POST)
+    project_to_check = get_object_or_404(Project, id=int(pid))
+    if not project_to_check.can_manage(request):
+        return forbidden_view(request)
 
     has_geocoding_plugin = False
     if 'gvsigol_plugin_geocoding' in settings.INSTALLED_APPS:
@@ -1766,15 +1774,20 @@ def project_update(request, pid):
                                                        })
 
 
+def _can_delete_project(user, project):
+    """Eliminar un proyecto: solo superusuarios y quien lo creó (el permiso de gestión no basta)."""
+    return user.is_superuser or (user.is_staff and project.created_by == user.username)
+
+
 @login_required()
 @staff_required
 def project_delete(request, pid):
     if request.method == 'POST':
+        project = Project.objects.filter(id=int(pid)).first()
+        if project is None or not _can_delete_project(request.user, project):
+            return HttpResponseForbidden(json.dumps({"deleted": False, "error": "Not allowed"}),
+                                         content_type='application/json')
         try:
-            if request.user.is_superuser:
-                project = Project.objects.get(id=int(pid))
-            else:
-                project = Project.objects.get(id=int(pid), created_by__exact=request.user.username)
             project.delete()
             response = {
                 'deleted': True
@@ -2743,7 +2756,11 @@ def documentation(request):
             if app_name.startswith('gvsigol_plugin_') and _user_can_see_plugin_manual(request.user, app_name)
         ]
 
+    # Los plugins con manual en Markdown (docs/docs.yml) ya no buscan su PDF
+    md_apps = docs_center.apps_with_manuals()
     for app_name in apps_to_scan:
+        if app_name in md_apps:
+            continue
         the_path, manual_lang = _find_plugin_manual(
             app_name, lang, plugins_base_path, base_docs_url
         )
@@ -2764,8 +2781,26 @@ def documentation(request):
             'lang': manual_lang
         })
         
+    # Manuales en Markdown: el core según su público (visores o administración) y el resto con
+    # los plugins. Desde un panel, solo los de los plugins del proyecto.
+    md_cards = {'viewer': [], 'admin': [], 'plugins': []}
+    for manual in docs_center.visible_manuals(request.user, allowed_apps=allowed if from_panels else None):
+        if manual.is_core:
+            group = 'admin' if manual.audience in ('staff', 'superuser') else 'viewer'
+        else:
+            group = 'plugins'
+        md_cards[group].append({
+            'url': reverse('documentation_manual', kwargs={'app': manual.app, 'manual': manual.slug}),
+            'title': docs_center.text_for(manual.title, lang),
+            'desc': docs_center.text_for(manual.description, lang),
+            'icon': manual.icon,
+        })
+
     response = {
         'plugin_manuals': plugin_manuals,
+        'md_viewer_manuals': md_cards['viewer'],
+        'md_admin_manuals': md_cards['admin'],
+        'md_plugin_manuals': md_cards['plugins'],
     }
     
     if admin:
@@ -2839,7 +2874,7 @@ def save_shared_view(request):
             do_save_shared_view(pid, description, view_state, expiration_date, request.user, False, shared_url)
         else:
             shared_view = do_save_shared_view(pid, description, view_state, expiration_date, request.user)
-            shared_url = shared_view.shared_url
+            shared_url = shared_view.url
         #for email in emails.split(';'):
         #    send_shared_view(email, shared_url)
         response = {
@@ -2874,6 +2909,8 @@ def load_shared_view(request, view_name):
         if not (project.is_public or request.user.is_authenticated):
             shared_url = settings.BASE_URL + '/gvsigonline/auth/login_user/?next=/gvsigonline/core/load_shared_view/' + view_name
             return redirect(shared_url)
+        if not project.is_public and not core_utils.can_read_project(request, project):
+            return render(request, 'illegal_operation.html', {})
 
         plugins_config = core_utils.get_plugins_config()
         enabled_plugins = core_utils.get_enabled_plugins(project)
@@ -2906,6 +2943,11 @@ def load_shared_view(request, view_name):
     except Exception:
         return redirect('not_found_sharedview')
 
+def _can_delete_shared_view(user, shared_view):
+    """Borra una vista compartida quien la creó o un superusuario."""
+    return user.is_superuser or shared_view.created_by == user.username
+
+
 @login_required()
 @staff_required
 def shared_view_list(request):
@@ -2919,6 +2961,7 @@ def shared_view_list(request):
         shared_view['url'] = sv.url
         shared_view['expiration_date'] = sv.expiration_date
         shared_view['description'] = sv.description
+        shared_view['can_delete'] = _can_delete_shared_view(request.user, sv)
         shared_views.append(shared_view)
 
     response = {
@@ -2931,6 +2974,8 @@ def shared_view_list(request):
 def shared_view_delete(request, svid):
     if request.method == 'POST':
         shared_view = SharedView.objects.get(id=int(svid))
+        if not _can_delete_shared_view(request.user, shared_view):
+            return HttpResponseForbidden()
         shared_view.delete()
 
         response = {
@@ -3232,6 +3277,10 @@ def application_add(request):
 @login_required()
 @staff_required
 def application_update(request, appid):
+    # Como al eliminarla: quien la creó o un superusuario (la lista ya filtra así)
+    if not (request.user.is_superuser or
+            Application.objects.filter(id=int(appid), created_by__exact=request.user.username).exists()):
+        return forbidden_view(request)
     if request.method == 'POST':
         name = request.POST.get('application-name')
         title = request.POST.get('application-title')

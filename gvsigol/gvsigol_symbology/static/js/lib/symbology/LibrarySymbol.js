@@ -97,9 +97,19 @@ LibrarySymbol.prototype.libraryPreview = function(featureType, rule, json_symbol
 		return parseInt(b.order) - parseInt(a.order);
 	});
 	
-	var sldBody = this.symbologyUtils.getSLDBody(symbolizers);
-	var url = previewUrl + '&SLD_BODY=' + encodeURIComponent(sldBody);
-	var ui = '<img id="rule-preview-img" src="' + url + '" class="rule-preview"></img>';
+	var url;
+	var cls = 'rule-preview';
+	if (typeof SymbolOptions !== 'undefined' && SymbolOptions.anyAdvanced(symbolizers)) {
+		// con simbología avanzada la vista previa la genera el servidor con el SLD que se publica, al
+		// tamaño de la tarjeta (a 20 px no se distinguen las marcas, flechas ni tramas)
+		var size = featureType == 'LineSymbolizer' ? [120, 56] : [56, 56];
+		url = SymbolOptions.previewUrl(previewUrl, symbolizers, size[0], size[1]);
+		cls += ' gol-sym-preview-large';
+	} else {
+		var sldBody = this.symbologyUtils.getSLDBody(symbolizers);
+		url = previewUrl + '&SLD_BODY=' + encodeURIComponent(sldBody);
+	}
+	var ui = '<img id="rule-preview-img" src="' + url + '" class="' + cls + '"></img>';
 	$("#library-symbol-preview-div-" + rule.id).empty();
 	$("#library-symbol-preview-div-" + rule.id).append(ui);
 };

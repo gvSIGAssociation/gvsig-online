@@ -1,1 +1,0 @@
-default_app_config = 'gvsigol_plugin_baseapi.apps.GvsigolBaseApiConfig'

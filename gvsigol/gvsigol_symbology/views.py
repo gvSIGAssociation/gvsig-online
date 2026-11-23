@@ -26,6 +26,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseForbidden
 from django.db.models import Q
 from gvsigol_services import geographic_servers
+from gvsigol_core import ai_assist
 from gvsigol_services.models import Workspace, Datastore, Layer, Server
 from gvsigol_services import utils as service_utils
 from gvsigol_services.tasks import do_layer_cache_clear
@@ -41,12 +42,13 @@ from django.views.decorators.csrf import csrf_exempt
 from . import utils
 import json
 import ast
+import html
 from gvsigol_services.backend_postgis import Introspect
 import re
 import logging
 from functools import wraps
 from django.views.decorators.http import require_POST, require_GET
-from . import geoserver_proxy
+from . import geoserver_proxy, symbol_preview
 logger = logging.getLogger("gvsigol")
 
 
@@ -110,6 +112,17 @@ def delete_preview_style(request, name, gs):
             pass
         
     return success
+
+
+def _ai_style(request, layer_id):
+    """Asistente «Sugerir estilo con IA» (lo aporta un plugin). None = sin botón; nunca rompe la página."""
+    try:
+        layer = Layer.objects.filter(id=int(layer_id)).first()
+    except (TypeError, ValueError):
+        return None
+    if layer is None:
+        return None
+    return ai_assist.get(ai_assist.STYLE_SUGGESTION, request, layer)
 
 
 def _style_saved_response(request, style, layer, gs, preview_name):
@@ -277,7 +290,8 @@ def select_legend_type(request, layer_id):
     
     is_vectorial = False
     is_points = False
-    if layer.type == 'v_PostGIS':
+    # Las capas de vistas SQL también son vectoriales (antes se les ofrecían las leyendas ráster)
+    if layer.type in ('v_PostGIS', 'v_PostGIS_View'):
         is_vectorial = True
         try:
             params = json.loads(layer.datastore.connection_params)
@@ -295,7 +309,8 @@ def select_legend_type(request, layer_id):
                     is_points = True
         except Exception as e:
             logger.exception('Error obteniendo las columnas geométricas de la capa %s', layer.name)
-            raise
+            if layer.type == 'v_PostGIS':
+                raise
         
     is_view = False
     if layer.type == 'v_PostGIS_View':
@@ -308,6 +323,7 @@ def select_legend_type(request, layer_id):
         'is_points': is_points
     }
         
+    response['ai_style'] = _ai_style(request, layer_id)
     return render(request, 'select_legend_type.html', response)
 
 @login_required()
@@ -442,6 +458,7 @@ def unique_symbol_add(request, layer_id):
         
     else:                 
         response = services_unique_symbol.get_conf(request, layer_id)     
+        response['ai_style'] = _ai_style(request, layer_id)
         return render(request, 'unique_symbol_add.html', response)
     
 @login_required()
@@ -492,6 +509,7 @@ def unique_symbol_update(request, layer_id, style_id):
                         response['property_name'] = rule_filter.get('property_name')   
          
         
+        response['ai_style'] = _ai_style(request, layer_id)
         return render(request, 'unique_symbol_update.html', response)
     
     
@@ -519,6 +537,7 @@ def unique_values_add(request, layer_id, style_id=None):
         color_ramps = ColorRampLibrary.objects.all()        
         response["ramp_libraries"] = color_ramps
         
+        response['ai_style'] = _ai_style(request, layer_id)
         return render(request, 'unique_values_add.html', response)
     
 @login_required()
@@ -572,6 +591,7 @@ def unique_values_update(request, layer_id, style_id):
         color_ramps = ColorRampLibrary.objects.all()        
         response["ramp_libraries"] = color_ramps
         
+        response['ai_style'] = _ai_style(request, layer_id)
         return render(request, 'unique_values_update.html', response)
     
 @login_required()
@@ -627,6 +647,7 @@ def intervals_add(request, layer_id):
         color_ramps = ColorRampLibrary.objects.all()        
         response["ramp_libraries"] = color_ramps
         
+        response['ai_style'] = _ai_style(request, layer_id)
         return render(request, 'intervals_add.html', response)
 
 
@@ -788,6 +809,7 @@ def intervals_update(request, layer_id, style_id):
         color_ramps = ColorRampLibrary.objects.all()        
         response["ramp_libraries"] = color_ramps
         
+        response['ai_style'] = _ai_style(request, layer_id)
         return render(request, 'intervals_update.html', response)
     
 @login_required()
@@ -857,7 +879,7 @@ def clustered_points_update(request, layer_id, style_id):
     else:                
         style = Style.objects.get(id=int(style_id))
         
-        style_rules = Rule.objects.filter(style=style)
+        style_rules = Rule.objects.filter(style=style).order_by('order', 'id')
         rules = []
         for r in style_rules:
             rule = _rule_to_dict(r)
@@ -1365,8 +1387,12 @@ def color_ramp_folder_delete(request, color_ramp_folder_id):
   
 @staff_required
 def library_list(request):
+    libraries = Library.objects.all()
     response = {
-        'libraries': Library.objects.all()
+        'libraries': libraries,
+        # símbolos avanzados por biblioteca: al exportar se avisa y se ofrece la exportación compatible
+        'advanced_counts': utils.json_for_script(
+            dict((str(lib.id), services_library.advanced_symbol_count(lib)) for lib in libraries)),
     }
     return render(request, 'library_list.html', response)
 
@@ -1432,6 +1458,7 @@ def library_update(request, library_id):
         response = {
             'library': library,
             'rules': rules,
+            'advanced_symbols': services_library.advanced_symbol_count(library),
             'preview_point_url': wms_url + '?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_point',
             'preview_line_url': wms_url + '?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_line',
             'preview_polygon_url': wms_url + '?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=preview_polygon'
@@ -1483,7 +1510,9 @@ def library_export(request, library_id):
     library_rules = LibraryRule.objects.filter(library_id=library.id)
     
     try:
-        response = services_library.export_library(library, library_rules)
+        # compat=1: símbolos avanzados como clásicos, para versiones anteriores de gvSIG Online
+        compat = request.GET.get('compat') == '1'
+        response = services_library.export_library(library, library_rules, compat=compat)
         return response
         
     except Exception as e:
@@ -1744,25 +1773,21 @@ def get_ol_style(layer):
 @require_GET
 def geoserver_proxy_view(request):
     """
-    Reenvía a GeoServer peticiones WMS/WFS de lectura de la previsualización con las
-    credenciales de la sesión del usuario (ver geoserver_proxy.py). Solo lo usa el
-    navegador cuando la sesión tiene contraseña y no hay token OIDC.
+    Reenvía a GeoServer peticiones WMS/WFS de lectura de la previsualización (ver geoserver_proxy.py).
+
+    - Sesión con contraseña (LDAP/local): con las credenciales del usuario; GeoServer aplica sus permisos.
+    - Sesión de Keycloak: el token de la sesión caduca antes de que Django lo renueve, así que se comprueba
+      en gvSIG que el usuario puede leer las capas pedidas y se pide con las credenciales de servicio.
     """
     extra_params = [(k, v) for k, v in request.GET.items() if k != 'url']
-    servers = []
-    for srv in Server.objects.all():
-        if not srv.frontend_url:
-            continue
-        gs = geographic_servers.get_instance().get_server_by_id(srv.id)
-        servers.append((srv.frontend_url, getattr(gs, 'conf_url', None)))
     try:
-        absolute_url, params = geoserver_proxy.resolve_target(
-            request.GET.get('url'), extra_params, servers)
+        absolute_url, params, gs, frontend_url = _resolve_proxy_target(request.GET.get('url'), extra_params)
+        session = _preview_session(request, gs, params, request.GET.get('url'), frontend_url)
     except geoserver_proxy.ProxyNotAllowed as e:
         logger.warning('geoserver_proxy rechazado: %s', e)
         return HttpResponseForbidden()
     try:
-        resp = geoserver_proxy.forward(service_utils.getUserAuthSession(request), absolute_url, params)
+        resp = geoserver_proxy.forward(session, absolute_url, params)
     except Exception:
         logger.exception('geoserver_proxy: error reenviando a %s', absolute_url)
         return HttpResponse(status=502)
@@ -1770,3 +1795,132 @@ def geoserver_proxy_view(request):
                             content_type=resp.headers.get('Content-Type', 'application/octet-stream'))
     response['Cache-Control'] = 'private, no-store'
     return response
+
+
+def _resolve_proxy_target(url, extra_params):
+    """(url interna, parámetros, servidor geográfico, frontend_url) del GeoServer al que va la petición."""
+    for srv in Server.objects.all():
+        if not srv.frontend_url:
+            continue
+        gs = geographic_servers.get_instance().get_server_by_id(srv.id)
+        try:
+            absolute_url, params = geoserver_proxy.resolve_target(
+                url, extra_params, [(srv.frontend_url, getattr(gs, 'conf_url', None))])
+        except geoserver_proxy.ProxyNotAllowed:
+            continue
+        return absolute_url, params, gs, srv.frontend_url
+    raise geoserver_proxy.ProxyNotAllowed('servidor no permitido')
+
+
+def _uses_service_credentials(request):
+    """Sin contraseña en la sesión (Keycloak): las peticiones van con las credenciales de servicio."""
+    return not request.session.get('password')
+
+
+def _can_read_layer_fn(request):
+    def can_read(workspace, name):
+        layers = Layer.objects.filter(name=name).select_related('datastore__workspace')
+        if workspace:
+            layers = layers.filter(datastore__workspace__name=workspace)
+        layers = list(layers)
+        # Sin espacio de trabajo puede haber varias con el mismo nombre: tienen que poder leerse todas
+        return bool(layers) and all(service_utils.can_read_layer(request.user, layer) for layer in layers)
+    return can_read
+
+
+def _service_session(gs):
+    if not getattr(gs, 'user', None):
+        raise geoserver_proxy.ProxyNotAllowed('el servidor no tiene credenciales de servicio')
+    import requests as http_requests
+    session = http_requests.Session()
+    session.auth = (gs.user, gs.password)
+    return session
+
+
+def _preview_session(request, gs, params, url, frontend_url):
+    """Sesión HTTP para pedir a GeoServer, validando la petición si va con credenciales de servicio."""
+    if not _uses_service_credentials(request):
+        return service_utils.getUserAuthSession(request)
+    geoserver_proxy.check_service_request(params, geoserver_proxy.path_workspace(url, frontend_url),
+                                          _can_read_layer_fn(request))
+    return _service_session(gs)
+
+
+
+@login_required()
+@staff_required
+@require_GET
+def symbol_preview_view(request):
+    """
+    Vista previa de un simbolizador (o de los de una regla) con el SLD que se publica
+    (symbol_preview.py). Parámetros: url (la URL de vista previa del editor), symbolizers
+    (JSON [{type, json}]), width y height opcionales.
+
+    - La leyenda (GetLegendGraphic) se pide como en geoserver_proxy_view: con las credenciales de la
+      sesión si tiene contraseña; con Keycloak, con las de servicio tras comprobar los permisos en gvSIG.
+    - El GetMap de las líneas con decoraciones (sobre una línea quebrada) se pide con las credenciales
+      de servicio del servidor: solo afecta a las capas técnicas preview:preview_* (datos sintéticos)
+      con un SLD normalizado, y el token OIDC guardado en la sesión puede haber caducado.
+    """
+    candidates = []
+    for srv in Server.objects.all():
+        if not srv.frontend_url:
+            continue
+        gs = geographic_servers.get_instance().get_server_by_id(srv.id)
+        candidates.append((srv.frontend_url, getattr(gs, 'conf_url', None), gs))
+    # La URL de vista previa del editor sale de la plantilla escapada como HTML ("{{ preview_url }}"
+    # -> &amp;): en un <img src> el navegador lo deshace, aquí llega tal cual.
+    url = html.unescape(request.GET.get('url') or '')
+    target = None
+    try:
+        for frontend_url, internal_url, gs in candidates:
+            try:
+                absolute_url, params = geoserver_proxy.resolve_target(
+                    url, [('SERVICE', 'WMS')], [(frontend_url, internal_url)])
+            except geoserver_proxy.ProxyNotAllowed:
+                continue
+            target = (absolute_url, params, gs, frontend_url)
+            break
+        if target is None:
+            raise geoserver_proxy.ProxyNotAllowed('servidor no permitido')
+        absolute_url, params, gs, frontend_url = target
+        instances = symbol_preview.parse_symbolizers(request.GET.get('symbolizers'))
+        attempts = symbol_preview.requests_for(params, instances, request.GET.get('width'),
+                                               request.GET.get('height'))
+    except (geoserver_proxy.ProxyNotAllowed, symbol_preview.PreviewError) as e:
+        logger.warning('symbol_preview rechazado: %s', e)
+        return HttpResponseForbidden()
+    service_session = None
+    if getattr(gs, 'user', None):
+        service_session = _service_session(gs)
+    if _uses_service_credentials(request):
+        # Keycloak: la leyenda tampoco puede ir con el token de la sesión (caduca); solo capas que pueda leer
+        try:
+            geoserver_proxy.check_service_request(params, geoserver_proxy.path_workspace(url, frontend_url),
+                                                  _can_read_layer_fn(request))
+        except geoserver_proxy.ProxyNotAllowed as e:
+            logger.warning('symbol_preview rechazado: %s', e)
+            return HttpResponseForbidden()
+        if service_session is None:
+            return HttpResponse(status=502)
+        user_session = service_session
+    else:
+        user_session = service_utils.getUserAuthSession(request)
+    last = None
+    for query, is_map in attempts:
+        session = service_session if (is_map and service_session is not None) else user_session
+        try:
+            # por POST: con las cabeceras de la sesión, un SLD_BODY grande supera el límite de Tomcat en GET
+            last = geoserver_proxy.forward_form(session, absolute_url, query)
+        except Exception:
+            logger.exception('symbol_preview: error pidiendo la vista previa a %s', absolute_url)
+            continue
+        if last.status_code == 200 and last.headers.get('Content-Type', '').startswith('image/'):
+            response = HttpResponse(last.content, content_type=last.headers.get('Content-Type'))
+            response['Cache-Control'] = 'private, max-age=300'
+            return response
+        logger.warning('symbol_preview: %s sin imagen (HTTP %s, %s)', 'GetMap' if is_map else 'leyenda',
+                       last.status_code, last.headers.get('Content-Type', ''))
+    if last is None:
+        return HttpResponse(status=502)
+    return HttpResponse(status=502)

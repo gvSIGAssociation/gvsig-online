@@ -80,14 +80,16 @@
 								<div class="row">
 									<div class="col-md-12">
 										<label>{% trans "Password" %}</label>
-										<input placeholder="{% trans 'Password' %}" name="server_password" id="server_password" type="text" class="form-control" value="{{server.password}}">							
+										<input placeholder="{% trans 'Leave blank to keep the current password' %}" name="server_password" id="server_password" type="password" class="form-control" value="" autocomplete="new-password">
+										<p class="help-block"><i class="fa fa-info-circle" aria-hidden="true"></i> {% trans 'For security, the saved password is not shown. Leave the field blank to keep it, or type a new one to change it.' %}</p>							
 									</div>
 								</div>
 								<div class="row">
 									<div class="col-md-12 form-group">
 										<label for="default">{% trans "Default" %}</label>&nbsp;&nbsp;
 										{% if server.default %}
-										<input type="checkbox" name="default"  id="default" checked/>
+										<input type="checkbox" name="default"  id="default" checked disabled/>
+										<p class="help-block"><i class="fa fa-info-circle" aria-hidden="true"></i> {% trans 'This is the default server. To change it, mark another server as default.' %}</p>
 										{% else %}
 										<input type="checkbox" name="default"  id="default"/>
 										{% endif %}								

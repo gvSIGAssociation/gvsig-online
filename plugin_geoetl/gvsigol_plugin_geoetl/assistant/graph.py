@@ -366,6 +366,8 @@ def _clean_node(raw, catalog, connections, warnings, removed):
     params = _parameters(raw.get('parameters'))
     params, param_warnings = _filter_parameters(alias, spec, params, connections)
     warnings.extend(param_warnings)
+    _fix_where(alias, spec, params, warnings)
+    _fix_expose(spec, params)
     _warn_sql(alias, spec, params, warnings)
     _warn_required(alias, spec, params, warnings)
     return {
@@ -397,10 +399,12 @@ def _clean_update(raw, catalog, connections, canvas_nodes, restricted, warnings,
         warnings.append('No modifico %s: el tipo %s no tiene ficha.' % (alias, type_name))
         return None
     params = dict(current.get('parameters') or {})
-    if raw.get('parameters') is not None:
-        params.update(_parameters(raw.get('parameters')))
+    sent = _parameters(raw.get('parameters')) if raw.get('parameters') is not None else {}
+    params.update(sent)
     params, param_warnings = _filter_parameters(alias, spec, params, connections)
     warnings.extend(param_warnings)
+    _fix_where(alias, spec, params, warnings)
+    _fix_expose(spec, params, sent)
     _warn_sql(alias, spec, params, warnings)
     label = raw.get('label')
     op = {
@@ -412,7 +416,8 @@ def _clean_update(raw, catalog, connections, canvas_nodes, restricted, warnings,
     }
     if label:
         op['label'] = _clip(label, 80)
-    if isinstance(raw.get('schema'), list):
+    # Las columnas de una entrada las lee el servidor; una lista vacía dejaría sin columnas a los nodos siguientes
+    if isinstance(raw.get('schema'), list) and raw.get('schema') and spec.get('family') != 'input':
         op['schema'] = raw.get('schema')
     schemaold = _schemaold(raw)
     if schemaold:
@@ -591,6 +596,38 @@ def _filter_connection(alias, spec, params, connections, warnings):
             '%s: "%s" es de tipo %s y este nodo admite %s.'
             % (alias, name, found.get('type'), ', '.join(allowed_types))
         )
+
+
+WHERE_PREFIX = re.compile(r'^\s*where\s+', re.IGNORECASE)
+
+
+def _fix_expose(spec, params, sent=None):
+    """trans_ExposeAttr: attrs es la lista que usa el editor y attr la que enseña el diálogo; schema lo calcula el editor.
+
+    sent son los parámetros que manda el modelo en un update_node: mandan sobre los que ya tenía el nodo.
+    """
+    if spec.get('type') != 'trans_ExposeAttr':
+        return
+    sent = sent if sent is not None else params
+    names = sent.get('attrs') or sent.get('attr') or params.get('attrs') or params.get('attr') or ''
+    if isinstance(names, list):
+        names = ' '.join(str(n) for n in names)
+    names = ' '.join(str(names).replace(',', ' ').split())
+    params['attr'] = params['attrs'] = names
+    params.pop('schema', None)
+
+
+def _fix_where(alias, spec, params, warnings):
+    """En input_Postgis, clause va detrás de WHERE y checkbox dice si se aplica: se dejan coherentes."""
+    if spec.get('type') != 'input_Postgis':
+        return
+    clause = params.get('clause')
+    clause = clause.strip() if isinstance(clause, str) else ''
+    if WHERE_PREFIX.match(clause):
+        clause = WHERE_PREFIX.sub('', clause)
+        warnings.append('%s: quito la palabra WHERE del filtro; ya la añade la entrada.' % alias)
+    params['clause'] = clause
+    params['checkbox'] = 'true' if clause else ''
 
 
 def _warn_sql(alias, spec, params, warnings):

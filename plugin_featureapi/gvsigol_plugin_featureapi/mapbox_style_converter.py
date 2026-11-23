@@ -36,6 +36,9 @@ from gvsigol_symbology.models import (
 )
 from gvsigol_services.models import Layer
 from gvsigol import settings
+from gvsigol_symbology import symbol_options
+from .mapbox_symbol_converter import (dash_in_width_units, convert_new_geometry_symbolizer,
+                                      icons_for as new_symbol_icons)
 
 logger = logging.getLogger(__name__)
 
@@ -711,8 +714,8 @@ def convert_line_symbolizer(symbolizer, layer_id, rule_name, source_layer):
     if symbolizer.stroke_opacity is not None and symbolizer.stroke_opacity < 1.0:
         layer["paint"]["line-opacity"] = symbolizer.stroke_opacity
     
-    # Dash array
-    dash = parse_dash_array(symbolizer.stroke_dash_array)
+    # Dash array: Mapbox lo mide en múltiplos del grosor (SLD, en px)
+    dash = dash_in_width_units(symbolizer.stroke_dash_array, symbolizer.stroke_width)
     if dash:
         layer["paint"]["line-dasharray"] = dash
     
@@ -773,7 +776,7 @@ def convert_polygon_symbolizer(symbolizer, layer_id, rule_name, source_layer):
         if symbolizer.stroke_opacity is not None and symbolizer.stroke_opacity < 1.0:
             stroke_layer["paint"]["line-opacity"] = symbolizer.stroke_opacity
         
-        dash = parse_dash_array(symbolizer.stroke_dash_array)
+        dash = dash_in_width_units(symbolizer.stroke_dash_array, symbolizer.stroke_width)
         if dash:
             stroke_layer["paint"]["line-dasharray"] = dash
         
@@ -976,6 +979,12 @@ def collect_external_graphic_icons(layer):
         spec = mark_icon_spec(mark)
         if spec:
             icons[spec[0]] = spec[1]
+    # Simbolizadores nuevos (con opciones): marcas y decoraciones de líneas
+    for model in (MarkSymbolizer, LineSymbolizer):
+        for sym in model.objects.filter(rule__style__stylelayer__layer=layer, options__isnull=False).distinct():
+            options = symbol_options.of(sym)
+            if options is not None:
+                icons.update(new_symbol_icons(sym, options))
     return icons
 
 
@@ -1386,10 +1395,10 @@ def parse_line_symbolizer_from_sld(symbolizer, namespaces, layer_id, rule_name, 
         except:
             pass
     
-    # Stroke dasharray
+    # Stroke dasharray (en múltiplos del grosor, como Mapbox)
     stroke_dasharray = symbolizer.find('.//sld:Stroke/sld:CssParameter[@name="stroke-dasharray"]', namespaces)
     if stroke_dasharray is not None and stroke_dasharray.text:
-        dash = parse_dash_array(stroke_dasharray.text)
+        dash = dash_in_width_units(stroke_dasharray.text, layer["paint"].get("line-width"))
         if dash:
             layer["paint"]["line-dasharray"] = dash
     
@@ -1458,7 +1467,7 @@ def parse_polygon_symbolizer_from_sld(symbolizer, namespaces, layer_id, rule_nam
                 # Stroke dasharray
                 stroke_dasharray = symbolizer.find('.//sld:Stroke/sld:CssParameter[@name="stroke-dasharray"]', namespaces)
                 if stroke_dasharray is not None and stroke_dasharray.text:
-                    dash = parse_dash_array(stroke_dasharray.text)
+                    dash = dash_in_width_units(stroke_dasharray.text, width)
                     if dash:
                         stroke_layer["paint"]["line-dasharray"] = dash
                 
@@ -2254,6 +2263,21 @@ def convert_style_to_mapbox(layer_id, style_id=None, tms_base_url=None, style_ob
             # Si es un heatmap, no procesamos los otros symbolizers
             continue
         
+        # Reglas con algún simbolizador nuevo (con opciones): se dibujan en el orden de GeoServer
+        # (de mayor a menor «order», como sld_builder). Las reglas solo con simbolizadores
+        # antiguos siguen exactamente como antes (agrupados por tipo).
+        geometry_symbolizers = list(polygon_symbolizers) + list(line_symbolizers) + list(mark_symbolizers)
+        if any(symbol_options.of(sym) is not None for sym in geometry_symbolizers):
+            ordered = geometry_symbolizers + list(external_graphic_symbolizers)
+            ordered.sort(key=lambda sym: (-(sym.order or 0), sym.pk))
+            for sym in ordered:
+                for lyr in _convert_any_geometry_symbolizer(sym, layer_id, rule_name, source_layer):
+                    if mapbox_filter:
+                        lyr["filter"] = mapbox_filter
+                    lyr = apply_scale_to_layer(lyr, rule.minscale, rule.maxscale)
+                    mapbox_style["layers"].append(lyr)
+            polygon_symbolizers = line_symbolizers = mark_symbolizers = external_graphic_symbolizers = []
+
         # Convertir cada tipo de symbolizer (solo si no es heatmap)
         for sym in polygon_symbolizers:
             layers = convert_polygon_symbolizer(sym, layer_id, rule_name, source_layer)
@@ -2328,7 +2352,23 @@ def convert_style_to_mapbox(layer_id, style_id=None, tms_base_url=None, style_ob
 # 4: las imágenes externas nunca se ocultan por colisión (declutter en el visor).
 # 5: etiquetas de líneas que no siguen la línea, giradas según el tramo (alignToLine).
 # 6: fuentes de las etiquetas con equivalente para el navegador y la negrita conservada.
-CONVERTER_VERSION = 6
+# 7: guiones en múltiplos del grosor (como WMS) y simbolizadores nuevos de punto, línea y polígono.
+CONVERTER_VERSION = 7
+
+
+def _convert_any_geometry_symbolizer(sym, layer_id, rule_name, source_layer):
+    '''Capas Mapbox de un simbolizador de punto, línea, polígono o imagen (nuevo o antiguo).'''
+    options = symbol_options.of(sym)
+    if options is not None:
+        return convert_new_geometry_symbolizer(sym, options, layer_id, rule_name, source_layer)
+    if isinstance(sym, PolygonSymbolizer):
+        return convert_polygon_symbolizer(sym, layer_id, rule_name, source_layer)
+    if isinstance(sym, LineSymbolizer):
+        return [convert_line_symbolizer(sym, layer_id, rule_name, source_layer)]
+    if isinstance(sym, MarkSymbolizer):
+        return [convert_mark_symbolizer(sym, layer_id, rule_name, source_layer)]
+    lyr = convert_external_graphic_symbolizer(sym, layer_id, rule_name, source_layer)
+    return [lyr] if lyr else []
 
 
 def cache_is_current(json_cache):

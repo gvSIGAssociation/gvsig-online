@@ -47,6 +47,28 @@ WELL_KNOWN_NAMES = (
     ('cross', 'Cruz'),
 )
 
+class IntegralFloatField(models.FloatField):
+    '''
+    Número decimal que se lee como entero cuando no tiene decimales (1.0 -> 1).
+
+    Sustituye a IntegerField en grosores, tamaños y opacidad de las marcas: admite valores como
+    0.5, y los valores existentes (todos enteros) se siguen leyendo como int, de modo que el SLD,
+    el JSON del editor, las exportaciones y el estilo del SPA no cambian ("1", nunca "1.0").
+    '''
+
+    @staticmethod
+    def _integral(value):
+        if isinstance(value, float) and value.is_integer():
+            return int(value)
+        return value
+
+    def from_db_value(self, value, expression, connection, *args):
+        return self._integral(value)
+
+    def to_python(self, value):
+        return self._integral(super().to_python(value))
+
+
 UNIQUE_SYMBOL = 'US'
 UNIQUE_VALUES = 'UV'
 INTERVALS = 'IN'
@@ -100,17 +122,20 @@ class Symbolizer(models.Model):
     rule = models.ForeignKey(Rule, on_delete=models.CASCADE)
     order = models.IntegerField(null=False, default=0)
     
+# options: opciones avanzadas (JSON en texto, compatible con Django 2; ver symbol_options.py).
+# NULL = simbolizador "antiguo": se genera exactamente como siempre.
 class MarkSymbolizer(Symbolizer):
-    opacity = models.IntegerField(default=1)
-    size = models.IntegerField(default=8)
+    opacity = IntegralFloatField(default=1)
+    size = IntegralFloatField(default=8)
     rotation = models.IntegerField(default=0)
     well_known_name = models.CharField(max_length=25, choices=WELL_KNOWN_NAMES, default='circle')
     fill = models.CharField(max_length=100)
     fill_opacity = models.FloatField(default=1.0)
     stroke = models.CharField(max_length=100)
-    stroke_width = models.IntegerField(default=1)
+    stroke_width = IntegralFloatField(default=1)
     stroke_opacity = models.FloatField(default=1.0)
     stroke_dash_array = models.CharField(max_length=100)
+    options = models.TextField(null=True, blank=True)
     
 class ExternalGraphicSymbolizer(Symbolizer):
     opacity = models.IntegerField(default=1)
@@ -121,17 +146,19 @@ class ExternalGraphicSymbolizer(Symbolizer):
     
 class LineSymbolizer(Symbolizer):
     stroke = models.CharField(max_length=100)
-    stroke_width = models.IntegerField(default=1)
+    stroke_width = IntegralFloatField(default=1)
     stroke_opacity = models.FloatField(default=1.0)
     stroke_dash_array = models.CharField(max_length=100)
+    options = models.TextField(null=True, blank=True)
     
 class PolygonSymbolizer(Symbolizer):
     fill = models.CharField(max_length=100)
     fill_opacity = models.FloatField(default=1.0)
     stroke = models.CharField(max_length=100)
-    stroke_width = models.IntegerField(default=1)
+    stroke_width = IntegralFloatField(default=1)
     stroke_opacity = models.FloatField(default=1.0)
     stroke_dash_array = models.CharField(max_length=100)
+    options = models.TextField(null=True, blank=True)
     
 class TextSymbolizer(Symbolizer):
     is_actived = models.BooleanField(default=False)

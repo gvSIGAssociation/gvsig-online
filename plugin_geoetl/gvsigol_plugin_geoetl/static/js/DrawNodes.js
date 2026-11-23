@@ -131,7 +131,28 @@ function etlEnsureOption($select, value, label) {
 	}
 }
 
-function fillEtlNodeForm(type, figure, parameters, schemaold) {
+/* Los campos SQL usan CodeMirror, que guarda su propio texto: sin esto, al aceptar el diálogo vuelve el SQL anterior. */
+function etlSyncSqlEditor(key, id, value) {
+	if (window.etlSqlEditors && window.etlSqlEditors[key + '-' + id] && typeof window.setEtlSqlEditorValue === 'function') {
+		window.setEtlSqlEditorValue(key + '-' + id, value);
+	}
+}
+
+function etlClearField(key, id) {
+	var field = $('#' + key + '-' + id);
+	if (!field.length) {
+		return;
+	}
+	if (field.is(':checkbox')) {
+		field.prop('checked', false).val('');
+	} else if (!field.is(':radio')) {
+		field.val('');
+		etlSyncSqlEditor(key, id, '');
+	}
+}
+
+/* exact: también vacía los campos cuyo valor llega vacío (cambios del asistente). */
+function fillEtlNodeForm(type, figure, parameters, schemaold, exact) {
 	if (!parameters || !parameters.length || !parameters[0]) {
 		return;
 	}
@@ -139,6 +160,9 @@ function fillEtlNodeForm(type, figure, parameters, schemaold) {
 	Object.keys(parameters[0]).forEach(function (key) {
 		try {
 			if (!parameters[0][key]) {
+				if (exact) {
+					etlClearField(key, figure.id);
+				}
 				return;
 			}
 			if ($('#' + key + '-' + figure.id).is('select') && key.indexOf('epsg') === -1 && key.indexOf('option') === -1) {
@@ -164,8 +188,9 @@ function fillEtlNodeForm(type, figure, parameters, schemaold) {
 				$('#' + String(parameters[0][key]).toLowerCase() + '-' + figure.id).attr('checked', true);
 				$('#' + String(parameters[0][key]).toLowerCase() + '-' + figure.id).val(parameters[0][key]);
 			} else if ($('#' + key + '-' + figure.id).is(':checkbox')) {
-				$('#' + key + '-' + figure.id).attr('checked', true);
-				$('#' + key + '-' + figure.id).val(parameters[0][key]);
+				var on = parameters[0][key] !== false && String(parameters[0][key]).toLowerCase() !== 'false';
+				$('#' + key + '-' + figure.id).prop('checked', on);
+				$('#' + key + '-' + figure.id).val(on ? parameters[0][key] : '');
 			} else {
 				var field = $('#' + key + '-' + figure.id);
 				if (field.is('select')) {
@@ -175,6 +200,7 @@ function fillEtlNodeForm(type, figure, parameters, schemaold) {
 					});
 				}
 				field.val(parameters[0][key]);
+				etlSyncSqlEditor(key, figure.id, parameters[0][key]);
 			}
 			if ((type.indexOf('input_') === 0 || type.indexOf('output_') === 0 || type === 'trans_ExecuteSQL') && editablerestrictedly) {
 				$('#' + key + '-' + figure.id).prop('disabled', true);

@@ -44,6 +44,7 @@ from .etl_raster import input_Raster, trans_RasterSample, trans_RandomForest, tr
 from .etl_raster_publish import output_RasterPublish  # noqa: F401
 from .etl_layer_publish import output_LayerPublish  # noqa: F401
 from .etl_models import input_Model, output_ModelSave  # noqa: F401
+from .etl_ai import trans_AIText  # noqa: F401
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from celery.utils.log import get_task_logger
@@ -1962,7 +1963,7 @@ def input_Csv(dicc):
                 while chunk_counter == 10000:
                     if file_first_chunk:
                         # First chunk: read header row after skipping base_skiprows
-                        df = pd.read_csv(file_path, sep=dicc["separator"], encoding='utf8', 
+                        df = pd.read_csv(file_path, sep=dicc["separator"], encoding=etl_schema.csv_codec(dicc), 
                                        skiprows=base_skiprows, nrows=10000, 
                                        header=header_param)
                     else:
@@ -1971,7 +1972,7 @@ def input_Csv(dicc):
                         # plus all data rows already read (chunk_number * 10000)
                         header_offset = 1 if header_param == 0 else 0
                         rows_to_skip = base_skiprows + header_offset + (chunk_number * 10000)
-                        df = pd.read_csv(file_path, sep=dicc["separator"], encoding='utf8', 
+                        df = pd.read_csv(file_path, sep=dicc["separator"], encoding=etl_schema.csv_codec(dicc), 
                                        skiprows=rows_to_skip, nrows=10000, 
                                        header=None, names=global_column_names)
                     
@@ -2025,7 +2026,7 @@ def input_Csv(dicc):
 
             if first:
                 # First chunk: read header row after skipping base_skiprows
-                df = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], encoding='utf8', 
+                df = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], encoding=etl_schema.csv_codec(dicc), 
                                 skiprows=base_skiprows, nrows=10000, 
                                 header=header_param)
             else:
@@ -2034,7 +2035,7 @@ def input_Csv(dicc):
                 # plus all data rows already read (chunk_number * 10000)
                 header_offset = 1 if header_param == 0 else 0
                 rows_to_skip = base_skiprows + header_offset + (chunk_number * 10000)
-                df = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], encoding='utf8', 
+                df = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], encoding=etl_schema.csv_codec(dicc), 
                                 skiprows=rows_to_skip, nrows=10000, 
                                 header=None, names=column_names)
 
@@ -2224,6 +2225,10 @@ def trans_Calculator(dicc):
             run = True
 
     if run:
+        srid = _geometry_srid(cur, table_name_target, attr)
+        if srid is not None:
+            _set_geometry_type(cur, table_name_target, attr, 'Geometry', srid)
+
         sqlInsert = sql.SQL('UPDATE {schema}.{tbl_target} SET {attr} = {expres} ').format(
                 schema = sql.Identifier(GEOETL_DB["schema"]),
                 tbl_target = sql.Identifier(table_name_target),
@@ -2234,10 +2239,38 @@ def trans_Calculator(dicc):
         cur.execute(sqlInsert)
         conn.commit()
 
+        if srid is not None:
+            cur.execute(sql.SQL('SELECT DISTINCT GeometryType({attr}) FROM {schema}.{tbl} WHERE {attr} IS NOT NULL').format(
+                attr = sql.Identifier(attr),
+                schema = sql.Identifier(GEOETL_DB["schema"]),
+                tbl = sql.Identifier(table_name_target)))
+            types = [row[0] for row in cur.fetchall()]
+            if len(types) == 1:
+                _set_geometry_type(cur, table_name_target, attr, types[0], srid)
+            conn.commit()
+
     conn.close()
     cur.close()
 
     return [table_name_target]
+
+
+def _geometry_srid(cur, table, column):
+    """SRID si la columna es una geometría de la tabla temporal; None si es un atributo normal."""
+    cur.execute('SELECT srid FROM geometry_columns WHERE f_table_schema = %s AND f_table_name = %s '
+                'AND f_geometry_column = %s', [GEOETL_DB["schema"], table, column])
+    row = cur.fetchone()
+    return (row[0] or 0) if row else None
+
+
+def _set_geometry_type(cur, table, column, geometry_type, srid):
+    """Cambia el tipo de la geometría: una columna MultiPolygon no admite, por ejemplo, el resultado de ST_Centroid."""
+    target = sql.SQL('geometry({}, {})').format(sql.SQL(geometry_type), sql.Literal(int(srid))) if srid else sql.SQL('geometry')
+    cur.execute(sql.SQL('ALTER TABLE {schema}.{tbl} ALTER COLUMN {col} TYPE {target} USING {col}').format(
+        schema = sql.Identifier(GEOETL_DB["schema"]),
+        tbl = sql.Identifier(table),
+        col = sql.Identifier(column),
+        target = target))
 
 CADASTRAL_WINDOW_SECONDS = 3600.0
 CADASTRAL_MAX_REQUESTS = 3600
@@ -5310,13 +5343,6 @@ def crea_Grid(dicc):
 
 def trans_ExposeAttr(dicc):
 
-    attr = dicc['attr']
-    schemaListDups = dicc['schema']
-    
-    schemaList = []
-    [schemaList.append(x) for x in schemaListDups if x not in schemaList]
-
-
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
@@ -5331,16 +5357,20 @@ def trans_ExposeAttr(dicc):
 
 
     sqlDatetype = 'SELECT column_name, data_type from information_schema.columns '
-    sqlDatetype += "where table_schema = %s and table_name = %s "
+    sqlDatetype += "where table_schema = %s and table_name = %s ORDER BY ordinal_position"
 
     cur.execute(sql.SQL(sqlDatetype).format(),[GEOETL_DB["schema"], table_name_source])
     conn.commit()
+    source_columns = [row[0] for row in cur.fetchall()]
 
-    for row in cur:
-        if 'wkb_geometry' == row[0]:
-            if 'wkb_geometry' not in schemaList:
-                schemaList.append('wkb_geometry')
-            break
+    # Sin lista guardada (nodo no aceptado en su diálogo): todas las columnas más las expuestas
+    schemaListDups = dicc.get('schema') or source_columns + str(dicc.get('attrs') or dicc.get('attr') or '').split()
+
+    schemaList = []
+    [schemaList.append(x) for x in schemaListDups if x not in schemaList]
+
+    if 'wkb_geometry' in source_columns and 'wkb_geometry' not in schemaList:
+        schemaList.append('wkb_geometry')
 
     sql_ = 'create table {schema}.{tbl_target} as (select '
 

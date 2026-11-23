@@ -172,7 +172,8 @@ $(document).ready(function() {
 
 	function deleteStyle(data){
 		var style_id = $("#select-"+data[0]).val();
-		if(style_id != null){	
+		{% trans "Delete the selected style? This cannot be undone." as confirm_style %}
+		if(style_id != null && window.confirm('{{ confirm_style|escapejs }}')){	
 			$.ajax({
 				type: 'POST',
 				async: false,

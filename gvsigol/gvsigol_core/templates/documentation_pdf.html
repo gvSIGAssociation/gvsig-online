@@ -1,0 +1,50 @@
+{% comment %}
+Documento del PDF de un manual (gvsigol_core/docs_pdf.py, WeasyPrint): portada, índice y capítulos.
+Los estilos están en documentation_pdf.css. Se puede sobrescribir desde una app de proyecto.
+
+Variables:
+  lang, title, description, site, updated (texto ya con la fecha), contents_label
+  chapters: [{anchor, lang, title, html, sections: [{anchor, name}]}]
+    - anchor: id del capítulo (enlace interno: href="#{{ chapter.anchor }}")
+    - html: la página ya convertida y limpia, con los id y los enlaces resueltos para el PDF
+    - sections: sus apartados de nivel 2, para el índice
+{% endcomment %}<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+	<meta charset="utf-8">
+	<title>{{ title }}</title>
+	<meta name="author" content="{{ site }}">
+	<meta name="generator" content="gvSIG Online">
+</head>
+<body>
+	<header class="cover">
+		<p class="cover-site">{{ site }}</p>
+		<h1 class="cover-title">{{ title }}</h1>
+		{% if description %}<p class="cover-desc">{{ description }}</p>{% endif %}
+		<p class="cover-date">{{ updated }}</p>
+	</header>
+
+	<nav class="toc">
+		<h2 class="toc-title">{{ contents_label }}</h2>
+		<ul>
+			{% for chapter in chapters %}
+			<li class="toc-chapter"><a href="#{{ chapter.anchor }}">{{ chapter.title }}</a>
+				{% if chapter.sections %}
+				<ul>
+					{% for section in chapter.sections %}
+					<li class="toc-sub"><a href="#{{ section.anchor }}">{{ section.name }}</a></li>
+					{% endfor %}
+				</ul>
+				{% endif %}
+			</li>
+			{% endfor %}
+		</ul>
+	</nav>
+
+	{% for chapter in chapters %}
+	<section class="chapter" id="{{ chapter.anchor }}" lang="{{ chapter.lang }}">
+		{{ chapter.html|safe }}
+	</section>
+	{% endfor %}
+</body>
+</html>

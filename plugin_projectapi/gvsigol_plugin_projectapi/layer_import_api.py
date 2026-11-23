@@ -33,13 +33,18 @@ def _check_project_access(request, project_id):
 
 def _check_project_publish_access(request, project_id):
     """
-    Persisting layers into a project is restricted to superusers.
-    Staff (non-superuser) must never publish, even if they can read the project.
+    Persisting layers into a project is allowed for staff and superusers.
+    Concrete destinations are further filtered by can_use_datastore /
+    can_use_layergroup on import-options and on POST.
     """
     project = _check_project_access(request, project_id)
-    if not getattr(request.user, 'is_superuser', False):
+    user = request.user
+    if not (
+        getattr(user, 'is_superuser', False)
+        or getattr(user, 'is_staff', False)
+    ):
         raise PermissionDenied(
-            'Only superusers can publish layers into a project')
+            'Only staff or superusers can publish layers into a project')
     return project
 
 
@@ -48,6 +53,51 @@ def _request_bool(data, key, default=False):
     if isinstance(value, bool):
         return value
     return str(value).lower() in ('1', 'true', 'yes', 'on')
+
+
+def _published_layer_payload(request, project, layer, layer_group):
+    """
+    Enough projectconf-shaped data for the SPA to hot-add the layer without
+    depending on get_layerread filters (publisher may not match ACL yet).
+    """
+    from gvsigol_plugin_projectapi import util as projectapi_util
+    from gvsigol_plugin_projectapi.infoserializer import (
+        LayerSerializer,
+        _get_group_server_endpoints,
+    )
+
+    lang = request.META.get('HTTP_ACCEPT_LANGUAGE', 'es')
+    context = {
+        'request': request,
+        'user': getattr(request.user, 'username', None),
+        'lang': lang,
+        'projectid': project.id,
+    }
+    layer_data = LayerSerializer(layer, context=context).data
+    endpoints = _get_group_server_endpoints(layer_group)
+    try:
+        group_order = projectapi_util.get_order_in_project(
+            project.id, layer_group.name)
+    except Exception:
+        group_order = 0
+    return {
+        'layer': layer_data,
+        'layer_group': {
+            'id': layer_group.id,
+            'name': layer_group.name,
+            'title': layer_group.title or layer_group.name,
+            'cached': bool(layer_group.cached),
+            'created_by': layer_group.created_by,
+            'visible': True,
+            'server_id': layer_group.server_id,
+            'order': group_order,
+            'allows_getmap': False,
+            'wms_url': endpoints.get('wms_url'),
+            'wfs_url': endpoints.get('wfs_url'),
+            'cache_url': endpoints.get('cache_url'),
+            'layers': [layer_data],
+        },
+    }
 
 
 class ProjectLayerImportOptionsView(APIView):
@@ -212,6 +262,13 @@ class ProjectLayerImportView(APIView):
                 'layer_id': layer.id,
                 'has_geometry': has_geometry,
             }
+            try:
+                result.update(
+                    _published_layer_payload(
+                        request, project, layer, layer_group))
+            except Exception:
+                # Hot-add payload is best-effort; import already succeeded.
+                pass
             cache.set(cache_key, result, timeout=86400)
             return Response(dict(result, job_id=job_id), status=status.HTTP_201_CREATED)
         except (DjangoValidationError, ValueError) as exc:

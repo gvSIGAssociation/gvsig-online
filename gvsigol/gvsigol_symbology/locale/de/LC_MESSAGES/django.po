@@ -1658,3 +1658,25 @@ msgstr "Die SVG-Datei ist ungültig."
 #: external_graphics.py
 msgid "The SVG file must define its size (width and height, or a viewBox)."
 msgstr "Die SVG-Datei muss ihre Größe angeben (width und height oder eine viewBox)."
+
+#: templates/library_update.html templates/library_list.html
+msgctxt "symbology"
+msgid "Advanced symbols are exported as classic symbols (shape, colours and dashes)"
+msgstr "Erweiterte Symbole werden als klassische Symbole exportiert (Form, Farben und Strichmuster)"
+
+#: templates/library_update.html templates/library_list.html
+msgctxt "symbology"
+msgid "Earlier versions of gvSIG Online cannot import advanced symbols correctly. If the library is for one of them, export it for earlier versions: advanced symbols become classic symbols (shape, colours and dashes)."
+msgstr "Frühere Versionen von gvSIG Online können erweiterte Symbole nicht korrekt importieren. Ist die Bibliothek für eine davon bestimmt, exportieren Sie sie für frühere Versionen: Erweiterte Symbole werden zu klassischen Symbolen (Form, Farben und Strichmuster)."
+
+#: templates/library_update.html templates/library_list.html
+msgctxt "symbology"
+msgid "Export for earlier versions"
+msgstr "Für frühere Versionen exportieren"
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "This library has %(counter)s symbol with advanced symbology. Earlier versions of gvSIG Online cannot import it correctly: to use the library there, export it for earlier versions."
+msgid_plural "This library has %(counter)s symbols with advanced symbology. Earlier versions of gvSIG Online cannot import them correctly: to use the library there, export it for earlier versions."
+msgstr[0] "Diese Bibliothek enthält %(counter)s Symbol mit erweiterter Symbologie. Frühere Versionen von gvSIG Online können es nicht korrekt importieren: Um die Bibliothek dort zu verwenden, exportieren Sie sie für frühere Versionen."
+msgstr[1] "Diese Bibliothek enthält %(counter)s Symbole mit erweiterter Symbologie. Frühere Versionen von gvSIG Online können sie nicht korrekt importieren: Um die Bibliothek dort zu verwenden, exportieren Sie sie für frühere Versionen."

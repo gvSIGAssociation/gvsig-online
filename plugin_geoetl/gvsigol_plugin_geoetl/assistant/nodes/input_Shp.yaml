@@ -12,7 +12,8 @@ parameters:
   - UTF-8
   - ISO-8859-15
   - WINDOWS-1252
-  summary: Codificación de los textos.
+  - CP850
+  summary: Codificación de los textos. No la supongas; se detecta del .cpg o del .dbf al leer las columnas.
   default: UTF-8
 - name: epsg
   summary: 'EPSG, solo el número. Vacío: se toma del propio shapefile.'

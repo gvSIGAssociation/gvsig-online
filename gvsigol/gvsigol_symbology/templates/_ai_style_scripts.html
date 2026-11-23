@@ -1,0 +1,46 @@
+{% load i18n static %}{# JS de «Sugerir estilo con IA». Solo se incluye si hay asistente (ai_style). #}
+<script type="text/javascript" src="{% static "js/lib/symbology/AiStyleAssist.js" %}?v=20261123c"></script>
+{% url 'unique_symbol_add' ai_layer_id as u_symbol %}{% url 'unique_values_add' ai_layer_id as u_values %}{% url 'intervals_add' ai_layer_id as u_intervals %}
+<script type="text/javascript">
+{% trans "Generating proposal..." context "symbology" as t_busy %}{% trans "The AI assistant did not respond. Try again later." context "symbology" as t_unavailable %}{% trans "The AI proposal could not be used. Try again." context "symbology" as t_invalid %}{% trans "Your session has expired or you do not have permission. Reload the page and try again." context "symbology" as t_session %}{% trans "AI proposal" context "symbology" as t_proposal %}{% trans "Review the rules and the preview, and click Save to keep the style." context "symbology" as t_review %}{% trans "Labels have been added: review them in Labeling." context "symbology" as t_labels_added %}{% trans "The labels have been removed." context "symbology" as t_labels_removed %}{% trans "Colour by categories" context "symbology" as t_chip_categories %}{% trans "Colour by ranges" context "symbology" as t_chip_ranges %}{% trans "With labels" context "symbology" as t_chip_labels %}{% trans "Visible from 1:25,000" context "symbology" as t_chip_scale %}{% trans "Diagonal hatching" context "symbology" as t_chip_hatch %}{% trans "Grid hatching" context "symbology" as t_chip_grid %}{% trans "Outline only" context "symbology" as t_chip_outline %}{% trans "Dashed outline" context "symbology" as t_chip_dashed_outline %}{% trans "Semi-transparent fill" context "symbology" as t_chip_transparent %}{% trans "Dashed line" context "symbology" as t_chip_dashed %}{% trans "Dotted line" context "symbology" as t_chip_dotted %}{% trans "Arrow at the end" context "symbology" as t_chip_arrow_end %}{% trans "Direction arrows" context "symbology" as t_chip_arrows %}{% trans "Railway style" context "symbology" as t_chip_railway %}{% trans "Diamond shape" context "symbology" as t_chip_diamond %}{% trans "Star shape" context "symbology" as t_chip_star %}{% trans "No fill" context "symbology" as t_chip_no_fill %}{% trans "Larger symbol" context "symbology" as t_chip_larger %}{% trans "Thinner" context "symbology" as t_chip_thinner %}{% trans "More spaced" context "symbology" as t_chip_spaced %}{% trans "Softer colours" context "symbology" as t_chip_softer %}{% trans "Remove the labels" context "symbology" as t_chip_no_labels %}
+	GolAiStyle.configure({
+		url: "{{ ai_style.url|escapejs }}",
+		editors: {
+			unique_symbol: "{{ u_symbol|escapejs }}",
+			unique_values: "{{ u_values|escapejs }}",
+			intervals: "{{ u_intervals|escapejs }}"
+		},
+		texts: {
+			busy: "{{ t_busy|escapejs }}",
+			unavailable: "{{ t_unavailable|escapejs }}",
+			invalid: "{{ t_invalid|escapejs }}",
+			session: "{{ t_session|escapejs }}",
+			proposal: "{{ t_proposal|escapejs }}",
+			review: "{{ t_review|escapejs }}",
+			labels_added: "{{ t_labels_added|escapejs }}",
+			labels_removed: "{{ t_labels_removed|escapejs }}",
+			chip_categories: "{{ t_chip_categories|escapejs }}",
+			chip_ranges: "{{ t_chip_ranges|escapejs }}",
+			chip_labels: "{{ t_chip_labels|escapejs }}",
+			chip_scale: "{{ t_chip_scale|escapejs }}",
+			chip_hatch: "{{ t_chip_hatch|escapejs }}",
+			chip_grid: "{{ t_chip_grid|escapejs }}",
+			chip_outline: "{{ t_chip_outline|escapejs }}",
+			chip_dashed_outline: "{{ t_chip_dashed_outline|escapejs }}",
+			chip_transparent: "{{ t_chip_transparent|escapejs }}",
+			chip_dashed: "{{ t_chip_dashed|escapejs }}",
+			chip_dotted: "{{ t_chip_dotted|escapejs }}",
+			chip_arrow_end: "{{ t_chip_arrow_end|escapejs }}",
+			chip_arrows: "{{ t_chip_arrows|escapejs }}",
+			chip_railway: "{{ t_chip_railway|escapejs }}",
+			chip_diamond: "{{ t_chip_diamond|escapejs }}",
+			chip_star: "{{ t_chip_star|escapejs }}",
+			chip_no_fill: "{{ t_chip_no_fill|escapejs }}",
+			chip_larger: "{{ t_chip_larger|escapejs }}",
+			chip_thinner: "{{ t_chip_thinner|escapejs }}",
+			chip_spaced: "{{ t_chip_spaced|escapejs }}",
+			chip_softer: "{{ t_chip_softer|escapejs }}",
+			chip_no_labels: "{{ t_chip_no_labels|escapejs }}"
+		}
+	});
+</script>

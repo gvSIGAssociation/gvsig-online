@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+{% load static %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+	<title>{{ page.title }} · {{ manual_title }} · {{GVSIGOL_NAME}}</title>
+	<link rel="shortcut icon" href="{% static "img/favicon.png" %}">
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta content="width=device-width, initial-scale=1" name="viewport">
+
+	<link rel="stylesheet" href="{% static "js/vendors/bootstrap-3.3.7/css/bootstrap.min.css" %}">
+	<link rel="stylesheet" href="{% static "css/font-awesome-4.4.0/css/font-awesome.min.css" %}">
+	<link rel="stylesheet" href="{% static "css/googlefonts.css" %}">
+	<link rel="stylesheet" href="{% static "css/gvsigOL.css" %}">
+	<link rel="stylesheet" href="{% static "css/gol-tokens.css" %}">
+	<link rel="stylesheet" href="{% static "css/gol-themes.css" %}">
+
+	<style>
+	/* =================================================================
+	   Lector de manuales en Markdown: índice de manuales a la izquierda,
+	   la página en el centro y su índice («En esta página») a la derecha.
+	   ================================================================= */
+	{% include "documentation_common_styles.html" %}
+
+	.doc-layout {
+		flex: 1;
+		display: grid;
+		grid-template-columns: 260px minmax(0, 1fr) 220px;
+		gap: 40px;
+		width: 100%;
+		max-width: 1360px;
+		margin: 0 auto;
+		padding: 28px 24px 56px;
+	}
+
+	/* ---- Índice de manuales ---- */
+	.doc-nav { position: sticky; top: 74px; align-self: start; max-height: calc(100vh - 96px); overflow-y: auto; font-size: 14px; }
+	.doc-nav__back {
+		display: inline-flex; align-items: center; gap: 7px; margin-bottom: 18px;
+		font-size: 13px; font-weight: 600; color: var(--pl-muted) !important; text-decoration: none !important;
+	}
+	.doc-nav__back:hover { color: var(--pl-accent) !important; }
+	.doc-nav__manual { margin-bottom: 14px; }
+	.doc-nav__manual-title {
+		display: flex; align-items: center; gap: 8px; padding: 6px 8px;
+		font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+		color: var(--pl-muted) !important; text-decoration: none !important; border-radius: 6px;
+	}
+	.doc-nav__manual-title .fa { width: 16px; text-align: center; color: var(--pl-accent); }
+	.doc-nav__manual--current .doc-nav__manual-title { color: var(--pl-text) !important; }
+	.doc-nav__pages { list-style: none; margin: 2px 0 0; padding: 0 0 0 12px; border-left: 1px solid var(--pl-border); margin-left: 15px; }
+	.doc-nav__pages a {
+		display: block; padding: 5px 10px; margin-left: -1px; border-left: 2px solid transparent;
+		color: var(--pl-text) !important; text-decoration: none !important; line-height: 1.4;
+	}
+	.doc-nav__pages a:hover { color: var(--pl-accent) !important; }
+	.doc-nav__pages a[aria-current="page"] { border-left-color: var(--pl-accent); color: var(--pl-accent) !important; font-weight: 600; }
+
+	/* ---- Página ---- */
+	.doc-article { min-width: 0; }
+	.doc-breadcrumb { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; padding: 0; list-style: none; font-size: 13px; color: var(--pl-muted); }
+	.doc-breadcrumb li + li::before { content: "›"; margin-right: 6px; }
+	.doc-breadcrumb a { color: var(--pl-muted); }
+	.doc-actions { float: right; display: flex; gap: 8px; margin-left: 16px; }
+	.doc-action {
+		display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px;
+		border: 1px solid var(--pl-border); border-radius: 6px; background: var(--pl-white);
+		font-size: 13px; color: var(--pl-text); cursor: pointer;
+	}
+	.doc-action:hover { border-color: var(--pl-accent); color: var(--pl-accent); text-decoration: none; }
+	.doc-notice--info { background: var(--gol-accent-lt, #eaf2f8) !important; color: var(--pl-text) !important; }
+	.doc-notice {
+		display: flex; gap: 10px; align-items: flex-start; margin: 0 0 20px; padding: 10px 14px;
+		border-radius: 6px; background: #fdf4e3; color: #6b4600; font-size: 14px;
+	}
+
+	.doc-body { font-size: 16px; line-height: 1.65; color: var(--pl-text); }
+	.doc-body h1 { margin: 0 0 18px; font-size: 32px; font-weight: 700; line-height: 1.2; }
+	.doc-body h2 { margin: 40px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--pl-border); font-size: 24px; font-weight: 700; }
+	.doc-body h3 { margin: 28px 0 10px; font-size: 19px; font-weight: 700; }
+	.doc-body h4 { margin: 22px 0 8px; font-size: 16px; font-weight: 700; }
+	.doc-body h2, .doc-body h3, .doc-body h4 { scroll-margin-top: 70px; }
+	.doc-body p, .doc-body ul, .doc-body ol, .doc-body dl, .doc-body table { margin: 0 0 16px; }
+	.doc-body li { margin: 4px 0; }
+	.doc-body li > ul, .doc-body li > ol { margin: 4px 0 0; }
+	.doc-body a { color: var(--pl-accent); }
+	.doc-body .headerlink { margin-left: 8px; font-weight: 400; color: var(--pl-muted); opacity: 0; text-decoration: none; }
+	.doc-body :is(h2, h3, h4):hover .headerlink { opacity: 1; }
+	.doc-body h1 .headerlink { display: none; }
+	.doc-body .doc-broken-link { color: #b94a48; text-decoration: line-through; cursor: help; }
+	.doc-body img { display: block; max-width: 100%; height: auto; margin: 8px 0 6px; border: 1px solid var(--pl-border); border-radius: 6px; box-shadow: var(--pl-shadow); }
+	.doc-body code { padding: 1px 5px; border-radius: 4px; background: var(--pl-bg); color: inherit; font-size: 0.9em; }
+	.doc-body pre { padding: 12px 14px; border: 1px solid var(--pl-border); border-radius: 6px; background: var(--pl-bg); font-size: 13px; line-height: 1.5; }
+	.doc-body pre code { padding: 0; background: none; }
+	.doc-body blockquote { margin: 0 0 16px; padding: 4px 16px; border-left: 4px solid var(--pl-border); color: var(--pl-muted); font-size: inherit; }
+	.doc-body table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; font-size: 14px; }
+	.doc-body th, .doc-body td { padding: 8px 12px; border: 1px solid var(--pl-border); vertical-align: top; }
+	.doc-body th { background: var(--pl-bg); font-weight: 700; }
+	.doc-body .admonition { margin: 0 0 16px; padding: 10px 16px; border-left: 4px solid var(--pl-accent); border-radius: 0 6px 6px 0; background: var(--gol-accent-lt, #eaf2f8); }
+	.doc-body .admonition-title { margin: 0 0 4px; font-weight: 700; }
+	.doc-body .admonition.warning, .doc-body .admonition.caution { border-left-color: #e0a100; background: #fdf4e3; }
+	.doc-body .admonition.danger, .doc-body .admonition.error { border-left-color: #b94a48; background: #fbeaea; }
+
+	.doc-pager { display: flex; gap: 16px; margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--pl-border); }
+	.doc-pager a {
+		flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 12px 16px;
+		border: 1px solid var(--pl-border); border-radius: 8px; text-decoration: none !important; color: var(--pl-text) !important;
+	}
+	.doc-pager a:hover { border-color: var(--pl-accent); }
+	.doc-pager__label { font-size: 12px; color: var(--pl-muted); }
+	.doc-pager__title { font-weight: 600; color: var(--pl-accent); }
+	.doc-pager__next { text-align: right; }
+
+	/* ---- En esta página ---- */
+	.doc-toc { position: sticky; top: 74px; align-self: start; max-height: calc(100vh - 96px); overflow-y: auto; font-size: 13px; }
+	.doc-toc__title { margin: 0 0 10px; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--pl-muted); }
+	.doc-toc ul { list-style: none; margin: 0; padding: 0; }
+	.doc-toc ul ul { padding-left: 12px; }
+	.doc-toc a { display: block; padding: 3px 0 3px 10px; border-left: 2px solid transparent; color: var(--pl-muted) !important; text-decoration: none !important; line-height: 1.4; }
+	.doc-toc a:hover { color: var(--pl-accent) !important; }
+	.doc-toc a.is-active { border-left-color: var(--pl-accent); color: var(--pl-text) !important; }
+
+	@media (max-width: 1199px) {
+		.doc-layout { grid-template-columns: 240px minmax(0, 1fr); }
+		.doc-toc { display: none; }
+	}
+	@media (max-width: 767px) {
+		.doc-layout { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 16px 16px 40px; }
+		.doc-nav { position: static; max-height: none; padding-bottom: 16px; border-bottom: 1px solid var(--pl-border); }
+		.doc-body h1 { font-size: 26px; }
+		.doc-actions { float: none; margin: 0 0 12px; }
+	}
+	@media print {
+		.doc-topbar, .doc-nav, .doc-toc, .doc-actions, .doc-pager, .doc-footer, .doc-breadcrumb { display: none !important; }
+		.doc-layout { display: block; max-width: none; padding: 0; }
+		.doc-body { font-size: 11pt; }
+		.doc-body h2 { break-after: avoid; }
+		.doc-body img, .doc-body table { break-inside: avoid; box-shadow: none; }
+		.doc-body .headerlink { display: none; }
+	}
+	</style>
+</head>
+
+<body class="{{GVSIGOL_SKIN}}">
+
+	<header class="doc-topbar">
+		<nav class="doc-topbar__inner" style="max-width:1360px;margin:0 auto;padding:0 24px;">
+			<a href="/" class="doc-topbar__logo">
+				<img src="{% static "img/logo_custom_icon.png" %}" class="doc-topbar__logo-img" alt="Logo"><b>{{GVSIGOL_NAME}}</b>{% if GVSIGOL_SURNAME %}<span class="doc-topbar__surname">{{GVSIGOL_SURNAME}}</span>{% endif %}
+			</a>
+			<a href="{% url 'documentation' %}" class="doc-topbar__link" title="{% trans "Documentation" context "documentation" %}"><i class="fa fa-book" aria-hidden="true"></i><span class="doc-topbar__link-text">{% trans "Documentation" context "documentation" %}</span></a>
+		</nav>
+	</header>
+
+	<div class="doc-layout">
+
+		<nav class="doc-nav" aria-label="{% trans "Manuals" context "documentation" %}">
+			<a class="doc-nav__back" href="{% url 'documentation' %}"><i class="fa fa-arrow-left" aria-hidden="true"></i> {% trans "All manuals" context "documentation" %}</a>
+			{% for manual in nav %}
+			<div class="doc-nav__manual{% if manual.current %} doc-nav__manual--current{% endif %}">
+				<a class="doc-nav__manual-title" href="{{ manual.url }}"><i class="fa {{ manual.icon }}" aria-hidden="true"></i> {{ manual.title }}</a>
+				{% if manual.current %}
+				<ul class="doc-nav__pages">
+					{% for p in manual.pages %}
+					<li><a href="{{ p.url }}"{% if p.current %} aria-current="page"{% endif %}>{{ p.title }}</a></li>
+					{% endfor %}
+				</ul>
+				{% endif %}
+			</div>
+			{% endfor %}
+		</nav>
+
+		<main class="doc-article">
+			<ol class="doc-breadcrumb">
+				<li><a href="{% url 'documentation' %}">{% trans "Documentation" context "documentation" %}</a></li>
+				<li><a href="{{ manual_url }}">{{ manual_title }}</a></li>
+			</ol>
+			<div class="doc-actions">
+				{% if can_edit %}<a class="doc-action" href="{{ edit_url }}"><i class="fa fa-pencil" aria-hidden="true"></i> {% trans "Edit" context "documentation" %}</a>{% endif %}
+				{% if export_all_url %}<a class="doc-action" href="{{ export_all_url }}" title="{% trans "ZIP with every page edited and image uploaded on the web for this package, with their paths in the repository" context "documentation" %}"><i class="fa fa-download" aria-hidden="true"></i> {% trans "Export web changes" context "documentation" %} ({{ web_changes }})</a>{% endif %}
+				{% if pdf_url %}<a class="doc-action" id="doc-pdf" href="{{ pdf_url }}" download data-busy="{% trans "Generating PDF…" context "documentation" %}"><i class="fa fa-file-pdf-o" aria-hidden="true"></i> <span class="doc-pdf__label">{% trans "Download PDF" context "documentation" %}</span></a>{% endif %}
+				<button type="button" class="doc-action" onclick="window.print()"><i class="fa fa-print" aria-hidden="true"></i> {% trans "Print" context "documentation" %}</button>
+			</div>
+			{% if web_edit %}
+			<p class="doc-notice doc-notice--info"><i class="fa fa-pencil" aria-hidden="true"></i> {% blocktrans with user=web_edit.updated_by date=web_edit.updated_at|date:"SHORT_DATETIME_FORMAT" context "documentation" %}This page was edited on the web by {{ user }} ({{ date }}). Export it from the editor to keep it in the repository.{% endblocktrans %}</p>
+			{% endif %}
+			{% if base_changed %}
+			<p class="doc-notice"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans "The repository version of this page has changed since it was edited on the web. Review the editor before exporting." context "documentation" %}</p>
+			{% endif %}
+			{% if fallback_lang %}
+			<p class="doc-notice"><i class="fa fa-language" aria-hidden="true"></i> {% blocktrans with lang=fallback_lang|upper context "documentation" %}This page is not available in your language yet. It is shown in {{ lang }}.{% endblocktrans %}</p>
+			{% endif %}
+
+			<article class="doc-body" lang="{{ page.lang }}">
+				{{ page.html|safe }}
+			</article>
+
+			{% if previous or next %}
+			<nav class="doc-pager" aria-label="{% trans "Pages" context "documentation" %}">
+				{% if previous %}<a href="{{ previous.url }}"><span class="doc-pager__label">{% trans "Previous" context "documentation" %}</span><span class="doc-pager__title">{{ previous.title }}</span></a>{% else %}<span style="flex:1"></span>{% endif %}
+				{% if next %}<a class="doc-pager__next" href="{{ next.url }}"><span class="doc-pager__label">{% trans "Next" context "documentation" %}</span><span class="doc-pager__title">{{ next.title }}</span></a>{% endif %}
+			</nav>
+			{% endif %}
+		</main>
+
+		{% if page.toc %}
+		<aside class="doc-toc" aria-label="{% trans "On this page" context "documentation" %}">
+			<p class="doc-toc__title">{% trans "On this page" context "documentation" %}</p>
+			<ul>
+				{% for h in page.toc %}
+				<li><a href="#{{ h.id }}">{{ h.name }}</a>
+					{% if h.children %}<ul>{% for c in h.children %}<li><a href="#{{ c.id }}">{{ c.name }}</a></li>{% endfor %}</ul>{% endif %}
+				</li>
+				{% endfor %}
+			</ul>
+		</aside>
+		{% endif %}
+	</div>
+
+	<footer class="doc-footer">
+		<span><b>{% trans "Version" %}</b>&nbsp;{{GVSIGOL_VERSION}}</span>
+	</footer>
+
+	<script>
+		// «En esta página»: marca la sección que se está leyendo
+		(function () {
+			var links = Array.prototype.slice.call(document.querySelectorAll('.doc-toc a'));
+			if (!links.length || !('IntersectionObserver' in window)) { return; }
+			var byId = {};
+			links.forEach(function (a) { byId[decodeURIComponent(a.getAttribute('href').slice(1))] = a; });
+			var observer = new IntersectionObserver(function (entries) {
+				entries.forEach(function (entry) {
+					if (entry.isIntersecting && byId[entry.target.id]) {
+						links.forEach(function (a) { a.classList.remove('is-active'); });
+						byId[entry.target.id].classList.add('is-active');
+					}
+				});
+			}, { rootMargin: '-70px 0px -70% 0px' });
+			document.querySelectorAll('.doc-body h2[id], .doc-body h3[id]').forEach(function (h) { observer.observe(h); });
+		})();
+
+		// «Descargar PDF»: se pide con fetch y se guarda desde el navegador. El gestor de descargas
+		// de Chrome puede fallar sin llegar a pedirlo (p. ej. con certificados autofirmados), y así
+		// además se ve que el PDF se está generando. Si algo falla, se abre el enlace normal.
+		(function () {
+			var link = document.getElementById('doc-pdf');
+			if (!link || !window.fetch || !window.URL || !URL.createObjectURL) { return; }
+			var icon = link.querySelector('.fa');
+			var label = link.querySelector('.doc-pdf__label');
+			var idle = label.textContent;
+			link.addEventListener('click', function (ev) {
+				ev.preventDefault();
+				if (link.getAttribute('aria-busy') === 'true') { return; }
+				link.setAttribute('aria-busy', 'true');
+				icon.className = 'fa fa-spinner fa-spin';
+				label.textContent = link.getAttribute('data-busy');
+				var done = function () {
+					link.removeAttribute('aria-busy');
+					icon.className = 'fa fa-file-pdf-o';
+					label.textContent = idle;
+				};
+				fetch(link.href, {credentials: 'same-origin', cache: 'no-store'}).then(function (r) {
+					// Sin sesión llega la página de inicio de sesión; con un error, su mensaje
+					if (!r.ok || (r.headers.get('Content-Type') || '').indexOf('application/pdf') !== 0) {
+						throw new Error('respuesta ' + r.status);
+					}
+					var match = /filename="([^"]+)"/.exec(r.headers.get('Content-Disposition') || '');
+					return r.blob().then(function (blob) { return {blob: blob, name: match ? match[1] : 'manual.pdf'}; });
+				}).then(function (result) {
+					var url = URL.createObjectURL(result.blob);
+					var a = document.createElement('a');
+					a.href = url;
+					a.download = result.name;
+					document.body.appendChild(a);
+					a.click();
+					a.remove();
+					setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+					done();
+				}).catch(function () {
+					done();
+					window.location.href = link.href;
+				});
+			});
+		})();
+	</script>
+</body>
+</html>

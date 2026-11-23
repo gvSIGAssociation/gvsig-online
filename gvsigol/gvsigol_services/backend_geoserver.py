@@ -475,9 +475,15 @@ class Geoserver():
             else:
                 catalog.delete(ds, purge, recurse=True)
                 if delete_schema:
-                    utils.delete_schema_for_datastore(
-                        datastore.get_connection_params_dict()
-                    )
+                    sharing = utils.datastores_sharing_schema(datastore)
+                    if sharing:
+                        # Otros almacenes usan ese esquema: se conserva (se borrará con el último)
+                        logger.warning("Schema of datastore %s kept: also used by %s",
+                                       datastore, ', '.join(str(d) for d in sharing))
+                    else:
+                        utils.delete_schema_for_datastore(
+                            datastore.get_connection_params_dict()
+                        )
                 
             return True
         else:

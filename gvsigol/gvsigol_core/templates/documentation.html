@@ -32,78 +32,7 @@
 	   manuales agrupados por público en tarjetas. Colores del tema activo
 	   (tokens --pl-* y --gol-* de gol-tokens.css).
 	   ================================================================= */
-	*, *::before, *::after { box-sizing: border-box; }
-
-	body {
-		margin: 0;
-		padding: 0;
-		background: var(--pl-bg);
-		font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-		color: var(--pl-text);
-		min-height: 100vh;
-		display: flex;
-		flex-direction: column;
-	}
-
-	/* ---- Barra superior: como la cabecera del core, con los colores del tema
-	   (variables --hdr-* de gol-themes.css, activas por la clase de tema del body) ---- */
-	.doc-topbar {
-		position: sticky;
-		top: 0;
-		z-index: 200;
-		flex-shrink: 0;
-		background-color: var(--hdr-bg);
-		box-shadow: var(--hdr-shadow);
-		border-bottom: var(--hdr-border);
-	}
-	.doc-topbar__inner {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		height: 50px;
-	}
-	.doc-topbar__logo {
-		display: inline-flex;
-		align-items: center;
-		height: 50px;
-		padding: 0 10px;
-		margin-left: -10px;
-		font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-		font-size: 20px;
-		font-weight: 300;
-		line-height: 50px;
-		color: var(--hdr-text) !important;
-		text-decoration: none !important;
-		transition: background-color 0.15s;
-	}
-	.doc-topbar__logo:hover, .doc-topbar__logo:focus { background-color: var(--hdr-item-hover); }
-	.doc-topbar__logo-img {
-		width: 28px;
-		height: 28px;
-		margin-right: 9px;
-		flex-shrink: 0;
-		object-fit: contain;
-		border-radius: 5px;
-		filter: var(--hdr-logo-filter);
-	}
-	.doc-topbar__logo b { font-weight: 700; }
-	.doc-topbar__surname { margin-left: 4px; opacity: 0.85; }
-	.doc-topbar__link {
-		display: inline-flex;
-		align-items: center;
-		gap: 7px;
-		height: 50px;
-		padding: 0 15px;
-		margin-right: -15px;
-		font-size: 14px;
-		color: var(--hdr-text) !important;
-		text-decoration: none !important;
-		transition: background-color 0.15s;
-	}
-	.doc-topbar__link:hover, .doc-topbar__link:focus { background-color: var(--hdr-item-hover); color: var(--hdr-text-dim) !important; }
-	button.doc-topbar__link { background: transparent; border: 0; cursor: pointer; }
-	.doc-topbar__link[hidden] { display: none; }
-	.doc-topbar a:focus-visible, .doc-topbar button:focus-visible { outline: 2px solid var(--hdr-text); outline-offset: -2px; }
+	{% include "documentation_common_styles.html" %}
 
 	/* ---- Cabecera de la página ---- */
 	.doc-hero {
@@ -239,25 +168,11 @@
 	.doc-empty .fa { font-size: 30px; opacity: 0.5; }
 	.doc-empty p { margin: 10px 0 0; font-size: 14px; }
 
-	/* ---- Pie ---- */
-	.doc-footer {
-		background: var(--pl-white);
-		border-top: 1px solid var(--pl-border);
-		padding: 12px 24px;
-		font-size: 12px;
-		color: var(--pl-muted);
-		display: flex;
-		align-items: center;
-		justify-content: flex-end;
-		flex-shrink: 0;
-	}
 
 	@media (max-width: 767px) {
 		.doc-grid { grid-template-columns: minmax(0, 1fr); }
 		.doc-hero .container { padding-top: 28px; padding-bottom: 24px; }
 		.doc-hero__title { font-size: 24px; }
-		.doc-topbar__logo { font-size: 17px; }
-		.doc-topbar__link-text { display: none; }
 	}
 	@media (prefers-reduced-motion: reduce) {
 		.doc-card, .doc-card__icon { transition: none; }
@@ -291,7 +206,7 @@
 	<main class="doc-content">
 		<div class="container">
 
-			{% if viewer or spaviewer %}
+			{% if viewer or spaviewer or md_viewer_manuals %}
 			<section class="doc-group">
 				<h2 class="doc-group__title">{% trans "Map viewers" context "documentation" %}</h2>
 				<div class="doc-grid">
@@ -311,6 +226,7 @@
 						</span>
 					</a>
 					{% endif %}
+					{% for manual in md_viewer_manuals %}{% include "documentation_md_card.html" %}{% endfor %}
 					{% if spaviewer %}
 					<a class="doc-card" href="{{spaviewer.url}}" target="_blank" rel="noopener">
 						<span class="doc-card__top">
@@ -331,10 +247,12 @@
 			</section>
 			{% endif %}
 
-			{% if admin and user.is_active %}{% if user.is_superuser or user.is_staff %}
+			{% if md_admin_manuals or admin and user.is_active and user.is_superuser or admin and user.is_active and user.is_staff %}
 			<section class="doc-group">
 				<h2 class="doc-group__title">{% trans "Administration" context "documentation" %}</h2>
 				<div class="doc-grid">
+					{% for manual in md_admin_manuals %}{% include "documentation_md_card.html" %}{% endfor %}
+					{% if admin and user.is_active %}{% if user.is_superuser or user.is_staff %}
 					<a class="doc-card" href="{{admin.url}}" target="_blank" rel="noopener">
 						<span class="doc-card__top">
 							<span class="doc-card__icon" aria-hidden="true"><i class="fa fa-cogs"></i></span>
@@ -349,14 +267,16 @@
 							<span class="doc-card__open">{% trans "Open manual" context "documentation" %} <i class="fa fa-external-link" aria-hidden="true"></i></span>
 						</span>
 					</a>
+					{% endif %}{% endif %}
 				</div>
 			</section>
-			{% endif %}{% endif %}
+			{% endif %}
 
-			{% if plugin_manuals %}
+			{% if plugin_manuals or md_plugin_manuals %}
 			<section class="doc-group">
 				<h2 class="doc-group__title">{% trans "Plugins" context "documentation" %}</h2>
 				<div class="doc-grid">
+					{% for manual in md_plugin_manuals %}{% include "documentation_md_card.html" %}{% endfor %}
 					{% for plugin_manual in plugin_manuals %}
 					<a class="doc-card" href="{{plugin_manual.url}}" target="_blank" rel="noopener">
 						<span class="doc-card__top">
@@ -398,7 +318,7 @@
 			</section>
 			{% endif %}
 
-			{% if not viewer and not spaviewer and not mobile and not plugin_manuals %}{% if not admin or not user.is_active or not user.is_superuser and not user.is_staff %}
+			{% if not viewer and not spaviewer and not mobile and not plugin_manuals and not md_viewer_manuals and not md_admin_manuals and not md_plugin_manuals %}{% if not admin or not user.is_active or not user.is_superuser and not user.is_staff %}
 			<div class="doc-empty">
 				<i class="fa fa-book" aria-hidden="true"></i>
 				<p>{% trans "No manuals are available at the moment." context "documentation" %}</p>

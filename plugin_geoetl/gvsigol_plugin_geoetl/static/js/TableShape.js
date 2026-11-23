@@ -1586,6 +1586,13 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
                                 '<div class="col-md-6">'+
                                     '<label class="col-form-label">'+gettext('Skip header:')+'</label>'+
                                     '<input type="number" id="header-'+ID+'" value=0 min="0" class="form-control">'+
+                                    '<label class="col-form-label">'+gettext('Encoding:')+'</label>'+
+                                    '<select id="encode-'+ID+'" class="form-control">'+
+                                        '<option value="UTF-8">UTF-8</option>'+
+                                        '<option value="WINDOWS-1252">WINDOWS-1252 (LATIN1)</option>'+
+                                        '<option value="ISO-8859-15">ISO-8859-15</option>'+
+                                        '<option value="CP850">CP850 (MS-DOS)</option>'+
+                                    '</select>'+
                                 '</div>'+
                                 '<div class="col-md-6">'+
                                     '<label class="col-form-label">'+gettext('Schema options:')+'</label>'+
@@ -1723,6 +1730,7 @@ input_Csv = draw2d.shape.layout.VerticalLayout.extend({
             "parameters": [
                 {"csv-file": $('#csv-file-'+ID).val(),
                 "separator": $('#separator-'+ID).val(),
+                "encode": $('#encode-'+ID).val(),
                 "header": $('#header-'+ID).val(),
                 "schema-option": $('input:radio[name="schema-option-'+ID+'"]:checked').val(),
                 "reading": $('input:radio[name="reading-'+ID+'"]:checked').val(),
@@ -4067,6 +4075,7 @@ input_Shp = draw2d.shape.layout.VerticalLayout.extend({
                                         '<option value="UTF-8">UTF-8</option>'+
                                         '<option value="ISO-8859-15">ISO-8859-15</option>'+
                                         '<option value="WINDOWS-1252">WINDOWS-1252</option>'+
+                                        '<option value="CP850">CP850 (MS-DOS)</option>'+
                                     '</select>'+
                                 '</div>'+
                                 '<div class="col-md-8">'+
@@ -8106,6 +8115,354 @@ trans_ConcatAttr = draw2d.shape.layout.VerticalLayout.extend({
 
          return this;
      }  
+
+});
+
+//// AI TEXT ////
+
+trans_AIText = draw2d.shape.layout.VerticalLayout.extend({
+
+    NAME: "trans_AIText",
+
+    init : function(attr)
+    {
+        this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+
+        this.classLabel = new draw2d.shape.basic.Label({
+            text: gettext("AI Text"),
+            stroke:1,
+            fontColor:"#ffffff",
+            bold:true,
+            bgColor:"#71c7ec",
+            radius: this.getRadius(),
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+
+        var icon = new draw2d.shape.icon.Gear({
+            minWidth:13,
+            minHeight:13,
+            width:13,
+            height:13,
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+
+        this.add(this.classLabel);
+
+        var ID = this.id
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        function selectedAITextAttrs() {
+            var value = $('#attr-'+ID).val()
+            if (Array.isArray(value)) {
+                return value.filter(Boolean)
+            }
+            return value ? [value] : []
+        }
+
+        function suggestAITextAttrs(attrs, instruction) {
+            var base = Array.isArray(attrs) ? (attrs[0] || '') : String(attrs || '')
+            base = base.trim()
+            instruction = instruction || ''
+            if (!base) {
+                return []
+            }
+            var found = [], seen = {}, match, re = /_[A-Za-z]{2,12}\b/g
+            while ((match = re.exec(instruction)) !== null) {
+                if (!seen[match[0]]) {
+                    seen[match[0]] = true
+                    found.push(base + match[0])
+                }
+            }
+            return found
+        }
+
+        function parseAITextAttrs(text) {
+            return String(text || '').split(/[,;|]/).map(function(part) {
+                return part.trim()
+            }).filter(Boolean)
+        }
+
+        $('#canvas-parent').append('<div id="dialog-ai-text-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title" >'+paramsTransTpl.replace('{}', gettext("AI Text"))+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<p class="help-block">'+gettext('Choose the task and detail it in the instruction. You can select several input attributes when the text is split across fields, and ask for several results at once. Distinct value combinations are sent to the language model configured in GeoCopilot; unresolved values stay empty.')+'</p>'+
+                            '<div>'+
+                                '<label class="col-form-label">'+gettext('Attributes with the text:')+'</label>'+
+                                '<select class="form-control" multiple id="attr-'+ID+'"> </select>'+
+                            '</div>'+
+                            '<div>'+
+                                '<label class="col-form-label">'+gettext('Task:')+'</label>'+
+                                '<select class="form-control" id="mode-'+ID+'">'+
+                                    '<option value="translate">'+gettext('Translate')+'</option>'+
+                                    '<option value="classify">'+gettext('Classify')+'</option>'+
+                                    '<option value="extract">'+gettext('Extract data')+'</option>'+
+                                    '<option value="normalize">'+gettext('Normalize')+'</option>'+
+                                    '<option value="summarize">'+gettext('Summarize')+'</option>'+
+                                '</select>'+
+                            '</div>'+
+                            '<div>'+
+                                '<label class="col-form-label">'+gettext('Instruction:')+'</label>'+
+                                '<textarea id="instruction-'+ID+'" rows="3" class="form-control"></textarea>'+
+                                '<p class="help-block" id="instruction-hint-'+ID+'"></p>'+
+                            '</div>'+
+                            '<div>'+
+                                '<label class="col-form-label">'+gettext('New attributes (comma separated):')+'</label>'+
+                                '<input id="new-attrs-'+ID+'" type="text" value="" class="form-control" placeholder="'+gettext('e.g. name_en, name_pt')+'">'+
+                                '<p class="help-block">'+gettext('Filled automatically from suffixes like _en and _pt in the instruction; you can edit them.')+'</p>'+
+                            '</div>'+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="ai-text-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+
+        var instructionHints = {
+            'translate': gettext('Example: to English and Portuguese; new fields are _en and _pt'),
+            'classify': gettext('Example: categories A, B, C'),
+            'extract': gettext('Example: extract the date, amount or code mentioned in the text'),
+            'normalize': gettext('Example: unify spelling, abbreviations and format'),
+            'summarize': gettext('Example: at most 15 words')
+        }
+        var suggestedFromInstruction = true
+
+        function syncInstructionHint() {
+            var hint = instructionHints[$('#mode-'+ID).val()] || instructionHints['translate']
+            $('#instruction-hint-'+ID).text(hint)
+            $('#instruction-'+ID).attr('placeholder', hint)
+        }
+
+        function syncSuggestedAttrs() {
+            if (!suggestedFromInstruction) {
+                return
+            }
+            var suggested = suggestAITextAttrs(selectedAITextAttrs(), $('#instruction-'+ID).val())
+            if (suggested.length) {
+                $('#new-attrs-'+ID).val(suggested.join(', '))
+            }
+        }
+
+        $('#mode-'+ID).on('change', syncInstructionHint)
+        $('#instruction-'+ID).on('input', function() {
+            suggestedFromInstruction = true
+            syncSuggestedAttrs()
+        })
+        $('#attr-'+ID).on('change', function() {
+            suggestedFromInstruction = true
+            syncSuggestedAttrs()
+        })
+        $('#new-attrs-'+ID).on('input', function() {
+            suggestedFromInstruction = false
+        })
+        syncInstructionHint()
+
+      var context = this
+
+        icon.on("click", function(){
+
+            setTimeout(function(){
+                try{
+                    schemas = getOwnSchemas(context.canvas, ID)
+                    schema = schemas[0]
+                    schemaOld = schemas[1]
+                }catch{
+                    schema=[]
+                    schemaOld =[]
+                }
+
+                schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
+
+                if (true){ // always sync options from edge (propagation may already have updated schema-old)
+                    schema = schemaEdge
+                    refillSelectPreserving($('#attr-'+ID), schema, getStoredParamValue(ID, 'attr'))
+                    var $attr = $('#attr-'+ID)
+                    if ($attr.data('select2')) {
+                        $attr.select2('destroy')
+                    }
+                    $attr.select2({
+                        tags: false,
+                        placeholder: gettext('Select attributes'),
+                        width: '100%',
+                        allowClear: true,
+                        dropdownParent: $('#dialog-ai-text-'+ID)
+                    })
+                }
+                var storedMode = getStoredParamValue(ID, 'mode')
+                if (storedMode) {
+                    $('#mode-'+ID).val(storedMode)
+                }
+                syncInstructionHint()
+                var storedAttrs = getStoredParamValue(ID, 'new-attrs')
+                if (Array.isArray(storedAttrs)) {
+                    $('#new-attrs-'+ID).val(storedAttrs.join(', '))
+                    suggestedFromInstruction = false
+                } else if (storedAttrs) {
+                    $('#new-attrs-'+ID).val(storedAttrs)
+                    suggestedFromInstruction = false
+                } else {
+                    suggestedFromInstruction = true
+                    syncSuggestedAttrs()
+                }
+
+            },100);
+
+            $('#dialog-ai-text-'+ID).modal('show')
+
+        });
+
+        $('#ai-text-accept-'+ID).click(function() {
+
+            var attr = selectedAITextAttrs()
+            var mode = $('#mode-'+ID).val()
+            var instruction = ($('#instruction-'+ID).val() || '').trim()
+            var newAttrs = parseAITextAttrs($('#new-attrs-'+ID).val())
+            if (!newAttrs.length) {
+                newAttrs = suggestAITextAttrs(attr, instruction)
+            }
+            if (!attr.length) {
+                alert(gettext('Choose at least one attribute with the text.'))
+                return
+            }
+            if (!instruction) {
+                alert(gettext('Detail the instruction (languages, categories, what to extract…).'))
+                return
+            }
+            if (!newAttrs.length) {
+                alert(gettext('Indicate the new attributes (for example name_en, name_pt, or suffixes _en and _pt in the instruction).'))
+                return
+            }
+
+            var paramsAI = {"id": ID,
+            "parameters": [
+                {"attr": attr,
+                "mode": mode,
+                "instruction": instruction,
+                "new-attrs": newAttrs }
+            ]}
+
+            schemaMod =[...schemaEdge]
+            for (var i = 0; i < newAttrs.length; i++) {
+                if (newAttrs[i] && schemaMod.indexOf(newAttrs[i]) === -1) {
+                    schemaMod.push(newAttrs[i])
+                }
+            }
+
+            paramsAI['schema-old'] = schemaEdge
+            paramsAI['schema'] = schemaMod
+
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+
+            isAlreadyInCanvas(jsonParams, paramsAI, ID)
+            if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
+
+            icon.setColor('#4682B4')
+
+            $('#dialog-ai-text-'+ID).modal('hide')
+
+        });
+
+    },
+
+    /**
+     * @method
+     * Add an entity to the db shape
+     *
+     * @param {Number} [optionalIndex] index where to insert the entity
+     */
+    addEntity: function( optionalIndex)
+    {
+	   	 var label1 =new draw2d.shape.basic.Label({
+	   	     text: gettext("Input"),
+	   	     stroke:0.2,
+	   	     radius:0,
+	   	     bgColor:"#ffffff",
+	   	     padding:{left:10, top:3, right:10, bottom:5},
+	   	     fontColor:"#111111",
+             resizeable:true
+	   	 });
+
+	   	 var label2 =new draw2d.shape.basic.Label({
+            text: gettext("Output"),
+            stroke:0.2,
+            radius:0,
+            bgColor:"#ffffff",
+            padding:{left:40, top:3, right:10, bottom:5},
+            fontColor:"#111111",
+            resizeable:true
+        });
+
+         var input = label1.createPort("input");
+         input.setName("input_"+label1.id);
+
+	     var output= label2.createPort("output");
+         output.setName("output_"+label2.id);
+
+	     if($.isNumeric(optionalIndex)){
+             this.add(label1, null, optionalIndex+1);
+             this.add(label2, null, optionalIndex+1);
+	     }
+	     else{
+             this.add(label1);
+             this.add(label2);
+	     }
+
+         listLabel.push([this.id, [input.name], [output.name]])
+
+	     return label1, label2;
+    },
+
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index+1).figure);
+    },
+
+    getEntity: function(index)
+    {
+        return this.children.get(index+1).figure;
+    },
+
+     setName: function(name)
+     {
+         this.classLabel.setText(name);
+
+         return this;
+     },
+
+     getPersistentAttributes : getPerAttr,
+
+     setPersistentAttributes : function(memento)
+     {
+         this._super(memento);
+
+         this.setName(memento.name);
+
+         if(typeof memento.entities !== "undefined"){
+             $.each(memento.entities, $.proxy(function(i,e){
+                 var entity =this.addEntity(e.text);
+                 entity.id = e.id;
+                 entity.getInputPort(0).setName("input_"+e.id);
+                 entity.getOutputPort(0).setName("output_"+e.id);
+             },this));
+         }
+
+         return this;
+     }
 
 });
 

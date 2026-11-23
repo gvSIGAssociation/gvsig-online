@@ -586,7 +586,7 @@ msgstr "Programa e-mails"
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:617
 
 msgid "Endpoint Parameters"
-msgstr "Parámetros SQL"
+msgstr "Parámetros del endpoint"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:430
 
@@ -707,12 +707,12 @@ msgstr "Envía e-mail si el proceso falla"
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:599
 
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:605
 
 msgid "Method"
-msgstr ""
+msgstr "Método"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:618
 
@@ -722,12 +722,12 @@ msgstr ""
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:625
 
 msgid "Send to endpoint after process finishes correctly"
-msgstr "Envía e-mail después de que el proceso finalice correctamente"
+msgstr "Enviar al endpoint cuando el proceso finalice correctamente"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:632
 
 msgid "Send to endpoint if process fails"
-msgstr "Envía e-mail si el proceso falla"
+msgstr "Enviar al endpoint si el proceso falla"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:641
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:1073
@@ -1538,3 +1538,45 @@ msgstr "Salidas / Visualizador"
 
 msgid "Publish Layer"
 msgstr "Publicar capa"
+
+msgid "Overwrite"
+msgstr "Sobrescribir"
+
+msgid "Save as new"
+msgstr "Guardar como nuevo"
+
+msgid "This workflow is already saved. You can overwrite it or save it as a new workflow (with another name)."
+msgstr "Este flujo ya está guardado. Puedes sobrescribirlo o guardarlo como un flujo nuevo (con otro nombre)."
+
+msgid "The saved workflow will be replaced by the current one. To keep it, cancel and use \"Save as new\"."
+msgstr "El flujo guardado se sustituirá por el actual. Para conservarlo, cancela y usa \"Guardar como nuevo\"."
+
+msgid "AI Text"
+msgstr "Texto con IA"
+
+msgid "Stop"
+msgstr "Detener"
+
+msgid "Stopped"
+msgstr "Detenido"
+
+msgid "Stop the running process"
+msgstr "Detener el proceso en marcha"
+
+msgid "Stopping…"
+msgstr "Deteniendo…"
+
+msgid "Stopping the process. It will stop as soon as the current step allows it."
+msgstr "Deteniendo el proceso. Se parará en cuanto el paso actual lo permita."
+
+msgid "The process was stopped by the user."
+msgstr "El proceso lo ha detenido el usuario."
+
+msgid "Could not stop the process"
+msgstr "No se ha podido detener el proceso"
+
+msgid "Workspace not found"
+msgstr "No se ha encontrado el workspace"
+
+msgid "Permission denied"
+msgstr "Permiso denegado"

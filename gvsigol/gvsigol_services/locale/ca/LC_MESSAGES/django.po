@@ -5697,3 +5697,65 @@ msgstr "Les capes publicades des d'aquest magatzem en depenen: els canvis les af
 msgctxt "services"
 msgid "Permissions define which roles can use the datastore or manage it."
 msgstr "Els permisos indiquen quins rols poden utilitzar el magatzem o administrar-lo."
+
+#: gvsigol_services/views.py
+#, python-format
+msgid "The schema \"%(schema)s\" is also used by other datastores (%(datastores)s) and cannot be deleted. Uncheck the schema deletion option to remove only this datastore."
+msgstr "L'esquema «%(schema)s» també l'usen altres magatzems de dades (%(datastores)s) i no es pot eliminar. Desmarqueu l'opció d'eliminar l'esquema per a esborrar només aquest magatzem."
+
+
+#: gvsigol_services/templates/server_update.html
+msgid "Leave blank to keep the current password"
+msgstr "Deixeu-la en blanc per a conservar la contrasenya actual"
+
+#: gvsigol_services/templates/server_update.html
+msgid "For security, the saved password is not shown. Leave the field blank to keep it, or type a new one to change it."
+msgstr "Per seguretat, la contrasenya guardada no es mostra. Deixeu el camp en blanc per a conservar-la o escriviu-ne una de nova per a canviar-la."
+
+#: gvsigol_services/templates/sqlview_list.html
+msgid "The SQL view will be deleted from the database. Layers that use it are not deleted, but they will stop working."
+msgstr "La vista SQL s'esborrarà de la base de dades. Les capes que la usen no s'esborren, però deixaran de funcionar."
+
+#: gvsigol_services/templates/layer_cache_config.html
+msgid "Select extent"
+msgstr "Seleccionar extensió"
+
+#: gvsigol_services/templates/server_update.html
+msgid "This is the default server. To change it, mark another server as default."
+msgstr "Aquest és el servidor per defecte. Per a canviar-lo, marqueu un altre servidor com a servidor per defecte."
+
+#: gvsigol_services/templates/layer_config.html
+msgid "Generate titles with AI"
+msgstr "Generar títols amb IA"
+
+#: gvsigol_services/templates/layer_config.html
+msgid "Replace existing titles"
+msgstr "Substituir els títols existents"
+
+#: gvsigol_services/templates/layer_config.html
+msgid "Generating titles..."
+msgstr "Generant títols..."
+
+#: gvsigol_services/templates/layer_config.html
+msgid "All fields already have a title. Check “Replace existing titles” to generate them again."
+msgstr "Tots els camps ja tenen títol. Marca «Substituir els títols existents» per a generar-los de nou."
+
+#: gvsigol_services/templates/layer_config.html
+msgid "Suggested by AI"
+msgstr "Suggerit per IA"
+
+#: gvsigol_services/templates/layer_config.html
+msgid "{count} titles suggested. Review them and click Save to keep them."
+msgstr "{count} títols suggerits. Revisa'ls i prem Guardar per a conservar-los."
+
+#: gvsigol_services/templates/layer_config.html
+msgid "The AI did not suggest any new title."
+msgstr "La IA no ha suggerit cap títol nou."
+
+#: gvsigol_services/templates/layer_config.html
+msgid "The AI assistant did not respond. Try again later."
+msgstr "L'assistent d'IA no ha respost. Torna-ho a provar més tard."
+
+#: gvsigol_services/templates/layer_config.html
+msgid "Your session has expired or you do not have permission. Reload the page and try again."
+msgstr "La teua sessió ha caducat o no tens permís. Recarrega la pàgina i torna-ho a provar."

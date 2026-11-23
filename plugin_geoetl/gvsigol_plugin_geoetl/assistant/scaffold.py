@@ -30,15 +30,19 @@ SUMMARIES = {
     'input_PadronAlbacete': 'Lee el padrón de Albacete (servicio PRO o PRE).',
     'input_PadronAtm': 'Lee el padrón ATM a través de su conexión.',
     'crea_Grid': 'Crea una malla de celdas rectangulares a partir de un origen, tamaño y EPSG.',
-    'trans_Calculator': 'Crea o rellena un atributo con una expresión.',
+    'trans_Calculator': 'Actualiza un atributo o la geometría con una expresión SQL de PostgreSQL/PostGIS en cada fila; '
+                        'es la alternativa para cualquier cálculo por fila que no tenga nodo propio.',
     'trans_ChangeAttrType': 'Cambia el tipo de un atributo.',
     'trans_CompareRows': 'Compara filas de dos entradas por un atributo. Tiene dos entradas y varias salidas.',
+    'trans_AIText': 'Transforma un texto con un modelo de lenguaje según una instrucción (traducir a uno o varios '
+                    'idiomas, clasificar, extraer, normalizar o resumir) y guarda uno o más atributos nuevos.',
     'trans_ConcatAttr': 'Concatena atributos en uno nuevo.',
     'trans_Counter': 'Numera filas, opcionalmente dentro de grupos.',
     'trans_CorrectSpelling': 'Corrige la ortografía de un atributo de texto.',
     'trans_CurrentDate': 'Escribe la fecha actual en un atributo.',
     'trans_CreateAttr': 'Añade un atributo con un valor constante.',
-    'trans_ExposeAttr': 'Expone atributos anidados.',
+    'trans_ExposeAttr': 'Hace visibles para los nodos siguientes atributos que están en los datos pero no en la lista '
+                        'de columnas, como la geometría (wkb_geometry) o campos anidados.',
     'trans_Filter': 'Filtra filas. La salida 0 son las que cumplen y la 1 las que no.',
     'trans_FilterDupli': 'Separa duplicados. La salida 0 son las filas únicas.',
     'trans_Join': 'Cruza dos tablas por atributos. Entrada 0 es la principal y la 1 la secundaria.',

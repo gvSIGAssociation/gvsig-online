@@ -995,6 +995,17 @@ class Introspect:
             print(str(e))
             return False
 
+    def get_view_definition(self, schema, view_name):
+        """SELECT de una vista existente (para poder restaurarla), o None."""
+        try:
+            self.cursor.execute(
+                "SELECT pg_get_viewdef(format('%%I.%%I', %s, %s)::regclass, true)", [schema, view_name])
+            row = self.cursor.fetchone()
+            return row[0].strip().rstrip(';') if row and row[0] else None
+        except Exception:
+            logger.exception("error reading SQL view definition")
+            return None
+
     def delete_view(self, schema, view_name):
         query = sqlbuilder.SQL("DROP VIEW IF EXISTS {schema}.{view}").format(
             schema=sqlbuilder.Identifier(schema),

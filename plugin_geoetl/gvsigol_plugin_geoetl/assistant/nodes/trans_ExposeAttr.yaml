@@ -1,12 +1,17 @@
 type: trans_ExposeAttr
 label: Expose Attribute
 family: transform
-summary: Expone atributos anidados.
+summary: Hace visibles para los nodos siguientes atributos que están en los datos pero no en la lista de columnas,
+  como la geometría (wkb_geometry) o campos anidados. Es el paso previo para usar la geometría en un parámetro, por
+  ejemplo en trans_Calculator.
 parameters:
-- name: attr
-  summary: Atributo sobre el que actúa la tarea.
 - name: attrs
+  summary: Atributos que se exponen, separados por espacio.
+  example: wkb_geometry
+- name: attr
+  summary: Lo mismo que attrs (es lo que enseña el diálogo); basta con rellenar uno de los dos.
 - name: schema
+  summary: Columnas de salida. Las calcula el editor; no lo rellenes.
 ports:
 - direction: input
   label: Input

@@ -236,7 +236,7 @@ $().ready(function() {
 	var dragBoxCtrl = new ol.control.Toggle({
 		html: '<i class="fa fa-pencil-square-o"></i>',
 		className: "dragbox-custom",
-		title: "Select extent",
+		title: "{% trans "Select extent" as select_extent %}{{ select_extent|escapejs }}",
 		//interaction: interaction,
 		active: false,
 		onToggle: function(active){	

@@ -611,6 +611,12 @@ def user_update(request, username):
                     },
                 )
 
+            # Los roles no editables se muestran marcados pero desactivados, así que no llegan en el
+            # POST; como update_user sustituye la lista completa, se añaden para no quitárselos
+            for role in auth_utils.get_all_roles_checked_by_user(username):
+                if role.get('editable') is False and role.get('checked') and role.get('name') not in assigned_roles:
+                    assigned_roles.append(role.get('name'))
+
             # The groups tab is hidden in user_update.html, so the POST has no group
             # data: 'groups' must not be passed or the backend would clear them
             try:
@@ -801,12 +807,17 @@ def role_delete(request, role_name):
                 'deleted': False,
                 'message': _("System roles can't be deleted")
             }
-        else:
-            auth_backend.delete_role(role_name)
+        elif auth_backend.delete_role(role_name):
             response = {
                'deleted': True
             }
             status = 200
+        else:
+            status = 400
+            response = {
+                'deleted': False,
+                'message': _("The role could not be deleted")
+            }
         return HttpResponse(json.dumps(response, indent=4), content_type='application/json', status=status)
 
 @login_required()

@@ -1734,3 +1734,25 @@ msgstr "O ficheiro SVG não é válido."
 #: external_graphics.py
 msgid "The SVG file must define its size (width and height, or a viewBox)."
 msgstr "O ficheiro SVG deve indicar o seu tamanho (width e height, ou uma viewBox)."
+
+#: templates/library_update.html templates/library_list.html
+msgctxt "symbology"
+msgid "Advanced symbols are exported as classic symbols (shape, colours and dashes)"
+msgstr "Os símbolos avançados são exportados como símbolos clássicos (forma, cores e tracejados)"
+
+#: templates/library_update.html templates/library_list.html
+msgctxt "symbology"
+msgid "Earlier versions of gvSIG Online cannot import advanced symbols correctly. If the library is for one of them, export it for earlier versions: advanced symbols become classic symbols (shape, colours and dashes)."
+msgstr "As versões anteriores do gvSIG Online não conseguem importar corretamente os símbolos avançados. Se a biblioteca for para uma delas, exporte-a para versões anteriores: os símbolos avançados tornam-se símbolos clássicos (forma, cores e tracejados)."
+
+#: templates/library_update.html templates/library_list.html
+msgctxt "symbology"
+msgid "Export for earlier versions"
+msgstr "Exportar para versões anteriores"
+
+#: templates/library_update.html
+msgctxt "symbology"
+msgid "This library has %(counter)s symbol with advanced symbology. Earlier versions of gvSIG Online cannot import it correctly: to use the library there, export it for earlier versions."
+msgid_plural "This library has %(counter)s symbols with advanced symbology. Earlier versions of gvSIG Online cannot import them correctly: to use the library there, export it for earlier versions."
+msgstr[0] "Esta biblioteca tem %(counter)s símbolo com simbologia avançada. As versões anteriores do gvSIG Online não o conseguem importar corretamente: para usar a biblioteca nelas, exporte-a para versões anteriores."
+msgstr[1] "Esta biblioteca tem %(counter)s símbolos com simbologia avançada. As versões anteriores do gvSIG Online não os conseguem importar corretamente: para usar a biblioteca nelas, exporte-a para versões anteriores."

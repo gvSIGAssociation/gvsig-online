@@ -238,6 +238,8 @@ def _collect_symbol_library_assets(layer):
     used in the layer's styles.  Only files that actually exist on disk are
     included.
     """
+    from urllib.parse import unquote
+
     libs = {}
     style_ids = StyleLayer.objects.filter(layer=layer).values_list('style_id', flat=True)
     rule_ids = Rule.objects.filter(style_id__in=style_ids).values_list('id', flat=True)
@@ -247,13 +249,17 @@ def _collect_symbol_library_assets(layer):
         idx = url.find(marker)
         if idx == -1:
             continue
-        rel = url[idx + len(marker):]  # e.g. "my_lib/icon.svg"
+        rel = unquote(url[idx + len(marker):])  # e.g. "my_lib/icon.svg"
         parts = rel.split('/', 1)
         if len(parts) != 2:
             continue
         lib_name, file_name = parts
         abs_path = os.path.join(settings.MEDIA_ROOT, 'symbol_libraries', lib_name, file_name)
         if not os.path.isfile(abs_path):
+            LOG.warning(
+                'Symbol library asset missing on disk for layer %s: %s',
+                layer.id, abs_path,
+            )
             continue
         if lib_name not in libs:
             lib_obj = Library.objects.filter(name=lib_name).first()

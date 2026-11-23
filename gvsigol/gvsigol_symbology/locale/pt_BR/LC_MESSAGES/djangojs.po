@@ -949,3 +949,540 @@ msgstr "Usar"
 msgctxt "symbology"
 msgid "Valid name"
 msgstr "Nome válido"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Add angle from field"
+msgstr "Somar o ângulo de um campo"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Advanced symbol"
+msgstr "Símbolo avançado"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Arrowhead"
+msgstr "Ponta de seta"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Background color"
+msgstr "Cor de fundo"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Background color under the pattern"
+msgstr "Cor de fundo sob o padrão"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Background opacity"
+msgstr "Opacidade do fundo"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Backslash"
+msgstr "Barra invertida"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Bevel"
+msgstr "Chanfrada"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Butt"
+msgstr "Reto"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Circle"
+msgstr "Círculo"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Closed arrow"
+msgstr "Seta fechada"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Color"
+msgstr "Cor"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Corners"
+msgstr "Cantos"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Cross"
+msgstr "Cruz"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Custom pattern"
+msgstr "Padrão personalizado"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Dash and gap lengths in pixels, separated by spaces."
+msgstr "Comprimentos de traço e de espaço em pixels, separados por espaços."
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Dash offset"
+msgstr "Deslocamento do tracejado"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Dash pattern"
+msgstr "Padrão de tracejado"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Decoration"
+msgstr "Decoração"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Diagonal /"
+msgstr "Diagonal /"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Diagonal \\"
+msgstr "Diagonal \\"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Diagonal grid"
+msgstr "Grade diagonal"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Diamond"
+msgstr "Losango"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Dots"
+msgstr "Pontos"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Draw the line"
+msgstr "Desenhar a linha"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "End of the line"
+msgstr "Fim da linha"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Equilateral triangle"
+msgstr "Triângulo equilátero"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Fill the shape"
+msgstr "Preencher a forma"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Fill type"
+msgstr "Tipo de preenchimento"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Gap between marks"
+msgstr "Espaço entre marcas"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Grid"
+msgstr "Grade"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Hatch"
+msgstr "Hachura"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Hexagon"
+msgstr "Hexágono"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Horizontal"
+msgstr "Horizontal"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Initial offset"
+msgstr "Deslocamento inicial"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Line ends"
+msgstr "Extremidades"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Line width"
+msgstr "Espessura da linha"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Marks along the line"
+msgstr "Marcas ao longo da linha"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Marks follow the direction of the line: use them for railways, arrows showing the flow, or boundaries."
+msgstr "As marcas seguem a direção da linha: use-as para ferrovias, setas que indiquem o sentido ou limites."
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Miter"
+msgstr "Em ângulo"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "No field"
+msgstr "Nenhum campo"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "No fill"
+msgstr "Sem preenchimento"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "None"
+msgstr "Nenhuma"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "North arrow"
+msgstr "Seta para cima"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Offset"
+msgstr "Deslocamento"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Open arrow"
+msgstr "Seta aberta"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Pattern"
+msgstr "Padrão"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Pattern color"
+msgstr "Cor do padrão"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Pentagon"
+msgstr "Pentágono"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Plus"
+msgstr "Mais"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Rectangle"
+msgstr "Retângulo"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Round"
+msgstr "Arredondado"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Semicircle"
+msgstr "Semicírculo"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Shape"
+msgstr "Forma"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Side offset"
+msgstr "Deslocamento lateral"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Side offset moves the line to the left (positive) or to the right (negative) of its direction, for example to draw parallel lines or the edge of a road."
+msgstr "O deslocamento lateral move a linha para a esquerda (positivo) ou para a direita (negativo) do seu sentido, por exemplo para desenhar linhas paralelas ou a borda de uma estrada."
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Slash"
+msgstr "Barra"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Solid"
+msgstr "Sólido"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "South arrow"
+msgstr "Seta para baixo"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Spacing"
+msgstr "Espaçamento"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Square"
+msgstr "Quadrado"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Star"
+msgstr "Estrela"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Start of the line"
+msgstr "Início da linha"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Symbol opacity"
+msgstr "Opacidade do símbolo"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Symbol preview"
+msgstr "Pré-visualização do símbolo"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "This shape is drawn with its stroke only."
+msgstr "Esta forma é desenhada apenas com o contorno."
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Times"
+msgstr "Xis"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Triangle"
+msgstr "Triângulo"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Vertical"
+msgstr "Vertical"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Vertical (up)"
+msgstr "Vertical (para cima)"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "Vertical line"
+msgstr "Linha vertical"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "X"
+msgstr "X"
+
+#: static/js/lib/symbology/SymbolOptionsEditor.js
+msgctxt "symbology"
+msgid "e.g. 10 4 2 4"
+msgstr "ex.: 10 4 2 4"
+
+#: templates/library_list.html
+msgctxt "symbology"
+msgid "This library has %s symbol with advanced symbology."
+msgid_plural "This library has %s symbols with advanced symbology."
+msgstr[0] "Esta biblioteca tem %s símbolo com simbologia avançada."
+msgstr[1] "Esta biblioteca tem %s símbolos com simbologia avançada."
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Administrative boundary"
+msgstr "Limite administrativo"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Building"
+msgstr "Edificação"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Canal"
+msgstr "Canal"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Choose a preset to replace the symbolizers of the rule. The label is kept, and you can edit the symbolizers afterwards."
+msgstr "Escolha um símbolo predefinido para substituir os simbolizadores da regra. O rótulo é mantido e depois você pode editar os simbolizadores."
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Crops"
+msgstr "Cultivo"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Dashed outline"
+msgstr "Contorno tracejado"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Double line"
+msgstr "Linha dupla"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Fence"
+msgstr "Cerca"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Flood zone"
+msgstr "Área inundável"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Footpath"
+msgstr "Trilha"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Green area"
+msgstr "Área verde"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Highlighted star"
+msgstr "Estrela destacada"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Line with end arrow"
+msgstr "Linha com seta final"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Main road"
+msgstr "Estrada principal"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Municipal boundary"
+msgstr "Limite municipal"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Parcel outline"
+msgstr "Contorno de lote"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Point of interest"
+msgstr "Ponto de interesse"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Power line"
+msgstr "Linha de energia"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Presets"
+msgstr "Predefinidos"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Protected area"
+msgstr "Área protegida"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Railway"
+msgstr "Ferrovia"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Railway (classic)"
+msgstr "Ferrovia (clássica)"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Restricted area"
+msgstr "Área restrita"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "River"
+msgstr "Rio"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "River with flow direction"
+msgstr "Rio com sentido da correnteza"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Secondary road"
+msgstr "Estrada secundária"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Survey point"
+msgstr "Vértice geodésico"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Symbol presets"
+msgstr "Símbolos predefinidos"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Target"
+msgstr "Alvo"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Track"
+msgstr "Caminho"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Vegetation"
+msgstr "Vegetação"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "Water body"
+msgstr "Corpo d'água"
+
+#: static/js/lib/symbology/SymbolPresets.js
+msgctxt "symbology"
+msgid "X mark"
+msgstr "Marca em X"

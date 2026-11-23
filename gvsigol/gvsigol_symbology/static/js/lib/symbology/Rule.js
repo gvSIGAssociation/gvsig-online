@@ -123,6 +123,10 @@ Rule.prototype.getTableUI = function(allowImport, type, editableRule) {
 	ui += 			'</div>';
 	ui += 			'<div class="box-footer clearfix">';
 	ui += 				'<a id="append-symbol-button-' + this.id + '" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-star-o margin-r-5"></i>' + gettext('Append symbolizer') + '</a>';
+	if (type != 'clusteredpoints' && typeof SymbolPresets !== 'undefined' && this.utils && this.utils.getFeatureType
+			&& SymbolPresets.forType(this.utils.getFeatureType()).length) {
+		ui += 			'<a id="preset-symbol-button-' + this.id + '" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-th-large margin-r-5"></i>' + symoptT('Presets') + '</a>';
+	}
 	if(type == 'clusteredpoints') {
 		ui += 				'<a id="append-textsymbol-button-' + this.id + '" href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right margin-r-5"><i class="fa fa-font margin-r-5"></i>' + gettext('Append textsymbolizer') + '</a>';
 	}
@@ -296,11 +300,17 @@ Rule.prototype.registerEvents = function(type) {
 	$("#append-symbol-button-" + this.id).on('click', function(e){
 		self.addSymbolizer();
 	});
+
+	$("#preset-symbol-button-" + this.id).on('click', function(e){
+		e.preventDefault();
+		SymbolPresets.open(self);
+	});
 	
 	$("#append-textsymbol-button-" + this.id).on('click', function(e){
 		var textsymbolizer = self.addTextSymbolizer();
 		textsymbolizer.fill = "#ffffff";
 		textsymbolizer.label = "count";
+		textsymbolizer.is_actived = true;
 		textsymbolizer.AnchorPointX = 0.5;
 		textsymbolizer.AnchorPointY = 0.8;
 	});
@@ -341,8 +351,14 @@ Rule.prototype.preview = function() {
 		return parseInt(b.order) - parseInt(a.order);
 	});
 	
-	var sldBody = this.utils.getSLDBody(this.symbolizers);
-	var url = this.utils.getPreviewUrl() + '&SLD_BODY=' + encodeURIComponent(sldBody);
+	var url;
+	if (typeof SymbolOptions !== 'undefined' && SymbolOptions.anyAdvanced(this.symbolizers)) {
+		// con simbología avanzada la vista previa la genera el servidor con el SLD que se publica
+		url = SymbolOptions.previewUrl(this.utils.getPreviewUrl(), this.symbolizers);
+	} else {
+		var sldBody = this.utils.getSLDBody(this.symbolizers);
+		url = this.utils.getPreviewUrl() + '&SLD_BODY=' + encodeURIComponent(sldBody);
+	}
 	var ui = '<img id="rule-preview-img" src="' + url + '" class="rule-preview"></img>';
 	$("#rule-preview-" + this.id).empty();
 	$("#rule-preview-" + this.id).append(ui);
@@ -378,9 +394,19 @@ Rule.prototype.libraryPreview = function(rid,json_symbolizers) {
 		return parseInt(b.order) - parseInt(a.order);
 	});
 	
-	var sldBody = this.utils.getSLDBody(symbolizers);
-	var url = this.utils.getPreviewUrl() + '&SLD_BODY=' + encodeURIComponent(sldBody);
-	var ui = '<img id="rule-preview-img" src="' + url + '" class="rule-preview"></img>';
+	var url;
+	var cls = 'rule-preview';
+	if (typeof SymbolOptions !== 'undefined' && SymbolOptions.anyAdvanced(symbolizers)) {
+		// diálogo «Importar desde librería»: símbolos avanzados al tamaño de la tarjeta (a 20 px no se
+		// distinguen las marcas, flechas ni tramas)
+		var size = this.utils.getFeatureType() == 'LineSymbolizer' ? [110, 48] : [48, 48];
+		url = SymbolOptions.previewUrl(this.utils.getPreviewUrl(), symbolizers, size[0], size[1]);
+		cls += ' gol-sym-preview-large';
+	} else {
+		var sldBody = this.utils.getSLDBody(symbolizers);
+		url = this.utils.getPreviewUrl() + '&SLD_BODY=' + encodeURIComponent(sldBody);
+	}
+	var ui = '<img id="rule-preview-img" src="' + url + '" class="' + cls + '"></img>';
 	$("#library-symbol-preview-div-" + rid).empty();
 	$("#library-symbol-preview-div-" + rid).append(ui);
 };
@@ -457,28 +483,74 @@ Rule.prototype.getSymbolsFromLibrary = function(libraryId) {
 
 
 Rule.prototype.loadLibrarySymbol = function(symbolizers) {
-	
+	var self = this;
+	var texts = [];
+	for (var t = 0; t < this.symbolizers.length; t++) {
+		if (this.symbolizers[t].type == 'TextSymbolizer') {
+			texts.push(this.symbolizers[t]);
+		}
+	}
 	$("#table-symbolizers-body-" + this.id).empty();
-	this.removeAllSymbolizers();
-	this.removeLabel();
+	this.symbolizers = [];
 	
 	symbolizers.sort(function(a, b) {
 	    return a.order - b.order;
 	});
-	for (var i=0; i<symbolizers.length; i++) {
-		
-		var symbolizer = JSON.parse(symbolizers[i].json);
-		var order = symbolizers[i].order;
-		var options = symbolizer[0].fields;
-		options['order'] = order;
-		
-		if (symbolizer[0].model == 'gvsigol_symbology.externalgraphicsymbolizer') {
-			this.addExternalGraphicSymbolizer(options);
+	try {
+		for (var i=0; i<symbolizers.length; i++) {
 			
-		} else {
-			this.addSymbolizer(options);
-		}	
-		
+			var symbolizer = JSON.parse(symbolizers[i].json);
+			var order = symbolizers[i].order;
+			var options = symbolizer[0].fields;
+			options['order'] = order;
+			
+			if (symbolizer[0].model == 'gvsigol_symbology.externalgraphicsymbolizer') {
+				this.addExternalGraphicSymbolizer(options);
+				
+			} else if (symbolizer[0].model == 'gvsigol_symbology.textsymbolizer') {
+				continue;
+			} else {
+				this.addSymbolizer(options);
+			}	
+			
+		}
+	} finally {
+		for (var k = 0; k < texts.length; k++) {
+			var text = texts[k];
+			var row = $(text.getTableUI());
+			$('#rule-' + this.id + '-symbolizers tbody').append(row);
+			row.find('.edit-label-link-' + text.id).on('click', function(e){
+				e.preventDefault();
+				self.setSelected(self.getSymbolizerById($(this).attr("data-labelid")));
+				self.updateForm();
+				$('#modal-symbolizer').modal('show');
+			});
+			row.find('.delete-label-link-' + text.id).on('click', function(e){
+				e.preventDefault();
+				self.removeSymbolizer($(this).attr("data-labelid"));
+			});
+			this.symbolizers.push(text);
+			if (typeof text.updatePreview === 'function') {
+				text.updatePreview();
+			}
+		}
+		this.preview();
+	}
+};
+
+/**
+ * Sustituye los simbolizadores de la regla por los de un símbolo predefinido (SymbolPresets.js).
+ * La etiqueta se conserva. Las filas quedan como al cargar un estilo: la de arriba es order 0.
+ */
+Rule.prototype.applyPreset = function(preset) {
+	$("#table-symbolizers-body-" + this.id).empty();
+	this.removeAllSymbolizers();
+	var defs = SymbolPresets.definitions(preset);
+	defs.sort(function(a, b) {
+		return a.order - b.order;
+	});
+	for (var i = 0; i < defs.length; i++) {
+		this.addSymbolizer(defs[i]);
 	}
 	this.preview();
 };
@@ -594,6 +666,12 @@ Rule.prototype.addExternalGraphicSymbolizer = function(options) {
 	if (options && options.order !== undefined && options.order !== null && options.order !== '') {
 		symbolizer.order = options.order;
 	}
+	if (options && options.opacity !== undefined && options.opacity !== null && options.opacity !== '') {
+		symbolizer.opacity = options.opacity;
+	}
+	if (options && options.rotation !== undefined && options.rotation !== null && options.rotation !== '') {
+		symbolizer.rotation = options.rotation;
+	}
 	
 	var row = $(symbolizer.getTableUI());
 	$('#rule-' + this.id + '-symbolizers tbody').append(row);	
@@ -607,7 +685,9 @@ Rule.prototype.addExternalGraphicSymbolizer = function(options) {
 	
 	row.find('.edit-eg-link').on('click', function(e){	
 		e.preventDefault();
-		messageBox.show('warning', gettext('Image symbols can only be edited from the library'));
+		self.setSelected(self.getSymbolizerById(this.dataset.symbolizerid));
+		self.updateForm();
+		$('#modal-symbolizer').modal('show');
 	});
 	row.find('.delete-symbolizer-link-' + this.id).on('click', function(e){	
 		e.preventDefault();
@@ -673,6 +753,9 @@ Rule.prototype.setSelectedCME = function(cme) {
 };
 
 Rule.prototype.updateForm = function() {
+	if (typeof SymbolOptions !== 'undefined') {
+		SymbolOptions.cleanup(); // lo que añade el editor de simbología avanzada (vista previa, eventos)
+	}
 	$('#tab-menu').empty();
 	$('#tab-content').empty();	
 	
@@ -687,6 +770,8 @@ Rule.prototype.updateForm = function() {
 		
 	} else if (this.selected.type == 'ExternalGraphicSymbolizer') {
 		$('#tab-menu').append(this.selected.getTabMenu());
+		$('#tab-content').append(this.selected.getSizeTabUI());
+		$('.nav-tabs a[href="#eg-size-tab"]').tab('show');
 		this.selected.registerEvents();
 		
 	} else if (this.selected.type == 'LineSymbolizer') {

@@ -569,6 +569,74 @@ def get_schema_sharepoint_excel(dicc):
 #         if os.path.exists(temp_dir):
 #             shutil.rmtree(temp_dir)
 
+# Valores del desplegable de codificación del nodo CSV (nombres de códec de Python)
+CSV_ENCODINGS = ('UTF-8', 'WINDOWS-1252', 'ISO-8859-15', 'CP850')
+_ENCODING_SAMPLE = 1024 * 1024
+
+
+def csv_codec(dicc):
+    """Códec con el que se lee un CSV. Los nodos guardados sin encode se leen en UTF-8, como siempre."""
+    return (dicc.get('encode') or 'UTF-8').strip()
+
+
+def _is_utf8(sample):
+    try:
+        sample.decode('utf-8')
+        return True
+    except UnicodeDecodeError as error:
+        # La muestra puede cortar por la mitad un carácter de varios bytes
+        return error.reason == 'unexpected end of data' and error.start >= len(sample) - 3
+
+
+def _guess_encoding(sample):
+    """UTF-8 si la muestra se decodifica como tal; si no, la página de códigos con más letras.
+
+    En CP850 (Excel/MS-DOS) la Ñ es 0xA5, que en Windows-1252 es ¥: se elige la
+    codificación en la que los bytes no ASCII salen como letras y no como símbolos.
+    """
+    if _is_utf8(sample):
+        return 'UTF-8'
+    best, best_score = 'WINDOWS-1252', None
+    for codec in ('WINDOWS-1252', 'CP850'):
+        extra = [char for char in sample.decode(codec, errors='replace') if ord(char) > 127]
+        score = sum(1 if char.isalpha() else -1 for char in extra)
+        if best_score is None or score > best_score:
+            best, best_score = codec, score
+    return best
+
+
+def detect_csv_encoding(path):
+    with open(path, 'rb') as handle:
+        return _guess_encoding(handle.read(_ENCODING_SAMPLE))
+
+
+# Contenido del .cpg -> valor del desplegable de codificación del nodo Shapefile
+_CPG_ENCODINGS = (('UTF', 'UTF-8'), ('1252', 'WINDOWS-1252'), ('885915', 'ISO-8859-15'),
+                  ('88591', 'LATIN1'), ('LATIN1', 'LATIN1'), ('850', 'CP850'))
+
+
+def detect_shp_encoding(path):
+    """Codificación de los textos de un shapefile: la del .cpg y, sin él, la de los registros del .dbf."""
+    base = os.path.splitext(path)[0]
+    for extension in ('.cpg', '.CPG'):
+        if os.path.exists(base + extension):
+            with open(base + extension, 'r', errors='replace') as handle:
+                declared = re.sub(r'[^A-Z0-9]', '', handle.read(100).upper())
+            for marker, encoding in _CPG_ENCODINGS:
+                if marker in declared:
+                    return encoding
+    for extension in ('.dbf', '.DBF'):
+        if os.path.exists(base + extension):
+            with open(base + extension, 'rb') as handle:
+                header = handle.read(32)
+                if len(header) < 32:
+                    return None
+                # Bytes 8-9: longitud de la cabecera; los registros van detrás
+                handle.seek(int.from_bytes(header[8:10], 'little'))
+                return _guess_encoding(handle.read(_ENCODING_SAMPLE))
+    return None
+
+
 def get_schema_csv(dicc):
     # Determine header parameter for pandas
     skiprows = int(dicc.get("header", 0))  # Always respect skip header value
@@ -582,7 +650,7 @@ def get_schema_csv(dicc):
         for file in os.listdir(dicc["csv-file"]):
             if file.endswith((".csv", ".txt",".CSV", ".TXT")):
                 csvdata = pd.read_csv(dicc["csv-file"]+'/'+file, sep=dicc["separator"], 
-                                    header=header_param, skiprows=skiprows)
+                                    header=header_param, skiprows=skiprows, encoding=csv_codec(dicc))
                 
                 # Generate automatic column names if no schema
                 if dicc.get('schema-option') == 'no-schema':
@@ -597,7 +665,7 @@ def get_schema_csv(dicc):
         return column_array
     else:
         csvdata = pd.read_csv(dicc["csv-file"], sep=dicc["separator"], 
-                            header=header_param, skiprows=skiprows)
+                            header=header_param, skiprows=skiprows, encoding=csv_codec(dicc))
         
         # Generate automatic column names if no schema
         if dicc.get('schema-option') == 'no-schema':

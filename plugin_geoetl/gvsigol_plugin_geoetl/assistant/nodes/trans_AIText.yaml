@@ -1,0 +1,48 @@
+type: trans_AIText
+label: AI Text
+family: transform
+summary: 'Transforma texto con un modelo de lenguaje: eliges la tarea (traducir, clasificar, extraer,
+  normalizar o resumir) y la detallas en una instrucción. Puedes marcar varios atributos de entrada si el
+  texto está repartido (calle + número + municipio) y crear varios atributos nuevos de una vez. Solo para
+  tareas de lenguaje; lo que no resuelve queda vacío.'
+parameters:
+- name: attr
+  required: true
+  summary: 'Columnas con el texto. Una o varias; si hay varias se envían juntas al modelo.'
+  format: list
+  example:
+  - calle
+  - numero
+  - municipio
+  column: 0
+- name: mode
+  required: true
+  summary: 'Tarea: translate (traducir), classify (clasificar), extract (extraer un dato), normalize
+    (normalizar) o summarize (resumir).'
+  choices:
+  - translate
+  - classify
+  - extract
+  - normalize
+  - summarize
+  example: normalize
+- name: instruction
+  required: true
+  summary: 'Detalle de la tarea: idiomas, categorías, qué extraer, cómo normalizar, sufijos de campos…
+    Ejemplo (normalize): unifica ortografía, abreviaturas y formato.'
+  example: unifica ortografía, abreviaturas y formato
+- name: new-attrs
+  required: true
+  summary: 'Nombres de los atributos nuevos, en lista. Si la instrucción usa sufijos (_en, _pt), se deducen
+    del primer atributo de entrada. No pueden existir ya.'
+  format: list
+  example:
+  - direccion_norm
+ports:
+- direction: input
+  label: Input
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

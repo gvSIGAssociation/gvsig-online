@@ -232,6 +232,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 									</div>
 									<span id="progress-label-{{ workspace.id }}" class="etl-ws-progress-label" style="display:none;">0%</span>
 									<button type="button" name="see-msg-status" id="see-msg-status-{{ workspace.id }}" data-toggle="tooltip" data-placement="bottom" title='{% trans "See status message" %}' class="btn btn-light" style="display:none" value="{{ workspace.id }}"><i class="fa fa-eye"></i></button>
+									<button type="button" name="stop-ws" id="stop-ws-{{ workspace.id }}" data-toggle="tooltip" data-placement="bottom" title='{% trans "Stop the running process" %}' class="btn btn-light" style="display:none;color:#c0392b" value="{{ workspace.id }}"><i class="fa fa-stop"></i></button>
 								</div>
 							</td>
 							<td>
@@ -300,6 +301,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 									</div>
 									<span id="progress-label-{{ workspace.id }}" class="etl-ws-progress-label" style="display:none;">0%</span>
 									<button type="button" name="see-msg-status" id="see-msg-status-{{ workspace.id }}" data-toggle="tooltip" data-placement="bottom" title='{% trans "See status message" %}' class="btn btn-light" style="display:none" value="{{ workspace.id }}"><i class="fa fa-eye"></i></button>
+									<button type="button" name="stop-ws" id="stop-ws-{{ workspace.id }}" data-toggle="tooltip" data-placement="bottom" title='{% trans "Stop the running process" %}' class="btn btn-light" style="display:none;color:#c0392b" value="{{ workspace.id }}"><i class="fa fa-stop"></i></button>
 								</div>
 							</td>
 							<td>
@@ -372,12 +374,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 				<div class="tab-content">
 					<div id="general" class="tab-pane active">
 						<form id="workspace-form" role="form">
-							<div class="row">
-								<div class="col-md-12">
-									<label for="etl_id">ID</label>
-									<input placeholder="{% trans 'ETL Workflow ID' %}" name="etl_id" id="etl_id" type="text" class="form-control">
-								</div>
-							</div>
+							<input name="etl_id" id="etl_id" type="hidden">
 							<div class="row">
 								<div class="col-md-12">
 									<label for="etl_name">{% trans "Name" %}</label>
@@ -691,12 +688,7 @@ table.dataTable.no-footer { border-bottom: none !important; }
 			</div>
 			<div class="modal-body" style="max-height:calc(100vh - 225px);overflow-y:auto;">
 				<form id="layer-group-form" role="form">
-					<div class="row">
-						<div class="col-md-12">
-							<label for="etl_id">ID</label>
-							<input placeholder="{% trans 'ETL Workflow ID' %}" name="etl_id" id="etl_id" type="text" class="form-control">
-						</div>
-					</div>
+					<input name="etl_id" id="etl_id" type="hidden">
 					<div class="row">
 						<div class="col-md-12">
 							<label for="db">{% trans "DB Connection" %}</label>
@@ -2380,8 +2372,8 @@ function setSqlAfterValue(val) {
 							$('#checkbox-send-endpoint-fails').prop('checked', true);
 
 						} else {
-							$('#checkbox-send-mail-fails').val('False')
-							$('#checkbox-send-mail-fails').prop('checked', false);
+							$('#checkbox-send-endpoint-fails').val('False')
+							$('#checkbox-send-endpoint-fails').prop('checked', false);
 						}
 
 						if (checkbox_user_params == 'True'){
@@ -2887,6 +2879,30 @@ function setSqlAfterValue(val) {
 			var progress = workspace['progress'] || 0;
 
 			$("#see-msg-status-"+id).css("display", "inline-block");
+			var stopBtn = $("#stop-ws-"+id);
+			if(status == 'Running'){
+				stopBtn.css("display", "inline-block");
+				if(!stopBtn.data("pending")){
+					stopBtn.prop("disabled", false);
+				}
+			} else if(status == 'Stopping'){
+				stopBtn.css("display", "inline-block").prop("disabled", true);
+			} else {
+				stopBtn.hide().prop("disabled", false).data("pending", false);
+			}
+
+			if(status == 'Stopping'){
+				$("#icon-success-"+id).css("display", "none");
+				$("#icon-error-"+id).css("display", "none");
+				$("#btn-open-visualizer-"+id).hide();
+				setWsProgress(id, progress, true);
+			}
+			if(status == 'Cancelled'){
+				$("#icon-success-"+id).css("display", "none");
+				$("#icon-error-"+id).css("display", "none");
+				$("#btn-open-visualizer-"+id).hide();
+				setWsProgress(id, 0, false);
+			}
 
 			if(status == ''){
 
@@ -2964,6 +2980,26 @@ function setSqlAfterValue(val) {
 
     startCurrentCanvasStatus();
     getCurrentCanvasStatus()
+
+	$("button[name='stop-ws']").click(function() {
+		var btn = $(this);
+		btn.prop("disabled", true).data("pending", true);
+		$.ajax({
+			type: 'POST',
+			url: '/gvsigonline/etl/etl_stop_canvas/',
+			data: { id_ws: btn.val() },
+			beforeSend: function(xhr){
+				xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+			},
+			success: function(){
+				getCurrentCanvasStatus();
+			},
+			error: function(xhr){
+				btn.prop("disabled", false).data("pending", false);
+				messageBox.show('error', (xhr.responseJSON && xhr.responseJSON.error) || "{% filter escapejs %}{% trans 'Could not stop the process' %}{% endfilter %}");
+			}
+		});
+	});
 
 	$("button[name='see-msg-status']").click(function() {
 

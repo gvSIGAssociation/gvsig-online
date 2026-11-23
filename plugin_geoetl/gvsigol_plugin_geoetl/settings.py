@@ -55,6 +55,13 @@ env_plugin_geoetl = environ.Env(
     ETL_ASSISTANT_NEXT_STEPS=(bool, True),
     # El asistente lee las columnas de las entradas y pregunta por los campos con sus valores reales.
     ETL_ASSISTANT_COLUMNS=(bool, True),
+    # Nodo "Texto con IA" (trans_AIText): envía los valores de un campo al modelo de GeoCopilot, así que los datos
+    # salen al proveedor (OpenAI/Azure). Apagado hasta que la instalación lo active.
+    ETL_AI_TEXT_ENABLED=(bool, False),
+    # Valores distintos máximos que procesa un nodo. Si el campo tiene más, el nodo falla sin llamar al modelo.
+    ETL_AI_TEXT_MAX_VALUES=(int, 2000),
+    # Valores por llamada al modelo.
+    ETL_AI_TEXT_BATCH_SIZE=(int, 40),
     # --- Nodos predictivos / ráster (etl_raster.py). 0 = sin límite ---
     # Píxeles máximos del ráster que procesa un nodo (alto x ancho).
     ETL_RASTER_MAX_PIXELS=(int, 4000000000),
@@ -119,6 +126,9 @@ ETL_ASSISTANT_ALTERNATIVES = env_plugin_geoetl('ETL_ASSISTANT_ALTERNATIVES')
 ETL_ASSISTANT_PARAM_PICKER = env_plugin_geoetl('ETL_ASSISTANT_PARAM_PICKER')
 ETL_ASSISTANT_NEXT_STEPS = env_plugin_geoetl('ETL_ASSISTANT_NEXT_STEPS')
 ETL_ASSISTANT_COLUMNS = env_plugin_geoetl('ETL_ASSISTANT_COLUMNS')
+ETL_AI_TEXT_ENABLED = env_plugin_geoetl('ETL_AI_TEXT_ENABLED')
+ETL_AI_TEXT_MAX_VALUES = env_plugin_geoetl('ETL_AI_TEXT_MAX_VALUES')
+ETL_AI_TEXT_BATCH_SIZE = env_plugin_geoetl('ETL_AI_TEXT_BATCH_SIZE')
 
 LOGGER.info("ETL_DB_HOST= %s",GEOETL_DB['host'])
 LOGGER.info("ETL_DB_PORT= %s",GEOETL_DB['port'])

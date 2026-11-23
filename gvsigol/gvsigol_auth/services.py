@@ -35,6 +35,7 @@ import sys
 import os
 import imp
 import logging
+logger = logging.getLogger('gvsigol')
 
 LDAP_ENCODING = 'utf-8'
 LOGGER_NAME = 'gvsigol'
@@ -410,7 +411,13 @@ class GvSigOnlineServices():
             
     def delete_data_directory(self, group):
         try: 
-            path = settings.MEDIA_ROOT + "data/" + group
+            # os.path.join: MEDIA_ROOT puede no acabar en «/» (antes no se borraba nada). Solo una
+            # carpeta dentro de data/, nunca data/ entera ni rutas que salgan de ella
+            base = os.path.realpath(os.path.join(settings.MEDIA_ROOT, 'data'))
+            path = os.path.realpath(os.path.join(base, group or ''))
+            if not group or os.path.dirname(path) != base:
+                logger.warning('delete_data_directory: ruta no válida para el rol %r', group)
+                return False
             if os.path.exists(path):
                 shutil.rmtree(path)
                     

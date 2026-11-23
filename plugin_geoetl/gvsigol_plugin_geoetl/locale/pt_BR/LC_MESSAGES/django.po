@@ -936,7 +936,7 @@ msgstr "Programa e-mails"
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:416
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:617
 msgid "Endpoint Parameters"
-msgstr "Parámetros SQL"
+msgstr "Parâmetros do endpoint"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:561
 msgid "Get e-mails"
@@ -964,11 +964,11 @@ msgstr "Escreva os parâmetros como JSON (opcional). Exemplo:"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:625
 msgid "Send to endpoint after process finishes correctly"
-msgstr "Envía e-mail depois de que el proceso finalice correctamente"
+msgstr "Enviar ao endpoint quando o processo terminar corretamente"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:632
 msgid "Send to endpoint if process fails"
-msgstr "Envía e-mail si el proceso falla"
+msgstr "Enviar ao endpoint se o processo falhar"
 
 #: gvsigol_plugin_geoetl/templates/etl.html:55
 msgid "Correct Spelling"
@@ -1277,3 +1277,45 @@ msgstr "Descargar la conversa"
 
 msgid "Publish Layer"
 msgstr "Publicar camada"
+
+msgid "Overwrite"
+msgstr "Sobrescrever"
+
+msgid "Save as new"
+msgstr "Salvar como novo"
+
+msgid "This workflow is already saved. You can overwrite it or save it as a new workflow (with another name)."
+msgstr "Este fluxo já está salvo. Você pode sobrescrevê-lo ou salvá-lo como um novo fluxo (com outro nome)."
+
+msgid "The saved workflow will be replaced by the current one. To keep it, cancel and use \"Save as new\"."
+msgstr "O fluxo salvo será substituído pelo atual. Para mantê-lo, cancele e use \"Salvar como novo\"."
+
+msgid "AI Text"
+msgstr "Texto com IA"
+
+msgid "Stop"
+msgstr "Parar"
+
+msgid "Stopped"
+msgstr "Parado"
+
+msgid "Stop the running process"
+msgstr "Parar o processo em execução"
+
+msgid "Stopping…"
+msgstr "Parando…"
+
+msgid "Stopping the process. It will stop as soon as the current step allows it."
+msgstr "Parando o processo. Ele vai parar assim que a etapa atual permitir."
+
+msgid "The process was stopped by the user."
+msgstr "O processo foi parado pelo usuário."
+
+msgid "Could not stop the process"
+msgstr "Não foi possível parar o processo"
+
+msgid "Workspace not found"
+msgstr "Workspace não encontrado"
+
+msgid "Permission denied"
+msgstr "Permissão negada"

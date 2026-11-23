@@ -1,5 +1,6 @@
 from django.urls import path
 from gvsigol_core import views as core_views
+from gvsigol_core import views_docs
 
 urlpatterns = [
     path('', core_views.home, name='home'),
@@ -18,6 +19,19 @@ urlpatterns = [
     path('select_public_project/', core_views.select_public_project, name='select_public_project'),
     path('select_public_mobile_project/', core_views.select_public_mobile_project, name='select_public_mobile_project'),
     path('documentation/', core_views.documentation, name='documentation'),
+    # Manuales en Markdown de cada app (<paquete>/docs/): recursos, manual y página
+    path('documentation/<str:app>/_files/<path:path>', views_docs.documentation_file, name='documentation_file'),
+    path('documentation/<str:app>/<slug:manual>/', views_docs.documentation_manual, name='documentation_manual'),
+    # Antes que la página: «_pdf» no puede ser el nombre de una página (empiezan por letra o número)
+    path('documentation/<str:app>/<slug:manual>/_pdf/', views_docs.documentation_pdf, name='documentation_pdf'),
+    path('documentation/<str:app>/<slug:manual>/_export/', views_docs.documentation_export_all, name='documentation_export_all'),
+    path('documentation/<str:app>/<slug:manual>/<slug:page>/', views_docs.documentation_page, name='documentation_page'),
+    # Edición desde la web (personal y superusuarios)
+    path('documentation/<str:app>/<slug:manual>/<slug:page>/edit/', views_docs.documentation_edit, name='documentation_edit'),
+    path('documentation/<str:app>/<slug:manual>/<slug:page>/preview/', views_docs.documentation_preview, name='documentation_preview'),
+    path('documentation/<str:app>/<slug:manual>/<slug:page>/upload/', views_docs.documentation_upload, name='documentation_upload'),
+    path('documentation/<str:app>/<slug:manual>/<slug:page>/restore/', views_docs.documentation_restore, name='documentation_restore'),
+    path('documentation/<str:app>/<slug:manual>/<slug:page>/export/', views_docs.documentation_export, name='documentation_export'),
     path('blank_page/', core_views.blank_page, name='blank_page'),
     path('portable_project_load/<project_name>/', core_views.portable_project_load, name='portable_project_load'),
     path('save_shared_view/', core_views.save_shared_view, name='save_shared_view'),

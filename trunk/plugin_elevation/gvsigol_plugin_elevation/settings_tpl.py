@@ -1,3 +1,0 @@
-# -*- coding: utf-8 -*-
-ELEVATION_URL = '##ELEVATION_URL##'
-ELEVATION_LAYER = '##ELEVATION_LAYER##'
