@@ -197,6 +197,8 @@ env = environ.Env(
 
     UI_HIDEN_PROJECTS_PREFIX=(str,'_'),
     FILEMANAGER_NEW_UI=(bool, False),  # interfaz nueva del gestor de ficheros (explorador)
+    DOCS_ROOT=(str, ''),  # documentación central (gvsig_doc/gvSIG); vacío = buscarla junto a gvsigol; off = no usarla
+    DOCS_BUNDLE_URL=(str, 'https://docs.gvsig-services.com/paquete/manuales.tar.gz'),  # paquete que descarga docs_fetch
     FILEMANAGER_NEW_POPUP=(bool, False),  # selector de ficheros (?popup=1) con la interfaz nueva
     FILEMANAGER_UPLOAD_MAX_SIZE=(_parse_size, 50 * 1024 ** 3),  # tamaño máximo por fichero en la subida por trozos
     GDALTOOLS_BASEPATH=(str,''),
@@ -687,6 +689,8 @@ FILEMANAGER_MEDIA_URL = os.path.join(MEDIA_URL, FILEMANAGER_DIRECTORY)
 # Interfaz nueva del gestor de ficheros. Con False se ve la clásica. Solo se elige aquí: no se puede
 # cambiar en tiempo de ejecución.
 FILEMANAGER_NEW_UI = env('FILEMANAGER_NEW_UI')
+DOCS_ROOT = env('DOCS_ROOT')
+DOCS_BUNDLE_URL = env('DOCS_BUNDLE_URL')
 # Lo mismo para el selector que abren otras pantallas (?popup=1); se activa por separado.
 FILEMANAGER_NEW_POPUP = env('FILEMANAGER_NEW_POPUP')
 # Tamaño máximo de cada fichero subido (la subida por trozos de la nueva y la subida clásica).

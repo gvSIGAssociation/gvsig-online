@@ -2,9 +2,10 @@
 Pasa al repositorio lo editado desde la web en el centro de documentación (solo en desarrollo,
 donde el código del repositorio está montado en el contenedor).
 
-Escribe las páginas editadas y las imágenes subidas en la carpeta docs/ de su paquete y después
-borra esas ediciones de la base de datos (el historial de revisiones se conserva), de modo que la
-página vuelve a salir del fichero. No ejecuta svn: al terminar indica qué ficheros son nuevos.
+Escribe las páginas editadas y las imágenes subidas en el repositorio de su manual (la
+documentación central de gvsig_doc o la carpeta docs/ del paquete) y después borra esas ediciones
+de la base de datos (el historial de revisiones se conserva), de modo que la página vuelve a salir
+del fichero. No ejecuta svn ni git: al terminar indica qué ficheros son nuevos.
 
 Uso (en el contenedor, como root para poder dejar los ficheros a nombre del dueño del repositorio):
 
@@ -22,7 +23,7 @@ from gvsigol_core import docs_sync
 
 
 class Command(BaseCommand):
-    help = 'Escribe en la carpeta docs/ de cada paquete las páginas editadas y las imágenes subidas desde la web'
+    help = 'Escribe en el repositorio de cada manual las páginas editadas y las imágenes subidas desde la web'
 
     def add_arguments(self, parser):
         parser.add_argument('--app', help='Solo esta app (p. ej. gvsigol_core)')
@@ -39,7 +40,7 @@ class Command(BaseCommand):
         apps = sorted(set(DocPageEdit.objects.values_list('app', flat=True))
                       | set(DocAsset.objects.values_list('app', flat=True)))
         if options['app']:
-            if options['app'] not in dc.apps_with_manuals():
+            if options['app'] not in {m.app for m in dc.all_manuals()}:
                 raise CommandError('La app %s no tiene manuales (docs/docs.yml)' % options['app'])
             apps = [a for a in apps if a == options['app']]
         if not apps:
@@ -54,22 +55,21 @@ class Command(BaseCommand):
             self._apply(changes, options)
 
     def _apply(self, changes, options):
-        root = os.path.realpath(changes.root)
-        if not options['dry_run'] and not os.access(root, os.W_OK):
-            raise CommandError('No se puede escribir en %s. Ejecute el comando como root '
-                               '(docker exec -u root ...).' % root)
-        owner = os.stat(root)
-        self.stdout.write(self.style.MIGRATE_HEADING('%s → %s' % (changes.app, root)))
-
+        self.stdout.write(self.style.MIGRATE_HEADING(changes.app))
+        owners = {}
         written, new_files, skipped = [], [], []
         for change in changes.pages + changes.images:
             if change.base_changed and not options['force']:
                 skipped.append(change)
                 continue
-            target = os.path.realpath(os.path.join(root, change.rel))
-            if not target.startswith(root + os.sep):
+            target = change.target
+            base = os.path.realpath(change.manual.root)
+            if not target:
                 skipped.append(change)
                 continue
+            if not options['dry_run'] and not os.access(base, os.W_OK):
+                raise CommandError('No se puede escribir en %s. Ejecute el comando como root '
+                                   '(docker exec -u root ...).' % base)
             data = change.read()
             exists = os.path.isfile(target)
             if exists:
@@ -79,21 +79,23 @@ class Command(BaseCommand):
                         continue
             written.append((change, 'modificado' if exists else 'nuevo'))
             if not exists:
-                new_files.append(target)
+                new_files.append(change)
             if options['dry_run']:
                 continue
-            self._write(target, data, root, owner)
+            if base not in owners:
+                owners[base] = os.stat(base)
+            self._write(target, data, owners[base])
 
         for change, state in written:
-            self.stdout.write('  %-11s %s' % (state, change.rel))
+            self.stdout.write('  %-11s %s' % (state, change.repo_rel))
         for change in skipped:
             self.stdout.write(self.style.WARNING(
                 '  OMITIDO    %s: el fichero del repositorio cambió después de editarlo en la web. '
-                'Revíselo en el editor o use --force.' % change.rel))
+                'Revíselo en el editor o use --force.' % change.repo_rel))
         for change in changes.unused_images:
             self.stdout.write(self.style.WARNING(
                 '  sin usar   %s: subida desde la web, pero ninguna página la usa; se deja en la base de datos'
-                % change.rel))
+                % change.repo_rel))
 
         if options['dry_run']:
             self.stdout.write(self.style.NOTICE('  (simulación: no se ha escrito nada)'))
@@ -112,14 +114,20 @@ class Command(BaseCommand):
             dc._render_cache.clear()
 
         if new_files:
-            package_parent = os.path.dirname(os.path.dirname(root))
-            rels = ' '.join(os.path.relpath(p, package_parent) for p in new_files)
-            self.stdout.write('  Ficheros nuevos; desde %s:\n    svn add --parents %s' % (package_parent, rels))
+            by_repo = {}
+            for change in new_files:
+                by_repo.setdefault(change.manual.repo_root, []).append(change.repo_rel)
+            for repo, rels in sorted(by_repo.items()):
+                if os.path.isdir(os.path.join(repo, '.git')):
+                    command = 'git add %s' % ' '.join(rels)
+                else:
+                    command = 'svn add --parents %s' % ' '.join(rels)
+                self.stdout.write('  Ficheros nuevos; desde %s:\n    %s' % (repo, command))
         self.stdout.write(self.style.SUCCESS('  %d escritos, %d omitidos.' % (
             sum(1 for _c, s in written if s != 'sin cambios'), len(skipped))))
 
-    def _write(self, target, data, root, owner):
-        """Escribe el fichero y deja a nombre del dueño de docs/ lo que se cree (si se es root)."""
+    def _write(self, target, data, owner):
+        """Escribe el fichero y deja a nombre del dueño de la carpeta docs/ lo que se cree (si se es root)."""
         created_dirs = []
         parent = os.path.dirname(target)
         while not os.path.isdir(parent):
