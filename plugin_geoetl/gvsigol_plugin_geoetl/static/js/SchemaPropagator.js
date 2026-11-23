@@ -419,6 +419,34 @@ var SCHEMA_HANDLERS = {};
         }
     };
 
+    SCHEMA_HANDLERS.trans_AIText = {
+        computeOutputSchema: function (inputSchemas, params) {
+            var schemaMod = schemaAsColumnList(inputSchemas);
+            var p = params && params.parameters && params.parameters[0] ? params.parameters[0] : {};
+            var names = p['new-attrs'];
+            if (!names && p['new-attr']) {
+                names = p['new-attr'];
+            }
+            if (typeof names === 'string') {
+                names = names.split(/[,;|]/).map(function (part) { return part.trim(); }).filter(Boolean);
+            }
+            if (Array.isArray(names)) {
+                for (var i = 0; i < names.length; i++) {
+                    if (names[i] && schemaMod.indexOf(names[i]) === -1) {
+                        schemaMod.push(names[i]);
+                    }
+                }
+            }
+            return schemaMod;
+        },
+        validateParams: function (inputSchemas, params) {
+            if (!params || !params.parameters || !params.parameters[0]) {
+                return false;
+            }
+            return attrsExistInSchema(params.parameters[0].attr, inputSchemas);
+        }
+    };
+
     SCHEMA_HANDLERS.trans_PadAttr = {
         computeOutputSchema: function (inputSchemas, params) {
             var schemaMod = schemaAsColumnList(inputSchemas);
@@ -1166,6 +1194,10 @@ function propagateSchemaFrom(startNodeId, canvasCtxt, options) {
         var isOpaque = (typeName === 'trans_ExecuteSQL');
         if (result.ok || params.schema === undefined || !isOpaque) {
             params.schema = result.outputSchema;
+        }
+        // Exponer atributo ejecuta un SELECT de parameters[0].schema (lo rellena su diálogo al aceptar).
+        if (typeName === 'trans_ExposeAttr' && params.parameters && params.parameters[0] && Array.isArray(params.schema)) {
+            params.parameters[0].schema = params.schema.slice();
         }
 
         passSchemaToEdgeConnected(nodeId, listLabel, params.schema, canvasCtxt);

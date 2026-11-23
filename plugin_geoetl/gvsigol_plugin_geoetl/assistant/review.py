@@ -5,7 +5,10 @@ Trabaja con alias (n1, n2…). Sirve para revisar el canvas abierto y para compr
 de una propuesta antes de devolverla, de modo que el modelo pueda corregirla.
 """
 
+import re
+
 from .catalog import port_count, port_kind
+from .schemas import GEOMETRY_COLUMN, column_issues, listed
 
 ERROR = 'error'
 WARNING = 'warning'
@@ -142,6 +145,8 @@ def check_graph(nodes, edges, catalog, connections=None):
         _check_columns(alias, name, spec, params, incoming.get(alias) or [], nodes, issues)
         _check_outputs(alias, name, spec, outgoing.get(alias) or [], len(nodes), issues)
 
+    _check_propagated_columns(nodes, edges, catalog, issues)
+
     for edge in edges:
         _check_edge(edge, nodes, catalog, issues)
 
@@ -193,7 +198,36 @@ def _check_columns(alias, name, spec, params, edges_in, nodes, issues):
                                  param=item.get('name')))
 
 
+def _check_propagated_columns(nodes, edges, catalog, issues):
+    """Lo que pondría la rueda en rojo al aplicar: columnas calculadas como el editor, también tras nodos nuevos."""
+    for alias, param, missing, port, available in column_issues(nodes, edges, catalog):
+        node = nodes[alias]
+        name = '%s (%s)' % (node.get('label') or node.get('type'), alias)
+        issues[:] = [item for item in issues if not (item['code'] == 'unknown_column' and item['node'] == alias
+                                                     and item.get('param') == param)]
+        geometry = (' La geometría (%s) no llega como columna: para usarla, pon antes un trans_ExposeAttr con '
+                    'attrs %s.' % (GEOMETRY_COLUMN, GEOMETRY_COLUMN)
+                    if any('geom' in m.lower() or m.lower() == 'shape' for m in missing) else '')
+        issues.append(_issue(ERROR, alias, 'unknown_column',
+                             '%s: %s = "%s" no es una columna que le llegue por la entrada %s, y el editor lo '
+                             'marcaría en rojo. Columnas que le llegan: %s. Usa una de ellas.%s'
+                             % (name, param, ', '.join(missing), port, listed(available) or '(ninguna)', geometry),
+                             param=param))
+
+
+FULL_QUERY = re.compile(r'^\s*\(?\s*(select|with|insert|update|delete|create|drop)\b|;', re.IGNORECASE)
+
+
 def _check_parameters(alias, name, spec, params, connections, issues):
+    clause = params.get('clause') if spec.get('type') == 'input_Postgis' else None
+    if isinstance(clause, str) and FULL_QUERY.search(clause):
+        issues.append(_issue(ERROR, alias, 'invalid_where',
+                             '%s: clause solo admite la condición que va detrás de WHERE (por ejemplo "pop_2008" > 1000), '
+                             'no una consulta completa: ahora se ejecutaría select * from tabla WHERE %s. Déjalo vacío '
+                             'para leer la tabla entera y haz la transformación con transformadores (trans_Calculator '
+                             'admite expresiones PostGIS; la geometría se expone antes con trans_ExposeAttr).'
+                             % (name, clause[:80]),
+                             param='clause'))
     if spec.get('type') == 'input_Excel' and params.get('excel-file') and not params.get('sheet-name') \
             and params.get('reading') != 'multiple':
         issues.append(_issue(ERROR, alias, 'missing_parameter', '%s: falta elegir la hoja del Excel.' % name,

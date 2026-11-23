@@ -62,6 +62,20 @@ class ResolveTests(SimpleTestCase):
         questions, _ = self.resolve([{'label': 'Conexión', 'text': '¿Cuál?', 'source': 'connections'}])
         self.assertEqual(self.values(questions[0]), ['gis', 'ora', 'pg'])
 
+    def test_connections_filtered_without_a_node(self):
+        context = AssistantContext.from_payload({'is_superuser': True, 'is_staff': True,
+                                                 'connections': CONNECTIONS + [{'name': 'api', 'type': 'gestiona'}]})
+        for question, expected in (
+                ({'text': '¿Qué conexión PostGIS uso?'}, ['gis', 'pg']),
+                ({'text': '¿Qué conexión uso?', 'connection_type': 'PostGIS'}, ['gis', 'pg']),
+                ({'text': '¿En qué conexión está la tabla viajeros?'}, ['gis', 'ora', 'pg']),
+                ({'text': '¿Qué conexión uso?', 'type': 'input_Oracle'}, ['ora']),
+                ({'text': '¿Qué conexión uso?'}, ['gis', 'ora', 'pg', 'api'])):
+            with self.subTest(question=question):
+                questions, _ = resolve_questions([dict(question, label='Conexión', source='connections')],
+                                                 self.catalog, CANVAS, context)
+                self.assertEqual(self.values(questions[0]), expected)
+
     def test_tables_and_columns_from_the_connection(self):
         with mock.patch.object(tools_module, '_list_level', return_value=['municipios', 'padron']) as level, \
                 mock.patch.object(tools_module, '_columns',

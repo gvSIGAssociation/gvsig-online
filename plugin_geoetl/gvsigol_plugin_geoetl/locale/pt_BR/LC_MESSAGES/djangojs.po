@@ -2950,3 +2950,129 @@ msgstr "Ese arquivo no es válido. Elige un arquivo de tipo:"
 
 msgid "{done} of {total}"
 msgstr "{done} de {total}"
+
+msgid "AI Text"
+msgstr "Texto com IA"
+
+msgid "Attribute with the text:"
+msgstr "Atributo com o texto:"
+
+msgid "Task:"
+msgstr "Tarefa:"
+
+msgid "Translate"
+msgstr "Traduzir"
+
+msgid "Classify"
+msgstr "Classificar"
+
+msgid "Extract data"
+msgstr "Extrair um dado"
+
+msgid "Normalize"
+msgstr "Normalizar"
+
+msgid "Summarize"
+msgstr "Resumir"
+
+msgid "Target language:"
+msgstr "Idioma de destino:"
+
+msgid "e.g. English"
+msgstr "p. ex. inglês"
+
+msgid "Categories (comma separated):"
+msgstr "Categorias (separadas por vírgulas):"
+
+msgid "e.g. Lighting, Cleaning, Traffic"
+msgstr "p. ex. Iluminação, Limpeza, Trânsito"
+
+msgid "Data to extract:"
+msgstr "Dado a extrair:"
+
+msgid "e.g. postal code"
+msgstr "p. ex. código postal"
+
+msgid "Kind of value (opt.):"
+msgstr "Tipo de valor (opc.):"
+
+msgid "e.g. postal address"
+msgstr "p. ex. endereço postal"
+
+msgid "Length (opt.):"
+msgstr "Comprimento (opc.):"
+
+msgid "e.g. at most 15 words"
+msgstr "p. ex. no máximo 15 palavras"
+
+msgid "The distinct values of the attribute are sent to the language model configured in GeoCopilot. Values it cannot resolve are left empty. Review the result before using it."
+msgstr "Os valores distintos do atributo são enviados ao modelo de linguagem configurado no GeoCopilot. Os que não conseguir resolver ficam vazios. Reveja o resultado antes de o usar."
+
+msgid "Write what to do with the text: translate, classify, extract, normalize or summarize. You can ask for several results at once. The distinct values are sent to the language model configured in GeoCopilot; unresolved values stay empty."
+msgstr "Escreva o que fazer com o texto: traduzir, classificar, extrair, normalizar ou resumir. Pode pedir vários resultados de uma vez. Os valores distintos são enviados ao modelo de linguagem configurado no GeoCopilot; os não resolvidos ficam vazios."
+
+msgid "Example: Translate to English and Portuguese; new fields are _en and _pt"
+msgstr "Exemplo: Traduza para inglês e português; os novos campos são _en e _pt"
+
+msgid "Instruction:"
+msgstr "Instrução:"
+
+msgid "New attributes (comma separated):"
+msgstr "Atributos novos (separados por vírgulas):"
+
+msgid "e.g. name_en, name_pt"
+msgstr "p. ex. name_en, name_pt"
+
+msgid "Filled automatically from suffixes like _en and _pt in the instruction; you can edit them."
+msgstr "São preenchidos automaticamente a partir de sufixos como _en e _pt na instrução; pode editá-los."
+
+msgid "Write what to do with the text."
+msgstr "Escreva o que fazer com o texto."
+
+msgid "Indicate the new attributes (for example name_en, name_pt, or suffixes _en and _pt in the instruction)."
+msgstr "Indique os atributos novos (por exemplo name_en, name_pt, ou sufixos _en e _pt na instrução)."
+
+msgid "Choose the task and detail it in the instruction. You can ask for several results at once. The distinct values are sent to the language model configured in GeoCopilot; unresolved values stay empty."
+msgstr "Escolha a tarefa e detalhe-a na instrução. Pode pedir vários resultados de uma vez. Os valores distintos são enviados ao modelo de linguagem configurado no GeoCopilot; os não resolvidos ficam vazios."
+
+msgid "Example: to English and Portuguese; new fields are _en and _pt"
+msgstr "Exemplo: para inglês e português; os novos campos são _en e _pt"
+
+msgid "Example: categories Lighting, Cleaning, Traffic"
+msgstr "Exemplo: categorias Iluminação, Limpeza, Trânsito"
+
+msgid "Example: extract the postal code"
+msgstr "Exemplo: extrai o código postal"
+
+msgid "Example: normalize as a postal address"
+msgstr "Exemplo: normaliza como endereço postal"
+
+msgid "Example: at most 15 words"
+msgstr "Exemplo: no máximo 15 palavras"
+
+msgid "Detail the instruction (languages, categories, what to extract…)."
+msgstr "Detalhe a instrução (idiomas, categorias, o que extrair…)."
+
+msgid "Choose the task and detail it in the instruction. You can select several input attributes when the text is split across fields, and ask for several results at once. Distinct value combinations are sent to the language model configured in GeoCopilot; unresolved values stay empty."
+msgstr "Escolha a tarefa e detalhe-a na instrução. Pode marcar vários atributos de entrada se o texto estiver repartido por vários campos, e pedir vários resultados de uma vez. As combinações distintas são enviadas ao modelo de linguagem configurado no GeoCopilot; as não resolvidas ficam vazias."
+
+msgid "Attributes with the text:"
+msgstr "Atributos com o texto:"
+
+msgid "Hold Ctrl or Cmd to select more than one."
+msgstr "Mantenha Ctrl ou Cmd para marcar mais de um."
+
+msgid "Example: categories A, B, C"
+msgstr "Exemplo: categorias A, B, C"
+
+msgid "Example: extract the date, amount or code mentioned in the text"
+msgstr "Exemplo: extrai a data, o valor ou o código que aparece no texto"
+
+msgid "Example: unify spelling, abbreviations and format"
+msgstr "Exemplo: unifica ortografia, abreviaturas e formato"
+
+msgid "Choose at least one attribute with the text."
+msgstr "Escolha pelo menos um atributo com o texto."
+
+msgid "Select attributes"
+msgstr "Selecione atributos"

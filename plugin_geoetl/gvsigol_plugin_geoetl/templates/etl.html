@@ -165,6 +165,8 @@
 #etl-run-status-dock.is-running { border-right-color: #4a7fa5; }
 #etl-run-status-dock.is-success { border-right-color: #1a7a45; }
 #etl-run-status-dock.is-error { border-right-color: #c0392b; }
+#etl-run-status-dock.is-cancelled { border-right-color: #e8832a; }
+#etl-run-stop { height: 22px; padding: 0 8px; font-size: 11px; gap: 4px; flex-shrink: 0; }
 #etl-run-status-dock.is-collapsed { width: auto; max-width: 220px; }
 #etl-run-status-dock__header {
 	display: flex; align-items: center; gap: 7px; padding: 6px 8px;
@@ -445,6 +447,7 @@
                             <li><a data-shape="trans_Calculator" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Calculator" %}</a></li>
                             <li><a data-shape="trans_ChangeAttrType" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Change Attribute Type" %}</a></li>
                             <li><a data-shape="trans_CompareRows" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Compare Rows" %}</a></li>
+                            {% if etl_ai_text_enabled %}<li><a data-shape="trans_AIText" class="palette_node_element draw2d_droppable dropdown-item">{% trans "AI Text" %}</a></li>{% endif %}
                             <li><a data-shape="trans_ConcatAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Concatenate Attributes" %}</a></li>
                             <li><a data-shape="trans_Counter" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Counter" %}</a></li>
                             <li><a data-shape="trans_CorrectSpelling" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Correct Spelling" %}</a></li>
@@ -594,6 +597,7 @@
                             <i id="etl-dock-icon-success" class="fa fa-check" style="color:#1a7a45" aria-hidden="true"></i>
                             <i id="etl-dock-icon-error" class="fa fa-times" style="color:#c0392b" aria-hidden="true"></i>
                             <i id="etl-dock-icon-running" class="fa fa-play-circle" style="color:#4a7fa5" aria-hidden="true"></i>
+                            <i id="etl-dock-icon-cancelled" class="fa fa-stop-circle" style="color:#e8832a" aria-hidden="true"></i>
                         </span>
                         <span id="etl-run-status-dock__title">{% trans "Run status" %}</span>
                         <button type="button" id="etl-run-status-dock__toggle" aria-expanded="false" aria-controls="etl-run-status-dock__body" title="{% trans 'Show or hide run status' %}">
@@ -606,6 +610,7 @@
                                 <div id="etl-run-status-dock__progress-bar" class="progress-bar progress-bar-striped active" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
                             <span id="etl-run-status-dock__pct">0%</span>
+                            <button type="button" id="etl-run-stop" class="btn-pl-add btn-pl-add--danger" title="{% trans 'Stop the running process' %}"><i class="fa fa-stop"></i>{% trans "Stop" %}</button>
                         </div>
                         <pre id="etl-run-status-dock__message">{% trans "No run yet." %}</pre>
                         <div id="etl-run-status-dock__actions" hidden></div>
@@ -672,12 +677,14 @@
                         <div id="general" class="tab-pane active">
                     <form id="layer-group-form" role="form">
 
+                        <input value="{{ id }}" name="etl_id" id="etl_id" type="hidden">
+                        {% if id %}
                         <div class="row">
                             <div class="col-md-12">
-                                <label for="etl_id" >ID</label>
-                                <input value ="{{ id }}" placeholder="{% trans 'ETL Workflow ID' %}" name="etl_id" id="etl_id" type="text" class="form-control">
+                                <p class="help-block">{% trans "This workflow is already saved. You can overwrite it or save it as a new workflow (with another name)." %}</p>
                             </div>
                         </div>
+                        {% endif %}
 
                         <div class="row">
                             <div class="col-md-12">
@@ -758,7 +765,10 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">{% trans 'Close' %}</button>
-            <button type="button" class="btn btn-primary" id="save-etl" title='{% trans "Set parameters of all tasks before save" %}'>{% trans 'Save' %}</button>
+            {% if id and not editablerestrictedly %}
+            <button type="button" class="btn btn-default" id="save-etl-new" title='{% trans "Set parameters of all tasks before save" %}'>{% trans 'Save as new' %}</button>
+            {% endif %}
+            <button type="button" class="btn btn-primary" id="save-etl" title='{% trans "Set parameters of all tasks before save" %}'>{% if id %}{% trans 'Overwrite' %}{% else %}{% trans 'Save' %}{% endif %}</button>
         </div>
     </div></div></div>
 
@@ -775,13 +785,13 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12 form-group">
-                            <p style="font-weight: 600;">{% trans 'Workflow' %} {{ id }} {% trans 'will be overwritten. If you do not want to overwrite it the ID must be empty' %}</p>
+                            <p style="font-weight: 600;">{% trans 'The saved workflow will be replaced by the current one. To keep it, cancel and use "Save as new".' %}</p>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button id="button-overwrite-workspace-cancel" type="button" class="btn btn-default" data-dismiss="modal">{% trans 'Cancel' %}</button>
-                    <button id="button-overwrite-workspace-accept" type="button" class="btn btn-primary">{% trans 'Accept' %}</button>
+                    <button id="button-overwrite-workspace-accept" type="button" class="btn btn-primary">{% trans 'Overwrite' %}</button>
                 </div>
             </div>
         </div>
@@ -1072,6 +1082,8 @@
         return '';
     }
 
+    var _etlStopPending = false;
+
     function setEtlRunStatusDock(data){
         var dock = $("#etl-run-status-dock");
         if(!dock.length){
@@ -1083,14 +1095,17 @@
         if(isNaN(progress)){
             progress = 0;
         }
+        if(status != 'Running' && status != 'Stopping'){
+            _etlStopPending = false;
+        }
 
-        dock.removeClass("is-idle is-running is-success is-error");
-        $("#etl-dock-icon-success, #etl-dock-icon-error, #etl-dock-icon-running").hide();
+        dock.removeClass("is-idle is-running is-success is-error is-cancelled");
+        $("#etl-dock-icon-success, #etl-dock-icon-error, #etl-dock-icon-running, #etl-dock-icon-cancelled").hide();
         $("#etl-run-status-dock__progress-wrap").removeClass("is-visible");
         $("#etl-run-status-dock__progress-bar").css("width", "0%").attr("aria-valuenow", 0);
         $("#etl-run-status-dock__pct").text("0%");
 
-        if(status == 'Running'){
+        if(status == 'Running' || status == 'Stopping'){
             if(progress < 5){
                 progress = 5;
             }
@@ -1099,10 +1114,26 @@
             $("#etl-run-status-dock__progress-wrap").addClass("is-visible");
             $("#etl-run-status-dock__progress-bar").css("width", progress + "%").attr("aria-valuenow", progress);
             $("#etl-run-status-dock__pct").text(progress + "%");
-            var nodeLabel = etlRunningNodeLabel(message);
-            $("#etl-run-status-dock__title").text(nodeLabel || "{% trans 'Running' %}");
+            if(status == 'Stopping'){
+                $("#etl-run-stop").prop("disabled", true);
+                $("#etl-run-status-dock__title").text("{% trans 'Stopping…' %}");
+                message = "{% trans 'Stopping the process. It will stop as soon as the current step allows it.' %}";
+            } else {
+                if(!_etlStopPending){
+                    $("#etl-run-stop").prop("disabled", false);
+                }
+                var nodeLabel = etlRunningNodeLabel(message);
+                $("#etl-run-status-dock__title").text(nodeLabel || "{% trans 'Running' %}");
+            }
             setEtlRunStatusDockExpanded(true);
             setCurrentCanvasStatusInterval(1500);
+        } else if(status == 'Cancelled'){
+            dock.addClass("is-cancelled");
+            $("#etl-dock-icon-cancelled").show();
+            $("#etl-run-status-dock__title").text("{% trans 'Stopped' %}");
+            message = "{% trans 'The process was stopped by the user.' %}";
+            setEtlRunStatusDockExpanded(false);
+            setCurrentCanvasStatusInterval(5000);
         } else if(status == 'Success'){
             dock.addClass("is-success");
             $("#etl-dock-icon-success").show();
@@ -1139,10 +1170,10 @@
             return;
         }
 
-        if(data.status == 'Running'){
+        if(data.status == 'Running' || data.status == 'Stopping' || data.status == 'Cancelled'){
             $("#button-open-inspector").hide();
             setEtlRunStatusDock({
-                status: 'Running',
+                status: data.status,
                 message: data.message || '',
                 progress: data.progress || 0
             });
@@ -1178,6 +1209,35 @@
         e.preventDefault();
         e.stopPropagation();
         setEtlRunStatusDockExpanded($("#etl-run-status-dock").hasClass("is-collapsed"));
+    });
+    $(document).on("click", "#etl-run-stop", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        var btn = $(this);
+        btn.prop("disabled", true);
+        _etlStopPending = true;
+        var stopData = {};
+        var etlId = ($('#etl_id').val() || '').trim();
+        if (etlId) {
+            stopData.id_ws = etlId;
+        }
+        $.ajax({
+            type: 'POST',
+            url: '/gvsigonline/etl/etl_stop_canvas/',
+            data: stopData,
+            beforeSend: function(xhr){
+                xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+            },
+            success: function(){
+                getCurrentCanvasStatus();
+            },
+            error: function(xhr){
+                _etlStopPending = false;
+                btn.prop("disabled", false);
+                var err = (xhr.responseJSON && xhr.responseJSON.error) || "{% trans 'Could not stop the process' %}";
+                messageBox.show('error', err);
+            }
+        });
     });
     $(document).on("mousedown", "#etl-run-status-dock__message, #etl-run-status-dock__actions", function(e){
         // Permitir seleccionar/copiar el mensaje y usar los botones sin plegar el panel
@@ -1283,8 +1343,8 @@
         $(".repeat_periodically_time").slideUp("slow");
     }
 
-    $("#save-etl").prop("disabled",false);
-    $('#save-etl').attr('data-toggle','');
+    $("#save-etl, #save-etl-new").prop("disabled",false);
+    $('#save-etl, #save-etl-new').attr('data-toggle','');
 
     $('#repeat_periodically').click(function() {
 

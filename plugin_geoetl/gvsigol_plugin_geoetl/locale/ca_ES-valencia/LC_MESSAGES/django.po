@@ -597,7 +597,7 @@ msgstr "Esquemes"
 #| msgid "SQL Parameters"
 
 msgid "Endpoint Parameters"
-msgstr "Paràmetres SQL"
+msgstr "Paràmetres de l'endpoint"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:430
 
@@ -721,12 +721,12 @@ msgstr ""
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:599
 
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:605
 
 msgid "Method"
-msgstr ""
+msgstr "Mètode"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:618
 
@@ -736,12 +736,12 @@ msgstr ""
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:625
 
 msgid "Send to endpoint after process finishes correctly"
-msgstr ""
+msgstr "Envia a l'endpoint quan el procés finalitze correctament"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:632
 
 msgid "Send to endpoint if process fails"
-msgstr ""
+msgstr "Envia a l'endpoint si el procés falla"
 
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:641
 #: gvsigol_plugin_geoetl/templates/dashboard_geoetl_workspaces_list.html:1073
@@ -1373,3 +1373,45 @@ msgstr "Error"
 
 msgid "Outputs / Visualizer"
 msgstr "Eixides / Visualitzador"
+
+msgid "Overwrite"
+msgstr "Sobreescriu"
+
+msgid "Save as new"
+msgstr "Guarda com a nou"
+
+msgid "This workflow is already saved. You can overwrite it or save it as a new workflow (with another name)."
+msgstr "Este flux ja està guardat. Pots sobreescriure'l o guardar-lo com un flux nou (amb un altre nom)."
+
+msgid "The saved workflow will be replaced by the current one. To keep it, cancel and use \"Save as new\"."
+msgstr "El flux guardat se substituirà per l'actual. Per a conservar-lo, cancel·la i utilitza \"Guarda com a nou\"."
+
+msgid "AI Text"
+msgstr "Text amb IA"
+
+msgid "Stop"
+msgstr "Para"
+
+msgid "Stopped"
+msgstr "Parat"
+
+msgid "Stop the running process"
+msgstr "Para el procés en marxa"
+
+msgid "Stopping…"
+msgstr "Parant…"
+
+msgid "Stopping the process. It will stop as soon as the current step allows it."
+msgstr "S'està parant el procés. Es pararà tan prompte com el pas actual ho permeta."
+
+msgid "The process was stopped by the user."
+msgstr "L'usuari ha parat el procés."
+
+msgid "Could not stop the process"
+msgstr "No s'ha pogut parar el procés"
+
+msgid "Workspace not found"
+msgstr "No s'ha trobat el workspace"
+
+msgid "Permission denied"
+msgstr "Permís denegat"

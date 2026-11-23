@@ -48,6 +48,7 @@ from .forms import UploadFileForm
 from .models import (ETLworkspaces, ETLstatus, EtlWorkspaceEditRole, EtlWorkspaceExecuteRole,
                      EtlWorkspaceEditRestrictedRole, SendEmails, SendEndpoint, ETLPluginSettings,
                      ETLVisualizerSession, ETLVisualizerLayer, enterapi_LastDownload)
+from . import etl_cancel
 
 
 def _ctx(extra=None):
@@ -59,6 +60,9 @@ def _ctx(extra=None):
     ctx['etl_assistant_next_steps'] = bool(getattr(settings_geoetl, 'ETL_ASSISTANT_NEXT_STEPS', False))
     # Lectura automática de las columnas de las entradas
     ctx['etl_assistant_columns'] = bool(getattr(settings_geoetl, 'ETL_ASSISTANT_COLUMNS', False))
+    # Nodo Texto con IA: flag + GeoCopilot instalado
+    from .etl_ai import feature_enabled as etl_ai_text_feature_enabled
+    ctx['etl_ai_text_enabled'] = etl_ai_text_feature_enabled()
     if extra:
         ctx.update(extra)
     return ctx
@@ -109,7 +113,7 @@ def _etl_progress_from_task(celery_task_id, db_status=''):
     """
     if db_status in ('Success', 'Warning'):
         return 100, ''
-    if db_status == 'Error':
+    if db_status in ('Error', etl_cancel.CANCELLED):
         return 0, ''
     if not celery_task_id:
         return 0, ''
@@ -167,12 +171,18 @@ def _store_etl_celery_task_id(id_ws, username, task_id):
 
 def _heal_etl_status_from_celery(sm):
     """Repair rows left as Running after an eager task already finished."""
-    if not sm or sm.status != 'Running' or not sm.celery_task_id:
+    if not sm or sm.status not in ('Running', etl_cancel.STOPPING) or not sm.celery_task_id:
         return sm
     try:
         result = AsyncResult(sm.celery_task_id)
         state = result.state
-        if state == 'SUCCESS':
+        if sm.status == etl_cancel.STOPPING:
+            # El worker murió antes de poder marcar la parada
+            if state in ('SUCCESS', 'FAILURE', 'REVOKED'):
+                sm.status = etl_cancel.CANCELLED
+                sm.message = etl_cancel.CANCELLED_MESSAGE
+                sm.save(update_fields=['status', 'message'])
+        elif state == 'SUCCESS':
             sm.status = 'Success'
             if not sm.message or sm.message in ('Running', 'Running again'):
                 sm.message = 'Process has been executed successfully'
@@ -1057,6 +1067,35 @@ def etl_task_status(request, task_id):
 
 @login_required()
 @staff_required
+def etl_stop_canvas(request):
+    """Detiene la ejecución en marcha del workspace (id_ws) o del canvas sin guardar del usuario."""
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    id_ws = (request.POST.get('id_ws') or '').strip()
+    if id_ws:
+        try:
+            ws = ETLworkspaces.objects.get(id=int(id_ws))
+        except (TypeError, ValueError, ETLworkspaces.DoesNotExist):
+            return JsonResponse({'stopped': False, 'error': _('Workspace not found')}, status=404)
+        if not (ws.can_execute(request) or ws.can_edit(request) or ws.can_edit_restrictedly(request)):
+            return JsonResponse({'stopped': False, 'error': _('Permission denied')}, status=403)
+        sm = ETLstatus.objects.filter(id_ws=ws.id).first()
+    else:
+        sm = ETLstatus.objects.filter(name='current_canvas.' + request.user.username).first()
+
+    if not sm:
+        return JsonResponse({'stopped': False, 'status': ''})
+    try:
+        stopped = etl_cancel.request_stop(sm)
+    except Exception:
+        logger.exception('Could not stop ETL run %s', sm.pk)
+        return JsonResponse({'stopped': False, 'error': _('Could not stop the process')}, status=500)
+    sm.refresh_from_db(fields=['status'])
+    return JsonResponse({'stopped': stopped, 'status': sm.status})
+
+
+@login_required()
+@staff_required
 def etl_read_canvas(request):
     task_id = ''
     if request.method == 'POST':
@@ -1510,7 +1549,7 @@ def etl_workspace_is_running(request):
         response = {"run": 'false'}
 
         for sm in statusModel:
-            if sm.status == 'Running':
+            if sm.status in ('Running', etl_cancel.STOPPING):
                 response['run'] = 'true'
                 break
 
@@ -1626,7 +1665,7 @@ def get_workspace_parameters(request):
                 response['checkbox-send-endpoint-fails'] = send_endpoint_params.send_fails
                 response['url-endpoint'] = send_endpoint_params.url
                 response['parameters-endpoint'] = send_endpoint_params.parameters
-                response['method-endpoint'] = send_endpoint_params.method
+                response['method-endpoint'] = SendEndpoint.clean_method(send_endpoint_params.method)
 
                 
             except:
@@ -1703,7 +1742,7 @@ def set_workspace_parameters(request):
                 send_endpoint_params.send_fails = request.POST['checkbox-send-endpoint-fails']
                 send_endpoint_params.url = request.POST['url-endpoint']
                 send_endpoint_params.parameters = request.POST['parameters-endpoint']
-                send_endpoint_params.method = request.POST['method-endpoint'],
+                send_endpoint_params.method = SendEndpoint.clean_method(request.POST['method-endpoint'])
                 send_endpoint_params.save()
 
             except:
@@ -1713,7 +1752,7 @@ def set_workspace_parameters(request):
                     send_fails = request.POST['checkbox-send-endpoint-fails'],
                     url = request.POST['url-endpoint'],
                     parameters = request.POST['parameters-endpoint'],
-                    method = request.POST['method-endpoint'],
+                    method = SendEndpoint.clean_method(request.POST['method-endpoint']),
                     etl_ws_id = request.POST['id']
                 )
                 send_endpoint_params.save()

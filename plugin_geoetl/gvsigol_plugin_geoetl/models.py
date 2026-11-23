@@ -201,6 +201,17 @@ class SendEndpoint(models.Model):
     parameters = models.TextField(null=True, blank=True)
     method = models.CharField(max_length=10)
 
+    METHODS = ('GET', 'POST', 'PUT', 'DELETE')
+
+    @classmethod
+    def clean_method(cls, value):
+        """Método HTTP válido; versiones anteriores lo guardaban como "('POST',)"."""
+        text = str(value or '').upper()
+        for method in cls.METHODS:
+            if method in text:
+                return method
+        return 'POST'
+
     class Meta:
         indexes = [
             models.Index(fields=['etl_ws']),

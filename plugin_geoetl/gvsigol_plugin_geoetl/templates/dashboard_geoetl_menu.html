@@ -1,9 +1,30 @@
 {% load static %}
 {% load i18n %}
 {% if user.is_staff or user.is_superuser %}
+<style>
+	#menu-plugin-etl > a {
+		display: flex;
+		align-items: center;
+	}
+	#menu-plugin-etl > a > .etl-menu-icon {
+		width: 1.15em;
+		height: 1.15em;
+		margin-right: 6px;
+		flex: 0 0 auto;
+		overflow: visible;
+	}
+</style>
 <li id="menu-plugin-etl" class="treeview">
-	<a href="/gvsigonline/etl/etl_workspace_list/"> 
-		<i class="fa fa-code-fork" aria-hidden="true"></i><span>{% trans "Extract, Transform & Load" %}</span>
+	<a href="/gvsigonline/etl/etl_workspace_list/">
+		{# Bifurcación horizontal (= fa-code-fork girado 90° a la derecha) #}
+		<svg class="etl-menu-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+			<circle cx="2.2" cy="8" r="1.45" fill="currentColor"/>
+			<circle cx="13.8" cy="3.6" r="1.45" fill="currentColor"/>
+			<circle cx="13.8" cy="12.4" r="1.45" fill="currentColor"/>
+			<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+				d="M3.7 8 H7.2 C9.6 8 10.6 3.6 12.3 3.6 M7.2 8 C9.6 8 10.6 12.4 12.3 12.4"/>
+		</svg>
+		<span>{% trans "Extract, Transform & Load" %}</span>
 	</a>
 </li>
 

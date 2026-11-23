@@ -14,7 +14,7 @@ parameters:
   summary: Si es verdadero, se usa SQL libre en lugar de la tabla.
   default: 'false'
 - name: sql
-  summary: Consulta SQL.
+  summary: Consulta SELECT completa que se lee en lugar de la tabla (solo con checkbox 'true').
   default: ''
 ports:
 - direction: output

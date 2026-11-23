@@ -12,7 +12,16 @@ parameters:
   choices:
   - ;
   - ','
-  summary: Separador de campos.
+  summary: Separador de campos. No lo supongas; se detecta del fichero. Usa el de detected de get_file_columns
+    o déjalo vacío.
+- name: encode
+  choices:
+  - UTF-8
+  - WINDOWS-1252
+  - ISO-8859-15
+  - CP850
+  summary: Codificación del fichero. No la supongas; se detecta del fichero (CP850 es la de los CSV de
+    Excel/MS-DOS con Ñ). Usa la de detected de get_file_columns o déjala vacía.
 - name: header
   summary: Filas que se saltan antes de la cabecera.
   default: '0'

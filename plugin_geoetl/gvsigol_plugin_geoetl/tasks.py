@@ -10,7 +10,7 @@ from .models import (ETLworkspaces, ETLstatus, cadastral_requests, SendEmails, S
 from gvsigol_services.models import Connection
 from gvsigol import settings
 
-from . import etl_tasks, views, etl_raster
+from . import etl_tasks, views, etl_raster, etl_cancel
 from .settings import GEOETL_DB, ETL_CANVAS_MAX_DELIVERIES
 
 import psycopg2
@@ -108,9 +108,25 @@ def run_canvas_background(self, **kwargs):
     try:
         _run_canvas_background_impl(kwargs, task=self)
     finally:
+        etl_cancel.end()
         # Clean exit (success or handled exception) → ack; drop counter.
         # OOM/SIGKILL never reaches here, so the counter survives for redelivery.
         _clear_canvas_delivery(task_id)
+
+
+def _status_row(id_ws, username):
+    if id_ws:
+        return ETLstatus.objects.filter(id_ws=id_ws).first()
+    return ETLstatus.objects.filter(name='current_canvas.' + username).first()
+
+
+def _mark_cancelled(status_id):
+    ETLstatus.objects.filter(pk=status_id).update(
+        status=etl_cancel.CANCELLED,
+        message=etl_cancel.CANCELLED_MESSAGE,
+        visualizer_session_id=None,
+    )
+    logger.info('ETL run stopped by user (ETLstatus %s)', status_id)
 
 
 def _run_canvas_background_impl(kwargs, task=None):
@@ -141,7 +157,15 @@ def _run_canvas_background_impl(kwargs, task=None):
             username = kwargs["username"]
             params = kwargs["parameters"]
 
-    
+        # Detenido mientras esperaba en la cola: el Stop va ligado a este task id
+        # para que un STOPPING antiguo no anule una ejecución programada posterior.
+        own_task_id = getattr(getattr(task, 'request', None), 'id', None) if task else None
+        previous = _status_row(id_ws, username)
+        if (previous and previous.status == etl_cancel.STOPPING and own_task_id
+                and previous.celery_task_id == str(own_task_id)):
+            _mark_cancelled(previous.pk)
+            break
+
         if id_ws:
             # Obtener el nombre del workspace para usar en el status
             try:
@@ -201,6 +225,8 @@ def _run_canvas_background_impl(kwargs, task=None):
             continue
 
         _set_etl_celery_progress(task, 5, 'Running')
+        status_id = statusModel.pk
+        etl_cancel.begin(status_id)
 
         # Propietario de los modelos guardados: el dueño del workspace (quien lo comparte da permiso de
         # ejecución) o, en un canvas sin guardar, el usuario que ejecuta.
@@ -343,6 +369,7 @@ def _run_canvas_background_impl(kwargs, task=None):
                                                 if '@@'+key+'@@' in str(parameters[key2]):
                                                     parameters[key2] = parameters[key2].replace('@@'+key+'@@', str(json_user_params[key]))
 
+                            etl_cancel.check(force=True)
                             print('Task ' + n[1]['type'] +' ('+n[1]['id']+ ') starts.')
                             errormsg = 'ERROR: In '+n[1]['type'] +' ('+n[1]['id']+ ')' +' Node. '
                             node_idx += 1
@@ -447,7 +474,9 @@ def _run_canvas_background_impl(kwargs, task=None):
                                         if etl_raster.is_artifact_ref(table_name):
                                             continue
                                         TempETLTable.objects.update_or_create(table_name=table_name)
-            
+
+            etl_cancel.check(force=True)
+
             if move:
                 for m in move:
                     parameters = m['entities'][0]['parameters'][0]
@@ -495,6 +524,12 @@ def _run_canvas_background_impl(kwargs, task=None):
             delete_tables(tables_list_name)
         
         except Exception as e:
+            # Al cancelar su consulta, el nodo falla con QueryCanceled: también es una parada
+            if isinstance(e, etl_cancel.EtlCancelled) or etl_cancel.stop_requested(status_id):
+                _mark_cancelled(status_id)
+                delete_tables(tables_list_name)
+                break
+
             logger.exception('Error running workspace')
             
             if id_ws:
@@ -539,15 +574,21 @@ def delete_tables(nodes):
     conn_ = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur_ = conn_.cursor()
 
-    sqlBlocks = "SELECT pid, query FROM pg_stat_activity WHERE query != '<IDLE>' AND query NOT ILIKE '%pg_stat_activity%' ORDER BY query_start desc"
-    cur_.execute(sqlBlocks)
+    own_app = etl_cancel.current_app_name()
+    if own_app:
+        sqlBlocks = ("SELECT pid, query FROM pg_stat_activity WHERE state = 'active' "
+                     "AND application_name = %s AND pid <> pg_backend_pid()")
+        cur_.execute(sqlBlocks, [own_app])
+    else:
+        sqlBlocks = "SELECT pid, query FROM pg_stat_activity WHERE query != '<IDLE>' AND query NOT ILIKE '%pg_stat_activity%' ORDER BY query_start desc"
+        cur_.execute(sqlBlocks)
     conn_.commit()
 
     pids = []
 
     for c in cur_:
 
-        if 'ds_plugin_geoetl.' in c[1]:
+        if own_app or 'ds_plugin_geoetl.' in c[1]:
             pids.append(c[0])
 
     for pid in pids:
@@ -606,7 +647,7 @@ def periodic_clean():
     response = {"run": 'false'}
 
     for sm in statusModel:
-        if sm.status == 'Running':
+        if sm.status in ('Running', etl_cancel.STOPPING):
             response['run'] = 'true'
             break
     
@@ -771,8 +812,7 @@ def sendEmail(id, msg, sub, listMails):
 def requestEndpoint(_id):
     send_endpoint = SendEndpoint.objects.get(etl_ws_id = _id)
     
-    if send_endpoint.parameters or send_endpoint.parameters != '':
-    
+    if send_endpoint.parameters and send_endpoint.parameters.strip():
         request_options = json.loads(send_endpoint.parameters)
         
     else:
@@ -807,14 +847,8 @@ def requestEndpoint(_id):
         if 'format' in request_options:
             kwargs['format'] = request_options['format']
     
-    method = send_endpoint.method
-    
-    if method.startswith('('):
-        patron = r"'([^']*)'"
-        method = re.findall(patron, method)[0]
-        
-        
-        
+    method = SendEndpoint.clean_method(send_endpoint.method)
+
     if method == 'GET':
         response = requests.get(send_endpoint.url, **kwargs)
     elif method == 'POST':

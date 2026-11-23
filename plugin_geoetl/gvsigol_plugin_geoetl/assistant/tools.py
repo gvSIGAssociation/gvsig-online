@@ -2,6 +2,7 @@
 """Herramientas del agente. La autorización se comprueba aquí, no en las vistas de esquema."""
 
 import contextlib
+import difflib
 import json
 import logging
 import re
@@ -118,15 +119,18 @@ def build_tools(request, catalog, canvas, connections, restricted, holder, trace
         def body():
             found = context.find_connection(connection)
             if not found:
-                return _json({'error': 'Conexión no disponible.'})
+                return _json(_unknown_connection(connection, connections))
             if schema and _bad_ident(schema):
                 return _json({'error': 'Nombre de esquema no válido.'})
             try:
                 rows = _list_level(found, connection, schema)
+                missing = _not_found(found, connection, schema, None, connections) if schema and not rows else None
             except Exception:
                 # El detalle puede incluir host y usuario: se queda en el log, no va al proveedor de IA
                 LOGGER.exception('etl_assistant: no se pudo leer la conexión')
                 return _json({'error': 'No se ha podido leer la conexión.'})
+            if missing:
+                return _json(missing)
             return _json({
                 'connection': connection,
                 'type': found.get('type'),
@@ -142,14 +146,17 @@ def build_tools(request, catalog, canvas, connections, restricted, holder, trace
         def body():
             found = context.find_connection(connection)
             if not found:
-                return _json({'error': 'Conexión no disponible.'})
+                return _json(_unknown_connection(connection, connections))
             if _bad_ident(schema) or _bad_ident(table):
                 return _json({'error': 'Nombre de esquema o tabla no válido.'})
             try:
                 columns = _columns(found, connection, schema, table)
+                missing = None if columns else _not_found(found, connection, schema, table, connections)
             except Exception:
                 LOGGER.exception('etl_assistant: no se pudo leer el esquema de una tabla')
                 return _json({'error': 'No se ha podido leer el esquema.'})
+            if missing:
+                return _json(missing)
             return _json({'connection': connection, 'schema': schema, 'table': table, 'columns': columns})
         return guarded('get_table_schema', body)
 
@@ -276,7 +283,7 @@ def build_tools(request, catalog, canvas, connections, restricted, holder, trace
 
     @tool(args_schema=AskArgs)
     def ask_user(questions=None, questions_json=None) -> str:
-        """Pregunta al usuario lo que no se puede deducir; el panel enseña las opciones para elegir con un clic. Hasta 4 preguntas, cada una con label, text y source. Orígenes: choices (con node o type y param), connections, datastores (destino de una tabla PostGIS), tables (con connection y schema), columns (con connection, schema y table, o con file), files (con extensions: se elige en el administrador de archivos), workspaces, layer_groups o custom (con options, solo para reglas que no salen de los datos). Después escribe solo una frase breve, sin repetir las preguntas ni las opciones."""
+        """Pregunta al usuario lo que no se puede deducir; el panel enseña las opciones para elegir con un clic. Hasta 4 preguntas, cada una con label, text y source. Orígenes: choices (con node o type y param), connections (con node o type del nodo que la usará, o connection_type, para no ofrecer conexiones de otro tipo), datastores (destino de una tabla PostGIS), tables (con connection y schema; con table, la que buscas, solo se ofrecen las que coinciden o se parecen), columns (con connection, schema y table, o con file), files (con extensions: se elige en el administrador de archivos), workspaces, layer_groups o custom (con options, solo para reglas que no salen de los datos). Después escribe solo una frase breve, sin repetir las preguntas ni las opciones."""
         def body():
             from .questions import resolve_questions
             if (questions_json or '').strip():
@@ -312,7 +319,13 @@ def build_tools(request, catalog, canvas, connections, restricted, holder, trace
         def body():
             from .columns import read_file
             read = read_file(file, sheet, context) or {}
-            return _json({'columns': read.get('schema'), 'sheets': read.get('sheets'), 'error': read.get('error')})
+            detected = {key: value for key, value in (read.get('params') or {}).items()
+                        if key in ('separator', 'encode')}
+            out = {'columns': read.get('schema'), 'sheets': read.get('sheets'), 'detected': detected or None,
+                   'error': read.get('error')}
+            if read.get('similar_files'):
+                out.update(similar_files=read['similar_files'], hint=_NOT_FOUND_HINT)
+            return _json(out)
         return guarded('get_file_columns', body)
 
     for typed in (check_workspace, propose_workspace, ask_user):
@@ -411,6 +424,116 @@ def _list_level(connection, name, schema):
             return list(etl_schema.get_tables_sqlserver({'db': name, 'schema-name': schema}))
         return list(etl_schema.get_schemas_sqlserver({'db': name}))
     return []
+
+
+_NOT_FOUND_HINT = ('No sigas con un nombre que no existe ni lo cambies sin decirlo. Si hay nombres parecidos, pregunta '
+                   'al usuario si se refiere a alguno (ask_user, con source custom y esas opciones, o tables si ya '
+                   'sabes el esquema); si no los hay, díselo y pregunta.')
+_SIMILAR_CAP = 5
+_OTHER_CONNECTIONS_CAP = 5
+
+
+def _similar(name, candidates):
+    """Nombres que contienen al buscado (o al revés, 44523361f y ds_44523361f) y los cercanos por letras."""
+    wanted = str(name).lower()
+    by_lower = {}
+    for candidate in candidates:
+        if candidate:
+            by_lower.setdefault(str(candidate).lower(), str(candidate))
+    contains = [low for low in by_lower if wanted in low or (len(low) > 2 and low in wanted)]
+    close = difflib.get_close_matches(wanted, list(by_lower), n=_SIMILAR_CAP, cutoff=0.6)
+    found = []
+    for low in contains + close:
+        if by_lower[low] not in found and by_lower[low] != name:
+            found.append(by_lower[low])
+    return found[:_SIMILAR_CAP]
+
+
+def _unknown_connection(name, connections):
+    out = {'error': 'Conexión no disponible.'}
+    similar = _similar(name, [item.get('name') for item in connections or []])
+    if similar:
+        out.update(similar_connections=similar, hint=_NOT_FOUND_HINT)
+    return out
+
+
+def _has(names, value):
+    return str(value).lower() in (str(item).lower() for item in names)
+
+
+_SCHEMAS_CHECKED = 3
+_TABLES_PER_SCHEMA = 2
+
+
+def _tables_in(connection, name, schemas, table):
+    """[(exacta, esquema, tabla)] de la tabla buscada, o de las de nombre parecido, en esos esquemas."""
+    found = []
+    for schema in schemas[:_SCHEMAS_CHECKED]:
+        tables = [str(item) for item in _list_level(connection, name, schema)]
+        exact = [item for item in tables if item.lower() == str(table).lower()]
+        for item in exact or _similar(table, tables)[:_TABLES_PER_SCHEMA]:
+            found.append((bool(exact), schema, item))
+    return found
+
+
+def _suggest(out, wanted, found):
+    """Añade suggestions y una pregunta lista para ask_user; las tablas exactas van primero."""
+    found = sorted(found, key=lambda item: not item[0])
+    values = []
+    for _exact, connection_name, schema, table in found:
+        value = '%s.%s' % (schema, table) + (' (conexión %s)' % connection_name if connection_name else '')
+        if value not in values:
+            values.append(value)
+    if not values:
+        return out
+    out['suggestions'] = values[:_SIMILAR_CAP]
+    out['ask'] = {'label': 'Tabla', 'source': 'custom', 'options': out['suggestions'],
+                  'text': '%s no existe. ¿Te refieres a %s?' % (wanted, ' o '.join(out['suggestions'][:2]))}
+    out['hint'] = _SUGGEST_HINT
+    return out
+
+
+_SUGGEST_HINT = ('No sigas con un nombre que no existe ni lo cambies sin decirlo. Confírmalo con el usuario pasando ask '
+                 'tal cual a ask_user (o, sin ask_user, preguntándole por esas opciones). Cuando elija una, ya tienes '
+                 'esquema y tabla: no vuelvas a preguntar por la tabla.')
+
+
+def _not_found(connection, name, schema, table, connections):
+    """Si falta el esquema o la tabla, dice cuál y ofrece los nombres parecidos. None si los dos existen.
+
+    Un esquema parecido solo es buena propuesta si tiene la tabla (o una parecida):
+    se comprueba y se devuelve directamente esquema.tabla.
+    """
+    schemas = _list_level(connection, name, '')
+    if schema not in schemas:
+        similar = _similar(schema, schemas)
+        out = {'error': 'El esquema %s no existe en la conexión %s.' % (schema, name), 'similar_schemas': similar,
+               'hint': _NOT_FOUND_HINT}
+        found = [(exact, None, item_schema, item_table)
+                 for exact, item_schema, item_table in (_tables_in(connection, name, similar, table) if table else [])]
+        # El usuario no siempre dice la conexión: el esquema puede estar en otra suya del mismo tipo
+        others = [item for item in connections or []
+                  if item.get('name') != name and item.get('type') == connection.get('type')]
+        elsewhere = []
+        for item in others[:_OTHER_CONNECTIONS_CAP]:
+            their = _list_level(item, item.get('name'), '')
+            matches = [schema] if _has(their, schema) else _similar(schema, their)
+            if matches:
+                elsewhere.append({'connection': item.get('name'), 'schemas': matches})
+                if table:
+                    found += [(exact, item.get('name'), item_schema, item_table)
+                              for exact, item_schema, item_table in _tables_in(item, item.get('name'), matches, table)]
+        if elsewhere:
+            out['connections_with_schema'] = elsewhere
+        return _suggest(out, '%s.%s' % (schema, table) if table else 'El esquema %s' % schema, found)
+    if table:
+        tables = _list_level(connection, name, schema)
+        if not _has(tables, table):
+            similar = _similar(table, tables)
+            out = {'error': 'La tabla %s no existe en el esquema %s.' % (table, schema),
+                   'similar_tables': similar, 'hint': _NOT_FOUND_HINT}
+            return _suggest(out, '%s.%s' % (schema, table), [(False, None, schema, item) for item in similar])
+    return None
 
 
 def _columns(connection, name, schema, table):

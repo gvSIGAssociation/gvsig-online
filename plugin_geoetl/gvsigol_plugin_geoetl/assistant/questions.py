@@ -57,6 +57,13 @@ _POSTGIS_WORDS = re.compile(r'\b(postgis|postgres(ql)?)\b')
 _DATASTORE_WORDS = re.compile(r'\b(datastores?|almacen(es)?( de datos)?)\b')
 _DESTINATION_WORDS = re.compile(r'\b(destino|desti|destination|crear?|creo|create|guardar?|guardo|save|escribir|escribo|write|publicar?)\b')
 _OTHER_DATABASE_WORDS = re.compile(r'\b(oracle|sql ?server)\b')
+_DATA_WORDS = re.compile(r'\b(tablas?|esquemas?|taules?|tables?|schemas?|bases? de datos|databases?|bbdd)\b')
+DATABASE_TYPES = ('PostGIS', 'PostgreSQL', 'Oracle', 'SQLServer')
+_TYPE_WORDS = (
+    (_POSTGIS_WORDS, ('PostGIS', 'PostgreSQL')),
+    (re.compile(r'\boracle\b'), ('Oracle',)),
+    (re.compile(r'\bsql ?server\b'), ('SQLServer',)),
+)
 _WORKSPACE_WORDS = re.compile(r'\b(workspaces?|espacios? de trabajo)\b')
 _LAYER_GROUP_WORDS = re.compile(r'\b(grupos? de capas|layer groups?)\b')
 _FILE_WORDS = re.compile(r'\b(ficheros?|archivos?|arxius?|files?)\b')
@@ -208,6 +215,26 @@ def _options(values):
     return options
 
 
+def _connection_types(question, catalog, canvas, proposal):
+    """Tipos de conexión que sirven para la pregunta. Vacío: cualquiera.
+
+    Primero los del nodo; si no hay nodo, el tipo que indica el modelo o que
+    nombra la pregunta ("¿Qué conexión PostGIS…?"), y si habla de tablas o
+    esquemas, los de base de datos (nunca las conexiones a APIs).
+    """
+    type_name = question.get('type') or _node_type(question.get('node'), canvas, proposal)
+    allowed = (catalog.get(type_name) or {}).get('connection_types') or []
+    if allowed:
+        return list(allowed)
+    words = _plain(' '.join(_text(question.get(key), MAX_TEXT) for key in ('connection_type', 'label', 'text')))
+    for pattern, types in _TYPE_WORDS:
+        if pattern.search(words):
+            return list(types)
+    if _DATA_WORDS.search(words) or question.get('schema') or question.get('table'):
+        return list(DATABASE_TYPES)
+    return []
+
+
 def _real_options(question, source, catalog, canvas, proposal, context):
     """Opciones reales de una pregunta según su origen. Lanza si no se pueden leer."""
     from . import tools
@@ -220,10 +247,9 @@ def _real_options(question, source, catalog, canvas, proposal, context):
                 return _options([str(c) for c in item.get('choices') or []])
         return []
     if source == 'connections':
-        type_name = question.get('type') or _node_type(question.get('node'), canvas, proposal)
-        allowed = (catalog.get(type_name) or {}).get('connection_types') or []
+        allowed = [kind.lower() for kind in _connection_types(question, catalog, canvas, proposal)]
         return _options([c.get('name') for c in context.connections
-                         if not allowed or c.get('type') in allowed])
+                         if not allowed or str(c.get('type')).lower() in allowed])
     if source == 'columns' and question.get('file'):
         from .columns import read_file
         read = read_file(question.get('file'), _text(question.get('sheet'), 200), context) or {}
@@ -242,7 +268,15 @@ def _real_options(question, source, catalog, canvas, proposal, context):
         if schema and tools._bad_ident(schema):
             return []
         if source == 'tables':
-            return _options([_name(item) for item in tools._list_level(found, name, schema)])
+            tables = [table for table in (_name(item) for item in tools._list_level(found, name, schema)) if table]
+            # Con la tabla que busca el usuario se ofrecen solo la que coincide o las parecidas, no el esquema entero
+            searched = _text(question.get('table'), 200)
+            if searched:
+                close = [table for table in tables if table.lower() == searched.lower()] \
+                    or tools._similar(searched, tables)
+                if close:
+                    return _options(close)
+            return _options(tables)
         table = _text(question.get('table'), 200)
         if not schema or not table or tools._bad_ident(table):
             return []

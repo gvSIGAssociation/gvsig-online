@@ -29,6 +29,17 @@ def load_catalog(directory=None):
     return catalog
 
 
+AI_TEXT = 'trans_AIText'
+
+
+def available(catalog):
+    """El catálogo sin los nodos que la instalación tiene apagados."""
+    from gvsigol_plugin_geoetl.etl_ai import feature_enabled
+    if feature_enabled() or AI_TEXT not in catalog:
+        return catalog
+    return {name: spec for name, spec in catalog.items() if name != AI_TEXT}
+
+
 def port_count(spec, direction):
     return sum(1 for port in spec.get('ports') or [] if port.get('direction') == direction)
 

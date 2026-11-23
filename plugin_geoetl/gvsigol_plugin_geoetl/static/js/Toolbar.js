@@ -100,8 +100,8 @@ gvsigolETL.Toolbar = Class.extend({
 
 			$('#dialog-save').modal('show')
 
-			$("#save-etl").prop("disabled",false)
-			$('#save-etl').attr('data-toggle','');
+			$("#save-etl, #save-etl-new").prop("disabled",false)
+			$('#save-etl, #save-etl-new').attr('data-toggle','');
 
 			var writer = new draw2d.io.json.Writer();
 
@@ -109,20 +109,28 @@ gvsigolETL.Toolbar = Class.extend({
 
 				for(i=0;i<json.length;i++){
 					if (json[i] == null){
-						$("#save-etl").prop("disabled",true);
-						$('#save-etl').attr('data-toggle','tooltip');
+						$("#save-etl, #save-etl-new").prop("disabled",true);
+						$('#save-etl, #save-etl-new').attr('data-toggle','tooltip');
 						break;
 					}
 				}
 			});
 
 			$('#save-etl').off('click').on('click', function() {
+				saveWorkspace(false);
+			});
+			$('#save-etl-new').off('click').on('click', function() {
+				saveWorkspace(true);
+			});
+
+			function saveWorkspace(asNew) {
 				if (!validateEtlPeriodicSchedule()) {
 					return;
 				}
 				var formWorkspace = new FormData();
+				var workspaceId = asNew ? '' : $('#etl_id').val();
 
-				formWorkspace.append('id', $('#etl_id').val())
+				formWorkspace.append('id', workspaceId)
 				formWorkspace.append('name', $('#etl_name').val())
 				formWorkspace.append('description', $('#etl_desc').val())
 
@@ -185,7 +193,7 @@ gvsigolETL.Toolbar = Class.extend({
 					formWorkspace.append('workspace',jsonCanvas)
 				});
 
-				if ($('#etl_id').val()==''){
+				if (workspaceId == ''){
 
 					$.ajax({
 						type: 'POST',
@@ -259,7 +267,7 @@ gvsigolETL.Toolbar = Class.extend({
 						});
 					});
 				}
-			});
+			}
 		});
 
 		// Inject the RUN Button (status lives in #etl-run-status-dock on the canvas)

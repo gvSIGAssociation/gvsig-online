@@ -62,5 +62,36 @@ test('los campos de texto siguen igual', () => {
     assert.strictEqual(w.$('#titulo-1').val(), 'hola');
 });
 
+function makeWhereEnv() {
+    const w = makeEnv();
+    w.$('body').append('<input type="checkbox" id="checkbox-1" value="true" checked><textarea id="clause-1">SELECT 1</textarea>');
+    let editorText = 'SELECT 1';
+    w.etlSqlEditors = { 'clause-1': { setValue: (v) => { editorText = v; }, getValue: () => editorText } };
+    w.setEtlSqlEditorValue = (id, v) => w.etlSqlEditors[id].setValue(v || '');
+    w.editorText = () => editorText;
+    return w;
+}
+
+test('el asistente vacía el filtro: campo, editor SQL y casilla', () => {
+    const w = makeWhereEnv();
+    w.fillEtlNodeForm('input_Postgis', { id: '1' }, [{ checkbox: '', clause: '' }], [], true);
+    assert.strictEqual(w.$('#clause-1').val(), '');
+    assert.strictEqual(w.editorText(), '');
+    assert.strictEqual(w.$('#checkbox-1').prop('checked'), false);
+});
+
+test('al restaurar sin exact, los vacíos no tocan el formulario', () => {
+    const w = makeWhereEnv();
+    w.fillEtlNodeForm('input_Postgis', { id: '1' }, [{ clause: '' }], []);
+    assert.strictEqual(w.$('#clause-1').val(), 'SELECT 1');
+});
+
+test('el editor SQL recibe el valor nuevo y checkbox "false" queda desmarcada', () => {
+    const w = makeWhereEnv();
+    w.fillEtlNodeForm('input_Postgis', { id: '1' }, [{ checkbox: 'false', clause: '"pop" > 1' }], []);
+    assert.strictEqual(w.editorText(), '"pop" > 1');
+    assert.strictEqual(w.$('#checkbox-1').prop('checked'), false);
+});
+
 console.log('\n' + passed + ' correctos, ' + failed + ' fallidos');
 process.exit(failed ? 1 : 0);

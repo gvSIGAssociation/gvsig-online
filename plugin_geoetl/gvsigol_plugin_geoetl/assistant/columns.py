@@ -35,7 +35,8 @@ TYPE_BY_EXTENSION = {
     '.shp': 'input_Shp', '.csv': 'input_Csv', '.txt': 'input_Csv', '.xls': 'input_Excel', '.xlsx': 'input_Excel',
     '.kml': 'input_Kml', '.kmz': 'input_Kml',
 }
-_SEPARATORS = ';,\t|'
+# Los que admite el nodo CSV
+_SEPARATORS = ';,'
 READ_ERROR = 'No se han podido leer las columnas.'
 NO_ACCESS = 'No tienes acceso a ese fichero.'
 
@@ -66,13 +67,15 @@ def _texts(values):
     return [str(value) for value in values]
 
 
-def _sniff_separator(path):
-    with open(path, 'r', encoding='utf-8', errors='replace') as handle:
+def _sniff_separator(path, codec):
+    with open(path, 'r', encoding=codec, errors='replace') as handle:
         sample = handle.read(4096)
     try:
         return csv.Sniffer().sniff(sample, delimiters=_SEPARATORS).delimiter
     except csv.Error:
-        return ';'
+        # El Sniffer falla con comillas o filas irregulares: gana el que más aparece en la cabecera
+        header = sample.splitlines()[0] if sample else ''
+        return max(_SEPARATORS, key=header.count)
 
 
 def _read_excel(path, params):
@@ -90,16 +93,84 @@ def _read_excel(path, params):
     return {'schema': _texts(etl_schema.get_schema_excel(reading)), 'sheets': sheets, 'params': extra}
 
 
-def _read_csv(path, params):
+def _local(path):
+    return path[7:] if path.startswith('file://') else path
+
+
+def _with_corrections(read, corrected, notes):
+    if corrected:
+        read['corrected'] = corrected
+        read['notes'] = notes
+    return read
+
+
+def _pick_encoding(given, detected, corrected, notes):
+    """La codificación indicada, salvo si es UTF-8 y el fichero no lo es (la ejecución fallaría)."""
+    if not detected:
+        return given or 'UTF-8'
+    if not given:
+        return detected
+    if given.upper().replace('-', '') == 'UTF8' and detected != 'UTF-8':
+        corrected['encode'] = detected
+        notes.append('el fichero no está en UTF-8: uso la codificación %s' % detected)
+        return detected
+    return given
+
+
+def _read_shp(path, params):
     from gvsigol_plugin_geoetl import etl_schema
 
-    extra = {'separator': params.get('separator') or _sniff_separator(path[7:] if path.startswith('file://') else path),
+    corrected, notes = {}, []
+    encode = _pick_encoding(params.get('encode'), etl_schema.detect_shp_encoding(_local(path)), corrected, notes)
+    # EPSG vacío: la ejecución lo toma del propio shapefile
+    extra = {'epsg': params.get('epsg') or '', 'encode': encode}
+    read = {'schema': ['ogc_fid'] + _texts(etl_schema.get_schema_shape(path)), 'params': extra}
+    return _with_corrections(read, corrected, notes)
+
+
+def _missing_file(type_name, path, context):
+    """Error de un fichero que no existe, con los del usuario que se llaman parecido."""
+    from . import tools
+    from .param_options import FILE_EXTENSIONS
+
+    listed = tools._list_files(context, '', FILE_EXTENSIONS.get(FILE_PARAMS[type_name], ''))
+    by_name = {}
+    for item in listed.get('files') or []:
+        by_name.setdefault(os.path.basename(item['path']), item['value'])
+    similar = tools._similar(os.path.basename(_local(path)), list(by_name))
+    return {'schema': None, 'params': {}, 'error': 'El fichero %s no existe.' % os.path.basename(_local(path)),
+            'similar_files': [by_name[name] for name in similar]}
+
+
+def _read_csv(path, params):
+    """Lee la cabecera con el separador y la codificación del fichero.
+
+    El modelo no ve el fichero, así que un separador o una codificación que no
+    encajan con él se corrigen (en 'corrected', con su nota) en lugar de dejar
+    que el nodo falle al ejecutarse.
+    """
+    from gvsigol_plugin_geoetl import etl_schema
+
+    local_path = _local(path)
+    corrected, notes = {}, []
+    encode = _pick_encoding(params.get('encode'), etl_schema.detect_csv_encoding(local_path), corrected, notes)
+    detected_separator = _sniff_separator(local_path, encode)
+    extra = {'separator': params.get('separator') or detected_separator,
+             'encode': encode,
              'header': params.get('header') or '0',
              'schema-option': params.get('schema-option') or 'has-schema',
              'reading': 'single'}
     local = dict(params, **extra)
-    local['csv-file'] = path[7:] if path.startswith('file://') else path
-    return {'schema': _texts(etl_schema.get_schema_csv(local)), 'params': extra}
+    local['csv-file'] = local_path
+    schema = _texts(etl_schema.get_schema_csv(local))
+    if len(schema) <= 1 and extra['separator'] != detected_separator:
+        retry = _texts(etl_schema.get_schema_csv(dict(local, separator=detected_separator)))
+        if len(retry) > 1:
+            notes.append("con el separador '%s' sale una sola columna: uso '%s', el del fichero"
+                         % (extra['separator'], detected_separator))
+            extra['separator'] = corrected['separator'] = detected_separator
+            schema = retry
+    return _with_corrections({'schema': schema, 'params': extra}, corrected, notes)
 
 
 def _read_database(type_name, params, context):
@@ -114,8 +185,14 @@ def _read_database(type_name, params, context):
     if not found or not schema or not table or tools._bad_ident(schema) or tools._bad_ident(table):
         return None
     # La ejecución consulta checkbox siempre: sin él, el nodo falla
-    return {'schema': [c for c in (_name(item) for item in tools._columns(found, name, schema, table)) if c],
-            'params': {'checkbox': params.get('checkbox') or 'false'}}
+    extra = {'checkbox': params.get('checkbox') or 'false'}
+    schema_columns = [c for c in (_name(item) for item in tools._columns(found, name, schema, table)) if c]
+    if not schema_columns:
+        missing = tools._not_found(found, name, schema, table, context.connections)
+        if missing:
+            missing.pop('hint', None)
+            return dict(missing, schema=None, params=extra)
+    return {'schema': schema_columns, 'params': extra}
 
 
 def read_columns(type_name, params, context):
@@ -133,10 +210,10 @@ def read_columns(type_name, params, context):
             return None
         if not file_allowed(path, context):
             return {'schema': None, 'params': {}, 'error': NO_ACCESS}
+        if not os.path.exists(_local(path)):
+            return _missing_file(type_name, path, context)
         if type_name == 'input_Shp':
-            # EPSG vacío: la ejecución lo toma del propio shapefile
-            extra = {'epsg': params.get('epsg') or '', 'encode': params.get('encode') or 'UTF-8'}
-            return {'schema': ['ogc_fid'] + _texts(etl_schema.get_schema_shape(path)), 'params': extra}
+            return _read_shp(path, params)
         if type_name == 'input_Kml':
             return {'schema': _texts(etl_schema.get_schema_kml(path)), 'params': {}}
         if type_name == 'input_Excel':
@@ -243,9 +320,26 @@ def enrich_proposal(result, context):
         for key, value in (read.get('params') or {}).items():
             if not node['parameters'].get(key):
                 node['parameters'][key] = value
+        node['parameters'].update(read.get('corrected') or {})
+        for note in read.get('notes') or []:
+            result.setdefault('warnings', []).append('%s: %s' % (alias, note))
         if read.get('schema'):
             node['schema'] = read['schema']
             found[alias] = read['schema']
         elif read.get('error'):
-            result.setdefault('warnings', []).append('%s: %s' % (alias, read['error']))
+            result.setdefault('warnings', []).append('%s: %s%s' % (alias, read['error'], _similar_text(read)))
     return found
+
+
+SIMILAR_KEYS = ('similar_files', 'similar_schemas', 'similar_tables', 'similar_connections')
+
+
+def _similar_text(read):
+    """' Parecidos: a, b. Pregunta al usuario si se refiere a alguno.' si la lectura trae nombres parecidos.
+
+    Las suggestions (esquema.tabla comprobados) van antes que los esquemas sueltos.
+    """
+    similar = read.get('suggestions') or [name for key in SIMILAR_KEYS for name in read.get(key) or []]
+    if not similar:
+        return ''
+    return ' Parecidos: %s. Pregunta al usuario si se refiere a alguno.' % ', '.join(similar)

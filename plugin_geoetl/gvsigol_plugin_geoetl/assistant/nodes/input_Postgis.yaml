@@ -1,7 +1,10 @@
 type: input_Postgis
 label: PgSQL/PostGIS
 family: input
-summary: Lee una tabla o una consulta de una conexión PostgreSQL o PostGIS.
+summary: Lee una tabla de una conexión PostgreSQL o PostGIS, opcionalmente filtrada con una condición WHERE. No
+  admite consultas SQL completas; para transformar los datos usa transformadores (o trans_Calculator con SQL). La
+  geometría llega a los nodos siguientes como wkb_geometry (campo oculto, se expone con trans_ExposeAttr), aunque en
+  la tabla se llame de otra forma.
 parameters:
 - name: get_schema-name
   summary: Esquemas cargados en el desplegable. Lo rellena el servidor al aplicar.
@@ -15,10 +18,13 @@ parameters:
 - name: tablename
   summary: Tabla que se lee.
 - name: checkbox
-  summary: Si es verdadero, se usa SQL libre en lugar de la tabla.
-  default: 'false'
+  summary: '''true'' para filtrar la tabla con la condición de clause; vacío para leerla entera. Se ajusta solo
+    según haya o no condición.'
+  default: ''
 - name: clause
-  summary: Cláusula SQL adicional (WHERE, etc.).
+  summary: 'Solo la condición que va detrás de WHERE, sin la palabra WHERE. Nunca un SELECT ni una consulta completa:
+    se ejecuta select * from tabla WHERE <clause>.'
+  example: '"pop_2008" > 1000 AND "region" = ''Norte'''
 ports:
 - direction: output
   label: Input

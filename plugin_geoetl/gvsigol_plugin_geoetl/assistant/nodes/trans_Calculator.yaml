@@ -1,17 +1,23 @@
 type: trans_Calculator
 label: Calculator
 family: transform
-summary: Crea o rellena un atributo con una expresión.
+summary: Actualiza un atributo o la geometría con una expresión SQL de PostgreSQL/PostGIS en cada fila; es la
+  alternativa para cualquier cálculo por fila que no tenga nodo propio. Fórmulas, textos, fechas, CASE WHEN,
+  COALESCE o funciones geométricas (ST_Centroid, ST_Buffer, ST_Transform…) sobre wkb_geometry, que antes hay que
+  exponer con trans_ExposeAttr. Si el campo es nuevo, créalo antes con trans_CreateAttr. No sirve si el resultado
+  depende de otras filas o tablas.
 parameters:
 - name: attr
   required: true
   summary: 'Columna que se rellena. Tiene que existir: si es nueva, créala antes con
-    trans_CreateAttr.'
+    trans_CreateAttr. Para cambiar la geometría, wkb_geometry, expuesta antes con trans_ExposeAttr; puede
+    cambiar de tipo (polígono a punto, etc.).'
   column: 0
   example: densidad
 - name: expression
   required: true
-  summary: Expresión SQL de PostgreSQL con las columnas entre comillas dobles.
+  summary: Expresión SQL de PostgreSQL/PostGIS para el valor de cada fila (lo que va tras SET attr =), con las
+    columnas entre comillas dobles. No es una consulta completa.
   example: '"poblacion" / NULLIF("superficie", 0)'
 ports:
 - direction: input

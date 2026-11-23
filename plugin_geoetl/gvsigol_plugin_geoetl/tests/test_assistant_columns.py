@@ -85,6 +85,89 @@ class ReadTests(Base):
         self.assertEqual(read['schema'], ['id', 'nombre'])
         self.assertEqual(read['params']['separator'], ';')
 
+    def write(self, rel, data):
+        with open(os.path.join(self.root, rel), 'wb') as handle:
+            handle.write(data)
+        return self.file(rel)
+
+    def test_wrong_separator_is_corrected(self):
+        path = self.write('rol_a/coma.csv', b'id,nombre,poblacion\n1,a,10\n2,b,20\n')
+        read = columns.read_columns('input_Csv', {'csv-file': path, 'separator': ';'}, self.context())
+        self.assertEqual(read['schema'], ['id', 'nombre', 'poblacion'])
+        self.assertEqual(read['params']['separator'], ',')
+        self.assertEqual(read['corrected'], {'separator': ','})
+
+    def test_separator_that_works_is_kept(self):
+        path = self.write('rol_a/mixto.csv', b'id;nombre,apellido\n1;a,b\n')
+        read = columns.read_columns('input_Csv', {'csv-file': path, 'separator': ';'}, self.context())
+        self.assertEqual(read['schema'], ['id', 'nombre,apellido'])
+        self.assertNotIn('corrected', read)
+
+    def test_dos_encoding_is_detected(self):
+        path = self.write('rol_a/dos.csv', 'id;nombre\n1;ESPAÑA\n2;Peñíscola\n'.encode('cp850'))
+        read = columns.read_columns('input_Csv', {'csv-file': path}, self.context())
+        self.assertEqual(read['params']['encode'], 'CP850')
+        self.assertEqual(read['schema'], ['id', 'nombre'])
+
+    def test_windows_encoding_is_detected(self):
+        path = self.write('rol_a/win.csv', 'id;nombre\n1;ESPAÑA\n2;Peñíscola\n'.encode('cp1252'))
+        read = columns.read_columns('input_Csv', {'csv-file': path}, self.context())
+        self.assertEqual(read['params']['encode'], 'WINDOWS-1252')
+
+    def test_utf8_given_for_a_non_utf8_file_is_corrected(self):
+        path = self.write('rol_a/dos2.csv', 'id;año\n1;Ñ\n'.encode('cp850'))
+        read = columns.read_columns('input_Csv', {'csv-file': path, 'encode': 'UTF-8'}, self.context())
+        self.assertEqual(read['corrected'], {'encode': 'CP850'})
+        self.assertEqual(read['schema'], ['id', 'año'])
+
+    def test_corrections_reach_the_proposal_with_a_warning(self):
+        path = self.write('rol_a/coma2.csv', b'id,nombre\n1,a\n')
+        result = {'proposal': {'mode': 'replace', 'nodes': [
+            {'alias': 'n1', 'type': 'input_Csv', 'parameters': {'csv-file': path, 'separator': ';'}}]}}
+        found = columns.enrich_proposal(result, self.context())
+        node = result['proposal']['nodes'][0]
+        self.assertEqual(node['parameters']['separator'], ',')
+        self.assertEqual(node['parameters']['encode'], 'UTF-8')
+        self.assertEqual(found['n1'], ['id', 'nombre'])
+        self.assertTrue(any(w.startswith('n1: ') and "','" in w for w in result['warnings']))
+
+    def test_shapefile_encoding_from_the_cpg(self):
+        self.write('rol_a/a.cpg', b'1252')
+        with mock.patch.object(etl_schema, 'get_schema_shape', return_value=['id']):
+            read = columns.read_columns('input_Shp', {'shp-file': self.file('rol_a/a.shp'), 'encode': 'UTF-8'},
+                                        self.context())
+        self.assertEqual(read['params']['encode'], 'WINDOWS-1252')
+        self.assertEqual(read['corrected'], {'encode': 'WINDOWS-1252'})
+
+    def test_shapefile_encoding_from_the_dbf_records(self):
+        header = bytearray(32)
+        header[8:10] = (33).to_bytes(2, 'little')
+        self.write('rol_a/a.dbf', bytes(header) + b'\r' + ' ESPAÑA  Peñíscola'.encode('cp850'))
+        with mock.patch.object(etl_schema, 'get_schema_shape', return_value=['id']):
+            read = columns.read_columns('input_Shp', {'shp-file': self.file('rol_a/a.shp')}, self.context())
+        self.assertEqual(read['params']['encode'], 'CP850')
+
+    def test_shapefile_in_utf8_keeps_the_given_encoding(self):
+        self.write('rol_a/a.cpg', b'UTF-8')
+        with mock.patch.object(etl_schema, 'get_schema_shape', return_value=['id']):
+            read = columns.read_columns('input_Shp', {'shp-file': self.file('rol_a/a.shp'), 'encode': 'UTF-8'},
+                                        self.context())
+        self.assertEqual(read['params']['encode'], 'UTF-8')
+        self.assertNotIn('corrected', read)
+
+    def test_missing_file_offers_similar_names(self):
+        self.write('rol_a/viajeros_2024.csv', b'id;a\n')
+        read = columns.read_columns('input_Csv', {'csv-file': self.file('rol_a/viajeros.csv')}, self.context())
+        self.assertIn('viajeros.csv no existe', read['error'])
+        self.assertEqual(read['similar_files'], [self.file('rol_a/viajeros_2024.csv')])
+
+    def test_missing_file_warning_reaches_the_model(self):
+        self.write('rol_a/viajeros_2024.csv', b'id;a\n')
+        result = {'proposal': {'mode': 'replace', 'nodes': [
+            {'alias': 'n1', 'type': 'input_Csv', 'parameters': {'csv-file': self.file('rol_a/viajeros.csv')}}]}}
+        columns.enrich_proposal(result, self.context())
+        self.assertIn('viajeros_2024.csv', result['warnings'][0])
+
     def test_failure_does_not_show_details(self):
         with mock.patch.object(etl_schema, 'get_schema_shape', side_effect=RuntimeError('/ruta/secreta')):
             read = columns.read_columns('input_Shp', {'shp-file': self.file('rol_a/a.shp')}, self.context())
@@ -114,6 +197,17 @@ class DatabaseTests(Base):
                 self.assertEqual(read.call_args[0][1:], expected)
                 self.assertEqual(out['schema'], ['id', 'nombre'])
                 self.assertEqual(out['params']['checkbox'], 'false')    # la ejecución lo consulta siempre
+
+    def test_missing_table_of_a_database_input_offers_similar_ones(self):
+        from gvsigol_plugin_geoetl.assistant import tools as tools_module
+        levels = {'': ['public', 'ds_44523361f'], 'ds_44523361f': ['viajeros']}
+        with mock.patch.object(tools_module, '_columns', return_value=[]), \
+                mock.patch.object(tools_module, '_list_level', side_effect=lambda c, n, s: levels.get(s, [])):
+            out = columns.read_columns('input_Postgis', {'db': 'gis', 'schema-name': '44523361f',
+                                                         'tablename': 'viajeros'}, self._context())
+        self.assertIsNone(out['schema'])
+        self.assertEqual(out['similar_schemas'], ['ds_44523361f'])
+        self.assertEqual(out['params']['checkbox'], 'false')
 
     def test_free_sql_or_other_connections_are_not_read(self):
         from gvsigol_plugin_geoetl.assistant import tools as tools_module
@@ -288,3 +382,112 @@ class EndpointTests(Base):
         self.assertEqual(self._post({'type': 'input_Shp'}, staff=False).status_code, 403)
         self.assertEqual(self._post({'type': 'trans_Join'}).status_code, 400)
         self.assertEqual(self._post({'type': 'input_Shp'}, access=(None, True)).status_code, 403)
+
+
+class PropagatedColumnsTests(SimpleTestCase):
+    """Las columnas se calculan como en el editor, también detrás de nodos recién propuestos."""
+
+    CANVAS = {'nodes': [
+        {'alias': 'n1', 'id': 'u1', 'type': 'input_Postgis', 'label': 'regioes', 'status': '',
+         'parameters': {'db': 'gis', 'tablename': 'regioes'}, 'schema': ['region', 'pop_2008', 'nome']},
+        {'alias': 'n2', 'id': 'u2', 'type': 'trans_Union', 'label': 'Fusión', 'status': '',
+         'parameters': {'group-by-attr': 'region'}, 'schema': ['region']},
+        {'alias': 'n3', 'id': 'u3', 'type': 'output_Postgis', 'label': 'salida', 'status': '',
+         'parameters': {'db': 'gis', 'tablename': 'r'}, 'schema': ['region']}],
+        'edges': [{'source': 'n1', 'target': 'n2', 'source_port': 0, 'target_port': 0},
+                  {'source': 'n2', 'target': 'n3', 'source_port': 0, 'target_port': 0}]}
+
+    def _issues(self, filter_attr, stats=None):
+        stats = stats or {'attr': 'pop_2008', 'group-by-attr': 'region'}
+        ops = [
+            {'op': 'remove_edge', 'source': 'n2', 'target': 'n3'},
+            {'op': 'add_node', 'node': {'alias': 'n4', 'type': 'trans_Stats', 'parameters': stats}},
+            {'op': 'add_node', 'node': {'alias': 'n5', 'type': 'trans_Join',
+                                        'parameters': {'attr-1': 'region', 'attr-2': 'region'}}},
+            {'op': 'add_node', 'node': {'alias': 'n6', 'type': 'trans_Filter', 'parameters': {'attr': filter_attr}}},
+            {'op': 'add_edge', 'source': 'n1', 'target': 'n4'},
+            {'op': 'add_edge', 'source': 'n2', 'target': 'n5', 'target_port': 0},
+            {'op': 'add_edge', 'source': 'n4', 'target': 'n5', 'target_port': 1},
+            {'op': 'add_edge', 'source': 'n5', 'target': 'n6'},
+            {'op': 'add_edge', 'source': 'n6', 'target': 'n3'},
+        ]
+        nodes, edges = graph_after({'mode': 'patch', 'ops': ops}, self.CANVAS)
+        return [i for i in check_graph(nodes, edges, load_catalog(), CONNECTIONS) if i['code'] == 'unknown_column']
+
+    def test_original_column_after_stats_turns_red(self):
+        wrong = self._issues('pop_2008')
+        self.assertEqual([(i['node'], i['param']) for i in wrong], [('n6', 'attr')])
+        self.assertIn('_sum', wrong[0]['message'])
+
+    def test_stats_columns_are_ok(self):
+        self.assertEqual(self._issues('_sum'), [])
+
+    def test_stats_on_a_missing_column(self):
+        wrong = self._issues('_sum', stats={'attr': 'poblacion', 'group-by-attr': 'region'})
+        self.assertEqual([(i['node'], i['param']) for i in wrong], [('n4', 'attr')])
+
+    def test_join_key_missing_on_the_second_input(self):
+        nodes, edges = graph_after({'mode': 'patch', 'ops': [
+            {'op': 'add_node', 'node': {'alias': 'n4', 'type': 'trans_Stats',
+                                        'parameters': {'attr': 'pop_2008', 'group-by-attr': '-'}}},
+            {'op': 'add_node', 'node': {'alias': 'n5', 'type': 'trans_Join',
+                                        'parameters': {'attr-1': 'region', 'attr-2': 'region'}}},
+            {'op': 'add_edge', 'source': 'n1', 'target': 'n4'},
+            {'op': 'add_edge', 'source': 'n1', 'target': 'n5', 'target_port': 0},
+            {'op': 'add_edge', 'source': 'n4', 'target': 'n5', 'target_port': 1},
+        ]}, self.CANVAS)
+        wrong = [i for i in check_graph(nodes, edges, load_catalog(), CONNECTIONS) if i['code'] == 'unknown_column']
+        self.assertEqual([(i['node'], i['param']) for i in wrong], [('n5', 'attr-2')])
+
+    def test_canvas_nodes_untouched_are_not_rechecked(self):
+        nodes, edges = graph_after(None, self.CANVAS)
+        self.assertEqual([i for i in check_graph(nodes, edges, load_catalog(), CONNECTIONS)
+                          if i['code'] == 'unknown_column'], [])
+
+    def test_unknown_upstream_is_not_reported(self):
+        nodes, edges = graph_after({'mode': 'replace', 'nodes': [
+            {'alias': 'n1', 'type': 'input_Csv', 'parameters': {'csv-file': 'x'}},
+            {'alias': 'n2', 'type': 'trans_Filter', 'parameters': {'attr': 'lo_que_sea'}}],
+            'edges': [{'source': 'n1', 'target': 'n2', 'source_port': 0, 'target_port': 0}]}, None)
+        self.assertEqual([i for i in check_graph(nodes, edges, load_catalog(), CONNECTIONS)
+                          if i['code'] == 'unknown_column'], [])
+
+
+class SqlPlacementTests(SimpleTestCase):
+
+    def _issues(self, node, code):
+        nodes, edges = graph_after(None, {'nodes': node, 'edges': []})
+        return [i for i in check_graph(nodes, edges, load_catalog(), CONNECTIONS) if i['code'] == code]
+
+    def _input(self, clause):
+        return [{'alias': 'n1', 'id': 'u1', 'type': 'input_Postgis', 'label': 'e', 'status': '',
+                 'parameters': {'db': 'gis', 'tablename': 't', 'checkbox': 'true', 'clause': clause},
+                 'schema': ['ogc_fid']}]
+
+    def test_full_query_in_the_where_is_an_error(self):
+        wrong = self._issues(self._input('SELECT "ogc_fid", ST_Centroid(geom) FROM "ds_brasil"."t"'), 'invalid_where')
+        self.assertEqual([i['param'] for i in wrong], ['clause'])
+
+    def test_conditions_and_subqueries_are_fine(self):
+        self.assertEqual(self._issues(self._input('"ogc_fid" IN (SELECT "id" FROM "x"."y")'), 'invalid_where'), [])
+        self.assertEqual(self._issues(self._input('"pop_2008" > 1000'), 'invalid_where'), [])
+
+    def _calculator(self, attr, expose):
+        ops = [{'op': 'add_node', 'node': {'alias': 'n3', 'type': 'trans_Calculator',
+                                           'parameters': {'attr': attr, 'expression': 'ST_Centroid("wkb_geometry")'}}}]
+        if expose:
+            ops += [{'op': 'add_node', 'node': {'alias': 'n2', 'type': 'trans_ExposeAttr', 'parameters': {'attrs': 'wkb_geometry'}}},
+                    {'op': 'add_edge', 'source': 'n1', 'target': 'n2'}, {'op': 'add_edge', 'source': 'n2', 'target': 'n3'}]
+        else:
+            ops += [{'op': 'add_edge', 'source': 'n1', 'target': 'n3'}]
+        nodes, edges = graph_after({'mode': 'patch', 'ops': ops}, {'nodes': self._input(''), 'edges': []})
+        return [i for i in check_graph(nodes, edges, load_catalog(), CONNECTIONS) if i['code'] == 'unknown_column']
+
+    def test_exposed_geometry_can_be_filled_by_the_calculator(self):
+        self.assertEqual(self._calculator('wkb_geometry', expose=True), [])
+
+    def test_hidden_geometry_must_be_exposed_first(self):
+        for attr in ('wkb_geometry', 'geom'):
+            wrong = self._calculator(attr, expose=False)
+            self.assertEqual([i['node'] for i in wrong], ['n3'])
+            self.assertIn('trans_ExposeAttr', wrong[0]['message'])
