@@ -372,6 +372,7 @@ def project_list(request):
         project['is_public'] = p.is_public
         can_manage = 'true' if p.can_manage(request) else 'false'
         project['can_manage'] = can_manage
+        project['can_delete'] = 'true' if _can_delete_project(request.user, p) else 'false'
         projects.append(project)
 
     # temporalmente mostramos todos los proyectos ignorando VIEWER_UI_CHOICES para poder comparar
@@ -1472,6 +1473,11 @@ def project_add(request):
 @login_required()
 @staff_required
 def project_update(request, pid):
+    # La lista solo enseña «Modificar» a quien puede gestionar el proyecto; aquí se exige también,
+    # para que no baste con escribir la URL (GET y POST)
+    project_to_check = get_object_or_404(Project, id=int(pid))
+    if not project_to_check.can_manage(request):
+        return forbidden_view(request)
 
     has_geocoding_plugin = False
     if 'gvsigol_plugin_geocoding' in settings.INSTALLED_APPS:
@@ -1768,15 +1774,20 @@ def project_update(request, pid):
                                                        })
 
 
+def _can_delete_project(user, project):
+    """Eliminar un proyecto: solo superusuarios y quien lo creó (el permiso de gestión no basta)."""
+    return user.is_superuser or (user.is_staff and project.created_by == user.username)
+
+
 @login_required()
 @staff_required
 def project_delete(request, pid):
     if request.method == 'POST':
+        project = Project.objects.filter(id=int(pid)).first()
+        if project is None or not _can_delete_project(request.user, project):
+            return HttpResponseForbidden(json.dumps({"deleted": False, "error": "Not allowed"}),
+                                         content_type='application/json')
         try:
-            if request.user.is_superuser:
-                project = Project.objects.get(id=int(pid))
-            else:
-                project = Project.objects.get(id=int(pid), created_by__exact=request.user.username)
             project.delete()
             response = {
                 'deleted': True
