@@ -37,6 +37,7 @@
 							<th>{% trans "Title" %}</th>
 							<th>{% trans "Server" %}</th>
 							<th>{% trans "Asigned to" %}</th>
+							<th style="display:none">{% trans "Can manage" %}</th>
 							<th></th>
 							<th></th>
 							<th></th>
@@ -54,6 +55,7 @@
 							<td>{{ layergroup.title }}</td>
 							<td>{{ layergroup.server }}</td>
 							<td>{{ layergroup.projects }}</td>
+							<td style="display:none">{{ layergroup.can_manage }}</td>
 							<td></td>
 							<td></td>
 							<td></td>
@@ -124,21 +126,38 @@
 </script>
 <script>
 $(document).ready(function() {
+	function canManage(data) { return data[5] === 'true'; }
+
 	var table = golListTable('#layergroups-table', {
 		mode: 'server',
 		dt: {
 		"columnDefs": [{
 	  		"targets": -1,
 	        "data": null,
-	        "defaultContent": '<button type="button" name="button-delete-layergroup" data-toggle="modal" data-target="#modal-delete-layergroup" data-placement="bottom" title="' + '{% trans "Delete layer group" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>'
+	        "render": function (data, type, row) {
+	        	if (!canManage(data)) {
+	        		return '';
+	        	}
+	        	return '<button type="button" name="button-delete-layergroup" data-toggle="modal" data-target="#modal-delete-layergroup" data-placement="bottom" title="' + '{% trans "Delete layer group" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>';
+	        }
 	  	},{
 	      	"targets": -2,
 	       	"data": null,
-	        "defaultContent": '<button type="button" name="button-clear-cache" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Clear cache" %}' + '" class="btn btn-warning"><i class="fa fa-refresh"></i></button>'
+	        "render": function (data, type, row) {
+	        	if (!canManage(data)) {
+	        		return '';
+	        	}
+	        	return '<button type="button" name="button-clear-cache" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Clear cache" %}' + '" class="btn btn-warning"><i class="fa fa-refresh"></i></button>';
+	        }
 	  	},{
 	      	"targets": -3,
 	       	"data": null,
-	        "defaultContent": '<button type="button" name="button-update-layergroup" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update layer group" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>'
+	        "render": function (data, type, row) {
+	        	if (!canManage(data)) {
+	        		return '';
+	        	}
+	        	return '<button type="button" name="button-update-layergroup" data-toggle="tooltip" data-placement="bottom" title="' + '{% trans "Update layer group" %}' + '" class="btn btn-success"><i class="fa fa-edit"></i></button>';
+	        }
 	  	}]
 		}
 	});

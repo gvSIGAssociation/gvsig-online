@@ -4039,10 +4039,21 @@ def layer_group_cache_clear(layergroup):
 @login_required()
 @staff_required
 def layergroup_list(request):
-    layergroups_qs = utils.get_user_layergroups(request, permissions=LayerGroupRole.PERM_MANAGE)
     project_id = request.GET.get('project_id')
-    if project_id is not None:
-        layergroups_qs = layergroups_qs.filter(projectlayergroup__project__id=project_id)
+    if project_id:
+        try:
+            project_id = int(project_id)
+        except (TypeError, ValueError):
+            return not_found_view(request)
+        project = get_object_or_404(Project, id=project_id)
+        if not project.can_manage(request):
+            return forbidden_view(request)
+        layergroups_qs = LayerGroup.objects.filter(
+            projectlayergroup__project_id=project_id
+        ).exclude(name='__default__')
+    else:
+        project_id = None
+        layergroups_qs = utils.get_user_layergroups(request, permissions=LayerGroupRole.PERM_MANAGE)
     
     # Aplicar búsqueda si se proporciona el parámetro 'search'
     search_query = request.GET.get('search', '').strip()
@@ -4084,6 +4095,15 @@ def layergroup_list(request):
         )
         for plg in plgs:
             projects_by_lg[plg.layer_group_id].append(plg.project.name)
+
+    if request.user.is_superuser or not project_id:
+        manageable_ids = None
+    else:
+        manageable_ids = set(
+            utils.get_user_layergroups(request, permissions=LayerGroupRole.PERM_MANAGE)
+            .filter(id__in=lg_ids)
+            .values_list('id', flat=True)
+        )
     
     layergroups = []
     for lg in page_layergroups:
@@ -4097,6 +4117,7 @@ def layergroup_list(request):
             # Obtener server desde el diccionario cacheado
             server = servers_by_id.get(lg.server_id) if lg.server_id else None
             layergroup['server'] = server.title if server else ''
+            layergroup['can_manage'] = 'true' if manageable_ids is None or lg.id in manageable_ids else 'false'
             layergroups.append(layergroup)
 
     response = {
@@ -4353,6 +4374,8 @@ def _layergroup_update(request, lgid, project_id):
         return redirect('layergroup_list')
     else:
         layergroup = LayerGroup.objects.get(id=int(lgid))
+        if not utils.can_manage_layergroup(request.user, layergroup):
+            return forbidden_view(request)
         layers = []
         for layer in  Layer.objects.filter(layer_group_id=layergroup.id).order_by('-order', '-id'):
             lyr_def = {
