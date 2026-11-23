@@ -1,0 +1,43 @@
+{% load i18n %}{# Ventana de «Sugerir estilo con IA». Solo se incluye si hay asistente (ai_style). #}
+<style>
+	.gol-ai-style-info { position: relative; margin: 0 0 14px; padding: 12px 36px 12px 14px; border: 1px solid #c9d8e8; border-left: 4px solid #285A8C; border-radius: 4px; background: #f3f7fb; color: #2b3a4a; }
+	.gol-ai-style-info p { margin: 0 0 6px; }
+	.gol-ai-style-info p:last-child { margin-bottom: 0; }
+	.gol-ai-style-info__title { font-weight: 600; color: #285A8C; }
+	.gol-ai-style-info__warnings { margin: 4px 0 6px; padding-left: 18px; color: #8a5a00; }
+	.gol-ai-style-info__review { font-size: 12px; color: #5a6b7d; }
+	.gol-ai-style-info .close { position: absolute; top: 8px; right: 12px; }
+	#modal-ai-style .gol-ai-style-help { color: #5a6b7d; }
+	#gol-ai-style-replace { display: none; color: #8a5a00; }
+	#gol-ai-style-error { color: #b03a2e; min-height: 1em; margin-top: 8px; }
+	.gol-sym-type-card--ai .gol-sym-type-card__icon { color: #285A8C; }
+	#gol-ai-style-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
+	.gol-ai-style-chip { border: 1px solid #b7cbe0; background: #f3f7fb; color: #285A8C; border-radius: 14px; padding: 3px 10px; font-size: 12px; line-height: 1.4; cursor: pointer; }
+	.gol-ai-style-chip:hover, .gol-ai-style-chip:focus { background: #285A8C; border-color: #285A8C; color: #ffffff; outline: none; }
+</style>
+<div class="modal fade" id="modal-ai-style" tabindex="-1" role="dialog" aria-labelledby="modal-ai-style-title">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="{% trans 'Close' %}"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="modal-ai-style-title"><i class="fa fa-magic" aria-hidden="true"></i> {% trans "Suggest style with AI" context "symbology" %}</h4>
+			</div>
+			<div class="modal-body">
+				<p class="gol-ai-style-help">{% trans "The AI analyses the fields of the layer and proposes a legend. The classes are calculated with the real data. Nothing is saved until you click Save." context "symbology" %}</p>
+				<p id="gol-ai-style-replace"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {% trans "The current rules of the editor will be replaced by the proposal." context "symbology" %}</p>
+				<div id="gol-ai-style-refine-box" class="checkbox" style="display:none">
+					<label><input type="checkbox" id="gol-ai-style-refine" checked> <strong>{% trans "Refine the current proposal" context "symbology" %}</strong></label>
+					<p class="gol-ai-style-help">{% trans "Describe what to change (e.g. “more spaced lines”, “add labels with the name”). Manual changes made after the proposal will be lost." context "symbology" %}</p>
+				</div>
+				<label for="gol-ai-style-request">{% trans "What do you want to show? (optional)" context "symbology" %}</label>
+				<textarea id="gol-ai-style-request" class="form-control" rows="3" maxlength="300" placeholder="{% trans 'For example: colour the plots by land use' context 'symbology' %}"></textarea>
+				<div id="gol-ai-style-chips" aria-label="{% trans 'Quick options' context 'symbology' %}"></div>
+				<div id="gol-ai-style-error" role="alert"></div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+				<button type="button" id="gol-ai-style-go" class="btn-pf-save"><i class="fa fa-magic" aria-hidden="true"></i> {% trans "Suggest" context "symbology" %}</button>
+			</div>
+		</div>
+	</div>
+</div>

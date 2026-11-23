@@ -1836,3 +1836,208 @@ msgstr "Voleu eliminar l'estil seleccionat? No es pot desfer."
 #: gvsigol_symbology/templates/symbol_update.html
 msgid "Delete this symbol? This cannot be undone."
 msgstr "Voleu eliminar aquest símbol? No es pot desfer."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "Suggest style with AI"
+msgstr "Suggerir estil amb IA"
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "The AI analyses the fields of the layer and proposes a legend. The classes are calculated with the real data. Nothing is saved until you click Save."
+msgstr "La IA analitza els camps de la capa i proposa una llegenda. Les classes es calculen amb les dades reals. No es guarda res fins que prems Guardar."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "The current rules of the editor will be replaced by the proposal."
+msgstr "Les regles actuals de l'editor se substituiran per la proposta."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "What do you want to show? (optional)"
+msgstr "Què vols mostrar? (opcional)"
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "For example: colour the plots by land use"
+msgstr "Per exemple: acolorir les parcel·les per ús del sòl"
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "Suggest"
+msgstr "Suggerir"
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "Generating proposal..."
+msgstr "Generant proposta..."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "The AI assistant did not respond. Try again later."
+msgstr "L'assistent d'IA no ha respost. Torna-ho a provar més tard."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "The AI proposal could not be used. Try again."
+msgstr "No s'ha pogut usar la proposta de la IA. Torna-ho a provar."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "Your session has expired or you do not have permission. Reload the page and try again."
+msgstr "La teua sessió ha caducat o no tens permís. Recarrega la pàgina i torna-ho a provar."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "AI proposal"
+msgstr "Proposta de la IA"
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "Review the rules and the preview, and click Save to keep the style."
+msgstr "Revisa les regles i la vista prèvia, i prem Guardar per a conservar l'estil."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "Suggest with AI"
+msgstr "Suggerir amb IA"
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "The AI analyses the fields of the layer, chooses the most suitable type of legend and prepares it with the real data. You review it in the editor before saving."
+msgstr "La IA analitza els camps de la capa, tria el tipus de llegenda més adequat i el prepara amb les dades reals. El revises en l'editor abans de guardar."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "Refine the current proposal"
+msgstr "Retocar la proposta actual"
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "Describe what to change (e.g. “more spaced lines”, “add labels with the name”). Manual changes made after the proposal will be lost."
+msgstr "Descriu què vols canviar (p. ex. «línies més separades», «afig etiquetes amb el nom»). Es perdran els canvis fets a mà després de la proposta."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "Labels have been added: review them in Labeling."
+msgstr "S'han afegit etiquetes: revisa-les en «Etiquetat»."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "The labels have been removed."
+msgstr "S'han llevat les etiquetes."
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Quick options"
+msgstr "Opcions ràpides"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Colour by categories"
+msgstr "Acolorir per categories"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Colour by ranges"
+msgstr "Acolorir per rangs"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "With labels"
+msgstr "Amb etiquetes"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Visible from 1:25,000"
+msgstr "Visible a partir d'1:25.000"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Diagonal hatching"
+msgstr "Trama de línies obliqües"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Grid hatching"
+msgstr "Trama en quadrícula"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Outline only"
+msgstr "Només contorn"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Dashed outline"
+msgstr "Contorn discontinu"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Semi-transparent fill"
+msgstr "Farciment semitransparent"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Dashed line"
+msgstr "Línia discontínua"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Dotted line"
+msgstr "Línia puntejada"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Arrow at the end"
+msgstr "Fletxa al final"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Direction arrows"
+msgstr "Fletxes de sentit"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Railway style"
+msgstr "Estil ferrocarril"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Diamond shape"
+msgstr "Forma de rombe"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Star shape"
+msgstr "Forma d'estrela"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "No fill"
+msgstr "Sense farciment"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Larger symbol"
+msgstr "Símbol més gran"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Thinner"
+msgstr "Més fi"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "More spaced"
+msgstr "Més separat"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Softer colours"
+msgstr "Colors més suaus"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Remove the labels"
+msgstr "Lleva les etiquetes"

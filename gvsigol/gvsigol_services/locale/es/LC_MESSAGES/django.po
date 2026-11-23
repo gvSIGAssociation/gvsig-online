@@ -5744,3 +5744,39 @@ msgstr "Seleccionar extensión"
 #: gvsigol_services/templates/server_update.html
 msgid "This is the default server. To change it, mark another server as default."
 msgstr "Este es el servidor por defecto. Para cambiarlo, marque otro servidor como servidor por defecto."
+
+#: gvsigol_services/templates/layer_config.html
+msgid "Generate titles with AI"
+msgstr "Generar títulos con IA"
+
+#: gvsigol_services/templates/layer_config.html
+msgid "Replace existing titles"
+msgstr "Sustituir los títulos existentes"
+
+#: gvsigol_services/templates/layer_config.html
+msgid "Generating titles..."
+msgstr "Generando títulos..."
+
+#: gvsigol_services/templates/layer_config.html
+msgid "All fields already have a title. Check “Replace existing titles” to generate them again."
+msgstr "Todos los campos ya tienen título. Marca «Sustituir los títulos existentes» para generarlos de nuevo."
+
+#: gvsigol_services/templates/layer_config.html
+msgid "Suggested by AI"
+msgstr "Sugerido por IA"
+
+#: gvsigol_services/templates/layer_config.html
+msgid "{count} titles suggested. Review them and click Save to keep them."
+msgstr "{count} títulos sugeridos. Revísalos y pulsa Guardar para conservarlos."
+
+#: gvsigol_services/templates/layer_config.html
+msgid "The AI did not suggest any new title."
+msgstr "La IA no ha sugerido ningún título nuevo."
+
+#: gvsigol_services/templates/layer_config.html
+msgid "The AI assistant did not respond. Try again later."
+msgstr "El asistente de IA no ha respondido. Inténtalo más tarde."
+
+#: gvsigol_services/templates/layer_config.html
+msgid "Your session has expired or you do not have permission. Reload the page and try again."
+msgstr "Tu sesión ha caducado o no tienes permiso. Recarga la página y vuelve a intentarlo."

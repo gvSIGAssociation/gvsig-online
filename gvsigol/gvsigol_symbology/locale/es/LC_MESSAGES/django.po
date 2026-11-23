@@ -1837,3 +1837,208 @@ msgstr "¿Eliminar el estilo seleccionado? No se puede deshacer."
 #: gvsigol_symbology/templates/symbol_update.html
 msgid "Delete this symbol? This cannot be undone."
 msgstr "¿Eliminar este símbolo? No se puede deshacer."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "Suggest style with AI"
+msgstr "Sugerir estilo con IA"
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "The AI analyses the fields of the layer and proposes a legend. The classes are calculated with the real data. Nothing is saved until you click Save."
+msgstr "La IA analiza los campos de la capa y propone una leyenda. Las clases se calculan con los datos reales. No se guarda nada hasta que pulses Guardar."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "The current rules of the editor will be replaced by the proposal."
+msgstr "Las reglas actuales del editor se sustituirán por la propuesta."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "What do you want to show? (optional)"
+msgstr "¿Qué quieres mostrar? (opcional)"
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "For example: colour the plots by land use"
+msgstr "Por ejemplo: colorear las parcelas por uso del suelo"
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "Suggest"
+msgstr "Sugerir"
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "Generating proposal..."
+msgstr "Generando propuesta..."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "The AI assistant did not respond. Try again later."
+msgstr "El asistente de IA no ha respondido. Inténtalo más tarde."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "The AI proposal could not be used. Try again."
+msgstr "No se ha podido usar la propuesta de la IA. Inténtalo de nuevo."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "Your session has expired or you do not have permission. Reload the page and try again."
+msgstr "Tu sesión ha caducado o no tienes permiso. Recarga la página y vuelve a intentarlo."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "AI proposal"
+msgstr "Propuesta de la IA"
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "Review the rules and the preview, and click Save to keep the style."
+msgstr "Revisa las reglas y la vista previa, y pulsa Guardar para conservar el estilo."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "Suggest with AI"
+msgstr "Sugerir con IA"
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "The AI analyses the fields of the layer, chooses the most suitable type of legend and prepares it with the real data. You review it in the editor before saving."
+msgstr "La IA analiza los campos de la capa, elige el tipo de leyenda más adecuado y lo prepara con los datos reales. Lo revisas en el editor antes de guardar."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "Refine the current proposal"
+msgstr "Retocar la propuesta actual"
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "Describe what to change (e.g. “more spaced lines”, “add labels with the name”). Manual changes made after the proposal will be lost."
+msgstr "Describe qué cambiar (p. ej. «líneas más separadas», «añade etiquetas con el nombre»). Se perderán los cambios hechos a mano después de la propuesta."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "Labels have been added: review them in Labeling."
+msgstr "Se han añadido etiquetas: revísalas en «Etiquetado»."
+
+#: gvsigol_symbology/templates/_ai_style_modal.html
+msgctxt "symbology"
+msgid "The labels have been removed."
+msgstr "Se han quitado las etiquetas."
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Quick options"
+msgstr "Opciones rápidas"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Colour by categories"
+msgstr "Colorear por categorías"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Colour by ranges"
+msgstr "Colorear por rangos"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "With labels"
+msgstr "Con etiquetas"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Visible from 1:25,000"
+msgstr "Visible a partir de 1:25.000"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Diagonal hatching"
+msgstr "Trama de líneas oblicuas"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Grid hatching"
+msgstr "Trama en cuadrícula"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Outline only"
+msgstr "Solo contorno"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Dashed outline"
+msgstr "Contorno discontinuo"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Semi-transparent fill"
+msgstr "Relleno semitransparente"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Dashed line"
+msgstr "Línea discontinua"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Dotted line"
+msgstr "Línea punteada"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Arrow at the end"
+msgstr "Flecha al final"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Direction arrows"
+msgstr "Flechas de sentido"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Railway style"
+msgstr "Estilo ferrocarril"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Diamond shape"
+msgstr "Forma de rombo"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Star shape"
+msgstr "Forma de estrella"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "No fill"
+msgstr "Sin relleno"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Larger symbol"
+msgstr "Símbolo más grande"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Thinner"
+msgstr "Más fino"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "More spaced"
+msgstr "Más separado"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Softer colours"
+msgstr "Colores más suaves"
+
+#: gvsigol_symbology/templates/_ai_style_scripts.html
+msgctxt "symbology"
+msgid "Remove the labels"
+msgstr "Quita las etiquetas"

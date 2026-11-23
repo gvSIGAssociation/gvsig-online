@@ -223,6 +223,20 @@
 					<div class="col-md-12">
 						<div class="box">
 							<div class="box-body">
+{% if ai_field_titles %}
+								<style>
+									#ai-titles-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 12px; }
+									#ai-titles-bar .checkbox-inline { padding-top: 0; }
+									#ai-titles-status { color: #5a6b7d; }
+									#ai-titles-status.ai-error { color: #b03a2e; }
+									#tab-layer-field-trans input.ai-suggested { background-color: #eef4fa; border-color: #285A8C; }
+								</style>
+								<div id="ai-titles-bar" data-url="{{ ai_field_titles.url }}">
+									<button type="button" id="ai-titles-btn" class="btn btn-default btn-sm"><i class="fa fa-magic" aria-hidden="true"></i> {% trans "Generate titles with AI" %}</button>
+									<label class="checkbox-inline"><input type="checkbox" id="ai-titles-overwrite"> {% trans "Replace existing titles" %}</label>
+									<span id="ai-titles-status" role="status" aria-live="polite"></span>
+								</div>
+								{% endif %}
 								<div class="row">
 									<div class="col-md-12">
 										<div class="table-responsive">
@@ -2186,5 +2200,111 @@
 				}
 			});
 		});
+
+{% if ai_field_titles %}
+	// Asistente de IA para los títulos de campo (lo aporta un plugin). Solo rellena los inputs:
+	// no guarda nada hasta que el usuario pulsa Guardar.
+	$(function() {
+		var $bar = $('#ai-titles-bar');
+		var $btn = $('#ai-titles-btn');
+		var $status = $('#ai-titles-status');
+		var $tab = $('#tab-layer-field-trans');
+		var langs = {{ available_languages_array|safe }};
+		var busyHtml = '<i class="fa fa-spinner fa-spin" aria-hidden="true"></i> ' + "{% trans 'Generating titles...'|escapejs %}";
+		var idleHtml = $btn.html();
+
+		var setStatus = function(text, isError) {
+			$status.text(text || '').toggleClass('ai-error', !!isError);
+		};
+
+		// Filas de la pestaña: {nombre, índice}
+		var rows = function() {
+			var out = [];
+			$tab.find('input[name^="field-name-"]').each(function() {
+				var idx = this.name.substring('field-name-'.length);
+				out.push({name: $(this).val(), idx: idx});
+			});
+			return out;
+		};
+
+		var titleInput = function(lang, idx) {
+			return $tab.find('input[name="field-title-' + lang + '-' + idx + '"]');
+		};
+
+		// Sin título = vacío o igual al nombre del campo (lo que se muestra por defecto)
+		var untitled = function($input, name) {
+			var value = $.trim($input.val() || '');
+			return value === '' || value === name;
+		};
+
+		$tab.on('input', 'input.ai-suggested', function() {
+			$(this).removeClass('ai-suggested').removeAttr('title');
+		});
+
+		$btn.on('click', function() {
+			var overwrite = $('#ai-titles-overwrite').is(':checked');
+			var all = rows();
+			var wanted = $.grep(all, function(row) {
+				if (overwrite) { return true; }
+				for (var j = 0; j < langs.length; j++) {
+					var $input = titleInput(langs[j], row.idx);
+					if ($input.length && untitled($input, row.name)) { return true; }
+				}
+				return false;
+			});
+			if (!wanted.length) {
+				setStatus("{% trans 'All fields already have a title. Check “Replace existing titles” to generate them again.'|escapejs %}", false);
+				return;
+			}
+			$btn.prop('disabled', true).html(busyHtml);
+			setStatus('', false);
+			$.ajax({
+				type: 'POST',
+				url: $bar.data('url'),
+				contentType: 'application/json',
+				data: JSON.stringify({fields: $.map(wanted, function(r) { return r.name; })}),
+				dataType: 'json',
+				timeout: 120000,
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+				},
+				success: function(response) {
+					var suggestions = (response && response.suggestions) || {};
+					var filled = 0;
+					$.each(wanted, function(_, row) {
+						var titles = suggestions[row.name];
+						if (!titles) { return; }
+						$.each(langs, function(_, lang) {
+							var $input = titleInput(lang, row.idx);
+							if (!$input.length || !titles[lang]) { return; }
+							if (!overwrite && !untitled($input, row.name)) { return; }
+							if ($input.val() === titles[lang]) { return; }
+							$input.val(titles[lang]).addClass('ai-suggested')
+								.attr('title', "{% trans 'Suggested by AI'|escapejs %}");
+							filled++;
+						});
+					});
+					if (filled) {
+						setStatus("{% trans '{count} titles suggested. Review them and click Save to keep them.'|escapejs %}".replace('{count}', filled), false);
+					} else {
+						setStatus("{% trans 'The AI did not suggest any new title.'|escapejs %}", false);
+					}
+				},
+				error: function(jqXHR, textStatus) {
+					var text = "{% trans 'The AI assistant did not respond. Try again later.'|escapejs %}";
+					if (textStatus !== 'timeout' && jqXHR.responseJSON && jqXHR.responseJSON.error) {
+						text = jqXHR.responseJSON.error;
+					} else if (jqXHR.status === 401 || jqXHR.status === 403) {
+						text = "{% trans 'Your session has expired or you do not have permission. Reload the page and try again.'|escapejs %}";
+					}
+					setStatus(text, true);
+				},
+				complete: function() {
+					$btn.prop('disabled', false).html(idleHtml);
+				}
+			});
+		});
+	});
+{% endif %}
 </script>
 {% endblock %}

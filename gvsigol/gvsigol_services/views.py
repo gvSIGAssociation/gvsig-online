@@ -68,6 +68,7 @@ from gvsigol.settings import MOSAIC_DB
 from gvsigol_auth.utils import superuser_required, staff_required, get_primary_user_role, ascii_norm_username
 from gvsigol_auth import auth_backend
 from gvsigol_core import utils as core_utils
+from gvsigol_core import ai_assist
 from gvsigol_core.views import forbidden_view
 from gvsigol_core.models import Project, ProjectRole
 from gvsigol_core.models import ProjectLayerGroup
@@ -3708,6 +3709,8 @@ def layer_config(request, layer_id):
             'connection_triggers': connection_triggers,
             'layer_connection_triggers': layer_connection_triggers,
             'calculated_fields_used': json.dumps(calculated_fields_used),
+            # Asistente de IA para los títulos (lo aporta un plugin; None = sin botón)
+            'ai_field_titles': ai_assist.get(ai_assist.FIELD_TITLES, request, layer),
         }
         return render(request, 'layer_config.html', data)
 

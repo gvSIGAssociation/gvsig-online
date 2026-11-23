@@ -2,7 +2,7 @@
 {% load static %}
 {% load i18n %}
 
-{% block content %}
+{% block content %}{% if ai_style %}{% include "_ai_style_modal.html" %}{% endif %}
 <div class="row">
 	<div class="col-md-12">
 		<div class="pl-panel gol-sym-editor gol-sym-editor--cards">
@@ -16,7 +16,8 @@
 </div>
 				</div>
 				<div class="pl-panel__actions">
-					<button id="refresh-preview" class="btn-pf-secondary refresh-preview"><i class="fa fa-refresh"></i> {% trans "Update preview" %}</button>
+					{% if ai_style %}<button id="gol-ai-style-open" class="btn-pf-secondary"><i class="fa fa-magic" aria-hidden="true"></i> {% trans "Suggest with AI" context "symbology" %}</button>
+					{% endif %}<button id="refresh-preview" class="btn-pf-secondary refresh-preview"><i class="fa fa-refresh"></i> {% trans "Update preview" %}</button>
 					<button id="show-label" class="btn-pf-secondary refresh-preview"><i class="fa fa-tags"></i> {% trans "Labeling" %}</button>
 					<button id="save-legend" class="btn-pf-save save-legend"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
 				</div>
@@ -163,6 +164,7 @@
 {% endblock %}
 
 {% block extra-scripts %}
+{% if ai_style %}{% include "_ai_style_scripts.html" with ai_layer_id=layer_id %}{% endif %}
 <script>
 	$('#menu-manage-symbology').addClass("active");
 	$('#submenu-styles').addClass("active");
@@ -223,6 +225,8 @@
 {% endblock %}	
 	utils.centerMap(layerName, wfsUrl, authToken);
 {% block unique_symbol_v15 %}{% endblock %}	
+{% if ai_style %}	GolAiStyle.attach('unique_symbol', uniqueSymbol, layerId, featureType);
+{% endif %}
 	$("#show-label").on('click', function(e){
 		uniqueSymbol.showLabel();
 	});

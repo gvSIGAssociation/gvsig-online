@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="{% static "css/gol-list-page.css" %}">
 {% endblock %}
 
-{% block content %}
+{% block content %}{% if ai_style %}{% include "_ai_style_modal.html" %}{% endif %}
 <div class="row">
 	<div class="col-md-12">
 		<div class="pl-panel">
@@ -22,6 +22,15 @@
 			<div class="pl-panel__body with-padding">
 				<p class="gol-sym-intro">{% trans "Choose the type of legend to create" %}</p>
 				<div class="gol-sym-type-grid">
+				{% if ai_style and is_vectorial %}
+					<a class="gol-sym-type-card gol-sym-type-card--ai" href="#" id="gol-ai-style-open" role="button">
+						<span class="gol-sym-type-card__icon"><i class="fa fa-magic"></i></span>
+						<span class="gol-sym-type-card__body">
+							<span class="gol-sym-type-card__title">{% trans "Suggest with AI" context "symbology" %}</span>
+							<span class="gol-sym-type-card__desc">{% trans "The AI analyses the fields of the layer, chooses the most suitable type of legend and prepares it with the real data. You review it in the editor before saving." context "symbology" %}</span>
+						</span>
+					</a>
+				{% endif %}
 				{% if is_vectorial %}
 					<a class="gol-sym-type-card" href="/gvsigonline/symbology/unique_symbol_add/{{layer.id}}/">
 						<span class="gol-sym-type-card__icon"><i class="fa fa-map-marker"></i></span>
@@ -107,6 +116,8 @@
 {% endblock %}
 
 {% block extra-scripts %}
+{% if ai_style %}{% include "_ai_style_scripts.html" with ai_layer_id=layer.id %}{% endif %}
+{% if ai_style %}<script>$(function() { GolAiStyle.initChooser("{{ layer.id }}"); });</script>{% endif %}
 <script>
 	$('#menu-manage-symbology').addClass("active");
 	$('#submenu-styles').addClass("active");

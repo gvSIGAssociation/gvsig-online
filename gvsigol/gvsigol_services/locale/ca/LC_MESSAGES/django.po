@@ -5723,3 +5723,39 @@ msgstr "Seleccionar extensió"
 #: gvsigol_services/templates/server_update.html
 msgid "This is the default server. To change it, mark another server as default."
 msgstr "Aquest és el servidor per defecte. Per a canviar-lo, marqueu un altre servidor com a servidor per defecte."
+
+#: gvsigol_services/templates/layer_config.html
+msgid "Generate titles with AI"
+msgstr "Generar títols amb IA"
+
+#: gvsigol_services/templates/layer_config.html
+msgid "Replace existing titles"
+msgstr "Substituir els títols existents"
+
+#: gvsigol_services/templates/layer_config.html
+msgid "Generating titles..."
+msgstr "Generant títols..."
+
+#: gvsigol_services/templates/layer_config.html
+msgid "All fields already have a title. Check “Replace existing titles” to generate them again."
+msgstr "Tots els camps ja tenen títol. Marca «Substituir els títols existents» per a generar-los de nou."
+
+#: gvsigol_services/templates/layer_config.html
+msgid "Suggested by AI"
+msgstr "Suggerit per IA"
+
+#: gvsigol_services/templates/layer_config.html
+msgid "{count} titles suggested. Review them and click Save to keep them."
+msgstr "{count} títols suggerits. Revisa'ls i prem Guardar per a conservar-los."
+
+#: gvsigol_services/templates/layer_config.html
+msgid "The AI did not suggest any new title."
+msgstr "La IA no ha suggerit cap títol nou."
+
+#: gvsigol_services/templates/layer_config.html
+msgid "The AI assistant did not respond. Try again later."
+msgstr "L'assistent d'IA no ha respost. Torna-ho a provar més tard."
+
+#: gvsigol_services/templates/layer_config.html
+msgid "Your session has expired or you do not have permission. Reload the page and try again."
+msgstr "La teua sessió ha caducat o no tens permís. Recarrega la pàgina i torna-ho a provar."

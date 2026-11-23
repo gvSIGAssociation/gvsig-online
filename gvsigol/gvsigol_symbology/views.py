@@ -26,6 +26,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseForbidden
 from django.db.models import Q
 from gvsigol_services import geographic_servers
+from gvsigol_core import ai_assist
 from gvsigol_services.models import Workspace, Datastore, Layer, Server
 from gvsigol_services import utils as service_utils
 from gvsigol_services.tasks import do_layer_cache_clear
@@ -111,6 +112,17 @@ def delete_preview_style(request, name, gs):
             pass
         
     return success
+
+
+def _ai_style(request, layer_id):
+    """Asistente «Sugerir estilo con IA» (lo aporta un plugin). None = sin botón; nunca rompe la página."""
+    try:
+        layer = Layer.objects.filter(id=int(layer_id)).first()
+    except (TypeError, ValueError):
+        return None
+    if layer is None:
+        return None
+    return ai_assist.get(ai_assist.STYLE_SUGGESTION, request, layer)
 
 
 def _style_saved_response(request, style, layer, gs, preview_name):
@@ -311,6 +323,7 @@ def select_legend_type(request, layer_id):
         'is_points': is_points
     }
         
+    response['ai_style'] = _ai_style(request, layer_id)
     return render(request, 'select_legend_type.html', response)
 
 @login_required()
@@ -445,6 +458,7 @@ def unique_symbol_add(request, layer_id):
         
     else:                 
         response = services_unique_symbol.get_conf(request, layer_id)     
+        response['ai_style'] = _ai_style(request, layer_id)
         return render(request, 'unique_symbol_add.html', response)
     
 @login_required()
@@ -495,6 +509,7 @@ def unique_symbol_update(request, layer_id, style_id):
                         response['property_name'] = rule_filter.get('property_name')   
          
         
+        response['ai_style'] = _ai_style(request, layer_id)
         return render(request, 'unique_symbol_update.html', response)
     
     
@@ -522,6 +537,7 @@ def unique_values_add(request, layer_id, style_id=None):
         color_ramps = ColorRampLibrary.objects.all()        
         response["ramp_libraries"] = color_ramps
         
+        response['ai_style'] = _ai_style(request, layer_id)
         return render(request, 'unique_values_add.html', response)
     
 @login_required()
@@ -575,6 +591,7 @@ def unique_values_update(request, layer_id, style_id):
         color_ramps = ColorRampLibrary.objects.all()        
         response["ramp_libraries"] = color_ramps
         
+        response['ai_style'] = _ai_style(request, layer_id)
         return render(request, 'unique_values_update.html', response)
     
 @login_required()
@@ -630,6 +647,7 @@ def intervals_add(request, layer_id):
         color_ramps = ColorRampLibrary.objects.all()        
         response["ramp_libraries"] = color_ramps
         
+        response['ai_style'] = _ai_style(request, layer_id)
         return render(request, 'intervals_add.html', response)
 
 
@@ -791,6 +809,7 @@ def intervals_update(request, layer_id, style_id):
         color_ramps = ColorRampLibrary.objects.all()        
         response["ramp_libraries"] = color_ramps
         
+        response['ai_style'] = _ai_style(request, layer_id)
         return render(request, 'intervals_update.html', response)
     
 @login_required()
