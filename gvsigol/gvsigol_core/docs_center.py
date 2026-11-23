@@ -45,6 +45,7 @@ FILES_SEGMENT = '_files'
 _SLUG_RE = re.compile(r'^[A-Za-z0-9][A-Za-z0-9_-]*$')
 _EXTERNAL_RE = re.compile(r'^[a-zA-Z][a-zA-Z0-9+.-]*:')
 _H1_RE = re.compile(r'^#\s+(.+?)\s*#*\s*$')
+_RAW_IMG_SRC_RE = re.compile(r'(<img\b[^>]*?\bsrc=")([^"]+)(")')
 
 
 # --------------------------------------------------------------------------------------------
@@ -192,11 +193,13 @@ def _parse_central(docs_root: str) -> List[Manual]:
         data = yaml.safe_load(f) or {}
     manuals = []
     for item in data.get('manuals') or []:
+        if isinstance(item, dict) and not item.get('app'):
+            continue    # sin app: solo se publica en el sitio de documentación (p. ej. gvSIG Mapps)
         try:
             app = str(item.get('app') or '')
             path = safe_relpath(str(item.get('path') or ''))
-            if not app or not path:
-                raise ValueError('faltan app o path')
+            if not path:
+                raise ValueError('falta path')
             manual = _manual_from(item, app, os.path.join(docs_root, DOCS_DIRNAME), path=path,
                                   repo_root=os.path.dirname(os.path.realpath(docs_root)))
             if manual:
@@ -553,6 +556,19 @@ def _link_extension(manual: Manual, lang_dir: str):
             return file_url(self.manual.app, rel) + fragment if rel else '#'
 
 
+    from markdown.postprocessors import Postprocessor
+
+    class _RawImageResolver(Postprocessor):
+        """Las <img> escritas en HTML (p. ej. dentro de celdas de tabla) no pasan por el árbol:
+        se resuelve su src en el HTML final con la misma regla."""
+
+        def __init__(self, md, resolver):
+            super().__init__(md)
+            self.resolver = resolver
+
+        def run(self, text: str) -> str:
+            return _RAW_IMG_SRC_RE.sub(lambda m: m.group(1) + self.resolver._resource(m.group(2)) + m.group(3), text)
+
     class _LinkExtension(Extension):
         def __init__(self, manual: Manual, lang_dir: str):
             super().__init__()
@@ -560,8 +576,11 @@ def _link_extension(manual: Manual, lang_dir: str):
             self.lang_dir = lang_dir
 
         def extendMarkdown(self, md):
+            resolver = _LinkResolver(md, self.manual, self.lang_dir)
             # Después de los enlaces en línea y antes de serializar
-            md.treeprocessors.register(_LinkResolver(md, self.manual, self.lang_dir), 'gol_doc_links', 4)
+            md.treeprocessors.register(resolver, 'gol_doc_links', 4)
+            # Después de reinsertar el HTML en bruto (raw_html, prioridad 30)
+            md.postprocessors.register(_RawImageResolver(md, resolver), 'gol_doc_raw_images', 5)
 
     return _LinkExtension(manual, lang_dir)
 
@@ -640,7 +659,13 @@ _IMAGE_RE = re.compile(r'!\[([^\]]*)\]\(\s*<?([^)\s>]+)>?(?:\s+"[^"]*")?\s*\)')
 def referenced_images(text: str, lang_dir: str) -> List[Tuple[str, str]]:
     """Imágenes locales que usa el Markdown: [(ruta relativa a docs/, texto alternativo)]."""
     found, seen = [], set()
-    for alt, target in _IMAGE_RE.findall(text or ''):
+    raw = []        # <img> escritas en HTML (dentro de tablas)
+    for match in re.finditer(r'<img\b[^>]*>', text or ''):
+        src = re.search(r'\bsrc="([^"]+)"', match.group(0))
+        alt = re.search(r'\balt="([^"]*)"', match.group(0))
+        if src:
+            raw.append((alt.group(1) if alt else '', src.group(1)))
+    for alt, target in _IMAGE_RE.findall(text or '') + raw:
         target = target.split('#')[0]
         if not target or _EXTERNAL_RE.match(target) or target.startswith('/'):
             continue
