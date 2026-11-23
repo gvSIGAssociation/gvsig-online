@@ -12,7 +12,8 @@ Los proyectos se gestionan desde el panel de administración, en **Proyectos**.
 |---|---|
 | Ver la lista de proyectos | Personal (*staff*) y superusuarios. Los superusuarios ven todos; el resto, los proyectos en los que alguno de sus roles tiene permiso de acceso o de gestión |
 | Crear un proyecto | Personal y superusuarios |
-| Modificar, exportar o eliminar un proyecto | Quien lo gestiona: los superusuarios, quien lo creó y quien tenga un rol con **Permiso de gestión** en el proyecto |
+| Modificar o exportar un proyecto | Quien lo gestiona: los superusuarios, quien lo creó y quien tenga un rol con **Permiso de gestión** en el proyecto |
+| Eliminar un proyecto | Solo los superusuarios y quien lo creó. Quien solo tiene **Permiso de gestión** ve el botón desactivado |
 | Clonar un proyecto | Solo superusuarios |
 | Extender los permisos del proyecto a sus capas | Solo superusuarios |
 
@@ -136,7 +137,8 @@ ofrecen desde los paneles de ese proyecto.
   muestra las capas que el usuario puede ver.
 - Para cada rol:
     - **Permiso de acceso**: los usuarios con ese rol pueden abrir el proyecto.
-    - **Permiso de gestión**: además, pueden modificarlo, exportarlo y eliminarlo.
+    - **Permiso de gestión**: además, pueden modificarlo y exportarlo (eliminarlo, no: eso queda para
+      quien lo creó y los superusuarios).
 - **Extender a capas** (solo superusuarios): da a los roles marcados permiso de lectura sobre
   todas las capas del proyecto. Tenga en cuenta que:
     - Si el proyecto es público, todas sus capas pasan a ser públicas.

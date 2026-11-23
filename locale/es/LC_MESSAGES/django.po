@@ -3147,3 +3147,7 @@ msgstr "ZIP con todas las páginas editadas y las imágenes subidas desde la web
 #: templates/shared_view_list.html
 msgid "Only its creator or a superuser can delete it"
 msgstr "Solo puede eliminarla quien la creó o un superusuario"
+
+#: templates/project_list.html
+msgid "Only the creator of the project or a superuser can delete it"
+msgstr "Solo quien creó el proyecto o un superusuario puede eliminarlo"

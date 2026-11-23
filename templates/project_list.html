@@ -57,6 +57,7 @@
 							<th>{% trans "Is public?" %}</th>
 							<th>{% trans "Preview" %}</th>
 							<th style="display:none">{% trans "Can manage" %}</th>
+							<th style="display:none"></th>
 							<th></th>
 							<th></th>
 							<th></th>
@@ -85,6 +86,7 @@
 								{% endif %}
 							</td>
 						<td style="display:none">{{ project.can_manage }}</td>
+						<td style="display:none">{{ project.can_delete }}</td>
 						<td></td>
 						<td></td>
 						<td></td>
@@ -345,6 +347,8 @@ $(document).ready(function() {
 	   evita que un selector que no encuentre el tr deje un undefined y rompa
 	   el draw entero, apagando los botones de todas las filas. */
 	function canManage(data) { return data[6] === 'true'; }
+	// Eliminar: solo superusuarios y quien creó el proyecto (el permiso de gestión no basta)
+	function canDelete(data) { return data[7] === 'true'; }
 
 	var table = golListTable('#projects-table', {
 		mode: 'server',
@@ -353,6 +357,9 @@ $(document).ready(function() {
 	        "targets": -1,
 	        "data": null,
 			"render": function ( data, type, row ) {
+				if (canManage(data) && !canDelete(data)) {
+					return '<span title="{% trans "Only the creator of the project or a superuser can delete it" %}" data-toggle="tooltip" data-placement="top"><button type="button" class="btn btn-danger" disabled><i class="fa fa-times"></i></button></span>';
+				}
 				if (canManage(data)) {
                 	return '<button type="button" name="button-delete-project" data-toggle="modal" data-target="#modal-delete-project" data-toggle="tooltip" data-placement="top" title="' + '{% trans "Delete project" %}' + '" class="btn btn-danger"><i class="fa fa-times"></i></button>';
 				}
@@ -784,7 +791,10 @@ $(document).ready(function() {
 					$('#modal-delete-project').modal('hide');
 					location.reload();
 				},
-				error: function(){}
+				error: function(){
+					$('#modal-delete-project').modal('hide');
+					alert('{% trans "Only the creator of the project or a superuser can delete it" %}');
+				}
 			});
 		});
 	}
