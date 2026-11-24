@@ -985,6 +985,15 @@ def _delete_unused_empty_layer_group(layer_group_obj):
     return True
 
 
+def _imported_group_selectable(plg_cfg, project_selectable_groups, baselayer_group):
+    """Paquetes antiguos solo traen el flag del proyecto: se aplica a cada grupo que no es base."""
+    if baselayer_group:
+        return False
+    if isinstance(plg_cfg, dict) and 'selectable' in plg_cfg:
+        return bool(plg_cfg.get('selectable'))
+    return bool(project_selectable_groups)
+
+
 def _finalize_definition_foreign_layer_groups(
     project,
     plg_obj,
@@ -1066,6 +1075,7 @@ def _finalize_definition_foreign_layer_groups(
             layer_group=shared_lg,
             multiselect=plg_cfg.get('multiselect', True),
             baselayer_group=False,
+            selectable=_imported_group_selectable(plg_cfg, project.selectable_groups, False),
             default_baselayer=None,
         )
         if idx == 0:
@@ -3727,11 +3737,15 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
                 report.append({'layer_group_created': lg.name})
             if basemap_sig is not None and not basemap_canonical_hit:
                 canonical_baselayer_lg_by_sig[basemap_sig] = lg
+            plg_baselayer = plg_cfg.get('baselayer_group', False)
             plg_obj = ProjectLayerGroup.objects.create(
                 project=project,
                 layer_group=lg,
                 multiselect=plg_cfg.get('multiselect', True),
-                baselayer_group=plg_cfg.get('baselayer_group', False),
+                baselayer_group=plg_baselayer,
+                selectable=_imported_group_selectable(
+                    plg_cfg, project.selectable_groups, plg_baselayer
+                ),
                 default_baselayer=None,
             )
             default_eid = _resolve_default_baselayer_export_id(
@@ -4062,6 +4076,11 @@ def commit_job(job: ProjectPackageImportJob, username, progress_cb=None):
                 plg_fresh = ProjectLayerGroup.objects.filter(pk=plg_obj.pk).first()
                 if plg_fresh:
                     pending_default_baselayers.append((plg_fresh, default_eid))
+
+        project.selectable_groups = ProjectLayerGroup.objects.filter(
+            project=project, selectable=True,
+        ).exists()
+        project.save(update_fields=['selectable_groups'])
 
         for plg_obj, default_eid in pending_default_baselayers:
             new_layer_id = id_map.get(default_eid)

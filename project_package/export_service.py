@@ -712,6 +712,7 @@ def build_project_zip(project: Project, export_options=None, progress_cb=None):
                 'project_layer_group': {
                     'multiselect': prj_lg.multiselect,
                     'baselayer_group': prj_lg.baselayer_group,
+                    'selectable': bool(prj_lg.selectable) and not prj_lg.baselayer_group,
                     'default_baselayer_export_id': default_baselayer_eid,
                 },
                 'layers': group_layers,

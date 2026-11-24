@@ -92,7 +92,7 @@
 									</div>
 								</div>
 
-								<details class="gol-pg-section" data-gol-section="toc" data-gol-section-persist data-gol-meta-fields="#id_toc_mode, #selectable_groups, #id_expiration_date">
+								<details class="gol-pg-section" data-gol-section="toc" data-gol-section-persist data-gol-meta-fields="#id_toc_mode, #id_expiration_date">
 									<summary><span class="gol-pg-section__title"><i class="fa fa-sliders" aria-hidden="true"></i> {% trans "Table of contents and access" context "core" %}</span><span class="gol-pg-section__meta" aria-hidden="true"></span></summary>
 									<div class="gol-pg-section__body">
 
@@ -105,13 +105,7 @@
 											<option value="toc_layers"{% if project.toc_mode == 'toc_layers' %} selected{% endif %}>{% trans "Show toc, groups and layers" %}</option>
 										</select>
 									</div>
-									<div class="col-md-3 form-group">
-										<label class="pf-switch">
-											<input type="checkbox" name="selectable_groups" id="selectable_groups"{% if project.selectable_groups %} checked{% endif %}/>
-											{% trans "Selectable layer groups" %}
-										</label>
-									</div>
-									<div class="col-md-3 form-group">
+									<div class="col-md-6 form-group">
 										<label for="id_expiration_date">{% trans "expiration_date_optional" %}</label>
 										<div class="input-group date" id="expiration_date">
 											<input id="id_expiration_date" onkeydown="return false" name="datetimepicker-start-value" type="text" class="form-control" autocomplete="off" value="{{ expiration_display|default:'' }}" />
@@ -283,6 +277,12 @@
 															{% else %}
 																<input type="checkbox" class="layergroup-input" data-groupid="{{layergroup.id}}" data-name="{{layergroup.name}}" data-title="{{layergroup.title}}" name="layergroup-{{layergroup.id}}" id="layergroup-{{layergroup.id}}"/><span>{% trans "Add" %}</span>
 															{% endif %}
+														</label>
+													</div>
+													<div style="margin-right: 10px;" class="proj-perms pull-right">
+														<label class="proj-perm-chip">
+															<input type="checkbox" class="selectable-group" data-groupid="{{layergroup.id}}" name="selectable-group-{{layergroup.id}}" id="selectable-group-{{layergroup.id}}"{% if layergroup.selectable and not layergroup.baselayer_group %} checked{% endif %}{% if layergroup.baselayer_group %} disabled{% endif %}/>
+															<span>{% trans "Selectable layer groups" %}</span>
 														</label>
 													</div>
 													<span class="product-description"><span class="searchable-layer-desc">{{layergroup.name}}</span></span>
@@ -721,7 +721,21 @@
 		}
 	}
 
+	function syncSelectableWithBaseGroup() {
+		$('.selectable-group').each(function() {
+			var id = $(this).attr('data-groupid');
+			var isBase = $('#selected-base-group-' + id).is(':checked');
+			var locked = $('#layergroup-' + id).is(':disabled');
+			if (isBase) {
+				$(this).prop('checked', false).prop('disabled', true);
+			} else if (!locked) {
+				$(this).prop('disabled', false);
+			}
+		});
+	}
+
 	function setOnSelectedBasegroupChanged() {
+		syncSelectableWithBaseGroup();
 		$('input[name=selected-base-group-btn]').parent().mouseup(function(e) {
 			var previousSelection = $('input:radio[name=selected-base-group-btn]:checked');
 			var data_id = $(previousSelection).attr("data-groupid");
@@ -770,6 +784,7 @@
 					
 				}
 			});
+			syncSelectableWithBaseGroup();
 		});
 	}
 
@@ -804,8 +819,17 @@
 		  		}
 		  		
 				$("#lg_"+data_id).remove();
+				syncSelectableWithBaseGroup();
+				$("#selectable-group-" + data_id).prop("checked", false);
 	  		}
 	  	});
+		$(".selectable-group").on("change", function() {
+			var id = $(this).attr("data-groupid");
+			var addBox = $("#layergroup-" + id);
+			if ($(this).is(":checked") && !addBox.is(":checked") && !addBox.is(":disabled")) {
+				addBox.trigger("click");
+			}
+		});
 	}
 	
 	$().ready(function() {
