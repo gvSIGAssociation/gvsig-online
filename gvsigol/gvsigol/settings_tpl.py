@@ -431,6 +431,7 @@ GVSIGOL_ENABLE_ENUMERATIONS = ##GVSIGOL_ENABLE_ENUMERATIONS##
 #                           skin-elegant
 # Cliente:                  skin-albacete, skin-almendralejo, skin-alzira,
 #                           skin-atlasrenewableenergy, skin-cartagena,
+#                           skin-castillalamancha,
 #                           skin-csicgranada, skin-eliana, skin-ideuy,
 #                           skin-libra, skin-mallorca, skin-ormusa,
 #                           skin-picanya, skin-pobla, skin-talavera,
