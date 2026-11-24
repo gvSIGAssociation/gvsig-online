@@ -1,0 +1,55 @@
+type: trans_AIAction
+label: SQL with AI
+family: transform
+summary: 'Ejecuta una acción libre en lenguaje natural como SQL/PostGIS. Por defecto 1 entrada y
+  1 salida (máx. 5 entradas / 10 salidas); al aceptar aparecen los puertos. Cada salida tiene su
+  propio esquema y su propio SELECT (pestañas). Generar produce un SQL por salida cuando hay
+  varias; puedes sugerir el esquema de la pestaña activa a partir de su SQL. En ejecución cada
+  salida materializa su SELECT (o, en legado con un solo SQL, proyecta columnas del mismo resultado).'
+parameters:
+- name: inputs_count
+  required: true
+  summary: 'Número de entradas (1–5). Al aceptar se crean los puertos. En el SQL: input_0, input_1, …'
+  example: 1
+- name: outputs_count
+  required: true
+  summary: 'Número de salidas (1–10). Al aceptar se crean los puertos. Cada una puede tener filas y columnas distintas.'
+  example: 1
+- name: output_schemas
+  required: false
+  summary: 'Lista de esquemas, uno por salida: [[{name, type}, …], …]. Obligatorio para ejecutar.'
+  format: list
+  example:
+  - - name: x
+      type: double
+    - name: y
+      type: double
+  - - name: x
+      type: double
+- name: output_schema
+  required: false
+  summary: 'Compat: igual que output_schemas (lista plana = un solo esquema, o lista de listas).'
+  format: list
+- name: instruction
+  required: false
+  summary: 'Qué hay que hacer, en lenguaje natural. Obligatorio para generar/ejecutar, no para aceptar puertos.'
+  example: calcula los centroides y guarda x e y
+- name: sqls
+  required: false
+  summary: 'Lista de SELECT/WITH, uno por salida. Preferido cuando outputs_count > 1.'
+  format: list
+  example:
+  - SELECT a.*, b.* FROM input_0 a INNER JOIN input_1 b ON a.preid = b.id
+  - SELECT a.* FROM input_0 a WHERE NOT EXISTS (SELECT 1 FROM input_1 b WHERE b.id = a.preid)
+- name: sql
+  required: false
+  summary: 'Compat: un solo SELECT/WITH (o el de la primera salida). Si es el único SQL con varias salidas, cada salida proyecta columnas del mismo resultado.'
+  example: SELECT ST_X(ST_Centroid(wkb_geometry)) AS x, ST_Y(ST_Centroid(wkb_geometry)) AS y FROM input_0
+ports:
+- direction: input
+  label: Input 1
+- direction: output
+  label: Output
+connection_types: []
+connection_parameter: null
+sql_parameters: []

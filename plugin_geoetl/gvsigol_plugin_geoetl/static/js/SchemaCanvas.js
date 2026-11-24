@@ -219,6 +219,10 @@ document.addEventListener("DOMContentLoaded",function () {
     var app  = new gvsigolETL.Application();
     window.etlApp = app;
 
+    if (typeof etlInstallCopyPaste === 'function') {
+        etlInstallCopyPaste(app.view);
+    }
+
     app.view.installEditPolicy(new draw2d.policy.connection.DragConnectionCreatePolicy({
         createConnection: function(){
             var connection = new draw2d.Connection({

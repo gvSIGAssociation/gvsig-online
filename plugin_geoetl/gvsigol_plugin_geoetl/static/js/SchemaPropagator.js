@@ -447,6 +447,66 @@ var SCHEMA_HANDLERS = {};
         }
     };
 
+    SCHEMA_HANDLERS.trans_AIAction = {
+        computeOutputSchema: function (inputSchemas, params) {
+            var p = params && params.parameters && params.parameters[0] ? params.parameters[0] : {};
+            var outs = Math.max(1, parseInt(p.outputs_count, 10) || 1);
+            var fallback = [];
+            if (Array.isArray(inputSchemas) && Array.isArray(inputSchemas[0])) {
+                fallback = inputSchemas[0].slice();
+            } else {
+                fallback = schemaAsColumnList(inputSchemas);
+            }
+            function namesFromBlock(block) {
+                var names = [];
+                var items = block;
+                if (block && typeof block === 'object' && !Array.isArray(block) && block.columns) {
+                    items = block.columns;
+                }
+                if (!Array.isArray(items)) {
+                    return names;
+                }
+                for (var i = 0; i < items.length; i++) {
+                    var col = items[i];
+                    var name = (typeof col === 'string') ? col : (col && col.name);
+                    if (name) {
+                        names.push(name);
+                    }
+                }
+                return names;
+            }
+            var raw = (p.output_schemas != null) ? p.output_schemas : p.output_schema;
+            var perOut = [];
+            if (Array.isArray(raw) && raw.length && Array.isArray(raw[0])) {
+                for (var o = 0; o < raw.length; o++) {
+                    perOut.push(namesFromBlock(raw[o]));
+                }
+            } else {
+                var shared = namesFromBlock(raw || []);
+                for (var s = 0; s < outs; s++) {
+                    perOut.push(shared.slice());
+                }
+            }
+            while (perOut.length < outs) {
+                perOut.push([]);
+            }
+            perOut = perOut.slice(0, outs);
+            for (var j = 0; j < perOut.length; j++) {
+                if (!perOut[j].length) {
+                    perOut[j] = fallback.slice();
+                }
+            }
+            if (outs <= 1) {
+                return perOut[0] || fallback.slice();
+            }
+            return perOut;
+        },
+        validateParams: function (inputSchemas, params) {
+            // Se puede aceptar a medias (solo puertos / esquema parcial)
+            return !!(params && params.parameters && params.parameters[0]);
+        }
+    };
+
     SCHEMA_HANDLERS.trans_PadAttr = {
         computeOutputSchema: function (inputSchemas, params) {
             var schemaMod = schemaAsColumnList(inputSchemas);

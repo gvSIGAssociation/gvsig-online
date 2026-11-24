@@ -11,6 +11,7 @@ var paramsTransTpl = gettext('Parameters: {}');
  *  - Toda entrada (incluida ráster) → verde
  *  - Creadores → verde más oscuro
  *  - Transformadores clásicos → azul claro
+ *  - IA (AI Text, SQL con IA) → amarillo
  *  - Predictivo → índigo pizarra (combina con el resto)
  *  - Herramientas ráster (no inputs) → rosa polvo (menos chillón que el fucsia)
  *  - Salidas → ámbar; visualizer → naranja
@@ -21,6 +22,7 @@ var ETL_NODE_STYLE = {
     creator:    { header: '#5fad7e', gear: '#2d6a4f' },
     predictive: { header: '#5b6fa8', gear: '#3a4a78' },
     transform:  { header: '#71c7ec', gear: '#4682B4' },
+    ai:         { header: '#c9a227', gear: '#8a7018' },
     // Todas las salidas (PostGIS, modelo, ráster, visualizer) → naranja suave
     output:     { header: '#e8832a', gear: '#b8651a' },
     visualizer: { header: '#e8832a', gear: '#b8651a' },
@@ -100,6 +102,9 @@ function etlChromeForType(type) {
     }
     if (t.indexOf('output_') === 0) {
         return ETL_NODE_STYLE.output;
+    }
+    if (t === 'trans_AIText' || t === 'trans_AIAction' || t.indexOf('trans_AI') === 0) {
+        return ETL_NODE_STYLE.ai;
     }
     if (window.ETL_PREDICTIVE_TYPES[t]) {
         return ETL_NODE_STYLE.predictive;
@@ -8133,7 +8138,7 @@ trans_AIText = draw2d.shape.layout.VerticalLayout.extend({
             stroke:1,
             fontColor:"#ffffff",
             bold:true,
-            bgColor:"#71c7ec",
+            bgColor:"#c9a227",
             radius: this.getRadius(),
             padding:10,
             resizeable:true,
@@ -8371,7 +8376,7 @@ trans_AIText = draw2d.shape.layout.VerticalLayout.extend({
             isAlreadyInCanvas(jsonParams, paramsAI, ID)
             if (typeof propagateSchemaFrom === 'function' && typeof context !== 'undefined' && context.canvas) { propagateSchemaFrom(ID, context.canvas, { skipStart: true }); }
 
-            icon.setColor('#4682B4')
+            icon.setColor(ETL_NODE_STYLE.ai.gear)
 
             $('#dialog-ai-text-'+ID).modal('hide')
 
@@ -8464,6 +8469,794 @@ trans_AIText = draw2d.shape.layout.VerticalLayout.extend({
          return this;
      }
 
+});
+
+//// PROCESS DATA (AI ACTION) ////
+
+trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
+
+    NAME: "trans_AIAction",
+
+    init : function(attr)
+    {
+        this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
+
+        this.classLabel = new draw2d.shape.basic.Label({
+            text: gettext("SQL with AI"),
+            stroke:1,
+            fontColor:"#ffffff",
+            bold:true,
+            bgColor:"#c9a227",
+            radius: this.getRadius(),
+            padding:10,
+            resizeable:true,
+            editor:new draw2d.ui.LabelInplaceEditor()
+        });
+
+        var icon = new draw2d.shape.icon.Gear({
+            minWidth:13,
+            minHeight:13,
+            width:13,
+            height:13,
+            color:"#e2504c"
+        });
+
+        this.classLabel.add(icon, new draw2d.layout.locator.XYRelPortLocator(82, 8))
+        this.add(this.classLabel);
+
+        var ID = this.id
+        var context = this
+        var schemaEdge = []
+
+        setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
+
+        $('#canvas-parent').append('<div id="dialog-ai-action-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
+            '<div class="modal-dialog modal-lg" role="document">'+
+                '<div class="modal-content">'+
+                    '<div class="modal-header">'+
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                            '<span aria-hidden="true">&times;</span>'+
+                        '</button>'+
+                        '<h4 class="modal-title">'+paramsTransTpl.replace('{}', gettext("SQL with AI"))+'</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                        '<form>'+
+                            '<p class="help-block">'+gettext('You can Accept with only inputs/outputs set (ports appear then). Each output has its own schema and SQL tab. Instruction and SQL are needed to run, not to Accept.')+'</p>'+
+                            '<div class="row">'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Number of inputs:')+'</label>'+
+                                    '<input type="number" class="form-control" id="inputs-count-'+ID+'" min="1" max="5" step="1" value="1">'+
+                                '</div>'+
+                                '<div class="col-md-4">'+
+                                    '<label class="col-form-label">'+gettext('Number of outputs:')+'</label>'+
+                                    '<input type="number" class="form-control" id="outputs-count-'+ID+'" min="1" max="10" step="1" value="1">'+
+                                '</div>'+
+                            '</div>'+
+                            '<div style="margin-top:10px">'+
+                                '<label class="col-form-label">'+gettext('Instruction:')+'</label>'+
+                                '<textarea id="ai-action-instruction-'+ID+'" rows="3" class="form-control" placeholder="'+gettext('e.g. unify street, number and municipality into address; or compute centroids as x and y')+'"></textarea>'+
+                            '</div>'+
+                            '<div style="margin-top:10px">'+
+                                '<button type="button" class="btn btn-primary btn-sm" id="ai-action-generate-'+ID+'"><i class="fa fa-magic"></i> '+gettext('Generate')+'</button>'+
+                                '<span id="ai-action-generate-status-'+ID+'" class="help-block" style="display:inline;margin-left:8px"></span>'+
+                            '</div>'+
+                            '<div style="margin-top:10px">'+
+                                '<label class="col-form-label">'+gettext('Outputs (schema + SQL per tab):')+'</label>'+
+                                '<p class="help-block" id="ai-action-out-tabs-hint-'+ID+'" style="margin-bottom:4px"></p>'+
+                                '<ul class="nav nav-tabs" id="ai-action-out-tabs-'+ID+'" style="margin-bottom:0"></ul>'+
+                                '<div id="ai-action-out-panels-'+ID+'" style="border:1px solid #ddd;border-top:none;padding:8px;background:#fafafa">'+
+                                    '<label class="col-form-label">'+gettext('Schema:')+'</label>'+
+                                    '<div id="ai-action-out-cols-'+ID+'" style="max-height:180px;overflow-y:auto"></div>'+
+                                    '<div style="margin-top:6px">'+
+                                        '<button type="button" class="btn btn-default btn-sm" id="ai-action-add-col-'+ID+'"><i class="fa fa-plus"></i> '+gettext('Add column')+'</button> '+
+                                        '<button type="button" class="btn btn-default btn-sm" id="ai-action-copy-schema-'+ID+'">'+gettext('Reload from input schema')+'</button> '+
+                                        '<button type="button" class="btn btn-default btn-sm" id="ai-action-suggest-schema-'+ID+'"><i class="fa fa-lightbulb-o"></i> '+gettext('Suggest from SQL')+'</button>'+
+                                        '<span id="ai-action-suggest-status-'+ID+'" class="help-block" style="display:inline;margin-left:8px"></span>'+
+                                    '</div>'+
+                                    '<div style="margin-top:10px">'+
+                                        '<label class="col-form-label">'+gettext('SQL (reviewable):')+'</label>'+
+                                        '<textarea id="ai-action-sql-'+ID+'" rows="6" class="form-control" style="font-family:Menlo,Monaco,Consolas,monospace;font-size:12px"></textarea>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</form>'+
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                        '<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">'+gettext('Close')+'</button>'+
+                        '<button type="button" class="btn btn-default btn-sm" id="ai-action-accept-'+ID+'">'+gettext('Accept')+'</button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>')
+
+        var AI_ACTION_MAX_INPUTS = 5
+        var AI_ACTION_MAX_OUTPUTS = 10
+        var outputSchemasState = [[]]
+        var sqlsState = ['']
+        var activeOutTab = 0
+
+        function aiActionColTypes(selected) {
+            var types = ['text', 'integer', 'double', 'geometry', 'boolean']
+            return types.map(function(t) {
+                return '<option value="'+t+'"'+(t === selected ? ' selected' : '')+'>'+t+'</option>'
+            }).join('')
+        }
+
+        function normalizeSchemaBlock(schema) {
+            if (!schema || !schema.length) {
+                return []
+            }
+            return schema.map(function(col) {
+                if (typeof col === 'string') {
+                    return {name: col, type: 'text'}
+                }
+                return {name: col.name, type: col.type || 'text'}
+            }).filter(function(col) { return !!(col && col.name) })
+        }
+
+        function clampCount(raw, max) {
+            var n = parseInt(raw, 10)
+            if (!isFinite(n) || n < 1) {
+                return 1
+            }
+            if (n > max) {
+                return max
+            }
+            return n
+        }
+
+        function inferOutputsFromInstruction(instruction, declared) {
+            declared = clampCount(declared, AI_ACTION_MAX_OUTPUTS)
+            var text = (instruction || '').toLowerCase()
+            if (!text) {
+                return declared
+            }
+            var inferred = 1
+            var wordMap = {
+                dos: 2, two: 2, tres: 3, three: 3, cuatro: 4, four: 4,
+                cinco: 5, five: 5, seis: 6, six: 6, siete: 7, seven: 7,
+                ocho: 8, eight: 8, nueve: 9, nine: 9, diez: 10, ten: 10
+            }
+            var match = text.match(/\b(dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|two|three|four|five|six|seven|eight|nine|ten|\d+)\s+salidas?\b/)
+                || text.match(/\b(dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|two|three|four|five|six|seven|eight|nine|ten|\d+)\s+outputs?\b/)
+            if (match) {
+                var token = match[1]
+                inferred = /^\d+$/.test(token) ? parseInt(token, 10) : (wordMap[token] || 1)
+            }
+            if (/\bsalida\s*2\b/.test(text) || /\boutput\s*2\b/.test(text)
+                    || /una\s+con[\s\S]+y\s+otra\s+con/.test(text)
+                    || /one\s+with[\s\S]+and\s+(another|the\s+other)\s+with/.test(text)) {
+                inferred = Math.max(inferred, 2)
+            }
+            return clampCount(Math.max(declared, inferred), AI_ACTION_MAX_OUTPUTS)
+        }
+
+        function schemasForGenerate(count) {
+            var blocks = []
+            var i
+            if (Array.isArray(schemaEdge) && Array.isArray(schemaEdge[0])) {
+                for (i = 0; i < count; i++) {
+                    blocks.push(schemaEdge[i] || [])
+                }
+            } else {
+                blocks.push(Array.isArray(schemaEdge) ? schemaEdge : [])
+                for (i = 1; i < count; i++) {
+                    blocks.push([])
+                }
+            }
+            return blocks
+        }
+
+        function incomingColumnList() {
+            // Une las columnas de todas las entradas declaradas (sin duplicar por nombre)
+            var count = clampCount($('#inputs-count-'+ID).val(), AI_ACTION_MAX_INPUTS)
+            var blocks = schemasForGenerate(count)
+            var seen = {}
+            var rows = []
+            for (var b = 0; b < blocks.length; b++) {
+                var cols = blocks[b] || []
+                for (var i = 0; i < cols.length; i++) {
+                    var col = cols[i]
+                    var name = (typeof col === 'string') ? col : (col && col.name)
+                    if (!name) {
+                        continue
+                    }
+                    var key = String(name).toLowerCase()
+                    if (seen[key]) {
+                        continue
+                    }
+                    seen[key] = true
+                    rows.push({
+                        name: name,
+                        type: (col && typeof col === 'object' && col.type) ? col.type : 'text'
+                    })
+                }
+            }
+            return rows
+        }
+
+        function persistActiveTabSql() {
+            sqlsState[activeOutTab] = ($('#ai-action-sql-'+ID).val() || '')
+            return sqlsState[activeOutTab]
+        }
+
+        function renderActiveTabSql() {
+            $('#ai-action-sql-'+ID).val(sqlsState[activeOutTab] || '')
+        }
+
+        function persistActiveTabCols() {
+            persistActiveTabSql()
+            var rows = []
+            $('#ai-action-out-cols-'+ID+' .ai-action-col-row').each(function() {
+                var name = ($(this).find('.ai-action-col-name').val() || '').trim()
+                var type = $(this).find('.ai-action-col-type').val() || 'text'
+                if (name) {
+                    rows.push({name: name, type: type})
+                }
+            })
+            outputSchemasState[activeOutTab] = rows
+            return rows
+        }
+
+        function addOutputColRow(name, type) {
+            var row = $('<div class="ai-action-col-row row" style="margin-top:4px">'+
+                '<div class="col-md-6"><input type="text" class="form-control ai-action-col-name" placeholder="'+gettext('column name')+'"></div>'+
+                '<div class="col-md-4"><select class="form-control ai-action-col-type">'+aiActionColTypes(type || 'text')+'</select></div>'+
+                '<div class="col-md-2"><button type="button" class="btn btn-default btn-sm ai-action-col-remove"><i class="fa fa-minus"></i></button></div>'+
+                '</div>')
+            if (name) {
+                row.find('.ai-action-col-name').val(name)
+            }
+            $('#ai-action-out-cols-'+ID).append(row)
+        }
+
+        function renderActiveTabCols() {
+            var schema = outputSchemasState[activeOutTab] || []
+            $('#ai-action-out-cols-'+ID).empty()
+            if (!schema.length) {
+                addOutputColRow('', 'text')
+                return
+            }
+            schema.forEach(function(col) {
+                addOutputColRow(col.name, col.type || 'text')
+            })
+        }
+
+        function renderOutTabs(count, skipPersist) {
+            // Al cargar desde params el DOM aún está vacío/viejo: no pisar el estado
+            if (!skipPersist) {
+                persistActiveTabCols()
+            }
+            count = clampCount(count, AI_ACTION_MAX_OUTPUTS)
+            while (outputSchemasState.length < count) {
+                outputSchemasState.push([])
+            }
+            if (outputSchemasState.length > count) {
+                outputSchemasState = outputSchemasState.slice(0, count)
+            }
+            while (sqlsState.length < count) {
+                sqlsState.push(sqlsState.length ? (sqlsState[0] || '') : '')
+            }
+            if (sqlsState.length > count) {
+                sqlsState = sqlsState.slice(0, count)
+            }
+            if (activeOutTab >= count) {
+                activeOutTab = count - 1
+            }
+            var $tabs = $('#ai-action-out-tabs-'+ID).empty()
+            for (var i = 0; i < count; i++) {
+                var $li = $('<li role="presentation"></li>')
+                if (i === activeOutTab) {
+                    $li.addClass('active')
+                }
+                $li.append(
+                    $('<a href="#"></a>').text(gettext('Output') + ' ' + (i + 1)).attr('data-out-index', i)
+                )
+                $tabs.append($li)
+            }
+            var $hint = $('#ai-action-out-tabs-hint-'+ID)
+            if (count > 1) {
+                $hint.text(gettext('Each tab has its own schema and SELECT. Switch tabs to review every output.'))
+            } else {
+                $hint.text(gettext('If the instruction asks for several outputs, Generate will create more tabs automatically.'))
+            }
+            renderActiveTabCols()
+            renderActiveTabSql()
+        }
+
+        function isSchemaBlockList(value) {
+            // [[ {name,type}, … ], …]  (un bloque por salida)
+            return Array.isArray(value) && value.length > 0 && Array.isArray(value[0])
+        }
+
+        function isFlatColumnList(value) {
+            // [ {name,type}, … ] o [ 'col', … ]
+            if (!Array.isArray(value) || !value.length || Array.isArray(value[0])) {
+                return false
+            }
+            var first = value[0]
+            return typeof first === 'string' || (first && typeof first === 'object' && (first.name || first.column))
+        }
+
+        function loadStoredSqls(outCount) {
+            var multi = getStoredParamValue(ID, 'sqls')
+            var single = getStoredParamValue(ID, 'sql') || ''
+            sqlsState = []
+            if (Array.isArray(multi) && multi.length) {
+                for (var i = 0; i < outCount; i++) {
+                    sqlsState.push(typeof multi[i] === 'string' ? multi[i] : (single || ''))
+                }
+            } else {
+                for (var j = 0; j < outCount; j++) {
+                    sqlsState.push(single || '')
+                }
+            }
+            sqlsState = sqlsState.slice(0, outCount)
+            while (sqlsState.length < outCount) {
+                sqlsState.push(single || '')
+            }
+        }
+
+        function loadStoredSchemas(outCount) {
+            var multi = getStoredParamValue(ID, 'output_schemas')
+            var single = getStoredParamValue(ID, 'output_schema')
+            var incoming = incomingColumnList()
+            outputSchemasState = []
+            if (isSchemaBlockList(multi)) {
+                for (var i = 0; i < outCount; i++) {
+                    outputSchemasState.push(normalizeSchemaBlock(multi[i] || []))
+                }
+            } else if (isSchemaBlockList(single)) {
+                for (var j = 0; j < outCount; j++) {
+                    outputSchemasState.push(normalizeSchemaBlock(single[j] || []))
+                }
+            } else if (isFlatColumnList(single)) {
+                var shared = normalizeSchemaBlock(single)
+                for (var k = 0; k < outCount; k++) {
+                    outputSchemasState.push(shared.slice())
+                }
+            } else if (isFlatColumnList(multi)) {
+                var sharedMulti = normalizeSchemaBlock(multi)
+                for (var m = 0; m < outCount; m++) {
+                    outputSchemasState.push(sharedMulti.slice())
+                }
+            } else {
+                for (var n = 0; n < outCount; n++) {
+                    outputSchemasState.push(incoming.slice())
+                }
+            }
+            while (outputSchemasState.length < outCount) {
+                outputSchemasState.push(incoming.slice())
+            }
+            outputSchemasState = outputSchemasState.slice(0, outCount)
+            loadStoredSqls(outCount)
+            activeOutTab = 0
+            renderOutTabs(outCount, true)
+        }
+
+        $('#ai-action-out-tabs-'+ID).on('click', 'a', function(ev) {
+            ev.preventDefault()
+            persistActiveTabCols()
+            activeOutTab = parseInt($(this).attr('data-out-index'), 10) || 0
+            $('#ai-action-out-tabs-'+ID+' li').removeClass('active')
+            $(this).parent().addClass('active')
+            renderActiveTabCols()
+            renderActiveTabSql()
+        })
+
+        $('#outputs-count-'+ID).on('change input', function() {
+            var outCount = clampCount($(this).val(), AI_ACTION_MAX_OUTPUTS)
+            $(this).val(outCount)
+            renderOutTabs(outCount)
+        })
+
+        $('#ai-action-add-col-'+ID).on('click', function() {
+            addOutputColRow('', 'text')
+        })
+        $(document).on('click', '#ai-action-out-cols-'+ID+' .ai-action-col-remove', function() {
+            $(this).closest('.ai-action-col-row').remove()
+            if (!$('#ai-action-out-cols-'+ID+' .ai-action-col-row').length) {
+                addOutputColRow('', 'text')
+            }
+        })
+
+        $('#ai-action-copy-schema-'+ID).on('click', function() {
+            try {
+                schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
+            } catch (e) {
+                schemaEdge = []
+            }
+            outputSchemasState[activeOutTab] = incomingColumnList()
+            renderActiveTabCols()
+        })
+
+        icon.on('click', function() {
+            setTimeout(function() {
+                try {
+                    schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
+                } catch (e) {
+                    schemaEdge = []
+                }
+                var inCount = clampCount(getStoredParamValue(ID, 'inputs_count') || '1', AI_ACTION_MAX_INPUTS)
+                var outCount = clampCount(getStoredParamValue(ID, 'outputs_count') || '1', AI_ACTION_MAX_OUTPUTS)
+                $('#inputs-count-'+ID).val(inCount)
+                $('#outputs-count-'+ID).val(outCount)
+                loadStoredSchemas(outCount)
+                $('#ai-action-instruction-'+ID).val(getStoredParamValue(ID, 'instruction') || '')
+                $('#ai-action-suggest-status-'+ID).text('')
+                $('#ai-action-generate-status-'+ID).text('')
+            }, 100)
+            $('#dialog-ai-action-'+ID).modal('show')
+        })
+
+        $('#ai-action-suggest-schema-'+ID).on('click', function() {
+            var inCount = clampCount($('#inputs-count-'+ID).val(), AI_ACTION_MAX_INPUTS)
+            $('#inputs-count-'+ID).val(inCount)
+            persistActiveTabSql()
+            var sqlText = (sqlsState[activeOutTab] || '').trim()
+            if (!sqlText) {
+                alert(gettext('Paste or generate the SQL first.'))
+                return
+            }
+            var status = $('#ai-action-suggest-status-'+ID)
+            status.text(gettext('Suggesting schema…'))
+            $('#ai-action-suggest-schema-'+ID).prop('disabled', true)
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_ai_action_suggest_schema/',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    sql: sqlText,
+                    input_schemas: schemasForGenerate(inCount)
+                }),
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'))
+                },
+                success: function(resp) {
+                    outputSchemasState[activeOutTab] = normalizeSchemaBlock(resp.output_schema || [])
+                    renderActiveTabCols()
+                    status.text(gettext('Schema suggested for the active output tab.'))
+                },
+                error: function(xhr) {
+                    var err = (xhr.responseJSON && xhr.responseJSON.error) || gettext('Could not suggest the output schema.')
+                    status.text('')
+                    alert(err)
+                },
+                complete: function() {
+                    $('#ai-action-suggest-schema-'+ID).prop('disabled', false)
+                }
+            })
+        })
+
+        $('#ai-action-generate-'+ID).on('click', function() {
+            var count = clampCount($('#inputs-count-'+ID).val(), AI_ACTION_MAX_INPUTS)
+            var instruction = ($('#ai-action-instruction-'+ID).val() || '').trim()
+            if (!instruction) {
+                alert(gettext('Indicate the natural-language instruction.'))
+                return
+            }
+            var declaredOut = clampCount($('#outputs-count-'+ID).val(), AI_ACTION_MAX_OUTPUTS)
+            var outCount = inferOutputsFromInstruction(instruction, declaredOut)
+            $('#inputs-count-'+ID).val(count)
+            $('#outputs-count-'+ID).val(outCount)
+            persistActiveTabCols()
+            renderOutTabs(outCount)
+            persistActiveTabCols()
+            var status = $('#ai-action-generate-status-'+ID)
+            status.text(gettext('Generating…'))
+            $('#ai-action-generate-'+ID).prop('disabled', true)
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_ai_action_generate/',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    instruction: instruction,
+                    inputs_count: count,
+                    outputs_count: outCount,
+                    output_schema: outputSchemasState[0] || [],
+                    output_schemas: outputSchemasState.slice(0, outCount),
+                    input_schemas: schemasForGenerate(count)
+                }),
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'))
+                },
+                success: function(resp) {
+                    var respSqls = Array.isArray(resp.sqls) && resp.sqls.length
+                        ? resp.sqls
+                        : [resp.sql || '']
+                    outCount = clampCount(
+                        Math.max(outCount, resp.outputs_count || 1, respSqls.length),
+                        AI_ACTION_MAX_OUTPUTS
+                    )
+                    $('#outputs-count-'+ID).val(outCount)
+                    while (outputSchemasState.length < outCount) {
+                        outputSchemasState.push([])
+                    }
+                    sqlsState = []
+                    for (var i = 0; i < outCount; i++) {
+                        sqlsState.push(typeof respSqls[i] === 'string' ? respSqls[i] : '')
+                    }
+                    var respSchemas = null
+                    if (Array.isArray(resp.output_schemas) && resp.output_schemas.length) {
+                        respSchemas = resp.output_schemas
+                    } else if (resp.output_schema && resp.output_schema.length) {
+                        respSchemas = [resp.output_schema]
+                    }
+                    if (respSchemas) {
+                        for (var s = 0; s < outCount; s++) {
+                            var block = respSchemas[s] || []
+                            if (block && block.length) {
+                                outputSchemasState[s] = normalizeSchemaBlock(block)
+                            }
+                        }
+                    }
+                    activeOutTab = 0
+                    renderOutTabs(outCount, true)
+                    if (outCount > 1) {
+                        status.text(gettext('SQL generated for each output tab. Switch tabs to review.'))
+                    } else {
+                        status.text(gettext('SQL generated. Review it before accepting.'))
+                    }
+                },
+                error: function(xhr) {
+                    var err = (xhr.responseJSON && xhr.responseJSON.error) || gettext('Could not generate the SQL.')
+                    status.text('')
+                    alert(err)
+                },
+                complete: function() {
+                    $('#ai-action-generate-'+ID).prop('disabled', false)
+                }
+            })
+        })
+
+        $('#ai-action-accept-'+ID).on('click', function() {
+            var inCount = clampCount($('#inputs-count-'+ID).val(), AI_ACTION_MAX_INPUTS)
+            var outCount = clampCount($('#outputs-count-'+ID).val(), AI_ACTION_MAX_OUTPUTS)
+            $('#inputs-count-'+ID).val(inCount)
+            $('#outputs-count-'+ID).val(outCount)
+            persistActiveTabCols()
+            renderOutTabs(outCount)
+            persistActiveTabCols()
+            var instruction = ($('#ai-action-instruction-'+ID).val() || '').trim()
+            var schemas = outputSchemasState.slice(0, outCount).map(function(block) {
+                return normalizeSchemaBlock(block)
+            })
+            var sqls = sqlsState.slice(0, outCount).map(function(s) {
+                return (s || '').trim()
+            })
+            var sqlText = sqls[0] || ''
+
+            var paramsAI = {"id": ID,
+            "parameters": [
+                {"inputs_count": inCount,
+                "outputs_count": outCount,
+                "instruction": instruction,
+                "output_schema": schemas,
+                "output_schemas": schemas,
+                "sql": sqlText,
+                "sqls": sqls}
+            ]}
+            var schemaMod = schemas.map(function(block) {
+                if (block && block.length) {
+                    return block.map(function(col) { return col.name })
+                }
+                return incomingColumnList().map(function(col) { return col.name })
+            })
+            if (outCount <= 1) {
+                schemaMod = schemaMod[0] || []
+            }
+            paramsAI['schema-old'] = schemaEdge
+            paramsAI['schema'] = schemaMod
+            context.syncPorts(inCount, outCount)
+            passSchemaToEdgeConnected(ID, listLabel, schemaMod, context.canvas)
+            isAlreadyInCanvas(jsonParams, paramsAI, ID)
+            if (typeof propagateSchemaFrom === 'function' && context.canvas) {
+                propagateSchemaFrom(ID, context.canvas, { skipStart: true })
+            }
+            icon.setColor(ETL_NODE_STYLE.ai.gear)
+            $('#dialog-ai-action-'+ID).modal('hide')
+        })
+    },
+
+    /**
+     * Ajusta entradas (≤5) y salidas (≤10). Por defecto una de cada;
+     * al aceptar se crean o quitan puertos (y cables de los que sobran).
+     */
+    syncPorts: function(inCount, outCount)
+    {
+        inCount = Math.max(1, Math.min(5, parseInt(inCount, 10) || 1))
+        outCount = Math.max(1, Math.min(10, parseInt(outCount, 10) || 1))
+        // getChildren() ya devuelve las figuras (no {figure, locator})
+        var children = this.getChildren()
+        var inputLabels = []
+        var outputLabels = []
+        var i
+        for (i = 1; i < children.getSize(); i++) {
+            var fig = children.get(i)
+            if (!fig) {
+                continue
+            }
+            if (typeof fig.getOutputPort === 'function' && fig.getOutputPort(0)) {
+                outputLabels.push(fig)
+            } else if (typeof fig.getInputPort === 'function' && fig.getInputPort(0)) {
+                inputLabels.push(fig)
+            }
+        }
+
+        var canvas = this.getCanvas()
+        function detach(port) {
+            if (!(canvas && port)) {
+                return
+            }
+            var conns = port.getConnections().clone()
+            for (var c = 0; c < conns.getSize(); c++) {
+                canvas.remove(conns.get(c))
+            }
+        }
+
+        while (inputLabels.length > inCount) {
+            var dropIn = inputLabels.pop()
+            detach(dropIn.getInputPort(0))
+            this.remove(dropIn)
+        }
+        while (inputLabels.length < inCount) {
+            var idxIn = inputLabels.length
+            var labelIn = new draw2d.shape.basic.Label({
+                text: gettext('Input') + ' ' + (idxIn + 1),
+                stroke: 0.2, radius: 0, bgColor: '#ffffff',
+                padding: {left: 10, top: 3, right: 10, bottom: 5},
+                fontColor: '#111111', resizeable: true
+            })
+            var portDirIn = 'in' + 'put'
+            var input = labelIn.createPort(portDirIn)
+            input.setName('input_' + labelIn.id)
+            // Antes de la primera salida
+            var insertAt = 1 + inputLabels.length
+            this.add(labelIn, null, insertAt)
+            inputLabels.push(labelIn)
+        }
+        for (i = 0; i < inputLabels.length; i++) {
+            inputLabels[i].setText(gettext('Input') + ' ' + (i + 1))
+        }
+
+        while (outputLabels.length > outCount) {
+            var dropOut = outputLabels.pop()
+            detach(dropOut.getOutputPort(0))
+            this.remove(dropOut)
+        }
+        while (outputLabels.length < outCount) {
+            var idxOut = outputLabels.length
+            var labelOut = new draw2d.shape.basic.Label({
+                text: gettext('Output') + (outCount > 1 || idxOut > 0 ? (' ' + (idxOut + 1)) : ''),
+                stroke: 0.2, radius: 0, bgColor: '#ffffff',
+                padding: {left: 40, top: 3, right: 10, bottom: 5},
+                fontColor: '#111111', resizeable: true
+            })
+            var portDirOut = 'out' + 'put'
+            var output = labelOut.createPort(portDirOut)
+            output.setName('output_' + labelOut.id)
+            this.add(labelOut)
+            outputLabels.push(labelOut)
+        }
+        for (i = 0; i < outputLabels.length; i++) {
+            outputLabels[i].setText(
+                gettext('Output') + (outputLabels.length > 1 ? (' ' + (i + 1)) : '')
+            )
+        }
+
+        var inputNames = inputLabels.map(function(lab) { return lab.getInputPort(0).getName() })
+        var outputNames = outputLabels.map(function(lab) { return lab.getOutputPort(0).getName() })
+        var found = false
+        for (i = 0; i < listLabel.length; i++) {
+            if (listLabel[i][0] === this.id) {
+                listLabel[i] = [this.id, inputNames, outputNames]
+                found = true
+                break
+            }
+        }
+        if (!found) {
+            listLabel.push([this.id, inputNames, outputNames])
+        }
+        // draw2d cachea getPorts(): si no se limpia, al ejecutar solo aparecen
+        // los puertos previos a syncPorts (p. ej. 1 entrada aunque haya 2).
+        this.cachedPorts = null
+    },
+
+    // compat: por si quedó alguna llamada antigua
+    syncInputPorts: function(count) {
+        this.syncPorts(count, 1)
+    },
+
+    addEntity: function(optionalIndex)
+    {
+        var labelIn = new draw2d.shape.basic.Label({
+            text: gettext('Input') + ' 1',
+            stroke: 0.2, radius: 0, bgColor: '#ffffff',
+            padding: {left: 10, top: 3, right: 10, bottom: 5},
+            fontColor: '#111111', resizeable: true
+        })
+        var labelOut = new draw2d.shape.basic.Label({
+            text: gettext('Output'),
+            stroke: 0.2, radius: 0, bgColor: '#ffffff',
+            padding: {left: 40, top: 3, right: 10, bottom: 5},
+            fontColor: '#111111', resizeable: true
+        })
+
+        var input = labelIn.createPort('input')
+        input.setName('input_' + labelIn.id)
+        var output = labelOut.createPort('output')
+        output.setName('output_' + labelOut.id)
+
+        if ($.isNumeric(optionalIndex)) {
+            this.add(labelIn, null, optionalIndex + 1)
+            this.add(labelOut, null, optionalIndex + 1)
+        } else {
+            this.add(labelIn)
+            this.add(labelOut)
+        }
+        listLabel.push([this.id, [input.name], [output.name]])
+        return labelIn
+    },
+
+    removeEntity: function(index)
+    {
+        this.remove(this.children.get(index + 1).figure)
+    },
+
+    getEntity: function(index)
+    {
+        return this.children.get(index + 1).figure
+    },
+
+    setName: function(name)
+    {
+        this.classLabel.setText(name)
+        return this
+    },
+
+    getPersistentAttributes: getPerAttr,
+
+    setPersistentAttributes: function(memento)
+    {
+        this._super(memento)
+        this.setName(memento.name)
+        // No rehidratar entity a entity (addEntity crea in+out a la vez).
+        // Contar desde parámetros o desde el memento y syncPorts.
+        var inCount = 1
+        var outCount = 1
+        try {
+            if (typeof jsonParams !== 'undefined' && Array.isArray(jsonParams)) {
+                for (var j = 0; j < jsonParams.length; j++) {
+                    if (jsonParams[j] && jsonParams[j].id === this.id && jsonParams[j].parameters && jsonParams[j].parameters[0]) {
+                        var p0 = jsonParams[j].parameters[0]
+                        inCount = parseInt(p0.inputs_count, 10) || 1
+                        outCount = parseInt(p0.outputs_count, 10) || 1
+                        break
+                    }
+                }
+            }
+            if ((inCount === 1 && outCount === 1) && memento && Array.isArray(memento.entities)) {
+                var nIn = 0
+                var nOut = 0
+                for (var e = 0; e < memento.entities.length; e++) {
+                    var txt = (memento.entities[e].text || '').toLowerCase()
+                    if (txt.indexOf('input') !== -1 || txt.indexOf('entrada') !== -1) {
+                        nIn++
+                    } else {
+                        nOut++
+                    }
+                }
+                if (nIn) {
+                    inCount = nIn
+                }
+                if (nOut) {
+                    outCount = nOut
+                }
+            }
+        } catch (err) {}
+        this.syncPorts(inCount, outCount)
+        return this
+    }
 });
 
 //// PAD ATTRIBUTE////

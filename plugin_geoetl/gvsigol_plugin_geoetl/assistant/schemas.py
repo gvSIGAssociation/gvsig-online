@@ -71,6 +71,55 @@ def _plus_param(key):
     return lambda inputs, params: _cols(inputs) + ([params[key]] if params.get(key) else [])
 
 
+def _names_from_schema_block(block):
+    names = []
+    items = block
+    if isinstance(block, dict) and 'columns' in block:
+        items = block.get('columns') or []
+    for item in items or []:
+        if isinstance(item, dict):
+            name = (item.get('name') or '').strip()
+        else:
+            name = str(item).strip()
+        if name:
+            names.append(name)
+    return names
+
+
+def _output_schema_only(inputs, params):
+    """Una lista de columnas por salida; si falta, el esquema de la primera entrada."""
+    try:
+        outs = int(params.get('outputs_count') or 1)
+    except (TypeError, ValueError):
+        outs = 1
+    outs = max(1, outs)
+    raw = params.get('output_schemas')
+    if raw in (None, ''):
+        raw = params.get('output_schema') or []
+
+    per_out = []
+    if isinstance(raw, list) and raw and isinstance(raw[0], list):
+        for block in raw:
+            per_out.append(_names_from_schema_block(block))
+    elif isinstance(raw, list) and raw and isinstance(raw[0], dict) and 'columns' in raw[0]:
+        for block in raw:
+            per_out.append(_names_from_schema_block(block))
+    else:
+        shared = _names_from_schema_block(raw)
+        per_out = [list(shared) for _ in range(outs)] if shared else []
+
+    fallback = _cols(inputs)
+    while len(per_out) < outs:
+        per_out.append([])
+    per_out = per_out[:outs]
+    for i, names in enumerate(per_out):
+        if not names:
+            per_out[i] = list(fallback)
+    if outs <= 1:
+        return per_out[0] if per_out else fallback
+    return per_out
+
+
 def _plus_list(key, fallback=None):
     def compute(inputs, params):
         value = params.get(key)
@@ -258,6 +307,7 @@ HANDLERS = {
     'trans_RenameAttr': (_rename, _rename_check),
     'trans_ConcatAttr': (_plus_param('new-attr'), _fields('attr')),
     'trans_AIText': (_plus_list('new-attrs', 'new-attr'), _fields('attr')),
+    'trans_AIAction': (_output_schema_only, _no_check),
     'trans_PadAttr': (_moved_to_end, _fields('attr')),
     'trans_FilterDupli': (_copies(2), _fields('attr')),
     'trans_Filter': (_same, _fields('attr')),

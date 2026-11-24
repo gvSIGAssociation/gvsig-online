@@ -2677,3 +2677,93 @@ msgstr "Elige al menos un atributo con el texto."
 
 msgid "Select attributes"
 msgstr "Selecciona atributos"
+
+msgid "Process data"
+msgstr "Procesar datos"
+
+msgid "Describe the action in natural language. You fix how many inputs and which output columns; Generate builds a SQL that must match that contract. Review the SQL before accepting."
+msgstr "Describe la acción en lenguaje natural. Tú fijas cuántas entradas y qué columnas salen; Generar construye un SQL que debe respetar ese contrato. Revisa el SQL antes de aceptar."
+
+msgid "Number of inputs:"
+msgstr "Número de entradas:"
+
+msgid "Start from input 0 schema"
+msgstr "Partir del esquema de input 0"
+
+msgid "Output columns:"
+msgstr "Columnas de salida:"
+
+msgid "Add column"
+msgstr "Añadir columna"
+
+msgid "column name"
+msgstr "nombre de columna"
+
+msgid "e.g. unify street, number and municipality into address; or compute centroids as x and y"
+msgstr "p. ej. unifica calle, número y municipio en direccion; o calcula centroides como x e y"
+
+msgid "Generate"
+msgstr "Generar"
+
+msgid "Generating…"
+msgstr "Generando…"
+
+msgid "SQL generated. Review it before accepting."
+msgstr "SQL generado. Revísalo antes de aceptar."
+
+msgid "SQL (reviewable):"
+msgstr "SQL (revisable):"
+
+msgid "Define at least one output column."
+msgstr "Define al menos una columna de salida."
+
+msgid "Generate and review the SQL before accepting."
+msgstr "Genera y revisa el SQL antes de aceptar."
+
+msgid "Indicate the natural-language instruction."
+msgstr "Indica la instrucción en lenguaje natural."
+
+msgid "Could not generate the SQL."
+msgstr "No se ha podido generar el SQL."
+
+msgid "IA"
+msgstr "IA"
+
+msgid "SQL with AI"
+msgstr "SQL con IA"
+
+msgid "Describe the action in natural language. Choose how many inputs (extra ports appear when you Accept). Fix the output columns; Generate builds SQL that must match that contract. One output table. Review the SQL before accepting."
+msgstr "Describe la acción en lenguaje natural. Elige cuántas entradas (los puertos extra aparecen al Aceptar). Fija las columnas de salida; Generar construye un SQL que debe respetar ese contrato. Una sola tabla de salida. Revisa el SQL antes de aceptar."
+
+msgid "Number of outputs:"
+msgstr "Número de salidas:"
+
+msgid "Reload from input schema"
+msgstr "Recargar desde el esquema de entrada"
+
+msgid "Output columns (from input; edit freely):"
+msgstr "Columnas de salida (desde la entrada; edítalas):"
+
+msgid "You can Accept with only inputs/outputs set (ports appear then). Output columns start from the incoming schema so you can remove or add. Instruction and SQL are needed to run, not to Accept."
+msgstr "Puedes Aceptar solo con entradas/salidas (ahí aparecen los puertos). Las columnas de salida parten del esquema que llega para que quites o añadas. La instrucción y el SQL hacen falta para ejecutar, no para Aceptar."
+
+msgid "You can Accept with only inputs/outputs set (ports appear then). Each output has its own schema tab. Instruction and SQL are needed to run, not to Accept."
+msgstr "Puedes Aceptar solo con entradas/salidas (ahí aparecen los puertos). Cada salida tiene su pestaña de esquema. La instrucción y el SQL hacen falta para ejecutar, no para Aceptar."
+
+msgid "Output schemas:"
+msgstr "Esquemas de salida:"
+
+msgid "Suggest from SQL"
+msgstr "Sugerir desde el SQL"
+
+msgid "Paste or generate the SQL first."
+msgstr "Pega o genera el SQL antes."
+
+msgid "Suggesting schema…"
+msgstr "Sugiriendo esquema…"
+
+msgid "Schema suggested for the active output tab."
+msgstr "Esquema sugerido para la pestaña de salida activa."
+
+msgid "Could not suggest the output schema."
+msgstr "No se ha podido sugerir el esquema de salida."

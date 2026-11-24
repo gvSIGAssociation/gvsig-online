@@ -56,6 +56,8 @@ urlpatterns = [
     path('etl/etl_list_canvas_status/', views.etl_list_canvas_status, name='etl_list_canvas_status'),
     path('etl/etl_task_status/<str:task_id>/', views.etl_task_status, name='etl_task_status'),
     path('etl/etl_stop_canvas/', views.etl_stop_canvas, name='etl_stop_canvas'),
+    path('etl/etl_ai_action_generate/', views.etl_ai_action_generate, name='etl_ai_action_generate'),
+    path('etl/etl_ai_action_suggest_schema/', views.etl_ai_action_suggest_schema, name='etl_ai_action_suggest_schema'),
 
     path('etl/etl_owners_oracle/', views.etl_owners_oracle, name='etl_owners_oracle'),
     path('etl/etl_tables_oracle/', views.etl_tables_oracle, name='etl_tables_oracle'),

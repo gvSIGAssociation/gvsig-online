@@ -89,6 +89,13 @@ _AI_RULES = (
     'tiempos, distancias, coordenadas, población) ni para nada que no sea lenguaje: eso sigue sin poder hacerse. '
     'Para clasificar, deja las categorías en instruction; si el usuario no las ha dicho, pregúntalas. Di en '
     'assumptions que los valores se envían al modelo de lenguaje y que lo que no resuelva queda vacío.\n'
+    '- trans_AIAction (Procesar datos) es un paso opaco: instrucción libre → SQL/PostGIS. El usuario (o tú en la '
+    'propuesta) fija inputs_count (1–5) y outputs_count (1–10; puertos al aceptar) y output_schemas (una lista de '
+    'columnas {name, type} por salida). El SQL lee solo input_0…input_N y debe incluir las columnas de cada salida; '
+    'en ejecución cada puerto proyecta su propio esquema. Sirve para unificar columnas, joins espaciales, '
+    'centroides, buffers, filtros, agregaciones… Si quieres el flujo auditable nodo a nodo (Join + Calculador + …), '
+    'no lo uses. No lo uses para publicar, Excel, HTTP ni tablas no conectadas. Si propones este nodo, rellena '
+    'también instruction y un sql razonable; el usuario puede regenerarlo o sugerir el esquema desde el SQL.\n'
 )
 
 
@@ -170,10 +177,15 @@ replace o patch:
         if _ASSUMPTIONS_ANCHOR not in body:
             raise ValueError('prompt: no se encuentra la regla de las suposiciones')
         body = body.replace(_ASSUMPTIONS_ANCHOR, _ASSUMPTIONS_ANCHOR + _ASSUMPTIONS_OPTIONS)
-    if 'trans_AIText' in catalog:
+    if 'trans_AIText' in catalog or 'trans_AIAction' in catalog:
         if _AI_ANCHOR not in body:
             raise ValueError('prompt: no se encuentra la regla de lo que no se puede hacer')
-        body = body.replace(_AI_ANCHOR, _AI_RULES + _AI_ANCHOR)
+        rules = _AI_RULES
+        if 'trans_AIText' not in catalog:
+            rules = '\n'.join(line for line in rules.split('\n') if 'trans_AIText' not in line) + '\n'
+        if 'trans_AIAction' not in catalog:
+            rules = '\n'.join(line for line in rules.split('\n') if 'trans_AIAction' not in line) + '\n'
+        body = body.replace(_AI_ANCHOR, rules + _AI_ANCHOR)
     return body.replace('{', '{{').replace('}', '}}')
 
 

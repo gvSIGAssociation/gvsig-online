@@ -259,9 +259,9 @@ def _content_text(content):
 
 
 def feature_enabled():
-    """Flag activo y plugin GeoCopilot instalado (el nodo usa su build_llm)."""
+    """Nodos IA del canvas activos y plugin GeoCopilot instalado."""
     from django.apps import apps
-    if not geoetl_settings.ETL_AI_TEXT_ENABLED:
+    if not geoetl_settings.ETL_AI_NODES_ENABLED:
         return False
     return apps.is_installed('gvsigol_plugin_geocopilot')
 
@@ -303,7 +303,7 @@ def trans_AIText(dicc, invoke=None):
     if not feature_enabled():
         raise ValueError(
             'El nodo Texto con IA está desactivado en esta instalación '
-            '(ETL_AI_TEXT_ENABLED o plugin GeoCopilot no disponible).'
+            '(ETL_AI_NODES_ENABLED o plugin GeoCopilot no disponible).'
         )
     attrs, mode, instruction, new_attrs = check_params(dicc)
 

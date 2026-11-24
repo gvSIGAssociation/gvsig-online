@@ -88,6 +88,13 @@
 .pl-panel__toolbar .btn-predictive { border: 1px solid #5b6fa8 !important; color: #5b6fa8 !important; }
 .pl-panel__toolbar .btn-primary    { border: 1px solid #4682B4 !important; color: #4682B4 !important; }
 .pl-panel__toolbar .btn-warning    { border: 1px solid #e8832a !important; color: #e8832a !important; }
+.pl-panel__toolbar .btn-ai {
+	border: 1px solid #c9a227 !important; color: #c9a227 !important;
+	background: #fffbe6 !important;
+}
+.pl-panel__toolbar .btn-ai:hover {
+	border-color: #a8861a !important; color: #a8861a !important; background: #fff3bf !important;
+}
 .pl-panel__toolbar .btn:disabled { opacity: 0.5; cursor: not-allowed; filter: none; transform: none; box-shadow: none; }
 
 /* Layout: columna lateral + canvas */
@@ -447,7 +454,6 @@
                             <li><a data-shape="trans_Calculator" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Calculator" %}</a></li>
                             <li><a data-shape="trans_ChangeAttrType" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Change Attribute Type" %}</a></li>
                             <li><a data-shape="trans_CompareRows" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Compare Rows" %}</a></li>
-                            {% if etl_ai_text_enabled %}<li><a data-shape="trans_AIText" class="palette_node_element draw2d_droppable dropdown-item">{% trans "AI Text" %}</a></li>{% endif %}
                             <li><a data-shape="trans_ConcatAttr" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Concatenate Attributes" %}</a></li>
                             <li><a data-shape="trans_Counter" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Counter" %}</a></li>
                             <li><a data-shape="trans_CorrectSpelling" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Correct Spelling" %}</a></li>
@@ -502,6 +508,17 @@
                             <li><a data-shape="trans_Voronoi" class="palette_node_element draw2d_droppable dropdown-item">{% trans "Voronoi Diagram" %}</a></li>
                         </div>
                     </div>
+
+                    {% if etl_ai_nodes_enabled %}
+                    <div class="btn-group">
+                        <button class="btn btn-ai" type="button" id="button-ai"
+                        {% if editablerestrictedly == 'true' %} disabled {% endif %}><i class="fa fa-magic"></i> {% trans "IA" %}</button>
+                        <div class="dropdown-menu">
+                            <li><a data-shape="trans_AIText" class="palette_node_element draw2d_droppable dropdown-item">{% trans "AI Text" %}</a></li>
+                            <li><a data-shape="trans_AIAction" class="palette_node_element draw2d_droppable dropdown-item">{% trans "SQL with AI" %}</a></li>
+                        </div>
+                    </div>
+                    {% endif %}
 
                     <div class="btn-group">
                         <button class="btn btn-primary" type="button" id="button-list"><i class="fa fa-list-ol"></i> {% trans "List" %}</button>
@@ -1493,16 +1510,16 @@ window.refreshEtlSqlEditor = function(textareaId) {
 </script>
 
 <script type="text/javascript" src="{% static "js/Application.js" %}"></script>
-<script type="text/javascript" src="{% static "js/View.js" %}?v=etl-chrome-15"></script>
-<script type="text/javascript" src="{% static "js/Toolbar.js" %}?v=etl-chrome-15"></script>
-<script type="text/javascript" src="{% static "js/TableShape.js" %}?v=etl-chrome-15"></script>
-<script type="text/javascript" src="{% static "js/SchemaPropagator.js" %}?v=etl-chrome-15"></script>
-<script type="text/javascript" src="{% static "js/PredictiveShapes.js" %}?v=etl-chrome-15"></script>
-<script type="text/javascript" src="{% static "js/SchemaCanvas.js" %}"></script>
+<script type="text/javascript" src="{% static "js/View.js" %}?v=etl-chrome-16"></script>
+<script type="text/javascript" src="{% static "js/Toolbar.js" %}?v=etl-chrome-22"></script>
+<script type="text/javascript" src="{% static "js/TableShape.js" %}?v=etl-chrome-22"></script>
+<script type="text/javascript" src="{% static "js/SchemaPropagator.js" %}?v=etl-chrome-19"></script>
+<script type="text/javascript" src="{% static "js/PredictiveShapes.js" %}?v=etl-chrome-19"></script>
+<script type="text/javascript" src="{% static "js/DrawNodes.js" %}?v=etl-chrome-22"></script>
+<script type="text/javascript" src="{% static "js/SchemaCanvas.js" %}?v=etl-chrome-19"></script>
 {% if etl_assistant_enabled %}
 <script type="text/javascript" src="{% static "js/lib/marked.min.js" %}"></script>
 <script type="text/javascript" src="{% static "js/lib/purify.min.js" %}"></script>
-<script type="text/javascript" src="{% static "js/DrawNodes.js" %}?v=etl-chrome-15"></script>
 <script type="text/javascript" src="{% static "js/Assistant.js" %}"></script>
 {% endif %}
 

@@ -45,6 +45,7 @@ from .etl_raster_publish import output_RasterPublish  # noqa: F401
 from .etl_layer_publish import output_LayerPublish  # noqa: F401
 from .etl_models import input_Model, output_ModelSave  # noqa: F401
 from .etl_ai import trans_AIText  # noqa: F401
+from .etl_ai_action import trans_AIAction  # noqa: F401
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from celery.utils.log import get_task_logger

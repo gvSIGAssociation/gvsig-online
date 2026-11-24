@@ -130,7 +130,7 @@ class RunTests(SimpleTestCase):
         invoke.assert_not_called()
 
     def test_without_geocopilot_feature_is_off(self):
-        with mock.patch.object(etl_ai.geoetl_settings, 'ETL_AI_TEXT_ENABLED', True), \
+        with mock.patch.object(etl_ai.geoetl_settings, 'ETL_AI_NODES_ENABLED', True), \
                 mock.patch('django.apps.apps.is_installed', return_value=False):
             self.assertFalse(etl_ai.feature_enabled())
 

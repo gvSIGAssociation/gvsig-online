@@ -447,18 +447,46 @@ gvsigolETL.Toolbar = Class.extend({
 						figure.etlAlias = etlAliasFromDocument(cnv[o]);
 					}
 
+					taskparameters = {"id": figure.id, "parameters": parameters, "schema": schema, "schema-old": schemaold}
+
+					isAlreadyInCanvas(jsonParams, taskparameters, figure.id)
+
+					// SQL con IA: recrear N entradas / M salidas ANTES de remapear cables
+					if (type === 'trans_AIAction' && typeof figure.syncPorts === 'function') {
+						var p0 = (parameters && parameters[0]) ? parameters[0] : {};
+						var restoredIn = parseInt(p0.inputs_count, 10) || 1;
+						var restoredOut = parseInt(p0.outputs_count, 10) || 1;
+						// Si faltan counts, inferir por puertos guardados
+						if ((!p0.inputs_count || !p0.outputs_count) && Array.isArray(ports)) {
+							var nInPorts = 0;
+							var nOutPorts = 0;
+							for (var pi = 0; pi < ports.length; pi++) {
+								var pname = String((ports[pi] && ports[pi].name) || '');
+								if (pname.indexOf('input') === 0) {
+									nInPorts++;
+								} else if (pname.indexOf('output') === 0) {
+									nOutPorts++;
+								}
+							}
+							if (!p0.inputs_count && nInPorts) {
+								restoredIn = nInPorts;
+							}
+							if (!p0.outputs_count && nOutPorts) {
+								restoredOut = nOutPorts;
+							}
+						}
+						figure.syncPorts(restoredIn, restoredOut);
+					}
+
+					arrayPorts = [];
 					for(j=0;j<listLabel.length;j++){
 						if(listLabel[j][0]==figure.id){
-							arrayPorts = listLabel[j][1].concat(listLabel[j][2])
+							arrayPorts = (listLabel[j][1] || []).concat(listLabel[j][2] || []);
 							break;
 						};
 					};
 
 					idRestore.push([id, figure.id, ports, arrayPorts])
-
-					taskparameters = {"id": figure.id, "parameters": parameters, "schema": schema, "schema-old": schemaold}
-
-					isAlreadyInCanvas(jsonParams, taskparameters, figure.id)
 
 					// create a command for the undo/redo support
 					var command = new draw2d.command.CommandAdd(view, figure, x, y);
@@ -471,6 +499,10 @@ gvsigolETL.Toolbar = Class.extend({
 					Object.keys(parameters[0]).forEach(function(key){
 
 						try{
+							// Esquemas / listas complejas no tienen input en el DOM: no tocarlas
+							if (key === 'output_schema' || key === 'output_schemas' || key === 'input_schemas' || key === 'sqls') {
+								return;
+							}
 							if (parameters[0][key]){
 
 								if ($('#'+key+'-'+figure.id).is('select') && !key.includes('epsg') && !key.includes('option') ){
@@ -551,25 +583,17 @@ gvsigolETL.Toolbar = Class.extend({
 					for(j=0;j<idRestore.length;j++){
 						if(cnv[o]['source']['node'] == idRestore[j][0]){
 							cnv[o]['source']['node'] = idRestore[j][1]
-							for (k=0; k<idRestore[j][2].length;k++){
-								if(idRestore[j][2][k]['name'] == cnv[o]['source']['port']){
-									cnv[o]['source']['port'] = idRestore[j][3][k]
-									break;
-								};
-							};
-
+							cnv[o]['source']['port'] = etlRemapRestoredPort(
+								idRestore[j][2], idRestore[j][3], cnv[o]['source']['port']
+							);
 							s = true
 						};
 
 						if(cnv[o]['target']['node'] == idRestore[j][0]){
 							cnv[o]['target']['node'] = idRestore[j][1]
-							for (k=0; k<idRestore[j][2].length;k++){
-								if(idRestore[j][2][k]['name'] == cnv[o]['target']['port']){
-									cnv[o]['target']['port'] = idRestore[j][3][k]
-									break;
-								};
-							};
-
+							cnv[o]['target']['port'] = etlRemapRestoredPort(
+								idRestore[j][2], idRestore[j][3], cnv[o]['target']['port']
+							);
 							t = true
 						};
 

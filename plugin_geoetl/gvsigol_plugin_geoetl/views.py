@@ -60,9 +60,9 @@ def _ctx(extra=None):
     ctx['etl_assistant_next_steps'] = bool(getattr(settings_geoetl, 'ETL_ASSISTANT_NEXT_STEPS', False))
     # Lectura automática de las columnas de las entradas
     ctx['etl_assistant_columns'] = bool(getattr(settings_geoetl, 'ETL_ASSISTANT_COLUMNS', False))
-    # Nodo Texto con IA: flag + GeoCopilot instalado
-    from .etl_ai import feature_enabled as etl_ai_text_feature_enabled
-    ctx['etl_ai_text_enabled'] = etl_ai_text_feature_enabled()
+    # Nodos IA del canvas (texto + procesar datos): flag + GeoCopilot
+    from .etl_ai import feature_enabled as etl_ai_nodes_feature_enabled
+    ctx['etl_ai_nodes_enabled'] = etl_ai_nodes_feature_enabled()
     if extra:
         ctx.update(extra)
     return ctx
@@ -1092,6 +1092,116 @@ def etl_stop_canvas(request):
         return JsonResponse({'stopped': False, 'error': _('Could not stop the process')}, status=500)
     sm.refresh_from_db(fields=['status'])
     return JsonResponse({'stopped': stopped, 'status': sm.status})
+
+
+def _ai_action_normalize_input_schemas(payload, etl_ai_action):
+    input_schemas = payload.get('input_schemas') or []
+    if not isinstance(input_schemas, list) or not input_schemas:
+        raise ValueError(_('Connect at least one input and declare its columns.'))
+    if len(input_schemas) > etl_ai_action.MAX_INPUTS:
+        raise ValueError(_('At most %s inputs.') % etl_ai_action.MAX_INPUTS)
+    normalized_inputs = []
+    for block in input_schemas:
+        if isinstance(block, dict) and 'columns' in block:
+            normalized_inputs.append(block.get('columns') or [])
+        elif isinstance(block, list):
+            normalized_inputs.append(block)
+        else:
+            raise ValueError(_('Each input schema must be a column list.'))
+    return normalized_inputs
+
+
+@login_required()
+@staff_required
+def etl_ai_action_generate(request):
+    """Compila instrucción NL + contrato E/S a un SELECT/WITH revisable."""
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    from . import etl_ai_action
+    if not etl_ai_action.feature_enabled():
+        return JsonResponse({'error': _('AI nodes are disabled in this installation.')}, status=403)
+    try:
+        payload = json.loads(request.body.decode('utf-8') or '{}')
+    except (TypeError, ValueError, UnicodeDecodeError):
+        return JsonResponse({'error': _('Invalid JSON')}, status=400)
+    try:
+        instruction = (payload.get('instruction') or '').strip()
+        if not instruction:
+            raise ValueError(_('Indicate the natural-language instruction.'))
+        try:
+            declared_outputs = int(payload.get('outputs_count') or 1)
+        except (TypeError, ValueError):
+            declared_outputs = 1
+        outputs_count = etl_ai_action.infer_outputs_count(instruction, declared_outputs)
+        # Pistas opcionales; la instrucción manda y el dry-run fija el esquema
+        raw_schemas = payload.get('output_schemas')
+        if raw_schemas in (None, ''):
+            raw_schemas = payload.get('output_schema')
+        output_schemas = etl_ai_action.parse_output_schemas(
+            raw_schemas, outputs_count, allow_empty=True
+        )
+        normalized_inputs = _ai_action_normalize_input_schemas(payload, etl_ai_action)
+        sql_result, schema_result = etl_ai_action.generate_sql(
+            instruction, normalized_inputs,
+            output_schema=output_schemas[0] if output_schemas else [],
+            outputs_count=outputs_count,
+            output_schemas=output_schemas,
+        )
+        if outputs_count > 1:
+            sqls = sql_result if isinstance(sql_result, list) else [sql_result]
+            schemas = schema_result if (
+                isinstance(schema_result, list)
+                and schema_result
+                and isinstance(schema_result[0], list)
+            ) else [schema_result]
+            return JsonResponse({
+                'sql': sqls[0] if sqls else '',
+                'sqls': sqls,
+                'inputs_count': len(normalized_inputs),
+                'outputs_count': outputs_count,
+                'output_schema': schemas[0] if schemas else [],
+                'output_schemas': schemas,
+            })
+        return JsonResponse({
+            'sql': sql_result,
+            'sqls': [sql_result],
+            'inputs_count': len(normalized_inputs),
+            'outputs_count': 1,
+            'output_schema': schema_result,
+            'output_schemas': [schema_result],
+        })
+    except ValueError as exc:
+        return JsonResponse({'error': str(exc)}, status=400)
+    except Exception:
+        logger.exception('etl_ai_action_generate failed')
+        return JsonResponse({'error': _('Could not generate the SQL.')}, status=500)
+
+
+@login_required()
+@staff_required
+def etl_ai_action_suggest_schema(request):
+    """Infiere columnas de salida a partir del SQL (dry-run contra esquemas de entrada)."""
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    from . import etl_ai_action
+    if not etl_ai_action.feature_enabled():
+        return JsonResponse({'error': _('AI nodes are disabled in this installation.')}, status=403)
+    try:
+        payload = json.loads(request.body.decode('utf-8') or '{}')
+    except (TypeError, ValueError, UnicodeDecodeError):
+        return JsonResponse({'error': _('Invalid JSON')}, status=400)
+    try:
+        sql_text = (payload.get('sql') or '').strip()
+        if not sql_text:
+            raise ValueError(_('Paste or generate the SQL first.'))
+        normalized_inputs = _ai_action_normalize_input_schemas(payload, etl_ai_action)
+        columns = etl_ai_action.suggest_schema_from_sql(sql_text, normalized_inputs)
+        return JsonResponse({'output_schema': columns})
+    except ValueError as exc:
+        return JsonResponse({'error': str(exc)}, status=400)
+    except Exception:
+        logger.exception('etl_ai_action_suggest_schema failed')
+        return JsonResponse({'error': _('Could not suggest the output schema.')}, status=500)
 
 
 @login_required()

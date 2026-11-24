@@ -1429,3 +1429,93 @@ msgstr "Tria almenys un atribut amb el text."
 
 msgid "Select attributes"
 msgstr "Selecciona atributs"
+
+msgid "Process data"
+msgstr "Processar dades"
+
+msgid "Describe the action in natural language. You fix how many inputs and which output columns; Generate builds a SQL that must match that contract. Review the SQL before accepting."
+msgstr "Descriu l'acció en llenguatge natural. Tu fixes quantes entrades i quines columnes surten; Generar construeix un SQL que ha de respectar aquest contracte. Revisa el SQL abans d'acceptar."
+
+msgid "Number of inputs:"
+msgstr "Nombre d'entrades:"
+
+msgid "Start from input 0 schema"
+msgstr "Parteix de l'esquema d'input 0"
+
+msgid "Output columns:"
+msgstr "Columnes de sortida:"
+
+msgid "Add column"
+msgstr "Afegeix columna"
+
+msgid "column name"
+msgstr "nom de columna"
+
+msgid "e.g. unify street, number and municipality into address; or compute centroids as x and y"
+msgstr "p. ex. unifica carrer, número i municipi en adreça; o calcula centroides com a x i y"
+
+msgid "Generate"
+msgstr "Genera"
+
+msgid "Generating…"
+msgstr "S'està generant…"
+
+msgid "SQL generated. Review it before accepting."
+msgstr "SQL generat. Revisa'l abans d'acceptar."
+
+msgid "SQL (reviewable):"
+msgstr "SQL (revisable):"
+
+msgid "Define at least one output column."
+msgstr "Defineix almenys una columna de sortida."
+
+msgid "Generate and review the SQL before accepting."
+msgstr "Genera i revisa el SQL abans d'acceptar."
+
+msgid "Indicate the natural-language instruction."
+msgstr "Indica la instrucció en llenguatge natural."
+
+msgid "Could not generate the SQL."
+msgstr "No s'ha pogut generar l'SQL."
+
+msgid "IA"
+msgstr "IA"
+
+msgid "SQL with AI"
+msgstr "SQL amb IA"
+
+msgid "Describe the action in natural language. Choose how many inputs (extra ports appear when you Accept). Fix the output columns; Generate builds SQL that must match that contract. One output table. Review the SQL before accepting."
+msgstr "Descriu l'acció en llenguatge natural. Tria quantes entrades (els ports extra apareixen en Acceptar). Fixa les columnes de sortida; Generar construeix un SQL que ha de respectar aquest contracte. Una sola taula de sortida. Revisa el SQL abans d'acceptar."
+
+msgid "Number of outputs:"
+msgstr "Nombre de sortides:"
+
+msgid "Reload from input schema"
+msgstr "Torna a carregar des de l'esquema d'entrada"
+
+msgid "Output columns (from input; edit freely):"
+msgstr "Columnes de sortida (des de l'entrada; edita-les):"
+
+msgid "You can Accept with only inputs/outputs set (ports appear then). Output columns start from the incoming schema so you can remove or add. Instruction and SQL are needed to run, not to Accept."
+msgstr "Pots Acceptar només amb entrades/sortides (aquí apareixen els ports). Les columnes de sortida parten de l'esquema que arriba perquè en treguis o n'afegeixis. La instrucció i l'SQL calen per executar, no per Acceptar."
+
+msgid "You can Accept with only inputs/outputs set (ports appear then). Each output has its own schema tab. Instruction and SQL are needed to run, not to Accept."
+msgstr "Pots Acceptar només amb entrades/sortides (aquí apareixen els ports). Cada sortida té la seva pestanya d'esquema. La instrucció i l'SQL calen per executar, no per Acceptar."
+
+msgid "Output schemas:"
+msgstr "Esquemes de sortida:"
+
+msgid "Suggest from SQL"
+msgstr "Suggerir a partir de l'SQL"
+
+msgid "Paste or generate the SQL first."
+msgstr "Enganxa o genera l'SQL abans."
+
+msgid "Suggesting schema…"
+msgstr "S'està suggerint l'esquema…"
+
+msgid "Schema suggested for the active output tab."
+msgstr "Esquema suggerit per a la pestanya de sortida activa."
+
+msgid "Could not suggest the output schema."
+msgstr "No s'ha pogut suggerir l'esquema de sortida."

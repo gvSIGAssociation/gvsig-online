@@ -398,43 +398,57 @@ def _run_canvas_background_impl(kwargs, task=None):
                             
                             #execute trasnformers or outputs tasks    
                             else:
-                                
-                                for ip in n[1]['ports']:
-                                    if ip['name'].startswith('input'):
-                                        
-                                        targetPort = ip['name']
-                                        targetPortRepeated = False
-                                        for e in edges:
-                                            if e['target']['port'] == targetPort:
+                                # Orden de entradas: puertos del nodo + cualquier cable
+                                # a este nodo cuyo puerto no esté en la lista (caché draw2d stale).
+                                node_id = n[1]['id']
+                                input_port_names = [
+                                    ip['name'] for ip in (n[1].get('ports') or [])
+                                    if str(ip.get('name') or '').startswith('input')
+                                ]
+                                for e in edges:
+                                    tgt = e.get('target') or {}
+                                    if tgt.get('node') != node_id:
+                                        continue
+                                    tp = str(tgt.get('port') or '')
+                                    if tp.startswith('input') and tp not in input_port_names:
+                                        input_port_names.append(tp)
 
-                                                sourceNode = e['source']['node']
-                                                sourcePort = e['source']['port']
-                                                
-                                                for nd in nodes:
-                                                    if nd[1]['id'] == sourceNode:
-                                                        
-                                                        outputPortCounter=-1
-                                                        for op in nd[1]['ports']:
-                                                            
-                                                            if op['name'].startswith('output'):
-                                                                outputPortCounter+=1
-                                                            if op['name']== sourcePort:
-                                                                break
-                                                        if 'data' in parameters:
-                                                            parameters['data'].append(nd[2][outputPortCounter])
-                                                        else:
-                                                            parameters['data'] = [nd[2][outputPortCounter]]
-                                                            
+                                for targetPort in input_port_names:
+                                    targetPortRepeated = False
+                                    for e in edges:
+                                        if e['target']['port'] != targetPort:
+                                            continue
+                                        if e['target'].get('node') and e['target']['node'] != node_id:
+                                            continue
+
+                                        sourceNode = e['source']['node']
+                                        sourcePort = e['source']['port']
+
+                                        for nd in nodes:
+                                            if nd[1]['id'] == sourceNode:
+
+                                                outputPortCounter = -1
+                                                for op in nd[1]['ports']:
+
+                                                    if op['name'].startswith('output'):
+                                                        outputPortCounter += 1
+                                                    if op['name'] == sourcePort:
                                                         break
-                                                
-                                                #if more than one edge have the end in the same port
-                                                if targetPortRepeated == True:
-                                                    
-                                                    result = etl_tasks.merge_tables(parameters['data'])
-                                                    parameters['data'] = result
-                                                    tables_list_name.append(result)
-                                                
-                                                targetPortRepeated = True      
+                                                if 'data' in parameters:
+                                                    parameters['data'].append(nd[2][outputPortCounter])
+                                                else:
+                                                    parameters['data'] = [nd[2][outputPortCounter]]
+
+                                                break
+
+                                        # if more than one edge have the end in the same port
+                                        if targetPortRepeated is True:
+
+                                            result = etl_tasks.merge_tables(parameters['data'])
+                                            parameters['data'] = result
+                                            tables_list_name.append(result)
+
+                                        targetPortRepeated = True
 
                                 method_to_call = getattr(etl_tasks, n[1]['type'])
                                 parameters['id'] = n[1]['id']
@@ -451,8 +465,7 @@ def _run_canvas_background_impl(kwargs, task=None):
                                             expires_at=timezone.now() + timedelta(hours=get_ttl_hours()),
                                         )
 
-                                    node_id = n[1]['id']
-                                    layer_order = visualizer_node_order.get(node_id, 0)
+                                    layer_order = visualizer_node_order.get(n[1]['id'], 0)
                                     parameters['_session_id'] = str(visualizer_session.session_id)
                                     parameters['_layer_order'] = layer_order
                                     if not parameters.get('layer-name', '').strip():
