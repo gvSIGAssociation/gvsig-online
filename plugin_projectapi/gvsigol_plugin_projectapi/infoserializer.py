@@ -649,6 +649,18 @@ def _compute_allows_getmap(layers_qs):
     return allows_getmap
 
 
+def _selectable_by_project(project_id):
+    if not project_id:
+        return {}
+    rows = ProjectLayerGroup.objects.filter(project_id=project_id).values_list(
+        'layer_group_id', 'selectable', 'baselayer_group'
+    )
+    return {
+        layer_group_id: bool(selectable) and not baselayer
+        for layer_group_id, selectable, baselayer in rows
+    }
+
+
 def _get_group_server_endpoints(group):
     try:
         server = Server.objects.get(id=group.server_id)
@@ -665,6 +677,7 @@ class LayerGroupSerializer(serializers.ModelSerializer):
     layers = serializers.SerializerMethodField('get_layers_')
     order = serializers.SerializerMethodField('get_order_')
     allows_getmap = serializers.SerializerMethodField('get_allows_getmap_')
+    selectable = serializers.SerializerMethodField('get_selectable_')
     wms_url = serializers.SerializerMethodField('get_wms_url_')
     wfs_url = serializers.SerializerMethodField('get_wfs_url_')
     cache_url = serializers.SerializerMethodField('get_cache_url_')
@@ -693,6 +706,9 @@ class LayerGroupSerializer(serializers.ModelSerializer):
     def get_allows_getmap_(self, obj):
         return _compute_allows_getmap(self._get_readable_layers_queryset(obj))
 
+    def get_selectable_(self, obj):
+        return bool(self.context.get('selectable_by_group', {}).get(obj.id))
+
     def get_wms_url_(self, obj):
         return _get_group_server_endpoints(obj).get('wms_url')
 
@@ -704,12 +720,13 @@ class LayerGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LayerGroup
-        fields = ['id', 'name', 'title', 'cached', 'created_by', 'visible', 'server_id', 'layers', 'order', 'allows_getmap', 'wms_url', 'wfs_url', 'cache_url']
+        fields = ['id', 'name', 'title', 'cached', 'created_by', 'visible', 'server_id', 'layers', 'order', 'allows_getmap', 'selectable', 'wms_url', 'wfs_url', 'cache_url']
 
 class PublicLayerGroupSerializer(serializers.ModelSerializer):
     layers = serializers.SerializerMethodField('get_layers_')
     order = serializers.SerializerMethodField('get_order_')
     allows_getmap = serializers.SerializerMethodField('get_allows_getmap_')
+    selectable = serializers.SerializerMethodField('get_selectable_')
     wms_url = serializers.SerializerMethodField('get_wms_url_')
     wfs_url = serializers.SerializerMethodField('get_wfs_url_')
     cache_url = serializers.SerializerMethodField('get_cache_url_')
@@ -732,6 +749,9 @@ class PublicLayerGroupSerializer(serializers.ModelSerializer):
     def get_allows_getmap_(self, obj):
         return _compute_allows_getmap(self._get_readable_layers_queryset(obj))
 
+    def get_selectable_(self, obj):
+        return bool(self.context.get('selectable_by_group', {}).get(obj.id))
+
     def get_wms_url_(self, obj):
         return _get_group_server_endpoints(obj).get('wms_url')
 
@@ -743,7 +763,7 @@ class PublicLayerGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LayerGroup
-        fields = ['id', 'name', 'title', 'cached', 'created_by', 'visible', 'server_id', 'layers', 'order', 'allows_getmap', 'wms_url', 'wfs_url', 'cache_url']
+        fields = ['id', 'name', 'title', 'cached', 'created_by', 'visible', 'server_id', 'layers', 'order', 'allows_getmap', 'selectable', 'wms_url', 'wfs_url', 'cache_url']
 
 
 class InfoSerializer(serializers.ModelSerializer):
@@ -764,11 +784,12 @@ class InfoSerializer(serializers.ModelSerializer):
         lang = self.context['lang']
         user_profile = self.context.get('user_profile')
         resultset = util.get_layergroups_by_user_and_project(request, obj.id, user_profile=user_profile)
+        selectable_by_group = _selectable_by_project(obj.id)
         layer_groups = []
         for layer_group in resultset:
             layers = util.get_layerread_by_user_and_group(request, layer_group.id, user_profile=user_profile).order_by("-order", "-id")
             if layers.exists():
-                context={'request': request, 'user': username, 'lang': lang, 'projectid': obj.id, 'user_profile': user_profile}
+                context={'request': request, 'user': username, 'lang': lang, 'projectid': obj.id, 'user_profile': user_profile, 'selectable_by_group': selectable_by_group}
                 serializer = LayerGroupSerializer(layer_group, context=context)
                 layer_groups.append(serializer.data)
         
@@ -842,12 +863,13 @@ class PublicInfoSerializer(serializers.ModelSerializer):
 
     def get_project_layer_groups(self, obj):
         lang = self.context['lang']
-        resultset = util.get_layergroups_by_project(obj.id)        
+        resultset = util.get_layergroups_by_project(obj.id)
+        selectable_by_group = _selectable_by_project(obj.id)
         layer_groups = []
         for layer_group in resultset:
             layers = util.get_layerread_by_group(layer_group.id).order_by("-order", "-id")
             if layers.exists():
-                serializer = PublicLayerGroupSerializer(layer_group, context={'lang': lang, 'projectid': obj.id})
+                serializer = PublicLayerGroupSerializer(layer_group, context={'lang': lang, 'projectid': obj.id, 'selectable_by_group': selectable_by_group})
                 layer_groups.append(serializer.data)
 
         ordered_layer_groups = sorted(layer_groups, key=itemgetter('order'), reverse=True)
