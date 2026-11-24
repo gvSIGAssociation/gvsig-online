@@ -437,7 +437,7 @@ var EtlApplyCommand = draw2d.command.Command.extend({
 	}
 });
 
-/* ——— Copiar / pegar transformadores (Ctrl+C / Ctrl+V), sin cables ——— */
+/* ——— Atajos canvas: copiar/pegar (Ctrl+C/V/D) y deshacer/rehacer (Ctrl+Z / Ctrl+Y) ——— */
 
 window._etlNodeClipboard = window._etlNodeClipboard || null;
 window._etlPasteOffset = 0;
@@ -498,42 +498,318 @@ function etlDeepClone(value) {
 	}
 }
 
-/** Copia el nodo seleccionado (entrada/salida/transformador/creador) sin conexiones. */
-function etlCopySelectedTransformer(view) {
-	if (!view || typeof view.getPrimarySelection !== 'function') {
+function etlFigureRoot(figure) {
+	if (!figure) {
+		return null;
+	}
+	var current = figure;
+	// Subir por padres hasta el nodo ETL (input_/trans_/…)
+	while (current) {
+		if (etlIsCopyableNode(current)) {
+			return current;
+		}
+		if (typeof current.getParent === 'function' && current.getParent()) {
+			current = current.getParent();
+			continue;
+		}
+		break;
+	}
+	if (typeof figure.getRoot === 'function' && figure.getRoot()) {
+		return figure.getRoot();
+	}
+	return figure;
+}
+
+/** Puertos de entrada/salida reales del nodo (están en las Labels hijas). */
+function etlCollectLivePorts(figure, kind) {
+	var ports = [];
+	if (!figure) {
+		return ports;
+	}
+	function takeFrom(fig) {
+		if (!fig || typeof fig.getPorts !== 'function') {
+			return;
+		}
+		fig.getPorts().each(function (i, port) {
+			if (!port) {
+				return;
+			}
+			var name = (typeof port.getName === 'function' ? port.getName() : port.name) || '';
+			var isOutput = false;
+			var isInput = false;
+			try {
+				isOutput = (typeof draw2d !== 'undefined' && draw2d.OutputPort && port instanceof draw2d.OutputPort)
+					|| /output/i.test(name)
+					|| /OutputPort/i.test(String(port.NAME || ''));
+				isInput = (typeof draw2d !== 'undefined' && draw2d.InputPort && port instanceof draw2d.InputPort)
+					|| /input/i.test(name)
+					|| /InputPort/i.test(String(port.NAME || ''));
+			} catch (errKind) {
+				isOutput = /output/i.test(name);
+				isInput = /input/i.test(name);
+			}
+			if (kind === 'output' && isOutput) {
+				ports.push(port);
+			} else if (kind === 'input' && isInput) {
+				ports.push(port);
+			}
+		});
+	}
+	takeFrom(figure);
+	if (typeof figure.getChildren === 'function') {
+		figure.getChildren().each(function (i, entry) {
+			takeFrom(entry && entry.figure ? entry.figure : entry);
+		});
+	}
+	return ports;
+}
+
+function etlLivePortIndex(figure, kind, port) {
+	var ports = etlCollectLivePorts(figure, kind);
+	var name = port && (typeof port.getName === 'function' ? port.getName() : port.name);
+	for (var i = 0; i < ports.length; i++) {
+		if (ports[i] === port) {
+			return i;
+		}
+		var n = typeof ports[i].getName === 'function' ? ports[i].getName() : ports[i].name;
+		if (name && n === name) {
+			return i;
+		}
+	}
+	// Fallback listLabel (por si el puerto no aparece aún en hijos)
+	if (figure && name) {
+		var labeled = etlPortIndex(figure.id, kind, name);
+		if (labeled >= 0) {
+			return labeled;
+		}
+	}
+	return -1;
+}
+
+function etlLivePortByIndex(figure, kind, index) {
+	var ports = etlCollectLivePorts(figure, kind);
+	if (typeof index === 'number' && index >= 0 && index < ports.length) {
+		return ports[index];
+	}
+	return etlPortByIndex(figure, kind, index);
+}
+
+function etlNodeIdFromPort(port, nodeIdSet) {
+	if (!port) {
+		return null;
+	}
+	var fromLabel = typeof etlFigureIdOfPort === 'function' ? etlFigureIdOfPort(port) : null;
+	if (fromLabel && (!nodeIdSet || nodeIdSet[fromLabel])) {
+		return fromLabel;
+	}
+	var owner = etlFigureRoot(
+		typeof port.getParent === 'function' ? port.getParent() : port.parent
+	);
+	if (owner && owner.id && (!nodeIdSet || nodeIdSet[owner.id])) {
+		return owner.id;
+	}
+	return fromLabel || (owner && owner.id) || null;
+}
+
+function etlIsConnectionLine(line) {
+	if (!line) {
 		return false;
 	}
-	var figure = view.getPrimarySelection();
-	if (!etlIsCopyableNode(figure)) {
-		return false;
+	if (typeof draw2d !== 'undefined' && draw2d.Connection) {
+		try {
+			if (line instanceof draw2d.Connection) {
+				return true;
+			}
+		} catch (errInst) {
+		}
 	}
+	return (line.NAME === 'draw2d.Connection' || line.cssClass === 'draw2d.Connection')
+		&& typeof line.getSource === 'function'
+		&& typeof line.getTarget === 'function';
+}
+
+/** Puertos del nodo en el mismo orden que usa el guardado (inputs + outputs). */
+function etlPortsSnapshot(figure) {
+	var ports = [];
+	if (!figure) {
+		return ports;
+	}
+	var inputs = etlPortNames(figure.id, 'input');
+	var outputs = etlPortNames(figure.id, 'output');
+	var i;
+	if (inputs.length || outputs.length) {
+		for (i = 0; i < inputs.length; i++) {
+			ports.push({name: inputs[i]});
+		}
+		for (i = 0; i < outputs.length; i++) {
+			ports.push({name: outputs[i]});
+		}
+		return ports;
+	}
+	var liveIn = etlCollectLivePorts(figure, 'input');
+	var liveOut = etlCollectLivePorts(figure, 'output');
+	for (i = 0; i < liveIn.length; i++) {
+		ports.push({
+			name: typeof liveIn[i].getName === 'function' ? liveIn[i].getName() : liveIn[i].name
+		});
+	}
+	for (i = 0; i < liveOut.length; i++) {
+		ports.push({
+			name: typeof liveOut[i].getName === 'function' ? liveOut[i].getName() : liveOut[i].name
+		});
+	}
+	return ports;
+}
+
+function etlSnapshotNode(figure) {
 	var type = String(figure.cssClass || figure.NAME || '');
 	var stored = etlParamsForFigure(figure.id);
 	var name = (figure.classLabel && typeof figure.classLabel.getText === 'function')
 		? figure.classLabel.getText()
 		: '';
-	window._etlNodeClipboard = {
+	return {
+		id: figure.id,
 		type: type,
 		name: name,
 		x: typeof figure.getX === 'function' ? figure.getX() : 40,
 		y: typeof figure.getY === 'function' ? figure.getY() : 40,
+		ports: etlPortsSnapshot(figure),
 		parameters: stored ? etlDeepClone(stored.parameters) || [] : [],
 		schema: stored ? etlDeepClone(stored.schema) : undefined,
 		'schema-old': stored ? etlDeepClone(stored['schema-old']) : undefined
 	};
-	window._etlPasteOffset = 0;
-	return true;
 }
 
-/** Pega el último transformador copiado, desplazado y sin cables. */
-function etlPasteTransformer(view) {
-	var clip = window._etlNodeClipboard;
-	if (!view || !clip || !clip.type) {
-		return null;
+/** Nodos copiables de la selección actual (caja / multi-selección). */
+function etlSelectedCopyableNodes(view) {
+	var nodes = [];
+	var seen = {};
+	if (!view || typeof view.getSelection !== 'function') {
+		return nodes;
 	}
-	var figure = (typeof createEtlFigure === 'function') ? createEtlFigure(clip.type) : null;
+	var selection = view.getSelection();
+	if (!selection || typeof selection.getAll !== 'function') {
+		var primary = view.getPrimarySelection && view.getPrimarySelection();
+		var primaryRoot = etlFigureRoot(primary);
+		if (etlIsCopyableNode(primaryRoot)) {
+			nodes.push(primaryRoot);
+		}
+		return nodes;
+	}
+	selection.getAll().each(function (i, figure) {
+		var root = etlFigureRoot(figure);
+		if (!etlIsCopyableNode(root) || seen[root.id]) {
+			return;
+		}
+		seen[root.id] = true;
+		nodes.push(root);
+	});
+	return nodes;
+}
+
+function etlPushInternalConnection(connections, seen, nodeIdSet, line) {
+	if (!line || typeof line.getSource !== 'function' || typeof line.getTarget !== 'function') {
+		return;
+	}
+	if (!line.getSource() || !line.getTarget()) {
+		return;
+	}
+	var sourceId = null;
+	var targetId = null;
+	var sourcePortName = null;
+	var targetPortName = null;
+	try {
+		if (typeof line.getPersistentAttributes === 'function') {
+			var memento = line.getPersistentAttributes();
+			if (memento && memento.source && memento.target) {
+				sourceId = memento.source.node;
+				targetId = memento.target.node;
+				sourcePortName = memento.source.port;
+				targetPortName = memento.target.port;
+			}
+		}
+	} catch (errMem) {
+	}
+	if (!sourceId || !targetId) {
+		var sourcePort = line.getSource();
+		var targetPort = line.getTarget();
+		sourceId = etlNodeIdFromPort(sourcePort, nodeIdSet);
+		targetId = etlNodeIdFromPort(targetPort, nodeIdSet);
+		sourcePortName = sourcePort && (typeof sourcePort.getName === 'function'
+			? sourcePort.getName() : sourcePort.name);
+		targetPortName = targetPort && (typeof targetPort.getName === 'function'
+			? targetPort.getName() : targetPort.name);
+	}
+	if (!sourceId || !targetId || !nodeIdSet[sourceId] || !nodeIdSet[targetId]) {
+		return;
+	}
+	if (!sourcePortName || !targetPortName) {
+		return;
+	}
+	var key = sourceId + '/' + sourcePortName + '>' + targetId + '/' + targetPortName;
+	if (seen[key]) {
+		return;
+	}
+	seen[key] = true;
+	connections.push({
+		source: {node: sourceId, port: sourcePortName},
+		target: {node: targetId, port: targetPortName}
+	});
+}
+
+/**
+ * Cables internos: mismo contrato que el JSON del canvas
+ * (source/target.node + .port). Usa getPersistentAttributes de draw2d.
+ */
+function etlInternalConnections(view, nodeIdSet) {
+	var connections = [];
+	var seen = {};
+	if (!view || !nodeIdSet) {
+		return connections;
+	}
+	if (view.getLines) {
+		view.getLines().each(function (i, line) {
+			etlPushInternalConnection(connections, seen, nodeIdSet, line);
+		});
+	}
+	// Respaldo: algunos cables solo aparecen en getConnections() de los puertos
+	if (!connections.length && view.getFigures) {
+		view.getFigures().each(function (fi, figure) {
+			var root = etlFigureRoot(figure);
+			if (!root || !nodeIdSet[root.id]) {
+				return;
+			}
+			var allPorts = etlCollectLivePorts(root, 'output').concat(etlCollectLivePorts(root, 'input'));
+			for (var p = 0; p < allPorts.length; p++) {
+				var port = allPorts[p];
+				if (!port || typeof port.getConnections !== 'function') {
+					continue;
+				}
+				port.getConnections().each(function (ci, line) {
+					etlPushInternalConnection(connections, seen, nodeIdSet, line);
+				});
+			}
+		});
+	}
+	return connections;
+}
+
+function etlApplyNodeChrome(figure, type) {
+	if (typeof etlApplyConfiguredChrome === 'function' && figure && figure.classLabel) {
+		var gear = null;
+		if (typeof etlFindGear === 'function') {
+			var entry = etlFindGear(figure.classLabel);
+			gear = entry && entry.figure;
+		}
+		etlApplyConfiguredChrome(gear, type, figure.classLabel);
+	}
+}
+
+function etlCreatePastedFigure(nodeSnap) {
+	var type = nodeSnap.type;
+	var figure = (typeof createEtlFigure === 'function') ? createEtlFigure(type) : null;
 	if (!figure) {
-		var Ctor = window[clip.type];
+		var Ctor = window[type];
 		if (typeof Ctor === 'function') {
 			figure = new Ctor();
 		}
@@ -542,41 +818,199 @@ function etlPasteTransformer(view) {
 		return null;
 	}
 	figure.addEntity('id');
-	if (clip.name && typeof figure.setName === 'function') {
-		figure.setName(clip.name);
+	if (nodeSnap.name && typeof figure.setName === 'function') {
+		figure.setName(nodeSnap.name);
 	}
-	var parameters = etlDeepClone(clip.parameters) || [];
-	if (clip.type === 'trans_AIAction' && typeof figure.syncPorts === 'function') {
+	var parameters = etlDeepClone(nodeSnap.parameters) || [];
+	if (type === 'trans_AIAction' && typeof figure.syncPorts === 'function') {
 		var p0 = parameters[0] || {};
 		figure.syncPorts(p0.inputs_count || 1, p0.outputs_count || 1);
 	}
+	return {figure: figure, type: type, parameters: parameters};
+}
+
+/**
+ * Copia la selección: uno o varios nodos y los cables entre ellos.
+ * Arrastra un rectángulo en el canvas vacío para multi-seleccionar.
+ */
+function etlCopySelectedTransformer(view) {
+	var nodes = etlSelectedCopyableNodes(view);
+	if (!nodes.length) {
+		return false;
+	}
+	var idSet = {};
+	var snaps = [];
+	for (var i = 0; i < nodes.length; i++) {
+		idSet[nodes[i].id] = true;
+		snaps.push(etlSnapshotNode(nodes[i]));
+	}
+	var connections = etlInternalConnections(view, idSet);
+	window._etlNodeClipboard = {
+		version: 2,
+		nodes: snaps,
+		connections: connections,
+		// Compat con el formato anterior (un solo nodo)
+		type: snaps[0].type,
+		name: snaps[0].name,
+		x: snaps[0].x,
+		y: snaps[0].y,
+		parameters: snaps[0].parameters,
+		schema: snaps[0].schema,
+		'schema-old': snaps[0]['schema-old']
+	};
+	window._etlPasteOffset = 0;
+	return true;
+}
+
+/** Pega el último flujo copiado (nodos + cables internos), desplazado. */
+function etlPasteTransformer(view) {
+	var clip = window._etlNodeClipboard;
+	if (!view || !clip) {
+		return null;
+	}
+	var nodes = Array.isArray(clip.nodes) && clip.nodes.length
+		? clip.nodes
+		: (clip.type ? [clip] : []);
+	if (!nodes.length) {
+		return null;
+	}
+	var connections = Array.isArray(clip.connections) ? clip.connections : [];
 	window._etlPasteOffset = (window._etlPasteOffset || 0) + 1;
 	var dx = 40 * window._etlPasteOffset;
 	var dy = 40 * window._etlPasteOffset;
-	var x = (clip.x || 40) + dx;
-	var y = (clip.y || 40) + dy;
-	isAlreadyInCanvas(jsonParams, {
-		id: figure.id,
-		parameters: parameters,
-		schema: etlDeepClone(clip.schema),
-		'schema-old': etlDeepClone(clip['schema-old'])
-	}, figure.id);
-	view.getCommandStack().execute(new draw2d.command.CommandAdd(view, figure, x, y));
-	if (typeof fillEtlNodeForm === 'function') {
-		fillEtlNodeForm(clip.type, figure, parameters, clip['schema-old']);
+	var stack = view.getCommandStack();
+	var ownTransaction = false;
+	if (stack && !stack.isInTransaction()) {
+		stack.startTransaction('etl-paste');
+		ownTransaction = true;
 	}
-	if (typeof etlApplyConfiguredChrome === 'function' && figure.classLabel) {
-		var gear = null;
-		if (typeof etlFindGear === 'function') {
-			var entry = etlFindGear(figure.classLabel);
-			gear = entry && entry.figure;
+	var idMap = {};
+	var restored = [];
+	var pasted = [];
+	try {
+		for (var i = 0; i < nodes.length; i++) {
+			var created = etlCreatePastedFigure(nodes[i]);
+			if (!created) {
+				continue;
+			}
+			var figure = created.figure;
+			idMap[nodes[i].id] = figure.id;
+			isAlreadyInCanvas(jsonParams, {
+				id: figure.id,
+				parameters: created.parameters,
+				schema: etlDeepClone(nodes[i].schema),
+				'schema-old': etlDeepClone(nodes[i]['schema-old'])
+			}, figure.id);
+			stack.execute(new draw2d.command.CommandAdd(
+				view, figure, (nodes[i].x || 40) + dx, (nodes[i].y || 40) + dy
+			));
+			if (typeof fillEtlNodeForm === 'function') {
+				fillEtlNodeForm(created.type, figure, created.parameters, nodes[i]['schema-old']);
+			}
+			etlApplyNodeChrome(figure, created.type);
+			var arrayPorts = etlPortNames(figure.id, 'input').concat(etlPortNames(figure.id, 'output'));
+			if (!arrayPorts.length) {
+				var liveIn = etlCollectLivePorts(figure, 'input');
+				var liveOut = etlCollectLivePorts(figure, 'output');
+				arrayPorts = liveIn.concat(liveOut).map(function (p) {
+					return typeof p.getName === 'function' ? p.getName() : p.name;
+				});
+			}
+			restored.push({
+				oldId: nodes[i].id,
+				figure: figure,
+				oldPorts: nodes[i].ports || [],
+				arrayPorts: arrayPorts
+			});
+			pasted.push(figure);
 		}
-		etlApplyConfiguredChrome(gear, clip.type, figure.classLabel);
+		for (var c = 0; c < connections.length; c++) {
+			var conn = connections[c];
+			var src = conn.source || {};
+			var tgt = conn.target || {};
+			// Compat con el formato anterior (índices)
+			if (!src.node && conn.sourceId) {
+				src = {node: conn.sourceId, port: null};
+			}
+			if (!tgt.node && conn.targetId) {
+				tgt = {node: conn.targetId, port: null};
+			}
+			var newSourceId = idMap[src.node];
+			var newTargetId = idMap[tgt.node];
+			if (!newSourceId || !newTargetId) {
+				continue;
+			}
+			var sourceFigure = view.getFigure(newSourceId) || etlFigureById(view, newSourceId, restored);
+			var targetFigure = view.getFigure(newTargetId) || etlFigureById(view, newTargetId, restored);
+			if (!sourceFigure || !targetFigure) {
+				continue;
+			}
+			var sourcePort = null;
+			var targetPort = null;
+			// getPorts() cachea hijos: forzar recálculo tras crear el nodo
+			sourceFigure.cachedPorts = null;
+			targetFigure.cachedPorts = null;
+			if (src.port) {
+				var srcName = remapPortName(src.node, src.port, restored);
+				sourcePort = etlPortOnFigure(sourceFigure, srcName)
+					|| etlPortOnFigure(sourceFigure, src.port);
+				if (!sourcePort) {
+					sourcePort = etlLivePortByIndex(
+						sourceFigure, 'output',
+						etlPortIndex(src.node, 'output', src.port)
+					);
+				}
+			} else if (typeof conn.sourcePort === 'number') {
+				sourcePort = etlLivePortByIndex(sourceFigure, 'output', conn.sourcePort);
+			}
+			if (tgt.port) {
+				var tgtName = remapPortName(tgt.node, tgt.port, restored);
+				targetPort = etlPortOnFigure(targetFigure, tgtName)
+					|| etlPortOnFigure(targetFigure, tgt.port);
+				if (!targetPort) {
+					targetPort = etlLivePortByIndex(
+						targetFigure, 'input',
+						etlPortIndex(tgt.node, 'input', tgt.port)
+					);
+				}
+			} else if (typeof conn.targetPort === 'number') {
+				targetPort = etlLivePortByIndex(targetFigure, 'input', conn.targetPort);
+			}
+			if (!sourcePort || !targetPort) {
+				continue;
+			}
+			var connection = etlStyledConnection();
+			connection.setSource(sourcePort);
+			connection.setTarget(targetPort);
+			stack.execute(new draw2d.command.CommandAdd(view, connection, 0, 0));
+			if (typeof propagateSchemaFrom === 'function' && targetFigure) {
+				try {
+					propagateSchemaFrom(targetFigure.id, view, {skipStart: true});
+				} catch (errProp) {
+				}
+			}
+		}
+		if (ownTransaction) {
+			stack.commitTransaction();
+		}
+	} catch (err) {
+		if (ownTransaction && stack.isInTransaction()) {
+			stack.transactionCommand = null;
+		}
+		throw err;
 	}
-	if (typeof view.setCurrentSelection === 'function') {
-		view.setCurrentSelection(figure);
+	if (pasted.length && typeof view.setCurrentSelection === 'function') {
+		if (pasted.length === 1 || typeof draw2d === 'undefined' || !draw2d.util || !draw2d.util.ArrayList) {
+			view.setCurrentSelection(pasted[0]);
+		} else {
+			var list = new draw2d.util.ArrayList();
+			for (var s = 0; s < pasted.length; s++) {
+				list.add(pasted[s]);
+			}
+			view.setCurrentSelection(list);
+		}
 	}
-	return figure;
+	return pasted.length === 1 ? pasted[0] : pasted;
 }
 
 function etlInstallCopyPaste(view) {
@@ -592,6 +1026,29 @@ function etlInstallCopyPaste(view) {
 			return;
 		}
 		var key = (event.key || '').toLowerCase();
+		var stack = (typeof view.getCommandStack === 'function') ? view.getCommandStack() : null;
+		// Ctrl+Z deshacer; Ctrl+Shift+Z o Ctrl+Y rehacer (misma pila que los botones Undo/Redo)
+		if (key === 'z' && event.shiftKey) {
+			if (stack && stack.canRedo && stack.canRedo()) {
+				event.preventDefault();
+				stack.redo();
+			}
+			return;
+		}
+		if (key === 'z') {
+			if (stack && stack.canUndo && stack.canUndo()) {
+				event.preventDefault();
+				stack.undo();
+			}
+			return;
+		}
+		if (key === 'y') {
+			if (stack && stack.canRedo && stack.canRedo()) {
+				event.preventDefault();
+				stack.redo();
+			}
+			return;
+		}
 		if (key === 'c') {
 			if (etlCopySelectedTransformer(view)) {
 				event.preventDefault();
