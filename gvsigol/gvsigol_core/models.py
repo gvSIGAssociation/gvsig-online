@@ -296,6 +296,7 @@ class ProjectLayerGroup(models.Model):
     project = models.ForeignKey(Project, default=None, on_delete=models.CASCADE)
     layer_group = models.ForeignKey(LayerGroup, default=None, on_delete=models.CASCADE)
     multiselect = models.BooleanField(default=True)
+    selectable = models.BooleanField(default=False)
     baselayer_group = models.BooleanField(default=False)
     default_baselayer = models.IntegerField(null=True, blank=True)
     

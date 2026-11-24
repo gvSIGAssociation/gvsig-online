@@ -1539,14 +1539,14 @@ viewer.core = {
 	},
 
 	_selectableGroupDrawsChildren: function(group) {
-		return !!(this.conf.selectable_groups && group && group.allows_getmap && group.visible);
+		return !!(group && group.selectable && group.allows_getmap && group.visible);
 	},
 
 	_loadLayerGroups: function() {
 		var self = this;
 		for (var i=0; i<this.conf.layerGroups.length; i++) {
 			var group = this.conf.layerGroups[i];
-			if (!group.basegroup && group.allows_getmap && !this.conf.selectable_groups) {
+			if (!group.basegroup && group.allows_getmap && !group.selectable) {
 				var url = null;
 				var params = null;
 				var sourceOptions = null;

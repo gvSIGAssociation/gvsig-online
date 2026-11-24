@@ -132,6 +132,7 @@ def get_all_layer_groups_checked_by_project(request, project):
                 if lgba.layer_group_id == g.id:
                     layer_group['checked'] = True
                     layer_group['baselayer_group'] = lgba.baselayer_group
+                    layer_group['selectable'] = bool(lgba.selectable) and not lgba.baselayer_group
                     if lgba.baselayer_group:
                         layer_group['default_baselayer'] = lgba.default_baselayer
             if can_use_layergroup(request, g, LayerGroupRole.PERM_INCLUDEINPROJECTS):
@@ -149,6 +150,8 @@ def get_all_layer_groups_checked_by_project(request, project):
     for aux in layer_groups:
         if not 'baselayer_group' in aux:
             aux['baselayer_group'] = False
+        if not aux.get('selectable'):
+            aux['selectable'] = False
         
     return layer_groups
 

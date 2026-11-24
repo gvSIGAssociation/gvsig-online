@@ -118,7 +118,7 @@ layerTree.prototype.createTree = function() {
 				
 				tree += '			<li class="box box-default collapsed-box" id="' + layerGroup.groupId + '">';
 				tree += '				<div class="box-header with-border">';
-				if (this.conf.selectable_groups) {
+				if (layerGroup.selectable) {
 					if (layerGroup.visible) {
 						tree += '					<input type="checkbox" class="layer-group" id="layergroup-' + layerGroup.groupId + '" checked>';
 					} else {

@@ -1201,6 +1201,28 @@ def _get_prepared_layer_groups(request):
     prepared_layer_groups.sort(key=_layer_group_sort_key)
     return prepared_layer_groups
 
+
+def _posted_selectable_group_ids(post):
+    prefix = 'selectable-group-'
+    ids = set()
+    for key in post:
+        if key.startswith(prefix):
+            try:
+                ids.add(int(key[len(prefix):]))
+            except (TypeError, ValueError):
+                pass
+    return ids
+
+
+def _layergroup_is_base(layer_group_id, selected_base_group):
+    if selected_base_group in (None, ''):
+        return False
+    try:
+        return int(layer_group_id) == int(selected_base_group)
+    except (TypeError, ValueError):
+        return False
+
+
 @login_required()
 @staff_required
 
@@ -1258,11 +1280,7 @@ def project_add(request):
         show_project_icon = False
         if 'show_project_icon' in request.POST:
             show_project_icon = True
-        
-        selectable_groups = False
-        if 'selectable_groups' in request.POST:
-            selectable_groups = True
-            
+
         restricted_extent = False
         if 'restricted_extent' in request.POST:
             restricted_extent = True
@@ -1295,6 +1313,7 @@ def project_add(request):
         assigned_layergroups = []
         assigned_read_roles = []
         assigned_manage_roles = []
+        selectable_group_ids = _posted_selectable_group_ids(request.POST)
         for key in request.POST:
             if 'layergroup-' in key:
                 assigned_layergroups.append(int(key.split('-')[1]))
@@ -1302,6 +1321,10 @@ def project_add(request):
                 assigned_read_roles.append(key[len('read-role-'):])
             if 'manage-role-' in key:
                 assigned_manage_roles.append(key[len('manage-role-'):])
+        selectable_groups = any(
+            alg in selectable_group_ids and not _layergroup_is_base(alg, selected_base_group)
+            for alg in assigned_layergroups
+        )
 
         if name == '':
             groups = core_utils.get_checked_project_roles(assigned_read_roles, assigned_manage_roles, creator_user_role)
@@ -1404,7 +1427,8 @@ def project_add(request):
                 project = project,
                 layer_group = layergroup,
                 multiselect = True,
-                baselayer_group = baselayer_group
+                baselayer_group = baselayer_group,
+                selectable = (not baselayer_group) and alg in selectable_group_ids,
             )
             project_layergroup.save()
             if baselayer_group and selected_base_layer:
@@ -1513,11 +1537,7 @@ def project_update(request, pid):
         show_project_icon = False
         if 'show_project_icon' in request.POST:
             show_project_icon = True
-            
-        selectable_groups = False
-        if 'selectable_groups' in request.POST:
-            selectable_groups = True
-            
+
         restricted_extent = False
         if 'restricted_extent' in request.POST:
             restricted_extent = True
@@ -1541,6 +1561,7 @@ def project_update(request, pid):
         assigned_layergroups = []
         assigned_read_roles = []
         assigned_manage_roles = []
+        selectable_group_ids = _posted_selectable_group_ids(request.POST)
         for key in request.POST:
             if 'layergroup-' in key:
                 assigned_layergroups.append(int(key.split('-')[1]))
@@ -1548,6 +1569,10 @@ def project_update(request, pid):
                 assigned_read_roles.append(key[len('read-role-'):])
             if 'manage-role-' in key:
                 assigned_manage_roles.append(key[len('manage-role-'):])
+        selectable_groups = any(
+            alg in selectable_group_ids and not _layergroup_is_base(alg, selected_base_group)
+            for alg in assigned_layergroups
+        )
 
         has_image = False
         if 'project-image' in request.FILES:
@@ -1634,7 +1659,8 @@ def project_update(request, pid):
                 project = project,
                 layer_group = layergroup,
                 multiselect = True,
-                baselayer_group = baselayer_group
+                baselayer_group = baselayer_group,
+                selectable = (not baselayer_group) and alg in selectable_group_ids,
             )
             project_layergroup.save()
             if baselayer_group and selected_base_layer:
@@ -2002,6 +2028,7 @@ def project_get_conf(request):
         if project_group.baselayer_group:
             conf_group['visible'] = False 
         conf_group['basegroup'] = project_group.baselayer_group
+        conf_group['selectable'] = bool(project_group.selectable) and not project_group.baselayer_group
         conf_group['wms_endpoint'] = server.getWmsEndpoint(relative=True)
         conf_group['wfs_endpoint'] = server.getWfsEndpoint(relative=True)
         conf_group['cache_endpoint'] = server.getCacheEndpoint(relative=True)
@@ -2391,7 +2418,7 @@ def project_get_conf(request):
         'tile_size': gvsigol.settings.TILE_SIZE,
         'is_public_project': project.is_public,
         'show_project_icon': project.show_project_icon,
-        'selectable_groups': project.selectable_groups,
+        'selectable_groups': any(g.get('selectable') for g in ordered_layer_groups),
         'resource_manager': resource_manager,
         'remote_auth': settings.AUTH_WITH_REMOTE_USER,
         'temporal_advanced_parameters': gvsigol.settings.TEMPORAL_ADVANCED_PARAMETERS,
