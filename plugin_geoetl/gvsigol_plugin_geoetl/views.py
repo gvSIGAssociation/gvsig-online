@@ -1094,12 +1094,20 @@ def etl_stop_canvas(request):
     return JsonResponse({'stopped': stopped, 'status': sm.status})
 
 
-def _ai_action_normalize_input_schemas(payload, etl_ai_action):
+def _ai_action_normalize_input_schemas(payload, etl_ai_action, inputs_count=None, require_columns=False):
+    """
+    Normaliza input_schemas. Si no hay bloques, crea stubs vacíos (inputs_count).
+    require_columns=True exige al menos una columna con nombre (p. ej. dry-run de esquema).
+    """
     input_schemas = payload.get('input_schemas') or []
-    if not isinstance(input_schemas, list) or not input_schemas:
-        raise ValueError(_('Connect at least one input and declare its columns.'))
-    if len(input_schemas) > etl_ai_action.MAX_INPUTS:
-        raise ValueError(_('At most %s inputs.') % etl_ai_action.MAX_INPUTS)
+    if not isinstance(input_schemas, list):
+        input_schemas = []
+    try:
+        target = int(inputs_count) if inputs_count is not None else len(input_schemas) or 1
+    except (TypeError, ValueError):
+        target = len(input_schemas) or 1
+    target = max(1, min(etl_ai_action.MAX_INPUTS, target))
+
     normalized_inputs = []
     for block in input_schemas:
         if isinstance(block, dict) and 'columns' in block:
@@ -1108,6 +1116,13 @@ def _ai_action_normalize_input_schemas(payload, etl_ai_action):
             normalized_inputs.append(block)
         else:
             raise ValueError(_('Each input schema must be a column list.'))
+    while len(normalized_inputs) < target:
+        normalized_inputs.append([])
+    normalized_inputs = normalized_inputs[:target]
+    if len(normalized_inputs) > etl_ai_action.MAX_INPUTS:
+        raise ValueError(_('At most %s inputs.') % etl_ai_action.MAX_INPUTS)
+    if require_columns and not etl_ai_action.input_schemas_have_columns(normalized_inputs):
+        raise ValueError(_('Connect at least one input and declare its columns.'))
     return normalized_inputs
 
 
@@ -1129,18 +1144,33 @@ def etl_ai_action_generate(request):
         if not instruction:
             raise ValueError(_('Indicate the natural-language instruction.'))
         try:
+            declared_inputs = int(payload.get('inputs_count') or 1)
+        except (TypeError, ValueError):
+            declared_inputs = 1
+        try:
             declared_outputs = int(payload.get('outputs_count') or 1)
         except (TypeError, ValueError):
             declared_outputs = 1
-        outputs_count = etl_ai_action.infer_outputs_count(instruction, declared_outputs)
-        # Pistas opcionales; la instrucción manda y el dry-run fija el esquema
+        from_in = etl_ai_action.parse_inputs_from_instruction(instruction)
+        inputs_count = from_in or max(1, min(etl_ai_action.MAX_INPUTS, declared_inputs))
+        from_out = etl_ai_action.parse_outputs_from_instruction(instruction)
+        # from_out==1 suele ser un join simple: no bajar un outputs_count ya declarado > 1
+        if from_out >= 2:
+            outputs_count = from_out
+        elif from_out == 1 and declared_outputs <= 1:
+            outputs_count = 1
+        else:
+            outputs_count = etl_ai_action.infer_outputs_count(instruction, declared_outputs)
+        # Pistas opcionales; sin columnas de entrada el esquema puede quedar vacío
         raw_schemas = payload.get('output_schemas')
         if raw_schemas in (None, ''):
             raw_schemas = payload.get('output_schema')
         output_schemas = etl_ai_action.parse_output_schemas(
             raw_schemas, outputs_count, allow_empty=True
         )
-        normalized_inputs = _ai_action_normalize_input_schemas(payload, etl_ai_action)
+        normalized_inputs = _ai_action_normalize_input_schemas(
+            payload, etl_ai_action, inputs_count=inputs_count, require_columns=False
+        )
         sql_result, schema_result = etl_ai_action.generate_sql(
             instruction, normalized_inputs,
             output_schema=output_schemas[0] if output_schemas else [],
@@ -1167,8 +1197,8 @@ def etl_ai_action_generate(request):
             'sqls': [sql_result],
             'inputs_count': len(normalized_inputs),
             'outputs_count': 1,
-            'output_schema': schema_result,
-            'output_schemas': [schema_result],
+            'output_schema': schema_result or [],
+            'output_schemas': [schema_result or []],
         })
     except ValueError as exc:
         return JsonResponse({'error': str(exc)}, status=400)
@@ -1194,7 +1224,9 @@ def etl_ai_action_suggest_schema(request):
         sql_text = (payload.get('sql') or '').strip()
         if not sql_text:
             raise ValueError(_('Paste or generate the SQL first.'))
-        normalized_inputs = _ai_action_normalize_input_schemas(payload, etl_ai_action)
+        normalized_inputs = _ai_action_normalize_input_schemas(
+            payload, etl_ai_action, require_columns=True
+        )
         columns = etl_ai_action.suggest_schema_from_sql(sql_text, normalized_inputs)
         return JsonResponse({'output_schema': columns})
     except ValueError as exc:
@@ -1207,7 +1239,7 @@ def etl_ai_action_suggest_schema(request):
 @login_required()
 @staff_required
 def etl_ai_action_suggest_from_instruction(request):
-    """Sugiere número de salidas y/o esquemas a partir de la instrucción (sin SQL)."""
+    """Sugiere entradas/salidas (y esquemas si hay columnas) a partir de la instrucción."""
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
     from . import etl_ai_action
@@ -1221,21 +1253,40 @@ def etl_ai_action_suggest_from_instruction(request):
         instruction = (payload.get('instruction') or '').strip()
         if not instruction:
             raise ValueError(_('Indicate the natural-language instruction.'))
-        want_outputs = bool(payload.get('suggest_outputs', True))
         want_schemas = bool(payload.get('suggest_schemas', True))
         try:
-            declared = int(payload.get('outputs_count') or 1)
+            declared_in = int(payload.get('inputs_count') or 1)
         except (TypeError, ValueError):
-            declared = 1
-        from_instr = etl_ai_action.parse_outputs_from_instruction(instruction)
-        outputs_count = from_instr or max(1, min(etl_ai_action.MAX_OUTPUTS, declared))
-        result = {'outputs_count': outputs_count}
-        if want_outputs and not from_instr and not want_schemas:
-            raise ValueError(
-                _('No output count found in the instruction. Write e.g. “two outputs”.')
-            )
-        if want_schemas:
-            normalized_inputs = _ai_action_normalize_input_schemas(payload, etl_ai_action)
+            declared_in = 1
+        try:
+            declared_out = int(payload.get('outputs_count') or 1)
+        except (TypeError, ValueError):
+            declared_out = 1
+        declared_in = max(1, min(etl_ai_action.MAX_INPUTS, declared_in))
+        declared_out = max(1, min(etl_ai_action.MAX_OUTPUTS, declared_out))
+
+        from_in = etl_ai_action.parse_inputs_from_instruction(instruction)
+        from_out = etl_ai_action.parse_outputs_from_instruction(instruction)
+        inputs_count = from_in or declared_in
+        outputs_count = from_out or declared_out
+
+        result = {
+            'inputs_count': inputs_count,
+            'outputs_count': outputs_count,
+            'schemas_suggested': False,
+        }
+
+        if not want_schemas:
+            return JsonResponse(result)
+
+        # Esquemas solo si ya hay columnas de entrada; sin ellas igual devolvemos puertos
+        normalized_inputs = _ai_action_normalize_input_schemas(
+            payload, etl_ai_action, inputs_count=inputs_count, require_columns=False
+        )
+        if not etl_ai_action.input_schemas_have_columns(normalized_inputs):
+            return JsonResponse(result)
+
+        try:
             outputs_count, schemas = etl_ai_action.suggest_schemas_from_instruction(
                 instruction,
                 normalized_inputs,
@@ -1244,12 +1295,10 @@ def etl_ai_action_suggest_from_instruction(request):
             result['outputs_count'] = outputs_count
             result['output_schemas'] = schemas
             result['output_schema'] = schemas[0] if schemas else []
-        elif want_outputs:
-            if not from_instr:
-                raise ValueError(
-                    _('No output count found in the instruction. Write e.g. “two outputs”.')
-                )
-            result['outputs_count'] = from_instr
+            result['schemas_suggested'] = True
+        except ValueError:
+            # Puertos ya sugeridos; esquemas opcionales
+            pass
         return JsonResponse(result)
     except ValueError as exc:
         return JsonResponse({'error': str(exc)}, status=400)

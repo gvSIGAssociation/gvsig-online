@@ -3795,9 +3795,9 @@ def trans_Intersection(dicc):
 
     table_name_target = dicc['id']
 
-    merge = dicc['merge']
+    merge = dicc.get('merge', '')
 
-    self_int = dicc['self-intersect']
+    self_int = dicc.get('self-intersect', '')
 
     schemas = dicc['schema']
 
@@ -3896,10 +3896,60 @@ def trans_Intersection(dicc):
         cur.execute(sqlDropCol)
         conn.commit()
 
+    sources = [table_name_source_0] if self_int != '' else [table_name_source_0, table_name_source_1]
+    _type_overlay_output(cur, conn, table_name_target, sources)
+
     conn.close()
     cur.close()
 
     return [table_name_target]
+
+
+_GEOM_DIMENSION = {'POINT': 1, 'LINESTRING': 2, 'POLYGON': 3}
+_MULTI_BY_DIMENSION = {1: 'MultiPoint', 2: 'MultiLineString', 3: 'MultiPolygon'}
+
+
+def _source_srid_and_dimension(cur, table_name):
+    srid, type_geom = get_type_n_srid(table_name)
+    dimension = _GEOM_DIMENSION.get(str(type_geom or '').upper().replace('MULTI', ''))
+    if not srid or not dimension:
+        cur.execute(sql.SQL('SELECT ST_SRID(wkb_geometry), ST_Dimension(wkb_geometry) FROM {schema}.{tbl} '
+                            'WHERE wkb_geometry IS NOT NULL AND NOT ST_IsEmpty(wkb_geometry) LIMIT 1').format(
+            schema=sql.Identifier(GEOETL_DB["schema"]), tbl=sql.Identifier(table_name)))
+        row = cur.fetchone()
+        if row:
+            srid = srid or row[0]
+            dimension = dimension or (row[1] + 1 if row[1] is not None else None)
+    return srid or 0, dimension
+
+
+def _type_overlay_output(cur, conn, table_name_target, sources):
+    """La salida de un CREATE TABLE AS con ST_Intersection queda como geometry genérica (sin tipo ni EPSG)
+    y puede mezclar tipos: se deja solo la dimensión del resultado, en Multi, con el EPSG de la entrada.
+    Si la entrada no tiene EPSG conocido no se asigna ninguno."""
+    found = [_source_srid_and_dimension(cur, name) for name in sources]
+    dims = [dim for _, dim in found if dim]
+    srids = [srid for srid, _ in found if srid]
+    if not dims:
+        return
+    dimension = min(dims)
+    srid = srids[0] if srids else 0
+    target = sql.SQL('{}.{}').format(sql.Identifier(GEOETL_DB["schema"]), sql.Identifier(table_name_target))
+
+    cur.execute(sql.SQL('UPDATE {target} SET wkb_geometry = ST_Multi(ST_CollectionExtract(wkb_geometry, %s))').format(
+        target=target), [dimension])
+    cur.execute(sql.SQL('DELETE FROM {target} WHERE wkb_geometry IS NULL OR ST_IsEmpty(wkb_geometry)').format(
+        target=target))
+    geom_type = _MULTI_BY_DIMENSION[dimension]
+    if srid:
+        cur.execute(sql.SQL('ALTER TABLE {target} ALTER COLUMN wkb_geometry TYPE geometry({kind}, {srid}) '
+                            'USING ST_SetSRID(wkb_geometry, {srid})').format(
+            target=target, kind=sql.SQL(geom_type), srid=sql.Literal(int(srid))))
+    else:
+        cur.execute(sql.SQL('ALTER TABLE {target} ALTER COLUMN wkb_geometry TYPE geometry({kind})').format(
+            target=target, kind=sql.SQL(geom_type)))
+    conn.commit()
+
 
 def trans_FilterDupli(dicc):
 
@@ -4629,6 +4679,25 @@ def trans_RemoveGeom(dicc):
 
     return [table_name_target]
 
+_ICV_COUNTRY_WORDS = {'españa', 'spain', 'espanya'}
+
+
+def _icv_queries(address):
+    """El buscador del ICV no devuelve nada si la dirección acaba en el país o repite el municipio como provincia."""
+    queries = [address]
+    parts = [p.strip() for p in address.split(',') if p.strip()]
+    while parts and parts[-1].lower() in _ICV_COUNTRY_WORDS:
+        parts.pop()
+    cleaned = []
+    for part in parts:
+        if not cleaned or part.lower() != cleaned[-1].lower():
+            cleaned.append(part)
+    candidate = ', '.join(cleaned)
+    if candidate and candidate not in queries:
+        queries.append(candidate)
+    return queries
+
+
 def trans_Geocoder(dicc):
 
     table_name_source = dicc['data'][0]
@@ -4661,6 +4730,9 @@ def trans_Geocoder(dicc):
 
     if mode == 'direct':
         attrs = dicc["attr-selected"].split(' ')
+        print('Geocoder %s: motor %s, campos %s' % (table_name_target, engine, attrs))
+        total = found = 0
+        not_found = []
 
         sqlAlter = sql.SQL('ALTER TABLE {schema}.{table_target}  ADD COLUMN IF NOT EXISTS "_X" FLOAT, ADD COLUMN IF NOT EXISTS "_Y" FLOAT, ADD COLUMN IF NOT EXISTS _id_temp SERIAL').format(
             schema = sql.Identifier(GEOETL_DB["schema"]),
@@ -4694,29 +4766,32 @@ def trans_Geocoder(dicc):
                 if row[x]:
                     address_list.append(str(row[x]))
             address = ' '.join(address_list)
+            total += 1
             
             if engine == 'ICV':
-                
-                r = requests.get(URL_GEOCODER['icv-direct'] % address)
 
                 try:
-                    payload = json.loads(r.content.decode('utf-8'))
-                    resp = payload.get('response', payload)
-                    results = resp.get('results') or []
-                    if not results:
-                        continue
-                    bbox_str = results[0].get('bbox', '')
-                    if not bbox_str:
-                        continue
-                    parts = [p.strip() for p in bbox_str.split(',')]
+                    results = []
+                    for query in _icv_queries(address):
+                        r = requests.get(URL_GEOCODER['icv-direct'] % query)
+                        payload = json.loads(r.content.decode('utf-8'))
+                        resp = payload.get('response', payload)
+                        results = resp.get('results') or []
+                        if results:
+                            break
+                    bbox_str = results[0].get('bbox', '') if results else ''
+                    parts = [p.strip() for p in bbox_str.split(',')] if bbox_str else []
                     if len(parts) < 4:
+                        not_found.append(address)
                         continue
                     xmin, ymin, xmax, ymax = float(parts[0]), float(parts[1]), float(parts[2]), float(parts[3])
                     coord_x = (xmin + xmax) / 2
                     coord_y = (ymin + ymax) / 2
                     cur_2.execute(sqlUpdate, [coord_x, coord_y, row[0]])
                     conn_2.commit()
+                    found += 1
                 except Exception as e:
+                    not_found.append(address)
                     print(e)
 
             #En este else entran todos los motores de búsqueda del plugin_geocoding que estén configurados
@@ -4737,9 +4812,14 @@ def trans_Geocoder(dicc):
                     else:
                         cur_2.execute(sqlUpdate,[result['address'][0]['lng'], result['address'][0]['lat'], row[0]])
                         conn_2.commit()
+                    found += 1
 
                 except Exception as e:
+                    not_found.append(address)
                     print(e)
+
+        print('Geocoder %s: %d de %d direcciones geocodificadas. Sin resultado: %s'
+              % (table_name_target, found, total, not_found[:20]))
 
     else:
 

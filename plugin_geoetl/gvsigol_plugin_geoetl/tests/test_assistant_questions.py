@@ -126,8 +126,19 @@ class ResolveTests(SimpleTestCase):
     def test_invented_options_are_dropped(self):
         questions, notes = self.resolve([{'label': 'Separador', 'text': '¿Separador?', 'node': 'n1',
                                           'param': 'separator', 'source': 'choices', 'options': [';', '|']}])
-        self.assertEqual(self.values(questions[0]), [';'])
-        self.assertIn('|', notes[0])
+        self.assertEqual(questions, [])
+        self.assertTrue(any('|' in note for note in notes))
+
+    def test_single_choice_is_not_asked(self):
+        questions, notes = self.resolve([{
+            'label': 'Motor',
+            'text': 'Selecciona el motor del geocodificador correspondiente al ICV.',
+            'type': 'trans_Geocoder',
+            'param': 'engine-option',
+            'source': 'choices',
+        }])
+        self.assertEqual(questions, [])
+        self.assertTrue(any('único valor' in note and 'ICV' in note for note in notes))
 
     def test_custom_options_are_capped(self):
         options = ['opción %d' % i for i in range(12)] + ['x' * 500, 'opción 1']
@@ -176,6 +187,35 @@ class InferenceTests(SimpleTestCase):
                 self.assertEqual([q['source'] for q in questions], ['files', 'files', 'datastores'])
                 self.assertEqual([q['file_picker']['extensions'] for q in questions[:2]], ['shp', 'xls,xlsx'])
                 self.assertTrue(questions[2]['create_datastore'])
+
+    def test_geocoder_engine_question_is_inferred_and_skipped_when_only_icv(self):
+        questions, notes = self.resolve([{
+            'label': 'Motor',
+            'text': 'Selecciona el motor del geocodificador correspondiente al ICV.',
+            'source': 'custom',
+        }])
+        self.assertEqual(questions, [])
+        self.assertTrue(any('único valor' in note and 'ICV' in note for note in notes))
+
+    def test_visualizer_group_is_not_online_layer_groups(self):
+        targets = {'workspaces': [{'id': 1, 'name': 'ws_a'}],
+                   'layer_groups': [{'id': 2, 'name': 'lg_a', 'title': 'Grupo A'}]}
+        context = AssistantContext.from_payload({'is_staff': True, 'connections': [], 'publish_targets': targets})
+        questions, notes = resolve_questions([{
+            'label': 'Grupo',
+            'text': '¿En qué grupo del visualizador quieres publicar las tres capas?',
+            'source': 'layer_groups',
+            'type': 'output_Visualizer',
+            'param': 'layer-group',
+        }], self.catalog, CANVAS, context)
+        self.assertEqual(questions, [])
+        self.assertTrue(any('Visualizer' in note and 'Online' in note for note in notes))
+        # Publicar capa Online sigue ofreciendo grupos reales
+        publish_q, _ = resolve_questions([{
+            'label': 'G', 'text': '¿En qué grupo de capas publico?', 'source': 'layer_groups',
+            'type': 'output_LayerPublish', 'param': 'layer-group',
+        }], self.catalog, CANVAS, context)
+        self.assertEqual(publish_q[0]['options'], [{'value': 'lg_a', 'label': 'Grupo A'}])
 
     DATASTORES = [{'name': 'ds_a', 'description': 'Cartografía base', 'workspace': 'ws_general',
                    'connection': 'gis', 'schema': 'carto'},

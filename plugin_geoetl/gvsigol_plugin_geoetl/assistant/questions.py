@@ -66,6 +66,7 @@ _TYPE_WORDS = (
 )
 _WORKSPACE_WORDS = re.compile(r'\b(workspaces?|espacios? de trabajo)\b')
 _LAYER_GROUP_WORDS = re.compile(r'\b(grupos? de capas|layer groups?)\b')
+_VISUALIZER_WORDS = re.compile(r'\b(visualizador|visualizers?|visualiser)\b')
 _FILE_WORDS = re.compile(r'\b(ficheros?|archivos?|arxius?|files?)\b')
 _FILE_KINDS = (
     (re.compile(r'\b(shapefiles?|shp)\b'), 'shp'),
@@ -75,6 +76,10 @@ _FILE_KINDS = (
     (re.compile(r'\bjson\b'), 'json'),
     (re.compile(r'\bxml\b'), 'xml'),
     (re.compile(r'\b(raster|geotiff|tiff?)\b'), 'tif,tiff'),
+)
+# "motor del geocodificador", "geocoder engine", "ICV" junto a geocod…
+_GEOCODER_ENGINE_WORDS = re.compile(
+    r'\b(geocod|geocoder|geocode)\b|\bmotor\b.{0,40}\b(geocod|icv)\b|\bengine\b.{0,40}\bgeocod'
 )
 
 
@@ -115,13 +120,32 @@ def _inferred_from_parameter(question, catalog, canvas, proposal):
     return None
 
 
+def _is_visualizer_question(question, label, text, canvas, proposal):
+    """True si pregunta por etiquetas del visualizador ETL (no grupos del Online)."""
+    type_name = question.get('type') or _node_type(question.get('node'), canvas, proposal)
+    if type_name == 'output_Visualizer':
+        return True
+    param = question.get('param')
+    words = _plain(label + ' ' + text)
+    if _VISUALIZER_WORDS.search(words):
+        return True
+    if param in ('layer-group', 'layer-name') and _VISUALIZER_WORDS.search(words):
+        return True
+    return False
+
+
 def _inferred_from_words(label, text):
     """(origen, datos) deducidos de la pregunta, o None."""
     words = _plain(label + ' ' + text)
+    if _GEOCODER_ENGINE_WORDS.search(words):
+        return 'choices', {'type': 'trans_Geocoder', 'param': 'engine-option'}
     if _DATASTORE_WORDS.search(words):
         return 'datastores', {}
     if _CONNECTION_WORDS.search(words):
         return 'connections', ({'type': 'output_Postgis'} if _POSTGIS_WORDS.search(words) else {})
+    # Visualizador ETL: textos libres; no confundir con grupos de capas del Online
+    if _VISUALIZER_WORDS.search(words):
+        return None
     if _LAYER_GROUP_WORDS.search(words):
         return 'layer_groups', {}
     if _WORKSPACE_WORDS.search(words):
@@ -348,6 +372,14 @@ def resolve_questions(raw, catalog, canvas, context, proposal=None):
             source = 'datastores'
         if source == 'datastores':
             question.pop('options', None)          # el modelo no conoce los almacenes del usuario
+        # Visualizador ETL: layer-group/layer-name son textos libres (default Visualizer / Layer 1)
+        if _is_visualizer_question(question, label, text, canvas, proposal):
+            notes.append(
+                '"%s": no preguntes por grupos del Online. En output_Visualizer usa textos libres: '
+                'layer-group "Visualizer" (o uno corto común a las capas) y layer-name descriptivos; '
+                'continúa con propose_workspace.' % label
+            )
+            continue
         picker = None
         if source == 'files':
             # Se elige en el administrador de archivos: aquí no se lista nada
@@ -377,6 +409,15 @@ def resolve_questions(raw, catalog, canvas, context, proposal=None):
             options = options[:MAX_OPTIONS]
             if not options and not any(label in n for n in notes):
                 notes.append('"%s": no hay opciones de %s; queda como respuesta libre.' % (label, source))
+            # Una sola opción cerrada: no molestar al usuario; el modelo debe usarla
+            if source == 'choices' and len(options) == 1 and not picker:
+                only = options[0].get('value') or options[0].get('label')
+                param = _text(question.get('param'), 100) or 'el parámetro'
+                notes.append(
+                    '"%s": no preguntes; hay un único valor (%s). Úsalo en %s y continúa con propose_workspace.'
+                    % (label, only, param)
+                )
+                continue
         questions.append({
             'id': 'q%d' % (len(questions) + 1),
             'label': label,

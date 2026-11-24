@@ -8639,7 +8639,7 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
                             '</div>'+
                             '<div style="margin-top:10px">'+
                                 '<button type="button" class="btn btn-primary btn-sm" id="ai-action-generate-'+ID+'" title="'+gettext('Generate SQL and schemas from the instruction')+'"><i class="fa fa-magic"></i> '+gettext('Generate')+'</button> '+
-                                '<button type="button" class="btn btn-default btn-sm" id="ai-action-suggest-from-instr-'+ID+'" title="'+gettext('Suggest number of outputs and schemas from the instruction')+'"><i class="fa fa-lightbulb-o"></i> '+gettext('Suggest outputs and schemas')+'</button>'+
+                                '<button type="button" class="btn btn-default btn-sm" id="ai-action-suggest-from-instr-'+ID+'" title="'+gettext('Suggest inputs, outputs and schemas from the instruction')+'"><i class="fa fa-lightbulb-o"></i> '+gettext('Suggest inputs, outputs and schemas')+'</button>'+
                                 '<span id="ai-action-generate-status-'+ID+'" class="help-block" style="display:inline;margin-left:8px"></span>'+
                             '</div>'+
                             '<div style="margin-top:10px">'+
@@ -8690,12 +8690,31 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
             if (!schema || !schema.length) {
                 return []
             }
-            return schema.map(function(col) {
-                if (typeof col === 'string') {
-                    return {name: col, type: 'text'}
+            var out = []
+            var seen = {}
+            schema.forEach(function(col) {
+                var name = (typeof col === 'string') ? col : (col && col.name)
+                var type = (typeof col === 'object' && col && col.type) ? col.type : 'text'
+                name = (name || '').trim()
+                if (!name || /^_placeholder/i.test(name)) {
+                    return
                 }
-                return {name: col.name, type: col.type || 'text'}
-            }).filter(function(col) { return !!(col && col.name) })
+                var key = name.toLowerCase()
+                var n = (seen[key] || 0) + 1
+                seen[key] = n
+                if (n > 1) {
+                    var candidate = name + '_' + n
+                    while (seen[candidate.toLowerCase()]) {
+                        n += 1
+                        seen[key] = n
+                        candidate = name + '_' + n
+                    }
+                    name = candidate
+                    seen[name.toLowerCase()] = 1
+                }
+                out.push({name: name, type: type || 'text'})
+            })
+            return out
         }
 
         function clampCount(raw, max) {
@@ -8707,6 +8726,36 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
                 return max
             }
             return n
+        }
+
+        function countToken(token, wordMap) {
+            if (/^\d+$/.test(token)) {
+                return parseInt(token, 10)
+            }
+            return wordMap[token] || 0
+        }
+
+        function parseInputsFromInstruction(instruction) {
+            var text = (instruction || '').toLowerCase()
+            if (!text) {
+                return 0
+            }
+            var wordMap = {
+                dos: 2, two: 2, tres: 3, three: 3, cuatro: 4, four: 4,
+                cinco: 5, five: 5
+            }
+            var inferred = 0
+            var match = text.match(/\b(dos|tres|cuatro|cinco|two|three|four|five|\d+)\s+(tablas?|entradas?|inputs?|capas?|layers?|datasets?|fuentes?)\b/)
+            if (match) {
+                inferred = Math.max(inferred, countToken(match[1], wordMap))
+            }
+            if (/\b(join|inner\s+join|left\s+join|right\s+join|full\s+join|uni[oó]n|unir|cruzar|combinar|merge|emparejar|relacionar)\b/.test(text)) {
+                inferred = Math.max(inferred, 2)
+            }
+            if (/\binput[_\s-]*2\b/.test(text) || /\bentrada\s*2\b/.test(text)) {
+                inferred = Math.max(inferred, 2)
+            }
+            return inferred > 0 ? clampCount(inferred, AI_ACTION_MAX_INPUTS) : 0
         }
 
         function parseOutputsFromInstruction(instruction) {
@@ -8723,15 +8772,35 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
             var match = text.match(/\b(dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|two|three|four|five|six|seven|eight|nine|ten|\d+)\s+salidas?\b/)
                 || text.match(/\b(dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|two|three|four|five|six|seven|eight|nine|ten|\d+)\s+outputs?\b/)
             if (match) {
-                var token = match[1]
-                inferred = /^\d+$/.test(token) ? parseInt(token, 10) : (wordMap[token] || 0)
+                inferred = countToken(match[1], wordMap)
             }
             if (/\bsalida\s*2\b/.test(text) || /\boutput\s*2\b/.test(text)
                     || /una\s+con[\s\S]+y\s+otra\s+con/.test(text)
                     || /one\s+with[\s\S]+and\s+(another|the\s+other)\s+with/.test(text)) {
                 inferred = Math.max(inferred, 2)
             }
+            if (inferred < 1 && parseInputsFromInstruction(instruction) >= 2
+                    && /\b(join|inner\s+join|left\s+join|right\s+join|full\s+join|uni[oó]n|unir|cruzar|combinar|merge)\b/.test(text)) {
+                inferred = 1
+            }
             return inferred > 0 ? clampCount(inferred, AI_ACTION_MAX_OUTPUTS) : 0
+        }
+
+        function inputSchemasHaveColumns(blocks) {
+            if (!Array.isArray(blocks)) {
+                return false
+            }
+            for (var b = 0; b < blocks.length; b++) {
+                var cols = blocks[b] || []
+                for (var i = 0; i < cols.length; i++) {
+                    var col = cols[i]
+                    var name = (typeof col === 'string') ? col : (col && (col.name || col.column))
+                    if (name) {
+                        return true
+                    }
+                }
+            }
+            return false
         }
 
         function inferOutputsFromInstruction(instruction, declared) {
@@ -9013,6 +9082,63 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
             applySuggestedOutputsCount(outCount)
         }
 
+        function softPersistPortCounts(inCount, outCount) {
+            // Guarda conteos sin cerrar el diálogo (para que Aceptar/reabrir no los pierda)
+            var instruction = ($('#ai-action-instruction-'+ID).val() || '').trim()
+            var schemas = outputSchemasState.slice(0, outCount).map(function(block) {
+                return normalizeSchemaBlock(block || [])
+            })
+            var sqls = sqlsState.slice(0, outCount).map(function(s) {
+                return (s || '').trim()
+            })
+            var paramsAI = {
+                id: ID,
+                parameters: [{
+                    inputs_count: inCount,
+                    outputs_count: outCount,
+                    instruction: instruction,
+                    output_schema: schemas,
+                    output_schemas: schemas,
+                    sql: sqls[0] || '',
+                    sqls: sqls
+                }],
+                'schema-old': schemaEdge,
+                schema: outCount <= 1
+                    ? ((schemas[0] || []).map(function(col) { return col.name }))
+                    : schemas.map(function(block) {
+                        return (block || []).map(function(col) { return col.name })
+                    })
+            }
+            isAlreadyInCanvas(jsonParams, paramsAI, ID)
+        }
+
+        function applyInstructionPorts(resp) {
+            var inCount = clampCount(
+                (resp && resp.inputs_count) || $('#inputs-count-'+ID).val(),
+                AI_ACTION_MAX_INPUTS
+            )
+            var outCount = clampCount(
+                (resp && resp.outputs_count) || $('#outputs-count-'+ID).val(),
+                AI_ACTION_MAX_OUTPUTS
+            )
+            $('#inputs-count-'+ID).val(inCount)
+            if (resp && resp.schemas_suggested) {
+                applyInstructionSchemas(
+                    resp.output_schemas || (resp.output_schema ? [resp.output_schema] : []),
+                    outCount
+                )
+            } else {
+                applySuggestedOutputsCount(outCount)
+            }
+            // Los puertos del canvas se crean ya al sugerir (no hace falta Aceptar solo para verlos)
+            context.syncPorts(inCount, outCount)
+            softPersistPortCounts(inCount, outCount)
+            if (ETL_NODE_STYLE && ETL_NODE_STYLE.ai) {
+                icon.setColor(ETL_NODE_STYLE.ai.gear)
+            }
+            return {inputs: inCount, outputs: outCount}
+        }
+
         $('#ai-action-suggest-from-instr-'+ID).on('click', function() {
             var instruction = ($('#ai-action-instruction-'+ID).val() || '').trim()
             if (!instruction) {
@@ -9021,36 +9147,47 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
             }
             var inCount = clampCount($('#inputs-count-'+ID).val(), AI_ACTION_MAX_INPUTS)
             var outCount = clampCount($('#outputs-count-'+ID).val(), AI_ACTION_MAX_OUTPUTS)
-            var fromInstr = parseOutputsFromInstruction(instruction)
+            var localIn = parseInputsFromInstruction(instruction)
+            var localOut = parseOutputsFromInstruction(instruction)
+            // Aplicar ya la heurística local (p. ej. join → 2/1) aunque falle el backend
+            if (localIn || localOut) {
+                applyInstructionPorts({
+                    inputs_count: localIn || inCount,
+                    outputs_count: localOut || outCount,
+                    schemas_suggested: false
+                })
+            }
             var status = $('#ai-action-generate-status-'+ID)
             status.text(gettext('Suggesting…'))
             $('#ai-action-suggest-from-instr-'+ID).prop('disabled', true)
+            var inputSchemas = schemasForGenerate(localIn || inCount)
+            var canSuggestSchemas = inputSchemasHaveColumns(inputSchemas)
             $.ajax({
                 type: 'POST',
                 url: '/gvsigonline/etl/etl_ai_action_suggest_from_instruction/',
                 contentType: 'application/json',
                 data: JSON.stringify({
                     instruction: instruction,
-                    inputs_count: inCount,
-                    outputs_count: fromInstr || outCount,
+                    inputs_count: localIn || inCount,
+                    outputs_count: localOut || outCount,
                     suggest_outputs: true,
-                    suggest_schemas: true,
-                    input_schemas: schemasForGenerate(inCount)
+                    suggest_schemas: canSuggestSchemas,
+                    input_schemas: canSuggestSchemas ? inputSchemas : []
                 }),
                 beforeSend: function(xhr) {
                     xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'))
                 },
                 success: function(resp) {
-                    applyInstructionSchemas(
-                        resp.output_schemas || (resp.output_schema ? [resp.output_schema] : []),
-                        resp.outputs_count || fromInstr || outCount
-                    )
+                    applyInstructionPorts(resp || {})
                     status.text('')
                 },
                 error: function(xhr) {
-                    var err = (xhr.responseJSON && xhr.responseJSON.error) || gettext('Could not suggest from the instruction.')
+                    // Si la heurística local ya puso puertos, no molestar con alert
+                    if (!(localIn || localOut)) {
+                        var err = (xhr.responseJSON && xhr.responseJSON.error) || gettext('Could not suggest from the instruction.')
+                        alert(err)
+                    }
                     status.text('')
-                    alert(err)
                 },
                 complete: function() {
                     $('#ai-action-suggest-from-instr-'+ID).prop('disabled', false)
@@ -9174,19 +9311,22 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
         })
 
         $('#ai-action-generate-'+ID).on('click', function() {
-            var count = clampCount($('#inputs-count-'+ID).val(), AI_ACTION_MAX_INPUTS)
             var instruction = ($('#ai-action-instruction-'+ID).val() || '').trim()
             if (!instruction) {
                 alert(gettext('Indicate the natural-language instruction.'))
                 return
             }
+            var localIn = parseInputsFromInstruction(instruction)
+            var localOut = parseOutputsFromInstruction(instruction)
+            var count = clampCount(localIn || $('#inputs-count-'+ID).val(), AI_ACTION_MAX_INPUTS)
             var declaredOut = clampCount($('#outputs-count-'+ID).val(), AI_ACTION_MAX_OUTPUTS)
-            var outCount = inferOutputsFromInstruction(instruction, declaredOut)
-            $('#inputs-count-'+ID).val(count)
-            $('#outputs-count-'+ID).val(outCount)
-            persistActiveTabCols()
-            renderOutTabs(outCount)
-            persistActiveTabCols()
+            var outCount = localOut || inferOutputsFromInstruction(instruction, declaredOut)
+            // Ajustar puertos ya (join → 2/1) aunque aún no haya esquemas
+            applyInstructionPorts({
+                inputs_count: count,
+                outputs_count: outCount,
+                schemas_suggested: false
+            })
             var status = $('#ai-action-generate-status-'+ID)
             status.text(gettext('Generating…'))
             $('#ai-action-generate-'+ID).prop('disabled', true)
@@ -9209,11 +9349,14 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
                     var respSqls = Array.isArray(resp.sqls) && resp.sqls.length
                         ? resp.sqls
                         : [resp.sql || '']
+                    count = clampCount(resp.inputs_count || count, AI_ACTION_MAX_INPUTS)
                     outCount = clampCount(
                         Math.max(outCount, resp.outputs_count || 1, respSqls.length),
                         AI_ACTION_MAX_OUTPUTS
                     )
+                    $('#inputs-count-'+ID).val(count)
                     $('#outputs-count-'+ID).val(outCount)
+                    context.syncPorts(count, outCount)
                     while (outputSchemasState.length < outCount) {
                         outputSchemasState.push([])
                     }
@@ -9227,12 +9370,13 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
                     } else if (resp.output_schema && resp.output_schema.length) {
                         respSchemas = [resp.output_schema]
                     }
-                    // Generar siempre aporta esquemas desde el dry-run del SQL
+                    var anySchema = false
                     if (respSchemas) {
                         for (var s = 0; s < outCount; s++) {
-                            var block = respSchemas[s] || respSchemas[0] || []
+                            var block = normalizeSchemaBlock(respSchemas[s] || respSchemas[0] || [])
                             if (block && block.length) {
-                                outputSchemasState[s] = normalizeSchemaBlock(block)
+                                outputSchemasState[s] = block
+                                anySchema = true
                             }
                         }
                     }
@@ -9240,7 +9384,12 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
                     renderOutTabs(outCount, true)
                     ensureAIActionSqlEditor()
                     renderActiveTabSql()
-                    status.text(gettext('SQL and output schemas generated. Review the tabs; use Suggest from SQL if you edit the query.'))
+                    softPersistPortCounts(count, outCount)
+                    if (anySchema) {
+                        status.text(gettext('SQL and output schemas generated. Review the tabs; use Suggest from SQL if you edit the query.'))
+                    } else {
+                        status.text(gettext('SQL generated. Connect inputs to fill schemas (Suggest from SQL).'))
+                    }
                 },
                 error: function(xhr) {
                     var err = (xhr.responseJSON && xhr.responseJSON.error) || gettext('Could not generate the SQL.')

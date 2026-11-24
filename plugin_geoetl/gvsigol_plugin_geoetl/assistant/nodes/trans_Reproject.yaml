@@ -1,16 +1,20 @@
 type: trans_Reproject
 label: Reproject
 family: transform
-summary: Reproyecta la geometría de un EPSG a otro.
+summary: >
+  Reproyecta la geometría de un EPSG a otro. No pongas un Reproject por cada
+  visualizador ni por cada paso posterior: si buffers, solapes u otras salidas
+  comparten el mismo EPSG destino, un solo Reproject y desde ahí ramifica
+  (visualizador, transformadores, etc.).
 parameters:
 - name: source-epsg
   required: true
   summary: EPSG de origen, solo el número.
-  example: '4326'
+  example: '25830'
 - name: target-epsg
   required: true
   summary: EPSG de destino, solo el número.
-  example: '25830'
+  example: '4258'
 ports:
 - direction: input
   label: Input

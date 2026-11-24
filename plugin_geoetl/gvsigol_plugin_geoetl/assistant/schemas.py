@@ -67,6 +67,10 @@ def _plus(*extra):
     return lambda inputs, params: _cols(inputs) + list(extra)
 
 
+def _point_to_text(params):
+    return params.get('txt-to-point') == 'point-to-txt'
+
+
 def _plus_param(key):
     return lambda inputs, params: _cols(inputs) + ([params[key]] if params.get(key) else [])
 
@@ -343,7 +347,10 @@ HANDLERS = {
     'output_Visualizer': (_sink, _no_check),
     'trans_Difference': (_first_port, _no_check),
     'trans_SpatialRel': (lambda inputs, params: _first_port(inputs, params) + ['_related'], _no_check),
-    'trans_TextToPoint': (_plus('_xlon', '_ylat'), _fields('lon', 'lat')),
+    'trans_TextToPoint': (
+        lambda inputs, params: _cols(inputs) + (['_xlon', '_ylat'] if _point_to_text(params) else []),
+        lambda inputs, params: [] if _point_to_text(params) else _fields('lon', 'lat')(inputs, params),
+    ),
     'trans_WktGeom': (_without('attr'), _fields('attr')),
     'trans_SplitAttr': (_split_attr, _fields('attr')),
     'trans_ExplodeList': (lambda inputs, params: _without('list', add='attr')(inputs, params), _fields('list')),

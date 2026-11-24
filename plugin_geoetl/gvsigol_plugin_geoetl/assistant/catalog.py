@@ -8,6 +8,31 @@ import yaml
 NODES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'nodes')
 
 
+def _geocoder_engine_choices():
+    """ICV (integrado) + motores del plugin de geocodificación, como en el diálogo del nodo."""
+    choices = ['ICV']
+    try:
+        from gvsigol_plugin_geocoding.models import Provider
+        for provider in Provider.objects.all():
+            engine = getattr(provider, 'type', None)
+            if engine and engine not in choices:
+                choices.append(engine)
+    except Exception:
+        pass
+    return choices
+
+
+def _enrich_geocoder_spec(spec):
+    if (spec.get('type') or '') != 'trans_Geocoder':
+        return
+    for item in spec.get('parameters') or []:
+        if item.get('name') != 'engine-option':
+            continue
+        item['choices'] = _geocoder_engine_choices()
+        item.setdefault('default', 'ICV')
+        break
+
+
 def load_catalog(directory=None):
     directory = directory or NODES_DIR
     catalog = {}
@@ -25,6 +50,7 @@ def load_catalog(directory=None):
         spec.setdefault('ports', [])
         spec.setdefault('connection_types', [])
         spec.setdefault('sql_parameters', [])
+        _enrich_geocoder_spec(spec)
         catalog[type_name] = spec
     return catalog
 

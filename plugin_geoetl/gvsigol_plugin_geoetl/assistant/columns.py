@@ -271,6 +271,23 @@ def _normalize_parameters(params, spec, new_node):
         for short, full in (('attr1', 'attr-1'), ('attr2', 'attr-2')):
             if params.get(short) and not params.get(full):
                 params[full] = params[short]
+    if spec.get('type') == 'trans_Geocoder':
+        # La ejecución lee attr-selected (campos separados por espacio), no solo attr
+        selected = params.get('attr-selected')
+        if not (isinstance(selected, str) and selected.strip()):
+            attr = params.get('attr')
+            if isinstance(attr, list):
+                params['attr-selected'] = ' '.join(str(part) for part in attr if part)
+            elif isinstance(attr, str) and attr.strip():
+                params['attr-selected'] = attr.strip()
+    if spec.get('type') == 'trans_Intersection':
+        # El motor espera la cadena "true" o vacío
+        for name in ('self-intersect', 'merge'):
+            flag = params.get(name)
+            if flag in (True, 'True', 'true', '1', 1):
+                params[name] = 'true'
+            elif flag in (False, 'False', 'false', '0', 0, None):
+                params[name] = ''
 
 
 def normalize_proposal(payload, catalog, canvas=None):

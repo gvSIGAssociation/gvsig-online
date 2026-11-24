@@ -18,6 +18,11 @@ parameters:
   column: 0
   example: lat
 - name: txt-to-point
+  choices:
+  - txt-to-point
+  - point-to-txt
+  summary: txt-to-point crea la geometría desde lon y lat; point-to-txt añade _xlon y _ylat desde la geometría.
+  default: txt-to-point
 ports:
 - direction: input
   label: Input

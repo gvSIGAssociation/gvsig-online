@@ -1,16 +1,32 @@
 type: trans_Intersection
 label: Intersection
 family: transform
-summary: Intersección geométrica de dos entradas.
+summary: >
+  Intersección geométrica. Con dos entradas distintas cruza Main y Secondary.
+  Para solapes de una sola capa consigo misma, self-intersect true y solo Main.
 parameters:
 - name: self-intersect
+  summary: >
+    true = autointersección de la capa Main (áreas donde las geometrías de la
+    misma capa se solapan). Dejar vacío para cruzar dos entradas.
+  choices:
+  - 'true'
+  - ''
+  default: ''
 - name: merge
+  summary: true = conservar atributos de ambas entradas al cruzar dos capas.
+  choices:
+  - 'true'
+  - ''
+  default: ''
 - name: schema
+  summary: Esquemas de las entradas. Lo rellena el editor; no lo pongas.
 ports:
 - direction: input
   label: Main
 - direction: input
   label: Secondary
+  summary: No hace falta si self-intersect es true (autointersección de Main).
 - direction: output
   label: Output
 connection_types: []

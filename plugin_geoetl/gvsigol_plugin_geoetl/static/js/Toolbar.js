@@ -335,17 +335,23 @@ gvsigolETL.Toolbar = Class.extend({
 		this.deleteButton  = $('<button id="button-remove" class="btn-pl-add btn-pl-add--danger"><i class="fa fa-times"></i>' + gettext('Remove') + '</button>');
 		this.html.append(this.deleteButton);
 		this.deleteButton.click($.proxy(function(){
-			var node = this.view.getPrimarySelection();
-			//$('div[id*="'+node.id+'"]').remove()
-			
-			if (editablerestrictedly && (node.cssClass.startsWith('input_') || node.cssClass.startsWith('output_') || node.cssClass == 'trans_ExecuteSQL')){
-
-			}else{
-				var command= new draw2d.command.CommandDelete(node);
-				this.view.getCommandStack().execute(command);
-				this.disableButton(this.deleteButton, true);
+			if (typeof etlDeleteSelected === 'function') {
+				if (etlDeleteSelected(this.view)) {
+					this.disableButton(this.deleteButton, true);
+				}
+				return;
 			}
-
+			var node = this.view.getPrimarySelection();
+			if (!node) {
+				return;
+			}
+			var css = String((node && node.cssClass) || '');
+			if (editablerestrictedly && (css.indexOf('input_') === 0 || css.indexOf('output_') === 0 || css === 'trans_ExecuteSQL')){
+				return;
+			}
+			var command= new draw2d.command.CommandDelete(node);
+			this.view.getCommandStack().execute(command);
+			this.disableButton(this.deleteButton, true);
 		},this));
 
 		// Inject the UNDO Button and the callbacks

@@ -1,18 +1,44 @@
 type: trans_Geocoder
 label: Geocoder
 family: transform
-summary: Geocodifica una dirección o hace geocodificación inversa.
+summary: >
+  Geocodifica una dirección (mode-option direct) o hace geocodificación inversa
+  (reverse). El motor integrado por defecto es ICV (engine-option ICV, coordenadas
+  en EPSG:25830 como _X/_Y). Si el usuario pide ICV u otro motor de choices, rellena
+  engine-option con ese valor y no preguntes. Tras geocodificar en directo, crea la
+  geometría con trans_TextToPoint (lon _X, lat _Y) y, si hace falta otro EPSG,
+  reproyecta con trans_Reproject; ICV no entrega 4258/4326 de fábrica.
 parameters:
 - name: engine-option
+  summary: >
+    Motor de geocodificación. ICV es el integrado por defecto (EPSG:25830). Si el
+    usuario ya nombra el motor (p. ej. ICV), usa ese valor sin preguntar.
+  default: ICV
+  choices:
+  - ICV
 - name: mode-option
+  summary: direct = dirección → coordenadas; reverse = coordenadas → dirección.
+  default: direct
   choices:
   - direct
   - reverse
 - name: attr
-  summary: Atributo sobre el que actúa la tarea.
+  summary: >
+    Desplegable del diálogo (modo direct). La ejecución no lo usa solo: hay que
+    rellenar también attr-selected.
 - name: attr-selected
+  summary: >
+    Campos que forman la dirección en modo direct, separados por espacio (p. ej.
+    "direccion" o "calle numero"). Obligatorio en direct: si acabas de
+    normalizar un campo, pon aquí ese nombre. Sin este valor el geocoder no
+    tiene dirección. En reverse déjalo vacío. Con ICV la dirección debe ser
+    "vía, número, municipio", sin provincia ni país: si la normalizas antes,
+    pídelo así en la instrucción.
+  example: direccion
 - name: x
+  summary: Atributo longitud/X (modo reverse).
 - name: y
+  summary: Atributo latitud/Y (modo reverse).
 ports:
 - direction: input
   label: Input

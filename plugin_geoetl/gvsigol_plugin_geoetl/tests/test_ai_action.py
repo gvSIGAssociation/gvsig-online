@@ -123,6 +123,22 @@ class ParamsTests(SimpleTestCase):
             0,
         )
         self.assertEqual(
+            etl_ai_action.parse_inputs_from_instruction(
+                'Hazme un Join de dos tablas mediante el campo común ID'
+            ),
+            2,
+        )
+        self.assertEqual(
+            etl_ai_action.parse_outputs_from_instruction(
+                'Hazme un Join de dos tablas mediante el campo común ID'
+            ),
+            1,
+        )
+        self.assertEqual(
+            etl_ai_action.parse_inputs_from_instruction('calcula centroides'),
+            0,
+        )
+        self.assertEqual(
             etl_ai_action.count_outputs_from_sqls([
                 'SELECT 1 AS a FROM input_0',
                 'SELECT 1 AS a FROM input_0',
@@ -153,6 +169,18 @@ class ParamsTests(SimpleTestCase):
 
 
 class SandboxTests(SimpleTestCase):
+
+    def test_dedupe_schema_columns(self):
+        cols = etl_ai_action.dedupe_schema_columns([
+            {'name': '_placeholder', 'type': 'text'},
+            {'name': 'id', 'type': 'integer'},
+            {'name': 'id', 'type': 'integer'},
+            {'name': '_placeholder_1', 'type': 'text'},
+            {'name': 'nome', 'type': 'text'},
+        ])
+        names = [c['name'] for c in cols]
+        self.assertEqual(names, ['id', 'id_2', 'nome'])
+        self.assertEqual(len(set(n.lower() for n in names)), len(names))
 
     def test_sanitize_allows_select(self):
         self.assertTrue(etl_ai_action.sanitize_sql('SELECT a FROM input_0').startswith('SELECT'))
@@ -232,6 +260,20 @@ class GenerateTests(SimpleTestCase):
         self.assertEqual(schema[0]['name'], 'direccion')
         invoke.assert_called_once()
 
+    def test_generate_allows_empty_schema_without_input_columns(self):
+        invoke = mock.Mock(return_value=json.dumps({
+            'sql': 'SELECT * FROM input_0 a INNER JOIN input_1 b ON a.id = b.id',
+        }))
+        with mock.patch.object(etl_ai_action, 'dry_run_schema', return_value=[]):
+            sql_text, schema = etl_ai_action.generate_sql(
+                'Haz un join de dos tablas de entrada',
+                [[], []],
+                invoke=invoke,
+            )
+        self.assertIn('INNER JOIN', sql_text)
+        self.assertEqual(schema, [])
+        invoke.assert_called_once()
+
     def test_generate_multi_outputs(self):
         invoke = mock.Mock(return_value=json.dumps({
             'sqls': [
@@ -270,6 +312,29 @@ class GenerateTests(SimpleTestCase):
         self.assertIn('prioridad', system.lower())
         self.assertIn('id10', user)
         self.assertIn('output_schema_hint', user)
+
+    def test_generate_prompt_join_keeps_all_columns(self):
+        system, user = etl_ai_action.build_generate_messages(
+            'Haz un join de dos tablas de entrada por un campo comun ID',
+            [[], []],
+        )
+        self.assertIn('EXCLUDE', system)
+        self.assertIn('TODAS las columnas', system)
+        self.assertIn('inválido', system)
+        self.assertIn('join', user.lower())
+
+    def test_generate_prompt_requires_typed_geometry(self):
+        system, _ = etl_ai_action.build_generate_messages(
+            'calcula centroides',
+            [[{'name': 'wkb_geometry', 'type': 'geometry'}]],
+        )
+        self.assertIn('geometry(Point,', system)
+        self.assertIn('geometry(LineString,', system)
+        self.assertIn('EPSG', system)
+        self.assertIn('NUNCA', system)
+        self.assertIn('solo un ejemplo', system)
+        self.assertIn('NO inventes', system)
+        self.assertNotIn('usa 4326', system)
 
     def test_suggest_schema_from_sql(self):
         with mock.patch.object(
@@ -494,3 +559,29 @@ class ViewTests(SimpleTestCase):
         body = json.loads(response.content)
         self.assertEqual(body['outputs_count'], 2)
         self.assertEqual(len(body['output_schemas']), 2)
+        self.assertTrue(body['schemas_suggested'])
+
+    def test_suggest_ports_without_input_schemas(self):
+        request = RequestFactory().post(
+            '/gvsigonline/etl/etl_ai_action_suggest_from_instruction/',
+            data=json.dumps({
+                'instruction': 'Hazme un Join de dos tablas mediante el campo común ID',
+                'inputs_count': 1,
+                'outputs_count': 1,
+                'suggest_schemas': True,
+                'input_schemas': [],
+            }),
+            content_type='application/json',
+        )
+        request.user = mock.Mock(is_authenticated=True, is_staff=True, is_superuser=True)
+        with mock.patch('gvsigol_plugin_geoetl.etl_ai_action.feature_enabled', return_value=True), \
+                mock.patch(
+                    'gvsigol_plugin_geoetl.etl_ai_action.suggest_schemas_from_instruction',
+                    side_effect=AssertionError('no debe pedir esquemas sin columnas'),
+                ):
+            response = views.etl_ai_action_suggest_from_instruction(request)
+        self.assertEqual(response.status_code, 200)
+        body = json.loads(response.content)
+        self.assertEqual(body['inputs_count'], 2)
+        self.assertEqual(body['outputs_count'], 1)
+        self.assertFalse(body['schemas_suggested'])

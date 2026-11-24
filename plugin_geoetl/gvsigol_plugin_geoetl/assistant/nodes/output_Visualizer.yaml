@@ -1,10 +1,24 @@
 type: output_Visualizer
 label: Visualizer
 family: output
-summary: Publica el resultado en el visualizador con un nombre de capa y un grupo.
+summary: >
+  Abre el resultado en el visualizador ETL (sesión nueva). layer-name y
+  layer-group son textos libres de etiqueta (placeholders del diálogo: "Layer 1"
+  y "Visualizer"), NO los grupos de capas ni workspaces de gvSIG Online. No
+  preguntes por grupos del mapa Online. Usa por defecto layer-group "Visualizer"
+  y layer-name descriptivos; varias capas en el mismo visualizador = mismo
+  layer-group y distinto layer-name.
 parameters:
 - name: layer-name
+  summary: Nombre libre de la capa en el visualizador ETL (p. ej. Puntos, Buffers).
+  default: Layer 1
+  example: Puntos
 - name: layer-group
+  summary: >
+    Etiqueta libre que agrupa capas en el visualizador ETL. Por defecto
+    "Visualizer". No es un grupo de capas del visor Online.
+  default: Visualizer
+  example: Visualizer
 ports:
 - direction: input
   label: Output

@@ -1,7 +1,9 @@
 type: trans_Buffer
 label: Buffer
 family: transform
-summary: Calcula un área de influencia. El radio puede ser fijo o un atributo.
+summary: >
+  Área de influencia. El radio está en unidades del EPSG de la capa: si se pide
+  en metros, la geometría debe estar en un CRS métrico.
 parameters:
 - name: mode-option
   choices:
@@ -50,8 +52,7 @@ parameters:
 - name: radius-increase
   default: '0.001'
 - name: schema
-  summary: 'Columnas de salida. Lo rellena el editor al pulsar Aceptar: avisa al usuario
-    de que abra el nodo y lo acepte.'
+  summary: Columnas que llegan. Lo rellena el editor; no lo pongas.
 ports:
 - direction: input
   label: Input

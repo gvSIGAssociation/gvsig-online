@@ -52,6 +52,11 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(sum(1 for port in geom if port['direction'] == 'input'), 1)
         self.assertEqual(sum(1 for port in geom if port['direction'] == 'output'), 6)
 
+    def test_geocoder_defaults_to_icv(self):
+        engine = next(p for p in self.catalog['trans_Geocoder']['parameters'] if p['name'] == 'engine-option')
+        self.assertEqual(engine.get('default'), 'ICV')
+        self.assertIn('ICV', engine.get('choices') or [])
+
     def test_factory_nodes_are_read_from_predictive_shapes(self):
         # Los nodos de PredictiveShapes.js (defineEtlNode) se leen igual que los de TableShape.js
         for name, ports in {

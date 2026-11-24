@@ -464,6 +464,42 @@ function etlIsEditableKeyboardTarget(target) {
 	return false;
 }
 
+/** true si el foco está en un modal Bootstrap abierto o un CodeMirror activo (no chrome del canvas). */
+function etlIsOpenModalOrCodeMirrorTarget(target) {
+	if (!target || !target.closest) {
+		return false;
+	}
+	var modal = target.closest('.modal');
+	if (modal) {
+		if (modal.classList.contains('in') || modal.classList.contains('show')) {
+			return true;
+		}
+		try {
+			var style = window.getComputedStyle(modal);
+			if (style.display !== 'none' && style.visibility !== 'hidden') {
+				return true;
+			}
+		} catch (err) { /* ignore */ }
+		return false;
+	}
+	return !!target.closest('.CodeMirror');
+}
+
+/** Al interactuar con el canvas, quitar foco de buscador/asistente/etc. para que Supr funcione. */
+function etlBlurCanvasChromeEditors() {
+	var ae = document.activeElement;
+	if (!ae || ae === document.body || ae === document.documentElement) {
+		return;
+	}
+	if (etlIsOpenModalOrCodeMirrorTarget(ae)) {
+		return;
+	}
+	var tag = (ae.tagName || '').toLowerCase();
+	if (tag === 'input' || tag === 'textarea' || tag === 'select' || ae.isContentEditable) {
+		ae.blur();
+	}
+}
+
 function etlIsCopyableNode(figure) {
 	if (!figure || figure instanceof draw2d.Connection) {
 		return false;
@@ -1013,19 +1049,154 @@ function etlPasteTransformer(view) {
 	return pasted.length === 1 ? pasted[0] : pasted;
 }
 
+function etlCanDeleteFigure(figure) {
+	if (!figure) {
+		return false;
+	}
+	var css = String(figure.cssClass || figure.NAME || '');
+	if (typeof editablerestrictedly !== 'undefined' && editablerestrictedly &&
+		(css.indexOf('input_') === 0 || css.indexOf('output_') === 0 || css === 'trans_ExecuteSQL')) {
+		return false;
+	}
+	if (typeof figure.isDeleteable === 'function' && !figure.isDeleteable()) {
+		return false;
+	}
+	return true;
+}
+
+/** Borra la selección del canvas (Supr), misma lógica que DefaultKeyboardPolicy + botón Quitar. */
+function etlDeleteSelected(view) {
+	if (!view || typeof view.getPrimarySelection !== 'function' || view.getPrimarySelection() === null) {
+		return false;
+	}
+	var stack = typeof view.getCommandStack === 'function' ? view.getCommandStack() : null;
+	var selection = typeof view.getSelection === 'function' ? view.getSelection() : null;
+	if (!stack || !selection) {
+		return false;
+	}
+	var figures = [];
+	var seen = {};
+	var pushFig = function (figure) {
+		var root = typeof etlFigureRoot === 'function' ? etlFigureRoot(figure) : figure;
+		if (!root || seen[root.id] || !etlCanDeleteFigure(root)) {
+			return;
+		}
+		seen[root.id] = true;
+		figures.push(root);
+	};
+	if (typeof selection.getAll === 'function') {
+		selection.getAll().each(function (i, figure) {
+			pushFig(figure);
+		});
+	} else if (typeof selection.each === 'function') {
+		selection.each(function (i, figure) {
+			pushFig(figure);
+		});
+	} else {
+		pushFig(view.getPrimarySelection());
+	}
+	if (!figures.length) {
+		return false;
+	}
+	var deleted = false;
+	stack.startTransaction('delete');
+	try {
+		for (var i = 0; i < figures.length; i++) {
+			var figure = figures[i];
+			if (typeof draw2d !== 'undefined' && figure instanceof draw2d.Connection) {
+				if (typeof selection.contains === 'function') {
+					if (figure.getSource && selection.contains(figure.getSource(), true)) {
+						continue;
+					}
+					if (figure.getTarget && selection.contains(figure.getTarget(), true)) {
+						continue;
+					}
+				}
+			}
+			var cmd = null;
+			if (typeof draw2d !== 'undefined' && draw2d.command && draw2d.command.CommandDelete) {
+				cmd = new draw2d.command.CommandDelete(figure);
+			} else if (figure.createCommand) {
+				cmd = figure.createCommand(new draw2d.command.CommandType(draw2d.command.CommandType.DELETE));
+			}
+			if (cmd !== null) {
+				stack.execute(cmd);
+				deleted = true;
+			}
+		}
+	} finally {
+		stack.commitTransaction();
+	}
+	return deleted;
+}
+
 function etlInstallCopyPaste(view) {
-	if (!view || view._etlCopyPasteInstalled) {
+	if (!view) {
 		return;
 	}
+	// Reinstalable (p. ej. tras hot-reload): quitar listener anterior
+	if (view._etlCanvasKeydown) {
+		document.removeEventListener('keydown', view._etlCanvasKeydown, true);
+		view._etlCanvasKeydown = null;
+	}
+	if (view._etlCopyPasteInstalled) {
+		$(document).off('keydown.etlCopyPaste');
+		if (view.html && typeof view.html.off === 'function') {
+			view.html.off('mousedown.etlCopyPaste');
+		}
+	}
 	view._etlCopyPasteInstalled = true;
-	$(document).on('keydown.etlCopyPaste', function (event) {
+	// Exponer para depuración / botón Quitar
+	window.etlDeleteSelected = etlDeleteSelected;
+	// Al seleccionar / pinchar el canvas, quitar foco de asistente/buscador
+	if (typeof view.on === 'function') {
+		view.on('select', function () {
+			etlBlurCanvasChromeEditors();
+		});
+	}
+	if (view.html && typeof view.html.on === 'function') {
+		view.html.on('mousedown.etlCopyPaste', function () {
+			etlBlurCanvasChromeEditors();
+		});
+	}
+
+	function onCanvasKeydown(event) {
+		var key = (event.key || '').toLowerCase();
+		var keyCode = event.keyCode || event.which;
+		// Supr / Delete (46). Backspace (8) también: en portátiles a menudo no hay Supr
+		// o el SO envía Backspace; no robar Backspace si el foco está en un input real.
+		var isDelete = key === 'delete' || key === 'del' || keyCode === 46;
+		var isBackspace = key === 'backspace' || keyCode === 8;
+
+		if ((isDelete || isBackspace) && !event.ctrlKey && !event.metaKey && !event.altKey) {
+			if (etlIsOpenModalOrCodeMirrorTarget(event.target)) {
+				return;
+			}
+			if (isBackspace) {
+				var bt = event.target;
+				var btag = (bt && bt.tagName) ? bt.tagName.toLowerCase() : '';
+				if (btag === 'input' || btag === 'textarea' || btag === 'select' || (bt && bt.isContentEditable)) {
+					return;
+				}
+			}
+			if (view.getPrimarySelection && view.getPrimarySelection()) {
+				etlBlurCanvasChromeEditors();
+				if (etlDeleteSelected(view)) {
+					event.preventDefault();
+					if (typeof event.stopPropagation === 'function') {
+						event.stopPropagation();
+					}
+				}
+			}
+			return;
+		}
+
 		if (!(event.ctrlKey || event.metaKey) || event.altKey) {
 			return;
 		}
 		if (etlIsEditableKeyboardTarget(event.target)) {
 			return;
 		}
-		var key = (event.key || '').toLowerCase();
 		var stack = (typeof view.getCommandStack === 'function') ? view.getCommandStack() : null;
 		// Ctrl+Z deshacer; Ctrl+Shift+Z o Ctrl+Y rehacer (misma pila que los botones Undo/Redo)
 		if (key === 'z' && event.shiftKey) {
@@ -1068,5 +1239,9 @@ function etlInstallCopyPaste(view) {
 				event.preventDefault();
 			}
 		}
-	});
+	}
+
+	// Capture phase: llega aunque otro handler haga stopPropagation en bubble
+	document.addEventListener('keydown', onCanvasKeydown, true);
+	view._etlCanvasKeydown = onCanvasKeydown;
 }

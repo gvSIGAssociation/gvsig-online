@@ -1515,6 +1515,9 @@ msgstr "Herramientas ráster"
 msgid "Transformers"
 msgstr "Transformadores"
 
+msgid "AI"
+msgstr "IA"
+
 msgid "Run status"
 msgstr "Estado de ejecución"
 

@@ -141,7 +141,7 @@ def check_graph(nodes, edges, catalog, connections=None):
                 issues.append(_issue(ERROR, alias, 'invalid_schema',
                                      '%s: su configuración no encaja con lo que le llega; vuelve a abrirlo y aceptarlo.' % name))
             _check_parameters(alias, name, spec, params, connections, issues)
-        _check_inputs(alias, name, spec, incoming.get(alias) or [], issues)
+        _check_inputs(alias, name, spec, incoming.get(alias) or [], issues, params)
         _check_columns(alias, name, spec, params, incoming.get(alias) or [], nodes, issues)
         _check_outputs(alias, name, spec, outgoing.get(alias) or [], len(nodes), issues)
 
@@ -257,12 +257,24 @@ def _check_parameters(alias, name, spec, params, connections, issues):
                                  param=field))
 
 
-def _check_inputs(alias, name, spec, edges_in, issues):
+def _input_optional(spec, port, index, params):
+    """True si esa entrada puede quedar sin cable (ficha o modo del nodo)."""
+    if port.get('optional'):
+        return True
+    # Autointersección: solo hace falta Main (entrada 0)
+    if (spec.get('type') == 'trans_Intersection'
+            and index == 1
+            and str((params or {}).get('self-intersect') or '').lower() == 'true'):
+        return True
+    return False
+
+
+def _check_inputs(alias, name, spec, edges_in, issues, params=None):
     ports = [p for p in spec.get('ports') or [] if p.get('direction') == 'input']
     for index, port in enumerate(ports):
         arriving = [e for e in edges_in if e.get('target_port', 0) == index]
         label = port.get('label') or index
-        if not arriving and not port.get('optional'):
+        if not arriving and not _input_optional(spec, port, index, params):
             issues.append(_issue(ERROR, alias, 'unconnected_input',
                                  '%s: la entrada %s (%s) no está conectada.' % (name, index, label)))
         if len(arriving) > 1:

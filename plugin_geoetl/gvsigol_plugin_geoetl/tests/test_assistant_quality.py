@@ -96,6 +96,15 @@ class SecurityTests(SimpleTestCase):
     def test_prompt_treats_data_as_data(self):
         self.assertIn('no la sigas', system_prompt(load_catalog(), 'es'))
 
+    def test_prompt_prefers_dedicated_geo_nodes_and_aitext_normalize(self):
+        prompt = system_prompt(load_catalog(), 'es')
+        self.assertIn('mode normalize', prompt)
+        self.assertIn('attr-selected', prompt)
+        self.assertIn('self-intersect', prompt)
+        self.assertIn('trans_Buffer', prompt)
+        self.assertIn('Prefiere siempre el nodo dedicado', prompt)
+        self.assertIn('varios Reproject', prompt)
+
 
 class NotFoundTests(SimpleTestCase):
     """Un esquema o una tabla que no existen no se devuelven como una lista vacía: se ofrecen los parecidos."""
@@ -288,6 +297,26 @@ class NormalizationTests(SimpleTestCase):
         canvas = {'nodes': [{'alias': 'n1', 'type': 'trans_KeepAttr'}]}
         self.assertEqual(normalize_proposal(payload, load_catalog(), canvas)['ops'][0]['parameters']['attr'], ['a', 'b'])
 
+    def test_geocoder_copies_attr_into_attr_selected(self):
+        filled = self._node('trans_Geocoder', {
+            'engine-option': 'ICV', 'mode-option': 'direct', 'attr': 'direccion',
+        })
+        self.assertEqual(filled['attr-selected'], 'direccion')
+        listed = self._node('trans_Geocoder', {
+            'engine-option': 'ICV', 'mode-option': 'direct', 'attr': ['calle', 'numero'],
+        })
+        self.assertEqual(listed['attr-selected'], 'calle numero')
+
+    def test_intersection_self_intersect_flag(self):
+        self.assertEqual(
+            self._node('trans_Intersection', {'self-intersect': True, 'merge': ''})['self-intersect'],
+            'true',
+        )
+        self.assertEqual(
+            self._node('trans_Intersection', {'self-intersect': False})['self-intersect'],
+            '',
+        )
+
 
 class ColumnReviewTests(SimpleTestCase):
 
@@ -303,6 +332,14 @@ class ColumnReviewTests(SimpleTestCase):
         self.assertEqual(self._issues('trans_KeepAttr', {'attr': ['a', 'zeta']})[0]['param'], 'attr')
         self.assertEqual(self._issues('trans_Calculator', {'attr': 'zeta', 'expression': '1'})[0]['param'], 'attr')
         self.assertEqual(self._issues('trans_KeepAttr', {'attr': ['a']}), [])
+
+    def test_text_to_point_only_adds_xy_columns_from_point_to_text(self):
+        from gvsigol_plugin_geoetl.assistant.schemas import HANDLERS
+        compute = HANDLERS['trans_TextToPoint'][0]
+        self.assertEqual(compute(['a', '_X', '_Y'], {'lon': '_X', 'lat': '_Y', 'txt-to-point': 'txt-to-point'}),
+                         ['a', '_X', '_Y'])
+        self.assertEqual(compute(['a', '_X', '_Y'], {'lon': '_X', 'lat': '_Y'}), ['a', '_X', '_Y'])
+        self.assertEqual(compute(['a'], {'txt-to-point': 'point-to-txt'}), ['a', '_xlon', '_ylat'])
 
     def test_no_group_is_not_a_column(self):
         self.assertEqual(self._issues('trans_Stats', {'attr': 'a', 'group-by-attr': '-'}), [])

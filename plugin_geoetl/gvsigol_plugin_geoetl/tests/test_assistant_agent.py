@@ -75,6 +75,23 @@ class ReviewTests(unittest.TestCase):
         self.assertNotIn('unconnected_input', codes(issues, 'n3'))   # Raster 3 y 4 son opcionales
         self.assertIn('unknown_connection', codes(issues, 'n4'))
 
+    def test_intersection_self_intersect_does_not_require_secondary(self):
+        nodes = [
+            canvas_node('n1', 'input_Csv', {'csv-file': 'x'}),
+            canvas_node('n2', 'trans_Intersection', {'self-intersect': 'true', 'merge': ''}),
+            canvas_node('n3', 'output_Visualizer', {'layer-name': 'Solapes', 'layer-group': 'Visualizer'}),
+        ]
+        edges = [
+            {'source': 'n1', 'target': 'n2', 'source_port': 0, 'target_port': 0},
+            {'source': 'n2', 'target': 'n3', 'source_port': 0, 'target_port': 0},
+        ]
+        issues = self.check(nodes, edges)
+        self.assertNotIn('unconnected_input', codes(issues, 'n2'))
+        # Sin autointersección, Secondary sigue siendo obligatoria
+        nodes[1] = canvas_node('n2', 'trans_Intersection', {'self-intersect': '', 'merge': ''})
+        issues = self.check(nodes, edges)
+        self.assertIn('unconnected_input', codes(issues, 'n2'))
+
     def test_graph_after_patch_applies_ops(self):
         canvas = {'nodes': [canvas_node('n1', 'input_Postgis'), canvas_node('n2', 'output_Postgis')],
                   'edges': [{'source': 'n1', 'target': 'n2', 'source_port': 0, 'target_port': 0}]}

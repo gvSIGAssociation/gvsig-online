@@ -2798,6 +2798,12 @@ msgstr "Sugerir salidas y esquemas"
 msgid "Suggest number of outputs and schemas from the instruction"
 msgstr "Sugerir número de salidas y esquemas a partir de la instrucción"
 
+msgid "Suggest inputs, outputs and schemas"
+msgstr "Sugerir entradas, salidas y esquemas"
+
+msgid "Suggest inputs, outputs and schemas from the instruction"
+msgstr "Sugerir entradas, salidas y esquemas a partir de la instrucción"
+
 msgid "Suggest from the instruction"
 msgstr "Sugerir desde la instrucción"
 
@@ -2863,6 +2869,9 @@ msgstr "Esquemas sugeridos para algunas salidas; revisa el SQL de las demás."
 
 msgid "SQL and output schemas generated. Review the tabs; use Suggest from SQL if you edit the query."
 msgstr "SQL y esquemas de salida generados. Revisa las pestañas; usa Sugerir desde el SQL si editas la consulta."
+
+msgid "SQL generated. Connect inputs to fill schemas (Suggest from SQL)."
+msgstr "SQL generado. Conecta entradas para rellenar esquemas (Sugerir desde el SQL)."
 
 msgid "You can Accept with only inputs/outputs set (ports appear then). Each output has its own schema and SQL tab. Instruction and SQL are needed to run, not to Accept."
 msgstr "Puedes Aceptar solo con entradas/salidas (ahí aparecen los puertos). Cada salida tiene su pestaña de esquema y SQL. La instrucción y el SQL hacen falta para ejecutar, no para Aceptar."

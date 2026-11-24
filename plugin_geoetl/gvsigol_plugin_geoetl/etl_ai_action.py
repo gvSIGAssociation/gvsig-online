@@ -38,6 +38,41 @@ def feature_enabled():
     return etl_ai.feature_enabled()
 
 
+def dedupe_schema_columns(columns):
+    """
+    Quita placeholders y garantiza nombres únicos (case-insensitive).
+    Si hay colisión, renombra a name_2, name_3, …
+    """
+    out = []
+    seen = {}
+    for item in columns or []:
+        if isinstance(item, str):
+            name, col_type = item.strip(), 'text'
+        elif isinstance(item, dict):
+            name = str(item.get('name') or item.get('column') or '').strip()
+            col_type = str(item.get('type') or 'text').strip().lower() or 'text'
+        else:
+            continue
+        if not name or name.lower().startswith('_placeholder'):
+            continue
+        if col_type not in OUTPUT_TYPES:
+            col_type = 'text'
+        base = name
+        key = base.lower()
+        n = seen.get(key, 0) + 1
+        seen[key] = n
+        if n > 1:
+            candidate = '%s_%s' % (base, n)
+            while candidate.lower() in seen:
+                n += 1
+                seen[key] = n
+                candidate = '%s_%s' % (base, n)
+            name = candidate
+            seen[name.lower()] = 1
+        out.append({'name': name, 'type': col_type})
+    return out
+
+
 def parse_column_list(value, allow_empty=False):
     """Normaliza una lista [{name, type}, ...] o nombres sueltos."""
     if value in (None, ''):
@@ -46,8 +81,7 @@ def parse_column_list(value, allow_empty=False):
         value = json.loads(value) if value.strip() else []
     if not isinstance(value, list):
         raise ValueError('El esquema de columnas debe ser una lista.')
-    out = []
-    seen = set()
+    raw = []
     for item in value:
         if isinstance(item, str):
             name, col_type = item.strip(), 'text'
@@ -56,17 +90,14 @@ def parse_column_list(value, allow_empty=False):
             col_type = str(item.get('type') or 'text').strip().lower() or 'text'
         else:
             raise ValueError('Cada columna de salida debe tener name y type.')
-        if not name:
+        if not name or name.lower().startswith('_placeholder'):
             continue
         if not re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', name):
             raise ValueError('Nombre de columna no válido: %s' % name)
         if col_type not in OUTPUT_TYPES:
             raise ValueError('Tipo de columna no válido: %s' % col_type)
-        key = name.lower()
-        if key in seen:
-            raise ValueError('Columna de salida duplicada: %s' % name)
-        seen.add(key)
-        out.append({'name': name, 'type': col_type})
+        raw.append({'name': name, 'type': col_type})
+    out = dedupe_schema_columns(raw)
     if not out and not allow_empty:
         raise ValueError('Define al menos una columna de salida.')
     return out
@@ -343,7 +374,9 @@ def dry_run_schema(sql_text, input_schemas, schema=None):
             cur.execute(sql.SQL('DROP TABLE IF EXISTS {}.{}').format(
                 sql.Identifier(schema), sql.Identifier(name)))
             if not columns:
-                cols_sql = sql.SQL('"_placeholder" text')
+                # Nombre único por entrada para que a.* / b.* no choquen en el dry-run
+                cols_sql = sql.SQL('{} text').format(
+                    sql.Identifier('_placeholder_%s' % index))
             else:
                 parts = []
                 for col in columns:
@@ -352,7 +385,12 @@ def dry_run_schema(sql_text, input_schemas, schema=None):
                         col_type = _pg_type(str(col.get('type') or 'text').lower())
                     else:
                         col_name, col_type = str(col), 'text'
+                    if not col_name:
+                        continue
                     parts.append(sql.SQL('{} {}').format(sql.Identifier(col_name), sql.SQL(col_type)))
+                if not parts:
+                    parts = [sql.SQL('{} text').format(
+                        sql.Identifier('_placeholder_%s' % index))]
                 cols_sql = sql.SQL(', ').join(parts)
             cur.execute(sql.SQL('CREATE TABLE {}.{} ({})').format(
                 sql.Identifier(schema), sql.Identifier(name), cols_sql))
@@ -365,7 +403,8 @@ def dry_run_schema(sql_text, input_schemas, schema=None):
                 'name': desc[0],
                 'type': _type_from_oid(desc[1], desc[0]),
             })
-        return result
+        # Sin nombres repetidos ni placeholders internos del dry-run
+        return dedupe_schema_columns(result)
     finally:
         for name in temp_names:
             try:
@@ -399,9 +438,53 @@ _SUGGEST_SCHEMAS_SYSTEM = (
     'con exactamente N listas de columnas (una por salida). '
     'La instrucción en lenguaje natural manda: si pide varias salidas, N>1. '
     'No inventes columnas de entrada; sí puedes proponer columnas calculadas que pida la instrucción. '
-    'Tipos válidos: text, integer, double, geometry, boolean. '
+    'Tipos válidos en este JSON de UI: text, integer, double, geometry, boolean '
+    '(geometry = columna espacial; el SQL tipará Point/LineString/Polygon/… + EPSG aparte). '
     'Si la instrucción no fija columnas, parte del esquema de entrada conservando lo útil.'
 )
+
+
+_COUNT_WORD_MAP = {
+    'dos': 2, 'two': 2, 'tres': 3, 'three': 3, 'cuatro': 4, 'four': 4,
+    'cinco': 5, 'five': 5, 'seis': 6, 'six': 6, 'siete': 7, 'seven': 7,
+    'ocho': 8, 'eight': 8, 'nueve': 9, 'nine': 9, 'diez': 10, 'ten': 10,
+}
+
+
+def _count_token(token):
+    token = (token or '').lower()
+    if token.isdigit():
+        return int(token)
+    return _COUNT_WORD_MAP.get(token, 0)
+
+
+def parse_inputs_from_instruction(instruction):
+    """
+    Devuelve N si la instrucción implica N entradas; 0 si no lo deja claro.
+    p. ej. «join de dos tablas», «unir tres capas», «2 entradas».
+    """
+    text = (instruction or '').strip().lower()
+    if not text:
+        return 0
+    inferred = 0
+    match = re.search(
+        r'\b(dos|tres|cuatro|cinco|two|three|four|five|\d+)\s+'
+        r'(tablas?|entradas?|inputs?|capas?|layers?|datasets?|fuentes?)\b',
+        text,
+    )
+    if match:
+        inferred = max(inferred, _count_token(match.group(1)))
+    if re.search(
+        r'\b(join|inner\s+join|left\s+join|right\s+join|full\s+join|'
+        r'uni[oó]n|unir|cruzar|combinar|merge|emparejar|relacionar)\b',
+        text,
+    ):
+        inferred = max(inferred, 2)
+    if re.search(r'\binput[_\s-]*2\b', text) or re.search(r'\bentrada\s*2\b', text):
+        inferred = max(inferred, 2)
+    if inferred < 1:
+        return 0
+    return min(MAX_INPUTS, inferred)
 
 
 def parse_outputs_from_instruction(instruction):
@@ -409,11 +492,6 @@ def parse_outputs_from_instruction(instruction):
     text = (instruction or '').strip().lower()
     if not text:
         return 0
-    word_map = {
-        'dos': 2, 'two': 2, 'tres': 3, 'three': 3, 'cuatro': 4, 'four': 4,
-        'cinco': 5, 'five': 5, 'seis': 6, 'six': 6, 'siete': 7, 'seven': 7,
-        'ocho': 8, 'eight': 8, 'nueve': 9, 'nine': 9, 'diez': 10, 'ten': 10,
-    }
     inferred = 0
     match = re.search(
         r'\b(dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|two|three|four|five|six|seven|eight|nine|ten|\d+)\s+salidas?\b',
@@ -423,8 +501,7 @@ def parse_outputs_from_instruction(instruction):
         text,
     )
     if match:
-        token = match.group(1).lower()
-        inferred = int(token) if token.isdigit() else word_map.get(token, 0)
+        inferred = _count_token(match.group(1))
     if (
         re.search(r'\bsalida\s*2\b', text)
         or re.search(r'\boutput\s*2\b', text)
@@ -432,9 +509,34 @@ def parse_outputs_from_instruction(instruction):
         or re.search(r'one\s+with[\s\S]+and\s+(?:another|the\s+other)\s+with', text)
     ):
         inferred = max(inferred, 2)
+    # Un join / unión típico produce una sola tabla de resultado
+    if inferred < 1 and parse_inputs_from_instruction(instruction) >= 2:
+        if re.search(
+            r'\b(join|inner\s+join|left\s+join|right\s+join|full\s+join|'
+            r'uni[oó]n|unir|cruzar|combinar|merge)\b',
+            text,
+        ):
+            inferred = 1
     if inferred < 1:
         return 0
     return min(MAX_OUTPUTS, inferred)
+
+
+def input_schemas_have_columns(input_schemas):
+    """True si algún bloque de entrada trae al menos una columna con nombre."""
+    for block in input_schemas or []:
+        if isinstance(block, dict):
+            cols = block.get('columns') or []
+        else:
+            cols = block
+        for col in cols or []:
+            if isinstance(col, dict):
+                name = col.get('name') or col.get('column')
+            else:
+                name = col
+            if name:
+                return True
+    return False
 
 
 def count_outputs_from_sqls(sqls):
@@ -555,6 +657,25 @@ def _normalize_input_aliases(input_schemas):
     return aliases
 
 
+# Reglas PostGIS para el SQL generado (evitar geometry genérica sin SRID/tipo)
+_GEOMETRY_SQL_RULES = (
+    'GEOMETRÍA (obligatorio si hay geom/wkb_geometry o ST_*): '
+    'NUNCA dejes el tipo GEOMETRY/geometry sin tipar. Toda geometría en el SELECT debe '
+    'llevar tipo concreto y EPSG según lo que sea (puntos, líneas, polígonos, multi-…), '
+    'p. ej. geometry(Point,4326), geometry(LineString,25830), geometry(MultiLineString,25830), '
+    'geometry(Polygon,4326), geometry(MultiPolygon,25830). '
+    'Elige el tipo que corresponda a la instrucción/entrada; MultiPolygon es solo un ejemplo. '
+    'Si proyectas wkb_geometry de la entrada, conserva su tipología y SRID '
+    '(ST_SetSRID / ST_Transform / ::geometry(Tipo,EPSG) solo si el EPSG es conocido). '
+    'Si construyes o transformas geometría y conoces tipo+EPSG, termina con cast tipado '
+    '(…)::geometry(Tipo,EPSG) AS wkb_geometry. Si la instrucción no fija EPSG, reutiliza el '
+    'de la entrada. Si el EPSG NO se conoce: NO inventes ninguno (ni 4326 ni otro); tipa solo '
+    'la tipología cuando se sepa (p. ej. ::geometry(Point)) o proyecta la geom tal cual, '
+    'sin ST_SetSRID/ST_Transform con un código inventado. '
+    'Prefiere el nombre wkb_geometry cuando exista en la entrada. '
+)
+
+
 def build_generate_messages(instruction, input_schemas, output_schema=None,
                             outputs_count=1, output_schemas=None):
     aliases = _normalize_input_aliases(input_schemas)
@@ -577,13 +698,18 @@ def build_generate_messages(instruction, input_schemas, output_schema=None,
             'NUNCA empaquetes varias salidas en un solo SELECT con jsonb_agg, arrays, ni columnas '
             'que sean resultados anidados; cada salida debe ser una tabla relacional plana. '
             'Si la instrucción pide un INNER JOIN en una salida y los no unidos en otra, genera '
-            'p. ej. SELECT de a.* y b.* (con alias si hay nombres repetidos) para la primera, y '
-            'SELECT de a.* WHERE NOT EXISTS (…) para la segunda. '
+            'p. ej. SELECT a.*, b.* (o columnas con alias) para la primera, y '
+            'SELECT a.* WHERE NOT EXISTS (…) para la segunda. '
+            'JOIN: el campo común (p. ej. ID) va en el ON, NO limites el SELECT a solo esa clave. '
+            'Si no conoces el esquema, proyecta todas las columnas sin duplicar la clave del JOIN, '
+            'p. ej. SELECT a.*, b.* EXCLUDE ("ID") FROM input_0 AS a INNER JOIN input_1 AS b '
+            'ON a."ID" = b."ID" (ajusta el nombre de la clave). Si sí conoces columnas y hay '
+            'nombres repetidos, enumera con alias únicos; no uses «b.* AS algo» (inválido). '
             'La instrucción en lenguaje natural es la prioridad. '
             'output_schemas_hint es solo una pista por salida (puede estar vacía). '
             'No uses INSERT/UPDATE/DELETE/DROP/CREATE/INTO ni otras tablas. '
             'No inventes tablas ni columnas de entrada; sí puedes calcular columnas nuevas. '
-            'Para geometría usa wkb_geometry si existe en la entrada.'
+            + _GEOMETRY_SQL_RULES
         ) % outputs_count
         user = json.dumps({
             'instruction': instruction,
@@ -597,14 +723,23 @@ def build_generate_messages(instruction, input_schemas, output_schema=None,
             'Devuelves SOLO un JSON {"sql":"..."} con una única sentencia SELECT o WITH. '
             'Las únicas tablas permitidas son los alias input_0, input_1, … indicados. '
             'La instrucción en lenguaje natural es la prioridad: impleméntala con expresiones SQL reales '
-            '(sumas, concatenaciones, ST_*, CASE, etc.). Si pide un atributo nuevo (p. ej. id10 = id + 10), '
+            '(sumas, concatenaciones, ST_*, CASE, JOINs, etc.). Si pide un atributo nuevo (p. ej. id10 = id + 10), '
             'DEBE aparecer en el SELECT con ese alias y el cálculo; no te limites a proyectar columnas. '
-            'output_schema es solo una pista del esquema base o deseado: puedes añadir columnas que pida la '
-            'instrucción y, si no dice lo contrario, conservar el resto de columnas de la entrada o del tip. '
-            'No conviertas todo a ::text sin necesidad; usa el tipo adecuado (enteros, double, geometry…). '
+            'JOIN de varias entradas: el campo común (p. ej. ID) sirve para el ON. '
+            'Por defecto proyecta TODAS las columnas de las tablas unidas, no solo la clave, '
+            'y NO repitas la clave del JOIN dos veces. '
+            'Si el esquema de entrada está vacío o desconocido, genera algo del estilo '
+            'SELECT a.*, b.* EXCLUDE ("ID") FROM input_0 AS a INNER JOIN input_1 AS b '
+            'ON a."ID" = b."ID" (ajustando alias/nombre de clave a la instrucción; '
+            'EXCLUDE es PostgreSQL). No uses «b.* AS "ID"» (inválido). '
+            'Si conoces columnas y hay nombres repetidos entre tablas, enumera con alias únicos '
+            '(a.id AS id, b.nombre AS nombre_b, …) dejando una sola copia de la clave. '
+            'output_schema es solo una pista: puedes añadir columnas que pida la instrucción y, '
+            'si no dice lo contrario, conservar el resto. '
+            'No conviertas todo a ::text sin necesidad; usa el tipo adecuado (enteros, double, …). '
             'No uses INSERT/UPDATE/DELETE/DROP/CREATE/INTO ni otras tablas. '
             'No inventes tablas ni columnas de entrada que no existan; sí puedes calcular columnas nuevas. '
-            'Para geometría usa wkb_geometry si existe en la entrada.'
+            + _GEOMETRY_SQL_RULES
         )
         user = json.dumps({
             'instruction': instruction,
@@ -659,17 +794,24 @@ def generate_sql(instruction, input_schemas, output_schema=None, invoke=None,
     Devuelve (sql_text_o_lista, schema_o_lista_de_schemas).
     Con outputs_count==1: (str, [{name,type},…]).
     Con outputs_count>1: (list[str], list[list[{name,type}]]).
+    Los esquemas de entrada pueden ir vacíos (solo stubs): el SQL se genera igual;
+    el dry-run puede devolver esquema vacío sin fallar.
     """
     outputs_count = max(1, int(outputs_count or 1))
     if not (instruction or '').strip():
         raise ValueError('Indica la instrucción en lenguaje natural.')
-    if not input_schemas:
+    if input_schemas is None:
+        input_schemas = []
+    if not isinstance(input_schemas, list):
         raise ValueError('Hace falta el esquema de al menos una entrada.')
+    if len(input_schemas) < 1:
+        input_schemas = [[]]
     if len(input_schemas) > MAX_INPUTS:
         raise ValueError('Como máximo %s entradas.' % MAX_INPUTS)
     if outputs_count > MAX_OUTPUTS:
         raise ValueError('Como máximo %s salidas.' % MAX_OUTPUTS)
 
+    has_real_columns = input_schemas_have_columns(input_schemas)
     invoke = invoke or etl_ai.model_invoker()
     system, user = build_generate_messages(
         instruction, input_schemas, output_schema=output_schema,
@@ -680,12 +822,17 @@ def generate_sql(instruction, input_schemas, output_schema=None, invoke=None,
     result_schemas = []
     for index, sql_text in enumerate(sqls):
         assert_only_input_aliases(sql_text, len(input_schemas))
-        result_schema = dry_run_schema(sql_text, input_schemas)
-        if not result_schema:
+        try:
+            result_schema = dry_run_schema(sql_text, input_schemas)
+        except Exception:
+            if has_real_columns:
+                raise
+            result_schema = []
+        if not result_schema and has_real_columns:
             raise ValueError(
                 'El SQL de la salida %s no ha devuelto columnas.' % (index + 1)
             )
-        result_schemas.append(result_schema)
+        result_schemas.append(result_schema or [])
 
     if outputs_count == 1:
         return sqls[0], result_schemas[0]

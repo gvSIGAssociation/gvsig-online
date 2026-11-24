@@ -298,6 +298,19 @@ def build_tools(request, catalog, canvas, connections, restricted, holder, trace
             proposal = holder[-1].get('proposal') if holder else None
             resolved, notes = resolve_questions(payload, catalog, canvas, context, proposal)
             if not resolved:
+                # Todas resueltas solas (único valor, visualizador con defaults…): no parar el turno
+                if notes and any(
+                    marker in note
+                    for note in notes
+                    for marker in ('único valor', 'no preguntes por grupos del Online')
+                ):
+                    return _json({
+                        'accepted': True,
+                        'questions': [],
+                        'notes': notes,
+                        'instruction': ('No hace falta preguntar al usuario: aplica lo indicado en notes '
+                                        'y continúa con propose_workspace.'),
+                    })
                 return _json({'accepted': False, 'errors': notes or ['No hay ninguna pregunta válida.']})
             asked[:] = [resolved]
             if trace:

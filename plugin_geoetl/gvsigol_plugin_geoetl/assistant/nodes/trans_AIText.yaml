@@ -1,25 +1,32 @@
 type: trans_AIText
 label: AI Text
 family: transform
-summary: 'Transforma texto con un modelo de lenguaje a partir de una instrucción en lenguaje natural.
-  Deduce qué columnas usar, qué tarea hacer (traducir, clasificar, extraer, normalizar, resumir…) y
-  sugiere los atributos nuevos. Solo para tareas de lenguaje; lo que no resuelve queda vacío.'
+summary: >
+  Transforma texto con un modelo de lenguaje (tareas predeterminadas: translate,
+  classify, extract, normalize, summarize). Si el usuario pide normalizar,
+  unificar o limpiar direcciones/textos a partir de varios campos, usa este nodo
+  con mode normalize (no Calculator ni CreateAttr+concat). Solo lenguaje; lo que
+  no resuelva queda vacío.
 parameters:
 - name: instruction
   required: true
-  summary: 'Qué hay que hacer, en lenguaje natural (idiomas, categorías, qué extraer, cómo normalizar…).
-    Puede mencionar columnas de entrada y nombres de campos nuevos.'
-  example: traduce o campo nome ao inglés e ao portugués (_en e _pt)
+  summary: >
+    Qué hay que hacer, en lenguaje natural (idiomas, categorías, qué extraer,
+    cómo normalizar una dirección con calle, número, municipio, ciudad…).
+  example: Normaliza la dirección para Valencia capital a partir de calle y numero
 - name: attr
   required: false
-  summary: 'Columnas de entrada con el texto. Si se omite, se infieren de la instrucción y el esquema.'
+  summary: Columnas de entrada con el texto. Si se omite, se infieren de la instrucción y el esquema.
   format: list
   example:
-  - nome
+  - calle
+  - numero
   column: 0
 - name: mode
   required: false
-  summary: 'Tarea inferida o explícita: translate, classify, extract, normalize, summarize o auto.'
+  summary: >
+    Tarea predeterminada: translate, classify, extract, normalize, summarize o auto.
+    Si el usuario dice normalizar / unificar dirección o texto, usa normalize.
   choices:
   - translate
   - classify
@@ -27,14 +34,14 @@ parameters:
   - normalize
   - summarize
   - auto
-  example: auto
+  default: auto
+  example: normalize
 - name: new-attrs
   required: true
-  summary: 'Nombres de los atributos nuevos. Se pueden sugerir desde la instrucción (p. ej. sufijos _en, _pt).'
+  summary: Nombres de los atributos nuevos (p. ej. direccion tras normalizar).
   format: list
   example:
-  - nome_en
-  - nome_pt
+  - direccion
 ports:
 - direction: input
   label: Input

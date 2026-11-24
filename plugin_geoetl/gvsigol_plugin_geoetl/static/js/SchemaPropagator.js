@@ -318,6 +318,14 @@ function opaqueKeepOutputHandler(attrFields) {
 
 var SCHEMA_HANDLERS = {};
 
+// Qué guarda cada diálogo en parameters[0].schema: las columnas que llegan (por puerto si hay varios) o las de salida.
+var PARAM_SCHEMA_SOURCE = {
+    trans_Buffer: 'input',
+    trans_Intersection: 'input',
+    trans_Difference: 'output',
+    trans_ExposeAttr: 'output'
+};
+
 (function registerSchemaHandlers() {
     var inputs = [
         'input_Indenova', 'input_Segex', 'input_Csv', 'input_Json', 'input_PadronAlbacete',
@@ -838,15 +846,21 @@ var SCHEMA_HANDLERS = {};
     };
 
     SCHEMA_HANDLERS.trans_TextToPoint = {
-        computeOutputSchema: function (inputSchemas) {
+        computeOutputSchema: function (inputSchemas, params) {
             var schemaMod = schemaAsColumnList(inputSchemas);
-            schemaMod.push('_xlon');
-            schemaMod.push('_ylat');
+            var p = params && params.parameters && params.parameters[0] ? params.parameters[0] : {};
+            if (p['txt-to-point'] === 'point-to-txt') {
+                schemaMod.push('_xlon');
+                schemaMod.push('_ylat');
+            }
             return schemaMod;
         },
         validateParams: function (inputSchemas, params) {
             if (!params || !params.parameters || !params.parameters[0]) {
                 return false;
+            }
+            if (params.parameters[0]['txt-to-point'] === 'point-to-txt') {
+                return true;
             }
             return validateAttrFields(params.parameters[0], inputSchemas, ['lon', 'lat']);
         }
@@ -1261,9 +1275,14 @@ function propagateSchemaFrom(startNodeId, canvasCtxt, options) {
         if (result.ok || params.schema === undefined || !isOpaque) {
             params.schema = result.outputSchema;
         }
-        // Exponer atributo ejecuta un SELECT de parameters[0].schema (lo rellena su diálogo al aceptar).
-        if (typeName === 'trans_ExposeAttr' && params.parameters && params.parameters[0] && Array.isArray(params.schema)) {
-            params.parameters[0].schema = params.schema.slice();
+        // Estos nodos leen parameters[0].schema al ejecutarse (lo rellena su diálogo al aceptar):
+        // un nodo creado por el asistente no pasa por el diálogo y fallaría con KeyError 'schema'.
+        var paramSchema = PARAM_SCHEMA_SOURCE[typeName];
+        if (paramSchema && params.parameters && params.parameters[0]) {
+            var value = paramSchema === 'input' ? inputSchemas : params.schema;
+            if (Array.isArray(value)) {
+                params.parameters[0].schema = JSON.parse(JSON.stringify(value));
+            }
         }
 
         passSchemaToEdgeConnected(nodeId, listLabel, params.schema, canvasCtxt);
