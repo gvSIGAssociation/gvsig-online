@@ -234,6 +234,24 @@ body {
 	--gol-accent-lt: rgba(255,89,0,0.06);
 }
 
+/* Junta de Comunidades de Castilla-La Mancha: cabecera en azul Pantone
+   295 C con el escudo en blanco. El filtro convierte el escudo azul en
+   blanco; sus zonas transparentes no cambian. */
+.skin-castillalamancha {
+	--hdr-bg:                 #002855;
+	--hdr-bg-dk:              #001a3a;
+	--hdr-logo-filter:        brightness(0) invert(1);
+	--sb-bg:                  #001a33;
+	--sb-bg-dark:             #000f1f;
+	--sb-accent:              #4f7bb0;
+	--sb-accent-lt:           #9fc1e6;
+	--sb-text:                #d6e2f0;
+	--sb-text-muted:          #8fa6c2;
+	--gol-accent:             #002855;
+	--gol-accent-dk:          #001a3a;
+	--gol-accent-lt:          rgba(0,40,85,0.06);
+}
+
 .skin-cartagena {
 	--hdr-bg:        #004466;
 	--hdr-bg-dk:     #003050;
