@@ -1,43 +1,40 @@
 type: trans_AIText
 label: AI Text
 family: transform
-summary: 'Transforma texto con un modelo de lenguaje: eliges la tarea (traducir, clasificar, extraer,
-  normalizar o resumir) y la detallas en una instrucción. Puedes marcar varios atributos de entrada si el
-  texto está repartido (calle + número + municipio) y crear varios atributos nuevos de una vez. Solo para
-  tareas de lenguaje; lo que no resuelve queda vacío.'
+summary: 'Transforma texto con un modelo de lenguaje a partir de una instrucción en lenguaje natural.
+  Deduce qué columnas usar, qué tarea hacer (traducir, clasificar, extraer, normalizar, resumir…) y
+  sugiere los atributos nuevos. Solo para tareas de lenguaje; lo que no resuelve queda vacío.'
 parameters:
-- name: attr
+- name: instruction
   required: true
-  summary: 'Columnas con el texto. Una o varias; si hay varias se envían juntas al modelo.'
+  summary: 'Qué hay que hacer, en lenguaje natural (idiomas, categorías, qué extraer, cómo normalizar…).
+    Puede mencionar columnas de entrada y nombres de campos nuevos.'
+  example: traduce o campo nome ao inglés e ao portugués (_en e _pt)
+- name: attr
+  required: false
+  summary: 'Columnas de entrada con el texto. Si se omite, se infieren de la instrucción y el esquema.'
   format: list
   example:
-  - calle
-  - numero
-  - municipio
+  - nome
   column: 0
 - name: mode
-  required: true
-  summary: 'Tarea: translate (traducir), classify (clasificar), extract (extraer un dato), normalize
-    (normalizar) o summarize (resumir).'
+  required: false
+  summary: 'Tarea inferida o explícita: translate, classify, extract, normalize, summarize o auto.'
   choices:
   - translate
   - classify
   - extract
   - normalize
   - summarize
-  example: normalize
-- name: instruction
-  required: true
-  summary: 'Detalle de la tarea: idiomas, categorías, qué extraer, cómo normalizar, sufijos de campos…
-    Ejemplo (normalize): unifica ortografía, abreviaturas y formato.'
-  example: unifica ortografía, abreviaturas y formato
+  - auto
+  example: auto
 - name: new-attrs
   required: true
-  summary: 'Nombres de los atributos nuevos, en lista. Si la instrucción usa sufijos (_en, _pt), se deducen
-    del primer atributo de entrada. No pueden existir ya.'
+  summary: 'Nombres de los atributos nuevos. Se pueden sugerir desde la instrucción (p. ej. sufijos _en, _pt).'
   format: list
   example:
-  - direccion_norm
+  - nome_en
+  - nome_pt
 ports:
 - direction: input
   label: Input

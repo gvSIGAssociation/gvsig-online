@@ -46,15 +46,69 @@ class ParamsTests(SimpleTestCase):
 
     def test_missing_or_wrong(self):
         for params, message in (
-            ({'attr': ''}, 'atributo'),
-            ({'mode': 'free'}, 'qué hay que hacer'),
+            ({'attr': '', 'instruction': 'traduce algo'}, 'atributo'),
             ({'instruction': ''}, 'instrucción'),
-            ({'instruction': 'al inglés', 'new-attrs': None}, 'atributos nuevos'),
             ({'new-attrs': ['nome']}, 'igual que uno de origen'),
         ):
             with self.subTest(params=params):
                 with self.assertRaisesRegex(ValueError, message):
                     self._check(**params)
+
+    def test_translate_infers_new_attrs(self):
+        attrs, mode, _, fields = self._check(instruction='al inglés', **{'new-attrs': None})
+        self.assertEqual(mode, 'translate')
+        self.assertEqual(fields, ['nome_en'])
+        self.assertEqual(attrs, ['nome'])
+
+    def test_infer_mode_and_attrs(self):
+        self.assertEqual(etl_ai.infer_mode('traduce ao inglés'), 'translate')
+        self.assertEqual(etl_ai.infer_mode('normaliza ortografía'), 'normalize')
+        self.assertEqual(
+            etl_ai.infer_attrs('traduce o campo nome e a descripcion', ['id', 'nome', 'descripcion']),
+            ['nome', 'descripcion'],
+        )
+
+    def test_suggest_config_local(self):
+        suggested = etl_ai.suggest_config(
+            'traduce o campo nome ao inglés e ao portugués (_en e _pt)',
+            ['id', 'nome', 'wkb_geometry'],
+            invoke=mock.Mock(side_effect=AssertionError('no debe llamar al modelo')),
+        )
+        self.assertEqual(suggested['attr'], ['nome'])
+        self.assertEqual(suggested['mode'], 'translate')
+        self.assertEqual(suggested['new-attrs'], ['nome_en', 'nome_pt'])
+
+    def test_suggest_observaciones_not_id(self):
+        suggested = etl_ai.suggest_config(
+            'Traducir al inglés y al portugués las observaciones; campos nuevos _en y _pt',
+            ['id', 'observacion', 'wkb_geometry'],
+            invoke=mock.Mock(side_effect=AssertionError('no debe llamar al modelo')),
+        )
+        self.assertEqual(suggested['attr'], ['observacion'])
+        self.assertEqual(suggested['new-attrs'], ['observacion_en', 'observacion_pt'])
+
+    def test_suggest_summarize_not_lang_suffixes(self):
+        suggested = etl_ai.suggest_config(
+            'Resumir en el minimo de palabras posible las observaciones',
+            ['id', 'observacion', 'wkb_geometry'],
+            invoke=mock.Mock(side_effect=AssertionError('no debe llamar al modelo')),
+            explicit_new=['observacion_en', 'observacion_pt'],
+        )
+        self.assertEqual(suggested['attr'], ['observacion'])
+        self.assertEqual(suggested['mode'], 'summarize')
+        self.assertEqual(suggested['new-attrs'], ['observacion_resumen'])
+
+    def test_as_list_newlines(self):
+        self.assertEqual(
+            etl_ai.as_list('observacion_en\nobservacion_pt'),
+            ['observacion_en', 'observacion_pt'],
+        )
+
+    def test_mode_auto_allowed(self):
+        attrs, mode, _, fields = self._check(mode='auto')
+        self.assertEqual(mode, 'auto')
+        self.assertEqual(attrs, ['nome'])
+        self.assertEqual(fields, ['nome_en', 'nome_pt'])
 
     def test_compose_text(self):
         self.assertEqual(etl_ai.compose_text(['a'], ['Hola']), 'Hola')
@@ -75,6 +129,13 @@ class MessagesTests(SimpleTestCase):
         self.assertIn('Atributos de origen: texto', system)
         texts = json.loads(user)['texts']
         self.assertEqual(len(texts[1]['text']), etl_ai.MAX_TEXT)
+
+    def test_auto_mode_prompt(self):
+        system, _ = etl_ai.build_messages(
+            ['nome'], 'auto', 'traduce ao inglés', ['nome_en'], ['Hola'],
+        )
+        self.assertIn('Tarea: auto', system)
+        self.assertIn('Interpreta la instrucción', system)
 
 
 class ParseTests(SimpleTestCase):

@@ -306,7 +306,11 @@ HANDLERS = {
     'trans_KeepAttr': (_keep_attr, _fields('attr')),
     'trans_RenameAttr': (_rename, _rename_check),
     'trans_ConcatAttr': (_plus_param('new-attr'), _fields('attr')),
-    'trans_AIText': (_plus_list('new-attrs', 'new-attr'), _fields('attr')),
+    # attr es opcional (se infiere de la instrucción); si viene, se valida contra el esquema
+    'trans_AIText': (
+        _plus_list('new-attrs', 'new-attr'),
+        lambda inputs, params: _fields('attr')(inputs, params) if params.get('attr') else [],
+    ),
     'trans_AIAction': (_output_schema_only, _no_check),
     'trans_PadAttr': (_moved_to_end, _fields('attr')),
     'trans_FilterDupli': (_copies(2), _fields('attr')),

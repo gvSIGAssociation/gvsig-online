@@ -440,10 +440,16 @@ var SCHEMA_HANDLERS = {};
             return schemaMod;
         },
         validateParams: function (inputSchemas, params) {
+            // Aceptar suave: se puede guardar a medias (como SQL con IA)
             if (!params || !params.parameters || !params.parameters[0]) {
+                return true;
+            }
+            var p = params.parameters[0];
+            // Si hay attr guardado, debe existir en el esquema
+            if (p.attr && !attrsExistInSchema(p.attr, inputSchemas)) {
                 return false;
             }
-            return attrsExistInSchema(params.parameters[0].attr, inputSchemas);
+            return true;
         }
     };
 

@@ -3,6 +3,7 @@
 import json
 import logging
 import re
+import uuid
 
 import psycopg2
 from psycopg2 import sql
@@ -329,13 +330,15 @@ def dry_run_schema(sql_text, input_schemas, schema=None):
     sanitize_sql(sql_text)
     assert_only_input_aliases(sql_text, inputs_count)
 
+    # Sufijo único: varias sugerencias en paralelo no pueden compartir _ai_action_in_0
+    run_id = uuid.uuid4().hex[:12]
     conn = _connect()
     conn.autocommit = True
     cur = conn.cursor()
     temp_names = []
     try:
         for index, columns in enumerate(input_schemas):
-            name = '_ai_action_in_%s' % index
+            name = '_ai_action_in_%s_%s' % (index, run_id)
             temp_names.append(name)
             cur.execute(sql.SQL('DROP TABLE IF EXISTS {}.{}').format(
                 sql.Identifier(schema), sql.Identifier(name)))
@@ -380,10 +383,140 @@ def suggest_schema_from_sql(sql_text, input_schemas):
         raise ValueError('Hace falta el esquema de al menos una entrada.')
     if len(input_schemas) > MAX_INPUTS:
         raise ValueError('Como máximo %s entradas.' % MAX_INPUTS)
-    cols = dry_run_schema(sql_text, input_schemas)
+    try:
+        cols = dry_run_schema(sql_text, input_schemas)
+    except psycopg2.Error as exc:
+        raise ValueError('No se ha podido analizar el SQL: %s' % (exc.diag.message_primary or exc)) from exc
     if not cols:
         raise ValueError('El SQL no ha devuelto columnas.')
     return cols
+
+
+_SUGGEST_SCHEMAS_SYSTEM = (
+    'Eres un asistente de esquemas ETL PostgreSQL/PostGIS. '
+    'Devuelves SOLO un JSON '
+    '{"outputs_count":N,"output_schemas":[[{"name":"...","type":"text|integer|double|geometry|boolean"},...],...]} '
+    'con exactamente N listas de columnas (una por salida). '
+    'La instrucción en lenguaje natural manda: si pide varias salidas, N>1. '
+    'No inventes columnas de entrada; sí puedes proponer columnas calculadas que pida la instrucción. '
+    'Tipos válidos: text, integer, double, geometry, boolean. '
+    'Si la instrucción no fija columnas, parte del esquema de entrada conservando lo útil.'
+)
+
+
+def parse_outputs_from_instruction(instruction):
+    """Devuelve N si la instrucción pide N salidas; 0 si no lo deja claro."""
+    text = (instruction or '').strip().lower()
+    if not text:
+        return 0
+    word_map = {
+        'dos': 2, 'two': 2, 'tres': 3, 'three': 3, 'cuatro': 4, 'four': 4,
+        'cinco': 5, 'five': 5, 'seis': 6, 'six': 6, 'siete': 7, 'seven': 7,
+        'ocho': 8, 'eight': 8, 'nueve': 9, 'nine': 9, 'diez': 10, 'ten': 10,
+    }
+    inferred = 0
+    match = re.search(
+        r'\b(dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|two|three|four|five|six|seven|eight|nine|ten|\d+)\s+salidas?\b',
+        text,
+    ) or re.search(
+        r'\b(dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|two|three|four|five|six|seven|eight|nine|ten|\d+)\s+outputs?\b',
+        text,
+    )
+    if match:
+        token = match.group(1).lower()
+        inferred = int(token) if token.isdigit() else word_map.get(token, 0)
+    if (
+        re.search(r'\bsalida\s*2\b', text)
+        or re.search(r'\boutput\s*2\b', text)
+        or re.search(r'una\s+con[\s\S]+y\s+otra\s+con', text)
+        or re.search(r'one\s+with[\s\S]+and\s+(?:another|the\s+other)\s+with', text)
+    ):
+        inferred = max(inferred, 2)
+    if inferred < 1:
+        return 0
+    return min(MAX_OUTPUTS, inferred)
+
+
+def count_outputs_from_sqls(sqls):
+    """Cuenta SELECTs no vacíos con texto distinto (ignora copias idénticas)."""
+    seen = set()
+    for raw in sqls or []:
+        text = (raw or '').strip()
+        if not text:
+            continue
+        key = re.sub(r'\s+', ' ', text).lower()
+        seen.add(key)
+    return min(MAX_OUTPUTS, len(seen))
+
+
+def suggest_schemas_from_instruction(instruction, input_schemas, outputs_count=None, invoke=None):
+    """
+    Propone outputs_count + output_schemas a partir de la instrucción (sin generar SQL).
+    """
+    instruction = (instruction or '').strip()
+    if not instruction:
+        raise ValueError('Indica la instrucción en lenguaje natural.')
+    if not input_schemas:
+        raise ValueError('Hace falta el esquema de al menos una entrada.')
+    if len(input_schemas) > MAX_INPUTS:
+        raise ValueError('Como máximo %s entradas.' % MAX_INPUTS)
+
+    try:
+        declared = int(outputs_count) if outputs_count is not None else 1
+    except (TypeError, ValueError):
+        declared = 1
+    declared = max(1, min(MAX_OUTPUTS, declared))
+    from_instr = parse_outputs_from_instruction(instruction)
+    target = from_instr or declared
+
+    aliases = _normalize_input_aliases(input_schemas)
+    invoke = invoke or etl_ai.model_invoker()
+    user = json.dumps({
+        'instruction': instruction,
+        'inputs': aliases,
+        'outputs_count_hint': target,
+    }, ensure_ascii=False)
+    raw = etl_ai._content_text(invoke(_SUGGEST_SCHEMAS_SYSTEM, user)).strip()
+    if raw.startswith('```'):
+        raw = re.sub(r'^```(?:json)?\s*', '', raw)
+        raw = re.sub(r'\s*```$', '', raw)
+    start, end = raw.find('{'), raw.rfind('}')
+    data = {}
+    if start != -1 and end > start:
+        try:
+            data = json.loads(raw[start:end + 1])
+        except ValueError:
+            data = {}
+    if not isinstance(data, dict):
+        data = {}
+
+    try:
+        model_count = int(data.get('outputs_count') or target)
+    except (TypeError, ValueError):
+        model_count = target
+    model_count = max(1, min(MAX_OUTPUTS, model_count))
+    if from_instr:
+        model_count = max(model_count, from_instr)
+
+    raw_schemas = data.get('output_schemas')
+    if not isinstance(raw_schemas, list) or not raw_schemas:
+        single = data.get('output_schema')
+        raw_schemas = [single] if single else []
+    schemas = parse_output_schemas(raw_schemas, model_count, allow_empty=True)
+    if not any(schemas):
+        # Fallback: copiar esquema de la primera entrada a cada salida
+        base = []
+        for col in (input_schemas[0] or []):
+            if isinstance(col, dict):
+                name = col.get('name') or col.get('column')
+                if name:
+                    base.append({'name': name, 'type': str(col.get('type') or 'text')})
+            else:
+                base.append({'name': str(col), 'type': 'text'})
+        if not base:
+            raise ValueError('No se han podido sugerir esquemas desde la instrucción.')
+        schemas = [list(base) for _ in range(model_count)]
+    return model_count, schemas
 
 
 def assert_columns_match(actual, output_schema):

@@ -1206,6 +1206,87 @@ def etl_ai_action_suggest_schema(request):
 
 @login_required()
 @staff_required
+def etl_ai_action_suggest_from_instruction(request):
+    """Sugiere número de salidas y/o esquemas a partir de la instrucción (sin SQL)."""
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    from . import etl_ai_action
+    if not etl_ai_action.feature_enabled():
+        return JsonResponse({'error': _('AI nodes are disabled in this installation.')}, status=403)
+    try:
+        payload = json.loads(request.body.decode('utf-8') or '{}')
+    except (TypeError, ValueError, UnicodeDecodeError):
+        return JsonResponse({'error': _('Invalid JSON')}, status=400)
+    try:
+        instruction = (payload.get('instruction') or '').strip()
+        if not instruction:
+            raise ValueError(_('Indicate the natural-language instruction.'))
+        want_outputs = bool(payload.get('suggest_outputs', True))
+        want_schemas = bool(payload.get('suggest_schemas', True))
+        try:
+            declared = int(payload.get('outputs_count') or 1)
+        except (TypeError, ValueError):
+            declared = 1
+        from_instr = etl_ai_action.parse_outputs_from_instruction(instruction)
+        outputs_count = from_instr or max(1, min(etl_ai_action.MAX_OUTPUTS, declared))
+        result = {'outputs_count': outputs_count}
+        if want_outputs and not from_instr and not want_schemas:
+            raise ValueError(
+                _('No output count found in the instruction. Write e.g. “two outputs”.')
+            )
+        if want_schemas:
+            normalized_inputs = _ai_action_normalize_input_schemas(payload, etl_ai_action)
+            outputs_count, schemas = etl_ai_action.suggest_schemas_from_instruction(
+                instruction,
+                normalized_inputs,
+                outputs_count=outputs_count,
+            )
+            result['outputs_count'] = outputs_count
+            result['output_schemas'] = schemas
+            result['output_schema'] = schemas[0] if schemas else []
+        elif want_outputs:
+            if not from_instr:
+                raise ValueError(
+                    _('No output count found in the instruction. Write e.g. “two outputs”.')
+                )
+            result['outputs_count'] = from_instr
+        return JsonResponse(result)
+    except ValueError as exc:
+        return JsonResponse({'error': str(exc)}, status=400)
+    except Exception:
+        logger.exception('etl_ai_action_suggest_from_instruction failed')
+        return JsonResponse({'error': _('Could not suggest from the instruction.')}, status=500)
+
+
+@login_required()
+@staff_required
+def etl_ai_text_suggest(request):
+    """Sugiere attr, mode y new-attrs a partir de la instrucción y el esquema de entrada."""
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    from . import etl_ai
+    if not etl_ai.feature_enabled():
+        return JsonResponse({'error': _('AI nodes are disabled in this installation.')}, status=403)
+    try:
+        payload = json.loads(request.body.decode('utf-8') or '{}')
+    except (TypeError, ValueError, UnicodeDecodeError):
+        return JsonResponse({'error': _('Invalid JSON')}, status=400)
+    try:
+        instruction = (payload.get('instruction') or '').strip()
+        columns = payload.get('input_schema') or payload.get('columns') or []
+        suggested = etl_ai.suggest_config(
+            instruction, columns, explicit_new=payload.get('new-attrs')
+        )
+        return JsonResponse(suggested)
+    except ValueError as exc:
+        return JsonResponse({'error': str(exc)}, status=400)
+    except Exception:
+        logger.exception('etl_ai_text_suggest failed')
+        return JsonResponse({'error': _('Could not suggest the attributes.')}, status=500)
+
+
+@login_required()
+@staff_required
 def etl_read_canvas(request):
     task_id = ''
     if request.method == 'POST':

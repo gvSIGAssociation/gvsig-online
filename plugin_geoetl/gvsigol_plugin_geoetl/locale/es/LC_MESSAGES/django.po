@@ -1685,3 +1685,9 @@ msgstr "Esquema sugerido para la pestaña de salida activa."
 
 msgid "Could not suggest the output schema."
 msgstr "No se ha podido sugerir el esquema de salida."
+
+msgid "Could not suggest from the instruction."
+msgstr "No se ha podido sugerir desde la instrucción."
+
+msgid "No output count found in the instruction. Write e.g. “two outputs”."
+msgstr "No se ha encontrado el número de salidas en la instrucción. Escribe p. ej. «dos salidas»."

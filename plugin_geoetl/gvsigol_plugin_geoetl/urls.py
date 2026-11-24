@@ -58,6 +58,8 @@ urlpatterns = [
     path('etl/etl_stop_canvas/', views.etl_stop_canvas, name='etl_stop_canvas'),
     path('etl/etl_ai_action_generate/', views.etl_ai_action_generate, name='etl_ai_action_generate'),
     path('etl/etl_ai_action_suggest_schema/', views.etl_ai_action_suggest_schema, name='etl_ai_action_suggest_schema'),
+    path('etl/etl_ai_action_suggest_from_instruction/', views.etl_ai_action_suggest_from_instruction, name='etl_ai_action_suggest_from_instruction'),
+    path('etl/etl_ai_text_suggest/', views.etl_ai_text_suggest, name='etl_ai_text_suggest'),
 
     path('etl/etl_owners_oracle/', views.etl_owners_oracle, name='etl_owners_oracle'),
     path('etl/etl_tables_oracle/', views.etl_tables_oracle, name='etl_tables_oracle'),

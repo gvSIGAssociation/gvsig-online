@@ -8161,36 +8161,24 @@ trans_AIText = draw2d.shape.layout.VerticalLayout.extend({
 
         setColorIfIsOpened(jsonParams, this.cssClass, ID, icon)
 
-        function selectedAITextAttrs() {
-            var value = $('#attr-'+ID).val()
-            if (Array.isArray(value)) {
-                return value.filter(Boolean)
-            }
-            return value ? [value] : []
-        }
-
-        function suggestAITextAttrs(attrs, instruction) {
-            var base = Array.isArray(attrs) ? (attrs[0] || '') : String(attrs || '')
-            base = base.trim()
-            instruction = instruction || ''
-            if (!base) {
-                return []
-            }
-            var found = [], seen = {}, match, re = /_[A-Za-z]{2,12}\b/g
-            while ((match = re.exec(instruction)) !== null) {
-                if (!seen[match[0]]) {
-                    seen[match[0]] = true
-                    found.push(base + match[0])
-                }
-            }
-            return found
-        }
-
-        function parseAITextAttrs(text) {
-            return String(text || '').split(/[,;|]/).map(function(part) {
+        function parseAITextAttrTokens(text) {
+            return String(text || '').split(/[\n\r,;|]+/).map(function(part) {
                 return part.trim()
             }).filter(Boolean)
         }
+
+        function inputSchemaNames() {
+            var cols = Array.isArray(schemaEdge) ? schemaEdge : []
+            return cols.map(function(col) {
+                return (typeof col === 'string') ? col : (col && col.name)
+            }).filter(Boolean)
+        }
+
+        var resolvedAIText = {
+            attr: [],
+            mode: 'auto'
+        }
+        var newAttrsState = []
 
         $('#canvas-parent').append('<div id="dialog-ai-text-'+ID+'" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'+
             '<div class="modal-dialog" role="document">'+
@@ -8203,30 +8191,22 @@ trans_AIText = draw2d.shape.layout.VerticalLayout.extend({
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
-                            '<p class="help-block">'+gettext('Choose the task and detail it in the instruction. You can select several input attributes when the text is split across fields, and ask for several results at once. Distinct value combinations are sent to the language model configured in GeoCopilot; unresolved values stay empty.')+'</p>'+
-                            '<div>'+
-                                '<label class="col-form-label">'+gettext('Attributes with the text:')+'</label>'+
-                                '<select class="form-control" multiple id="attr-'+ID+'"> </select>'+
-                            '</div>'+
-                            '<div>'+
-                                '<label class="col-form-label">'+gettext('Task:')+'</label>'+
-                                '<select class="form-control" id="mode-'+ID+'">'+
-                                    '<option value="translate">'+gettext('Translate')+'</option>'+
-                                    '<option value="classify">'+gettext('Classify')+'</option>'+
-                                    '<option value="extract">'+gettext('Extract data')+'</option>'+
-                                    '<option value="normalize">'+gettext('Normalize')+'</option>'+
-                                    '<option value="summarize">'+gettext('Summarize')+'</option>'+
-                                '</select>'+
-                            '</div>'+
+                            '<p class="help-block">'+gettext('You can Accept with incomplete options (ports stay available). Instruction and suggested attributes are needed to run, not to Accept. Distinct value combinations are sent to the language model; unresolved values stay empty.')+'</p>'+
                             '<div>'+
                                 '<label class="col-form-label">'+gettext('Instruction:')+'</label>'+
-                                '<textarea id="instruction-'+ID+'" rows="3" class="form-control"></textarea>'+
-                                '<p class="help-block" id="instruction-hint-'+ID+'"></p>'+
+                                '<div id="ai-text-chips-'+ID+'" style="margin-bottom:6px"></div>'+
+                                '<textarea id="instruction-'+ID+'" rows="4" class="form-control" placeholder="'+gettext('e.g. translate the name field to English and Portuguese (_en, _pt)')+'"></textarea>'+
                             '</div>'+
-                            '<div>'+
-                                '<label class="col-form-label">'+gettext('New attributes (comma separated):')+'</label>'+
-                                '<input id="new-attrs-'+ID+'" type="text" value="" class="form-control" placeholder="'+gettext('e.g. name_en, name_pt')+'">'+
-                                '<p class="help-block">'+gettext('Filled automatically from suffixes like _en and _pt in the instruction; you can edit them.')+'</p>'+
+                            '<div style="margin-top:10px">'+
+                                '<label class="col-form-label">'+gettext('New attributes:')+'</label>'+
+                                '<div id="ai-text-new-attrs-box-'+ID+'" class="form-control" style="min-height:38px;height:auto;cursor:text;padding:4px 6px">'+
+                                    '<span id="ai-text-new-attrs-chips-'+ID+'"></span>'+
+                                    '<input type="text" id="ai-text-new-attr-input-'+ID+'" class="ai-text-tag-input" placeholder="'+gettext('Type a name and press Enter')+'" style="border:0;outline:0;box-shadow:none;width:140px;max-width:100%;padding:2px 4px;margin:2px 0;background:transparent">'+
+                                '</div>'+
+                                '<p class="help-block" style="margin-bottom:6px">'+gettext('Press Enter to add. Click × to remove.')+'</p>'+
+                                '<button type="button" class="btn btn-default btn-sm" id="ai-text-suggest-'+ID+'"><i class="fa fa-magic"></i> '+gettext('Suggest')+'</button>'+
+                                '<p class="help-block" id="ai-text-suggest-status-'+ID+'"></p>'+
+                                '<p class="help-block" id="ai-text-resolved-'+ID+'"></p>'+
                             '</div>'+
                         '</form>'+
                     '</div>'+
@@ -8238,44 +8218,185 @@ trans_AIText = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
 
-        var instructionHints = {
-            'translate': gettext('Example: to English and Portuguese; new fields are _en and _pt'),
-            'classify': gettext('Example: categories A, B, C'),
-            'extract': gettext('Example: extract the date, amount or code mentioned in the text'),
-            'normalize': gettext('Example: unify spelling, abbreviations and format'),
-            'summarize': gettext('Example: at most 15 words')
-        }
-        var suggestedFromInstruction = true
+        var aiTextChips = [
+            {label: gettext('Translate'), text: gettext('Translate to English and Portuguese; new fields _en and _pt')},
+            {label: gettext('Normalize'), text: gettext('Normalize spelling, abbreviations and format')},
+            {label: gettext('Classify'), text: gettext('Classify into categories A, B, C')},
+            {label: gettext('Extract data'), text: gettext('Extract the code, date or amount mentioned in the text')},
+            {label: gettext('Summarize'), text: gettext('Summarize in at most 15 words')}
+        ]
+        var $chips = $('#ai-text-chips-'+ID).empty()
+        aiTextChips.forEach(function(chip) {
+            var $btn = $('<button type="button" class="btn btn-default btn-xs" style="margin:0 4px 4px 0"></button>')
+                .text(chip.label)
+                .attr('title', chip.text)
+            $btn.on('click', function() {
+                $('#instruction-'+ID).val(chip.text).trigger('input')
+            })
+            $chips.append($btn)
+        })
 
-        function syncInstructionHint() {
-            var hint = instructionHints[$('#mode-'+ID).val()] || instructionHints['translate']
-            $('#instruction-hint-'+ID).text(hint)
-            $('#instruction-'+ID).attr('placeholder', hint)
+        function normalizeNewAttrName(name) {
+            return String(name || '').trim().replace(/\s+/g, '_')
         }
 
-        function syncSuggestedAttrs() {
-            if (!suggestedFromInstruction) {
+        function getNewAttrs() {
+            return newAttrsState.slice()
+        }
+
+        function renderNewAttrChips() {
+            var $box = $('#ai-text-new-attrs-chips-'+ID).empty()
+            newAttrsState.forEach(function(name, index) {
+                var $chip = $(
+                    '<span class="label label-info" style="display:inline-block;margin:2px;padding:5px 8px;font-size:12px;font-weight:normal">'+
+                        '<span class="ai-text-tag-label"></span> '+
+                        '<a href="#" class="ai-text-tag-remove" style="color:#fff;margin-left:4px;text-decoration:none"><i class="fa fa-times"></i></a>'+
+                    '</span>'
+                )
+                $chip.find('.ai-text-tag-label').text(name)
+                $chip.find('.ai-text-tag-remove').on('click', function(ev) {
+                    ev.preventDefault()
+                    newAttrsState.splice(index, 1)
+                    renderNewAttrChips()
+                })
+                $box.append($chip)
+            })
+        }
+
+        function addNewAttrNames(names) {
+            var changed = false
+            ;(names || []).forEach(function(raw) {
+                var name = normalizeNewAttrName(raw)
+                if (!name) {
+                    return
+                }
+                var exists = newAttrsState.some(function(n) {
+                    return n.toLowerCase() === name.toLowerCase()
+                })
+                if (!exists) {
+                    newAttrsState.push(name)
+                    changed = true
+                }
+            })
+            if (changed) {
+                renderNewAttrChips()
+            }
+            return changed
+        }
+
+        function setNewAttrs(names) {
+            newAttrsState = []
+            addNewAttrNames(names)
+            if (!names || !names.length) {
+                renderNewAttrChips()
+            }
+        }
+
+        function commitNewAttrInput() {
+            var $input = $('#ai-text-new-attr-input-'+ID)
+            var tokens = parseAITextAttrTokens($input.val())
+            if (tokens.length) {
+                addNewAttrNames(tokens)
+                $input.val('')
+            }
+        }
+
+        $('#ai-text-new-attrs-box-'+ID).on('click', function() {
+            $('#ai-text-new-attr-input-'+ID).focus()
+        })
+        $('#ai-text-new-attr-input-'+ID).on('keydown', function(ev) {
+            if (ev.key === 'Enter' || ev.keyCode === 13 || ev.key === ',' || ev.keyCode === 188) {
+                ev.preventDefault()
+                commitNewAttrInput()
                 return
             }
-            var suggested = suggestAITextAttrs(selectedAITextAttrs(), $('#instruction-'+ID).val())
-            if (suggested.length) {
-                $('#new-attrs-'+ID).val(suggested.join(', '))
+            if ((ev.key === 'Backspace' || ev.keyCode === 8) && !$(this).val() && newAttrsState.length) {
+                newAttrsState.pop()
+                renderNewAttrChips()
             }
+        })
+        $('#ai-text-new-attr-input-'+ID).on('blur', function() {
+            commitNewAttrInput()
+        })
+
+        function showResolvedHelp() {
+            var parts = []
+            if (resolvedAIText.attr && resolvedAIText.attr.length) {
+                parts.push(gettext('Source columns:') + ' ' + resolvedAIText.attr.join(', '))
+            }
+            if (resolvedAIText.mode) {
+                parts.push(gettext('Task:') + ' ' + resolvedAIText.mode)
+            }
+            $('#ai-text-resolved-'+ID).text(parts.join(' · '))
         }
 
-        $('#mode-'+ID).on('change', syncInstructionHint)
-        $('#instruction-'+ID).on('input', function() {
-            suggestedFromInstruction = true
-            syncSuggestedAttrs()
+        function applyAITextSuggestion(resp) {
+            if (!resp) {
+                return
+            }
+            if (Array.isArray(resp.attr)) {
+                resolvedAIText.attr = resp.attr.filter(Boolean)
+            }
+            if (resp.mode) {
+                resolvedAIText.mode = resp.mode
+            }
+            var names = resp['new-attrs'] || resp.new_attrs
+            if (Array.isArray(names) && names.length) {
+                setNewAttrs(names)
+            }
+            showResolvedHelp()
+        }
+
+        function requestAITextSuggest(done, fail) {
+            var instruction = ($('#instruction-'+ID).val() || '').trim()
+            if (!instruction) {
+                alert(gettext('Detail the instruction (what to do with the text).'))
+                if (fail) {
+                    fail()
+                }
+                return
+            }
+            commitNewAttrInput()
+            var status = $('#ai-text-suggest-status-'+ID)
+            status.text(gettext('Suggesting…'))
+            $('#ai-text-suggest-'+ID).prop('disabled', true)
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_ai_text_suggest/',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    instruction: instruction,
+                    input_schema: inputSchemaNames(),
+                    // No reenviar chips viejos: Sugerir parte de la instrucción actual
+                    'new-attrs': []
+                }),
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'))
+                },
+                success: function(resp) {
+                    applyAITextSuggestion(resp)
+                    status.text(gettext('Suggestion ready. You can edit the new attributes before accepting.'))
+                    if (done) {
+                        done(resp)
+                    }
+                },
+                error: function(xhr) {
+                    var err = (xhr.responseJSON && xhr.responseJSON.error) || gettext('Could not suggest the attributes.')
+                    status.text('')
+                    alert(err)
+                    if (fail) {
+                        fail(err)
+                    }
+                },
+                complete: function() {
+                    $('#ai-text-suggest-'+ID).prop('disabled', false)
+                }
+            })
+        }
+
+        $('#ai-text-suggest-'+ID).on('click', function() {
+            requestAITextSuggest()
         })
-        $('#attr-'+ID).on('change', function() {
-            suggestedFromInstruction = true
-            syncSuggestedAttrs()
-        })
-        $('#new-attrs-'+ID).on('input', function() {
-            suggestedFromInstruction = false
-        })
-        syncInstructionHint()
 
       var context = this
 
@@ -8292,38 +8413,30 @@ trans_AIText = draw2d.shape.layout.VerticalLayout.extend({
                 }
 
                 schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
+                schema = schemaEdge
 
-                if (true){ // always sync options from edge (propagation may already have updated schema-old)
-                    schema = schemaEdge
-                    refillSelectPreserving($('#attr-'+ID), schema, getStoredParamValue(ID, 'attr'))
-                    var $attr = $('#attr-'+ID)
-                    if ($attr.data('select2')) {
-                        $attr.select2('destroy')
-                    }
-                    $attr.select2({
-                        tags: false,
-                        placeholder: gettext('Select attributes'),
-                        width: '100%',
-                        allowClear: true,
-                        dropdownParent: $('#dialog-ai-text-'+ID)
-                    })
-                }
-                var storedMode = getStoredParamValue(ID, 'mode')
-                if (storedMode) {
-                    $('#mode-'+ID).val(storedMode)
-                }
-                syncInstructionHint()
+                var storedInstruction = getStoredParamValue(ID, 'instruction') || ''
+                $('#instruction-'+ID).val(storedInstruction)
                 var storedAttrs = getStoredParamValue(ID, 'new-attrs')
                 if (Array.isArray(storedAttrs)) {
-                    $('#new-attrs-'+ID).val(storedAttrs.join(', '))
-                    suggestedFromInstruction = false
+                    setNewAttrs(storedAttrs)
                 } else if (storedAttrs) {
-                    $('#new-attrs-'+ID).val(storedAttrs)
-                    suggestedFromInstruction = false
+                    setNewAttrs(parseAITextAttrTokens(String(storedAttrs)))
                 } else {
-                    suggestedFromInstruction = true
-                    syncSuggestedAttrs()
+                    setNewAttrs([])
                 }
+                var storedAttr = getStoredParamValue(ID, 'attr')
+                if (Array.isArray(storedAttr)) {
+                    resolvedAIText.attr = storedAttr.filter(Boolean)
+                } else if (storedAttr) {
+                    resolvedAIText.attr = [storedAttr]
+                } else {
+                    resolvedAIText.attr = []
+                }
+                resolvedAIText.mode = getStoredParamValue(ID, 'mode') || 'auto'
+                $('#ai-text-suggest-status-'+ID).text('')
+                $('#ai-text-new-attr-input-'+ID).val('')
+                showResolvedHelp()
 
             },100);
 
@@ -8331,32 +8444,11 @@ trans_AIText = draw2d.shape.layout.VerticalLayout.extend({
 
         });
 
-        $('#ai-text-accept-'+ID).click(function() {
-
-            var attr = selectedAITextAttrs()
-            var mode = $('#mode-'+ID).val()
-            var instruction = ($('#instruction-'+ID).val() || '').trim()
-            var newAttrs = parseAITextAttrs($('#new-attrs-'+ID).val())
-            if (!newAttrs.length) {
-                newAttrs = suggestAITextAttrs(attr, instruction)
-            }
-            if (!attr.length) {
-                alert(gettext('Choose at least one attribute with the text.'))
-                return
-            }
-            if (!instruction) {
-                alert(gettext('Detail the instruction (languages, categories, what to extract…).'))
-                return
-            }
-            if (!newAttrs.length) {
-                alert(gettext('Indicate the new attributes (for example name_en, name_pt, or suffixes _en and _pt in the instruction).'))
-                return
-            }
-
+        function finishAITextAccept(attr, mode, instruction, newAttrs) {
             var paramsAI = {"id": ID,
             "parameters": [
                 {"attr": attr,
-                "mode": mode,
+                "mode": mode || 'auto',
                 "instruction": instruction,
                 "new-attrs": newAttrs }
             ]}
@@ -8379,7 +8471,16 @@ trans_AIText = draw2d.shape.layout.VerticalLayout.extend({
             icon.setColor(ETL_NODE_STYLE.ai.gear)
 
             $('#dialog-ai-text-'+ID).modal('hide')
+        }
 
+        $('#ai-text-accept-'+ID).click(function() {
+            // Aceptar suave: se puede guardar a medias (instrucción / attrs / new-attrs opcionales)
+            commitNewAttrInput()
+            var instruction = ($('#instruction-'+ID).val() || '').trim()
+            var newAttrs = getNewAttrs()
+            var attr = resolvedAIText.attr || []
+            var mode = resolvedAIText.mode || 'auto'
+            finishAITextAccept(attr, mode, instruction, newAttrs)
         });
 
     },
@@ -8537,7 +8638,8 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
                                 '<textarea id="ai-action-instruction-'+ID+'" rows="3" class="form-control" placeholder="'+gettext('e.g. unify street, number and municipality into address; or compute centroids as x and y')+'"></textarea>'+
                             '</div>'+
                             '<div style="margin-top:10px">'+
-                                '<button type="button" class="btn btn-primary btn-sm" id="ai-action-generate-'+ID+'"><i class="fa fa-magic"></i> '+gettext('Generate')+'</button>'+
+                                '<button type="button" class="btn btn-primary btn-sm" id="ai-action-generate-'+ID+'" title="'+gettext('Generate SQL and schemas from the instruction')+'"><i class="fa fa-magic"></i> '+gettext('Generate')+'</button> '+
+                                '<button type="button" class="btn btn-default btn-sm" id="ai-action-suggest-from-instr-'+ID+'" title="'+gettext('Suggest number of outputs and schemas from the instruction')+'"><i class="fa fa-lightbulb-o"></i> '+gettext('Suggest outputs and schemas')+'</button>'+
                                 '<span id="ai-action-generate-status-'+ID+'" class="help-block" style="display:inline;margin-left:8px"></span>'+
                             '</div>'+
                             '<div style="margin-top:10px">'+
@@ -8549,13 +8651,15 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
                                     '<div id="ai-action-out-cols-'+ID+'" style="max-height:180px;overflow-y:auto"></div>'+
                                     '<div style="margin-top:6px">'+
                                         '<button type="button" class="btn btn-default btn-sm" id="ai-action-add-col-'+ID+'"><i class="fa fa-plus"></i> '+gettext('Add column')+'</button> '+
-                                        '<button type="button" class="btn btn-default btn-sm" id="ai-action-copy-schema-'+ID+'">'+gettext('Reload from input schema')+'</button> '+
-                                        '<button type="button" class="btn btn-default btn-sm" id="ai-action-suggest-schema-'+ID+'"><i class="fa fa-lightbulb-o"></i> '+gettext('Suggest from SQL')+'</button>'+
-                                        '<span id="ai-action-suggest-status-'+ID+'" class="help-block" style="display:inline;margin-left:8px"></span>'+
+                                        '<button type="button" class="btn btn-default btn-sm" id="ai-action-copy-schema-'+ID+'">'+gettext('Reload from input schema')+'</button>'+
                                     '</div>'+
                                     '<div style="margin-top:10px">'+
                                         '<label class="col-form-label">'+gettext('SQL (reviewable):')+'</label>'+
-                                        '<textarea id="ai-action-sql-'+ID+'" rows="6" class="form-control" style="font-family:Menlo,Monaco,Consolas,monospace;font-size:12px"></textarea>'+
+                                        '<textarea id="ai-action-sql-'+ID+'" rows="6" class="form-control"></textarea>'+
+                                        '<div style="margin-top:6px">'+
+                                            '<button type="button" class="btn btn-default btn-sm" id="ai-action-suggest-schema-'+ID+'" title="'+gettext('Infer schemas by dry-running each output SQL')+'"><i class="fa fa-lightbulb-o"></i> '+gettext('Suggest schemas from SQL')+'</button>'+
+                                            '<span id="ai-action-suggest-status-'+ID+'" class="help-block" style="display:inline;margin-left:8px"></span>'+
+                                        '</div>'+
                                     '</div>'+
                                 '</div>'+
                             '</div>'+
@@ -8605,13 +8709,12 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
             return n
         }
 
-        function inferOutputsFromInstruction(instruction, declared) {
-            declared = clampCount(declared, AI_ACTION_MAX_OUTPUTS)
+        function parseOutputsFromInstruction(instruction) {
             var text = (instruction || '').toLowerCase()
             if (!text) {
-                return declared
+                return 0
             }
-            var inferred = 1
+            var inferred = 0
             var wordMap = {
                 dos: 2, two: 2, tres: 3, three: 3, cuatro: 4, four: 4,
                 cinco: 5, five: 5, seis: 6, six: 6, siete: 7, seven: 7,
@@ -8621,14 +8724,31 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
                 || text.match(/\b(dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|two|three|four|five|six|seven|eight|nine|ten|\d+)\s+outputs?\b/)
             if (match) {
                 var token = match[1]
-                inferred = /^\d+$/.test(token) ? parseInt(token, 10) : (wordMap[token] || 1)
+                inferred = /^\d+$/.test(token) ? parseInt(token, 10) : (wordMap[token] || 0)
             }
             if (/\bsalida\s*2\b/.test(text) || /\boutput\s*2\b/.test(text)
                     || /una\s+con[\s\S]+y\s+otra\s+con/.test(text)
                     || /one\s+with[\s\S]+and\s+(another|the\s+other)\s+with/.test(text)) {
                 inferred = Math.max(inferred, 2)
             }
+            return inferred > 0 ? clampCount(inferred, AI_ACTION_MAX_OUTPUTS) : 0
+        }
+
+        function inferOutputsFromInstruction(instruction, declared) {
+            declared = clampCount(declared, AI_ACTION_MAX_OUTPUTS)
+            var inferred = parseOutputsFromInstruction(instruction)
+            if (!inferred) {
+                return declared
+            }
             return clampCount(Math.max(declared, inferred), AI_ACTION_MAX_OUTPUTS)
+        }
+
+        function applySuggestedOutputsCount(count) {
+            count = clampCount(count, AI_ACTION_MAX_OUTPUTS)
+            $('#outputs-count-'+ID).val(count)
+            // skipPersist: no pisar el estado recién sugerido con el DOM viejo de la pestaña activa
+            renderOutTabs(count, true)
+            return count
         }
 
         function schemasForGenerate(count) {
@@ -8675,13 +8795,35 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
             return rows
         }
 
+        var aiActionSqlEditorId = 'ai-action-sql-'+ID
+
+        function ensureAIActionSqlEditor() {
+            if (typeof window.initEtlSqlEditor === 'function' && !(window.etlSqlEditors && window.etlSqlEditors[aiActionSqlEditorId])) {
+                window.initEtlSqlEditor(aiActionSqlEditorId, 'postgres')
+            }
+            if (typeof window.refreshEtlSqlEditor === 'function') {
+                window.refreshEtlSqlEditor(aiActionSqlEditorId)
+            }
+        }
+
         function persistActiveTabSql() {
-            sqlsState[activeOutTab] = ($('#ai-action-sql-'+ID).val() || '')
+            var value = (typeof window.getEtlSqlEditorValue === 'function')
+                ? window.getEtlSqlEditorValue(aiActionSqlEditorId)
+                : ($('#ai-action-sql-'+ID).val() || '')
+            sqlsState[activeOutTab] = value || ''
             return sqlsState[activeOutTab]
         }
 
         function renderActiveTabSql() {
-            $('#ai-action-sql-'+ID).val(sqlsState[activeOutTab] || '')
+            var value = sqlsState[activeOutTab] || ''
+            if (typeof window.setEtlSqlEditorValue === 'function') {
+                window.setEtlSqlEditorValue(aiActionSqlEditorId, value)
+            } else {
+                $('#ai-action-sql-'+ID).val(value)
+            }
+            if (typeof window.refreshEtlSqlEditor === 'function') {
+                window.refreshEtlSqlEditor(aiActionSqlEditorId)
+            }
         }
 
         function persistActiveTabCols() {
@@ -8735,7 +8877,8 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
                 outputSchemasState = outputSchemasState.slice(0, count)
             }
             while (sqlsState.length < count) {
-                sqlsState.push(sqlsState.length ? (sqlsState[0] || '') : '')
+                // Nuevas salidas vacías: no clonar SQL (evitar que «Sugerir» cuente copias)
+                sqlsState.push('')
             }
             if (sqlsState.length > count) {
                 sqlsState = sqlsState.slice(0, count)
@@ -8850,6 +8993,71 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
             renderOutTabs(outCount)
         })
 
+        function applyInstructionSchemas(schemas, outCount) {
+            outCount = clampCount(outCount || (schemas && schemas.length) || 1, AI_ACTION_MAX_OUTPUTS)
+            while (outputSchemasState.length < outCount) {
+                outputSchemasState.push([])
+            }
+            if (outputSchemasState.length > outCount) {
+                outputSchemasState = outputSchemasState.slice(0, outCount)
+            }
+            if (Array.isArray(schemas)) {
+                for (var i = 0; i < outCount; i++) {
+                    var block = schemas[i] || schemas[0] || []
+                    outputSchemasState[i] = normalizeSchemaBlock(block || [])
+                }
+            }
+            if (activeOutTab >= outCount) {
+                activeOutTab = outCount - 1
+            }
+            applySuggestedOutputsCount(outCount)
+        }
+
+        $('#ai-action-suggest-from-instr-'+ID).on('click', function() {
+            var instruction = ($('#ai-action-instruction-'+ID).val() || '').trim()
+            if (!instruction) {
+                alert(gettext('Indicate the natural-language instruction.'))
+                return
+            }
+            var inCount = clampCount($('#inputs-count-'+ID).val(), AI_ACTION_MAX_INPUTS)
+            var outCount = clampCount($('#outputs-count-'+ID).val(), AI_ACTION_MAX_OUTPUTS)
+            var fromInstr = parseOutputsFromInstruction(instruction)
+            var status = $('#ai-action-generate-status-'+ID)
+            status.text(gettext('Suggesting…'))
+            $('#ai-action-suggest-from-instr-'+ID).prop('disabled', true)
+            $.ajax({
+                type: 'POST',
+                url: '/gvsigonline/etl/etl_ai_action_suggest_from_instruction/',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    instruction: instruction,
+                    inputs_count: inCount,
+                    outputs_count: fromInstr || outCount,
+                    suggest_outputs: true,
+                    suggest_schemas: true,
+                    input_schemas: schemasForGenerate(inCount)
+                }),
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'))
+                },
+                success: function(resp) {
+                    applyInstructionSchemas(
+                        resp.output_schemas || (resp.output_schema ? [resp.output_schema] : []),
+                        resp.outputs_count || fromInstr || outCount
+                    )
+                    status.text('')
+                },
+                error: function(xhr) {
+                    var err = (xhr.responseJSON && xhr.responseJSON.error) || gettext('Could not suggest from the instruction.')
+                    status.text('')
+                    alert(err)
+                },
+                complete: function() {
+                    $('#ai-action-suggest-from-instr-'+ID).prop('disabled', false)
+                }
+            })
+        })
+
         $('#ai-action-add-col-'+ID).on('click', function() {
             addOutputColRow('', 'text')
         })
@@ -8885,47 +9093,84 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
                 $('#ai-action-instruction-'+ID).val(getStoredParamValue(ID, 'instruction') || '')
                 $('#ai-action-suggest-status-'+ID).text('')
                 $('#ai-action-generate-status-'+ID).text('')
+                ensureAIActionSqlEditor()
+                renderActiveTabSql()
             }, 100)
             $('#dialog-ai-action-'+ID).modal('show')
+            setTimeout(function() {
+                ensureAIActionSqlEditor()
+                renderActiveTabSql()
+            }, 250)
         })
 
         $('#ai-action-suggest-schema-'+ID).on('click', function() {
             var inCount = clampCount($('#inputs-count-'+ID).val(), AI_ACTION_MAX_INPUTS)
+            var outCount = clampCount($('#outputs-count-'+ID).val(), AI_ACTION_MAX_OUTPUTS)
             $('#inputs-count-'+ID).val(inCount)
+            $('#outputs-count-'+ID).val(outCount)
             persistActiveTabSql()
-            var sqlText = (sqlsState[activeOutTab] || '').trim()
-            if (!sqlText) {
+            var jobs = []
+            for (var ti = 0; ti < outCount; ti++) {
+                var sqlText = (sqlsState[ti] || '').trim()
+                if (sqlText) {
+                    jobs.push({index: ti, sql: sqlText})
+                }
+            }
+            if (!jobs.length) {
                 alert(gettext('Paste or generate the SQL first.'))
                 return
             }
             var status = $('#ai-action-suggest-status-'+ID)
-            status.text(gettext('Suggesting schema…'))
+            status.text(gettext('Suggesting…'))
             $('#ai-action-suggest-schema-'+ID).prop('disabled', true)
-            $.ajax({
-                type: 'POST',
-                url: '/gvsigonline/etl/etl_ai_action_suggest_schema/',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    sql: sqlText,
-                    input_schemas: schemasForGenerate(inCount)
-                }),
-                beforeSend: function(xhr) {
-                    xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'))
-                },
-                success: function(resp) {
-                    outputSchemasState[activeOutTab] = normalizeSchemaBlock(resp.output_schema || [])
-                    renderActiveTabCols()
-                    status.text(gettext('Schema suggested for the active output tab.'))
-                },
-                error: function(xhr) {
-                    var err = (xhr.responseJSON && xhr.responseJSON.error) || gettext('Could not suggest the output schema.')
+            var inputSchemas = schemasForGenerate(inCount)
+            var errors = []
+            var suggested = 0
+            function finishSuggest() {
+                $('#ai-action-suggest-schema-'+ID).prop('disabled', false)
+                renderActiveTabCols()
+                if (errors.length && !suggested) {
                     status.text('')
-                    alert(err)
-                },
-                complete: function() {
-                    $('#ai-action-suggest-schema-'+ID).prop('disabled', false)
+                    alert(errors[0])
+                    return
                 }
-            })
+                status.text('')
+                if (errors.length) {
+                    alert(errors.join('\n'))
+                }
+            }
+            // En serie: evita carreras en tablas temporales del dry-run
+            function runJob(pos) {
+                if (pos >= jobs.length) {
+                    finishSuggest()
+                    return
+                }
+                var job = jobs[pos]
+                $.ajax({
+                    type: 'POST',
+                    url: '/gvsigonline/etl/etl_ai_action_suggest_schema/',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        sql: job.sql,
+                        input_schemas: inputSchemas
+                    }),
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'))
+                    },
+                    success: function(resp) {
+                        outputSchemasState[job.index] = normalizeSchemaBlock(resp.output_schema || [])
+                        suggested += 1
+                    },
+                    error: function(xhr) {
+                        var err = (xhr.responseJSON && xhr.responseJSON.error) || gettext('Could not suggest the output schema.')
+                        errors.push(gettext('Output') + ' ' + (job.index + 1) + ': ' + err)
+                    },
+                    complete: function() {
+                        runJob(pos + 1)
+                    }
+                })
+            }
+            runJob(0)
         })
 
         $('#ai-action-generate-'+ID).on('click', function() {
@@ -8982,9 +9227,10 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
                     } else if (resp.output_schema && resp.output_schema.length) {
                         respSchemas = [resp.output_schema]
                     }
+                    // Generar siempre aporta esquemas desde el dry-run del SQL
                     if (respSchemas) {
                         for (var s = 0; s < outCount; s++) {
-                            var block = respSchemas[s] || []
+                            var block = respSchemas[s] || respSchemas[0] || []
                             if (block && block.length) {
                                 outputSchemasState[s] = normalizeSchemaBlock(block)
                             }
@@ -8992,11 +9238,9 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
                     }
                     activeOutTab = 0
                     renderOutTabs(outCount, true)
-                    if (outCount > 1) {
-                        status.text(gettext('SQL generated for each output tab. Switch tabs to review.'))
-                    } else {
-                        status.text(gettext('SQL generated. Review it before accepting.'))
-                    }
+                    ensureAIActionSqlEditor()
+                    renderActiveTabSql()
+                    status.text(gettext('SQL and output schemas generated. Review the tabs; use Suggest from SQL if you edit the query.'))
                 },
                 error: function(xhr) {
                     var err = (xhr.responseJSON && xhr.responseJSON.error) || gettext('Could not generate the SQL.')

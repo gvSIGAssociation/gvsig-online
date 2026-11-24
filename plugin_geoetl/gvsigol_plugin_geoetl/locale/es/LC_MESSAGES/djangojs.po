@@ -2624,6 +2624,21 @@ msgstr "Atributos nuevos (separados por comas):"
 msgid "e.g. name_en, name_pt"
 msgstr "p. ej. name_en, name_pt"
 
+msgid "New attributes (one per line or comma-separated):"
+msgstr "Atributos nuevos (uno por línea o separados por comas):"
+
+msgid "e.g. observacion_en\nobservacion_pt"
+msgstr "p. ej. observacion_en\nobservacion_pt"
+
+msgid "New attributes:"
+msgstr "Atributos nuevos:"
+
+msgid "Type a name and press Enter"
+msgstr "Escribe un nombre y pulsa Intro"
+
+msgid "Press Enter to add. Click × to remove."
+msgstr "Pulsa Intro para añadir. Pulsa × para quitar."
+
 msgid "Filled automatically from suffixes like _en and _pt in the instruction; you can edit them."
 msgstr "Se rellenan solos a partir de sufijos como _en y _pt en la instrucción; puedes editarlos."
 
@@ -2767,3 +2782,123 @@ msgstr "Esquema sugerido para la pestaña de salida activa."
 
 msgid "Could not suggest the output schema."
 msgstr "No se ha podido sugerir el esquema de salida."
+
+msgid "Suggest"
+msgstr "Sugerir"
+
+msgid "Suggest outputs"
+msgstr "Sugerir salidas"
+
+msgid "Suggest schemas"
+msgstr "Sugerir esquemas"
+
+msgid "Suggest outputs and schemas"
+msgstr "Sugerir salidas y esquemas"
+
+msgid "Suggest number of outputs and schemas from the instruction"
+msgstr "Sugerir número de salidas y esquemas a partir de la instrucción"
+
+msgid "Suggest from the instruction"
+msgstr "Sugerir desde la instrucción"
+
+msgid "Suggest number of outputs from the instruction"
+msgstr "Sugerir el número de salidas a partir de la instrucción"
+
+msgid "Suggest output schemas from the instruction"
+msgstr "Sugerir los esquemas de salida a partir de la instrucción"
+
+msgid "Generate SQL and schemas from the instruction"
+msgstr "Generar SQL y esquemas a partir de la instrucción"
+
+msgid "Suggest schemas from SQL"
+msgstr "Sugerir esquemas desde el SQL"
+
+msgid "Suggest outputs from SQL"
+msgstr "Sugerir salidas desde el SQL"
+
+msgid "Suggest outputs and schemas from SQL"
+msgstr "Sugerir salidas y esquemas desde el SQL"
+
+msgid "Set outputs from distinct SQL and infer schemas"
+msgstr "Ajustar salidas según SQL distintos e inferir esquemas"
+
+msgid "Infer schemas by dry-running each output SQL"
+msgstr "Inferir esquemas ejecutando en seco el SQL de cada salida"
+
+msgid "Count distinct non-empty SQL tabs"
+msgstr "Contar pestañas SQL no vacías y distintas"
+
+msgid "Suggesting schemas…"
+msgstr "Sugiriendo esquemas…"
+
+msgid "Schemas suggested from the instruction."
+msgstr "Esquemas sugeridos desde la instrucción."
+
+msgid "Could not suggest from the instruction."
+msgstr "No se ha podido sugerir desde la instrucción."
+
+msgid "Outputs set from distinct SQL:"
+msgstr "Salidas según SQL distintos:"
+
+msgid "No output count found in the instruction. Write e.g. “two outputs”."
+msgstr "No se ha encontrado el número de salidas en la instrucción. Escribe p. ej. «dos salidas»."
+
+msgid "Outputs (schema + SQL per tab):"
+msgstr "Salidas (esquema + SQL por pestaña):"
+
+msgid "Each tab has its own schema and SELECT. Switch tabs to review every output."
+msgstr "Cada pestaña tiene su propio esquema y SELECT. Cambia de pestaña para revisar cada salida."
+
+msgid "If the instruction asks for several outputs, Generate will create more tabs automatically."
+msgstr "Si la instrucción pide varias salidas, Generar creará más pestañas automáticamente."
+
+msgid "Suggesting schemas for all outputs…"
+msgstr "Sugiriendo esquemas para todas las salidas…"
+
+msgid "Schemas suggested for every output with SQL."
+msgstr "Esquemas sugeridos para todas las salidas con SQL."
+
+msgid "Schemas suggested for some outputs; check the SQL of the others."
+msgstr "Esquemas sugeridos para algunas salidas; revisa el SQL de las demás."
+
+msgid "SQL and output schemas generated. Review the tabs; use Suggest from SQL if you edit the query."
+msgstr "SQL y esquemas de salida generados. Revisa las pestañas; usa Sugerir desde el SQL si editas la consulta."
+
+msgid "You can Accept with only inputs/outputs set (ports appear then). Each output has its own schema and SQL tab. Instruction and SQL are needed to run, not to Accept."
+msgstr "Puedes Aceptar solo con entradas/salidas (ahí aparecen los puertos). Cada salida tiene su pestaña de esquema y SQL. La instrucción y el SQL hacen falta para ejecutar, no para Aceptar."
+
+msgid "You can Accept with incomplete options (ports stay available). Instruction and suggested attributes are needed to run, not to Accept. Distinct value combinations are sent to the language model; unresolved values stay empty."
+msgstr "Puedes Aceptar con opciones incompletas (los puertos siguen disponibles). La instrucción y los atributos sugeridos hacen falta para ejecutar, no para Aceptar. Se envían al modelo las combinaciones distintas de valores; las no resueltas quedan vacías."
+
+msgid "e.g. translate the name field to English and Portuguese (_en, _pt)"
+msgstr "p. ej. traduce el campo nombre al inglés y al portugués (_en, _pt)"
+
+msgid "Source columns:"
+msgstr "Columnas de origen:"
+
+msgid "Suggesting…"
+msgstr "Sugiriendo…"
+
+msgid "Suggestion ready. You can edit the new attributes before accepting."
+msgstr "Sugerencia lista. Puedes editar los atributos nuevos antes de aceptar."
+
+msgid "Could not suggest the attributes."
+msgstr "No se han podido sugerir los atributos."
+
+msgid "Detail the instruction (what to do with the text)."
+msgstr "Detalla la instrucción (qué hacer con el texto)."
+
+msgid "Translate to English and Portuguese; new fields _en and _pt"
+msgstr "Traducir al inglés y al portugués; campos nuevos _en y _pt"
+
+msgid "Normalize spelling, abbreviations and format"
+msgstr "Normalizar ortografía, abreviaturas y formato"
+
+msgid "Classify into categories A, B, C"
+msgstr "Clasificar en categorías A, B, C"
+
+msgid "Extract the code, date or amount mentioned in the text"
+msgstr "Extraer el código, la fecha o el importe mencionados en el texto"
+
+msgid "Summarize in at most 15 words"
+msgstr "Resumir en 15 palabras como máximo"

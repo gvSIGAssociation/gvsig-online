@@ -114,6 +114,42 @@ class ParamsTests(SimpleTestCase):
             etl_ai_action.infer_outputs_count('dos salidas', 4),
             4,
         )
+        self.assertEqual(
+            etl_ai_action.parse_outputs_from_instruction('dos salidas distintas'),
+            2,
+        )
+        self.assertEqual(
+            etl_ai_action.parse_outputs_from_instruction('calcula centroides'),
+            0,
+        )
+        self.assertEqual(
+            etl_ai_action.count_outputs_from_sqls([
+                'SELECT 1 AS a FROM input_0',
+                'SELECT 1 AS a FROM input_0',
+                'SELECT 2 AS b FROM input_0',
+                '',
+            ]),
+            2,
+        )
+
+    def test_suggest_schemas_from_instruction(self):
+        def fake_invoke(system, user):
+            return json.dumps({
+                'outputs_count': 2,
+                'output_schemas': [
+                    [{'name': 'a', 'type': 'text'}],
+                    [{'name': 'b', 'type': 'integer'}],
+                ],
+            })
+        count, schemas = etl_ai_action.suggest_schemas_from_instruction(
+            'dos salidas: una con a y otra con b',
+            [[{'name': 'id', 'type': 'integer'}]],
+            outputs_count=1,
+            invoke=fake_invoke,
+        )
+        self.assertEqual(count, 2)
+        self.assertEqual(schemas[0][0]['name'], 'a')
+        self.assertEqual(schemas[1][0]['name'], 'b')
 
 
 class SandboxTests(SimpleTestCase):
@@ -435,3 +471,26 @@ class ViewTests(SimpleTestCase):
         with mock.patch('gvsigol_plugin_geoetl.etl_ai_action.feature_enabled', return_value=False):
             response = views.etl_ai_action_generate(request)
         self.assertEqual(response.status_code, 403)
+
+    def test_suggest_from_instruction_endpoint(self):
+        request = RequestFactory().post(
+            '/gvsigonline/etl/etl_ai_action_suggest_from_instruction/',
+            data=json.dumps({
+                'instruction': 'dos salidas',
+                'input_schemas': [[{'name': 'id', 'type': 'integer'}]],
+                'suggest_outputs': True,
+                'suggest_schemas': True,
+            }),
+            content_type='application/json',
+        )
+        request.user = mock.Mock(is_authenticated=True, is_staff=True, is_superuser=True)
+        with mock.patch('gvsigol_plugin_geoetl.etl_ai_action.feature_enabled', return_value=True), \
+                mock.patch(
+                    'gvsigol_plugin_geoetl.etl_ai_action.suggest_schemas_from_instruction',
+                    return_value=(2, [[{'name': 'a', 'type': 'text'}], [{'name': 'b', 'type': 'text'}]]),
+                ):
+            response = views.etl_ai_action_suggest_from_instruction(request)
+        self.assertEqual(response.status_code, 200)
+        body = json.loads(response.content)
+        self.assertEqual(body['outputs_count'], 2)
+        self.assertEqual(len(body['output_schemas']), 2)
