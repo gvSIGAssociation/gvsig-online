@@ -82,14 +82,30 @@ def publish_postgis_resource(user, datastore, layer_group, name, title=None,
         layer.order = max_order + 1
     layer.save()
 
+    # Empty multipart role fields must not mean "nobody can read". Prefer the
+    # creator primary role plus the roles the user actually has (OIDC/classic).
+    default_roles = []
     primary_role = auth_backend.get_primary_role(user.username)
-    default_roles = [primary_role] if primary_role else []
+    if primary_role:
+        default_roles.append(primary_role)
+    try:
+        for role in auth_backend.get_roles(user) or []:
+            if role and role not in default_roles:
+                default_roles.append(role)
+    except Exception:
+        pass
+
+    def _roles_or_default(roles):
+        if roles is None or (isinstance(roles, (list, tuple)) and len(roles) == 0):
+            return list(default_roles)
+        return list(roles)
+
     services_utils.set_layer_permissions(
         layer,
         bool(is_public),
-        default_roles if read_roles is None else read_roles,
-        default_roles if write_roles is None else write_roles,
-        default_roles if manage_roles is None else manage_roles,
+        _roles_or_default(read_roles),
+        _roles_or_default(write_roles),
+        _roles_or_default(manage_roles),
     )
 
     if has_geometry:
