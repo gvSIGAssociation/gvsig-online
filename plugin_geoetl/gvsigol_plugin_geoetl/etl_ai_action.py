@@ -9,7 +9,8 @@ import psycopg2
 from psycopg2 import sql
 
 from . import etl_ai
-from .settings import GEOETL_DB
+from .etl_security import validate_ai_select
+from .settings import GEOETL_DB, ETL_AI_SQL_TIMEOUT, ETL_AI_SQL_DRY_RUN_TIMEOUT
 
 LOG = logging.getLogger('gvsigol')
 
@@ -289,6 +290,8 @@ def sanitize_sql(sql_text):
     head = cleaned.lstrip().lower()
     if not (head.startswith('select') or head.startswith('with')):
         raise ValueError('El SQL debe empezar por SELECT o WITH.')
+    # La lista de palabras no basta (p. ej. DropGeometryTable o leer public.auth_user)
+    validate_ai_select(text)
     return text
 
 
@@ -322,10 +325,14 @@ def bind_sql(sql_text, table_names, schema=None):
     return bound
 
 
-def _connect():
+def _connect(timeout_seconds=None):
+    kwargs = {}
+    if timeout_seconds and timeout_seconds > 0:
+        kwargs['options'] = '-c statement_timeout=%d' % (int(timeout_seconds) * 1000)
     return psycopg2.connect(
         user=GEOETL_DB['user'], password=GEOETL_DB['password'],
         host=GEOETL_DB['host'], port=GEOETL_DB['port'], database=GEOETL_DB['database'],
+        **kwargs
     )
 
 
@@ -363,7 +370,7 @@ def dry_run_schema(sql_text, input_schemas, schema=None):
 
     # Sufijo único: varias sugerencias en paralelo no pueden compartir _ai_action_in_0
     run_id = uuid.uuid4().hex[:12]
-    conn = _connect()
+    conn = _connect(ETL_AI_SQL_DRY_RUN_TIMEOUT)
     conn.autocommit = True
     cur = conn.cursor()
     temp_names = []
@@ -890,7 +897,7 @@ def trans_AIAction(dicc):
     unique_sqls = list({s for s in sqls})
     shared_sql = unique_sqls[0] if len(unique_sqls) == 1 else None
 
-    conn = _connect()
+    conn = _connect(ETL_AI_SQL_TIMEOUT)
     cur = conn.cursor()
     results = []
     try:

@@ -644,12 +644,14 @@ table.dataTable.no-footer { border-bottom: none !important; }
 						<label for="ttl-input">{% trans "Hours to keep temporary tables" %}</label>
 						<input type="number" id="ttl-input" class="form-control" min="1" value="24">
 					</div>
+					{% if user.is_superuser %}
 					<div class="form-group" style="border-top:1px solid var(--pl-border);padding-top:14px;margin-top:4px;">
 						<label style="display:block;margin-bottom:8px;">{% trans "Clean temporary tables now" %}</label>
 						<button id="button-clean-tmp" class="btn-pl-add btn-pl-add--outline" data-toggle="tooltip" data-placement="top" title='{% trans "Clean temporary tables" %}'>
 							<i class="fa fa-trash"></i> {% trans "Clean" %}
 						</button>
 					</div>
+					{% endif %}
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>

@@ -1354,12 +1354,14 @@ def etl_read_canvas(request):
                     params = None
 
                 concat = ws.concat
+                auth_username = ws.username
 
             else:
                 # Ejecución desde el editor: usa el JSON del canvas actual.
                 # Si el workspace ya está guardado, el estado va ligado a ese id_ws
                 # para no mezclar ejecuciones entre pestañas/workspaces del mismo usuario.
                 jsonCanvas = json.loads(request.POST['jsonCanvas'])
+                auth_username = request.user.username
                 id_ws_raw = (request.POST.get('id_ws') or '').strip()
                 id_ws = None
                 params = None
@@ -1396,6 +1398,7 @@ def etl_read_canvas(request):
                     'jsonCanvas': jsonCanvas,
                     'id_ws': id_ws,
                     'username': request.user.username,
+                    'auth_username': auth_username,
                     'parameters': params,
                     'concat': concat,
                 })
@@ -1793,15 +1796,22 @@ def etl_workspace_is_running(request):
                 response['run'] = 'true'
                 break
 
-        if response['run'] == 'false':
-            etl_clean_tmp_tables(request)
+        if response['run'] == 'false' and request.user.is_superuser:
+            _drop_etl_temp_schemas()
 
     return HttpResponse(json.dumps(response, indent=4), content_type='folder/json')
 
 @login_required()
-@staff_required
+@superuser_required
 def etl_clean_tmp_tables(request):
+    # Borra las tablas temporales de todos los usuarios: solo superusuario y por POST (CSRF).
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    _drop_etl_temp_schemas()
+    return JsonResponse({'ok': True})
 
+
+def _drop_etl_temp_schemas():
     connection_params = GEOETL_DB
 
     user = connection_params.get('user')
@@ -1848,9 +1858,6 @@ def etl_clean_tmp_tables(request):
     # Clear visualizer_session_id from all ETLstatus entries so the
     # "Open Visualizer" button no longer appears in the workspace list
     ETLstatus.objects.all().update(visualizer_session_id=None)
-
-    response = {}
-    return render(request, 'dashboard_geoetl_workspaces_list.html', _ctx(response))
 
 
 @login_required()

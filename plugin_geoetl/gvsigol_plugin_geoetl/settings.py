@@ -62,6 +62,10 @@ env_plugin_geoetl = environ.Env(
     ETL_AI_TEXT_MAX_VALUES=(int, 2000),
     # Valores por llamada al modelo (solo trans_AIText).
     ETL_AI_TEXT_BATCH_SIZE=(int, 40),
+    # Tiempo máximo (segundos) de cada sentencia del nodo Procesa datos con IA. 0 = sin límite.
+    ETL_AI_SQL_TIMEOUT=(int, 900),
+    # Tiempo máximo (segundos) del análisis previo del SQL al generar o sugerir esquemas.
+    ETL_AI_SQL_DRY_RUN_TIMEOUT=(int, 30),
     # --- Nodos predictivos / ráster (etl_raster.py). 0 = sin límite ---
     # Píxeles máximos del ráster que procesa un nodo (alto x ancho).
     ETL_RASTER_MAX_PIXELS=(int, 4000000000),
@@ -129,6 +133,8 @@ ETL_ASSISTANT_COLUMNS = env_plugin_geoetl('ETL_ASSISTANT_COLUMNS')
 ETL_AI_NODES_ENABLED = env_plugin_geoetl('ETL_AI_NODES_ENABLED')
 ETL_AI_TEXT_MAX_VALUES = env_plugin_geoetl('ETL_AI_TEXT_MAX_VALUES')
 ETL_AI_TEXT_BATCH_SIZE = env_plugin_geoetl('ETL_AI_TEXT_BATCH_SIZE')
+ETL_AI_SQL_TIMEOUT = env_plugin_geoetl('ETL_AI_SQL_TIMEOUT')
+ETL_AI_SQL_DRY_RUN_TIMEOUT = env_plugin_geoetl('ETL_AI_SQL_DRY_RUN_TIMEOUT')
 
 LOGGER.info("ETL_DB_HOST= %s",GEOETL_DB['host'])
 LOGGER.info("ETL_DB_PORT= %s",GEOETL_DB['port'])

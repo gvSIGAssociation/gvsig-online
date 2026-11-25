@@ -10,7 +10,7 @@ from .models import (ETLworkspaces, ETLstatus, cadastral_requests, SendEmails, S
 from gvsigol_services.models import Connection
 from gvsigol import settings
 
-from . import etl_tasks, views, etl_raster, etl_cancel
+from . import etl_tasks, views, etl_raster, etl_cancel, etl_security
 from .settings import GEOETL_DB, ETL_CANVAS_MAX_DELIVERIES
 
 import psycopg2
@@ -239,6 +239,10 @@ def _run_canvas_background_impl(kwargs, task=None):
             except Exception:
                 logger.exception('No se pudo determinar el propietario del workspace %s', id_ws)
 
+        # Permisos de conexión: quien envía el JSON desde el editor, o el dueño del workspace guardado
+        # (ejecuciones desde la lista y tareas programadas).
+        auth_username = kwargs.get('auth_username') or models_owner
+
         nodes=[]
         edges =[]
 
@@ -303,6 +307,25 @@ def _run_canvas_background_impl(kwargs, task=None):
         #### ####
 
         try:
+
+            # El JSON del canvas llega del cliente: tipos de nodo y conexiones se validan aquí,
+            # no solo en el editor.
+            errormsg = 'ERROR: '
+            for n in nodes:
+                etl_security.resolve_node_function(etl_tasks, n[1].get('type'))
+            node_params = []
+            for n in nodes:
+                try:
+                    node_params.append(n[1]['entities'][0]['parameters'][0])
+                except (KeyError, IndexError, TypeError):
+                    pass
+            etl_security.assert_connections_allowed(
+                auth_username,
+                etl_security.canvas_connection_names(
+                    node_params,
+                    params if params and not statusModel.name.startswith('current_canvas') else None,
+                ),
+            )
 
             if params and not statusModel.name.startswith('current_canvas'):
                 if len(params['sql-before']) > 0:
@@ -391,7 +414,7 @@ def _run_canvas_background_impl(kwargs, task=None):
                                     if parameters['move'] != '':
                                         move.append(n[1])
 
-                                method_to_call = getattr(etl_tasks, n[1]['type'])
+                                method_to_call = etl_security.resolve_node_function(etl_tasks, n[1]['type'])
                                 result = method_to_call(parameters)
                                 n.append(result)
                                 tables_list_name.append(result)
@@ -450,7 +473,7 @@ def _run_canvas_background_impl(kwargs, task=None):
 
                                         targetPortRepeated = True
 
-                                method_to_call = getattr(etl_tasks, n[1]['type'])
+                                method_to_call = etl_security.resolve_node_function(etl_tasks, n[1]['type'])
                                 parameters['id'] = n[1]['id']
 
                                 if n[1]['type'] == 'output_Visualizer':
