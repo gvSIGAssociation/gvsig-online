@@ -259,6 +259,12 @@ def _normalize_parameters(params, spec, new_node):
         if new_node and name not in params and 'default' in item:
             params[name] = item['default']
         value = params.get(name)
+        if isinstance(value, str) and item.get('choices'):
+            # El motor compara las opciones literalmente
+            for choice in item['choices']:
+                if isinstance(choice, str) and choice != value and choice.lower() == value.strip().lower():
+                    params[name] = value = choice
+                    break
         if kind == 'list' and isinstance(value, str):
             params[name] = [part for part in re.split(r'[,\s]+', value) if part]
         elif kind == 'spaced' and isinstance(value, list):
@@ -280,6 +286,12 @@ def _normalize_parameters(params, spec, new_node):
                 params['attr-selected'] = ' '.join(str(part) for part in attr if part)
             elif isinstance(attr, str) and attr.strip():
                 params['attr-selected'] = attr.strip()
+    if spec.get('type') == 'input_Json':
+        # El motor lee la URL solo con api-rest "true"; sin fichero y con URL, es una API
+        flag = str(params.get('api-rest') or '').strip().lower()
+        if flag not in ('true', '1', 'yes', 'si', 'sí') and params.get('url') and not params.get('json-file'):
+            flag = 'true'
+        params['api-rest'] = 'true' if flag in ('true', '1', 'yes', 'si', 'sí') else ''
     if spec.get('type') == 'trans_Intersection':
         # El motor espera la cadena "true" o vacío
         for name in ('self-intersect', 'merge'):

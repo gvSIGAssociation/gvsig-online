@@ -1063,6 +1063,57 @@ const reply = (extra) => Object.assign({ reply: '', warnings: [], assumptions: [
         assert.ok(!w.$('#etl-assistant-send').hasClass('is-stop'));
     });
 
+    await test('aplicar: los nodos nuevos no pisan otros nodos ni tapan conexiones', async () => {
+        const w = makeEnv({ id: '7' });
+        await tick();
+        // Figuras con tamaño y puertos (en draw2d cuelgan de una etiqueta interna)
+        const box = (id, alias, x, y) => {
+            const f = { id, etlAlias: alias, NAME: 'trans_Filter', x, y, classLabel: { getText: () => alias },
+                getX() { return this.x; }, getY() { return this.y; }, getWidth: () => 200, getHeight: () => 80,
+                getParent: () => null, setGlow() {}, getCanvas: () => ({}) };
+            const label = { getParent: () => f };
+            const port = (dx) => ({ getParent: () => label, getAbsoluteX: () => f.x + dx, getAbsoluteY: () => f.y + 40 });
+            f.inPort = port(0);
+            f.outPort = port(200);
+            return f;
+        };
+        const a = box('uuid-a', 'n1', 100, 100);
+        const b = box('uuid-b', 'n2', 700, 100);
+        w.__figures = [a, b];
+        w.__lines = [{ getSource: () => a.outPort, getTarget: () => b.inPort }];
+        w.etlApp.view.getLines = () => ({ each(fn) { w.__lines.forEach((l, i) => fn(i, l)); } });
+        w.eval('draw2d.command.CommandMove = function (f) { this.f = f; this.x0 = f.x; this.y0 = f.y; };'
+            + 'draw2d.command.CommandMove.prototype.setPosition = function (x, y) { this.x1 = x; this.y1 = y; };'
+            + 'draw2d.command.CommandMove.prototype.execute = function () { this.f.x = this.x1; this.f.y = this.y1; };'
+            + 'draw2d.command.CommandMove.prototype.undo = function () { this.f.x = this.x0; this.f.y = this.y0; };');
+        w.drawNodes = (docs) => {
+            const map = {};
+            docs.filter((d) => d.type !== 'draw2d.Connection').forEach((d) => {
+                const f = box('uuid-' + d.id, d.id, d.x, d.y);
+                w.__figures.push(f);
+                map[d.id] = f.id;
+            });
+            return map;
+        };
+        w.propagateInputs = () => {};
+        w.$('#etl-assistant-input').val('añade dos filtros');
+        w.$('#etl-assistant-form').trigger('submit');
+        const node = (id, x, y) => ({ op: 'add_node', node: { id, type: 'trans_Filter', label: 'Filter', x, y,
+            parameters: {}, schema: [], input_count: 1, output_count: 2 } });
+        w.__ajax[0].respond(reply({ reply: 'Hecho.', needs_confirmation: true,
+            proposal: { mode: 'patch', ops: [node('n6', 120, 110), node('n7', 400, 80)] } }));
+        w.$('.pl-assistant__actions .btn-pl-add').trigger('click');
+        const fresh = w.__figures.slice(2);
+        const overlap = (p, q) => p.x < q.x + 200 && q.x < p.x + 200 && p.y < q.y + 80 && q.y < p.y + 80;
+        w.__figures.forEach((p, i) => w.__figures.forEach((q, j) => {
+            assert.ok(i === j || !overlap(p, q), p.etlAlias + ' pisa ' + q.etlAlias);
+        }));
+        // La conexión n1 -> n2 va recta a y=140: n7 (x 400-600) no debe quedar encima
+        const n7 = fresh.find((f) => f.etlAlias === 'n7');
+        assert.ok(n7.y > 140 || n7.y + 80 < 140, 'n7 tapa la conexión: y=' + n7.y);
+        assert.ok(Math.abs(n7.y - 80) <= 200, 'n7 se ha ido demasiado lejos: y=' + n7.y);
+    });
+
     console.log('\n' + passed + ' correctos, ' + failed + ' fallidos');
     process.exit(failed ? 1 : 0);
 })();

@@ -1,12 +1,26 @@
 type: input_Json
 label: JSON
 family: input
-summary: Lee un fichero JSON o responde a una URL.
+summary: Lee un JSON de un fichero o de una URL (API REST). Basta con uno de los dos, según api-rest.
 parameters:
 - name: json-file
   required: true
+  required_unless:
+    api-rest: 'true'
+  summary: Valor file:// del fichero JSON. Solo si api-rest va vacío.
+  default: ''
 - name: api-rest
+  choices:
+  - ''
+  - 'true'
+  summary: "'true' para leer de url; vacío para leer json-file."
+  default: ''
 - name: url
+  required: true
+  required_when:
+    api-rest: 'true'
+  summary: URL que devuelve el JSON. Solo con api-rest 'true'.
+  default: ''
 ports:
 - direction: output
   label: Input

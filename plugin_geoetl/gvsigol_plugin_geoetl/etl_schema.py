@@ -605,9 +605,30 @@ def _guess_encoding(sample):
     return best
 
 
+_ENCODING_SCAN_LIMIT = 256 * 1024 * 1024
+
+
+def _non_ascii_sample(handle):
+    """Primer bloque con bytes no ASCII: los acentos pueden aparecer muy dentro del fichero."""
+    first = handle.read(_ENCODING_SAMPLE)
+    chunk, read = first, len(first)
+    while chunk and max(chunk) < 128 and read < _ENCODING_SCAN_LIMIT:
+        chunk = handle.read(_ENCODING_SAMPLE)
+        read += len(chunk)
+    if not chunk or max(chunk) < 128:
+        return first
+    if chunk is not first:
+        # El bloque puede empezar a mitad de un carácter UTF-8 de varios bytes
+        start = 0
+        while start < 3 and 0x80 <= chunk[start] <= 0xBF:
+            start += 1
+        chunk = chunk[start:]
+    return chunk
+
+
 def detect_csv_encoding(path):
     with open(path, 'rb') as handle:
-        return _guess_encoding(handle.read(_ENCODING_SAMPLE))
+        return _guess_encoding(_non_ascii_sample(handle))
 
 
 # Contenido del .cpg -> valor del desplegable de codificación del nodo Shapefile
@@ -616,9 +637,9 @@ _CPG_ENCODINGS = (('UTF', 'UTF-8'), ('1252', 'WINDOWS-1252'), ('885915', 'ISO-88
 
 
 def detect_shp_encoding(path):
-    """Codificación de los textos de un shapefile: la del .cpg y, sin él, la de los registros del .dbf."""
+    """Codificación de los textos de un shapefile: la del .cpg (o el .cst de GeoServer) y, sin él, la de los registros del .dbf."""
     base = os.path.splitext(path)[0]
-    for extension in ('.cpg', '.CPG'):
+    for extension in ('.cpg', '.CPG', '.cst', '.CST'):
         if os.path.exists(base + extension):
             with open(base + extension, 'r', errors='replace') as handle:
                 declared = re.sub(r'[^A-Z0-9]', '', handle.read(100).upper())
@@ -633,7 +654,7 @@ def detect_shp_encoding(path):
                     return None
                 # Bytes 8-9: longitud de la cabecera; los registros van detrás
                 handle.seek(int.from_bytes(header[8:10], 'little'))
-                return _guess_encoding(handle.read(_ENCODING_SAMPLE))
+                return _guess_encoding(_non_ascii_sample(handle))
     return None
 
 
@@ -1219,7 +1240,7 @@ def get_types_segex (dicc):
 
 def get_schema_json(dicc):
     
-    if dicc['api-rest'] == 'true':
+    if dicc.get('api-rest') == 'true':
         """if dicc['is-pag'] == 'true':
             start = dicc['init-pag']
             jsondata = pd.read_json(dicc['url']+'&'+dicc['pag-par']+'='+str(start))

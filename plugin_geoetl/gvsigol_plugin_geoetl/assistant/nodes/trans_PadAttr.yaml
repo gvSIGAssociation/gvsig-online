@@ -4,10 +4,14 @@ family: transform
 summary: Rellena un texto hasta una longitud por la izquierda o la derecha.
 parameters:
 - name: attr
+  required: true
   summary: Atributo sobre el que actúa la tarea.
 - name: length
+  required: true
 - name: side-option
+  default: 'Right'
 - name: string
+  required: true
 ports:
 - direction: input
   label: Input

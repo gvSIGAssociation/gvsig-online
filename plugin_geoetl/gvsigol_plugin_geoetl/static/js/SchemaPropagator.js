@@ -92,6 +92,22 @@ function schemaAsColumnList(schema) {
     return [];
 }
 
+/** Copia de una lista de columnas (o una por puerto) con solo nombres de texto: el backend los usa como identificadores SQL. */
+function columnNamesOnly(schema) {
+    var out = [];
+    for (var i = 0; i < schema.length; i++) {
+        var item = schema[i];
+        if (Array.isArray(item)) {
+            out.push(columnNamesOnly(item));
+        } else if (item && typeof item === 'object' && typeof item.name === 'string') {
+            out.push(item.name);
+        } else if (typeof item === 'string' && item.length) {
+            out.push(item);
+        }
+    }
+    return out;
+}
+
 function attrsExistInSchema(attrs, schema) {
     if (attrs === undefined || attrs === null || attrs === '') {
         return true;
@@ -1279,9 +1295,9 @@ function propagateSchemaFrom(startNodeId, canvasCtxt, options) {
         // un nodo creado por el asistente no pasa por el diálogo y fallaría con KeyError 'schema'.
         var paramSchema = PARAM_SCHEMA_SOURCE[typeName];
         if (paramSchema && params.parameters && params.parameters[0]) {
-            var value = paramSchema === 'input' ? inputSchemas : params.schema;
+            var value = paramSchema === 'input' ? inputSchemas : schemaAsColumnList(params.schema);
             if (Array.isArray(value)) {
-                params.parameters[0].schema = JSON.parse(JSON.stringify(value));
+                params.parameters[0].schema = columnNamesOnly(value);
             }
         }
 

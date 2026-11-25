@@ -4,6 +4,7 @@ family: transform
 summary: Valida la geometría. stop detiene el flujo si no es válida.
 parameters:
 - name: stop
+  default: 'false'
 ports:
 - direction: input
   label: Input

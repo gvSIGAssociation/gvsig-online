@@ -1,18 +1,30 @@
 type: trans_Cluster
 label: Clustering
 family: transform
-summary: Agrupa puntos con DBSCAN o K-means.
+summary: Agrupa geometrías con DBSCAN o K-means y añade _cluster, _distance_to_centroid y _cluster_rmse.
 parameters:
 - name: option
+  default: 'ST_ClusterDBSCAN'
   choices:
   - ST_ClusterDBSCAN
   - ST_ClusterKMeans
 - name: eps
+  summary: DBSCAN. Distancia máxima entre vecinos, en unidades del EPSG.
+  default: '50.0'
 - name: minpoints
+  summary: DBSCAN. Mínimo de geometrías para formar grupo.
+  default: '5'
 - name: number-clusters
+  summary: K-means. Número de grupos.
+  default: '5'
 - name: max-radius
+  summary: K-means. Radio máximo de un grupo; 0 sin límite.
+  default: '0.0'
 - name: attr
-  summary: Atributo sobre el que actúa la tarea.
+  summary: K-means. Columna numérica que pondera el agrupamiento además de la posición. '-' agrupa solo
+    por posición; nunca la geometría.
+  default: '-'
+  column: 0
 ports:
 - direction: input
   label: Input

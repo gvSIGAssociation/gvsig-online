@@ -5,6 +5,7 @@ summary: Compara filas de dos entradas por un atributo. Tiene dos entradas y var
   salidas.
 parameters:
 - name: attr
+  required: true
   summary: Atributo sobre el que actúa la tarea.
 ports:
 - direction: input

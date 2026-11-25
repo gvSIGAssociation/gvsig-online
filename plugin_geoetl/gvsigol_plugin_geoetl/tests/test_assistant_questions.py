@@ -103,12 +103,23 @@ class ResolveTests(SimpleTestCase):
     def test_files_are_chosen_in_the_file_manager(self):
         with mock.patch.object(tools_module, '_list_files') as files:
             questions, notes = self.resolve([{'label': 'Fichero', 'text': '¿Qué fichero?', 'source': 'files',
-                                              'extensions': 'csv', 'options': ['inventado.csv']}])
+                                              'extensions': 'csv'}])
         files.assert_not_called()
         self.assertEqual(questions[0]['options'], [])
         self.assertEqual(questions[0]['file_picker'], {'extensions': 'csv'})
         self.assertNotIn('empty', questions[0])
         self.assertEqual(notes, [])
+
+    def test_similar_files_are_offered_next_to_the_file_manager(self):
+        listed = {'files': [{'path': 'rol/viajeros_2024.csv', 'value': 'file:///d/rol/viajeros_2024.csv'}]}
+        with mock.patch.object(tools_module, '_list_files', return_value=listed):
+            questions, notes = self.resolve([{'label': 'Fichero', 'text': '¿Cuál es?', 'source': 'files',
+                                              'extensions': 'csv',
+                                              'options': ['file:///d/rol/viajeros_2024.csv', 'inventado.csv']}])
+        self.assertEqual(questions[0]['options'],
+                         [{'value': 'file:///d/rol/viajeros_2024.csv', 'label': 'rol/viajeros_2024.csv'}])
+        self.assertEqual(questions[0]['file_picker'], {'extensions': 'csv'})
+        self.assertIn('inventado.csv', notes[0])
 
     def test_workspaces_and_layer_groups_only_those_of_the_user(self):
         targets = {'workspaces': [{'id': 1, 'name': 'ws_a'}],

@@ -889,9 +889,28 @@
 		var allowOther = question.source !== 'datastores';    // un destino tiene que ser un almacén
 
 		if (question.file_picker) {
-			var file = filePickerField(box, question.file_picker.extensions, onChange);
+			// Ficheros parecidos al que nombró el usuario: se eligen con un clic o se busca otro en el administrador
+			options.forEach(function (option) {
+				var input = $('<input>').attr({type: 'radio', name: name}).val(option.value).data('label', option.label);
+				input.on('change', onChange);
+				box.append($('<label class="pl-assistant__option"></label>').append(input)
+					.append($('<span></span>').text(option.label)));
+			});
+			var pickedAt = 0;
+			var file = filePickerField(box, question.file_picker.extensions, function () {
+				pickedAt = Date.now();
+				box.find('input[name="' + name + '"]').prop('checked', false);
+				onChange();
+			});
+			box.find('input[name="' + name + '"]').on('change', function () {
+				pickedAt = 0;
+			});
 			return {element: box, value: function () {
-				return file.value() ? [file.value()] : null;
+				var checked = box.find('input[name="' + name + '"]:checked');
+				if (checked.length) {
+					return [{value: checked.val(), label: checked.data('label')}];
+				}
+				return pickedAt && file.value() ? [file.value()] : null;
 			}};
 		}
 
@@ -1763,6 +1782,140 @@
 		};
 	}
 
+	var LAYOUT_GAP = 30;
+	var LAYOUT_STEP = 40;
+	var LAYOUT_TRIES = 30;
+	var LAYOUT_CROSSING = 400;     // píxeles que merece la pena desplazar un nodo para no tapar una conexión
+
+	function figureBox(figure, dy, gap) {
+		return {
+			x: figure.getX() - gap,
+			y: figure.getY() + dy - gap,
+			w: figure.getWidth() + 2 * gap,
+			h: figure.getHeight() + 2 * gap
+		};
+	}
+
+	function boxesOverlap(a, b) {
+		return a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+	}
+
+	/* Las conexiones son splines sobre un trazado Manhattan: salen en horizontal, cruzan a media distancia y llegan en horizontal. */
+	function linePath(from, to) {
+		var middle = (from.x + to.x) / 2;
+		return [from, {x: middle, y: from.y}, {x: middle, y: to.y}, to];
+	}
+
+	function pathHitsBox(path, box) {
+		for (var i = 1; i < path.length; i++) {
+			var p = path[i - 1];
+			var q = path[i];
+			var horizontal = p.y === q.y;
+			var fixed = horizontal ? p.y : p.x;
+			var low = horizontal ? box.y : box.x;
+			var high = horizontal ? box.y + box.h : box.x + box.w;
+			var start = horizontal ? Math.min(p.x, q.x) : Math.min(p.y, q.y);
+			var end = horizontal ? Math.max(p.x, q.x) : Math.max(p.y, q.y);
+			var spanLow = horizontal ? box.x : box.y;
+			var spanHigh = horizontal ? box.x + box.w : box.y + box.h;
+			if (fixed > low && fixed < high && end > spanLow && start < spanHigh) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/* Los puertos cuelgan de las etiquetas internas de la figura. */
+	function portFigure(port) {
+		var figure = port.getParent();
+		while (figure && figure.getParent && figure.getParent()) {
+			figure = figure.getParent();
+		}
+		return figure;
+	}
+
+	function portPoint(port, figure, dy) {
+		return {x: port.getAbsoluteX(), y: port.getAbsoluteY() + (portFigure(port) === figure ? dy : 0)};
+	}
+
+	function layoutCost(figure, dy, others, lines) {
+		var box = figureBox(figure, dy, LAYOUT_GAP / 2);
+		for (var i = 0; i < others.length; i++) {
+			if (boxesOverlap(box, figureBox(others[i], 0, LAYOUT_GAP / 2))) {
+				return Infinity;
+			}
+		}
+		var body = figureBox(figure, dy, 4);
+		var crossings = 0;
+		lines.forEach(function (line) {
+			var source = line.getSource();
+			var target = line.getTarget();
+			var ends = [portFigure(source), portFigure(target)];
+			var path = linePath(portPoint(source, figure, dy), portPoint(target, figure, dy));
+			if (ends.indexOf(figure) === -1) {
+				crossings += pathHitsBox(path, body) ? 1 : 0;
+				return;
+			}
+			others.forEach(function (other) {
+				if (ends.indexOf(other) === -1 && pathHitsBox(path, figureBox(other, 0, 4))) {
+					crossings += 1;
+				}
+			});
+		});
+		return crossings * LAYOUT_CROSSING + Math.abs(dy);
+	}
+
+	/* Baja (o sube un poco) cada nodo nuevo hasta que no pise otro nodo y, si se puede, no tape conexiones. */
+	function untangleFigures(canvasView, ids) {
+		var moving = ids.map(function (id) {
+			return canvasView.getFigure(id);
+		}).filter(function (figure) {
+			return figure && figure.getWidth;
+		});
+		if (!moving.length) {
+			return;
+		}
+		moving.sort(function (a, b) {
+			return (a.getX() - b.getX()) || (a.getY() - b.getY());
+		});
+		var settled = [];
+		canvasView.getFigures().each(function (i, figure) {
+			if (moving.indexOf(figure) === -1 && figure.getWidth) {
+				settled.push(figure);
+			}
+		});
+		var lines = [];
+		canvasView.getLines().each(function (i, line) {
+			if (line.getSource() && line.getTarget()) {
+				lines.push(line);
+			}
+		});
+		var stack = canvasView.getCommandStack();
+		moving.forEach(function (figure) {
+			var best = 0;
+			var bestCost = layoutCost(figure, 0, settled, lines);
+			for (var k = 1; k <= LAYOUT_TRIES && k * LAYOUT_STEP < bestCost; k++) {
+				var offsets = [k * LAYOUT_STEP];
+				if (k <= 4 && figure.getY() - k * LAYOUT_STEP >= 20) {
+					offsets.push(-k * LAYOUT_STEP);
+				}
+				offsets.forEach(function (dy) {
+					var cost = layoutCost(figure, dy, settled, lines);
+					if (cost < bestCost) {
+						best = dy;
+						bestCost = cost;
+					}
+				});
+			}
+			if (best) {
+				var move = new draw2d.command.CommandMove(figure);
+				move.setPosition(figure.getX(), figure.getY() + best);
+				stack.execute(move);
+			}
+			settled.push(figure);
+		});
+	}
+
 	function edgeDocument(op) {
 		return {
 			type: 'draw2d.Connection',
@@ -1913,6 +2066,9 @@
 					$.extend(map, created);
 				}
 			}
+			untangleFigures(canvasView, Object.keys(created).map(function (key) {
+				return created[key];
+			}));
 			var after = JSON.parse(JSON.stringify(jsonParams));
 			stack.execute(new EtlApplyCommand(
 				function () {

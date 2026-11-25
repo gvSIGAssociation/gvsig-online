@@ -1,17 +1,39 @@
 type: crea_Grid
 label: Grid
 family: creator
-summary: Crea una malla de celdas rectangulares a partir de un origen, tamaño y EPSG.
+summary: >
+  Crea una malla de celdas rectangulares con columnas _row y _column. Con Coordinates la malla sale
+  de rows, columns, width, height, init-x, init-y y epsg, y no necesita entrada; con Extent cubre la
+  extensión de la capa de entrada con celdas de width por height.
 parameters:
 - name: create
+  required: true
+  choices:
+  - Coordinates
+  - Extent
+  summary: Coordinates (desde un origen dado, esquina inferior izquierda) o Extent (extensión de la entrada).
+  default: Coordinates
 - name: rows
+  summary: Con Coordinates. Número de filas.
+  default: '1'
 - name: columns
+  summary: Con Coordinates. Número de columnas.
+  default: '1'
 - name: width
+  required: true
+  summary: Ancho de la celda, en unidades del EPSG.
 - name: height
+  required: true
+  summary: Alto de la celda, en unidades del EPSG.
 - name: init-x
+  summary: Con Coordinates. X del origen.
+  default: '0'
 - name: init-y
+  summary: Con Coordinates. Y del origen.
+  default: '0'
 - name: epsg
-  summary: Código EPSG.
+  summary: Con Coordinates. EPSG de la malla, solo el número; con Extent se usa el de la entrada.
+  default: ''
 ports:
 - direction: input
   label: Input

@@ -4,12 +4,15 @@ family: transform
 summary: Corrige la ortografía de un atributo de texto.
 parameters:
 - name: attr
+  required: true
   summary: Atributo sobre el que actúa la tarea.
 - name: lang-option
+  default: 'es_ES'
   choices:
   - es_ES
   - en_GB
 - name: accent-mark
+  default: 'false'
 ports:
 - direction: input
   label: Input

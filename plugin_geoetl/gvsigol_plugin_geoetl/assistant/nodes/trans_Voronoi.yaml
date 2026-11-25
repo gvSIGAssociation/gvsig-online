@@ -4,6 +4,7 @@ family: transform
 summary: Construye el diagrama de Voronoi de los puntos.
 parameters:
 - name: tolerance
+  default: '0.0'
 ports:
 - direction: input
   label: Input

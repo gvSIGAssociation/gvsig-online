@@ -1,7 +1,9 @@
 type: trans_CreateAttr
 label: Create Attribute
 family: transform
-summary: Añade un atributo con un valor constante.
+summary: >
+  Añade un atributo con un valor constante. Los nodos que ya crean su propia columna
+  (trans_CurrentDate, trans_CalcArea, trans_ConcatAttr...) no lo necesitan antes.
 parameters:
 - name: attr
   required: true

@@ -161,9 +161,12 @@ def build_tools(request, catalog, canvas, connections, restricted, holder, trace
         return guarded('get_table_schema', body)
 
     @tool
-    def list_files(folder: str = '', extensions: str = '') -> str:
-        """Ficheros del gestor de ficheros a los que el usuario tiene acceso (solo nombres, no el contenido). folder es una carpeta relativa (vacío = todas las suyas); extensions, una lista separada por comas, por ejemplo "csv,txt" o "tif,tiff". Cada fichero trae value, la ruta lista para el parámetro de fichero del nodo."""
-        return guarded('list_files', lambda: _json(_list_files(context, folder, extensions)))
+    def list_files(folder: str = '', extensions: str = '', name: str = '') -> str:
+        """Ficheros del gestor de ficheros a los que el usuario tiene acceso (solo nombres, no el contenido). folder es una carpeta relativa (vacío = todas las suyas); extensions, una lista separada por comas, por ejemplo "csv,txt" o "tif,tiff". name busca un fichero que nombra el usuario: devuelve matches (mismo nombre) y similar_files (nombres parecidos). Cada fichero trae value, la ruta lista para el parámetro de fichero del nodo."""
+        def body():
+            listed = _list_files(context, folder, extensions)
+            return _json(_match_files(listed, name) if name and name.strip() else listed)
+        return guarded('list_files', body)
 
     @tool
     def get_canvas_nodes(ids: str) -> str:
@@ -419,6 +422,46 @@ def _list_files(context, folder, extensions):
             break
     return {'folder': folder or '/', 'files': files, 'truncated': truncated,
             'hint': 'Si hay varios candidatos y no sabes cuál es, pregunta al usuario.'}
+
+
+_FILE_FOUND_HINT = ('Hay un fichero con ese nombre, pero no lo uses sin confirmar: pregunta con ask_user, source '
+                    'files, extensions y options con el value de matches (y los de similar_files), para que lo '
+                    'confirme o cargue otro en el administrador de archivos.')
+_FILE_SIMILAR_HINT = ('No existe un fichero con ese nombre. Pregunta al usuario con ask_user, source files, extensions '
+                      'y options con los value de similar_files: puede elegir uno o buscar otro en el administrador '
+                      'de archivos. No sigas con ninguno sin preguntar.')
+_FILE_SEVERAL_HINT = ('Hay varios ficheros con ese nombre en carpetas distintas. Pregunta cuál con ask_user, source '
+                      'files, extensions y options con los value de matches; también puede cargar otro.')
+_FILE_NONE_HINT = ('No hay ningún fichero con ese nombre ni parecido. Díselo y pídele que lo busque con ask_user, '
+                   'source files y extensions (lo elige en el administrador de archivos).')
+
+
+def _match_files(listed, name):
+    """Del listado, los ficheros que se llaman como name y los de nombre parecido (por nombre y sin extensión)."""
+    import os
+    if listed.get('error'):
+        return listed
+    wanted = os.path.basename(name.strip().replace('\\', '/'))
+    files = listed.get('files') or []
+    by_base, by_stem = {}, {}
+    for item in files:
+        base = os.path.basename(item['path'])
+        by_base.setdefault(base, []).append(item)
+        by_stem.setdefault(os.path.splitext(base)[0], []).append(item)
+    matches = [item for base, items in by_base.items() if base.lower() == wanted.lower() for item in items]
+    similar = []
+    names = _similar(wanted, list(by_base))
+    stems = _similar(os.path.splitext(wanted)[0], list(by_stem))
+    for item in [i for n in names for i in by_base[n]] + [i for s in stems for i in by_stem[s]]:
+        if item not in similar and item not in matches:
+            similar.append(item)
+    similar = similar[:_SIMILAR_CAP]
+    if len(matches) > 1:
+        hint = _FILE_SEVERAL_HINT
+    else:
+        hint = _FILE_FOUND_HINT if matches else (_FILE_SIMILAR_HINT if similar else _FILE_NONE_HINT)
+    return {'name': wanted, 'matches': matches, 'similar_files': similar, 'truncated': listed.get('truncated'),
+            'hint': hint}
 
 
 def _list_level(connection, name, schema):

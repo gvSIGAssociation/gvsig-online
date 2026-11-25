@@ -1,7 +1,10 @@
 type: trans_Filter
 label: Filter
 family: transform
-summary: Filtra filas. La salida 0 son las que cumplen y la 1 las que no.
+summary: >
+  Filtra filas. La salida 0 son las que cumplen y la 1 las que no. Varias condiciones sobre
+  las mismas filas van en un solo Filter con filter-expression (cond1 AND cond2), no en un
+  Filter por condición encadenados.
 parameters:
 - name: attr
   summary: Columna que se compara. Se usa si filter-expression va vacío.
@@ -26,8 +29,8 @@ parameters:
   default: ''
   example: '1000'
 - name: filter-expression
-  summary: Condición WHERE de SQL de PostgreSQL. Déjala vacía para las comparaciones
-    simples y usa attr, option y value; es solo para condiciones compuestas.
+  summary: Condición WHERE de SQL de PostgreSQL. Déjala vacía para una comparación
+    simple y usa attr, option y value; con dos o más condiciones, úsala uniéndolas con AND/OR.
   default: ''
   example: '"poblacion" > 1000 AND "uso" = ''residencial'''
 ports:

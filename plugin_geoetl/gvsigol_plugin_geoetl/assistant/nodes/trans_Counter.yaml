@@ -4,6 +4,7 @@ family: transform
 summary: Numera filas, opcionalmente dentro de grupos.
 parameters:
 - name: attr
+  required: true
   summary: Nombre de la columna nueva con el contador.
   example: orden
 - name: group-by-attr

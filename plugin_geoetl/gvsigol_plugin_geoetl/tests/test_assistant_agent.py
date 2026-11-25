@@ -345,6 +345,18 @@ class ListFilesTests(SimpleTestCase):
         staff = SimpleNamespace(is_superuser=False, is_staff=True, roles=('rol_a',))
         self.assertIn('error', self.list(staff, folder='rol_b'))
 
+    def test_search_by_name_returns_match_or_similar_files(self):
+        staff = SimpleNamespace(is_superuser=False, is_staff=True, roles=('rol_a',))
+        exact = self.list(staff, name='MUNICIPIOS.csv')
+        self.assertEqual([f['path'] for f in exact['matches']], ['rol_a/datos/municipios.csv'])
+        self.assertIn('no lo uses sin confirmar', exact['hint'])
+        similar = self.list(staff, name='municipio.csv', extensions='csv')
+        self.assertEqual(similar['matches'], [])
+        self.assertEqual([f['path'] for f in similar['similar_files']], ['rol_a/datos/municipios.csv'])
+        none = self.list(staff, name='viajeros.csv', extensions='csv')
+        self.assertEqual((none['matches'], none['similar_files']), ([], []))
+        self.assertIn('administrador de archivos', none['hint'])
+
 
 @override_settings(LANGUAGE_CODE='es')
 class WiringTests(SimpleTestCase):

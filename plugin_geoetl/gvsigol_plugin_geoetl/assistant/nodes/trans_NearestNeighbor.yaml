@@ -4,8 +4,10 @@ family: transform
 summary: Asigna a cada fila de la entrada 0 el vecino más cercano de la entrada 1.
 parameters:
 - name: attr
+  default: ''
   summary: Atributo sobre el que actúa la tarea.
 - name: tol
+  default: ''
 ports:
 - direction: input
   label: Input Main

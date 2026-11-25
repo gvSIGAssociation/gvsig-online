@@ -3,7 +3,7 @@
 
 import re
 
-from .catalog import port_count, port_kind
+from .catalog import is_required, port_count, port_kind
 
 _ALIAS_RE = re.compile(r'\bn\d+\b')
 _MAX_NODES = 40
@@ -643,7 +643,7 @@ def _warn_sql(alias, spec, params, warnings):
 
 def _warn_required(alias, spec, params, warnings):
     for item in spec.get('parameters') or []:
-        if not item.get('required'):
+        if not is_required(item, params):
             continue
         value = params.get(item.get('name'))
         if value in (None, '', []):

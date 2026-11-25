@@ -1,13 +1,23 @@
 type: trans_CurrentDate
 label: Current Date
 family: transform
-summary: Escribe la fecha actual en un atributo.
+summary: >
+  Crea un atributo nuevo con la fecha actual (DATE) o con la fecha y hora (TIMESTAMP).
+  Crea él mismo la columna: no pongas antes un trans_CreateAttr con ese nombre, fallaría
+  porque la columna ya existiría.
 parameters:
 - name: attr
-  summary: Atributo sobre el que actúa la tarea.
+  required: true
+  summary: Nombre de la columna nueva. No debe llegar ya al nodo.
+  example: fecha_alta
 - name: checkbox
-  summary: Si es verdadero, se usa SQL libre en lugar de la tabla.
+  default: ''
+  choices:
+  - ''
+  - 'true'
+  summary: Vacío = solo fecha (DATE); true = fecha y hora (TIMESTAMP).
 - name: format
+  summary: No se usa al ejecutar.
 ports:
 - direction: input
   label: Input

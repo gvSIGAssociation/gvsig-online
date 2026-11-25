@@ -8,6 +8,7 @@ parameters:
   summary: Atributo sobre el que actúa la tarea.
 - name: list
 - name: split
+  required: true
 ports:
 - direction: input
   label: Input

@@ -7,8 +7,8 @@ de una propuesta antes de devolverla, de modo que el modelo pueda corregirla.
 
 import re
 
-from .catalog import port_count, port_kind
-from .schemas import GEOMETRY_COLUMN, column_issues, listed
+from .catalog import is_required, port_count, port_kind
+from .schemas import GEOMETRY_COLUMN, column_issues, listed, new_column_clashes, redundant_exposes
 
 ERROR = 'error'
 WARNING = 'warning'
@@ -146,6 +146,7 @@ def check_graph(nodes, edges, catalog, connections=None):
         _check_outputs(alias, name, spec, outgoing.get(alias) or [], len(nodes), issues)
 
     _check_propagated_columns(nodes, edges, catalog, issues)
+    _check_chained_filters(nodes, edges, issues)
 
     for edge in edges:
         _check_edge(edge, nodes, catalog, issues)
@@ -160,6 +161,26 @@ def check_graph(nodes, edges, catalog, connections=None):
         issues.append(_issue(WARNING, None, 'no_output',
                              'El flujo no termina en ninguna salida: al ejecutarlo no se guardará ningún resultado.'))
     return issues
+
+
+def _check_chained_filters(nodes, edges, issues):
+    """Un trans_Filter que solo recibe las filas que pasan otro trans_Filter, sin más usos de este, se puede unir."""
+    for alias, node in nodes.items():
+        if node.get('type') != 'trans_Filter' or node.get('status') != 'proposed':
+            continue
+        incoming = [e for e in edges if e.get('target') == alias]
+        if len(incoming) != 1:
+            continue
+        source = incoming[0].get('source')
+        if (nodes.get(source) or {}).get('type') != 'trans_Filter' or incoming[0].get('source_port', 0) != 0:
+            continue
+        others = [e for e in edges if e.get('source') == source and e is not incoming[0]]
+        if others:
+            continue
+        name = '%s (%s)' % (node.get('label') or node.get('type'), alias)
+        issues.append(_issue(ERROR, alias, 'chained_filters',
+                             '%s: solo filtra las filas que ya pasan %s. Une los dos en un único trans_Filter con '
+                             'filter-expression "condición1 AND condición2" y quita el otro.' % (name, source)))
 
 
 def summarize_issues(issues):
@@ -213,6 +234,20 @@ def _check_propagated_columns(nodes, edges, catalog, issues):
                              'marcaría en rojo. Columnas que le llegan: %s. Usa una de ellas.%s'
                              % (name, param, ', '.join(missing), port, listed(available) or '(ninguna)', geometry),
                              param=param))
+    for alias, param, column in new_column_clashes(nodes, edges, catalog):
+        node = nodes[alias]
+        name = '%s (%s)' % (node.get('label') or node.get('type'), alias)
+        issues.append(_issue(ERROR, alias, 'column_exists',
+                             '%s: crea la columna "%s", pero ya le llega una con ese nombre y fallará al ejecutar. '
+                             'Este nodo crea la columna él mismo: quita el nodo anterior que la crea o usa otro nombre.'
+                             % (name, column), param=param))
+    for alias, exposed in redundant_exposes(nodes, edges, catalog):
+        node = nodes[alias]
+        name = '%s (%s)' % (node.get('label') or node.get('type'), alias)
+        issues.append(_issue(ERROR, alias, 'redundant_expose',
+                             '%s: "%s" ya llega expuesto desde un nodo anterior y sigue disponible en todos los '
+                             'siguientes. Quita este nodo y conecta directamente su entrada con su salida.'
+                             % (name, ' '.join(exposed)), param='attrs'))
 
 
 FULL_QUERY = re.compile(r'^\s*\(?\s*(select|with|insert|update|delete|create|drop)\b|;', re.IGNORECASE)
@@ -235,7 +270,7 @@ def _check_parameters(alias, name, spec, params, connections, issues):
     for item in spec.get('parameters') or []:
         key = item.get('name')
         value = params.get(key)
-        if item.get('required') and value in (None, '', []):
+        if is_required(item, params) and value in (None, '', []):
             issues.append(_issue(ERROR, alias, 'missing_parameter',
                                  '%s: falta el parámetro obligatorio "%s".' % (name, key), param=key))
         choices = item.get('choices')
@@ -265,6 +300,9 @@ def _input_optional(spec, port, index, params):
     if (spec.get('type') == 'trans_Intersection'
             and index == 1
             and str((params or {}).get('self-intersect') or '').lower() == 'true'):
+        return True
+    # Malla desde coordenadas: no lee la entrada
+    if spec.get('type') == 'crea_Grid' and (params or {}).get('create') == 'Coordinates':
         return True
     return False
 

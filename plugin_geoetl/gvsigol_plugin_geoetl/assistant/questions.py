@@ -16,7 +16,8 @@ esquema del nodo de salida.
 
 Los ficheros no se listan: file_picker ({extensions}) hace que el panel abra el
 administrador de archivos, como los nodos, con los permisos y la subida de
-ficheros que ya tiene.
+ficheros que ya tiene. Si el modelo sugiere ficheros (los parecidos al que
+nombra el usuario), se ofrecen como opciones junto al administrador.
 
 El modelo no siempre indica bien el origen, así que se corrige aquí: se aceptan
 sinónimos y, si no hay origen útil, se deduce del parámetro o del texto de la
@@ -339,6 +340,30 @@ def _wanted(raw):
     return wanted
 
 
+def _suggested_files(raw, extensions, context, label, notes):
+    """Ficheros que sugiere el modelo (value file://, ruta relativa o nombre), solo si el usuario los tiene."""
+    import os
+    from . import tools
+    wanted = _wanted(raw)
+    if not wanted:
+        return []
+    listed = tools._list_files(context, '', extensions or '').get('files') or []
+    by_key = {}
+    for item in listed:
+        for key in (item['value'], item['path'], os.path.basename(item['path'])):
+            by_key.setdefault(key, item)
+    kept, dropped = [], []
+    for value in wanted:
+        item = by_key.get(value)
+        if item:
+            kept.append((item['value'], item['path']))
+        else:
+            dropped.append(value)
+    if dropped:
+        notes.append('"%s": se descartan ficheros que el usuario no tiene: %s.' % (label, ', '.join(dropped[:5])))
+    return _options(kept)[:MAX_OPTIONS]
+
+
 def resolve_questions(raw, catalog, canvas, context, proposal=None):
     """Valida las preguntas del modelo. Devuelve (preguntas, avisos para el modelo)."""
     notes = []
@@ -382,10 +407,10 @@ def resolve_questions(raw, catalog, canvas, context, proposal=None):
             continue
         picker = None
         if source == 'files':
-            # Se elige en el administrador de archivos: aquí no se lista nada
+            # Se elige en el administrador de archivos; si el modelo sugiere ficheros parecidos, se ofrecen también
             picker = {'extensions': _extensions(question.get('extensions'))
                       or _file_extensions(_plain(label + ' ' + text))}
-            options = []
+            options = _suggested_files(question.get('options'), picker['extensions'], context, label, notes)
         elif source == 'custom':
             options = _custom_options(question.get('options'))
         else:

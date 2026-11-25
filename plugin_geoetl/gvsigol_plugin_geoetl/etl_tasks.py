@@ -3550,7 +3550,7 @@ def trans_CurrentDate(dicc):
     cur.execute(sqlDup)
     conn.commit()
 
-    if dicc['checkbox'] == 'true':
+    if dicc.get('checkbox', '') == 'true':
         sqlAdd = sql.SQL('ALTER TABLE {schema}.{tbl_target} ADD COLUMN {attr} TIMESTAMP; UPDATE {schema}.{tbl_target} SET {attr} = CURRENT_TIMESTAMP;').format(
             schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target),
@@ -4046,7 +4046,7 @@ def trans_PadAttr(dicc):
     cur.execute(sqlDrop)
     conn.commit()
 
-    if dicc['side-option'] == 'Right':
+    if dicc.get('side-option', 'Right') == 'Right':
         side = 'rpad'
     else:
         side = 'lpad'
@@ -5186,7 +5186,7 @@ def input_Json(dicc):
 
     table_name = dicc['id']
 
-    if dicc['api-rest'] == 'true':
+    if dicc.get('api-rest') == 'true':
 
         """if dicc['is-pag'] == 'true':
 
@@ -5422,6 +5422,19 @@ def crea_Grid(dicc):
     return[table_name_target]
 
 
+def _column_names(value):
+    """Nombres de columna de una lista de esquema: aplana listas por puerto y descarta lo que no es texto."""
+    names = []
+    for item in value if isinstance(value, list) else []:
+        if isinstance(item, list):
+            names.extend(_column_names(item))
+        elif isinstance(item, dict) and isinstance(item.get('name'), str):
+            names.append(item['name'])
+        elif isinstance(item, str) and item:
+            names.append(item)
+    return names
+
+
 def trans_ExposeAttr(dicc):
 
     table_name_source = dicc['data'][0]
@@ -5445,10 +5458,16 @@ def trans_ExposeAttr(dicc):
     source_columns = [row[0] for row in cur.fetchall()]
 
     # Sin lista guardada (nodo no aceptado en su diálogo): todas las columnas más las expuestas
-    schemaListDups = dicc.get('schema') or source_columns + str(dicc.get('attrs') or dicc.get('attr') or '').split()
+    exposed = dicc.get('attrs') or dicc.get('attr') or ''
+    if isinstance(exposed, list):
+        exposed = ' '.join(str(name) for name in exposed if name)
+    schemaListDups = _column_names(dicc.get('schema')) or source_columns + str(exposed).split()
 
+    # Solo se pueden seleccionar columnas que existen en la tabla de entrada
     schemaList = []
-    [schemaList.append(x) for x in schemaListDups if x not in schemaList]
+    [schemaList.append(x) for x in schemaListDups if x in source_columns and x not in schemaList]
+    if not schemaList:
+        schemaList = list(source_columns)
 
     if 'wkb_geometry' in source_columns and 'wkb_geometry' not in schemaList:
         schemaList.append('wkb_geometry')
@@ -5514,7 +5533,7 @@ def trans_ValGeom(dicc):
     cur.execute(sqlDup2)
     conn.commit()
 
-    if dicc['stop'] == 'true':
+    if dicc.get('stop', 'false') == 'true':
         sqlCount = sql.SQL("SELECT * from {schema}.{tbl_target} LIMIT 1").format(
             schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target_invalid)
@@ -5576,7 +5595,7 @@ def trans_SimpGeom(dicc):
     cur.execute(sqlDup2)
     conn.commit()
 
-    if dicc['stop'] == 'true':
+    if dicc.get('stop', 'false') == 'true':
         sqlCount = sql.SQL("SELECT * from {schema}.{tbl_target} LIMIT 1").format(
             schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target_no_simple)
@@ -6000,7 +6019,7 @@ def input_SqlServer(dicc):
 def trans_NearestNeighbor(dicc):
 
     attr = dicc['attr']
-    tol = dicc['tol']
+    tol = dicc.get('tol', '')
 
 
     table_name_source_0 = dicc['data'][0]
@@ -6415,8 +6434,8 @@ def trans_NearestNeighbor(dicc):
 def trans_CorrectSpelling(dicc):
 
     attr = dicc['attr']
-    lang = dicc['lang-option']
-    accent_mark = dicc['accent-mark']
+    lang = dicc.get('lang-option', 'es_ES')
+    accent_mark = dicc.get('accent-mark', 'false')
 
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
@@ -6542,12 +6561,21 @@ def trans_Cluster(dicc):
     minpoints = dicc['minpoints']
     num_clusters = dicc['number-clusters']
     max_radius = dicc['max-radius']
-    attr = dicc['attr']
+    attr = str(dicc.get('attr') or '-').strip() or '-'
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 
     conn = psycopg2.connect(user = GEOETL_DB["user"], password = GEOETL_DB["password"], host = GEOETL_DB["host"], port = GEOETL_DB["port"], database = GEOETL_DB["database"])
     cur = conn.cursor()
+
+    if attr != '-':
+        # K-means solo pondera con un atributo numérico (cuarta dimensión); otro tipo agrupa solo por posición
+        cur.execute('SELECT data_type FROM information_schema.columns WHERE table_schema = %s AND table_name = %s AND column_name = %s',
+                    [GEOETL_DB["schema"], table_name_source, attr])
+        row = cur.fetchone()
+        if not row or row[0] not in ('smallint', 'integer', 'bigint', 'numeric', 'real', 'double precision'):
+            print('Cluster %s: "%s" no es un atributo numérico; se agrupa solo por posición.' % (dicc['id'], attr))
+            attr = '-'
 
     sqlDrop = sql.SQL("DROP TABLE IF EXISTS {}.{}").format(
         sql.Identifier(GEOETL_DB["schema"]),
@@ -6625,7 +6653,7 @@ def trans_Cluster(dicc):
                 schema = sql.Identifier(GEOETL_DB["schema"]),
                 tbl_target = sql.Identifier(table_name_target),
                 num_clusters = sql.SQL(str(num_clusters)),
-                attr = sql.SQL(str(attr)),
+                attr = sql.Identifier(attr),
                 max_radius = sql.SQL(str(max_radius)))
 
     cur.execute(sqlUpdate)
@@ -6691,7 +6719,7 @@ def trans_Cluster(dicc):
         """).format(
             schema = sql.Identifier(GEOETL_DB["schema"]),
             tbl_target = sql.Identifier(table_name_target),
-            attr = sql.SQL(str(attr)))
+            attr = sql.Identifier(attr))
     else:
         # Para DBSCAN o K-Means sin atributo, calcular ambos valores solo espaciales
         sqlDistances = sql.SQL(""" 
@@ -6756,7 +6784,7 @@ def trans_Cluster(dicc):
 
 def trans_Voronoi(dicc):
     
-    tolerance = dicc['tolerance']
+    tolerance = dicc.get('tolerance', '0.0')
     table_name_source = dicc['data'][0]
     table_name_target = dicc['id']
 

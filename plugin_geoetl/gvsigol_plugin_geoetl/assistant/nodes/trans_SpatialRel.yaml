@@ -4,6 +4,7 @@ family: transform
 summary: Filtra la entrada 0 según una relación espacial con la entrada 1.
 parameters:
 - name: option
+  default: 'ST_CONTAINS'
   choices:
   - ST_CONTAINS
   - ST_EQUALS

@@ -78,6 +78,25 @@ def port_kind(spec, direction, index):
     return 'table'
 
 
+def _matches(params, condition):
+    return all(str(params.get(name) or '').strip().lower() == str(value or '').strip().lower()
+               for name, value in condition.items())
+
+
+def is_required(item, params):
+    """Obligatorio según la ficha: required, y si los hay, required_when / required_unless {parámetro: valor}."""
+    if not item.get('required'):
+        return False
+    params = params or {}
+    when = item.get('required_when')
+    if isinstance(when, dict) and not _matches(params, when):
+        return False
+    unless = item.get('required_unless')
+    if isinstance(unless, dict) and _matches(params, unless):
+        return False
+    return True
+
+
 def first_sentence(text, limit=160):
     """Primera frase de un resumen, para el índice del prompt (la ficha completa va en get_node_specs)."""
     text = ' '.join((text or '').split())

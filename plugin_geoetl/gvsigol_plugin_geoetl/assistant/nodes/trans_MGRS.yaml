@@ -4,12 +4,16 @@ family: transform
 summary: Convierte entre coordenada MGRS y longitud/latitud.
 parameters:
 - name: select
+  default: 'mgrstolatlon'
   choices:
   - mgrstolatlon
   - latlontomgrs
 - name: mgrs
+  default: ''
 - name: lon
+  default: ''
 - name: lat
+  default: ''
 ports:
 - direction: input
   label: Input

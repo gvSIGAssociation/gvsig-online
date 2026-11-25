@@ -147,6 +147,23 @@ class ReadTests(Base):
             read = columns.read_columns('input_Shp', {'shp-file': self.file('rol_a/a.shp')}, self.context())
         self.assertEqual(read['params']['encode'], 'CP850')
 
+    def test_shapefile_encoding_from_the_geoserver_cst(self):
+        self.write('rol_a/a.cst', b'ISO-8859-1')
+        with mock.patch.object(etl_schema, 'get_schema_shape', return_value=['id']):
+            read = columns.read_columns('input_Shp', {'shp-file': self.file('rol_a/a.shp'), 'encode': 'UTF-8'},
+                                        self.context())
+        self.assertEqual(read['params']['encode'], 'LATIN1')
+
+    def test_shapefile_accents_far_into_the_dbf_are_detected(self):
+        header = bytearray(32)
+        header[8:10] = (33).to_bytes(2, 'little')
+        records = b' ' * (3 * 1024 * 1024 + 7) + 'Vinificación'.encode('latin1')
+        self.write('rol_a/a.dbf', bytes(header) + b'\r' + records)
+        with mock.patch.object(etl_schema, 'get_schema_shape', return_value=['id']):
+            read = columns.read_columns('input_Shp', {'shp-file': self.file('rol_a/a.shp'), 'encode': 'UTF-8'},
+                                        self.context())
+        self.assertEqual(read['params']['encode'], 'WINDOWS-1252')
+
     def test_shapefile_in_utf8_keeps_the_given_encoding(self):
         self.write('rol_a/a.cpg', b'UTF-8')
         with mock.patch.object(etl_schema, 'get_schema_shape', return_value=['id']):
@@ -226,7 +243,7 @@ class RequiredParametersTests(SimpleTestCase):
         'trans_KeepAttr': ['attr'], 'trans_RemoveAttr': ['attr'], 'trans_RenameAttr': ['old-attr', 'new-attr'],
         'trans_CreateAttr': ['attr', 'data-type'], 'trans_Calculator': ['attr', 'expression'],
         'trans_ChangeAttrType': ['attr', 'data-type-option'], 'trans_ModifyValue': ['attr'],
-        'trans_ConcatAttr': ['attr', 'new-attr'], 'trans_SplitAttr': ['attr'],
+        'trans_ConcatAttr': ['attr', 'new-attr'], 'trans_SplitAttr': ['attr', 'split'],
         'trans_Reproject': ['source-epsg', 'target-epsg'], 'trans_FilterDupli': ['attr'],
         'trans_TextToPoint': ['epsg', 'lat', 'lon'], 'trans_CalcArea': ['attr'],
         'output_Postgis': ['db-option', 'schema-name-option', 'tablename'], 'trans_Join': ['attr-1', 'attr-2'],

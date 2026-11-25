@@ -1,9 +1,11 @@
 type: trans_ExposeAttr
 label: Expose Attribute
 family: transform
-summary: Hace visibles para los nodos siguientes atributos que están en los datos pero no en la lista de columnas,
+summary: >
+  Hace visibles para los nodos siguientes atributos que están en los datos pero no en la lista de columnas,
   como la geometría (wkb_geometry) o campos anidados. Es el paso previo para usar la geometría en un parámetro, por
-  ejemplo en trans_Calculator.
+  ejemplo en trans_Calculator. Una vez expuesta, la columna sigue disponible en todos los nodos siguientes: basta
+  un único Expose al principio de la rama, no uno antes de cada nodo que la use.
 parameters:
 - name: attrs
   summary: Atributos que se exponen, separados por espacio.

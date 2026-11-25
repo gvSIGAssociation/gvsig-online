@@ -6,6 +6,7 @@ summary: Calcula estadísticas de un atributo, opcionalmente por grupos. Solo de
   siguientes deben usar _sum, _mean, etc.
 parameters:
 - name: attr
+  required: true
   summary: Columna numérica o de fecha sobre la que se calculan las estadísticas.
   column: 0
   example: poblacion

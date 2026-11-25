@@ -68,7 +68,8 @@ class QuestionIn(_Open):
     connection_type: Optional[str] = Field(None, description='Con connections y sin nodo: tipo de conexión que sirve '
                                                              '(PostGIS, Oracle, SQLServer), si el usuario lo ha dicho.')
     multiple: Optional[bool] = Field(None, description='True si puede elegir varias.')
-    options: Optional[List[Any]] = Field(None, description='Con custom: hasta 8 textos cortos.')
+    options: Optional[List[Any]] = Field(None, description='Con custom: hasta 8 textos cortos. Con files: los value '
+                                                           'de los ficheros parecidos que devolvió list_files.')
     connection: Optional[str] = None
     schema_: Optional[str] = Field(None, alias='schema')
     table: Optional[str] = None

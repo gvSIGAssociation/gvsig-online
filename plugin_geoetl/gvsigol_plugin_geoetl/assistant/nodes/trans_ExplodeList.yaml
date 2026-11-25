@@ -4,8 +4,10 @@ family: transform
 summary: Expande un atributo que contiene una lista en varias filas.
 parameters:
 - name: attr
+  required: true
   summary: Atributo sobre el que actúa la tarea.
 - name: list
+  required: true
 ports:
 - direction: input
   label: Input

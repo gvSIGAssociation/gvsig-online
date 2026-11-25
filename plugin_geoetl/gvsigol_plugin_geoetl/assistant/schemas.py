@@ -403,13 +403,43 @@ def _order(nodes, edges):
     return ordered                       # con un ciclo faltan nodos: el ciclo ya se avisa aparte
 
 
+# Nodos que crean una columna con ALTER TABLE ADD COLUMN: fallan al ejecutar si ya llega una con ese nombre
+NEW_COLUMN_PARAMS = {
+    'trans_CurrentDate': 'attr',
+    'trans_CreateAttr': 'attr',
+    'trans_CalcArea': 'attr',
+    'trans_ConcatAttr': 'new-attr',
+}
+
+
 def column_issues(nodes, edges, catalog):
     """[(alias, parámetro, columnas que faltan, puerto, columnas que llegan)] de los nodos que el editor pondría en rojo.
 
     Solo se revisan los nodos propuestos y los que reciben columnas de uno propuesto
     (lo que el editor vuelve a calcular al aplicar); los demás ya muestran su estado.
     """
-    outputs, changed, found = {}, set(), []
+    return _review_columns(nodes, edges, catalog)[0]
+
+
+def new_column_clashes(nodes, edges, catalog):
+    """[(alias, parámetro, columna)] de los nodos que crean una columna que ya les llega."""
+    return _review_columns(nodes, edges, catalog)[1]
+
+
+def redundant_exposes(nodes, edges, catalog):
+    """[(alias, columnas)] de los trans_ExposeAttr cuyas columnas ya llegan expuestas desde aguas arriba."""
+    return _review_columns(nodes, edges, catalog)[2]
+
+
+def _exposed_names(params):
+    names = params.get('attrs') or params.get('attr') or ''
+    if isinstance(names, list):
+        names = ' '.join(str(n) for n in names if n)
+    return str(names).replace(',', ' ').split()
+
+
+def _review_columns(nodes, edges, catalog):
+    outputs, changed, found, clashes, redundant = {}, set(), [], [], []
     for alias in _order(nodes, edges):
         node = nodes[alias]
         type_name = node.get('type')
@@ -452,7 +482,15 @@ def column_issues(nodes, edges, catalog):
         for param, missing, port in check(inputs, params):
             if missing:
                 found.append((alias, param, missing, port, _port(inputs, port) if port else _cols(inputs)))
-    return found
+        new_param = NEW_COLUMN_PARAMS.get(type_name)
+        new_column = params.get(new_param) if new_param else None
+        if isinstance(new_column, str) and new_column and new_column in _cols(inputs):
+            clashes.append((alias, new_param, new_column))
+        if type_name == 'trans_ExposeAttr':
+            exposed = _exposed_names(params)
+            if exposed and all(name in _cols(inputs) for name in exposed):
+                redundant.append((alias, exposed))
+    return found, clashes, redundant
 
 
 def listed(columns):

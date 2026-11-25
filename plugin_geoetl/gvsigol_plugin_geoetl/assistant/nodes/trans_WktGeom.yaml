@@ -4,8 +4,10 @@ family: transform
 summary: Convierte un atributo WKT en geometría.
 parameters:
 - name: attr
+  required: true
   summary: Atributo sobre el que actúa la tarea.
 - name: epsg
+  required: true
   summary: Código EPSG.
 ports:
 - direction: input

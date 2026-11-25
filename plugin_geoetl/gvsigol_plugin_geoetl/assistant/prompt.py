@@ -52,9 +52,16 @@ _ASSUMPTIONS_OPTIONS = ('- Si una suposición es el valor de un parámetro que e
 
 
 # Con preguntas, ficheros y destinos no se buscan: los elige el usuario
-_FILES_TEXT = 'Si son ficheros, búscalos con list_files para usar su ruta real.'
-_FILES_ASK = ('Si son ficheros que el usuario no ha indicado, pídeselos con ask_user (source files y extensions): los '
-              'elige en el administrador de archivos. Usa list_files solo si pregunta qué ficheros tiene.')
+_FILES_TEXT = ('Si son ficheros, búscalos con list_files (name con el nombre que dice el usuario) para usar su ruta '
+               'real. Confirma con el usuario el fichero antes de usarlo, aunque el nombre coincida: dile el que '
+               'has encontrado y los parecidos (similar_files) y pregunta cuál es o si quiere otro; si no hay '
+               'ninguno, díselo y pídele que lo indique.')
+_FILES_ASK = ('Si el usuario nombra un fichero (aunque sea solo el nombre, "viajeros.csv"), búscalo con list_files y '
+              'name, y no lo uses directamente aunque el nombre coincida: pregunta siempre con ask_user (source '
+              'files, extensions y options con los value de matches primero y luego los de similar_files), así lo '
+              'confirma con un clic o carga otro en el administrador de archivos; si no hay ninguno, pregunta igual '
+              'sin options para que lo busque. Si no nombra ningún fichero, pídeselo con ask_user (source files y '
+              'extensions).')
 _CONNECTIONS_TEXT = 'Las conexiones se citan por su nombre, el que devuelve list_connections.'
 _CONNECTIONS_ASK = ('Las conexiones se citan por su nombre, el que devuelve list_connections. Para el destino de una '
                     'tabla PostGIS no preguntes por la conexión: pregunta por el almacén (source datastores).')
@@ -117,7 +124,7 @@ Si un mensaje mezcla intenciones (por ejemplo "revisa el flujo y arréglalo"), h
 
 # 2. Construir o modificar
 El usuario puede describir solo las entradas y el resultado; no tiene que nombrar los nodos. Sigue este orden:
-1. Identifica las entradas. Si son tablas de una conexión, consulta sus columnas con get_table_schema. Si el destino es una tabla que ya existe, consulta también sus columnas. Si son ficheros, búscalos con list_files para usar su ruta real.
+1. Identifica las entradas. Si son tablas de una conexión, consulta sus columnas con get_table_schema. Si el destino es una tabla que ya existe, consulta también sus columnas. Si son ficheros, búscalos con list_files (name con el nombre que dice el usuario) para usar su ruta real. Confirma con el usuario el fichero antes de usarlo, aunque el nombre coincida: dile el que has encontrado y los parecidos (similar_files) y pregunta cuál es o si quiere otro; si no hay ninguno, díselo y pídele que lo indique.
 2. Compara entradas y destino: columnas que faltan, sobran o cambian de nombre, filas que hay que filtrar o agregar, geometría y EPSG. De esa diferencia deduces los nodos.
 3. Pide las fichas con get_node_specs de TODOS los tipos que vayas a usar (puedes pedir varios a la vez). El índice de abajo es solo un resumen.
 4. Llama a propose_workspace con el flujo. Es la única forma de cambiar el canvas: el texto que escribes no modifica nada. Nunca digas que has añadido, cambiado o conectado algo si propose_workspace no lo ha aceptado.

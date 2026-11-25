@@ -7,7 +7,7 @@ from unittest import mock
 
 from django.test import SimpleTestCase
 
-from gvsigol_plugin_geoetl.assistant import agent, tools as tools_module
+from gvsigol_plugin_geoetl.assistant import agent, columns, tools as tools_module
 from gvsigol_plugin_geoetl.assistant.catalog import load_catalog
 from gvsigol_plugin_geoetl.assistant.columns import normalize_proposal
 from gvsigol_plugin_geoetl.assistant.context import AssistantContext
@@ -332,6 +332,83 @@ class ColumnReviewTests(SimpleTestCase):
         self.assertEqual(self._issues('trans_KeepAttr', {'attr': ['a', 'zeta']})[0]['param'], 'attr')
         self.assertEqual(self._issues('trans_Calculator', {'attr': 'zeta', 'expression': '1'})[0]['param'], 'attr')
         self.assertEqual(self._issues('trans_KeepAttr', {'attr': ['a']}), [])
+
+    def test_current_date_after_create_attr_with_same_name_is_an_error(self):
+        canvas = {'nodes': [
+            {'alias': 'n1', 'id': 'u1', 'type': 'input_Csv', 'label': 'c', 'parameters': {'csv-file': 'x'},
+             'schema': ['a', 'b'], 'status': ''},
+            {'alias': 'n2', 'id': 'u2', 'type': 'trans_CreateAttr', 'label': 'c',
+             'parameters': {'attr': 'fecha_alta', 'data-type': 'DATE'}, 'schema': [], 'status': 'proposed'},
+            {'alias': 'n3', 'id': 'u3', 'type': 'trans_CurrentDate', 'label': 'd',
+             'parameters': {'attr': 'fecha_alta'}, 'schema': [], 'status': 'proposed'}],
+            'edges': [{'source': 'n1', 'target': 'n2', 'source_port': 0, 'target_port': 0},
+                      {'source': 'n2', 'target': 'n3', 'source_port': 0, 'target_port': 0}]}
+        nodes, edges = graph_after(None, canvas)
+        clashes = [i for i in check_graph(nodes, edges, load_catalog(), CONNECTIONS) if i['code'] == 'column_exists']
+        self.assertEqual([(i['node'], i['param']) for i in clashes], [('n3', 'attr')])
+
+    def test_grid_from_coordinates_needs_no_input_and_options_keep_their_case(self):
+        canvas = {'nodes': [{'alias': 'n1', 'id': 'u1', 'type': 'crea_Grid', 'label': 'g',
+                             'parameters': {'create': 'coordinates', 'rows': '10', 'columns': '10',
+                                            'width': '20000', 'height': '20000', 'init-x': '600000',
+                                            'init-y': '4190000', 'epsg': '25830'},
+                             'schema': [], 'status': 'proposed'}], 'edges': []}
+        nodes, edges = graph_after(None, canvas)
+        columns._normalize_parameters(nodes['n1']['parameters'], load_catalog().get('crea_Grid'), True)
+        self.assertEqual(nodes['n1']['parameters']['create'], 'Coordinates')
+        codes = [i['code'] for i in check_graph(nodes, edges, load_catalog(), CONNECTIONS)]
+        self.assertNotIn('unconnected_input', codes)
+        nodes['n1']['parameters']['create'] = 'Extent'
+        codes = [i['code'] for i in check_graph(nodes, edges, load_catalog(), CONNECTIONS)]
+        self.assertIn('unconnected_input', codes)
+
+    def test_json_needs_either_the_file_or_the_url(self):
+        def codes(params):
+            canvas = {'nodes': [{'alias': 'n1', 'id': 'u1', 'type': 'input_Json', 'label': 'j',
+                                 'parameters': params, 'schema': ['a'], 'status': 'proposed'}], 'edges': []}
+            nodes, edges = graph_after(None, canvas)
+            columns._normalize_parameters(nodes['n1']['parameters'], load_catalog().get('input_Json'), True)
+            return [(i['code'], i.get('param')) for i in check_graph(nodes, edges, load_catalog(), CONNECTIONS)
+                    if i['code'] == 'missing_parameter']
+        self.assertEqual(codes({'url': 'https://example.com/x.json'}), [])
+        self.assertEqual(codes({'api-rest': True, 'url': 'https://example.com/x.json'}), [])
+        self.assertEqual(codes({'json-file': 'file:///data/x.json'}), [])
+        self.assertEqual(codes({}), [('missing_parameter', 'json-file')])
+        self.assertEqual(codes({'api-rest': 'true'}), [('missing_parameter', 'url')])
+
+    def test_chained_filters_are_flagged_to_merge(self):
+        node = lambda alias, attr: {'alias': alias, 'id': 'u' + alias, 'type': 'trans_Filter', 'label': 'f',
+                                    'parameters': {'attr': attr, 'option': '=', 'value': '1'},
+                                    'schema': [], 'status': 'proposed'}
+        canvas = {'nodes': [
+            {'alias': 'n1', 'id': 'u1', 'type': 'input_Csv', 'label': 'c', 'parameters': {'csv-file': 'x'},
+             'schema': ['a', 'b'], 'status': ''},
+            node('n2', 'a'), node('n3', 'b')],
+            'edges': [{'source': 'n1', 'target': 'n2', 'source_port': 0, 'target_port': 0},
+                      {'source': 'n2', 'target': 'n3', 'source_port': 0, 'target_port': 0}]}
+        nodes, edges = graph_after(None, canvas)
+        flagged = [i['node'] for i in check_graph(nodes, edges, load_catalog(), CONNECTIONS)
+                   if i['code'] == 'chained_filters']
+        self.assertEqual(flagged, ['n3'])
+        canvas['nodes'].append({'alias': 'n4', 'id': 'u4', 'type': 'output_Visualizer', 'label': 'v',
+                                'parameters': {}, 'schema': [], 'status': 'proposed'})
+        canvas['edges'].append({'source': 'n2', 'target': 'n4', 'source_port': 1, 'target_port': 0})
+        nodes, edges = graph_after(None, canvas)
+        self.assertNotIn('chained_filters', [i['code'] for i in check_graph(nodes, edges, load_catalog(), CONNECTIONS)])
+
+    def test_exposing_geometry_twice_is_flagged(self):
+        node = lambda alias, attrs: {'alias': alias, 'id': 'u' + alias, 'type': 'trans_ExposeAttr', 'label': 'e',
+                                     'parameters': {'attrs': attrs}, 'schema': [], 'status': 'proposed'}
+        canvas = {'nodes': [
+            {'alias': 'n1', 'id': 'u1', 'type': 'input_Csv', 'label': 'c', 'parameters': {'csv-file': 'x'},
+             'schema': ['a'], 'status': ''},
+            node('n2', 'wkb_geometry'), node('n3', 'wkb_geometry')],
+            'edges': [{'source': 'n1', 'target': 'n2', 'source_port': 0, 'target_port': 0},
+                      {'source': 'n2', 'target': 'n3', 'source_port': 0, 'target_port': 0}]}
+        nodes, edges = graph_after(None, canvas)
+        flagged = [i['node'] for i in check_graph(nodes, edges, load_catalog(), CONNECTIONS)
+                   if i['code'] == 'redundant_expose']
+        self.assertEqual(flagged, ['n3'])
 
     def test_text_to_point_only_adds_xy_columns_from_point_to_text(self):
         from gvsigol_plugin_geoetl.assistant.schemas import HANDLERS
