@@ -1,11 +1,12 @@
 type: trans_AIAction
-label: SQL with AI
+label: Process data with AI
 family: transform
-summary: 'Ejecuta una acción libre en lenguaje natural como SQL/PostGIS. Por defecto 1 entrada y
-  1 salida (máx. 5 entradas / 10 salidas); al aceptar aparecen los puertos. Cada salida tiene su
-  propio esquema y su propio SELECT (pestañas). Generar produce un SQL por salida cuando hay
-  varias; puedes sugerir el esquema de la pestaña activa a partir de su SQL. En ejecución cada
-  salida materializa su SELECT (o, en legado con un solo SQL, proyecta columnas del mismo resultado).'
+summary: >
+  Acción libre en lenguaje natural (joins, varias salidas, geo custom…) cuando ningún transformador
+  ni Calculator la resuelve. Por defecto 1 entrada y 1 salida (máx. 5 entradas / 10 salidas); al
+  aceptar aparecen los puertos. Cada salida tiene su propio esquema y su propio SELECT (pestañas).
+  Generar produce un SQL por salida; puedes sugerir el esquema de la pestaña activa a partir de su
+  SQL. En ejecución cada salida materializa su SELECT.
 parameters:
 - name: inputs_count
   required: true
@@ -32,8 +33,10 @@ parameters:
   format: list
 - name: instruction
   required: false
-  summary: 'Qué hay que hacer, en lenguaje natural. Obligatorio para generar/ejecutar, no para aceptar puertos.'
-  example: calcula los centroides y guarda x e y
+  summary: >
+    Qué hay que hacer, en lenguaje natural. Solo para lo que no cubre otro nodo (no concatenar
+    campos, no centroides, no buffer…). Obligatorio para generar/ejecutar, no para aceptar puertos.
+  example: cruza parcelas con propietarios por owner_id y devuelve también las que no tienen propietario
 - name: sqls
   required: false
   summary: 'Lista de SELECT/WITH, uno por salida. Preferido cuando outputs_count > 1.'

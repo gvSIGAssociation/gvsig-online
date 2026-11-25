@@ -457,7 +457,7 @@ gvsigolETL.Toolbar = Class.extend({
 
 					isAlreadyInCanvas(jsonParams, taskparameters, figure.id)
 
-					// SQL con IA: recrear N entradas / M salidas ANTES de remapear cables
+					// Procesa datos con IA: recrear N entradas / M salidas ANTES de remapear cables
 					if (type === 'trans_AIAction' && typeof figure.syncPorts === 'function') {
 						var p0 = (parameters && parameters[0]) ? parameters[0] : {};
 						var restoredIn = parseInt(p0.inputs_count, 10) || 1;

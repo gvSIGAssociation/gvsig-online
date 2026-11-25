@@ -2696,6 +2696,9 @@ msgstr "Selecciona atributos"
 msgid "Process data"
 msgstr "Procesar datos"
 
+msgid "Process data with AI"
+msgstr "Procesa datos con IA"
+
 msgid "Describe the action in natural language. You fix how many inputs and which output columns; Generate builds a SQL that must match that contract. Review the SQL before accepting."
 msgstr "Describe la acción en lenguaje natural. Tú fijas cuántas entradas y qué columnas salen; Generar construye un SQL que debe respetar ese contrato. Revisa el SQL antes de aceptar."
 
@@ -2714,8 +2717,8 @@ msgstr "Añadir columna"
 msgid "column name"
 msgstr "nombre de columna"
 
-msgid "e.g. unify street, number and municipality into address; or compute centroids as x and y"
-msgstr "p. ej. unifica calle, número y municipio en direccion; o calcula centroides como x e y"
+msgid "e.g. join parcels with owners on owner_id and also return parcels without an owner (two outputs)"
+msgstr "p. ej. cruza parcelas con propietarios por owner_id y también las que no tienen propietario (dos salidas)"
 
 msgid "Generate"
 msgstr "Generar"
@@ -2745,7 +2748,7 @@ msgid "IA"
 msgstr "IA"
 
 msgid "SQL with AI"
-msgstr "SQL con IA"
+msgstr "Procesa datos con IA"
 
 msgid "Describe the action in natural language. Choose how many inputs (extra ports appear when you Accept). Fix the output columns; Generate builds SQL that must match that contract. One output table. Review the SQL before accepting."
 msgstr "Describe la acción en lenguaje natural. Elige cuántas entradas (los puertos extra aparecen al Aceptar). Fija las columnas de salida; Generar construye un SQL que debe respetar ese contrato. Una sola tabla de salida. Revisa el SQL antes de aceptar."
@@ -2911,3 +2914,27 @@ msgstr "Extraer el código, la fecha o el importe mencionados en el texto"
 
 msgid "Summarize in at most 15 words"
 msgstr "Resumir en 15 palabras como máximo"
+
+msgid "Match + unmatched"
+msgstr "Cruzar + sin pareja"
+
+msgid "Join parcels with owners on owner_id and also return parcels without an owner (two outputs)"
+msgstr "Cruza parcelas con propietarios por owner_id y también las que no tienen propietario (dos salidas)"
+
+msgid "Intersect or not"
+msgstr "Intersectan o no"
+
+msgid "Keep features that intersect the second layer and also return those that do not (two outputs)"
+msgstr "Quédate con las entidades que intersectan la segunda capa y también con las que no (dos salidas)"
+
+msgid "Enrich"
+msgstr "Enriquecer"
+
+msgid "Add columns from the second input matching on id; keep all rows of the first input"
+msgstr "Añade columnas de la segunda entrada cruzando por id; conserva todas las filas de la primera"
+
+msgid "Custom filter"
+msgstr "Filtro a medida"
+
+msgid "Keep only polygon features with area greater than 1000"
+msgstr "Quédate solo con los polígonos cuya área sea mayor que 1000"

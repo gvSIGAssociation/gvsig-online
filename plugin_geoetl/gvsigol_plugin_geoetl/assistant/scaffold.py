@@ -34,8 +34,9 @@ SUMMARIES = {
                         'es la alternativa para cualquier cálculo por fila que no tenga nodo propio.',
     'trans_ChangeAttrType': 'Cambia el tipo de un atributo.',
     'trans_CompareRows': 'Compara filas de dos entradas por un atributo. Tiene dos entradas y varias salidas.',
-    'trans_AIAction': 'SQL con IA: acción libre (joins, geo, unificar columnas…) con hasta 5 entradas y '
-                      '10 salidas (puertos al aceptar); cada salida puede tener su propio esquema.',
+    'trans_AIAction': 'Procesa datos con IA: acción libre (joins, varias salidas, geo custom…) cuando '
+                      'ningún otro nodo la resuelve; hasta 5 entradas y 10 salidas; cada salida puede '
+                      'tener su propio esquema.',
     'trans_AIText': 'Transforma un texto con un modelo de lenguaje según una instrucción (traducir a uno o varios '
                     'idiomas, clasificar, extraer, normalizar o resumir) y guarda uno o más atributos nuevos.',
     'trans_ConcatAttr': 'Concatena atributos en uno nuevo.',

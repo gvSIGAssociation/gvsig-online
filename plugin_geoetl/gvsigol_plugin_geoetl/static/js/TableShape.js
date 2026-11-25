@@ -11,7 +11,7 @@ var paramsTransTpl = gettext('Parameters: {}');
  *  - Toda entrada (incluida ráster) → verde
  *  - Creadores → verde más oscuro
  *  - Transformadores clásicos → azul claro
- *  - IA (AI Text, SQL con IA) → amarillo
+ *  - IA (AI Text, Process data with AI) → amarillo
  *  - Predictivo → índigo pizarra (combina con el resto)
  *  - Herramientas ráster (no inputs) → rosa polvo (menos chillón que el fucsia)
  *  - Salidas → ámbar; visualizer → naranja
@@ -8218,23 +8218,27 @@ trans_AIText = draw2d.shape.layout.VerticalLayout.extend({
             '</div>'+
         '</div>')
 
-        var aiTextChips = [
-            {label: gettext('Translate'), text: gettext('Translate to English and Portuguese; new fields _en and _pt')},
-            {label: gettext('Normalize'), text: gettext('Normalize spelling, abbreviations and format')},
-            {label: gettext('Classify'), text: gettext('Classify into categories A, B, C')},
-            {label: gettext('Extract data'), text: gettext('Extract the code, date or amount mentioned in the text')},
-            {label: gettext('Summarize'), text: gettext('Summarize in at most 15 words')}
-        ]
-        var $chips = $('#ai-text-chips-'+ID).empty()
-        aiTextChips.forEach(function(chip) {
-            var $btn = $('<button type="button" class="btn btn-default btn-xs" style="margin:0 4px 4px 0"></button>')
-                .text(chip.label)
-                .attr('title', chip.text)
-            $btn.on('click', function() {
-                $('#instruction-'+ID).val(chip.text).trigger('input')
+        function renderAITextChips() {
+            var aiTextChips = [
+                {label: gettext('Translate'), text: gettext('Translate to English and Portuguese; new fields _en and _pt')},
+                {label: gettext('Normalize'), text: gettext('Normalize spelling, abbreviations and format')},
+                {label: gettext('Classify'), text: gettext('Classify into categories A, B, C')},
+                {label: gettext('Extract data'), text: gettext('Extract the code, date or amount mentioned in the text')},
+                {label: gettext('Summarize'), text: gettext('Summarize in at most 15 words')}
+            ]
+            var $chips = $('#ai-text-chips-'+ID).empty()
+            aiTextChips.forEach(function(chip) {
+                var $btn = $('<button type="button" class="btn btn-default btn-xs" style="margin:0 4px 4px 0"></button>')
+                    .html('<i class="fa fa-lightbulb-o"></i> ')
+                    .append(document.createTextNode(chip.label))
+                    .attr('title', chip.text)
+                $btn.on('click', function() {
+                    $('#instruction-'+ID).val(chip.text).trigger('input')
+                })
+                $chips.append($btn)
             })
-            $chips.append($btn)
-        })
+        }
+        renderAITextChips()
 
         function normalizeNewAttrName(name) {
             return String(name || '').trim().replace(/\s+/g, '_')
@@ -8403,6 +8407,7 @@ trans_AIText = draw2d.shape.layout.VerticalLayout.extend({
         icon.on("click", function(){
 
             setTimeout(function(){
+                renderAITextChips()
                 try{
                     schemas = getOwnSchemas(context.canvas, ID)
                     schema = schemas[0]
@@ -8583,7 +8588,7 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
         this._super($.extend({bgColor:"#dbddde", color:"#d7d7d7", stroke:1, radius:3},attr));
 
         this.classLabel = new draw2d.shape.basic.Label({
-            text: gettext("SQL with AI"),
+            text: gettext("Process data with AI"),
             stroke:1,
             fontColor:"#ffffff",
             bold:true,
@@ -8618,7 +8623,7 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
                             '<span aria-hidden="true">&times;</span>'+
                         '</button>'+
-                        '<h4 class="modal-title">'+paramsTransTpl.replace('{}', gettext("SQL with AI"))+'</h4>'+
+                        '<h4 class="modal-title">'+paramsTransTpl.replace('{}', gettext("Process data with AI"))+'</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                         '<form>'+
@@ -8635,7 +8640,8 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
                             '</div>'+
                             '<div style="margin-top:10px">'+
                                 '<label class="col-form-label">'+gettext('Instruction:')+'</label>'+
-                                '<textarea id="ai-action-instruction-'+ID+'" rows="3" class="form-control" placeholder="'+gettext('e.g. unify street, number and municipality into address; or compute centroids as x and y')+'"></textarea>'+
+                                '<div id="ai-action-chips-'+ID+'" style="margin-bottom:6px"></div>'+
+                                '<textarea id="ai-action-instruction-'+ID+'" rows="3" class="form-control" placeholder="'+gettext('e.g. join parcels with owners on owner_id and also return parcels without an owner (two outputs)')+'"></textarea>'+
                             '</div>'+
                             '<div style="margin-top:10px">'+
                                 '<button type="button" class="btn btn-primary btn-sm" id="ai-action-generate-'+ID+'" title="'+gettext('Generate SQL and schemas from the instruction')+'"><i class="fa fa-magic"></i> '+gettext('Generate')+'</button> '+
@@ -8672,6 +8678,27 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
                 '</div>'+
             '</div>'+
         '</div>')
+
+        function renderAIActionChips() {
+            var aiActionChips = [
+                {label: gettext('Match + unmatched'), text: gettext('Join parcels with owners on owner_id and also return parcels without an owner (two outputs)')},
+                {label: gettext('Intersect or not'), text: gettext('Keep features that intersect the second layer and also return those that do not (two outputs)')},
+                {label: gettext('Enrich'), text: gettext('Add columns from the second input matching on id; keep all rows of the first input')},
+                {label: gettext('Custom filter'), text: gettext('Keep only polygon features with area greater than 1000')}
+            ]
+            var $aiActionChips = $('#ai-action-chips-'+ID).empty()
+            aiActionChips.forEach(function(chip) {
+                var $btn = $('<button type="button" class="btn btn-default btn-xs" style="margin:0 4px 4px 0"></button>')
+                    .html('<i class="fa fa-lightbulb-o"></i> ')
+                    .append(document.createTextNode(chip.label))
+                    .attr('title', chip.text)
+                $btn.on('click', function() {
+                    $('#ai-action-instruction-'+ID).val(chip.text).trigger('input')
+                })
+                $aiActionChips.append($btn)
+            })
+        }
+        renderAIActionChips()
 
         var AI_ACTION_MAX_INPUTS = 5
         var AI_ACTION_MAX_OUTPUTS = 10
@@ -9217,6 +9244,7 @@ trans_AIAction = draw2d.shape.layout.VerticalLayout.extend({
 
         icon.on('click', function() {
             setTimeout(function() {
+                renderAIActionChips()
                 try {
                     schemaEdge = passSchemaWhenInputTask(context.canvas, listLabel, ID)
                 } catch (e) {

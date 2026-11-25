@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Nodo Procesar datos (trans_AIAction): instrucción libre → SQL/PostGIS bajo contrato E/S."""
+"""Nodo Procesa datos con IA (trans_AIAction): instrucción libre → SQL/PostGIS bajo contrato E/S."""
 import json
 import logging
 import re
@@ -870,7 +870,7 @@ def _materialize_output(cur, conn, schema, out_name, bound, out_schema, label):
 def trans_AIAction(dicc):
     if not feature_enabled():
         raise ValueError(
-            'El nodo SQL con IA está desactivado en esta instalación '
+            'El nodo Procesa datos con IA está desactivado en esta instalación '
             '(ETL_AI_NODES_ENABLED o plugin GeoCopilot no disponible).'
         )
     inputs_count, outputs_count, _instruction, output_schemas, _sql_text, sqls = check_params(

@@ -464,7 +464,7 @@ var PARAM_SCHEMA_SOURCE = {
             return schemaMod;
         },
         validateParams: function (inputSchemas, params) {
-            // Aceptar suave: se puede guardar a medias (como SQL con IA)
+            // Aceptar suave: se puede guardar a medias (como Procesa datos con IA)
             if (!params || !params.parameters || !params.parameters[0]) {
                 return true;
             }

@@ -294,7 +294,7 @@ function drawNodes(cnv, options) {
 			}
 			var entity = (cnv[o].entities && cnv[o].entities[0]) ? cnv[o].entities[0] : {};
 			var parameters = entity.parameters || [];
-			// SQL con IA: restaurar N entradas / M salidas antes de cablear
+			// Procesa datos con IA: restaurar N entradas / M salidas antes de cablear
 			if (type === 'trans_AIAction' && typeof figure.syncPorts === 'function') {
 				var p0 = parameters[0] || {};
 				var restoredIn = parseInt(p0.inputs_count, 10) || 1;
