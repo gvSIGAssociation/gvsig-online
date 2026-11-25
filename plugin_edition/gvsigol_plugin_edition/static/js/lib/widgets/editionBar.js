@@ -1404,7 +1404,7 @@ EditionBar.prototype.createFeatureForm = function(feature) {
 				}
 
 				for (var j=0; j<enumeration.items.length; j++) {
-					enum_html += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+					enum_html += '<option value="' + EditionBar.escapeHtml(enumeration.items[j].name) + '">' + EditionBar.escapeHtml(enumeration.items[j].name) + '</option>';
 				}
 				enum_html += 	'</select>';
 			}else{
@@ -1719,6 +1719,21 @@ EditionBar.prototype.createAllErrors = function() {
 /**
  * @param {Event} e Browser event.
  */
+/**
+ * Escapa un valor de un elemento para insertarlo en el HTML del formulario
+ * (contenido o atributo entre comillas). Los valores de las capas pueden venir
+ * de fuera (p. ej. reportes ciudadanos) y no deben interpretarse como HTML.
+ * Conserva el comportamiento anterior con null/undefined ("null"/"undefined").
+ */
+EditionBar.escapeHtml = function(value) {
+	return String(value)
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;');
+};
+
 EditionBar.prototype.getDateTime = function(time) {
 	if(time == ""){
 		return null;
@@ -1796,7 +1811,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 							value = "";
 						}
 						var numeric_conf = this.getNumericProperties(this.featureType[i]);
-						featureProperties += '<input id="' + this.featureType[i].name + '" type="number" '+ numeric_conf +' class="form-control" value="' + value + '">';
+						featureProperties += '<input id="' + this.featureType[i].name + '" type="number" '+ numeric_conf +' class="form-control" value="' + EditionBar.escapeHtml(value) + '">';
 					} else if (this.isDateType(this.featureType[i].type)) {
 						if (value != null) {
 							value = this.modifyDateTime(value);
@@ -1808,7 +1823,7 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 							'name': this.featureType[i].name,
 							'format': dateformat
 						});
-						featureProperties += '<div id="datetimepicker-' + this.featureType[i].name + '"><input id="' + this.featureType[i].name + '" class="form-control"  value="' + value + '"/></div>';
+						featureProperties += '<div id="datetimepicker-' + this.featureType[i].name + '"><input id="' + this.featureType[i].name + '" class="form-control"  value="' + EditionBar.escapeHtml(value) + '"/></div>';
 						//featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="'+dateformat+'" value="' + value + '">';
 
 					} else if (this.featureType[i].type.endsWith("enumeration")) {
@@ -1820,25 +1835,25 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 						if(this.featureType[i].type == "multiple_enumeration") {
 							has_multiple = true;
 							enumeration_names.push(this.featureType[i].name);
-							featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="multiple" data-value="' + value + '"></div>';
+							featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="multiple" data-value="' + EditionBar.escapeHtml(value) + '"></div>';
 						} else {
 							enumeration_names.push(this.featureType[i].name);
-							featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="single" data-value="'+value+'"></div>';
+							featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="single" data-value="'+EditionBar.escapeHtml(value)+'"></div>';
 						}
 					} else if (this.isStringType(this.featureType[i].type)) {
 						if (this.featureType[i].name.startsWith("form_")) {
-							featureProperties += '<br/><a target="_blank" class="form-link form-link-open form-control" href="" data-orig="'+ this.featureType[i].name +'" data-value="' + value + '"><i class="fa fa-check-square-o" aria-hidden="true"></i>&nbsp;&nbsp;' + gettext("Show form") + '</a>';
-							featureProperties += '<input id="' + this.featureType[i].name + '" type="hidden" value="' + value + '">';
+							featureProperties += '<br/><a target="_blank" class="form-link form-link-open form-control" href="" data-orig="'+ this.featureType[i].name +'" data-value="' + EditionBar.escapeHtml(value) + '"><i class="fa fa-check-square-o" aria-hidden="true"></i>&nbsp;&nbsp;' + gettext("Show form") + '</a>';
+							featureProperties += '<input id="' + this.featureType[i].name + '" type="hidden" value="' + EditionBar.escapeHtml(value) + '">';
 						} else if (this.featureType[i].name.startsWith("cd_json_")) {
-							featureProperties += '<textarea id="' + this.featureType[i].name + '" rows="4" class="form-control">' + value + '</textarea>';
+							featureProperties += '<textarea id="' + this.featureType[i].name + '" rows="4" class="form-control">' + EditionBar.escapeHtml(value) + '</textarea>';
 						} else {
 							if (value==null) {
 								value = "";
 							}
 							if("length" in this.featureType[i] && this.featureType[i].length>0){
-								featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" maxlength="'+this.featureType[i].length+'" value="' + value + '">';
+								featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" maxlength="'+this.featureType[i].length+'" value="' + EditionBar.escapeHtml(value) + '">';
 							}else{
-								featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + value + '">';
+								featureProperties += '<input id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + EditionBar.escapeHtml(value) + '">';
 							}
 						}
 
@@ -1898,9 +1913,9 @@ EditionBar.prototype.editFeatureForm = function(feature) {
 				for (var j=0; j<enumeration.items.length; j++) {
 					var enum_item_name = ";"+enumeration.items[j].name+";";
 					if (enum_value.indexOf(enum_item_name) !== -1) {
-						enum_html += '<option selected value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+						enum_html += '<option selected value="' + EditionBar.escapeHtml(enumeration.items[j].name) + '">' + EditionBar.escapeHtml(enumeration.items[j].name) + '</option>';
 					} else {
-						enum_html += '<option value="' + enumeration.items[j].name + '">' + enumeration.items[j].name + '</option>';
+						enum_html += '<option value="' + EditionBar.escapeHtml(enumeration.items[j].name) + '">' + EditionBar.escapeHtml(enumeration.items[j].name) + '</option>';
 					}
 				}
 				enum_html += 	'</select>';
@@ -2216,7 +2231,7 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 							value = "";
 						}
 						var numeric_conf = this.getNumericProperties(this.featureType[i]);
-						featureProperties += '<input disabled id="' + this.featureType[i].name + '" type="number" '+ numeric_conf +' class="form-control" value="' + value + '">';
+						featureProperties += '<input disabled id="' + this.featureType[i].name + '" type="number" '+ numeric_conf +' class="form-control" value="' + EditionBar.escapeHtml(value) + '">';
 					} else if (this.isDateType(this.featureType[i].type)) {
 						if (value != null) {
 							value = this.modifyDateTime(value);
@@ -2228,7 +2243,7 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 							'name': this.featureType[i].name,
 							'format': dateformat
 						});
-						featureProperties += '<div id="datetimepicker-' + this.featureType[i].name + '"><input disabled id="' + this.featureType[i].name + '" class="form-control"  value="' + value + '"/></div>';
+						featureProperties += '<div id="datetimepicker-' + this.featureType[i].name + '"><input disabled id="' + this.featureType[i].name + '" class="form-control"  value="' + EditionBar.escapeHtml(value) + '"/></div>';
 						//featureProperties += '<input id="' + this.featureType[i].name + '" data-provide="datepicker" class="form-control" data-date-format="'+dateformat+'" value="' + value + '">';
 
 					} else if (this.featureType[i].type.endsWith("enumeration")) {
@@ -2240,25 +2255,25 @@ EditionBar.prototype.removeFeatureForm = function(evt, feature) {
 						if(this.featureType[i].type == "multiple_enumeration") {
 							has_multiple = true;
 							enumeration_names.push(this.featureType[i].name);
-							featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="multiple" data-value="' + value + '"></div>';
+							featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="multiple" data-value="' + EditionBar.escapeHtml(value) + '"></div>';
 						} else {
 							enumeration_names.push(this.featureType[i].name);
-							featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="single" data-value="'+value+'"></div>';
+							featureProperties += '<div id="div-' + this.featureType[i].name + '" data-type="single" data-value="'+EditionBar.escapeHtml(value)+'"></div>';
 						}
 					} else if (this.isStringType(this.featureType[i].type)) {
 						if (this.featureType[i].name.startsWith("form_")) {
-							featureProperties += '<br/><a target="_blank" class="form-link form-link-open form-control" href="" data-orig="'+ this.featureType[i].name +'" data-value="' + value + '"><i class="fa fa-check-square-o" aria-hidden="true"></i>&nbsp;&nbsp;' + gettext("Show form") + '</a>';
-							featureProperties += '<input disabled id="' + this.featureType[i].name + '" type="hidden" value="' + value + '">';
+							featureProperties += '<br/><a target="_blank" class="form-link form-link-open form-control" href="" data-orig="'+ this.featureType[i].name +'" data-value="' + EditionBar.escapeHtml(value) + '"><i class="fa fa-check-square-o" aria-hidden="true"></i>&nbsp;&nbsp;' + gettext("Show form") + '</a>';
+							featureProperties += '<input disabled id="' + this.featureType[i].name + '" type="hidden" value="' + EditionBar.escapeHtml(value) + '">';
 						} else if (this.featureType[i].name.startsWith("cd_json_")) {
-							featureProperties += '<textarea disabled id="' + this.featureType[i].name + '" rows="4" class="form-control">' + value + '</textarea>';
+							featureProperties += '<textarea disabled id="' + this.featureType[i].name + '" rows="4" class="form-control">' + EditionBar.escapeHtml(value) + '</textarea>';
 						} else {
 							if (value==null) {
 								value = "";
 							}
 							if("length" in this.featureType[i] && this.featureType[i].length>0){
-								featureProperties += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" maxlength="'+this.featureType[i].length+'" value="' + value + '">';
+								featureProperties += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" maxlength="'+this.featureType[i].length+'" value="' + EditionBar.escapeHtml(value) + '">';
 							}else{
-								featureProperties += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + value + '">';
+								featureProperties += '<input disabled id="' + this.featureType[i].name + '" type="text" class="form-control" value="' + EditionBar.escapeHtml(value) + '">';
 							}
 						}
 
