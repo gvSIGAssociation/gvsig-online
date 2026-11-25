@@ -2451,7 +2451,8 @@ def etl_visualizer_config(request, session_id):
     supported_crs = core_utils.get_supported_crs_array()
 
     from django.conf import settings as _dj_settings
-    logo_url = _dj_settings.STATIC_URL + 'img/no_project.png'
+    # Absolute URL so the SPA (:9000) can load static from the Django host.
+    logo_url = request.build_absolute_uri(_dj_settings.STATIC_URL + 'img/no_project.png')
 
     return JsonResponse({
         'session_id': str(session.session_id),
@@ -2459,6 +2460,7 @@ def etl_visualizer_config(request, session_id):
         'combined_extent': combined_extent,
         'supported_crs': supported_crs,
         'logo_url': logo_url,
+        'title': None,  # frontend i18n (Visualizador ETL)
     })
 
 
