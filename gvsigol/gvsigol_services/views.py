@@ -6235,10 +6235,21 @@ def _rollback_failed_external_wms_cache(layer, params, server, master_node_url):
 @login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
 @staff_required
+def _can_edit_external_layer_permissions(request):
+    return bool(settings.MANAGE_PERMISSION_UI or request.user.is_superuser)
+
+
+def _manage_roles_from_post(request):
+    return [key[len('manage-usergroup-'):] for key in request.POST if key.startswith('manage-usergroup-')]
+
+
 def external_layer_add(request):
     back_url = reverse('external_layer_list')
+    can_manage_permissions = _can_edit_external_layer_permissions(request)
     if request.method == 'POST':
         form = ExternalLayerForm(request, request.POST)
+        assigned_manage_roles = _manage_roles_from_post(request)
+        roles = utils.get_layer_checked_roles_from_user_input([], [], assigned_manage_roles)
 
         try:
             is_visible = False
@@ -6388,6 +6399,9 @@ def external_layer_add(request):
             external_layer.external_params = json.dumps(params)
             external_layer.save()
 
+            if can_manage_permissions:
+                utils.set_external_layer_manage_roles(external_layer, assigned_manage_roles)
+
             if external_layer.cached:
                 if external_layer.type == 'WMS':
                     master_node = geographic_servers.get_instance().get_master_node(server.id)
@@ -6427,8 +6441,12 @@ def external_layer_add(request):
     else:
         form = ExternalLayerForm(request)
         form.initial['srs'] = 'EPSG:3857'
+        roles = utils.get_all_user_roles_checked_by_layer(None, get_primary_user_role(request))
 
-    return render(request, 'external_layer_add.html', {'form': form, 'bing_layers': BING_LAYERS, 'back_url': back_url})
+    return render(request, 'external_layer_add.html', {
+        'form': form, 'bing_layers': BING_LAYERS, 'back_url': back_url,
+        'roles': roles, 'can_manage_permissions': can_manage_permissions,
+    })
 
 @login_required()
 @require_http_methods(["GET", "POST", "HEAD"])
@@ -6441,6 +6459,7 @@ def external_layer_update(request, external_layer_id):
     external_layer = Layer.objects.get(id=external_layer_id)
     if not utils.can_manage_layer(request, external_layer):
         return forbidden_view(request)
+    can_manage_permissions = _can_edit_external_layer_permissions(request)
 
     # Tipos aportados por plugins (p. ej. 3D Tiles): se editan desde el propio plugin
     from gvsigol_services.external_layer_types import get_handler
@@ -6466,13 +6485,17 @@ def external_layer_update(request, external_layer_id):
 
     if request.method == 'POST':
         form = ExternalLayerForm(request, request.POST)
+        assigned_manage_roles = _manage_roles_from_post(request)
+        roles = utils.get_layer_checked_roles_from_user_input([], [], assigned_manage_roles)
         if not layergroup_id:
             layergroup_id = request.POST.get('layer_group')
         try:
             layer_group = LayerGroup.objects.get(id=layergroup_id)
         except LayerGroup.DoesNotExist:
             return not_found_view(request)
-        if not utils.can_use_layergroup(request, layer_group, permission=LayerGroupRole.PERM_INCLUDEINPROJECTS):
+        if layer_group.id != external_layer.layer_group_id and not (
+                utils.can_manage_layergroup(request, external_layer.layer_group)
+                and utils.can_manage_layergroup(request, layer_group)):
             return forbidden_view(request)
         server = Server.objects.get(id=layer_group.server_id)
 
@@ -6708,6 +6731,9 @@ def external_layer_update(request, external_layer_id):
             external_layer.external_params = json.dumps(params)
             external_layer.save()
 
+            if can_manage_permissions:
+                utils.set_external_layer_manage_roles(external_layer, assigned_manage_roles)
+
             if external_layer.cached and external_layer.type == 'WMS':
                 new_gwc_config = _external_cached_wms_gwc_config(
                     params, external_layer.native_srs, layer_group.id
@@ -6775,12 +6801,16 @@ def external_layer_update(request, external_layer_id):
                 'from_redirect': from_redirect,
                 'back_url': back_url,
                 'layer_md_uuid': core_utils.get_layer_metadata_uuid(external_layer),
+                'roles': roles,
+                'can_manage_permissions': can_manage_permissions,
                 'plugins_config': core_utils.get_plugins_config(),
                 'layer_id': external_layer.id,
             }
 
     else:
         form = ExternalLayerForm(request, instance=external_layer)
+        form.fields['layer_group'].queryset = (utils.get_user_layergroups(request) | LayerGroup.objects.filter(id=external_layer.layer_group_id)).order_by('name').distinct()
+        roles = utils.get_all_user_roles_checked_by_layer(external_layer)
 
         if external_layer.external_params:
             params = json.loads(external_layer.external_params)
@@ -6825,6 +6855,8 @@ def external_layer_update(request, external_layer_id):
             'back_url': back_url,
             'style_file_error_message': style_file_error_message,
             'layer_md_uuid': md_uuid,
+            'roles': roles,
+            'can_manage_permissions': can_manage_permissions,
             'plugins_config': plugins_config,
             'layer_id': external_layer.id,
         }
