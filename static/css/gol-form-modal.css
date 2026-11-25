@@ -39,5 +39,24 @@
 	border-color: var(--gol-accent-dk);
 	color: #fff;
 }
-/* Las confirmaciones irreversibles conservan el rojo que pide el marcado. */
-.modal-footer .btn-modal-accept.btn-danger { color: #fff; }
+
+.modal-footer .btn-modal-accept.btn-danger,
+.modal-footer .btn-modal-accept.btn-danger:disabled,
+.modal-footer .btn-modal-accept.btn-danger[disabled] {
+	background: #dd4b39;
+	border: 1px solid #d73925;
+	color: #fff;
+}
+.modal-footer .btn-modal-accept.btn-danger:hover,
+.modal-footer .btn-modal-accept.btn-danger:focus,
+.modal-footer .btn-modal-accept.btn-danger:active {
+	background: #d73925;
+	border-color: #d73925;
+	color: #fff;
+}
+.modal-footer .btn-modal-accept.btn-danger:disabled:hover,
+.modal-footer .btn-modal-accept.btn-danger[disabled]:hover {
+	background: #dd4b39;
+	border-color: #d73925;
+	color: #fff;
+}
