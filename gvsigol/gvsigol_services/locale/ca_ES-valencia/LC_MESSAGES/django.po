@@ -3753,6 +3753,21 @@ msgstr ""
 msgid "Error: workspace could not be created"
 msgstr "Error: L'espai de treball no pot ser creat"
 
+#: gvsigol_services/views.py
+#, python-brace-format
+msgid "The workspace '{value}' cannot be created because it already exists."
+msgstr "No és possible crear l'espai de treball '{value}' perquè ja existeix."
+
+#: gvsigol_services/views.py
+#, python-brace-format
+msgid "The workspace '{value}' cannot be created because that name already exists on the map server and is not in the list."
+msgstr "No és possible crear l'espai de treball '{value}' perquè este nom ja existeix al servidor de mapes i no figura en el llistat."
+
+#: gvsigol_services/views.py
+#, python-brace-format
+msgid "The workspace '{value}' could not be deleted from the map server, so it remains in the list."
+msgstr "No s'ha pogut eliminar l'espai de treball '{value}' al servidor de mapes, així que continua en el llistat."
+
 #: gvsigol_services/views.py:599 gvsigol_services/views.py:4300
 #, python-brace-format
 msgid ""

@@ -412,15 +412,20 @@ def workspace_add(request):
                 form.add_error(None, _("Invalid workspace name: '{value}'. Identifiers must begin with a letter or an underscore (_). Subsequent characters can be letters, underscores or numbers").format(value=name))
             else:
                 form.cleaned_data['is_public'] = form.cleaned_data['is_public'] if form.cleaned_data['is_public'] else False
-                if utils.create_workspace(form.cleaned_data['server'].id,
-                                       form.cleaned_data['name'],
-                                       form.cleaned_data['uri'],
-                                       form.cleaned_data,
-                                       request.user.username):
-                    return HttpResponseRedirect(reverse('workspace_list'))
+                if Workspace.objects.filter(name=name).exists():
+                    form.add_error(None, _("The workspace '{value}' cannot be created because it already exists.").format(value=name))
                 else:
-                    # FIXME: the backend should raise an exception to identify the cause (e.g. workspace exists, backend is offline)
-                    form.add_error(None, _("Error: workspace could not be created"))
+                    gs = geographic_servers.get_instance().get_server_by_id(form.cleaned_data['server'].id)
+                    if gs.getWorkspace(name):
+                        form.add_error(None, _("The workspace '{value}' cannot be created because that name already exists on the map server and is not in the list.").format(value=name))
+                    elif utils.create_workspace(form.cleaned_data['server'].id,
+                                           form.cleaned_data['name'],
+                                           form.cleaned_data['uri'],
+                                           form.cleaned_data,
+                                           request.user.username):
+                        return HttpResponseRedirect(reverse('workspace_list'))
+                    else:
+                        form.add_error(None, _("Error: workspace could not be created"))
 
     else:
         sv = None
@@ -476,12 +481,15 @@ def workspace_delete(request, wsid):
         return HttpResponseRedirect(reverse('workspace_list'))
     except BackendNotAvailable:
         return HttpResponse('The map server is not available. Try again later or contact the system administrators', status=503)
-    except:
-        if ws:
-            ws_str = ws.name
-        else:
-            ws_str = wsid
-        return HttpResponseNotFound('Workspace not found: {0}'.format(ws_str))
+    except Workspace.DoesNotExist:
+        return HttpResponseNotFound('Workspace not found: {0}'.format(wsid))
+    except Exception:
+        logger.exception("Error deleting workspace")
+        ws_name = ws.name if ws else wsid
+        return HttpResponse(
+            _("The workspace '{value}' could not be deleted from the map server, so it remains in the list.").format(value=ws_name),
+            status=409,
+        )
 
 @login_required()
 @superuser_required

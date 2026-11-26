@@ -6,6 +6,9 @@
 <link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-with-aside.css" %}">
+<style>
+.gol-pg-card--keep-fields .box-body .errorlist.nonfield { display: none; }
+</style>
 {% endblock %}
 
 {% block content %}	
@@ -29,7 +32,9 @@
 				{% if form.errors %}
 				<div class="pf-error-msg">
 					<ul>
-					{{ form.non_field_errors }}
+					{% for error in form.non_field_errors %}
+						<li>{{ error }}</li>
+					{% endfor %}
 					{% for field in form %}
 						{% if field.errors %}
 							<li>{{field.label}}. {{ field.errors|striptags }}</li>

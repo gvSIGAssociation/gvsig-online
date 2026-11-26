@@ -4573,6 +4573,21 @@ msgstr ""
 msgid "Error: workspace could not be created"
 msgstr ""
 
+#: gvsigol_services/views.py
+#, python-brace-format
+msgid "The workspace '{value}' cannot be created because it already exists."
+msgstr "The workspace '{value}' cannot be created because it already exists."
+
+#: gvsigol_services/views.py
+#, python-brace-format
+msgid "The workspace '{value}' cannot be created because that name already exists on the map server and is not in the list."
+msgstr "The workspace '{value}' cannot be created because that name already exists on the map server and is not in the list."
+
+#: gvsigol_services/views.py
+#, python-brace-format
+msgid "The workspace '{value}' could not be deleted from the map server, so it remains in the list."
+msgstr "The workspace '{value}' could not be deleted from the map server, so it remains in the list."
+
 #: gvsigol_services/views.py:599 gvsigol_services/views.py:4300
 #, python-brace-format
 msgid ""

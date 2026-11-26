@@ -1791,7 +1791,9 @@ def _workspace_delete(ws, delete_data=False, reload_nodes=False):
                 delete_datastore_elements(ds, gs=gs)
             except:
                 logger.exception("Error deleting datastore")
-        gs.deleteWorkspace(ws)
+        if not gs.deleteWorkspace(ws) and gs.getWorkspace(ws.name):
+            logger.error("Workspace %s could not be deleted from the map server", ws.name)
+            raise Exception("Workspace could not be deleted from the map server: {0}".format(ws.name))
         ws.delete()
         if reload_nodes:
             gs.reload_nodes()
