@@ -365,10 +365,50 @@
 		runIfChanged();
 	}
 
+	function initRoleAssignList() {
+		var box = document.getElementById('role-assign-box');
+		if (!box || typeof List !== 'function' || !box.querySelector('.assign-list__item')) {
+			return;
+		}
+		var roleList = new List('role-assign-box', {
+			valueNames: ['assign-list__name', 'assign-list__desc'],
+			listClass: 'assign-list',
+			searchClass: 'search',
+			page: 6,
+			pagination: {outerWindow: 1}
+		});
+		var pages = box.querySelector('.role-assign-pages');
+		function togglePages() {
+			if (pages) {
+				pages.hidden = roleList.matchingItems.length <= roleList.page;
+			}
+		}
+		roleList.on('updated', togglePages);
+		togglePages();
+
+		var form = box.closest('form');
+		if (!form) {
+			return;
+		}
+		form.addEventListener('submit', function (e) {
+			if (form.getAttribute('data-roles-ready') === '1') {
+				return;
+			}
+			e.preventDefault();
+			var i;
+			for (i = 0; i < roleList.items.length; i++) {
+				roleList.items[i].show();
+			}
+			form.setAttribute('data-roles-ready', '1');
+			form.submit();
+		});
+	}
+
 	$(function () {
 		$('[data-gol-auth-check]').each(function () {
 			init(this);
 		});
+		initRoleAssignList();
 	});
 
 	window.GolAuthForms = {suggestIdentifier: suggestIdentifier, quickRatio: quickRatio, tooSimilar: tooSimilar};

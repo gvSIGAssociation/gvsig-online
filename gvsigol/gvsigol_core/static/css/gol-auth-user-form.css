@@ -97,6 +97,65 @@
 	cursor: pointer;
 }
 
+.role-assign-pages {
+	display: flex;
+	justify-content: flex-end;
+	margin: 4px 0 2px;
+}
+.role-assign-pages[hidden] { display: none; }
+.role-assign-pages .pagination {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	float: none;
+}
+.role-assign-pages .pagination > li {
+	display: inline-flex;
+	float: none;
+	padding: 0;
+}
+.role-assign-pages .pagination > li > a {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 30px;
+	height: 30px;
+	padding: 0 8px;
+	margin: 0;
+	float: none;
+	border: 1px solid var(--pf-border);
+	border-radius: 6px;
+	background: var(--pf-white);
+	color: var(--pf-text);
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1;
+	text-decoration: none;
+}
+.role-assign-pages .pagination > li > a:hover,
+.role-assign-pages .pagination > li > a:focus {
+	background: #f0f6fb;
+	border-color: var(--pf-accent);
+	color: var(--pf-text);
+}
+.role-assign-pages .pagination > li.active > a,
+.role-assign-pages .pagination > li.active > a:hover,
+.role-assign-pages .pagination > li.active > a:focus {
+	background: var(--pf-accent);
+	border-color: var(--pf-accent);
+	color: #fff;
+}
+.role-assign-pages .pagination > li.disabled > a,
+.role-assign-pages .pagination > li.disabled > a:hover {
+	background: var(--pf-bg);
+	border-color: var(--pf-border);
+	color: var(--pf-muted);
+	cursor: default;
+}
+
 /* ---- Cabecera de sección dentro de la pestaña ---- */
 .tab-section-title {
 	font-size: 13px;
