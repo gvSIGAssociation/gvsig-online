@@ -6,6 +6,8 @@
 <link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
 <link rel="stylesheet" href="{% static "css/gol-form-with-aside.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-roles.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-permissions.css" %}">
 {% endblock %}
 
 {% block content %}
@@ -63,6 +65,7 @@
 		<ul class="nav nav-tabs">
           	<li class="active"><a href="#tab-layer-general" data-toggle="tab"><i class="fa fa-cog tab-icon"></i> {% trans "General" %}</a></li>
           	<li><a href="#tab-layer-properties" data-toggle="tab"><i class="fa fa-paint-brush tab-icon"></i> {% trans "Display properties" %}</a></li>
+          	{% if can_manage_permissions %}<li><a href="#tab-layer-permissions" data-toggle="tab"><i class="fa fa-lock tab-icon"></i> {% trans "Permissions" %}</a></li>{% endif %}
           	<li><a href="#tab-layer-metadata" data-toggle="tab"><i class="fa fa-info-circle tab-icon"></i> {% trans "Metadata" %}</a></li>
           	<li><a href="#tab-layer-detailedinfo" data-toggle="tab"><i class="fa fa-file-text-o tab-icon"></i> {% trans "Detailed information" %}</a></li>
         </ul>
@@ -237,6 +240,11 @@
 				</div>
           	</div>
 
+	        {% if can_manage_permissions %}
+	        <div class="tab-pane" id="tab-layer-permissions">
+				{% include "select_layer_permissions.html" with manage_only=True %}
+			</div>
+			{% endif %}
 	        <div class="tab-pane" id="tab-layer-metadata">
 	         	<div class="row">
 					<div class="col-md-12">
@@ -362,6 +370,15 @@ function fileExists(url) {
     }
 };
 $(document).ready(function(){
+	if ($('#read-list-box').length) {
+		new List('read-list-box', {
+			valueNames: ['searchable-rolename', 'searchable-roledesc'],
+			listClass: 'list',
+			searchClass: 'search',
+			page: 5,
+			pagination: false
+		});
+	}
 	$('#id_srs').on('change', function() {
 		if ($(this).val() === '__other__') {
 			$('#custom-srs-row').show();

@@ -1478,6 +1478,14 @@ def set_layer_permissions(layer, is_public, assigned_read_roles, assigned_write_
     authz = gs.getAuthorizationService()
     authz.set_layer_permissions(layer, is_public, assigned_read_roles, assigned_write_roles, assigned_manage_roles)
 
+def set_external_layer_manage_roles(layer, assigned_manage_roles):
+    admin_role = auth_backend.get_admin_role()
+    all_roles = auth_backend.get_all_roles()
+    LayerManageRole.objects.filter(layer=layer).delete()
+    for role in list(assigned_manage_roles) + [admin_role]:
+        if role in all_roles:
+            LayerManageRole.objects.get_or_create(layer=layer, role=role)
+
 def set_layergroup_permissions(layergroup, assigned_includeinproject_roles, assigned_manage_roles):
     admin_role = auth_backend.get_admin_role()
     assigned_includeinproject_roles.append(admin_role)

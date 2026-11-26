@@ -9,10 +9,12 @@
 				<div class="lp-search">
 					<input type="text" class="search form-control" placeholder="{% filter force_escape %}{% trans 'Search user role...' %}{% endfilter %}" />
 				</div>
+				{% if not manage_only %}
 				<label class="lp-public" title="{% trans 'Layer will be readable by everyone if public' %}">
 					<input type="checkbox" name="resource-is-public" id="resource-is-public" {% if resource_is_public %}checked {% endif %}/>
 					<span>{% trans "Is public" %}</span>
 				</label>
+				{% endif %}
 			</div>
 			<div class="box-body">
 				<ul class="products-list product-list-in-box list">
@@ -32,6 +34,7 @@
 									<div class="lp-role-desc searchable-roledesc">{{role.description}}</div>
 								</div>
 								<div class="lp-perms">
+									{% if not manage_only %}
 									<label class="lp-perm-chip">
 										<input class="layer-read-checkbox{% if not role.external %} gvsigol-checkable{% endif %}" type="checkbox" name="read-usergroup-{{role.name}}" id="read-usergroup-{{role.name}}"{% if role.read_checked %} checked{% endif %}{% if role.external %} disabled{% endif %} />
 										<span>{% trans "Read permission" %}</span>
@@ -44,6 +47,7 @@
 										{% endif %}
 										<span>{% trans "Write permission" %}</span>
 									</label>
+									{% endif %}
 									<label class="lp-perm-chip">
 										<input class="layer-manage-checkbox" type="checkbox" name="manage-usergroup-{{role.name}}" id="manage-usergroup-{{role.name}}" {% if role.manage_checked %}checked {% endif %}/>
 										<span>{% trans "Permission to manage" %}</span>
