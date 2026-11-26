@@ -194,6 +194,9 @@ env = environ.Env(
     COUNTRIES_FIRST = (list, []),
     COUNTRIES_FIRST_BREAK = (str,"----"),
     GEOSERVER_USE_KEEPALIVE = (bool,True),
+    # Añadir a GeoServer (2.24+) la regla de URL checks que permite los iconos de las
+    # bibliotecas de símbolos (MEDIA_ROOT/symbol_libraries). Desactivado: no se toca GeoServer.
+    GEOSERVER_ENSURE_SYMBOL_URLCHECK = (bool, False),
 
     UI_HIDEN_PROJECTS_PREFIX=(str,'_'),
     FILEMANAGER_NEW_UI=(bool, False),  # interfaz nueva del gestor de ficheros (explorador)
@@ -604,6 +607,7 @@ GVSIGOL_USERS_CARTODB = {
     'jndiname': env('DB_JNDI_NAME')
 }
 GEOSERVER_USE_KEEPALIVE = env('GEOSERVER_USE_KEEPALIVE')
+GEOSERVER_ENSURE_SYMBOL_URLCHECK = env('GEOSERVER_ENSURE_SYMBOL_URLCHECK')
 
 MOSAIC_DB = {
     'host': env('DB_HOST'),

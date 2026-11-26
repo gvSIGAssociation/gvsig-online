@@ -653,7 +653,9 @@ class Geoserver():
         self.last_style_error = None
         try:
             from gvsigol_symbology.utils import geoserver_sld
+            from gvsigol_symbology.geoserver_urlchecks import maybe_ensure_for_sld
             data = geoserver_sld(data)
+            maybe_ensure_for_sld(self, data)  # solo con GEOSERVER_ENSURE_SYMBOL_URLCHECK
             self.getGsconfig().create_style(name, data, overwrite=overwrite, workspace=None, style_format="sld10", raw=raw)
             return True
         
@@ -709,7 +711,9 @@ class Geoserver():
             
         try:
             from gvsigol_symbology.utils import geoserver_sld
+            from gvsigol_symbology.geoserver_urlchecks import maybe_ensure_for_sld
             sld_body = geoserver_sld(sld_body)
+            maybe_ensure_for_sld(self, sld_body)  # solo con GEOSERVER_ENSURE_SYMBOL_URLCHECK
             self.rest_catalog.update_style(style_name, sld_body, user=self.user, password=self.password, raw=raw)
             if layer is not None:
                 style_list = []
