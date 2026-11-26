@@ -151,6 +151,10 @@ env = environ.Env(
     # TODO: revisar si es necesaria o podemos usar la anterior. 
     # Esta variable puede ser una url completa, no un path y se usa en el view.py de la app, ej. app_libra
     FRONTEND_REDIRECT_URL = (str,'/spa'),
+    # Vacías: el login y el logout siguen en Django. Si se definen, login_user y
+    # logout_user redirigen al front (auth básica, p. ej. libra hasta GVLOGIN).
+    FRONTEND_LOGIN_URL = (str,''),
+    FRONTEND_LOGOUT_URL = (str,''),
     #Log level
     LOG_LEVEL=(str,"DEBUG"),
     # LDAP
@@ -926,6 +930,8 @@ FILE_UPLOAD_DIRECTORY_PERMISSIONS = env('FILE_UPLOAD_DIRECTORY_PERMISSIONS')
 USE_SPA_PROJECT_LINKS = env('USE_SPA_PROJECT_LINKS')
 FRONTEND_BASE_URL = env('FRONTEND_BASE_URL')
 FRONTEND_REDIRECT_URL = env('FRONTEND_REDIRECT_URL')
+FRONTEND_LOGIN_URL = env('FRONTEND_LOGIN_URL')
+FRONTEND_LOGOUT_URL = env('FRONTEND_LOGOUT_URL')
 
 # prueba para el gtfseditor y el problema con POST
 #APPEND_SLASH=True

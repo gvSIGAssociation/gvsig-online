@@ -33,6 +33,11 @@ from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext as _
+from urllib.parse import urlencode
+try:
+    from django.utils.http import url_has_allowed_host_and_scheme
+except ImportError:
+    from django.utils.http import is_safe_url as url_has_allowed_host_and_scheme
 from .forms import UserCreateForm, UserGroupForm, UserRoleForm
 from django.contrib.auth.models import User
 from gvsigol_auth import services as auth_services
@@ -74,8 +79,34 @@ def _is_user_editable(username):
         except Exception:
             return True
 
+def _safe_redirect_uri(request):
+    next_url = request.GET.get('next')
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return request.build_absolute_uri(next_url)
+    return request.build_absolute_uri(reverse('home'))
+
+def _redirect_with_query(url, **params):
+    separator = '&' if '?' in url else '?'
+    return redirect(url + separator + urlencode(params))
+
+def _is_browser_navigation(request):
+    # fetch() del front pide el HTML de login_user solo para leer el CSRF.
+    # Sec-Fetch-Mode es "cors" en ese caso y "navigate" al abrir la página.
+    fetch_mode = request.META.get('HTTP_SEC_FETCH_MODE')
+    if fetch_mode:
+        return fetch_mode == 'navigate'
+    return 'text/html' in request.META.get('HTTP_ACCEPT', '')
+
 def login_user(request):
     errors = []
+    frontend_login_url = getattr(settings, 'FRONTEND_LOGIN_URL', '') or ''
+    if (frontend_login_url and request.method == 'GET' and not request.GET.get('usu')
+            and _is_browser_navigation(request)):
+        return _redirect_with_query(frontend_login_url, redirect_uri=_safe_redirect_uri(request))
     if request.method == "POST":
         if request.user.is_authenticated:
             logout_user(request)
@@ -224,6 +255,9 @@ def rest_session_login(request):
 
 def logout_user(request):
     logout(request)
+    frontend_logout_url = getattr(settings, 'FRONTEND_LOGOUT_URL', '') or ''
+    if frontend_logout_url:
+        return redirect(frontend_logout_url)
     return redirect(LOGOUT_REDIRECT_URL)
 
 @csrf_exempt
