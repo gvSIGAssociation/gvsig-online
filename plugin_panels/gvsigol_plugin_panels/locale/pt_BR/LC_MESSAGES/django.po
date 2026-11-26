@@ -1,3 +1,4 @@
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: gvsigol_plugin_panels\n"
@@ -7,34 +8,34 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "gvsigol_plugin_panels manual title"
-msgstr "Painéis de controle"
+msgstr "Painéis gerenciais"
 
 msgid "gvsigol_plugin_panels manual desc"
-msgstr "Construtor de painéis de controle interativos do projeto"
+msgstr "Construtor de painéis gerenciais interativos do projeto"
 
 msgid "Paneles"
-msgstr "Painéis de controle"
+msgstr "Painéis gerenciais"
 
 msgid "Panels"
-msgstr "Painéis de controle"
+msgstr "Painéis gerenciais"
 
 msgid "Panels list"
-msgstr "Lista de painéis de controle"
+msgstr "Lista de painéis gerenciais"
 
 msgid "Panel data"
-msgstr "Dados do painel de controle"
+msgstr "Dados do painel gerencial"
 
 msgid "Search user role..."
-msgstr "Pesquisar função de usuário..."
+msgstr "Buscar função..."
 
 msgid "roles"
 msgstr "funções"
 
 msgid "New panel"
-msgstr "Novo painel de controle"
+msgstr "Novo painel gerencial"
 
 msgid "Edit panel"
-msgstr "Editar painel de controle"
+msgstr "Editar painel gerencial"
 
 msgid "New"
 msgstr "Novo"
@@ -61,7 +62,7 @@ msgid "Open"
 msgstr "Abrir"
 
 msgid "Open panel"
-msgstr "Abrir painel de controle"
+msgstr "Abrir painel gerencial"
 
 msgid "Design"
 msgstr "Design"
@@ -73,22 +74,22 @@ msgid "Configure"
 msgstr "Configurar"
 
 msgid "Configure panel"
-msgstr "Configurar painel de controle"
+msgstr "Configurar painel gerencial"
 
 msgid "Delete"
 msgstr "Excluir"
 
 msgid "Delete panel"
-msgstr "Excluir painel de controle"
+msgstr "Excluir painel gerencial"
 
 msgid "The panel and all its widgets will be deleted"
-msgstr "O painel de controle e todos os seus elementos serão excluídos"
+msgstr "O painel gerencial e todos os seus elementos serão excluídos"
 
 msgid "Accept"
 msgstr "Aceitar"
 
 msgid "There are no panels yet"
-msgstr "Ainda não há painéis de controle"
+msgstr "Ainda não há painéis gerenciais"
 
 msgid "No records available"
 msgstr "Não há registros disponíveis"
@@ -103,7 +104,7 @@ msgid "of"
 msgstr "de"
 
 msgid "panels"
-msgstr "painéis de controle"
+msgstr "painéis gerenciais"
 
 msgid "Previous"
 msgstr "Anterior"
@@ -124,13 +125,13 @@ msgid "Save"
 msgstr "Salvar"
 
 msgid "Panel information"
-msgstr "Informações do painel de controle"
+msgstr "Informações do painel gerencial"
 
 msgid "Name"
 msgstr "Nome"
 
 msgid "Internal name used to build the panel URL."
-msgstr "Nome interno usado para construir a URL do painel de controle."
+msgstr "Nome interno usado para construir a URL do painel gerencial."
 
 msgid "Title"
 msgstr "Título"
@@ -138,8 +139,12 @@ msgstr "Título"
 msgid "Description"
 msgstr "Descrição"
 
-msgid "The project cannot be changed after creating the panel because its widgets refer to project layers."
-msgstr "O projeto não pode ser alterado após a criação do painel de controle porque seus elementos fazem referência às camadas do projeto."
+msgid ""
+"The project cannot be changed after creating the panel because its widgets "
+"refer to project layers."
+msgstr ""
+"O projeto não pode ser alterado após a criação do painel gerencial porque "
+"seus elementos fazem referência às camadas do projeto."
 
 msgid "Select a project"
 msgstr "Selecione um projeto"
@@ -147,8 +152,12 @@ msgstr "Selecione um projeto"
 msgid "Public access"
 msgstr "Acesso público"
 
-msgid "Anyone with the link can open the panel. If disabled, only roles with access permission can open it."
-msgstr "Qualquer pessoa com o link pode abrir o painel de controle. Se desativado, somente funções com permissão de acesso poderão abri-lo."
+msgid ""
+"Anyone with the link can open the panel. If disabled, only roles with access"
+" permission can open it."
+msgstr ""
+"Qualquer pessoa com o link pode abrir o painel gerencial. Se desativado, "
+"somente funções com permissão de acesso poderão abri-lo."
 
 msgid "Permissions by role"
 msgstr "Permissões por função"
@@ -169,19 +178,22 @@ msgid "Name and title are required"
 msgstr "Nome e título são obrigatórios"
 
 msgid "Panel created successfully"
-msgstr "Painel de controle criado com sucesso"
+msgstr "Painel gerencial criado com sucesso"
 
 msgid "Panel updated successfully"
-msgstr "Painel de controle atualizado com sucesso"
+msgstr "Painel gerencial atualizado com sucesso"
 
 msgid "Panel deleted successfully"
-msgstr "Painel de controle excluído com sucesso"
+msgstr "Painel gerencial excluído com sucesso"
 
 msgid "No project (global panel)"
-msgstr "Sem projeto (painel de controle global)"
+msgstr "Sem projeto (painel gerencial global)"
 
-msgid "Optional. Linked panels also appear in the panels menu of that project."
-msgstr "Opcional. Os painéis de controle vinculados também aparecem no menu de painéis de controle desse projeto."
+msgid ""
+"Optional. Linked panels also appear in the panels menu of that project."
+msgstr ""
+"Opcional. Os painéis gerenciais vinculados também aparecem no menu de "
+"painéis gerenciais desse projeto."
 
 msgid "Global"
 msgstr "Global"
@@ -193,19 +205,28 @@ msgid "Confirmation required"
 msgstr "Confirmação necessária"
 
 msgid "Publishing this panel will also make these layers public:"
-msgstr "Ao publicar este painel de controle, estas camadas também serão tornadas públicas:"
+msgstr ""
+"Ao publicar este painel gerencial, estas camadas também serão tornadas "
+"públicas:"
 
-msgid "The panel cannot be public because you cannot manage all its private layers."
-msgstr "O painel de controle não pode ser público porque você não pode gerenciar todas as suas camadas privadas."
+msgid ""
+"The panel cannot be public because you cannot manage all its private layers."
+msgstr ""
+"O painel gerencial não pode ser público porque você não pode gerenciar "
+"todas as suas camadas privadas."
 
-msgid "You cannot publish this panel because you cannot manage all its private layers."
-msgstr "Você não pode publicar este painel de controle porque não pode gerenciar todas as suas camadas privadas."
+msgid ""
+"You cannot publish this panel because you cannot manage all its private "
+"layers."
+msgstr ""
+"Você não pode publicar este painel gerencial porque não pode gerenciar "
+"todas as suas camadas privadas."
 
 msgid "Projects, panels & applications"
-msgstr "Projetos, painéis de controle e aplicações"
+msgstr "Projetos, painéis gerenciais e aplicações"
 
 msgid "Panel"
-msgstr "Painel de controle"
+msgstr "Painel gerencial"
 
 msgid "Image"
 msgstr "Imagem"
@@ -213,19 +234,30 @@ msgstr "Imagem"
 msgid "Remove image"
 msgstr "Remover imagem"
 
-msgid "If no image is selected, the current image is kept; new panels use the default image."
-msgstr "Se nenhuma imagem for selecionada, a imagem atual será mantida; os novos painéis de controle usam a imagem padrão."
+msgid ""
+"If no image is selected, the current image is kept; new panels use the "
+"default image."
+msgstr ""
+"Se nenhuma imagem for selecionada, a imagem atual será mantida; os novos "
+"painéis gerenciais usam a imagem padrão."
 
 msgid "The selected file is not a valid image."
 msgstr "O arquivo selecionado não é uma imagem válida."
 
-msgid "This layer cannot be made private because it is used by public panels: {}"
-msgstr "Esta camada não pode se tornar privada porque é usada por painéis de controle públicos: {}"
+msgid ""
+"This layer cannot be made private because it is used by public panels: {}"
+msgstr ""
+"Esta camada não pode se tornar privada porque é usada por painéis "
+"gerenciais públicos: {}"
 
 msgctxt "panels"
 msgid "Breadcrumb"
 msgstr "Caminho de navegação"
 
 msgctxt "panels"
-msgid "A page of its own with maps and data, open to anyone with the link or only to the roles you choose."
-msgstr "Uma página própria com mapas e dados, aberta a qualquer pessoa com o link ou apenas aos papéis que você escolher."
+msgid ""
+"A page of its own with maps and data, open to anyone with the link or only "
+"to the roles you choose."
+msgstr ""
+"Uma página própria com mapas e dados, aberta a qualquer pessoa com o link ou"
+" apenas aos papéis que você escolher."
