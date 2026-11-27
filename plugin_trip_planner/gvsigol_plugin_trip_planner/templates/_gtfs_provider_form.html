@@ -1,0 +1,131 @@
+{% load i18n %}
+{# Formulario común de alta y edición de proveedor GTFS. Variables: form, form_action, page_title, page_lead #}
+<form id="provider-form" role="form" method="post" action="{{ form_action }}" enctype="multipart/form-data">
+{% csrf_token %}
+<div class="gol-pg-page">
+	<div class="gol-pg-header">
+		<nav aria-label="{% trans "Breadcrumb" context "core" %}">
+			<ol class="gol-pg-crumbs">
+				<li>{% trans "Plugins" %}</li>
+				<li><a href="{% url 'gtfs_provider_list' %}">{% trans "Trip Planner" %}</a></li>
+				<li aria-current="page">{{ page_title }}</li>
+			</ol>
+		</nav>
+		<h1 class="gol-pg-title"><span class="gol-pg-icon" aria-hidden="true"><i class="fa fa-bus"></i></span>{{ page_title }}</h1>
+		<p class="gol-pg-lead">{{ page_lead }}</p>
+	</div>
+	<div class="gol-pg-grid">
+		<div class="gol-pg-card">
+			<div class="gol-pg-body">
+				{% if form.errors %}
+				<div class="gol-pg-alert" role="alert">
+					<i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+					<div>
+						<ul>
+						{% for error in form.non_field_errors %}
+							<li>{{ error }}</li>
+						{% endfor %}
+						{% for field in form %}
+							{% if field.errors %}
+							<li>{{ field.label }}. {{ field.errors|striptags }}</li>
+							{% endif %}
+						{% endfor %}
+						</ul>
+					</div>
+				</div>
+				{% endif %}
+
+				<p class="gol-pg-section-title">{% trans "General" %}</p>
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label for="{{ form.name.id_for_label }}">{% trans "Name" %} <span class="gol-pg-required" aria-hidden="true">*</span></label>
+						{{ form.name }}
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 form-group">
+						<label for="{{ form.description.id_for_label }}">{% trans "Description" %} <span class="gol-pg-optional">({% trans "optional" %})</span></label>
+						{{ form.description }}
+					</div>
+				</div>
+
+				<p class="gol-pg-section-title">{% trans "GTFS source" %}</p>
+				<div class="gol-pg-options tp-source">
+					<label class="gol-pg-option" for="source-url">
+						<input type="radio" name="{{ form.source_type.html_name }}" id="source-url" value="url"{% if form.source_type.value != 'file' %} checked{% endif %}/>
+						<span class="gol-pg-option__text">
+							<span class="gol-pg-option__title"><i class="fa fa-link" aria-hidden="true"></i> {% trans "Download from a URL" %}</span>
+							<span class="gol-pg-option__desc">{% trans "The feed is downloaded again whenever the operator publishes a new version." %}</span>
+						</span>
+					</label>
+					<label class="gol-pg-option" for="source-file">
+						<input type="radio" name="{{ form.source_type.html_name }}" id="source-file" value="file"{% if form.source_type.value == 'file' %} checked{% endif %}/>
+						<span class="gol-pg-option__text">
+							<span class="gol-pg-option__title"><i class="fa fa-upload" aria-hidden="true"></i> {% trans "Upload a file" %}</span>
+							<span class="gol-pg-option__desc">{% trans "A GTFS .zip uploaded by hand. It only changes when you upload a new one." %}</span>
+						</span>
+					</label>
+				</div>
+
+				<div class="row tp-source-url">
+					<div class="col-md-12 form-group">
+						<label for="{{ form.url.id_for_label }}">{% trans "Url" %} <span class="gol-pg-required" aria-hidden="true">*</span></label>
+						{{ form.url }}
+						<p class="gol-pg-hint">{% trans "Direct link to the GTFS .zip file published by the transport operator." %}</p>
+					</div>
+				</div>
+
+				<div class="row tp-source-file">
+					<div class="col-md-12 form-group">
+						<label for="{{ form.gtfs_file.id_for_label }}">{% trans "GTFS file" %}{% if not has_file %} <span class="gol-pg-required" aria-hidden="true">*</span>{% endif %}</label>
+						{% if has_file and provider.is_file %}
+						<p class="tp-current-file"><i class="fa fa-file-archive-o" aria-hidden="true"></i>
+							{% trans "Current file uploaded" %}{% if provider.last_update %} {{ provider.last_update|date:"SHORT_DATETIME_FORMAT" }}{% endif %}.
+							{% trans "Choose another one only to replace it." %}</p>
+						{% endif %}
+						<input type="file" name="{{ form.gtfs_file.html_name }}" id="{{ form.gtfs_file.id_for_label }}" class="form-control" accept=".zip,application/zip"/>
+						<p class="gol-pg-hint">{% trans "A .zip with at least agency.txt, stops.txt, routes.txt, trips.txt, stop_times.txt and calendar.txt or calendar_dates.txt." %}</p>
+					</div>
+				</div>
+
+				<p class="gol-pg-section-title">{% trans "Status" %}</p>
+				<div class="gol-pg-options">
+					<label class="gol-pg-option" for="{{ form.is_active.id_for_label }}">
+						<input type="checkbox" name="{{ form.is_active.html_name }}" id="{{ form.is_active.id_for_label }}"{% if form.is_active.value %} checked{% endif %}/>
+						<span class="gol-pg-option__text">
+							<span class="gol-pg-option__title">{% trans "Active" %}</span>
+							<span class="gol-pg-option__desc">{% trans "Only active providers are downloaded and included in the graph." %}</span>
+						</span>
+					</label>
+				</div>
+			</div>
+			<div class="gol-pg-footer">
+				<a href="{% url 'gtfs_provider_list' %}" class="btn-pf-secondary">{% trans "Cancel" %}</a>
+				<button type="submit" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
+			</div>
+		</div>
+		<aside class="gol-pg-aside">
+			<h2 class="gol-pg-aside-title"><i class="fa fa-info-circle" aria-hidden="true"></i>{% trans "Good to know" context "core" %}</h2>
+			<ul class="gol-pg-aside-list gol-pg-aside-list--info">
+				<li>{% trans "The feed is downloaded again only when the server reports a newer version." %}</li>
+				<li>{% trans "Changes are applied to the trip planner the next time the graph is updated." %}</li>
+				<li>{% trans "You can force an update from the providers list with Update Now." %}</li>
+			</ul>
+		</aside>
+	</div>
+</div>
+</form>
+<script>
+(function () {
+	var form = document.getElementById('provider-form');
+	function refreshSource() {
+		var file = document.getElementById('source-file').checked;
+		form.querySelector('.tp-source-url').style.display = file ? 'none' : '';
+		form.querySelector('.tp-source-file').style.display = file ? '' : 'none';
+	}
+	form.querySelectorAll('input[name="{{ form.source_type.html_name }}"]').forEach(function (el) {
+		el.addEventListener('change', refreshSource);
+	});
+	refreshSource();
+})();
+</script>
