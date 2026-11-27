@@ -799,8 +799,11 @@ def _sort_key_no_accents(s):
     return ''.join(c for c in nfd if unicodedata.category(c) != 'Mn')
 
 
-def get_public_items_ordered():
-    """Public projects and applications for landing grids, respecting global UserHomeOrder."""
+def get_public_items_ordered(mobile=False):
+    """Public projects and applications for landing grids, respecting global UserHomeOrder.
+
+    With mobile=True, project urls point to the mobile viewer (mobile_url).
+    """
     hidden_prefix = getattr(settings, 'UI_HIDEN_PROJECTS_PREFIX', '')
     query = (
         Project.objects.filter(is_public=True, expiration_date__gte=datetime.datetime.now()) |
@@ -815,7 +818,7 @@ def get_public_items_ordered():
             'title': p.title,
             'description': p.description or '',
             'image': unquote(p.image_url),
-            'url': p.url,
+            'url': p.mobile_url if mobile else p.url,
             'item_type': 'public',
         })
 

@@ -54,58 +54,30 @@
 				<section class="content background-grey">
 					<div class="box">
 						<div class="box-header with-border">
-							<h3 class="box-title">{% trans "Projects list" %}</h3>
+							<h3 class="box-title">{% trans "Public viewers" %}</h3>
 						</div>
 						<div class="box-body">
 							<ul class="products-list product-list-in-box">
-								{% if projects %}
-								{% for project in projects %}
+								{% for item in items %}
 								<li class="item">
 									<div class="product-img">
-										<img src={{project.image}} alt="Project Image">
+										<img src="{{item.image}}" alt="Project Image">
 									</div>
 									<div class="product-info">
-										<a href="{{project.absurl}}" class="product-title">{{project.title}} <span class="btn btn-default pull-right"><i style="font-size: 20px;" class="fa fa-play-circle margin-r-5"></i></span></a>
-										<span class="product-description"> {{project.description}}</span>
+										<a href="{{item.absurl}}" class="product-title">{{item.title}} <span class="btn btn-default pull-right"><i style="font-size: 20px;" class="fa fa-play-circle margin-r-5"></i></span></a>
+										<span class="product-description"> {{item.description}}</span>
 									</div>
 								</li>
-								{% endfor %}
-								{% else %}
+								{% empty %}
 								<li class="item">
-									<div class="product-img">
-										
-									</div>
-									<div class="product-info">
-										<a href="{{project.absurl}}" class="product-title">{% trans "There are no public projects" %}
-										<span class="product-description"></span>
-									</div>
-								</li>
-								{% endif %}
-							</ul>
-						</div>
-					</div>
-					{% if applications %}
-					<div class="box">
-						<div class="box-header with-border">
-							<h3 class="box-title">{% trans "Application list" %}</h3>
-						</div>
-						<div class="box-body">
-							<ul class="products-list product-list-in-box">
-								{% for application in applications %}
-								<li class="item">
-									<div class="product-img">
-										<img src={{application.image}} alt="Project Image">
-									</div>
-									<div class="product-info">
-										<a href="{{application.absurl}}" class="product-title">{{application.title}} <span class="btn btn-default pull-right"><i style="font-size: 20px;" class="fa fa-play-circle margin-r-5"></i></span></a>
-										<span class="product-description"> {{application.description}}</span>
+									<div class="product-info" style="margin-left: 0;">
+										<span class="product-title">{% trans "There are no public viewers" %}</span>
 									</div>
 								</li>
 								{% endfor %}
 							</ul>
 						</div>
 					</div>
-					{% endif %}
 				</section>
 			</div>
 		</div>
