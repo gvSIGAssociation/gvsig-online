@@ -2524,41 +2524,30 @@ def public_layers(request):
     return render(request, 'public_layers.html', {'layers': rows})
 
 def select_public_project(request):
-    public_projects = Project.objects.filter(is_public=True)
-    public_apps = Application.objects.filter(is_public=True)
-    hidden_prefix = getattr(settings, 'UI_HIDEN_PROJECTS_PREFIX', '')
-    if hidden_prefix:
-        public_projects = public_projects.exclude(name__startswith=hidden_prefix)
-        public_apps = public_apps.exclude(name__startswith=hidden_prefix)
+    # Same source and order as the public viewers section of the landing page:
+    # public projects and applications merged, following the global home order.
+    items = core_utils.get_public_items_ordered()
 
-    if len (public_projects) == 1 and len(public_apps) == 0:
-        return redirect('load', project_name=public_projects[0].name)
-    elif len (public_projects) == 0 and len(public_apps) == 1:
-        return redirect(public_apps[0].absurl)
-    
+    if len(items) == 1:
+        return redirect(items[0]['url'])
+
+    public_items = []
     projects = []
     apps = []
-    for p in public_projects:
-        image = p.image_url
-        project = {}
-        project['id'] = p.id
-        project['name'] = p.name
-        project['title'] = p.title
-        project['description'] = p.description
-        project['image'] = unquote(image)
-        project['absurl'] = p.url
-        projects.append(project)
-    for pa in public_apps:
-        image = pa.image_url
-        app = {}
-        app['id'] = pa.id
-        app['name'] = pa.name
-        app['title'] = pa.title
-        app['description'] = pa.description
-        app['image'] = unquote(image)
-        app['absurl'] = pa.absurl
-        apps.append(app)
-    return render(request, 'select_public_project.html', {'projects': projects, 'applications': apps})
+    for item in items:
+        entry = dict(item)
+        entry['image'] = unquote(entry.get('image') or '')
+        entry['absurl'] = entry['url']
+        public_items.append(entry)
+        if entry['item_type'] == 'app':
+            apps.append(entry)
+        else:
+            projects.append(entry)
+    return render(request, 'select_public_project.html', {
+        'items': public_items,
+        'projects': projects,
+        'applications': apps,
+    })
 
 def select_public_mobile_project(request):
     public_projects = Project.objects.filter(is_public=True)
