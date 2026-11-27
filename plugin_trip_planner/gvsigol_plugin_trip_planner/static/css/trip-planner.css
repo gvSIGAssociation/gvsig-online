@@ -1,29 +1,191 @@
-.base_layer_check{
-	float:right
+/* =================================================================
+   gvSIG Online - Plugin Trip Planner
+   Solo lo que no cubren gol-list-page.css / gol-form-page.css /
+   gol-form-with-aside.css. Usa los tokens de gol-tokens.css.
+   ================================================================= */
+
+/* ---- Listado de proveedores ---- */
+.pl-table td.tp-url {
+	max-width: 420px;
+	word-break: break-all;
+	color: var(--gol-muted);
 }
 
-.base_layer_item{
-	padding-top: 10px;
+/* ---- Tarjeta de actualización del grafo ---- */
+.tp-graph { margin-top: 20px; }
+.tp-graph .gol-pg-card { flex-basis: 100%; }
+.tp-graph__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 12px;
+	margin-bottom: 4px;
+	padding-bottom: 12px;
+	border-bottom: 1px solid var(--gol-border);
+}
+.tp-graph__header .gol-pg-card-title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+.tp-graph__header .gol-pg-card-title .fa { color: var(--gol-accent); }
+.tp-graph__now {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.tp-graph .gol-pg-hint { margin: 10px 0 16px; }
+.tp-options { grid-template-columns: minmax(0, 1fr); max-width: 560px; }
+.tp-schedule { transition: opacity var(--gol-transition); }
+.tp-schedule.is-disabled { opacity: 0.55; }
+
+/* Indicador de estado (misma forma que .gol-pg-chip) */
+.tp-status {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 3px 11px;
+	border-radius: 12px;
+	border: 1px solid var(--gol-border);
+	background: var(--gol-white);
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--gol-muted);
+	white-space: nowrap;
+	cursor: default;
+}
+.tp-status[data-status="Running"] { color: var(--gol-accent); border-color: var(--gol-accent); background: var(--gol-accent-lt); }
+.tp-status[data-status="Success"] { color: #2e7d4f; border-color: #b7dfc7; background: #eef8f2; }
+.tp-status[data-status="Error"]   { color: #a93226; border-color: #f1c4c0; background: #fdf3f2; }
+.btn-pl-outline:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ---- Configuración de la app móvil ---- */
+.gol-pg-aside code {
+	display: inline-block;
+	margin-top: 4px;
+	word-break: break-all;
+	white-space: normal;
 }
 
-.base_layer_remove{
-	font-size: 24px;
-    padding-top: 3px;
-	color: red;
+/* Capas base */
+.tp-section-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-top: 8px;
+}
+.tp-section-head .gol-pg-section-title { margin: 8px 0; }
+.tp-layers-head,
+.tp-layer {
+	display: grid;
+	grid-template-columns: 84px minmax(0, 1fr) minmax(0, 2fr) 30px;
+	align-items: center;
+	gap: 10px;
+}
+.tp-layers-head {
+	padding: 0 12px 6px;
+	white-space: nowrap;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--gol-muted);
+}
+.tp-layers { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.tp-layer {
+	padding: 10px 12px;
+	border: 1px solid var(--gol-border);
+	border-radius: 8px;
+	background: var(--gol-white);
+	transition: border-color var(--gol-transition), background var(--gol-transition);
+}
+.tp-layer:has(.base_layer_check:checked) {
+	border-color: var(--gol-accent);
+	background: var(--gol-accent-lt);
+}
+.tp-layer .form-control { max-width: none; }
+.tp-layer__default { text-align: center; }
+.tp-layer__default input { margin: 0; accent-color: var(--gol-accent); cursor: pointer; }
+.tp-layers-empty { margin: 0 0 14px; }
+
+@media (max-width: 767px) {
+	.tp-layers-head { display: none !important; }
+	.tp-layer { grid-template-columns: 24px minmax(0, 1fr) 30px; }
+	.tp-layer .base_layer_url { grid-column: 2 / 3; }
 }
 
-#message-div-ok{
-	border: solid 1px #00a65a;
-	background-color: rgba(0,166,90,0.1);
-	padding: 5px;
-	color:#00a65a;
-	margin-bottom: 5px;
+/* ---- Resultado de la última actualización ---- */
+.tp-last-run {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin: 0 0 16px;
+	padding: 12px 14px;
+	border: 1px solid var(--gol-border);
+	border-left: 3px solid var(--gol-muted);
+	border-radius: 8px;
+	background: var(--gol-bg);
+	font-size: 13px;
+	color: var(--gol-text);
 }
-
-#icon-success{
-	color: green
+.tp-last-run__icon { margin-top: 2px; color: var(--gol-muted); }
+.tp-last-run__body { flex: 1; min-width: 0; }
+.tp-last-run__when { margin-top: 2px; font-size: 12px; color: var(--gol-muted); }
+.tp-last-run__when:empty { display: none; }
+.tp-last-run[data-status="Running"] { border-left-color: var(--gol-accent); }
+.tp-last-run[data-status="Running"] .tp-last-run__icon { color: var(--gol-accent); }
+.tp-last-run[data-status="Success"] { border-color: #b7dfc7; border-left-color: #2e7d4f; background: #eef8f2; }
+.tp-last-run[data-status="Success"] .tp-last-run__icon { color: #2e7d4f; }
+.tp-last-run[data-status="NoProviders"] { border-color: #f3dfb0; border-left-color: #c98a12; background: #fdf8ec; }
+.tp-last-run[data-status="NoProviders"] .tp-last-run__icon { color: #c98a12; }
+.tp-last-run[data-status="Error"] { border-color: #f1c4c0; border-left-color: #c0392b; background: #fdf3f2; color: #8e2a20; }
+.tp-last-run[data-status="Error"] .tp-last-run__icon { color: #c0392b; }
+.tp-status[data-status="NoProviders"] { color: #a66f08; border-color: #f3dfb0; background: #fdf8ec; }
+.tp-last-run__details { margin-top: 8px; }
+.tp-last-run__details summary { cursor: pointer; font-size: 12px; font-weight: 600; color: var(--gol-accent); }
+.tp-log,
+.tp-script {
+	margin: 8px 0 0;
+	padding: 10px 12px;
+	max-height: 320px;
+	overflow: auto;
+	border: 1px solid var(--gol-border);
+	border-radius: 6px;
+	background: var(--gol-white);
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--gol-text);
+	white-space: pre-wrap;
+	word-break: break-all;
 }
+.tp-script { margin: 0 0 6px; background: var(--gol-bg); }
 
-#icon-error{
-	color: red
+/* ---- Origen del GTFS (URL o fichero subido) ---- */
+.tp-source .gol-pg-option input[type="radio"] { flex: 0 0 auto; margin: 2px 0 0; accent-color: var(--gol-accent); cursor: inherit; }
+.tp-source .gol-pg-option__title .fa { color: var(--gol-accent); margin-right: 2px; }
+.tp-current-file {
+	margin: 0 0 8px;
+	padding: 8px 12px;
+	border: 1px solid var(--gol-border);
+	border-radius: 6px;
+	background: var(--gol-bg);
+	font-size: 12px;
+	color: var(--gol-text);
+}
+.tp-current-file .fa { color: var(--gol-accent); margin-right: 4px; }
+.tp-file-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 2px 10px;
+	border-radius: 12px;
+	background: var(--gol-accent-lt);
+	border: 1px solid var(--gol-border);
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--gol-accent);
+	word-break: normal;
 }

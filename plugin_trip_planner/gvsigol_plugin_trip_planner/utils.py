@@ -18,15 +18,21 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import requests
-import urllib3
-import os
 import datetime
+import logging
+import os
+
 import pytz
-import ssl
+import requests
 from dateutil.parser import parse as parsedate
 from tzlocal import get_localzone
-from shutil import copyfileobj
+
+logger = logging.getLogger(__name__)
+
+# Some GTFS publishers serve their feeds with invalid/self-signed certificates.
+# Keep the historical behaviour (no verification) but apply it consistently.
+VERIFY_SSL = False
+TIMEOUT = (30, 600)  # (connect, read) seconds
 
 
 def _localize_naive(dt, tz):
@@ -40,43 +46,46 @@ def _localize_naive(dt, tz):
 
 
 def download_file(url, dstFile):
+    """Download url into dstFile atomically. Returns True on success, False otherwise.
+    An existing dstFile is left untouched if the download fails."""
+    tmpFile = dstFile + '.tmp'
     try:
-#         unverified_context = ssl._create_unverified_context()        
-#         urllib.urlretrieve(url, dstFile, context = unverified_context)
-        # c = urllib3.PoolManager()
-        
-        r = requests.get(url, allow_redirects=True, verify=False)
-        open(dstFile, 'wb').write(r.content)
-        
-        # with c.request('GET',url, preload_content=False, verify=False) as resp, open(dstFile, 'wb') as out_file:
-#         with r.content as resp, open(dstFile, 'wb') as out_file:
-#             shutil.copyfileobj(resp, out_file)
-#         
-#         resp.release_conn()     # not 100% sure this is required though        
+        os.makedirs(os.path.dirname(dstFile), exist_ok=True)
+        with requests.get(url, allow_redirects=True, verify=VERIFY_SSL, timeout=TIMEOUT, stream=True) as r:
+            r.raise_for_status()
+            with open(tmpFile, 'wb') as out:
+                for chunk in r.iter_content(chunk_size=1024 * 1024):
+                    out.write(chunk)
+        os.replace(tmpFile, dstFile)
         return True
-    except Exception as e:
-        print(e)
+    except Exception:
+        logger.exception('Error downloading %s into %s', url, dstFile)
+        try:
+            if os.path.exists(tmpFile):
+                os.remove(tmpFile)
+        except OSError:
+            pass
         return False
-    
+
 
 def download_file_if_newer(url, dstFile):
-    try :
-        r = requests.head(url)
-        if 'last-modified' in list(r.headers.keys()):
-            url_time = r.headers['last-modified']
-        else:
-            return download_file(url, dstFile)
-        url_date = parsedate(url_time)
-        
-        file_time = datetime.datetime.fromtimestamp(os.path.getmtime(dstFile))
-        tz = get_localzone()
-        local_dt = _localize_naive(file_time, tz)
-        utc_dt = local_dt.astimezone(pytz.utc)
-    
-        if url_date > utc_dt :
-            return download_file(url, dstFile)
-        else:
-            return False
-    except requests.exceptions.RequestException as e:
-        print(e)
+    """Download url only if the remote Last-Modified is newer than dstFile.
+    Returns True if a new file was downloaded."""
+    try:
+        r = requests.head(url, allow_redirects=True, verify=VERIFY_SSL, timeout=TIMEOUT)
+        r.raise_for_status()
+    except requests.exceptions.RequestException:
+        logger.exception('Error checking %s', url)
         return False
+
+    url_time = r.headers.get('last-modified')
+    if not url_time:
+        return download_file(url, dstFile)
+
+    url_date = parsedate(url_time)
+    file_time = datetime.datetime.fromtimestamp(os.path.getmtime(dstFile))
+    utc_dt = _localize_naive(file_time, get_localzone()).astimezone(pytz.utc)
+
+    if url_date > utc_dt:
+        return download_file(url, dstFile)
+    return False

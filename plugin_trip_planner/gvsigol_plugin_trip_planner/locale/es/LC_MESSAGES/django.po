@@ -285,3 +285,178 @@ msgstr "Error: el proveedor no se pudo publicar"
 #: views.py:174
 msgid "GTFS Provider not found"
 msgstr "Proveedor GTFS no encontrado"
+
+# --- trip planner UI (gol-pg / pl-panel) ---
+msgid "A public transport operator whose GTFS feed is used to build the trip planner graph."
+msgstr "Un operador de transporte público cuyo feed GTFS se usa para construir el grafo del planificador de rutas."
+
+msgid "Changes are applied to the trip planner the next time the graph is updated."
+msgstr "Los cambios se aplican al planificador la próxima vez que se actualice el grafo."
+
+msgid "Changes reach the app the next time it starts."
+msgstr "Los cambios llegan a la app la próxima vez que se inicie."
+
+msgid "Direct link to the GTFS .zip file published by the transport operator."
+msgstr "Enlace directo al fichero .zip GTFS publicado por el operador de transporte."
+
+msgid "Downloads the active GTFS feeds that have changed and, if any did, rebuilds the OpenTripPlanner graph."
+msgstr "Descarga los feeds GTFS activos que hayan cambiado y, si alguno lo ha hecho, reconstruye el grafo de OpenTripPlanner."
+
+msgid "Error"
+msgstr "Error"
+
+msgid "Graph update"
+msgstr "Actualización del grafo"
+
+msgid "If unchecked, the graph is only updated with the Update Now button."
+msgstr "Si se desmarca, el grafo solo se actualiza con el botón Actualizar ahora."
+
+msgid "Invalid JSON configuration"
+msgstr "Configuración JSON no válida"
+
+msgid "Invalid day of week"
+msgstr "Día de la semana no válido"
+
+msgid "Invalid interval"
+msgstr "Intervalo no válido"
+
+msgid "Invalid time"
+msgstr "Hora no válida"
+
+msgid "No base layers yet. Add one with the Add button."
+msgstr "Todavía no hay capas base. Añade una con el botón Añadir."
+
+msgid "Not run yet"
+msgstr "Sin ejecutar"
+
+msgid "Only active providers are downloaded and included in the graph."
+msgstr "Solo se descargan e incluyen en el grafo los proveedores activos."
+
+msgid "Running"
+msgstr "En ejecución"
+
+msgid "Save schedule"
+msgstr "Guardar programación"
+
+msgid "Schedule"
+msgstr "Programación"
+
+msgid "Settings that the trip planner mobile app downloads when it starts."
+msgstr "Ajustes que descarga la app móvil del planificador de rutas al iniciarse."
+
+msgid "The app reads this configuration from a public address:"
+msgstr "La app lee esta configuración desde una dirección pública:"
+
+msgid "The base layer marked as default is the one shown when the app opens."
+msgstr "La capa base marcada por defecto es la que se muestra al abrir la app."
+
+msgid "The feed is downloaded again only when the server reports a newer version."
+msgstr "El feed solo se vuelve a descargar cuando el servidor indica que hay una versión más reciente."
+
+msgid "Unit"
+msgstr "Unidad"
+
+msgid "Updated"
+msgstr "Actualizado"
+
+msgid "You can force an update from the providers list with Update Now."
+msgstr "Puedes forzar una actualización desde la lista de proveedores con Actualizar ahora."
+
+msgid "optional"
+msgstr "opcional"
+
+msgid "Update Now always rebuilds the graph."
+msgstr "Actualizar ahora siempre reconstruye el grafo."
+
+msgid "Show details"
+msgstr "Ver detalles"
+
+msgid "Rebuild script"
+msgstr "Script de reconstrucción"
+
+msgid "Defined by the GTFS_SCRIPT environment variable. GTFS files are downloaded to %(dir)s (available to the script as $GTFS_DIR)."
+msgstr "Definido en la variable de entorno GTFS_SCRIPT. Los ficheros GTFS se descargan en %(dir)s (disponible para el script como $GTFS_DIR)."
+
+msgid "Downloading GTFS feeds and rebuilding the graph..."
+msgstr "Descargando los feeds GTFS y reconstruyendo el grafo..."
+
+msgid "Graph rebuilt"
+msgstr "Grafo reconstruido"
+
+msgid "The rebuild script finished successfully."
+msgstr "El script de reconstrucción ha terminado correctamente."
+
+msgid "No changes"
+msgstr "Sin cambios"
+
+msgid "No GTFS feed has changed, so the graph was not rebuilt."
+msgstr "Ningún feed GTFS ha cambiado, así que no se ha reconstruido el grafo."
+
+msgid "No providers"
+msgstr "Sin proveedores"
+
+msgid "There are no active GTFS providers. Add one above to build the graph; the rebuild script was not run."
+msgstr "No hay proveedores GTFS activos. Añade uno arriba para construir el grafo; el script de reconstrucción no se ha ejecutado."
+
+msgid "The last update failed. Check the details."
+msgstr "La última actualización ha fallado. Revisa los detalles."
+
+msgid "Last run"
+msgstr "Última ejecución"
+
+msgid "Source"
+msgstr "Origen"
+
+msgid "GTFS file"
+msgstr "Fichero GTFS"
+
+msgid "GTFS source"
+msgstr "Origen del GTFS"
+
+msgid "Download from a URL"
+msgstr "Descargar desde una URL"
+
+msgid "The feed is downloaded again whenever the operator publishes a new version."
+msgstr "El feed se vuelve a descargar cada vez que el operador publica una nueva versión."
+
+msgid "Upload a file"
+msgstr "Subir un fichero"
+
+msgid "A GTFS .zip uploaded by hand. It only changes when you upload a new one."
+msgstr "Un .zip GTFS subido a mano. Solo cambia cuando subes uno nuevo."
+
+msgid "Current file uploaded"
+msgstr "Fichero actual subido el"
+
+msgid "Choose another one only to replace it."
+msgstr "Elige otro solo si quieres sustituirlo."
+
+msgid "A .zip with at least agency.txt, stops.txt, routes.txt, trips.txt, stop_times.txt and calendar.txt or calendar_dates.txt."
+msgstr "Un .zip con al menos agency.txt, stops.txt, routes.txt, trips.txt, stop_times.txt y calendar.txt o calendar_dates.txt."
+
+msgid "Uploaded file"
+msgstr "Fichero subido"
+
+msgid "Downloads the new versions of the active GTFS feeds and rebuilds the OpenTripPlanner graph if the active GTFS changed (new versions, uploads, or providers activated, deactivated or removed)."
+msgstr "Descarga las nuevas versiones de los feeds GTFS activos y reconstruye el grafo de OpenTripPlanner si los GTFS activos han cambiado (nuevas versiones, subidas o proveedores activados, desactivados o eliminados)."
+
+msgid "The GTFS file must be a .zip file."
+msgstr "El fichero GTFS debe ser un .zip."
+
+msgid "The URL is required for a downloaded feed."
+msgstr "La URL es obligatoria para un feed descargado."
+
+msgid "Upload a GTFS .zip file."
+msgstr "Sube un fichero .zip GTFS."
+
+msgid "The file is not a valid zip file."
+msgstr "El fichero no es un zip válido."
+
+msgid "The zip file is corrupted (%(name)s)."
+msgstr "El fichero zip está dañado (%(name)s)."
+
+msgid "This is not a GTFS feed. Missing files: %(files)s"
+msgstr "No es un feed GTFS. Faltan los ficheros: %(files)s"
+
+msgid "The GTFS file could not be saved on the server: %(error)s"
+msgstr "No se ha podido guardar el fichero GTFS en el servidor: %(error)s"

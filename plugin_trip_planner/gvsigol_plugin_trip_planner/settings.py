@@ -18,17 +18,18 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-#GTFS_CRONTAB = "2 0 * * *"
-#GTFS_SCRIPT  = "##GTFS_SCRIPT##"
+import logging
 
 import environ
 
+logging.getLogger(__name__).info('Loading plugin_trip_planner.')
 
-print('INFO: Loading plugin_trip_planner.')
-
+# GTFS_SCRIPT is executed with `bash -e -c`, so wildcards work and it stops at the
+# first failing command. The environment variable $GTFS_DIR points to the directory
+# where the GTFS files are downloaded (MEDIA_ROOT/data/plugin_trip_planner/GTFS).
 env_trip_planner = environ.Env(
-    GTFS_CRONTAB=(str,'2 0 * * *'),
-    GTFS_SCRIPT=(str,'mkdir -p /var/www/media/data/GTFS; rm -f /var/otp/graphs/vlc/*.zip; cp /var/www/media/data/GTFS/*.zip /var/otp/graphs/vlc/; java -Xmx2G -jar /var/otp/otp-1.4.0-shaded.jar --build /var/otp/graphs/vlc; sudo service otp restart')
+    GTFS_CRONTAB=(str, '2 0 * * *'),
+    GTFS_SCRIPT=(str, 'rm -f /var/otp/graphs/vlc/*.zip; cp "$GTFS_DIR"/*.zip /var/otp/graphs/vlc/; java -Xmx2G -jar /var/otp/otp-1.4.0-shaded.jar --build /var/otp/graphs/vlc; sudo service otp restart')
 )
 
 GTFS_CRONTAB = env_trip_planner('GTFS_CRONTAB')

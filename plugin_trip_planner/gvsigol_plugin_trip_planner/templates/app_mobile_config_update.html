@@ -2,102 +2,114 @@
 {% load static %}
 {% load i18n %}
 
+{% block header %}
+<link rel="stylesheet" href="{% static "css/gol-form-page.css" %}">
+<link rel="stylesheet" href="{% static "css/gol-form-with-aside.css" %}">
+{% endblock %}
+
 {% block content %}
-<div class="row">
-	<div class="col-md-12">
-		<div class="box">
+<form id="provider-form" role="form" method="post" action="{% url 'app_mobile_config_update' %}">
+{% csrf_token %}
+<input id="base_layer_config" type="hidden" name="params" value="">
+<div class="gol-pg-page">
+	<div class="gol-pg-header">
+		<nav aria-label="{% trans "Breadcrumb" context "core" %}">
+			<ol class="gol-pg-crumbs">
+				<li>{% trans "Plugins" %}</li>
+				<li><a href="{% url 'gtfs_provider_list' %}">{% trans "Trip Planner" %}</a></li>
+				<li aria-current="page">{% trans "Config APP Mobile" %}</li>
+			</ol>
+		</nav>
+		<h1 class="gol-pg-title"><span class="gol-pg-icon" aria-hidden="true"><i class="fa fa-mobile"></i></span>{% trans "Update APP Mobile Config" %}</h1>
+		<p class="gol-pg-lead">{% trans "Settings that the trip planner mobile app downloads when it starts." %}</p>
+	</div>
 
-			<form id="provider-form" enctype="multipart/form-data" role="form"
-				method="post"
-				action="/gvsigonline/trip_planner/app_mobile_config_update/">
-					<div class="box-header with-border">
-						<h3 class="box-title">{% trans "Update APP Mobile Config" %}</h3>
-						<div class="box-tools pull-right">
-							<div id="save-button" class="btn btn-default btn-sm"><em class="fa fa-floppy-o margin-r-5"></em> {% trans "Save" %}</div>
-						</div>
+	{% if is_saved %}
+	<ul class="pf-messages">
+		<li class="info">{% trans "Mobile configuration saved successfully" %}</li>
+	</ul>
+	{% endif %}
+
+	<div class="gol-pg-grid">
+		<div class="gol-pg-card">
+			<div class="gol-pg-body">
+				<div id="client-errors" class="gol-pg-alert" role="alert" style="display:none">
+					<i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+					<div id="message-div"></div>
+				</div>
+
+				{% if form.errors %}
+				<div class="gol-pg-alert" role="alert">
+					<i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+					<div>
+						<ul>
+						{% for field in form %}
+							{% if field.errors %}
+							<li>{{ field.label }}. {{ field.errors|striptags }}</li>
+							{% endif %}
+						{% endfor %}
+						</ul>
 					</div>
+				</div>
+				{% endif %}
 
-					<div class="box-body">
-						<div id="message-div" style="color:#ff0000;"></div>
-
-						{% if is_saved %}
-						<div id="message-div-ok">
-							<p>{% trans "Mobile configuration saved successfully" %}</p>
-						</div>
-						{% endif %}
-
-						{% csrf_token %}
-						{% if form.errors %}
-							<div id="form-error" style="color:#ff0000;">
-								<ul>
-								{% for field in form %}
-									{% if field.errors %}
-										<li>{{field.label}}. {{ field.errors|striptags }}</li>
-									{% endif %}
-								{% endfor %}
-								</ul>
-							</div>
-						{% endif %}
-
-						{% if message %}
-							<div id="form-error" style="color:#ff0000;">
-								<p>* {{ message }}</p>
-							</div>
-						{% endif %}
-
-
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label for="id_name">{% trans "Name" %}</label>
-								{{ form.name }}
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label for="id_description">{% trans "Description" %}</label>
-								{{ form.description }}
-							</div>
-						</div>
-
-						<input id="base_layer_config" type="hidden" name="params" value="{{params}}">
-
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label for="id_url_contact">{% trans "Contact URL" %}</label>
-								<input class="form-control" id="id_url_contact" maxlength="1000" name="url_contact" type="text" value="">
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label for="id_url_contact">{% trans "Geocoder URL" %}</label>
-								<input class="form-control" id="id_url_geocoder" maxlength="1000" name="url_geocoder" type="text" value="">
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-md-12 form-group">
-								<label for="id_base_layers">{% trans "Base_layers" %}</label>
-								<div class="box-tools pull-right">
-									<div id="add_base_layer" class="btn btn-default btn-sm"><em class="fa fa-plus margin-r-5"></em> {% trans "Add" %}</div>
-								</div>
-								<div id="base_layer_div">
-								</div>
-							</div>
-						</div>
-
+				<p class="gol-pg-section-title">{% trans "General" %}</p>
+				<div class="row">
+					<div class="col-md-6 form-group">
+						<label for="id_name">{% trans "Name" %} <span class="gol-pg-required" aria-hidden="true">*</span></label>
+						{{ form.name }}
 					</div>
-				</form>
+					<div class="col-md-6 form-group">
+						<label for="id_description">{% trans "Description" %} <span class="gol-pg-optional">({% trans "optional" %})</span></label>
+						{{ form.description }}
+					</div>
+				</div>
 
-			<div class="row">
+				<p class="gol-pg-section-title">{% trans "Services" %}</p>
+				<div class="row">
+					<div class="col-md-6 form-group">
+						<label for="id_url_contact">{% trans "Contact URL" %} <span class="gol-pg-required" aria-hidden="true">*</span></label>
+						<input class="form-control" id="id_url_contact" maxlength="1000" type="url" placeholder="https://">
+					</div>
+					<div class="col-md-6 form-group">
+						<label for="id_url_geocoder">{% trans "Geocoder URL" %} <span class="gol-pg-optional">({% trans "optional" %})</span></label>
+						<input class="form-control" id="id_url_geocoder" maxlength="1000" type="url" placeholder="https://">
+					</div>
+				</div>
+
+				<div class="tp-section-head">
+					<p class="gol-pg-section-title">{% trans "Base_layers" %}</p>
+					<button type="button" id="add_base_layer" class="btn-pf-add-item"><i class="fa fa-plus"></i> {% trans "Add" %}</button>
+				</div>
+				<div class="tp-layers-head" aria-hidden="true">
+					<span>{% trans "Default" %}</span>
+					<span>{% trans "Title" %}</span>
+					<span>{% trans "Url" %}</span>
+					<span></span>
+				</div>
+				<div id="base_layer_div" class="tp-layers"></div>
+				<p class="gol-pg-empty tp-layers-empty">{% trans "No base layers yet. Add one with the Add button." %}</p>
+			</div>
+			<div class="gol-pg-footer">
+				<button type="button" id="save-button" class="btn-pf-save"><i class="fa fa-floppy-o"></i> {% trans "Save" %}</button>
 			</div>
 		</div>
+		<aside class="gol-pg-aside">
+			<h2 class="gol-pg-aside-title"><i class="fa fa-info-circle" aria-hidden="true"></i>{% trans "Good to know" context "core" %}</h2>
+			<ul class="gol-pg-aside-list gol-pg-aside-list--info">
+				<li>{% trans "The app reads this configuration from a public address:" %} <code>{% url 'get_app_mobile_config' %}</code></li>
+				<li>{% trans "The base layer marked as default is the one shown when the app opens." %}</li>
+				<li>{% trans "Changes reach the app the next time it starts." %}</li>
+			</ul>
+		</aside>
 	</div>
 </div>
-{% endblock %} {% block extra-scripts %}
+</form>
+{% endblock %}
+
+{% block extra-scripts %}
+{{ config|json_script:"app-config-data" }}
 <script type="text/javascript">
-	var params = JSON.parse('{{ params | escapejs }}');
 	$('#menu-manage-plugins').addClass("active");
 	$('#submenu-trip-planner-mobile').addClass("active");
 
@@ -107,15 +119,16 @@
 
 		var msgs = is_valid(params);
 		if(msgs.length == 0){
+			$("#client-errors").hide();
 			$("#provider-form").submit();
 		}else{
-			$("#message-div").html("")
-			var html = "<ul>"
+			var ul = $("<ul></ul>");
 			for(var i=0;i<msgs.length; i++){
-				html += "<li>"+msgs[i]+"</li>"
+				ul.append($("<li></li>").text(msgs[i]));
 			}
-			html += "</ul>";
-			$("#message-div").html(html);
+			$("#message-div").empty().append(ul);
+			$("#client-errors").show();
+			$('html, body').animate({scrollTop: $("#client-errors").offset().top - 80}, 200);
 		}
 	});
 
@@ -129,21 +142,16 @@
 		 return !!pattern.test(str);
 	}
 
-
 	function is_valid(params){
 		var msgs = [];
 		if(params["url_contact"].length == 0){
 			msgs.push(gettext("Url contact can't be empty"));
-		}else{
-			if(!is_valid_url(params["url_contact"])){
-				msgs.push(gettext("Url contact hasn't correct format") + " (" + params["url_contact"] +")");
-			}
+		}else if(!is_valid_url(params["url_contact"])){
+			msgs.push(gettext("Url contact hasn't correct format") + " (" + params["url_contact"] +")");
 		}
 
-		if(params["url_geocoder"].length > 0){
-			if(!is_valid_url(params["url_geocoder"])){
-				msgs.push(gettext("Url geocoder hasn't correct format") + " (" + params["url_geocoder"] +")");
-			}
+		if(params["url_geocoder"].length > 0 && !is_valid_url(params["url_geocoder"])){
+			msgs.push(gettext("Url geocoder hasn't correct format") + " (" + params["url_geocoder"] +")");
 		}
 
 		for(var i=0; i<params["base_layers"].length; i++){
@@ -153,30 +161,42 @@
 			}
 			if(base_layer["url"].length == 0){
 				msgs.push(gettext("Base layer") + " nº" + (i+1) +": "+ gettext("url can't be empty"));
-			}else{
-				if(!is_valid_url(base_layer["url"])){
-					msgs.push(gettext("Base layer") + " nº" + (i+1) +": "+ gettext("url hasn't correct format") +" (" + base_layer["url"] + ")");
-				}
+			}else if(!is_valid_url(base_layer["url"])){
+				msgs.push(gettext("Base layer") + " nº" + (i+1) +": "+ gettext("url hasn't correct format") +" (" + base_layer["url"] + ")");
 			}
 		}
 
 		return msgs;
 	}
 
+	function refreshEmpty(){
+		var empty = $("#base_layer_div .base_layer_item").length == 0;
+		$(".tp-layers-empty").toggle(empty);
+		$(".tp-layers-head").toggle(!empty);
+	}
+
+	function addBaseLayerItem(base_layer){
+		var item = $('<div class="base_layer_item tp-layer"></div>');
+		var check = $('<input type="radio" class="base_layer_check" name="base_layer_check">')
+			.attr('title', gettext("Default")).prop('checked', !!base_layer["default"]);
+		var name = $('<input type="text" class="form-control base_layer_name">')
+			.attr('placeholder', gettext("Insert a base_layer title")).val(base_layer["title"] || "");
+		var url = $('<input type="text" class="form-control base_layer_url">')
+			.attr('placeholder', gettext("Insert a base_layer url")).val(base_layer["url"] || "");
+		var remove = $('<button type="button" class="btn-delete-item base_layer_remove"><i class="fa fa-trash-o" aria-hidden="true"></i></button>')
+			.attr('title', gettext("Remove")).click(function(){
+				item.remove();
+				refreshEmpty();
+			});
+		item.append($('<div class="tp-layer__default"></div>').append(check));
+		item.append(name, url, remove);
+		$("#base_layer_div").append(item);
+		refreshEmpty();
+	}
+
 	$("#add_base_layer").click(function(){
-		$("#base_layer_div").append(
-				"<div class=\"base_layer_item row\">"+
-
-				"<div class=\"col-md-1 form-group\"><input type=\"radio\" class=\"base_layer_check\" name=\"base_layer_check\"></div>"+
-				"<div class=\"col-md-4 form-group\"><input type=\"text\" class=\"form-control base_layer_name\" placeHolder=\""+ gettext("Insert a base_layer title") + "\" name=\"base_layer_name\" value=\"\"></div>"+
-				"<div class=\"col-md-6 form-group\"><input type=\"text\" class=\"col-md-4 form-group form-control base_layer_url\" placeHolder=\""+ gettext("Insert a base_layer url") + "\" name=\"base_layer_url\" value=\"\"></div>"+
-				"<div class=\"col-md-1 form-group\"><i class=\"fa fa-times base_layer_remove\" aria-hidden=\"true\"></i></div>"+
-				"</div>"
-		);
-
-		$(".base_layer_remove").unbind("click").click(function(){
-			$(this).parent().parent().remove();
-		})
+		addBaseLayerItem({"default": $("#base_layer_div .base_layer_item").length == 0});
+		$("#base_layer_div .base_layer_name").last().focus();
 	});
 
 	function saveConfig(){
@@ -185,15 +205,11 @@
 				"url_geocoder": $("#id_url_geocoder").val(),
 				"base_layers": []
 		}
-		$(".base_layer_item").each(function(index){
-			var checked = $(this).find(".base_layer_check")[0].checked;
-			var name = $(this).find(".base_layer_name")[0].value;
-			var url = $(this).find(".base_layer_url")[0].value;
-
+		$(".base_layer_item").each(function(){
 			params["base_layers"].push({
-				"default": checked,
-				"title": name,
-				"url": url
+				"default": $(this).find(".base_layer_check")[0].checked,
+				"title": $(this).find(".base_layer_name")[0].value,
+				"url": $(this).find(".base_layer_url")[0].value
 			})
 		})
 
@@ -203,46 +219,27 @@
 	function loadConfig(config){
 		$("#id_url_contact").val(config["url_contact"]);
 		$("#id_url_geocoder").val(config["url_geocoder"]);
-		$("#base_layer_div").html("");
-
+		$("#base_layer_div").empty();
 		for(var i=0; i<config["base_layers"].length; i++){
-			var base_layer = config["base_layers"][i];
-			var checked = "";
-			if(base_layer["default"]){
-				checked = " checked";
-			}
-			$("#base_layer_div").append(
-					"<div class=\"base_layer_item row\">"+
-					"<div class=\"col-md-1 form-group\"><input type=\"radio\" class=\"base_layer_check\" name=\"base_layer_check\""+ checked +"></div>"+
-					"<div class=\"col-md-4 form-group\"><input type=\"text\" class=\"form-control base_layer_name\" placeHolder=\""+ gettext("Insert a base_layer title") + "\" name=\"base_layer_name\" value=\""+base_layer["title"]+"\"></div>"+
-					"<div class=\"col-md-6 form-group\"><input type=\"text\" class=\"form-control base_layer_url\" placeHolder=\""+ gettext("Insert a base_layer url") + "\" name=\"base_layer_url\" value=\""+base_layer["url"]+"\"></div>"+
-					"<div class=\"col-md-1 form-group\"><i class=\"fa fa-times base_layer_remove\" aria-hidden=\"true\"></i></div>"+
-					"</div>"
-			);
-
+			addBaseLayerItem(config["base_layers"][i]);
 		}
-
-		$(".base_layer_remove").unbind("click").click(function(){
-			$(this).parent().parent().remove();
-		})
-
+		refreshEmpty();
 	}
 
 	$().ready(function() {
-		var config = {{ params|safe }};
+		var config = JSON.parse(document.getElementById('app-config-data').textContent) || {};
 
 		if(!("url_contact" in config)){
 			config["url_contact"] = "";
 		}
-
 		if(!("url_geocoder" in config)){
 			config["url_geocoder"] = "";
 		}
-
-		if(!("base_layers" in config)){
+		if(!Array.isArray(config["base_layers"])){
 			config["base_layers"] = [];
 		}
 
+		$("#base_layer_config").val(JSON.stringify(config));
 		loadConfig(config);
 	});
 </script>

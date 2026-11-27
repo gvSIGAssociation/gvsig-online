@@ -15,13 +15,12 @@ function back_from_working_dir()
 }
 
 function configure() {
+    # settings.py reads GTFS_SCRIPT / GTFS_CRONTAB from the environment at runtime (django-environ)
     if [ -z "$GTFS_SCRIPT" ]; then
-        echo "[ERROR]: GTFS_SCRIPT is not defined."
-        exit -1  
-    else 
-	    echo "GTFS_SCRIPT: $GTFS_SCRIPT"		      
+        echo "[WARNING]: GTFS_SCRIPT is not defined, the default from settings.py will be used."
+    else
+        echo "GTFS_SCRIPT: $GTFS_SCRIPT"
     fi
-    grep -rl "##GTFS_SCRIPT##"  | xargs sed -i "s%##GTFS_SCRIPT##%$GTFS_SCRIPT%g"
 }
 
 function move_template() {
