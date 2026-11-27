@@ -97,6 +97,8 @@
 </style>
 {% endblock %}
 
+{% block breadcrumbs %}{% if attr_config %}{% include "_gol_crumbs_slot.html" with title=attr_config.name %}{% else %}{% trans "Add" as crumb_title %}{% include "_gol_crumbs_slot.html" with title=crumb_title %}{% endif %}{% endblock %}
+
 {% block content %}
 <form role="form" method="post" id="attr-form">
     {% csrf_token %}

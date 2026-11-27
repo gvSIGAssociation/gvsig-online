@@ -35,6 +35,7 @@
 	<link rel="stylesheet" href="{% static "css/gol-themes.css" %}">
 	<link rel="stylesheet" href="{% static "css/gol-skin-base.css" %}">
 	<link rel="stylesheet" href="{% static "css/gol-layout.css" %}">
+	<link rel="stylesheet" href="{% static "css/gol-breadcrumbs.css" %}">
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror-5.49.0/lib/codemirror.css" %}" />
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror-5.49.0/addon/hint/show-hint.css" %}" />
 	<link rel="stylesheet" href="{% static "js/vendors/codemirror-5.49.0/theme/xq-dark.css" %}" />
@@ -190,6 +191,8 @@
 
 		<div class="content-wrapper" id="base-content-wrapper" {% if IFRAME_MODE_UI or HIDE_DASHBOARD_SIDEBAR %} style="margin-left: 0px !important;" {% endif %}>
 			<section class="content">
+				{# Ruta de navegación: se rellena sola (golBreadcrumbs.js) salvo que la página defina sus migas #}
+				{% if not IFRAME_MODE_UI %}{% block breadcrumbs %}{% include "_gol_crumbs_slot.html" %}{% endblock %}{% endif %}
 				{% block content %}{% endblock %}
 			</section>
 		</div>
@@ -224,6 +227,7 @@
 	<script type="text/javascript" src="{% static "js/vendors/DataTables-1.10.11/extensions/Select/js/dataTables.select.js" %}"></script>
 	{% include "_gol_datatables_lang.html" %}
 	<script type="text/javascript" src="{% static "js/lib/golListPage.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/lib/golBreadcrumbs.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/jQuery/jquery.autocomplete.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/proj4js/proj4.js" %}"></script>
 	<script type="text/javascript" src="{% static "js/vendors/ol-4.0.1/ol.js" %}"></script>

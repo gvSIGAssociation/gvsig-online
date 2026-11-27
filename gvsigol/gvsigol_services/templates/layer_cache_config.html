@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="{% static "css/gol-services-form.css" %}">
 {% endblock %}
 
+{% block breadcrumbs %}{% trans "Configure cache options" as crumb_title %}{% include "_gol_crumbs_slot.html" with title=crumb_title %}{% endblock %}
+
 {% block content %}
 <form id="cache-config-form" role="form" method="post" action="/gvsigonline/services/layer_cache_config/{{layer_id}}/">
 	<div class="row">

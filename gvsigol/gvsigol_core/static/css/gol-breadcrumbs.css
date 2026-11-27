@@ -1,0 +1,45 @@
+/* =================================================================
+   gvSIG Online — Ruta de navegación (migas de pan) de la administración
+
+   Estilo único de ol.gol-pg-crumbs, tanto de las migas escritas en las
+   plantillas como de las que genera golBreadcrumbs.js en el hueco
+   #gol-crumbs-slot de la plantilla base. Antes estaba en
+   gol-form-with-aside.css y solo lo tenían los formularios que cargaban
+   esa hoja. Requiere gol-tokens.css (y gol-themes.css para el acento).
+   ================================================================= */
+
+.gol-pg-crumbs {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	margin: 0 0 8px;
+	padding: 0;
+	list-style: none;
+	font-size: 12px;
+	color: var(--gol-muted);
+}
+.gol-pg-crumbs > li { display: inline-flex; align-items: center; min-width: 0; }
+.gol-pg-crumbs > li + li::before {
+	content: '';
+	flex: 0 0 auto;
+	width: 6px;
+	height: 6px;
+	margin: 0 10px 0 8px;
+	border-top: 1.5px solid currentColor;
+	border-right: 1.5px solid currentColor;
+	transform: rotate(45deg);
+	opacity: 0.6;
+}
+.gol-pg-crumbs a {
+	color: var(--gol-accent);
+	font-weight: 600;
+	text-decoration: none;
+}
+.gol-pg-crumbs a:hover,
+.gol-pg-crumbs a:focus { text-decoration: underline; }
+.gol-pg-crumbs > li[aria-current] { color: var(--gol-text); font-weight: 600; }
+
+/* Migas generadas: franja encima del contenido de la página */
+#gol-crumbs-slot { margin: 2px 0 12px; }
+#gol-crumbs-slot[hidden] { display: none; }
+#gol-crumbs-slot > .gol-pg-crumbs { margin: 0; }

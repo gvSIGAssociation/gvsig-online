@@ -21,35 +21,8 @@
 
 /* ---- Cabecera de página ---- */
 .gol-pg-header { margin: 2px 0 18px; }
-.gol-pg-crumbs {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	margin: 0 0 8px;
-	padding: 0;
-	list-style: none;
-	font-size: 12px;
-	color: var(--gol-muted);
-}
-.gol-pg-crumbs > li { display: inline-flex; align-items: center; }
-.gol-pg-crumbs > li + li::before {
-	content: '';
-	width: 6px;
-	height: 6px;
-	margin: 0 10px 0 8px;
-	border-top: 1.5px solid currentColor;
-	border-right: 1.5px solid currentColor;
-	transform: rotate(45deg);
-	opacity: 0.6;
-}
-.gol-pg-crumbs a {
-	color: var(--gol-accent);
-	font-weight: 600;
-	text-decoration: none;
-}
-.gol-pg-crumbs a:hover,
-.gol-pg-crumbs a:focus { text-decoration: underline; }
-.gol-pg-crumbs > li[aria-current] { color: var(--gol-text); font-weight: 600; }
+/* La ruta de navegación (.gol-pg-crumbs) está en gol-breadcrumbs.css,
+   que cargan todas las plantillas base */
 .gol-pg-title {
 	display: flex;
 	flex-wrap: wrap;

@@ -16,6 +16,8 @@
 </style>
 {% endblock %}
 
+{% block breadcrumbs %}{% trans "Export to database" as crumb_title %}{% include "_gol_crumbs_slot.html" with menu="menu-manage-files" title=crumb_title %}{% endblock %}
+
 {% block content %}
 <div class="row">
 	<div class="col-md-12">

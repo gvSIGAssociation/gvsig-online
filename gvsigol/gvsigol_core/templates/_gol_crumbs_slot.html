@@ -1,0 +1,14 @@
+{% load i18n %}{% comment %}
+Hueco de la ruta de navegación (migas de pan) de la administración. Lo rellena golBreadcrumbs.js
+con Inicio › sección del menú › entrada del menú › [miga intermedia] › título de la página.
+
+Lo incluyen las plantillas base dentro de {% block breadcrumbs %}. Una página puede volver a
+incluirlo en ese bloque para afinar la ruta (todo opcional):
+  menu          id del <li> del menú lateral al que pertenece la página (si no lo marca activo)
+  parent_label  miga intermedia entre la entrada del menú y la página (p. ej. el listado del que cuelga)
+  parent_url    enlace de esa miga intermedia
+  title         título de la página, si no tiene uno reconocible o se quiere otro
+Ejemplo:
+  {% block breadcrumbs %}{% trans "Import report" as crumb_title %}
+  {% include "_gol_crumbs_slot.html" with menu="submenu-projects" title=crumb_title %}{% endblock %}
+{% endcomment %}<nav id="gol-crumbs-slot" aria-label="{% trans "Breadcrumb" context "core" %}" hidden{% if menu %} data-menu="{{ menu }}"{% endif %}{% if parent_label %} data-parent-label="{{ parent_label }}"{% if parent_url %} data-parent-href="{{ parent_url }}"{% endif %}{% endif %}{% if title %} data-title="{{ title }}"{% endif %}></nav>

@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load i18n %}
 
+{% block breadcrumbs %}{% include "_gol_crumbs_slot.html" with menu="submenu-projects" %}{% endblock %}
+
 {% block content %}
 <div class="box box-primary">
 	<div class="box-header with-border">

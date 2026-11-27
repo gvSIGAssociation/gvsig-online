@@ -25,6 +25,8 @@
 </style>
 {% endblock %}
 
+{% block breadcrumbs %}{% trans "Configure layer" as crumb_title %}{% include "_gol_crumbs_slot.html" with title=crumb_title %}{% endblock %}
+
 {% block content %}
 
 {% if redirect_to_layergroup %}
