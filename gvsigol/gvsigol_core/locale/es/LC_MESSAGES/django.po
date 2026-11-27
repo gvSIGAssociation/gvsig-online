@@ -1048,6 +1048,10 @@ msgstr "Abrir aplicación"
 msgid "Load project"
 msgstr "Cargar proyecto"
 
+#: gvsigol_core/templates/select_public_project.html:95
+msgid "Load viewer"
+msgstr "Cargar visor"
+
 #: gvsigol_core/templates/home.html:1040
 msgid "No items found."
 msgstr "No se encontraron elementos."
@@ -2225,6 +2229,10 @@ msgstr "Visores públicos - %(GVSIGOL_CUSTOMER_NAME)s"
 #: gvsigol_core/templates/select_public_project.html:107
 msgid "There are no public projects"
 msgstr "No hay proyectos públicos"
+
+#: gvsigol_core/templates/select_public_project.html:102
+msgid "There are no public viewers"
+msgstr "No hay visores públicos"
 
 #: gvsigol_core/templates/select_public_mobile_project.html:91
 #: gvsigol_core/templates/select_public_project.html:118
