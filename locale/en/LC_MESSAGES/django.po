@@ -1252,6 +1252,14 @@ msgstr ""
 msgid "There are no public projects"
 msgstr ""
 
+#: gvsigol_core/templates/select_public_project.html:102
+msgid "There are no public viewers"
+msgstr ""
+
+#: gvsigol_core/templates/select_public_project.html:95
+msgid "Load viewer"
+msgstr ""
+
 #: templates/select_public_mobile_project.html:91
 #: templates/select_public_project.html:118
 msgid "Application list"
