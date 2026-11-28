@@ -955,8 +955,16 @@
 		max-width: 100%;
 		font-size: 15px;
 	}
+	/* Tipo como dato bajo el nombre, alineado a la izquierda y sin pastilla
+	   (la vista de lista de escritorio lo centra en su propia columna) */
 	.projects-grid--list .project-card__type-tag {
 		order: 2;
+		align-self: flex-start;
+		padding: 0;
+		background: none;
+		font-size: 10.5px;
+		letter-spacing: 0.5px;
+		opacity: 0.85;
 	}
 	.projects-grid--list .project-card__footer {
 		padding: 0 14px 0 0;
