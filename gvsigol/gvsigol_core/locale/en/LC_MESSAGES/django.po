@@ -1628,3 +1628,31 @@ msgstr "An unexpected error occurred on the server. Please try again in a few mo
 msgctxt "errors"
 msgid "Try again"
 msgstr "Try again"
+
+#: templates/base.html
+msgid "Language"
+msgstr "Language"
+
+#: templates/base.html
+msgid "My profile"
+msgstr "My profile"
+
+#: templates/base.html
+msgid "Help"
+msgstr "Help"
+
+#: templates/_gol_mobile_notice.html
+msgid "This page is designed for larger screens"
+msgstr "This page is designed for larger screens"
+
+#: templates/_gol_mobile_notice.html
+msgid "Administration needs more room than a phone screen offers. Open it on a computer or a tablet."
+msgstr "Administration needs more room than a phone screen offers. Open it on a computer or a tablet."
+
+#: templates/_gol_mobile_notice.html
+msgid "Back to my projects"
+msgstr "Back to my projects"
+
+#: templates/_gol_mobile_notice.html
+msgid "Open anyway"
+msgstr "Open anyway"

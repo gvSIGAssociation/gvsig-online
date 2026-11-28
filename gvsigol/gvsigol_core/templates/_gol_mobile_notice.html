@@ -1,0 +1,25 @@
+{% load i18n %}
+{# Aviso de la administración en el móvil (< 768 px, ver gol-layout.css).        #}
+{# Lo incluyen las plantillas base; una página que no sea de administración lo    #}
+{# quita sobrescribiendo el bloque gol_mobile_notice con un bloque vacío.          #}
+{# No bloquea: «Abrir igualmente» lo descarta hasta que se cierre la pestaña.      #}
+<script>
+	(function() {
+		var root = document.documentElement;
+		root.classList.add('gol-admin-page');
+		try {
+			if (sessionStorage.getItem('gvsigol.mobile.admin.ok') === '1') {
+				root.classList.add('gol-mobile-ok');
+			}
+		} catch (e) {}
+	})();
+</script>
+<div class="gol-mobile-notice" role="region" aria-labelledby="gol-mobile-notice-title">
+	<div class="gol-mobile-notice__card">
+		<i class="fa fa-desktop gol-mobile-notice__icon" aria-hidden="true"></i>
+		<h2 class="gol-mobile-notice__title" id="gol-mobile-notice-title">{% trans "This page is designed for larger screens" %}</h2>
+		<p class="gol-mobile-notice__text">{% trans "Administration needs more room than a phone screen offers. Open it on a computer or a tablet." %}</p>
+		<a class="gol-mobile-notice__back" href="{% url 'home' %}"><i class="fa fa-th-large" aria-hidden="true"></i>{% trans "Back to my projects" %}</a>
+		<button type="button" class="gol-mobile-notice__anyway" onclick="try { sessionStorage.setItem('gvsigol.mobile.admin.ok', '1'); } catch (e) {} document.documentElement.classList.add('gol-mobile-ok'); window.scrollTo(0, 0);">{% trans "Open anyway" %}</button>
+	</div>
+</div>

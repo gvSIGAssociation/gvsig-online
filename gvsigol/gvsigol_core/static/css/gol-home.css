@@ -866,3 +866,130 @@
 	.projects-grid--list .project-card__body { flex-wrap: wrap; }
 	.projects-grid--list .project-card__desc { display: none; }
 }
+
+/* ============================================================
+   MOVIL (< 768 px) — solo para entrar en los proyectos
+   En el movil el inicio no se administra: quedan el buscador, los
+   filtros en una fila desplazable y una lista compacta en la que
+   toda la fila abre el proyecto. Se ocultan la ficha de perfil (se
+   llega desde "Mi perfil" del menu de usuario, #perfil), Anadir, el
+   orden, Guardar orden, el orden global, Ocultos y el cambio de vista.
+   El JS de home.html fuerza aqui la vista de lista sin guardarla.
+   ============================================================ */
+@media (max-width: 767px) {
+	.home-page:not(.home-page--profile) .profile-bar,
+	.home-page:not(.home-page--profile) .profile-details-panel {
+		display: none;
+	}
+
+	#button-add-project,
+	.sort-toggle-bar,
+	#btn-save-order,
+	#btn-save-order.visible,
+	#scope-order-select,
+	#btn-toggle-hidden,
+	.view-toggle-bar,
+	#hidden-items-section,
+	.projects-panel__header .projects-panel__title {
+		display: none !important;
+	}
+
+	/* Cabecera del panel: buscador a todo el ancho y filtros debajo */
+	.projects-panel__header {
+		background: transparent;
+		border: 0;
+		box-shadow: none;
+		margin-bottom: 12px;
+	}
+	.projects-panel__header-main {
+		padding: 0;
+	}
+	.elegant-search {
+		width: 100%;
+	}
+	.elegant-search .form-control {
+		height: 42px;
+		font-size: 16px; /* 16 px o mas: iOS no hace zoom al enfocar */
+		border-radius: 21px;
+	}
+	.projects-panel__header-secondary {
+		padding: 10px 0 0;
+	}
+	.filter-bar {
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		gap: 6px;
+		width: 100%;
+		padding-bottom: 2px;
+		scrollbar-width: none;
+		-webkit-overflow-scrolling: touch;
+	}
+	.filter-bar::-webkit-scrollbar { display: none; }
+	.filter-btn {
+		flex: none;
+		padding: 7px 13px;
+		font-size: 13px;
+	}
+
+	/* Lista compacta: la fila entera abre el proyecto */
+	.projects-grid--list > li { margin-bottom: 8px; }
+	.projects-grid--list .project-card,
+	.projects-grid--list .project-card__body {
+		flex-wrap: nowrap;
+	}
+	.projects-grid--list .project-card__thumb {
+		width: 48px;
+		height: 48px;
+		min-width: 48px;
+		margin: 10px 0 10px 10px;
+	}
+	.projects-grid--list .project-card__body {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 4px;
+		padding: 10px 12px;
+	}
+	.projects-grid--list .project-card__name {
+		order: 1;
+		max-width: 100%;
+		font-size: 15px;
+	}
+	.projects-grid--list .project-card__type-tag {
+		order: 2;
+	}
+	.projects-grid--list .project-card__footer {
+		padding: 0 14px 0 0;
+	}
+	.projects-grid--list .project-card__btn,
+	.projects-grid--list .project-card:hover .project-card__btn {
+		position: static;
+		width: auto;
+		padding: 0;
+		background: none;
+		border: 0;
+		font-size: 0;
+		color: var(--h-accent) !important;
+	}
+	.projects-grid--list .project-card__btn .fa {
+		display: none;
+	}
+	.projects-grid--list .project-card__btn::before {
+		content: "\f054"; /* fa-chevron-right */
+		font: normal normal normal 14px/1 FontAwesome;
+	}
+	.projects-grid--list .project-card__btn::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+	}
+	.projects-grid--list .project-card:active {
+		background: color-mix(in srgb, var(--h-accent) 7%, var(--h-white));
+	}
+
+	/* Sin arrastrar en el movil aunque el orden sea manual */
+	.sortable-mode .drag-handle,
+	.projects-grid--list .drag-handle {
+		display: none !important;
+	}
+}

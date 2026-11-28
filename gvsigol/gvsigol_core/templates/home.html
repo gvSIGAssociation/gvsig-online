@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{# No es de administración: sin el aviso del móvil #}
+{% block gol_mobile_notice %}{% endblock %}
 {% load static %}
 {% load i18n %}
 
@@ -339,6 +341,27 @@
 		$('#profile-details-panel').toggleClass('details-visible');
 	});
 
+	// "Mi perfil" del menú de usuario en el móvil (base.html) lleva a #perfil:
+	// abre los detalles (contraseña incluida) y los muestra
+	function openProfileFromHash() {
+		if (location.hash !== '#perfil') { return; }
+		// En el móvil la ficha de perfil está oculta salvo cuando se pide (gol-home.css)
+		$('.home-page').addClass('home-page--profile');
+		$('#btn-toggle-details').addClass('active');
+		$('#profile-details-panel').addClass('details-visible');
+		var bar = document.querySelector('.profile-bar');
+		if (bar) { bar.scrollIntoView({block: 'start'}); }
+	}
+	openProfileFromHash();
+	$(window).on('hashchange', openProfileFromHash);
+	// Si ya se estaba en #perfil, el enlace no cambia el hash: se abre a mano
+	$(document).on('click', 'a[href$="#perfil"]', function() {
+		if (location.hash === '#perfil') {
+			$('.user-menu.open').removeClass('open');
+			setTimeout(openProfileFromHash, 0);
+		}
+	});
+
 	$('#show-hide-pass-update-link').click(function(e) {
 		e.preventDefault();
 		$('#show-hide-pass-update-div').toggleClass('pass-visible');
@@ -418,24 +441,28 @@
 
 		// ---- Toggle vista Cards / Lista ----
 		var $gridEl = $('#all-items-panel ul.items-list');
-		var savedView = localStorage.getItem('home_view_mode');
-		if (savedView === 'list') {
-			$gridEl.addClass('projects-grid--list');
-			$('#btn-view-grid').removeClass('active');
-			$('#btn-view-list').addClass('active');
+		// En el móvil (< 768 px, como gol-home.css) siempre lista, sin tocar
+		// la preferencia guardada, que se recupera al volver a pantalla ancha
+		var mqMobile = window.matchMedia ? window.matchMedia('(max-width: 767px)') : null;
+		function applyViewMode() {
+			var isList = (mqMobile && mqMobile.matches) || localStorage.getItem('home_view_mode') === 'list';
+			$gridEl.toggleClass('projects-grid--list', isList);
+			$('#btn-view-grid').toggleClass('active', !isList);
+			$('#btn-view-list').toggleClass('active', isList);
+		}
+		applyViewMode();
+		if (mqMobile) {
+			if (mqMobile.addEventListener) { mqMobile.addEventListener('change', applyViewMode); }
+			else if (mqMobile.addListener) { mqMobile.addListener(applyViewMode); }
 		}
 
 		$('#btn-view-grid').on('click', function() {
-			$gridEl.removeClass('projects-grid--list');
-			$('#btn-view-list').removeClass('active');
-			$(this).addClass('active');
 			localStorage.setItem('home_view_mode', 'grid');
+			applyViewMode();
 		});
 		$('#btn-view-list').on('click', function() {
-			$gridEl.addClass('projects-grid--list');
-			$('#btn-view-grid').removeClass('active');
-			$(this).addClass('active');
 			localStorage.setItem('home_view_mode', 'list');
+			applyViewMode();
 		});
 
 		// ---- List.js (búsqueda + paginación) ----

@@ -3159,3 +3159,31 @@ msgstr "Solo puede eliminarla quien la creó o un superusuario"
 #: templates/project_list.html
 msgid "Only the creator of the project or a superuser can delete it"
 msgstr "Solo quien creó el proyecto o un superusuario puede eliminarlo"
+
+#: templates/base.html
+msgid "Language"
+msgstr "Idioma"
+
+#: templates/base.html
+msgid "My profile"
+msgstr "Mi perfil"
+
+#: templates/base.html
+msgid "Help"
+msgstr "Ayuda"
+
+#: templates/_gol_mobile_notice.html
+msgid "This page is designed for larger screens"
+msgstr "Esta página está pensada para pantallas grandes"
+
+#: templates/_gol_mobile_notice.html
+msgid "Administration needs more room than a phone screen offers. Open it on a computer or a tablet."
+msgstr "La administración necesita más espacio del que hay en un móvil. Ábrela en un ordenador o una tableta."
+
+#: templates/_gol_mobile_notice.html
+msgid "Back to my projects"
+msgstr "Volver a mis proyectos"
+
+#: templates/_gol_mobile_notice.html
+msgid "Open anyway"
+msgstr "Abrir igualmente"

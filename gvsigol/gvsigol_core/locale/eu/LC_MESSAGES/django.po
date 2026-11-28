@@ -1394,3 +1394,31 @@ msgstr "Ustekabeko errore bat gertatu da zerbitzarian. Saiatu berriro une batzuk
 msgctxt "errors"
 msgid "Try again"
 msgstr "Saiatu berriro"
+
+#: templates/base.html
+msgid "Language"
+msgstr "Hizkuntza"
+
+#: templates/base.html
+msgid "My profile"
+msgstr "Nire profila"
+
+#: templates/base.html
+msgid "Help"
+msgstr "Laguntza"
+
+#: templates/_gol_mobile_notice.html
+msgid "This page is designed for larger screens"
+msgstr "Orri hau pantaila handietarako pentsatuta dago"
+
+#: templates/_gol_mobile_notice.html
+msgid "Administration needs more room than a phone screen offers. Open it on a computer or a tablet."
+msgstr "Administrazioak mugikor batek baino leku gehiago behar du. Ireki ordenagailu edo tableta batean."
+
+#: templates/_gol_mobile_notice.html
+msgid "Back to my projects"
+msgstr "Itzuli nire proiektuetara"
+
+#: templates/_gol_mobile_notice.html
+msgid "Open anyway"
+msgstr "Ireki hala ere"

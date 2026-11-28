@@ -1518,3 +1518,31 @@ msgstr "Auf dem Server ist ein unerwarteter Fehler aufgetreten. Bitte versuchen 
 msgctxt "errors"
 msgid "Try again"
 msgstr "Erneut versuchen"
+
+#: templates/base.html
+msgid "Language"
+msgstr "Sprache"
+
+#: templates/base.html
+msgid "My profile"
+msgstr "Mein Profil"
+
+#: templates/base.html
+msgid "Help"
+msgstr "Hilfe"
+
+#: templates/_gol_mobile_notice.html
+msgid "This page is designed for larger screens"
+msgstr "Diese Seite ist für größere Bildschirme gedacht"
+
+#: templates/_gol_mobile_notice.html
+msgid "Administration needs more room than a phone screen offers. Open it on a computer or a tablet."
+msgstr "Die Verwaltung braucht mehr Platz, als ein Handy bietet. Öffnen Sie sie auf einem Computer oder Tablet."
+
+#: templates/_gol_mobile_notice.html
+msgid "Back to my projects"
+msgstr "Zurück zu meinen Projekten"
+
+#: templates/_gol_mobile_notice.html
+msgid "Open anyway"
+msgstr "Trotzdem öffnen"

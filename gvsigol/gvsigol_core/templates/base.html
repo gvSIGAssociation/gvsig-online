@@ -95,8 +95,8 @@
 				<a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button" {% if HIDE_DASHBOARD_SIDEBAR %} style="display: none" {% endif %}> <span class="sr-only">Toggle navigation</span></a>				
 				<div class="navbar-custom-menu">
 					<ul class="nav navbar-nav">
-						<li><a href="{% url 'documentation' %}" target="_blank" id="help" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-question-circle"></i></a></li>
-						<li>
+						<li class="gol-hdr-desktop"><a href="{% url 'documentation' %}" target="_blank" id="help" class="dropdown-toggle"> <i style="font-size: 18px;" class="fa fa-question-circle"></i></a></li>
+						<li class="gol-hdr-desktop">
 							<form id="select-language-form" action="{% url 'set_language' %}" method="post">{% csrf_token %}
 								<input name="next" type="hidden" value="{{ request.get_full_path }}" />
 							    <select id="select-language" name="language" class="form-control" style="margin-top: 10px;">
@@ -125,6 +125,20 @@
 									<p>
 										{{user.username}}<small>{{user.email}}</small>
 									</p>
+								</li>
+								{# Solo por debajo de 768 px (gol-layout.css): idioma, ayuda y perfil pasan al menú de usuario. Va en un <form> propio para que Bootstrap no cierre el menú al tocar el selector. #}
+								<li class="gol-mobile-menu">
+									<form class="gol-mobile-menu__item gol-mobile-menu__lang" action="{% url 'set_language' %}" method="post">{% csrf_token %}
+										<input name="next" type="hidden" value="{{ request.get_full_path }}" />
+										<label for="select-language-m"><i class="fa fa-language" aria-hidden="true"></i>{% trans "Language" %}</label>
+										<select id="select-language-m" name="language" onchange="this.form.submit()">
+											{% for language in languages %}
+											<option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected="selected"{% endif %}>{% trans language.name_translated %}{% if language.code == 'pt' %} (BR){% endif %}</option>
+											{% endfor %}
+										</select>
+									</form>
+									<a class="gol-mobile-menu__item" href="{% url 'home' %}#perfil"><i class="fa fa-user" aria-hidden="true"></i>{% trans "My profile" %}</a>
+									<a class="gol-mobile-menu__item" href="{% url 'documentation' %}" target="_blank"><i class="fa fa-question-circle" aria-hidden="true"></i>{% trans "Help" %}</a>
 								</li>
 								<li class="user-footer">
 									<div class="pull-right">
@@ -192,6 +206,8 @@
 		<div class="content-wrapper" id="base-content-wrapper" {% if IFRAME_MODE_UI or HIDE_DASHBOARD_SIDEBAR %} style="margin-left: 0px !important;" {% endif %}>
 			<section class="content">
 				{# Ruta de navegación: se rellena sola (golBreadcrumbs.js) salvo que la página defina sus migas #}
+				{# Aviso en el móvil: la administración es para pantallas grandes (_gol_mobile_notice.html) #}
+				{% if user.is_authenticated and not IFRAME_MODE_UI %}{% block gol_mobile_notice %}{% include "_gol_mobile_notice.html" %}{% endblock %}{% endif %}
 				{% if not IFRAME_MODE_UI %}{% block breadcrumbs %}{% include "_gol_crumbs_slot.html" %}{% endblock %}{% endif %}
 				{% block content %}{% endblock %}
 			</section>

@@ -3061,3 +3061,31 @@ msgstr "Només la pot eliminar qui la va crear o un superusuari"
 #: templates/project_list.html
 msgid "Only the creator of the project or a superuser can delete it"
 msgstr "Només qui ha creat el projecte o un superusuari el pot eliminar"
+
+#: templates/base.html
+msgid "Language"
+msgstr "Idioma"
+
+#: templates/base.html
+msgid "My profile"
+msgstr "El meu perfil"
+
+#: templates/base.html
+msgid "Help"
+msgstr "Ajuda"
+
+#: templates/_gol_mobile_notice.html
+msgid "This page is designed for larger screens"
+msgstr "Aquesta pàgina està pensada per a pantalles grans"
+
+#: templates/_gol_mobile_notice.html
+msgid "Administration needs more room than a phone screen offers. Open it on a computer or a tablet."
+msgstr "L'administració necessita més espai del que hi ha en un mòbil. Obre-la en un ordinador o una tauleta."
+
+#: templates/_gol_mobile_notice.html
+msgid "Back to my projects"
+msgstr "Tornar als meus projectes"
+
+#: templates/_gol_mobile_notice.html
+msgid "Open anyway"
+msgstr "Obrir igualment"

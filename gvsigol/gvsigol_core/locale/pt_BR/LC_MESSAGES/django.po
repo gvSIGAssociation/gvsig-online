@@ -2426,3 +2426,31 @@ msgstr "Pesquisar dados geográficos"
 
 msgid "No geographic data match the search."
 msgstr "Nenhum dado geográfico corresponde à pesquisa."
+
+#: templates/base.html
+msgid "Language"
+msgstr "Idioma"
+
+#: templates/base.html
+msgid "My profile"
+msgstr "Meu perfil"
+
+#: templates/base.html
+msgid "Help"
+msgstr "Ajuda"
+
+#: templates/_gol_mobile_notice.html
+msgid "This page is designed for larger screens"
+msgstr "Esta página foi pensada para telas maiores"
+
+#: templates/_gol_mobile_notice.html
+msgid "Administration needs more room than a phone screen offers. Open it on a computer or a tablet."
+msgstr "A administração precisa de mais espaço do que um celular oferece. Abra-a em um computador ou tablet."
+
+#: templates/_gol_mobile_notice.html
+msgid "Back to my projects"
+msgstr "Voltar aos meus projetos"
+
+#: templates/_gol_mobile_notice.html
+msgid "Open anyway"
+msgstr "Abrir mesmo assim"
